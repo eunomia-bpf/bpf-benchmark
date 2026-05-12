@@ -146,6 +146,24 @@ fn cond_select_rewrites_jmp32_predicate() {
 }
 
 #[test]
+fn cond_select_skips_diamond_join_with_external_predecessor() {
+    let input = vec![
+        BpfInsn::jump_imm(BPF_JEQ, BPF_REG_9, 0, 4),
+        BpfInsn::jump_imm(BPF_JNE, BPF_REG_1, 0, 2),
+        BpfInsn::mov64_imm(BPF_REG_0, 0),
+        BpfInsn::ja(1),
+        BpfInsn::mov64_imm(BPF_REG_0, 1),
+        BpfInsn::exit(),
+    ];
+
+    let run = run_pass_on_insns(CondSelectPass, input.clone(), &select_ctx());
+
+    assert_eq!(run.result.sites_applied, 0);
+    assert_skip_reason(&run.result, 1, "external predecessor");
+    assert_eq!(run.lowered, input);
+}
+
+#[test]
 fn test_cond_select_short_pattern_c_no_match_cond_clobbered() {
     // Restored from HEAD: short pattern C must not match when the pre-branch
     // MOV overwrites the register that the following Jcc reads.

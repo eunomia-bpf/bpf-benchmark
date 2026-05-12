@@ -467,16 +467,6 @@ struct SiteRewrite {
     skipped_sites: BTreeSet<InsnSite>,
     replacements: Vec<SiteReplacement>,
 }
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum LookupRewriteMode {
-    Hard,
-    Soft,
-}
-#[derive(Clone, Copy, Debug)]
-struct LookupRewriteOptions {
-    null_check: Option<InsnSite>,
-    mode: LookupRewriteMode,
-}
 type SiteRewriteResult<T> = anyhow::Result<std::result::Result<T, String>>;
 fn site_replacement(
     prog: &BBProgram,
@@ -1286,7 +1276,7 @@ fn run_map_inline_round(
                     "soft inline hints are not supported for map-in-map outer lookups".to_string()
                 );
             }
-            let Some(null_check) = find_soft_fold_null_handler(prog, site.call_site)? else {
+            if find_soft_fold_null_handler(prog, site.call_site)?.is_none() {
                 diagnostics.push("missing immediate null check".to_string());
                 skip_lookup!(
                     &mut skipped,
@@ -1294,7 +1284,7 @@ fn run_map_inline_round(
                     site.call_site,
                     "soft fold not applicable: missing null handler".to_string()
                 );
-            };
+            }
             let hint = site_inline_hints
                 .iter()
                 .find(|hint| hint.mode == MapInlineHintMode::Soft)
@@ -1320,31 +1310,21 @@ fn run_map_inline_round(
                     "lookup result is not consumed by fixed-offset scalar loads".to_string();
                 skip_lookup!(&mut skipped, &mut site_diagnostics, site.call_site, reason);
             }
-            let rewrite = match build_site_rewrite(
-                prog,
-                side_input,
-                &site,
-                &key,
-                &uses,
-                info,
-                LookupRewriteOptions {
-                    null_check: Some(null_check),
-                    mode: LookupRewriteMode::Soft,
-                },
-            )? {
-                Ok(Some(rewrite)) => rewrite,
-                Ok(None) => {
-                    skip_lookup!(
-                        &mut skipped,
-                        &mut site_diagnostics,
-                        site.call_site,
-                        "failed to materialize replacement constants".to_string()
-                    );
-                }
-                Err(reason) => {
-                    skip_lookup!(&mut skipped, &mut site_diagnostics, site.call_site, reason);
-                }
-            };
+            let rewrite =
+                match build_site_rewrite(prog, side_input, &site, &key, &uses, info, true)? {
+                    Ok(Some(rewrite)) => rewrite,
+                    Ok(None) => {
+                        skip_lookup!(
+                            &mut skipped,
+                            &mut site_diagnostics,
+                            site.call_site,
+                            "failed to materialize replacement constants".to_string()
+                        );
+                    }
+                    Err(reason) => {
+                        skip_lookup!(&mut skipped, &mut site_diagnostics, site.call_site, reason);
+                    }
+                };
             if let Some(anchor) = key.used_hint.clone() {
                 inline_hints_consumed.insert(anchor);
             }
@@ -1399,31 +1379,21 @@ fn run_map_inline_round(
             let reason = "lookup result is not consumed by fixed-offset scalar loads".to_string();
             skip_lookup!(&mut skipped, &mut site_diagnostics, site.call_site, reason);
         }
-        let mut rewrite = match build_site_rewrite(
-            prog,
-            side_input,
-            &site,
-            &key,
-            &uses,
-            info,
-            LookupRewriteOptions {
-                null_check,
-                mode: LookupRewriteMode::Hard,
-            },
-        )? {
-            Ok(Some(rewrite)) => rewrite,
-            Ok(None) => {
-                skip_lookup!(
-                    &mut skipped,
-                    &mut site_diagnostics,
-                    site.call_site,
-                    "failed to materialize replacement constants".to_string()
-                );
-            }
-            Err(reason) => {
-                skip_lookup!(&mut skipped, &mut site_diagnostics, site.call_site, reason);
-            }
-        };
+        let mut rewrite =
+            match build_site_rewrite(prog, side_input, &site, &key, &uses, info, false)? {
+                Ok(Some(rewrite)) => rewrite,
+                Ok(None) => {
+                    skip_lookup!(
+                        &mut skipped,
+                        &mut site_diagnostics,
+                        site.call_site,
+                        "failed to materialize replacement constants".to_string()
+                    );
+                }
+                Err(reason) => {
+                    skip_lookup!(&mut skipped, &mut site_diagnostics, site.call_site, reason);
+                }
+            };
         if rewrite
             .skipped_sites
             .iter()
@@ -1723,29 +1693,26 @@ fn build_site_rewrite(
     key: &LookupKey,
     uses: &LookupResultUses,
     info: &MapInfo,
-    options: LookupRewriteOptions,
+    soft_hint: bool,
 ) -> SiteRewriteResult<Option<SiteRewrite>> {
-    let remove_lookup_pattern = match options.mode {
-        LookupRewriteMode::Soft => false,
-        LookupRewriteMode::Hard => {
-            if info.has_removable_lookup_pattern() {
-                true
-            } else {
-                info.requires_entry_presence_check()
-                    && uses.other_uses.is_empty()
-                    && options.null_check.is_some_and(|site| {
-                        prog.insn_at(site)
-                            .is_some_and(null_check_is_fallthrough_non_null)
-                    })
-            }
-        }
+    let remove_lookup_pattern = if soft_hint {
+        false
+    } else if info.has_removable_lookup_pattern() {
+        true
+    } else {
+        info.requires_entry_presence_check()
+            && uses.other_uses.is_empty()
+            && uses.null_check.is_some_and(|site| {
+                prog.insn_at(site)
+                    .is_some_and(null_check_is_fallthrough_non_null)
+            })
     };
     let encoded_key = encode_key_bytes(&key.bytes, info.key_size as usize);
     let lookup_value_size = lookup_value_size(side_input, info).map_err(anyhow::Error::msg)?;
     let value = match lookup_elem(side_input, info.map_id, &encoded_key, lookup_value_size) {
         Ok(value) => value,
         Err(MapLookupError::MissingKey { .. })
-            if options.mode == LookupRewriteMode::Soft || is_hash_like_map_type(info.map_type) =>
+            if soft_hint || is_hash_like_map_type(info.map_type) =>
         {
             return site_level_inline_veto(format!(
                 "map {} has no live entry for key {}",
@@ -1771,7 +1738,7 @@ fn build_site_rewrite(
         Ok(value) => value,
         Err(reason) => return site_level_inline_veto(reason),
     };
-    let removable_null_check = options.null_check.filter(|site| {
+    let removable_null_check = uses.null_check.filter(|site| {
         prog.insn_at(*site)
             .is_some_and(null_check_is_fallthrough_non_null)
     });

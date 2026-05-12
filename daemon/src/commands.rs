@@ -519,8 +519,8 @@ fn run_program_steps(
     let map_values_path = workdir.path().join("map-values");
 
     let target_paths = if referenced.contains(VAR_TARGET) {
-        let probed = bpf::probe_target_json(kinsn_probes)
-            .with_context(|| format!("probe target kinsns for prog {prog_id}"))?;
+        let probed = bpf::target_json_for_probes(kinsn_probes)
+            .with_context(|| format!("prepare target.json for prog {prog_id}"))?;
         write_json_file(&target_probe_path, &probed)
             .with_context(|| format!("write {}", target_probe_path.display()))?;
         (

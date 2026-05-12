@@ -84,6 +84,17 @@ pub(crate) fn snapshot_program(prog_id: u32) -> Result<ProgramSnapshot> {
     })
 }
 
+pub(crate) fn target_json_for_probes(targets: &[KinsnProbeTarget]) -> Result<TargetJson> {
+    if targets.is_empty() {
+        return Ok(TargetJson {
+            arch: detect_arch(),
+            features: detect_features(),
+            kinsns: BTreeMap::new(),
+        });
+    }
+    probe_target_json(targets)
+}
+
 pub(crate) fn probe_target_json(targets: &[KinsnProbeTarget]) -> Result<TargetJson> {
     if targets.is_empty() {
         bail!("target probing requested with no kinsn targets");
