@@ -51,26 +51,8 @@ pub struct PrefetchHint {
 
 #[derive(Clone, Copy, Debug)]
 pub struct KinsnDescriptor {
-    pub canonical_name: &'static str,
-    pub aliases: &'static [&'static str],
-    pub proof_len: fn(payload: u64) -> anyhow::Result<usize>,
+    pub name: &'static str,
     pub register_uses: fn(payload: u64) -> RegSet,
-}
-
-impl KinsnDescriptor {
-    pub fn probe_aliases(self) -> Vec<&'static str> {
-        let bpf_aliases = self
-            .aliases
-            .iter()
-            .copied()
-            .filter(|alias| alias.starts_with("bpf_"))
-            .collect::<Vec<_>>();
-        if bpf_aliases.is_empty() {
-            vec![self.canonical_name]
-        } else {
-            bpf_aliases
-        }
-    }
 }
 
 impl Serialize for KinsnDescriptor {
@@ -78,9 +60,8 @@ impl Serialize for KinsnDescriptor {
     where
         S: Serializer,
     {
-        let mut state = serializer.serialize_struct("KinsnDescriptor", 2)?;
-        state.serialize_field("json_name", self.canonical_name)?;
-        state.serialize_field("probe_aliases", &self.probe_aliases())?;
+        let mut state = serializer.serialize_struct("KinsnDescriptor", 1)?;
+        state.serialize_field("name", self.name)?;
         state.end()
     }
 }
@@ -97,21 +78,6 @@ pub(crate) fn regs_from_offsets(payload: u64, offsets: &[u8]) -> RegSet {
         .copied()
         .map(|shift| kinsn_payload_reg(payload, shift))
         .collect()
-}
-
-pub(crate) fn kinsn_payload_u8(payload: u64, shift: u8) -> u8 {
-    BpfInsn::unpack_u8(payload, shift)
-}
-
-pub(crate) fn kinsn_payload_s16(payload: u64, shift: u8) -> i16 {
-    BpfInsn::unpack_u16(payload, shift) as i16
-}
-
-pub(crate) fn validate_bpf_reg(label: &str, reg: u8) -> anyhow::Result<()> {
-    if reg > 10 {
-        anyhow::bail!("{label} register {reg} is outside BPF_REG_0..BPF_REG_10");
-    }
-    Ok(())
 }
 
 // ── Per-instruction annotation — populated by analysis passes, read by transform passes.
@@ -538,16 +504,20 @@ impl KinsnRegistry {
         };
         for pass in crate::passes::PASS_REGISTRY {
             for descriptor in pass.metadata.kinsn_targets {
-                registry.register_descriptor(descriptor)?;
+                let previous = registry.by_name.insert(
+                    descriptor.name,
+                    RegistryEntry {
+                        btf_id: None,
+                        call_off: 0,
+                        descriptor,
+                    },
+                );
+                if previous.is_some() {
+                    anyhow::bail!("duplicate kinsn target name {}", descriptor.name);
+                }
             }
         }
         Ok(registry)
-    }
-
-    pub fn canonical_name_for_target_name(&self, target_name: &str) -> Option<&'static str> {
-        self.by_name
-            .get(target_name)
-            .map(|entry| entry.descriptor.canonical_name)
     }
 
     pub fn lookup_by_kinsn_call(
@@ -571,8 +541,42 @@ impl KinsnRegistry {
         btf_id: i32,
         call_off: i16,
     ) -> anyhow::Result<()> {
-        let descriptor = self.descriptor_for_target_name(target_name)?;
-        self.set_kinsn_call_for_descriptor(descriptor, btf_id, call_off)
+        if btf_id < 0 {
+            anyhow::bail!(
+                "kinsn target {target_name} cannot be registered with negative btf_id {btf_id}"
+            );
+        }
+        let entry = self
+            .by_name
+            .get_mut(target_name)
+            .ok_or_else(|| anyhow::anyhow!("unknown kinsn target: {target_name}"))?;
+        let descriptor = entry.descriptor;
+        let old_btf_id = entry.btf_id;
+        let old_call_off = entry.call_off;
+
+        let key = KinsnCallKey { btf_id, call_off };
+        if let Some(existing) = self.by_call.get(&key) {
+            if existing.name != descriptor.name {
+                anyhow::bail!(
+                    "kinsn btf_id {btf_id} call_off {call_off} is already registered for {}",
+                    existing.name
+                );
+            }
+        }
+        if let Some(btf_id) = old_btf_id {
+            self.by_call.remove(&KinsnCallKey {
+                btf_id,
+                call_off: old_call_off,
+            });
+        }
+        self.by_call.insert(key, descriptor);
+        let entry = self
+            .by_name
+            .get_mut(target_name)
+            .expect("entry just looked up");
+        entry.btf_id = Some(btf_id);
+        entry.call_off = call_off;
+        Ok(())
     }
 
     pub fn btf_id_for_target_name(&self, target_name: &str) -> anyhow::Result<i32> {
@@ -596,95 +600,6 @@ impl KinsnRegistry {
         self.by_name
             .get(target_name)
             .is_some_and(|entry| entry.btf_id.is_some())
-    }
-
-    fn register_descriptor(&mut self, descriptor: &'static KinsnDescriptor) -> anyhow::Result<()> {
-        self.register_descriptor_name(descriptor.canonical_name, descriptor)?;
-        for alias in descriptor.aliases {
-            self.register_descriptor_name(alias, descriptor)?;
-        }
-        Ok(())
-    }
-
-    fn register_descriptor_name(
-        &mut self,
-        name: &'static str,
-        descriptor: &'static KinsnDescriptor,
-    ) -> anyhow::Result<()> {
-        let previous = self.by_name.insert(
-            name,
-            RegistryEntry {
-                btf_id: None,
-                call_off: 0,
-                descriptor,
-            },
-        );
-        if previous.is_some() {
-            anyhow::bail!("duplicate kinsn target name {name}");
-        }
-        Ok(())
-    }
-
-    fn descriptor_for_target_name(
-        &self,
-        target_name: &str,
-    ) -> anyhow::Result<&'static KinsnDescriptor> {
-        self.by_name
-            .get(target_name)
-            .map(|entry| entry.descriptor)
-            .ok_or_else(|| anyhow::anyhow!("unknown kinsn target: {target_name}"))
-    }
-
-    fn set_kinsn_call_for_descriptor(
-        &mut self,
-        descriptor: &'static KinsnDescriptor,
-        btf_id: i32,
-        call_off: i16,
-    ) -> anyhow::Result<()> {
-        if btf_id < 0 {
-            anyhow::bail!(
-                "kinsn target {} cannot be registered with negative btf_id {btf_id}",
-                descriptor.canonical_name
-            );
-        }
-        let (old_btf_id, old_call_off) = self
-            .by_name
-            .get(descriptor.canonical_name)
-            .map(|entry| (entry.btf_id, entry.call_off))
-            .ok_or_else(|| {
-                anyhow::anyhow!("unknown kinsn target: {}", descriptor.canonical_name)
-            })?;
-
-        let key = KinsnCallKey { btf_id, call_off };
-        if let Some(existing) = self.by_call.get(&key) {
-            if existing.canonical_name != descriptor.canonical_name {
-                anyhow::bail!(
-                    "kinsn btf_id {btf_id} call_off {call_off} is already registered for {}",
-                    existing.canonical_name
-                );
-            }
-        }
-        if let Some(btf_id) = old_btf_id {
-            self.by_call.remove(&KinsnCallKey {
-                btf_id,
-                call_off: old_call_off,
-            });
-        }
-        self.by_call.insert(key, descriptor);
-        for entry in self.entries_for_descriptor_mut(descriptor) {
-            entry.btf_id = Some(btf_id);
-            entry.call_off = call_off;
-        }
-        Ok(())
-    }
-
-    fn entries_for_descriptor_mut(
-        &mut self,
-        descriptor: &'static KinsnDescriptor,
-    ) -> impl Iterator<Item = &mut RegistryEntry> {
-        self.by_name
-            .values_mut()
-            .filter(move |entry| entry.descriptor.canonical_name == descriptor.canonical_name)
     }
 }
 

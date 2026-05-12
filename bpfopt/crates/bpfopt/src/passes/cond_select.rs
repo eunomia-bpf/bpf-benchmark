@@ -7,22 +7,9 @@ use crate::analysis::{insn_use_def_set, BBProgram, BlockId, DiamondPattern, Insn
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
-    canonical_name: "bpf_select64",
-    aliases: &["select64"],
-    proof_len: select_proof_len,
+    name: "bpf_select64",
     register_uses: cond_select_register_uses,
 }];
-
-fn select_proof_len(payload: u64) -> anyhow::Result<usize> {
-    validate_bpf_reg("select dst", kinsn_payload_reg(payload, 0))?;
-    validate_bpf_reg("select true", kinsn_payload_reg(payload, 4))?;
-    validate_bpf_reg("select false", kinsn_payload_reg(payload, 8))?;
-    validate_bpf_reg("select cond", kinsn_payload_reg(payload, 12))?;
-    if kinsn_payload_reg(payload, 16) != 0 {
-        anyhow::bail!("select condition mode is not KINSN_SELECT_COND_NEZ");
-    }
-    Ok(4)
-}
 
 fn cond_select_register_uses(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[0, 4, 8, 12])

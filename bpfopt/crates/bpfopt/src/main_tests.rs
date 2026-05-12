@@ -111,70 +111,6 @@ fn canonical_pass_names_accept_v3_cli_names() {
 }
 
 #[test]
-fn canonical_kinsn_names_accept_all_v3_aliases() {
-    for (input, expected) in [
-        ("bpf_rotate64", "bpf_rotate64"),
-        ("rotate64", "bpf_rotate64"),
-        ("bpf_rotate32", "bpf_rotate32"),
-        ("rotate32", "bpf_rotate32"),
-        ("bpf_select64", "bpf_select64"),
-        ("select64", "bpf_select64"),
-        ("bpf_ccmp64", "bpf_ccmp64"),
-        ("ccmp64", "bpf_ccmp64"),
-        ("bpf_extract64", "bpf_extract64"),
-        ("extract64", "bpf_extract64"),
-        ("bpf_endian_load16", "bpf_endian_load16"),
-        ("endian_load16", "bpf_endian_load16"),
-        ("bpf_endian_load32", "bpf_endian_load32"),
-        ("endian_load32", "bpf_endian_load32"),
-        ("bpf_endian_load64", "bpf_endian_load64"),
-        ("endian_load64", "bpf_endian_load64"),
-        ("bpf_bulk_memcpy", "bpf_bulk_memcpy"),
-        ("bulk_memcpy", "bpf_bulk_memcpy"),
-        ("bpf_memcpy_bulk", "bpf_bulk_memcpy"),
-        ("memcpy_bulk", "bpf_bulk_memcpy"),
-        ("bpf_bulk_memset", "bpf_bulk_memset"),
-        ("bulk_memset", "bpf_bulk_memset"),
-        ("bpf_memset_bulk", "bpf_bulk_memset"),
-        ("memset_bulk", "bpf_bulk_memset"),
-        ("bpf_prefetch", "bpf_prefetch"),
-        ("prefetch", "bpf_prefetch"),
-    ] {
-        assert_eq!(canonicalize_kinsn_name(input).unwrap(), expected);
-    }
-}
-
-#[test]
-fn target_json_maps_v3_kinsn_aliases_to_registry_fields() {
-    let mut target = kinsn_target(&[
-        ("rotate32", 10, 1),
-        ("bpf_bulk_memcpy", 11, 2),
-        ("bpf_endian_load64", 12, 0),
-        ("bpf_ccmp64", 13, 0),
-        ("bpf_prefetch", 14, 7),
-    ]);
-    target.features = vec!["cmov".to_string(), "movbe".to_string()];
-
-    let registry = kinsn_registry_from_target(&target).unwrap();
-    for (name, btf_id) in [
-        ("bpf_rotate32", 10),
-        ("bpf_bulk_memcpy", 11),
-        ("bpf_endian_load64", 12),
-        ("bpf_ccmp64", 13),
-        ("bpf_prefetch", 14),
-    ] {
-        assert_eq!(registry.btf_id_for_target_name(name).unwrap(), btf_id);
-    }
-    for (name, call_off) in [
-        ("bpf_rotate32", 1),
-        ("bpf_bulk_memcpy", 2),
-        ("bpf_prefetch", 7),
-    ] {
-        assert_eq!(registry.call_off_for_target_name(name).unwrap(), call_off);
-    }
-}
-
-#[test]
 fn target_json_disambiguates_module_local_btf_ids_by_call_offset() {
     let target = kinsn_target(&[
         ("bpf_endian_load16", 128703, 1),
@@ -183,17 +119,11 @@ fn target_json_disambiguates_module_local_btf_ids_by_call_offset() {
     let registry = kinsn_registry_from_target(&target).unwrap();
 
     assert_eq!(
-        registry
-            .lookup_by_kinsn_call(128703, 1)
-            .unwrap()
-            .canonical_name,
+        registry.lookup_by_kinsn_call(128703, 1).unwrap().name,
         "bpf_endian_load16"
     );
     assert_eq!(
-        registry
-            .lookup_by_kinsn_call(128703, 2)
-            .unwrap()
-            .canonical_name,
+        registry.lookup_by_kinsn_call(128703, 2).unwrap().name,
         "bpf_rotate64"
     );
 }
@@ -207,17 +137,11 @@ fn target_json_allows_shared_btf_id_when_zero_call_offset_is_first() {
     let registry = kinsn_registry_from_target(&target).unwrap();
 
     assert_eq!(
-        registry
-            .lookup_by_kinsn_call(128703, 0)
-            .unwrap()
-            .canonical_name,
+        registry.lookup_by_kinsn_call(128703, 0).unwrap().name,
         "bpf_endian_load16"
     );
     assert_eq!(
-        registry
-            .lookup_by_kinsn_call(128703, 2)
-            .unwrap()
-            .canonical_name,
+        registry.lookup_by_kinsn_call(128703, 2).unwrap().name,
         "bpf_rotate64"
     );
 }

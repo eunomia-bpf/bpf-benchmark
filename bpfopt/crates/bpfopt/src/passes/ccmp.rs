@@ -5,45 +5,12 @@ use crate::analysis::{BBProgram, BlockId, InsnSite, MakeReplacement, Terminator}
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
-    canonical_name: "bpf_ccmp64",
-    aliases: &["ccmp64"],
-    proof_len: ccmp_proof_len,
+    name: "bpf_ccmp64",
     register_uses: ccmp_register_uses,
 }];
 
 const MIN_CCMP_TERMS: usize = 2;
 const MAX_CCMP_TERMS: usize = 4;
-
-fn ccmp_proof_len(payload: u64) -> anyhow::Result<usize> {
-    let dst_reg = kinsn_payload_reg(payload, 0);
-    let count_bits = BpfInsn::unpack_u4(payload, 4) & 0x3;
-    let count = usize::from(count_bits) + 2;
-
-    if payload >> 24 != 0 {
-        anyhow::bail!("ccmp payload has non-zero reserved bits");
-    }
-    if count_bits > 2 {
-        anyhow::bail!("ccmp count {} exceeds maximum 4", count);
-    }
-    if dst_reg > BPF_REG_9 {
-        anyhow::bail!("ccmp dst register {dst_reg} is outside BPF_REG_0..BPF_REG_9");
-    }
-    for idx in 0..4 {
-        let reg = kinsn_payload_reg(payload, (8 + idx * 4) as u8);
-        if idx >= count {
-            if reg != 0 {
-                anyhow::bail!("ccmp unused register slot {idx} is non-zero");
-            }
-            continue;
-        }
-        validate_bpf_reg("ccmp compare", reg)?;
-        if reg == dst_reg {
-            anyhow::bail!("ccmp dst register aliases compare operand r{reg}");
-        }
-    }
-
-    Ok(count + 2)
-}
 
 fn ccmp_register_uses(payload: u64) -> RegSet {
     let count = usize::from(BpfInsn::unpack_u4(payload, 4) & 0x3) + 2;

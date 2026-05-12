@@ -10,87 +10,14 @@ const MIN_BULK_BYTES: usize = 32;
 const CHUNK_MAX_BYTES: usize = 128;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
-        canonical_name: MEMCPY_TARGET,
-        aliases: &["bulk_memcpy", "bpf_memcpy_bulk", "memcpy_bulk"],
-        proof_len: memcpy_bulk_proof_len,
+        name: MEMCPY_TARGET,
         register_uses: memcpy_bulk_register_uses,
     },
     KinsnDescriptor {
-        canonical_name: MEMSET_TARGET,
-        aliases: &["bulk_memset", "bpf_memset_bulk", "memset_bulk"],
-        proof_len: memset_bulk_proof_len,
+        name: MEMSET_TARGET,
         register_uses: memset_bulk_register_uses,
     },
 ];
-fn validate_bulk_len(kind: &str, len: usize) -> anyhow::Result<()> {
-    anyhow::ensure!(
-        (1..=CHUNK_MAX_BYTES).contains(&len),
-        "{kind} bulk length {len} is outside 1..128"
-    );
-    Ok(())
-}
-fn validate_bulk_offsets(kind: &str, ranges: &[(i16, usize)]) -> anyhow::Result<()> {
-    anyhow::ensure!(
-        ranges.iter().all(|&(offset, len)| {
-            let end = i32::from(offset) + len as i32 - 1;
-            (i32::from(i16::MIN)..=i32::from(i16::MAX)).contains(&end)
-        }),
-        "{kind} bulk offset range is outside s16"
-    );
-    Ok(())
-}
-fn memcpy_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
-    let dst_base = kinsn_payload_reg(payload, 0);
-    let src_base = kinsn_payload_reg(payload, 4);
-    let dst_off = kinsn_payload_s16(payload, 8);
-    let src_off = kinsn_payload_s16(payload, 24);
-    let len = usize::from(kinsn_payload_u8(payload, 40)) + 1;
-    let tmp_reg = kinsn_payload_reg(payload, 48);
-    anyhow::ensure!(
-        payload >> 52 == 0,
-        "memcpy bulk payload has non-zero reserved bits"
-    );
-    validate_bulk_len("memcpy", len)?;
-    validate_bpf_reg("memcpy bulk dst", dst_base)?;
-    validate_bpf_reg("memcpy bulk src", src_base)?;
-    validate_bpf_reg("memcpy bulk tmp", tmp_reg)?;
-    anyhow::ensure!(
-        tmp_reg != BPF_REG_10 && tmp_reg != dst_base && tmp_reg != src_base,
-        "memcpy bulk tmp register aliases an invalid operand"
-    );
-    validate_bulk_offsets("memcpy", &[(dst_off, len), (src_off, len)])?;
-    Ok(len * 2)
-}
-fn memset_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
-    let dst_base = kinsn_payload_reg(payload, 0);
-    let val_reg = kinsn_payload_reg(payload, 4);
-    let dst_off = kinsn_payload_s16(payload, 8);
-    let len = usize::from(kinsn_payload_u8(payload, 24)) + 1;
-    let width_class = u64::from(BpfInsn::unpack_u4(payload, 32) & 0x3);
-    let value_from_reg = (BpfInsn::unpack_u4(payload, 34) & 0x1) != 0;
-    let zero_fill = (BpfInsn::unpack_u4(payload, 35) & 0x1) != 0;
-    let fill_imm8 = kinsn_payload_u8(payload, 36);
-    let width_bytes = 1usize << width_class;
-    anyhow::ensure!(
-        payload >> 44 == 0,
-        "memset bulk payload has non-zero reserved bits"
-    );
-    validate_bulk_len("memset", len)?;
-    validate_bpf_reg("memset bulk dst", dst_base)?;
-    if value_from_reg {
-        validate_bpf_reg("memset bulk value", val_reg)?;
-    }
-    anyhow::ensure!(
-        len % width_bytes == 0,
-        "memset bulk length {len} is not a multiple of width {width_bytes}"
-    );
-    validate_bulk_offsets("memset", &[(dst_off, len)])?;
-    anyhow::ensure!(
-        !(zero_fill && fill_imm8 != 0),
-        "memset bulk zero-fill payload has non-zero fill immediate"
-    );
-    Ok(len)
-}
 fn memcpy_bulk_register_uses(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[0, 4])
 }

@@ -90,7 +90,6 @@ struct SkippedSiteReport {
 #[derive(Clone, Debug, Serialize)]
 struct ListPassEntry {
     name: String,
-    canonical_name: &'static str,
     description: &'static str,
     needs_target: bool,
     needs_verifier_states: bool,
@@ -176,7 +175,6 @@ fn list_passes(common: &CommonArgs, args: &ListPassesArgs) -> Result<()> {
             .iter()
             .map(|entry| ListPassEntry {
                 name: cli_name_for_pass(entry.name),
-                canonical_name: entry.name,
                 description: entry.description,
                 needs_target: entry.metadata.needs_target(),
                 needs_verifier_states: entry.metadata.needs_verifier_states(),
@@ -543,8 +541,7 @@ fn apply_features(platform: &mut PlatformCapabilities, features: &[String]) -> R
 fn kinsn_registry_from_target(target: &TargetJson) -> Result<KinsnRegistry> {
     let mut registry = KinsnRegistry::new()?;
     for (name, spec) in &target.kinsns {
-        let canonical = canonicalize_kinsn_name(name)?;
-        registry.set_kinsn_call_for_target_name(canonical, spec.btf_func_id, spec.call_offset)?;
+        registry.set_kinsn_call_for_target_name(name, spec.btf_func_id, spec.call_offset)?;
     }
     Ok(registry)
 }
@@ -563,16 +560,9 @@ fn apply_kinsn_list(registry: &mut KinsnRegistry, kinsns: &[String]) -> Result<(
         } else {
             (trimmed, 0)
         };
-        let canonical = canonicalize_kinsn_name(name)?;
-        registry.set_kinsn_call_for_target_name(canonical, btf_id, 0)?;
+        registry.set_kinsn_call_for_target_name(name, btf_id, 0)?;
     }
     Ok(())
-}
-
-fn canonicalize_kinsn_name(input: &str) -> Result<&'static str> {
-    KinsnRegistry::new()?
-        .canonical_name_for_target_name(input)
-        .ok_or_else(|| anyhow!("unknown kinsn name: {input}"))
 }
 
 fn read_verifier_states(path: &Path) -> Result<VerifierStatesJson> {

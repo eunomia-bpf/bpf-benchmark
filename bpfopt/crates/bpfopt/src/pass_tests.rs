@@ -171,10 +171,7 @@ fn kinsn_registry_replaces_old_call_key_when_target_moves() {
 
     assert!(registry.lookup_by_kinsn_call(1234, 0).is_err());
     assert_eq!(
-        registry
-            .lookup_by_kinsn_call(5678, 3)
-            .unwrap()
-            .canonical_name,
+        registry.lookup_by_kinsn_call(5678, 3).unwrap().name,
         "bpf_rotate64"
     );
 }

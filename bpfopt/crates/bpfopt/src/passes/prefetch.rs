@@ -9,21 +9,9 @@ const TARGET_PREFETCH_DISTANCE: usize = 8;
 const MAX_PREFETCH_DISTANCE: usize = 16;
 const MAP_VALUE_LOOKAHEAD: usize = 64;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
-    canonical_name: PREFETCH_TARGET_NAME,
-    aliases: &["prefetch"],
-    proof_len: prefetch_proof_len,
+    name: PREFETCH_TARGET_NAME,
     register_uses: prefetch_register_uses,
 }];
-fn prefetch_proof_len(payload: u64) -> anyhow::Result<usize> {
-    validate_bpf_reg("prefetch ptr", kinsn_payload_reg(payload, 0))?;
-    if BpfInsn::unpack_u4(payload, 4) != 0 {
-        anyhow::bail!("prefetch payload has unsupported hint kind");
-    }
-    if payload >> 8 != 0 {
-        anyhow::bail!("prefetch payload has non-zero reserved bits");
-    }
-    Ok(1)
-}
 fn prefetch_register_uses(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[0])
 }

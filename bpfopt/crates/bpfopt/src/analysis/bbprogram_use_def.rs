@@ -184,16 +184,8 @@ fn kinsn_aware_site_facts(prog: &BBProgram) -> anyhow::Result<BTreeMap<InsnSite,
 
         let descriptor = prog.kinsn_reg.lookup_by_kinsn_call(call.imm, call.off)?;
         let payload = sidecar.sidecar_payload();
-        (descriptor.proof_len)(payload).map_err(|err| {
-            anyhow::anyhow!(
-                "failed to decode proof region for {} at {:?}: {err}",
-                descriptor.canonical_name,
-                site
-            )
-        })?;
-
         let uses = (descriptor.register_uses)(payload);
-        validate_register_uses(descriptor.canonical_name, site, &uses)?;
+        validate_register_uses(descriptor.name, site, &uses)?;
         facts.insert(sidecar_site, RegUseDefSet::default());
         facts.insert(
             site,

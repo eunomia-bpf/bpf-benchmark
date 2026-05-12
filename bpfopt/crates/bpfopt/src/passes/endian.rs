@@ -4,21 +4,15 @@ use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
-        canonical_name: "bpf_endian_load16",
-        aliases: &["endian_load16"],
-        proof_len: endian_proof_len,
+        name: "bpf_endian_load16",
         register_uses: endian_register_uses,
     },
     KinsnDescriptor {
-        canonical_name: "bpf_endian_load32",
-        aliases: &["endian_load32"],
-        proof_len: endian_proof_len,
+        name: "bpf_endian_load32",
         register_uses: endian_register_uses,
     },
     KinsnDescriptor {
-        canonical_name: "bpf_endian_load64",
-        aliases: &["endian_load64"],
-        proof_len: endian_proof_len,
+        name: "bpf_endian_load64",
         register_uses: endian_register_uses,
     },
 ];
@@ -33,11 +27,6 @@ fn endian_target(w: BpfMemWidth) -> Option<&'static str> {
         BpfMemWidth::DW => Some("bpf_endian_load64"),
         BpfMemWidth::B => None,
     }
-}
-fn endian_proof_len(payload: u64) -> anyhow::Result<usize> {
-    validate_bpf_reg("endian dst", kinsn_payload_reg(payload, 0))?;
-    validate_bpf_reg("endian base", kinsn_payload_reg(payload, 4))?;
-    Ok(2)
 }
 fn endian_register_uses(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[0, 4])

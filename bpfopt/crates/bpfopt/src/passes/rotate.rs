@@ -4,45 +4,14 @@ use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
-        canonical_name: "bpf_rotate64",
-        aliases: &["rotate64"],
-        proof_len: rotate64_proof_len,
+        name: "bpf_rotate64",
         register_uses: rotate_register_uses,
     },
     KinsnDescriptor {
-        canonical_name: "bpf_rotate32",
-        aliases: &["rotate32"],
-        proof_len: rotate32_proof_len,
+        name: "bpf_rotate32",
         register_uses: rotate_register_uses,
     },
 ];
-
-fn rotate64_proof_len(payload: u64) -> anyhow::Result<usize> {
-    rotate_proof_len(payload, 63)
-}
-
-fn rotate32_proof_len(payload: u64) -> anyhow::Result<usize> {
-    rotate_proof_len(payload, 31)
-}
-
-fn rotate_proof_len(payload: u64, shift_mask: u8) -> anyhow::Result<usize> {
-    let dst_reg = kinsn_payload_reg(payload, 0);
-    let src_reg = kinsn_payload_reg(payload, 4);
-    let shift = kinsn_payload_u8(payload, 8) & shift_mask;
-    let tmp_reg = kinsn_payload_reg(payload, 16);
-
-    validate_bpf_reg("rotate dst", dst_reg)?;
-    validate_bpf_reg("rotate src", src_reg)?;
-    validate_bpf_reg("rotate tmp", tmp_reg)?;
-    if tmp_reg == dst_reg || tmp_reg == src_reg {
-        anyhow::bail!("rotate tmp register aliases an operand");
-    }
-    Ok(match (shift, dst_reg == src_reg) {
-        (0, _) => 1,
-        (_, true) => 4,
-        _ => 5,
-    })
-}
 
 fn rotate_register_uses(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[0, 4])
