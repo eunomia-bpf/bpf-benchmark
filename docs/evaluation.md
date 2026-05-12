@@ -1,4 +1,4 @@
-# BpfReJIT Evaluation — Methodology and Infrastructure (2026-05-07)
+# BpfReJIT Evaluation — Methodology and Infrastructure
 
 TL'DR:
 
@@ -304,7 +304,7 @@ intact for all 7 apps).
 
 | Pass | bcc | bpftrace | cilium | katran | otel | tetragon | tracee |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `map_inline` | 0 / 12 | 0 / 16 | 1 454 / 1 824 | 0 / 14 | 1 192 / 1 264 | 0 / 765 | 5 / 1 725 |
+| `map_inline` | 0 / 13 | 0 / 22 | 1 454 / 1 824 | 13 / 80 | 1 192 / 1 264 | 0 / 765 | 5 / 1 725 |
 | `wide_mem` | 0 / 0 | 10 / 18 | 0 / 0 | 4 / 4 | 132 / 137 | 2 826 / 2 826 | 179 / 229 |
 | `cond_select` | 8 / 8 | 4 / 4 | 208 / 218 | 7 / 7 | 45 / 47 | 1 331 / 1 753 | 391 / 400 |
 | `bulk_memory` | 0 / 0 | 0 / 0 | 5 / 5 | 0 / 0 | 1 / 1 | 163 / 165 | 117 / 214 |
@@ -322,8 +322,10 @@ Observations:
 
 - `map_inline` finds candidates almost everywhere (1 824 in cilium,
   1 725 in tracee, 1 264 in otel, 765 in tetragon) but **applies only
-  where captured map values are constant**: cilium 80 %, otel 94 %, but
-  0 % on bcc / bpftrace / katran / tetragon and 0.3 % on tracee. Needs further investigation.
+  where captured map values are constant or supplied via `--inline-hint`**:
+  cilium 80 %, otel 94 %, katran 16 % (driven entirely by 6
+  `--inline-hint` directives in `runner/config/passes/map_inline/katran.yaml`),
+  but 0 % on bcc / bpftrace / tetragon and 0.3 % on tracee. Needs further investigation.
 - `cond_select` apply rate dips on tetragon (1 331 / 1 753 ≈ 76 %).
 - `rotate` finds zero candidates in the 7-app corpus; the workload
   exposes no shift+or pairs that survive verifier range tracking.
