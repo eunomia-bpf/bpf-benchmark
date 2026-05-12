@@ -228,5 +228,22 @@ fn pass_report_serializes_inlined_map_entries_as_hex() {
     assert_eq!(report["inlined_map_entries"][0]["value_hex"], "2a000000");
 }
 
+#[test]
+fn verifier_states_input_accepts_raw_verifier_log() {
+    let mut path = std::env::temp_dir();
+    path.push(format!(
+        "bpfopt-verifier-log-{}-{}.log",
+        std::process::id(),
+        std::thread::current().name().unwrap_or("test")
+    ));
+    std::fs::write(&path, "0: R1=ctx() R10=fp0\n1: (b7) r0 = 7 ; R0=7\n").unwrap();
+
+    let states = read_verifier_states(&path).unwrap();
+    std::fs::remove_file(&path).unwrap();
+
+    assert_eq!(states.insns.len(), 2);
+    assert_eq!(states.insns[1].regs["r0"].const_val, Some(7));
+}
+
 // (verifier-log parsing tests live in bpfopt/crates/bpfopt/src/verifier_log_tests.rs,
 // which has direct access to crate-internal helpers.)

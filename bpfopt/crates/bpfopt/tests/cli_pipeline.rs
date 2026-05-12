@@ -357,7 +357,7 @@ fn invalid_bytecode_length_exits_with_error() {
 }
 
 #[test]
-fn verifier_states_rejects_raw_log_input() {
+fn verifier_states_accepts_raw_log_input() {
     let verifier_path = write_temp_file("raw-verifier-log.txt", "0: R0=0\n");
     let verifier_arg = verifier_path.to_string_lossy().to_string();
     let output = run_bpfopt(
@@ -366,13 +366,9 @@ fn verifier_states_rejects_raw_log_input() {
     );
     remove_file_if_exists(verifier_path);
 
-    assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(
-        stderr.contains("must be JSON; raw verifier logs are not accepted"),
-        "stderr={stderr}"
-    );
-    assert!(output.stdout.is_empty());
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+    assert_eq!(output.stdout, minimal_program_bytes());
 }
 
 #[test]

@@ -1115,22 +1115,11 @@ fn run_map_inline_round(
         if let Some(reason) = kernel_mutable_reason_for_map(&kernel_mutable_maps, info) {
             skip_lookup!(&mut skipped, &mut site_diagnostics, site.call_site, reason);
         }
-        if map_snapshot_skipped_by_size(side_input, info.map_id)? {
-            if !side_input.compressed_values.contains_key(&info.map_id) {
-                return Err(anyhow::anyhow!("snapshot skipped map {}", info.map_id));
-            }
-            let reason = format!(
-                "map snapshot skipped by size and no overlay provided (map_name={}, map_id={})",
-                match side_input.metadata.get(&info.map_id) {
-                    Some(metadata) if !metadata.name.is_empty() => metadata.name.clone(),
-                    Some(_) => "<unnamed>".to_string(),
-                    None => "<unknown>".to_string(),
-                },
-                info.map_id
-            );
+        let site_inline_hints = hints_for_call_site(inline_hints, site.call_site);
+        if map_snapshot_skipped_by_size(side_input, info.map_id)? && site_inline_hints.is_none() {
+            let reason = map_snapshot_skipped_by_size_reason(info.map_id);
             skip_lookup!(&mut skipped, &mut site_diagnostics, site.call_site, reason);
         }
-        let site_inline_hints = hints_for_call_site(inline_hints, site.call_site);
         if info.is_map_in_map() {
             if find_map_in_map_chains(prog, std::slice::from_ref(&site))?
                 .into_iter()
