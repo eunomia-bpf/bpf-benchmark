@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{BBProgram, BlockId, InsnSite, SlotDistance};
+use crate::analysis::{BBProgram, BlockId, InsnSite, MakeReplacement, SlotDistance};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const HELPER_MAP_LOOKUP_ELEM: i32 = libbpf_sys::BPF_FUNC_map_lookup_elem as i32;
@@ -31,18 +31,13 @@ fn prefetch_register_uses(payload: u64) -> RegSet {
     [kinsn_payload_reg(payload, 0)].into_iter().collect()
 }
 pub struct PrefetchPass;
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum PrefetchKind {
-    MapValue,
-    Packet,
-}
 #[derive(Clone, Copy, Debug)]
 struct PrefetchSite {
     anchor: InsnSite,
     target: InsnSite,
     ptr_reg: u8,
     ptr_def: InsnSite,
-    kind: PrefetchKind,
+    default_score: u64,
 }
 #[derive(Clone, Debug)]
 struct PrefetchCandidate {
@@ -51,42 +46,12 @@ struct PrefetchCandidate {
     ptr_reg: u8,
     score: u64,
 }
-
-enum PrefetchAdmission {
-    Admit(u64),
-    Skip(String),
-}
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum TrackedValue {
     Unknown,
     Ctx,
     PacketData { ptr_def: InsnSite },
     PacketEnd,
-}
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum RegWriteKind {
-    Explicit,
-    CallClobber,
-}
-enum InsertReject {
-    Plain(String),
-    ControlFlow(InsnSite),
-    RegWrite { reg: u8, site: InsnSite },
-}
-impl InsertReject {
-    fn message(&self) -> String {
-        match self {
-            Self::Plain(reason) => reason.clone(),
-            Self::ControlFlow(site) => format!(
-                "prefetch window contains control-flow instruction at {:?}",
-                site
-            ),
-            Self::RegWrite { reg, site } => format!(
-                "r{reg} is redefined inside the prefetch window at {:?}",
-                site
-            ),
-        }
-    }
 }
 pub(super) fn prefetch_payload(ptr_reg: u8) -> anyhow::Result<u64> {
     if ptr_reg > BPF_REG_10 {
@@ -110,8 +75,8 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     let mut skipped = Vec::new();
     for site in scan_prefetch_sites(prog, ctx.prog_type)? {
         let score = match prefetch_score_for_site(prog, site)? {
-            PrefetchAdmission::Admit(score) => score,
-            PrefetchAdmission::Skip(reason) => {
+            Ok(score) => score,
+            Err(reason) => {
                 skipped.push(pf_skip_reason(prog, site.target, reason)?);
                 continue;
             }
@@ -119,7 +84,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
         let insert_site = match choose_prefetch_insert_site(prog, site)? {
             Ok(insert) => insert,
             Err(reason) => {
-                skipped.push(pf_skip_reason(prog, site.target, reason.message())?);
+                skipped.push(pf_skip_reason(prog, site.target, reason)?);
                 continue;
             }
         };
@@ -137,22 +102,20 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             ..PassResult::unchanged()
         });
     }
-    let btf_id = ctx
-        .kinsn_registry
-        .btf_id_for_target_name(PREFETCH_TARGET_NAME)?;
-    let kfunc_off = ctx
-        .kinsn_registry
-        .call_off_for_target_name(PREFETCH_TARGET_NAME)?;
+    let (btf_id, kfunc_off) = prog.kinsn_call(PREFETCH_TARGET_NAME)?;
+    let mut applied = 0usize;
     for candidate in candidates.iter().rev() {
         let payload = prefetch_payload(candidate.ptr_reg)?;
-        prog.replace_range_at(
-            candidate.insert,
-            0,
-            emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
-        )?;
+        let replacement = emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off);
+        let new_len = replacement.len();
+        if prog.try_replace_range_with_skips(candidate.insert, 0, new_len, &mut skipped, || {
+            Ok(MakeReplacement::Use(replacement))
+        })? {
+            applied += 1;
+        }
     }
     Ok(PassResult {
-        sites_applied: candidates.len(),
+        sites_applied: applied,
         site_skipped: skipped,
         ..Default::default()
     })
@@ -167,17 +130,15 @@ fn scan_prefetch_sites(prog: &BBProgram, prog_type: u32) -> anyhow::Result<Vec<P
 fn prefetch_score_for_site(
     prog: &BBProgram,
     site: PrefetchSite,
-) -> anyhow::Result<PrefetchAdmission> {
+) -> anyhow::Result<std::result::Result<u64, String>> {
     let profile_hint = prog
         .prefetch_hint(site.target)
         .or_else(|| prog.prefetch_hint(site.anchor));
     let Some(profile_hint) = profile_hint else {
-        return Ok(PrefetchAdmission::Admit(default_site_score(site)));
+        return Ok(Ok(site.default_score));
     };
     if profile_hint.cache_misses == 0 {
-        return Ok(PrefetchAdmission::Skip(
-            "prefetch site has no observed cache misses".into(),
-        ));
+        return Ok(Err("prefetch site has no observed cache misses".into()));
     }
     let hotness = prog
         .site_hotness(site.target)
@@ -189,17 +150,9 @@ fn prefetch_score_for_site(
             )
         })?;
     if hotness == 0 {
-        return Ok(PrefetchAdmission::Skip(
-            "prefetch site execution_count is zero".into(),
-        ));
+        return Ok(Err("prefetch site execution_count is zero".into()));
     }
-    Ok(PrefetchAdmission::Admit(hotness))
-}
-fn default_site_score(site: PrefetchSite) -> u64 {
-    match site.kind {
-        PrefetchKind::MapValue => 2,
-        PrefetchKind::Packet => 1,
-    }
+    Ok(Ok(hotness))
 }
 fn scan_map_value_prefetch_sites(prog: &BBProgram) -> anyhow::Result<Vec<PrefetchSite>> {
     let mut sites = Vec::new();
@@ -234,7 +187,7 @@ fn first_map_value_deref_after_lookup(
                     target: site,
                     ptr_reg: base_reg,
                     ptr_def,
-                    kind: PrefetchKind::MapValue,
+                    default_score: 2,
                 }));
             }
         }
@@ -303,7 +256,7 @@ fn scan_packet_prefetch_sites(
                         target: site,
                         ptr_reg: base_reg,
                         ptr_def,
-                        kind: PrefetchKind::Packet,
+                        default_score: 1,
                     });
                 }
             }
@@ -397,12 +350,10 @@ fn memory_base_reg(insn: &BpfInsn) -> Option<u8> {
 fn choose_prefetch_insert_site(
     prog: &BBProgram,
     site: PrefetchSite,
-) -> anyhow::Result<std::result::Result<InsnSite, InsertReject>> {
+) -> anyhow::Result<std::result::Result<InsnSite, String>> {
     let window = pf_prefetch_window_sites(prog, site.ptr_def, site.target, MAX_PREFETCH_DISTANCE)?;
     if window.is_empty() {
-        return Ok(Err(InsertReject::Plain(
-            "no valid prefetch insertion window".into(),
-        )));
+        return Ok(Err("no valid prefetch insertion window".into()));
     }
     if let Some(reason) = reject_control_flow_between(prog, &window)? {
         return Ok(Err(reason));
@@ -413,9 +364,9 @@ fn choose_prefetch_insert_site(
     let Some(insert_site) =
         pf_nearest_prefetch_insert_site(prog, &window, site.target, TARGET_PREFETCH_DISTANCE)?
     else {
-        return Ok(Err(InsertReject::Plain(
-            "prefetch insertion window has no instruction boundary".into(),
-        )));
+        return Ok(Err(
+            "prefetch insertion window has no instruction boundary".into()
+        ));
     };
     Ok(Ok(insert_site))
 }
@@ -514,15 +465,12 @@ fn pf_nearest_prefetch_insert_site(
     Ok(best.map(|(_, _, site)| site))
 }
 
-/// End-of-site layout offset = site_layout_offset(site) + site_slot_width(site).
 fn pf_site_end_offset(prog: &BBProgram, site: InsnSite) -> anyhow::Result<SlotDistance> {
     prog.site_layout_offset(site)?
         .checked_add(prog.site_slot_width(site)?)
         .ok_or_else(|| anyhow::anyhow!("prefetch site {:?} end offset overflows", site))
 }
 
-/// Layout offset of the first body site in `block`, used to clamp prefetch
-/// candidates to the current block.
 fn first_block_layout_offset(prog: &BBProgram, block: BlockId) -> anyhow::Result<SlotDistance> {
     match prog.sites_in_block_with_terminator(block)?.first() {
         Some(&first) => prog.site_layout_offset(first),
@@ -533,14 +481,17 @@ fn first_block_layout_offset(prog: &BBProgram, block: BlockId) -> anyhow::Result
 fn reject_control_flow_between(
     prog: &BBProgram,
     window: &[InsnSite],
-) -> anyhow::Result<Option<InsertReject>> {
+) -> anyhow::Result<Option<String>> {
     for &site in window {
         let insn = prog
             .insn_at(site)
             .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
         if insn.is_call() || insn.is_exit() || insn.is_jmp_class() || insn.is_ldimm64_pseudo_func()
         {
-            return Ok(Some(InsertReject::ControlFlow(site)));
+            return Ok(Some(format!(
+                "prefetch window contains control-flow instruction at {:?}",
+                site
+            )));
         }
     }
     Ok(None)
@@ -549,30 +500,28 @@ fn reject_reg_write_between(
     prog: &BBProgram,
     window: &[InsnSite],
     reg: u8,
-) -> anyhow::Result<Option<InsertReject>> {
+) -> anyhow::Result<Option<String>> {
     for &site in window {
         let insn = prog
             .insn_at(site)
             .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
-        if reg_write_kind(insn, reg).is_some() {
-            return Ok(Some(InsertReject::RegWrite { reg, site }));
+        if writes_reg(insn, reg) {
+            return Ok(Some(format!(
+                "r{reg} is redefined inside the prefetch window at {:?}",
+                site
+            )));
         }
     }
     Ok(None)
 }
-fn reg_write_kind(insn: &BpfInsn, reg: u8) -> Option<RegWriteKind> {
+fn writes_reg(insn: &BpfInsn, reg: u8) -> bool {
     if insn.is_call() && reg <= BPF_REG_5 {
-        return Some(RegWriteKind::CallClobber);
+        return true;
     }
     if insn.is_ldimm64() {
-        return (insn.dst_reg() == reg).then_some(RegWriteKind::Explicit);
+        return insn.dst_reg() == reg;
     }
-    match insn.class() {
-        BPF_LD | BPF_LDX | BPF_ALU | BPF_ALU64 => {
-            (insn.dst_reg() == reg).then_some(RegWriteKind::Explicit)
-        }
-        _ => None,
-    }
+    matches!(insn.class(), BPF_LD | BPF_LDX | BPF_ALU | BPF_ALU64) && insn.dst_reg() == reg
 }
 fn dedup_candidates(mut candidates: Vec<PrefetchCandidate>) -> Vec<PrefetchCandidate> {
     candidates.sort_by(|a, b| {

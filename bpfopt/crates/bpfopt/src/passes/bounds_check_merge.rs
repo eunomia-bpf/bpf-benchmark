@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 use std::collections::{BTreeMap, BTreeSet};
 
-use crate::analysis::{BBProgram, BlockId, InsnSite, Terminator};
+use crate::analysis::{BBProgram, BlockId, InsnSite, MakeReplacement, Terminator};
 use crate::insn::*;
 use crate::pass::*;
 const MAX_LADDER_WINDOW_GROWTH: i32 = 24;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum RegValue {
     Unknown,
     Scalar,
@@ -40,6 +40,7 @@ struct ScanResult {
     guards: Vec<GuardSite>,
     skips: Vec<SiteSkipReason>,
 }
+
 pub struct BoundsCheckMergePass;
 
 impl BpfPass for BoundsCheckMergePass {
@@ -119,7 +120,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, prog_type: u32) -> anyhow::Result<
         });
     }
 
-    apply_rewrites(prog, &rewrites)?;
+    apply_rewrites(prog, &rewrites, &mut scan.skips)?;
     Ok(PassResult {
         sites_applied: rewrites.len(),
         site_skipped: scan.skips,
@@ -130,6 +131,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, prog_type: u32) -> anyhow::Result<
 fn apply_rewrites(
     prog: &mut BBProgram,
     rewrites: &[(InsnSite, i32, Vec<InsnSite>)],
+    skipped: &mut Vec<SiteSkipReason>,
 ) -> anyhow::Result<()> {
     let mut deleted_sites = BTreeSet::new();
     let mut deleted_branches = BTreeSet::new();
@@ -139,7 +141,9 @@ fn apply_rewrites(
             .insn_at(*dominant_add)
             .ok_or_else(|| anyhow::anyhow!("missing dominant add at {:?}", dominant_add))?;
         widened.imm = *merged_end;
-        prog.replace_range_at(*dominant_add, 1, vec![widened])?;
+        prog.try_replace_range_with_skips(*dominant_add, 1, 1, skipped, || {
+            Ok(MakeReplacement::Use(vec![widened]))
+        })?;
 
         for &site in skip_sites {
             if prog.is_terminator_site(site)? {
@@ -160,7 +164,9 @@ fn apply_rewrites(
     for (_, mut sites) in deletions_by_block {
         sites.sort_unstable_by(|a, b| b.cmp(a));
         for site in sites {
-            prog.replace_range_at(site, 1, Vec::new())?;
+            prog.try_replace_range_with_skips(site, 1, 0, skipped, || {
+                Ok(MakeReplacement::Use(Vec::new()))
+            })?;
         }
     }
     for block in deleted_branches {
@@ -191,18 +197,15 @@ fn scan_guard_sites(
         }
 
         let block_sites = prog.sites_in_block_with_terminator(block.id)?;
-        let setup_by_compare = guard_setup_windows(&block_sites);
-
-        for site in block_sites {
+        for (idx, site) in block_sites.iter().copied().enumerate() {
             let Some(&insn) = prog.insn_at(site) else {
                 continue;
             };
-            let setup = setup_by_compare.get(&site).copied();
-            if let Some(skip) = detect_variable_guard(site, prog, setup, &states)? {
-                result.skips.push(skip);
-            } else if let Some(site) = detect_guard_site(site, prog, target_sites, setup, &states)?
+            let setup = (idx >= 2).then(|| (block_sites[idx - 2], block_sites[idx - 1]));
+            if let Some(guard) =
+                detect_guard_candidate(site, prog, target_sites, setup, &states, &mut result.skips)?
             {
-                result.guards.push(site);
+                result.guards.push(guard);
             }
 
             apply_transfer(
@@ -218,12 +221,13 @@ fn scan_guard_sites(
     Ok(result)
 }
 
-fn detect_guard_site(
+fn detect_guard_candidate(
     site: InsnSite,
     prog: &BBProgram,
     target_sites: &BTreeSet<InsnSite>,
     setup: Option<(InsnSite, InsnSite)>,
     states: &[RegValue],
+    skips: &mut Vec<SiteSkipReason>,
 ) -> anyhow::Result<Option<GuardSite>> {
     let Some(insn) = prog.insn_at(site) else {
         return Ok(None);
@@ -243,30 +247,54 @@ fn detect_guard_site(
     if mov.code != (BPF_ALU64 | BPF_MOV | BPF_X) || mov.dst_reg() != cursor_reg {
         return Ok(None);
     }
-    if add.code != (BPF_ALU64 | BPF_ADD | BPF_K) || add.dst_reg() != cursor_reg {
+    if add.dst_reg() != cursor_reg {
         return Ok(None);
     }
 
     let root_reg = mov.src_reg();
+    if add.code == (BPF_ALU64 | BPF_ADD | BPF_X) {
+        if let (
+            Some(RegValue::PacketData {
+                root_id: left_root,
+                const_off: 0,
+            }),
+            Some(RegValue::PacketEnd {
+                root_id: right_root,
+            }),
+        ) = (reg_value(states, root_reg), reg_value(states, data_end_reg))
+        {
+            if left_root == right_root {
+                skips.push(SiteSkipReason {
+                    site,
+                    reason: "variable packet window is not mergeable in v1".into(),
+                });
+            }
+        }
+        return Ok(None);
+    }
+    if add.code != (BPF_ALU64 | BPF_ADD | BPF_K) {
+        return Ok(None);
+    }
+
     let window_end = add.imm;
     if window_end <= 0 {
         return Ok(None);
     }
 
-    let Some(RegValue::PacketData { root_id, const_off }) = reg_state(states, cursor_reg).cloned()
-    else {
-        return Ok(None);
-    };
-    let Some(RegValue::PacketData {
-        root_id: root_base_id,
-        const_off: root_off,
-    }) = reg_state(states, root_reg).cloned()
-    else {
-        return Ok(None);
-    };
-    let Some(RegValue::PacketEnd {
-        root_id: end_root_id,
-    }) = reg_state(states, data_end_reg).cloned()
+    let (
+        Some(RegValue::PacketData { root_id, const_off }),
+        Some(RegValue::PacketData {
+            root_id: root_base_id,
+            const_off: root_off,
+        }),
+        Some(RegValue::PacketEnd {
+            root_id: end_root_id,
+        }),
+    ) = (
+        reg_value(states, cursor_reg),
+        reg_value(states, root_reg),
+        reg_value(states, data_end_reg),
+    )
     else {
         return Ok(None);
     };
@@ -304,66 +332,6 @@ fn detect_guard_site(
         can_widen_in_place,
         can_remove_setup,
     }))
-}
-
-fn detect_variable_guard(
-    site: InsnSite,
-    prog: &BBProgram,
-    setup: Option<(InsnSite, InsnSite)>,
-    states: &[RegValue],
-) -> anyhow::Result<Option<SiteSkipReason>> {
-    let Some(insn) = prog.insn_at(site) else {
-        return Ok(None);
-    };
-    let Some((cursor_reg, data_end_reg, _)) = normalize_slow_guard(insn) else {
-        return Ok(None);
-    };
-    let Some((mov_site, add_site)) = setup else {
-        return Ok(None);
-    };
-    let mov = prog
-        .insn_at(mov_site)
-        .ok_or_else(|| anyhow::anyhow!("missing variable guard setup mov at {:?}", mov_site))?;
-    let add = prog
-        .insn_at(add_site)
-        .ok_or_else(|| anyhow::anyhow!("missing variable guard setup add at {:?}", add_site))?;
-
-    if mov.code != (BPF_ALU64 | BPF_MOV | BPF_X) || mov.dst_reg() != cursor_reg {
-        return Ok(None);
-    }
-    if add.code != (BPF_ALU64 | BPF_ADD | BPF_X) || add.dst_reg() != cursor_reg {
-        return Ok(None);
-    }
-
-    let root_reg = mov.src_reg();
-    let (Some(root_state), Some(end_state)) =
-        (reg_state(states, root_reg), reg_state(states, data_end_reg))
-    else {
-        return Ok(None);
-    };
-    let skip = match (root_state, end_state) {
-        (
-            RegValue::PacketData {
-                root_id: left_root,
-                const_off: 0,
-            },
-            RegValue::PacketEnd {
-                root_id: right_root,
-            },
-        ) if left_root == right_root => Some(SiteSkipReason {
-            site,
-            reason: "variable packet window is not mergeable in v1".into(),
-        }),
-        _ => None,
-    };
-    Ok(skip)
-}
-
-fn guard_setup_windows(sites: &[InsnSite]) -> BTreeMap<InsnSite, (InsnSite, InsnSite)> {
-    sites
-        .windows(3)
-        .map(|window| (window[2], (window[0], window[1])))
-        .collect()
 }
 
 fn cursor_dead_after_compare(
@@ -416,74 +384,59 @@ fn can_extend_ladder(
         || prev.slow_target != next.slow_target
         || next.window_end <= prev.window_end
         || next.window_end - prev.window_end > MAX_LADDER_WINDOW_GROWTH
+        || target_sites.contains(&next.compare)
     {
         return Ok(false);
     }
-    let Some(interleaves) = bcm_sites_between(prog, prev.compare, next.mov)? else {
-        return Ok(false);
-    };
-    for site in interleaves {
-        if !is_merge_safe_interleave(site, prog, target_sites)? {
-            return Ok(false);
-        }
-    }
-
-    Ok(!target_sites.contains(&next.compare))
+    interleaves_are_merge_safe(prog, prev.compare, next.mov, target_sites)
 }
 
-fn bcm_sites_between(
+fn interleaves_are_merge_safe(
     prog: &BBProgram,
     start: InsnSite,
     end: InsnSite,
-) -> anyhow::Result<Option<Vec<InsnSite>>> {
+    target_sites: &BTreeSet<InsnSite>,
+) -> anyhow::Result<bool> {
     let frame = prog.block_frame(start.block)?;
     if prog.block_frame(end.block)? != frame || !prog.is_terminator_site(start)? {
-        return Ok(None);
+        return Ok(false);
     }
 
     let Terminator::CondBranch { fallthrough, .. } = prog.terminator(start.block)? else {
-        return Ok(None);
+        return Ok(false);
     };
 
-    let mut sites = Vec::new();
     let mut cursor = fallthrough;
     let mut visited = BTreeSet::new();
     loop {
         if !visited.insert(cursor) || prog.block_frame(cursor)? != frame {
-            return Ok(None);
+            return Ok(false);
         }
 
         for site in prog.sites_in_block_with_terminator(cursor)? {
             if cursor == prog.site_block(end) && site == end {
-                return Ok(Some(sites));
+                return Ok(true);
             }
-            sites.push(site);
+            if target_sites.contains(&site) {
+                return Ok(false);
+            }
+            let insn = prog
+                .insn_at(site)
+                .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
+            if match insn.class() {
+                BPF_JMP | BPF_JMP32 => true,
+                BPF_ST | BPF_STX => insn.dst_reg() != 10,
+                _ => false,
+            } {
+                return Ok(false);
+            }
         }
 
         let Terminator::Fallthrough { next } = prog.terminator(cursor)? else {
-            return Ok(None);
+            return Ok(false);
         };
         cursor = next;
     }
-}
-
-fn is_merge_safe_interleave(
-    site: InsnSite,
-    prog: &BBProgram,
-    target_sites: &BTreeSet<InsnSite>,
-) -> anyhow::Result<bool> {
-    if target_sites.contains(&site) {
-        return Ok(false);
-    }
-
-    let insn = prog
-        .insn_at(site)
-        .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
-    Ok(match insn.class() {
-        BPF_JMP | BPF_JMP32 => false,
-        BPF_ST | BPF_STX => insn.dst_reg() == 10,
-        _ => true,
-    })
 }
 
 fn build_ladder_rewrite(
@@ -553,15 +506,10 @@ fn apply_transfer(
         BPF_ALU64 | BPF_ALU => {
             let op = bpf_op(insn.code);
             match (op, bpf_src(insn.code)) {
-                (BPF_MOV, BPF_X) => {
-                    states[dst] = match states.get(src).cloned() {
-                        Some(state) => state,
-                        None => RegValue::Unknown,
-                    }
-                }
+                (BPF_MOV, BPF_X) => states[dst] = reg_index_value(states, src),
                 (BPF_MOV, _) => states[dst] = RegValue::Scalar,
                 (BPF_ADD, BPF_K) => {
-                    states[dst] = match states.get(dst).cloned() {
+                    states[dst] = match states.get(dst).copied() {
                         Some(RegValue::PacketData { root_id, const_off }) => RegValue::PacketData {
                             root_id,
                             const_off: const_off + insn.imm,
@@ -591,12 +539,14 @@ fn is_ctx_data_end_load(insn: &BpfInsn, layout: PacketCtxLayout) -> bool {
     insn.is_ldx_mem() && insn.src_reg() == 1 && insn.off == layout.data_end_off
 }
 
-fn reg_state(states: &[RegValue], reg: u8) -> Option<&RegValue> {
-    states.get(reg as usize)
+fn reg_value(states: &[RegValue], reg: u8) -> Option<RegValue> {
+    states.get(reg as usize).copied()
+}
+
+fn reg_index_value(states: &[RegValue], reg: usize) -> RegValue {
+    states.get(reg).copied().unwrap_or(RegValue::Unknown)
 }
 
 fn clear_states(states: &mut [RegValue]) {
-    for state in states {
-        *state = RegValue::Unknown;
-    }
+    states.fill(RegValue::Unknown);
 }

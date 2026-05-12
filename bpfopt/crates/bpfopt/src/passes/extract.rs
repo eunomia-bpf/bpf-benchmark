@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{BBProgram, InsnSite, Terminator};
+use crate::analysis::{BBProgram, InsnSite, MakeReplacement, Terminator};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
@@ -39,14 +39,17 @@ fn extract_site_from_pair(i0: &BpfInsn, i1: &BpfInsn) -> Option<ExtractSite> {
     {
         return None;
     }
-    let shift = i0.imm as u32;
+    let shift = u32::try_from(i0.imm).ok()?;
     let mask = i1.imm as i64 as u64;
     let bit_len = contiguous_mask_len(mask)?;
-    (shift + bit_len <= 64).then_some(ExtractSite {
-        dst_reg: i0.dst_reg(),
-        shift_amount: shift,
-        bit_len,
-    })
+    shift
+        .checked_add(bit_len)
+        .is_some_and(|end| end <= 64)
+        .then_some(ExtractSite {
+            dst_reg: i0.dst_reg(),
+            shift_amount: shift,
+            bit_len,
+        })
 }
 impl BpfPass for ExtractPass {
     fn name(&self) -> &str {
@@ -56,9 +59,7 @@ impl BpfPass for ExtractPass {
         run_on_bbprogram(program, ctx)
     }
 }
-pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
-    let btf_id = ctx.kinsn_registry.btf_id_for_target_name("bpf_extract64")?;
-    let mut safe_sites = Vec::new();
+pub fn run_on_bbprogram(prog: &mut BBProgram, _ctx: &PassContext) -> anyhow::Result<PassResult> {
     let mut skipped = Vec::new();
     for block in prog.block_ids().collect::<Vec<_>>() {
         for start in prog.sites_in_block(block)? {
@@ -76,48 +77,29 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
                 .map(|site| window.hit(window.start_idx, 2, site)),
         )
     })?;
-    for hit in raw_sites {
-        if prog
-            .rep_admit_kinsn_site_window(hit.start, hit.old_len, 2, &mut skipped)?
-            .is_none()
-        {
-            continue;
-        }
-        safe_sites.push((hit.start, hit.value));
-    }
-    if safe_sites.is_empty() {
+    if raw_sites.is_empty() {
         return Ok(PassResult {
             site_skipped: skipped,
             ..PassResult::unchanged()
         });
     }
-    let kfunc_off = ctx
-        .kinsn_registry
-        .call_off_for_target_name("bpf_extract64")?;
-    for (start, site) in safe_sites.iter().rev() {
-        let shift_amount = u8::try_from(site.shift_amount).map_err(|_| {
-            anyhow::anyhow!(
-                "extract shift amount {} exceeds packed payload width",
-                site.shift_amount
-            )
-        })?;
-        let bit_len = u8::try_from(site.bit_len).map_err(|_| {
-            anyhow::anyhow!(
-                "extract bit length {} exceeds packed payload width",
-                site.bit_len
-            )
-        })?;
+    let mut applied = 0usize;
+    for hit in raw_sites.iter().rev() {
+        let site = &hit.value;
+        let (btf_id, kfunc_off) = prog.kinsn_call("bpf_extract64")?;
         let payload = BpfInsn::pack_u4(site.dst_reg, 0)
-            | BpfInsn::pack_u8(shift_amount, 8)
-            | BpfInsn::pack_u8(bit_len, 16);
-        prog.replace_range_at(
-            *start,
-            2,
-            emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
-        )?;
+            | BpfInsn::pack_u8(site.shift_amount as u8, 8)
+            | BpfInsn::pack_u8(site.bit_len as u8, 16);
+        if prog.try_replace_range_with_skips(hit.start, 2, 2, &mut skipped, || {
+            Ok(MakeReplacement::Use(emit_packed_kinsn_call_with_off(
+                payload, btf_id, kfunc_off,
+            )))
+        })? {
+            applied += 1;
+        }
     }
     Ok(PassResult {
-        sites_applied: safe_sites.len(),
+        sites_applied: applied,
         site_skipped: skipped,
         ..Default::default()
     })

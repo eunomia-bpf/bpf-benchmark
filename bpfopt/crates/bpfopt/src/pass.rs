@@ -5,8 +5,9 @@
 //! - `BBProgram`: basic-block IR used by production pass execution
 //! - `BpfPass`: transformation pass that may modify the program
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt;
+use std::path::PathBuf;
 use std::sync::Arc;
 
 use crate::analysis::{BBProgram, InsnSite};
@@ -15,8 +16,9 @@ use crate::verifier_log::{verifier_states_from_json, VerifierStatesJson};
 #[cfg(test)]
 pub(crate) use crate::verifier_log::{RegState, ScalarRange, StackState, Tnum, VerifierValueWidth};
 pub(crate) use crate::verifier_log::{VerifierInsn, VerifierInsnKind};
+use clap::Args;
 use serde::ser::SerializeStruct;
-use serde::{Serialize, Serializer};
+use serde::{Deserialize, Serialize, Serializer};
 
 pub type RegSet = HashSet<u8>;
 
@@ -220,6 +222,83 @@ impl BtfInfoRecords {
         }
         Ok(Self { rec_size, bytes })
     }
+}
+
+/// Framework-global CLI args shared by every pass invocation.
+///
+/// IMPORTANT: only put a flag here when *every* bpfopt run conceivably
+/// needs it (input/output/report paths, target arch, prog type, BTF
+/// remapping inputs, kinsn target metadata, verifier-states log).
+/// Per-pass tuning (e.g. map_inline's `--inline-hint`, branch_flip's
+/// `--profile`, prefetch's `--profile`) goes in the pass's own
+/// `<Pass>CliArgs` struct and is parsed AFTER `--`. Adding a pass-specific
+/// flag here pollutes the global namespace and breaks the pass-local
+/// args trait.
+#[derive(Args, Clone, Debug, Default)]
+pub struct CommonArgs {
+    /// Input bytecode file. Defaults to stdin.
+    #[arg(long, global = true, value_name = "FILE")]
+    pub input: Option<PathBuf>,
+    /// Output bytecode or JSON file. Defaults to stdout.
+    #[arg(long, global = true, value_name = "FILE")]
+    pub output: Option<PathBuf>,
+    /// Canonicalize map references from loader FD form to stable map-index form.
+    #[arg(long, global = true)]
+    pub canonicalize_map_refs: bool,
+    /// Program map IDs in kernel used_maps order, comma-separated.
+    #[arg(long, global = true, value_name = "IDS", value_delimiter = ',')]
+    pub map_ids: Vec<u32>,
+    /// Pass report JSON output file.
+    #[arg(long, global = true, value_name = "FILE")]
+    pub report: Option<PathBuf>,
+    /// Target architecture: x86_64 or aarch64.
+    #[arg(long, global = true, value_name = "ARCH")]
+    pub platform: Option<String>,
+    /// BPF program type, such as xdp, sched_cls, tracing, or a numeric type.
+    #[arg(long, global = true, value_name = "TYPE")]
+    pub prog_type: Option<String>,
+    /// Available kinsns, comma-separated. Entries may be name or name:btf_id.
+    #[arg(long, global = true, value_name = "LIST", value_delimiter = ',')]
+    pub kinsns: Vec<String>,
+    /// Target platform JSON file.
+    #[arg(long, global = true, value_name = "FILE")]
+    pub target: Option<PathBuf>,
+    /// Output target platform JSON file after canonicalization-time rewrites.
+    #[arg(long, global = true, value_name = "FILE")]
+    pub target_output: Option<PathBuf>,
+    /// Verifier states JSON file.
+    #[arg(long, global = true, value_name = "FILE")]
+    pub verifier_states: Option<PathBuf>,
+    /// Raw func_info records to remap in place when instruction offsets change.
+    #[arg(long, global = true, value_name = "FILE")]
+    pub func_info: Option<PathBuf>,
+    /// Byte size of one func_info record.
+    #[arg(long, global = true, value_name = "BYTES")]
+    pub func_info_rec_size: Option<u32>,
+    /// Raw line_info records to remap in place when instruction offsets change.
+    #[arg(long, global = true, value_name = "FILE")]
+    pub line_info: Option<PathBuf>,
+    /// Byte size of one line_info record.
+    #[arg(long, global = true, value_name = "BYTES")]
+    pub line_info_rec_size: Option<u32>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct TargetJson {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub arch: Option<String>,
+    #[serde(default)]
+    pub features: Vec<String>,
+    #[serde(default)]
+    pub kinsns: BTreeMap<String, KinsnJson>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct KinsnJson {
+    pub btf_func_id: i32,
+    #[serde(default)]
+    pub btf_id: u32,
+    pub call_offset: i16,
 }
 
 // ── Program IR ──────────────────────────────────────────────────────

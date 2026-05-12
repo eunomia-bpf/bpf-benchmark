@@ -6,6 +6,7 @@ use std::ops::Range;
 
 use crate::analysis::{BBProgram, Block, BlockId, DefSite, InsnSite, Terminator};
 use crate::insn::{insn_width, BpfInsn};
+use crate::pass::SiteSkipReason;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct DiamondPattern {
@@ -13,6 +14,24 @@ pub struct DiamondPattern {
     pub true_branch: BlockId,
     pub false_branch: BlockId,
     pub join: Option<BlockId>,
+}
+
+/// What a `try_replace_range` closure returns to BBProgram.
+pub enum MakeReplacement {
+    /// Commit this replacement.
+    Use(Vec<BpfInsn>),
+    /// Skip this site (closure decided pass-specific check failed).
+    Skip(String),
+}
+
+/// Result of `try_replace_range`.
+pub enum TryReplaceOutcome {
+    /// Replacement was applied.
+    Applied,
+    /// Site was skipped, either by structural admission failure or by the
+    /// closure returning `MakeReplacement::Skip`. The reason is suitable for a
+    /// `SiteSkipReason::reason` field.
+    Skipped(String),
 }
 
 impl BBProgram {
@@ -48,37 +67,98 @@ impl BBProgram {
         Ok(removed_slots)
     }
 
-    pub fn replace_range_at(
+    /// Universal in-block instruction replacement core.
+    ///
+    /// Flow:
+    /// 1. Basic bounds check on `(start, old_len)`.
+    /// 2. Structural admission (subprog boundary) on `(old_len, new_len)`.
+    ///    Skipped admission for pure inserts (`old_len == 0`) and pure deletes
+    ///    (`new_len == 0`) since those cannot cross subprog boundaries.
+    /// 3. On admission failure, returns `Skipped(reason)` without calling closure.
+    /// 4. On admission success, calls closure to lazily produce the replacement
+    ///    or to opt out (e.g., pass-specific live-out check).
+    /// 5. Closure returning `Use(insns)` commits if `insns.len() == new_len`,
+    ///    else returns hard error. Closure returning `Skip(reason)` returns
+    ///    `Skipped(reason)` without mutation. Closure returning `Err` propagates.
+    pub fn try_replace_range<F>(
         &mut self,
-        site: InsnSite,
-        len: usize,
-        replacement: Vec<BpfInsn>,
-    ) -> anyhow::Result<()> {
-        let block_ref = self.block(site.block)?;
-        if site.idx > block_ref.insns.len() {
+        start: InsnSite,
+        old_len: usize,
+        new_len: usize,
+        make_replacement: F,
+    ) -> anyhow::Result<TryReplaceOutcome>
+    where
+        F: FnOnce() -> anyhow::Result<MakeReplacement>,
+    {
+        let block_ref = self.block(start.block)?;
+        if start.idx > block_ref.insns.len() {
             anyhow::bail!(
-                "replace_range_at starts at {:?}, beyond block body length {}",
-                site,
+                "try_replace_range starts at {:?}, beyond block body length {}",
+                start,
                 block_ref.insns.len()
             );
         }
-        let end = site
+        let end = start
             .idx
-            .checked_add(len)
-            .ok_or_else(|| anyhow::anyhow!("replace_range_at at {:?} overflows", site))?;
+            .checked_add(old_len)
+            .ok_or_else(|| anyhow::anyhow!("try_replace_range at {:?} overflows", start))?;
         if end > block_ref.insns.len() {
             anyhow::bail!(
-                "replace_range_at {:?} length {} exceeds block body length {}",
-                site,
-                len,
+                "try_replace_range {:?} length {} exceeds block body length {}",
+                start,
+                old_len,
                 block_ref.insns.len()
             );
         }
 
+        if old_len > 0 && new_len > 0 {
+            if let Some(reason) = self.admission_skip_reason(start, old_len, new_len)? {
+                return Ok(TryReplaceOutcome::Skipped(reason));
+            }
+        }
+
+        let replacement = match make_replacement()? {
+            MakeReplacement::Use(insns) => insns,
+            MakeReplacement::Skip(reason) => return Ok(TryReplaceOutcome::Skipped(reason)),
+        };
+        if replacement.len() != new_len {
+            anyhow::bail!(
+                "try_replace_range at {:?} expected {} replacement insns, closure produced {}",
+                start,
+                new_len,
+                replacement.len()
+            );
+        }
+
         let mut next = self.clone();
-        next.replace_range_in_place(site.block, site.idx..end, replacement)?;
+        next.replace_range_in_place(start.block, start.idx..end, replacement)?;
         *self = next;
-        Ok(())
+        Ok(TryReplaceOutcome::Applied)
+    }
+
+    /// Convenience: try_replace_range that pushes the skip reason into a
+    /// `Vec<SiteSkipReason>` on rejection. Returns true if applied.
+    pub fn try_replace_range_with_skips<F>(
+        &mut self,
+        start: InsnSite,
+        old_len: usize,
+        new_len: usize,
+        skipped: &mut Vec<SiteSkipReason>,
+        make_replacement: F,
+    ) -> anyhow::Result<bool>
+    where
+        F: FnOnce() -> anyhow::Result<MakeReplacement>,
+    {
+        match self.try_replace_range(start, old_len, new_len, make_replacement)? {
+            TryReplaceOutcome::Applied => Ok(true),
+            TryReplaceOutcome::Skipped(reason) => {
+                skipped.push(SiteSkipReason {
+                    site: start,
+                    reason,
+                });
+                Ok(false)
+            }
+        }
     }
 
     fn replace_range_in_place(

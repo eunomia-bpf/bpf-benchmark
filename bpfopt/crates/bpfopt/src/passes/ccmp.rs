@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 //! ARM64 CCMP optimization pass.
 
-use crate::analysis::{BBProgram, BlockId, InsnSite, Terminator};
+use crate::analysis::{BBProgram, BlockId, InsnSite, MakeReplacement, Terminator};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
@@ -13,7 +13,7 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
 
 const MIN_CCMP_TERMS: usize = 2;
 const MAX_CCMP_TERMS: usize = 4;
-const CCMP_REPLACEMENT_LEN: usize = 3;
+const CCMP_ADMISSION_REPLACEMENT_LEN: usize = 3;
 
 fn decode_ccmp_proof(payload: &[u8]) -> ProofRegion {
     ProofRegion::from_result(decode_packed_kinsn_payload(payload).and_then(ccmp_proof_len))
@@ -61,10 +61,11 @@ fn ccmp_register_uses(payload: u64) -> RegSet {
 /// ARM64-only conditional-compare kinsn plus one final branch.
 pub struct CcmpPass;
 
+#[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum CcmpFailMode {
-    EqZero,
-    NeZero,
+    EqZero = 0,
+    NeZero = 1,
 }
 
 impl CcmpFailMode {
@@ -75,19 +76,13 @@ impl CcmpFailMode {
             _ => None,
         }
     }
-
-    fn payload_bit(self) -> u64 {
-        match self {
-            Self::EqZero => 0,
-            Self::NeZero => 1,
-        }
-    }
 }
 
+#[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum CcmpWidth {
-    Bpf64,
-    Bpf32,
+    Bpf64 = 0,
+    Bpf32 = 1,
 }
 
 impl CcmpWidth {
@@ -98,21 +93,6 @@ impl CcmpWidth {
             _ => None,
         }
     }
-
-    fn payload_bit(self) -> u64 {
-        match self {
-            Self::Bpf64 => 0,
-            Self::Bpf32 => 1,
-        }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(super) struct CcmpPayload {
-    pub(super) dst_reg: u8,
-    pub(super) fail_mode: CcmpFailMode,
-    pub(super) width: CcmpWidth,
-    pub(super) regs: Vec<u8>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -127,12 +107,6 @@ pub(super) struct CcmpSite {
     pub(super) regs: Vec<u8>,
 }
 
-struct SafeCcmpSite {
-    site: CcmpSite,
-    dst_reg: u8,
-    payload: u64,
-}
-
 struct BranchTerm {
     block: BlockId,
     target_block: BlockId,
@@ -140,6 +114,23 @@ struct BranchTerm {
     reg: u8,
     fail_mode: CcmpFailMode,
     width: CcmpWidth,
+}
+
+impl CcmpSite {
+    fn skip(&self, reason: impl Into<String>) -> SiteSkipReason {
+        SiteSkipReason {
+            site: self.start_site,
+            reason: reason.into(),
+        }
+    }
+}
+
+impl BranchTerm {
+    fn matches_chain(&self, first: &Self) -> bool {
+        self.target_block == first.target_block
+            && self.fail_mode == first.fail_mode
+            && self.width == first.width
+    }
 }
 
 impl BpfPass for CcmpPass {
@@ -165,58 +156,39 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
 
     for site in sites {
         if site.regs.len() > MAX_CCMP_TERMS {
-            skipped.push(SiteSkipReason {
-                site: site.start_site,
-                reason: format!(
-                    "ccmp chain length {} exceeds maximum {}",
-                    site.regs.len(),
-                    MAX_CCMP_TERMS
-                ),
-            });
+            skipped.push(site.skip(format!(
+                "ccmp chain length {} exceeds maximum {}",
+                site.regs.len(),
+                MAX_CCMP_TERMS
+            )));
             continue;
         }
 
         if site.blocks.contains(&site.target_block) {
-            skipped.push(SiteSkipReason {
-                site: site.start_site,
-                reason: "ccmp chain target is inside the chain boundary".into(),
-            });
+            skipped.push(site.skip("ccmp chain target is inside the chain boundary"));
             continue;
         }
 
-        if prog
-            .rep_admit_kinsn_site_window(
-                site.start_site,
-                site.old_len,
-                CCMP_REPLACEMENT_LEN,
-                &mut skipped,
-            )?
-            .is_none()
-        {
+        if let Some(reason) = prog.admission_skip_reason(
+            site.start_site,
+            site.old_len,
+            CCMP_ADMISSION_REPLACEMENT_LEN,
+        )? {
+            skipped.push(site.skip(reason));
             continue;
         }
 
         let Some(dst_reg) = choose_dead_dst_reg(prog, &site)? else {
-            skipped.push(SiteSkipReason {
-                site: site.start_site,
-                reason: "no dead register available for ccmp predicate".into(),
-            });
+            skipped.push(site.skip("no dead register available for ccmp predicate"));
             continue;
         };
 
-        validate_ccmp_chain(prog, &site)?;
+        let mut trial = prog.clone();
+        let (chain, target, success) = ccmp_chain_blocks(&mut trial, &site)?;
+        validate_chain_edges(&trial, &site, &chain, target, success)?;
 
-        let payload = encode_ccmp_payload(&CcmpPayload {
-            dst_reg,
-            fail_mode: site.fail_mode,
-            width: site.width,
-            regs: site.regs.clone(),
-        })?;
-        safe_sites.push(SafeCcmpSite {
-            site,
-            dst_reg,
-            payload,
-        });
+        let payload = encode_ccmp_payload(dst_reg, site.fail_mode, site.width, &site.regs)?;
+        safe_sites.push((site, dst_reg, payload));
     }
 
     if safe_sites.is_empty() {
@@ -226,39 +198,47 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
         });
     }
 
-    let btf_id = ctx.kinsn_registry.btf_id_for_target_name("bpf_ccmp64")?;
-    let kfunc_off = ctx.kinsn_registry.call_off_for_target_name("bpf_ccmp64")?;
-    safe_sites.sort_by_key(|safe| safe.site.start_site);
-    for safe_site in safe_sites.iter().rev() {
-        apply_ccmp_site(prog, safe_site, btf_id, kfunc_off)?;
+    let (btf_id, kfunc_off) = prog.kinsn_call("bpf_ccmp64")?;
+    safe_sites.sort_by_key(|(site, _, _)| site.start_site);
+    let mut applied = 0usize;
+    for (site, dst_reg, payload) in safe_sites.iter().rev() {
+        if apply_ccmp_site(
+            prog,
+            site,
+            *dst_reg,
+            *payload,
+            btf_id,
+            kfunc_off,
+            &mut skipped,
+        )? {
+            applied += 1;
+        }
     }
 
     Ok(PassResult {
-        sites_applied: safe_sites.len(),
+        sites_applied: applied,
         site_skipped: skipped,
         ..Default::default()
     })
 }
 
-fn validate_ccmp_chain(prog: &BBProgram, site: &CcmpSite) -> anyhow::Result<()> {
-    let mut trial = prog.clone();
-    let (chain, target, success) = ccmp_chain_blocks(&mut trial, site)?;
-    validate_chain_edges(&trial, site, &chain, target, success)
-}
-
 fn apply_ccmp_site(
     prog: &mut BBProgram,
-    safe_site: &SafeCcmpSite,
+    site: &CcmpSite,
+    dst_reg: u8,
+    payload: u64,
     btf_id: i32,
     kfunc_off: i16,
-) -> anyhow::Result<()> {
-    let (chain, target, success) = ccmp_chain_blocks(prog, &safe_site.site)?;
-    validate_chain_edges(prog, &safe_site.site, &chain, target, success)?;
+    skipped: &mut Vec<SiteSkipReason>,
+) -> anyhow::Result<bool> {
+    let mut trial = prog.clone();
+    let (chain, target, success) = ccmp_chain_blocks(&mut trial, site)?;
+    validate_chain_edges(&trial, site, &chain, target, success)?;
     for pair in chain.windows(2) {
-        prog.replace_terminator(pair[0], Terminator::Fallthrough { next: pair[1] })?;
+        trial.replace_terminator(pair[0], Terminator::Fallthrough { next: pair[1] })?;
     }
-    let merged = prog.merge_linear_chain(&chain)?;
-    let (target, success) = match prog.terminator(merged)? {
+    let merged = trial.merge_linear_chain(&chain)?;
+    let (target, success) = match trial.terminator(merged)? {
         Terminator::CondBranch {
             taken, fallthrough, ..
         } => (taken, fallthrough),
@@ -268,42 +248,45 @@ fn apply_ccmp_site(
             term
         ),
     };
-    let merged_sites = prog.sites_in_block(merged)?;
+    let merged_sites = trial.sites_in_block(merged)?;
     let replacement_start = match merged_sites.first().copied() {
         Some(site) => site,
-        None => prog.terminator_site(merged)?.ok_or_else(|| {
+        None => trial.terminator_site(merged)?.ok_or_else(|| {
             anyhow::anyhow!("ccmp merged block {:?} has no insertion site", merged)
         })?,
     };
-    prog.replace_range_at(
+    let replacement = emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off);
+    if !trial.try_replace_range_with_skips(
         replacement_start,
         merged_sites.len(),
-        emit_packed_kinsn_call_with_off(safe_site.payload, btf_id, kfunc_off),
-    )?;
+        replacement.len(),
+        skipped,
+        || Ok(MakeReplacement::Use(replacement)),
+    )? {
+        return Ok(false);
+    }
 
-    let branch = BpfInsn::new(
-        BPF_JMP | BPF_JEQ | BPF_K,
-        BpfInsn::make_regs(safe_site.dst_reg, 0),
-        0,
-        0,
-    );
-    prog.replace_terminator(
+    trial.replace_terminator(
         merged,
         Terminator::CondBranch {
-            cond: branch,
+            cond: BpfInsn::new(
+                BPF_JMP | BPF_JEQ | BPF_K,
+                BpfInsn::make_regs(dst_reg, 0),
+                0,
+                0,
+            ),
             taken: target,
             fallthrough: success,
         },
-    )
+    )?;
+    *prog = trial;
+    Ok(true)
 }
 
 fn ccmp_chain_blocks(
     prog: &mut BBProgram,
     site: &CcmpSite,
 ) -> anyhow::Result<(Vec<BlockId>, BlockId, BlockId)> {
-    let mut chain = site.blocks.clone();
-    let mut target = site.target_block;
-    let mut success = site.success_block;
     let first = prog.site_block(site.start_site);
     if !prog.is_terminator_site(site.start_site)? {
         anyhow::bail!(
@@ -311,19 +294,18 @@ fn ccmp_chain_blocks(
             site.start_site
         );
     }
-    if !prog.sites_in_block(first)?.is_empty() {
-        let (_, tail) = prog.split_block(site.start_site)?;
-        let Some(first_term) = branch_term(prog, tail)? else {
-            anyhow::bail!("ccmp split tail {:?} has no branch term", tail);
-        };
-        let Some(updated) = try_match_ccmp_chain(prog, first_term)? else {
-            anyhow::bail!("ccmp split tail {:?} no longer matches a chain", tail);
-        };
-        chain = updated.blocks;
-        target = updated.target_block;
-        success = updated.success_block;
+    if prog.sites_in_block(first)?.is_empty() {
+        return Ok((site.blocks.clone(), site.target_block, site.success_block));
     }
-    Ok((chain, target, success))
+
+    let (_, tail) = prog.split_block(site.start_site)?;
+    let Some(first_term) = branch_term(prog, tail)? else {
+        anyhow::bail!("ccmp split tail {:?} has no branch term", tail);
+    };
+    let Some(updated) = try_match_ccmp_chain(prog, first_term)? else {
+        anyhow::bail!("ccmp split tail {:?} no longer matches a chain", tail);
+    };
+    Ok((updated.blocks, updated.target_block, updated.success_block))
 }
 
 fn validate_chain_edges(
@@ -355,10 +337,7 @@ fn validate_chain_edges(
                 target
             );
         }
-        let expected_fallthrough = match chain.get(idx + 1) {
-            Some(&next) => next,
-            None => success,
-        };
+        let expected_fallthrough = chain.get(idx + 1).copied().unwrap_or(success);
         if fallthrough != expected_fallthrough {
             anyhow::bail!(
                 "ccmp chain block {:?} falls through to {:?}, expected {:?}",
@@ -388,9 +367,7 @@ pub(super) fn scan_ccmp_sites(prog: &BBProgram) -> anyhow::Result<Vec<CcmpSite>>
         if has_same_chain_predecessor(prog, &first)? {
             continue;
         }
-        if let Some(site) = try_match_ccmp_chain(prog, first)? {
-            sites.push(site);
-        }
+        sites.extend(try_match_ccmp_chain(prog, first)?);
     }
     Ok(sites)
 }
@@ -404,10 +381,7 @@ fn try_match_ccmp_chain(prog: &BBProgram, first: BranchTerm) -> anyhow::Result<O
         if blocks.contains(&term.block) {
             break;
         }
-        if term.target_block != first.target_block
-            || term.fail_mode != first.fail_mode
-            || term.width != first.width
-        {
+        if !term.matches_chain(&first) {
             break;
         }
         regs.push(term.reg);
@@ -422,12 +396,11 @@ fn try_match_ccmp_chain(prog: &BBProgram, first: BranchTerm) -> anyhow::Result<O
     let start_site = prog
         .terminator_site(first.block)?
         .ok_or_else(|| anyhow::anyhow!("ccmp block {:?} has no terminator site", first.block))?;
-    let success_block = cursor;
     Ok(Some(CcmpSite {
         start_site,
         old_len: regs.len(),
         target_block: first.target_block,
-        success_block,
+        success_block: cursor,
         blocks,
         fail_mode: first.fail_mode,
         width: first.width,
@@ -440,11 +413,7 @@ fn has_same_chain_predecessor(prog: &BBProgram, first: &BranchTerm) -> anyhow::R
         let Some(term) = branch_term(prog, pred)? else {
             continue;
         };
-        if term.fallthrough == first.block
-            && term.target_block == first.target_block
-            && term.fail_mode == first.fail_mode
-            && term.width == first.width
-        {
+        if term.fallthrough == first.block && term.matches_chain(first) {
             return Ok(true);
         }
     }
@@ -460,10 +429,7 @@ fn branch_term(prog: &BBProgram, block: BlockId) -> anyhow::Result<Option<Branch
     else {
         return Ok(None);
     };
-    if !insn.is_cond_jmp() || bpf_src(insn.code) != BPF_K || insn.imm != 0 {
-        return Ok(None);
-    }
-    if taken == fallthrough {
+    if !insn.is_cond_jmp() || bpf_src(insn.code) != BPF_K || insn.imm != 0 || taken == fallthrough {
         return Ok(None);
     }
     let Some(fail_mode) = CcmpFailMode::from_bpf_op(bpf_op(insn.code)) else {
@@ -500,27 +466,32 @@ fn choose_dead_dst_reg(prog: &BBProgram, site: &CcmpSite) -> anyhow::Result<Opti
     Ok((BPF_REG_0..=BPF_REG_9).find(|reg| !live_after.contains(reg) && !site.regs.contains(reg)))
 }
 
-pub(super) fn encode_ccmp_payload(payload: &CcmpPayload) -> anyhow::Result<u64> {
-    if payload.regs.len() < MIN_CCMP_TERMS || payload.regs.len() > MAX_CCMP_TERMS {
+pub(super) fn encode_ccmp_payload(
+    dst_reg: u8,
+    fail_mode: CcmpFailMode,
+    width: CcmpWidth,
+    regs: &[u8],
+) -> anyhow::Result<u64> {
+    if !(MIN_CCMP_TERMS..=MAX_CCMP_TERMS).contains(&regs.len()) {
         anyhow::bail!(
             "ccmp payload term count {} is outside {}..{}",
-            payload.regs.len(),
+            regs.len(),
             MIN_CCMP_TERMS,
             MAX_CCMP_TERMS
         );
     }
-    if payload.dst_reg > BPF_REG_9 {
-        anyhow::bail!("ccmp dst register r{} is invalid", payload.dst_reg);
+    if dst_reg > BPF_REG_9 {
+        anyhow::bail!("ccmp dst register r{} is invalid", dst_reg);
     }
-    if payload.regs.contains(&payload.dst_reg) {
+    if regs.contains(&dst_reg) {
         anyhow::bail!("ccmp dst register aliases a compare operand");
     }
 
-    let mut encoded = BpfInsn::pack_u4(payload.dst_reg, 0)
-        | BpfInsn::pack_u4((payload.regs.len() - 2) as u8, 4)
-        | BpfInsn::pack_u4(payload.fail_mode.payload_bit() as u8, 6)
-        | BpfInsn::pack_u4(payload.width.payload_bit() as u8, 7);
-    for (idx, &reg) in payload.regs.iter().enumerate() {
+    let mut encoded = BpfInsn::pack_u4(dst_reg, 0)
+        | BpfInsn::pack_u4((regs.len() - 2) as u8, 4)
+        | BpfInsn::pack_u4(fail_mode as u8, 6)
+        | BpfInsn::pack_u4(width as u8, 7);
+    for (idx, &reg) in regs.iter().enumerate() {
         if reg > BPF_REG_10 {
             anyhow::bail!("ccmp compare register r{reg} is invalid");
         }

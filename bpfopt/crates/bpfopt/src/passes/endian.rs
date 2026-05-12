@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{BBProgram, InsnSite, Terminator};
+use crate::analysis::{BBProgram, InsnSite, MakeReplacement, Terminator};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
@@ -25,6 +25,33 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
 pub struct EndianFusionPass;
 const BPF_TO_LE: u8 = 0x00;
 const MAX_NARROW_SCAN: usize = 32;
+#[derive(Clone, Copy)]
+struct EndianWidth {
+    size: u8,
+    bits: i32,
+    target: &'static str,
+    aarch64_shift: i16,
+}
+const ENDIAN_WIDTHS: &[EndianWidth] = &[
+    EndianWidth {
+        size: BPF_H,
+        bits: 16,
+        target: "bpf_endian_load16",
+        aarch64_shift: 1,
+    },
+    EndianWidth {
+        size: BPF_W,
+        bits: 32,
+        target: "bpf_endian_load32",
+        aarch64_shift: 2,
+    },
+    EndianWidth {
+        size: BPF_DW,
+        bits: 64,
+        target: "bpf_endian_load64",
+        aarch64_shift: 3,
+    },
+];
 fn decode_endian_proof(payload: &[u8]) -> ProofRegion {
     ProofRegion::from_result(decode_packed_kinsn_payload(payload).and_then(endian_proof_len))
 }
@@ -92,30 +119,18 @@ fn endian_swap_size(insn: &BpfInsn) -> Option<u8> {
     {
         return None;
     }
-    match insn.imm {
-        16 => Some(BPF_H),
-        32 => Some(BPF_W),
-        64 => Some(BPF_DW),
-        _ => None,
-    }
+    ENDIAN_WIDTHS
+        .iter()
+        .find(|width| width.bits == insn.imm)
+        .map(|width| width.size)
 }
 fn fusion_size(load_size: u8, endian_size: u8) -> Option<u8> {
-    if matches!(
-        (load_size, endian_size),
-        (BPF_H, BPF_H) | (BPF_W, BPF_W) | (BPF_DW, BPF_DW)
-    ) {
-        return Some(load_size);
-    }
-    if is_narrowing(load_size, endian_size) {
-        return Some(endian_size);
-    }
-    None
+    (load_size == endian_size || is_narrowing(load_size, endian_size)).then_some(endian_size)
 }
 fn is_narrowing(load_size: u8, endian_size: u8) -> bool {
-    matches!(
-        (load_size, endian_size),
-        (BPF_W, BPF_H) | (BPF_DW, BPF_H) | (BPF_DW, BPF_W)
-    )
+    let load = endian_width(load_size);
+    let endian = endian_width(endian_size);
+    matches!((load, endian), (Some(load), Some(endian)) if load.aarch64_shift > endian.aarch64_shift)
 }
 fn find_blocked_narrow_sites(prog: &BBProgram) -> anyhow::Result<Vec<SiteSkipReason>> {
     let mut skips = Vec::new();
@@ -171,12 +186,13 @@ fn writes_reg(insn: &BpfInsn, reg: u8) -> bool {
     matches!(insn.class(), BPF_ALU64 | BPF_ALU | BPF_LDX | BPF_LD) && insn.dst_reg() == reg
 }
 fn kfunc_name_for_size(size: u8) -> Option<&'static str> {
-    match size {
-        BPF_H => Some("bpf_endian_load16"),
-        BPF_W => Some("bpf_endian_load32"),
-        BPF_DW => Some("bpf_endian_load64"),
-        _ => None,
-    }
+    endian_width(size).map(|width| width.target)
+}
+fn endian_width(size: u8) -> Option<EndianWidth> {
+    ENDIAN_WIDTHS
+        .iter()
+        .find(|width| width.size == size)
+        .copied()
 }
 pub(super) fn endian_payload(dst_reg: u8, base_reg: u8, offset: i16) -> u64 {
     BpfInsn::pack_u4(dst_reg, 0)
@@ -187,11 +203,9 @@ fn offset_is_directly_encodable(arch: Arch, size: u8, offset: i16) -> bool {
     match arch {
         Arch::X86_64 => true,
         Arch::Aarch64 => {
-            let shift = match size {
-                BPF_H => 1,
-                BPF_W => 2,
-                BPF_DW => 3,
-                _ => return false,
+            let shift = match endian_width(size) {
+                Some(width) => width.aarch64_shift,
+                None => return false,
             };
             (offset >= 0 && offset <= (0x0fff << shift) && (offset & ((1 << shift) - 1)) == 0)
                 || (-256..=255).contains(&offset)
@@ -250,23 +264,6 @@ fn emit_endian_fusion_call(
     ));
     out
 }
-fn endian_fusion_replacement_len(
-    dst_reg: u8,
-    src_reg: u8,
-    offset: i16,
-    arch: Arch,
-    size: u8,
-) -> usize {
-    if offset_is_directly_encodable(arch, size, offset) || offset == 0 {
-        2
-    } else if src_reg != dst_reg && src_reg != BPF_REG_10 {
-        4
-    } else if dst_reg == src_reg {
-        3
-    } else {
-        4
-    }
-}
 impl BpfPass for EndianFusionPass {
     fn name(&self) -> &str {
         "endian_fusion"
@@ -276,7 +273,6 @@ impl BpfPass for EndianFusionPass {
     }
 }
 pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
-    let mut safe_sites: Vec<(InsnSite, usize, Vec<BpfInsn>, EndianFusionSite)> = Vec::new();
     let mut skipped = Vec::new();
     skipped.extend(find_blocked_narrow_sites(prog)?);
     for block in prog.block_ids().collect::<Vec<_>>() {
@@ -290,35 +286,19 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
         Ok(scan_endian_site_in_window(window.lookahead)
             .map(|(old_len, site)| window.hit(window.start_idx, old_len, site)))
     })?;
-    for hit in raw_sites {
-        let site = hit.value;
-        let replacement_len = endian_fusion_replacement_len(
-            site.dst_reg,
-            site.src_reg,
-            site.offset,
-            ctx.platform.arch,
-            site.size,
-        ) + hit.old_len.saturating_sub(2);
-        if prog
-            .rep_admit_kinsn_site_window(hit.start, hit.old_len, replacement_len, &mut skipped)?
-            .is_none()
-        {
-            continue;
-        }
-        let preserved = preserved_body_insns(prog, hit.start, hit.old_len.saturating_sub(2))?;
-        safe_sites.push((hit.start, hit.old_len, preserved, site));
-    }
-    if safe_sites.is_empty() {
+    if raw_sites.is_empty() {
         return Ok(PassResult {
             site_skipped: skipped,
             ..PassResult::unchanged()
         });
     }
-    for (start, old_len, preserved, site) in safe_sites.iter().rev() {
+    let mut applied = 0usize;
+    for hit in raw_sites.iter().rev() {
+        let site = &hit.value;
         let kfunc_name = kfunc_name_for_size(site.size)
             .ok_or_else(|| anyhow::anyhow!("unsupported endian fusion size {}", site.size))?;
-        let btf_id = ctx.kinsn_registry.btf_id_for_target_name(kfunc_name)?;
-        let kfunc_off = ctx.kinsn_registry.call_off_for_target_name(kfunc_name)?;
+        let (btf_id, kfunc_off) = prog.kinsn_call(kfunc_name)?;
+        let preserved = preserved_body_insns(prog, hit.start, hit.old_len.saturating_sub(2))?;
         let mut replacement = emit_endian_fusion_call(
             site.dst_reg,
             site.src_reg,
@@ -328,11 +308,19 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             ctx.platform.arch,
             site.size,
         );
-        replacement.extend_from_slice(preserved);
-        prog.replace_range_at(*start, *old_len, replacement)?;
+        replacement.extend_from_slice(&preserved);
+        if prog.try_replace_range_with_skips(
+            hit.start,
+            hit.old_len,
+            replacement.len(),
+            &mut skipped,
+            || Ok(MakeReplacement::Use(replacement)),
+        )? {
+            applied += 1;
+        }
     }
     Ok(PassResult {
-        sites_applied: safe_sites.len(),
+        sites_applied: applied,
         site_skipped: skipped,
         ..Default::default()
     })

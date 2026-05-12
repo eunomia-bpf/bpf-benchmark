@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-use super::ccmp::{encode_ccmp_payload, CcmpFailMode, CcmpPass, CcmpPayload, CcmpWidth};
+use super::ccmp::{encode_ccmp_payload, CcmpFailMode, CcmpPass, CcmpWidth};
 use crate::insn::*;
 use crate::pass::Arch;
 use crate::test_helpers::*;
@@ -26,7 +26,7 @@ fn three_term_chain() -> Vec<BpfInsn> {
     ]
 }
 
-fn decode_ccmp_payload(encoded: u64) -> anyhow::Result<CcmpPayload> {
+fn decode_ccmp_payload(encoded: u64) -> anyhow::Result<(u8, CcmpFailMode, CcmpWidth, Vec<u8>)> {
     const MAX_CCMP_TERMS_FOR_TEST: usize = 4;
 
     if encoded >> 24 != 0 {
@@ -59,28 +59,22 @@ fn decode_ccmp_payload(encoded: u64) -> anyhow::Result<CcmpPayload> {
         }
         regs.push(reg);
     }
-    let payload = CcmpPayload {
-        dst_reg,
-        fail_mode,
-        width,
-        regs,
-    };
-    encode_ccmp_payload(&payload)?;
-    Ok(payload)
+    encode_ccmp_payload(dst_reg, fail_mode, width, &regs)?;
+    Ok((dst_reg, fail_mode, width, regs))
 }
 
 #[test]
 fn ccmp_payload_roundtrips_canonical_encoding() {
     // Restored from HEAD: the CCMP kinsn sidecar payload is an ABI contract,
     // including reserved bits and canonical unused register slots.
-    let payload = CcmpPayload {
-        dst_reg: BPF_REG_0,
-        fail_mode: CcmpFailMode::EqZero,
-        width: CcmpWidth::Bpf64,
-        regs: vec![BPF_REG_1, BPF_REG_2, BPF_REG_3],
-    };
+    let payload = (
+        BPF_REG_0,
+        CcmpFailMode::EqZero,
+        CcmpWidth::Bpf64,
+        vec![BPF_REG_1, BPF_REG_2, BPF_REG_3],
+    );
 
-    let encoded = encode_ccmp_payload(&payload).unwrap();
+    let encoded = encode_ccmp_payload(payload.0, payload.1, payload.2, &payload.3).unwrap();
 
     assert_eq!(decode_ccmp_payload(encoded).unwrap(), payload);
 }

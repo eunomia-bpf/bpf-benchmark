@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{insn_use_def_set, BBProgram, InsnSite};
+use crate::analysis::{insn_use_def_set, BBProgram, InsnSite, MakeReplacement};
 use crate::insn::{advance_reg_state as advance_simple_reg_state, SimpleRegValue, *};
 use crate::pass::*;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
+
 const MEMCPY_TARGET: &str = "bpf_bulk_memcpy";
 const MEMSET_TARGET: &str = "bpf_bulk_memset";
 const MIN_BULK_BYTES: usize = 32;
@@ -32,6 +33,22 @@ fn bulk_offset_range_valid(offset: i16, len: usize) -> bool {
     let end = i32::from(offset) + len as i32 - 1;
     (i32::from(i16::MIN)..=i32::from(i16::MAX)).contains(&end)
 }
+fn validate_bulk_len(kind: &str, len: usize) -> anyhow::Result<()> {
+    anyhow::ensure!(
+        (1..=CHUNK_MAX_BYTES).contains(&len),
+        "{kind} bulk length {len} is outside 1..128"
+    );
+    Ok(())
+}
+fn validate_bulk_offsets(kind: &str, ranges: &[(i16, usize)]) -> anyhow::Result<()> {
+    anyhow::ensure!(
+        ranges
+            .iter()
+            .all(|&(offset, len)| bulk_offset_range_valid(offset, len)),
+        "{kind} bulk offset range is outside s16"
+    );
+    Ok(())
+}
 fn memcpy_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
     let dst_base = kinsn_payload_reg(payload, 0);
     let src_base = kinsn_payload_reg(payload, 4);
@@ -39,21 +56,19 @@ fn memcpy_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
     let src_off = kinsn_payload_s16(payload, 24);
     let len = usize::from(kinsn_payload_u8(payload, 40)) + 1;
     let tmp_reg = kinsn_payload_reg(payload, 48);
-    if payload >> 52 != 0 {
-        anyhow::bail!("memcpy bulk payload has non-zero reserved bits");
-    }
-    if len == 0 || len > 128 {
-        anyhow::bail!("memcpy bulk length {len} is outside 1..128");
-    }
+    anyhow::ensure!(
+        payload >> 52 == 0,
+        "memcpy bulk payload has non-zero reserved bits"
+    );
+    validate_bulk_len("memcpy", len)?;
     validate_bpf_reg("memcpy bulk dst", dst_base)?;
     validate_bpf_reg("memcpy bulk src", src_base)?;
     validate_bpf_reg("memcpy bulk tmp", tmp_reg)?;
-    if tmp_reg == BPF_REG_10 || tmp_reg == dst_base || tmp_reg == src_base {
-        anyhow::bail!("memcpy bulk tmp register aliases an invalid operand");
-    }
-    if !bulk_offset_range_valid(dst_off, len) || !bulk_offset_range_valid(src_off, len) {
-        anyhow::bail!("memcpy bulk offset range is outside s16");
-    }
+    anyhow::ensure!(
+        tmp_reg != BPF_REG_10 && tmp_reg != dst_base && tmp_reg != src_base,
+        "memcpy bulk tmp register aliases an invalid operand"
+    );
+    validate_bulk_offsets("memcpy", &[(dst_off, len), (src_off, len)])?;
     Ok(len * 2)
 }
 fn memset_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
@@ -66,25 +81,24 @@ fn memset_bulk_proof_len(payload: u64) -> anyhow::Result<usize> {
     let zero_fill = (BpfInsn::unpack_u4(payload, 35) & 0x1) != 0;
     let fill_imm8 = kinsn_payload_u8(payload, 36);
     let width_bytes = 1usize << width_class;
-    if payload >> 44 != 0 {
-        anyhow::bail!("memset bulk payload has non-zero reserved bits");
-    }
-    if len == 0 || len > 128 {
-        anyhow::bail!("memset bulk length {len} is outside 1..128");
-    }
+    anyhow::ensure!(
+        payload >> 44 == 0,
+        "memset bulk payload has non-zero reserved bits"
+    );
+    validate_bulk_len("memset", len)?;
     validate_bpf_reg("memset bulk dst", dst_base)?;
     if value_from_reg {
         validate_bpf_reg("memset bulk value", val_reg)?;
     }
-    if len % width_bytes != 0 {
-        anyhow::bail!("memset bulk length {len} is not a multiple of width {width_bytes}");
-    }
-    if !bulk_offset_range_valid(dst_off, len) {
-        anyhow::bail!("memset bulk offset range is outside s16");
-    }
-    if zero_fill && fill_imm8 != 0 {
-        anyhow::bail!("memset bulk zero-fill payload has non-zero fill immediate");
-    }
+    anyhow::ensure!(
+        len % width_bytes == 0,
+        "memset bulk length {len} is not a multiple of width {width_bytes}"
+    );
+    validate_bulk_offsets("memset", &[(dst_off, len)])?;
+    anyhow::ensure!(
+        !(zero_fill && fill_imm8 != 0),
+        "memset bulk zero-fill payload has non-zero fill immediate"
+    );
     Ok(len)
 }
 fn memcpy_bulk_register_uses(payload: u64) -> RegSet {
@@ -99,35 +113,28 @@ fn memset_bulk_register_uses(payload: u64) -> RegSet {
     }
     uses
 }
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum RegValue {
-    Unknown,
-    Const(u64),
-}
+type RegValue = Option<u64>;
 impl SimpleRegValue for RegValue {
     fn unknown() -> Self {
-        Self::Unknown
+        None
     }
     fn const64(value: i64) -> Self {
-        Self::Const(value as u64)
+        Some(value as u64)
     }
     fn const32(value: u32) -> Self {
-        Self::Const(u64::from(value))
+        Some(u64::from(value))
     }
     fn mov32(value: Self) -> Self {
-        match value {
-            Self::Const(value) => Self::Const(u64::from(value as u32)),
-            Self::Unknown => Self::Unknown,
-        }
+        value.map(|value| u64::from(value as u32))
     }
     fn xor_self() -> Self {
-        Self::Const(0)
+        Some(0)
     }
     fn alu64_imm(_value: Self, _op: u8, _imm: i32) -> Self {
-        Self::Unknown
+        None
     }
     fn alu32_add_sub(_value: Self, _imm: i32, _is_add: bool) -> Self {
-        Self::Unknown
+        None
     }
 }
 #[derive(Clone, Debug)]
@@ -197,44 +204,41 @@ impl BpfPass for BulkMemoryPass {
         run_on_bbprogram(program, ctx)
     }
 }
-pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+pub fn run_on_bbprogram(prog: &mut BBProgram, _ctx: &PassContext) -> anyhow::Result<PassResult> {
     let scan = scan_sites(prog)?;
     let mut skipped = scan.skips;
-    let mut safe_sites = Vec::new();
-    for (start, site) in scan.sites {
-        if prog
-            .rep_admit_kinsn_site_window(start, site.old_len, site.replacement_len(), &mut skipped)?
-            .is_none()
-        {
-            continue;
-        }
-        safe_sites.push((start, site));
-    }
-    if safe_sites.is_empty() {
+    if scan.sites.is_empty() {
         return Ok(PassResult {
             site_skipped: skipped,
             ..PassResult::unchanged()
         });
     }
-    for (start, site) in safe_sites.iter().rev() {
-        prog.replace_range_at(
+    let mut applied = 0usize;
+    for (start, site) in scan.sites.iter().rev() {
+        let replacement_len = site.replacement_len();
+        let replacement = emit_site_replacement(site, prog)?;
+        if prog.try_replace_range_with_skips(
             *start,
             site.old_len,
-            emit_site_replacement(site, &ctx.kinsn_registry)?,
-        )?;
+            replacement_len,
+            &mut skipped,
+            || Ok(MakeReplacement::Use(replacement)),
+        )? {
+            applied += 1;
+        }
     }
     Ok(PassResult {
-        sites_applied: safe_sites.len(),
+        sites_applied: applied,
         site_skipped: skipped,
         ..Default::default()
     })
 }
 fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
     let mut scan = ScanResult::default();
-    let mut regs = [RegValue::Unknown; 11];
+    let mut regs = [None; 11];
     for block in prog.block_ids().collect::<Vec<_>>() {
         if prog.should_reset_linear_state_at_block(block)? {
-            regs = [RegValue::Unknown; 11];
+            regs = [None; 11];
         }
         let body = prog.block_body_view(block)?;
         let mut live_out = HashMap::new();
@@ -320,17 +324,15 @@ fn try_match_memcpy_run_at(
     let mut next_src_off = first.src_off as i32 + lane_bytes as i32;
     let mut next_dst_off = first.dst_off as i32 + lane_bytes as i32;
     while cursor + 1 < insns.len() {
-        let Some(lane) = memcpy_lane_at(insns, cursor) else {
+        let Some(lane) = memcpy_lane_at(insns, cursor).filter(|lane| {
+            lane.width == first.width
+                && lane.src_base == first.src_base
+                && lane.dst_base == first.dst_base
+                && lane.src_off as i32 == next_src_off
+                && lane.dst_off as i32 == next_dst_off
+        }) else {
             break;
         };
-        if lane.width != first.width
-            || lane.src_base != first.src_base
-            || lane.dst_base != first.dst_base
-            || lane.src_off as i32 != next_src_off
-            || lane.dst_off as i32 != next_dst_off
-        {
-            break;
-        }
         pair_count += 1;
         tmp_regs.push(lane.tmp_reg);
         next_src_off += lane_bytes as i32;
@@ -360,14 +362,16 @@ fn try_match_memcpy_run_at(
     let live_after = live_out
         .get(&last_site)
         .ok_or_else(|| anyhow::anyhow!("bulk_memory missing live_out for {:?}", last_site))?;
-    let mut seen = HashSet::new();
+    let mut seen = 0u16;
     for tmp_reg in tmp_regs.iter().take(consumed_pairs).copied() {
-        if seen.insert(tmp_reg) && live_after.contains(&tmp_reg) {
+        let bit = 1u16 << tmp_reg;
+        if seen & bit == 0 && live_after.contains(&tmp_reg) {
             return Ok(MatchOutcome::Skip(
                 format!("temp tmp_reg r{tmp_reg} is live after site"),
                 raw_len,
             ));
         }
+        seen |= bit;
     }
     Ok(MatchOutcome::Apply(BulkSite {
         old_len,
@@ -406,11 +410,8 @@ fn try_match_memset_run_at(
         next_off += width_bytes(lane.width)? as i32;
         cursor += 1;
     }
-    let lane_bytes = widths
-        .iter()
-        .map(|&width| width_bytes(width))
-        .collect::<anyhow::Result<Vec<_>>>()?;
-    let (chunk_sizes, consumed_lanes) = greedy_store_chunk_sizes(&lane_bytes);
+    let (chunk_sizes, consumed_lanes) =
+        greedy_store_chunk_sizes(widths.iter().copied().map(width_bytes))?;
     if chunk_sizes.is_empty() {
         return Ok(None);
     }
@@ -473,18 +474,15 @@ fn memset_lane_at(
         return Ok(None);
     }
     let fill_byte = match insn.class() {
-        BPF_ST => match fill_byte_from_imm(width, insn.imm)? {
-            Some(fill) => fill,
-            None => return Ok(None),
-        },
+        BPF_ST => fill_byte_from_imm(width, insn.imm)?,
         BPF_STX => match regs[insn.src_reg() as usize] {
-            RegValue::Const(value) => match fill_byte_from_const(width, value)? {
-                Some(fill) => fill,
-                None => return Ok(None),
-            },
-            RegValue::Unknown => return Ok(None),
+            Some(value) => fill_byte_from_const(width, value)?,
+            None => None,
         },
-        _ => return Ok(None),
+        _ => None,
+    };
+    let Some(fill_byte) = fill_byte else {
+        return Ok(None);
     };
     Ok(Some(MemsetLane {
         width,
@@ -493,10 +491,7 @@ fn memset_lane_at(
         fill_byte,
     }))
 }
-fn emit_site_replacement(
-    site: &BulkSite,
-    kinsn_registry: &KinsnRegistry,
-) -> anyhow::Result<Vec<BpfInsn>> {
+fn emit_site_replacement(site: &BulkSite, prog: &BBProgram) -> anyhow::Result<Vec<BpfInsn>> {
     match &site.kind {
         BulkSiteKind::Memcpy {
             dst_base,
@@ -506,28 +501,21 @@ fn emit_site_replacement(
             temp_reg,
             chunk_sizes,
         } => {
-            let memcpy_btf_id = kinsn_registry.btf_id_for_target_name(MEMCPY_TARGET)?;
-            let memcpy_off = kinsn_registry.call_off_for_target_name(MEMCPY_TARGET)?;
-            let mut out = Vec::with_capacity(chunk_sizes.len() * 2);
             let mut cur_dst_off = *dst_off as i32;
             let mut cur_src_off = *src_off as i32;
-            for &chunk_size in chunk_sizes {
-                out.extend_from_slice(&emit_packed_kinsn_call_with_off(
-                    pack_memcpy_payload(
-                        *dst_base,
-                        *src_base,
-                        cur_dst_off as i16,
-                        cur_src_off as i16,
-                        chunk_size as u8,
-                        *temp_reg,
-                    ),
-                    memcpy_btf_id,
-                    memcpy_off,
-                ));
+            emit_chunked_calls(prog, MEMCPY_TARGET, chunk_sizes, |chunk_size| {
+                let payload = pack_memcpy_payload(
+                    *dst_base,
+                    *src_base,
+                    cur_dst_off as i16,
+                    cur_src_off as i16,
+                    chunk_size as u8,
+                    *temp_reg,
+                );
                 cur_dst_off += chunk_size as i32;
                 cur_src_off += chunk_size as i32;
-            }
-            Ok(out)
+                Ok(payload)
+            })
         }
         BulkSiteKind::Memset {
             base,
@@ -536,27 +524,37 @@ fn emit_site_replacement(
             fill_byte,
             chunk_sizes,
         } => {
-            let memset_btf_id = kinsn_registry.btf_id_for_target_name(MEMSET_TARGET)?;
-            let memset_off = kinsn_registry.call_off_for_target_name(MEMSET_TARGET)?;
-            let mut out = Vec::with_capacity(chunk_sizes.len() * 2);
             let mut cur_dst_off = *dst_off as i32;
-            for &chunk_size in chunk_sizes {
-                out.extend_from_slice(&emit_packed_kinsn_call_with_off(
-                    pack_memset_payload(
-                        *base,
-                        cur_dst_off as i16,
-                        chunk_size as u8,
-                        *width,
-                        *fill_byte,
-                    )?,
-                    memset_btf_id,
-                    memset_off,
-                ));
+            emit_chunked_calls(prog, MEMSET_TARGET, chunk_sizes, |chunk_size| {
+                let payload = pack_memset_payload(
+                    *base,
+                    cur_dst_off as i16,
+                    chunk_size as u8,
+                    *width,
+                    *fill_byte,
+                )?;
                 cur_dst_off += chunk_size as i32;
-            }
-            Ok(out)
+                Ok(payload)
+            })
         }
     }
+}
+fn emit_chunked_calls(
+    prog: &BBProgram,
+    target: &str,
+    chunk_sizes: &[usize],
+    mut pack_payload: impl FnMut(usize) -> anyhow::Result<u64>,
+) -> anyhow::Result<Vec<BpfInsn>> {
+    let (btf_id, call_off) = prog.kinsn_call(target)?;
+    let mut out = Vec::with_capacity(chunk_sizes.len() * 2);
+    for &chunk_size in chunk_sizes {
+        out.extend_from_slice(&emit_packed_kinsn_call_with_off(
+            pack_payload(chunk_size)?,
+            btf_id,
+            call_off,
+        ));
+    }
+    Ok(out)
 }
 fn pack_memcpy_payload(
     dst_base: u8,
@@ -584,18 +582,9 @@ fn pack_memset_payload(
     Ok(BpfInsn::pack_u4(base, 0)
         | BpfInsn::pack_u16(dst_off as u16, 8)
         | BpfInsn::pack_u8(len - 1, 24)
-        | BpfInsn::pack_u4(width_class(width)?, 32)
+        | BpfInsn::pack_u4(width_props(width)?.0, 32)
         | BpfInsn::pack_u4(zero_fill as u8, 35)
         | BpfInsn::pack_u8(fill_byte, 36))
-}
-fn width_class(size: u8) -> anyhow::Result<u8> {
-    Ok(match size {
-        BPF_B => 0,
-        BPF_H => 1,
-        BPF_W => 2,
-        BPF_DW => 3,
-        _ => anyhow::bail!("bulk_memory unsupported width opcode {size:#x}"),
-    })
 }
 fn uniform_chunk_sizes(total_bytes: usize) -> Vec<usize> {
     if total_bytes < MIN_BULK_BYTES {
@@ -611,12 +600,15 @@ fn uniform_chunk_sizes(total_bytes: usize) -> Vec<usize> {
     }
     chunks
 }
-fn greedy_store_chunk_sizes(lane_bytes: &[usize]) -> (Vec<usize>, usize) {
+fn greedy_store_chunk_sizes(
+    lane_bytes: impl IntoIterator<Item = anyhow::Result<usize>>,
+) -> anyhow::Result<(Vec<usize>, usize)> {
     let mut chunks = Vec::new();
     let mut chunk_lanes = Vec::new();
     let mut current_bytes = 0usize;
     let mut current_lanes = 0usize;
-    for &lane_bytes in lane_bytes {
+    for lane_bytes in lane_bytes {
+        let lane_bytes = lane_bytes?;
         if current_bytes > 0 && current_bytes + lane_bytes > CHUNK_MAX_BYTES {
             chunks.push(current_bytes);
             chunk_lanes.push(current_lanes);
@@ -634,24 +626,25 @@ fn greedy_store_chunk_sizes(lane_bytes: &[usize]) -> (Vec<usize>, usize) {
         chunks.pop();
         chunk_lanes.pop();
     }
-    (chunks, chunk_lanes.into_iter().sum())
+    Ok((chunks, chunk_lanes.into_iter().sum()))
 }
 fn fill_byte_from_imm(width: u8, imm: i32) -> anyhow::Result<Option<u8>> {
-    let value = match width {
-        BPF_B => imm as u8 as u64,
-        BPF_H => imm as i16 as u16 as u64,
-        BPF_W => imm as u32 as u64,
-        BPF_DW => imm as i64 as u64,
-        _ => anyhow::bail!("unsupported memset store width class {width:#x}"),
+    let lane_bytes = width_bytes(width)?;
+    let value = if lane_bytes == 8 {
+        imm as i64 as u64
+    } else {
+        (imm as u64) & ((1u64 << (lane_bytes * 8)) - 1)
     };
-    fill_byte_from_const(width, value)
+    Ok(fill_byte_from_lane(lane_bytes, value))
 }
 fn fill_byte_from_const(width: u8, value: u64) -> anyhow::Result<Option<u8>> {
-    let lane_bytes = width_bytes(width)?;
+    Ok(fill_byte_from_lane(width_bytes(width)?, value))
+}
+fn fill_byte_from_lane(lane_bytes: usize, value: u64) -> Option<u8> {
     let fill = value as u8;
-    Ok((0..lane_bytes)
+    (0..lane_bytes)
         .all(|byte_idx| ((value >> (byte_idx * 8)) & 0xff) as u8 == fill)
-        .then_some(fill))
+        .then_some(fill)
 }
 fn ranges_overlap(src_off: i16, dst_off: i16, len: usize) -> bool {
     let src_start = src_off as i32;
@@ -660,14 +653,17 @@ fn ranges_overlap(src_off: i16, dst_off: i16, len: usize) -> bool {
     src_start < dst_start + len && dst_start < src_start + len
 }
 fn is_supported_width(width: u8) -> bool {
-    matches!(width, BPF_B | BPF_H | BPF_W | BPF_DW)
+    width_props(width).is_ok()
 }
 fn width_bytes(width: u8) -> anyhow::Result<usize> {
+    Ok(width_props(width)?.1)
+}
+fn width_props(width: u8) -> anyhow::Result<(u8, usize)> {
     Ok(match width {
-        BPF_B => 1,
-        BPF_H => 2,
-        BPF_W => 4,
-        BPF_DW => 8,
+        BPF_B => (0, 1),
+        BPF_H => (1, 2),
+        BPF_W => (2, 4),
+        BPF_DW => (3, 8),
         _ => anyhow::bail!("bulk_memory unsupported width opcode {width:#x}"),
     })
 }
@@ -680,33 +676,29 @@ fn is_likely_stack_ptr(reg: u8, before_insn_count: usize, insns: &[BpfInsn]) -> 
     let mut target_reg = reg;
     let mut cursor = before_insn_count;
     for _ in 0..LOOKBACK {
-        let mut found_def = false;
-        for def_idx in (start..cursor).rev() {
-            let insn = &insns[def_idx];
-            if !insn_use_def_set(insn).defs.contains(&target_reg) {
-                continue;
-            }
-            found_def = true;
-            if insn.is_alu_reg(BPF_ALU64, BPF_MOV) && insn.dst_reg() == target_reg {
-                let src_reg = insn.src_reg();
-                if src_reg == STACK_PTR_REG {
-                    return true;
-                }
-                target_reg = src_reg;
-                cursor = def_idx;
-                break;
-            }
-            if insn.dst_reg() == target_reg
-                && (insn.is_alu_imm(BPF_ALU64, BPF_ADD) || insn.is_alu_imm(BPF_ALU64, BPF_SUB))
-            {
-                cursor = def_idx;
-                break;
-            }
+        let Some(def_idx) = (start..cursor)
+            .rev()
+            .find(|&idx| insn_use_def_set(&insns[idx]).defs.contains(&target_reg))
+        else {
             return false;
+        };
+        let insn = &insns[def_idx];
+        if insn.is_alu_reg(BPF_ALU64, BPF_MOV) && insn.dst_reg() == target_reg {
+            let src_reg = insn.src_reg();
+            if src_reg == STACK_PTR_REG {
+                return true;
+            }
+            target_reg = src_reg;
+            cursor = def_idx;
+            continue;
         }
-        if !found_def {
-            return false;
+        if insn.dst_reg() == target_reg
+            && (insn.is_alu_imm(BPF_ALU64, BPF_ADD) || insn.is_alu_imm(BPF_ALU64, BPF_SUB))
+        {
+            cursor = def_idx;
+            continue;
         }
+        return false;
     }
     false
 }
@@ -720,16 +712,16 @@ fn advance_reg_state_range(
     let end_idx = start_idx.checked_add(len).ok_or_else(|| {
         anyhow::anyhow!("bulk_memory range start {start_idx} + len {len} overflows")
     })?;
-    if end_idx > sites.len() {
-        anyhow::bail!(
+    let range = sites.get(start_idx..end_idx).ok_or_else(|| {
+        anyhow::anyhow!(
             "bulk_memory range {}..{} exceeds body length {}",
             start_idx,
             end_idx,
             sites.len()
-        );
-    }
-    for site in &sites[start_idx..end_idx] {
-        advance_reg_state_at_site(prog, *site, regs)?;
+        )
+    })?;
+    for &site in range {
+        advance_reg_state_at_site(prog, site, regs)?;
     }
     Ok(())
 }

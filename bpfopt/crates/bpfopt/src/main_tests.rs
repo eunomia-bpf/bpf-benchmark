@@ -1,6 +1,10 @@
 use super::*;
-use bpfopt::analysis::lift_with_pass_context;
+use bpfopt::analysis::{
+    canonicalize_map_refs_to_idx, lift_with_pass_context,
+    shift_target_module_call_offsets_for_map_prefix,
+};
 use bpfopt::insn::{MapPseudo, BPF_DW, BPF_IMM, BPF_LD};
+use bpfopt::pass::KinsnJson;
 
 fn minimal_program_bytes() -> Vec<u8> {
     vec![

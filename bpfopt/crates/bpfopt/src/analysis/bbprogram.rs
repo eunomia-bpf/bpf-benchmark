@@ -92,20 +92,6 @@ pub struct Block {
     pub(super) terminator: Terminator,
     pub frame: FrameId,
 }
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct KinsnAdmissionWindow {
-    start: InsnSite,
-    end: InsnSite,
-}
-impl KinsnAdmissionWindow {
-    pub fn start_site(&self) -> InsnSite {
-        self.start
-    }
-
-    pub fn end_site(&self) -> InsnSite {
-        self.end
-    }
-}
 #[derive(Debug)]
 pub(crate) struct BlockBodyView<'a> {
     pub(crate) block: BlockId,
@@ -543,6 +529,46 @@ impl BBProgram {
     /// Returns an opaque `SlotDistance` token; passes may only compare/saturate, not arbitrary arithmetic.
     pub fn site_layout_offset(&self, site: InsnSite) -> anyhow::Result<SlotDistance> {
         self.site_current_pc(site).map(SlotDistance)
+    }
+    /// Convenience for kinsn-class passes: return `(btf_id, kfunc_off)` for a
+    /// kinsn target by name. Replaces the two-call sequence of
+    /// `kinsn_registry().btf_id_for_target_name(name)` +
+    /// `kinsn_registry().call_off_for_target_name(name)`.
+    pub fn kinsn_call(&self, target_name: &str) -> anyhow::Result<(i32, i16)> {
+        let btf_id = self.kinsn_reg.btf_id_for_target_name(target_name)?;
+        let kfunc_off = self.kinsn_reg.call_off_for_target_name(target_name)?;
+        Ok((btf_id, kfunc_off))
+    }
+    /// Live-out RegSet at the last instruction of a kinsn window starting at
+    /// `start` and consuming `len` body sites. Used by passes (today: rotate)
+    /// that need to know whether a scratch register survives past the window.
+    pub fn live_out_after_window(&self, start: InsnSite, len: usize) -> anyhow::Result<RegSet> {
+        if len == 0 {
+            anyhow::bail!("live_out_after_window len must be > 0 at {:?}", start);
+        }
+        let block = self.block(start.block)?;
+        let end_idx = start
+            .idx
+            .checked_add(len)
+            .and_then(|v| v.checked_sub(1))
+            .ok_or_else(|| {
+                anyhow::anyhow!(
+                    "live_out_after_window window at {:?} len {} overflows",
+                    start,
+                    len
+                )
+            })?;
+        if end_idx >= block.insns.len() {
+            anyhow::bail!(
+                "live_out_after_window end idx {end_idx} exceeds block body length {}",
+                block.insns.len()
+            );
+        }
+        let end_site = InsnSite {
+            block: start.block,
+            idx: end_idx,
+        };
+        self.live_out_site_checked(end_site)
     }
     /// LAYOUT QUERY: how many machine slots a single instruction occupies
     /// (LD_IMM64 = 2, everything else = 1).
@@ -1490,40 +1516,18 @@ impl BBProgram {
         Ok(block_logical_slot_bounds(self, site.block)?.0 + offset)
     }
 
-    pub(crate) fn rep_admit_kinsn_site_window(
+    /// Structural admission check for an in-block replacement. Returns
+    /// `Some(reason)` if the replacement crosses subprog boundary. Caller
+    /// (try_replace_range) guarantees `old_len > 0 && new_len > 0` before
+    /// calling — pure inserts/deletes don't need this check.
+    pub(crate) fn admission_skip_reason(
         &self,
         start: InsnSite,
         old_len: usize,
-        replacement_len: usize,
-        skipped: &mut Vec<crate::pass::SiteSkipReason>,
-    ) -> anyhow::Result<Option<KinsnAdmissionWindow>> {
+        new_len: usize,
+    ) -> anyhow::Result<Option<String>> {
         let start_slot = site_offset_in_block_slots(self, start)?;
-        if let Some(reason) = self.kinsn_replacement_subprog_skip_reason(
-            start.block,
-            start_slot,
-            old_len,
-            replacement_len,
-        )? {
-            skipped.push(crate::pass::SiteSkipReason {
-                site: start,
-                reason,
-            });
-            return Ok(None);
-        }
-        let end_exclusive = start
-            .idx
-            .checked_add(old_len)
-            .ok_or_else(|| anyhow::anyhow!("kinsn replacement site window overflows"))?;
-        let end_idx = end_exclusive
-            .checked_sub(1)
-            .ok_or_else(|| anyhow::anyhow!("kinsn replacement site window is empty"))?;
-        Ok(Some(KinsnAdmissionWindow {
-            start,
-            end: InsnSite {
-                block: start.block,
-                idx: end_idx,
-            },
-        }))
+        self.kinsn_replacement_subprog_skip_reason(start.block, start_slot, old_len, new_len)
     }
 }
 

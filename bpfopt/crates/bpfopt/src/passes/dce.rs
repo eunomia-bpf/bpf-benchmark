@@ -1,15 +1,10 @@
 // SPDX-License-Identifier: MIT
-// Dead register definition elimination on BBProgram.
 
 use crate::analysis::{BBProgram, DefSite, InsnSite};
 use crate::insn::*;
 use crate::pass::{BpfPass, PassContext, PassResult};
 use std::collections::BTreeSet;
 
-/// Dead code elimination pass.
-///
-/// Scope:
-/// - remove side-effect-free register definitions whose results are dead
 pub struct DcePass;
 
 impl BpfPass for DcePass {
@@ -43,11 +38,10 @@ pub fn run_on_bbprogram(prog: &mut BBProgram) -> anyhow::Result<PassResult> {
         }
     }
 
-    let diagnostics = if sites_applied > 0 {
-        vec![format!("removed {} dead-def insns", sites_applied)]
-    } else {
-        Vec::new()
-    };
+    let diagnostics = (sites_applied > 0)
+        .then(|| format!("removed {} dead-def insns", sites_applied))
+        .into_iter()
+        .collect();
     Ok(PassResult {
         sites_applied,
         diagnostics,

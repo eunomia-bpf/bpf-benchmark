@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
 //! Lift linear BPF bytecode into BBProgram.
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::sync::Arc;
+
+use anyhow::{Context, Result};
 
 use crate::analysis::{
     BBProgram, Block, BlockId, BtfMetadataMap, FrameId, InsnSite, Terminator, VerifierOracle,
@@ -10,7 +12,7 @@ use crate::analysis::{
 use crate::insn::*;
 use crate::pass::{
     KinsnRegistry, MapInlineHintAnchorSpec, MapInlineHintModeSpec, MapInlineHintSpec, PassContext,
-    VerifierInsn, VerifierInsnKind,
+    TargetJson, VerifierInsn, VerifierInsnKind,
 };
 
 #[cfg(test)]
@@ -148,6 +150,211 @@ pub fn lift_with_pass_context(insns: &[BpfInsn], ctx: &PassContext) -> anyhow::R
     )?;
     prog.attach_profile_from_annotations(&ctx.annotations)?;
     Ok(prog)
+}
+
+// Snapshot initialization canonicalizes loader-owned map references before the
+// daemon lifts bytecode into BBProgram. This is intentionally a raw Vec mutation
+// path for lift-time normalization; optimization passes operate through BBProgram.
+pub fn canonicalize_map_refs_to_idx(
+    insns: &mut [BpfInsn],
+    original_loader_fd_array: Option<&[i32]>,
+    map_ids: &[u32],
+) -> Result<()> {
+    let fd_to_map_index = collect_fd_form_map_refs(insns)?;
+    if fd_to_map_index.is_empty() && !contains_idx_form_map_ref(insns)? {
+        return Ok(());
+    }
+
+    if fd_to_map_index.len() > map_ids.len() {
+        anyhow::bail!(
+            "canonicalize_map_refs_to_idx: bytecode references {} unique loader map fds but prog_info has {} map ids",
+            fd_to_map_index.len(),
+            map_ids.len()
+        );
+    }
+
+    let mut i = 0;
+    while i < insns.len() {
+        if insns[i].is_ldimm64() {
+            let map_pseudo = insns[i].map_pseudo();
+            if map_pseudo.is_some() && i + 1 >= insns.len() {
+                anyhow::bail!(
+                    "canonicalize_map_refs_to_idx: truncated LD_IMM64 map reference at pc {i}"
+                );
+            }
+            if matches!(map_pseudo, Some(MapPseudo::Fd | MapPseudo::FdValue)) {
+                let old_fd = insns[i].imm;
+                let Some(&map_index) = fd_to_map_index.get(&old_fd) else {
+                    anyhow::bail!(
+                        "canonicalize_map_refs_to_idx: loader map fd {} was not present in first-seen bindings",
+                        old_fd
+                    );
+                };
+                insns[i].imm = i32::try_from(map_index).with_context(|| {
+                    format!("canonicalize_map_refs_to_idx: map index {map_index} exceeds i32")
+                })?;
+                insns[i].set_src_reg(if map_pseudo == Some(MapPseudo::Fd) {
+                    MapPseudo::Idx.src_reg()
+                } else {
+                    MapPseudo::IdxValue.src_reg()
+                });
+            } else if matches!(map_pseudo, Some(MapPseudo::Idx | MapPseudo::IdxValue)) {
+                let map_index = canonical_idx_map_index(
+                    insns[i].imm,
+                    original_loader_fd_array,
+                    &fd_to_map_index,
+                    map_ids.len(),
+                )?;
+                insns[i].imm = i32::try_from(map_index).with_context(|| {
+                    format!("canonicalize_map_refs_to_idx: map index {map_index} exceeds i32")
+                })?;
+            }
+            i += 2;
+            continue;
+        }
+        i += 1;
+    }
+
+    Ok(())
+}
+
+fn collect_fd_form_map_refs(insns: &[BpfInsn]) -> Result<HashMap<i32, usize>> {
+    let mut fd_to_map_index = HashMap::new();
+    let mut i = 0;
+    while i < insns.len() {
+        if insns[i].is_ldimm64() {
+            if matches!(
+                insns[i].map_pseudo(),
+                Some(MapPseudo::Fd | MapPseudo::FdValue)
+            ) {
+                if i + 1 >= insns.len() {
+                    anyhow::bail!(
+                        "canonicalize_map_refs_to_idx: truncated LD_IMM64 map reference at pc {i}"
+                    );
+                }
+                let old_fd = insns[i].imm;
+                let next_index = fd_to_map_index.len();
+                if let std::collections::hash_map::Entry::Vacant(e) = fd_to_map_index.entry(old_fd)
+                {
+                    e.insert(next_index);
+                }
+            }
+            i += 2;
+            continue;
+        }
+        i += 1;
+    }
+    Ok(fd_to_map_index)
+}
+
+fn contains_idx_form_map_ref(insns: &[BpfInsn]) -> Result<bool> {
+    let mut i = 0;
+    while i < insns.len() {
+        if insns[i].is_ldimm64() {
+            if matches!(
+                insns[i].map_pseudo(),
+                Some(MapPseudo::Idx | MapPseudo::IdxValue)
+            ) {
+                if i + 1 >= insns.len() {
+                    anyhow::bail!(
+                        "canonicalize_map_refs_to_idx: truncated LD_IMM64 map reference at pc {i}"
+                    );
+                }
+                return Ok(true);
+            }
+            i += 2;
+            continue;
+        }
+        i += 1;
+    }
+    Ok(false)
+}
+
+fn canonical_idx_map_index(
+    old_index: i32,
+    original_loader_fd_array: Option<&[i32]>,
+    fd_to_map_index: &HashMap<i32, usize>,
+    map_count: usize,
+) -> Result<usize> {
+    let old_index = usize::try_from(old_index).with_context(|| {
+        format!("canonicalize_map_refs_to_idx: negative map fd_array index {old_index}")
+    })?;
+    let Some(loader_fd_array) = original_loader_fd_array else {
+        if old_index >= map_count {
+            anyhow::bail!(
+                "canonicalize_map_refs_to_idx: map index {} out of range for {} map ids",
+                old_index,
+                map_count
+            );
+        }
+        return Ok(old_index);
+    };
+    let Some(&loader_fd) = loader_fd_array.get(old_index) else {
+        anyhow::bail!(
+            "canonicalize_map_refs_to_idx: loader fd_array index {} out of range for {} fds",
+            old_index,
+            loader_fd_array.len()
+        );
+    };
+    if let Some(&map_index) = fd_to_map_index.get(&loader_fd) {
+        return Ok(map_index);
+    }
+    if loader_fd_array.len() != map_count {
+        anyhow::bail!(
+            "canonicalize_map_refs_to_idx: cannot map loader fd_array index {} without fd-form binding; loader fd_array has {} entries but prog_info has {} map ids",
+            old_index,
+            loader_fd_array.len(),
+            map_count
+        );
+    }
+    if old_index >= map_count {
+        anyhow::bail!(
+            "canonicalize_map_refs_to_idx: map index {} out of range for {} map ids",
+            old_index,
+            map_count
+        );
+    }
+    Ok(old_index)
+}
+
+pub fn shift_target_module_call_offsets_for_map_prefix(
+    target: &mut TargetJson,
+    map_count: usize,
+) -> Result<()> {
+    let module_base = module_fd_array_base(map_count)?;
+    for (name, kinsn) in &mut target.kinsns {
+        if kinsn.call_offset == 0 {
+            continue;
+        }
+        if kinsn.call_offset < 0 {
+            anyhow::bail!(
+                "target kinsn {name} has negative call_offset {}",
+                kinsn.call_offset
+            );
+        }
+        if kinsn.btf_id == 0 {
+            anyhow::bail!(
+                "target kinsn {name} has call_offset {} but no BTF object id",
+                kinsn.call_offset
+            );
+        }
+        let shifted = module_base
+            .checked_add(i32::from(kinsn.call_offset) - 1)
+            .with_context(|| format!("target kinsn {name} call_offset overflow"))?;
+        if shifted > i32::from(i16::MAX) {
+            anyhow::bail!(
+                "target kinsn {name} shifted call_offset {shifted} exceeds BPF instruction off field"
+            );
+        }
+        kinsn.call_offset =
+            i16::try_from(shifted).context("shifted call_offset exceeds i16 range")?;
+    }
+    Ok(())
+}
+
+fn module_fd_array_base(map_count: usize) -> Result<i32> {
+    let map_count = i32::try_from(map_count).context("map count exceeds i32")?;
+    Ok(map_count.max(1))
 }
 
 pub fn validate_map_inline_hint_specs(hints: &[MapInlineHintSpec]) -> anyhow::Result<()> {

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{BBProgram, BlockId, InsnSite};
+use crate::analysis::{BBProgram, BlockId, InsnSite, MakeReplacement};
 use crate::insn::*;
 use crate::pass::*;
 use std::collections::BTreeMap;
@@ -15,27 +15,21 @@ struct RegConstFact {
     may_pointer: bool,
 }
 impl RegConstFact {
-    const fn unknown() -> Self {
+    const POINTER: Self = Self {
+        exact64: None,
+        exact32: None,
+        may_pointer: true,
+    };
+
+    const fn exact64(value: u64) -> Self {
         Self {
-            exact64: None,
-            exact32: None,
+            exact64: Some(value),
+            exact32: Some(value as u32),
             may_pointer: false,
-        }
-    }
-    const fn pointer() -> Self {
-        Self {
-            exact64: None,
-            exact32: None,
-            may_pointer: true,
         }
     }
 }
 type RegConstState = [RegConstFact; REG_COUNT];
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum AluWidth {
-    Bits32,
-    Bits64,
-}
 enum AluFoldDecision {
     Replace(Vec<BpfInsn>),
     Skip(SiteSkipReason),
@@ -90,8 +84,12 @@ pub fn run_on_bbprogram(prog: &mut BBProgram) -> anyhow::Result<PassResult> {
     let mut applied = 0usize;
     replacements.sort_by_key(|(site, _)| *site);
     for (site, replacement) in replacements.into_iter().rev() {
-        prog.replace_range_at(site, 1, replacement)?;
-        applied += 1;
+        let new_len = replacement.len();
+        if prog.try_replace_range_with_skips(site, 1, new_len, &mut sites_skipped, || {
+            Ok(MakeReplacement::Use(replacement))
+        })? {
+            applied += 1;
+        }
     }
     Ok(PassResult {
         sites_applied: applied,
@@ -177,11 +175,10 @@ fn simulate_block(
         let insn = *prog
             .insn_at(site)
             .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
-        let ldimm64_value = if insn.is_ldimm64() {
-            Some(decode_ldimm64_site(prog, site)?)
-        } else {
-            None
-        };
+        let ldimm64_value = insn
+            .is_ldimm64()
+            .then(|| decode_ldimm64_site(prog, site))
+            .transpose()?;
         let (next_state, decision) =
             analyze_instruction(prog, &insn, ldimm64_value, site, &state, collect_rewrites)?;
         if let Some(outputs) = rewrite_outputs.as_mut() {
@@ -208,25 +205,20 @@ fn analyze_instruction(
     let mut next = *state;
     let decision = match insn.class() {
         BPF_LD => {
-            if insn.is_ldimm64() {
-                if insn.src_reg() == 0 {
-                    let value = ldimm64_value
-                        .ok_or_else(|| anyhow::anyhow!("missing LD_IMM64 value at {:?}", site))?;
-                    set_reg_exact64(&mut next, insn.dst_reg(), value);
-                } else {
-                    /* Pseudo-imm forms like MAP_FD/MAP_VALUE carry verifier-visible
-                     * type via src_reg. Treat them as non-foldable so const_prop
-                     * never re-emits them as plain scalar LD_IMM64.
-                     */
-                    set_reg_may_pointer(&mut next, insn.dst_reg());
-                }
+            let fact = if insn.is_ldimm64() && insn.src_reg() == 0 {
+                let value = ldimm64_value
+                    .ok_or_else(|| anyhow::anyhow!("missing LD_IMM64 value at {:?}", site))?;
+                RegConstFact::exact64(value)
+            } else if insn.is_ldimm64() {
+                RegConstFact::POINTER
             } else {
-                set_reg_unknown(&mut next, insn.dst_reg());
-            }
+                RegConstFact::default()
+            };
+            set_reg_fact(&mut next, insn.dst_reg(), fact);
             AluFoldDecision::None
         }
         BPF_LDX => {
-            set_reg_unknown(&mut next, insn.dst_reg());
+            set_reg_fact(&mut next, insn.dst_reg(), RegConstFact::default());
             AluFoldDecision::None
         }
         BPF_ALU | BPF_ALU64 => {
@@ -236,32 +228,28 @@ fn analyze_instruction(
                 AluFoldDecision::None
             };
             let result = evaluate_alu_result(insn, state);
-            match result {
-                Some(value) => set_reg_exact64(&mut next, insn.dst_reg(), value),
-                None if alu_inputs_may_be_pointer(insn, state) => {
-                    set_reg_may_pointer(&mut next, insn.dst_reg())
-                }
-                None => set_reg_unknown(&mut next, insn.dst_reg()),
-            }
+            let fact = match result {
+                Some(value) => RegConstFact::exact64(value),
+                None if alu_inputs_may_be_pointer(insn, state) => RegConstFact::POINTER,
+                None => RegConstFact::default(),
+            };
+            set_reg_fact(&mut next, insn.dst_reg(), fact);
             decision
         }
         BPF_JMP | BPF_JMP32 => {
             if insn.is_call() {
                 for reg in 0..=5 {
-                    set_reg_unknown(&mut next, reg as u8);
+                    set_reg_fact(&mut next, reg as u8, RegConstFact::default());
                 }
             }
             AluFoldDecision::None
         }
         _ => AluFoldDecision::None,
     };
-    if can_apply_program_facts(insn) {
+    if !(insn.is_call() || insn.is_mov64_reg() || insn.is_mov32_reg()) {
         apply_program_facts(prog, site, &mut next);
     }
     Ok((next, decision))
-}
-fn can_apply_program_facts(insn: &BpfInsn) -> bool {
-    !(insn.is_call() || insn.is_mov64_reg() || insn.is_mov32_reg())
 }
 fn fold_alu_instruction(
     prog: &BBProgram,
@@ -274,22 +262,20 @@ fn fold_alu_instruction(
     }
     let is_32 = insn.class() == BPF_ALU;
     let result = evaluate_alu_result(insn, state).or_else(|| {
-        program_materializes_alu_result(insn)
-            .then(|| program_exact_for_instruction(prog, site, insn.dst_reg(), is_32))
-            .flatten()
+        if insn.is_mov64_reg() || insn.is_mov32_reg() {
+            None
+        } else {
+            prog.reg_known_constant(site, insn.dst_reg())
+                .map(|value| normalize_alu_result(is_32, value as u64))
+        }
     });
     let Some(result) = result else {
         return AluFoldDecision::None;
     };
     let candidate = emit_scalar_const_load(insn.dst_reg(), result, is_32);
-    if replacement_if_changed(insn, &candidate).is_none() {
+    if candidate.len() == 1 && candidate[0] == *insn {
         return AluFoldDecision::None;
     }
-    let width = if is_32 {
-        AluWidth::Bits32
-    } else {
-        AluWidth::Bits64
-    };
     if alu_inputs_may_be_pointer(insn, state) {
         return AluFoldDecision::Skip(SiteSkipReason {
             site,
@@ -302,7 +288,7 @@ fn fold_alu_instruction(
             reason: VERIFIER_POST_STATE_POINTER_TYPE.to_string(),
         });
     }
-    if !program_proves_scalar_exact(prog, site, insn.dst_reg(), result, width) {
+    if !program_proves_scalar_exact(prog, site, insn.dst_reg(), result, is_32) {
         return AluFoldDecision::Skip(SiteSkipReason {
             site,
             reason: VERIFIER_POST_STATE_NOT_SCALAR_EXACT.to_string(),
@@ -310,46 +296,26 @@ fn fold_alu_instruction(
     }
     AluFoldDecision::Replace(candidate)
 }
-fn program_materializes_alu_result(insn: &BpfInsn) -> bool {
-    !(insn.is_mov64_reg() || insn.is_mov32_reg())
-}
-fn program_exact_for_instruction(
-    prog: &BBProgram,
-    site: InsnSite,
-    reg: u8,
-    is_32: bool,
-) -> Option<u64> {
-    let value = prog.reg_known_constant(site, reg)? as u64;
-    Some(normalize_alu_result(is_32, value))
-}
 fn program_proves_scalar_exact(
     prog: &BBProgram,
     site: InsnSite,
     reg: u8,
     expected: u64,
-    width: AluWidth,
+    is_32: bool,
 ) -> bool {
-    let Some(value) = prog.reg_known_constant(site, reg) else {
-        return false;
-    };
-    match width {
-        AluWidth::Bits32 => value as u32 as u64 == expected as u32 as u64,
-        AluWidth::Bits64 => value as u64 == expected,
-    }
+    prog.reg_known_constant(site, reg).is_some_and(|value| {
+        normalize_alu_result(is_32, value as u64) == normalize_alu_result(is_32, expected)
+    })
 }
 fn apply_program_facts(prog: &BBProgram, site: InsnSite, state: &mut RegConstState) {
     for reg in 0..REG_COUNT {
         let reg = reg as u8;
-        let fact = if verifier_reg_may_be_pointer(prog, site, reg) {
-            Some(RegConstFact::pointer())
-        } else {
-            prog.reg_known_constant(site, reg)
-                .map(|value| RegConstFact {
-                    exact64: Some(value as u64),
-                    exact32: Some(value as u32),
-                    may_pointer: false,
-                })
-        };
+        let fact = verifier_reg_may_be_pointer(prog, site, reg)
+            .then_some(RegConstFact::POINTER)
+            .or_else(|| {
+                prog.reg_known_constant(site, reg)
+                    .map(|value| RegConstFact::exact64(value as u64))
+            });
         if let Some(fact) = fact {
             set_reg_program_fact(state, reg, fact);
         }
@@ -384,7 +350,7 @@ fn evaluate_alu_result(insn: &BpfInsn, state: &RegConstState) -> Option<u64> {
     }
     let dst = reg_const(state, insn.dst_reg(), is_32)?;
     if op == BPF_NEG {
-        return eval_unary_alu(op, dst, is_32);
+        return Some(eval_neg_alu(dst, is_32));
     }
     let rhs = if bpf_src(insn.code) == BPF_X {
         reg_const(state, insn.src_reg(), is_32)?
@@ -393,11 +359,11 @@ fn evaluate_alu_result(insn: &BpfInsn, state: &RegConstState) -> Option<u64> {
     };
     eval_binary_alu_const(op, dst, rhs, is_32)
 }
-fn eval_unary_alu(op: u8, lhs: u64, is_32: bool) -> Option<u64> {
-    match (op, is_32) {
-        (BPF_NEG, true) => Some((-(lhs as u32 as i32) as u32) as u64),
-        (BPF_NEG, false) => Some((-(lhs as i64)) as u64),
-        _ => None,
+fn eval_neg_alu(lhs: u64, is_32: bool) -> u64 {
+    if is_32 {
+        (-(lhs as u32 as i32) as u32) as u64
+    } else {
+        (-(lhs as i64)) as u64
     }
 }
 fn alu_inputs_may_be_pointer(insn: &BpfInsn, state: &RegConstState) -> bool {
@@ -442,35 +408,15 @@ fn set_reg_program_fact(state: &mut RegConstState, reg: u8, fact: RegConstFact) 
         *slot = fact;
     }
 }
-fn set_reg_exact64(state: &mut RegConstState, reg: u8, value: u64) {
-    set_reg_fact(
-        state,
-        reg,
-        RegConstFact {
-            exact64: Some(value),
-            exact32: Some(value as u32),
-            may_pointer: false,
-        },
-    );
-}
-fn set_reg_unknown(state: &mut RegConstState, reg: u8) {
-    set_reg_fact(state, reg, RegConstFact::unknown());
-}
-fn set_reg_may_pointer(state: &mut RegConstState, reg: u8) {
-    set_reg_fact(state, reg, RegConstFact::pointer());
-}
 fn merge_reg_fact(lhs: RegConstFact, rhs: RegConstFact) -> RegConstFact {
     RegConstFact {
-        exact64: match (lhs.exact64, rhs.exact64) {
-            (Some(left), Some(right)) if left == right => Some(left),
-            _ => None,
-        },
-        exact32: match (lhs.exact32, rhs.exact32) {
-            (Some(left), Some(right)) if left == right => Some(left),
-            _ => None,
-        },
+        exact64: merge_exact(lhs.exact64, rhs.exact64),
+        exact32: merge_exact(lhs.exact32, rhs.exact32),
         may_pointer: lhs.may_pointer || rhs.may_pointer,
     }
+}
+fn merge_exact<T: Copy + Eq>(lhs: Option<T>, rhs: Option<T>) -> Option<T> {
+    (lhs == rhs).then_some(lhs).flatten()
 }
 fn meet_states(lhs: &RegConstState, rhs: &RegConstState) -> RegConstState {
     let mut merged = unknown_state();
@@ -480,8 +426,8 @@ fn meet_states(lhs: &RegConstState, rhs: &RegConstState) -> RegConstState {
     merged
 }
 fn unknown_state() -> RegConstState {
-    let mut state = [RegConstFact::unknown(); REG_COUNT];
-    state[10] = RegConstFact::pointer();
+    let mut state = [RegConstFact::default(); REG_COUNT];
+    state[10] = RegConstFact::POINTER;
     state
 }
 fn decode_ldimm64_site(prog: &BBProgram, site: InsnSite) -> anyhow::Result<u64> {
@@ -492,10 +438,4 @@ fn decode_ldimm64_site(prog: &BBProgram, site: InsnSite) -> anyhow::Result<u64> 
         .ldimm64_second_slot(site)
         .ok_or_else(|| anyhow::anyhow!("missing LD_IMM64 second slot at {:?}", site))?;
     Ok(decode_ldimm64_value(first, second))
-}
-fn replacement_if_changed(insn: &BpfInsn, candidate: &[BpfInsn]) -> Option<Vec<BpfInsn>> {
-    if candidate.len() == 1 && candidate[0] == *insn {
-        return None;
-    }
-    Some(candidate.to_vec())
 }

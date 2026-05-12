@@ -1,15 +1,18 @@
 // SPDX-License-Identifier: MIT
 use crate::analysis::{
-    insn_use_def_set, validate_map_inline_hint_specs, BBProgram, InsnSite, Terminator,
+    insn_use_def_set, validate_map_inline_hint_specs, BBProgram, InsnSite, MakeReplacement,
+    Terminator,
 };
 use crate::insn::*;
 use crate::pass::*;
 use anyhow::{anyhow, bail, Context, Result};
+use serde::Deserialize;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, VecDeque};
+use std::fs;
+use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
-mod map_info;
-use map_info::analyze_map_info;
-pub use map_info::{MapInfo, MapInfoResult, MapReference};
+
+pub use crate::pass::MapMetadata as MapInfo;
 const R2_SETUP_LOOKBACK_LIMIT: usize = 8;
 const REG_RESOLUTION_LIMIT: usize = 64;
 const CONST_STACK_VALUE_LOOKBACK_LIMIT: usize = 256;
@@ -1593,6 +1596,7 @@ fn run_map_inline_round(
         removed_any_null_check,
         applied,
     )?;
+    skipped.append(&mut result.site_skipped);
     result.site_skipped = skipped;
     result.diagnostics = diagnostics;
     result.site_diagnostics = site_diagnostics;
@@ -1608,7 +1612,13 @@ fn apply_map_inline_edit(
     sites_applied: usize,
 ) -> anyhow::Result<PassResult> {
     let mut next = prog.clone();
-    apply_replacements_and_deletions(&mut next, replacements, skip_sites)?;
+    let mut skipped = Vec::new();
+    if !apply_replacements_and_deletions(&mut next, replacements, skip_sites, &mut skipped)? {
+        return Ok(PassResult {
+            site_skipped: skipped,
+            ..PassResult::unchanged()
+        });
+    }
     if cleanup_unreachable {
         cleanup_map_inline_bbprogram(&mut next)?;
     }
@@ -1616,6 +1626,7 @@ fn apply_map_inline_edit(
     *prog = next;
     Ok(PassResult {
         sites_applied,
+        site_skipped: skipped,
         insns_before: old_len,
         insns_after: new_len,
         ..Default::default()
@@ -1625,7 +1636,8 @@ fn apply_replacements_and_deletions(
     prog: &mut BBProgram,
     replacements: Vec<SiteReplacement>,
     skip_sites: BTreeSet<InsnSite>,
-) -> anyhow::Result<()> {
+    skipped: &mut Vec<SiteSkipReason>,
+) -> anyhow::Result<bool> {
     let mut replacement_by_site = BTreeMap::new();
     for replacement in replacements {
         if skip_sites.contains(&replacement.site) {
@@ -1643,25 +1655,41 @@ fn apply_replacements_and_deletions(
     edit_sites.extend(skip_sites.iter().copied());
     for site in edit_sites.into_iter().rev() {
         if let Some(replacement) = replacement_by_site.remove(&site) {
-            replace_site(prog, replacement)?;
-        } else {
-            delete_site(prog, site)?;
+            if !replace_site(prog, replacement, skipped)? {
+                return Ok(false);
+            }
+        } else if !delete_site(prog, site, skipped)? {
+            return Ok(false);
         }
     }
-    Ok(())
+    Ok(true)
 }
-fn replace_site(prog: &mut BBProgram, replacement: SiteReplacement) -> anyhow::Result<()> {
+fn replace_site(
+    prog: &mut BBProgram,
+    replacement: SiteReplacement,
+    skipped: &mut Vec<SiteSkipReason>,
+) -> anyhow::Result<bool> {
     if replacement.replacement.is_empty() {
         anyhow::bail!("map_inline replacement at {:?} is empty", replacement.site);
     }
     if prog.is_terminator_site(replacement.site)? {
         let terminator =
             terminator_for_site_replacement(prog, replacement.site, &replacement.replacement)?;
-        return prog.replace_terminator_at_site(replacement.site, terminator);
+        prog.replace_terminator_at_site(replacement.site, terminator)?;
+        return Ok(true);
     }
-    prog.replace_range_at(replacement.site, 1, replacement.replacement)
+    let site = replacement.site;
+    let replacement = replacement.replacement;
+    let replacement_len = replacement.len();
+    prog.try_replace_range_with_skips(site, 1, replacement_len, skipped, || {
+        Ok(MakeReplacement::Use(replacement))
+    })
 }
-fn delete_site(prog: &mut BBProgram, site: InsnSite) -> anyhow::Result<()> {
+fn delete_site(
+    prog: &mut BBProgram,
+    site: InsnSite,
+    skipped: &mut Vec<SiteSkipReason>,
+) -> anyhow::Result<bool> {
     if prog.is_terminator_site(site)? {
         let terminator = match prog.terminator_at_site(site)? {
             Terminator::CondBranch { fallthrough, .. } => {
@@ -1673,9 +1701,10 @@ fn delete_site(prog: &mut BBProgram, site: InsnSite) -> anyhow::Result<()> {
                 anyhow::bail!("map_inline cannot delete terminator at {:?}", site)
             }
         };
-        return prog.replace_terminator_at_site(site, terminator);
+        prog.replace_terminator_at_site(site, terminator)?;
+        return Ok(true);
     }
-    prog.replace_range_at(site, 1, Vec::new())
+    prog.try_replace_range_with_skips(site, 1, 0, skipped, || Ok(MakeReplacement::Use(Vec::new())))
 }
 fn terminator_for_site_replacement(
     prog: &BBProgram,
@@ -2915,4 +2944,1346 @@ fn insn_uses_any_alias(insn: &BpfInsn, alias_regs: &HashMap<u8, i16>) -> bool {
 fn kill_defined_alias_regs(alias_regs: &mut HashMap<u8, i16>, insn: &BpfInsn) {
     let use_def = insn_use_def_set(insn);
     alias_regs.retain(|reg, _| !use_def.defs.contains(reg));
+}
+
+// ===== begin merged from passes/map_inline/cli.rs =====
+
+pub fn attach_cli_side_input(
+    common: &CommonArgs,
+    ctx: &mut PassContext,
+    pass_args: &[String],
+) -> Result<()> {
+    let cli = MapInlineCliArgs::parse(pass_args)?;
+    let map_ids = cli.resolve_map_ids(common)?;
+    let snapshot = read_map_values(&cli.map_values, &map_ids)?;
+    ctx.map_ids = map_ids;
+    ctx.map_metadata = snapshot.metadata;
+    ctx.map_values = snapshot.values;
+    ctx.map_value_overlays = snapshot.compressed_values;
+    ctx.map_inner_map_ids = snapshot.inner_map_ids;
+    ctx.map_snapshots_skipped_by_size = snapshot.maps_skipped_by_size;
+    ctx.map_inline_hints = cli.inline_hints;
+    Ok(())
+}
+
+struct MapInlineCliArgs {
+    map_values: PathBuf,
+    map_ids: Option<String>,
+    inline_hints: Vec<MapInlineHintSpec>,
+}
+
+impl MapInlineCliArgs {
+    fn parse(args: &[String]) -> Result<Self> {
+        let mut map_values = None;
+        let mut map_ids = None;
+        let mut inline_hints = Vec::new();
+        let mut iter = args.iter();
+        while let Some(arg) = iter.next() {
+            if let Some(value) = arg.strip_prefix("--inline-hint=") {
+                inline_hints.push(parse_inline_hint(value)?);
+                continue;
+            }
+            match arg.as_str() {
+                "--map-values" => {
+                    let value = iter
+                        .next()
+                        .ok_or_else(|| anyhow!("--map-values requires DIR"))?;
+                    map_values = Some(PathBuf::from(value));
+                }
+                "--map-ids" => {
+                    let value = iter
+                        .next()
+                        .ok_or_else(|| anyhow!("--map-ids requires LIST"))?;
+                    map_ids = Some(value.clone());
+                }
+                "--inline-hint" => {
+                    let value = iter.next().ok_or_else(|| {
+                        anyhow!("--inline-hint requires <anchor>:[!]<hex_key_bytes>")
+                    })?;
+                    inline_hints.push(parse_inline_hint(value)?);
+                }
+                other => bail!("map_inline unknown pass-local arg: {other}"),
+            }
+        }
+        validate_map_inline_hint_specs(&inline_hints)?;
+        Ok(Self {
+            map_values: map_values.ok_or_else(|| anyhow!("map_inline requires --map-values"))?,
+            map_ids,
+            inline_hints,
+        })
+    }
+
+    fn resolve_map_ids(&self, common: &CommonArgs) -> Result<Vec<u32>> {
+        let pass_local = match self.map_ids.as_deref() {
+            Some(value) => Some(parse_map_ids_arg(value)?),
+            None => None,
+        };
+        match (pass_local, common.map_ids.is_empty()) {
+            (Some(map_ids), true) => Ok(map_ids),
+            (Some(map_ids), false) => {
+                if map_ids != common.map_ids {
+                    bail!("map_inline pass-local --map-ids differs from global --map-ids");
+                }
+                Ok(map_ids)
+            }
+            (None, false) => Ok(common.map_ids.clone()),
+            (None, true) => bail!("map_inline requires --map-ids"),
+        }
+    }
+}
+
+fn parse_inline_hint(input: &str) -> Result<MapInlineHintSpec> {
+    let (anchor_str, key_str) = input.split_once(':').ok_or_else(|| {
+        anyhow!("invalid --inline-hint '{input}': expected <anchor>:[!]<hex_key_bytes>")
+    })?;
+    let anchor = parse_inline_hint_anchor(anchor_str)
+        .with_context(|| format!("invalid --inline-hint anchor in '{input}'"))?;
+    let (mode, hex_str) = if let Some(hex) = key_str.strip_prefix('!') {
+        (MapInlineHintModeSpec::Hard, hex)
+    } else {
+        (MapInlineHintModeSpec::Soft, key_str)
+    };
+    let key = parse_inline_hint_hex(hex_str)
+        .with_context(|| format!("invalid --inline-hint key bytes in '{input}'"))?;
+    Ok(MapInlineHintSpec { anchor, mode, key })
+}
+
+fn parse_inline_hint_anchor(input: &str) -> Result<MapInlineHintAnchorSpec> {
+    if input.is_empty() {
+        bail!("anchor is empty");
+    }
+    if input.bytes().all(|byte| byte.is_ascii_digit()) {
+        let pc = input
+            .parse::<usize>()
+            .with_context(|| format!("invalid call_pc anchor {input:?}"))?;
+        return Ok(MapInlineHintAnchorSpec::Pc(pc));
+    }
+    let first = input.as_bytes()[0];
+    if !(first.is_ascii_alphabetic() || first == b'_') {
+        bail!("map-name anchor must start with a letter or underscore");
+    }
+    if !input
+        .bytes()
+        .skip(1)
+        .all(|byte| byte.is_ascii_alphanumeric() || byte == b'_')
+    {
+        bail!("map-name anchor must contain only ASCII letters, digits, and underscores");
+    }
+    Ok(MapInlineHintAnchorSpec::MapName(input.to_string()))
+}
+
+fn parse_inline_hint_hex(input: &str) -> Result<Vec<u8>> {
+    if !input.len().is_multiple_of(2) {
+        bail!("hex string must have an even number of digits");
+    }
+    input
+        .as_bytes()
+        .chunks_exact(2)
+        .map(|pair| {
+            let hi = hex_nibble(pair[0])
+                .ok_or_else(|| anyhow!("invalid hex digit '{}'", char::from(pair[0])))?;
+            let lo = hex_nibble(pair[1])
+                .ok_or_else(|| anyhow!("invalid hex digit '{}'", char::from(pair[1])))?;
+            Ok((hi << 4) | lo)
+        })
+        .collect()
+}
+
+fn hex_nibble(byte: u8) -> Option<u8> {
+    match byte {
+        b'0'..=b'9' => Some(byte - b'0'),
+        b'a'..=b'f' => Some(byte - b'a' + 10),
+        b'A'..=b'F' => Some(byte - b'A' + 10),
+        _ => None,
+    }
+}
+
+#[derive(Clone)]
+struct MapSnapshot {
+    metadata: HashMap<u32, MapMetadata>,
+    values: HashMap<(u32, Vec<u8>), Vec<u8>>,
+    compressed_values: HashMap<u32, CompressedMapValues>,
+    inner_map_ids: HashMap<(u32, Vec<u8>), u32>,
+    maps_skipped_by_size: HashSet<u32>,
+}
+
+#[derive(Debug, Deserialize)]
+struct ProgInfoMapIdsJson {
+    #[serde(default)]
+    map_ids: Vec<u32>,
+}
+
+#[derive(Debug, Deserialize)]
+struct BpftoolMapShowJson {
+    id: u32,
+    #[serde(default)]
+    name: String,
+    #[serde(rename = "type")]
+    map_type: MapTypeJson,
+    bytes_key: u32,
+    bytes_value: u32,
+    max_entries: u32,
+}
+
+#[derive(Debug, Deserialize)]
+struct BpftoolMapEntryJson {
+    key: Vec<String>,
+    #[serde(default)]
+    value: Option<BpftoolMapValueJson>,
+    #[serde(default)]
+    values: Vec<BpftoolPerCpuValueJson>,
+    #[serde(default)]
+    inner_map_id: Option<u32>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+enum InnerMapIdJson {
+    Number(u32),
+    String(String),
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct BpftoolMapDumpSkipMarker {
+    skipped: bool,
+    reason: String,
+    size_bytes: u64,
+    limit_bytes: u64,
+}
+
+enum BpftoolMapDumpSnapshot {
+    Entries(Vec<BpftoolMapEntryJson>),
+    Compressed(CompressedMapValues),
+    SkippedBySize,
+}
+
+#[derive(Debug, Deserialize)]
+struct BpftoolPerCpuValueJson {
+    value: Vec<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+enum BpftoolMapValueJson {
+    Bytes(Vec<String>),
+    Error { error: String },
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct CompressedMapValuesJson {
+    compression: String,
+    value_size: usize,
+    #[serde(default)]
+    value_hex: Option<String>,
+    #[serde(default)]
+    default_hex: Option<String>,
+    #[serde(default)]
+    entries: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+enum MapTypeJson {
+    Number(u32),
+    Name(String),
+}
+
+fn read_map_values(path: &Path, map_ids: &[u32]) -> Result<MapSnapshot> {
+    if !path.is_dir() {
+        bail!(
+            "--map-values must point to a bpftool snapshot directory, got {}",
+            path.display()
+        );
+    }
+    let mut metadata = HashMap::new();
+    let mut values = HashMap::new();
+    let mut compressed_values = HashMap::new();
+    let mut inner_map_ids = HashMap::new();
+    let mut maps_skipped_by_size = HashSet::new();
+    let mut empty_lpm_trie_maps = HashSet::new();
+    for &map_id in map_ids.iter().filter(|&&map_id| map_id != 0) {
+        let show = read_bpftool_map_show(path, map_id)?;
+        let map_type = parse_map_type(&show.map_type)?;
+        let map_metadata = MapMetadata {
+            map_type,
+            key_size: show.bytes_key,
+            value_size: show.bytes_value,
+            max_entries: show.max_entries,
+            map_id: show.id,
+            name: show.name,
+        };
+        if needs_bpftool_map_dump(map_type) {
+            match read_bpftool_map_dump(path, show.id, &map_metadata)? {
+                BpftoolMapDumpSnapshot::Entries(entries) => {
+                    if entries.is_empty()
+                        && map_metadata.map_type == libbpf_sys::BPF_MAP_TYPE_LPM_TRIE
+                    {
+                        empty_lpm_trie_maps.insert(show.id);
+                    }
+                    for entry in entries {
+                        let key = decode_bpftool_hex_bytes(&entry.key)
+                            .with_context(|| format!("invalid key bytes for map {}", show.id))?;
+                        let value = decode_bpftool_entry_value(&entry, &map_metadata)
+                            .with_context(|| format!("invalid value bytes for map {}", show.id))?;
+                        values.insert((show.id, key.clone()), value);
+                        if let Some(inner_map_id) = entry.inner_map_id {
+                            inner_map_ids.insert((show.id, key), inner_map_id);
+                        }
+                    }
+                }
+                BpftoolMapDumpSnapshot::Compressed(compressed) => {
+                    if values.keys().any(|(map_id, _)| *map_id == show.id) {
+                        bail!(
+                            "map {} has both raw entries and compression overlay",
+                            show.id
+                        );
+                    }
+                    compressed_values.insert(show.id, compressed);
+                }
+                BpftoolMapDumpSnapshot::SkippedBySize => {
+                    maps_skipped_by_size.insert(show.id);
+                }
+            }
+            read_inner_map_ids_supplement(
+                path,
+                show.id,
+                map_metadata.key_size as usize,
+                &mut inner_map_ids,
+            )?;
+        }
+        metadata.insert(show.id, map_metadata);
+    }
+    read_optional_compressed_overlay_file(path, &metadata, &values, &mut compressed_values)?;
+    synthesize_empty_lpm_trie_overlays(&empty_lpm_trie_maps, &metadata, &mut compressed_values)?;
+    Ok(MapSnapshot {
+        metadata,
+        values,
+        compressed_values,
+        inner_map_ids,
+        maps_skipped_by_size,
+    })
+}
+
+fn read_bpftool_map_show(path: &Path, map_id: u32) -> Result<BpftoolMapShowJson> {
+    let show_path = path.join(format!("map-{map_id}.show.json"));
+    let show: BpftoolMapShowJson = read_json_file(&show_path, "bpftool map show JSON")?;
+    if show.id != map_id {
+        bail!(
+            "{} contains map id {}, expected {}",
+            show_path.display(),
+            show.id,
+            map_id
+        );
+    }
+    Ok(show)
+}
+
+fn read_bpftool_map_dump(
+    path: &Path,
+    map_id: u32,
+    metadata: &MapMetadata,
+) -> Result<BpftoolMapDumpSnapshot> {
+    let dump_path = path.join(format!("map-{map_id}.dump.json"));
+    let data =
+        fs::read(&dump_path).with_context(|| format!("failed to read {}", dump_path.display()))?;
+    let Some(first) = data
+        .iter()
+        .copied()
+        .find(|byte| !byte.is_ascii_whitespace())
+    else {
+        bail!("{} is empty", dump_path.display());
+    };
+    match first {
+        b'[' => {
+            let entries = serde_json::from_slice(&data).with_context(|| {
+                format!(
+                    "failed to parse bpftool map dump JSON from {}",
+                    dump_path.display()
+                )
+            })?;
+            Ok(BpftoolMapDumpSnapshot::Entries(entries))
+        }
+        b'{' => {
+            let value: serde_json::Value = serde_json::from_slice(&data).with_context(|| {
+                format!(
+                    "failed to parse bpftool map dump object from {}",
+                    dump_path.display()
+                )
+            })?;
+            if value.get("compression").is_some() {
+                let compressed = parse_compressed_map_values_json(map_id, metadata, value)
+                    .with_context(|| {
+                        format!(
+                            "failed to parse compressed map overlay {}",
+                            dump_path.display()
+                        )
+                    })?;
+                return Ok(BpftoolMapDumpSnapshot::Compressed(compressed));
+            }
+            let marker: BpftoolMapDumpSkipMarker =
+                serde_json::from_value(value).with_context(|| {
+                    format!(
+                        "failed to parse bpftool map dump skip marker from {}",
+                        dump_path.display()
+                    )
+                })?;
+            if !marker.skipped
+                || marker.reason != "size_limit"
+                || marker.size_bytes <= marker.limit_bytes
+            {
+                bail!(
+                    "unexpected bpftool map dump skip marker in {}",
+                    dump_path.display()
+                );
+            }
+            Ok(BpftoolMapDumpSnapshot::SkippedBySize)
+        }
+        _ => bail!(
+            "{} is neither a bpftool map dump array nor a skip marker object",
+            dump_path.display()
+        ),
+    }
+}
+
+fn read_inner_map_ids_supplement(
+    path: &Path,
+    map_id: u32,
+    key_size: usize,
+    inner_map_ids: &mut HashMap<(u32, Vec<u8>), u32>,
+) -> Result<()> {
+    let supplement_path = path.join(format!("map-{map_id}.inner_map_ids.json"));
+    let data = match fs::read(&supplement_path) {
+        Ok(data) => data,
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(()),
+        Err(err) => {
+            return Err(err)
+                .with_context(|| format!("failed to read {}", supplement_path.display()));
+        }
+    };
+    let supplement: HashMap<String, HashMap<String, InnerMapIdJson>> =
+        serde_json::from_slice(&data).with_context(|| {
+            format!(
+                "failed to parse inner_map_id supplement from {}",
+                supplement_path.display()
+            )
+        })?;
+    let expected_map_id = map_id.to_string();
+    for present_map_id in supplement.keys() {
+        if present_map_id != &expected_map_id {
+            bail!(
+                "{} contains inner_map_id table for map {}, expected only {}",
+                supplement_path.display(),
+                present_map_id,
+                expected_map_id
+            );
+        }
+    }
+    let entries = supplement.get(&expected_map_id).ok_or_else(|| {
+        anyhow!(
+            "{} does not contain inner_map_id table for map {}",
+            supplement_path.display(),
+            map_id
+        )
+    })?;
+    for (key_hex, inner_map_id_json) in entries {
+        let key = decode_inner_map_id_key_hex(map_id, key_hex, key_size)?;
+        let inner_map_id = decode_inner_map_id_json(map_id, key_hex, inner_map_id_json)?;
+        inner_map_ids.insert((map_id, key), inner_map_id);
+    }
+    Ok(())
+}
+
+fn decode_inner_map_id_key_hex(map_id: u32, hex: &str, key_size: usize) -> Result<Vec<u8>> {
+    let expected = expected_hex_digits(key_size, "key_size")?;
+    if hex.len() != expected {
+        bail!(
+            "map {map_id} inner_map_id supplement key has {} hex digit(s), expected {}",
+            hex.len(),
+            expected
+        );
+    }
+    parse_inline_hint_hex(hex)
+        .with_context(|| format!("map {map_id} inner_map_id supplement key has invalid hex"))
+}
+
+fn decode_inner_map_id_json(map_id: u32, key_hex: &str, value: &InnerMapIdJson) -> Result<u32> {
+    let inner_map_id = match value {
+        InnerMapIdJson::Number(number) => *number,
+        InnerMapIdJson::String(text) => text.parse::<u32>().with_context(|| {
+            format!("map {map_id} inner_map_id supplement entry {key_hex:?} is not a u32 id")
+        })?,
+    };
+    if inner_map_id == 0 {
+        bail!("map {map_id} inner_map_id supplement entry {key_hex:?} has id 0; omit NULL entries");
+    }
+    Ok(inner_map_id)
+}
+
+fn read_optional_compressed_overlay_file(
+    path: &Path,
+    metadata: &HashMap<u32, MapMetadata>,
+    raw_values: &HashMap<(u32, Vec<u8>), Vec<u8>>,
+    compressed_values: &mut HashMap<u32, CompressedMapValues>,
+) -> Result<()> {
+    let overlay_path = path.join("overlays.json");
+    let data = match fs::read(&overlay_path) {
+        Ok(data) => data,
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(()),
+        Err(err) => {
+            return Err(err).with_context(|| format!("failed to read {}", overlay_path.display()));
+        }
+    };
+    let overlays: HashMap<String, serde_json::Value> =
+        serde_json::from_slice(&data).with_context(|| {
+            format!(
+                "failed to parse compressed map overlays from {}",
+                overlay_path.display()
+            )
+        })?;
+    for (map_id_text, overlay) in overlays {
+        let map_id = map_id_text
+            .parse::<u32>()
+            .with_context(|| format!("invalid compressed overlay map id {map_id_text:?}"))?;
+        let map_metadata = metadata.get(&map_id).ok_or_else(|| {
+            anyhow!(
+                "compressed overlay references map {} not present in --map-ids metadata",
+                map_id
+            )
+        })?;
+        if raw_values
+            .keys()
+            .any(|(raw_map_id, _)| *raw_map_id == map_id)
+        {
+            bail!("map {map_id} has both raw entries and compression overlay");
+        }
+        let compressed = parse_compressed_map_values_json(map_id, map_metadata, overlay)
+            .map_err(|err| anyhow!("invalid compressed overlay for map {map_id}: {err}"))?;
+        if compressed_values.insert(map_id, compressed).is_some() {
+            bail!("map {map_id} has duplicate compression overlays");
+        }
+    }
+    Ok(())
+}
+
+fn synthesize_empty_lpm_trie_overlays(
+    empty_lpm_trie_maps: &HashSet<u32>,
+    metadata: &HashMap<u32, MapMetadata>,
+    compressed_values: &mut HashMap<u32, CompressedMapValues>,
+) -> Result<()> {
+    for map_id in empty_lpm_trie_maps {
+        if compressed_values.contains_key(map_id) {
+            continue;
+        }
+        let map_metadata = metadata
+            .get(map_id)
+            .ok_or_else(|| anyhow!("empty LPM_TRIE map {} missing map_values metadata", map_id))?;
+        compressed_values.insert(
+            *map_id,
+            CompressedMapValues {
+                value_size: map_metadata.value_size as usize,
+                kind: CompressedMapValuesKind::Enumerated {
+                    entries: HashMap::new(),
+                },
+            },
+        );
+    }
+    Ok(())
+}
+
+fn parse_compressed_map_values_json(
+    map_id: u32,
+    metadata: &MapMetadata,
+    value: serde_json::Value,
+) -> Result<CompressedMapValues> {
+    let overlay: CompressedMapValuesJson = serde_json::from_value(value)
+        .with_context(|| format!("invalid compressed map overlay schema for map {map_id}"))?;
+    if overlay.value_size != metadata.value_size as usize {
+        bail!(
+            "map {map_id} compressed overlay value_size {} does not match map bytes_value {}",
+            overlay.value_size,
+            metadata.value_size
+        );
+    }
+    let kind = match overlay.compression.as_str() {
+        "uniform" => {
+            if let Some(entries) = overlay.entries {
+                if entries.is_array() {
+                    bail!("map {map_id} has both raw entries and compression overlay");
+                }
+                bail!("map {map_id} uniform compression must not include entries");
+            }
+            if overlay.default_hex.is_some() {
+                bail!("map {map_id} uniform compression must not include default_hex");
+            }
+            let value_hex = overlay
+                .value_hex
+                .ok_or_else(|| anyhow!("map {map_id} uniform compression requires value_hex"))?;
+            let value =
+                decode_compressed_value_hex(map_id, "value_hex", &value_hex, overlay.value_size)?;
+            CompressedMapValuesKind::Uniform(value)
+        }
+        "sparse" => {
+            if overlay.value_hex.is_some() {
+                bail!("map {map_id} sparse compression must not include value_hex");
+            }
+            let default_hex = overlay
+                .default_hex
+                .ok_or_else(|| anyhow!("map {map_id} sparse compression requires default_hex"))?;
+            let default = decode_compressed_value_hex(
+                map_id,
+                "default_hex",
+                &default_hex,
+                overlay.value_size,
+            )?;
+            let entries = overlay
+                .entries
+                .ok_or_else(|| anyhow!("map {map_id} sparse compression requires entries"))?;
+            let entries = decode_compressed_entries(
+                map_id,
+                metadata.key_size as usize,
+                overlay.value_size,
+                entries,
+            )?;
+            CompressedMapValuesKind::Sparse { default, entries }
+        }
+        "enumerated" => {
+            if overlay.value_hex.is_some() {
+                bail!("map {map_id} enumerated compression must not include value_hex");
+            }
+            if overlay.default_hex.is_some() {
+                bail!("map {map_id} enumerated compression must not include default_hex");
+            }
+            let entries = overlay
+                .entries
+                .ok_or_else(|| anyhow!("map {map_id} enumerated compression requires entries"))?;
+            let entries = decode_compressed_entries(
+                map_id,
+                metadata.key_size as usize,
+                overlay.value_size,
+                entries,
+            )?;
+            CompressedMapValuesKind::Enumerated { entries }
+        }
+        other => bail!("map {map_id} unsupported compression {other:?}"),
+    };
+    Ok(CompressedMapValues {
+        value_size: overlay.value_size,
+        kind,
+    })
+}
+
+fn decode_compressed_entries(
+    map_id: u32,
+    key_size: usize,
+    value_size: usize,
+    entries: serde_json::Value,
+) -> Result<HashMap<Vec<u8>, Vec<u8>>> {
+    let object = entries
+        .as_object()
+        .ok_or_else(|| anyhow!("map {map_id} compressed entries must be a JSON object"))?;
+    let mut decoded = HashMap::new();
+    for (key_hex, value_json) in object {
+        let value_hex = value_json.as_str().ok_or_else(|| {
+            anyhow!("map {map_id} compressed entry {key_hex:?} value must be a hex string")
+        })?;
+        let key = decode_compressed_key_hex(map_id, key_hex, key_size)?;
+        let value = decode_compressed_value_hex(map_id, "entries value", value_hex, value_size)?;
+        decoded.insert(key, value);
+    }
+    Ok(decoded)
+}
+
+fn decode_compressed_key_hex(map_id: u32, hex: &str, key_size: usize) -> Result<Vec<u8>> {
+    let expected = expected_hex_digits(key_size, "key_size")?;
+    if hex.len() != expected {
+        bail!(
+            "map {map_id} compressed entry key has {} hex digit(s), expected {}",
+            hex.len(),
+            expected
+        );
+    }
+    parse_inline_hint_hex(hex)
+        .with_context(|| format!("map {map_id} compressed entry key has invalid hex"))
+}
+
+fn decode_compressed_value_hex(
+    map_id: u32,
+    field: &str,
+    hex: &str,
+    value_size: usize,
+) -> Result<Vec<u8>> {
+    let expected = expected_hex_digits(value_size, "value_size")?;
+    if hex.len() != expected {
+        bail!(
+            "map {map_id} compressed {field} has {} hex digit(s), expected {}",
+            hex.len(),
+            expected
+        );
+    }
+    parse_inline_hint_hex(hex)
+        .with_context(|| format!("map {map_id} compressed {field} has invalid hex"))
+}
+
+fn expected_hex_digits(byte_len: usize, label: &str) -> Result<usize> {
+    byte_len
+        .checked_mul(2)
+        .ok_or_else(|| anyhow!("{label} {byte_len} overflows hex length"))
+}
+
+fn decode_bpftool_entry_value(
+    entry: &BpftoolMapEntryJson,
+    metadata: &MapMetadata,
+) -> Result<Vec<u8>> {
+    if !entry.values.is_empty() {
+        return decode_bpftool_percpu_values(&entry.values, metadata.value_size as usize);
+    }
+    let Some(value) = &entry.value else {
+        bail!("bpftool entry has neither value nor per-CPU values");
+    };
+    match value {
+        BpftoolMapValueJson::Bytes(bytes) => decode_bpftool_hex_bytes(bytes),
+        BpftoolMapValueJson::Error { error } => {
+            bail!("bpftool map dump returned lookup error: {error}")
+        }
+    }
+}
+
+fn decode_bpftool_percpu_values(
+    values: &[BpftoolPerCpuValueJson],
+    value_size: usize,
+) -> Result<Vec<u8>> {
+    let stride = (value_size + 7) & !7;
+    let mut out = Vec::with_capacity(values.len().saturating_mul(stride));
+    for value in values {
+        let bytes = decode_bpftool_hex_bytes(&value.value)?;
+        if bytes.len() != value_size {
+            bail!(
+                "per-CPU value has {} byte(s), expected {}",
+                bytes.len(),
+                value_size
+            );
+        }
+        out.extend_from_slice(&bytes);
+        out.resize(out.len() + (stride - value_size), 0);
+    }
+    Ok(out)
+}
+
+fn decode_bpftool_hex_bytes(input: &[String]) -> Result<Vec<u8>> {
+    input
+        .iter()
+        .map(|byte| {
+            let byte = byte.trim();
+            let hex = match byte.strip_prefix("0x") {
+                Some(hex) => hex,
+                None => byte,
+            };
+            u8::from_str_radix(hex, 16).with_context(|| format!("invalid bpftool byte {byte:?}"))
+        })
+        .collect()
+}
+
+fn needs_bpftool_map_dump(map_type: u32) -> bool {
+    matches!(
+        map_type,
+        libbpf_sys::BPF_MAP_TYPE_HASH
+            | libbpf_sys::BPF_MAP_TYPE_ARRAY
+            | libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY
+            | libbpf_sys::BPF_MAP_TYPE_LRU_HASH
+            | libbpf_sys::BPF_MAP_TYPE_LPM_TRIE
+            | libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS
+            | libbpf_sys::BPF_MAP_TYPE_HASH_OF_MAPS
+    )
+}
+
+fn parse_map_type(map_type: &MapTypeJson) -> Result<u32> {
+    match map_type {
+        MapTypeJson::Number(number) => Ok(*number),
+        MapTypeJson::Name(name) => {
+            let normalized = name
+                .trim()
+                .trim_start_matches("BPF_MAP_TYPE_")
+                .trim_start_matches("bpf_map_type_")
+                .replace(['-', ' '], "_")
+                .to_ascii_lowercase();
+            match normalized.as_str() {
+                "hash" => Ok(libbpf_sys::BPF_MAP_TYPE_HASH),
+                "array" => Ok(libbpf_sys::BPF_MAP_TYPE_ARRAY),
+                "prog_array" => Ok(libbpf_sys::BPF_MAP_TYPE_PROG_ARRAY),
+                "perf_event_array" => Ok(libbpf_sys::BPF_MAP_TYPE_PERF_EVENT_ARRAY),
+                "percpu_hash" | "per_cpu_hash" => Ok(libbpf_sys::BPF_MAP_TYPE_PERCPU_HASH),
+                "percpu_array" | "per_cpu_array" => Ok(libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY),
+                "stack_trace" => Ok(libbpf_sys::BPF_MAP_TYPE_STACK_TRACE),
+                "cgroup_array" => Ok(libbpf_sys::BPF_MAP_TYPE_CGROUP_ARRAY),
+                "lru_hash" => Ok(libbpf_sys::BPF_MAP_TYPE_LRU_HASH),
+                "lru_percpu_hash" | "lru_per_cpu_hash" => {
+                    Ok(libbpf_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH)
+                }
+                "lpm_trie" => Ok(libbpf_sys::BPF_MAP_TYPE_LPM_TRIE),
+                "array_of_maps" => Ok(libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS),
+                "hash_of_maps" => Ok(libbpf_sys::BPF_MAP_TYPE_HASH_OF_MAPS),
+                "devmap" => Ok(libbpf_sys::BPF_MAP_TYPE_DEVMAP),
+                "devmap_hash" => Ok(libbpf_sys::BPF_MAP_TYPE_DEVMAP_HASH),
+                "sockmap" => Ok(libbpf_sys::BPF_MAP_TYPE_SOCKMAP),
+                "cpumap" => Ok(libbpf_sys::BPF_MAP_TYPE_CPUMAP),
+                "xskmap" => Ok(libbpf_sys::BPF_MAP_TYPE_XSKMAP),
+                "sockhash" => Ok(libbpf_sys::BPF_MAP_TYPE_SOCKHASH),
+                "cgroup_storage" => Ok(libbpf_sys::BPF_MAP_TYPE_CGROUP_STORAGE),
+                "reuseport_sockarray" => Ok(libbpf_sys::BPF_MAP_TYPE_REUSEPORT_SOCKARRAY),
+                "percpu_cgroup_storage" | "per_cpu_cgroup_storage" => {
+                    Ok(libbpf_sys::BPF_MAP_TYPE_PERCPU_CGROUP_STORAGE)
+                }
+                "queue" => Ok(libbpf_sys::BPF_MAP_TYPE_QUEUE),
+                "stack" => Ok(libbpf_sys::BPF_MAP_TYPE_STACK),
+                "sk_storage" => Ok(libbpf_sys::BPF_MAP_TYPE_SK_STORAGE),
+                "struct_ops" => Ok(libbpf_sys::BPF_MAP_TYPE_STRUCT_OPS),
+                "ringbuf" => Ok(libbpf_sys::BPF_MAP_TYPE_RINGBUF),
+                "inode_storage" => Ok(libbpf_sys::BPF_MAP_TYPE_INODE_STORAGE),
+                "task_storage" => Ok(libbpf_sys::BPF_MAP_TYPE_TASK_STORAGE),
+                "bloom_filter" => Ok(libbpf_sys::BPF_MAP_TYPE_BLOOM_FILTER),
+                "user_ringbuf" => Ok(libbpf_sys::BPF_MAP_TYPE_USER_RINGBUF),
+                "cgrp_storage" => Ok(libbpf_sys::BPF_MAP_TYPE_CGRP_STORAGE),
+                "arena" => Ok(libbpf_sys::BPF_MAP_TYPE_ARENA),
+                "insn_array" => Ok(libbpf_sys::BPF_MAP_TYPE_INSN_ARRAY),
+                _ => bail!("unsupported map_type: {name}"),
+            }
+        }
+    }
+}
+
+fn parse_map_ids_arg(value: &str) -> Result<Vec<u32>> {
+    if value.contains('/') || value.ends_with(".json") {
+        let prog_info: ProgInfoMapIdsJson = read_json_file(Path::new(value), "prog_info JSON")?;
+        return Ok(prog_info.map_ids);
+    }
+    parse_u32_csv(value, "--map-ids")
+}
+
+fn parse_u32_csv(value: &str, flag: &str) -> Result<Vec<u32>> {
+    value
+        .split(',')
+        .map(|entry| {
+            entry
+                .trim()
+                .parse::<u32>()
+                .with_context(|| format!("invalid {flag} value: {entry}"))
+        })
+        .collect()
+}
+
+fn read_json_file<T: for<'de> Deserialize<'de>>(path: &Path, label: &str) -> Result<T> {
+    let data = fs::read(path).with_context(|| format!("failed to read {}", path.display()))?;
+    serde_json::from_slice(&data)
+        .with_context(|| format!("failed to parse {label} from {}", path.display()))
+}
+
+// ===== begin merged from passes/map_inline/map_info.rs =====
+
+const BPF_MAP_TYPE_HASH_LOCAL: u32 = libbpf_sys::BPF_MAP_TYPE_HASH;
+const BPF_MAP_TYPE_ARRAY_LOCAL: u32 = libbpf_sys::BPF_MAP_TYPE_ARRAY;
+const BPF_MAP_TYPE_ARRAY_OF_MAPS_LOCAL: u32 = libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS;
+const BPF_MAP_TYPE_PERCPU_ARRAY_LOCAL: u32 = libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
+const BPF_MAP_TYPE_HASH_OF_MAPS_LOCAL: u32 = libbpf_sys::BPF_MAP_TYPE_HASH_OF_MAPS;
+const BPF_MAP_TYPE_LRU_HASH_LOCAL: u32 = libbpf_sys::BPF_MAP_TYPE_LRU_HASH;
+
+impl MapMetadata {
+    pub fn supports_direct_value_access(&self) -> bool {
+        matches!(
+            self.map_type,
+            BPF_MAP_TYPE_HASH_LOCAL
+                | BPF_MAP_TYPE_ARRAY_LOCAL
+                | BPF_MAP_TYPE_PERCPU_ARRAY_LOCAL
+                | BPF_MAP_TYPE_LRU_HASH_LOCAL
+        )
+    }
+
+    pub fn is_map_in_map(&self) -> bool {
+        matches!(
+            self.map_type,
+            BPF_MAP_TYPE_ARRAY_OF_MAPS_LOCAL | BPF_MAP_TYPE_HASH_OF_MAPS_LOCAL
+        )
+    }
+
+    pub fn has_removable_lookup_pattern(&self) -> bool {
+        matches!(
+            self.map_type,
+            BPF_MAP_TYPE_ARRAY_LOCAL | BPF_MAP_TYPE_PERCPU_ARRAY_LOCAL
+        )
+    }
+
+    pub fn requires_entry_presence_check(&self) -> bool {
+        matches!(
+            self.map_type,
+            BPF_MAP_TYPE_HASH_LOCAL | BPF_MAP_TYPE_LRU_HASH_LOCAL
+        )
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MapReference {
+    pub site: InsnSite,
+    pub dst_reg: u8,
+    pub imm: i32,
+    pub map_ordinal: usize,
+    pub map_id: Option<u32>,
+    pub info: Option<MapInfo>,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct MapInfoResult {
+    pub references: Vec<MapReference>,
+    pub unique_maps: Vec<MapInfo>,
+}
+
+impl MapInfoResult {
+    pub fn reference_at_site(&self, site: InsnSite) -> Option<&MapReference> {
+        self.references
+            .iter()
+            .find(|reference| reference.site == site)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct MapBinding {
+    site: InsnSite,
+    kind: MapPseudo,
+    dst_reg: u8,
+    imm: i32,
+    map_ordinal: Option<usize>,
+    map_id: Option<u32>,
+}
+
+fn analyze_map_info(
+    program: &BBProgram,
+    side_input: &MapInlineSideInput<'_>,
+) -> Result<MapInfoResult> {
+    let fd_bindings = program
+        .map_bindings()
+        .iter()
+        .map(|binding| (binding.old_fd, binding.map_id))
+        .collect::<HashMap<_, _>>();
+    let map_refs = collect_map_bindings_from_sites(program, side_input.map_ids, &fd_bindings)?;
+    collect_map_references_from_bindings(side_input.map_ids.len(), map_refs, |map_id| {
+        let Some(metadata) = side_input.metadata.get(&map_id) else {
+            return Err(anyhow!(
+                "map_values snapshot has no metadata for map {}",
+                map_id
+            ));
+        };
+        Ok(Some(metadata.clone()))
+    })
+}
+
+fn collect_map_bindings_from_sites(
+    program: &BBProgram,
+    map_ids: &[u32],
+    fd_bindings: &HashMap<i32, u32>,
+) -> Result<Vec<MapBinding>> {
+    let mut bindings = Vec::new();
+    let mut fd_order = Vec::<i32>::new();
+
+    for site in program.all_sites() {
+        let Some(insn) = program.insn_at(site) else {
+            continue;
+        };
+        if let Some(kind) = insn.map_pseudo() {
+            let (map_ordinal, map_id) =
+                resolve_map_ref(kind, insn.imm, map_ids, fd_bindings, &mut fd_order);
+            bindings.push(MapBinding {
+                site,
+                kind,
+                dst_reg: insn.dst_reg(),
+                imm: insn.imm,
+                map_ordinal,
+                map_id,
+            });
+        }
+    }
+
+    Ok(bindings)
+}
+
+fn resolve_map_ref(
+    kind: MapPseudo,
+    imm: i32,
+    map_ids: &[u32],
+    fd_bindings: &HashMap<i32, u32>,
+    fd_order: &mut Vec<i32>,
+) -> (Option<usize>, Option<u32>) {
+    if kind.uses_index() {
+        let Ok(index) = usize::try_from(imm) else {
+            return (None, None);
+        };
+        return (Some(index), map_ids.get(index).copied());
+    }
+
+    if !fd_order.contains(&imm) {
+        fd_order.push(imm);
+    }
+    let index = fd_order.iter().position(|fd| *fd == imm);
+    let map_id = fd_bindings
+        .get(&imm)
+        .copied()
+        .or_else(|| index.and_then(|idx| map_ids.get(idx).copied()));
+    (index, map_id)
+}
+
+fn collect_map_references_from_bindings<F>(
+    map_id_count: usize,
+    map_refs: Vec<MapBinding>,
+    mut resolver: F,
+) -> Result<MapInfoResult>
+where
+    F: FnMut(u32) -> Result<Option<MapInfo>>,
+{
+    let mut references = Vec::new();
+    let mut resolved_by_index: BTreeMap<usize, Option<MapInfo>> = BTreeMap::new();
+
+    for binding in map_refs {
+        let kind @ (MapPseudo::Fd | MapPseudo::Idx) = binding.kind else {
+            continue;
+        };
+        let map_ordinal = binding.map_ordinal.ok_or_else(|| {
+            anyhow!(
+                "negative pseudo-map index {} at site {:?}",
+                binding.imm,
+                binding.site
+            )
+        })?;
+        let map_id = if kind == MapPseudo::Idx {
+            Some(binding.map_id.ok_or_else(|| {
+                anyhow!(
+                    "pseudo-map index {} at site {:?} out of range for {} map ids",
+                    map_ordinal,
+                    binding.site,
+                    map_id_count
+                )
+            })?)
+        } else {
+            binding.map_id
+        };
+        let info = match resolved_by_index.get(&map_ordinal) {
+            Some(info) => info.clone(),
+            None => {
+                let resolved = match map_id {
+                    Some(map_id) => resolver(map_id)?,
+                    None => None,
+                };
+                resolved_by_index.insert(map_ordinal, resolved.clone());
+                resolved
+            }
+        };
+
+        references.push(MapReference {
+            site: binding.site,
+            dst_reg: binding.dst_reg,
+            imm: binding.imm,
+            map_ordinal,
+            map_id,
+            info,
+        });
+    }
+
+    let mut resolved_indexes = resolved_by_index.keys().copied().collect::<Vec<_>>();
+    resolved_indexes.sort_unstable();
+    let unique_maps = resolved_indexes
+        .into_iter()
+        .filter_map(|index| resolved_by_index.get(&index).cloned().flatten())
+        .collect();
+
+    Ok(MapInfoResult {
+        references,
+        unique_maps,
+    })
+}
+
+#[cfg(test)]
+mod map_info_tests {
+    use super::*;
+    use crate::analysis::BlockId;
+    use crate::insn::{insn_width, BpfInsn, MapPseudo, BPF_DW, BPF_IMM, BPF_LD};
+    use std::collections::HashMap;
+
+    const BPF_MAP_TYPE_PERCPU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_PERCPU_HASH;
+    const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH;
+    const BPF_MAP_TYPE_ARRAY_OF_MAPS: u32 = libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS;
+    const BPF_MAP_TYPE_HASH_OF_MAPS: u32 = libbpf_sys::BPF_MAP_TYPE_HASH_OF_MAPS;
+    const BPF_MAP_TYPE_ARRAY: u32 = libbpf_sys::BPF_MAP_TYPE_ARRAY;
+    const BPF_MAP_TYPE_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_HASH;
+    const BPF_MAP_TYPE_LRU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_LRU_HASH;
+    const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
+
+    fn collect_map_references<F>(
+        insns: &[BpfInsn],
+        map_ids: &[u32],
+        resolver: F,
+    ) -> Result<MapInfoResult>
+    where
+        F: FnMut(u32) -> Result<Option<MapInfo>>,
+    {
+        collect_map_references_with_bindings(insns, map_ids, &HashMap::new(), resolver)
+    }
+
+    fn collect_map_references_with_bindings<F>(
+        insns: &[BpfInsn],
+        map_ids: &[u32],
+        map_fd_bindings: &HashMap<i32, u32>,
+        resolver: F,
+    ) -> Result<MapInfoResult>
+    where
+        F: FnMut(u32) -> Result<Option<MapInfo>>,
+    {
+        let map_refs = collect_map_bindings(insns, map_ids, map_fd_bindings);
+        collect_map_references_from_bindings(map_ids.len(), map_refs, resolver)
+    }
+
+    fn collect_map_bindings(
+        insns: &[BpfInsn],
+        map_ids: &[u32],
+        fd_bindings: &HashMap<i32, u32>,
+    ) -> Vec<MapBinding> {
+        let mut bindings = Vec::new();
+        let mut fd_order = Vec::<i32>::new();
+        let mut pc = 0usize;
+        while pc < insns.len() {
+            let insn = insns[pc];
+            if let Some(kind) = insn.map_pseudo() {
+                let (map_ordinal, map_id) =
+                    resolve_map_ref(kind, insn.imm, map_ids, fd_bindings, &mut fd_order);
+                bindings.push(MapBinding {
+                    site: InsnSite::for_test(BlockId(0), bindings.len()),
+                    kind,
+                    dst_reg: insn.dst_reg(),
+                    imm: insn.imm,
+                    map_ordinal,
+                    map_id,
+                });
+            }
+            pc += insn_width(&insn);
+        }
+        bindings
+    }
+
+    fn make_ld_imm64(dst: u8, src: u8, imm_lo: i32) -> [BpfInsn; 2] {
+        [
+            BpfInsn::new(
+                BPF_LD | BPF_DW | BPF_IMM,
+                BpfInsn::make_regs(dst, src),
+                0,
+                imm_lo,
+            ),
+            BpfInsn::new(0, 0, 0, 0),
+        ]
+    }
+
+    fn array_map(map_id: u32, max_entries: u32) -> MapInfo {
+        MapInfo {
+            map_type: BPF_MAP_TYPE_ARRAY,
+            key_size: 4,
+            value_size: 8,
+            max_entries,
+            map_id,
+            name: format!("map_{map_id}"),
+        }
+    }
+
+    fn hash_map(map_id: u32) -> MapInfo {
+        MapInfo {
+            map_type: BPF_MAP_TYPE_HASH,
+            key_size: 4,
+            value_size: 8,
+            max_entries: 16,
+            map_id,
+            name: format!("map_{map_id}"),
+        }
+    }
+
+    fn lru_hash_map(map_id: u32) -> MapInfo {
+        MapInfo {
+            map_type: BPF_MAP_TYPE_LRU_HASH,
+            key_size: 4,
+            value_size: 8,
+            max_entries: 16,
+            map_id,
+            name: format!("map_{map_id}"),
+        }
+    }
+
+    #[test]
+    fn collect_map_references_tracks_unique_fd_order() {
+        let ld0 = make_ld_imm64(1, MapPseudo::Fd.src_reg(), 10);
+        let ld1 = make_ld_imm64(2, MapPseudo::Fd.src_reg(), 11);
+        let ld2 = make_ld_imm64(3, MapPseudo::Fd.src_reg(), 10);
+        let insns = vec![ld0[0], ld0[1], ld1[0], ld1[1], ld2[0], ld2[1]];
+
+        let result = collect_map_references(&insns, &[101, 202], |map_id| {
+            Ok(match map_id {
+                101 => Some(array_map(101, 4)),
+                202 => Some(hash_map(202)),
+                _ => None,
+            })
+        })
+        .expect("map reference collection should succeed");
+
+        assert_eq!(result.references.len(), 3);
+        assert_eq!(result.references[0].map_ordinal, 0);
+        assert_eq!(result.references[1].map_ordinal, 1);
+        assert_eq!(result.references[2].map_ordinal, 0);
+        assert_eq!(result.references[0].map_id, Some(101));
+        assert_eq!(result.references[1].map_id, Some(202));
+        assert_eq!(result.unique_maps.len(), 2);
+        assert!(result.unique_maps[0].supports_direct_value_access());
+        assert!(result.unique_maps[1].supports_direct_value_access());
+        assert!(result.unique_maps[1].requires_entry_presence_check());
+    }
+
+    #[test]
+    fn map_info_marks_lru_hash_as_entry_presence_checked() {
+        let ld = make_ld_imm64(1, MapPseudo::Fd.src_reg(), 10);
+        let insns = vec![ld[0], ld[1]];
+
+        let result = collect_map_references(&insns, &[303], |map_id| {
+            Ok(match map_id {
+                303 => Some(lru_hash_map(303)),
+                _ => None,
+            })
+        })
+        .expect("map reference collection should succeed");
+
+        assert_eq!(result.unique_maps.len(), 1);
+        assert!(result.unique_maps[0].supports_direct_value_access());
+        assert!(result.unique_maps[0].requires_entry_presence_check());
+        assert!(!result.unique_maps[0].has_removable_lookup_pattern());
+    }
+
+    #[test]
+    fn collect_map_references_ignores_non_map_ldimm64() {
+        let plain = make_ld_imm64(1, 0, 77);
+        let result = collect_map_references(&plain, &[101], |_| Ok(Some(array_map(101, 4))))
+            .expect("map reference collection should succeed");
+        assert!(result.references.is_empty());
+        assert!(result.unique_maps.is_empty());
+    }
+
+    #[test]
+    fn collect_map_references_handles_missing_map_ids() {
+        let ld0 = make_ld_imm64(1, MapPseudo::Fd.src_reg(), 10);
+        let ld1 = make_ld_imm64(2, MapPseudo::Fd.src_reg(), 11);
+        let insns = vec![ld0[0], ld0[1], ld1[0], ld1[1]];
+
+        let result = collect_map_references(&insns, &[101], |map_id| Ok(Some(array_map(map_id, 4))))
+            .expect("map reference collection should succeed");
+
+        assert_eq!(result.references.len(), 2);
+        assert_eq!(result.references[0].map_id, Some(101));
+        assert_eq!(result.references[1].map_id, None);
+        assert_eq!(result.references[1].info, None);
+        assert_eq!(result.unique_maps.len(), 1);
+    }
+
+    #[test]
+    fn map_info_analysis_resolves_canonical_idx_refs_by_map_id_order() {
+        let ld0 = make_ld_imm64(1, MapPseudo::Idx.src_reg(), 1);
+        let ld1 = make_ld_imm64(2, MapPseudo::Idx.src_reg(), 0);
+        let insns = vec![ld0[0], ld0[1], ld1[0], ld1[1]];
+
+        let result =
+            collect_map_references(&insns, &[101, 202], |map_id| Ok(Some(array_map(map_id, 4))))
+                .expect("canonical IDX references should resolve through map_ids");
+
+        assert_eq!(result.references.len(), 2);
+        assert_eq!(result.references[0].map_ordinal, 1);
+        assert_eq!(result.references[0].map_id, Some(202));
+        assert_eq!(result.references[1].map_ordinal, 0);
+        assert_eq!(result.references[1].map_id, Some(101));
+        assert_eq!(result.unique_maps.len(), 2);
+    }
+
+    #[test]
+    fn unsupported_map_types_reject_direct_value_access() {
+        const BPF_MAP_TYPE_PROG_ARRAY: u32 = libbpf_sys::BPF_MAP_TYPE_PROG_ARRAY;
+        const BPF_MAP_TYPE_PERF_EVENT_ARRAY: u32 = libbpf_sys::BPF_MAP_TYPE_PERF_EVENT_ARRAY;
+        const BPF_MAP_TYPE_STACK_TRACE: u32 = libbpf_sys::BPF_MAP_TYPE_STACK_TRACE;
+        const BPF_MAP_TYPE_CGROUP_STORAGE: u32 = libbpf_sys::BPF_MAP_TYPE_CGROUP_STORAGE;
+        const BPF_MAP_TYPE_RINGBUF: u32 = libbpf_sys::BPF_MAP_TYPE_RINGBUF;
+
+        for map_type in [
+            BPF_MAP_TYPE_PROG_ARRAY,
+            BPF_MAP_TYPE_PERF_EVENT_ARRAY,
+            BPF_MAP_TYPE_PERCPU_HASH,
+            BPF_MAP_TYPE_STACK_TRACE,
+            BPF_MAP_TYPE_LRU_PERCPU_HASH,
+            BPF_MAP_TYPE_CGROUP_STORAGE,
+            BPF_MAP_TYPE_RINGBUF,
+        ] {
+            let info = MapInfo {
+                map_type,
+                key_size: 4,
+                value_size: 8,
+                max_entries: 16,
+                map_id: 999,
+                name: "unsupported".to_string(),
+            };
+            assert!(
+                !info.supports_direct_value_access(),
+                "map_type {} should NOT support direct value access",
+                map_type
+            );
+        }
+    }
+
+    #[test]
+    fn percpu_array_is_conditionally_inlineable_but_percpu_hashes_still_are_not() {
+        let percpu_array = MapInfo {
+            map_type: BPF_MAP_TYPE_PERCPU_ARRAY,
+            key_size: 4,
+            value_size: 8,
+            max_entries: 16,
+            map_id: 501,
+            name: "percpu_array".to_string(),
+        };
+        assert!(percpu_array.supports_direct_value_access());
+        assert!(percpu_array.has_removable_lookup_pattern());
+        assert!(!percpu_array.requires_entry_presence_check());
+
+        let percpu_hash = MapInfo {
+            map_type: BPF_MAP_TYPE_PERCPU_HASH,
+            key_size: 4,
+            value_size: 8,
+            max_entries: 16,
+            map_id: 502,
+            name: "percpu_hash".to_string(),
+        };
+        assert!(!percpu_hash.supports_direct_value_access());
+        assert!(!percpu_hash.requires_entry_presence_check());
+
+        let lru_percpu_hash = MapInfo {
+            map_type: BPF_MAP_TYPE_LRU_PERCPU_HASH,
+            key_size: 4,
+            value_size: 8,
+            max_entries: 16,
+            map_id: 503,
+            name: "lru_percpu_hash".to_string(),
+        };
+        assert!(!lru_percpu_hash.supports_direct_value_access());
+        assert!(!lru_percpu_hash.requires_entry_presence_check());
+    }
+
+    #[test]
+    fn map_in_map_types_are_not_direct_value_inlineable() {
+        for map_type in [BPF_MAP_TYPE_ARRAY_OF_MAPS, BPF_MAP_TYPE_HASH_OF_MAPS] {
+            let info = MapInfo {
+                map_type,
+                key_size: 4,
+                value_size: 4,
+                max_entries: 16,
+                map_id: 700,
+                name: "map_in_map".to_string(),
+            };
+            assert!(info.is_map_in_map());
+            assert!(!info.supports_direct_value_access());
+        }
+    }
 }

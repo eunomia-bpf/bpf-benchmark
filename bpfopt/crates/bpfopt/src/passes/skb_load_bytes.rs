@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
-//! skb_load_bytes specialization pass.
-
 use std::collections::BTreeSet;
 
-use crate::analysis::{BBProgram, InsnSite};
+use crate::analysis::{BBProgram, InsnSite, MakeReplacement};
 use crate::insn::*;
 use crate::pass::*;
 
@@ -15,6 +13,24 @@ enum RegValue {
     Ctx,
     Const(i64),
     FpPlusConst(i32),
+}
+
+impl RegValue {
+    fn nonnegative_i32(self) -> Option<i32> {
+        match self {
+            Self::Const(current) if (0..=i32::MAX as i64).contains(&current) => {
+                Some(current as i32)
+            }
+            _ => None,
+        }
+    }
+
+    fn fp_stack_off(self) -> Option<i32> {
+        match self {
+            Self::FpPlusConst(off) => Some(off),
+            _ => None,
+        }
+    }
 }
 
 impl SimpleRegValue for RegValue {
@@ -31,18 +47,39 @@ impl SimpleRegValue for RegValue {
     }
 
     fn mov32(value: Self) -> Self {
-        mov32_value(value)
+        match value {
+            Self::Const(current) => Self::Const(current as u32 as i64),
+            _ => Self::Unknown,
+        }
     }
 
     fn alu64_imm(value: Self, op: u8, imm: i32) -> Self {
-        match apply_alu64_imm(value, op, imm) {
-            Some(value) => value,
-            None => Self::Unknown,
+        match value {
+            Self::Const(current) => add_sub_i64(current, op, imm)
+                .map(Self::Const)
+                .unwrap_or(Self::Unknown),
+            Self::FpPlusConst(current) => add_sub_i64(i64::from(current), op, imm)
+                .and_then(|next| i32::try_from(next).ok())
+                .map(Self::FpPlusConst)
+                .unwrap_or(Self::Unknown),
+            _ => Self::Unknown,
         }
     }
 
     fn alu32_add_sub(value: Self, imm: i32, is_add: bool) -> Self {
-        alu32_add_sub(value, imm, is_add)
+        match value {
+            Self::Const(current) => {
+                let current = current as u32;
+                let imm = imm as u32;
+                let next = if is_add {
+                    current.wrapping_add(imm)
+                } else {
+                    current.wrapping_sub(imm)
+                };
+                Self::Const(next as i64)
+            }
+            _ => Self::Unknown,
+        }
     }
 }
 
@@ -52,11 +89,7 @@ struct RewriteSite {
     len: i32,
 }
 
-#[derive(Clone, Debug)]
-struct AppliedRewriteSite {
-    call_site: InsnSite,
-    rewrite: RewriteSite,
-}
+type AppliedRewriteSite = (InsnSite, RewriteSite);
 
 #[derive(Default)]
 struct ScanResult {
@@ -64,7 +97,6 @@ struct ScanResult {
     skips: Vec<SiteSkipReason>,
 }
 
-/// Specialize eligible `bpf_skb_load_bytes()` helper sites into direct packet access.
 pub struct SkbLoadBytesSpecPass;
 
 impl BpfPass for SkbLoadBytesSpecPass {
@@ -81,16 +113,16 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, prog_type: u32) -> anyhow::Result<
         return Ok(PassResult::unchanged());
     };
     let branch_targets = prog.branch_target_entry_sites()?;
-    let scan = scan_sites(prog, &branch_targets)?;
+    let mut scan = scan_sites(prog, &branch_targets)?;
     if scan.sites.is_empty() {
         return Ok(PassResult {
             site_skipped: scan.skips,
             ..PassResult::unchanged()
         });
     }
-    apply_skb_load_bytes_sites(prog, &scan.sites, layout)?;
+    let applied = apply_skb_load_bytes_sites(prog, &scan.sites, layout, &mut scan.skips)?;
     Ok(PassResult {
-        sites_applied: scan.sites.len(),
+        sites_applied: applied,
         site_skipped: scan.skips,
         ..PassResult::unchanged()
     })
@@ -100,11 +132,19 @@ fn apply_skb_load_bytes_sites(
     prog: &mut BBProgram,
     sites: &[AppliedRewriteSite],
     layout: PacketCtxLayout,
-) -> anyhow::Result<()> {
-    for site in sites.iter().rev() {
-        prog.replace_range_at(site.call_site, 1, emit_replacement(site.rewrite, layout))?;
+    skipped: &mut Vec<SiteSkipReason>,
+) -> anyhow::Result<usize> {
+    let mut applied = 0usize;
+    for &(call_site, rewrite) in sites.iter().rev() {
+        let replacement = emit_replacement(rewrite, layout);
+        let new_len = replacement.len();
+        if prog.try_replace_range_with_skips(call_site, 1, new_len, skipped, || {
+            Ok(MakeReplacement::Use(replacement))
+        })? {
+            applied += 1;
+        }
     }
-    Ok(())
+    Ok(applied)
 }
 
 fn scan_sites(prog: &BBProgram, branch_targets: &BTreeSet<InsnSite>) -> anyhow::Result<ScanResult> {
@@ -125,10 +165,7 @@ fn scan_sites(prog: &BBProgram, branch_targets: &BTreeSet<InsnSite>) -> anyhow::
                     });
                 } else {
                     match classify_site(branch_targets.contains(&site), &regs) {
-                        Ok(rewrite_site) => scan.sites.push(AppliedRewriteSite {
-                            call_site: site,
-                            rewrite: rewrite_site,
-                        }),
+                        Ok(rewrite_site) => scan.sites.push((site, rewrite_site)),
                         Err(reason) => scan.skips.push(SiteSkipReason { site, reason }),
                     }
                 }
@@ -156,18 +193,18 @@ fn classify_site(is_branch_target: bool, regs: &[RegValue; 11]) -> Result<Rewrit
         return Err("arg1 is not ctx".into());
     }
 
-    let Some(offset) = extract_nonnegative_i32(regs[2]) else {
+    let Some(offset) = regs[2].nonnegative_i32() else {
         return Err("offset is not constant".into());
     };
 
-    let Some(dest_off) = extract_fp_stack_off(regs[3]) else {
+    let Some(dest_off) = regs[3].fp_stack_off() else {
         return Err("dest is not fp-relative stack".into());
     };
     if dest_off >= 0 {
         return Err("dest is not fp-relative stack".into());
     }
 
-    let Some(len) = extract_nonnegative_i32(regs[4]) else {
+    let Some(len) = regs[4].nonnegative_i32() else {
         return Err("len is not constant".into());
     };
     if len == 0 {
@@ -197,16 +234,18 @@ fn emit_replacement(site: RewriteSite, layout: PacketCtxLayout) -> Vec<BpfInsn> 
     ];
 
     insns.extend(copy_insns);
-    insns.push(BpfInsn::mov64_imm(0, 0));
-    insns.push(BpfInsn::ja(3));
-    insns.push(BpfInsn::mov64_imm(2, site.offset));
-    insns.push(BpfInsn::mov64_imm(4, site.len));
-    insns.push(BpfInsn::new(
-        BPF_JMP | BPF_CALL,
-        BpfInsn::make_regs(0, 0),
-        0,
-        BPF_FUNC_SKB_LOAD_BYTES,
-    ));
+    insns.extend([
+        BpfInsn::mov64_imm(0, 0),
+        BpfInsn::ja(3),
+        BpfInsn::mov64_imm(2, site.offset),
+        BpfInsn::mov64_imm(4, site.len),
+        BpfInsn::new(
+            BPF_JMP | BPF_CALL,
+            BpfInsn::make_regs(0, 0),
+            0,
+            BPF_FUNC_SKB_LOAD_BYTES,
+        ),
+    ]);
 
     insns
 }
@@ -230,67 +269,10 @@ fn initial_reg_state() -> [RegValue; 11] {
     regs
 }
 
-fn apply_alu64_imm(value: RegValue, op: u8, imm: i32) -> Option<RegValue> {
-    match value {
-        RegValue::Const(current) => {
-            let next = match op {
-                BPF_ADD => current.checked_add(imm as i64)?,
-                BPF_SUB => current.checked_sub(imm as i64)?,
-                _ => return None,
-            };
-            Some(RegValue::Const(next))
-        }
-        RegValue::FpPlusConst(current) => {
-            let next = match op {
-                BPF_ADD => (current as i64).checked_add(imm as i64)?,
-                BPF_SUB => (current as i64).checked_sub(imm as i64)?,
-                _ => return None,
-            };
-            let next = match i32::try_from(next) {
-                Ok(next) => next,
-                Err(_) => return None,
-            };
-            Some(RegValue::FpPlusConst(next))
-        }
-        _ => None,
-    }
-}
-
-fn mov32_value(value: RegValue) -> RegValue {
-    match value {
-        RegValue::Const(current) => RegValue::Const(current as u32 as i64),
-        _ => RegValue::Unknown,
-    }
-}
-
-fn alu32_add_sub(value: RegValue, imm: i32, is_add: bool) -> RegValue {
-    match value {
-        RegValue::Const(current) => {
-            let current = current as u32;
-            let imm = imm as u32;
-            let next = if is_add {
-                current.wrapping_add(imm)
-            } else {
-                current.wrapping_sub(imm)
-            };
-            RegValue::Const(next as i64)
-        }
-        _ => RegValue::Unknown,
-    }
-}
-
-fn extract_nonnegative_i32(value: RegValue) -> Option<i32> {
-    match value {
-        RegValue::Const(current) if (0..=i32::MAX as i64).contains(&current) => {
-            Some(current as i32)
-        }
-        _ => None,
-    }
-}
-
-fn extract_fp_stack_off(value: RegValue) -> Option<i32> {
-    match value {
-        RegValue::FpPlusConst(off) => Some(off),
+fn add_sub_i64(current: i64, op: u8, imm: i32) -> Option<i64> {
+    match op {
+        BPF_ADD => current.checked_add(i64::from(imm)),
+        BPF_SUB => current.checked_sub(i64::from(imm)),
         _ => None,
     }
 }

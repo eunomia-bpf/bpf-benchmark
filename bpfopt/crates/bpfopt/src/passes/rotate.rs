@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{BBProgram, InsnSite};
+use crate::analysis::{BBProgram, InsnSite, MakeReplacement};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
@@ -44,13 +44,11 @@ fn rotate_proof_len(payload: u64, shift_mask: u8) -> anyhow::Result<usize> {
     if tmp_reg == dst_reg || tmp_reg == src_reg {
         anyhow::bail!("rotate tmp register aliases an operand");
     }
-    if shift == 0 {
-        Ok(1)
-    } else if dst_reg == src_reg {
-        Ok(4)
-    } else {
-        Ok(5)
-    }
+    Ok(match (shift, dst_reg == src_reg) {
+        (0, _) => 1,
+        (_, true) => 4,
+        _ => 5,
+    })
 }
 
 fn rotate_register_uses(payload: u64) -> RegSet {
@@ -69,81 +67,62 @@ impl BpfPass for RotatePass {
     }
 }
 
-pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
-    let mut safe_sites: Vec<(InsnSite, RotateSite)> = Vec::new();
+pub fn run_on_bbprogram(prog: &mut BBProgram, _ctx: &PassContext) -> anyhow::Result<PassResult> {
     let mut skipped = Vec::new();
+    let candidates: Vec<(InsnSite, RotateSite)> = prog
+        .scan_block_starts(5, |window| {
+            Ok(rotate_site_at(window.insns, window.start_idx)
+                .map(|site| window.hit(site.start_idx, site.old_len, site)))
+        })?
+        .into_iter()
+        .map(|hit| (hit.start, hit.value))
+        .collect();
 
-    let raw_sites = prog.scan_block_starts(5, |window| {
-        Ok(rotate_site_at(window.insns, window.start_idx)
-            .map(|site| window.hit(site.start_idx, site.old_len, site)))
-    })?;
-    for hit in raw_sites {
-        let Some(admission_window) =
-            prog.rep_admit_kinsn_site_window(hit.start, hit.old_len, 2, &mut skipped)?
-        else {
-            continue;
-        };
-
-        let replacement_start = admission_window.start_site();
-        let last_site = admission_window.end_site();
-        if prog
-            .live_out_site_checked(last_site)?
-            .contains(&hit.value.tmp_reg)
-        {
-            skipped.push(SiteSkipReason {
-                site: replacement_start,
-                reason: format!("tmp_reg r{} is live after site", hit.value.tmp_reg),
-            });
-            continue;
-        }
-
-        safe_sites.push((replacement_start, hit.value));
-    }
-
-    if safe_sites.is_empty() {
+    if candidates.is_empty() {
         return Ok(PassResult {
             site_skipped: skipped,
             ..PassResult::unchanged()
         });
     }
 
-    for (start, site) in safe_sites.iter().rev() {
-        let btf_id = ctx
-            .kinsn_registry
-            .btf_id_for_target_name(site.width.target_name())?;
-        let kfunc_off = ctx
-            .kinsn_registry
-            .call_off_for_target_name(site.width.target_name())?;
+    let mut applied = 0usize;
+    for (start, site) in candidates.iter().rev() {
+        let (btf_id, kfunc_off) = prog.kinsn_call(site.width.target_name())?;
         let shift_amount = u8::try_from(site.shift_amount).map_err(|_| {
             anyhow::anyhow!(
                 "rotate shift amount {} exceeds packed payload width",
                 site.shift_amount
             )
         })?;
-        let payload = BpfInsn::pack_u4(site.dst_reg, 0)
-            | BpfInsn::pack_u4(site.val_reg, 4)
-            | BpfInsn::pack_u8(shift_amount, 8)
-            | BpfInsn::pack_u4(site.tmp_reg, 16);
-        prog.replace_range_at(
-            *start,
-            site.old_len,
-            emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
-        )?;
+        let live_out = prog.live_out_after_window(*start, site.old_len)?;
+        if prog.try_replace_range_with_skips(*start, site.old_len, 2, &mut skipped, || {
+            if live_out.contains(&site.tmp_reg) {
+                return Ok(MakeReplacement::Skip(format!(
+                    "tmp_reg r{} is live after site",
+                    site.tmp_reg
+                )));
+            }
+            let payload = BpfInsn::pack_u4(site.dst_reg, 0)
+                | BpfInsn::pack_u4(site.val_reg, 4)
+                | BpfInsn::pack_u8(shift_amount, 8)
+                | BpfInsn::pack_u4(site.tmp_reg, 16);
+            Ok(MakeReplacement::Use(emit_packed_kinsn_call_with_off(
+                payload, btf_id, kfunc_off,
+            )))
+        })? {
+            applied += 1;
+        }
     }
 
     Ok(PassResult {
-        sites_applied: safe_sites.len(),
+        sites_applied: applied,
         site_skipped: skipped,
         ..Default::default()
     })
 }
 
 fn rotate_site_at(insns: &[BpfInsn], idx: usize) -> Option<RotateSite> {
-    if idx + 3 > insns.len() {
-        return None;
-    }
-    let (Some(i0), Some(i1), Some(i2)) = (insns.get(idx), insns.get(idx + 1), insns.get(idx + 2))
-    else {
+    let [i0, i1, i2] = insns.get(idx..idx + 3)? else {
         return None;
     };
     try_match_rotate(insns, i0, i1, i2, idx)
@@ -158,13 +137,16 @@ pub(super) struct RotateSite {
     pub(super) shift_amount: u32,
     pub(super) width: RotateWidth,
 }
+#[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum RotateWidth {
-    W32,
-    W64,
+    W32 = BPF_ALU,
+    W64 = BPF_ALU64,
 }
 
 impl RotateWidth {
+    const MATCH_ORDER: [Self; 2] = [Self::W64, Self::W32];
+
     fn bits(self) -> u32 {
         match self {
             Self::W32 => 32,
@@ -173,10 +155,7 @@ impl RotateWidth {
     }
 
     fn alu_class(self) -> u8 {
-        match self {
-            Self::W32 => BPF_ALU,
-            Self::W64 => BPF_ALU64,
-        }
+        self as u8
     }
 
     fn target_name(self) -> &'static str {
@@ -207,9 +186,8 @@ fn find_provenance_mov(
 }
 
 fn is_reg_mov_for_width(insn: &BpfInsn, width: RotateWidth) -> bool {
-    let mov64 = insn.is_alu_reg(BPF_ALU64, BPF_MOV);
-    let mov32 = insn.is_alu_reg(BPF_ALU, BPF_MOV);
-    mov64 || (width == RotateWidth::W32 && mov32)
+    insn.is_alu_reg(BPF_ALU64, BPF_MOV)
+        || (width == RotateWidth::W32 && insn.is_alu_reg(BPF_ALU, BPF_MOV))
 }
 
 fn try_match_rotate(
@@ -219,13 +197,14 @@ fn try_match_rotate(
     i2: &BpfInsn,
     idx: usize,
 ) -> Option<RotateSite> {
-    try_match_split_copy_rotate(insns, idx)
-        .or_else(|| try_match_rotate_width(insns, i0, i1, i2, idx, RotateWidth::W64))
-        .or_else(|| try_match_rotate_width(insns, i0, i1, i2, idx, RotateWidth::W32))
-}
-fn try_match_split_copy_rotate(insns: &[BpfInsn], idx: usize) -> Option<RotateSite> {
-    try_match_split_copy_rotate_width(insns, idx, RotateWidth::W64)
-        .or_else(|| try_match_split_copy_rotate_width(insns, idx, RotateWidth::W32))
+    RotateWidth::MATCH_ORDER
+        .into_iter()
+        .find_map(|width| try_match_split_copy_rotate_width(insns, idx, width))
+        .or_else(|| {
+            RotateWidth::MATCH_ORDER
+                .into_iter()
+                .find_map(|width| try_match_rotate_width(insns, i0, i1, i2, idx, width))
+        })
 }
 
 fn try_match_split_copy_rotate_width(
@@ -233,15 +212,9 @@ fn try_match_split_copy_rotate_width(
     idx: usize,
     width: RotateWidth,
 ) -> Option<RotateSite> {
-    if idx + 4 >= insns.len() {
+    let [mov0, shift0, mov1, shift1, or_insn] = insns.get(idx..idx + 5)? else {
         return None;
-    }
-
-    let mov0 = &insns[idx];
-    let shift0 = &insns[idx + 1];
-    let mov1 = &insns[idx + 2];
-    let shift1 = &insns[idx + 3];
-    let or_insn = &insns[idx + 4];
+    };
 
     if !is_reg_mov_for_width(mov0, width) || !is_reg_mov_for_width(mov1, width) {
         return None;
@@ -258,32 +231,16 @@ fn try_match_split_copy_rotate_width(
         return None;
     }
 
+    let (lsh_amount, _, _) = checked_shift_pair(shift0, shift1, width)?;
+
     let alu_class = width.alu_class();
-    let shift0_is_lsh = shift0.is_alu_imm(alu_class, BPF_LSH);
-    let shift0_is_rsh = shift0.is_alu_imm(alu_class, BPF_RSH);
-    let shift1_is_lsh = shift1.is_alu_imm(alu_class, BPF_LSH);
-    let shift1_is_rsh = shift1.is_alu_imm(alu_class, BPF_RSH);
-
-    let (lsh_amount, rsh_amount) = if shift0_is_lsh && shift1_is_rsh {
-        (shift0.imm as u32, shift1.imm as u32)
-    } else if shift0_is_rsh && shift1_is_lsh {
-        (shift1.imm as u32, shift0.imm as u32)
-    } else {
-        return None;
-    };
-
-    if lsh_amount + rsh_amount != width.bits() {
-        return None;
-    }
-
     if !or_insn.is_alu_reg(alu_class, BPF_OR) {
         return None;
     }
 
     let or_dst = or_insn.dst_reg();
     let or_src = or_insn.src_reg();
-    let or_uses_both = (or_dst == reg0 && or_src == reg1) || (or_dst == reg1 && or_src == reg0);
-    if !or_uses_both {
+    if !uses_both_regs(or_dst, or_src, reg0, reg1) {
         return None;
     }
 
@@ -302,44 +259,38 @@ fn try_match_rotate_width(
     if !i2.is_alu_reg(alu_class, BPF_OR) {
         return None;
     }
-    let (lsh_amount, rsh_amount, lsh_reg, rsh_reg) = shift_pair(i0, i1, alu_class)?;
-    if lsh_amount + rsh_amount != width.bits() || lsh_reg == rsh_reg {
-        return None;
-    }
+    let (lsh_amount, lsh_reg, rsh_reg) = checked_shift_pair(i0, i1, width)?;
     let or_dst = i2.dst_reg();
     let or_src = i2.src_reg();
-    let or_uses_both =
-        (or_dst == lsh_reg && or_src == rsh_reg) || (or_dst == rsh_reg && or_src == lsh_reg);
-    if !or_uses_both {
+    if !uses_both_regs(or_dst, or_src, lsh_reg, rsh_reg) {
         return None;
     }
-    if let Some(mov_idx) = find_provenance_mov(insns, idx, rsh_reg, lsh_reg, width) {
-        return rotate_site(
-            mov_idx,
-            (idx + 3) - mov_idx,
-            or_dst,
-            lsh_reg,
-            rsh_reg,
-            lsh_amount,
-            width,
-        );
-    }
-    if let Some(mov_idx) = find_provenance_mov(insns, idx, lsh_reg, rsh_reg, width) {
-        return rotate_site(
-            mov_idx,
-            (idx + 3) - mov_idx,
-            or_dst,
-            rsh_reg,
-            lsh_reg,
-            lsh_amount,
-            width,
-        );
+
+    for (tmp_reg, val_reg) in [(rsh_reg, lsh_reg), (lsh_reg, rsh_reg)] {
+        if let Some(mov_idx) = find_provenance_mov(insns, idx, tmp_reg, val_reg, width) {
+            return rotate_site(
+                mov_idx,
+                (idx + 3) - mov_idx,
+                or_dst,
+                val_reg,
+                tmp_reg,
+                lsh_amount,
+                width,
+            );
+        }
     }
 
     None
 }
 
-fn shift_pair(i0: &BpfInsn, i1: &BpfInsn, alu_class: u8) -> Option<(u32, u32, u8, u8)> {
+fn checked_shift_pair(i0: &BpfInsn, i1: &BpfInsn, width: RotateWidth) -> Option<(u32, u8, u8)> {
+    let (lsh_amount, rsh_amount, lsh_reg, rsh_reg) = shift_pair(i0, i1, width)?;
+    (lsh_amount + rsh_amount == width.bits() && lsh_reg != rsh_reg)
+        .then_some((lsh_amount, lsh_reg, rsh_reg))
+}
+
+fn shift_pair(i0: &BpfInsn, i1: &BpfInsn, width: RotateWidth) -> Option<(u32, u32, u8, u8)> {
+    let alu_class = width.alu_class();
     if i0.is_alu_imm(alu_class, BPF_RSH) && i1.is_alu_imm(alu_class, BPF_LSH) {
         return Some((i1.imm as u32, i0.imm as u32, i1.dst_reg(), i0.dst_reg()));
     }
@@ -347,6 +298,10 @@ fn shift_pair(i0: &BpfInsn, i1: &BpfInsn, alu_class: u8) -> Option<(u32, u32, u8
         return Some((i0.imm as u32, i1.imm as u32, i0.dst_reg(), i1.dst_reg()));
     }
     None
+}
+
+fn uses_both_regs(dst: u8, src: u8, reg0: u8, reg1: u8) -> bool {
+    (dst == reg0 && src == reg1) || (dst == reg1 && src == reg0)
 }
 
 fn rotate_site(
