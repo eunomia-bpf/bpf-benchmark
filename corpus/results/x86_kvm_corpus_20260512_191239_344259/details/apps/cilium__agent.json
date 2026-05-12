@@ -1,0 +1,2446 @@
+{
+  "app": "cilium/agent",
+  "baseline": {
+    "bpf": {
+      "10": {
+        "bytes_jited": 167,
+        "bytes_xlated": 280,
+        "id": 10,
+        "name": "dump_bpf_map",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "11": {
+        "bytes_jited": 740,
+        "bytes_xlated": 520,
+        "id": 11,
+        "name": "dump_bpf_prog",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "106": {
+        "bytes_jited": 490,
+        "bytes_xlated": 848,
+        "id": 106,
+        "name": "cil_xdp_entry",
+        "run_cnt_delta": 543689,
+        "run_time_ns_delta": 18751509,
+        "type": "xdp"
+      },
+      "107": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 107,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "108": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 108,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "109": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 109,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "110": {
+        "bytes_jited": 12622,
+        "bytes_xlated": 21224,
+        "id": 110,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "112": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 112,
+        "name": "cil_to_host",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 530,
+        "type": "sched_cls"
+      },
+      "113": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 113,
+        "name": "cil_from_host",
+        "run_cnt_delta": 539064,
+        "run_time_ns_delta": 96930277,
+        "type": "sched_cls"
+      },
+      "114": {
+        "bytes_jited": 8048,
+        "bytes_xlated": 13936,
+        "id": 114,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "116": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 116,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "117": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 117,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "118": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 118,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "119": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 119,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "120": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 120,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "121": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 121,
+        "name": "cil_to_host",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 761,
+        "type": "sched_cls"
+      },
+      "122": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 122,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "123": {
+        "bytes_jited": 8056,
+        "bytes_xlated": 13888,
+        "id": 123,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "124": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 124,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "125": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 125,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "126": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 126,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "127": {
+        "bytes_jited": 12653,
+        "bytes_xlated": 21272,
+        "id": 127,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "128": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 128,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "129": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 129,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "130": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 130,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "131": {
+        "bytes_jited": 8056,
+        "bytes_xlated": 13888,
+        "id": 131,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "132": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 132,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "133": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 133,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "134": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 134,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "135": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 135,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 612709,
+        "run_time_ns_delta": 108531986,
+        "type": "sched_cls"
+      },
+      "136": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 136,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "137": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 137,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "138": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 138,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "139": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 139,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "140": {
+        "bytes_jited": 12653,
+        "bytes_xlated": 21272,
+        "id": 140,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "141": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 141,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 543689,
+        "run_time_ns_delta": 67882039,
+        "type": "sched_cls"
+      },
+      "142": {
+        "bytes_jited": 330,
+        "bytes_xlated": 608,
+        "id": 142,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "143": {
+        "bytes_jited": 5306,
+        "bytes_xlated": 9136,
+        "id": 143,
+        "name": "tail_ipv4_ct_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "144": {
+        "bytes_jited": 5832,
+        "bytes_xlated": 10216,
+        "id": 144,
+        "name": "tail_handle_ipv4_cont",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "145": {
+        "bytes_jited": 5418,
+        "bytes_xlated": 9600,
+        "id": 145,
+        "name": "tail_handle_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "146": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 146,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "147": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 147,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "148": {
+        "bytes_jited": 5424,
+        "bytes_xlated": 9352,
+        "id": 148,
+        "name": "tail_ipv4_ct_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "150": {
+        "bytes_jited": 5749,
+        "bytes_xlated": 10384,
+        "id": 150,
+        "name": "tail_ipv4_to_endpoint",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "151": {
+        "bytes_jited": 11128,
+        "bytes_xlated": 19272,
+        "id": 151,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "152": {
+        "bytes_jited": 3605,
+        "bytes_xlated": 6344,
+        "id": 152,
+        "name": "tail_nodeport_rev_dnat_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "153": {
+        "bytes_jited": 908,
+        "bytes_xlated": 1392,
+        "id": 153,
+        "name": "cil_from_container",
+        "run_cnt_delta": 1323575,
+        "run_time_ns_delta": 295743235,
+        "type": "sched_cls"
+      },
+      "154": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 154,
+        "name": "cil_lxc_policy_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "155": {
+        "bytes_jited": 3605,
+        "bytes_xlated": 6344,
+        "id": 155,
+        "name": "tail_nodeport_rev_dnat_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "156": {
+        "bytes_jited": 5832,
+        "bytes_xlated": 10216,
+        "id": 156,
+        "name": "tail_handle_ipv4_cont",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "157": {
+        "bytes_jited": 5306,
+        "bytes_xlated": 9136,
+        "id": 157,
+        "name": "tail_ipv4_ct_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "158": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 158,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "159": {
+        "bytes_jited": 5749,
+        "bytes_xlated": 10384,
+        "id": 159,
+        "name": "tail_ipv4_to_endpoint",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "160": {
+        "bytes_jited": 330,
+        "bytes_xlated": 608,
+        "id": 160,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "161": {
+        "bytes_jited": 11128,
+        "bytes_xlated": 19272,
+        "id": 161,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "162": {
+        "bytes_jited": 5424,
+        "bytes_xlated": 9352,
+        "id": 162,
+        "name": "tail_ipv4_ct_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "163": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 163,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "164": {
+        "bytes_jited": 5418,
+        "bytes_xlated": 9600,
+        "id": 164,
+        "name": "tail_handle_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "165": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 165,
+        "name": "cil_lxc_policy_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "167": {
+        "bytes_jited": 908,
+        "bytes_xlated": 1392,
+        "id": 167,
+        "name": "cil_from_container",
+        "run_cnt_delta": 675,
+        "run_time_ns_delta": 2661932,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/bin/wrk",
+              "-t4",
+              "-c50",
+              "-d30s",
+              "http://198.18.0.2:18080/"
+            ],
+            "config": {
+              "tool": "wrk",
+              "url": "http://198.18.0.2:18080/"
+            },
+            "duration_s": 30.154042271999998,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Running 30s test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   314.57ms  259.10ms   2.00s    87.01%\n    Req/Sec    23.90     16.00    80.00     69.48%\n  2569 requests in 30.08s, 392.50KB read\n  Socket errors: connect 0, read 0, write 0, timeout 50\nRequests/sec:     85.40\nTransfer/sec:     13.05KB",
+            "workload_name": "network_lossy_multi_wrk"
+          },
+          {
+            "command": [],
+            "components": [
+              {
+                "command": [
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": null,
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.0092342599999995,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    49.48ms   17.56ms 218.57ms   94.96%\n    Req/Sec    69.45     14.35   100.00     85.00%\n  139 requests in 1.00s, 21.98KB read\nRequests/sec:    138.37\nTransfer/sec:     21.88KB",
+                "workload_name": "cilium host-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.45:39687/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.45:39687/"
+                },
+                "duration_s": 1.009429764999993,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.45:39687/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    49.52ms   17.81ms 219.58ms   94.85%\n    Req/Sec    74.94     54.05   160.00     50.00%\n  136 requests in 1.00s, 21.53KB read\nRequests/sec:    135.56\nTransfer/sec:     21.46KB",
+                "workload_name": "cilium endpoint-to-host"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.93:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.93:18080/"
+                },
+                "duration_s": 1.0109782830000142,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.93:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.47ms   11.09ms  60.17ms   85.00%\n    Req/Sec    60.10     43.26   140.00     90.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.48\nTransfer/sec:     18.89KB",
+                "workload_name": "cilium endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepb",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepb",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.0069372460000068,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.70ms   11.30ms  60.15ms   92.50%\n    Req/Sec    59.90     20.52    80.00     95.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.62\nTransfer/sec:     18.91KB",
+                "workload_name": "cilium reverse-endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://198.18.0.2:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://198.18.0.2:18080/"
+                },
+                "duration_s": 1.010544154999991,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.66ms   11.31ms  60.12ms   83.33%\n    Req/Sec   120.00      8.47   141.00     70.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.57\nTransfer/sec:     18.90KB",
+                "workload_name": "cilium endpoint-to-external"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbenchns",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.0105002130000003,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    54.73ms   28.31ms 230.39ms   92.72%\n    Req/Sec   111.61     87.88   202.00     22.22%\n  202 requests in 1.00s, 32.06KB read\nRequests/sec:    201.23\nTransfer/sec:     31.94KB",
+                "workload_name": "cilium external-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.93",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "10.244.0.93",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0114688559999934,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "718286",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.177",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbenchns",
+                  "target_host": "10.244.0.177",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0107306250000079,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "537347",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "198.18.0.2",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "198.18.0.2",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0103237739999997,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "602987",
+                "workload_name": "udp_burst"
+              }
+            ],
+            "duration_s": 9.090147177000006,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "",
+            "workload_name": "cilium_endpoint_matrix"
+          }
+        ],
+        "config": {
+          "netem": {
+            "delay_ms": 50,
+            "loss_pct": 20.0
+          },
+          "network_device": "bpfbench0"
+        },
+        "duration_s": 39.244189449000004,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "network_lossy_multi"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "10": {
+        "bytes_jited": 167,
+        "bytes_xlated": 280,
+        "id": 10,
+        "name": "dump_bpf_map",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "11": {
+        "bytes_jited": 740,
+        "bytes_xlated": 520,
+        "id": 11,
+        "name": "dump_bpf_prog",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "106": {
+        "bytes_jited": 490,
+        "bytes_xlated": 848,
+        "id": 106,
+        "name": "cil_xdp_entry",
+        "run_cnt_delta": 522842,
+        "run_time_ns_delta": 19532906,
+        "type": "xdp"
+      },
+      "107": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 107,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "108": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 108,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "109": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 109,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "110": {
+        "bytes_jited": 12622,
+        "bytes_xlated": 21224,
+        "id": 110,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "112": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 112,
+        "name": "cil_to_host",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 782,
+        "type": "sched_cls"
+      },
+      "113": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 113,
+        "name": "cil_from_host",
+        "run_cnt_delta": 517489,
+        "run_time_ns_delta": 97307678,
+        "type": "sched_cls"
+      },
+      "114": {
+        "bytes_jited": 8048,
+        "bytes_xlated": 13936,
+        "id": 114,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "116": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 116,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "117": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 117,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "118": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 118,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "119": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 119,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "120": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 120,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "121": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 121,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "122": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 122,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "123": {
+        "bytes_jited": 8056,
+        "bytes_xlated": 13888,
+        "id": 123,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "124": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 124,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "125": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 125,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "126": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 126,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "127": {
+        "bytes_jited": 12653,
+        "bytes_xlated": 21272,
+        "id": 127,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "128": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 128,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "129": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 129,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "130": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 130,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "131": {
+        "bytes_jited": 8056,
+        "bytes_xlated": 13888,
+        "id": 131,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "132": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 132,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "133": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 133,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "134": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 134,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "135": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 135,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 624581,
+        "run_time_ns_delta": 108560313,
+        "type": "sched_cls"
+      },
+      "136": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 136,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "137": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 137,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "138": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 138,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "139": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 139,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "140": {
+        "bytes_jited": 12653,
+        "bytes_xlated": 21272,
+        "id": 140,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "141": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 141,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 522842,
+        "run_time_ns_delta": 70384332,
+        "type": "sched_cls"
+      },
+      "142": {
+        "bytes_jited": 330,
+        "bytes_xlated": 608,
+        "id": 142,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "143": {
+        "bytes_jited": 5306,
+        "bytes_xlated": 9136,
+        "id": 143,
+        "name": "tail_ipv4_ct_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "144": {
+        "bytes_jited": 5832,
+        "bytes_xlated": 10216,
+        "id": 144,
+        "name": "tail_handle_ipv4_cont",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "145": {
+        "bytes_jited": 5418,
+        "bytes_xlated": 9600,
+        "id": 145,
+        "name": "tail_handle_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "146": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 146,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "147": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 147,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "148": {
+        "bytes_jited": 5424,
+        "bytes_xlated": 9352,
+        "id": 148,
+        "name": "tail_ipv4_ct_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "150": {
+        "bytes_jited": 5749,
+        "bytes_xlated": 10384,
+        "id": 150,
+        "name": "tail_ipv4_to_endpoint",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "151": {
+        "bytes_jited": 11128,
+        "bytes_xlated": 19272,
+        "id": 151,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "152": {
+        "bytes_jited": 3605,
+        "bytes_xlated": 6344,
+        "id": 152,
+        "name": "tail_nodeport_rev_dnat_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "153": {
+        "bytes_jited": 908,
+        "bytes_xlated": 1392,
+        "id": 153,
+        "name": "cil_from_container",
+        "run_cnt_delta": 1331685,
+        "run_time_ns_delta": 303806916,
+        "type": "sched_cls"
+      },
+      "154": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 154,
+        "name": "cil_lxc_policy_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "155": {
+        "bytes_jited": 3605,
+        "bytes_xlated": 6344,
+        "id": 155,
+        "name": "tail_nodeport_rev_dnat_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "156": {
+        "bytes_jited": 5832,
+        "bytes_xlated": 10216,
+        "id": 156,
+        "name": "tail_handle_ipv4_cont",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "157": {
+        "bytes_jited": 5306,
+        "bytes_xlated": 9136,
+        "id": 157,
+        "name": "tail_ipv4_ct_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "158": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 158,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "159": {
+        "bytes_jited": 5749,
+        "bytes_xlated": 10384,
+        "id": 159,
+        "name": "tail_ipv4_to_endpoint",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "160": {
+        "bytes_jited": 330,
+        "bytes_xlated": 608,
+        "id": 160,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "161": {
+        "bytes_jited": 11128,
+        "bytes_xlated": 19272,
+        "id": 161,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "162": {
+        "bytes_jited": 5424,
+        "bytes_xlated": 9352,
+        "id": 162,
+        "name": "tail_ipv4_ct_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "163": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 163,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "164": {
+        "bytes_jited": 5418,
+        "bytes_xlated": 9600,
+        "id": 164,
+        "name": "tail_handle_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "165": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 165,
+        "name": "cil_lxc_policy_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "167": {
+        "bytes_jited": 908,
+        "bytes_xlated": 1392,
+        "id": 167,
+        "name": "cil_from_container",
+        "run_cnt_delta": 844,
+        "run_time_ns_delta": 3042324,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/bin/wrk",
+              "-t4",
+              "-c50",
+              "-d30s",
+              "http://198.18.0.2:18080/"
+            ],
+            "config": {
+              "tool": "wrk",
+              "url": "http://198.18.0.2:18080/"
+            },
+            "duration_s": 30.13693306899998,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Running 30s test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   291.92ms  231.71ms   1.65s    86.72%\n    Req/Sec    29.17     18.73    90.00     48.41%\n  2957 requests in 30.07s, 451.10KB read\n  Socket errors: connect 0, read 0, write 0, timeout 46\nRequests/sec:     98.35\nTransfer/sec:     15.00KB",
+            "workload_name": "network_lossy_multi_wrk"
+          },
+          {
+            "command": [],
+            "components": [
+              {
+                "command": [
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": null,
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.0095036210000217,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.12ms   10.61ms  60.24ms   89.29%\n    Req/Sec    69.95     54.44   160.00     90.00%\n  140 requests in 1.01s, 22.13KB read\nRequests/sec:    139.29\nTransfer/sec:     22.02KB",
+                "workload_name": "cilium host-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.45:37353/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.45:37353/"
+                },
+                "duration_s": 1.0154524139999808,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.45:37353/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    49.87ms   17.38ms 220.88ms   94.87%\n    Req/Sec    78.05     43.77   130.00     85.00%\n  156 requests in 1.01s, 24.69KB read\nRequests/sec:    155.04\nTransfer/sec:     24.54KB",
+                "workload_name": "cilium endpoint-to-host"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.93:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.93:18080/"
+                },
+                "duration_s": 1.0092144190000454,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.93:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    49.35ms   11.26ms  60.29ms   94.96%\n    Req/Sec    69.55     51.63   141.00     95.00%\n  139 requests in 1.01s, 21.98KB read\nRequests/sec:    138.17\nTransfer/sec:     21.85KB",
+                "workload_name": "cilium endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepb",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepb",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.0099410259999786,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.56ms   11.02ms  60.15ms   83.75%\n    Req/Sec    80.05     42.75   160.00     95.00%\n  160 requests in 1.00s, 25.30KB read\nRequests/sec:    159.57\nTransfer/sec:     25.23KB",
+                "workload_name": "cilium reverse-endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://198.18.0.2:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://198.18.0.2:18080/"
+                },
+                "duration_s": 1.007700849999992,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    50.29ms   16.60ms 219.21ms   94.89%\n    Req/Sec    97.22     73.29   190.00     50.00%\n  176 requests in 1.00s, 27.85KB read\nRequests/sec:    175.69\nTransfer/sec:     27.80KB",
+                "workload_name": "cilium endpoint-to-external"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.177:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbenchns",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.177:18080/"
+                },
+                "duration_s": 1.0114968060000251,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.177:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    68.04ms   59.16ms 422.99ms   89.15%\n    Req/Sec   172.50     57.14   210.00     90.00%\n  344 requests in 1.00s, 53.82KB read\nRequests/sec:    342.70\nTransfer/sec:     53.62KB",
+                "workload_name": "cilium external-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.93",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "10.244.0.93",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0153724230000307,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "715492",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.177",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbenchns",
+                  "target_host": "10.244.0.177",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0117602309999825,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "515138",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "198.18.0.2",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "198.18.0.2",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0106341770000427,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "613182",
+                "workload_name": "udp_burst"
+              }
+            ],
+            "duration_s": 9.1010759670001,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "",
+            "workload_name": "cilium_endpoint_matrix"
+          }
+        ],
+        "config": {
+          "netem": {
+            "delay_ms": 50,
+            "loss_pct": 20.0
+          },
+          "network_device": "bpfbench0"
+        },
+        "duration_s": 39.23800903600008,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "network_lossy_multi"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "10": {
+        "error_message": "probe target kinsns for prog 10: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 10,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 10,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "106": {
+        "error_message": "probe target kinsns for prog 106: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 106,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 106,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "107": {
+        "error_message": "probe target kinsns for prog 107: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 107,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 107,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "108": {
+        "error_message": "probe target kinsns for prog 108: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 108,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 108,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "109": {
+        "error_message": "probe target kinsns for prog 109: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 109,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 109,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "11": {
+        "error_message": "probe target kinsns for prog 11: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 11,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 11,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "110": {
+        "error_message": "probe target kinsns for prog 110: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 110,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 110,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "112": {
+        "error_message": "probe target kinsns for prog 112: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 112,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 112,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "113": {
+        "error_message": "probe target kinsns for prog 113: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 113,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 113,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "114": {
+        "error_message": "probe target kinsns for prog 114: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 114,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 114,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "116": {
+        "error_message": "probe target kinsns for prog 116: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 116,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 116,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "117": {
+        "error_message": "probe target kinsns for prog 117: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 117,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 117,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "118": {
+        "error_message": "probe target kinsns for prog 118: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 118,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 118,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "119": {
+        "error_message": "probe target kinsns for prog 119: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 119,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 119,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "120": {
+        "error_message": "probe target kinsns for prog 120: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 120,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 120,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "121": {
+        "error_message": "probe target kinsns for prog 121: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 121,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 121,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "122": {
+        "error_message": "probe target kinsns for prog 122: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 122,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 122,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "123": {
+        "error_message": "probe target kinsns for prog 123: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 123,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 123,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "124": {
+        "error_message": "probe target kinsns for prog 124: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 124,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 124,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "125": {
+        "error_message": "probe target kinsns for prog 125: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 125,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 125,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "126": {
+        "error_message": "probe target kinsns for prog 126: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 126,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 126,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "127": {
+        "error_message": "probe target kinsns for prog 127: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 127,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 127,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "128": {
+        "error_message": "probe target kinsns for prog 128: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 128,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 128,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "129": {
+        "error_message": "probe target kinsns for prog 129: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 129,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 129,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "130": {
+        "error_message": "probe target kinsns for prog 130: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 130,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 130,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "131": {
+        "error_message": "probe target kinsns for prog 131: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 131,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 131,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "132": {
+        "error_message": "probe target kinsns for prog 132: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 132,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 132,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "133": {
+        "error_message": "probe target kinsns for prog 133: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 133,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 133,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "134": {
+        "error_message": "probe target kinsns for prog 134: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 134,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 134,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "135": {
+        "error_message": "probe target kinsns for prog 135: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 135,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 135,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "136": {
+        "error_message": "probe target kinsns for prog 136: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 136,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 136,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "137": {
+        "error_message": "probe target kinsns for prog 137: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 137,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 137,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "138": {
+        "error_message": "probe target kinsns for prog 138: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 138,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 138,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "139": {
+        "error_message": "probe target kinsns for prog 139: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 139,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 139,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "140": {
+        "error_message": "probe target kinsns for prog 140: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 140,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 140,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "141": {
+        "error_message": "probe target kinsns for prog 141: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 141,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 141,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "142": {
+        "error_message": "probe target kinsns for prog 142: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 142,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 142,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "143": {
+        "error_message": "probe target kinsns for prog 143: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 143,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 143,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "144": {
+        "error_message": "probe target kinsns for prog 144: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 144,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 144,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "145": {
+        "error_message": "probe target kinsns for prog 145: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 145,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 145,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "146": {
+        "error_message": "probe target kinsns for prog 146: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 146,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 146,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "147": {
+        "error_message": "probe target kinsns for prog 147: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 147,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 147,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "148": {
+        "error_message": "probe target kinsns for prog 148: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 148,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 148,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "150": {
+        "error_message": "probe target kinsns for prog 150: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 150,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 150,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "151": {
+        "error_message": "probe target kinsns for prog 151: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 151,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 151,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "152": {
+        "error_message": "probe target kinsns for prog 152: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 152,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 152,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "153": {
+        "error_message": "probe target kinsns for prog 153: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 153,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 153,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "154": {
+        "error_message": "probe target kinsns for prog 154: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 154,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 154,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "155": {
+        "error_message": "probe target kinsns for prog 155: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 155,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 155,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "156": {
+        "error_message": "probe target kinsns for prog 156: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 156,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 156,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "157": {
+        "error_message": "probe target kinsns for prog 157: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 157,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 157,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "158": {
+        "error_message": "probe target kinsns for prog 158: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 158,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 158,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "159": {
+        "error_message": "probe target kinsns for prog 159: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 159,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 159,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "160": {
+        "error_message": "probe target kinsns for prog 160: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 160,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 160,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "161": {
+        "error_message": "probe target kinsns for prog 161: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 161,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 161,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "162": {
+        "error_message": "probe target kinsns for prog 162: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 162,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 162,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "163": {
+        "error_message": "probe target kinsns for prog 163: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 163,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 163,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "164": {
+        "error_message": "probe target kinsns for prog 164: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 164,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 164,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "165": {
+        "error_message": "probe target kinsns for prog 165: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 165,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 165,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "167": {
+        "error_message": "probe target kinsns for prog 167: target probing requested with no kinsn targets",
+        "passes": [],
+        "prog_id": 167,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 167,
+          "prog_name": "",
+          "prog_type": 0
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "cilium",
+  "selected_workload": "network_lossy_multi",
+  "status": "ok"
+}

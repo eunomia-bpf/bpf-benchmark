@@ -368,7 +368,7 @@ fn map_inline_errors_when_snapshot_key_is_absent() {
     let output = run_bpfopt(
         &[
             "--pass",
-            "map-inline",
+            "map_inline",
             "--verifier-states",
             &verifier_arg,
             "--",
@@ -416,7 +416,7 @@ fn map_inline_skips_hash_lookup_when_snapshot_entry_is_absent() {
     let output = run_bpfopt(
         &[
             "--pass",
-            "map-inline",
+            "map_inline",
             "--report",
             &report_arg,
             "--verifier-states",
@@ -472,7 +472,7 @@ fn map_inline_accepts_prog_info_json_for_map_ids() {
     let output = run_bpfopt(
         &[
             "--pass",
-            "map-inline",
+            "map_inline",
             "--report",
             &report_arg,
             "--verifier-states",
@@ -548,7 +548,7 @@ fn bulk_memory_missing_kinsns_fails_with_v3_names() {
     let output = run_bpfopt(
         &[
             "--pass",
-            "bulk-memory",
+            "bulk_memory",
             "--target",
             &target_arg,
             "--report",
@@ -561,7 +561,7 @@ fn bulk_memory_missing_kinsns_fails_with_v3_names() {
     assert!(!output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(
-        stderr.contains("bulk-memory requires target kinsns: bpf_bulk_memcpy, bpf_bulk_memset"),
+        stderr.contains("bulk_memory requires target kinsns: bpf_bulk_memcpy, bpf_bulk_memset"),
         "stderr={stderr}"
     );
     assert!(!stderr.contains("bpf_memcpy_bulk"), "stderr={stderr}");

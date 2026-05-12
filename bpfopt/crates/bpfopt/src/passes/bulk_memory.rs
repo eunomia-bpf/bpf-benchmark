@@ -293,7 +293,7 @@ fn memcpy_lane_at(insns: &[BpfInsn], idx: usize) -> Option<MemcpyLane> {
     let load = insns.get(idx)?;
     let store = insns.get(idx + 1)?;
     let width = bpf_size(load.code);
-    if !BpfMemWidth::from_size_opcode(width).is_some() || !load.is_ldx_mem_size(width) {
+    if BpfMemWidth::from_size_opcode(width).is_none() || !load.is_ldx_mem_size(width) {
         return None;
     }
     if store.class() != BPF_STX || bpf_mode(store.code) != BPF_MEM || bpf_size(store.code) != width
@@ -325,7 +325,7 @@ fn memset_lane_at(
         return Ok(None);
     };
     let width = bpf_size(insn.code);
-    if !BpfMemWidth::from_size_opcode(width).is_some() || bpf_mode(insn.code) != BPF_MEM {
+    if BpfMemWidth::from_size_opcode(width).is_none() || bpf_mode(insn.code) != BPF_MEM {
         return Ok(None);
     }
     let fill_byte = match insn.class() {

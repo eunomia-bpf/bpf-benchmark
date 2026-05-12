@@ -6,10 +6,11 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Result};
 use bpfopt::analysis::{lift_with_pass_context, lower};
 use bpfopt::insn::BpfInsn;
-use bpfopt::pass::PassContext;
+use bpfopt::pass::{run_pass_once, PassContext};
+use bpfopt::passes::NoopPass;
 
 #[test]
-fn testbin_programs_roundtrip_byte_identical() -> Result<()> {
+fn testbin_programs_roundtrip_and_noop_byte_identical() -> Result<()> {
     let paths = canonicalize_outputs()?;
     assert_eq!(paths.len(), 542, "unexpected testbin program count");
 
@@ -17,16 +18,30 @@ fn testbin_programs_roundtrip_byte_identical() -> Result<()> {
         let bytes = fs::read(path).with_context(|| format!("read {}", path.display()))?;
         let insns = decode_insns(&bytes).with_context(|| format!("decode {}", path.display()))?;
         let ctx = PassContext::try_baseline().context("build baseline pass context")?;
-        let prog = lift_with_pass_context(&insns, &ctx)
+        let mut prog = lift_with_pass_context(&insns, &ctx)
             .with_context(|| format!("lift {}", path.display()))?;
         let lowered = lower(&prog).with_context(|| format!("lower {}", path.display()))?;
         if lowered != insns {
             panic!("{}", roundtrip_diff(path, &insns, &lowered));
         }
+
+        let result = run_pass_once(&NoopPass, &mut prog, &ctx)
+            .with_context(|| format!("noop {}", path.display()))?;
+        assert_eq!(
+            result.sites_applied,
+            0,
+            "noop unexpectedly applied sites for {}",
+            path.display()
+        );
+        let noop_lowered =
+            lower(&prog).with_context(|| format!("lower noop {}", path.display()))?;
+        if noop_lowered != insns {
+            panic!("{}", roundtrip_diff(path, &insns, &noop_lowered));
+        }
     }
 
     println!(
-        "{}/{} programs roundtripped byte-identical",
+        "{}/{} programs roundtripped and noop-preserved byte-identical",
         paths.len(),
         paths.len()
     );
