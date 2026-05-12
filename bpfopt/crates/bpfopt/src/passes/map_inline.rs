@@ -1684,18 +1684,7 @@ fn build_site_rewrite(
     info: &MapInfo,
     soft_hint: bool,
 ) -> SiteRewriteResult<Option<SiteRewrite>> {
-    let remove_lookup_pattern = if soft_hint {
-        false
-    } else if info.has_removable_lookup_pattern() {
-        true
-    } else {
-        info.requires_entry_presence_check()
-            && uses.other_uses.is_empty()
-            && uses.null_check.is_some_and(|site| {
-                prog.insn_at(site)
-                    .is_some_and(null_check_is_fallthrough_non_null)
-            })
-    };
+    let remove_lookup_pattern = !soft_hint && info.has_removable_lookup_pattern();
     let encoded_key = encode_key_bytes(&key.bytes, info.key_size as usize);
     let lookup_value_size = lookup_value_size(side_input, info).map_err(anyhow::Error::msg)?;
     let value = match lookup_elem(side_input, info.map_id, &encoded_key, lookup_value_size) {

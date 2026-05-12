@@ -15,7 +15,6 @@ use crate::insn::{
     BpfInsn, BPF_JEQ, BPF_JGE, BPF_JGT, BPF_JLE, BPF_JLT, BPF_JNE, BPF_JSGE, BPF_JSGT, BPF_JSLE,
     BPF_JSLT,
 };
-use crate::verifier_log::{verifier_states_from_json, VerifierStatesJson};
 #[cfg(test)]
 pub(crate) use crate::verifier_log::{RegState, ScalarRange, StackState, Tnum, VerifierValueWidth};
 pub(crate) use crate::verifier_log::{VerifierInsn, VerifierInsnKind};
@@ -817,9 +816,18 @@ pub fn first_report_site(program: &BBProgram) -> anyhow::Result<InsnSite> {
 // ── Helper: default PassContext for testing ──────────────────────────
 
 impl PassContext {
-    pub fn set_verifier_states_json(&mut self, states: VerifierStatesJson) -> anyhow::Result<()> {
-        self.verifier_states = Arc::from(verifier_states_from_json(states)?);
+    pub fn set_verifier_states_from_log(&mut self, log: &str) -> anyhow::Result<()> {
+        let states = crate::verifier_log::verifier_states_from_log(log);
+        if states.is_empty() {
+            anyhow::bail!("verifier log did not contain parseable state snapshots");
+        }
+        self.verifier_states = Arc::from(states);
         Ok(())
+    }
+
+    #[cfg(test)]
+    pub(crate) fn set_verifier_states_test(&mut self, states: Vec<VerifierInsn>) {
+        self.verifier_states = Arc::from(states);
     }
 
     pub fn has_verifier_states(&self) -> bool {
@@ -831,11 +839,6 @@ impl PassContext {
     /// `BBProgram::reg_*` queries instead of touching raw verifier data.
     pub(crate) fn verifier_states_arc(&self) -> Arc<[VerifierInsn]> {
         Arc::clone(&self.verifier_states)
-    }
-
-    #[cfg(test)]
-    pub(crate) fn set_verifier_states_test(&mut self, states: Vec<VerifierInsn>) {
-        self.verifier_states = Arc::from(states);
     }
 
     pub fn try_baseline() -> anyhow::Result<Self> {

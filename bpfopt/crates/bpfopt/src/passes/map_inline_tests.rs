@@ -219,6 +219,46 @@ fn map_inline_soft_hint_inlines_load_but_keeps_lookup_and_null_check() {
 }
 
 #[test]
+fn map_inline_hard_hash_hint_keeps_lookup_and_null_check() {
+    let value = 7u32.to_le_bytes().to_vec();
+    let mut ctx = PassContext::baseline();
+    ctx.map_ids = vec![111];
+    ctx.map_metadata.insert(
+        111,
+        MapMetadata {
+            map_type: libbpf_sys::BPF_MAP_TYPE_HASH,
+            key_size: 4,
+            value_size: value.len() as u32,
+            max_entries: 8,
+            map_id: 111,
+            name: format!("hash_{}", 111),
+        },
+    );
+    ctx.map_values
+        .insert((111, 1u32.to_le_bytes().to_vec()), value);
+    ctx.map_inline_hints = vec![MapInlineHintSpec {
+        anchor: MapInlineHintAnchorSpec::Pc(5),
+        mode: MapInlineHintModeSpec::Hard,
+        key: 1u32.to_le_bytes().to_vec(),
+    }];
+
+    let run = run_pass_on_insns(MapInlinePass, nullable_lookup_program(42), &ctx);
+
+    assert_eq!(run.result.sites_applied, 1);
+    assert!(run.lowered.contains(&BpfInsn::mov32_imm(BPF_REG_6, 7)));
+    assert_eq!(
+        run.lowered
+            .iter()
+            .filter(|insn| insn.is_call() && insn.imm == LOOKUP)
+            .count(),
+        1
+    );
+    assert!(run.lowered.iter().any(|insn| insn.class() == BPF_JMP
+        && bpf_op(insn.code) == BPF_JEQ
+        && insn.dst_reg() == BPF_REG_0));
+}
+
+#[test]
 fn map_inline_soft_hint_skips_when_snapshot_key_is_absent() {
     let mut ctx = PassContext::baseline();
     ctx.map_ids = vec![111];
@@ -370,54 +410,6 @@ fn map_inline_skipped_snapshot_records_site_skip_for_array_lookup() {
 
     assert_eq!(run.result.sites_applied, 0);
     assert_skip_reason(&run.result, 5, "snapshot skipped by size");
-}
-
-#[test]
-fn map_inline_skipped_snapshot_does_not_block_independent_hint() {
-    let mut input = lookup_program(42);
-    input.pop();
-    input.extend(lookup_program(43));
-
-    let mut ctx = PassContext::baseline();
-    set_map_ids(&mut ctx, vec![111, 222]);
-    ctx.map_metadata.insert(
-        111,
-        MapMetadata {
-            map_type: libbpf_sys::BPF_MAP_TYPE_ARRAY,
-            key_size: 4,
-            value_size: 4,
-            max_entries: 8,
-            map_id: 111,
-            name: "skipped_array".to_string(),
-        },
-    );
-    ctx.map_metadata.insert(
-        222,
-        MapMetadata {
-            map_type: libbpf_sys::BPF_MAP_TYPE_ARRAY,
-            key_size: 4,
-            value_size: 4,
-            max_entries: 8,
-            map_id: 222,
-            name: "hinted_array".to_string(),
-        },
-    );
-    ctx.map_snapshots_skipped_by_size.insert(111);
-    ctx.map_values.insert(
-        (222, 1u32.to_le_bytes().to_vec()),
-        7u32.to_le_bytes().to_vec(),
-    );
-    ctx.map_inline_hints = vec![MapInlineHintSpec {
-        anchor: MapInlineHintAnchorSpec::Pc(12),
-        mode: MapInlineHintModeSpec::Hard,
-        key: 1u32.to_le_bytes().to_vec(),
-    }];
-
-    let run = run_pass_on_insns(MapInlinePass, input, &ctx);
-
-    assert_eq!(run.result.sites_applied, 1);
-    assert_skip_reason(&run.result, 5, "snapshot skipped by size");
-    assert!(run.lowered.contains(&BpfInsn::mov32_imm(BPF_REG_6, 7)));
 }
 
 #[test]

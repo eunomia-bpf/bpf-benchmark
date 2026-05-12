@@ -1,0 +1,520 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 1000355,
+        "run_time_ns_delta": 147038312,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d15s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 15.102492686999994,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 15s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   249.40us  161.36us   4.90ms   82.58%\n    Req/Sec     8.32k   430.84     9.64k    71.03%\n  Latency Distribution\n     50%  209.00us\n     75%  311.00us\n     90%  450.00us\n     99%  816.00us\n  500155 requests in 15.10s, 77.75MB read\nRequests/sec:  33124.19\nTransfer/sec:      5.15MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 1001017,
+        "run_time_ns_delta": 156748761,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d15s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 15.103244154999999,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 15s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   248.59us  159.80us   3.91ms   82.14%\n    Req/Sec     8.34k   545.37    11.98k    78.61%\n  Latency Distribution\n     50%  208.00us\n     75%  311.00us\n     90%  449.00us\n     99%  812.00us\n  500486 requests in 15.10s, 77.80MB read\nRequests/sec:  33144.57\nTransfer/sec:      5.15MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "9": {
+        "passes": [
+          {
+            "bpfopt_ms": 27,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 438,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2721,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "maps_skipped_by_size=4",
+                "inline_hints_consumed=5",
+                "site at PC=13: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=365: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=464: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=541: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=562: skip reason: map-in-map chain is not inlineable",
+                "site at PC=570: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=592: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=616: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=654: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=793: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=814: skip reason: map-in-map chain is not inlineable",
+                "site at PC=823: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=844: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=863: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=863: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(142), idx: 5 } has no verifier state for r2",
+                "site at PC=895: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=895: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(151), idx: 5 } has no verifier state for r2",
+                "site at PC=1001: skip reason: map 18 snapshot skipped by size and no overlay provided",
+                "site at PC=1018: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "site at PC=1041: keeping lookup pattern because removal would cross a branch target",
+                "site at PC=1056: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1072: skip reason: map-in-map chain is not inlineable",
+                "site at PC=1086: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1113: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1128: skip reason: map 10 snapshot skipped by size and no overlay provided",
+                "site at PC=1221: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1245: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1303: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1311: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                "site at PC=1320: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1351: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1351: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(235), idx: 5 } has no verifier state for r2",
+                "site at PC=1381: skip reason: map 11 snapshot skipped by size and no overlay provided",
+                "site at PC=1495: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1524: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                "site at PC=1550: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1573: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "site at PC=1593: skip reason: map 18 snapshot skipped by size and no overlay provided",
+                "site at PC=1634: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1670: skip reason: map 18 snapshot skipped by size and no overlay provided",
+                "site at PC=1702: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                "site at PC=1726: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "site at PC=1746: keeping lookup pattern because removal would cross a branch target",
+                "site at PC=1760: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1776: skip reason: map-in-map chain is not inlineable",
+                "site at PC=1789: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1807: keeping lookup pattern because removal would cross a branch target",
+                "site at PC=1815: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1829: skip reason: map 10 snapshot skipped by size and no overlay provided",
+                "site at PC=1927: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1948: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=2006: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=2027: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=2062: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=2062: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(361), idx: 5 } has no verifier state for r2",
+                "site at PC=2079: skip reason: map 11 snapshot skipped by size and no overlay provided",
+                "site at PC=2202: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=2214: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=2223: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=2263: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=2298: skip reason: map 18 snapshot skipped by size and no overlay provided",
+                "site at PC=512: inlined successfully, value=0x2",
+                "site at PC=520: inlined successfully, value=0x2",
+                "site at PC=762: inlined successfully, value=0x2",
+                "site at PC=770: skip reason: overlapping map inline rewrite",
+                "site at PC=1041: inlined successfully, value=0x0",
+                "site at PC=1105: inlined successfully, value=0x02000000000b0000",
+                "site at PC=1292: inlined successfully, value=0x1",
+                "site at PC=1514: inlined successfully, value=0x0",
+                "site at PC=1692: inlined successfully, value=0x0",
+                "site at PC=1746: inlined successfully, value=0x0",
+                "site at PC=1807: inlined successfully, value=0x02000000000b0000",
+                "site at PC=1995: inlined successfully, value=0x1",
+                "site at PC=2018: inlined successfully, value=0x200c80a"
+              ],
+              "inlined_map_entries": [
+                {
+                  "key_hex": "0a6401010000000000000000000000001f900600",
+                  "map_id": 5,
+                  "value_hex": "0200000000000000"
+                },
+                {
+                  "key_hex": "0a6401010000000000000000000000001f900600",
+                  "map_id": 5,
+                  "value_hex": "0200000000000000"
+                },
+                {
+                  "key_hex": "0a6401010000000000000000000000001f900600",
+                  "map_id": 5,
+                  "value_hex": "0200000000000000"
+                },
+                {
+                  "key_hex": "01000000",
+                  "map_id": 9,
+                  "value_hex": "0ac8000200000000000000000000000000000000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 4,
+                  "value_hex": "02000000000b0000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 8,
+                  "value_hex": "01000000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 16,
+                  "value_hex": "00000000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 16,
+                  "value_hex": "00000000"
+                },
+                {
+                  "key_hex": "01000000",
+                  "map_id": 9,
+                  "value_hex": "0ac8000200000000000000000000000000000000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 4,
+                  "value_hex": "02000000000b0000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 8,
+                  "value_hex": "01000000"
+                },
+                {
+                  "key_hex": "01000000",
+                  "map_id": 9,
+                  "value_hex": "0ac8000200000000000000000000000000000000"
+                }
+              ],
+              "insn_count_after": 2488,
+              "insn_count_before": 2542,
+              "insn_delta": -54,
+              "pass": "map_inline",
+              "sites_applied": 12,
+              "sites_matched": 67,
+              "sites_skipped": 55,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 4,
+                "lookup result is not consumed by fixed-offset scalar loads": 3,
+                "map 10 snapshot skipped by size and no overlay provided": 2,
+                "map 11 snapshot skipped by size and no overlay provided": 2,
+                "map 18 snapshot skipped by size and no overlay provided": 4,
+                "map 3 snapshot skipped by size and no overlay provided": 32,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6": 3,
+                "map-in-map chain is not inlineable": 4,
+                "overlapping map inline rewrite": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 13,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 365,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 464,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 541,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 562,
+                  "reason": "map-in-map chain is not inlineable"
+                },
+                {
+                  "pc": 570,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 592,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 616,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 654,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 793,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 814,
+                  "reason": "map-in-map chain is not inlineable"
+                },
+                {
+                  "pc": 823,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 844,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 863,
+                  "reason": "lookup key is not available from verifier-guided state"
+                },
+                {
+                  "pc": 895,
+                  "reason": "lookup key is not available from verifier-guided state"
+                },
+                {
+                  "pc": 1001,
+                  "reason": "map 18 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1018,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6"
+                },
+                {
+                  "pc": 1056,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1072,
+                  "reason": "map-in-map chain is not inlineable"
+                },
+                {
+                  "pc": 1086,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1113,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1128,
+                  "reason": "map 10 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1221,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1245,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1303,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1311,
+                  "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                },
+                {
+                  "pc": 1320,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1351,
+                  "reason": "lookup key is not available from verifier-guided state"
+                },
+                {
+                  "pc": 1381,
+                  "reason": "map 11 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1495,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1524,
+                  "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                },
+                {
+                  "pc": 1550,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1573,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6"
+                },
+                {
+                  "pc": 1593,
+                  "reason": "map 18 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1634,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1670,
+                  "reason": "map 18 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1702,
+                  "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                },
+                {
+                  "pc": 1726,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6"
+                },
+                {
+                  "pc": 1760,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1776,
+                  "reason": "map-in-map chain is not inlineable"
+                },
+                {
+                  "pc": 1789,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1815,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1829,
+                  "reason": "map 10 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1927,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1948,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 2006,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 2027,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 2062,
+                  "reason": "lookup key is not available from verifier-guided state"
+                },
+                {
+                  "pc": 2079,
+                  "reason": "map 11 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 2202,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 2214,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 2223,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 2263,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 2298,
+                  "reason": "map 18 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 770,
+                  "reason": "overlapping map inline rewrite"
+                }
+              ]
+            },
+            "error": "kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 13: Permission denied (os error 13)\nverifier log:\n0: R1=ctx() R10=fp0\n0: (bf) r6 = r1                       ; R1=ctx() R6=ctx()\n1: (b7) r7 = 1                        ; R7=1\n2: (61) r8 = *(u32 *)(r6 +0)          ; R6=ctx() R8=pkt(r=0)\n3: (61) r9 = *(u32 *)(r6 +4)          ; R6=ctx() R9=pkt_end()\n4: (bf) r1 = r8                       ; R1=pkt(r=0) R8=pkt(r=0)\n5: (07) r1 += 14                      ; R1=pkt(off=14,r=0)\n6: (2d) if r1 > r9 goto pc+1520       ; R1=pkt(off=14,r=14) R9=pkt_end()\n7: (b7) r1 = 528                      ; R1=528\n8: (63) *(u32 *)(r10 -132) = r1       ; R1=528 R10=fp0 fp-136=mmmm????\n9: (bf) r2 = r10                      ; R2=fp0 R10=fp0\n10: (07) r2 += -132                   ; R2=fp-132\n11: (18) r1 = 0xffff8dd5ef0b8000      ; R1=map_ptr(map=stats,ks=4,vs=16)\n13: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=1,map=stats,ks=4,vs=16)\n14: (15) if r0 == 0x0 goto pc+1512    ; R0=map_value(map=stats,ks=4,vs=16)\n15: (1f) r9 -= r8                     ; R8=pkt(r=14) R9=scalar()\n16: (79) r1 = *(u64 *)(r0 +8)         ; R0=map_value(map=stats,ks=4,vs=16) R1=scalar()\n17: (0f) r1 += r9                     ; R1=scalar() R9=scalar()\n18: (7b) *(u64 *)(r0 +8) = r1         ; R0=map_value(map=stats,ks=4,vs=16) R1=scalar()\n19: (79) r1 = *(u64 *)(r0 +0)         ; R0=map_value(map=stats,ks=4,vs=16) R1=scalar()\n20: (07) r1 += 1                      ; R1=scalar()\n21: (7b) *(u64 *)(r0 +0) = r1         ; R0=map_value(map=stats,ks=4,vs=16) R1=scalar()\n22: (71) r2 = *(u8 *)(r8 +12)         ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R8=pkt(r=14)\n23: (71) r1 = *(u8 *)(r8 +13)         ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R8=pkt(r=14)\n24: (67) r1 <<= 8                     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xff00,var_off=(0x0; 0xff00))\n25: (4f) r1 |= r2                     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n26: (b7) r8 = 1                       ; R8=1\n27: (15) if r1 == 0xdd86 goto pc+124 152: R0=map_value(map=stats,ks=4,vs=16) R1=0xdd86 R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=ctx() R7=1 R8=1 R9=scalar() R10=fp0 fp-136=mmmm????\n152: (61) r2 = *(u32 *)(r6 +4)        ; R2=pkt_end() R6=ctx()\n153: (61) r7 = *(u32 *)(r6 +0)        ; R6=ctx() R7=pkt(r=0)\n154: (b7) r1 = 0                      ; R1=0\n155: (7b) *(u64 *)(r10 -48) = r1      ; R1=0 R10=fp0 fp-48=0\n156: (7b) *(u64 *)(r10 -56) = r1      ; R1=0 R10=fp0 fp-56=0\n157: (7b) *(u64 *)(r10 -64) = r1      ; R1=0 R10=fp0 fp-64=0\n158: (7b) *(u64 *)(r10 -72) = r1      ; R1=0 R10=fp0 fp-72=0\n159: (7b) *(u64 *)(r10 -80) = r1      ; R1=0 R10=fp0 fp-80=0\n160: (7b) *(u64 *)(r10 -88) = r1      ; R1=0 R10=fp0 fp-88=0\n161: (63) *(u32 *)(r10 -96) = r1      ; R1=0 R10=fp0 fp-96=????0\n162: (7b) *(u64 *)(r10 -104) = r1     ; R1=0 R10=fp0 fp-104=0\n163: (7b) *(u64 *)(r10 -112) = r1     ; R1=0 R10=fp0 fp-112=0\n164: (63) *(u32 *)(r10 -120) = r1     ; R1=0 R10=fp0 fp-120=????0\n165: (bf) r3 = r7                     ; R3=pkt(r=0) R7=pkt(r=0)\n166: (07) r3 += 54                    ; R3=pkt(off=54,r=0)\n167: (7b) *(u64 *)(r10 -144) = r2     ; R2=pkt_end() R10=fp0 fp-144=pkt_end()\n168: (2d) if r3 > r2 goto pc+1329     ; R2=pkt_end() R3=pkt(off=54,r=54)\n169: (71) r1 = *(u8 *)(r7 +20)        ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=pkt(r=54)\n170: (73) *(u8 *)(r10 -52) = r1       ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R10=fp0 fp-56=mmmmmmmm\n171: (71) r2 = *(u8 *)(r7 +14)        ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=pkt(r=54)\n172: (67) r2 <<= 4                    ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=4080,var_off=(0x0; 0xff0))\n173: (73) *(u8 *)(r10 -43) = r2       ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=4080,var_off=(0x0; 0xff0)) R10=fp0 fp-48=mmmmmmmm\n174: (71) r4 = *(u8 *)(r7 +15)        ; R4=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=pkt(r=54)\n175: (77) r4 >>= 4                    ; R4=scalar(smin=smin32=0,smax=umax=smax32=umax32=15,var_off=(0x0; 0xf))\n176: (4f) r4 |= r2                    ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=4080,var_off=(0x0; 0xff0)) R4=scalar(smin=smin32=0,smax=umax=smax32=umax32=4095,var_off=(0x0; 0xfff))\n177: (73) *(u8 *)(r10 -43) = r4       ; R4=scalar(smin=smin32=0,smax=umax=smax32=umax32=4095,var_off=(0x0; 0xfff)) R10=fp0 fp-48=mmmmmmmm\n178: (15) if r1 == 0x2c goto pc+1319          ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n179: (69) r2 = *(u16 *)(r7 +18)       ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R7=pkt(r=54)\n180: (7b) *(u64 *)(r10 -152) = r2     ; R2=scalar(id=888,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-152=scalar(id=888,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n181: (15) if r1 == 0x3a goto pc+124   ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n182: (61) r2 = *(u32 *)(r7 +34)       ; R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=pkt(r=54)\n183: (67) r2 <<= 32                   ; R2=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n184: (61) r4 = *(u32 *)(r7 +30)       ; R4=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=pkt(r=54)\n185: (4f) r2 |= r4                    ; R2=scalar() R4=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n186: (7b) *(u64 *)(r10 -80) = r2      ; R2=scalar(id=889) R10=fp0 fp-80=scalar(id=889)\n187: (61) r2 = *(u32 *)(r7 +26)       ; R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=pkt(r=54)\n188: (67) r2 <<= 32                   ; R2=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n189: (61) r4 = *(u32 *)(r7 +22)       ; R4=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=pkt(r=54)\n190: (4f) r2 |= r4                    ; R2=scalar() R4=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n191: (7b) *(u64 *)(r10 -88) = r2      ; R2=scalar(id=890) R10=fp0 fp-88=scalar(id=890)\n192: (61) r2 = *(u32 *)(r7 +50)       ; R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=pkt(r=54)\n193: (67) r2 <<= 32                   ; R2=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n194: (61) r4 = *(u32 *)(r7 +46)       ; R4=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=pkt(r=54)\n195: (4f) r2 |= r4                    ; R2=scalar() R4=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n196: (7b) *(u64 *)(r10 -64) = r2      ; R2=scalar(id=891) R10=fp0 fp-64=scalar(id=891)\n197: (61) r2 = *(u32 *)(r7 +38)       ; R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=pkt(r=54)\n198: (61) r4 = *(u32 *)(r7 +42)       ; R4=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=pkt(r=54)\n199: (67) r4 <<= 32                   ; R4=scalar(smax=0x7fffffff00000000,umax=0xffffffff00000000,smin32=0,smax32=umax32=0,var_off=(0x0; 0xffffffff00000000))\n200: (4f) r4 |= r2                    ; R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R4=scalar()\n201: (7b) *(u64 *)(r10 -72) = r4      ; R4=scalar(id=892) R10=fp0 fp-72=scalar(id=892)\n202: (b7) r2 = 0                      ; R2=0\n203: (15) if r1 == 0x1 goto pc+1      ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n204: (05) goto pc+201\n406: (15) if r1 == 0x11 goto pc+31    ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n407: (b7) r8 = 2                      ; R8=2\n408: (55) if r1 != 0x6 goto pc+1089   ; R1=6\n409: (bf) r3 = r2                     ; R2=0 R3=0\n410: (57) r3 &= 1                     ; R3=0\n411: (b7) r5 = 54                     ; R5=54\n412: (15) if r3 == 0x0 goto pc+1      ; R3=0\n414: (bf) r4 = r7                     ; R4=pkt(r=54) R7=pkt(r=54)\n415: (0f) r4 += r5                    ; R4=pkt(off=54,r=54) R5=54\n416: (bf) r5 = r4                     ; R4=pkt(off=54,r=54) R5=pkt(off=54,r=54)\n417: (07) r5 += 20                    ; R5=pkt(off=74,r=54)\n418: (b7) r8 = 1                      ; R8=1\n419: (79) r0 = *(u64 *)(r10 -144)     ; R0=pkt_end() R10=fp0 fp-144=pkt_end()\n420: (2d) if r5 > r0 goto pc+1077     ; R0=pkt_end() R5=pkt(off=74,r=74)\n421: (79) r5 = *(u64 *)(r10 -152)     ; R5=scalar(id=893,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-152=scalar(id=893,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n422: (69) r5 = *(u16 *)(r4 +12)       ; R4=pkt(off=54,r=74) R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n423: (bf) r0 = r5                     ; R0=scalar(id=894,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R5=scalar(id=894,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n424: (57) r0 &= 512                   ; R0=scalar(smin=smin32=0,smax=umax=smax32=umax32=512,var_off=(0x0; 0x200))\n425: (15) if r0 == 0x0 goto pc+3      ; R0=512\n426: (47) r2 |= 2                     ; R2=2\n427: (73) *(u8 *)(r10 -44) = r2       ; R2=2 R10=fp0 fp-48=mmmmmmmm\n428: (69) r5 = *(u16 *)(r4 +12)       ; R4=pkt(off=54,r=74) R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n429: (57) r5 &= 1024                  ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=1024,var_off=(0x0; 0x400))\n430: (15) if r5 == 0x0 goto pc+2      ; R5=1024\n431: (47) r2 |= 4                     ; R2=6\n432: (73) *(u8 *)(r10 -44) = r2       ; R2=6 R10=fp0 fp-48=mmmmmmmm\n433: (55) if r3 != 0x0 goto pc+60     ; R3=0\n434: (69) r2 = *(u16 *)(r4 +0)        ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R4=pkt(off=54,r=74)\n435: (6b) *(u16 *)(r10 -56) = r2      ; R2=scalar(id=895,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-56=mmmmmmscalar(id=895,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n436: (69) r2 = *(u16 *)(r4 +2)        ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R4=pkt(off=54,r=74)\n437: (05) goto pc+63\n501: (6b) *(u16 *)(r10 -54) = r2      ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-56=mmmmmmmm\n502: (79) r3 = *(u64 *)(r10 -64)      ; R3=scalar(id=896) R10=fp0 fp-64=scalar(id=896)\n503: (79) r3 = *(u64 *)(r10 -72)      ; R3=scalar(id=897) R10=fp0 fp-72=scalar(id=897)\n504: (bf) r2 = r10                    ; R2=fp0 R10=fp0\n505: (07) r2 += -112                  ; R2=fp-112\n506: (18) r1 = 0xffff8dd106572000     ; R1=map_ptr(map=vip_map,ks=20,vs=8)\n508: (85) call bpf_map_lookup_elem#1          ; R0=map_value_or_null(id=898,map=vip_map,ks=20,vs=8)\n509: (55) if r0 != 0x0 goto pc+8      ; R0=0\n510: (b7) r1 = 0                      ; R1=0\n511: (b7) r8 = 2                      ; R8=2\n512: (79) r1 = *(u64 *)(r10 -152)     ; R1=scalar(id=899,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-152=scalar(id=899,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n513: (b4) w1 = 2                      ; R1=2\n514: (57) r1 &= 136                   ; R1=0\n515: (55) if r1 != 0x0 goto pc+2      ; R1=0\n516: (b7) r1 = 0                      ; R1=0\n517: (6b) *(u16 *)(r10 -54) = r1      ; R1=0 R10=fp0 fp-56=mmmm00mm\n518: (79) r1 = *(u64 *)(r10 -144)     ; R1=pkt_end() R10=fp0 fp-144=pkt_end()\n519: (1f) r1 -= r7                    ; R1=scalar() R7=pkt(r=74)\n520: (b7) r8 = 1                      ; R8=1\n521: (79) r2 = *(u64 *)(r10 -152)     ; R2=scalar(id=900,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R10=fp0 fp-152=scalar(id=900,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))\n522: (65) if r1 s> 0x5ea goto pc+975          ; R1=scalar(smax=1514)\n523: (7b) *(u64 *)(r10 -160) = r0     ; R0=0 R10=fp0 fp-160=0\n524: (b7) r1 = 512                    ; R1=512\n525: (63) *(u32 *)(r10 -124) = r1     ; R1=512 R10=fp0 fp-128=mmmm????\n526: (bf) r2 = r10                    ; R2=fp0 R10=fp0\n527: (07) r2 += -124                  ; R2=fp-124\n528: (18) r1 = 0xffff8dd5ef0b8000     ; R1=map_ptr(map=stats,ks=4,vs=16)\n530: (85) call bpf_map_lookup_elem#1          ; R0=map_value_or_null(id=901,map=stats,ks=4,vs=16)\n531: (15) if r0 == 0x0 goto pc+966    ; R0=map_value(map=stats,ks=4,vs=16)\n532: (79) r1 = *(u64 *)(r0 +0)        ; R0=map_value(map=stats,ks=4,vs=16) R1=scalar()\n533: (07) r1 += 1                     ; R1=scalar()\n534: (7b) *(u64 *)(r10 -176) = r0     ; R0=map_value(map=stats,ks=4,vs=16) R10=fp0 fp-176=map_value(map=stats,ks=4,vs=16)\n535: (7b) *(u64 *)(r0 +0) = r1        ; R0=map_value(map=stats,ks=4,vs=16) R1=scalar()\n536: (79) r8 = *(u64 *)(r10 -160)     ; R8=0 R10=fp0 fp-160=0\n537: (b4) w1 = 2                      ; R1=2\n538: (57) r1 &= 1                     ; R1=0\n539: (15) if r1 == 0x0 goto pc+2      ; R1=0\n542: (61) r1 = *(u32 *)(r8 +4)\nR8 invalid mem access 'scalar'\nprocessed 14642 insns (limit 1000000) max_states_per_insn 15 total_states 990 peak_states 452 mark_read 0",
+            "rejit_syscall_ms": 19,
+            "status": "failed_rejit",
+            "step": {
+              "command": "OVERLAY_DIR=/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/map_inline/overlays/katran; CH=; RE=; SI=; for f in ${MAP_VALUES}/map-*.show.json; do n=$(jq -r .name \"$f\"); i=$(jq -r .id \"$f\"); case \"$n\" in ch_rings) CH=$i ;; reals) RE=$i ;; server_id_map) SI=$i ;; esac; done; jq -n --arg c \"$CH\" --arg r \"$RE\" --arg s \"$SI\" --slurpfile co \"$OVERLAY_DIR/ch_rings.json\" --slurpfile ro \"$OVERLAY_DIR/reals.json\" --slurpfile so \"$OVERLAY_DIR/server_id_map.json\" '($c | if . == \"\" then {} else {(.): $co[0]} end) + ($r | if . == \"\" then {} else {(.): $ro[0]} end) + ($s | if . == \"\" then {} else {(.): $so[0]} end)' > ${MAP_VALUES}/overlays.json && timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --inline-hint=ctl_array:!00000000 --inline-hint=vip_map:!0a6401010000000000000000000000001f900600 --inline-hint=ch_rings:!00000000 --inline-hint=reals:!01000000 --inline-hint=server_id_map:!00000000 # lpm_src_v4/v6 hints commented: katran is built without # -DLPM_SRC_LOOKUP, so these maps are guarded out of the program # by `#ifdef LPM_SRC_LOOKUP` in balancer_maps.h. bpfopt fail-fasts # on hint anchor not in metadata (correct: catches typos and # mis-applied hints early). Uncomment if a future build turns on # source-IP routing. # --inline-hint=lpm_src_v4:!00000000 # --inline-hint=lpm_src_v6:!00000000 # lru_mapping/global_lru_maps outer-only hints commented: katran # benchmark uses F_LRU_BYPASS + no `-forwarding_cores`, so the outer # ARRAY_OF_MAPS stays empty (every slot ENOENT). #265 root-caused this: # `attachLrus()` iterates empty forwardingCores_ \u2192 zero update_elem. # bpfopt fail-fasts when hinted outer key has no live inner map # (correct: hint claims something kernel snapshot disproves). # Uncomment only if benchmark configures forwarding cores OR an # alternative test deploys populated map-in-map. # --inline-hint=lru_mapping:!00000000 # --inline-hint=global_lru_maps:!00000000",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 9,
+        "program": {
+          "final_insn_count": 2542,
+          "orig_insn_count": 2542,
+          "prog_id": 9,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}

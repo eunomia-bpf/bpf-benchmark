@@ -145,17 +145,12 @@ fn unreachable_idx_then_live_idx_program_bytes() -> Vec<u8> {
     .collect()
 }
 
-fn map_lookup_verifier_states_json() -> &'static str {
-    r#"{"insns":[
-        {"pc":5,"regs":{"r2":{"type":"fp","offset":-4}},"stack":{"fp-8":{"slot_types":"rrrr????","value":{"type":"scalar","precise":true,"const_val":4294967296}}}}
-    ]}"#
+fn map_lookup_verifier_log() -> &'static str {
+    "5: R2=fp-4 fp-8=rrrr????P4294967296\n"
 }
 
-fn two_hash_lookup_verifier_states_json() -> &'static str {
-    r#"{"insns":[
-        {"pc":5,"regs":{"r2":{"type":"fp","offset":-4}},"stack":{"fp-8":{"slot_types":"rrrr????","value":{"type":"scalar","precise":true,"const_val":4294967296}}}},
-        {"pc":16,"regs":{"r2":{"type":"fp","offset":-8}},"stack":{"fp-8":{"slot_types":"????rrrr","value":{"type":"scalar","precise":true,"const_val":2}}}}
-    ]}"#
+fn two_hash_lookup_verifier_log() -> &'static str {
+    "5: R2=fp-4 fp-8=rrrr????P4294967296\n16: R2=fp-8 fp-8=????rrrrP2\n"
 }
 
 fn temp_path(name: &str) -> PathBuf {
@@ -374,10 +369,8 @@ fn verifier_states_accepts_raw_log_input() {
 #[test]
 fn map_inline_errors_when_snapshot_key_is_absent() {
     let map_values_path = write_bpftool_map_values_dir("map-values-absent-key", 111, "array", "[]");
-    let verifier_path = write_temp_file(
-        "map-lookup-verifier-states.json",
-        map_lookup_verifier_states_json(),
-    );
+    let verifier_path =
+        write_temp_file("map-lookup-verifier-states.log", map_lookup_verifier_log());
     let map_values_arg = map_values_path.to_string_lossy().to_string();
     let verifier_arg = verifier_path.to_string_lossy().to_string();
     let output = run_bpfopt(
@@ -424,8 +417,8 @@ fn map_inline_skips_hash_lookup_when_snapshot_entry_is_absent() {
     let report_arg = report_path.to_string_lossy().to_string();
     let map_values_arg = map_values_path.to_string_lossy().to_string();
     let verifier_path = write_temp_file(
-        "two-hash-lookup-verifier-states.json",
-        two_hash_lookup_verifier_states_json(),
+        "two-hash-lookup-verifier-states.log",
+        two_hash_lookup_verifier_log(),
     );
     let verifier_arg = verifier_path.to_string_lossy().to_string();
     let output = run_bpfopt(
@@ -477,8 +470,8 @@ fn map_inline_accepts_prog_info_json_for_map_ids() {
     );
     let prog_info_path = write_temp_file("prog-info-map-ids.json", r#"{"map_ids":[111]}"#);
     let verifier_path = write_temp_file(
-        "map-lookup-verifier-states-json-map-ids.json",
-        map_lookup_verifier_states_json(),
+        "map-lookup-verifier-states-map-ids.log",
+        map_lookup_verifier_log(),
     );
     let report_arg = report_path.to_string_lossy().to_string();
     let map_values_arg = map_values_path.to_string_lossy().to_string();

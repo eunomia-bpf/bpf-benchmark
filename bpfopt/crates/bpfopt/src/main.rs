@@ -15,7 +15,6 @@ use bpfopt::pass::{
     KinsnRegistry, PassContext, PassResult, PlatformCapabilities, TargetJson,
 };
 use bpfopt::passes::PASS_REGISTRY;
-use bpfopt::verifier_log::{verifier_states_from_log, VerifierStatesJson};
 use clap::{Args, Parser, Subcommand};
 use serde::{Deserialize, Serialize};
 
@@ -375,7 +374,10 @@ fn build_pass_context(common: &CommonArgs) -> Result<PassContext> {
     ctx.platform = detect_platform();
     ctx.map_ids = common.map_ids.clone();
     if let Some(path) = common.verifier_states.as_deref() {
-        ctx.set_verifier_states_json(read_verifier_states(path)?)?;
+        let log = fs::read_to_string(path)
+            .with_context(|| format!("failed to read verifier states from {}", path.display()))?;
+        ctx.set_verifier_states_from_log(&log)
+            .with_context(|| format!("verifier states from {}", path.display()))?;
     }
     ctx.func_info = read_btf_info_records(
         common.func_info.as_deref(),
@@ -531,28 +533,6 @@ fn apply_kinsn_list(registry: &mut KinsnRegistry, kinsns: &[String]) -> Result<(
         registry.set_kinsn_call_for_target_name(name, btf_id, 0)?;
     }
     Ok(())
-}
-
-fn read_verifier_states(path: &Path) -> Result<VerifierStatesJson> {
-    let input = fs::read_to_string(path)
-        .with_context(|| format!("failed to read verifier states from {}", path.display()))?;
-    let states = if input.trim_start().starts_with('{') {
-        serde_json::from_str::<VerifierStatesJson>(&input).with_context(|| {
-            format!(
-                "failed to parse verifier states JSON from {}",
-                path.display()
-            )
-        })?
-    } else {
-        verifier_states_from_log(&input)
-    };
-    if states.insns.is_empty() {
-        bail!(
-            "verifier states {} did not contain parseable state snapshots",
-            path.display()
-        );
-    }
-    Ok(states)
 }
 
 fn read_json_file<T: for<'de> Deserialize<'de>>(path: &Path, label: &str) -> Result<T> {

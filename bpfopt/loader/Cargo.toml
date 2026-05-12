@@ -1,0 +1,16 @@
+[package]
+name = "bpfopt-loader"
+version = "0.1.0"
+edition = "2021"
+description = "Host-side bpfopt fixture loader"
+
+[[bin]]
+name = "bpfopt-loader"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+libbpf-sys.workspace = true

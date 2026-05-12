@@ -76,6 +76,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "bpfopt-loader"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "libbpf-sys",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "cc"
 version = "1.2.61"
 source = "registry+https://github.com/rust-lang/crates.io-index"
