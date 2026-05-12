@@ -36,7 +36,7 @@ fn lift_assigns_pseudo_call_target_to_a_subprogram_frame() {
         callee, return_to, ..
     } = entry.terminator
     else {
-        panic!("entry block should end in a pseudo_call terminator");
+        panic!("entry block should end in a pseudo_call exit");
     };
 
     assert_eq!(prog.blocks[callee.0].frame, FrameId(1));
@@ -94,7 +94,7 @@ fn lift_resolves_conditional_branch_taken_and_fallthrough_blocks() {
 fn lift_records_exit_as_a_raw_terminator() {
     let insns = vec![BpfInsn::mov64_imm(0, 0), BpfInsn::exit()];
 
-    let prog = lift(&insns, None).expect("lift should keep exit terminator");
+    let prog = lift(&insns, None).expect("lift should keep exit exit");
 
     let Terminator::Exit { insn } = prog.blocks[0].terminator else {
         panic!("block should end in exit");

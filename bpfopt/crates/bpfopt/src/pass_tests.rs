@@ -129,9 +129,12 @@ fn remap_btf_metadata_drops_deleted_entries_and_shifts_survivors() {
     .expect("delete should remap BTF metadata");
 
     // IMPL: needs BBProgram::btf_records() with offsets and type-id views.
-    assert_eq!(prog.btf_records().func_offsets(), vec![0]);
-    assert_eq!(prog.btf_records().line_offsets(), vec![0, 1, 2]);
-    assert_eq!(prog.btf_records().line_type_ids(), vec![100, 102, 103]);
+    assert_eq!(prog.btf_records().unwrap().func_offsets(), vec![0]);
+    assert_eq!(prog.btf_records().unwrap().line_offsets(), vec![0, 1, 2]);
+    assert_eq!(
+        prog.btf_records().unwrap().line_type_ids(),
+        vec![100, 102, 103]
+    );
 }
 
 #[test]

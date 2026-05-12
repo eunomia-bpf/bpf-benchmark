@@ -166,7 +166,7 @@ fn pattern_a_for_site(
     let mut jcc_site = site.start_site;
     if !prog.is_terminator_site(jcc_site)? {
         anyhow::bail!(
-            "pattern A branch site {:?} is not a block terminator",
+            "pattern A branch site {:?} is not a block exit",
             site.start_site
         );
     }
@@ -174,7 +174,7 @@ fn pattern_a_for_site(
         let (_, tail) = prog.split_block(jcc_site)?;
         jcc_site = prog
             .terminator_site(tail)?
-            .ok_or_else(|| anyhow::anyhow!("split tail {:?} has no terminator site", tail))?;
+            .ok_or_else(|| anyhow::anyhow!("split tail {:?} has no exit site", tail))?;
     }
     let predecessor = prog.site_block(jcc_site);
     let Terminator::CondBranch {
@@ -222,10 +222,7 @@ fn pattern_c_for_site(
         prog.split_block(start_site)?.1
     };
     let branch_site = prog.terminator_site(predecessor)?.ok_or_else(|| {
-        anyhow::anyhow!(
-            "pattern C predecessor {:?} has no terminator site",
-            predecessor
-        )
+        anyhow::anyhow!("pattern C predecessor {:?} has no exit site", predecessor)
     })?;
     let Terminator::CondBranch {
         taken, fallthrough, ..
@@ -255,9 +252,9 @@ fn scan_cond_select_sites(prog: &BBProgram) -> anyhow::Result<Vec<CondSelectSite
         else {
             continue;
         };
-        let branch_site = prog.terminator_site(block.id)?.ok_or_else(|| {
-            anyhow::anyhow!("conditional block {:?} has no terminator site", block.id)
-        })?;
+        let branch_site = prog
+            .terminator_site(block.id)?
+            .ok_or_else(|| anyhow::anyhow!("conditional block {:?} has no exit site", block.id))?;
         let shape = CondBranchShape {
             block: block.id,
             site: branch_site,

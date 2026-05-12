@@ -479,11 +479,6 @@ impl BpfInsn {
     pub fn is_call_kinsn(&self) -> bool {
         self.is_call() && self.src_reg() == BPF_PSEUDO_KINSN_CALL
     }
-    /// `call helper_id` (src_reg = 0).
-    #[cfg(test)]
-    pub fn helper_call(id: i32) -> Self {
-        Self::new(BPF_JMP | BPF_CALL, Self::make_regs(0, 0), 0, id)
-    }
     /// `call pc-relative subprogram` (src_reg = BPF_PSEUDO_CALL).
     pub fn pseudo_call_to(call_pc: usize, target_pc: usize) -> Self {
         let imm = target_pc as i64 - (call_pc as i64 + 1);
@@ -501,17 +496,9 @@ impl BpfInsn {
     pub fn jeq_imm(dst: u8, imm: i32, off: i16) -> Self {
         Self::jump_imm(BPF_JEQ, dst, imm, off)
     }
-    #[cfg(test)]
-    pub fn jne_imm(dst: u8, imm: i32, off: i16) -> Self {
-        Self::jump_imm(BPF_JNE, dst, imm, off)
-    }
     /// `j<op> dst, src, +off`
     pub fn jump_reg(op: u8, dst: u8, src: u8, off: i16) -> Self {
         Self::new(BPF_JMP | op | BPF_X, Self::make_regs(dst, src), off, 0)
-    }
-    #[cfg(test)]
-    pub fn jgt_reg(dst: u8, src: u8, off: i16) -> Self {
-        Self::jump_reg(BPF_JGT, dst, src, off)
     }
     /// `exit`
     pub fn exit() -> Self {
@@ -583,11 +570,6 @@ impl BpfInsn {
     pub fn stx_mem(size: u8, dst: u8, src: u8, off: i16) -> Self {
         Self::new(BPF_STX | size | BPF_MEM, Self::make_regs(dst, src), off, 0)
     }
-    /// `st_mem size, [dst + off], imm`
-    #[cfg(test)]
-    pub fn st_mem(size: u8, dst: u8, off: i16, imm: i32) -> Self {
-        Self::new(BPF_ST | size | BPF_MEM, Self::make_regs(dst, 0), off, imm)
-    }
     /// `alu64 op, dst, imm`  (e.g., LSH64_IMM, OR64_IMM)
     pub fn alu64_imm(op: u8, dst: u8, imm: i32) -> Self {
         Self::new(BPF_ALU64 | op | BPF_K, Self::make_regs(dst, 0), 0, imm)
@@ -608,15 +590,6 @@ impl BpfInsn {
     #[cfg(test)]
     pub fn alu32_reg(op: u8, dst: u8, src: u8) -> Self {
         Self::new(BPF_ALU | op | BPF_X, Self::make_regs(dst, src), 0, 0)
-    }
-    #[cfg(test)]
-    pub fn endian_to_be(dst: u8, size: i32) -> Self {
-        Self::new(
-            BPF_ALU | BPF_END | BPF_TO_BE,
-            Self::make_regs(dst, 0),
-            0,
-            size,
-        )
     }
     /// NOP — encoded as `ja +0`.
     pub fn nop() -> Self {

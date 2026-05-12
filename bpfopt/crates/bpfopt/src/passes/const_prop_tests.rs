@@ -103,7 +103,7 @@ fn const_prop_does_not_fold_typed_ldimm64_map_value() {
 fn const_prop_uses_verifier_exact_constants_for_alu_after_helper_calls() {
     let run = run_const_prop(
         vec![
-            BpfInsn::helper_call(7),
+            BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, 7),
             BpfInsn::add64_imm(BPF_REG_0, 1),
             BpfInsn::exit(),
         ],
@@ -116,7 +116,7 @@ fn const_prop_uses_verifier_exact_constants_for_alu_after_helper_calls() {
     assert_eq!(
         run.lowered,
         vec![
-            BpfInsn::helper_call(7),
+            BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, 7),
             BpfInsn::mov64_imm(BPF_REG_0, 42),
             BpfInsn::exit(),
         ]
@@ -127,7 +127,7 @@ fn const_prop_uses_verifier_exact_constants_for_alu_after_helper_calls() {
 fn const_prop_does_not_seed_caller_saved_regs_from_call_post_state() {
     // P1-K: call-pc post-state for R0-R5 must not repopulate caller-saved facts.
     let input = vec![
-        BpfInsn::helper_call(7),
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, 7),
         BpfInsn::add64_imm(BPF_REG_0, 1),
         BpfInsn::exit(),
     ];
@@ -216,7 +216,7 @@ fn const_prop_rejects_edge_state_only_pointer_arithmetic_materialization() {
 #[test]
 fn const_prop_rejects_replacement_when_observation_missing_at_some_visit() {
     let input = vec![
-        BpfInsn::helper_call(7),
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, 7),
         BpfInsn::jeq_imm(BPF_REG_0, 0, 1),
         BpfInsn::nop(),
         BpfInsn::add64_imm(BPF_REG_3, 1),
@@ -238,7 +238,7 @@ fn const_prop_rejects_replacement_when_observation_missing_at_some_visit() {
 #[test]
 fn const_prop_rejects_replacement_when_full_state_visit_omits_reg() {
     let input = vec![
-        BpfInsn::helper_call(7),
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, 7),
         BpfInsn::add64_imm(BPF_REG_3, 1),
         BpfInsn::exit(),
     ];
@@ -258,7 +258,7 @@ fn const_prop_rejects_replacement_when_full_state_visit_omits_reg() {
 #[test]
 fn const_prop_rejects_replacement_across_disagreeing_frames() {
     let input = vec![
-        BpfInsn::helper_call(7),
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, 7),
         BpfInsn::add64_imm(BPF_REG_3, 1),
         BpfInsn::exit(),
     ];
@@ -279,7 +279,7 @@ fn const_prop_rejects_replacement_across_disagreeing_frames() {
 fn const_prop_accepts_when_every_visit_agrees() {
     let run = run_const_prop(
         vec![
-            BpfInsn::helper_call(7),
+            BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, 7),
             BpfInsn::add64_imm(BPF_REG_3, 1),
             BpfInsn::exit(),
         ],
@@ -293,7 +293,7 @@ fn const_prop_accepts_when_every_visit_agrees() {
     assert_eq!(
         run.lowered,
         vec![
-            BpfInsn::helper_call(7),
+            BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, 7),
             BpfInsn::mov64_imm(BPF_REG_3, 42),
             BpfInsn::exit(),
         ]

@@ -13,8 +13,8 @@ fn bbprogram_live_in_marks_register_used_before_local_def() {
     ];
     let prog = lift_test_program(&insns, &pass_ctx());
 
-    assert!(prog.live_in(BlockId(0)).contains(&BPF_REG_1));
-    assert!(prog.live_in(BlockId(0)).contains(&BPF_REG_2));
+    assert!(prog.live_in(BlockId(0)).unwrap().contains(&BPF_REG_1));
+    assert!(prog.live_in(BlockId(0)).unwrap().contains(&BPF_REG_2));
 }
 
 #[test]
@@ -27,22 +27,22 @@ fn bbprogram_live_out_propagates_across_branch_successors() {
     ];
     let prog = lift_test_program(&insns, &pass_ctx());
 
-    assert!(prog.live_out(BlockId(0)).contains(&BPF_REG_2));
-    assert!(prog.live_in(BlockId(1)).contains(&BPF_REG_3));
+    assert!(prog.live_out(BlockId(0)).unwrap().contains(&BPF_REG_2));
+    assert!(prog.live_in(BlockId(1)).unwrap().contains(&BPF_REG_3));
 }
 
 #[test]
 fn bbprogram_liveness_models_helper_call_clobbers() {
     let insns = vec![
         BpfInsn::mov64_imm(BPF_REG_1, 7),
-        BpfInsn::helper_call(1),
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, 1),
         BpfInsn::alu64_reg(BPF_ADD, BPF_REG_6, BPF_REG_1),
         BpfInsn::exit(),
     ];
     let prog = lift_test_program(&insns, &pass_ctx());
 
-    assert!(!prog.live_out(BlockId(0)).contains(&BPF_REG_1));
-    assert!(prog.live_in(BlockId(0)).contains(&BPF_REG_6));
+    assert!(!prog.live_out(BlockId(0)).unwrap().contains(&BPF_REG_1));
+    assert!(prog.live_in(BlockId(0)).unwrap().contains(&BPF_REG_6));
 }
 
 #[test]
@@ -65,9 +65,9 @@ fn bbprogram_liveness_includes_kinsn_implicit_register_uses() {
     ];
     let prog = lift_test_program(&insns, &ctx);
 
-    assert!(prog.live_out(BlockId(0)).contains(&BPF_REG_6));
-    assert!(prog.live_out(BlockId(0)).contains(&BPF_REG_0));
-    assert!(prog.live_out(BlockId(0)).contains(&BPF_REG_1));
+    assert!(prog.live_out(BlockId(0)).unwrap().contains(&BPF_REG_6));
+    assert!(prog.live_out(BlockId(0)).unwrap().contains(&BPF_REG_0));
+    assert!(prog.live_out(BlockId(0)).unwrap().contains(&BPF_REG_1));
 }
 
 #[test]
@@ -85,5 +85,5 @@ fn bbprogram_liveness_recomputes_after_delete_insn() {
 
     prog.delete_insn(def).expect("delete should update use-def");
 
-    assert!(prog.live_in(BlockId(0)).contains(&BPF_REG_2));
+    assert!(prog.live_in(BlockId(0)).unwrap().contains(&BPF_REG_2));
 }

@@ -83,7 +83,7 @@ pub(crate) fn lift_with_kinsn_registry(
                 btf.insert(site, pc);
                 pc += 1;
                 if pc != end_pc {
-                    anyhow::bail!("terminator at pc {pc} did not end block {:?}", id);
+                    anyhow::bail!("exit at pc {pc} did not end block {:?}", id);
                 }
                 break;
             }

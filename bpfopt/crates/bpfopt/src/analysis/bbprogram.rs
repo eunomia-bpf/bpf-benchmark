@@ -7,7 +7,7 @@ use crate::analysis::bbprogram_lower::remap_btf_records_for_lowering;
 use crate::analysis::{DefSite, UseDefGraph};
 use crate::insn::{insn_width, BpfInsn, MapPseudo};
 use crate::pass::{
-    BtfInfoRecords, InsnAnnotation, KinsnRegistry, PmuRecord, PrefetchHint, RegKind, RegSet,
+    BtfInfoRecords, InsnAnnotation, KinsnRegistry, PrefetchProfile, RegKind, RegSet,
 };
 use crate::verifier_log::{RegState, StackState, VerifierInsn, VerifierInsnKind};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
@@ -48,10 +48,6 @@ impl SlotDistance {
     pub fn slots(self) -> usize {
         self.0
     }
-    /// Does this distance fit in the BPF JA imm16 range (-32768..=32767)?
-    pub fn fits_jmp_imm16(self) -> bool {
-        self.0 <= i16::MAX as usize
-    }
     pub fn saturating_sub(self, other: Self) -> Self {
         Self(self.0.saturating_sub(other.0))
     }
@@ -74,7 +70,7 @@ pub struct BBProgram {
     pub(crate) entry: BlockId,
     pub(super) use_def: UseDefGraph,
     pub(super) oracle: Option<VerifierOracle>,
-    pub(super) pmu_profile: BTreeMap<InsnSite, PmuRecord>,
+    pub(super) pmu_profile: BTreeMap<InsnSite, InsnAnnotation>,
     pub(super) btf: BtfMetadataMap,
     pub(super) kinsn_reg: Arc<KinsnRegistry>,
     pub(crate) map_bindings: Vec<BBMapBinding>,
@@ -256,16 +252,7 @@ impl BBProgram {
         )
     }
     #[cfg(test)]
-    pub fn dominance(&self) -> Dominance {
-        Dominance::compute(self)
-    }
-    #[cfg(test)]
-    pub fn live_in(&self, block: BlockId) -> RegSet {
-        self.live_in_checked(block)
-            .unwrap_or_else(|err| panic!("invalid live_in query for {:?}: {err}", block))
-    }
-    #[cfg(test)]
-    pub fn live_in_checked(&self, block: BlockId) -> anyhow::Result<RegSet> {
+    pub fn live_in(&self, block: BlockId) -> anyhow::Result<RegSet> {
         self.block(block)?;
         compute_liveness(self)
             .live_in
@@ -273,12 +260,7 @@ impl BBProgram {
             .ok_or_else(|| anyhow::anyhow!("liveness missing live_in for {:?}", block))
     }
     #[cfg(test)]
-    pub fn live_out(&self, block: BlockId) -> RegSet {
-        self.live_out_checked(block)
-            .unwrap_or_else(|err| panic!("invalid live_out query for {:?}: {err}", block))
-    }
-    #[cfg(test)]
-    pub fn live_out_checked(&self, block: BlockId) -> anyhow::Result<RegSet> {
+    pub fn live_out(&self, block: BlockId) -> anyhow::Result<RegSet> {
         self.block(block)?;
         compute_liveness(self)
             .live_out
@@ -455,14 +437,8 @@ impl BBProgram {
             .map(|profile| profile.execution_count);
         branch_count.into_iter().chain(execution_count).max()
     }
-    pub fn prefetch_hint(&self, site: InsnSite) -> Option<PrefetchHint> {
-        let profile = self.pmu_profile.get(&site)?.prefetch_profile.as_ref()?;
-        Some(PrefetchHint {
-            execution_count: profile.execution_count,
-            cache_references: profile.cache_references,
-            cache_misses: profile.cache_misses,
-            miss_rate: profile.miss_rate as f32,
-        })
+    pub fn prefetch_hint(&self, site: InsnSite) -> Option<&PrefetchProfile> {
+        self.pmu_profile.get(&site)?.prefetch_profile.as_ref()
     }
     pub(crate) fn attach_profile_from_annotations(
         &mut self,
@@ -493,12 +469,7 @@ impl BBProgram {
             .map(|block| block.id)
     }
     #[cfg(test)]
-    pub fn btf_records(&self) -> BtfRemapView {
-        self.btf_records_checked()
-            .unwrap_or_else(|err| panic!("BBProgram BTF remap should be valid: {err}"))
-    }
-    #[cfg(test)]
-    pub fn btf_records_checked(&self) -> anyhow::Result<BtfRemapView> {
+    pub fn btf_records(&self) -> anyhow::Result<BtfRemapView> {
         Ok(BtfRemapView {
             func: remap_btf_records_view(self, self.func_info.as_ref(), BtfRecordKind::Func)?,
             line: remap_btf_records_view(self, self.line_info.as_ref(), BtfRecordKind::Line)?,
@@ -509,7 +480,7 @@ impl BBProgram {
         Ok((0..len).map(move |idx| InsnSite { block, idx }).collect())
     }
     pub fn sites_in_block_with_terminator(&self, block: BlockId) -> anyhow::Result<Vec<InsnSite>> {
-        self.logical_sites_in_block(block)
+        Ok(logical_sites_for_block(self.block(block)?))
     }
     pub(super) fn current_site_pcs(&self) -> anyhow::Result<BTreeMap<InsnSite, usize>> {
         current_site_pcs(self)
@@ -624,7 +595,9 @@ impl BBProgram {
         Ok(targets)
     }
     pub fn first_site_in_block(&self, block: BlockId) -> anyhow::Result<Option<InsnSite>> {
-        Ok(self.logical_sites_in_block(block)?.into_iter().next())
+        Ok(logical_sites_for_block(self.block(block)?)
+            .into_iter()
+            .next())
     }
     pub fn terminator_site(&self, block: BlockId) -> anyhow::Result<Option<InsnSite>> {
         let block_ref = self.block(block)?;
@@ -822,9 +795,6 @@ impl BBProgram {
         self.blocks
             .get_mut(block.0)
             .ok_or_else(|| anyhow::anyhow!("invalid block id {:?}", block))
-    }
-    pub(super) fn logical_sites_in_block(&self, block: BlockId) -> anyhow::Result<Vec<InsnSite>> {
-        Ok(logical_sites_for_block(self.block(block)?))
     }
     pub(crate) fn dataflow_successors(&self, block: BlockId) -> anyhow::Result<Vec<BlockId>> {
         let block_ref = self
@@ -1118,58 +1088,6 @@ impl Terminator {
             Self::Call { return_to, .. } => vec![return_to],
             Self::Exit { .. } | Self::End => Vec::new(),
         }
-    }
-}
-#[derive(Clone, Debug)]
-#[cfg(test)]
-pub struct Dominance {
-    dominators: Vec<BTreeSet<BlockId>>,
-}
-#[cfg(test)]
-impl Dominance {
-    fn compute(prog: &BBProgram) -> Self {
-        let all = prog
-            .blocks
-            .iter()
-            .map(|block| block.id)
-            .collect::<BTreeSet<_>>();
-        let mut dominators = vec![all.clone(); prog.blocks.len()];
-        if prog.entry.0 < dominators.len() {
-            dominators[prog.entry.0] = BTreeSet::from([prog.entry]);
-        }
-        let mut changed = true;
-        while changed {
-            changed = false;
-            for block in prog.blocks() {
-                if block.id == prog.entry {
-                    continue;
-                }
-                let preds = prog.predecessors(block.id);
-                let mut next = if let Some((&first, rest)) = preds.split_first() {
-                    let mut acc = dominators[first.0].clone();
-                    for pred in rest {
-                        acc = acc
-                            .intersection(&dominators[pred.0])
-                            .copied()
-                            .collect::<BTreeSet<_>>();
-                    }
-                    acc
-                } else {
-                    BTreeSet::new()
-                };
-                next.insert(block.id);
-                if next != dominators[block.id.0] {
-                    dominators[block.id.0] = next;
-                    changed = true;
-                }
-            }
-        }
-        Self { dominators }
-    }
-    pub fn dominates(&self, dominator: BlockId, block: BlockId) -> bool {
-        self.dominators
-            .get(block.0)
-            .is_some_and(|set| set.contains(&dominator))
     }
 }
 fn current_site_pcs(prog: &BBProgram) -> anyhow::Result<BTreeMap<InsnSite, usize>> {
@@ -1780,9 +1698,6 @@ mod tests {
         assert_eq!(prog.successors(BlockId(0)), &[BlockId(1), BlockId(2)]);
         assert_eq!(prog.predecessors(BlockId(1)), &[BlockId(0)]);
         assert_eq!(prog.predecessors(BlockId(2)), &[BlockId(0), BlockId(1)]);
-        let dom = prog.dominance();
-        assert!(dom.dominates(BlockId(0), BlockId(1)));
-        assert!(dom.dominates(BlockId(0), BlockId(2)));
     }
     #[test]
     fn bbprogram_cfg_edges_use_ja32_imm_target() {

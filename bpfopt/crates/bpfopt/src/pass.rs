@@ -41,14 +41,6 @@ pub enum RegKind {
     Unknown,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct PrefetchHint {
-    pub execution_count: u64,
-    pub cache_references: u64,
-    pub cache_misses: u64,
-    pub miss_rate: f32,
-}
-
 #[derive(Clone, Copy, Debug)]
 pub struct KinsnDescriptor {
     pub name: &'static str,
@@ -103,14 +95,12 @@ pub struct BranchProfile {
 
 /// Real per-site PMU memory statistics for optional prefetch admission.
 #[derive(Clone, Debug)]
-pub(crate) struct PrefetchProfile {
+pub struct PrefetchProfile {
     pub execution_count: u64,
     pub cache_references: u64,
     pub cache_misses: u64,
     pub miss_rate: f64,
 }
-pub(crate) type PmuRecord = InsnAnnotation;
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MapInlineHintModeSpec {
     Soft,

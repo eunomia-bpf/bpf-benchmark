@@ -20,8 +20,13 @@ fn setup(offset: i32, stack_off: i32, len: i32) -> Vec<BpfInsn> {
 
 fn skb_program(offset: i32, stack_off: i32, len: i32) -> Vec<BpfInsn> {
     let mut insns = setup(offset, stack_off, len);
-    insns.push(BpfInsn::helper_call(SKB_LOAD_BYTES));
-    insns.push(BpfInsn::jne_imm(BPF_REG_0, 0, 2));
+    insns.push(BpfInsn::new(
+        BPF_JMP | BPF_CALL,
+        BpfInsn::make_regs(0, 0),
+        0,
+        SKB_LOAD_BYTES,
+    ));
+    insns.push(BpfInsn::jump_imm(BPF_JNE, BPF_REG_0, 0, 2));
     insns.push(BpfInsn::mov64_imm(BPF_REG_0, 1));
     insns.push(BpfInsn::exit());
     insns.push(BpfInsn::mov64_imm(BPF_REG_0, 0));
@@ -51,7 +56,12 @@ fn skb_load_bytes_rewrites_constant_offset_and_length() {
 #[test]
 fn skb_load_bytes_ignores_non_skb_helper() {
     let mut input = setup(14, -8, 1);
-    input.push(BpfInsn::helper_call(MAP_LOOKUP));
+    input.push(BpfInsn::new(
+        BPF_JMP | BPF_CALL,
+        BpfInsn::make_regs(0, 0),
+        0,
+        MAP_LOOKUP,
+    ));
     input.push(BpfInsn::exit());
 
     let run = run_skb(input.clone(), SCHED_CLS);
@@ -67,7 +77,12 @@ fn skb_load_bytes_rejects_variable_offset() {
         BpfInsn::mov64_reg(BPF_REG_3, BPF_REG_10),
         BpfInsn::add64_imm(BPF_REG_3, -8),
         BpfInsn::mov64_imm(BPF_REG_4, 1),
-        BpfInsn::helper_call(SKB_LOAD_BYTES),
+        BpfInsn::new(
+            BPF_JMP | BPF_CALL,
+            BpfInsn::make_regs(0, 0),
+            0,
+            SKB_LOAD_BYTES,
+        ),
         BpfInsn::exit(),
     ];
 
@@ -84,7 +99,12 @@ fn skb_load_bytes_rejects_variable_length() {
         BpfInsn::mov64_reg(BPF_REG_3, BPF_REG_10),
         BpfInsn::add64_imm(BPF_REG_3, -8),
         BpfInsn::mov64_reg(BPF_REG_4, BPF_REG_7),
-        BpfInsn::helper_call(SKB_LOAD_BYTES),
+        BpfInsn::new(
+            BPF_JMP | BPF_CALL,
+            BpfInsn::make_regs(0, 0),
+            0,
+            SKB_LOAD_BYTES,
+        ),
         BpfInsn::exit(),
     ];
 
@@ -108,12 +128,17 @@ fn skb_load_bytes_requires_tc_program_type() {
 fn skb_load_bytes_requires_ctx_reload_after_prior_helper() {
     let input = vec![
         BpfInsn::mov64_reg(BPF_REG_6, BPF_REG_1),
-        BpfInsn::helper_call(MAP_LOOKUP),
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, MAP_LOOKUP),
         BpfInsn::mov64_imm(BPF_REG_2, 14),
         BpfInsn::mov64_reg(BPF_REG_3, BPF_REG_10),
         BpfInsn::add64_imm(BPF_REG_3, -8),
         BpfInsn::mov64_imm(BPF_REG_4, 1),
-        BpfInsn::helper_call(SKB_LOAD_BYTES),
+        BpfInsn::new(
+            BPF_JMP | BPF_CALL,
+            BpfInsn::make_regs(0, 0),
+            0,
+            SKB_LOAD_BYTES,
+        ),
         BpfInsn::exit(),
     ];
 

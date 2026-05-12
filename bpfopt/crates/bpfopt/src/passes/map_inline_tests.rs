@@ -16,10 +16,15 @@ fn lookup_program(old_fd: i32) -> Vec<BpfInsn> {
     vec![
         map[0],
         map[1],
-        BpfInsn::st_mem(BPF_W, BPF_REG_10, -4, 1),
+        BpfInsn::new(
+            BPF_ST | BPF_W | BPF_MEM,
+            BpfInsn::make_regs(BPF_REG_10, 0),
+            -4,
+            1,
+        ),
         BpfInsn::mov64_reg(BPF_REG_2, BPF_REG_10),
         BpfInsn::add64_imm(BPF_REG_2, -4),
-        BpfInsn::helper_call(LOOKUP),
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, LOOKUP),
         BpfInsn::ldx_mem(BPF_W, BPF_REG_6, BPF_REG_0, 0),
         BpfInsn::exit(),
     ]
@@ -363,7 +368,10 @@ fn map_inline_pass_inlines_uniform_percpu_array_maps() {
 #[test]
 fn map_inline_skips_kernel_mutable_map() {
     let mut input = lookup_program(42);
-    input.insert(5, BpfInsn::helper_call(UPDATE));
+    input.insert(
+        5,
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, UPDATE),
+    );
     let ctx = ctx_for_array_lookup(111, 7u32.to_le_bytes().to_vec());
 
     let run = run_pass_on_insns(MapInlinePass, input, &ctx);
@@ -443,7 +451,10 @@ fn map_inline_soft_hint_requires_immediate_null_check_when_hard_fold_coexists() 
 #[test]
 fn map_inline_route_a_rejects_kernel_mutable_inner_hint() {
     let mut input = lookup_program(42);
-    input.insert(5, BpfInsn::helper_call(UPDATE));
+    input.insert(
+        5,
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, UPDATE),
+    );
     let mut ctx = ctx_for_array_lookup(111, 7u32.to_le_bytes().to_vec());
     ctx.map_metadata.insert(
         111,

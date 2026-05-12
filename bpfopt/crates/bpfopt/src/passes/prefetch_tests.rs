@@ -11,7 +11,12 @@ fn prefetch_ctx() -> crate::pass::PassContext {
 
 fn map_lookup_program() -> Vec<BpfInsn> {
     vec![
-        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
+        BpfInsn::new(
+            BPF_JMP | BPF_CALL,
+            BpfInsn::make_regs(0, 0),
+            0,
+            libbpf_sys::BPF_FUNC_map_lookup_elem as i32,
+        ),
         BpfInsn::jeq_imm(BPF_REG_0, 0, 1),
         BpfInsn::ldx_mem(BPF_DW, BPF_REG_1, BPF_REG_0, 0),
         BpfInsn::exit(),
@@ -32,7 +37,12 @@ fn prefetch_emits_map_value_prefetch() {
 #[test]
 fn prefetch_uses_alias_register_for_map_value_deref() {
     let input = vec![
-        BpfInsn::helper_call(libbpf_sys::BPF_FUNC_map_lookup_elem as i32),
+        BpfInsn::new(
+            BPF_JMP | BPF_CALL,
+            BpfInsn::make_regs(0, 0),
+            0,
+            libbpf_sys::BPF_FUNC_map_lookup_elem as i32,
+        ),
         BpfInsn::mov64_reg(BPF_REG_6, BPF_REG_0),
         BpfInsn::jeq_imm(BPF_REG_6, 0, 1),
         BpfInsn::ldx_mem(BPF_DW, BPF_REG_1, BPF_REG_6, 8),

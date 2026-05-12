@@ -1,0 +1,2192 @@
+{
+  "app": "bcc/set",
+  "baseline": {
+    "bpf": {
+      "6": {
+        "bytes_jited": 72,
+        "bytes_xlated": 112,
+        "id": 6,
+        "name": "tracepoint__raw_syscalls__sys_enter",
+        "run_cnt_delta": 258853497,
+        "run_time_ns_delta": 19862385647,
+        "type": "tracepoint"
+      },
+      "7": {
+        "bytes_jited": 236,
+        "bytes_xlated": 400,
+        "id": 7,
+        "name": "tracepoint__raw_syscalls__sys_exit",
+        "run_cnt_delta": 258853856,
+        "run_time_ns_delta": 19043162118,
+        "type": "tracepoint"
+      },
+      "10": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 10,
+        "name": "vfs_create",
+        "run_cnt_delta": 476566,
+        "run_time_ns_delta": 28477112,
+        "type": "tracing"
+      },
+      "11": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 11,
+        "name": "kfunc__vmlinux__vfs_fsync_range",
+        "run_cnt_delta": 37260,
+        "run_time_ns_delta": 1933595,
+        "type": "tracing"
+      },
+      "12": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 12,
+        "name": "vfs_open",
+        "run_cnt_delta": 5765207,
+        "run_time_ns_delta": 265620123,
+        "type": "tracing"
+      },
+      "13": {
+        "bytes_jited": 87,
+        "bytes_xlated": 136,
+        "id": 13,
+        "name": "vfs_read",
+        "run_cnt_delta": 8210790,
+        "run_time_ns_delta": 288498881,
+        "type": "tracing"
+      },
+      "14": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 14,
+        "name": "vfs_write",
+        "run_cnt_delta": 2488140,
+        "run_time_ns_delta": 104121458,
+        "type": "tracing"
+      },
+      "19": {
+        "bytes_jited": 203,
+        "bytes_xlated": 344,
+        "id": 19,
+        "name": "cap_capable",
+        "run_cnt_delta": 14651539,
+        "run_time_ns_delta": 685738797,
+        "type": "kprobe"
+      },
+      "22": {
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 22,
+        "name": "__x64_sys_open",
+        "run_cnt_delta": 16862,
+        "run_time_ns_delta": 2677656,
+        "type": "tracing"
+      },
+      "23": {
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 23,
+        "name": "kretfunc__vmlinux____x64_sys_openat",
+        "run_cnt_delta": 4075154,
+        "run_time_ns_delta": 997848036,
+        "type": "tracing"
+      },
+      "24": {
+        "bytes_jited": 590,
+        "bytes_xlated": 640,
+        "id": 24,
+        "name": "kretfunc__vmlinux____x64_sys_openat2",
+        "run_cnt_delta": 2944,
+        "run_time_ns_delta": 547679,
+        "type": "tracing"
+      },
+      "27": {
+        "bytes_jited": 662,
+        "bytes_xlated": 1168,
+        "id": 27,
+        "name": "sched_switch",
+        "run_cnt_delta": 6866238,
+        "run_time_ns_delta": 1007572085,
+        "type": "raw_tracepoint"
+      },
+      "28": {
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 28,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 4917173,
+        "run_time_ns_delta": 447276195,
+        "type": "raw_tracepoint"
+      },
+      "29": {
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 29,
+        "name": "raw_tracepoint__sched_wakeup_new",
+        "run_cnt_delta": 189254,
+        "run_time_ns_delta": 46563608,
+        "type": "raw_tracepoint"
+      },
+      "32": {
+        "bytes_jited": 75,
+        "bytes_xlated": 120,
+        "id": 32,
+        "name": "trace_connect_entry",
+        "run_cnt_delta": 93490,
+        "run_time_ns_delta": 9693615,
+        "type": "kprobe"
+      },
+      "33": {
+        "bytes_jited": 480,
+        "bytes_xlated": 720,
+        "id": 33,
+        "name": "trace_connect_v4_return",
+        "run_cnt_delta": 93490,
+        "run_time_ns_delta": 81438366,
+        "type": "kprobe"
+      },
+      "34": {
+        "bytes_jited": 477,
+        "bytes_xlated": 712,
+        "id": 34,
+        "name": "trace_connect_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "37": {
+        "bytes_jited": 1067,
+        "bytes_xlated": 1672,
+        "id": 37,
+        "name": "tracepoint__sock__inet_sock_set_state",
+        "run_cnt_delta": 1123776,
+        "run_time_ns_delta": 306565004,
+        "type": "tracepoint"
+      },
+      "38": {
+        "bytes_jited": 267,
+        "bytes_xlated": 448,
+        "id": 38,
+        "name": "trace_pid_start_tp",
+        "run_cnt_delta": 167743,
+        "run_time_ns_delta": 73359701,
+        "type": "tracepoint"
+      },
+      "39": {
+        "bytes_jited": 335,
+        "bytes_xlated": 616,
+        "id": 39,
+        "name": "trace_req_start",
+        "run_cnt_delta": 168887,
+        "run_time_ns_delta": 63845696,
+        "type": "kprobe"
+      },
+      "40": {
+        "bytes_jited": 550,
+        "bytes_xlated": 856,
+        "id": 40,
+        "name": "trace_req_completion_tp",
+        "run_cnt_delta": 170108,
+        "run_time_ns_delta": 34562821,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "4",
+          "--eventfd",
+          "4",
+          "--get",
+          "4",
+          "--prctl",
+          "4",
+          "--set",
+          "4",
+          "--dup",
+          "4",
+          "--kill",
+          "4",
+          "--sigfd",
+          "4",
+          "--signal",
+          "4",
+          "--pty",
+          "4",
+          "--itimer",
+          "4",
+          "--timerfd",
+          "4",
+          "--exec",
+          "4",
+          "--fork",
+          "4",
+          "--vfork",
+          "4",
+          "--clone",
+          "4",
+          "--ptrace",
+          "4",
+          "--futex",
+          "4",
+          "--sem",
+          "4",
+          "--aio",
+          "4",
+          "--aiol",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--io",
+          "4",
+          "--iomix",
+          "4",
+          "--iomix-bytes",
+          "128M",
+          "--io-uring",
+          "4",
+          "--sync-file",
+          "4",
+          "--epoll",
+          "4",
+          "--netdev",
+          "4",
+          "--sctp",
+          "4",
+          "--sock",
+          "4",
+          "--sockdiag",
+          "4",
+          "--sockfd",
+          "4",
+          "--sockpair",
+          "4",
+          "--sockmany",
+          "4",
+          "--udp",
+          "4",
+          "--udp-flood",
+          "4",
+          "--mmap",
+          "4",
+          "--mmap-bytes",
+          "16M",
+          "--mprotect",
+          "4",
+          "--mremap",
+          "4",
+          "--mremap-bytes",
+          "16M",
+          "--madvise",
+          "4",
+          "--access",
+          "4",
+          "--chdir",
+          "4",
+          "--chmod",
+          "4",
+          "--chown",
+          "4",
+          "--dentry",
+          "4",
+          "--dir",
+          "4",
+          "--dirmany",
+          "4",
+          "--fallocate",
+          "4",
+          "--fallocate-bytes",
+          "128M",
+          "--file-ioctl",
+          "4",
+          "--filename",
+          "4",
+          "--flock",
+          "4",
+          "--fpunch",
+          "4",
+          "--fpunch-bytes",
+          "32M",
+          "--fstat",
+          "4",
+          "--getdent",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--inotify",
+          "4",
+          "--open",
+          "4",
+          "--open-max",
+          "1024",
+          "--rename",
+          "4",
+          "--touch",
+          "4",
+          "--utime",
+          "4",
+          "--link",
+          "4",
+          "--symlink",
+          "4",
+          "--mknod",
+          "4",
+          "--fcntl",
+          "4",
+          "--epoll-port",
+          "21932",
+          "--sctp-port",
+          "22032",
+          "--sock-port",
+          "22132",
+          "--sockfd-port",
+          "22232",
+          "--timeout",
+          "15s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/2xdb4"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "eventfd",
+            "get",
+            "prctl",
+            "set",
+            "dup",
+            "kill",
+            "sigfd",
+            "signal",
+            "pty",
+            "itimer",
+            "timerfd",
+            "exec",
+            "fork",
+            "vfork",
+            "clone",
+            "ptrace",
+            "futex",
+            "sem",
+            "aio",
+            "aiol",
+            "hdd",
+            "io",
+            "iomix",
+            "io-uring",
+            "sync-file",
+            "epoll",
+            "netdev",
+            "sctp",
+            "sock",
+            "sockdiag",
+            "sockfd",
+            "sockpair",
+            "sockmany",
+            "udp",
+            "udp-flood",
+            "mmap",
+            "mprotect",
+            "mremap",
+            "madvise",
+            "access",
+            "chdir",
+            "chmod",
+            "chown",
+            "dentry",
+            "dir",
+            "dirmany",
+            "fallocate",
+            "file-ioctl",
+            "filename",
+            "flock",
+            "fpunch",
+            "fstat",
+            "getdent",
+            "hdd",
+            "inotify",
+            "open",
+            "rename",
+            "touch",
+            "utime",
+            "link",
+            "symlink",
+            "mknod",
+            "fcntl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 15.622550912000008,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [3567] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [3567] setting to a 15 secs run per stressor\nstress-ng: info:  [3567] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd, 4 fork, 4 vfork, 4 clone, 4 ptrace, 4 futex, 4 sem, 4 aio, 4 aiol, 4 hdd, 4 io, 4 iomix, 4 io-uring, 4 sync-file, 4 epoll, 4 netdev, 4 sctp, 4 sock, 4 sockdiag, 4 sockfd, 4 sockpair, 4 sockmany, 4 udp, 4 udp-flood, 4 mmap, 4 mprotect, 4 mremap, 4 madvise, 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [3567] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [3763] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: info:  [4936] open: using a maximum of 1024 file descriptors\nstress-ng: metrc: [3567] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [3567]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [3567] cap             1206384     15.05      0.33      4.13     80148.71      270786.52\nstress-ng: metrc: [3567] eventfd          831879     15.00      0.59      5.26     55445.57      142264.35\nstress-ng: metrc: [3567] get                6674     15.01      0.25      3.40       444.65        1826.18\nstress-ng: metrc: [3567] prctl             10226     15.00      3.08      2.00       681.51        2012.98\nstress-ng: metrc: [3567] set               91345     15.04      0.42      3.83      6072.42       21507.35\nstress-ng: metrc: [3567] dup                2200     15.01      0.77      0.69       146.57        1499.09\nstress-ng: metrc: [3567] kill              22902     15.11      0.04      4.89      1515.59        4648.88\nstress-ng: metrc: [3567] sigfd           3320498     15.16      0.48      5.43    219036.84      562267.45\nstress-ng: metrc: [3567] signal                0     15.04      0.03      0.26         0.00           0.00\nstress-ng: metrc: [3567] pty                 288     15.05      0.25      6.37        19.13          43.46\nstress-ng: metrc: [3567] itimer              928     15.10      0.65      7.63        61.45         112.15\nstress-ng: metrc: [3567] timerfd          923648     15.14      0.44      4.99     61018.37      170226.95\nstress-ng: metrc: [3567] fork              12516     15.01      1.79      2.53       833.89        2896.37\nstress-ng: metrc: [3567] vfork            109259     15.00      1.49      1.93      7282.82       31915.81\nstress-ng: metrc: [3567] clone              3288     15.09      1.41      6.23       217.83         430.36\nstress-ng: metrc: [3567] ptrace           689697     15.01      0.30      3.33     45962.86      190118.06\nstress-ng: metrc: [3567] futex           1150208     30.11      0.87      7.67     38197.41      134638.24\nstress-ng: metrc: [3567] sem             1175906     15.04      0.12      0.55     78203.09     1755358.68\nstress-ng: metrc: [3567] aio               15323     15.21      0.00      0.11      1007.41      140632.17\nstress-ng: metrc: [3567] aiol              19555     15.37      0.19      1.00      1272.64       16484.68\nstress-ng: metrc: [3567] hdd               79360     15.27      1.19      1.02      5197.68       35988.33\nstress-ng: metrc: [3567] io                   26     15.30      0.04      0.05         1.70         285.43\nstress-ng: metrc: [3567] iomix             21706     15.42      0.35      4.12      1407.63        4863.73\nstress-ng: metrc: [3567] io-uring          24448     15.31      0.00      1.25      1596.45       19473.98\nstress-ng: metrc: [3567] sync-file           181     15.26      0.11      0.48        11.86         307.61\nstress-ng: metrc: [3567] epoll              1073     15.12      0.05      0.39        70.98        2461.60\nstress-ng: metrc: [3567] netdev          2046662     15.04      0.42      3.30    136103.06      549045.48\nstress-ng: metrc: [3567] sctp             268280     15.01      0.12      1.90     17874.74      132674.94\nstress-ng: metrc: [3567] sock               4920     15.03      0.12      3.09       327.27        1536.12\nstress-ng: metrc: [3567] sockdiag       59212161     15.00      0.13      5.07   3946858.55    11376946.70\nstress-ng: metrc: [3567] sockfd          1059750     15.06      0.38      4.06     70360.85      238464.86\nstress-ng: metrc: [3567] sockpair          24635     15.10      0.07      0.24      1631.99       80709.63\nstress-ng: metrc: [3567] sockmany          93490     15.09      0.13      2.94      6197.27       30419.49\nstress-ng: metrc: [3567] udp              172428     15.11      0.14      2.94     11413.28       56085.29\nstress-ng: metrc: [3567] udp-flood       2269474     15.05      0.24      3.41    150789.44      620755.83\nstress-ng: metrc: [3567] mmap               5424     15.11      0.23      5.70       359.05         915.18\nstress-ng: metrc: [3567] mprotect       14816957     15.12      3.60     33.56    980178.48      398807.68\nstress-ng: metrc: [3567] mremap            12810     15.05      0.09      8.30       851.19        1527.11\nstress-ng: metrc: [3567] madvise             236     15.11      0.59      6.23        15.62          34.60\nstress-ng: metrc: [3567] access            28423     15.18      0.24      3.17      1872.51        8328.70\nstress-ng: metrc: [3567] chdir               102     15.39      0.32      3.66         6.63          25.64\nstress-ng: metrc: [3567] chmod               454     15.19      0.02      0.37        29.90        1151.52\nstress-ng: metrc: [3567] chown               638     15.19      0.01      0.08        42.00        7388.36\nstress-ng: metrc: [3567] dentry            20480     15.25      0.07      0.74      1343.12       25408.86\nstress-ng: metrc: [3567] dir               32771     15.38      0.20      3.74      2130.71        8315.75\nstress-ng: metrc: [3567] dirmany           39338     15.17      0.01      1.05      2593.11       36894.48\nstress-ng: metrc: [3567] fallocate             5     15.18      0.00      0.06         0.33          83.48\nstress-ng: metrc: [3567] file-ioctl       132764     15.08      0.13      2.49      8803.80       50641.87\nstress-ng: metrc: [3567] filename          12070     15.16      0.16      2.57       796.30        4435.67\nstress-ng: metrc: [3567] flock           3078571     15.08      0.67      2.56    204121.96      952737.45\nstress-ng: metrc: [3567] fpunch             1747     15.14      0.00      2.86       115.40         611.00\nstress-ng: metrc: [3567] fstat             11664     15.02      0.18      2.65       776.53        4112.73\nstress-ng: metrc: [3567] getdent          410318     15.03      0.16      2.92     27306.37      133224.93\nstress-ng: metrc: [3567] hdd               67072     15.14      0.88      0.94      4430.33       36805.73\nstress-ng: metrc: [3567] inotify              29     15.16      0.03      0.04         1.91         446.11\nstress-ng: metrc: [3567] open              18432     15.17      0.02      0.29      1215.22       59092.64\nstress-ng: metrc: [3567] rename           187419     15.12      0.10      1.12     12397.66      154073.11\nstress-ng: metrc: [3567] touch            285072     15.17      0.26      7.32     18785.72       37584.75\nstress-ng: metrc: [3567] utime            144489     15.10      0.12      2.89      9568.21       48091.82\nstress-ng: metrc: [3567] link                 12     15.18      0.10      1.65         0.79           6.87\nstress-ng: metrc: [3567] symlink               8     15.19      0.04      2.25         0.53           3.49\nstress-ng: metrc: [3567] mknod                43     15.10      0.01      0.02         2.85        1893.44\nstress-ng: metrc: [3567] fcntl             28481     15.05      0.08      0.74      1891.86       34611.53\nstress-ng: info:  [3567] skipped: 4: exec (4)\nstress-ng: info:  [3567] passed: 252: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [3567] failed: 0\nstress-ng: info:  [3567] metrics untrustworthy: 0\nstress-ng: info:  [3567] successful run completed in 15.60 secs",
+        "workload_name": "stress_ng_os_io_network"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "6": {
+        "bytes_jited": 72,
+        "bytes_xlated": 112,
+        "id": 6,
+        "name": "tracepoint__raw_syscalls__sys_enter",
+        "run_cnt_delta": 222961484,
+        "run_time_ns_delta": 25180468280,
+        "type": "tracepoint"
+      },
+      "7": {
+        "bytes_jited": 236,
+        "bytes_xlated": 400,
+        "id": 7,
+        "name": "tracepoint__raw_syscalls__sys_exit",
+        "run_cnt_delta": 222961862,
+        "run_time_ns_delta": 7085273772,
+        "type": "tracepoint"
+      },
+      "10": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 10,
+        "name": "vfs_create",
+        "run_cnt_delta": 465199,
+        "run_time_ns_delta": 27455226,
+        "type": "tracing"
+      },
+      "11": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 11,
+        "name": "kfunc__vmlinux__vfs_fsync_range",
+        "run_cnt_delta": 36154,
+        "run_time_ns_delta": 1878368,
+        "type": "tracing"
+      },
+      "12": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 12,
+        "name": "vfs_open",
+        "run_cnt_delta": 5201467,
+        "run_time_ns_delta": 570528725,
+        "type": "tracing"
+      },
+      "13": {
+        "bytes_jited": 87,
+        "bytes_xlated": 136,
+        "id": 13,
+        "name": "vfs_read",
+        "run_cnt_delta": 6668461,
+        "run_time_ns_delta": 245519317,
+        "type": "tracing"
+      },
+      "14": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 14,
+        "name": "vfs_write",
+        "run_cnt_delta": 1899912,
+        "run_time_ns_delta": 77755258,
+        "type": "tracing"
+      },
+      "19": {
+        "bytes_jited": 203,
+        "bytes_xlated": 344,
+        "id": 19,
+        "name": "cap_capable",
+        "run_cnt_delta": 13058651,
+        "run_time_ns_delta": 642761886,
+        "type": "kprobe"
+      },
+      "22": {
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 22,
+        "name": "__x64_sys_open",
+        "run_cnt_delta": 11972,
+        "run_time_ns_delta": 1975346,
+        "type": "tracing"
+      },
+      "23": {
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 23,
+        "name": "kretfunc__vmlinux____x64_sys_openat",
+        "run_cnt_delta": 3475217,
+        "run_time_ns_delta": 628607725,
+        "type": "tracing"
+      },
+      "24": {
+        "bytes_jited": 590,
+        "bytes_xlated": 640,
+        "id": 24,
+        "name": "kretfunc__vmlinux____x64_sys_openat2",
+        "run_cnt_delta": 2162,
+        "run_time_ns_delta": 415256,
+        "type": "tracing"
+      },
+      "27": {
+        "bytes_jited": 662,
+        "bytes_xlated": 1168,
+        "id": 27,
+        "name": "sched_switch",
+        "run_cnt_delta": 4625527,
+        "run_time_ns_delta": 717846567,
+        "type": "raw_tracepoint"
+      },
+      "28": {
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 28,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 3390738,
+        "run_time_ns_delta": 335495850,
+        "type": "raw_tracepoint"
+      },
+      "29": {
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 29,
+        "name": "raw_tracepoint__sched_wakeup_new",
+        "run_cnt_delta": 198853,
+        "run_time_ns_delta": 49529554,
+        "type": "raw_tracepoint"
+      },
+      "32": {
+        "bytes_jited": 75,
+        "bytes_xlated": 120,
+        "id": 32,
+        "name": "trace_connect_entry",
+        "run_cnt_delta": 112307,
+        "run_time_ns_delta": 10861008,
+        "type": "kprobe"
+      },
+      "33": {
+        "bytes_jited": 480,
+        "bytes_xlated": 720,
+        "id": 33,
+        "name": "trace_connect_v4_return",
+        "run_cnt_delta": 112307,
+        "run_time_ns_delta": 83838217,
+        "type": "kprobe"
+      },
+      "34": {
+        "bytes_jited": 477,
+        "bytes_xlated": 712,
+        "id": 34,
+        "name": "trace_connect_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "37": {
+        "bytes_jited": 1067,
+        "bytes_xlated": 1672,
+        "id": 37,
+        "name": "tracepoint__sock__inet_sock_set_state",
+        "run_cnt_delta": 1334536,
+        "run_time_ns_delta": 368192182,
+        "type": "tracepoint"
+      },
+      "38": {
+        "bytes_jited": 267,
+        "bytes_xlated": 448,
+        "id": 38,
+        "name": "trace_pid_start_tp",
+        "run_cnt_delta": 193517,
+        "run_time_ns_delta": 83328056,
+        "type": "tracepoint"
+      },
+      "39": {
+        "bytes_jited": 335,
+        "bytes_xlated": 616,
+        "id": 39,
+        "name": "trace_req_start",
+        "run_cnt_delta": 194580,
+        "run_time_ns_delta": 73381510,
+        "type": "kprobe"
+      },
+      "40": {
+        "bytes_jited": 550,
+        "bytes_xlated": 856,
+        "id": 40,
+        "name": "trace_req_completion_tp",
+        "run_cnt_delta": 196006,
+        "run_time_ns_delta": 37258798,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "4",
+          "--eventfd",
+          "4",
+          "--get",
+          "4",
+          "--prctl",
+          "4",
+          "--set",
+          "4",
+          "--dup",
+          "4",
+          "--kill",
+          "4",
+          "--sigfd",
+          "4",
+          "--signal",
+          "4",
+          "--pty",
+          "4",
+          "--itimer",
+          "4",
+          "--timerfd",
+          "4",
+          "--exec",
+          "4",
+          "--fork",
+          "4",
+          "--vfork",
+          "4",
+          "--clone",
+          "4",
+          "--ptrace",
+          "4",
+          "--futex",
+          "4",
+          "--sem",
+          "4",
+          "--aio",
+          "4",
+          "--aiol",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--io",
+          "4",
+          "--iomix",
+          "4",
+          "--iomix-bytes",
+          "128M",
+          "--io-uring",
+          "4",
+          "--sync-file",
+          "4",
+          "--epoll",
+          "4",
+          "--netdev",
+          "4",
+          "--sctp",
+          "4",
+          "--sock",
+          "4",
+          "--sockdiag",
+          "4",
+          "--sockfd",
+          "4",
+          "--sockpair",
+          "4",
+          "--sockmany",
+          "4",
+          "--udp",
+          "4",
+          "--udp-flood",
+          "4",
+          "--mmap",
+          "4",
+          "--mmap-bytes",
+          "16M",
+          "--mprotect",
+          "4",
+          "--mremap",
+          "4",
+          "--mremap-bytes",
+          "16M",
+          "--madvise",
+          "4",
+          "--access",
+          "4",
+          "--chdir",
+          "4",
+          "--chmod",
+          "4",
+          "--chown",
+          "4",
+          "--dentry",
+          "4",
+          "--dir",
+          "4",
+          "--dirmany",
+          "4",
+          "--fallocate",
+          "4",
+          "--fallocate-bytes",
+          "128M",
+          "--file-ioctl",
+          "4",
+          "--filename",
+          "4",
+          "--flock",
+          "4",
+          "--fpunch",
+          "4",
+          "--fpunch-bytes",
+          "32M",
+          "--fstat",
+          "4",
+          "--getdent",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--inotify",
+          "4",
+          "--open",
+          "4",
+          "--open-max",
+          "1024",
+          "--rename",
+          "4",
+          "--touch",
+          "4",
+          "--utime",
+          "4",
+          "--link",
+          "4",
+          "--symlink",
+          "4",
+          "--mknod",
+          "4",
+          "--fcntl",
+          "4",
+          "--epoll-port",
+          "21932",
+          "--sctp-port",
+          "22032",
+          "--sock-port",
+          "22132",
+          "--sockfd-port",
+          "22232",
+          "--timeout",
+          "15s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/2xdb4"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "eventfd",
+            "get",
+            "prctl",
+            "set",
+            "dup",
+            "kill",
+            "sigfd",
+            "signal",
+            "pty",
+            "itimer",
+            "timerfd",
+            "exec",
+            "fork",
+            "vfork",
+            "clone",
+            "ptrace",
+            "futex",
+            "sem",
+            "aio",
+            "aiol",
+            "hdd",
+            "io",
+            "iomix",
+            "io-uring",
+            "sync-file",
+            "epoll",
+            "netdev",
+            "sctp",
+            "sock",
+            "sockdiag",
+            "sockfd",
+            "sockpair",
+            "sockmany",
+            "udp",
+            "udp-flood",
+            "mmap",
+            "mprotect",
+            "mremap",
+            "madvise",
+            "access",
+            "chdir",
+            "chmod",
+            "chown",
+            "dentry",
+            "dir",
+            "dirmany",
+            "fallocate",
+            "file-ioctl",
+            "filename",
+            "flock",
+            "fpunch",
+            "fstat",
+            "getdent",
+            "hdd",
+            "inotify",
+            "open",
+            "rename",
+            "touch",
+            "utime",
+            "link",
+            "symlink",
+            "mknod",
+            "fcntl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 15.545312547999998,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [12304] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [12304] setting to a 15 secs run per stressor\nstress-ng: info:  [12304] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd, 4 fork, 4 vfork, 4 clone, 4 ptrace, 4 futex, 4 sem, 4 aio, 4 aiol, 4 hdd, 4 io, 4 iomix, 4 io-uring, 4 sync-file, 4 epoll, 4 netdev, 4 sctp, 4 sock, 4 sockdiag, 4 sockfd, 4 sockpair, 4 sockmany, 4 udp, 4 udp-flood, 4 mmap, 4 mprotect, 4 mremap, 4 madvise, 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [12304] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [12444] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: info:  [13111] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [12829] dentry: 10640 dentries allocated\nstress-ng: metrc: [12304] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [12304]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [12304] cap             1290892     15.03      0.36      4.71     85904.24      254458.97\nstress-ng: metrc: [12304] eventfd          460612     15.01      0.39      3.23     30690.15      127173.99\nstress-ng: metrc: [12304] get                4699     15.03      0.18      2.88       312.65        1534.31\nstress-ng: metrc: [12304] prctl              9307     15.01      2.92      2.05       620.20        1873.06\nstress-ng: metrc: [12304] set               95296     15.03      0.29      4.50      6340.37       19923.56\nstress-ng: metrc: [12304] dup                2315     15.04      0.81      0.78       153.91        1458.23\nstress-ng: metrc: [12304] kill              20356     15.08      0.04      5.05      1349.89        3998.78\nstress-ng: metrc: [12304] sigfd           2781137     15.07      0.35      4.41    184574.62      583693.81\nstress-ng: metrc: [12304] signal                0     15.01      0.03      0.04         0.00           0.00\nstress-ng: metrc: [12304] pty                 193     15.06      0.23      6.30        12.81          29.56\nstress-ng: metrc: [12304] itimer              670     15.06      0.53      5.15        44.50         117.81\nstress-ng: metrc: [12304] timerfd         1522688     15.17      1.19      7.73    100394.02      170570.33\nstress-ng: metrc: [12304] fork              11523     15.02      1.79      2.55       767.18        2651.79\nstress-ng: metrc: [12304] vfork            120313     15.01      1.54      2.21      8017.12       32093.02\nstress-ng: metrc: [12304] clone              2863     15.13      1.33      6.54       189.24         364.10\nstress-ng: metrc: [12304] ptrace           314976     15.02      0.27      2.05     20969.17      135297.92\nstress-ng: metrc: [12304] futex            360824     30.13      0.65      4.23     11975.88       73918.91\nstress-ng: metrc: [12304] sem                4394     15.05      0.01      0.02       292.05      164366.14\nstress-ng: metrc: [12304] aio               19490     15.19      0.03      0.07      1283.30      194175.72\nstress-ng: metrc: [12304] aiol              23186     15.30      0.35      0.98      1515.68       17355.97\nstress-ng: metrc: [12304] hdd               57344     15.14      0.63      0.86      3786.48       38399.49\nstress-ng: metrc: [12304] io                  136     15.22      0.07      0.01         8.94        1670.70\nstress-ng: metrc: [12304] iomix             12964     15.24      0.37      3.78       850.67        3124.47\nstress-ng: metrc: [12304] io-uring          21168     15.24      0.00      1.12      1388.69       18811.84\nstress-ng: metrc: [12304] sync-file           132     15.24      0.02      0.46         8.66         279.56\nstress-ng: metrc: [12304] epoll              2353     15.13      0.05      0.29       155.50        7009.94\nstress-ng: metrc: [12304] netdev          2814643     15.07      0.29      4.94    186728.29      538257.56\nstress-ng: metrc: [12304] sctp             327933     15.00      0.12      2.29     21860.67      136446.53\nstress-ng: metrc: [12304] sock               4176     15.09      0.16      2.85       276.72        1386.83\nstress-ng: metrc: [12304] sockdiag      100333921     15.02      0.22     10.84   6681431.33     9063687.24\nstress-ng: metrc: [12304] sockfd           639831     15.11      0.24      2.78     42331.05      211940.36\nstress-ng: metrc: [12304] sockpair           3848     15.06      0.04      0.12       255.49       23744.88\nstress-ng: metrc: [12304] sockmany         112305     15.14      0.09      3.38      7419.26       32389.29\nstress-ng: metrc: [12304] udp              432575     15.05      0.29      4.91     28738.22       83146.50\nstress-ng: metrc: [12304] udp-flood       3813395     15.03      0.56      5.78    253723.54      601129.24\nstress-ng: metrc: [12304] mmap               4349     15.10      0.22      4.63       288.06         896.61\nstress-ng: metrc: [12304] mprotect       12625320     15.15      2.99     28.55    833161.83      400244.19\nstress-ng: metrc: [12304] mremap            14327     15.07      0.14      9.78       950.79        1444.42\nstress-ng: metrc: [12304] madvise             226     15.16      0.49      6.23        14.90          33.60\nstress-ng: metrc: [12304] access            20976     15.16      0.17      2.43      1383.24        8050.22\nstress-ng: metrc: [12304] chdir               176     15.37      0.52      5.62        11.45          28.68\nstress-ng: metrc: [12304] chmod               381     15.16      0.00      0.34        25.14        1103.77\nstress-ng: metrc: [12304] chown               516     15.16      0.00      0.12        34.03        4342.52\nstress-ng: metrc: [12304] dentry            26227     15.18      0.07      0.90      1727.86       27256.53\nstress-ng: metrc: [12304] dir               34921     15.27      0.20      4.09      2286.89        8139.56\nstress-ng: metrc: [12304] dirmany           37630     15.14      0.02      0.92      2485.81       39701.21\nstress-ng: metrc: [12304] fallocate             5     15.13      0.03      0.00         0.33         181.17\nstress-ng: metrc: [12304] file-ioctl       143630     15.12      0.14      2.65      9496.82       51509.83\nstress-ng: metrc: [12304] filename          10244     15.11      0.08      2.11       678.11        4674.50\nstress-ng: metrc: [12304] flock           1676906     15.14      0.36      1.48    110789.93      907525.20\nstress-ng: metrc: [12304] fpunch             2208     15.13      0.02      3.03       145.95         726.12\nstress-ng: metrc: [12304] fstat             11903     15.01      0.23      2.72       793.17        4031.88\nstress-ng: metrc: [12304] getdent          607259     15.02      0.24      4.31     40432.45      133473.55\nstress-ng: metrc: [12304] hdd               56071     15.09      0.65      0.87      3716.77       36838.24\nstress-ng: metrc: [12304] inotify              34     15.10      0.05      0.04         2.25         358.88\nstress-ng: metrc: [12304] open              13312     15.10      0.01      0.21       881.35       60046.46\nstress-ng: metrc: [12304] rename           236068     15.12      0.10      1.62     15615.08      137583.52\nstress-ng: metrc: [12304] touch            290234     15.07      0.23      6.26     19263.69       44765.94\nstress-ng: metrc: [12304] utime            124066     15.04      0.17      2.57      8247.84       45334.51\nstress-ng: metrc: [12304] link                 12     15.09      0.12      1.60         0.80           6.98\nstress-ng: metrc: [12304] symlink               8     15.15      0.05      2.16         0.53           3.62\nstress-ng: metrc: [12304] mknod                35     15.05      0.01      0.02         2.32        1219.38\nstress-ng: metrc: [12304] fcntl             18028     15.03      0.04      0.46      1199.27       36259.93\nstress-ng: info:  [12304] skipped: 4: exec (4)\nstress-ng: info:  [12304] passed: 252: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [12304] failed: 0\nstress-ng: info:  [12304] metrics untrustworthy: 0\nstress-ng: info:  [12304] successful run completed in 15.52 secs",
+        "workload_name": "stress_ng_os_io_network"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "10": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 10,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=6: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=6: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(0), idx: 5 } has no verifier state for r2"
+              ],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 6,
+                  "reason": "lookup key is not available from verifier-guided state"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 2,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 10,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 10,
+          "prog_name": "vfs_create",
+          "prog_type": 26
+        },
+        "status": "ok"
+      },
+      "11": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 10,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=6: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=6: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(0), idx: 5 } has no verifier state for r2"
+              ],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 6,
+                  "reason": "lookup key is not available from verifier-guided state"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 3,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 11,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 11,
+          "prog_name": "vfs_fsync_range",
+          "prog_type": 26
+        },
+        "status": "ok"
+      },
+      "12": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 8,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=6: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=6: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(0), idx: 5 } has no verifier state for r2"
+              ],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 6,
+                  "reason": "lookup key is not available from verifier-guided state"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 1,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 12,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 12,
+          "prog_name": "vfs_open",
+          "prog_type": 26
+        },
+        "status": "ok"
+      },
+      "13": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 11,
+              "insn_count_before": 11,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 10,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=6: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=6: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(0), idx: 5 } has no verifier state for r2"
+              ],
+              "insn_count_after": 11,
+              "insn_count_before": 11,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 6,
+                  "reason": "lookup key is not available from verifier-guided state"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 3,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 13,
+        "program": {
+          "final_insn_count": 11,
+          "orig_insn_count": 11,
+          "prog_id": 13,
+          "prog_name": "vfs_read",
+          "prog_type": 26
+        },
+        "status": "ok"
+      },
+      "14": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 10,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=6: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=6: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(0), idx: 5 } has no verifier state for r2"
+              ],
+              "insn_count_after": 12,
+              "insn_count_before": 12,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 6,
+                  "reason": "lookup key is not available from verifier-guided state"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 3,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 14,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 14,
+          "prog_name": "vfs_write",
+          "prog_type": 26
+        },
+        "status": "ok"
+      },
+      "19": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 43,
+              "insn_count_before": 43,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 8,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 43,
+              "insn_count_before": 43,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 19,
+        "program": {
+          "final_insn_count": 43,
+          "orig_insn_count": 43,
+          "prog_id": 19,
+          "prog_name": "cap_capable",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "22": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 75,
+              "insn_count_before": 75,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 9,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 75,
+              "insn_count_before": 75,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 2,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 22,
+        "program": {
+          "final_insn_count": 75,
+          "orig_insn_count": 75,
+          "prog_id": 22,
+          "prog_name": "__x64_sys_open",
+          "prog_type": 26
+        },
+        "status": "ok"
+      },
+      "23": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 75,
+              "insn_count_before": 75,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 8,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 75,
+              "insn_count_before": 75,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 1,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 23,
+        "program": {
+          "final_insn_count": 75,
+          "orig_insn_count": 75,
+          "prog_id": 23,
+          "prog_name": "__x64_sys_opena",
+          "prog_type": 26
+        },
+        "status": "ok"
+      },
+      "24": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 80,
+              "insn_count_before": 80,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 10,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 80,
+              "insn_count_before": 80,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 3,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 24,
+        "program": {
+          "final_insn_count": 80,
+          "orig_insn_count": 80,
+          "prog_id": 24,
+          "prog_name": "__x64_sys_opena",
+          "prog_type": 26
+        },
+        "status": "ok"
+      },
+      "27": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 138,
+              "insn_count_before": 138,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 6,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=60: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=11",
+                "site at PC=127: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=127: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(24), idx: 10 } has no verifier state for r2"
+              ],
+              "insn_count_after": 138,
+              "insn_count_before": 138,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 2,
+              "sites_skipped": 2,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 1,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=11": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 60,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=11"
+                },
+                {
+                  "pc": 127,
+                  "reason": "lookup key is not available from verifier-guided state"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 27,
+        "program": {
+          "final_insn_count": 138,
+          "orig_insn_count": 138,
+          "prog_id": 27,
+          "prog_name": "sched_switch",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "28": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 31,
+              "insn_count_before": 31,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 7,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 31,
+              "insn_count_before": 31,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 28,
+        "program": {
+          "final_insn_count": 31,
+          "orig_insn_count": 31,
+          "prog_id": 28,
+          "prog_name": "sched_wakeup",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "29": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 31,
+              "insn_count_before": 31,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 6,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 31,
+              "insn_count_before": 31,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 29,
+        "program": {
+          "final_insn_count": 31,
+          "orig_insn_count": 31,
+          "prog_id": 29,
+          "prog_name": "sched_wakeup_ne",
+          "prog_type": 17
+        },
+        "status": "ok"
+      },
+      "32": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 15,
+              "insn_count_before": 15,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 6,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 15,
+              "insn_count_before": 15,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 32,
+        "program": {
+          "final_insn_count": 15,
+          "orig_insn_count": 15,
+          "prog_id": 32,
+          "prog_name": "trace_connect_e",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "33": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 88,
+              "insn_count_before": 88,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 8,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=9: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=16"
+              ],
+              "insn_count_after": 88,
+              "insn_count_before": 88,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=16": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 9,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=16"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 33,
+        "program": {
+          "final_insn_count": 88,
+          "orig_insn_count": 88,
+          "prog_id": 33,
+          "prog_name": "trace_connect_v",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "34": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 87,
+              "insn_count_before": 87,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 8,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=9: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=16"
+              ],
+              "insn_count_after": 87,
+              "insn_count_before": 87,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=16": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 9,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=16"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 34,
+        "program": {
+          "final_insn_count": 87,
+          "orig_insn_count": 87,
+          "prog_id": 34,
+          "prog_name": "trace_connect_v",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "37": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 205,
+              "insn_count_before": 205,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 8,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "maps_skipped_by_size=1",
+                "site at PC=57: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=20",
+                "site at PC=75: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=17"
+              ],
+              "insn_count_after": 205,
+              "insn_count_before": 205,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 2,
+              "sites_skipped": 2,
+              "skip_reasons": {
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=17": 1,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=20": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 57,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=20"
+                },
+                {
+                  "pc": 75,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=17"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 1,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 37,
+        "program": {
+          "final_insn_count": 205,
+          "orig_insn_count": 205,
+          "prog_id": 37,
+          "prog_name": "sock__inet_sock",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "38": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 56,
+              "insn_count_before": 56,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 6,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "maps_skipped_by_size=1"
+              ],
+              "insn_count_after": 56,
+              "insn_count_before": 56,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 38,
+        "program": {
+          "final_insn_count": 56,
+          "orig_insn_count": 56,
+          "prog_id": 38,
+          "prog_name": "trace_pid_start",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "39": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 77,
+              "insn_count_before": 77,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 7,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "maps_skipped_by_size=1"
+              ],
+              "insn_count_after": 77,
+              "insn_count_before": 77,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 39,
+        "program": {
+          "final_insn_count": 77,
+          "orig_insn_count": 77,
+          "prog_id": 39,
+          "prog_name": "trace_req_start",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "40": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 103,
+              "insn_count_before": 103,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 6,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "maps_skipped_by_size=2",
+                "site at PC=46: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=7",
+                "site at PC=63: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6"
+              ],
+              "insn_count_after": 103,
+              "insn_count_before": 103,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 2,
+              "sites_skipped": 2,
+              "skip_reasons": {
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6": 1,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=7": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 46,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=7"
+                },
+                {
+                  "pc": 63,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 40,
+        "program": {
+          "final_insn_count": 103,
+          "orig_insn_count": 103,
+          "prog_id": 40,
+          "prog_name": "trace_req_compl",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "6": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 14,
+              "insn_count_before": 14,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 6,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "maps_skipped_by_size=1"
+              ],
+              "insn_count_after": 14,
+              "insn_count_before": 14,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 6,
+        "program": {
+          "final_insn_count": 14,
+          "orig_insn_count": 14,
+          "prog_id": 6,
+          "prog_name": "raw_syscalls__s",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "7": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 44,
+              "insn_count_before": 44,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 6,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass map_inline --input /var/tmp/bpfrejit-runtime/2xdb4/bpfrejit-daemon-plan-1860-5/output_step0.bin --output /var/tmp/bpfrejit-runtime/2xdb4/bpfrejit-daemon-plan-1860-5/output_step1.bin --report /var/tmp/bpfrejit-runtime/2xdb4/bpfrejit-daemon-plan-1860-5/report_step1.json --prog-type tracepoint --verifier-states /var/tmp/bpfrejit-runtime/2xdb4/bpfrejit-daemon-plan-1860-5/verifier_log_step0.log -- --map-values /var/tmp/bpfrejit-runtime/2xdb4/bpfrejit-daemon-plan-1860-5/map-values --map-ids 3,2\nsubprocess output:\nerror: snapshot skipped map 3",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 7,
+        "program": {
+          "final_insn_count": 44,
+          "orig_insn_count": 44,
+          "prog_id": 7,
+          "prog_name": "raw_syscalls__s",
+          "prog_type": 5
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bcc_set",
+  "selected_workload": "stress_ng_os_io_network",
+  "status": "ok"
+}

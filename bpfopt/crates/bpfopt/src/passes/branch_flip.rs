@@ -181,7 +181,7 @@ fn bf_cond_branch(
             fallthrough,
         } => Ok((cond, taken, fallthrough)),
         term => anyhow::bail!(
-            "branch_flip site at {:?} expected conditional terminator, got {:?}",
+            "branch_flip site at {:?} expected conditional exit, got {:?}",
             site.cond_site,
             term
         ),
@@ -250,7 +250,7 @@ fn apply_branch_flip_site(prog: &mut BBProgram, site: &BranchFlipSite) -> anyhow
     let (ja, join) = match prog.terminator(then_last)? {
         Terminator::Jump { insn, target } => (insn, target),
         term => anyhow::bail!(
-            "branch_flip site at {:?} expected then-body JA terminator, got {:?}",
+            "branch_flip site at {:?} expected then-body JA exit, got {:?}",
             site.cond_site,
             term
         ),

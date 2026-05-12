@@ -7,7 +7,7 @@ use crate::test_helpers::*;
 
 fn diamond() -> Vec<BpfInsn> {
     vec![
-        BpfInsn::jne_imm(BPF_REG_1, 0, 2),
+        BpfInsn::jump_imm(BPF_JNE, BPF_REG_1, 0, 2),
         BpfInsn::mov64_imm(BPF_REG_0, 10),
         BpfInsn::ja(1),
         BpfInsn::mov64_imm(BPF_REG_0, 20),
@@ -172,7 +172,7 @@ fn branch_flip_skips_high_site_miss_rate() {
 fn branch_flip_rejects_oversized_else_delta_through_pass_path() {
     // P1-H: exercise the actual pass and BBProgram lower path, not only a helper.
     let mut insns = vec![
-        BpfInsn::jne_imm(BPF_REG_1, 0, 2),
+        BpfInsn::jump_imm(BPF_JNE, BPF_REG_1, 0, 2),
         BpfInsn::mov64_imm(BPF_REG_0, 10),
         BpfInsn::ja(i16::MAX),
     ];
@@ -194,7 +194,7 @@ fn branch_flip_rejects_oversized_else_delta_through_pass_path() {
 #[test]
 fn branch_flip_handles_multiple_sites_without_length_change() {
     let input = vec![
-        BpfInsn::jne_imm(BPF_REG_1, 0, 3),
+        BpfInsn::jump_imm(BPF_JNE, BPF_REG_1, 0, 3),
         BpfInsn::mov64_imm(BPF_REG_0, 1),
         BpfInsn::mov64_imm(BPF_REG_2, 2),
         BpfInsn::ja(2),

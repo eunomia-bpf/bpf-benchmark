@@ -161,7 +161,7 @@ fn emit_terminator(
         Terminator::Exit { insn } => out.push(insn),
         Terminator::End => {
             if current_pc != total_slot_len(prog)? {
-                anyhow::bail!("non-final End terminator at pc {current_pc}");
+                anyhow::bail!("non-final End exit at pc {current_pc}");
             }
         }
     }

@@ -1582,7 +1582,7 @@ fn terminator_for_site_replacement(
 ) -> anyhow::Result<Terminator> {
     if replacement.len() != 1 {
         anyhow::bail!(
-            "map_inline cannot replace terminator at {:?} with multiple insns",
+            "map_inline cannot replace exit at {:?} with multiple insns",
             site
         );
     }
@@ -1613,10 +1613,7 @@ fn terminator_for_site_replacement(
     if insn.is_exit() {
         return Ok(Terminator::Exit { insn });
     }
-    anyhow::bail!(
-        "map_inline unsupported terminator replacement at {:?}",
-        site
-    )
+    anyhow::bail!("map_inline unsupported exit replacement at {:?}", site)
 }
 fn cleanup_map_inline_bbprogram(prog: &mut BBProgram) -> anyhow::Result<()> {
     loop {

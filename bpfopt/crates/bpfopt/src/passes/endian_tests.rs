@@ -23,7 +23,12 @@ fn endian_ctx() -> crate::pass::PassContext {
 fn endian_rewrites_32bit_load_swap() {
     let input = vec![
         BpfInsn::ldx_mem(BPF_W, BPF_REG_2, BPF_REG_6, 8),
-        BpfInsn::endian_to_be(BPF_REG_2, 32),
+        BpfInsn::new(
+            BPF_ALU | BPF_END | BPF_TO_BE,
+            BpfInsn::make_regs(BPF_REG_2, 0),
+            0,
+            32,
+        ),
         BpfInsn::exit(),
     ];
 
@@ -40,7 +45,12 @@ fn endian_rewrites_32bit_load_swap() {
 fn endian_rewrites_16bit_load_swap() {
     let input = vec![
         BpfInsn::ldx_mem(BPF_H, BPF_REG_3, BPF_REG_6, 10),
-        BpfInsn::endian_to_be(BPF_REG_3, 16),
+        BpfInsn::new(
+            BPF_ALU | BPF_END | BPF_TO_BE,
+            BpfInsn::make_regs(BPF_REG_3, 0),
+            0,
+            16,
+        ),
         BpfInsn::exit(),
     ];
 
@@ -57,7 +67,12 @@ fn endian_rewrites_16bit_load_swap() {
 fn endian_rewrites_64bit_load_swap() {
     let input = vec![
         BpfInsn::ldx_mem(BPF_DW, BPF_REG_0, BPF_REG_7, 0),
-        BpfInsn::endian_to_be(BPF_REG_0, 64),
+        BpfInsn::new(
+            BPF_ALU | BPF_END | BPF_TO_BE,
+            BpfInsn::make_regs(BPF_REG_0, 0),
+            0,
+            64,
+        ),
         BpfInsn::exit(),
     ];
 
@@ -74,7 +89,12 @@ fn endian_rewrites_64bit_load_swap() {
 fn endian_rejects_register_mismatch() {
     let input = vec![
         BpfInsn::ldx_mem(BPF_W, BPF_REG_2, BPF_REG_1, 0),
-        BpfInsn::endian_to_be(BPF_REG_3, 32),
+        BpfInsn::new(
+            BPF_ALU | BPF_END | BPF_TO_BE,
+            BpfInsn::make_regs(BPF_REG_3, 0),
+            0,
+            32,
+        ),
         BpfInsn::exit(),
     ];
 
@@ -88,7 +108,12 @@ fn endian_rejects_register_mismatch() {
 fn endian_rejects_size_mismatch() {
     let input = vec![
         BpfInsn::ldx_mem(BPF_H, BPF_REG_2, BPF_REG_1, 0),
-        BpfInsn::endian_to_be(BPF_REG_2, 32),
+        BpfInsn::new(
+            BPF_ALU | BPF_END | BPF_TO_BE,
+            BpfInsn::make_regs(BPF_REG_2, 0),
+            0,
+            32,
+        ),
         BpfInsn::exit(),
     ];
 
@@ -103,7 +128,12 @@ fn endian_skips_interior_branch_target() {
     let input = vec![
         BpfInsn::jeq_imm(BPF_REG_5, 0, 1),
         BpfInsn::ldx_mem(BPF_W, BPF_REG_2, BPF_REG_1, 0),
-        BpfInsn::endian_to_be(BPF_REG_2, 32),
+        BpfInsn::new(
+            BPF_ALU | BPF_END | BPF_TO_BE,
+            BpfInsn::make_regs(BPF_REG_2, 0),
+            0,
+            32,
+        ),
         BpfInsn::exit(),
     ];
 
@@ -120,7 +150,12 @@ fn test_endian_fusion_pass_branch_fixup() {
     let input = vec![
         BpfInsn::jeq_imm(BPF_REG_5, 0, 2),
         BpfInsn::ldx_mem(BPF_W, BPF_REG_2, BPF_REG_6, 4),
-        BpfInsn::endian_to_be(BPF_REG_2, 32),
+        BpfInsn::new(
+            BPF_ALU | BPF_END | BPF_TO_BE,
+            BpfInsn::make_regs(BPF_REG_2, 0),
+            0,
+            32,
+        ),
         BpfInsn::exit(),
     ];
 
@@ -142,7 +177,12 @@ fn endian_preserves_module_call_offset() {
         .expect("register endian32 module call");
     let input = vec![
         BpfInsn::ldx_mem(BPF_W, BPF_REG_2, BPF_REG_6, 8),
-        BpfInsn::endian_to_be(BPF_REG_2, 32),
+        BpfInsn::new(
+            BPF_ALU | BPF_END | BPF_TO_BE,
+            BpfInsn::make_regs(BPF_REG_2, 0),
+            0,
+            32,
+        ),
         BpfInsn::exit(),
     ];
 

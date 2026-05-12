@@ -11,7 +11,7 @@ fn select_ctx() -> crate::pass::PassContext {
 
 fn pattern(false_mov: BpfInsn, true_mov: BpfInsn) -> Vec<BpfInsn> {
     vec![
-        BpfInsn::jne_imm(BPF_REG_1, 0, 2),
+        BpfInsn::jump_imm(BPF_JNE, BPF_REG_1, 0, 2),
         false_mov,
         BpfInsn::ja(1),
         true_mov,
@@ -71,7 +71,7 @@ fn test_cond_select_alias_all_overlap_combinations() {
         for &true_src in &regs {
             for &false_src in &regs {
                 let input = vec![
-                    BpfInsn::jne_imm(cond_reg, 0, 2),
+                    BpfInsn::jump_imm(BPF_JNE, cond_reg, 0, 2),
                     BpfInsn::mov64_reg(BPF_REG_0, false_src),
                     BpfInsn::ja(1),
                     BpfInsn::mov64_reg(BPF_REG_0, true_src),
@@ -151,7 +151,7 @@ fn test_cond_select_short_pattern_c_no_match_cond_clobbered() {
     // MOV overwrites the register that the following Jcc reads.
     let input = vec![
         BpfInsn::mov64_imm(BPF_REG_1, 42),
-        BpfInsn::jne_imm(BPF_REG_1, 0, 1),
+        BpfInsn::jump_imm(BPF_JNE, BPF_REG_1, 0, 1),
         BpfInsn::mov64_imm(BPF_REG_1, 0),
         BpfInsn::exit(),
     ];

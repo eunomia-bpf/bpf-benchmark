@@ -93,7 +93,7 @@ fn process_block_state(
 ) -> anyhow::Result<ReachingState> {
     let mut graph = graph;
     let mut state = input.clone();
-    for site in prog.logical_sites_in_block(block)? {
+    for site in prog.sites_in_block_with_terminator(block)? {
         let Some(facts) = site_facts.get(&site) else {
             anyhow::bail!("missing use-def facts for site {:?}", site);
         };
@@ -155,7 +155,7 @@ fn kinsn_aware_site_facts(prog: &BBProgram) -> anyhow::Result<BTreeMap<InsnSite,
     let mut sites = Vec::new();
 
     for block in prog.blocks() {
-        for site in prog.logical_sites_in_block(block.id)? {
+        for site in prog.sites_in_block_with_terminator(block.id)? {
             let insn = prog
                 .insn_at(site)
                 .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;

@@ -20,7 +20,7 @@ fn guard(cursor: u8, root: u8, data_end: u8, window_end: i32) -> Vec<BpfInsn> {
     vec![
         BpfInsn::mov64_reg(cursor, root),
         BpfInsn::add64_imm(cursor, window_end),
-        BpfInsn::jgt_reg(cursor, data_end, 0),
+        BpfInsn::jump_reg(BPF_JGT, cursor, data_end, 0),
     ]
 }
 
@@ -127,7 +127,7 @@ fn bounds_check_merge_rejects_variable_offset_guard() {
     insns.push(BpfInsn::mov64_imm(BPF_REG_8, 20));
     insns.push(BpfInsn::mov64_reg(BPF_REG_4, BPF_REG_2));
     insns.push(BpfInsn::alu64_reg(BPF_ADD, BPF_REG_4, BPF_REG_8));
-    insns.push(BpfInsn::jgt_reg(BPF_REG_4, BPF_REG_3, 0));
+    insns.push(BpfInsn::jump_reg(BPF_JGT, BPF_REG_4, BPF_REG_3, 0));
     insns.push(BpfInsn::ldx_mem(BPF_H, BPF_REG_6, BPF_REG_2, 12));
     insns.extend(guard(BPF_REG_5, BPF_REG_2, BPF_REG_3, 34));
     insns.push(BpfInsn::ldx_mem(BPF_W, BPF_REG_7, BPF_REG_2, 30));
@@ -241,6 +241,9 @@ fn bounds_check_merge_remaps_btf_metadata_on_bbprogram() {
 
     assert_eq!(run.result.sites_applied, 1);
     // IMPL: needs BBProgram::btf_records() or equivalent lowered metadata view.
-    assert_eq!(run.prog.btf_records().func_offsets(), vec![0, 9]);
-    assert_eq!(run.prog.btf_records().line_offsets(), vec![5, 6, 9]);
+    assert_eq!(run.prog.btf_records().unwrap().func_offsets(), vec![0, 9]);
+    assert_eq!(
+        run.prog.btf_records().unwrap().line_offsets(),
+        vec![5, 6, 9]
+    );
 }

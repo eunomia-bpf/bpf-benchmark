@@ -168,7 +168,7 @@ fn apply_ccmp_site(
             taken, fallthrough, ..
         } => (taken, fallthrough),
         term => anyhow::bail!(
-            "ccmp merged block {:?} expected conditional terminator, got {:?}",
+            "ccmp merged block {:?} expected conditional exit, got {:?}",
             merged,
             term
         ),
@@ -208,10 +208,7 @@ fn ccmp_chain_blocks(
 ) -> anyhow::Result<(Vec<BlockId>, BlockId, BlockId)> {
     let first = prog.site_block(site.start_site);
     if !prog.is_terminator_site(site.start_site)? {
-        anyhow::bail!(
-            "ccmp branch site {:?} is not a block terminator",
-            site.start_site
-        );
+        anyhow::bail!("ccmp branch site {:?} is not a block exit", site.start_site);
     }
     if prog.sites_in_block(first)?.is_empty() {
         return Ok((site.blocks.clone(), site.target_block, site.success_block));
@@ -314,7 +311,7 @@ fn try_match_ccmp_chain(prog: &BBProgram, first: BranchTerm) -> anyhow::Result<O
 
     let start_site = prog
         .terminator_site(first.block)?
-        .ok_or_else(|| anyhow::anyhow!("ccmp block {:?} has no terminator site", first.block))?;
+        .ok_or_else(|| anyhow::anyhow!("ccmp block {:?} has no exit site", first.block))?;
     Ok(Some(CcmpSite {
         start_site,
         old_len: regs.len(),
@@ -363,7 +360,7 @@ fn branch_term(prog: &BBProgram, block: BlockId) -> anyhow::Result<Option<Branch
     };
     let branch_site = prog
         .terminator_site(block)?
-        .ok_or_else(|| anyhow::anyhow!("ccmp block {:?} has no terminator site", block))?;
+        .ok_or_else(|| anyhow::anyhow!("ccmp block {:?} has no exit site", block))?;
     prog.insn(branch_site)?;
     Ok(Some(BranchTerm {
         block,
@@ -383,7 +380,7 @@ fn choose_dead_dst_reg(prog: &BBProgram, site: &CcmpSite) -> anyhow::Result<Opti
         .ok_or_else(|| anyhow::anyhow!("ccmp site {:?} has no blocks", site.start_site))?;
     let last_site = prog
         .terminator_site(last_block)?
-        .ok_or_else(|| anyhow::anyhow!("ccmp block {:?} has no terminator site", last_block))?;
+        .ok_or_else(|| anyhow::anyhow!("ccmp block {:?} has no exit site", last_block))?;
     let live_after = prog.live_out_site_checked(last_site)?;
     Ok((BPF_REG_0..=BPF_REG_9).find(|reg| !live_after.contains(reg) && !site.regs.contains(reg)))
 }

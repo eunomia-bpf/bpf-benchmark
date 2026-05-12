@@ -29,9 +29,9 @@ fn memcpy_run(lanes: usize) -> Vec<BpfInsn> {
 fn memset_zero_run(lanes: usize) -> Vec<BpfInsn> {
     let mut insns = Vec::new();
     for lane in 0..lanes {
-        insns.push(BpfInsn::st_mem(
-            BPF_DW,
-            BPF_REG_10,
+        insns.push(BpfInsn::new(
+            BPF_ST | BPF_DW | BPF_MEM,
+            BpfInsn::make_regs(BPF_REG_10, 0),
             -64 + (lane * 8) as i16,
             0,
         ));
@@ -79,9 +79,9 @@ fn st_mem_fill_run(size: u8, imm: i32, lanes: usize) -> Vec<BpfInsn> {
     };
     let mut insns = Vec::new();
     for lane in 0..lanes {
-        insns.push(BpfInsn::st_mem(
-            size,
-            BPF_REG_10,
+        insns.push(BpfInsn::new(
+            BPF_ST | size | BPF_MEM,
+            BpfInsn::make_regs(BPF_REG_10, 0),
             -32 + stride * lane as i16,
             imm,
         ));
