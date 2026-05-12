@@ -215,26 +215,19 @@ impl BpfPass for EndianFusionPass {
 pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
     let mut skipped = Vec::new();
     skipped.extend(find_blocked_narrow_sites(prog)?);
-    for block in prog.block_ids().collect::<Vec<_>>() {
-        for start in prog.sites_in_block(block)? {
-            if let Some(skip) = check_cross_block_pair_pattern(
-                prog,
-                start,
-                |load, endian| {
-                    if !load.is_ldx_mem() || endian.dst_reg() != load.dst_reg() {
-                        return false;
-                    }
-                    let load_size = bpf_size(load.code);
-                    endian_swap_size(endian)
-                        .map(|size| load_size == size || is_narrowing(load_size, size))
-                        .unwrap_or(false)
-                },
-                "interior branch target",
-            )? {
-                skipped.push(skip);
+    skipped.extend(collect_cross_block_pair_skips(
+        prog,
+        |load, endian| {
+            if !load.is_ldx_mem() || endian.dst_reg() != load.dst_reg() {
+                return false;
             }
-        }
-    }
+            let load_size = bpf_size(load.code);
+            endian_swap_size(endian)
+                .map(|size| load_size == size || is_narrowing(load_size, size))
+                .unwrap_or(false)
+        },
+        "interior branch target",
+    )?);
     let raw_sites = prog.scan_block_starts(MAX_NARROW_SCAN + 1, |window| {
         Ok(scan_endian_site_in_window(window.lookahead)
             .map(|(old_len, site)| (window.start_idx, old_len, site)))

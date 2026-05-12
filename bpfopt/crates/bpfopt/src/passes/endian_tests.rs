@@ -6,7 +6,6 @@ use crate::test_helpers::*;
 
 fn endian_ctx() -> crate::pass::PassContext {
     let mut ctx = pass_ctx();
-    ctx.platform.has_movbe = true;
     ctx.kinsn_registry
         .set_kinsn_call_for_target_name("bpf_endian_load16", 1616, 0)
         .expect("register endian16");
@@ -171,7 +170,6 @@ fn test_endian_fusion_pass_branch_fixup() {
 #[test]
 fn endian_preserves_module_call_offset() {
     let mut ctx = pass_ctx();
-    ctx.platform.has_movbe = true;
     ctx.kinsn_registry
         .set_kinsn_call_for_target_name("bpf_endian_load32", 3232, 2)
         .expect("register endian32 module call");

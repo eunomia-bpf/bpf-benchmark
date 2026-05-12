@@ -242,15 +242,6 @@ pub fn branch_profile(taken: u64, not_taken: u64, miss_rate: f64) -> crate::pass
     }
 }
 
-pub fn prefetch_profile(execution_count: u64, miss_rate: f64) -> crate::pass::PrefetchProfile {
-    crate::pass::PrefetchProfile {
-        execution_count,
-        cache_references: execution_count,
-        cache_misses: (execution_count as f64 * miss_rate) as u64,
-        miss_rate,
-    }
-}
-
 pub fn assert_skip_reason(result: &PassResult, pc: usize, reason: &str) {
     assert!(
         result

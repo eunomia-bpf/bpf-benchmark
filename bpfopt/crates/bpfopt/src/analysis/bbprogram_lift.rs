@@ -482,13 +482,6 @@ fn collect_block_starts(insns: &[BpfInsn], boundaries: &[bool]) -> anyhow::Resul
             if next_pc < insns.len() {
                 starts.insert(next_pc);
             }
-        } else if insn.is_cond_jmp() || insn.is_ja() {
-            if let Some(target) = branch_or_call_target_pc(&insn, pc)? {
-                starts.insert(target);
-            }
-            if next_pc < insns.len() {
-                starts.insert(next_pc);
-            }
         }
 
         pc = next_pc;

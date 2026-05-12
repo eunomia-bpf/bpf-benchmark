@@ -46,19 +46,11 @@ impl BpfPass for ExtractPass {
     }
 }
 pub fn run_on_bbprogram(prog: &mut BBProgram, _ctx: &PassContext) -> anyhow::Result<PassResult> {
-    let mut skipped = Vec::new();
-    for block in prog.block_ids().collect::<Vec<_>>() {
-        for start in prog.sites_in_block(block)? {
-            if let Some(skip) = check_cross_block_pair_pattern(
-                prog,
-                start,
-                |i0, i1| extract_site_from_pair(i0, i1).is_some(),
-                "interior branch target",
-            )? {
-                skipped.push(skip);
-            };
-        }
-    }
+    let mut skipped = collect_cross_block_pair_skips(
+        prog,
+        |i0, i1| extract_site_from_pair(i0, i1).is_some(),
+        "interior branch target",
+    )?;
     let candidates: Vec<(InsnSite, ExtractSite)> = prog
         .scan_block_starts(2, |window| {
             if window.lookahead.len() < 2 {

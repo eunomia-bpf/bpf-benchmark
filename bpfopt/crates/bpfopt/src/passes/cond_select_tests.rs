@@ -200,7 +200,6 @@ fn cond_select_skips_when_no_branchless_target_exists() {
 fn cond_select_works_on_aarch64_without_cmov_cpu_feature() {
     let mut ctx = select_ctx();
     ctx.platform.arch = Arch::Aarch64;
-    ctx.platform.has_cmov = false;
     let input = pattern(
         BpfInsn::mov64_imm(BPF_REG_0, 0),
         BpfInsn::mov64_imm(BPF_REG_0, 1),

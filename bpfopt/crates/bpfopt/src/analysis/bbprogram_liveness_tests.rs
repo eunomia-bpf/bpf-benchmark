@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-use crate::analysis::BlockId;
+use crate::analysis::{BlockId, InsnSite};
 use crate::insn::*;
 use crate::test_helpers::*;
 
@@ -65,9 +65,14 @@ fn bbprogram_liveness_includes_kinsn_implicit_register_uses() {
     ];
     let prog = lift_test_program(&insns, &ctx);
 
-    assert!(prog.live_out(BlockId(0)).unwrap().contains(&BPF_REG_6));
-    assert!(prog.live_out(BlockId(0)).unwrap().contains(&BPF_REG_0));
-    assert!(prog.live_out(BlockId(0)).unwrap().contains(&BPF_REG_1));
+    let kinsn_site = InsnSite {
+        block: BlockId(0),
+        idx: 4,
+    };
+    let live_in = prog.live_in_site_checked(kinsn_site).unwrap();
+    assert!(live_in.contains(&BPF_REG_6));
+    assert!(live_in.contains(&BPF_REG_0));
+    assert!(live_in.contains(&BPF_REG_1));
 }
 
 #[test]

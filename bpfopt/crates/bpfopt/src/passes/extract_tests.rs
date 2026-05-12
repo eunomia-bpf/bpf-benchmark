@@ -5,9 +5,7 @@ use crate::insn::*;
 use crate::test_helpers::*;
 
 fn extract_ctx(btf_id: i32) -> crate::pass::PassContext {
-    let mut ctx = ctx_with_kinsn("bpf_extract64", btf_id);
-    ctx.platform.has_bmi1 = true;
-    ctx
+    ctx_with_kinsn("bpf_extract64", btf_id)
 }
 
 #[test]
@@ -106,7 +104,6 @@ fn test_extract_pass_branch_fixup() {
 #[test]
 fn extract_preserves_module_call_offset() {
     let mut ctx = pass_ctx();
-    ctx.platform.has_bmi1 = true;
     ctx.kinsn_registry
         .set_kinsn_call_for_target_name("bpf_extract64", 7777, 3)
         .expect("register module kinsn");

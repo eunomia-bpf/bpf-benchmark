@@ -2,7 +2,6 @@
 
 use super::prefetch::PrefetchPass;
 use crate::insn::*;
-use crate::pass::InsnAnnotation;
 use crate::test_helpers::*;
 
 fn prefetch_ctx() -> crate::pass::PassContext {
@@ -53,19 +52,6 @@ fn prefetch_uses_alias_register_for_map_value_deref() {
 
     assert_eq!(run.result.sites_applied, 1);
     assert!(run.lowered.iter().any(|i| i.is_kinsn_sidecar()));
-}
-
-#[test]
-fn prefetch_profile_filters_cold_map_value_site() {
-    let mut annotations = vec![InsnAnnotation::default(); 4];
-    annotations[2].prefetch_profile = Some(prefetch_profile(100, 0.0));
-    let mut ctx = pass_ctx();
-    ctx.annotations = annotations;
-
-    let run = run_pass_on_insns(PrefetchPass, map_lookup_program(), &ctx);
-
-    assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 2, "no observed cache misses");
 }
 
 #[test]

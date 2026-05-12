@@ -351,7 +351,6 @@ fn build_pass_context(common: &CommonArgs) -> Result<PassContext> {
         if let Some(arch) = target.arch.as_deref() {
             ctx.platform.arch = parse_arch(arch)?;
         }
-        apply_features(&mut ctx.platform, &target.features)?;
         ctx.kinsn_registry = kinsn_registry_from_target(&target)?;
     }
 
@@ -364,7 +363,6 @@ fn build_pass_context(common: &CommonArgs) -> Result<PassContext> {
 
 fn detect_platform() -> PlatformCapabilities {
     let mut platform = PlatformCapabilities::default();
-
     #[cfg(target_arch = "aarch64")]
     {
         platform.arch = bpfopt::pass::Arch::Aarch64;
@@ -372,13 +370,7 @@ fn detect_platform() -> PlatformCapabilities {
     #[cfg(target_arch = "x86_64")]
     {
         platform.arch = bpfopt::pass::Arch::X86_64;
-        platform.has_cmov = true;
-        platform.has_bmi1 = std::is_x86_feature_detected!("bmi1");
-        platform.has_bmi2 = std::is_x86_feature_detected!("bmi2");
-        platform.has_movbe = std::is_x86_feature_detected!("movbe");
-        platform.has_rorx = std::is_x86_feature_detected!("bmi2");
     }
-
     platform
 }
 
@@ -435,26 +427,6 @@ fn parse_prog_type(input: &str) -> Result<u32> {
         _ => bail!("unknown prog type '{input}'"),
     };
     Ok(value)
-}
-
-fn apply_features(platform: &mut PlatformCapabilities, features: &[String]) -> Result<()> {
-    platform.has_bmi1 = false;
-    platform.has_bmi2 = false;
-    platform.has_cmov = false;
-    platform.has_movbe = false;
-    platform.has_rorx = false;
-
-    for feature in features {
-        match feature.as_str() {
-            "bmi1" => platform.has_bmi1 = true,
-            "bmi2" => platform.has_bmi2 = true,
-            "cmov" => platform.has_cmov = true,
-            "movbe" => platform.has_movbe = true,
-            "rorx" => platform.has_rorx = true,
-            _ => bail!("unknown target feature: {feature}"),
-        }
-    }
-    Ok(())
 }
 
 fn kinsn_registry_from_target(target: &TargetJson) -> Result<KinsnRegistry> {

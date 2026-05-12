@@ -65,9 +65,6 @@ pub struct InsnAnnotation {
     /// PGO: branch taken/not-taken counts at this instruction.
     /// Used by BranchFlipPass to decide whether to flip.
     pub branch_profile: Option<BranchProfile>,
-    /// Optional PMU data for prefetch admission.
-    /// Used by PrefetchPass to suppress structurally valid but cold sites.
-    pub(crate) prefetch_profile: Option<PrefetchProfile>,
 }
 
 /// Real per-site PMU branch statistics.
@@ -78,15 +75,6 @@ pub struct BranchProfile {
     pub miss_rate: f64,
     pub taken_count: u64,
     pub not_taken_count: u64,
-}
-
-/// Real per-site PMU memory statistics for optional prefetch admission.
-#[derive(Clone, Debug)]
-pub struct PrefetchProfile {
-    pub execution_count: u64,
-    pub cache_references: u64,
-    pub cache_misses: u64,
-    pub miss_rate: f64,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MapInlineHintModeSpec {
@@ -182,8 +170,6 @@ pub struct CommonArgs {
 pub struct TargetJson {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub arch: Option<String>,
-    #[serde(default)]
-    pub features: Vec<String>,
     #[serde(default)]
     pub kinsns: BTreeMap<String, KinsnJson>,
 }
@@ -567,14 +553,10 @@ impl KinsnRegistry {
     }
 }
 
-/// CPU platform capabilities.
+/// CPU platform capabilities. Currently only `arch` matters at runtime —
+/// pass admission gates on kinsn availability instead of CPU feature bits.
 #[derive(Clone, Debug, Default)]
 pub struct PlatformCapabilities {
-    pub has_bmi1: bool,
-    pub has_bmi2: bool,
-    pub has_cmov: bool,
-    pub has_movbe: bool,
-    pub has_rorx: bool,
     pub arch: Arch,
 }
 
@@ -642,48 +624,43 @@ where
     Ok(applied)
 }
 
-/// Detect a 2-insn pattern that crosses a single fallthrough block boundary.
+/// Walk every block boundary and record a "pattern straddles block split"
+/// skip whenever the last body insn of one block and the first body insn of
+/// its fallthrough successor satisfy `matches_pair`.
 ///
-/// `start` must point to the candidate first insn. If `start` is the last site
-/// in its block and the block falls through into a successor whose first site
-/// makes `matches_pair(start_insn, next_insn)` true, returns
-/// `Some(SiteSkipReason { site: start, reason })`. Otherwise `None`.
-///
-/// Used by passes whose matchers operate on adjacent insn pairs and need to
-/// surface a clear "skipped: interior branch target" signal when the pattern
-/// straddles a block split (e.g. extract, endian, wide_mem).
-pub fn check_cross_block_pair_pattern<F>(
+/// Used by 2-insn pair passes (extract, endian) to surface the same
+/// interior-branch-target signal scan_block_starts misses.
+pub fn collect_cross_block_pair_skips<F>(
     prog: &BBProgram,
-    start: InsnSite,
-    matches_pair: F,
+    mut matches_pair: F,
     reason: &str,
-) -> anyhow::Result<Option<SiteSkipReason>>
+) -> anyhow::Result<Vec<SiteSkipReason>>
 where
-    F: FnOnce(&BpfInsn, &BpfInsn) -> bool,
+    F: FnMut(&BpfInsn, &BpfInsn) -> bool,
 {
     use crate::analysis::Terminator;
-    let i0 = prog.insn(start)?;
-    let start_block = prog.site_block(start);
-    let body = prog.block_body_view(start_block)?;
-    if start.idx + 1 < body.sites.len() {
-        return Ok(None);
+    let mut skipped = Vec::new();
+    for block in prog.block_ids().collect::<Vec<_>>() {
+        let body = prog.block_body_view(block)?;
+        let Some(&start) = body.sites.last() else {
+            continue;
+        };
+        let next_block = match prog.terminator(block)? {
+            Terminator::Fallthrough { next } => next,
+            _ => continue,
+        };
+        let successors = prog.successors(block);
+        if successors.len() != 1 || successors[0] != next_block {
+            anyhow::bail!("fallthrough block {:?} has inconsistent successors", block);
+        }
+        let Some(next) = prog.sites_in_block(next_block)?.first().copied() else {
+            continue;
+        };
+        if matches_pair(prog.insn(start)?, prog.insn(next)?) {
+            skipped.push(SiteSkipReason::new(start, reason));
+        }
     }
-    let next_block = match prog.terminator_at_site(start)? {
-        Terminator::Fallthrough { next } => next,
-        _ => return Ok(None),
-    };
-    let successors = prog.successors(start_block);
-    if successors.len() != 1 || successors[0] != next_block {
-        anyhow::bail!(
-            "fallthrough block {:?} has inconsistent successors",
-            start_block
-        );
-    }
-    let Some(next) = prog.sites_in_block(next_block)?.first().copied() else {
-        return Ok(None);
-    };
-    let i1 = prog.insn(next)?;
-    Ok(matches_pair(i0, i1).then(|| SiteSkipReason::new(start, reason)))
+    Ok(skipped)
 }
 
 pub(crate) fn invert_cond_jmp_op(op: u8) -> Option<u8> {

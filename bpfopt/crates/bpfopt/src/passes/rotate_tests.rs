@@ -5,15 +5,11 @@ use crate::insn::*;
 use crate::test_helpers::*;
 
 fn rotate64_ctx(btf_id: i32) -> crate::pass::PassContext {
-    let mut ctx = ctx_with_kinsn("bpf_rotate64", btf_id);
-    ctx.platform.has_rorx = true;
-    ctx
+    ctx_with_kinsn("bpf_rotate64", btf_id)
 }
 
 fn rotate32_ctx(btf_id: i32) -> crate::pass::PassContext {
-    let mut ctx = ctx_with_kinsn("bpf_rotate32", btf_id);
-    ctx.platform.has_rorx = true;
-    ctx
+    ctx_with_kinsn("bpf_rotate32", btf_id)
 }
 
 #[test]

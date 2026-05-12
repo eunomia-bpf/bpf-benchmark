@@ -471,7 +471,10 @@ impl BpfInsn {
     pub fn is_call_kinsn(&self) -> bool {
         self.is_call() && self.src_reg() == BPF_PSEUDO_KINSN_CALL
     }
-    /// `call pc-relative subprogram` (src_reg = BPF_PSEUDO_CALL).
+    /// `call pc-relative subprogram` (src_reg = BPF_PSEUDO_CALL). Test-only:
+    /// production code constructs pseudo calls through the lifter, not this
+    /// truncating `imm as i32` shortcut.
+    #[cfg(test)]
     pub fn pseudo_call_to(call_pc: usize, target_pc: usize) -> Self {
         let imm = target_pc as i64 - (call_pc as i64 + 1);
         let regs = Self::make_regs(0, BPF_PSEUDO_CALL);

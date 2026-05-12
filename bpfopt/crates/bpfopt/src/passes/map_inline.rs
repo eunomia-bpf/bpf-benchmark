@@ -1987,7 +1987,7 @@ fn resolve_snapshot_map_value(
         return Ok(cached.clone());
     }
     let resolved = (|| -> anyhow::Result<Option<SnapshotMapValue>> {
-        let Some(map_id) = map_id_for_ref(prog, side_input, map_ref)? else {
+        let Some(map_id) = prog.map_id_for_imm(map_ref.imm) else {
             return Ok(None);
         };
         if map_snapshot_skipped_by_size(side_input, map_id)? {
@@ -2014,31 +2014,6 @@ fn resolve_snapshot_map_value(
     let cached = resolved?;
     cache.insert(map_ref, cached.clone());
     Ok(cached)
-}
-fn map_id_for_ref(
-    prog: &BBProgram,
-    side_input: &MapInlineSideInput<'_>,
-    map_ref: MapRefKey,
-) -> anyhow::Result<Option<u32>> {
-    match MapPseudo::from_src_reg(map_ref.src_reg) {
-        Some(MapPseudo::Fd | MapPseudo::FdValue) => {
-            Ok(prog.map_fd_bindings().get(&map_ref.imm).copied())
-        }
-        Some(kind) if kind.uses_index() => {
-            let index = usize::try_from(map_ref.imm).map_err(|_| {
-                anyhow::anyhow!("negative canonical pseudo-map index {}", map_ref.imm)
-            })?;
-            let Some(&map_id) = side_input.map_ids.get(index) else {
-                anyhow::bail!(
-                    "canonical pseudo-map index {} out of range for {} map ids",
-                    index,
-                    side_input.map_ids.len()
-                );
-            };
-            Ok(Some(map_id))
-        }
-        _ => Ok(None),
-    }
 }
 fn encode_key_bytes(bytes: &[u8], key_size: usize) -> Vec<u8> {
     bytes[..key_size].to_vec()
@@ -2108,38 +2083,27 @@ fn find_direct_map_load_for_reg_before_site_inner(
     if budget == 0 {
         return Ok(None);
     }
-    let previous_sites = sites_before_in_frame_rev(prog, site)?;
-    for prev_site in previous_sites {
-        let insn = prog.insn(prev_site)?;
-        if insn_use_def_set(insn).defs.contains(&reg) {
-            if insn.dst_reg() == reg
-                && matches!(insn.map_pseudo(), Some(MapPseudo::Fd | MapPseudo::Idx))
-            {
-                return Ok(Some(prev_site));
-            }
-            if insn.is_mov64_reg() && insn.dst_reg() == reg {
-                return find_direct_map_load_for_reg_before_site_inner(
-                    prog,
-                    prev_site,
-                    insn.src_reg(),
-                    budget - 1,
-                );
-            }
-            if insn.class() == BPF_LDX
-                && bpf_mode(insn.code) == BPF_MEM
-                && bpf_size(insn.code) == BPF_DW
-                && insn.dst_reg() == reg
-                && insn.src_reg() == 10
-            {
-                return find_direct_map_load_for_stack_slot_before_site(
-                    prog,
-                    prev_site,
-                    insn.off,
-                    budget - 1,
-                );
-            }
-            return Ok(None);
-        }
+    let Some(prev) = prog.prev_def_in_frame(site, reg)? else {
+        return Ok(None);
+    };
+    let insn = *prog.insn(prev)?;
+    if matches!(insn.map_pseudo(), Some(MapPseudo::Fd | MapPseudo::Idx)) {
+        return Ok(Some(prev));
+    }
+    if insn.is_mov64_reg() {
+        return find_direct_map_load_for_reg_before_site_inner(
+            prog,
+            prev,
+            insn.src_reg(),
+            budget - 1,
+        );
+    }
+    if insn.class() == BPF_LDX
+        && bpf_mode(insn.code) == BPF_MEM
+        && bpf_size(insn.code) == BPF_DW
+        && insn.src_reg() == 10
+    {
+        return find_direct_map_load_for_stack_slot_before_site(prog, prev, insn.off, budget - 1);
     }
     Ok(None)
 }
@@ -2152,8 +2116,7 @@ fn find_direct_map_load_for_stack_slot_before_site(
     if budget == 0 {
         return Ok(None);
     }
-    let previous_sites = sites_before_in_frame_rev(prog, site)?;
-    for prev_site in previous_sites {
+    for prev_site in sites_before_in_frame_rev(prog, site)? {
         let insn = prog.insn(prev_site)?;
         if bpf_mode(insn.code) == BPF_MEM
             && bpf_size(insn.code) == BPF_DW
@@ -2190,21 +2153,18 @@ fn find_r2_stack_pointer_setup_simple(
     prog: &BBProgram,
     call_site: InsnSite,
 ) -> anyhow::Result<Option<(InsnSite, InsnSite, i16)>> {
-    let (r2_add_site, scanned) =
-        match find_prev_reg_def_within(prog, call_site, 2, R2_SETUP_LOOKBACK_LIMIT) {
-            Ok(Some(found)) => found,
-            Ok(None) => return Ok(None),
-            Err(err) => return Err(err),
-        };
+    let Some((r2_add_site, scanned)) =
+        find_prev_def_within(prog, call_site, 2, R2_SETUP_LOOKBACK_LIMIT)?
+    else {
+        return Ok(None);
+    };
     let add = prog.insn(r2_add_site)?;
     if add.code != (BPF_ALU64 | BPF_ADD | BPF_K) || add.dst_reg() != 2 || add.imm >= 0 {
         return Ok(None);
     }
     let remaining = R2_SETUP_LOOKBACK_LIMIT.saturating_sub(scanned);
-    let (r2_mov_site, _) = match find_prev_reg_def_within(prog, r2_add_site, 2, remaining) {
-        Ok(Some(found)) => found,
-        Ok(None) => return Ok(None),
-        Err(err) => return Err(err),
+    let Some((r2_mov_site, _)) = find_prev_def_within(prog, r2_add_site, 2, remaining)? else {
+        return Ok(None);
     };
     let mov = prog.insn(r2_mov_site)?;
     if mov.code != (BPF_ALU64 | BPF_MOV | BPF_X) || mov.dst_reg() != 2 || mov.src_reg() != 10 {
@@ -2214,39 +2174,27 @@ fn find_r2_stack_pointer_setup_simple(
         .map_err(|_| anyhow::anyhow!("r2 stack add immediate {} does not fit i16", add.imm))?;
     Ok(Some((r2_mov_site, r2_add_site, stack_off)))
 }
-fn find_prev_reg_def_within(
+fn find_prev_def_within(
     prog: &BBProgram,
-    start_site: InsnSite,
+    start: InsnSite,
     reg: u8,
     limit: usize,
 ) -> anyhow::Result<Option<(InsnSite, usize)>> {
-    let mut scanned = 0usize;
-    for site in sites_before_in_frame_rev(prog, start_site)? {
-        scanned += 1;
-        if scanned > limit {
+    for (scanned, site) in sites_before_in_frame_rev(prog, start)?
+        .into_iter()
+        .enumerate()
+    {
+        if scanned >= limit {
             break;
         }
         if insn_use_def_set(prog.insn(site)?).defs.contains(&reg) {
-            return Ok(Some((site, scanned)));
+            return Ok(Some((site, scanned + 1)));
         }
     }
     Ok(None)
 }
 fn size_in_bytes(size: u8) -> Option<u8> {
     BpfMemWidth::from_size_opcode(size).map(|w| w.bytes() as u8)
-}
-fn find_prev_reg_def(
-    prog: &BBProgram,
-    start_site: InsnSite,
-    reg: u8,
-) -> Result<Option<InsnSite>, String> {
-    for site in sites_before_in_frame_rev(prog, start_site).map_err(|err| err.to_string())? {
-        let insn = prog.insn(site).map_err(|err| err.to_string())?;
-        if insn_use_def_set(insn).defs.contains(&reg) {
-            return Ok(Some(site));
-        }
-    }
-    Ok(None)
 }
 fn resolve_map_value_pointer_inner(
     prog: &BBProgram,
@@ -2260,7 +2208,10 @@ fn resolve_map_value_pointer_inner(
             reg, REG_RESOLUTION_LIMIT
         ));
     }
-    let Some(site) = find_prev_reg_def(prog, before_site, reg)? else {
+    let Some(site) = prog
+        .prev_def_in_frame(before_site, reg)
+        .map_err(|err| err.to_string())?
+    else {
         return Ok(None);
     };
     let insn = *prog.insn(site).map_err(|err| err.to_string())?;
@@ -3440,51 +3391,15 @@ fn analyze_map_info(
     program: &BBProgram,
     side_input: &MapInlineSideInput<'_>,
 ) -> Result<MapInfoBySite> {
-    let fd_bindings: HashMap<i32, u32> = program
-        .map_bindings()
-        .iter()
-        .map(|binding| (binding.old_fd, binding.map_id))
-        .collect();
-    let map_ids = side_input.map_ids;
     let mut by_site = HashMap::new();
-    let mut fd_order = Vec::<i32>::new();
     for site in program.all_sites() {
         let Some(insn) = program.insn_at(site) else {
             continue;
         };
-        let Some(kind) = insn.map_pseudo() else {
+        if !matches!(insn.map_pseudo(), Some(MapPseudo::Fd | MapPseudo::Idx)) {
             continue;
-        };
-        let map_id = match kind {
-            MapPseudo::Fd => {
-                let index = fd_order
-                    .iter()
-                    .position(|fd| *fd == insn.imm)
-                    .unwrap_or_else(|| {
-                        fd_order.push(insn.imm);
-                        fd_order.len() - 1
-                    });
-                fd_bindings
-                    .get(&insn.imm)
-                    .copied()
-                    .or_else(|| map_ids.get(index).copied())
-            }
-            MapPseudo::Idx => {
-                let index = usize::try_from(insn.imm).map_err(|_| {
-                    anyhow!("negative pseudo-map index {} at site {:?}", insn.imm, site)
-                })?;
-                Some(map_ids.get(index).copied().ok_or_else(|| {
-                    anyhow!(
-                        "pseudo-map index {} at site {:?} out of range for {} map ids",
-                        index,
-                        site,
-                        map_ids.len()
-                    )
-                })?)
-            }
-            _ => continue,
-        };
-        let Some(map_id) = map_id else {
+        }
+        let Some(map_id) = program.map_id_for_imm(insn.imm) else {
             continue;
         };
         let info = side_input

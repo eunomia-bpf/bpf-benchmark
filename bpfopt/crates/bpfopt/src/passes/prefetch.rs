@@ -18,18 +18,15 @@ fn prefetch_register_uses(payload: u64) -> RegSet {
 pub struct PrefetchPass;
 #[derive(Clone, Copy, Debug)]
 struct PrefetchSite {
-    anchor: InsnSite,
     target: InsnSite,
     ptr_reg: u8,
     ptr_def: InsnSite,
-    default_score: u64,
 }
 #[derive(Clone, Debug)]
 struct PrefetchCandidate {
     target: InsnSite,
     insert: InsnSite,
     ptr_reg: u8,
-    score: u64,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum TrackedValue {
@@ -59,13 +56,6 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     let mut candidates = Vec::new();
     let mut skipped = Vec::new();
     for site in scan_prefetch_sites(prog, ctx.prog_type)? {
-        let score = match prefetch_score_for_site(prog, site)? {
-            Ok(score) => score,
-            Err(reason) => {
-                skipped.push(checked_site_skip(prog, site.target, reason)?);
-                continue;
-            }
-        };
         let insert_site = match choose_prefetch_insert_site(prog, site)? {
             Ok(insert) => insert,
             Err(reason) => {
@@ -77,7 +67,6 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             target: site.target,
             insert: insert_site,
             ptr_reg: site.ptr_reg,
-            score,
         });
     }
     let candidates = dedup_candidates(candidates);
@@ -102,33 +91,6 @@ fn scan_prefetch_sites(prog: &BBProgram, prog_type: u32) -> anyhow::Result<Vec<P
         sites.extend(scan_packet_prefetch_sites(prog, layout)?);
     }
     Ok(sites)
-}
-fn prefetch_score_for_site(
-    prog: &BBProgram,
-    site: PrefetchSite,
-) -> anyhow::Result<std::result::Result<u64, String>> {
-    let profile_hint = prog
-        .prefetch_hint(site.target)
-        .or_else(|| prog.prefetch_hint(site.anchor));
-    let Some(profile_hint) = profile_hint else {
-        return Ok(Ok(site.default_score));
-    };
-    if profile_hint.cache_misses == 0 {
-        return Ok(Err("prefetch site has no observed cache misses".into()));
-    }
-    let hotness = prog
-        .site_hotness(site.target)
-        .or_else(|| prog.site_hotness(site.anchor))
-        .ok_or_else(|| {
-            anyhow::anyhow!(
-                "prefetch candidate at {:?} has profile hint but no execution count",
-                site.target
-            )
-        })?;
-    if hotness == 0 {
-        return Ok(Err("prefetch site execution_count is zero".into()));
-    }
-    Ok(Ok(hotness))
 }
 fn scan_map_value_prefetch_sites(prog: &BBProgram) -> anyhow::Result<Vec<PrefetchSite>> {
     let mut sites = Vec::new();
@@ -155,11 +117,9 @@ fn first_map_value_deref_after_lookup(
         if let Some(base_reg) = memory_base_reg(insn) {
             if let Some(ptr_def) = aliases[base_reg as usize] {
                 return Ok(Some(PrefetchSite {
-                    anchor: call_site,
                     target: site,
                     ptr_reg: base_reg,
                     ptr_def,
-                    default_score: 2,
                 }));
             }
         }
@@ -221,11 +181,9 @@ fn scan_packet_prefetch_sites(
             if let Some(base_reg) = memory_base_reg(insn) {
                 if let TrackedValue::PacketData { ptr_def } = regs[base_reg as usize] {
                     sites.push(PrefetchSite {
-                        anchor: site,
                         target: site,
                         ptr_reg: base_reg,
                         ptr_def,
-                        default_score: 1,
                     });
                 }
             }
@@ -467,20 +425,18 @@ fn reject_reg_write_between(
 }
 fn dedup_candidates(mut candidates: Vec<PrefetchCandidate>) -> Vec<PrefetchCandidate> {
     candidates.sort_by(|a, b| {
-        b.score
-            .cmp(&a.score)
-            .then_with(|| a.insert.cmp(&b.insert))
+        a.insert
+            .cmp(&b.insert)
             .then_with(|| a.target.cmp(&b.target))
     });
-    let mut kept = Vec::new();
+    let mut kept: Vec<PrefetchCandidate> = Vec::new();
     for candidate in candidates {
-        if kept.iter().any(|existing: &PrefetchCandidate| {
+        if kept.iter().any(|existing| {
             existing.insert == candidate.insert && existing.ptr_reg == candidate.ptr_reg
         }) {
             continue;
         }
         kept.push(candidate);
     }
-    kept.sort_by_key(|candidate| candidate.insert);
     kept
 }

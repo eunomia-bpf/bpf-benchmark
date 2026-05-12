@@ -6,9 +6,7 @@ use crate::analysis::bbprogram_btf::{remap_btf_records_view, BtfRemapView};
 use crate::analysis::bbprogram_lower::remap_btf_records_for_lowering;
 use crate::analysis::{DefSite, UseDefGraph};
 use crate::insn::{insn_width, BpfInsn, MapPseudo};
-use crate::pass::{
-    BtfInfoRecords, InsnAnnotation, KinsnRegistry, PrefetchProfile, RegKind, RegSet,
-};
+use crate::pass::{BtfInfoRecords, InsnAnnotation, KinsnRegistry, RegKind, RegSet};
 use crate::verifier_log::{RegState, StackState, VerifierInsn, VerifierInsnKind};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::sync::{Arc, Mutex};
@@ -253,19 +251,28 @@ impl BBProgram {
     }
     #[cfg(test)]
     pub fn live_in(&self, block: BlockId) -> anyhow::Result<RegSet> {
-        self.block(block)?;
-        compute_liveness(self)
-            .live_in
-            .remove(&block)
-            .ok_or_else(|| anyhow::anyhow!("liveness missing live_in for {:?}", block))
+        let first = logical_sites_for_block(self.block(block)?)
+            .into_iter()
+            .next()
+            .ok_or_else(|| anyhow::anyhow!("block {:?} has no sites", block))?;
+        self.live_in_site_checked(first)
     }
     #[cfg(test)]
     pub fn live_out(&self, block: BlockId) -> anyhow::Result<RegSet> {
-        self.block(block)?;
-        compute_liveness(self)
-            .live_out
-            .remove(&block)
-            .ok_or_else(|| anyhow::anyhow!("liveness missing live_out for {:?}", block))
+        let last = logical_sites_for_block(self.block(block)?)
+            .into_iter()
+            .next_back()
+            .ok_or_else(|| anyhow::anyhow!("block {:?} has no sites", block))?;
+        self.live_out_site_checked(last)
+    }
+    pub fn live_in_site_checked(&self, site: InsnSite) -> anyhow::Result<RegSet> {
+        self.insn_at(site)
+            .ok_or_else(|| anyhow::anyhow!("invalid instruction site {:?}", site))?;
+        self.site_liveness()?
+            .live_in
+            .get(&site)
+            .cloned()
+            .ok_or_else(|| anyhow::anyhow!("site liveness missing live_in for {:?}", site))
     }
     pub fn live_out_site_checked(&self, site: InsnSite) -> anyhow::Result<RegSet> {
         self.insn_at(site)
@@ -331,6 +338,16 @@ impl BBProgram {
             .iter()
             .map(|binding| (binding.old_fd, binding.map_id))
             .collect()
+    }
+    /// Resolve the kernel map id for a pseudo-map ldimm64 immediate.
+    /// Returns the map id that was bound at BBProgram construction time;
+    /// callers must skip the site if `None` (the construction snapshot
+    /// is the authoritative source).
+    pub fn map_id_for_imm(&self, imm: i32) -> Option<u32> {
+        self.map_bindings
+            .iter()
+            .find(|binding| binding.old_fd == imm)
+            .map(|binding| binding.map_id)
     }
     #[cfg(test)]
     pub(crate) fn verifier_states_by_site(&self) -> Option<&VerifierStatesBySite> {
@@ -426,19 +443,13 @@ impl BBProgram {
         miss_rate.is_finite().then_some(miss_rate as f32)
     }
     pub fn site_hotness(&self, site: InsnSite) -> Option<u64> {
-        let record = self.pmu_profile.get(&site)?;
-        let branch_count = record
-            .branch_profile
-            .as_ref()
-            .map(|profile| profile.branch_count);
-        let execution_count = record
-            .prefetch_profile
-            .as_ref()
-            .map(|profile| profile.execution_count);
-        branch_count.into_iter().chain(execution_count).max()
-    }
-    pub fn prefetch_hint(&self, site: InsnSite) -> Option<&PrefetchProfile> {
-        self.pmu_profile.get(&site)?.prefetch_profile.as_ref()
+        Some(
+            self.pmu_profile
+                .get(&site)?
+                .branch_profile
+                .as_ref()?
+                .branch_count,
+        )
     }
     pub(crate) fn attach_profile_from_annotations(
         &mut self,
@@ -446,7 +457,7 @@ impl BBProgram {
     ) -> anyhow::Result<()> {
         self.pmu_profile.clear();
         for (pc, annotation) in annotations.iter().enumerate() {
-            if annotation.branch_profile.is_none() && annotation.prefetch_profile.is_none() {
+            if annotation.branch_profile.is_none() {
                 continue;
             }
             let site = self.original_pc_to_site(pc).ok_or_else(|| {
@@ -458,6 +469,20 @@ impl BBProgram {
     }
     pub fn def_sites(&self) -> impl Iterator<Item = DefSite> + '_ {
         self.use_def.defs().copied()
+    }
+    /// First in-frame predecessor site (in linear layout order, no CFG) that
+    /// defines `reg`. Returns `None` if no such site exists within the frame.
+    /// Callers that need CFG/dominance reasoning must not use this primitive.
+    pub fn prev_def_in_frame(&self, start: InsnSite, reg: u8) -> anyhow::Result<Option<InsnSite>> {
+        for site in crate::pass::sites_before_in_frame_rev(self, start)? {
+            if crate::analysis::insn_use_def_set(self.insn(site)?)
+                .defs
+                .contains(&reg)
+            {
+                return Ok(Some(site));
+            }
+        }
+        Ok(None)
     }
     pub fn uses_for_def(&self, def: DefSite) -> &[crate::analysis::UseSite] {
         self.use_def.uses_for(def)
@@ -1195,14 +1220,9 @@ fn logical_sites_for_block(block: &Block) -> Vec<InsnSite> {
     }
     sites
 }
-#[cfg(test)]
-#[derive(Clone, Debug, Default)]
-struct LivenessSets {
-    live_in: HashMap<BlockId, RegSet>,
-    live_out: HashMap<BlockId, RegSet>,
-}
 #[derive(Clone, Debug, Default)]
 struct SiteLivenessSets {
+    live_in: HashMap<InsnSite, RegSet>,
     live_out: HashMap<InsnSite, RegSet>,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -1296,78 +1316,6 @@ impl LiftedRegFact {
 struct LiftedRegFacts {
     by_site: HashMap<InsnSite, [LiftedRegFact; 11]>,
 }
-#[cfg(test)]
-fn compute_liveness(prog: &BBProgram) -> LivenessSets {
-    let mut use_sets = HashMap::<BlockId, RegSet>::new();
-    let mut def_sets = HashMap::<BlockId, RegSet>::new();
-    let mut kinsn_uses = HashMap::<BlockId, RegSet>::new();
-    for block in prog.blocks() {
-        let mut uses = RegSet::new();
-        let mut defs = RegSet::new();
-        let mut implicit = RegSet::new();
-        for site in logical_sites_for_block(block) {
-            let site_uses = prog
-                .use_def
-                .uses
-                .keys()
-                .filter(|use_site| use_site.block == site.block && use_site.idx == site.idx)
-                .map(|use_site| use_site.reg)
-                .collect::<RegSet>();
-            for reg in site_uses {
-                if !defs.contains(&reg) {
-                    uses.insert(reg);
-                }
-                if prog.insn_at(site).is_some_and(|insn| insn.is_call_kinsn()) {
-                    implicit.insert(reg);
-                }
-            }
-            for def in prog
-                .use_def
-                .defs
-                .keys()
-                .filter(|def| def.block == site.block && def.idx == site.idx)
-            {
-                defs.insert(def.reg);
-            }
-        }
-        use_sets.insert(block.id, uses);
-        def_sets.insert(block.id, defs);
-        kinsn_uses.insert(block.id, implicit);
-    }
-    let mut live_in = HashMap::<BlockId, RegSet>::new();
-    let mut live_out = HashMap::<BlockId, RegSet>::new();
-    for block in prog.blocks() {
-        live_in.insert(block.id, RegSet::new());
-        live_out.insert(block.id, RegSet::new());
-    }
-    let mut changed = true;
-    while changed {
-        changed = false;
-        for block in prog.blocks().collect::<Vec<_>>().into_iter().rev() {
-            let mut out = RegSet::new();
-            for succ in prog.successors(block.id) {
-                if let Some(succ_in) = live_in.get(succ) {
-                    out.extend(succ_in.iter().copied());
-                }
-            }
-            let mut input = out
-                .difference(&def_sets[&block.id])
-                .copied()
-                .collect::<RegSet>();
-            input.extend(use_sets[&block.id].iter().copied());
-            let mut public_out = out;
-            public_out.extend(kinsn_uses[&block.id].iter().copied());
-            if live_in.get(&block.id) != Some(&input)
-                || live_out.get(&block.id) != Some(&public_out)
-            {
-                live_in.insert(block.id, input);
-                live_out.insert(block.id, public_out);
-                changed = true;
-            }
-        }
-    }
-    LivenessSets { live_in, live_out }
-}
 fn compute_site_liveness(prog: &BBProgram) -> anyhow::Result<SiteLivenessSets> {
     let mut sites = Vec::new();
     let mut use_sets = HashMap::<InsnSite, RegSet>::new();
@@ -1423,7 +1371,7 @@ fn compute_site_liveness(prog: &BBProgram) -> anyhow::Result<SiteLivenessSets> {
             }
         }
     }
-    Ok(SiteLivenessSets { live_out })
+    Ok(SiteLivenessSets { live_in, live_out })
 }
 fn compute_lifted_reg_facts(prog: &BBProgram) -> anyhow::Result<LiftedRegFacts> {
     let mut by_site = HashMap::new();
