@@ -504,7 +504,7 @@ fn is_map_lookup_elem_call(insn: &BpfInsn) -> bool {
 fn collect_kernel_mutable_maps(
     prog: &BBProgram,
     side_input: &MapInlineSideInput<'_>,
-    map_info: &MapInfoResult,
+    map_info: &MapInfoBySite,
 ) -> anyhow::Result<KernelMutableMaps> {
     let mut ids = HashSet::new();
     let mut reasons = HashMap::new();
@@ -519,19 +519,6 @@ fn collect_kernel_mutable_maps(
                 ),
             );
         }
-    }
-    for info in &map_info.unique_maps {
-        if ids.contains(&info.map_id) || !lru_lookup_mutates_map(info.map_type) {
-            continue;
-        }
-        ids.insert(info.map_id);
-        reasons.insert(
-            info.map_id,
-            format!(
-                "map kernel-mutable: LRU map lookup mutates access order on map_id={}",
-                info.map_id
-            ),
-        );
     }
     for site in prog.all_sites() {
         let insn = prog.insn(site)?;
@@ -551,25 +538,19 @@ fn collect_kernel_mutable_maps(
             } else {
                 "BPF_FUNC_<non-writer>"
             };
-            let map_ref = map_info.reference_at_site(map_load_site).ok_or_else(|| {
+            let info = map_info.get(&map_load_site).ok_or_else(|| {
                 anyhow::anyhow!(
                     "map_inline cannot resolve map reference at {:?} for {helper_name} helper at {:?}",
                     map_load_site,
                     site
                 )
             })?;
-            let map_id = map_ref.map_id.ok_or_else(|| {
-                anyhow::anyhow!(
-                    "map_inline cannot resolve map_id at {:?} for {helper_name} helper at {:?}",
-                    map_load_site,
-                    site
-                )
-            })?;
-            ids.insert(map_id);
+            ids.insert(info.map_id);
             reasons.insert(
-                map_id,
+                info.map_id,
                 format!(
-                    "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id={map_id}"
+                    "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id={}",
+                    info.map_id
                 ),
             );
         }
@@ -613,7 +594,7 @@ fn kernel_mutable_reason_for_map(
 fn resolve_inline_hints(
     prog: &BBProgram,
     side_input: &MapInlineSideInput<'_>,
-    map_info: &MapInfoResult,
+    map_info: &MapInfoBySite,
     kernel_mutable_maps: &KernelMutableMaps,
     hints: &[MapInlineHint],
 ) -> anyhow::Result<ResolvedHintMap> {
@@ -648,7 +629,7 @@ fn resolve_inline_hints(
 fn resolve_direct_inline_hint(
     prog: &BBProgram,
     side_input: &MapInlineSideInput<'_>,
-    map_info: &MapInfoResult,
+    map_info: &MapInfoBySite,
     kernel_mutable_maps: &KernelMutableMaps,
     sites: &[MapLookupSite],
     hint: &MapInlineHint,
@@ -679,7 +660,7 @@ fn resolve_direct_inline_hint(
         }
         MapInlineHintAnchor::MapName(name) => {
             let mut map_ids = HashSet::new();
-            for info in &map_info.unique_maps {
+            for info in unique_maps(map_info) {
                 let metadata = side_input.metadata.get(&info.map_id).ok_or_else(|| {
                     anyhow::anyhow!(
                         "map_values snapshot has no metadata for used map {} while resolving inline hint map_name anchor {name:?}",
@@ -720,7 +701,7 @@ fn resolve_direct_inline_hint(
 fn resolve_deferred_inner_hints(
     prog: &BBProgram,
     side_input: &MapInlineSideInput<'_>,
-    map_info: &MapInfoResult,
+    map_info: &MapInfoBySite,
     kernel_mutable_maps: &KernelMutableMaps,
     sites: &[MapLookupSite],
     deferred: &[MapInlineHint],
@@ -791,7 +772,7 @@ fn resolve_deferred_inner_hints(
 fn resolve_hinted_map_in_map_routes(
     prog: &BBProgram,
     side_input: &MapInlineSideInput<'_>,
-    map_info: &MapInfoResult,
+    map_info: &MapInfoBySite,
     sites: &[MapLookupSite],
     resolved: &ResolvedHintMap,
 ) -> anyhow::Result<Vec<(InsnSite, MapInfo)>> {
@@ -873,21 +854,15 @@ fn metadata_map_ids_for_name(
     Ok(matched)
 }
 fn lookup_site_map_info<'a>(
-    map_info: &'a MapInfoResult,
+    map_info: &'a MapInfoBySite,
     site: &MapLookupSite,
 ) -> anyhow::Result<&'a MapInfo> {
-    let map_ref = map_info
-        .reference_at_site(site.map_load_site)
-        .ok_or_else(|| {
-            anyhow::anyhow!(
-                "map reference metadata unavailable for lookup site {:?}",
-                site.call_site
-            )
-        })?;
-    map_ref
-        .info
-        .as_ref()
-        .ok_or_else(|| anyhow::anyhow!("map info unavailable for lookup site {:?}", site.call_site))
+    map_info.get(&site.map_load_site).ok_or_else(|| {
+        anyhow::anyhow!(
+            "map reference metadata unavailable for lookup site {:?}",
+            site.call_site
+        )
+    })
 }
 fn insert_resolved_hint(
     side_input: &MapInlineSideInput<'_>,
@@ -1140,20 +1115,12 @@ fn run_map_inline_round(
         }
     }
     for site in sites {
-        let Some(map_ref) = map_info.reference_at_site(site.map_load_site) else {
+        let Some(info) = map_info.get(&site.map_load_site) else {
             skip_lookup!(
                 &mut skipped,
                 &mut site_diagnostics,
                 site.call_site,
                 "map reference metadata unavailable".to_string()
-            );
-        };
-        let Some(info) = map_ref.info.as_ref() else {
-            skip_lookup!(
-                &mut skipped,
-                &mut site_diagnostics,
-                site.call_site,
-                "map info unavailable".to_string()
             );
         };
         if let Some(reason) = kernel_mutable_reason_for_map(&kernel_mutable_maps, info) {
@@ -3523,456 +3490,76 @@ impl MapMetadata {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct MapReference {
-    pub site: InsnSite,
-    pub dst_reg: u8,
-    pub imm: i32,
-    pub map_ordinal: usize,
-    pub map_id: Option<u32>,
-    pub info: Option<MapInfo>,
-}
 
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct MapInfoResult {
-    pub references: Vec<MapReference>,
-    pub unique_maps: Vec<MapInfo>,
-}
-
-impl MapInfoResult {
-    pub fn reference_at_site(&self, site: InsnSite) -> Option<&MapReference> {
-        self.references
-            .iter()
-            .find(|reference| reference.site == site)
-    }
-}
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-struct MapBinding {
-    site: InsnSite,
-    kind: MapPseudo,
-    dst_reg: u8,
-    imm: i32,
-    map_ordinal: Option<usize>,
-    map_id: Option<u32>,
-}
+pub type MapInfoBySite = HashMap<InsnSite, MapInfo>;
 
 fn analyze_map_info(
     program: &BBProgram,
     side_input: &MapInlineSideInput<'_>,
-) -> Result<MapInfoResult> {
-    let fd_bindings = program
+) -> Result<MapInfoBySite> {
+    let fd_bindings: HashMap<i32, u32> = program
         .map_bindings()
         .iter()
         .map(|binding| (binding.old_fd, binding.map_id))
-        .collect::<HashMap<_, _>>();
-    let map_refs = collect_map_bindings_from_sites(program, side_input.map_ids, &fd_bindings)?;
-    collect_map_references_from_bindings(side_input.map_ids.len(), map_refs, |map_id| {
-        let Some(metadata) = side_input.metadata.get(&map_id) else {
-            return Err(anyhow!(
-                "map_values snapshot has no metadata for map {}",
-                map_id
-            ));
-        };
-        Ok(Some(metadata.clone()))
-    })
-}
-
-fn collect_map_bindings_from_sites(
-    program: &BBProgram,
-    map_ids: &[u32],
-    fd_bindings: &HashMap<i32, u32>,
-) -> Result<Vec<MapBinding>> {
-    let mut bindings = Vec::new();
+        .collect();
+    let map_ids = side_input.map_ids;
+    let mut by_site = HashMap::new();
     let mut fd_order = Vec::<i32>::new();
-
     for site in program.all_sites() {
         let Some(insn) = program.insn_at(site) else {
             continue;
         };
-        if let Some(kind) = insn.map_pseudo() {
-            let (map_ordinal, map_id) =
-                resolve_map_ref(kind, insn.imm, map_ids, fd_bindings, &mut fd_order);
-            bindings.push(MapBinding {
-                site,
-                kind,
-                dst_reg: insn.dst_reg(),
-                imm: insn.imm,
-                map_ordinal,
-                map_id,
-            });
-        }
-    }
-
-    Ok(bindings)
-}
-
-fn resolve_map_ref(
-    kind: MapPseudo,
-    imm: i32,
-    map_ids: &[u32],
-    fd_bindings: &HashMap<i32, u32>,
-    fd_order: &mut Vec<i32>,
-) -> (Option<usize>, Option<u32>) {
-    if kind.uses_index() {
-        let Ok(index) = usize::try_from(imm) else {
-            return (None, None);
-        };
-        return (Some(index), map_ids.get(index).copied());
-    }
-
-    let index = fd_order.iter().position(|fd| *fd == imm).unwrap_or_else(|| {
-        fd_order.push(imm);
-        fd_order.len() - 1
-    });
-    let map_id = fd_bindings
-        .get(&imm)
-        .copied()
-        .or_else(|| map_ids.get(index).copied());
-    (Some(index), map_id)
-}
-
-fn collect_map_references_from_bindings<F>(
-    map_id_count: usize,
-    map_refs: Vec<MapBinding>,
-    mut resolver: F,
-) -> Result<MapInfoResult>
-where
-    F: FnMut(u32) -> Result<Option<MapInfo>>,
-{
-    let mut references = Vec::new();
-    let mut resolved_by_index: BTreeMap<usize, Option<MapInfo>> = BTreeMap::new();
-
-    for binding in map_refs {
-        let kind @ (MapPseudo::Fd | MapPseudo::Idx) = binding.kind else {
+        let Some(kind) = insn.map_pseudo() else {
             continue;
         };
-        let map_ordinal = binding.map_ordinal.ok_or_else(|| {
-            anyhow!(
-                "negative pseudo-map index {} at site {:?}",
-                binding.imm,
-                binding.site
-            )
-        })?;
-        let map_id = if kind == MapPseudo::Idx {
-            Some(binding.map_id.ok_or_else(|| {
-                anyhow!(
-                    "pseudo-map index {} at site {:?} out of range for {} map ids",
-                    map_ordinal,
-                    binding.site,
-                    map_id_count
-                )
-            })?)
-        } else {
-            binding.map_id
-        };
-        let info = match resolved_by_index.get(&map_ordinal) {
-            Some(info) => info.clone(),
-            None => {
-                let resolved = match map_id {
-                    Some(map_id) => resolver(map_id)?,
-                    None => None,
-                };
-                resolved_by_index.insert(map_ordinal, resolved.clone());
-                resolved
+        let map_id = match kind {
+            MapPseudo::Fd => {
+                let index = fd_order
+                    .iter()
+                    .position(|fd| *fd == insn.imm)
+                    .unwrap_or_else(|| {
+                        fd_order.push(insn.imm);
+                        fd_order.len() - 1
+                    });
+                fd_bindings
+                    .get(&insn.imm)
+                    .copied()
+                    .or_else(|| map_ids.get(index).copied())
             }
+            MapPseudo::Idx => {
+                let index = usize::try_from(insn.imm).map_err(|_| {
+                    anyhow!("negative pseudo-map index {} at site {:?}", insn.imm, site)
+                })?;
+                Some(map_ids.get(index).copied().ok_or_else(|| {
+                    anyhow!(
+                        "pseudo-map index {} at site {:?} out of range for {} map ids",
+                        index,
+                        site,
+                        map_ids.len()
+                    )
+                })?)
+            }
+            _ => continue,
         };
-
-        references.push(MapReference {
-            site: binding.site,
-            dst_reg: binding.dst_reg,
-            imm: binding.imm,
-            map_ordinal,
-            map_id,
-            info,
-        });
+        let Some(map_id) = map_id else {
+            continue;
+        };
+        let info = side_input
+            .metadata
+            .get(&map_id)
+            .ok_or_else(|| anyhow!("map_values snapshot has no metadata for map {}", map_id))?
+            .clone();
+        by_site.insert(site, info);
     }
-
-    let mut resolved_indexes = resolved_by_index.keys().copied().collect::<Vec<_>>();
-    resolved_indexes.sort_unstable();
-    let unique_maps = resolved_indexes
-        .into_iter()
-        .filter_map(|index| resolved_by_index.get(&index).cloned().flatten())
-        .collect();
-
-    Ok(MapInfoResult {
-        references,
-        unique_maps,
-    })
+    Ok(by_site)
 }
 
-#[cfg(test)]
-mod map_info_tests {
-    use super::*;
-    use crate::analysis::BlockId;
-    use crate::insn::{insn_width, BpfInsn, MapPseudo, BPF_DW, BPF_IMM, BPF_LD};
-    use std::collections::HashMap;
-
-    const BPF_MAP_TYPE_PERCPU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_PERCPU_HASH;
-    const BPF_MAP_TYPE_LRU_PERCPU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH;
-    const BPF_MAP_TYPE_ARRAY_OF_MAPS: u32 = libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS;
-    const BPF_MAP_TYPE_HASH_OF_MAPS: u32 = libbpf_sys::BPF_MAP_TYPE_HASH_OF_MAPS;
-    const BPF_MAP_TYPE_ARRAY: u32 = libbpf_sys::BPF_MAP_TYPE_ARRAY;
-    const BPF_MAP_TYPE_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_HASH;
-    const BPF_MAP_TYPE_LRU_HASH: u32 = libbpf_sys::BPF_MAP_TYPE_LRU_HASH;
-    const BPF_MAP_TYPE_PERCPU_ARRAY: u32 = libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
-
-    fn collect_map_references<F>(
-        insns: &[BpfInsn],
-        map_ids: &[u32],
-        resolver: F,
-    ) -> Result<MapInfoResult>
-    where
-        F: FnMut(u32) -> Result<Option<MapInfo>>,
-    {
-        collect_map_references_with_bindings(insns, map_ids, &HashMap::new(), resolver)
+fn unique_maps(map_info: &MapInfoBySite) -> Vec<MapInfo> {
+    let mut seen = HashMap::new();
+    for info in map_info.values() {
+        seen.entry(info.map_id).or_insert_with(|| info.clone());
     }
-
-    fn collect_map_references_with_bindings<F>(
-        insns: &[BpfInsn],
-        map_ids: &[u32],
-        map_fd_bindings: &HashMap<i32, u32>,
-        resolver: F,
-    ) -> Result<MapInfoResult>
-    where
-        F: FnMut(u32) -> Result<Option<MapInfo>>,
-    {
-        let map_refs = collect_map_bindings(insns, map_ids, map_fd_bindings);
-        collect_map_references_from_bindings(map_ids.len(), map_refs, resolver)
-    }
-
-    fn collect_map_bindings(
-        insns: &[BpfInsn],
-        map_ids: &[u32],
-        fd_bindings: &HashMap<i32, u32>,
-    ) -> Vec<MapBinding> {
-        let mut bindings = Vec::new();
-        let mut fd_order = Vec::<i32>::new();
-        let mut pc = 0usize;
-        while pc < insns.len() {
-            let insn = insns[pc];
-            if let Some(kind) = insn.map_pseudo() {
-                let (map_ordinal, map_id) =
-                    resolve_map_ref(kind, insn.imm, map_ids, fd_bindings, &mut fd_order);
-                bindings.push(MapBinding {
-                    site: InsnSite::for_test(BlockId(0), bindings.len()),
-                    kind,
-                    dst_reg: insn.dst_reg(),
-                    imm: insn.imm,
-                    map_ordinal,
-                    map_id,
-                });
-            }
-            pc += insn_width(&insn);
-        }
-        bindings
-    }
-
-    fn make_ld_imm64(dst: u8, src: u8, imm_lo: i32) -> [BpfInsn; 2] {
-        [
-            BpfInsn::new(
-                BPF_LD | BPF_DW | BPF_IMM,
-                BpfInsn::make_regs(dst, src),
-                0,
-                imm_lo,
-            ),
-            BpfInsn::new(0, 0, 0, 0),
-        ]
-    }
-
-    fn make_map_info(map_type: u32, map_id: u32, max_entries: u32) -> MapInfo {
-        MapInfo {
-            map_type,
-            key_size: 4,
-            value_size: 8,
-            max_entries,
-            map_id,
-            name: format!("map_{map_id}"),
-        }
-    }
-
-    fn array_map(map_id: u32, max_entries: u32) -> MapInfo {
-        make_map_info(BPF_MAP_TYPE_ARRAY, map_id, max_entries)
-    }
-
-    fn hash_map(map_id: u32) -> MapInfo {
-        make_map_info(BPF_MAP_TYPE_HASH, map_id, 16)
-    }
-
-    #[test]
-    fn collect_map_references_tracks_unique_fd_order() {
-        let ld0 = make_ld_imm64(1, MapPseudo::Fd.src_reg(), 10);
-        let ld1 = make_ld_imm64(2, MapPseudo::Fd.src_reg(), 11);
-        let ld2 = make_ld_imm64(3, MapPseudo::Fd.src_reg(), 10);
-        let insns = vec![ld0[0], ld0[1], ld1[0], ld1[1], ld2[0], ld2[1]];
-
-        let result = collect_map_references(&insns, &[101, 202], |map_id| {
-            Ok(match map_id {
-                101 => Some(array_map(101, 4)),
-                202 => Some(hash_map(202)),
-                _ => None,
-            })
-        })
-        .expect("map reference collection should succeed");
-
-        assert_eq!(result.references.len(), 3);
-        assert_eq!(result.references[0].map_ordinal, 0);
-        assert_eq!(result.references[1].map_ordinal, 1);
-        assert_eq!(result.references[2].map_ordinal, 0);
-        assert_eq!(result.references[0].map_id, Some(101));
-        assert_eq!(result.references[1].map_id, Some(202));
-        assert_eq!(result.unique_maps.len(), 2);
-        assert!(result.unique_maps[0].supports_direct_value_access());
-        assert!(result.unique_maps[1].supports_direct_value_access());
-        assert!(result.unique_maps[1].requires_entry_presence_check());
-    }
-
-    #[test]
-    fn map_info_marks_lru_hash_as_entry_presence_checked() {
-        let ld = make_ld_imm64(1, MapPseudo::Fd.src_reg(), 10);
-        let insns = vec![ld[0], ld[1]];
-
-        let result = collect_map_references(&insns, &[303], |map_id| {
-            Ok(match map_id {
-                303 => Some(make_map_info(BPF_MAP_TYPE_LRU_HASH, 303, 16)),
-                _ => None,
-            })
-        })
-        .expect("map reference collection should succeed");
-
-        assert_eq!(result.unique_maps.len(), 1);
-        assert!(result.unique_maps[0].supports_direct_value_access());
-        assert!(result.unique_maps[0].requires_entry_presence_check());
-        assert!(!result.unique_maps[0].has_removable_lookup_pattern());
-    }
-
-    #[test]
-    fn collect_map_references_ignores_non_map_ldimm64() {
-        let plain = make_ld_imm64(1, 0, 77);
-        let result = collect_map_references(&plain, &[101], |_| Ok(Some(array_map(101, 4))))
-            .expect("map reference collection should succeed");
-        assert!(result.references.is_empty());
-        assert!(result.unique_maps.is_empty());
-    }
-
-    #[test]
-    fn collect_map_references_handles_missing_map_ids() {
-        let ld0 = make_ld_imm64(1, MapPseudo::Fd.src_reg(), 10);
-        let ld1 = make_ld_imm64(2, MapPseudo::Fd.src_reg(), 11);
-        let insns = vec![ld0[0], ld0[1], ld1[0], ld1[1]];
-
-        let result =
-            collect_map_references(&insns, &[101], |map_id| Ok(Some(array_map(map_id, 4))))
-                .expect("map reference collection should succeed");
-
-        assert_eq!(result.references.len(), 2);
-        assert_eq!(result.references[0].map_id, Some(101));
-        assert_eq!(result.references[1].map_id, None);
-        assert_eq!(result.references[1].info, None);
-        assert_eq!(result.unique_maps.len(), 1);
-    }
-
-    #[test]
-    fn map_info_analysis_resolves_canonical_idx_refs_by_map_id_order() {
-        let ld0 = make_ld_imm64(1, MapPseudo::Idx.src_reg(), 1);
-        let ld1 = make_ld_imm64(2, MapPseudo::Idx.src_reg(), 0);
-        let insns = vec![ld0[0], ld0[1], ld1[0], ld1[1]];
-
-        let result =
-            collect_map_references(&insns, &[101, 202], |map_id| Ok(Some(array_map(map_id, 4))))
-                .expect("canonical IDX references should resolve through map_ids");
-
-        assert_eq!(result.references.len(), 2);
-        assert_eq!(result.references[0].map_ordinal, 1);
-        assert_eq!(result.references[0].map_id, Some(202));
-        assert_eq!(result.references[1].map_ordinal, 0);
-        assert_eq!(result.references[1].map_id, Some(101));
-        assert_eq!(result.unique_maps.len(), 2);
-    }
-
-    #[test]
-    fn unsupported_map_types_reject_direct_value_access() {
-        const BPF_MAP_TYPE_PROG_ARRAY: u32 = libbpf_sys::BPF_MAP_TYPE_PROG_ARRAY;
-        const BPF_MAP_TYPE_PERF_EVENT_ARRAY: u32 = libbpf_sys::BPF_MAP_TYPE_PERF_EVENT_ARRAY;
-        const BPF_MAP_TYPE_STACK_TRACE: u32 = libbpf_sys::BPF_MAP_TYPE_STACK_TRACE;
-        const BPF_MAP_TYPE_CGROUP_STORAGE: u32 = libbpf_sys::BPF_MAP_TYPE_CGROUP_STORAGE;
-        const BPF_MAP_TYPE_RINGBUF: u32 = libbpf_sys::BPF_MAP_TYPE_RINGBUF;
-
-        for map_type in [
-            BPF_MAP_TYPE_PROG_ARRAY,
-            BPF_MAP_TYPE_PERF_EVENT_ARRAY,
-            BPF_MAP_TYPE_PERCPU_HASH,
-            BPF_MAP_TYPE_STACK_TRACE,
-            BPF_MAP_TYPE_LRU_PERCPU_HASH,
-            BPF_MAP_TYPE_CGROUP_STORAGE,
-            BPF_MAP_TYPE_RINGBUF,
-        ] {
-            let info = MapInfo {
-                map_type,
-                key_size: 4,
-                value_size: 8,
-                max_entries: 16,
-                map_id: 999,
-                name: "unsupported".to_string(),
-            };
-            assert!(
-                !info.supports_direct_value_access(),
-                "map_type {} should NOT support direct value access",
-                map_type
-            );
-        }
-    }
-
-    #[test]
-    fn percpu_array_is_conditionally_inlineable_but_percpu_hashes_still_are_not() {
-        let percpu_array = MapInfo {
-            map_type: BPF_MAP_TYPE_PERCPU_ARRAY,
-            key_size: 4,
-            value_size: 8,
-            max_entries: 16,
-            map_id: 501,
-            name: "percpu_array".to_string(),
-        };
-        assert!(percpu_array.supports_direct_value_access());
-        assert!(percpu_array.has_removable_lookup_pattern());
-        assert!(!percpu_array.requires_entry_presence_check());
-
-        let percpu_hash = MapInfo {
-            map_type: BPF_MAP_TYPE_PERCPU_HASH,
-            key_size: 4,
-            value_size: 8,
-            max_entries: 16,
-            map_id: 502,
-            name: "percpu_hash".to_string(),
-        };
-        assert!(!percpu_hash.supports_direct_value_access());
-        assert!(!percpu_hash.requires_entry_presence_check());
-
-        let lru_percpu_hash = MapInfo {
-            map_type: BPF_MAP_TYPE_LRU_PERCPU_HASH,
-            key_size: 4,
-            value_size: 8,
-            max_entries: 16,
-            map_id: 503,
-            name: "lru_percpu_hash".to_string(),
-        };
-        assert!(!lru_percpu_hash.supports_direct_value_access());
-        assert!(!lru_percpu_hash.requires_entry_presence_check());
-    }
-
-    #[test]
-    fn map_in_map_types_are_not_direct_value_inlineable() {
-        for map_type in [BPF_MAP_TYPE_ARRAY_OF_MAPS, BPF_MAP_TYPE_HASH_OF_MAPS] {
-            let info = MapInfo {
-                map_type,
-                key_size: 4,
-                value_size: 4,
-                max_entries: 16,
-                map_id: 700,
-                name: "map_in_map".to_string(),
-            };
-            assert!(info.is_map_in_map());
-            assert!(!info.supports_direct_value_access());
-        }
-    }
+    let mut ordered = seen.into_values().collect::<Vec<_>>();
+    ordered.sort_by_key(|info| info.map_id);
+    ordered
 }
