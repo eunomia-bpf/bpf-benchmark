@@ -479,51 +479,91 @@ impl BBProgram {
         }
         let replacement_len = replacement.len();
 
+        // A diamond block is "shared" if it has any incoming edge from outside
+        // {predecessor, true_branch, false_branch}. Shared blocks can't be
+        // removed (their external edges would dangle), so we keep them in place
+        // and route the diamond path around them via Jump→join from the
+        // predecessor. If any branch is shared, the join must also be preserved
+        // so the still-live branch reaches a still-live join.
+        let branch_shared = |branch: BlockId| {
+            branch != pattern.predecessor
+                && self
+                    .predecessors(branch)
+                    .iter()
+                    .any(|pred| *pred != pattern.predecessor)
+        };
+        let any_branch_shared =
+            branch_shared(pattern.true_branch) || branch_shared(pattern.false_branch);
+        let join_shared = pattern.join.is_some_and(|join| {
+            let allowed = [
+                pattern.predecessor,
+                pattern.true_branch,
+                pattern.false_branch,
+            ];
+            self.predecessors(join)
+                .iter()
+                .any(|pred| !allowed.contains(pred))
+        });
+        let preserve_join = pattern.join.is_some() && (any_branch_shared || join_shared);
+
         let mut remove = BTreeSet::new();
         for block in [pattern.true_branch, pattern.false_branch] {
-            if block != pattern.predecessor {
+            if block != pattern.predecessor && !branch_shared(block) {
                 remove.insert(block);
             }
         }
         if let Some(join) = pattern.join {
-            if join != pattern.predecessor {
+            if join != pattern.predecessor && !preserve_join {
                 remove.insert(join);
             }
         }
 
-        let replacement_offset = replacement_len;
         if let Some(join) = pattern.join {
-            let join_body = self.block(join)?.insns.clone();
-            let join_body_len = join_body.len();
-            let join_terminator = self.block(join)?.terminator;
-            let remap_site = |site: InsnSite| -> Option<InsnSite> {
-                if site.block == join {
-                    if site.idx < join_body_len {
-                        return Some(InsnSite {
-                            block: pattern.predecessor,
-                            idx: replacement_offset + site.idx,
-                        });
+            if preserve_join {
+                let remap_site = |site: InsnSite| -> Option<InsnSite> {
+                    (!remove.contains(&site.block)).then_some(site)
+                };
+                self.remap_metadata_sites(remap_site);
+                let predecessor = self.block_mut(pattern.predecessor)?;
+                predecessor.insns = replacement;
+                predecessor.terminator = Terminator::Jump {
+                    insn: BpfInsn::ja(0),
+                    target: join,
+                };
+            } else {
+                let replacement_offset = replacement_len;
+                let join_body = self.block(join)?.insns.clone();
+                let join_body_len = join_body.len();
+                let join_terminator = self.block(join)?.terminator;
+                let remap_site = |site: InsnSite| -> Option<InsnSite> {
+                    if site.block == join {
+                        if site.idx < join_body_len {
+                            return Some(InsnSite {
+                                block: pattern.predecessor,
+                                idx: replacement_offset + site.idx,
+                            });
+                        }
+                        if site.idx == join_body_len {
+                            return Some(InsnSite {
+                                block: pattern.predecessor,
+                                idx: replacement_offset + join_body_len,
+                            });
+                        }
                     }
-                    if site.idx == join_body_len {
-                        return Some(InsnSite {
-                            block: pattern.predecessor,
-                            idx: replacement_offset + join_body_len,
-                        });
-                    }
-                }
-                (!remove.contains(&site.block)).then_some(site)
-            };
-            self.remap_metadata_sites(remap_site);
-            let predecessor = self.block_mut(pattern.predecessor)?;
-            predecessor.insns = Vec::with_capacity(replacement_len + join_body_len);
-            predecessor.insns.extend_from_slice(&replacement);
-            predecessor.insns.extend_from_slice(&join_body);
-            predecessor.terminator = join_terminator;
+                    (!remove.contains(&site.block)).then_some(site)
+                };
+                self.remap_metadata_sites(remap_site);
+                let predecessor = self.block_mut(pattern.predecessor)?;
+                predecessor.insns = Vec::with_capacity(replacement_len + join_body_len);
+                predecessor.insns.extend_from_slice(&replacement);
+                predecessor.insns.extend_from_slice(&join_body);
+                predecessor.terminator = join_terminator;
+            }
         } else {
             let true_term = self.block(pattern.true_branch)?.terminator;
             let false_term = self.block(pattern.false_branch)?.terminator;
             if true_term != false_term {
-                anyhow::bail!("diamond branches do not share a terminator");
+                anyhow::bail!("CFG diamond branches do not share a terminator");
             }
             let remap_site = |site: InsnSite| -> Option<InsnSite> {
                 (!remove.contains(&site.block)).then_some(site)
@@ -757,7 +797,7 @@ fn validate_diamond(prog: &BBProgram, pattern: DiamondPattern) -> anyhow::Result
     } = prog.block(pattern.predecessor)?.terminator
     else {
         anyhow::bail!(
-            "diamond predecessor {:?} is not a conditional branch",
+            "CFG diamond predecessor {:?} is not a conditional branch",
             pattern.predecessor
         );
     };
@@ -772,43 +812,16 @@ fn validate_diamond(prog: &BBProgram, pattern: DiamondPattern) -> anyhow::Result
             && fallthrough == pattern.false_branch
             && branch_reaches_join(prog, pattern.false_branch, join);
         if !pattern_a && !pattern_c {
-            anyhow::bail!("blocks {:?} do not form a supported diamond", pattern);
-        }
-        for branch in [pattern.true_branch, pattern.false_branch] {
-            if branch == pattern.predecessor || branch == join {
-                continue;
-            }
-            let preds = prog.predecessors(branch);
-            if preds != [pattern.predecessor] {
-                anyhow::bail!(
-                    "diamond branch {:?} has unexpected predecessors {:?}",
-                    branch,
-                    preds
-                );
-            }
-        }
-        let allowed_preds = [
-            pattern.predecessor,
-            pattern.true_branch,
-            pattern.false_branch,
-        ];
-        for pred in prog.predecessors(join) {
-            if !allowed_preds.contains(pred) {
-                anyhow::bail!(
-                    "diamond join {:?} has external predecessor {:?}",
-                    join,
-                    pred
-                );
-            }
+            anyhow::bail!("blocks {:?} do not form a supported CFG diamond", pattern);
         }
     } else {
         if taken != pattern.true_branch || fallthrough != pattern.false_branch {
-            anyhow::bail!("diamond without join must branch to true/false blocks directly");
+            anyhow::bail!("CFG diamond without join must branch to true/false blocks directly");
         }
         let true_term = prog.block(pattern.true_branch)?.terminator;
         let false_term = prog.block(pattern.false_branch)?.terminator;
         if true_term != false_term {
-            anyhow::bail!("diamond without join has different branch terminators");
+            anyhow::bail!("CFG diamond without join has different branch terminators");
         }
     }
     Ok(())

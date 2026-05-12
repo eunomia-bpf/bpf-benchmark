@@ -7,7 +7,7 @@ use std::sync::Arc;
 use anyhow::{Context, Result};
 
 use crate::analysis::{
-    BBProgram, Block, BlockId, BtfMetadataMap, FrameId, InsnSite, Terminator, VerifierOracle,
+    BBProgram, Block, BlockId, BtfMetadataMap, FrameId, InsnSite, Terminator, VerifierStatesBySite,
 };
 use crate::insn::*;
 use crate::pass::{
@@ -18,21 +18,21 @@ use crate::pass::{
 #[cfg(test)]
 pub(crate) fn lift(
     insns: &[BpfInsn],
-    oracle: Option<Arc<[VerifierInsn]>>,
+    verifier_states: Option<Arc<[VerifierInsn]>>,
 ) -> anyhow::Result<BBProgram> {
-    lift_with_kinsn_registry(insns, oracle, Arc::new(KinsnRegistry::new()?))
+    lift_with_kinsn_registry(insns, verifier_states, Arc::new(KinsnRegistry::new()?))
 }
 
 pub(crate) fn lift_with_kinsn_registry(
     insns: &[BpfInsn],
-    oracle: Option<Arc<[VerifierInsn]>>,
+    verifier_states: Option<Arc<[VerifierInsn]>>,
     kinsn_reg: Arc<KinsnRegistry>,
 ) -> anyhow::Result<BBProgram> {
     if insns.is_empty() {
         return BBProgram::new(
             Vec::new(),
             BlockId(0),
-            lift_oracle(oracle, &BTreeMap::new())?,
+            lift_verifier_states_by_site(verifier_states, &BTreeMap::new())?,
             BTreeMap::new(),
             kinsn_reg,
             BTreeMap::new(),
@@ -123,12 +123,12 @@ pub(crate) fn lift_with_kinsn_registry(
         blocks.push(block);
     }
 
-    let oracle = lift_oracle(oracle, &btf)?;
+    let verifier_states = lift_verifier_states_by_site(verifier_states, &btf)?;
 
     BBProgram::new(
         blocks,
         BlockId(0),
-        oracle,
+        verifier_states,
         btf,
         kinsn_reg,
         ldimm64_second_slots,
@@ -388,11 +388,11 @@ fn format_hint_anchor_spec(anchor: &MapInlineHintAnchorSpec) -> String {
     }
 }
 
-fn lift_oracle(
-    oracle: Option<Arc<[VerifierInsn]>>,
+fn lift_verifier_states_by_site(
+    verifier_states: Option<Arc<[VerifierInsn]>>,
     btf: &BtfMetadataMap,
-) -> anyhow::Result<Option<VerifierOracle>> {
-    let Some(oracle) = oracle else {
+) -> anyhow::Result<Option<VerifierStatesBySite>> {
+    let Some(verifier_states) = verifier_states else {
         return Ok(None);
     };
     let pc_to_site = btf
@@ -400,7 +400,7 @@ fn lift_oracle(
         .map(|(&site, &pc)| (pc, site))
         .collect::<BTreeMap<_, _>>();
     let mut states_by_site = BTreeMap::<InsnSite, Vec<VerifierInsn>>::new();
-    for state in oracle.iter() {
+    for state in verifier_states.iter() {
         states_by_site
             .entry(verifier_state_site(state, &pc_to_site)?)
             .or_default()
@@ -422,14 +422,17 @@ fn verifier_state_site(
         return Ok(site);
     }
     if state.kind != VerifierInsnKind::InsnDeltaState {
-        anyhow::bail!("verifier state pc {} is not present in BBProgram", state.pc);
+        anyhow::bail!(
+            "verifier state pc {} is not present in the control-flow graph",
+            state.pc
+        );
     }
     pc_to_site
         .range(state.pc..)
         .next()
         .map(|(_, &site)| site)
         .or_else(|| pc_to_site.iter().next_back().map(|(_, &site)| site))
-        .ok_or_else(|| anyhow::anyhow!("verifier state pc {} has no BBProgram site", state.pc))
+        .ok_or_else(|| anyhow::anyhow!("verifier state pc {} has no instruction site", state.pc))
 }
 
 fn instruction_boundaries(insns: &[BpfInsn]) -> anyhow::Result<Vec<bool>> {

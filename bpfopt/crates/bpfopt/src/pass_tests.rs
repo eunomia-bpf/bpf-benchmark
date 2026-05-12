@@ -8,7 +8,7 @@ use crate::test_helpers::*;
 
 #[test]
 fn test_pass_manager_invalidates_verifier_states_after_transform() {
-    // Restored from HEAD: verifier/oracle facts must not survive a bytecode
+    // Restored from HEAD: verifier states must not survive a bytecode
     // mutation, or later passes can apply stale per-PC verifier evidence.
     let input = vec![
         BpfInsn::mov64_imm(BPF_REG_1, 42),
@@ -21,18 +21,24 @@ fn test_pass_manager_invalidates_verifier_states_after_transform() {
     )]);
     let mut prog = lift_test_program(&input, &ctx);
 
-    assert_eq!(prog.oracle().expect("oracle should be lifted").len(), 1);
+    assert_eq!(
+        prog.verifier_states_by_site()
+            .expect("verifier states should be lifted")
+            .len(),
+        1
+    );
 
     prog.delete_insn(DefSite {
         block: BlockId(0),
         idx: 0,
         reg: BPF_REG_1,
     })
-    .expect("delete should invalidate oracle");
+    .expect("delete should invalidate verifier states");
 
     assert!(
-        prog.oracle().is_none_or(|states| states.is_empty()),
-        "BBProgram mutation must clear stale verifier/oracle facts"
+        prog.verifier_states_by_site()
+            .is_none_or(|states| states.is_empty()),
+        "BBProgram mutation must clear stale verifier states"
     );
 }
 
@@ -63,7 +69,7 @@ fn pipeline_pass_context_carries_verifier_states_between_passes() {
 
     assert_eq!(results.len(), 2);
     assert!(
-        prog.oracle().is_none(),
+        prog.verifier_states_by_site().is_none(),
         "mutating passes must invalidate consumed verifier states"
     );
     assert!(lowered.contains(&BpfInsn::mov64_imm(BPF_REG_1, 20)));

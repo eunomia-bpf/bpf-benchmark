@@ -9,6 +9,8 @@
 //! This module extracts per-PC register state summaries that feed later
 //! optimization analyses (constant propagation, range checks, liveness, etc.).
 use std::collections::HashMap;
+
+use anyhow::{anyhow, bail, Context, Result};
 #[allow(clippy::enum_variant_names)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum VerifierInsnKind {
@@ -96,21 +98,42 @@ pub(crate) struct StackState {
 }
 #[cfg(test)]
 pub(crate) fn parse_verifier_log(log: &str) -> Vec<VerifierInsn> {
-    log.lines().filter_map(parse_state_line).collect()
+    parse_verifier_log_result(log).expect("test verifier log should parse")
 }
-pub(crate) fn verifier_states_from_log(log: &str) -> Vec<VerifierInsn> {
-    log.lines()
-        .filter_map(parse_state_line)
-        .filter(|state| state.kind != VerifierInsnKind::BranchDeltaState)
-        .collect()
+#[cfg(test)]
+pub(crate) fn parse_verifier_log_result(log: &str) -> Result<Vec<VerifierInsn>> {
+    parse_log_states(log, true)
 }
-fn parse_state_line(line: &str) -> Option<VerifierInsn> {
+pub(crate) fn verifier_states_from_log(log: &str) -> Result<Vec<VerifierInsn>> {
+    parse_log_states(log, false)
+}
+fn parse_log_states(log: &str, include_branch_delta: bool) -> Result<Vec<VerifierInsn>> {
+    let mut states = Vec::new();
+    for (idx, line) in log.lines().enumerate() {
+        let Some(state) = parse_state_line(line)
+            .with_context(|| format!("failed to parse verifier state line {}", idx + 1))?
+        else {
+            continue;
+        };
+        if include_branch_delta || state.kind != VerifierInsnKind::BranchDeltaState {
+            states.push(state);
+        }
+    }
+    Ok(states)
+}
+fn parse_state_line(line: &str) -> Result<Option<VerifierInsn>> {
     let trimmed = line.trim();
     if trimmed.is_empty() {
-        return None;
+        return Ok(None);
     }
-    let (pc, from_pc, kind, speculative, state_text) =
-        parse_from_state_line(trimmed).or_else(|| parse_pc_state_line(trimmed))?;
+    let Some((pc, from_pc, kind, speculative, state_text)) =
+        parse_from_state_line(trimmed).or_else(|| parse_pc_state_line(trimmed))
+    else {
+        if looks_like_state_line(trimmed) {
+            bail!("state-like line did not match a supported verifier state format");
+        }
+        return Ok(None);
+    };
     let (frame, state_text) = strip_frame_prefix(state_text);
     let mut regs = HashMap::new();
     let mut stack = HashMap::new();
@@ -130,11 +153,15 @@ fn parse_state_line(line: &str) -> Option<VerifierInsn> {
                 && parse_stack_token(tokens[idx + 1]).is_none()
                 && looks_like_reg_state(tokens[idx + 1])
             {
-                state.value = Some(parse_reg_state(
-                    tokens[idx + 1],
-                    VerifierValueWidth::Unknown,
-                ));
-                idx += 1;
+                match parse_reg_state(tokens[idx + 1], VerifierValueWidth::Unknown) {
+                    Ok(value) => {
+                        state.value = Some(value);
+                        idx += 1;
+                    }
+                    Err(err) => {
+                        warn_verifier_log(format!("skipping {:?}: {err:#}", tokens[idx + 1]));
+                    }
+                }
             }
             stack.insert(off, state);
             idx += 1;
@@ -143,9 +170,9 @@ fn parse_state_line(line: &str) -> Option<VerifierInsn> {
         idx += 1;
     }
     if regs.is_empty() && stack.is_empty() {
-        return None;
+        bail!("verifier state line contained no register or stack state");
     }
-    Some(VerifierInsn {
+    Ok(Some(VerifierInsn {
         pc,
         frame,
         from_pc,
@@ -153,7 +180,18 @@ fn parse_state_line(line: &str) -> Option<VerifierInsn> {
         speculative,
         regs,
         stack,
-    })
+    }))
+}
+fn looks_like_state_line(line: &str) -> bool {
+    if line.starts_with("from ") {
+        return line.contains(':')
+            && (line.contains(" R") || line.contains(": R") || line.contains("frame"));
+    }
+    let Some((pc, tail)) = line.split_once(':') else {
+        return false;
+    };
+    pc.trim().chars().all(|ch| ch.is_ascii_digit())
+        && (is_state_text(tail.trim()) || tail.contains(';'))
 }
 fn parse_from_state_line(
     line: &str,
@@ -254,15 +292,34 @@ fn split_top_level_tokens(text: &str) -> Vec<&str> {
 }
 fn parse_reg_token(token: &str) -> Option<(u8, RegState)> {
     let (lhs, rhs) = token.split_once('=')?;
-    let (regno, value_width) = parse_reg_name(lhs)?;
-    let state = parse_reg_state(rhs.trim(), value_width);
-    Some((regno, state))
+    let Some((regno, value_width)) = parse_reg_name(lhs) else {
+        if lhs.starts_with('R') {
+            warn_verifier_log(format!("invalid register token {token:?}"));
+        }
+        return None;
+    };
+    match parse_reg_state(rhs.trim(), value_width) {
+        Ok(state) => Some((regno, state)),
+        Err(err) => {
+            warn_verifier_log(format!("skipping {token:?}: {err:#}"));
+            None
+        }
+    }
 }
 fn parse_stack_token(token: &str) -> Option<(i16, StackState)> {
     let (lhs, rhs) = token.split_once('=')?;
-    let off = parse_i32(lhs.strip_prefix("fp")?)?.try_into().ok()?;
-    let state = parse_stack_state(rhs.trim());
-    Some((off, state))
+    let fp_off = lhs.strip_prefix("fp")?;
+    let Some(off) = parse_i32(fp_off).and_then(|off| off.try_into().ok()) else {
+        warn_verifier_log(format!("invalid stack offset in {token:?}"));
+        return None;
+    };
+    match parse_stack_state(rhs.trim()) {
+        Ok(state) => Some((off, state)),
+        Err(err) => {
+            warn_verifier_log(format!("skipping {token:?}: {err:#}"));
+            None
+        }
+    }
 }
 fn parse_reg_name(name: &str) -> Option<(u8, VerifierValueWidth)> {
     let name = name.strip_prefix('R')?;
@@ -273,7 +330,7 @@ fn parse_reg_name(name: &str) -> Option<(u8, VerifierValueWidth)> {
     };
     Some((name.parse().ok()?, value_width))
 }
-fn parse_reg_state(raw: &str, value_width: VerifierValueWidth) -> RegState {
+fn parse_reg_state(raw: &str, value_width: VerifierValueWidth) -> Result<RegState> {
     let (precise, value) = match raw.strip_prefix('P') {
         Some(rest) => (true, rest),
         None => (false, raw),
@@ -283,31 +340,32 @@ fn parse_reg_state(raw: &str, value_width: VerifierValueWidth) -> RegState {
         state.precise = precise;
         state.exact_value = Some(exact);
         apply_exact_value_to_range(&mut state.range, exact, value_width);
-        return state;
+        return Ok(state);
     }
     if let Some(rest) = value.strip_prefix("fp") {
         let mut state = RegState::new("fp", value_width);
         state.precise = precise;
         if !rest.is_empty() {
-            state.offset = parse_i32(rest);
+            state.offset = Some(
+                parse_i32(rest).ok_or_else(|| anyhow!("invalid frame-pointer offset {rest:?}"))?,
+            );
         }
-        return state;
+        return Ok(state);
     }
     if let Some(open) = value.find('(') {
-        let close = match value.rfind(')') {
-            Some(close) => close,
-            None => value.len(),
-        };
+        let close = value
+            .rfind(')')
+            .ok_or_else(|| anyhow!("missing ')' in verifier register state {value:?}"))?;
         let reg_type = normalize_reg_type(&value[..open]);
         let mut state = RegState::new(reg_type, value_width);
         state.precise = precise;
         parse_reg_attributes(&value[open + 1..close], &mut state);
         infer_exact_value(&mut state);
-        return state;
+        return Ok(state);
     }
     let mut state = RegState::new(normalize_reg_type(value), value_width);
     state.precise = precise;
-    state
+    Ok(state)
 }
 fn normalize_reg_type(reg_type: &str) -> String {
     match reg_type {
@@ -315,12 +373,12 @@ fn normalize_reg_type(reg_type: &str) -> String {
         other => other.to_string(),
     }
 }
-fn parse_stack_state(raw: &str) -> StackState {
+fn parse_stack_state(raw: &str) -> Result<StackState> {
     if raw.is_empty() {
-        return StackState {
+        return Ok(StackState {
             slot_types: None,
             value: None,
-        };
+        });
     }
     for split in raw.char_indices().skip(1).map(|(idx, _)| idx) {
         let prefix = &raw[..split];
@@ -329,34 +387,34 @@ fn parse_stack_state(raw: &str) -> StackState {
             && prefix.chars().all(is_stack_slot_type_char)
             && looks_like_reg_state(rest)
         {
-            return StackState {
+            return Ok(StackState {
                 slot_types: Some(prefix.to_string()),
-                value: Some(parse_reg_state(rest, VerifierValueWidth::Unknown)),
-            };
+                value: Some(parse_reg_state(rest, VerifierValueWidth::Unknown)?),
+            });
         }
     }
     if raw.len() == 8 && raw.chars().all(is_stack_slot_type_char) {
-        return StackState {
+        return Ok(StackState {
             slot_types: Some(raw.to_string()),
             value: None,
-        };
+        });
     }
     if looks_like_reg_state(raw) {
-        return StackState {
+        return Ok(StackState {
             slot_types: None,
-            value: Some(parse_reg_state(raw, VerifierValueWidth::Unknown)),
-        };
+            value: Some(parse_reg_state(raw, VerifierValueWidth::Unknown)?),
+        });
     }
     if raw.chars().all(is_stack_slot_type_char) {
-        return StackState {
+        return Ok(StackState {
             slot_types: Some(raw.to_string()),
             value: None,
-        };
+        });
     }
-    StackState {
+    Ok(StackState {
         slot_types: None,
-        value: Some(parse_reg_state(raw, VerifierValueWidth::Unknown)),
-    }
+        value: Some(parse_reg_state(raw, VerifierValueWidth::Unknown)?),
+    })
 }
 fn looks_like_reg_state(raw: &str) -> bool {
     if raw.is_empty() {
@@ -381,27 +439,72 @@ fn parse_reg_attributes(attrs: &str, state: &mut RegState) {
             .map(str::trim)
             .filter(|part| !part.is_empty())
             .collect();
+        if parts.len() == 1 {
+            match parts[0] {
+                "trusted" | "untrusted" | "rdonly_buf" | "rdwr_buf" | "rcu" | "percpu_ptr"
+                | "may_be_null" | "alloc" => continue,
+                other => {
+                    warn_verifier_log(format!("unknown verifier register attribute {other:?}"));
+                    continue;
+                }
+            }
+        }
         if parts.len() < 2 {
+            warn_verifier_log(format!(
+                "malformed verifier register attribute segment {segment:?}"
+            ));
             continue;
         }
         let value = parts[parts.len() - 1];
         for key in &parts[..parts.len() - 1] {
             match *key {
-                "smin" | "smin_value" => state.range.smin = parse_signed_value(value),
-                "smax" | "smax_value" => state.range.smax = parse_signed_value(value),
-                "umin" | "umin_value" => state.range.umin = parse_unsigned_value(value),
-                "umax" | "umax_value" => state.range.umax = parse_unsigned_value(value),
-                "smin32" | "smin32_value" => state.range.smin32 = parse_i32(value),
-                "smax32" | "smax32_value" => state.range.smax32 = parse_i32(value),
-                "umin32" | "umin32_value" => state.range.umin32 = parse_u32(value),
-                "umax32" | "umax32_value" => state.range.umax32 = parse_u32(value),
-                "off" => state.offset = parse_i32(value),
-                "id" => state.id = parse_u32(value),
-                "var_off" => state.tnum = parse_tnum(value),
-                _ => {}
+                "smin" | "smin_value" => {
+                    state.range.smin = parse_attr(key, value, parse_signed_value(value));
+                }
+                "smax" | "smax_value" => {
+                    state.range.smax = parse_attr(key, value, parse_signed_value(value));
+                }
+                "umin" | "umin_value" => {
+                    state.range.umin = parse_attr(key, value, parse_unsigned_value(value));
+                }
+                "umax" | "umax_value" => {
+                    state.range.umax = parse_attr(key, value, parse_unsigned_value(value));
+                }
+                "smin32" | "smin32_value" => {
+                    state.range.smin32 = parse_attr(key, value, parse_i32(value));
+                }
+                "smax32" | "smax32_value" => {
+                    state.range.smax32 = parse_attr(key, value, parse_i32(value));
+                }
+                "umin32" | "umin32_value" => {
+                    state.range.umin32 = parse_attr(key, value, parse_u32(value));
+                }
+                "umax32" | "umax32_value" => {
+                    state.range.umax32 = parse_attr(key, value, parse_u32(value));
+                }
+                "off" => state.offset = parse_attr(key, value, parse_i32(value)),
+                "id" => state.id = parse_attr(key, value, parse_u32(value)),
+                "var_off" => {
+                    state.tnum = parse_attr(key, value, parse_tnum(value));
+                }
+                "r" | "map" | "ks" | "vs" | "imm" | "ref_obj_id" | "btf_id" | "mem_size"
+                | "alloc_size" | "aux_off" | "name" => {}
+                other => {
+                    warn_verifier_log(format!("unknown verifier register attribute {other:?}"));
+                }
             }
         }
     }
+}
+
+fn warn_verifier_log(message: String) {
+    eprintln!("warning: verifier log: {message}");
+}
+fn parse_attr<T>(key: &str, value: &str, parsed: Option<T>) -> Option<T> {
+    if parsed.is_none() {
+        warn_verifier_log(format!("invalid {key} attribute value {value:?}"));
+    }
+    parsed
 }
 fn apply_exact_value_to_range(
     range: &mut ScalarRange,

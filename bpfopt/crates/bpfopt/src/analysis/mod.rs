@@ -12,7 +12,7 @@ pub use bbprogram::{
     BBMapBinding, BBProgram, Block, BlockId, FrameId, InsnSite, LiftedRegFact, SlotDistance,
     Terminator,
 };
-pub(crate) use bbprogram::{BtfMetadataMap, VerifierOracle};
+pub(crate) use bbprogram::{BtfMetadataMap, VerifierStatesBySite};
 pub use bbprogram_api::DiamondPattern;
 pub use bbprogram_lift::{
     canonicalize_map_refs_to_idx, lift_with_pass_context,

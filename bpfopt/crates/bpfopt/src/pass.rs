@@ -597,7 +597,7 @@ pub fn run_pass_once(
     result.insns_after = insns_after;
 
     if insns_after != insns_before {
-        program.invalidate_oracle();
+        program.invalidate_verifier_states();
     }
 
     Ok(result)
@@ -788,14 +788,14 @@ pub fn first_report_site(program: &BBProgram) -> anyhow::Result<InsnSite> {
             return Ok(site);
         }
     }
-    anyhow::bail!("cannot report a pass site for an empty BBProgram")
+    anyhow::bail!("cannot report a pass site for an empty program")
 }
 
 // ── Helper: default PassContext for testing ──────────────────────────
 
 impl PassContext {
     pub fn set_verifier_states_from_log(&mut self, log: &str) -> anyhow::Result<()> {
-        let states = crate::verifier_log::verifier_states_from_log(log);
+        let states = crate::verifier_log::verifier_states_from_log(log)?;
         if states.is_empty() {
             anyhow::bail!("verifier log did not contain parseable state snapshots");
         }
@@ -813,7 +813,7 @@ impl PassContext {
     }
 
     /// Lift-time accessor: only `bbprogram_lift` reads raw verifier states here
-    /// to seed the BBProgram oracle. After lift, passes consume typed
+    /// to seed the BBProgram verifier-state map. After lift, passes consume typed
     /// `BBProgram::reg_*` queries instead of touching raw verifier data.
     pub(crate) fn verifier_states_arc(&self) -> Arc<[VerifierInsn]> {
         Arc::clone(&self.verifier_states)

@@ -145,20 +145,16 @@ fn distinguishes_exact_64bit_and_32bit_scalars() {
 }
 
 #[test]
-fn truncated_log_tail_does_not_drop_complete_states() {
+fn truncated_state_line_is_an_error() {
     let log = "\
 0: R1=ctx() R10=fp0
 1: (b7) r0 = 0                        ; R0=0
 2: (07) r0 += 1                       ; R0=scalar(var_off=(0x1;
 ";
 
-    let insns = parse_verifier_log(log);
-    assert_eq!(insns.len(), 3);
-    assert_eq!(insns[0].pc, 0);
-    assert_eq!(insns[1].regs.get(&0).unwrap().exact_u64(), Some(0));
-    assert_eq!(insns[2].pc, 2);
-    assert_eq!(insns[2].regs.get(&0).unwrap().reg_type, "scalar");
-    assert_eq!(insns[2].regs.get(&0).unwrap().exact_u64(), None);
+    let err = format!("{:#}", parse_verifier_log_result(log).unwrap_err());
+    assert!(err.contains("failed to parse verifier state line 3"));
+    assert!(err.contains("no register or stack state"));
 }
 
 #[test]
@@ -171,6 +167,20 @@ processed 4 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_stat
 "#;
 
     assert!(parse_verifier_log(log).is_empty());
+}
+
+#[test]
+fn unknown_verifier_attribute_does_not_fail_state_parse() {
+    let states = parse_verifier_log_result("0: R0=scalar(new_attr=1)\n").unwrap();
+    assert_eq!(states.len(), 1);
+    assert!(states[0].regs.contains_key(&0));
+}
+
+#[test]
+fn bad_verifier_attribute_value_does_not_fail_state_parse() {
+    let states = parse_verifier_log_result("0: R0=scalar(umin=not_a_number)\n").unwrap();
+    assert_eq!(states.len(), 1);
+    assert_eq!(states[0].regs.get(&0).unwrap().range.umin, None);
 }
 
 #[test]

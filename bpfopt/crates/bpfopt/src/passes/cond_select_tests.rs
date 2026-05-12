@@ -146,7 +146,11 @@ fn cond_select_rewrites_jmp32_predicate() {
 }
 
 #[test]
-fn cond_select_skips_diamond_join_with_external_predecessor() {
+fn cond_select_rewrites_diamond_join_with_external_predecessor() {
+    // Outer JEQ at pc=0 has an external edge to the shared join (pc=5 exit).
+    // The inner JNE at pc=1 forms a valid cond_select diamond whose join is
+    // that same exit. The rewrite must succeed: predecessor body is replaced
+    // with the select sequence and retargeted to the still-live join.
     let input = vec![
         BpfInsn::jump_imm(BPF_JEQ, BPF_REG_9, 0, 4),
         BpfInsn::jump_imm(BPF_JNE, BPF_REG_1, 0, 2),
@@ -156,11 +160,10 @@ fn cond_select_skips_diamond_join_with_external_predecessor() {
         BpfInsn::exit(),
     ];
 
-    let run = run_pass_on_insns(CondSelectPass, input.clone(), &select_ctx());
+    let run = run_pass_on_insns(CondSelectPass, input, &select_ctx());
 
-    assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 1, "external predecessor");
-    assert_eq!(run.lowered, input);
+    assert_eq!(run.result.sites_applied, 1);
+    assert!(run.lowered.iter().any(|i| i.is_call_kinsn()));
 }
 
 #[test]

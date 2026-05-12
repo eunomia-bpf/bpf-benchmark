@@ -180,7 +180,8 @@ fn lookup_pass_name(input: &str) -> Result<&'static str> {
 fn validate_required_side_inputs(common: &CommonArgs, pass_names: &[&str]) -> Result<()> {
     for &pass_name in pass_names {
         let entry = registry_entry(pass_name)?;
-        if entry.requirements.needs_kinsns() && common.target.is_none() && common.kinsns.is_empty() {
+        if entry.requirements.needs_kinsns() && common.target.is_none() && common.kinsns.is_empty()
+        {
             bail!("{pass_name} requires --target kinsn capabilities or --kinsns");
         }
         if entry.requirements.needs_verifier_states() && common.verifier_states.is_none() {

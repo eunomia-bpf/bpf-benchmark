@@ -62,7 +62,7 @@ fn map_inline_side_input<'a>(
     ctx: &'a PassContext,
 ) -> anyhow::Result<MapInlineSideInput<'a>> {
     if !has_map_inline_side_input(ctx) {
-        anyhow::bail!("map_inline side input is missing from PassContext");
+        anyhow::bail!("map_inline side input is missing");
     }
     validate_map_inline_hint_specs(&ctx.map_inline_hints)?;
     Ok(MapInlineSideInput {
@@ -112,7 +112,7 @@ fn resolve_map_inline_hint_anchor(
     match anchor {
         MapInlineHintAnchorSpec::Pc(pc) => {
             let site = prog.original_pc_to_site(*pc).ok_or_else(|| {
-                anyhow::anyhow!("map_inline hint pc {pc} is not present in BBProgram")
+                anyhow::anyhow!("map_inline hint pc {pc} is not present in the control-flow graph")
             })?;
             Ok(MapInlineHintAnchor::Site(site))
         }
@@ -178,7 +178,7 @@ fn lookup_elem(
     }
     if !side_input.map_info.contains_key(&map_id) {
         return Err(MapLookupError::Failed(format!(
-            "map_values snapshot has no metadata for map {}",
+            "map_values snapshot has no map info for map {}",
             map_id
         )));
     }
@@ -660,7 +660,7 @@ fn resolve_direct_inline_hint(
             for info in unique_maps(map_info) {
                 let metadata = side_input.map_info.get(&info.map_id).ok_or_else(|| {
                     anyhow::anyhow!(
-                        "map_values snapshot has no metadata for used map {} while resolving inline hint map_name anchor {name:?}",
+                        "map_values snapshot has no map info for used map {} while resolving inline hint map_name anchor {name:?}",
                         info.map_id
                     )
                 })?;
@@ -737,7 +737,7 @@ fn resolve_deferred_inner_hints(
             let matches_route = match &hint.anchor {
                 MapInlineHintAnchor::Site(call_site) => *call_site == *inner_call_site,
                 MapInlineHintAnchor::MapName(name) => {
-                    metadata_map_ids_for_name(side_input, name)?.contains(&inner_info.map_id)
+                    map_ids_for_name(side_input, name)?.contains(&inner_info.map_id)
                 }
             };
             if !matches_route {
@@ -789,12 +789,12 @@ fn resolve_hinted_map_in_map_routes(
             let encoded_outer_key =
                 encode_key_bytes(&outer_hint.key_bytes, outer_info.key_size as usize);
             let inner_info = side_input
-                .metadata
+                .map_info
                 .get(&inner_map_id)
                 .cloned()
                 .ok_or_else(|| {
                     anyhow::anyhow!(
-                        "map_values snapshot has no metadata for inner map {} from outer map {} key {}",
+                        "map_values snapshot has no map info for inner map {} from outer map {} key {}",
                         inner_map_id,
                         outer_info.map_id,
                         format_bytes_preview(&encoded_outer_key)
@@ -822,7 +822,7 @@ fn deferred_hint_targets_known_map_in_map_inner(
             .iter()
             .any(|chain| chain.inner_call_site == *call_site)),
         MapInlineHintAnchor::MapName(name) => {
-            let map_ids = metadata_map_ids_for_name(side_input, name)?;
+            let map_ids = map_ids_for_name(side_input, name)?;
             Ok(map_ids.iter().any(|map_id| {
                 side_input
                     .inner_map_ids
@@ -832,12 +832,12 @@ fn deferred_hint_targets_known_map_in_map_inner(
         }
     }
 }
-fn metadata_map_ids_for_name(
+fn map_ids_for_name(
     side_input: &MapInlineSideInput<'_>,
     name: &str,
 ) -> anyhow::Result<HashSet<u32>> {
     let matched = side_input
-        .metadata
+        .map_info
         .values()
         .filter(|metadata| metadata.name == name)
         .map(|metadata| metadata.map_id)
@@ -846,7 +846,7 @@ fn metadata_map_ids_for_name(
         if !side_input.inner_map_ids.is_empty() {
             bail!("inner inline hint anchor map_name:{name} has no matching map-in-map outer hint");
         }
-        bail!("inline hint map_name anchor {name:?} is not present in map_values metadata");
+        bail!("inline hint map_name anchor {name:?} is not present in map_values map info");
     }
     Ok(matched)
 }
@@ -856,7 +856,7 @@ fn lookup_site_map_info<'a>(
 ) -> anyhow::Result<&'a MapInfo> {
     map_info.get(&site.map_load_site).ok_or_else(|| {
         anyhow::anyhow!(
-            "map reference metadata unavailable for lookup site {:?}",
+            "map reference info unavailable for lookup site {:?}",
             site.call_site
         )
     })
@@ -1108,7 +1108,7 @@ fn run_map_inline_round(
                 &mut skipped,
                 &mut site_diagnostics,
                 site.call_site,
-                "map reference metadata unavailable".to_string()
+                "map reference info unavailable".to_string()
             );
         };
         if let Some(reason) = kernel_mutable_reason_for_map(&kernel_mutable_maps, info) {
@@ -2877,8 +2877,7 @@ fn read_map_values(path: &Path, map_ids: &[u32]) -> Result<MapSnapshot> {
         if needs_bpftool_map_dump(map_type) {
             match read_bpftool_map_dump(path, show.id, &map_info)? {
                 BpftoolMapDumpSnapshot::Entries(entries) => {
-                    if entries.is_empty()
-                        && map_info.map_type == libbpf_sys::BPF_MAP_TYPE_LPM_TRIE
+                    if entries.is_empty() && map_info.map_type == libbpf_sys::BPF_MAP_TYPE_LPM_TRIE
                     {
                         empty_lpm_trie_maps.insert(show.id);
                     }
@@ -3092,7 +3091,7 @@ fn read_optional_compressed_overlay_file(
             .with_context(|| format!("invalid compressed overlay map id {map_id_text:?}"))?;
         let map_info = metadata.get(&map_id).ok_or_else(|| {
             anyhow!(
-                "compressed overlay references map {} not present in --map-ids metadata",
+                "compressed overlay references map {} not present in --map-ids map info",
                 map_id
             )
         })?;
@@ -3122,7 +3121,7 @@ fn synthesize_empty_lpm_trie_overlays(
         }
         let map_info = metadata
             .get(map_id)
-            .ok_or_else(|| anyhow!("empty LPM_TRIE map {} missing map_values metadata", map_id))?;
+            .ok_or_else(|| anyhow!("empty LPM_TRIE map {} missing map_values map info", map_id))?;
         compressed_values.insert(
             *map_id,
             CompressedMapValues {
@@ -3262,10 +3261,7 @@ fn decode_fixed_hex_bytes(map_id: u32, label: &str, hex: &str, byte_len: usize) 
     parse_inline_hint_hex(hex).with_context(|| format!("map {map_id} {label} has invalid hex"))
 }
 
-fn decode_bpftool_entry_value(
-    entry: &BpftoolMapEntryJson,
-    metadata: &MapInfo,
-) -> Result<Vec<u8>> {
+fn decode_bpftool_entry_value(entry: &BpftoolMapEntryJson, metadata: &MapInfo) -> Result<Vec<u8>> {
     if !entry.values.is_empty() {
         return decode_bpftool_percpu_values(&entry.values, metadata.value_size as usize);
     }
@@ -3492,9 +3488,9 @@ fn analyze_map_info(
             continue;
         };
         let info = side_input
-            .metadata
+            .map_info
             .get(&map_id)
-            .ok_or_else(|| anyhow!("map_values snapshot has no metadata for map {}", map_id))?
+            .ok_or_else(|| anyhow!("map_values snapshot has no map info for map {}", map_id))?
             .clone();
         by_site.insert(site, info);
     }

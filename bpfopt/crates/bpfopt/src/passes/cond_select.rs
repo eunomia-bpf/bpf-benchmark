@@ -125,10 +125,6 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
 
         let mut trial = prog.clone();
         let pattern = diamond_pattern_for_site(&mut trial, &site)?;
-        if let Some(reason) = external_join_predecessor_skip(&trial, pattern) {
-            skipped.push(site.skip(reason));
-            continue;
-        }
         trial.replace_diamond_with_insns(pattern, vec![BpfInsn::nop()])?;
 
         safe_sites.push((site, lowering));
@@ -150,10 +146,6 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
         replacement.extend_from_slice(&lowering.prefix);
         replacement.extend_from_slice(&kinsn_call);
         let pattern = diamond_pattern_for_site(prog, site)?;
-        if let Some(reason) = external_join_predecessor_skip(prog, pattern) {
-            skipped.push(site.skip(reason));
-            continue;
-        }
         prog.replace_diamond_with_insns(pattern, replacement)?;
         applied += 1;
     }
@@ -252,24 +244,6 @@ fn pattern_c_for_site(
         false_branch: fallthrough,
         join: Some(taken),
     })
-}
-
-fn external_join_predecessor_skip(prog: &BBProgram, pattern: DiamondPattern) -> Option<String> {
-    let join = pattern.join?;
-    let allowed_preds = [
-        pattern.predecessor,
-        pattern.true_branch,
-        pattern.false_branch,
-    ];
-    let pred = prog
-        .predecessors(join)
-        .iter()
-        .copied()
-        .find(|pred| !allowed_preds.contains(pred))?;
-    Some(format!(
-        "diamond join {:?} has external predecessor {:?}",
-        join, pred
-    ))
 }
 
 fn scan_cond_select_sites(prog: &BBProgram) -> anyhow::Result<Vec<CondSelectSite>> {

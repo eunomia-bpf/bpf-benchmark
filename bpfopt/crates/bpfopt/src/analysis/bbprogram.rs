@@ -12,7 +12,7 @@ use crate::pass::{
 use crate::verifier_log::{RegState, StackState, VerifierInsn, VerifierInsnKind};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::sync::{Arc, Mutex};
-pub(crate) type VerifierOracle = BTreeMap<InsnSite, Arc<[VerifierInsn]>>;
+pub(crate) type VerifierStatesBySite = BTreeMap<InsnSite, Arc<[VerifierInsn]>>;
 pub(crate) type BtfMetadataMap = BTreeMap<InsnSite, usize>;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct BlockId(pub(crate) usize);
@@ -69,7 +69,7 @@ pub struct BBProgram {
     pub(super) blocks: Vec<Block>,
     pub(crate) entry: BlockId,
     pub(super) use_def: UseDefGraph,
-    pub(super) oracle: Option<VerifierOracle>,
+    pub(super) verifier_states: Option<VerifierStatesBySite>,
     pub(super) pmu_profile: BTreeMap<InsnSite, InsnAnnotation>,
     pub(super) btf: BtfMetadataMap,
     pub(super) kinsn_reg: Arc<KinsnRegistry>,
@@ -91,7 +91,7 @@ impl Clone for BBProgram {
             blocks: self.blocks.clone(),
             entry: self.entry,
             use_def: self.use_def.clone(),
-            oracle: self.oracle.clone(),
+            verifier_states: self.verifier_states.clone(),
             pmu_profile: self.pmu_profile.clone(),
             btf: self.btf.clone(),
             kinsn_reg: Arc::clone(&self.kinsn_reg),
@@ -166,7 +166,7 @@ impl BBProgram {
     pub(crate) fn new(
         blocks: Vec<Block>,
         entry: BlockId,
-        oracle: Option<VerifierOracle>,
+        verifier_states: Option<VerifierStatesBySite>,
         btf: BtfMetadataMap,
         kinsn_reg: Arc<KinsnRegistry>,
         ldimm64_second_slots: BTreeMap<InsnSite, BpfInsn>,
@@ -176,7 +176,7 @@ impl BBProgram {
             blocks,
             entry,
             use_def: UseDefGraph::default(),
-            oracle,
+            verifier_states,
             pmu_profile: BTreeMap::new(),
             btf,
             kinsn_reg,
@@ -333,11 +333,11 @@ impl BBProgram {
             .collect()
     }
     #[cfg(test)]
-    pub(crate) fn oracle(&self) -> Option<&VerifierOracle> {
-        self.oracle.as_ref()
+    pub(crate) fn verifier_states_by_site(&self) -> Option<&VerifierStatesBySite> {
+        self.verifier_states.as_ref()
     }
     fn verifier_states_at(&self, site: InsnSite) -> Option<&[VerifierInsn]> {
-        self.oracle.as_ref()?.get(&site).map(AsRef::as_ref)
+        self.verifier_states.as_ref()?.get(&site).map(AsRef::as_ref)
     }
     pub fn reg_known_constant(&self, site: InsnSite, reg: u8) -> Option<i64> {
         let mut states = self.verifier_reg_states(site, reg)?;
@@ -449,9 +449,9 @@ impl BBProgram {
             if annotation.branch_profile.is_none() && annotation.prefetch_profile.is_none() {
                 continue;
             }
-            let site = self
-                .original_pc_to_site(pc)
-                .ok_or_else(|| anyhow::anyhow!("profile pc {pc} is not present in BBProgram"))?;
+            let site = self.original_pc_to_site(pc).ok_or_else(|| {
+                anyhow::anyhow!("profile pc {pc} is not present in the control-flow graph")
+            })?;
             self.pmu_profile.insert(site, annotation.clone());
         }
         Ok(())
@@ -617,7 +617,7 @@ impl BBProgram {
     }
     pub fn insn(&self, site: InsnSite) -> anyhow::Result<&BpfInsn> {
         self.insn_at(site)
-            .ok_or_else(|| anyhow::anyhow!("no instruction at BBProgram site {:?}", site))
+            .ok_or_else(|| anyhow::anyhow!("no instruction at site {:?}", site))
     }
     pub(crate) fn ldimm64_second_slot(&self, site: InsnSite) -> Option<&BpfInsn> {
         self.ldimm64_second_slots.get(&site)
@@ -771,13 +771,13 @@ impl BBProgram {
         self.line_info = line_info;
         Ok(())
     }
-    pub(crate) fn invalidate_oracle(&mut self) {
-        self.oracle = None;
+    pub(crate) fn invalidate_verifier_states(&mut self) {
+        self.verifier_states = None;
         self.pmu_profile.clear();
     }
     pub(crate) fn rebuild_use_def_after_mutation(&mut self) -> anyhow::Result<()> {
         self.rebuild_use_def()?;
-        self.invalidate_oracle();
+        self.invalidate_verifier_states();
         Ok(())
     }
     pub fn remapped_func_info_records(&self) -> anyhow::Result<Option<BtfInfoRecords>> {

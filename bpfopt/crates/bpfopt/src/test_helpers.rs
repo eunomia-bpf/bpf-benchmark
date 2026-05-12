@@ -5,8 +5,8 @@ use std::collections::HashMap;
 use crate::analysis::{lift_with_pass_context, lower, BBProgram};
 use crate::insn::BpfInsn;
 use crate::pass::{
-    BpfPass, MapInfo, PassContext, PassResult, RegState, ScalarRange, SkipReason, StackState,
-    Tnum, VerifierInsn, VerifierInsnKind, VerifierValueWidth,
+    BpfPass, MapInfo, PassContext, PassResult, RegState, ScalarRange, SkipReason, StackState, Tnum,
+    VerifierInsn, VerifierInsnKind, VerifierValueWidth,
 };
 
 pub struct PassRun {

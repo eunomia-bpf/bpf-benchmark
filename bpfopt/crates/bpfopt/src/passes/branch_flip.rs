@@ -232,7 +232,7 @@ fn apply_branch_flip_site(prog: &mut BBProgram, site: &BranchFlipSite) -> anyhow
         || else_first > else_last
     {
         anyhow::bail!(
-            "branch_flip site at {:?} is not a contiguous BBProgram diamond",
+            "branch_flip site at {:?} is not a contiguous CFG diamond",
             site.cond_site
         );
     }
@@ -320,7 +320,7 @@ fn swapped_range_order(
         }
     }
     if !emitted_swap {
-        anyhow::bail!("branch_flip swap range was not present in BBProgram order");
+        anyhow::bail!("branch_flip swap range was not present in program order");
     }
     Ok(order)
 }
