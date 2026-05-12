@@ -169,9 +169,6 @@ impl MapPseudo {
             Self::IdxValue => BPF_PSEUDO_MAP_IDX_VALUE,
         }
     }
-    pub fn uses_fd(self) -> bool {
-        matches!(self, Self::Fd | Self::FdValue)
-    }
     pub fn uses_index(self) -> bool {
         matches!(self, Self::Idx | Self::IdxValue)
     }
@@ -181,16 +178,6 @@ pub enum BranchOff {
     Off16(i16),
     Imm32(i32),
     None,
-}
-impl BranchOff {
-    #[inline]
-    pub fn delta(self) -> Option<i64> {
-        match self {
-            Self::Off16(off) => Some(i64::from(off)),
-            Self::Imm32(imm) => Some(i64::from(imm)),
-            Self::None => None,
-        }
-    }
 }
 #[inline]
 pub fn relative_branch_target_pc(pc: usize, delta: i64) -> Option<usize> {
@@ -336,9 +323,12 @@ impl BpfInsn {
     }
     #[inline]
     pub fn branch_target_pc(&self, pc: usize) -> Option<usize> {
-        self.branch_target_offset()
-            .and_then(BranchOff::delta)
-            .and_then(|delta| relative_branch_target_pc(pc, delta))
+        let delta = match self.branch_target_offset()? {
+            BranchOff::Off16(off) => i64::from(off),
+            BranchOff::Imm32(imm) => i64::from(imm),
+            BranchOff::None => return None,
+        };
+        relative_branch_target_pc(pc, delta)
     }
     pub fn set_branch_target_delta(&mut self, delta: i64) -> anyhow::Result<()> {
         match self.branch_target_offset() {
@@ -436,6 +426,7 @@ impl BpfInsn {
         self.is_call() && self.src_reg() == BPF_PSEUDO_KINSN_CALL
     }
     /// `call helper_id` (src_reg = 0).
+    #[cfg(test)]
     pub fn helper_call(id: i32) -> Self {
         Self::new(BPF_JMP | BPF_CALL, Self::make_regs(0, 0), 0, id)
     }
@@ -456,6 +447,7 @@ impl BpfInsn {
     pub fn jeq_imm(dst: u8, imm: i32, off: i16) -> Self {
         Self::jump_imm(BPF_JEQ, dst, imm, off)
     }
+    #[cfg(test)]
     pub fn jne_imm(dst: u8, imm: i32, off: i16) -> Self {
         Self::jump_imm(BPF_JNE, dst, imm, off)
     }
@@ -463,6 +455,7 @@ impl BpfInsn {
     pub fn jump_reg(op: u8, dst: u8, src: u8, off: i16) -> Self {
         Self::new(BPF_JMP | op | BPF_X, Self::make_regs(dst, src), off, 0)
     }
+    #[cfg(test)]
     pub fn jgt_reg(dst: u8, src: u8, off: i16) -> Self {
         Self::jump_reg(BPF_JGT, dst, src, off)
     }
@@ -537,6 +530,7 @@ impl BpfInsn {
         Self::new(BPF_STX | size | BPF_MEM, Self::make_regs(dst, src), off, 0)
     }
     /// `st_mem size, [dst + off], imm`
+    #[cfg(test)]
     pub fn st_mem(size: u8, dst: u8, off: i16, imm: i32) -> Self {
         Self::new(BPF_ST | size | BPF_MEM, Self::make_regs(dst, 0), off, imm)
     }
@@ -544,13 +538,16 @@ impl BpfInsn {
     pub fn alu64_imm(op: u8, dst: u8, imm: i32) -> Self {
         Self::new(BPF_ALU64 | op | BPF_K, Self::make_regs(dst, 0), 0, imm)
     }
+    #[cfg(test)]
     pub fn add64_imm(dst: u8, imm: i32) -> Self {
         Self::alu64_imm(BPF_ADD, dst, imm)
     }
     /// `alu64 op, dst, src` (e.g., OR64_REG)
+    #[cfg(test)]
     pub fn alu64_reg(op: u8, dst: u8, src: u8) -> Self {
         Self::new(BPF_ALU64 | op | BPF_X, Self::make_regs(dst, src), 0, 0)
     }
+    #[cfg(test)]
     pub fn alu32_imm(op: u8, dst: u8, imm: i32) -> Self {
         Self::new(BPF_ALU | op | BPF_K, Self::make_regs(dst, 0), 0, imm)
     }
@@ -558,6 +555,7 @@ impl BpfInsn {
     pub fn alu32_reg(op: u8, dst: u8, src: u8) -> Self {
         Self::new(BPF_ALU | op | BPF_X, Self::make_regs(dst, src), 0, 0)
     }
+    #[cfg(test)]
     pub fn endian_to_be(dst: u8, size: i32) -> Self {
         Self::new(
             BPF_ALU | BPF_END | BPF_TO_BE,
@@ -600,17 +598,6 @@ pub fn insn_width(insn: &BpfInsn) -> usize {
     } else {
         1
     }
-}
-pub fn emit_ldimm64(dst_reg: u8, value: u64) -> Vec<BpfInsn> {
-    vec![
-        BpfInsn::new(
-            BPF_LD | BPF_DW | BPF_IMM,
-            BpfInsn::make_regs(dst_reg, 0),
-            0,
-            value as u32 as i32,
-        ),
-        BpfInsn::new(0, 0, 0, (value >> 32) as u32 as i32),
-    ]
 }
 pub fn decode_ldimm64_value(lo: &BpfInsn, hi: &BpfInsn) -> u64 {
     (lo.imm as u32 as u64) | ((hi.imm as u32 as u64) << 32)
@@ -684,7 +671,15 @@ pub fn emit_scalar_const_load(dst_reg: u8, value: u64, is_32: bool) -> Vec<BpfIn
     if (imm as i64) as u64 == value {
         vec![BpfInsn::mov64_imm(dst_reg, imm)]
     } else {
-        emit_ldimm64(dst_reg, value)
+        vec![
+            BpfInsn::new(
+                BPF_LD | BPF_DW | BPF_IMM,
+                BpfInsn::make_regs(dst_reg, 0),
+                0,
+                value as u32 as i32,
+            ),
+            BpfInsn::new(0, 0, 0, (value >> 32) as u32 as i32),
+        ]
     }
 }
 pub fn eval_binary_alu_const(op: u8, lhs: u64, rhs: u64, is_32: bool) -> Option<u64> {

@@ -68,31 +68,11 @@ pub(super) enum CcmpFailMode {
     NeZero = 1,
 }
 
-impl CcmpFailMode {
-    fn from_bpf_op(op: u8) -> Option<Self> {
-        match op {
-            BPF_JEQ => Some(Self::EqZero),
-            BPF_JNE => Some(Self::NeZero),
-            _ => None,
-        }
-    }
-}
-
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum CcmpWidth {
     Bpf64 = 0,
     Bpf32 = 1,
-}
-
-impl CcmpWidth {
-    fn from_class(class: u8) -> Option<Self> {
-        match class {
-            BPF_JMP => Some(Self::Bpf64),
-            BPF_JMP32 => Some(Self::Bpf32),
-            _ => None,
-        }
-    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -422,11 +402,15 @@ fn branch_term(prog: &BBProgram, block: BlockId) -> anyhow::Result<Option<Branch
     if !insn.is_cond_jmp() || bpf_src(insn.code) != BPF_K || insn.imm != 0 || taken == fallthrough {
         return Ok(None);
     }
-    let Some(fail_mode) = CcmpFailMode::from_bpf_op(bpf_op(insn.code)) else {
-        return Ok(None);
+    let fail_mode = match bpf_op(insn.code) {
+        BPF_JEQ => CcmpFailMode::EqZero,
+        BPF_JNE => CcmpFailMode::NeZero,
+        _ => return Ok(None),
     };
-    let Some(width) = CcmpWidth::from_class(insn.class()) else {
-        return Ok(None);
+    let width = match insn.class() {
+        BPF_JMP => CcmpWidth::Bpf64,
+        BPF_JMP32 => CcmpWidth::Bpf32,
+        _ => return Ok(None),
     };
     let branch_site = prog
         .terminator_site(block)?

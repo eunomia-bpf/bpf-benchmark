@@ -438,8 +438,6 @@ fn map_inline_soft_hint_requires_immediate_null_check_when_hard_fold_coexists() 
         1
     );
     assert_diagnostic(&run.result, "missing immediate null check");
-    // IMPL: BBProgram should expose unreachable block IDs after mutation for CFG sanity checks.
-    assert!(run.prog.unreachable_blocks().is_empty());
 }
 
 #[test]

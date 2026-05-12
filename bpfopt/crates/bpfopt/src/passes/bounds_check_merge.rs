@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeSet;
 
 use crate::analysis::{BBProgram, BlockId, InsnSite, MakeReplacement, Terminator};
 use crate::insn::*;
@@ -144,21 +144,7 @@ fn apply_rewrites(
         }
     }
 
-    let mut deletions_by_block: BTreeMap<BlockId, Vec<InsnSite>> = BTreeMap::new();
-    for site in &deleted_sites {
-        deletions_by_block
-            .entry(prog.site_block(*site))
-            .or_default()
-            .push(*site);
-    }
-    for (_, mut sites) in deletions_by_block {
-        sites.sort_unstable_by(|a, b| b.cmp(a));
-        for site in sites {
-            prog.try_replace_range_with_skips(site, 1, 0, skipped, || {
-                Ok(MakeReplacement::Use(Vec::new()))
-            })?;
-        }
-    }
+    delete_body_sites_reverse(prog, deleted_sites, skipped)?;
     for block in deleted_branches {
         prog.delete_cond_branch(block)?;
     }

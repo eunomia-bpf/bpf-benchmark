@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{insn_use_def_set, BBProgram, InsnSite};
+use crate::analysis::{BBProgram, InsnSite};
 use crate::insn::{advance_reg_state as advance_simple_reg_state, SimpleRegValue, *};
 use crate::pass::*;
 use std::collections::HashMap;
@@ -8,7 +8,6 @@ const MEMCPY_TARGET: &str = "bpf_bulk_memcpy";
 const MEMSET_TARGET: &str = "bpf_bulk_memset";
 const MIN_BULK_BYTES: usize = 32;
 const CHUNK_MAX_BYTES: usize = 128;
-const STACK_PTR_REG: u8 = 10;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
         canonical_name: MEMCPY_TARGET,
@@ -29,10 +28,6 @@ fn decode_memcpy_bulk_proof(payload: &[u8]) -> ProofRegion {
 fn decode_memset_bulk_proof(payload: &[u8]) -> ProofRegion {
     ProofRegion::from_result(decode_packed_kinsn_payload(payload).and_then(memset_bulk_proof_len))
 }
-fn bulk_offset_range_valid(offset: i16, len: usize) -> bool {
-    let end = i32::from(offset) + len as i32 - 1;
-    (i32::from(i16::MIN)..=i32::from(i16::MAX)).contains(&end)
-}
 fn validate_bulk_len(kind: &str, len: usize) -> anyhow::Result<()> {
     anyhow::ensure!(
         (1..=CHUNK_MAX_BYTES).contains(&len),
@@ -42,9 +37,10 @@ fn validate_bulk_len(kind: &str, len: usize) -> anyhow::Result<()> {
 }
 fn validate_bulk_offsets(kind: &str, ranges: &[(i16, usize)]) -> anyhow::Result<()> {
     anyhow::ensure!(
-        ranges
-            .iter()
-            .all(|&(offset, len)| bulk_offset_range_valid(offset, len)),
+        ranges.iter().all(|&(offset, len)| {
+            let end = i32::from(offset) + len as i32 - 1;
+            (i32::from(i16::MIN)..=i32::from(i16::MAX)).contains(&end)
+        }),
         "{kind} bulk offset range is outside s16"
     );
     Ok(())
@@ -223,7 +219,7 @@ fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
             let start = body.sites[idx];
             match try_match_memcpy_run_at(body.insns, &body.sites, idx, &live_out)? {
                 MatchOutcome::Apply(site) => {
-                    if let Some(reason) = memcpy_alias_skip_reason(&site, idx, body.insns) {
+                    if let Some(reason) = memcpy_alias_skip_reason(&site, start, prog) {
                         scan.skips.push(SiteSkipReason {
                             site: start,
                             reason,
@@ -263,7 +259,7 @@ fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
     }
     Ok(scan)
 }
-fn memcpy_alias_skip_reason(site: &BulkSite, idx: usize, insns: &[BpfInsn]) -> Option<String> {
+fn memcpy_alias_skip_reason(site: &BulkSite, start: InsnSite, prog: &BBProgram) -> Option<String> {
     let BulkSiteKind::Memcpy {
         src_base, dst_base, ..
     } = &site.kind
@@ -273,13 +269,11 @@ fn memcpy_alias_skip_reason(site: &BulkSite, idx: usize, insns: &[BpfInsn]) -> O
     if src_base == dst_base {
         return None;
     }
-    (is_likely_stack_ptr(*src_base, idx, insns) == is_likely_stack_ptr(*dst_base, idx, insns)).then(
-        || {
-            format!(
-                "different-base memcpy alias not provably safe (src r{src_base}, dst r{dst_base})"
-            )
-        },
-    )
+    let is_stack =
+        |reg: u8| matches!(prog.reg_kind(start, reg), Some(RegKind::FramePointer)) || reg == 10;
+    (is_stack(*src_base) == is_stack(*dst_base)).then(|| {
+        format!("different-base memcpy alias not provably safe (src r{src_base}, dst r{dst_base})")
+    })
 }
 fn try_match_memcpy_run_at(
     insns: &[BpfInsn],
@@ -639,41 +633,6 @@ fn width_props(width: u8) -> anyhow::Result<(u8, usize)> {
         BPF_DW => (3, 8),
         _ => anyhow::bail!("bulk_memory unsupported width opcode {width:#x}"),
     })
-}
-fn is_likely_stack_ptr(reg: u8, before_insn_count: usize, insns: &[BpfInsn]) -> bool {
-    if reg == STACK_PTR_REG {
-        return true;
-    }
-    const LOOKBACK: usize = 32;
-    let start = before_insn_count.saturating_sub(LOOKBACK);
-    let mut target_reg = reg;
-    let mut cursor = before_insn_count;
-    for _ in 0..LOOKBACK {
-        let Some(def_idx) = (start..cursor)
-            .rev()
-            .find(|&idx| insn_use_def_set(&insns[idx]).defs.contains(&target_reg))
-        else {
-            return false;
-        };
-        let insn = &insns[def_idx];
-        if insn.is_alu_reg(BPF_ALU64, BPF_MOV) && insn.dst_reg() == target_reg {
-            let src_reg = insn.src_reg();
-            if src_reg == STACK_PTR_REG {
-                return true;
-            }
-            target_reg = src_reg;
-            cursor = def_idx;
-            continue;
-        }
-        if insn.dst_reg() == target_reg
-            && (insn.is_alu_imm(BPF_ALU64, BPF_ADD) || insn.is_alu_imm(BPF_ALU64, BPF_SUB))
-        {
-            cursor = def_idx;
-            continue;
-        }
-        return false;
-    }
-    false
 }
 fn advance_reg_state_range(
     prog: &BBProgram,

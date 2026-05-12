@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{BBProgram, BlockId, InsnSite, SlotDistance};
+use crate::analysis::{insn_use_def_set, BBProgram, BlockId, InsnSite, SlotDistance};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const HELPER_MAP_LOOKUP_ELEM: i32 = libbpf_sys::BPF_FUNC_map_lookup_elem as i32;
@@ -77,14 +77,14 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
         let score = match prefetch_score_for_site(prog, site)? {
             Ok(score) => score,
             Err(reason) => {
-                skipped.push(pf_skip_reason(prog, site.target, reason)?);
+                skipped.push(checked_site_skip(prog, site.target, reason)?);
                 continue;
             }
         };
         let insert_site = match choose_prefetch_insert_site(prog, site)? {
             Ok(insert) => insert,
             Err(reason) => {
-                skipped.push(pf_skip_reason(prog, site.target, reason)?);
+                skipped.push(checked_site_skip(prog, site.target, reason)?);
                 continue;
             }
         };
@@ -182,18 +182,16 @@ fn first_map_value_deref_after_lookup(
                 }));
             }
         }
-        if stops_map_value_scan(insn) {
+        if insn.is_call()
+            || insn.is_exit()
+            || insn.is_ldimm64_pseudo_func()
+            || (insn.is_ja() && insn.off != 0)
+        {
             break;
         }
         apply_map_value_alias_transfer(insn, site, &mut aliases);
     }
     Ok(None)
-}
-fn stops_map_value_scan(insn: &BpfInsn) -> bool {
-    insn.is_call()
-        || insn.is_exit()
-        || insn.is_ldimm64_pseudo_func()
-        || (insn.is_ja() && insn.off != 0)
 }
 fn apply_map_value_alias_transfer(
     insn: &BpfInsn,
@@ -231,7 +229,8 @@ fn scan_packet_prefetch_sites(
     layout: PacketCtxLayout,
 ) -> anyhow::Result<Vec<PrefetchSite>> {
     let mut sites = Vec::new();
-    let mut regs = initial_packet_regs();
+    let mut regs = [TrackedValue::Unknown; 11];
+    regs[BPF_REG_1 as usize] = TrackedValue::Ctx;
     for block in prog.block_ids().collect::<Vec<_>>() {
         if prog.should_reset_linear_state_at_block(block)? {
             regs = [TrackedValue::Unknown; 11];
@@ -255,11 +254,6 @@ fn scan_packet_prefetch_sites(
         }
     }
     Ok(sites)
-}
-fn initial_packet_regs() -> [TrackedValue; 11] {
-    let mut regs = [TrackedValue::Unknown; 11];
-    regs[BPF_REG_1 as usize] = TrackedValue::Ctx;
-    regs
 }
 fn apply_packet_transfer(
     insn: &BpfInsn,
@@ -362,15 +356,6 @@ fn choose_prefetch_insert_site(
     Ok(Ok(insert_site))
 }
 
-fn pf_skip_reason(
-    prog: &BBProgram,
-    site: InsnSite,
-    reason: String,
-) -> anyhow::Result<SiteSkipReason> {
-    prog.insn(site)?;
-    Ok(SiteSkipReason::new(site, reason))
-}
-
 fn pf_sites_after_in_frame(
     prog: &BBProgram,
     anchor: InsnSite,
@@ -458,7 +443,7 @@ fn pf_nearest_prefetch_insert_site(
 
 fn pf_site_end_offset(prog: &BBProgram, site: InsnSite) -> anyhow::Result<SlotDistance> {
     prog.site_layout_offset(site)?
-        .checked_add(prog.site_slot_width(site)?)
+        .checked_add(SlotDistance::from_slots(prog.insn_slot_width(site)?))
         .ok_or_else(|| anyhow::anyhow!("prefetch site {:?} end offset overflows", site))
 }
 
@@ -496,7 +481,7 @@ fn reject_reg_write_between(
         let insn = prog
             .insn_at(site)
             .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
-        if writes_reg(insn, reg) {
+        if insn_use_def_set(insn).defs.contains(&reg) {
             return Ok(Some(format!(
                 "r{reg} is redefined inside the prefetch window at {:?}",
                 site
@@ -504,15 +489,6 @@ fn reject_reg_write_between(
         }
     }
     Ok(None)
-}
-fn writes_reg(insn: &BpfInsn, reg: u8) -> bool {
-    if insn.is_call() && reg <= BPF_REG_5 {
-        return true;
-    }
-    if insn.is_ldimm64() {
-        return insn.dst_reg() == reg;
-    }
-    matches!(insn.class(), BPF_LD | BPF_LDX | BPF_ALU | BPF_ALU64) && insn.dst_reg() == reg
 }
 fn dedup_candidates(mut candidates: Vec<PrefetchCandidate>) -> Vec<PrefetchCandidate> {
     candidates.sort_by(|a, b| {

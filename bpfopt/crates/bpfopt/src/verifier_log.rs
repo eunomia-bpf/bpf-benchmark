@@ -144,11 +144,12 @@ fn default_reg_type() -> String {
 fn is_zero_usize(value: &usize) -> bool {
     *value == 0
 }
-fn parse_verifier_log(log: &str) -> Vec<VerifierInsn> {
+#[cfg(test)]
+pub(crate) fn parse_verifier_log(log: &str) -> Vec<VerifierInsn> {
     log.lines().filter_map(parse_state_line).collect()
 }
 pub fn verifier_states_from_log(log: &str) -> VerifierStatesJson {
-    let parsed = parse_verifier_log(log);
+    let parsed: Vec<VerifierInsn> = log.lines().filter_map(parse_state_line).collect();
     convert_verifier_states(&parsed)
 }
 pub(crate) fn verifier_states_from_json(
@@ -450,7 +451,7 @@ fn parse_pc_state_line(line: &str) -> Option<(usize, Option<usize>, VerifierInsn
     let semicolon = find_top_level_char(tail, ';')?;
     let insn_text = tail[..semicolon].trim();
     let state_text = tail[semicolon + 1..].trim();
-    let kind = if is_conditional_branch_text(insn_text) {
+    let kind = if insn_text.contains(" if ") && insn_text.contains(" goto ") {
         VerifierInsnKind::BranchDeltaState
     } else {
         VerifierInsnKind::InsnDeltaState
@@ -459,9 +460,6 @@ fn parse_pc_state_line(line: &str) -> Option<(usize, Option<usize>, VerifierInsn
 }
 fn is_state_text(text: &str) -> bool {
     text.starts_with('R') || text.starts_with("frame")
-}
-fn is_conditional_branch_text(text: &str) -> bool {
-    text.contains(" if ") && text.contains(" goto ")
 }
 fn strip_frame_prefix(text: &str) -> (usize, &str) {
     let Some(rest) = text.strip_prefix("frame") else {
@@ -518,7 +516,7 @@ fn parse_reg_token(token: &str) -> Option<(u8, RegState)> {
 }
 fn parse_stack_token(token: &str) -> Option<(i16, StackState)> {
     let (lhs, rhs) = token.split_once('=')?;
-    let off = parse_stack_name(lhs)?;
+    let off = result_to_option(parse_i32(lhs.strip_prefix("fp")?)?.try_into())?;
     let state = parse_stack_state(rhs.trim());
     Some((off, state))
 }
@@ -530,10 +528,6 @@ fn parse_reg_name(name: &str) -> Option<(u8, VerifierValueWidth)> {
         (name, VerifierValueWidth::Bits64)
     };
     Some((parse_optional(name)?, value_width))
-}
-fn parse_stack_name(name: &str) -> Option<i16> {
-    let name = name.strip_prefix("fp")?;
-    result_to_option(parse_i32(name)?.try_into())
 }
 fn parse_reg_state(raw: &str, value_width: VerifierValueWidth) -> RegState {
     let (precise, value) = match raw.strip_prefix('P') {

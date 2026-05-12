@@ -149,7 +149,9 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             continue;
         }
 
-        validate_diamond_site(prog, &site)?;
+        let mut trial = prog.clone();
+        let pattern = diamond_pattern_for_site(&mut trial, &site)?;
+        trial.replace_diamond_with_insns(pattern, vec![BpfInsn::nop()])?;
 
         safe_sites.push((site, lowering));
     }
@@ -173,13 +175,6 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     }
 
     Ok(PassResult::with_sites(safe_sites.len(), skipped))
-}
-
-fn validate_diamond_site(prog: &BBProgram, site: &CondSelectSite) -> anyhow::Result<()> {
-    let mut trial = prog.clone();
-    let pattern = diamond_pattern_for_site(&mut trial, site)?;
-    trial.replace_diamond_with_insns(pattern, vec![BpfInsn::nop()])?;
-    Ok(())
 }
 
 fn diamond_pattern_for_site(
@@ -220,7 +215,18 @@ fn pattern_a_for_site(
             predecessor
         );
     };
-    let join = common_successor(prog, taken, fallthrough)?;
+    let join = prog
+        .successors(taken)
+        .iter()
+        .copied()
+        .find(|succ| prog.successors(fallthrough).contains(succ))
+        .ok_or_else(|| {
+            anyhow::anyhow!(
+                "blocks {:?} and {:?} do not share a join",
+                taken,
+                fallthrough
+            )
+        })?;
     Ok(DiamondPattern {
         predecessor,
         true_branch: taken,
@@ -267,14 +273,6 @@ fn pattern_c_for_site(
     })
 }
 
-fn common_successor(prog: &BBProgram, a: BlockId, b: BlockId) -> anyhow::Result<BlockId> {
-    prog.successors(a)
-        .iter()
-        .copied()
-        .find(|succ| prog.successors(b).contains(succ))
-        .ok_or_else(|| anyhow::anyhow!("blocks {:?} and {:?} do not share a join", a, b))
-}
-
 fn scan_cond_select_sites(prog: &BBProgram) -> anyhow::Result<Vec<CondSelectSite>> {
     let mut sites = Vec::new();
     for block in prog.blocks() {
@@ -307,7 +305,9 @@ fn try_match_pattern_a(
     prog: &BBProgram,
     shape: CondBranchShape,
 ) -> anyhow::Result<Option<CondSelectSite>> {
-    let jcc = shape.cond;
+    if shape.block == shape.taken || shape.block == shape.fallthrough {
+        return Ok(None);
+    }
     let Some(mov_false) = prog.block_single_body_insn(shape.fallthrough)? else {
         return Ok(None);
     };
@@ -319,28 +319,28 @@ fn try_match_pattern_a(
     else {
         return Ok(None);
     };
-    let Some(false_join) = single_successor(prog, shape.fallthrough)? else {
-        return Ok(None);
-    };
-    let Some(true_join) = single_successor(prog, shape.taken)? else {
-        return Ok(None);
-    };
-    if false_join != true_join || mov_false.dst_reg() != mov_true.dst_reg() {
+    if mov_false.dst_reg() != mov_true.dst_reg() {
         return Ok(None);
     }
-    let true_mov_site = prog
+    let (Some(false_join), Some(true_join)) = (
+        single_successor(prog, shape.fallthrough)?,
+        single_successor(prog, shape.taken)?,
+    ) else {
+        return Ok(None);
+    };
+    if false_join != true_join {
+        return Ok(None);
+    }
+    let end_site = prog
         .sites_in_block(shape.taken)?
         .first()
         .copied()
         .ok_or_else(|| anyhow::anyhow!("true branch {:?} has no body site", shape.taken))?;
-    if shape.block == shape.taken || shape.block == shape.fallthrough {
-        return Ok(None);
-    }
     Ok(Some(CondSelectSite {
         start_site: shape.site,
-        end_site: true_mov_site,
+        end_site,
         old_len: 4,
-        cond: jcc,
+        cond: shape.cond,
         dst_reg: mov_false.dst_reg(),
         true_val,
         false_val,
@@ -351,9 +351,7 @@ fn try_match_pattern_c(
     prog: &BBProgram,
     shape: CondBranchShape,
 ) -> anyhow::Result<Option<CondSelectSite>> {
-    let jcc = shape.cond;
-    let block_sites = prog.sites_in_block(shape.block)?;
-    let Some(mov_true_site) = block_sites.last().copied() else {
+    let Some(mov_true_site) = prog.sites_in_block(shape.block)?.last().copied() else {
         return Ok(None);
     };
     let mov_true = prog
@@ -370,27 +368,25 @@ fn try_match_pattern_c(
     if mov_true.dst_reg() != mov_false.dst_reg() {
         return Ok(None);
     }
-    let Some(false_join) = single_successor(prog, shape.fallthrough)? else {
-        return Ok(None);
-    };
-    if false_join != shape.taken {
+    if single_successor(prog, shape.fallthrough)? != Some(shape.taken) {
         return Ok(None);
     }
-    let mov_true_dst = mov_true.dst_reg();
-    if insn_use_def_set(&jcc).uses.contains(&mov_true_dst) {
+    if insn_use_def_set(&shape.cond)
+        .uses
+        .contains(&mov_true.dst_reg())
+    {
         return Ok(None);
     }
-    let start_site = mov_true_site;
     let end_site = prog
         .sites_in_block(shape.fallthrough)?
         .first()
         .copied()
         .ok_or_else(|| anyhow::anyhow!("false branch {:?} has no body site", shape.fallthrough))?;
     Ok(Some(CondSelectSite {
-        start_site,
+        start_site: mov_true_site,
         end_site,
         old_len: 3,
-        cond: jcc,
+        cond: shape.cond,
         dst_reg: mov_true.dst_reg(),
         true_val,
         false_val,
@@ -511,7 +507,7 @@ fn condition_prefix(
             cond.imm,
         )
     };
-    if let Some(inverse_op) = inverse_jcc_op(cond_op) {
+    if let Some(inverse_op) = invert_cond_jmp_op(cond_op) {
         return Ok((
             vec![
                 BpfInsn::mov64_imm(pred, 0),
@@ -547,22 +543,6 @@ fn choose_compare_pred_reg(
 ) -> Result<u8, String> {
     choose_temp_reg(site, live_after, forbidden, &[])
         .ok_or_else(|| "no dead register available for cond_select compare predicate".to_string())
-}
-
-fn inverse_jcc_op(op: u8) -> Option<u8> {
-    match op {
-        BPF_JEQ => Some(BPF_JNE),
-        BPF_JNE => Some(BPF_JEQ),
-        BPF_JGT => Some(BPF_JLE),
-        BPF_JGE => Some(BPF_JLT),
-        BPF_JLT => Some(BPF_JGE),
-        BPF_JLE => Some(BPF_JGT),
-        BPF_JSGT => Some(BPF_JSLE),
-        BPF_JSGE => Some(BPF_JSLT),
-        BPF_JSLT => Some(BPF_JSGE),
-        BPF_JSLE => Some(BPF_JSGT),
-        _ => None,
-    }
 }
 
 fn materialize_value(

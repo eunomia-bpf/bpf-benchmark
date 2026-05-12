@@ -10,8 +10,11 @@ use std::fmt;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use crate::analysis::{BBProgram, InsnSite};
-use crate::insn::BpfInsn;
+use crate::analysis::{BBProgram, InsnSite, MakeReplacement};
+use crate::insn::{
+    BpfInsn, BPF_JEQ, BPF_JGE, BPF_JGT, BPF_JLE, BPF_JLT, BPF_JNE, BPF_JSGE, BPF_JSGT, BPF_JSLE,
+    BPF_JSLT,
+};
 use crate::verifier_log::{verifier_states_from_json, VerifierStatesJson};
 #[cfg(test)]
 pub(crate) use crate::verifier_log::{RegState, ScalarRange, StackState, Tnum, VerifierValueWidth};
@@ -94,25 +97,14 @@ enum ProofRegionState {
 }
 
 impl ProofRegion {
-    pub fn valid(proof_len: usize) -> Self {
-        Self {
-            state: ProofRegionState::Valid { proof_len },
-        }
-    }
-
-    pub fn invalid(error: impl Into<String>) -> Self {
-        Self {
-            state: ProofRegionState::Invalid {
-                error: error.into(),
-            },
-        }
-    }
-
     pub fn from_result(result: anyhow::Result<usize>) -> Self {
-        match result {
-            Ok(proof_len) => Self::valid(proof_len),
-            Err(err) => Self::invalid(err.to_string()),
-        }
+        let state = match result {
+            Ok(proof_len) => ProofRegionState::Valid { proof_len },
+            Err(err) => ProofRegionState::Invalid {
+                error: err.to_string(),
+            },
+        };
+        Self { state }
     }
 
     pub fn proof_len(&self) -> anyhow::Result<usize> {
@@ -877,6 +869,106 @@ where
         .insn_at(next)
         .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", next))?;
     Ok(matches_pair(i0, i1).then(|| SiteSkipReason::new(start, reason)))
+}
+
+pub(crate) fn invert_cond_jmp_op(op: u8) -> Option<u8> {
+    match op {
+        BPF_JEQ => Some(BPF_JNE),
+        BPF_JNE => Some(BPF_JEQ),
+        BPF_JGT => Some(BPF_JLE),
+        BPF_JGE => Some(BPF_JLT),
+        BPF_JLT => Some(BPF_JGE),
+        BPF_JLE => Some(BPF_JGT),
+        BPF_JSGT => Some(BPF_JSLE),
+        BPF_JSGE => Some(BPF_JSLT),
+        BPF_JSLT => Some(BPF_JSGE),
+        BPF_JSLE => Some(BPF_JSGT),
+        _ => None,
+    }
+}
+
+pub(crate) fn checked_site_skip(
+    prog: &BBProgram,
+    site: InsnSite,
+    reason: impl Into<String>,
+) -> anyhow::Result<SiteSkipReason> {
+    prog.insn(site)?;
+    Ok(SiteSkipReason::new(site, reason))
+}
+
+pub(crate) fn delete_body_sites_reverse<I>(
+    prog: &mut BBProgram,
+    sites: I,
+    skipped: &mut Vec<SiteSkipReason>,
+) -> anyhow::Result<usize>
+where
+    I: IntoIterator<Item = InsnSite>,
+{
+    let mut sites = sites.into_iter().collect::<Vec<_>>();
+    sites.sort_unstable_by(|a, b| b.cmp(a));
+    let mut deleted = 0usize;
+    for site in sites {
+        if prog.is_terminator_site(site)? {
+            anyhow::bail!(
+                "delete_body_sites_reverse cannot delete terminator at {:?}",
+                site
+            );
+        }
+        if prog.try_replace_range_with_skips(site, 1, 0, skipped, || {
+            Ok(MakeReplacement::Use(Vec::new()))
+        })? {
+            deleted += 1;
+        }
+    }
+    Ok(deleted)
+}
+
+pub(crate) fn sites_after_in_frame(
+    prog: &BBProgram,
+    start: InsnSite,
+) -> anyhow::Result<Vec<InsnSite>> {
+    let frame = prog.site_frame(start)?;
+    let mut seen_start = false;
+    let mut sites = Vec::new();
+    for block in prog.subprog_blocks(frame) {
+        for site in prog.sites_in_block_with_terminator(block)? {
+            if seen_start {
+                sites.push(site);
+            } else if site == start {
+                seen_start = true;
+            }
+        }
+    }
+    if !seen_start {
+        anyhow::bail!("site {:?} is missing from frame {:?}", start, frame);
+    }
+    Ok(sites)
+}
+
+pub(crate) fn sites_before_in_frame_rev(
+    prog: &BBProgram,
+    end: InsnSite,
+) -> anyhow::Result<Vec<InsnSite>> {
+    let frame = prog.site_frame(end)?;
+    let mut seen_end = false;
+    let mut sites = Vec::new();
+    for block in prog.subprog_blocks(frame) {
+        for site in prog.sites_in_block_with_terminator(block)? {
+            if site == end {
+                seen_end = true;
+                break;
+            }
+            sites.push(site);
+        }
+        if seen_end {
+            break;
+        }
+    }
+    if !seen_end {
+        anyhow::bail!("site {:?} is missing from frame {:?}", end, frame);
+    }
+    sites.reverse();
+    Ok(sites)
 }
 
 pub fn first_report_site(program: &BBProgram) -> anyhow::Result<InsnSite> {

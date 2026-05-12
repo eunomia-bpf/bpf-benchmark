@@ -150,16 +150,6 @@ pub(super) fn emit_wide_mem(site: &RewriteSite) -> anyhow::Result<Vec<BpfInsn>> 
         off,
     )])
 }
-fn wide_load_alignment_skip_reason(site: &RewriteSite) -> Option<String> {
-    let width = i64::from(site.width);
-    if site.base_off.rem_euclid(width) != 0 {
-        return Some(format!(
-            "wide load offset {} is not naturally aligned for width {}",
-            site.base_off, site.width
-        ));
-    }
-    None
-}
 fn is_packet_unsafe_prog_type(prog_type: u32) -> bool {
     matches!(
         prog_type,
@@ -171,17 +161,6 @@ fn is_packet_unsafe_prog_type(prog_type: u32) -> bool {
             | libbpf_sys::BPF_PROG_TYPE_LWT_XMIT
             | libbpf_sys::BPF_PROG_TYPE_SK_SKB
     )
-}
-fn is_likely_packet_ptr(reg: i32, before_insn_count: usize, insns: &[BpfInsn]) -> bool {
-    const LOOKBACK: usize = 32;
-    let start = before_insn_count.saturating_sub(LOOKBACK);
-    for i in (start..before_insn_count).rev() {
-        let insn = &insns[i];
-        if insn.dst_reg() as i32 == reg {
-            return insn.is_ldx_mem() && insn.src_reg() == 1;
-        }
-    }
-    true
 }
 pub struct WideMemPass;
 impl BpfPass for WideMemPass {
@@ -240,22 +219,30 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
             ));
             continue;
         }
-        if let Some(reason) = wide_load_alignment_skip_reason(&site) {
-            skipped.push(SiteSkipReason::new(start_site, reason));
+        if site.base_off.rem_euclid(i64::from(site.width)) != 0 {
+            skipped.push(SiteSkipReason::new(
+                start_site,
+                format!(
+                    "wide load offset {} is not naturally aligned for width {}",
+                    site.base_off, site.width
+                ),
+            ));
             continue;
         }
-        if is_packet_unsafe_prog_type(ctx.prog_type) {
-            let base_reg = i32::from(site.base_reg);
-            if site.base_reg != 10 && is_likely_packet_ptr(base_reg, start_idx, body.insns) {
-                skipped.push(SiteSkipReason::new(
-                    start_site,
-                    format!(
-                        "likely packet pointer r{} in XDP/TC prog (prog_type={})",
-                        site.base_reg, ctx.prog_type
-                    ),
-                ));
-                continue;
-            }
+        if is_packet_unsafe_prog_type(ctx.prog_type)
+            && site.base_reg != 10
+            && prog.reg_kind(start_site, site.base_reg).is_none_or(|kind| {
+                matches!(kind, RegKind::PacketPointer | RegKind::PacketMetaPointer)
+            })
+        {
+            skipped.push(SiteSkipReason::new(
+                start_site,
+                format!(
+                    "likely packet pointer r{} in XDP/TC prog (prog_type={})",
+                    site.base_reg, ctx.prog_type
+                ),
+            ));
+            continue;
         }
         if prog
             .reg_kind(start_site, site.base_reg)

@@ -88,7 +88,7 @@ pub fn run_on_bbprogram(
                 bf_validate_flipped_branch_deltas(prog, site, cond)?;
                 safe_sites.push(site.clone());
             }
-            Err(reason) => skipped.push(bf_skip_reason(prog, site.cond_site, reason)?),
+            Err(reason) => skipped.push(checked_site_skip(prog, site.cond_site, reason)?),
         }
     }
 
@@ -115,7 +115,7 @@ fn branch_flip_candidate_cond(
         return Ok(Err("interior branch target from external source".into()));
     }
     let (cond, _, _) = bf_cond_branch(prog, site)?;
-    if invert_jcc_op(bpf_op(cond.code)).is_none() {
+    if invert_cond_jmp_op(bpf_op(cond.code)).is_none() {
         return Ok(Err("cannot invert condition opcode".into()));
     }
     if site_miss_rate > max_branch_miss_rate {
@@ -132,64 +132,36 @@ fn branch_flip_candidate_cond(
 }
 
 fn branch_flip_profile(prog: &BBProgram, site: InsnSite) -> anyhow::Result<(f64, f64)> {
-    let branch_count = require_branch_profile_value(prog.site_hotness(site), site, "branch count")?;
-    let miss_rate =
-        require_branch_profile_value(prog.branch_miss_rate(site), site, "branch miss rate")?;
-    let taken_rate =
-        require_branch_profile_value(prog.branch_taken_rate(site), site, "branch direction data")?;
-    validate_real_branch_profile(site, branch_count, miss_rate, taken_rate)?;
-    Ok((f64::from(miss_rate), f64::from(taken_rate)))
-}
-
-fn require_branch_profile_value<T>(
-    value: Option<T>,
-    site: InsnSite,
-    label: &str,
-) -> anyhow::Result<T> {
-    value.ok_or_else(|| {
+    let missing = |label: &str| {
         anyhow::anyhow!(
             "branch_flip candidate at {:?} has no real per-site {}",
             site,
             label
         )
-    })
-}
-
-fn validate_real_branch_profile(
-    report_site: InsnSite,
-    branch_count: u64,
-    miss_rate: f32,
-    taken_rate: f32,
-) -> anyhow::Result<()> {
+    };
+    let branch_count = prog
+        .site_hotness(site)
+        .ok_or_else(|| missing("branch count"))?;
+    let miss_rate = prog
+        .branch_miss_rate(site)
+        .ok_or_else(|| missing("branch miss rate"))?;
+    let taken_rate = prog
+        .branch_taken_rate(site)
+        .ok_or_else(|| missing("branch direction data"))?;
     if branch_count == 0 {
-        anyhow::bail!(
-            "branch_flip candidate at {:?} has zero branch_count",
-            report_site
-        );
+        anyhow::bail!("branch_flip candidate at {:?} has zero branch_count", site);
     }
-    validate_branch_rate(report_site, "miss_rate", miss_rate)?;
-    validate_branch_rate(report_site, "taken_rate", taken_rate)
-}
-
-fn validate_branch_rate(report_site: InsnSite, label: &str, rate: f32) -> anyhow::Result<()> {
-    if !rate.is_finite() || !(0.0..=1.0).contains(&rate) {
-        anyhow::bail!(
-            "branch_flip candidate at {:?} has invalid {} {}",
-            report_site,
-            label,
-            rate
-        );
+    for (label, rate) in [("miss_rate", miss_rate), ("taken_rate", taken_rate)] {
+        if !rate.is_finite() || !(0.0..=1.0).contains(&rate) {
+            anyhow::bail!(
+                "branch_flip candidate at {:?} has invalid {} {}",
+                site,
+                label,
+                rate
+            );
+        }
     }
-    Ok(())
-}
-
-fn bf_skip_reason(
-    prog: &BBProgram,
-    site: InsnSite,
-    reason: String,
-) -> anyhow::Result<SiteSkipReason> {
-    prog.insn(site)?;
-    Ok(SiteSkipReason::new(site, reason))
+    Ok((f64::from(miss_rate), f64::from(taken_rate)))
 }
 
 fn bf_blocks_are_adjacent(prog: &BBProgram, left: BlockId, right: BlockId) -> anyhow::Result<bool> {
@@ -305,7 +277,7 @@ fn apply_branch_flip_site(prog: &mut BBProgram, site: &BranchFlipSite) -> anyhow
         ),
     }
 
-    let new_op = invert_jcc_op(bpf_op(cond.code))
+    let new_op = invert_cond_jmp_op(bpf_op(cond.code))
         .ok_or_else(|| anyhow::anyhow!("branch_flip cannot invert condition"))?;
     let mut inverted = cond;
     inverted.code = (cond.code & 0x0f) | new_op;
@@ -488,21 +460,4 @@ fn has_exterior_interior_target(
         }
     }
     Ok(false)
-}
-
-pub(super) fn invert_jcc_op(op: u8) -> Option<u8> {
-    match op {
-        BPF_JEQ => Some(BPF_JNE),
-        BPF_JNE => Some(BPF_JEQ),
-        BPF_JGT => Some(BPF_JLE),
-        BPF_JLE => Some(BPF_JGT),
-        BPF_JGE => Some(BPF_JLT),
-        BPF_JLT => Some(BPF_JGE),
-        BPF_JSGT => Some(BPF_JSLE),
-        BPF_JSLE => Some(BPF_JSGT),
-        BPF_JSGE => Some(BPF_JSLT),
-        BPF_JSLT => Some(BPF_JSGE),
-        BPF_JSET => None,
-        _ => None,
-    }
 }

@@ -86,10 +86,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, _ctx: &PassContext) -> anyhow::Res
     // window, since the kinsn replacement does not preserve tmp_reg.
     let mut applicable = Vec::with_capacity(candidates.len());
     for (start, site) in candidates {
-        if prog
-            .live_out_after_window(start, site.old_len)?
-            .contains(&site.tmp_reg)
-        {
+        if live_out_after_window(prog, start, site.old_len)?.contains(&site.tmp_reg) {
             skipped.push(SiteSkipReason::new(
                 start,
                 format!("tmp_reg r{} is live after site", site.tmp_reg),
@@ -119,6 +116,34 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, _ctx: &PassContext) -> anyhow::Res
         })?;
 
     Ok(PassResult::with_sites(applied, skipped))
+}
+
+fn live_out_after_window(prog: &BBProgram, start: InsnSite, len: usize) -> anyhow::Result<RegSet> {
+    if len == 0 {
+        anyhow::bail!("live_out_after_window len must be > 0 at {:?}", start);
+    }
+    let body = prog.block_body_view(start.block)?;
+    let end_idx = start
+        .idx
+        .checked_add(len)
+        .and_then(|value| value.checked_sub(1))
+        .ok_or_else(|| {
+            anyhow::anyhow!(
+                "live_out_after_window window at {:?} len {} overflows",
+                start,
+                len
+            )
+        })?;
+    if end_idx >= body.insns.len() {
+        anyhow::bail!(
+            "live_out_after_window end idx {end_idx} exceeds block body length {}",
+            body.insns.len()
+        );
+    }
+    prog.live_out_site_checked(InsnSite {
+        block: start.block,
+        idx: end_idx,
+    })
 }
 
 fn rotate_site_at(insns: &[BpfInsn], idx: usize) -> Option<RotateSite> {

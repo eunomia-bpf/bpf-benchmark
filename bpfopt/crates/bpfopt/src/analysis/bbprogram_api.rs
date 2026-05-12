@@ -24,16 +24,6 @@ pub enum MakeReplacement {
     Skip(String),
 }
 
-/// Result of `try_replace_range`.
-pub enum TryReplaceOutcome {
-    /// Replacement was applied.
-    Applied,
-    /// Site was skipped, either by structural admission failure or by the
-    /// closure returning `MakeReplacement::Skip`. The reason is suitable for a
-    /// `SiteSkipReason::reason` field.
-    Skipped(String),
-}
-
 impl BBProgram {
     pub fn delete_insn(&mut self, site: DefSite) -> anyhow::Result<usize> {
         let mut next = self.clone();
@@ -74,19 +64,20 @@ impl BBProgram {
     /// 2. Structural admission (subprog boundary) on `(old_len, new_len)`.
     ///    Skipped admission for pure inserts (`old_len == 0`) and pure deletes
     ///    (`new_len == 0`) since those cannot cross subprog boundaries.
-    /// 3. On admission failure, returns `Skipped(reason)` without calling closure.
+    /// 3. On admission failure, records `SiteSkipReason` without calling closure.
     /// 4. On admission success, calls closure to lazily produce the replacement
     ///    or to opt out (e.g., pass-specific live-out check).
     /// 5. Closure returning `Use(insns)` commits if `insns.len() == new_len`,
-    ///    else returns hard error. Closure returning `Skip(reason)` returns
-    ///    `Skipped(reason)` without mutation. Closure returning `Err` propagates.
-    pub fn try_replace_range<F>(
+    ///    else returns hard error. Closure returning `Skip(reason)` records a
+    ///    skip without mutation. Closure returning `Err` propagates.
+    pub fn try_replace_range_with_skips<F>(
         &mut self,
         start: InsnSite,
         old_len: usize,
         new_len: usize,
+        skipped: &mut Vec<SiteSkipReason>,
         make_replacement: F,
-    ) -> anyhow::Result<TryReplaceOutcome>
+    ) -> anyhow::Result<bool>
     where
         F: FnOnce() -> anyhow::Result<MakeReplacement>,
     {
@@ -113,13 +104,23 @@ impl BBProgram {
 
         if old_len > 0 && new_len > 0 {
             if let Some(reason) = self.admission_skip_reason(start, old_len, new_len)? {
-                return Ok(TryReplaceOutcome::Skipped(reason));
+                skipped.push(SiteSkipReason {
+                    site: start,
+                    reason,
+                });
+                return Ok(false);
             }
         }
 
         let replacement = match make_replacement()? {
             MakeReplacement::Use(insns) => insns,
-            MakeReplacement::Skip(reason) => return Ok(TryReplaceOutcome::Skipped(reason)),
+            MakeReplacement::Skip(reason) => {
+                skipped.push(SiteSkipReason {
+                    site: start,
+                    reason,
+                });
+                return Ok(false);
+            }
         };
         if replacement.len() != new_len {
             anyhow::bail!(
@@ -133,32 +134,7 @@ impl BBProgram {
         let mut next = self.clone();
         next.replace_range_in_place(start.block, start.idx..end, replacement)?;
         *self = next;
-        Ok(TryReplaceOutcome::Applied)
-    }
-
-    /// Convenience: try_replace_range that pushes the skip reason into a
-    /// `Vec<SiteSkipReason>` on rejection. Returns true if applied.
-    pub fn try_replace_range_with_skips<F>(
-        &mut self,
-        start: InsnSite,
-        old_len: usize,
-        new_len: usize,
-        skipped: &mut Vec<SiteSkipReason>,
-        make_replacement: F,
-    ) -> anyhow::Result<bool>
-    where
-        F: FnOnce() -> anyhow::Result<MakeReplacement>,
-    {
-        match self.try_replace_range(start, old_len, new_len, make_replacement)? {
-            TryReplaceOutcome::Applied => Ok(true),
-            TryReplaceOutcome::Skipped(reason) => {
-                skipped.push(SiteSkipReason {
-                    site: start,
-                    reason,
-                });
-                Ok(false)
-            }
-        }
+        Ok(true)
     }
 
     fn replace_range_in_place(
@@ -257,17 +233,6 @@ impl BBProgram {
         next.replace_terminator_in_place(block, terminator)?;
         *self = next;
         Ok(())
-    }
-
-    pub fn replace_terminator_at_site(
-        &mut self,
-        site: InsnSite,
-        terminator: Terminator,
-    ) -> anyhow::Result<()> {
-        if !self.is_terminator_site(site)? {
-            anyhow::bail!("site {:?} is not a terminator", site);
-        }
-        self.replace_terminator(site.block, terminator)
     }
 
     fn replace_terminator_in_place(
@@ -458,7 +423,11 @@ impl BBProgram {
             .filter(|block| !reachable.contains(block))
             .collect::<BTreeSet<_>>();
         let removed = remove.len();
-        self.remove_blocks(&remove)?;
+        if removed > 0 {
+            let mut next = self.clone();
+            next.remove_blocks_in_place(&remove)?;
+            *self = next;
+        }
         Ok(removed)
     }
 
@@ -612,13 +581,6 @@ impl BBProgram {
         }
 
         self.remove_blocks_in_place(&remove)?;
-        Ok(())
-    }
-
-    fn remove_blocks(&mut self, remove: &BTreeSet<BlockId>) -> anyhow::Result<()> {
-        let mut next = self.clone();
-        next.remove_blocks_in_place(remove)?;
-        *self = next;
         Ok(())
     }
 

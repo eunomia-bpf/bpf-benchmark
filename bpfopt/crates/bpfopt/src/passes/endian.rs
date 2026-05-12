@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{BBProgram, InsnSite};
+use crate::analysis::{insn_use_def_set, BBProgram, InsnSite};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
@@ -105,7 +105,11 @@ fn scan_endian_site_in_window(insns: &[BpfInsn]) -> Option<(usize, EndianFusionS
                 }
             }
         }
-        if is_window_barrier(insn) || reads_reg(insn, dst) || writes_reg(insn, dst) {
+        if insn.is_ldimm64() || insn.is_jmp_class() {
+            break;
+        }
+        let ud = insn_use_def_set(insn);
+        if ud.uses.contains(&dst) || ud.defs.contains(&dst) {
             break;
         }
     }
@@ -150,35 +154,18 @@ fn find_blocked_narrow_sites(prog: &BBProgram) -> anyhow::Result<Vec<SiteSkipRea
                     }
                     break;
                 }
-                if is_window_barrier(insn) || writes_reg(insn, dst) {
+                if insn.is_ldimm64() || insn.is_jmp_class() {
                     break;
                 }
-                read_before_endian |= reads_reg(insn, dst);
+                let ud = insn_use_def_set(insn);
+                if ud.defs.contains(&dst) {
+                    break;
+                }
+                read_before_endian |= ud.uses.contains(&dst);
             }
         }
     }
     Ok(skips)
-}
-fn is_window_barrier(insn: &BpfInsn) -> bool {
-    insn.is_ldimm64() || insn.is_jmp_class()
-}
-fn reads_reg(insn: &BpfInsn, reg: u8) -> bool {
-    if insn.is_call() {
-        return (BPF_REG_1..=BPF_REG_5).contains(&reg);
-    }
-    if insn.is_exit() {
-        return reg == BPF_REG_0;
-    }
-    (bpf_src(insn.code) == BPF_X && insn.src_reg() == reg)
-        || (matches!(insn.class(), BPF_ALU64 | BPF_ALU | BPF_ST | BPF_STX) && insn.dst_reg() == reg)
-        || (matches!(insn.class(), BPF_JMP | BPF_JMP32) && !insn.is_ja() && insn.dst_reg() == reg)
-        || (insn.class() == BPF_LDX && insn.src_reg() == reg)
-}
-fn writes_reg(insn: &BpfInsn, reg: u8) -> bool {
-    if insn.is_call() {
-        return reg <= BPF_REG_5;
-    }
-    matches!(insn.class(), BPF_ALU64 | BPF_ALU | BPF_LDX | BPF_LD) && insn.dst_reg() == reg
 }
 fn endian_width(size: u8) -> Option<EndianWidth> {
     ENDIAN_WIDTHS

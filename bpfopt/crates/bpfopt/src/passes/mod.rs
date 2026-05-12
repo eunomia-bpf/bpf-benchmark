@@ -28,7 +28,7 @@ pub use const_prop::ConstPropPass;
 pub use dce::DcePass;
 pub use endian::EndianFusionPass;
 pub use extract::ExtractPass;
-pub use map_inline::{MapInfo, MapInfoResult, MapInlinePass, MapReference};
+pub use map_inline::MapInlinePass;
 pub use noop::NoopPass;
 pub use prefetch::PrefetchPass;
 pub use rotate::RotatePass;

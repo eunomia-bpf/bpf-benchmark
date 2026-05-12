@@ -565,11 +565,6 @@ impl BBProgram {
         };
         self.live_out_site_checked(end_site)
     }
-    /// LAYOUT QUERY: how many machine slots a single instruction occupies
-    /// (LD_IMM64 = 2, everything else = 1).
-    pub fn site_slot_width(&self, site: InsnSite) -> anyhow::Result<SlotDistance> {
-        self.insn_slot_width(site).map(SlotDistance)
-    }
     /// LAYOUT QUERY: total slot count across the contiguous block range
     /// `[first.. =last]` in BlockId order. Used by branch_flip to validate
     /// reflected arm fits within JA imm16 range.
@@ -1264,12 +1259,6 @@ fn block_logical_slot_len(prog: &BBProgram, block: BlockId) -> anyhow::Result<us
     }
     Ok(len)
 }
-#[cfg(test)]
-fn block_logical_slot_bounds(prog: &BBProgram, block: BlockId) -> anyhow::Result<(usize, usize)> {
-    let start = prog.block_start_pc(block)?;
-    let len = block_logical_slot_len(prog, block)?;
-    Ok((start, start + len))
-}
 fn frame_relative_logical_slot(
     prog: &BBProgram,
     block: BlockId,
@@ -1501,7 +1490,7 @@ impl BBProgram {
     #[cfg(test)]
     pub(crate) fn rep_site_slot(&self, site: InsnSite) -> anyhow::Result<usize> {
         let offset = site_offset_in_block_slots(self, site)?;
-        Ok(block_logical_slot_bounds(self, site.block)?.0 + offset)
+        Ok(self.block_start_pc(site.block)? + offset)
     }
 
     /// Structural admission check for an in-block replacement. Returns
