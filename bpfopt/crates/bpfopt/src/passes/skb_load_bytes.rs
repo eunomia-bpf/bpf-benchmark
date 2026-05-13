@@ -92,8 +92,8 @@ fn classify_site(
     if len == 0 {
         return Ok(Err("len == 0".into()));
     }
-    if len > 8 {
-        return Ok(Err("len > 8".into()));
+    if len > 20 {
+        return Ok(Err("len > 20".into()));
     }
     if offset.checked_add(len).is_none() {
         return Ok(Err("offset + len exceeds i32".into()));

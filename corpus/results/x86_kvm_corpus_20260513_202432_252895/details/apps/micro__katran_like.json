@@ -1,0 +1,99 @@
+{
+  "app": "micro/katran_like",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 3463,
+        "bytes_xlated": 6832,
+        "id": 9,
+        "name": "katran_like_xdp",
+        "run_cnt_delta": 100000,
+        "run_time_ns_delta": 4198252,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "kill",
+          "-USR1",
+          "1862"
+        ],
+        "duration_s": 0.09871049800000264,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "{\"compile_ns\":590688,\"exec_ns\":64,\"timing_source\":\"ktime\",\"timing_source_wall\":\"rdtsc\",\"wall_exec_ns\":774,\"exec_cycles\":2852,\"tsc_freq_hz\":3686283693,\"result\":5895923248507644458,\"retval\":2,\"jited_prog_len\":3463,\"xlated_prog_len\":6832,\"code_size\":{\"bpf_bytecode_bytes\":6832,\"native_code_bytes\":3463},\"phases_ns\":{\"memory_prepare_ns\":22648,\"object_open_ns\":61465,\"object_load_ns\":529223,\"packet_prepare_ns\":2308,\"prog_run_wall_ns\":77371014,\"result_extract_ns\":303},\"perf_counters\":{},\"perf_counters_meta\":{\"requested\":false,\"collected\":false,\"include_kernel\":false,\"scope\":\"full_repeat_raw\",\"error\":\"\"}}\n",
+        "workload_name": "micro/katran_like"
+      }
+    ]
+  },
+  "error": "katran_like result mismatch: 6630047213893624271 != 5895923248507644458",
+  "post_rejit": null,
+  "rejit_result": {
+    "per_program": {
+      "9": {
+        "passes": [
+          {
+            "bpfopt_ms": 30,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 816,
+              "insn_count_before": 872,
+              "insn_delta": -56,
+              "pass": "rotate",
+              "sites_applied": 14,
+              "sites_matched": 14,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 2,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_ms": 30,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "removed 12 dead defs"
+              ],
+              "insn_count_after": 792,
+              "insn_count_before": 816,
+              "insn_delta": -24,
+              "pass": "dce",
+              "sites_applied": 12,
+              "sites_matched": 12,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 2,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          }
+        ],
+        "prog_id": 9,
+        "program": {
+          "final_insn_count": 792,
+          "orig_insn_count": 872,
+          "prog_id": 9,
+          "prog_name": "katran_like_xdp",
+          "prog_type": 6
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "micro",
+  "selected_workload": "katran_like",
+  "status": "error"
+}

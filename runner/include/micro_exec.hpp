@@ -49,6 +49,7 @@ struct cli_options {
     std::optional<std::string> program_name;
     std::string io_mode = "map";
     bool raw_packet = false;
+    bool signal_control = false;
     uint32_t repeat = 1;
     uint32_t warmup_repeat = 5;
     uint32_t input_size = 0;
