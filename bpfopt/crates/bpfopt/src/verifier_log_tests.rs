@@ -170,20 +170,6 @@ processed 4 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_stat
 }
 
 #[test]
-fn unknown_verifier_attribute_does_not_fail_state_parse() {
-    let states = parse_verifier_log_result("0: R0=scalar(new_attr=1)\n").unwrap();
-    assert_eq!(states.len(), 1);
-    assert!(states[0].regs.contains_key(&0));
-}
-
-#[test]
-fn bad_verifier_attribute_value_does_not_fail_state_parse() {
-    let states = parse_verifier_log_result("0: R0=scalar(umin=not_a_number)\n").unwrap();
-    assert_eq!(states.len(), 1);
-    assert_eq!(states[0].regs.get(&0).unwrap().range.umin, None);
-}
-
-#[test]
 fn parses_frame_and_stack_tokens() {
     let log = r#"
 3: frame1: R1=ctx() R2=fp-24 R10=fp0 fp-24=scalar(id=1) fp-32=0000???? fp-40=fp-56

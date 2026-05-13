@@ -235,9 +235,11 @@ pub fn run_on_bbprogram(prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Res
         // packet bound, and the daemon records that as failed_rejit naturally.
         if is_packet_unsafe_prog_type(ctx.prog_type)
             && site.base_reg != 10
-            && prog.reg_kind(start_site, site.base_reg).is_some_and(|kind| {
-                matches!(kind, RegKind::PacketPointer | RegKind::PacketMetaPointer)
-            })
+            && prog
+                .reg_kind(start_site, site.base_reg)
+                .is_some_and(|kind| {
+                    matches!(kind, RegKind::PacketPointer | RegKind::PacketMetaPointer)
+                })
         {
             skipped.push(SiteSkipReason::new(
                 start_site,

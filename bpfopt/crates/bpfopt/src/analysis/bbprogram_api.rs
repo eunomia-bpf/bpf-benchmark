@@ -306,7 +306,7 @@ impl ProgramCFG {
         let first = chain[0];
         let last = chain[chain.len() - 1];
         for succ in self.successors(last) {
-            if chain_set.contains(succ) {
+            if chain_set.contains(&succ) {
                 anyhow::bail!("last chain block {:?} branches back into the chain", last);
             }
         }
@@ -429,6 +429,7 @@ impl ProgramCFG {
                 insns: tail_insns,
                 terminator: tail_terminator,
                 frame,
+                predecessors: Vec::new(),
             },
         );
         for (idx, block) in self.blocks.iter_mut().enumerate() {

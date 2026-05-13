@@ -76,6 +76,13 @@ Keep the codebase fail-fast so missing v3 capabilities become visible defects in
 ### No Revert / Restore Commits
 Do not produce `git revert` commits or "Restore X" commits to undo previous changes. If a change is wrong, fix it forward in a new commit that does the right thing — do not bounce the tree between two states. Repeated revert/restore pairs (e.g. `Revert "X"` followed by `Restore X`) are forbidden; they pollute history and obscure intent. Decide what the code should be, write that, commit once.
 
+### No Unauthorized Git Mutations
+Assistants (Claude or codex) must NOT run git commands that modify state: `commit`, `commit --amend`, `checkout -- <files>`, `checkout HEAD -- <files>`, `reset`, `reset --hard`, `restore`, `stash`, `stash pop`, `branch -D`, `push`, `push -f`, `rebase`, `cherry-pick`, `revert`. The only allowed git commands are read-only: `status`, `diff`, `log`, `blame`, `show`, `fsck`, `stash list`, `reflog`.
+
+Uncommitted working-tree modifications may be the user's or a concurrent agent's WIP. Even when the build is broken (e.g., 82 compile errors from a half-done refactor), do NOT `git checkout` to "fix" it — report the situation to the user and wait for direction. Lost WIP is not recoverable through `git reflog` because reflog only tracks committed states.
+
+Codex prompts must explicitly include "DO NOT modify git state" when invoking codex on a dirty tree.
+
 ### Unit Test Quality
 Do not add unit tests unless they have a clear bug-detection purpose.
 Good unit tests cover logic branches, state changes, calculations, conversions, boundaries, error paths, external ABI/layout/serialization contracts, or bug regressions.

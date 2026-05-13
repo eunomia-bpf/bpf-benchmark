@@ -70,6 +70,7 @@ pub(crate) fn lift_with_kinsn_registry(
             insns: Vec::new(),
             terminator: Terminator::End,
             frame,
+            predecessors: Vec::new(),
         };
 
         let mut pc = start_pc;

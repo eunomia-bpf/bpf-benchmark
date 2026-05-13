@@ -6,7 +6,7 @@ use crate::analysis::bbprogram_btf::{remap_btf_records_view, BtfRemapView};
 use crate::analysis::bbprogram_lower::remap_btf_records_for_lowering;
 use crate::analysis::{DefSite, UseDefGraph};
 use crate::insn::{insn_width, BpfInsn, MapPseudo};
-use crate::pass::{BtfInfoRecords, InsnAnnotation, KinsnRegistry, RegKind, RegSet};
+use crate::pass::{BranchProfile, BtfInfoRecords, KinsnRegistry, RegKind, RegSet};
 use crate::verifier_log::{RegState, StackState, VerifierInsn, VerifierInsnKind};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::sync::{Arc, Mutex};
@@ -68,7 +68,7 @@ pub struct ProgramCFG {
     pub(crate) entry: BlockId,
     pub(super) use_def: UseDefGraph,
     pub(super) verifier_states: Option<VerifierStatesBySite>,
-    pub(super) pmu_profile: BTreeMap<InsnSite, InsnAnnotation>,
+    pub(super) branch_profile_by_site: BTreeMap<InsnSite, BranchProfile>,
     pub(super) btf: BtfMetadataMap,
     pub(super) kinsn_reg: Arc<KinsnRegistry>,
     pub(crate) map_bindings: Vec<MapBinding>,
@@ -76,8 +76,6 @@ pub struct ProgramCFG {
     pub(crate) line_info: Option<BtfInfoRecords>,
     ldimm64_second_slots: BTreeMap<InsnSite, BpfInsn>,
     pub(crate) pc_relative_ldimm64_targets: BTreeMap<InsnSite, BlockId>,
-    pub(crate) predecessors: Vec<Vec<BlockId>>,
-    pub(crate) successors: Vec<Vec<BlockId>>,
     pub(super) prog_type: u32,
     site_liveness_cache: Mutex<Option<Arc<SiteLivenessSets>>>,
     lifted_reg_facts_cache: Mutex<Option<Arc<LiftedRegFacts>>>,
@@ -90,7 +88,7 @@ impl Clone for ProgramCFG {
             entry: self.entry,
             use_def: self.use_def.clone(),
             verifier_states: self.verifier_states.clone(),
-            pmu_profile: self.pmu_profile.clone(),
+            branch_profile_by_site: self.branch_profile_by_site.clone(),
             btf: self.btf.clone(),
             kinsn_reg: Arc::clone(&self.kinsn_reg),
             map_bindings: self.map_bindings.clone(),
@@ -98,8 +96,6 @@ impl Clone for ProgramCFG {
             line_info: self.line_info.clone(),
             ldimm64_second_slots: self.ldimm64_second_slots.clone(),
             pc_relative_ldimm64_targets: self.pc_relative_ldimm64_targets.clone(),
-            predecessors: self.predecessors.clone(),
-            successors: self.successors.clone(),
             prog_type: self.prog_type,
             site_liveness_cache: Mutex::new(None),
             lifted_reg_facts_cache: Mutex::new(None),
@@ -112,6 +108,7 @@ pub struct BasicBlock {
     pub(super) insns: Vec<BpfInsn>,
     pub(super) terminator: Terminator,
     pub frame: FrameId,
+    pub(super) predecessors: Vec<BlockId>,
 }
 #[derive(Debug)]
 pub(crate) struct BlockBodyView<'a> {
@@ -121,10 +118,7 @@ pub(crate) struct BlockBodyView<'a> {
 }
 #[derive(Debug)]
 pub(crate) struct BlockStartWindow<'a> {
-    pub(crate) block: BlockId,
     pub(crate) start_idx: usize,
-    pub(crate) start_site: InsnSite,
-    pub(crate) sites: &'a [InsnSite],
     pub(crate) insns: &'a [BpfInsn],
     pub(crate) lookahead: &'a [BpfInsn],
 }
@@ -175,7 +169,7 @@ impl ProgramCFG {
             entry,
             use_def: UseDefGraph::default(),
             verifier_states,
-            pmu_profile: BTreeMap::new(),
+            branch_profile_by_site: BTreeMap::new(),
             btf,
             kinsn_reg,
             map_bindings: Vec::new(),
@@ -183,8 +177,6 @@ impl ProgramCFG {
             line_info: None,
             ldimm64_second_slots,
             pc_relative_ldimm64_targets,
-            predecessors: Vec::new(),
-            successors: Vec::new(),
             prog_type: 0,
             site_liveness_cache: Mutex::new(None),
             lifted_reg_facts_cache: Mutex::new(None),
@@ -225,10 +217,13 @@ impl ProgramCFG {
         Ok((block.insns.len() == 1).then(|| &block.insns[0]))
     }
     pub fn predecessors(&self, block: BlockId) -> &[BlockId] {
-        &self.predecessors[block.0]
+        &self.blocks[block.0].predecessors
     }
-    pub fn successors(&self, block: BlockId) -> &[BlockId] {
-        &self.successors[block.0]
+    pub fn successors(&self, block: BlockId) -> Vec<BlockId> {
+        let mut s = self.blocks[block.0].terminator.successors();
+        s.sort_unstable();
+        s.dedup();
+        s
     }
     pub fn should_reset_linear_state_at_block(&self, block: BlockId) -> anyhow::Result<bool> {
         self.block(block)?;
@@ -333,12 +328,6 @@ impl ProgramCFG {
     pub fn map_bindings(&self) -> &[MapBinding] {
         &self.map_bindings
     }
-    pub fn map_fd_bindings(&self) -> HashMap<i32, u32> {
-        self.map_bindings
-            .iter()
-            .map(|binding| (binding.old_fd, binding.map_id))
-            .collect()
-    }
     /// Resolve the kernel map id for a pseudo-map ldimm64 immediate.
     /// Returns the map id that was bound at ProgramCFG construction time;
     /// callers must skip the site if `None` (the construction snapshot
@@ -429,41 +418,28 @@ impl ProgramCFG {
         Some(states.iter().filter_map(move |state| state.regs.get(&reg)))
     }
     pub fn branch_taken_rate(&self, site: InsnSite) -> Option<f32> {
-        let profile = self.pmu_profile.get(&site)?.branch_profile.as_ref()?;
+        let profile = self.branch_profile_by_site.get(&site)?;
         let total = profile.taken_count.checked_add(profile.not_taken_count)?;
         (total != 0).then_some(profile.taken_count as f32 / total as f32)
     }
     pub fn branch_miss_rate(&self, site: InsnSite) -> Option<f32> {
-        let miss_rate = self
-            .pmu_profile
-            .get(&site)?
-            .branch_profile
-            .as_ref()?
-            .miss_rate;
+        let miss_rate = self.branch_profile_by_site.get(&site)?.miss_rate;
         miss_rate.is_finite().then_some(miss_rate as f32)
     }
     pub fn site_hotness(&self, site: InsnSite) -> Option<u64> {
-        Some(
-            self.pmu_profile
-                .get(&site)?
-                .branch_profile
-                .as_ref()?
-                .branch_count,
-        )
+        Some(self.branch_profile_by_site.get(&site)?.branch_count)
     }
     pub(crate) fn attach_profile_from_annotations(
         &mut self,
-        annotations: &[InsnAnnotation],
+        annotations: &[Option<BranchProfile>],
     ) -> anyhow::Result<()> {
-        self.pmu_profile.clear();
-        for (pc, annotation) in annotations.iter().enumerate() {
-            if annotation.branch_profile.is_none() {
-                continue;
-            }
+        self.branch_profile_by_site.clear();
+        for (pc, profile) in annotations.iter().enumerate() {
+            let Some(profile) = profile else { continue };
             let site = self.original_pc_to_site(pc).ok_or_else(|| {
                 anyhow::anyhow!("profile pc {pc} is not present in the control-flow graph")
             })?;
-            self.pmu_profile.insert(site, annotation.clone());
+            self.branch_profile_by_site.insert(site, profile.clone());
         }
         Ok(())
     }
@@ -754,29 +730,26 @@ impl ProgramCFG {
         }
     }
     pub(crate) fn rebuild_cfg_edges(&mut self) -> anyhow::Result<()> {
-        self.successors = vec![Vec::new(); self.blocks.len()];
-        self.predecessors = vec![Vec::new(); self.blocks.len()];
-        for block in &self.blocks {
-            let from = block.id;
-            for succ in block.terminator.successors() {
-                if succ.0 >= self.blocks.len() {
+        for block in &mut self.blocks {
+            block.predecessors.clear();
+        }
+        let blocks_len = self.blocks.len();
+        for from in 0..blocks_len {
+            let from_id = self.blocks[from].id;
+            for succ in self.blocks[from].terminator.successors() {
+                if succ.0 >= blocks_len {
                     anyhow::bail!(
                         "block {:?} terminator references invalid successor {:?}",
-                        from,
+                        from_id,
                         succ
                     );
                 }
-                self.successors[from.0].push(succ);
-                self.predecessors[succ.0].push(from);
+                self.blocks[succ.0].predecessors.push(from_id);
             }
         }
-        for edges in &mut self.successors {
-            edges.sort_unstable();
-            edges.dedup();
-        }
-        for edges in &mut self.predecessors {
-            edges.sort_unstable();
-            edges.dedup();
+        for block in &mut self.blocks {
+            block.predecessors.sort_unstable();
+            block.predecessors.dedup();
         }
         Ok(())
     }
@@ -798,7 +771,7 @@ impl ProgramCFG {
     }
     pub(crate) fn invalidate_verifier_states(&mut self) {
         self.verifier_states = None;
-        self.pmu_profile.clear();
+        self.branch_profile_by_site.clear();
     }
     pub(crate) fn rebuild_use_def_after_mutation(&mut self) -> anyhow::Result<()> {
         self.rebuild_use_def()?;
@@ -888,22 +861,16 @@ impl ProgramCFG {
         let mut hits = Vec::new();
         for block in self.block_ids() {
             let body = self.block_body_view(block)?;
-            for (start_idx, &start_site) in body.sites.iter().enumerate() {
+            for start_idx in 0..body.sites.len() {
                 let lookahead_end = start_idx
                     .checked_add(max_lookahead)
                     .map(|end| end.min(body.insns.len()))
                     .ok_or_else(|| anyhow::anyhow!("lookahead at {start_idx} overflows"))?;
                 let window = BlockStartWindow {
-                    block: body.block,
                     start_idx,
-                    start_site,
-                    sites: &body.sites,
                     insns: body.insns,
                     lookahead: &body.insns[start_idx..lookahead_end],
                 };
-                if window.sites.get(window.start_idx).copied() != Some(window.start_site) {
-                    anyhow::bail!("inconsistent start window in {:?}", window.block);
-                }
                 let Some((local_start_idx, old_len, value)) = f(window)? else {
                     continue;
                 };
@@ -1781,10 +1748,7 @@ mod tests {
         );
         let hits = prog
             .scan_block_starts(4, |window| {
-                assert_eq!(window.block, BlockId(0));
                 assert_eq!(window.start_idx, 0);
-                assert_eq!(window.start_site, InsnSite::for_test(BlockId(0), 0));
-                assert_eq!(window.sites.len(), 1);
                 assert_eq!(window.lookahead.len(), 1);
                 Ok(Some((window.start_idx, 1, window.lookahead[0].imm)))
             })
@@ -1807,13 +1771,12 @@ mod tests {
         );
         let hits = prog
             .scan_block_starts(2, |window| {
-                Ok((window.start_idx == 2).then_some((1, 2, window.start_site)))
+                Ok((window.start_idx == 2).then_some((1, 2, ())))
             })
             .expect("backward-start scan should succeed");
         assert_eq!(hits.len(), 1);
         assert_eq!(hits[0].start_idx, 1);
         assert_eq!(hits[0].start, InsnSite::for_test(BlockId(0), 1));
-        assert_eq!(hits[0].value, InsnSite::for_test(BlockId(0), 2));
     }
     #[test]
     fn scan_block_starts_rejects_out_of_range_local_start() {

@@ -2,7 +2,7 @@
 
 use super::branch_flip::BranchFlipPass;
 use crate::insn::*;
-use crate::pass::InsnAnnotation;
+use crate::pass::BranchProfile;
 use crate::test_helpers::*;
 
 fn diamond() -> Vec<BpfInsn> {
@@ -23,8 +23,8 @@ fn pass() -> BranchFlipPass {
 }
 
 fn ctx_with_branch_profile(taken: u64, not_taken: u64, miss_rate: f64) -> crate::pass::PassContext {
-    let mut annotations = vec![InsnAnnotation::default(); 5];
-    annotations[0].branch_profile = Some(branch_profile(taken, not_taken, miss_rate));
+    let mut annotations = vec![None::<BranchProfile>; 5];
+    annotations[0] = Some(branch_profile(taken, not_taken, miss_rate));
     let mut ctx = pass_ctx();
     ctx.annotations = annotations;
     ctx.branch_miss_rate = Some(0.02);
@@ -35,8 +35,8 @@ fn ctx_with_branch_profile(taken: u64, not_taken: u64, miss_rate: f64) -> crate:
 fn branch_flip_requires_program_level_pmu_data() {
     // BranchFlip must fail fast without real PMU program data.
     let annotations = {
-        let mut anns = vec![InsnAnnotation::default(); 5];
-        anns[0].branch_profile = Some(branch_profile(80, 20, 0.02));
+        let mut anns = vec![None::<BranchProfile>; 5];
+        anns[0] = Some(branch_profile(80, 20, 0.02));
         anns
     };
     let mut ctx = pass_ctx();
@@ -87,8 +87,8 @@ fn test_branch_flip_asymmetric_with_pgo() {
         BpfInsn::mov64_imm(BPF_REG_2, 30),
         BpfInsn::exit(),
     ];
-    let mut annotations = vec![InsnAnnotation::default(); input.len()];
-    annotations[0].branch_profile = Some(branch_profile(90, 10, 0.01));
+    let mut annotations = vec![None::<BranchProfile>; input.len()];
+    annotations[0] = Some(branch_profile(90, 10, 0.01));
     let mut ctx = pass_ctx();
     ctx.annotations = annotations;
     ctx.branch_miss_rate = Some(0.02);
@@ -124,8 +124,8 @@ fn test_branch_flip_skips_jset() {
         BpfInsn::mov64_imm(BPF_REG_0, 20),
         BpfInsn::exit(),
     ];
-    let mut annotations = vec![InsnAnnotation::default(); input.len()];
-    annotations[0].branch_profile = Some(branch_profile(90, 10, 0.01));
+    let mut annotations = vec![None::<BranchProfile>; input.len()];
+    annotations[0] = Some(branch_profile(90, 10, 0.01));
     let mut ctx = pass_ctx();
     ctx.annotations = annotations;
     ctx.branch_miss_rate = Some(0.02);
@@ -180,8 +180,8 @@ fn branch_flip_rejects_oversized_else_delta_through_pass_path() {
         insns.push(BpfInsn::mov64_imm(BPF_REG_0, 20));
     }
     insns.push(BpfInsn::exit());
-    let mut annotations = vec![InsnAnnotation::default(); insns.len()];
-    annotations[0].branch_profile = Some(branch_profile(90, 10, 0.01));
+    let mut annotations = vec![None::<BranchProfile>; insns.len()];
+    annotations[0] = Some(branch_profile(90, 10, 0.01));
     let mut ctx = pass_ctx();
     ctx.annotations = annotations;
     ctx.branch_miss_rate = Some(0.02);
@@ -206,9 +206,9 @@ fn branch_flip_handles_multiple_sites_without_length_change() {
         BpfInsn::mov64_imm(BPF_REG_0, 200),
         BpfInsn::exit(),
     ];
-    let mut annotations = vec![InsnAnnotation::default(); input.len()];
-    annotations[0].branch_profile = Some(branch_profile(80, 20, 0.02));
-    annotations[6].branch_profile = Some(branch_profile(85, 15, 0.02));
+    let mut annotations = vec![None::<BranchProfile>; input.len()];
+    annotations[0] = Some(branch_profile(80, 20, 0.02));
+    annotations[6] = Some(branch_profile(85, 15, 0.02));
     let mut ctx = pass_ctx();
     ctx.annotations = annotations;
     ctx.branch_miss_rate = Some(0.02);

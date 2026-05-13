@@ -59,15 +59,8 @@ pub(crate) fn regs_from_offsets(payload: u64, offsets: &[u8]) -> RegSet {
         .collect()
 }
 
-// ── Per-instruction annotation — populated by analysis passes, read by transform passes.
-#[derive(Clone, Debug, Default)]
-pub struct InsnAnnotation {
-    /// PGO: branch taken/not-taken counts at this instruction.
-    /// Used by BranchFlipPass to decide whether to flip.
-    pub branch_profile: Option<BranchProfile>,
-}
-
-/// Real per-site PMU branch statistics.
+/// Real per-site PMU branch statistics. Optional per-PC PGO input; the lift
+/// step attaches present entries onto ProgramCFG keyed by site.
 #[derive(Clone, Debug)]
 pub struct BranchProfile {
     pub branch_count: u64,
@@ -395,8 +388,8 @@ pub struct PassContext {
     /// Parsed verifier state snapshots consumed at the ProgramCFG lift boundary.
     /// Private; lift accesses via `verifier_states_arc()`, tests via `set_verifier_states_test`.
     verifier_states: Arc<[VerifierInsn]>,
-    /// Per-original-PC annotations used by profile-guided passes.
-    pub annotations: Vec<InsnAnnotation>,
+    /// Per-original-PC branch profiles used by profile-guided passes.
+    pub annotations: Vec<Option<BranchProfile>>,
     /// Program-level branch miss rate from real PMU data.
     pub branch_miss_rate: Option<f64>,
     /// Program map IDs in kernel `used_maps` order.
@@ -772,11 +765,11 @@ pub fn first_report_site(program: &ProgramCFG) -> anyhow::Result<InsnSite> {
 
 impl PassContext {
     pub fn set_verifier_states_from_log(&mut self, log: &str) -> anyhow::Result<()> {
-        let states = crate::verifier_log::verifier_states_from_log(log)?;
-        if states.is_empty() {
-            anyhow::bail!("verifier log did not contain parseable state snapshots");
-        }
-        self.verifier_states = Arc::from(states);
+        // An empty state set is legitimate when the previous daemon step ran at
+        // log_level=1 — the kernel only emits the final pass/fail line, no
+        // per-PC deltas. Passes that consume verifier states fall back to
+        // unknown reg classification (which their is_some_and gates handle).
+        self.verifier_states = Arc::from(crate::verifier_log::verifier_states_from_log(log)?);
         Ok(())
     }
 

@@ -433,10 +433,6 @@ impl BpfInsn {
     pub fn is_mov64_reg(&self) -> bool {
         self.code == (BPF_ALU64 | BPF_MOV | BPF_X)
     }
-    #[inline]
-    pub fn is_mov32_reg(&self) -> bool {
-        self.code == (BPF_ALU | BPF_MOV | BPF_X)
-    }
     // ── Constructors ────────────────────────────────────────────────
     /// `mov64 dst, src` (register)
     pub fn mov64_reg(dst: u8, src: u8) -> Self {
@@ -642,43 +638,6 @@ pub fn emit_scalar_const_load(dst_reg: u8, value: u64, is_32: bool) -> Vec<BpfIn
             BpfInsn::new(0, 0, 0, (value >> 32) as u32 as i32),
         ]
     }
-}
-pub fn eval_binary_alu_const(op: u8, lhs: u64, rhs: u64, is_32: bool) -> Option<u64> {
-    if is_32 {
-        let lhs = lhs as u32;
-        let rhs = rhs as u32;
-        let result = match op {
-            BPF_ADD => lhs.wrapping_add(rhs),
-            BPF_SUB => lhs.wrapping_sub(rhs),
-            BPF_MUL => lhs.wrapping_mul(rhs),
-            BPF_DIV if rhs != 0 => lhs / rhs,
-            BPF_MOD if rhs != 0 => lhs % rhs,
-            BPF_DIV | BPF_MOD => return None,
-            BPF_OR => lhs | rhs,
-            BPF_AND => lhs & rhs,
-            BPF_XOR => lhs ^ rhs,
-            BPF_LSH => (rhs < 32).then_some(lhs.wrapping_shl(rhs))?,
-            BPF_RSH => (rhs < 32).then_some(lhs.wrapping_shr(rhs))?,
-            BPF_ARSH => (rhs < 32).then_some(((lhs as i32) >> rhs) as u32)?,
-            _ => return None,
-        };
-        return Some(result as u64);
-    }
-    Some(match op {
-        BPF_ADD => lhs.wrapping_add(rhs),
-        BPF_SUB => lhs.wrapping_sub(rhs),
-        BPF_MUL => lhs.wrapping_mul(rhs),
-        BPF_DIV if rhs != 0 => lhs / rhs,
-        BPF_MOD if rhs != 0 => lhs % rhs,
-        BPF_DIV | BPF_MOD => return None,
-        BPF_OR => lhs | rhs,
-        BPF_AND => lhs & rhs,
-        BPF_XOR => lhs ^ rhs,
-        BPF_LSH => (rhs < 64).then_some(lhs.wrapping_shl(rhs as u32))?,
-        BPF_RSH => (rhs < 64).then_some(lhs.wrapping_shr(rhs as u32))?,
-        BPF_ARSH => (rhs < 64).then_some(((lhs as i64) >> rhs) as u64)?,
-        _ => return None,
-    })
 }
 /// Emit a packed-ABI kinsn call using a sidecar pseudo-insn immediately before
 /// the kinsn CALL. The result register is part of `payload`, so no extra

@@ -1,0 +1,4543 @@
+{
+  "app": "cilium/agent",
+  "baseline": {
+    "bpf": {
+      "10": {
+        "bytes_jited": 167,
+        "bytes_xlated": 280,
+        "id": 10,
+        "name": "dump_bpf_map",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "11": {
+        "bytes_jited": 740,
+        "bytes_xlated": 520,
+        "id": 11,
+        "name": "dump_bpf_prog",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "106": {
+        "bytes_jited": 490,
+        "bytes_xlated": 848,
+        "id": 106,
+        "name": "cil_xdp_entry",
+        "run_cnt_delta": 529549,
+        "run_time_ns_delta": 19588568,
+        "type": "xdp"
+      },
+      "107": {
+        "bytes_jited": 12622,
+        "bytes_xlated": 21224,
+        "id": 107,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "108": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 108,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "109": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 109,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "110": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 110,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "111": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 111,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "112": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 112,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "113": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 113,
+        "name": "cil_from_host",
+        "run_cnt_delta": 527621,
+        "run_time_ns_delta": 94669226,
+        "type": "sched_cls"
+      },
+      "114": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 114,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "115": {
+        "bytes_jited": 8048,
+        "bytes_xlated": 13936,
+        "id": 115,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "116": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 116,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "117": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 117,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "118": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 118,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "119": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 119,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "120": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 120,
+        "name": "cil_to_host",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 855,
+        "type": "sched_cls"
+      },
+      "121": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 121,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "122": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 122,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "123": {
+        "bytes_jited": 8056,
+        "bytes_xlated": 13888,
+        "id": 123,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "124": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 124,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "125": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 125,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "126": {
+        "bytes_jited": 12653,
+        "bytes_xlated": 21272,
+        "id": 126,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "127": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 127,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "128": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 128,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "129": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 129,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "130": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 130,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "131": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 131,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 595213,
+        "run_time_ns_delta": 99796136,
+        "type": "sched_cls"
+      },
+      "132": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 132,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "133": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 133,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "134": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 134,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "135": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 135,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 529549,
+        "run_time_ns_delta": 57714432,
+        "type": "sched_cls"
+      },
+      "136": {
+        "bytes_jited": 8056,
+        "bytes_xlated": 13888,
+        "id": 136,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "137": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 137,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "138": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 138,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "139": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 139,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "140": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 140,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "141": {
+        "bytes_jited": 12653,
+        "bytes_xlated": 21272,
+        "id": 141,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "142": {
+        "bytes_jited": 5749,
+        "bytes_xlated": 10384,
+        "id": 142,
+        "name": "tail_ipv4_to_endpoint",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "143": {
+        "bytes_jited": 5418,
+        "bytes_xlated": 9600,
+        "id": 143,
+        "name": "tail_handle_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "144": {
+        "bytes_jited": 5424,
+        "bytes_xlated": 9352,
+        "id": 144,
+        "name": "tail_ipv4_ct_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "145": {
+        "bytes_jited": 3605,
+        "bytes_xlated": 6344,
+        "id": 145,
+        "name": "tail_nodeport_rev_dnat_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "146": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 146,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "148": {
+        "bytes_jited": 330,
+        "bytes_xlated": 608,
+        "id": 148,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "149": {
+        "bytes_jited": 11128,
+        "bytes_xlated": 19272,
+        "id": 149,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "150": {
+        "bytes_jited": 5832,
+        "bytes_xlated": 10216,
+        "id": 150,
+        "name": "tail_handle_ipv4_cont",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "151": {
+        "bytes_jited": 908,
+        "bytes_xlated": 1392,
+        "id": 151,
+        "name": "cil_from_container",
+        "run_cnt_delta": 1319291,
+        "run_time_ns_delta": 296266201,
+        "type": "sched_cls"
+      },
+      "152": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 152,
+        "name": "cil_lxc_policy_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "153": {
+        "bytes_jited": 5306,
+        "bytes_xlated": 9136,
+        "id": 153,
+        "name": "tail_ipv4_ct_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "154": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 154,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "155": {
+        "bytes_jited": 5306,
+        "bytes_xlated": 9136,
+        "id": 155,
+        "name": "tail_ipv4_ct_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "156": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 156,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "157": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 157,
+        "name": "cil_lxc_policy_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "158": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 158,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "159": {
+        "bytes_jited": 5832,
+        "bytes_xlated": 10216,
+        "id": 159,
+        "name": "tail_handle_ipv4_cont",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "160": {
+        "bytes_jited": 11128,
+        "bytes_xlated": 19272,
+        "id": 160,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "161": {
+        "bytes_jited": 330,
+        "bytes_xlated": 608,
+        "id": 161,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "162": {
+        "bytes_jited": 5424,
+        "bytes_xlated": 9352,
+        "id": 162,
+        "name": "tail_ipv4_ct_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "163": {
+        "bytes_jited": 5749,
+        "bytes_xlated": 10384,
+        "id": 163,
+        "name": "tail_ipv4_to_endpoint",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "164": {
+        "bytes_jited": 908,
+        "bytes_xlated": 1392,
+        "id": 164,
+        "name": "cil_from_container",
+        "run_cnt_delta": 750,
+        "run_time_ns_delta": 2671262,
+        "type": "sched_cls"
+      },
+      "165": {
+        "bytes_jited": 5418,
+        "bytes_xlated": 9600,
+        "id": 165,
+        "name": "tail_handle_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "167": {
+        "bytes_jited": 3605,
+        "bytes_xlated": 6344,
+        "id": 167,
+        "name": "tail_nodeport_rev_dnat_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/bin/wrk",
+              "-t4",
+              "-c50",
+              "-d15s",
+              "http://198.18.0.2:18080/"
+            ],
+            "config": {
+              "tool": "wrk",
+              "url": "http://198.18.0.2:18080/"
+            },
+            "duration_s": 15.097284814999995,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Running 15s test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   310.96ms  258.84ms   1.86s    87.07%\n    Req/Sec    24.76     16.46    80.00     75.96%\n  1227 requests in 15.03s, 189.91KB read\n  Socket errors: connect 0, read 0, write 0, timeout 29\nRequests/sec:     81.66\nTransfer/sec:     12.64KB",
+            "workload_name": "network_lossy_multi_wrk"
+          },
+          {
+            "command": [],
+            "components": [
+              {
+                "command": [
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.124:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": null,
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.124:18080/"
+                },
+                "duration_s": 1.0060885849999863,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.124:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.63ms   10.58ms  60.26ms   86.67%\n    Req/Sec   120.10      9.70   141.00     80.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.61\nTransfer/sec:     18.91KB",
+                "workload_name": "cilium host-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.30:40751/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.30:40751/"
+                },
+                "duration_s": 1.1066916189999745,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.30:40751/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    47.46ms   12.92ms  60.22ms   92.86%\n    Req/Sec   127.73     23.98   200.00     90.91%\n  140 requests in 1.10s, 22.54KB read\nRequests/sec:    127.27\nTransfer/sec:     20.49KB",
+                "workload_name": "cilium endpoint-to-host"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.32:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.32:18080/"
+                },
+                "duration_s": 1.0084431439999832,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.32:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    47.80ms   10.96ms  60.26ms   90.08%\n    Req/Sec   121.40      3.06   130.00     90.00%\n  121 requests in 1.00s, 19.12KB read\nRequests/sec:    120.65\nTransfer/sec:     19.07KB",
+                "workload_name": "cilium endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepb",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.124:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepb",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.124:18080/"
+                },
+                "duration_s": 1.0093707149999886,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.124:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.00ms   10.47ms  60.07ms   90.21%\n    Req/Sec    71.70     53.53   150.00     95.00%\n  143 requests in 1.01s, 22.59KB read\nRequests/sec:    142.19\nTransfer/sec:     22.46KB",
+                "workload_name": "cilium reverse-endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://198.18.0.2:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://198.18.0.2:18080/"
+                },
+                "duration_s": 1.0061669789999996,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    47.84ms   10.76ms  60.16ms   91.98%\n    Req/Sec    81.25     44.35   170.00     95.00%\n  162 requests in 1.00s, 25.60KB read\nRequests/sec:    161.71\nTransfer/sec:     25.55KB",
+                "workload_name": "cilium endpoint-to-external"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.124:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbenchns",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.124:18080/"
+                },
+                "duration_s": 1.010806582999976,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.124:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    53.34ms   27.18ms 230.78ms   92.98%\n    Req/Sec   112.45     80.59   202.00     50.00%\n  224 requests in 1.00s, 35.52KB read\nRequests/sec:    223.58\nTransfer/sec:     35.46KB",
+                "workload_name": "cilium external-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.32",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "10.244.0.32",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.014922365000018,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "726953",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.124",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbenchns",
+                  "target_host": "10.244.0.124",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0117042490000188,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "525764",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "198.18.0.2",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "198.18.0.2",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0106067700000096,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "589776",
+                "workload_name": "udp_burst"
+              }
+            ],
+            "duration_s": 9.184801008999955,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "",
+            "workload_name": "cilium_endpoint_matrix"
+          }
+        ],
+        "config": {
+          "netem": {
+            "delay_ms": 50,
+            "loss_pct": 20.0
+          },
+          "network_device": "bpfbench0"
+        },
+        "duration_s": 24.28208582399995,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "network_lossy_multi"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "10": {
+        "bytes_jited": 167,
+        "bytes_xlated": 280,
+        "id": 10,
+        "name": "dump_bpf_map",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "11": {
+        "bytes_jited": 740,
+        "bytes_xlated": 520,
+        "id": 11,
+        "name": "dump_bpf_prog",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "106": {
+        "bytes_jited": 490,
+        "bytes_xlated": 848,
+        "id": 106,
+        "name": "cil_xdp_entry",
+        "run_cnt_delta": 514901,
+        "run_time_ns_delta": 16681354,
+        "type": "xdp"
+      },
+      "107": {
+        "bytes_jited": 12622,
+        "bytes_xlated": 21224,
+        "id": 107,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "108": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 108,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "109": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 109,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "110": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 110,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "111": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 111,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "112": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 112,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "113": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 113,
+        "name": "cil_from_host",
+        "run_cnt_delta": 512476,
+        "run_time_ns_delta": 93559408,
+        "type": "sched_cls"
+      },
+      "114": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 114,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "115": {
+        "bytes_jited": 8048,
+        "bytes_xlated": 13936,
+        "id": 115,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "116": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 116,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "117": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 117,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "118": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 118,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "119": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 119,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "120": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 120,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "121": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 121,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "122": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 122,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "123": {
+        "bytes_jited": 8056,
+        "bytes_xlated": 13888,
+        "id": 123,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "124": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 124,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "125": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 125,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "126": {
+        "bytes_jited": 12653,
+        "bytes_xlated": 21272,
+        "id": 126,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "127": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 127,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "128": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 128,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "129": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 129,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "130": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 130,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "131": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 131,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 607692,
+        "run_time_ns_delta": 98757744,
+        "type": "sched_cls"
+      },
+      "132": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 132,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "133": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 133,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "134": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 134,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "135": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 135,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 514901,
+        "run_time_ns_delta": 57013269,
+        "type": "sched_cls"
+      },
+      "136": {
+        "bytes_jited": 8056,
+        "bytes_xlated": 13888,
+        "id": 136,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "137": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 137,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "138": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 138,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "139": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 139,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "140": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 140,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "141": {
+        "bytes_jited": 12653,
+        "bytes_xlated": 21272,
+        "id": 141,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "142": {
+        "bytes_jited": 5749,
+        "bytes_xlated": 10384,
+        "id": 142,
+        "name": "tail_ipv4_to_endpoint",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "143": {
+        "bytes_jited": 5418,
+        "bytes_xlated": 9600,
+        "id": 143,
+        "name": "tail_handle_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "144": {
+        "bytes_jited": 5424,
+        "bytes_xlated": 9352,
+        "id": 144,
+        "name": "tail_ipv4_ct_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "145": {
+        "bytes_jited": 3605,
+        "bytes_xlated": 6344,
+        "id": 145,
+        "name": "tail_nodeport_rev_dnat_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "146": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 146,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "148": {
+        "bytes_jited": 330,
+        "bytes_xlated": 608,
+        "id": 148,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "149": {
+        "bytes_jited": 11128,
+        "bytes_xlated": 19272,
+        "id": 149,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "150": {
+        "bytes_jited": 5832,
+        "bytes_xlated": 10216,
+        "id": 150,
+        "name": "tail_handle_ipv4_cont",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "151": {
+        "bytes_jited": 908,
+        "bytes_xlated": 1392,
+        "id": 151,
+        "name": "cil_from_container",
+        "run_cnt_delta": 1338966,
+        "run_time_ns_delta": 294688932,
+        "type": "sched_cls"
+      },
+      "152": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 152,
+        "name": "cil_lxc_policy_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "153": {
+        "bytes_jited": 5306,
+        "bytes_xlated": 9136,
+        "id": 153,
+        "name": "tail_ipv4_ct_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "154": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 154,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "155": {
+        "bytes_jited": 5306,
+        "bytes_xlated": 9136,
+        "id": 155,
+        "name": "tail_ipv4_ct_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "156": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 156,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "157": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 157,
+        "name": "cil_lxc_policy_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "158": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 158,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "159": {
+        "bytes_jited": 5832,
+        "bytes_xlated": 10216,
+        "id": 159,
+        "name": "tail_handle_ipv4_cont",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "160": {
+        "bytes_jited": 11128,
+        "bytes_xlated": 19272,
+        "id": 160,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "161": {
+        "bytes_jited": 330,
+        "bytes_xlated": 608,
+        "id": 161,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "162": {
+        "bytes_jited": 5424,
+        "bytes_xlated": 9352,
+        "id": 162,
+        "name": "tail_ipv4_ct_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "163": {
+        "bytes_jited": 5749,
+        "bytes_xlated": 10384,
+        "id": 163,
+        "name": "tail_ipv4_to_endpoint",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "164": {
+        "bytes_jited": 908,
+        "bytes_xlated": 1392,
+        "id": 164,
+        "name": "cil_from_container",
+        "run_cnt_delta": 755,
+        "run_time_ns_delta": 2291149,
+        "type": "sched_cls"
+      },
+      "165": {
+        "bytes_jited": 5418,
+        "bytes_xlated": 9600,
+        "id": 165,
+        "name": "tail_handle_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "167": {
+        "bytes_jited": 3605,
+        "bytes_xlated": 6344,
+        "id": 167,
+        "name": "tail_nodeport_rev_dnat_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/bin/wrk",
+              "-t4",
+              "-c50",
+              "-d15s",
+              "http://198.18.0.2:18080/"
+            ],
+            "config": {
+              "tool": "wrk",
+              "url": "http://198.18.0.2:18080/"
+            },
+            "duration_s": 15.101284892999985,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Running 15s test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   317.60ms  287.44ms   1.99s    87.71%\n    Req/Sec    27.21     15.46    80.00     62.55%\n  1427 requests in 15.03s, 220.18KB read\n  Socket errors: connect 0, read 0, write 0, timeout 35\nRequests/sec:     94.96\nTransfer/sec:     14.65KB",
+            "workload_name": "network_lossy_multi_wrk"
+          },
+          {
+            "command": [],
+            "components": [
+              {
+                "command": [
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.124:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": null,
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.124:18080/"
+                },
+                "duration_s": 1.007211562000009,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.124:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.50ms   10.49ms  60.20ms   86.78%\n    Req/Sec    60.65     41.86   110.00     95.00%\n  121 requests in 1.00s, 18.99KB read\nRequests/sec:    120.51\nTransfer/sec:     18.91KB",
+                "workload_name": "cilium host-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.30:39811/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.30:39811/"
+                },
+                "duration_s": 1.0069899959999873,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.30:39811/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.34ms   11.17ms  60.12ms   85.00%\n    Req/Sec   120.10     18.86   160.00     80.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.61\nTransfer/sec:     18.91KB",
+                "workload_name": "cilium endpoint-to-host"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.32:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.32:18080/"
+                },
+                "duration_s": 1.1069287539999948,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.32:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    45.69ms   14.45ms  60.17ms   89.86%\n    Req/Sec    65.76     47.43   160.00     90.48%\n  138 requests in 1.10s, 22.64KB read\nRequests/sec:    125.36\nTransfer/sec:     20.57KB",
+                "workload_name": "cilium endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepb",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.124:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepb",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.124:18080/"
+                },
+                "duration_s": 1.0047709700000098,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.124:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.44ms   10.86ms  60.27ms   87.60%\n    Req/Sec    60.50     21.39    90.00     90.00%\n  121 requests in 1.00s, 19.12KB read\nRequests/sec:    120.90\nTransfer/sec:     19.11KB",
+                "workload_name": "cilium reverse-endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://198.18.0.2:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://198.18.0.2:18080/"
+                },
+                "duration_s": 1.0087537040000143,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    47.70ms   10.67ms  60.12ms   92.50%\n    Req/Sec   120.50      0.53   121.00    100.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.69\nTransfer/sec:     18.92KB",
+                "workload_name": "cilium endpoint-to-external"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.124:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbenchns",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.124:18080/"
+                },
+                "duration_s": 1.1035028699999998,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.124:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.48ms   11.06ms  60.35ms   86.39%\n    Req/Sec    70.00     10.00    80.00    100.00%\n  147 requests in 1.10s, 23.19KB read\nRequests/sec:    133.58\nTransfer/sec:     21.08KB",
+                "workload_name": "cilium external-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.32",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "10.244.0.32",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0130228769999974,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "734883",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.124",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbenchns",
+                  "target_host": "10.244.0.124",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0146410739999965,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "510985",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "198.18.0.2",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "198.18.0.2",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0107837899999765,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "601852",
+                "workload_name": "udp_burst"
+              }
+            ],
+            "duration_s": 9.276605596999985,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "",
+            "workload_name": "cilium_endpoint_matrix"
+          }
+        ],
+        "config": {
+          "netem": {
+            "delay_ms": 50,
+            "loss_pct": 20.0
+          },
+          "network_device": "bpfbench0"
+        },
+        "duration_s": 24.37789048999997,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "network_lossy_multi"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "10": {
+        "passes": [
+          {
+            "bpfopt_ms": 32,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 35,
+              "insn_count_before": 35,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 1,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-0/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-0/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-0/report_step1.json --prog-type tracing --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-0/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-0/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 10,
+        "program": {
+          "final_insn_count": 35,
+          "orig_insn_count": 35,
+          "prog_id": 10,
+          "prog_name": "dump_bpf_map",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "106": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 276,
+              "insn_count_before": 276,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-15/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-15/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-15/report_step1.json --prog-type xdp --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-15/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-15/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 106,
+        "program": {
+          "final_insn_count": 276,
+          "orig_insn_count": 276,
+          "prog_id": 106,
+          "prog_name": "cil_xdp_entry",
+          "prog_type": 6
+        },
+        "status": "error"
+      },
+      "107": {
+        "passes": [
+          {
+            "bpfopt_ms": 37,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2617,
+              "insn_count_before": 2617,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 934,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-7/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-7/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-7/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-7/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-7/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 107,
+        "program": {
+          "final_insn_count": 2617,
+          "orig_insn_count": 2617,
+          "prog_id": 107,
+          "prog_name": "tail_handle_sna",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "108": {
+        "passes": [
+          {
+            "bpfopt_ms": 48,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1837,
+              "insn_count_before": 1837,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 948,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-22/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-22/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-22/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-22/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-22/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 108,
+        "program": {
+          "final_insn_count": 1837,
+          "orig_insn_count": 1837,
+          "prog_id": 108,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "109": {
+        "passes": [
+          {
+            "bpfopt_ms": 10,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1113,
+              "insn_count_before": 1113,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 30,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-18/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-18/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-18/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-18/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-18/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 109,
+        "program": {
+          "final_insn_count": 1113,
+          "orig_insn_count": 1113,
+          "prog_id": 109,
+          "prog_name": "cil_from_netdev",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "11": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 65,
+              "insn_count_before": 65,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "kernel rejected BPF_PROG_REJIT: BPF_PROG_REJIT errno 13: Permission denied (os error 13)\nverifier log:\n0: R1=ctx() R10=fp0\n0: (79) r2 = *(u64 *)(r1 +0)\nfunc 'bpf_iter_bpf_prog' arg0 has btf_id 70231 type STRUCT 'bpf_iter_meta'\n1: R1=ctx() R2=trusted_ptr_bpf_iter_meta()\n1: (79) r6 = *(u64 *)(r2 +0)          ; R2=trusted_ptr_bpf_iter_meta() R6=trusted_ptr_seq_file()\n2: (79) r1 = *(u64 *)(r1 +8)          ; R1=ptr_or_null_bpf_prog(id=1)\n3: (15) if r1 == 0x0 goto pc+59       ; R1=ptr_bpf_prog()\n4: (79) r7 = *(u64 *)(r1 +0)\naccess beyond the end of member pages (mend:2) in struct bpf_prog with off 0 size 8\nprocessed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            "rejit_syscall_ms": 0,
+            "status": "failed_rejit",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 11,
+        "program": {
+          "final_insn_count": 65,
+          "orig_insn_count": 65,
+          "prog_id": 11,
+          "prog_name": "dump_bpf_prog",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "110": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 96,
+              "insn_count_before": 96,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 854,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-29/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-29/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-29/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-29/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-29/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 110,
+        "program": {
+          "final_insn_count": 96,
+          "orig_insn_count": 96,
+          "prog_id": 110,
+          "prog_name": "tail_drop_notif",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "111": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 227,
+              "insn_count_before": 227,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 60,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-5/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-5/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-5/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-5/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-5/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 111,
+        "program": {
+          "final_insn_count": 227,
+          "orig_insn_count": 227,
+          "prog_id": 111,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "112": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 351,
+              "insn_count_before": 351,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-21/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-21/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-21/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-21/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-21/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 112,
+        "program": {
+          "final_insn_count": 351,
+          "orig_insn_count": 351,
+          "prog_id": 112,
+          "prog_name": "cil_to_host",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "113": {
+        "passes": [
+          {
+            "bpfopt_ms": 79,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1194,
+              "insn_count_before": 1194,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 31,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-11/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-11/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-11/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-11/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-11/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 113,
+        "program": {
+          "final_insn_count": 1194,
+          "orig_insn_count": 1194,
+          "prog_id": 113,
+          "prog_name": "cil_from_host",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "114": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 31,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-12/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-12/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-12/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-12/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-12/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 114,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 114,
+          "prog_name": "cil_host_policy",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "115": {
+        "passes": [
+          {
+            "bpfopt_ms": 50,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1720,
+              "insn_count_before": 1720,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 953,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-3/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-3/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-3/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-3/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-3/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 115,
+        "program": {
+          "final_insn_count": 1720,
+          "orig_insn_count": 1720,
+          "prog_id": 115,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "116": {
+        "passes": [
+          {
+            "bpfopt_ms": 43,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1164,
+              "insn_count_before": 1164,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 99,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-10/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-10/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-10/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-10/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-10/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 116,
+        "program": {
+          "final_insn_count": 1164,
+          "orig_insn_count": 1164,
+          "prog_id": 116,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "117": {
+        "passes": [
+          {
+            "bpfopt_ms": 20,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1281,
+              "insn_count_before": 1281,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 21,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-6/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-6/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-6/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-6/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-6/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 117,
+        "program": {
+          "final_insn_count": 1281,
+          "orig_insn_count": 1281,
+          "prog_id": 117,
+          "prog_name": "cil_to_netdev",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "118": {
+        "passes": [
+          {
+            "bpfopt_ms": 11,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 605,
+              "insn_count_before": 605,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 59,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-8/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-8/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-8/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-8/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-8/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 118,
+        "program": {
+          "final_insn_count": 605,
+          "orig_insn_count": 605,
+          "prog_id": 118,
+          "prog_name": "tail_no_service",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "119": {
+        "passes": [
+          {
+            "bpfopt_ms": 81,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1164,
+              "insn_count_before": 1164,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 770,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-4/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-4/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-4/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-4/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-4/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 119,
+        "program": {
+          "final_insn_count": 1164,
+          "orig_insn_count": 1164,
+          "prog_id": 119,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "120": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 351,
+              "insn_count_before": 351,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-46/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-46/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-46/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-46/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-46/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 120,
+        "program": {
+          "final_insn_count": 351,
+          "orig_insn_count": 351,
+          "prog_id": 120,
+          "prog_name": "cil_to_host",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "121": {
+        "passes": [
+          {
+            "bpfopt_ms": 16,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1281,
+              "insn_count_before": 1281,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 176,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-47/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-47/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-47/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-47/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-47/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 121,
+        "program": {
+          "final_insn_count": 1281,
+          "orig_insn_count": 1281,
+          "prog_id": 121,
+          "prog_name": "cil_to_netdev",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "122": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1837,
+              "insn_count_before": 1837,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 73,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-55/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-55/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-55/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-55/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-55/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 122,
+        "program": {
+          "final_insn_count": 1837,
+          "orig_insn_count": 1837,
+          "prog_id": 122,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "123": {
+        "passes": [
+          {
+            "bpfopt_ms": 18,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1720,
+              "insn_count_before": 1720,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 717,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-38/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-38/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-38/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-38/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-38/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 123,
+        "program": {
+          "final_insn_count": 1720,
+          "orig_insn_count": 1720,
+          "prog_id": 123,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "124": {
+        "passes": [
+          {
+            "bpfopt_ms": 10,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1194,
+              "insn_count_before": 1194,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 7,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-53/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-53/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-53/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-53/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-53/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 124,
+        "program": {
+          "final_insn_count": 1194,
+          "orig_insn_count": 1194,
+          "prog_id": 124,
+          "prog_name": "cil_from_host",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "125": {
+        "passes": [
+          {
+            "bpfopt_ms": 11,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1113,
+              "insn_count_before": 1113,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 75,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-52/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-52/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-52/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-52/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-52/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 125,
+        "program": {
+          "final_insn_count": 1113,
+          "orig_insn_count": 1113,
+          "prog_id": 125,
+          "prog_name": "cil_from_netdev",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "126": {
+        "passes": [
+          {
+            "bpfopt_ms": 36,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2617,
+              "insn_count_before": 2617,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 131,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 4,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-56/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-56/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-56/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-56/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-56/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 126,
+        "program": {
+          "final_insn_count": 2617,
+          "orig_insn_count": 2617,
+          "prog_id": 126,
+          "prog_name": "tail_handle_sna",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "127": {
+        "passes": [
+          {
+            "bpfopt_ms": 103,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 96,
+              "insn_count_before": 96,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 710,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-1/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-1/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-1/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-1/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-1/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 127,
+        "program": {
+          "final_insn_count": 96,
+          "orig_insn_count": 96,
+          "prog_id": 127,
+          "prog_name": "tail_drop_notif",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "128": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 227,
+              "insn_count_before": 227,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 142,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-45/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-45/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-45/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-45/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-45/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 128,
+        "program": {
+          "final_insn_count": 227,
+          "orig_insn_count": 227,
+          "prog_id": 128,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "129": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-48/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-48/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-48/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-48/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-48/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 129,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 129,
+          "prog_name": "cil_host_policy",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "130": {
+        "passes": [
+          {
+            "bpfopt_ms": 10,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1194,
+              "insn_count_before": 1194,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 340,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-49/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-49/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-49/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-49/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-49/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 130,
+        "program": {
+          "final_insn_count": 1194,
+          "orig_insn_count": 1194,
+          "prog_id": 130,
+          "prog_name": "cil_from_host",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "131": {
+        "passes": [
+          {
+            "bpfopt_ms": 20,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1281,
+              "insn_count_before": 1281,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 103,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-34/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-34/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-34/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-34/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-34/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 131,
+        "program": {
+          "final_insn_count": 1281,
+          "orig_insn_count": 1281,
+          "prog_id": 131,
+          "prog_name": "cil_to_netdev",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "132": {
+        "passes": [
+          {
+            "bpfopt_ms": 11,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1164,
+              "insn_count_before": 1164,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 114,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-39/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-39/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-39/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-39/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-39/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 132,
+        "program": {
+          "final_insn_count": 1164,
+          "orig_insn_count": 1164,
+          "prog_id": 132,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "133": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 96,
+              "insn_count_before": 96,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 775,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-43/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-43/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-43/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-43/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-43/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 133,
+        "program": {
+          "final_insn_count": 96,
+          "orig_insn_count": 96,
+          "prog_id": 133,
+          "prog_name": "tail_drop_notif",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "134": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-59/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-59/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-59/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-59/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-59/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 134,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 134,
+          "prog_name": "cil_host_policy",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "135": {
+        "passes": [
+          {
+            "bpfopt_ms": 12,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1113,
+              "insn_count_before": 1113,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 2,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 87,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-2/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-2/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-2/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-2/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-2/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 135,
+        "program": {
+          "final_insn_count": 1113,
+          "orig_insn_count": 1113,
+          "prog_id": 135,
+          "prog_name": "cil_from_netdev",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "136": {
+        "passes": [
+          {
+            "bpfopt_ms": 18,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1720,
+              "insn_count_before": 1720,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 128,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-24/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-24/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-24/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-24/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-24/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 136,
+        "program": {
+          "final_insn_count": 1720,
+          "orig_insn_count": 1720,
+          "prog_id": 136,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "137": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 227,
+              "insn_count_before": 227,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 92,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-35/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-35/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-35/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-35/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-35/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 137,
+        "program": {
+          "final_insn_count": 227,
+          "orig_insn_count": 227,
+          "prog_id": 137,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "138": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 351,
+              "insn_count_before": 351,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-30/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-30/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-30/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-30/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-30/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 138,
+        "program": {
+          "final_insn_count": 351,
+          "orig_insn_count": 351,
+          "prog_id": 138,
+          "prog_name": "cil_to_host",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "139": {
+        "passes": [
+          {
+            "bpfopt_ms": 22,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1837,
+              "insn_count_before": 1837,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 124,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-32/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-32/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-32/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-32/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-32/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 139,
+        "program": {
+          "final_insn_count": 1837,
+          "orig_insn_count": 1837,
+          "prog_id": 139,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "140": {
+        "passes": [
+          {
+            "bpfopt_ms": 11,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 605,
+              "insn_count_before": 605,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 103,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-37/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-37/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-37/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-37/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-37/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 140,
+        "program": {
+          "final_insn_count": 605,
+          "orig_insn_count": 605,
+          "prog_id": 140,
+          "prog_name": "tail_no_service",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "141": {
+        "passes": [
+          {
+            "bpfopt_ms": 36,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2617,
+              "insn_count_before": 2617,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 858,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-41/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-41/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-41/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-41/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-41/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 141,
+        "program": {
+          "final_insn_count": 2617,
+          "orig_insn_count": 2617,
+          "prog_id": 141,
+          "prog_name": "tail_handle_sna",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "142": {
+        "passes": [
+          {
+            "bpfopt_ms": 10,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1343,
+              "insn_count_before": 1343,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 110,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-19/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-19/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-19/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-19/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-19/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 142,
+        "program": {
+          "final_insn_count": 1343,
+          "orig_insn_count": 1343,
+          "prog_id": 142,
+          "prog_name": "tail_ipv4_to_en",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "143": {
+        "passes": [
+          {
+            "bpfopt_ms": 12,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1217,
+              "insn_count_before": 1217,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 62,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-33/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-33/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-33/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-33/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-33/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 143,
+        "program": {
+          "final_insn_count": 1217,
+          "orig_insn_count": 1217,
+          "prog_id": 143,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "144": {
+        "passes": [
+          {
+            "bpfopt_ms": 9,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1146,
+              "insn_count_before": 1146,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 65,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-36/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-36/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-36/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-36/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-36/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 144,
+        "program": {
+          "final_insn_count": 1146,
+          "orig_insn_count": 1146,
+          "prog_id": 144,
+          "prog_name": "tail_ipv4_ct_eg",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "145": {
+        "passes": [
+          {
+            "bpfopt_ms": 6,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 775,
+              "insn_count_before": 775,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 68,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-40/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-40/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-40/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-40/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-40/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 145,
+        "program": {
+          "final_insn_count": 775,
+          "orig_insn_count": 775,
+          "prog_id": 145,
+          "prog_name": "tail_nodeport_r",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "146": {
+        "passes": [
+          {
+            "bpfopt_ms": 13,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 601,
+              "insn_count_before": 601,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 61,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-42/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-42/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-42/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-42/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-42/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 146,
+        "program": {
+          "final_insn_count": 601,
+          "orig_insn_count": 601,
+          "prog_id": 146,
+          "prog_name": "tail_no_service",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "148": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 88,
+              "insn_count_before": 88,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 1561,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-44/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-44/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-44/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-44/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-44/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 148,
+        "program": {
+          "final_insn_count": 88,
+          "orig_insn_count": 88,
+          "prog_id": 148,
+          "prog_name": "tail_drop_notif",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "149": {
+        "passes": [
+          {
+            "bpfopt_ms": 33,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2446,
+              "insn_count_before": 2446,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 884,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-58/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-58/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-58/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-58/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-58/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 149,
+        "program": {
+          "final_insn_count": 2446,
+          "orig_insn_count": 2446,
+          "prog_id": 149,
+          "prog_name": "cil_lxc_policy",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "150": {
+        "passes": [
+          {
+            "bpfopt_ms": 11,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1377,
+              "insn_count_before": 1377,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 873,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-60/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-60/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-60/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-60/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-60/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 150,
+        "program": {
+          "final_insn_count": 1377,
+          "orig_insn_count": 1377,
+          "prog_id": 150,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "151": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 380,
+              "insn_count_before": 380,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 1,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 0,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-9/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-9/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-9/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-9/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-9/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 151,
+        "program": {
+          "final_insn_count": 380,
+          "orig_insn_count": 380,
+          "prog_id": 151,
+          "prog_name": "cil_from_contai",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "152": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 62,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-20/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-20/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-20/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-20/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-20/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 152,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 152,
+          "prog_name": "cil_lxc_policy_",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "153": {
+        "passes": [
+          {
+            "bpfopt_ms": 6,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1121,
+              "insn_count_before": 1121,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 15,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-23/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-23/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-23/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-23/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-23/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 153,
+        "program": {
+          "final_insn_count": 1121,
+          "orig_insn_count": 1121,
+          "prog_id": 153,
+          "prog_name": "tail_ipv4_ct_in",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "154": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 197,
+              "insn_count_before": 197,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 89,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-26/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-26/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-26/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-26/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-26/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 154,
+        "program": {
+          "final_insn_count": 197,
+          "orig_insn_count": 197,
+          "prog_id": 154,
+          "prog_name": "tail_handle_arp",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "155": {
+        "passes": [
+          {
+            "bpfopt_ms": 72,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1121,
+              "insn_count_before": 1121,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 2023,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-17/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-17/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-17/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-17/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-17/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 155,
+        "program": {
+          "final_insn_count": 1121,
+          "orig_insn_count": 1121,
+          "prog_id": 155,
+          "prog_name": "tail_ipv4_ct_in",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "156": {
+        "passes": [
+          {
+            "bpfopt_ms": 13,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 601,
+              "insn_count_before": 601,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 863,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-50/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-50/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-50/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-50/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-50/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 156,
+        "program": {
+          "final_insn_count": 601,
+          "orig_insn_count": 601,
+          "prog_id": 156,
+          "prog_name": "tail_no_service",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "157": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-27/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-27/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-27/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-27/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-27/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 157,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 157,
+          "prog_name": "cil_lxc_policy_",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "158": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 197,
+              "insn_count_before": 197,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 1814,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-28/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-28/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-28/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-28/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-28/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 158,
+        "program": {
+          "final_insn_count": 197,
+          "orig_insn_count": 197,
+          "prog_id": 158,
+          "prog_name": "tail_handle_arp",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "159": {
+        "passes": [
+          {
+            "bpfopt_ms": 8,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1377,
+              "insn_count_before": 1377,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 2021,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-14/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-14/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-14/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-14/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-14/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 159,
+        "program": {
+          "final_insn_count": 1377,
+          "orig_insn_count": 1377,
+          "prog_id": 159,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "160": {
+        "passes": [
+          {
+            "bpfopt_ms": 32,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2446,
+              "insn_count_before": 2446,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 1778,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-31/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-31/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-31/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-31/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-31/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 160,
+        "program": {
+          "final_insn_count": 2446,
+          "orig_insn_count": 2446,
+          "prog_id": 160,
+          "prog_name": "cil_lxc_policy",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "161": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 88,
+              "insn_count_before": 88,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 1656,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-25/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-25/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-25/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-25/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-25/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 161,
+        "program": {
+          "final_insn_count": 88,
+          "orig_insn_count": 88,
+          "prog_id": 161,
+          "prog_name": "tail_drop_notif",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "162": {
+        "passes": [
+          {
+            "bpfopt_ms": 9,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1146,
+              "insn_count_before": 1146,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 1167,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-51/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-51/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-51/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-51/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-51/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 162,
+        "program": {
+          "final_insn_count": 1146,
+          "orig_insn_count": 1146,
+          "prog_id": 162,
+          "prog_name": "tail_ipv4_ct_eg",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "163": {
+        "passes": [
+          {
+            "bpfopt_ms": 12,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1343,
+              "insn_count_before": 1343,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 1714,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-16/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-16/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-16/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-16/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-16/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 163,
+        "program": {
+          "final_insn_count": 1343,
+          "orig_insn_count": 1343,
+          "prog_id": 163,
+          "prog_name": "tail_ipv4_to_en",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "164": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 380,
+              "insn_count_before": 380,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 687,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-61/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-61/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-61/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-61/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-61/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 164,
+        "program": {
+          "final_insn_count": 380,
+          "orig_insn_count": 380,
+          "prog_id": 164,
+          "prog_name": "cil_from_contai",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "165": {
+        "passes": [
+          {
+            "bpfopt_ms": 11,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1217,
+              "insn_count_before": 1217,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 1025,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-54/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-54/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-54/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-54/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-54/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 165,
+        "program": {
+          "final_insn_count": 1217,
+          "orig_insn_count": 1217,
+          "prog_id": 165,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "167": {
+        "passes": [
+          {
+            "bpfopt_ms": 5,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 775,
+              "insn_count_before": 775,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 861,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-57/output_step0.bin --output /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-57/output_step1.bin --report /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-57/report_step1.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-57/verifier_log_step0.log\nsubprocess output:\nerror: verifier states from /var/tmp/bpfrejit-runtime/x1gf9/bpfrejit-daemon-plan-1853-57/verifier_log_step0.log: verifier log did not contain parseable state snapshots",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 167,
+        "program": {
+          "final_insn_count": 775,
+          "orig_insn_count": 775,
+          "prog_id": 167,
+          "prog_name": "tail_nodeport_r",
+          "prog_type": 3
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "cilium",
+  "selected_workload": "network_lossy_multi",
+  "status": "ok"
+}
