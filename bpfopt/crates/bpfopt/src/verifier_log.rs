@@ -110,8 +110,9 @@ pub(crate) fn verifier_states_from_log(log: &str) -> Result<Vec<VerifierInsn>> {
 fn parse_log_states(log: &str, include_branch_delta: bool) -> Result<Vec<VerifierInsn>> {
     let mut states = Vec::new();
     for (idx, line) in log.lines().enumerate() {
-        let Some(state) = parse_state_line(line)
-            .with_context(|| format!("failed to parse verifier state line {}", idx + 1))?
+        let Some(state) = parse_state_line(line).with_context(|| {
+            format!("failed to parse verifier state line {}: {:?}", idx + 1, line)
+        })?
         else {
             continue;
         };

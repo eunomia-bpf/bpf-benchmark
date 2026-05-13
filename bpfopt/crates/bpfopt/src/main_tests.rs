@@ -52,7 +52,6 @@ fn pseudo_pairs(insns: &[BpfInsn]) -> Vec<(u8, i32, i32)> {
 fn kinsn_target(entries: &[(&str, i32, i16)]) -> TargetJson {
     TargetJson {
         arch: Some("x86_64".to_string()),
-        features: Vec::new(),
         kinsns: entries
             .iter()
             .map(|(name, btf_func_id, call_offset)| {
@@ -168,7 +167,6 @@ fn target_json_requires_call_offset_for_each_kinsn() {
 fn target_call_offsets_shift_after_map_prefix() {
     let mut target = TargetJson {
         arch: Some("x86_64".to_string()),
-        features: Vec::new(),
         kinsns: BTreeMap::from([
             (
                 "bpf_rotate64".to_string(),

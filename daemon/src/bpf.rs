@@ -50,7 +50,6 @@ pub(crate) struct ProgramSnapshot {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub(crate) struct TargetJson {
     pub(crate) arch: String,
-    pub(crate) features: Vec<String>,
     pub(crate) kinsns: BTreeMap<String, TargetKinsnJson>,
 }
 
@@ -88,7 +87,6 @@ pub(crate) fn target_json_for_probes(targets: &[KinsnProbeTarget]) -> Result<Tar
     if targets.is_empty() {
         return Ok(TargetJson {
             arch: detect_arch(),
-            features: detect_features(),
             kinsns: BTreeMap::new(),
         });
     }
@@ -107,7 +105,6 @@ pub(crate) fn probe_target_json(targets: &[KinsnProbeTarget]) -> Result<TargetJs
     }
     Ok(TargetJson {
         arch: detect_arch(),
-        features: detect_features(),
         kinsns,
     })
 }
@@ -301,64 +298,6 @@ fn detect_arch() -> String {
         "aarch64" => "aarch64".to_string(),
         other => other.to_string(),
     }
-}
-
-fn detect_features() -> Vec<String> {
-    let mut features = Vec::new();
-
-    #[cfg(target_arch = "x86_64")]
-    {
-        features.push("cmov".to_string());
-        if std::is_x86_feature_detected!("bmi1") {
-            features.push("bmi1".to_string());
-        }
-        if std::is_x86_feature_detected!("bmi2") {
-            features.push("bmi2".to_string());
-            features.push("rorx".to_string());
-        }
-        if std::is_x86_feature_detected!("movbe") {
-            features.push("movbe".to_string());
-        }
-    }
-
-    // ARM64: bpfopt does not consume per-CPU ARM64 features yet (passes branch
-    // on PlatformCapabilities.arch == Aarch64). Emit nothing here; add features
-    // back when bpfopt grows ARM64 fine-grained feature gating.
-
-    #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
-    {
-        features.extend(cpuinfo_feature_tokens());
-    }
-
-    features
-}
-
-#[cfg(any(
-    target_arch = "aarch64",
-    not(any(target_arch = "x86_64", target_arch = "aarch64"))
-))]
-fn cpuinfo_feature_tokens() -> Vec<String> {
-    let Ok(cpuinfo) = std::fs::read_to_string("/proc/cpuinfo") else {
-        return Vec::new();
-    };
-
-    let mut tokens = Vec::new();
-    for line in cpuinfo.lines() {
-        let Some((key, value)) = line.split_once(':') else {
-            continue;
-        };
-        let key = key.trim().to_ascii_lowercase();
-        if key != "features" && key != "flags" {
-            continue;
-        }
-        for token in value.split_whitespace() {
-            let token = token.to_ascii_lowercase();
-            if !tokens.contains(&token) {
-                tokens.push(token);
-            }
-        }
-    }
-    tokens
 }
 
 fn c_name_u8(bytes: &[u8]) -> String {
