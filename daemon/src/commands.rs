@@ -500,7 +500,7 @@ fn canonicalize_snapshot_map_refs(
             if details.is_empty() {
                 "<no subprocess output>".to_string()
             } else {
-                details.lines().take(40).collect::<Vec<_>>().join("\n")
+                truncate_response_log(details)
             }
         );
     }
@@ -690,7 +690,7 @@ fn run_program_steps(
             let captured = if summary.is_empty() {
                 "<no subprocess output>".to_string()
             } else {
-                summary.lines().take(40).collect::<Vec<_>>().join("\n")
+                truncate_response_log(summary)
             };
             step_details.push(pass_detail(
                 step,
@@ -702,7 +702,10 @@ fn run_program_steps(
                 bpfopt_ms,
                 None,
             ));
-            break;
+            // Keep going: prior input_path / verifier_states_path / current_bytes
+            // are still the last successful pass's outputs, so the next step
+            // gets the same inputs as if this failed step had been omitted.
+            continue;
         }
 
         // Step succeeded. If it produced a non-empty bytecode at $OUTPUT,
@@ -795,7 +798,10 @@ fn run_program_steps(
                     bpfopt_ms,
                     rejit_syscall_ms,
                 ));
-                break;
+                // Keep going on ReJIT failure: don't advance input/state
+                // pointers, so the next pass works against the last
+                // successfully-ReJITted bytecode and verifier log.
+                continue;
             }
         };
 

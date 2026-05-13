@@ -1,442 +1,542 @@
 # x86 native C instruction gap vs current kInsn passes
 
-Date: 2026-05-12
+Date: 2026-05-13
 
-This note answers one narrow question: which x86 instructions are actually
-emitted when the same BPF-oriented C sources are compiled directly to native
-x86, where they appear, and what gap remains versus the current bpfopt kInsn
-matchers and x86 emitters.
+This note answers one question: when benchmark-set BPF C sources are compiled
+directly to native x86, which x86 instructions does clang actually choose, and
+what still differs from the current BPF bytecode -> kInsn -> x86 path?
 
-The key distinction:
+The important split is:
 
-- **Direct C -> x86 evidence** means clang compiled a `.bpf.c`/C source to
-  x86 assembly. These are the only rows I treat as "C compiler really emits
-  this instruction".
-- `docs/tmp/llvm_vs_kernel_jit_disasm_20260319_artifacts/*.llvmbpf.asm` are
-  useful cross-checks, but they are BPF-bytecode-through-LLVM-JIT artifacts,
-  not direct source-C compilation evidence.
-- `bpfopt/testbin/` is BPF bytecode evidence: it tells us whether the current
-  pass can recover an equivalent semantic site from production bytecode.
+- `bpfopt/testccode/*.x86.s`: direct C -> x86 evidence. This is the strongest
+  evidence for "clang really emits this instruction from the app source".
+- `bpfopt/testobject/*.bpf.o`: one BPF object per copied source file. These are
+  useful for object-level source/object comparison, but they are not yet split
+  into the exact live program bytecode that the optimizer sees.
+- `bpfopt/testbin/*/*/canonicalize_output.bin`: live per-program BPF bytecode
+  after canonicalize-map-refs. This is the strongest evidence for whether a
+  current bpfopt pass can recover a semantic site from production bytecode.
 
-## Evidence sources
+Generated native assembly is an instruction-shape check, not a replacement for
+the real app loader path or a benchmark result. The copied sources are kept close
+to upstream benchmark app sources and use local shims only for BPF-only headers,
+helpers, maps, and compiler builtins.
 
-### Direct C -> x86
+## Executive conclusion
 
-1. Katran full native artifact:
-   `docs/tmp/katran_native_compile/clang.s`
+The real-app direct native census changed the priority order:
 
-   Source corresponds to Katran `balancer.bpf.c`, function
-   `balancer_ingress`.
+1. Katran jhash is a `rotate32` problem, not a `jhash` kInsn problem. Native
+   x86 emits 20 independent 32-bit `rorx` sites in `katran_balancer`, and
+   current testbin bytecode has exactly 20 Katran rotate sites. Keep this as
+   `bpf_rotate32`.
+2. The cleanest remaining x86-emitter parity gap is endian load: direct native
+   emits 91 `movbe` instructions across Cilium/Katran/OTel/Tetragon/Tracee, and
+   current `endian_fusion` finds 260 testbin sites, but the x86 emitter still
+   emits load+`bswap`/`rol`.
+3. `cmov`/`setcc` are very real in direct native output: 661 `cmov*` and 475
+   `setcc`. Current `cond_select` already applies many bytecode sites, but its
+   boolean-condition ABI cannot match native `cmp/test + cmovcc` as tightly as a
+   compare-select kInsn could.
+4. `lea` is massive in native output, but the count alone does not justify a
+   `bpf_lea` kInsn. Much of it is x86 address-mode selection or flagless add
+   selection after native register allocation. That needs the separate LEA
+   native-vs-BPF census, and may be a kernel-JIT/address-mode problem rather
+   than a bpfopt kInsn problem.
+5. `bextr`, `lzcnt`, `tzcnt`, and `prefetch*` are not emitted by direct native
+   clang for these 37 real-app sources. Do not prioritize them as native-parity
+   kInsns. `popcnt` exists, but only 7 sites in Tracee, so it needs a bytecode
+   loop census before code.
 
-2. Fresh local native compiles of selected micro BPF C sources:
+## Corpus used
 
-   ```sh
-   clang -O3 -march=x86-64-v3 \
-     -D__TARGET_ARCH_x86 \
-     -D__wsum=__u32 -D__be16=__u16 -D__be32=__u32 -D__be64=__u64 \
-     -Imicro/programs -S -masm=intel micro/programs/<name>.bpf.c
-   ```
+`bpfopt/testccode` currently has 37 copied real-app C files, with generated
+`.x86.s` and `.arm64.s` for each. `bpfopt/testobject` has the corresponding 37
+BPF objects. App coverage:
 
-   This is only an instruction-shape check. It does not replace the real BPF
-   loader path.
+| App prefix | C files | x86 asm | arm64 asm | BPF objects |
+|---|---:|---:|---:|---:|
+| `bcc` | 8 | 8 | 8 | 8 |
+| `bpftrace` | 9 | 9 | 9 | 9 |
+| `cilium` | 7 | 7 | 7 | 7 |
+| `katran` | 5 | 5 | 5 | 5 |
+| `otel` | 3 | 3 | 3 | 3 |
+| `tetragon` | 2 | 2 | 2 | 2 |
+| `tracee` | 3 | 3 | 3 | 3 |
+| Total | 37 | 37 | 37 | 37 |
 
-3. Cross-check against existing native/JIT dumps:
-   `docs/tmp/llvm_vs_kernel_jit_disasm_20260319_artifacts/`.
+The native build entrypoint is `bpfopt/testccode/Makefile`. It compiles x86 with
+`-O3 --target=x86_64-linux-gnu -march=x86-64-v3 -masm=intel` and arm64 with
+`-O3 --target=aarch64-linux-gnu -march=armv8.2-a`. `make -q -C
+bpfopt/testccode x86` and `make -q -C bpfopt/testccode arm64` both returned
+status 0, so the generated asm was up to date during this check.
 
-### Current bpfopt/testbin checks
+Source files:
 
-The committed testbin contains 542 live corpus programs:
-`bpfopt/testbin/README.md`.
+```text
+bcc_biosnoop.bpf.c
+bcc_capable.bpf.c
+bcc_opensnoop.bpf.c
+bcc_runqlat.bpf.c
+bcc_syscount.bpf.c
+bcc_tcpconnect.bpf.c
+bcc_tcplife.bpf.c
+bcc_vfsstat.bpf.c
+bpftrace_base.bpf.c
+bpftrace_map_map.bpf.c
+bpftrace_process_process.bpf.c
+bpftrace_strings_strings.bpf.c
+bpftrace_system_system.bpf.c
+bpftrace_task_task.bpf.c
+bpftrace_task_vma.bpf.c
+bpftrace_test_test.bpf.c
+bpftrace_usdt_usdt.bpf.c
+cilium_bpf_alignchecker.bpf.c
+cilium_bpf_host.bpf.c
+cilium_bpf_lxc.bpf.c
+cilium_bpf_overlay.bpf.c
+cilium_bpf_sock.bpf.c
+cilium_bpf_wireguard.bpf.c
+cilium_bpf_xdp.bpf.c
+katran_balancer.bpf.c
+katran_healthchecking.bpf.c
+katran_healthchecking_ipip.bpf.c
+katran_xdp_pktcntr.bpf.c
+katran_xdp_root.bpf.c
+otel_generic_probe.bpf.c
+otel_native_stack_trace.bpf.c
+otel_sched_monitor.bpf.c
+tetragon_bpf_generic_kprobe.c
+tetragon_bpf_generic_tracepoint.c
+tracee_lsm_support_kprobe_check.bpf.c
+tracee_lsm_support_lsm_check.bpf.c
+tracee_tracee.bpf.c
+```
 
-Relevant current local checks:
+## Direct C -> x86 census
 
-- Katran `bpfopt/testbin/katran/530_balancer_ingress`:
-  - `rotate`: 20 matched / 20 applied, delta -80 BPF insns.
-  - `cond_select`: 7 matched / 7 applied.
-  - `endian_fusion`: 6 matched / 6 applied.
-  - `extract`: 0.
-- Current rotate pass after the masked/in-place matcher work:
-  - total testbin rotate sites: 64 applied.
-  - Katran: 20.
-  - Tetragon observer: 44.
+Counts below are mnemonic counts in `bpfopt/testccode/*.x86.s`, skipping labels,
+directives, and comments.
 
-The older full corpus result
-`corpus/results/x86_kvm_corpus_20260423_124338_026179/result.json` is useful
-for broad pass-location hints, but it predates the current rotate matcher and
-some cond_select behavior, so I do not use it as current rotate/cond_select
-truth.
+| App | Objects | Insns | `rorx` | `cmov` | `setcc` | `movbe` | `bswap` | `rol` | `lea` | `shrx` | `shlx` | `sarx` | `bextr` | `popcnt` | `lzcnt` | `tzcnt` | `prefetch` | vector `v*` | `imul` | `adc/sbb` | `rep` |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| bcc | 8 | 2493 | 0 | 2 | 9 | 0 | 0 | 0 | 285 | 8 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 51 | 0 | 0 | 0 |
+| bpftrace | 9 | 453 | 0 | 2 | 0 | 0 | 0 | 0 | 20 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 35 | 0 | 1 | 0 |
+| cilium | 7 | 10040 | 0 | 47 | 6 | 57 | 0 | 0 | 1796 | 7 | 13 | 0 | 0 | 0 | 0 | 0 | 0 | 88 | 10 | 0 | 0 |
+| katran | 5 | 2400 | 20 | 22 | 3 | 8 | 0 | 6 | 225 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 81 | 2 | 0 | 0 |
+| otel | 3 | 4419 | 0 | 64 | 8 | 12 | 0 | 0 | 359 | 0 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 625 | 0 | 2 | 0 |
+| tetragon | 2 | 25558 | 2 | 180 | 184 | 6 | 0 | 0 | 2841 | 0 | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 130 | 12 | 0 | 0 |
+| tracee | 3 | 330852 | 11 | 344 | 265 | 8 | 4 | 0 | 36627 | 0 | 44 | 0 | 0 | 7 | 0 | 0 | 0 | 8070 | 89 | 18 | 0 |
+| Total | 37 | 376215 | 33 | 661 | 475 | 91 | 4 | 6 | 42153 | 16 | 62 | 3 | 0 | 7 | 0 | 0 | 0 | 9080 | 113 | 21 | 0 |
 
-## Direct native instruction census
+Largest per-file sites:
 
-### Micro direct C compiles
+| Family | Files |
+|---|---|
+| `rorx` | `katran_balancer.bpf.x86.s` 20, `tracee_tracee.bpf.x86.s` 11, `tetragon_bpf_generic_kprobe.x86.s` 2 |
+| `cmov` | `tracee_tracee.bpf.x86.s` 344, `tetragon_bpf_generic_kprobe.x86.s` 122, `otel_native_stack_trace.bpf.x86.s` 64, `tetragon_bpf_generic_tracepoint.x86.s` 58 |
+| `setcc` | `tracee_tracee.bpf.x86.s` 265, `tetragon_bpf_generic_kprobe.x86.s` 108, `tetragon_bpf_generic_tracepoint.x86.s` 76 |
+| `movbe` | Cilium files 57 total, `otel_native_stack_trace.bpf.x86.s` 7, `katran_balancer.bpf.x86.s` 6, Tracee 8, Tetragon 6 |
+| `popcnt` | `tracee_tracee.bpf.x86.s` 7 |
+| `lea` | `tracee_tracee.bpf.x86.s` 36621, Tetragon 2841, Cilium 1796, OTel 359, Katran 225 |
 
-| Source program | Native x86 instructions observed | Interpretation |
-|---|---:|---|
-| `micro/programs/rotate_dense.bpf.c` | `rorx` 256, `lea` 135 | Strong rotate64 evidence. |
-| `micro/programs/rotate64_hash.bpf.c` | `rorx` 116, `lea` 2 | Strong rotate64/hash evidence. |
-| `micro/programs/cond_select_dense.bpf.c` | `cmov` 104, `lea` 2 | Strong compare/select evidence. |
-| `micro/programs/cmov_dense.bpf.c` | `cmov` 32, `rorx` 32, `lea` 34 | Combined select + rotate evidence. |
-| `micro/programs/cmov_select.bpf.c` | `cmov` 1, `rorx` 4, `shrx` 5, `shlx` 1, `lea` 12 | Select plus BMI2 variable shifts. |
-| `micro/programs/endian_swap_dense.bpf.c` | `movbe` 256, `lea` 2 | Strong fused endian-load evidence. |
-| `micro/programs/extract_dense.bpf.c` | `shr`/`and` pairs, `lea` 3; **no `bextr`** | Native clang does not choose BEXTR here. |
-| `micro/programs/load_byte_recompose.bpf.c` | `shrx` 1, `lea` 2 | BMI2 variable shift, but not a kInsn gap by itself. |
-| `micro/programs/large_mixed_500.bpf.c` | `rorx` 7, `cmov` 4, `shlx` 1, `lea` 23 | Mixed rotate/select/address evidence. |
-| `micro/programs/bitcount.bpf.c` | `shrx` 1, `lea` 2; **no `popcnt`** | No direct popcnt evidence for current source. |
-| `micro/programs/bounds_ladder.bpf.c` | `cmov` 2, `lea` 2 | Bounds/boolean lowering can become cmov. |
+Tracee is huge because `tracee_tracee.bpf.c` compiles a large real source file;
+use its counts as instruction-shape evidence, not as a statement that every
+static function is equally hot in the benchmark workload.
 
-### Katran direct C compile
+## Current testbin pass census
 
-`docs/tmp/katran_native_compile/clang.s` contains:
+This was run over all 542 committed `bpfopt/testbin/*/*/canonicalize_output.bin`
+programs with `target/release/bpfopt`, using a target containing
+`bpf_rotate64`, `bpf_rotate32`, `bpf_select64`,
+`bpf_endian_load16/32/64`, and `bpf_extract64`. Two `cond_select` invocations
+hit the 10 second offline-analysis timeout; other pass invocations completed.
 
-| Native instruction family | Count | Where / why |
-|---|---:|---|
-| `rorx` | 20 | jhash in `balancer_ingress`; this matches the 20 Katran BPF rotate sites. |
-| `cmov*` | 16 | min/select and conditional pointer/value selection in packet path. |
-| `setcc` | 3 | Boolean materialization near bounds/condition handling. |
-| `bswap` | 2 | Endian conversion after load into register. |
-| `rol r16, 8` | 7 | 16-bit byte swap form. |
-| `lea` | 152 | Address arithmetic and add/add-constant folding. |
-| vector moves/arithmetic (`vmov*`, `vpaddq`, `vpmovzxwq`, `vshufps`) | present | Small fixed copies, counter updates, checksum-style reductions. |
+| App | Pass | Programs | Matched | Applied | Skipped | BPF insn delta |
+|---|---|---:|---:|---:|---:|---:|
+| bcc_set | rotate | 21 | 0 | 0 | 0 | 0 |
+| bcc_set | cond_select | 21 | 8 | 8 | 0 | 39 |
+| bcc_set | endian_fusion | 21 | 1 | 1 | 0 | 0 |
+| bcc_set | extract | 21 | 1 | 1 | 0 | 0 |
+| bpftrace_set | rotate | 9 | 0 | 0 | 0 | 0 |
+| bpftrace_set | cond_select | 9 | 4 | 4 | 0 | 20 |
+| bpftrace_set | endian_fusion | 9 | 1 | 1 | 0 | 0 |
+| bpftrace_set | extract | 9 | 0 | 0 | 0 | 0 |
+| cilium_agent | rotate | 53 | 0 | 0 | 0 | 0 |
+| cilium_agent | cond_select | 53 | 244 | 234 | 10 | 1011 |
+| cilium_agent | endian_fusion | 53 | 24 | 24 | 0 | 0 |
+| cilium_agent | extract | 53 | 0 | 0 | 0 | 0 |
+| katran | rotate | 1 | 20 | 20 | 0 | -80 |
+| katran | cond_select | 1 | 7 | 7 | 0 | 14 |
+| katran | endian_fusion | 1 | 6 | 6 | 0 | 0 |
+| katran | extract | 1 | 0 | 0 | 0 | 0 |
+| otelcol-ebpf-profiler_profiling | rotate | 13 | 0 | 0 | 0 | 0 |
+| otelcol-ebpf-profiler_profiling | cond_select | 12 | 34 | 34 | 0 | 103 |
+| otelcol-ebpf-profiler_profiling | endian_fusion | 13 | 4 | 4 | 0 | 0 |
+| otelcol-ebpf-profiler_profiling | extract | 13 | 36 | 36 | 0 | 0 |
+| tetragon_observer | rotate | 287 | 44 | 44 | 0 | 0 |
+| tetragon_observer | cond_select | 287 | 2003 | 1695 | 308 | 6537 |
+| tetragon_observer | endian_fusion | 287 | 220 | 220 | 0 | 0 |
+| tetragon_observer | extract | 287 | 114 | 114 | 0 | 0 |
+| tracee_monitor | rotate | 158 | 0 | 0 | 0 | 0 |
+| tracee_monitor | cond_select | 157 | 397 | 387 | 10 | 1195 |
+| tracee_monitor | endian_fusion | 158 | 4 | 4 | 0 | 0 |
+| tracee_monitor | extract | 158 | 47 | 37 | 10 | 0 |
 
-The important Katran point is that jhash is not a special opaque operation in
-native code. Native clang emits ordinary 32-bit `rorx` sites, and the current
-BPF bytecode has recoverable rotate32 shapes. That argues for a general
-`rotate32` matcher, not a `jhash` super-kInsn.
+Totals from completed invocations:
 
-## Current pass/emitter gap by instruction family
+| Pass | Matched | Applied | Skipped | Interpretation |
+|---|---:|---:|---:|---|
+| rotate | 64 | 64 | 0 | All current production rotate recovery is Katran 20 + Tetragon 44. |
+| cond_select | 2697 | 2369 | 328 | Broadly applicable, but not native-like enough because it consumes a boolean register rather than original compare flags. |
+| endian_fusion | 260 | 260 | 0 | Good bytecode coverage; x86 emitter is the remaining MOVBE gap. |
+| extract | 198 | 188 | 10 | Useful bytecode compaction, but not a native `bextr` parity argument. |
 
-### 1. `rorx` / rotate
+The positive BPF instruction delta for many `cond_select` sites is expected:
+the replacement has to set up kfunc arguments and a boolean condition. The point
+is not BPF instruction count; the point is whether the final JITed x86 can avoid
+branches. This is also why compare-select is the better next ABI for native
+parity.
 
-Direct native evidence:
+## Why BPF -> x86 is not as optimized as direct C -> x86
 
-- `rotate_dense`: 256 `rorx`.
-- `rotate64_hash`: 116 `rorx`.
-- `cmov_dense`: 32 `rorx`.
-- `large_mixed_500`: 7 `rorx`.
-- Katran `balancer_ingress`: 20 `rorx` from jhash.
+Direct native clang still has source-level expression trees, x86 flags, x86
+addressing modes, and vector registers available during instruction selection.
+BPF bytecode has already lowered those into scalar registers, explicit jumps,
+helper calls, verifier-visible pointer state, and simple memory operands.
+
+Concrete losses visible here:
+
+- Rotate: source/native can become `rorx`; BPF often becomes masked
+  shift/shift/or with zero-extension artifacts. The current rotate matcher
+  recovers the Katran and Tetragon shapes that are visible in bytecode.
+- Select: source/native can use the flags from the original `cmp/test` and emit
+  `cmovcc` or `setcc`. Current `bpf_select64` gets only a boolean condition
+  register, so it must re-test the bool and often needs predicate setup.
+- Endian: source/native can fuse a memory load and byte swap into `movbe`. The
+  current kInsn recovers "endian load" semantics but emits load+`bswap`/`rol`.
+- LEA/addressing: native x86 can fold arithmetic into memory operands or
+  flagless `lea`. BPF cannot encode x86 SIB addressing, so many native `lea`
+  sites may not correspond to any bytecode-level kInsn opportunity.
+- SIMD: native x86 can use vector registers for fixed copies/reductions. BPF
+  verifier state has no vector register model, so a general SIMD kInsn is not a
+  production-safe first step.
+
+The practical improvement strategy is therefore not "make a big source-level
+kInsn". It is:
+
+1. Recover narrow semantics that survive in BPF bytecode.
+2. Emit the exact native instruction family when the kInsn target guarantees it.
+3. Leave pure x86 instruction-selection problems to the kernel JIT where the BPF
+   operation is already explicit.
+
+## Family analysis
+
+### `rorx` / rotate
+
+Direct native real-app evidence:
+
+- 33 total `rorx` sites.
+- `katran_balancer.bpf.x86.s`: 20, all 32-bit operands from jhash.
+- `tracee_tracee.bpf.x86.s`: 11, all 32-bit operands.
+- `tetragon_bpf_generic_kprobe.x86.s`: 2, all 32-bit operands.
+- No real-app `rorxq` was found in the 37-source direct native set. The older
+  rotate64 evidence is still valid for micro programs, but not for this real-app
+  source corpus.
 
 Current BPF/kInsn state:
 
-- `rotate` pass supports `bpf_rotate64` and `bpf_rotate32`.
-- Current matcher handles:
-  - clean split-copy rotate;
-  - same-source complementary shifts;
-  - Katran masked 32-bit jhash rotate;
-  - Tetragon in-place masked 32-bit rotate.
-- Current x86 emitter:
-  - `bpf_rotate32` emits BMI2 `rorx r32, r/m32, imm`.
-  - `bpf_rotate64` still emits the older `mov + rol` sequence.
+- `rotate` declares both `bpf_rotate64` and `bpf_rotate32`.
+- `runner/config/passes/rotate/default.yaml` requests both target probes.
+- The x86 module defines both kfuncs.
+- `bpf_rotate32` x86 emitter always emits BMI2 `rorx r32, r/m32, imm`; there is
+  no fallback path in the current emitter.
+- `bpf_rotate64` still emits the older `mov + rol` path.
+- Current testbin apply count is 64: Katran 20 and Tetragon 44.
+
+Katran-specific conclusion:
+
+Katran is a 32-bit rotate problem. The jhash native shape is not one opaque hash
+operation; it is ordinary 32-bit add/sub/xor plus 20 independent `rorx` sites.
+The closest native-like kInsn plan is:
+
+```text
+masked/zero-extended BPF shift/or rotate
+  -> bpf_rotate32 payload(dst, src, shift, tmp)
+  -> x86 rorx r32, r/m32, imm
+```
+
+Do not build a `jhash` kInsn. It would be less reusable, would couple the pass
+to a whole hash dataflow and constants, and would not help the Tetragon/Tracee
+rotate-shaped cases. The remaining differences around jhash are register
+allocation, surrounding ALU scheduling, and dead mask/zero-extension code; those
+belong to DCE and ordinary JIT lowering, not to a hash mega-instruction.
+
+Tetragon note:
+
+The 44 Tetragon rotate sites are bytecode rotate semantics recovered by the
+in-place masked matcher. Rotate alone has delta 0 because the replacement cannot
+blindly delete the masked temporary branch when that temp is live out on the
+CFG. This is the right safety behavior. To see final cleanup, validate
+`rotate,dce`, not rotate alone.
+
+Remaining gap:
+
+- For real apps: Tracee has 11 direct-native `rorx` sites, but current testbin
+  rotate finds 0 Tracee sites. That means either those native sites do not
+  survive into the live Tracee bytecode shape, or the current matcher still
+  misses that BPF form. Tracee should be the next rotate census target if we
+  want more rotate coverage.
+- For micro rotate64: change `bpf_rotate64` x86 emitter to `rorxq` if rotate64
+  remains a benchmark target. It is not the Katran fix.
+
+### `cmov` / `setcc` / branchless conditions
+
+Direct native real-app evidence:
+
+- 661 `cmov*` sites across all apps.
+- 475 `setcc` sites across all apps.
+- Largest `cmov` files: Tracee 344, Tetragon generic kprobe 122, OTel native
+  stack trace 64, Tetragon generic tracepoint 58.
+- Largest `setcc` files: Tracee 265, Tetragon generic kprobe 108, Tetragon
+  generic tracepoint 76.
+
+Current BPF/kInsn state:
+
+- `cond_select` emits `bpf_select64`.
+- x86 emitter does `test cond_reg, cond_reg` plus optional `mov` and `cmov`.
+- Testbin census: 2697 matched, 2369 applied, 328 skipped.
 
 Gap:
 
-- Katran rotate32 parity is now good: 20/20 sites become `bpf_rotate32`, and
-  the x86 emitter can lower to `rorx`.
-- Tetragon has 44 real rotate32 sites in BPF bytecode; current matcher applies.
-  This is BPF evidence, not direct C-native evidence.
-- rotate64 micro/hash parity is still incomplete because native C emits
-  `rorxq`, while `bpf_rotate64` emits `mov + rol`.
+Native clang commonly keeps the original flags:
+
+```text
+cmp/test original operands
+cmovcc dst, src
+```
+
+Current `bpf_select64` gets this instead:
+
+```text
+materialize bool condition in a BPF register
+CALL bpf_select64
+x86: test bool,bool; cmov...
+```
+
+That can still remove branches, but it is not as tight as native C output. It
+also explains why `cond_select` can increase BPF instruction count while still
+being potentially useful at final x86 runtime.
 
 Recommendation:
 
-1. Keep rotate as a general semantic kInsn, not a jhash kInsn.
-2. Change `bpf_rotate64` x86 emitter to `rorxq` to match native C for
-   `rotate_dense` / `rotate64_hash`.
-3. Keep DCE after rotate; masked rotate recovery can leave dead mask/copy
-   instructions depending on the bytecode shape.
+Add a separate compare-select kInsn rather than stretching `bpf_select64`:
 
-### 2. `cmov` / branchless select
+```text
+bpf_select_cmp64(dst, true_reg, false_reg, lhs_reg, rhs_reg_or_imm, cmp_op)
+```
 
-Direct native evidence:
+The x86 emitter can then generate `cmp/test + cmovcc` directly. Keep
+`bpf_select64` for already-boolean conditions. A standalone `cond_bool`/`setcc`
+kInsn should come later, after proving boolean values are consumed as booleans
+rather than immediately feeding a select.
 
-- `cond_select_dense`: 104 `cmov`.
-- `cmov_dense`: 32 `cmov`.
-- `cmov_select`: 1 `cmov`.
-- `bounds_ladder`: 2 `cmov`.
-- `large_mixed_500`: 4 `cmov`.
-- Katran `balancer_ingress`: 16 `cmov`.
+### `movbe` / endian fused loads
 
-Current BPF/kInsn state:
+Direct native real-app evidence:
 
-- `cond_select` matches branch+move diamond shapes and emits `bpf_select64`.
-- `bpf_select64` x86 emitter emits:
-  - `test cond_reg, cond_reg`;
-  - optional `mov dst, false`;
-  - `cmovz/cmovnz` between the two value registers.
-- Current Katran testbin check applies 7 sites.
-
-Gap:
-
-- Native C often emits `cmp/test` directly followed by `cmovcc`, using the
-  flags from the original comparison.
-- Current `bpf_select64` ABI only accepts a boolean condition register. For
-  non-zero-test conditions, `cond_select` must first materialize a predicate
-  register in BPF bytecode. In the general case that prefix itself uses a
-  branch:
-
-  ```text
-  pred = 0/1
-  original compare branch sets pred
-  CALL bpf_select64
-  x86: test pred,pred; cmov...
-  ```
-
-- This recovers some branchless value selection, but it is not native-like
-  compare+cmov. It can also increase BPF instruction count when immediates or
-  predicate materialization need temp registers.
-- Katran shows this concretely: native C has 16 `cmov*`; current bytecode pass
-  finds/applies 7 `cond_select` sites.
-
-Recommendation:
-
-1. Add a compare-select kInsn rather than overloading `bpf_select64` too far.
-   Example semantic shape:
-
-   ```text
-   bpf_select_cmp64(dst, true_reg, false_reg, lhs_reg, rhs_or_imm, cmp_op)
-   ```
-
-   x86 emitter can generate `cmp/test + cmovcc` directly.
-
-2. Keep `bpf_select64` for already-boolean conditions.
-3. Add immediate-value support only when the replacement does not require
-   expensive save/restore; otherwise it defeats the purpose of cmov parity.
-4. A smaller companion pass, `cond_bool`, may be useful for true `setcc`
-   materialization, but compare-select has higher immediate value.
-
-### 3. `movbe`, `bswap`, `rol16` / endian load
-
-Direct native evidence:
-
-- `endian_swap_dense`: 256 `movbe`.
-- Katran `balancer_ingress`: 2 `bswap`, 7 `rol r16,8`.
-
-Cross-check:
-
-- Existing kernel JIT dump for `endian_swap_dense` shows 256 `bswap`, not
-  `movbe`.
+- 91 total `movbe` sites.
+- Cilium contributes 57 across host/lxc/overlay/wireguard/xdp/alignchecker.
+- Katran contributes 8, mainly packet/endian field loads and stores.
+- OTel contributes 12, Tetragon 6, Tracee 8.
+- Direct native also has 4 `bswap` and 6 `rol` sites, but `movbe` is the bigger
+  real-app signal.
+- This census counts all `movbe` mnemonics, including stores. The current kInsn
+  is load-only, so store parity would require a separate store-side bytecode
+  census and matcher.
 
 Current BPF/kInsn state:
 
-- `endian_fusion` pass emits `bpf_endian_load16/32/64`.
-- x86 emitter currently emits:
+- `endian_fusion` emits `bpf_endian_load16/32/64`.
+- Testbin census: 260 matched, 260 applied, 0 skipped.
+- Current x86 emitter emits:
   - load16 + `rol16 8`;
   - load32 + `bswap32`;
   - load64 + `bswap64`.
-- It does **not** emit `movbe`, even though the target JSON used locally has a
-  `movbe` feature.
-- Current Katran testbin check applies 6 endian sites.
+- It does not emit `movbe`.
 
 Gap:
 
-- The kInsn name and semantics are "fused endian load", but the x86 emitter
-  still uses two instructions for 32/64-bit loads.
-- Direct native C proves clang will choose `movbe` for dense memory bswap32.
+The pass already recovers the right semantic operation, but the emitter does not
+match direct native x86. This is a clean emitter-side/native-parity opportunity.
 
 Recommendation:
 
-1. Add `movbe` emission for `bpf_endian_load16/32/64` on x86 when the probed
-   target supports it.
-2. If the kernel module cannot safely assume MOVBE on every supported x86 CPU,
-   split capability exposure so `bpf_endian_load*` is only registered/probed
-   with MOVBE-capable lowering, or add a separate `bpf_movbe_load*` kInsn.
-3. Keep load+bswap only as a different target capability if fallback policy is
-   explicitly desired. For strict native parity, `movbe` is the missing emitter
-   piece.
+Change the x86 emitter for `bpf_endian_load16/32/64` to emit `movbe` when the
+kInsn target is exposed for a MOVBE-capable x86 target. If the module cannot
+legally assume MOVBE for all deployments, make capability exposure strict rather
+than silently falling back. The benchmark target already reports MOVBE in older
+discovery logs, but old artifacts predate some current kInsn target shape, so a
+fresh live run should still verify target probing.
 
-### 4. `lea` / address-generation and add folding
+### `extract` / `bextr`
 
-Direct native evidence:
+Direct native real-app evidence:
 
-- Katran: 152 `lea`.
-- `rotate_dense`: 135 `lea`.
-- `cmov_dense`: 34 `lea`.
-- `large_mixed_500`: 23 `lea`.
-- Many other direct micro compiles have small `lea` counts.
+- `bextr`: 0.
+- `lzcnt`: 0.
+- `tzcnt`: 0.
 
 Current BPF/kInsn state:
 
-- There is no current `lea` pass or `bpf_lea*` kInsn.
-- BPF memory operands can express `base + imm`, but not x86's full
-  `base + index * scale + disp` addressing or arithmetic `lea` as an ALU op.
-- The kernel JIT may use `lea` for some pointer additions internally, but it
-  cannot generally combine multiple BPF ALU instructions into one x86 LEA.
+- `extract` emits `bpf_extract64`.
+- Testbin census: 198 matched, 188 applied, 10 skipped.
+- Current x86 emitter emits `shr` + `and`.
 
 Gap:
 
-- Native C uses `lea` both for address computation and arithmetic addition
-  without flags.
-- BPF bytecode usually preserves these as multiple `mov/add/lsh/add`
-  instructions.
+There is no direct-native `bextr` parity gap in this real-app source corpus.
+`extract` can still be useful as BPF bytecode compaction or as a target for
+future emitter experiments, but "clang native already emits BEXTR" is false for
+these sources.
 
 Recommendation:
 
-1. Do a bytecode census before adding code:
-   - scalar `dst = base + index`;
-   - `dst = base + (idx << 1/2/3) + imm`;
-   - add/add-constant chains in hash and packet parser paths.
-2. Treat pointer and scalar cases separately. Pointer arithmetic changes
-   verifier-visible state; scalar-only LEA is much safer.
-3. If the site count is high, add a narrow `bpf_lea64` kInsn for scalar
-   arithmetic first. Do not start with pointer LEA.
+Do not prioritize a BEXTR emitter change from this evidence. If wanted, treat it
+as a separate microarchitecture experiment and benchmark it against `shr+and`.
 
-### 5. `shrx` / `shlx` variable shifts
+### `lea`
 
-Direct native evidence:
+Direct native real-app evidence:
 
-- `cmov_select`: `shrx` 5, `shlx` 1.
-- `load_byte_recompose`: `shrx` 1.
-- `large_mixed_500`: `shlx` 1.
-- `bitcount`: `shrx` 1.
-
-Cross-check:
-
-- Existing kernel JIT dumps already contain `shrx`/`shlx` for the corresponding
-  variable-shift cases.
-
-Current BPF/kInsn state:
-
-- No dedicated kInsn.
-- Likely not needed on x86: the kernel JIT already knows how to lower BPF
-  variable shifts to BMI2 in at least these artifacts.
-
-Recommendation:
-
-- Do not add a variable-shift kInsn now. It is real native C output, but it is
-  not a demonstrated BPF/kernel-JIT gap.
-
-### 6. Small fixed copies, vector moves, and bulk memory
-
-Direct native evidence:
-
-- Katran native has `vmovups`, `vmovdqu`, `vmovdqa`, `vpaddq`,
-  `vpmovzxwq`, and `vshufps`.
-- Katran source has many small `memcpy` sites: 6-byte MAC copies and 16-byte
-  IPv6/address copies.
-
-Current BPF/kInsn state:
-
-- `wide_mem` is BPF->BPF and can collapse byte ladders to wider scalar
-  loads/stores.
-- `bulk_memory` kInsn currently targets larger memcpy/memset runs:
-  - `MIN_BULK_BYTES = 32`;
-  - x86 emitter uses `rep movsb` / `rep stosb`;
-  - it has alias checks and chunking.
+- 42153 total `lea` sites.
+- Tracee dominates with 36627.
+- Tetragon has 2841, Cilium 1796, OTel 359, Katran 225, BCC 285.
 
 Gap:
 
-- Native clang does not use `rep movsb` for Katran's small fixed copies; it
-  uses scalar/vector moves.
-- Current `bulk_memory` intentionally ignores small copies below 32 bytes, so
-  it is not the Katran small-copy parity mechanism.
-- A general SIMD kInsn would be a large semantic and ABI expansion: BPF has no
-  vector registers in verifier state, and saving/restoring vector state inside
-  BPF JIT code is not production-safe as a first step.
+This is not enough to justify `bpf_lea`. Native `lea` has at least three
+different meanings:
+
+- x86 addressing-mode materialization;
+- flagless scalar add/add-constant;
+- scaled-index arithmetic after native register allocation.
+
+BPF bytecode cannot encode x86 SIB memory operands, and many native `lea` sites
+may never exist as a recoverable multi-insn scalar pattern in live bytecode.
 
 Recommendation:
 
-1. Prefer extending `wide_mem` / scalar small-copy recognition before adding
-   vector kInsns.
-2. Add a small-copy path only for fixed 8/16/24-byte scalar copies when alias
-   and alignment/range safety are clear.
-3. Keep `bulk_memory` for larger runs; do not use `rep movsb` as the answer for
-   Katran's 6/16-byte copies.
+Use the separate LEA native-asm-vs-BPF-object/testbin census before adding any
+code. If the evidence is mostly address-mode folding, this should be scoped as a
+kernel-JIT peephole/addressing improvement, not a bpfopt kInsn. If there are many
+scalar-only `mov/add/lsh/add` chains with verifier-safe register state, a narrow
+scalar `bpf_lea64` could be reconsidered.
 
-### 7. `setcc` / boolean materialization
+### `shrx` / `shlx` / `sarx`
 
-Direct native evidence:
+Direct native real-app evidence:
 
-- Katran: 3 `setcc`.
-- Micro entry/bounds code commonly has a few `seta` instructions.
-
-Current BPF/kInsn state:
-
-- No dedicated `cond_bool` kInsn.
-- Some uses are part of compiler-generated bounds aggregation; some can be
-  consumed by compare-select if the final use is a selected value.
+- `shrx`: 16.
+- `shlx`: 62.
+- `sarx`: 3.
+- Most `shlx` sites are Tracee/Cilium.
 
 Gap:
 
-- Native C can materialize a bool with `setcc` without a branch.
-- BPF often keeps explicit branches or converts condition into a register via
-  multiple BPF insns.
+These are real native x86 instructions, but they are not automatically kInsn
+gaps. BPF already has variable shifts, and the kernel JIT can lower explicit BPF
+variable shifts to BMI2 where supported. Add a kInsn only if JIT dumps show the
+current kernel path is failing to select BMI2 for an existing BPF variable-shift
+operation.
 
 Recommendation:
 
-- Do not prioritize a standalone `cond_bool` until after compare-select.
-  `cond_bool` is only clearly useful when the boolean value itself is consumed
-  later; compare-select covers the hotter cmov-style cases.
+No kInsn work now. Verify with JIT dumps before spending code here.
 
-## Things that are not proven by direct C native evidence
+### `popcnt`
 
-### `bextr`
+Direct native real-app evidence:
 
-`extract_dense` direct C native emits `shr` + `and`, not `bextr`.
+- 7 total sites, all in `tracee_tracee.bpf.x86.s`.
 
-Current `bpf_extract64` x86 emitter also emits `shr` + `and`, so there is no
-native-parity gap here. Changing the emitter to BMI1 `bextr` might still be a
-valid experiment, but it is not justified by "clang native already does this"
-for the current sources.
+Gap:
 
-### `popcnt`, `lzcnt`, `tzcnt`
+BPF has no scalar popcount instruction. A kInsn could only help if the BPF
+bytecode contains recognizable bitcount loops or table-free popcount idioms in
+live programs. The current evidence only says native clang can emit `popcnt` in
+Tracee source compilation.
 
-`bitcount.bpf.c` direct C native did not emit `popcnt`; it emitted ordinary
-loop/shift code. No current corpus/micro direct-native evidence justifies a
-popcount kInsn.
+Recommendation:
 
-### `prefetch`
+Do a Tracee bytecode census for popcount loops before implementing anything.
+This is lower priority than MOVBE and compare-select.
 
-No direct C source in this check emitted `prefetch*`. The existing
-`bpf_prefetch` pass is a runtime/profile-oriented idea, not a C-native parity
-gap demonstrated by these programs.
+### Vector `v*`, fixed copies, and bulk memory
 
-### Generic SIMD
+Direct native real-app evidence:
 
-SIMD is real in Katran native output, but it is not a good first-class BPF kInsn
-target unless scoped to a very narrow memory primitive. General vector ALU state
-does not fit current BPF verifier/register semantics.
+- 9080 vector-mnemonic sites, dominated by Tracee and OTel.
+- Katran has 81 vector sites in direct native output.
 
-## Program-level map
+Gap:
 
-| Program / source | True native C instruction family | Current bpfopt status | Gap |
-|---|---|---|---|
-| Katran `balancer_ingress` | 20 `rorx` jhash | `rotate` applies 20/20; `bpf_rotate32` emits `rorx` | Mostly closed for jhash rotate. |
-| Katran `balancer_ingress` | 16 `cmov` | `cond_select` applies 7 local testbin sites | Need compare-select kInsn using original compare flags. |
-| Katran `balancer_ingress` | 2 `bswap`, 7 `rol16` | `endian_fusion` applies 6 sites; emitter load+bswap/rol | OK for bswap/rol shape; not `movbe` parity. |
-| Katran `balancer_ingress` | 152 `lea` | No LEA pass | Needs scalar LEA census. |
-| Katran `balancer_ingress` | vector moves/arithmetic | `wide_mem`/`bulk_memory` only partial scalar/bulk coverage | Consider small scalar copy, not generic SIMD. |
-| Tetragon observer testbin | 44 rotate32 bytecode sites | `rotate` applies 44 | BPF evidence only; current matcher covers it. |
-| `rotate_dense` / `rotate64_hash` | many `rorxq` | `rotate` has `bpf_rotate64`, but x86 emitter is `mov+rol` | Change rotate64 emitter to `rorxq`. |
-| `cond_select_dense` / `cmov_dense` | many `cmov` | `cond_select` exists but boolean-cond ABI is weaker than native cmp+cmov | Add compare-select kInsn. |
-| `endian_swap_dense` | 256 `movbe` | `endian_fusion` exists, emitter is load+bswap | Add MOVBE emitter/capability. |
-| `extract_dense` | `shr` + `and`, no `bextr` | `extract` matcher/emitter also uses `shr` + `and` | No native-parity gap. |
-| `load_byte_recompose`, `large_mixed_500`, `bitcount` | `shrx`/`shlx` | Kernel JIT already emits BMI2 variable shifts in artifacts | No kInsn needed now. |
+This is real native output but not a good general kInsn target. BPF verifier
+state has scalar registers, not vector registers. A generic vector kInsn would
+require vector-state ABI decisions and save/restore rules that are much larger
+than the current kInsn model.
+
+Recommendation:
+
+Do not build generic SIMD kInsns. For copy-like cases, continue with scalar
+`wide_mem` and narrowly scoped fixed-size memory patterns. `bulk_memory` remains
+for large runs; it is not the answer for Katran-style 6/16-byte copies.
+
+### `imul`, `adc/sbb`, and plain ALU lowering
+
+Direct native real-app evidence:
+
+- `imul`: 113.
+- `adc/sbb`: 21.
+
+Gap:
+
+`imul` is usually just the native lowering of existing BPF multiply; this is a
+kernel JIT instruction-selection issue only if JIT dumps show a worse sequence.
+`adc/sbb` is low-count and mostly multiword arithmetic/compiler lowering.
+
+Recommendation:
+
+No kInsn priority from this evidence.
+
+## Current target-probing status for rotate32
+
+The old artifact problem was real: some older discovery logs showed
+`bpf_rotate64` but not `bpf_rotate32`. Current source state is different:
+
+- `module/x86/bpf_rotate.c` defines `bpf_rotate32`.
+- `bpfopt/crates/bpfopt/src/passes/rotate.rs` declares `bpf_rotate32` in
+  `KINSN_TARGETS`.
+- `runner/config/passes/rotate/default.yaml` requests `bpf_rotate32`.
+- The local offline target used for this census included `bpf_rotate32`.
+
+That proves the current code path expects the target, but it is still worth
+checking the next live run's per-program `target.json` because target probing is
+runtime BTF discovery, not just source registration.
 
 ## Priority order
 
-1. **Finish rotate parity**
-   - `bpf_rotate32` is already the right Katran/Tetragon direction.
-   - Change `bpf_rotate64` emitter to `rorxq`.
-
-2. **Add compare-select**
-   - This is the largest proven remaining native-C gap after rotate.
-   - It addresses Katran's remaining cmov gap and the micro `cond_select*`
-     family.
-
-3. **Use MOVBE for endian fused loads**
-   - Direct C emits `movbe`; current emitter does not.
-   - This is a clean emitter-side improvement if target probing/module
-     capability is made strict.
-
-4. **Run LEA census**
-   - The native evidence is strong, but the safe BPF rewrite surface is not yet
-     scoped.
-   - Start with scalar-only patterns.
-
-5. **Small fixed-copy scalar widening**
-   - Useful for Katran copies, but should be implemented as scalar wide
-     load/store recognition, not generic SIMD.
-
-6. **Defer BEXTR/POPCNT/PREFETCH**
-   - They are plausible x86 features, but not demonstrated by direct C native
-     output for the current sources.
-
+1. Keep `bpf_rotate32` as the Katran jhash solution. Do not add a `jhash`
+   kInsn. Use `rotate,dce` for final bytecode cleanup validation.
+2. Add MOVBE x86 emission for `bpf_endian_load16/32/64`. This has both direct
+   native evidence (91 `movbe`) and bytecode pass coverage (260 applied sites).
+3. Design compare-select (`cmp/test + cmovcc`) as a new kInsn ABI. Current
+   `cond_select` has wide coverage but cannot preserve native compare flags.
+4. Investigate Tracee's 11 native `rorx` sites against Tracee live BPF bytecode.
+   Current rotate pass finds 0 Tracee sites, so this is the next rotate matcher
+   census, not Katran.
+5. Decide LEA only from the separate native-vs-BPF LEA census. Do not infer
+   `bpf_lea` ROI from native `lea` counts alone.
+6. Defer BEXTR/LZCNT/TZCNT/PREFETCH. They have zero real-app direct-native
+   evidence here.
+7. Treat POPCNT as Tracee-only exploratory work after a bytecode-loop census.
