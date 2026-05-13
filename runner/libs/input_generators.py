@@ -556,6 +556,36 @@ def generate_packet_rss_hash(output: Path) -> dict[str, int]:
     return {"packet_len": len(packet), "protocol": 6}
 
 
+def generate_katran_like(output: Path) -> dict[str, int]:
+    packet = bytearray(54)
+    packet[0:6] = bytes([0x10, 0x11, 0x12, 0x13, 0x14, 0x15])
+    packet[6:12] = bytes([0x20, 0x21, 0x22, 0x23, 0x24, 0x25])
+    _write_be16(packet, 12, 0x0800)
+    ip = 14
+    packet[ip] = 0x45
+    packet[ip + 1] = 0x00
+    _write_be16(packet, ip + 2, 40)
+    _write_be16(packet, ip + 4, 0xBEEF)
+    _write_be16(packet, ip + 6, 0x0000)
+    packet[ip + 8] = 32
+    packet[ip + 9] = 6
+    _write_be16(packet, ip + 10, 0)
+    packet[ip + 12 : ip + 16] = bytes([172, 16, 1, 9])
+    packet[ip + 16 : ip + 20] = bytes([10, 100, 1, 1])
+    tcp = ip + 20
+    _write_be16(packet, tcp, 1234)
+    _write_be16(packet, tcp + 2, 8080)
+    _write_be32(packet, tcp + 4, 0x01020304)
+    _write_be32(packet, tcp + 8, 0x05060708)
+    packet[tcp + 12] = 0x50
+    packet[tcp + 13] = 0x18
+    _write_be16(packet, tcp + 14, 0x2000)
+    _write_be16(packet, tcp + 16, 0)
+    _write_be16(packet, tcp + 18, 0)
+    output.write_bytes(packet)
+    return {"packet_len": len(packet), "protocol": 6, "vip_port": 8080}
+
+
 def generate_struct_field_cluster(output: Path) -> dict[str, int]:
     record_count, record_size = 32, 32
     state = 0x2468ACE113579BDF; blob = bytearray(struct.pack("<II", record_count, record_size))

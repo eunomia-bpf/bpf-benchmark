@@ -605,6 +605,10 @@ fn collect_kernel_mutable_maps(
     for site in prog.all_sites() {
         let insn = prog.insn(site)?;
         if is_map_writer_helper_call(insn) {
+            // Audit 2026-05-13 (C5, docs/tmp/correctness_and_guard_audit_20260513.md):
+            // continue-on-None can leave a writer-targeted map out of the mutable set,
+            // letting downstream inline a stale snapshot. User decision: keep current
+            // behavior pending testbin evidence of an exploitable case in real corpus.
             let Some(map_load_site) = find_direct_map_load_for_reg_before_site(prog, site, 1)?
             else {
                 continue;

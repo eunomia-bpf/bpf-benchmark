@@ -550,6 +550,19 @@ benchmarks:
     expected_result: 11016707074064960918
     tags: [packet, hash, endian, pure-jit]
 
+  - name: katran_like
+    description: Katran-like IPv4 TCP VIP path with local fixture lookups and Jenkins hash
+    category: alu-mix
+    family: packet-load-balancer
+    level: katran-hotpath
+    hypothesis: A helper-free Katran-shaped path should expose realistic parse, hash, selection, and encap ALU patterns
+    base_name: katran_like
+    io_mode: packet
+    kernel_input_size: 54
+    input_generator: katran_like
+    expected_result: 5895923248507644458
+    tags: [packet, katran, hash, endian, pure-jit]
+
   - name: imm64_storm
     description: Straight-line reduction with many distinct 64-bit immediates
     category: program-scale
