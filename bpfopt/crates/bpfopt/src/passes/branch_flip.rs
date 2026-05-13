@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 use std::collections::BTreeSet;
 
-use crate::analysis::{BBProgram, BlockId, InsnSite, SlotDistance, Terminator};
+use crate::analysis::{BlockId, InsnSite, ProgramCFG, SlotDistance, Terminator};
 use crate::insn::*;
 use crate::pass::*;
 pub struct BranchFlipPass {
@@ -35,7 +35,7 @@ impl BpfPass for BranchFlipPass {
     fn name(&self) -> &str {
         "branch_flip"
     }
-    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(
             program,
             ctx.branch_miss_rate,
@@ -46,7 +46,7 @@ impl BpfPass for BranchFlipPass {
 }
 
 pub fn run_on_bbprogram(
-    prog: &mut BBProgram,
+    prog: &mut ProgramCFG,
     branch_miss_rate: Option<f64>,
     min_bias: f64,
     max_branch_miss_rate: f64,
@@ -104,7 +104,7 @@ pub fn run_on_bbprogram(
 }
 
 fn branch_flip_candidate_cond(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     branch_targets: &BTreeSet<InsnSite>,
     site: &BranchFlipSite,
     min_bias: f64,
@@ -131,7 +131,7 @@ fn branch_flip_candidate_cond(
     Ok(Ok(cond))
 }
 
-fn branch_flip_profile(prog: &BBProgram, site: InsnSite) -> anyhow::Result<(f64, f64)> {
+fn branch_flip_profile(prog: &ProgramCFG, site: InsnSite) -> anyhow::Result<(f64, f64)> {
     let missing = |label: &str| {
         anyhow::anyhow!(
             "branch_flip candidate at {:?} has no real per-site {}",
@@ -164,14 +164,18 @@ fn branch_flip_profile(prog: &BBProgram, site: InsnSite) -> anyhow::Result<(f64,
     Ok((f64::from(miss_rate), f64::from(taken_rate)))
 }
 
-fn bf_blocks_are_adjacent(prog: &BBProgram, left: BlockId, right: BlockId) -> anyhow::Result<bool> {
+fn bf_blocks_are_adjacent(
+    prog: &ProgramCFG,
+    left: BlockId,
+    right: BlockId,
+) -> anyhow::Result<bool> {
     prog.block_frame(left)?;
     prog.block_frame(right)?;
     Ok(left.0 + 1 == right.0)
 }
 
 fn bf_cond_branch(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     site: &BranchFlipSite,
 ) -> anyhow::Result<(BpfInsn, BlockId, BlockId)> {
     match prog.terminator(site.pred)? {
@@ -189,7 +193,7 @@ fn bf_cond_branch(
 }
 
 fn bf_validate_flipped_branch_deltas(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     site: &BranchFlipSite,
     cond: BpfInsn,
 ) -> anyhow::Result<()> {
@@ -219,7 +223,7 @@ fn bf_validate_flipped_branch_deltas(
     Ok(())
 }
 
-fn apply_branch_flip_site(prog: &mut BBProgram, site: &BranchFlipSite) -> anyhow::Result<()> {
+fn apply_branch_flip_site(prog: &mut ProgramCFG, site: &BranchFlipSite) -> anyhow::Result<()> {
     let pred = site.pred;
     let then_first = site.then_first;
     let then_last = site.then_last;
@@ -299,7 +303,7 @@ fn apply_branch_flip_site(prog: &mut BBProgram, site: &BranchFlipSite) -> anyhow
 }
 
 fn swapped_range_order(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     first: &[BlockId],
     second: &[BlockId],
 ) -> anyhow::Result<Vec<BlockId>> {
@@ -324,7 +328,7 @@ fn swapped_range_order(
     }
     Ok(order)
 }
-pub(super) fn scan_branch_flip_sites(prog: &BBProgram) -> anyhow::Result<Vec<BranchFlipSite>> {
+pub(super) fn scan_branch_flip_sites(prog: &ProgramCFG) -> anyhow::Result<Vec<BranchFlipSite>> {
     let mut sites = Vec::new();
     let mut covered_blocks = BTreeSet::new();
     for block in prog.blocks() {
@@ -339,7 +343,7 @@ pub(super) fn scan_branch_flip_sites(prog: &BBProgram) -> anyhow::Result<Vec<Bra
     Ok(sites)
 }
 
-fn branch_flip_site_at(prog: &BBProgram, pred: BlockId) -> anyhow::Result<Option<BranchFlipSite>> {
+fn branch_flip_site_at(prog: &ProgramCFG, pred: BlockId) -> anyhow::Result<Option<BranchFlipSite>> {
     let Terminator::CondBranch {
         cond,
         taken: else_first,
@@ -389,7 +393,7 @@ fn branch_flip_site_at(prog: &BBProgram, pred: BlockId) -> anyhow::Result<Option
 }
 
 fn then_arm(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     start: BlockId,
     else_first: BlockId,
 ) -> anyhow::Result<Option<(Vec<BlockId>, BlockId, BlockId)>> {
@@ -416,7 +420,7 @@ fn then_arm(
 }
 
 fn else_arm(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     start: BlockId,
     join: BlockId,
 ) -> anyhow::Result<Option<(Vec<BlockId>, BlockId)>> {
@@ -440,7 +444,7 @@ fn else_arm(
 }
 
 fn has_exterior_interior_target(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     branch_targets: &std::collections::BTreeSet<InsnSite>,
     site: &BranchFlipSite,
 ) -> anyhow::Result<bool> {

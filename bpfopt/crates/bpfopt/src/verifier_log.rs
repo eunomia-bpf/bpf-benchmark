@@ -111,7 +111,11 @@ fn parse_log_states(log: &str, include_branch_delta: bool) -> Result<Vec<Verifie
     let mut states = Vec::new();
     for (idx, line) in log.lines().enumerate() {
         let Some(state) = parse_state_line(line).with_context(|| {
-            format!("failed to parse verifier state line {}: {:?}", idx + 1, line)
+            format!(
+                "failed to parse verifier state line {}: {:?}",
+                idx + 1,
+                line
+            )
         })?
         else {
             continue;
@@ -366,9 +370,10 @@ fn parse_reg_state(raw: &str, value_width: VerifierValueWidth) -> Result<RegStat
             None => rest,
         };
         if !offset_text.is_empty() {
-            state.offset = Some(parse_i32(offset_text).ok_or_else(|| {
-                anyhow!("invalid frame-pointer offset {offset_text:?}")
-            })?);
+            state.offset = Some(
+                parse_i32(offset_text)
+                    .ok_or_else(|| anyhow!("invalid frame-pointer offset {offset_text:?}"))?,
+            );
         }
         return Ok(state);
     }

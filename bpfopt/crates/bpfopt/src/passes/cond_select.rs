@@ -3,7 +3,9 @@
 
 use std::collections::HashSet;
 
-use crate::analysis::{insn_use_def_set, BBProgram, BlockId, DiamondPattern, InsnSite, Terminator};
+use crate::analysis::{
+    insn_use_def_set, BlockId, DiamondPattern, InsnSite, ProgramCFG, Terminator,
+};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
@@ -87,12 +89,12 @@ impl BpfPass for CondSelectPass {
     fn name(&self) -> &str {
         "cond_select"
     }
-    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program, ctx)
     }
 }
 
-pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+pub fn run_on_bbprogram(prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
     // Check if the target exposes the select kinsn; CPU features alone are
     // insufficient because this pass always emits bpf_select64.
     if !ctx.has_branchless_select() {
@@ -154,7 +156,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
 }
 
 fn diamond_pattern_for_site(
-    prog: &mut BBProgram,
+    prog: &mut ProgramCFG,
     site: &CondSelectSite,
 ) -> anyhow::Result<DiamondPattern> {
     match site.old_len {
@@ -165,7 +167,7 @@ fn diamond_pattern_for_site(
 }
 
 fn pattern_a_for_site(
-    prog: &mut BBProgram,
+    prog: &mut ProgramCFG,
     site: &CondSelectSite,
 ) -> anyhow::Result<DiamondPattern> {
     let mut jcc_site = site.start_site;
@@ -212,7 +214,7 @@ fn pattern_a_for_site(
 }
 
 fn pattern_c_for_site(
-    prog: &mut BBProgram,
+    prog: &mut ProgramCFG,
     site: &CondSelectSite,
 ) -> anyhow::Result<DiamondPattern> {
     let start_site = site.start_site;
@@ -246,7 +248,7 @@ fn pattern_c_for_site(
     })
 }
 
-fn scan_cond_select_sites(prog: &BBProgram) -> anyhow::Result<Vec<CondSelectSite>> {
+fn scan_cond_select_sites(prog: &ProgramCFG) -> anyhow::Result<Vec<CondSelectSite>> {
     let mut sites = Vec::new();
     for block in prog.blocks() {
         let Terminator::CondBranch {
@@ -275,7 +277,7 @@ fn scan_cond_select_sites(prog: &BBProgram) -> anyhow::Result<Vec<CondSelectSite
 }
 
 fn try_match_pattern_a(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     shape: CondBranchShape,
 ) -> anyhow::Result<Option<CondSelectSite>> {
     if shape.block == shape.taken || shape.block == shape.fallthrough {
@@ -321,7 +323,7 @@ fn try_match_pattern_a(
 }
 
 fn try_match_pattern_c(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     shape: CondBranchShape,
 ) -> anyhow::Result<Option<CondSelectSite>> {
     let Some(mov_true_site) = prog.sites_in_block(shape.block)?.last().copied() else {
@@ -364,7 +366,7 @@ fn try_match_pattern_c(
     }))
 }
 
-fn single_successor(prog: &BBProgram, block: BlockId) -> anyhow::Result<Option<BlockId>> {
+fn single_successor(prog: &ProgramCFG, block: BlockId) -> anyhow::Result<Option<BlockId>> {
     Ok(match prog.terminator(block)? {
         Terminator::Fallthrough { next } | Terminator::Jump { target: next, .. } => Some(next),
         Terminator::CondBranch { .. }

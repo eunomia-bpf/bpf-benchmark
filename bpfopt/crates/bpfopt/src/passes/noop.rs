@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-use crate::analysis::BBProgram;
+use crate::analysis::ProgramCFG;
 use crate::pass::*;
 
 pub struct NoopPass;
@@ -10,7 +10,7 @@ impl BpfPass for NoopPass {
         "noop"
     }
 
-    fn run(&self, _program: &mut BBProgram, _ctx: &PassContext) -> anyhow::Result<PassResult> {
+    fn run(&self, _program: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
         Ok(PassResult::unchanged())
     }
 }

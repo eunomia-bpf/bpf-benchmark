@@ -230,7 +230,7 @@ fn bounds_check_merge_accepts_tc_layout_and_rejects_wrong_prog_type() {
 
 #[test]
 fn bounds_check_merge_remaps_btf_metadata_on_bbprogram() {
-    // P1-H: BTF metadata must be remapped by the BBProgram mutation/lower path.
+    // P1-H: BTF metadata must be remapped by the ProgramCFG mutation/lower path.
     let input = two_adjacent_checks(XDP_PACKET_DATA_OFFSET, XDP_PACKET_DATA_END_OFFSET);
     let mut ctx = pass_ctx();
     ctx.prog_type = XDP;
@@ -240,7 +240,7 @@ fn bounds_check_merge_remaps_btf_metadata_on_bbprogram() {
     let run = run_pass_on_insns(BoundsCheckMergePass, input, &ctx);
 
     assert_eq!(run.result.sites_applied, 1);
-    // IMPL: needs BBProgram::btf_records() or equivalent lowered metadata view.
+    // IMPL: needs ProgramCFG::btf_records() or equivalent lowered metadata view.
     assert_eq!(run.prog.btf_records().unwrap().func_offsets(), vec![0, 9]);
     assert_eq!(
         run.prog.btf_records().unwrap().line_offsets(),

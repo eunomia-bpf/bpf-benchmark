@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{BBProgram, InsnSite};
+use crate::analysis::{InsnSite, ProgramCFG};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
@@ -22,12 +22,12 @@ impl BpfPass for RotatePass {
     fn name(&self) -> &str {
         "rotate"
     }
-    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program, ctx)
     }
 }
 
-pub fn run_on_bbprogram(prog: &mut BBProgram, _ctx: &PassContext) -> anyhow::Result<PassResult> {
+pub fn run_on_bbprogram(prog: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
     let mut skipped = Vec::new();
     let candidates: Vec<(InsnSite, RotateSite)> = prog
         .scan_block_starts(5, |window| {

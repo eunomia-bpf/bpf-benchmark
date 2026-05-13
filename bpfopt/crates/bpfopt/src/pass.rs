@@ -2,7 +2,7 @@
 //! Pass framework for BPF program transformations.
 //!
 //! Core abstractions:
-//! - `BBProgram`: basic-block IR used by production pass execution
+//! - `ProgramCFG`: basic-block IR used by production pass execution
 //! - `BpfPass`: transformation pass that may modify the program
 
 use std::collections::{BTreeMap, HashMap, HashSet};
@@ -10,7 +10,7 @@ use std::fmt;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use crate::analysis::{BBProgram, InsnSite};
+use crate::analysis::{InsnSite, ProgramCFG};
 use crate::insn::{
     BpfInsn, BPF_JEQ, BPF_JGE, BPF_JGT, BPF_JLE, BPF_JLT, BPF_JNE, BPF_JSGE, BPF_JSGT, BPF_JSLE,
     BPF_JSLT,
@@ -273,7 +273,7 @@ pub fn hex_bytes(bytes: &[u8]) -> String {
 pub struct PassResult {
     /// Number of sites applied.
     pub sites_applied: usize,
-    /// Sites that were skipped by BBProgram-native passes before report PC
+    /// Sites that were skipped by ProgramCFG-native passes before report PC
     /// materialization.
     pub site_skipped: Vec<SiteSkipReason>,
     /// Diagnostic messages (read by tests and debug output).
@@ -288,7 +288,7 @@ pub struct PassResult {
     /// Instruction count after this pass ran.
     pub insns_after: usize,
     /// Test-only PC-keyed skip mirror, materialized by test helpers before
-    /// the BBProgram is mutated. Production code uses `site_skipped`.
+    /// the ProgramCFG is mutated. Production code uses `site_skipped`.
     #[cfg(test)]
     pub sites_skipped: Vec<SkipReason>,
 }
@@ -318,7 +318,7 @@ impl PassResult {
     }
 
     /// Whole-pass skip anchored at the program's first report site.
-    pub fn skipped_pass(program: &BBProgram, reason: impl Into<String>) -> anyhow::Result<Self> {
+    pub fn skipped_pass(program: &ProgramCFG, reason: impl Into<String>) -> anyhow::Result<Self> {
         Ok(Self::skipped_site(SiteSkipReason::new(
             first_report_site(program)?,
             reason,
@@ -376,7 +376,7 @@ pub trait BpfPass: Send + Sync {
     /// - `ctx`: platform context (kfunc availability, CPU features, etc.)
     ///
     /// Returns PassResult describing what was done.
-    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult>;
+    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult>;
 }
 
 /// Pass execution context — contains platform info and external configuration.
@@ -392,7 +392,7 @@ pub struct PassContext {
     /// Used by passes to apply program-type-specific safety filters.
     /// 0 = unspecified (conservative behavior applies).
     pub prog_type: u32,
-    /// Parsed verifier state snapshots consumed at the BBProgram lift boundary.
+    /// Parsed verifier state snapshots consumed at the ProgramCFG lift boundary.
     /// Private; lift accesses via `verifier_states_arc()`, tests via `set_verifier_states_test`.
     verifier_states: Arc<[VerifierInsn]>,
     /// Per-original-PC annotations used by profile-guided passes.
@@ -413,9 +413,9 @@ pub struct PassContext {
     pub map_snapshots_skipped_by_size: HashSet<u32>,
     /// Explicit map_inline key hints keyed by original CLI anchors.
     pub map_inline_hints: Vec<MapInlineHintSpec>,
-    /// Raw func_info records for BBProgram/lower remapping.
+    /// Raw func_info records for ProgramCFG/lower remapping.
     pub func_info: Option<BtfInfoRecords>,
-    /// Raw line_info records for BBProgram/lower remapping.
+    /// Raw line_info records for ProgramCFG/lower remapping.
     pub line_info: Option<BtfInfoRecords>,
 }
 
@@ -569,7 +569,7 @@ pub enum Arch {
 
 pub fn run_pass_once(
     pass: &dyn BpfPass,
-    program: &mut BBProgram,
+    program: &mut ProgramCFG,
     ctx: &PassContext,
 ) -> anyhow::Result<PassResult> {
     let insns_before = program_instruction_slots(program)?;
@@ -585,12 +585,12 @@ pub fn run_pass_once(
     Ok(result)
 }
 
-pub fn report_site_pc(program: &BBProgram, site: InsnSite) -> anyhow::Result<u64> {
+pub fn report_site_pc(program: &ProgramCFG, site: InsnSite) -> anyhow::Result<u64> {
     let pc = program.site_current_pc(site)?;
     u64::try_from(pc).map_err(|_| anyhow::anyhow!("report PC {pc} for {site:?} does not fit u64"))
 }
 
-fn program_instruction_slots(program: &BBProgram) -> anyhow::Result<usize> {
+fn program_instruction_slots(program: &ProgramCFG) -> anyhow::Result<usize> {
     let mut len = 0usize;
     for site in program.all_sites() {
         len = len
@@ -606,13 +606,13 @@ fn program_instruction_slots(program: &BBProgram) -> anyhow::Result<usize> {
 /// `(old_len, replacement_insns)`. Returns the number of sites that committed
 /// (i.e. `try_replace_range` returned `Ok(true)`).
 pub fn apply_candidates_reverse<S, F>(
-    prog: &mut BBProgram,
+    prog: &mut ProgramCFG,
     candidates: &[(InsnSite, S)],
     skipped: &mut Vec<SiteSkipReason>,
     mut emit: F,
 ) -> anyhow::Result<usize>
 where
-    F: FnMut(&BBProgram, InsnSite, &S) -> anyhow::Result<(usize, Vec<BpfInsn>)>,
+    F: FnMut(&ProgramCFG, InsnSite, &S) -> anyhow::Result<(usize, Vec<BpfInsn>)>,
 {
     let mut applied = 0usize;
     for (start, site) in candidates.iter().rev() {
@@ -631,7 +631,7 @@ where
 /// Used by 2-insn pair passes (extract, endian) to surface the same
 /// interior-branch-target signal scan_block_starts misses.
 pub fn collect_cross_block_pair_skips<F>(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     mut matches_pair: F,
     reason: &str,
 ) -> anyhow::Result<Vec<SiteSkipReason>>
@@ -680,7 +680,7 @@ pub(crate) fn invert_cond_jmp_op(op: u8) -> Option<u8> {
 }
 
 pub(crate) fn checked_site_skip(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     site: InsnSite,
     reason: impl Into<String>,
 ) -> anyhow::Result<SiteSkipReason> {
@@ -689,7 +689,7 @@ pub(crate) fn checked_site_skip(
 }
 
 pub(crate) fn delete_body_sites_reverse<I>(
-    prog: &mut BBProgram,
+    prog: &mut ProgramCFG,
     sites: I,
     skipped: &mut Vec<SiteSkipReason>,
 ) -> anyhow::Result<usize>
@@ -717,7 +717,7 @@ where
 /// after `anchor` (in forward order) or the sites strictly before `anchor`
 /// (in reverse order, nearest first).
 fn frame_sites_around(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     anchor: InsnSite,
     after: bool,
 ) -> anyhow::Result<Vec<InsnSite>> {
@@ -746,20 +746,20 @@ fn frame_sites_around(
 }
 
 pub(crate) fn sites_after_in_frame(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     start: InsnSite,
 ) -> anyhow::Result<Vec<InsnSite>> {
     frame_sites_around(prog, start, true)
 }
 
 pub(crate) fn sites_before_in_frame_rev(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     end: InsnSite,
 ) -> anyhow::Result<Vec<InsnSite>> {
     frame_sites_around(prog, end, false)
 }
 
-pub fn first_report_site(program: &BBProgram) -> anyhow::Result<InsnSite> {
+pub fn first_report_site(program: &ProgramCFG) -> anyhow::Result<InsnSite> {
     for block in program.block_ids() {
         if let Some(site) = program.first_site_in_block(block)? {
             return Ok(site);
@@ -790,8 +790,8 @@ impl PassContext {
     }
 
     /// Lift-time accessor: only `bbprogram_lift` reads raw verifier states here
-    /// to seed the BBProgram verifier-state map. After lift, passes consume typed
-    /// `BBProgram::reg_*` queries instead of touching raw verifier data.
+    /// to seed the ProgramCFG verifier-state map. After lift, passes consume typed
+    /// `ProgramCFG::reg_*` queries instead of touching raw verifier data.
     pub(crate) fn verifier_states_arc(&self) -> Arc<[VerifierInsn]> {
         Arc::clone(&self.verifier_states)
     }

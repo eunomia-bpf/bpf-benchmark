@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{insn_use_def_set, BBProgram, BlockId, InsnSite, SlotDistance};
+use crate::analysis::{insn_use_def_set, BlockId, InsnSite, ProgramCFG, SlotDistance};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const HELPER_MAP_LOOKUP_ELEM: i32 = libbpf_sys::BPF_FUNC_map_lookup_elem as i32;
@@ -45,11 +45,11 @@ impl BpfPass for PrefetchPass {
     fn name(&self) -> &str {
         "prefetch"
     }
-    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program, ctx)
     }
 }
-pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+pub fn run_on_bbprogram(prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
     if prog.all_sites().next().is_none() {
         return Ok(PassResult::unchanged());
     }
@@ -85,14 +85,14 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     })?;
     Ok(PassResult::with_sites(applied, skipped))
 }
-fn scan_prefetch_sites(prog: &BBProgram, prog_type: u32) -> anyhow::Result<Vec<PrefetchSite>> {
+fn scan_prefetch_sites(prog: &ProgramCFG, prog_type: u32) -> anyhow::Result<Vec<PrefetchSite>> {
     let mut sites = scan_map_value_prefetch_sites(prog)?;
     if let Some(layout) = packet_ctx_layout(prog_type, PacketCtxLayoutScope::PacketAccess) {
         sites.extend(scan_packet_prefetch_sites(prog, layout)?);
     }
     Ok(sites)
 }
-fn scan_map_value_prefetch_sites(prog: &BBProgram) -> anyhow::Result<Vec<PrefetchSite>> {
+fn scan_map_value_prefetch_sites(prog: &ProgramCFG) -> anyhow::Result<Vec<PrefetchSite>> {
     let mut sites = Vec::new();
     for block in prog.block_ids().collect::<Vec<_>>() {
         for site in prog.sites_in_block(block)? {
@@ -107,7 +107,7 @@ fn scan_map_value_prefetch_sites(prog: &BBProgram) -> anyhow::Result<Vec<Prefetc
     Ok(sites)
 }
 fn first_map_value_deref_after_lookup(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     call_site: InsnSite,
 ) -> anyhow::Result<Option<PrefetchSite>> {
     let mut aliases = [None::<InsnSite>; 11];
@@ -166,7 +166,7 @@ fn apply_map_value_alu64_transfer(
     }
 }
 fn scan_packet_prefetch_sites(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     layout: PacketCtxLayout,
 ) -> anyhow::Result<Vec<PrefetchSite>> {
     let mut sites = Vec::new();
@@ -270,7 +270,7 @@ fn memory_base_reg(insn: &BpfInsn) -> Option<u8> {
     }
 }
 fn choose_prefetch_insert_site(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     site: PrefetchSite,
 ) -> anyhow::Result<std::result::Result<InsnSite, String>> {
     let window = pf_prefetch_window_sites(prog, site.ptr_def, site.target, MAX_PREFETCH_DISTANCE)?;
@@ -294,7 +294,7 @@ fn choose_prefetch_insert_site(
 }
 
 fn pf_sites_after_in_frame(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     anchor: InsnSite,
     max_slots: usize,
 ) -> anyhow::Result<Vec<InsnSite>> {
@@ -321,7 +321,7 @@ fn pf_sites_after_in_frame(
 }
 
 fn pf_prefetch_window_sites(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     ptr_def: InsnSite,
     target: InsnSite,
     max_slots: usize,
@@ -357,7 +357,7 @@ fn pf_prefetch_window_sites(
 }
 
 fn pf_nearest_prefetch_insert_site(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     sites: &[InsnSite],
     target: InsnSite,
     ideal_distance: usize,
@@ -378,13 +378,13 @@ fn pf_nearest_prefetch_insert_site(
     Ok(best.map(|(_, _, site)| site))
 }
 
-fn pf_site_end_offset(prog: &BBProgram, site: InsnSite) -> anyhow::Result<SlotDistance> {
+fn pf_site_end_offset(prog: &ProgramCFG, site: InsnSite) -> anyhow::Result<SlotDistance> {
     prog.site_layout_offset(site)?
         .checked_add(SlotDistance::from_slots(prog.insn_slot_width(site)?))
         .ok_or_else(|| anyhow::anyhow!("prefetch site {:?} end offset overflows", site))
 }
 
-fn first_block_layout_offset(prog: &BBProgram, block: BlockId) -> anyhow::Result<SlotDistance> {
+fn first_block_layout_offset(prog: &ProgramCFG, block: BlockId) -> anyhow::Result<SlotDistance> {
     match prog.sites_in_block_with_terminator(block)?.first() {
         Some(&first) => prog.site_layout_offset(first),
         None => Ok(SlotDistance::ZERO),
@@ -392,7 +392,7 @@ fn first_block_layout_offset(prog: &BBProgram, block: BlockId) -> anyhow::Result
 }
 
 fn reject_control_flow_between(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     window: &[InsnSite],
 ) -> anyhow::Result<Option<String>> {
     for &site in window {
@@ -408,7 +408,7 @@ fn reject_control_flow_between(
     Ok(None)
 }
 fn reject_reg_write_between(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     window: &[InsnSite],
     reg: u8,
 ) -> anyhow::Result<Option<String>> {

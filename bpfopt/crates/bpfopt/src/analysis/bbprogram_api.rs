@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-//! Mutation API for BBProgram.
+//! Mutation API for ProgramCFG.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::ops::Range;
 
-use crate::analysis::{BBProgram, Block, BlockId, DefSite, InsnSite, Terminator};
+use crate::analysis::{BasicBlock, BlockId, DefSite, InsnSite, ProgramCFG, Terminator};
 use crate::insn::{insn_width, BpfInsn};
 use crate::pass::SiteSkipReason;
 
@@ -16,7 +16,7 @@ pub struct DiamondPattern {
     pub join: Option<BlockId>,
 }
 
-impl BBProgram {
+impl ProgramCFG {
     /// Transactional rollback wrapper for mutations: clones self, applies `f` to
     /// the clone, swaps on success. On error, self is left untouched.
     fn try_mutate<R>(
@@ -424,7 +424,7 @@ impl BBProgram {
 
         self.blocks.insert(
             tail.0,
-            Block {
+            BasicBlock {
                 id: tail,
                 insns: tail_insns,
                 terminator: tail_terminator,
@@ -715,7 +715,7 @@ fn validate_unique_blocks(blocks: &[BlockId]) -> anyhow::Result<()> {
 }
 
 fn ensure_no_pc_relative_targets(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     removed_chain_blocks: &BTreeSet<BlockId>,
     kept: BlockId,
 ) -> anyhow::Result<()> {
@@ -788,7 +788,7 @@ fn remap_terminator_after_remove(
     remap_terminator(term, |b| remap_block_id(b, old_to_new))
 }
 
-fn validate_diamond(prog: &BBProgram, pattern: DiamondPattern) -> anyhow::Result<()> {
+fn validate_diamond(prog: &ProgramCFG, pattern: DiamondPattern) -> anyhow::Result<()> {
     let Terminator::CondBranch {
         taken, fallthrough, ..
     } = prog.block(pattern.predecessor)?.terminator
@@ -824,6 +824,6 @@ fn validate_diamond(prog: &BBProgram, pattern: DiamondPattern) -> anyhow::Result
     Ok(())
 }
 
-fn branch_reaches_join(prog: &BBProgram, branch: BlockId, join: BlockId) -> bool {
+fn branch_reaches_join(prog: &ProgramCFG, branch: BlockId, join: BlockId) -> bool {
     branch == join || prog.successors(branch) == [join]
 }

@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use anyhow::{anyhow, bail, Context, Result};
-use bpfopt::analysis::{lift_with_pass_context, lower, BBProgram};
+use bpfopt::analysis::{lift_with_pass_context, lower, ProgramCFG};
 use bpfopt::insn::BpfInsn;
 use bpfopt::pass::{
     hex_bytes, report_site_pc, run_pass_once, Arch, BtfInfoRecords, CommonArgs, KinsnRegistry,
@@ -297,7 +297,7 @@ fn read_btf_info_records(
     Ok(Some(BtfInfoRecords::new(label, rec_size, bytes)?))
 }
 
-fn write_btf_info_outputs(common: &CommonArgs, program: &BBProgram) -> Result<()> {
+fn write_btf_info_outputs(common: &CommonArgs, program: &ProgramCFG) -> Result<()> {
     for (path_opt, records, label) in [
         (
             common.func_info.as_deref(),
@@ -462,7 +462,7 @@ fn read_json_file<T: for<'de> Deserialize<'de>>(path: &Path, label: &str) -> Res
         .with_context(|| format!("failed to parse {label} from {}", path.display()))
 }
 
-fn pass_report(pass_name: &str, program: &BBProgram, result: &PassResult) -> Result<PassReport> {
+fn pass_report(pass_name: &str, program: &ProgramCFG, result: &PassResult) -> Result<PassReport> {
     let mut skip_reasons = BTreeMap::new();
     for skip in &result.site_skipped {
         *skip_reasons.entry(skip.reason.clone()).or_insert(0) += 1;
@@ -490,7 +490,7 @@ fn pass_report(pass_name: &str, program: &BBProgram, result: &PassResult) -> Res
 }
 
 fn site_skip_reports(
-    program: &BBProgram,
+    program: &ProgramCFG,
     skips: &[bpfopt::pass::SiteSkipReason],
 ) -> Result<Vec<SkippedSiteReport>> {
     skips
@@ -505,7 +505,7 @@ fn site_skip_reports(
 }
 
 fn site_diagnostic_reports(
-    program: &BBProgram,
+    program: &ProgramCFG,
     diagnostics: &[bpfopt::pass::SiteDiagnostic],
 ) -> Result<Vec<String>> {
     diagnostics

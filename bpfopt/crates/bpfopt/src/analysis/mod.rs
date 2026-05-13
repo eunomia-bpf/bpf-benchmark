@@ -9,7 +9,7 @@ pub(crate) mod bbprogram_lower;
 mod bbprogram_use_def;
 
 pub use bbprogram::{
-    BBMapBinding, BBProgram, Block, BlockId, FrameId, InsnSite, LiftedRegFact, SlotDistance,
+    BasicBlock, BlockId, FrameId, InsnSite, LiftedRegFact, MapBinding, ProgramCFG, SlotDistance,
     Terminator,
 };
 pub(crate) use bbprogram::{BtfMetadataMap, VerifierStatesBySite};

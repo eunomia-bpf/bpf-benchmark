@@ -38,7 +38,7 @@ fn test_pass_manager_invalidates_verifier_states_after_transform() {
     assert!(
         prog.verifier_states_by_site()
             .is_none_or(|states| states.is_empty()),
-        "BBProgram mutation must clear stale verifier states"
+        "ProgramCFG mutation must clear stale verifier states"
     );
 }
 
@@ -134,7 +134,7 @@ fn remap_btf_metadata_drops_deleted_entries_and_shifts_survivors() {
     })
     .expect("delete should remap BTF metadata");
 
-    // IMPL: needs BBProgram::btf_records() with offsets and type-id views.
+    // IMPL: needs ProgramCFG::btf_records() with offsets and type-id views.
     assert_eq!(prog.btf_records().unwrap().func_offsets(), vec![0]);
     assert_eq!(prog.btf_records().unwrap().line_offsets(), vec![0, 1, 2]);
     assert_eq!(

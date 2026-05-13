@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 use std::collections::BTreeSet;
 
-use crate::analysis::{BBProgram, InsnSite, LiftedRegFact};
+use crate::analysis::{InsnSite, LiftedRegFact, ProgramCFG};
 use crate::insn::*;
 use crate::pass::*;
 
@@ -25,12 +25,12 @@ impl BpfPass for SkbLoadBytesSpecPass {
     fn name(&self) -> &str {
         "skb_load_bytes_spec"
     }
-    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program, ctx.prog_type)
     }
 }
 
-pub fn run_on_bbprogram(prog: &mut BBProgram, prog_type: u32) -> anyhow::Result<PassResult> {
+pub fn run_on_bbprogram(prog: &mut ProgramCFG, prog_type: u32) -> anyhow::Result<PassResult> {
     let Some(layout) = packet_ctx_layout(prog_type, PacketCtxLayoutScope::SkbHelper) else {
         return Ok(PassResult::unchanged());
     };
@@ -45,7 +45,10 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, prog_type: u32) -> anyhow::Result<
     Ok(PassResult::with_sites(applied, scan.skips))
 }
 
-fn scan_sites(prog: &BBProgram, branch_targets: &BTreeSet<InsnSite>) -> anyhow::Result<ScanResult> {
+fn scan_sites(
+    prog: &ProgramCFG,
+    branch_targets: &BTreeSet<InsnSite>,
+) -> anyhow::Result<ScanResult> {
     let mut scan = ScanResult::default();
     for block in prog.block_ids().collect::<Vec<_>>() {
         for site in prog.sites_in_block(block)? {
@@ -70,7 +73,7 @@ fn scan_sites(prog: &BBProgram, branch_targets: &BTreeSet<InsnSite>) -> anyhow::
 }
 
 fn classify_site(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     site: InsnSite,
     is_branch_target: bool,
 ) -> anyhow::Result<Result<RewriteSite, String>> {

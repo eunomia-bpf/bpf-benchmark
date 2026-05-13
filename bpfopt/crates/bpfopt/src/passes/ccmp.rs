@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 //! ARM64 CCMP optimization pass.
 
-use crate::analysis::{BBProgram, BlockId, InsnSite, Terminator};
+use crate::analysis::{BlockId, InsnSite, ProgramCFG, Terminator};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
@@ -76,12 +76,12 @@ impl BpfPass for CcmpPass {
     fn name(&self) -> &str {
         "ccmp"
     }
-    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program, ctx)
     }
 }
 
-pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+pub fn run_on_bbprogram(prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
     if ctx.platform.arch != Arch::Aarch64 {
         return PassResult::skipped_pass(prog, "ccmp is only valid on aarch64");
     }
@@ -148,7 +148,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
 }
 
 fn apply_ccmp_site(
-    prog: &mut BBProgram,
+    prog: &mut ProgramCFG,
     site: &CcmpSite,
     dst_reg: u8,
     payload: u64,
@@ -203,7 +203,7 @@ fn apply_ccmp_site(
 }
 
 fn ccmp_chain_blocks(
-    prog: &mut BBProgram,
+    prog: &mut ProgramCFG,
     site: &CcmpSite,
 ) -> anyhow::Result<(Vec<BlockId>, BlockId, BlockId)> {
     let first = prog.site_block(site.start_site);
@@ -225,7 +225,7 @@ fn ccmp_chain_blocks(
 }
 
 fn validate_chain_edges(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     site: &CcmpSite,
     chain: &[BlockId],
     target: BlockId,
@@ -273,7 +273,7 @@ fn validate_chain_edges(
     Ok(())
 }
 
-pub(super) fn scan_ccmp_sites(prog: &BBProgram) -> anyhow::Result<Vec<CcmpSite>> {
+pub(super) fn scan_ccmp_sites(prog: &ProgramCFG) -> anyhow::Result<Vec<CcmpSite>> {
     let mut sites = Vec::new();
 
     for block in prog.blocks() {
@@ -288,7 +288,7 @@ pub(super) fn scan_ccmp_sites(prog: &BBProgram) -> anyhow::Result<Vec<CcmpSite>>
     Ok(sites)
 }
 
-fn try_match_ccmp_chain(prog: &BBProgram, first: BranchTerm) -> anyhow::Result<Option<CcmpSite>> {
+fn try_match_ccmp_chain(prog: &ProgramCFG, first: BranchTerm) -> anyhow::Result<Option<CcmpSite>> {
     let mut regs = Vec::new();
     let mut blocks = Vec::new();
     let mut cursor = first.block;
@@ -324,7 +324,7 @@ fn try_match_ccmp_chain(prog: &BBProgram, first: BranchTerm) -> anyhow::Result<O
     }))
 }
 
-fn has_same_chain_predecessor(prog: &BBProgram, first: &BranchTerm) -> anyhow::Result<bool> {
+fn has_same_chain_predecessor(prog: &ProgramCFG, first: &BranchTerm) -> anyhow::Result<bool> {
     for &pred in prog.predecessors(first.block) {
         let Some(term) = branch_term(prog, pred)? else {
             continue;
@@ -336,7 +336,7 @@ fn has_same_chain_predecessor(prog: &BBProgram, first: &BranchTerm) -> anyhow::R
     Ok(false)
 }
 
-fn branch_term(prog: &BBProgram, block: BlockId) -> anyhow::Result<Option<BranchTerm>> {
+fn branch_term(prog: &ProgramCFG, block: BlockId) -> anyhow::Result<Option<BranchTerm>> {
     let Terminator::CondBranch {
         cond: insn,
         taken,
@@ -372,7 +372,7 @@ fn branch_term(prog: &BBProgram, block: BlockId) -> anyhow::Result<Option<Branch
     }))
 }
 
-fn choose_dead_dst_reg(prog: &BBProgram, site: &CcmpSite) -> anyhow::Result<Option<u8>> {
+fn choose_dead_dst_reg(prog: &ProgramCFG, site: &CcmpSite) -> anyhow::Result<Option<u8>> {
     let last_block = site
         .blocks
         .last()

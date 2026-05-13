@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 use std::collections::BTreeSet;
 
-use crate::analysis::{BBProgram, BlockId, InsnSite, Terminator};
+use crate::analysis::{BlockId, InsnSite, ProgramCFG, Terminator};
 use crate::insn::*;
 use crate::pass::*;
 const MAX_LADDER_WINDOW_GROWTH: i32 = 24;
@@ -19,7 +19,7 @@ struct GuardSite {
     compare: InsnSite,
     root_reg: u8,
     data_end_reg: u8,
-    /// Identity of the underlying packet pointer (ptr_def from BBProgram lift).
+    /// Identity of the underlying packet pointer (ptr_def from ProgramCFG lift).
     /// Replaces the old `root_id: u32` counter — two guards share a "root"
     /// iff they observe the same `ptr_def` site.
     root_ptr_def: InsnSite,
@@ -42,12 +42,12 @@ impl BpfPass for BoundsCheckMergePass {
     fn name(&self) -> &str {
         "bounds_check_merge"
     }
-    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program, ctx.prog_type)
     }
 }
 
-pub fn run_on_bbprogram(prog: &mut BBProgram, prog_type: u32) -> anyhow::Result<PassResult> {
+pub fn run_on_bbprogram(prog: &mut ProgramCFG, prog_type: u32) -> anyhow::Result<PassResult> {
     if packet_ctx_layout(prog_type, PacketCtxLayoutScope::PacketAccess).is_none() {
         return Ok(PassResult::unchanged());
     }
@@ -114,7 +114,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, prog_type: u32) -> anyhow::Result<
 }
 
 fn apply_rewrites(
-    prog: &mut BBProgram,
+    prog: &mut ProgramCFG,
     rewrites: &[(InsnSite, i32, Vec<InsnSite>)],
     skipped: &mut Vec<SiteSkipReason>,
 ) -> anyhow::Result<()> {
@@ -143,7 +143,7 @@ fn apply_rewrites(
 }
 
 fn scan_guard_sites(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     target_sites: &BTreeSet<InsnSite>,
 ) -> anyhow::Result<ScanResult> {
     let mut result = ScanResult::default();
@@ -163,7 +163,7 @@ fn scan_guard_sites(
 
 fn detect_guard_candidate(
     site: InsnSite,
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     target_sites: &BTreeSet<InsnSite>,
     setup: Option<(InsnSite, InsnSite)>,
     skips: &mut Vec<SiteSkipReason>,
@@ -264,7 +264,7 @@ fn detect_guard_candidate(
 }
 
 fn cursor_dead_after_compare(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     add_site: InsnSite,
     compare_site: InsnSite,
     cursor_reg: u8,
@@ -303,7 +303,7 @@ fn normalize_slow_guard(insn: &BpfInsn) -> Option<(u8, u8, GuardCmpKind)> {
 fn can_extend_ladder(
     prev: &GuardSite,
     next: &GuardSite,
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     target_sites: &BTreeSet<InsnSite>,
 ) -> anyhow::Result<bool> {
     if prev.root_ptr_def != next.root_ptr_def
@@ -321,7 +321,7 @@ fn can_extend_ladder(
 }
 
 fn interleaves_are_merge_safe(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     start: InsnSite,
     end: InsnSite,
     target_sites: &BTreeSet<InsnSite>,

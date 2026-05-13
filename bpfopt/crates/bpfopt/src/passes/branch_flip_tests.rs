@@ -170,7 +170,7 @@ fn branch_flip_skips_high_site_miss_rate() {
 
 #[test]
 fn branch_flip_rejects_oversized_else_delta_through_pass_path() {
-    // P1-H: exercise the actual pass and BBProgram lower path, not only a helper.
+    // P1-H: exercise the actual pass and ProgramCFG lower path, not only a helper.
     let mut insns = vec![
         BpfInsn::jump_imm(BPF_JNE, BPF_REG_1, 0, 2),
         BpfInsn::mov64_imm(BPF_REG_0, 10),

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-//! Lower BBProgram back to linear BPF bytecode.
+//! Lower ProgramCFG back to linear BPF bytecode.
 
 use crate::analysis::bbprogram_btf::{remap_btf_records, BtfRecordKind};
-use crate::analysis::{BBProgram, BlockId, InsnSite, Terminator};
+use crate::analysis::{BlockId, InsnSite, ProgramCFG, Terminator};
 use crate::insn::BpfInsn;
 use crate::pass::BtfInfoRecords;
 
-pub fn lower(prog: &BBProgram) -> anyhow::Result<Vec<BpfInsn>> {
+pub fn lower(prog: &ProgramCFG) -> anyhow::Result<Vec<BpfInsn>> {
     if prog.blocks.is_empty() {
         return Ok(Vec::new());
     }
@@ -50,7 +50,7 @@ pub fn lower(prog: &BBProgram) -> anyhow::Result<Vec<BpfInsn>> {
 }
 
 pub(crate) fn remap_btf_records_for_lowering(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     records: Option<&BtfInfoRecords>,
     kind: BtfRecordKind,
 ) -> anyhow::Result<Option<BtfInfoRecords>> {
@@ -76,7 +76,7 @@ pub(crate) fn remap_btf_records_for_lowering(
     }))
 }
 
-fn assign_block_pcs(prog: &BBProgram, order: &[BlockId]) -> anyhow::Result<Vec<usize>> {
+fn assign_block_pcs(prog: &ProgramCFG, order: &[BlockId]) -> anyhow::Result<Vec<usize>> {
     let mut block_start_pc = vec![0usize; prog.blocks.len()];
     let mut pc = 0usize;
     for &block_id in order {
@@ -96,7 +96,7 @@ fn assign_block_pcs(prog: &BBProgram, order: &[BlockId]) -> anyhow::Result<Vec<u
 }
 
 fn emit_terminator(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     term: &Terminator,
     block_start_pc: &[usize],
     current_pc: usize,
@@ -168,7 +168,7 @@ fn emit_terminator(
     Ok(())
 }
 
-fn total_slot_len(prog: &BBProgram) -> anyhow::Result<usize> {
+fn total_slot_len(prog: &ProgramCFG) -> anyhow::Result<usize> {
     let mut len = 0usize;
     for block in prog.blocks() {
         for idx in 0..block.insns.len() {

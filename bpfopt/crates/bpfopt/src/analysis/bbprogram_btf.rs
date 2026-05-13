@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-//! BTF metadata remapping for BBProgram lowering/reporting.
+//! BTF metadata remapping for ProgramCFG lowering/reporting.
 
 use std::collections::BTreeMap;
 
-use crate::analysis::bbprogram::BBProgram;
+use crate::analysis::bbprogram::ProgramCFG;
 use crate::pass::BtfInfoRecords;
 
 #[cfg(test)]
@@ -46,7 +46,7 @@ pub(crate) enum BtfRecordKind {
 
 #[cfg(test)]
 pub(crate) fn remap_btf_records_view(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     records: Option<&BtfInfoRecords>,
     kind: BtfRecordKind,
 ) -> anyhow::Result<Vec<BtfRecordView>> {
@@ -73,7 +73,7 @@ pub(crate) fn remap_btf_records_view(
 }
 
 pub(crate) fn remap_btf_records<F>(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     records: &BtfInfoRecords,
     kind: BtfRecordKind,
     mut emit: F,
@@ -132,7 +132,7 @@ pub(crate) fn read_u32_field(record: &[u8], offset: usize, label: &str) -> anyho
     })?))
 }
 
-pub(crate) fn old_pc_to_current_pc(prog: &BBProgram) -> anyhow::Result<BTreeMap<usize, usize>> {
+pub(crate) fn old_pc_to_current_pc(prog: &ProgramCFG) -> anyhow::Result<BTreeMap<usize, usize>> {
     let site_pcs = prog.current_site_pcs()?;
     let mut old_to_new = BTreeMap::new();
     for &site in prog.btf.keys() {

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{BBProgram, InsnSite};
+use crate::analysis::{InsnSite, ProgramCFG};
 use crate::insn::*;
 use crate::pass::*;
 use std::collections::HashMap;
@@ -82,11 +82,11 @@ impl BpfPass for BulkMemoryPass {
     fn name(&self) -> &str {
         "bulk_memory"
     }
-    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program, ctx)
     }
 }
-pub fn run_on_bbprogram(prog: &mut BBProgram, _ctx: &PassContext) -> anyhow::Result<PassResult> {
+pub fn run_on_bbprogram(prog: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
     let scan = scan_sites(prog)?;
     let mut skipped = scan.skips;
     if scan.sites.is_empty() {
@@ -97,7 +97,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, _ctx: &PassContext) -> anyhow::Res
     })?;
     Ok(PassResult::with_sites(applied, skipped))
 }
-fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
+fn scan_sites(prog: &ProgramCFG) -> anyhow::Result<ScanResult> {
     let mut scan = ScanResult::default();
     for block in prog.block_ids().collect::<Vec<_>>() {
         let body = prog.block_body_view(block)?;
@@ -145,7 +145,7 @@ fn scan_sites(prog: &BBProgram) -> anyhow::Result<ScanResult> {
     }
     Ok(scan)
 }
-fn memcpy_alias_skip_reason(site: &BulkSite, start: InsnSite, prog: &BBProgram) -> Option<String> {
+fn memcpy_alias_skip_reason(site: &BulkSite, start: InsnSite, prog: &ProgramCFG) -> Option<String> {
     let BulkSiteKind::Memcpy {
         src_base, dst_base, ..
     } = &site.kind
@@ -239,7 +239,7 @@ fn try_match_memcpy_run_at(
     }))
 }
 fn try_match_memset_run_at(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     insns: &[BpfInsn],
     sites: &[InsnSite],
     idx: usize,
@@ -316,7 +316,7 @@ fn memcpy_lane_at(insns: &[BpfInsn], idx: usize) -> Option<MemcpyLane> {
     })
 }
 fn memset_lane_at(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     insns: &[BpfInsn],
     sites: &[InsnSite],
     idx: usize,
@@ -346,7 +346,7 @@ fn memset_lane_at(
         fill_byte,
     }))
 }
-fn emit_site_replacement(site: &BulkSite, prog: &BBProgram) -> anyhow::Result<Vec<BpfInsn>> {
+fn emit_site_replacement(site: &BulkSite, prog: &ProgramCFG) -> anyhow::Result<Vec<BpfInsn>> {
     match &site.kind {
         BulkSiteKind::Memcpy {
             dst_base,
@@ -395,7 +395,7 @@ fn emit_site_replacement(site: &BulkSite, prog: &BBProgram) -> anyhow::Result<Ve
     }
 }
 fn emit_chunked_calls(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     target: &str,
     chunk_sizes: &[usize],
     mut pack_payload: impl FnMut(usize) -> anyhow::Result<u64>,

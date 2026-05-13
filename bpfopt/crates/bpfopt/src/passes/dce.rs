@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-use crate::analysis::{BBProgram, DefSite, InsnSite};
+use crate::analysis::{DefSite, InsnSite, ProgramCFG};
 use crate::insn::*;
 use crate::pass::{BpfPass, PassContext, PassResult};
 use std::collections::BTreeSet;
@@ -12,12 +12,12 @@ impl BpfPass for DcePass {
         "dce"
     }
 
-    fn run(&self, program: &mut BBProgram, _ctx: &PassContext) -> anyhow::Result<PassResult> {
+    fn run(&self, program: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program)
     }
 }
 
-pub fn run_on_bbprogram(prog: &mut BBProgram) -> anyhow::Result<PassResult> {
+pub fn run_on_bbprogram(prog: &mut ProgramCFG) -> anyhow::Result<PassResult> {
     let mut sites_applied = 0usize;
 
     loop {
@@ -49,7 +49,10 @@ pub fn run_on_bbprogram(prog: &mut BBProgram) -> anyhow::Result<PassResult> {
     })
 }
 
-fn would_empty_all_bodies(prog: &BBProgram, dead_defs: &BTreeSet<DefSite>) -> anyhow::Result<bool> {
+fn would_empty_all_bodies(
+    prog: &ProgramCFG,
+    dead_defs: &BTreeSet<DefSite>,
+) -> anyhow::Result<bool> {
     let removable_sites = dead_defs
         .iter()
         .map(|def| InsnSite {
@@ -69,7 +72,7 @@ fn would_empty_all_bodies(prog: &BBProgram, dead_defs: &BTreeSet<DefSite>) -> an
     Ok(true)
 }
 
-fn is_removable_dead_def(prog: &BBProgram, def: DefSite) -> anyhow::Result<bool> {
+fn is_removable_dead_def(prog: &ProgramCFG, def: DefSite) -> anyhow::Result<bool> {
     let site = InsnSite {
         block: def.block,
         idx: def.idx,

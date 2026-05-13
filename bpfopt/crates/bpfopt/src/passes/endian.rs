@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{insn_use_def_set, BBProgram, InsnSite};
+use crate::analysis::{insn_use_def_set, InsnSite, ProgramCFG};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
@@ -95,7 +95,7 @@ fn is_narrowing(load_size: u8, endian_size: u8) -> bool {
     let endian = BpfMemWidth::from_size_opcode(endian_size);
     matches!((load, endian), (Some(load), Some(endian)) if load.aarch64_shift() > endian.aarch64_shift())
 }
-fn find_blocked_narrow_sites(prog: &BBProgram) -> anyhow::Result<Vec<SiteSkipReason>> {
+fn find_blocked_narrow_sites(prog: &ProgramCFG) -> anyhow::Result<Vec<SiteSkipReason>> {
     let mut skips = Vec::new();
     for block in prog.block_ids().collect::<Vec<_>>() {
         let body = prog.block_body_view(block)?;
@@ -208,11 +208,11 @@ impl BpfPass for EndianFusionPass {
     fn name(&self) -> &str {
         "endian_fusion"
     }
-    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program, ctx)
     }
 }
-pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+pub fn run_on_bbprogram(prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
     let mut skipped = Vec::new();
     skipped.extend(find_blocked_narrow_sites(prog)?);
     skipped.extend(collect_cross_block_pair_skips(
@@ -262,7 +262,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     Ok(PassResult::with_sites(applied, skipped))
 }
 fn preserved_body_insns(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     start: InsnSite,
     len: usize,
 ) -> anyhow::Result<Vec<BpfInsn>> {

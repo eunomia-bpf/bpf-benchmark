@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-//! Use-def graph construction for BBProgram.
+//! Use-def graph construction for ProgramCFG.
 
 use std::collections::{BTreeMap, BTreeSet, HashSet};
 
-use crate::analysis::{BBProgram, BlockId, InsnSite};
+use crate::analysis::{BlockId, InsnSite, ProgramCFG};
 use crate::insn::*;
 use crate::pass::RegSet;
 
@@ -36,7 +36,7 @@ pub struct RegUseDefSet {
 type ReachingState = BTreeMap<u8, BTreeSet<DefSite>>;
 
 impl UseDefGraph {
-    pub fn build(prog: &BBProgram) -> anyhow::Result<Self> {
+    pub fn build(prog: &ProgramCFG) -> anyhow::Result<Self> {
         let site_facts = kinsn_aware_site_facts(prog)?;
         let mut in_states = vec![ReachingState::new(); prog.blocks.len()];
         let mut changed = true;
@@ -85,7 +85,7 @@ impl UseDefGraph {
 }
 
 fn process_block_state(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     block: BlockId,
     site_facts: &BTreeMap<InsnSite, RegUseDefSet>,
     input: &ReachingState,
@@ -150,7 +150,7 @@ fn merge_state(dst: &mut ReachingState, src: &ReachingState) -> bool {
     changed
 }
 
-fn kinsn_aware_site_facts(prog: &BBProgram) -> anyhow::Result<BTreeMap<InsnSite, RegUseDefSet>> {
+fn kinsn_aware_site_facts(prog: &ProgramCFG) -> anyhow::Result<BTreeMap<InsnSite, RegUseDefSet>> {
     let mut facts = BTreeMap::new();
     let mut sites = Vec::new();
 

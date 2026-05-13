@@ -2,7 +2,7 @@
 
 use std::collections::HashMap;
 
-use crate::analysis::{lift_with_pass_context, lower, BBProgram};
+use crate::analysis::{lift_with_pass_context, lower, ProgramCFG};
 use crate::insn::BpfInsn;
 use crate::pass::{
     BpfPass, MapInfo, PassContext, PassResult, RegState, ScalarRange, SkipReason, StackState, Tnum,
@@ -12,25 +12,25 @@ use crate::pass::{
 pub struct PassRun {
     pub result: PassResult,
     pub lowered: Vec<BpfInsn>,
-    pub prog: BBProgram,
+    pub prog: ProgramCFG,
 }
 
-pub fn lift_test_program(insns: &[BpfInsn], ctx: &PassContext) -> BBProgram {
+pub fn lift_test_program(insns: &[BpfInsn], ctx: &PassContext) -> ProgramCFG {
     lift_with_pass_context(insns, ctx)
-        .expect("test bytecode and side inputs should lift into BBProgram")
+        .expect("test bytecode and side inputs should lift into ProgramCFG")
 }
 
-pub fn lower_test_program(prog: &BBProgram) -> Vec<BpfInsn> {
-    lower(prog).expect("test BBProgram should lower")
+pub fn lower_test_program(prog: &ProgramCFG) -> Vec<BpfInsn> {
+    lower(prog).expect("test ProgramCFG should lower")
 }
 
 pub fn run_pass_on_insns<P: BpfPass>(pass: P, insns: Vec<BpfInsn>, ctx: &PassContext) -> PassRun {
     let mut prog = lift_test_program(&insns, ctx);
     let report_prog = prog.clone();
-    // Test helpers run passes through the production BBProgram API.
+    // Test helpers run passes through the production ProgramCFG API.
     let mut result = pass
         .run(&mut prog, ctx)
-        .expect("future BBProgram-native pass should run");
+        .expect("future ProgramCFG-native pass should run");
     materialize_site_skips_for_tests(&report_prog, &mut result);
     let lowered = lower_test_program(&prog);
     PassRun {
@@ -42,9 +42,9 @@ pub fn run_pass_on_insns<P: BpfPass>(pass: P, insns: Vec<BpfInsn>, ctx: &PassCon
 
 pub fn pass_error_on_insns<P: BpfPass>(pass: P, insns: Vec<BpfInsn>, ctx: &PassContext) -> String {
     let mut prog = lift_test_program(&insns, ctx);
-    // Test helpers run passes through the production BBProgram API.
+    // Test helpers run passes through the production ProgramCFG API.
     pass.run(&mut prog, ctx)
-        .expect_err("future BBProgram-native pass should reject this fixture")
+        .expect_err("future ProgramCFG-native pass should reject this fixture")
         .to_string()
 }
 
@@ -52,15 +52,15 @@ pub fn run_pipeline_on_insns(
     passes: Vec<Box<dyn BpfPass>>,
     insns: Vec<BpfInsn>,
     ctx: &PassContext,
-) -> (Vec<PassResult>, Vec<BpfInsn>, BBProgram) {
+) -> (Vec<PassResult>, Vec<BpfInsn>, ProgramCFG) {
     let mut prog = lift_test_program(&insns, ctx);
     let mut results = Vec::new();
     for pass in passes {
         let report_prog = prog.clone();
-        // Test helpers run passes through the production BBProgram API.
+        // Test helpers run passes through the production ProgramCFG API.
         let mut result = pass
             .run(&mut prog, ctx)
-            .expect("future BBProgram-native pipeline pass should run");
+            .expect("future ProgramCFG-native pipeline pass should run");
         materialize_site_skips_for_tests(&report_prog, &mut result);
         results.push(result);
     }
@@ -68,7 +68,7 @@ pub fn run_pipeline_on_insns(
     (results, lowered, prog)
 }
 
-fn materialize_site_skips_for_tests(report_prog: &BBProgram, result: &mut PassResult) {
+fn materialize_site_skips_for_tests(report_prog: &ProgramCFG, result: &mut PassResult) {
     for skip in result.site_skipped.drain(..) {
         let pc = report_prog
             .rep_site_slot(skip.site)

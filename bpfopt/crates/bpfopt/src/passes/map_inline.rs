@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 use crate::analysis::{
-    insn_use_def_set, validate_map_inline_hint_specs, BBProgram, InsnSite, Terminator,
+    insn_use_def_set, validate_map_inline_hint_specs, InsnSite, ProgramCFG, Terminator,
 };
 use crate::insn::*;
 use crate::pass::*;
@@ -58,7 +58,7 @@ fn format_hint_anchor(anchor: &MapInlineHintAnchor) -> String {
 }
 
 fn map_inline_side_input<'a>(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     ctx: &'a PassContext,
 ) -> anyhow::Result<MapInlineSideInput<'a>> {
     if !has_map_inline_side_input(ctx) {
@@ -87,7 +87,7 @@ fn has_map_inline_side_input(ctx: &PassContext) -> bool {
 }
 
 fn resolve_map_inline_hint_specs(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     hints: &[MapInlineHintSpec],
 ) -> anyhow::Result<Vec<MapInlineHint>> {
     hints
@@ -106,7 +106,7 @@ fn resolve_map_inline_hint_specs(
 }
 
 fn resolve_map_inline_hint_anchor(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     anchor: &MapInlineHintAnchorSpec,
 ) -> anyhow::Result<MapInlineHintAnchor> {
     match anchor {
@@ -249,7 +249,7 @@ struct MapRefKey {
     src_reg: u8,
     imm: i32,
 }
-fn find_map_lookup_sites(prog: &BBProgram) -> anyhow::Result<Vec<MapLookupSite>> {
+fn find_map_lookup_sites(prog: &ProgramCFG) -> anyhow::Result<Vec<MapLookupSite>> {
     let mut sites = Vec::new();
     for block in prog.blocks() {
         for site in prog.sites_in_block(block.id)? {
@@ -270,7 +270,7 @@ fn find_map_lookup_sites(prog: &BBProgram) -> anyhow::Result<Vec<MapLookupSite>>
     Ok(sites)
 }
 fn find_map_in_map_chains(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     outer_sites: &[MapLookupSite],
 ) -> anyhow::Result<Vec<MapInMapChain>> {
     outer_sites
@@ -284,7 +284,7 @@ fn find_map_in_map_chains(
         .collect()
 }
 fn find_map_in_map_chain_for_outer(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     outer_site: &MapLookupSite,
 ) -> anyhow::Result<Option<MapInMapChain>> {
     let mut alias_regs = HashMap::from([(0u8, 0i16)]);
@@ -353,7 +353,7 @@ fn find_map_in_map_chain_for_outer(
     Ok(None)
 }
 fn try_extract_lookup_key_verifier_guided(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     call_site: InsnSite,
     key_size: u32,
 ) -> anyhow::Result<std::result::Result<LookupKey, String>> {
@@ -395,7 +395,7 @@ fn constant_key_value(bytes: &[u8]) -> u64 {
     u64::from_le_bytes(buf)
 }
 fn lookup_key_setup_sites(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     call_site: InsnSite,
     key_width: usize,
 ) -> anyhow::Result<BTreeSet<InsnSite>> {
@@ -411,7 +411,7 @@ fn lookup_key_setup_sites(
     Ok(sites)
 }
 fn collect_lookup_key_stack_store_sites(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     call_site: InsnSite,
     stack_off: i16,
     key_width: usize,
@@ -468,7 +468,7 @@ struct SiteRewrite {
 }
 type SiteRewriteResult<T> = anyhow::Result<std::result::Result<T, String>>;
 fn site_replacement(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     site: InsnSite,
     replacement: Vec<BpfInsn>,
 ) -> anyhow::Result<SiteReplacement> {
@@ -499,7 +499,7 @@ fn is_map_lookup_elem_call(insn: &BpfInsn) -> bool {
     insn.is_call() && insn.src_reg() == 0 && insn.imm == libbpf_sys::BPF_FUNC_map_lookup_elem as i32
 }
 fn collect_kernel_mutable_maps(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     side_input: &MapInlineSideInput<'_>,
     map_info: &MapInfoBySite,
 ) -> anyhow::Result<KernelMutableMaps> {
@@ -589,7 +589,7 @@ fn kernel_mutable_reason_for_map(
     })
 }
 fn resolve_inline_hints(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     side_input: &MapInlineSideInput<'_>,
     map_info: &MapInfoBySite,
     kernel_mutable_maps: &KernelMutableMaps,
@@ -624,7 +624,7 @@ fn resolve_inline_hints(
     Ok(resolved)
 }
 fn resolve_direct_inline_hint(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     side_input: &MapInlineSideInput<'_>,
     map_info: &MapInfoBySite,
     kernel_mutable_maps: &KernelMutableMaps,
@@ -696,7 +696,7 @@ fn resolve_direct_inline_hint(
     }
 }
 fn resolve_deferred_inner_hints(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     side_input: &MapInlineSideInput<'_>,
     map_info: &MapInfoBySite,
     kernel_mutable_maps: &KernelMutableMaps,
@@ -767,7 +767,7 @@ fn resolve_deferred_inner_hints(
     Ok(())
 }
 fn resolve_hinted_map_in_map_routes(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     side_input: &MapInlineSideInput<'_>,
     map_info: &MapInfoBySite,
     sites: &[MapLookupSite],
@@ -812,7 +812,7 @@ fn resolve_hinted_map_in_map_routes(
     Ok(routes)
 }
 fn deferred_hint_targets_known_map_in_map_inner(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     side_input: &MapInlineSideInput<'_>,
     sites: &[MapLookupSite],
     hint: &MapInlineHint,
@@ -1006,11 +1006,11 @@ impl BpfPass for MapInlinePass {
     fn name(&self) -> &str {
         "map_inline"
     }
-    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program, ctx)
     }
 }
-pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+pub fn run_on_bbprogram(prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
     let side_input = map_inline_side_input(prog, ctx)?;
     let initial_map_info = analyze_map_info(prog, &side_input)?;
     let initial_kernel_mutable_maps =
@@ -1047,7 +1047,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     Ok(result)
 }
 fn run_map_inline_round(
-    prog: &mut BBProgram,
+    prog: &mut ProgramCFG,
     side_input: &MapInlineSideInput<'_>,
     inline_hints: &ResolvedHintMap,
     inline_hints_consumed: &mut HashSet<MapInlineHintAnchor>,
@@ -1486,7 +1486,7 @@ fn run_map_inline_round(
     Ok(result)
 }
 fn apply_map_inline_edit(
-    prog: &mut BBProgram,
+    prog: &mut ProgramCFG,
     old_len: usize,
     replacements: Vec<SiteReplacement>,
     skip_sites: BTreeSet<InsnSite>,
@@ -1515,7 +1515,7 @@ fn apply_map_inline_edit(
     })
 }
 fn apply_replacements_and_deletions(
-    prog: &mut BBProgram,
+    prog: &mut ProgramCFG,
     replacements: Vec<SiteReplacement>,
     skip_sites: BTreeSet<InsnSite>,
     skipped: &mut Vec<SiteSkipReason>,
@@ -1547,7 +1547,7 @@ fn apply_replacements_and_deletions(
     Ok(true)
 }
 fn replace_site(
-    prog: &mut BBProgram,
+    prog: &mut ProgramCFG,
     replacement: SiteReplacement,
     skipped: &mut Vec<SiteSkipReason>,
 ) -> anyhow::Result<bool> {
@@ -1564,7 +1564,7 @@ fn replace_site(
     prog.try_replace_range(site, 1, replacement.replacement, skipped)
 }
 fn delete_site(
-    prog: &mut BBProgram,
+    prog: &mut ProgramCFG,
     site: InsnSite,
     skipped: &mut Vec<SiteSkipReason>,
 ) -> anyhow::Result<bool> {
@@ -1585,7 +1585,7 @@ fn delete_site(
     prog.try_replace_range(site, 1, Vec::new(), skipped)
 }
 fn terminator_for_site_replacement(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     site: InsnSite,
     replacement: &[BpfInsn],
 ) -> anyhow::Result<Terminator> {
@@ -1624,7 +1624,7 @@ fn terminator_for_site_replacement(
     }
     anyhow::bail!("map_inline unsupported exit replacement at {:?}", site)
 }
-fn cleanup_map_inline_bbprogram(prog: &mut BBProgram) -> anyhow::Result<()> {
+fn cleanup_map_inline_bbprogram(prog: &mut ProgramCFG) -> anyhow::Result<()> {
     loop {
         let removed = prog.delete_unreachable_blocks()?;
         if removed == 0 {
@@ -1649,7 +1649,7 @@ fn cleanup_map_inline_bbprogram(prog: &mut BBProgram) -> anyhow::Result<()> {
     Ok(())
 }
 fn extract_site_constant_key(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     call_site: InsnSite,
     info: &MapInfo,
     site_inline_hints: Option<&[ResolvedMapInlineHint]>,
@@ -1675,7 +1675,7 @@ fn extract_site_constant_key(
     }
 }
 fn build_site_rewrite(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     side_input: &MapInlineSideInput<'_>,
     site: &MapLookupSite,
     key: &LookupKey,
@@ -1772,7 +1772,7 @@ fn build_site_rewrite(
     })))
 }
 fn build_hard_null_site_rewrite(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     site: &MapLookupSite,
     key: &LookupKey,
     info: &MapInfo,
@@ -1808,7 +1808,7 @@ fn build_hard_null_site_rewrite(
     }))
 }
 fn find_soft_fold_null_handler(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     call_site: InsnSite,
 ) -> anyhow::Result<Option<InsnSite>> {
     let sites = sites_after_in_frame(prog, call_site)?;
@@ -1873,7 +1873,7 @@ fn resolve_inner_map_id_for_outer_key(
     Ok(Ok(inner_map_id))
 }
 fn build_direct_map_value_load_rewrites(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     side_input: &MapInlineSideInput<'_>,
     kernel_mutable_maps: &KernelMutableMaps,
 ) -> anyhow::Result<DirectMapValueLoadRewriteResult> {
@@ -1977,7 +1977,7 @@ fn build_direct_map_value_load_rewrites(
     })
 }
 fn resolve_snapshot_map_value(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     side_input: &MapInlineSideInput<'_>,
     map_ref: MapRefKey,
     kernel_mutable_maps: &KernelMutableMaps,
@@ -2068,14 +2068,14 @@ fn read_scalar_from_value_at(value: &[u8], offset: usize, size: u8) -> Option<u6
     Some(u64::from_le_bytes(buf))
 }
 fn find_direct_map_load_for_reg_before_site(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     site: InsnSite,
     reg: u8,
 ) -> anyhow::Result<Option<InsnSite>> {
     find_direct_map_load_for_reg_before_site_inner(prog, site, reg, REG_RESOLUTION_LIMIT)
 }
 fn find_direct_map_load_for_reg_before_site_inner(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     site: InsnSite,
     reg: u8,
     budget: usize,
@@ -2108,7 +2108,7 @@ fn find_direct_map_load_for_reg_before_site_inner(
     Ok(None)
 }
 fn find_direct_map_load_for_stack_slot_before_site(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     site: InsnSite,
     stack_off: i16,
     budget: usize,
@@ -2150,7 +2150,7 @@ fn is_hash_like_map_type(map_type: u32) -> bool {
     )
 }
 fn find_r2_stack_pointer_setup_simple(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     call_site: InsnSite,
 ) -> anyhow::Result<Option<(InsnSite, InsnSite, i16)>> {
     let Some((r2_add_site, scanned)) =
@@ -2175,7 +2175,7 @@ fn find_r2_stack_pointer_setup_simple(
     Ok(Some((r2_mov_site, r2_add_site, stack_off)))
 }
 fn find_prev_def_within(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     start: InsnSite,
     reg: u8,
     limit: usize,
@@ -2197,7 +2197,7 @@ fn size_in_bytes(size: u8) -> Option<u8> {
     BpfMemWidth::from_size_opcode(size).map(|w| w.bytes() as u8)
 }
 fn resolve_map_value_pointer_inner(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     before_site: InsnSite,
     reg: u8,
     budget: usize,
@@ -2311,7 +2311,7 @@ fn format_inlined_value_diagnostic(value: &[u8], loads: &[LookupValueLoad]) -> S
     format_bytes_preview(value)
 }
 fn classify_r0_uses_with_options(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     start_site: InsnSite,
     allow_helper_calls: bool,
 ) -> anyhow::Result<LookupResultUses> {
@@ -2426,7 +2426,7 @@ fn classify_r0_uses_with_options(
     Ok(classification)
 }
 fn resolve_stack_store_slot(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     site: InsnSite,
     insn: &BpfInsn,
 ) -> anyhow::Result<Option<(i16, u8)>> {
@@ -2454,7 +2454,7 @@ fn resolve_stack_store_slot(
     Ok(Some((stack_off, width)))
 }
 fn resolve_stack_load_slot(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     site: InsnSite,
     insn: &BpfInsn,
 ) -> anyhow::Result<Option<i16>> {
@@ -2495,7 +2495,7 @@ fn surviving_alias_regs_after_helper_call(alias_regs: &HashMap<u8, i16>) -> Hash
         .collect()
 }
 fn non_null_successor_site(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     null_check: InsnSite,
     insn: &BpfInsn,
 ) -> anyhow::Result<Option<InsnSite>> {
@@ -3388,7 +3388,7 @@ impl MapInfo {
 type MapInfoBySite = HashMap<InsnSite, MapInfo>;
 
 fn analyze_map_info(
-    program: &BBProgram,
+    program: &ProgramCFG,
     side_input: &MapInlineSideInput<'_>,
 ) -> Result<MapInfoBySite> {
     let mut by_site = HashMap::new();

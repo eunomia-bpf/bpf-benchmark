@@ -1,6 +1,6 @@
 use super::*;
 
-fn block_for_original_pc(prog: &BBProgram, pc: usize) -> BlockId {
+fn block_for_original_pc(prog: &ProgramCFG, pc: usize) -> BlockId {
     prog.btf
         .iter()
         .find_map(|(site, &old_pc)| (old_pc == pc).then_some(site.block))

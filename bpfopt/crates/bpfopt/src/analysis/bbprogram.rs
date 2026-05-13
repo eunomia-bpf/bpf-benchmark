@@ -58,20 +58,20 @@ impl SlotDistance {
     }
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct BBMapBinding {
+pub struct MapBinding {
     pub old_fd: i32,
     pub map_id: u32,
 }
 #[derive(Debug)]
-pub struct BBProgram {
-    pub(super) blocks: Vec<Block>,
+pub struct ProgramCFG {
+    pub(super) blocks: Vec<BasicBlock>,
     pub(crate) entry: BlockId,
     pub(super) use_def: UseDefGraph,
     pub(super) verifier_states: Option<VerifierStatesBySite>,
     pub(super) pmu_profile: BTreeMap<InsnSite, InsnAnnotation>,
     pub(super) btf: BtfMetadataMap,
     pub(super) kinsn_reg: Arc<KinsnRegistry>,
-    pub(crate) map_bindings: Vec<BBMapBinding>,
+    pub(crate) map_bindings: Vec<MapBinding>,
     pub(crate) func_info: Option<BtfInfoRecords>,
     pub(crate) line_info: Option<BtfInfoRecords>,
     ldimm64_second_slots: BTreeMap<InsnSite, BpfInsn>,
@@ -83,7 +83,7 @@ pub struct BBProgram {
     lifted_reg_facts_cache: Mutex<Option<Arc<LiftedRegFacts>>>,
 }
 
-impl Clone for BBProgram {
+impl Clone for ProgramCFG {
     fn clone(&self) -> Self {
         Self {
             blocks: self.blocks.clone(),
@@ -107,7 +107,7 @@ impl Clone for BBProgram {
     }
 }
 #[derive(Clone, Debug)]
-pub struct Block {
+pub struct BasicBlock {
     pub id: BlockId,
     pub(super) insns: Vec<BpfInsn>,
     pub(super) terminator: Terminator,
@@ -160,9 +160,9 @@ pub enum Terminator {
     },
     End,
 }
-impl BBProgram {
+impl ProgramCFG {
     pub(crate) fn new(
-        blocks: Vec<Block>,
+        blocks: Vec<BasicBlock>,
         entry: BlockId,
         verifier_states: Option<VerifierStatesBySite>,
         btf: BtfMetadataMap,
@@ -193,7 +193,7 @@ impl BBProgram {
         prog.rebuild_use_def()?;
         Ok(prog)
     }
-    pub fn blocks(&self) -> impl Iterator<Item = &Block> {
+    pub fn blocks(&self) -> impl Iterator<Item = &BasicBlock> {
         self.blocks.iter()
     }
     pub fn is_empty(&self) -> bool {
@@ -330,7 +330,7 @@ impl BBProgram {
         *slot = Some(Arc::clone(&fresh));
         Ok(fresh)
     }
-    pub fn map_bindings(&self) -> &[BBMapBinding] {
+    pub fn map_bindings(&self) -> &[MapBinding] {
         &self.map_bindings
     }
     pub fn map_fd_bindings(&self) -> HashMap<i32, u32> {
@@ -340,7 +340,7 @@ impl BBProgram {
             .collect()
     }
     /// Resolve the kernel map id for a pseudo-map ldimm64 immediate.
-    /// Returns the map id that was bound at BBProgram construction time;
+    /// Returns the map id that was bound at ProgramCFG construction time;
     /// callers must skip the site if `None` (the construction snapshot
     /// is the authoritative source).
     pub fn map_id_for_imm(&self, imm: i32) -> Option<u32> {
@@ -811,12 +811,12 @@ impl BBProgram {
     pub fn remapped_line_info_records(&self) -> anyhow::Result<Option<BtfInfoRecords>> {
         remap_btf_records_for_lowering(self, self.line_info.as_ref(), BtfRecordKind::Line)
     }
-    pub(super) fn block(&self, block: BlockId) -> anyhow::Result<&Block> {
+    pub(super) fn block(&self, block: BlockId) -> anyhow::Result<&BasicBlock> {
         self.blocks
             .get(block.0)
             .ok_or_else(|| anyhow::anyhow!("invalid block id {:?}", block))
     }
-    pub(super) fn block_mut(&mut self, block: BlockId) -> anyhow::Result<&mut Block> {
+    pub(super) fn block_mut(&mut self, block: BlockId) -> anyhow::Result<&mut BasicBlock> {
         self.blocks
             .get_mut(block.0)
             .ok_or_else(|| anyhow::anyhow!("invalid block id {:?}", block))
@@ -950,7 +950,7 @@ impl BBProgram {
         Ok(hits)
     }
 }
-fn collect_map_bindings(insns: &[BpfInsn], map_ids: &[u32]) -> anyhow::Result<Vec<BBMapBinding>> {
+fn collect_map_bindings(insns: &[BpfInsn], map_ids: &[u32]) -> anyhow::Result<Vec<MapBinding>> {
     let mut bindings = Vec::new();
     let mut fd_order = Vec::<i32>::new();
     let mut pc = 0usize;
@@ -959,7 +959,7 @@ fn collect_map_bindings(insns: &[BpfInsn], map_ids: &[u32]) -> anyhow::Result<Ve
         if let Some(kind) = insn.map_pseudo() {
             let map_id = resolve_map_id(kind, insn.imm, map_ids, &mut fd_order)?;
             if let Some(map_id) = map_id {
-                bindings.push(BBMapBinding {
+                bindings.push(MapBinding {
                     old_fd: insn.imm,
                     map_id,
                 });
@@ -1115,7 +1115,7 @@ impl Terminator {
         }
     }
 }
-fn current_site_pcs(prog: &BBProgram) -> anyhow::Result<BTreeMap<InsnSite, usize>> {
+fn current_site_pcs(prog: &ProgramCFG) -> anyhow::Result<BTreeMap<InsnSite, usize>> {
     let mut pcs = BTreeMap::new();
     let mut pc = 0usize;
     for block in prog.blocks() {
@@ -1141,7 +1141,7 @@ fn current_site_pcs(prog: &BBProgram) -> anyhow::Result<BTreeMap<InsnSite, usize
     Ok(pcs)
 }
 #[cfg(test)]
-fn current_block_start_pcs(prog: &BBProgram) -> anyhow::Result<Vec<usize>> {
+fn current_block_start_pcs(prog: &ProgramCFG) -> anyhow::Result<Vec<usize>> {
     let mut block_start_pc = vec![0usize; prog.blocks.len()];
     let mut pc = 0usize;
     for block in prog.blocks() {
@@ -1158,7 +1158,7 @@ fn current_block_start_pcs(prog: &BBProgram) -> anyhow::Result<Vec<usize>> {
     }
     Ok(block_start_pc)
 }
-fn block_logical_slot_len(prog: &BBProgram, block: BlockId) -> anyhow::Result<usize> {
+fn block_logical_slot_len(prog: &ProgramCFG, block: BlockId) -> anyhow::Result<usize> {
     let block_ref = prog.block(block)?;
     let mut len = 0usize;
     for idx in 0..block_ref.insns.len() {
@@ -1174,7 +1174,7 @@ fn block_logical_slot_len(prog: &BBProgram, block: BlockId) -> anyhow::Result<us
     Ok(len)
 }
 fn frame_relative_logical_slot(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     block: BlockId,
     slot: usize,
 ) -> anyhow::Result<usize> {
@@ -1192,7 +1192,7 @@ fn frame_relative_logical_slot(
     }
     anyhow::bail!("block {:?} is missing from its frame", block)
 }
-fn site_offset_in_block_slots(prog: &BBProgram, site: InsnSite) -> anyhow::Result<usize> {
+fn site_offset_in_block_slots(prog: &ProgramCFG, site: InsnSite) -> anyhow::Result<usize> {
     prog.block(site.block)?;
     let mut offset = 0usize;
     for idx in 0..site.idx {
@@ -1205,7 +1205,7 @@ fn site_offset_in_block_slots(prog: &BBProgram, site: InsnSite) -> anyhow::Resul
     }
     Ok(offset)
 }
-fn logical_sites_for_block(block: &Block) -> Vec<InsnSite> {
+fn logical_sites_for_block(block: &BasicBlock) -> Vec<InsnSite> {
     let mut sites = (0..block.insns.len())
         .map(|idx| InsnSite {
             block: block.id,
@@ -1316,7 +1316,7 @@ impl LiftedRegFact {
 struct LiftedRegFacts {
     by_site: HashMap<InsnSite, [LiftedRegFact; 11]>,
 }
-fn compute_site_liveness(prog: &BBProgram) -> anyhow::Result<SiteLivenessSets> {
+fn compute_site_liveness(prog: &ProgramCFG) -> anyhow::Result<SiteLivenessSets> {
     let mut sites = Vec::new();
     let mut use_sets = HashMap::<InsnSite, RegSet>::new();
     let mut def_sets = HashMap::<InsnSite, RegSet>::new();
@@ -1373,7 +1373,7 @@ fn compute_site_liveness(prog: &BBProgram) -> anyhow::Result<SiteLivenessSets> {
     }
     Ok(SiteLivenessSets { live_in, live_out })
 }
-fn compute_lifted_reg_facts(prog: &BBProgram) -> anyhow::Result<LiftedRegFacts> {
+fn compute_lifted_reg_facts(prog: &ProgramCFG) -> anyhow::Result<LiftedRegFacts> {
     let mut by_site = HashMap::new();
     let layout = crate::insn::packet_ctx_layout(
         prog.prog_type,
@@ -1509,7 +1509,7 @@ fn advance_lifted_regs(
     }
     Ok(())
 }
-fn site_successors(prog: &BBProgram, site: InsnSite) -> anyhow::Result<Vec<InsnSite>> {
+fn site_successors(prog: &ProgramCFG, site: InsnSite) -> anyhow::Result<Vec<InsnSite>> {
     let block = prog.block(site.block)?;
     if site.idx < block.insns.len() {
         if site.idx + 1 < block.insns.len() {
@@ -1532,7 +1532,7 @@ fn site_successors(prog: &BBProgram, site: InsnSite) -> anyhow::Result<Vec<InsnS
     Ok(successors)
 }
 fn first_logical_sites(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     block: BlockId,
     visited: &mut BTreeSet<BlockId>,
 ) -> anyhow::Result<Vec<InsnSite>> {
@@ -1550,7 +1550,7 @@ fn first_logical_sites(
     }
     Ok(successors)
 }
-impl BBProgram {
+impl ProgramCFG {
     #[cfg(test)]
     pub(crate) fn rep_site_slot(&self, site: InsnSite) -> anyhow::Result<usize> {
         let offset = site_offset_in_block_slots(self, site)?;

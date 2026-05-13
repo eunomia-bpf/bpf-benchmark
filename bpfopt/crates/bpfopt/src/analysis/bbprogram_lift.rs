@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-//! Lift linear BPF bytecode into BBProgram.
+//! Lift linear BPF bytecode into ProgramCFG.
 
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::sync::Arc;
@@ -7,7 +7,8 @@ use std::sync::Arc;
 use anyhow::{Context, Result};
 
 use crate::analysis::{
-    BBProgram, Block, BlockId, BtfMetadataMap, FrameId, InsnSite, Terminator, VerifierStatesBySite,
+    BasicBlock, BlockId, BtfMetadataMap, FrameId, InsnSite, ProgramCFG, Terminator,
+    VerifierStatesBySite,
 };
 use crate::insn::*;
 use crate::pass::{
@@ -19,7 +20,7 @@ use crate::pass::{
 pub(crate) fn lift(
     insns: &[BpfInsn],
     verifier_states: Option<Arc<[VerifierInsn]>>,
-) -> anyhow::Result<BBProgram> {
+) -> anyhow::Result<ProgramCFG> {
     lift_with_kinsn_registry(insns, verifier_states, Arc::new(KinsnRegistry::new()?))
 }
 
@@ -27,9 +28,9 @@ pub(crate) fn lift_with_kinsn_registry(
     insns: &[BpfInsn],
     verifier_states: Option<Arc<[VerifierInsn]>>,
     kinsn_reg: Arc<KinsnRegistry>,
-) -> anyhow::Result<BBProgram> {
+) -> anyhow::Result<ProgramCFG> {
     if insns.is_empty() {
-        return BBProgram::new(
+        return ProgramCFG::new(
             Vec::new(),
             BlockId(0),
             lift_verifier_states_by_site(verifier_states, &BTreeMap::new())?,
@@ -64,7 +65,7 @@ pub(crate) fn lift_with_kinsn_registry(
             frame = current_frame;
         }
         let frame = FrameId(frame);
-        let mut block = Block {
+        let mut block = BasicBlock {
             id,
             insns: Vec::new(),
             terminator: Terminator::End,
@@ -125,7 +126,7 @@ pub(crate) fn lift_with_kinsn_registry(
 
     let verifier_states = lift_verifier_states_by_site(verifier_states, &btf)?;
 
-    BBProgram::new(
+    ProgramCFG::new(
         blocks,
         BlockId(0),
         verifier_states,
@@ -136,7 +137,7 @@ pub(crate) fn lift_with_kinsn_registry(
     )
 }
 
-pub fn lift_with_pass_context(insns: &[BpfInsn], ctx: &PassContext) -> anyhow::Result<BBProgram> {
+pub fn lift_with_pass_context(insns: &[BpfInsn], ctx: &PassContext) -> anyhow::Result<ProgramCFG> {
     let mut prog = lift_with_kinsn_registry(
         insns,
         ctx.has_verifier_states().then(|| ctx.verifier_states_arc()),
@@ -154,8 +155,8 @@ pub fn lift_with_pass_context(insns: &[BpfInsn], ctx: &PassContext) -> anyhow::R
 }
 
 // Snapshot initialization canonicalizes loader-owned map references before the
-// daemon lifts bytecode into BBProgram. This is intentionally a raw Vec mutation
-// path for lift-time normalization; optimization passes operate through BBProgram.
+// daemon lifts bytecode into ProgramCFG. This is intentionally a raw Vec mutation
+// path for lift-time normalization; optimization passes operate through ProgramCFG.
 pub fn canonicalize_map_refs_to_idx(
     insns: &mut [BpfInsn],
     original_loader_fd_array: Option<&[i32]>,

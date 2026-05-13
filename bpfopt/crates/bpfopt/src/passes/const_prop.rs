@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{BBProgram, InsnSite};
+use crate::analysis::{InsnSite, ProgramCFG};
 use crate::insn::*;
 use crate::pass::*;
 
@@ -12,12 +12,12 @@ impl BpfPass for ConstPropPass {
     fn name(&self) -> &str {
         "const_prop"
     }
-    fn run(&self, program: &mut BBProgram, _ctx: &PassContext) -> anyhow::Result<PassResult> {
+    fn run(&self, program: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program)
     }
 }
 
-pub fn run_on_bbprogram(prog: &mut BBProgram) -> anyhow::Result<PassResult> {
+pub fn run_on_bbprogram(prog: &mut ProgramCFG) -> anyhow::Result<PassResult> {
     if prog.is_empty() {
         return Ok(PassResult::unchanged());
     }

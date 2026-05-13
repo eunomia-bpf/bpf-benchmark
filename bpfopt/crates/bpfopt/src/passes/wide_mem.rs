@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{BBProgram, BlockId, InsnSite, Terminator};
+use crate::analysis::{BlockId, InsnSite, ProgramCFG, Terminator};
 use crate::insn::*;
 use crate::pass::*;
 use anyhow::{bail, Context};
@@ -167,11 +167,11 @@ impl BpfPass for WideMemPass {
     fn name(&self) -> &str {
         "wide_mem"
     }
-    fn run(&self, program: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program, ctx)
     }
 }
-pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Result<PassResult> {
+pub fn run_on_bbprogram(prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
     let branch_targets = prog.branch_target_entry_sites()?;
     let mut safe_sites = Vec::new();
     let mut skipped = Vec::new();
@@ -269,7 +269,7 @@ pub fn run_on_bbprogram(prog: &mut BBProgram, ctx: &PassContext) -> anyhow::Resu
     Ok(PassResult::with_sites(applied, skipped))
 }
 fn add_cross_block_wide_mem_skips(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     branch_targets: &BTreeSet<InsnSite>,
     reported_starts: &mut BTreeSet<InsnSite>,
     skipped: &mut Vec<SiteSkipReason>,
@@ -299,7 +299,7 @@ fn add_cross_block_wide_mem_skips(
     Ok(())
 }
 fn collect_wide_mem_window(
-    prog: &BBProgram,
+    prog: &ProgramCFG,
     start_block: BlockId,
     start_idx: usize,
     branch_targets: &BTreeSet<InsnSite>,
