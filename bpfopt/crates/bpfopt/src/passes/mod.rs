@@ -27,78 +27,20 @@ use crate::pass::{BpfPass, KinsnDescriptor};
 
 // ── Pass registry ───────────────────────────────────────────────────
 
-/// Entry in the pass registry. Defines the canonical name and constructor for
-/// each pass.
+/// Entry in the pass registry. `kinsn_targets` declares which kinsn descriptors
+/// the pass might emit (used by `KinsnRegistry` to know which targets exist and
+/// to compute register liveness for in-bytecode kinsn calls). `needs_verifier_states`
+/// flags passes that consume the daemon's verifier log at lift time.
+///
+/// There is intentionally no kinsn pre-flight or arch gate here — bpfopt emits
+/// candidate bytecode and lets the kernel verifier (via the daemon's REJIT)
+/// reject what the running kernel cannot accept.
 pub struct PassRegistryEntry {
-    /// Canonical pass name (matches `BpfPass::name()`).
     pub name: &'static str,
-    /// Constructor: parses pass-local CLI args and returns a boxed pass instance.
     pub make: fn(&[String]) -> Result<Box<dyn BpfPass>>,
-    /// Side-input and kinsn requirements consumed by the CLI entrypoint.
-    pub requirements: PassRequirements,
-}
-
-#[derive(Clone, Copy, Debug)]
-pub struct PassRequirements {
-    flags: u8,
     pub kinsn_targets: &'static [KinsnDescriptor],
-    pub required_kinsns: &'static [&'static str],
+    pub needs_verifier_states: bool,
 }
-
-impl PassRequirements {
-    const fn new(
-        flags: u8,
-        kinsn_targets: &'static [KinsnDescriptor],
-        required_kinsns: &'static [&'static str],
-    ) -> Self {
-        Self {
-            flags,
-            kinsn_targets,
-            required_kinsns,
-        }
-    }
-
-    pub fn needs_kinsns(self) -> bool {
-        self.flags & NEEDS_KINSNS != 0
-    }
-
-    pub fn needs_verifier_states(self) -> bool {
-        self.flags & NEEDS_VERIFIER_STATES != 0
-    }
-}
-
-const NEEDS_KINSNS: u8 = 1 << 0;
-const NEEDS_VERIFIER_STATES: u8 = 1 << 1;
-
-const REQ_ROTATE: &[&str] = &["bpf_rotate64", "bpf_rotate32"];
-const REQ_SELECT: &[&str] = &["bpf_select64"];
-const REQ_CCMP: &[&str] = &["bpf_ccmp64"];
-const REQ_EXTRACT: &[&str] = &["bpf_extract64"];
-const REQ_ENDIAN: &[&str] = &[
-    "bpf_endian_load16",
-    "bpf_endian_load32",
-    "bpf_endian_load64",
-];
-const REQ_BULK_MEMORY: &[&str] = &["bpf_bulk_memcpy", "bpf_bulk_memset"];
-const REQ_PREFETCH: &[&str] = &["bpf_prefetch"];
-
-const PASS_REQ_NONE: PassRequirements = PassRequirements::new(0, &[], &[]);
-const PASS_REQ_NEEDS_STATES: PassRequirements =
-    PassRequirements::new(NEEDS_VERIFIER_STATES, &[], &[]);
-const PASS_REQ_ROTATE: PassRequirements =
-    PassRequirements::new(NEEDS_KINSNS, rotate::KINSN_TARGETS, REQ_ROTATE);
-const PASS_REQ_SELECT: PassRequirements =
-    PassRequirements::new(NEEDS_KINSNS, cond_select::KINSN_TARGETS, REQ_SELECT);
-const PASS_REQ_CCMP: PassRequirements =
-    PassRequirements::new(NEEDS_KINSNS, ccmp::KINSN_TARGETS, REQ_CCMP);
-const PASS_REQ_EXTRACT: PassRequirements =
-    PassRequirements::new(NEEDS_KINSNS, extract::KINSN_TARGETS, REQ_EXTRACT);
-const PASS_REQ_ENDIAN: PassRequirements =
-    PassRequirements::new(NEEDS_KINSNS, endian::KINSN_TARGETS, REQ_ENDIAN);
-const PASS_REQ_BULK_MEMORY: PassRequirements =
-    PassRequirements::new(NEEDS_KINSNS, bulk_memory::KINSN_TARGETS, REQ_BULK_MEMORY);
-const PASS_REQ_PREFETCH: PassRequirements =
-    PassRequirements::new(NEEDS_KINSNS, prefetch::KINSN_TARGETS, REQ_PREFETCH);
 
 fn reject_pass_args(pass_name: &str, args: &[String]) -> Result<()> {
     if !args.is_empty() {
@@ -111,14 +53,15 @@ fn reject_pass_args(pass_name: &str, args: &[String]) -> Result<()> {
 }
 
 #[rustfmt::skip] macro_rules! pass_entry {
-    ($name:literal, $make:expr, $requirements:expr) => {
+    ($name:literal, $make:expr, $kinsn_targets:expr, $needs_verifier_states:expr) => {
         PassRegistryEntry {
             name: $name,
             make: |args| -> Result<Box<dyn BpfPass>> {
                 reject_pass_args($name, args)?;
                 Ok(Box::new($make))
             },
-            requirements: $requirements,
+            kinsn_targets: $kinsn_targets,
+            needs_verifier_states: $needs_verifier_states,
         }
     };
 }
@@ -127,21 +70,21 @@ fn reject_pass_args(pass_name: &str, args: &[String]) -> Result<()> {
 /// build a single-pass invocation; the daemon iterates this array in order when
 /// orchestrating multiple per-pass `bpfopt` invocations.
 #[rustfmt::skip] pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
-    pass_entry!("noop", noop::NoopPass, PASS_REQ_NONE),
-    PassRegistryEntry { name: "map_inline", make: map_inline::MapInlinePass::from_cli_args, requirements: PASS_REQ_NEEDS_STATES },
-    pass_entry!("const_prop", const_prop::ConstPropPass, PASS_REQ_NEEDS_STATES),
-    pass_entry!("dce", dce::DcePass, PASS_REQ_NONE),
-    pass_entry!("skb_load_bytes_spec", skb_load_bytes::SkbLoadBytesSpecPass, PASS_REQ_NONE),
-    pass_entry!("bounds_check_merge", bounds_check_merge::BoundsCheckMergePass, PASS_REQ_NONE),
-    pass_entry!("wide_mem", wide_mem::WideMemPass, PASS_REQ_NONE),
-    pass_entry!("bulk_memory", bulk_memory::BulkMemoryPass, PASS_REQ_BULK_MEMORY),
-    pass_entry!("rotate", rotate::RotatePass, PASS_REQ_ROTATE),
-    pass_entry!("cond_select", cond_select::CondSelectPass, PASS_REQ_SELECT),
-    pass_entry!("ccmp", ccmp::CcmpPass, PASS_REQ_CCMP),
-    pass_entry!("extract", extract::ExtractPass, PASS_REQ_EXTRACT),
-    pass_entry!("endian_fusion", endian::EndianFusionPass, PASS_REQ_ENDIAN),
-    pass_entry!("branch_flip", branch_flip::BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 }, PASS_REQ_NONE),
-    pass_entry!("prefetch", prefetch::PrefetchPass, PASS_REQ_PREFETCH),
+    pass_entry!("noop", noop::NoopPass, &[], false),
+    PassRegistryEntry { name: "map_inline", make: map_inline::MapInlinePass::from_cli_args, kinsn_targets: &[], needs_verifier_states: true },
+    pass_entry!("const_prop", const_prop::ConstPropPass, &[], true),
+    pass_entry!("dce", dce::DcePass, &[], false),
+    pass_entry!("skb_load_bytes_spec", skb_load_bytes::SkbLoadBytesSpecPass, &[], false),
+    pass_entry!("bounds_check_merge", bounds_check_merge::BoundsCheckMergePass, &[], false),
+    pass_entry!("wide_mem", wide_mem::WideMemPass, &[], false),
+    pass_entry!("bulk_memory", bulk_memory::BulkMemoryPass, bulk_memory::KINSN_TARGETS, false),
+    pass_entry!("rotate", rotate::RotatePass, rotate::KINSN_TARGETS, false),
+    pass_entry!("cond_select", cond_select::CondSelectPass, cond_select::KINSN_TARGETS, false),
+    pass_entry!("ccmp", ccmp::CcmpPass, ccmp::KINSN_TARGETS, false),
+    pass_entry!("extract", extract::ExtractPass, extract::KINSN_TARGETS, false),
+    pass_entry!("endian_fusion", endian::EndianFusionPass, endian::KINSN_TARGETS, false),
+    pass_entry!("branch_flip", branch_flip::BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 }, &[], false),
+    pass_entry!("prefetch", prefetch::PrefetchPass, prefetch::KINSN_TARGETS, false),
 ];
 
 #[cfg(test)]

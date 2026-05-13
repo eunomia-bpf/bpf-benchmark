@@ -111,9 +111,6 @@ pub struct CommonArgs {
     /// Pass report JSON output file.
     #[arg(long, value_name = "FILE")]
     pub report: Option<PathBuf>,
-    /// Target architecture: x86_64 or aarch64.
-    #[arg(long, value_name = "ARCH")]
-    pub platform: Option<String>,
     /// BPF program type, such as xdp, sched_cls, tracing, or a numeric type.
     #[arg(long, value_name = "TYPE")]
     pub prog_type: Option<String>,
@@ -142,7 +139,9 @@ pub struct CommonArgs {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct TargetJson {
-    #[serde(skip_serializing_if = "Option::is_none")]
+    /// Target architecture (e.g. "x86_64", "aarch64"). Consumed by passes
+    /// for emit-time optimization choices; never used for admission/gating.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub arch: Option<String>,
     #[serde(default)]
     pub kinsns: BTreeMap<String, KinsnJson>,
@@ -253,8 +252,11 @@ pub trait BpfPass: Send + Sync {
 pub struct PassContext {
     /// Available kinsn targets and static descriptors.
     pub kinsn_registry: KinsnRegistry,
-    /// CPU capabilities (detected at startup, checked by kinsn passes).
-    pub platform: PlatformCapabilities,
+    /// Target architecture for emission-time optimization choices (e.g.
+    /// endian_fusion's directly-encodable offset rules). Sourced from
+    /// `target.json`, never auto-detected from the host. Has no bearing on
+    /// pass admission — invalid bytecode is rejected by the kernel verifier.
+    pub arch: Arch,
     /// BPF program type (from `bpf_prog_info.type`).
     /// Used by passes to apply program-type-specific safety filters.
     /// 0 = unspecified (conservative behavior applies).
@@ -319,7 +321,7 @@ impl KinsnRegistry {
             by_call: HashMap::new(),
         };
         for pass in crate::passes::PASS_REGISTRY {
-            for descriptor in pass.requirements.kinsn_targets {
+            for descriptor in pass.kinsn_targets {
                 let previous = registry.by_name.insert(
                     descriptor.name,
                     RegistryEntry {
@@ -411,26 +413,29 @@ impl KinsnRegistry {
             .map(|entry| entry.call_off)
             .ok_or_else(|| anyhow::anyhow!("unknown kinsn target: {target_name}"))
     }
-
-    pub fn is_target_available(&self, target_name: &str) -> bool {
-        self.by_name
-            .get(target_name)
-            .is_some_and(|entry| entry.btf_id.is_some())
-    }
 }
 
 /// CPU platform capabilities. Currently only `arch` matters at runtime —
 /// pass admission gates on kinsn availability instead of CPU feature bits.
-#[derive(Clone, Debug, Default)]
-pub struct PlatformCapabilities {
-    pub arch: Arch,
-}
-
+/// Target architecture, sourced from `target.json`. Used by emit-time
+/// optimization choices in passes (e.g. endian_fusion offset encoding).
+/// Default is `X86_64` so that programs targeting the most common arch
+/// stay optimized when `target.json` omits the `arch` field.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum Arch {
     #[default]
     X86_64,
     Aarch64,
+}
+
+impl Arch {
+    pub fn from_str(s: &str) -> anyhow::Result<Self> {
+        match s {
+            "x86_64" | "amd64" => Ok(Self::X86_64),
+            "aarch64" | "arm64" => Ok(Self::Aarch64),
+            _ => anyhow::bail!("unsupported target arch: {s}"),
+        }
+    }
 }
 
 pub fn run_pass_once(
@@ -660,10 +665,5 @@ impl PassContext {
     /// `ProgramCFG::reg_*` queries instead of touching raw verifier data.
     pub(crate) fn verifier_states_arc(&self) -> Arc<[VerifierInsn]> {
         Arc::clone(&self.verifier_states)
-    }
-
-    /// Whether cond_select can lower to the branchless-select kinsn.
-    pub fn has_branchless_select(&self) -> bool {
-        self.kinsn_registry.is_target_available("bpf_select64")
     }
 }

@@ -86,16 +86,7 @@ impl CondSelectSite {
 }
 
 impl BpfPass for CondSelectPass {
-    fn run(&self, prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
-        // Check if the target exposes the select kinsn; CPU features alone are
-        // insufficient because this pass always emits bpf_select64.
-        if !ctx.has_branchless_select() {
-            return PassResult::skipped_pass(
-                prog,
-                "target lacks bpf_select64 branchless select support",
-            );
-        }
-
+    fn run(&self, prog: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
         let sites = scan_cond_select_sites(prog)?;
         let (btf_id, kfunc_off) = prog.kinsn_call("bpf_select64")?;
         let mut safe_sites = Vec::new();

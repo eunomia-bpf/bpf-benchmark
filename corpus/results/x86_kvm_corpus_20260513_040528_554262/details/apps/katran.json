@@ -1,0 +1,116 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "530": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 530,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 984205,
+        "run_time_ns_delta": 152265286,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d15s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 15.10362021100002,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 15s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   252.76us  161.52us   4.18ms   81.79%\n    Req/Sec     8.20k   489.74    11.74k    78.11%\n  Latency Distribution\n     50%  211.00us\n     75%  314.00us\n     90%  457.00us\n     99%  826.00us\n  492079 requests in 15.10s, 76.49MB read\nRequests/sec:  32589.66\nTransfer/sec:      5.07MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "530": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 530,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 998927,
+        "run_time_ns_delta": 150544982,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d15s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 15.102529147000041,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 15s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   249.29us  158.37us   3.47ms   81.18%\n    Req/Sec     8.31k   438.64    10.16k    70.53%\n  Latency Distribution\n     50%  208.00us\n     75%  310.00us\n     90%  449.00us\n     99%  811.00us\n  499441 requests in 15.10s, 77.64MB read\nRequests/sec:  33075.33\nTransfer/sec:      5.14MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "530": {
+        "passes": [
+          {
+            "bpfopt_ms": 5,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-383/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-383/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-383/report_step0.json --prog-type xdp --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-383/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-383/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 530,
+        "program": {
+          "final_insn_count": 2542,
+          "orig_insn_count": 2542,
+          "prog_id": 530,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}

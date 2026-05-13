@@ -2,7 +2,6 @@
 
 use super::cond_select::CondSelectPass;
 use crate::insn::*;
-use crate::pass::Arch;
 use crate::test_helpers::*;
 
 fn select_ctx() -> crate::pass::PassContext {
@@ -184,29 +183,13 @@ fn test_cond_select_short_pattern_c_no_match_cond_clobbered() {
 }
 
 #[test]
-fn cond_select_skips_when_no_branchless_target_exists() {
+fn cond_select_errors_when_no_branchless_target_exists() {
     let input = pattern(
         BpfInsn::mov64_imm(BPF_REG_0, 0),
         BpfInsn::mov64_imm(BPF_REG_0, 1),
     );
 
-    let run = run_pass_on_insns(CondSelectPass, input, &pass_ctx());
+    let err = pass_error_on_insns(CondSelectPass, input, &pass_ctx());
 
-    assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run, 0, "branchless select");
-}
-
-#[test]
-fn cond_select_works_on_aarch64_without_cmov_cpu_feature() {
-    let mut ctx = select_ctx();
-    ctx.platform.arch = Arch::Aarch64;
-    let input = pattern(
-        BpfInsn::mov64_imm(BPF_REG_0, 0),
-        BpfInsn::mov64_imm(BPF_REG_0, 1),
-    );
-
-    let run = run_pass_on_insns(CondSelectPass, input, &ctx);
-
-    assert_eq!(run.result.sites_applied, 1);
-    assert!(run.lowered.iter().any(|i| i.is_call_kinsn()));
+    assert!(err.contains("bpf_select64"), "unexpected error: {err}");
 }

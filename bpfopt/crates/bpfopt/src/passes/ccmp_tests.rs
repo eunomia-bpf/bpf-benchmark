@@ -2,17 +2,14 @@
 
 use super::ccmp::{encode_ccmp_payload, CcmpFailMode, CcmpPass, CcmpWidth};
 use crate::insn::*;
-use crate::pass::Arch;
 use crate::test_helpers::*;
 
 fn jmp_zero(op: u8, class: u8, reg: u8, off: i16) -> BpfInsn {
     BpfInsn::new(class | op | BPF_K, BpfInsn::make_regs(reg, 0), off, 0)
 }
 
-fn ccmp_ctx(arch: Arch) -> crate::pass::PassContext {
-    let mut ctx = ctx_with_kinsn("bpf_ccmp64", 77);
-    ctx.platform.arch = arch;
-    ctx
+fn ccmp_ctx() -> crate::pass::PassContext {
+    ctx_with_kinsn("bpf_ccmp64", 77)
 }
 
 fn three_term_chain() -> Vec<BpfInsn> {
@@ -80,15 +77,8 @@ fn ccmp_payload_roundtrips_canonical_encoding() {
 }
 
 #[test]
-fn ccmp_arch_gate_fails_on_x86_64() {
-    let err = pass_error_on_insns(CcmpPass, three_term_chain(), &ccmp_ctx(Arch::X86_64));
-
-    assert!(err.contains("aarch64"), "unexpected error: {err}");
-}
-
-#[test]
 fn ccmp_emits_kinsn_and_final_branch_on_aarch64() {
-    let run = run_pass_on_insns(CcmpPass, three_term_chain(), &ccmp_ctx(Arch::Aarch64));
+    let run = run_pass_on_insns(CcmpPass, three_term_chain(), &ccmp_ctx());
 
     assert_eq!(run.result.sites_applied, 1);
     assert!(run.lowered[0].is_kinsn_sidecar());
@@ -107,7 +97,7 @@ fn ccmp_rejects_mixed_fail_polarity_chain() {
         BpfInsn::exit(),
     ];
 
-    let run = run_pass_on_insns(CcmpPass, input.clone(), &ccmp_ctx(Arch::Aarch64));
+    let run = run_pass_on_insns(CcmpPass, input.clone(), &ccmp_ctx());
 
     assert_eq!(run.result.sites_applied, 0);
     assert_eq!(run.lowered, input);
@@ -125,7 +115,7 @@ fn ccmp_skips_overlong_chain_without_partial_rewrite() {
         BpfInsn::exit(),
     ];
 
-    let run = run_pass_on_insns(CcmpPass, input, &ccmp_ctx(Arch::Aarch64));
+    let run = run_pass_on_insns(CcmpPass, input, &ccmp_ctx());
 
     assert_eq!(run.result.sites_applied, 0);
     assert_skip_reason(&run, 0, "exceeds maximum");
@@ -141,7 +131,7 @@ fn ccmp_skips_site_crossing_subprog_boundary() {
         BpfInsn::exit(),
     ];
 
-    let run = run_pass_on_insns(CcmpPass, input, &ccmp_ctx(Arch::Aarch64));
+    let run = run_pass_on_insns(CcmpPass, input, &ccmp_ctx());
 
     assert_eq!(run.result.sites_applied, 0);
     assert_skip_reason(&run, 0, "subprog boundary");

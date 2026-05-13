@@ -12,7 +12,7 @@ use bpfopt::analysis::{lift_with_pass_context, lower, ProgramCFG};
 use bpfopt::insn::BpfInsn;
 use bpfopt::pass::{
     hex_bytes, report_site_pc, run_pass_once, BtfInfoRecords, CommonArgs, KinsnRegistry,
-    PassContext, PassResult, PlatformCapabilities, TargetJson,
+    PassContext, PassResult, TargetJson,
 };
 use bpfopt::passes::PASS_REGISTRY;
 use clap::Parser;
@@ -104,7 +104,8 @@ fn run_main() -> Result<()> {
         .pass
         .as_deref()
         .ok_or_else(|| anyhow!("bpfopt requires --pass <name>"))?;
-    run_single_pass(&cli.common, lookup_pass_name(pass)?, &cli.pass_args)
+    let pass_name = registry_entry(pass.trim())?.name;
+    run_single_pass(&cli.common, pass_name, &cli.pass_args)
 }
 
 fn run_canonicalize_map_refs(
@@ -138,7 +139,10 @@ fn run_single_pass(
     pass_name: &'static str,
     pass_args: &[String],
 ) -> Result<()> {
-    validate_required_side_inputs(common, &[pass_name])?;
+    let entry = registry_entry(pass_name)?;
+    if entry.needs_verifier_states && common.verifier_states.is_none() {
+        bail!("{pass_name} requires --verifier-states");
+    }
 
     let input = read_bytecode(common.input.as_deref())?;
     let mut ctx = build_pass_context(common)?;
@@ -148,10 +152,8 @@ fn run_single_pass(
     } else {
         pass_args
     };
-    validate_required_kinsns(&ctx, &[pass_name])?;
     let mut program = lift_with_pass_context(&input, &ctx)?;
     let report_program = common.report.is_some().then(|| program.clone());
-    let entry = registry_entry(pass_name)?;
     let pass = (entry.make)(pass_constructor_args)?;
     let result = run_pass_once(pass.as_ref(), &mut program, &ctx)?;
     let output = lower(&program)?;
@@ -172,53 +174,6 @@ fn registry_entry(name: &str) -> Result<&'static bpfopt::passes::PassRegistryEnt
         .iter()
         .find(|entry| entry.name == name)
         .ok_or_else(|| anyhow!("unknown pass name: {name}"))
-}
-
-fn lookup_pass_name(input: &str) -> Result<&'static str> {
-    Ok(registry_entry(input.trim())?.name)
-}
-
-fn validate_required_side_inputs(common: &CommonArgs, pass_names: &[&str]) -> Result<()> {
-    for &pass_name in pass_names {
-        let entry = registry_entry(pass_name)?;
-        if entry.requirements.needs_kinsns() && common.target.is_none() && common.kinsns.is_empty()
-        {
-            bail!("{pass_name} requires --target kinsn capabilities or --kinsns");
-        }
-        if entry.requirements.needs_verifier_states() && common.verifier_states.is_none() {
-            bail!("{pass_name} requires --verifier-states");
-        }
-    }
-    Ok(())
-}
-
-fn validate_required_kinsns(ctx: &PassContext, pass_names: &[&str]) -> Result<()> {
-    for &pass_name in pass_names {
-        let entry = registry_entry(pass_name)?;
-        if !entry.requirements.needs_kinsns() {
-            continue;
-        }
-        let target_names = entry.requirements.required_kinsns.iter().copied();
-        require_all_kinsns(ctx, target_names, pass_name)?;
-    }
-    Ok(())
-}
-
-fn require_all_kinsns<I>(ctx: &PassContext, target_names: I, pass_label: &str) -> Result<()>
-where
-    I: IntoIterator<Item = &'static str>,
-{
-    let missing = target_names
-        .into_iter()
-        .filter(|target_name| !ctx.kinsn_registry.is_target_available(target_name))
-        .collect::<Vec<_>>();
-    if missing.is_empty() {
-        return Ok(());
-    }
-    bail!(
-        "{pass_label} requires target kinsns: {}",
-        missing.join(", ")
-    );
 }
 
 fn read_bytecode(input: Option<&Path>) -> Result<Vec<BpfInsn>> {
@@ -320,7 +275,6 @@ fn write_btf_info_outputs(common: &CommonArgs, program: &ProgramCFG) -> Result<(
 
 fn build_pass_context(common: &CommonArgs) -> Result<PassContext> {
     let mut ctx = PassContext::default();
-    ctx.platform = detect_platform();
     if let Some(path) = common.verifier_states.as_deref() {
         let log = fs::read_to_string(path)
             .with_context(|| format!("failed to read verifier states from {}", path.display()))?;
@@ -338,9 +292,6 @@ fn build_pass_context(common: &CommonArgs) -> Result<PassContext> {
         "line-info",
     )?;
 
-    if let Some(platform) = common.platform.as_deref() {
-        ctx.platform.arch = parse_arch(platform)?;
-    }
     if let Some(prog_type) = common.prog_type.as_deref() {
         ctx.prog_type = parse_prog_type(prog_type)?;
     }
@@ -348,7 +299,7 @@ fn build_pass_context(common: &CommonArgs) -> Result<PassContext> {
     if let Some(path) = common.target.as_deref() {
         let target: TargetJson = read_json_file(path, "target.json")?;
         if let Some(arch) = target.arch.as_deref() {
-            ctx.platform.arch = parse_arch(arch)?;
+            ctx.arch = bpfopt::pass::Arch::from_str(arch)?;
         }
         ctx.kinsn_registry = kinsn_registry_from_target(&target)?;
     }
@@ -358,27 +309,6 @@ fn build_pass_context(common: &CommonArgs) -> Result<PassContext> {
     }
 
     Ok(ctx)
-}
-
-fn detect_platform() -> PlatformCapabilities {
-    let mut platform = PlatformCapabilities::default();
-    #[cfg(target_arch = "aarch64")]
-    {
-        platform.arch = bpfopt::pass::Arch::Aarch64;
-    }
-    #[cfg(target_arch = "x86_64")]
-    {
-        platform.arch = bpfopt::pass::Arch::X86_64;
-    }
-    platform
-}
-
-fn parse_arch(arch: &str) -> Result<bpfopt::pass::Arch> {
-    match arch {
-        "x86_64" | "amd64" => Ok(bpfopt::pass::Arch::X86_64),
-        "aarch64" | "arm64" => Ok(bpfopt::pass::Arch::Aarch64),
-        _ => bail!("unsupported platform arch: {arch}"),
-    }
 }
 
 fn parse_prog_type(input: &str) -> Result<u32> {

@@ -1,0 +1,1378 @@
+{
+  "app": "bcc/set",
+  "baseline": {
+    "bpf": {
+      "6": {
+        "bytes_jited": 72,
+        "bytes_xlated": 112,
+        "id": 6,
+        "name": "tracepoint__raw_syscalls__sys_enter",
+        "run_cnt_delta": 233103438,
+        "run_time_ns_delta": 24053078920,
+        "type": "tracepoint"
+      },
+      "7": {
+        "bytes_jited": 236,
+        "bytes_xlated": 400,
+        "id": 7,
+        "name": "tracepoint__raw_syscalls__sys_exit",
+        "run_cnt_delta": 233103858,
+        "run_time_ns_delta": 16798563772,
+        "type": "tracepoint"
+      },
+      "10": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 10,
+        "name": "vfs_create",
+        "run_cnt_delta": 565039,
+        "run_time_ns_delta": 57405747,
+        "type": "tracing"
+      },
+      "11": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 11,
+        "name": "kfunc__vmlinux__vfs_fsync_range",
+        "run_cnt_delta": 36960,
+        "run_time_ns_delta": 1986472,
+        "type": "tracing"
+      },
+      "12": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 12,
+        "name": "vfs_open",
+        "run_cnt_delta": 6133496,
+        "run_time_ns_delta": 279785784,
+        "type": "tracing"
+      },
+      "13": {
+        "bytes_jited": 87,
+        "bytes_xlated": 136,
+        "id": 13,
+        "name": "vfs_read",
+        "run_cnt_delta": 5835844,
+        "run_time_ns_delta": 215612185,
+        "type": "tracing"
+      },
+      "14": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 14,
+        "name": "vfs_write",
+        "run_cnt_delta": 1570514,
+        "run_time_ns_delta": 67676145,
+        "type": "tracing"
+      },
+      "19": {
+        "bytes_jited": 203,
+        "bytes_xlated": 344,
+        "id": 19,
+        "name": "cap_capable",
+        "run_cnt_delta": 12924769,
+        "run_time_ns_delta": 592171981,
+        "type": "kprobe"
+      },
+      "22": {
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 22,
+        "name": "__x64_sys_open",
+        "run_cnt_delta": 9296,
+        "run_time_ns_delta": 1699531,
+        "type": "tracing"
+      },
+      "23": {
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 23,
+        "name": "kretfunc__vmlinux____x64_sys_openat",
+        "run_cnt_delta": 3842769,
+        "run_time_ns_delta": 712392961,
+        "type": "tracing"
+      },
+      "24": {
+        "bytes_jited": 590,
+        "bytes_xlated": 640,
+        "id": 24,
+        "name": "kretfunc__vmlinux____x64_sys_openat2",
+        "run_cnt_delta": 1698,
+        "run_time_ns_delta": 356785,
+        "type": "tracing"
+      },
+      "27": {
+        "bytes_jited": 662,
+        "bytes_xlated": 1168,
+        "id": 27,
+        "name": "sched_switch",
+        "run_cnt_delta": 6467624,
+        "run_time_ns_delta": 1005950344,
+        "type": "raw_tracepoint"
+      },
+      "28": {
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 28,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 4453926,
+        "run_time_ns_delta": 422179873,
+        "type": "raw_tracepoint"
+      },
+      "29": {
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 29,
+        "name": "raw_tracepoint__sched_wakeup_new",
+        "run_cnt_delta": 186527,
+        "run_time_ns_delta": 46386392,
+        "type": "raw_tracepoint"
+      },
+      "32": {
+        "bytes_jited": 75,
+        "bytes_xlated": 120,
+        "id": 32,
+        "name": "trace_connect_entry",
+        "run_cnt_delta": 154230,
+        "run_time_ns_delta": 20646771,
+        "type": "kprobe"
+      },
+      "33": {
+        "bytes_jited": 480,
+        "bytes_xlated": 720,
+        "id": 33,
+        "name": "trace_connect_v4_return",
+        "run_cnt_delta": 154230,
+        "run_time_ns_delta": 137054208,
+        "type": "kprobe"
+      },
+      "34": {
+        "bytes_jited": 477,
+        "bytes_xlated": 712,
+        "id": 34,
+        "name": "trace_connect_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "37": {
+        "bytes_jited": 1067,
+        "bytes_xlated": 1672,
+        "id": 37,
+        "name": "tracepoint__sock__inet_sock_set_state",
+        "run_cnt_delta": 1669447,
+        "run_time_ns_delta": 496281047,
+        "type": "tracepoint"
+      },
+      "38": {
+        "bytes_jited": 267,
+        "bytes_xlated": 448,
+        "id": 38,
+        "name": "trace_pid_start_tp",
+        "run_cnt_delta": 196622,
+        "run_time_ns_delta": 71735799,
+        "type": "tracepoint"
+      },
+      "39": {
+        "bytes_jited": 335,
+        "bytes_xlated": 616,
+        "id": 39,
+        "name": "trace_req_start",
+        "run_cnt_delta": 197894,
+        "run_time_ns_delta": 71909184,
+        "type": "kprobe"
+      },
+      "40": {
+        "bytes_jited": 550,
+        "bytes_xlated": 856,
+        "id": 40,
+        "name": "trace_req_completion_tp",
+        "run_cnt_delta": 199254,
+        "run_time_ns_delta": 36591701,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "4",
+          "--eventfd",
+          "4",
+          "--get",
+          "4",
+          "--prctl",
+          "4",
+          "--set",
+          "4",
+          "--dup",
+          "4",
+          "--kill",
+          "4",
+          "--sigfd",
+          "4",
+          "--signal",
+          "4",
+          "--pty",
+          "4",
+          "--itimer",
+          "4",
+          "--timerfd",
+          "4",
+          "--exec",
+          "4",
+          "--fork",
+          "4",
+          "--vfork",
+          "4",
+          "--clone",
+          "4",
+          "--ptrace",
+          "4",
+          "--futex",
+          "4",
+          "--sem",
+          "4",
+          "--aio",
+          "4",
+          "--aiol",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--io",
+          "4",
+          "--iomix",
+          "4",
+          "--iomix-bytes",
+          "128M",
+          "--io-uring",
+          "4",
+          "--sync-file",
+          "4",
+          "--epoll",
+          "4",
+          "--netdev",
+          "4",
+          "--sctp",
+          "4",
+          "--sock",
+          "4",
+          "--sockdiag",
+          "4",
+          "--sockfd",
+          "4",
+          "--sockpair",
+          "4",
+          "--sockmany",
+          "4",
+          "--udp",
+          "4",
+          "--udp-flood",
+          "4",
+          "--mmap",
+          "4",
+          "--mmap-bytes",
+          "16M",
+          "--mprotect",
+          "4",
+          "--mremap",
+          "4",
+          "--mremap-bytes",
+          "16M",
+          "--madvise",
+          "4",
+          "--access",
+          "4",
+          "--chdir",
+          "4",
+          "--chmod",
+          "4",
+          "--chown",
+          "4",
+          "--dentry",
+          "4",
+          "--dir",
+          "4",
+          "--dirmany",
+          "4",
+          "--fallocate",
+          "4",
+          "--fallocate-bytes",
+          "128M",
+          "--file-ioctl",
+          "4",
+          "--filename",
+          "4",
+          "--flock",
+          "4",
+          "--fpunch",
+          "4",
+          "--fpunch-bytes",
+          "32M",
+          "--fstat",
+          "4",
+          "--getdent",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--inotify",
+          "4",
+          "--open",
+          "4",
+          "--open-max",
+          "1024",
+          "--rename",
+          "4",
+          "--touch",
+          "4",
+          "--utime",
+          "4",
+          "--link",
+          "4",
+          "--symlink",
+          "4",
+          "--mknod",
+          "4",
+          "--fcntl",
+          "4",
+          "--epoll-port",
+          "21930",
+          "--sctp-port",
+          "22030",
+          "--sock-port",
+          "22130",
+          "--sockfd-port",
+          "22230",
+          "--timeout",
+          "15s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/do"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "eventfd",
+            "get",
+            "prctl",
+            "set",
+            "dup",
+            "kill",
+            "sigfd",
+            "signal",
+            "pty",
+            "itimer",
+            "timerfd",
+            "exec",
+            "fork",
+            "vfork",
+            "clone",
+            "ptrace",
+            "futex",
+            "sem",
+            "aio",
+            "aiol",
+            "hdd",
+            "io",
+            "iomix",
+            "io-uring",
+            "sync-file",
+            "epoll",
+            "netdev",
+            "sctp",
+            "sock",
+            "sockdiag",
+            "sockfd",
+            "sockpair",
+            "sockmany",
+            "udp",
+            "udp-flood",
+            "mmap",
+            "mprotect",
+            "mremap",
+            "madvise",
+            "access",
+            "chdir",
+            "chmod",
+            "chown",
+            "dentry",
+            "dir",
+            "dirmany",
+            "fallocate",
+            "file-ioctl",
+            "filename",
+            "flock",
+            "fpunch",
+            "fstat",
+            "getdent",
+            "hdd",
+            "inotify",
+            "open",
+            "rename",
+            "touch",
+            "utime",
+            "link",
+            "symlink",
+            "mknod",
+            "fcntl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 16.148384919999984,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [10799] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [10799] setting to a 15 secs run per stressor\nstress-ng: info:  [10799] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd, 4 fork, 4 vfork, 4 clone, 4 ptrace, 4 futex, 4 sem, 4 aio, 4 aiol, 4 hdd, 4 io, 4 iomix, 4 io-uring, 4 sync-file, 4 epoll, 4 netdev, 4 sctp, 4 sock, 4 sockdiag, 4 sockfd, 4 sockpair, 4 sockmany, 4 udp, 4 udp-flood, 4 mmap, 4 mprotect, 4 mremap, 4 madvise, 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [10799] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [10969] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: info:  [11485] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [11334] dentry: 457594 dentries allocated\nstress-ng: metrc: [10799] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [10799]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [10799] cap             1481717     15.05      0.46      5.54     98424.12      246612.55\nstress-ng: metrc: [10799] eventfd          336901     15.01      0.37      2.48     22447.12      118360.18\nstress-ng: metrc: [10799] get                8814     15.00      0.17      4.15       587.48        2039.02\nstress-ng: metrc: [10799] prctl              9190     15.00      2.92      1.89       612.47        1913.46\nstress-ng: metrc: [10799] set               88368     15.07      0.28      3.79      5864.50       21725.55\nstress-ng: metrc: [10799] dup                2170     15.00      0.72      0.69       144.62        1546.21\nstress-ng: metrc: [10799] kill              27386     15.10      0.06      4.96      1813.74        5458.65\nstress-ng: metrc: [10799] sigfd           2940662     15.10      0.49      5.53    194746.72      488424.45\nstress-ng: metrc: [10799] signal                0     15.01      0.02      0.08         0.00           0.00\nstress-ng: metrc: [10799] pty                1140     15.08      0.46     11.03        75.61          99.18\nstress-ng: metrc: [10799] itimer              559     15.05      0.42      4.44        37.14         115.14\nstress-ng: metrc: [10799] timerfd          841728     15.13      0.34      4.66     55639.32      168449.94\nstress-ng: metrc: [10799] fork              11734     15.01      1.73      2.35       781.97        2873.94\nstress-ng: metrc: [10799] vfork            112399     15.01      1.40      1.98      7489.96       33268.21\nstress-ng: metrc: [10799] clone              2983     15.08      1.20      5.70       197.81         432.36\nstress-ng: metrc: [10799] ptrace           551625     15.03      0.28      2.71     36699.38      184447.22\nstress-ng: metrc: [10799] futex           1078784     30.12      0.65      7.24     35811.15      136750.92\nstress-ng: metrc: [10799] sem              107154     15.09      0.02      0.08      7098.67     1002732.50\nstress-ng: metrc: [10799] aio               15855     15.12      0.00      0.10      1048.43      152049.87\nstress-ng: metrc: [10799] aiol              22025     15.28      0.32      0.99      1441.88       16737.07\nstress-ng: metrc: [10799] hdd               68096     15.21      0.92      1.03      4478.45       34905.36\nstress-ng: metrc: [10799] io                   25     15.26      0.03      0.06         1.64         268.09\nstress-ng: metrc: [10799] iomix             10661     15.92      0.32      3.22       669.64        3014.32\nstress-ng: metrc: [10799] io-uring          26088     15.22      0.00      1.48      1714.45       17576.42\nstress-ng: metrc: [10799] sync-file           151     15.06      0.02      0.54        10.02         267.72\nstress-ng: metrc: [10799] epoll               648     15.10      0.05      0.32        42.91        1748.33\nstress-ng: metrc: [10799] netdev          1057330     15.07      0.07      1.96     70163.48      521693.09\nstress-ng: metrc: [10799] sctp              66656     15.00      0.10      1.45      4442.45       42905.47\nstress-ng: metrc: [10799] sock               2756     15.09      0.08      1.83       182.68        1443.24\nstress-ng: metrc: [10799] sockdiag       53558867     15.02      0.16      5.76   3565419.38     9042813.63\nstress-ng: metrc: [10799] sockfd           547187     15.03      0.15      2.30     36414.38      223807.43\nstress-ng: metrc: [10799] sockpair           1249     15.09      0.03      0.10        82.75        9470.87\nstress-ng: metrc: [10799] sockmany         154228     15.09      0.18      4.80     10218.28       30927.17\nstress-ng: metrc: [10799] udp              672403     15.08      0.41      7.14     44585.78       89032.35\nstress-ng: metrc: [10799] udp-flood       3546584     15.04      0.37      5.81    235848.48      574024.32\nstress-ng: metrc: [10799] mmap               4884     15.06      0.17      5.24       324.20         902.30\nstress-ng: metrc: [10799] mprotect       14549577     15.12      3.55     34.08    962167.68      386568.98\nstress-ng: metrc: [10799] mremap             8753     15.03      0.06      5.83       582.18        1485.02\nstress-ng: metrc: [10799] madvise             220     15.07      0.47      6.40        14.59          32.04\nstress-ng: metrc: [10799] access            20633     15.13      0.23      2.23      1363.38        8395.51\nstress-ng: metrc: [10799] chdir                75     15.35      0.20      2.86         4.89          24.52\nstress-ng: metrc: [10799] chmod               444     15.18      0.00      0.39        29.26        1143.10\nstress-ng: metrc: [10799] chown               487     15.18      0.01      0.11        32.08        4348.52\nstress-ng: metrc: [10799] dentry            18432     15.27      0.02      0.56      1206.82       31376.02\nstress-ng: metrc: [10799] dir               32771     15.28      0.20      5.74      2144.22        5516.09\nstress-ng: metrc: [10799] dirmany           45308     15.16      0.00      1.06      2988.82       42734.41\nstress-ng: metrc: [10799] fallocate             8     15.16      0.03      0.01         0.53         215.58\nstress-ng: metrc: [10799] file-ioctl       196011     15.12      0.20      3.57     12967.88       52080.62\nstress-ng: metrc: [10799] filename          12973     15.14      0.17      2.62       857.01        4640.03\nstress-ng: metrc: [10799] flock           2678468     15.14      0.50      2.78    176915.27      817179.62\nstress-ng: metrc: [10799] fpunch             1843     15.16      0.02      2.87       121.55         638.95\nstress-ng: metrc: [10799] fstat             10765     15.01      0.18      2.57       717.20        3928.69\nstress-ng: metrc: [10799] getdent          493897     15.03      0.25      3.47     32867.75      132762.87\nstress-ng: metrc: [10799] hdd               54784     15.12      0.84      0.71      3622.83       35332.21\nstress-ng: metrc: [10799] inotify              32     15.10      0.04      0.04         2.12         405.43\nstress-ng: metrc: [10799] open              10240     15.17      0.00      0.18       674.89       56337.72\nstress-ng: metrc: [10799] rename           244270     15.07      0.10      1.75     16205.52      131938.92\nstress-ng: metrc: [10799] touch            364287     15.14      0.20      7.16     24062.08       49524.52\nstress-ng: metrc: [10799] utime            111791     15.06      0.11      2.47      7423.79       43206.36\nstress-ng: metrc: [10799] link                 12     15.21      0.08      1.65         0.79           6.94\nstress-ng: metrc: [10799] symlink               9     15.20      0.06      2.24         0.59           3.92\nstress-ng: metrc: [10799] mknod                20     15.14      0.00      0.01         1.32        1363.14\nstress-ng: metrc: [10799] fcntl             36396     15.08      0.06      0.96      2413.89       35919.60\nstress-ng: info:  [10799] skipped: 4: exec (4)\nstress-ng: info:  [10799] passed: 252: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [10799] failed: 0\nstress-ng: info:  [10799] metrics untrustworthy: 0\nstress-ng: info:  [10799] successful run completed in 16.12 secs",
+        "workload_name": "stress_ng_os_io_network"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "6": {
+        "bytes_jited": 72,
+        "bytes_xlated": 112,
+        "id": 6,
+        "name": "tracepoint__raw_syscalls__sys_enter",
+        "run_cnt_delta": 217101955,
+        "run_time_ns_delta": 35774501271,
+        "type": "tracepoint"
+      },
+      "7": {
+        "bytes_jited": 236,
+        "bytes_xlated": 400,
+        "id": 7,
+        "name": "tracepoint__raw_syscalls__sys_exit",
+        "run_cnt_delta": 217102330,
+        "run_time_ns_delta": 6425553720,
+        "type": "tracepoint"
+      },
+      "10": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 10,
+        "name": "vfs_create",
+        "run_cnt_delta": 408444,
+        "run_time_ns_delta": 28537620,
+        "type": "tracing"
+      },
+      "11": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 11,
+        "name": "kfunc__vmlinux__vfs_fsync_range",
+        "run_cnt_delta": 35148,
+        "run_time_ns_delta": 1797726,
+        "type": "tracing"
+      },
+      "12": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 12,
+        "name": "vfs_open",
+        "run_cnt_delta": 4747677,
+        "run_time_ns_delta": 218451151,
+        "type": "tracing"
+      },
+      "13": {
+        "bytes_jited": 87,
+        "bytes_xlated": 136,
+        "id": 13,
+        "name": "vfs_read",
+        "run_cnt_delta": 6731005,
+        "run_time_ns_delta": 859711481,
+        "type": "tracing"
+      },
+      "14": {
+        "bytes_jited": 90,
+        "bytes_xlated": 144,
+        "id": 14,
+        "name": "vfs_write",
+        "run_cnt_delta": 1906203,
+        "run_time_ns_delta": 82129052,
+        "type": "tracing"
+      },
+      "19": {
+        "bytes_jited": 203,
+        "bytes_xlated": 344,
+        "id": 19,
+        "name": "cap_capable",
+        "run_cnt_delta": 14015156,
+        "run_time_ns_delta": 666614472,
+        "type": "kprobe"
+      },
+      "22": {
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 22,
+        "name": "__x64_sys_open",
+        "run_cnt_delta": 16203,
+        "run_time_ns_delta": 2745366,
+        "type": "tracing"
+      },
+      "23": {
+        "bytes_jited": 517,
+        "bytes_xlated": 600,
+        "id": 23,
+        "name": "kretfunc__vmlinux____x64_sys_openat",
+        "run_cnt_delta": 3305908,
+        "run_time_ns_delta": 603453730,
+        "type": "tracing"
+      },
+      "24": {
+        "bytes_jited": 590,
+        "bytes_xlated": 640,
+        "id": 24,
+        "name": "kretfunc__vmlinux____x64_sys_openat2",
+        "run_cnt_delta": 2966,
+        "run_time_ns_delta": 588861,
+        "type": "tracing"
+      },
+      "27": {
+        "bytes_jited": 662,
+        "bytes_xlated": 1168,
+        "id": 27,
+        "name": "sched_switch",
+        "run_cnt_delta": 6579069,
+        "run_time_ns_delta": 1027433082,
+        "type": "raw_tracepoint"
+      },
+      "28": {
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 28,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 4647155,
+        "run_time_ns_delta": 444015703,
+        "type": "raw_tracepoint"
+      },
+      "29": {
+        "bytes_jited": 149,
+        "bytes_xlated": 248,
+        "id": 29,
+        "name": "raw_tracepoint__sched_wakeup_new",
+        "run_cnt_delta": 247371,
+        "run_time_ns_delta": 60707381,
+        "type": "raw_tracepoint"
+      },
+      "32": {
+        "bytes_jited": 75,
+        "bytes_xlated": 120,
+        "id": 32,
+        "name": "trace_connect_entry",
+        "run_cnt_delta": 169468,
+        "run_time_ns_delta": 24728470,
+        "type": "kprobe"
+      },
+      "33": {
+        "bytes_jited": 480,
+        "bytes_xlated": 720,
+        "id": 33,
+        "name": "trace_connect_v4_return",
+        "run_cnt_delta": 169468,
+        "run_time_ns_delta": 119071022,
+        "type": "kprobe"
+      },
+      "34": {
+        "bytes_jited": 477,
+        "bytes_xlated": 712,
+        "id": 34,
+        "name": "trace_connect_v6_return",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "37": {
+        "bytes_jited": 1067,
+        "bytes_xlated": 1672,
+        "id": 37,
+        "name": "tracepoint__sock__inet_sock_set_state",
+        "run_cnt_delta": 1858574,
+        "run_time_ns_delta": 503383087,
+        "type": "tracepoint"
+      },
+      "38": {
+        "bytes_jited": 267,
+        "bytes_xlated": 448,
+        "id": 38,
+        "name": "trace_pid_start_tp",
+        "run_cnt_delta": 182584,
+        "run_time_ns_delta": 69581765,
+        "type": "tracepoint"
+      },
+      "39": {
+        "bytes_jited": 335,
+        "bytes_xlated": 616,
+        "id": 39,
+        "name": "trace_req_start",
+        "run_cnt_delta": 184441,
+        "run_time_ns_delta": 67477143,
+        "type": "kprobe"
+      },
+      "40": {
+        "bytes_jited": 550,
+        "bytes_xlated": 856,
+        "id": 40,
+        "name": "trace_req_completion_tp",
+        "run_cnt_delta": 186190,
+        "run_time_ns_delta": 35567800,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "4",
+          "--eventfd",
+          "4",
+          "--get",
+          "4",
+          "--prctl",
+          "4",
+          "--set",
+          "4",
+          "--dup",
+          "4",
+          "--kill",
+          "4",
+          "--sigfd",
+          "4",
+          "--signal",
+          "4",
+          "--pty",
+          "4",
+          "--itimer",
+          "4",
+          "--timerfd",
+          "4",
+          "--exec",
+          "4",
+          "--fork",
+          "4",
+          "--vfork",
+          "4",
+          "--clone",
+          "4",
+          "--ptrace",
+          "4",
+          "--futex",
+          "4",
+          "--sem",
+          "4",
+          "--aio",
+          "4",
+          "--aiol",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--io",
+          "4",
+          "--iomix",
+          "4",
+          "--iomix-bytes",
+          "128M",
+          "--io-uring",
+          "4",
+          "--sync-file",
+          "4",
+          "--epoll",
+          "4",
+          "--netdev",
+          "4",
+          "--sctp",
+          "4",
+          "--sock",
+          "4",
+          "--sockdiag",
+          "4",
+          "--sockfd",
+          "4",
+          "--sockpair",
+          "4",
+          "--sockmany",
+          "4",
+          "--udp",
+          "4",
+          "--udp-flood",
+          "4",
+          "--mmap",
+          "4",
+          "--mmap-bytes",
+          "16M",
+          "--mprotect",
+          "4",
+          "--mremap",
+          "4",
+          "--mremap-bytes",
+          "16M",
+          "--madvise",
+          "4",
+          "--access",
+          "4",
+          "--chdir",
+          "4",
+          "--chmod",
+          "4",
+          "--chown",
+          "4",
+          "--dentry",
+          "4",
+          "--dir",
+          "4",
+          "--dirmany",
+          "4",
+          "--fallocate",
+          "4",
+          "--fallocate-bytes",
+          "128M",
+          "--file-ioctl",
+          "4",
+          "--filename",
+          "4",
+          "--flock",
+          "4",
+          "--fpunch",
+          "4",
+          "--fpunch-bytes",
+          "32M",
+          "--fstat",
+          "4",
+          "--getdent",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--inotify",
+          "4",
+          "--open",
+          "4",
+          "--open-max",
+          "1024",
+          "--rename",
+          "4",
+          "--touch",
+          "4",
+          "--utime",
+          "4",
+          "--link",
+          "4",
+          "--symlink",
+          "4",
+          "--mknod",
+          "4",
+          "--fcntl",
+          "4",
+          "--epoll-port",
+          "21930",
+          "--sctp-port",
+          "22030",
+          "--sock-port",
+          "22130",
+          "--sockfd-port",
+          "22230",
+          "--timeout",
+          "15s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/do"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "eventfd",
+            "get",
+            "prctl",
+            "set",
+            "dup",
+            "kill",
+            "sigfd",
+            "signal",
+            "pty",
+            "itimer",
+            "timerfd",
+            "exec",
+            "fork",
+            "vfork",
+            "clone",
+            "ptrace",
+            "futex",
+            "sem",
+            "aio",
+            "aiol",
+            "hdd",
+            "io",
+            "iomix",
+            "io-uring",
+            "sync-file",
+            "epoll",
+            "netdev",
+            "sctp",
+            "sock",
+            "sockdiag",
+            "sockfd",
+            "sockpair",
+            "sockmany",
+            "udp",
+            "udp-flood",
+            "mmap",
+            "mprotect",
+            "mremap",
+            "madvise",
+            "access",
+            "chdir",
+            "chmod",
+            "chown",
+            "dentry",
+            "dir",
+            "dirmany",
+            "fallocate",
+            "file-ioctl",
+            "filename",
+            "flock",
+            "fpunch",
+            "fstat",
+            "getdent",
+            "hdd",
+            "inotify",
+            "open",
+            "rename",
+            "touch",
+            "utime",
+            "link",
+            "symlink",
+            "mknod",
+            "fcntl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 16.16926551200001,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [22184] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [22184] setting to a 15 secs run per stressor\nstress-ng: info:  [22184] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd, 4 fork, 4 vfork, 4 clone, 4 ptrace, 4 futex, 4 sem, 4 aio, 4 aiol, 4 hdd, 4 io, 4 iomix, 4 io-uring, 4 sync-file, 4 epoll, 4 netdev, 4 sctp, 4 sock, 4 sockdiag, 4 sockfd, 4 sockpair, 4 sockmany, 4 udp, 4 udp-flood, 4 mmap, 4 mprotect, 4 mremap, 4 madvise, 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [22184] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [22305] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: info:  [23062] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [22968] dentry: 149741 dentries allocated\nstress-ng: metrc: [22184] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [22184]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [22184] cap             1285547     15.07      0.46      5.21     85284.00      226584.72\nstress-ng: metrc: [22184] eventfd          463625     15.01      0.48      3.24     30887.53      124619.66\nstress-ng: metrc: [22184] get                7435     15.02      0.23      3.75       495.16        1868.18\nstress-ng: metrc: [22184] prctl             11588     15.02      3.58      2.02       771.35        2068.40\nstress-ng: metrc: [22184] set               76820     15.10      0.20      3.69      5087.38       19745.86\nstress-ng: metrc: [22184] dup                2081     15.02      0.63      0.64       138.58        1646.35\nstress-ng: metrc: [22184] kill              14102     15.10      0.02      2.69       934.12        5191.58\nstress-ng: metrc: [22184] sigfd           2828255     15.12      0.63      8.36    187113.33      314586.29\nstress-ng: metrc: [22184] signal                0     15.04      0.10      0.89         0.00           0.00\nstress-ng: metrc: [22184] pty                 279     15.08      0.20      6.63        18.51          40.90\nstress-ng: metrc: [22184] itimer              647     15.07      0.32      5.54        42.94         110.45\nstress-ng: metrc: [22184] timerfd         1481728     15.18      1.20      7.78     97611.57      165024.34\nstress-ng: metrc: [22184] fork              15735     15.05      2.09      2.73      1045.53        3260.57\nstress-ng: metrc: [22184] vfork            159334     15.02      1.69      2.25     10606.17       40395.89\nstress-ng: metrc: [22184] clone              3359     15.07      1.43      6.82       222.96         407.15\nstress-ng: metrc: [22184] ptrace           679523     15.02      0.23      3.42     45235.33      186243.96\nstress-ng: metrc: [22184] futex           1054398     30.14      0.61      7.37     34981.57      132020.39\nstress-ng: metrc: [22184] sem                1951     15.08      0.01      0.01       129.41      123739.46\nstress-ng: metrc: [22184] aio               14888     15.21      0.01      0.09       978.95      145635.25\nstress-ng: metrc: [22184] aiol              15188     15.32      0.07      0.89       991.33       15760.35\nstress-ng: metrc: [22184] hdd               62741     15.12      0.71      0.95      4150.54       37733.59\nstress-ng: metrc: [22184] io                   82     15.12      0.01      0.07         5.42        1083.87\nstress-ng: metrc: [22184] iomix              5932     15.50      0.28      4.08       382.60        1361.47\nstress-ng: metrc: [22184] io-uring          25528     15.27      0.00      1.14      1671.27       22415.87\nstress-ng: metrc: [22184] sync-file           105     15.19      0.09      0.36         6.91         230.28\nstress-ng: metrc: [22184] epoll              4475     15.15      0.12      1.60       295.32        2609.16\nstress-ng: metrc: [22184] netdev          1721639     15.02      0.35      3.54    114652.08      442224.78\nstress-ng: metrc: [22184] sctp             198784     15.01      0.06      2.15     13243.38       89899.88\nstress-ng: metrc: [22184] sock               3711     15.08      0.28      2.79       246.11        1209.92\nstress-ng: metrc: [22184] sockdiag       72456448     15.04      0.19      6.12   4817441.60    11485436.11\nstress-ng: metrc: [22184] sockfd           442909     15.09      0.06      2.31     29357.33      186904.07\nstress-ng: metrc: [22184] sockpair          23962     15.09      0.09      0.34      1587.88       55812.68\nstress-ng: metrc: [22184] sockmany         169467     15.09      0.20      5.15     11229.54       31670.85\nstress-ng: metrc: [22184] udp              473003     15.09      0.33      5.71     31345.01       78314.57\nstress-ng: metrc: [22184] udp-flood       3770764     15.02      0.41      5.98    251032.66      590268.25\nstress-ng: metrc: [22184] mmap               4975     15.09      0.31      5.47       329.64         860.49\nstress-ng: metrc: [22184] mprotect       12578291     15.09      3.10     32.28    833590.96      355497.07\nstress-ng: metrc: [22184] mremap             9232     15.07      0.07      6.22       612.61        1467.39\nstress-ng: metrc: [22184] madvise             205     15.14      0.45      5.89        13.54          32.30\nstress-ng: metrc: [22184] access            17619     15.20      0.18      2.21      1159.50        7362.08\nstress-ng: metrc: [22184] chdir                64     15.31      0.24      2.89         4.18          20.40\nstress-ng: metrc: [22184] chmod               302     15.18      0.01      0.22        19.89        1307.97\nstress-ng: metrc: [22184] chown               377     15.17      0.02      0.00        24.85       21449.70\nstress-ng: metrc: [22184] dentry            24576     15.18      0.07      0.87      1618.84       26087.45\nstress-ng: metrc: [22184] dir               32769     15.52      0.17      3.95      2110.92        7957.58\nstress-ng: metrc: [22184] dirmany           35968     15.14      0.04      0.91      2375.24       37789.97\nstress-ng: metrc: [22184] fallocate            10     15.18      0.01      0.03         0.66         259.79\nstress-ng: metrc: [22184] file-ioctl       114863     15.18      0.13      2.32      7566.24       46947.76\nstress-ng: metrc: [22184] filename           9132     15.16      0.07      1.86       602.49        4736.05\nstress-ng: metrc: [22184] flock            881165     15.15      0.22      0.87     58144.44      812454.88\nstress-ng: metrc: [22184] fpunch             1958     15.12      0.02      3.56       129.51         547.98\nstress-ng: metrc: [22184] fstat             12626     15.01      0.25      2.97       841.07        3915.26\nstress-ng: metrc: [22184] getdent          710295     15.03      0.41      4.76     47261.50      137195.21\nstress-ng: metrc: [22184] hdd               54478     15.16      0.68      0.82      3592.96       36280.14\nstress-ng: metrc: [22184] inotify              29     15.18      0.07      0.00         1.91         445.82\nstress-ng: metrc: [22184] open              17827     15.14      0.01      0.31      1177.53       55621.08\nstress-ng: metrc: [22184] rename           139187     15.18      0.07      0.97      9170.79      133890.30\nstress-ng: metrc: [22184] touch            246034     15.14      0.20      5.69     16250.94       41795.70\nstress-ng: metrc: [22184] utime             92847     15.07      0.06      2.23      6159.54       40462.33\nstress-ng: metrc: [22184] link                 11     15.09      0.08      1.64         0.73           6.38\nstress-ng: metrc: [22184] symlink               8     15.17      0.12      1.89         0.53           3.97\nstress-ng: metrc: [22184] mknod                95     15.09      0.00      0.03         6.30        3158.14\nstress-ng: metrc: [22184] fcntl             11023     15.09      0.00      0.39       730.56       28519.39\nstress-ng: info:  [22184] skipped: 4: exec (4)\nstress-ng: info:  [22184] passed: 252: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [22184] failed: 0\nstress-ng: info:  [22184] metrics untrustworthy: 0\nstress-ng: info:  [22184] successful run completed in 16.15 secs",
+        "workload_name": "stress_ng_os_io_network"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "10": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-3/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-3/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-3/report_step0.json --prog-type tracing --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-3/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-3/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 10,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 10,
+          "prog_name": "vfs_create",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "11": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-14/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-14/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-14/report_step0.json --prog-type tracing --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-14/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-14/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 11,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 11,
+          "prog_name": "vfs_fsync_range",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "12": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-13/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-13/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-13/report_step0.json --prog-type tracing --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-13/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-13/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 12,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 12,
+          "prog_name": "vfs_open",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "13": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-2/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-2/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-2/report_step0.json --prog-type tracing --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-2/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-2/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 13,
+        "program": {
+          "final_insn_count": 11,
+          "orig_insn_count": 11,
+          "prog_id": 13,
+          "prog_name": "vfs_read",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "14": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-8/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-8/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-8/report_step0.json --prog-type tracing --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-8/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-8/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 14,
+        "program": {
+          "final_insn_count": 12,
+          "orig_insn_count": 12,
+          "prog_id": 14,
+          "prog_name": "vfs_write",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "19": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-5/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-5/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-5/report_step0.json --prog-type kprobe --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-5/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-5/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 19,
+        "program": {
+          "final_insn_count": 43,
+          "orig_insn_count": 43,
+          "prog_id": 19,
+          "prog_name": "cap_capable",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "22": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-9/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-9/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-9/report_step0.json --prog-type tracing --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-9/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-9/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 22,
+        "program": {
+          "final_insn_count": 75,
+          "orig_insn_count": 75,
+          "prog_id": 22,
+          "prog_name": "__x64_sys_open",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "23": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-12/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-12/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-12/report_step0.json --prog-type tracing --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-12/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-12/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 23,
+        "program": {
+          "final_insn_count": 75,
+          "orig_insn_count": 75,
+          "prog_id": 23,
+          "prog_name": "__x64_sys_opena",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "24": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-1/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-1/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-1/report_step0.json --prog-type tracing --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-1/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-1/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 24,
+        "program": {
+          "final_insn_count": 80,
+          "orig_insn_count": 80,
+          "prog_id": 24,
+          "prog_name": "__x64_sys_opena",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "27": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-11/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-11/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-11/report_step0.json --prog-type raw_tracepoint --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-11/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-11/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 27,
+        "program": {
+          "final_insn_count": 138,
+          "orig_insn_count": 138,
+          "prog_id": 27,
+          "prog_name": "sched_switch",
+          "prog_type": 17
+        },
+        "status": "error"
+      },
+      "28": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-7/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-7/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-7/report_step0.json --prog-type raw_tracepoint --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-7/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-7/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 28,
+        "program": {
+          "final_insn_count": 31,
+          "orig_insn_count": 31,
+          "prog_id": 28,
+          "prog_name": "sched_wakeup",
+          "prog_type": 17
+        },
+        "status": "error"
+      },
+      "29": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-10/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-10/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-10/report_step0.json --prog-type raw_tracepoint --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-10/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-10/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 29,
+        "program": {
+          "final_insn_count": 31,
+          "orig_insn_count": 31,
+          "prog_id": 29,
+          "prog_name": "sched_wakeup_ne",
+          "prog_type": 17
+        },
+        "status": "error"
+      },
+      "32": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-20/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-20/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-20/report_step0.json --prog-type kprobe --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-20/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-20/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 32,
+        "program": {
+          "final_insn_count": 15,
+          "orig_insn_count": 15,
+          "prog_id": 32,
+          "prog_name": "trace_connect_e",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "33": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-6/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-6/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-6/report_step0.json --prog-type kprobe --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-6/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-6/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 33,
+        "program": {
+          "final_insn_count": 88,
+          "orig_insn_count": 88,
+          "prog_id": 33,
+          "prog_name": "trace_connect_v",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "34": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-18/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-18/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-18/report_step0.json --prog-type kprobe --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-18/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-18/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 34,
+        "program": {
+          "final_insn_count": 87,
+          "orig_insn_count": 87,
+          "prog_id": 34,
+          "prog_name": "trace_connect_v",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "37": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-19/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-19/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-19/report_step0.json --prog-type tracepoint --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-19/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-19/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 37,
+        "program": {
+          "final_insn_count": 205,
+          "orig_insn_count": 205,
+          "prog_id": 37,
+          "prog_name": "sock__inet_sock",
+          "prog_type": 5
+        },
+        "status": "error"
+      },
+      "38": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-15/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-15/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-15/report_step0.json --prog-type tracepoint --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-15/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-15/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 38,
+        "program": {
+          "final_insn_count": 56,
+          "orig_insn_count": 56,
+          "prog_id": 38,
+          "prog_name": "trace_pid_start",
+          "prog_type": 5
+        },
+        "status": "error"
+      },
+      "39": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-16/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-16/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-16/report_step0.json --prog-type kprobe --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-16/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-16/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 39,
+        "program": {
+          "final_insn_count": 77,
+          "orig_insn_count": 77,
+          "prog_id": 39,
+          "prog_name": "trace_req_start",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "40": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-17/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-17/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-17/report_step0.json --prog-type tracepoint --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-17/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-17/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 40,
+        "program": {
+          "final_insn_count": 103,
+          "orig_insn_count": 103,
+          "prog_id": 40,
+          "prog_name": "trace_req_compl",
+          "prog_type": 5
+        },
+        "status": "error"
+      },
+      "6": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-0/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-0/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-0/report_step0.json --prog-type tracepoint --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-0/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-0/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 6,
+        "program": {
+          "final_insn_count": 14,
+          "orig_insn_count": 14,
+          "prog_id": 6,
+          "prog_name": "raw_syscalls__s",
+          "prog_type": 5
+        },
+        "status": "error"
+      },
+      "7": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-4/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-4/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-4/report_step0.json --prog-type tracepoint --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-4/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-4/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 7,
+        "program": {
+          "final_insn_count": 44,
+          "orig_insn_count": 44,
+          "prog_id": 7,
+          "prog_name": "raw_syscalls__s",
+          "prog_type": 5
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bcc_set",
+  "selected_workload": "stress_ng_os_io_network",
+  "status": "ok"
+}

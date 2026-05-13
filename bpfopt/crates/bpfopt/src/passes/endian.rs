@@ -248,7 +248,7 @@ impl BpfPass for EndianFusionPass {
                     site.offset,
                     btf_id,
                     kfunc_off,
-                    ctx.platform.arch,
+                    ctx.arch,
                     site.size,
                 );
                 replacement.extend_from_slice(&preserved);

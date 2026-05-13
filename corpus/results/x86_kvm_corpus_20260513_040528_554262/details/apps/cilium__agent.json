@@ -1,0 +1,3190 @@
+{
+  "app": "cilium/agent",
+  "baseline": {
+    "bpf": {
+      "63": {
+        "bytes_jited": 167,
+        "bytes_xlated": 280,
+        "id": 63,
+        "name": "dump_bpf_map",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "64": {
+        "bytes_jited": 740,
+        "bytes_xlated": 520,
+        "id": 64,
+        "name": "dump_bpf_prog",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "159": {
+        "bytes_jited": 490,
+        "bytes_xlated": 848,
+        "id": 159,
+        "name": "cil_xdp_entry",
+        "run_cnt_delta": 532281,
+        "run_time_ns_delta": 19735638,
+        "type": "xdp"
+      },
+      "160": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 160,
+        "name": "cil_from_host",
+        "run_cnt_delta": 528853,
+        "run_time_ns_delta": 94887677,
+        "type": "sched_cls"
+      },
+      "161": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 161,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "162": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 162,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "163": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 163,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "164": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 164,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "165": {
+        "bytes_jited": 8048,
+        "bytes_xlated": 13936,
+        "id": 165,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "166": {
+        "bytes_jited": 12622,
+        "bytes_xlated": 21224,
+        "id": 166,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "167": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 167,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "168": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 168,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "169": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 169,
+        "name": "cil_to_host",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 1512,
+        "type": "sched_cls"
+      },
+      "170": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 170,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "171": {
+        "bytes_jited": 12653,
+        "bytes_xlated": 21272,
+        "id": 171,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "172": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 172,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "173": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 173,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "174": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 174,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "175": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 175,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "176": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 176,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "177": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 177,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "178": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 178,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "179": {
+        "bytes_jited": 8056,
+        "bytes_xlated": 13888,
+        "id": 179,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "180": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 180,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "181": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 181,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "182": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 182,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "183": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 183,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "184": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 184,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "185": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 185,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 532281,
+        "run_time_ns_delta": 61765954,
+        "type": "sched_cls"
+      },
+      "186": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 186,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "187": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 187,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 589595,
+        "run_time_ns_delta": 100085060,
+        "type": "sched_cls"
+      },
+      "188": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 188,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "189": {
+        "bytes_jited": 8056,
+        "bytes_xlated": 13888,
+        "id": 189,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "190": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 190,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "191": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 191,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "192": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 192,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "193": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 193,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "194": {
+        "bytes_jited": 12653,
+        "bytes_xlated": 21272,
+        "id": 194,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "195": {
+        "bytes_jited": 908,
+        "bytes_xlated": 1392,
+        "id": 195,
+        "name": "cil_from_container",
+        "run_cnt_delta": 1297543,
+        "run_time_ns_delta": 293367835,
+        "type": "sched_cls"
+      },
+      "196": {
+        "bytes_jited": 5418,
+        "bytes_xlated": 9600,
+        "id": 196,
+        "name": "tail_handle_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "197": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 197,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "198": {
+        "bytes_jited": 5306,
+        "bytes_xlated": 9136,
+        "id": 198,
+        "name": "tail_ipv4_ct_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "199": {
+        "bytes_jited": 5424,
+        "bytes_xlated": 9352,
+        "id": 199,
+        "name": "tail_ipv4_ct_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "200": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 200,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "201": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 201,
+        "name": "cil_lxc_policy_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "202": {
+        "bytes_jited": 330,
+        "bytes_xlated": 608,
+        "id": 202,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "203": {
+        "bytes_jited": 3605,
+        "bytes_xlated": 6344,
+        "id": 203,
+        "name": "tail_nodeport_rev_dnat_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "205": {
+        "bytes_jited": 5749,
+        "bytes_xlated": 10384,
+        "id": 205,
+        "name": "tail_ipv4_to_endpoint",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "206": {
+        "bytes_jited": 5832,
+        "bytes_xlated": 10216,
+        "id": 206,
+        "name": "tail_handle_ipv4_cont",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "207": {
+        "bytes_jited": 11128,
+        "bytes_xlated": 19272,
+        "id": 207,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "208": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 208,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "209": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 209,
+        "name": "cil_lxc_policy_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "210": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 210,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "211": {
+        "bytes_jited": 5749,
+        "bytes_xlated": 10384,
+        "id": 211,
+        "name": "tail_ipv4_to_endpoint",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "212": {
+        "bytes_jited": 5832,
+        "bytes_xlated": 10216,
+        "id": 212,
+        "name": "tail_handle_ipv4_cont",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "213": {
+        "bytes_jited": 5418,
+        "bytes_xlated": 9600,
+        "id": 213,
+        "name": "tail_handle_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "214": {
+        "bytes_jited": 3605,
+        "bytes_xlated": 6344,
+        "id": 214,
+        "name": "tail_nodeport_rev_dnat_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "215": {
+        "bytes_jited": 5306,
+        "bytes_xlated": 9136,
+        "id": 215,
+        "name": "tail_ipv4_ct_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "216": {
+        "bytes_jited": 330,
+        "bytes_xlated": 608,
+        "id": 216,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "217": {
+        "bytes_jited": 908,
+        "bytes_xlated": 1392,
+        "id": 217,
+        "name": "cil_from_container",
+        "run_cnt_delta": 770,
+        "run_time_ns_delta": 2246485,
+        "type": "sched_cls"
+      },
+      "218": {
+        "bytes_jited": 5424,
+        "bytes_xlated": 9352,
+        "id": 218,
+        "name": "tail_ipv4_ct_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "219": {
+        "bytes_jited": 11128,
+        "bytes_xlated": 19272,
+        "id": 219,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/bin/wrk",
+              "-t4",
+              "-c50",
+              "-d15s",
+              "http://198.18.0.2:18080/"
+            ],
+            "config": {
+              "tool": "wrk",
+              "url": "http://198.18.0.2:18080/"
+            },
+            "duration_s": 15.088437742999986,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Running 15s test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   333.32ms  284.70ms   1.93s    86.97%\n    Req/Sec    34.21     16.05    80.00     77.49%\n  1991 requests in 15.03s, 304.88KB read\n  Socket errors: connect 0, read 0, write 0, timeout 27\nRequests/sec:    132.47\nTransfer/sec:     20.28KB",
+            "workload_name": "network_lossy_multi_wrk"
+          },
+          {
+            "command": [],
+            "components": [
+              {
+                "command": [
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.184:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": null,
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.184:18080/"
+                },
+                "duration_s": 1.0069602060000307,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.184:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.38ms   11.19ms  60.14ms   86.25%\n    Req/Sec    80.20     22.97   131.00     95.00%\n  160 requests in 1.00s, 25.30KB read\nRequests/sec:    159.56\nTransfer/sec:     25.23KB",
+                "workload_name": "cilium host-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.114:33545/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.114:33545/"
+                },
+                "duration_s": 1.0082634600000233,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.114:33545/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.04ms   10.96ms  60.18ms   89.17%\n    Req/Sec    60.05     21.86   101.00     90.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.67\nTransfer/sec:     18.92KB",
+                "workload_name": "cilium endpoint-to-host"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.168:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.168:18080/"
+                },
+                "duration_s": 1.0059442729999546,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.168:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    47.83ms   10.78ms  59.85ms   90.71%\n    Req/Sec    70.20     51.62   131.00     95.00%\n  140 requests in 1.00s, 22.13KB read\nRequests/sec:    139.69\nTransfer/sec:     22.09KB",
+                "workload_name": "cilium endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepb",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.184:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepb",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.184:18080/"
+                },
+                "duration_s": 1.005775385999982,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.184:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    50.18ms   17.40ms 211.42ms   94.85%\n    Req/Sec    75.06     52.80   140.00     50.00%\n  136 requests in 1.00s, 21.26KB read\nRequests/sec:    135.78\nTransfer/sec:     21.23KB",
+                "workload_name": "cilium reverse-endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://198.18.0.2:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://198.18.0.2:18080/"
+                },
+                "duration_s": 1.0058291189999977,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    49.34ms   17.66ms 217.13ms   94.89%\n    Req/Sec    75.44     56.03   180.00     88.89%\n  137 requests in 1.00s, 21.68KB read\nRequests/sec:    136.66\nTransfer/sec:     21.63KB",
+                "workload_name": "cilium endpoint-to-external"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.184:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbenchns",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.184:18080/"
+                },
+                "duration_s": 1.006731344000002,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.184:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    47.89ms   10.29ms  60.10ms   91.52%\n    Req/Sec    82.70     45.10   180.00     95.00%\n  165 requests in 1.00s, 25.78KB read\nRequests/sec:    164.48\nTransfer/sec:     25.70KB",
+                "workload_name": "cilium external-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.168",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "10.244.0.168",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0120366080000167,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "713328",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.184",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbenchns",
+                  "target_host": "10.244.0.184",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0113897530000031,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "527198",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "198.18.0.2",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "198.18.0.2",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.011322306000011,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "581855",
+                "workload_name": "udp_burst"
+              }
+            ],
+            "duration_s": 9.074252455000021,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "",
+            "workload_name": "cilium_endpoint_matrix"
+          }
+        ],
+        "config": {
+          "netem": {
+            "delay_ms": 50,
+            "loss_pct": 20.0
+          },
+          "network_device": "bpfbench0"
+        },
+        "duration_s": 24.162690198000007,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "network_lossy_multi"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "63": {
+        "bytes_jited": 167,
+        "bytes_xlated": 280,
+        "id": 63,
+        "name": "dump_bpf_map",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "64": {
+        "bytes_jited": 740,
+        "bytes_xlated": 520,
+        "id": 64,
+        "name": "dump_bpf_prog",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "159": {
+        "bytes_jited": 490,
+        "bytes_xlated": 848,
+        "id": 159,
+        "name": "cil_xdp_entry",
+        "run_cnt_delta": 531630,
+        "run_time_ns_delta": 19528029,
+        "type": "xdp"
+      },
+      "160": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 160,
+        "name": "cil_from_host",
+        "run_cnt_delta": 528054,
+        "run_time_ns_delta": 96199649,
+        "type": "sched_cls"
+      },
+      "161": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 161,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "162": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 162,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "163": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 163,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "164": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 164,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "165": {
+        "bytes_jited": 8048,
+        "bytes_xlated": 13936,
+        "id": 165,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "166": {
+        "bytes_jited": 12622,
+        "bytes_xlated": 21224,
+        "id": 166,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "167": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 167,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "168": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 168,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "169": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 169,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "170": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 170,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "171": {
+        "bytes_jited": 12653,
+        "bytes_xlated": 21272,
+        "id": 171,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "172": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 172,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "173": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 173,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "174": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 174,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "175": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 175,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "176": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 176,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "177": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 177,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "178": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 178,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "179": {
+        "bytes_jited": 8056,
+        "bytes_xlated": 13888,
+        "id": 179,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "180": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 180,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "181": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 181,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "182": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 182,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "183": {
+        "bytes_jited": 364,
+        "bytes_xlated": 672,
+        "id": 183,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "184": {
+        "bytes_jited": 1183,
+        "bytes_xlated": 1976,
+        "id": 184,
+        "name": "tail_handle_ipv4_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "185": {
+        "bytes_jited": 3112,
+        "bytes_xlated": 5392,
+        "id": 185,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 531630,
+        "run_time_ns_delta": 61626535,
+        "type": "sched_cls"
+      },
+      "186": {
+        "bytes_jited": 526,
+        "bytes_xlated": 952,
+        "id": 186,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "187": {
+        "bytes_jited": 4845,
+        "bytes_xlated": 8264,
+        "id": 187,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 589609,
+        "run_time_ns_delta": 100055498,
+        "type": "sched_cls"
+      },
+      "188": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 188,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "189": {
+        "bytes_jited": 8056,
+        "bytes_xlated": 13888,
+        "id": 189,
+        "name": "tail_handle_ipv4_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "190": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 190,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "191": {
+        "bytes_jited": 5818,
+        "bytes_xlated": 9568,
+        "id": 191,
+        "name": "tail_nodeport_nat_egress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "192": {
+        "bytes_jited": 3340,
+        "bytes_xlated": 5952,
+        "id": 192,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "193": {
+        "bytes_jited": 8699,
+        "bytes_xlated": 14848,
+        "id": 193,
+        "name": "tail_nodeport_nat_ingress_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "194": {
+        "bytes_jited": 12653,
+        "bytes_xlated": 21272,
+        "id": 194,
+        "name": "tail_handle_snat_fwd_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "195": {
+        "bytes_jited": 908,
+        "bytes_xlated": 1392,
+        "id": 195,
+        "name": "cil_from_container",
+        "run_cnt_delta": 1313328,
+        "run_time_ns_delta": 293270972,
+        "type": "sched_cls"
+      },
+      "196": {
+        "bytes_jited": 5418,
+        "bytes_xlated": 9600,
+        "id": 196,
+        "name": "tail_handle_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "197": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 197,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "198": {
+        "bytes_jited": 5306,
+        "bytes_xlated": 9136,
+        "id": 198,
+        "name": "tail_ipv4_ct_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "199": {
+        "bytes_jited": 5424,
+        "bytes_xlated": 9352,
+        "id": 199,
+        "name": "tail_ipv4_ct_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "200": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 200,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "201": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 201,
+        "name": "cil_lxc_policy_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "202": {
+        "bytes_jited": 330,
+        "bytes_xlated": 608,
+        "id": 202,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "203": {
+        "bytes_jited": 3605,
+        "bytes_xlated": 6344,
+        "id": 203,
+        "name": "tail_nodeport_rev_dnat_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "205": {
+        "bytes_jited": 5749,
+        "bytes_xlated": 10384,
+        "id": 205,
+        "name": "tail_ipv4_to_endpoint",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "206": {
+        "bytes_jited": 5832,
+        "bytes_xlated": 10216,
+        "id": 206,
+        "name": "tail_handle_ipv4_cont",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "207": {
+        "bytes_jited": 11128,
+        "bytes_xlated": 19272,
+        "id": 207,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "208": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 208,
+        "name": "tail_no_service_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "209": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 209,
+        "name": "cil_lxc_policy_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "210": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 210,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "211": {
+        "bytes_jited": 5749,
+        "bytes_xlated": 10384,
+        "id": 211,
+        "name": "tail_ipv4_to_endpoint",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "212": {
+        "bytes_jited": 5832,
+        "bytes_xlated": 10216,
+        "id": 212,
+        "name": "tail_handle_ipv4_cont",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "213": {
+        "bytes_jited": 5418,
+        "bytes_xlated": 9600,
+        "id": 213,
+        "name": "tail_handle_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "214": {
+        "bytes_jited": 3605,
+        "bytes_xlated": 6344,
+        "id": 214,
+        "name": "tail_nodeport_rev_dnat_ipv4",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "215": {
+        "bytes_jited": 5306,
+        "bytes_xlated": 9136,
+        "id": 215,
+        "name": "tail_ipv4_ct_ingress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "216": {
+        "bytes_jited": 330,
+        "bytes_xlated": 608,
+        "id": 216,
+        "name": "tail_drop_notify",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "217": {
+        "bytes_jited": 908,
+        "bytes_xlated": 1392,
+        "id": 217,
+        "name": "cil_from_container",
+        "run_cnt_delta": 818,
+        "run_time_ns_delta": 2338960,
+        "type": "sched_cls"
+      },
+      "218": {
+        "bytes_jited": 5424,
+        "bytes_xlated": 9352,
+        "id": 218,
+        "name": "tail_ipv4_ct_egress",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "219": {
+        "bytes_jited": 11128,
+        "bytes_xlated": 19272,
+        "id": 219,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/bin/wrk",
+              "-t4",
+              "-c50",
+              "-d15s",
+              "http://198.18.0.2:18080/"
+            ],
+            "config": {
+              "tool": "wrk",
+              "url": "http://198.18.0.2:18080/"
+            },
+            "duration_s": 15.108251200999973,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Running 15s test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   323.61ms  276.77ms   1.99s    87.20%\n    Req/Sec    34.83     16.88    90.00     76.24%\n  1994 requests in 15.03s, 305.87KB read\n  Socket errors: connect 0, read 0, write 0, timeout 32\nRequests/sec:    132.62\nTransfer/sec:     20.34KB",
+            "workload_name": "network_lossy_multi_wrk"
+          },
+          {
+            "command": [],
+            "components": [
+              {
+                "command": [
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.184:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": null,
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.184:18080/"
+                },
+                "duration_s": 1.0100116230000253,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.184:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.09ms   10.24ms  60.09ms   92.50%\n    Req/Sec   120.20      0.42   121.00     80.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.46\nTransfer/sec:     18.89KB",
+                "workload_name": "cilium host-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.114:45089/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.114:45089/"
+                },
+                "duration_s": 1.0083412959999691,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.114:45089/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.42ms   10.91ms  60.04ms   85.00%\n    Req/Sec   120.40      4.97   131.00     80.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.59\nTransfer/sec:     18.91KB",
+                "workload_name": "cilium endpoint-to-host"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.168:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.168:18080/"
+                },
+                "duration_s": 1.0087682550000068,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.168:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    50.27ms   17.13ms 215.24ms   94.87%\n    Req/Sec    78.05     23.13   101.00     85.00%\n  156 requests in 1.00s, 24.69KB read\nRequests/sec:    155.39\nTransfer/sec:     24.59KB",
+                "workload_name": "cilium endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepb",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.184:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepb",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.184:18080/"
+                },
+                "duration_s": 1.0073007940000025,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.184:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.33ms   11.26ms  60.10ms   84.29%\n    Req/Sec   140.30      0.48   141.00     70.00%\n  140 requests in 1.00s, 22.13KB read\nRequests/sec:    139.54\nTransfer/sec:     22.06KB",
+                "workload_name": "cilium reverse-endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://198.18.0.2:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://198.18.0.2:18080/"
+                },
+                "duration_s": 1.0072713370000201,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    49.60ms   17.14ms 218.28ms   94.97%\n    Req/Sec    79.50      6.86   100.00     85.00%\n  159 requests in 1.00s, 25.15KB read\nRequests/sec:    158.76\nTransfer/sec:     25.11KB",
+                "workload_name": "cilium endpoint-to-external"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "--timeout",
+                  "1s",
+                  "http://10.244.0.184:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbenchns",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.184:18080/"
+                },
+                "duration_s": 1.009618622000005,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.184:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    52.27ms   23.31ms 220.49ms   93.51%\n    Req/Sec   114.45     81.55   202.00     50.00%\n  228 requests in 1.01s, 36.13KB read\nRequests/sec:    226.79\nTransfer/sec:     35.94KB",
+                "workload_name": "cilium external-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.168",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "10.244.0.168",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0133259950000024,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "729112",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.184",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbenchns",
+                  "target_host": "10.244.0.184",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0111314330000027,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "526269",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "198.18.0.2",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "198.18.0.2",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0138125899999864,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "581667",
+                "workload_name": "udp_burst"
+              }
+            ],
+            "duration_s": 9.08958194500002,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "",
+            "workload_name": "cilium_endpoint_matrix"
+          }
+        ],
+        "config": {
+          "netem": {
+            "delay_ms": 50,
+            "loss_pct": 20.0
+          },
+          "network_device": "bpfbench0"
+        },
+        "duration_s": 24.197833145999994,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "network_lossy_multi"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "159": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-51/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-51/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-51/report_step0.json --prog-type xdp --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-51/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-51/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 159,
+        "program": {
+          "final_insn_count": 276,
+          "orig_insn_count": 276,
+          "prog_id": 159,
+          "prog_name": "cil_xdp_entry",
+          "prog_type": 6
+        },
+        "status": "error"
+      },
+      "160": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-41/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-41/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-41/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-41/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-41/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 160,
+        "program": {
+          "final_insn_count": 1194,
+          "orig_insn_count": 1194,
+          "prog_id": 160,
+          "prog_name": "cil_from_host",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "161": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-56/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-56/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-56/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-56/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-56/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 161,
+        "program": {
+          "final_insn_count": 1113,
+          "orig_insn_count": 1113,
+          "prog_id": 161,
+          "prog_name": "cil_from_netdev",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "162": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-53/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-53/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-53/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-53/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-53/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 162,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 162,
+          "prog_name": "cil_host_policy",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "163": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-57/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-57/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-57/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-57/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-57/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 163,
+        "program": {
+          "final_insn_count": 1837,
+          "orig_insn_count": 1837,
+          "prog_id": 163,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "164": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-42/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-42/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-42/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-42/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-42/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 164,
+        "program": {
+          "final_insn_count": 1164,
+          "orig_insn_count": 1164,
+          "prog_id": 164,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "165": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-62/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-62/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-62/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-62/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-62/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 165,
+        "program": {
+          "final_insn_count": 1720,
+          "orig_insn_count": 1720,
+          "prog_id": 165,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "166": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-47/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-47/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-47/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-47/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-47/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 166,
+        "program": {
+          "final_insn_count": 2617,
+          "orig_insn_count": 2617,
+          "prog_id": 166,
+          "prog_name": "tail_handle_sna",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "167": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-60/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-60/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-60/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-60/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-60/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 167,
+        "program": {
+          "final_insn_count": 96,
+          "orig_insn_count": 96,
+          "prog_id": 167,
+          "prog_name": "tail_drop_notif",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "168": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-44/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-44/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-44/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-44/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-44/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 168,
+        "program": {
+          "final_insn_count": 227,
+          "orig_insn_count": 227,
+          "prog_id": 168,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "169": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-61/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-61/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-61/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-61/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-61/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 169,
+        "program": {
+          "final_insn_count": 351,
+          "orig_insn_count": 351,
+          "prog_id": 169,
+          "prog_name": "cil_to_host",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "170": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-71/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-71/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-71/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-71/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-71/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 170,
+        "program": {
+          "final_insn_count": 1281,
+          "orig_insn_count": 1281,
+          "prog_id": 170,
+          "prog_name": "cil_to_netdev",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "171": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-82/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-82/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-82/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-82/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-82/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 171,
+        "program": {
+          "final_insn_count": 2617,
+          "orig_insn_count": 2617,
+          "prog_id": 171,
+          "prog_name": "tail_handle_sna",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "172": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-35/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-35/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-35/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-35/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-35/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 172,
+        "program": {
+          "final_insn_count": 1164,
+          "orig_insn_count": 1164,
+          "prog_id": 172,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "173": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-40/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-40/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-40/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-40/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-40/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 173,
+        "program": {
+          "final_insn_count": 227,
+          "orig_insn_count": 227,
+          "prog_id": 173,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "174": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-38/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-38/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-38/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-38/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-38/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 174,
+        "program": {
+          "final_insn_count": 351,
+          "orig_insn_count": 351,
+          "prog_id": 174,
+          "prog_name": "cil_to_host",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "175": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-52/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-52/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-52/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-52/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-52/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 175,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 175,
+          "prog_name": "cil_host_policy",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "176": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-36/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-36/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-36/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-36/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-36/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 176,
+        "program": {
+          "final_insn_count": 605,
+          "orig_insn_count": 605,
+          "prog_id": 176,
+          "prog_name": "tail_no_service",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "177": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-55/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-55/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-55/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-55/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-55/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 177,
+        "program": {
+          "final_insn_count": 96,
+          "orig_insn_count": 96,
+          "prog_id": 177,
+          "prog_name": "tail_drop_notif",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "178": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-45/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-45/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-45/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-45/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-45/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 178,
+        "program": {
+          "final_insn_count": 1837,
+          "orig_insn_count": 1837,
+          "prog_id": 178,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "179": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-67/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-67/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-67/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-67/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-67/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 179,
+        "program": {
+          "final_insn_count": 1720,
+          "orig_insn_count": 1720,
+          "prog_id": 179,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "180": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-37/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-37/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-37/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-37/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-37/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 180,
+        "program": {
+          "final_insn_count": 1194,
+          "orig_insn_count": 1194,
+          "prog_id": 180,
+          "prog_name": "cil_from_host",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "181": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-59/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-59/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-59/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-59/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-59/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 181,
+        "program": {
+          "final_insn_count": 1113,
+          "orig_insn_count": 1113,
+          "prog_id": 181,
+          "prog_name": "cil_from_netdev",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "182": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-66/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-66/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-66/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-66/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-66/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 182,
+        "program": {
+          "final_insn_count": 1281,
+          "orig_insn_count": 1281,
+          "prog_id": 182,
+          "prog_name": "cil_to_netdev",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "183": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-72/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-72/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-72/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-72/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-72/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 183,
+        "program": {
+          "final_insn_count": 96,
+          "orig_insn_count": 96,
+          "prog_id": 183,
+          "prog_name": "tail_drop_notif",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "184": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-48/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-48/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-48/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-48/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-48/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 184,
+        "program": {
+          "final_insn_count": 227,
+          "orig_insn_count": 227,
+          "prog_id": 184,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "185": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-58/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-58/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-58/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-58/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-58/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 185,
+        "program": {
+          "final_insn_count": 1113,
+          "orig_insn_count": 1113,
+          "prog_id": 185,
+          "prog_name": "cil_from_netdev",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "186": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-54/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-54/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-54/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-54/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-54/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 186,
+        "program": {
+          "final_insn_count": 351,
+          "orig_insn_count": 351,
+          "prog_id": 186,
+          "prog_name": "cil_to_host",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "187": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-64/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-64/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-64/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-64/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-64/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 187,
+        "program": {
+          "final_insn_count": 1281,
+          "orig_insn_count": 1281,
+          "prog_id": 187,
+          "prog_name": "cil_to_netdev",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "188": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-34/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-34/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-34/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-34/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-34/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 188,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 188,
+          "prog_name": "cil_host_policy",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "189": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-50/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-50/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-50/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-50/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-50/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 189,
+        "program": {
+          "final_insn_count": 1720,
+          "orig_insn_count": 1720,
+          "prog_id": 189,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "190": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-78/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-78/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-78/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-78/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-78/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 190,
+        "program": {
+          "final_insn_count": 605,
+          "orig_insn_count": 605,
+          "prog_id": 190,
+          "prog_name": "tail_no_service",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "191": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-75/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-75/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-75/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-75/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-75/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 191,
+        "program": {
+          "final_insn_count": 1164,
+          "orig_insn_count": 1164,
+          "prog_id": 191,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "192": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-93/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-93/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-93/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-93/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-93/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 192,
+        "program": {
+          "final_insn_count": 1194,
+          "orig_insn_count": 1194,
+          "prog_id": 192,
+          "prog_name": "cil_from_host",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "193": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-92/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-92/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-92/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-92/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-92/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 193,
+        "program": {
+          "final_insn_count": 1837,
+          "orig_insn_count": 1837,
+          "prog_id": 193,
+          "prog_name": "tail_nodeport_n",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "194": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-94/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-94/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-94/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-94/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-94/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 194,
+        "program": {
+          "final_insn_count": 2617,
+          "orig_insn_count": 2617,
+          "prog_id": 194,
+          "prog_name": "tail_handle_sna",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "195": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-74/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-74/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-74/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-74/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-74/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 195,
+        "program": {
+          "final_insn_count": 380,
+          "orig_insn_count": 380,
+          "prog_id": 195,
+          "prog_name": "cil_from_contai",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "196": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-83/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-83/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-83/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-83/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-83/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 196,
+        "program": {
+          "final_insn_count": 1217,
+          "orig_insn_count": 1217,
+          "prog_id": 196,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "197": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-91/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-91/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-91/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-91/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-91/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 197,
+        "program": {
+          "final_insn_count": 197,
+          "orig_insn_count": 197,
+          "prog_id": 197,
+          "prog_name": "tail_handle_arp",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "198": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-95/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-95/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-95/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-95/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-95/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 198,
+        "program": {
+          "final_insn_count": 1121,
+          "orig_insn_count": 1121,
+          "prog_id": 198,
+          "prog_name": "tail_ipv4_ct_in",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "199": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-87/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-87/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-87/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-87/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-87/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 199,
+        "program": {
+          "final_insn_count": 1146,
+          "orig_insn_count": 1146,
+          "prog_id": 199,
+          "prog_name": "tail_ipv4_ct_eg",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "200": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-89/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-89/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-89/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-89/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-89/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 200,
+        "program": {
+          "final_insn_count": 601,
+          "orig_insn_count": 601,
+          "prog_id": 200,
+          "prog_name": "tail_no_service",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "201": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-88/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-88/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-88/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-88/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-88/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 201,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 201,
+          "prog_name": "cil_lxc_policy_",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "202": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-90/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-90/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-90/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-90/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-90/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 202,
+        "program": {
+          "final_insn_count": 88,
+          "orig_insn_count": 88,
+          "prog_id": 202,
+          "prog_name": "tail_drop_notif",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "203": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-43/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-43/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-43/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-43/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-43/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 203,
+        "program": {
+          "final_insn_count": 775,
+          "orig_insn_count": 775,
+          "prog_id": 203,
+          "prog_name": "tail_nodeport_r",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "205": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-63/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-63/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-63/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-63/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-63/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 205,
+        "program": {
+          "final_insn_count": 1343,
+          "orig_insn_count": 1343,
+          "prog_id": 205,
+          "prog_name": "tail_ipv4_to_en",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "206": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-68/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-68/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-68/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-68/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-68/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 206,
+        "program": {
+          "final_insn_count": 1377,
+          "orig_insn_count": 1377,
+          "prog_id": 206,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "207": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-85/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-85/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-85/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-85/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-85/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 207,
+        "program": {
+          "final_insn_count": 2446,
+          "orig_insn_count": 2446,
+          "prog_id": 207,
+          "prog_name": "cil_lxc_policy",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "208": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-65/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-65/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-65/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-65/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-65/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 208,
+        "program": {
+          "final_insn_count": 601,
+          "orig_insn_count": 601,
+          "prog_id": 208,
+          "prog_name": "tail_no_service",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "209": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-69/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-69/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-69/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-69/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-69/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 209,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 209,
+          "prog_name": "cil_lxc_policy_",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "210": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-76/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-76/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-76/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-76/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-76/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 210,
+        "program": {
+          "final_insn_count": 197,
+          "orig_insn_count": 197,
+          "prog_id": 210,
+          "prog_name": "tail_handle_arp",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "211": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-86/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-86/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-86/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-86/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-86/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 211,
+        "program": {
+          "final_insn_count": 1343,
+          "orig_insn_count": 1343,
+          "prog_id": 211,
+          "prog_name": "tail_ipv4_to_en",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "212": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-46/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-46/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-46/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-46/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-46/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 212,
+        "program": {
+          "final_insn_count": 1377,
+          "orig_insn_count": 1377,
+          "prog_id": 212,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "213": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-80/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-80/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-80/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-80/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-80/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 213,
+        "program": {
+          "final_insn_count": 1217,
+          "orig_insn_count": 1217,
+          "prog_id": 213,
+          "prog_name": "tail_handle_ipv",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "214": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-73/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-73/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-73/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-73/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-73/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 214,
+        "program": {
+          "final_insn_count": 775,
+          "orig_insn_count": 775,
+          "prog_id": 214,
+          "prog_name": "tail_nodeport_r",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "215": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-84/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-84/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-84/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-84/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-84/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 215,
+        "program": {
+          "final_insn_count": 1121,
+          "orig_insn_count": 1121,
+          "prog_id": 215,
+          "prog_name": "tail_ipv4_ct_in",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "216": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-70/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-70/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-70/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-70/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-70/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 216,
+        "program": {
+          "final_insn_count": 88,
+          "orig_insn_count": 88,
+          "prog_id": 216,
+          "prog_name": "tail_drop_notif",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "217": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-77/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-77/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-77/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-77/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-77/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 217,
+        "program": {
+          "final_insn_count": 380,
+          "orig_insn_count": 380,
+          "prog_id": 217,
+          "prog_name": "cil_from_contai",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "218": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-79/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-79/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-79/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-79/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-79/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 218,
+        "program": {
+          "final_insn_count": 1146,
+          "orig_insn_count": 1146,
+          "prog_id": 218,
+          "prog_name": "tail_ipv4_ct_eg",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "219": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-81/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-81/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-81/report_step0.json --prog-type sched_cls --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-81/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-81/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 219,
+        "program": {
+          "final_insn_count": 2446,
+          "orig_insn_count": 2446,
+          "prog_id": 219,
+          "prog_name": "cil_lxc_policy",
+          "prog_type": 3
+        },
+        "status": "error"
+      },
+      "63": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-39/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-39/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-39/report_step0.json --prog-type tracing --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-39/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-39/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 63,
+        "program": {
+          "final_insn_count": 35,
+          "orig_insn_count": 35,
+          "prog_id": 63,
+          "prog_name": "dump_bpf_map",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "64": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "step 0 failed (exit 1): timeout 6000 bpfopt --pass wide_mem --input /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-49/input_step0.bin --output /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-49/output_step0.bin --report /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-49/report_step0.json --prog-type tracing --verifier-states /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-49/verifier_log_initial.log\nsubprocess output:\nerror: failed to read verifier states from /var/tmp/bpfrejit-runtime/do/bpfrejit-daemon-plan-1859-49/verifier_log_initial.log: No such file or directory (os error 2)",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          }
+        ],
+        "prog_id": 64,
+        "program": {
+          "final_insn_count": 65,
+          "orig_insn_count": 65,
+          "prog_id": 64,
+          "prog_name": "dump_bpf_prog",
+          "prog_type": 26
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "cilium",
+  "selected_workload": "network_lossy_multi",
+  "status": "ok"
+}
