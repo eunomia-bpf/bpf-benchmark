@@ -34,13 +34,14 @@ impl BpfPass for RotatePass {
             return Ok(PassResult::with_sites(0, skipped));
         }
 
-        // tmp_reg liveness pre-check: skip sites whose tmp_reg is read after the
-        // window, since the kinsn replacement does not preserve tmp_reg.
+        // tmp_reg liveness pre-check: skip sites whose replacement drops the
+        // original tmp_reg value while it is still read after the window.
         let mut applicable = Vec::with_capacity(candidates.len());
         for (start, site) in candidates {
-            if prog
-                .live_out_after_window(start, site.old_len)?
-                .contains(&site.tmp_reg)
+            if site.clobbers_tmp
+                && prog
+                    .live_out_after_window(start, site.old_len)?
+                    .contains(&site.tmp_reg)
             {
                 skipped.push(SiteSkipReason::new(
                     start,
@@ -89,6 +90,7 @@ pub(super) struct RotateSite {
     pub(super) tmp_reg: u8,
     pub(super) shift_amount: u32,
     pub(super) width: RotateWidth,
+    pub(super) clobbers_tmp: bool,
 }
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -162,21 +164,28 @@ fn try_match_rotate(
 }
 
 fn try_match_masked32_rotate(insns: &[BpfInsn], idx: usize) -> Option<RotateSite> {
-    let [mov_rsh, and_mask, rsh, mov_lsh, lsh, or_insn] = insns.get(idx..idx + 6)? else {
+    let [mov_rsh, and_mask, rsh, i3, i4] = insns.get(idx..idx + 5)? else {
         return None;
     };
 
-    if !mov_rsh.is_alu_reg(BPF_ALU64, BPF_MOV) || !mov_lsh.is_alu_reg(BPF_ALU64, BPF_MOV) {
+    if !mov_rsh.is_alu_reg(BPF_ALU64, BPF_MOV) {
         return None;
     }
 
     let val_reg = mov_rsh.src_reg();
-    if mov_lsh.src_reg() != val_reg {
-        return None;
-    }
-
     let rsh_reg = mov_rsh.dst_reg();
-    let lsh_reg = mov_lsh.dst_reg();
+    let (start_idx, old_len, clobbers_tmp, lsh, or_insn, lsh_reg) =
+        if i3.is_alu_reg(BPF_ALU64, BPF_MOV) {
+            if i3.src_reg() != val_reg {
+                return None;
+            }
+            (idx, 6, true, i4, insns.get(idx + 5)?, i3.dst_reg())
+        } else {
+            if !is_zero_extend32_pair(insns.get(idx + 5)?, insns.get(idx + 6)?, val_reg) {
+                return None;
+            }
+            (idx + 3, 2, false, i3, i4, val_reg)
+        };
     if rsh_reg == lsh_reg {
         return None;
     }
@@ -208,20 +217,32 @@ fn try_match_masked32_rotate(insns: &[BpfInsn], idx: usize) -> Option<RotateSite
     if !uses_both_regs(or_dst, or_src, lsh_reg, rsh_reg) {
         return None;
     }
+    let tmp_reg = if or_dst == rsh_reg { lsh_reg } else { rsh_reg };
 
-    rotate_site(
-        idx,
-        6,
+    let mut site = rotate_site(
+        start_idx,
+        old_len,
         or_dst,
         val_reg,
-        or_src,
+        tmp_reg,
         lsh_amount,
         RotateWidth::W32,
-    )
+    )?;
+    site.clobbers_tmp = clobbers_tmp;
+    Some(site)
 }
 
 fn high32_rotate_mask(rsh_amount: u32) -> Option<u64> {
     (rsh_amount < 32).then_some((u64::from(u32::MAX) << rsh_amount) & u64::from(u32::MAX))
+}
+
+fn is_zero_extend32_pair(i0: &BpfInsn, i1: &BpfInsn, reg: u8) -> bool {
+    i0.is_alu_imm(BPF_ALU64, BPF_LSH)
+        && i0.dst_reg() == reg
+        && i0.imm == 32
+        && i1.is_alu_imm(BPF_ALU64, BPF_RSH)
+        && i1.dst_reg() == reg
+        && i1.imm == 32
 }
 
 fn and_mask_value(insns: &[BpfInsn], and_idx: usize, and_insn: &BpfInsn) -> Option<u64> {
@@ -376,5 +397,6 @@ fn rotate_site(
         tmp_reg,
         shift_amount,
         width,
+        clobbers_tmp: true,
     })
 }

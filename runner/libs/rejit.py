@@ -173,8 +173,19 @@ def _platform_policy_passes(policy_config: Mapping[str, Any]) -> list[str] | Non
     raise SystemExit(f"benchmark config does not define policy.platforms passes for {arch_keys}")
 
 
+def _expand_groups(passes: Sequence[str], policy: Mapping[str, Any]) -> list[str]:
+    """Single-level group expansion; duplicates preserved."""
+    groups = _mapping_dict(policy.get("groups"), field_name="policy.groups")
+    return [
+        str(p).strip()
+        for name in passes
+        for p in (groups[name] if isinstance(groups.get(name), list) else [name])
+        if str(p).strip()
+    ]
+
+
 def _require_non_empty_passes(raw_passes: Sequence[str], *, field_name: str) -> list[str]:
-    passes = _ordered_unique_passes(raw_passes)
+    passes = [str(p).strip() for p in raw_passes if str(p).strip()]
     if not passes:
         raise SystemExit(f"benchmark config field {field_name} must not be empty")
     return passes
@@ -185,7 +196,7 @@ def benchmark_config_enabled_passes(benchmark_config: Mapping[str, Any] | None) 
     platform_passes = _platform_policy_passes(policy_config)
     if platform_passes is not None:
         return _require_non_empty_passes(
-            platform_passes,
+            _expand_groups(platform_passes, policy_config),
             field_name="policy.platforms.<arch>.passes",
         )
     policy_default = _mapping_dict(policy_config.get("default"), field_name="policy.default")
@@ -216,7 +227,8 @@ def benchmark_rejit_enabled_passes() -> list[str]:
         text = raw.strip()
         if text.lower() == "default":
             return list(_cached_benchmark_config_enabled_passes())
-        return [token.strip() for token in text.split(",") if token.strip()]
+        tokens = [token.strip() for token in text.split(",") if token.strip()]
+        return _expand_groups(tokens, load_benchmark_config().get("policy") or {})
     return list(_cached_benchmark_config_enabled_passes())
 
 

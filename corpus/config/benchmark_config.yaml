@@ -1,33 +1,14 @@
 policy:
+  groups:
+    map-only: [noop, map_inline]
+    map-dce:      [noop, map_inline, const_prop, dce]
+    kinsn-5: [rotate, cond_select, extract, endian_fusion, bulk_memory]
+    kinsn-6: [rotate, cond_select, extract, endian_fusion, bulk_memory, prefetch]
+    br:      [noop, wide_mem, const_prop, dce, bounds_check_merge, skb_load_bytes_spec]
+    full: [noop, map_inline, const_prop, dce,
+           rotate, cond_select, extract, endian_fusion, ccmp, bulk_memory, prefetch,
+           wide_mem, bounds_check_merge, skb_load_bytes_spec,
+           noop, const_prop, dce]
   platforms:
-    x86_64:
-      passes:
-        - wide_mem
-        - rotate
-        - cond_select
-        - extract
-        - endian_fusion
-        - noop
-        - map_inline
-        - const_prop
-        - dce
-        - bounds_check_merge
-        - skb_load_bytes_spec
-        - bulk_memory
-        - prefetch
-    arm64:
-      passes:
-        - wide_mem
-        - rotate
-        - cond_select
-        - extract
-        - endian_fusion
-        - noop
-        - map_inline
-        - const_prop
-        - dce
-        - bounds_check_merge
-        - skb_load_bytes_spec
-        - bulk_memory
-        - prefetch
-        - ccmp
+    x86_64: { passes: [full] }
+    arm64:  { passes: [full] }

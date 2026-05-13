@@ -2,12 +2,13 @@
 //! Host-side developer loader for bpfopt. Run from the project root.
 //!
 //! Flow:
-//!   1. libbpf-load `<obj>:<prog>` with log_level=2, capture verifier log
-//!   2. dump map snapshots + metadata into a workdir
-//!   3. invoke `bpfopt --canonicalize-map-refs`
-//!   4. if `--pass` given: run the daemon's per-pass yaml
-//!      (`runner/config/passes/<pass>/default.yaml`) and re-verify the output
-//!      with `BPF_PROG_LOAD`
+//!   1. libbpf-load every program in `<obj>` with log_level=2; one shared dump
+//!      of map snapshots and per-program {bytecode, verifier log, metadata}
+//!      into `<workdir>/<prog_name>/`
+//!   2. for each program: `bpfopt --canonicalize-map-refs`
+//!   3. for each program (if `--pass` given): execute the daemon's per-pass yaml
+//!      at `runner/config/passes/<pass>/default.yaml`, then re-verify the
+//!      produced bytecode with `BPF_PROG_LOAD`
 //!
 //! `--workdir` is optional; if omitted a `/tmp/bpfopt-loader-<pid>-<n>` dir is
 //! created and removed on exit.
@@ -56,12 +57,10 @@ const BPF_PSEUDO_MAP_IDX_VALUE: u8 = 6;
     about = "Host-side bpfopt fixture loader"
 )]
 struct Cli {
-    /// BPF object file to open through libbpf.
+    /// BPF object file to open through libbpf. All programs inside it are
+    /// loaded and processed; each ends up in `<workdir>/<prog_name>/`.
     #[arg(long, value_name = "FILE")]
     obj: PathBuf,
-    /// Program name or ELF section to select.
-    #[arg(long, value_name = "NAME_OR_SECTION")]
-    prog: String,
     /// Pass to run via the daemon's per-pass yaml.
     #[arg(long, value_name = "NAME")]
     pass: Option<String>,
@@ -71,6 +70,12 @@ struct Cli {
     /// Workdir to use. If omitted, a tmp dir is created and removed on exit.
     #[arg(long, value_name = "DIR")]
     workdir: Option<PathBuf>,
+}
+
+/// One per program in the loaded .bpf.o.
+struct PreparedProgram {
+    dir: PathBuf,
+    map_ids: Vec<u32>,
 }
 
 /// Allocate a workdir. Caller-supplied paths are not cleaned up; tmp dirs are
@@ -164,7 +169,6 @@ impl Drop for BpfObject {
 struct ProgramRef {
     ptr: *mut libbpf_sys::bpf_program,
     name: String,
-    section: String,
 }
 
 struct MapRef {
@@ -184,68 +188,77 @@ fn main() -> ExitCode {
 
 fn run(cli: Cli) -> Result<()> {
     let workdir = WorkDir::open(cli.workdir.clone())?;
-    let map_ids = prepare_workdir(&workdir.path, &cli.obj, &cli.prog)?;
+    let map_values_dir = workdir.path.join(MAP_VALUES_DIR);
+    let prepared = prepare_workdir(&workdir.path, &cli.obj)?;
 
-    // Canonicalize loader-FD map refs into stable IDX form.
-    let mut canon = Command::new(BPFOPT_BIN);
-    canon
-        .arg("--canonicalize-map-refs")
-        .arg("--input")
-        .arg(workdir.path.join(CANONICALIZE_INPUT_BIN))
-        .arg("--output")
-        .arg(workdir.path.join(INPUT_BIN));
-    if !map_ids.is_empty() {
-        canon.arg("--map-ids").arg(join_u32_csv(&map_ids));
-    }
-    let status = canon
-        .status()
-        .with_context(|| format!("failed to run {BPFOPT_BIN}"))?;
-    if !status.success() {
-        bail!("bpfopt canonicalize failed with {status}");
-    }
+    for prog in &prepared {
+        // Canonicalize loader-FD map refs into stable IDX form.
+        let mut canon = Command::new(BPFOPT_BIN);
+        canon
+            .arg("--canonicalize-map-refs")
+            .arg("--input")
+            .arg(prog.dir.join(CANONICALIZE_INPUT_BIN))
+            .arg("--output")
+            .arg(prog.dir.join(INPUT_BIN));
+        if !prog.map_ids.is_empty() {
+            canon.arg("--map-ids").arg(join_u32_csv(&prog.map_ids));
+        }
+        let status = canon.status()?;
+        if !status.success() {
+            bail!("canonicalize failed for {} ({status})", prog.dir.display());
+        }
 
-    if let Some(pass) = cli.pass.as_deref() {
-        run_pass_via_yaml(&workdir.path, pass, cli.target.as_deref(), &map_ids)?;
-        verify_workdir(&workdir.path)?;
+        if let Some(pass) = cli.pass.as_deref() {
+            run_pass_via_yaml(
+                &prog.dir,
+                &map_values_dir,
+                pass,
+                cli.target.as_deref(),
+                &prog.map_ids,
+            )?;
+            verify_workdir(&prog.dir, &map_values_dir)?;
+        }
     }
     Ok(())
 }
 
-/// libbpf-load `<obj_path>:<prog_selector>` and dump bytecode, verifier log,
-/// metadata, and map snapshots into `workdir`. Returns the bytecode map ids.
-fn prepare_workdir(workdir: &Path, obj_path: &Path, prog_selector: &str) -> Result<Vec<u32>> {
-    fs::create_dir_all(workdir.join(MAP_VALUES_DIR))?;
+/// libbpf-load every program in `obj_path` with log_level=2 and dump bytecode,
+/// verifier log, metadata, and shared map snapshots into `workdir`. Each
+/// program lands in `<workdir>/<prog_name>/`; map snapshots are shared at
+/// `<workdir>/map-values/`.
+fn prepare_workdir(workdir: &Path, obj_path: &Path) -> Result<Vec<PreparedProgram>> {
+    let map_values_dir = workdir.join(MAP_VALUES_DIR);
+    fs::create_dir_all(&map_values_dir)?;
 
     let obj = open_bpf_object(obj_path)?;
-    let selected = select_program(&obj, prog_selector)?;
-    // Disable autoload for every program except the selected one, and set
-    // log_level=2 on the selected program so the verifier log lands in log_buf.
-    for prog in programs(&obj)? {
+    let progs = programs(&obj)?;
+    let mut log_bufs: Vec<Vec<c_char>> = (0..progs.len()).map(|_| vec![0; LOG_BYTES]).collect();
+    for (prog, buf) in progs.iter().zip(log_bufs.iter_mut()) {
         libbpf_ok(
-            unsafe { libbpf_sys::bpf_program__set_autoload(prog.ptr, prog.ptr == selected.ptr) },
-            "bpf_program__set_autoload",
+            unsafe { libbpf_sys::bpf_program__set_log_level(prog.ptr, 2) },
+            "bpf_program__set_log_level",
+        )?;
+        libbpf_ok(
+            unsafe {
+                libbpf_sys::bpf_program__set_log_buf(
+                    prog.ptr,
+                    buf.as_mut_ptr(),
+                    LOG_BYTES as libbpf_sys::size_t,
+                )
+            },
+            "bpf_program__set_log_buf",
         )?;
         unsafe { libbpf_sys::bpf_program__set_autoattach(prog.ptr, false) };
     }
-    let mut log_buf = vec![0 as c_char; LOG_BYTES];
-    libbpf_ok(
-        unsafe { libbpf_sys::bpf_program__set_log_level(selected.ptr, 2) },
-        "bpf_program__set_log_level",
-    )?;
-    libbpf_ok(
-        unsafe {
-            libbpf_sys::bpf_program__set_log_buf(
-                selected.ptr,
-                log_buf.as_mut_ptr(),
-                LOG_BYTES as libbpf_sys::size_t,
-            )
-        },
-        "bpf_program__set_log_buf",
-    )?;
 
     let ret = unsafe { libbpf_sys::bpf_object__load(obj.ptr) };
     if ret < 0 {
-        fs::write(workdir.join(VERIFIER_LOG), log_buf_to_string(&log_buf))?;
+        // Dump whatever verifier output libbpf produced so the user can diagnose.
+        for (prog, buf) in progs.iter().zip(&log_bufs) {
+            let dir = workdir.join(&prog.name);
+            let _ = fs::create_dir_all(&dir);
+            let _ = fs::write(dir.join(VERIFIER_LOG), log_buf_to_string(buf));
+        }
         bail!(
             "libbpf failed to load {}: {}",
             obj_path.display(),
@@ -253,44 +266,55 @@ fn prepare_workdir(workdir: &Path, obj_path: &Path, prog_selector: &str) -> Resu
         );
     }
 
-    let prog_fd = unsafe { libbpf_sys::bpf_program__fd(selected.ptr) };
-    if prog_fd < 0 {
-        bail!("selected program has no loaded fd");
-    }
-    let prog_info: libbpf_sys::bpf_prog_info = unsafe { obj_info(prog_fd)? };
     let loaded_maps = maps(&obj)?;
+    let mut prepared = Vec::with_capacity(progs.len());
+    let mut all_map_ids = BTreeSet::new();
+    for (prog, log_buf) in progs.into_iter().zip(log_bufs) {
+        let dir = workdir.join(&prog.name);
+        fs::create_dir_all(&dir)?;
 
-    let insn_cnt = unsafe { libbpf_sys::bpf_program__insn_cnt(selected.ptr) };
-    let insn_ptr = unsafe { libbpf_sys::bpf_program__insns(selected.ptr) };
-    if insn_ptr.is_null() && insn_cnt != 0 {
-        bail!("selected program has null instruction pointer");
-    }
-    let insns = unsafe { slice::from_raw_parts(insn_ptr, insn_cnt as usize) }.to_vec();
-    let map_ids = bytecode_map_ids(&insns, &loaded_maps)?;
+        let prog_fd = unsafe { libbpf_sys::bpf_program__fd(prog.ptr) };
+        if prog_fd < 0 {
+            bail!("program {} has no loaded fd", prog.name);
+        }
+        let prog_info: libbpf_sys::bpf_prog_info = unsafe { obj_info(prog_fd)? };
+        let insn_cnt = unsafe { libbpf_sys::bpf_program__insn_cnt(prog.ptr) };
+        let insn_ptr = unsafe { libbpf_sys::bpf_program__insns(prog.ptr) };
+        if insn_ptr.is_null() && insn_cnt != 0 {
+            bail!("program {} has a null instruction pointer", prog.name);
+        }
+        let insns = unsafe { slice::from_raw_parts(insn_ptr, insn_cnt as usize) }.to_vec();
+        let map_ids = bytecode_map_ids(&insns, &loaded_maps)?;
 
-    write_json(
-        &workdir.join(MAP_IDS_JSON),
-        &MapIdsJson {
-            map_ids: map_ids.clone(),
-        },
-    )?;
-    let bytes =
-        unsafe { slice::from_raw_parts(insns.as_ptr().cast::<u8>(), mem::size_of_val(&insns[..])) };
-    fs::write(workdir.join(CANONICALIZE_INPUT_BIN), bytes)?;
-    dump_map_snapshots(&loaded_maps, &map_ids, &workdir.join(MAP_VALUES_DIR))?;
-    fs::write(workdir.join(VERIFIER_LOG), log_buf_to_string(&log_buf))?;
-    write_json(
-        &workdir.join(METADATA_JSON),
-        &ProgramMetadata {
-            name: selected.name,
-            prog_type: unsafe { libbpf_sys::bpf_program__type(selected.ptr) },
-            expected_attach_type: unsafe {
-                libbpf_sys::bpf_program__expected_attach_type(selected.ptr)
+        write_json(
+            &dir.join(MAP_IDS_JSON),
+            &MapIdsJson {
+                map_ids: map_ids.clone(),
             },
-            attach_btf_id: prog_info.attach_btf_id,
-        },
-    )?;
-    Ok(map_ids)
+        )?;
+        let bytes = unsafe {
+            slice::from_raw_parts(insns.as_ptr().cast::<u8>(), mem::size_of_val(&insns[..]))
+        };
+        fs::write(dir.join(CANONICALIZE_INPUT_BIN), bytes)?;
+        fs::write(dir.join(VERIFIER_LOG), log_buf_to_string(&log_buf))?;
+        write_json(
+            &dir.join(METADATA_JSON),
+            &ProgramMetadata {
+                name: prog.name.clone(),
+                prog_type: unsafe { libbpf_sys::bpf_program__type(prog.ptr) },
+                expected_attach_type: unsafe {
+                    libbpf_sys::bpf_program__expected_attach_type(prog.ptr)
+                },
+                attach_btf_id: prog_info.attach_btf_id,
+            },
+        )?;
+        all_map_ids.extend(map_ids.iter().copied());
+        prepared.push(PreparedProgram { dir, map_ids });
+    }
+
+    let all_map_ids: Vec<u32> = all_map_ids.into_iter().collect();
+    dump_map_snapshots(&loaded_maps, &all_map_ids, &map_values_dir)?;
+    Ok(prepared)
 }
 
 /// `BPF_OBJ_GET_INFO_BY_FD` for any sized info struct.
@@ -305,10 +329,11 @@ unsafe fn obj_info<T: Default>(fd: i32) -> Result<T> {
 }
 
 /// Read `runner/config/passes/<pass>/default.yaml`, substitute `${VAR}` tokens
-/// with workdir paths and metadata, and execute the command via `sh -c`. The
-/// yaml's bare `bpfopt` is rewritten to the hardcoded binary path.
+/// with `prog_dir` paths + the shared `map_values_dir`, and execute the command
+/// via `sh -c`. The yaml's bare `bpfopt` is rewritten to the hardcoded binary.
 fn run_pass_via_yaml(
-    workdir: &Path,
+    prog_dir: &Path,
+    map_values_dir: &Path,
     pass: &str,
     target: Option<&Path>,
     map_ids: &[u32],
@@ -320,8 +345,8 @@ fn run_pass_via_yaml(
         .and_then(|v| v.as_str())
         .ok_or_else(|| anyhow!("{} missing `command` string", yaml_path.display()))?;
 
-    let metadata = read_json::<ProgramMetadata>(&workdir.join(METADATA_JSON))?;
-    let p = |sub: &str| workdir.join(sub).display().to_string();
+    let metadata = read_json::<ProgramMetadata>(&prog_dir.join(METADATA_JSON))?;
+    let p = |sub: &str| prog_dir.join(sub).display().to_string();
     let map_ids_arg = if map_ids.is_empty() {
         "0".into()
     } else {
@@ -334,7 +359,7 @@ fn run_pass_via_yaml(
         .replace("${OUTPUT}", &p(OUTPUT_BIN))
         .replace("${REPORT}", &p(REPORT_JSON))
         .replace("${VERIFIER_STATES}", &p(VERIFIER_LOG))
-        .replace("${MAP_VALUES}", &p(MAP_VALUES_DIR))
+        .replace("${MAP_VALUES}", &map_values_dir.display().to_string())
         .replace("${MAP_IDS}", &map_ids_arg)
         .replace("${PROG_TYPE}", &metadata.prog_type.to_string())
         .replace("${TARGET}", &target_arg);
@@ -346,14 +371,23 @@ fn run_pass_via_yaml(
     Ok(())
 }
 
-/// Reload the produced bytecode via BPF_PROG_LOAD as a sanity check.
-fn verify_workdir(workdir: &Path) -> Result<()> {
-    let metadata = read_json::<ProgramMetadata>(&workdir.join(METADATA_JSON))?;
-    let map_ids = read_json::<MapIdsJson>(&workdir.join(MAP_IDS_JSON))?.map_ids;
-    let input = workdir.join(OUTPUT_BIN);
-    let map_fds = create_verify_maps(&workdir.join(MAP_VALUES_DIR), &map_ids)?;
+/// Reload the bytecode produced for `prog_dir` via BPF_PROG_LOAD as a sanity
+/// check, using the shared map snapshots at `map_values_dir`.
+fn verify_workdir(prog_dir: &Path, map_values_dir: &Path) -> Result<()> {
+    let metadata = read_json::<ProgramMetadata>(&prog_dir.join(METADATA_JSON))?;
+    let map_ids = read_json::<MapIdsJson>(&prog_dir.join(MAP_IDS_JSON))?.map_ids;
+    let input = prog_dir.join(OUTPUT_BIN);
+    let map_fds = create_verify_maps(map_values_dir, &map_ids)?;
     let fd_nums = map_fds.iter().map(|fd| fd.as_raw_fd()).collect::<Vec<_>>();
-    let mut insns = read_insns(&input)?;
+
+    // Read OUTPUT_BIN and rewrite IDX-form map refs to FD-form in place.
+    let raw = fs::read(&input)?;
+    let stride = mem::size_of::<libbpf_sys::bpf_insn>();
+    if !raw.len().is_multiple_of(stride) {
+        bail!("{} length is not a multiple of 8 bytes", input.display());
+    }
+    let mut insns = vec![libbpf_sys::bpf_insn::default(); raw.len() / stride];
+    unsafe { ptr::copy_nonoverlapping(raw.as_ptr(), insns.as_mut_ptr().cast(), raw.len()) };
     rewrite_map_indices_to_fds(&mut insns, &fd_nums)?;
 
     let name = CString::new(metadata.name.as_str())?;
@@ -379,7 +413,7 @@ fn verify_workdir(workdir: &Path) -> Result<()> {
         )
     };
     let log = log_buf_to_string(&log_buf);
-    fs::write(workdir.join(VERIFY_LOG), &log)?;
+    fs::write(prog_dir.join(VERIFY_LOG), &log)?;
     if fd < 0 {
         bail!(
             "BPF_PROG_LOAD rejected {}: {}; verifier log: {}",
@@ -418,18 +452,6 @@ fn open_bpf_object(path: &Path) -> Result<BpfObject> {
     Ok(BpfObject { ptr })
 }
 
-fn select_program(obj: &BpfObject, selector: &str) -> Result<ProgramRef> {
-    let matches = programs(obj)?
-        .into_iter()
-        .filter(|prog| prog.name == selector || prog.section == selector)
-        .collect::<Vec<_>>();
-    match matches.len() {
-        0 => bail!("program {selector:?} not found in object"),
-        1 => Ok(matches.into_iter().next().unwrap()),
-        _ => bail!("program selector {selector:?} is ambiguous"),
-    }
-}
-
 fn programs(obj: &BpfObject) -> Result<Vec<ProgramRef>> {
     let mut out = Vec::new();
     let mut prev = ptr::null_mut();
@@ -441,7 +463,6 @@ fn programs(obj: &BpfObject) -> Result<Vec<ProgramRef>> {
         out.push(ProgramRef {
             ptr: prog,
             name: c_string(unsafe { libbpf_sys::bpf_program__name(prog) })?,
-            section: c_string(unsafe { libbpf_sys::bpf_program__section_name(prog) })?,
         });
         prev = prog;
     }
@@ -656,17 +677,6 @@ fn create_verify_maps(dir: &Path, map_ids: &[u32]) -> Result<Vec<OwnedFd>> {
     Ok(fds)
 }
 
-fn read_insns(path: &Path) -> Result<Vec<libbpf_sys::bpf_insn>> {
-    let bytes = fs::read(path)?;
-    let stride = mem::size_of::<libbpf_sys::bpf_insn>();
-    if !bytes.len().is_multiple_of(stride) {
-        bail!("{} length is not a multiple of 8 bytes", path.display());
-    }
-    let mut insns = vec![libbpf_sys::bpf_insn::default(); bytes.len() / stride];
-    unsafe { ptr::copy_nonoverlapping(bytes.as_ptr(), insns.as_mut_ptr().cast(), bytes.len()) };
-    Ok(insns)
-}
-
 fn rewrite_map_indices_to_fds(insns: &mut [libbpf_sys::bpf_insn], fds: &[i32]) -> Result<()> {
     let mut pc = 0usize;
     while pc < insns.len() {
@@ -803,16 +813,8 @@ mod tests {
 
         let mut failures = Vec::new();
         for obj in objects.iter().take(SMOKE_OBJECTS) {
-            let selector = match first_program_selector(obj) {
-                Ok(sel) => sel,
-                Err(err) => {
-                    failures.push(format!("{}: {err:#}", obj.display()));
-                    continue;
-                }
-            };
             let cli = Cli {
                 obj: obj.clone(),
-                prog: selector,
                 pass: Some("noop".into()),
                 target: None,
                 workdir: None,
@@ -859,23 +861,5 @@ mod tests {
             .collect::<Vec<_>>();
         objects.sort();
         Ok(objects)
-    }
-
-    fn first_program_selector(path: &Path) -> Result<String> {
-        let obj = open_bpf_object(path)?;
-        let progs = programs(&obj)?;
-        let first = progs
-            .first()
-            .ok_or_else(|| anyhow!("{} has no BPF programs", path.display()))?;
-        if progs.iter().filter(|p| p.name == first.name).count() == 1 {
-            Ok(first.name.clone())
-        } else if progs.iter().filter(|p| p.section == first.section).count() == 1 {
-            Ok(first.section.clone())
-        } else {
-            bail!(
-                "{} first program ambiguous by name and section",
-                path.display()
-            )
-        }
     }
 }
