@@ -139,7 +139,7 @@ fn endian_skips_interior_branch_target() {
     let run = run_pass_on_insns(EndianFusionPass, input, &endian_ctx());
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 1, "interior branch target");
+    assert_skip_reason(&run, 1, "interior branch target");
 }
 
 #[test]

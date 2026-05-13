@@ -18,7 +18,8 @@ pub use bbprogram_lift::{
     shift_target_module_call_offsets_for_map_prefix, validate_map_inline_hint_specs,
 };
 pub use bbprogram_lower::lower;
-pub use bbprogram_use_def::{insn_use_def_set, DefSite, UseDefGraph, UseSite};
+pub(crate) use bbprogram_use_def::{insn_use_def_set, UseDefGraph};
+pub use bbprogram_use_def::{DefSite, UseSite};
 
 #[cfg(test)]
 mod bbprogram_liveness_tests;

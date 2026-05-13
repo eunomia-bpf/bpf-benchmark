@@ -205,59 +205,59 @@ fn emit_endian_fusion_call(
     out
 }
 impl BpfPass for EndianFusionPass {
-    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
-        run_on_bbprogram(program, ctx)
-    }
-}
-pub fn run_on_bbprogram(prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
-    let mut skipped = Vec::new();
-    skipped.extend(find_blocked_narrow_sites(prog)?);
-    skipped.extend(collect_cross_block_pair_skips(
-        prog,
-        |load, endian| {
-            if !load.is_ldx_mem() || endian.dst_reg() != load.dst_reg() {
-                return false;
-            }
-            let load_size = bpf_size(load.code);
-            endian_swap_size(endian)
-                .map(|size| load_size == size || is_narrowing(load_size, size))
-                .unwrap_or(false)
-        },
-        "interior branch target",
-    )?);
-    let raw_sites = prog.scan_block_starts(MAX_NARROW_SCAN + 1, |window| {
-        Ok(scan_endian_site_in_window(window.lookahead)
-            .map(|(old_len, site)| (window.start_idx, old_len, site)))
-    })?;
-    if raw_sites.is_empty() {
-        return Ok(PassResult::with_sites(0, skipped));
-    }
-    let candidates: Vec<(InsnSite, (EndianFusionSite, usize))> = raw_sites
-        .into_iter()
-        .map(|hit| (hit.start, (hit.value, hit.old_len)))
-        .collect();
-    let applied =
-        apply_candidates_reverse(prog, &candidates, &mut skipped, |prog, start, payload| {
-            let (site, old_len) = payload;
-            let kfunc_name = BpfMemWidth::from_size_opcode(site.size)
-                .and_then(endian_target)
-                .ok_or_else(|| anyhow::anyhow!("unsupported endian fusion size {}", site.size))?;
-            let (btf_id, kfunc_off) = prog.kinsn_call(kfunc_name)?;
-            let preserved = preserved_body_insns(prog, start, old_len.saturating_sub(2))?;
-            let mut replacement = emit_endian_fusion_call(
-                site.dst_reg,
-                site.src_reg,
-                site.offset,
-                btf_id,
-                kfunc_off,
-                ctx.platform.arch,
-                site.size,
-            );
-            replacement.extend_from_slice(&preserved);
-            Ok((*old_len, replacement))
+    fn run(&self, prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        let mut skipped = Vec::new();
+        skipped.extend(find_blocked_narrow_sites(prog)?);
+        skipped.extend(collect_cross_block_pair_skips(
+            prog,
+            |load, endian| {
+                if !load.is_ldx_mem() || endian.dst_reg() != load.dst_reg() {
+                    return false;
+                }
+                let load_size = bpf_size(load.code);
+                endian_swap_size(endian)
+                    .map(|size| load_size == size || is_narrowing(load_size, size))
+                    .unwrap_or(false)
+            },
+            "interior branch target",
+        )?);
+        let raw_sites = prog.scan_block_starts(MAX_NARROW_SCAN + 1, |window| {
+            Ok(scan_endian_site_in_window(window.lookahead)
+                .map(|(old_len, site)| (window.start_idx, old_len, site)))
         })?;
-    Ok(PassResult::with_sites(applied, skipped))
+        if raw_sites.is_empty() {
+            return Ok(PassResult::with_sites(0, skipped));
+        }
+        let candidates: Vec<(InsnSite, (EndianFusionSite, usize))> = raw_sites
+            .into_iter()
+            .map(|hit| (hit.start, (hit.value, hit.old_len)))
+            .collect();
+        let applied =
+            apply_candidates_reverse(prog, &candidates, &mut skipped, |prog, start, payload| {
+                let (site, old_len) = payload;
+                let kfunc_name = BpfMemWidth::from_size_opcode(site.size)
+                    .and_then(endian_target)
+                    .ok_or_else(|| {
+                        anyhow::anyhow!("unsupported endian fusion size {}", site.size)
+                    })?;
+                let (btf_id, kfunc_off) = prog.kinsn_call(kfunc_name)?;
+                let preserved = preserved_body_insns(prog, start, old_len.saturating_sub(2))?;
+                let mut replacement = emit_endian_fusion_call(
+                    site.dst_reg,
+                    site.src_reg,
+                    site.offset,
+                    btf_id,
+                    kfunc_off,
+                    ctx.platform.arch,
+                    site.size,
+                );
+                replacement.extend_from_slice(&preserved);
+                Ok((*old_len, replacement))
+            })?;
+        Ok(PassResult::with_sites(applied, skipped))
+    }
 }
+
 fn preserved_body_insns(
     prog: &ProgramCFG,
     start: InsnSite,

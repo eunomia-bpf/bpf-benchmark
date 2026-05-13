@@ -86,70 +86,66 @@ impl CondSelectSite {
 }
 
 impl BpfPass for CondSelectPass {
-    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
-        run_on_bbprogram(program, ctx)
-    }
-}
+    fn run(&self, prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        // Check if the target exposes the select kinsn; CPU features alone are
+        // insufficient because this pass always emits bpf_select64.
+        if !ctx.has_branchless_select() {
+            return PassResult::skipped_pass(
+                prog,
+                "target lacks bpf_select64 branchless select support",
+            );
+        }
 
-pub fn run_on_bbprogram(prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
-    // Check if the target exposes the select kinsn; CPU features alone are
-    // insufficient because this pass always emits bpf_select64.
-    if !ctx.has_branchless_select() {
-        return PassResult::skipped_pass(
-            prog,
-            "target lacks bpf_select64 branchless select support",
-        );
-    }
+        let sites = scan_cond_select_sites(prog)?;
+        let (btf_id, kfunc_off) = prog.kinsn_call("bpf_select64")?;
+        let mut safe_sites = Vec::new();
+        let mut skipped = Vec::new();
 
-    let sites = scan_cond_select_sites(prog)?;
-    let (btf_id, kfunc_off) = prog.kinsn_call("bpf_select64")?;
-    let mut safe_sites = Vec::new();
-    let mut skipped = Vec::new();
+        for site in sites {
+            let live_after = prog.live_out_site_checked(site.end_site)?;
 
-    for site in sites {
-        let live_after = prog.live_out_site_checked(site.end_site)?;
+            let lowering = match build_lowering(&site, &live_after) {
+                Ok(lowering) => lowering,
+                Err(reason) => {
+                    skipped.push(site.skip(reason));
+                    continue;
+                }
+            };
 
-        let lowering = match build_lowering(&site, &live_after) {
-            Ok(lowering) => lowering,
-            Err(reason) => {
+            if let Some(reason) = prog.admission_skip_reason(site.start_site, site.old_len)? {
                 skipped.push(site.skip(reason));
                 continue;
             }
-        };
 
-        if let Some(reason) = prog.admission_skip_reason(site.start_site, site.old_len)? {
-            skipped.push(site.skip(reason));
-            continue;
+            let mut trial = prog.clone();
+            let pattern = diamond_pattern_for_site(&mut trial, &site)?;
+            trial.replace_diamond_with_insns(pattern, vec![BpfInsn::nop()])?;
+
+            safe_sites.push((site, lowering));
         }
 
-        let mut trial = prog.clone();
-        let pattern = diamond_pattern_for_site(&mut trial, &site)?;
-        trial.replace_diamond_with_insns(pattern, vec![BpfInsn::nop()])?;
+        if safe_sites.is_empty() {
+            return Ok(PassResult::with_sites(0, skipped));
+        }
 
-        safe_sites.push((site, lowering));
+        safe_sites.sort_by_key(|(site, _)| site.start_site);
+        let mut applied = 0;
+        for (site, lowering) in safe_sites.iter().rev() {
+            let payload = BpfInsn::pack_u4(site.dst_reg, 0)
+                | BpfInsn::pack_u4(lowering.a_reg, 4)
+                | BpfInsn::pack_u4(lowering.b_reg, 8)
+                | BpfInsn::pack_u4(lowering.cond_reg, 12);
+            let kinsn_call = emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off);
+            let mut replacement = Vec::with_capacity(lowering.prefix.len() + kinsn_call.len());
+            replacement.extend_from_slice(&lowering.prefix);
+            replacement.extend_from_slice(&kinsn_call);
+            let pattern = diamond_pattern_for_site(prog, site)?;
+            prog.replace_diamond_with_insns(pattern, replacement)?;
+            applied += 1;
+        }
+
+        Ok(PassResult::with_sites(applied, skipped))
     }
-
-    if safe_sites.is_empty() {
-        return Ok(PassResult::with_sites(0, skipped));
-    }
-
-    safe_sites.sort_by_key(|(site, _)| site.start_site);
-    let mut applied = 0;
-    for (site, lowering) in safe_sites.iter().rev() {
-        let payload = BpfInsn::pack_u4(site.dst_reg, 0)
-            | BpfInsn::pack_u4(lowering.a_reg, 4)
-            | BpfInsn::pack_u4(lowering.b_reg, 8)
-            | BpfInsn::pack_u4(lowering.cond_reg, 12);
-        let kinsn_call = emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off);
-        let mut replacement = Vec::with_capacity(lowering.prefix.len() + kinsn_call.len());
-        replacement.extend_from_slice(&lowering.prefix);
-        replacement.extend_from_slice(&kinsn_call);
-        let pattern = diamond_pattern_for_site(prog, site)?;
-        prog.replace_diamond_with_insns(pattern, replacement)?;
-        applied += 1;
-    }
-
-    Ok(PassResult::with_sites(applied, skipped))
 }
 
 fn diamond_pattern_for_site(

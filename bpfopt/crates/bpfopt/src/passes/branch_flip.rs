@@ -42,72 +42,60 @@ impl BranchFlipSite {
 }
 
 impl BpfPass for BranchFlipPass {
-    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
-        run_on_bbprogram(
-            program,
-            ctx.branch_miss_rate,
-            self.min_bias,
-            self.max_branch_miss_rate,
-        )
-    }
-}
-
-pub fn run_on_bbprogram(
-    prog: &mut ProgramCFG,
-    branch_miss_rate: Option<f64>,
-    min_bias: f64,
-    max_branch_miss_rate: f64,
-) -> anyhow::Result<PassResult> {
-    let Some(program_miss_rate) = branch_miss_rate else {
-        anyhow::bail!("branch_flip requires real program-level branch_miss_rate data");
-    };
-    if !program_miss_rate.is_finite() || !(0.0..=1.0).contains(&program_miss_rate) {
-        anyhow::bail!(
-            "branch_flip program branch_miss_rate must be finite and within [0, 1], got {}",
-            program_miss_rate
-        );
-    }
-    if program_miss_rate > max_branch_miss_rate {
-        return PassResult::skipped_pass(
-            prog,
-            format!(
-                "program branch_miss_rate {:.1}% exceeds threshold {:.1}% (unpredictable branches)",
-                program_miss_rate * 100.0,
-                max_branch_miss_rate * 100.0,
-            ),
-        );
-    }
-
-    let branch_targets = prog.branch_target_entry_sites()?;
-    let sites = scan_branch_flip_sites(prog)?;
-    let mut safe_sites: Vec<BranchFlipSite> = Vec::new();
-    let mut skipped = Vec::new();
-
-    for site in &sites {
-        match branch_flip_candidate_cond(
-            prog,
-            &branch_targets,
-            site,
-            min_bias,
-            max_branch_miss_rate,
-        )? {
-            Ok(cond) => {
-                bf_validate_flipped_branch_deltas(prog, site, cond)?;
-                safe_sites.push(site.clone());
-            }
-            Err(reason) => skipped.push(checked_site_skip(prog, site.cond_site, reason)?),
+    fn run(&self, prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        let min_bias = self.min_bias;
+        let max_branch_miss_rate = self.max_branch_miss_rate;
+        let Some(program_miss_rate) = ctx.branch_miss_rate else {
+            anyhow::bail!("branch_flip requires real program-level branch_miss_rate data");
+        };
+        if !program_miss_rate.is_finite() || !(0.0..=1.0).contains(&program_miss_rate) {
+            anyhow::bail!(
+                "branch_flip program branch_miss_rate must be finite and within [0, 1], got {}",
+                program_miss_rate
+            );
         }
-    }
+        if program_miss_rate > max_branch_miss_rate {
+            return PassResult::skipped_pass(
+                prog,
+                format!(
+                    "program branch_miss_rate {:.1}% exceeds threshold {:.1}% (unpredictable branches)",
+                    program_miss_rate * 100.0,
+                    max_branch_miss_rate * 100.0,
+                ),
+            );
+        }
 
-    if safe_sites.is_empty() {
-        return Ok(PassResult::with_sites(0, skipped));
-    }
-    safe_sites.sort_by_key(|site| site.cond_site);
-    for site in &safe_sites {
-        apply_branch_flip_site(prog, site)?;
-    }
+        let branch_targets = prog.branch_target_entry_sites()?;
+        let sites = scan_branch_flip_sites(prog)?;
+        let mut safe_sites: Vec<BranchFlipSite> = Vec::new();
+        let mut skipped = Vec::new();
 
-    Ok(PassResult::with_sites(safe_sites.len(), skipped))
+        for site in &sites {
+            match branch_flip_candidate_cond(
+                prog,
+                &branch_targets,
+                site,
+                min_bias,
+                max_branch_miss_rate,
+            )? {
+                Ok(cond) => {
+                    bf_validate_flipped_branch_deltas(prog, site, cond)?;
+                    safe_sites.push(site.clone());
+                }
+                Err(reason) => skipped.push(checked_site_skip(prog, site.cond_site, reason)?),
+            }
+        }
+
+        if safe_sites.is_empty() {
+            return Ok(PassResult::with_sites(0, skipped));
+        }
+        safe_sites.sort_by_key(|site| site.cond_site);
+        for site in &safe_sites {
+            apply_branch_flip_site(prog, site)?;
+        }
+
+        Ok(PassResult::with_sites(safe_sites.len(), skipped))
+    }
 }
 
 fn branch_flip_candidate_cond(

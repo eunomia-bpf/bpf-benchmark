@@ -39,75 +39,72 @@ struct ScanResult {
 pub struct BoundsCheckMergePass;
 
 impl BpfPass for BoundsCheckMergePass {
-    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
-        run_on_bbprogram(program, ctx.prog_type)
-    }
-}
-
-pub fn run_on_bbprogram(prog: &mut ProgramCFG, prog_type: u32) -> anyhow::Result<PassResult> {
-    if packet_ctx_layout(prog_type, PacketCtxLayoutScope::PacketAccess).is_none() {
-        return Ok(PassResult::default());
-    }
-    if prog.is_empty() {
-        return Ok(PassResult::default());
-    }
-
-    let target_sites = prog.branch_target_entry_sites()?;
-    let mut scan = scan_guard_sites(prog, &target_sites)?;
-    if scan.guards.is_empty() {
-        return Ok(PassResult::with_sites(0, scan.skips));
-    }
-
-    let mut rewrites = Vec::new();
-    let mut consumed = vec![false; scan.guards.len()];
-    let mut i = 0usize;
-    while i < scan.guards.len() {
-        if consumed[i] {
-            i += 1;
-            continue;
+    fn run(&self, prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        let prog_type = ctx.prog_type;
+        if packet_ctx_layout(prog_type, PacketCtxLayoutScope::PacketAccess).is_none() {
+            return Ok(PassResult::default());
+        }
+        if prog.is_empty() {
+            return Ok(PassResult::default());
         }
 
-        let mut group = vec![i];
-        let mut j = i + 1;
-        while j < scan.guards.len() {
-            let prev = &scan.guards[group[group.len() - 1]];
-            let next = &scan.guards[j];
-            if !can_extend_ladder(prev, next, prog, &target_sites)? {
-                break;
-            }
-            group.push(j);
-            j += 1;
+        let target_sites = prog.branch_target_entry_sites()?;
+        let mut scan = scan_guard_sites(prog, &target_sites)?;
+        if scan.guards.is_empty() {
+            return Ok(PassResult::with_sites(0, scan.skips));
         }
 
-        if group.len() >= 2 {
-            if let Some(rewrite) = build_ladder_rewrite(&group, &scan.guards, &target_sites) {
-                for &idx in &group {
-                    consumed[idx] = true;
-                }
-                rewrites.push(rewrite);
-                i = j;
+        let mut rewrites = Vec::new();
+        let mut consumed = vec![false; scan.guards.len()];
+        let mut i = 0usize;
+        while i < scan.guards.len() {
+            if consumed[i] {
+                i += 1;
                 continue;
             }
+
+            let mut group = vec![i];
+            let mut j = i + 1;
+            while j < scan.guards.len() {
+                let prev = &scan.guards[group[group.len() - 1]];
+                let next = &scan.guards[j];
+                if !can_extend_ladder(prev, next, prog, &target_sites)? {
+                    break;
+                }
+                group.push(j);
+                j += 1;
+            }
+
+            if group.len() >= 2 {
+                if let Some(rewrite) = build_ladder_rewrite(&group, &scan.guards, &target_sites) {
+                    for &idx in &group {
+                        consumed[idx] = true;
+                    }
+                    rewrites.push(rewrite);
+                    i = j;
+                    continue;
+                }
+            }
+
+            i += 1;
         }
 
-        i += 1;
-    }
-
-    for (idx, guard) in scan.guards.iter().enumerate() {
-        if !consumed[idx] {
-            scan.skips.push(SiteSkipReason::new(
-                guard.compare,
-                "guard not part of a mergeable ladder",
-            ));
+        for (idx, guard) in scan.guards.iter().enumerate() {
+            if !consumed[idx] {
+                scan.skips.push(SiteSkipReason::new(
+                    guard.compare,
+                    "guard not part of a mergeable ladder",
+                ));
+            }
         }
-    }
 
-    if rewrites.is_empty() {
-        return Ok(PassResult::with_sites(0, scan.skips));
-    }
+        if rewrites.is_empty() {
+            return Ok(PassResult::with_sites(0, scan.skips));
+        }
 
-    apply_rewrites(prog, &rewrites, &mut scan.skips)?;
-    Ok(PassResult::with_sites(rewrites.len(), scan.skips))
+        apply_rewrites(prog, &rewrites, &mut scan.skips)?;
+        Ok(PassResult::with_sites(rewrites.len(), scan.skips))
+    }
 }
 
 fn apply_rewrites(

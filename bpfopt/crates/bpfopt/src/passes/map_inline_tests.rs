@@ -283,7 +283,7 @@ fn map_inline_soft_hint_skips_when_snapshot_key_is_absent() {
     let run = run_pass_on_insns(MapInlinePass, nullable_lookup_program(42), &ctx);
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 5, "no live entry");
+    assert_skip_reason(&run, 5, "no live entry");
 }
 
 #[test]
@@ -357,7 +357,7 @@ fn map_inline_skipped_snapshot_records_site_skip_for_array_lookup() {
     let run = run_pass_on_insns(MapInlinePass, lookup_program(42), &ctx);
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 5, "snapshot skipped by size");
+    assert_skip_reason(&run, 5, "snapshot skipped by size");
 }
 
 #[test]
@@ -411,7 +411,7 @@ fn map_inline_skips_percpu_map_without_scalarizing_value() {
     let run = run_pass_on_insns(MapInlinePass, lookup_program(42), &ctx);
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 5, "per-cpu");
+    assert_skip_reason(&run, 5, "per-cpu");
 }
 
 #[test]
@@ -455,7 +455,7 @@ fn map_inline_skips_kernel_mutable_map() {
     let run = run_pass_on_insns(MapInlinePass, input, &ctx);
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 6, "kernel-mutable");
+    assert_skip_reason(&run, 6, "kernel-mutable");
 }
 
 #[test]

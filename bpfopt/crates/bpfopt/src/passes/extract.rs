@@ -38,42 +38,39 @@ fn extract_site_from_pair(i0: &BpfInsn, i1: &BpfInsn) -> Option<ExtractSite> {
         })
 }
 impl BpfPass for ExtractPass {
-    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
-        run_on_bbprogram(program, ctx)
+    fn run(&self, prog: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
+        let mut skipped = collect_cross_block_pair_skips(
+            prog,
+            |i0, i1| extract_site_from_pair(i0, i1).is_some(),
+            "interior branch target",
+        )?;
+        let candidates: Vec<(InsnSite, ExtractSite)> = prog
+            .scan_block_starts(2, |window| {
+                if window.lookahead.len() < 2 {
+                    return Ok(None);
+                }
+                Ok(
+                    extract_site_from_pair(&window.lookahead[0], &window.lookahead[1])
+                        .map(|site| (window.start_idx, 2, site)),
+                )
+            })?
+            .into_iter()
+            .map(|hit| (hit.start, hit.value))
+            .collect();
+        if candidates.is_empty() {
+            return Ok(PassResult::with_sites(0, skipped));
+        }
+        let applied =
+            apply_candidates_reverse(prog, &candidates, &mut skipped, |prog, _start, site| {
+                let (btf_id, kfunc_off) = prog.kinsn_call("bpf_extract64")?;
+                let payload = BpfInsn::pack_u4(site.dst_reg, 0)
+                    | BpfInsn::pack_u8(site.shift_amount as u8, 8)
+                    | BpfInsn::pack_u8(site.bit_len as u8, 16);
+                Ok((
+                    2,
+                    emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
+                ))
+            })?;
+        Ok(PassResult::with_sites(applied, skipped))
     }
-}
-pub fn run_on_bbprogram(prog: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
-    let mut skipped = collect_cross_block_pair_skips(
-        prog,
-        |i0, i1| extract_site_from_pair(i0, i1).is_some(),
-        "interior branch target",
-    )?;
-    let candidates: Vec<(InsnSite, ExtractSite)> = prog
-        .scan_block_starts(2, |window| {
-            if window.lookahead.len() < 2 {
-                return Ok(None);
-            }
-            Ok(
-                extract_site_from_pair(&window.lookahead[0], &window.lookahead[1])
-                    .map(|site| (window.start_idx, 2, site)),
-            )
-        })?
-        .into_iter()
-        .map(|hit| (hit.start, hit.value))
-        .collect();
-    if candidates.is_empty() {
-        return Ok(PassResult::with_sites(0, skipped));
-    }
-    let applied =
-        apply_candidates_reverse(prog, &candidates, &mut skipped, |prog, _start, site| {
-            let (btf_id, kfunc_off) = prog.kinsn_call("bpf_extract64")?;
-            let payload = BpfInsn::pack_u4(site.dst_reg, 0)
-                | BpfInsn::pack_u8(site.shift_amount as u8, 8)
-                | BpfInsn::pack_u8(site.bit_len as u8, 16);
-            Ok((
-                2,
-                emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
-            ))
-        })?;
-    Ok(PassResult::with_sites(applied, skipped))
 }

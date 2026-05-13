@@ -162,7 +162,7 @@ fn const_prop_post_state_guard_rejects_packet_pointer_copy_materialization() {
     );
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 1, VERIFIER_POST_STATE_POINTER_TYPE);
+    assert_skip_reason(&run, 1, VERIFIER_POST_STATE_POINTER_TYPE);
     assert_eq!(run.lowered, input);
 }
 

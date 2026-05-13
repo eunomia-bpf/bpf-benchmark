@@ -42,46 +42,44 @@ pub(super) fn prefetch_payload(ptr_reg: u8) -> anyhow::Result<u64> {
     Ok(BpfInsn::pack_u4(ptr_reg, 0))
 }
 impl BpfPass for PrefetchPass {
-    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
-        run_on_bbprogram(program, ctx)
+    fn run(&self, prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        if prog.all_sites().next().is_none() {
+            return Ok(PassResult::default());
+        }
+        let mut candidates = Vec::new();
+        let mut skipped = Vec::new();
+        for site in scan_prefetch_sites(prog, ctx.prog_type)? {
+            let insert_site = match choose_prefetch_insert_site(prog, site)? {
+                Ok(insert) => insert,
+                Err(reason) => {
+                    skipped.push(checked_site_skip(prog, site.target, reason)?);
+                    continue;
+                }
+            };
+            candidates.push(PrefetchCandidate {
+                target: site.target,
+                insert: insert_site,
+                ptr_reg: site.ptr_reg,
+            });
+        }
+        let candidates = dedup_candidates(candidates);
+        if candidates.is_empty() {
+            return Ok(PassResult::with_sites(0, skipped));
+        }
+        let (btf_id, kfunc_off) = prog.kinsn_call(PREFETCH_TARGET_NAME)?;
+        let pairs: Vec<(InsnSite, PrefetchCandidate)> =
+            candidates.into_iter().map(|c| (c.insert, c)).collect();
+        let applied = apply_candidates_reverse(prog, &pairs, &mut skipped, |_, _, candidate| {
+            let payload = prefetch_payload(candidate.ptr_reg)?;
+            Ok((
+                0,
+                emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
+            ))
+        })?;
+        Ok(PassResult::with_sites(applied, skipped))
     }
 }
-pub fn run_on_bbprogram(prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
-    if prog.all_sites().next().is_none() {
-        return Ok(PassResult::default());
-    }
-    let mut candidates = Vec::new();
-    let mut skipped = Vec::new();
-    for site in scan_prefetch_sites(prog, ctx.prog_type)? {
-        let insert_site = match choose_prefetch_insert_site(prog, site)? {
-            Ok(insert) => insert,
-            Err(reason) => {
-                skipped.push(checked_site_skip(prog, site.target, reason)?);
-                continue;
-            }
-        };
-        candidates.push(PrefetchCandidate {
-            target: site.target,
-            insert: insert_site,
-            ptr_reg: site.ptr_reg,
-        });
-    }
-    let candidates = dedup_candidates(candidates);
-    if candidates.is_empty() {
-        return Ok(PassResult::with_sites(0, skipped));
-    }
-    let (btf_id, kfunc_off) = prog.kinsn_call(PREFETCH_TARGET_NAME)?;
-    let pairs: Vec<(InsnSite, PrefetchCandidate)> =
-        candidates.into_iter().map(|c| (c.insert, c)).collect();
-    let applied = apply_candidates_reverse(prog, &pairs, &mut skipped, |_, _, candidate| {
-        let payload = prefetch_payload(candidate.ptr_reg)?;
-        Ok((
-            0,
-            emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
-        ))
-    })?;
-    Ok(PassResult::with_sites(applied, skipped))
-}
+
 fn scan_prefetch_sites(prog: &ProgramCFG, prog_type: u32) -> anyhow::Result<Vec<PrefetchSite>> {
     let mut sites = scan_map_value_prefetch_sites(prog)?;
     if let Some(layout) = packet_ctx_layout(prog_type, PacketCtxLayoutScope::PacketAccess) {

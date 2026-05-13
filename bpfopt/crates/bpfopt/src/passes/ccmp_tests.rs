@@ -128,7 +128,7 @@ fn ccmp_skips_overlong_chain_without_partial_rewrite() {
     let run = run_pass_on_insns(CcmpPass, input, &ccmp_ctx(Arch::Aarch64));
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 0, "exceeds maximum");
+    assert_skip_reason(&run, 0, "exceeds maximum");
 }
 
 #[test]
@@ -144,5 +144,5 @@ fn ccmp_skips_site_crossing_subprog_boundary() {
     let run = run_pass_on_insns(CcmpPass, input, &ccmp_ctx(Arch::Aarch64));
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 0, "subprog boundary");
+    assert_skip_reason(&run, 0, "subprog boundary");
 }

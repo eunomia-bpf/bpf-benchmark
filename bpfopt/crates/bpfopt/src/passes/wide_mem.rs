@@ -164,113 +164,113 @@ fn is_packet_unsafe_prog_type(prog_type: u32) -> bool {
 }
 pub struct WideMemPass;
 impl BpfPass for WideMemPass {
-    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
-        run_on_bbprogram(program, ctx)
-    }
-}
-pub fn run_on_bbprogram(prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
-    let branch_targets = prog.branch_target_entry_sites()?;
-    let mut safe_sites = Vec::new();
-    let mut skipped = Vec::new();
-    let mut reported_starts = BTreeSet::new();
-    let raw_sites = prog.scan_block_starts(MAX_WIDE_MEM_LEN, |window| {
-        Ok(try_match_wide_mem_at(window.insns, window.start_idx)
-            .map(|site| (site.start_idx, site.old_len, site)))
-    })?;
-    let mut last_hit_end = None;
-    for hit in raw_sites {
-        let hit_end = hit.start_idx + hit.old_len;
-        if last_hit_end.is_some_and(|(block, end)| block == hit.block && hit.start_idx < end) {
-            continue;
-        }
-        last_hit_end = Some((hit.block, hit_end));
-        let body = prog.block_body_view(hit.block)?;
-        let start_idx = hit.start_idx;
-        let start_site = hit.start;
-        let site = hit.value;
-        reported_starts.insert(start_site);
-        if hit_end > body.sites.len() {
-            anyhow::bail!(
-                "wide_mem site at {:?} spans beyond block {:?} body",
-                start_site,
-                hit.block
-            );
-        }
-        let has_interior_target = body.sites[start_idx + 1..hit_end]
-            .iter()
-            .any(|candidate| branch_targets.contains(candidate));
-        if has_interior_target {
-            skipped.push(SiteSkipReason::new(start_site, "interior branch target"));
-            continue;
-        }
-        let live_after = prog.live_out_site_checked(body.sites[hit_end - 1])?;
-        let has_live_scratch = body.insns[start_idx..hit_end].iter().any(|insn| {
-            matches!(insn.class(), BPF_ALU64 | BPF_ALU | BPF_LDX)
-                && insn.dst_reg() != site.dst_reg
-                && live_after.contains(&insn.dst_reg())
-        });
-        if has_live_scratch {
-            skipped.push(SiteSkipReason::new(
-                start_site,
-                "scratch register live after site",
-            ));
-            continue;
-        }
-        if site.base_off.rem_euclid(i64::from(site.width)) != 0 {
-            skipped.push(SiteSkipReason::new(
-                start_site,
-                format!(
-                    "wide load offset {} is not naturally aligned for width {}",
-                    site.base_off, site.width
-                ),
-            ));
-            continue;
-        }
-        // Skip only when verifier state explicitly classifies the base as a
-        // packet pointer. Unknown classification falls through to apply; the
-        // kernel verifier will reject the wide load if it actually crosses a
-        // packet bound, and the daemon records that as failed_rejit naturally.
-        if is_packet_unsafe_prog_type(ctx.prog_type)
-            && site.base_reg != 10
-            && prog
+    fn run(&self, prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        let branch_targets = prog.branch_target_entry_sites()?;
+        let mut safe_sites = Vec::new();
+        let mut skipped = Vec::new();
+        let mut reported_starts = BTreeSet::new();
+        let raw_sites = prog.scan_block_starts(MAX_WIDE_MEM_LEN, |window| {
+            Ok(try_match_wide_mem_at(window.insns, window.start_idx)
+                .map(|site| (site.start_idx, site.old_len, site)))
+        })?;
+        let mut last_hit_end = None;
+        for hit in raw_sites {
+            let hit_end = hit.start_idx + hit.old_len;
+            if last_hit_end.is_some_and(|(block, end)| block == hit.block && hit.start_idx < end) {
+                continue;
+            }
+            last_hit_end = Some((hit.block, hit_end));
+            let body = prog.block_body_view(hit.block)?;
+            let start_idx = hit.start_idx;
+            let start_site = hit.start;
+            let site = hit.value;
+            reported_starts.insert(start_site);
+            if hit_end > body.sites.len() {
+                anyhow::bail!(
+                    "wide_mem site at {:?} spans beyond block {:?} body",
+                    start_site,
+                    hit.block
+                );
+            }
+            let has_interior_target = body.sites[start_idx + 1..hit_end]
+                .iter()
+                .any(|candidate| branch_targets.contains(candidate));
+            if has_interior_target {
+                skipped.push(SiteSkipReason::new(start_site, "interior branch target"));
+                continue;
+            }
+            let live_after = prog.live_out_site_checked(body.sites[hit_end - 1])?;
+            let has_live_scratch = body.insns[start_idx..hit_end].iter().any(|insn| {
+                matches!(insn.class(), BPF_ALU64 | BPF_ALU | BPF_LDX)
+                    && insn.dst_reg() != site.dst_reg
+                    && live_after.contains(&insn.dst_reg())
+            });
+            if has_live_scratch {
+                skipped.push(SiteSkipReason::new(
+                    start_site,
+                    "scratch register live after site",
+                ));
+                continue;
+            }
+            if site.base_off.rem_euclid(i64::from(site.width)) != 0 {
+                skipped.push(SiteSkipReason::new(
+                    start_site,
+                    format!(
+                        "wide load offset {} is not naturally aligned for width {}",
+                        site.base_off, site.width
+                    ),
+                ));
+                continue;
+            }
+            // Skip only when verifier state explicitly classifies the base as a
+            // packet pointer. Unknown classification falls through to apply; the
+            // kernel verifier will reject the wide load if it actually crosses a
+            // packet bound, and the daemon records that as failed_rejit naturally.
+            if is_packet_unsafe_prog_type(ctx.prog_type)
+                && site.base_reg != 10
+                && prog
+                    .reg_kind(start_site, site.base_reg)
+                    .is_some_and(|kind| {
+                        matches!(kind, RegKind::PacketPointer | RegKind::PacketMetaPointer)
+                    })
+            {
+                skipped.push(SiteSkipReason::new(
+                    start_site,
+                    format!(
+                        "packet pointer r{} in XDP/TC prog (prog_type={})",
+                        site.base_reg, ctx.prog_type
+                    ),
+                ));
+                continue;
+            }
+            if prog
                 .reg_kind(start_site, site.base_reg)
                 .is_some_and(|kind| {
-                    matches!(kind, RegKind::PacketPointer | RegKind::PacketMetaPointer)
+                    matches!(kind, RegKind::BtfStructPointer | RegKind::OtherPointer)
                 })
-        {
-            skipped.push(SiteSkipReason::new(
-                start_site,
-                format!(
-                    "packet pointer r{} in XDP/TC prog (prog_type={})",
-                    site.base_reg, ctx.prog_type
-                ),
-            ));
-            continue;
+            {
+                skipped.push(SiteSkipReason::new(
+                    start_site,
+                    format!(
+                        "base register r{} is a BTF struct pointer; wide load may cross field boundary",
+                        site.base_reg
+                    ),
+                ));
+                continue;
+            }
+            safe_sites.push((start_site, site));
         }
-        if prog
-            .reg_kind(start_site, site.base_reg)
-            .is_some_and(|kind| matches!(kind, RegKind::BtfStructPointer | RegKind::OtherPointer))
-        {
-            skipped.push(SiteSkipReason::new(
-                start_site,
-                format!(
-                    "base register r{} is a BTF struct pointer; wide load may cross field boundary",
-                    site.base_reg
-                ),
-            ));
-            continue;
+        add_cross_block_wide_mem_skips(prog, &branch_targets, &mut reported_starts, &mut skipped)?;
+        if safe_sites.is_empty() {
+            return Ok(PassResult::with_sites(0, skipped));
         }
-        safe_sites.push((start_site, site));
+        let applied = apply_candidates_reverse(prog, &safe_sites, &mut skipped, |_, _, site| {
+            Ok((site.old_len, emit_wide_mem(site)?))
+        })?;
+        Ok(PassResult::with_sites(applied, skipped))
     }
-    add_cross_block_wide_mem_skips(prog, &branch_targets, &mut reported_starts, &mut skipped)?;
-    if safe_sites.is_empty() {
-        return Ok(PassResult::with_sites(0, skipped));
-    }
-    let applied = apply_candidates_reverse(prog, &safe_sites, &mut skipped, |_, _, site| {
-        Ok((site.old_len, emit_wide_mem(site)?))
-    })?;
-    Ok(PassResult::with_sites(applied, skipped))
 }
+
 fn add_cross_block_wide_mem_skips(
     prog: &ProgramCFG,
     branch_targets: &BTreeSet<InsnSite>,

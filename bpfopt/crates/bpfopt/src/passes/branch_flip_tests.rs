@@ -134,7 +134,7 @@ fn test_branch_flip_skips_jset() {
 
     assert_eq!(run.result.sites_applied, 0);
     assert_eq!(run.lowered, input);
-    assert_skip_reason(&run.result, 0, "cannot invert");
+    assert_skip_reason(&run, 0, "cannot invert");
 }
 
 #[test]
@@ -144,7 +144,7 @@ fn branch_flip_skips_insufficient_bias() {
     let run = run_pass_on_insns(pass(), diamond(), &ctx);
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 0, "not biased enough");
+    assert_skip_reason(&run, 0, "not biased enough");
 }
 
 #[test]
@@ -155,7 +155,7 @@ fn branch_flip_skips_high_program_miss_rate() {
     let run = run_pass_on_insns(pass(), diamond(), &ctx);
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 0, "branch_miss_rate");
+    assert_skip_reason(&run, 0, "branch_miss_rate");
 }
 
 #[test]
@@ -165,7 +165,7 @@ fn branch_flip_skips_high_site_miss_rate() {
     let run = run_pass_on_insns(pass(), diamond(), &ctx);
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 0, "site branch_miss_rate");
+    assert_skip_reason(&run, 0, "site branch_miss_rate");
 }
 
 #[test]

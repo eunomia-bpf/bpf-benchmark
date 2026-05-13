@@ -70,7 +70,7 @@ fn wide_mem_skips_misaligned_halfword_site() {
     );
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 0, "not naturally aligned");
+    assert_skip_reason(&run, 0, "not naturally aligned");
 }
 
 #[test]
@@ -82,7 +82,7 @@ fn wide_mem_skips_site_with_interior_branch_target() {
     let run = run_pass_on_insns(WideMemPass, input, &pass_ctx());
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 1, "interior branch target");
+    assert_skip_reason(&run, 1, "interior branch target");
 }
 
 #[test]
@@ -94,7 +94,7 @@ fn wide_mem_skips_site_with_live_scratch_reg() {
     let run = run_pass_on_insns(WideMemPass, input, &pass_ctx());
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 0, "scratch register live");
+    assert_skip_reason(&run, 0, "scratch register live");
 }
 
 #[test]
@@ -136,7 +136,7 @@ fn wide_mem_skips_byte_ladder_with_pseudo_func_boundary_inside() {
     let run = run_pass_on_insns(WideMemPass, input, &pass_ctx());
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 4, "interior branch target");
+    assert_skip_reason(&run, 4, "interior branch target");
     assert!(run.lowered[2].is_ldimm64_pseudo_func());
 }
 
@@ -161,7 +161,7 @@ fn wide_mem_skips_btf_struct_pointer_field_loads() {
     );
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 0, "BTF struct pointer");
+    assert_skip_reason(&run, 0, "BTF struct pointer");
 }
 
 #[test]

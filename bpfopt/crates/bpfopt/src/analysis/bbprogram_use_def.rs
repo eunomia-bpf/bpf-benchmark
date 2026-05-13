@@ -22,13 +22,13 @@ pub struct UseSite {
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct UseDefGraph {
+pub(crate) struct UseDefGraph {
     pub(super) defs: BTreeMap<DefSite, Vec<UseSite>>,
     pub(super) uses: BTreeMap<UseSite, Vec<DefSite>>,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct RegUseDefSet {
+pub(crate) struct RegUseDefSet {
     pub uses: HashSet<u8>,
     pub defs: HashSet<u8>,
 }
@@ -211,7 +211,7 @@ fn validate_register_uses(name: &str, site: InsnSite, uses: &RegSet) -> anyhow::
     Ok(())
 }
 
-pub fn insn_use_def_set(insn: &BpfInsn) -> RegUseDefSet {
+pub(crate) fn insn_use_def_set(insn: &BpfInsn) -> RegUseDefSet {
     let mut uses = HashSet::new();
     let mut defs = HashSet::new();
 

@@ -19,63 +19,59 @@ fn rotate_register_uses(payload: u64) -> RegSet {
 pub struct RotatePass;
 
 impl BpfPass for RotatePass {
-    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
-        run_on_bbprogram(program, ctx)
-    }
-}
+    fn run(&self, prog: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
+        let mut skipped = Vec::new();
+        let candidates: Vec<(InsnSite, RotateSite)> = prog
+            .scan_block_starts(5, |window| {
+                Ok(rotate_site_at(window.insns, window.start_idx)
+                    .map(|site| (site.start_idx, site.old_len, site)))
+            })?
+            .into_iter()
+            .map(|hit| (hit.start, hit.value))
+            .collect();
 
-pub fn run_on_bbprogram(prog: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
-    let mut skipped = Vec::new();
-    let candidates: Vec<(InsnSite, RotateSite)> = prog
-        .scan_block_starts(5, |window| {
-            Ok(rotate_site_at(window.insns, window.start_idx)
-                .map(|site| (site.start_idx, site.old_len, site)))
-        })?
-        .into_iter()
-        .map(|hit| (hit.start, hit.value))
-        .collect();
-
-    if candidates.is_empty() {
-        return Ok(PassResult::with_sites(0, skipped));
-    }
-
-    // tmp_reg liveness pre-check: skip sites whose tmp_reg is read after the
-    // window, since the kinsn replacement does not preserve tmp_reg.
-    let mut applicable = Vec::with_capacity(candidates.len());
-    for (start, site) in candidates {
-        if prog
-            .live_out_after_window(start, site.old_len)?
-            .contains(&site.tmp_reg)
-        {
-            skipped.push(SiteSkipReason::new(
-                start,
-                format!("tmp_reg r{} is live after site", site.tmp_reg),
-            ));
-        } else {
-            applicable.push((start, site));
+        if candidates.is_empty() {
+            return Ok(PassResult::with_sites(0, skipped));
         }
-    }
 
-    let applied =
-        apply_candidates_reverse(prog, &applicable, &mut skipped, |prog, _start, site| {
-            let (btf_id, kfunc_off) = prog.kinsn_call(site.width.target_name())?;
-            let shift_amount = u8::try_from(site.shift_amount).map_err(|_| {
-                anyhow::anyhow!(
-                    "rotate shift amount {} exceeds packed payload width",
-                    site.shift_amount
-                )
+        // tmp_reg liveness pre-check: skip sites whose tmp_reg is read after the
+        // window, since the kinsn replacement does not preserve tmp_reg.
+        let mut applicable = Vec::with_capacity(candidates.len());
+        for (start, site) in candidates {
+            if prog
+                .live_out_after_window(start, site.old_len)?
+                .contains(&site.tmp_reg)
+            {
+                skipped.push(SiteSkipReason::new(
+                    start,
+                    format!("tmp_reg r{} is live after site", site.tmp_reg),
+                ));
+            } else {
+                applicable.push((start, site));
+            }
+        }
+
+        let applied =
+            apply_candidates_reverse(prog, &applicable, &mut skipped, |prog, _start, site| {
+                let (btf_id, kfunc_off) = prog.kinsn_call(site.width.target_name())?;
+                let shift_amount = u8::try_from(site.shift_amount).map_err(|_| {
+                    anyhow::anyhow!(
+                        "rotate shift amount {} exceeds packed payload width",
+                        site.shift_amount
+                    )
+                })?;
+                let payload = BpfInsn::pack_u4(site.dst_reg, 0)
+                    | BpfInsn::pack_u4(site.val_reg, 4)
+                    | BpfInsn::pack_u8(shift_amount, 8)
+                    | BpfInsn::pack_u4(site.tmp_reg, 16);
+                Ok((
+                    site.old_len,
+                    emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
+                ))
             })?;
-            let payload = BpfInsn::pack_u4(site.dst_reg, 0)
-                | BpfInsn::pack_u4(site.val_reg, 4)
-                | BpfInsn::pack_u8(shift_amount, 8)
-                | BpfInsn::pack_u4(site.tmp_reg, 16);
-            Ok((
-                site.old_len,
-                emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
-            ))
-        })?;
 
-    Ok(PassResult::with_sites(applied, skipped))
+        Ok(PassResult::with_sites(applied, skipped))
+    }
 }
 
 fn rotate_site_at(insns: &[BpfInsn], idx: usize) -> Option<RotateSite> {

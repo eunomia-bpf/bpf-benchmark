@@ -1088,46 +1088,44 @@ macro_rules! skip_lookup {
     }};
 }
 impl BpfPass for MapInlinePass {
-    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
-        run_on_bbprogram(program, ctx)
+    fn run(&self, prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        let side_input = map_inline_side_input(prog, ctx)?;
+        let initial_map_info = analyze_map_info(prog, &side_input)?;
+        let initial_kernel_mutable_maps =
+            collect_kernel_mutable_maps(prog, &side_input, &initial_map_info)?;
+        if prog
+            .all_sites()
+            .any(|site| prog.insn_at(site).is_some_and(is_map_writer_helper_call))
+            && !side_input.hints.is_empty()
+            && !side_input.inner_map_ids.is_empty()
+            && side_input.map_info.values().any(MapInfo::is_map_in_map)
+        {
+            anyhow::bail!("kernel-mutable inner map");
+        }
+        let initial_inline_hints = resolve_inline_hints(
+            prog,
+            &side_input,
+            &initial_map_info,
+            &initial_kernel_mutable_maps,
+            &side_input.hints,
+        )?;
+        let mut inline_hints_consumed = HashSet::<MapInlineHintAnchor>::new();
+        let mut result = run_map_inline_round(
+            prog,
+            &side_input,
+            &initial_inline_hints,
+            &mut inline_hints_consumed,
+        )?;
+        if !side_input.hints.is_empty() {
+            result.diagnostics.push(format!(
+                "inline_hints_consumed={}",
+                inline_hints_consumed.len()
+            ));
+        }
+        Ok(result)
     }
 }
-pub fn run_on_bbprogram(prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
-    let side_input = map_inline_side_input(prog, ctx)?;
-    let initial_map_info = analyze_map_info(prog, &side_input)?;
-    let initial_kernel_mutable_maps =
-        collect_kernel_mutable_maps(prog, &side_input, &initial_map_info)?;
-    if prog
-        .all_sites()
-        .any(|site| prog.insn_at(site).is_some_and(is_map_writer_helper_call))
-        && !side_input.hints.is_empty()
-        && !side_input.inner_map_ids.is_empty()
-        && side_input.map_info.values().any(MapInfo::is_map_in_map)
-    {
-        anyhow::bail!("kernel-mutable inner map");
-    }
-    let initial_inline_hints = resolve_inline_hints(
-        prog,
-        &side_input,
-        &initial_map_info,
-        &initial_kernel_mutable_maps,
-        &side_input.hints,
-    )?;
-    let mut inline_hints_consumed = HashSet::<MapInlineHintAnchor>::new();
-    let mut result = run_map_inline_round(
-        prog,
-        &side_input,
-        &initial_inline_hints,
-        &mut inline_hints_consumed,
-    )?;
-    if !side_input.hints.is_empty() {
-        result.diagnostics.push(format!(
-            "inline_hints_consumed={}",
-            inline_hints_consumed.len()
-        ));
-    }
-    Ok(result)
-}
+
 fn run_map_inline_round(
     prog: &mut ProgramCFG,
     side_input: &MapInlineSideInput<'_>,

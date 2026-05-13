@@ -78,7 +78,7 @@ fn extract_skips_site_with_interior_branch_target() {
     let run = run_pass_on_insns(ExtractPass, input, &extract_ctx(7777));
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 1, "interior branch target");
+    assert_skip_reason(&run, 1, "interior branch target");
 }
 
 #[test]

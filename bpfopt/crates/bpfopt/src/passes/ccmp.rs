@@ -73,75 +73,71 @@ impl BranchTerm {
 }
 
 impl BpfPass for CcmpPass {
-    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
-        run_on_bbprogram(program, ctx)
-    }
-}
-
-pub fn run_on_bbprogram(prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
-    if ctx.platform.arch != Arch::Aarch64 {
-        anyhow::bail!("ccmp is only valid on aarch64");
-    }
-
-    let sites = scan_ccmp_sites(prog)?;
-    let mut safe_sites = Vec::new();
-    let mut skipped = Vec::new();
-
-    for site in sites {
-        if site.regs.len() > MAX_CCMP_TERMS {
-            skipped.push(site.skip(format!(
-                "ccmp chain length {} exceeds maximum {}",
-                site.regs.len(),
-                MAX_CCMP_TERMS
-            )));
-            continue;
+    fn run(&self, prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        if ctx.platform.arch != Arch::Aarch64 {
+            anyhow::bail!("ccmp is only valid on aarch64");
         }
 
-        if site.blocks.contains(&site.target_block) {
-            skipped.push(site.skip("ccmp chain target is inside the chain boundary"));
-            continue;
+        let sites = scan_ccmp_sites(prog)?;
+        let mut safe_sites = Vec::new();
+        let mut skipped = Vec::new();
+
+        for site in sites {
+            if site.regs.len() > MAX_CCMP_TERMS {
+                skipped.push(site.skip(format!(
+                    "ccmp chain length {} exceeds maximum {}",
+                    site.regs.len(),
+                    MAX_CCMP_TERMS
+                )));
+                continue;
+            }
+
+            if site.blocks.contains(&site.target_block) {
+                skipped.push(site.skip("ccmp chain target is inside the chain boundary"));
+                continue;
+            }
+
+            if let Some(reason) = prog.admission_skip_reason(site.start_site, site.old_len)? {
+                skipped.push(site.skip(reason));
+                continue;
+            }
+
+            let Some(dst_reg) = choose_dead_dst_reg(prog, &site)? else {
+                skipped.push(site.skip("no dead register available for ccmp predicate"));
+                continue;
+            };
+
+            let mut trial = prog.clone();
+            let (chain, target, success) = ccmp_chain_blocks(&mut trial, &site)?;
+            validate_chain_edges(&trial, &site, &chain, target, success)?;
+
+            let payload = encode_ccmp_payload(dst_reg, site.fail_mode, site.width, &site.regs)?;
+            safe_sites.push((site, dst_reg, payload));
         }
 
-        if let Some(reason) = prog.admission_skip_reason(site.start_site, site.old_len)? {
-            skipped.push(site.skip(reason));
-            continue;
+        if safe_sites.is_empty() {
+            return Ok(PassResult::with_sites(0, skipped));
         }
 
-        let Some(dst_reg) = choose_dead_dst_reg(prog, &site)? else {
-            skipped.push(site.skip("no dead register available for ccmp predicate"));
-            continue;
-        };
-
-        let mut trial = prog.clone();
-        let (chain, target, success) = ccmp_chain_blocks(&mut trial, &site)?;
-        validate_chain_edges(&trial, &site, &chain, target, success)?;
-
-        let payload = encode_ccmp_payload(dst_reg, site.fail_mode, site.width, &site.regs)?;
-        safe_sites.push((site, dst_reg, payload));
-    }
-
-    if safe_sites.is_empty() {
-        return Ok(PassResult::with_sites(0, skipped));
-    }
-
-    let (btf_id, kfunc_off) = prog.kinsn_call("bpf_ccmp64")?;
-    safe_sites.sort_by_key(|(site, _, _)| site.start_site);
-    let mut applied = 0usize;
-    for (site, dst_reg, payload) in safe_sites.iter().rev() {
-        if apply_ccmp_site(
-            prog,
-            site,
-            *dst_reg,
-            *payload,
-            btf_id,
-            kfunc_off,
-            &mut skipped,
-        )? {
-            applied += 1;
+        let (btf_id, kfunc_off) = prog.kinsn_call("bpf_ccmp64")?;
+        safe_sites.sort_by_key(|(site, _, _)| site.start_site);
+        let mut applied = 0usize;
+        for (site, dst_reg, payload) in safe_sites.iter().rev() {
+            if apply_ccmp_site(
+                prog,
+                site,
+                *dst_reg,
+                *payload,
+                btf_id,
+                kfunc_off,
+                &mut skipped,
+            )? {
+                applied += 1;
+            }
         }
-    }
 
-    Ok(PassResult::with_sites(applied, skipped))
+        Ok(PassResult::with_sites(applied, skipped))
+    }
 }
 
 fn apply_ccmp_site(

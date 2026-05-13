@@ -187,18 +187,6 @@ pub struct PassResult {
     pub insns_before: usize,
     /// Instruction count after this pass ran.
     pub insns_after: usize,
-    /// Test-only PC-keyed skip mirror, materialized by test helpers before
-    /// the ProgramCFG is mutated. Production code uses `site_skipped`.
-    #[cfg(test)]
-    pub sites_skipped: Vec<SkipReason>,
-}
-
-/// Test-only PC-keyed skip record used by test assertions. Not in production.
-#[cfg(test)]
-#[derive(Clone, Debug)]
-pub struct SkipReason {
-    pub pc: usize,
-    pub reason: String,
 }
 
 impl PassResult {

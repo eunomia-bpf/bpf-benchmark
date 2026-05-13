@@ -191,7 +191,7 @@ fn bulk_memory_rejects_aliasing_memcpy_ranges() {
     let run = run_pass_on_insns(BulkMemoryPass, input, &bulk_ctx());
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 0, "alias");
+    assert_skip_reason(&run, 0, "alias");
 }
 
 #[test]
@@ -214,5 +214,5 @@ fn bulk_memory_skips_when_proof_temp_live_out() {
     let run = run_pass_on_insns(BulkMemoryPass, input, &bulk_ctx());
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 0, "temp");
+    assert_skip_reason(&run, 0, "temp");
 }

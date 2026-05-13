@@ -5,8 +5,8 @@ use std::collections::HashMap;
 use crate::analysis::{lift_with_pass_context, lower, ProgramCFG};
 use crate::insn::BpfInsn;
 use crate::pass::{
-    BpfPass, PassContext, PassResult, RegState, ScalarRange, SkipReason, StackState, Tnum,
-    VerifierInsn, VerifierInsnKind, VerifierValueWidth,
+    BpfPass, PassContext, PassResult, RegState, ScalarRange, StackState, Tnum, VerifierInsn,
+    VerifierInsnKind, VerifierValueWidth,
 };
 use crate::passes::map_inline::MapInfo;
 
@@ -14,6 +14,9 @@ pub struct PassRun {
     pub result: PassResult,
     pub lowered: Vec<BpfInsn>,
     pub prog: ProgramCFG,
+    /// Snapshot of the lifted program before the pass mutated it. Tests use
+    /// this to resolve `site_skipped` entries to pre-mutation report PCs.
+    pub report_prog: ProgramCFG,
 }
 
 pub fn lift_test_program(insns: &[BpfInsn], ctx: &PassContext) -> ProgramCFG {
@@ -29,15 +32,15 @@ pub fn run_pass_on_insns<P: BpfPass>(pass: P, insns: Vec<BpfInsn>, ctx: &PassCon
     let mut prog = lift_test_program(&insns, ctx);
     let report_prog = prog.clone();
     // Test helpers run passes through the production ProgramCFG API.
-    let mut result = pass
+    let result = pass
         .run(&mut prog, ctx)
         .expect("future ProgramCFG-native pass should run");
-    materialize_site_skips_for_tests(&report_prog, &mut result);
     let lowered = lower_test_program(&prog);
     PassRun {
         result,
         lowered,
         prog,
+        report_prog,
     }
 }
 
@@ -47,18 +50,6 @@ pub fn pass_error_on_insns<P: BpfPass>(pass: P, insns: Vec<BpfInsn>, ctx: &PassC
     pass.run(&mut prog, ctx)
         .expect_err("future ProgramCFG-native pass should reject this fixture")
         .to_string()
-}
-
-fn materialize_site_skips_for_tests(report_prog: &ProgramCFG, result: &mut PassResult) {
-    for skip in result.site_skipped.drain(..) {
-        let pc = report_prog
-            .rep_site_slot(skip.site)
-            .expect("test site skip should resolve to a report pc");
-        result.sites_skipped.push(SkipReason {
-            pc,
-            reason: skip.reason,
-        });
-    }
 }
 
 pub fn pass_ctx() -> PassContext {
@@ -223,14 +214,14 @@ pub fn branch_profile(taken: u64, not_taken: u64, miss_rate: f64) -> crate::pass
     }
 }
 
-pub fn assert_skip_reason(result: &PassResult, pc: usize, reason: &str) {
+pub fn assert_skip_reason(run: &PassRun, pc: usize, reason: &str) {
+    let matched = run.result.site_skipped.iter().any(|skip| {
+        run.report_prog.rep_site_slot(skip.site).ok() == Some(pc) && skip.reason.contains(reason)
+    });
     assert!(
-        result
-            .sites_skipped
-            .iter()
-            .any(|skip| skip.pc == pc && skip.reason.contains(reason)),
+        matched,
         "missing skip pc={pc} reason containing {reason:?}; got {:?}",
-        result.sites_skipped
+        run.result.site_skipped
     );
 }
 

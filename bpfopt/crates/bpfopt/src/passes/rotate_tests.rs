@@ -114,7 +114,7 @@ fn rotate_rejects_tmp_live_out_conflict() {
     let run = run_pass_on_insns(RotatePass, input, &rotate64_ctx(9999));
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 0, "tmp_reg");
+    assert_skip_reason(&run, 0, "tmp_reg");
 }
 
 #[test]

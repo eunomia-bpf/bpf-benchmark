@@ -79,21 +79,20 @@ struct MemsetLane {
 }
 pub struct BulkMemoryPass;
 impl BpfPass for BulkMemoryPass {
-    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
-        run_on_bbprogram(program, ctx)
+    fn run(&self, prog: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
+        let scan = scan_sites(prog)?;
+        let mut skipped = scan.skips;
+        if scan.sites.is_empty() {
+            return Ok(PassResult::with_sites(0, skipped));
+        }
+        let applied =
+            apply_candidates_reverse(prog, &scan.sites, &mut skipped, |prog, _, site| {
+                Ok((site.old_len, emit_site_replacement(site, prog)?))
+            })?;
+        Ok(PassResult::with_sites(applied, skipped))
     }
 }
-pub fn run_on_bbprogram(prog: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
-    let scan = scan_sites(prog)?;
-    let mut skipped = scan.skips;
-    if scan.sites.is_empty() {
-        return Ok(PassResult::with_sites(0, skipped));
-    }
-    let applied = apply_candidates_reverse(prog, &scan.sites, &mut skipped, |prog, _, site| {
-        Ok((site.old_len, emit_site_replacement(site, prog)?))
-    })?;
-    Ok(PassResult::with_sites(applied, skipped))
-}
+
 fn scan_sites(prog: &ProgramCFG) -> anyhow::Result<ScanResult> {
     let mut scan = ScanResult::default();
     for block in prog.block_ids().collect::<Vec<_>>() {

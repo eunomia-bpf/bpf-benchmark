@@ -193,7 +193,7 @@ fn cond_select_skips_when_no_branchless_target_exists() {
     let run = run_pass_on_insns(CondSelectPass, input, &pass_ctx());
 
     assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 0, "branchless select");
+    assert_skip_reason(&run, 0, "branchless select");
 }
 
 #[test]

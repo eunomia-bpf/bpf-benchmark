@@ -22,24 +22,21 @@ struct ScanResult {
 pub struct SkbLoadBytesSpecPass;
 
 impl BpfPass for SkbLoadBytesSpecPass {
-    fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
-        run_on_bbprogram(program, ctx.prog_type)
+    fn run(&self, prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        let Some(layout) = packet_ctx_layout(ctx.prog_type, PacketCtxLayoutScope::SkbHelper) else {
+            return Ok(PassResult::default());
+        };
+        let branch_targets = prog.branch_target_entry_sites()?;
+        let mut scan = scan_sites(prog, &branch_targets)?;
+        if scan.sites.is_empty() {
+            return Ok(PassResult::with_sites(0, scan.skips));
+        }
+        let applied =
+            apply_candidates_reverse(prog, &scan.sites, &mut scan.skips, |_, _, rewrite| {
+                Ok((1, emit_replacement(*rewrite, layout)))
+            })?;
+        Ok(PassResult::with_sites(applied, scan.skips))
     }
-}
-
-pub fn run_on_bbprogram(prog: &mut ProgramCFG, prog_type: u32) -> anyhow::Result<PassResult> {
-    let Some(layout) = packet_ctx_layout(prog_type, PacketCtxLayoutScope::SkbHelper) else {
-        return Ok(PassResult::default());
-    };
-    let branch_targets = prog.branch_target_entry_sites()?;
-    let mut scan = scan_sites(prog, &branch_targets)?;
-    if scan.sites.is_empty() {
-        return Ok(PassResult::with_sites(0, scan.skips));
-    }
-    let applied = apply_candidates_reverse(prog, &scan.sites, &mut scan.skips, |_, _, rewrite| {
-        Ok((1, emit_replacement(*rewrite, layout)))
-    })?;
-    Ok(PassResult::with_sites(applied, scan.skips))
 }
 
 fn scan_sites(

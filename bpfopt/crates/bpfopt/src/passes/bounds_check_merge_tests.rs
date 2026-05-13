@@ -174,7 +174,7 @@ fn test_different_base_regs_not_merged() {
     assert_eq!(run.lowered, input);
     assert_eq!(compare_pcs(&run.lowered), vec![4, 9]);
     assert!(
-        !run.result.sites_skipped.is_empty(),
+        !run.result.site_skipped.is_empty(),
         "different packet roots should block merging"
     );
 }
@@ -209,7 +209,7 @@ fn test_different_error_targets_not_merged() {
     assert_eq!(run.lowered, input);
     assert_eq!(compare_pcs(&run.lowered), vec![4, 8]);
     assert!(
-        !run.result.sites_skipped.is_empty(),
+        !run.result.site_skipped.is_empty(),
         "guards with different slow sinks should be rejected"
     );
 }
