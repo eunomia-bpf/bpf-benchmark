@@ -95,6 +95,7 @@ tests/integration/
 !bpfopt/testobject/
 !bpfopt/testobject/*.o
 !bpfopt/testobject/*.bpf.o
+bpfopt/testccode/*.s
 # Makefile incremental rebuild stamp files
 .build.stamp
 

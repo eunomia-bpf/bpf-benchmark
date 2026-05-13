@@ -117,20 +117,10 @@ def load_benchmark_config() -> dict[str, Any]:
     return effective
 
 
-def _ordered_unique_passes(raw: Sequence[str] | Sequence[object]) -> list[str]:
-    ordered: list[str] = []
-    seen: set[str] = set()
-    for value in raw:
-        name = str(value).strip()
-        if not name or name in seen:
-            continue
-        seen.add(name)
-        ordered.append(name)
-    return ordered
-
-
 def _normalize_pass_list(raw: Any) -> list[str]:
-    return _ordered_unique_passes(raw) if isinstance(raw, list) else []
+    return (
+        [str(p).strip() for p in raw if str(p).strip()] if isinstance(raw, list) else []
+    )
 
 
 def _policy_pass_list(raw: Any, *, field_name: str) -> list[str] | None:
