@@ -1360,7 +1360,7 @@ fn compute_lifted_reg_facts(prog: &ProgramCFG) -> anyhow::Result<LiftedRegFacts>
             last_data_load = None;
         }
         let sites = prog.sites_in_block_with_terminator(block)?;
-        for site in sites {
+        for (block_idx, site) in sites.iter().copied().enumerate() {
             by_site.insert(site, regs);
             let Some(insn) = prog.insn_at(site) else {
                 continue;
@@ -1372,9 +1372,28 @@ fn compute_lifted_reg_facts(prog: &ProgramCFG) -> anyhow::Result<LiftedRegFacts>
             } else {
                 None
             };
+            let kinsn_call_defs = if insn.is_call_kinsn() {
+                let sidecar_site = block_idx
+                    .checked_sub(1)
+                    .and_then(|i| sites.get(i).copied())
+                    .ok_or_else(|| {
+                        anyhow::anyhow!("kinsn call at {:?} is missing its packed sidecar", site)
+                    })?;
+                let sidecar = prog.insn_at(sidecar_site).ok_or_else(|| {
+                    anyhow::anyhow!("missing kinsn sidecar instruction at {:?}", sidecar_site)
+                })?;
+                if !sidecar.is_kinsn_sidecar() {
+                    anyhow::bail!("kinsn call at {:?} is missing its packed sidecar", site);
+                }
+                let descriptor = prog.kinsn_reg.lookup_by_kinsn_call(insn.imm, insn.off)?;
+                Some((descriptor.register_defs)(sidecar.sidecar_payload()))
+            } else {
+                None
+            };
             advance_lifted_regs(
                 insn,
                 ldimm64_hi,
+                kinsn_call_defs.as_ref(),
                 site,
                 layout,
                 &mut regs,
@@ -1387,6 +1406,7 @@ fn compute_lifted_reg_facts(prog: &ProgramCFG) -> anyhow::Result<LiftedRegFacts>
 fn advance_lifted_regs(
     insn: &BpfInsn,
     ldimm64_hi: Option<&BpfInsn>,
+    kinsn_call_defs: Option<&RegSet>,
     site: InsnSite,
     layout: Option<crate::insn::PacketCtxLayout>,
     regs: &mut [LiftedRegFact; 11],
@@ -1396,6 +1416,25 @@ fn advance_lifted_regs(
         bpf_op, bpf_size, bpf_src, decode_ldimm64_value, BPF_ADD, BPF_ALU, BPF_ALU64, BPF_K,
         BPF_LD, BPF_LDX, BPF_MEM, BPF_MOV, BPF_REG_0, BPF_REG_5, BPF_SUB, BPF_W, BPF_X, BPF_XOR,
     };
+    // kinsn sidecar carries dst/off/imm as packed metadata for the immediately
+    // following kinsn call. It is not a real assignment, so it must not update
+    // any reg fact — otherwise its dst_reg field (= the upcoming kinsn dst)
+    // would be falsely set to Const(payload imm) here.
+    if insn.is_kinsn_sidecar() {
+        return Ok(());
+    }
+    if insn.is_call_kinsn() {
+        // kinsn calls have explicit register defs declared by KinsnDescriptor.
+        // Clear only those regs; preserve all others (packet facts, scratch
+        // regs, last_data_load). kinsn modules do not mutate packets.
+        let defs = kinsn_call_defs.ok_or_else(|| {
+            anyhow::anyhow!("kinsn call at {:?} missing resolved descriptor defs", site)
+        })?;
+        for &reg in defs {
+            regs[reg as usize] = LiftedRegFact::Unknown;
+        }
+        return Ok(());
+    }
     if insn.is_call() {
         // Conservative: blast all packet-typed regs and r0..r5 to Unknown.
         // (Original bounds_check_merge cleared ALL regs on call; we keep r6..r9
