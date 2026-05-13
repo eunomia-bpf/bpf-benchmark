@@ -191,8 +191,20 @@ fn looks_like_state_line(line: &str) -> bool {
     let Some((pc, tail)) = line.split_once(':') else {
         return false;
     };
-    pc.trim().chars().all(|ch| ch.is_ascii_digit())
-        && (is_state_text(tail.trim()) || tail.contains(';'))
+    if !pc.trim().chars().all(|ch| ch.is_ascii_digit()) {
+        return false;
+    }
+    let tail = tail.trim();
+    if is_state_text(tail) {
+        return true;
+    }
+    // "<pc>: <insn> ; <state>" — only state-like if the post-`;` segment
+    // actually contains register/frame state. Lines like
+    // "224: (85) call bpf_tail_call#12       ;" have an empty post-`;`
+    // because the verifier emits no state for non-returning instructions.
+    tail.split_once(';')
+        .map(|(_, state)| is_state_text(state.trim()))
+        .unwrap_or(false)
 }
 fn parse_from_state_line(
     line: &str,
@@ -346,10 +358,17 @@ fn parse_reg_state(raw: &str, value_width: VerifierValueWidth) -> Result<RegStat
     if let Some(rest) = value.strip_prefix("fp") {
         let mut state = RegState::new("fp", value_width);
         state.precise = precise;
-        if !rest.is_empty() {
-            state.offset = Some(
-                parse_i32(rest).ok_or_else(|| anyhow!("invalid frame-pointer offset {rest:?}"))?,
-            );
+        // Cross-frame form `fp[N]-M`: the kernel verifier annotates the source
+        // frame for stack pointers. We don't track frame index per register, so
+        // strip the `[N]` and use the offset M.
+        let offset_text = match rest.strip_prefix('[').and_then(|r| r.split_once(']')) {
+            Some((_, after)) => after,
+            None => rest,
+        };
+        if !offset_text.is_empty() {
+            state.offset = Some(parse_i32(offset_text).ok_or_else(|| {
+                anyhow!("invalid frame-pointer offset {offset_text:?}")
+            })?);
         }
         return Ok(state);
     }
