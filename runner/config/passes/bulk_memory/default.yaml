@@ -10,4 +10,4 @@ kinsns:
     aliases:
       - bpf_memset_bulk
 command: |
-  timeout 6000 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} --verifier-states ${VERIFIER_STATES}
+  timeout 6000 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}

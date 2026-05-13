@@ -12,6 +12,7 @@ mod const_prop;
 mod dce;
 mod endian;
 mod extract;
+mod lea;
 pub mod map_inline;
 mod noop;
 mod prefetch;
@@ -77,12 +78,13 @@ fn reject_pass_args(pass_name: &str, args: &[String]) -> Result<()> {
     pass_entry!("skb_load_bytes_spec", skb_load_bytes::SkbLoadBytesSpecPass, &[], false),
     pass_entry!("bounds_check_merge", bounds_check_merge::BoundsCheckMergePass, &[], false),
     pass_entry!("wide_mem", wide_mem::WideMemPass, &[], false),
-    pass_entry!("bulk_memory", bulk_memory::BulkMemoryPass, bulk_memory::KINSN_TARGETS, true),
+    pass_entry!("bulk_memory", bulk_memory::BulkMemoryPass, bulk_memory::KINSN_TARGETS, false),
     pass_entry!("rotate", rotate::RotatePass, rotate::KINSN_TARGETS, false),
     pass_entry!("cond_select", cond_select::CondSelectPass, cond_select::KINSN_TARGETS, false),
     pass_entry!("ccmp", ccmp::CcmpPass, ccmp::KINSN_TARGETS, false),
     pass_entry!("extract", extract::ExtractPass, extract::KINSN_TARGETS, false),
     pass_entry!("endian_fusion", endian::EndianFusionPass, endian::KINSN_TARGETS, false),
+    pass_entry!("lea", lea::LeaPass, lea::KINSN_TARGETS, false),
     pass_entry!("branch_flip", branch_flip::BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 }, &[], false),
     pass_entry!("prefetch", prefetch::PrefetchPass, prefetch::KINSN_TARGETS, false),
 ];
@@ -105,6 +107,8 @@ mod dce_tests;
 mod endian_tests;
 #[cfg(test)]
 mod extract_tests;
+#[cfg(test)]
+mod lea_tests;
 #[cfg(test)]
 mod map_inline_tests;
 #[cfg(test)]

@@ -1,81 +1,73 @@
 # cond_select diamond external-predecessor fix
 
-Date: 2026-05-12
+Date: 2026-05-13
 
-## Root cause
+## Verdict Source
 
-`validate_diamond()` in `bpfopt/crates/bpfopt/src/analysis/bbprogram_api.rs` rejects any diamond whose join block has a predecessor outside this set:
+Read `docs/tmp/cilium_regression_full_20260512.md`, especially the Verdict section. The decisive signal is the current cilium run aborting `cond_select` with:
 
-- `pattern.predecessor`
-- `pattern.true_branch`
-- `pattern.false_branch`
+```text
+diamond join BlockId(...) has external predecessor BlockId(...)
+```
 
-The failing check is the strict external-predecessor guard around `bbprogram_api.rs:790-803`. That guard was left unchanged.
-
-`cond_select` can detect a local mov diamond whose apparent join is also reachable from another block. `pattern_a_for_site()` selects the shared successor of the taken/fallthrough blocks, and `pattern_c_for_site()` uses the taken block as the join. Before this fix, `run_on_bbprogram()` passed that pattern directly into `replace_diamond_with_insns()`, so `validate_diamond()` surfaced the invalid join as a hard bpfopt failure.
+That abort marks the program failed for the pass chain, so remaining passes do not get a successful `cond_select` output for those programs.
 
 ## Fix
 
-Changed `bpfopt/crates/bpfopt/src/passes/cond_select.rs` only:
+Implemented scan-time rejection in `bpfopt/crates/bpfopt/src/passes/cond_select.rs`.
 
-- `cond_select.rs:126-132`: after deriving the trial `DiamondPattern`, pre-check whether the selected join has an external predecessor. If yes, record a skipped site and do not call `replace_diamond_with_insns()`.
-- `cond_select.rs:152-158`: repeat the same pre-check immediately before final replacement on the real program, and count only actually applied sites.
-- `cond_select.rs:257-273`: added `external_join_predecessor_skip()`, which mirrors `validate_diamond()`'s allowed predecessor rule and returns the same diagnostic shape as a skip reason.
+- `scan_cond_select_sites()` now returns both candidate sites and scan-time skipped sites.
+- `try_match_pattern_a()` checks the shared join after the mov-diamond shape is otherwise matched. The join may only have the taken and fallthrough branch blocks as predecessors.
+- `try_match_pattern_c()` checks its join after the short pattern is otherwise matched. The join may only have the predecessor block and false branch block as predecessors.
+- If an external predecessor is found, the pass records a `SiteSkipReason` with the same diagnostic shape as the validator error and does not call `replace_diamond_with_insns()` for that site.
 
-Added regression coverage:
+`bpfopt/crates/bpfopt/src/analysis/bbprogram_api.rs` keeps the strict diamond invariant by rejecting joins with external predecessors in `validate_diamond()`. This preserves fail-fast behavior if another caller ever bypasses the pass-level scan guard.
 
-- `bpfopt/crates/bpfopt/src/passes/cond_select_tests.rs:148-164`: `cond_select_skips_diamond_join_with_external_predecessor` builds a cond-select pattern whose join also has an external predecessor, then verifies the pass returns `sites_applied == 0`, records an `external predecessor` skip, and leaves bytecode unchanged.
+## Regression Input
 
-## Host Reproduction
-
-Before the fix, this host-side testbin command reproduced the cilium failure:
-
-```sh
-cargo run -q --manifest-path bpfopt/Cargo.toml -p bpfopt -- \
-  --pass cond_select \
-  --input bpfopt/testbin/cilium_agent/159_cil_xdp_entry/canonicalize_output.bin \
-  --output /tmp/cond_select_159_before.bin \
-  --report /tmp/cond_select_159_before.json \
-  --kinsns bpf_select64:5555
-```
-
-Observed pre-fix error:
+The new unit test builds this mini program:
 
 ```text
-error: diamond join BlockId(28) has external predecessor BlockId(1)
+pc0: if r9 == 0 goto pc5      ; external edge to shared join
+pc1: if r1 != 0 goto pc4      ; inner cond_select candidate
+pc2: r0 = 0                   ; false mov
+pc3: goto pc5
+pc4: r0 = 1                   ; true mov
+pc5: exit                     ; join has pc0 plus diamond predecessors
 ```
 
-After the fix, the same input succeeds and reports the site as skipped:
-
-```json
-{
-  "pass": "cond_select",
-  "sites_applied": 0,
-  "sites_matched": 1,
-  "sites_skipped": 1,
-  "skip_reasons": {
-    "diamond join BlockId(28) has external predecessor BlockId(1)": 1
-  },
-  "insn_count_before": 276,
-  "insn_count_after": 276,
-  "insn_delta": 0
-}
-```
-
-I also scanned `bpfopt/testbin/cilium_agent/*/canonicalize_output.bin` with `cond_select`; all entries completed without bpfopt failure after the fix.
+Without the scan guard, the inner diamond reaches `replace_diamond_with_insns()` and strict validation rejects the shared join. With the fix, `cond_select` returns successfully, leaves bytecode unchanged, reports `sites_applied == 0`, and records one skipped site. CLI `sites_matched` would count this as `applied + skipped == 1`.
 
 ## Test Results
 
-Targeted regression test:
+Targeted regression:
 
 ```text
-cargo test --manifest-path bpfopt/Cargo.toml -p bpfopt --lib cond_select_skips_diamond_join_with_external_predecessor
-test result: ok. 1 passed; 0 failed; 165 filtered out
+cargo test -p bpfopt --lib cond_select_skips_diamond_join_with_external_predecessor
+test result: ok. 1 passed; 0 failed; 166 filtered out
 ```
 
-Full requested lib test:
+Full requested lib suite:
 
 ```text
-cargo test --manifest-path bpfopt/Cargo.toml -p bpfopt --lib
-test result: ok. 166 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+cargo test -p bpfopt --lib
+test result: ok. 167 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+```
+
+Formatting:
+
+```text
+cargo fmt --all --check
+cargo fmt --all
+```
+
+Both formatting commands completed successfully; `cargo fmt --all` was a no-op after the check passed.
+
+## Code Diff Stat
+
+```text
+bpfopt/crates/bpfopt/src/analysis/bbprogram_api.rs | 25 ++++++++++
+bpfopt/crates/bpfopt/src/passes/cond_select.rs     | 55 +++++++++++++++++++---
+bpfopt/crates/bpfopt/src/passes/cond_select_tests.rs  | 16 ++++---
+3 files changed, 84 insertions(+), 12 deletions(-)
 ```

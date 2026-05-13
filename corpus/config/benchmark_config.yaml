@@ -9,6 +9,10 @@ policy:
            rotate, cond_select, extract, endian_fusion, ccmp, bulk_memory, prefetch,
            wide_mem, bounds_check_merge, skb_load_bytes_spec,
            noop, const_prop, dce]
+    full-x86: [noop, map_inline, const_prop, dce,
+               rotate, cond_select, extract, endian_fusion, lea, ccmp, bulk_memory, prefetch,
+               wide_mem, bounds_check_merge, skb_load_bytes_spec,
+               noop, const_prop, dce]
   platforms:
-    x86_64: { passes: [full] }
+    x86_64: { passes: [full-x86] }
     arm64:  { passes: [full] }
