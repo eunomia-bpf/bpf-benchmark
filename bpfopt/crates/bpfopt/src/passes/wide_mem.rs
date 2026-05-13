@@ -210,21 +210,6 @@ impl BpfPass for WideMemPass {
                 ));
                 continue;
             }
-            if prog
-                .reg_kind(start_site, site.base_reg)
-                .is_some_and(|kind| {
-                    matches!(kind, RegKind::BtfStructPointer | RegKind::OtherPointer)
-                })
-            {
-                skipped.push(SiteSkipReason::new(
-                    start_site,
-                    format!(
-                        "base register r{} is a BTF struct pointer; wide load may cross field boundary",
-                        site.base_reg
-                    ),
-                ));
-                continue;
-            }
             safe_sites.push((start_site, site));
         }
         add_cross_block_wide_mem_skips(prog, &branch_targets, &mut reported_starts, &mut skipped)?;

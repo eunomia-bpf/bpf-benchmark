@@ -77,7 +77,7 @@ fn reject_pass_args(pass_name: &str, args: &[String]) -> Result<()> {
     pass_entry!("skb_load_bytes_spec", skb_load_bytes::SkbLoadBytesSpecPass, &[], false),
     pass_entry!("bounds_check_merge", bounds_check_merge::BoundsCheckMergePass, &[], false),
     pass_entry!("wide_mem", wide_mem::WideMemPass, &[], false),
-    pass_entry!("bulk_memory", bulk_memory::BulkMemoryPass, bulk_memory::KINSN_TARGETS, false),
+    pass_entry!("bulk_memory", bulk_memory::BulkMemoryPass, bulk_memory::KINSN_TARGETS, true),
     pass_entry!("rotate", rotate::RotatePass, rotate::KINSN_TARGETS, false),
     pass_entry!("cond_select", cond_select::CondSelectPass, cond_select::KINSN_TARGETS, false),
     pass_entry!("ccmp", ccmp::CcmpPass, ccmp::KINSN_TARGETS, false),

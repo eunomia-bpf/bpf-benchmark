@@ -304,10 +304,6 @@ fn build_pass_context(common: &CommonArgs) -> Result<PassContext> {
         ctx.kinsn_registry = kinsn_registry_from_target(&target)?;
     }
 
-    if !common.kinsns.is_empty() {
-        apply_kinsn_list(&mut ctx.kinsn_registry, &common.kinsns)?;
-    }
-
     Ok(ctx)
 }
 
@@ -364,25 +360,6 @@ fn kinsn_registry_from_target(target: &TargetJson) -> Result<KinsnRegistry> {
         registry.set_kinsn_call_for_target_name(name, spec.btf_func_id, spec.call_offset)?;
     }
     Ok(registry)
-}
-
-fn apply_kinsn_list(registry: &mut KinsnRegistry, kinsns: &[String]) -> Result<()> {
-    for item in kinsns {
-        let trimmed = item.trim();
-        if trimmed.is_empty() {
-            continue;
-        }
-        let (name, btf_id) = if let Some((name, btf)) = trimmed.split_once(':') {
-            let id = btf
-                .parse::<i32>()
-                .with_context(|| format!("invalid btf id in --kinsns entry {trimmed}"))?;
-            (name, id)
-        } else {
-            (trimmed, 0)
-        };
-        registry.set_kinsn_call_for_target_name(name, btf_id, 0)?;
-    }
-    Ok(())
 }
 
 fn read_json_file<T: for<'de> Deserialize<'de>>(path: &Path, label: &str) -> Result<T> {

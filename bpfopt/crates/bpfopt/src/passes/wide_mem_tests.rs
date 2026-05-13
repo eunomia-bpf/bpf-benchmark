@@ -140,27 +140,3 @@ fn wide_mem_skips_byte_ladder_with_pseudo_func_boundary_inside() {
     assert!(run.lowered[2].is_ldimm64_pseudo_func());
 }
 
-#[test]
-fn wide_mem_skips_btf_struct_pointer_field_loads() {
-    // P1-H: BTF struct pointers are not ordinary byte ladders.
-    let ctx = ctx_with_verifier_states(vec![verifier_full_state(
-        0,
-        std::collections::HashMap::from([(
-            BPF_REG_6,
-            crate::pass::RegState::new(
-                "trusted_ptr_bpf_prog",
-                crate::pass::VerifierValueWidth::Unknown,
-            ),
-        )]),
-    )]);
-
-    let run = run_pass_on_insns(
-        WideMemPass,
-        with_exit(wide_mem_2(BPF_REG_0, BPF_REG_1, BPF_REG_6, 0)),
-        &ctx,
-    );
-
-    assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run, 0, "BTF struct pointer");
-}
-

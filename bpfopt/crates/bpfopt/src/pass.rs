@@ -114,9 +114,6 @@ pub struct CommonArgs {
     /// BPF program type, such as xdp, sched_cls, tracing, or a numeric type.
     #[arg(long, value_name = "TYPE")]
     pub prog_type: Option<String>,
-    /// Available kinsns, comma-separated. Entries may be name or name:btf_id.
-    #[arg(long, value_name = "LIST", value_delimiter = ',')]
-    pub kinsns: Vec<String>,
     /// Kinsn capability JSON file.
     #[arg(long, value_name = "FILE")]
     pub target: Option<PathBuf>,
