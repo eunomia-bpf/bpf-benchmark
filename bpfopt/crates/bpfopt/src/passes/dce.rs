@@ -46,7 +46,7 @@ pub fn run_on_bbprogram(prog: &mut ProgramCFG) -> anyhow::Result<PassResult> {
     Ok(PassResult {
         sites_applied,
         diagnostics,
-        ..PassResult::unchanged()
+        ..PassResult::default()
     })
 }
 

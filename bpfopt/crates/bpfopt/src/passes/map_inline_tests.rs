@@ -2,7 +2,7 @@
 
 use super::map_inline::{
     CompressedMapValues, CompressedMapValuesKind, MapInfo, MapInlineHintAnchorSpec,
-    MapInlineHintModeSpec, MapInlineHintSpec, MapInlinePass,
+    MapInlineHintMode, MapInlineHintSpec, MapInlinePass,
 };
 use crate::insn::*;
 use crate::pass::PassContext;
@@ -111,7 +111,7 @@ fn map_inline_consumes_hint_when_verifier_state_unavailable() {
         .insert((111, 1u32.to_le_bytes().to_vec()), value);
     ctx.map_inline_hints = vec![MapInlineHintSpec {
         anchor: MapInlineHintAnchorSpec::Pc(5),
-        mode: MapInlineHintModeSpec::Hard,
+        mode: MapInlineHintMode::Hard,
         key: 1u32.to_le_bytes().to_vec(),
     }];
 
@@ -141,7 +141,7 @@ fn map_inline_rejects_hint_with_wrong_key_size() {
         .insert((111, 1u32.to_le_bytes().to_vec()), value);
     ctx.map_inline_hints = vec![MapInlineHintSpec {
         anchor: MapInlineHintAnchorSpec::Pc(5),
-        mode: MapInlineHintModeSpec::Hard,
+        mode: MapInlineHintMode::Hard,
         key: vec![1, 2],
     }];
 
@@ -170,7 +170,7 @@ fn map_inline_rejects_hint_pointing_at_non_lookup_call() {
         .insert((111, 1u32.to_le_bytes().to_vec()), value);
     ctx.map_inline_hints = vec![MapInlineHintSpec {
         anchor: MapInlineHintAnchorSpec::Pc(6),
-        mode: MapInlineHintModeSpec::Hard,
+        mode: MapInlineHintMode::Hard,
         key: 1u32.to_le_bytes().to_vec(),
     }];
 
@@ -199,7 +199,7 @@ fn map_inline_soft_hint_inlines_load_but_keeps_lookup_and_null_check() {
         .insert((111, 1u32.to_le_bytes().to_vec()), value);
     ctx.map_inline_hints = vec![MapInlineHintSpec {
         anchor: MapInlineHintAnchorSpec::Pc(5),
-        mode: MapInlineHintModeSpec::Soft,
+        mode: MapInlineHintMode::Soft,
         key: 1u32.to_le_bytes().to_vec(),
     }];
 
@@ -239,7 +239,7 @@ fn map_inline_hard_hash_hint_keeps_lookup_and_null_check() {
         .insert((111, 1u32.to_le_bytes().to_vec()), value);
     ctx.map_inline_hints = vec![MapInlineHintSpec {
         anchor: MapInlineHintAnchorSpec::Pc(5),
-        mode: MapInlineHintModeSpec::Hard,
+        mode: MapInlineHintMode::Hard,
         key: 1u32.to_le_bytes().to_vec(),
     }];
 
@@ -276,7 +276,7 @@ fn map_inline_soft_hint_skips_when_snapshot_key_is_absent() {
     );
     ctx.map_inline_hints = vec![MapInlineHintSpec {
         anchor: MapInlineHintAnchorSpec::Pc(5),
-        mode: MapInlineHintModeSpec::Soft,
+        mode: MapInlineHintMode::Soft,
         key: 1u32.to_le_bytes().to_vec(),
     }];
 
@@ -463,7 +463,7 @@ fn map_inline_route_a_rejects_missing_outer_entry_for_hint() {
     let mut ctx = ctx_for_array_lookup(111, 7u32.to_le_bytes().to_vec());
     ctx.map_inline_hints = vec![MapInlineHintSpec {
         anchor: MapInlineHintAnchorSpec::Pc(5),
-        mode: MapInlineHintModeSpec::Hard,
+        mode: MapInlineHintMode::Hard,
         key: 1u32.to_le_bytes().to_vec(),
     }];
     ctx.map_info.insert(
@@ -503,12 +503,12 @@ fn map_inline_soft_hint_requires_immediate_null_check_when_hard_fold_coexists() 
     ctx.map_inline_hints = vec![
         MapInlineHintSpec {
             anchor: MapInlineHintAnchorSpec::Pc(5),
-            mode: MapInlineHintModeSpec::Hard,
+            mode: MapInlineHintMode::Hard,
             key: 1u32.to_le_bytes().to_vec(),
         },
         MapInlineHintSpec {
             anchor: MapInlineHintAnchorSpec::Pc(13),
-            mode: MapInlineHintModeSpec::Soft,
+            mode: MapInlineHintMode::Soft,
             key: 1u32.to_le_bytes().to_vec(),
         },
     ];
@@ -553,7 +553,7 @@ fn map_inline_route_a_rejects_kernel_mutable_inner_hint() {
         .insert((111, 1u32.to_le_bytes().to_vec()), 222);
     ctx.map_inline_hints = vec![MapInlineHintSpec {
         anchor: MapInlineHintAnchorSpec::Pc(6),
-        mode: MapInlineHintModeSpec::Hard,
+        mode: MapInlineHintMode::Hard,
         key: 1u32.to_le_bytes().to_vec(),
     }];
 
@@ -569,7 +569,7 @@ fn map_inline_route_a_rejects_orphan_inner_hint() {
         .insert((222, 1u32.to_le_bytes().to_vec()), 333);
     ctx.map_inline_hints = vec![MapInlineHintSpec {
         anchor: MapInlineHintAnchorSpec::MapName("inner".to_string()),
-        mode: MapInlineHintModeSpec::Hard,
+        mode: MapInlineHintMode::Hard,
         key: 1u32.to_le_bytes().to_vec(),
     }];
 

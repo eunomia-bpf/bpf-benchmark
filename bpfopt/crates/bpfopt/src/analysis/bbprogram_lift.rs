@@ -12,9 +12,7 @@ use crate::analysis::{
 };
 use crate::insn::*;
 use crate::pass::{KinsnRegistry, PassContext, TargetJson, VerifierInsn, VerifierInsnKind};
-use crate::passes::map_inline::{
-    MapInlineHintAnchorSpec, MapInlineHintModeSpec, MapInlineHintSpec,
-};
+use crate::passes::map_inline::{MapInlineHintAnchorSpec, MapInlineHintMode, MapInlineHintSpec};
 
 #[cfg(test)]
 pub(crate) fn lift(
@@ -357,7 +355,7 @@ fn module_fd_array_base(map_count: usize) -> Result<i32> {
 }
 
 pub fn validate_map_inline_hint_specs(hints: &[MapInlineHintSpec]) -> anyhow::Result<()> {
-    let mut anchors = BTreeMap::<MapInlineHintAnchorSpec, (MapInlineHintModeSpec, usize)>::new();
+    let mut anchors = BTreeMap::<MapInlineHintAnchorSpec, (MapInlineHintMode, usize)>::new();
     for hint in hints {
         match anchors.get_mut(&hint.anchor) {
             Some((mode, count)) => {
@@ -367,7 +365,7 @@ pub fn validate_map_inline_hint_specs(hints: &[MapInlineHintSpec]) -> anyhow::Re
                         format_hint_anchor_spec(&hint.anchor)
                     );
                 }
-                if hint.mode == MapInlineHintModeSpec::Hard {
+                if hint.mode == MapInlineHintMode::Hard {
                     anyhow::bail!(
                         "inline hint anchor {} has multiple hard folds",
                         format_hint_anchor_spec(&hint.anchor)

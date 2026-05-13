@@ -11,6 +11,6 @@ impl BpfPass for NoopPass {
     }
 
     fn run(&self, _program: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
-        Ok(PassResult::unchanged())
+        Ok(PassResult::default())
     }
 }

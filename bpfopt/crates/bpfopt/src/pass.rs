@@ -202,27 +202,13 @@ pub struct SkipReason {
 }
 
 impl PassResult {
-    pub fn unchanged() -> Self {
-        Self {
-            sites_applied: 0,
-            diagnostics: Vec::new(),
-            ..Default::default()
-        }
-    }
-
-    pub fn skipped_site(reason: SiteSkipReason) -> Self {
-        Self {
-            site_skipped: vec![reason],
-            ..Self::unchanged()
-        }
-    }
-
     /// Whole-pass skip anchored at the program's first report site.
     pub fn skipped_pass(program: &ProgramCFG, reason: impl Into<String>) -> anyhow::Result<Self> {
-        Ok(Self::skipped_site(SiteSkipReason::new(
-            first_report_site(program)?,
-            reason,
-        )))
+        let site_skipped = vec![SiteSkipReason::new(first_report_site(program)?, reason)];
+        Ok(Self {
+            site_skipped,
+            ..Default::default()
+        })
     }
 
     pub fn with_sites(sites_applied: usize, site_skipped: Vec<SiteSkipReason>) -> Self {
@@ -282,7 +268,7 @@ pub trait BpfPass: Send + Sync {
 /// Pass execution context — contains platform info and external configuration.
 ///
 /// These values are invariant for the duration of a single pass invocation.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct PassContext {
     /// Available kinsn targets and static descriptors.
     pub kinsn_registry: KinsnRegistry,
@@ -339,7 +325,6 @@ struct KinsnCallKey {
     call_off: i16,
 }
 
-#[cfg(test)]
 impl Default for KinsnRegistry {
     fn default() -> Self {
         Self::new().expect("built-in kinsn registry should not contain duplicate target names")

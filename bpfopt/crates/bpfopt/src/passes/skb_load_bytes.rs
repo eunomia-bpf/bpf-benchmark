@@ -32,7 +32,7 @@ impl BpfPass for SkbLoadBytesSpecPass {
 
 pub fn run_on_bbprogram(prog: &mut ProgramCFG, prog_type: u32) -> anyhow::Result<PassResult> {
     let Some(layout) = packet_ctx_layout(prog_type, PacketCtxLayoutScope::SkbHelper) else {
-        return Ok(PassResult::unchanged());
+        return Ok(PassResult::default());
     };
     let branch_targets = prog.branch_target_entry_sites()?;
     let mut scan = scan_sites(prog, &branch_targets)?;

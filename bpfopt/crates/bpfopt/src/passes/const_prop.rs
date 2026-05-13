@@ -19,7 +19,7 @@ impl BpfPass for ConstPropPass {
 
 pub fn run_on_bbprogram(prog: &mut ProgramCFG) -> anyhow::Result<PassResult> {
     if prog.is_empty() {
-        return Ok(PassResult::unchanged());
+        return Ok(PassResult::default());
     }
     let mut candidates = Vec::<(InsnSite, Vec<BpfInsn>)>::new();
     let mut sites_skipped = Vec::new();
@@ -54,7 +54,7 @@ pub fn run_on_bbprogram(prog: &mut ProgramCFG) -> anyhow::Result<PassResult> {
     }
     if candidates.is_empty() {
         if sites_skipped.is_empty() {
-            return Ok(PassResult::unchanged());
+            return Ok(PassResult::default());
         }
         return Ok(PassResult {
             site_skipped: sites_skipped,

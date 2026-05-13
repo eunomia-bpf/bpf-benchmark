@@ -51,7 +51,7 @@ impl BpfPass for PrefetchPass {
 }
 pub fn run_on_bbprogram(prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
     if prog.all_sites().next().is_none() {
-        return Ok(PassResult::unchanged());
+        return Ok(PassResult::default());
     }
     let mut candidates = Vec::new();
     let mut skipped = Vec::new();

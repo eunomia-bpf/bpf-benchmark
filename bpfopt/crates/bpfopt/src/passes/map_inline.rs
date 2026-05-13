@@ -17,7 +17,7 @@ const CONST_STACK_VALUE_LOOKBACK_LIMIT: usize = 256;
 const VALUE_PREVIEW_BYTES: usize = 32;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum MapInlineHintModeSpec {
+pub enum MapInlineHintMode {
     Soft,
     Hard,
 }
@@ -31,7 +31,7 @@ pub enum MapInlineHintAnchorSpec {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MapInlineHintSpec {
     pub anchor: MapInlineHintAnchorSpec,
-    pub mode: MapInlineHintModeSpec,
+    pub mode: MapInlineHintMode,
     pub key: Vec<u8>,
 }
 
@@ -112,11 +112,6 @@ enum MapInlineHintAnchor {
     Site(InsnSite),
     MapName(String),
 }
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum MapInlineHintMode {
-    Soft,
-    Hard,
-}
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct MapInlineHint {
     anchor: MapInlineHintAnchor,
@@ -188,10 +183,7 @@ fn resolve_map_inline_hint_specs(
         .map(|hint| {
             Ok(MapInlineHint {
                 anchor: resolve_map_inline_hint_anchor(prog, &hint.anchor)?,
-                mode: match hint.mode {
-                    MapInlineHintModeSpec::Soft => MapInlineHintMode::Soft,
-                    MapInlineHintModeSpec::Hard => MapInlineHintMode::Hard,
-                },
+                mode: hint.mode,
                 key: hint.key.clone(),
             })
         })
@@ -1507,7 +1499,7 @@ fn run_map_inline_round(
             site_skipped: skipped,
             diagnostics,
             site_diagnostics,
-            ..PassResult::unchanged()
+            ..PassResult::default()
         });
     }
     let mut skip_sites = BTreeSet::new();
@@ -1560,7 +1552,7 @@ fn run_map_inline_round(
             diagnostics,
             site_diagnostics,
             map_inline_records,
-            ..PassResult::unchanged()
+            ..PassResult::default()
         });
     }
     let mut result = apply_map_inline_edit(
@@ -1591,7 +1583,7 @@ fn apply_map_inline_edit(
     if !apply_replacements_and_deletions(&mut next, replacements, skip_sites, &mut skipped)? {
         return Ok(PassResult {
             site_skipped: skipped,
-            ..PassResult::unchanged()
+            ..PassResult::default()
         });
     }
     if cleanup_unreachable {
@@ -2743,9 +2735,9 @@ fn parse_inline_hint(input: &str) -> Result<MapInlineHintSpec> {
     let anchor = parse_inline_hint_anchor(anchor_str)
         .with_context(|| format!("invalid --inline-hint anchor in '{input}'"))?;
     let (mode, hex_str) = if let Some(hex) = key_str.strip_prefix('!') {
-        (MapInlineHintModeSpec::Hard, hex)
+        (MapInlineHintMode::Hard, hex)
     } else {
-        (MapInlineHintModeSpec::Soft, key_str)
+        (MapInlineHintMode::Soft, key_str)
     };
     let key = parse_inline_hint_hex(hex_str)
         .with_context(|| format!("invalid --inline-hint key bytes in '{input}'"))?;

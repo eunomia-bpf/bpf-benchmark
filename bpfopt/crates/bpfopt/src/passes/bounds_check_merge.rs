@@ -49,10 +49,10 @@ impl BpfPass for BoundsCheckMergePass {
 
 pub fn run_on_bbprogram(prog: &mut ProgramCFG, prog_type: u32) -> anyhow::Result<PassResult> {
     if packet_ctx_layout(prog_type, PacketCtxLayoutScope::PacketAccess).is_none() {
-        return Ok(PassResult::unchanged());
+        return Ok(PassResult::default());
     }
     if prog.is_empty() {
-        return Ok(PassResult::unchanged());
+        return Ok(PassResult::default());
     }
 
     let target_sites = prog.branch_target_entry_sites()?;
