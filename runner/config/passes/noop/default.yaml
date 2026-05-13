@@ -3,4 +3,15 @@
 # Daemon substitutes ${...} vars; runner sends this command verbatim.
 log_level: 1
 command: |
-  timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}
+  if [ "x$BPFREJIT_DUMP_LIVE_JIT" = "x1" ]; then
+    bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt;
+    bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json;
+    bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm;
+    bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin;
+    chmod 0644 ${WORKDIR}/live_jited.bin;
+    arch=$(uname -m);
+    case "$arch" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo "unsupported JIT dump objdump arch: $arch" >&2; exit 1 ;; esac;
+    objdump -D -b binary -m "$objdump_machine" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump;
+  fi;
+  timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET};
+  if [ "x$BPFREJIT_DUMP_LIVE_JIT_FAIL" = "x1" ]; then false; fi

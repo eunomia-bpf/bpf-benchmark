@@ -343,7 +343,7 @@ COPY tests/negative ./tests/negative
 RUN set -eux; \
     make -C vendor/linux-framework/tools/bpf/bpftool \
         VMLINUX_BTF= \
-        feature-llvm=0 \
+        feature-llvm=1 \
         feature-libbfd=0 \
         feature-libbfd-liberty=0 \
         feature-libbfd-liberty-z=0 \
