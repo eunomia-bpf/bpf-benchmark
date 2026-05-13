@@ -73,7 +73,12 @@ impl BranchTerm {
 }
 
 impl BpfPass for CcmpPass {
-    fn run(&self, prog: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
+    fn run(&self, prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        // ccmp is an arm64-only kinsn; on non-arm64 the target lacks bpf_ccmp64
+        // and the pass produces no sites.
+        if ctx.arch != Arch::Aarch64 {
+            return PassResult::skipped_pass(prog, "ccmp requires aarch64 target");
+        }
         let sites = scan_ccmp_sites(prog)?;
         let mut safe_sites = Vec::new();
         let mut skipped = Vec::new();

@@ -92,6 +92,9 @@ tests/integration/
 # BPF build artifacts
 *.bpf.o
 *.bpf.d
+!bpfopt/testobject/
+!bpfopt/testobject/*.o
+!bpfopt/testobject/*.bpf.o
 # Makefile incremental rebuild stamp files
 .build.stamp
 

@@ -2,16 +2,18 @@
 //! Host-side developer loader for bpfopt. Run from the project root.
 //!
 //! Flow:
-//!   1. libbpf-load every program in `<obj>` with log_level=2; one shared dump
-//!      of map snapshots and per-program {bytecode, verifier log, metadata}
-//!      into `<workdir>/<prog_name>/`
-//!   2. for each program: `bpfopt --canonicalize-map-refs`
-//!   3. for each program (if `--pass` given): execute the daemon's per-pass yaml
+//!   1. libbpf-load every program in `<obj>` with log_level=2; write per-program
+//!      {bytecode, verifier log, metadata, map-ids} into `<workdir>/<prog_name>/`
+//!   2. shell out to `bpftool map show -j` + `bpftool map dump -j` for each map
+//!      referenced by the loaded programs → `<workdir>/map-values/`
+//!   3. for each program: `bpfopt --canonicalize-map-refs`
+//!   4. for each program (if `--pass` given): execute the daemon's per-pass yaml
 //!      at `runner/config/passes/<pass>/default.yaml`, then re-verify the
 //!      produced bytecode with `BPF_PROG_LOAD`
 //!
 //! `--workdir` is optional; if omitted a `/tmp/bpfopt-loader-<pid>-<n>` dir is
-//! created and removed on exit.
+//! created and removed on exit. Map snapshots come straight from `bpftool` so
+//! the file format is whatever bpfopt's downstream passes already expect.
 
 use std::collections::BTreeSet;
 use std::ffi::{CStr, CString};
@@ -47,8 +49,6 @@ const MAP_VALUES_DIR: &str = "map-values";
 const METADATA_JSON: &str = "metadata.json";
 const VERIFIER_LOG: &str = "verifier.log";
 const VERIFY_LOG: &str = "verify.log";
-const BPF_PSEUDO_MAP_IDX: u8 = 5;
-const BPF_PSEUDO_MAP_IDX_VALUE: u8 = 6;
 
 #[derive(Parser)]
 #[command(
@@ -72,7 +72,6 @@ struct Cli {
     workdir: Option<PathBuf>,
 }
 
-/// One per program in the loaded .bpf.o.
 struct PreparedProgram {
     dir: PathBuf,
     map_ids: Vec<u32>,
@@ -127,31 +126,19 @@ struct MapIdsJson {
     map_ids: Vec<u32>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+/// Subset of `bpftool map show -j` we actually consume. Extra fields are
+/// ignored; the file is written verbatim from bpftool so its full schema is
+/// also what `bpfopt`'s downstream passes see.
+#[derive(Debug, Deserialize)]
 struct MapShowJson {
-    id: u32,
     name: String,
     #[serde(rename = "type")]
-    type_: u32,
+    type_str: String,
     bytes_key: u32,
     bytes_value: u32,
     max_entries: u32,
     #[serde(default)]
-    map_flags: u32,
-}
-
-#[derive(Debug, Serialize)]
-struct MapDumpEntryJson {
-    key: Vec<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    value: Option<Vec<String>>,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    values: Vec<PerCpuValueJson>,
-}
-
-#[derive(Debug, Serialize)]
-struct PerCpuValueJson {
-    value: Vec<String>,
+    flags: u32,
 }
 
 struct BpfObject {
@@ -192,7 +179,6 @@ fn run(cli: Cli) -> Result<()> {
     let prepared = prepare_workdir(&workdir.path, &cli.obj)?;
 
     for prog in &prepared {
-        // Canonicalize loader-FD map refs into stable IDX form.
         let mut canon = Command::new(BPFOPT_BIN);
         canon
             .arg("--canonicalize-map-refs")
@@ -313,7 +299,7 @@ fn prepare_workdir(workdir: &Path, obj_path: &Path) -> Result<Vec<PreparedProgra
     }
 
     let all_map_ids: Vec<u32> = all_map_ids.into_iter().collect();
-    dump_map_snapshots(&loaded_maps, &all_map_ids, &map_values_dir)?;
+    dump_map_snapshots(&all_map_ids, &map_values_dir)?;
     Ok(prepared)
 }
 
@@ -380,7 +366,6 @@ fn verify_workdir(prog_dir: &Path, map_values_dir: &Path) -> Result<()> {
     let map_fds = create_verify_maps(map_values_dir, &map_ids)?;
     let fd_nums = map_fds.iter().map(|fd| fd.as_raw_fd()).collect::<Vec<_>>();
 
-    // Read OUTPUT_BIN and rewrite IDX-form map refs to FD-form in place.
     let raw = fs::read(&input)?;
     let stride = mem::size_of::<libbpf_sys::bpf_insn>();
     if !raw.len().is_multiple_of(stride) {
@@ -460,10 +445,14 @@ fn programs(obj: &BpfObject) -> Result<Vec<ProgramRef>> {
         if prog.is_null() {
             break;
         }
-        out.push(ProgramRef {
-            ptr: prog,
-            name: c_string(unsafe { libbpf_sys::bpf_program__name(prog) })?,
-        });
+        let name_ptr = unsafe { libbpf_sys::bpf_program__name(prog) };
+        if name_ptr.is_null() {
+            bail!("libbpf returned a null program name");
+        }
+        let name = unsafe { CStr::from_ptr(name_ptr) }
+            .to_string_lossy()
+            .into_owned();
+        out.push(ProgramRef { ptr: prog, name });
         prev = prog;
     }
     if out.is_empty() {
@@ -492,46 +481,38 @@ fn maps(obj: &BpfObject) -> Result<Vec<MapRef>> {
     Ok(out)
 }
 
-fn dump_map_snapshots(loaded_maps: &[MapRef], map_ids: &[u32], dir: &Path) -> Result<()> {
+/// Shell out to `bpftool map show -j` and `bpftool map dump -j` for each map.
+/// We don't reimplement libbpf's map iteration — bpftool's JSON is exactly
+/// what `bpfopt`'s downstream passes (e.g. map_inline) already consume.
+fn dump_map_snapshots(map_ids: &[u32], dir: &Path) -> Result<()> {
     let unique_ids = map_ids.iter().copied().collect::<BTreeSet<_>>();
     for map_id in unique_ids {
-        let map = loaded_maps
-            .iter()
-            .find(|map| map.info.id == map_id)
-            .ok_or_else(|| {
-                anyhow!("program uses map id {map_id}, but loaded object has no matching map")
-            })?;
-        let name_bytes: Vec<u8> = map
-            .info
-            .name
-            .iter()
-            .take_while(|&&c| c != 0)
-            .map(|&c| c as u8)
-            .collect();
-        let show = MapShowJson {
-            id: map.info.id,
-            name: String::from_utf8(name_bytes).context("kernel map name is not UTF-8")?,
-            type_: map.info.type_,
-            bytes_key: map.info.key_size,
-            bytes_value: map.info.value_size,
-            max_entries: map.info.max_entries,
-            map_flags: map.info.map_flags,
-        };
-        write_json(&dir.join(format!("map-{map_id}.show.json")), &show)?;
-        if matches!(
-            map.info.type_,
-            libbpf_sys::BPF_MAP_TYPE_HASH
-                | libbpf_sys::BPF_MAP_TYPE_ARRAY
-                | libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY
-                | libbpf_sys::BPF_MAP_TYPE_LRU_HASH
-                | libbpf_sys::BPF_MAP_TYPE_LPM_TRIE
-                | libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS
-                | libbpf_sys::BPF_MAP_TYPE_HASH_OF_MAPS
-        ) {
-            dump_map_entries(map, &dir.join(format!("map-{map_id}.dump.json")))?;
-        }
+        let id = map_id.to_string();
+        bpftool_to(
+            &["map", "show", "-j", "-p", "id", &id],
+            &dir.join(format!("map-{map_id}.show.json")),
+        )?;
+        bpftool_to(
+            &["map", "dump", "-j", "-p", "id", &id],
+            &dir.join(format!("map-{map_id}.dump.json")),
+        )?;
     }
     Ok(())
+}
+
+fn bpftool_to(args: &[&str], out: &Path) -> Result<()> {
+    let output = Command::new("bpftool")
+        .args(args)
+        .output()
+        .context("failed to spawn bpftool")?;
+    if !output.status.success() {
+        bail!(
+            "bpftool {} failed: {}",
+            args.join(" "),
+            String::from_utf8_lossy(&output.stderr).trim()
+        );
+    }
+    fs::write(out, &output.stdout).with_context(|| format!("write {}", out.display()))
 }
 
 fn bytecode_map_ids(insns: &[libbpf_sys::bpf_insn], loaded_maps: &[MapRef]) -> Result<Vec<u32>> {
@@ -540,124 +521,42 @@ fn bytecode_map_ids(insns: &[libbpf_sys::bpf_insn], loaded_maps: &[MapRef]) -> R
     let mut pc = 0usize;
     while pc < insns.len() {
         let insn = &insns[pc];
-        if is_ldimm64(insn) {
-            if matches!(
-                insn.src_reg(),
-                x if x == libbpf_sys::BPF_PSEUDO_MAP_FD as u8
-                    || x == libbpf_sys::BPF_PSEUDO_MAP_VALUE as u8
-            ) && seen_fds.insert(insn.imm)
-            {
-                let map = loaded_maps
-                    .iter()
-                    .find(|map| map.fd == insn.imm)
-                    .ok_or_else(|| {
-                        anyhow!("bytecode references loader map fd {} at pc {pc}", insn.imm)
-                    })?;
-                map_ids.push(map.info.id);
-            }
-            pc += 2;
-        } else {
+        if !is_ldimm64(insn) {
             pc += 1;
-        }
-    }
-    Ok(map_ids)
-}
-
-fn dump_map_entries(map: &MapRef, path: &Path) -> Result<()> {
-    if matches!(
-        map.info.type_,
-        libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS | libbpf_sys::BPF_MAP_TYPE_HASH_OF_MAPS
-    ) {
-        bail!("map-in-map snapshots are not implemented");
-    }
-    let value_size = map.info.value_size as usize;
-    let is_percpu = map.info.type_ == libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY;
-    let stride = if is_percpu {
-        (value_size + 7) & !7
-    } else {
-        value_size
-    };
-    let buf_size = if is_percpu {
-        stride * possible_cpu_count()?
-    } else {
-        value_size
-    };
-
-    let mut entries = Vec::new();
-    for key in map_keys(map.fd, map.info.key_size as usize)? {
-        let mut raw = vec![0u8; buf_size];
-        syscall_ok(
-            unsafe {
-                libbpf_sys::bpf_map_lookup_elem(
-                    map.fd,
-                    key.as_ptr().cast::<c_void>(),
-                    raw.as_mut_ptr().cast::<c_void>(),
-                )
-            },
-            "bpf_map_lookup_elem",
-        )?;
-        let entry = if is_percpu {
-            MapDumpEntryJson {
-                key: hex_byte_array(&key),
-                value: None,
-                values: raw
-                    .chunks_exact(stride)
-                    .map(|c| PerCpuValueJson {
-                        value: hex_byte_array(&c[..value_size]),
-                    })
-                    .collect(),
-            }
-        } else {
-            MapDumpEntryJson {
-                key: hex_byte_array(&key),
-                value: Some(hex_byte_array(&raw)),
-                values: Vec::new(),
-            }
-        };
-        entries.push(entry);
-    }
-    write_json(path, &entries)
-}
-
-fn map_keys(fd: i32, key_size: usize) -> Result<Vec<Vec<u8>>> {
-    let mut keys = Vec::new();
-    let mut previous: Option<Vec<u8>> = None;
-    loop {
-        let mut next = vec![0u8; key_size];
-        let prev_ptr = previous.as_ref().map_or(ptr::null(), |k| k.as_ptr().cast());
-        let ret =
-            unsafe { libbpf_sys::bpf_map_get_next_key(fd, prev_ptr, next.as_mut_ptr().cast()) };
-        if ret == 0 {
-            previous = Some(next.clone());
-            keys.push(next);
             continue;
         }
-        if io::Error::last_os_error().kind() == io::ErrorKind::NotFound {
-            return Ok(keys);
+        let src = insn.src_reg();
+        let is_fd_ref = src == libbpf_sys::BPF_PSEUDO_MAP_FD as u8
+            || src == libbpf_sys::BPF_PSEUDO_MAP_VALUE as u8;
+        if is_fd_ref && seen_fds.insert(insn.imm) {
+            let map = loaded_maps
+                .iter()
+                .find(|m| m.fd == insn.imm)
+                .ok_or_else(|| {
+                    anyhow!("bytecode references loader map fd {} at pc {pc}", insn.imm)
+                })?;
+            map_ids.push(map.info.id);
         }
-        return Err(io::Error::last_os_error()).context("bpf_map_get_next_key");
+        pc += 2;
     }
+    Ok(map_ids)
 }
 
 fn create_verify_maps(dir: &Path, map_ids: &[u32]) -> Result<Vec<OwnedFd>> {
     let mut fds = Vec::new();
     for &map_id in map_ids {
         let show = read_json::<MapShowJson>(&dir.join(format!("map-{map_id}.show.json")))?;
-        if matches!(
-            show.type_,
-            libbpf_sys::BPF_MAP_TYPE_ARRAY_OF_MAPS | libbpf_sys::BPF_MAP_TYPE_HASH_OF_MAPS
-        ) {
-            bail!("verify does not support map-in-map map {}", show.id);
-        }
+        let type_id =
+            map_type_from_bpftool_str(&show.type_str).with_context(|| format!("map {map_id}"))?;
         let name = CString::new(show.name.as_str()).context("map name has NUL byte")?;
         let opts = libbpf_sys::bpf_map_create_opts {
             sz: mem::size_of::<libbpf_sys::bpf_map_create_opts>() as libbpf_sys::size_t,
-            map_flags: show.map_flags,
+            map_flags: show.flags,
             ..Default::default()
         };
         let fd = unsafe {
             libbpf_sys::bpf_map_create(
-                show.type_,
+                type_id,
                 name.as_ptr(),
                 show.bytes_key,
                 show.bytes_value,
@@ -667,8 +566,7 @@ fn create_verify_maps(dir: &Path, map_ids: &[u32]) -> Result<Vec<OwnedFd>> {
         };
         if fd < 0 {
             bail!(
-                "failed to create verify map {}: {}",
-                show.id,
+                "failed to create verify map id={map_id}: {}",
                 io::Error::last_os_error()
             );
         }
@@ -677,49 +575,62 @@ fn create_verify_maps(dir: &Path, map_ids: &[u32]) -> Result<Vec<OwnedFd>> {
     Ok(fds)
 }
 
+/// Translate bpftool's `"type"` string to the kernel `BPF_MAP_TYPE_*` numeric.
+/// Only the subset that the loader's verify path needs to recreate (no
+/// map-in-map: BPF_PROG_LOAD doesn't allow recreating these without their
+/// inner-map proto, which we don't track).
+fn map_type_from_bpftool_str(s: &str) -> Result<u32> {
+    Ok(match s {
+        "hash" => libbpf_sys::BPF_MAP_TYPE_HASH,
+        "array" => libbpf_sys::BPF_MAP_TYPE_ARRAY,
+        "prog_array" => libbpf_sys::BPF_MAP_TYPE_PROG_ARRAY,
+        "perf_event_array" => libbpf_sys::BPF_MAP_TYPE_PERF_EVENT_ARRAY,
+        "percpu_hash" => libbpf_sys::BPF_MAP_TYPE_PERCPU_HASH,
+        "percpu_array" => libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY,
+        "stack_trace" => libbpf_sys::BPF_MAP_TYPE_STACK_TRACE,
+        "cgroup_array" => libbpf_sys::BPF_MAP_TYPE_CGROUP_ARRAY,
+        "lru_hash" => libbpf_sys::BPF_MAP_TYPE_LRU_HASH,
+        "lru_percpu_hash" => libbpf_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH,
+        "lpm_trie" => libbpf_sys::BPF_MAP_TYPE_LPM_TRIE,
+        "ringbuf" => libbpf_sys::BPF_MAP_TYPE_RINGBUF,
+        "stack" => libbpf_sys::BPF_MAP_TYPE_STACK,
+        "queue" => libbpf_sys::BPF_MAP_TYPE_QUEUE,
+        s => bail!("unsupported map type {s:?}"),
+    })
+}
+
 fn rewrite_map_indices_to_fds(insns: &mut [libbpf_sys::bpf_insn], fds: &[i32]) -> Result<()> {
+    let idx_form = libbpf_sys::BPF_PSEUDO_MAP_IDX as u8;
+    let idx_value_form = libbpf_sys::BPF_PSEUDO_MAP_IDX_VALUE as u8;
     let mut pc = 0usize;
     while pc < insns.len() {
         let insn = &mut insns[pc];
-        if is_ldimm64(insn) {
-            match insn.src_reg() {
-                BPF_PSEUDO_MAP_IDX | BPF_PSEUDO_MAP_IDX_VALUE => {
-                    let idx = usize::try_from(insn.imm)
-                        .with_context(|| format!("negative map index at pc {pc}"))?;
-                    let fd = fds.get(idx).copied().ok_or_else(|| {
-                        anyhow!("map index {idx} at pc {pc} has no verify map fd")
-                    })?;
-                    insn.imm = fd;
-                    insn.set_src_reg(if insn.src_reg() == BPF_PSEUDO_MAP_IDX {
-                        libbpf_sys::BPF_PSEUDO_MAP_FD as u8
-                    } else {
-                        libbpf_sys::BPF_PSEUDO_MAP_VALUE as u8
-                    });
-                }
-                _ => {}
-            }
-            pc += 2;
-        } else {
+        if !is_ldimm64(insn) {
             pc += 1;
+            continue;
         }
+        let src = insn.src_reg();
+        if src == idx_form || src == idx_value_form {
+            let idx = usize::try_from(insn.imm)
+                .with_context(|| format!("negative map index at pc {pc}"))?;
+            let fd = fds
+                .get(idx)
+                .copied()
+                .ok_or_else(|| anyhow!("map index {idx} at pc {pc} has no verify map fd"))?;
+            insn.imm = fd;
+            insn.set_src_reg(if src == idx_form {
+                libbpf_sys::BPF_PSEUDO_MAP_FD as u8
+            } else {
+                libbpf_sys::BPF_PSEUDO_MAP_VALUE as u8
+            });
+        }
+        pc += 2;
     }
     Ok(())
 }
 
 fn is_ldimm64(insn: &libbpf_sys::bpf_insn) -> bool {
     insn.code == (libbpf_sys::BPF_LD | libbpf_sys::BPF_DW | libbpf_sys::BPF_IMM) as u8
-}
-
-/// Parse `/sys/devices/system/cpu/possible`. Kernel almost always writes a
-/// single range `0-N` (or `0` on a uniprocessor). No multi-range/comma support.
-fn possible_cpu_count() -> Result<usize> {
-    let text = fs::read_to_string("/sys/devices/system/cpu/possible")?;
-    let trimmed = text.trim();
-    let last = match trimmed.split_once('-') {
-        Some((_, end)) => end.parse::<usize>()?,
-        None => trimmed.parse::<usize>()?,
-    };
-    Ok(last + 1)
 }
 
 fn read_json<T: for<'de> Deserialize<'de>>(path: &Path) -> Result<T> {
@@ -735,25 +646,12 @@ fn write_json<T: Serialize>(path: &Path, value: &T) -> Result<()> {
     writeln!(file).with_context(|| format!("failed to write {}", path.display()))
 }
 
-fn hex_byte_array(bytes: &[u8]) -> Vec<String> {
-    bytes.iter().map(|byte| format!("0x{byte:02x}")).collect()
-}
-
 fn join_u32_csv(values: &[u32]) -> String {
     values
         .iter()
         .map(u32::to_string)
         .collect::<Vec<_>>()
         .join(",")
-}
-
-fn c_string(ptr: *const c_char) -> Result<String> {
-    if ptr.is_null() {
-        bail!("libbpf returned a null string");
-    }
-    Ok(unsafe { CStr::from_ptr(ptr) }
-        .to_string_lossy()
-        .into_owned())
 }
 
 fn log_buf_to_string(buf: &[c_char]) -> String {

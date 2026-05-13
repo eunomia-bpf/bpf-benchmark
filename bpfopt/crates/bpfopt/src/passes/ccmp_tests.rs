@@ -9,7 +9,9 @@ fn jmp_zero(op: u8, class: u8, reg: u8, off: i16) -> BpfInsn {
 }
 
 fn ccmp_ctx() -> crate::pass::PassContext {
-    ctx_with_kinsn("bpf_ccmp64", 77)
+    let mut ctx = ctx_with_kinsn("bpf_ccmp64", 77);
+    ctx.arch = crate::pass::Arch::Aarch64;
+    ctx
 }
 
 fn three_term_chain() -> Vec<BpfInsn> {
