@@ -150,21 +150,9 @@ pub(super) fn emit_wide_mem(site: &RewriteSite) -> anyhow::Result<Vec<BpfInsn>> 
         off,
     )])
 }
-fn is_packet_unsafe_prog_type(prog_type: u32) -> bool {
-    matches!(
-        prog_type,
-        libbpf_sys::BPF_PROG_TYPE_SCHED_CLS
-            | libbpf_sys::BPF_PROG_TYPE_SCHED_ACT
-            | libbpf_sys::BPF_PROG_TYPE_XDP
-            | libbpf_sys::BPF_PROG_TYPE_LWT_IN
-            | libbpf_sys::BPF_PROG_TYPE_LWT_OUT
-            | libbpf_sys::BPF_PROG_TYPE_LWT_XMIT
-            | libbpf_sys::BPF_PROG_TYPE_SK_SKB
-    )
-}
 pub struct WideMemPass;
 impl BpfPass for WideMemPass {
-    fn run(&self, prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
+    fn run(&self, prog: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
         let branch_targets = prog.branch_target_entry_sites()?;
         let mut safe_sites = Vec::new();
         let mut skipped = Vec::new();
@@ -218,27 +206,6 @@ impl BpfPass for WideMemPass {
                     format!(
                         "wide load offset {} is not naturally aligned for width {}",
                         site.base_off, site.width
-                    ),
-                ));
-                continue;
-            }
-            // Skip only when verifier state explicitly classifies the base as a
-            // packet pointer. Unknown classification falls through to apply; the
-            // kernel verifier will reject the wide load if it actually crosses a
-            // packet bound, and the daemon records that as failed_rejit naturally.
-            if is_packet_unsafe_prog_type(ctx.prog_type)
-                && site.base_reg != 10
-                && prog
-                    .reg_kind(start_site, site.base_reg)
-                    .is_some_and(|kind| {
-                        matches!(kind, RegKind::PacketPointer | RegKind::PacketMetaPointer)
-                    })
-            {
-                skipped.push(SiteSkipReason::new(
-                    start_site,
-                    format!(
-                        "packet pointer r{} in XDP/TC prog (prog_type={})",
-                        site.base_reg, ctx.prog_type
                     ),
                 ));
                 continue;

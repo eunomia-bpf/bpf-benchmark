@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT kinsn: ROTATE — 32/64-bit rotate left via ROL instruction
+ * BpfReJIT kinsn: ROTATE — rotate lowering for x86-64
  */
 
 #include "kinsn_common.h"
@@ -137,6 +137,25 @@ static void emit_rol_imm(u8 *buf, u32 *len, bool is64, u8 dst_reg, u8 imm8)
 	emit_u8(buf, len, imm8);
 }
 
+static void emit_rorx32_imm(u8 *buf, u32 *len, u8 dst_reg, u8 src_reg, u8 imm8)
+{
+	u8 vex2 = 0x43;
+
+	if (!kinsn_x86_reg_ext(dst_reg))
+		vex2 |= 0x80;
+	if (!kinsn_x86_reg_ext(src_reg))
+		vex2 |= 0x20;
+
+	emit_u8(buf, len, 0xC4);
+	emit_u8(buf, len, vex2);
+	emit_u8(buf, len, 0x7B);
+	emit_u8(buf, len, 0xF0);
+	emit_u8(buf, len, 0xC0 |
+		(kinsn_x86_reg_code(dst_reg) << 3) |
+		kinsn_x86_reg_code(src_reg));
+	emit_u8(buf, len, imm8);
+}
+
 static int emit_rotate_x86(u8 *image, u32 *off, bool emit,
 			   u64 payload, const struct bpf_prog *prog,
 			   bool is64)
@@ -182,7 +201,30 @@ static int emit_rotate64_x86(u8 *image, u32 *off, bool emit,
 static int emit_rotate32_x86(u8 *image, u32 *off, bool emit,
 			     u64 payload, const struct bpf_prog *prog)
 {
-	return emit_rotate_x86(image, off, emit, payload, prog, false);
+	u8 buf[16];
+	u8 dst_reg, src_reg, tmp_reg, shift;
+	u32 len = 0;
+	int err;
+
+	(void)prog;
+
+	if (!off)
+		return -EINVAL;
+	if (emit && !image)
+		return -EINVAL;
+
+	err = decode_rotate32_payload(payload, &dst_reg, &src_reg, &tmp_reg, &shift);
+	if (err)
+		return err;
+	if (!kinsn_x86_reg_valid(dst_reg) || !kinsn_x86_reg_valid(src_reg))
+		return -EINVAL;
+
+	emit_rorx32_imm(buf, &len, dst_reg, src_reg, (-shift) & 31);
+
+	if (emit)
+		memcpy(image + *off, buf, len);
+	*off += len;
+	return len;
 }
 
 const struct bpf_kinsn bpf_rotate64_desc = {
@@ -206,5 +248,5 @@ static const struct bpf_kinsn * const bpf_rotate_kinsn_descs[] = {
 	&bpf_rotate32_desc,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_rotate, "BpfReJIT kinsn: ROTATE (ROL)",
+DEFINE_KINSN_V2_MODULE(bpf_rotate, "BpfReJIT kinsn: ROTATE",
 		       bpf_rotate_kfunc_ids, bpf_rotate_kinsn_descs);

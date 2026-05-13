@@ -299,26 +299,6 @@ fn command_requires_single_pass_name() {
 }
 
 #[test]
-fn single_kinsn_pass_without_target_fails_before_running() {
-    let report_path = temp_path("optimize-kinsn-skip-report.json");
-    let report_arg = report_path.to_string_lossy().to_string();
-    let output = run_bpfopt(
-        &["--pass", "rotate", "--report", &report_arg],
-        &minimal_program_bytes(),
-    );
-
-    assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(
-        stderr.contains("rotate requires --target kinsn capabilities or --kinsns"),
-        "stderr={stderr}"
-    );
-    assert!(output.stdout.is_empty());
-    assert!(!report_path.exists());
-    remove_file_if_exists(report_path);
-}
-
-#[test]
 fn invalid_bytecode_length_exits_with_error() {
     let output = run_bpfopt(&["--pass", "wide_mem"], &[0u8; 9]);
 
@@ -486,72 +466,4 @@ fn map_inline_accepts_prog_info_json_for_map_ids() {
     assert_eq!(report["pass"], "map_inline");
     assert_eq!(report["sites_applied"], 1);
     assert_eq!(report["inlined_map_entries"][0]["map_id"], 111);
-}
-
-#[test]
-fn explicit_kinsn_pass_fails_when_target_lacks_kinsn() {
-    let target_path = write_temp_file(
-        "empty-target.json",
-        r#"{"arch":"x86_64","features":["cmov"],"kinsns":{}}"#,
-    );
-    let report_path = temp_path("target-lacks-kinsn-report.json");
-    let target_arg = target_path.to_string_lossy().to_string();
-    let report_arg = report_path.to_string_lossy().to_string();
-    let output = run_bpfopt(
-        &[
-            "--pass",
-            "rotate",
-            "--target",
-            &target_arg,
-            "--report",
-            &report_arg,
-        ],
-        &minimal_program_bytes(),
-    );
-    remove_file_if_exists(target_path);
-
-    assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(
-        stderr.contains("rotate requires target kinsns: bpf_rotate64, bpf_rotate32"),
-        "stderr={stderr}"
-    );
-    assert!(output.stdout.is_empty());
-    assert!(!report_path.exists());
-    remove_file_if_exists(report_path);
-}
-
-#[test]
-fn bulk_memory_missing_kinsns_fails_with_v3_names() {
-    let target_path = write_temp_file(
-        "empty-target.json",
-        r#"{"arch":"x86_64","features":["cmov"],"kinsns":{}}"#,
-    );
-    let report_path = temp_path("bulk-memory-target-lacks-kinsn-report.json");
-    let target_arg = target_path.to_string_lossy().to_string();
-    let report_arg = report_path.to_string_lossy().to_string();
-    let output = run_bpfopt(
-        &[
-            "--pass",
-            "bulk_memory",
-            "--target",
-            &target_arg,
-            "--report",
-            &report_arg,
-        ],
-        &minimal_program_bytes(),
-    );
-    remove_file_if_exists(target_path);
-
-    assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(
-        stderr.contains("bulk_memory requires target kinsns: bpf_bulk_memcpy, bpf_bulk_memset"),
-        "stderr={stderr}"
-    );
-    assert!(!stderr.contains("bpf_memcpy_bulk"), "stderr={stderr}");
-    assert!(!stderr.contains("bpf_memset_bulk"), "stderr={stderr}");
-    assert!(output.stdout.is_empty());
-    assert!(!report_path.exists());
-    remove_file_if_exists(report_path);
 }

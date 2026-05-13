@@ -68,6 +68,51 @@ fn rotate_rewrites_cilium_split_copy_shape() {
 }
 
 #[test]
+fn rotate_rewrites_katran_masked_high32_shape() {
+    let mask = BpfInsn::ld_imm64(BPF_REG_3, 0, 0xf000_0000);
+    let input = vec![
+        mask[0],
+        mask[1],
+        BpfInsn::mov64_reg(BPF_REG_4, BPF_REG_2),
+        BpfInsn::alu64_reg(BPF_AND, BPF_REG_4, BPF_REG_3),
+        BpfInsn::alu64_imm(BPF_RSH, BPF_REG_4, 28),
+        BpfInsn::mov64_reg(BPF_REG_0, BPF_REG_2),
+        BpfInsn::alu64_imm(BPF_LSH, BPF_REG_0, 4),
+        BpfInsn::alu64_reg(BPF_OR, BPF_REG_0, BPF_REG_4),
+        BpfInsn::exit(),
+    ];
+
+    let run = run_pass_on_insns(RotatePass, input, &rotate32_ctx(8888));
+
+    assert_eq!(run.result.sites_applied, 1);
+    assert!(run
+        .lowered
+        .iter()
+        .any(|i| i.is_call_kinsn() && i.imm == 8888));
+}
+
+#[test]
+fn rotate_rejects_masked_low32_shape() {
+    let mask = BpfInsn::ld_imm64(BPF_REG_3, 0, 0x00ff_ffff);
+    let input = vec![
+        mask[0],
+        mask[1],
+        BpfInsn::mov64_reg(BPF_REG_4, BPF_REG_2),
+        BpfInsn::alu64_reg(BPF_AND, BPF_REG_4, BPF_REG_3),
+        BpfInsn::alu64_imm(BPF_RSH, BPF_REG_4, 24),
+        BpfInsn::mov64_reg(BPF_REG_0, BPF_REG_2),
+        BpfInsn::alu64_imm(BPF_LSH, BPF_REG_0, 8),
+        BpfInsn::alu64_reg(BPF_OR, BPF_REG_0, BPF_REG_4),
+        BpfInsn::exit(),
+    ];
+
+    let run = run_pass_on_insns(RotatePass, input.clone(), &rotate32_ctx(8888));
+
+    assert_eq!(run.result.sites_applied, 0);
+    assert_eq!(run.lowered, input);
+}
+
+#[test]
 fn rotate_rejects_missing_adjacent_provenance_mov() {
     let input = vec![
         BpfInsn::mov64_reg(BPF_REG_3, BPF_REG_2),

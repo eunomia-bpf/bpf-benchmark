@@ -22,7 +22,7 @@ impl BpfPass for RotatePass {
     fn run(&self, prog: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
         let mut skipped = Vec::new();
         let candidates: Vec<(InsnSite, RotateSite)> = prog
-            .scan_block_starts(5, |window| {
+            .scan_block_starts(6, |window| {
                 Ok(rotate_site_at(window.insns, window.start_idx)
                     .map(|site| (site.start_idx, site.old_len, site)))
             })?
@@ -153,11 +153,116 @@ fn try_match_rotate(
     RotateWidth::MATCH_ORDER
         .into_iter()
         .find_map(|width| try_match_split_copy_rotate_width(insns, idx, width))
+        .or_else(|| try_match_masked32_rotate(insns, idx))
         .or_else(|| {
             RotateWidth::MATCH_ORDER
                 .into_iter()
                 .find_map(|width| try_match_rotate_width(insns, i0, i1, i2, idx, width))
         })
+}
+
+fn try_match_masked32_rotate(insns: &[BpfInsn], idx: usize) -> Option<RotateSite> {
+    let [mov_rsh, and_mask, rsh, mov_lsh, lsh, or_insn] = insns.get(idx..idx + 6)? else {
+        return None;
+    };
+
+    if !mov_rsh.is_alu_reg(BPF_ALU64, BPF_MOV) || !mov_lsh.is_alu_reg(BPF_ALU64, BPF_MOV) {
+        return None;
+    }
+
+    let val_reg = mov_rsh.src_reg();
+    if mov_lsh.src_reg() != val_reg {
+        return None;
+    }
+
+    let rsh_reg = mov_rsh.dst_reg();
+    let lsh_reg = mov_lsh.dst_reg();
+    if rsh_reg == lsh_reg {
+        return None;
+    }
+
+    if !and_mask.is_alu_reg(BPF_ALU64, BPF_AND)
+        || and_mask.dst_reg() != rsh_reg
+        || !rsh.is_alu_imm(BPF_ALU64, BPF_RSH)
+        || rsh.dst_reg() != rsh_reg
+        || !lsh.is_alu_imm(BPF_ALU64, BPF_LSH)
+        || lsh.dst_reg() != lsh_reg
+        || !or_insn.is_alu_reg(BPF_ALU64, BPF_OR)
+    {
+        return None;
+    }
+
+    let rsh_amount = u32::try_from(rsh.imm).ok()?;
+    let lsh_amount = u32::try_from(lsh.imm).ok()?;
+    if rsh_amount == 0 || lsh_amount == 0 || rsh_amount + lsh_amount != 32 {
+        return None;
+    }
+
+    let mask = and_mask_value(insns, idx + 1, and_mask)?;
+    if mask != high32_rotate_mask(rsh_amount)? {
+        return None;
+    }
+
+    let or_dst = or_insn.dst_reg();
+    let or_src = or_insn.src_reg();
+    if !uses_both_regs(or_dst, or_src, lsh_reg, rsh_reg) {
+        return None;
+    }
+
+    rotate_site(
+        idx,
+        6,
+        or_dst,
+        val_reg,
+        or_src,
+        lsh_amount,
+        RotateWidth::W32,
+    )
+}
+
+fn high32_rotate_mask(rsh_amount: u32) -> Option<u64> {
+    (rsh_amount < 32).then_some((u64::from(u32::MAX) << rsh_amount) & u64::from(u32::MAX))
+}
+
+fn and_mask_value(insns: &[BpfInsn], and_idx: usize, and_insn: &BpfInsn) -> Option<u64> {
+    if and_insn.is_alu_imm(BPF_ALU64, BPF_AND) {
+        return Some((and_insn.imm as u32).into());
+    }
+
+    if !and_insn.is_alu_reg(BPF_ALU64, BPF_AND) {
+        return None;
+    }
+
+    find_const_reg_value_before(insns, and_idx, and_insn.src_reg())
+}
+
+fn find_const_reg_value_before(insns: &[BpfInsn], idx: usize, reg: u8) -> Option<u64> {
+    let mut scan = idx;
+    while scan > 0 {
+        scan -= 1;
+        let insn = &insns[scan];
+        if writes_reg(insn, reg) {
+            if insn.is_ldimm64() && scan + 1 < idx {
+                return Some(decode_ldimm64_value(insn, &insns[scan + 1]));
+            }
+            if insn.is_alu_imm(BPF_ALU64, BPF_MOV) || insn.is_alu_imm(BPF_ALU, BPF_MOV) {
+                return Some((insn.imm as u32).into());
+            }
+            return None;
+        }
+    }
+    None
+}
+
+fn writes_reg(insn: &BpfInsn, reg: u8) -> bool {
+    if insn.code == 0 {
+        return false;
+    }
+    if insn.dst_reg() != reg {
+        return false;
+    }
+
+    matches!(bpf_class(insn.code), BPF_LD | BPF_LDX | BPF_ALU | BPF_ALU64)
 }
 
 fn try_match_split_copy_rotate_width(

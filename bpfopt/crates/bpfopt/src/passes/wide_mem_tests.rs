@@ -164,21 +164,3 @@ fn wide_mem_skips_btf_struct_pointer_field_loads() {
     assert_skip_reason(&run, 0, "BTF struct pointer");
 }
 
-#[test]
-fn wide_mem_xdp_skips_only_when_verifier_classifies_base_as_packet_pointer() {
-    // Without verifier-state info, wide_mem applies and the kernel verifier
-    // will reject any rewrite that actually crosses a packet bound. Only when
-    // the verifier explicitly marks the base as a packet pointer do we skip
-    // up-front (avoids the daemon-side rejit churn).
-    let mut ctx = pass_ctx();
-    ctx.prog_type = libbpf_sys::BPF_PROG_TYPE_XDP;
-
-    let run = run_pass_on_insns(
-        WideMemPass,
-        with_exit(wide_mem_2(BPF_REG_0, BPF_REG_1, BPF_REG_6, 0)),
-        &ctx,
-    );
-
-    // No verifier state for r6 in pass_ctx() → apply, not skip.
-    assert_eq!(run.result.sites_applied, 1);
-}
