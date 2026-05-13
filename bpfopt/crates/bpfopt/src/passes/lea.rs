@@ -7,10 +7,12 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
         name: "bpf_lea64",
         register_uses: lea_register_uses,
+        register_defs: lea_register_defs,
     },
     KinsnDescriptor {
         name: "bpf_lea32",
         register_uses: lea_register_uses,
+        register_defs: lea_register_defs,
     },
 ];
 
@@ -23,6 +25,10 @@ fn lea_register_uses(payload: u64) -> RegSet {
         regs.insert(kinsn_payload_reg(payload, 8));
     }
     regs
+}
+
+fn lea_register_defs(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[0])
 }
 
 pub struct LeaPass;
@@ -123,18 +129,20 @@ fn lea_site_from_pair_width(i0: &BpfInsn, i1: &BpfInsn, width: LeaWidth) -> Opti
         });
     }
 
-    if !i1.is_alu_reg(width.alu_class(), BPF_ADD)
-        || i1.src_reg() > BPF_REG_10
-        || i1.src_reg() == i1.dst_reg()
-    {
+    if !i1.is_alu_reg(width.alu_class(), BPF_ADD) || i1.src_reg() > BPF_REG_10 {
         return None;
     }
+    let index_reg = if i1.src_reg() == i1.dst_reg() {
+        i0.src_reg()
+    } else {
+        i1.src_reg()
+    };
 
     Some(LeaSite {
         old_len: 2,
         dst_reg: i0.dst_reg(),
         base_reg: i0.src_reg(),
-        index_reg: Some(i1.src_reg()),
+        index_reg: Some(index_reg),
         disp: 0,
         width,
     })

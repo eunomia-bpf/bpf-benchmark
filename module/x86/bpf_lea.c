@@ -79,7 +79,7 @@ static int instantiate_lea(u64 payload, struct bpf_insn *insn_buf, bool is64)
 	if (has_base && has_index && dst_reg == base_reg && dst_reg == index_reg) {
 		insn_buf[cnt++] = is64 ? BPF_ALU64_IMM(BPF_MUL, dst_reg, (1 << scale_log2) + 1) :
 					 BPF_ALU32_IMM(BPF_MUL, dst_reg, (1 << scale_log2) + 1);
-	} else if (has_base && dst_reg != index_reg) {
+	} else if (has_base && (!has_index || dst_reg != index_reg)) {
 		if (dst_reg != base_reg)
 			insn_buf[cnt++] = is64 ? BPF_MOV64_REG(dst_reg, base_reg) :
 						 BPF_MOV32_REG(dst_reg, base_reg);
@@ -164,6 +164,22 @@ static void emit_lea(u8 *buf, u32 *len, bool is64,
 	emit_rex_lea(buf, len, is64, dst_reg, base_reg, index_reg,
 		     has_base, has_index);
 	emit_u8(buf, len, 0x8D);
+
+	if (has_base && !has_index) {
+		if (!disp && base_code != 5)
+			mod = 0x00;
+		else if (disp >= -128 && disp <= 127)
+			mod = 0x40;
+		else
+			mod = 0x80;
+
+		emit_u8(buf, len, mod | (kinsn_x86_reg_code(dst_reg) << 3) | base_code);
+		if (mod == 0x40)
+			emit_u8(buf, len, (u8)disp);
+		else if (mod == 0x80)
+			emit_s32(buf, len, disp);
+		return;
+	}
 
 	if (!has_base)
 		mod = 0x00;

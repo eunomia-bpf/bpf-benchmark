@@ -6,14 +6,17 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
         name: "bpf_endian_load16",
         register_uses: endian_register_uses,
+        register_defs: endian_register_defs,
     },
     KinsnDescriptor {
         name: "bpf_endian_load32",
         register_uses: endian_register_uses,
+        register_defs: endian_register_defs,
     },
     KinsnDescriptor {
         name: "bpf_endian_load64",
         register_uses: endian_register_uses,
+        register_defs: endian_register_defs,
     },
 ];
 pub struct EndianFusionPass;
@@ -29,7 +32,10 @@ fn endian_target(w: BpfMemWidth) -> Option<&'static str> {
     }
 }
 fn endian_register_uses(payload: u64) -> RegSet {
-    regs_from_offsets(payload, &[0, 4])
+    regs_from_offsets(payload, &[4])
+}
+fn endian_register_defs(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[0])
 }
 pub(super) struct EndianFusionSite {
     pub(super) dst_reg: u8,

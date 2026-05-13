@@ -11,6 +11,7 @@ const MAP_VALUE_LOOKAHEAD: usize = 64;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
     name: PREFETCH_TARGET_NAME,
     register_uses: prefetch_register_uses,
+    register_defs: no_regs,
 }];
 fn prefetch_register_uses(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[0])

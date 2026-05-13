@@ -1,5 +1,6 @@
 # cond_select diamond external-predecessor fix
 
+
 Date: 2026-05-13
 
 ## Verdict Source

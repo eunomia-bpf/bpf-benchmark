@@ -12,10 +12,12 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
         name: MEMCPY_TARGET,
         register_uses: memcpy_bulk_register_uses,
+        register_defs: no_regs,
     },
     KinsnDescriptor {
         name: MEMSET_TARGET,
         register_uses: memset_bulk_register_uses,
+        register_defs: no_regs,
     },
 ];
 fn memcpy_bulk_register_uses(payload: u64) -> RegSet {

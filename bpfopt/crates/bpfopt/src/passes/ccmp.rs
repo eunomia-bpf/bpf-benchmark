@@ -7,6 +7,7 @@ use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
     name: "bpf_ccmp64",
     register_uses: ccmp_register_uses,
+    register_defs: ccmp_register_defs,
 }];
 
 const MIN_CCMP_TERMS: usize = 2;
@@ -14,9 +15,13 @@ const MAX_CCMP_TERMS: usize = 4;
 
 fn ccmp_register_uses(payload: u64) -> RegSet {
     let count = usize::from(BpfInsn::unpack_u4(payload, 4) & 0x3) + 2;
-    std::iter::once(kinsn_payload_reg(payload, 0))
-        .chain((0..count).map(|idx| kinsn_payload_reg(payload, (8 + idx * 4) as u8)))
+    (0..count)
+        .map(|idx| kinsn_payload_reg(payload, (8 + idx * 4) as u8))
         .collect()
+}
+
+fn ccmp_register_defs(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[0])
 }
 
 /// CCMP pass: folds same-target zero-test short-circuit AND chains into an

@@ -185,25 +185,26 @@ fn kinsn_aware_site_facts(prog: &ProgramCFG) -> anyhow::Result<BTreeMap<InsnSite
         let descriptor = prog.kinsn_reg.lookup_by_kinsn_call(call.imm, call.off)?;
         let payload = sidecar.sidecar_payload();
         let uses = (descriptor.register_uses)(payload);
-        validate_register_uses(descriptor.name, site, &uses)?;
+        let defs = (descriptor.register_defs)(payload);
+        validate_registers(descriptor.name, site, "uses", &uses)?;
+        validate_registers(descriptor.name, site, "defs", &defs)?;
         facts.insert(sidecar_site, RegUseDefSet::default());
-        facts.insert(
-            site,
-            RegUseDefSet {
-                uses,
-                defs: HashSet::new(),
-            },
-        );
+        facts.insert(site, RegUseDefSet { uses, defs });
     }
 
     Ok(facts)
 }
 
-fn validate_register_uses(name: &str, site: InsnSite, uses: &RegSet) -> anyhow::Result<()> {
-    for &reg in uses {
+fn validate_registers(
+    name: &str,
+    site: InsnSite,
+    label: &str,
+    regs: &RegSet,
+) -> anyhow::Result<()> {
+    for &reg in regs {
         if reg > BPF_REG_10 {
             anyhow::bail!(
-                "{name} kinsn call at {:?} uses invalid register r{reg}",
+                "{name} kinsn call at {:?} {label} invalid register r{reg}",
                 site
             );
         }

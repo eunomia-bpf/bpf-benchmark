@@ -2,9 +2,11 @@
 
 Date: 2026-05-13
 
-Scope: read-only investigation of committed `bpfopt/testbin/*/*/canonicalize_output.bin`
+Scope: investigation of committed `bpfopt/testbin/*/*/canonicalize_output.bin`
 inputs plus the generated `bpfopt/testccode/` native assembly and
-`bpfopt/testobject/` BPF objects. No benchmark was run.
+`bpfopt/testobject/` BPF objects. The original census was read-only; the
+2026-05-13 follow-up implemented an x86-only `bpf_lea{32,64}` kinsn experiment
+and ran targeted Katran checks.
 
 ## Starting point
 
@@ -426,15 +428,15 @@ Katran-specific result:
   materialization, not arithmetic that survived into BPF bytecode. A BPF
   `bpf_lea` kinsn would not capture the Katran gap that motivated this check.
 
-Revised design implication: the kinsn design below is retained as a concrete
-sketch, but the combined evidence no longer justifies implementing it as a
-first-wave `bpfopt` pass. A core kernel-JIT peephole would be the technically
-direct lowering for adjacent verified BPF `MOV+ADD`, but that is not the
-preferred engineering path for this project: kinsn exists to avoid editing the
-core kernel JIT. Under that no-core-JIT-change policy, the actionable conclusion
-is to defer LEA rather than to pursue a kernel peephole. If the kinsn route is
-revived, treat it as a narrow scalar-only experiment with lower priority than
-endian MOVBE and compare-select.
+Revised design implication: LEA is not a Katran-specific answer, because
+Katran has only 4 BPF-level strict sites despite 225 native `lea`
+instructions. However, a kinsn-only implementation is still useful as a narrow
+x86 experiment: it avoids core kernel-JIT peepholes, exposes full x86 LEA
+semantics through the kinsn payload, and lets the userspace pass decide which
+bytecode windows are worth replacing. The implemented bpfopt pass currently
+rewrites adjacent `MOV dst, base; ADD dst, imm/src` only; broader scaled and
+displacement forms are supported by the kinsn ABI but not yet matched by the
+userspace pass.
 
 ## Design: kernel kinsn
 
@@ -518,15 +520,13 @@ add wD, wBase, wIndex, lsl #N
 optional add/sub immediate for disp
 ```
 
-For the current corpus first wave, `disp == 0` for every strict site. If future
-`c`/`d` sites appear, arm64 should either emit only immediate values encodable by
-ADD/SUB immediate or return `-EINVAL`; bpfopt can also skip non-encodable ARM64
-displacements once target-specific admission exists.
+The current implementation is x86-only. ARM64 deliberately has no LEA emitter
+for this experiment; arm64 targets should simply not advertise `bpf_lea{32,64}`.
 
-If the superseded kinsn route is revived, `bpf_lea32` should travel with
-`bpf_lea64`. Only 63 runtime-testbin strict sites are ALU32 today, all in
-Cilium, but ALU32 semantics are clean: x86 `lea r32, [...]` wraps to 32 bits and
-zero-extends, matching BPF ALU32 destination semantics.
+`bpf_lea32` travels with `bpf_lea64`. Only 63 runtime-testbin strict sites are
+ALU32 today, all in Cilium, but ALU32 semantics are clean: x86
+`lea r32, [...]` wraps to 32 bits and zero-extends, matching BPF ALU32
+destination semantics.
 
 ## Design: bpfopt pass
 
@@ -537,27 +537,42 @@ Registry wiring:
 ```rust
 mod lea;
 
-pass_entry!("lea", lea::LeaPass, lea::KINSN_TARGETS, true)
+pass_entry!("lea", lea::LeaPass, lea::KINSN_TARGETS, false)
 ```
 
-`needs_verifier_states=true` is intentional for the first implementation because
-the pass should admit scalar-only sites. This means the pass YAML should mirror
-`bulk_memory` by passing `${VERIFIER_STATES}`.
+The pass is not verifier-state-gated. kInsn semantics are defined by the module
+instantiation, and site selection stays in userspace without pointer/scalar
+policy guards.
 
 Kinsn descriptors:
 
 ```rust
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
-    KinsnDescriptor { name: "bpf_lea64", register_uses: lea_register_uses },
-    KinsnDescriptor { name: "bpf_lea32", register_uses: lea_register_uses },
+    KinsnDescriptor {
+        name: "bpf_lea64",
+        register_uses: lea_register_uses,
+        register_defs: lea_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_lea32",
+        register_uses: lea_register_uses,
+        register_defs: lea_register_defs,
+    },
 ];
 
 fn lea_register_uses(payload: u64) -> RegSet {
-    let mut regs = regs_from_offsets(payload, &[0, 4]); // dst + base, matching existing conservative convention
+    let mut regs = RegSet::new();
+    if lea_payload_has_base(payload) {
+        regs.insert(kinsn_payload_reg(payload, 4));
+    }
     if ((payload >> 14) & 1) != 0 {
         regs.insert(kinsn_payload_reg(payload, 8));
     }
     regs
+}
+
+fn lea_register_defs(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[0])
 }
 ```
 
@@ -565,13 +580,8 @@ Scan:
 
 - call `prog.branch_target_entry_sites()?` once;
 - scan block starts with max lookahead 4;
-- match `c`, `b`, `d`, then `a`; do not implement broad `e` in v1;
+- match adjacent `a` only for the current implementation;
 - reject an interior branch target exactly as `wide_mem` does;
-- reject any source `r10`;
-- require `prog.reg_kind(start, base) == Some(RegKind::Scalar)` and, when
-  present, `prog.reg_kind(start, index) == Some(RegKind::Scalar)`;
-- reject `Unknown` instead of guessing;
-- require `dst != base` and `dst != index` for scaled forms;
 - no scratch register is needed with the sidecar ABI.
 
 Replacement:
@@ -603,10 +613,7 @@ pattern does not reduce `bytes_xlated`. The ROI is native instruction count and
 JIT code quality: one x86 LEA instead of native mov+add. If future `b`/`c`/`d`
 sites appear, those would also reduce BPF instruction slots.
 
-## Archived pass YAML
-
-Not recommended after the native-vs-BPF census. This is retained only as the
-pass config shape that the superseded kinsn route would have used:
+## Pass YAML
 
 ```yaml
 # Default per-pass step config for lea.
@@ -621,24 +628,19 @@ kinsns:
     aliases:
       - bpf_lea32
 command: |
-  timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET} --verifier-states ${VERIFIER_STATES}
+  timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}
 ```
 
-## Archived verification plan
+## Verification
 
-If the superseded bpfopt kinsn route is revived, unit tests in `lea_tests.rs`
-should cover:
+Implemented unit tests in `lea_tests.rs` cover:
 
 - `MOV64 + ADD64 reg` -> `bpf_lea64`;
+- `MOV64 + ADD64 dst,dst` canonicalized as base doubling;
 - `MOV32 + ADD32 reg` -> `bpf_lea32`;
-- scaled `MOV + LSH 1/2/3 + ADD`;
-- scaled plus displacement;
-- add-imm chain with displacement folding;
+- `MOV64 + ADD64 imm` -> no-index `bpf_lea64`;
 - skip when an interior instruction is a branch target;
-- skip when source is `r10`;
-- skip when base/index reg kind is pointer or unknown;
-- skip broad `ADD dst, src1; ADD dst, src2`;
-- payload ABI: exact bit offsets for dst/base/index/scale/has_index/disp.
+- preserve non-zero module call offsets.
 
 Host-side testbin checks, without running benchmarks:
 
@@ -660,10 +662,14 @@ target/debug/bpfopt --pass lea \
   --verifier-states <verifier-states.json>
 ```
 
-There is no bpfopt `lea` benchmark plan after this revision. Under the current
-no-core-JIT-change policy, do not replace it with a kernel-JIT peephole
-benchmark plan. Revisit only if LEA becomes a deliberate low-priority
-kinsn-only experiment.
+Targeted Katran checks:
+
+- `noop` Katran: neutral (`141.386ns -> 141.407ns`, ratio `1.000154`).
+- `lea` Katran: 122 applied, JIT bytes `13629 -> 13277`, but BPF counter ratio
+  `1.048680`; workload throughput stayed roughly flat.
+- `lea,dce` Katran: 122 LEA + 5 DCE applied, JIT bytes `13629 -> 13242`, but
+  one run regressed badly (`156.809ns -> 312.182ns`, ratio `1.990842`) and
+  needs isolation against `dce`-only before any production claim.
 
 ## ROI interpretation
 
@@ -700,14 +706,14 @@ Expected effect if implemented as the kinsn design above:
   bpfopt pass, pass YAML, and tests to get only a one-native-instruction
   lowering for the dominant 2-slot bytecode pattern.
 
-Recommendation: do not implement `bpf_lea64` / `bpf_lea32` as a bpfopt kinsn
-pass in the current optimization queue. Also do not recommend a core kernel-JIT
-peephole under the project's no-core-JIT-change constraint. The practical action
-is to defer LEA and spend implementation effort on cleaner kinsn-native gaps
-such as endian MOVBE emission and compare-select.
+Recommendation: keep LEA as an x86-only kinsn experiment, not as evidence for a
+Katran-specific win yet. Do not replace it with a core kernel-JIT peephole under
+the project's no-core-JIT-change constraint. The native-size ROI is real for
+`MOV+ADD` sites, but Katran runtime ROI is currently unproven and `lea,dce`
+must be isolated before treating LEA as production-positive.
 
 ROI summary: `testobject` has 6,999 strict BPF sites across all 7 apps
 (BPF/native 16.6%); `testbin` has 13,321 strict runtime sites but no scaled+disp
 or add-imm-chain sites; Katran has 225 native `lea` but only 4 BPF strict sites.
-Revised verdict: defer/no-action for now. No core kernel-JIT peephole; kinsn
-route remains possible but low ROI and not first-wave.
+Revised verdict: implemented x86-only kinsn experiment; no core kernel-JIT
+peephole; production policy depends on post-hoc performance evidence.

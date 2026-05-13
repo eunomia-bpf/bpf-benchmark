@@ -88,12 +88,10 @@ fn lea_rewrites_alu32_forms_to_lea32() {
 }
 
 #[test]
-fn lea_rejects_zero_imm_and_add_dst_dst() {
+fn lea_rejects_zero_imm() {
     let input = vec![
         BpfInsn::mov64_reg(BPF_REG_3, BPF_REG_7),
         BpfInsn::alu64_imm(BPF_ADD, BPF_REG_3, 0),
-        BpfInsn::mov64_reg(BPF_REG_4, BPF_REG_8),
-        BpfInsn::alu64_reg(BPF_ADD, BPF_REG_4, BPF_REG_4),
         BpfInsn::exit(),
     ];
 
@@ -101,6 +99,24 @@ fn lea_rejects_zero_imm_and_add_dst_dst() {
 
     assert_eq!(run.result.sites_applied, 0);
     assert_eq!(run.lowered, input);
+}
+
+#[test]
+fn lea_rewrites_add_dst_dst_as_base_doubling() {
+    let input = vec![
+        BpfInsn::mov64_reg(BPF_REG_4, BPF_REG_8),
+        BpfInsn::alu64_reg(BPF_ADD, BPF_REG_4, BPF_REG_4),
+        BpfInsn::exit(),
+    ];
+
+    let run = run_pass_on_insns(LeaPass, input, &lea_ctx());
+
+    assert_eq!(run.result.sites_applied, 1);
+    let payload = sidecar_payload(&run);
+    assert_eq!(BpfInsn::unpack_u4(payload, 0), BPF_REG_4);
+    assert_eq!(BpfInsn::unpack_u4(payload, 4), BPF_REG_8);
+    assert_eq!(BpfInsn::unpack_u4(payload, 8), BPF_REG_8);
+    assert_eq!((payload >> 14) & 1, 1);
 }
 
 #[test]

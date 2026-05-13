@@ -11,10 +11,15 @@ use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
     name: "bpf_select64",
     register_uses: cond_select_register_uses,
+    register_defs: cond_select_register_defs,
 }];
 
 fn cond_select_register_uses(payload: u64) -> RegSet {
-    regs_from_offsets(payload, &[0, 4, 8, 12])
+    regs_from_offsets(payload, &[4, 8, 12])
+}
+
+fn cond_select_register_defs(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[0])
 }
 
 /// COND_SELECT pass: replaces branch+mov diamond patterns with

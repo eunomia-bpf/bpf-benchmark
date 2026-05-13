@@ -43,6 +43,7 @@ pub enum RegKind {
 pub struct KinsnDescriptor {
     pub name: &'static str,
     pub register_uses: fn(payload: u64) -> RegSet,
+    pub register_defs: fn(payload: u64) -> RegSet,
 }
 
 pub(crate) fn kinsn_payload_reg(payload: u64, shift: u8) -> u8 {
@@ -57,6 +58,10 @@ pub(crate) fn regs_from_offsets(payload: u64, offsets: &[u8]) -> RegSet {
         .copied()
         .map(|shift| kinsn_payload_reg(payload, shift))
         .collect()
+}
+
+pub(crate) fn no_regs(_payload: u64) -> RegSet {
+    RegSet::new()
 }
 
 /// Real per-site PMU branch statistics. Optional per-PC PGO input; the lift

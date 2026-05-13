@@ -76,6 +76,30 @@ fn bbprogram_liveness_includes_kinsn_implicit_register_uses() {
 }
 
 #[test]
+fn bbprogram_liveness_models_kinsn_implicit_register_defs() {
+    let btf_id = 0x1234;
+    let payload = BpfInsn::pack_u4(BPF_REG_3, 0) | BpfInsn::pack_u4(BPF_REG_1, 4) | (1 << 15);
+    let ctx = ctx_with_kinsn("bpf_lea64", btf_id);
+    let insns = vec![
+        BpfInsn::mov64_imm(BPF_REG_3, 99),
+        BpfInsn::mov64_imm(BPF_REG_1, 7),
+        BpfInsn::kinsn_sidecar(payload),
+        BpfInsn::call_kinsn_with_off(btf_id, 0),
+        BpfInsn::alu64_reg(BPF_ADD, BPF_REG_2, BPF_REG_3),
+        BpfInsn::exit(),
+    ];
+    let prog = lift_test_program(&insns, &ctx);
+
+    let kinsn_site = InsnSite {
+        block: BlockId(0),
+        idx: 3,
+    };
+    let live_in = prog.live_in_site_checked(kinsn_site).unwrap();
+    assert!(live_in.contains(&BPF_REG_1));
+    assert!(!live_in.contains(&BPF_REG_3));
+}
+
+#[test]
 fn bbprogram_liveness_recomputes_after_delete_insn() {
     let insns = vec![
         BpfInsn::mov64_imm(BPF_REG_2, 1),

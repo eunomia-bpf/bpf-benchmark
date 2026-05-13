@@ -5,8 +5,12 @@ use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
     name: "bpf_extract64",
     register_uses: extract_register_uses,
+    register_defs: extract_register_defs,
 }];
 fn extract_register_uses(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[0])
+}
+fn extract_register_defs(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[0])
 }
 pub struct ExtractPass;

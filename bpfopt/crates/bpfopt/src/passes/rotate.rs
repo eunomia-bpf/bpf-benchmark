@@ -6,15 +6,21 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
         name: "bpf_rotate64",
         register_uses: rotate_register_uses,
+        register_defs: rotate_register_defs,
     },
     KinsnDescriptor {
         name: "bpf_rotate32",
         register_uses: rotate_register_uses,
+        register_defs: rotate_register_defs,
     },
 ];
 
 fn rotate_register_uses(payload: u64) -> RegSet {
-    regs_from_offsets(payload, &[0, 4])
+    regs_from_offsets(payload, &[4])
+}
+
+fn rotate_register_defs(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[0])
 }
 pub struct RotatePass;
 

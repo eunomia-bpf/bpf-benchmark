@@ -306,13 +306,13 @@ intact for all 7 apps).
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | `map_inline` | 0 / 13 | 0 / 22 | 1 454 / 1 824 | 13 / 80 | 1 192 / 1 264 | 0 / 765 | 5 / 1 725 |
 | `wide_mem` | 0 / 0 | 10 / 18 | 0 / 0 | 4 / 4 | 132 / 137 | 2 826 / 2 826 | 179 / 229 |
-| `cond_select` | 8 / 8 | 4 / 4 | 208 / 218 | 7 / 7 | 45 / 47 | 1 331 / 1 753 | 391 / 400 |
-| `bulk_memory` | 0 / 0 | 0 / 0 | 5 / 5 | 0 / 0 | 1 / 1 | 163 / 165 | 117 / 214 |
-| `endian_fusion` | 1 / 1 | 1 / 1 | 24 / 24 | 6 / 6 | 4 / 4 | 210 / 210 | 4 / 4 |
-| `extract` | 1 / 1 | 0 / 0 | 0 / 0 | 0 / 0 | 36 / 36 | 112 / 112 | 37 / 47 |
+| `cond_select` | 8 / 8 | 4 / 4 | 278 / 288 | 7 / 7 | 45 / 47 | 1 695 / 2 003 | 408 / 418 |
+| `bulk_memory` | 0 / 0 | 0 / 0 | 6 / 6 | 0 / 0 | 1 / 1 | 171 / 171 | 216 / 216 |
+| `endian_fusion` | 1 / 1 | 1 / 1 | 45 / 45 | 6 / 6 | 4 / 4 | 220 / 220 | 4 / 4 |
+| `extract` | 1 / 1 | 0 / 0 | 0 / 0 | 0 / 0 | 36 / 36 | 114 / 114 | 37 / 47 |
 | `prefetch` | 3 / 3 | 9 / 9 | 430 / 430 | 44 / 44 | 415 / 415 | 1 526 / 1 526 | 1 770 / 1 770 |
 | `skb_load_bytes_spec` | 0 / 0 | 0 / 0 | 4 / 166 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
-| `rotate` | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+| `rotate` | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 44 / 44 | 0 / 0 |
 
 Passes omitted (no useful data in any 30 s 7-app run): `noop` (producer
 pass, always 0 / 0), `const_prop`, `dce`, `bounds_check_merge` (no
@@ -326,9 +326,11 @@ Observations:
   cilium 80 %, otel 94 %, katran 16 % (driven entirely by 6
   `--inline-hint` directives in `runner/config/passes/map_inline/katran.yaml`),
   but 0 % on bcc / bpftrace / tetragon and 0.3 % on tracee. Needs further investigation.
-- `cond_select` apply rate dips on tetragon (1 331 / 1 753 ≈ 76 %).
-- `rotate` finds zero candidates in the 7-app corpus; the workload
-  exposes no shift+or pairs that survive verifier range tracking.
+- `cond_select` apply rate on tetragon is 1 695 / 2 003 ≈ 85 % after
+  the diamond-validator relaxation that lets external-predecessor joins
+  rewrite instead of bail.
+- `rotate` finds 44 sites on tetragon (high32-masked shift+or patterns)
+  and zero on the other six apps in this corpus.
 - `skb_load_bytes_spec` matches 166 cilium sites but applies only 4
   (≈ 2.4 %) — almost all cilium `bpf_skb_load_bytes` calls fail the
   fixed-width specialization safety check.
