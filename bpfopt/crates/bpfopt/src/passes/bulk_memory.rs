@@ -106,14 +106,6 @@ fn scan_sites(prog: &ProgramCFG) -> anyhow::Result<ScanResult> {
             let start = body.sites[idx];
             match try_match_memcpy_run_at(body.insns, &body.sites, idx, &live_out)? {
                 MatchOutcome::Apply(site) => {
-                    if let Some(reason) = memcpy_alias_skip_reason(&site, start, prog) {
-                        scan.skips.push(SiteSkipReason {
-                            site: start,
-                            reason,
-                        });
-                        idx += site.old_len;
-                        continue;
-                    }
                     let old_len = site.old_len;
                     scan.sites.push((start, site));
                     idx += old_len;
@@ -140,22 +132,6 @@ fn scan_sites(prog: &ProgramCFG) -> anyhow::Result<ScanResult> {
         }
     }
     Ok(scan)
-}
-fn memcpy_alias_skip_reason(site: &BulkSite, start: InsnSite, prog: &ProgramCFG) -> Option<String> {
-    let BulkSiteKind::Memcpy {
-        src_base, dst_base, ..
-    } = &site.kind
-    else {
-        return None;
-    };
-    if src_base == dst_base {
-        return None;
-    }
-    let is_stack =
-        |reg: u8| matches!(prog.reg_kind(start, reg), Some(RegKind::FramePointer)) || reg == 10;
-    (is_stack(*src_base) == is_stack(*dst_base)).then(|| {
-        format!("different-base memcpy alias not provably safe (src r{src_base}, dst r{dst_base})")
-    })
 }
 fn try_match_memcpy_run_at(
     insns: &[BpfInsn],

@@ -60,6 +60,8 @@ impl ProgramCFG {
 
     /// Universal in-block instruction replacement core.
     ///
+    /// All in-block body replacements must go through this API.
+    ///
     /// 1. Basic bounds check on `(start, old_len)`.
     /// 2. Structural admission (subprog boundary) on `(old_len, new_len)`.
     ///    Skipped for pure inserts (`old_len == 0`) and pure deletes
@@ -480,10 +482,10 @@ impl ProgramCFG {
         }
         // A branch block is "shared" if any incoming edge enters it from outside
         // the diamond. Shared branches can't be removed (their external edges
-        // would dangle); the diamond path bypasses them via Jump→join from the
-        // predecessor. The join is always preserved when present — removing it
-        // would force a physical-layout assumption that does not hold for
-        // CFG-only-matching diamonds.
+        // would dangle); the diamond path bypasses them via Jump->join from the
+        // predecessor. The join is always preserved when present, so unrelated
+        // external predecessors of the join remain valid after the branch arms
+        // are removed.
         let branch_shared = |branch: BlockId| {
             branch != pattern.predecessor
                 && self
