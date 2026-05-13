@@ -15,11 +15,13 @@
 #include <cctype>
 #include <chrono>
 #include <cmath>
+#include <csignal>
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
 #include <fcntl.h>
 #include <fstream>
+#include <iostream>
 #include <netinet/in.h>
 #include <string>
 #include <string_view>
@@ -42,6 +44,14 @@ constexpr uint32_t kKatranRealNum = 1;
 constexpr uint32_t kKatranVipFlags = 1U << 1;
 constexpr uint32_t kKatranChRingSize = 65537;
 constexpr size_t kKatranEncapHeadroom = 64;
+volatile std::sig_atomic_t g_signal_run_requested = 0;
+volatile std::sig_atomic_t g_signal_stop_requested = 0;
+
+void handle_signal_control(int signo)
+{
+    if (signo == SIGUSR1) g_signal_run_requested = 1;
+    else g_signal_stop_requested = 1;
+}
 
 #if defined(__x86_64__) || defined(__i386__)
 constexpr bool kHasTscMeasurement = true;
@@ -1014,6 +1024,27 @@ std::vector<sample_result> run_kernel(const cli_options &options)
     }
     const auto program_info = load_prog_info(program_fd);
 
+    if (options.signal_control) {
+        std::signal(SIGUSR1, handle_signal_control);
+        std::signal(SIGTERM, handle_signal_control);
+        std::signal(SIGINT, handle_signal_control);
+        std::cout
+            << "{\"status\":\"ready\",\"id\":" << program_info.id
+            << ",\"name\":\"" << json_escape(program_name_from_info(program_info))
+            << "\"}\n" << std::flush;
+    }
+
+    for (;;) {
+    if (options.signal_control) {
+        while (!g_signal_run_requested && !g_signal_stop_requested) {
+            pause();
+        }
+        if (g_signal_stop_requested) {
+            return {};
+        }
+        g_signal_run_requested = 0;
+    }
+
     std::chrono::steady_clock::time_point exec_input_prepare_start {};
     std::chrono::steady_clock::time_point exec_input_prepare_end {};
     std::chrono::steady_clock::time_point result_read_start {};
@@ -1174,5 +1205,11 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         {result_phase_name(effective_io_mode), elapsed_ns(result_read_start, result_read_end)},
     };
     sample.perf_counters = std::move(run_pass.perf_counters);
+    if (options.signal_control) {
+        print_json(sample);
+        std::cout << std::flush;
+        continue;
+    }
     return {std::move(sample)};
+    }
 }

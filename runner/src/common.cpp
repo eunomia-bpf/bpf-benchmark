@@ -14,7 +14,7 @@ std::string usage_text()
         "  micro_exec test-run [--program <path>|<path>] [--program-name <name>] "
         "[--memory <path>] [--fixture-path <path>] [--btf-custom-path <path>] "
         "[--io-mode map|staged|packet|context] [--raw-packet] [--inner-repeat N] "
-        "[--warmup N] [--input-size N] [--perf-counters] "
+        "[--warmup N] [--input-size N] [--signal-control] [--perf-counters] "
         "[--perf-scope full_repeat_raw|full_repeat_avg] [--dump-jit] "
         "[--dump-xlated <path>]\n"
 #ifdef MICRO_EXEC_ENABLE_LLVMBPF
@@ -278,6 +278,10 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--raw-packet") {
             options.raw_packet = true;
+            continue;
+        }
+        if (current == "--signal-control") {
+            options.signal_control = true;
             continue;
         }
         if (current == "--inner-repeat" && index + 1 < argc) {
