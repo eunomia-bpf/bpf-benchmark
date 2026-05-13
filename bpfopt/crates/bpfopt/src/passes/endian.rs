@@ -205,9 +205,6 @@ fn emit_endian_fusion_call(
     out
 }
 impl BpfPass for EndianFusionPass {
-    fn name(&self) -> &str {
-        "endian_fusion"
-    }
     fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program, ctx)
     }

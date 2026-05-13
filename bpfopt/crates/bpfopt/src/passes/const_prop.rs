@@ -9,9 +9,6 @@ pub(super) const VERIFIER_POST_STATE_POINTER_TYPE: &str =
 pub struct ConstPropPass;
 
 impl BpfPass for ConstPropPass {
-    fn name(&self) -> &str {
-        "const_prop"
-    }
     fn run(&self, program: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program)
     }

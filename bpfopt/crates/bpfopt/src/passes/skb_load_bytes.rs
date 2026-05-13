@@ -22,9 +22,6 @@ struct ScanResult {
 pub struct SkbLoadBytesSpecPass;
 
 impl BpfPass for SkbLoadBytesSpecPass {
-    fn name(&self) -> &str {
-        "skb_load_bytes_spec"
-    }
     fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program, ctx.prog_type)
     }

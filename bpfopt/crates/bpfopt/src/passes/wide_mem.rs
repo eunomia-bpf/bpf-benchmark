@@ -164,9 +164,6 @@ fn is_packet_unsafe_prog_type(prog_type: u32) -> bool {
 }
 pub struct WideMemPass;
 impl BpfPass for WideMemPass {
-    fn name(&self) -> &str {
-        "wide_mem"
-    }
     fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program, ctx)
     }

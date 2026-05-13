@@ -94,7 +94,7 @@ fn make_percpu_blob(slot_value: &[u8], slots: usize) -> Vec<u8> {
 fn map_inline_consumes_hint_when_verifier_state_unavailable() {
     // P1-H: operator hard hints are real side inputs, not fallback heuristics.
     let value = 7u32.to_le_bytes().to_vec();
-    let mut ctx = PassContext::baseline();
+    let mut ctx = PassContext::default();
     ctx.map_ids = vec![111];
     ctx.map_info.insert(
         111,
@@ -124,7 +124,7 @@ fn map_inline_consumes_hint_when_verifier_state_unavailable() {
 #[test]
 fn map_inline_rejects_hint_with_wrong_key_size() {
     let value = 7u32.to_le_bytes().to_vec();
-    let mut ctx = PassContext::baseline();
+    let mut ctx = PassContext::default();
     ctx.map_ids = vec![111];
     ctx.map_info.insert(
         111,
@@ -153,7 +153,7 @@ fn map_inline_rejects_hint_with_wrong_key_size() {
 #[test]
 fn map_inline_rejects_hint_pointing_at_non_lookup_call() {
     let value = 7u32.to_le_bytes().to_vec();
-    let mut ctx = PassContext::baseline();
+    let mut ctx = PassContext::default();
     ctx.map_ids = vec![111];
     ctx.map_info.insert(
         111,
@@ -182,7 +182,7 @@ fn map_inline_rejects_hint_pointing_at_non_lookup_call() {
 #[test]
 fn map_inline_soft_hint_inlines_load_but_keeps_lookup_and_null_check() {
     let value = 7u32.to_le_bytes().to_vec();
-    let mut ctx = PassContext::baseline();
+    let mut ctx = PassContext::default();
     ctx.map_ids = vec![111];
     ctx.map_info.insert(
         111,
@@ -222,7 +222,7 @@ fn map_inline_soft_hint_inlines_load_but_keeps_lookup_and_null_check() {
 #[test]
 fn map_inline_hard_hash_hint_keeps_lookup_and_null_check() {
     let value = 7u32.to_le_bytes().to_vec();
-    let mut ctx = PassContext::baseline();
+    let mut ctx = PassContext::default();
     ctx.map_ids = vec![111];
     ctx.map_info.insert(
         111,
@@ -261,7 +261,7 @@ fn map_inline_hard_hash_hint_keeps_lookup_and_null_check() {
 
 #[test]
 fn map_inline_soft_hint_skips_when_snapshot_key_is_absent() {
-    let mut ctx = PassContext::baseline();
+    let mut ctx = PassContext::default();
     ctx.map_ids = vec![111];
     ctx.map_info.insert(
         111,
@@ -485,7 +485,7 @@ fn map_inline_soft_hint_requires_immediate_null_check_when_hard_fold_coexists() 
     input.extend_from_slice(&second[..second.len() - 1]);
     input.push(BpfInsn::exit());
     let value = 7u32.to_le_bytes().to_vec();
-    let mut ctx = PassContext::baseline();
+    let mut ctx = PassContext::default();
     ctx.map_ids = vec![111];
     ctx.map_info.insert(
         111,

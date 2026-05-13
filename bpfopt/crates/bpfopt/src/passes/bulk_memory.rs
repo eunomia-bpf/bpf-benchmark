@@ -79,9 +79,6 @@ struct MemsetLane {
 }
 pub struct BulkMemoryPass;
 impl BpfPass for BulkMemoryPass {
-    fn name(&self) -> &str {
-        "bulk_memory"
-    }
     fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program, ctx)
     }

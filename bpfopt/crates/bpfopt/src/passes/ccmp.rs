@@ -73,9 +73,6 @@ impl BranchTerm {
 }
 
 impl BpfPass for CcmpPass {
-    fn name(&self) -> &str {
-        "ccmp"
-    }
     fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program, ctx)
     }

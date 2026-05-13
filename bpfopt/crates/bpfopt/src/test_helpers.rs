@@ -62,7 +62,7 @@ fn materialize_site_skips_for_tests(report_prog: &ProgramCFG, result: &mut PassR
 }
 
 pub fn pass_ctx() -> PassContext {
-    PassContext::baseline()
+    PassContext::default()
 }
 
 pub fn ctx_with_kinsn(target: &str, btf_id: i32) -> PassContext {

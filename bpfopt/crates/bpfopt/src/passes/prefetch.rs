@@ -42,9 +42,6 @@ pub(super) fn prefetch_payload(ptr_reg: u8) -> anyhow::Result<u64> {
     Ok(BpfInsn::pack_u4(ptr_reg, 0))
 }
 impl BpfPass for PrefetchPass {
-    fn name(&self) -> &str {
-        "prefetch"
-    }
     fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program, ctx)
     }

@@ -39,9 +39,6 @@ struct ScanResult {
 pub struct BoundsCheckMergePass;
 
 impl BpfPass for BoundsCheckMergePass {
-    fn name(&self) -> &str {
-        "bounds_check_merge"
-    }
     fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program, ctx.prog_type)
     }

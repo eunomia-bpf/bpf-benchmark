@@ -38,9 +38,6 @@ fn extract_site_from_pair(i0: &BpfInsn, i1: &BpfInsn) -> Option<ExtractSite> {
         })
 }
 impl BpfPass for ExtractPass {
-    fn name(&self) -> &str {
-        "extract"
-    }
     fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program, ctx)
     }

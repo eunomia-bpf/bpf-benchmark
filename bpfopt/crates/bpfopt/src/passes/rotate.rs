@@ -19,9 +19,6 @@ fn rotate_register_uses(payload: u64) -> RegSet {
 pub struct RotatePass;
 
 impl BpfPass for RotatePass {
-    fn name(&self) -> &str {
-        "rotate"
-    }
     fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program, ctx)
     }

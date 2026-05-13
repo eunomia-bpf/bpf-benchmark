@@ -319,7 +319,7 @@ fn write_btf_info_outputs(common: &CommonArgs, program: &ProgramCFG) -> Result<(
 }
 
 fn build_pass_context(common: &CommonArgs) -> Result<PassContext> {
-    let mut ctx = PassContext::try_baseline()?;
+    let mut ctx = PassContext::default();
     ctx.platform = detect_platform();
     if let Some(path) = common.verifier_states.as_deref() {
         let log = fs::read_to_string(path)

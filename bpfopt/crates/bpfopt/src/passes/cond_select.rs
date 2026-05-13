@@ -86,9 +86,6 @@ impl CondSelectSite {
 }
 
 impl BpfPass for CondSelectPass {
-    fn name(&self) -> &str {
-        "cond_select"
-    }
     fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program, ctx)
     }

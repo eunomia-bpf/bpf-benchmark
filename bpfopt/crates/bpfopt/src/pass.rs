@@ -253,15 +253,8 @@ pub struct MapInlineRecord {
 ///
 /// Each optimization is a pass: scan the program, find rewrite sites, apply transforms.
 pub trait BpfPass: Send + Sync {
-    /// Pass name.
-    fn name(&self) -> &str;
-
-    /// Execute the pass.
-    ///
-    /// - `program`: mutable reference — pass may modify the instruction stream
-    /// - `ctx`: platform context (kfunc availability, CPU features, etc.)
-    ///
-    /// Returns PassResult describing what was done.
+    /// Execute the pass. `program` may be mutated; `ctx` carries platform and
+    /// side-input state. Returns a `PassResult` describing what changed.
     fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult>;
 }
 
@@ -679,33 +672,6 @@ impl PassContext {
     /// `ProgramCFG::reg_*` queries instead of touching raw verifier data.
     pub(crate) fn verifier_states_arc(&self) -> Arc<[VerifierInsn]> {
         Arc::clone(&self.verifier_states)
-    }
-
-    pub fn try_baseline() -> anyhow::Result<Self> {
-        Ok(Self {
-            kinsn_registry: KinsnRegistry::new()?,
-            platform: PlatformCapabilities::default(),
-            prog_type: 0,
-            verifier_states: Arc::from([]),
-            annotations: Vec::new(),
-            branch_miss_rate: None,
-            map_ids: Vec::new(),
-            map_info: HashMap::new(),
-            map_values: HashMap::new(),
-            map_value_overlays: HashMap::new(),
-            map_inner_map_ids: HashMap::new(),
-            map_snapshots_skipped_by_size: HashSet::new(),
-            map_inline_hints: Vec::new(),
-            func_info: None,
-            line_info: None,
-        })
-    }
-
-    /// Create a minimal PassContext suitable for testing.
-    /// All kinsn targets unavailable, no special CPU features.
-    #[cfg(test)]
-    pub fn baseline() -> Self {
-        Self::try_baseline().expect("baseline pass context should build")
     }
 
     /// Whether cond_select can lower to the branchless-select kinsn.

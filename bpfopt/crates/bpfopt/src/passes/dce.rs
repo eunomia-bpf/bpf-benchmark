@@ -8,46 +8,38 @@ use std::collections::BTreeSet;
 pub struct DcePass;
 
 impl BpfPass for DcePass {
-    fn name(&self) -> &str {
-        "dce"
-    }
+    fn run(&self, prog: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
+        let mut sites_applied = 0usize;
 
-    fn run(&self, program: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
-        run_on_bbprogram(program)
-    }
-}
-
-pub fn run_on_bbprogram(prog: &mut ProgramCFG) -> anyhow::Result<PassResult> {
-    let mut sites_applied = 0usize;
-
-    loop {
-        let mut dead_defs = BTreeSet::new();
-        for def in prog.def_sites() {
-            if prog.uses_for_def(def).is_empty() && is_removable_dead_def(prog, def)? {
-                dead_defs.insert(def);
+        loop {
+            let mut dead_defs = BTreeSet::new();
+            for def in prog.def_sites() {
+                if prog.uses_for_def(def).is_empty() && is_removable_dead_def(prog, def)? {
+                    dead_defs.insert(def);
+                }
+            }
+            if dead_defs.is_empty() {
+                break;
+            }
+            if would_empty_all_bodies(prog, &dead_defs)? {
+                break;
+            }
+            for def in dead_defs.into_iter().rev() {
+                prog.delete_insn(def)?;
+                sites_applied += 1;
             }
         }
-        if dead_defs.is_empty() {
-            break;
-        }
-        if would_empty_all_bodies(prog, &dead_defs)? {
-            break;
-        }
-        for def in dead_defs.into_iter().rev() {
-            prog.delete_insn(def)?;
-            sites_applied += 1;
-        }
-    }
 
-    let diagnostics = (sites_applied > 0)
-        .then(|| format!("removed {} dead defs", sites_applied))
-        .into_iter()
-        .collect();
-    Ok(PassResult {
-        sites_applied,
-        diagnostics,
-        ..PassResult::default()
-    })
+        let diagnostics = (sites_applied > 0)
+            .then(|| format!("removed {} dead defs", sites_applied))
+            .into_iter()
+            .collect();
+        Ok(PassResult {
+            sites_applied,
+            diagnostics,
+            ..PassResult::default()
+        })
+    }
 }
 
 fn would_empty_all_bodies(

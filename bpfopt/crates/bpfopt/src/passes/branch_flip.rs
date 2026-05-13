@@ -42,9 +42,6 @@ impl BranchFlipSite {
 }
 
 impl BpfPass for BranchFlipPass {
-    fn name(&self) -> &str {
-        "branch_flip"
-    }
     fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(
             program,

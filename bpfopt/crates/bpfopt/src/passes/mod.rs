@@ -19,21 +19,9 @@ mod rotate;
 mod skb_load_bytes;
 mod wide_mem;
 
-pub use bounds_check_merge::BoundsCheckMergePass;
-pub use branch_flip::BranchFlipPass;
-pub use bulk_memory::BulkMemoryPass;
-pub use ccmp::CcmpPass;
-pub use cond_select::CondSelectPass;
-pub use const_prop::ConstPropPass;
-pub use dce::DcePass;
-pub use endian::EndianFusionPass;
-pub use extract::ExtractPass;
-pub use map_inline::MapInlinePass;
+// Only NoopPass is referenced outside this module (by the bbprogram_roundtrip
+// integration test). The other pass structs are reached through PASS_REGISTRY.
 pub use noop::NoopPass;
-pub use prefetch::PrefetchPass;
-pub use rotate::RotatePass;
-pub use skb_load_bytes::SkbLoadBytesSpecPass;
-pub use wide_mem::WideMemPass;
 
 use crate::pass::{BpfPass, KinsnDescriptor};
 
@@ -139,21 +127,21 @@ fn reject_pass_args(pass_name: &str, args: &[String]) -> Result<()> {
 /// build a single-pass invocation; the daemon iterates this array in order when
 /// orchestrating multiple per-pass `bpfopt` invocations.
 #[rustfmt::skip] pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
-    pass_entry!("noop", NoopPass, PASS_REQ_NONE),
-    PassRegistryEntry { name: "map_inline", make: MapInlinePass::from_cli_args, requirements: PASS_REQ_NEEDS_STATES },
-    pass_entry!("const_prop", ConstPropPass, PASS_REQ_NEEDS_STATES),
-    pass_entry!("dce", DcePass, PASS_REQ_NONE),
-    pass_entry!("skb_load_bytes_spec", SkbLoadBytesSpecPass, PASS_REQ_NONE),
-    pass_entry!("bounds_check_merge", BoundsCheckMergePass, PASS_REQ_NONE),
-    pass_entry!("wide_mem", WideMemPass, PASS_REQ_NONE),
-    pass_entry!("bulk_memory", BulkMemoryPass, PASS_REQ_BULK_MEMORY),
-    pass_entry!("rotate", RotatePass, PASS_REQ_ROTATE),
-    pass_entry!("cond_select", CondSelectPass, PASS_REQ_SELECT),
-    pass_entry!("ccmp", CcmpPass, PASS_REQ_CCMP),
-    pass_entry!("extract", ExtractPass, PASS_REQ_EXTRACT),
-    pass_entry!("endian_fusion", EndianFusionPass, PASS_REQ_ENDIAN),
-    pass_entry!("branch_flip", BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 }, PASS_REQ_NONE),
-    pass_entry!("prefetch", PrefetchPass, PASS_REQ_PREFETCH),
+    pass_entry!("noop", noop::NoopPass, PASS_REQ_NONE),
+    PassRegistryEntry { name: "map_inline", make: map_inline::MapInlinePass::from_cli_args, requirements: PASS_REQ_NEEDS_STATES },
+    pass_entry!("const_prop", const_prop::ConstPropPass, PASS_REQ_NEEDS_STATES),
+    pass_entry!("dce", dce::DcePass, PASS_REQ_NONE),
+    pass_entry!("skb_load_bytes_spec", skb_load_bytes::SkbLoadBytesSpecPass, PASS_REQ_NONE),
+    pass_entry!("bounds_check_merge", bounds_check_merge::BoundsCheckMergePass, PASS_REQ_NONE),
+    pass_entry!("wide_mem", wide_mem::WideMemPass, PASS_REQ_NONE),
+    pass_entry!("bulk_memory", bulk_memory::BulkMemoryPass, PASS_REQ_BULK_MEMORY),
+    pass_entry!("rotate", rotate::RotatePass, PASS_REQ_ROTATE),
+    pass_entry!("cond_select", cond_select::CondSelectPass, PASS_REQ_SELECT),
+    pass_entry!("ccmp", ccmp::CcmpPass, PASS_REQ_CCMP),
+    pass_entry!("extract", extract::ExtractPass, PASS_REQ_EXTRACT),
+    pass_entry!("endian_fusion", endian::EndianFusionPass, PASS_REQ_ENDIAN),
+    pass_entry!("branch_flip", branch_flip::BranchFlipPass { min_bias: 0.7, max_branch_miss_rate: 0.05 }, PASS_REQ_NONE),
+    pass_entry!("prefetch", prefetch::PrefetchPass, PASS_REQ_PREFETCH),
 ];
 
 #[cfg(test)]

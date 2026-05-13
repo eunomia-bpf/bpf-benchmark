@@ -217,7 +217,7 @@ fn pass_report_serializes_inlined_map_entries_as_hex() {
     };
 
     let insns = parse_bytecode(&minimal_program_bytes()).unwrap();
-    let program = lift_with_pass_context(&insns, &PassContext::try_baseline().unwrap()).unwrap();
+    let program = lift_with_pass_context(&insns, &PassContext::default()).unwrap();
     let report =
         serde_json::to_value(pass_report("map_inline", &program, &result).unwrap()).unwrap();
 

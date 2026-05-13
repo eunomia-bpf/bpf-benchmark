@@ -1088,9 +1088,6 @@ macro_rules! skip_lookup {
     }};
 }
 impl BpfPass for MapInlinePass {
-    fn name(&self) -> &str {
-        "map_inline"
-    }
     fn run(&self, program: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         run_on_bbprogram(program, ctx)
     }
