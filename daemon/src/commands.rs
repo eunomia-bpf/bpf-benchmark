@@ -34,13 +34,18 @@ fn truncate_response_log(text: String) -> String {
     if text.len() <= RESPONSE_LOG_TAIL_BYTES {
         return text;
     }
+    // Preserve the first line: callers format the syscall errno prefix
+    // ("BPF_PROG_REJIT errno 28: No space left on device") on the first line
+    // before appending the verifier log body. Dropping that line in favor of
+    // the verifier-log tail makes ENOSPC look like a bytecode rejection.
+    let prefix = text.lines().next().unwrap_or("");
     let dropped = text.len() - RESPONSE_LOG_TAIL_BYTES;
     let mut start = text.len() - RESPONSE_LOG_TAIL_BYTES;
     while start < text.len() && !text.is_char_boundary(start) {
         start += 1;
     }
     format!(
-        "... [truncated {dropped} leading bytes; full log in workdir tar]\n{}",
+        "{prefix}\n... [truncated {dropped} leading bytes; full log in workdir tar]\n{}",
         &text[start..]
     )
 }

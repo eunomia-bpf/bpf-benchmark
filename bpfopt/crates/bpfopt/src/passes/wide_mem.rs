@@ -229,16 +229,20 @@ pub fn run_on_bbprogram(prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Res
             ));
             continue;
         }
+        // Skip only when verifier state explicitly classifies the base as a
+        // packet pointer. Unknown classification falls through to apply; the
+        // kernel verifier will reject the wide load if it actually crosses a
+        // packet bound, and the daemon records that as failed_rejit naturally.
         if is_packet_unsafe_prog_type(ctx.prog_type)
             && site.base_reg != 10
-            && prog.reg_kind(start_site, site.base_reg).is_none_or(|kind| {
+            && prog.reg_kind(start_site, site.base_reg).is_some_and(|kind| {
                 matches!(kind, RegKind::PacketPointer | RegKind::PacketMetaPointer)
             })
         {
             skipped.push(SiteSkipReason::new(
                 start_site,
                 format!(
-                    "likely packet pointer r{} in XDP/TC prog (prog_type={})",
+                    "packet pointer r{} in XDP/TC prog (prog_type={})",
                     site.base_reg, ctx.prog_type
                 ),
             ));

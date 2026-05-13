@@ -1,0 +1,1233 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "62": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 62,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 1011705,
+        "run_time_ns_delta": 165393565,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d15s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 15.103535307999948,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 15s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   246.40us  159.60us   6.52ms   84.22%\n    Req/Sec     8.42k   385.08     9.87k    71.69%\n  Latency Distribution\n     50%  207.00us\n     75%  304.00us\n     90%  442.00us\n     99%  800.00us\n  505830 requests in 15.10s, 78.63MB read\nRequests/sec:  33499.51\nTransfer/sec:      5.21MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "62": {
+        "bytes_jited": 13548,
+        "bytes_xlated": 23704,
+        "id": 62,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 1006194,
+        "run_time_ns_delta": 159663618,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d15s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 15.103001899999981,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 15s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   247.12us  157.41us   3.05ms   81.38%\n    Req/Sec     8.39k   481.58    11.76k    77.45%\n  Latency Distribution\n     50%  207.00us\n     75%  307.00us\n     90%  446.00us\n     99%  804.00us\n  503074 requests in 15.10s, 78.20MB read\nRequests/sec:  33317.37\nTransfer/sec:      5.18MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "62": {
+        "passes": [
+          {
+            "bpfopt_ms": 24,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 86,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 58,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "wide_mem",
+              "sites_applied": 0,
+              "sites_matched": 4,
+              "sites_skipped": 4,
+              "skip_reasons": {
+                "likely packet pointer r7 in XDP/TC prog (prog_type=6)": 4
+              },
+              "skipped_sites": [
+                {
+                  "pc": 112,
+                  "reason": "likely packet pointer r7 in XDP/TC prog (prog_type=6)"
+                },
+                {
+                  "pc": 117,
+                  "reason": "likely packet pointer r7 in XDP/TC prog (prog_type=6)"
+                },
+                {
+                  "pc": 262,
+                  "reason": "likely packet pointer r7 in XDP/TC prog (prog_type=6)"
+                },
+                {
+                  "pc": 267,
+                  "reason": "likely packet pointer r7 in XDP/TC prog (prog_type=6)"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 425,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 2,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 431,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "const_prop_alu_materialized=8"
+              ],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 8,
+              "sites_matched": 248,
+              "sites_skipped": 240,
+              "skip_reasons": {
+                "register has pointer type, cannot materialize": 240
+              },
+              "skipped_sites": [
+                {
+                  "pc": 4,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 5,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 9,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 10,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 42,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 43,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 65,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 66,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 75,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 76,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 165,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 166,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 206,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 307,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 317,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 361,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 362,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 377,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 414,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 417,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 442,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 445,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 460,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 461,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 477,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 508,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 509,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 516,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 517,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 537,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 538,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 558,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 559,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 566,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 567,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 581,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 588,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 589,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 612,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 613,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 630,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 650,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 651,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 667,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 671,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 672,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 705,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 708,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 734,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 737,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 758,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 759,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 766,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 767,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 789,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 790,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 810,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 811,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 819,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 820,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 840,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 841,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 859,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 860,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 872,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 879,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 880,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 886,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 891,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 892,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 905,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 912,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 913,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 919,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 923,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 924,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 933,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 944,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 945,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 984,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 989,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 990,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 997,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 998,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1015,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1016,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1022,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1025,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1037,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1038,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1042,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1052,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1053,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1068,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1069,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1075,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1076,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1077,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1082,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1083,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1101,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1102,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1109,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1110,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1124,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1125,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1143,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1152,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1153,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1155,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1156,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1217,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1218,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1241,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1242,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1247,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1275,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1288,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1289,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1299,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1300,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1307,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1308,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1316,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1317,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1338,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1339,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1340,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1341,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1347,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1348,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1377,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1378,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1394,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1403,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1404,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1406,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1407,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1491,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1492,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1498,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1499,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1501,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1502,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1510,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1511,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1520,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1521,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1546,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1547,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1571,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1589,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1590,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1625,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1626,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1630,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1631,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1651,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1652,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1653,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1654,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1660,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1666,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1667,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1676,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1677,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1679,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1680,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1688,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1689,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1698,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1699,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1723,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1724,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1727,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1742,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1743,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1747,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1756,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1757,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1772,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1773,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1778,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1779,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1780,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1785,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1786,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1803,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1804,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1811,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1812,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1825,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1826,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1843,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1852,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1853,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1855,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1856,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1923,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1924,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1944,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1945,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1951,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1991,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1992,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2002,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2003,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2014,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2015,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2023,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2024,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2049,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2050,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2051,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2052,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2058,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2059,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2075,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2076,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2091,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2100,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2101,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2103,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2104,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2198,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2199,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2210,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2211,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2219,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2220,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2230,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2247,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2259,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2260,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2280,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2281,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2282,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2283,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2294,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2295,
+                  "reason": "register has pointer type, cannot materialize"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 88,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES}",
+              "log_level": 1,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 381,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "removed 17 dead-def insns"
+              ],
+              "insn_count_after": 2525,
+              "insn_count_before": 2542,
+              "insn_delta": -17,
+              "pass": "dce",
+              "sites_applied": 17,
+              "sites_matched": 17,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 89,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_ms": 32,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2525,
+              "insn_count_before": 2525,
+              "insn_delta": 0,
+              "pass": "bounds_check_merge",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "guard not part of a mergeable ladder": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 5,
+                  "reason": "guard not part of a mergeable ladder"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 83,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass bounds_check_merge --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_ms": 32,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2525,
+              "insn_count_before": 2525,
+              "insn_delta": 0,
+              "pass": "skb_load_bytes_spec",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 83,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass skb_load_bytes_spec --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE}",
+              "log_level": 1,
+              "name": "skb_load_bytes_spec"
+            }
+          }
+        ],
+        "prog_id": 62,
+        "program": {
+          "final_insn_count": 2525,
+          "orig_insn_count": 2542,
+          "prog_id": 62,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}
