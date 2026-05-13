@@ -139,4 +139,3 @@ fn wide_mem_skips_byte_ladder_with_pseudo_func_boundary_inside() {
     assert_skip_reason(&run, 4, "interior branch target");
     assert!(run.lowered[2].is_ldimm64_pseudo_func());
 }
-
