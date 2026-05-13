@@ -1339,6 +1339,24 @@ static int test_rejit_rotate_arbitrary_regs(void)
 					fd_array, ARRAY_SIZE(fd_array), 2);
 }
 
+static int test_rejit_rotate64_width_binding(void)
+{
+	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_ROTATE].btf_fd);
+	struct bpf_insn prog[] = {
+		BPF_LD_IMM64_RAW(BPF_REG_1, 0x0100000000000000ULL),
+		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 8,
+							      BPF_REG_6)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_MOV64_REG(BPF_REG_0, BPF_REG_1),
+		BPF_EXIT_INSN(),
+	};
+
+	patch_single_kinsn(prog, ARRAY_SIZE(prog), g_funcs[FUNC_ROTATE].btf_id);
+	return run_rejit_expect_success("rotate64_width_binding",
+					prog, ARRAY_SIZE(prog),
+					fd_array, ARRAY_SIZE(fd_array), 1);
+}
+
 static int test_rejit_rotate_r5_preserved(void)
 {
 	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_ROTATE].btf_fd);
@@ -1960,6 +1978,8 @@ int main(int argc, char **argv)
 		ret |= test_rejit_rotate_jit_emits_rol();
 	if (should_run_test(filter, "rotate_arbitrary_regs"))
 		ret |= test_rejit_rotate_arbitrary_regs();
+	if (should_run_test(filter, "rotate64_width_binding"))
+		ret |= test_rejit_rotate64_width_binding();
 	if (should_run_test(filter, "rotate_r5_preserved"))
 		ret |= test_rejit_rotate_r5_preserved();
 	if (should_run_test(filter, "rotate_restore_preserves_ldimm64_layout"))

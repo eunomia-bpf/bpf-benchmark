@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-use crate::analysis::{InsnSite, ProgramCFG};
+use crate::analysis::{BlockId, InsnSite, ProgramCFG};
 use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
@@ -27,9 +27,10 @@ pub struct RotatePass;
 impl BpfPass for RotatePass {
     fn run(&self, prog: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
         let mut skipped = Vec::new();
-        let candidates: Vec<(InsnSite, RotateSite)> = prog
-            .scan_block_starts(6, |window| {
-                Ok(rotate_site_at(window.insns, window.start_idx)
+        let prog_ref: &ProgramCFG = prog;
+        let candidates: Vec<(InsnSite, RotateSite)> = prog_ref
+            .scan_block_starts(7, |window| {
+                Ok(rotate_site_at(prog_ref, window.block, window.insns, window.start_idx)
                     .map(|site| (site.start_idx, site.old_len, site)))
             })?
             .into_iter()
@@ -81,11 +82,16 @@ impl BpfPass for RotatePass {
     }
 }
 
-fn rotate_site_at(insns: &[BpfInsn], idx: usize) -> Option<RotateSite> {
+fn rotate_site_at(
+    prog: &ProgramCFG,
+    block: BlockId,
+    insns: &[BpfInsn],
+    idx: usize,
+) -> Option<RotateSite> {
     let [i0, i1, i2] = insns.get(idx..idx + 3)? else {
         return None;
     };
-    try_match_rotate(insns, i0, i1, i2, idx)
+    try_match_rotate(prog, block, insns, i0, i1, i2, idx)
 }
 
 pub(super) struct RotateSite {
@@ -152,6 +158,8 @@ fn is_reg_mov_for_width(insn: &BpfInsn, width: RotateWidth) -> bool {
 }
 
 fn try_match_rotate(
+    prog: &ProgramCFG,
+    block: BlockId,
     insns: &[BpfInsn],
     i0: &BpfInsn,
     i1: &BpfInsn,
@@ -161,7 +169,7 @@ fn try_match_rotate(
     RotateWidth::MATCH_ORDER
         .into_iter()
         .find_map(|width| try_match_split_copy_rotate_width(insns, idx, width))
-        .or_else(|| try_match_masked32_rotate(insns, idx))
+        .or_else(|| try_match_masked32_rotate(prog, block, insns, idx))
         .or_else(|| {
             RotateWidth::MATCH_ORDER
                 .into_iter()
@@ -169,10 +177,13 @@ fn try_match_rotate(
         })
 }
 
-fn try_match_masked32_rotate(insns: &[BpfInsn], idx: usize) -> Option<RotateSite> {
-    let [mov_rsh, and_mask, rsh, i3, i4] = insns.get(idx..idx + 5)? else {
-        return None;
-    };
+fn try_match_masked32_rotate(
+    prog: &ProgramCFG,
+    block: BlockId,
+    insns: &[BpfInsn],
+    idx: usize,
+) -> Option<RotateSite> {
+    let mov_rsh = insns.get(idx)?;
 
     if !mov_rsh.is_alu_reg(BPF_ALU64, BPF_MOV) {
         return None;
@@ -180,17 +191,24 @@ fn try_match_masked32_rotate(insns: &[BpfInsn], idx: usize) -> Option<RotateSite
 
     let val_reg = mov_rsh.src_reg();
     let rsh_reg = mov_rsh.dst_reg();
+    let (and_idx, preserves_mask_load) =
+        masked32_and_index(insns, idx + 1, val_reg, rsh_reg).unwrap_or((idx + 1, false));
+    let [and_mask, rsh, i3, i4] = insns.get(and_idx..and_idx + 4)? else {
+        return None;
+    };
     let (start_idx, old_len, clobbers_tmp, lsh, or_insn, lsh_reg) =
         if i3.is_alu_reg(BPF_ALU64, BPF_MOV) {
             if i3.src_reg() != val_reg {
                 return None;
             }
-            (idx, 6, true, i4, insns.get(idx + 5)?, i3.dst_reg())
+            let or_idx = and_idx + 4;
+            let start_idx = if preserves_mask_load { and_idx } else { idx };
+            (start_idx, or_idx + 1 - start_idx, true, i4, insns.get(or_idx)?, i3.dst_reg())
         } else {
-            if !is_zero_extend32_pair(insns.get(idx + 5)?, insns.get(idx + 6)?, val_reg) {
+            if !is_zero_extend32_pair(insns.get(and_idx + 4)?, insns.get(and_idx + 5)?, val_reg) {
                 return None;
             }
-            (idx + 3, 2, false, i3, i4, val_reg)
+            (and_idx + 2, 2, false, i3, i4, val_reg)
         };
     if rsh_reg == lsh_reg {
         return None;
@@ -213,7 +231,7 @@ fn try_match_masked32_rotate(insns: &[BpfInsn], idx: usize) -> Option<RotateSite
         return None;
     }
 
-    let mask = and_mask_value(insns, idx + 1, and_mask)?;
+    let mask = and_mask_value(prog, block, insns, and_idx, and_mask)?;
     if mask != high32_rotate_mask(rsh_amount)? {
         return None;
     }
@@ -238,6 +256,37 @@ fn try_match_masked32_rotate(insns: &[BpfInsn], idx: usize) -> Option<RotateSite
     Some(site)
 }
 
+fn masked32_and_index(
+    insns: &[BpfInsn],
+    idx: usize,
+    val_reg: u8,
+    rsh_reg: u8,
+) -> Option<(usize, bool)> {
+    if is_and_insn(insns.get(idx)?) {
+        return Some((idx, false));
+    }
+
+    let mask_load = insns.get(idx)?;
+    let (mask_reg, and_idx) = if mask_load.is_ldimm64() {
+        (mask_load.dst_reg(), idx + 1)
+    } else if mask_load.is_alu_imm(BPF_ALU64, BPF_MOV) || mask_load.is_alu_imm(BPF_ALU, BPF_MOV) {
+        (mask_load.dst_reg(), idx + 1)
+    } else {
+        return None;
+    };
+    if mask_reg == val_reg || mask_reg == rsh_reg {
+        return None;
+    }
+
+    let and_insn = insns.get(and_idx)?;
+    (and_insn.is_alu_reg(BPF_ALU64, BPF_AND) && and_insn.src_reg() == mask_reg)
+        .then_some((and_idx, true))
+}
+
+fn is_and_insn(insn: &BpfInsn) -> bool {
+    insn.is_alu_reg(BPF_ALU64, BPF_AND) || insn.is_alu_imm(BPF_ALU64, BPF_AND)
+}
+
 fn high32_rotate_mask(rsh_amount: u32) -> Option<u64> {
     (rsh_amount < 32).then_some((u64::from(u32::MAX) << rsh_amount) & u64::from(u32::MAX))
 }
@@ -251,7 +300,13 @@ fn is_zero_extend32_pair(i0: &BpfInsn, i1: &BpfInsn, reg: u8) -> bool {
         && i1.imm == 32
 }
 
-fn and_mask_value(insns: &[BpfInsn], and_idx: usize, and_insn: &BpfInsn) -> Option<u64> {
+fn and_mask_value(
+    prog: &ProgramCFG,
+    block: BlockId,
+    insns: &[BpfInsn],
+    and_idx: usize,
+    and_insn: &BpfInsn,
+) -> Option<u64> {
     if and_insn.is_alu_imm(BPF_ALU64, BPF_AND) {
         return Some((and_insn.imm as u32).into());
     }
@@ -260,17 +315,24 @@ fn and_mask_value(insns: &[BpfInsn], and_idx: usize, and_insn: &BpfInsn) -> Opti
         return None;
     }
 
-    find_const_reg_value_before(insns, and_idx, and_insn.src_reg())
+    find_const_reg_value_before(prog, block, insns, and_idx, and_insn.src_reg())
 }
 
-fn find_const_reg_value_before(insns: &[BpfInsn], idx: usize, reg: u8) -> Option<u64> {
+fn find_const_reg_value_before(
+    prog: &ProgramCFG,
+    block: BlockId,
+    insns: &[BpfInsn],
+    idx: usize,
+    reg: u8,
+) -> Option<u64> {
     let mut scan = idx;
     while scan > 0 {
         scan -= 1;
         let insn = &insns[scan];
         if writes_reg(insn, reg) {
-            if insn.is_ldimm64() && scan + 1 < idx {
-                return Some(decode_ldimm64_value(insn, &insns[scan + 1]));
+            if insn.is_ldimm64() {
+                let hi = prog.ldimm64_second_slot(InsnSite { block, idx: scan })?;
+                return Some(decode_ldimm64_value(insn, hi));
             }
             if insn.is_alu_imm(BPF_ALU64, BPF_MOV) || insn.is_alu_imm(BPF_ALU, BPF_MOV) {
                 return Some((insn.imm as u32).into());

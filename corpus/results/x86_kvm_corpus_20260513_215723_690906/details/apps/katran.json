@@ -1,0 +1,126 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 71402,
+        "run_time_ns_delta": 10341920,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d1s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 1.1025518689999956,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 1s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   259.50us  220.66us   6.94ms   87.36%\n    Req/Sec     8.16k   728.84     9.83k    72.73%\n  Latency Distribution\n     50%  212.00us\n     75%  329.00us\n     90%  467.00us\n     99%    0.86ms\n  35679 requests in 1.10s, 5.55MB read\nRequests/sec:  32444.01\nTransfer/sec:      5.04MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 73604,
+        "run_time_ns_delta": 10485435,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d1s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 1.102433609000002,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 1s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   247.76us  168.19us   2.82ms   82.57%\n    Req/Sec     8.40k   555.63     9.56k    63.64%\n  Latency Distribution\n     50%  205.00us\n     75%  320.00us\n     90%  455.00us\n     99%  828.00us\n  36780 requests in 1.10s, 5.72MB read\nRequests/sec:  33439.56\nTransfer/sec:      5.20MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "9": {
+        "passes": [
+          {
+            "bpfopt_ms": 112,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "step 0 failed (exit 1): if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id 9 > /var/tmp/bpfrejit-runtime/n59kqvlv/bpfrejit-daemon-plan-1872-0/live_prog_show.txt; bpftool -j prog show id 9 > /var/tmp/bpfrejit-runtime/n59kqvlv/bpfrejit-daemon-plan-1872-0/live_prog_show.json; bpftool prog dump xlated id 9 > /var/tmp/bpfrejit-runtime/n59kqvlv/bpfrejit-daemon-plan-1872-0/live_xlated.disasm; bpftool prog dump jited id 9 file /var/tmp/bpfrejit-runtime/n59kqvlv/bpfrejit-daemon-plan-1872-0/live_jited.bin; chmod 0644 /var/tmp/bpfrejit-runtime/n59kqvlv/bpfrejit-daemon-plan-1872-0/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" /var/tmp/bpfrejit-runtime/n59kqvlv/bpfrejit-daemon-plan-1872-0/live_jited.bin > /var/tmp/bpfrejit-runtime/n59kqvlv/bpfrejit-daemon-plan-1872-0/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input /var/tmp/bpfrejit-runtime/n59kqvlv/bpfrejit-daemon-plan-1872-0/input_step0.bin --output /var/tmp/bpfrejit-runtime/n59kqvlv/bpfrejit-daemon-plan-1872-0/output_step0.bin --report /var/tmp/bpfrejit-runtime/n59kqvlv/bpfrejit-daemon-plan-1872-0/report_step0.json --prog-type xdp --target /var/tmp/bpfrejit-runtime/n59kqvlv/bpfrejit-daemon-plan-1872-0/target.json; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi\nsubprocess output:\nError: No JIT disassembly support\nchmod: cannot access '/var/tmp/bpfrejit-runtime/n59kqvlv/bpfrejit-daemon-plan-1872-0/live_jited.bin': No such file or directory\nobjdump: '/var/tmp/bpfrejit-runtime/n59kqvlv/bpfrejit-daemon-plan-1872-0/live_jited.bin': No such file",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 9,
+        "program": {
+          "final_insn_count": 2542,
+          "orig_insn_count": 2542,
+          "prog_id": 9,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}

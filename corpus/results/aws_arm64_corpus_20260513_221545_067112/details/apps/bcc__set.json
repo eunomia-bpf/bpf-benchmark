@@ -1,0 +1,10 @@
+{
+  "app": "bcc/set",
+  "baseline": null,
+  "error": "stress_ng_os_io_network workload failed: stress-ng: metrc: [2699] rename            36168     10.23      0.06      0.54      3535.05       60578.86\nstress-ng: metrc: [2699] touch              4526     10.17      0.01      1.07       444.94        4188.55\nstress-ng: metrc: [2699] utime             14629     10.11      0.03      0.90      1446.50       15710.36\nstress-ng: metrc: [2699] link                  4     10.78      0.10      1.37         0.37           2.73\nstress-ng: metrc: [2699] symlink               4     13.15      0.02      1.06         0.30           3.71\nstress-ng: metrc: [2699] mknod                88     10.03      0.02      0.01         8.77        3768.09\nstress-ng: metrc: [2699] fcntl              9868     10.02      0.02      0.57       984.35       16503.82\nstress-ng: info:  [2699] skipped: 4: exec (4)\nstress-ng: info:  [2699] passed: 250: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (2) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [2699] failed: 2: sctp (2)\nstress-ng: info:  [2699] metrics untrustworthy: 0\nstress-ng: info:  [2699] unsuccessful run completed in 26.53 secs",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "bcc_set",
+  "selected_workload": "stress_ng_os_io_network",
+  "status": "error"
+}

@@ -118,6 +118,7 @@ pub(crate) struct BlockBodyView<'a> {
 }
 #[derive(Debug)]
 pub(crate) struct BlockStartWindow<'a> {
+    pub(crate) block: BlockId,
     pub(crate) start_idx: usize,
     pub(crate) insns: &'a [BpfInsn],
     pub(crate) lookahead: &'a [BpfInsn],
@@ -867,6 +868,7 @@ impl ProgramCFG {
                     .map(|end| end.min(body.insns.len()))
                     .ok_or_else(|| anyhow::anyhow!("lookahead at {start_idx} overflows"))?;
                 let window = BlockStartWindow {
+                    block,
                     start_idx,
                     insns: body.insns,
                     lookahead: &body.insns[start_idx..lookahead_end],

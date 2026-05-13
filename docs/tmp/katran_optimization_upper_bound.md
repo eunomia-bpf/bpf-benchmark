@@ -2,9 +2,11 @@
 
 日期：2026-05-08
 
+更新：2026-05-13 补到 KVM kernel `7.0.0-rc2+` 的 Katran live JIT dump，确认 `%65537` 仍由 x86 JIT lower 成硬件 `div`；见 §1 和 §9.2。
+
 范围：Katran XDP `balancer_ingress`，x86_64，当前 BPF JIT/ReJIT 证据、native 编译对照、ReJIT-only 与手写 x86 上界估算。
 
-本文是分析产物；没有修改框架代码，没有 commit。native 编译 stub 放在 `/tmp/katran_native_compile`，仓库内主输出是本文。
+本文是分析产物；May 8 版本没有修改框架代码。May 13 为抓 KVM live JIT，新增了 noop 的可选 dump hook，并把 runtime bpftool 改为 `feature-llvm=1` 编译；没有改 daemon，没有 commit。native 编译 stub 放在 `/tmp/katran_native_compile`，仓库内主输出是本文。
 
 ## 0. 结论先行
 
@@ -22,9 +24,16 @@ May 8 运行数据：baseline `run_time_ns_delta / run_cnt_delta = 317.39 ns/run
 
 ## 1. 证据边界
 
-本轮无法拿到真实 live x86 JIT dump。宿主机 `bpftool prog show` 返回 `Operation not permitted`，已有 `KEEP_WORKDIRS=1` corpus run 只保留了失败 workdir tarball，没有成功优化后 JIT 机器码。
+May 8 本轮无法拿到真实 live x86 JIT dump。宿主机 `bpftool prog show` 返回 `Operation not permitted`，已有 `KEEP_WORKDIRS=1` corpus run 只保留了失败 workdir tarball，没有成功优化后 JIT 机器码。
 
-所以 `docs/tmp/katran_jited.disasm` 是状态说明，不是真实 `bpftool prog dump jited` 输出。本文对 JIT basic block 的判断来自 BPF xlated 形状、当前 pass report、native objdump 和性能计数；精确 machine-code 结论需要后续在 KVM guest 或 privileged host 重新 dump。
+所以 `docs/tmp/katran_jited.disasm` 是状态说明，不是真实 `bpftool prog dump jited` 输出。May 8 对 JIT basic block 的判断来自 BPF xlated 形状、当前 pass report、native objdump 和性能计数。
+
+May 13 追加测量已补齐这个缺口：通过 `noop` pass YAML hook 在 KVM corpus 内执行 `bpftool prog dump xlated/jited`，并用 `BPFREJIT_DUMP_LIVE_JIT_FAIL=1` 主动失败以保留 workdir。bpftool 需要重新用 `feature-llvm=1` 编译，否则 KVM 内会报 `No JIT disassembly support`。本次真实 live dump artifact：
+
+- result dir: `corpus/results/x86_kvm_corpus_20260513_220629_417656`
+- failure tar: `details/failure-artifacts/9.tar.gz`
+- extracted copy: `docs/tmp/katran_kvm_live_jit_noop_20260513_220629/`
+- live program: id 9, `balancer_ingress`, xlated 23,840 B, jited 13,629 B, run_cnt 144,240
 
 本轮生成/使用的仓库产物：
 
@@ -194,7 +203,7 @@ native 主体 prologue 大约 reserve 168 B stack，远小于 BPF 512 B 限制�
 
 ## 6. Native vs BPF/JIT basic block 对照
 
-这里的 JIT 列是从 BPF xlated 形状和 pass 状态推断，不是 live x86 JIT dump。
+这里的大部分 JIT 列仍是从 BPF xlated 形状和 pass 状态推断；CH modulo 的 `%65537` 例外，May 13 已有 live x86 JIT dump 直接证据。
 
 | hot block | native x86 shape | current BPF/ReJIT shape | gap |
 |---|---|---|---|
@@ -255,13 +264,40 @@ Trigger：BPF bytecode 中 Jenkins hash 的 `(x << c) | (x >> (32-c))` 或反向
 
 Trigger：`hash % RING_SIZE`，其中 `RING_SIZE=65537`，随后用于 `ch_rings` key。
 
-替换：reciprocal multiply-high / shift / subtract，x86 用 magic `imul` 序列，避免 division。
+范围收窄：只做 Katran 专用的 32-bit `%65537` rewrite，不做通用 modulo pass。匹配条件应至少包括 `r0` 先被 zero-extend 到 32-bit、紧跟 `r0 %= 65537`、后续是 `vip_num * 65537 + hash` 的 CH key 形状；scratch register 只用马上被覆盖的 `r1`，否则跳过。
 
-证据：native 有 magic-constant `imul`，没有 `div/idiv`；但当前 BPF JIT 是否已经优化 constant modulo 需要 live JIT dump 确认。
+May 13 live xlated 证据有两个 static sites：
 
-预期 site：1-2 hot sites。
+- `live_xlated.disasm:2018`: BPF PC 1480, `r0 %= 65537`
+- `live_xlated.disasm:3167`: BPF PC 2346, `r0 %= 65537`
 
-估算收益：如果当前 JIT emits divide，15-35 cycles/pkt；如果已是 reciprocal，接近 0。优先级是先验证再实现。
+对应 live x86 JIT 都是硬件除法，不是 reciprocal/magic lowering：
+
+- `live_jited.objdump:1699-1702`: `mov $0x10001,%r11; xor %edx,%edx; div %r11; mov %rdx,%rax`
+- `live_jited.objdump:2682-2685`: 同样的 `div %r11` 序列
+
+这说明 kernel x86 BPF JIT 当前没有为这个常量 modulo 做 strength reduction。`div` 还需要临时保存/恢复 `rdx`，实际序列是 `push %rdx; mov imm; xor %edx,%edx; div; mov %rdx,%rax; pop %rdx`。
+
+建议 rewrite 用 `2^16 == -1 (mod 65537)` 的特化公式。对 32-bit `x`，令 `lo = x & 0xffff`、`hi = x >> 16`，则 `x % 65537 = lo - hi (mod 65537)`；因为 `lo, hi <= 65535`，只需一次负数修正。branchless BPF 形状可写成：
+
+```text
+r1 = r0
+r1 >>= 16
+r1 &= 65535
+r0 &= 65535
+r0 -= r1
+r1 = r0
+r1 >>= 63
+r0 += r1
+r1 <<= 16
+r0 += r1
+```
+
+如果 `lo >= hi`，`r1 >> 63` 为 0，结果保持 `lo-hi`；如果 `lo < hi`，64-bit underflow 后 `r1 >> 63` 为 1，后两步补回 `1 + 65536 = 65537`。这样避免随机 hash 上的 data-dependent branch，也避免新 `imul`。
+
+预期 site：2 static sites；benchmark IPv4/TCP 热路径通常只执行其中一个，所以按一条 `%65537`/packet 估算。
+
+估算收益：当前已确认 emits divide，优先级上调。保守估计 15-35 cycles/pkt；如果 host CPU 的 64-bit `div` 延迟更高，可能更大。需要用 `BPFREJIT_BENCH_PASSES="noop,const_mod_reduce"` 做 Katran-only SAMPLES=3 验证。
 
 ### 9.3 `setcc_bool`
 
@@ -427,7 +463,7 @@ Specialization-only：
 |---:|---|---|---|---|---|
 | 1 | Finish `map_inline` Route A for `ctl_array[0]` | medium | moderate | yes-ish | 已知两站点，纪律最好 |
 | 2 | `prefetch` budget / E2BIG avoidance | low-medium | moderate-high | yes if accepted | 42 sites 已找出但 live fail |
-| 3 | Verify `%65537` JIT, then `const_mod_reduce` | low then medium | high if divide exists | yes | 先 dump machine code |
+| 3 | Katran-only `const_mod_reduce` for 32-bit `%65537` | medium | high | yes | May 13 live JIT 已确认当前是 `div` |
 | 4 | `jhash_rotate_canonicalize` | medium | moderate | yes | native 20 `rorx`，当前 0 |
 | 5 | Make `bounds_check_merge` effective on Katran | medium-high | moderate | yes if verified | 需要 dominance/range proof |
 | 6 | Keep/re-enable `wide_mem` | low-medium | small-moderate | yes | eval 有 4/4 |
@@ -442,9 +478,9 @@ Specialization-only：
 
 ## 15. 下一步测量
 
-必须补的第一个测量是真实 `bpftool prog dump jited`：baseline 和 post-ReJIT 都要，从 KVM guest 或 privileged host 抓。
+第一个测量已补：May 13 在 KVM guest 内通过 noop YAML hook 抓到了真实 `bpftool prog dump jited`，见 `docs/tmp/katran_kvm_live_jit_noop_20260513_220629/`。当前只抓了 baseline/noop 前状态；后续实现 `const_mod_reduce` 后还需要抓 post-ReJIT JIT dump。
 
-第二个测量是 CH modulo 路径：确认 `%65537` 是否已经被 x86 JIT lower 成 reciprocal arithmetic；如果还是真 divide，`const_mod_reduce` 立即变高优。
+第二个测量也已补：CH modulo 路径没有被 x86 JIT lower 成 reciprocal arithmetic，两个 static `%65537` site 都是 `div %r11`。因此下一步是实现 Katran-only `const_mod_reduce`，再跑 `noop,const_mod_reduce` 的 Katran SAMPLES=3 和 post-ReJIT dump。
 
 第三个测量是 jhash rotate bytecode census：解释 native 20 个 `rorx` 为什么 current `rotate` pass 是 0/0。
 

@@ -1,0 +1,10 @@
+{
+  "app": "cilium/agent",
+  "baseline": null,
+  "error": "interface-bound HTTP server in namespace bpfbench-cepa did not report ready at http://10.244.0.50:18080/",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "cilium",
+  "selected_workload": "network_lossy_multi",
+  "status": "error"
+}
