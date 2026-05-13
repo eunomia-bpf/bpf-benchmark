@@ -23,7 +23,8 @@ use serde::{Deserialize, Serialize};
 struct Cli {
     #[command(flatten)]
     common: CommonArgs,
-    /// Single pass to run. bpfopt intentionally has no built-in pass pipeline.
+    /// Pass to run. bpfopt runs exactly one pass per invocation; pass
+    /// sequencing is owned by the daemon, not by bpfopt.
     #[arg(long, value_name = "NAME")]
     pass: Option<String>,
     /// Canonicalize map references from loader FD form to stable map-index form.

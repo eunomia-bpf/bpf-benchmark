@@ -3,7 +3,6 @@
 use crate::analysis::{BlockId, DefSite};
 use crate::insn::*;
 use crate::pass::*;
-use crate::passes::{ConstPropPass, DcePass};
 use crate::test_helpers::*;
 
 #[test]
@@ -40,39 +39,6 @@ fn test_pass_manager_invalidates_verifier_states_after_transform() {
             .is_none_or(|states| states.is_empty()),
         "ProgramCFG mutation must clear stale verifier states"
     );
-}
-
-#[test]
-fn pipeline_pass_context_carries_verifier_states_between_passes() {
-    let input = vec![
-        BpfInsn::mov32_imm(BPF_REG_1, 20),
-        BpfInsn::alu64_imm(BPF_LSH, BPF_REG_1, 32),
-        BpfInsn::alu64_imm(BPF_RSH, BPF_REG_1, 32),
-        BpfInsn::exit(),
-    ];
-    let ctx = ctx_with_verifier_states(vec![
-        verifier_delta_state(
-            1,
-            std::collections::HashMap::from([(BPF_REG_1, scalar_reg(20u64 << 32))]),
-        ),
-        verifier_delta_state(
-            2,
-            std::collections::HashMap::from([(BPF_REG_1, scalar_reg(20))]),
-        ),
-    ]);
-
-    let (results, lowered, prog) = run_pipeline_on_insns(
-        vec![Box::new(ConstPropPass), Box::new(DcePass)],
-        input,
-        &ctx,
-    );
-
-    assert_eq!(results.len(), 2);
-    assert!(
-        prog.verifier_states_by_site().is_none(),
-        "mutating passes must invalidate consumed verifier states"
-    );
-    assert!(lowered.contains(&BpfInsn::mov64_imm(BPF_REG_1, 20)));
 }
 
 #[test]

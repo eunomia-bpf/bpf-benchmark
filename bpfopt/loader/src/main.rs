@@ -325,15 +325,9 @@ fn run_bpfopt(args: RunArgs) -> Result<()> {
         .arg(&report)
         .arg("--prog-type")
         .arg(metadata.program.prog_type.to_string());
-    if pass_needs_verifier_states(&args.pass) {
-        let verifier_states = verifier_states_path(&workdir)?.ok_or_else(|| {
-            anyhow!(
-                "{} requires verifier states in {}",
-                args.pass,
-                workdir.display()
-            )
-        })?;
-        cmd.arg("--verifier-states").arg(verifier_states);
+    let verifier_log = workdir.join(VERIFIER_LOG);
+    if verifier_log.exists() {
+        cmd.arg("--verifier-states").arg(verifier_log);
     }
     if let Some(target) = args.target.as_deref() {
         cmd.arg("--target").arg(target);
@@ -905,22 +899,6 @@ fn canonicalize_input(workdir: &Path, bpfopt_arg: Option<&Path>, map_ids: &[u32]
         );
     }
     Ok(())
-}
-
-fn verifier_states_path(workdir: &Path) -> Result<Option<PathBuf>> {
-    let json = workdir.join("verifier-states.json");
-    if json.exists() {
-        return Ok(Some(json));
-    }
-    let log = workdir.join(VERIFIER_LOG);
-    if log.exists() {
-        return Ok(Some(log));
-    }
-    Ok(None)
-}
-
-fn pass_needs_verifier_states(pass: &str) -> bool {
-    matches!(pass, "map_inline" | "const_prop")
 }
 
 fn read_insns(path: &Path) -> Result<Vec<libbpf_sys::bpf_insn>> {

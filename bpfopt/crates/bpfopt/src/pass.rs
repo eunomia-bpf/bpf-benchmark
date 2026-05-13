@@ -114,7 +114,7 @@ impl BtfInfoRecords {
 ///
 /// IMPORTANT: only put a flag here when *every* bpfopt run conceivably
 /// needs it (input/output/report paths, target arch, prog type, kinsn
-/// capability metadata, verifier-states JSON, BTF remapping inputs).
+/// capability metadata, verifier log, BTF remapping inputs).
 /// Per-pass tuning (e.g. map_inline's `--inline-hint`, branch_flip's
 /// `--profile`, prefetch's `--profile`) goes in the pass's own
 /// `<Pass>CliArgs` struct and is parsed AFTER `--`. Adding a pass-specific
@@ -374,7 +374,7 @@ pub trait BpfPass: Send + Sync {
 
 /// Pass execution context — contains platform info and external configuration.
 ///
-/// These values are invariant for the duration of a pipeline execution.
+/// These values are invariant for the duration of a single pass invocation.
 #[derive(Clone, Debug)]
 pub struct PassContext {
     /// Available kinsn targets and static descriptors.

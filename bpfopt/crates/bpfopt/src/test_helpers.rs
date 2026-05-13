@@ -48,26 +48,6 @@ pub fn pass_error_on_insns<P: BpfPass>(pass: P, insns: Vec<BpfInsn>, ctx: &PassC
         .to_string()
 }
 
-pub fn run_pipeline_on_insns(
-    passes: Vec<Box<dyn BpfPass>>,
-    insns: Vec<BpfInsn>,
-    ctx: &PassContext,
-) -> (Vec<PassResult>, Vec<BpfInsn>, ProgramCFG) {
-    let mut prog = lift_test_program(&insns, ctx);
-    let mut results = Vec::new();
-    for pass in passes {
-        let report_prog = prog.clone();
-        // Test helpers run passes through the production ProgramCFG API.
-        let mut result = pass
-            .run(&mut prog, ctx)
-            .expect("future ProgramCFG-native pipeline pass should run");
-        materialize_site_skips_for_tests(&report_prog, &mut result);
-        results.push(result);
-    }
-    let lowered = lower_test_program(&prog);
-    (results, lowered, prog)
-}
-
 fn materialize_site_skips_for_tests(report_prog: &ProgramCFG, result: &mut PassResult) {
     for skip in result.site_skipped.drain(..) {
         let pc = report_prog

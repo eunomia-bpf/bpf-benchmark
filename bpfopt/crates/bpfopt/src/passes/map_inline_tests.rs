@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
 use super::map_inline::MapInlinePass;
-use super::{ConstPropPass, DcePass};
 use crate::insn::*;
 use crate::pass::{CompressedMapValues, CompressedMapValuesKind, MapInfo, PassContext};
 use crate::pass::{MapInlineHintAnchorSpec, MapInlineHintModeSpec, MapInlineHintSpec};
@@ -304,59 +303,6 @@ fn map_inline_pass_does_not_use_non_verifier_fixpoint_fallback() {
             .filter(|insn| insn.is_call() && insn.imm == LOOKUP)
             .count(),
         1
-    );
-}
-
-#[test]
-fn map_inline_pseudo_map_value_feeds_const_prop_and_dce_without_branch_cleanup() {
-    // Restored from HEAD: pseudo-map-value constantization must cascade into
-    // const_prop and DCE without relying on map_inline's branch cleanup path.
-    let map_value = BpfInsn::ld_imm64(BPF_REG_1, BPF_PSEUDO_MAP_VALUE, 79);
-    let input = vec![
-        map_value[0],
-        map_value[1],
-        BpfInsn::ldx_mem(BPF_W, BPF_REG_2, BPF_REG_1, 0),
-        BpfInsn::jeq_imm(BPF_REG_2, 1, 1),
-        BpfInsn::mov64_imm(BPF_REG_0, 0),
-        BpfInsn::mov64_imm(BPF_REG_0, 1),
-        BpfInsn::exit(),
-    ];
-    let value = vec![1, 0, 0, 0];
-    let mut ctx = PassContext::baseline();
-    ctx.map_ids = vec![903];
-    ctx.map_info.insert(
-        903,
-        MapInfo {
-            map_type: libbpf_sys::BPF_MAP_TYPE_ARRAY,
-            key_size: 4,
-            value_size: value.len() as u32,
-            max_entries: 8,
-            map_id: 903,
-            name: format!("array_{}", 903),
-        },
-    );
-    ctx.map_values
-        .insert((903, 0u32.to_le_bytes().to_vec()), value);
-
-    let (results, lowered, _) = run_pipeline_on_insns(
-        vec![
-            Box::new(MapInlinePass),
-            Box::new(ConstPropPass),
-            Box::new(DcePass),
-        ],
-        input,
-        &ctx,
-    );
-
-    assert_eq!(results.len(), 3);
-    assert_eq!(
-        lowered,
-        vec![
-            BpfInsn::mov32_imm(BPF_REG_2, 1),
-            BpfInsn::jeq_imm(BPF_REG_2, 1, 0),
-            BpfInsn::mov64_imm(BPF_REG_0, 1),
-            BpfInsn::exit(),
-        ]
     );
 }
 

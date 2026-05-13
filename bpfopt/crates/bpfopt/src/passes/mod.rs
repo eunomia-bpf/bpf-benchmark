@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-//! Concrete pass implementations and pipeline constructors.
+//! Concrete pass implementations and registry.
 
 use anyhow::Result;
 
@@ -135,8 +135,9 @@ fn reject_pass_args(pass_name: &str, args: &[String]) -> Result<()> {
     };
 }
 
-/// Canonical pass ordering and requirements. Pipeline builders iterate this array in
-/// order, guaranteeing consistent pass sequencing regardless of selected names.
+/// Canonical pass ordering and requirements. The CLI looks up entries by name to
+/// build a single-pass invocation; the daemon iterates this array in order when
+/// orchestrating multiple per-pass `bpfopt` invocations.
 #[rustfmt::skip] pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
     pass_entry!("noop", NoopPass, PASS_REQ_NONE),
     PassRegistryEntry { name: "map_inline", make: MapInlinePass::from_cli_args, requirements: PASS_REQ_NEEDS_STATES },
@@ -175,8 +176,6 @@ mod endian_tests;
 mod extract_tests;
 #[cfg(test)]
 mod map_inline_tests;
-#[cfg(test)]
-mod mod_tests;
 #[cfg(test)]
 mod prefetch_tests;
 #[cfg(test)]
