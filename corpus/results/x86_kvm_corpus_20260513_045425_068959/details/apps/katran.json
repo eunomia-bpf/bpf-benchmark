@@ -1,0 +1,348 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 35604517,
+        "run_time_ns_delta": 5383937237,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d180s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 180.10308288599998,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 3m test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   252.01us  160.30us   5.92ms   80.01%\n    Req/Sec     8.20k   513.17    10.20k    70.84%\n  Latency Distribution\n     50%  212.00us\n     75%  320.00us\n     90%  454.00us\n     99%  807.00us\n  5881005 requests in 3.00m, 0.89GB read\nRequests/sec:  32654.18\nTransfer/sec:      5.08MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d180s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 180.102834163,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 3m test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   247.96us  157.89us   5.53ms   80.58%\n    Req/Sec     8.35k   465.05    11.78k    70.29%\n  Latency Distribution\n     50%  206.00us\n     75%  311.00us\n     90%  449.00us\n     99%  804.00us\n  5987094 requests in 3.00m, 0.91GB read\nRequests/sec:  33243.17\nTransfer/sec:      5.17MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d180s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 180.10294871400004,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 3m test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   250.37us  160.44us   6.11ms   81.80%\n    Req/Sec     8.28k   459.91    10.54k    70.24%\n  Latency Distribution\n     50%  208.00us\n     75%  315.00us\n     90%  454.00us\n     99%  815.00us\n  5934092 requests in 3.00m, 0.90GB read\nRequests/sec:  32948.89\nTransfer/sec:      5.12MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13329,
+        "bytes_xlated": 23160,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 35839235,
+        "run_time_ns_delta": 5361366775,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d180s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 180.10239887400007,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 3m test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   249.00us  159.17us   4.34ms   81.29%\n    Req/Sec     8.32k   465.35    11.61k    70.55%\n  Latency Distribution\n     50%  207.00us\n     75%  313.00us\n     90%  451.00us\n     99%  808.00us\n  5963858 requests in 3.00m, 0.91GB read\nRequests/sec:  33114.19\nTransfer/sec:      5.15MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d180s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 180.10760967499982,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 3m test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   248.07us  157.58us   5.45ms   80.35%\n    Req/Sec     8.34k   460.21    11.56k    70.62%\n  Latency Distribution\n     50%  207.00us\n     75%  312.00us\n     90%  448.00us\n     99%  800.00us\n  5979330 requests in 3.00m, 0.91GB read\nRequests/sec:  33200.18\nTransfer/sec:      5.16MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d180s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 180.10484078900004,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 3m test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   248.48us  158.80us   4.77ms   81.21%\n    Req/Sec     8.34k   464.64    10.34k    69.75%\n  Latency Distribution\n     50%  207.00us\n     75%  312.00us\n     90%  449.00us\n     99%  807.00us\n  5976362 requests in 3.00m, 0.91GB read\nRequests/sec:  33183.59\nTransfer/sec:      5.16MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "9": {
+        "passes": [
+          {
+            "bpfopt_ms": 131,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2530,
+              "insn_count_before": 2542,
+              "insn_delta": -12,
+              "pass": "wide_mem",
+              "sites_applied": 4,
+              "sites_matched": 4,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 86,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 445,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2450,
+              "insn_count_before": 2530,
+              "insn_delta": -80,
+              "pass": "rotate",
+              "sites_applied": 20,
+              "sites_matched": 20,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 85,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_ms": 614,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2464,
+              "insn_count_before": 2450,
+              "insn_delta": 14,
+              "pass": "cond_select",
+              "sites_applied": 7,
+              "sites_matched": 7,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 85,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2464,
+              "insn_count_before": 2464,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 84,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_ms": 165,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2464,
+              "insn_count_before": 2464,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 6,
+              "sites_matched": 6,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 89,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_ms": 24,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2464,
+              "insn_count_before": 2464,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 436,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 181,
+            "bpfopt_summary": null,
+            "error": "step 6 failed (exit 1): OVERLAY_DIR=/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/map_inline/overlays/katran; CH=; RE=; SI=; for f in /var/tmp/bpfrejit-runtime/ti3u4/bpfrejit-daemon-plan-1856-0/map-values/map-*.show.json; do n=$(jq -r .name \"$f\"); i=$(jq -r .id \"$f\"); case \"$n\" in ch_rings) CH=$i ;; reals) RE=$i ;; server_id_map) SI=$i ;; esac; done; jq -n --arg c \"$CH\" --arg r \"$RE\" --arg s \"$SI\" --slurpfile co \"$OVERLAY_DIR/ch_rings.json\" --slurpfile ro \"$OVERLAY_DIR/reals.json\" --slurpfile so \"$OVERLAY_DIR/server_id_map.json\" '($c | if . == \"\" then {} else {(.): $co[0]} end) + ($r | if . == \"\" then {} else {(.): $ro[0]} end) + ($s | if . == \"\" then {} else {(.): $so[0]} end)' > /var/tmp/bpfrejit-runtime/ti3u4/bpfrejit-daemon-plan-1856-0/map-values/overlays.json && timeout 6000 bpfopt --pass map_inline --input /var/tmp/bpfrejit-runtime/ti3u4/bpfrejit-daemon-plan-1856-0/output_step5.bin --output /var/tmp/bpfrejit-runtime/ti3u4/bpfrejit-daemon-plan-1856-0/output_step6.bin --report /var/tmp/bpfrejit-runtime/ti3u4/bpfrejit-daemon-plan-1856-0/report_step6.json --prog-type xdp --verifier-states /var/tmp/bpfrejit-runtime/ti3u4/bpfrejit-daemon-plan-1856-0/verifier_log_step5.log -- --map-values /var/tmp/bpfrejit-runtime/ti3u4/bpfrejit-daemon-plan-1856-0/map-values --map-ids 3,5,7,6,13,18,9,20,4,10,8,12,11,16 --inline-hint=ctl_array:!00000000 --inline-hint=vip_map:!0a6401010000000000000000000000001f900600 --inline-hint=ch_rings:!00000000 --inline-hint=reals:!01000000 --inline-hint=server_id_map:!00000000 # lpm_src_v4/v6 hints commented: katran is built without # -DLPM_SRC_LOOKUP, so these maps are guarded out of the program # by `#ifdef LPM_SRC_LOOKUP` in balancer_maps.h. bpfopt fail-fasts # on hint anchor not in metadata (correct: catches typos and # mis-applied hints early). Uncomment if a future build turns on # source-IP routing. # --inline-hint=lpm_src_v4:!00000000 # --inline-hint=lpm_src_v6:!00000000 # lru_mapping/global_lru_maps outer-only hints commented: katran # benchmark uses F_LRU_BYPASS + no `-forwarding_cores`, so the outer # ARRAY_OF_MAPS stays empty (every slot ENOENT). #265 root-caused this: # `attachLrus()` iterates empty forwardingCores_ \u2192 zero update_elem. # bpfopt fail-fasts when hinted outer key has no live inner map # (correct: hint claims something kernel snapshot disproves). # Uncomment only if benchmark configures forwarding cores OR an # alternative test deploys populated map-in-map. # --inline-hint=lru_mapping:!00000000 # --inline-hint=global_lru_maps:!00000000\nsubprocess output:\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"65+0\"\nwarning: verifier log: invalid id attribute value \"66+0\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"942-525483785\"\nwarning: verifier log: invalid id attribute value \"942-525483785\"\nwarning: verifier log: invalid id attribute value \"969-525483785\"\nwarning: verifier log: invalid id attribute value \"969-525483785\"\nwarning: verifier log: invalid id attribute value \"1014-525483785\"\nwarning: verifier log: invalid id attribute value \"1014-525483785\"\nwarning: verifier log: invalid id attribute value \"1032-525483785\"\nwarning: verifier log: invalid id attribute value \"1032-525483785\"\nwarning: verifier log: invalid id attribute value \"1103-525483785\"\nwarning: verifier log: invalid id attribute value \"1103-525483785\"\nwarning: verifier log: invalid id attribute value \"1128-525483785\"\nwarning: verifier log: invalid id attribute value \"1128-525483785\"\nwarning: verifier log: invalid id attribute value \"1178-525483785\"\nwarning: verifier log: invalid id attribute value \"1178-525483785\"\nwarning: verifier log: invalid id attribute value \"1196-525483785\"\nwarning: verifier log: invalid id attribute value \"1196-525483785\"\nwarning: verifier log: invalid id attribute value \"1269-525483785\"\nwarning: verifier log: invalid id attribute value \"1269-525483785\"\nwarning: verifier log: invalid id attribute value \"1295-525483785\"\nwarning: verifier log: invalid id attribute value \"1295-525483785\"\nwarning: verifier log: invalid id attribute value \"1340-525483785\"\nwarning: verifier log: invalid id attribute value \"1340-525483785\"\nwarning: verifier log: invalid id attribute value \"1358-525483785\"\nwarning: verifier log: invalid id attribute value \"1358-525483785\"\nwarning: verifier log: invalid id attribute value \"1428-525483785\"\nwarning: verifier log: invalid id attribute value \"1428-525483785\"\nwarning: verifier log: invalid id attribute value \"1452-525483785\"\nwarning: verifier log: invalid id attribute value \"1452-525483785\"",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "OVERLAY_DIR=/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/map_inline/overlays/katran; CH=; RE=; SI=; for f in ${MAP_VALUES}/map-*.show.json; do n=$(jq -r .name \"$f\"); i=$(jq -r .id \"$f\"); case \"$n\" in ch_rings) CH=$i ;; reals) RE=$i ;; server_id_map) SI=$i ;; esac; done; jq -n --arg c \"$CH\" --arg r \"$RE\" --arg s \"$SI\" --slurpfile co \"$OVERLAY_DIR/ch_rings.json\" --slurpfile ro \"$OVERLAY_DIR/reals.json\" --slurpfile so \"$OVERLAY_DIR/server_id_map.json\" '($c | if . == \"\" then {} else {(.): $co[0]} end) + ($r | if . == \"\" then {} else {(.): $ro[0]} end) + ($s | if . == \"\" then {} else {(.): $so[0]} end)' > ${MAP_VALUES}/overlays.json && timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --inline-hint=ctl_array:!00000000 --inline-hint=vip_map:!0a6401010000000000000000000000001f900600 --inline-hint=ch_rings:!00000000 --inline-hint=reals:!01000000 --inline-hint=server_id_map:!00000000 # lpm_src_v4/v6 hints commented: katran is built without # -DLPM_SRC_LOOKUP, so these maps are guarded out of the program # by `#ifdef LPM_SRC_LOOKUP` in balancer_maps.h. bpfopt fail-fasts # on hint anchor not in metadata (correct: catches typos and # mis-applied hints early). Uncomment if a future build turns on # source-IP routing. # --inline-hint=lpm_src_v4:!00000000 # --inline-hint=lpm_src_v6:!00000000 # lru_mapping/global_lru_maps outer-only hints commented: katran # benchmark uses F_LRU_BYPASS + no `-forwarding_cores`, so the outer # ARRAY_OF_MAPS stays empty (every slot ENOENT). #265 root-caused this: # `attachLrus()` iterates empty forwardingCores_ \u2192 zero update_elem. # bpfopt fail-fasts when hinted outer key has no live inner map # (correct: hint claims something kernel snapshot disproves). # Uncomment only if benchmark configures forwarding cores OR an # alternative test deploys populated map-in-map. # --inline-hint=lru_mapping:!00000000 # --inline-hint=global_lru_maps:!00000000",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 9,
+        "program": {
+          "final_insn_count": 2464,
+          "orig_insn_count": 2542,
+          "prog_id": 9,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}
