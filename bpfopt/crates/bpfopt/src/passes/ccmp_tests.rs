@@ -80,11 +80,10 @@ fn ccmp_payload_roundtrips_canonical_encoding() {
 }
 
 #[test]
-fn ccmp_arch_gate_skips_x86_64() {
-    let run = run_pass_on_insns(CcmpPass, three_term_chain(), &ccmp_ctx(Arch::X86_64));
+fn ccmp_arch_gate_fails_on_x86_64() {
+    let err = pass_error_on_insns(CcmpPass, three_term_chain(), &ccmp_ctx(Arch::X86_64));
 
-    assert_eq!(run.result.sites_applied, 0);
-    assert_skip_reason(&run.result, 0, "aarch64");
+    assert!(err.contains("aarch64"), "unexpected error: {err}");
 }
 
 #[test]

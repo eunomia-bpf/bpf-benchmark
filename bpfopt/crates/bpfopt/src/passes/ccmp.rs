@@ -83,7 +83,7 @@ impl BpfPass for CcmpPass {
 
 pub fn run_on_bbprogram(prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
     if ctx.platform.arch != Arch::Aarch64 {
-        return PassResult::skipped_pass(prog, "ccmp is only valid on aarch64");
+        anyhow::bail!("ccmp is only valid on aarch64");
     }
 
     let sites = scan_ccmp_sites(prog)?;

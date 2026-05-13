@@ -478,14 +478,12 @@ impl ProgramCFG {
         if replacement.is_empty() {
             anyhow::bail!("replace_diamond_with_insns requires a non-empty replacement");
         }
-        let replacement_len = replacement.len();
-
-        // A diamond block is "shared" if it has any incoming edge from outside
-        // {predecessor, true_branch, false_branch}. Shared blocks can't be
-        // removed (their external edges would dangle), so we keep them in place
-        // and route the diamond path around them via Jump→join from the
-        // predecessor. If any branch is shared, the join must also be preserved
-        // so the still-live branch reaches a still-live join.
+        // A branch block is "shared" if any incoming edge enters it from outside
+        // the diamond. Shared branches can't be removed (their external edges
+        // would dangle); the diamond path bypasses them via Jump→join from the
+        // predecessor. The join is always preserved when present — removing it
+        // would force a physical-layout assumption that does not hold for
+        // CFG-only-matching diamonds.
         let branch_shared = |branch: BlockId| {
             branch != pattern.predecessor
                 && self
@@ -493,19 +491,6 @@ impl ProgramCFG {
                     .iter()
                     .any(|pred| *pred != pattern.predecessor)
         };
-        let any_branch_shared =
-            branch_shared(pattern.true_branch) || branch_shared(pattern.false_branch);
-        let join_shared = pattern.join.is_some_and(|join| {
-            let allowed = [
-                pattern.predecessor,
-                pattern.true_branch,
-                pattern.false_branch,
-            ];
-            self.predecessors(join)
-                .iter()
-                .any(|pred| !allowed.contains(pred))
-        });
-        let preserve_join = pattern.join.is_some() && (any_branch_shared || join_shared);
 
         let mut remove = BTreeSet::new();
         for block in [pattern.true_branch, pattern.false_branch] {
@@ -513,53 +498,18 @@ impl ProgramCFG {
                 remove.insert(block);
             }
         }
-        if let Some(join) = pattern.join {
-            if join != pattern.predecessor && !preserve_join {
-                remove.insert(join);
-            }
-        }
 
         if let Some(join) = pattern.join {
-            if preserve_join {
-                let remap_site = |site: InsnSite| -> Option<InsnSite> {
-                    (!remove.contains(&site.block)).then_some(site)
-                };
-                self.remap_metadata_sites(remap_site);
-                let predecessor = self.block_mut(pattern.predecessor)?;
-                predecessor.insns = replacement;
-                predecessor.terminator = Terminator::Jump {
-                    insn: BpfInsn::ja(0),
-                    target: join,
-                };
-            } else {
-                let replacement_offset = replacement_len;
-                let join_body = self.block(join)?.insns.clone();
-                let join_body_len = join_body.len();
-                let join_terminator = self.block(join)?.terminator;
-                let remap_site = |site: InsnSite| -> Option<InsnSite> {
-                    if site.block == join {
-                        if site.idx < join_body_len {
-                            return Some(InsnSite {
-                                block: pattern.predecessor,
-                                idx: replacement_offset + site.idx,
-                            });
-                        }
-                        if site.idx == join_body_len {
-                            return Some(InsnSite {
-                                block: pattern.predecessor,
-                                idx: replacement_offset + join_body_len,
-                            });
-                        }
-                    }
-                    (!remove.contains(&site.block)).then_some(site)
-                };
-                self.remap_metadata_sites(remap_site);
-                let predecessor = self.block_mut(pattern.predecessor)?;
-                predecessor.insns = Vec::with_capacity(replacement_len + join_body_len);
-                predecessor.insns.extend_from_slice(&replacement);
-                predecessor.insns.extend_from_slice(&join_body);
-                predecessor.terminator = join_terminator;
-            }
+            let remap_site = |site: InsnSite| -> Option<InsnSite> {
+                (!remove.contains(&site.block)).then_some(site)
+            };
+            self.remap_metadata_sites(remap_site);
+            let predecessor = self.block_mut(pattern.predecessor)?;
+            predecessor.insns = replacement;
+            predecessor.terminator = Terminator::Jump {
+                insn: BpfInsn::ja(0),
+                target: join,
+            };
         } else {
             let true_term = self.block(pattern.true_branch)?.terminator;
             let false_term = self.block(pattern.false_branch)?.terminator;

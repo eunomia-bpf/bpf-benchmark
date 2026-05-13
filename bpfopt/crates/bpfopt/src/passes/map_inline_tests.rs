@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-use super::map_inline::MapInlinePass;
+use super::map_inline::{
+    CompressedMapValues, CompressedMapValuesKind, MapInfo, MapInlineHintAnchorSpec,
+    MapInlineHintModeSpec, MapInlineHintSpec, MapInlinePass,
+};
 use crate::insn::*;
-use crate::pass::{CompressedMapValues, CompressedMapValuesKind, MapInfo, PassContext};
-use crate::pass::{MapInlineHintAnchorSpec, MapInlineHintModeSpec, MapInlineHintSpec};
+use crate::pass::PassContext;
 use crate::test_helpers::*;
 use std::collections::HashMap;
 

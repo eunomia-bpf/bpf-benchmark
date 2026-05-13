@@ -34,12 +34,13 @@ pub fn run_on_bbprogram(prog: &mut ProgramCFG) -> anyhow::Result<PassResult> {
             break;
         }
         for def in dead_defs.into_iter().rev() {
-            sites_applied += prog.delete_insn(def)?;
+            prog.delete_insn(def)?;
+            sites_applied += 1;
         }
     }
 
     let diagnostics = (sites_applied > 0)
-        .then(|| format!("removed {} dead-def insns", sites_applied))
+        .then(|| format!("removed {} dead defs", sites_applied))
         .into_iter()
         .collect();
     Ok(PassResult {

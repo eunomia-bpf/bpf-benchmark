@@ -7,6 +7,7 @@ use crate::pass::*;
 use anyhow::{anyhow, bail, Context, Result};
 use serde::Deserialize;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, VecDeque};
+use std::fmt;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -14,6 +15,98 @@ const R2_SETUP_LOOKBACK_LIMIT: usize = 8;
 const REG_RESOLUTION_LIMIT: usize = 64;
 const CONST_STACK_VALUE_LOOKBACK_LIMIT: usize = 256;
 const VALUE_PREVIEW_BYTES: usize = 32;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MapInlineHintModeSpec {
+    Soft,
+    Hard,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum MapInlineHintAnchorSpec {
+    Pc(usize),
+    MapName(String),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MapInlineHintSpec {
+    pub anchor: MapInlineHintAnchorSpec,
+    pub mode: MapInlineHintModeSpec,
+    pub key: Vec<u8>,
+}
+
+/// Pre-loaded map info used by snapshot/offline map providers.
+///
+/// The pass resolves layout/type information from this data. Mutability
+/// is derived from bytecode-level writer helpers and map type rules.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MapInfo {
+    pub map_type: u32,
+    pub key_size: u32,
+    pub value_size: u32,
+    pub max_entries: u32,
+    pub map_id: u32,
+    pub name: String,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct CompressedMapValues {
+    pub value_size: usize,
+    pub kind: CompressedMapValuesKind,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum CompressedMapValuesKind {
+    Uniform(Vec<u8>),
+    Sparse {
+        default: Vec<u8>,
+        entries: HashMap<Vec<u8>, Vec<u8>>,
+    },
+    Enumerated {
+        entries: HashMap<Vec<u8>, Vec<u8>>,
+    },
+}
+
+impl CompressedMapValues {
+    pub fn lookup(&self, key: &[u8]) -> Option<Vec<u8>> {
+        match &self.kind {
+            CompressedMapValuesKind::Uniform(value) => Some(value.clone()),
+            CompressedMapValuesKind::Sparse { default, entries } => {
+                entries.get(key).cloned().or_else(|| Some(default.clone()))
+            }
+            CompressedMapValuesKind::Enumerated { entries } => entries.get(key).cloned(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum MapLookupError {
+    MissingKey { map_id: u32, key: Vec<u8> },
+    SkippedBySize { map_id: u32 },
+    Failed(String),
+}
+
+impl fmt::Display for MapLookupError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            MapLookupError::MissingKey { map_id, key } => {
+                write!(
+                    f,
+                    "map_values snapshot missing map {} key {}",
+                    map_id,
+                    hex_bytes(key)
+                )
+            }
+            MapLookupError::SkippedBySize { map_id } => {
+                write!(f, "map_values snapshot skipped map {} by size", map_id)
+            }
+            MapLookupError::Failed(message) => f.write_str(message),
+        }
+    }
+}
+
+impl std::error::Error for MapLookupError {}
+
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 enum MapInlineHintAnchor {
     Site(InsnSite),

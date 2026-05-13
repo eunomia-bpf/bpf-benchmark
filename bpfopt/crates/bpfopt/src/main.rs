@@ -11,7 +11,7 @@ use anyhow::{anyhow, bail, Context, Result};
 use bpfopt::analysis::{lift_with_pass_context, lower, ProgramCFG};
 use bpfopt::insn::BpfInsn;
 use bpfopt::pass::{
-    hex_bytes, report_site_pc, run_pass_once, Arch, BtfInfoRecords, CommonArgs, KinsnRegistry,
+    hex_bytes, report_site_pc, run_pass_once, BtfInfoRecords, CommonArgs, KinsnRegistry,
     PassContext, PassResult, PlatformCapabilities, TargetJson,
 };
 use bpfopt::passes::PASS_REGISTRY;
@@ -195,9 +195,7 @@ fn validate_required_side_inputs(common: &CommonArgs, pass_names: &[&str]) -> Re
 fn validate_required_kinsns(ctx: &PassContext, pass_names: &[&str]) -> Result<()> {
     for &pass_name in pass_names {
         let entry = registry_entry(pass_name)?;
-        if !entry.requirements.needs_kinsns()
-            || (pass_name == "ccmp" && ctx.platform.arch != Arch::Aarch64)
-        {
+        if !entry.requirements.needs_kinsns() {
             continue;
         }
         let target_names = entry.requirements.required_kinsns.iter().copied();

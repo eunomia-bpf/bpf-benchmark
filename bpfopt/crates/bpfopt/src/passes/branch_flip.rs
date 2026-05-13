@@ -13,16 +13,26 @@ pub struct BranchFlipPass {
 pub(super) struct BranchFlipSite {
     cond_site: InsnSite,
     pred: BlockId,
-    then_first: BlockId,
-    then_last: BlockId,
-    else_first: BlockId,
-    else_last: BlockId,
     join: BlockId,
+    // Non-empty by construction (see `then_arm` / `else_arm`).
     then_blocks: Vec<BlockId>,
     else_blocks: Vec<BlockId>,
 }
 
 impl BranchFlipSite {
+    fn then_first(&self) -> BlockId {
+        self.then_blocks[0]
+    }
+    fn then_last(&self) -> BlockId {
+        *self.then_blocks.last().unwrap()
+    }
+    fn else_first(&self) -> BlockId {
+        self.else_blocks[0]
+    }
+    fn else_last(&self) -> BlockId {
+        *self.else_blocks.last().unwrap()
+    }
+
     fn body_blocks(&self) -> impl Iterator<Item = BlockId> + '_ {
         self.then_blocks
             .iter()
@@ -197,8 +207,8 @@ fn bf_validate_flipped_branch_deltas(
     site: &BranchFlipSite,
     cond: BpfInsn,
 ) -> anyhow::Result<()> {
-    let then_len = prog.block_range_slot_count(site.then_first, site.then_last)?;
-    let else_len = prog.block_range_slot_count(site.else_first, site.else_last)?;
+    let then_len = prog.block_range_slot_count(site.then_first(), site.then_last())?;
+    let else_len = prog.block_range_slot_count(site.else_first(), site.else_last())?;
     let cond_delta = else_len
         .checked_add(SlotDistance::from_slots(1))
         .ok_or_else(|| {
@@ -225,10 +235,10 @@ fn bf_validate_flipped_branch_deltas(
 
 fn apply_branch_flip_site(prog: &mut ProgramCFG, site: &BranchFlipSite) -> anyhow::Result<()> {
     let pred = site.pred;
-    let then_first = site.then_first;
-    let then_last = site.then_last;
-    let else_first = site.else_first;
-    let else_last = site.else_last;
+    let then_first = site.then_first();
+    let then_last = site.then_last();
+    let else_first = site.else_first();
+    let else_last = site.else_last();
 
     if !bf_blocks_are_adjacent(prog, pred, then_first)?
         || then_first > then_last
@@ -382,10 +392,6 @@ fn branch_flip_site_at(prog: &ProgramCFG, pred: BlockId) -> anyhow::Result<Optio
     Ok(Some(BranchFlipSite {
         cond_site,
         pred,
-        then_first,
-        then_last,
-        else_first,
-        else_last,
         join,
         then_blocks,
         else_blocks,
@@ -449,7 +455,7 @@ fn has_exterior_interior_target(
     site: &BranchFlipSite,
 ) -> anyhow::Result<bool> {
     let own_target = prog
-        .sites_in_block_with_terminator(site.else_first)?
+        .sites_in_block_with_terminator(site.else_first())?
         .first()
         .copied();
     for block in site.body_blocks() {

@@ -11,9 +11,9 @@ use crate::analysis::{
     VerifierStatesBySite,
 };
 use crate::insn::*;
-use crate::pass::{
-    KinsnRegistry, MapInlineHintAnchorSpec, MapInlineHintModeSpec, MapInlineHintSpec, PassContext,
-    TargetJson, VerifierInsn, VerifierInsnKind,
+use crate::pass::{KinsnRegistry, PassContext, TargetJson, VerifierInsn, VerifierInsnKind};
+use crate::passes::map_inline::{
+    MapInlineHintAnchorSpec, MapInlineHintModeSpec, MapInlineHintSpec,
 };
 
 #[cfg(test)]

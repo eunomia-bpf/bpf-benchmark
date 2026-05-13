@@ -5,9 +5,10 @@ use std::collections::HashMap;
 use crate::analysis::{lift_with_pass_context, lower, ProgramCFG};
 use crate::insn::BpfInsn;
 use crate::pass::{
-    BpfPass, MapInfo, PassContext, PassResult, RegState, ScalarRange, SkipReason, StackState, Tnum,
+    BpfPass, PassContext, PassResult, RegState, ScalarRange, SkipReason, StackState, Tnum,
     VerifierInsn, VerifierInsnKind, VerifierValueWidth,
 };
+use crate::passes::map_inline::MapInfo;
 
 pub struct PassRun {
     pub result: PassResult,

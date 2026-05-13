@@ -6,9 +6,9 @@ use crate::pass::*;
 use crate::test_helpers::*;
 
 #[test]
-fn test_pass_manager_invalidates_verifier_states_after_transform() {
-    // Restored from HEAD: verifier states must not survive a bytecode
-    // mutation, or later passes can apply stale per-PC verifier evidence.
+fn verifier_states_invalidated_after_program_mutation() {
+    // Verifier states must not survive a bytecode mutation, or later passes
+    // can apply stale per-PC verifier evidence.
     let input = vec![
         BpfInsn::mov64_imm(BPF_REG_1, 42),
         BpfInsn::mov64_imm(BPF_REG_0, 0),

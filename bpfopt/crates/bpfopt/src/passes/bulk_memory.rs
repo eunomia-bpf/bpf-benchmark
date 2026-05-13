@@ -206,7 +206,13 @@ fn try_match_memcpy_run_at(
         .get(last_idx)
         .copied()
         .ok_or_else(|| anyhow::anyhow!("bulk_memory last index {last_idx} missing"))?;
-    if first.src_base == first.dst_base && ranges_overlap(first.src_off, first.dst_off, raw_bytes) {
+    // Only the consumed_bytes prefix is rewritten into a bulk kfunc; any tail
+    // beyond consumed_bytes keeps executing the original byte-by-byte memcpy,
+    // so its overlap (if any) is preserved by the unchanged code. Alias check
+    // therefore only needs to guard the consumed prefix.
+    if first.src_base == first.dst_base
+        && ranges_overlap(first.src_off, first.dst_off, consumed_bytes)
+    {
         return Ok(MatchOutcome::Skip(
             "alias overlap in same-base memcpy run".into(),
             raw_len,

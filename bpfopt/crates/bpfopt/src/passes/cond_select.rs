@@ -311,13 +311,6 @@ fn try_match_pattern_a(
         .first()
         .copied()
         .ok_or_else(|| anyhow::anyhow!("true branch {:?} has no body site", shape.taken))?;
-    // Physical-layout check: the 4-insn rewrite window must be contiguous in
-    // current PC order (branch, false_mov, ja, true_mov). Otherwise the
-    // post-rewrite CFG produces non-adjacent fallthroughs that the lowerer
-    // rejects.
-    if !physically_contiguous(prog, shape.site, end_site, 4)? {
-        return Ok(None);
-    }
     Ok(Some(CondSelectSite {
         start_site: shape.site,
         end_site,
@@ -362,12 +355,6 @@ fn try_match_pattern_c(
         .first()
         .copied()
         .ok_or_else(|| anyhow::anyhow!("false branch {:?} has no body site", shape.fallthrough))?;
-    // Physical-layout check: 3-insn window (mov_true, cond_branch, mov_false)
-    // must be contiguous; otherwise the rewrite leaves the false-branch block
-    // non-adjacent to the join and lowering fails.
-    if !physically_contiguous(prog, mov_true_site, end_site, 3)? {
-        return Ok(None);
-    }
     Ok(Some(CondSelectSite {
         start_site: mov_true_site,
         end_site,
@@ -377,19 +364,6 @@ fn try_match_pattern_c(
         true_val,
         false_val,
     }))
-}
-
-fn physically_contiguous(
-    prog: &ProgramCFG,
-    start: InsnSite,
-    end: InsnSite,
-    expected_len: usize,
-) -> anyhow::Result<bool> {
-    let start_pc = prog.site_current_pc(start)?;
-    let end_pc = prog.site_current_pc(end)?;
-    // expected_len counts instructions in the window [start, end] inclusive of
-    // both endpoints; the PC delta is therefore expected_len - 1.
-    Ok(end_pc == start_pc + (expected_len - 1))
 }
 
 fn single_successor(prog: &ProgramCFG, block: BlockId) -> anyhow::Result<Option<BlockId>> {
