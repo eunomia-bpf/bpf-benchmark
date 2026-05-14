@@ -53,6 +53,60 @@ fn nullable_lookup_program(old_fd: i32) -> Vec<BpfInsn> {
     ]
 }
 
+fn spilled_lookup_program(old_fd: i32) -> Vec<BpfInsn> {
+    let map = BpfInsn::ld_imm64(BPF_REG_1, BPF_PSEUDO_MAP_FD, i64::from(old_fd));
+    vec![
+        map[0],
+        map[1],
+        BpfInsn::new(
+            BPF_ST | BPF_W | BPF_MEM,
+            BpfInsn::make_regs(BPF_REG_10, 0),
+            -4,
+            1,
+        ),
+        BpfInsn::mov64_reg(BPF_REG_2, BPF_REG_10),
+        BpfInsn::add64_imm(BPF_REG_2, -4),
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, LOOKUP),
+        BpfInsn::stx_mem(BPF_DW, BPF_REG_10, BPF_REG_0, -16),
+        BpfInsn::jeq_imm(BPF_REG_0, 0, 5),
+        BpfInsn::ldx_mem(BPF_DW, BPF_REG_6, BPF_REG_10, -16),
+        BpfInsn::mov64_imm(BPF_REG_6, 0),
+        BpfInsn::ldx_mem(BPF_DW, BPF_REG_7, BPF_REG_10, -16),
+        BpfInsn::ldx_mem(BPF_W, BPF_REG_8, BPF_REG_7, 0),
+        BpfInsn::ja(1),
+        BpfInsn::mov64_imm(BPF_REG_8, 0),
+        BpfInsn::exit(),
+    ]
+}
+
+fn presence_only_lookup_program(old_fd: i32) -> Vec<BpfInsn> {
+    let map = BpfInsn::ld_imm64(BPF_REG_1, BPF_PSEUDO_MAP_FD, i64::from(old_fd));
+    vec![
+        map[0],
+        map[1],
+        BpfInsn::new(
+            BPF_ST | BPF_W | BPF_MEM,
+            BpfInsn::make_regs(BPF_REG_10, 0),
+            -4,
+            1,
+        ),
+        BpfInsn::mov64_reg(BPF_REG_2, BPF_REG_10),
+        BpfInsn::add64_imm(BPF_REG_2, -4),
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, LOOKUP),
+        BpfInsn::stx_mem(BPF_DW, BPF_REG_10, BPF_REG_0, -16),
+        BpfInsn::new(
+            BPF_JMP | BPF_JNE | BPF_K,
+            BpfInsn::make_regs(BPF_REG_0, 0),
+            2,
+            0,
+        ),
+        BpfInsn::mov64_imm(BPF_REG_8, 0),
+        BpfInsn::exit(),
+        BpfInsn::mov64_imm(BPF_REG_8, 1),
+        BpfInsn::exit(),
+    ]
+}
+
 fn ctx_for_array_lookup(map_id: u32, value: Vec<u8>) -> PassContext {
     let mut ctx = ctx_with_verifier_states(vec![verifier_delta_state_with_stack(
         5,
@@ -89,6 +143,33 @@ fn make_percpu_blob(slot_value: &[u8], slots: usize) -> Vec<u8> {
 // (compressed overlay schema validation + raw+compression conflict are now
 // enforced at the CLI/lift boundary in main.rs; tests covering those checks
 // live alongside the boundary parser.)
+
+#[test]
+fn map_inline_folds_array_presence_only_lookup() {
+    let run = run_pass_on_insns(
+        MapInlinePass,
+        presence_only_lookup_program(42),
+        &ctx_for_array_lookup(111, 7u32.to_le_bytes().to_vec()),
+    );
+
+    assert_eq!(run.result.sites_applied, 1);
+    assert!(run
+        .lowered
+        .iter()
+        .all(|insn| !(insn.is_call() && insn.imm == LOOKUP)));
+}
+
+#[test]
+fn map_inline_keeps_stack_alias_after_reload() {
+    let run = run_pass_on_insns(
+        MapInlinePass,
+        spilled_lookup_program(42),
+        &ctx_for_array_lookup(111, 7u32.to_le_bytes().to_vec()),
+    );
+
+    assert_eq!(run.result.sites_applied, 1);
+    assert!(run.lowered.contains(&BpfInsn::mov32_imm(BPF_REG_8, 7)));
+}
 
 #[test]
 fn map_inline_consumes_hint_when_verifier_state_unavailable() {

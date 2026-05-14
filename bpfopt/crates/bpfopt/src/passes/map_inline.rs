@@ -1447,7 +1447,11 @@ fn run_map_inline_round(
             let reason = "hash map inline requires an immediate null check".to_string();
             skip_lookup!(&mut skipped, &mut site_diagnostics, site.call_site, reason);
         }
-        if uses.loads.is_empty() {
+        if uses.loads.is_empty()
+            && !(info.has_removable_lookup_pattern()
+                && uses.null_check.is_some()
+                && uses.other_uses.is_empty())
+        {
             let reason = "lookup result is not consumed by fixed-offset scalar loads".to_string();
             skip_lookup!(&mut skipped, &mut site_diagnostics, site.call_site, reason);
         }
@@ -1478,6 +1482,14 @@ fn run_map_inline_round(
             });
             rewrite.skipped_sites.clear();
             rewrite.removed_null_check = false;
+        }
+        if rewrite.replacements.is_empty() && rewrite.skipped_sites.is_empty() {
+            skip_lookup!(
+                &mut skipped,
+                &mut site_diagnostics,
+                site.call_site,
+                "empty map inline rewrite".to_string()
+            );
         }
         if rewrite
             .replacements
@@ -1803,6 +1815,10 @@ fn build_site_rewrite(
         prog.insn_at(*site)
             .is_some_and(null_check_is_fallthrough_non_null)
     });
+    let non_null_jump_check = uses.null_check.filter(|site| {
+        prog.insn_at(*site)
+            .is_some_and(|insn| bpf_op(insn.code) == BPF_JNE)
+    });
     let mut lookup_pattern_sites = BTreeSet::new();
     if remove_lookup_pattern {
         lookup_pattern_sites.insert(site.call_site);
@@ -1823,6 +1839,11 @@ fn build_site_rewrite(
         BTreeSet::new()
     };
     let mut replacements = Vec::new();
+    if can_remove_lookup_pattern {
+        if let Some(null_check) = non_null_jump_check {
+            replacements.push(site_replacement(prog, null_check, vec![BpfInsn::ja(0)])?);
+        }
+    }
     for load in &uses.loads {
         let scalar =
             read_scalar_from_value(&inline_value, load.offset, load.size).ok_or_else(|| {
@@ -1840,12 +1861,15 @@ fn build_site_rewrite(
         )?);
     }
     if replacements.is_empty() {
-        return Ok(Ok(None));
+        if !(can_remove_lookup_pattern && uses.loads.is_empty() && uses.null_check.is_some()) {
+            return Ok(Ok(None));
+        }
     }
     Ok(Ok(Some(SiteRewrite {
         call_site: site.call_site,
         diagnostic_value: format_inlined_value_diagnostic(&inline_value, &uses.loads),
-        removed_null_check: can_remove_lookup_pattern && removable_null_check.is_some(),
+        removed_null_check: can_remove_lookup_pattern
+            && (removable_null_check.is_some() || non_null_jump_check.is_some()),
         map_inline_records: vec![MapInlineRecord {
             map_id: info.map_id,
             key: encoded_key,
@@ -2457,7 +2481,6 @@ fn classify_r0_uses_with_options(
         if let Some(stack_off) = resolve_stack_load_slot(prog, site, insn)? {
             if let Some(&alias_off) = alias_stack_slots.get(&stack_off) {
                 classification.alias_copies.push(site);
-                alias_stack_slots.remove(&stack_off);
                 kill_defined_alias_regs(&mut alias_regs, insn);
                 alias_regs.insert(insn.dst_reg(), alias_off);
                 continue;

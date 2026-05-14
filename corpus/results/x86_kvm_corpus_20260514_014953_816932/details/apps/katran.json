@@ -1,0 +1,620 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 4355119,
+        "run_time_ns_delta": 654033275,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.101832301,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   353.46us  276.56us   3.74ms   77.98%\n    Req/Sec     6.06k   221.00     6.94k    69.77%\n  Latency Distribution\n     50%  269.00us\n     75%  474.00us\n     90%  715.00us\n     99%    1.32ms\n  725581 requests in 30.10s, 112.79MB read\nRequests/sec:  24106.13\nTransfer/sec:      3.75MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.101915906999977,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   352.88us  274.27us   3.53ms   77.80%\n    Req/Sec     6.05k   218.51     6.70k    69.10%\n  Latency Distribution\n     50%  271.00us\n     75%  474.00us\n     90%  712.00us\n     99%    1.31ms\n  725248 requests in 30.10s, 112.74MB read\nRequests/sec:  24095.06\nTransfer/sec:      3.75MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.102045910999976,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   351.65us  272.09us   8.26ms   78.26%\n    Req/Sec     6.06k   215.36     6.84k    67.36%\n  Latency Distribution\n     50%  271.00us\n     75%  469.00us\n     90%  705.00us\n     99%    1.29ms\n  726664 requests in 30.10s, 112.96MB read\nRequests/sec:  24142.05\nTransfer/sec:      3.75MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 11192,
+        "bytes_xlated": 19528,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 4305765,
+        "run_time_ns_delta": 607983245,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.101999054999965,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   354.87us  273.04us   4.57ms   78.06%\n    Req/Sec     6.01k   229.63     6.82k    69.35%\n  Latency Distribution\n     50%  274.00us\n     75%  472.00us\n     90%  711.00us\n     99%    1.31ms\n  719636 requests in 30.10s, 111.87MB read\nRequests/sec:  23908.50\nTransfer/sec:      3.72MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.101929603999963,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   360.21us  282.78us   4.34ms   77.80%\n    Req/Sec     5.95k   239.62     6.69k    67.77%\n  Latency Distribution\n     50%  275.00us\n     75%  482.00us\n     90%  728.00us\n     99%    1.35ms\n  712487 requests in 30.10s, 110.76MB read\nRequests/sec:  23671.07\nTransfer/sec:      3.68MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.101839821999988,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   355.00us  274.63us   3.71ms   78.28%\n    Req/Sec     6.02k   232.77     6.84k    68.52%\n  Latency Distribution\n     50%  274.00us\n     75%  472.00us\n     90%  711.00us\n     99%    1.32ms\n  720693 requests in 30.10s, 112.03MB read\nRequests/sec:  23943.74\nTransfer/sec:      3.72MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "9": {
+        "passes": [
+          {
+            "bpfopt_ms": 33,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 644,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2116,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "maps_skipped_by_size=4",
+                "inline_hints_consumed=5",
+                "site at PC=13: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=365: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=464: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=541: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=562: skip reason: map-in-map chain is not inlineable",
+                "site at PC=570: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=592: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=616: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=654: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=793: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=814: skip reason: map-in-map chain is not inlineable",
+                "site at PC=823: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=844: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=863: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=863: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(142), idx: 5 } has no verifier state for r2",
+                "site at PC=895: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=895: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(151), idx: 5 } has no verifier state for r2",
+                "site at PC=1001: skip reason: map 18 snapshot skipped by size and no overlay provided",
+                "site at PC=1018: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "site at PC=1041: keeping lookup pattern because removal would cross a branch target",
+                "site at PC=1056: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1072: skip reason: map-in-map chain is not inlineable",
+                "site at PC=1086: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1113: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1128: skip reason: map 10 snapshot skipped by size and no overlay provided",
+                "site at PC=1221: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1245: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1303: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1311: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                "site at PC=1320: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1351: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=1351: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(235), idx: 5 } has no verifier state for r2",
+                "site at PC=1381: skip reason: map 11 snapshot skipped by size and no overlay provided",
+                "site at PC=1495: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1524: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                "site at PC=1550: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1573: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "site at PC=1593: skip reason: map 18 snapshot skipped by size and no overlay provided",
+                "site at PC=1634: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1670: skip reason: map 18 snapshot skipped by size and no overlay provided",
+                "site at PC=1702: skip reason: lookup result is not consumed by fixed-offset scalar loads",
+                "site at PC=1726: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6",
+                "site at PC=1746: keeping lookup pattern because removal would cross a branch target",
+                "site at PC=1760: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1776: skip reason: map-in-map chain is not inlineable",
+                "site at PC=1789: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1807: keeping lookup pattern because removal would cross a branch target",
+                "site at PC=1815: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1829: skip reason: map 10 snapshot skipped by size and no overlay provided",
+                "site at PC=1927: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=1948: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=2006: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=2027: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=2062: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=2062: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(361), idx: 5 } has no verifier state for r2",
+                "site at PC=2079: skip reason: map 11 snapshot skipped by size and no overlay provided",
+                "site at PC=2202: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=2214: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=2223: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=2263: skip reason: map 3 snapshot skipped by size and no overlay provided",
+                "site at PC=2298: skip reason: map 18 snapshot skipped by size and no overlay provided",
+                "site at PC=512: inlined successfully, value=0x2",
+                "site at PC=520: inlined successfully, value=0x2",
+                "site at PC=762: inlined successfully, value=0x2",
+                "site at PC=770: inlined successfully, value=0x2",
+                "site at PC=1041: inlined successfully, value=0x0",
+                "site at PC=1105: inlined successfully, value=0x02000000000b0000",
+                "site at PC=1292: inlined successfully, value=0x1",
+                "site at PC=1514: inlined successfully, value=0x0",
+                "site at PC=1692: inlined successfully, value=0x0",
+                "site at PC=1746: inlined successfully, value=0x0",
+                "site at PC=1807: inlined successfully, value=0x02000000000b0000",
+                "site at PC=1995: inlined successfully, value=0x1",
+                "site at PC=2018: inlined successfully, value=0x200c80a"
+              ],
+              "inlined_map_entries": [
+                {
+                  "key_hex": "0a6401010000000000000000000000001f900600",
+                  "map_id": 5,
+                  "value_hex": "0200000000000000"
+                },
+                {
+                  "key_hex": "0a6401010000000000000000000000001f900600",
+                  "map_id": 5,
+                  "value_hex": "0200000000000000"
+                },
+                {
+                  "key_hex": "0a6401010000000000000000000000001f900600",
+                  "map_id": 5,
+                  "value_hex": "0200000000000000"
+                },
+                {
+                  "key_hex": "0a6401010000000000000000000000001f900600",
+                  "map_id": 5,
+                  "value_hex": "0200000000000000"
+                },
+                {
+                  "key_hex": "01000000",
+                  "map_id": 9,
+                  "value_hex": "0ac8000200000000000000000000000000000000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 4,
+                  "value_hex": "02000000000b0000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 8,
+                  "value_hex": "01000000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 16,
+                  "value_hex": "00000000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 16,
+                  "value_hex": "00000000"
+                },
+                {
+                  "key_hex": "01000000",
+                  "map_id": 9,
+                  "value_hex": "0ac8000200000000000000000000000000000000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 4,
+                  "value_hex": "02000000000b0000"
+                },
+                {
+                  "key_hex": "00000000",
+                  "map_id": 8,
+                  "value_hex": "01000000"
+                },
+                {
+                  "key_hex": "01000000",
+                  "map_id": 9,
+                  "value_hex": "0ac8000200000000000000000000000000000000"
+                }
+              ],
+              "insn_count_after": 2499,
+              "insn_count_before": 2542,
+              "insn_delta": -43,
+              "pass": "map_inline",
+              "sites_applied": 13,
+              "sites_matched": 67,
+              "sites_skipped": 54,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 4,
+                "lookup result is not consumed by fixed-offset scalar loads": 3,
+                "map 10 snapshot skipped by size and no overlay provided": 2,
+                "map 11 snapshot skipped by size and no overlay provided": 2,
+                "map 18 snapshot skipped by size and no overlay provided": 4,
+                "map 3 snapshot skipped by size and no overlay provided": 32,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6": 3,
+                "map-in-map chain is not inlineable": 4
+              },
+              "skipped_sites": [
+                {
+                  "pc": 13,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 365,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 464,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 541,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 562,
+                  "reason": "map-in-map chain is not inlineable"
+                },
+                {
+                  "pc": 570,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 592,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 616,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 654,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 793,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 814,
+                  "reason": "map-in-map chain is not inlineable"
+                },
+                {
+                  "pc": 823,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 844,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 863,
+                  "reason": "lookup key is not available from verifier-guided state"
+                },
+                {
+                  "pc": 895,
+                  "reason": "lookup key is not available from verifier-guided state"
+                },
+                {
+                  "pc": 1001,
+                  "reason": "map 18 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1018,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6"
+                },
+                {
+                  "pc": 1056,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1072,
+                  "reason": "map-in-map chain is not inlineable"
+                },
+                {
+                  "pc": 1086,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1113,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1128,
+                  "reason": "map 10 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1221,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1245,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1303,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1311,
+                  "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                },
+                {
+                  "pc": 1320,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1351,
+                  "reason": "lookup key is not available from verifier-guided state"
+                },
+                {
+                  "pc": 1381,
+                  "reason": "map 11 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1495,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1524,
+                  "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                },
+                {
+                  "pc": 1550,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1573,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6"
+                },
+                {
+                  "pc": 1593,
+                  "reason": "map 18 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1634,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1670,
+                  "reason": "map 18 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1702,
+                  "reason": "lookup result is not consumed by fixed-offset scalar loads"
+                },
+                {
+                  "pc": 1726,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=6"
+                },
+                {
+                  "pc": 1760,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1776,
+                  "reason": "map-in-map chain is not inlineable"
+                },
+                {
+                  "pc": 1789,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1815,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1829,
+                  "reason": "map 10 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1927,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 1948,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 2006,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 2027,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 2062,
+                  "reason": "lookup key is not available from verifier-guided state"
+                },
+                {
+                  "pc": 2079,
+                  "reason": "map 11 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 2202,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 2214,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 2223,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 2263,
+                  "reason": "map 3 snapshot skipped by size and no overlay provided"
+                },
+                {
+                  "pc": 2298,
+                  "reason": "map 18 snapshot skipped by size and no overlay provided"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 65,
+            "status": "ok",
+            "step": {
+              "command": "OVERLAY_DIR=/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/map_inline/overlays/katran; CH=; RE=; SI=; for f in ${MAP_VALUES}/map-*.show.json; do n=$(jq -r .name \"$f\"); i=$(jq -r .id \"$f\"); case \"$n\" in ch_rings) CH=$i ;; reals) RE=$i ;; server_id_map) SI=$i ;; esac; done; jq -n --arg c \"$CH\" --arg r \"$RE\" --arg s \"$SI\" --slurpfile co \"$OVERLAY_DIR/ch_rings.json\" --slurpfile ro \"$OVERLAY_DIR/reals.json\" --slurpfile so \"$OVERLAY_DIR/server_id_map.json\" '($c | if . == \"\" then {} else {(.): $co[0]} end) + ($r | if . == \"\" then {} else {(.): $ro[0]} end) + ($s | if . == \"\" then {} else {(.): $so[0]} end)' > ${MAP_VALUES}/overlays.json && timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --inline-hint=ctl_array:!00000000 --inline-hint=vip_map:!0a6401010000000000000000000000001f900600 --inline-hint=ch_rings:!00000000 --inline-hint=reals:!01000000 --inline-hint=server_id_map:!00000000 # lpm_src_v4/v6 hints commented: katran is built without # -DLPM_SRC_LOOKUP, so these maps are guarded out of the program # by `#ifdef LPM_SRC_LOOKUP` in balancer_maps.h. bpfopt fail-fasts # on hint anchor not in metadata (correct: catches typos and # mis-applied hints early). Uncomment if a future build turns on # source-IP routing. # --inline-hint=lpm_src_v4:!00000000 # --inline-hint=lpm_src_v6:!00000000 # lru_mapping/global_lru_maps outer-only hints commented: katran # benchmark uses F_LRU_BYPASS + no `-forwarding_cores`, so the outer # ARRAY_OF_MAPS stays empty (every slot ENOENT). #265 root-caused this: # `attachLrus()` iterates empty forwardingCores_ \u2192 zero update_elem. # bpfopt fail-fasts when hinted outer key has no live inner map # (correct: hint claims something kernel snapshot disproves). # Uncomment only if benchmark configures forwarding cores OR an # alternative test deploys populated map-in-map. # --inline-hint=lru_mapping:!00000000 # --inline-hint=global_lru_maps:!00000000",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 9,
+        "program": {
+          "final_insn_count": 2499,
+          "orig_insn_count": 2542,
+          "prog_id": 9,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}
