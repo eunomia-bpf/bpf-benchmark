@@ -1,0 +1,26 @@
+{
+  "completed_benchmarks": 32,
+  "current_benchmark": "nested_loop_3",
+  "current_benchmark_index": 33,
+  "current_benchmark_record": {
+    "category": "loop-shape",
+    "description": "Three-level bounded nested loop over a generated value grid",
+    "expected_result": 1123355393214246525,
+    "family": "nested-loop",
+    "hypothesis": "Deeper loop nesting should stress induction-variable handling and loop-exit code quality",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/nested_loop_3.mem",
+    "io_mode": "staged",
+    "level": "3-level",
+    "name": "nested_loop_3",
+    "runs": [],
+    "tags": [
+      "compute",
+      "loop",
+      "nested",
+      "pure-jit"
+    ]
+  },
+  "error_message": "nested_loop_3/kernel_rejit result mismatch: 11849706036649288981 != 1123355393214246525",
+  "status": "error",
+  "total_benchmarks": 63
+}

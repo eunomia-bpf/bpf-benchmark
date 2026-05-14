@@ -1,0 +1,26 @@
+{
+  "completed_benchmarks": 0,
+  "current_benchmark": "memcmp_prefix_64",
+  "current_benchmark_index": 1,
+  "current_benchmark_record": {
+    "category": "memory-local",
+    "description": "Compare three 64-byte candidates against a fixed prefix pattern",
+    "expected_result": 9377358970524074984,
+    "family": "byte-compare",
+    "hypothesis": "Early-exit byte comparisons should expose byte-load lowering and branch short-circuit behavior",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/memcmp_prefix_64.mem",
+    "io_mode": "staged",
+    "level": "prefix-64",
+    "name": "memcmp_prefix_64",
+    "runs": [],
+    "tags": [
+      "memory",
+      "compare",
+      "branch",
+      "pure-jit"
+    ]
+  },
+  "error_message": "memcmp_prefix_64/kernel_rejit result mismatch: 11069793955954099111 != 9377358970524074984",
+  "status": "error",
+  "total_benchmarks": 1
+}

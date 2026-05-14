@@ -1,0 +1,26 @@
+{
+  "completed_benchmarks": 47,
+  "current_benchmark": "mega_basic_block_2048",
+  "current_benchmark_index": 48,
+  "current_benchmark_record": {
+    "category": "program-scale",
+    "description": "Single very large acyclic straight-line block with many live temporaries",
+    "expected_result": 11992325257241416031,
+    "family": "mega-block",
+    "hypothesis": "A huge basic block should directly stress scheduling and register allocation scalability",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/mega_basic_block_2048.mem",
+    "io_mode": "staged",
+    "level": "approx-2048",
+    "name": "mega_basic_block_2048",
+    "runs": [],
+    "tags": [
+      "compute",
+      "code-size",
+      "straight-line",
+      "pure-jit"
+    ]
+  },
+  "error_message": "mega_basic_block_2048/kernel_rejit result mismatch: 12027026216875956832 != 11992325257241416031",
+  "status": "error",
+  "total_benchmarks": 63
+}

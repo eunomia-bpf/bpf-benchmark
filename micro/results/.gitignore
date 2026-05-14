@@ -1,5 +1,4 @@
-# Ignore timestamped session run output. Keep curated reports explicit.
-*_20[0-9][0-9][0-9][0-9][0-9][0-9]_*
+# Keep generated micro run output visible to git.
 !README.md
 !.gitkeep
 !.gitignore

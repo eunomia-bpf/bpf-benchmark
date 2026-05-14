@@ -1,0 +1,25 @@
+{
+  "completed_benchmarks": 59,
+  "current_benchmark": "branch_flip_dense",
+  "current_benchmark_index": 60,
+  "current_benchmark_record": {
+    "category": "control-flow",
+    "description": "Pure dense if/else diamonds over aligned staged u64 input",
+    "expected_result": 255429993929868791,
+    "family": "branch-flip",
+    "hypothesis": "Isolates BRANCH_FLIP lowering with eight simple ALU-only diamonds repeated across 32 groups",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/branch_flip_dense.mem",
+    "io_mode": "staged",
+    "level": "canonical-dense",
+    "name": "branch_flip_dense",
+    "runs": [],
+    "tags": [
+      "branch",
+      "branch-flip",
+      "canonical",
+      "pure-jit"
+    ]
+  },
+  "status": "running",
+  "total_benchmarks": 63
+}

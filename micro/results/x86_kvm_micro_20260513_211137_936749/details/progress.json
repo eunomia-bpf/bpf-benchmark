@@ -1,0 +1,27 @@
+{
+  "completed_benchmarks": 0,
+  "current_benchmark": "katran_like",
+  "current_benchmark_index": 1,
+  "current_benchmark_record": {
+    "category": "alu-mix",
+    "description": "Katran-like IPv4 TCP VIP path with local fixture lookups and Jenkins hash",
+    "expected_result": 5895923248507644458,
+    "family": "packet-load-balancer",
+    "hypothesis": "A helper-free Katran-shaped path should expose realistic parse, hash, selection, and encap ALU patterns",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/katran_like.mem",
+    "io_mode": "packet",
+    "level": "katran-hotpath",
+    "name": "katran_like",
+    "runs": [],
+    "tags": [
+      "packet",
+      "katran",
+      "hash",
+      "endian",
+      "pure-jit"
+    ]
+  },
+  "error_message": "katran_like/kernel_rejit result mismatch: 9819779745284614698 != 5895923248507644458",
+  "status": "error",
+  "total_benchmarks": 1
+}

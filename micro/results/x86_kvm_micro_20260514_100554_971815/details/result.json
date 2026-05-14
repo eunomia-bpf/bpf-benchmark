@@ -1,0 +1,329 @@
+{
+  "benchmarks": [
+    {
+      "category": "memory-local",
+      "description": "Compare three 64-byte candidates against a fixed prefix pattern",
+      "expected_result": 9377358970524074984,
+      "family": "byte-compare",
+      "hypothesis": "Early-exit byte comparisons should expose byte-load lowering and branch short-circuit behavior",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/memcmp_prefix_64.mem",
+      "io_mode": "staged",
+      "level": "prefix-64",
+      "name": "memcmp_prefix_64",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "label": "llvmbpf LLVM JIT",
+          "mode": "llvmbpf",
+          "result_distribution": {
+            "9377358970524074984": 1
+          },
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1112,
+                "native_code_bytes": 469
+              },
+              "compile_ns": 10677845,
+              "exec_cycles": 392,
+              "exec_ns": 106,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 438,
+                "jit_compile_ns": 10677845,
+                "memory_prepare_ns": 26187,
+                "program_image_ns": 84930,
+                "vm_load_code_ns": 1118
+              },
+              "result": 9377358970524074984,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686277473,
+              "wall_exec_ns": 1720
+            }
+          ],
+          "timing_source": "rdtsc"
+        },
+        {
+          "inner_repeat": 10,
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "result_distribution": {
+            "9377358970524074984": 1
+          },
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1112,
+                "native_code_bytes": 565
+              },
+              "compile_ns": 801719,
+              "exec_cycles": 14778555,
+              "exec_ns": 151,
+              "jited_prog_len": 565,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 567,
+                "memory_prepare_ns": 19843,
+                "object_load_ns": 749105,
+                "object_open_ns": 52614,
+                "prog_run_wall_ns": 40090114,
+                "result_extract_ns": 724
+              },
+              "result": 9377358970524074984,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686279882,
+              "wall_exec_ns": 4009070,
+              "xlated_prog_len": 1112
+            }
+          ],
+          "timing_source": "ktime"
+        },
+        {
+          "inner_repeat": 10,
+          "label": "kernel eBPF + ReJIT",
+          "mode": "kernel_rejit",
+          "result_distribution": {
+            "9377358970524074984": 1
+          },
+          "runtime": "kernel_rejit",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1112,
+                "native_code_bytes": 565
+              },
+              "compile_ns": 791170,
+              "exec_cycles": 14699371,
+              "exec_ns": 250,
+              "jited_prog_len": 565,
+              "passes": [
+                "noop",
+                "const_prop"
+              ],
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 1956,
+                "memory_prepare_ns": 20082,
+                "object_load_ns": 741678,
+                "object_open_ns": 49492,
+                "prog_run_wall_ns": 39875253,
+                "result_extract_ns": 756
+              },
+              "rejit_result": {
+                "per_program": {
+                  "9": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 2,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "insn_count_after": 139,
+                          "insn_count_before": 139,
+                          "insn_delta": 0,
+                          "pass": "noop",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {}
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 21,
+                        "status": "ok",
+                        "step": {
+                          "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                          "log_level": 2,
+                          "name": "noop"
+                        }
+                      },
+                      {
+                        "bpfopt_ms": 11,
+                        "bpfopt_summary": {
+                          "diagnostics": [
+                            "const_prop_alu_materialized=7",
+                            "site at PC=48: debug_candidate_replacement=[BpfInsn { code: 0xb7, dst: 3, src: 0, off: 0, imm: 13 }]",
+                            "site at PC=48: debug_candidate_states=[VerifierInsn { pc: 48, frame: 0, from_pc: None, kind: InsnDeltaState, speculative: false, regs: {3: RegState { reg_type: \"scalar\", value_width: Bits64, precise: false, exact_value: Some(13), tnum: None, range: ScalarRange { smin: Some(13), smax: Some(13), umin: Some(13), umax: Some(13), smin32: Some(13), smax32: Some(13), umin32: Some(13), umax32: Some(13) }, offset: None, id: None }}, stack: {} }]",
+                            "site at PC=80: debug_candidate_replacement=[BpfInsn { code: 0xb7, dst: 2, src: 0, off: 0, imm: 16 }]",
+                            "site at PC=80: debug_candidate_states=[VerifierInsn { pc: 80, frame: 0, from_pc: None, kind: InsnDeltaState, speculative: false, regs: {2: RegState { reg_type: \"scalar\", value_width: Bits64, precise: false, exact_value: Some(16), tnum: None, range: ScalarRange { smin: Some(16), smax: Some(16), umin: Some(16), umax: Some(16), smin32: Some(16), smax32: Some(16), umin32: Some(16), umax32: Some(16) }, offset: None, id: None }}, stack: {} }]",
+                            "site at PC=112: debug_candidate_replacement=[BpfInsn { code: 0xb7, dst: 3, src: 0, off: 0, imm: 10137 }]",
+                            "site at PC=112: debug_candidate_states=[VerifierInsn { pc: 112, frame: 0, from_pc: None, kind: InsnDeltaState, speculative: false, regs: {3: RegState { reg_type: \"scalar\", value_width: Bits64, precise: false, exact_value: Some(10137), tnum: None, range: ScalarRange { smin: Some(10137), smax: Some(10137), umin: Some(10137), umax: Some(10137), smin32: Some(10137), smax32: Some(10137), umin32: Some(10137), umax32: Some(10137) }, offset: None, id: None }}, stack: {} }]",
+                            "site at PC=115: debug_candidate_replacement=[BpfInsn { code: 0xb7, dst: 3, src: 0, off: 0, imm: 2595231 }]",
+                            "site at PC=115: debug_candidate_states=[VerifierInsn { pc: 115, frame: 0, from_pc: None, kind: InsnDeltaState, speculative: false, regs: {3: RegState { reg_type: \"scalar\", value_width: Bits64, precise: false, exact_value: Some(2595231), tnum: None, range: ScalarRange { smin: Some(2595231), smax: Some(2595231), umin: Some(2595231), umax: Some(2595231), smin32: Some(2595231), smax32: Some(2595231), umin32: Some(2595231), umax32: Some(2595231) }, offset: None, id: None }}, stack: {} }]",
+                            "site at PC=118: debug_candidate_replacement=[BpfInsn { code: 0xb7, dst: 3, src: 0, off: 0, imm: 664379342 }]",
+                            "site at PC=118: debug_candidate_states=[VerifierInsn { pc: 118, frame: 0, from_pc: None, kind: InsnDeltaState, speculative: false, regs: {3: RegState { reg_type: \"scalar\", value_width: Bits64, precise: false, exact_value: Some(664379342), tnum: None, range: ScalarRange { smin: Some(664379342), smax: Some(664379342), umin: Some(664379342), umax: Some(664379342), smin32: Some(664379342), smax32: Some(664379342), umin32: Some(664379342), umax32: Some(664379342) }, offset: None, id: None }}, stack: {} }]",
+                            "site at PC=121: debug_candidate_replacement=[BpfInsn { code: 0x18, dst: 3, src: 0, off: 0, imm: -1717580045 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: 39 }]",
+                            "site at PC=121: debug_candidate_states=[VerifierInsn { pc: 121, frame: 0, from_pc: None, kind: InsnDeltaState, speculative: false, regs: {3: RegState { reg_type: \"scalar\", value_width: Bits64, precise: false, exact_value: Some(170081111795), tnum: None, range: ScalarRange { smin: Some(170081111795), smax: Some(170081111795), umin: Some(170081111795), umax: Some(170081111795), smin32: Some(-1717580045), smax32: Some(-1717580045), umin32: Some(2577387251), umax32: Some(2577387251) }, offset: None, id: None }}, stack: {} }]",
+                            "site at PC=133: debug_candidate_replacement=[BpfInsn { code: 0xb7, dst: 3, src: 0, off: 0, imm: 39 }]",
+                            "site at PC=133: debug_candidate_states=[VerifierInsn { pc: 133, frame: 0, from_pc: None, kind: InsnDeltaState, speculative: false, regs: {3: RegState { reg_type: \"scalar\", value_width: Bits64, precise: false, exact_value: Some(39), tnum: None, range: ScalarRange { smin: Some(39), smax: Some(39), umin: Some(39), umax: Some(39), smin32: Some(39), smax32: Some(39), umin32: Some(39), umax32: Some(39) }, offset: None, id: None }}, stack: {} }]"
+                          ],
+                          "insn_count_after": 139,
+                          "insn_count_before": 139,
+                          "insn_delta": 0,
+                          "pass": "const_prop",
+                          "sites_applied": 0,
+                          "sites_matched": 7,
+                          "sites_skipped": 7,
+                          "skip_reasons": {
+                            "register has pointer type, cannot materialize": 7
+                          },
+                          "skipped_sites": [
+                            {
+                              "pc": 4,
+                              "reason": "register has pointer type, cannot materialize"
+                            },
+                            {
+                              "pc": 5,
+                              "reason": "register has pointer type, cannot materialize"
+                            },
+                            {
+                              "pc": 7,
+                              "reason": "register has pointer type, cannot materialize"
+                            },
+                            {
+                              "pc": 8,
+                              "reason": "register has pointer type, cannot materialize"
+                            },
+                            {
+                              "pc": 33,
+                              "reason": "register has pointer type, cannot materialize"
+                            },
+                            {
+                              "pc": 60,
+                              "reason": "register has pointer type, cannot materialize"
+                            },
+                            {
+                              "pc": 92,
+                              "reason": "register has pointer type, cannot materialize"
+                            }
+                          ]
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 5,
+                        "status": "ok",
+                        "step": {
+                          "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET}",
+                          "log_level": 1,
+                          "name": "const_prop"
+                        }
+                      }
+                    ],
+                    "prog_id": 9,
+                    "program": {
+                      "final_insn_count": 139,
+                      "orig_insn_count": 139,
+                      "prog_id": 9,
+                      "prog_name": "memcmp_prefix_6",
+                      "prog_type": 6
+                    },
+                    "status": "ok"
+                  }
+                },
+                "status": "ok"
+              },
+              "result": 9377358970524074984,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686212062,
+              "wall_exec_ns": 3987663,
+              "xlated_prog_len": 1112
+            }
+          ],
+          "timing_source": "ktime"
+        }
+      ],
+      "tags": [
+        "memory",
+        "compare",
+        "branch",
+        "pure-jit"
+      ]
+    }
+  ],
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec"
+  },
+  "defaults": {
+    "inner_repeat": 10,
+    "perf_counters": false,
+    "perf_scope": "full_repeat_raw",
+    "runtime_order_seed": 0,
+    "samples": 1,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "generated_at": "2026-05-14T10:05:54.971815+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "unknown",
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_root_mods=1 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 panic=-1 virtme.exec=`L3RtcC9iZW5jaG1hcmstZ3Vlc3QtNzk0dnI4dTEuc2g=` virtme_chdir=home/yunwei37/workspace/bpf-benchmark rootfstype=9p rootflags=version=9p2000.L,trans=virtio,access=any raid=noautodetect ro debug loglevel=7 panic=30 oops=panic init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init",
+    "kernel_version": "7.0.0-rc2+",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "unknown"
+  },
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_pure_jit.yaml",
+  "provenance": {
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 285K",
+    "environment": "vm",
+    "kernel_commit": "unknown",
+    "params": {
+      "inner_repeat": 10,
+      "samples": 1,
+      "warmups": 0
+    },
+    "repo_dirty": false,
+    "repo_git_sha": "unknown",
+    "timestamp": "2026-05-14T10:05:54.972577+00:00"
+  },
+  "sample_runtime_orders": {
+    "memcmp_prefix_64": [
+      [
+        "llvmbpf",
+        "kernel_rejit",
+        "kernel"
+      ]
+    ]
+  },
+  "suite": "micro_staged_codegen",
+  "toolchains": {
+    "libbpf": {
+      "root": "vendor/libbpf"
+    },
+    "llvmbpf": {
+      "root": "vendor/llvmbpf"
+    }
+  }
+}

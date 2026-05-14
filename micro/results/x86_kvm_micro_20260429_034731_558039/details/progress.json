@@ -1,0 +1,24 @@
+{
+  "completed_benchmarks": 3,
+  "current_benchmark": "bitcount",
+  "current_benchmark_index": 4,
+  "current_benchmark_record": {
+    "category": "alu-mix",
+    "description": "Kernighan popcount over generated u64 input",
+    "expected_result": 3035568289764064166,
+    "family": "popcount",
+    "hypothesis": "Favors stronger scalar optimization and loop code generation",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bitcount.mem",
+    "io_mode": "staged",
+    "level": "medium",
+    "name": "bitcount",
+    "runs": [],
+    "tags": [
+      "bitops",
+      "pure-jit"
+    ]
+  },
+  "error_message": "bitcount/llvmbpf result mismatch: 12830754992348206170 != 3035568289764064166",
+  "status": "error",
+  "total_benchmarks": 62
+}

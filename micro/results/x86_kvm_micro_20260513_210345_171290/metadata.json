@@ -1,0 +1,271 @@
+{
+  "benchmarks": [
+    {
+      "category": "alu-mix",
+      "description": "Katran-like IPv4 TCP VIP path with local fixture lookups and Jenkins hash",
+      "expected_result": 5895923248507644458,
+      "family": "packet-load-balancer",
+      "hypothesis": "A helper-free Katran-shaped path should expose realistic parse, hash, selection, and encap ALU patterns",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/katran_like.mem",
+      "io_mode": "packet",
+      "level": "katran-hotpath",
+      "name": "katran_like",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "label": "llvmbpf LLVM JIT",
+          "mode": "llvmbpf",
+          "result_distribution": {
+            "5895923248507644458": 1
+          },
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 6976,
+                "native_code_bytes": 1824
+              },
+              "compile_ns": 28548389,
+              "exec_cycles": 1634,
+              "exec_ns": 443,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "jit_compile_ns": 28548389,
+                "memory_prepare_ns": 16738,
+                "packet_prepare_ns": 456,
+                "program_image_ns": 105726,
+                "vm_load_code_ns": 1553
+              },
+              "result": 5895923248507644458,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686151915,
+              "wall_exec_ns": 25288
+            }
+          ],
+          "timing_source": "rdtsc"
+        },
+        {
+          "inner_repeat": 1,
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "result_distribution": {
+            "5895923248507644458": 1
+          },
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 6832,
+                "native_code_bytes": 3463
+              },
+              "compile_ns": 606271,
+              "exec_cycles": 1632,
+              "exec_ns": 41,
+              "jited_prog_len": 3463,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 26803,
+                "object_load_ns": 541471,
+                "object_open_ns": 64800,
+                "packet_prepare_ns": 697,
+                "prog_run_wall_ns": 483,
+                "result_extract_ns": 516
+              },
+              "result": 5895923248507644458,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686167386,
+              "wall_exec_ns": 443,
+              "xlated_prog_len": 6832
+            }
+          ],
+          "timing_source": "ktime"
+        },
+        {
+          "inner_repeat": 1,
+          "label": "kernel eBPF + ReJIT",
+          "mode": "kernel_rejit",
+          "result_distribution": {
+            "5895923248507644458": 1
+          },
+          "runtime": "kernel_rejit",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 6832,
+                "native_code_bytes": 3463
+              },
+              "compile_ns": 593694,
+              "exec_cycles": 1568,
+              "exec_ns": 36,
+              "jited_prog_len": 3463,
+              "passes": [
+                "endian_fusion"
+              ],
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 22325,
+                "object_load_ns": 532953,
+                "object_open_ns": 60741,
+                "packet_prepare_ns": 3626,
+                "prog_run_wall_ns": 462,
+                "result_extract_ns": 587
+              },
+              "rejit_result": {
+                "per_program": {
+                  "9": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 4,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "insn_count_after": 872,
+                          "insn_count_before": 872,
+                          "insn_delta": 0,
+                          "pass": "endian_fusion",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {}
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 1,
+                        "status": "ok",
+                        "step": {
+                          "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+                          "log_level": 1,
+                          "name": "endian_fusion"
+                        }
+                      }
+                    ],
+                    "prog_id": 9,
+                    "program": {
+                      "final_insn_count": 872,
+                      "orig_insn_count": 872,
+                      "prog_id": 9,
+                      "prog_name": "katran_like_xdp",
+                      "prog_type": 6
+                    },
+                    "status": "ok"
+                  }
+                },
+                "status": "ok"
+              },
+              "result": 5895923248507644458,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686348478,
+              "wall_exec_ns": 425,
+              "xlated_prog_len": 6832
+            }
+          ],
+          "timing_source": "ktime"
+        }
+      ],
+      "tags": [
+        "packet",
+        "katran",
+        "hash",
+        "endian",
+        "pure-jit"
+      ]
+    }
+  ],
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec"
+  },
+  "completed_at": "2026-05-13T21:03:45.669375+00:00",
+  "defaults": {
+    "inner_repeat": 1,
+    "perf_counters": false,
+    "perf_scope": "full_repeat_raw",
+    "runtime_order_seed": 0,
+    "samples": 1,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "details_dir": "details",
+  "generated_at": "2026-05-13T21:03:45.171290+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "unknown",
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_root_mods=1 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 panic=-1 virtme.exec=`L3RtcC9iZW5jaG1hcmstZ3Vlc3Qtb2t2eW5sa3cuc2g=` virtme_chdir=home/yunwei37/workspace/bpf-benchmark rootfstype=9p rootflags=version=9p2000.L,trans=virtio,access=any raid=noautodetect ro debug loglevel=7 panic=30 oops=panic init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init",
+    "kernel_version": "7.0.0-rc2+",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "unknown"
+  },
+  "last_updated_at": "2026-05-13T21:03:45.669375+00:00",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_pure_jit.yaml",
+  "progress": {
+    "completed_benchmarks": 1,
+    "current_benchmark": null,
+    "current_benchmark_index": null,
+    "total_benchmarks": 1
+  },
+  "provenance": {
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 285K",
+    "environment": "vm",
+    "kernel_commit": "unknown",
+    "params": {
+      "inner_repeat": 1,
+      "samples": 1,
+      "warmups": 0
+    },
+    "repo_dirty": false,
+    "repo_git_sha": "unknown",
+    "timestamp": "2026-05-13T21:03:45.172164+00:00"
+  },
+  "run_type": "x86_kvm_micro",
+  "sample_runtime_orders": {
+    "katran_like": [
+      [
+        "llvmbpf",
+        "kernel_rejit",
+        "kernel"
+      ]
+    ]
+  },
+  "started_at": "2026-05-13T21:03:45.171290+00:00",
+  "status": "completed",
+  "suite": "micro_staged_codegen",
+  "toolchains": {
+    "libbpf": {
+      "root": "vendor/libbpf"
+    },
+    "llvmbpf": {
+      "root": "vendor/llvmbpf"
+    }
+  }
+}

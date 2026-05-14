@@ -1,0 +1,734 @@
+{
+  "benchmarks": [
+    {
+      "category": "program-scale",
+      "description": "Single very large acyclic straight-line block with many live temporaries",
+      "expected_result": 11992325257241416031,
+      "family": "mega-block",
+      "hypothesis": "A huge basic block should directly stress scheduling and register allocation scalability",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/mega_basic_block_2048.mem",
+      "io_mode": "staged",
+      "level": "approx-2048",
+      "name": "mega_basic_block_2048",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "label": "llvmbpf LLVM JIT",
+          "mode": "llvmbpf",
+          "result_distribution": {
+            "11992325257241416031": 1
+          },
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 110216,
+                "native_code_bytes": 31050
+              },
+              "compile_ns": 364832484,
+              "exec_cycles": 4357,
+              "exec_ns": 1182,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 365,
+                "jit_compile_ns": 364832484,
+                "memory_prepare_ns": 21139,
+                "program_image_ns": 261378,
+                "vm_load_code_ns": 2251
+              },
+              "result": 11992325257241416031,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686210722,
+              "wall_exec_ns": 4230
+            }
+          ],
+          "timing_source": "rdtsc"
+        },
+        {
+          "inner_repeat": 10,
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "result_distribution": {
+            "11992325257241416031": 1
+          },
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 110216,
+                "native_code_bytes": 49565
+              },
+              "compile_ns": 2577971,
+              "exec_cycles": 14744213,
+              "exec_ns": 1776,
+              "jited_prog_len": 49565,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 663,
+                "memory_prepare_ns": 19158,
+                "object_load_ns": 2427861,
+                "object_open_ns": 150110,
+                "prog_run_wall_ns": 39997370,
+                "result_extract_ns": 1464
+              },
+              "result": 11992325257241416031,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686171926,
+              "wall_exec_ns": 3999871,
+              "xlated_prog_len": 110216
+            }
+          ],
+          "timing_source": "ktime"
+        },
+        {
+          "inner_repeat": 10,
+          "label": "kernel eBPF + ReJIT",
+          "mode": "kernel_rejit",
+          "result_distribution": {
+            "11992325257241416031": 1
+          },
+          "runtime": "kernel_rejit",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 100688,
+                "native_code_bytes": 44248
+              },
+              "compile_ns": 2589107,
+              "exec_cycles": 14701083,
+              "exec_ns": 1628,
+              "jited_prog_len": 44248,
+              "passes": [
+                "noop",
+                "map_inline",
+                "const_prop",
+                "dce",
+                "rotate",
+                "cond_select",
+                "extract",
+                "endian_fusion",
+                "lea",
+                "ccmp",
+                "bulk_memory",
+                "prefetch",
+                "wide_mem",
+                "bounds_check_merge",
+                "skb_load_bytes_spec",
+                "noop",
+                "const_prop"
+              ],
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 3333,
+                "memory_prepare_ns": 20212,
+                "object_load_ns": 2445339,
+                "object_open_ns": 143768,
+                "prog_run_wall_ns": 39880388,
+                "result_extract_ns": 1400
+              },
+              "rejit_result": {
+                "per_program": {
+                  "9": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 23,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "insn_count_after": 13777,
+                          "insn_count_before": 13777,
+                          "insn_delta": 0,
+                          "pass": "noop",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {}
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 35,
+                        "status": "ok",
+                        "step": {
+                          "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                          "log_level": 2,
+                          "name": "noop"
+                        }
+                      },
+                      {
+                        "bpfopt_ms": 326,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "insn_count_after": 13777,
+                          "insn_count_before": 13777,
+                          "insn_delta": 0,
+                          "pass": "map_inline",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {}
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 34,
+                        "status": "ok",
+                        "step": {
+                          "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+                          "log_level": 2,
+                          "name": "map_inline"
+                        }
+                      },
+                      {
+                        "bpfopt_ms": 56,
+                        "bpfopt_summary": {
+                          "diagnostics": [
+                            "const_prop_alu_materialized=0"
+                          ],
+                          "insn_count_after": 13777,
+                          "insn_count_before": 13777,
+                          "insn_delta": 0,
+                          "pass": "const_prop",
+                          "sites_applied": 0,
+                          "sites_matched": 5,
+                          "sites_skipped": 5,
+                          "skip_reasons": {
+                            "register has pointer type, cannot materialize": 5
+                          },
+                          "skipped_sites": [
+                            {
+                              "pc": 4,
+                              "reason": "register has pointer type, cannot materialize"
+                            },
+                            {
+                              "pc": 5,
+                              "reason": "register has pointer type, cannot materialize"
+                            },
+                            {
+                              "pc": 7,
+                              "reason": "register has pointer type, cannot materialize"
+                            },
+                            {
+                              "pc": 8,
+                              "reason": "register has pointer type, cannot materialize"
+                            },
+                            {
+                              "pc": 147,
+                              "reason": "register has pointer type, cannot materialize"
+                            }
+                          ]
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 31,
+                        "status": "ok",
+                        "step": {
+                          "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET}",
+                          "log_level": 1,
+                          "name": "const_prop"
+                        }
+                      },
+                      {
+                        "bpfopt_ms": 24,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "insn_count_after": 13777,
+                          "insn_count_before": 13777,
+                          "insn_delta": 0,
+                          "pass": "dce",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {}
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 31,
+                        "status": "ok",
+                        "step": {
+                          "command": "timeout 6000 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+                          "log_level": 1,
+                          "name": "dce"
+                        }
+                      },
+                      {
+                        "bpfopt_ms": 6676,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "insn_count_after": 12497,
+                          "insn_count_before": 13777,
+                          "insn_delta": -1280,
+                          "pass": "rotate",
+                          "sites_applied": 512,
+                          "sites_matched": 512,
+                          "sites_skipped": 0,
+                          "skip_reasons": {}
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 183,
+                        "status": "ok",
+                        "step": {
+                          "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+                          "log_level": 1,
+                          "name": "rotate"
+                        }
+                      },
+                      {
+                        "bpfopt_ms": 20,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "insn_count_after": 12497,
+                          "insn_count_before": 12497,
+                          "insn_delta": 0,
+                          "pass": "cond_select",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {}
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 182,
+                        "status": "ok",
+                        "step": {
+                          "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+                          "log_level": 1,
+                          "name": "cond_select"
+                        }
+                      },
+                      {
+                        "bpfopt_ms": 21,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "insn_count_after": 12497,
+                          "insn_count_before": 12497,
+                          "insn_delta": 0,
+                          "pass": "extract",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {}
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 183,
+                        "status": "ok",
+                        "step": {
+                          "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+                          "log_level": 1,
+                          "name": "extract"
+                        }
+                      },
+                      {
+                        "bpfopt_ms": 21,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "insn_count_after": 12497,
+                          "insn_count_before": 12497,
+                          "insn_delta": 0,
+                          "pass": "endian_fusion",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {}
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 183,
+                        "status": "ok",
+                        "step": {
+                          "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+                          "log_level": 1,
+                          "name": "endian_fusion"
+                        }
+                      },
+                      {
+                        "bpfopt_ms": 2375,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "insn_count_after": 12497,
+                          "insn_count_before": 12497,
+                          "insn_delta": 0,
+                          "pass": "lea",
+                          "sites_applied": 212,
+                          "sites_matched": 212,
+                          "sites_skipped": 0,
+                          "skip_reasons": {}
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 242,
+                        "status": "ok",
+                        "step": {
+                          "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+                          "log_level": 1,
+                          "name": "lea"
+                        }
+                      },
+                      {
+                        "bpfopt_ms": 21,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "insn_count_after": 12497,
+                          "insn_count_before": 12497,
+                          "insn_delta": 0,
+                          "pass": "ccmp",
+                          "sites_applied": 0,
+                          "sites_matched": 1,
+                          "sites_skipped": 1,
+                          "skip_reasons": {
+                            "ccmp requires aarch64 target": 1
+                          },
+                          "skipped_sites": [
+                            {
+                              "pc": 0,
+                              "reason": "ccmp requires aarch64 target"
+                            }
+                          ]
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 243,
+                        "status": "ok",
+                        "step": {
+                          "command": "timeout 6000 bpfopt --pass ccmp --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+                          "log_level": 1,
+                          "name": "ccmp"
+                        }
+                      },
+                      {
+                        "bpfopt_ms": 511,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "insn_count_after": 12497,
+                          "insn_count_before": 12497,
+                          "insn_delta": 0,
+                          "pass": "bulk_memory",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {}
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 243,
+                        "status": "ok",
+                        "step": {
+                          "command": "timeout 6000 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+                          "log_level": 1,
+                          "name": "bulk_memory"
+                        }
+                      },
+                      {
+                        "bpfopt_ms": 415949,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "insn_count_after": 12589,
+                          "insn_count_before": 12497,
+                          "insn_delta": 92,
+                          "pass": "prefetch",
+                          "sites_applied": 46,
+                          "sites_matched": 47,
+                          "sites_skipped": 1,
+                          "skip_reasons": {
+                            "r2 is redefined inside the prefetch window at InsnSite { block: BlockId(3), idx: 143 }": 1
+                          },
+                          "skipped_sites": [
+                            {
+                              "pc": 153,
+                              "reason": "r2 is redefined inside the prefetch window at InsnSite { block: BlockId(3), idx: 143 }"
+                            }
+                          ]
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 252,
+                        "status": "ok",
+                        "step": {
+                          "command": "timeout 6000 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+                          "log_level": 1,
+                          "name": "prefetch"
+                        }
+                      },
+                      {
+                        "bpfopt_ms": 702,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "insn_count_after": 12586,
+                          "insn_count_before": 12589,
+                          "insn_delta": -3,
+                          "pass": "wide_mem",
+                          "sites_applied": 1,
+                          "sites_matched": 1,
+                          "sites_skipped": 0,
+                          "skip_reasons": {}
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 252,
+                        "status": "ok",
+                        "step": {
+                          "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+                          "log_level": 1,
+                          "name": "wide_mem"
+                        }
+                      },
+                      {
+                        "bpfopt_ms": 21,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "insn_count_after": 12586,
+                          "insn_count_before": 12586,
+                          "insn_delta": 0,
+                          "pass": "bounds_check_merge",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {}
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 251,
+                        "status": "ok",
+                        "step": {
+                          "command": "timeout 6000 bpfopt --pass bounds_check_merge --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+                          "log_level": 1,
+                          "name": "bounds_check_merge"
+                        }
+                      },
+                      {
+                        "bpfopt_ms": 20,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "insn_count_after": 12586,
+                          "insn_count_before": 12586,
+                          "insn_delta": 0,
+                          "pass": "skb_load_bytes_spec",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {}
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 252,
+                        "status": "ok",
+                        "step": {
+                          "command": "timeout 6000 bpfopt --pass skb_load_bytes_spec --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+                          "log_level": 1,
+                          "name": "skb_load_bytes_spec"
+                        }
+                      },
+                      {
+                        "bpfopt_ms": 21,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "insn_count_after": 12586,
+                          "insn_count_before": 12586,
+                          "insn_delta": 0,
+                          "pass": "noop",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {}
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 139,
+                        "status": "ok",
+                        "step": {
+                          "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                          "log_level": 2,
+                          "name": "noop"
+                        }
+                      },
+                      {
+                        "bpfopt_ms": 49,
+                        "bpfopt_summary": {
+                          "diagnostics": [
+                            "DEBUG const_prop candidate pc=202 site=InsnSite { block: BlockId(3), idx: 192 } insn=BpfInsn { code: 0x4f, dst: 2, src: 6, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 2, src: 0, off: 0, imm: 2135587861 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640531527 }]",
+                            "DEBUG const_prop candidate pc=290 site=InsnSite { block: BlockId(3), idx: 278 } insn=BpfInsn { code: 0x67, dst: 1, src: 0, off: 0, imm: 56 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: 2135588296 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640531271 }]",
+                            "DEBUG const_prop candidate pc=403 site=InsnSite { block: BlockId(3), idx: 380 } insn=BpfInsn { code: 0xbf, dst: 1, src: 3, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: 2135588731 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640531015 }]",
+                            "DEBUG const_prop candidate pc=405 site=InsnSite { block: BlockId(3), idx: 382 } insn=BpfInsn { code: 0x0f, dst: 1, src: 6, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: 2135588731 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640531015 }]",
+                            "DEBUG const_prop candidate pc=439 site=InsnSite { block: BlockId(3), idx: 412 } insn=BpfInsn { code: 0xbf, dst: 2, src: 8, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 2, src: 0, off: 0, imm: -1768515948 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: 2 }]",
+                            "DEBUG const_prop candidate pc=479 site=InsnSite { block: BlockId(3), idx: 448 } insn=BpfInsn { code: 0xbf, dst: 0, src: 2, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 0, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111738 }]",
+                            "DEBUG const_prop candidate pc=617 site=InsnSite { block: BlockId(3), idx: 571 } insn=BpfInsn { code: 0x67, dst: 1, src: 0, off: 0, imm: 1 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: 2135590471 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640529991 }]",
+                            "DEBUG const_prop candidate pc=632 site=InsnSite { block: BlockId(3), idx: 585 } insn=BpfInsn { code: 0xbf, dst: 1, src: 5, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111740 }]",
+                            "DEBUG const_prop candidate pc=796 site=InsnSite { block: BlockId(3), idx: 731 } insn=BpfInsn { code: 0x77, dst: 0, src: 0, off: 0, imm: 4 } repl=[BpfInsn { code: 0x18, dst: 0, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111736 }]",
+                            "DEBUG const_prop candidate pc=804 site=InsnSite { block: BlockId(3), idx: 738 } insn=BpfInsn { code: 0xaf, dst: 8, src: 1, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 8, src: 0, off: 0, imm: 2135592646 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640528711 }]",
+                            "DEBUG const_prop candidate pc=845 site=InsnSite { block: BlockId(3), idx: 775 } insn=BpfInsn { code: 0xaf, dst: 1, src: 3, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111736 }]",
+                            "DEBUG const_prop candidate pc=883 site=InsnSite { block: BlockId(3), idx: 810 } insn=BpfInsn { code: 0xaf, dst: 3, src: 2, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 3, src: 0, off: 0, imm: 2135592646 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640528711 }]",
+                            "DEBUG const_prop candidate pc=906 site=InsnSite { block: BlockId(3), idx: 830 } insn=BpfInsn { code: 0x0f, dst: 2, src: 8, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 2, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111730 }]",
+                            "DEBUG const_prop candidate pc=973 site=InsnSite { block: BlockId(3), idx: 891 } insn=BpfInsn { code: 0x77, dst: 4, src: 0, off: 0, imm: 7 } repl=[BpfInsn { code: 0x18, dst: 4, src: 0, off: 0, imm: 252645126 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: 9 }]",
+                            "DEBUG const_prop candidate pc=1044 site=InsnSite { block: BlockId(3), idx: 954 } insn=BpfInsn { code: 0xaf, dst: 5, src: 4, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 5, src: 0, off: 0, imm: 2135593951 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640527943 }]",
+                            "DEBUG const_prop candidate pc=1486 site=InsnSite { block: BlockId(3), idx: 1350 } insn=BpfInsn { code: 0x67, dst: 1, src: 0, off: 0, imm: 6 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111724 }]",
+                            "DEBUG const_prop candidate pc=1539 site=InsnSite { block: BlockId(3), idx: 1398 } insn=BpfInsn { code: 0xaf, dst: 5, src: 2, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 5, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111717 }]",
+                            "DEBUG const_prop candidate pc=1553 site=InsnSite { block: BlockId(3), idx: 1411 } insn=BpfInsn { code: 0xaf, dst: 2, src: 5, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 2, src: 0, off: 0, imm: 2135598736 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640525127 }]",
+                            "DEBUG const_prop candidate pc=1649 site=InsnSite { block: BlockId(3), idx: 1497 } insn=BpfInsn { code: 0xaf, dst: 3, src: 5, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 3, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111720 }]",
+                            "DEBUG const_prop candidate pc=1812 site=InsnSite { block: BlockId(3), idx: 1642 } insn=BpfInsn { code: 0x0f, dst: 1, src: 7, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111715 }]",
+                            "DEBUG const_prop candidate pc=1874 site=InsnSite { block: BlockId(3), idx: 1698 } insn=BpfInsn { code: 0xbf, dst: 2, src: 9, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 2, src: 0, off: 0, imm: 2135601346 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640523591 }]",
+                            "DEBUG const_prop candidate pc=1927 site=InsnSite { block: BlockId(3), idx: 1745 } insn=BpfInsn { code: 0xaf, dst: 4, src: 3, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 4, src: 0, off: 0, imm: 2135601781 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640523335 }]",
+                            "DEBUG const_prop candidate pc=1932 site=InsnSite { block: BlockId(3), idx: 1749 } insn=BpfInsn { code: 0x0f, dst: 3, src: 9, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 3, src: 0, off: 0, imm: -1263225696 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: 20 }]",
+                            "DEBUG const_prop candidate pc=2182 site=InsnSite { block: BlockId(3), idx: 1972 } insn=BpfInsn { code: 0xaf, dst: 1, src: 2, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: -252645159 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: 23 }]",
+                            "DEBUG const_prop candidate pc=2537 site=InsnSite { block: BlockId(3), idx: 2291 } insn=BpfInsn { code: 0x67, dst: 1, src: 0, off: 0, imm: 3 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111704 }]",
+                            "DEBUG const_prop candidate pc=2763 site=InsnSite { block: BlockId(3), idx: 2493 } insn=BpfInsn { code: 0x77, dst: 1, src: 0, off: 0, imm: 5 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: 2135608741 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640519239 }]",
+                            "DEBUG const_prop candidate pc=2804 site=InsnSite { block: BlockId(3), idx: 2530 } insn=BpfInsn { code: 0xbf, dst: 5, src: 3, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 5, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111693 }]",
+                            "DEBUG const_prop candidate pc=2805 site=InsnSite { block: BlockId(3), idx: 2531 } insn=BpfInsn { code: 0xaf, dst: 5, src: 2, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 5, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111693 }]",
+                            "DEBUG const_prop candidate pc=2819 site=InsnSite { block: BlockId(3), idx: 2543 } insn=BpfInsn { code: 0xaf, dst: 2, src: 1, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 2, src: 0, off: 0, imm: 2135609176 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640518983 }]",
+                            "DEBUG const_prop candidate pc=2843 site=InsnSite { block: BlockId(3), idx: 2566 } insn=BpfInsn { code: 0x77, dst: 1, src: 0, off: 0, imm: 2 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: 2135608741 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640519239 }]",
+                            "DEBUG const_prop candidate pc=2862 site=InsnSite { block: BlockId(3), idx: 2582 } insn=BpfInsn { code: 0x0f, dst: 1, src: 0, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111695 }]",
+                            "DEBUG const_prop candidate pc=2875 site=InsnSite { block: BlockId(3), idx: 2594 } insn=BpfInsn { code: 0x67, dst: 5, src: 0, off: 0, imm: 5 } repl=[BpfInsn { code: 0x18, dst: 5, src: 0, off: 0, imm: 1515870778 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: 32 }]",
+                            "DEBUG const_prop candidate pc=3029 site=InsnSite { block: BlockId(3), idx: 2733 } insn=BpfInsn { code: 0xbf, dst: 2, src: 7, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 2, src: 0, off: 0, imm: 2135610916 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640517959 }]",
+                            "DEBUG const_prop candidate pc=3056 site=InsnSite { block: BlockId(3), idx: 2756 } insn=BpfInsn { code: 0xbf, dst: 1, src: 2, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: 2135610481 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640518215 }]",
+                            "DEBUG const_prop candidate pc=3057 site=InsnSite { block: BlockId(3), idx: 2757 } insn=BpfInsn { code: 0x77, dst: 1, src: 0, off: 0, imm: 3 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: 2135610481 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640518215 }]",
+                            "DEBUG const_prop candidate pc=3110 site=InsnSite { block: BlockId(3), idx: 2805 } insn=BpfInsn { code: 0xaf, dst: 5, src: 4, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 5, src: 0, off: 0, imm: 2135610916 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640517959 }]",
+                            "DEBUG const_prop candidate pc=3470 site=InsnSite { block: BlockId(3), idx: 3127 } insn=BpfInsn { code: 0xaf, dst: 1, src: 6, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: 2021161041 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: 39 }]",
+                            "DEBUG const_prop candidate pc=3539 site=InsnSite { block: BlockId(3), idx: 3188 } insn=BpfInsn { code: 0x67, dst: 3, src: 0, off: 0, imm: 1 } repl=[BpfInsn { code: 0x18, dst: 3, src: 0, off: 0, imm: 2135614396 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640515911 }]",
+                            "DEBUG const_prop candidate pc=3592 site=InsnSite { block: BlockId(3), idx: 3236 } insn=BpfInsn { code: 0xbf, dst: 2, src: 6, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 2, src: 0, off: 0, imm: 2135614831 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640515655 }]",
+                            "DEBUG const_prop candidate pc=3754 site=InsnSite { block: BlockId(3), idx: 3381 } insn=BpfInsn { code: 0xaf, dst: 9, src: 7, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 9, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111807 }]",
+                            "DEBUG const_prop candidate pc=3861 site=InsnSite { block: BlockId(3), idx: 3476 } insn=BpfInsn { code: 0x77, dst: 0, src: 0, off: 0, imm: 4 } repl=[BpfInsn { code: 0x18, dst: 0, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111802 }]",
+                            "DEBUG const_prop candidate pc=3873 site=InsnSite { block: BlockId(3), idx: 3487 } insn=BpfInsn { code: 0x0f, dst: 9, src: 7, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 9, src: 0, off: 0, imm: 2135617876 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640513863 }]",
+                            "DEBUG const_prop candidate pc=3911 site=InsnSite { block: BlockId(3), idx: 3521 } insn=BpfInsn { code: 0x0f, dst: 1, src: 0, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111802 }]",
+                            "DEBUG const_prop candidate pc=3923 site=InsnSite { block: BlockId(3), idx: 3532 } insn=BpfInsn { code: 0x0f, dst: 8, src: 9, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 8, src: 0, off: 0, imm: 2135618311 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640513607 }]",
+                            "DEBUG const_prop candidate pc=3931 site=InsnSite { block: BlockId(3), idx: 3540 } insn=BpfInsn { code: 0xbf, dst: 5, src: 8, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 5, src: 0, off: 0, imm: 1263225630 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: 45 }]",
+                            "DEBUG const_prop candidate pc=4145 site=InsnSite { block: BlockId(3), idx: 3731 } insn=BpfInsn { code: 0xbf, dst: 5, src: 7, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 5, src: 0, off: 0, imm: -505290318 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: 47 }]",
+                            "DEBUG const_prop candidate pc=4198 site=InsnSite { block: BlockId(3), idx: 3778 } insn=BpfInsn { code: 0xbf, dst: 1, src: 6, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: -2021161129 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: 48 }]",
+                            "DEBUG const_prop candidate pc=4200 site=InsnSite { block: BlockId(3), idx: 3780 } insn=BpfInsn { code: 0xaf, dst: 1, src: 7, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: -2021161129 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: 48 }]",
+                            "DEBUG const_prop candidate pc=4270 site=InsnSite { block: BlockId(3), idx: 3844 } insn=BpfInsn { code: 0xbf, dst: 3, src: 8, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 3, src: 0, off: 0, imm: 2135620486 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640512327 }]",
+                            "DEBUG const_prop candidate pc=4288 site=InsnSite { block: BlockId(3), idx: 3860 } insn=BpfInsn { code: 0xaf, dst: 2, src: 6, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 2, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111794 }]",
+                            "DEBUG const_prop candidate pc=4458 site=InsnSite { block: BlockId(3), idx: 4012 } insn=BpfInsn { code: 0xbf, dst: 1, src: 8, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: 2135622661 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640511047 }]",
+                            "DEBUG const_prop candidate pc=4505 site=InsnSite { block: BlockId(3), idx: 4054 } insn=BpfInsn { code: 0xaf, dst: 2, src: 9, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 2, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111790 }]",
+                            "DEBUG const_prop candidate pc=4557 site=InsnSite { block: BlockId(3), idx: 4101 } insn=BpfInsn { code: 0x67, dst: 1, src: 0, off: 0, imm: 6 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111791 }]",
+                            "DEBUG const_prop candidate pc=4752 site=InsnSite { block: BlockId(3), idx: 4276 } insn=BpfInsn { code: 0x67, dst: 1, src: 0, off: 0, imm: 7 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: 2135624401 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640510023 }]",
+                            "DEBUG const_prop candidate pc=4766 site=InsnSite { block: BlockId(3), idx: 4289 } insn=BpfInsn { code: 0x77, dst: 1, src: 0, off: 0, imm: 6 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111786 }]",
+                            "DEBUG const_prop candidate pc=4803 site=InsnSite { block: BlockId(3), idx: 4322 } insn=BpfInsn { code: 0xbf, dst: 5, src: 3, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 5, src: 0, off: 0, imm: 2135624836 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640509767 }]",
+                            "DEBUG const_prop candidate pc=4822 site=InsnSite { block: BlockId(3), idx: 4339 } insn=BpfInsn { code: 0x0f, dst: 5, src: 2, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 5, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111787 }]",
+                            "DEBUG const_prop candidate pc=4995 site=InsnSite { block: BlockId(3), idx: 4493 } insn=BpfInsn { code: 0x77, dst: 3, src: 0, off: 0, imm: 1 } repl=[BpfInsn { code: 0x18, dst: 3, src: 0, off: 0, imm: 2135627011 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640508487 }]",
+                            "DEBUG const_prop candidate pc=4999 site=InsnSite { block: BlockId(3), idx: 4497 } insn=BpfInsn { code: 0xbf, dst: 3, src: 4, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 3, src: 0, off: 0, imm: 2135627011 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -1640508487 }]",
+                            "DEBUG const_prop candidate pc=5003 site=InsnSite { block: BlockId(3), idx: 4500 } insn=BpfInsn { code: 0xaf, dst: 3, src: 1, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 3, src: 0, off: 0, imm: 1010580482 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: 58 }]",
+                            "DEBUG const_prop candidate pc=5058 site=InsnSite { block: BlockId(3), idx: 4548 } insn=BpfInsn { code: 0xbf, dst: 1, src: 8, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: -505290329 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: 58 }]",
+                            "DEBUG const_prop candidate pc=5060 site=InsnSite { block: BlockId(3), idx: 4550 } insn=BpfInsn { code: 0xaf, dst: 1, src: 3, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: -505290329 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: 58 }]",
+                            "DEBUG const_prop candidate pc=5310 site=InsnSite { block: BlockId(3), idx: 4774 } insn=BpfInsn { code: 0xaf, dst: 2, src: 6, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 2, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111773 }]",
+                            "DEBUG const_prop candidate pc=5507 site=InsnSite { block: BlockId(3), idx: 4951 } insn=BpfInsn { code: 0xbf, dst: 1, src: 2, off: 0, imm: 0 } repl=[BpfInsn { code: 0x18, dst: 1, src: 0, off: 0, imm: -561844331 }, BpfInsn { code: 0x00, dst: 0, src: 0, off: 0, imm: -785111769 }]",
+                            "const_prop_alu_materialized=145"
+                          ],
+                          "insn_count_after": 12586,
+                          "insn_count_before": 12586,
+                          "insn_delta": 0,
+                          "pass": "const_prop",
+                          "sites_applied": 0,
+                          "sites_matched": 0,
+                          "sites_skipped": 0,
+                          "skip_reasons": {}
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 253,
+                        "status": "ok",
+                        "step": {
+                          "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET}",
+                          "log_level": 1,
+                          "name": "const_prop"
+                        }
+                      }
+                    ],
+                    "prog_id": 9,
+                    "program": {
+                      "final_insn_count": 12586,
+                      "orig_insn_count": 13777,
+                      "prog_id": 9,
+                      "prog_name": "mega_basic_bloc",
+                      "prog_type": 6
+                    },
+                    "status": "ok"
+                  }
+                },
+                "status": "ok"
+              },
+              "result": 11992325257241416031,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686194741,
+              "wall_exec_ns": 3988146,
+              "xlated_prog_len": 100688
+            }
+          ],
+          "timing_source": "ktime"
+        }
+      ],
+      "tags": [
+        "compute",
+        "code-size",
+        "straight-line",
+        "pure-jit"
+      ]
+    }
+  ],
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec"
+  },
+  "defaults": {
+    "inner_repeat": 10,
+    "perf_counters": false,
+    "perf_scope": "full_repeat_raw",
+    "runtime_order_seed": 0,
+    "samples": 1,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "generated_at": "2026-05-14T11:20:51.592977+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "unknown",
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_root_mods=1 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 panic=-1 virtme.exec=`L3RtcC9iZW5jaG1hcmstZ3Vlc3QtM3pqMWZwMGYuc2g=` virtme_chdir=home/yunwei37/workspace/bpf-benchmark rootfstype=9p rootflags=version=9p2000.L,trans=virtio,access=any raid=noautodetect ro debug loglevel=7 panic=30 oops=panic init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init",
+    "kernel_version": "7.0.0-rc2+",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "unknown"
+  },
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_pure_jit.yaml",
+  "provenance": {
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 285K",
+    "environment": "vm",
+    "kernel_commit": "unknown",
+    "params": {
+      "inner_repeat": 10,
+      "samples": 1,
+      "warmups": 0
+    },
+    "repo_dirty": false,
+    "repo_git_sha": "unknown",
+    "timestamp": "2026-05-14T11:20:51.593781+00:00"
+  },
+  "sample_runtime_orders": {
+    "mega_basic_block_2048": [
+      [
+        "llvmbpf",
+        "kernel_rejit",
+        "kernel"
+      ]
+    ]
+  },
+  "suite": "micro_staged_codegen",
+  "toolchains": {
+    "libbpf": {
+      "root": "vendor/libbpf"
+    },
+    "llvmbpf": {
+      "root": "vendor/llvmbpf"
+    }
+  }
+}
