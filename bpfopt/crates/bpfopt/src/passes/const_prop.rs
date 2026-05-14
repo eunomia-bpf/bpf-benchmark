@@ -33,10 +33,10 @@ impl BpfPass for ConstPropPass {
                     sites_skipped.push(SiteSkipReason::new(site, VERIFIER_POST_STATE_POINTER_TYPE));
                     continue;
                 }
-                let Some(value) = prog.reg_known_constant(site, dst_reg) else {
+                let is_32 = insn.class() == BPF_ALU;
+                let Some(value) = prog.reg_known_constant(site, dst_reg, is_32) else {
                     continue;
                 };
-                let is_32 = insn.class() == BPF_ALU;
                 let replacement = emit_scalar_const_load(dst_reg, value as u64, is_32);
                 if replacement.len() == 1 && replacement[0] == insn {
                     continue;

@@ -40,6 +40,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--runner-binary", default="", help="Override the micro_exec runner binary path.")
     parser.add_argument("--program-dir", default="", help="Override the compiled micro BPF program directory.")
     parser.add_argument("--suite", default="", help="Path to the micro suite YAML manifest.")
+    parser.add_argument("--benchmark-set", default="", help="Named benchmark set from the micro suite manifest.")
     parser.add_argument("--bench", action="append", dest="benches", help="Benchmark name to run; repeatable.")
     parser.add_argument(
         "--runtime",
@@ -102,6 +103,8 @@ def _micro_driver_argv(workspace: Path, args: argparse.Namespace) -> list[str]:
     ])
     if args.suite:
         argv.extend(["--suite", str(resolve_workspace_path(workspace, args.suite))])
+    if args.benchmark_set:
+        argv.extend(["--benchmark-set", str(args.benchmark_set)])
     for bench in args.benches or []:
         argv.extend(["--bench", str(bench)])
     if args.cpu:

@@ -7,6 +7,7 @@ apps:
   - cilium/agent
   - tetragon/observer
   - katran
+
   - katran/pktgen
   - tracee/monitor
   - bpftrace/set

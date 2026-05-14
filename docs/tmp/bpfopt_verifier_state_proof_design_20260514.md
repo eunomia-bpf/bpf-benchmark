@@ -35,6 +35,10 @@ Do not create separate long-lived sidecar data structures for each domain
 be fields in one facts bundle, but ownership and invalidation should follow the
 IR node.
 
+Keep code growth close to zero. This refactor should primarily move and merge
+existing facts, not add a second analysis system beside the old one. Any new
+types or helpers should replace existing maps/helpers in the same patch series.
+
 The bpfopt IR remains BPF bytecode:
 
 ```text
@@ -302,6 +306,8 @@ Phase 1: lifecycle storage without broad semantic changes.
 5. Keep existing liveness/use-def computation, but write results to facts rather
    than only top-level maps.
 6. Update `const_prop` and `map_inline` to use unified query APIs.
+7. Delete the replaced top-level maps/helpers in the same migration step; do not
+   leave old and new fact stores running in parallel.
 
 Phase 2: remove duplicate fact shapes.
 
@@ -321,21 +327,25 @@ Phase 3: tighten preservation.
 
 ## Expected Code Impact
 
-The design should avoid adding another large analysis layer.
+The design should avoid adding another analysis layer and should target near-zero
+net code growth.
 
 Expected phase-1 movement:
 
-- add one reusable `Facts` bundle;
-- move current verifier queries and helpers into unified query code;
-- move liveness/use-def results from maps into facts slots;
+- add one reusable `Facts` bundle while deleting the replaced per-domain storage;
+- move current verifier queries and helpers into unified query code, then remove
+  the old raw-state query helpers;
+- move liveness/use-def results from maps into facts slots, keeping only derived
+  indexes that are still needed;
 - keep pass-local candidate matching inside passes;
 - avoid defining separate long-lived proof, liveness, local-state, and profile
   sidecar structures.
 
-The first implementation may grow code modestly because mutation APIs must keep
-facts synchronized with IR. The intended long-term reduction is fewer scattered
+Implementation patches should be reviewed for net line growth. Temporary growth
+is acceptable only inside a short migration sequence where the next patch deletes
+the replaced structure. The intended outcome is fewer scattered
 `BTreeMap<InsnSite, ...>` structures and fewer pass-private interpretations of
-the same register/stack facts.
+the same register/stack facts, not a larger bpfopt analysis layer.
 
 ## Open Questions
 

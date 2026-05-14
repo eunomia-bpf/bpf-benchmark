@@ -236,7 +236,74 @@ fn const_prop_rejects_replacement_when_observation_missing_at_some_visit() {
 }
 
 #[test]
-fn const_prop_rejects_replacement_when_full_state_visit_omits_reg() {
+fn const_prop_rejects_single_log_observation_at_cfg_join() {
+    let input = vec![
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, 7),
+        BpfInsn::jeq_imm(BPF_REG_0, 0, 1),
+        BpfInsn::mov64_imm(BPF_REG_3, 9),
+        BpfInsn::add64_imm(BPF_REG_3, 1),
+        BpfInsn::exit(),
+    ];
+
+    let run = run_const_prop(
+        input.clone(),
+        vec![verifier_delta_state(
+            3,
+            HashMap::from([(BPF_REG_3, scalar_reg(10))]),
+        )],
+    );
+
+    assert_eq!(run.result.sites_applied, 0);
+    assert_eq!(run.lowered, input);
+}
+
+#[test]
+fn const_prop_rejects_pc_full_state_as_pre_state() {
+    let input = vec![
+        BpfInsn::mov64_imm(BPF_REG_1, 4),
+        BpfInsn::add64_imm(BPF_REG_1, 8),
+        BpfInsn::exit(),
+    ];
+
+    let run = run_const_prop(
+        input.clone(),
+        vec![verifier_full_state(
+            1,
+            HashMap::from([(BPF_REG_1, scalar_reg(4))]),
+        )],
+    );
+
+    assert_eq!(run.result.sites_applied, 0);
+    assert_eq!(run.lowered, input);
+}
+
+#[test]
+fn const_prop_ignores_pc_full_state_when_delta_is_present() {
+    let run = run_const_prop(
+        vec![
+            BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, 7),
+            BpfInsn::add64_imm(BPF_REG_3, 1),
+            BpfInsn::exit(),
+        ],
+        vec![
+            verifier_delta_state(1, HashMap::from([(BPF_REG_3, scalar_reg(42))])),
+            verifier_full_state(1, HashMap::new()),
+        ],
+    );
+
+    assert_eq!(run.result.sites_applied, 1);
+    assert_eq!(
+        run.lowered,
+        vec![
+            BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, 7),
+            BpfInsn::mov64_imm(BPF_REG_3, 42),
+            BpfInsn::exit(),
+        ]
+    );
+}
+
+#[test]
+fn const_prop_rejects_delta_visit_that_omits_reg() {
     let input = vec![
         BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, 7),
         BpfInsn::add64_imm(BPF_REG_3, 1),
@@ -247,7 +314,7 @@ fn const_prop_rejects_replacement_when_full_state_visit_omits_reg() {
         input.clone(),
         vec![
             verifier_delta_state(1, HashMap::from([(BPF_REG_3, scalar_reg(42))])),
-            verifier_full_state(1, HashMap::new()),
+            verifier_delta_state(1, HashMap::new()),
         ],
     );
 
@@ -298,6 +365,110 @@ fn const_prop_accepts_when_every_visit_agrees() {
             BpfInsn::exit(),
         ]
     );
+}
+
+#[test]
+fn const_prop_rejects_alu64_when_only_low32_is_exact() {
+    let input = vec![BpfInsn::alu64_imm(BPF_XOR, BPF_REG_8, 1), BpfInsn::exit()];
+
+    let run = run_const_prop(
+        input.clone(),
+        vec![verifier_delta_state(
+            0,
+            HashMap::from([(BPF_REG_8, scalar32_reg(0x1331_11eb))]),
+        )],
+    );
+
+    assert_eq!(run.result.sites_applied, 0);
+    assert_eq!(run.lowered, input);
+}
+
+#[test]
+fn const_prop_accepts_alu32_when_low32_is_exact() {
+    let run = run_const_prop(
+        vec![BpfInsn::alu32_imm(BPF_XOR, BPF_REG_8, 1), BpfInsn::exit()],
+        vec![verifier_delta_state(
+            0,
+            HashMap::from([(BPF_REG_8, scalar32_reg(0x1331_11eb))]),
+        )],
+    );
+
+    assert_eq!(run.result.sites_applied, 1);
+    assert_eq!(
+        run.lowered,
+        vec![BpfInsn::mov32_imm(BPF_REG_8, 0x1331_11eb), BpfInsn::exit(),]
+    );
+}
+
+#[test]
+fn const_prop_rejects_verifier_constants_after_kinsn_direct_reg_def() {
+    let btf_id = 777;
+    let payload = BpfInsn::pack_u4(BPF_REG_2, 0) | BpfInsn::pack_u4(BPF_REG_1, 4);
+    let input = vec![
+        BpfInsn::mov64_imm(BPF_REG_1, 3),
+        BpfInsn::kinsn_sidecar(payload),
+        BpfInsn::call_kinsn_with_off(btf_id, 0),
+        BpfInsn::add64_imm(BPF_REG_2, 1),
+        BpfInsn::exit(),
+    ];
+    let mut ctx = ctx_with_kinsn("bpf_rotate64", btf_id);
+    ctx.set_verifier_states_test(vec![verifier_delta_state(
+        3,
+        HashMap::from([(BPF_REG_2, scalar_reg(42))]),
+    )]);
+
+    let run = run_pass_on_insns(ConstPropPass, input.clone(), &ctx);
+
+    assert_eq!(run.result.sites_applied, 0);
+    assert_eq!(run.lowered, input);
+}
+
+#[test]
+fn const_prop_rejects_verifier_constants_after_kinsn_sidecar_noop() {
+    let btf_id = 778;
+    let payload = BpfInsn::pack_u4(BPF_REG_6, 0);
+    let input = vec![
+        BpfInsn::mov64_imm(BPF_REG_6, 3),
+        BpfInsn::kinsn_sidecar(payload),
+        BpfInsn::call_kinsn_with_off(btf_id, 0),
+        BpfInsn::add64_imm(BPF_REG_6, 1),
+        BpfInsn::exit(),
+    ];
+    let mut ctx = ctx_with_kinsn("bpf_prefetch", btf_id);
+    ctx.set_verifier_states_test(vec![verifier_delta_state(
+        3,
+        HashMap::from([(BPF_REG_6, scalar_reg(42))]),
+    )]);
+
+    let run = run_pass_on_insns(ConstPropPass, input.clone(), &ctx);
+
+    assert_eq!(run.result.sites_applied, 0);
+    assert_eq!(run.lowered, input);
+}
+
+#[test]
+fn const_prop_rejects_verifier_constants_loaded_from_kinsn_divergent_stack() {
+    let btf_id = 779;
+    let payload = BpfInsn::pack_u4(BPF_REG_6, 0);
+    let input = vec![
+        BpfInsn::mov64_imm(BPF_REG_6, 3),
+        BpfInsn::kinsn_sidecar(payload),
+        BpfInsn::call_kinsn_with_off(btf_id, 0),
+        BpfInsn::stx_mem(BPF_DW, BPF_REG_10, BPF_REG_6, -8),
+        BpfInsn::ldx_mem(BPF_DW, BPF_REG_7, BPF_REG_10, -8),
+        BpfInsn::add64_imm(BPF_REG_7, 1),
+        BpfInsn::exit(),
+    ];
+    let mut ctx = ctx_with_kinsn("bpf_prefetch", btf_id);
+    ctx.set_verifier_states_test(vec![verifier_delta_state(
+        5,
+        HashMap::from([(BPF_REG_7, scalar_reg(42))]),
+    )]);
+
+    let run = run_pass_on_insns(ConstPropPass, input.clone(), &ctx);
+
+    assert_eq!(run.result.sites_applied, 0);
+    assert_eq!(run.lowered, input);
 }
 
 #[test]

@@ -194,6 +194,29 @@ def resolve_katran_server_binary(explicit: Path | str | None = None) -> Path:
     raise RuntimeError(f"Katran server binary not found or not executable; tried: {candidate}")
 
 
+def resolve_katranc_binary() -> Path:
+    candidate = (repo_artifact_root() / "katran" / "bin" / "katranc").resolve()
+    if candidate.is_file() and os.access(candidate, os.X_OK): return candidate
+    raise RuntimeError(f"katranc binary not found or not executable; tried: {candidate}")
+
+
+KATRAN_GRPC_ADDRESS = "127.0.0.1:50051"
+
+
+def _wait_for_katran_grpc(timeout_s: float = 60.0) -> None:
+    deadline = time.monotonic() + max(1.0, float(timeout_s))
+    katranc = str(resolve_katranc_binary())
+    last_error: str = ""
+    while time.monotonic() < deadline:
+        try:
+            run_command([katranc, "-server", KATRAN_GRPC_ADDRESS, "-list_mac"], timeout=10)
+            return
+        except Exception as exc:
+            last_error = str(exc)
+        time.sleep(0.25)
+    raise RuntimeError(f"Katran gRPC server not reachable at {KATRAN_GRPC_ADDRESS} within {timeout_s}s: {last_error}")
+
+
 def ip_binary() -> str:
     for candidate in DEFAULT_IP_CANDIDATES:
         path = Path(candidate)
@@ -611,25 +634,15 @@ class KatranServerSession:
 
 
 def configure_katran_maps(session: KatranServerSession, *, proto: int = TCP_PROTO) -> dict[str, object]:
-    vip_id = session.map_id("vip_map")
-    reals_id = session.map_id("reals")
-    rings_id = session.map_id("ch_rings")
-    ctl_id = session.map_id("ctl_array")
-    real_num_bytes = pack_u32(REAL_NUM)
-    _bpftool_map_update_batch(
-        [
-            (ctl_id, pack_u32(0), pack_ctl_mac(ROUTER_LB_MAC)),
-            (vip_id, pack_vip_definition(VIP_IP, VIP_PORT, proto), pack_vip_meta(F_LRU_BYPASS, VIP_NUM)),
-            (reals_id, real_num_bytes, pack_real_definition(REAL_IP)),
-            *[
-                (rings_id, pack_u32((VIP_NUM * CH_RING_SIZE) + ring_pos), real_num_bytes)
-                for ring_pos in range(CH_RING_SIZE)
-            ],
-        ]
-    )
+    _wait_for_katran_grpc()
+    katranc = str(resolve_katranc_binary())
+    vip_proto_flag = "-u" if int(proto) == UDP_PROTO else "-t"
+    vip_arg = f"{VIP_IP}:{int(VIP_PORT)}"
+    run_command([katranc, "-server", KATRAN_GRPC_ADDRESS, "-A", vip_proto_flag, vip_arg, "-vf", "NO_LRU"], timeout=60)
+    run_command([katranc, "-server", KATRAN_GRPC_ADDRESS, "-a", vip_proto_flag, vip_arg, "-r", REAL_IP, "-w", "1"], timeout=120)
     return {"map_ids": {n: session.map_id(n) for n in KATRAN_REQUIRED_MAP_NAMES},
-            "vip": {"address": VIP_IP, "port": VIP_PORT, "proto": proto, "vip_num": VIP_NUM, "flags": F_LRU_BYPASS},
-            "real": {"address": REAL_IP, "real_num": REAL_NUM}, "default_gateway_mac": ROUTER_LB_MAC, "ch_ring_size": CH_RING_SIZE}
+            "vip": {"address": VIP_IP, "port": VIP_PORT, "proto": proto, "flags": F_LRU_BYPASS},
+            "real": {"address": REAL_IP}, "default_gateway_mac": ROUTER_LB_MAC, "ch_ring_size": CH_RING_SIZE}
 
 
 DEFAULT_INTERFACE = "katran0"

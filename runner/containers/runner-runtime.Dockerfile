@@ -271,6 +271,7 @@ RUN set -eux; \
     test -f /usr/lib/calico/bpf/xdp_preamble.o; \
     test -f /usr/local/lib/libpcap.so.1; \
     test -x "/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bin/katran_server_grpc"; \
+    test -x "/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bin/katranc"; \
     test -f "/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bpf/balancer.bpf.o"; \
     image_arch="${TARGETARCH}"; \
     if [ -z "${image_arch}" ]; then image_arch="$(dpkg --print-architecture)"; fi; \
@@ -442,6 +443,7 @@ RUN set -eux; \
     test -d /artifacts/modules; \
     test -d /artifacts/kinsn; \
     test -x "/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bin/katran_server_grpc"; \
+    test -x "/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bin/katranc"; \
     case "${RUN_TARGET_ARCH}" in \
         x86_64) test -x "${IMAGE_WORKSPACE}/runner/build-llvmbpf/micro_exec"; test -d "${IMAGE_WORKSPACE}/tests/unittest/build/progs" ;; \
         arm64) test -x "${IMAGE_WORKSPACE}/runner/build-arm64-llvmbpf/micro_exec"; test -d "${IMAGE_WORKSPACE}/tests/unittest/build-arm64/progs" ;; \

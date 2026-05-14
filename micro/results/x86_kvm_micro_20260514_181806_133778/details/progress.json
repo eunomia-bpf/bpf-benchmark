@@ -1,23 +1,23 @@
 {
-  "completed_benchmarks": 47,
-  "current_benchmark": "mega_basic_block_2048",
-  "current_benchmark_index": 48,
+  "completed_benchmarks": 60,
+  "current_benchmark": "tc_bitcount",
+  "current_benchmark_index": 61,
   "current_benchmark_record": {
-    "category": "program-scale",
-    "description": "Single very large acyclic straight-line block with many live temporaries",
-    "expected_result": 11992325257241416031,
-    "family": "mega-block",
-    "hypothesis": "A huge basic block should directly stress scheduling and register allocation scalability",
-    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/mega_basic_block_2048.mem",
+    "category": "alu-mix",
+    "description": "TC version of Kernighan popcount over generated u64 input",
+    "expected_result": 12830754992348206170,
+    "family": "popcount",
+    "hypothesis": "Reuses the staged popcount kernel under a sched_cls hook to validate non-XDP packet execution",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bitcount.mem",
     "io_mode": "staged",
-    "level": "approx-2048",
-    "name": "mega_basic_block_2048",
+    "level": "medium",
+    "name": "tc_bitcount",
     "runs": [],
     "tags": [
-      "compute",
-      "code-size",
-      "straight-line",
-      "pure-jit"
+      "tc",
+      "pure-jit",
+      "non-xdp",
+      "kernel-only"
     ]
   },
   "status": "running",

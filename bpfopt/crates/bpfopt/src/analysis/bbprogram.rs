@@ -4,13 +4,15 @@ use crate::analysis::bbprogram_btf::BtfRecordKind;
 #[cfg(test)]
 use crate::analysis::bbprogram_btf::{remap_btf_records_view, BtfRemapView};
 use crate::analysis::bbprogram_lower::remap_btf_records_for_lowering;
+use crate::analysis::verifier_facts;
+use crate::analysis::VerifierStatesBySite;
 use crate::analysis::{DefSite, UseDefGraph};
-use crate::insn::{insn_width, BpfInsn, MapPseudo};
+use crate::insn::{
+    bpf_class, insn_width, BpfInsn, MapPseudo, BPF_LDX, BPF_REG_10, BPF_ST, BPF_STX,
+};
 use crate::pass::{BranchProfile, BtfInfoRecords, KinsnRegistry, RegKind, RegSet};
-use crate::verifier_log::{RegState, StackState, VerifierInsn, VerifierInsnKind};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::sync::{Arc, Mutex};
-pub(crate) type VerifierStatesBySite = BTreeMap<InsnSite, Arc<[VerifierInsn]>>;
 pub(crate) type BtfMetadataMap = BTreeMap<InsnSite, usize>;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct BlockId(pub(crate) usize);
@@ -343,28 +345,22 @@ impl ProgramCFG {
     pub(crate) fn verifier_states_by_site(&self) -> Option<&VerifierStatesBySite> {
         self.verifier_states.as_ref()
     }
-    fn verifier_states_at(&self, site: InsnSite) -> Option<&[VerifierInsn]> {
-        self.verifier_states.as_ref()?.get(&site).map(AsRef::as_ref)
-    }
-    pub fn reg_known_constant(&self, site: InsnSite, reg: u8) -> Option<i64> {
-        let mut states = self.verifier_reg_states(site, reg)?;
-        let first = reg_exact_value(states.next()?)?;
-        for state in states {
-            if reg_exact_value(state)? != first {
-                return None;
-            }
+    pub fn reg_known_constant(&self, site: InsnSite, reg: u8, is_32: bool) -> Option<i64> {
+        if !self.verifier_post_state_reaches_site_once(site) {
+            return None;
         }
-        Some(first as i64)
+        if self
+            .verifier_runtime_divergent_regs_after_sites()
+            .ok()?
+            .get(&site)
+            .is_some_and(|regs| regs.contains(&reg))
+        {
+            return None;
+        }
+        verifier_facts::reg_known_constant(self.verifier_states.as_ref(), site, reg, is_32)
     }
     pub fn reg_kind(&self, site: InsnSite, reg: u8) -> Option<RegKind> {
-        let mut states = self.verifier_reg_states(site, reg)?;
-        let first = reg_kind_from_verifier_type(&states.next()?.reg_type);
-        for state in states {
-            if reg_kind_from_verifier_type(&state.reg_type) != first {
-                return None;
-            }
-        }
-        Some(first)
+        verifier_facts::reg_kind(self.verifier_states.as_ref(), site, reg)
     }
     /// Returns the known constant bytes at the stack region the register
     /// points to, if the verifier proved them. Width is `key_width` bytes.
@@ -374,49 +370,159 @@ impl ProgramCFG {
         reg: u8,
         key_width: usize,
     ) -> Option<Vec<u8>> {
-        let states = self.verifier_states_at(site)?;
-        if states.is_empty()
-            || states
-                .iter()
-                .any(|state| state.kind == VerifierInsnKind::EdgeFullState)
-        {
-            return None;
-        }
-        let mut first = None;
-        for state in states {
-            let reg_state = state.regs.get(&reg)?;
-            let stack_off = fp_stack_offset_from_reg_state(reg_state)?;
-            let bytes = known_stack_bytes_from_state(state, stack_off, key_width)?;
-            match &first {
-                Some(existing) if existing != &bytes => return None,
-                Some(_) => {}
-                None => first = Some(bytes),
-            }
-        }
-        first
+        verifier_facts::reg_known_stack_bytes(self.verifier_states.as_ref(), site, reg, key_width)
     }
     pub fn site_is_dead_code(&self, site: InsnSite) -> bool {
-        self.verifier_states_at(site).is_some_and(|states| {
-            !states.is_empty() && states.iter().all(|state| state.speculative)
-        })
+        verifier_facts::site_is_dead_code(self.verifier_states.as_ref(), site)
     }
-    fn verifier_reg_states(
+    fn verifier_post_state_reaches_site_once(&self, site: InsnSite) -> bool {
+        if self.insn_at(site).is_none() {
+            return false;
+        }
+        self.block_has_single_reaching_state(site.block, &mut BTreeMap::new(), &mut BTreeSet::new())
+    }
+    fn block_has_single_reaching_state(
         &self,
-        site: InsnSite,
-        reg: u8,
-    ) -> Option<impl Iterator<Item = &RegState>> {
-        let states = self.verifier_states_at(site)?;
-        if states.is_empty()
-            || states
-                .iter()
-                .any(|state| state.kind == VerifierInsnKind::EdgeFullState)
-        {
-            return None;
+        block: BlockId,
+        memo: &mut BTreeMap<BlockId, bool>,
+        visiting: &mut BTreeSet<BlockId>,
+    ) -> bool {
+        if let Some(&known) = memo.get(&block) {
+            return known;
         }
-        if states.iter().any(|state| !state.regs.contains_key(&reg)) {
-            return None;
+        if !visiting.insert(block) {
+            memo.insert(block, false);
+            return false;
         }
-        Some(states.iter().filter_map(move |state| state.regs.get(&reg)))
+        let result = if block == self.entry {
+            true
+        } else if let Some(block_ref) = self.blocks.get(block.0) {
+            match block_ref.predecessors.as_slice() {
+                [pred] if *pred != block => {
+                    self.block_has_single_reaching_state(*pred, memo, visiting)
+                }
+                _ => false,
+            }
+        } else {
+            false
+        };
+        visiting.remove(&block);
+        memo.insert(block, result);
+        result
+    }
+    fn verifier_runtime_divergent_regs_after_sites(
+        &self,
+    ) -> anyhow::Result<HashMap<InsnSite, RegSet>> {
+        let site_facts = self.use_def_site_facts()?;
+        let mut in_states = vec![(RegSet::new(), false); self.blocks.len()];
+        let mut changed = true;
+
+        while changed {
+            changed = false;
+            let mut next_in_states = in_states.clone();
+            for block in self.blocks() {
+                let (out_regs, out_stack) = self.process_verifier_runtime_divergence_block(
+                    block.id,
+                    &site_facts,
+                    &in_states[block.id.0].0,
+                    in_states[block.id.0].1,
+                    None,
+                )?;
+                for succ in self.dataflow_successors(block.id)? {
+                    let Some(succ_state) = next_in_states.get_mut(succ.0) else {
+                        anyhow::bail!("block {:?} has invalid successor {:?}", block.id, succ);
+                    };
+                    let old_len = succ_state.0.len();
+                    succ_state.0.extend(out_regs.iter().copied());
+                    changed |= succ_state.0.len() != old_len;
+                    if out_stack && !succ_state.1 {
+                        succ_state.1 = true;
+                        changed = true;
+                    }
+                }
+            }
+            in_states = next_in_states;
+        }
+
+        let mut after_sites = HashMap::new();
+        for block in self.blocks() {
+            self.process_verifier_runtime_divergence_block(
+                block.id,
+                &site_facts,
+                &in_states[block.id.0].0,
+                in_states[block.id.0].1,
+                Some(&mut after_sites),
+            )?;
+        }
+        Ok(after_sites)
+    }
+    fn use_def_site_facts(&self) -> anyhow::Result<HashMap<InsnSite, (RegSet, RegSet)>> {
+        let mut facts = HashMap::new();
+        for block in self.blocks() {
+            for site in logical_sites_for_block(block) {
+                facts.insert(site, (RegSet::new(), RegSet::new()));
+            }
+        }
+        for use_site in self.use_def.uses.keys() {
+            let site = InsnSite {
+                block: use_site.block,
+                idx: use_site.idx,
+            };
+            let Some((uses, _)) = facts.get_mut(&site) else {
+                anyhow::bail!("use-def graph references invalid use site {:?}", site);
+            };
+            uses.insert(use_site.reg);
+        }
+        for def in self.use_def.defs.keys() {
+            let site = InsnSite {
+                block: def.block,
+                idx: def.idx,
+            };
+            let Some((_, defs)) = facts.get_mut(&site) else {
+                anyhow::bail!("use-def graph references invalid def site {:?}", site);
+            };
+            defs.insert(def.reg);
+        }
+        Ok(facts)
+    }
+    fn process_verifier_runtime_divergence_block(
+        &self,
+        block: BlockId,
+        site_facts: &HashMap<InsnSite, (RegSet, RegSet)>,
+        input: &RegSet,
+        input_stack: bool,
+        mut after_sites: Option<&mut HashMap<InsnSite, RegSet>>,
+    ) -> anyhow::Result<(RegSet, bool)> {
+        let mut state = input.clone();
+        let mut stack_divergent = input_stack;
+        for site in self.sites_in_block_with_terminator(block)? {
+            let insn = self.insn_at(site);
+            let (uses, defs) = site_facts
+                .get(&site)
+                .ok_or_else(|| anyhow::anyhow!("missing use-def facts for site {:?}", site))?;
+            let input_depends_on_kinsn = uses.iter().any(|reg| state.contains(reg));
+            let site_is_kinsn_call = insn.is_some_and(|insn| insn.is_call_kinsn());
+            let input_depends_on_stack = stack_divergent && insn.is_some_and(insn_loads_from_stack);
+            for &reg in defs {
+                if site_is_kinsn_call || input_depends_on_kinsn || input_depends_on_stack {
+                    state.insert(reg);
+                } else {
+                    state.remove(&reg);
+                }
+            }
+            if let Some(insn) = insn {
+                if input_depends_on_kinsn && insn_stores_to_stack(insn) {
+                    stack_divergent = true;
+                }
+                if insn.is_kinsn_sidecar() {
+                    state.insert(insn.dst_reg());
+                }
+            }
+            if let Some(after_sites) = after_sites.as_deref_mut() {
+                after_sites.insert(site, state.clone());
+            }
+        }
+        Ok((state, stack_divergent))
     }
     pub fn branch_taken_rate(&self, site: InsnSite) -> Option<f32> {
         let profile = self.branch_profile_by_site.get(&site)?;
@@ -958,80 +1064,11 @@ fn resolve_map_id(
         .ok_or_else(|| anyhow::anyhow!("failed to resolve map fd order for fd {imm}"))?;
     Ok(map_ids.get(index).copied())
 }
-fn reg_exact_value(state: &RegState) -> Option<u64> {
-    state
-        .exact_u64()
-        .or_else(|| state.exact_u32().map(u64::from))
+fn insn_loads_from_stack(insn: &BpfInsn) -> bool {
+    bpf_class(insn.code) == BPF_LDX && insn.src_reg() == BPF_REG_10
 }
-fn fp_stack_offset_from_reg_state(state: &RegState) -> Option<i32> {
-    (state.reg_type == "fp").then(|| state.offset.unwrap_or(0))
-}
-fn known_stack_bytes_from_state(
-    state: &VerifierInsn,
-    stack_off: i32,
-    width: usize,
-) -> Option<Vec<u8>> {
-    let mut bytes = Vec::with_capacity(width);
-    for idx in 0..width {
-        let idx = match i32::try_from(idx) {
-            Ok(idx) => idx,
-            Err(_) => return None,
-        };
-        bytes.push(known_stack_byte_from_state(
-            state,
-            stack_off.checked_add(idx)?,
-        )?);
-    }
-    Some(bytes)
-}
-fn known_stack_byte_from_state(state: &VerifierInsn, absolute_off: i32) -> Option<u8> {
-    let slot_start = verifier_stack_slot_start(absolute_off)?;
-    let byte_index = usize::try_from(absolute_off - i32::from(slot_start)).ok()?;
-    if byte_index >= 8 {
-        return None;
-    }
-    let stack = state.stack.get(&slot_start)?;
-    match verifier_stack_slot_type(stack, byte_index) {
-        Some(b'0') => Some(0),
-        Some(b'r') | None => verifier_stack_slot_exact_bytes(stack).map(|bytes| bytes[byte_index]),
-        Some(_) => None,
-    }
-}
-fn verifier_stack_slot_start(absolute_off: i32) -> Option<i16> {
-    if absolute_off >= 0 {
-        return None;
-    }
-    let slot_index = ((-absolute_off - 1) / 8) + 1;
-    i16::try_from(-slot_index * 8).ok()
-}
-fn verifier_stack_slot_type(stack: &StackState, byte_index: usize) -> Option<u8> {
-    let slot_types = stack.slot_types.as_ref()?;
-    if byte_index >= 8 {
-        return None;
-    }
-    slot_types.as_bytes().get(7 - byte_index).copied()
-}
-fn verifier_stack_slot_exact_bytes(stack: &StackState) -> Option<[u8; 8]> {
-    let value = reg_exact_value(stack.value.as_ref()?)?;
-    Some(value.to_le_bytes())
-}
-fn reg_kind_from_verifier_type(reg_type: &str) -> RegKind {
-    match reg_type {
-        "scalar" => RegKind::Scalar,
-        "fp" => RegKind::FramePointer,
-        "ctx" => RegKind::Context,
-        "pkt" => RegKind::PacketPointer,
-        "pkt_meta" => RegKind::PacketMetaPointer,
-        "map_ptr" => RegKind::MapPointer,
-        "map_value" => RegKind::MapValue,
-        "map_key" => RegKind::MapKey,
-        "mem" | "buf" | "ringbuf_mem" | "iter" => RegKind::Memory,
-        other if other.starts_with("scalar") => RegKind::Scalar,
-        other if other.starts_with("fp") => RegKind::FramePointer,
-        "" => RegKind::Unknown,
-        other if other.contains("ptr_") || other.contains("_ptr") => RegKind::BtfStructPointer,
-        _ => RegKind::OtherPointer,
-    }
+fn insn_stores_to_stack(insn: &BpfInsn) -> bool {
+    matches!(bpf_class(insn.code), BPF_ST | BPF_STX) && insn.dst_reg() == BPF_REG_10
 }
 impl Terminator {
     pub(crate) fn raw_insn(&self) -> Option<&BpfInsn> {
