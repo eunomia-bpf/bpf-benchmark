@@ -1,25 +1,8 @@
 {
-  "completed_benchmarks": 60,
-  "current_benchmark": "tc_bitcount",
-  "current_benchmark_index": 61,
-  "current_benchmark_record": {
-    "category": "alu-mix",
-    "description": "TC version of Kernighan popcount over generated u64 input",
-    "expected_result": 12830754992348206170,
-    "family": "popcount",
-    "hypothesis": "Reuses the staged popcount kernel under a sched_cls hook to validate non-XDP packet execution",
-    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bitcount.mem",
-    "io_mode": "staged",
-    "level": "medium",
-    "name": "tc_bitcount",
-    "runs": [],
-    "tags": [
-      "tc",
-      "pure-jit",
-      "non-xdp",
-      "kernel-only"
-    ]
-  },
-  "status": "running",
+  "completed_benchmarks": 63,
+  "current_benchmark": null,
+  "current_benchmark_index": null,
+  "current_benchmark_record": null,
+  "status": "completed",
   "total_benchmarks": 63
 }

@@ -5,8 +5,8 @@
 ## Current Suite
 
 - `micro/config/micro_pure_jit.yaml` is the active micro suite manifest.
-- The suite covers the active pure-JIT benchmark set across staged XDP cases, packet-backed XDP controls, and a small kernel-only non-XDP control subset.
-- The suite is designed to exercise the active canonical forms tracked in `docs/kernel-jit-optimization-plan.md`: `COND_SELECT`, `WIDE_MEM`, `ROTATE`, `ADDR_CALC`, `BITFIELD_EXTRACT`, `ENDIAN_FUSION`, and `BRANCH_FLIP`.
+- The suite covers the active workload-pattern benchmark set across staged XDP cases, packet-backed XDP controls, and a small kernel-only non-XDP control subset.
+- The default benchmark set is intentionally workload-shaped rather than pass-pattern-shaped; pass-specific reduced cases belong in unit or regression tests.
 
 ## Directory Layout
 
@@ -19,7 +19,7 @@
 
 ## Build
 
-Canonical preparation goes through the root `Makefile` (`make vm-micro`) and
+Canonical preparation goes through the root `Makefile` (`make micro`) and
 the Python local-prep pipeline. Direct `python3 micro/driver.py ...` execution
 assumes `runner/build/micro_exec` plus the staged `.bpf.o` inputs under
 `.cache/micro-programs/<arch>/` already exist. For direct driver debugging, set
@@ -50,13 +50,13 @@ python3 micro/driver.py --runtime llvmbpf
 Run inside the framework-kernel VM:
 
 ```bash
-make vm-micro
+make micro
 ```
 
 Run a targeted VM benchmark with current knobs:
 
 ```bash
-make vm-micro BENCH=simple SAMPLES=1 WARMUPS=0 INNER_REPEAT=10
+make micro BENCH=simple SAMPLES=1 WARMUPS=0 INNER_REPEAT=10
 ```
 
 Run a targeted smoke test directly:

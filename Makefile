@@ -32,8 +32,6 @@ SAMPLES  ?= 3
 WORKLOAD_DURATION ?=
 TIMEOUT  ?= 7200
 BENCH    ?=
-MICRO_BENCHMARK_SET ?=
-MICRO_SUITE ?=
 FUZZ_ROUNDS ?= 1000
 DOCKER_BUILD_CACHE_KEEP_STORAGE ?= 50GB
 
@@ -86,7 +84,7 @@ RUN_TOKEN ?= $(shell head -c 32 /dev/urandom 2>/dev/null | tr -dc 'a-z0-9' | hea
 export RUN_TOKEN TARGET
 
 # micro and test suites still consume legacy CLI args until their drivers migrate.
-MICRO_ARGS = --samples "$(SAMPLES)" --warmups "$(or $(WARMUPS),0)" --inner-repeat "$(or $(INNER_REPEAT),10)" $(if $(MICRO_SUITE),--suite "$(MICRO_SUITE)") $(if $(MICRO_BENCHMARK_SET),--benchmark-set "$(MICRO_BENCHMARK_SET)") $(foreach b,$(BENCH),--bench "$(b)")
+MICRO_ARGS = --samples "$(SAMPLES)" --warmups "$(or $(WARMUPS),0)" --inner-repeat "$(or $(INNER_REPEAT),10)" $(foreach b,$(BENCH),--bench "$(b)")
 TEST_ARGS_COMMON = --fuzz-rounds "$(FUZZ_ROUNDS)"
 
 .PHONY: check validate daemon-tests lint clean \

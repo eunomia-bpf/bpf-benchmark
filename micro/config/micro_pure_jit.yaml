@@ -65,18 +65,6 @@ benchmarks:
     expected_result: 12345678
     tags: [baseline, packet-backed, helper-free]
 
-  - name: memory_pair_sum
-    description: Fixed-size two-word memory baseline
-    category: baseline
-    family: baseline
-    level: small
-    hypothesis: Minimal fixed-width load pair with almost no control-flow
-    base_name: memory_pair_sum
-    kernel_input_size: 16
-    input_generator: memory_pair_sum
-    expected_result: 2459565876494606865
-    tags: [memory, baseline, pure-jit]
-
   - name: bitcount
     description: Kernighan popcount over generated u64 input
     category: alu-mix
@@ -88,42 +76,6 @@ benchmarks:
     input_generator: bitcount
     expected_result: 12830754992348206170
     tags: [bitops, pure-jit]
-
-  - name: log2_fold
-    description: Fold log2 over generated u64 input
-    category: alu-mix
-    family: log2-fold
-    level: medium
-    hypothesis: Mixes compares and bit tests with modest control-flow
-    base_name: log2_fold
-    kernel_input_size: 1032
-    input_generator: log2_fold
-    expected_result: 6
-    tags: [bitops, branch, pure-jit]
-
-  - name: dep_chain_short
-    description: Short serialized dependency chain over generated u64 input
-    category: dependency-ilp
-    family: dep-chain
-    level: short
-    hypothesis: Long scalar dependencies reduce ILP and stress single-chain scheduling
-    base_name: dep_chain_short
-    kernel_input_size: 520
-    input_generator: dep_chain_short
-    expected_result: 10694056033381314190
-    tags: [compute, dep-chain, pure-jit]
-
-  - name: dep_chain_long
-    description: Long serialized dependency chain over generated u64 input
-    category: dependency-ilp
-    family: dep-chain
-    level: long
-    hypothesis: Scaling dependency depth should amplify backend scheduling differences
-    base_name: dep_chain_long
-    kernel_input_size: 2056
-    input_generator: dep_chain_long
-    expected_result: 11607914882895964593
-    tags: [compute, dep-chain, pure-jit]
 
   - name: binary_search
     description: Repeated search over sorted data
@@ -137,18 +89,6 @@ benchmarks:
     expected_result: 126
     tags: [branch, search, pure-jit]
 
-  - name: branch_layout
-    description: Hot/cold branch skew for layout experiments
-    category: control-flow
-    family: branch-skew
-    level: hot-cold
-    hypothesis: Skewed branches should expose layout and prediction quality differences
-    base_name: branch_layout
-    kernel_input_size: 3464
-    input_generator: branch_layout
-    expected_result: 65835136
-    tags: [branch, layout, pure-jit]
-
   - name: switch_dispatch
     description: Dense switch dispatch over generated 6-bit values
     category: control-flow
@@ -161,18 +101,6 @@ benchmarks:
     expected_result: 16
     tags: [branch, dispatch, pure-jit]
 
-  - name: branch_dense
-    description: High-density conditional branch mesh over generated u32 inputs
-    category: control-flow
-    family: branch-density
-    level: dense
-    hypothesis: Many short conditional paths should magnify branch lowering and layout quality
-    base_name: branch_dense
-    kernel_input_size: 520
-    input_generator: branch_dense
-    expected_result: 15654347328787340782
-    tags: [branch, dense, pure-jit]
-
   - name: cmov_select
     description: Repeated single-diamond value selection over staged compare/select arrays
     category: control-flow
@@ -184,18 +112,6 @@ benchmarks:
     input_generator: cmov_select
     expected_result: 4719383495603449331
     tags: [branch, select, cmov, pure-jit]
-
-  - name: cmov_dense
-    description: 32 inlined compare/select sites over staged u64 arrays
-    category: control-flow
-    family: select-diamond
-    level: dense-32
-    hypothesis: Many inlined select sites should magnify any kernel JIT benefit from branch-to-cmov lowering
-    base_name: cmov_dense
-    kernel_input_size: 1024
-    input_generator: cmov_dense
-    expected_result: 15544056576594566652
-    tags: [branch, select, cmov, dense, pure-jit]
 
   - name: checksum
     description: Internet checksum style reduction
@@ -211,102 +127,6 @@ benchmarks:
     expected_result: 0
     tags: [alu, memory, pure-jit]
 
-  - name: load_word32
-    description: Direct 32-bit loads over staged input words
-    category: memory-local
-    family: load-width
-    level: word32
-    hypothesis: Direct u32 loads should surface kernel byte-recompose lowering overhead relative to llvmbpf
-    base_name: load_word32
-    kernel_input_size: 1032
-    input_generator: load_word32
-    expected_result: 568897730033
-    tags: [memory, load-width, byte-recompose, pure-jit]
-
-  - name: load_byte
-    description: Same staged input walked as individual byte loads
-    category: memory-local
-    family: load-width
-    level: byte
-    hypothesis: Byte-at-a-time control should avoid kernel byte-recompose while preserving the same staged input footprint
-    base_name: load_byte
-    kernel_input_size: 1032
-    input_generator: load_byte
-    expected_result: 132428
-    tags: [memory, load-width, control, pure-jit]
-
-  - name: load_byte_recompose
-    description: Recompose 128 staged u64 values from individual byte loads
-    category: memory-local
-    family: causal-isolation
-    level: byte-recompose
-    hypothesis: Kernel byte-load lowering should add measurable exec cost versus equivalent native u64 loads
-    base_name: load_byte_recompose
-    kernel_input_size: 1032
-    input_generator: load_byte_recompose
-    expected_result: 1253018829653002637
-    tags: [memory, byte-recompose, causal-isolation, pure-jit]
-
-  - name: load_native_u64
-    description: Read the same 128 staged u64 values via native aligned u64 loads
-    category: memory-local
-    family: causal-isolation
-    level: native-u64
-    hypothesis: Native u64 loads provide the control path for isolating kernel byte-recompose overhead
-    base_name: load_native_u64
-    kernel_input_size: 1032
-    input_generator: load_native_u64
-    expected_result: 1253018829653002637
-    tags: [memory, control, causal-isolation, pure-jit]
-
-  - name: packet_parse
-    description: Packet header parsing with bounds checks
-    category: memory-local
-    family: parser
-    level: fixed-l3l4
-    hypothesis: Structured parsing with field extraction may favor kernel's packet-oriented JIT path
-    base_name: packet_parse
-    kernel_input_size: 3464
-    input_generator: packet_parse
-    expected_result: 2969312
-    tags: [memory, parse, bounds, pure-jit]
-
-  - name: bounds_ladder
-    description: Record parsing with dense layered bounds checks
-    category: memory-local
-    family: bounds-density
-    level: high
-    hypothesis: Dense bounds checks should stress compare-heavy code generation more than raw memory bandwidth
-    base_name: bounds_ladder
-    kernel_input_size: 1032
-    input_generator: bounds_ladder
-    expected_result: 8686050057216939920
-    tags: [bounds, verifier-like, pure-jit]
-
-  - name: bounds_check_heavy
-    description: Record parser with dependent bounds checks and switch-based fixed-offset loads
-    category: memory-local
-    family: bounds-style
-    level: very-high
-    hypothesis: Dense bounds guards plus selector-driven fixed-offset dispatch should expose compare chains, branch pressure, and critical-path inflation
-    base_name: bounds_check_heavy
-    kernel_input_size: 1032
-    input_generator: bounds_check_heavy
-    expected_result: 13381490383825386298
-    tags: [bounds, branch-heavy, fixed-offsets, switch-dispatch, pure-jit]
-
-  - name: stride_load_4
-    description: Sequential-stride load pattern with stride 4 over a ring buffer
-    category: memory-local
-    family: stride-load
-    level: stride-4
-    hypothesis: Mild stride should stay cache-friendly while exposing address-generation cost
-    base_name: stride_load_4
-    kernel_input_size: 1032
-    input_generator: stride_load_4
-    expected_result: 1982929226459564480
-    tags: [memory, stride, pure-jit]
-
   - name: stride_load_16
     description: Wider-stride load pattern with stride 16 over a ring buffer
     category: memory-local
@@ -318,91 +138,6 @@ benchmarks:
     input_generator: stride_load_16
     expected_result: 17112594108265627168
     tags: [memory, stride, pure-jit]
-
-  - name: mixed_alu_mem
-    description: Interleaved ALU and irregular memory operations over a shared ring
-    category: alu-mix
-    family: mixed-alu-mem
-    level: interleaved
-    hypothesis: Alternating compute and memory should separate scalar scheduling gains from pure load bandwidth
-    base_name: mixed_alu_mem
-    kernel_input_size: 1032
-    input_generator: mixed_alu_mem
-    expected_result: 4293717546490700300
-    tags: [alu, memory, mixed, pure-jit]
-
-  - name: spill_pressure
-    description: Multi-accumulator arithmetic intended to stress register allocation
-    category: dependency-ilp
-    family: spill-pressure
-    level: medium
-    hypothesis: Register pressure should expose spill/fill quality and register allocator limits
-    base_name: spill_pressure
-    kernel_input_size: 520
-    input_generator: spill_pressure
-    expected_result: 17238232588209877611
-    tags: [compute, reg-pressure, pure-jit]
-
-  - name: multi_acc_4
-    description: Four-lane accumulator kernel with cross-lane mixing
-    category: dependency-ilp
-    family: multi-acc
-    level: 4-lane
-    hypothesis: More independent accumulators should reward ILP-friendly code generation
-    base_name: multi_acc_4
-    kernel_input_size: 1032
-    input_generator: multi_acc_4
-    expected_result: 1366287837132792961
-    tags: [compute, ilp, pure-jit]
-
-  - name: multi_acc_8
-    description: Eight-lane accumulator kernel with cross-lane mixing
-    category: dependency-ilp
-    family: multi-acc
-    level: 8-lane
-    hypothesis: Higher lane count should trade ILP gains against register pressure
-    base_name: multi_acc_8
-    kernel_input_size: 1032
-    input_generator: multi_acc_8
-    expected_result: 6524869553103642107
-    tags: [compute, ilp, pure-jit]
-
-  - name: fibonacci_iter
-    description: Loop-heavy Fibonacci-style recurrence with bounded iteration count
-    category: loop-shape
-    family: recurrence
-    level: long
-    hypothesis: Scalar recurrence loops should narrow the gap by limiting exploitable ILP
-    base_name: fibonacci_iter
-    kernel_input_size: 16
-    input_generator: fibonacci_iter
-    expected_result: 3918857671957494287
-    tags: [compute, loop, pure-jit]
-
-  - name: fibonacci_iter_packet
-    description: Packet-backed Fibonacci-style recurrence with bounded iteration count
-    category: loop-shape
-    family: recurrence
-    level: long
-    hypothesis: Removes staged input helper overhead to isolate the packet-fed recurrence loop shape
-    base_name: fibonacci_iter_packet
-    io_mode: packet
-    kernel_input_size: 16
-    input_generator: fibonacci_iter_packet
-    expected_result: 3918857671957494287
-    tags: [compute, loop, packet-backed, helper-free]
-
-  - name: fixed_loop_small
-    description: Short fixed-trip-count recurrence loop
-    category: loop-shape
-    family: fixed-loop
-    level: small
-    hypothesis: Short fixed loops should keep loop overhead visible relative to the loop body
-    base_name: fixed_loop_small
-    kernel_input_size: 16
-    input_generator: fixed_loop_small
-    expected_result: 14532921533732223337
-    tags: [compute, loop, pure-jit]
 
   - name: fixed_loop_large
     description: Long fixed-trip-count recurrence loop
@@ -416,66 +151,6 @@ benchmarks:
     expected_result: 8801144986419677599
     tags: [compute, loop, pure-jit]
 
-  - name: nested_loop_2
-    description: Two-level bounded nested loop over a generated value grid
-    category: loop-shape
-    family: nested-loop
-    level: 2-level
-    hypothesis: Two-level loop nests should expose loop-carried dependence handling beyond flat recurrences
-    base_name: nested_loop_2
-    kernel_input_size: 2064
-    input_generator: nested_loop_2
-    expected_result: 2067381267021326054
-    tags: [compute, loop, nested, pure-jit]
-
-  - name: nested_loop_3
-    description: Three-level bounded nested loop over a generated value grid
-    category: loop-shape
-    family: nested-loop
-    level: 3-level
-    hypothesis: Deeper loop nesting should stress induction-variable handling and loop-exit code quality
-    base_name: nested_loop_3
-    kernel_input_size: 2064
-    input_generator: nested_loop_3
-    expected_result: 1123355393214246525
-    tags: [compute, loop, nested, pure-jit]
-
-  - name: code_clone_2
-    description: Two-clone repeated scalar block inside the steady-state loop
-    category: call-size
-    family: code-clone
-    level: clone-2
-    hypothesis: Modest cloned straight-line code should slightly favor backends with stronger instruction scheduling
-    base_name: code_clone_2
-    kernel_input_size: 1032
-    input_generator: code_clone_2
-    expected_result: 8165017386613414132
-    tags: [compute, code-size, pure-jit]
-
-  - name: code_clone_8
-    description: Eight-clone repeated scalar block inside the steady-state loop
-    category: call-size
-    family: code-clone
-    level: clone-8
-    hypothesis: Larger cloned bodies should magnify code-size and straight-line scheduling differences
-    base_name: code_clone_8
-    kernel_input_size: 1032
-    input_generator: code_clone_8
-    expected_result: 2193237160901360836
-    tags: [compute, code-size, pure-jit]
-
-  - name: large_mixed_500
-    description: Large mixed straight-line body targeting roughly 500 BPF instructions
-    category: program-scale
-    family: large-mixed
-    level: approx-500
-    hypothesis: Larger hot bodies should begin to surface I-cache and allocator scalability effects
-    base_name: large_mixed_500
-    kernel_input_size: 264
-    input_generator: large_mixed_500
-    expected_result: 12101143943798384681
-    tags: [compute, memory, code-size, pure-jit]
-
   - name: large_mixed_1000
     description: Very large mixed straight-line body targeting roughly 1000 BPF instructions
     category: program-scale
@@ -487,18 +162,6 @@ benchmarks:
     input_generator: large_mixed_1000
     expected_result: 4283793436325605125
     tags: [compute, memory, code-size, pure-jit]
-
-  - name: bpf_call_chain
-    description: Chain of 3 __noinline BPF-to-BPF subprogram calls per loop iteration
-    category: call-overhead
-    family: bpf-local-call
-    level: chain-3
-    hypothesis: Subprogram call overhead should differ between kernel callee-saved convention and LLVM direct calls
-    base_name: bpf_call_chain
-    kernel_input_size: 64
-    input_generator: bpf_call_chain
-    expected_result: 17813494880153753973
-    tags: [call, bpf-to-bpf, local-call, pure-jit]
 
   - name: memcmp_prefix_64
     description: Compare three 64-byte candidates against a fixed prefix pattern
@@ -563,18 +226,6 @@ benchmarks:
     expected_result: 5895923248507644458
     tags: [packet, katran, hash, endian, pure-jit]
 
-  - name: imm64_storm
-    description: Straight-line reduction with many distinct 64-bit immediates
-    category: program-scale
-    family: immediate-stress
-    level: imm64-64
-    hypothesis: Dense literal materialization should surface backend differences hidden by data-driven kernels
-    base_name: imm64_storm
-    kernel_input_size: 32
-    input_generator: imm64_storm
-    expected_result: 1225801557240067915
-    tags: [compute, immediates, code-size, pure-jit]
-
   - name: alu32_64_pingpong
     description: Alternate u32 and u64 arithmetic on the same live values
     category: alu-mix
@@ -587,18 +238,6 @@ benchmarks:
     expected_result: 4047234684177357765
     tags: [alu, mixed-width, pure-jit]
 
-  - name: branch_fanout_32
-    description: Thirty-two-way sparse branch fanout with nontrivial per-arm work
-    category: control-flow
-    family: branch-fanout
-    level: sparse-32
-    hypothesis: Wide sparse fanout should stress branch layout and compare-ladder lowering beyond dense switch dispatch
-    base_name: branch_fanout_32
-    kernel_input_size: 516
-    input_generator: branch_fanout_32
-    expected_result: 9589146199917278581
-    tags: [branch, fanout, pure-jit]
-
   - name: deep_guard_tree_8
     description: Eight-level nested guard tree over staged record fields
     category: control-flow
@@ -610,18 +249,6 @@ benchmarks:
     input_generator: deep_guard_tree_8
     expected_result: 5333736376993440184
     tags: [branch, nested, guards, pure-jit]
-
-  - name: mega_basic_block_2048
-    description: Single very large acyclic straight-line block with many live temporaries
-    category: program-scale
-    family: mega-block
-    level: approx-2048
-    hypothesis: A huge basic block should directly stress scheduling and register allocation scalability
-    base_name: mega_basic_block_2048
-    kernel_input_size: 64
-    input_generator: mega_basic_block_2048
-    expected_result: 11992325257241416031
-    tags: [compute, code-size, straight-line, pure-jit]
 
   - name: rotate64_hash
     description: SipHash-like hash using 64-bit rotations to stress the ROTATE rewrite
@@ -647,18 +274,6 @@ benchmarks:
     input_generator: packet_redundant_bounds
     expected_result: 1610777047308888911
     tags: [packet, bounds, redundant-checks, pure-jit]
-
-  - name: const_fold_chain
-    description: ALU32-to-ALU64 constant cascade with repeated truncation and immediate updates
-    category: program-scale
-    family: const-fold
-    level: chained-immediates
-    hypothesis: Cross-instruction constant folding should shrink constant-heavy ALU32 and ALU64 cascades
-    base_name: const_fold_chain
-    kernel_input_size: 520
-    input_generator: const_fold_chain
-    expected_result: 4564298942497563464
-    tags: [compute, constants, mixed-width, pure-jit]
 
   - name: struct_field_cluster
     description: Dense fixed-offset field extraction from a staged array of naturally aligned records
@@ -696,30 +311,6 @@ benchmarks:
     expected_result: 13107848205125099949
     tags: [alu, strength-reduce, lea-like, pure-jit]
 
-  - name: cond_select_dense
-    description: Pure isolated compare/select diamonds over aligned staged arrays
-    category: control-flow
-    family: select-diamond
-    level: canonical-dense
-    hypothesis: Isolates COND_SELECT lowering without rotate or byte-recompose interference
-    base_name: cond_select_dense
-    kernel_input_size: 3328
-    input_generator: cond_select_dense
-    expected_result: 6523053130887371951
-    tags: [branch, select, cmov, canonical, pure-jit]
-
-  - name: rotate_dense
-    description: Pure register-resident ARX rounds over native-loaded seed words
-    category: alu-mix
-    family: rotate-canonical
-    level: canonical-dense
-    hypothesis: Isolates ROTATE lowering by keeping the hot path entirely in registers after seed loads
-    base_name: rotate_dense
-    kernel_input_size: 64
-    input_generator: rotate_dense
-    expected_result: 14870098989209412331
-    tags: [compute, rotate, canonical, pure-jit]
-
   - name: addr_calc_stride
     description: Pure explicit address-generation stride walk over aligned u64 values
     category: memory-local
@@ -731,58 +322,6 @@ benchmarks:
     input_generator: addr_calc_stride
     expected_result: 9302301800681049161
     tags: [memory, stride, lea, canonical, pure-jit]
-
-  - name: extract_dense
-    description: Pure packed-word bitfield extraction over aligned u64 staged input
-    category: memory-local
-    family: bitfield-extract
-    level: canonical-dense
-    hypothesis: Isolates BITFIELD_EXTRACT lowering using native loads and constant shift-and-mask fields
-    base_name: extract_dense
-    kernel_input_size: 2048
-    input_generator: extract_dense
-    expected_result: 13503953896175652977
-    tags: [memory, fields, bitfield, canonical, pure-jit]
-
-  - name: endian_swap_dense
-    description: Pure aligned load plus byte-swap sequence over staged u32 input
-    category: memory-local
-    family: endian-fusion
-    level: canonical-dense
-    hypothesis: Isolates ENDIAN_FUSION lowering by using native aligned loads followed by __builtin_bswap32
-    base_name: endian_swap_dense
-    kernel_input_size: 1024
-    input_generator: endian_swap_dense
-    expected_result: 4354686090269194327
-    tags: [memory, endian, canonical, pure-jit]
-
-  - name: branch_flip_dense
-    description: Pure dense if/else diamonds over aligned staged u64 input
-    category: control-flow
-    family: branch-flip
-    level: canonical-dense
-    hypothesis: Isolates BRANCH_FLIP lowering with eight simple ALU-only diamonds repeated across 32 groups
-    base_name: branch_flip_dense
-    kernel_input_size: 2048
-    input_generator: branch_flip_dense
-    expected_result: 255429993929868791
-    tags: [branch, branch-flip, canonical, pure-jit]
-
-  # Kernel-only non-XDP breadth checks. These use skb program types with packet-fed
-  # staged input and skb-context result extraction.
-  - name: tc_bitcount
-    description: TC version of Kernighan popcount over generated u64 input
-    category: alu-mix
-    family: popcount
-    level: medium
-    hypothesis: Reuses the staged popcount kernel under a sched_cls hook to validate non-XDP packet execution
-    base_name: tc_bitcount
-    program_name: tc_bitcount_prog
-    io_mode: staged
-    kernel_input_size: 2056
-    input_generator: bitcount
-    expected_result: 12830754992348206170
-    tags: [tc, pure-jit, non-xdp, kernel-only]
 
   - name: tc_checksum
     description: TC version of the checksum reduction benchmark
