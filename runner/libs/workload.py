@@ -471,13 +471,16 @@ _STRESS_NG_NETWORK_STRESSORS = (
     "udp",
     "udp-flood",
 )
-# Stressors that must be dropped on AL2023 ARM64 (t4g.small): SCTP kernel
-# module autoload is flaky, stress-ng fails its SCTP workers and exits 2,
-# zeroing the whole bcc workload. x86 keeps SCTP because the kernel has it
-# compiled in and cilium BPF has `#ifdef ENABLE_SCTP` paths worth exercising.
+# Stressors that must be dropped on AL2023 ARM64 (t4g.small) because their
+# workers fail intermittently, tripping stress-ng exit 2 and zeroing the
+# whole workload. x86 keeps both: kernel has them compiled in and they
+# exercise relevant BPF paths.
+#   sctp: kernel SCTP=m, autoload flaky.
+#   fcntl: some fcntl variants on aarch64 AL2023 fail 3/4 workers (cause TBD,
+#          observed 2026-05-13).
 # Keys are `platform.machine()` values.
 _STRESS_NG_DROP_STRESSORS_BY_ARCH: Mapping[str, frozenset[str]] = {
-    "aarch64": frozenset({"sctp"}),
+    "aarch64": frozenset({"sctp", "fcntl"}),
 }
 
 

@@ -1,0 +1,10 @@
+{
+  "app": "cilium/agent",
+  "baseline": null,
+  "error": "Command '['/usr/bin/wrk', '-t2', '-c20', '-d1s', '--timeout', '1s', 'http://10.244.0.247:18080/']' timed out after 31.0 seconds",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "cilium",
+  "selected_workload": "network_lossy_multi",
+  "status": "error"
+}

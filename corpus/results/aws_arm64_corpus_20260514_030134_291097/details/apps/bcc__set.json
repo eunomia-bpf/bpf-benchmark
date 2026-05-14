@@ -1,0 +1,10 @@
+{
+  "app": "bcc/set",
+  "baseline": null,
+  "error": "stress_ng_os_io_network workload failed: stress-ng: metrc: [2700] rename             2013     16.98      0.00      0.03       118.57       60298.35\nstress-ng: metrc: [2700] touch                20     16.58      0.01      0.00         1.21        1533.74\nstress-ng: metrc: [2700] utime                 4     16.26      0.00      0.00         0.25        1717.48\nstress-ng: metrc: [2700] link                  4     17.40      0.03      0.48         0.23           7.91\nstress-ng: metrc: [2700] symlink               4     17.44      0.03      0.47         0.23           8.09\nstress-ng: metrc: [2700] mknod                37     16.42      0.00      0.01         2.25        2652.90\nstress-ng: metrc: [2700] fcntl                 1     16.30      0.00      0.00         0.06         239.75\nstress-ng: info:  [2700] skipped: 4: exec (4)\nstress-ng: info:  [2700] passed: 245: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (1)\nstress-ng: info:  [2700] failed: 3: fcntl (3)\nstress-ng: info:  [2700] metrics untrustworthy: 0\nstress-ng: info:  [2700] unsuccessful run completed in 20.12 secs",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "bcc_set",
+  "selected_workload": "stress_ng_os_io_network",
+  "status": "error"
+}

@@ -1,0 +1,918 @@
+{
+  "app": "otelcol-ebpf-profiler/profiling",
+  "baseline": {
+    "bpf": {
+      "113": {
+        "bytes_jited": 3928,
+        "bytes_xlated": 6224,
+        "id": 113,
+        "name": "perf_unwind_stop",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "114": {
+        "bytes_jited": 22080,
+        "bytes_xlated": 36904,
+        "id": 114,
+        "name": "perf_unwind_native",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "115": {
+        "bytes_jited": 14936,
+        "bytes_xlated": 24552,
+        "id": 115,
+        "name": "perf_unwind_hotspot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "116": {
+        "bytes_jited": 18032,
+        "bytes_xlated": 29128,
+        "id": 116,
+        "name": "perf_unwind_perl",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "117": {
+        "bytes_jited": 15312,
+        "bytes_xlated": 25064,
+        "id": 117,
+        "name": "perf_unwind_php",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "118": {
+        "bytes_jited": 18808,
+        "bytes_xlated": 33248,
+        "id": 118,
+        "name": "perf_unwind_python",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "119": {
+        "bytes_jited": 17352,
+        "bytes_xlated": 27984,
+        "id": 119,
+        "name": "perf_unwind_ruby",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "120": {
+        "bytes_jited": 20608,
+        "bytes_xlated": 34256,
+        "id": 120,
+        "name": "perf_unwind_v8",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "121": {
+        "bytes_jited": 1624,
+        "bytes_xlated": 2496,
+        "id": 121,
+        "name": "perf_go_labels",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "122": {
+        "bytes_jited": 840,
+        "bytes_xlated": 1088,
+        "id": 122,
+        "name": "perf_unwind_beam",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "123": {
+        "bytes_jited": 928,
+        "bytes_xlated": 1320,
+        "id": 123,
+        "name": "tracepoint__sched_process_free",
+        "run_cnt_delta": 17,
+        "run_time_ns_delta": 65775,
+        "type": "tracepoint"
+      },
+      "124": {
+        "bytes_jited": 3768,
+        "bytes_xlated": 5592,
+        "id": 124,
+        "name": "native_tracer_entry",
+        "run_cnt_delta": 2090,
+        "run_time_ns_delta": 53719641,
+        "type": "perf_event"
+      }
+    },
+    "workloads": [
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-u",
+              "-c",
+              "import hashlib, sys, time\nbuf = b\"x\" * 1024\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    hashlib.sha256(buf).digest()\n    n += 1\n    if (n & 4095) == 0:\n        sys.stderr.write(f\"python3 sha256 ops={n} elapsed_s={time.monotonic()-t0:.6f}\\n\")\n        sys.stderr.flush()\nsys.stderr.write(f\"python3 sha256 ops={n} elapsed_s={time.monotonic()-t0:.6f}\\n\")\n",
+              "10"
+            ],
+            "config": {
+              "buffer_bytes": 1024,
+              "hash": "sha256",
+              "language": "python3",
+              "tool": "python3"
+            },
+            "duration_s": 10.035615285000006,
+            "returncode": 0,
+            "stderr": "python3 sha256 ops=4096 elapsed_s=0.026524\npython3 sha256 ops=8192 elapsed_s=0.033019\npython3 sha256 ops=12288 elapsed_s=0.066274\npython3 sha256 ops=16384 elapsed_s=0.072752\npython3 sha256 ops=20480 elapsed_s=0.099146\npython3 sha256 ops=24576 elapsed_s=0.112191\npython3 sha256 ops=28672 elapsed_s=0.154114\npython3 sha256 ops=32768 elapsed_s=0.162356\npython3 sha256 ops=36864 elapsed_s=0.204920\npython3 sha256 ops=40960 elapsed_s=0.242049\npython3 sha256 ops=45056 elapsed_s=0.259838\npython3 sha256 ops=49152 elapsed_s=0.272125\npython3 sha256 ops=53248 elapsed_s=0.308582\npython3 sha256 ops=57344 elapsed_s=0.314950\npython3 sha256 ops=61440 elapsed_s=0.351742\npython3 sha256 ops=65536 elapsed_s=0.391861\npython3 sha256 ops=69632 elapsed_s=0.424713\npython3 sha256 ops=73728 elapsed_s=0.431155\npython3 sha256 ops=77824 elapsed_s=0.457652\npython3 sha256 ops=81920 elapsed_s=0.464057\npython3 sha256 ops=86016 elapsed_s=0.490595\npython3 sha256 ops=90112 elapsed_s=0.517010\npython3 sha256 ops=94208 elapsed_s=0.523486\npython3 sha256 ops=98304 elapsed_s=0.550017\npython3 sha256 ops=102400 elapsed_s=0.576452\npython3 sha256 ops=106496 elapsed_s=0.582900\npython3 sha256 ops=110592 elapsed_s=0.619320\npython3 sha256 ops=114688 elapsed_s=0.625727\npython3 sha256 ops=118784 elapsed_s=0.651833\npython3 sha256 ops=122880 elapsed_s=0.662188\npython3 sha256 ops=126976 elapsed_s=0.695500\npython3 sha256 ops=131072 elapsed_s=0.701938\npython3 sha256 ops=135168 elapsed_s=0.743471\npython3 sha256 ops=139264 elapsed_s=0.769942\npython3 sha256 ops=143360 elapsed_s=0.808774\npython3 sha256 ops=147456 elapsed_s=0.843698\npython3 sha256 ops=151552 elapsed_s=0.862256\npython3 sha256 ops=155648 elapsed_s=0.892160\npython3 sha256 ops=159744 elapsed_s=0.924014\npython3 sha256 ops=163840 elapsed_s=0.952167\npython3 sha256 ops=167936 elapsed_s=0.982144\npython3 sha256 ops=172032 elapsed_s=1.025987\npython3 sha256 ops=176128 elapsed_s=1.032423\npython3 sha256 ops=180224 elapsed_s=1.058809\npython3 sha256 ops=184320 elapsed_s=1.065273\npython3 sha256 ops=188416 elapsed_s=1.090796\npython3 sha256 ops=192512 elapsed_s=1.102148\npython3 sha256 ops=196608 elapsed_s=1.132111\npython3 sha256 ops=200704 elapsed_s=1.152086\npython3 sha256 ops=204800 elapsed_s=1.176427\npython3 sha256 ops=208896 elapsed_s=1.182821\npython3 sha256 ops=212992 elapsed_s=1.212116\npython3 sha256 ops=217088 elapsed_s=1.222089\npython3 sha256 ops=221184 elapsed_s=1.252242\npython3 sha256 ops=225280 elapsed_s=1.276897\npython3 sha256 ops=229376 elapsed_s=1.283416\npython3 sha256 ops=233472 elapsed_s=1.312174\npython3 sha256 ops=237568 elapsed_s=1.338680\npython3 sha256 ops=241664 elapsed_s=1.345141\npython3 sha256 ops=245760 elapsed_s=1.372151\npython3 sha256 ops=249856 elapsed_s=1.393582\npython3 sha256 ops=253952 elapsed_s=1.402193\npython3 sha256 ops=258048 elapsed_s=1.432709\npython3 sha256 ops=262144 elapsed_s=1.442107\npython3 sha256 ops=266240 elapsed_s=1.472160\npython3 sha256 ops=270336 elapsed_s=1.482178\npython3 sha256 ops=274432 elapsed_s=1.512213\npython3 sha256 ops=278528 elapsed_s=1.530149\npython3 sha256 ops=282624 elapsed_s=1.542231\npython3 sha256 ops=286720 elapsed_s=1.563947\npython3 sha256 ops=290816 elapsed_s=1.596800\npython3 sha256 ops=294912 elapsed_s=1.612167\npython3 sha256 ops=299008 elapsed_s=1.622216\npython3 sha256 ops=303104 elapsed_s=1.654034\npython3 sha256 ops=307200 elapsed_s=1.670527\npython3 sha256 ops=311296 elapsed_s=1.682187\npython3 sha256 ops=315392 elapsed_s=1.712191\npython3 sha256 ops=319488 elapsed_s=1.738671\npython3 sha256 ops=323584 elapsed_s=1.748320\npython3 sha256 ops=327680 elapsed_s=1.772183\npython3 sha256 ops=331776 elapsed_s=1.796955\npython3 sha256 ops=335872 elapsed_s=1.803453\npython3 sha256 ops=339968 elapsed_s=1.832148\npython3 sha256 ops=344064 elapsed_s=1.858612\npython3 sha256 ops=348160 elapsed_s=1.875451\npython3 sha256 ops=352256 elapsed_s=1.881902\npython3 sha256 ops=356352 elapsed_s=1.912180\npython3 sha256 ops=360448 elapsed_s=1.928600\npython3 sha256 ops=364544 elapsed_s=1.942132\npython3 sha256 ops=368640 elapsed_s=1.972197\npython3 sha256 ops=372736 elapsed_s=1.980920\npython3 sha256 ops=376832 elapsed_s=2.002154\npython3 sha256 ops=380928 elapsed_s=2.029442\npython3 sha256 ops=385024 elapsed_s=2.057058\npython3 sha256 ops=389120 elapsed_s=2.063475\npython3 sha256 ops=393216 elapsed_s=2.089863\npython3 sha256 ops=397312 elapsed_s=2.102328\npython3 sha256 ops=401408 elapsed_s=2.132126\npython3 sha256 ops=405504 elapsed_s=2.159532\npython3 sha256 ops=409600 elapsed_s=2.166432\npython3 sha256 ops=413696 elapsed_s=2.189867\npython3 sha256 ops=417792 elapsed_s=2.202109\npython3 sha256 ops=421888 elapsed_s=2.212499\npython3 sha256 ops=425984 elapsed_s=2.242134\npython3 sha256 ops=430080 elapsed_s=2.252143\npython3 sha256 ops=434176 elapsed_s=2.280195\npython3 sha256 ops=438272 elapsed_s=2.302115\npython3 sha256 ops=442368 elapsed_s=2.326794\npython3 sha256 ops=446464 elapsed_s=2.347950\npython3 sha256 ops=450560 elapsed_s=2.362148\npython3 sha256 ops=454656 elapsed_s=2.382140\npython3 sha256 ops=458752 elapsed_s=2.395022\npython3 sha256 ops=462848 elapsed_s=2.428269\npython3 sha256 ops=466944 elapsed_s=2.442148\npython3 sha256 ops=471040 elapsed_s=2.469524\npython3 sha256 ops=475136 elapsed_s=2.496030\npython3 sha256 ops=479232 elapsed_s=2.502429\npython3 sha256 ops=483328 elapsed_s=2.523070\npython3 sha256 ops=487424 elapsed_s=2.542122\npython3 sha256 ops=491520 elapsed_s=2.562151\npython3 sha256 ops=495616 elapsed_s=2.572135\npython3 sha256 ops=499712 elapsed_s=2.593699\npython3 sha256 ops=503808 elapsed_s=2.622157\npython3 sha256 ops=507904 elapsed_s=2.642160\npython3 sha256 ops=512000 elapsed_s=2.662237\npython3 sha256 ops=516096 elapsed_s=2.672180\npython3 sha256 ops=520192 elapsed_s=2.692169\npython3 sha256 ops=524288 elapsed_s=2.718995\npython3 sha256 ops=528384 elapsed_s=2.742161\npython3 sha256 ops=532480 elapsed_s=2.752131\npython3 sha256 ops=536576 elapsed_s=2.777762\npython3 sha256 ops=540672 elapsed_s=2.802306\npython3 sha256 ops=544768 elapsed_s=2.828797\npython3 sha256 ops=548864 elapsed_s=2.835207\npython3 sha256 ops=552960 elapsed_s=2.862234\npython3 sha256 ops=557056 elapsed_s=2.870944\npython3 sha256 ops=561152 elapsed_s=2.892226\npython3 sha256 ops=565248 elapsed_s=2.912160\npython3 sha256 ops=569344 elapsed_s=2.942140\npython3 sha256 ops=573440 elapsed_s=2.964032\npython3 sha256 ops=577536 elapsed_s=2.980507\npython3 sha256 ops=581632 elapsed_s=2.992125\npython3 sha256 ops=585728 elapsed_s=3.022118\npython3 sha256 ops=589824 elapsed_s=3.048593\npython3 sha256 ops=593920 elapsed_s=3.055068\npython3 sha256 ops=598016 elapsed_s=3.070978\npython3 sha256 ops=602112 elapsed_s=3.108085\npython3 sha256 ops=606208 elapsed_s=3.114548\npython3 sha256 ops=610304 elapsed_s=3.132109\npython3 sha256 ops=614400 elapsed_s=3.160017\npython3 sha256 ops=618496 elapsed_s=3.176568\npython3 sha256 ops=622592 elapsed_s=3.204048\npython3 sha256 ops=626688 elapsed_s=3.210476\npython3 sha256 ops=630784 elapsed_s=3.232146\npython3 sha256 ops=634880 elapsed_s=3.242100\npython3 sha256 ops=638976 elapsed_s=3.270295\npython3 sha256 ops=643072 elapsed_s=3.289555\npython3 sha256 ops=647168 elapsed_s=3.302108\npython3 sha256 ops=651264 elapsed_s=3.332221\npython3 sha256 ops=655360 elapsed_s=3.342238\npython3 sha256 ops=659456 elapsed_s=3.372131\npython3 sha256 ops=663552 elapsed_s=3.382071\npython3 sha256 ops=667648 elapsed_s=3.409895\npython3 sha256 ops=671744 elapsed_s=3.421636\npython3 sha256 ops=675840 elapsed_s=3.452361\npython3 sha256 ops=679936 elapsed_s=3.461675\npython3 sha256 ops=684032 elapsed_s=3.489721\npython3 sha256 ops=688128 elapsed_s=3.512144\npython3 sha256 ops=692224 elapsed_s=3.524356\npython3 sha256 ops=696320 elapsed_s=3.552138\npython3 sha256 ops=700416 elapsed_s=3.576137\npython3 sha256 ops=704512 elapsed_s=3.597264\npython3 sha256 ops=708608 elapsed_s=3.603892\npython3 sha256 ops=712704 elapsed_s=3.622120\npython3 sha256 ops=716800 elapsed_s=3.645361\npython3 sha256 ops=720896 elapsed_s=3.662167\npython3 sha256 ops=724992 elapsed_s=3.682123\npython3 sha256 ops=729088 elapsed_s=3.702133\npython3 sha256 ops=733184 elapsed_s=3.722194\npython3 sha256 ops=737280 elapsed_s=3.735637\npython3 sha256 ops=741376 elapsed_s=3.765711\npython3 sha256 ops=745472 elapsed_s=3.792251\npython3 sha256 ops=749568 elapsed_s=3.800476\npython3 sha256 ops=753664 elapsed_s=3.822132\npython3 sha256 ops=757760 elapsed_s=3.833584\npython3 sha256 ops=761856 elapsed_s=3.869890\npython3 sha256 ops=765952 elapsed_s=3.882178\npython3 sha256 ops=770048 elapsed_s=3.916297\npython3 sha256 ops=774144 elapsed_s=3.922826\npython3 sha256 ops=778240 elapsed_s=3.950055\npython3 sha256 ops=782336 elapsed_s=3.976585\npython3 sha256 ops=786432 elapsed_s=3.983003\npython3 sha256 ops=790528 elapsed_s=4.009534\npython3 sha256 ops=794624 elapsed_s=4.019681\npython3 sha256 ops=798720 elapsed_s=4.042128\npython3 sha256 ops=802816 elapsed_s=4.061389\npython3 sha256 ops=806912 elapsed_s=4.072113\npython3 sha256 ops=811008 elapsed_s=4.099512\npython3 sha256 ops=815104 elapsed_s=4.122207\npython3 sha256 ops=819200 elapsed_s=4.144848\npython3 sha256 ops=823296 elapsed_s=4.151317\npython3 sha256 ops=827392 elapsed_s=4.188513\npython3 sha256 ops=831488 elapsed_s=4.200136\npython3 sha256 ops=835584 elapsed_s=4.212125\npython3 sha256 ops=839680 elapsed_s=4.242191\npython3 sha256 ops=843776 elapsed_s=4.262613\npython3 sha256 ops=847872 elapsed_s=4.280596\npython3 sha256 ops=851968 elapsed_s=4.307816\npython3 sha256 ops=856064 elapsed_s=4.314726\npython3 sha256 ops=860160 elapsed_s=4.333840\npython3 sha256 ops=864256 elapsed_s=4.372150\npython3 sha256 ops=868352 elapsed_s=4.382187\npython3 sha256 ops=872448 elapsed_s=4.416740\npython3 sha256 ops=876544 elapsed_s=4.423195\npython3 sha256 ops=880640 elapsed_s=4.452167\npython3 sha256 ops=884736 elapsed_s=4.478721\npython3 sha256 ops=888832 elapsed_s=4.485162\npython3 sha256 ops=892928 elapsed_s=4.502205\npython3 sha256 ops=897024 elapsed_s=4.529825\npython3 sha256 ops=901120 elapsed_s=4.549236\npython3 sha256 ops=905216 elapsed_s=4.571184\npython3 sha256 ops=909312 elapsed_s=4.582193\npython3 sha256 ops=913408 elapsed_s=4.618930\npython3 sha256 ops=917504 elapsed_s=4.625501\npython3 sha256 ops=921600 elapsed_s=4.652143\npython3 sha256 ops=925696 elapsed_s=4.678643\npython3 sha256 ops=929792 elapsed_s=4.685054\npython3 sha256 ops=933888 elapsed_s=4.702196\npython3 sha256 ops=937984 elapsed_s=4.722205\npython3 sha256 ops=942080 elapsed_s=4.742265\npython3 sha256 ops=946176 elapsed_s=4.772138\npython3 sha256 ops=950272 elapsed_s=4.792606\npython3 sha256 ops=954368 elapsed_s=4.817018\npython3 sha256 ops=958464 elapsed_s=4.830090\npython3 sha256 ops=962560 elapsed_s=4.858804\npython3 sha256 ops=966656 elapsed_s=4.865303\npython3 sha256 ops=970752 elapsed_s=4.892139\npython3 sha256 ops=974848 elapsed_s=4.918644\npython3 sha256 ops=978944 elapsed_s=4.925082\npython3 sha256 ops=983040 elapsed_s=4.953356\npython3 sha256 ops=987136 elapsed_s=4.959817\npython3 sha256 ops=991232 elapsed_s=4.982144\npython3 sha256 ops=995328 elapsed_s=5.009302\npython3 sha256 ops=999424 elapsed_s=5.035842\npython3 sha256 ops=1003520 elapsed_s=5.042224\npython3 sha256 ops=1007616 elapsed_s=5.058625\npython3 sha256 ops=1011712 elapsed_s=5.083550\npython3 sha256 ops=1015808 elapsed_s=5.113265\npython3 sha256 ops=1019904 elapsed_s=5.119743\npython3 sha256 ops=1024000 elapsed_s=5.142122\npython3 sha256 ops=1028096 elapsed_s=5.162119\npython3 sha256 ops=1032192 elapsed_s=5.193629\npython3 sha256 ops=1036288 elapsed_s=5.200070\npython3 sha256 ops=1040384 elapsed_s=5.212102\npython3 sha256 ops=1044480 elapsed_s=5.243386\npython3 sha256 ops=1048576 elapsed_s=5.252140\npython3 sha256 ops=1052672 elapsed_s=5.293601\npython3 sha256 ops=1056768 elapsed_s=5.300097\npython3 sha256 ops=1060864 elapsed_s=5.312104\npython3 sha256 ops=1064960 elapsed_s=5.340828\npython3 sha256 ops=1069056 elapsed_s=5.352122\npython3 sha256 ops=1073152 elapsed_s=5.382164\npython3 sha256 ops=1077248 elapsed_s=5.398975\npython3 sha256 ops=1081344 elapsed_s=5.422167\npython3 sha256 ops=1085440 elapsed_s=5.432123\npython3 sha256 ops=1089536 elapsed_s=5.451472\npython3 sha256 ops=1093632 elapsed_s=5.482213\npython3 sha256 ops=1097728 elapsed_s=5.498748\npython3 sha256 ops=1101824 elapsed_s=5.512150\npython3 sha256 ops=1105920 elapsed_s=5.542136\npython3 sha256 ops=1110016 elapsed_s=5.563259\npython3 sha256 ops=1114112 elapsed_s=5.572128\npython3 sha256 ops=1118208 elapsed_s=5.603647\npython3 sha256 ops=1122304 elapsed_s=5.620336\npython3 sha256 ops=1126400 elapsed_s=5.632141\npython3 sha256 ops=1130496 elapsed_s=5.652184\npython3 sha256 ops=1134592 elapsed_s=5.672141\npython3 sha256 ops=1138688 elapsed_s=5.699946\npython3 sha256 ops=1142784 elapsed_s=5.726389\npython3 sha256 ops=1146880 elapsed_s=5.732839\npython3 sha256 ops=1150976 elapsed_s=5.766373\npython3 sha256 ops=1155072 elapsed_s=5.772863\npython3 sha256 ops=1159168 elapsed_s=5.797428\npython3 sha256 ops=1163264 elapsed_s=5.812116\npython3 sha256 ops=1167360 elapsed_s=5.824413\npython3 sha256 ops=1171456 elapsed_s=5.868255\npython3 sha256 ops=1175552 elapsed_s=5.874735\npython3 sha256 ops=1179648 elapsed_s=5.912166\npython3 sha256 ops=1183744 elapsed_s=5.932172\npython3 sha256 ops=1187840 elapsed_s=5.962198\npython3 sha256 ops=1191936 elapsed_s=5.989475\npython3 sha256 ops=1196032 elapsed_s=6.000260\npython3 sha256 ops=1200128 elapsed_s=6.022196\npython3 sha256 ops=1204224 elapsed_s=6.048680\npython3 sha256 ops=1208320 elapsed_s=6.062242\npython3 sha256 ops=1212416 elapsed_s=6.100430\npython3 sha256 ops=1216512 elapsed_s=6.115929\npython3 sha256 ops=1220608 elapsed_s=6.132236\npython3 sha256 ops=1224704 elapsed_s=6.152168\npython3 sha256 ops=1228800 elapsed_s=6.177691\npython3 sha256 ops=1232896 elapsed_s=6.192121\npython3 sha256 ops=1236992 elapsed_s=6.212140\npython3 sha256 ops=1241088 elapsed_s=6.232176\npython3 sha256 ops=1245184 elapsed_s=6.242205\npython3 sha256 ops=1249280 elapsed_s=6.272149\npython3 sha256 ops=1253376 elapsed_s=6.282144\npython3 sha256 ops=1257472 elapsed_s=6.302200\npython3 sha256 ops=1261568 elapsed_s=6.332157\npython3 sha256 ops=1265664 elapsed_s=6.354451\npython3 sha256 ops=1269760 elapsed_s=6.360941\npython3 sha256 ops=1273856 elapsed_s=6.397938\npython3 sha256 ops=1277952 elapsed_s=6.412129\npython3 sha256 ops=1282048 elapsed_s=6.442109\npython3 sha256 ops=1286144 elapsed_s=6.452120\npython3 sha256 ops=1290240 elapsed_s=6.482130\npython3 sha256 ops=1294336 elapsed_s=6.508571\npython3 sha256 ops=1298432 elapsed_s=6.514978\npython3 sha256 ops=1302528 elapsed_s=6.532133\npython3 sha256 ops=1306624 elapsed_s=6.552122\npython3 sha256 ops=1310720 elapsed_s=6.572094\npython3 sha256 ops=1314816 elapsed_s=6.591352\npython3 sha256 ops=1318912 elapsed_s=6.612116\npython3 sha256 ops=1323008 elapsed_s=6.632116\npython3 sha256 ops=1327104 elapsed_s=6.642157\npython3 sha256 ops=1331200 elapsed_s=6.686559\npython3 sha256 ops=1335296 elapsed_s=6.692936\npython3 sha256 ops=1339392 elapsed_s=6.710589\npython3 sha256 ops=1343488 elapsed_s=6.722197\npython3 sha256 ops=1347584 elapsed_s=6.742238\npython3 sha256 ops=1351680 elapsed_s=6.772106\npython3 sha256 ops=1355776 elapsed_s=6.782214\npython3 sha256 ops=1359872 elapsed_s=6.812246\npython3 sha256 ops=1363968 elapsed_s=6.822363\npython3 sha256 ops=1368064 elapsed_s=6.842259\npython3 sha256 ops=1372160 elapsed_s=6.872175\npython3 sha256 ops=1376256 elapsed_s=6.882294\npython3 sha256 ops=1380352 elapsed_s=6.912216\npython3 sha256 ops=1384448 elapsed_s=6.922231\npython3 sha256 ops=1388544 elapsed_s=6.942302\npython3 sha256 ops=1392640 elapsed_s=6.972156\npython3 sha256 ops=1396736 elapsed_s=6.982192\npython3 sha256 ops=1400832 elapsed_s=7.012131\npython3 sha256 ops=1404928 elapsed_s=7.022115\npython3 sha256 ops=1409024 elapsed_s=7.042110\npython3 sha256 ops=1413120 elapsed_s=7.062194\npython3 sha256 ops=1417216 elapsed_s=7.089897\npython3 sha256 ops=1421312 elapsed_s=7.117427\npython3 sha256 ops=1425408 elapsed_s=7.123869\npython3 sha256 ops=1429504 elapsed_s=7.142143\npython3 sha256 ops=1433600 elapsed_s=7.162116\npython3 sha256 ops=1437696 elapsed_s=7.182126\npython3 sha256 ops=1441792 elapsed_s=7.201355\npython3 sha256 ops=1445888 elapsed_s=7.222125\npython3 sha256 ops=1449984 elapsed_s=7.242109\npython3 sha256 ops=1454080 elapsed_s=7.262106\npython3 sha256 ops=1458176 elapsed_s=7.272111\npython3 sha256 ops=1462272 elapsed_s=7.301545\npython3 sha256 ops=1466368 elapsed_s=7.323512\npython3 sha256 ops=1470464 elapsed_s=7.339817\npython3 sha256 ops=1474560 elapsed_s=7.353867\npython3 sha256 ops=1478656 elapsed_s=7.382179\npython3 sha256 ops=1482752 elapsed_s=7.399046\npython3 sha256 ops=1486848 elapsed_s=7.412159\npython3 sha256 ops=1490944 elapsed_s=7.442204\npython3 sha256 ops=1495040 elapsed_s=7.468653\npython3 sha256 ops=1499136 elapsed_s=7.475061\npython3 sha256 ops=1503232 elapsed_s=7.501714\npython3 sha256 ops=1507328 elapsed_s=7.528265\npython3 sha256 ops=1511424 elapsed_s=7.534711\npython3 sha256 ops=1515520 elapsed_s=7.562182\npython3 sha256 ops=1519616 elapsed_s=7.571483\npython3 sha256 ops=1523712 elapsed_s=7.592181\npython3 sha256 ops=1527808 elapsed_s=7.622127\npython3 sha256 ops=1531904 elapsed_s=7.648651\npython3 sha256 ops=1536000 elapsed_s=7.655043\npython3 sha256 ops=1540096 elapsed_s=7.672109\npython3 sha256 ops=1544192 elapsed_s=7.692152\npython3 sha256 ops=1548288 elapsed_s=7.712126\npython3 sha256 ops=1552384 elapsed_s=7.732131\npython3 sha256 ops=1556480 elapsed_s=7.742117\npython3 sha256 ops=1560576 elapsed_s=7.778291\npython3 sha256 ops=1564672 elapsed_s=7.792126\npython3 sha256 ops=1568768 elapsed_s=7.825995\npython3 sha256 ops=1572864 elapsed_s=7.832367\npython3 sha256 ops=1576960 elapsed_s=7.858729\npython3 sha256 ops=1581056 elapsed_s=7.865134\npython3 sha256 ops=1585152 elapsed_s=7.882092\npython3 sha256 ops=1589248 elapsed_s=7.905537\npython3 sha256 ops=1593344 elapsed_s=7.922148\npython3 sha256 ops=1597440 elapsed_s=7.952612\npython3 sha256 ops=1601536 elapsed_s=7.979074\npython3 sha256 ops=1605632 elapsed_s=7.985504\npython3 sha256 ops=1609728 elapsed_s=8.012646\npython3 sha256 ops=1613824 elapsed_s=8.039093\npython3 sha256 ops=1617920 elapsed_s=8.045556\npython3 sha256 ops=1622016 elapsed_s=8.063819\npython3 sha256 ops=1626112 elapsed_s=8.082134\npython3 sha256 ops=1630208 elapsed_s=8.112684\npython3 sha256 ops=1634304 elapsed_s=8.129707\npython3 sha256 ops=1638400 elapsed_s=8.142115\npython3 sha256 ops=1642496 elapsed_s=8.172683\npython3 sha256 ops=1646592 elapsed_s=8.189656\npython3 sha256 ops=1650688 elapsed_s=8.202250\npython3 sha256 ops=1654784 elapsed_s=8.222146\npython3 sha256 ops=1658880 elapsed_s=8.242121\npython3 sha256 ops=1662976 elapsed_s=8.262135\npython3 sha256 ops=1667072 elapsed_s=8.282116\npython3 sha256 ops=1671168 elapsed_s=8.302118\npython3 sha256 ops=1675264 elapsed_s=8.322119\npython3 sha256 ops=1679360 elapsed_s=8.332612\npython3 sha256 ops=1683456 elapsed_s=8.362149\npython3 sha256 ops=1687552 elapsed_s=8.372609\npython3 sha256 ops=1691648 elapsed_s=8.402183\npython3 sha256 ops=1695744 elapsed_s=8.422200\npython3 sha256 ops=1699840 elapsed_s=8.442161\npython3 sha256 ops=1703936 elapsed_s=8.462152\npython3 sha256 ops=1708032 elapsed_s=8.482252\npython3 sha256 ops=1712128 elapsed_s=8.502227\npython3 sha256 ops=1716224 elapsed_s=8.522136\npython3 sha256 ops=1720320 elapsed_s=8.532718\npython3 sha256 ops=1724416 elapsed_s=8.562169\npython3 sha256 ops=1728512 elapsed_s=8.572882\npython3 sha256 ops=1732608 elapsed_s=8.602153\npython3 sha256 ops=1736704 elapsed_s=8.612787\npython3 sha256 ops=1740800 elapsed_s=8.642187\npython3 sha256 ops=1744896 elapsed_s=8.652591\npython3 sha256 ops=1748992 elapsed_s=8.682144\npython3 sha256 ops=1753088 elapsed_s=8.692166\npython3 sha256 ops=1757184 elapsed_s=8.712112\npython3 sha256 ops=1761280 elapsed_s=8.735588\npython3 sha256 ops=1765376 elapsed_s=8.752135\npython3 sha256 ops=1769472 elapsed_s=8.782135\npython3 sha256 ops=1773568 elapsed_s=8.798151\npython3 sha256 ops=1777664 elapsed_s=8.819114\npython3 sha256 ops=1781760 elapsed_s=8.832185\npython3 sha256 ops=1785856 elapsed_s=8.852123\npython3 sha256 ops=1789952 elapsed_s=8.872123\npython3 sha256 ops=1794048 elapsed_s=8.892157\npython3 sha256 ops=1798144 elapsed_s=8.909137\npython3 sha256 ops=1802240 elapsed_s=8.932150\npython3 sha256 ops=1806336 elapsed_s=8.942157\npython3 sha256 ops=1810432 elapsed_s=8.972217\npython3 sha256 ops=1814528 elapsed_s=8.982306\npython3 sha256 ops=1818624 elapsed_s=9.009245\npython3 sha256 ops=1822720 elapsed_s=9.022684\npython3 sha256 ops=1826816 elapsed_s=9.056578\npython3 sha256 ops=1830912 elapsed_s=9.063046\npython3 sha256 ops=1835008 elapsed_s=9.093367\npython3 sha256 ops=1839104 elapsed_s=9.102159\npython3 sha256 ops=1843200 elapsed_s=9.132181\npython3 sha256 ops=1847296 elapsed_s=9.158651\npython3 sha256 ops=1851392 elapsed_s=9.165134\npython3 sha256 ops=1855488 elapsed_s=9.182160\npython3 sha256 ops=1859584 elapsed_s=9.202105\npython3 sha256 ops=1863680 elapsed_s=9.222119\npython3 sha256 ops=1867776 elapsed_s=9.242104\npython3 sha256 ops=1871872 elapsed_s=9.262121\npython3 sha256 ops=1875968 elapsed_s=9.282152\npython3 sha256 ops=1880064 elapsed_s=9.293643\npython3 sha256 ops=1884160 elapsed_s=9.322174\npython3 sha256 ops=1888256 elapsed_s=9.348715\npython3 sha256 ops=1892352 elapsed_s=9.355206\npython3 sha256 ops=1896448 elapsed_s=9.382095\npython3 sha256 ops=1900544 elapsed_s=9.409129\npython3 sha256 ops=1904640 elapsed_s=9.415511\npython3 sha256 ops=1908736 elapsed_s=9.432138\npython3 sha256 ops=1912832 elapsed_s=9.462260\npython3 sha256 ops=1916928 elapsed_s=9.488750\npython3 sha256 ops=1921024 elapsed_s=9.495186\npython3 sha256 ops=1925120 elapsed_s=9.515423\npython3 sha256 ops=1929216 elapsed_s=9.536893\npython3 sha256 ops=1933312 elapsed_s=9.543295\npython3 sha256 ops=1937408 elapsed_s=9.572128\npython3 sha256 ops=1941504 elapsed_s=9.584295\npython3 sha256 ops=1945600 elapsed_s=9.612120\npython3 sha256 ops=1949696 elapsed_s=9.632176\npython3 sha256 ops=1953792 elapsed_s=9.652201\npython3 sha256 ops=1957888 elapsed_s=9.662127\npython3 sha256 ops=1961984 elapsed_s=9.692118\npython3 sha256 ops=1966080 elapsed_s=9.718600\npython3 sha256 ops=1970176 elapsed_s=9.725087\npython3 sha256 ops=1974272 elapsed_s=9.752191\npython3 sha256 ops=1978368 elapsed_s=9.778846\npython3 sha256 ops=1982464 elapsed_s=9.785408\npython3 sha256 ops=1986560 elapsed_s=9.802173\npython3 sha256 ops=1990656 elapsed_s=9.825282\npython3 sha256 ops=1994752 elapsed_s=9.866123\npython3 sha256 ops=1998848 elapsed_s=9.874239\npython3 sha256 ops=2002944 elapsed_s=9.900641\npython3 sha256 ops=2007040 elapsed_s=9.912168\npython3 sha256 ops=2011136 elapsed_s=9.925196\npython3 sha256 ops=2015232 elapsed_s=9.952150\npython3 sha256 ops=2019328 elapsed_s=9.972143\npython3 sha256 ops=2023424 elapsed_s=9.992108\npython3 sha256 ops=2023424 elapsed_s=10.005759",
+            "stdout": "",
+            "workload_name": "otel_python3_sha256"
+          },
+          {
+            "command": [
+              "/usr/bin/ruby",
+              "-e",
+              "require \"digest\"\nbuf = \"x\" * 1024\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  Digest::SHA256.digest(buf)\n  n += 1\n  if (n & 4095) == 0\n    elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\n    STDERR.puts \"ruby sha256 ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)}\"\n    STDERR.flush\n  end\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby sha256 ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)}\"\n",
+              "10"
+            ],
+            "config": {
+              "buffer_bytes": 1024,
+              "hash": "sha256",
+              "language": "ruby",
+              "tool": "ruby"
+            },
+            "duration_s": 10.338592251999998,
+            "returncode": 0,
+            "stderr": "ruby sha256 ops=4096 elapsed_s=0.134770\nruby sha256 ops=8192 elapsed_s=0.226245\nruby sha256 ops=12288 elapsed_s=0.322120\nruby sha256 ops=16384 elapsed_s=0.445332\nruby sha256 ops=20480 elapsed_s=0.619971\nruby sha256 ops=24576 elapsed_s=0.726507\nruby sha256 ops=28672 elapsed_s=0.837353\nruby sha256 ops=32768 elapsed_s=0.915965\nruby sha256 ops=36864 elapsed_s=1.030450\nruby sha256 ops=40960 elapsed_s=1.129591\nruby sha256 ops=45056 elapsed_s=1.225522\nruby sha256 ops=49152 elapsed_s=1.320598\nruby sha256 ops=53248 elapsed_s=1.413207\nruby sha256 ops=57344 elapsed_s=1.496264\nruby sha256 ops=61440 elapsed_s=1.602105\nruby sha256 ops=65536 elapsed_s=1.702486\nruby sha256 ops=69632 elapsed_s=1.792116\nruby sha256 ops=73728 elapsed_s=1.896543\nruby sha256 ops=77824 elapsed_s=1.989508\nruby sha256 ops=81920 elapsed_s=2.083977\nruby sha256 ops=86016 elapsed_s=2.174296\nruby sha256 ops=90112 elapsed_s=2.290802\nruby sha256 ops=94208 elapsed_s=2.377849\nruby sha256 ops=98304 elapsed_s=2.465433\nruby sha256 ops=102400 elapsed_s=2.575262\nruby sha256 ops=106496 elapsed_s=2.654373\nruby sha256 ops=110592 elapsed_s=2.746168\nruby sha256 ops=114688 elapsed_s=2.857793\nruby sha256 ops=118784 elapsed_s=2.945902\nruby sha256 ops=122880 elapsed_s=3.044435\nruby sha256 ops=126976 elapsed_s=3.149306\nruby sha256 ops=131072 elapsed_s=3.249748\nruby sha256 ops=135168 elapsed_s=3.317494\nruby sha256 ops=139264 elapsed_s=3.432844\nruby sha256 ops=143360 elapsed_s=3.531097\nruby sha256 ops=147456 elapsed_s=3.622947\nruby sha256 ops=151552 elapsed_s=3.726410\nruby sha256 ops=155648 elapsed_s=3.798354\nruby sha256 ops=159744 elapsed_s=3.911536\nruby sha256 ops=163840 elapsed_s=4.003758\nruby sha256 ops=167936 elapsed_s=4.120459\nruby sha256 ops=172032 elapsed_s=4.215014\nruby sha256 ops=176128 elapsed_s=4.309423\nruby sha256 ops=180224 elapsed_s=4.408403\nruby sha256 ops=184320 elapsed_s=4.504366\nruby sha256 ops=188416 elapsed_s=4.585263\nruby sha256 ops=192512 elapsed_s=4.675376\nruby sha256 ops=196608 elapsed_s=4.791721\nruby sha256 ops=200704 elapsed_s=4.868499\nruby sha256 ops=204800 elapsed_s=4.968523\nruby sha256 ops=208896 elapsed_s=5.076178\nruby sha256 ops=212992 elapsed_s=5.169709\nruby sha256 ops=217088 elapsed_s=5.264529\nruby sha256 ops=221184 elapsed_s=5.369890\nruby sha256 ops=225280 elapsed_s=5.460563\nruby sha256 ops=229376 elapsed_s=5.563994\nruby sha256 ops=233472 elapsed_s=5.684983\nruby sha256 ops=237568 elapsed_s=5.791213\nruby sha256 ops=241664 elapsed_s=5.897997\nruby sha256 ops=245760 elapsed_s=5.975742\nruby sha256 ops=249856 elapsed_s=6.082933\nruby sha256 ops=253952 elapsed_s=6.189408\nruby sha256 ops=258048 elapsed_s=6.280669\nruby sha256 ops=262144 elapsed_s=6.375176\nruby sha256 ops=266240 elapsed_s=6.472313\nruby sha256 ops=270336 elapsed_s=6.579257\nruby sha256 ops=274432 elapsed_s=6.655663\nruby sha256 ops=278528 elapsed_s=6.756128\nruby sha256 ops=282624 elapsed_s=6.845798\nruby sha256 ops=286720 elapsed_s=6.937096\nruby sha256 ops=290816 elapsed_s=7.044617\nruby sha256 ops=294912 elapsed_s=7.125516\nruby sha256 ops=299008 elapsed_s=7.228118\nruby sha256 ops=303104 elapsed_s=7.317824\nruby sha256 ops=307200 elapsed_s=7.422085\nruby sha256 ops=311296 elapsed_s=7.518805\nruby sha256 ops=315392 elapsed_s=7.603703\nruby sha256 ops=319488 elapsed_s=7.694980\nruby sha256 ops=323584 elapsed_s=7.788525\nruby sha256 ops=327680 elapsed_s=7.885853\nruby sha256 ops=331776 elapsed_s=7.992064\nruby sha256 ops=335872 elapsed_s=8.100901\nruby sha256 ops=339968 elapsed_s=8.189861\nruby sha256 ops=344064 elapsed_s=8.276757\nruby sha256 ops=348160 elapsed_s=8.388874\nruby sha256 ops=352256 elapsed_s=8.465435\nruby sha256 ops=356352 elapsed_s=8.565081\nruby sha256 ops=360448 elapsed_s=8.666384\nruby sha256 ops=364544 elapsed_s=8.746581\nruby sha256 ops=368640 elapsed_s=8.856851\nruby sha256 ops=372736 elapsed_s=8.953488\nruby sha256 ops=376832 elapsed_s=9.045539\nruby sha256 ops=380928 elapsed_s=9.144343\nruby sha256 ops=385024 elapsed_s=9.249662\nruby sha256 ops=389120 elapsed_s=9.325086\nruby sha256 ops=393216 elapsed_s=9.421567\nruby sha256 ops=397312 elapsed_s=9.530237\nruby sha256 ops=401408 elapsed_s=9.621090\nruby sha256 ops=405504 elapsed_s=9.719505\nruby sha256 ops=409600 elapsed_s=9.785278\nruby sha256 ops=413696 elapsed_s=9.847345\nruby sha256 ops=417792 elapsed_s=9.879392\nruby sha256 ops=421888 elapsed_s=9.910295\nruby sha256 ops=425984 elapsed_s=9.941936\nruby sha256 ops=430080 elapsed_s=9.973095\nruby sha256 ops=433661 elapsed_s=10.000012",
+            "stdout": "",
+            "workload_name": "otel_ruby_sha256"
+          },
+          {
+            "command": [
+              "/usr/bin/nodejs",
+              "-e",
+              "const crypto = require(\"crypto\");\nconst buf = Buffer.alloc(1024, 120);\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  crypto.createHash(\"sha256\").update(buf).digest();\n  n++;\n  if ((n & 4095) === 0) {\n    const dt = Number(process.hrtime.bigint() - t0) / 1e9;\n    process.stderr.write(`nodejs sha256 ops=${n} elapsed_s=${dt.toFixed(6)}\\n`);\n  }\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs sha256 ops=${n} elapsed_s=${dt.toFixed(6)}\\n`);\n",
+              "10"
+            ],
+            "config": {
+              "buffer_bytes": 1024,
+              "hash": "sha256",
+              "language": "nodejs",
+              "tool": "nodejs"
+            },
+            "duration_s": 10.537027074999997,
+            "returncode": 0,
+            "stderr": "nodejs sha256 ops=4096 elapsed_s=0.179050\nnodejs sha256 ops=8192 elapsed_s=0.385736\nnodejs sha256 ops=12288 elapsed_s=0.438045\nnodejs sha256 ops=16384 elapsed_s=0.513416\nnodejs sha256 ops=20480 elapsed_s=0.565306\nnodejs sha256 ops=24576 elapsed_s=0.654452\nnodejs sha256 ops=28672 elapsed_s=0.742560\nnodejs sha256 ops=32768 elapsed_s=0.802886\nnodejs sha256 ops=36864 elapsed_s=0.860840\nnodejs sha256 ops=40960 elapsed_s=0.940622\nnodejs sha256 ops=45056 elapsed_s=0.999937\nnodejs sha256 ops=49152 elapsed_s=1.077016\nnodejs sha256 ops=53248 elapsed_s=1.155605\nnodejs sha256 ops=57344 elapsed_s=1.217570\nnodejs sha256 ops=61440 elapsed_s=1.299154\nnodejs sha256 ops=65536 elapsed_s=1.397078\nnodejs sha256 ops=69632 elapsed_s=1.482185\nnodejs sha256 ops=73728 elapsed_s=1.521369\nnodejs sha256 ops=77824 elapsed_s=1.612954\nnodejs sha256 ops=81920 elapsed_s=1.676368\nnodejs sha256 ops=86016 elapsed_s=1.735928\nnodejs sha256 ops=90112 elapsed_s=1.799553\nnodejs sha256 ops=94208 elapsed_s=1.896945\nnodejs sha256 ops=98304 elapsed_s=1.962608\nnodejs sha256 ops=102400 elapsed_s=2.026575\nnodejs sha256 ops=106496 elapsed_s=2.107465\nnodejs sha256 ops=110592 elapsed_s=2.166619\nnodejs sha256 ops=114688 elapsed_s=2.229434\nnodejs sha256 ops=118784 elapsed_s=2.298390\nnodejs sha256 ops=122880 elapsed_s=2.368295\nnodejs sha256 ops=126976 elapsed_s=2.441184\nnodejs sha256 ops=131072 elapsed_s=2.523989\nnodejs sha256 ops=135168 elapsed_s=2.579195\nnodejs sha256 ops=139264 elapsed_s=2.663720\nnodejs sha256 ops=143360 elapsed_s=2.734505\nnodejs sha256 ops=147456 elapsed_s=2.799989\nnodejs sha256 ops=151552 elapsed_s=2.882540\nnodejs sha256 ops=155648 elapsed_s=2.950808\nnodejs sha256 ops=159744 elapsed_s=3.039125\nnodejs sha256 ops=163840 elapsed_s=3.098205\nnodejs sha256 ops=167936 elapsed_s=3.161135\nnodejs sha256 ops=172032 elapsed_s=3.262063\nnodejs sha256 ops=176128 elapsed_s=3.317049\nnodejs sha256 ops=180224 elapsed_s=3.405183\nnodejs sha256 ops=184320 elapsed_s=3.468457\nnodejs sha256 ops=188416 elapsed_s=3.524052\nnodejs sha256 ops=192512 elapsed_s=3.612076\nnodejs sha256 ops=196608 elapsed_s=3.679779\nnodejs sha256 ops=200704 elapsed_s=3.739930\nnodejs sha256 ops=204800 elapsed_s=3.831651\nnodejs sha256 ops=208896 elapsed_s=3.943665\nnodejs sha256 ops=212992 elapsed_s=4.002698\nnodejs sha256 ops=217088 elapsed_s=4.068044\nnodejs sha256 ops=221184 elapsed_s=4.146745\nnodejs sha256 ops=225280 elapsed_s=4.199061\nnodejs sha256 ops=229376 elapsed_s=4.286777\nnodejs sha256 ops=233472 elapsed_s=4.350307\nnodejs sha256 ops=237568 elapsed_s=4.430349\nnodejs sha256 ops=241664 elapsed_s=4.489476\nnodejs sha256 ops=245760 elapsed_s=4.557128\nnodejs sha256 ops=249856 elapsed_s=4.640168\nnodejs sha256 ops=253952 elapsed_s=4.721098\nnodejs sha256 ops=258048 elapsed_s=4.788892\nnodejs sha256 ops=262144 elapsed_s=4.865449\nnodejs sha256 ops=266240 elapsed_s=4.911002\nnodejs sha256 ops=270336 elapsed_s=4.995920\nnodejs sha256 ops=274432 elapsed_s=5.084265\nnodejs sha256 ops=278528 elapsed_s=5.141919\nnodejs sha256 ops=282624 elapsed_s=5.206642\nnodejs sha256 ops=286720 elapsed_s=5.295433\nnodejs sha256 ops=290816 elapsed_s=5.344395\nnodejs sha256 ops=294912 elapsed_s=5.444520\nnodejs sha256 ops=299008 elapsed_s=5.532787\nnodejs sha256 ops=303104 elapsed_s=5.601608\nnodejs sha256 ops=307200 elapsed_s=5.666613\nnodejs sha256 ops=311296 elapsed_s=5.748701\nnodejs sha256 ops=315392 elapsed_s=5.808896\nnodejs sha256 ops=319488 elapsed_s=5.880698\nnodejs sha256 ops=323584 elapsed_s=5.930294\nnodejs sha256 ops=327680 elapsed_s=6.024026\nnodejs sha256 ops=331776 elapsed_s=6.084252\nnodejs sha256 ops=335872 elapsed_s=6.151279\nnodejs sha256 ops=339968 elapsed_s=6.251394\nnodejs sha256 ops=344064 elapsed_s=6.316646\nnodejs sha256 ops=348160 elapsed_s=6.386273\nnodejs sha256 ops=352256 elapsed_s=6.454545\nnodejs sha256 ops=356352 elapsed_s=6.532201\nnodejs sha256 ops=360448 elapsed_s=6.597409\nnodejs sha256 ops=364544 elapsed_s=6.682105\nnodejs sha256 ops=368640 elapsed_s=6.721531\nnodejs sha256 ops=372736 elapsed_s=6.815973\nnodejs sha256 ops=376832 elapsed_s=6.892888\nnodejs sha256 ops=380928 elapsed_s=6.948732\nnodejs sha256 ops=385024 elapsed_s=7.025646\nnodejs sha256 ops=389120 elapsed_s=7.105014\nnodejs sha256 ops=393216 elapsed_s=7.177384\nnodejs sha256 ops=397312 elapsed_s=7.226826\nnodejs sha256 ops=401408 elapsed_s=7.304674\nnodejs sha256 ops=405504 elapsed_s=7.378235\nnodejs sha256 ops=409600 elapsed_s=7.452075\nnodejs sha256 ops=413696 elapsed_s=7.515744\nnodejs sha256 ops=417792 elapsed_s=7.603715\nnodejs sha256 ops=421888 elapsed_s=7.662945\nnodejs sha256 ops=425984 elapsed_s=7.716352\nnodejs sha256 ops=430080 elapsed_s=7.780952\nnodejs sha256 ops=434176 elapsed_s=7.862238\nnodejs sha256 ops=438272 elapsed_s=7.925619\nnodejs sha256 ops=442368 elapsed_s=7.994969\nnodejs sha256 ops=446464 elapsed_s=8.054088\nnodejs sha256 ops=450560 elapsed_s=8.133379\nnodejs sha256 ops=454656 elapsed_s=8.200351\nnodejs sha256 ops=458752 elapsed_s=8.272336\nnodejs sha256 ops=462848 elapsed_s=8.359880\nnodejs sha256 ops=466944 elapsed_s=8.425460\nnodejs sha256 ops=471040 elapsed_s=8.495423\nnodejs sha256 ops=475136 elapsed_s=8.574361\nnodejs sha256 ops=479232 elapsed_s=8.640022\nnodejs sha256 ops=483328 elapsed_s=8.721156\nnodejs sha256 ops=487424 elapsed_s=8.798625\nnodejs sha256 ops=491520 elapsed_s=8.886830\nnodejs sha256 ops=495616 elapsed_s=8.949057\nnodejs sha256 ops=499712 elapsed_s=9.010317\nnodejs sha256 ops=503808 elapsed_s=9.089817\nnodejs sha256 ops=507904 elapsed_s=9.173444\nnodejs sha256 ops=512000 elapsed_s=9.226624\nnodejs sha256 ops=516096 elapsed_s=9.297867\nnodejs sha256 ops=520192 elapsed_s=9.384976\nnodejs sha256 ops=524288 elapsed_s=9.443933\nnodejs sha256 ops=528384 elapsed_s=9.530627\nnodejs sha256 ops=532480 elapsed_s=9.585431\nnodejs sha256 ops=536576 elapsed_s=9.621510\nnodejs sha256 ops=540672 elapsed_s=9.657757\nnodejs sha256 ops=544768 elapsed_s=9.682991\nnodejs sha256 ops=548864 elapsed_s=9.707260\nnodejs sha256 ops=552960 elapsed_s=9.726112\nnodejs sha256 ops=557056 elapsed_s=9.749240\nnodejs sha256 ops=561152 elapsed_s=9.772849\nnodejs sha256 ops=565248 elapsed_s=9.791706\nnodejs sha256 ops=569344 elapsed_s=9.815155\nnodejs sha256 ops=573440 elapsed_s=9.839181\nnodejs sha256 ops=577536 elapsed_s=9.858259\nnodejs sha256 ops=581632 elapsed_s=9.882211\nnodejs sha256 ops=585728 elapsed_s=9.906288\nnodejs sha256 ops=589824 elapsed_s=9.925248\nnodejs sha256 ops=593920 elapsed_s=9.949070\nnodejs sha256 ops=598016 elapsed_s=9.973381\nnodejs sha256 ops=602112 elapsed_s=9.992228\nnodejs sha256 ops=602680 elapsed_s=10.000089",
+            "stdout": "",
+            "workload_name": "otel_nodejs_sha256"
+          },
+          {
+            "command": [
+              "/usr/bin/perl",
+              "-e",
+              "use Digest::SHA qw(sha256);\nuse Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $buf = \"x\" x 1024;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  sha256($buf);\n  $n++;\n  if (($n & 4095) == 0) {\n    my $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\n    printf STDERR (\"perl sha256 ops=%d elapsed_s=%.6f\\n\", $n, $dt);\n  }\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl sha256 ops=%d elapsed_s=%.6f\\n\", $n, $dt);\n",
+              "10"
+            ],
+            "config": {
+              "buffer_bytes": 1024,
+              "hash": "sha256",
+              "language": "perl",
+              "tool": "perl"
+            },
+            "duration_s": 10.53721314500001,
+            "returncode": 0,
+            "stderr": "perl: warning: Setting locale failed.\nperl: warning: Please check that your locale settings:\n\tLANGUAGE = (unset),\n\tLC_ALL = (unset),\n\tLC_CTYPE = \"C.UTF-8\",\n\tLANG = \"en_US.UTF-8\"\n    are supported and installed on your system.\nperl: warning: Falling back to the standard locale (\"C\").\nperl sha256 ops=4096 elapsed_s=0.076512\nperl sha256 ops=8192 elapsed_s=0.183644\nperl sha256 ops=12288 elapsed_s=0.286278\nperl sha256 ops=16384 elapsed_s=0.359548\nperl sha256 ops=20480 elapsed_s=0.448278\nperl sha256 ops=24576 elapsed_s=0.575445\nperl sha256 ops=28672 elapsed_s=0.679392\nperl sha256 ops=32768 elapsed_s=0.789074\nperl sha256 ops=36864 elapsed_s=0.925777\nperl sha256 ops=40960 elapsed_s=1.007528\nperl sha256 ops=45056 elapsed_s=1.091023\nperl sha256 ops=49152 elapsed_s=1.160060\nperl sha256 ops=53248 elapsed_s=1.228890\nperl sha256 ops=57344 elapsed_s=1.282124\nperl sha256 ops=61440 elapsed_s=1.375421\nperl sha256 ops=65536 elapsed_s=1.444640\nperl sha256 ops=69632 elapsed_s=1.507858\nperl sha256 ops=73728 elapsed_s=1.579005\nperl sha256 ops=77824 elapsed_s=1.648831\nperl sha256 ops=81920 elapsed_s=1.712065\nperl sha256 ops=86016 elapsed_s=1.806267\nperl sha256 ops=90112 elapsed_s=1.882423\nperl sha256 ops=94208 elapsed_s=1.937204\nperl sha256 ops=98304 elapsed_s=2.002175\nperl sha256 ops=102400 elapsed_s=2.091025\nperl sha256 ops=106496 elapsed_s=2.155793\nperl sha256 ops=110592 elapsed_s=2.230588\nperl sha256 ops=114688 elapsed_s=2.309130\nperl sha256 ops=118784 elapsed_s=2.367689\nperl sha256 ops=122880 elapsed_s=2.444462\nperl sha256 ops=126976 elapsed_s=2.507693\nperl sha256 ops=131072 elapsed_s=2.579446\nperl sha256 ops=135168 elapsed_s=2.662773\nperl sha256 ops=139264 elapsed_s=2.726111\nperl sha256 ops=143360 elapsed_s=2.803891\nperl sha256 ops=147456 elapsed_s=2.867179\nperl sha256 ops=151552 elapsed_s=2.935673\nperl sha256 ops=155648 elapsed_s=3.005311\nperl sha256 ops=159744 elapsed_s=3.076230\nperl sha256 ops=163840 elapsed_s=3.147102\nperl sha256 ops=167936 elapsed_s=3.210390\nperl sha256 ops=172032 elapsed_s=3.293763\nperl sha256 ops=176128 elapsed_s=3.358184\nperl sha256 ops=180224 elapsed_s=3.428767\nperl sha256 ops=184320 elapsed_s=3.491985\nperl sha256 ops=188416 elapsed_s=3.576544\nperl sha256 ops=192512 elapsed_s=3.636064\nperl sha256 ops=196608 elapsed_s=3.708948\nperl sha256 ops=200704 elapsed_s=3.772244\nperl sha256 ops=204800 elapsed_s=3.855494\nperl sha256 ops=208896 elapsed_s=3.918749\nperl sha256 ops=212992 elapsed_s=3.981968\nperl sha256 ops=217088 elapsed_s=4.056927\nperl sha256 ops=221184 elapsed_s=4.134458\nperl sha256 ops=225280 elapsed_s=4.213036\nperl sha256 ops=229376 elapsed_s=4.276256\nperl sha256 ops=233472 elapsed_s=4.330025\nperl sha256 ops=237568 elapsed_s=4.388819\nperl sha256 ops=241664 elapsed_s=4.452105\nperl sha256 ops=245760 elapsed_s=4.535518\nperl sha256 ops=249856 elapsed_s=4.598821\nperl sha256 ops=253952 elapsed_s=4.662071\nperl sha256 ops=258048 elapsed_s=4.729875\nperl sha256 ops=262144 elapsed_s=4.813412\nperl sha256 ops=266240 elapsed_s=4.879202\nperl sha256 ops=270336 elapsed_s=4.958642\nperl sha256 ops=274432 elapsed_s=5.017535\nperl sha256 ops=278528 elapsed_s=5.090842\nperl sha256 ops=282624 elapsed_s=5.173199\nperl sha256 ops=286720 elapsed_s=5.237979\nperl sha256 ops=290816 elapsed_s=5.301209\nperl sha256 ops=294912 elapsed_s=5.377397\nperl sha256 ops=299008 elapsed_s=5.440695\nperl sha256 ops=303104 elapsed_s=5.523057\nperl sha256 ops=307200 elapsed_s=5.586403\nperl sha256 ops=311296 elapsed_s=5.651427\nperl sha256 ops=315392 elapsed_s=5.733330\nperl sha256 ops=319488 elapsed_s=5.796618\nperl sha256 ops=323584 elapsed_s=5.868331\nperl sha256 ops=327680 elapsed_s=5.911705\nperl sha256 ops=331776 elapsed_s=5.973943\nperl sha256 ops=335872 elapsed_s=6.044149\nperl sha256 ops=339968 elapsed_s=6.078688\nperl sha256 ops=344064 elapsed_s=6.158957\nperl sha256 ops=348160 elapsed_s=6.226612\nperl sha256 ops=352256 elapsed_s=6.289827\nperl sha256 ops=356352 elapsed_s=6.351806\nperl sha256 ops=360448 elapsed_s=6.442327\nperl sha256 ops=364544 elapsed_s=6.522157\nperl sha256 ops=368640 elapsed_s=6.599108\nperl sha256 ops=372736 elapsed_s=6.642293\nperl sha256 ops=376832 elapsed_s=6.733788\nperl sha256 ops=380928 elapsed_s=6.789111\nperl sha256 ops=385024 elapsed_s=6.871009\nperl sha256 ops=389120 elapsed_s=6.944373\nperl sha256 ops=393216 elapsed_s=7.013199\nperl sha256 ops=397312 elapsed_s=7.093100\nperl sha256 ops=401408 elapsed_s=7.158930\nperl sha256 ops=405504 elapsed_s=7.230754\nperl sha256 ops=409600 elapsed_s=7.303980\nperl sha256 ops=413696 elapsed_s=7.361386\nperl sha256 ops=417792 elapsed_s=7.444299\nperl sha256 ops=421888 elapsed_s=7.498064\nperl sha256 ops=425984 elapsed_s=7.571574\nperl sha256 ops=430080 elapsed_s=7.661180\nperl sha256 ops=434176 elapsed_s=7.710796\nperl sha256 ops=438272 elapsed_s=7.786403\nperl sha256 ops=442368 elapsed_s=7.859099\nperl sha256 ops=446464 elapsed_s=7.929291\nperl sha256 ops=450560 elapsed_s=8.013525\nperl sha256 ops=454656 elapsed_s=8.084040\nperl sha256 ops=458752 elapsed_s=8.147773\nperl sha256 ops=462848 elapsed_s=8.218628\nperl sha256 ops=466944 elapsed_s=8.296052\nperl sha256 ops=471040 elapsed_s=8.365840\nperl sha256 ops=475136 elapsed_s=8.449134\nperl sha256 ops=479232 elapsed_s=8.500092\nperl sha256 ops=483328 elapsed_s=8.571664\nperl sha256 ops=487424 elapsed_s=8.648014\nperl sha256 ops=491520 elapsed_s=8.710877\nperl sha256 ops=495616 elapsed_s=8.806141\nperl sha256 ops=499712 elapsed_s=8.852237\nperl sha256 ops=503808 elapsed_s=8.934946\nperl sha256 ops=507904 elapsed_s=9.011701\nperl sha256 ops=512000 elapsed_s=9.062256\nperl sha256 ops=516096 elapsed_s=9.139719\nperl sha256 ops=520192 elapsed_s=9.215086\nperl sha256 ops=524288 elapsed_s=9.294740\nperl sha256 ops=528384 elapsed_s=9.350590\nperl sha256 ops=532480 elapsed_s=9.425638\nperl sha256 ops=536576 elapsed_s=9.488333\nperl sha256 ops=540672 elapsed_s=9.572872\nperl sha256 ops=544768 elapsed_s=9.628992\nperl sha256 ops=548864 elapsed_s=9.692178\nperl sha256 ops=552960 elapsed_s=9.774477\nperl sha256 ops=557056 elapsed_s=9.847676\nperl sha256 ops=561152 elapsed_s=9.916880\nperl sha256 ops=565248 elapsed_s=9.996818\nperl sha256 ops=565791 elapsed_s=10.000004",
+            "stdout": "",
+            "workload_name": "otel_perl_sha256"
+          },
+          {
+            "command": [
+              "/usr/bin/php",
+              "-r",
+              "$buf = str_repeat(\"x\", 1024);\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  hash(\"sha256\", $buf, true);\n  $n++;\n  if (($n & 4095) === 0) {\n    $dt = (hrtime(true) - $t0) / 1e9;\n    fwrite(STDERR, sprintf(\"php sha256 ops=%d elapsed_s=%.6f\\n\", $n, $dt));\n  }\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php sha256 ops=%d elapsed_s=%.6f\\n\", $n, $dt));\n",
+              "10"
+            ],
+            "config": {
+              "buffer_bytes": 1024,
+              "hash": "sha256",
+              "language": "php",
+              "tool": "php"
+            },
+            "duration_s": 10.538042298000008,
+            "returncode": 0,
+            "stderr": "php sha256 ops=4096 elapsed_s=0.133214\nphp sha256 ops=8192 elapsed_s=0.317918\nphp sha256 ops=12288 elapsed_s=0.458116\nphp sha256 ops=16384 elapsed_s=0.564102\nphp sha256 ops=20480 elapsed_s=0.656158\nphp sha256 ops=24576 elapsed_s=0.696628\nphp sha256 ops=28672 elapsed_s=0.737807\nphp sha256 ops=32768 elapsed_s=0.777987\nphp sha256 ops=36864 elapsed_s=0.818149\nphp sha256 ops=40960 elapsed_s=0.877683\nphp sha256 ops=45056 elapsed_s=0.953800\nphp sha256 ops=49152 elapsed_s=1.054078\nphp sha256 ops=53248 elapsed_s=1.187318\nphp sha256 ops=57344 elapsed_s=1.302692\nphp sha256 ops=61440 elapsed_s=1.411336\nphp sha256 ops=65536 elapsed_s=1.531599\nphp sha256 ops=69632 elapsed_s=1.664026\nphp sha256 ops=73728 elapsed_s=1.781627\nphp sha256 ops=77824 elapsed_s=1.915026\nphp sha256 ops=81920 elapsed_s=2.023335\nphp sha256 ops=86016 elapsed_s=2.136683\nphp sha256 ops=90112 elapsed_s=2.277710\nphp sha256 ops=94208 elapsed_s=2.382115\nphp sha256 ops=98304 elapsed_s=2.505784\nphp sha256 ops=102400 elapsed_s=2.625981\nphp sha256 ops=106496 elapsed_s=2.746145\nphp sha256 ops=110592 elapsed_s=2.864372\nphp sha256 ops=114688 elapsed_s=3.000939\nphp sha256 ops=118784 elapsed_s=3.113929\nphp sha256 ops=122880 elapsed_s=3.226852\nphp sha256 ops=126976 elapsed_s=3.361313\nphp sha256 ops=131072 elapsed_s=3.481609\nphp sha256 ops=135168 elapsed_s=3.596088\nphp sha256 ops=139264 elapsed_s=3.720133\nphp sha256 ops=143360 elapsed_s=3.827046\nphp sha256 ops=147456 elapsed_s=3.967377\nphp sha256 ops=151552 elapsed_s=4.093340\nphp sha256 ops=155648 elapsed_s=4.209622\nphp sha256 ops=159744 elapsed_s=4.329083\nphp sha256 ops=163840 elapsed_s=4.430320\nphp sha256 ops=167936 elapsed_s=4.551705\nphp sha256 ops=172032 elapsed_s=4.679453\nphp sha256 ops=176128 elapsed_s=4.798590\nphp sha256 ops=180224 elapsed_s=4.911987\nphp sha256 ops=184320 elapsed_s=5.042156\nphp sha256 ops=188416 elapsed_s=5.160413\nphp sha256 ops=192512 elapsed_s=5.287445\nphp sha256 ops=196608 elapsed_s=5.395354\nphp sha256 ops=200704 elapsed_s=5.515485\nphp sha256 ops=204800 elapsed_s=5.635583\nphp sha256 ops=208896 elapsed_s=5.755747\nphp sha256 ops=212992 elapsed_s=5.867872\nphp sha256 ops=217088 elapsed_s=5.961934\nphp sha256 ops=221184 elapsed_s=6.063554\nphp sha256 ops=225280 elapsed_s=6.189274\nphp sha256 ops=229376 elapsed_s=6.304380\nphp sha256 ops=233472 elapsed_s=6.412386\nphp sha256 ops=237568 elapsed_s=6.516655\nphp sha256 ops=241664 elapsed_s=6.643874\nphp sha256 ops=245760 elapsed_s=6.788338\nphp sha256 ops=249856 elapsed_s=6.909803\nphp sha256 ops=253952 elapsed_s=7.019821\nphp sha256 ops=258048 elapsed_s=7.138941\nphp sha256 ops=262144 elapsed_s=7.260098\nphp sha256 ops=266240 elapsed_s=7.388500\nphp sha256 ops=270336 elapsed_s=7.486383\nphp sha256 ops=274432 elapsed_s=7.616714\nphp sha256 ops=278528 elapsed_s=7.744927\nphp sha256 ops=282624 elapsed_s=7.870230\nphp sha256 ops=286720 elapsed_s=7.991244\nphp sha256 ops=290816 elapsed_s=8.111597\nphp sha256 ops=294912 elapsed_s=8.235348\nphp sha256 ops=299008 elapsed_s=8.367992\nphp sha256 ops=303104 elapsed_s=8.484262\nphp sha256 ops=307200 elapsed_s=8.596537\nphp sha256 ops=311296 elapsed_s=8.733684\nphp sha256 ops=315392 elapsed_s=8.855868\nphp sha256 ops=319488 elapsed_s=8.978746\nphp sha256 ops=323584 elapsed_s=9.094309\nphp sha256 ops=327680 elapsed_s=9.222694\nphp sha256 ops=331776 elapsed_s=9.341718\nphp sha256 ops=335872 elapsed_s=9.461887\nphp sha256 ops=339968 elapsed_s=9.591885\nphp sha256 ops=344064 elapsed_s=9.710673\nphp sha256 ops=348160 elapsed_s=9.832268\nphp sha256 ops=352256 elapsed_s=9.967768\nphp sha256 ops=353915 elapsed_s=10.017215",
+            "stdout": "",
+            "workload_name": "otel_php_sha256"
+          },
+          {
+            "command": [
+              "/usr/bin/stress-ng",
+              "--cpu",
+              "1",
+              "--timeout",
+              "10s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/r9acndev"
+            ],
+            "config": {
+              "stressors": [
+                "cpu"
+              ],
+              "tool": "stress-ng"
+            },
+            "duration_s": 10.538148096,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [5495] setting to a 10 secs run per stressor\nstress-ng: info:  [5495] dispatching hogs: 1 cpu\nstress-ng: info:  [5495] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [5495] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [5495]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [5495] cpu                 623     10.00      3.26      0.00        62.28         191.18\nstress-ng: info:  [5495] skipped: 0\nstress-ng: info:  [5495] passed: 1: cpu (1)\nstress-ng: info:  [5495] failed: 0\nstress-ng: info:  [5495] metrics untrustworthy: 0\nstress-ng: info:  [5495] successful run completed in 10.03 secs",
+            "workload_name": "otel_stress_ng_cpu"
+          }
+        ],
+        "duration_s": 10.53816529400001,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "otel_mixed_workload"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "113": {
+        "bytes_jited": 3928,
+        "bytes_xlated": 6224,
+        "id": 113,
+        "name": "perf_unwind_stop",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "114": {
+        "bytes_jited": 22080,
+        "bytes_xlated": 36904,
+        "id": 114,
+        "name": "perf_unwind_native",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "115": {
+        "bytes_jited": 14936,
+        "bytes_xlated": 24552,
+        "id": 115,
+        "name": "perf_unwind_hotspot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "116": {
+        "bytes_jited": 18032,
+        "bytes_xlated": 29128,
+        "id": 116,
+        "name": "perf_unwind_perl",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "117": {
+        "bytes_jited": 15312,
+        "bytes_xlated": 25064,
+        "id": 117,
+        "name": "perf_unwind_php",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "118": {
+        "bytes_jited": 18808,
+        "bytes_xlated": 33248,
+        "id": 118,
+        "name": "perf_unwind_python",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "119": {
+        "bytes_jited": 17352,
+        "bytes_xlated": 27984,
+        "id": 119,
+        "name": "perf_unwind_ruby",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "120": {
+        "bytes_jited": 20608,
+        "bytes_xlated": 34256,
+        "id": 120,
+        "name": "perf_unwind_v8",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "121": {
+        "bytes_jited": 1624,
+        "bytes_xlated": 2496,
+        "id": 121,
+        "name": "perf_go_labels",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "122": {
+        "bytes_jited": 840,
+        "bytes_xlated": 1088,
+        "id": 122,
+        "name": "perf_unwind_beam",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "123": {
+        "bytes_jited": 928,
+        "bytes_xlated": 1320,
+        "id": 123,
+        "name": "tracepoint__sched_process_free",
+        "run_cnt_delta": 17,
+        "run_time_ns_delta": 79582,
+        "type": "tracepoint"
+      },
+      "124": {
+        "bytes_jited": 3768,
+        "bytes_xlated": 5592,
+        "id": 124,
+        "name": "native_tracer_entry",
+        "run_cnt_delta": 2077,
+        "run_time_ns_delta": 55858746,
+        "type": "perf_event"
+      }
+    },
+    "workloads": [
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-u",
+              "-c",
+              "import hashlib, sys, time\nbuf = b\"x\" * 1024\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    hashlib.sha256(buf).digest()\n    n += 1\n    if (n & 4095) == 0:\n        sys.stderr.write(f\"python3 sha256 ops={n} elapsed_s={time.monotonic()-t0:.6f}\\n\")\n        sys.stderr.flush()\nsys.stderr.write(f\"python3 sha256 ops={n} elapsed_s={time.monotonic()-t0:.6f}\\n\")\n",
+              "10"
+            ],
+            "config": {
+              "buffer_bytes": 1024,
+              "hash": "sha256",
+              "language": "python3",
+              "tool": "python3"
+            },
+            "duration_s": 10.049792357000001,
+            "returncode": 0,
+            "stderr": "python3 sha256 ops=4096 elapsed_s=0.006567\npython3 sha256 ops=8192 elapsed_s=0.042939\npython3 sha256 ops=12288 elapsed_s=0.099608\npython3 sha256 ops=16384 elapsed_s=0.106136\npython3 sha256 ops=20480 elapsed_s=0.154521\npython3 sha256 ops=24576 elapsed_s=0.191108\npython3 sha256 ops=28672 elapsed_s=0.206055\npython3 sha256 ops=32768 elapsed_s=0.242598\npython3 sha256 ops=36864 elapsed_s=0.249082\npython3 sha256 ops=40960 elapsed_s=0.285670\npython3 sha256 ops=45056 elapsed_s=0.313774\npython3 sha256 ops=49152 elapsed_s=0.338773\npython3 sha256 ops=53248 elapsed_s=0.355960\npython3 sha256 ops=57344 elapsed_s=0.375870\npython3 sha256 ops=61440 elapsed_s=0.394552\npython3 sha256 ops=65536 elapsed_s=0.422049\npython3 sha256 ops=69632 elapsed_s=0.436033\npython3 sha256 ops=73728 elapsed_s=0.453910\npython3 sha256 ops=77824 elapsed_s=0.465996\npython3 sha256 ops=81920 elapsed_s=0.498184\npython3 sha256 ops=86016 elapsed_s=0.526886\npython3 sha256 ops=90112 elapsed_s=0.543542\npython3 sha256 ops=94208 elapsed_s=0.555935\npython3 sha256 ops=98304 elapsed_s=0.584410\npython3 sha256 ops=102400 elapsed_s=0.595906\npython3 sha256 ops=106496 elapsed_s=0.639728\npython3 sha256 ops=110592 elapsed_s=0.646256\npython3 sha256 ops=114688 elapsed_s=0.672756\npython3 sha256 ops=118784 elapsed_s=0.695204\npython3 sha256 ops=122880 elapsed_s=0.716244\npython3 sha256 ops=126976 elapsed_s=0.734189\npython3 sha256 ops=131072 elapsed_s=0.745894\npython3 sha256 ops=135168 elapsed_s=0.775886\npython3 sha256 ops=139264 elapsed_s=0.792496\npython3 sha256 ops=143360 elapsed_s=0.817715\npython3 sha256 ops=147456 elapsed_s=0.824246\npython3 sha256 ops=151552 elapsed_s=0.855891\npython3 sha256 ops=155648 elapsed_s=0.882484\npython3 sha256 ops=159744 elapsed_s=0.889022\npython3 sha256 ops=163840 elapsed_s=0.905853\npython3 sha256 ops=167936 elapsed_s=0.927080\npython3 sha256 ops=172032 elapsed_s=0.951439\npython3 sha256 ops=176128 elapsed_s=0.965519\npython3 sha256 ops=180224 elapsed_s=0.995914\npython3 sha256 ops=184320 elapsed_s=1.006605\npython3 sha256 ops=188416 elapsed_s=1.025899\npython3 sha256 ops=192512 elapsed_s=1.055924\npython3 sha256 ops=196608 elapsed_s=1.079591\npython3 sha256 ops=200704 elapsed_s=1.086175\npython3 sha256 ops=204800 elapsed_s=1.114374\npython3 sha256 ops=208896 elapsed_s=1.133800\npython3 sha256 ops=212992 elapsed_s=1.149208\npython3 sha256 ops=217088 elapsed_s=1.189878\npython3 sha256 ops=221184 elapsed_s=1.196479\npython3 sha256 ops=225280 elapsed_s=1.205857\npython3 sha256 ops=229376 elapsed_s=1.240281\npython3 sha256 ops=233472 elapsed_s=1.246873\npython3 sha256 ops=237568 elapsed_s=1.275898\npython3 sha256 ops=241664 elapsed_s=1.285930\npython3 sha256 ops=245760 elapsed_s=1.313600\npython3 sha256 ops=249856 elapsed_s=1.326076\npython3 sha256 ops=253952 elapsed_s=1.355922\npython3 sha256 ops=258048 elapsed_s=1.365866\npython3 sha256 ops=262144 elapsed_s=1.395892\npython3 sha256 ops=266240 elapsed_s=1.412245\npython3 sha256 ops=270336 elapsed_s=1.425912\npython3 sha256 ops=274432 elapsed_s=1.447343\npython3 sha256 ops=278528 elapsed_s=1.464997\npython3 sha256 ops=282624 elapsed_s=1.486081\npython3 sha256 ops=286720 elapsed_s=1.515249\npython3 sha256 ops=290816 elapsed_s=1.525896\npython3 sha256 ops=294912 elapsed_s=1.556054\npython3 sha256 ops=299008 elapsed_s=1.573410\npython3 sha256 ops=303104 elapsed_s=1.585876\npython3 sha256 ops=307200 elapsed_s=1.614904\npython3 sha256 ops=311296 elapsed_s=1.625873\npython3 sha256 ops=315392 elapsed_s=1.655915\npython3 sha256 ops=319488 elapsed_s=1.682484\npython3 sha256 ops=323584 elapsed_s=1.689295\npython3 sha256 ops=327680 elapsed_s=1.712804\npython3 sha256 ops=331776 elapsed_s=1.725948\npython3 sha256 ops=335872 elapsed_s=1.768340\npython3 sha256 ops=339968 elapsed_s=1.777314\npython3 sha256 ops=344064 elapsed_s=1.798733\npython3 sha256 ops=348160 elapsed_s=1.814945\npython3 sha256 ops=352256 elapsed_s=1.836083\npython3 sha256 ops=356352 elapsed_s=1.855885\npython3 sha256 ops=360448 elapsed_s=1.875915\npython3 sha256 ops=364544 elapsed_s=1.895900\npython3 sha256 ops=368640 elapsed_s=1.930129\npython3 sha256 ops=372736 elapsed_s=1.936659\npython3 sha256 ops=376832 elapsed_s=1.953190\npython3 sha256 ops=380928 elapsed_s=1.968896\npython3 sha256 ops=385024 elapsed_s=1.995903\npython3 sha256 ops=389120 elapsed_s=2.008648\npython3 sha256 ops=393216 elapsed_s=2.035305\npython3 sha256 ops=397312 elapsed_s=2.064469\npython3 sha256 ops=401408 elapsed_s=2.085038\npython3 sha256 ops=405504 elapsed_s=2.105342\npython3 sha256 ops=409600 elapsed_s=2.125848\npython3 sha256 ops=413696 elapsed_s=2.146323\npython3 sha256 ops=417792 elapsed_s=2.167270\npython3 sha256 ops=421888 elapsed_s=2.187812\npython3 sha256 ops=425984 elapsed_s=2.213027\npython3 sha256 ops=430080 elapsed_s=2.233771\npython3 sha256 ops=434176 elapsed_s=2.254495\npython3 sha256 ops=438272 elapsed_s=2.274804\npython3 sha256 ops=442368 elapsed_s=2.295955\npython3 sha256 ops=446464 elapsed_s=2.317845\npython3 sha256 ops=450560 elapsed_s=2.338663\npython3 sha256 ops=454656 elapsed_s=2.359138\npython3 sha256 ops=458752 elapsed_s=2.380008\npython3 sha256 ops=462848 elapsed_s=2.401547\npython3 sha256 ops=466944 elapsed_s=2.424905\npython3 sha256 ops=471040 elapsed_s=2.447727\npython3 sha256 ops=475136 elapsed_s=2.468083\npython3 sha256 ops=479232 elapsed_s=2.489554\npython3 sha256 ops=483328 elapsed_s=2.511410\npython3 sha256 ops=487424 elapsed_s=2.531287\npython3 sha256 ops=491520 elapsed_s=2.552250\npython3 sha256 ops=495616 elapsed_s=2.573825\npython3 sha256 ops=499712 elapsed_s=2.596724\npython3 sha256 ops=503808 elapsed_s=2.620576\npython3 sha256 ops=507904 elapsed_s=2.627163\npython3 sha256 ops=512000 elapsed_s=2.655898\npython3 sha256 ops=516096 elapsed_s=2.679249\npython3 sha256 ops=520192 elapsed_s=2.698367\npython3 sha256 ops=524288 elapsed_s=2.720799\npython3 sha256 ops=528384 elapsed_s=2.741621\npython3 sha256 ops=532480 elapsed_s=2.763881\npython3 sha256 ops=536576 elapsed_s=2.785121\npython3 sha256 ops=540672 elapsed_s=2.807332\npython3 sha256 ops=544768 elapsed_s=2.830169\npython3 sha256 ops=548864 elapsed_s=2.853923\npython3 sha256 ops=552960 elapsed_s=2.876255\npython3 sha256 ops=557056 elapsed_s=2.897677\npython3 sha256 ops=561152 elapsed_s=2.918146\npython3 sha256 ops=565248 elapsed_s=2.934719\npython3 sha256 ops=569344 elapsed_s=2.956568\npython3 sha256 ops=573440 elapsed_s=2.973225\npython3 sha256 ops=577536 elapsed_s=2.985798\npython3 sha256 ops=581632 elapsed_s=3.012714\npython3 sha256 ops=585728 elapsed_s=3.034180\npython3 sha256 ops=589824 elapsed_s=3.059676\npython3 sha256 ops=593920 elapsed_s=3.066218\npython3 sha256 ops=598016 elapsed_s=3.104492\npython3 sha256 ops=602112 elapsed_s=3.116457\npython3 sha256 ops=606208 elapsed_s=3.134243\npython3 sha256 ops=610304 elapsed_s=3.153053\npython3 sha256 ops=614400 elapsed_s=3.179978\npython3 sha256 ops=618496 elapsed_s=3.200435\npython3 sha256 ops=622592 elapsed_s=3.215510\npython3 sha256 ops=626688 elapsed_s=3.225930\npython3 sha256 ops=630784 elapsed_s=3.255961\npython3 sha256 ops=634880 elapsed_s=3.265856\npython3 sha256 ops=638976 elapsed_s=3.295944\npython3 sha256 ops=643072 elapsed_s=3.305873\npython3 sha256 ops=647168 elapsed_s=3.334329\npython3 sha256 ops=651264 elapsed_s=3.346014\npython3 sha256 ops=655360 elapsed_s=3.375930\npython3 sha256 ops=659456 elapsed_s=3.402509\npython3 sha256 ops=663552 elapsed_s=3.409245\npython3 sha256 ops=667648 elapsed_s=3.435915\npython3 sha256 ops=671744 elapsed_s=3.446504\npython3 sha256 ops=675840 elapsed_s=3.475935\npython3 sha256 ops=679936 elapsed_s=3.485900\npython3 sha256 ops=684032 elapsed_s=3.511904\npython3 sha256 ops=688128 elapsed_s=3.533492\npython3 sha256 ops=692224 elapsed_s=3.545936\npython3 sha256 ops=696320 elapsed_s=3.565869\npython3 sha256 ops=700416 elapsed_s=3.595938\npython3 sha256 ops=704512 elapsed_s=3.621210\npython3 sha256 ops=708608 elapsed_s=3.627745\npython3 sha256 ops=712704 elapsed_s=3.655947\npython3 sha256 ops=716800 elapsed_s=3.682559\npython3 sha256 ops=720896 elapsed_s=3.689150\npython3 sha256 ops=724992 elapsed_s=3.698174\npython3 sha256 ops=729088 elapsed_s=3.724687\npython3 sha256 ops=733184 elapsed_s=3.746423\npython3 sha256 ops=737280 elapsed_s=3.779809\npython3 sha256 ops=741376 elapsed_s=3.797094\npython3 sha256 ops=745472 elapsed_s=3.818879\npython3 sha256 ops=749568 elapsed_s=3.833085\npython3 sha256 ops=753664 elapsed_s=3.859681\npython3 sha256 ops=757760 elapsed_s=3.866214\npython3 sha256 ops=761856 elapsed_s=3.895860\npython3 sha256 ops=765952 elapsed_s=3.921453\npython3 sha256 ops=770048 elapsed_s=3.927973\npython3 sha256 ops=774144 elapsed_s=3.956130\npython3 sha256 ops=778240 elapsed_s=3.968863\npython3 sha256 ops=782336 elapsed_s=3.995982\npython3 sha256 ops=786432 elapsed_s=4.006530\npython3 sha256 ops=790528 elapsed_s=4.024961\npython3 sha256 ops=794624 elapsed_s=4.055167\npython3 sha256 ops=798720 elapsed_s=4.073431\npython3 sha256 ops=802816 elapsed_s=4.085914\npython3 sha256 ops=806912 elapsed_s=4.116027\npython3 sha256 ops=811008 elapsed_s=4.143519\npython3 sha256 ops=815104 elapsed_s=4.160100\npython3 sha256 ops=819200 elapsed_s=4.166753\npython3 sha256 ops=823296 elapsed_s=4.185973\npython3 sha256 ops=827392 elapsed_s=4.212870\npython3 sha256 ops=831488 elapsed_s=4.225175\npython3 sha256 ops=835584 elapsed_s=4.253008\npython3 sha256 ops=839680 elapsed_s=4.279598\npython3 sha256 ops=843776 elapsed_s=4.286204\npython3 sha256 ops=847872 elapsed_s=4.311219\npython3 sha256 ops=851968 elapsed_s=4.325228\npython3 sha256 ops=856064 elapsed_s=4.355922\npython3 sha256 ops=860160 elapsed_s=4.382516\npython3 sha256 ops=864256 elapsed_s=4.389205\npython3 sha256 ops=868352 elapsed_s=4.411976\npython3 sha256 ops=872448 elapsed_s=4.425331\npython3 sha256 ops=876544 elapsed_s=4.447574\npython3 sha256 ops=880640 elapsed_s=4.465970\npython3 sha256 ops=884736 elapsed_s=4.485921\npython3 sha256 ops=888832 elapsed_s=4.511647\npython3 sha256 ops=892928 elapsed_s=4.525455\npython3 sha256 ops=897024 elapsed_s=4.545917\npython3 sha256 ops=901120 elapsed_s=4.558550\npython3 sha256 ops=905216 elapsed_s=4.585939\npython3 sha256 ops=909312 elapsed_s=4.605947\npython3 sha256 ops=913408 elapsed_s=4.625477\npython3 sha256 ops=917504 elapsed_s=4.645862\npython3 sha256 ops=921600 elapsed_s=4.665913\npython3 sha256 ops=925696 elapsed_s=4.675987\npython3 sha256 ops=929792 elapsed_s=4.705895\npython3 sha256 ops=933888 elapsed_s=4.715914\npython3 sha256 ops=937984 elapsed_s=4.750515\npython3 sha256 ops=942080 elapsed_s=4.762928\npython3 sha256 ops=946176 elapsed_s=4.790414\npython3 sha256 ops=950272 elapsed_s=4.820405\npython3 sha256 ops=954368 elapsed_s=4.826950\npython3 sha256 ops=958464 elapsed_s=4.853562\npython3 sha256 ops=962560 elapsed_s=4.880274\npython3 sha256 ops=966656 elapsed_s=4.886765\npython3 sha256 ops=970752 elapsed_s=4.913295\npython3 sha256 ops=974848 elapsed_s=4.930066\npython3 sha256 ops=978944 elapsed_s=4.936594\npython3 sha256 ops=983040 elapsed_s=4.965987\npython3 sha256 ops=987136 elapsed_s=4.982791\npython3 sha256 ops=991232 elapsed_s=4.994833\npython3 sha256 ops=995328 elapsed_s=5.022450\npython3 sha256 ops=999424 elapsed_s=5.035876\npython3 sha256 ops=1003520 elapsed_s=5.057372\npython3 sha256 ops=1007616 elapsed_s=5.075946\npython3 sha256 ops=1011712 elapsed_s=5.106223\npython3 sha256 ops=1015808 elapsed_s=5.132808\npython3 sha256 ops=1019904 elapsed_s=5.139331\npython3 sha256 ops=1024000 elapsed_s=5.165901\npython3 sha256 ops=1028096 elapsed_s=5.192527\npython3 sha256 ops=1032192 elapsed_s=5.199070\npython3 sha256 ops=1036288 elapsed_s=5.223868\npython3 sha256 ops=1040384 elapsed_s=5.243692\npython3 sha256 ops=1044480 elapsed_s=5.270276\npython3 sha256 ops=1048576 elapsed_s=5.277094\npython3 sha256 ops=1052672 elapsed_s=5.309787\npython3 sha256 ops=1056768 elapsed_s=5.316348\npython3 sha256 ops=1060864 elapsed_s=5.335877\npython3 sha256 ops=1064960 elapsed_s=5.361734\npython3 sha256 ops=1069056 elapsed_s=5.375922\npython3 sha256 ops=1073152 elapsed_s=5.395945\npython3 sha256 ops=1077248 elapsed_s=5.430242\npython3 sha256 ops=1081344 elapsed_s=5.436798\npython3 sha256 ops=1085440 elapsed_s=5.462926\npython3 sha256 ops=1089536 elapsed_s=5.475933\npython3 sha256 ops=1093632 elapsed_s=5.495909\npython3 sha256 ops=1097728 elapsed_s=5.515869\npython3 sha256 ops=1101824 elapsed_s=5.551016\npython3 sha256 ops=1105920 elapsed_s=5.557571\npython3 sha256 ops=1110016 elapsed_s=5.565903\npython3 sha256 ops=1114112 elapsed_s=5.595919\npython3 sha256 ops=1118208 elapsed_s=5.605881\npython3 sha256 ops=1122304 elapsed_s=5.634524\npython3 sha256 ops=1126400 elapsed_s=5.646025\npython3 sha256 ops=1130496 elapsed_s=5.680173\npython3 sha256 ops=1134592 elapsed_s=5.686725\npython3 sha256 ops=1138688 elapsed_s=5.705850\npython3 sha256 ops=1142784 elapsed_s=5.736878\npython3 sha256 ops=1146880 elapsed_s=5.745876\npython3 sha256 ops=1150976 elapsed_s=5.773983\npython3 sha256 ops=1155072 elapsed_s=5.799768\npython3 sha256 ops=1159168 elapsed_s=5.806309\npython3 sha256 ops=1163264 elapsed_s=5.835878\npython3 sha256 ops=1167360 elapsed_s=5.862453\npython3 sha256 ops=1171456 elapsed_s=5.869011\npython3 sha256 ops=1175552 elapsed_s=5.895875\npython3 sha256 ops=1179648 elapsed_s=5.912487\npython3 sha256 ops=1183744 elapsed_s=5.925920\npython3 sha256 ops=1187840 elapsed_s=5.954480\npython3 sha256 ops=1191936 elapsed_s=5.972699\npython3 sha256 ops=1196032 elapsed_s=5.985952\npython3 sha256 ops=1200128 elapsed_s=6.008610\npython3 sha256 ops=1204224 elapsed_s=6.025909\npython3 sha256 ops=1208320 elapsed_s=6.055939\npython3 sha256 ops=1212416 elapsed_s=6.072520\npython3 sha256 ops=1216512 elapsed_s=6.085879\npython3 sha256 ops=1220608 elapsed_s=6.105991\npython3 sha256 ops=1224704 elapsed_s=6.125966\npython3 sha256 ops=1228800 elapsed_s=6.135878\npython3 sha256 ops=1232896 elapsed_s=6.159067\npython3 sha256 ops=1236992 elapsed_s=6.185873\npython3 sha256 ops=1241088 elapsed_s=6.208058\npython3 sha256 ops=1245184 elapsed_s=6.231046\npython3 sha256 ops=1249280 elapsed_s=6.237614\npython3 sha256 ops=1253376 elapsed_s=6.265789\npython3 sha256 ops=1257472 elapsed_s=6.285969\npython3 sha256 ops=1261568 elapsed_s=6.305992\npython3 sha256 ops=1265664 elapsed_s=6.325917\npython3 sha256 ops=1269760 elapsed_s=6.335883\npython3 sha256 ops=1273856 elapsed_s=6.365879\npython3 sha256 ops=1277952 elapsed_s=6.391518\npython3 sha256 ops=1282048 elapsed_s=6.398096\npython3 sha256 ops=1286144 elapsed_s=6.424271\npython3 sha256 ops=1290240 elapsed_s=6.435870\npython3 sha256 ops=1294336 elapsed_s=6.455159\npython3 sha256 ops=1298432 elapsed_s=6.478072\npython3 sha256 ops=1302528 elapsed_s=6.505190\npython3 sha256 ops=1306624 elapsed_s=6.515969\npython3 sha256 ops=1310720 elapsed_s=6.535938\npython3 sha256 ops=1314816 elapsed_s=6.566047\npython3 sha256 ops=1318912 elapsed_s=6.592719\npython3 sha256 ops=1323008 elapsed_s=6.599299\npython3 sha256 ops=1327104 elapsed_s=6.625952\npython3 sha256 ops=1331200 elapsed_s=6.645295\npython3 sha256 ops=1335296 elapsed_s=6.655891\npython3 sha256 ops=1339392 elapsed_s=6.686074\npython3 sha256 ops=1343488 elapsed_s=6.707230\npython3 sha256 ops=1347584 elapsed_s=6.728387\npython3 sha256 ops=1351680 elapsed_s=6.734947\npython3 sha256 ops=1355776 elapsed_s=6.762773\npython3 sha256 ops=1359872 elapsed_s=6.776090\npython3 sha256 ops=1363968 elapsed_s=6.802052\npython3 sha256 ops=1368064 elapsed_s=6.808744\npython3 sha256 ops=1372160 elapsed_s=6.843027\npython3 sha256 ops=1376256 elapsed_s=6.855857\npython3 sha256 ops=1380352 elapsed_s=6.875884\npython3 sha256 ops=1384448 elapsed_s=6.895904\npython3 sha256 ops=1388544 elapsed_s=6.915890\npython3 sha256 ops=1392640 elapsed_s=6.939293\npython3 sha256 ops=1396736 elapsed_s=6.947359\npython3 sha256 ops=1400832 elapsed_s=6.968789\npython3 sha256 ops=1404928 elapsed_s=6.995984\npython3 sha256 ops=1409024 elapsed_s=7.026672\npython3 sha256 ops=1413120 elapsed_s=7.033330\npython3 sha256 ops=1417216 elapsed_s=7.055947\npython3 sha256 ops=1421312 elapsed_s=7.075912\npython3 sha256 ops=1425408 elapsed_s=7.095924\npython3 sha256 ops=1429504 elapsed_s=7.113462\npython3 sha256 ops=1433600 elapsed_s=7.135597\npython3 sha256 ops=1437696 elapsed_s=7.155983\npython3 sha256 ops=1441792 elapsed_s=7.175970\npython3 sha256 ops=1445888 elapsed_s=7.208442\npython3 sha256 ops=1449984 elapsed_s=7.215032\npython3 sha256 ops=1454080 elapsed_s=7.243382\npython3 sha256 ops=1458176 elapsed_s=7.263249\npython3 sha256 ops=1462272 elapsed_s=7.275984\npython3 sha256 ops=1466368 elapsed_s=7.305878\npython3 sha256 ops=1470464 elapsed_s=7.329981\npython3 sha256 ops=1474560 elapsed_s=7.336470\npython3 sha256 ops=1478656 elapsed_s=7.363122\npython3 sha256 ops=1482752 elapsed_s=7.389679\npython3 sha256 ops=1486848 elapsed_s=7.396345\npython3 sha256 ops=1490944 elapsed_s=7.422894\npython3 sha256 ops=1495040 elapsed_s=7.433546\npython3 sha256 ops=1499136 elapsed_s=7.469476\npython3 sha256 ops=1503232 elapsed_s=7.476199\npython3 sha256 ops=1507328 elapsed_s=7.495917\npython3 sha256 ops=1511424 elapsed_s=7.515950\npython3 sha256 ops=1515520 elapsed_s=7.543591\npython3 sha256 ops=1519616 elapsed_s=7.555887\npython3 sha256 ops=1523712 elapsed_s=7.575899\npython3 sha256 ops=1527808 elapsed_s=7.595868\npython3 sha256 ops=1531904 elapsed_s=7.615876\npython3 sha256 ops=1536000 elapsed_s=7.650727\npython3 sha256 ops=1540096 elapsed_s=7.657217\npython3 sha256 ops=1544192 elapsed_s=7.681108\npython3 sha256 ops=1548288 elapsed_s=7.687662\npython3 sha256 ops=1552384 elapsed_s=7.715930\npython3 sha256 ops=1556480 elapsed_s=7.725896\npython3 sha256 ops=1560576 elapsed_s=7.769923\npython3 sha256 ops=1564672 elapsed_s=7.776460\npython3 sha256 ops=1568768 elapsed_s=7.799739\npython3 sha256 ops=1572864 elapsed_s=7.806341\npython3 sha256 ops=1576960 elapsed_s=7.833996\npython3 sha256 ops=1581056 elapsed_s=7.855895\npython3 sha256 ops=1585152 elapsed_s=7.865985\npython3 sha256 ops=1589248 elapsed_s=7.895946\npython3 sha256 ops=1593344 elapsed_s=7.922588\npython3 sha256 ops=1597440 elapsed_s=7.935026\npython3 sha256 ops=1601536 elapsed_s=7.961363\npython3 sha256 ops=1605632 elapsed_s=7.975908\npython3 sha256 ops=1609728 elapsed_s=7.994624\npython3 sha256 ops=1613824 elapsed_s=8.019519\npython3 sha256 ops=1617920 elapsed_s=8.026096\npython3 sha256 ops=1622016 elapsed_s=8.055992\npython3 sha256 ops=1626112 elapsed_s=8.082631\npython3 sha256 ops=1630208 elapsed_s=8.089178\npython3 sha256 ops=1634304 elapsed_s=8.113577\npython3 sha256 ops=1638400 elapsed_s=8.140132\npython3 sha256 ops=1642496 elapsed_s=8.146736\npython3 sha256 ops=1646592 elapsed_s=8.175905\npython3 sha256 ops=1650688 elapsed_s=8.201325\npython3 sha256 ops=1654784 elapsed_s=8.207880\npython3 sha256 ops=1658880 elapsed_s=8.225876\npython3 sha256 ops=1662976 elapsed_s=8.255928\npython3 sha256 ops=1667072 elapsed_s=8.282618\npython3 sha256 ops=1671168 elapsed_s=8.289297\npython3 sha256 ops=1675264 elapsed_s=8.315975\npython3 sha256 ops=1679360 elapsed_s=8.332519\npython3 sha256 ops=1683456 elapsed_s=8.345930\npython3 sha256 ops=1687552 elapsed_s=8.380480\npython3 sha256 ops=1691648 elapsed_s=8.387090\npython3 sha256 ops=1695744 elapsed_s=8.406899\npython3 sha256 ops=1699840 elapsed_s=8.428660\npython3 sha256 ops=1703936 elapsed_s=8.445293\npython3 sha256 ops=1708032 elapsed_s=8.470500\npython3 sha256 ops=1712128 elapsed_s=8.477137\npython3 sha256 ops=1716224 elapsed_s=8.505902\npython3 sha256 ops=1720320 elapsed_s=8.526029\npython3 sha256 ops=1724416 elapsed_s=8.545866\npython3 sha256 ops=1728512 elapsed_s=8.565881\npython3 sha256 ops=1732608 elapsed_s=8.585904\npython3 sha256 ops=1736704 elapsed_s=8.595893\npython3 sha256 ops=1740800 elapsed_s=8.625887\npython3 sha256 ops=1744896 elapsed_s=8.644675\npython3 sha256 ops=1748992 elapsed_s=8.655879\npython3 sha256 ops=1753088 elapsed_s=8.686097\npython3 sha256 ops=1757184 elapsed_s=8.712782\npython3 sha256 ops=1761280 elapsed_s=8.739421\npython3 sha256 ops=1765376 elapsed_s=8.746016\npython3 sha256 ops=1769472 elapsed_s=8.772657\npython3 sha256 ops=1773568 elapsed_s=8.779319\npython3 sha256 ops=1777664 elapsed_s=8.819637\npython3 sha256 ops=1781760 elapsed_s=8.826278\npython3 sha256 ops=1785856 elapsed_s=8.852345\npython3 sha256 ops=1789952 elapsed_s=8.859002\npython3 sha256 ops=1794048 elapsed_s=8.885956\npython3 sha256 ops=1798144 elapsed_s=8.895865\npython3 sha256 ops=1802240 elapsed_s=8.923042\npython3 sha256 ops=1806336 elapsed_s=8.934899\npython3 sha256 ops=1810432 elapsed_s=8.965574\npython3 sha256 ops=1814528 elapsed_s=8.983870\npython3 sha256 ops=1818624 elapsed_s=8.995870\npython3 sha256 ops=1822720 elapsed_s=9.022566\npython3 sha256 ops=1826816 elapsed_s=9.035036\npython3 sha256 ops=1830912 elapsed_s=9.065928\npython3 sha256 ops=1835008 elapsed_s=9.092533\npython3 sha256 ops=1839104 elapsed_s=9.099154\npython3 sha256 ops=1843200 elapsed_s=9.125990\npython3 sha256 ops=1847296 elapsed_s=9.142240\npython3 sha256 ops=1851392 elapsed_s=9.155957\npython3 sha256 ops=1855488 elapsed_s=9.184294\npython3 sha256 ops=1859584 elapsed_s=9.210857\npython3 sha256 ops=1863680 elapsed_s=9.217470\npython3 sha256 ops=1867776 elapsed_s=9.245877\npython3 sha256 ops=1871872 elapsed_s=9.262459\npython3 sha256 ops=1875968 elapsed_s=9.275845\npython3 sha256 ops=1880064 elapsed_s=9.295915\npython3 sha256 ops=1884160 elapsed_s=9.316105\npython3 sha256 ops=1888256 elapsed_s=9.344410\npython3 sha256 ops=1892352 elapsed_s=9.371084\npython3 sha256 ops=1896448 elapsed_s=9.377749\npython3 sha256 ops=1900544 elapsed_s=9.404261\npython3 sha256 ops=1904640 elapsed_s=9.413878\npython3 sha256 ops=1908736 elapsed_s=9.435536\npython3 sha256 ops=1912832 elapsed_s=9.456004\npython3 sha256 ops=1916928 elapsed_s=9.475942\npython3 sha256 ops=1921024 elapsed_s=9.495921\npython3 sha256 ops=1925120 elapsed_s=9.515971\npython3 sha256 ops=1929216 elapsed_s=9.535686\npython3 sha256 ops=1933312 elapsed_s=9.555914\npython3 sha256 ops=1937408 elapsed_s=9.576080\npython3 sha256 ops=1941504 elapsed_s=9.589261\npython3 sha256 ops=1945600 elapsed_s=9.615945\npython3 sha256 ops=1949696 elapsed_s=9.625893\npython3 sha256 ops=1953792 elapsed_s=9.654161\npython3 sha256 ops=1957888 elapsed_s=9.668507\npython3 sha256 ops=1961984 elapsed_s=9.696031\npython3 sha256 ops=1966080 elapsed_s=9.708160\npython3 sha256 ops=1970176 elapsed_s=9.735956\npython3 sha256 ops=1974272 elapsed_s=9.755946\npython3 sha256 ops=1978368 elapsed_s=9.776010\npython3 sha256 ops=1982464 elapsed_s=9.798314\npython3 sha256 ops=1986560 elapsed_s=9.816054\npython3 sha256 ops=1990656 elapsed_s=9.833389\npython3 sha256 ops=1994752 elapsed_s=9.856069\npython3 sha256 ops=1998848 elapsed_s=9.875880\npython3 sha256 ops=2002944 elapsed_s=9.907339\npython3 sha256 ops=2007040 elapsed_s=9.914019\npython3 sha256 ops=2011136 elapsed_s=9.936043\npython3 sha256 ops=2015232 elapsed_s=9.955883\npython3 sha256 ops=2019328 elapsed_s=9.975906\npython3 sha256 ops=2023424 elapsed_s=9.995850\npython3 sha256 ops=2023797 elapsed_s=10.000004",
+            "stdout": "",
+            "workload_name": "otel_python3_sha256"
+          },
+          {
+            "command": [
+              "/usr/bin/ruby",
+              "-e",
+              "require \"digest\"\nbuf = \"x\" * 1024\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  Digest::SHA256.digest(buf)\n  n += 1\n  if (n & 4095) == 0\n    elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\n    STDERR.puts \"ruby sha256 ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)}\"\n    STDERR.flush\n  end\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby sha256 ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)}\"\n",
+              "10"
+            ],
+            "config": {
+              "buffer_bytes": 1024,
+              "hash": "sha256",
+              "language": "ruby",
+              "tool": "ruby"
+            },
+            "duration_s": 10.18954171,
+            "returncode": 0,
+            "stderr": "ruby sha256 ops=4096 elapsed_s=0.110453\nruby sha256 ops=8192 elapsed_s=0.195469\nruby sha256 ops=12288 elapsed_s=0.296036\nruby sha256 ops=16384 elapsed_s=0.389003\nruby sha256 ops=20480 elapsed_s=0.506124\nruby sha256 ops=24576 elapsed_s=0.600395\nruby sha256 ops=28672 elapsed_s=0.694570\nruby sha256 ops=32768 elapsed_s=0.796312\nruby sha256 ops=36864 elapsed_s=0.883808\nruby sha256 ops=40960 elapsed_s=0.975486\nruby sha256 ops=45056 elapsed_s=1.082924\nruby sha256 ops=49152 elapsed_s=1.181817\nruby sha256 ops=53248 elapsed_s=1.267861\nruby sha256 ops=57344 elapsed_s=1.360311\nruby sha256 ops=61440 elapsed_s=1.459569\nruby sha256 ops=65536 elapsed_s=1.555161\nruby sha256 ops=69632 elapsed_s=1.668594\nruby sha256 ops=73728 elapsed_s=1.752721\nruby sha256 ops=77824 elapsed_s=1.849442\nruby sha256 ops=81920 elapsed_s=1.951833\nruby sha256 ops=86016 elapsed_s=2.055045\nruby sha256 ops=90112 elapsed_s=2.155544\nruby sha256 ops=94208 elapsed_s=2.255962\nruby sha256 ops=98304 elapsed_s=2.365252\nruby sha256 ops=102400 elapsed_s=2.465998\nruby sha256 ops=106496 elapsed_s=2.565263\nruby sha256 ops=110592 elapsed_s=2.669821\nruby sha256 ops=114688 elapsed_s=2.772803\nruby sha256 ops=118784 elapsed_s=2.868133\nruby sha256 ops=122880 elapsed_s=2.969021\nruby sha256 ops=126976 elapsed_s=3.068730\nruby sha256 ops=131072 elapsed_s=3.161989\nruby sha256 ops=135168 elapsed_s=3.248292\nruby sha256 ops=139264 elapsed_s=3.352007\nruby sha256 ops=143360 elapsed_s=3.438715\nruby sha256 ops=147456 elapsed_s=3.529313\nruby sha256 ops=151552 elapsed_s=3.620996\nruby sha256 ops=155648 elapsed_s=3.724736\nruby sha256 ops=159744 elapsed_s=3.822360\nruby sha256 ops=163840 elapsed_s=3.915571\nruby sha256 ops=167936 elapsed_s=4.022148\nruby sha256 ops=172032 elapsed_s=4.114196\nruby sha256 ops=176128 elapsed_s=4.189091\nruby sha256 ops=180224 elapsed_s=4.303601\nruby sha256 ops=184320 elapsed_s=4.400879\nruby sha256 ops=188416 elapsed_s=4.484769\nruby sha256 ops=192512 elapsed_s=4.586579\nruby sha256 ops=196608 elapsed_s=4.661537\nruby sha256 ops=200704 elapsed_s=4.772782\nruby sha256 ops=204800 elapsed_s=4.861102\nruby sha256 ops=208896 elapsed_s=4.972377\nruby sha256 ops=212992 elapsed_s=5.057863\nruby sha256 ops=217088 elapsed_s=5.156426\nruby sha256 ops=221184 elapsed_s=5.237525\nruby sha256 ops=225280 elapsed_s=5.336692\nruby sha256 ops=229376 elapsed_s=5.429338\nruby sha256 ops=233472 elapsed_s=5.528000\nruby sha256 ops=237568 elapsed_s=5.619029\nruby sha256 ops=241664 elapsed_s=5.721730\nruby sha256 ops=245760 elapsed_s=5.814169\nruby sha256 ops=249856 elapsed_s=5.891588\nruby sha256 ops=253952 elapsed_s=6.012700\nruby sha256 ops=258048 elapsed_s=6.105754\nruby sha256 ops=262144 elapsed_s=6.203394\nruby sha256 ops=266240 elapsed_s=6.271275\nruby sha256 ops=270336 elapsed_s=6.389190\nruby sha256 ops=274432 elapsed_s=6.470139\nruby sha256 ops=278528 elapsed_s=6.574631\nruby sha256 ops=282624 elapsed_s=6.676444\nruby sha256 ops=286720 elapsed_s=6.757439\nruby sha256 ops=290816 elapsed_s=6.854853\nruby sha256 ops=294912 elapsed_s=6.954975\nruby sha256 ops=299008 elapsed_s=7.054660\nruby sha256 ops=303104 elapsed_s=7.137052\nruby sha256 ops=307200 elapsed_s=7.238414\nruby sha256 ops=311296 elapsed_s=7.348878\nruby sha256 ops=315392 elapsed_s=7.433245\nruby sha256 ops=319488 elapsed_s=7.526403\nruby sha256 ops=323584 elapsed_s=7.632016\nruby sha256 ops=327680 elapsed_s=7.720998\nruby sha256 ops=331776 elapsed_s=7.815694\nruby sha256 ops=335872 elapsed_s=7.899839\nruby sha256 ops=339968 elapsed_s=8.002688\nruby sha256 ops=344064 elapsed_s=8.086829\nruby sha256 ops=348160 elapsed_s=8.189575\nruby sha256 ops=352256 elapsed_s=8.289030\nruby sha256 ops=356352 elapsed_s=8.383117\nruby sha256 ops=360448 elapsed_s=8.468446\nruby sha256 ops=364544 elapsed_s=8.580905\nruby sha256 ops=368640 elapsed_s=8.659091\nruby sha256 ops=372736 elapsed_s=8.767770\nruby sha256 ops=376832 elapsed_s=8.865585\nruby sha256 ops=380928 elapsed_s=8.953255\nruby sha256 ops=385024 elapsed_s=9.045537\nruby sha256 ops=389120 elapsed_s=9.136434\nruby sha256 ops=393216 elapsed_s=9.234782\nruby sha256 ops=397312 elapsed_s=9.320295\nruby sha256 ops=401408 elapsed_s=9.431109\nruby sha256 ops=405504 elapsed_s=9.533385\nruby sha256 ops=409600 elapsed_s=9.616158\nruby sha256 ops=413696 elapsed_s=9.701325\nruby sha256 ops=417792 elapsed_s=9.812088\nruby sha256 ops=421888 elapsed_s=9.891710\nruby sha256 ops=425984 elapsed_s=9.955047\nruby sha256 ops=429094 elapsed_s=10.000010",
+            "stdout": "",
+            "workload_name": "otel_ruby_sha256"
+          },
+          {
+            "command": [
+              "/usr/bin/nodejs",
+              "-e",
+              "const crypto = require(\"crypto\");\nconst buf = Buffer.alloc(1024, 120);\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  crypto.createHash(\"sha256\").update(buf).digest();\n  n++;\n  if ((n & 4095) === 0) {\n    const dt = Number(process.hrtime.bigint() - t0) / 1e9;\n    process.stderr.write(`nodejs sha256 ops=${n} elapsed_s=${dt.toFixed(6)}\\n`);\n  }\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs sha256 ops=${n} elapsed_s=${dt.toFixed(6)}\\n`);\n",
+              "10"
+            ],
+            "config": {
+              "buffer_bytes": 1024,
+              "hash": "sha256",
+              "language": "nodejs",
+              "tool": "nodejs"
+            },
+            "duration_s": 10.47638829799999,
+            "returncode": 0,
+            "stderr": "nodejs sha256 ops=4096 elapsed_s=0.125844\nnodejs sha256 ops=8192 elapsed_s=0.228036\nnodejs sha256 ops=12288 elapsed_s=0.318666\nnodejs sha256 ops=16384 elapsed_s=0.410506\nnodejs sha256 ops=20480 elapsed_s=0.491465\nnodejs sha256 ops=24576 elapsed_s=0.558021\nnodejs sha256 ops=28672 elapsed_s=0.644078\nnodejs sha256 ops=32768 elapsed_s=0.705451\nnodejs sha256 ops=36864 elapsed_s=0.775255\nnodejs sha256 ops=40960 elapsed_s=0.853259\nnodejs sha256 ops=45056 elapsed_s=0.914032\nnodejs sha256 ops=49152 elapsed_s=0.993921\nnodejs sha256 ops=53248 elapsed_s=1.085993\nnodejs sha256 ops=57344 elapsed_s=1.146981\nnodejs sha256 ops=61440 elapsed_s=1.218118\nnodejs sha256 ops=65536 elapsed_s=1.294929\nnodejs sha256 ops=69632 elapsed_s=1.371657\nnodejs sha256 ops=73728 elapsed_s=1.410188\nnodejs sha256 ops=77824 elapsed_s=1.495247\nnodejs sha256 ops=81920 elapsed_s=1.581025\nnodejs sha256 ops=86016 elapsed_s=1.630060\nnodejs sha256 ops=90112 elapsed_s=1.720822\nnodejs sha256 ops=94208 elapsed_s=1.809738\nnodejs sha256 ops=98304 elapsed_s=1.868207\nnodejs sha256 ops=102400 elapsed_s=1.951947\nnodejs sha256 ops=106496 elapsed_s=2.023571\nnodejs sha256 ops=110592 elapsed_s=2.081871\nnodejs sha256 ops=114688 elapsed_s=2.129808\nnodejs sha256 ops=118784 elapsed_s=2.212901\nnodejs sha256 ops=122880 elapsed_s=2.275401\nnodejs sha256 ops=126976 elapsed_s=2.379901\nnodejs sha256 ops=131072 elapsed_s=2.447693\nnodejs sha256 ops=135168 elapsed_s=2.506595\nnodejs sha256 ops=139264 elapsed_s=2.583638\nnodejs sha256 ops=143360 elapsed_s=2.687330\nnodejs sha256 ops=147456 elapsed_s=2.763747\nnodejs sha256 ops=151552 elapsed_s=2.838029\nnodejs sha256 ops=155648 elapsed_s=2.919603\nnodejs sha256 ops=159744 elapsed_s=3.003684\nnodejs sha256 ops=163840 elapsed_s=3.040076\nnodejs sha256 ops=167936 elapsed_s=3.117117\nnodejs sha256 ops=172032 elapsed_s=3.205462\nnodejs sha256 ops=176128 elapsed_s=3.263716\nnodejs sha256 ops=180224 elapsed_s=3.328177\nnodejs sha256 ops=184320 elapsed_s=3.408046\nnodejs sha256 ops=188416 elapsed_s=3.466273\nnodejs sha256 ops=192512 elapsed_s=3.529626\nnodejs sha256 ops=196608 elapsed_s=3.622337\nnodejs sha256 ops=200704 elapsed_s=3.683670\nnodejs sha256 ops=204800 elapsed_s=3.755089\nnodejs sha256 ops=208896 elapsed_s=3.832307\nnodejs sha256 ops=212992 elapsed_s=3.870554\nnodejs sha256 ops=217088 elapsed_s=3.962807\nnodejs sha256 ops=221184 elapsed_s=4.027062\nnodejs sha256 ops=225280 elapsed_s=4.085485\nnodejs sha256 ops=229376 elapsed_s=4.164663\nnodejs sha256 ops=233472 elapsed_s=4.236926\nnodejs sha256 ops=237568 elapsed_s=4.321266\nnodejs sha256 ops=241664 elapsed_s=4.369679\nnodejs sha256 ops=245760 elapsed_s=4.456277\nnodejs sha256 ops=249856 elapsed_s=4.534651\nnodejs sha256 ops=253952 elapsed_s=4.593101\nnodejs sha256 ops=258048 elapsed_s=4.658349\nnodejs sha256 ops=262144 elapsed_s=4.736555\nnodejs sha256 ops=266240 elapsed_s=4.813347\nnodejs sha256 ops=270336 elapsed_s=4.860107\nnodejs sha256 ops=274432 elapsed_s=4.951877\nnodejs sha256 ops=278528 elapsed_s=4.990923\nnodejs sha256 ops=282624 elapsed_s=5.074065\nnodejs sha256 ops=286720 elapsed_s=5.141963\nnodejs sha256 ops=290816 elapsed_s=5.180350\nnodejs sha256 ops=294912 elapsed_s=5.264097\nnodejs sha256 ops=299008 elapsed_s=5.332973\nnodejs sha256 ops=303104 elapsed_s=5.393894\nnodejs sha256 ops=307200 elapsed_s=5.467822\nnodejs sha256 ops=311296 elapsed_s=5.541935\nnodejs sha256 ops=315392 elapsed_s=5.596575\nnodejs sha256 ops=319488 elapsed_s=5.654876\nnodejs sha256 ops=323584 elapsed_s=5.726051\nnodejs sha256 ops=327680 elapsed_s=5.799204\nnodejs sha256 ops=331776 elapsed_s=5.860190\nnodejs sha256 ops=335872 elapsed_s=5.952319\nnodejs sha256 ops=339968 elapsed_s=6.032882\nnodejs sha256 ops=344064 elapsed_s=6.061104\nnodejs sha256 ops=348160 elapsed_s=6.128710\nnodejs sha256 ops=352256 elapsed_s=6.200531\nnodejs sha256 ops=356352 elapsed_s=6.258874\nnodejs sha256 ops=360448 elapsed_s=6.330545\nnodejs sha256 ops=364544 elapsed_s=6.408310\nnodejs sha256 ops=368640 elapsed_s=6.466637\nnodejs sha256 ops=372736 elapsed_s=6.552868\nnodejs sha256 ops=376832 elapsed_s=6.624461\nnodejs sha256 ops=380928 elapsed_s=6.686196\nnodejs sha256 ops=385024 elapsed_s=6.757681\nnodejs sha256 ops=389120 elapsed_s=6.834855\nnodejs sha256 ops=393216 elapsed_s=6.897556\nnodejs sha256 ops=397312 elapsed_s=6.955785\nnodejs sha256 ops=401408 elapsed_s=7.008428\nnodejs sha256 ops=405504 elapsed_s=7.086770\nnodejs sha256 ops=409600 elapsed_s=7.147711\nnodejs sha256 ops=413696 elapsed_s=7.235059\nnodejs sha256 ops=417792 elapsed_s=7.289121\nnodejs sha256 ops=421888 elapsed_s=7.347429\nnodejs sha256 ops=425984 elapsed_s=7.419097\nnodejs sha256 ops=430080 elapsed_s=7.507772\nnodejs sha256 ops=434176 elapsed_s=7.565423\nnodejs sha256 ops=438272 elapsed_s=7.651442\nnodejs sha256 ops=442368 elapsed_s=7.709143\nnodejs sha256 ops=446464 elapsed_s=7.767609\nnodejs sha256 ops=450560 elapsed_s=7.836372\nnodejs sha256 ops=454656 elapsed_s=7.906348\nnodejs sha256 ops=458752 elapsed_s=7.964762\nnodejs sha256 ops=462848 elapsed_s=8.026878\nnodejs sha256 ops=466944 elapsed_s=8.104153\nnodejs sha256 ops=471040 elapsed_s=8.179481\nnodejs sha256 ops=475136 elapsed_s=8.237703\nnodejs sha256 ops=479232 elapsed_s=8.300309\nnodejs sha256 ops=483328 elapsed_s=8.376215\nnodejs sha256 ops=487424 elapsed_s=8.436488\nnodejs sha256 ops=491520 elapsed_s=8.512914\nnodejs sha256 ops=495616 elapsed_s=8.575881\nnodejs sha256 ops=499712 elapsed_s=8.634235\nnodejs sha256 ops=503808 elapsed_s=8.688232\nnodejs sha256 ops=507904 elapsed_s=8.750913\nnodejs sha256 ops=512000 elapsed_s=8.809305\nnodejs sha256 ops=516096 elapsed_s=8.880145\nnodejs sha256 ops=520192 elapsed_s=8.962320\nnodejs sha256 ops=524288 elapsed_s=9.017065\nnodejs sha256 ops=528384 elapsed_s=9.104384\nnodejs sha256 ops=532480 elapsed_s=9.157319\nnodejs sha256 ops=536576 elapsed_s=9.215819\nnodejs sha256 ops=540672 elapsed_s=9.284747\nnodejs sha256 ops=544768 elapsed_s=9.364002\nnodejs sha256 ops=548864 elapsed_s=9.442768\nnodejs sha256 ops=552960 elapsed_s=9.504903\nnodejs sha256 ops=557056 elapsed_s=9.565644\nnodejs sha256 ops=561152 elapsed_s=9.628319\nnodejs sha256 ops=565248 elapsed_s=9.649402\nnodejs sha256 ops=569344 elapsed_s=9.671636\nnodejs sha256 ops=573440 elapsed_s=9.693869\nnodejs sha256 ops=577536 elapsed_s=9.711841\nnodejs sha256 ops=581632 elapsed_s=9.733957\nnodejs sha256 ops=585728 elapsed_s=9.756380\nnodejs sha256 ops=589824 elapsed_s=9.776611\nnodejs sha256 ops=593920 elapsed_s=9.799574\nnodejs sha256 ops=598016 elapsed_s=9.823227\nnodejs sha256 ops=602112 elapsed_s=9.841930\nnodejs sha256 ops=606208 elapsed_s=9.865078\nnodejs sha256 ops=610304 elapsed_s=9.888285\nnodejs sha256 ops=614400 elapsed_s=9.906519\nnodejs sha256 ops=618496 elapsed_s=9.929723\nnodejs sha256 ops=622592 elapsed_s=9.953183\nnodejs sha256 ops=626688 elapsed_s=9.976602\nnodejs sha256 ops=630784 elapsed_s=9.995196\nnodejs sha256 ops=631829 elapsed_s=10.000104",
+            "stdout": "",
+            "workload_name": "otel_nodejs_sha256"
+          },
+          {
+            "command": [
+              "/usr/bin/perl",
+              "-e",
+              "use Digest::SHA qw(sha256);\nuse Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $buf = \"x\" x 1024;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  sha256($buf);\n  $n++;\n  if (($n & 4095) == 0) {\n    my $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\n    printf STDERR (\"perl sha256 ops=%d elapsed_s=%.6f\\n\", $n, $dt);\n  }\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl sha256 ops=%d elapsed_s=%.6f\\n\", $n, $dt);\n",
+              "10"
+            ],
+            "config": {
+              "buffer_bytes": 1024,
+              "hash": "sha256",
+              "language": "perl",
+              "tool": "perl"
+            },
+            "duration_s": 10.476566663,
+            "returncode": 0,
+            "stderr": "perl: warning: Setting locale failed.\nperl: warning: Please check that your locale settings:\n\tLANGUAGE = (unset),\n\tLC_ALL = (unset),\n\tLC_CTYPE = \"C.UTF-8\",\n\tLANG = \"en_US.UTF-8\"\n    are supported and installed on your system.\nperl: warning: Falling back to the standard locale (\"C\").\nperl sha256 ops=4096 elapsed_s=0.119953\nperl sha256 ops=8192 elapsed_s=0.230562\nperl sha256 ops=12288 elapsed_s=0.291453\nperl sha256 ops=16384 elapsed_s=0.371717\nperl sha256 ops=20480 elapsed_s=0.428176\nperl sha256 ops=24576 elapsed_s=0.507158\nperl sha256 ops=28672 elapsed_s=0.575231\nperl sha256 ops=32768 elapsed_s=0.635415\nperl sha256 ops=36864 elapsed_s=0.698754\nperl sha256 ops=40960 elapsed_s=0.782158\nperl sha256 ops=45056 elapsed_s=0.845512\nperl sha256 ops=49152 elapsed_s=0.930253\nperl sha256 ops=53248 elapsed_s=0.993653\nperl sha256 ops=57344 elapsed_s=1.057037\nperl sha256 ops=61440 elapsed_s=1.139616\nperl sha256 ops=65536 elapsed_s=1.212075\nperl sha256 ops=69632 elapsed_s=1.275451\nperl sha256 ops=73728 elapsed_s=1.370617\nperl sha256 ops=77824 elapsed_s=1.431108\nperl sha256 ops=81920 elapsed_s=1.494481\nperl sha256 ops=86016 elapsed_s=1.575214\nperl sha256 ops=90112 elapsed_s=1.628537\nperl sha256 ops=94208 elapsed_s=1.716940\nperl sha256 ops=98304 elapsed_s=1.790367\nperl sha256 ops=102400 elapsed_s=1.853681\nperl sha256 ops=106496 elapsed_s=1.916958\nperl sha256 ops=110592 elapsed_s=2.001395\nperl sha256 ops=114688 elapsed_s=2.061604\nperl sha256 ops=118784 elapsed_s=2.124965\nperl sha256 ops=122880 elapsed_s=2.188338\nperl sha256 ops=126976 elapsed_s=2.272473\nperl sha256 ops=131072 elapsed_s=2.335888\nperl sha256 ops=135168 elapsed_s=2.409261\nperl sha256 ops=139264 elapsed_s=2.477613\nperl sha256 ops=143360 elapsed_s=2.561185\nperl sha256 ops=147456 elapsed_s=2.631261\nperl sha256 ops=151552 elapsed_s=2.704355\nperl sha256 ops=155648 elapsed_s=2.790152\nperl sha256 ops=159744 elapsed_s=2.853594\nperl sha256 ops=163840 elapsed_s=2.929007\nperl sha256 ops=167936 elapsed_s=3.033278\nperl sha256 ops=172032 elapsed_s=3.108918\nperl sha256 ops=176128 elapsed_s=3.192437\nperl sha256 ops=180224 elapsed_s=3.249106\nperl sha256 ops=184320 elapsed_s=3.332492\nperl sha256 ops=188416 elapsed_s=3.410674\nperl sha256 ops=192512 elapsed_s=3.476203\nperl sha256 ops=196608 elapsed_s=3.549631\nperl sha256 ops=200704 elapsed_s=3.612997\nperl sha256 ops=204800 elapsed_s=3.683607\nperl sha256 ops=208896 elapsed_s=3.746887\nperl sha256 ops=212992 elapsed_s=3.839863\nperl sha256 ops=217088 elapsed_s=3.904016\nperl sha256 ops=221184 elapsed_s=3.980756\nperl sha256 ops=225280 elapsed_s=4.044038\nperl sha256 ops=229376 elapsed_s=4.107379\nperl sha256 ops=233472 elapsed_s=4.187462\nperl sha256 ops=237568 elapsed_s=4.262276\nperl sha256 ops=241664 elapsed_s=4.325646\nperl sha256 ops=245760 elapsed_s=4.404044\nperl sha256 ops=249856 elapsed_s=4.482903\nperl sha256 ops=253952 elapsed_s=4.546324\nperl sha256 ops=258048 elapsed_s=4.614564\nperl sha256 ops=262144 elapsed_s=4.693960\nperl sha256 ops=266240 elapsed_s=4.757257\nperl sha256 ops=270336 elapsed_s=4.831437\nperl sha256 ops=274432 elapsed_s=4.895950\nperl sha256 ops=278528 elapsed_s=4.959349\nperl sha256 ops=282624 elapsed_s=5.042680\nperl sha256 ops=286720 elapsed_s=5.115992\nperl sha256 ops=290816 elapsed_s=5.179353\nperl sha256 ops=294912 elapsed_s=5.272655\nperl sha256 ops=299008 elapsed_s=5.336043\nperl sha256 ops=303104 elapsed_s=5.420985\nperl sha256 ops=307200 elapsed_s=5.479124\nperl sha256 ops=311296 elapsed_s=5.552514\nperl sha256 ops=315392 elapsed_s=5.625825\nperl sha256 ops=319488 elapsed_s=5.710026\nperl sha256 ops=323584 elapsed_s=5.766732\nperl sha256 ops=327680 elapsed_s=5.850670\nperl sha256 ops=331776 elapsed_s=5.923969\nperl sha256 ops=335872 elapsed_s=5.985718\nperl sha256 ops=339968 elapsed_s=6.049000\nperl sha256 ops=344064 elapsed_s=6.133246\nperl sha256 ops=348160 elapsed_s=6.202303\nperl sha256 ops=352256 elapsed_s=6.281878\nperl sha256 ops=356352 elapsed_s=6.335778\nperl sha256 ops=360448 elapsed_s=6.399210\nperl sha256 ops=364544 elapsed_s=6.487503\nperl sha256 ops=368640 elapsed_s=6.570822\nperl sha256 ops=372736 elapsed_s=6.634228\nperl sha256 ops=376832 elapsed_s=6.702645\nperl sha256 ops=380928 elapsed_s=6.765992\nperl sha256 ops=385024 elapsed_s=6.829303\nperl sha256 ops=389120 elapsed_s=6.912641\nperl sha256 ops=393216 elapsed_s=6.977154\nperl sha256 ops=397312 elapsed_s=7.056553\nperl sha256 ops=401408 elapsed_s=7.139864\nperl sha256 ops=405504 elapsed_s=7.193190\nperl sha256 ops=409600 elapsed_s=7.256473\nperl sha256 ops=413696 elapsed_s=7.339805\nperl sha256 ops=417792 elapsed_s=7.413135\nperl sha256 ops=421888 elapsed_s=7.468084\nperl sha256 ops=425984 elapsed_s=7.551516\nperl sha256 ops=430080 elapsed_s=7.614877\nperl sha256 ops=434176 elapsed_s=7.695855\nperl sha256 ops=438272 elapsed_s=7.770891\nperl sha256 ops=442368 elapsed_s=7.834194\nperl sha256 ops=446464 elapsed_s=7.910344\nperl sha256 ops=450560 elapsed_s=7.981716\nperl sha256 ops=454656 elapsed_s=8.045009\nperl sha256 ops=458752 elapsed_s=8.118387\nperl sha256 ops=462848 elapsed_s=8.193208\nperl sha256 ops=466944 elapsed_s=8.256511\nperl sha256 ops=471040 elapsed_s=8.339905\nperl sha256 ops=475136 elapsed_s=8.413223\nperl sha256 ops=479232 elapsed_s=8.466547\nperl sha256 ops=483328 elapsed_s=8.559849\nperl sha256 ops=487424 elapsed_s=8.623139\nperl sha256 ops=491520 elapsed_s=8.700498\nperl sha256 ops=495616 elapsed_s=8.763761\nperl sha256 ops=499712 elapsed_s=8.827037\nperl sha256 ops=503808 elapsed_s=8.910554\nperl sha256 ops=507904 elapsed_s=8.983955\nperl sha256 ops=512000 elapsed_s=9.045678\nperl sha256 ops=516096 elapsed_s=9.108967\nperl sha256 ops=520192 elapsed_s=9.192301\nperl sha256 ops=524288 elapsed_s=9.255642\nperl sha256 ops=528384 elapsed_s=9.339902\nperl sha256 ops=532480 elapsed_s=9.396084\nperl sha256 ops=536576 elapsed_s=9.479502\nperl sha256 ops=540672 elapsed_s=9.542819\nperl sha256 ops=544768 elapsed_s=9.616156\nperl sha256 ops=548864 elapsed_s=9.690872\nperl sha256 ops=552960 elapsed_s=9.754180\nperl sha256 ops=557056 elapsed_s=9.827502\nperl sha256 ops=561152 elapsed_s=9.920299\nperl sha256 ops=565248 elapsed_s=9.980669\nperl sha256 ops=566879 elapsed_s=10.000002",
+            "stdout": "",
+            "workload_name": "otel_perl_sha256"
+          },
+          {
+            "command": [
+              "/usr/bin/php",
+              "-r",
+              "$buf = str_repeat(\"x\", 1024);\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  hash(\"sha256\", $buf, true);\n  $n++;\n  if (($n & 4095) === 0) {\n    $dt = (hrtime(true) - $t0) / 1e9;\n    fwrite(STDERR, sprintf(\"php sha256 ops=%d elapsed_s=%.6f\\n\", $n, $dt));\n  }\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php sha256 ops=%d elapsed_s=%.6f\\n\", $n, $dt));\n",
+              "10"
+            ],
+            "config": {
+              "buffer_bytes": 1024,
+              "hash": "sha256",
+              "language": "php",
+              "tool": "php"
+            },
+            "duration_s": 10.476741860999994,
+            "returncode": 0,
+            "stderr": "php sha256 ops=4096 elapsed_s=0.202674\nphp sha256 ops=8192 elapsed_s=0.357726\nphp sha256 ops=12288 elapsed_s=0.471391\nphp sha256 ops=16384 elapsed_s=0.583401\nphp sha256 ops=20480 elapsed_s=0.705219\nphp sha256 ops=24576 elapsed_s=0.845436\nphp sha256 ops=28672 elapsed_s=0.965616\nphp sha256 ops=32768 elapsed_s=1.085676\nphp sha256 ops=36864 elapsed_s=1.199750\nphp sha256 ops=40960 elapsed_s=1.321868\nphp sha256 ops=45056 elapsed_s=1.443254\nphp sha256 ops=49152 elapsed_s=1.563540\nphp sha256 ops=53248 elapsed_s=1.701153\nphp sha256 ops=57344 elapsed_s=1.813551\nphp sha256 ops=61440 elapsed_s=1.931646\nphp sha256 ops=65536 elapsed_s=2.077346\nphp sha256 ops=69632 elapsed_s=2.187502\nphp sha256 ops=73728 elapsed_s=2.307711\nphp sha256 ops=77824 elapsed_s=2.413676\nphp sha256 ops=81920 elapsed_s=2.543868\nphp sha256 ops=86016 elapsed_s=2.670051\nphp sha256 ops=90112 elapsed_s=2.801675\nphp sha256 ops=94208 elapsed_s=2.926597\nphp sha256 ops=98304 elapsed_s=3.074262\nphp sha256 ops=102400 elapsed_s=3.213083\nphp sha256 ops=106496 elapsed_s=3.347459\nphp sha256 ops=110592 elapsed_s=3.465487\nphp sha256 ops=114688 elapsed_s=3.590414\nphp sha256 ops=118784 elapsed_s=3.704048\nphp sha256 ops=122880 elapsed_s=3.822858\nphp sha256 ops=126976 elapsed_s=3.944175\nphp sha256 ops=131072 elapsed_s=4.082329\nphp sha256 ops=135168 elapsed_s=4.192518\nphp sha256 ops=139264 elapsed_s=4.313507\nphp sha256 ops=143360 elapsed_s=4.443761\nphp sha256 ops=147456 elapsed_s=4.553905\nphp sha256 ops=151552 elapsed_s=4.685283\nphp sha256 ops=155648 elapsed_s=4.811530\nphp sha256 ops=159744 elapsed_s=4.941674\nphp sha256 ops=163840 elapsed_s=5.060682\nphp sha256 ops=167936 elapsed_s=5.181491\nphp sha256 ops=172032 elapsed_s=5.311506\nphp sha256 ops=176128 elapsed_s=5.431632\nphp sha256 ops=180224 elapsed_s=5.561799\nphp sha256 ops=184320 elapsed_s=5.689982\nphp sha256 ops=188416 elapsed_s=5.810174\nphp sha256 ops=192512 elapsed_s=5.929094\nphp sha256 ops=196608 elapsed_s=6.059730\nphp sha256 ops=200704 elapsed_s=6.171447\nphp sha256 ops=204800 elapsed_s=6.291579\nphp sha256 ops=208896 elapsed_s=6.435703\nphp sha256 ops=212992 elapsed_s=6.556330\nphp sha256 ops=217088 elapsed_s=6.676178\nphp sha256 ops=221184 elapsed_s=6.806364\nphp sha256 ops=225280 elapsed_s=6.905004\nphp sha256 ops=229376 elapsed_s=7.040090\nphp sha256 ops=233472 elapsed_s=7.160416\nphp sha256 ops=237568 elapsed_s=7.296608\nphp sha256 ops=241664 elapsed_s=7.416892\nphp sha256 ops=245760 elapsed_s=7.530988\nphp sha256 ops=249856 elapsed_s=7.651126\nphp sha256 ops=253952 elapsed_s=7.762941\nphp sha256 ops=258048 elapsed_s=7.883964\nphp sha256 ops=262144 elapsed_s=8.004973\nphp sha256 ops=266240 elapsed_s=8.125280\nphp sha256 ops=270336 elapsed_s=8.262876\nphp sha256 ops=274432 elapsed_s=8.396249\nphp sha256 ops=278528 elapsed_s=8.512438\nphp sha256 ops=282624 elapsed_s=8.636219\nphp sha256 ops=286720 elapsed_s=8.749466\nphp sha256 ops=290816 elapsed_s=8.870475\nphp sha256 ops=294912 elapsed_s=8.992042\nphp sha256 ops=299008 elapsed_s=9.122289\nphp sha256 ops=303104 elapsed_s=9.255945\nphp sha256 ops=307200 elapsed_s=9.376146\nphp sha256 ops=311296 elapsed_s=9.490697\nphp sha256 ops=315392 elapsed_s=9.616832\nphp sha256 ops=319488 elapsed_s=9.739851\nphp sha256 ops=323584 elapsed_s=9.860139\nphp sha256 ops=327680 elapsed_s=9.975082\nphp sha256 ops=328174 elapsed_s=10.000009",
+            "stdout": "",
+            "workload_name": "otel_php_sha256"
+          },
+          {
+            "command": [
+              "/usr/bin/stress-ng",
+              "--cpu",
+              "1",
+              "--timeout",
+              "10s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/r9acndev"
+            ],
+            "config": {
+              "stressors": [
+                "cpu"
+              ],
+              "tool": "stress-ng"
+            },
+            "duration_s": 10.47684586199999,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [5581] setting to a 10 secs run per stressor\nstress-ng: info:  [5581] dispatching hogs: 1 cpu\nstress-ng: info:  [5581] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [5581] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [5581]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [5581] cpu                 656     10.13      3.39      0.01        64.78         193.10\nstress-ng: info:  [5581] skipped: 0\nstress-ng: info:  [5581] passed: 1: cpu (1)\nstress-ng: info:  [5581] failed: 0\nstress-ng: info:  [5581] metrics untrustworthy: 0\nstress-ng: info:  [5581] successful run completed in 10.14 secs",
+            "workload_name": "otel_stress_ng_cpu"
+          }
+        ],
+        "duration_s": 10.476863076,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "otel_mixed_workload"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "113": {
+        "passes": [
+          {
+            "bpfopt_ms": 31,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1616,
+              "insn_count_before": 1616,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 12,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 113,
+        "program": {
+          "final_insn_count": 1616,
+          "orig_insn_count": 1616,
+          "prog_id": 113,
+          "prog_name": "perf_unwind_sto",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "114": {
+        "passes": [
+          {
+            "bpfopt_ms": 466,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 7152,
+              "insn_count_before": 7152,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 348,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 114,
+        "program": {
+          "final_insn_count": 7152,
+          "orig_insn_count": 7152,
+          "prog_id": 114,
+          "prog_name": "perf_unwind_nat",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "115": {
+        "passes": [
+          {
+            "bpfopt_ms": 645,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 6448,
+              "insn_count_before": 6448,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 47,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 115,
+        "program": {
+          "final_insn_count": 6448,
+          "orig_insn_count": 6448,
+          "prog_id": 115,
+          "prog_name": "perf_unwind_hot",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "116": {
+        "passes": [
+          {
+            "bpfopt_ms": 547,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 7396,
+              "insn_count_before": 7396,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 51,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 116,
+        "program": {
+          "final_insn_count": 7396,
+          "orig_insn_count": 7396,
+          "prog_id": 116,
+          "prog_name": "perf_unwind_per",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "117": {
+        "passes": [
+          {
+            "bpfopt_ms": 693,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 6939,
+              "insn_count_before": 6939,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 45,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 117,
+        "program": {
+          "final_insn_count": 6939,
+          "orig_insn_count": 6939,
+          "prog_id": 117,
+          "prog_name": "perf_unwind_php",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "118": {
+        "passes": [
+          {
+            "bpfopt_ms": 124,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 5869,
+              "insn_count_before": 5869,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 42,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 118,
+        "program": {
+          "final_insn_count": 5869,
+          "orig_insn_count": 5869,
+          "prog_id": 118,
+          "prog_name": "perf_unwind_pyt",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "119": {
+        "passes": [
+          {
+            "bpfopt_ms": 279,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 5178,
+              "insn_count_before": 5178,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 63,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 119,
+        "program": {
+          "final_insn_count": 5178,
+          "orig_insn_count": 5178,
+          "prog_id": 119,
+          "prog_name": "perf_unwind_rub",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "120": {
+        "passes": [
+          {
+            "bpfopt_ms": 1320,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 7940,
+              "insn_count_before": 7940,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 180,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 120,
+        "program": {
+          "final_insn_count": 7940,
+          "orig_insn_count": 7940,
+          "prog_id": 120,
+          "prog_name": "perf_unwind_v8",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "121": {
+        "passes": [
+          {
+            "bpfopt_ms": 17,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 679,
+              "insn_count_before": 679,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 146,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 121,
+        "program": {
+          "final_insn_count": 679,
+          "orig_insn_count": 679,
+          "prog_id": 121,
+          "prog_name": "perf_go_labels",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "122": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 242,
+              "insn_count_before": 242,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 1,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 122,
+        "program": {
+          "final_insn_count": 242,
+          "orig_insn_count": 242,
+          "prog_id": 122,
+          "prog_name": "perf_unwind_bea",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "123": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 283,
+              "insn_count_before": 283,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 1,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 123,
+        "program": {
+          "final_insn_count": 283,
+          "orig_insn_count": 283,
+          "prog_id": 123,
+          "prog_name": "tracepoint__sch",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "124": {
+        "passes": [
+          {
+            "bpfopt_ms": 17,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 1332,
+              "insn_count_before": 1332,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 5,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 124,
+        "program": {
+          "final_insn_count": 1332,
+          "orig_insn_count": 1332,
+          "prog_id": 124,
+          "prog_name": "native_tracer_e",
+          "prog_type": 7
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "otelcol-ebpf-profiler",
+  "selected_workload": "otel_mixed_workload",
+  "status": "ok"
+}

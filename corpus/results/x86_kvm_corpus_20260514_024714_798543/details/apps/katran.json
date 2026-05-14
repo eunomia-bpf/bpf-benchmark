@@ -1,0 +1,138 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "530": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 530,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 486980,
+        "run_time_ns_delta": 74322584,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d10s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 10.103527096999983,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 10s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   351.87us  270.11us   4.51ms   78.34%\n    Req/Sec     6.06k   206.09     6.69k    69.31%\n  Latency Distribution\n     50%  273.00us\n     75%  467.00us\n     90%  702.00us\n     99%    1.30ms\n  243468 requests in 10.10s, 37.85MB read\nRequests/sec:  24105.96\nTransfer/sec:      3.75MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "530": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 530,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 493375,
+        "run_time_ns_delta": 76461931,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d10s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 10.102458354000078,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 10s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   345.34us  261.59us   3.43ms   78.31%\n    Req/Sec     6.15k   278.74     8.46k    82.13%\n  Latency Distribution\n     50%  269.00us\n     75%  458.00us\n     90%  688.00us\n     99%    1.26ms\n  246665 requests in 10.10s, 38.34MB read\nRequests/sec:  24422.34\nTransfer/sec:      3.80MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "530": {
+        "passes": [
+          {
+            "bpfopt_ms": 34,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 625,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 3615,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): OVERLAY_DIR=/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/map_inline/overlays/katran; CH=; RE=; SI=; for f in /var/tmp/bpfrejit-runtime/nui9i/bpfrejit-daemon-plan-1685-374/map-values/map-*.show.json; do n=$(jq -r .name \"$f\"); i=$(jq -r .id \"$f\"); case \"$n\" in ch_rings) CH=$i ;; reals) RE=$i ;; server_id_map) SI=$i ;; esac; done; jq -n --arg c \"$CH\" --arg r \"$RE\" --arg s \"$SI\" --slurpfile co \"$OVERLAY_DIR/ch_rings.json\" --slurpfile ro \"$OVERLAY_DIR/reals.json\" --slurpfile so \"$OVERLAY_DIR/server_id_map.json\" '($c | if . == \"\" then {} else {(.): $co[0]} end) + ($r | if . == \"\" then {} else {(.): $ro[0]} end) + ($s | if . == \"\" then {} else {(.): $so[0]} end)' > /var/tmp/bpfrejit-runtime/nui9i/bpfrejit-daemon-plan-1685-374/map-values/overlays.json && timeout 6000 bpfopt --pass map_inline --input /var/tmp/bpfrejit-runtime/nui9i/bpfrejit-daemon-plan-1685-374/output_step0.bin --output /var/tmp/bpfrejit-runtime/nui9i/bpfrejit-daemon-plan-1685-374/output_step1.bin --report /var/tmp/bpfrejit-runtime/nui9i/bpfrejit-daemon-plan-1685-374/report_step1.json --prog-type xdp --verifier-states /var/tmp/bpfrejit-runtime/nui9i/bpfrejit-daemon-plan-1685-374/verifier_log_step0.log -- --map-values /var/tmp/bpfrejit-runtime/nui9i/bpfrejit-daemon-plan-1685-374/map-values --map-ids 3705,3707,3709,3708,3715,3720,3711,3722,3706,3712,3710,3714,3713,3718 --inline-hint=ctl_array:!00000000 --inline-hint=vip_map:!0a6401010000000000000000000000001f900600 --inline-hint=ch_rings:!00000000 --inline-hint=reals:!01000000 --inline-hint=server_id_map:!00000000 # lpm_src_v4/v6 hints commented: katran is built without # -DLPM_SRC_LOOKUP, so these maps are guarded out of the program # by `#ifdef LPM_SRC_LOOKUP` in balancer_maps.h. bpfopt fail-fasts # on hint anchor not in metadata (correct: catches typos and # mis-applied hints early). Uncomment if a future build turns on # source-IP routing. # --inline-hint=lpm_src_v4:!00000000 # --inline-hint=lpm_src_v6:!00000000 # lru_mapping/global_lru_maps outer-only hints commented: katran # benchmark uses F_LRU_BYPASS + no `-forwarding_cores`, so the outer # ARRAY_OF_MAPS stays empty (every slot ENOENT). #265 root-caused this: # `attachLrus()` iterates empty forwardingCores_ \u2192 zero update_elem. # bpfopt fail-fasts when hinted outer key has no live inner map # (correct: hint claims something kernel snapshot disproves). # Uncomment only if benchmark configures forwarding cores OR an # alternative test deploys populated map-in-map. # --inline-hint=lru_mapping:!00000000 # --inline-hint=global_lru_maps:!00000000\nsubprocess output:\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"65+0\"\nwarning: verifier log: invalid id attribute value \"66+0\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"847-525483785\"\nwarning: verifier log: invalid id attribute value \"847-525483785\"\nwarning: verifier log: invalid id attribute value \"875-525483785\"\nwarning: verifier log: invalid id attribute value \"875-525483785\"\nwarning: verifier log: invalid id attribute value \"921-525483785\"\nwarning: verifier log: invalid id attribute value \"921-525483785\"\nwarning: verifier log: invalid id attribute value \"940-525483785\"\nwarning: verifier log: invalid id attribute value \"940-525483785\"\nwarning: verifier log: invalid id attribute value \"1012-525483785\"\nwarning: verifier log: invalid id attribute value \"1012-525483785\"\nwarning: verifier log: invalid id attribute value \"1039-525483785\"\nwarning: verifier log: invalid id attribute value \"1039-525483785\"\nwarning: verifier log: invalid id attribute value \"1090-525483785\"\nwarning: verifier log: invalid id attribute value \"1090-525483785\"\nwarning: verifier log: invalid id attribute value \"1109-525483785\"\nwarning: verifier log: invalid id attribute value \"1109-525483785\"\nwarning: verifier log: invalid id attribute value \"1187-525483785\"\nwarning: verifier log: invalid id attribute value \"1187-525483785\"\nwarning: verifier log: invalid id attribute value \"1214-525483785\"\nwarning: verifier log: invalid id attribute value \"1214-525483785\"\nwarning: verifier log: invalid id attribute value \"1260-525483785\"\nwarning: verifier log: invalid id attribute value \"1260-525483785\"\nwarning: verifier log: invalid id attribute value \"1279-525483785\"\nwarning: verifier log: invalid id attribute value \"1279-525483785\"\nwarning: verifier log: invalid id attribute value \"1350-525483785\"\nwarning: verifier log: invalid id attribute value \"1350-525483785\"\nwarning: verifier log: invalid id attribute value \"1376-525483785\"\nwarning: verifier log: invalid id attribute value \"1376-525483785\"\nwarning: verifier log: invalid id attribute value \"1427-525483785\"\nwarning: verifier log: invalid id attribute value \"1427-525483785\"\nwarning: verifier log: invalid id attribute value \"1446-525483785\"\nwarning: verifier log: invalid id attribute value \"1446-525483785\"\nwarning: verifier log: invalid id attribute value \"1558+0\"\nwarning: verifier log: invalid id attribute value \"1560+0\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid id attribute value \"1626+40\"\nwarning: verifier log: invalid id attribute value \"1626+40\"\nwarning: verifier log: invalid id attribute value \"1626+40\"\nwarning: verifier log: invalid id attribute value \"1629+20\"\nwarning: verifier log: invalid id attribute value \"1629+20\"\nwarning: verifier log: invalid id attribute value \"1629+20\"\nwarning: verifier log: invalid id attribute value \"1629+20\"\nwarning: verifier log: invalid id attribute value \"1632+0\"\nwarning: verifier log: invalid id attribute value \"1633+0\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid id attribute value \"1650-525483785\"\nwarning: verifier log: invalid id attribute value \"1650-525483785\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"1671+20\"\nwarning: verifier log: invalid id attribute value \"1671+20\"\nwarning: verifier log: invalid id attribute value \"1671+20\"\nwarning: verifier log: invalid id attribute value \"1671+20\"\nwarning: verifier log: invalid id attribute value \"1816-525483785\"\nwarning: verifier log: invalid id attribute value \"1816-525483785\"\nwarning: verifier log: invalid id attribute value \"1849+40\"\nwarning: verifier log: invalid id attribute value \"1849+40\"\nwarning: verifier log: invalid id attribute value \"1849+40\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"1854+20\"\nwarning: verifier log: invalid id attribute value \"1854+20\"\nwarning: verifier log: invalid id attribute value \"1854+20\"\nwarning: verifier log: invalid id attribute value \"1854+20\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"1908+20\"\nwarning: verifier log: invalid id attribute value \"1908+20\"\nwarning: verifier log: invalid id attribute value \"1908+20\"\nwarning: verifier log: invalid id attribute value \"1908+20\"\nwarning: verifier log: invalid id attribute value \"1927-525483785\"\nwarning: verifier log: invalid id attribute value \"1927-525483785\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"1949+20\"\nwarning: verifier log: invalid id attribute value \"1949+20\"\nwarning: verifier log: invalid id attribute value \"1949+20\"\nwarning: verifier log: invalid id attribute value \"1949+20\"\nwarning: verifier log: invalid id attribute value \"1985-525483785\"\nwarning: verifier log: invalid id attribute value \"1985-525483785\"\nwarning: verifier log: invalid id attribute value \"2103-525483785\"\nwarning: verifier log: invalid id attribute value \"2103-525483785\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"2143+20\"\nwarning: verifier log: invalid id attribute value \"2143+20\"\nwarning: verifier log: invalid id attribute value \"2143+20\"\nwarning: verifier log: invalid id attribute value \"2143+20\"\nwarning: verifier log: invalid id attribute value \"2197+40\"\nwarning: verifier log: invalid id attribute value \"2197+40\"\nwarning: verifier log: invalid id attribute value \"2197+40\"\nwarning: verifier log: invalid id attribute value \"2215-525483785\"\nwarning: verifier log: invalid id attribute value \"2215-525483785\"\nwarning: verifier log: invalid id attribute value \"2265-525483785\"\nwarning: verifier log: invalid id attribute value \"2265-525483785\"\nwarning: verifier log: invalid id attribute value \"2381-525483785\"\nwarning: verifier log: invalid id attribute value \"2381-525483785\"\nwarning: verifier log: invalid id attribute value \"2415+40\"\nwarning: verifier log: invalid id attribute value \"2415+40\"\nwarning: verifier log: invalid id attribute value \"2415+40\"\nwarning: verifier log: invalid id attribute value \"2488-525483785\"\nwarning: verifier log: invalid id attribute value \"2488-525483785\"\nwarning: verifier log: invalid id attribute value \"2544-525483785\"\nwarning: verifier log: invalid id attribute value \"2544-525483785\"\nwarning: verifier log: invalid id attribute value \"2666-525483785\"\nwarning: verifier log: invalid id attribute value \"2666-525483785\"\nwarning: verifier log: invalid id attribute value \"2890-525483785\"\nwarning: verifier log: invalid id attribute value \"2890-525483785\"\nwarning: verifier log: invalid id attribute value \"3004-525483785\"\nwarning: verifier log: invalid id attribute value \"3004-525483785\"\nwarning: verifier log: invalid id attribute value \"3136-525483785\"\nwarning: verifier log: invalid id attribute value \"3136-525483785\"\nwarning: verifier log: invalid id attribute value \"3256-525483785\"\nwarning: verifier log: invalid id attribute value \"3256-525483785\"\nwarning: verifier log: invalid id attribute value \"3385-525483785\"\nwarning: verifier log: invalid id attribute value \"3385-525483785\"\nwarning: verifier log: invalid id attribute value \"3503-525483785\"\nwarning: verifier log: invalid id attribute value \"3503-525483785\"\nwarning: verifier log: invalid id attribute value \"3638-525483785\"\nwarning: verifier log: invalid id attribute value \"3638-525483785\"\nwarning: verifier log: invalid id attribute value \"3762-525483785\"\nwarning: verifier log: invalid id attribute value \"3762-525483785\"\nerror: fallthrough to BlockId(274) is not physically adjacent: current pc 1486, target pc 1526",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "OVERLAY_DIR=/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/map_inline/overlays/katran; CH=; RE=; SI=; for f in ${MAP_VALUES}/map-*.show.json; do n=$(jq -r .name \"$f\"); i=$(jq -r .id \"$f\"); case \"$n\" in ch_rings) CH=$i ;; reals) RE=$i ;; server_id_map) SI=$i ;; esac; done; jq -n --arg c \"$CH\" --arg r \"$RE\" --arg s \"$SI\" --slurpfile co \"$OVERLAY_DIR/ch_rings.json\" --slurpfile ro \"$OVERLAY_DIR/reals.json\" --slurpfile so \"$OVERLAY_DIR/server_id_map.json\" '($c | if . == \"\" then {} else {(.): $co[0]} end) + ($r | if . == \"\" then {} else {(.): $ro[0]} end) + ($s | if . == \"\" then {} else {(.): $so[0]} end)' > ${MAP_VALUES}/overlays.json && timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --inline-hint=ctl_array:!00000000 --inline-hint=vip_map:!0a6401010000000000000000000000001f900600 --inline-hint=ch_rings:!00000000 --inline-hint=reals:!01000000 --inline-hint=server_id_map:!00000000 # lpm_src_v4/v6 hints commented: katran is built without # -DLPM_SRC_LOOKUP, so these maps are guarded out of the program # by `#ifdef LPM_SRC_LOOKUP` in balancer_maps.h. bpfopt fail-fasts # on hint anchor not in metadata (correct: catches typos and # mis-applied hints early). Uncomment if a future build turns on # source-IP routing. # --inline-hint=lpm_src_v4:!00000000 # --inline-hint=lpm_src_v6:!00000000 # lru_mapping/global_lru_maps outer-only hints commented: katran # benchmark uses F_LRU_BYPASS + no `-forwarding_cores`, so the outer # ARRAY_OF_MAPS stays empty (every slot ENOENT). #265 root-caused this: # `attachLrus()` iterates empty forwardingCores_ \u2192 zero update_elem. # bpfopt fail-fasts when hinted outer key has no live inner map # (correct: hint claims something kernel snapshot disproves). # Uncomment only if benchmark configures forwarding cores OR an # alternative test deploys populated map-in-map. # --inline-hint=lru_mapping:!00000000 # --inline-hint=global_lru_maps:!00000000",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 530,
+        "program": {
+          "final_insn_count": 2542,
+          "orig_insn_count": 2542,
+          "prog_id": 530,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}

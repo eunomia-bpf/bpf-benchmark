@@ -50,6 +50,7 @@ const TEST_RUN_JSON: &str = "test_run.json";
 const TEST_OUTPUT_BIN: &str = "test_output.bin";
 const MAP_IDS_JSON: &str = "map-ids.json";
 const MAP_VALUES_DIR: &str = "map-values";
+const MAP_DUMP_ENTRY_LIMIT: u32 = 8192;
 const METADATA_JSON: &str = "metadata.json";
 const VERIFIER_LOG: &str = "verifier.log";
 const VERIFY_LOG: &str = "verify.log";
@@ -189,21 +190,7 @@ fn run(cli: Cli) -> Result<()> {
     let (_obj, prepared) = prepare_workdir(&workdir.path, &cli.obj, cli.katran_maps, dump_values)?;
 
     for prog in &prepared {
-        let mut canon = Command::new(BPFOPT_BIN);
-        canon
-            .arg("--canonicalize-map-refs")
-            .arg("--input")
-            .arg(prog.dir.join(CANONICALIZE_INPUT_BIN))
-            .arg("--output")
-            .arg(prog.dir.join(INPUT_BIN));
-        if !prog.map_ids.is_empty() {
-            canon.arg("--map-ids").arg(join_u32_csv(&prog.map_ids));
-        }
-        let status = canon.status()?;
-        if !status.success() {
-            bail!("canonicalize failed for {} ({status})", prog.dir.display());
-        }
-
+        canonicalize_program(prog, Path::new(BPFOPT_BIN))?;
         if let Some(pass) = cli.pass.as_deref() {
             run_pass_via_yaml(
                 &prog.dir,
@@ -217,6 +204,24 @@ fn run(cli: Cli) -> Result<()> {
                 run_bpftestrun(fd.as_raw_fd(), &prog.dir, &cli)?;
             }
         }
+    }
+    Ok(())
+}
+
+fn canonicalize_program(prog: &PreparedProgram, bpfopt: &Path) -> Result<()> {
+    let mut canon = Command::new(bpfopt);
+    canon
+        .arg("--canonicalize-map-refs")
+        .arg("--input")
+        .arg(prog.dir.join(CANONICALIZE_INPUT_BIN))
+        .arg("--output")
+        .arg(prog.dir.join(INPUT_BIN));
+    if !prog.map_ids.is_empty() {
+        canon.arg("--map-ids").arg(join_u32_csv(&prog.map_ids));
+    }
+    let status = canon.status()?;
+    if !status.success() {
+        bail!("canonicalize failed for {} ({status})", prog.dir.display());
     }
     Ok(())
 }
@@ -586,10 +591,31 @@ fn dump_map_snapshots(
             .find(|map| map.info.id == map_id)
             .map(|map| map.info.max_entries)
             .unwrap_or(0);
-        if dump_values && entries <= 8192 {
+        if dump_values && entries <= MAP_DUMP_ENTRY_LIMIT {
             bpftool_to(
                 &["map", "dump", "-j", "-p", "id", &id],
                 &dir.join(format!("map-{map_id}.dump.json")),
+            )?;
+        } else if dump_values {
+            let (size_bytes, limit_bytes) = loaded_maps
+                .iter()
+                .find(|map| map.info.id == map_id)
+                .map(|map| {
+                    let entry_size = u64::from(map.info.key_size) + u64::from(map.info.value_size);
+                    (
+                        u64::from(map.info.max_entries) * entry_size,
+                        u64::from(MAP_DUMP_ENTRY_LIMIT) * entry_size,
+                    )
+                })
+                .unwrap_or((u64::from(entries), u64::from(MAP_DUMP_ENTRY_LIMIT)));
+            write_json(
+                &dir.join(format!("map-{map_id}.dump.json")),
+                &serde_json::json!({
+                    "skipped": true,
+                    "reason": "size_limit",
+                    "size_bytes": size_bytes,
+                    "limit_bytes": limit_bytes,
+                }),
             )?;
         }
     }
@@ -662,6 +688,9 @@ fn populate_katran_maps(maps: &[MapRef]) -> Result<()> {
     map_update(map("ctl_array")?, &zero, &[0x02, 0, 0, 0, 0, 0x0b, 0, 0])?;
     map_update(map("vip_map")?, &vip, &[2, 0, 0, 0, 0, 0, 0, 0])?;
     map_update(map("reals")?, &one, &real_def)?;
+    if let Some(server_id_map) = maps.iter().find(|map| map.name == "server_id_map") {
+        map_update(server_id_map.fd, &zero, &zero)?;
+    }
     let rings = map("ch_rings")?;
     for ring_pos in 0..KATRAN_CH_RING_SIZE {
         map_update(rings, &ring_pos.to_ne_bytes(), &one)?;
@@ -766,11 +795,61 @@ fn neg_errno(ret: i32) -> io::Error {
 mod tests {
     use super::*;
 
+    // reals[1] currently trips map_inline CFG lowering after the fold; keep
+    // this test on the hardcoded Katran path that verifies end-to-end.
+    const KATRAN_INLINE_HINTS: [&str; 4] = [
+        "--inline-hint=ctl_array:!00000000",
+        "--inline-hint=vip_map:!0a6401010000000000000000000000001f900600",
+        "--inline-hint=ch_rings:!00000000",
+        "--inline-hint=server_id_map:!00000000",
+    ];
+    const KATRAN_OVERLAY_MAPS: [(&str, &str); 2] = [
+        ("ch_rings", "ch_rings.json"),
+        ("server_id_map", "server_id_map.json"),
+    ];
+
     /// End-to-end smoke test: for up to `SMOKE_OBJECTS` BPF objects under
     /// `corpus/build`, run `--pass noop` + verify. Skipped on non-root hosts.
     /// Must be invoked from the project root (cargo test chdirs the test to
     /// the crate dir, so we chdir back to project root first).
     const SMOKE_OBJECTS: usize = 200;
+
+    #[test]
+    fn katran_optimization_path() -> Result<()> {
+        if !is_root() {
+            eprintln!("skipping katran_optimization_path: not running as root");
+            return Ok(());
+        }
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let obj = root.join("bpfopt/testobject/katran_balancer.bpf.o");
+        let bpfopt = root.join(BPFOPT_BIN);
+        let overlay_dir = root.join("runner/config/passes/map_inline/overlays/katran");
+        let workdir = WorkDir::open(None)?;
+        let map_values_dir = workdir.path.join(MAP_VALUES_DIR);
+        let (_obj, prepared) = prepare_workdir(&workdir.path, &obj, true, true)?;
+        let cli = Cli {
+            obj: PathBuf::from("bpfopt/testobject/katran_balancer.bpf.o"),
+            pass: Some("map_inline".into()),
+            target: None,
+            workdir: None,
+            bpftestrun: true,
+            katran_maps: true,
+            repeat: 10_000,
+        };
+        for prog in &prepared {
+            let metadata = read_json::<ProgramMetadata>(&prog.dir.join(METADATA_JSON))?;
+            if metadata.name != "balancer_ingress" {
+                continue;
+            }
+            canonicalize_program(prog, &bpfopt)?;
+            write_katran_overlays(&map_values_dir, &overlay_dir)?;
+            run_katran_map_inline(prog, &map_values_dir, &bpfopt)?;
+            let fd = verify_workdir(&prog.dir, &prog.map_fds)?;
+            run_bpftestrun(fd.as_raw_fd(), &prog.dir, &cli)?;
+            return Ok(());
+        }
+        bail!("katran_balancer.bpf.o did not contain balancer_ingress")
+    }
 
     #[test]
     fn prepare_noop_verify_many_objects() -> Result<()> {
@@ -811,6 +890,78 @@ mod tests {
                 SMOKE_OBJECTS.min(objects.len()),
                 failures.join("\n")
             );
+        }
+        Ok(())
+    }
+
+    fn write_katran_overlays(map_values_dir: &Path, overlay_dir: &Path) -> Result<()> {
+        let mut overlays = serde_json::Map::new();
+        for (map_name, overlay_file) in KATRAN_OVERLAY_MAPS {
+            let map_id = katran_map_id(map_values_dir, map_name)?;
+            if !map_dump_was_skipped(map_values_dir, map_id)? {
+                continue;
+            }
+            let overlay: serde_json::Value = read_json(&overlay_dir.join(overlay_file))?;
+            overlays.insert(map_id.to_string(), overlay);
+        }
+        write_json(&map_values_dir.join("overlays.json"), &overlays)
+    }
+
+    fn map_dump_was_skipped(map_values_dir: &Path, map_id: u32) -> Result<bool> {
+        let dump: serde_json::Value =
+            read_json(&map_values_dir.join(format!("map-{map_id}.dump.json")))?;
+        Ok(dump.get("skipped").and_then(|value| value.as_bool()) == Some(true))
+    }
+
+    fn katran_map_id(map_values_dir: &Path, expected_name: &str) -> Result<u32> {
+        for entry in fs::read_dir(map_values_dir)? {
+            let path = entry?.path();
+            let Some(file_name) = path.file_name().and_then(|name| name.to_str()) else {
+                continue;
+            };
+            if !file_name.ends_with(".show.json") {
+                continue;
+            }
+            let show: serde_json::Value = read_json(&path)?;
+            if show.get("name").and_then(|name| name.as_str()) == Some(expected_name) {
+                return show
+                    .get("id")
+                    .and_then(|id| id.as_u64())
+                    .and_then(|id| u32::try_from(id).ok())
+                    .ok_or_else(|| anyhow!("{} has no u32 id", path.display()));
+            }
+        }
+        bail!("katran map {expected_name:?} missing from map snapshot")
+    }
+
+    fn run_katran_map_inline(
+        prog: &PreparedProgram,
+        map_values_dir: &Path,
+        bpfopt: &Path,
+    ) -> Result<()> {
+        let metadata = read_json::<ProgramMetadata>(&prog.dir.join(METADATA_JSON))?;
+        let status = Command::new(bpfopt)
+            .arg("--pass")
+            .arg("map_inline")
+            .arg("--input")
+            .arg(prog.dir.join(INPUT_BIN))
+            .arg("--output")
+            .arg(prog.dir.join(OUTPUT_BIN))
+            .arg("--report")
+            .arg(prog.dir.join(REPORT_JSON))
+            .arg("--prog-type")
+            .arg(metadata.prog_type.to_string())
+            .arg("--verifier-states")
+            .arg(prog.dir.join(VERIFIER_LOG))
+            .arg("--")
+            .arg("--map-values")
+            .arg(map_values_dir)
+            .arg("--map-ids")
+            .arg(join_u32_csv(&prog.map_ids))
+            .args(KATRAN_INLINE_HINTS)
+            .status()?;
+        if !status.success() {
+            bail!("hardcoded katran map_inline exited with {status}");
         }
         Ok(())
     }

@@ -62,7 +62,56 @@ static __always_inline int decode_lea_payload(u64 payload,
 	return 0;
 }
 
-static int instantiate_lea(u64 payload, struct bpf_insn *insn_buf, bool is64)
+static int instantiate_lea64(u64 payload, struct bpf_insn *insn_buf)
+{
+	u8 dst_reg, base_reg, index_reg, scale_log2;
+	bool has_base, has_index;
+	s32 disp;
+	int add_count;
+	int cnt = 0;
+	int err;
+
+	err = decode_lea_payload(payload, &dst_reg, &base_reg, &index_reg,
+				 &scale_log2, &has_base, &has_index, &disp);
+	if (err)
+		return err;
+
+	if (has_base && has_index && dst_reg == index_reg && dst_reg != base_reg) {
+		if (scale_log2)
+			insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, dst_reg, scale_log2);
+		insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, dst_reg, base_reg);
+	} else if (has_base) {
+		if (dst_reg != base_reg)
+			insn_buf[cnt++] = BPF_MOV64_REG(dst_reg, base_reg);
+		if (has_index) {
+			if (dst_reg == index_reg && scale_log2) {
+				insn_buf[cnt++] = BPF_ALU64_IMM(BPF_MUL, dst_reg,
+								(1 << scale_log2) + 1);
+			} else {
+				add_count = 1 << scale_log2;
+				while (add_count--)
+					insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, dst_reg,
+									index_reg);
+			}
+		}
+	} else if (has_index) {
+		if (dst_reg != index_reg)
+			insn_buf[cnt++] = BPF_MOV64_REG(dst_reg, index_reg);
+		if (scale_log2)
+			insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, dst_reg, scale_log2);
+	} else if (!has_base) {
+		insn_buf[cnt++] = BPF_MOV64_IMM(dst_reg, disp);
+	}
+
+	if (disp && (has_base || has_index))
+		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_ADD, dst_reg, disp);
+	if (!cnt)
+		insn_buf[cnt++] = BPF_MOV64_REG(dst_reg, dst_reg);
+
+	return cnt;
+}
+
+static int instantiate_lea32(u64 payload, struct bpf_insn *insn_buf)
 {
 	u8 dst_reg, base_reg, index_reg, scale_log2;
 	bool has_base, has_index;
@@ -77,51 +126,32 @@ static int instantiate_lea(u64 payload, struct bpf_insn *insn_buf, bool is64)
 		return err;
 
 	if (has_base && has_index && dst_reg == base_reg && dst_reg == index_reg) {
-		insn_buf[cnt++] = is64 ? BPF_ALU64_IMM(BPF_MUL, dst_reg, (1 << scale_log2) + 1) :
-					 BPF_ALU32_IMM(BPF_MUL, dst_reg, (1 << scale_log2) + 1);
+		insn_buf[cnt++] = BPF_ALU32_IMM(BPF_MUL, dst_reg, (1 << scale_log2) + 1);
 	} else if (has_base && (!has_index || dst_reg != index_reg)) {
 		if (dst_reg != base_reg)
-			insn_buf[cnt++] = is64 ? BPF_MOV64_REG(dst_reg, base_reg) :
-						 BPF_MOV32_REG(dst_reg, base_reg);
+			insn_buf[cnt++] = BPF_MOV32_REG(dst_reg, base_reg);
 		if (has_index) {
 			add_count = 1 << scale_log2;
 			while (add_count--)
-				insn_buf[cnt++] = is64 ? BPF_ALU64_REG(BPF_ADD, dst_reg, index_reg) :
-							 BPF_ALU32_REG(BPF_ADD, dst_reg, index_reg);
+				insn_buf[cnt++] = BPF_ALU32_REG(BPF_ADD, dst_reg, index_reg);
 		}
 	} else if (has_index) {
 		if (dst_reg != index_reg)
-			insn_buf[cnt++] = is64 ? BPF_MOV64_REG(dst_reg, index_reg) :
-						 BPF_MOV32_REG(dst_reg, index_reg);
+			insn_buf[cnt++] = BPF_MOV32_REG(dst_reg, index_reg);
 		if (scale_log2)
-			insn_buf[cnt++] = is64 ? BPF_ALU64_IMM(BPF_LSH, dst_reg, scale_log2) :
-						 BPF_ALU32_IMM(BPF_LSH, dst_reg, scale_log2);
+			insn_buf[cnt++] = BPF_ALU32_IMM(BPF_LSH, dst_reg, scale_log2);
 		if (has_base)
-			insn_buf[cnt++] = is64 ? BPF_ALU64_REG(BPF_ADD, dst_reg, base_reg) :
-						 BPF_ALU32_REG(BPF_ADD, dst_reg, base_reg);
+			insn_buf[cnt++] = BPF_ALU32_REG(BPF_ADD, dst_reg, base_reg);
 	} else if (!has_base) {
-		insn_buf[cnt++] = is64 ? BPF_MOV64_IMM(dst_reg, disp) :
-					 BPF_MOV32_IMM(dst_reg, disp);
+		insn_buf[cnt++] = BPF_MOV32_IMM(dst_reg, disp);
 	}
 
 	if (disp && (has_base || has_index))
-		insn_buf[cnt++] = is64 ? BPF_ALU64_IMM(BPF_ADD, dst_reg, disp) :
-					 BPF_ALU32_IMM(BPF_ADD, dst_reg, disp);
+		insn_buf[cnt++] = BPF_ALU32_IMM(BPF_ADD, dst_reg, disp);
 	if (!cnt)
-		insn_buf[cnt++] = is64 ? BPF_MOV64_REG(dst_reg, dst_reg) :
-					 BPF_MOV32_REG(dst_reg, dst_reg);
+		insn_buf[cnt++] = BPF_MOV32_REG(dst_reg, dst_reg);
 
 	return cnt;
-}
-
-static int instantiate_lea64(u64 payload, struct bpf_insn *insn_buf)
-{
-	return instantiate_lea(payload, insn_buf, true);
-}
-
-static int instantiate_lea32(u64 payload, struct bpf_insn *insn_buf)
-{
-	return instantiate_lea(payload, insn_buf, false);
 }
 
 static void emit_u8(u8 *buf, u32 *len, u8 byte)

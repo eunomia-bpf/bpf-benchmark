@@ -1,0 +1,1321 @@
+{
+  "app": "bpftrace/set",
+  "baseline": {
+    "bpf": {
+      "709": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 709,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 1705691,
+        "run_time_ns_delta": 184436797,
+        "type": "tracepoint"
+      },
+      "710": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 710,
+        "name": "tracepoint_sched_sched_wakeup_new",
+        "run_cnt_delta": 69537,
+        "run_time_ns_delta": 14030933,
+        "type": "tracepoint"
+      },
+      "711": {
+        "bytes_jited": 515,
+        "bytes_xlated": 896,
+        "id": 711,
+        "name": "sched_switch",
+        "run_cnt_delta": 2181988,
+        "run_time_ns_delta": 373526272,
+        "type": "tracepoint"
+      },
+      "717": {
+        "bytes_jited": 362,
+        "bytes_xlated": 680,
+        "id": 717,
+        "name": "1",
+        "run_cnt_delta": 12,
+        "run_time_ns_delta": 13853,
+        "type": "perf_event"
+      },
+      "718": {
+        "bytes_jited": 140,
+        "bytes_xlated": 224,
+        "id": 718,
+        "name": "vfs_create",
+        "run_cnt_delta": 9629153,
+        "run_time_ns_delta": 418143160,
+        "type": "kprobe"
+      },
+      "724": {
+        "bytes_jited": 769,
+        "bytes_xlated": 1360,
+        "id": 724,
+        "name": "cap_capable",
+        "run_cnt_delta": 5295798,
+        "run_time_ns_delta": 1026122809,
+        "type": "kprobe"
+      },
+      "732": {
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 732,
+        "name": "block_io_start",
+        "run_cnt_delta": 91894,
+        "run_time_ns_delta": 40114386,
+        "type": "tracepoint"
+      },
+      "733": {
+        "bytes_jited": 931,
+        "bytes_xlated": 1576,
+        "id": 733,
+        "name": "block_io_done",
+        "run_cnt_delta": 93616,
+        "run_time_ns_delta": 51709752,
+        "type": "tracepoint"
+      },
+      "738": {
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 738,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 308383,
+        "run_time_ns_delta": 134241714,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "4",
+          "--eventfd",
+          "4",
+          "--get",
+          "4",
+          "--prctl",
+          "4",
+          "--set",
+          "4",
+          "--dup",
+          "4",
+          "--kill",
+          "4",
+          "--sigfd",
+          "4",
+          "--signal",
+          "4",
+          "--pty",
+          "4",
+          "--itimer",
+          "4",
+          "--timerfd",
+          "4",
+          "--exec",
+          "4",
+          "--fork",
+          "4",
+          "--vfork",
+          "4",
+          "--clone",
+          "4",
+          "--ptrace",
+          "4",
+          "--futex",
+          "4",
+          "--sem",
+          "4",
+          "--aio",
+          "4",
+          "--aiol",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--io",
+          "4",
+          "--iomix",
+          "4",
+          "--iomix-bytes",
+          "128M",
+          "--io-uring",
+          "4",
+          "--sync-file",
+          "4",
+          "--epoll",
+          "4",
+          "--netdev",
+          "4",
+          "--sctp",
+          "4",
+          "--sock",
+          "4",
+          "--sockdiag",
+          "4",
+          "--sockfd",
+          "4",
+          "--sockpair",
+          "4",
+          "--sockmany",
+          "4",
+          "--udp",
+          "4",
+          "--udp-flood",
+          "4",
+          "--mmap",
+          "4",
+          "--mmap-bytes",
+          "16M",
+          "--mprotect",
+          "4",
+          "--mremap",
+          "4",
+          "--mremap-bytes",
+          "16M",
+          "--madvise",
+          "4",
+          "--access",
+          "4",
+          "--chdir",
+          "4",
+          "--chmod",
+          "4",
+          "--chown",
+          "4",
+          "--dentry",
+          "4",
+          "--dir",
+          "4",
+          "--dirmany",
+          "4",
+          "--fallocate",
+          "4",
+          "--fallocate-bytes",
+          "128M",
+          "--file-ioctl",
+          "4",
+          "--filename",
+          "4",
+          "--flock",
+          "4",
+          "--fpunch",
+          "4",
+          "--fpunch-bytes",
+          "32M",
+          "--fstat",
+          "4",
+          "--getdent",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--inotify",
+          "4",
+          "--open",
+          "4",
+          "--open-max",
+          "1024",
+          "--rename",
+          "4",
+          "--touch",
+          "4",
+          "--utime",
+          "4",
+          "--link",
+          "4",
+          "--symlink",
+          "4",
+          "--mknod",
+          "4",
+          "--fcntl",
+          "4",
+          "--epoll-port",
+          "21756",
+          "--sctp-port",
+          "21856",
+          "--sock-port",
+          "21956",
+          "--sockfd-port",
+          "22056",
+          "--timeout",
+          "10s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/nui9i"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "eventfd",
+            "get",
+            "prctl",
+            "set",
+            "dup",
+            "kill",
+            "sigfd",
+            "signal",
+            "pty",
+            "itimer",
+            "timerfd",
+            "exec",
+            "fork",
+            "vfork",
+            "clone",
+            "ptrace",
+            "futex",
+            "sem",
+            "aio",
+            "aiol",
+            "hdd",
+            "io",
+            "iomix",
+            "io-uring",
+            "sync-file",
+            "epoll",
+            "netdev",
+            "sctp",
+            "sock",
+            "sockdiag",
+            "sockfd",
+            "sockpair",
+            "sockmany",
+            "udp",
+            "udp-flood",
+            "mmap",
+            "mprotect",
+            "mremap",
+            "madvise",
+            "access",
+            "chdir",
+            "chmod",
+            "chown",
+            "dentry",
+            "dir",
+            "dirmany",
+            "fallocate",
+            "file-ioctl",
+            "filename",
+            "flock",
+            "fpunch",
+            "fstat",
+            "getdent",
+            "hdd",
+            "inotify",
+            "open",
+            "rename",
+            "touch",
+            "utime",
+            "link",
+            "symlink",
+            "mknod",
+            "fcntl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 12.156131001999938,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [24720] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [24720] setting to a 10 secs run per stressor\nstress-ng: info:  [24720] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd, 4 fork, 4 vfork, 4 clone, 4 ptrace, 4 futex, 4 sem, 4 aio, 4 aiol, 4 hdd, 4 io, 4 iomix, 4 io-uring, 4 sync-file, 4 epoll, 4 netdev, 4 sctp, 4 sock, 4 sockdiag, 4 sockfd, 4 sockpair, 4 sockmany, 4 udp, 4 udp-flood, 4 mmap, 4 mprotect, 4 mremap, 4 madvise, 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [24720] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [24916] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: info:  [25624] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [25316] dentry: 397702 dentries allocated\nstress-ng: metrc: [24720] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [24720]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [24720] cap              969643     10.07      0.24      1.34     96283.05      616299.04\nstress-ng: metrc: [24720] eventfd          247872     10.01      0.17      1.30     24753.83      168777.13\nstress-ng: metrc: [24720] get                1484     10.01      0.06      0.63       148.19        2148.59\nstress-ng: metrc: [24720] prctl              3309     10.12      0.56      0.55       327.09        2971.39\nstress-ng: metrc: [24720] set              101529     10.12      0.20      1.43     10028.86       62019.45\nstress-ng: metrc: [24720] dup                 357     10.02      0.11      0.12        35.62        1536.68\nstress-ng: metrc: [24720] kill              13543     10.12      0.01      1.61      1338.14        8386.01\nstress-ng: metrc: [24720] sigfd           3860246     10.21      0.46      2.80    378124.90     1182507.84\nstress-ng: metrc: [24720] signal                0     10.08      0.00      0.05         0.00           0.00\nstress-ng: metrc: [24720] pty                 119     10.16      0.09      1.70        11.72          66.50\nstress-ng: metrc: [24720] itimer              277     10.02      0.54      1.75        27.65         120.71\nstress-ng: metrc: [24720] timerfd          272384     10.19      0.02      1.91     26743.49      141254.27\nstress-ng: metrc: [24720] fork               3244     10.03      0.40      0.61       323.34        3203.87\nstress-ng: metrc: [24720] vfork             40336     10.05      0.32      0.47      4012.14       51001.29\nstress-ng: metrc: [24720] clone               630     10.12      0.31      1.37        62.28         374.34\nstress-ng: metrc: [24720] ptrace           204451     10.01      0.04      0.79     20431.38      247829.91\nstress-ng: metrc: [24720] futex            270542     20.13      0.39      2.33     13439.76       99446.24\nstress-ng: metrc: [24720] sem              164270     10.02      0.03      0.07     16395.15     1675403.88\nstress-ng: metrc: [24720] aio               13163     10.43      0.03      0.02      1261.94      305569.10\nstress-ng: metrc: [24720] aiol               4353     10.94      0.08      0.23       398.00       14012.19\nstress-ng: metrc: [24720] hdd               26624     10.52      0.24      0.44      2530.39       39059.60\nstress-ng: metrc: [24720] io                   31     10.71      0.01      0.05         2.89         540.19\nstress-ng: metrc: [24720] iomix              5259     11.29      0.15      2.78       465.81        1795.06\nstress-ng: metrc: [24720] io-uring          12288     10.95      0.00      0.59      1121.98       20863.15\nstress-ng: metrc: [24720] sync-file            74     10.56      0.01      0.08         7.01         760.48\nstress-ng: metrc: [24720] epoll               377     10.44      0.02      0.30        36.11        1210.51\nstress-ng: metrc: [24720] netdev           412090     10.06      0.30      1.13     40955.35      288874.39\nstress-ng: metrc: [24720] sctp              11090     10.00      0.04      0.01      1108.93      226896.09\nstress-ng: metrc: [24720] sock               2316     10.14      0.04      1.07       228.50        2075.26\nstress-ng: metrc: [24720] sockdiag       33183578     10.07      0.12      2.12   3296531.88    14827852.80\nstress-ng: metrc: [24720] sockfd           375547     10.27      0.06      1.03     36561.67      345560.63\nstress-ng: metrc: [24720] sockpair            435     10.13      0.02      0.05        42.95        7177.15\nstress-ng: metrc: [24720] sockmany          34316     10.14      0.04      0.96      3385.76       34169.04\nstress-ng: metrc: [24720] udp              188609     10.11      0.06      2.14     18661.39       85645.60\nstress-ng: metrc: [24720] udp-flood        914393     10.05      0.08      1.87     90973.16      467685.76\nstress-ng: metrc: [24720] mmap               1210     10.13      0.07      1.41       119.47         813.87\nstress-ng: metrc: [24720] mprotect        8146410     10.14      1.84      9.97    803700.75      689441.17\nstress-ng: metrc: [24720] mremap             2605     10.08      0.04      2.04       258.42        1253.60\nstress-ng: metrc: [24720] madvise             106     10.31      0.22      1.75        10.28          53.88\nstress-ng: metrc: [24720] access             6907     10.40      0.08      0.59       664.37       10380.55\nstress-ng: metrc: [24720] chdir                 4     10.63      0.02      0.98         0.38           3.99\nstress-ng: metrc: [24720] chmod               133     10.67      0.01      0.09        12.47        1412.50\nstress-ng: metrc: [24720] chown               124     10.39      0.00      0.04        11.93        3048.03\nstress-ng: metrc: [24720] dentry            12288     10.83      0.03      0.31      1134.39       36036.78\nstress-ng: metrc: [24720] dir               19789     10.97      0.10      2.52      1804.57        7545.61\nstress-ng: metrc: [24720] dirmany           17660     10.58      0.02      0.37      1669.40       45218.05\nstress-ng: metrc: [24720] fallocate             1     10.66      0.02      0.00         0.09          54.39\nstress-ng: metrc: [24720] file-ioctl        59515     10.36      0.07      0.70      5741.93       76982.78\nstress-ng: metrc: [24720] filename           3049     10.55      0.04      0.59       289.06        4795.99\nstress-ng: metrc: [24720] flock           1706014     10.62      0.43      0.45    160572.96     1929570.14\nstress-ng: metrc: [24720] fpunch              254     10.67      0.00      0.53        23.82         477.46\nstress-ng: metrc: [24720] fstat              4926     10.06      0.06      0.50       489.49        8906.31\nstress-ng: metrc: [24720] getdent          209784     10.15      0.11      1.24     20671.59      155512.25\nstress-ng: metrc: [24720] hdd               18323     10.56      0.19      0.26      1734.57       40327.59\nstress-ng: metrc: [24720] inotify              15     10.77      0.02      0.00         1.39         657.84\nstress-ng: metrc: [24720] open               4096     10.71      0.02      0.05       382.36       59893.55\nstress-ng: metrc: [24720] rename            36987     10.34      0.02      0.23      3577.36      145900.15\nstress-ng: metrc: [24720] touch             71171     10.61      0.03      1.59      6708.48       43928.02\nstress-ng: metrc: [24720] utime             25353     10.41      0.03      0.45      2436.43       52905.27\nstress-ng: metrc: [24720] link                  6     10.73      0.02      0.70         0.56           8.31\nstress-ng: metrc: [24720] symlink               4     10.91      0.06      1.13         0.37           3.36\nstress-ng: metrc: [24720] mknod                80     10.67      0.01      0.00         7.50        8532.42\nstress-ng: metrc: [24720] fcntl             13744     10.62      0.02      0.19      1294.50       67678.10\nstress-ng: info:  [24720] skipped: 4: exec (4)\nstress-ng: info:  [24720] passed: 252: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [24720] failed: 0\nstress-ng: info:  [24720] metrics untrustworthy: 0\nstress-ng: info:  [24720] successful run completed in 12.14 secs",
+        "workload_name": "stress_ng_os_io_network"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "709": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 709,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 1756914,
+        "run_time_ns_delta": 176623104,
+        "type": "tracepoint"
+      },
+      "710": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 710,
+        "name": "tracepoint_sched_sched_wakeup_new",
+        "run_cnt_delta": 85043,
+        "run_time_ns_delta": 16027929,
+        "type": "tracepoint"
+      },
+      "711": {
+        "bytes_jited": 515,
+        "bytes_xlated": 896,
+        "id": 711,
+        "name": "sched_switch",
+        "run_cnt_delta": 2171445,
+        "run_time_ns_delta": 346183995,
+        "type": "tracepoint"
+      },
+      "717": {
+        "bytes_jited": 362,
+        "bytes_xlated": 680,
+        "id": 717,
+        "name": "1",
+        "run_cnt_delta": 11,
+        "run_time_ns_delta": 12516,
+        "type": "perf_event"
+      },
+      "718": {
+        "bytes_jited": 140,
+        "bytes_xlated": 224,
+        "id": 718,
+        "name": "vfs_create",
+        "run_cnt_delta": 8932088,
+        "run_time_ns_delta": 376629577,
+        "type": "kprobe"
+      },
+      "724": {
+        "bytes_jited": 769,
+        "bytes_xlated": 1360,
+        "id": 724,
+        "name": "cap_capable",
+        "run_cnt_delta": 5115800,
+        "run_time_ns_delta": 662883137,
+        "type": "kprobe"
+      },
+      "732": {
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 732,
+        "name": "block_io_start",
+        "run_cnt_delta": 107796,
+        "run_time_ns_delta": 54167297,
+        "type": "tracepoint"
+      },
+      "733": {
+        "bytes_jited": 931,
+        "bytes_xlated": 1576,
+        "id": 733,
+        "name": "block_io_done",
+        "run_cnt_delta": 109675,
+        "run_time_ns_delta": 74942341,
+        "type": "tracepoint"
+      },
+      "738": {
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 738,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 204095,
+        "run_time_ns_delta": 77273379,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "4",
+          "--eventfd",
+          "4",
+          "--get",
+          "4",
+          "--prctl",
+          "4",
+          "--set",
+          "4",
+          "--dup",
+          "4",
+          "--kill",
+          "4",
+          "--sigfd",
+          "4",
+          "--signal",
+          "4",
+          "--pty",
+          "4",
+          "--itimer",
+          "4",
+          "--timerfd",
+          "4",
+          "--exec",
+          "4",
+          "--fork",
+          "4",
+          "--vfork",
+          "4",
+          "--clone",
+          "4",
+          "--ptrace",
+          "4",
+          "--futex",
+          "4",
+          "--sem",
+          "4",
+          "--aio",
+          "4",
+          "--aiol",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--io",
+          "4",
+          "--iomix",
+          "4",
+          "--iomix-bytes",
+          "128M",
+          "--io-uring",
+          "4",
+          "--sync-file",
+          "4",
+          "--epoll",
+          "4",
+          "--netdev",
+          "4",
+          "--sctp",
+          "4",
+          "--sock",
+          "4",
+          "--sockdiag",
+          "4",
+          "--sockfd",
+          "4",
+          "--sockpair",
+          "4",
+          "--sockmany",
+          "4",
+          "--udp",
+          "4",
+          "--udp-flood",
+          "4",
+          "--mmap",
+          "4",
+          "--mmap-bytes",
+          "16M",
+          "--mprotect",
+          "4",
+          "--mremap",
+          "4",
+          "--mremap-bytes",
+          "16M",
+          "--madvise",
+          "4",
+          "--access",
+          "4",
+          "--chdir",
+          "4",
+          "--chmod",
+          "4",
+          "--chown",
+          "4",
+          "--dentry",
+          "4",
+          "--dir",
+          "4",
+          "--dirmany",
+          "4",
+          "--fallocate",
+          "4",
+          "--fallocate-bytes",
+          "128M",
+          "--file-ioctl",
+          "4",
+          "--filename",
+          "4",
+          "--flock",
+          "4",
+          "--fpunch",
+          "4",
+          "--fpunch-bytes",
+          "32M",
+          "--fstat",
+          "4",
+          "--getdent",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--inotify",
+          "4",
+          "--open",
+          "4",
+          "--open-max",
+          "1024",
+          "--rename",
+          "4",
+          "--touch",
+          "4",
+          "--utime",
+          "4",
+          "--link",
+          "4",
+          "--symlink",
+          "4",
+          "--mknod",
+          "4",
+          "--fcntl",
+          "4",
+          "--epoll-port",
+          "21756",
+          "--sctp-port",
+          "21856",
+          "--sock-port",
+          "21956",
+          "--sockfd-port",
+          "22056",
+          "--timeout",
+          "10s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/nui9i"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "eventfd",
+            "get",
+            "prctl",
+            "set",
+            "dup",
+            "kill",
+            "sigfd",
+            "signal",
+            "pty",
+            "itimer",
+            "timerfd",
+            "exec",
+            "fork",
+            "vfork",
+            "clone",
+            "ptrace",
+            "futex",
+            "sem",
+            "aio",
+            "aiol",
+            "hdd",
+            "io",
+            "iomix",
+            "io-uring",
+            "sync-file",
+            "epoll",
+            "netdev",
+            "sctp",
+            "sock",
+            "sockdiag",
+            "sockfd",
+            "sockpair",
+            "sockmany",
+            "udp",
+            "udp-flood",
+            "mmap",
+            "mprotect",
+            "mremap",
+            "madvise",
+            "access",
+            "chdir",
+            "chmod",
+            "chown",
+            "dentry",
+            "dir",
+            "dirmany",
+            "fallocate",
+            "file-ioctl",
+            "filename",
+            "flock",
+            "fpunch",
+            "fstat",
+            "getdent",
+            "hdd",
+            "inotify",
+            "open",
+            "rename",
+            "touch",
+            "utime",
+            "link",
+            "symlink",
+            "mknod",
+            "fcntl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 11.286461527000029,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [32318] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [32318] setting to a 10 secs run per stressor\nstress-ng: info:  [32318] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd, 4 fork, 4 vfork, 4 clone, 4 ptrace, 4 futex, 4 sem, 4 aio, 4 aiol, 4 hdd, 4 io, 4 iomix, 4 io-uring, 4 sync-file, 4 epoll, 4 netdev, 4 sctp, 4 sock, 4 sockdiag, 4 sockfd, 4 sockpair, 4 sockmany, 4 udp, 4 udp-flood, 4 mmap, 4 mprotect, 4 mremap, 4 madvise, 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [32318] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [514] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: info:  [5227] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [1335] chdir: removing 8192 directories\nstress-ng: info:  [1349] dentry: 87176 dentries allocated\nstress-ng: metrc: [32318] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [32318]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [32318] cap             1349766     10.03      0.39      1.63    134513.41      668177.17\nstress-ng: metrc: [32318] eventfd          216398     10.01      0.14      1.13     21619.16      170055.63\nstress-ng: metrc: [32318] get                2119     10.02      0.03      0.88       211.49        2317.62\nstress-ng: metrc: [32318] prctl              3587     10.03      0.62      0.52       357.53        3151.89\nstress-ng: metrc: [32318] set               80077     10.11      0.14      1.15      7921.26       62308.49\nstress-ng: metrc: [32318] dup                 510     10.09      0.15      0.10        50.55        1970.95\nstress-ng: metrc: [32318] kill              15024     10.12      0.03      1.73      1484.71        8522.78\nstress-ng: metrc: [32318] sigfd           3378848     10.27      0.42      2.23    328854.98     1275849.67\nstress-ng: metrc: [32318] signal                0     10.07      0.00      0.00         0.00           0.00\nstress-ng: metrc: [32318] pty                 168     10.10      0.08      2.09        16.63          77.28\nstress-ng: metrc: [32318] itimer              214     10.09      0.38      1.41        21.22         119.26\nstress-ng: metrc: [32318] timerfd          340992     10.18      0.05      2.35     33484.00      142136.03\nstress-ng: metrc: [32318] fork               3704     10.02      0.44      0.62       369.69        3509.51\nstress-ng: metrc: [32318] vfork             44454     10.03      0.40      0.49      4434.01       49651.13\nstress-ng: metrc: [32318] clone               851     10.25      0.45      1.72        83.00         393.14\nstress-ng: metrc: [32318] ptrace           184043     10.00      0.08      0.62     18399.79      262996.34\nstress-ng: metrc: [32318] futex            286606     20.20      0.31      2.86     14191.46       90532.39\nstress-ng: metrc: [32318] sem              275934     10.13      0.02      0.04     27251.52     4672570.87\nstress-ng: metrc: [32318] aio               22887     10.43      0.01      0.05      2193.30      380967.44\nstress-ng: metrc: [32318] aiol               5020     10.41      0.07      0.28       482.30       14614.61\nstress-ng: metrc: [32318] hdd               32768     10.28      0.42      0.36      3187.82       42407.64\nstress-ng: metrc: [32318] io                   91     10.89      0.02      0.02         8.35        2219.13\nstress-ng: metrc: [32318] iomix              5214     10.94      0.26      2.76       476.75        1730.67\nstress-ng: metrc: [32318] io-uring          16348     10.84      0.01      0.89      1507.44       18190.76\nstress-ng: metrc: [32318] sync-file           113     10.24      0.05      0.10        11.03         758.82\nstress-ng: metrc: [32318] epoll             18518     10.18      0.07      0.70      1818.90       24244.57\nstress-ng: metrc: [32318] netdev           809088     10.03      0.38      2.23     80652.02      310032.46\nstress-ng: metrc: [32318] sctp             188504     10.09      0.10      0.96     18675.86      178945.79\nstress-ng: metrc: [32318] sock               2096     10.05      0.05      1.00       208.46        1989.29\nstress-ng: metrc: [32318] sockdiag       31768055     10.10      0.15      2.02   3146874.38    14632765.12\nstress-ng: metrc: [32318] sockfd           359991     10.10      0.06      0.98     35651.19      347173.02\nstress-ng: metrc: [32318] sockpair            499     10.20      0.05      0.02        48.90        7186.78\nstress-ng: metrc: [32318] sockmany          22805     10.25      0.03      0.69      2224.65       31488.57\nstress-ng: metrc: [32318] udp              118860     10.14      0.03      1.71     11726.90       68104.82\nstress-ng: metrc: [32318] udp-flood       1111744     10.04      0.13      2.20    110747.27      476461.58\nstress-ng: metrc: [32318] mmap               1559     10.10      0.05      1.71       154.37         885.81\nstress-ng: metrc: [32318] mprotect        9881179     10.25      2.36     11.99    964325.91      688919.58\nstress-ng: metrc: [32318] mremap             2517     10.12      0.04      1.96       248.69        1261.64\nstress-ng: metrc: [32318] madvise             107     10.03      0.16      1.85        10.67          53.04\nstress-ng: metrc: [32318] access             8082     10.37      0.06      0.71       779.40       10520.79\nstress-ng: metrc: [32318] chdir                 4     10.74      0.00      0.85         0.37           4.73\nstress-ng: metrc: [32318] chmod               134     10.45      0.00      0.15        12.82         891.14\nstress-ng: metrc: [32318] chown               293     10.56      0.01      0.00        27.75       27051.98\nstress-ng: metrc: [32318] dentry             8192     10.52      0.00      0.24       778.81       34038.88\nstress-ng: metrc: [32318] dir               23273     10.70      0.12      1.67      2175.92       13007.26\nstress-ng: metrc: [32318] dirmany           14332     10.26      0.00      0.32      1396.64       45031.94\nstress-ng: metrc: [32318] fallocate             5     10.42      0.02      0.01         0.48         170.14\nstress-ng: metrc: [32318] file-ioctl        55089     10.35      0.03      0.66      5322.70       79698.10\nstress-ng: metrc: [32318] filename           3312     10.26      0.05      0.65       322.82        4683.42\nstress-ng: metrc: [32318] flock           1195091     10.19      0.16      0.45    117269.17     1941368.63\nstress-ng: metrc: [32318] fpunch              312     10.30      0.03      0.82        30.30         366.17\nstress-ng: metrc: [32318] fstat              7462     10.06      0.13      0.69       741.74        9166.07\nstress-ng: metrc: [32318] getdent          524588     10.02      0.37      1.69     52345.24      253997.55\nstress-ng: metrc: [32318] hdd               20063     10.20      0.23      0.25      1966.01       42115.80\nstress-ng: metrc: [32318] inotify              16     10.19      0.02      0.01         1.57         585.37\nstress-ng: metrc: [32318] open              11684     10.20      0.03      0.15      1145.23       67594.23\nstress-ng: metrc: [32318] rename            54151     10.13      0.04      0.33      5347.72      144590.06\nstress-ng: metrc: [32318] touch             81057     10.18      0.07      1.79      7964.22       43603.98\nstress-ng: metrc: [32318] utime             36444     10.13      0.02      0.67      3599.34       53190.50\nstress-ng: metrc: [32318] link                  4     10.23      0.03      0.55         0.39           6.80\nstress-ng: metrc: [32318] symlink               4     10.31      0.03      0.88         0.39           4.41\nstress-ng: metrc: [32318] mknod                25     10.18      0.00      0.00         2.46        5404.24\nstress-ng: metrc: [32318] fcntl             15829     10.17      0.06      0.18      1556.40       67102.17\nstress-ng: info:  [32318] skipped: 4: exec (4)\nstress-ng: info:  [32318] passed: 252: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (4) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [32318] failed: 0\nstress-ng: info:  [32318] metrics untrustworthy: 0\nstress-ng: info:  [32318] successful run completed in 11.27 secs",
+        "workload_name": "stress_ng_os_io_network"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "709": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 2,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 4,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): timeout 6000 bpfopt --pass map_inline --input /var/tmp/bpfrejit-runtime/nui9i/bpfrejit-daemon-plan-1685-533/output_step0.bin --output /var/tmp/bpfrejit-runtime/nui9i/bpfrejit-daemon-plan-1685-533/output_step1.bin --report /var/tmp/bpfrejit-runtime/nui9i/bpfrejit-daemon-plan-1685-533/report_step1.json --prog-type tracepoint --verifier-states /var/tmp/bpfrejit-runtime/nui9i/bpfrejit-daemon-plan-1685-533/verifier_log_step0.log --target /var/tmp/bpfrejit-runtime/nui9i/bpfrejit-daemon-plan-1685-533/target.json -- --map-values /var/tmp/bpfrejit-runtime/nui9i/bpfrejit-daemon-plan-1685-533/map-values --map-ids 3965\nsubprocess output:\nerror: invalid value bytes for map 3965: bpftool map dump returned lookup error: No such file or directory",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 709,
+        "program": {
+          "final_insn_count": 17,
+          "orig_insn_count": 17,
+          "prog_id": 709,
+          "prog_name": "sched_wakeup",
+          "prog_type": 5
+        },
+        "status": "error"
+      },
+      "710": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 2,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 710,
+        "program": {
+          "final_insn_count": 17,
+          "orig_insn_count": 17,
+          "prog_id": 710,
+          "prog_name": "sched_wakeup_ne",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "711": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 106,
+              "insn_count_before": 106,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 2,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=29: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3965",
+                "site at PC=80: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3966"
+              ],
+              "insn_count_after": 106,
+              "insn_count_before": 106,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 2,
+              "sites_skipped": 2,
+              "skip_reasons": {
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3965": 1,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3966": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 29,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3965"
+                },
+                {
+                  "pc": 80,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3966"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 711,
+        "program": {
+          "final_insn_count": 106,
+          "orig_insn_count": 106,
+          "prog_id": 711,
+          "prog_name": "sched_switch",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "717": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 3,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=17: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=17: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(1), idx: 4 } has no verifier state for r2",
+                "site at PC=40: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=40: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(5), idx: 5 } has no verifier state for r2",
+                "site at PC=61: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=61: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(9), idx: 4 } has no verifier state for r2"
+              ],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 3,
+              "sites_skipped": 3,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 3
+              },
+              "skipped_sites": [
+                {
+                  "pc": 17,
+                  "reason": "lookup key is not available from verifier-guided state"
+                },
+                {
+                  "pc": 40,
+                  "reason": "lookup key is not available from verifier-guided state"
+                },
+                {
+                  "pc": 61,
+                  "reason": "lookup key is not available from verifier-guided state"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 717,
+        "program": {
+          "final_insn_count": 67,
+          "orig_insn_count": 67,
+          "prog_id": 717,
+          "prog_name": "1",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "718": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 2,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=6: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3970"
+              ],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3970": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 6,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3970"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 1,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 718,
+        "program": {
+          "final_insn_count": 24,
+          "orig_insn_count": 24,
+          "prog_id": 718,
+          "prog_name": "vfs_create",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "724": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 2,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=19: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=19: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(1), idx: 4 } has no verifier state for r2",
+                "site at PC=52: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=52: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(3), idx: 28 } has no verifier state for r2",
+                "site at PC=150: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=150: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(7), idx: 4 } has no verifier state for r2"
+              ],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 3,
+              "sites_skipped": 3,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 3
+              },
+              "skipped_sites": [
+                {
+                  "pc": 19,
+                  "reason": "lookup key is not available from verifier-guided state"
+                },
+                {
+                  "pc": 52,
+                  "reason": "lookup key is not available from verifier-guided state"
+                },
+                {
+                  "pc": 150,
+                  "reason": "lookup key is not available from verifier-guided state"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 724,
+        "program": {
+          "final_insn_count": 156,
+          "orig_insn_count": 156,
+          "prog_id": 724,
+          "prog_name": "cap_capable",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "732": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 2,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "maps_skipped_by_size=3"
+              ],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 732,
+        "program": {
+          "final_insn_count": 51,
+          "orig_insn_count": 51,
+          "prog_id": 732,
+          "prog_name": "block_io_start",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "733": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 181,
+              "insn_count_before": 181,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 2,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "maps_skipped_by_size=3",
+                "site at PC=9: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3981",
+                "site at PC=31: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=31: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(3), idx: 15 } has no verifier state for r2",
+                "site at PC=50: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3979",
+                "site at PC=114: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3980",
+                "site at PC=128: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3981",
+                "site at PC=149: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=149: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(13), idx: 4 } has no verifier state for r2"
+              ],
+              "insn_count_after": 181,
+              "insn_count_before": 181,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 6,
+              "sites_skipped": 6,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 2,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3979": 1,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3980": 1,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3981": 2
+              },
+              "skipped_sites": [
+                {
+                  "pc": 9,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3981"
+                },
+                {
+                  "pc": 31,
+                  "reason": "lookup key is not available from verifier-guided state"
+                },
+                {
+                  "pc": 50,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3979"
+                },
+                {
+                  "pc": 114,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3980"
+                },
+                {
+                  "pc": 128,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3981"
+                },
+                {
+                  "pc": 149,
+                  "reason": "lookup key is not available from verifier-guided state"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 733,
+        "program": {
+          "final_insn_count": 181,
+          "orig_insn_count": 181,
+          "prog_id": 733,
+          "prog_name": "block_io_done",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "738": {
+        "passes": [
+          {
+            "bpfopt_ms": 3,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 4,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 6,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "maps_skipped_by_size=2",
+                "site at PC=19: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3985",
+                "site at PC=75: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3985",
+                "site at PC=87: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3985",
+                "site at PC=114: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3987",
+                "site at PC=122: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3986",
+                "site at PC=337: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=337: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(27), idx: 4 } has no verifier state for r2",
+                "site at PC=377: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=377: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(31), idx: 5 } has no verifier state for r2"
+              ],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 7,
+              "sites_skipped": 7,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 2,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3985": 3,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3986": 1,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3987": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 19,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3985"
+                },
+                {
+                  "pc": 75,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3985"
+                },
+                {
+                  "pc": 87,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3985"
+                },
+                {
+                  "pc": 114,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3987"
+                },
+                {
+                  "pc": 122,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=3986"
+                },
+                {
+                  "pc": 337,
+                  "reason": "lookup key is not available from verifier-guided state"
+                },
+                {
+                  "pc": 377,
+                  "reason": "lookup key is not available from verifier-guided state"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 1,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 738,
+        "program": {
+          "final_insn_count": 401,
+          "orig_insn_count": 401,
+          "prog_id": 738,
+          "prog_name": "tcp_set_state",
+          "prog_type": 2
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bpftrace_set",
+  "selected_workload": "stress_ng_os_io_network",
+  "status": "ok"
+}

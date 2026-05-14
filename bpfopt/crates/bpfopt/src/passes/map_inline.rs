@@ -1730,11 +1730,11 @@ fn cleanup_map_inline_bbprogram(prog: &mut ProgramCFG) -> anyhow::Result<()> {
     let ordered_blocks = prog.block_ids().collect::<Vec<_>>();
     let mut nops = Vec::new();
     for block in prog.blocks() {
-        if let Terminator::Jump { insn, target } = prog.terminator(block.id)? {
+        if let Terminator::Jump { target, .. } = prog.terminator(block.id)? {
             let linear_target = ordered_blocks
                 .windows(2)
                 .any(|window| window[0] == block.id && window[1] == target);
-            if insn == BpfInsn::nop() || linear_target {
+            if linear_target {
                 nops.push((block.id, target));
             }
         }
