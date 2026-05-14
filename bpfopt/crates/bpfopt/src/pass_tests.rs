@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-use crate::analysis::{BlockId, DefSite};
+use crate::analysis::{BlockId, DefSite, InsnSite, ProgramCFG};
 use crate::insn::*;
 use crate::pass::*;
 use crate::test_helpers::*;
@@ -20,11 +20,17 @@ fn verifier_states_invalidated_after_program_mutation() {
     )]);
     let mut prog = lift_test_program(&input, &ctx);
 
-    assert_eq!(
-        prog.verifier_states_by_site()
-            .expect("verifier states should be lifted")
-            .len(),
-        1
+    let any_states_attached = |prog: &ProgramCFG| {
+        prog.block_ids().any(|block| {
+            prog.sites_in_block_with_terminator(block)
+                .expect("sites")
+                .iter()
+                .any(|&site| prog.verifier_states_at(site).is_some())
+        })
+    };
+    assert!(
+        any_states_attached(&prog),
+        "verifier states should be lifted onto at least one site"
     );
 
     prog.delete_insn(DefSite {
@@ -35,8 +41,7 @@ fn verifier_states_invalidated_after_program_mutation() {
     .expect("delete should invalidate verifier states");
 
     assert!(
-        prog.verifier_states_by_site()
-            .is_none_or(|states| states.is_empty()),
+        !any_states_attached(&prog),
         "ProgramCFG mutation must clear stale verifier states"
     );
 }

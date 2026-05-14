@@ -362,6 +362,7 @@ impl ProgramCFG {
                 terminator: tail_terminator,
                 terminator_branch_profile: None,
                 terminator_btf_pc: None,
+                terminator_verifier_states: None,
                 frame,
                 predecessors: Vec::new(),
             },

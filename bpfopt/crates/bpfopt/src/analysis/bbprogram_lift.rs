@@ -28,12 +28,8 @@ pub(crate) fn lift_with_kinsn_registry(
     kinsn_reg: Arc<KinsnRegistry>,
 ) -> anyhow::Result<ProgramCFG> {
     if insns.is_empty() {
-        return ProgramCFG::new(
-            Vec::new(),
-            BlockId(0),
-            lift_verifier_states_by_site(verifier_states, &BTreeMap::new())?,
-            kinsn_reg,
-        );
+        let _ = lift_verifier_states_by_site(verifier_states, &BTreeMap::new())?;
+        return ProgramCFG::new(Vec::new(), BlockId(0), kinsn_reg);
     }
 
     let boundaries = instruction_boundaries(insns)?;
@@ -63,6 +59,7 @@ pub(crate) fn lift_with_kinsn_registry(
             terminator: Terminator::End,
             terminator_branch_profile: None,
             terminator_btf_pc: None,
+            terminator_verifier_states: None,
             frame,
             predecessors: Vec::new(),
         };
@@ -114,9 +111,30 @@ pub(crate) fn lift_with_kinsn_registry(
     }
 
     let btf = btf_from_blocks(&blocks);
-    let verifier_states = lift_verifier_states_by_site(verifier_states, &btf)?;
+    if let Some(states_by_site) = lift_verifier_states_by_site(verifier_states, &btf)? {
+        distribute_verifier_states(&mut blocks, states_by_site);
+    }
 
-    ProgramCFG::new(blocks, BlockId(0), verifier_states, kinsn_reg)
+    ProgramCFG::new(blocks, BlockId(0), kinsn_reg)
+}
+
+fn distribute_verifier_states(blocks: &mut [BasicBlock], mut states_by_site: VerifierStatesBySite) {
+    for block in blocks.iter_mut() {
+        for (idx, node) in block.insns.iter_mut().enumerate() {
+            if let Some(states) = states_by_site.remove(&InsnSite {
+                block: block.id,
+                idx,
+            }) {
+                node.verifier_states = Some(states);
+            }
+        }
+        if let Some(states) = states_by_site.remove(&InsnSite {
+            block: block.id,
+            idx: block.insns.len(),
+        }) {
+            block.terminator_verifier_states = Some(states);
+        }
+    }
 }
 
 fn btf_from_blocks(blocks: &[BasicBlock]) -> BtfMetadataMap {

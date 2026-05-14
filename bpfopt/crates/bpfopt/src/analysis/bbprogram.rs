@@ -4,13 +4,13 @@ use crate::analysis::bbprogram_btf::BtfRecordKind;
 #[cfg(test)]
 use crate::analysis::bbprogram_btf::{remap_btf_records_view, BtfRemapView};
 use crate::analysis::bbprogram_lower::remap_btf_records_for_lowering;
-use crate::analysis::verifier_facts;
-use crate::analysis::VerifierStatesBySite;
 use crate::analysis::{DefSite, UseDefGraph};
 use crate::insn::{
     bpf_class, insn_width, BpfInsn, MapPseudo, BPF_LDX, BPF_REG_10, BPF_ST, BPF_STX,
 };
 use crate::pass::{BranchProfile, BtfInfoRecords, KinsnRegistry, RegKind, RegSet};
+use crate::verifier_log as verifier_facts;
+use crate::verifier_log::VerifierInsn;
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::sync::{Arc, Mutex};
 pub(crate) type BtfMetadataMap = BTreeMap<InsnSite, usize>;
@@ -69,7 +69,6 @@ pub struct ProgramCFG {
     pub(super) blocks: Vec<BasicBlock>,
     pub(crate) entry: BlockId,
     pub(super) use_def: UseDefGraph,
-    pub(super) verifier_states: Option<VerifierStatesBySite>,
     pub(super) kinsn_reg: Arc<KinsnRegistry>,
     pub(crate) map_bindings: Vec<MapBinding>,
     pub(crate) func_info: Option<BtfInfoRecords>,
@@ -85,7 +84,6 @@ impl Clone for ProgramCFG {
             blocks: self.blocks.clone(),
             entry: self.entry,
             use_def: self.use_def.clone(),
-            verifier_states: self.verifier_states.clone(),
             kinsn_reg: Arc::clone(&self.kinsn_reg),
             map_bindings: self.map_bindings.clone(),
             func_info: self.func_info.clone(),
@@ -108,6 +106,9 @@ pub struct InsnNode {
     pub(super) pc_relative_ldimm64_target: Option<BlockId>,
     /// Original BTF / PC index in the lifted bytecode.
     pub(super) btf_pc: Option<usize>,
+    /// Verifier states (all visits) observed at this instruction site by the
+    /// kernel verifier. `None` when no verifier log was attached.
+    pub(super) verifier_states: Option<Arc<[VerifierInsn]>>,
 }
 
 impl InsnNode {
@@ -118,6 +119,7 @@ impl InsnNode {
             ldimm64_second: None,
             pc_relative_ldimm64_target: None,
             btf_pc: None,
+            verifier_states: None,
         }
     }
 }
@@ -155,6 +157,8 @@ pub struct BasicBlock {
     pub(super) terminator_branch_profile: Option<BranchProfile>,
     /// Original PC of this block's terminator (if any).
     pub(super) terminator_btf_pc: Option<usize>,
+    /// Verifier states observed at this block's terminator (all visits).
+    pub(super) terminator_verifier_states: Option<Arc<[VerifierInsn]>>,
     pub frame: FrameId,
     pub(super) predecessors: Vec<BlockId>,
 }
@@ -223,14 +227,12 @@ impl ProgramCFG {
     pub(crate) fn new(
         blocks: Vec<BasicBlock>,
         entry: BlockId,
-        verifier_states: Option<VerifierStatesBySite>,
         kinsn_reg: Arc<KinsnRegistry>,
     ) -> anyhow::Result<Self> {
         let mut prog = Self {
             blocks,
             entry,
             use_def: UseDefGraph::default(),
-            verifier_states,
             kinsn_reg,
             map_bindings: Vec::new(),
             func_info: None,
@@ -396,9 +398,15 @@ impl ProgramCFG {
             .find(|binding| binding.old_fd == imm)
             .map(|binding| binding.map_id)
     }
-    #[cfg(test)]
-    pub(crate) fn verifier_states_by_site(&self) -> Option<&VerifierStatesBySite> {
-        self.verifier_states.as_ref()
+    pub(crate) fn verifier_states_at(&self, site: InsnSite) -> Option<&[VerifierInsn]> {
+        let block = self.blocks.get(site.block.0)?;
+        if site.idx < block.insns.len() {
+            block.insns[site.idx].verifier_states.as_deref()
+        } else if site.idx == block.insns.len() {
+            block.terminator_verifier_states.as_deref()
+        } else {
+            None
+        }
     }
     pub fn reg_known_constant(&self, site: InsnSite, reg: u8, is_32: bool) -> Option<i64> {
         if !self.verifier_post_state_reaches_site_once(site) {
@@ -412,10 +420,10 @@ impl ProgramCFG {
         {
             return None;
         }
-        verifier_facts::reg_known_constant(self.verifier_states.as_ref(), site, reg, is_32)
+        verifier_facts::reg_known_constant(self.verifier_states_at(site), reg, is_32)
     }
     pub fn reg_kind(&self, site: InsnSite, reg: u8) -> Option<RegKind> {
-        verifier_facts::reg_kind(self.verifier_states.as_ref(), site, reg)
+        verifier_facts::reg_kind(self.verifier_states_at(site), reg)
     }
     /// Returns the known constant bytes at the stack region the register
     /// points to, if the verifier proved them. Width is `key_width` bytes.
@@ -425,10 +433,10 @@ impl ProgramCFG {
         reg: u8,
         key_width: usize,
     ) -> Option<Vec<u8>> {
-        verifier_facts::reg_known_stack_bytes(self.verifier_states.as_ref(), site, reg, key_width)
+        verifier_facts::reg_known_stack_bytes(self.verifier_states_at(site), reg, key_width)
     }
     pub fn site_is_dead_code(&self, site: InsnSite) -> bool {
-        verifier_facts::site_is_dead_code(self.verifier_states.as_ref(), site)
+        verifier_facts::site_is_dead_code(self.verifier_states_at(site))
     }
     fn verifier_post_state_reaches_site_once(&self, site: InsnSite) -> bool {
         if self.insn_at(site).is_none() {
@@ -932,9 +940,12 @@ impl ProgramCFG {
         Ok(())
     }
     pub(crate) fn invalidate_verifier_states(&mut self) {
-        self.verifier_states = None;
         for block in &mut self.blocks {
             block.terminator_branch_profile = None;
+            block.terminator_verifier_states = None;
+            for node in &mut block.insns {
+                node.verifier_states = None;
+            }
         }
     }
     pub(crate) fn rebuild_use_def_after_mutation(&mut self) -> anyhow::Result<()> {
