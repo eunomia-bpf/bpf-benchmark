@@ -1,0 +1,10 @@
+{
+  "app": "katran",
+  "baseline": null,
+  "error": "command failed (255): /usr/local/bin/bpftool batch file /var/tmp/bpfrejit-runtime/w5979/katran_maps_1sll88eb.bpftool\nError: reading batch file failed: Illegal seek",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "error"
+}

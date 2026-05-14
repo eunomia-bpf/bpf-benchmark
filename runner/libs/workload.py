@@ -471,6 +471,7 @@ _STRESS_NG_NETWORK_STRESSORS = (
     "udp",
     "udp-flood",
 )
+
 # Stressors that must be dropped on AL2023 ARM64 (t4g.small) because their
 # workers fail intermittently, tripping stress-ng exit 2 and zeroing the
 # whole workload. x86 keeps both: kernel has them compiled in and they
