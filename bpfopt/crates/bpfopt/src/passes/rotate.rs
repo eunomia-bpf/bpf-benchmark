@@ -30,8 +30,10 @@ impl BpfPass for RotatePass {
         let prog_ref: &ProgramCFG = prog;
         let candidates: Vec<(InsnSite, RotateSite)> = prog_ref
             .scan_block_starts(7, |window| {
-                Ok(rotate_site_at(prog_ref, window.block, window.insns, window.start_idx)
-                    .map(|site| (site.start_idx, site.old_len, site)))
+                Ok(
+                    rotate_site_at(prog_ref, window.block, window.insns, window.start_idx)
+                        .map(|site| (site.start_idx, site.old_len, site)),
+                )
             })?
             .into_iter()
             .map(|hit| (hit.start, hit.value))
@@ -203,7 +205,14 @@ fn try_match_masked32_rotate(
             }
             let or_idx = and_idx + 4;
             let start_idx = if preserves_mask_load { and_idx } else { idx };
-            (start_idx, or_idx + 1 - start_idx, true, i4, insns.get(or_idx)?, i3.dst_reg())
+            (
+                start_idx,
+                or_idx + 1 - start_idx,
+                true,
+                i4,
+                insns.get(or_idx)?,
+                i3.dst_reg(),
+            )
         } else {
             if !is_zero_extend32_pair(insns.get(and_idx + 4)?, insns.get(and_idx + 5)?, val_reg) {
                 return None;

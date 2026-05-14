@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import platform
 import re
 import select
 import shlex
@@ -270,7 +271,12 @@ class NamespacedHttpServer:
             text=True,
             bufsize=1,
         )
-        deadline = time.monotonic() + 5.0
+        # 30s (was 5s): AL2023 ARM64 t4g.small `ip netns exec python3 -u -c ...`
+        # startup occasionally takes 6-15s, tripping the 5s wait and zeroing
+        # cilium's namespaced-HTTP workload. x86 KVM (16 CPU / 64G) starts in
+        # <1s so the longer ceiling is harmless there. Failures still surface
+        # quickly via process.poll() in _wait_for_stdout_marker.
+        deadline = time.monotonic() + 30.0
         try:
             _wait_for_stdout_marker(
                 self.process,
@@ -465,6 +471,21 @@ _STRESS_NG_NETWORK_STRESSORS = (
     "udp",
     "udp-flood",
 )
+# Stressors that must be dropped on AL2023 ARM64 (t4g.small): SCTP kernel
+# module autoload is flaky, stress-ng fails its SCTP workers and exits 2,
+# zeroing the whole bcc workload. x86 keeps SCTP because the kernel has it
+# compiled in and cilium BPF has `#ifdef ENABLE_SCTP` paths worth exercising.
+# Keys are `platform.machine()` values.
+_STRESS_NG_DROP_STRESSORS_BY_ARCH: Mapping[str, frozenset[str]] = {
+    "aarch64": frozenset({"sctp"}),
+}
+
+
+def _stressors_for_current_arch(stressors: Sequence[str]) -> tuple[str, ...]:
+    drop = _STRESS_NG_DROP_STRESSORS_BY_ARCH.get(platform.machine(), frozenset())
+    if not drop:
+        return tuple(stressors)
+    return tuple(s for s in stressors if s not in drop)
 _STRESS_NG_OS_STRESSORS = (
     "cap",
     "eventfd",
@@ -1313,7 +1334,7 @@ def run_named_workload(
     if kind in _STRESS_NG_WORKLOAD_STRESSORS:
         return run_stress_ng_class_load(
             float(duration_s),
-            _STRESS_NG_WORKLOAD_STRESSORS[kind],
+            _stressors_for_current_arch(_STRESS_NG_WORKLOAD_STRESSORS[kind]),
             workload_name=kind,
         )
     if kind == "tcp_connect":

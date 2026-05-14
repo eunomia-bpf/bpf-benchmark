@@ -2,13 +2,13 @@
 
 Date: 2026-05-13
 
-Scope: Katran XDP `balancer_ingress` on x86_64. This is a feasibility and implementation plan for a narrow bytecode rewrite pass that handles the Katran CH-ring `hash % 65537` pattern only. It is not a general modulo-strength-reduction pass.
+Scope: Katran XDP `balancer_ingress` on x86_64. This is a feasibility and implementation plan for a narrow bytecode rewrite that handles the Katran CH-ring `hash % 65537` pattern only. It is not a general modulo-strength-reduction pass.
 
-No daemon change is needed. The pass belongs in `bpfopt`; corpus execution stays behind `make corpus`.
+Final constraint: do not change daemon code and do not add a formal `bpfopt` pass for this probe. The current implementation is a host-prepared raw `bpf_insn[]` artifact selected by exact input hash in runner pass config; corpus execution stays behind `make corpus`.
 
 ## Conclusion
 
-Implement `const_mod_reduce` as a Katran-only 32-bit `% 65537` BPF-to-BPF rewrite.
+For feasibility testing, implement `const_mod_reduce` as a Katran-only host-prepared 32-bit `% 65537` BPF-to-BPF artifact. The runner pass config only verifies the incoming bytecode hash, copies the prebuilt optimized blob, verifies the output hash, and emits a report.
 
 The live KVM x86 JIT currently emits hardware division for both Katran CH-ring modulo sites:
 
@@ -19,7 +19,7 @@ div %r11
 mov %rdx,%rax
 ```
 
-The pass should replace the specific zero-extended `r0 %= 65537` sequence feeding `vip_num * 65537 + hash` with a branchless reduction based on:
+The prepared artifact replaces the specific zero-extended `r0 %= 65537` sequence feeding `vip_num * 65537 + hash` with a branchless reduction based on:
 
 ```text
 2^16 == -1 (mod 65537)
@@ -205,6 +205,119 @@ The formula was checked on edge cases:
 
 The branchless sequence matches `x % 65537` for 32-bit `x`.
 
+### 8. Temporary same-length binary patch
+
+Before implementing a real pass, a same-length patch was tested through a temporary corpus pass config:
+
+```text
+runner/config/passes/manual_mod32/default.yaml
+```
+
+The hook does not change daemon behavior. It rewrites only the exact observed Katran CH-ring bytecode window by changing the modulo opcode from `ALU64 MOD imm 65537` to `ALU32 MOD imm 65537`:
+
+```text
+(97) r0 %= 65537  ->  (94) w0 %= 65537
+```
+
+This is intentionally not the proposed `const_mod_reduce` pass. It only tests the lower bound from asking the kernel JIT to emit 32-bit divide instead of 64-bit divide, without instruction insertion or branch/call offset repair.
+
+Smoke command:
+
+```sh
+BPFREJIT_CORPUS_APPS=katran \
+BPFREJIT_BENCH_PASSES=noop,manual_mod32 \
+SAMPLES=1 \
+WORKLOAD_DURATION=1 \
+TIMEOUT=1800 \
+make corpus
+```
+
+Result:
+
+```text
+corpus/results/x86_kvm_corpus_20260513_231338_150658
+```
+
+The pass was verifier-accepted, applied both sites, and changed JIT size from 13,629 B to 13,627 B.
+
+Temporary performance command:
+
+```sh
+BPFREJIT_CORPUS_APPS=katran \
+BPFREJIT_BENCH_PASSES=noop,manual_mod32 \
+SAMPLES=3 \
+WORKLOAD_DURATION=10 \
+TIMEOUT=1800 \
+make corpus
+```
+
+Result:
+
+```text
+corpus/results/x86_kvm_corpus_20260513_231550_026145
+```
+
+Raw counter-derived analysis:
+
+```text
+baseline: run_cnt=1,175,327  run_time_ns=352,259,574  avg=299.711973 ns/run
+post:     run_cnt=1,124,084  run_time_ns=342,884,465  avg=305.034557 ns/run
+ratio:    1.017759
+```
+
+This same-length patch is not a clear win on the 3x10s temporary run. It does not invalidate the full branchless rewrite, because the JIT still emits a hardware divide.
+
+Post-patch live JIT capture:
+
+```sh
+BPFREJIT_CORPUS_APPS=katran \
+BPFREJIT_BENCH_PASSES=noop,manual_mod32,noop \
+KEEP_WORKDIRS=1 \
+BPFREJIT_DUMP_LIVE_JIT=1 \
+BPFREJIT_DUMP_LIVE_JIT_FAIL=1 \
+SAMPLES=1 \
+WORKLOAD_DURATION=1 \
+TIMEOUT=1800 \
+make corpus
+```
+
+Result:
+
+```text
+corpus/results/x86_kvm_corpus_20260513_231939_355874
+```
+
+Extracted artifact:
+
+```text
+docs/tmp/katran_kvm_live_jit_manual_mod32_20260513_231939/
+```
+
+Report:
+
+```text
+sites_applied=2
+patched ALU64 MOD to ALU32 MOD at raw PC 1282
+patched ALU64 MOD to ALU32 MOD at raw PC 1985
+```
+
+The post-ReJIT xlated dump confirms:
+
+```text
+1480: (94) w0 %= 65537
+2346: (94) w0 %= 65537
+```
+
+The post-ReJIT x86 JIT confirms 32-bit divide:
+
+```text
+mov    $0x10001,%r11
+div    %r11d
+imul   $0x10001,%rdi,%rdi
+```
+
+So manual same-length patching is useful as a quick feasibility probe, but it is not the optimization we want. The real `const_mod_reduce` pass still needs insertion of the branchless reduction sequence and normal jump/call offset repair.
+
 ## Implementation plan
 
 ### P0: Keep scope narrow
@@ -222,31 +335,60 @@ The first version should only match:
 
 This avoids broad verifier risk and avoids accidentally changing unrelated BPF programs.
 
-### P1: Add a new bpfopt pass
+### P1: Prepare a host-side optimized raw bytecode artifact
 
-Add:
+Do not add `bpfopt/crates/bpfopt/src/passes/const_mod_reduce.rs`.
 
-```text
-bpfopt/crates/bpfopt/src/passes/const_mod_reduce.rs
-bpfopt/crates/bpfopt/src/passes/const_mod_reduce_tests.rs
-```
-
-Register it in:
+The manual probe uses the already captured canonical/noop Katran raw bytecode:
 
 ```text
-bpfopt/crates/bpfopt/src/passes/mod.rs
+docs/tmp/katran_kvm_live_jit_const_mod_reduce_20260513_235438/input_step0.bin
+sha256=1d8367af26069a84fdef702a2feb8ce759d0be5a904686bb146b13eadb52525e
 ```
 
-Add:
+and the branchless optimized raw output:
 
-```rust
-mod const_mod_reduce;
-pass_entry!("const_mod_reduce", const_mod_reduce::ConstModReducePass, &[], false)
+```text
+runner/config/passes/const_mod_reduce/katran_x86_kvm_balancer_ingress_branchless_mod65537.bin
+sha256=1929357b97f00f4a8ed653fad7c7ed84a0ee810adcb9a325b8db6b06f9a985e5
 ```
 
-This pass is pure bytecode rewrite and needs no kinsn target and no verifier-state side input.
+The host-side generator is:
 
-### P2: Match the exact Katran CH-ring pattern
+```text
+runner/config/passes/const_mod_reduce/generate_katran_branchless_mod65537.py
+```
+
+Rebuild the artifact from the captured testbin with:
+
+```sh
+runner/config/passes/const_mod_reduce/generate_katran_branchless_mod65537.py \
+  docs/tmp/katran_kvm_live_jit_const_mod_reduce_20260513_235438/input_step0.bin \
+  runner/config/passes/const_mod_reduce/katran_x86_kvm_balancer_ingress_branchless_mod65537.bin
+```
+
+The rejected branchless candidate is also preserved under a stable pass name:
+
+```text
+runner/config/passes/const_mod_reduce_branchless_rejected/default.yaml
+runner/config/passes/const_mod_reduce_branchless_rejected/katran_x86_kvm_balancer_ingress_branchless_mod65537.bin
+```
+
+Run it with:
+
+```sh
+BPFREJIT_BENCH_PASSES=noop,const_mod_reduce_branchless_rejected make corpus
+```
+
+A copy is also kept as a research artifact:
+
+```text
+docs/tmp/katran_const_mod_reduce_host_prepared_20260513/katran_x86_kvm_balancer_ingress_branchless_mod65537.bin
+```
+
+The artifact is valid only when the incoming program bytes match the exact input hash above.
+
+### P2: Match the exact Katran CH-ring pattern during host preparation
 
 Match a single-block window around this shape:
 
@@ -267,9 +409,9 @@ The spill offset should not be hard-coded as the semantic guard. Use it only as 
 - following key arithmetic is `some_reg *= 65537; some_reg += r0`
 - `r1` is overwritten before the `r1 *= 65537` use
 
-If any guard fails, skip and report a site skip reason.
+For the manual artifact path, these guards were applied during host preparation. Runtime config does not scan or transform; it fails fast on input hash mismatch.
 
-### P3: Rewrite the zero-extend plus modulo sequence
+### P3: Rewrite the zero-extend plus modulo sequence in the prepared artifact
 
 Replace the three instructions:
 
@@ -307,32 +449,7 @@ The emitted instructions are ordinary scalar ALU ops:
 
 No helper call, map access, pointer arithmetic, or verifier-state dependency is introduced.
 
-### P4: Tests
-
-Unit tests should catch real correctness bugs, not just existence:
-
-- rewrites the exact Katran-like pattern
-- applies to two independent sites in one program
-- skips non-`r0` modulo
-- skips divisor other than 65537
-- skips missing zero-extension
-- skips missing CH-ring `* 65537 + r0` suffix
-- skips when scratch `r1` is read before being overwritten
-- validates the arithmetic sequence for representative 32-bit values by simulating the emitted ALU operations
-
-Suggested targeted unit command during development:
-
-```sh
-cargo test --workspace --manifest-path bpfopt/Cargo.toml const_mod_reduce
-```
-
-Repository-level validation remains through the Makefile:
-
-```sh
-make test
-```
-
-### P5: Add runner config, but not default policy yet
+### P4: Add runner config, but not default policy yet
 
 Add:
 
@@ -340,20 +457,19 @@ Add:
 runner/config/passes/const_mod_reduce/default.yaml
 ```
 
-with the standard pure bpfopt CLI command:
+with a pure shell artifact loader:
 
 ```sh
-timeout 6000 bpfopt --pass const_mod_reduce \
-  --input ${INPUT} \
-  --output ${OUTPUT} \
-  --report ${REPORT} \
-  --prog-type ${PROG_TYPE} \
-  --target ${TARGET}
+set -eu
+sha256sum "${INPUT}" must equal 1d8367af...
+cp runner/config/passes/const_mod_reduce/katran_x86_kvm_balancer_ingress_branchless_mod65537.bin "${OUTPUT}"
+sha256sum "${OUTPUT}" must equal 192935...
+write report_step*.json with sites_applied=2 and insn_count 2542->2556
 ```
 
 Do not put it into the default `full-x86` policy until the Katran isolated run proves verifier acceptance and positive performance.
 
-### P6: Verify bytecode, JIT, and performance
+### P5: Verify bytecode, JIT, and performance
 
 First isolated functional run:
 
@@ -387,6 +503,48 @@ Expected post-ReJIT checks:
 - post JIT no longer has `div %r11` for CH modulo
 - program remains verifier-accepted
 
+Current host-artifact smoke:
+
+```text
+corpus/results/x86_kvm_corpus_20260514_001248_985725
+```
+
+Observed:
+
+```text
+rejit_result.status: ok
+prog 9 balancer_ingress: ok
+const_mod_reduce bpfopt_summary:
+  diagnostics:
+    host_prepared_artifact=katran_x86_kvm_balancer_ingress_branchless_mod65537.bin
+    input_sha256=1d8367af26069a84fdef702a2feb8ce759d0be5a904686bb146b13eadb52525e
+    output_sha256=1929357b97f00f4a8ed653fad7c7ed84a0ee810adcb9a325b8db6b06f9a985e5
+  sites_applied: 2
+  insn_count_before: 2542
+  insn_count_after: 2556
+post-ReJIT balancer_ingress:
+  bytes_xlated: 23952
+  bytes_jited: 13659
+```
+
+Katran SAMPLES=3 measurements:
+
+```text
+corpus/results/x86_kvm_corpus_20260514_001850_584276
+baseline: 6013602 runs, 835452075 ns => 138.927 ns/run
+post:     6004042 runs, 845628863 ns => 140.843 ns/run
+post/base: 1.01379
+delta: +1.916 ns/run
+
+corpus/results/x86_kvm_corpus_20260514_002822_465245
+baseline: 6017842 runs, 827751455 ns => 137.550 ns/run
+post:     6011588 runs, 858306694 ns => 142.775 ns/run
+post/base: 1.03799
+delta: +5.226 ns/run
+```
+
+Both SAMPLES=3 runs put the branchless artifact on the slower side, so this candidate should remain rejected unless a different machine-code shape is proposed and verified.
+
 Finally run paper-grade Katran isolated measurement:
 
 ```sh
@@ -408,11 +566,13 @@ The rewrite expands each site by 7 BPF instructions. Katran has two sites, so ex
 
 ### Register clobber risk
 
-The rewrite uses `r1` as scratch. The observed Katran pattern overwrites `r1` immediately after the modulo. The pass must verify this, or use liveness to prove `r1` is not live across the replacement.
+The rewrite uses `r1` as scratch. The observed Katran pattern overwrites `r1` immediately after the modulo. A future maintained pass would need to verify this, or use liveness to prove `r1` is not live across the replacement.
+
+For the current host-prepared artifact, this is guarded by exact input hash rather than by a runtime liveness analysis.
 
 ### Semantics risk
 
-The formula is valid for 32-bit unsigned input. The pass must require the existing `r0 <<= 32; r0 >>= 32` shape, then replace that shape together with modulo. Do not apply to 64-bit values.
+The formula is valid for 32-bit unsigned input. The host-prepared artifact was made from the existing `r0 <<= 32; r0 >>= 32` shape and replaces that shape together with modulo. Do not generalize this to 64-bit values.
 
 ### Benchmark-only creep
 
@@ -428,11 +588,19 @@ Done:
 - two Katran `%65537` sites identified
 - both sites confirmed to JIT as `div`
 - arithmetic rewrite formula checked on representative edge cases
+- temporary same-length `manual_mod32` patch accepted by ReJIT
+- post-patch live JIT confirmed `div %r11d`, not elimination of divide
+- temporary 3x10s measurement found no clear win from `ALU32 MOD` alone
+- formal `bpfopt` `const_mod_reduce` pass removed from source
+- host-prepared branchless raw bytecode artifact created
+- host-side generator script added for reproducing the branchless artifact from captured testbin
+- rejected branchless candidate preserved as `const_mod_reduce_branchless_rejected`
+- `runner/config/passes/const_mod_reduce/default.yaml` now only hash-checks and copies the artifact
+- Katran-only smoke accepted the host-prepared artifact via ReJIT
+- two Katran SAMPLES=3 runs measured the branchless artifact slower
 
 Next:
 
-1. Implement `bpfopt` pass and unit tests.
-2. Add `runner/config/passes/const_mod_reduce/default.yaml`.
-3. Run Katran isolated `noop,const_mod_reduce` smoke.
-4. Capture post-ReJIT JIT and verify `div` is gone.
-5. Run Katran SAMPLES=3 performance measurement through `make corpus`.
+1. Keep the rejected artifact only for reproducibility.
+2. Capture post-ReJIT JIT only if investigating why the ALU sequence loses.
+3. Do not productize this branchless shape into a maintained `bpfopt` pass.

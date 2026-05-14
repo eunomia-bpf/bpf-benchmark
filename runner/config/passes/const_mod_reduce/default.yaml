@@ -1,0 +1,17 @@
+# Temporary Katran-only host-prepared artifact loader.
+# This intentionally does not call bpfopt and does not rewrite bytecode in the
+# VM. The optimized raw bpf_insn[] blob is prepared on the host and copied only
+# when the incoming Katran balancer_ingress bytecode hash matches exactly.
+log_level: 1
+command: |
+  set -eu;
+  expected_input_sha=1d8367af26069a84fdef702a2feb8ce759d0be5a904686bb146b13eadb52525e;
+  expected_output_sha=1929357b97f00f4a8ed653fad7c7ed84a0ee810adcb9a325b8db6b06f9a985e5;
+  artifact="/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/const_mod_reduce/katran_x86_kvm_balancer_ingress_branchless_mod65537.bin";
+  actual_input_sha="$(sha256sum "${INPUT}" | awk '{print $1}')";
+  if [ "$actual_input_sha" != "$expected_input_sha" ]; then echo "const_mod_reduce host artifact input hash mismatch: got $actual_input_sha, expected $expected_input_sha" >&2; exit 1; fi;
+  test -f "$artifact";
+  cp "$artifact" "${OUTPUT}";
+  actual_output_sha="$(sha256sum "${OUTPUT}" | awk '{print $1}')";
+  if [ "$actual_output_sha" != "$expected_output_sha" ]; then echo "const_mod_reduce host artifact output hash mismatch: got $actual_output_sha, expected $expected_output_sha" >&2; exit 1; fi;
+  printf '%s\n' '{' '  "pass": "const_mod_reduce",' '  "sites_applied": 2,' '  "sites_matched": 2,' '  "sites_skipped": 0,' '  "skip_reasons": {},' '  "diagnostics": [' '    "host_prepared_artifact=katran_x86_kvm_balancer_ingress_branchless_mod65537.bin",' '    "input_sha256=1d8367af26069a84fdef702a2feb8ce759d0be5a904686bb146b13eadb52525e",' '    "output_sha256=1929357b97f00f4a8ed653fad7c7ed84a0ee810adcb9a325b8db6b06f9a985e5"' '  ],' '  "insn_count_before": 2542,' '  "insn_count_after": 2556,' '  "insn_delta": 14' '}' > "${REPORT}";

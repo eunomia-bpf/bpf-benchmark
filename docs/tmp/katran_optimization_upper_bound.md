@@ -299,6 +299,29 @@ r0 += r1
 
 估算收益：当前已确认 emits divide，优先级上调。保守估计 15-35 cycles/pkt；如果 host CPU 的 64-bit `div` 延迟更高，可能更大。需要用 `BPFREJIT_BENCH_PASSES="noop,const_mod_reduce"` 做 Katran-only SAMPLES=3 验证。
 
+May 13 追加做了一个不写正式 pass 的 same-length tmp probe：临时 `runner/config/passes/manual_mod32/default.yaml` 只把两个 `(97) r0 %= 65537` opcode 改成 `(94) w0 %= 65537`，不插入新指令。该 patch ReJIT accepted，`sites_applied=2`，JIT size `13629 -> 13627`，post dump 位于 `docs/tmp/katran_kvm_live_jit_manual_mod32_20260513_231939/`。xlated 变成两个 `w0 %= 65537`，x86 JIT 从 `div %r11` 变成 `div %r11d`，但仍然是硬件 divide。
+
+`manual_mod32` 的 3x10s tmp run 是 `corpus/results/x86_kvm_corpus_20260513_231550_026145`。raw counter-derived result：baseline `299.711973 ns/run`，post `305.034557 ns/run`，ratio `1.017759`。结论是 32-bit divide alone 没有清晰收益；它只说明同长度 binary patch 路径可用于快速 feasibility probe，不能替代真正的 branchless `const_mod_reduce`。
+
+May 14 按“不要改 bpfopt 源码”的约束改成 host-prepared binary probe：不保留 `bpfopt/crates/bpfopt/src/passes/const_mod_reduce.rs`，而是在 host 上准备 raw `bpf_insn[]` artifact，runner config 只做 input sha256 校验、copy artifact、output sha256 校验和 report 输出。
+
+- artifact：`runner/config/passes/const_mod_reduce/katran_x86_kvm_balancer_ingress_branchless_mod65537.bin`
+- input sha256：`1d8367af26069a84fdef702a2feb8ce759d0be5a904686bb146b13eadb52525e`
+- output sha256：`1929357b97f00f4a8ed653fad7c7ed84a0ee810adcb9a325b8db6b06f9a985e5`
+- host copy：`docs/tmp/katran_const_mod_reduce_host_prepared_20260513/katran_x86_kvm_balancer_ingress_branchless_mod65537.bin`
+- generator：`runner/config/passes/const_mod_reduce/generate_katran_branchless_mod65537.py`
+- rejected-preserved config：`runner/config/passes/const_mod_reduce_branchless_rejected/default.yaml`
+- Katran smoke：`corpus/results/x86_kvm_corpus_20260514_001248_985725`
+
+smoke 结果：`const_mod_reduce` step accepted，`sites_applied=2`，insn `2542 -> 2556`，post `balancer_ingress` size `bytes_xlated=23952` / `bytes_jited=13659`。这验证了“不改 bpfopt、只加载 host-prepared binary”的路径可行；性能结论仍然要看 Katran SAMPLES=3，不能从 1s smoke 解读。
+
+Katran SAMPLES=3 已跑两轮，方向一致为变慢：
+
+- `corpus/results/x86_kvm_corpus_20260514_001850_584276`：baseline `138.927 ns/run`，post `140.843 ns/run`，post/base `1.01379`，delta `+1.916 ns/run`
+- `corpus/results/x86_kvm_corpus_20260514_002822_465245`：baseline `137.550 ns/run`，post `142.775 ns/run`，post/base `1.03799`，delta `+5.226 ns/run`
+
+结论：当前 branchless `%65537` BPF artifact 不值得产品化。保留 `const_mod_reduce_branchless_rejected` 只用于复现和对照。
+
 ### 9.3 `setcc_bool`
 
 Trigger：branch materializes boolean 0/1，例如 init register、conditional branch、overwrite opposite value。
@@ -478,9 +501,9 @@ Specialization-only：
 
 ## 15. 下一步测量
 
-第一个测量已补：May 13 在 KVM guest 内通过 noop YAML hook 抓到了真实 `bpftool prog dump jited`，见 `docs/tmp/katran_kvm_live_jit_noop_20260513_220629/`。当前只抓了 baseline/noop 前状态；后续实现 `const_mod_reduce` 后还需要抓 post-ReJIT JIT dump。
+第一个测量已补：May 13 在 KVM guest 内通过 noop YAML hook 抓到了真实 `bpftool prog dump jited`，见 `docs/tmp/katran_kvm_live_jit_noop_20260513_220629/`。`manual_mod32` tmp probe 的 post-ReJIT dump 也已补，见 `docs/tmp/katran_kvm_live_jit_manual_mod32_20260513_231939/`；它确认 32-bit MOD 只把 `div %r11` 改成 `div %r11d`。
 
-第二个测量也已补：CH modulo 路径没有被 x86 JIT lower 成 reciprocal arithmetic，两个 static `%65537` site 都是 `div %r11`。因此下一步是实现 Katran-only `const_mod_reduce`，再跑 `noop,const_mod_reduce` 的 Katran SAMPLES=3 和 post-ReJIT dump。
+第二个测量也已补：CH modulo 路径没有被 x86 JIT lower 成 reciprocal arithmetic，两个 static `%65537` site 都是 `div %r11`。same-length `ALU32 MOD` probe 没有清晰性能收益。当前 branchless host-prepared artifact 的两轮 Katran SAMPLES=3 也都变慢，所以不要把这个形状产品化成 pass；只保留 rejected config 方便复现。
 
 第三个测量是 jhash rotate bytecode census：解释 native 20 个 `rorx` 为什么 current `rotate` pass 是 0/0。
 

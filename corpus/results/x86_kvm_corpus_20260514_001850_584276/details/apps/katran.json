@@ -1,0 +1,253 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 6013602,
+        "run_time_ns_delta": 835452075,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.102109506999994,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   248.70us  165.80us   4.76ms   84.07%\n    Req/Sec     8.38k   411.73     9.63k    68.85%\n  Latency Distribution\n     50%  203.00us\n     75%  317.00us\n     90%  456.00us\n     99%  834.00us\n  1003496 requests in 30.10s, 155.99MB read\nRequests/sec:  33338.89\nTransfer/sec:      5.18MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.10275575999998,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   248.01us  165.67us   4.53ms   83.99%\n    Req/Sec     8.40k   447.03    12.33k    73.90%\n  Latency Distribution\n     50%  202.00us\n     75%  316.00us\n     90%  455.00us\n     99%  834.00us\n  1005517 requests in 30.10s, 156.31MB read\nRequests/sec:  33405.88\nTransfer/sec:      5.19MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.103163290000026,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   250.23us  167.59us   5.95ms   83.76%\n    Req/Sec     8.33k   460.45     9.79k    71.35%\n  Latency Distribution\n     50%  205.00us\n     75%  319.00us\n     90%  460.00us\n     99%  840.00us\n  997721 requests in 30.10s, 155.09MB read\nRequests/sec:  33147.40\nTransfer/sec:      5.15MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13659,
+        "bytes_xlated": 23952,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 6004042,
+        "run_time_ns_delta": 845628863,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.10274993300004,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   247.64us  164.96us   5.19ms   84.20%\n    Req/Sec     8.41k   411.12     9.83k    70.85%\n  Latency Distribution\n     50%  202.00us\n     75%  315.00us\n     90%  453.00us\n     99%  828.00us\n  1007304 requests in 30.10s, 156.58MB read\nRequests/sec:  33465.67\nTransfer/sec:      5.20MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.10271940199999,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   249.06us  164.51us   7.89ms   83.80%\n    Req/Sec     8.35k   420.26     9.80k    71.43%\n  Latency Distribution\n     50%  205.00us\n     75%  316.00us\n     90%  455.00us\n     99%  825.00us\n  999689 requests in 30.10s, 155.40MB read\nRequests/sec:  33212.47\nTransfer/sec:      5.16MB",
+        "workload_name": "katran_wrk_http"
+      },
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d30s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 30.10270325700003,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 30s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   251.11us  169.02us   5.20ms   83.66%\n    Req/Sec     8.30k   440.90     9.72k    71.84%\n  Latency Distribution\n     50%  204.00us\n     75%  321.00us\n     90%  463.00us\n     99%  849.00us\n  994962 requests in 30.10s, 154.67MB read\nRequests/sec:  33055.22\nTransfer/sec:      5.14MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "9": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 85,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 7,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "host_prepared_artifact=katran_x86_kvm_balancer_ingress_branchless_mod65537.bin",
+                "input_sha256=1d8367af26069a84fdef702a2feb8ce759d0be5a904686bb146b13eadb52525e",
+                "output_sha256=1929357b97f00f4a8ed653fad7c7ed84a0ee810adcb9a325b8db6b06f9a985e5"
+              ],
+              "insn_count_after": 2556,
+              "insn_count_before": 2542,
+              "insn_delta": 14,
+              "pass": "const_mod_reduce",
+              "sites_applied": 2,
+              "sites_matched": 2,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 85,
+            "status": "ok",
+            "step": {
+              "command": "set -eu; expected_input_sha=1d8367af26069a84fdef702a2feb8ce759d0be5a904686bb146b13eadb52525e; expected_output_sha=1929357b97f00f4a8ed653fad7c7ed84a0ee810adcb9a325b8db6b06f9a985e5; artifact=\"/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/const_mod_reduce/katran_x86_kvm_balancer_ingress_branchless_mod65537.bin\"; actual_input_sha=\"$(sha256sum \"${INPUT}\" | awk '{print $1}')\"; if [ \"$actual_input_sha\" != \"$expected_input_sha\" ]; then echo \"const_mod_reduce host artifact input hash mismatch: got $actual_input_sha, expected $expected_input_sha\" >&2; exit 1; fi; test -f \"$artifact\"; cp \"$artifact\" \"${OUTPUT}\"; actual_output_sha=\"$(sha256sum \"${OUTPUT}\" | awk '{print $1}')\"; if [ \"$actual_output_sha\" != \"$expected_output_sha\" ]; then echo \"const_mod_reduce host artifact output hash mismatch: got $actual_output_sha, expected $expected_output_sha\" >&2; exit 1; fi; printf '%s\\n' '{' ' \"pass\": \"const_mod_reduce\",' ' \"sites_applied\": 2,' ' \"sites_matched\": 2,' ' \"sites_skipped\": 0,' ' \"skip_reasons\": {},' ' \"diagnostics\": [' ' \"host_prepared_artifact=katran_x86_kvm_balancer_ingress_branchless_mod65537.bin\",' ' \"input_sha256=1d8367af26069a84fdef702a2feb8ce759d0be5a904686bb146b13eadb52525e\",' ' \"output_sha256=1929357b97f00f4a8ed653fad7c7ed84a0ee810adcb9a325b8db6b06f9a985e5\"' ' ],' ' \"insn_count_before\": 2542,' ' \"insn_count_after\": 2556,' ' \"insn_delta\": 14' '}' > \"${REPORT}\";",
+              "log_level": 1,
+              "name": "const_mod_reduce"
+            }
+          }
+        ],
+        "prog_id": 9,
+        "program": {
+          "final_insn_count": 2556,
+          "orig_insn_count": 2542,
+          "prog_id": 9,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}
