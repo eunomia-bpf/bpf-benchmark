@@ -48,18 +48,13 @@ const REPORT_JSON: &str = "report.json";
 const TEST_INPUT_BIN: &str = "test_input.bin";
 const TEST_RUN_JSON: &str = "test_run.json";
 const TEST_OUTPUT_BIN: &str = "test_output.bin";
+const KATRAN_TEST_INPUT: &str = "corpus/inputs/katran_vip_packet_64.bin";
 const MAP_IDS_JSON: &str = "map-ids.json";
 const MAP_VALUES_DIR: &str = "map-values";
 const MAP_DUMP_ENTRY_LIMIT: u32 = 8192;
 const METADATA_JSON: &str = "metadata.json";
 const VERIFIER_LOG: &str = "verifier.log";
 const VERIFY_LOG: &str = "verify.log";
-const KATRAN_CORPUS_WRK_INGRESS_PACKET: [u8; 64] = [
-    0x02, 0x00, 0x00, 0x00, 0x00, 0x0a, 0x02, 0x00, 0x00, 0x00, 0x00, 0x0b, 0x08, 0x00, 0x45, 0x00,
-    0x00, 0x32, 0x00, 0x00, 0x40, 0x00, 0x3f, 0x06, 0x26, 0x60, 0x0a, 0x00, 0x00, 0x02, 0x0a, 0x64,
-    0x01, 0x01, 0x7a, 0x69, 0x1f, 0x90, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x50, 0x10,
-    0x20, 0x00, 0x59, 0x1d, 0x00, 0x00, 0x4b, 0x41, 0x54, 0x52, 0x41, 0x4e, 0x56, 0x49, 0x50, 0x21,
-];
 
 #[derive(Parser)]
 #[command(
@@ -439,7 +434,8 @@ fn verify_workdir(prog_dir: &Path, map_fds: &[i32]) -> Result<OwnedFd> {
 
 fn run_bpftestrun(prog_fd: i32, prog_dir: &Path, cli: &Cli) -> Result<()> {
     let data_in = if cli.katran_maps {
-        KATRAN_CORPUS_WRK_INGRESS_PACKET.to_vec()
+        fs::read(KATRAN_TEST_INPUT)
+            .with_context(|| format!("failed to read Katran test input {KATRAN_TEST_INPUT}"))?
     } else {
         Vec::new()
     };
@@ -820,22 +816,17 @@ mod tests {
             eprintln!("skipping katran_optimization_path: not running as root");
             return Ok(());
         }
-        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../..")
+            .canonicalize()
+            .context("resolve project root")?;
+        std::env::set_current_dir(&root).context("chdir to project root")?;
         let obj = root.join("bpfopt/testobject/katran_balancer.bpf.o");
         let bpfopt = root.join(BPFOPT_BIN);
         let overlay_dir = root.join("runner/config/passes/map_inline/overlays/katran");
         let workdir = WorkDir::open(None)?;
         let map_values_dir = workdir.path.join(MAP_VALUES_DIR);
         let (_obj, prepared) = prepare_workdir(&workdir.path, &obj, true, true)?;
-        let cli = Cli {
-            obj: PathBuf::from("bpfopt/testobject/katran_balancer.bpf.o"),
-            pass: Some("map_inline".into()),
-            target: None,
-            workdir: None,
-            bpftestrun: true,
-            katran_maps: true,
-            repeat: 10_000,
-        };
         for prog in &prepared {
             let metadata = read_json::<ProgramMetadata>(&prog.dir.join(METADATA_JSON))?;
             if metadata.name != "balancer_ingress" {
@@ -845,7 +836,9 @@ mod tests {
             write_katran_overlays(&map_values_dir, &overlay_dir)?;
             run_katran_map_inline(prog, &map_values_dir, &bpfopt)?;
             let fd = verify_workdir(&prog.dir, &prog.map_fds)?;
-            run_bpftestrun(fd.as_raw_fd(), &prog.dir, &cli)?;
+            run_bpftestrun(fd.as_raw_fd(), &prog.dir, &katran_test_cli(1))?;
+            assert_katran_forwarding_output(&prog.dir)?;
+            run_bpftestrun(fd.as_raw_fd(), &prog.dir, &katran_test_cli(10_000))?;
             return Ok(());
         }
         bail!("katran_balancer.bpf.o did not contain balancer_ingress")
@@ -962,6 +955,99 @@ mod tests {
             .status()?;
         if !status.success() {
             bail!("hardcoded katran map_inline exited with {status}");
+        }
+        Ok(())
+    }
+
+    fn katran_test_cli(repeat: u32) -> Cli {
+        Cli {
+            obj: PathBuf::from("bpfopt/testobject/katran_balancer.bpf.o"),
+            pass: Some("map_inline".into()),
+            target: None,
+            workdir: None,
+            bpftestrun: true,
+            katran_maps: true,
+            repeat,
+        }
+    }
+
+    fn assert_katran_forwarding_output(prog_dir: &Path) -> Result<()> {
+        const XDP_TX: i64 = 3;
+
+        let report: serde_json::Value = read_json(&prog_dir.join(TEST_RUN_JSON))?;
+        let retval = report
+            .get("retval")
+            .and_then(|value| value.as_i64())
+            .ok_or_else(|| anyhow!("{} missing integer retval", TEST_RUN_JSON))?;
+        if retval != XDP_TX {
+            bail!("Katran semantic test returned {retval}, expected XDP_TX({XDP_TX})");
+        }
+
+        let output = fs::read(prog_dir.join(TEST_OUTPUT_BIN)).with_context(|| {
+            format!(
+                "failed to read {}",
+                prog_dir.join(TEST_OUTPUT_BIN).display()
+            )
+        })?;
+        let data_size_out = report
+            .get("data_size_out")
+            .and_then(|value| value.as_u64())
+            .and_then(|value| usize::try_from(value).ok())
+            .ok_or_else(|| anyhow!("{} missing integer data_size_out", TEST_RUN_JSON))?;
+        if data_size_out != output.len() {
+            bail!(
+                "Katran semantic output size mismatch: report says {data_size_out}, file has {}",
+                output.len()
+            );
+        }
+
+        let input = fs::read(KATRAN_TEST_INPUT)
+            .with_context(|| format!("failed to read Katran test input {KATRAN_TEST_INPUT}"))?;
+        assert_katran_ipip_packet(&input, &output)
+    }
+
+    fn assert_katran_ipip_packet(input: &[u8], output: &[u8]) -> Result<()> {
+        const ETH_HLEN: usize = 14;
+        const IPV4_MIN_HLEN: usize = 20;
+        const IPPROTO_IPIP: u8 = 4;
+
+        if input.len() < ETH_HLEN + IPV4_MIN_HLEN {
+            bail!(
+                "Katran input is too short for Ethernet + IPv4: {}",
+                input.len()
+            );
+        }
+        if output.len() < ETH_HLEN + IPV4_MIN_HLEN {
+            bail!(
+                "Katran output is too short for Ethernet + outer IPv4: {}",
+                output.len()
+            );
+        }
+        if output[12..14] != [0x08, 0x00] {
+            bail!("Katran output is not IPv4 Ethernet");
+        }
+        let version = output[ETH_HLEN] >> 4;
+        let outer_ihl = usize::from(output[ETH_HLEN] & 0x0f) * 4;
+        if version != 4 || outer_ihl < IPV4_MIN_HLEN {
+            bail!("Katran output has invalid outer IPv4 header");
+        }
+        if output[ETH_HLEN + 9] != IPPROTO_IPIP {
+            bail!(
+                "Katran output outer protocol is {}, expected IPIP({IPPROTO_IPIP})",
+                output[ETH_HLEN + 9]
+            );
+        }
+
+        let inner = ETH_HLEN + outer_ihl;
+        let expected_len = inner + input.len() - ETH_HLEN;
+        if output.len() != expected_len {
+            bail!(
+                "Katran IPIP output length is {}, expected {expected_len}",
+                output.len()
+            );
+        }
+        if output[inner..] != input[ETH_HLEN..] {
+            bail!("Katran IPIP inner IPv4 packet does not match corpus input");
         }
         Ok(())
     }

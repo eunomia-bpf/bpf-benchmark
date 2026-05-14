@@ -8,6 +8,8 @@
 
 #include "kinsn_common.h"
 
+#define KINSN_X86_REG_R9 11
+
 __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_lea64(void) {}
 __bpf_kfunc void bpf_lea32(void) {}
@@ -165,6 +167,38 @@ static void emit_s32(u8 *buf, u32 *len, s32 value)
 	*len += sizeof(value);
 }
 
+static __always_inline bool lea_prog_uses_priv_stack(const struct bpf_prog *prog)
+{
+	return prog && prog->aux && prog->aux->priv_stack_ptr;
+}
+
+static __always_inline u8 lea_x86_reg_for_prog(const struct bpf_prog *prog,
+					       u8 bpf_reg)
+{
+	if (bpf_reg == BPF_REG_10 && lea_prog_uses_priv_stack(prog))
+		return KINSN_X86_REG_R9;
+	return bpf_reg;
+}
+
+static __always_inline u8 lea_x86_reg_code(u8 reg)
+{
+	if (reg == KINSN_X86_REG_R9)
+		return 1;
+	return kinsn_x86_reg_code(reg);
+}
+
+static __always_inline bool lea_x86_reg_ext(u8 reg)
+{
+	if (reg == KINSN_X86_REG_R9)
+		return true;
+	return kinsn_x86_reg_ext(reg);
+}
+
+static __always_inline bool lea_x86_reg_valid(u8 reg)
+{
+	return lea_x86_reg_code(reg) != 0xff;
+}
+
 static void emit_rex_lea(u8 *buf, u32 *len, bool is64,
 			 u8 dst_reg, u8 base_reg, u8 index_reg,
 			 bool has_base, bool has_index)
@@ -173,11 +207,11 @@ static void emit_rex_lea(u8 *buf, u32 *len, bool is64,
 
 	if (is64)
 		rex |= 0x08;
-	if (kinsn_x86_reg_ext(dst_reg))
+	if (lea_x86_reg_ext(dst_reg))
 		rex |= 0x04;
-	if (has_index && kinsn_x86_reg_ext(index_reg))
+	if (has_index && lea_x86_reg_ext(index_reg))
 		rex |= 0x02;
-	if (has_base && kinsn_x86_reg_ext(base_reg))
+	if (has_base && lea_x86_reg_ext(base_reg))
 		rex |= 0x01;
 	if (rex != 0x40)
 		emit_u8(buf, len, rex);
@@ -187,8 +221,8 @@ static void emit_lea(u8 *buf, u32 *len, bool is64,
 		     u8 dst_reg, u8 base_reg, u8 index_reg,
 		     u8 scale_log2, bool has_base, bool has_index, s32 disp)
 {
-	u8 base_code = has_base ? kinsn_x86_reg_code(base_reg) : 5;
-	u8 index_code = has_index ? kinsn_x86_reg_code(index_reg) : 4;
+	u8 base_code = has_base ? lea_x86_reg_code(base_reg) : 5;
+	u8 index_code = has_index ? lea_x86_reg_code(index_reg) : 4;
 	u8 mod;
 
 	emit_rex_lea(buf, len, is64, dst_reg, base_reg, index_reg,
@@ -203,7 +237,7 @@ static void emit_lea(u8 *buf, u32 *len, bool is64,
 		else
 			mod = 0x80;
 
-		emit_u8(buf, len, mod | (kinsn_x86_reg_code(dst_reg) << 3) | base_code);
+		emit_u8(buf, len, mod | (lea_x86_reg_code(dst_reg) << 3) | base_code);
 		if (mod == 0x40)
 			emit_u8(buf, len, (u8)disp);
 		else if (mod == 0x80)
@@ -220,7 +254,7 @@ static void emit_lea(u8 *buf, u32 *len, bool is64,
 	else
 		mod = 0x80;
 
-	emit_u8(buf, len, mod | (kinsn_x86_reg_code(dst_reg) << 3) | 0x04);
+	emit_u8(buf, len, mod | (lea_x86_reg_code(dst_reg) << 3) | 0x04);
 	emit_u8(buf, len, (scale_log2 << 6) | (index_code << 3) | base_code);
 	if (mod == 0x40)
 		emit_u8(buf, len, (u8)disp);
@@ -250,11 +284,18 @@ static int emit_lea_x86(u8 *image, u32 *off, bool emit,
 				 &scale_log2, &has_base, &has_index, &disp);
 	if (err)
 		return err;
-	if (!kinsn_x86_reg_valid(dst_reg))
+
+	dst_reg = lea_x86_reg_for_prog(prog, dst_reg);
+	if (has_base)
+		base_reg = lea_x86_reg_for_prog(prog, base_reg);
+	if (has_index)
+		index_reg = lea_x86_reg_for_prog(prog, index_reg);
+
+	if (!lea_x86_reg_valid(dst_reg))
 		return -EINVAL;
-	if (has_base && !kinsn_x86_reg_valid(base_reg))
+	if (has_base && !lea_x86_reg_valid(base_reg))
 		return -EINVAL;
-	if (has_index && !kinsn_x86_reg_valid(index_reg))
+	if (has_index && !lea_x86_reg_valid(index_reg))
 		return -EINVAL;
 
 	emit_lea(buf, &len, is64, dst_reg, base_reg, index_reg,

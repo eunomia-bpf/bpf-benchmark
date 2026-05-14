@@ -78,14 +78,12 @@ sudo -n bash -lc 'ulimit -l unlimited; cd /home/yunwei37/workspace/bpf-benchmark
 The transformed program is verifier-loaded against the maps that libbpf already
 created from the object; the loader does not rebuild Katran maps from scratch.
 
-When `--katran-maps --bpftestrun` is used, the loader uses a built-in packet
-matching the corpus wrk path at the Katran XDP ingress point:
-client `10.0.0.2` to VIP `10.100.1.1:8080/tcp`, after router forwarding, with
-Ethernet source `02:00:00:00:00:0b`, Ethernet destination
-`02:00:00:00:00:0a`, TTL `63`, and the corresponding IPv4 header checksum.
-This packet takes the forwarding path in host `BPF_PROG_TEST_RUN` and should
-return `XDP_TX` (`retval=3`) with an IPIP-encapsulated packet in
-`test_output.bin`.
+When `--katran-maps --bpftestrun` is used, the loader reads the same packet file
+used by the corpus-side Katran prog-test fixture:
+`corpus/inputs/katran_vip_packet_64.bin`. This packet is client
+`10.0.0.2` to VIP `10.100.1.1:8080/tcp` at the Katran XDP ingress point. In
+host `BPF_PROG_TEST_RUN`, `--repeat 1` is the semantic check: it should return
+`XDP_TX` (`retval=3`) with an IPIP-encapsulated packet in `test_output.bin`.
 
 For Katran, `--repeat 1` writes `test_output.bin` for packet inspection. Katran
 `--repeat > 1` automatically uses the kernel's XDP live-frames mode, where
@@ -103,8 +101,9 @@ sudo -n bash -lc 'ulimit -l unlimited; cd /home/yunwei37/workspace/bpf-benchmark
     --workdir /tmp/bpfopt-loader-katran-live-frames'
 ```
 
-This uses the same built-in corpus ingress packet as a template for every
-fresh frame.
+This uses the same corpus ingress packet as a template for every fresh frame.
+Do not use the live-frames `retval` as the semantic check; use the prior
+`--repeat 1` run and packet output inspection for that.
 
 The loader skips map value dumps unless `--pass map_inline` is selected. For
 `map_inline`, large maps are left as `map show` metadata only so Katran's
