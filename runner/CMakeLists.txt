@@ -40,6 +40,7 @@ set(MICRO_EXEC_SOURCES
     src/elf_program_loader.cpp
     src/kernel_runner.cpp
     src/main.cpp
+    src/native_runner.cpp
     src/perf_counters.cpp
 )
 
@@ -130,6 +131,7 @@ target_link_libraries(micro_exec
         PkgConfig::LIBELF
         PkgConfig::ZLIB
         PkgConfig::YAMLCPP
+        ${CMAKE_DL_LIBS}
 )
 
 if(MICRO_EXEC_ENABLE_LLVMBPF)

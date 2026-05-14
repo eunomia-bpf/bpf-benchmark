@@ -16,8 +16,8 @@ build:
 defaults:
   samples: 10
   warmups: 2
-  inner_repeat: 200
-  runtimes: [llvmbpf, kernel]
+  inner_repeat: 1000
+  runtimes: [native, llvmbpf, kernel]
   output: micro/results/dev/pure_jit.json
 
 benchmark_defaults:
@@ -27,16 +27,17 @@ analysis:
   baseline_benchmark: simple
 
 runtimes:
+  - name: native
+    mode: native
+
   - name: llvmbpf
     label: llvmbpf LLVM JIT
     mode: llvmbpf
-    inner_repeat: 200
     aliases: [llvm]
 
   - name: kernel
     label: kernel eBPF
     mode: kernel
-    inner_repeat: 200
     sudo: true
 
 benchmarks:

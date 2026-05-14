@@ -17,6 +17,8 @@ std::string usage_text()
         "[--warmup N] [--input-size N] [--signal-control] [--perf-counters] "
         "[--perf-scope full_repeat_raw|full_repeat_avg] [--dump-jit] "
         "[--dump-xlated <path>]\n"
+        "  micro_exec run-native [--program <path>|<path>] [--program-name <name>] "
+        "[--memory <path>] [--io-mode staged|packet] [--inner-repeat N] [--input-size N]\n"
 #ifdef MICRO_EXEC_ENABLE_LLVMBPF
         "  micro_exec run-llvmbpf [--program <path>|<path>] [--program-name <name>] "
         "[--memory <path>] [--io-mode map|staged|packet] [--raw-packet] "
@@ -30,6 +32,7 @@ void validate_cli_options(const cli_options &options)
 {
     const bool supported_command =
         options.command == "test-run" ||
+        options.command == "run-native" ||
         options.command == "list-programs"
 #ifdef MICRO_EXEC_ENABLE_LLVMBPF
         || options.command == "run-llvmbpf"
@@ -46,6 +49,7 @@ void validate_cli_options(const cli_options &options)
         fail("--perf-scope must be one of full_repeat_raw or full_repeat_avg");
     }
     if ((options.command == "test-run"
+         || options.command == "run-native"
 #ifdef MICRO_EXEC_ENABLE_LLVMBPF
          || options.command == "run-llvmbpf"
 #endif

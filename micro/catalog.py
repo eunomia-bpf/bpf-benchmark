@@ -37,6 +37,8 @@ def _policy_mode_for_runtime(name: str, mode: str) -> str:
 
 
 def _backend_for_runtime(mode: str) -> str:
+    if mode == "native":
+        return "native"
     return "llvmbpf" if "llvmbpf" in mode else "kernel"
 
 

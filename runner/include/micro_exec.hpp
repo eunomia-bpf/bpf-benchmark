@@ -119,6 +119,7 @@ program_image load_program_image(
 void initialize_micro_exec_process();
 std::vector<sample_result> run_kernel(const cli_options &options);
 sample_result run_llvmbpf(const cli_options &options);
+sample_result run_native(const cli_options &options);
 void print_json(std::ostream &out, const sample_result &sample);
 void print_json(std::ostream &out, const std::vector<sample_result> &samples);
 void print_json(const sample_result &sample);

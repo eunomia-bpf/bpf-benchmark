@@ -1,9 +1,23 @@
 #ifndef MICRO_PROGRAMS_COMMON_H
 #define MICRO_PROGRAMS_COMMON_H
 
+#ifdef MICRO_NATIVE
+#include <stdint.h>
+#define SEC(NAME) __attribute__((visibility("default")))
+#define XDP_ABORTED 0
+#define XDP_DROP 1
+#define XDP_PASS 2
+#define XDP_TX 3
+#define TC_ACT_OK 0
+#define TC_ACT_SHOT 2
+typedef uint8_t __u8; typedef uint16_t __u16; typedef uint32_t __u32; typedef uint64_t __u64;
+struct xdp_md { uintptr_t data, data_end; };
+struct __sk_buff { uintptr_t data, data_end; __u32 cb[5]; };
+#else
 #include <linux/bpf.h>
 #include <linux/pkt_cls.h>
 #include <bpf/bpf_helpers.h>
+#endif
 
 #define u8 unsigned char
 #define u16 unsigned short

@@ -274,6 +274,8 @@ def build_runner_command(
 ) -> list[str]:
     if runtime.mode == "llvmbpf":
         command = [str(runner_binary), "run-llvmbpf"]
+    elif runtime.mode == "native":
+        command = [str(runner_binary), "run-native"]
     elif runtime.mode in {"kernel", "kernel_rejit"}:
         command = [str(runner_binary), "test-run"]
     else:

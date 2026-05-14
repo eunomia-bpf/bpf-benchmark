@@ -1,65 +1,105 @@
-# bpfopt Lifecycle-Aligned Facts Design
+# bpfopt 生命周期对齐事实设计
 
-Date: 2026-05-14
+日期: 2026-05-14
 
-## Problem
+## 问题
 
-`map_inline`, `const_prop`, and other verifier-facing passes need facts about the
-same BPF instruction stream:
+`map_inline`、`const_prop` 等面向 verifier 的 pass 需要关于同一条 BPF 指令流的事实(facts):
 
-- verifier-proven scalar exact values, pointer kinds, stack bytes, packet ranges;
-- local bytecode-derived register/stack state such as `r10 + off`;
-- use-def and liveness facts;
-- branch/profile annotations;
-- BTF/PC metadata used during lowering and reporting.
+- verifier 证明的精确标量、指针种类、栈字节、包范围;
+- 本地 bytecode 推导的寄存器/栈状态,例如 `r10 + off`;
+- use-def 和 liveness;
+- 分支/profile 标注;
+- BTF/PC 元数据。
 
-Today these facts live in several shapes:
+今天这些事实分散在多种形态:
 
-- top-level `ProgramCFG` caches such as liveness and lifted register facts;
-- raw `BTreeMap<InsnSite, ...>` maps for verifier states and metadata;
-- pass-private scans in `map_inline`, `cond_select`, `wide_mem`, `bulk_memory`,
-  `rotate`, and others.
+- `ProgramCFG` 顶层 cache(liveness、lifted register facts);
+- 裸 `BTreeMap<InsnSite, ...>`(verifier state、metadata);
+- pass-private 扫描(`map_inline`、`cond_select`、`wide_mem`、`bulk_memory`、`rotate` 各扫一遍)。
 
-That split makes it too easy for one pass to consume a stale or differently
-interpreted fact. `map_inline` and `const_prop` should not each have their own
-understanding of "constant", stack bytes, or verifier state. Analysis results
-should live with the IR object that owns their lifecycle.
+这种割裂导致 pass 之间对 “常量”、“栈字节”、“verifier state” 各有解读,容易吃陈旧或不一致的事实。`map_inline` 和 `const_prop` 不应各持一份 “constant 是什么” 的理解;事实应该跟它生命周期归属的 IR 结点放在一起。
 
-## Core Decision
+## 设计出发点
 
-Use one lifecycle-aligned facts structure, attached at the program, block,
-instruction, and terminator positions where the facts are valid.
+这次重构的核心原则,先于一切实现细节:
 
-Do not create separate long-lived sidecar data structures for each domain
-(`BlockVerifierProof`, `BlockAnalysis`, `BlockLiveness`, etc.). The domains can
-be fields in one facts bundle, but ownership and invalidation should follow the
-IR node.
+1. **一个生命周期对应一个 struct**。指令、终结子、块、CFG 是四个不同的生命周期单元(只有前三个持有事实,CFG 只放派生 cache)。每一级的事实直接 inline 进它自己的 struct,字段集按这一层真实需要的内容定。
 
-Keep code growth close to zero. This refactor should primarily move and merge
-existing facts, not add a second analysis system beside the old one. Any new
-types or helpers should replace existing maps/helpers in the same patch series.
+2. **不创建额外的中间类型**。不引入共享 `Facts` 包装、不引入 `BlockVerifierProof` / `BlockAnalysis` / `BlockLiveness` 这种按 domain 切的 sidecar 类型、不引入 `BTreeMap<InsnSite, ...>` 这种与 IR 平行的长生命存储。事实跟着所属 IR 结点活,跟着所属 IR 结点死。
 
-The bpfopt IR remains BPF bytecode:
+3. **不并存新旧两套**。任何新加的字段必须同一变更里替换掉旧的存储/查询/helper。review 阶段出现 “暂时保留旧 map,后续清理” 一律打回。
+
+4. **不重复表达同一个事实**。同义的事实(例如块 entry verifier state == 块第一条指令 verifier_before)在 query 层做合并,不在两处都存。
+
+这四条决定了下面的结构、生命周期规则、mutation 边界,以及 “删除什么” 的硬约束。任何与之冲突的实现细节(包括为了 “渐进迁移” 而临时引入的并存类型)都不在本设计范围内。
+
+## 核心决定
+
+**事实直接 inline 进它生命周期所属的 IR 结点。**
+
+- 不引入共享的 `Facts` 中间类型(避免把 “某些字段对某层无意义” 的语义偏差固化进类型);
+- 不引入独立的长生命 sidecar(`BlockVerifierProof` / `BlockAnalysis` / `BlockLiveness` 之类禁止);
+- 不引入第二套并行存储 — 旧的顶层 `BTreeMap<InsnSite, ...>`、`LiftedRegFact`、pass-private 扫描结果同一次变更里删干净,不准 “新旧并存,以后清理”。
+
+三级生命周期单元各自持有自己的字段集:
+
+- **指令** — `InsnNode`,包 `BpfInsn` + 该指令位置的事实;
+- **终结子** — `Terminator`,块尾分支/跳转/退出 + 该位置的事实;
+- **块** — `BasicBlock`,`InsnNode` 序列 + `Terminator` + 块 entry/exit 级事实;
+- `ProgramCFG` 只持有派生 index 和版本 epoch,**不**作为事实的主生命周期所有者。
+
+bpfopt IR 仍然是 BPF bytecode:
 
 ```text
-BpfInsn       = instruction IR
-BasicBlock   = lifecycle/index owner for a sequence of BpfInsn
-ProgramCFG   = CFG view, mutation API, compute entry points
-Facts        = one bundle of analysis/proof/profile/metadata facts
+BpfInsn       内核 ABI 指令(不改其字段)
+InsnNode      BpfInsn + 该指令位置的事实
+Terminator    分支/跳转/退出 + 该位置的事实
+BasicBlock    InsnNode 序列 + Terminator + 块级事实
+ProgramCFG    CFG 视图、变更 API、派生 index、epoch
 ```
 
-## Shape
+## 结构
 
-First implementation should avoid wrapping every `BpfInsn` immediately. Keep
-`Vec<BpfInsn>` and add parallel facts vectors owned by `BasicBlock`:
+字段集**故意因层而异**。`ldimm64_second` 只在指令位置有意义,`branch_profile` 只在终结子位置有意义,块级事实不重复 verifier before/after。统一由查询 API 派分到对应层。
 
 ```rust
-struct ProgramCFG {
-    blocks: Vec<BasicBlock>,
-    version: u64,
+struct InsnNode {
+    insn: BpfInsn,
 
-    // Only truly global derived indexes or epochs stay here.
-    // The per-site facts themselves live on blocks/instructions.
+    // verifier 证明的状态(可缺)
+    verifier_before: ...,
+    verifier_after: ...,
+
+    // 本地 bytecode 推导(fp 偏移、ctx 装载、pkt data/end 来源等)
+    local_before: ...,
+    local_after: ...,
+
+    // dataflow:站点持有结果,CFG 级算法不动点完成后写回
+    uses: RegSet,
+    defs: RegSet,
+    live_in: Option<RegSet>,
+    live_out: Option<RegSet>,
+    reaching_defs_in: ...,
+    reaching_defs_out: ...,
+
+    // 元数据
+    btf_pc: Option<usize>,
+    ldimm64_second: Option<BpfInsn>,
+}
+
+struct Terminator {
+    kind: TerminatorKind,
+
+    // 终结子位置的 before-state;终结子之后是边,边状态归边
+    verifier_before: ...,
+    local_before: ...,
+
+    uses: RegSet,
+    defs: RegSet,
+
+    branch_profile: Option<BranchProfile>,
+    btf_pc: Option<usize>,
 }
 
 struct BasicBlock {
@@ -68,292 +108,207 @@ struct BasicBlock {
     frame: FrameId,
     predecessors: Vec<BlockId>,
 
-    insns: Vec<BpfInsn>,
+    insns: Vec<InsnNode>,
     terminator: Terminator,
 
-    block_facts: Facts,
-    insn_facts: Vec<Facts>,      // same length and order as `insns`
-    terminator_facts: Facts,
-}
-
-struct Facts {
-    version: u64,
-
-    // Verifier-like state. For an instruction this means before/after states.
-    // For a block this means entry/exit-edge states.
-    verifier: ...,
-
-    // Local bytecode-derived state, e.g. fp offsets, packet ctx loads, packet
-    // data/end provenance. This replaces ad hoc duplicate state shapes.
-    local: ...,
-
-    // Dataflow results. Computed at CFG/program scope, stored at the site.
-    uses: RegSet,
-    defs: RegSet,
+    // 块 entry/exit:CFG 不动点的产出落在这里
     live_in: Option<RegSet>,
     live_out: Option<RegSet>,
     reaching_defs_in: ...,
     reaching_defs_out: ...,
+}
 
-    // Metadata and profile attached to this lifecycle point.
-    branch_profile: Option<BranchProfile>,
-    btf_pc: Option<usize>,
-    ldimm64_second: Option<BpfInsn>,
+struct ProgramCFG {
+    blocks: Vec<BasicBlock>,
+    version: u64,
+
+    // 只放派生 index 和 epoch,不持有事实本身
+    use_def_index: Option<DefUseIndex>,   // DefSite -> Vec<UseSite>,可选
+    facts_epoch: u64,                     // 不动点是否需要重算
 }
 ```
 
-The ellipses are intentional. The design requirement is not a large type tree.
-It is one facts bundle with verifier/local/dataflow/profile/metadata fields.
-The exact internal representation can be added only when an implementation needs
-it.
+`...` 是有意留空。设计要求不是把每个事实子类型都先定义出来,而是**字段直接挂在所属层级,不另立类型**。具体表示由实现给出。
 
-Later, if the mechanical churn is acceptable, `BpfInsn` plus its `Facts` can be
-wrapped:
+## 生命周期规则
 
-```rust
-struct InsnNode {
-    insn: BpfInsn,
-    facts: Facts,
-}
-```
-
-That is an internal cleanup, not a prerequisite for the design.
-
-## Lifecycle Rule
-
-Facts live exactly where their owner lives:
-
-- instruction facts live in `insn_facts[idx]`;
-- terminator facts live in `terminator_facts`;
-- block entry/exit facts live in `block_facts`;
-- only program-wide derived indexes or epochs live in `ProgramCFG`.
-
-Mutation must update facts atomically with the IR:
+事实跟 IR 原子变动:
 
 ```text
-delete insn       -> delete its facts
-insert insn       -> insert empty facts
-replace insn(s)   -> replace facts with empty facts unless explicitly preserved
-split block       -> split insns and split/move corresponding facts
-merge blocks      -> merge insns and merge/move corresponding facts
-replace terminator -> clear terminator facts and affected edge facts
-remove block      -> remove block and all its facts
+删指令      -> 删除该 InsnNode(及其所有事实)
+插指令      -> 插入新 InsnNode(事实初始化为空)
+替换指令    -> 替换 InsnNode;字段重置为空,除非 mutation API 显式声明保留
+拆分块      -> 拆 InsnNode 序列;块级事实失效
+合并块      -> 合并 InsnNode 序列;块级事实失效
+替换终结子  -> 重置 Terminator;受影响边的事实失效
+删除块      -> 删除块及其所有事实
 ```
 
-This is the main reason to bind facts to `BasicBlock`: `BasicBlock` is already
-the owner of instruction indices and mutation lifecycle.
+事实绑定在 `BasicBlock` / `InsnNode` 上是因为它们本来就是指令索引与变更生命周期的所有者。
 
-## Mutation Boundary
+## Mutation 边界
 
-The current code is close to the right shape:
+只有 `ProgramCFG` / `BasicBlock` 暴露的变更 API 能改 IR + 事实:
 
-- passes generally cannot directly mutate `BasicBlock.insns` because it is
-  `pub(super)`;
-- most rewrites already go through `ProgramCFG` APIs in `bbprogram_api.rs`;
-- lift construction directly pushes instructions, which is construction rather
-  than rewrite;
-- `bbprogram_api.rs` still directly mutates `insns` and `terminator` internally.
+- 现在 `BasicBlock.insns` / `Terminator` 已经是 `pub(super)`,基本上 pass 进不去;
+- 大多数改写已经走 `bbprogram_api.rs`;
+- lift 构造直接 push 指令,这是构造不是改写,可以单独处理;
+- `bbprogram_api.rs` 内部仍然直接动 `insns` 和 `terminator`,需要把字段重置/边失效一并接进同一 API。
 
-The required cleanup is to make the `ProgramCFG` / `BasicBlock` mutation APIs
-the only place that changes both IR and facts. Passes should never update facts
-manually.
+passes 永远不直接动事实字段;读取也只能走查询 API,不准 grep 字段名。
 
-## Verifier Log Boundary
+## Verifier Log 边界
 
-Verifier log remains only an input format:
+verifier log 只是输入格式:
 
 ```text
 daemon ReJIT log_level=2
-  -> verifier_log.rs parses raw lines
-  -> ProgramCFG attaches normalized verifier fields into Facts
-  -> passes query Facts through ProgramCFG APIs
+  -> verifier_log.rs 解析原始行
+  -> ProgramCFG 把规范化后的字段写入对应 InsnNode / Terminator
+  -> passes 通过 ProgramCFG 查询 API 读取
 ```
 
-Passes must not import or inspect raw verifier-log records such as
-`VerifierInsn`, `VerifierInsnKind`, `RegState`, or `StackState`.
+passes **禁止** import / 检查原始 verifier-log 类型:`VerifierInsn`、`VerifierInsnKind`、`RegState`、`StackState`。
 
-The verifier importer is responsible for:
+verifier 导入器负责:
 
-- PC to block/insn/terminator mapping;
-- before/after/edge classification;
-- delta/full-state normalization;
-- retaining all visits and frames;
-- converting textual verifier states into the verifier fields inside `Facts`.
+- PC ↔ 块 / 指令 / 终结子映射;
+- before / after / 边分类;
+- delta / 全状态 normalize;
+- 保留所有 visit 与 frame;
+- 把文本 verifier state 写入 `InsnNode.verifier_*` 或 `Terminator.verifier_before`。
 
-## Unified Queries
+## 统一查询
 
-Passes should query facts through one API. The API can sit on `ProgramCFG`, but
-the data comes from the lifecycle-owned `Facts`.
-
-Examples:
+passes 通过 `ProgramCFG` 上的查询 API 拿事实,**不直接读字段**(读字段也算耦合,日后调整存储就要全 grep):
 
 ```rust
-prog.verifier_exact_scalar_after(site, reg)
-prog.verifier_reg_kind_after(site, reg)
-prog.verifier_stack_bytes_before(site, BPF_REG_2, width)
-prog.local_reg_before(site, reg)
-prog.live_out(site)
-prog.reaching_defs(site, reg)
+prog.verifier_exact_scalar_after(site, reg)        -> Option<i64>
+prog.verifier_reg_kind_after(site, reg)            -> Option<RegKind>
+prog.verifier_stack_bytes_before(site, reg, width) -> Option<StackBytes>
+prog.local_reg_before(site, reg)                   -> Option<LocalReg>
+prog.live_out(site)                                -> Option<RegSet>
+prog.reaching_defs(site, reg)                      -> Option<DefSiteSet>
 ```
 
-The query layer owns meet/consistency rules:
+`site` 是统一定位类型(`Site::Insn(b, i)` / `Site::Terminator(b)` / `Site::BlockEntry(b)` / `Site::BlockExit(b)`),query API 内部按 site 派分到对应层级的字段。
 
-- no states means no fact;
-- missing register means no verifier fact;
-- disagreeing visits mean no exact fact;
-- disagreeing frames mean no single-frame fact;
-- edge-only evidence cannot be treated as site-wide evidence;
-- verifier and local facts can be compared, but verifier-required queries must
-  not silently fall back to local facts.
+query 层拥有 meet / 一致性规则:
 
-This allows cross-checking:
+- 没有任何 state -> 没有事实;
+- 缺寄存器 -> 没有 verifier 事实;
+- 多个 visit 不一致 -> 没有 exact 事实;
+- 多个 frame 不一致 -> 没有单 frame 事实;
+- 仅边证据不能当作站点级证据;
+- verifier-required 查询**不准**静默回退到 local 事实。
+
+允许交叉验证:
 
 ```text
-local says r2 == fp-132
-verifier says r2 == fp-132 and stack bytes are exact
-  -> map_inline may use verifier stack bytes and report local agreement
+local 说 r2 == fp-132
+verifier 说 r2 == fp-132 且 stack bytes 精确
+  -> map_inline 用 verifier stack bytes,记录 local 一致
 
-local says r2 == fp-132
-verifier has no r2 state or says r2 is scalar
-  -> verifier-required query returns None; mismatch is visible
+local 说 r2 == fp-132
+verifier 没 r2 或 verifier 说 r2 是 scalar
+  -> verifier-required 查询返回 None;不一致暴露出来
 ```
 
-## What Goes Into Facts
+## 各层放什么
 
-All persistent analysis results should be stored where their lifecycle belongs:
+**InsnNode**
 
-- verifier state: instruction before/after, terminator before/after, block
-  entry/exit;
-- local register/stack state: instruction before/after;
-- use/def sets: instruction and terminator facts;
-- liveness: instruction and terminator facts;
-- reaching defs: instruction and terminator facts;
-- branch profile: branch terminator facts;
-- BTF/PC metadata: instruction or terminator facts;
-- LD_IMM64 second slot metadata: instruction facts.
+- verifier before/after state、local register/stack state;
+- use/def 集;
+- liveness in/out;
+- reaching defs in/out;
+- BTF/PC 元数据;
+- LD_IMM64 第二槽。
 
-The computation may still be program-level. For example, liveness and reaching
-defs require CFG fixed-point propagation. The result should still be written
-back to each instruction/terminator facts slot.
+**Terminator**
 
-Top-level `ProgramCFG` may keep derived indexes when needed for efficient
-queries, for example `DefSite -> Vec<UseSite>`. Those indexes are caches over
-facts, not the primary lifetime owner.
+- verifier before state、local before state;
+- use/def(分支条件读的寄存器);
+- branch profile(命中 / 未命中);
+- 边分类(由 verifier 导入器写)。
 
-## What Stays Pass-Local
+**BasicBlock**(块 entry/exit)
 
-Ephemeral matcher state can stay inside passes:
+- live_in / live_out;
+- reaching_defs_in / reaching_defs_out;
+- 不重复 verifier state — 同义于 `block.insns[0].verifier_before` 和 `terminator.verifier_after`,query 层做合并即可。
 
-- candidate lists;
-- temporary scan windows;
-- `map_inline` rewrite plans;
-- `cond_select` diamond candidates;
-- `wide_mem` ladder windows;
-- `bulk_memory` run candidates.
+**ProgramCFG**
 
-If a pass-local result becomes a reusable fact or affects correctness across
-passes, it should move into `Facts` rather than becoming another sidecar map.
+- 派生 index(例如 `DefSite -> Vec<UseSite>`);
+- 不动点 epoch、版本号;
+- 派生 index 是 cache,**不是**事实的主生命周期所有者。事实变了 index 失效,不是反过来。
 
-## Pass Responsibilities
+## 什么留在 pass 内
 
-`const_prop` should use verifier queries only:
+短暂的匹配器状态可以留在 pass 内,**不要**升级成长生命 sidecar:
+
+- 候选列表;
+- 临时扫描窗口;
+- `map_inline` 改写计划;
+- `cond_select` diamond 候选;
+- `wide_mem` ladder 窗口;
+- `bulk_memory` run 候选。
+
+如果 pass-local 结果跨 pass 复用或影响正确性,必须升级到对应层级的字段(`InsnNode` / `Terminator` / `BasicBlock`),不准新开 sidecar map。
+
+## Pass 职责
+
+`const_prop` 只用 verifier 查询:
 
 ```rust
 prog.verifier_reg_kind_after(site, dst_reg)
 prog.verifier_exact_scalar_after(site, dst_reg)
 ```
 
-`map_inline` should use verifier stack-byte queries for key proof:
+`map_inline` key 证明用 verifier stack-bytes 查询:
 
 ```rust
 prog.verifier_stack_bytes_before(call_site, BPF_REG_2, key_size)
 ```
 
-`map_inline` may use local facts and structural scans to find setup/delete sites,
-but it must not treat local facts as verifier proof of key bytes.
+`map_inline` 可以用 local 事实和结构扫描找 setup / delete 位置,但**不准**把 local 事实当成 key 字节的 verifier 证明。
 
-Other passes should consume shared facts instead of adding new pass-private
-dataflow where the result is not purely local to the matcher.
+其他 pass 一律消费共享事实,不再开 pass-private dataflow(纯匹配器内部状态除外)。
 
 ## Preservation
 
-Default preservation is conservative:
+默认保守失效:
 
 ```text
-changed instruction body -> new/empty facts for changed instructions
-changed block body       -> block entry/exit facts cleared unless preserved
-changed terminator       -> terminator facts and affected edge facts cleared
-changed CFG edge         -> dependent liveness/reaching-def facts stale
+指令体变了    -> 该 InsnNode 字段重置为空
+块体变了      -> 块级事实失效
+终结子变了    -> Terminator 字段重置;受影响边失效
+CFG 边变了    -> 相关 liveness / reaching defs 失效
 ```
 
-Runtime semantic equivalence does not automatically preserve verifier facts.
-Any preservation must be explicit in the mutation API, not inferred by a pass
-after the fact.
+运行时语义等价**不**自动保留 verifier 事实。任何保留必须在 mutation API 上显式声明,不准 pass 写完之后偷偷复用旧字段。
 
-The first implementation can simply clear affected facts and mark fixed-point
-analyses stale. More precise preservation can be added later if needed.
+## 期望代码影响
 
-## Migration Plan
+一次性到位:
 
-Phase 1: lifecycle storage without broad semantic changes.
+- 加 `InsnNode`(包 `BpfInsn` + 该指令位置的事实字段);
+- `BasicBlock.insns: Vec<BpfInsn>` 改成 `Vec<InsnNode>`,`Terminator` 加事实字段,`BasicBlock` 加块级字段;
+- 删旧的 `BTreeMap<InsnSite, VerifierState>`、顶层 liveness map、`LiftedRegFact` 等独立存储;
+- 删旧的 verifier 查询、liveness、use-def helper,统一换成 `ProgramCFG` 查询 API;
+- `const_prop` / `map_inline` 改用统一查询;
+- pass 里被新存储覆盖的 dataflow 扫描全部删掉。
 
-1. Add `Facts` fields to `BasicBlock`: one block facts slot, one facts slot per
-   instruction, and one terminator facts slot.
-2. Update lift construction to initialize empty facts alongside instructions.
-3. Update mutation APIs to insert/delete/clear facts together with instructions
-   and terminators.
-4. Move current verifier-state query payloads into facts.
-5. Keep existing liveness/use-def computation, but write results to facts rather
-   than only top-level maps.
-6. Update `const_prop` and `map_inline` to use unified query APIs.
-7. Delete the replaced top-level maps/helpers in the same migration step; do not
-   leave old and new fact stores running in parallel.
+硬约束:
 
-Phase 2: remove duplicate fact shapes.
-
-1. Replace `LiftedRegFact` and verifier reg/stack query shapes with one
-   verifier/local state vocabulary inside `Facts`.
-2. Keep source strength explicit: verifier facts and local bytecode facts are
-   comparable but not interchangeable.
-3. Add consistency checks where local and verifier facts cover the same register
-   or stack location.
-
-Phase 3: tighten preservation.
-
-1. Start with conservative invalidation.
-2. Add explicit preservation only for edits whose fact transfer is proven.
-3. Consider `InsnNode { insn, facts }` only after the parallel-vector approach is
-   stable.
-
-## Expected Code Impact
-
-The design should avoid adding another analysis layer and should target near-zero
-net code growth.
-
-Expected phase-1 movement:
-
-- add one reusable `Facts` bundle while deleting the replaced per-domain storage;
-- move current verifier queries and helpers into unified query code, then remove
-  the old raw-state query helpers;
-- move liveness/use-def results from maps into facts slots, keeping only derived
-  indexes that are still needed;
-- keep pass-local candidate matching inside passes;
-- avoid defining separate long-lived proof, liveness, local-state, and profile
-  sidecar structures.
-
-Implementation patches should be reviewed for net line growth. Temporary growth
-is acceptable only inside a short migration sequence where the next patch deletes
-the replaced structure. The intended outcome is fewer scattered
-`BTreeMap<InsnSite, ...>` structures and fewer pass-private interpretations of
-the same register/stack facts, not a larger bpfopt analysis layer.
+- 旧存储和新存储**不能**同 patch 共存。同一次变更里替换并删旧,review 出现 “暂时保留旧 map,后续清理” 这种行立即打回;
+- passes 不准 import 原始 verifier-log 类型,不准直接读 `InsnNode.*` 字段(走查询 API);
+- 净行数应该减少。新加的 `InsnNode` 字段被删除的 sidecar 类型 + 顶层 map + pass-private 扫描抵消并超过。
 
 ## Open Questions
 
-- Exact before/after/edge mapping from kernel verifier logs still needs to be
-  validated against real logs.
-- `BranchDeltaState` should be normalized deliberately rather than dropped or
-  treated as site-wide proof.
-- How much of the current `UseDefGraph` should remain as a derived index after
-  per-site facts own uses/defs/reaching-def facts?
-- Whether block permutation can carry facts safely depends on current `BlockId`
-  remapping guarantees.
+- 内核 verifier log 的 before / after / 边映射,需要在真实日志上对齐验证;
+- `BranchDeltaState` 该怎么 normalize(显式保留还是丢弃);
+- 现有 `UseDefGraph` 是完全替换成 `InsnNode.uses/defs` + `ProgramCFG.use_def_index`,还是部分保留;
+- 块重排(permutation)能否安全携带事实,取决于现有 `BlockId` 重映射的保证。
