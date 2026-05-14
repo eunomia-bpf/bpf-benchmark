@@ -438,6 +438,166 @@ def generate_cilium_socket_lb_service_select(output: Path) -> dict[str, int]:
     return {"record_count": record_count, "record_size": record_size}
 
 
+def generate_bcc_tcpconnect_ipv4_tuple_filter(output: Path) -> dict[str, int]:
+    record_count = 32
+    record_size = 24
+    state = 0xBCC700C0FFEE1234
+    blob = bytearray(struct.pack("<II", record_count, record_size))
+    ports = [22, 53, 80, 443, 8080, 8443, 30001, 32767]
+    for index in range(record_count):
+        state = _lcg(state ^ ((index + 1) * 0x9E3779B97F4A7C15))
+        pid = 1000 + index * 17
+        uid = 1000 + (index % 9)
+        src = 0x0A010000 | ((index + 1) & 0xFF)
+        dst = 0xAC100000 | ((index * 37) & 0xFFFF)
+        sport = 20000 + ((state >> 8) & 0x3FFF)
+        dport = ports[index % len(ports)]
+        family = 2 if index % 7 != 0 else 10
+        flags = (1 if index % 3 != 0 else 0) | (2 if index % 4 == 0 else 0) | (4 if index % 5 == 0 else 0)
+        netns = 400 + (index * 11)
+        blob.extend(struct.pack("<IIIIHHBBH", pid, uid, src, dst, sport, dport, family, flags, netns))
+
+    output.write_bytes(blob)
+    return {"record_count": record_count, "record_size": record_size}
+
+
+def generate_tetragon_process_event_arg_filter(output: Path) -> dict[str, int]:
+    record_count = 32
+    record_size = 32
+    state = 0x7E7A60A123456789
+    arg_names = [b"bash", b"curl", b"python", b"sh", b"nginx", b"sshd", b"java", b"bpftool"]
+    event_ids = [1, 2, 5, 9, 13, 17]
+    blob = bytearray(struct.pack("<II", record_count, record_size))
+    for index in range(record_count):
+        state = _lcg(state ^ ((index + 3) * 0xD1342543DE82EF95))
+        pid = 2000 + index * 19
+        tid = pid + (index & 3)
+        namespace_id = 0x4200 | (index & 0xFF) if index % 4 == 0 else 0x1100 | index
+        event_id = event_ids[index % len(event_ids)]
+        action = (index & 7) | (2 if index % 3 == 0 else 0)
+        caps = (0x2400 if index % 5 == 0 else 0x80) ^ (state & 0xFFFF)
+        arg = bytearray(8)
+        name = arg_names[index % len(arg_names)]
+        arg[:len(name)] = name[:8]
+        arg_sig = struct.unpack("<Q", bytes(arg))[0]
+        blob.extend(struct.pack("<IIIHHQQ", pid, tid, namespace_id, event_id, action, caps, arg_sig))
+
+    output.write_bytes(blob)
+    return {"record_count": record_count, "record_size": record_size}
+
+
+def generate_otel_stack_frame_unwind_scan(output: Path) -> dict[str, int]:
+    frame_count = 24
+    frame_size = 24
+    state = 0x07E15A5ECAFED00D
+    blob = bytearray(struct.pack("<II", frame_count, frame_size))
+    for index in range(frame_count):
+        state = _lcg(state ^ ((index + 5) * 0xA0761D6478BD642F))
+        ip = 0x7F0000000000 + ((state >> 12) & 0xFFFFFFF)
+        sp_delta = 8 + ((index % 9) * 16)
+        fp_delta = 16 + ((index % 7) * 24)
+        if index % 11 == 0:
+            fp_delta = 9000
+        flags = (index & 7) | (2 if index % 4 == 0 else 0)
+        kind = index % 5
+        symbol_hash = ((state >> 28) ^ (index * 0x45D9F3B)) & 0xFFFFFFFF
+        blob.extend(struct.pack("<QIIHHI", ip, sp_delta, fp_delta, flags, kind, symbol_hash))
+
+    output.write_bytes(blob)
+    return {"frame_count": frame_count, "frame_size": frame_size}
+
+
+def generate_cilium_ct_nat_tuple_rewrite(output: Path) -> dict[str, int]:
+    record_count = 32
+    record_size = 32
+    state = 0xC71110A7DEADBEEF
+    blob = bytearray(struct.pack("<II", record_count, record_size))
+    for index in range(record_count):
+        state = _lcg(state ^ ((index + 1) * 0x9E3779B97F4A7C15))
+        src = 0x0A020000 | ((index + 1) & 0xFF)
+        dst = 0xAC110000 | ((index * 29) & 0xFFFF)
+        sport = 10000 + ((state >> 9) & 0x3FFF)
+        dport = 30000 + (index * 31 % 2768)
+        proto = 6 if index % 3 != 0 else 17
+        if index % 13 == 0:
+            proto = 1
+        direction = index & 1
+        flags = (1 if index % 2 == 0 else 0) | (2 if index % 3 == 0 else 0) | (4 if index % 5 == 0 else 0)
+        nat_src = 0x0A640000 | ((index + 7) & 0xFF)
+        nat_dst = 0x0A650000 | ((index * 7) & 0xFF)
+        rev_nat_id = 100 + index
+        identity = 2000 + (index * 3)
+        lifetime = 30 + ((state >> 17) & 0xFFFF)
+        blob.extend(struct.pack(
+            "<IIHHBBHIIHHI",
+            src,
+            dst,
+            sport,
+            dport,
+            proto,
+            direction,
+            flags,
+            nat_src,
+            nat_dst,
+            rev_nat_id,
+            identity,
+            lifetime,
+        ))
+
+    output.write_bytes(blob)
+    return {"record_count": record_count, "record_size": record_size}
+
+
+def generate_packet_toeplitz_rss_hash(output: Path) -> dict[str, int]:
+    packet = bytearray(54)
+    packet[0:6] = bytes([0x00, 0x16, 0x3E, 0x12, 0x34, 0x56])
+    packet[6:12] = bytes([0x52, 0x54, 0x00, 0xAB, 0xCD, 0xEF])
+    _write_be16(packet, 12, 0x0800)
+    ip = 14
+    packet[ip] = 0x45
+    packet[ip + 1] = 0x00
+    _write_be16(packet, ip + 2, 40)
+    _write_be16(packet, ip + 4, 0x4321)
+    _write_be16(packet, ip + 6, 0x4000)
+    packet[ip + 8] = 64
+    packet[ip + 9] = 6
+    _write_be16(packet, ip + 10, 0)
+    packet[ip + 12 : ip + 16] = bytes([10, 2, 3, 4])
+    packet[ip + 16 : ip + 20] = bytes([198, 51, 100, 77])
+    tcp = ip + 20
+    _write_be16(packet, tcp, 41432)
+    _write_be16(packet, tcp + 2, 443)
+    _write_be32(packet, tcp + 4, 0x10203040)
+    _write_be32(packet, tcp + 8, 0x50607080)
+    packet[tcp + 12] = 0x50
+    packet[tcp + 13] = 0x18
+    _write_be16(packet, tcp + 14, 0x4000)
+    _write_be16(packet, tcp + 16, 0)
+    _write_be16(packet, tcp + 18, 0)
+    output.write_bytes(packet)
+    return {"packet_len": len(packet), "protocol": 6}
+
+
+def generate_bpftrace_comm_key_fnv_hash(output: Path) -> dict[str, int]:
+    record_count = 32
+    record_size = 32
+    comms = [b"python3", b"node", b"bash", b"curl", b"java", b"nginx", b"postgres", b"bpftrace"]
+    blob = bytearray(struct.pack("<II", record_count, record_size))
+    for index in range(record_count):
+        pid = 3000 + index * 23
+        tgid = pid - (index & 3)
+        probe_id = 0x100 + (index % 11)
+        flags = (index & 3) | (1 if index % 5 == 0 else 0)
+        comm = bytearray(16)
+        raw = comms[index % len(comms)]
+        comm[:len(raw)] = raw
+        blob.extend(struct.pack("<IIII", pid, tgid, probe_id, flags))
+        blob.extend(comm)
+
+    output.write_bytes(blob)
+    return {"record_count": record_count, "record_size": record_size}
+
+
 def _make_spec_generator(name: str, spec: dict):
     builder = _KIND_BUILDERS[spec["kind"]]
     def _gen(output: Path) -> dict[str, int]: return builder(output, spec)

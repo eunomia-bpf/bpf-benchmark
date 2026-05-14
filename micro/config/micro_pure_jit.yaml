@@ -299,6 +299,79 @@ benchmarks:
     expected_result: 2868565165525030065
     tags: [cilium, socket-lb, branch, hash, pure-jit]
 
+  - name: bcc_tcpconnect_ipv4_tuple_filter
+    description: bcc tcpconnect-style IPv4 tuple event filter over pid, uid, netns, and port class
+    category: control-flow
+    family: tracing-tuple-filter
+    level: ipv4-connect
+    hypothesis: Captures tracing event tuple filtering without packet parsing, maps, or helpers
+    base_name: bcc_tcpconnect_ipv4_tuple_filter
+    kernel_input_size: 776
+    input_generator: bcc_tcpconnect_ipv4_tuple_filter
+    expected_result: 18109187572642697766
+    tags: [bcc, tracing, tuple, branch, pure-jit]
+
+  - name: tetragon_process_event_arg_filter
+    description: Tetragon process-event argument, namespace, capability, and action filter
+    category: control-flow
+    family: security-event-filter
+    level: process-args
+    hypothesis: Represents security policy event filtering over process metadata and argument signatures
+    base_name: tetragon_process_event_arg_filter
+    kernel_input_size: 1032
+    input_generator: tetragon_process_event_arg_filter
+    expected_result: 12641586655603153431
+    tags: [tetragon, security, branch, string, pure-jit]
+
+  - name: otel_stack_frame_unwind_scan
+    description: OpenTelemetry profiler-style stack frame unwind scan over frame deltas and symbol hashes
+    category: memory-local
+    family: profiler-unwind
+    level: frame-scan
+    hypothesis: Captures profiler unwind cursor updates and frame classification without helper dependencies
+    base_name: otel_stack_frame_unwind_scan
+    kernel_input_size: 584
+    input_generator: otel_stack_frame_unwind_scan
+    expected_result: 12043289854646947360
+    tags: [otel, profiler, stack, fields, pure-jit]
+
+  - name: cilium_ct_nat_tuple_rewrite
+    description: Cilium conntrack/NAT tuple rewrite with direction swap, rev NAT id, identity, and lifetime fields
+    category: alu-mix
+    family: ct-nat-rewrite
+    level: tuple-rewrite
+    hypothesis: Represents datapath tuple rewrite and CT/NAT metadata mixing distinct from service selection
+    base_name: cilium_ct_nat_tuple_rewrite
+    kernel_input_size: 1032
+    input_generator: cilium_ct_nat_tuple_rewrite
+    expected_result: 14199193300769829204
+    tags: [cilium, conntrack, nat, tuple, pure-jit]
+
+  - name: packet_toeplitz_rss_hash
+    description: Packet-backed IPv4 TCP Toeplitz RSS hash over a 5-tuple
+    category: alu-mix
+    family: rss-hash
+    level: toeplitz-ipv4-tcp
+    hypothesis: Adds NIC/RSS-style Toeplitz hashing, a different packet hash family from Jenkins and SipHash-like mixers
+    base_name: packet_toeplitz_rss_hash
+    io_mode: packet
+    kernel_input_size: 54
+    input_generator: packet_toeplitz_rss_hash
+    expected_result: 13526464303109995596
+    tags: [packet, hash, toeplitz, rss, pure-jit]
+
+  - name: bpftrace_comm_key_fnv_hash
+    description: bpftrace-style comm plus pid/tgid/probe aggregation key hashed with FNV-1a
+    category: alu-mix
+    family: tracing-key-hash
+    level: fnv1a-comm-key
+    hypothesis: Adds lightweight string/tuple aggregation key hashing distinct from packet-oriented hash paths
+    base_name: bpftrace_comm_key_fnv_hash
+    kernel_input_size: 1032
+    input_generator: bpftrace_comm_key_fnv_hash
+    expected_result: 8524536671075880526
+    tags: [bpftrace, tracing, hash, string, pure-jit]
+
   - name: tc_packet_checksum_fold
     description: TC version of the packet checksum fold benchmark
     category: memory-local

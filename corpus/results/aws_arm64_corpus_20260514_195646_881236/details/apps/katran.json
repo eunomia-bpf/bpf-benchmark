@@ -1,0 +1,127 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "85": {
+        "bytes_jited": 14464,
+        "bytes_xlated": 23824,
+        "id": 85,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 153716,
+        "run_time_ns_delta": 89316025,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d10s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 10.048864298999995,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 10s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     4.21ms   10.05ms 130.01ms   91.09%\n    Req/Sec     1.93k   806.94     3.93k    73.43%\n  Latency Distribution\n     50%  721.00us\n     75%    1.91ms\n     90%   12.51ms\n     99%   49.97ms\n  76827 requests in 10.04s, 11.94MB read\nRequests/sec:   7655.51\nTransfer/sec:      1.19MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "85": {
+        "bytes_jited": 14464,
+        "bytes_xlated": 23824,
+        "id": 85,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 148183,
+        "run_time_ns_delta": 85781604,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "ip",
+          "netns",
+          "exec",
+          "katran-client",
+          "/usr/bin/wrk",
+          "-t4",
+          "-c10",
+          "-d10s",
+          "--latency",
+          "http://10.100.1.1:8080/"
+        ],
+        "config": {
+          "connections": 10,
+          "threads": 4,
+          "tool": "wrk",
+          "url": "http://10.100.1.1:8080/"
+        },
+        "duration_s": 10.073176089999997,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Running 10s test @ http://10.100.1.1:8080/\n  4 threads and 10 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency     4.95ms   11.61ms 159.86ms   90.76%\n    Req/Sec     1.85k   827.59     4.64k    71.25%\n  Latency Distribution\n     50%  681.00us\n     75%    3.21ms\n     90%   15.35ms\n     99%   56.73ms\n  74056 requests in 10.05s, 11.51MB read\nRequests/sec:   7367.44\nTransfer/sec:      1.15MB",
+        "workload_name": "katran_wrk_http"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "85": {
+        "passes": [
+          {
+            "bpfopt_ms": 78,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2544,
+              "insn_count_before": 2544,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 291,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 85,
+        "program": {
+          "final_insn_count": 2544,
+          "orig_insn_count": 2544,
+          "prog_id": 85,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "ok"
+}

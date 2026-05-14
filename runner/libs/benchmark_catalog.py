@@ -29,8 +29,8 @@ MACRO_APP_DEFINITIONS: tuple[MacroAppDefinition, ...] = (
     MacroAppDefinition(name="otelcol-ebpf-profiler/profiling", runner="otelcol-ebpf-profiler", workload="otel_mixed_workload"),
     MacroAppDefinition(name="cilium/agent", runner="cilium", workload="network_lossy_multi"),
     MacroAppDefinition(name="tetragon/observer", runner="tetragon", workload="stress_ng_os_io_network"),
-    MacroAppDefinition(name="katran", runner="katran", workload="xdp_traffic"),
-    MacroAppDefinition(name="katran/pktgen", runner="katran", workload="xdp_pktgen"),
+    MacroAppDefinition(name="katran", runner="katran", workload="xdp_pktgen"),
+    MacroAppDefinition(name="katran/wrk", runner="katran", workload="xdp_traffic"),
     MacroAppDefinition(name="tracee/monitor", runner="tracee", workload="stress_ng_os_io_network"),
     MacroAppDefinition(name="bpftrace/set", runner="bpftrace_set", workload="stress_ng_os_io_network"),
 )
