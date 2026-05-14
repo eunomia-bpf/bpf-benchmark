@@ -67,16 +67,13 @@ impl BpfPass for PrefetchPass {
         if candidates.is_empty() {
             return Ok(PassResult::with_sites(0, skipped));
         }
-        let (btf_id, kfunc_off) = prog.kinsn_call(PREFETCH_TARGET_NAME)?;
         let pairs: Vec<(InsnSite, PrefetchCandidate)> =
             candidates.into_iter().map(|c| (c.insert, c)).collect();
-        let applied = apply_candidates_reverse(prog, &pairs, &mut skipped, |_, _, candidate| {
-            let payload = prefetch_payload(candidate.ptr_reg)?;
-            Ok((
-                0,
-                emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
-            ))
-        })?;
+        let applied =
+            apply_candidates_reverse(prog, &pairs, &mut skipped, |prog, _, candidate| {
+                let payload = prefetch_payload(candidate.ptr_reg)?;
+                Ok((0, prog.kinsn_emit(PREFETCH_TARGET_NAME, payload)?))
+            })?;
         Ok(PassResult::with_sites(applied, skipped))
     }
 }

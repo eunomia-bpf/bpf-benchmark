@@ -301,14 +301,52 @@ bool patch_map_symbol(std::vector<uint8_t> &text, size_t pc,
 	return false;
 }
 
+std::optional<size_t> subprog_start_pc(const std::vector<uint8_t> &input)
+{
+	std::optional<size_t> start;
+	const size_t insn_count = input.size() / INSN_SIZE;
+	for (size_t pc = 0; pc < insn_count; pc++) {
+		const uint8_t opcode = input[pc * INSN_SIZE];
+		if ((opcode != BPF_CALL && opcode != BPF_CALLX) ||
+		    src_reg(input, pc) != BPF_PSEUDO_CALL) {
+			continue;
+		}
+		const int64_t target = static_cast<int64_t>(pc) + 1 +
+				       static_cast<int64_t>(read_imm(input, pc));
+		if (target < 0 || target >= static_cast<int64_t>(insn_count)) {
+			throw std::runtime_error("local call target out of range");
+		}
+		const auto target_pc = static_cast<size_t>(target);
+		start = start ? std::min(*start, target_pc) : target_pc;
+	}
+	return start;
+}
+
+size_t remap_original_pc(size_t original_pc, std::optional<size_t> subprog_start,
+			 size_t generated_insns)
+{
+	if (!subprog_start) {
+		return original_pc;
+	}
+	if (original_pc < *subprog_start) {
+		throw std::runtime_error(
+			"pseudo-call target points before subprogram tail");
+	}
+	return generated_insns + (original_pc - *subprog_start);
+}
+
 bool patch_call_symbol(std::vector<uint8_t> &text, size_t pc,
-		       std::string_view name)
+		       std::string_view name,
+		       std::optional<size_t> subprog_start,
+		       size_t generated_insns)
 {
 	constexpr std::string_view prefix = "__llvmbpf_pseudo_call_pc_";
 	if (!name.starts_with(prefix)) {
 		return false;
 	}
-	const uint32_t target = parse_hex_u32(name.substr(prefix.size()));
+	const size_t target = remap_original_pc(parse_hex_u32(name.substr(prefix.size())),
+						subprog_start,
+						generated_insns);
 	const int64_t imm = static_cast<int64_t>(target) -
 			    static_cast<int64_t>(pc) - 1;
 	if (imm < std::numeric_limits<int32_t>::min() ||
@@ -323,7 +361,9 @@ bool patch_call_symbol(std::vector<uint8_t> &text, size_t pc,
 
 void apply_one_relocation(llvm::object::ObjectFile &object,
 			  const llvm::object::RelocationRef &reloc,
-			  std::vector<uint8_t> &text)
+			  std::vector<uint8_t> &text,
+			  std::optional<size_t> subprog_start,
+			  size_t generated_insns)
 {
 	const auto symbol = reloc.getSymbol();
 	if (symbol == object.symbol_end()) {
@@ -340,7 +380,8 @@ void apply_one_relocation(llvm::object::ObjectFile &object,
 		set_src_reg(text, pc, 0);
 		write_imm(text, pc, static_cast<int32_t>(*helper));
 	} else if (!patch_map_symbol(text, pc, name) &&
-		   !patch_call_symbol(text, pc, name)) {
+		   !patch_call_symbol(text, pc, name, subprog_start,
+				      generated_insns)) {
 		throw std::runtime_error("unsupported relocation symbol " +
 					 name + " at offset " +
 					 std::to_string(reloc.getOffset()) +
@@ -349,7 +390,9 @@ void apply_one_relocation(llvm::object::ObjectFile &object,
 }
 
 void apply_text_relocations(llvm::object::ObjectFile &object,
-			    std::vector<uint8_t> &text)
+			    std::vector<uint8_t> &text,
+			    std::optional<size_t> subprog_start,
+			    size_t generated_insns)
 {
 	for (const auto &section : object.sections()) {
 		auto relocated = section.getRelocatedSection();
@@ -362,7 +405,8 @@ void apply_text_relocations(llvm::object::ObjectFile &object,
 			continue;
 		}
 		for (const auto &reloc : section.relocations()) {
-			apply_one_relocation(object, reloc, text);
+			apply_one_relocation(object, reloc, text,
+					     subprog_start, generated_insns);
 		}
 	}
 	for (size_t pc = 0; pc < text.size() / INSN_SIZE; pc++) {
@@ -376,7 +420,8 @@ void apply_text_relocations(llvm::object::ObjectFile &object,
 }
 
 std::vector<uint8_t>
-extract_relocated_text(const std::vector<uint8_t> &object_bytes)
+extract_relocated_text(const std::vector<uint8_t> &object_bytes,
+		       const std::vector<uint8_t> &input)
 {
 	auto buffer = llvm::MemoryBuffer::getMemBuffer(
 		llvm::StringRef(
@@ -402,7 +447,13 @@ extract_relocated_text(const std::vector<uint8_t> &object_bytes)
 	if (text.size() % INSN_SIZE != 0) {
 		throw std::runtime_error(".text size is not a multiple of 8");
 	}
-	apply_text_relocations(*object, text);
+	const auto subprog_start = subprog_start_pc(input);
+	const size_t generated_insns = text.size() / INSN_SIZE;
+	apply_text_relocations(*object, text, subprog_start, generated_insns);
+	if (subprog_start) {
+		text.insert(text.end(), input.begin() + *subprog_start * INSN_SIZE,
+			    input.end());
+	}
 	return text;
 }
 
@@ -513,7 +564,7 @@ std::vector<uint8_t> run_llvm_roundtrip(const std::vector<uint8_t> &input)
 		throw std::runtime_error(llvm_error_string(module.takeError()));
 	}
 	return module->withModuleDo([&](llvm::Module &module) {
-		return extract_relocated_text(emit_bpf_object(module));
+		return extract_relocated_text(emit_bpf_object(module), input);
 	});
 }
 

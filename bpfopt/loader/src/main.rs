@@ -2,8 +2,9 @@
 //! Host-side developer loader for bpfopt. Run from the project root.
 //!
 //! Flow:
-//!   1. libbpf-load every program in `<obj>` with log_level=2; write per-program
-//!      {bytecode, verifier log, metadata, map-ids} into `<workdir>/<prog_name>/`
+//!   1. libbpf-load every program in `<obj>`; write per-program
+//!      {bytecode, verifier log when requested, metadata, map-ids} into
+//!      `<workdir>/<prog_name>/`
 //!   2. shell out to `bpftool map show -j` + `bpftool map dump -j` for each map
 //!      referenced by the loaded programs → `<workdir>/map-values/`
 //!   3. for each program: `bpfopt --canonicalize-map-refs`
@@ -185,7 +186,17 @@ fn run(cli: Cli) -> Result<()> {
     let workdir = WorkDir::open(cli.workdir.clone())?;
     let map_values_dir = workdir.path.join(MAP_VALUES_DIR);
     let dump_values = cli.pass.as_deref() == Some("map_inline");
-    let (_obj, prepared) = prepare_workdir(&workdir.path, &cli.obj, cli.katran_maps, dump_values)?;
+    let initial_log_level = match cli.pass.as_deref() {
+        Some(pass) if !pass_uses_verifier_states(pass)? => 0,
+        _ => 2,
+    };
+    let (_obj, prepared) = prepare_workdir(
+        &workdir.path,
+        &cli.obj,
+        cli.katran_maps,
+        dump_values,
+        initial_log_level,
+    )?;
 
     for prog in &prepared {
         canonicalize_program(prog, &cli.bpfopt)?;
@@ -229,15 +240,15 @@ fn shell_quote_path(path: &Path) -> String {
     format!("'{}'", path.display().to_string().replace('\'', "'\\''"))
 }
 
-/// libbpf-load every program in `obj_path` with log_level=2 and dump bytecode,
-/// verifier log, metadata, and shared map snapshots into `workdir`. Each
-/// program lands in `<workdir>/<prog_name>/`; map snapshots are shared at
-/// `<workdir>/map-values/`.
+/// libbpf-load every program in `obj_path` and dump bytecode, verifier log,
+/// metadata, and shared map snapshots into `workdir`. Each program lands in
+/// `<workdir>/<prog_name>/`; map snapshots are shared at `<workdir>/map-values/`.
 fn prepare_workdir(
     workdir: &Path,
     obj_path: &Path,
     katran_maps: bool,
     dump_values: bool,
+    initial_log_level: u32,
 ) -> Result<(BpfObject, Vec<PreparedProgram>)> {
     let map_values_dir = workdir.join(MAP_VALUES_DIR);
     fs::create_dir_all(&map_values_dir)?;
@@ -247,7 +258,7 @@ fn prepare_workdir(
     let mut log_bufs: Vec<Vec<c_char>> = (0..progs.len()).map(|_| vec![0; LOG_BYTES]).collect();
     for (prog, buf) in progs.iter().zip(log_bufs.iter_mut()) {
         libbpf_ok(
-            unsafe { libbpf_sys::bpf_program__set_log_level(prog.ptr, 2) },
+            unsafe { libbpf_sys::bpf_program__set_log_level(prog.ptr, initial_log_level) },
             "bpf_program__set_log_level",
         )?;
         libbpf_ok(
@@ -358,12 +369,7 @@ fn run_pass_via_yaml(
     target: Option<&Path>,
     map_ids: &[u32],
 ) -> Result<()> {
-    let yaml_path = Path::new(PASS_CONFIG_DIR).join(pass).join("default.yaml");
-    let yaml: serde_yaml::Value = serde_yaml::from_slice(&fs::read(&yaml_path)?)?;
-    let template = yaml
-        .get("command")
-        .and_then(|v| v.as_str())
-        .ok_or_else(|| anyhow!("{} missing `command` string", yaml_path.display()))?;
+    let template = load_pass_command(pass)?;
 
     let metadata = read_json::<ProgramMetadata>(&prog_dir.join(METADATA_JSON))?;
     let p = |sub: &str| prog_dir.join(sub).display().to_string();
@@ -389,6 +395,20 @@ fn run_pass_via_yaml(
         bail!("pass {pass} exited with {status}");
     }
     Ok(())
+}
+
+fn pass_uses_verifier_states(pass: &str) -> Result<bool> {
+    Ok(load_pass_command(pass)?.contains("${VERIFIER_STATES}"))
+}
+
+fn load_pass_command(pass: &str) -> Result<String> {
+    let yaml_path = Path::new(PASS_CONFIG_DIR).join(pass).join("default.yaml");
+    let yaml: serde_yaml::Value = serde_yaml::from_slice(&fs::read(&yaml_path)?)?;
+    let command = yaml
+        .get("command")
+        .and_then(|v| v.as_str())
+        .ok_or_else(|| anyhow!("{} missing `command` string", yaml_path.display()))?;
+    Ok(command.to_string())
 }
 
 /// Reload the bytecode produced for `prog_dir` via BPF_PROG_LOAD as a sanity
@@ -843,7 +863,7 @@ mod tests {
         let overlay_dir = root.join("runner/config/passes/map_inline/overlays/katran");
         let workdir = WorkDir::open(None)?;
         let map_values_dir = workdir.path.join(MAP_VALUES_DIR);
-        let (_obj, prepared) = prepare_workdir(&workdir.path, &obj, true, true)?;
+        let (_obj, prepared) = prepare_workdir(&workdir.path, &obj, true, true, 2)?;
         for prog in &prepared {
             let metadata = read_json::<ProgramMetadata>(&prog.dir.join(METADATA_JSON))?;
             if metadata.name != "balancer_ingress" {

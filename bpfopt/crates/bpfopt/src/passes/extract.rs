@@ -66,14 +66,10 @@ impl BpfPass for ExtractPass {
         }
         let applied =
             apply_candidates_reverse(prog, &candidates, &mut skipped, |prog, _start, site| {
-                let (btf_id, kfunc_off) = prog.kinsn_call("bpf_extract64")?;
                 let payload = BpfInsn::pack_u4(site.dst_reg, 0)
                     | BpfInsn::pack_u8(site.shift_amount as u8, 8)
                     | BpfInsn::pack_u8(site.bit_len as u8, 16);
-                Ok((
-                    2,
-                    emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
-                ))
+                Ok((2, prog.kinsn_emit("bpf_extract64", payload)?))
             })?;
         Ok(PassResult::with_sites(applied, skipped))
     }

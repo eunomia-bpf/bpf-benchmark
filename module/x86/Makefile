@@ -12,6 +12,10 @@ obj-m += bpf_endian.o
 obj-m += bpf_lea.o
 obj-m += bpf_bulk_memory.o
 obj-m += bpf_prefetch.o
+obj-m += bpf_x86_mov_sib.o
+obj-m += bpf_x86_movbe_sib.o
+obj-m += bpf_x86_popcnt.o
+obj-m += bpf_x86_bmi1.o
 
 all:
 	$(MAKE) -C $(KDIR) M=$(CURDIR) modules

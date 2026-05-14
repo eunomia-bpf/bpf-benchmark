@@ -729,6 +729,15 @@ impl ProgramCFG {
         let kfunc_off = self.kinsn_reg.call_off_for_target_name(target_name)?;
         Ok((btf_id, kfunc_off))
     }
+    /// One-shot helper: resolve kinsn target + emit packed call sequence
+    /// (sidecar + call). Replaces the two-step `let (btf, off) = kinsn_call(name)?;
+    /// emit_packed_kinsn_call_with_off(payload, btf, off)` pattern.
+    pub fn kinsn_emit(&self, target_name: &str, payload: u64) -> anyhow::Result<Vec<BpfInsn>> {
+        let (btf_id, kfunc_off) = self.kinsn_call(target_name)?;
+        Ok(crate::insn::emit_packed_kinsn_call_with_off(
+            payload, btf_id, kfunc_off,
+        ))
+    }
     /// Live-out RegSet at the last instruction of a kinsn window starting at
     /// `start` and consuming `len` body sites. Used by passes (today: rotate)
     /// that need to know whether a scratch register survives past the window.

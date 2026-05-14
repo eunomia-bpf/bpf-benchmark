@@ -66,7 +66,6 @@ impl BpfPass for RotatePass {
 
         let applied =
             apply_candidates_reverse(prog, &applicable, &mut skipped, |prog, _start, site| {
-                let (btf_id, kfunc_off) = prog.kinsn_call(site.width.target_name())?;
                 let shift_amount = u8::try_from(site.shift_amount).map_err(|_| {
                     anyhow::anyhow!(
                         "rotate shift amount {} exceeds packed payload width",
@@ -79,7 +78,7 @@ impl BpfPass for RotatePass {
                     | BpfInsn::pack_u4(site.tmp_reg, 16);
                 Ok((
                     site.old_len,
-                    emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
+                    prog.kinsn_emit(site.width.target_name(), payload)?,
                 ))
             })?;
 

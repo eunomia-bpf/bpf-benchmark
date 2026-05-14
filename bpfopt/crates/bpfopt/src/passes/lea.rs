@@ -91,11 +91,9 @@ impl BpfPass for LeaPass {
 
         let applied =
             apply_candidates_reverse(prog, &candidates, &mut skipped, |prog, _start, site| {
-                let (btf_id, kfunc_off) = prog.kinsn_call(site.width.target_name())?;
-                let payload = lea_payload(site);
                 Ok((
                     site.old_len,
-                    emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off),
+                    prog.kinsn_emit(site.width.target_name(), lea_payload(site))?,
                 ))
             })?;
 

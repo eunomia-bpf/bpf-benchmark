@@ -2,7 +2,6 @@
 use crate::analysis::{InsnSite, ProgramCFG};
 use crate::insn::*;
 use crate::pass::*;
-use std::collections::HashMap;
 
 const MEMCPY_TARGET: &str = "bpf_bulk_memcpy";
 const MEMSET_TARGET: &str = "bpf_bulk_memset";
@@ -100,14 +99,10 @@ fn scan_sites(prog: &ProgramCFG) -> anyhow::Result<ScanResult> {
     for block in prog.block_ids().collect::<Vec<_>>() {
         let body = prog.block_body_view(block)?;
         let body_insns = body.bpf_insns();
-        let mut live_out = HashMap::new();
-        for &site in &body.sites {
-            live_out.insert(site, prog.live_out_site_checked(site)?);
-        }
         let mut idx = 0usize;
         while idx < body.insns.len() {
             let start = body.sites[idx];
-            match try_match_memcpy_run_at(&body_insns, &body.sites, idx, &live_out)? {
+            match try_match_memcpy_run_at(prog, &body_insns, &body.sites, idx)? {
                 MatchOutcome::Apply(site) => {
                     let old_len = site.old_len;
                     scan.sites.push((start, site));
@@ -137,10 +132,10 @@ fn scan_sites(prog: &ProgramCFG) -> anyhow::Result<ScanResult> {
     Ok(scan)
 }
 fn try_match_memcpy_run_at(
+    prog: &ProgramCFG,
     insns: &[BpfInsn],
     sites: &[InsnSite],
     idx: usize,
-    live_out: &HashMap<InsnSite, RegSet>,
 ) -> anyhow::Result<MatchOutcome> {
     let Some(first) = memcpy_lane_at(insns, idx) else {
         return Ok(MatchOutcome::NoMatch);
@@ -193,9 +188,7 @@ fn try_match_memcpy_run_at(
             raw_len,
         ));
     }
-    let live_after = live_out
-        .get(&last_site)
-        .ok_or_else(|| anyhow::anyhow!("bulk_memory missing live_out for {:?}", last_site))?;
+    let live_after = prog.live_out_site_checked(last_site)?;
     let mut seen = 0u16;
     for tmp_reg in tmp_regs.iter().take(consumed_pairs).copied() {
         let bit = 1u16 << tmp_reg;
