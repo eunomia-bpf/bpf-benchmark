@@ -1,7 +1,7 @@
 #include "common.h"
 
 /*
- * rotate64_hash: SipHash-like hash using 64-bit rotations.
+ * siphash_rotate64_mixer: SipHash-like hash using 64-bit rotations.
  *
  * Uses micro_rotl64() exclusively in the hot path so clang emits
  * the clean 4-insn rotate pattern (mov+lsh+rsh+or) without masking.
@@ -35,7 +35,7 @@
     } while (0)
 
 static __always_inline int
-bench_rotate64_hash(const u8 *data, u32 len, u64 *out)
+bench_siphash_rotate64_mixer(const u8 *data, u32 len, u64 *out)
 {
     u64 v0 = 0x736F6D6570736575ULL;
     u64 v1 = 0x646F72616E646F6DULL;
@@ -104,5 +104,5 @@ bench_rotate64_hash(const u8 *data, u32 len, u64 *out)
     return 0;
 }
 
-DEFINE_STAGED_INPUT_XDP_BENCH(rotate64_hash_xdp, bench_rotate64_hash,
-                              rotate64_hash_input, 64)
+DEFINE_STAGED_INPUT_XDP_BENCH(siphash_rotate64_mixer_xdp, bench_siphash_rotate64_mixer,
+                              siphash_rotate64_mixer_input, 64)

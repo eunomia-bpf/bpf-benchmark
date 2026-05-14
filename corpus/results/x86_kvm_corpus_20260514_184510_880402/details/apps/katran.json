@@ -1,0 +1,10 @@
+{
+  "app": "katran",
+  "baseline": null,
+  "error": "Katran gRPC server not reachable at 127.0.0.1:50051 within 60.0s: command failed (1): /artifacts/user/repo-artifacts/x86_64/katran/bin/katranc -server 127.0.0.1:50051 -list_mac\n2026/05/14 18:46:16 Error: rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:50051: connect: connection refused\"",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "error"
+}

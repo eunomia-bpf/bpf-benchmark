@@ -6,7 +6,7 @@
     (8U + PACKET_REDUNDANT_BOUNDS_RECORDS * PACKET_REDUNDANT_BOUNDS_RECORD_SIZE)
 
 static __always_inline int
-bench_packet_redundant_bounds(const u8 *data, u32 len, u64 *out)
+bench_packet_record_bounds_window(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 8U)) {
         return -1;
@@ -92,6 +92,6 @@ bench_packet_redundant_bounds(const u8 *data, u32 len, u64 *out)
 }
 
 DEFINE_FIXED_PACKET_BACKED_XDP_BENCH(
-    packet_redundant_bounds_xdp,
-    bench_packet_redundant_bounds,
+    packet_record_bounds_window_xdp,
+    bench_packet_record_bounds_window,
     PACKET_REDUNDANT_BOUNDS_INPUT_SIZE)

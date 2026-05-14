@@ -74,7 +74,7 @@ static __always_inline u32 switch_value(u32 value)
     }
 }
 
-static __always_inline int bench_switch_dispatch(const u8 *data, u32 len, u64 *out)
+static __always_inline int bench_trace_event_type_switch_dispatch(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 4)) {
         return -1;
@@ -99,7 +99,7 @@ static __always_inline int bench_switch_dispatch(const u8 *data, u32 len, u64 *o
 }
 
 DEFINE_STAGED_INPUT_XDP_BENCH(
-    switch_dispatch_xdp,
-    bench_switch_dispatch,
-    switch_dispatch_input_value,
+    trace_event_type_switch_dispatch_xdp,
+    bench_trace_event_type_switch_dispatch,
+    trace_event_type_switch_dispatch_input_value,
     SWITCH_DISPATCH_INPUT_SIZE)

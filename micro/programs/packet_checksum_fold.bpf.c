@@ -4,7 +4,7 @@
 #define CHECKSUM_MAX_WORDS 512U
 #define CHECKSUM_INPUT_SIZE (8U + CHECKSUM_MAX_WORDS * 2U)
 
-static __always_inline int bench_checksum(const u8 *data, u32 len, u64 *out)
+static __always_inline int bench_packet_checksum_fold(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 8)) {
         return -1;
@@ -40,4 +40,8 @@ static __always_inline int bench_checksum(const u8 *data, u32 len, u64 *out)
     return 0;
 }
 
-DEFINE_STAGED_INPUT_XDP_BENCH(checksum_xdp, bench_checksum, checksum_input_value, CHECKSUM_INPUT_SIZE)
+DEFINE_STAGED_INPUT_XDP_BENCH(
+    packet_checksum_fold_xdp,
+    bench_packet_checksum_fold,
+    packet_checksum_fold_input_value,
+    CHECKSUM_INPUT_SIZE)

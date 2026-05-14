@@ -51,7 +51,7 @@ static __noinline u64 local_call_bytes(u64 acc, const u8 *data, u32 offset, u32 
     return mixed;
 }
 
-static __always_inline int bench_local_call_fanout(const u8 *data, u32 len, u64 *out)
+static __always_inline int bench_bpf_local_call_fanout_dispatch(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 8U)) {
         return -1;
@@ -95,7 +95,7 @@ static __always_inline int bench_local_call_fanout(const u8 *data, u32 len, u64 
 }
 
 DEFINE_STAGED_INPUT_XDP_BENCH(
-    local_call_fanout_xdp,
-    bench_local_call_fanout,
-    local_call_fanout_input_value,
+    bpf_local_call_fanout_dispatch_xdp,
+    bench_bpf_local_call_fanout_dispatch,
+    bpf_local_call_fanout_dispatch_input_value,
     LOCAL_CALL_FANOUT_INPUT_SIZE)

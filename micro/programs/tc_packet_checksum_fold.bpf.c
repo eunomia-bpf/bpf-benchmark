@@ -41,7 +41,7 @@ static __always_inline int bench_checksum(const u8 *data, u32 len, u64 *out)
 }
 
 DEFINE_MAP_BACKED_TC_BENCH(
-    tc_checksum_prog,
+    tc_packet_checksum_fold_prog,
     bench_checksum,
-    tc_checksum_input_value,
+    tc_packet_checksum_fold_input_value,
     TC_CHECKSUM_INPUT_SIZE)

@@ -2,7 +2,7 @@
 
 #define STRUCT_FIELD_CLUSTER_RECORDS 32U
 
-struct struct_field_cluster_record {
+struct flow_record_field_scan_record {
     __u32 tag;
     __u16 flags;
     __u16 length;
@@ -12,29 +12,29 @@ struct struct_field_cluster_record {
     __u32 dport;
 };
 
-struct struct_field_cluster_layout {
+struct flow_record_field_scan_layout {
     __u32 record_count;
     __u32 record_size;
-    struct struct_field_cluster_record records[STRUCT_FIELD_CLUSTER_RECORDS];
+    struct flow_record_field_scan_record records[STRUCT_FIELD_CLUSTER_RECORDS];
 };
 
-#define STRUCT_FIELD_CLUSTER_INPUT_SIZE sizeof(struct struct_field_cluster_layout)
+#define STRUCT_FIELD_CLUSTER_INPUT_SIZE sizeof(struct flow_record_field_scan_layout)
 
 static __always_inline int
-bench_struct_field_cluster(const u8 *data, u32 len, u64 *out)
+bench_flow_record_field_scan(const u8 *data, u32 len, u64 *out)
 {
     (void)len;
 
-    const struct struct_field_cluster_layout *layout =
-        (const struct struct_field_cluster_layout *)(const void *)data;
+    const struct flow_record_field_scan_layout *layout =
+        (const struct flow_record_field_scan_layout *)(const void *)data;
     if (layout->record_count != STRUCT_FIELD_CLUSTER_RECORDS ||
-        layout->record_size != sizeof(struct struct_field_cluster_record)) {
+        layout->record_size != sizeof(struct flow_record_field_scan_record)) {
         return -1;
     }
 
     u64 acc = 0x9E3779B97F4A7C15ULL;
     for (u32 index = 0; index < STRUCT_FIELD_CLUSTER_RECORDS; index++) {
-        const struct struct_field_cluster_record *record = &layout->records[index];
+        const struct flow_record_field_scan_record *record = &layout->records[index];
         u64 tuple = record->src + record->dst;
         u64 ports = ((u64)record->sport << 32U) | record->dport;
 
@@ -53,7 +53,7 @@ bench_struct_field_cluster(const u8 *data, u32 len, u64 *out)
 }
 
 DEFINE_STAGED_INPUT_XDP_BENCH(
-    struct_field_cluster_xdp,
-    bench_struct_field_cluster,
-    struct_field_cluster_input_value,
+    flow_record_field_scan_xdp,
+    bench_flow_record_field_scan,
+    flow_record_field_scan_input_value,
     STRUCT_FIELD_CLUSTER_INPUT_SIZE)

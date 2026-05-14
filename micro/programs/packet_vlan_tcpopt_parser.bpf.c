@@ -47,7 +47,7 @@ micro_parse_tcp_options(const u8 *options_cursor, const u8 *options_end, const u
 }
 
 static __always_inline int
-bench_packet_parse_vlans_tcpopts(const u8 *data, const u8 *data_end, u64 *out)
+bench_packet_vlan_tcpopt_parser(const u8 *data, const u8 *data_end, u64 *out)
 {
     if (data + 14U > data_end) {
         return -1;
@@ -142,7 +142,7 @@ bench_packet_parse_vlans_tcpopts(const u8 *data, const u8 *data_end, u64 *out)
     return 0;
 }
 
-SEC("xdp") int packet_parse_vlans_tcpopts_xdp(struct xdp_md *ctx)
+SEC("xdp") int packet_vlan_tcpopt_parser_xdp(struct xdp_md *ctx)
 {
     u8 *data = (u8 *)(long)ctx->data;
     u8 *data_end = (u8 *)(long)ctx->data_end;
@@ -158,7 +158,7 @@ SEC("xdp") int packet_parse_vlans_tcpopts_xdp(struct xdp_md *ctx)
         return XDP_ABORTED;
     }
 
-    if (bench_packet_parse_vlans_tcpopts(payload, data_end, &result) < 0) {
+    if (bench_packet_vlan_tcpopt_parser(payload, data_end, &result) < 0) {
         return XDP_ABORTED;
     }
 

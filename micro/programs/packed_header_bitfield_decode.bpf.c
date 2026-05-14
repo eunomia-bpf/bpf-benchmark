@@ -8,7 +8,7 @@
     (BITFIELD_EXTRACT_HEADER_SIZE + BITFIELD_EXTRACT_RECORDS * BITFIELD_EXTRACT_RECORD_SIZE)
 
 static __always_inline int
-bench_bitfield_extract(const u8 *data, u32 len, u64 *out)
+bench_packed_header_bitfield_decode(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, BITFIELD_EXTRACT_HEADER_SIZE)) {
         return -1;
@@ -67,7 +67,7 @@ bench_bitfield_extract(const u8 *data, u32 len, u64 *out)
 }
 
 DEFINE_STAGED_INPUT_XDP_BENCH(
-    bitfield_extract_xdp,
-    bench_bitfield_extract,
-    bitfield_extract_input_value,
+    packed_header_bitfield_decode_xdp,
+    bench_packed_header_bitfield_decode,
+    packed_header_bitfield_decode_input_value,
     BITFIELD_EXTRACT_INPUT_SIZE)

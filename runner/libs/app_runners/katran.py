@@ -203,7 +203,7 @@ def resolve_katranc_binary() -> Path:
 KATRAN_GRPC_ADDRESS = "127.0.0.1:50051"
 
 
-def _wait_for_katran_grpc(timeout_s: float = 60.0) -> None:
+def _wait_for_katran_grpc(session: "KatranServerSession | None" = None, timeout_s: float = 60.0) -> None:
     deadline = time.monotonic() + max(1.0, float(timeout_s))
     katranc = str(resolve_katranc_binary())
     last_error: str = ""
@@ -214,7 +214,14 @@ def _wait_for_katran_grpc(timeout_s: float = 60.0) -> None:
         except Exception as exc:
             last_error = str(exc)
         time.sleep(0.25)
-    raise RuntimeError(f"Katran gRPC server not reachable at {KATRAN_GRPC_ADDRESS} within {timeout_s}s: {last_error}")
+    daemon_tail = ""
+    if session is not None:
+        snapshot = session.collector_snapshot() or {}
+        stderr_tail = list(snapshot.get("stderr_tail") or [])
+        stdout_tail = list(snapshot.get("stdout_tail") or [])
+        if stderr_tail or stdout_tail:
+            daemon_tail = "\n[katran_server_grpc tail]\n" + "\n".join(stderr_tail[-40:] + stdout_tail[-40:])
+    raise RuntimeError(f"Katran gRPC server not reachable at {KATRAN_GRPC_ADDRESS} within {timeout_s}s: {last_error}{daemon_tail}")
 
 
 def ip_binary() -> str:
@@ -634,7 +641,7 @@ class KatranServerSession:
 
 
 def configure_katran_maps(session: KatranServerSession, *, proto: int = TCP_PROTO) -> dict[str, object]:
-    _wait_for_katran_grpc()
+    _wait_for_katran_grpc(session)
     katranc = str(resolve_katranc_binary())
     vip_proto_flag = "-u" if int(proto) == UDP_PROTO else "-t"
     vip_arg = f"{VIP_IP}:{int(VIP_PORT)}"

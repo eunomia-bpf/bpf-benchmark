@@ -13,7 +13,7 @@ static __always_inline u64 micro_popcount64(u64 value)
     return count;
 }
 
-static __always_inline int bench_bitcount(const u8 *data, u32 len, u64 *out)
+static __always_inline int bench_bitmap_popcount_scan(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 8)) {
         return -1;
@@ -40,4 +40,4 @@ static __always_inline int bench_bitcount(const u8 *data, u32 len, u64 *out)
     return 0;
 }
 
-DEFINE_STAGED_INPUT_XDP_BENCH(bitcount_xdp, bench_bitcount, bitcount_input_value, BITCOUNT_INPUT_SIZE)
+DEFINE_STAGED_INPUT_XDP_BENCH(bitmap_popcount_scan_xdp, bench_bitmap_popcount_scan, bitmap_popcount_scan_input_value, BITCOUNT_INPUT_SIZE)

@@ -9,7 +9,7 @@ static __always_inline u8 memcmp_prefix_pattern_byte(u32 index)
     return (u8)((((index * 29U) ^ (index << 2U) ^ 0xA5U) + 0x11U) & 0xFFU);
 }
 
-static __always_inline int bench_memcmp_prefix_64(const u8 *data, u32 len, u64 *out)
+static __always_inline int bench_payload_prefix_memcmp_scan(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, MEMCMP_PREFIX_INPUT_SIZE)) {
         return -1;
@@ -53,7 +53,7 @@ static __always_inline int bench_memcmp_prefix_64(const u8 *data, u32 len, u64 *
 }
 
 DEFINE_STAGED_INPUT_XDP_BENCH(
-    memcmp_prefix_64_xdp,
-    bench_memcmp_prefix_64,
-    memcmp_prefix_64_input_value,
+    payload_prefix_memcmp_scan_xdp,
+    bench_payload_prefix_memcmp_scan,
+    payload_prefix_memcmp_scan_input_value,
     MEMCMP_PREFIX_INPUT_SIZE)

@@ -636,7 +636,7 @@ katran_process_packet(const u8 *data, const u8 *data_end, u64 nh_off,
 }
 
 static __always_inline int
-bench_katran_like(const u8 *data, const u8 *data_end, u64 *out)
+bench_katran_lb_consistent_hash_select(const u8 *data, const u8 *data_end, u64 *out)
 {
     u64 data_len = data_end - data;
     u32 nh_off = 14U;
@@ -664,7 +664,7 @@ bench_katran_like(const u8 *data, const u8 *data_end, u64 *out)
     return 0;
 }
 
-SEC("xdp") int katran_like_xdp(struct xdp_md *ctx)
+SEC("xdp") int katran_lb_consistent_hash_select_xdp(struct xdp_md *ctx)
 {
     u8 *data = (u8 *)(long)ctx->data;
     u8 *data_end = (u8 *)(long)ctx->data_end;
@@ -680,7 +680,7 @@ SEC("xdp") int katran_like_xdp(struct xdp_md *ctx)
         return XDP_ABORTED;
     }
 
-    if (bench_katran_like(payload, data_end, &result) < 0) {
+    if (bench_katran_lb_consistent_hash_select(payload, data_end, &result) < 0) {
         return XDP_ABORTED;
     }
 

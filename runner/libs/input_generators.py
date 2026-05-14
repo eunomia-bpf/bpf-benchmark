@@ -136,7 +136,7 @@ def _build_lcg_u64_no_header(output: Path, spec: dict) -> dict:
     output.write_bytes(blob); return {"bytes": n * 8}
 
 
-def _build_switch_dispatch(output: Path, spec: dict) -> dict:
+def _build_trace_event_type_switch_dispatch(output: Path, spec: dict) -> dict:
     count = spec["count"]; state = spec["initial_state"] & MASK64; mask = spec.get("mask", 0x3F)
     blob = bytearray(struct.pack("<I", count))
     for index in range(count):
@@ -269,7 +269,7 @@ _KIND_BUILDERS = {
     "lcg_u32_ii":          _build_lcg_u32_ii,
     "lcg_u16_ii":          _build_lcg_u16_ii,
     "lcg_u64_no_header":   _build_lcg_u64_no_header,
-    "switch_dispatch":     _build_switch_dispatch,
+    "trace_event_type_switch_dispatch":     _build_trace_event_type_switch_dispatch,
     "branch_layout":       _build_branch_layout,
     "nested_loop":         _build_nested_loop,
     "hash_chain":          _build_hash_chain,
@@ -294,7 +294,7 @@ def _memcmp_prefix_pattern_byte(index: int) -> int:
     return (((index * 29) ^ (index << 2) ^ 0xA5) + 0x11) & 0xFF
 
 
-def generate_binary_search(output: Path) -> dict[str, int]:
+def generate_sorted_rule_binary_search(output: Path) -> dict[str, int]:
     data_len, query_len = 32, 16
     data = [index * 3 + 7 for index in range(data_len)]
     queries = [data[(index * 17) % data_len] if index % 3 == 0 else (index * 19) + 5 for index in range(query_len)]
@@ -369,7 +369,7 @@ def generate_bounds_check_heavy(output: Path) -> dict[str, int]:
     return {"record_count": record_count, "record_size": record_size}
 
 
-def generate_packet_redundant_bounds(output: Path) -> dict[str, int]:
+def generate_packet_record_bounds_window(output: Path) -> dict[str, int]:
     record_count = 32
     record_size = 24
     state = 0x1020304050607080
@@ -464,7 +464,7 @@ def generate_cond_select_dense(output: Path) -> dict[str, int]:
     return {"groups": groups, "lanes": lanes, "count": count}
 
 
-def generate_memcmp_prefix_64(output: Path) -> dict[str, int]:
+def generate_payload_prefix_memcmp_scan(output: Path) -> dict[str, int]:
     scenario_count = 3
     pattern = bytearray(_memcmp_prefix_pattern_byte(index) for index in range(64))
     early_mismatch = bytearray(pattern)
@@ -480,7 +480,7 @@ def generate_memcmp_prefix_64(output: Path) -> dict[str, int]:
     return {"scenario_count": scenario_count, "bytes_per_candidate": 64}
 
 
-def generate_packet_parse_vlans_tcpopts(output: Path) -> dict[str, int]:
+def generate_packet_vlan_tcpopt_parser(output: Path) -> dict[str, int]:
     packet = bytearray(74)
     packet[0:6] = bytes([0x00, 0x11, 0x22, 0x33, 0x44, 0x55])
     packet[6:12] = bytes([0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB])
@@ -515,7 +515,7 @@ def generate_packet_parse_vlans_tcpopts(output: Path) -> dict[str, int]:
     return {"packet_len": len(packet), "vlan_count": 2, "tcp_header_len": 32}
 
 
-def generate_local_call_fanout(output: Path) -> dict[str, int]:
+def generate_bpf_local_call_fanout_dispatch(output: Path) -> dict[str, int]:
     record_count, record_size = 16, 24
     state = 0x0123456789ABCDEF; blob = bytearray(struct.pack("<II", record_count, record_size))
     for index in range(record_count):
@@ -526,7 +526,7 @@ def generate_local_call_fanout(output: Path) -> dict[str, int]:
     output.write_bytes(blob); return {"record_count": record_count, "record_size": record_size}
 
 
-def generate_packet_rss_hash(output: Path) -> dict[str, int]:
+def generate_flow_5tuple_rss_hash(output: Path) -> dict[str, int]:
     packet = bytearray(54)
     packet[0:6] = bytes([0x10, 0x11, 0x12, 0x13, 0x14, 0x15])
     packet[6:12] = bytes([0x20, 0x21, 0x22, 0x23, 0x24, 0x25])
@@ -556,7 +556,7 @@ def generate_packet_rss_hash(output: Path) -> dict[str, int]:
     return {"packet_len": len(packet), "protocol": 6}
 
 
-def generate_katran_like(output: Path) -> dict[str, int]:
+def generate_katran_lb_consistent_hash_select(output: Path) -> dict[str, int]:
     packet = bytearray(54)
     packet[0:6] = bytes([0x10, 0x11, 0x12, 0x13, 0x14, 0x15])
     packet[6:12] = bytes([0x20, 0x21, 0x22, 0x23, 0x24, 0x25])
@@ -586,7 +586,7 @@ def generate_katran_like(output: Path) -> dict[str, int]:
     return {"packet_len": len(packet), "protocol": 6, "vip_port": 8080}
 
 
-def generate_struct_field_cluster(output: Path) -> dict[str, int]:
+def generate_flow_record_field_scan(output: Path) -> dict[str, int]:
     record_count, record_size = 32, 32
     state = 0x2468ACE113579BDF; blob = bytearray(struct.pack("<II", record_count, record_size))
     for index in range(record_count):
@@ -601,7 +601,7 @@ def generate_struct_field_cluster(output: Path) -> dict[str, int]:
     output.write_bytes(blob); return {"record_count": record_count, "record_size": record_size}
 
 
-def generate_bitfield_extract(output: Path) -> dict[str, int]:
+def generate_packed_header_bitfield_decode(output: Path) -> dict[str, int]:
     record_count = 32
     record_words = 2
     state = 0xA5A55A5ADEADBEEF
@@ -634,7 +634,7 @@ def generate_bitfield_extract(output: Path) -> dict[str, int]:
     return {"record_count": record_count, "record_words": record_words}
 
 
-def generate_deep_guard_tree_8(output: Path) -> dict[str, int]:
+def generate_cilium_policy_guard_tree_filter(output: Path) -> dict[str, int]:
     record_count, record_size = 32, 16
     state = 0x0F1E2D3C4B5A6978; blob = bytearray(struct.pack("<I", record_count))
     leaf_table = [(0x10, 0x00, 0x40, 0x80, 0x08, 0x00, 0x33, 0x00), (0x31, 0x02, 0x40, 0x80, 0x08, 0x00, 0x33, 0x00),
@@ -649,6 +649,105 @@ def generate_deep_guard_tree_8(output: Path) -> dict[str, int]:
         fields = (0x33, 0x01, 0x40, index & 0xFF, 0x08, 0x10, 0x33, 0x00) if leaf == 3 else leaf_table[leaf]
         blob.extend(bytes(fields)); blob.extend(struct.pack("<Q", payload))
     output.write_bytes(blob); return {"record_count": record_count, "record_size": record_size}
+
+
+def generate_bpftrace_string_search_prefix_scan(output: Path) -> dict[str, int]:
+    haystack_size = 128
+    needle_count = 5
+    needle_size = 12
+    haystack_text = (
+        b"tracepoint:syscalls:sys_enter_openat /usr/bin/python3 "
+        b"GET /healthz label=prod service=bpftrace"
+    )
+    needles = [b"/usr/bin", b"GET ", b"service", b"bpftrace", b"missing"]
+
+    haystack = bytearray(haystack_size)
+    haystack[:len(haystack_text)] = haystack_text
+    blob = bytearray(struct.pack("<II", len(haystack_text), needle_count))
+    blob.extend(haystack)
+    for needle in needles:
+        padded = bytearray(needle_size)
+        padded[:len(needle)] = needle
+        blob.extend(padded)
+
+    output.write_bytes(blob)
+    return {"haystack_len": len(haystack_text), "needle_count": needle_count}
+
+
+def generate_tracee_http_method_prefix_detect(output: Path) -> dict[str, int]:
+    record_count = 8
+    record_size = 16
+    payloads = [
+        b"GET /index",
+        b"POST /v1",
+        b"PUT /obj",
+        b"DELETE /",
+        b"HEAD /",
+        b"HTTP/1.1",
+        b"PATCH /x",
+        b"XYZ /bad",
+    ]
+    blob = bytearray(struct.pack("<II", record_count, record_size))
+    for payload in payloads:
+        record = bytearray(record_size)
+        record[:len(payload)] = payload
+        blob.extend(record)
+
+    output.write_bytes(blob)
+    return {"record_count": record_count, "record_size": record_size}
+
+
+def generate_tracee_syscall_name_table_lookup(output: Path) -> dict[str, int]:
+    syscall_ids = [
+        0, 1, 2, 3, 9, 12, 39, 56,
+        57, 59, 60, 61, 80, 87, 89, 158,
+        202, 217, 257, 263, 281, 291, 321, 332,
+        333, 334, 424, 425, 426, 427, 428, 429,
+    ]
+    while len(syscall_ids) < 64:
+        syscall_ids.append(700 + len(syscall_ids) * 13)
+
+    blob = bytearray(struct.pack("<I", len(syscall_ids)))
+    for syscall_id in syscall_ids:
+        blob.extend(struct.pack("<I", syscall_id))
+
+    output.write_bytes(blob)
+    return {"syscall_count": len(syscall_ids)}
+
+
+def generate_cilium_socket_lb_service_select(output: Path) -> dict[str, int]:
+    record_count = 64
+    record_size = 24
+    state = 0xC1111A5E5ACCE55
+    blob = bytearray(struct.pack("<II", record_count, record_size))
+    for index in range(record_count):
+        state = _lcg(state ^ ((index + 1) * 0x9E3779B97F4A7C15))
+        src_ip = 0x0A000000 | ((index + 1) & 0xFF)
+        dst_ip = 0xAC100000 | ((index * 17) & 0xFFFF)
+        sport = 10000 + ((state >> 8) & 0x3FFF)
+        dport = 30000 + (index * 37 % 2768) if (index & 3) != 0 else 80 + index
+        proto = 6 if (index & 1) == 0 else 17
+        if index % 11 == 0:
+            proto = 1
+        flags = ((index & 1) | (((index >> 1) & 1) << 1) | (((index >> 2) & 1) << 2))
+        svc_count = (index % 7) + 1
+        cookie = (state ^ ((index + 3) * 0xD1342543DE82EF95)) & 0xFFFFFFFF
+        scope = 1 if (index % 5) == 0 else 0
+        blob.extend(struct.pack(
+            "<IIHHBBHII",
+            src_ip,
+            dst_ip,
+            sport,
+            dport,
+            proto,
+            flags,
+            svc_count,
+            cookie,
+            scope,
+        ))
+
+    output.write_bytes(blob)
+    return {"record_count": record_count, "record_size": record_size}
 
 
 def _make_spec_generator(name: str, spec: dict):

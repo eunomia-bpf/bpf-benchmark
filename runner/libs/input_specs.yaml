@@ -182,7 +182,7 @@ mega_basic_block_2048:
   salt1: 0x9E3779B97F4A7C15
   salt2: 0xA0761D6478BD642F
 
-rotate64_hash:
+siphash_rotate64_mixer:
   kind: lcg_words_q
   word_count: 8
   initial_state: 0x123456789ABCDEF0
@@ -253,7 +253,7 @@ memory_pair_sum:
 # kind: lcg_u64_ii  — <II header> + N u64s
 #   state = lcg(state ^ (i+1)*salt1); value = state ^ (i+offset)*salt2 [^ seed]
 # ---------------------------------------------------------------------------
-bitcount:
+bitmap_popcount_scan:
   kind: lcg_u64_ii
   count: 256
   seed:  0x00C0FFEE
@@ -294,7 +294,7 @@ alu32_64_pingpong:
   # We use xor_seed: true which XORs `seed` — close enough for parameterisation purposes
   xor_seed: true
 
-log2_fold:
+bcc_runqlat_log2_histogram_bucket:
   kind: lcg_u64_ii
   count: 128
   seed:  0xABCD1234
@@ -352,7 +352,7 @@ const_fold_chain:
 # ---------------------------------------------------------------------------
 # kind: lcg_u16_ii  — <II header> + N u16s
 # ---------------------------------------------------------------------------
-checksum:
+packet_checksum_fold:
   kind: lcg_u16_ii
   rounds: 32
   word_count: 512
@@ -368,10 +368,10 @@ bpf_call_chain:
   initial_state: 0x123456789ABCDEF0
 
 # ---------------------------------------------------------------------------
-# kind: switch_dispatch  — <I count> + N u32 values
+# kind: trace_event_type_switch_dispatch  — <I count> + N u32 values
 # ---------------------------------------------------------------------------
-switch_dispatch:
-  kind: switch_dispatch
+trace_event_type_switch_dispatch:
+  kind: trace_event_type_switch_dispatch
   count: 128
   initial_state: 0x1020304050607080
   mask: 0x3F
@@ -402,7 +402,7 @@ branch_layout_random:
 # ---------------------------------------------------------------------------
 # kind: hash_chain  — <II rounds word_count> + N u64s
 # ---------------------------------------------------------------------------
-hash_chain:
+cgroup_skb_hash_chain:
   kind: hash_chain
   rounds: 16
   word_count: 8

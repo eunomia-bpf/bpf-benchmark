@@ -5,7 +5,7 @@
 #define DEEP_GUARD_TREE_8_INPUT_SIZE \
     (4U + DEEP_GUARD_TREE_8_RECORDS * DEEP_GUARD_TREE_8_RECORD_SIZE)
 
-static __always_inline int bench_deep_guard_tree_8(const u8 *data, u32 len, u64 *out)
+static __always_inline int bench_cilium_policy_guard_tree_filter(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 4U)) {
         return -1;
@@ -74,7 +74,7 @@ static __always_inline int bench_deep_guard_tree_8(const u8 *data, u32 len, u64 
 }
 
 DEFINE_STAGED_INPUT_XDP_BENCH(
-    deep_guard_tree_8_xdp,
-    bench_deep_guard_tree_8,
-    deep_guard_tree_8_input_value,
+    cilium_policy_guard_tree_filter_xdp,
+    bench_cilium_policy_guard_tree_filter,
+    cilium_policy_guard_tree_filter_input_value,
     DEEP_GUARD_TREE_8_INPUT_SIZE)

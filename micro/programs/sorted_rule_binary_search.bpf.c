@@ -5,7 +5,7 @@
 #define BINARY_SEARCH_INPUT_SIZE \
     (8U + (BINARY_SEARCH_MAX_DATA_LEN + BINARY_SEARCH_MAX_QUERY_LEN) * 8U)
 
-static __always_inline int bench_binary_search(const u8 *data, u32 len, u64 *out)
+static __always_inline int bench_sorted_rule_binary_search(const u8 *data, u32 len, u64 *out)
 {
     if (!micro_has_bytes(len, 0, 8)) {
         return -1;
@@ -53,7 +53,7 @@ static __always_inline int bench_binary_search(const u8 *data, u32 len, u64 *out
 }
 
 DEFINE_STAGED_INPUT_XDP_BENCH(
-    binary_search_xdp,
-    bench_binary_search,
-    binary_search_input_value,
+    sorted_rule_binary_search_xdp,
+    bench_sorted_rule_binary_search,
+    sorted_rule_binary_search_input_value,
     BINARY_SEARCH_INPUT_SIZE)

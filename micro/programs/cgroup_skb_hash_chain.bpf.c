@@ -39,7 +39,7 @@ static __always_inline int bench_hash_chain(const u8 *data, u32 len, u64 *out)
 }
 
 DEFINE_MAP_BACKED_CGROUP_SKB_BENCH(
-    cgroup_hash_chain_prog,
+    cgroup_skb_hash_chain_prog,
     bench_hash_chain,
-    cgroup_hash_chain_input_value,
+    cgroup_skb_hash_chain_input_value,
     HASH_CHAIN_INPUT_SIZE)
