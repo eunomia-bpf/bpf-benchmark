@@ -41,8 +41,9 @@ ifeq ($(PLATFORM),kvm)
     $(error PLATFORM=kvm only supports ARCH=x86)
   endif
   TARGET := x86-kvm
+  KVM_HOST_SETUP := kvm-host-cpu
   COMMON_DEPS := $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(X86_RUNTIME_KERNEL_IMAGE) $(DAEMON_DIR)/target/release/bpfrejit-daemon
-  EXECUTOR_INVOKE = "$(PYTHON)" -m runner.libs.kvm_executor
+  EXECUTOR_INVOKE = taskset -c 0-7 "$(PYTHON)" -m runner.libs.kvm_executor
 else ifeq ($(PLATFORM),aws)
   EXECUTOR_INVOKE = "$(PYTHON)" -m runner.libs.aws_executor run
   ifeq ($(ARCH),arm64)
@@ -87,7 +88,7 @@ MICRO_ARGS = --samples "$(SAMPLES)" --warmups "$(or $(WARMUPS),0)" --inner-repea
 TEST_ARGS_COMMON = --fuzz-rounds "$(FUZZ_ROUNDS)"
 
 .PHONY: check validate daemon-tests lint clean \
-	selftest negative-test test micro corpus all terminate \
+	selftest negative-test test micro corpus all terminate kvm-host-cpu \
 	clean-build clean-results clean-vm-tmp clean-docker-cache
 
 validate:
@@ -113,10 +114,15 @@ negative-test: $(COMMON_DEPS)
 test: $(COMMON_DEPS)
 	$(EXECUTOR_INVOKE) $(TARGET) test --test-mode test $(TEST_ARGS_COMMON)
 
-micro: $(COMMON_DEPS)
+kvm-host-cpu:
+	sudo sh -c 'for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo performance > "$$f"; done'
+	sudo sh -c 'echo 1 > /sys/devices/system/cpu/intel_pstate/no_turbo'
+	sudo sh -c 'for p in /sys/devices/system/cpu/cpufreq/policy[0-7]; do cat "$$p/scaling_max_freq" > "$$p/scaling_min_freq"; done'
+
+micro: $(KVM_HOST_SETUP) $(COMMON_DEPS)
 	$(EXECUTOR_INVOKE) $(TARGET) micro $(MICRO_ARGS)
 
-corpus: $(COMMON_DEPS)
+corpus: $(KVM_HOST_SETUP) $(COMMON_DEPS)
 	$(EXECUTOR_INVOKE) $(TARGET) corpus
 
 all: test micro corpus
