@@ -46,7 +46,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         action="append",
         dest="runtimes",
         default=None,
-        help="Runtime name to run; repeatable. Defaults to llvmbpf and kernel.",
+        help="Runtime name to run; repeatable. Defaults to native, llvmbpf, and kernel.",
     )
     parser.add_argument("--samples", type=positive_int, required=True, help="Measured samples per runtime pair.")
     parser.add_argument("--warmups", type=nonnegative_int, required=True, help="Warmup runs per benchmark/runtime.")
@@ -90,7 +90,7 @@ def _micro_driver_argv(workspace: Path, args: argparse.Namespace) -> list[str]:
         workspace,
         args.output or str(workspace / "micro" / "results" / f"{args.target_name}_micro.json"),
     )
-    runtimes = args.runtimes or ["llvmbpf", "kernel"]
+    runtimes = args.runtimes or ["native", "llvmbpf", "kernel"]
     argv: list[str] = []
     for runtime in runtimes:
         argv.extend(["--runtime", str(runtime)])

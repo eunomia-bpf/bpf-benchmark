@@ -1,0 +1,880 @@
+{
+  "benchmarks": [
+    {
+      "category": "baseline",
+      "description": "Return-only baseline",
+      "expected_result": 12345678,
+      "family": "baseline",
+      "hypothesis": "Captures the staged harness floor for baseline subtraction",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/simple.mem",
+      "io_mode": "staged",
+      "level": "tiny",
+      "name": "simple",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "label": "llvmbpf LLVM JIT",
+          "mode": "llvmbpf",
+          "result_distribution": {
+            "12345678": 1
+          },
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 192,
+                "native_code_bytes": 59
+              },
+              "compile_ns": 5410404,
+              "exec_cycles": 186,
+              "exec_ns": 50,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 363,
+                "jit_compile_ns": 5410404,
+                "memory_prepare_ns": 32450,
+                "program_image_ns": 79193,
+                "vm_load_code_ns": 181
+              },
+              "result": 12345678,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686203458,
+              "wall_exec_ns": 2910
+            }
+          ],
+          "timing_source": "rdtsc"
+        },
+        {
+          "inner_repeat": 10,
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "result_distribution": {
+            "12345678": 1
+          },
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 192,
+                "native_code_bytes": 107
+              },
+              "compile_ns": 232382,
+              "exec_cycles": 14734041,
+              "exec_ns": 61,
+              "jited_prog_len": 107,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 554,
+                "memory_prepare_ns": 23539,
+                "object_load_ns": 176606,
+                "object_open_ns": 55776,
+                "prog_run_wall_ns": 39969659,
+                "result_extract_ns": 1681
+              },
+              "result": 12345678,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686202073,
+              "wall_exec_ns": 3997079,
+              "xlated_prog_len": 192
+            }
+          ],
+          "timing_source": "ktime"
+        },
+        {
+          "inner_repeat": 10,
+          "label": "kernel eBPF + ReJIT",
+          "mode": "kernel_rejit",
+          "result_distribution": {
+            "12345678": 1
+          },
+          "runtime": "kernel_rejit",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 192,
+                "native_code_bytes": 101
+              },
+              "compile_ns": 248150,
+              "exec_cycles": 22167959,
+              "exec_ns": 47,
+              "jited_prog_len": 101,
+              "passes": [
+                "lea"
+              ],
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 2504,
+                "memory_prepare_ns": 21212,
+                "object_load_ns": 194260,
+                "object_open_ns": 53890,
+                "prog_run_wall_ns": 60135378,
+                "result_extract_ns": 1551
+              },
+              "rejit_result": {
+                "per_program": {
+                  "9": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 2,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "insn_count_after": 24,
+                          "insn_count_before": 24,
+                          "insn_delta": 0,
+                          "pass": "lea",
+                          "sites_applied": 2,
+                          "sites_matched": 2,
+                          "sites_skipped": 0,
+                          "skip_reasons": {}
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 0,
+                        "status": "ok",
+                        "step": {
+                          "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+                          "log_level": 1,
+                          "name": "lea"
+                        }
+                      }
+                    ],
+                    "prog_id": 9,
+                    "program": {
+                      "final_insn_count": 24,
+                      "orig_insn_count": 24,
+                      "prog_id": 9,
+                      "prog_name": "simple_xdp",
+                      "prog_type": 6
+                    },
+                    "status": "ok"
+                  }
+                },
+                "status": "ok"
+              },
+              "result": 12345678,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686005247,
+              "wall_exec_ns": 6014088,
+              "xlated_prog_len": 192
+            }
+          ],
+          "timing_source": "ktime"
+        }
+      ],
+      "tags": [
+        "baseline",
+        "pure-jit"
+      ]
+    },
+    {
+      "category": "alu-mix",
+      "description": "Parse an IPv4 TCP 5-tuple and compute a Jenkins-style flow hash",
+      "expected_result": 11016707074064960918,
+      "family": "packet-hash",
+      "hypothesis": "Endian conversion plus field extraction and rotates should be more workload-realistic than standalone checksum math",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/flow_5tuple_rss_hash.mem",
+      "io_mode": "packet",
+      "level": "flow-5tuple",
+      "name": "flow_5tuple_rss_hash",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "label": "llvmbpf LLVM JIT",
+          "mode": "llvmbpf",
+          "result_distribution": {
+            "11016707074064960918": 1
+          },
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 2088,
+                "native_code_bytes": 633
+              },
+              "compile_ns": 13214568,
+              "exec_cycles": 202,
+              "exec_ns": 55,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "jit_compile_ns": 13214568,
+                "memory_prepare_ns": 17532,
+                "packet_prepare_ns": 292,
+                "program_image_ns": 99116,
+                "vm_load_code_ns": 226
+              },
+              "result": 11016707074064960918,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686185631,
+              "wall_exec_ns": 2330
+            }
+          ],
+          "timing_source": "rdtsc"
+        },
+        {
+          "inner_repeat": 10,
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "result_distribution": {
+            "11016707074064960918": 1
+          },
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 2088,
+                "native_code_bytes": 1009
+              },
+              "compile_ns": 327528,
+              "exec_cycles": 14795079,
+              "exec_ns": 102,
+              "jited_prog_len": 1009,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 20901,
+                "object_load_ns": 270191,
+                "object_open_ns": 57337,
+                "packet_prepare_ns": 586,
+                "prog_run_wall_ns": 40135036,
+                "result_extract_ns": 1049
+              },
+              "result": 11016707074064960918,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686240354,
+              "wall_exec_ns": 4013596,
+              "xlated_prog_len": 2088
+            }
+          ],
+          "timing_source": "ktime"
+        },
+        {
+          "inner_repeat": 10,
+          "label": "kernel eBPF + ReJIT",
+          "mode": "kernel_rejit",
+          "result_distribution": {
+            "11016707074064960918": 1
+          },
+          "runtime": "kernel_rejit",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 2088,
+                "native_code_bytes": 995
+              },
+              "compile_ns": 364228,
+              "exec_cycles": 22192962,
+              "exec_ns": 85,
+              "jited_prog_len": 995,
+              "passes": [
+                "lea"
+              ],
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 22717,
+                "object_load_ns": 304856,
+                "object_open_ns": 59372,
+                "packet_prepare_ns": 2893,
+                "prog_run_wall_ns": 60203492,
+                "result_extract_ns": 1251
+              },
+              "rejit_result": {
+                "per_program": {
+                  "21": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 4,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "insn_count_after": 261,
+                          "insn_count_before": 261,
+                          "insn_delta": 0,
+                          "pass": "lea",
+                          "sites_applied": 5,
+                          "sites_matched": 5,
+                          "sites_skipped": 0,
+                          "skip_reasons": {}
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 1,
+                        "status": "ok",
+                        "step": {
+                          "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+                          "log_level": 1,
+                          "name": "lea"
+                        }
+                      }
+                    ],
+                    "prog_id": 21,
+                    "program": {
+                      "final_insn_count": 261,
+                      "orig_insn_count": 261,
+                      "prog_id": 21,
+                      "prog_name": "flow_5tuple_rss",
+                      "prog_type": 6
+                    },
+                    "status": "ok"
+                  }
+                },
+                "status": "ok"
+              },
+              "result": 11016707074064960918,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686185891,
+              "wall_exec_ns": 6020576,
+              "xlated_prog_len": 2088
+            }
+          ],
+          "timing_source": "ktime"
+        }
+      ],
+      "tags": [
+        "packet",
+        "hash",
+        "endian",
+        "pure-jit"
+      ]
+    },
+    {
+      "category": "memory-local",
+      "description": "TC version of the packet checksum fold benchmark",
+      "expected_result": 0,
+      "family": "reduction",
+      "hypothesis": "Reuses the checksum reduction under a sched_cls hook with packet-fed staged input and skb-context result extraction",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_checksum_fold.mem",
+      "io_mode": "staged",
+      "level": "medium",
+      "name": "tc_packet_checksum_fold",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "label": "llvmbpf LLVM JIT",
+          "mode": "llvmbpf",
+          "result_distribution": {
+            "0": 1
+          },
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 672,
+                "native_code_bytes": 203
+              },
+              "compile_ns": 8096375,
+              "exec_cycles": 48947,
+              "exec_ns": 13278,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 463,
+                "jit_compile_ns": 8096375,
+                "memory_prepare_ns": 20938,
+                "program_image_ns": 99735,
+                "vm_load_code_ns": 147
+              },
+              "result": 0,
+              "retval": 0,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686266108,
+              "wall_exec_ns": 15298
+            }
+          ],
+          "timing_source": "rdtsc"
+        },
+        {
+          "inner_repeat": 10,
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "result_distribution": {
+            "0": 1
+          },
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 672,
+                "native_code_bytes": 361
+              },
+              "compile_ns": 33412257,
+              "exec_cycles": 65059,
+              "exec_ns": 17581,
+              "jited_prog_len": 361,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 1887,
+                "memory_prepare_ns": 22803,
+                "object_load_ns": 33356314,
+                "object_open_ns": 55943,
+                "prog_run_wall_ns": 176543,
+                "result_extract_ns": 652
+              },
+              "result": 0,
+              "retval": 0,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686151825,
+              "wall_exec_ns": 17649,
+              "xlated_prog_len": 672
+            }
+          ],
+          "timing_source": "ktime"
+        },
+        {
+          "inner_repeat": 10,
+          "label": "kernel eBPF + ReJIT",
+          "mode": "kernel_rejit",
+          "result_distribution": {
+            "0": 1
+          },
+          "runtime": "kernel_rejit",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 672,
+                "native_code_bytes": 353
+              },
+              "compile_ns": 33525494,
+              "exec_cycles": 65097,
+              "exec_ns": 17584,
+              "jited_prog_len": 353,
+              "passes": [
+                "lea"
+              ],
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 3413,
+                "memory_prepare_ns": 23298,
+                "object_load_ns": 33470986,
+                "object_open_ns": 54508,
+                "prog_run_wall_ns": 176647,
+                "result_extract_ns": 1362
+              },
+              "rejit_result": {
+                "per_program": {
+                  "32": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 2,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "insn_count_after": 84,
+                          "insn_count_before": 84,
+                          "insn_delta": 0,
+                          "pass": "lea",
+                          "sites_applied": 3,
+                          "sites_matched": 3,
+                          "sites_skipped": 0,
+                          "skip_reasons": {}
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 2259,
+                        "status": "ok",
+                        "step": {
+                          "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+                          "log_level": 1,
+                          "name": "lea"
+                        }
+                      }
+                    ],
+                    "prog_id": 32,
+                    "program": {
+                      "final_insn_count": 84,
+                      "orig_insn_count": 84,
+                      "prog_id": 32,
+                      "prog_name": "tc_packet_check",
+                      "prog_type": 3
+                    },
+                    "status": "ok"
+                  }
+                },
+                "status": "ok"
+              },
+              "result": 0,
+              "retval": 0,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3685984899,
+              "wall_exec_ns": 17661,
+              "xlated_prog_len": 672
+            }
+          ],
+          "timing_source": "ktime"
+        }
+      ],
+      "tags": [
+        "tc",
+        "pure-jit",
+        "non-xdp",
+        "kernel-only"
+      ]
+    },
+    {
+      "category": "alu-mix",
+      "description": "cgroup_skb egress hash-chain reduction over generated u64 words",
+      "expected_result": 12027228624407116210,
+      "family": "hash-chain",
+      "hypothesis": "Exercises a non-XDP cgroup_skb hook with packet-fed staged input and skb-context result extraction",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/cgroup_skb_hash_chain.mem",
+      "io_mode": "staged",
+      "level": "short",
+      "name": "cgroup_skb_hash_chain",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "label": "llvmbpf LLVM JIT",
+          "mode": "llvmbpf",
+          "result_distribution": {
+            "12027228624407116210": 1
+          },
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 936,
+                "native_code_bytes": 275
+              },
+              "compile_ns": 9636709,
+              "exec_cycles": 1254,
+              "exec_ns": 340,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 457,
+                "jit_compile_ns": 9636709,
+                "memory_prepare_ns": 21004,
+                "program_image_ns": 88359,
+                "vm_load_code_ns": 169
+              },
+              "result": 12027228624407116210,
+              "retval": 1,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686199365,
+              "wall_exec_ns": 2757
+            }
+          ],
+          "timing_source": "rdtsc"
+        },
+        {
+          "inner_repeat": 10,
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "result_distribution": {
+            "12027228624407116210": 1
+          },
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 936,
+                "native_code_bytes": 516
+              },
+              "compile_ns": 1079025,
+              "exec_cycles": 1296,
+              "exec_ns": 287,
+              "jited_prog_len": 516,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 634,
+                "memory_prepare_ns": 24018,
+                "object_load_ns": 1017137,
+                "object_open_ns": 61888,
+                "prog_run_wall_ns": 3566,
+                "result_extract_ns": 664
+              },
+              "result": 12027228624407116210,
+              "retval": 1,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686241746,
+              "wall_exec_ns": 352,
+              "xlated_prog_len": 936
+            }
+          ],
+          "timing_source": "ktime"
+        },
+        {
+          "inner_repeat": 10,
+          "label": "kernel eBPF + ReJIT",
+          "mode": "kernel_rejit",
+          "result_distribution": {
+            "12027228624407116210": 1
+          },
+          "runtime": "kernel_rejit",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 936,
+                "native_code_bytes": 509
+              },
+              "compile_ns": 1080275,
+              "exec_cycles": 2178,
+              "exec_ns": 483,
+              "jited_prog_len": 509,
+              "passes": [
+                "lea"
+              ],
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 2567,
+                "memory_prepare_ns": 24081,
+                "object_load_ns": 1020885,
+                "object_open_ns": 59390,
+                "prog_run_wall_ns": 5995,
+                "result_extract_ns": 847
+              },
+              "rejit_result": {
+                "per_program": {
+                  "43": {
+                    "passes": [
+                      {
+                        "bpfopt_ms": 3,
+                        "bpfopt_summary": {
+                          "diagnostics": [],
+                          "insn_count_after": 117,
+                          "insn_count_before": 117,
+                          "insn_delta": 0,
+                          "pass": "lea",
+                          "sites_applied": 3,
+                          "sites_matched": 3,
+                          "sites_skipped": 0,
+                          "skip_reasons": {}
+                        },
+                        "error": null,
+                        "rejit_syscall_ms": 8,
+                        "status": "ok",
+                        "step": {
+                          "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+                          "log_level": 1,
+                          "name": "lea"
+                        }
+                      }
+                    ],
+                    "prog_id": 43,
+                    "program": {
+                      "final_insn_count": 117,
+                      "orig_insn_count": 117,
+                      "prog_id": 43,
+                      "prog_name": "cgroup_skb_hash",
+                      "prog_type": 8
+                    },
+                    "status": "ok"
+                  }
+                },
+                "status": "ok"
+              },
+              "result": 12027228624407116210,
+              "retval": 1,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686176614,
+              "wall_exec_ns": 591,
+              "xlated_prog_len": 936
+            }
+          ],
+          "timing_source": "ktime"
+        }
+      ],
+      "tags": [
+        "cgroup-skb",
+        "pure-jit",
+        "non-xdp",
+        "kernel-only"
+      ]
+    }
+  ],
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec"
+  },
+  "completed_at": "2026-05-14T20:26:08.551280+00:00",
+  "defaults": {
+    "inner_repeat": 10,
+    "perf_counters": false,
+    "perf_scope": "full_repeat_raw",
+    "runtime_order_seed": 0,
+    "samples": 1,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "details_dir": "details",
+  "generated_at": "2026-05-14T20:26:03.126289+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "unknown",
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_root_mods=1 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 panic=-1 virtme.exec=`L3RtcC9iZW5jaG1hcmstZ3Vlc3QtMnh5MTk4ZmUuc2g=` virtme_chdir=home/yunwei37/workspace/bpf-benchmark rootfstype=9p rootflags=version=9p2000.L,trans=virtio,access=any raid=noautodetect ro debug loglevel=7 panic=30 oops=panic init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init",
+    "kernel_version": "7.0.0-rc2+",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "unknown"
+  },
+  "last_updated_at": "2026-05-14T20:26:08.551280+00:00",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_pure_jit.yaml",
+  "progress": {
+    "completed_benchmarks": 4,
+    "current_benchmark": null,
+    "current_benchmark_index": null,
+    "total_benchmarks": 4
+  },
+  "provenance": {
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 285K",
+    "environment": "vm",
+    "kernel_commit": "unknown",
+    "params": {
+      "inner_repeat": 10,
+      "samples": 1,
+      "warmups": 0
+    },
+    "repo_dirty": false,
+    "repo_git_sha": "unknown",
+    "timestamp": "2026-05-14T20:26:03.127292+00:00"
+  },
+  "run_type": "x86_kvm_micro",
+  "sample_runtime_orders": {
+    "cgroup_skb_hash_chain": [
+      [
+        "llvmbpf",
+        "kernel_rejit",
+        "kernel"
+      ]
+    ],
+    "flow_5tuple_rss_hash": [
+      [
+        "llvmbpf",
+        "kernel_rejit",
+        "kernel"
+      ]
+    ],
+    "simple": [
+      [
+        "llvmbpf",
+        "kernel_rejit",
+        "kernel"
+      ]
+    ],
+    "tc_packet_checksum_fold": [
+      [
+        "llvmbpf",
+        "kernel_rejit",
+        "kernel"
+      ]
+    ]
+  },
+  "started_at": "2026-05-14T20:26:03.126289+00:00",
+  "status": "completed",
+  "suite": "micro_staged_codegen",
+  "toolchains": {
+    "libbpf": {
+      "root": "vendor/libbpf"
+    },
+    "llvmbpf": {
+      "root": "vendor/llvmbpf"
+    }
+  }
+}

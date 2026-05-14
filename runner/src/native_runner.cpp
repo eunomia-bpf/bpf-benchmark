@@ -2,6 +2,7 @@
 #include <chrono>
 #include <cstring>
 #include <dlfcn.h>
+#include <link.h>
 namespace { using clock_type = std::chrono::steady_clock; using native_prog_fn = int (*)(void *);
 constexpr size_t kEthernetHeaderSize = 14; struct native_xdp_md { uintptr_t data, data_end; };
 struct native_skb { uintptr_t data, data_end; uint32_t cb[5]; }; }
@@ -16,6 +17,12 @@ sample_result run_native(const cli_options &options) {
     dlerror();
     auto *fn = reinterpret_cast<native_prog_fn>(dlsym(handle, symbol.c_str())); const char *sym_error = dlerror();
     if (sym_error != nullptr) fail("dlsym failed for " + symbol + ": " + sym_error);
+    Dl_info symbol_info {}; void *raw_symbol = nullptr;
+    if (dladdr1(reinterpret_cast<void *>(fn), &symbol_info, &raw_symbol, RTLD_DL_SYMENT) == 0 || raw_symbol == nullptr)
+        fail("dladdr1 failed to resolve native symbol size for " + symbol);
+    const auto *elf_symbol = static_cast<const ElfW(Sym) *>(raw_symbol);
+    if (elf_symbol->st_size == 0) fail("empty native symbol size for " + symbol);
+    const uint64_t native_code_bytes = elf_symbol->st_size;
     const auto load_end = clock_type::now();
     const bool is_skb = symbol.ends_with("_prog"); const size_t offset = is_skb && symbol.starts_with("cgroup_") ? kEthernetHeaderSize : 0;
     std::vector<uint8_t> packet(offset + sizeof(uint64_t) + input.size(), 0);
@@ -35,7 +42,7 @@ sample_result run_native(const cli_options &options) {
     sample_result sample {.compile_ns = elapsed_ns(load_start, load_end), .exec_ns = elapsed_ns(exec_start, exec_end) / repeat};
     sample.timing_source = "clock_monotonic"; sample.timing_source_wall = "clock_monotonic"; sample.wall_exec_ns = sample.exec_ns;
     sample.result = is_skb ? (static_cast<uint64_t>(skb.cb[0]) | (static_cast<uint64_t>(skb.cb[1]) << 32)) : packet_result;
-    sample.retval = retval; sample.code_size = {.bpf_bytecode_bytes = 0, .native_code_bytes = std::filesystem::file_size(so)};
+    sample.retval = retval; sample.code_size = {.bpf_bytecode_bytes = 0, .native_code_bytes = native_code_bytes};
     sample.phases_ns = {{"memory_prepare_ns", elapsed_ns(memory_start, memory_end)}, {"native_load_ns", sample.compile_ns}};
     sample.perf_counters = perf;
     dlclose(handle); return sample;
