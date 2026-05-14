@@ -53,13 +53,13 @@ programs:
       done;
       VIP_TCP=0a6401010000000000000000000000001f900600;
       VIP_UDP=0a6401010000000000000000000000001f901100;
-      VIP_DUMP=${MAP_VALUES}/map-${VIP}.dump.json;
+      VIP_DUMP=${MAP_VALUES}/map-$VIP.dump.json;
       if jq -e --arg key "$VIP_TCP" 'any(.[]?; ((.key // []) | map(sub("^0x"; "") | ascii_downcase) | join("")) == $key)' "$VIP_DUMP" >/dev/null; then
         VIP_KEY=$VIP_TCP;
       elif jq -e --arg key "$VIP_UDP" 'any(.[]?; ((.key // []) | map(sub("^0x"; "") | ascii_downcase) | join("")) == $key)' "$VIP_DUMP" >/dev/null; then
         VIP_KEY=$VIP_UDP;
       else
-        echo "katran map_inline: neither TCP nor UDP benchmark VIP key is present in ${VIP_DUMP}" >&2;
+        echo "katran map_inline: neither TCP nor UDP benchmark VIP key is present in $VIP_DUMP" >&2;
         exit 1;
       fi;
       jq -n --arg c "$CH" --arg r "$RE" --arg s "$SI"
@@ -75,7 +75,7 @@ programs:
         --
         --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}
         --inline-hint=ctl_array:!00000000
-        --inline-hint=vip_map:!${VIP_KEY}
+        --inline-hint=vip_map:!$VIP_KEY
         --inline-hint=ch_rings:!00000000
         --inline-hint=reals:!01000000
         --inline-hint=server_id_map:!00000000

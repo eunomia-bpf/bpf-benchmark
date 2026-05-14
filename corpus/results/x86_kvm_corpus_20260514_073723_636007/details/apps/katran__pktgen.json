@@ -1,0 +1,1465 @@
+{
+  "app": "katran/pktgen",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 1642036,
+        "run_time_ns_delta": 193614877,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "python3",
+          "-c",
+          "\nimport json, socket, struct, sys, time\n\niface = sys.argv[1]\nduration_s = float(sys.argv[2])\npkt_size = int(sys.argv[3])\n\ndef mac(value):\n    return bytes.fromhex(value.replace(\":\", \"\"))\n\ndef checksum(data):\n    if len(data) % 2:\n        data += b\"\\0\"\n    total = sum(struct.unpack(\"!%dH\" % (len(data) // 2), data))\n    total = (total & 0xffff) + (total >> 16)\n    total = (total & 0xffff) + (total >> 16)\n    return (~total) & 0xffff\n\nsrc_ip = socket.inet_aton(\"10.0.0.2\")\ndst_ip = socket.inet_aton(\"10.100.1.1\")\npayload = b\"\\0\" * max(0, pkt_size - 14 - 20 - 8)\nudp_len = 8 + len(payload)\nip_len = 20 + udp_len\nip0 = struct.pack(\"!BBHHHBBH4s4s\", 0x45, 0, ip_len, 0, 0, 64, 17, 0, src_ip, dst_ip)\nip = struct.pack(\"!BBHHHBBH4s4s\", 0x45, 0, ip_len, 0, 0, 64, 17, checksum(ip0), src_ip, dst_ip)\nudp = struct.pack(\"!HHHH\", 12345, 8080, udp_len, 0)\nframe = mac(\"02:00:00:00:00:0a\") + mac(\"02:00:00:00:00:0b\") + struct.pack(\"!H\", 0x0800) + ip + udp + payload\n\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nstart = time.monotonic()\ndeadline = start + duration_s\nsent = 0\nwhile time.monotonic() < deadline:\n    sock.send(frame)\n    sent += 1\nelapsed = time.monotonic() - start\nprint(json.dumps({\"packets_sent\": sent, \"duration_s\": elapsed, \"pps\": sent / elapsed if elapsed else 0.0}))\n",
+          "rtlb0",
+          "3",
+          "64"
+        ],
+        "config": {
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "src_ip": "10.0.0.2",
+          "tool": "af_packet"
+        },
+        "duration_s": 3.0523911260000034,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "{\"packets_sent\": 1642036, \"duration_s\": 3.000001348000012, \"pps\": 547345.0873929386}",
+        "workload_name": "katran_af_packet_l2_udp"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 12932,
+        "bytes_xlated": 23440,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 1604504,
+        "run_time_ns_delta": 191207712,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "python3",
+          "-c",
+          "\nimport json, socket, struct, sys, time\n\niface = sys.argv[1]\nduration_s = float(sys.argv[2])\npkt_size = int(sys.argv[3])\n\ndef mac(value):\n    return bytes.fromhex(value.replace(\":\", \"\"))\n\ndef checksum(data):\n    if len(data) % 2:\n        data += b\"\\0\"\n    total = sum(struct.unpack(\"!%dH\" % (len(data) // 2), data))\n    total = (total & 0xffff) + (total >> 16)\n    total = (total & 0xffff) + (total >> 16)\n    return (~total) & 0xffff\n\nsrc_ip = socket.inet_aton(\"10.0.0.2\")\ndst_ip = socket.inet_aton(\"10.100.1.1\")\npayload = b\"\\0\" * max(0, pkt_size - 14 - 20 - 8)\nudp_len = 8 + len(payload)\nip_len = 20 + udp_len\nip0 = struct.pack(\"!BBHHHBBH4s4s\", 0x45, 0, ip_len, 0, 0, 64, 17, 0, src_ip, dst_ip)\nip = struct.pack(\"!BBHHHBBH4s4s\", 0x45, 0, ip_len, 0, 0, 64, 17, checksum(ip0), src_ip, dst_ip)\nudp = struct.pack(\"!HHHH\", 12345, 8080, udp_len, 0)\nframe = mac(\"02:00:00:00:00:0a\") + mac(\"02:00:00:00:00:0b\") + struct.pack(\"!H\", 0x0800) + ip + udp + payload\n\nsock = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)\nsock.bind((iface, 0))\nstart = time.monotonic()\ndeadline = start + duration_s\nsent = 0\nwhile time.monotonic() < deadline:\n    sock.send(frame)\n    sent += 1\nelapsed = time.monotonic() - start\nprint(json.dumps({\"packets_sent\": sent, \"duration_s\": elapsed, \"pps\": sent / elapsed if elapsed else 0.0}))\n",
+          "rtlb0",
+          "3",
+          "64"
+        ],
+        "config": {
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "src_ip": "10.0.0.2",
+          "tool": "af_packet"
+        },
+        "duration_s": 3.042700722999996,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "{\"packets_sent\": 1604504, \"duration_s\": 3.0000021950000075, \"pps\": 534834.2753462539}",
+        "workload_name": "katran_af_packet_l2_udp"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "9": {
+        "passes": [
+          {
+            "bpfopt_ms": 34,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 646,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 330,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): OVERLAY_DIR=/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/map_inline/overlays/katran; CH=; RE=; SI=; for f in /var/tmp/bpfrejit-runtime/3fmd4/bpfrejit-daemon-plan-1686-0/map-values/map-*.show.json; do n=$(jq -r .name \"$f\"); i=$(jq -r .id \"$f\"); case \"$n\" in ch_rings) CH=$i ;; reals) RE=$i ;; server_id_map) SI=$i ;; esac; done; jq -n --arg c \"$CH\" --arg r \"$RE\" --arg s \"$SI\" --slurpfile co \"$OVERLAY_DIR/ch_rings.json\" --slurpfile ro \"$OVERLAY_DIR/reals.json\" --slurpfile so \"$OVERLAY_DIR/server_id_map.json\" '($c | if . == \"\" then {} else {(.): $co[0]} end) + ($r | if . == \"\" then {} else {(.): $ro[0]} end) + ($s | if . == \"\" then {} else {(.): $so[0]} end)' > /var/tmp/bpfrejit-runtime/3fmd4/bpfrejit-daemon-plan-1686-0/map-values/overlays.json && timeout 6000 bpfopt --pass map_inline --input /var/tmp/bpfrejit-runtime/3fmd4/bpfrejit-daemon-plan-1686-0/output_step0.bin --output /var/tmp/bpfrejit-runtime/3fmd4/bpfrejit-daemon-plan-1686-0/output_step1.bin --report /var/tmp/bpfrejit-runtime/3fmd4/bpfrejit-daemon-plan-1686-0/report_step1.json --prog-type xdp --verifier-states /var/tmp/bpfrejit-runtime/3fmd4/bpfrejit-daemon-plan-1686-0/verifier_log_step0.log -- --map-values /var/tmp/bpfrejit-runtime/3fmd4/bpfrejit-daemon-plan-1686-0/map-values --map-ids 3,5,7,6,13,18,9,20,4,10,8,12,11,16 --inline-hint=ctl_array:!00000000 --inline-hint=vip_map:!0a6401010000000000000000000000001f900600 --inline-hint=ch_rings:!00000000 --inline-hint=reals:!01000000 --inline-hint=server_id_map:!00000000 # lpm_src_v4/v6 hints commented: katran is built without # -DLPM_SRC_LOOKUP, so these maps are guarded out of the program # by `#ifdef LPM_SRC_LOOKUP` in balancer_maps.h. bpfopt fail-fasts # on hint anchor not in metadata (correct: catches typos and # mis-applied hints early). Uncomment if a future build turns on # source-IP routing. # --inline-hint=lpm_src_v4:!00000000 # --inline-hint=lpm_src_v6:!00000000 # lru_mapping/global_lru_maps outer-only hints commented: katran # benchmark uses F_LRU_BYPASS + no `-forwarding_cores`, so the outer # ARRAY_OF_MAPS stays empty (every slot ENOENT). #265 root-caused this: # `attachLrus()` iterates empty forwardingCores_ \u2192 zero update_elem. # bpfopt fail-fasts when hinted outer key has no live inner map # (correct: hint claims something kernel snapshot disproves). # Uncomment only if benchmark configures forwarding cores OR an # alternative test deploys populated map-in-map. # --inline-hint=lru_mapping:!00000000 # --inline-hint=global_lru_maps:!00000000\nsubprocess output:\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"65+0\"\nwarning: verifier log: invalid id attribute value \"66+0\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"847-525483785\"\nwarning: verifier log: invalid id attribute value \"847-525483785\"\nwarning: verifier log: invalid id attribute value \"875-525483785\"\nwarning: verifier log: invalid id attribute value \"875-525483785\"\nwarning: verifier log: invalid id attribute value \"921-525483785\"\nwarning: verifier log: invalid id attribute value \"921-525483785\"\nwarning: verifier log: invalid id attribute value \"940-525483785\"\nwarning: verifier log: invalid id attribute value \"940-525483785\"\nwarning: verifier log: invalid id attribute value \"1012-525483785\"\nwarning: verifier log: invalid id attribute value \"1012-525483785\"\nwarning: verifier log: invalid id attribute value \"1039-525483785\"\nwarning: verifier log: invalid id attribute value \"1039-525483785\"\nwarning: verifier log: invalid id attribute value \"1090-525483785\"\nwarning: verifier log: invalid id attribute value \"1090-525483785\"\nwarning: verifier log: invalid id attribute value \"1109-525483785\"\nwarning: verifier log: invalid id attribute value \"1109-525483785\"\nwarning: verifier log: invalid id attribute value \"1187-525483785\"\nwarning: verifier log: invalid id attribute value \"1187-525483785\"\nwarning: verifier log: invalid id attribute value \"1214-525483785\"\nwarning: verifier log: invalid id attribute value \"1214-525483785\"\nwarning: verifier log: invalid id attribute value \"1260-525483785\"\nwarning: verifier log: invalid id attribute value \"1260-525483785\"\nwarning: verifier log: invalid id attribute value \"1279-525483785\"\nwarning: verifier log: invalid id attribute value \"1279-525483785\"\nwarning: verifier log: invalid id attribute value \"1350-525483785\"\nwarning: verifier log: invalid id attribute value \"1350-525483785\"\nwarning: verifier log: invalid id attribute value \"1376-525483785\"\nwarning: verifier log: invalid id attribute value \"1376-525483785\"\nwarning: verifier log: invalid id attribute value \"1427-525483785\"\nwarning: verifier log: invalid id attribute value \"1427-525483785\"\nwarning: verifier log: invalid id attribute value \"1446-525483785\"\nwarning: verifier log: invalid id attribute value \"1446-525483785\"\nwarning: verifier log: invalid id attribute value \"1558+0\"\nwarning: verifier log: invalid id attribute value \"1560+0\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid id attribute value \"1626+40\"\nwarning: verifier log: invalid id attribute value \"1626+40\"\nwarning: verifier log: invalid id attribute value \"1626+40\"\nwarning: verifier log: invalid id attribute value \"1629+20\"\nwarning: verifier log: invalid id attribute value \"1629+20\"\nwarning: verifier log: invalid id attribute value \"1629+20\"\nwarning: verifier log: invalid id attribute value \"1629+20\"\nwarning: verifier log: invalid id attribute value \"1632+0\"\nwarning: verifier log: invalid id attribute value \"1633+0\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid id attribute value \"1650-525483785\"\nwarning: verifier log: invalid id attribute value \"1650-525483785\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"1671+20\"\nwarning: verifier log: invalid id attribute value \"1671+20\"\nwarning: verifier log: invalid id attribute value \"1671+20\"\nwarning: verifier log: invalid id attribute value \"1671+20\"\nwarning: verifier log: invalid id attribute value \"1816-525483785\"\nwarning: verifier log: invalid id attribute value \"1816-525483785\"\nwarning: verifier log: invalid id attribute value \"1849+40\"\nwarning: verifier log: invalid id attribute value \"1849+40\"\nwarning: verifier log: invalid id attribute value \"1849+40\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"1854+20\"\nwarning: verifier log: invalid id attribute value \"1854+20\"\nwarning: verifier log: invalid id attribute value \"1854+20\"\nwarning: verifier log: invalid id attribute value \"1854+20\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"1908+20\"\nwarning: verifier log: invalid id attribute value \"1908+20\"\nwarning: verifier log: invalid id attribute value \"1908+20\"\nwarning: verifier log: invalid id attribute value \"1908+20\"\nwarning: verifier log: invalid id attribute value \"1927-525483785\"\nwarning: verifier log: invalid id attribute value \"1927-525483785\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"1949+20\"\nwarning: verifier log: invalid id attribute value \"1949+20\"\nwarning: verifier log: invalid id attribute value \"1949+20\"\nwarning: verifier log: invalid id attribute value \"1949+20\"\nwarning: verifier log: invalid id attribute value \"1985-525483785\"\nwarning: verifier log: invalid id attribute value \"1985-525483785\"\nwarning: verifier log: invalid id attribute value \"2103-525483785\"\nwarning: verifier log: invalid id attribute value \"2103-525483785\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"2143+20\"\nwarning: verifier log: invalid id attribute value \"2143+20\"\nwarning: verifier log: invalid id attribute value \"2143+20\"\nwarning: verifier log: invalid id attribute value \"2143+20\"\nwarning: verifier log: invalid id attribute value \"2197+40\"\nwarning: verifier log: invalid id attribute value \"2197+40\"\nwarning: verifier log: invalid id attribute value \"2197+40\"\nwarning: verifier log: invalid id attribute value \"2215-525483785\"\nwarning: verifier log: invalid id attribute value \"2215-525483785\"\nwarning: verifier log: invalid id attribute value \"2265-525483785\"\nwarning: verifier log: invalid id attribute value \"2265-525483785\"\nwarning: verifier log: invalid id attribute value \"2381-525483785\"\nwarning: verifier log: invalid id attribute value \"2381-525483785\"\nwarning: verifier log: invalid id attribute value \"2415+40\"\nwarning: verifier log: invalid id attribute value \"2415+40\"\nwarning: verifier log: invalid id attribute value \"2415+40\"\nwarning: verifier log: invalid id attribute value \"2488-525483785\"\nwarning: verifier log: invalid id attribute value \"2488-525483785\"\nwarning: verifier log: invalid id attribute value \"2544-525483785\"\nwarning: verifier log: invalid id attribute value \"2544-525483785\"\nwarning: verifier log: invalid id attribute value \"2666-525483785\"\nwarning: verifier log: invalid id attribute value \"2666-525483785\"\nwarning: verifier log: invalid id attribute value \"2890-525483785\"\nwarning: verifier log: invalid id attribute value \"2890-525483785\"\nwarning: verifier log: invalid id attribute value \"3004-525483785\"\nwarning: verifier log: invalid id attribute value \"3004-525483785\"\nwarning: verifier log: invalid id attribute value \"3136-525483785\"\nwarning: verifier log: invalid id attribute value \"3136-525483785\"\nwarning: verifier log: invalid id attribute value \"3256-525483785\"\nwarning: verifier log: invalid id attribute value \"3256-525483785\"\nwarning: verifier log: invalid id attribute value \"3385-525483785\"\nwarning: verifier log: invalid id attribute value \"3385-525483785\"\nwarning: verifier log: invalid id attribute value \"3503-525483785\"\nwarning: verifier log: invalid id attribute value \"3503-525483785\"\nwarning: verifier log: invalid id attribute value \"3638-525483785\"\nwarning: verifier log: invalid id attribute value \"3638-525483785\"\nwarning: verifier log: invalid id attribute value \"3762-525483785\"\nwarning: verifier log: invalid id attribute value \"3762-525483785\"\nerror: inline hint anchor vip_map key 0x0a6401010000000000000000000000001f900600 for map_id=5: hint key is not present in map dump: map_values snapshot missing map 5 key 0x0a6401010000000000000000000000001f900600",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "OVERLAY_DIR=/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/map_inline/overlays/katran; CH=; RE=; SI=; for f in ${MAP_VALUES}/map-*.show.json; do n=$(jq -r .name \"$f\"); i=$(jq -r .id \"$f\"); case \"$n\" in ch_rings) CH=$i ;; reals) RE=$i ;; server_id_map) SI=$i ;; esac; done; jq -n --arg c \"$CH\" --arg r \"$RE\" --arg s \"$SI\" --slurpfile co \"$OVERLAY_DIR/ch_rings.json\" --slurpfile ro \"$OVERLAY_DIR/reals.json\" --slurpfile so \"$OVERLAY_DIR/server_id_map.json\" '($c | if . == \"\" then {} else {(.): $co[0]} end) + ($r | if . == \"\" then {} else {(.): $ro[0]} end) + ($s | if . == \"\" then {} else {(.): $so[0]} end)' > ${MAP_VALUES}/overlays.json && timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --inline-hint=ctl_array:!00000000 --inline-hint=vip_map:!0a6401010000000000000000000000001f900600 --inline-hint=ch_rings:!00000000 --inline-hint=reals:!01000000 --inline-hint=server_id_map:!00000000 # lpm_src_v4/v6 hints commented: katran is built without # -DLPM_SRC_LOOKUP, so these maps are guarded out of the program # by `#ifdef LPM_SRC_LOOKUP` in balancer_maps.h. bpfopt fail-fasts # on hint anchor not in metadata (correct: catches typos and # mis-applied hints early). Uncomment if a future build turns on # source-IP routing. # --inline-hint=lpm_src_v4:!00000000 # --inline-hint=lpm_src_v6:!00000000 # lru_mapping/global_lru_maps outer-only hints commented: katran # benchmark uses F_LRU_BYPASS + no `-forwarding_cores`, so the outer # ARRAY_OF_MAPS stays empty (every slot ENOENT). #265 root-caused this: # `attachLrus()` iterates empty forwardingCores_ \u2192 zero update_elem. # bpfopt fail-fasts when hinted outer key has no live inner map # (correct: hint claims something kernel snapshot disproves). # Uncomment only if benchmark configures forwarding cores OR an # alternative test deploys populated map-in-map. # --inline-hint=lru_mapping:!00000000 # --inline-hint=global_lru_maps:!00000000",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_ms": 568,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "const_prop_alu_materialized=8"
+              ],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 8,
+              "sites_matched": 248,
+              "sites_skipped": 240,
+              "skip_reasons": {
+                "register has pointer type, cannot materialize": 240
+              },
+              "skipped_sites": [
+                {
+                  "pc": 4,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 5,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 9,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 10,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 42,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 43,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 65,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 66,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 75,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 76,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 165,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 166,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 206,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 307,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 317,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 361,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 362,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 377,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 414,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 417,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 442,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 445,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 460,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 461,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 477,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 508,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 509,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 516,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 517,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 537,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 538,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 558,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 559,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 566,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 567,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 581,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 588,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 589,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 612,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 613,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 630,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 650,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 651,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 667,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 671,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 672,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 705,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 708,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 734,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 737,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 758,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 759,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 766,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 767,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 789,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 790,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 810,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 811,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 819,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 820,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 840,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 841,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 859,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 860,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 872,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 879,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 880,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 886,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 891,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 892,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 905,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 912,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 913,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 919,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 923,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 924,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 933,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 944,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 945,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 984,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 989,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 990,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 997,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 998,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1015,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1016,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1022,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1025,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1037,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1038,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1042,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1052,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1053,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1068,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1069,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1075,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1076,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1077,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1082,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1083,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1101,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1102,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1109,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1110,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1124,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1125,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1143,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1152,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1153,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1155,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1156,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1217,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1218,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1241,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1242,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1247,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1275,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1288,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1289,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1299,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1300,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1307,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1308,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1316,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1317,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1338,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1339,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1340,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1341,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1347,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1348,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1377,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1378,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1394,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1403,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1404,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1406,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1407,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1491,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1492,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1498,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1499,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1501,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1502,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1510,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1511,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1520,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1521,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1546,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1547,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1571,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1589,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1590,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1625,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1626,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1630,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1631,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1651,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1652,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1653,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1654,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1660,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1666,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1667,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1676,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1677,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1679,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1680,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1688,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1689,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1698,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1699,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1723,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1724,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1727,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1742,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1743,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1747,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1756,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1757,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1772,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1773,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1778,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1779,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1780,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1785,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1786,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1803,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1804,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1811,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1812,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1825,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1826,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1843,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1852,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1853,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1855,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1856,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1923,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1924,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1944,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1945,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1951,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1991,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 1992,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2002,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2003,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2014,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2015,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2023,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2024,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2049,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2050,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2051,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2052,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2058,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2059,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2075,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2076,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2091,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2100,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2101,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2103,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2104,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2198,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2199,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2210,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2211,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2219,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2220,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2230,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2247,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2259,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2260,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2280,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2281,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2282,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2283,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2294,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 2295,
+                  "reason": "register has pointer type, cannot materialize"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 126,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET}",
+              "log_level": 1,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 542,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "removed 17 dead defs"
+              ],
+              "insn_count_after": 2525,
+              "insn_count_before": 2542,
+              "insn_delta": -17,
+              "pass": "dce",
+              "sites_applied": 17,
+              "sites_matched": 17,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 124,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_ms": 654,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2445,
+              "insn_count_before": 2525,
+              "insn_delta": -80,
+              "pass": "rotate",
+              "sites_applied": 20,
+              "sites_matched": 20,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 124,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_ms": 903,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2459,
+              "insn_count_before": 2445,
+              "insn_delta": 14,
+              "pass": "cond_select",
+              "sites_applied": 7,
+              "sites_matched": 7,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 126,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_ms": 33,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2459,
+              "insn_count_before": 2459,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 126,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_ms": 213,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2459,
+              "insn_count_before": 2459,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 6,
+              "sites_matched": 6,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 126,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_ms": 3681,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2459,
+              "insn_count_before": 2459,
+              "insn_delta": 0,
+              "pass": "lea",
+              "sites_applied": 122,
+              "sites_matched": 122,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 129,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "lea"
+            }
+          },
+          {
+            "bpfopt_ms": 32,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2459,
+              "insn_count_before": 2459,
+              "insn_delta": 0,
+              "pass": "ccmp",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "ccmp requires aarch64 target": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 0,
+                  "reason": "ccmp requires aarch64 target"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 128,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass ccmp --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "ccmp"
+            }
+          },
+          {
+            "bpfopt_ms": 57,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2459,
+              "insn_count_before": 2459,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 129,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_ms": 11742,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2541,
+              "insn_count_before": 2459,
+              "insn_delta": 82,
+              "pass": "prefetch",
+              "sites_applied": 41,
+              "sites_matched": 41,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 133,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          },
+          {
+            "bpfopt_ms": 179,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2529,
+              "insn_count_before": 2541,
+              "insn_delta": -12,
+              "pass": "wide_mem",
+              "sites_applied": 4,
+              "sites_matched": 4,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 132,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 33,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2529,
+              "insn_count_before": 2529,
+              "insn_delta": 0,
+              "pass": "bounds_check_merge",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 133,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass bounds_check_merge --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_ms": 33,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2529,
+              "insn_count_before": 2529,
+              "insn_delta": 0,
+              "pass": "skb_load_bytes_spec",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 133,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass skb_load_bytes_spec --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_ms": 33,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2529,
+              "insn_count_before": 2529,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 659,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 185,
+            "bpfopt_summary": null,
+            "error": "step 16 failed (exit 1): timeout 6000 bpfopt --pass const_prop --input /var/tmp/bpfrejit-runtime/3fmd4/bpfrejit-daemon-plan-1686-0/output_step15.bin --output /var/tmp/bpfrejit-runtime/3fmd4/bpfrejit-daemon-plan-1686-0/output_step16.bin --report /var/tmp/bpfrejit-runtime/3fmd4/bpfrejit-daemon-plan-1686-0/report_step16.json --prog-type xdp --verifier-states /var/tmp/bpfrejit-runtime/3fmd4/bpfrejit-daemon-plan-1686-0/verifier_log_step15.log --target /var/tmp/bpfrejit-runtime/3fmd4/bpfrejit-daemon-plan-1686-0/target.json\nsubprocess output:\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"892-525483785\"\nwarning: verifier log: invalid id attribute value \"892-525483785\"\nwarning: verifier log: invalid id attribute value \"918-525483785\"\nwarning: verifier log: invalid id attribute value \"918-525483785\"\nwarning: verifier log: invalid id attribute value \"962-525483785\"\nwarning: verifier log: invalid id attribute value \"962-525483785\"\nwarning: verifier log: invalid id attribute value \"978-525483785\"\nwarning: verifier log: invalid id attribute value \"978-525483785\"\nwarning: verifier log: invalid id attribute value \"1046-525483785\"\nwarning: verifier log: invalid id attribute value \"1046-525483785\"\nwarning: verifier log: invalid id attribute value \"1071-525483785\"\nwarning: verifier log: invalid id attribute value \"1071-525483785\"\nwarning: verifier log: invalid id attribute value \"1119-525483785\"\nwarning: verifier log: invalid id attribute value \"1119-525483785\"\nwarning: verifier log: invalid id attribute value \"1135-525483785\"\nwarning: verifier log: invalid id attribute value \"1135-525483785\"\nwarning: verifier log: invalid id attribute value \"1205-525483785\"\nwarning: verifier log: invalid id attribute value \"1205-525483785\"\nwarning: verifier log: invalid id attribute value \"1231-525483785\"\nwarning: verifier log: invalid id attribute value \"1231-525483785\"\nwarning: verifier log: invalid id attribute value \"1275-525483785\"\nwarning: verifier log: invalid id attribute value \"1275-525483785\"\nwarning: verifier log: invalid id attribute value \"1291-525483785\"\nwarning: verifier log: invalid id attribute value \"1291-525483785\"\nwarning: verifier log: invalid id attribute value \"1359-525483785\"\nwarning: verifier log: invalid id attribute value \"1359-525483785\"\nwarning: verifier log: invalid id attribute value \"1383-525483785\"\nwarning: verifier log: invalid id attribute value \"1383-525483785\"\nwarning: verifier log: invalid id attribute value \"1431-525483785\"\nwarning: verifier log: invalid id attribute value \"1431-525483785\"\nwarning: verifier log: invalid id attribute value \"1447-525483785\"\nwarning: verifier log: invalid id attribute value \"1447-525483785\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid id attribute value \"1613+40\"\nwarning: verifier log: invalid id attribute value \"1613+40\"\nwarning: verifier log: invalid id attribute value \"1613+40\"\nwarning: verifier log: invalid id attribute value \"1616+20\"\nwarning: verifier log: invalid id attribute value \"1616+20\"\nwarning: verifier log: invalid id attribute value \"1616+20\"\nwarning: verifier log: invalid id attribute value \"1616+20\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid id attribute value \"1624-525483785\"\nwarning: verifier log: invalid id attribute value \"1624-525483785\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"1643+20\"\nwarning: verifier log: invalid id attribute value \"1643+20\"\nwarning: verifier log: invalid id attribute value \"1643+20\"\nwarning: verifier log: invalid id attribute value \"1643+20\"\nwarning: verifier log: invalid id attribute value \"1663-525483785\"\nwarning: verifier log: invalid id attribute value \"1663-525483785\"\nwarning: verifier log: invalid id attribute value \"1747-525483785\"\nwarning: verifier log: invalid id attribute value \"1747-525483785\"\nwarning: verifier log: invalid id attribute value \"1778+40\"\nwarning: verifier log: invalid id attribute value \"1778+40\"\nwarning: verifier log: invalid id attribute value \"1778+40\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"1783+20\"\nwarning: verifier log: invalid id attribute value \"1783+20\"\nwarning: verifier log: invalid id attribute value \"1783+20\"\nwarning: verifier log: invalid id attribute value \"1783+20\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"1836+20\"\nwarning: verifier log: invalid id attribute value \"1836+20\"\nwarning: verifier log: invalid id attribute value \"1836+20\"\nwarning: verifier log: invalid id attribute value \"1836+20\"\nwarning: verifier log: invalid id attribute value \"1845-525483785\"\nwarning: verifier log: invalid id attribute value \"1845-525483785\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"1865+20\"\nwarning: verifier log: invalid id attribute value \"1865+20\"\nwarning: verifier log: invalid id attribute value \"1865+20\"\nwarning: verifier log: invalid id attribute value \"1865+20\"\nwarning: verifier log: invalid id attribute value \"1889-525483785\"\nwarning: verifier log: invalid id attribute value \"1889-525483785\"\nwarning: verifier log: invalid id attribute value \"1980-525483785\"\nwarning: verifier log: invalid id attribute value \"1980-525483785\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"2018+20\"\nwarning: verifier log: invalid id attribute value \"2018+20\"\nwarning: verifier log: invalid id attribute value \"2018+20\"\nwarning: verifier log: invalid id attribute value \"2018+20\"\nwarning: verifier log: invalid id attribute value \"2070+40\"\nwarning: verifier log: invalid id attribute value \"2070+40\"\nwarning: verifier log: invalid id attribute value \"2070+40\"\nwarning: verifier log: invalid id attribute value \"2078-525483785\"\nwarning: verifier log: invalid id attribute value \"2078-525483785\"\nwarning: verifier log: invalid id attribute value \"2113-525483785\"\nwarning: verifier log: invalid id attribute value \"2113-525483785\"\nwarning: verifier log: invalid id attribute value \"2199-525483785\"\nwarning: verifier log: invalid id attribute value \"2199-525483785\"\nwarning: verifier log: invalid id attribute value \"2230+40\"\nwarning: verifier log: invalid id attribute value \"2230+40\"\nwarning: verifier log: invalid id attribute value \"2230+40\"\nwarning: verifier log: invalid id attribute value \"2291-525483785\"\nwarning: verifier log: invalid id attribute value \"2291-525483785\"\nwarning: verifier log: invalid id attribute value \"2332-525483785\"\nwarning: verifier log: invalid id attribute value \"2332-525483785\"\nwarning: verifier log: invalid id attribute value \"2425-525483785\"\nwarning: verifier log: invalid id attribute value \"2425-525483785\"\nwarning: verifier log: invalid id attribute value \"2595-525483785\"\nwarning: verifier log: invalid id attribute value \"2595-525483785\"\nwarning: verifier log: invalid id attribute value \"2681-525483785\"\nwarning: verifier log: invalid id attribute value \"2681-525483785\"\nwarning: verifier log: invalid id attribute value \"2785-525483785\"\nwarning: verifier log: invalid id attribute value \"2785-525483785\"\nwarning: verifier log: invalid id attribute value \"2878-525483785\"\nwarning: verifier log: invalid id attribute value \"2878-525483785\"\nwarning: verifier log: invalid id attribute value \"2977-525483785\"\nwarning: verifier log: invalid id attribute value \"2977-525483785\"\nwarning: verifier log: invalid id attribute value \"3065-525483785\"\nwarning: verifier log: invalid id attribute value \"3065-525483785\"\nwarning: verifier log: invalid id attribute value \"3170-525483785\"\nwarning: verifier log: invalid id attribute value \"3170-525483785\"\nwarning: verifier log: invalid id attribute value \"3265-525483785\"\nwarning: verifier log: invalid id attribute value \"3265-525483785\"\nerror: verifier state pc 862 is not present in the control-flow graph",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET}",
+              "log_level": 1,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 471,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "removed 15 dead defs"
+              ],
+              "insn_count_after": 2499,
+              "insn_count_before": 2529,
+              "insn_delta": -30,
+              "pass": "dce",
+              "sites_applied": 15,
+              "sites_matched": 15,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 132,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          }
+        ],
+        "prog_id": 9,
+        "program": {
+          "final_insn_count": 2499,
+          "orig_insn_count": 2542,
+          "prog_id": 9,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_pktgen",
+  "status": "ok"
+}

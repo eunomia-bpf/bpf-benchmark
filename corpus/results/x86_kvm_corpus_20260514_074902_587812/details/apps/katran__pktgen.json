@@ -1,0 +1,508 @@
+{
+  "app": "katran/pktgen",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 1986810,
+        "run_time_ns_delta": 224045983,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "config": {
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 3.1109882000000084,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 9  udp_src_max: 9  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags:\nCurrent:\n     pkts-sofar: 1986810  errors: 0\n     started: 136100034us  stopped: 139081711us idle: 0us\n     seq_num: 1986811  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 9\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 2981677(c2981677+d0) usec, 1986810 (64byte,-1frags)\n  666339pps 341Mb/sec (341165568bps) errors: 0",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 12978,
+        "bytes_xlated": 23536,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 1984376,
+        "run_time_ns_delta": 219517351,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "config": {
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 3.1106417239999757,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 9  udp_src_max: 9  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags:\nCurrent:\n     pkts-sofar: 1984376  errors: 0\n     started: 222050039us  stopped: 225031773us idle: 0us\n     seq_num: 1984377  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 9\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 2981733(c2981733+d0) usec, 1984376 (64byte,-1frags)\n  665510pps 340Mb/sec (340741120bps) errors: 0",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "9": {
+        "passes": [
+          {
+            "bpfopt_ms": 34,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 645,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 326,
+            "bpfopt_summary": null,
+            "error": "step 1 failed (exit 1): OVERLAY_DIR=/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/map_inline/overlays/katran; CH=; RE=; SI=; for f in /var/tmp/bpfrejit-runtime/nbuct/bpfrejit-daemon-plan-1688-0/map-values/map-*.show.json; do n=$(jq -r .name \"$f\"); i=$(jq -r .id \"$f\"); case \"$n\" in ch_rings) CH=$i ;; reals) RE=$i ;; server_id_map) SI=$i ;; esac; done; jq -n --arg c \"$CH\" --arg r \"$RE\" --arg s \"$SI\" --slurpfile co \"$OVERLAY_DIR/ch_rings.json\" --slurpfile ro \"$OVERLAY_DIR/reals.json\" --slurpfile so \"$OVERLAY_DIR/server_id_map.json\" '($c | if . == \"\" then {} else {(.): $co[0]} end) + ($r | if . == \"\" then {} else {(.): $ro[0]} end) + ($s | if . == \"\" then {} else {(.): $so[0]} end)' > /var/tmp/bpfrejit-runtime/nbuct/bpfrejit-daemon-plan-1688-0/map-values/overlays.json && timeout 6000 bpfopt --pass map_inline --input /var/tmp/bpfrejit-runtime/nbuct/bpfrejit-daemon-plan-1688-0/output_step0.bin --output /var/tmp/bpfrejit-runtime/nbuct/bpfrejit-daemon-plan-1688-0/output_step1.bin --report /var/tmp/bpfrejit-runtime/nbuct/bpfrejit-daemon-plan-1688-0/report_step1.json --prog-type xdp --verifier-states /var/tmp/bpfrejit-runtime/nbuct/bpfrejit-daemon-plan-1688-0/verifier_log_step0.log -- --map-values /var/tmp/bpfrejit-runtime/nbuct/bpfrejit-daemon-plan-1688-0/map-values --map-ids 3,5,7,6,13,18,9,20,4,10,8,12,11,16 --inline-hint=ctl_array:!00000000 --inline-hint=vip_map:!0a6401010000000000000000000000001f900600 --inline-hint=ch_rings:!00000000 --inline-hint=reals:!01000000 --inline-hint=server_id_map:!00000000 # lpm_src_v4/v6 hints commented: katran is built without # -DLPM_SRC_LOOKUP, so these maps are guarded out of the program # by `#ifdef LPM_SRC_LOOKUP` in balancer_maps.h. bpfopt fail-fasts # on hint anchor not in metadata (correct: catches typos and # mis-applied hints early). Uncomment if a future build turns on # source-IP routing. # --inline-hint=lpm_src_v4:!00000000 # --inline-hint=lpm_src_v6:!00000000 # lru_mapping/global_lru_maps outer-only hints commented: katran # benchmark uses F_LRU_BYPASS + no `-forwarding_cores`, so the outer # ARRAY_OF_MAPS stays empty (every slot ENOENT). #265 root-caused this: # `attachLrus()` iterates empty forwardingCores_ \u2192 zero update_elem. # bpfopt fail-fasts when hinted outer key has no live inner map # (correct: hint claims something kernel snapshot disproves). # Uncomment only if benchmark configures forwarding cores OR an # alternative test deploys populated map-in-map. # --inline-hint=lru_mapping:!00000000 # --inline-hint=global_lru_maps:!00000000\nsubprocess output:\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"65+0\"\nwarning: verifier log: invalid id attribute value \"66+0\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"847-525483785\"\nwarning: verifier log: invalid id attribute value \"847-525483785\"\nwarning: verifier log: invalid id attribute value \"875-525483785\"\nwarning: verifier log: invalid id attribute value \"875-525483785\"\nwarning: verifier log: invalid id attribute value \"921-525483785\"\nwarning: verifier log: invalid id attribute value \"921-525483785\"\nwarning: verifier log: invalid id attribute value \"940-525483785\"\nwarning: verifier log: invalid id attribute value \"940-525483785\"\nwarning: verifier log: invalid id attribute value \"1012-525483785\"\nwarning: verifier log: invalid id attribute value \"1012-525483785\"\nwarning: verifier log: invalid id attribute value \"1039-525483785\"\nwarning: verifier log: invalid id attribute value \"1039-525483785\"\nwarning: verifier log: invalid id attribute value \"1090-525483785\"\nwarning: verifier log: invalid id attribute value \"1090-525483785\"\nwarning: verifier log: invalid id attribute value \"1109-525483785\"\nwarning: verifier log: invalid id attribute value \"1109-525483785\"\nwarning: verifier log: invalid id attribute value \"1187-525483785\"\nwarning: verifier log: invalid id attribute value \"1187-525483785\"\nwarning: verifier log: invalid id attribute value \"1214-525483785\"\nwarning: verifier log: invalid id attribute value \"1214-525483785\"\nwarning: verifier log: invalid id attribute value \"1260-525483785\"\nwarning: verifier log: invalid id attribute value \"1260-525483785\"\nwarning: verifier log: invalid id attribute value \"1279-525483785\"\nwarning: verifier log: invalid id attribute value \"1279-525483785\"\nwarning: verifier log: invalid id attribute value \"1350-525483785\"\nwarning: verifier log: invalid id attribute value \"1350-525483785\"\nwarning: verifier log: invalid id attribute value \"1376-525483785\"\nwarning: verifier log: invalid id attribute value \"1376-525483785\"\nwarning: verifier log: invalid id attribute value \"1427-525483785\"\nwarning: verifier log: invalid id attribute value \"1427-525483785\"\nwarning: verifier log: invalid id attribute value \"1446-525483785\"\nwarning: verifier log: invalid id attribute value \"1446-525483785\"\nwarning: verifier log: invalid id attribute value \"1558+0\"\nwarning: verifier log: invalid id attribute value \"1560+0\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid id attribute value \"1626+40\"\nwarning: verifier log: invalid id attribute value \"1626+40\"\nwarning: verifier log: invalid id attribute value \"1626+40\"\nwarning: verifier log: invalid id attribute value \"1629+20\"\nwarning: verifier log: invalid id attribute value \"1629+20\"\nwarning: verifier log: invalid id attribute value \"1629+20\"\nwarning: verifier log: invalid id attribute value \"1629+20\"\nwarning: verifier log: invalid id attribute value \"1632+0\"\nwarning: verifier log: invalid id attribute value \"1633+0\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid smin32 attribute value \"0xffff0000\"\nwarning: verifier log: invalid id attribute value \"1650-525483785\"\nwarning: verifier log: invalid id attribute value \"1650-525483785\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"1671+20\"\nwarning: verifier log: invalid id attribute value \"1671+20\"\nwarning: verifier log: invalid id attribute value \"1671+20\"\nwarning: verifier log: invalid id attribute value \"1671+20\"\nwarning: verifier log: invalid id attribute value \"1816-525483785\"\nwarning: verifier log: invalid id attribute value \"1816-525483785\"\nwarning: verifier log: invalid id attribute value \"1849+40\"\nwarning: verifier log: invalid id attribute value \"1849+40\"\nwarning: verifier log: invalid id attribute value \"1849+40\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"1854+20\"\nwarning: verifier log: invalid id attribute value \"1854+20\"\nwarning: verifier log: invalid id attribute value \"1854+20\"\nwarning: verifier log: invalid id attribute value \"1854+20\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"1908+20\"\nwarning: verifier log: invalid id attribute value \"1908+20\"\nwarning: verifier log: invalid id attribute value \"1908+20\"\nwarning: verifier log: invalid id attribute value \"1908+20\"\nwarning: verifier log: invalid id attribute value \"1927-525483785\"\nwarning: verifier log: invalid id attribute value \"1927-525483785\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"1949+20\"\nwarning: verifier log: invalid id attribute value \"1949+20\"\nwarning: verifier log: invalid id attribute value \"1949+20\"\nwarning: verifier log: invalid id attribute value \"1949+20\"\nwarning: verifier log: invalid id attribute value \"1985-525483785\"\nwarning: verifier log: invalid id attribute value \"1985-525483785\"\nwarning: verifier log: invalid id attribute value \"2103-525483785\"\nwarning: verifier log: invalid id attribute value \"2103-525483785\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid smin32 attribute value \"0x800010ac\"\nwarning: verifier log: invalid id attribute value \"2143+20\"\nwarning: verifier log: invalid id attribute value \"2143+20\"\nwarning: verifier log: invalid id attribute value \"2143+20\"\nwarning: verifier log: invalid id attribute value \"2143+20\"\nwarning: verifier log: invalid id attribute value \"2197+40\"\nwarning: verifier log: invalid id attribute value \"2197+40\"\nwarning: verifier log: invalid id attribute value \"2197+40\"\nwarning: verifier log: invalid id attribute value \"2215-525483785\"\nwarning: verifier log: invalid id attribute value \"2215-525483785\"\nwarning: verifier log: invalid id attribute value \"2265-525483785\"\nwarning: verifier log: invalid id attribute value \"2265-525483785\"\nwarning: verifier log: invalid id attribute value \"2381-525483785\"\nwarning: verifier log: invalid id attribute value \"2381-525483785\"\nwarning: verifier log: invalid id attribute value \"2415+40\"\nwarning: verifier log: invalid id attribute value \"2415+40\"\nwarning: verifier log: invalid id attribute value \"2415+40\"\nwarning: verifier log: invalid id attribute value \"2488-525483785\"\nwarning: verifier log: invalid id attribute value \"2488-525483785\"\nwarning: verifier log: invalid id attribute value \"2544-525483785\"\nwarning: verifier log: invalid id attribute value \"2544-525483785\"\nwarning: verifier log: invalid id attribute value \"2666-525483785\"\nwarning: verifier log: invalid id attribute value \"2666-525483785\"\nwarning: verifier log: invalid id attribute value \"2890-525483785\"\nwarning: verifier log: invalid id attribute value \"2890-525483785\"\nwarning: verifier log: invalid id attribute value \"3004-525483785\"\nwarning: verifier log: invalid id attribute value \"3004-525483785\"\nwarning: verifier log: invalid id attribute value \"3136-525483785\"\nwarning: verifier log: invalid id attribute value \"3136-525483785\"\nwarning: verifier log: invalid id attribute value \"3256-525483785\"\nwarning: verifier log: invalid id attribute value \"3256-525483785\"\nwarning: verifier log: invalid id attribute value \"3385-525483785\"\nwarning: verifier log: invalid id attribute value \"3385-525483785\"\nwarning: verifier log: invalid id attribute value \"3503-525483785\"\nwarning: verifier log: invalid id attribute value \"3503-525483785\"\nwarning: verifier log: invalid id attribute value \"3638-525483785\"\nwarning: verifier log: invalid id attribute value \"3638-525483785\"\nwarning: verifier log: invalid id attribute value \"3762-525483785\"\nwarning: verifier log: invalid id attribute value \"3762-525483785\"\nerror: inline hint anchor vip_map key 0x0a6401010000000000000000000000001f900600 for map_id=5: hint key is not present in map dump: map_values snapshot missing map 5 key 0x0a6401010000000000000000000000001f900600",
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "OVERLAY_DIR=/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/map_inline/overlays/katran; CH=; RE=; SI=; for f in ${MAP_VALUES}/map-*.show.json; do n=$(jq -r .name \"$f\"); i=$(jq -r .id \"$f\"); case \"$n\" in ch_rings) CH=$i ;; reals) RE=$i ;; server_id_map) SI=$i ;; esac; done; jq -n --arg c \"$CH\" --arg r \"$RE\" --arg s \"$SI\" --slurpfile co \"$OVERLAY_DIR/ch_rings.json\" --slurpfile ro \"$OVERLAY_DIR/reals.json\" --slurpfile so \"$OVERLAY_DIR/server_id_map.json\" '($c | if . == \"\" then {} else {(.): $co[0]} end) + ($r | if . == \"\" then {} else {(.): $ro[0]} end) + ($s | if . == \"\" then {} else {(.): $so[0]} end)' > ${MAP_VALUES}/overlays.json && timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --inline-hint=ctl_array:!00000000 --inline-hint=vip_map:!0a6401010000000000000000000000001f900600 --inline-hint=ch_rings:!00000000 --inline-hint=reals:!01000000 --inline-hint=server_id_map:!00000000 # lpm_src_v4/v6 hints commented: katran is built without # -DLPM_SRC_LOOKUP, so these maps are guarded out of the program # by `#ifdef LPM_SRC_LOOKUP` in balancer_maps.h. bpfopt fail-fasts # on hint anchor not in metadata (correct: catches typos and # mis-applied hints early). Uncomment if a future build turns on # source-IP routing. # --inline-hint=lpm_src_v4:!00000000 # --inline-hint=lpm_src_v6:!00000000 # lru_mapping/global_lru_maps outer-only hints commented: katran # benchmark uses F_LRU_BYPASS + no `-forwarding_cores`, so the outer # ARRAY_OF_MAPS stays empty (every slot ENOENT). #265 root-caused this: # `attachLrus()` iterates empty forwardingCores_ \u2192 zero update_elem. # bpfopt fail-fasts when hinted outer key has no live inner map # (correct: hint claims something kernel snapshot disproves). # Uncomment only if benchmark configures forwarding cores OR an # alternative test deploys populated map-in-map. # --inline-hint=lru_mapping:!00000000 # --inline-hint=global_lru_maps:!00000000",
+              "log_level": 1,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_ms": 33,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2542,
+              "insn_count_before": 2542,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 124,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 182,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "removed 5 dead defs"
+              ],
+              "insn_count_after": 2537,
+              "insn_count_before": 2542,
+              "insn_delta": -5,
+              "pass": "dce",
+              "sites_applied": 5,
+              "sites_matched": 5,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 124,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_ms": 649,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2457,
+              "insn_count_before": 2537,
+              "insn_delta": -80,
+              "pass": "rotate",
+              "sites_applied": 20,
+              "sites_matched": 20,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 124,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_ms": 899,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2471,
+              "insn_count_before": 2457,
+              "insn_delta": 14,
+              "pass": "cond_select",
+              "sites_applied": 7,
+              "sites_matched": 7,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 126,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_ms": 33,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2471,
+              "insn_count_before": 2471,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 125,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_ms": 211,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2471,
+              "insn_count_before": 2471,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 6,
+              "sites_matched": 6,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 127,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_ms": 3692,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2471,
+              "insn_count_before": 2471,
+              "insn_delta": 0,
+              "pass": "lea",
+              "sites_applied": 122,
+              "sites_matched": 122,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 129,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "lea"
+            }
+          },
+          {
+            "bpfopt_ms": 33,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2471,
+              "insn_count_before": 2471,
+              "insn_delta": 0,
+              "pass": "ccmp",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "ccmp requires aarch64 target": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 0,
+                  "reason": "ccmp requires aarch64 target"
+                }
+              ]
+            },
+            "error": null,
+            "rejit_syscall_ms": 129,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass ccmp --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "ccmp"
+            }
+          },
+          {
+            "bpfopt_ms": 58,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2471,
+              "insn_count_before": 2471,
+              "insn_delta": 0,
+              "pass": "bulk_memory",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 129,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_ms": 11843,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2553,
+              "insn_count_before": 2471,
+              "insn_delta": 82,
+              "pass": "prefetch",
+              "sites_applied": 41,
+              "sites_matched": 41,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 132,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          },
+          {
+            "bpfopt_ms": 179,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2541,
+              "insn_count_before": 2553,
+              "insn_delta": -12,
+              "pass": "wide_mem",
+              "sites_applied": 4,
+              "sites_matched": 4,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 132,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 34,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2541,
+              "insn_count_before": 2541,
+              "insn_delta": 0,
+              "pass": "bounds_check_merge",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 132,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass bounds_check_merge --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_ms": 33,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2541,
+              "insn_count_before": 2541,
+              "insn_delta": 0,
+              "pass": "skb_load_bytes_spec",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 132,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass skb_load_bytes_spec --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_ms": 34,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2541,
+              "insn_count_before": 2541,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 132,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 1,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 34,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2541,
+              "insn_count_before": 2541,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 133,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 473,
+            "bpfopt_summary": {
+              "diagnostics": [
+                "removed 15 dead defs"
+              ],
+              "insn_count_after": 2511,
+              "insn_count_before": 2541,
+              "insn_delta": -30,
+              "pass": "dce",
+              "sites_applied": 15,
+              "sites_matched": 15,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 132,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          }
+        ],
+        "prog_id": 9,
+        "program": {
+          "final_insn_count": 2511,
+          "orig_insn_count": 2542,
+          "prog_id": 9,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_pktgen",
+  "status": "ok"
+}

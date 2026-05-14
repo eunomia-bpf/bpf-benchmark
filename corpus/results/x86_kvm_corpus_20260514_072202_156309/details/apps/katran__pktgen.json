@@ -1,0 +1,10 @@
+{
+  "app": "katran/pktgen",
+  "baseline": null,
+  "error": "modprobe pktgen failed: modprobe: FATAL: Module pktgen not found in directory //lib/modules/7.0.0-rc2+",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "katran",
+  "selected_workload": "xdp_pktgen",
+  "status": "error"
+}
