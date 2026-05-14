@@ -4,6 +4,7 @@
 use std::collections::BTreeMap;
 
 use crate::analysis::bbprogram::ProgramCFG;
+use crate::analysis::InsnSite;
 use crate::pass::BtfInfoRecords;
 
 #[cfg(test)]
@@ -135,10 +136,25 @@ pub(crate) fn read_u32_field(record: &[u8], offset: usize, label: &str) -> anyho
 pub(crate) fn old_pc_to_current_pc(prog: &ProgramCFG) -> anyhow::Result<BTreeMap<usize, usize>> {
     let site_pcs = prog.current_site_pcs()?;
     let mut old_to_new = BTreeMap::new();
-    for &site in prog.btf.keys() {
-        let old_pc = prog.original_pc(site)?;
-        if let Some(&new_pc) = site_pcs.get(&site) {
-            old_to_new.insert(old_pc, new_pc);
+    for block in prog.blocks() {
+        for (idx, node) in block.insns.iter().enumerate() {
+            let Some(old_pc) = node.btf_pc else { continue };
+            let site = InsnSite {
+                block: block.id,
+                idx,
+            };
+            if let Some(&new_pc) = site_pcs.get(&site) {
+                old_to_new.insert(old_pc, new_pc);
+            }
+        }
+        let term_site = InsnSite {
+            block: block.id,
+            idx: block.insns.len(),
+        };
+        if let Some(old_pc) = block.terminator_btf_pc {
+            if let Some(&new_pc) = site_pcs.get(&term_site) {
+                old_to_new.insert(old_pc, new_pc);
+            }
         }
     }
     Ok(old_to_new)

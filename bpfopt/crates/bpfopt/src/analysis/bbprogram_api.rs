@@ -4,7 +4,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::ops::Range;
 
-use crate::analysis::{BasicBlock, BlockId, DefSite, InsnSite, ProgramCFG, Terminator};
+use crate::analysis::{BasicBlock, BlockId, DefSite, InsnNode, InsnSite, ProgramCFG, Terminator};
 use crate::insn::{insn_width, BpfInsn};
 use crate::pass::SiteSkipReason;
 
@@ -46,14 +46,6 @@ impl ProgramCFG {
             }
             block.insns.remove(site.idx);
         }
-        Self::shift_metadata_after_delete(&mut self.btf, site.block, site.idx, 1);
-        self.shift_ldimm64_second_slots_after_delete(site.block, site.idx, 1);
-        Self::shift_metadata_after_delete(
-            &mut self.pc_relative_ldimm64_targets,
-            site.block,
-            site.idx,
-            1,
-        );
         self.rebuild_use_def_after_mutation()?;
         Ok(removed_slots)
     }
@@ -139,27 +131,12 @@ impl ProgramCFG {
 
         {
             let block_ref = self.block_mut(block)?;
-            block_ref.insns.splice(range.clone(), new_insns.clone());
+            block_ref
+                .insns
+                .splice(range.clone(), new_insns.iter().cloned().map(InsnNode::from));
         }
 
-        Self::shift_metadata_after_delete(&mut self.btf, block, range.start, old_len);
-        self.shift_ldimm64_second_slots_after_delete(block, range.start, old_len);
-        Self::shift_metadata_after_delete(
-            &mut self.pc_relative_ldimm64_targets,
-            block,
-            range.start,
-            old_len,
-        );
-        if !new_insns.is_empty() {
-            Self::shift_metadata_after_insert(&mut self.btf, block, range.start, new_insns.len());
-            self.shift_ldimm64_second_slots_after_insert(block, range.start, new_insns.len());
-            Self::shift_metadata_after_insert(
-                &mut self.pc_relative_ldimm64_targets,
-                block,
-                range.start,
-                new_insns.len(),
-            );
-        }
+        let _ = old_len;
         for (idx, second) in new_second_slots {
             self.insert_ldimm64_second_slot(
                 InsnSite {
@@ -167,7 +144,7 @@ impl ProgramCFG {
                     idx: range.start + idx,
                 },
                 second,
-            );
+            )?;
         }
 
         self.rebuild_use_def_after_mutation()
@@ -186,14 +163,11 @@ impl ProgramCFG {
                 term
             ),
         };
-        let site = InsnSite {
-            block,
-            idx: self.block(block)?.insns.len(),
-        };
-        self.btf.remove(&site);
-        self.remove_ldimm64_second_slot(site);
-        self.pc_relative_ldimm64_targets.remove(&site);
-        self.block_mut(block)?.terminator = Terminator::Fallthrough { next: fallthrough };
+        {
+            let b = self.block_mut(block)?;
+            b.terminator = Terminator::Fallthrough { next: fallthrough };
+            b.terminator_btf_pc = None;
+        }
         self.rebuild_cfg_edges()?;
         self.rebuild_use_def_after_mutation()
     }
@@ -211,14 +185,11 @@ impl ProgramCFG {
         block: BlockId,
         terminator: Terminator,
     ) -> anyhow::Result<()> {
-        let site = InsnSite {
-            block,
-            idx: self.block(block)?.insns.len(),
-        };
-        self.btf.remove(&site);
-        self.remove_ldimm64_second_slot(site);
-        self.pc_relative_ldimm64_targets.remove(&site);
-        self.block_mut(block)?.terminator = terminator;
+        {
+            let b = self.block_mut(block)?;
+            b.terminator = terminator;
+            b.terminator_btf_pc = None;
+        }
         self.rebuild_cfg_edges()?;
         self.rebuild_use_def_after_mutation()
     }
@@ -254,12 +225,6 @@ impl ProgramCFG {
         }
         self.blocks = blocks;
         self.entry = remap_block_id(self.entry, &old_to_new)?;
-        self.remap_metadata_sites(|site| {
-            old_to_new[site.block.0].map(|block| InsnSite {
-                block,
-                idx: site.idx,
-            })
-        });
         self.remap_pc_relative_targets_after_remove(&old_to_new)?;
         self.rebuild_cfg_edges()?;
         self.rebuild_use_def_after_mutation()
@@ -318,45 +283,11 @@ impl ProgramCFG {
             return Ok(first);
         }
 
-        let original_first_len = self.block(first)?.insns.len();
         let mut merged_insns = self.block(first)?.insns.clone();
-        let mut offsets = BTreeMap::new();
-        let mut block_lens = BTreeMap::new();
-        for &block in chain {
-            block_lens.insert(block, self.block(block)?.insns.len());
-        }
-        offsets.insert(first, 0usize);
         for &block in &chain[1..] {
-            offsets.insert(block, merged_insns.len());
             merged_insns.extend_from_slice(&self.block(block)?.insns);
         }
-        let merged_body_len = merged_insns.len();
         let last_terminator = self.block(last)?.terminator;
-
-        let remap_site = |site: InsnSite| -> Option<InsnSite> {
-            if !chain_set.contains(&site.block) {
-                return Some(site);
-            }
-            if site.block == first {
-                return (site.idx < original_first_len).then_some(site);
-            }
-            let block_len = block_lens[&site.block];
-            if site.idx < block_len {
-                let offset = offsets[&site.block];
-                return Some(InsnSite {
-                    block: first,
-                    idx: offset + site.idx,
-                });
-            }
-            if site.block == last && site.idx == block_len {
-                return Some(InsnSite {
-                    block: first,
-                    idx: merged_body_len,
-                });
-            }
-            None
-        };
-        self.remap_metadata_sites(remap_site);
 
         {
             let first_block = self.block_mut(first)?;
@@ -412,7 +343,6 @@ impl ProgramCFG {
         }
         let head = at.block;
         let tail = BlockId(head.0 + 1);
-        self.remap_metadata_sites_after_split(at, tail);
         self.remap_pc_relative_targets_after_insert(tail);
 
         let (tail_insns, tail_terminator, frame) = {
@@ -430,6 +360,8 @@ impl ProgramCFG {
                 id: tail,
                 insns: tail_insns,
                 terminator: tail_terminator,
+                terminator_branch_profile: None,
+                terminator_btf_pc: None,
                 frame,
                 predecessors: Vec::new(),
             },
@@ -502,12 +434,8 @@ impl ProgramCFG {
         }
 
         if let Some(join) = pattern.join {
-            let remap_site = |site: InsnSite| -> Option<InsnSite> {
-                (!remove.contains(&site.block)).then_some(site)
-            };
-            self.remap_metadata_sites(remap_site);
             let predecessor = self.block_mut(pattern.predecessor)?;
-            predecessor.insns = replacement;
+            predecessor.insns = replacement.iter().cloned().map(InsnNode::from).collect();
             predecessor.terminator = Terminator::Jump {
                 insn: BpfInsn::ja(0),
                 target: join,
@@ -518,12 +446,8 @@ impl ProgramCFG {
             if true_term != false_term {
                 anyhow::bail!("CFG diamond branches do not share a terminator");
             }
-            let remap_site = |site: InsnSite| -> Option<InsnSite> {
-                (!remove.contains(&site.block)).then_some(site)
-            };
-            self.remap_metadata_sites(remap_site);
             let predecessor = self.block_mut(pattern.predecessor)?;
-            predecessor.insns = replacement;
+            predecessor.insns = replacement.iter().cloned().map(InsnNode::from).collect();
             predecessor.terminator = true_term;
         }
         for (idx, second) in new_second_slots {
@@ -533,7 +457,7 @@ impl ProgramCFG {
                     idx,
                 },
                 second,
-            );
+            )?;
         }
 
         self.remove_blocks_in_place(&remove)?;
@@ -571,55 +495,24 @@ impl ProgramCFG {
         }
         self.blocks = blocks;
         self.entry = remap_block_id(self.entry, &old_to_new)?;
-        self.remap_metadata_sites(|site| {
-            old_to_new[site.block.0].map(|block| InsnSite {
-                block,
-                idx: site.idx,
-            })
-        });
         self.remap_pc_relative_targets_after_remove(&old_to_new)?;
         self.rebuild_cfg_edges()?;
         self.rebuild_use_def_after_mutation()
     }
 
-    fn remap_metadata_sites<F>(&mut self, mut remap: F)
-    where
-        F: FnMut(InsnSite) -> Option<InsnSite>,
-    {
-        self.btf = remap_site_map(std::mem::take(&mut self.btf), &mut remap);
-        self.remap_ldimm64_second_slots(&mut remap);
-        self.pc_relative_ldimm64_targets = remap_site_map(
-            std::mem::take(&mut self.pc_relative_ldimm64_targets),
-            &mut remap,
-        );
-    }
-
-    fn remap_metadata_sites_after_split(&mut self, at: InsnSite, tail: BlockId) {
-        self.remap_metadata_sites(|site| {
-            if site.block == at.block {
-                if site.idx < at.idx {
-                    Some(site)
-                } else {
-                    Some(InsnSite {
-                        block: Self::remap_block_after_insert(site.block, at.block, tail),
-                        idx: site.idx - at.idx,
-                    })
-                }
-            } else if site.block.0 >= tail.0 {
-                Some(InsnSite {
-                    block: Self::remap_block_after_insert(site.block, at.block, tail),
-                    idx: site.idx,
-                })
-            } else {
-                Some(site)
-            }
-        });
-    }
+    // remap_metadata_sites / remap_metadata_sites_after_split were the
+    // sidecar-shifting helpers for the deleted btf BTreeMap. With all per-insn
+    // metadata now living inline on `InsnNode`, Vec splice/move carries the
+    // fields with the instruction and no remap is needed.
 
     fn remap_pc_relative_targets_after_insert(&mut self, inserted: BlockId) {
-        for target in self.pc_relative_ldimm64_targets.values_mut() {
-            if target.0 >= inserted.0 {
-                target.0 += 1;
+        for block in &mut self.blocks {
+            for node in &mut block.insns {
+                if let Some(target) = node.pc_relative_ldimm64_target.as_mut() {
+                    if target.0 >= inserted.0 {
+                        target.0 += 1;
+                    }
+                }
             }
         }
     }
@@ -628,8 +521,12 @@ impl ProgramCFG {
         &mut self,
         old_to_new: &[Option<BlockId>],
     ) -> anyhow::Result<()> {
-        for target in self.pc_relative_ldimm64_targets.values_mut() {
-            *target = remap_block_id(*target, old_to_new)?;
+        for block in &mut self.blocks {
+            for node in &mut block.insns {
+                if let Some(target) = node.pc_relative_ldimm64_target.as_mut() {
+                    *target = remap_block_id(*target, old_to_new)?;
+                }
+            }
         }
         Ok(())
     }
@@ -672,25 +569,24 @@ fn ensure_no_pc_relative_targets(
     removed_chain_blocks: &BTreeSet<BlockId>,
     kept: BlockId,
 ) -> anyhow::Result<()> {
-    for (&site, &target) in &prog.pc_relative_ldimm64_targets {
-        if removed_chain_blocks.contains(&target) && target != kept {
-            anyhow::bail!(
-                "pc-relative LD_IMM64 at {:?} targets merged-away block {:?}",
-                site,
-                target
-            );
+    for block in prog.blocks() {
+        for (idx, node) in block.insns.iter().enumerate() {
+            if let Some(target) = node.pc_relative_ldimm64_target {
+                if removed_chain_blocks.contains(&target) && target != kept {
+                    let site = InsnSite {
+                        block: block.id,
+                        idx,
+                    };
+                    anyhow::bail!(
+                        "pc-relative LD_IMM64 at {:?} targets merged-away block {:?}",
+                        site,
+                        target
+                    );
+                }
+            }
         }
     }
     Ok(())
-}
-
-fn remap_site_map<T, F>(map: BTreeMap<InsnSite, T>, remap: &mut F) -> BTreeMap<InsnSite, T>
-where
-    F: FnMut(InsnSite) -> Option<InsnSite>,
-{
-    map.into_iter()
-        .filter_map(|(site, value)| remap(site).map(|site| (site, value)))
-        .collect()
 }
 
 fn remap_block_id(block: BlockId, old_to_new: &[Option<BlockId>]) -> anyhow::Result<BlockId> {

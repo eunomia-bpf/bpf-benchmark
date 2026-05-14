@@ -228,7 +228,7 @@ impl BpfPass for EndianFusionPass {
             "interior branch target",
         )?);
         let raw_sites = prog.scan_block_starts(MAX_NARROW_SCAN + 1, |window| {
-            Ok(scan_endian_site_in_window(window.lookahead)
+            Ok(scan_endian_site_in_window(&window.bpf_lookahead())
                 .map(|(old_len, site)| (window.start_idx, old_len, site)))
         })?;
         if raw_sites.is_empty() {
@@ -286,5 +286,7 @@ fn preserved_body_insns(
                 start
             )
         })?
-        .to_vec())
+        .iter()
+        .map(|n| n.insn)
+        .collect::<Vec<_>>())
 }

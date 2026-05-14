@@ -17,13 +17,14 @@ pub fn lower(prog: &ProgramCFG) -> anyhow::Result<Vec<BpfInsn>> {
 
     for block_id in block_order {
         let block = prog.block(block_id)?;
-        for (idx, &insn) in block.insns.iter().enumerate() {
+        for (idx, node) in block.insns.iter().enumerate() {
+            let insn = node.insn;
             let site = InsnSite {
                 block: block_id,
                 idx,
             };
             let mut emitted = insn;
-            if let Some(&target) = prog.pc_relative_ldimm64_targets.get(&site) {
+            if let Some(target) = node.pc_relative_ldimm64_target {
                 let target_pc = block_start_pc[target.0];
                 let delta = pc_delta(out.len(), target_pc)?;
                 emitted.set_pc_relative_imm_delta(delta)?;

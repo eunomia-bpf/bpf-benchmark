@@ -51,7 +51,7 @@
 - **指令** — `InsnNode`,包 `BpfInsn` + 该指令位置的事实;
 - **终结子** — `Terminator`,块尾分支/跳转/退出 + 该位置的事实;
 - **块** — `BasicBlock`,`InsnNode` 序列 + `Terminator` + 块 entry/exit 级事实;
-- `ProgramCFG` 只持有派生 index 和版本 epoch,**不**作为事实的主生命周期所有者。
+- `ProgramCFG` 只持有派生 index,**不**作为事实的主生命周期所有者。
 
 bpfopt IR 仍然是 BPF bytecode:
 
@@ -60,7 +60,7 @@ BpfInsn       内核 ABI 指令(不改其字段)
 InsnNode      BpfInsn + 该指令位置的事实
 Terminator    分支/跳转/退出 + 该位置的事实
 BasicBlock    InsnNode 序列 + Terminator + 块级事实
-ProgramCFG    CFG 视图、变更 API、派生 index、epoch
+ProgramCFG    CFG 视图、变更 API、派生 index
 ```
 
 ## 结构
@@ -108,7 +108,6 @@ struct Terminator {
 
 struct BasicBlock {
     id: BlockId,
-    version: u64,
     frame: FrameId,
     predecessors: Vec<BlockId>,
 
@@ -124,11 +123,10 @@ struct BasicBlock {
 
 struct ProgramCFG {
     blocks: Vec<BasicBlock>,
-    version: u64,
+    entry: BlockId,
 
-    // 只放派生 index 和 epoch,不持有事实本身
-    use_def_index: Option<DefUseIndex>,   // DefSite -> Vec<UseSite>,可选
-    facts_epoch: u64,                     // 不动点是否需要重算
+    // 只放派生 index,不持有事实本身
+    use_def_index: Option<DefUseIndex>,   // DefSite -> Vec<UseSite>,lazy 计算
 }
 ```
 
@@ -244,9 +242,9 @@ verifier 没 r2 或 verifier 说 r2 是 scalar
 
 **ProgramCFG**
 
-- 派生 index(例如 `DefSite -> Vec<UseSite>`);
-- 不动点 epoch、版本号;
+- 派生 index(例如 `DefSite -> Vec<UseSite>`,lazy 计算);
 - 派生 index 是 cache,**不是**事实的主生命周期所有者。事实变了 index 失效,不是反过来。
+- 没有 `version` / `epoch` 字段(理由见 "单 pass 假设" 节)。
 
 ## 什么留在 pass 内
 
@@ -280,18 +278,35 @@ prog.verifier_stack_bytes_before(call_site, BPF_REG_2, key_size)
 
 其他 pass 一律消费共享事实,不再开 pass-private dataflow(纯匹配器内部状态除外)。
 
+## 单 pass 假设
+
+bpfopt 一次 CLI 调用只跑一个 pass。这是 v3 架构(`docs/tmp/bpfopt_design_v3.md`)的硬约束 —— daemon 把 pass 串联,每个 pass 独立 fork+exec 一个 bpfopt 进程,verifier 重跑由 daemon 在两次 bpfopt 之间用 `BPF_PROG_REJIT(log_level=2)` 完成。
+
+这一假设让本设计**显式不需要**考虑:
+
+- 跨 pass 的 fact cache 失效 / 重计算 —— 每次 bpfopt 进程启动 lift 一次,退出后整个 ProgramCFG 释放;
+- 多 pass 之间的事实优先级 / 仲裁 —— bpfopt 只看自己当前 pass 的 mutation;
+- `version` / `epoch` 字段 —— 没有跨调用复用,不需要版本号;structs 上看不到 `version: u64`;
+- pass-to-pass 依赖排序 —— 由 daemon 端的 pass list 决定,bpfopt 不感知;
+- 多 pass 抽象 —— bpfopt 不提供 "pass 1 写、pass 2 读" 的共享事实接口。
+
+跨调用的事实新鲜度由 daemon 端的 `BPF_PROG_REJIT(log_level=2)` 保证 —— 这跟 bpfopt 内部设计无关。
+
 ## Preservation
 
-默认保守失效:
+mutation API 是事实生命周期的唯一掌控者。每个 mutation 函数自己定义事实行为,**不暴露 contract 给 pass**(因为 pass 不知道 verifier 证明在做什么,也不该知道):
 
 ```text
-指令体变了    -> 该 InsnNode 字段重置为空
-块体变了      -> 块级事实失效
-终结子变了    -> Terminator 字段重置;受影响边失效
-CFG 边变了    -> 相关 liveness / reaching defs 失效
+delete_insns(sites)      -> 删 InsnNode 序列;邻居 InsnNode facts 不动;块级 facts 失效
+insert_insns(at, new)    -> 新 InsnNode facts 全空;邻居 InsnNode facts 不动;块级 facts 失效
+replace_insns(range, new)-> 新 InsnNode facts 全空;range 之外的 InsnNode facts 不动;块级 facts 失效
+split_block(at)          -> 两半 InsnNode facts 不动;两半的块级 facts 失效
+merge_blocks(a, b)       -> 合并 InsnNode 序列 facts 不动;合并后块级 facts 失效;原 a 的终结子 facts 丢失
+replace_terminator       -> Terminator 字段重置;块级 facts 失效
+remove_block             -> 删块及其所有 facts;邻居块的 predecessors/successors 边状态作废
 ```
 
-运行时语义等价**不**自动保留 verifier 事实。任何保留必须在 mutation API 上显式声明,不准 pass 写完之后偷偷复用旧字段。
+运行时语义等价**不**自动保留 verifier 事实 —— 任何 mutation 都按上面规则处理,**pass 不能要求 API 保留**。如果 const_prop 在 map_inline 后想拿 fresh verifier 事实,该走 daemon 端 `BPF_PROG_REJIT(log_level=2)` 之后重 lift,不是 bpfopt 内部的事。
 
 ## 期望代码影响
 

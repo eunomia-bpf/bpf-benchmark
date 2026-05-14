@@ -99,6 +99,7 @@ fn scan_sites(prog: &ProgramCFG) -> anyhow::Result<ScanResult> {
     let mut scan = ScanResult::default();
     for block in prog.block_ids().collect::<Vec<_>>() {
         let body = prog.block_body_view(block)?;
+        let body_insns = body.bpf_insns();
         let mut live_out = HashMap::new();
         for &site in &body.sites {
             live_out.insert(site, prog.live_out_site_checked(site)?);
@@ -106,7 +107,7 @@ fn scan_sites(prog: &ProgramCFG) -> anyhow::Result<ScanResult> {
         let mut idx = 0usize;
         while idx < body.insns.len() {
             let start = body.sites[idx];
-            match try_match_memcpy_run_at(body.insns, &body.sites, idx, &live_out)? {
+            match try_match_memcpy_run_at(&body_insns, &body.sites, idx, &live_out)? {
                 MatchOutcome::Apply(site) => {
                     let old_len = site.old_len;
                     scan.sites.push((start, site));
@@ -124,7 +125,7 @@ fn scan_sites(prog: &ProgramCFG) -> anyhow::Result<ScanResult> {
                 }
                 MatchOutcome::NoMatch => {}
             }
-            if let Some(site) = try_match_memset_run_at(prog, body.insns, &body.sites, idx)? {
+            if let Some(site) = try_match_memset_run_at(prog, &body_insns, &body.sites, idx)? {
                 let old_len = site.old_len;
                 scan.sites.push((start, site));
                 idx += old_len;

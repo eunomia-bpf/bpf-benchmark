@@ -7,7 +7,7 @@ use std::sync::Arc;
 use anyhow::{Context, Result};
 
 use crate::analysis::{
-    BasicBlock, BlockId, BtfMetadataMap, FrameId, InsnSite, ProgramCFG, Terminator,
+    BasicBlock, BlockId, BtfMetadataMap, FrameId, InsnNode, InsnSite, ProgramCFG, Terminator,
     VerifierStatesBySite,
 };
 use crate::insn::*;
@@ -32,10 +32,7 @@ pub(crate) fn lift_with_kinsn_registry(
             Vec::new(),
             BlockId(0),
             lift_verifier_states_by_site(verifier_states, &BTreeMap::new())?,
-            BTreeMap::new(),
             kinsn_reg,
-            BTreeMap::new(),
-            BTreeMap::new(),
         );
     }
 
@@ -48,9 +45,6 @@ pub(crate) fn lift_with_kinsn_registry(
     let frame_by_pc = frame_by_pc_map(insns.len(), &subprog_starts);
 
     let mut blocks = Vec::with_capacity(block_starts.len());
-    let mut btf = BtfMetadataMap::new();
-    let mut ldimm64_second_slots = BTreeMap::new();
-    let mut pc_relative_ldimm64_targets = BTreeMap::new();
 
     for (block_idx, &start_pc) in block_starts.iter().enumerate() {
         let end_pc = match block_starts.get(block_idx + 1).copied() {
@@ -67,6 +61,8 @@ pub(crate) fn lift_with_kinsn_registry(
             id,
             insns: Vec::new(),
             terminator: Terminator::End,
+            terminator_branch_profile: None,
+            terminator_btf_pc: None,
             frame,
             predecessors: Vec::new(),
         };
@@ -76,11 +72,7 @@ pub(crate) fn lift_with_kinsn_registry(
             let insn = insns[pc];
             if is_block_terminator(&insn) {
                 block.terminator = lift_terminator(insns, pc, end_pc, &pc_to_block)?;
-                let site = InsnSite {
-                    block: id,
-                    idx: block.insns.len(),
-                };
-                btf.insert(site, pc);
+                block.terminator_btf_pc = Some(pc);
                 pc += 1;
                 if pc != end_pc {
                     anyhow::bail!("exit at pc {pc} did not end block {:?}", id);
@@ -88,27 +80,25 @@ pub(crate) fn lift_with_kinsn_registry(
                 break;
             }
 
-            let site = InsnSite {
-                block: id,
-                idx: block.insns.len(),
-            };
-            btf.insert(site, pc);
-            block.insns.push(insn);
+            let mut node = InsnNode::from(insn);
+            node.btf_pc = Some(pc);
             if insn.is_ldimm64() {
                 let second_pc = pc + 1;
                 let second = *insns
                     .get(second_pc)
                     .ok_or_else(|| anyhow::anyhow!("LD_IMM64 at pc {pc} is missing second slot"))?;
-                ldimm64_second_slots.insert(site, second);
+                node.ldimm64_second = Some(second);
                 if insn.is_ldimm64_pseudo_func() {
-                    let target = target_block_for_pc_relative_imm(
+                    node.pc_relative_ldimm64_target = Some(target_block_for_pc_relative_imm(
                         pc,
                         i64::from(insn.imm),
                         &pc_to_block,
                         insns.len(),
-                    )?;
-                    pc_relative_ldimm64_targets.insert(site, target);
+                    )?);
                 }
+            }
+            block.insns.push(node);
+            if insn.is_ldimm64() {
                 pc += 2;
             } else {
                 pc += 1;
@@ -123,17 +113,37 @@ pub(crate) fn lift_with_kinsn_registry(
         blocks.push(block);
     }
 
+    let btf = btf_from_blocks(&blocks);
     let verifier_states = lift_verifier_states_by_site(verifier_states, &btf)?;
 
-    ProgramCFG::new(
-        blocks,
-        BlockId(0),
-        verifier_states,
-        btf,
-        kinsn_reg,
-        ldimm64_second_slots,
-        pc_relative_ldimm64_targets,
-    )
+    ProgramCFG::new(blocks, BlockId(0), verifier_states, kinsn_reg)
+}
+
+fn btf_from_blocks(blocks: &[BasicBlock]) -> BtfMetadataMap {
+    let mut map = BtfMetadataMap::new();
+    for block in blocks {
+        for (idx, node) in block.insns.iter().enumerate() {
+            if let Some(pc) = node.btf_pc {
+                map.insert(
+                    InsnSite {
+                        block: block.id,
+                        idx,
+                    },
+                    pc,
+                );
+            }
+        }
+        if let Some(pc) = block.terminator_btf_pc {
+            map.insert(
+                InsnSite {
+                    block: block.id,
+                    idx: block.insns.len(),
+                },
+                pc,
+            );
+        }
+    }
+    map
 }
 
 pub fn lift_with_pass_context(insns: &[BpfInsn], ctx: &PassContext) -> anyhow::Result<ProgramCFG> {

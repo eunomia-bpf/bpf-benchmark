@@ -11,7 +11,8 @@ mod verifier_facts;
 
 pub(crate) use bbprogram::BtfMetadataMap;
 pub use bbprogram::{
-    BasicBlock, BlockId, FrameId, InsnSite, LiftedRegFact, ProgramCFG, SlotDistance, Terminator,
+    BasicBlock, BlockId, FrameId, InsnNode, InsnSite, LiftedRegFact, ProgramCFG, SlotDistance,
+    Terminator,
 };
 pub use bbprogram_api::DiamondPattern;
 pub use bbprogram_lift::{

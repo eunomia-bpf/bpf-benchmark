@@ -158,7 +158,7 @@ impl BpfPass for WideMemPass {
         let mut skipped = Vec::new();
         let mut reported_starts = BTreeSet::new();
         let raw_sites = prog.scan_block_starts(MAX_WIDE_MEM_LEN, |window| {
-            Ok(try_match_wide_mem_at(window.insns, window.start_idx)
+            Ok(try_match_wide_mem_at(&window.bpf_insns(), window.start_idx)
                 .map(|site| (site.start_idx, site.old_len, site)))
         })?;
         let mut last_hit_end = None;

@@ -70,14 +70,10 @@ pub struct ProgramCFG {
     pub(crate) entry: BlockId,
     pub(super) use_def: UseDefGraph,
     pub(super) verifier_states: Option<VerifierStatesBySite>,
-    pub(super) branch_profile_by_site: BTreeMap<InsnSite, BranchProfile>,
-    pub(super) btf: BtfMetadataMap,
     pub(super) kinsn_reg: Arc<KinsnRegistry>,
     pub(crate) map_bindings: Vec<MapBinding>,
     pub(crate) func_info: Option<BtfInfoRecords>,
     pub(crate) line_info: Option<BtfInfoRecords>,
-    ldimm64_second_slots: BTreeMap<InsnSite, BpfInsn>,
-    pub(crate) pc_relative_ldimm64_targets: BTreeMap<InsnSite, BlockId>,
     pub(super) prog_type: u32,
     site_liveness_cache: Mutex<Option<Arc<SiteLivenessSets>>>,
     lifted_reg_facts_cache: Mutex<Option<Arc<LiftedRegFacts>>>,
@@ -90,25 +86,75 @@ impl Clone for ProgramCFG {
             entry: self.entry,
             use_def: self.use_def.clone(),
             verifier_states: self.verifier_states.clone(),
-            branch_profile_by_site: self.branch_profile_by_site.clone(),
-            btf: self.btf.clone(),
             kinsn_reg: Arc::clone(&self.kinsn_reg),
             map_bindings: self.map_bindings.clone(),
             func_info: self.func_info.clone(),
             line_info: self.line_info.clone(),
-            ldimm64_second_slots: self.ldimm64_second_slots.clone(),
-            pc_relative_ldimm64_targets: self.pc_relative_ldimm64_targets.clone(),
             prog_type: self.prog_type,
             site_liveness_cache: Mutex::new(None),
             lifted_reg_facts_cache: Mutex::new(None),
         }
     }
 }
+/// Lifecycle-aligned indirect wrapper for an instruction.
+///
+/// Hosts inline fact fields. See docs/tmp/bpfopt_verifier_state_proof_design_20260514.md.
+#[derive(Clone, Debug)]
+pub struct InsnNode {
+    pub insn: BpfInsn,
+    /// Second 8-byte slot for LD_IMM64 instructions. `None` for non-LD_IMM64.
+    pub(super) ldimm64_second: Option<BpfInsn>,
+    /// Target block when this LD_IMM64 has BPF_PSEUDO_FUNC pointing to a sub-function.
+    pub(super) pc_relative_ldimm64_target: Option<BlockId>,
+    /// Original BTF / PC index in the lifted bytecode.
+    pub(super) btf_pc: Option<usize>,
+}
+
+impl InsnNode {
+    #[inline]
+    pub fn new(insn: BpfInsn) -> Self {
+        Self {
+            insn,
+            ldimm64_second: None,
+            pc_relative_ldimm64_target: None,
+            btf_pc: None,
+        }
+    }
+}
+
+impl From<BpfInsn> for InsnNode {
+    #[inline]
+    fn from(insn: BpfInsn) -> Self {
+        Self::new(insn)
+    }
+}
+
+impl std::ops::Deref for InsnNode {
+    type Target = BpfInsn;
+    #[inline]
+    fn deref(&self) -> &BpfInsn {
+        &self.insn
+    }
+}
+
+impl std::ops::DerefMut for InsnNode {
+    #[inline]
+    fn deref_mut(&mut self) -> &mut BpfInsn {
+        &mut self.insn
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct BasicBlock {
     pub id: BlockId,
-    pub(super) insns: Vec<BpfInsn>,
+    pub(super) insns: Vec<InsnNode>,
     pub(super) terminator: Terminator,
+    /// Branch profile attached to this block's terminator (only meaningful for
+    /// branching terminators). `None` for non-branch terminators or when no profile
+    /// is loaded.
+    pub(super) terminator_branch_profile: Option<BranchProfile>,
+    /// Original PC of this block's terminator (if any).
+    pub(super) terminator_btf_pc: Option<usize>,
     pub frame: FrameId,
     pub(super) predecessors: Vec<BlockId>,
 }
@@ -116,14 +162,30 @@ pub struct BasicBlock {
 pub(crate) struct BlockBodyView<'a> {
     pub(crate) block: BlockId,
     pub(crate) sites: Vec<InsnSite>,
-    pub(crate) insns: &'a [BpfInsn],
+    pub(crate) insns: &'a [InsnNode],
 }
+
+impl BlockBodyView<'_> {
+    pub(crate) fn bpf_insns(&self) -> Vec<BpfInsn> {
+        self.insns.iter().map(|n| n.insn).collect()
+    }
+}
+
 #[derive(Debug)]
 pub(crate) struct BlockStartWindow<'a> {
     pub(crate) block: BlockId,
     pub(crate) start_idx: usize,
-    pub(crate) insns: &'a [BpfInsn],
-    pub(crate) lookahead: &'a [BpfInsn],
+    pub(crate) insns: &'a [InsnNode],
+    pub(crate) lookahead: &'a [InsnNode],
+}
+
+impl BlockStartWindow<'_> {
+    pub(crate) fn bpf_insns(&self) -> Vec<BpfInsn> {
+        self.insns.iter().map(|n| n.insn).collect()
+    }
+    pub(crate) fn bpf_lookahead(&self) -> Vec<BpfInsn> {
+        self.lookahead.iter().map(|n| n.insn).collect()
+    }
 }
 #[derive(Debug)]
 pub(crate) struct WindowHit<T> {
@@ -162,24 +224,17 @@ impl ProgramCFG {
         blocks: Vec<BasicBlock>,
         entry: BlockId,
         verifier_states: Option<VerifierStatesBySite>,
-        btf: BtfMetadataMap,
         kinsn_reg: Arc<KinsnRegistry>,
-        ldimm64_second_slots: BTreeMap<InsnSite, BpfInsn>,
-        pc_relative_ldimm64_targets: BTreeMap<InsnSite, BlockId>,
     ) -> anyhow::Result<Self> {
         let mut prog = Self {
             blocks,
             entry,
             use_def: UseDefGraph::default(),
             verifier_states,
-            branch_profile_by_site: BTreeMap::new(),
-            btf,
             kinsn_reg,
             map_bindings: Vec::new(),
             func_info: None,
             line_info: None,
-            ldimm64_second_slots,
-            pc_relative_ldimm64_targets,
             prog_type: 0,
             site_liveness_cache: Mutex::new(None),
             lifted_reg_facts_cache: Mutex::new(None),
@@ -217,7 +272,7 @@ impl ProgramCFG {
     }
     pub fn block_single_body_insn(&self, block: BlockId) -> anyhow::Result<Option<&BpfInsn>> {
         let block = self.block(block)?;
-        Ok((block.insns.len() == 1).then(|| &block.insns[0]))
+        Ok((block.insns.len() == 1).then(|| &block.insns[0].insn))
     }
     pub fn predecessors(&self, block: BlockId) -> &[BlockId] {
         &self.blocks[block.0].predecessors
@@ -524,29 +579,47 @@ impl ProgramCFG {
         }
         Ok((state, stack_divergent))
     }
+    fn terminator_profile(&self, site: InsnSite) -> Option<&BranchProfile> {
+        let block = self.blocks.get(site.block.0)?;
+        (site.idx == block.insns.len())
+            .then_some(())
+            .and(block.terminator_branch_profile.as_ref())
+    }
     pub fn branch_taken_rate(&self, site: InsnSite) -> Option<f32> {
-        let profile = self.branch_profile_by_site.get(&site)?;
+        let profile = self.terminator_profile(site)?;
         let total = profile.taken_count.checked_add(profile.not_taken_count)?;
         (total != 0).then_some(profile.taken_count as f32 / total as f32)
     }
     pub fn branch_miss_rate(&self, site: InsnSite) -> Option<f32> {
-        let miss_rate = self.branch_profile_by_site.get(&site)?.miss_rate;
+        let miss_rate = self.terminator_profile(site)?.miss_rate;
         miss_rate.is_finite().then_some(miss_rate as f32)
     }
     pub fn site_hotness(&self, site: InsnSite) -> Option<u64> {
-        Some(self.branch_profile_by_site.get(&site)?.branch_count)
+        Some(self.terminator_profile(site)?.branch_count)
     }
     pub(crate) fn attach_profile_from_annotations(
         &mut self,
         annotations: &[Option<BranchProfile>],
     ) -> anyhow::Result<()> {
-        self.branch_profile_by_site.clear();
+        for block in &mut self.blocks {
+            block.terminator_branch_profile = None;
+        }
         for (pc, profile) in annotations.iter().enumerate() {
             let Some(profile) = profile else { continue };
             let site = self.original_pc_to_site(pc).ok_or_else(|| {
                 anyhow::anyhow!("profile pc {pc} is not present in the control-flow graph")
             })?;
-            self.branch_profile_by_site.insert(site, profile.clone());
+            let block = self
+                .blocks
+                .get_mut(site.block.0)
+                .ok_or_else(|| anyhow::anyhow!("profile site {:?} block out of range", site))?;
+            if site.idx != block.insns.len() {
+                anyhow::bail!(
+                    "profile pc {pc} maps to non-terminator site {:?}; profiles only attach to terminators",
+                    site
+                );
+            }
+            block.terminator_branch_profile = Some(profile.clone());
         }
         Ok(())
     }
@@ -593,16 +666,24 @@ impl ProgramCFG {
     pub(super) fn current_site_pcs(&self) -> anyhow::Result<BTreeMap<InsnSite, usize>> {
         current_site_pcs(self)
     }
-    pub(crate) fn original_pc(&self, site: InsnSite) -> anyhow::Result<usize> {
-        self.btf
-            .get(&site)
-            .copied()
-            .ok_or_else(|| anyhow::anyhow!("site {:?} has no original-PC mapping", site))
-    }
     pub(crate) fn original_pc_to_site(&self, pc: usize) -> Option<InsnSite> {
-        self.btf
-            .iter()
-            .find_map(|(&site, &original_pc)| (original_pc == pc).then_some(site))
+        for block in &self.blocks {
+            for (idx, node) in block.insns.iter().enumerate() {
+                if node.btf_pc == Some(pc) {
+                    return Some(InsnSite {
+                        block: block.id,
+                        idx,
+                    });
+                }
+            }
+            if block.terminator_btf_pc == Some(pc) {
+                return Some(InsnSite {
+                    block: block.id,
+                    idx: block.insns.len(),
+                });
+            }
+        }
+        None
     }
     pub(crate) fn site_current_pc(&self, site: InsnSite) -> anyhow::Result<usize> {
         self.current_site_pcs()?
@@ -695,9 +776,13 @@ impl ProgramCFG {
                 }
             }
         }
-        for &target in self.pc_relative_ldimm64_targets.values() {
-            if let Some(site) = self.first_site_in_block(target)? {
-                targets.insert(site);
+        for block in &self.blocks {
+            for node in &block.insns {
+                if let Some(target) = node.pc_relative_ldimm64_target {
+                    if let Some(site) = self.first_site_in_block(target)? {
+                        targets.insert(site);
+                    }
+                }
             }
         }
         Ok(targets)
@@ -717,7 +802,7 @@ impl ProgramCFG {
     pub fn insn_at(&self, site: InsnSite) -> Option<&BpfInsn> {
         let block = self.blocks.get(site.block.0)?;
         if site.idx < block.insns.len() {
-            return block.insns.get(site.idx);
+            return block.insns.get(site.idx).map(|n| &n.insn);
         }
         (site.idx == block.insns.len())
             .then(|| block.terminator.raw_insn())
@@ -728,38 +813,21 @@ impl ProgramCFG {
             .ok_or_else(|| anyhow::anyhow!("no instruction at site {:?}", site))
     }
     pub(crate) fn ldimm64_second_slot(&self, site: InsnSite) -> Option<&BpfInsn> {
-        self.ldimm64_second_slots.get(&site)
+        let block = self.blocks.get(site.block.0)?;
+        block.insns.get(site.idx)?.ldimm64_second.as_ref()
     }
-    pub(super) fn remove_ldimm64_second_slot(&mut self, site: InsnSite) {
-        self.ldimm64_second_slots.remove(&site);
-    }
-    pub(super) fn insert_ldimm64_second_slot(&mut self, site: InsnSite, second: BpfInsn) {
-        self.ldimm64_second_slots.insert(site, second);
-    }
-    pub(super) fn shift_ldimm64_second_slots_after_insert(
+    pub(super) fn insert_ldimm64_second_slot(
         &mut self,
-        block: BlockId,
-        at: usize,
-        delta: usize,
-    ) {
-        Self::shift_metadata_after_insert(&mut self.ldimm64_second_slots, block, at, delta);
-    }
-    pub(super) fn shift_ldimm64_second_slots_after_delete(
-        &mut self,
-        block: BlockId,
-        at: usize,
-        deleted: usize,
-    ) {
-        Self::shift_metadata_after_delete(&mut self.ldimm64_second_slots, block, at, deleted);
-    }
-    pub(super) fn remap_ldimm64_second_slots<F>(&mut self, remap: &mut F)
-    where
-        F: FnMut(InsnSite) -> Option<InsnSite>,
-    {
-        self.ldimm64_second_slots = std::mem::take(&mut self.ldimm64_second_slots)
-            .into_iter()
-            .filter_map(|(site, value)| remap(site).map(|site| (site, value)))
-            .collect();
+        site: InsnSite,
+        second: BpfInsn,
+    ) -> anyhow::Result<()> {
+        self.blocks
+            .get_mut(site.block.0)
+            .and_then(|b| b.insns.get_mut(site.idx))
+            .map(|n| n.ldimm64_second = Some(second))
+            .ok_or_else(|| {
+                anyhow::anyhow!("insert_ldimm64_second_slot: no instruction at {:?}", site)
+            })
     }
     #[cfg(test)]
     fn block_start_pc(&self, block: BlockId) -> anyhow::Result<usize> {
@@ -796,19 +864,6 @@ impl ProgramCFG {
         }
         Ok(None)
     }
-    pub(crate) fn remap_block_after_insert(
-        block: BlockId,
-        split_head: BlockId,
-        split_tail: BlockId,
-    ) -> BlockId {
-        if block == split_head {
-            split_tail
-        } else if block.0 >= split_tail.0 {
-            BlockId(block.0 + 1)
-        } else {
-            block
-        }
-    }
     pub(crate) fn remap_block_after_remove(
         block: BlockId,
         removed: &[BlockId],
@@ -828,7 +883,7 @@ impl ProgramCFG {
             .insn_at(site)
             .ok_or_else(|| anyhow::anyhow!("invalid instruction site {:?}", site))?;
         if insn.is_ldimm64() {
-            if !self.ldimm64_second_slots.contains_key(&site) {
+            if self.ldimm64_second_slot(site).is_none() {
                 anyhow::bail!("LD_IMM64 at {:?} is missing its second slot", site);
             }
             Ok(2)
@@ -878,7 +933,9 @@ impl ProgramCFG {
     }
     pub(crate) fn invalidate_verifier_states(&mut self) {
         self.verifier_states = None;
-        self.branch_profile_by_site.clear();
+        for block in &mut self.blocks {
+            block.terminator_branch_profile = None;
+        }
     }
     pub(crate) fn rebuild_use_def_after_mutation(&mut self) -> anyhow::Result<()> {
         self.rebuild_use_def()?;
@@ -907,45 +964,6 @@ impl ProgramCFG {
             .get(block.0)
             .ok_or_else(|| anyhow::anyhow!("invalid block id {:?}", block))?;
         Ok(block_ref.terminator.dataflow_successors())
-    }
-    pub(crate) fn shift_metadata_after_insert<T>(
-        map: &mut BTreeMap<InsnSite, T>,
-        block: BlockId,
-        at: usize,
-        delta: usize,
-    ) {
-        let old = std::mem::take(map);
-        *map = old
-            .into_iter()
-            .map(|(mut site, value)| {
-                if site.block == block && site.idx >= at {
-                    site.idx += delta;
-                }
-                (site, value)
-            })
-            .collect();
-    }
-    pub(crate) fn shift_metadata_after_delete<T>(
-        map: &mut BTreeMap<InsnSite, T>,
-        block: BlockId,
-        at: usize,
-        deleted: usize,
-    ) {
-        let old = std::mem::take(map);
-        *map = old
-            .into_iter()
-            .filter_map(|(mut site, value)| {
-                if site.block == block {
-                    if (at..at + deleted).contains(&site.idx) {
-                        return None;
-                    }
-                    if site.idx >= at + deleted {
-                        site.idx -= deleted;
-                    }
-                }
-                Some((site, value))
-            })
-            .collect();
     }
     pub(crate) fn block_body_view(&self, block: BlockId) -> anyhow::Result<BlockBodyView<'_>> {
         let block_ref = self.block(block)?;

@@ -30,10 +30,13 @@ impl BpfPass for RotatePass {
         let prog_ref: &ProgramCFG = prog;
         let candidates: Vec<(InsnSite, RotateSite)> = prog_ref
             .scan_block_starts(7, |window| {
-                Ok(
-                    rotate_site_at(prog_ref, window.block, window.insns, window.start_idx)
-                        .map(|site| (site.start_idx, site.old_len, site)),
+                Ok(rotate_site_at(
+                    prog_ref,
+                    window.block,
+                    &window.bpf_insns(),
+                    window.start_idx,
                 )
+                .map(|site| (site.start_idx, site.old_len, site)))
             })?
             .into_iter()
             .map(|hit| (hit.start, hit.value))

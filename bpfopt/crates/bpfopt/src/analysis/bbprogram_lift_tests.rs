@@ -1,9 +1,8 @@
 use super::*;
 
 fn block_for_original_pc(prog: &ProgramCFG, pc: usize) -> BlockId {
-    prog.btf
-        .iter()
-        .find_map(|(site, &old_pc)| (old_pc == pc).then_some(site.block))
+    prog.original_pc_to_site(pc)
+        .map(|site| site.block)
         .expect("original pc should map to a block")
 }
 
