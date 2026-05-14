@@ -1,11 +1,6 @@
 {
-  "apps_done": 1,
-  "last_app": "bcc/set",
-  "last_app_status": "ok",
-  "last_updated_at": "2026-05-14T05:04:20.847373+00:00",
-  "samples": 3,
-  "status": "running",
-  "suite": "corpus",
-  "total_apps": 7,
-  "workload_seconds": 30.0
+  "error_message": "corpus suite reported errors",
+  "failed_at": "2026-05-14T05:35:42.616043+00:00",
+  "status": "error",
+  "suite": "corpus"
 }

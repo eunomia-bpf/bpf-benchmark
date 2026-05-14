@@ -63,48 +63,91 @@ Katran is not a good runtime-key testbin for this change: its current
 map_inline opportunities are mostly constant/hinted keys, skipped large
 snapshots, map-in-map, or mutable maps.
 
-## TODO
+## Implemented first step
 
-1. First implement no-key uniform-value folding.
-   - Keep `bpf_map_lookup_elem()` and the null check.
-   - Do not delete key setup or the helper.
-   - Replace only fixed-offset loads from `r0` with constants.
-   - This directly relaxes the key-const guard without needing key dispatch.
-   - Safe sources:
-     - `CompressedMapValuesKind::Uniform`;
-     - `ARRAY`/`PERCPU_ARRAY` raw snapshots only when the full closed key domain
-       is dumped and the loaded fields are uniform.
-   - Do not use raw HASH dumps as "complete" by default; HASH key space is open.
+Implemented complete enumerated runtime-key membership dispatch for HASH-like
+maps with uniform entry values.
 
-2. Add runtime-key guarded dispatch only after step 1.
-   - Introduce a `LookupKeyRef` carrying stack key location/width and setup
-     sites, separate from current concrete `LookupKey`.
-   - For a small enumerated key set, emit key compares before the original
-     helper. On hit, materialize known value loads and jump to the original
-     post-use continuation; on miss, fall back to the original helper.
-   - This is safe for HASH membership because miss still calls the helper.
-   - This needs code cloning or a controlled in-block replacement shape; it is
-     more invasive than step 1.
+- It only runs when the key pointer is the simple stack form `r2 = fp + off`,
+  the map snapshot/overlay exposes an enumerated key set, every entry's inline
+  value is identical, and `r0` is consumed only by the immediate null check plus
+  fixed-offset value loads.
+- It replaces the helper call with an in-block key membership chain:
+  load key from stack, compare against every enumerated key, set `r0` to `1` on
+  hit or `0` on miss, then reuse the original null check.
+- It constantizes the fixed-offset loads from the uniform value.
+- It does not delete key setup/map setup in this first version; later `dce` can
+  remove those dead instructions. This keeps the first change tightly scoped and
+  avoids branch-target deletion concerns.
+- It deliberately does not use `CompressedMapValuesKind::Uniform` by itself:
+  uniform value without an enumerated key set does not prove membership.
 
-3. Add complete runtime-key dispatch only with explicit completeness semantics.
-   - For ARRAY/PERCPU_ARRAY with full snapshot, miss can mean out-of-range/null.
-   - For HASH, require an explicit complete/enumerated side-input or hint.
-   - Without completeness, never turn a non-matching runtime key into null.
+## Offline testbin result after first step
 
-4. Relax HASH helper deletion only for already-proven sites.
+Validation commands:
+
+- `cargo test --manifest-path bpfopt/Cargo.toml --all map_inline`
+- `cargo build --release --workspace --manifest-path bpfopt/Cargo.toml -p bpfopt`
+- offline `bpfopt/testbin` sweep with a mock enumerated HASH snapshot:
+  every canonicalized map index was assigned a HASH map containing one key
+  `00000000` and one all-zero 8 KiB value; verifier input was intentionally
+  empty (`0: R0=0`) so this measures matcher shape, not real runtime map
+  safety.
+
+Unit tests passed: 21 map_inline lib tests plus 3 CLI map_inline tests.
+
+Mock testbin sweep result:
+
+| app | programs | ok | errors/timeouts | membership dispatch applied |
+| --- | ---: | ---: | ---: | ---: |
+| bcc_set | 21 | 21 | 0 / 0 | 0 |
+| bpftrace_set | 9 | 9 | 0 / 0 | 2 |
+| cilium_agent | 53 | 50 | 0 / 0 | 82 |
+| katran | 1 | 1 | 0 / 0 | 13 |
+| otelcol-ebpf-profiler_profiling | 13 | 7 | 0 / 6 | 13 |
+| tetragon_observer | 287 | 129 | 158 / 0 | 395 |
+| tracee_monitor | 158 | 153 | 2 / 2 | 336 |
+| total | 542 | 370 | 160 / 8 | 841 |
+
+Interpretation:
+
+- The 841 number is a mock-shape upper bound for the new replacement path, not
+  a real corpus apply count. It intentionally disables verifier-known constant
+  keys and makes every map look like an enumerated uniform HASH map.
+- In this mock mode, each `membership dispatch applied` site deletes one
+  `bpf_map_lookup_elem` helper and replaces value loads with constants.
+- The mock run also explains why the number is much larger than the earlier
+  runtime-key census: many constant-key sites become "runtime-key" only because
+  the test intentionally supplied no verifier states.
+- Katran shows 13 shape matches under the mock setup, but that does not mean 13
+  production HASH dispatches are currently available; real Katran map_inline
+  count still depends on the live map types, stable values, hints, map-in-map
+  state, and verifier-state key proof.
+- The Tetragon errors are from the 8 KiB mock value being smaller than fixed
+  loads around offsets 24 KiB. They are mock artifact limits, not verifier/JIT
+  failures.
+
+## Remaining TODO
+
+1. Add guarded dispatch with helper fallback for incomplete key sets.
+   - For a small hot-key set, emit key compares before the original helper.
+   - On hit, materialize known value loads and jump to the original post-use
+     continuation; on miss, fall back to the original helper.
+   - This is safe for HASH membership when completeness is unavailable.
+
+2. Add no-key uniform-value folding only when helper retention is acceptable.
+   - This can increase `sites_applied` without deleting the helper.
+   - It is useful only if we want load constantization even when helper cost
+     remains.
+
+3. Relax HASH helper deletion only for already-proven constant-key sites.
    - Constant key + stable present value + no `r0` pointer uses except fixed
      loads/null check can delete the helper.
-   - Runtime-key complete dispatch can delete the helper.
-   - Guarded dispatch cannot delete the helper globally because miss falls back.
    - Testbin census found no clean const-key HASH deletion candidates; this is
      expected to improve native code for selected sites, not materially increase
      `sites_applied`.
 
-5. Tests to add.
-   - Synthetic unit: runtime key + uniform overlay keeps helper/null check and
-     replaces loads.
-   - Synthetic unit: HASH hard hint with constant key and clean fixed loads can
-     delete helper only when the new deletion path is enabled.
+4. Tests still worth adding.
    - Extracted-shape unit from Tetragon actions PC 441 for byte-ladder loads.
    - Extracted-shape unit from Tracee `tracepoint__exec_test` PC 3233 for wide
      fixed loads followed by stores elsewhere.

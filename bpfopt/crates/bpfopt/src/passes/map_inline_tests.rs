@@ -53,6 +53,25 @@ fn nullable_lookup_program(old_fd: i32) -> Vec<BpfInsn> {
     ]
 }
 
+fn runtime_key_nullable_lookup_program(old_fd: i32) -> Vec<BpfInsn> {
+    let map = BpfInsn::ld_imm64(BPF_REG_1, BPF_PSEUDO_MAP_FD, i64::from(old_fd));
+    vec![
+        BpfInsn::ldx_mem(BPF_W, BPF_REG_3, BPF_REG_1, 0),
+        BpfInsn::stx_mem(BPF_W, BPF_REG_10, BPF_REG_3, -4),
+        map[0],
+        map[1],
+        BpfInsn::mov64_reg(BPF_REG_2, BPF_REG_10),
+        BpfInsn::add64_imm(BPF_REG_2, -4),
+        BpfInsn::new(BPF_JMP | BPF_CALL, BpfInsn::make_regs(0, 0), 0, LOOKUP),
+        BpfInsn::mov64_reg(BPF_REG_7, BPF_REG_0),
+        BpfInsn::jeq_imm(BPF_REG_7, 0, 2),
+        BpfInsn::ldx_mem(BPF_W, BPF_REG_6, BPF_REG_7, 0),
+        BpfInsn::ja(1),
+        BpfInsn::mov64_imm(BPF_REG_6, 0),
+        BpfInsn::exit(),
+    ]
+}
+
 fn spilled_lookup_program(old_fd: i32) -> Vec<BpfInsn> {
     let map = BpfInsn::ld_imm64(BPF_REG_1, BPF_PSEUDO_MAP_FD, i64::from(old_fd));
     vec![
@@ -127,6 +146,29 @@ fn ctx_for_array_lookup(map_id: u32, value: Vec<u8>) -> PassContext {
     );
     ctx.map_values
         .insert((map_id, 1u32.to_le_bytes().to_vec()), value);
+    ctx
+}
+
+fn ctx_for_hash_entries(map_id: u32, entries: &[(u32, u32)]) -> PassContext {
+    let mut ctx = PassContext::default();
+    set_map_ids(&mut ctx, vec![map_id]);
+    ctx.map_info.insert(
+        map_id,
+        MapInfo {
+            map_type: libbpf_sys::BPF_MAP_TYPE_HASH,
+            key_size: 4,
+            value_size: 4,
+            max_entries: 8,
+            map_id,
+            name: format!("hash_{map_id}"),
+        },
+    );
+    for (key, value) in entries {
+        ctx.map_values.insert(
+            (map_id, key.to_le_bytes().to_vec()),
+            value.to_le_bytes().to_vec(),
+        );
+    }
     ctx
 }
 
@@ -338,6 +380,42 @@ fn map_inline_hard_hash_hint_keeps_lookup_and_null_check() {
     assert!(run.lowered.iter().any(|insn| insn.class() == BPF_JMP
         && bpf_op(insn.code) == BPF_JEQ
         && insn.dst_reg() == BPF_REG_0));
+}
+
+#[test]
+fn map_inline_deletes_hash_lookup_with_runtime_key_uniform_membership() {
+    let ctx = ctx_for_hash_entries(111, &[(1, 7), (2, 7)]);
+
+    let run = run_pass_on_insns(MapInlinePass, runtime_key_nullable_lookup_program(42), &ctx);
+
+    assert_eq!(run.result.sites_applied, 1);
+    assert!(run
+        .lowered
+        .iter()
+        .all(|insn| !(insn.is_call() && insn.imm == LOOKUP)));
+    assert!(run.lowered.contains(&BpfInsn::mov32_imm(BPF_REG_6, 7)));
+    assert!(run.lowered.iter().any(|insn| {
+        insn.class() == BPF_JMP32 && bpf_op(insn.code) == BPF_JEQ && insn.dst_reg() == BPF_REG_0
+    }));
+    assert!(run.lowered.iter().any(|insn| {
+        insn.class() == BPF_JMP && bpf_op(insn.code) == BPF_JEQ && insn.dst_reg() == BPF_REG_7
+    }));
+}
+
+#[test]
+fn map_inline_keeps_hash_lookup_when_runtime_key_values_differ() {
+    let ctx = ctx_for_hash_entries(111, &[(1, 7), (2, 9)]);
+
+    let run = run_pass_on_insns(MapInlinePass, runtime_key_nullable_lookup_program(42), &ctx);
+
+    assert_eq!(run.result.sites_applied, 0);
+    assert_eq!(
+        run.lowered
+            .iter()
+            .filter(|insn| insn.is_call() && insn.imm == LOOKUP)
+            .count(),
+        1
+    );
 }
 
 #[test]

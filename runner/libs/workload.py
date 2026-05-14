@@ -561,19 +561,40 @@ _STRESS_NG_STRESSOR_ARGS: Mapping[str, tuple[str, ...]] = {
     "open": ("--open-max", "1024"),
     "syscall": ("--syscall-method", "fast75"),
 }
+_STRESS_NG_STRESSOR_WORKERS: Mapping[str, int] = {
+    # stress-ng's SCTP worker shares --sctp-port across workers. With four
+    # workers one process can fail intermittently while the other three pass.
+    "sctp": 1,
+}
 _STRESS_NG_NETWORK_PORT_STRESSORS = {
     "epoll": 100,
     "sctp": 200,
     "sock": 300,
     "sockfd": 400,
 }
+_STRESS_NG_PORT_BASE_MIN = 12000
+_STRESS_NG_PORT_BASE_SPAN = 49152
+_STRESS_NG_PORT_BASE_STRIDE = 512
+_stress_ng_port_base_lock = threading.Lock()
+_stress_ng_port_base_counter = 0
+
+
+def _stress_ng_next_port_base() -> int:
+    global _stress_ng_port_base_counter
+
+    with _stress_ng_port_base_lock:
+        counter = _stress_ng_port_base_counter
+        _stress_ng_port_base_counter += 1
+    return _STRESS_NG_PORT_BASE_MIN + (
+        (os.getpid() + counter * _STRESS_NG_PORT_BASE_STRIDE) % _STRESS_NG_PORT_BASE_SPAN
+    )
 
 
 def _stress_ng_dynamic_stressor_args(stressors: Sequence[str]) -> list[str]:
     selected = {str(stressor).strip() for stressor in stressors if str(stressor).strip()}
     if not (selected & set(_STRESS_NG_NETWORK_PORT_STRESSORS)):
         return []
-    base_port = 20000 + (os.getpid() % 30000)
+    base_port = _stress_ng_next_port_base()
     args: list[str] = []
     for stressor, offset in _STRESS_NG_NETWORK_PORT_STRESSORS.items():
         if stressor in selected:
@@ -592,7 +613,8 @@ def run_stress_ng_class_load(duration_s: int | float, stressors: Sequence[str], 
     temp_root = _disk_backed_tmp_root()
     command: list[str] = [stress_ng]
     for stressor in normalized_stressors:
-        command += [f"--{stressor}", "4"]
+        workers = _STRESS_NG_STRESSOR_WORKERS.get(stressor, 4)
+        command += [f"--{stressor}", str(workers)]
         command += list(_STRESS_NG_STRESSOR_ARGS.get(stressor, ()))
     command += _stress_ng_dynamic_stressor_args(normalized_stressors)
     command += ["--timeout", f"{seconds}s", "--metrics-brief", "--temp-path", str(temp_root)]

@@ -109,6 +109,13 @@ The loader skips map value dumps unless `--pass map_inline` is selected. For
 `map_inline`, large maps are left as `map show` metadata only so Katran's
 existing overlay/size-skip path can handle them.
 
+The loader unit test `katran_optimization_path` is the hardcoded Katran
+optimization smoke. It does not read a yaml pass chain. The test runs
+`map_inline -> const_prop -> dce`, with Katran inline hints and overlays wired
+in the testcase. `const_prop` must use verifier state for the post-`map_inline`
+program, so the test verifier-loads the `map_inline` output with `log_level=2`
+and promotes that `verify.log` before continuing the chain.
+
 ## Workdir Layout
 
 - `<prog>/canonicalize_input.bin`: relocated bytecode from libbpf after object

@@ -551,6 +551,10 @@ struct SiteRewrite {
     skipped_sites: BTreeSet<InsnSite>,
     replacements: Vec<SiteReplacement>,
 }
+struct EnumeratedUniformValues {
+    keys: Vec<Vec<u8>>,
+    value: Vec<u8>,
+}
 type SiteRewriteResult<T> = anyhow::Result<std::result::Result<T, String>>;
 fn site_replacement(
     prog: &ProgramCFG,
@@ -1406,6 +1410,19 @@ fn run_map_inline_round(
         let key = match extract_site_constant_key(prog, site.call_site, info, site_inline_hints)? {
             Ok(key) => key,
             Err(detail) => {
+                match build_enumerated_uniform_membership_rewrite(prog, side_input, &site, info)? {
+                    Ok(Some(rewrite)) => {
+                        rewrites.push(rewrite);
+                        continue;
+                    }
+                    Ok(None) => {}
+                    Err(reason) => {
+                        site_diagnostics.push(SiteDiagnostic {
+                            site: site.call_site,
+                            message: format!("runtime-key membership skip: {reason}"),
+                        });
+                    }
+                }
                 skip_lookup!(
                     &mut skipped,
                     &mut site_diagnostics,
@@ -1878,6 +1895,163 @@ fn build_site_rewrite(
         skipped_sites,
         replacements,
     })))
+}
+fn build_enumerated_uniform_membership_rewrite(
+    prog: &ProgramCFG,
+    side_input: &MapInlineSideInput<'_>,
+    site: &MapLookupSite,
+    info: &MapInfo,
+) -> SiteRewriteResult<Option<SiteRewrite>> {
+    if !is_hash_like_map_type(info.map_type) || !matches!(info.key_size, 1 | 2 | 4) {
+        return Ok(Ok(None));
+    }
+    let Some((_, _, stack_off)) = find_r2_stack_pointer_setup_simple(prog, site.call_site)? else {
+        return Ok(Ok(None));
+    };
+    let uses = classify_r0_uses_with_options(prog, site.call_site, false)?;
+    if uses.loads.is_empty() || uses.null_check.is_none() || !uses.other_uses.is_empty() {
+        return Ok(Ok(None));
+    }
+    let uniform = match enumerated_uniform_values(side_input, info)? {
+        Ok(Some(uniform)) => uniform,
+        Ok(None) => return Ok(Ok(None)),
+        Err(reason) => return site_level_inline_veto(reason),
+    };
+    if uniform.keys.len() + 3 > i16::MAX as usize {
+        return site_level_inline_veto("runtime-key membership dispatch is too large");
+    }
+    let mut replacements = Vec::new();
+    replacements.push(site_replacement(
+        prog,
+        site.call_site,
+        emit_membership_dispatch(info.key_size, stack_off, &uniform.keys)?,
+    )?);
+    for load in &uses.loads {
+        let scalar =
+            read_scalar_from_value(&uniform.value, load.offset, load.size).ok_or_else(|| {
+                anyhow::anyhow!(
+                    "map value read out of bounds for load {:?} (offset {}, size {})",
+                    load.site,
+                    load.offset,
+                    load.size
+                )
+            })?;
+        replacements.push(site_replacement(
+            prog,
+            load.site,
+            emit_scalar_const_load(load.dst_reg, scalar, load.size != BPF_DW),
+        )?);
+    }
+    let map_inline_records = uniform
+        .keys
+        .iter()
+        .map(|key| MapInlineRecord {
+            map_id: info.map_id,
+            key: key.clone(),
+            value: uniform.value.clone(),
+        })
+        .collect();
+    Ok(Ok(Some(SiteRewrite {
+        call_site: site.call_site,
+        diagnostic_value: format!(
+            "{} for {} enumerated key(s)",
+            format_inlined_value_diagnostic(&uniform.value, &uses.loads),
+            uniform.keys.len()
+        ),
+        removed_null_check: false,
+        map_inline_records,
+        skipped_sites: BTreeSet::new(),
+        replacements,
+    })))
+}
+fn enumerated_uniform_values(
+    side_input: &MapInlineSideInput<'_>,
+    info: &MapInfo,
+) -> SiteRewriteResult<Option<EnumeratedUniformValues>> {
+    let mut entries = Vec::new();
+    if let Some(compressed) = side_input.compressed_values.get(&info.map_id) {
+        if let CompressedMapValuesKind::Enumerated { entries: values } = &compressed.kind {
+            entries.extend(
+                values
+                    .iter()
+                    .map(|(key, value)| (key.clone(), value.clone())),
+            );
+        } else {
+            return Ok(Ok(None));
+        }
+    } else {
+        if map_snapshot_skipped_by_size(side_input, info.map_id)? {
+            return site_level_inline_veto(map_snapshot_skipped_by_size_reason(info.map_id));
+        }
+        entries.extend(
+            side_input
+                .values
+                .iter()
+                .filter(|((map_id, _), _)| *map_id == info.map_id)
+                .map(|((_, key), value)| (key.clone(), value.clone())),
+        );
+    }
+    if entries.is_empty() {
+        return Ok(Ok(None));
+    }
+    entries.sort_by(|(a, _), (b, _)| a.cmp(b));
+    let mut keys = Vec::with_capacity(entries.len());
+    let mut inline_value = None::<Vec<u8>>;
+    for (key, raw_value) in entries {
+        if key.len() != info.key_size as usize {
+            return site_level_inline_veto(format!(
+                "map {} enumerated key width {} does not match map key size {}",
+                info.map_id,
+                key.len(),
+                info.key_size
+            ));
+        }
+        let value = match prepare_inline_value(info, &raw_value) {
+            Ok(value) => value,
+            Err(reason) => return site_level_inline_veto(reason),
+        };
+        match &inline_value {
+            Some(first) if first != &value => return Ok(Ok(None)),
+            None => inline_value = Some(value),
+            _ => {}
+        }
+        keys.push(key);
+    }
+    Ok(Ok(Some(EnumeratedUniformValues {
+        keys,
+        value: inline_value.expect("non-empty entries must set uniform value"),
+    })))
+}
+fn emit_membership_dispatch(
+    key_size: u32,
+    stack_off: i16,
+    keys: &[Vec<u8>],
+) -> anyhow::Result<Vec<BpfInsn>> {
+    let size = match key_size {
+        1 => BPF_B,
+        2 => BPF_H,
+        4 => BPF_W,
+        _ => anyhow::bail!("runtime-key membership dispatch only supports <=32-bit keys"),
+    };
+    let mut insns = Vec::with_capacity(keys.len() + 4);
+    insns.push(BpfInsn::ldx_mem(size, BPF_REG_0, BPF_REG_10, stack_off));
+    let hit_index = keys.len() + 3;
+    for (idx, key) in keys.iter().enumerate() {
+        let mut buf = [0u8; 4];
+        buf[..key.len()].copy_from_slice(key);
+        let off = i16::try_from(hit_index - (idx + 1) - 1)
+            .map_err(|_| anyhow::anyhow!("runtime-key membership dispatch is too large"))?;
+        insns.push(BpfInsn::new(
+            BPF_JMP32 | BPF_JEQ | BPF_K,
+            BpfInsn::make_regs(BPF_REG_0, 0),
+            off,
+            u32::from_le_bytes(buf) as i32,
+        ));
+    }
+    insns.push(BpfInsn::mov64_imm(BPF_REG_0, 0));
+    insns.push(BpfInsn::ja(1));
+    insns.push(BpfInsn::mov64_imm(BPF_REG_0, 1));
+    Ok(insns)
 }
 fn build_hard_null_site_rewrite(
     prog: &ProgramCFG,

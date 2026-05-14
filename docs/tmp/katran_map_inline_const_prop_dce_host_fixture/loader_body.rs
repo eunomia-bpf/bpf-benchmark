@@ -1,20 +1,3 @@
-// SPDX-License-Identifier: MIT
-//! Host-side developer loader for bpfopt. Run from the project root.
-//!
-//! Flow:
-//!   1. libbpf-load every program in `<obj>` with log_level=2; write per-program
-//!      {bytecode, verifier log, metadata, map-ids} into `<workdir>/<prog_name>/`
-//!   2. shell out to `bpftool map show -j` + `bpftool map dump -j` for each map
-//!      referenced by the loaded programs → `<workdir>/map-values/`
-//!   3. for each program: `bpfopt --canonicalize-map-refs`
-//!   4. for each program (if `--pass` given): execute the daemon's per-pass yaml
-//!      at `runner/config/passes/<pass>/default.yaml`, then re-verify the
-//!      produced bytecode with `BPF_PROG_LOAD`
-//!
-//! `--workdir` is optional; if omitted a `/tmp/bpfopt-loader-<pid>-<n>` dir is
-//! created and removed on exit. Map snapshots come straight from `bpftool` so
-//! the file format is whatever bpfopt's downstream passes already expect.
-
 use std::collections::BTreeSet;
 use std::ffi::{CStr, CString};
 use std::fs;
@@ -385,14 +368,6 @@ fn run_pass_via_yaml(
 /// Reload the bytecode produced for `prog_dir` via BPF_PROG_LOAD as a sanity
 /// check, using the shared map snapshots at `map_values_dir`.
 fn verify_workdir(prog_dir: &Path, map_fds: &[i32]) -> Result<OwnedFd> {
-    verify_workdir_with_log_level(prog_dir, map_fds, 1)
-}
-
-fn verify_workdir_with_log_level(
-    prog_dir: &Path,
-    map_fds: &[i32],
-    log_level: u32,
-) -> Result<OwnedFd> {
     let metadata = read_json::<ProgramMetadata>(&prog_dir.join(METADATA_JSON))?;
     let input = prog_dir.join(OUTPUT_BIN);
 
@@ -410,7 +385,7 @@ fn verify_workdir_with_log_level(
     let mut log_buf = vec![0 as c_char; LOG_BYTES];
     let mut opts = libbpf_sys::bpf_prog_load_opts {
         sz: mem::size_of::<libbpf_sys::bpf_prog_load_opts>() as libbpf_sys::size_t,
-        log_level,
+        log_level: 1,
         log_size: log_buf.len() as u32,
         log_buf: log_buf.as_mut_ptr(),
         expected_attach_type: metadata.expected_attach_type,
@@ -843,11 +818,6 @@ mod tests {
             canonicalize_program(prog, &bpfopt)?;
             write_katran_overlays(&map_values_dir, &overlay_dir)?;
             run_katran_map_inline(prog, &map_values_dir, &bpfopt)?;
-            refresh_katran_verifier_log(prog)?;
-            promote_output_to_input(prog)?;
-            run_katran_bytecode_pass(prog, &bpfopt, "const_prop", true)?;
-            promote_output_to_input(prog)?;
-            run_katran_bytecode_pass(prog, &bpfopt, "dce", false)?;
             let fd = verify_workdir(&prog.dir, &prog.map_fds)?;
             run_bpftestrun(fd.as_raw_fd(), &prog.dir, &katran_test_cli(1))?;
             assert_katran_forwarding_output(&prog.dir)?;
@@ -897,56 +867,6 @@ mod tests {
                 failures.join("\n")
             );
         }
-        Ok(())
-    }
-
-    fn run_katran_bytecode_pass(
-        prog: &PreparedProgram,
-        bpfopt: &Path,
-        pass: &str,
-        needs_verifier_log: bool,
-    ) -> Result<()> {
-        let metadata = read_json::<ProgramMetadata>(&prog.dir.join(METADATA_JSON))?;
-        let mut command = Command::new(bpfopt);
-        command
-            .arg("--pass")
-            .arg(pass)
-            .arg("--input")
-            .arg(prog.dir.join(INPUT_BIN))
-            .arg("--output")
-            .arg(prog.dir.join(OUTPUT_BIN))
-            .arg("--report")
-            .arg(prog.dir.join(REPORT_JSON))
-            .arg("--prog-type")
-            .arg(metadata.prog_type.to_string());
-        if needs_verifier_log {
-            command
-                .arg("--verifier-states")
-                .arg(prog.dir.join(VERIFIER_LOG));
-        }
-        let status = command.status()?;
-        if !status.success() {
-            bail!("hardcoded katran {pass} exited with {status}");
-        }
-        Ok(())
-    }
-
-    fn refresh_katran_verifier_log(prog: &PreparedProgram) -> Result<()> {
-        drop(verify_workdir_with_log_level(&prog.dir, &prog.map_fds, 2)?);
-        fs::copy(prog.dir.join(VERIFY_LOG), prog.dir.join(VERIFIER_LOG))
-            .with_context(|| format!("failed to promote {} to {}", VERIFY_LOG, VERIFIER_LOG))?;
-        Ok(())
-    }
-
-    fn promote_output_to_input(prog: &PreparedProgram) -> Result<()> {
-        fs::copy(prog.dir.join(OUTPUT_BIN), prog.dir.join(INPUT_BIN)).with_context(|| {
-            format!(
-                "failed to promote {} to {} for {}",
-                OUTPUT_BIN,
-                INPUT_BIN,
-                prog.dir.display()
-            )
-        })?;
         Ok(())
     }
 
