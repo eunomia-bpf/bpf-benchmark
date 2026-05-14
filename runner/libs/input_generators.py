@@ -22,19 +22,6 @@ def _load_specs() -> dict:
         return yaml.safe_load(f)
 
 
-def _build_code_clone(output: Path, spec: dict) -> dict:
-    count, seed, salt = spec["count"], spec["seed"], spec["salt"]
-    state = salt & MASK64; blob = bytearray(struct.pack("<II", count, seed))
-    for index in range(count):
-        state = _lcg(state); blob.extend(struct.pack("<Q", (state ^ ((index + 13) * 0x94D049BB133111EB) ^ (seed << (index & 3))) & MASK64))
-    output.write_bytes(blob); return {"count": count, "seed": seed}
-
-
-def _build_fixed_loop(output: Path, spec: dict) -> dict:
-    rounds, mix, seed = spec["rounds"], spec["mix"], spec["seed"]
-    output.write_bytes(struct.pack("<IIQ", rounds, mix, seed)); return {"rounds": rounds, "mix": mix}
-
-
 def _build_lcg_words_q(output: Path, spec: dict) -> dict:
     n = spec["word_count"]; state = spec["initial_state"] & MASK64
     salt1, salt2, offset2 = spec["salt1"], spec["salt2"], spec.get("index_offset_salt2", 1)
@@ -45,39 +32,8 @@ def _build_lcg_words_q(output: Path, spec: dict) -> dict:
     return {spec.get("metadata_count_key", "words"): n, "bytes": n * 8}
 
 
-def _build_addr_calc_stride(output: Path, spec: dict) -> dict:
-    n = spec["value_count"]; state = spec["initial_state"] & MASK64; salt1, salt2 = spec["salt1"], spec["salt2"]; blob = bytearray()
-    for index in range(n):
-        state = _lcg(state ^ ((index + 1) * salt1)); blob.extend(struct.pack("<Q", (state ^ ((index + 11) * salt2)) & MASK64))
-    output.write_bytes(blob); return {"value_count": n, "bytes": n * 8}
-
-
-def _build_endian_swap_dense(output: Path, spec: dict) -> dict:
-    groups, lanes = spec["groups"], spec["lanes"]; count = groups * lanes
-    state = spec["initial_state"] & MASK64; blob = bytearray()
-    for index in range(count):
-        state = _lcg(state ^ ((index + 1) * 0xE7037ED1A0B428DB))
-        blob.extend(struct.pack("<I", ((state >> 16) ^ ((index + 1) * 0x9E3779B9)) & 0xFFFFFFFF))
-    output.write_bytes(blob); return {"groups": groups, "lanes": lanes, "count": count}
-
-
-def _build_groups_lanes_u64(output: Path, spec: dict) -> dict:
-    """header=none; body=(groups*lanes) u64s via lcg(state^(i+1)*salt1) ^ (i+offset)*salt2."""
-    groups, lanes = spec["groups"], spec["lanes"]; count = groups * lanes
-    state = spec["initial_state"] & MASK64; salt1, salt2 = spec["salt1"], spec["salt2"]
-    offset = spec.get("index_offset_salt2", 1); blob = bytearray()
-    for index in range(count):
-        state = _lcg(state ^ ((index + 1) * salt1)); blob.extend(struct.pack("<Q", (state ^ ((index + offset) * salt2)) & MASK64))
-    output.write_bytes(blob); return {"groups": groups, "lanes": lanes, "count": count}
-
-
 def _build_plain_bytes(output: Path, spec: dict) -> dict:
     n = spec["count"]; output.write_bytes(bytes(range(n))); return {"bytes": n}
-
-
-def _build_plain_u64_pair(output: Path, spec: dict) -> dict:
-    left, right = spec["left"], spec["right"]
-    output.write_bytes(struct.pack("<QQ", left, right)); return {"left": left, "right": right}
 
 
 def _build_lcg_u64_ii(output: Path, spec: dict) -> dict:
@@ -109,17 +65,6 @@ def _build_lcg_u64_ii(output: Path, spec: dict) -> dict:
     return {"count": count, meta_b_key: seed if meta_b_key == "seed" else header_b}
 
 
-def _build_lcg_u32_ii(output: Path, spec: dict) -> dict:
-    count = spec["count"]; header_b = spec.get("header_b", 0); state = spec["initial_state"] & MASK64
-    salt1 = spec.get("salt1", 0x9E3779B97F4A7C15)
-    shift = spec.get("shift", 24); xor_index_mul = spec.get("xor_index_mul", 0); xor_seed = spec.get("xor_seed", 0)
-    blob = bytearray(struct.pack("<II", count, header_b))
-    for index in range(count):
-        state = _lcg(state ^ ((index + 1) * salt1))
-        blob.extend(struct.pack("<I", ((state >> shift) ^ ((index + 1) * xor_index_mul) ^ xor_seed) & 0xFFFFFFFF))
-    output.write_bytes(blob); return {"count": count, "header_b": header_b}
-
-
 def _build_lcg_u16_ii(output: Path, spec: dict) -> dict:
     rounds, word_count = spec["rounds"], spec["word_count"]
     state = spec["initial_state"] & MASK64; index_mul = spec.get("index_mul", 257)
@@ -129,73 +74,12 @@ def _build_lcg_u16_ii(output: Path, spec: dict) -> dict:
     output.write_bytes(blob); return {"rounds": rounds, "word_count": word_count}
 
 
-def _build_lcg_u64_no_header(output: Path, spec: dict) -> dict:
-    n = spec["count"]; state = spec["initial_state"] & MASK64; blob = bytearray()
-    for _ in range(n):
-        state = _lcg(state); blob.extend(struct.pack("<Q", state & MASK64))
-    output.write_bytes(blob); return {"bytes": n * 8}
-
-
 def _build_trace_event_type_switch_dispatch(output: Path, spec: dict) -> dict:
     count = spec["count"]; state = spec["initial_state"] & MASK64; mask = spec.get("mask", 0x3F)
     blob = bytearray(struct.pack("<I", count))
     for index in range(count):
         state = _lcg(state); blob.extend(struct.pack("<I", ((state >> 32) ^ index) & mask))
     output.write_bytes(blob); return {"count": count}
-
-
-def _build_branch_layout(output: Path, spec: dict) -> dict:
-    count = spec["count"]
-    hot_threshold = spec["hot_threshold"]
-    distribution = spec.get("distribution", "linear")
-    blob = bytearray(struct.pack("<II", count, hot_threshold))
-    state = spec.get("initial_state", 0) & MASK64
-    salt = spec.get("salt", 0x9E3779B97F4A7C15)
-    for index in range(count):
-        if distribution == "predictable":
-            value = ((index * 37) + 11) % hot_threshold
-        elif distribution == "random":
-            state = _lcg(state ^ ((index + 1) * salt))
-            if state & 1:
-                value = state % hot_threshold
-            else:
-                value = hot_threshold + ((state >> 16) % 2048)
-        else:  # linear (original branch_layout behaviour)
-            if index % 10 == 0:
-                value = 1000 + index
-            else:
-                value = (index * 37) % hot_threshold
-        blob.extend(struct.pack("<Q", value))
-    output.write_bytes(blob)
-    meta = {"count": count, "hot_threshold": hot_threshold}
-    if distribution != "linear":
-        meta["distribution"] = distribution
-    return meta
-
-
-def _build_nested_loop(output: Path, spec: dict) -> dict:
-    outer = spec["outer"]
-    inner = spec["inner"]
-    seed = spec["seed"]
-    salt = spec["salt"] & MASK64
-    middle = spec.get("middle")
-    if middle is not None:
-        header = struct.pack("<IIII", outer, middle, inner, seed)
-        count = outer * middle * inner
-    else:
-        header = struct.pack("<IIQ", outer, inner, seed)
-        count = outer * inner
-    state = salt
-    blob = bytearray(header)
-    for index in range(count):
-        state = _lcg(state)
-        value = state ^ ((index + 9) * 0xA0761D6478BD642F)
-        blob.extend(struct.pack("<Q", value & MASK64))
-    output.write_bytes(blob)
-    meta = {"outer": outer, "inner": inner}
-    if middle is not None:
-        meta["middle"] = middle
-    return meta
 
 
 def _build_hash_chain(output: Path, spec: dict) -> dict:
@@ -208,73 +92,13 @@ def _build_hash_chain(output: Path, spec: dict) -> dict:
     output.write_bytes(blob); return {"rounds": rounds, "word_count": word_count}
 
 
-def _build_branch_dense(output: Path, spec: dict) -> dict:
-    count = spec["count"]; hot_threshold = spec["hot_threshold"]
-    state = spec["initial_state"] & MASK64; hot_every = spec.get("hot_every", 5)
-    blob = bytearray(struct.pack("<II", count, hot_threshold))
-    for index in range(count):
-        state = _lcg(state)
-        value = hot_threshold + ((state >> 12) & 0x7FF) if index % hot_every == 0 else ((state >> 20) ^ (index * 73)) & 0x3FF
-        blob.extend(struct.pack("<I", value))
-    output.write_bytes(blob); return {"count": count, "hot_threshold": hot_threshold}
-
-
-def _build_branch_fanout(output: Path, spec: dict) -> dict:
-    tags = spec["tags"]
-    count = spec["count"]
-    distribution = spec.get("distribution", "cyclic")
-    state = spec.get("initial_state", 0) & MASK64
-    salt = spec.get("salt", 0xA0761D6478BD642F)
-    fixed_tag_index = spec.get("fixed_tag_index", 0)
-    index_step = spec.get("index_step", 9)
-    index_shift = spec.get("index_shift", 5)
-    blob = bytearray(struct.pack("<I", count))
-    for index in range(count):
-        base = (((index + 1) * 0x1F123BB5) ^ (index * 0x9E3779B9)) & 0xFFFFFFFF
-        if distribution == "predictable":
-            tag = tags[fixed_tag_index]
-        elif distribution == "random":
-            state = _lcg(state ^ ((index + 3) * salt))
-            tag = tags[state % len(tags)]
-            base = (base ^ (state >> 7)) & 0xFFFFFFFF
-        else:  # cyclic
-            tag = tags[(index * index_step + index_shift) % len(tags)]
-        value = (base & ~63) | tag
-        blob.extend(struct.pack("<I", value))
-    output.write_bytes(blob)
-    meta: dict = {"count": count, "fanout": 1 if distribution == "predictable" else len(tags)}
-    if distribution != "cyclic":
-        meta["distribution"] = distribution
-    return meta
-
-
 _KIND_BUILDERS = {
-    "simple_lcg_u64_ii":  _build_lcg_u64_ii,
-    "dep_chain":           _build_lcg_u64_ii,
-    "multi_acc":           _build_lcg_u64_ii,
-    "stride_load":         _build_lcg_u64_ii,
-    "large_mixed":         _build_lcg_u64_ii,
-    "load_isolation":      _build_lcg_u64_ii,
-    "code_clone":          _build_code_clone,
-    "fixed_loop":          _build_fixed_loop,
-    "lcg_words_q":         _build_lcg_words_q,
-    "addr_calc_stride":    _build_addr_calc_stride,
-    "endian_swap_dense":   _build_endian_swap_dense,
-    "groups_lanes_u64":    _build_groups_lanes_u64,
-    "branch_flip_dense":   _build_groups_lanes_u64,    # alias
-    "extract_dense":       lambda output, spec: _build_groups_lanes_u64(output, {**spec, "index_offset_salt2": spec.get("index_offset_salt2", 3)}),
-    "plain_bytes":         _build_plain_bytes,
-    "plain_u64_pair":      _build_plain_u64_pair,
-    "lcg_u64_ii":          _build_lcg_u64_ii,
-    "lcg_u32_ii":          _build_lcg_u32_ii,
-    "lcg_u16_ii":          _build_lcg_u16_ii,
-    "lcg_u64_no_header":   _build_lcg_u64_no_header,
-    "trace_event_type_switch_dispatch":     _build_trace_event_type_switch_dispatch,
-    "branch_layout":       _build_branch_layout,
-    "nested_loop":         _build_nested_loop,
-    "hash_chain":          _build_hash_chain,
-    "branch_dense":        _build_branch_dense,
-    "branch_fanout":       _build_branch_fanout,
+    "lcg_words_q": _build_lcg_words_q,
+    "plain_bytes": _build_plain_bytes,
+    "lcg_u64_ii": _build_lcg_u64_ii,
+    "lcg_u16_ii": _build_lcg_u16_ii,
+    "trace_event_type_switch_dispatch": _build_trace_event_type_switch_dispatch,
+    "hash_chain": _build_hash_chain,
 }
 
 
@@ -304,71 +128,6 @@ def generate_sorted_rule_binary_search(output: Path) -> dict[str, int]:
     output.write_bytes(blob); return {"data_len": data_len, "query_len": query_len}
 
 
-def generate_packet_parse(output: Path) -> dict[str, int]:
-    packet_count = 54
-    packet_size = 64
-    blob = bytearray(struct.pack("<II", packet_count, packet_size))
-    for index in range(packet_count):
-        packet = bytearray(packet_size)
-        packet[12] = 0x08
-        packet[13] = 0x00
-        packet[14] = 0x45
-        packet[15] = 0x00
-        _write_be16(packet, 16, 40 + (index % 4) * 4)
-        packet[22] = 64
-        packet[23] = 6 if index % 2 == 0 else 17
-        packet[26:30] = bytes([10, 0, index & 0xFF, (index * 3) & 0xFF])
-        packet[30:34] = bytes([10, 1, (index * 5) & 0xFF, (index * 7) & 0xFF])
-        _write_be16(packet, 34, 10000 + index)
-        _write_be16(packet, 36, 20000 + index * 2)
-        _write_be16(packet, 38, 24 + (index % 8))
-        blob.extend(packet)
-    output.write_bytes(blob)
-    return {"packet_count": packet_count, "packet_size": packet_size}
-
-
-def generate_bounds_ladder(output: Path) -> dict[str, int]:
-    record_count, record_size = 32, 32
-    state = 0x55AA55AA12349876; blob = bytearray(struct.pack("<II", record_count, record_size))
-    for index in range(record_count):
-        state = _lcg(state); tag = (state ^ index) & 0xFFFFFFFF
-        state = _lcg(state); left = state & MASK64
-        state = _lcg(state); span = ((state >> 16) ^ (index * 13)) & 0xFFFFFFFF
-        state = _lcg(state); right = state & MASK64
-        state = _lcg(state); tail = (state ^ (index * 0xA5A5A5A5A5A5A5A5)) & MASK64
-        blob.extend(struct.pack("<IQIQQ", tag, left, span, right, tail))
-    output.write_bytes(blob); return {"record_count": record_count, "record_size": record_size}
-
-
-def generate_bounds_check_heavy(output: Path) -> dict[str, int]:
-    record_count = 32
-    record_size = 32
-    state = 0x0F0F1E1E2D2D3C3C
-    blob = bytearray(struct.pack("<II", record_count, record_size))
-    for index in range(record_count):
-        state = _lcg(state)
-        span0 = 4 + (state & 7)
-        state = _lcg(state)
-        off1 = state & 7
-        state = _lcg(state)
-        off2 = state & 7
-        state = _lcg(state)
-        selector = state & 0x1F
-        record = bytearray(record_size)
-        record[0] = span0 & 0xFF
-        record[1] = off1 & 0xFF
-        record[2] = off2 & 0xFF
-        record[3] = selector & 0xFF
-        for offset in range(4, record_size, 8):
-            state = _lcg(state)
-            value = state ^ ((index + offset) * 0x9E3779B97F4A7C15)
-            width = min(8, record_size - offset)
-            record[offset : offset + width] = struct.pack("<Q", value & MASK64)[:width]
-        blob.extend(record)
-    output.write_bytes(blob)
-    return {"record_count": record_count, "record_size": record_size}
-
-
 def generate_packet_record_bounds_window(output: Path) -> dict[str, int]:
     record_count = 32
     record_size = 24
@@ -393,75 +152,6 @@ def generate_packet_record_bounds_window(output: Path) -> dict[str, int]:
         blob.extend(record)
     output.write_bytes(blob)
     return {"record_count": record_count, "record_size": record_size}
-
-
-def generate_cmov_select(output: Path) -> dict[str, int]:
-    groups, lanes = 27, 4; count = groups * lanes; compare_mask = (1 << 63) - 1
-    state = 0x123456789ABCDEF0
-    compare_lhs: list[int] = []; compare_rhs: list[int] = []
-    select_true: list[int] = []; select_false: list[int] = []
-    for index in range(count):
-        state = _lcg(state ^ ((index + 1) * 0x9E3779B97F4A7C15)); raw_lhs = state & compare_mask
-        state = _lcg(state ^ ((index + 1) * 0xD1342543DE82EF95)); raw_rhs = state & compare_mask
-        hi, lo = (raw_lhs, raw_rhs) if raw_lhs >= raw_rhs else (raw_rhs, raw_lhs)
-        if hi == lo: hi += 1 if hi < compare_mask else 0; lo -= 1 if lo > 0 else 0
-        if index & 1: compare_lhs.append(hi); compare_rhs.append(lo)
-        else: compare_lhs.append(lo); compare_rhs.append(hi)
-        state = _lcg(state ^ ((index + 1) * 0xA0761D6478BD642F))
-        select_true.append((state ^ ((index + 5) * 0xE7037ED1A0B428DB)) & MASK64)
-        state = _lcg(state ^ ((index + 1) * 0x8EBC6AF09C88C6E3))
-        select_false.append((state ^ ((index + 9) * 0x589965CC75374CC3)) & MASK64)
-    blob = bytearray(struct.pack("<II", count, groups))
-    for values in (compare_lhs, compare_rhs, select_true, select_false):
-        for value in values: blob.extend(struct.pack("<Q", value))
-    output.write_bytes(blob); return {"count": count, "groups": groups, "lanes": lanes}
-
-
-def generate_cmov_dense(output: Path) -> dict[str, int]:
-    count = 32; state = 0xC001D00DF00DBAAD; arrays: list[list[int]] = [[], [], [], []]
-    for index in range(count):
-        for array_index, values in enumerate(arrays):
-            state = _lcg(state ^ ((index + 1) * (array_index + 3) * 0x9E3779B97F4A7C15)); values.append(state & MASK64)
-    blob = bytearray()
-    for values in arrays:
-        for value in values:
-            blob.extend(struct.pack("<Q", value))
-    output.write_bytes(blob)
-    return {"count": count, "arrays": len(arrays)}
-
-
-def generate_cond_select_dense(output: Path) -> dict[str, int]:
-    groups = 13
-    lanes = 8
-    count = groups * lanes
-    state = 0xC0DECAFE12345678
-    compare_lhs: list[int] = []
-    compare_rhs: list[int] = []
-    on_true: list[int] = []
-    on_false: list[int] = []
-    for index in range(count):
-        state = _lcg(state ^ ((index + 1) * 0x9E3779B97F4A7C15))
-        base = state & ((1 << 61) - 1)
-        state = _lcg(state ^ ((index + 5) * 0xA0761D6478BD642F))
-        delta = ((state >> 9) & 0xFFFFF) + 1
-        if index & 1:
-            lhs = base
-            rhs = base + delta
-        else:
-            rhs = base
-            lhs = base + delta
-        state = _lcg(state ^ ((index + 9) * 0xD1342543DE82EF95))
-        compare_lhs.append(lhs & MASK64)
-        compare_rhs.append(rhs & MASK64)
-        on_true.append((state ^ ((index + 1) * 0x94D049BB133111EB)) & MASK64)
-        state = _lcg(state ^ ((index + 13) * 0xBF58476D1CE4E5B9))
-        on_false.append((state ^ ((index + 1) * 0x369DEA0F31A53F85)) & MASK64)
-    blob = bytearray()
-    for values in (compare_lhs, compare_rhs, on_true, on_false):
-        for value in values:
-            blob.extend(struct.pack("<Q", value))
-    output.write_bytes(blob)
-    return {"groups": groups, "lanes": lanes, "count": count}
 
 
 def generate_payload_prefix_memcmp_scan(output: Path) -> dict[str, int]:
@@ -652,26 +342,24 @@ def generate_cilium_policy_guard_tree_filter(output: Path) -> dict[str, int]:
 
 
 def generate_bpftrace_string_search_prefix_scan(output: Path) -> dict[str, int]:
-    haystack_size = 128
-    needle_count = 5
-    needle_size = 12
+    haystack_size = 96
+    needle_size = 8
     haystack_text = (
         b"tracepoint:syscalls:sys_enter_openat /usr/bin/python3 "
-        b"GET /healthz label=prod service=bpftrace"
+        b"GET /healthz service=bpftrace"
     )
-    needles = [b"/usr/bin", b"GET ", b"service", b"bpftrace", b"missing"]
+    needle = b"service"
 
     haystack = bytearray(haystack_size)
     haystack[:len(haystack_text)] = haystack_text
-    blob = bytearray(struct.pack("<II", len(haystack_text), needle_count))
+    blob = bytearray(struct.pack("<II", len(haystack_text), len(needle)))
     blob.extend(haystack)
-    for needle in needles:
-        padded = bytearray(needle_size)
-        padded[:len(needle)] = needle
-        blob.extend(padded)
+    padded = bytearray(needle_size)
+    padded[:len(needle)] = needle
+    blob.extend(padded)
 
     output.write_bytes(blob)
-    return {"haystack_len": len(haystack_text), "needle_count": needle_count}
+    return {"haystack_len": len(haystack_text), "needle_len": len(needle)}
 
 
 def generate_tracee_http_method_prefix_detect(output: Path) -> dict[str, int]:

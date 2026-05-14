@@ -34,7 +34,6 @@ RUN apt-get update \
         g++ \
         gcc \
         git \
-        golang-go \
         iproute2 \
         kmod \
         libboost-all-dev \
@@ -141,12 +140,6 @@ RUN --mount=type=cache,target=/tmp/bpf-benchmark-build,id=katran-build-${RUN_TAR
     install -m 0755 vendor/linux-framework/tools/bpf/bpftool/bpftool /usr/local/bin/bpftool; \
     bpftool version; \
     command -v grpc_cpp_plugin >/dev/null; \
-    export GOPATH=/tmp/bpf-benchmark-build/go-${target_arch}; \
-    mkdir -p "${GOPATH}/bin"; \
-    GO111MODULE=on GOFLAGS=-mod=mod go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.34.2; \
-    GO111MODULE=on GOFLAGS=-mod=mod go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1; \
-    cp -f "${GOPATH}/bin/protoc-gen-go-grpc" "${GOPATH}/bin/protoc-gen-go_grpc"; \
-    export PATH="${GOPATH}/bin:${PATH}"; \
     make image-katran-artifacts \
         RUN_TARGET_ARCH="${target_arch}" \
         REPO_KATRAN_ROOT="${katran_cache_install}" \
@@ -156,7 +149,6 @@ RUN --mount=type=cache,target=/tmp/bpf-benchmark-build,id=katran-build-${RUN_TAR
     mkdir -p /artifacts; \
     cp -a "${katran_cache_install}" /artifacts/katran; \
     test -x /artifacts/katran/bin/katran_server_grpc; \
-    test -x /artifacts/katran/bin/katranc; \
     test -d /artifacts/katran/lib; \
     test -f /artifacts/katran/bpf/balancer.bpf.o; \
     test -f /artifacts/katran/bpf/healthchecking_ipip.bpf.o; \

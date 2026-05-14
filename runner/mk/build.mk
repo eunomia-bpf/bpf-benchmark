@@ -88,7 +88,7 @@ HOST_KINSN_MODULES_X86 := $(patsubst %.o,%,$(shell awk '/^obj-m[[:space:]]*\+=/ 
 HOST_KINSN_MODULES_ARM64 := $(patsubst %.o,%,$(shell awk '/^obj-m[[:space:]]*\+=/ { print $$3 }' "$(ROOT_DIR)/module/arm64/Makefile" 2>/dev/null))
 HOST_KINSN_KO_FILES_X86 := $(addprefix $(HOST_KINSN_DIR_X86)/,$(addsuffix .ko,$(HOST_KINSN_MODULES_X86)))
 HOST_KINSN_KO_FILES_ARM64 := $(addprefix $(HOST_KINSN_DIR_ARM64)/,$(addsuffix .ko,$(HOST_KINSN_MODULES_ARM64)))
-ACTIVE_KATRAN_REQUIRED := $(REPO_KATRAN_ROOT)/bin/katran_server_grpc $(REPO_KATRAN_ROOT)/bin/katranc $(REPO_KATRAN_ROOT)/bpf/balancer.bpf.o $(REPO_KATRAN_ROOT)/bpf/healthchecking_ipip.bpf.o $(REPO_KATRAN_ROOT)/bpf/xdp_root.bpf.o
+ACTIVE_KATRAN_REQUIRED := $(REPO_KATRAN_ROOT)/bin/katran_server_grpc $(REPO_KATRAN_ROOT)/bpf/balancer.bpf.o $(REPO_KATRAN_ROOT)/bpf/healthchecking_ipip.bpf.o $(REPO_KATRAN_ROOT)/bpf/xdp_root.bpf.o
 
 REQUIRE_IMAGE_BUILD = @if [ "$(BPFREJIT_IMAGE_BUILD)" != "1" ]; then echo "$@ must be run from the runner Dockerfile with BPFREJIT_IMAGE_BUILD=1" >&2; exit 1; fi
 

@@ -51,9 +51,5 @@ $(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES) $(KATRAN_ARTIFACTS_BUILD_RUL
 	test -x "$$install_root/bin/katran_server_grpc" || { echo "missing Katran install output: $$install_root/bin/katran_server_grpc" >&2; exit 1; }; \
 	[ -f "$$bpf_root/healthchecking_ipip.o" ] && mv -f "$$bpf_root/healthchecking_ipip.o" "$$bpf_root/healthchecking_ipip.bpf.o" || true; \
 	[ -f "$$bpf_root/xdp_root.o" ] && mv -f "$$bpf_root/xdp_root.o" "$$bpf_root/xdp_root.bpf.o" || true; \
-	goclient_root="$$repo_root/example_grpc/goclient/src/katranc"; \
-	cd "$$repo_root/example_grpc" && rm -rf "$$goclient_root/lb_katran" && mkdir -p "$$goclient_root/lb_katran" && \
-		protoc -I protos katran.proto --go_out="$$goclient_root/lb_katran" --go_grpc_out="$$goclient_root/lb_katran"; \
-	cd "$$goclient_root" && { [ -f go.mod ] || (go mod init katranc && go mod tidy); } && go build -o "$$install_root/bin/katranc" ./main; \
 	for path in $(ACTIVE_KATRAN_REQUIRED); do test -e "$$path"; done; \
 	touch $(ACTIVE_KATRAN_REQUIRED)

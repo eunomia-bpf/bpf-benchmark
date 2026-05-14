@@ -65,290 +65,266 @@ benchmarks:
     expected_result: 12345678
     tags: [baseline, packet-backed, helper-free]
 
-  - name: bitcount
-    description: Kernighan popcount over generated u64 input
+  - name: bitmap_popcount_scan
+    description: Bitmap popcount scan over generated u64 words
     category: alu-mix
     family: popcount
     level: medium
-    hypothesis: Favors stronger scalar optimization and loop code generation
-    base_name: bitcount
+    hypothesis: Represents bitmap/set summarization loops common in BPF policy and tracing code
+    base_name: bitmap_popcount_scan
     kernel_input_size: 2056
-    input_generator: bitcount
+    input_generator: bitmap_popcount_scan
     expected_result: 12830754992348206170
     tags: [bitops, pure-jit]
 
-  - name: binary_search
-    description: Repeated search over sorted data
+  - name: sorted_rule_binary_search
+    description: Repeated lookup over a sorted rule table
     category: control-flow
     family: search
     level: medium
-    hypothesis: Branch-heavy search should reward stronger branch-oriented code generation
-    base_name: binary_search
+    hypothesis: Captures verifier-friendly bounded rule lookup without map/helper dependencies
+    base_name: sorted_rule_binary_search
     kernel_input_size: 392
-    input_generator: binary_search
+    input_generator: sorted_rule_binary_search
     expected_result: 126
     tags: [branch, search, pure-jit]
 
-  - name: switch_dispatch
-    description: Dense switch dispatch over generated 6-bit values
+  - name: bcc_runqlat_log2_histogram_bucket
+    description: bcc runqlat-style log2 latency bucket selection with clamp
+    category: alu-mix
+    family: histogram-bucket
+    level: log2-clamp
+    hypothesis: Mirrors tracing histogram bucket selection without helper/map updates
+    base_name: bcc_runqlat_log2_histogram_bucket
+    kernel_input_size: 1032
+    input_generator: bcc_runqlat_log2_histogram_bucket
+    expected_result: 17790125373615940312
+    tags: [bcc, tracing, log2, histogram, pure-jit]
+
+  - name: trace_event_type_switch_dispatch
+    description: Trace event type dispatch over generated 6-bit event IDs
     category: control-flow
     family: switch-dispatch
     level: dense-64
-    hypothesis: Dense dispatch should reflect jump-table or compare-ladder lowering quality
-    base_name: switch_dispatch
+    hypothesis: Represents event/type dispatch tables seen in tracing filters
+    base_name: trace_event_type_switch_dispatch
     kernel_input_size: 516
-    input_generator: switch_dispatch
+    input_generator: trace_event_type_switch_dispatch
     expected_result: 16
     tags: [branch, dispatch, pure-jit]
 
-  - name: cmov_select
-    description: Repeated single-diamond value selection over staged compare/select arrays
-    category: control-flow
-    family: select-diamond
-    level: repeated-cmov
-    hypothesis: Narrow assignment-only diamonds should expose whether the backend can lower hot selects without branch overhead
-    base_name: cmov_select
-    kernel_input_size: 3464
-    input_generator: cmov_select
-    expected_result: 4719383495603449331
-    tags: [branch, select, cmov, pure-jit]
-
-  - name: checksum
-    description: Internet checksum style reduction
+  - name: packet_checksum_fold
+    description: Internet checksum style packet reduction
     category: memory-local
     family: reduction
     level: medium
     hypothesis: Sequential 16-bit reductions should emphasize scalar memory throughput
-    base_name: checksum
+    base_name: packet_checksum_fold
     kernel_input_size: 1032
-    input_generator: checksum
+    input_generator: packet_checksum_fold
     # The input is non-zero; the repeated XOR fold cancels because each 16-bit lane
     # receives the same checksum value eight times across the 32 rounds.
     expected_result: 0
     tags: [alu, memory, pure-jit]
 
-  - name: stride_load_16
-    description: Wider-stride load pattern with stride 16 over a ring buffer
-    category: memory-local
-    family: stride-load
-    level: stride-16
-    hypothesis: Wider stride should amplify addressing and prefetch sensitivity
-    base_name: stride_load_16
-    kernel_input_size: 1032
-    input_generator: stride_load_16
-    expected_result: 17112594108265627168
-    tags: [memory, stride, pure-jit]
-
-  - name: fixed_loop_large
-    description: Long fixed-trip-count recurrence loop
-    category: loop-shape
-    family: fixed-loop
-    level: large
-    hypothesis: Larger trip counts should amortize setup overhead and highlight steady-state loop code quality
-    base_name: fixed_loop_large
-    kernel_input_size: 16
-    input_generator: fixed_loop_large
-    expected_result: 8801144986419677599
-    tags: [compute, loop, pure-jit]
-
-  - name: large_mixed_1000
-    description: Very large mixed straight-line body targeting roughly 1000 BPF instructions
-    category: program-scale
-    family: large-mixed
-    level: approx-1000
-    hypothesis: Very large bodies should amplify backend scalability differences hidden by tiny kernels
-    base_name: large_mixed_1000
-    kernel_input_size: 264
-    input_generator: large_mixed_1000
-    expected_result: 4283793436325605125
-    tags: [compute, memory, code-size, pure-jit]
-
-  - name: memcmp_prefix_64
-    description: Compare three 64-byte candidates against a fixed prefix pattern
+  - name: payload_prefix_memcmp_scan
+    description: Payload prefix comparison over fixed-size candidate records
     category: memory-local
     family: byte-compare
     level: prefix-64
-    hypothesis: Early-exit byte comparisons should expose byte-load lowering and branch short-circuit behavior
-    base_name: memcmp_prefix_64
+    hypothesis: Represents protocol/string prefix filters with early mismatch exits
+    base_name: payload_prefix_memcmp_scan
     kernel_input_size: 196
-    input_generator: memcmp_prefix_64
+    input_generator: payload_prefix_memcmp_scan
     expected_result: 9377358970524074984
     tags: [memory, compare, branch, pure-jit]
 
-  - name: packet_parse_vlans_tcpopts
+  - name: packet_vlan_tcpopt_parser
     description: Packet-backed Ethernet plus VLAN plus IPv4 plus TCP parser with options walk
     category: memory-local
     family: parser
     level: variable-vlan-tcpopts
     hypothesis: Variable cursor advancement and repeated bounds checks should magnify packet-parse codegen differences
-    base_name: packet_parse_vlans_tcpopts
+    base_name: packet_vlan_tcpopt_parser
     io_mode: packet
     kernel_input_size: 74
-    input_generator: packet_parse_vlans_tcpopts
+    input_generator: packet_vlan_tcpopt_parser
     expected_result: 7124500222221
     tags: [packet, parse, bounds, variable-offsets, pure-jit]
 
-  - name: local_call_fanout
+  - name: bpf_local_call_fanout_dispatch
     description: Dispatch among four __noinline local subprograms with different pressure profiles
     category: call-overhead
     family: bpf-local-call
     level: fanout-4
     hypothesis: Fan-out local calls should stress call-site layout, prologue diversity, and join-point register allocation
-    base_name: local_call_fanout
+    base_name: bpf_local_call_fanout_dispatch
     kernel_input_size: 392
-    input_generator: local_call_fanout
+    input_generator: bpf_local_call_fanout_dispatch
     expected_result: 1171593469689687806
     tags: [call, bpf-to-bpf, local-call, reg-pressure, pure-jit]
 
-  - name: packet_rss_hash
+  - name: flow_5tuple_rss_hash
     description: Parse an IPv4 TCP 5-tuple and compute a Jenkins-style flow hash
     category: alu-mix
     family: packet-hash
     level: flow-5tuple
     hypothesis: Endian conversion plus field extraction and rotates should be more workload-realistic than standalone checksum math
-    base_name: packet_rss_hash
+    base_name: flow_5tuple_rss_hash
     io_mode: packet
     kernel_input_size: 54
-    input_generator: packet_rss_hash
+    input_generator: flow_5tuple_rss_hash
     expected_result: 11016707074064960918
     tags: [packet, hash, endian, pure-jit]
 
-  - name: katran_like
-    description: Katran-like IPv4 TCP VIP path with local fixture lookups and Jenkins hash
+  - name: katran_lb_consistent_hash_select
+    description: Katran IPv4 TCP VIP path with local fixture lookups and consistent-hash backend selection
     category: alu-mix
     family: packet-load-balancer
     level: katran-hotpath
     hypothesis: A helper-free Katran-shaped path should expose realistic parse, hash, selection, and encap ALU patterns
-    base_name: katran_like
+    base_name: katran_lb_consistent_hash_select
     io_mode: packet
     kernel_input_size: 54
-    input_generator: katran_like
+    input_generator: katran_lb_consistent_hash_select
     expected_result: 5895923248507644458
     tags: [packet, katran, hash, endian, pure-jit]
 
-  - name: alu32_64_pingpong
-    description: Alternate u32 and u64 arithmetic on the same live values
-    category: alu-mix
-    family: mixed-width
-    level: pingpong
-    hypothesis: Mixed-width arithmetic should stress zero-extension correctness and 32-bit lowering quality
-    base_name: alu32_64_pingpong
-    kernel_input_size: 520
-    input_generator: alu32_64_pingpong
-    expected_result: 4047234684177357765
-    tags: [alu, mixed-width, pure-jit]
-
-  - name: deep_guard_tree_8
-    description: Eight-level nested guard tree over staged record fields
+  - name: cilium_policy_guard_tree_filter
+    description: Cilium-policy-shaped nested guard tree over staged record fields
     category: control-flow
     family: deep-guards
     level: depth-8
-    hypothesis: Deeply nested conditionals should magnify branch inversion, hot-path asymmetry, and join pressure
-    base_name: deep_guard_tree_8
+    hypothesis: Represents policy/filter decision trees without map/helper dependencies
+    base_name: cilium_policy_guard_tree_filter
     kernel_input_size: 516
-    input_generator: deep_guard_tree_8
+    input_generator: cilium_policy_guard_tree_filter
     expected_result: 5333736376993440184
-    tags: [branch, nested, guards, pure-jit]
+    tags: [cilium, branch, nested, guards, pure-jit]
 
-  - name: rotate64_hash
-    description: SipHash-like hash using 64-bit rotations to stress the ROTATE rewrite
+  - name: siphash_rotate64_mixer
+    description: SipHash-like hash mixer using 64-bit rotations
     category: alu-mix
     family: rotate-hash
     level: siphash-64
-    hypothesis: Dense 64-bit rotations should exercise the 4-insn rotate rewrite pattern
-    base_name: rotate64_hash
+    hypothesis: Captures a realistic rotate-heavy hash mixer used by packet and map-key paths
+    base_name: siphash_rotate64_mixer
     kernel_input_size: 64
-    input_generator: rotate64_hash
+    input_generator: siphash_rotate64_mixer
     expected_result: 2666935177028490406
     tags: [compute, rotate, hash, pure-jit]
 
-  - name: packet_redundant_bounds
+  - name: packet_record_bounds_window
     description: Packet-backed record parser with one wide dominating window plus many redundant sub-checks
     category: memory-local
     family: bounds-density
     level: redundant-window
     hypothesis: Dominating range checks should create a clean target for redundant bounds-check elimination
-    base_name: packet_redundant_bounds
+    base_name: packet_record_bounds_window
     io_mode: packet
     kernel_input_size: 776
-    input_generator: packet_redundant_bounds
+    input_generator: packet_record_bounds_window
     expected_result: 1610777047308888911
     tags: [packet, bounds, redundant-checks, pure-jit]
 
-  - name: struct_field_cluster
-    description: Dense fixed-offset field extraction from a staged array of naturally aligned records
+  - name: flow_record_field_scan
+    description: Dense fixed-offset field extraction from flow-like records
     category: memory-local
     family: field-access
     level: clustered-records
     hypothesis: Many same-base fixed-offset loads should reward base-plus-offset fusion and grouped field lowering
-    base_name: struct_field_cluster
+    base_name: flow_record_field_scan
     kernel_input_size: 1032
-    input_generator: struct_field_cluster
+    input_generator: flow_record_field_scan
     expected_result: 9354240374969449171
     tags: [memory, fields, fixed-offsets, pure-jit]
 
-  - name: bitfield_extract
-    description: Packed-word bitfield extraction over staged two-word records
+  - name: packed_header_bitfield_decode
+    description: Packed header bitfield extraction over staged two-word records
     category: memory-local
     family: bitfield-extract
     level: packed-records
     hypothesis: Repeated constant shift-and-mask extracts should reward compact canonical extract lowering over packed inputs
-    base_name: bitfield_extract
+    base_name: packed_header_bitfield_decode
     kernel_input_size: 520
-    input_generator: bitfield_extract
+    input_generator: packed_header_bitfield_decode
     expected_result: 12211926182125163441
     tags: [memory, fields, bitfield, pure-jit]
 
-  - name: smallmul_strength_reduce
-    description: Hot loop dominated by multiply-by-small-constant arithmetic and index scaling
-    category: alu-mix
-    family: strength-reduce
-    level: smallmul
-    hypothesis: Small constant multiplies should isolate LEA-style fusion and strength-reduction opportunities
-    base_name: smallmul_strength_reduce
-    kernel_input_size: 1032
-    input_generator: smallmul_strength_reduce
-    expected_result: 13107848205125099949
-    tags: [alu, strength-reduce, lea-like, pure-jit]
-
-  - name: addr_calc_stride
-    description: Pure explicit address-generation stride walk over aligned u64 values
+  - name: bpftrace_string_search_prefix_scan
+    description: bpftrace-style bounded string length and substring prefix scan
     category: memory-local
-    family: addr-calc
-    level: canonical-dense
-    hypothesis: Isolates ADDR_CALC lowering via integer-address construction followed by u64 loads
-    base_name: addr_calc_stride
-    kernel_input_size: 2048
-    input_generator: addr_calc_stride
-    expected_result: 9302301800681049161
-    tags: [memory, stride, lea, canonical, pure-jit]
+    family: string-scan
+    level: bounded-strings
+    hypothesis: Represents helper-free string fallback paths with bounded byte loops
+    base_name: bpftrace_string_search_prefix_scan
+    kernel_input_size: 112
+    input_generator: bpftrace_string_search_prefix_scan
+    expected_result: 15111065535037762995
+    tags: [bpftrace, string, compare, loop, pure-jit]
 
-  - name: tc_checksum
-    description: TC version of the checksum reduction benchmark
+  - name: tracee_syscall_name_table_lookup
+    description: Tracee-style sparse syscall number to name-table dispatch
+    category: control-flow
+    family: syscall-dispatch
+    level: sparse-table
+    hypothesis: Represents sparse syscall lookup and name classification without map/helper dependencies
+    base_name: tracee_syscall_name_table_lookup
+    kernel_input_size: 260
+    input_generator: tracee_syscall_name_table_lookup
+    expected_result: 4063733557757466536
+    tags: [tracee, syscall, dispatch, pure-jit]
+
+  - name: tracee_http_method_prefix_detect
+    description: Tracee net_l7_is_http-style HTTP method prefix detection
+    category: memory-local
+    family: protocol-prefix
+    level: http-methods
+    hypothesis: Represents protocol prefix chains over packet/string bytes
+    base_name: tracee_http_method_prefix_detect
+    kernel_input_size: 136
+    input_generator: tracee_http_method_prefix_detect
+    expected_result: 11562433829591280482
+    tags: [tracee, http, string, branch, pure-jit]
+
+  - name: cilium_socket_lb_service_select
+    description: Cilium socket LB service selection over protocol, port range, wildcard, and backend count
+    category: alu-mix
+    family: socket-lb
+    level: service-select
+    hypothesis: Captures protocol/port/range/wildcard decision trees plus backend selection math
+    base_name: cilium_socket_lb_service_select
+    kernel_input_size: 1544
+    input_generator: cilium_socket_lb_service_select
+    expected_result: 2868565165525030065
+    tags: [cilium, socket-lb, branch, hash, pure-jit]
+
+  - name: tc_packet_checksum_fold
+    description: TC version of the packet checksum fold benchmark
     category: memory-local
     family: reduction
     level: medium
     hypothesis: Reuses the checksum reduction under a sched_cls hook with packet-fed staged input and skb-context result extraction
-    base_name: tc_checksum
-    program_name: tc_checksum_prog
+    base_name: tc_packet_checksum_fold
+    program_name: tc_packet_checksum_fold_prog
     io_mode: staged
     kernel_input_size: 1032
-    input_generator: checksum
+    input_generator: packet_checksum_fold
     # Same checksum fold as `checksum`; the repeated XOR cancels to zero despite
     # non-zero generated input.
     expected_result: 0
     tags: [tc, pure-jit, non-xdp, kernel-only]
 
-  - name: cgroup_hash_chain
+  - name: cgroup_skb_hash_chain
     description: cgroup_skb egress hash-chain reduction over generated u64 words
     category: alu-mix
     family: hash-chain
     level: short
     hypothesis: Exercises a non-XDP cgroup_skb hook with packet-fed staged input and skb-context result extraction
-    base_name: cgroup_hash_chain
-    program_name: cgroup_hash_chain_prog
+    base_name: cgroup_skb_hash_chain
+    program_name: cgroup_skb_hash_chain_prog
     io_mode: staged
     kernel_input_size: 72
-    input_generator: hash_chain
+    input_generator: cgroup_skb_hash_chain
     expected_result: 12027228624407116210
     tags: [cgroup-skb, pure-jit, non-xdp, kernel-only]

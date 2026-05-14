@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import ctypes
+import errno
 import os
+import platform
 import shlex
 import socket
 import struct
 import subprocess
-import tempfile
 import time
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -194,36 +196,6 @@ def resolve_katran_server_binary(explicit: Path | str | None = None) -> Path:
     raise RuntimeError(f"Katran server binary not found or not executable; tried: {candidate}")
 
 
-def resolve_katranc_binary() -> Path:
-    candidate = (repo_artifact_root() / "katran" / "bin" / "katranc").resolve()
-    if candidate.is_file() and os.access(candidate, os.X_OK): return candidate
-    raise RuntimeError(f"katranc binary not found or not executable; tried: {candidate}")
-
-
-KATRAN_GRPC_ADDRESS = "127.0.0.1:50051"
-
-
-def _wait_for_katran_grpc(session: "KatranServerSession | None" = None, timeout_s: float = 60.0) -> None:
-    deadline = time.monotonic() + max(1.0, float(timeout_s))
-    katranc = str(resolve_katranc_binary())
-    last_error: str = ""
-    while time.monotonic() < deadline:
-        try:
-            run_command([katranc, "-server", KATRAN_GRPC_ADDRESS, "-list_mac"], timeout=10)
-            return
-        except Exception as exc:
-            last_error = str(exc)
-        time.sleep(0.25)
-    daemon_tail = ""
-    if session is not None:
-        snapshot = session.collector_snapshot() or {}
-        stderr_tail = list(snapshot.get("stderr_tail") or [])
-        stdout_tail = list(snapshot.get("stdout_tail") or [])
-        if stderr_tail or stdout_tail:
-            daemon_tail = "\n[katran_server_grpc tail]\n" + "\n".join(stderr_tail[-40:] + stdout_tail[-40:])
-    raise RuntimeError(f"Katran gRPC server not reachable at {KATRAN_GRPC_ADDRESS} within {timeout_s}s: {last_error}{daemon_tail}")
-
-
 def ip_binary() -> str:
     for candidate in DEFAULT_IP_CANDIDATES:
         path = Path(candidate)
@@ -289,21 +261,59 @@ def pack_vip_meta(flags: int, vip_num: int) -> bytes: return struct.pack("=II", 
 def pack_real_definition(address: str, flags: int = 0) -> bytes: return socket.inet_aton(address) + (b"\x00" * 12) + bytes([int(flags) & 0xFF]) + (b"\x00" * 3)
 
 
-def _bpftool_map_update_args(map_id: int, key: bytes, value: bytes) -> list[str]:
-    return ["map", "update", "id", str(map_id), "key", "hex", *[f"{b:02x}" for b in key], "value", "hex", *[f"{b:02x}" for b in value]]
+_SYS_BPF = {"x86_64": 321, "amd64": 321, "aarch64": 280, "arm64": 280}.get(platform.machine())
+_BPF_MAP_GET_FD_BY_ID = 14
+_BPF_MAP_UPDATE_BATCH = 26
+_LIBC = ctypes.CDLL("libc.so.6", use_errno=True)
 
 
-def _bpftool_map_update_batch(updates: list[tuple[int, bytes, bytes]]) -> None:
+class _BpfAttrGetFdById(ctypes.Structure):
+    _pack_ = 8
+    _fields_ = [("map_id", ctypes.c_uint32), ("next_id", ctypes.c_uint32), ("open_flags", ctypes.c_uint32)]
+
+
+class _BpfAttrBatch(ctypes.Structure):
+    _pack_ = 8
+    _fields_ = [("in_batch", ctypes.c_uint64), ("out_batch", ctypes.c_uint64),
+                ("keys", ctypes.c_uint64), ("values", ctypes.c_uint64),
+                ("count", ctypes.c_uint32), ("map_fd", ctypes.c_uint32),
+                ("elem_flags", ctypes.c_uint64), ("flags", ctypes.c_uint64)]
+
+
+def _bpf_syscall(cmd: int, attr: ctypes.Structure) -> int:
+    if _SYS_BPF is None:
+        raise RuntimeError(f"unsupported architecture for BPF syscall: {platform.machine()!r}")
+    rc = _LIBC.syscall(_SYS_BPF, cmd, ctypes.byref(attr), ctypes.sizeof(attr))
+    if rc < 0:
+        e = ctypes.get_errno()
+        raise OSError(e, f"bpf(cmd={cmd}) failed: {errno.errorcode.get(e, e)} {os.strerror(e)}")
+    return rc
+
+
+def _bpf_map_update_batch(updates: list[tuple[int, bytes, bytes]]) -> None:
     if not updates: return
-    with tempfile.NamedTemporaryFile("w", prefix="katran_maps_", suffix=".bpftool", delete=False) as batch:
-        for map_id, key, value in updates: batch.write(" ".join(_bpftool_map_update_args(map_id, key, value)) + "\n")
-        batch_path = batch.name
-    try:
-        run_command([resolve_bpftool_binary(), "batch", "file", batch_path], timeout=max(60, (len(updates) // 500) + 30))
-    finally:
-        batch_file = Path(batch_path)
-        if batch_file.exists():
-            batch_file.unlink()
+    by_map: dict[int, list[tuple[bytes, bytes]]] = {}
+    for map_id, key, value in updates:
+        by_map.setdefault(int(map_id), []).append((bytes(key), bytes(value)))
+    for map_id, entries in by_map.items():
+        fd = _bpf_syscall(_BPF_MAP_GET_FD_BY_ID, _BpfAttrGetFdById(map_id=map_id))
+        try:
+            key_size = len(entries[0][0]); value_size = len(entries[0][1])
+            for k, v in entries:
+                if len(k) != key_size or len(v) != value_size:
+                    raise RuntimeError(f"inconsistent key/value sizes for map {map_id}")
+            keys_blob = b"".join(k for k, _ in entries)
+            values_blob = b"".join(v for _, v in entries)
+            keys_buf = (ctypes.c_char * len(keys_blob)).from_buffer_copy(keys_blob)
+            values_buf = (ctypes.c_char * len(values_blob)).from_buffer_copy(values_blob)
+            attr = _BpfAttrBatch(map_fd=fd, count=len(entries),
+                                 keys=ctypes.addressof(keys_buf),
+                                 values=ctypes.addressof(values_buf))
+            _bpf_syscall(_BPF_MAP_UPDATE_BATCH, attr)
+            if attr.count != len(entries):
+                raise RuntimeError(f"BPF_MAP_UPDATE_BATCH partial update for map {map_id}: {attr.count}/{len(entries)}")
+        finally:
+            os.close(fd)
 
 
 class KatranDsrTopology:
@@ -641,15 +651,25 @@ class KatranServerSession:
 
 
 def configure_katran_maps(session: KatranServerSession, *, proto: int = TCP_PROTO) -> dict[str, object]:
-    _wait_for_katran_grpc(session)
-    katranc = str(resolve_katranc_binary())
-    vip_proto_flag = "-u" if int(proto) == UDP_PROTO else "-t"
-    vip_arg = f"{VIP_IP}:{int(VIP_PORT)}"
-    run_command([katranc, "-server", KATRAN_GRPC_ADDRESS, "-A", vip_proto_flag, vip_arg, "-vf", "NO_LRU"], timeout=60)
-    run_command([katranc, "-server", KATRAN_GRPC_ADDRESS, "-a", vip_proto_flag, vip_arg, "-r", REAL_IP, "-w", "1"], timeout=120)
+    vip_id = session.map_id("vip_map")
+    reals_id = session.map_id("reals")
+    rings_id = session.map_id("ch_rings")
+    ctl_id = session.map_id("ctl_array")
+    real_num_bytes = pack_u32(REAL_NUM)
+    _bpf_map_update_batch(
+        [
+            (ctl_id, pack_u32(0), pack_ctl_mac(ROUTER_LB_MAC)),
+            (vip_id, pack_vip_definition(VIP_IP, VIP_PORT, proto), pack_vip_meta(F_LRU_BYPASS, VIP_NUM)),
+            (reals_id, real_num_bytes, pack_real_definition(REAL_IP)),
+            *[
+                (rings_id, pack_u32((VIP_NUM * CH_RING_SIZE) + ring_pos), real_num_bytes)
+                for ring_pos in range(CH_RING_SIZE)
+            ],
+        ]
+    )
     return {"map_ids": {n: session.map_id(n) for n in KATRAN_REQUIRED_MAP_NAMES},
-            "vip": {"address": VIP_IP, "port": VIP_PORT, "proto": proto, "flags": F_LRU_BYPASS},
-            "real": {"address": REAL_IP}, "default_gateway_mac": ROUTER_LB_MAC, "ch_ring_size": CH_RING_SIZE}
+            "vip": {"address": VIP_IP, "port": VIP_PORT, "proto": proto, "vip_num": VIP_NUM, "flags": F_LRU_BYPASS},
+            "real": {"address": REAL_IP, "real_num": REAL_NUM}, "default_gateway_mac": ROUTER_LB_MAC, "ch_ring_size": CH_RING_SIZE}
 
 
 DEFAULT_INTERFACE = "katran0"

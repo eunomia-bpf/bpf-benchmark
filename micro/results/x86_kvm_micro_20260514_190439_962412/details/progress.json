@@ -1,0 +1,27 @@
+{
+  "completed_benchmarks": 17,
+  "current_benchmark": "bpftrace_string_search_prefix_scan",
+  "current_benchmark_index": 18,
+  "current_benchmark_record": {
+    "category": "memory-local",
+    "description": "bpftrace-style bounded string length and substring prefix scan",
+    "expected_result": 5729197973038468401,
+    "family": "string-scan",
+    "hypothesis": "Represents helper-free string fallback paths with bounded byte loops",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bpftrace_string_search_prefix_scan.mem",
+    "io_mode": "staged",
+    "level": "bounded-strings",
+    "name": "bpftrace_string_search_prefix_scan",
+    "runs": [],
+    "tags": [
+      "bpftrace",
+      "string",
+      "compare",
+      "loop",
+      "pure-jit"
+    ]
+  },
+  "error_message": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/bpftrace_string_search_prefix_scan.bpf.o --program-name bpftrace_string_search_prefix_scan_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bpftrace_string_search_prefix_scan.mem --io-mode staged --input-size 196 --inner-repeat 10\n; return (value << shift) | (value >> (64U - shift)); @ common.h:93\n206: (bf) r1 = r4                     ; R1=4 R4=4\n207: (67) r1 <<= 32                   ; R1=0x400000000\n208: (77) r1 >>= 32                   ; R1=4\n209: (a7) r1 ^= 63                    ; R1=59\n210: (bf) r3 = r5\nBPF program is too large. Processed 1000001 insn\nprocessed 1000001 insns (limit 1000000) max_states_per_insn 37 total_states 31102 peak_states 280 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'bpftrace_string_search_prefix_scan_xdp': failed to load: -E2BIG\nlibbpf: failed to load object '/artifacts/user/micro-programs/x86_64/bpftrace_string_search_prefix_scan.bpf.o'\nbpf_object__load failed: Argument list too long",
+  "status": "error",
+  "total_benchmarks": 23
+}

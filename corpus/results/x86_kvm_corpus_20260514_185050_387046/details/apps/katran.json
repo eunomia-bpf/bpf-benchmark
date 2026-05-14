@@ -1,0 +1,10 @@
+{
+  "app": "katran",
+  "baseline": null,
+  "error": "Katran gRPC server not reachable at 127.0.0.1:50051 within 60.0s: command failed (1): /artifacts/user/repo-artifacts/x86_64/katran/bin/katranc -server 127.0.0.1:50051 -list_mac\n2026/05/14 18:51:55 Error: rpc error: code = Unavailable desc = connection error: desc = \"transport: Error while dialing: dial tcp 127.0.0.1:50051: connect: connection refused\"\n[katran_server_grpc tail]\nI20260514 18:50:51.095577  2026 KatranGrpcService.cpp:69] Starting Katran\nE20260514 18:50:51.095754  2026 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260514 18:50:51.095762  2026 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260514 18:50:51.095880  2026 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260514 18:50:51.095885  2026 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame\nE20260514 18:50:51.096045  2026 BaseBpfAdapter.cpp:144] libbpf: elf: skipping unrecognized data section(21) .eh_frame\nE20260514 18:50:51.096050  2026 BaseBpfAdapter.cpp:144] libbpf: elf: skipping relo section(22) .rel.eh_frame for section(21) .eh_frame",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "katran",
+  "selected_workload": "xdp_traffic",
+  "status": "error"
+}

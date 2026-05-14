@@ -37,6 +37,8 @@
 static __always_inline int
 bench_siphash_rotate64_mixer(const u8 *data, u32 len, u64 *out)
 {
+    (void)len;
+
     u64 v0 = 0x736F6D6570736575ULL;
     u64 v1 = 0x646F72616E646F6DULL;
     u64 v2 = 0x6C7967656E657261ULL;
