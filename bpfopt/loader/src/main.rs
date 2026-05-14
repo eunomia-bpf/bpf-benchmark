@@ -39,16 +39,26 @@ const PASS_CONFIG_DIR: &str = "runner/config/passes";
 #[cfg(test)]
 const CORPUS_BUILD_DIR: &str = "corpus/build";
 
-const LOG_BYTES: usize = 16 * 1024 * 1024;
+const LOG_BYTES: usize = 64 * 1024 * 1024;
+const KATRAN_CH_RING_SIZE: u32 = 65537;
 const INPUT_BIN: &str = "input.bin";
 const CANONICALIZE_INPUT_BIN: &str = "canonicalize_input.bin";
 const OUTPUT_BIN: &str = "output.bin";
 const REPORT_JSON: &str = "report.json";
+const TEST_INPUT_BIN: &str = "test_input.bin";
+const TEST_RUN_JSON: &str = "test_run.json";
+const TEST_OUTPUT_BIN: &str = "test_output.bin";
 const MAP_IDS_JSON: &str = "map-ids.json";
 const MAP_VALUES_DIR: &str = "map-values";
 const METADATA_JSON: &str = "metadata.json";
 const VERIFIER_LOG: &str = "verifier.log";
 const VERIFY_LOG: &str = "verify.log";
+const KATRAN_CORPUS_WRK_INGRESS_PACKET: [u8; 64] = [
+    0x02, 0x00, 0x00, 0x00, 0x00, 0x0a, 0x02, 0x00, 0x00, 0x00, 0x00, 0x0b, 0x08, 0x00, 0x45, 0x00,
+    0x00, 0x32, 0x00, 0x00, 0x40, 0x00, 0x3f, 0x06, 0x26, 0x60, 0x0a, 0x00, 0x00, 0x02, 0x0a, 0x64,
+    0x01, 0x01, 0x7a, 0x69, 0x1f, 0x90, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x50, 0x10,
+    0x20, 0x00, 0x59, 0x1d, 0x00, 0x00, 0x4b, 0x41, 0x54, 0x52, 0x41, 0x4e, 0x56, 0x49, 0x50, 0x21,
+];
 
 #[derive(Parser)]
 #[command(
@@ -70,11 +80,21 @@ struct Cli {
     /// Workdir to use. If omitted, a tmp dir is created and removed on exit.
     #[arg(long, value_name = "DIR")]
     workdir: Option<PathBuf>,
+    /// Run BPF_PROG_TEST_RUN after host verifier loading the pass output.
+    #[arg(long)]
+    bpftestrun: bool,
+    /// Populate Katran balancer maps like runner/libs/app_runners/katran.py.
+    #[arg(long)]
+    katran_maps: bool,
+    /// BPF_PROG_TEST_RUN repeat count.
+    #[arg(long, default_value_t = 1)]
+    repeat: u32,
 }
 
 struct PreparedProgram {
     dir: PathBuf,
     map_ids: Vec<u32>,
+    map_fds: Vec<i32>,
 }
 
 /// Allocate a workdir. Caller-supplied paths are not cleaned up; tmp dirs are
@@ -126,21 +146,6 @@ struct MapIdsJson {
     map_ids: Vec<u32>,
 }
 
-/// Subset of `bpftool map show -j` we actually consume. Extra fields are
-/// ignored; the file is written verbatim from bpftool so its full schema is
-/// also what `bpfopt`'s downstream passes see.
-#[derive(Debug, Deserialize)]
-struct MapShowJson {
-    name: String,
-    #[serde(rename = "type")]
-    type_str: String,
-    bytes_key: u32,
-    bytes_value: u32,
-    max_entries: u32,
-    #[serde(default)]
-    flags: u32,
-}
-
 struct BpfObject {
     ptr: *mut libbpf_sys::bpf_object,
 }
@@ -160,6 +165,7 @@ struct ProgramRef {
 
 struct MapRef {
     fd: i32,
+    name: String,
     info: libbpf_sys::bpf_map_info,
 }
 
@@ -174,9 +180,13 @@ fn main() -> ExitCode {
 }
 
 fn run(cli: Cli) -> Result<()> {
+    if cli.bpftestrun && cli.pass.is_none() {
+        bail!("--bpftestrun requires --pass; use --pass noop for unoptimized bytecode");
+    }
     let workdir = WorkDir::open(cli.workdir.clone())?;
     let map_values_dir = workdir.path.join(MAP_VALUES_DIR);
-    let prepared = prepare_workdir(&workdir.path, &cli.obj)?;
+    let dump_values = cli.pass.as_deref() == Some("map_inline");
+    let (_obj, prepared) = prepare_workdir(&workdir.path, &cli.obj, cli.katran_maps, dump_values)?;
 
     for prog in &prepared {
         let mut canon = Command::new(BPFOPT_BIN);
@@ -202,7 +212,10 @@ fn run(cli: Cli) -> Result<()> {
                 cli.target.as_deref(),
                 &prog.map_ids,
             )?;
-            verify_workdir(&prog.dir, &map_values_dir)?;
+            let fd = verify_workdir(&prog.dir, &prog.map_fds)?;
+            if cli.bpftestrun {
+                run_bpftestrun(fd.as_raw_fd(), &prog.dir, &cli)?;
+            }
         }
     }
     Ok(())
@@ -212,7 +225,12 @@ fn run(cli: Cli) -> Result<()> {
 /// verifier log, metadata, and shared map snapshots into `workdir`. Each
 /// program lands in `<workdir>/<prog_name>/`; map snapshots are shared at
 /// `<workdir>/map-values/`.
-fn prepare_workdir(workdir: &Path, obj_path: &Path) -> Result<Vec<PreparedProgram>> {
+fn prepare_workdir(
+    workdir: &Path,
+    obj_path: &Path,
+    katran_maps: bool,
+    dump_values: bool,
+) -> Result<(BpfObject, Vec<PreparedProgram>)> {
     let map_values_dir = workdir.join(MAP_VALUES_DIR);
     fs::create_dir_all(&map_values_dir)?;
 
@@ -253,6 +271,9 @@ fn prepare_workdir(workdir: &Path, obj_path: &Path) -> Result<Vec<PreparedProgra
     }
 
     let loaded_maps = maps(&obj)?;
+    if katran_maps {
+        populate_katran_maps(&loaded_maps)?;
+    }
     let mut prepared = Vec::with_capacity(progs.len());
     let mut all_map_ids = BTreeSet::new();
     for (prog, log_buf) in progs.into_iter().zip(log_bufs) {
@@ -270,7 +291,7 @@ fn prepare_workdir(workdir: &Path, obj_path: &Path) -> Result<Vec<PreparedProgra
             bail!("program {} has a null instruction pointer", prog.name);
         }
         let insns = unsafe { slice::from_raw_parts(insn_ptr, insn_cnt as usize) }.to_vec();
-        let map_ids = bytecode_map_ids(&insns, &loaded_maps)?;
+        let (map_ids, map_fds) = bytecode_maps(&insns, &loaded_maps)?;
 
         write_json(
             &dir.join(MAP_IDS_JSON),
@@ -295,12 +316,16 @@ fn prepare_workdir(workdir: &Path, obj_path: &Path) -> Result<Vec<PreparedProgra
             },
         )?;
         all_map_ids.extend(map_ids.iter().copied());
-        prepared.push(PreparedProgram { dir, map_ids });
+        prepared.push(PreparedProgram {
+            dir,
+            map_ids,
+            map_fds,
+        });
     }
 
     let all_map_ids: Vec<u32> = all_map_ids.into_iter().collect();
-    dump_map_snapshots(&all_map_ids, &map_values_dir)?;
-    Ok(prepared)
+    dump_map_snapshots(&all_map_ids, &map_values_dir, &loaded_maps, dump_values)?;
+    Ok((obj, prepared))
 }
 
 /// `BPF_OBJ_GET_INFO_BY_FD` for any sized info struct.
@@ -359,12 +384,9 @@ fn run_pass_via_yaml(
 
 /// Reload the bytecode produced for `prog_dir` via BPF_PROG_LOAD as a sanity
 /// check, using the shared map snapshots at `map_values_dir`.
-fn verify_workdir(prog_dir: &Path, map_values_dir: &Path) -> Result<()> {
+fn verify_workdir(prog_dir: &Path, map_fds: &[i32]) -> Result<OwnedFd> {
     let metadata = read_json::<ProgramMetadata>(&prog_dir.join(METADATA_JSON))?;
-    let map_ids = read_json::<MapIdsJson>(&prog_dir.join(MAP_IDS_JSON))?.map_ids;
     let input = prog_dir.join(OUTPUT_BIN);
-    let map_fds = create_verify_maps(map_values_dir, &map_ids)?;
-    let fd_nums = map_fds.iter().map(|fd| fd.as_raw_fd()).collect::<Vec<_>>();
 
     let raw = fs::read(&input)?;
     let stride = mem::size_of::<libbpf_sys::bpf_insn>();
@@ -373,7 +395,7 @@ fn verify_workdir(prog_dir: &Path, map_values_dir: &Path) -> Result<()> {
     }
     let mut insns = vec![libbpf_sys::bpf_insn::default(); raw.len() / stride];
     unsafe { ptr::copy_nonoverlapping(raw.as_ptr(), insns.as_mut_ptr().cast(), raw.len()) };
-    rewrite_map_indices_to_fds(&mut insns, &fd_nums)?;
+    rewrite_map_indices_to_fds(&mut insns, map_fds)?;
 
     let name = CString::new(metadata.name.as_str())?;
     let license = CString::new("GPL").unwrap();
@@ -407,7 +429,70 @@ fn verify_workdir(prog_dir: &Path, map_values_dir: &Path) -> Result<()> {
             log.trim()
         );
     }
-    drop(unsafe { OwnedFd::from_raw_fd(fd) });
+    Ok(unsafe { OwnedFd::from_raw_fd(fd) })
+}
+
+fn run_bpftestrun(prog_fd: i32, prog_dir: &Path, cli: &Cli) -> Result<()> {
+    let data_in = if cli.katran_maps {
+        KATRAN_CORPUS_WRK_INGRESS_PACKET.to_vec()
+    } else {
+        Vec::new()
+    };
+    fs::write(prog_dir.join(TEST_INPUT_BIN), &data_in)?;
+    let live_xdp = cli.katran_maps && cli.repeat > 1;
+    let mut data_out = if live_xdp {
+        Vec::new()
+    } else {
+        let mut out = data_in.clone();
+        if out.len() < 4096 {
+            out.resize(4096, 0);
+        }
+        out
+    };
+    let mut opts = libbpf_sys::bpf_test_run_opts {
+        sz: mem::size_of::<libbpf_sys::bpf_test_run_opts>() as libbpf_sys::size_t,
+        data_in: if data_in.is_empty() {
+            ptr::null()
+        } else {
+            data_in.as_ptr().cast()
+        },
+        data_out: if data_out.is_empty() {
+            ptr::null_mut()
+        } else {
+            data_out.as_mut_ptr().cast()
+        },
+        data_size_in: u32::try_from(data_in.len()).context("test input is too large")?,
+        data_size_out: u32::try_from(data_out.len()).context("test output is too large")?,
+        repeat: i32::try_from(cli.repeat).context("repeat exceeds i32")?,
+        flags: if live_xdp {
+            libbpf_sys::BPF_F_TEST_XDP_LIVE_FRAMES
+        } else {
+            0
+        },
+        ..Default::default()
+    };
+    syscall_ok(
+        unsafe { libbpf_sys::bpf_prog_test_run_opts(prog_fd, &mut opts) },
+        "bpf_prog_test_run_opts",
+    )?;
+    let output_path = prog_dir.join(TEST_OUTPUT_BIN);
+    if live_xdp {
+        if output_path.exists() {
+            fs::remove_file(&output_path)
+                .with_context(|| format!("failed to remove {}", output_path.display()))?;
+        }
+    } else {
+        data_out.truncate(opts.data_size_out as usize);
+        fs::write(&output_path, &data_out)?;
+    }
+    let report = serde_json::json!({
+        "retval": opts.retval,
+        "duration_ns": opts.duration,
+        "repeat": cli.repeat,
+        "data_size_out": if live_xdp { 0 } else { opts.data_size_out },
+    });
+    write_json(&prog_dir.join(TEST_RUN_JSON), &report)?;
+    println!("{}", serde_json::to_string(&report)?);
     Ok(())
 }
 
@@ -471,10 +556,9 @@ fn maps(obj: &BpfObject) -> Result<Vec<MapRef>> {
         }
         let fd = unsafe { libbpf_sys::bpf_map__fd(map) };
         if fd >= 0 {
-            out.push(MapRef {
-                fd,
-                info: unsafe { obj_info(fd)? },
-            });
+            let info: libbpf_sys::bpf_map_info = unsafe { obj_info(fd)? };
+            let name = log_buf_to_string(&info.name);
+            out.push(MapRef { fd, name, info });
         }
         prev = map;
     }
@@ -484,7 +568,12 @@ fn maps(obj: &BpfObject) -> Result<Vec<MapRef>> {
 /// Shell out to `bpftool map show -j` and `bpftool map dump -j` for each map.
 /// We don't reimplement libbpf's map iteration — bpftool's JSON is exactly
 /// what `bpfopt`'s downstream passes (e.g. map_inline) already consume.
-fn dump_map_snapshots(map_ids: &[u32], dir: &Path) -> Result<()> {
+fn dump_map_snapshots(
+    map_ids: &[u32],
+    dir: &Path,
+    loaded_maps: &[MapRef],
+    dump_values: bool,
+) -> Result<()> {
     let unique_ids = map_ids.iter().copied().collect::<BTreeSet<_>>();
     for map_id in unique_ids {
         let id = map_id.to_string();
@@ -492,10 +581,17 @@ fn dump_map_snapshots(map_ids: &[u32], dir: &Path) -> Result<()> {
             &["map", "show", "-j", "-p", "id", &id],
             &dir.join(format!("map-{map_id}.show.json")),
         )?;
-        bpftool_to(
-            &["map", "dump", "-j", "-p", "id", &id],
-            &dir.join(format!("map-{map_id}.dump.json")),
-        )?;
+        let entries = loaded_maps
+            .iter()
+            .find(|map| map.info.id == map_id)
+            .map(|map| map.info.max_entries)
+            .unwrap_or(0);
+        if dump_values && entries <= 8192 {
+            bpftool_to(
+                &["map", "dump", "-j", "-p", "id", &id],
+                &dir.join(format!("map-{map_id}.dump.json")),
+            )?;
+        }
     }
     Ok(())
 }
@@ -515,8 +611,12 @@ fn bpftool_to(args: &[&str], out: &Path) -> Result<()> {
     fs::write(out, &output.stdout).with_context(|| format!("write {}", out.display()))
 }
 
-fn bytecode_map_ids(insns: &[libbpf_sys::bpf_insn], loaded_maps: &[MapRef]) -> Result<Vec<u32>> {
+fn bytecode_maps(
+    insns: &[libbpf_sys::bpf_insn],
+    loaded_maps: &[MapRef],
+) -> Result<(Vec<u32>, Vec<i32>)> {
     let mut map_ids = Vec::new();
+    let mut map_fds = Vec::new();
     let mut seen_fds = BTreeSet::new();
     let mut pc = 0usize;
     while pc < insns.len() {
@@ -536,67 +636,46 @@ fn bytecode_map_ids(insns: &[libbpf_sys::bpf_insn], loaded_maps: &[MapRef]) -> R
                     anyhow!("bytecode references loader map fd {} at pc {pc}", insn.imm)
                 })?;
             map_ids.push(map.info.id);
+            map_fds.push(map.fd);
         }
         pc += 2;
     }
-    Ok(map_ids)
+    Ok((map_ids, map_fds))
 }
 
-fn create_verify_maps(dir: &Path, map_ids: &[u32]) -> Result<Vec<OwnedFd>> {
-    let mut fds = Vec::new();
-    for &map_id in map_ids {
-        let show = read_json::<MapShowJson>(&dir.join(format!("map-{map_id}.show.json")))?;
-        let type_id =
-            map_type_from_bpftool_str(&show.type_str).with_context(|| format!("map {map_id}"))?;
-        let name = CString::new(show.name.as_str()).context("map name has NUL byte")?;
-        let opts = libbpf_sys::bpf_map_create_opts {
-            sz: mem::size_of::<libbpf_sys::bpf_map_create_opts>() as libbpf_sys::size_t,
-            map_flags: show.flags,
-            ..Default::default()
-        };
-        let fd = unsafe {
-            libbpf_sys::bpf_map_create(
-                type_id,
-                name.as_ptr(),
-                show.bytes_key,
-                show.bytes_value,
-                show.max_entries,
-                &opts,
-            )
-        };
-        if fd < 0 {
-            bail!(
-                "failed to create verify map id={map_id}: {}",
-                io::Error::last_os_error()
-            );
-        }
-        fds.push(unsafe { OwnedFd::from_raw_fd(fd) });
+fn populate_katran_maps(maps: &[MapRef]) -> Result<()> {
+    let map = |name: &str| -> Result<i32> {
+        maps.iter()
+            .find(|map| map.name == name)
+            .map(|map| map.fd)
+            .ok_or_else(|| anyhow!("--katran-maps requested but map {name:?} is absent"))
+    };
+    let zero = 0u32.to_ne_bytes();
+    let one = 1u32.to_ne_bytes();
+    let mut vip = [0u8; 20];
+    vip[..4].copy_from_slice(&[10, 100, 1, 1]);
+    vip[16..18].copy_from_slice(&8080u16.to_be_bytes());
+    vip[18] = 6;
+    let mut real_def = [0u8; 20];
+    real_def[..4].copy_from_slice(&[10, 200, 0, 2]);
+
+    map_update(map("ctl_array")?, &zero, &[0x02, 0, 0, 0, 0, 0x0b, 0, 0])?;
+    map_update(map("vip_map")?, &vip, &[2, 0, 0, 0, 0, 0, 0, 0])?;
+    map_update(map("reals")?, &one, &real_def)?;
+    let rings = map("ch_rings")?;
+    for ring_pos in 0..KATRAN_CH_RING_SIZE {
+        map_update(rings, &ring_pos.to_ne_bytes(), &one)?;
     }
-    Ok(fds)
+    Ok(())
 }
 
-/// Translate bpftool's `"type"` string to the kernel `BPF_MAP_TYPE_*` numeric.
-/// Only the subset that the loader's verify path needs to recreate (no
-/// map-in-map: BPF_PROG_LOAD doesn't allow recreating these without their
-/// inner-map proto, which we don't track).
-fn map_type_from_bpftool_str(s: &str) -> Result<u32> {
-    Ok(match s {
-        "hash" => libbpf_sys::BPF_MAP_TYPE_HASH,
-        "array" => libbpf_sys::BPF_MAP_TYPE_ARRAY,
-        "prog_array" => libbpf_sys::BPF_MAP_TYPE_PROG_ARRAY,
-        "perf_event_array" => libbpf_sys::BPF_MAP_TYPE_PERF_EVENT_ARRAY,
-        "percpu_hash" => libbpf_sys::BPF_MAP_TYPE_PERCPU_HASH,
-        "percpu_array" => libbpf_sys::BPF_MAP_TYPE_PERCPU_ARRAY,
-        "stack_trace" => libbpf_sys::BPF_MAP_TYPE_STACK_TRACE,
-        "cgroup_array" => libbpf_sys::BPF_MAP_TYPE_CGROUP_ARRAY,
-        "lru_hash" => libbpf_sys::BPF_MAP_TYPE_LRU_HASH,
-        "lru_percpu_hash" => libbpf_sys::BPF_MAP_TYPE_LRU_PERCPU_HASH,
-        "lpm_trie" => libbpf_sys::BPF_MAP_TYPE_LPM_TRIE,
-        "ringbuf" => libbpf_sys::BPF_MAP_TYPE_RINGBUF,
-        "stack" => libbpf_sys::BPF_MAP_TYPE_STACK,
-        "queue" => libbpf_sys::BPF_MAP_TYPE_QUEUE,
-        s => bail!("unsupported map type {s:?}"),
-    })
+fn map_update(fd: i32, key: &[u8], value: &[u8]) -> Result<()> {
+    syscall_ok(
+        unsafe {
+            libbpf_sys::bpf_map_update_elem(fd, key.as_ptr().cast(), value.as_ptr().cast(), 0)
+        },
+        "bpf_map_update_elem",
+    )
 }
 
 fn rewrite_map_indices_to_fds(insns: &mut [libbpf_sys::bpf_insn], fds: &[i32]) -> Result<()> {
@@ -716,6 +795,9 @@ mod tests {
                 pass: Some("noop".into()),
                 target: None,
                 workdir: None,
+                bpftestrun: false,
+                katran_maps: false,
+                repeat: 1,
             };
             if let Err(err) = run(cli) {
                 failures.push(format!("{}: {err:#}", obj.display()));
