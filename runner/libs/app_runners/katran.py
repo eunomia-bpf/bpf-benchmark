@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import shlex
 import socket
 import struct
 import subprocess
@@ -29,6 +30,7 @@ DEFAULT_IP_CANDIDATES = (
     "/bin/ip",
 )
 TCP_PROTO = socket.IPPROTO_TCP
+UDP_PROTO = socket.IPPROTO_UDP
 F_LRU_BYPASS = 1 << 1
 CH_RING_SIZE = 65537
 VIP_NUM = 0
@@ -608,7 +610,7 @@ class KatranServerSession:
     def __exit__(self, exc_type, exc, tb) -> None: self.close()
 
 
-def configure_katran_maps(session: KatranServerSession) -> dict[str, object]:
+def configure_katran_maps(session: KatranServerSession, *, proto: int = TCP_PROTO) -> dict[str, object]:
     vip_id = session.map_id("vip_map")
     reals_id = session.map_id("reals")
     rings_id = session.map_id("ch_rings")
@@ -617,7 +619,7 @@ def configure_katran_maps(session: KatranServerSession) -> dict[str, object]:
     _bpftool_map_update_batch(
         [
             (ctl_id, pack_u32(0), pack_ctl_mac(ROUTER_LB_MAC)),
-            (vip_id, pack_vip_definition(VIP_IP, VIP_PORT, TCP_PROTO), pack_vip_meta(F_LRU_BYPASS, VIP_NUM)),
+            (vip_id, pack_vip_definition(VIP_IP, VIP_PORT, proto), pack_vip_meta(F_LRU_BYPASS, VIP_NUM)),
             (reals_id, real_num_bytes, pack_real_definition(REAL_IP)),
             *[
                 (rings_id, pack_u32((VIP_NUM * CH_RING_SIZE) + ring_pos), real_num_bytes)
@@ -626,14 +628,19 @@ def configure_katran_maps(session: KatranServerSession) -> dict[str, object]:
         ]
     )
     return {"map_ids": {n: session.map_id(n) for n in KATRAN_REQUIRED_MAP_NAMES},
-            "vip": {"address": VIP_IP, "port": VIP_PORT, "proto": TCP_PROTO, "vip_num": VIP_NUM, "flags": F_LRU_BYPASS},
+            "vip": {"address": VIP_IP, "port": VIP_PORT, "proto": proto, "vip_num": VIP_NUM, "flags": F_LRU_BYPASS},
             "real": {"address": REAL_IP, "real_num": REAL_NUM}, "default_gateway_mac": ROUTER_LB_MAC, "ch_ring_size": CH_RING_SIZE}
 
 
 DEFAULT_INTERFACE = "katran0"
 DEFAULT_WRK_THREADS = 4
 DEFAULT_WRK_CONNECTIONS = 10
+DEFAULT_PKTGEN_PKT_SIZE = 64
+PKTGEN_THREAD = "/proc/net/pktgen/kpktgend_0"
+PKTGEN_CTRL = "/proc/net/pktgen/pgctrl"
+PKTGEN_ROUTER_DEV = f"/proc/net/pktgen/{ROUTER_LB_IFACE}"
 DEFAULT_LOAD_TIMEOUT_S = DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S
+KATRAN_WORKLOADS = {"xdp_traffic", "xdp_pktgen"}
 
 
 def _resolve_katran_bpf_artifact(*relative_candidates: str) -> Path:
@@ -669,8 +676,8 @@ class KatranRunner(AppRunner):
         self.wrk_connections = max(1, int(wrk_connections))
         self.workload_spec = dict(workload_spec)
         self.workload_kind = str(self.workload_spec.get("kind") or self.workload_spec.get("name") or "").strip().lower()
-        if self.workload_kind != "xdp_traffic":
-            raise RuntimeError(f"KatranRunner only supports workload_spec.kind='xdp_traffic', got {self.workload_kind!r}")
+        if self.workload_kind not in KATRAN_WORKLOADS:
+            raise RuntimeError(f"KatranRunner only supports workload_spec.kind in {sorted(KATRAN_WORKLOADS)!r}, got {self.workload_kind!r}")
         self.default_router_mac = str(default_router_mac)
         self.topology: Any | None = None; self.http_server: Any | None = None; self.session: KatranServerSession | None = None
         self.artifacts: dict[str, object] = {}
@@ -703,7 +710,7 @@ class KatranRunner(AppRunner):
                 "topology": topology.metadata(),
                 "http_server": http_server.metadata(),
                 "live_program": session.metadata(),
-                "map_configuration": configure_katran_maps(session),
+                "map_configuration": configure_katran_maps(session, proto=UDP_PROTO if self.workload_kind == "xdp_pktgen" else TCP_PROTO),
             }
             time.sleep(TOPOLOGY_SETTLE_S)
         except Exception:
@@ -759,8 +766,74 @@ class KatranRunner(AppRunner):
             config={"tool": "wrk", "url": url, "threads": self.wrk_threads, "connections": self.wrk_connections},
         )
 
+    def _run_pktgen_workload(self, seconds: float) -> WorkloadResult:
+        duration_s = max(1, int(float(seconds)))
+        ensure_kernel_module_loaded("pktgen")
+        self._pktgen_write(PKTGEN_CTRL, "reset")
+        self._pktgen_write(PKTGEN_THREAD, "rem_device_all")
+        self._pktgen_write(PKTGEN_THREAD, f"add_device {ROUTER_LB_IFACE}")
+        for command in (
+            "flag !SHARED",
+            "clone_skb 0",
+            "burst 1",
+            "count 0",
+            "delay 0",
+            "xmit_mode start_xmit",
+            f"pkt_size {DEFAULT_PKTGEN_PKT_SIZE}",
+            f"src_min {CLIENT_IP}",
+            f"src_max {CLIENT_IP}",
+            f"dst {VIP_IP}",
+            f"dst_max {VIP_IP}",
+            f"src_mac {ROUTER_LB_MAC}",
+            f"dst_mac {LB_MAC}",
+            f"udp_dst_min {VIP_PORT}",
+            f"udp_dst_max {VIP_PORT}",
+            "clear_counters",
+        ):
+            self._pktgen_write(PKTGEN_ROUTER_DEV, command)
+        command = [ip_binary(), "netns", "exec", ROUTER_NS, "sh", "-c", self._pktgen_write_script(PKTGEN_CTRL, "start")]
+        start = time.monotonic()
+        process = subprocess.Popen(command, cwd=ROOT_DIR, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        try:
+            time.sleep(duration_s)
+            self._pktgen_write(PKTGEN_CTRL, "stop")
+            stdout, stderr = process.communicate(timeout=60)
+        except Exception:
+            if process.poll() is None:
+                try: self._pktgen_write(PKTGEN_CTRL, "stop")
+                finally: process.kill()
+            raise
+        elapsed = time.monotonic() - start
+        if process.returncode != 0:
+            raise RuntimeError(f"Katran pktgen workload failed: {tail_text(stderr or stdout)}")
+        device_state = self._pktgen_read(PKTGEN_ROUTER_DEV)
+        return WorkloadResult(
+            workload_name="katran_kernel_pktgen_l2_udp",
+            command=tuple(str(p) for p in command),
+            returncode=int(process.returncode or 0),
+            duration_s=elapsed,
+            stdout=tail_text(device_state, max_lines=200000, max_chars=8388608),
+            stderr=tail_text(stderr or "", max_lines=200000, max_chars=8388608),
+            config={"tool": "kernel_pktgen", "namespace": ROUTER_NS, "iface": ROUTER_LB_IFACE,
+                    "shared_skb": False, "xmit_mode": "start_xmit",
+                    "pkt_size": DEFAULT_PKTGEN_PKT_SIZE,
+                    "src_ip": CLIENT_IP, "dst_ip": VIP_IP, "dst_port": VIP_PORT, "proto": UDP_PROTO},
+        )
+
+    @staticmethod
+    def _pktgen_write_script(path: str, command: str) -> str:
+        return f"printf '%s\\n' {shlex.quote(command)} > {shlex.quote(path)}"
+
+    def _pktgen_write(self, path: str, command: str) -> None:
+        ns_exec_command(ROUTER_NS, ["sh", "-c", self._pktgen_write_script(path, command)], timeout=150)
+
+    def _pktgen_read(self, path: str) -> str:
+        return ns_exec_command(ROUTER_NS, ["cat", path], timeout=150).stdout or ""
+
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None: raise RuntimeError("KatranRunner is not running")
+        if self.workload_kind == "xdp_pktgen":
+            return self._run_pktgen_workload(seconds)
         return self._run_network_workload(seconds)
 
     def run_workload_spec(self, workload_spec: Mapping[str, object], seconds: float) -> WorkloadResult:
