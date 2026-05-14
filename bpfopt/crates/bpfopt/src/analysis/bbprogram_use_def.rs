@@ -21,35 +21,33 @@ pub struct UseSite {
     pub reg: u8,
 }
 
+/// Reverse index from def-site to its use-sites. The per-site `uses`/`defs`
+/// register sets live inline on `InsnNode` / `BasicBlock`; this struct is the
+/// single derived def→uses lookup table allowed by the design.
 #[derive(Clone, Debug, Default)]
 pub(crate) struct UseDefGraph {
     pub(super) defs: BTreeMap<DefSite, Vec<UseSite>>,
-    pub(super) uses: BTreeMap<UseSite, Vec<DefSite>>,
-}
-
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub(crate) struct RegUseDefSet {
-    pub uses: HashSet<u8>,
-    pub defs: HashSet<u8>,
 }
 
 type ReachingState = BTreeMap<u8, BTreeSet<DefSite>>;
 
 impl UseDefGraph {
-    pub fn build(prog: &ProgramCFG) -> anyhow::Result<Self> {
-        let site_facts = kinsn_aware_site_facts(prog)?;
+    /// Populate per-site `uses`/`defs` on each InsnNode + BasicBlock terminator,
+    /// then build the reverse def→uses index. Must be called from within
+    /// `ProgramCFG::rebuild_use_def` so the program is mutable.
+    pub fn build(prog: &mut ProgramCFG) -> anyhow::Result<Self> {
+        populate_site_use_def(prog)?;
+
         let mut in_states = vec![ReachingState::new(); prog.blocks.len()];
         let mut changed = true;
-
         while changed {
             changed = false;
             let mut next_in_states = in_states.clone();
-            for block in prog.blocks() {
-                let out_state =
-                    process_block_state(prog, block.id, &site_facts, &in_states[block.id.0], None)?;
-                for succ in prog.dataflow_successors(block.id)? {
+            for block_id in prog.block_ids().collect::<Vec<_>>() {
+                let out_state = process_block_state(prog, block_id, &in_states[block_id.0], None)?;
+                for succ in prog.dataflow_successors(block_id)? {
                     let Some(succ_state) = next_in_states.get_mut(succ.0) else {
-                        anyhow::bail!("block {:?} has invalid successor {:?}", block.id, succ);
+                        anyhow::bail!("block {:?} has invalid successor {:?}", block_id, succ);
                     };
                     if merge_state(succ_state, &out_state) {
                         changed = true;
@@ -60,14 +58,8 @@ impl UseDefGraph {
         }
 
         let mut graph = Self::default();
-        for block in prog.blocks() {
-            process_block_state(
-                prog,
-                block.id,
-                &site_facts,
-                &in_states[block.id.0],
-                Some(&mut graph),
-            )?;
+        for block_id in prog.block_ids().collect::<Vec<_>>() {
+            process_block_state(prog, block_id, &in_states[block_id.0], Some(&mut graph))?;
         }
         Ok(graph)
     }
@@ -84,23 +76,33 @@ impl UseDefGraph {
     }
 }
 
+fn site_uses_defs<'a>(prog: &'a ProgramCFG, site: InsnSite) -> Option<(&'a RegSet, &'a RegSet)> {
+    let block = prog.block_ref(site.block)?;
+    if site.idx < block.insns.len() {
+        let node = &block.insns[site.idx];
+        Some((&node.uses, &node.defs))
+    } else if site.idx == block.insns.len() {
+        Some((&block.terminator_uses, &block.terminator_defs))
+    } else {
+        None
+    }
+}
+
 fn process_block_state(
     prog: &ProgramCFG,
     block: BlockId,
-    site_facts: &BTreeMap<InsnSite, RegUseDefSet>,
     input: &ReachingState,
     graph: Option<&mut UseDefGraph>,
 ) -> anyhow::Result<ReachingState> {
     let mut graph = graph;
     let mut state = input.clone();
     for site in prog.sites_in_block_with_terminator(block)? {
-        let Some(facts) = site_facts.get(&site) else {
-            anyhow::bail!("missing use-def facts for site {:?}", site);
-        };
+        let (uses, defs) = site_uses_defs(prog, site)
+            .ok_or_else(|| anyhow::anyhow!("missing use-def facts for site {:?}", site))?;
         if let Some(graph) = graph.as_deref_mut() {
-            record_uses(graph, site, facts, &state);
+            record_uses(graph, site, uses, &state);
         }
-        for &reg in &facts.defs {
+        for &reg in defs {
             let def = DefSite {
                 block: site.block,
                 idx: site.idx,
@@ -115,27 +117,18 @@ fn process_block_state(
     Ok(state)
 }
 
-fn record_uses(
-    graph: &mut UseDefGraph,
-    site: InsnSite,
-    facts: &RegUseDefSet,
-    state: &ReachingState,
-) {
-    for &reg in &facts.uses {
+fn record_uses(graph: &mut UseDefGraph, site: InsnSite, uses: &RegSet, state: &ReachingState) {
+    for &reg in uses {
         let use_site = UseSite {
             block: site.block,
             idx: site.idx,
             reg,
         };
-        let defs = if let Some(defs) = state.get(&reg) {
-            defs.iter().copied().collect::<Vec<_>>()
-        } else {
-            Vec::new()
-        };
-        for def in &defs {
-            graph.defs.entry(*def).or_default().push(use_site);
+        if let Some(defs) = state.get(&reg) {
+            for def in defs {
+                graph.defs.entry(*def).or_default().push(use_site);
+            }
         }
-        graph.uses.insert(use_site, defs);
     }
 }
 
@@ -150,49 +143,81 @@ fn merge_state(dst: &mut ReachingState, src: &ReachingState) -> bool {
     changed
 }
 
-fn kinsn_aware_site_facts(prog: &ProgramCFG) -> anyhow::Result<BTreeMap<InsnSite, RegUseDefSet>> {
-    let mut facts = BTreeMap::new();
-    let mut sites = Vec::new();
+fn populate_site_use_def(prog: &mut ProgramCFG) -> anyhow::Result<()> {
+    // Pass 1: every body insn and terminator gets its insn-derived uses/defs.
+    for block_id in prog.block_ids().collect::<Vec<_>>() {
+        let body_len = prog.block_ref(block_id).expect("block").insns.len();
+        for idx in 0..body_len {
+            let insn = prog.block_ref(block_id).expect("block").insns[idx].insn;
+            let (uses, defs) = insn_use_def_pair(&insn);
+            let node = &mut prog.block_mut_for_use_def(block_id)?.insns[idx];
+            node.uses = uses;
+            node.defs = defs;
+        }
+        if let Some(term_insn) = prog
+            .block_ref(block_id)
+            .expect("block")
+            .terminator
+            .raw_insn()
+        {
+            let (uses, defs) = insn_use_def_pair(&term_insn);
+            let block = prog.block_mut_for_use_def(block_id)?;
+            block.terminator_uses = uses;
+            block.terminator_defs = defs;
+        } else {
+            let block = prog.block_mut_for_use_def(block_id)?;
+            block.terminator_uses = Default::default();
+            block.terminator_defs = Default::default();
+        }
+    }
 
-    for block in prog.blocks() {
-        for site in prog.sites_in_block_with_terminator(block.id)? {
-            let insn = prog
+    // Pass 2: kinsn-aware overrides. A `call <kinsn>` consumes registers per
+    // its descriptor; its preceding `BPF_LD` sidecar contributes none.
+    for block_id in prog.block_ids().collect::<Vec<_>>() {
+        let sites: Vec<InsnSite> = prog
+            .sites_in_block_with_terminator(block_id)?
+            .into_iter()
+            .collect();
+        for window_idx in 0..sites.len() {
+            let site = sites[window_idx];
+            let call = prog
                 .insn_at(site)
                 .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
-            facts.insert(site, insn_use_def_set(insn));
-            sites.push(site);
+            if !call.is_call_kinsn() {
+                continue;
+            }
+            let Some(&sidecar_site) = window_idx.checked_sub(1).and_then(|i| sites.get(i)) else {
+                anyhow::bail!("kinsn call at {:?} is missing its packed sidecar", site);
+            };
+            let sidecar = prog
+                .insn_at(sidecar_site)
+                .ok_or_else(|| anyhow::anyhow!("missing kinsn sidecar at {:?}", sidecar_site))?;
+            if !sidecar.is_kinsn_sidecar() {
+                anyhow::bail!("kinsn call at {:?} is missing its packed sidecar", site);
+            }
+            let descriptor = prog.kinsn_reg.lookup_by_kinsn_call(call.imm, call.off)?;
+            let payload = sidecar.sidecar_payload();
+            let uses = (descriptor.register_uses)(payload);
+            let defs = (descriptor.register_defs)(payload);
+            validate_registers(descriptor.name, site, "uses", &uses)?;
+            validate_registers(descriptor.name, site, "defs", &defs)?;
+
+            let block = prog.block_mut_for_use_def(block_id)?;
+            // Sidecar contributes neither uses nor defs.
+            if sidecar_site.idx < block.insns.len() {
+                block.insns[sidecar_site.idx].uses = Default::default();
+                block.insns[sidecar_site.idx].defs = Default::default();
+            }
+            if site.idx < block.insns.len() {
+                block.insns[site.idx].uses = uses;
+                block.insns[site.idx].defs = defs;
+            } else {
+                block.terminator_uses = uses;
+                block.terminator_defs = defs;
+            }
         }
     }
-
-    for index in 0..sites.len() {
-        let site = sites[index];
-        let call = prog
-            .insn_at(site)
-            .ok_or_else(|| anyhow::anyhow!("missing instruction at {:?}", site))?;
-        if !call.is_call_kinsn() {
-            continue;
-        }
-        let Some(&sidecar_site) = index.checked_sub(1).and_then(|i| sites.get(i)) else {
-            anyhow::bail!("kinsn call at {:?} is missing its packed sidecar", site);
-        };
-        let sidecar = prog
-            .insn_at(sidecar_site)
-            .ok_or_else(|| anyhow::anyhow!("missing kinsn sidecar at {:?}", sidecar_site))?;
-        if !sidecar.is_kinsn_sidecar() {
-            anyhow::bail!("kinsn call at {:?} is missing its packed sidecar", site);
-        }
-
-        let descriptor = prog.kinsn_reg.lookup_by_kinsn_call(call.imm, call.off)?;
-        let payload = sidecar.sidecar_payload();
-        let uses = (descriptor.register_uses)(payload);
-        let defs = (descriptor.register_defs)(payload);
-        validate_registers(descriptor.name, site, "uses", &uses)?;
-        validate_registers(descriptor.name, site, "defs", &defs)?;
-        facts.insert(sidecar_site, RegUseDefSet::default());
-        facts.insert(site, RegUseDefSet { uses, defs });
-    }
-
-    Ok(facts)
+    Ok(())
 }
 
 fn validate_registers(
@@ -212,7 +237,7 @@ fn validate_registers(
     Ok(())
 }
 
-pub(crate) fn insn_use_def_set(insn: &BpfInsn) -> RegUseDefSet {
+fn insn_use_def_pair(insn: &BpfInsn) -> (RegSet, RegSet) {
     let mut uses = HashSet::new();
     let mut defs = HashSet::new();
 
@@ -267,5 +292,17 @@ pub(crate) fn insn_use_def_set(insn: &BpfInsn) -> RegUseDefSet {
         _ => {}
     }
 
+    (uses, defs)
+}
+
+/// Public API result struct preserved so passes can access `.uses` / `.defs`.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub(crate) struct RegUseDefSet {
+    pub uses: RegSet,
+    pub defs: RegSet,
+}
+
+pub(crate) fn insn_use_def_set(insn: &BpfInsn) -> RegUseDefSet {
+    let (uses, defs) = insn_use_def_pair(insn);
     RegUseDefSet { uses, defs }
 }

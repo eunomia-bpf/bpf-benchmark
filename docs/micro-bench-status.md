@@ -208,7 +208,9 @@ These are not LEA problems. They are cases where native code benefits from struc
 
 ## x86 Instruction and Transform Gap
 
-The remaining gap is best understood at two levels. The x86 backend has richer instruction forms than BPF exposes directly, but bpfopt runs before final x86 emission. A profitable transform therefore has to rewrite verifier-facing BPF into a shape that the kernel x86 JIT can already lower well, or it has to be implemented in a later x86-specific lowering path.
+The remaining gap is best understood at two levels. The x86 backend has richer instruction forms than BPF exposes directly, but bpfopt runs before final x86 emission. A profitable transform therefore has to rewrite verifier-facing BPF into a shape that the kernel x86 JIT can already lower well, or encode a kinsn whose module instantiate path expands to verifier-native BPF while the final x86 emitter lowers the same verified semantics more aggressively.
+
+The kinsn point is important: the verifier does not need to see an opaque kfunc call. For kinsn-backed transforms, the module instantiate callback supplies the BPF instruction sequence that is verified. The final x86 emitter can then replace that verified sequence with a shorter native form, as long as its semantics match the instantiate sequence. For pointer-derived loads, the issue is therefore not "avoid pointer-load kinsns"; it is "make the instantiate sequence preserve the same verifier-visible pointer arithmetic and `LDX_MEM` load proof."
 
 | x86 Codegen Gap | Native Shape Seen in Micro | Current BPF/ReJIT Shape | Transform Direction |
 |---|---|---|---|
@@ -221,11 +223,52 @@ The remaining gap is best understood at two levels. The x86 backend has richer i
 | Local-call ABI | compact native callees and normal x86 calls | bpf2bpf calls plus BPF register/spill conventions | Inline/specialize small local subprograms, then rerun local cleanup passes |
 | Scheduling/register allocation | native backend schedules across SSA values | BPF register model largely preserved | Only partly solvable in bytecode; deeper wins need final JIT scheduling/allocation work |
 
+The concrete x86 instruction/form matrix is:
+
+| x86 Insn/Form | Evidence in Native Micro Code | Closest Existing Pass | Current Coverage in Full Run | Remaining Gap |
+|---|---|---|---|---|
+| `movzbl m8, r32` | common byte loads in packet/string paths | none needed | baseline kernel JIT already emits byte loads | not a target by itself; the issue is when many byte loads should become a wider load |
+| `movzwl m16, r32` | `packet_checksum_fold`, `packet_record_bounds_window`, Katran | `wide_mem` | `wide_mem=186/255` applied/matched | misses some unaligned and cross-field clusters; checksum still consumes one logical word per loop trip |
+| `movl m32, r32` | bounds-window record fields and dense-switch input loads | `wide_mem` | `wide_mem=186/255` | needs whole-record clustering and endian-aware field reconstruction |
+| `movq m64, r64` | Cilium policy payload read, local-call callees | `wide_mem` | `wide_mem=186/255` | needs verified 8-byte packet/record clustering, including inside subprograms |
+| `disp(base,index,scale)` memory operand | Toeplitz table loads and dense switch table load | `lea` + `wide_mem`; possible future indexed-load kinsn | `lea=552/552`, `wide_mem=186/255` | current LEA helps address arithmetic but does not guarantee a final folded memory operand; an indexed-load kinsn could instantiate to pointer arithmetic + `LDX_MEM` and emit one SIB memory load |
+| `leaq disp(base,index,scale), r64` | address setup in all inspected native objects | `lea` | `lea=552/552` | scaled-index/add-chain forms are still mostly structural, not just two-insn add/move patterns |
+| `bswapl` / `bswapq` | Toeplitz uses `bswapl` | `endian_fusion` | `endian_fusion=0/0` in this run | byte-composed network-endian fields are not being normalized into endian ops here |
+| `rolw` | Katran and Toeplitz endian/rotate fragments | `rotate`, partly `endian_fusion` | `rotate=492/492`, `endian_fusion=0/0` | rotate is strong, but endian+rotate combinations and narrower-width forms still leave gaps |
+| `roll` / `rolq` | Katran hash mixing, local-call rotate path | `rotate` | `rotate=492/492` | instruction selection is recovered, but scheduling/register allocation still differs from native |
+| `cmovbq` / `cmovbl` | Katran carry/select path | `cond_select` is adjacent | `cond_select=33/33` | current select matching is not the same as carry-flag based `cmovb*`; true flag reuse may need x86 lowering |
+| `setcc` | observed in `sorted_rule_binary_search` native code (`sete`) | `cond_select` / `ccmp` are adjacent | `cond_select=33/33`; `ccmp=0/87` on x86 because it is aarch64-only | no x86-specific setcc materialization pass today |
+| `adc` / `sbb` | candidate for checksum/carry folding; not observed in selected native snippets | none | no current pass | likely requires final x86 lowering or a kinsn form; BPF bytecode has no flag-carry value model |
+| `cmp; ja; mov table(,idx,8)` | dense switch native lowering | none | no current pass | need switch/value-table recovery or final JIT compare-tree-to-table lowering |
+| `callq` to local functions | local-call fanout native entry and callees | none; `dce` cleans after other transforms | no local-inline pass; `dce=126/126` only removes dead defs | need bpf2bpf local-call inline/specialization before local cleanup passes |
+| `prefetch*` | not part of the selected native-code gap | `prefetch` | `prefetch=9/9` | existing pass covers explicit prefetch sites; not a dominant gap in these case studies |
+| `popcnt` / BMI bit ops | not observed in selected native snippets | none | no current pass | possible future scalar-pattern target, but current evidence does not make it a first-order gap |
+
+The same facts viewed from the existing pass list:
+
+| Existing Pass | x86 Insn/Form It Can Help Reach | Current Full-Run Coverage | What It Does Not Cover Yet |
+|---|---|---:|---|
+| `wide_mem` | `movzwl`, `movl`, `movq` | 186 applied / 255 matched | whole record clusters, some unaligned cases, loop-combined checksum loads |
+| `lea` | `leaq`, simpler address arithmetic feeding memory ops | 552 / 552 | full `disp(base,index,scale)` memory folding and scaled add-chain recovery |
+| `rotate` | `rolw`, `roll`, `rolq`-style idioms | 492 / 492 | endian+rotate fusion, scheduling, register allocation |
+| `endian_fusion` | `bswap*`, endian-normalized loads | 0 / 0 | current micro shapes do not match; byte-composed packet fields remain |
+| `cond_select` | branchless select, potentially `cmov`-like lowering | 33 / 33 | carry-flag `cmovb*`, `setcc`, and final flag reuse |
+| `extract` | bitfield extraction idioms | 33 / 33 | x86 BMI-style `bextr`/specialized bit ops are not currently targeted |
+| `ccmp` | conditional compare, but arm64-oriented | 0 / 87 | not an x86 solution in the current run |
+| `dce` | removes dead scalar/address work after other passes | 126 / 126 | does not create better x86 forms by itself |
+| `bounds_check_merge` | fewer `cmp/jcc` bounds checks | 0 / 0 | no coverage in this micro run; does not solve dense switch or branch layout |
+| `prefetch` | prefetch instruction/kfunc sites | 9 / 9 | not relevant to the dominant native-code gaps here |
+| `bulk_memory` | bulk copy/memory kfunc shape | 0 / 0 | no selected micro gap maps to it yet |
+| `map_inline` | enables constant map-value loads before later cleanup | 0 / 0 sites in micro | micro intentionally avoids helper/map-heavy shapes |
+| `const_prop` | materializes verifier-proven constants before later cleanup | 0 / 567 | not an x86 instruction selector; useful only when facts are safe to materialize |
+| `skb_load_bytes_spec` | skb helper specialization | 0 / 0 | not relevant to current XDP-style micro cases |
+| `branch_flip` | branch layout from real profile data | not in default policy | can help policy trees only with real per-site PGO, not with heuristic fallback |
+
 This separates near-term BPF transforms from lower-level x86 work:
 
 - BPF-level transforms that should be practical first: wider packet/record load clustering, endian/rotate expansion, scaled-index canonicalization, local-call inlining, and selected bounded-loop combine.
 - Structural transforms that need more analysis: dense switch/table recovery, Toeplitz key-table reconstruction, and branch-layout work for policy trees.
-- x86-specific lowering that bytecode rewriting probably cannot fully express: `cmov`/`setcc`/`adc`/`sbb`, jump tables, `popcnt` or BMI-style scalar idioms, real register allocation, and final instruction scheduling.
+- x86-specific lowering that plain bytecode rewriting probably cannot fully express, but kinsn emitters may: `cmov`/`setcc`/`adc`/`sbb`, indexed memory operands, jump tables, `popcnt` or BMI-style scalar idioms. Real register allocation and final instruction scheduling remain below the current bytecode pass layer.
 
 This also explains why code size alone is a weak predictor. `packet_checksum_fold` gets smaller without changing the loop-carried dependence, while `packet_toeplitz_rss_hash` gets faster even with slightly larger code because dependency shape matters more than byte count.
 

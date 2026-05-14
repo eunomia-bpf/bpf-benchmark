@@ -12,7 +12,7 @@ use crate::pass::{BranchProfile, BtfInfoRecords, KinsnRegistry, RegKind, RegSet}
 use crate::verifier_log as verifier_facts;
 use crate::verifier_log::VerifierInsn;
 use std::collections::{BTreeMap, BTreeSet, HashMap};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 pub(crate) type BtfMetadataMap = BTreeMap<InsnSite, usize>;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct BlockId(pub(crate) usize);
@@ -74,8 +74,6 @@ pub struct ProgramCFG {
     pub(crate) func_info: Option<BtfInfoRecords>,
     pub(crate) line_info: Option<BtfInfoRecords>,
     pub(super) prog_type: u32,
-    site_liveness_cache: Mutex<Option<Arc<SiteLivenessSets>>>,
-    lifted_reg_facts_cache: Mutex<Option<Arc<LiftedRegFacts>>>,
 }
 
 impl Clone for ProgramCFG {
@@ -89,8 +87,6 @@ impl Clone for ProgramCFG {
             func_info: self.func_info.clone(),
             line_info: self.line_info.clone(),
             prog_type: self.prog_type,
-            site_liveness_cache: Mutex::new(None),
-            lifted_reg_facts_cache: Mutex::new(None),
         }
     }
 }
@@ -109,6 +105,18 @@ pub struct InsnNode {
     /// Verifier states (all visits) observed at this instruction site by the
     /// kernel verifier. `None` when no verifier log was attached.
     pub(super) verifier_states: Option<Arc<[VerifierInsn]>>,
+    /// Registers read by this instruction (kinsn-aware).
+    pub(super) uses: RegSet,
+    /// Registers written by this instruction (kinsn-aware).
+    pub(super) defs: RegSet,
+    /// Liveness: registers live at the entry of this instruction site.
+    pub(super) live_in: Option<RegSet>,
+    /// Liveness: registers live at the exit of this instruction site.
+    pub(super) live_out: Option<RegSet>,
+    /// Local bytecode-derived per-register fact at instruction entry
+    /// (`None` = site untracked by lifted-reg analysis; per-reg `Unknown`
+    /// for tracked sites where the register is opaque).
+    pub(super) local_reg_state: Option<[LiftedRegFact; 11]>,
 }
 
 impl InsnNode {
@@ -120,6 +128,11 @@ impl InsnNode {
             pc_relative_ldimm64_target: None,
             btf_pc: None,
             verifier_states: None,
+            uses: RegSet::new(),
+            defs: RegSet::new(),
+            live_in: None,
+            live_out: None,
+            local_reg_state: None,
         }
     }
 }
@@ -159,6 +172,16 @@ pub struct BasicBlock {
     pub(super) terminator_btf_pc: Option<usize>,
     /// Verifier states observed at this block's terminator (all visits).
     pub(super) terminator_verifier_states: Option<Arc<[VerifierInsn]>>,
+    /// Registers read by this block's terminator.
+    pub(super) terminator_uses: RegSet,
+    /// Registers written by this block's terminator.
+    pub(super) terminator_defs: RegSet,
+    /// Liveness at the entry of the terminator (= last insn's live_out).
+    pub(super) terminator_live_in: Option<RegSet>,
+    /// Liveness at the exit of the terminator (block exit liveness).
+    pub(super) terminator_live_out: Option<RegSet>,
+    /// Local bytecode-derived per-register fact at the terminator's entry.
+    pub(super) terminator_local_reg_state: Option<[LiftedRegFact; 11]>,
     pub frame: FrameId,
     pub(super) predecessors: Vec<BlockId>,
 }
@@ -238,8 +261,6 @@ impl ProgramCFG {
             func_info: None,
             line_info: None,
             prog_type: 0,
-            site_liveness_cache: Mutex::new(None),
-            lifted_reg_facts_cache: Mutex::new(None),
         };
         prog.rebuild_cfg_edges()?;
         prog.rebuild_use_def()?;
@@ -323,67 +344,67 @@ impl ProgramCFG {
     pub fn live_in_site_checked(&self, site: InsnSite) -> anyhow::Result<RegSet> {
         self.insn_at(site)
             .ok_or_else(|| anyhow::anyhow!("invalid instruction site {:?}", site))?;
-        self.site_liveness()?
-            .live_in
-            .get(&site)
-            .cloned()
-            .ok_or_else(|| anyhow::anyhow!("site liveness missing live_in for {:?}", site))
+        let block = self
+            .blocks
+            .get(site.block.0)
+            .ok_or_else(|| anyhow::anyhow!("invalid block {:?}", site.block))?;
+        if site.idx < block.insns.len() {
+            block.insns[site.idx]
+                .live_in
+                .clone()
+                .ok_or_else(|| anyhow::anyhow!("site liveness missing live_in for {:?}", site))
+        } else {
+            block
+                .terminator_live_in
+                .clone()
+                .ok_or_else(|| anyhow::anyhow!("site liveness missing live_in for {:?}", site))
+        }
     }
     pub fn live_out_site_checked(&self, site: InsnSite) -> anyhow::Result<RegSet> {
         self.insn_at(site)
             .ok_or_else(|| anyhow::anyhow!("invalid instruction site {:?}", site))?;
-        self.site_liveness()?
-            .live_out
-            .get(&site)
-            .cloned()
-            .ok_or_else(|| anyhow::anyhow!("site liveness missing live_out for {:?}", site))
-    }
-    fn site_liveness(&self) -> anyhow::Result<Arc<SiteLivenessSets>> {
-        let mut slot = self
-            .site_liveness_cache
-            .lock()
-            .map_err(|_| anyhow::anyhow!("site liveness cache poisoned"))?;
-        if let Some(cached) = slot.as_ref() {
-            return Ok(Arc::clone(cached));
+        let block = self
+            .blocks
+            .get(site.block.0)
+            .ok_or_else(|| anyhow::anyhow!("invalid block {:?}", site.block))?;
+        if site.idx < block.insns.len() {
+            block.insns[site.idx]
+                .live_out
+                .clone()
+                .ok_or_else(|| anyhow::anyhow!("site liveness missing live_out for {:?}", site))
+        } else {
+            block
+                .terminator_live_out
+                .clone()
+                .ok_or_else(|| anyhow::anyhow!("site liveness missing live_out for {:?}", site))
         }
-        let fresh = Arc::new(compute_site_liveness(self)?);
-        *slot = Some(Arc::clone(&fresh));
-        Ok(fresh)
     }
     /// Lift-time linear reg-fact for `reg` at the entry of `site`.
     /// Returns `LiftedRegFact::Unknown` if the site is not tracked.
     pub fn reg_fact_at(&self, site: InsnSite, reg: u8) -> anyhow::Result<LiftedRegFact> {
-        let facts = self.lifted_reg_facts()?;
-        Ok(facts
-            .by_site
-            .get(&site)
+        let block = self
+            .blocks
+            .get(site.block.0)
+            .ok_or_else(|| anyhow::anyhow!("invalid block {:?}", site.block))?;
+        let state_slot = if site.idx < block.insns.len() {
+            block.insns[site.idx].local_reg_state.as_ref()
+        } else if site.idx == block.insns.len() {
+            block.terminator_local_reg_state.as_ref()
+        } else {
+            None
+        };
+        Ok(state_slot
             .map(|state| state[reg as usize])
             .unwrap_or(LiftedRegFact::Unknown))
     }
-    /// Set the program type and invalidate any caches that depend on it
-    /// (lifted reg facts use prog_type to derive packet ctx layout).
+    /// Set the program type and refresh lifted reg facts (their packet-ctx
+    /// layout depends on `prog_type`).
     pub(crate) fn set_prog_type(&mut self, prog_type: u32) -> anyhow::Result<()> {
         if self.prog_type == prog_type {
             return Ok(());
         }
         self.prog_type = prog_type;
-        *self
-            .lifted_reg_facts_cache
-            .lock()
-            .map_err(|_| anyhow::anyhow!("lifted reg facts cache poisoned"))? = None;
-        Ok(())
-    }
-    fn lifted_reg_facts(&self) -> anyhow::Result<Arc<LiftedRegFacts>> {
-        let mut slot = self
-            .lifted_reg_facts_cache
-            .lock()
-            .map_err(|_| anyhow::anyhow!("lifted reg facts cache poisoned"))?;
-        if let Some(cached) = slot.as_ref() {
-            return Ok(Arc::clone(cached));
-        }
-        let fresh = Arc::new(compute_lifted_reg_facts(self)?);
-        *slot = Some(Arc::clone(&fresh));
-        Ok(fresh)
+        self.rebuild_lifted_reg_facts()
     }
     pub fn map_bindings(&self) -> &[MapBinding] {
         &self.map_bindings
@@ -522,29 +543,24 @@ impl ProgramCFG {
     fn use_def_site_facts(&self) -> anyhow::Result<HashMap<InsnSite, (RegSet, RegSet)>> {
         let mut facts = HashMap::new();
         for block in self.blocks() {
-            for site in logical_sites_for_block(block) {
-                facts.insert(site, (RegSet::new(), RegSet::new()));
+            for (idx, node) in block.insns.iter().enumerate() {
+                facts.insert(
+                    InsnSite {
+                        block: block.id,
+                        idx,
+                    },
+                    (node.uses.clone(), node.defs.clone()),
+                );
             }
-        }
-        for use_site in self.use_def.uses.keys() {
-            let site = InsnSite {
-                block: use_site.block,
-                idx: use_site.idx,
-            };
-            let Some((uses, _)) = facts.get_mut(&site) else {
-                anyhow::bail!("use-def graph references invalid use site {:?}", site);
-            };
-            uses.insert(use_site.reg);
-        }
-        for def in self.use_def.defs.keys() {
-            let site = InsnSite {
-                block: def.block,
-                idx: def.idx,
-            };
-            let Some((_, defs)) = facts.get_mut(&site) else {
-                anyhow::bail!("use-def graph references invalid def site {:?}", site);
-            };
-            defs.insert(def.reg);
+            if block.terminator.raw_insn().is_some() {
+                facts.insert(
+                    InsnSite {
+                        block: block.id,
+                        idx: block.insns.len(),
+                    },
+                    (block.terminator_uses.clone(), block.terminator_defs.clone()),
+                );
+            }
         }
         Ok(facts)
     }
@@ -925,6 +941,58 @@ impl ProgramCFG {
     }
     fn rebuild_use_def(&mut self) -> anyhow::Result<()> {
         self.use_def = UseDefGraph::build(self)?;
+        self.rebuild_site_liveness()?;
+        self.rebuild_lifted_reg_facts()?;
+        Ok(())
+    }
+
+    fn rebuild_lifted_reg_facts(&mut self) -> anyhow::Result<()> {
+        let facts = compute_lifted_reg_facts(self)?;
+        for block in &mut self.blocks {
+            for node in &mut block.insns {
+                node.local_reg_state = None;
+            }
+            block.terminator_local_reg_state = None;
+        }
+        for (site, state) in facts.by_site {
+            let block = &mut self.blocks[site.block.0];
+            if site.idx < block.insns.len() {
+                block.insns[site.idx].local_reg_state = Some(state);
+            } else {
+                block.terminator_local_reg_state = Some(state);
+            }
+        }
+        Ok(())
+    }
+
+    fn rebuild_site_liveness(&mut self) -> anyhow::Result<()> {
+        let sets = compute_site_liveness(self)?;
+        // Clear any stale liveness on InsnNode / BasicBlock first.
+        for block in &mut self.blocks {
+            for node in &mut block.insns {
+                node.live_in = None;
+                node.live_out = None;
+            }
+            block.terminator_live_in = None;
+            block.terminator_live_out = None;
+        }
+        // Distribute computed sets.
+        for (site, regs) in sets.live_in {
+            let block = &mut self.blocks[site.block.0];
+            if site.idx < block.insns.len() {
+                block.insns[site.idx].live_in = Some(regs);
+            } else {
+                block.terminator_live_in = Some(regs);
+            }
+        }
+        for (site, regs) in sets.live_out {
+            let block = &mut self.blocks[site.block.0];
+            if site.idx < block.insns.len() {
+                block.insns[site.idx].live_out = Some(regs);
+            } else {
+                block.terminator_live_out = Some(regs);
+            }
+        }
         Ok(())
     }
     pub(crate) fn attach_side_inputs(
@@ -968,6 +1036,19 @@ impl ProgramCFG {
         self.blocks
             .get_mut(block.0)
             .ok_or_else(|| anyhow::anyhow!("invalid block id {:?}", block))
+    }
+    /// Same as `block()` but returns `Option` (used by use-def populator that
+    /// already holds `&self` and prefers Option-based site-lookup helpers).
+    pub(crate) fn block_ref(&self, block: BlockId) -> Option<&BasicBlock> {
+        self.blocks.get(block.0)
+    }
+    /// Mutable access for use-def population; same as `block_mut` with a
+    /// distinct name to keep the use-def populator's intent explicit.
+    pub(crate) fn block_mut_for_use_def(
+        &mut self,
+        block: BlockId,
+    ) -> anyhow::Result<&mut BasicBlock> {
+        self.block_mut(block)
     }
     pub(crate) fn dataflow_successors(&self, block: BlockId) -> anyhow::Result<Vec<BlockId>> {
         let block_ref = self
@@ -1356,26 +1437,23 @@ fn compute_site_liveness(prog: &ProgramCFG) -> anyhow::Result<SiteLivenessSets> 
     let mut use_sets = HashMap::<InsnSite, RegSet>::new();
     let mut def_sets = HashMap::<InsnSite, RegSet>::new();
     for block in prog.blocks() {
-        for site in logical_sites_for_block(block) {
+        for (idx, node) in block.insns.iter().enumerate() {
+            let site = InsnSite {
+                block: block.id,
+                idx,
+            };
             sites.push(site);
-            use_sets.insert(
-                site,
-                prog.use_def
-                    .uses
-                    .keys()
-                    .filter(|use_site| use_site.block == site.block && use_site.idx == site.idx)
-                    .map(|use_site| use_site.reg)
-                    .collect(),
-            );
-            def_sets.insert(
-                site,
-                prog.use_def
-                    .defs
-                    .keys()
-                    .filter(|def| def.block == site.block && def.idx == site.idx)
-                    .map(|def| def.reg)
-                    .collect(),
-            );
+            use_sets.insert(site, node.uses.clone());
+            def_sets.insert(site, node.defs.clone());
+        }
+        if block.terminator.raw_insn().is_some() {
+            let site = InsnSite {
+                block: block.id,
+                idx: block.insns.len(),
+            };
+            sites.push(site);
+            use_sets.insert(site, block.terminator_uses.clone());
+            def_sets.insert(site, block.terminator_defs.clone());
         }
     }
     let mut live_in = sites

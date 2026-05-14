@@ -70,6 +70,9 @@ struct Cli {
     /// Pass to run via the daemon's per-pass yaml.
     #[arg(long, value_name = "NAME")]
     pass: Option<String>,
+    /// bpfopt executable to invoke.
+    #[arg(long, value_name = "FILE", default_value = BPFOPT_BIN)]
+    bpfopt: PathBuf,
     /// Target.json passed to the pass yaml (only needed by kinsn-class passes).
     #[arg(long, value_name = "FILE")]
     target: Option<PathBuf>,
@@ -185,12 +188,13 @@ fn run(cli: Cli) -> Result<()> {
     let (_obj, prepared) = prepare_workdir(&workdir.path, &cli.obj, cli.katran_maps, dump_values)?;
 
     for prog in &prepared {
-        canonicalize_program(prog, Path::new(BPFOPT_BIN))?;
+        canonicalize_program(prog, &cli.bpfopt)?;
         if let Some(pass) = cli.pass.as_deref() {
             run_pass_via_yaml(
                 &prog.dir,
                 &map_values_dir,
                 pass,
+                &cli.bpfopt,
                 cli.target.as_deref(),
                 &prog.map_ids,
             )?;
@@ -219,6 +223,10 @@ fn canonicalize_program(prog: &PreparedProgram, bpfopt: &Path) -> Result<()> {
         bail!("canonicalize failed for {} ({status})", prog.dir.display());
     }
     Ok(())
+}
+
+fn shell_quote_path(path: &Path) -> String {
+    format!("'{}'", path.display().to_string().replace('\'', "'\\''"))
 }
 
 /// libbpf-load every program in `obj_path` with log_level=2 and dump bytecode,
@@ -341,11 +349,12 @@ unsafe fn obj_info<T: Default>(fd: i32) -> Result<T> {
 
 /// Read `runner/config/passes/<pass>/default.yaml`, substitute `${VAR}` tokens
 /// with `prog_dir` paths + the shared `map_values_dir`, and execute the command
-/// via `sh -c`. The yaml's bare `bpfopt` is rewritten to the hardcoded binary.
+/// via `sh -c`. The yaml's bare `bpfopt` is rewritten to the selected binary.
 fn run_pass_via_yaml(
     prog_dir: &Path,
     map_values_dir: &Path,
     pass: &str,
+    bpfopt: &Path,
     target: Option<&Path>,
     map_ids: &[u32],
 ) -> Result<()> {
@@ -365,7 +374,7 @@ fn run_pass_via_yaml(
     };
     let target_arg = target.map(|t| t.display().to_string()).unwrap_or_default();
     let command = template
-        .replacen("bpfopt ", &format!("{BPFOPT_BIN} "), 1)
+        .replacen("bpfopt ", &format!("{} ", shell_quote_path(bpfopt)), 1)
         .replace("${INPUT}", &p(INPUT_BIN))
         .replace("${OUTPUT}", &p(OUTPUT_BIN))
         .replace("${REPORT}", &p(REPORT_JSON))
@@ -878,6 +887,7 @@ mod tests {
             let cli = Cli {
                 obj: obj.clone(),
                 pass: Some("noop".into()),
+                bpfopt: PathBuf::from(BPFOPT_BIN),
                 target: None,
                 workdir: None,
                 bpftestrun: false,
@@ -1026,6 +1036,7 @@ mod tests {
         Cli {
             obj: PathBuf::from("bpfopt/testobject/katran_balancer.bpf.o"),
             pass: Some("map_inline".into()),
+            bpfopt: PathBuf::from(BPFOPT_BIN),
             target: None,
             workdir: None,
             bpftestrun: true,

@@ -60,6 +60,11 @@ pub(crate) fn lift_with_kinsn_registry(
             terminator_branch_profile: None,
             terminator_btf_pc: None,
             terminator_verifier_states: None,
+            terminator_uses: Default::default(),
+            terminator_defs: Default::default(),
+            terminator_live_in: None,
+            terminator_live_out: None,
+            terminator_local_reg_state: None,
             frame,
             predecessors: Vec::new(),
         };

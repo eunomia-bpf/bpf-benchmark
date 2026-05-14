@@ -16,6 +16,7 @@ Run one pass against one program in a BPF object:
 bpfopt/target/debug/bpfopt-loader \
   --obj path/to/test.bpf.o \
   --pass noop \
+  --bpfopt bpfopt/target/debug/bpfopt \
   --workdir /tmp/bpfopt-loader-work
 ```
 
