@@ -17,6 +17,7 @@ Artifacts:
 - `docs/tmp/katran_host_loader_jit_map_inline_20260513_214450/baseline_noop/`
 - `docs/tmp/katran_host_loader_jit_map_inline_20260513_214450/optimized_map_inline/`
 - `docs/tmp/katran_host_loader_jit_map_inline_const_dce_20260513/`
+- `docs/tmp/katran_map_inline_const_prop_dce_host_fixture/`
 
 Important selector detail: selecting `name == "balancer_ingress"` is wrong for the verifier reload. The original libbpf-loaded object keeps `balancer_ingress`, while the reload through `bpf_prog_load()` is truncated by the kernel to `balancer_ingres`. The valid capture selects the latest XDP program whose name starts with `balancer_ingres`.
 

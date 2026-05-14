@@ -28,7 +28,6 @@ class AppSuite:
     manifest_path: Path
     suite_name: str
     schema_version: int
-    defaults: dict[str, object]
     apps: tuple[AppSpec, ...]
 
 
@@ -37,34 +36,6 @@ def _string_required(value: Any, *, field_name: str) -> str:
     if not text:
         raise SystemExit(f"invalid app suite field: {field_name} is required")
     return text
-
-
-def _mapping(value: Any, *, field_name: str) -> dict[str, object]:
-    if value is None:
-        return {}
-    if not isinstance(value, Mapping):
-        raise SystemExit(f"invalid app suite field: {field_name} must be a mapping")
-    return {str(key): item for key, item in value.items()}
-
-
-def _workload_required(value: Any, *, field_name: str) -> str:
-    if isinstance(value, str):
-        return _string_required(value, field_name=field_name)
-    if not isinstance(value, Mapping):
-        raise SystemExit(f"invalid app suite field: {field_name} must be a non-empty string")
-    if "corpus" in value:
-        return _string_required(value.get("corpus"), field_name=f"{field_name}.corpus")
-    return _string_required(value.get("name"), field_name=field_name)
-
-
-def _app_args(raw_app: Mapping[str, object], *, field_name: str) -> dict[str, object]:
-    if raw_app.get("args") is not None:
-        raise SystemExit(f"invalid app suite field: {field_name}.args is not supported; use flat app keys")
-    return {
-        str(key): item
-        for key, item in raw_app.items()
-        if str(key) not in {"name", "runner", "workload", "args"}
-    }
 
 
 def _app_spec_from_v2_name(name: str) -> AppSpec:
@@ -85,42 +56,31 @@ def load_app_suite_from_yaml(yaml_path: Path) -> AppSuite:
         raise SystemExit(f"app suite YAML root must be a mapping: {yaml_path}")
 
     schema_version = int(manifest.get("schema_version", 0) or 0)
-    if schema_version not in {1, 2}:
-        raise SystemExit(f"app suite YAML must use schema_version 1 or 2: {yaml_path}")
+    if schema_version != 2:
+        raise SystemExit(f"app suite YAML must use schema_version 2: {yaml_path}")
 
     raw_apps = manifest.get("apps")
     if not isinstance(raw_apps, list) or not raw_apps:
         raise SystemExit(f"app suite YAML field 'apps' must be a non-empty sequence: {yaml_path}")
 
-    defaults = _mapping(manifest.get("defaults"), field_name="defaults") if schema_version == 1 else {}
     suite_name = str(manifest.get("suite_name") or yaml_path.stem).strip() or yaml_path.stem
 
     apps: list[AppSpec] = []
     seen_names: set[str] = set()
     for index, raw_app in enumerate(raw_apps, start=1):
-        if schema_version == 2:
-            if isinstance(raw_app, str):
-                app = _app_spec_from_v2_name(_string_required(raw_app, field_name=f"apps[{index}]"))
-            elif isinstance(raw_app, Mapping):
-                raw_keys = {str(key) for key in raw_app.keys()}
-                if raw_keys != {"name"}:
-                    raise SystemExit(
-                        f"invalid app suite field: apps[{index}] only supports the name key in schema_version 2"
-                    )
-                app = _app_spec_from_v2_name(
-                    _string_required(raw_app.get("name"), field_name=f"apps[{index}].name")
+        if isinstance(raw_app, str):
+            app = _app_spec_from_v2_name(_string_required(raw_app, field_name=f"apps[{index}]"))
+        elif isinstance(raw_app, Mapping):
+            raw_keys = {str(key) for key in raw_app.keys()}
+            if raw_keys != {"name"}:
+                raise SystemExit(
+                    f"invalid app suite field: apps[{index}] only supports the name key in schema_version 2"
                 )
-            else:
-                raise SystemExit(f"invalid app suite field: apps[{index}] must be a string or mapping")
-        else:
-            if not isinstance(raw_app, Mapping):
-                raise SystemExit(f"invalid app suite field: apps[{index}] must be a mapping")
-            app = AppSpec(
-                name=_string_required(raw_app.get("name"), field_name=f"apps[{index}].name"),
-                runner=_string_required(raw_app.get("runner"), field_name=f"apps[{index}].runner"),
-                workload=_workload_required(raw_app.get("workload"), field_name=f"apps[{index}].workload"),
-                args=_app_args({str(key): item for key, item in raw_app.items()}, field_name=f"apps[{index}]"),
+            app = _app_spec_from_v2_name(
+                _string_required(raw_app.get("name"), field_name=f"apps[{index}].name")
             )
+        else:
+            raise SystemExit(f"invalid app suite field: apps[{index}] must be a string or mapping")
         if app.name in seen_names:
             raise SystemExit(f"invalid app suite field: duplicate app name {app.name!r}")
         seen_names.add(app.name)
@@ -130,7 +90,6 @@ def load_app_suite_from_yaml(yaml_path: Path) -> AppSuite:
         manifest_path=yaml_path,
         suite_name=suite_name,
         schema_version=schema_version,
-        defaults=defaults,
         apps=tuple(apps),
     )
     return suite
