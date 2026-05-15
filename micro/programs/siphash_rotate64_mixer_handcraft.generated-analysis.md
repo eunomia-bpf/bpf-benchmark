@@ -6,16 +6,16 @@ Warnings: 56
 |---:|---|---|---|
 | `0x1100` | `mov    rcx,QWORD PTR [rdi]` | `warning-context-abi` | HC_LDX(BPF_W, BPF_REG_4, BPF_REG_1, 0) |
 | `0x1103` | `mov    rdx,QWORD PTR [rdi+0x8]` | `warning-context-abi` | HC_LDX(BPF_W, BPF_REG_3, BPF_REG_1, 4) |
-| `0x1107` | `xor    eax,eax` | `bpf-jit` | HC_RAW(BPF_ALU | BPF_XOR | BPF_X, BPF_REG_0, BPF_REG_0, 0, 0) |
+| `0x1107` | `xor    eax,eax` | `bpf-jit` | HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_0, 0, 0, 0) |
 | `0x1109` | `cmp    rcx,rdx` | `cmp-state` | sets flags; materialized by following jcc when possible |
-| `0x110c` | `ja     1569 <siphash_rotate64_mixer_xdp+0x469>` | `bpf-branch` | HC_JMP_REG(BPF_JGT, BPF_REG_4, BPF_REG_3, 434) |
+| `0x110c` | `ja     1569 <siphash_rotate64_mixer_xdp+0x469>` | `bpf-branch` | HC_JMP_REG(BPF_JGT, BPF_REG_4, BPF_REG_3, 444) |
 | `0x1112` | `lea    rsi,[rcx+0x8]` | `exact-kinsn` | HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_4, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ) |
 | `0x1116` | `cmp    rsi,rdx` | `cmp-state` | sets flags; materialized by following jcc when possible |
-| `0x1119` | `ja     1569 <siphash_rotate64_mixer_xdp+0x469>` | `bpf-branch` | HC_JMP_REG(BPF_JGT, BPF_REG_2, BPF_REG_3, 431) |
+| `0x1119` | `ja     1569 <siphash_rotate64_mixer_xdp+0x469>` | `bpf-branch` | HC_JMP_REG(BPF_JGT, BPF_REG_2, BPF_REG_3, 441) |
 | `0x111f` | `lea    rsi,[rcx+0x48]` | `exact-kinsn` | HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_4, 0, 0, 1, 0, 72), MICRO_HANDCRAFT_BPF_X86_LEAQ) |
 | `0x1123` | `cmp    rsi,rdx` | `cmp-state` | sets flags; materialized by following jcc when possible |
-| `0x1126` | `ja     1569 <siphash_rotate64_mixer_xdp+0x469>` | `bpf-branch` | HC_JMP_REG(BPF_JGT, BPF_REG_2, BPF_REG_3, 428) |
-| `0x112c` | `mov    r9,QWORD PTR [rcx+0x8]` | `warning-reg-remap` | HC_LDX(BPF_DW, BPF_REG_9, BPF_REG_4, 8) |
+| `0x1126` | `ja     1569 <siphash_rotate64_mixer_xdp+0x469>` | `bpf-branch` | HC_JMP_REG(BPF_JGT, BPF_REG_2, BPF_REG_3, 438) |
+| `0x112c` | `mov    r9,QWORD PTR [rcx+0x8]` | `warning-reg-remap` | HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_9, BPF_REG_4, 8), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM) |
 | `0x1130` | `movabs rdi,0x7465646279746573` | `bpf-jit` | HC_LD_IMM64_RAW(BPF_REG_1, 0, 0x7465646279746573ULL) |
 | `0x113a` | `xor    rdi,r9` | `warning-reg-remap` | HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_1, BPF_REG_9, 0, 0) |
 | `0x113d` | `movabs rdx,0x6c7967656e657261` | `bpf-jit` | HC_LD_IMM64_RAW(BPF_REG_3, 0, 0x6c7967656e657261ULL) |
@@ -42,7 +42,7 @@ Warnings: 56
 | `0x119e` | `rol    rdi,0x15` | `exact-kinsn` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
 | `0x11a2` | `add    rax,rdx` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_ADD | BPF_X, BPF_REG_0, BPF_REG_3, 0, 0) |
 | `0x11a5` | `rol    rdx,0x11` | `exact-kinsn` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
-| `0x11a9` | `mov    rsi,QWORD PTR [rcx+0x10]` | `bpf-jit` | HC_LDX(BPF_DW, BPF_REG_2, BPF_REG_4, 16) |
+| `0x11a9` | `mov    rsi,QWORD PTR [rcx+0x10]` | `exact-kinsn` | HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_2, BPF_REG_4, 16), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM) |
 | `0x11ad` | `xor    rdx,rax` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_3, BPF_REG_0, 0, 0) |
 | `0x11b0` | `rol    rax,0x20` | `exact-kinsn` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
 | `0x11b4` | `xor    r9,r8` | `warning-reg-remap` | HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_9, BPF_REG_5, 0, 0) |
@@ -73,7 +73,7 @@ Warnings: 56
 | `0x1208` | `rol    r8,0x15` | `exact-kinsn` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
 | `0x120c` | `add    rax,rdx` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_ADD | BPF_X, BPF_REG_0, BPF_REG_3, 0, 0) |
 | `0x120f` | `rol    rdx,0x11` | `exact-kinsn` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
-| `0x1213` | `mov    rdi,QWORD PTR [rcx+0x18]` | `bpf-jit` | HC_LDX(BPF_DW, BPF_REG_1, BPF_REG_4, 24) |
+| `0x1213` | `mov    rdi,QWORD PTR [rcx+0x18]` | `exact-kinsn` | HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_1, BPF_REG_4, 24), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM) |
 | `0x1217` | `xor    rdx,rax` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_3, BPF_REG_0, 0, 0) |
 | `0x121a` | `rol    rax,0x20` | `exact-kinsn` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
 | `0x121e` | `xor    rsi,r9` | `warning-reg-remap` | HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_2, BPF_REG_9, 0, 0) |
@@ -104,7 +104,7 @@ Warnings: 56
 | `0x1272` | `rol    r9,0x15` | `warning-reg-remap` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_9, BPF_REG_9, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
 | `0x1276` | `add    rax,rdx` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_ADD | BPF_X, BPF_REG_0, BPF_REG_3, 0, 0) |
 | `0x1279` | `rol    rdx,0x11` | `exact-kinsn` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
-| `0x127d` | `mov    r8,QWORD PTR [rcx+0x20]` | `bpf-jit` | HC_LDX(BPF_DW, BPF_REG_5, BPF_REG_4, 32) |
+| `0x127d` | `mov    r8,QWORD PTR [rcx+0x20]` | `exact-kinsn` | HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_5, BPF_REG_4, 32), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM) |
 | `0x1281` | `xor    rdx,rax` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_3, BPF_REG_0, 0, 0) |
 | `0x1284` | `rol    rax,0x20` | `exact-kinsn` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
 | `0x1288` | `xor    rdi,rsi` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_1, BPF_REG_2, 0, 0) |
@@ -135,7 +135,7 @@ Warnings: 56
 | `0x12dc` | `rol    rsi,0x15` | `exact-kinsn` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
 | `0x12e0` | `add    rax,rdx` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_ADD | BPF_X, BPF_REG_0, BPF_REG_3, 0, 0) |
 | `0x12e3` | `rol    rdx,0x11` | `exact-kinsn` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
-| `0x12e7` | `mov    r9,QWORD PTR [rcx+0x28]` | `warning-reg-remap` | HC_LDX(BPF_DW, BPF_REG_9, BPF_REG_4, 40) |
+| `0x12e7` | `mov    r9,QWORD PTR [rcx+0x28]` | `warning-reg-remap` | HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_9, BPF_REG_4, 40), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM) |
 | `0x12eb` | `xor    rdx,rax` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_3, BPF_REG_0, 0, 0) |
 | `0x12ee` | `rol    rax,0x20` | `exact-kinsn` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
 | `0x12f2` | `xor    r8,rdi` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_5, BPF_REG_1, 0, 0) |
@@ -166,7 +166,7 @@ Warnings: 56
 | `0x1346` | `rol    rdi,0x15` | `exact-kinsn` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
 | `0x134a` | `add    rax,rdx` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_ADD | BPF_X, BPF_REG_0, BPF_REG_3, 0, 0) |
 | `0x134d` | `rol    rdx,0x11` | `exact-kinsn` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
-| `0x1351` | `mov    rsi,QWORD PTR [rcx+0x30]` | `bpf-jit` | HC_LDX(BPF_DW, BPF_REG_2, BPF_REG_4, 48) |
+| `0x1351` | `mov    rsi,QWORD PTR [rcx+0x30]` | `exact-kinsn` | HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_2, BPF_REG_4, 48), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM) |
 | `0x1355` | `xor    rdx,rax` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_3, BPF_REG_0, 0, 0) |
 | `0x1358` | `rol    rax,0x20` | `exact-kinsn` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
 | `0x135c` | `xor    r9,r8` | `warning-reg-remap` | HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_9, BPF_REG_5, 0, 0) |
@@ -197,7 +197,7 @@ Warnings: 56
 | `0x13b0` | `rol    r8,0x15` | `exact-kinsn` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
 | `0x13b4` | `add    rax,rdx` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_ADD | BPF_X, BPF_REG_0, BPF_REG_3, 0, 0) |
 | `0x13b7` | `rol    rdx,0x11` | `exact-kinsn` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
-| `0x13bb` | `mov    rdi,QWORD PTR [rcx+0x38]` | `bpf-jit` | HC_LDX(BPF_DW, BPF_REG_1, BPF_REG_4, 56) |
+| `0x13bb` | `mov    rdi,QWORD PTR [rcx+0x38]` | `exact-kinsn` | HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_1, BPF_REG_4, 56), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM) |
 | `0x13bf` | `xor    rdx,rax` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_3, BPF_REG_0, 0, 0) |
 | `0x13c2` | `rol    rax,0x20` | `exact-kinsn` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
 | `0x13c6` | `xor    rsi,r9` | `warning-reg-remap` | HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_2, BPF_REG_9, 0, 0) |
@@ -228,7 +228,7 @@ Warnings: 56
 | `0x141a` | `rol    r9,0x15` | `warning-reg-remap` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_9, BPF_REG_9, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
 | `0x141e` | `add    rax,rdx` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_ADD | BPF_X, BPF_REG_0, BPF_REG_3, 0, 0) |
 | `0x1421` | `rol    rdx,0x11` | `exact-kinsn` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
-| `0x1425` | `mov    r8,QWORD PTR [rcx+0x40]` | `bpf-jit` | HC_LDX(BPF_DW, BPF_REG_5, BPF_REG_4, 64) |
+| `0x1425` | `mov    r8,QWORD PTR [rcx+0x40]` | `exact-kinsn` | HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_5, BPF_REG_4, 64), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM) |
 | `0x1429` | `xor    rdx,rax` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_3, BPF_REG_0, 0, 0) |
 | `0x142c` | `rol    rax,0x20` | `exact-kinsn` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
 | `0x1430` | `xor    rdi,rsi` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_1, BPF_REG_2, 0, 0) |
@@ -315,11 +315,11 @@ Warnings: 56
 | `0x1547` | `xor    rdx,rdi` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_3, BPF_REG_1, 0, 0) |
 | `0x154a` | `add    rax,rdx` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_ADD | BPF_X, BPF_REG_0, BPF_REG_3, 0, 0) |
 | `0x154d` | `rol    rdx,0x11` | `exact-kinsn` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
-| `0x1551` | `mov    rdi,rax` | `bpf-jit` | HC_MOV64_REG(BPF_REG_1, BPF_REG_0) |
+| `0x1551` | `mov    rdi,rax` | `exact-kinsn` | HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_1, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_MOVQ_RR) |
 | `0x1554` | `rol    rdi,0x20` | `exact-kinsn` | HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM) |
 | `0x1558` | `xor    rdi,rdx` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_1, BPF_REG_3, 0, 0) |
 | `0x155b` | `xor    rdi,rsi` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_1, BPF_REG_2, 0, 0) |
 | `0x155e` | `xor    rdi,rax` | `bpf-jit` | HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_1, BPF_REG_0, 0, 0) |
-| `0x1561` | `mov    QWORD PTR [rcx],rdi` | `bpf-jit` | HC_STX(BPF_DW, BPF_REG_4, BPF_REG_1, 0) |
+| `0x1561` | `mov    QWORD PTR [rcx],rdi` | `exact-kinsn` | HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_1, BPF_REG_4, 0), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM_REG) |
 | `0x1564` | `mov    eax,0x2` | `bpf-jit` | HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_0, 0, 0, 2) |
 | `0x1569` | `ret` | `bpf-jit` | HC_EXIT() |

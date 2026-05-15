@@ -62,6 +62,18 @@ for base, aliases in {
 OBJ_LINE_RE = re.compile(r"^\s*(?P<addr>[0-9a-f]+):\s+(?P<bytes>(?:[0-9a-f]{2}\s+)+)\s*(?P<asm>.*)$")
 ASM_LINE_RE = re.compile(r"^\s*(?P<mnemonic>[a-z][a-z0-9]*)\s*(?P<operands>.*)$")
 SIZE_BY_PTR = {"BYTE": "BPF_B", "WORD": "BPF_H", "DWORD": "BPF_W", "QWORD": "BPF_DW"}
+DIRECT_LOAD_SELECTOR = {
+    "BPF_B": "MICRO_HANDCRAFT_BPF_X86_MOVZBL_MEM",
+    "BPF_H": "MICRO_HANDCRAFT_BPF_X86_MOVZWL_MEM",
+    "BPF_W": "MICRO_HANDCRAFT_BPF_X86_MOVL_MEM",
+    "BPF_DW": "MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM",
+}
+DIRECT_STORE_SELECTOR = {
+    "BPF_B": "MICRO_HANDCRAFT_BPF_X86_MOVB_MEM_REG",
+    "BPF_H": "MICRO_HANDCRAFT_BPF_X86_MOVW_MEM_REG",
+    "BPF_W": "MICRO_HANDCRAFT_BPF_X86_MOVL_MEM_REG",
+    "BPF_DW": "MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM_REG",
+}
 ALU_OP = {"add": "BPF_ADD", "sub": "BPF_SUB", "xor": "BPF_XOR", "or": "BPF_OR", "and": "BPF_AND", "shl": "BPF_LSH", "shr": "BPF_RSH"}
 JCC_OP = {
     "ja": "BPF_JGT",
@@ -301,7 +313,14 @@ def translate_mem_load(dst_op: str, mem_op: str, size: str) -> Translation:
             return Translation("warning-unmapped", (), f"SIB load size {size} has no current selector")
         payload = f"HC_SIB_PAYLOAD({dst[0]}, {base_reg[0]}, {index_reg[0]}, {slog2}, {off})"
         return Translation("exact-kinsn", (f"HC_KINSN({payload}, {target})",), "indexed memory load via x86 SIB kinsn")
-    return Translation("bpf-jit", (emit_ldx(size, dst[0], base_reg[0], off),), "direct load; exactness depends on kernel BPF JIT encoding")
+    target = DIRECT_LOAD_SELECTOR.get(size)
+    if target is None:
+        return Translation("bpf-jit", (emit_ldx(size, dst[0], base_reg[0], off),), "direct load; exactness depends on kernel BPF JIT encoding")
+    return Translation(
+        "exact-kinsn",
+        (f"HC_KINSN(HC_MEM_PAYLOAD({dst[0]}, {base_reg[0]}, {off}), {target})",),
+        "direct memory load via x86 kinsn selector",
+    )
 
 
 def translate(insn: NativeInsn) -> Translation:
@@ -333,7 +352,11 @@ def translate(insn: NativeInsn) -> Translation:
         src_reg = bpf_reg(src)
         if dst_reg and src_reg:
             if dst_reg[1] == 64 and src_reg[1] == 64:
-                return Translation("bpf-jit", (f"HC_MOV64_REG({dst_reg[0]}, {src_reg[0]})",), "register move")
+                return Translation(
+                    "exact-kinsn",
+                    (f"HC_KINSN(HC_REG_REG_PAYLOAD({dst_reg[0]}, {src_reg[0]}), MICRO_HANDCRAFT_BPF_X86_MOVQ_RR)",),
+                    "movq register-to-register kinsn",
+                )
             if dst_reg[1] == 32 and src_reg[1] == 32:
                 return Translation("bpf-jit", (f"HC_RAW(BPF_ALU | BPF_MOV | BPF_X, {dst_reg[0]}, {src_reg[0]}, 0, 0)",), "32-bit register move")
             return Translation("warning-unmapped", (), f"mixed-width register move {dst}, {src}")
@@ -355,7 +378,14 @@ def translate(insn: NativeInsn) -> Translation:
             base = bpf_reg(mem[0] or "")
             if base is None:
                 return Translation("warning-unmapped", (), f"store base {mem[0]} is not in the BPF JIT register file")
-            return Translation("bpf-jit", (emit_stx(size, base[0], src_reg[0], mem[3]),), "direct store")
+            target = DIRECT_STORE_SELECTOR.get(size)
+            if target is None:
+                return Translation("bpf-jit", (emit_stx(size, base[0], src_reg[0], mem[3]),), "direct store")
+            return Translation(
+                "exact-kinsn",
+                (f"HC_KINSN(HC_MEM_PAYLOAD({src_reg[0]}, {base[0]}, {mem[3]}), {target})",),
+                "direct memory store via x86 kinsn selector",
+            )
     if op == "movzx" and len(ops) == 2:
         size = size_from_mem(ops[1])
         if size not in {"BPF_B", "BPF_H"}:
@@ -402,6 +432,8 @@ def translate(insn: NativeInsn) -> Translation:
         if dst is None:
             return Translation("warning-unmapped", (), f"ALU destination {ops[0]} is not in the BPF JIT register file")
         bpf_class = "BPF_ALU64" if dst[1] == 64 else "BPF_ALU"
+        if op == "xor" and src and dst[0] == src[0]:
+            return Translation("bpf-jit", (f"HC_RAW({bpf_class} | BPF_MOV | BPF_K, {dst[0]}, 0, 0, 0)",), "zero idiom")
         if op == "shr" and dst[1] == 64 and re.match(r"^(0x[0-9a-fA-F]+|\d+)$", ops[1]):
             return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_IMM_PAYLOAD({dst[0]}, {parse_int(ops[1])}), MICRO_HANDCRAFT_BPF_X86_SHRQ_IMM)",), "shrq imm kinsn")
         if op == "and" and dst[1] == 32 and re.match(r"^(0x[0-9a-fA-F]+|\d+)$", ops[1]):

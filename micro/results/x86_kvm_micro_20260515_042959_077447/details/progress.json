@@ -1,0 +1,27 @@
+{
+  "completed_benchmarks": 0,
+  "current_benchmark": "siphash_rotate64_mixer_handcraft",
+  "current_benchmark_index": 1,
+  "current_benchmark_record": {
+    "category": "alu-mix",
+    "description": "Hand-written x86 rol kinsn over SipHash-style input words",
+    "expected_result": 2666935177028490406,
+    "family": "rotate-hash",
+    "hypothesis": "Tests direct rol kinsn lowering on a rotate-heavy hash input",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/siphash_rotate64_mixer.mem",
+    "io_mode": "staged",
+    "level": "handcraft-kinsn",
+    "name": "siphash_rotate64_mixer_handcraft",
+    "runs": [],
+    "tags": [
+      "compute",
+      "rotate",
+      "hash",
+      "handcraft-kinsn",
+      "x86"
+    ]
+  },
+  "error_message": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/siphash_rotate64_mixer_handcraft.handcraft.so --program-name siphash_rotate64_mixer_handcraft_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/siphash_rotate64_mixer.mem --io-mode staged --input-size 64 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_042959_077447/details/jit_dumps/siphash_rotate64_mixer_handcraft__kernel__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_042959_077447/details/jit_dumps/siphash_rotate64_mixer_handcraft__kernel__sample00.xlated.bin\n    665: 01234..... (af) r1 ^= r3\n    666: 012.4..... (af) r1 ^= r2\n    667: 01..4..... (af) r1 ^= r0\n    668: .1..4..... (7b) *(u64 *)(r4 +0) = r1\n    669: .......... (b4) w0 = 2\n    670: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (61) r4 = *(u32 *)(r1 +0)          ; R1=ctx() R4=pkt(r=0)\n1: (61) r3 = *(u32 *)(r1 +4)          ; R1=ctx() R3=pkt_end()\n2: (ac) w0 ^= w0\nR0 !read_ok\nprocessed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+  "status": "error",
+  "total_benchmarks": 1
+}

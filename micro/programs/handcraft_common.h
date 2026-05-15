@@ -37,6 +37,9 @@
 #define HC_REG_IMM_PAYLOAD(DST, IMM) ((__u64)(DST) | ((__u64)(__u32)(IMM) << 8))
 #define HC_TEST_PAYLOAD(REG) ((__u64)(REG))
 #define HC_CMOV_PAYLOAD(DST, SRC, COND) ((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(COND) << 8))
+#define HC_REG_REG_PAYLOAD(DST, SRC) ((__u64)(DST) | ((__u64)(SRC) << 4))
+#define HC_MEM_PAYLOAD(REG, BASE, OFF) \
+    ((__u64)(REG) | ((__u64)(BASE) << 4) | ((__u64)(__u16)(OFF) << 8))
 #define HC_POPCNT_PAYLOAD(DST, SRC, TMP1, TMP2) \
     ((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(TMP1) << 8) | ((__u64)(TMP2) << 12))
 #define HC_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF) \
