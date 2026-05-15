@@ -10,6 +10,7 @@ obj-m += bpf_x86_cmov.o
 obj-m += bpf_x86_alu_imm.o
 obj-m += bpf_x86_mov_mem.o
 obj-m += bpf_x86_mov_store.o
+obj-m += bpf_x86_mov_reg.o
 obj-m += bpf_x86_byteorder.o
 obj-m += bpf_x86_lea.o
 obj-m += bpf_x86_prefetch.o

@@ -3,20 +3,12 @@
 # Daemon substitutes ${...} vars; runner sends this command verbatim.
 log_level: 1
 kinsns:
+  - name: bpf_x86_movq_rr
   - name: bpf_x86_testq_rr
-    aliases:
-      - bpf_x86_testq_rr
   - name: bpf_x86_cmovneq_rr
-    aliases:
-      - bpf_x86_cmovneq_rr
   - name: bpf_x86_cmoveq_rr
-    aliases:
-      - bpf_x86_cmoveq_rr
+  - name: bpf_arm64_mov_x_rr
   - name: bpf_arm64_tst_rr
-    aliases:
-      - bpf_arm64_tst_rr
   - name: bpf_arm64_csel_ne_rrr
-    aliases:
-      - bpf_arm64_csel_ne_rrr
 command: |
   timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}

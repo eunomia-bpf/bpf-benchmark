@@ -265,27 +265,8 @@ fn emit_endian_fusion_call(
     arch: Arch,
     size: u8,
 ) -> anyhow::Result<Vec<BpfInsn>> {
-    let direct_offset = offset_is_directly_encodable(arch, size, offset);
     let mut out = Vec::new();
-    if direct_offset {
-        append_endian_kinsns(&mut out, prog, dst_reg, src_reg, offset, arch, size)?;
-        return Ok(out);
-    }
-    let base_reg = if offset == 0 {
-        src_reg
-    } else if src_reg != dst_reg && src_reg != 10 {
-        out.push(BpfInsn::alu64_imm(BPF_ADD, src_reg, offset as i32));
-        append_endian_kinsns(&mut out, prog, dst_reg, src_reg, 0, arch, size)?;
-        out.push(BpfInsn::alu64_imm(BPF_ADD, src_reg, -(offset as i32)));
-        return Ok(out);
-    } else {
-        if dst_reg != src_reg {
-            out.push(BpfInsn::mov64_reg(dst_reg, src_reg));
-        }
-        out.push(BpfInsn::alu64_imm(BPF_ADD, dst_reg, offset as i32));
-        dst_reg
-    };
-    append_endian_kinsns(&mut out, prog, dst_reg, base_reg, 0, arch, size)?;
+    append_endian_kinsns(&mut out, prog, dst_reg, src_reg, offset, arch, size)?;
     Ok(out)
 }
 impl BpfPass for EndianFusionPass {
@@ -312,10 +293,20 @@ impl BpfPass for EndianFusionPass {
         if raw_sites.is_empty() {
             return Ok(PassResult::with_sites(0, skipped));
         }
-        let candidates: Vec<(InsnSite, (EndianFusionSite, usize))> = raw_sites
-            .into_iter()
-            .map(|hit| (hit.start, (hit.value, hit.old_len)))
-            .collect();
+        let mut candidates = Vec::new();
+        for hit in raw_sites {
+            if !offset_is_directly_encodable(ctx.arch, hit.value.size, hit.value.offset) {
+                skipped.push(SiteSkipReason::new(
+                    hit.start,
+                    "endian fusion offset is not encodable as one target load instruction",
+                ));
+                continue;
+            }
+            candidates.push((hit.start, (hit.value, hit.old_len)));
+        }
+        if candidates.is_empty() {
+            return Ok(PassResult::with_sites(0, skipped));
+        }
         let applied =
             apply_candidates_reverse(prog, &candidates, &mut skipped, |prog, start, payload| {
                 let (site, old_len) = payload;

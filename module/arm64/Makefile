@@ -11,6 +11,7 @@ obj-m += bpf_arm64_ccmp.o
 obj-m += bpf_arm64_ubfm.o
 obj-m += bpf_arm64_ldr.o
 obj-m += bpf_arm64_str.o
+obj-m += bpf_arm64_mov.o
 obj-m += bpf_arm64_rev.o
 obj-m += bpf_arm64_ldp.o
 obj-m += bpf_arm64_prfm.o

@@ -10,6 +10,11 @@ use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
+        name: "bpf_x86_movq_rr",
+        register_uses: mov_rr_register_uses,
+        register_defs: mov_rr_register_defs,
+    },
+    KinsnDescriptor {
         name: "bpf_x86_testq_rr",
         register_uses: test_register_uses,
         register_defs: no_regs,
@@ -23,6 +28,11 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
         name: "bpf_x86_cmoveq_rr",
         register_uses: x86_cmov_register_uses,
         register_defs: cond_select_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_arm64_mov_x_rr",
+        register_uses: mov_rr_register_uses,
+        register_defs: mov_rr_register_defs,
     },
     KinsnDescriptor {
         name: "bpf_arm64_tst_rr",
@@ -49,6 +59,14 @@ fn x86_cmov_register_uses(payload: u64) -> RegSet {
 }
 
 fn cond_select_register_defs(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[0])
+}
+
+fn mov_rr_register_uses(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[4])
+}
+
+fn mov_rr_register_defs(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[0])
 }
 
@@ -171,7 +189,13 @@ fn emit_cond_select_kinsns(
         if site.dst_reg == lowering.a_reg {
             return Ok(Vec::new());
         }
-        return Ok(vec![BpfInsn::mov64_reg(site.dst_reg, lowering.a_reg)]);
+        return prog.kinsn_emit(
+            match arch {
+                Arch::X86_64 => "bpf_x86_movq_rr",
+                Arch::Aarch64 => "bpf_arm64_mov_x_rr",
+            },
+            mov_rr_payload(site.dst_reg, lowering.a_reg),
+        );
     }
 
     match arch {
@@ -186,9 +210,12 @@ fn emit_x86_cond_select_kinsns(
     lowering: &CondSelectLowering,
 ) -> anyhow::Result<Vec<BpfInsn>> {
     let mut out = Vec::new();
-    if site.dst_reg != lowering.a_reg {
+        if site.dst_reg != lowering.a_reg {
         if site.dst_reg != lowering.b_reg {
-            out.push(BpfInsn::mov64_reg(site.dst_reg, lowering.b_reg));
+            out.extend_from_slice(&prog.kinsn_emit(
+                "bpf_x86_movq_rr",
+                mov_rr_payload(site.dst_reg, lowering.b_reg),
+            )?);
         }
         out.extend_from_slice(
             &prog.kinsn_emit("bpf_x86_testq_rr", test_payload(lowering.cond_reg))?,
@@ -232,6 +259,10 @@ fn test_payload(reg: u8) -> u64 {
 
 fn cmov_payload(dst_reg: u8, src_reg: u8, cond_reg: u8) -> u64 {
     BpfInsn::pack_u4(dst_reg, 0) | BpfInsn::pack_u4(src_reg, 4) | BpfInsn::pack_u4(cond_reg, 8)
+}
+
+fn mov_rr_payload(dst_reg: u8, src_reg: u8) -> u64 {
+    BpfInsn::pack_u4(dst_reg, 0) | BpfInsn::pack_u4(src_reg, 4)
 }
 
 fn diamond_pattern_for_site(

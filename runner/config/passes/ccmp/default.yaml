@@ -4,19 +4,9 @@
 log_level: 1
 kinsns:
   - name: bpf_arm64_cmp_x_imm0
-    aliases:
-      - bpf_arm64_cmp_x_imm0
   - name: bpf_arm64_cmp_w_imm0
-    aliases:
-      - bpf_arm64_cmp_w_imm0
   - name: bpf_arm64_ccmp_x_imm0
-    aliases:
-      - bpf_arm64_ccmp_x_imm0
   - name: bpf_arm64_ccmp_w_imm0
-    aliases:
-      - bpf_arm64_ccmp_w_imm0
   - name: bpf_arm64_cset_x_cond
-    aliases:
-      - bpf_arm64_cset_x_cond
 command: |
   timeout 6000 bpfopt --pass ccmp --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}

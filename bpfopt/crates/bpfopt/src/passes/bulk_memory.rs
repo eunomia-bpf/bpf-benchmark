@@ -8,8 +8,6 @@ const X86_STOREB_REG_TARGET: &str = "bpf_x86_movb_mem_reg";
 const X86_STOREB_IMM_TARGET: &str = "bpf_x86_movb_imm_mem";
 const ARM64_LOADB_TARGET: &str = "bpf_arm64_ldrb_mem";
 const ARM64_STOREB_REG_TARGET: &str = "bpf_arm64_strb_mem_reg";
-const ARM64_MOVZ_W10_IMM_TARGET: &str = "bpf_arm64_movz_w10_imm";
-const ARM64_STOREB_W10_TARGET: &str = "bpf_arm64_strb_w10_mem";
 const ARM64_STOREB_WZR_TARGET: &str = "bpf_arm64_strb_wzr_mem";
 const MIN_BULK_BYTES: usize = 32;
 const CHUNK_MAX_BYTES: usize = 128;
@@ -37,16 +35,6 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
         name: ARM64_STOREB_REG_TARGET,
         register_uses: store_reg_register_uses,
-        register_defs: no_regs,
-    },
-    KinsnDescriptor {
-        name: ARM64_MOVZ_W10_IMM_TARGET,
-        register_uses: no_regs,
-        register_defs: no_regs,
-    },
-    KinsnDescriptor {
-        name: ARM64_STOREB_W10_TARGET,
-        register_uses: store_imm_register_uses,
         register_defs: no_regs,
     },
     KinsnDescriptor {
@@ -379,10 +367,14 @@ fn bulk_site_supported_on_arch(site: &BulkSite, arch: Arch) -> bool {
             })
         }
         BulkSiteKind::Memset {
+            fill_byte,
             dst_off,
             chunk_sizes,
             ..
         } => {
+            if *fill_byte != 0 {
+                return false;
+            }
             let total_bytes: usize = chunk_sizes.iter().sum();
             (0..total_bytes).all(|idx| arm64_byte_offset_encodable(*dst_off as i32 + idx as i32))
         }
@@ -466,8 +458,7 @@ fn emit_memset_byte_kinsns(
 ) -> anyhow::Result<Vec<BpfInsn>> {
     let mut out = Vec::with_capacity(match arch {
         Arch::X86_64 => total_bytes * 2,
-        Arch::Aarch64 if fill_byte == 0 => total_bytes * 2,
-        Arch::Aarch64 => total_bytes * 4,
+        Arch::Aarch64 => total_bytes * 2,
     });
     for idx in 0..total_bytes {
         let dst_off = checked_byte_offset(dst_off, idx)?;
@@ -479,10 +470,9 @@ fn emit_memset_byte_kinsns(
             Arch::Aarch64 if fill_byte == 0 => {
                 out.extend_from_slice(&prog.kinsn_emit(ARM64_STOREB_WZR_TARGET, payload)?);
             }
-            Arch::Aarch64 => {
-                out.extend_from_slice(&prog.kinsn_emit(ARM64_MOVZ_W10_IMM_TARGET, payload)?);
-                out.extend_from_slice(&prog.kinsn_emit(ARM64_STOREB_W10_TARGET, payload)?);
-            }
+            Arch::Aarch64 => anyhow::bail!(
+                "arm64 nonzero memset has no single store-immediate machine instruction"
+            ),
         }
     }
     Ok(out)

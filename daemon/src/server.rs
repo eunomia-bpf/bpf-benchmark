@@ -231,32 +231,12 @@ fn parse_kinsn_probes(
         if !seen_names.insert(name.clone()) {
             return Err(format!("duplicate kinsn_probe name {name}"));
         }
-        let aliases_value = obj
-            .get("aliases")
-            .ok_or_else(|| format!("kinsn_probes[{idx}].aliases must be a JSON string array"))?;
-        let aliases_array = aliases_value
-            .as_array()
-            .ok_or_else(|| format!("kinsn_probes[{idx}].aliases must be a JSON string array"))?;
-        let mut aliases = Vec::with_capacity(aliases_array.len());
-        for (j, alias) in aliases_array.iter().enumerate() {
-            let raw = alias
-                .as_str()
-                .ok_or_else(|| format!("kinsn_probes[{idx}].aliases[{j}] must be a string"))?;
-            let trimmed = raw.trim().to_string();
-            if trimmed.is_empty() {
-                return Err(format!(
-                    "kinsn_probes[{idx}].aliases[{j}] must not be blank"
-                ));
-            }
-            aliases.push(trimmed);
+        if obj.contains_key("aliases") {
+            return Err(format!(
+                "kinsn_probes[{idx}].aliases is not supported; use exact kinsn names"
+            ));
         }
-        if aliases.is_empty() {
-            return Err(format!("kinsn_probes[{idx}].aliases must not be empty"));
-        }
-        probes.push(bpf::KinsnProbeTarget {
-            json_name: name,
-            probe_names: aliases,
-        });
+        probes.push(bpf::KinsnProbeTarget { name });
     }
     Ok(probes)
 }
@@ -522,26 +502,29 @@ mod tests {
                 ],
             }],
             "kinsn_probes": [
-                {"name": "bpf_x86_rolq_imm", "aliases": ["bpf_x86_rolq_imm"]},
-                {"name": "bpf_select64", "aliases": ["bpf_select64", "bpf_select32"]},
+                {"name": "bpf_x86_rolq_imm"},
+                {"name": "bpf_x86_testq_rr"},
             ],
         }))
         .unwrap();
         assert_eq!(parsed.kinsn_probes.len(), 2);
-        assert_eq!(parsed.kinsn_probes[0].json_name, "bpf_x86_rolq_imm");
-        assert_eq!(parsed.kinsn_probes[1].probe_names.len(), 2);
+        assert_eq!(parsed.kinsn_probes[0].name, "bpf_x86_rolq_imm");
+        assert_eq!(parsed.kinsn_probes[1].name, "bpf_x86_testq_rr");
         assert_eq!(parsed.plans[0].steps[0].name, "noop");
         assert_eq!(parsed.plans[0].steps[0].log_level, 2);
     }
 
     #[test]
-    fn parse_execute_plan_rejects_kinsn_probe_with_no_aliases() {
+    fn parse_execute_plan_rejects_kinsn_probe_aliases() {
         let err = parse_execute_plan(&serde_json::json!({
             "cmd": "execute_plan",
             "programs": [],
             "kinsn_probes": [{"name": "bpf_x86_rolq_imm", "aliases": []}],
         }))
         .unwrap_err();
-        assert_eq!(err, "kinsn_probes[0].aliases must not be empty");
+        assert_eq!(
+            err,
+            "kinsn_probes[0].aliases is not supported; use exact kinsn names"
+        );
     }
 }

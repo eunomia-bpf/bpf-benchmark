@@ -29,8 +29,8 @@ CONFIG_ROOT = Path(__file__).resolve().parents[1] / "config" / "passes"
 class StepConfig:
     command: str        # multi-line yaml block collapsed to single shell line
     log_level: int      # 1 or 2 — predecessor must rejit at this level
-    kinsns: tuple[tuple[str, tuple[str, ...]], ...]
-    """((json_name, (alias,...)),) — daemon target.json kinsn probes."""
+    kinsns: tuple[str, ...]
+    """Daemon target.json kinsn probes, by exact kfunc name."""
 
 
 def _load(path: Path) -> Mapping[str, Any]:
@@ -42,9 +42,9 @@ def _collapse(s: object) -> str:
     return " ".join(str(s).split())
 
 
-def _kinsns(payload: Mapping[str, Any]) -> tuple[tuple[str, tuple[str, ...]], ...]:
+def _kinsns(payload: Mapping[str, Any]) -> tuple[str, ...]:
     return tuple(sorted(
-        (str(k["name"]), tuple(sorted(str(a) for a in k["aliases"])))
+        str(k["name"])
         for k in (payload.get("kinsns") or [])
     ))
 
@@ -86,14 +86,10 @@ def find_step_config(
 
 def build_kinsn_probes(enabled_passes: Sequence[str]) -> list[dict[str, Any]]:
     """Union of kinsn probes across the chosen passes (read from default.yaml)."""
-    by_name: dict[str, set[str]] = {}
+    names: set[str] = set()
     for pass_name in enabled_passes:
-        for json_name, aliases in find_step_config(pass_name, None, None).kinsns:
-            by_name.setdefault(json_name, set()).update(aliases)
-    return [
-        {"name": n, "aliases": sorted(a)}
-        for n, a in sorted(by_name.items())
-    ]
+        names.update(find_step_config(pass_name, None, None).kinsns)
+    return [{"name": n} for n in sorted(names)]
 
 
 def build_execute_plan_payload(

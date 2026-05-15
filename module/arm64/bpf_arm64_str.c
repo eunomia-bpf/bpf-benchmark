@@ -5,24 +5,18 @@
 
 #include "kinsn_common.h"
 
-#define A64_HIDDEN_TMP	10
-
 __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_arm64_strb_mem_reg(void) {}
 __bpf_kfunc void bpf_arm64_strh_mem_reg(void) {}
 __bpf_kfunc void bpf_arm64_str_w_mem_reg(void) {}
 __bpf_kfunc void bpf_arm64_str_x_mem_reg(void) {}
 __bpf_kfunc void bpf_arm64_strb_wzr_mem(void) {}
-__bpf_kfunc void bpf_arm64_movz_w10_imm(void) {}
-__bpf_kfunc void bpf_arm64_strb_w10_mem(void) {}
 __bpf_kfunc_end_defs();
 
 BTF_KFUNCS_START(bpf_arm64_str_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_arm64_movz_w10_imm)
 BTF_ID_FLAGS(func, bpf_arm64_str_w_mem_reg)
 BTF_ID_FLAGS(func, bpf_arm64_str_x_mem_reg)
 BTF_ID_FLAGS(func, bpf_arm64_strb_mem_reg)
-BTF_ID_FLAGS(func, bpf_arm64_strb_w10_mem)
 BTF_ID_FLAGS(func, bpf_arm64_strb_wzr_mem)
 BTF_ID_FLAGS(func, bpf_arm64_strh_mem_reg)
 BTF_KFUNCS_END(bpf_arm64_str_kfunc_ids)
@@ -91,37 +85,6 @@ static int instantiate_str_x_mem_reg(u64 payload, struct bpf_insn *insn_buf)
 	return instantiate_store_reg(payload, insn_buf, BPF_DW);
 }
 
-static int instantiate_movz_w10_imm(u64 payload, struct bpf_insn *insn_buf)
-{
-	u8 base_reg, imm;
-	s16 offset;
-	int err;
-
-	err = decode_store_imm_payload(payload, &base_reg, &offset, &imm);
-	if (err)
-		return err;
-	(void)base_reg;
-	(void)offset;
-	(void)imm;
-
-	insn_buf[0] = BPF_JMP_A(0);
-	return 1;
-}
-
-static int instantiate_strb_imm_mem(u64 payload, struct bpf_insn *insn_buf)
-{
-	u8 base_reg, imm;
-	s16 offset;
-	int err;
-
-	err = decode_store_imm_payload(payload, &base_reg, &offset, &imm);
-	if (err)
-		return err;
-
-	insn_buf[0] = BPF_ST_MEM(BPF_B, base_reg, offset, imm);
-	return 1;
-}
-
 static int instantiate_strb_zero_mem(u64 payload, struct bpf_insn *insn_buf)
 {
 	u8 base_reg, imm;
@@ -187,11 +150,6 @@ static inline u32 a64_str_x(u8 rt, u8 rn, s16 offset)
 
 	return 0xF8000000U | ((((u32)offset) & 0x1ffU) << 12) |
 	       ((u32)rn << 5) | (u32)rt;
-}
-
-static inline u32 a64_movz_w(u8 rd, u16 imm16)
-{
-	return 0x52800000U | ((u32)imm16 << 5) | (u32)rd;
 }
 
 static int emit_store_reg_arm64(u32 *image, int *idx, bool emit, u64 payload,
@@ -273,32 +231,6 @@ static int emit_str_x_mem_reg_arm64(u32 *image, int *idx, bool emit,
 	return emit_store_reg_arm64(image, idx, emit, payload, prog, BPF_DW);
 }
 
-static int emit_movz_w10_imm_arm64(u32 *image, int *idx, bool emit,
-				   u64 payload, const struct bpf_prog *prog)
-{
-	u8 base_reg, imm;
-	s16 offset;
-	int err;
-
-	(void)prog;
-
-	if (!idx)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
-	err = decode_store_imm_payload(payload, &base_reg, &offset, &imm);
-	if (err)
-		return err;
-	(void)base_reg;
-	(void)offset;
-
-	if (emit)
-		image[*idx] = cpu_to_le32(a64_movz_w(A64_HIDDEN_TMP, imm));
-	*idx += 1;
-	return 1;
-}
-
 static int emit_strb_fixed_arm64(u32 *image, int *idx, bool emit, u64 payload,
 				 const struct bpf_prog *prog, u8 src_reg)
 {
@@ -336,12 +268,6 @@ static int emit_strb_wzr_mem_arm64(u32 *image, int *idx, bool emit,
 				   u64 payload, const struct bpf_prog *prog)
 {
 	return emit_strb_fixed_arm64(image, idx, emit, payload, prog, 31);
-}
-
-static int emit_strb_w10_mem_arm64(u32 *image, int *idx, bool emit,
-				   u64 payload, const struct bpf_prog *prog)
-{
-	return emit_strb_fixed_arm64(image, idx, emit, payload, prog, A64_HIDDEN_TMP);
 }
 
 const struct bpf_kinsn bpf_arm64_strb_mem_reg_desc = {
@@ -384,31 +310,13 @@ const struct bpf_kinsn bpf_arm64_strb_wzr_mem_desc = {
 	.emit_arm64 = emit_strb_wzr_mem_arm64,
 };
 
-const struct bpf_kinsn bpf_arm64_movz_w10_imm_desc = {
-	.owner = THIS_MODULE,
-	.max_insn_cnt = 1,
-	.max_emit_bytes = 4,
-	.instantiate_insn = instantiate_movz_w10_imm,
-	.emit_arm64 = emit_movz_w10_imm_arm64,
-};
-
-const struct bpf_kinsn bpf_arm64_strb_w10_mem_desc = {
-	.owner = THIS_MODULE,
-	.max_insn_cnt = 1,
-	.max_emit_bytes = 4,
-	.instantiate_insn = instantiate_strb_imm_mem,
-	.emit_arm64 = emit_strb_w10_mem_arm64,
-};
-
 static const struct bpf_kinsn * const bpf_arm64_str_kinsn_descs[] = {
-	&bpf_arm64_movz_w10_imm_desc,
 	&bpf_arm64_str_w_mem_reg_desc,
 	&bpf_arm64_str_x_mem_reg_desc,
 	&bpf_arm64_strb_mem_reg_desc,
-	&bpf_arm64_strb_w10_mem_desc,
 	&bpf_arm64_strb_wzr_mem_desc,
 	&bpf_arm64_strh_mem_reg_desc,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_arm64_str, "BpfReJIT arm64 kinsns: STR/MOVZ",
+DEFINE_KINSN_V2_MODULE(bpf_arm64_str, "BpfReJIT arm64 kinsns: STR",
 		       bpf_arm64_str_kfunc_ids, bpf_arm64_str_kinsn_descs);

@@ -4,40 +4,16 @@
 log_level: 1
 kinsns:
   - name: bpf_x86_movzwl_mem
-    aliases:
-      - bpf_x86_movzwl_mem
   - name: bpf_x86_movl_mem
-    aliases:
-      - bpf_x86_movl_mem
   - name: bpf_x86_movq_mem
-    aliases:
-      - bpf_x86_movq_mem
   - name: bpf_x86_rolw_imm
-    aliases:
-      - bpf_x86_rolw_imm
   - name: bpf_x86_bswapl
-    aliases:
-      - bpf_x86_bswapl
   - name: bpf_x86_bswapq
-    aliases:
-      - bpf_x86_bswapq
   - name: bpf_arm64_ldrh_mem
-    aliases:
-      - bpf_arm64_ldrh_mem
   - name: bpf_arm64_ldr_w_mem
-    aliases:
-      - bpf_arm64_ldr_w_mem
   - name: bpf_arm64_ldr_x_mem
-    aliases:
-      - bpf_arm64_ldr_x_mem
   - name: bpf_arm64_rev16_w
-    aliases:
-      - bpf_arm64_rev16_w
   - name: bpf_arm64_rev_w
-    aliases:
-      - bpf_arm64_rev_w
   - name: bpf_arm64_rev_x
-    aliases:
-      - bpf_arm64_rev_x
 command: |
   timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}

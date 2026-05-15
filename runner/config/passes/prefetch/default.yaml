@@ -4,10 +4,6 @@
 log_level: 1
 kinsns:
   - name: bpf_x86_prefetcht0
-    aliases:
-      - bpf_x86_prefetcht0
   - name: bpf_arm64_prfm_pldl1keep
-    aliases:
-      - bpf_arm64_prfm_pldl1keep
 command: |
   timeout 6000 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}

@@ -64,7 +64,9 @@ pub(crate) struct TargetKinsnJson {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-#[rustfmt::skip] pub(crate) struct KinsnProbeTarget { pub(crate) json_name: String, pub(crate) probe_names: Vec<String> }
+pub(crate) struct KinsnProbeTarget {
+    pub(crate) name: String,
+}
 
 pub(crate) fn snapshot_program(prog_id: u32) -> Result<ProgramSnapshot> {
     let fd = syscall::prog_get_fd_by_id(prog_id)
@@ -245,44 +247,42 @@ fn probe_kinsns_in_btf(
     targets: &[KinsnProbeTarget],
 ) -> Result<()> {
     for target in targets {
-        if found.contains_key(&target.json_name) {
+        if found.contains_key(&target.name) {
             continue;
         }
-        for probe_name in &target.probe_names {
-            if let Some(btf_func_id) = btf
-                .find_func_by_name(probe_name)
-                .with_context(|| format!("inspect BTF id {btf_id} for {probe_name}"))?
-            {
-                let Ok(btf_func_id) = i32::try_from(btf_func_id) else {
-                    bail!(
-                        "BTF id {btf_id} function {probe_name} type id {btf_func_id} exceeds target.json i32 range"
-                    );
-                };
-                let call_offset = if is_module {
-                    match module_slot_map.entry(btf_id) {
-                        std::collections::btree_map::Entry::Occupied(entry) => *entry.get(),
-                        std::collections::btree_map::Entry::Vacant(entry) => {
-                            let slot = *next_slot;
-                            *next_slot = next_slot.checked_add(1).ok_or_else(|| {
-                                anyhow::anyhow!("BTF module call_offset overflow after slot {slot}")
-                            })?;
-                            entry.insert(slot);
-                            slot
-                        }
-                    }
-                } else {
-                    0
-                };
-                found.insert(
-                    target.json_name.clone(),
-                    TargetKinsnJson {
-                        btf_func_id,
-                        btf_id,
-                        call_offset,
-                    },
+        if let Some(btf_func_id) = btf
+            .find_func_by_name(&target.name)
+            .with_context(|| format!("inspect BTF id {btf_id} for {}", target.name))?
+        {
+            let Ok(btf_func_id) = i32::try_from(btf_func_id) else {
+                bail!(
+                    "BTF id {btf_id} function {} type id {btf_func_id} exceeds target.json i32 range",
+                    target.name
                 );
-                break;
-            }
+            };
+            let call_offset = if is_module {
+                match module_slot_map.entry(btf_id) {
+                    std::collections::btree_map::Entry::Occupied(entry) => *entry.get(),
+                    std::collections::btree_map::Entry::Vacant(entry) => {
+                        let slot = *next_slot;
+                        *next_slot = next_slot.checked_add(1).ok_or_else(|| {
+                            anyhow::anyhow!("BTF module call_offset overflow after slot {slot}")
+                        })?;
+                        entry.insert(slot);
+                        slot
+                    }
+                }
+            } else {
+                0
+            };
+            found.insert(
+                target.name.clone(),
+                TargetKinsnJson {
+                    btf_func_id,
+                    btf_id,
+                    call_offset,
+                },
+            );
         }
     }
     Ok(())

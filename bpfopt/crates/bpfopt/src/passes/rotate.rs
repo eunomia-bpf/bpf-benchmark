@@ -4,6 +4,11 @@ use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
+        name: "bpf_x86_movq_rr",
+        register_uses: mov_rr_register_uses,
+        register_defs: mov_rr_register_defs,
+    },
+    KinsnDescriptor {
         name: "bpf_x86_rolq_imm",
         register_uses: rotate_register_uses,
         register_defs: rotate_register_defs,
@@ -30,6 +35,14 @@ fn rotate_register_uses(payload: u64) -> RegSet {
 }
 
 fn rotate_register_defs(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[0])
+}
+
+fn mov_rr_register_uses(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[4])
+}
+
+fn mov_rr_register_defs(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[0])
 }
 pub struct RotatePass;
@@ -154,7 +167,10 @@ fn emit_rotate_replacement(
     let mut replacement = Vec::new();
     let (call_dst, call_src) = if arch == Arch::X86_64 && site.width == RotateWidth::W64 {
         if site.dst_reg != site.val_reg {
-            replacement.push(BpfInsn::mov64_reg(site.dst_reg, site.val_reg));
+            replacement.extend_from_slice(&prog.kinsn_emit(
+                "bpf_x86_movq_rr",
+                mov_rr_payload(site.dst_reg, site.val_reg),
+            )?);
         }
         (site.dst_reg, site.dst_reg)
     } else {
@@ -166,6 +182,10 @@ fn emit_rotate_replacement(
         | BpfInsn::pack_u4(site.tmp_reg, 16);
     replacement.extend_from_slice(&prog.kinsn_emit(site.width.target_name(arch), payload)?);
     Ok(replacement)
+}
+
+fn mov_rr_payload(dst_reg: u8, src_reg: u8) -> u64 {
+    BpfInsn::pack_u4(dst_reg, 0) | BpfInsn::pack_u4(src_reg, 4)
 }
 fn find_provenance_mov(
     insns: &[BpfInsn],
