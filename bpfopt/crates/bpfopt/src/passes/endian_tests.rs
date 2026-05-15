@@ -7,14 +7,23 @@ use crate::test_helpers::*;
 fn endian_ctx() -> crate::pass::PassContext {
     let mut ctx = pass_ctx();
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_endian_load16", 1616, 0)
-        .expect("register endian16");
+        .set_kinsn_call_for_target_name("bpf_x86_movzwl_mem", 1616, 0)
+        .expect("register movzwl");
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_endian_load32", 3232, 0)
-        .expect("register endian32");
+        .set_kinsn_call_for_target_name("bpf_x86_movl_mem", 3232, 0)
+        .expect("register movl");
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_endian_load64", 6464, 0)
-        .expect("register endian64");
+        .set_kinsn_call_for_target_name("bpf_x86_movq_mem", 6464, 0)
+        .expect("register movq");
+    ctx.kinsn_registry
+        .set_kinsn_call_for_target_name("bpf_x86_rolw_imm", 1617, 0)
+        .expect("register rolw");
+    ctx.kinsn_registry
+        .set_kinsn_call_for_target_name("bpf_x86_bswapl", 3233, 0)
+        .expect("register bswapl");
+    ctx.kinsn_registry
+        .set_kinsn_call_for_target_name("bpf_x86_bswapq", 6465, 0)
+        .expect("register bswapq");
     ctx
 }
 
@@ -38,6 +47,10 @@ fn endian_rewrites_32bit_load_swap() {
         .lowered
         .iter()
         .any(|i| i.is_call_kinsn() && i.imm == 3232));
+    assert!(run
+        .lowered
+        .iter()
+        .any(|i| i.is_call_kinsn() && i.imm == 3233));
 }
 
 #[test]
@@ -60,6 +73,10 @@ fn endian_rewrites_16bit_load_swap() {
         .lowered
         .iter()
         .any(|i| i.is_call_kinsn() && i.imm == 1616));
+    assert!(run
+        .lowered
+        .iter()
+        .any(|i| i.is_call_kinsn() && i.imm == 1617));
 }
 
 #[test]
@@ -82,6 +99,10 @@ fn endian_rewrites_64bit_load_swap() {
         .lowered
         .iter()
         .any(|i| i.is_call_kinsn() && i.imm == 6464));
+    assert!(run
+        .lowered
+        .iter()
+        .any(|i| i.is_call_kinsn() && i.imm == 6465));
 }
 
 #[test]
@@ -171,8 +192,11 @@ fn test_endian_fusion_pass_branch_fixup() {
 fn endian_preserves_module_call_offset() {
     let mut ctx = pass_ctx();
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_endian_load32", 3232, 2)
-        .expect("register endian32 module call");
+        .set_kinsn_call_for_target_name("bpf_x86_movl_mem", 3232, 2)
+        .expect("register movl module call");
+    ctx.kinsn_registry
+        .set_kinsn_call_for_target_name("bpf_x86_bswapl", 3233, 4)
+        .expect("register bswapl module call");
     let input = vec![
         BpfInsn::ldx_mem(BPF_W, BPF_REG_2, BPF_REG_6, 8),
         BpfInsn::new(
@@ -185,8 +209,18 @@ fn endian_preserves_module_call_offset() {
     ];
 
     let run = run_pass_on_insns(EndianFusionPass, input, &ctx);
-    let call = run.lowered.iter().find(|i| i.is_call_kinsn()).unwrap();
+    let call = run
+        .lowered
+        .iter()
+        .find(|i| i.is_call_kinsn() && i.imm == 3232)
+        .unwrap();
 
     assert_eq!(call.imm, 3232);
     assert_eq!(call.off, 2);
+    let bswap = run
+        .lowered
+        .iter()
+        .find(|i| i.is_call_kinsn() && i.imm == 3233)
+        .unwrap();
+    assert_eq!(bswap.off, 4);
 }

@@ -3,31 +3,69 @@ use crate::analysis::{InsnSite, ProgramCFG};
 use crate::insn::*;
 use crate::pass::*;
 
-const MEMCPY_TARGET: &str = "bpf_bulk_memcpy";
-const MEMSET_TARGET: &str = "bpf_bulk_memset";
+const X86_LOADB_TARGET: &str = "bpf_x86_movzbl_mem";
+const X86_STOREB_REG_TARGET: &str = "bpf_x86_movb_mem_reg";
+const X86_STOREB_IMM_TARGET: &str = "bpf_x86_movb_imm_mem";
+const ARM64_LOADB_TARGET: &str = "bpf_arm64_ldrb_mem";
+const ARM64_STOREB_REG_TARGET: &str = "bpf_arm64_strb_mem_reg";
+const ARM64_MOVZ_W10_IMM_TARGET: &str = "bpf_arm64_movz_w10_imm";
+const ARM64_STOREB_W10_TARGET: &str = "bpf_arm64_strb_w10_mem";
+const ARM64_STOREB_WZR_TARGET: &str = "bpf_arm64_strb_wzr_mem";
 const MIN_BULK_BYTES: usize = 32;
 const CHUNK_MAX_BYTES: usize = 128;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
-        name: MEMCPY_TARGET,
-        register_uses: memcpy_bulk_register_uses,
+        name: X86_LOADB_TARGET,
+        register_uses: load_register_uses,
+        register_defs: load_register_defs,
+    },
+    KinsnDescriptor {
+        name: X86_STOREB_REG_TARGET,
+        register_uses: store_reg_register_uses,
         register_defs: no_regs,
     },
     KinsnDescriptor {
-        name: MEMSET_TARGET,
-        register_uses: memset_bulk_register_uses,
+        name: X86_STOREB_IMM_TARGET,
+        register_uses: store_imm_register_uses,
+        register_defs: no_regs,
+    },
+    KinsnDescriptor {
+        name: ARM64_LOADB_TARGET,
+        register_uses: load_register_uses,
+        register_defs: load_register_defs,
+    },
+    KinsnDescriptor {
+        name: ARM64_STOREB_REG_TARGET,
+        register_uses: store_reg_register_uses,
+        register_defs: no_regs,
+    },
+    KinsnDescriptor {
+        name: ARM64_MOVZ_W10_IMM_TARGET,
+        register_uses: no_regs,
+        register_defs: no_regs,
+    },
+    KinsnDescriptor {
+        name: ARM64_STOREB_W10_TARGET,
+        register_uses: store_imm_register_uses,
+        register_defs: no_regs,
+    },
+    KinsnDescriptor {
+        name: ARM64_STOREB_WZR_TARGET,
+        register_uses: store_imm_register_uses,
         register_defs: no_regs,
     },
 ];
-fn memcpy_bulk_register_uses(payload: u64) -> RegSet {
+fn load_register_uses(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[4])
+}
+fn load_register_defs(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[0])
+}
+fn store_reg_register_uses(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[0, 4])
 }
-fn memset_bulk_register_uses(payload: u64) -> RegSet {
-    let mut uses: RegSet = [kinsn_payload_reg(payload, 0)].into_iter().collect();
-    if (BpfInsn::unpack_u4(payload, 34) & 0x1) != 0 {
-        uses.insert(kinsn_payload_reg(payload, 4));
-    }
-    uses
+fn store_imm_register_uses(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[0])
 }
 #[derive(Clone, Debug)]
 enum BulkSiteKind {
@@ -42,7 +80,6 @@ enum BulkSiteKind {
     Memset {
         base: u8,
         dst_off: i16,
-        width: u8,
         fill_byte: u8,
         chunk_sizes: Vec<usize>,
     },
@@ -80,21 +117,21 @@ struct MemsetLane {
 }
 pub struct BulkMemoryPass;
 impl BpfPass for BulkMemoryPass {
-    fn run(&self, prog: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
-        let scan = scan_sites(prog)?;
+    fn run(&self, prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
+        let scan = scan_sites(prog, ctx.arch)?;
         let mut skipped = scan.skips;
         if scan.sites.is_empty() {
             return Ok(PassResult::with_sites(0, skipped));
         }
         let applied =
             apply_candidates_reverse(prog, &scan.sites, &mut skipped, |prog, _, site| {
-                Ok((site.old_len, emit_site_replacement(site, prog)?))
+                Ok((site.old_len, emit_site_replacement(site, prog, ctx.arch)?))
             })?;
         Ok(PassResult::with_sites(applied, skipped))
     }
 }
 
-fn scan_sites(prog: &ProgramCFG) -> anyhow::Result<ScanResult> {
+fn scan_sites(prog: &ProgramCFG, arch: Arch) -> anyhow::Result<ScanResult> {
     let mut scan = ScanResult::default();
     for block in prog.block_ids().collect::<Vec<_>>() {
         let body = prog.block_body_view(block)?;
@@ -102,7 +139,7 @@ fn scan_sites(prog: &ProgramCFG) -> anyhow::Result<ScanResult> {
         let mut idx = 0usize;
         while idx < body.insns.len() {
             let start = body.sites[idx];
-            match try_match_memcpy_run_at(prog, &body_insns, &body.sites, idx)? {
+            match try_match_memcpy_run_at(prog, &body_insns, &body.sites, idx, arch)? {
                 MatchOutcome::Apply(site) => {
                     let old_len = site.old_len;
                     scan.sites.push((start, site));
@@ -120,7 +157,8 @@ fn scan_sites(prog: &ProgramCFG) -> anyhow::Result<ScanResult> {
                 }
                 MatchOutcome::NoMatch => {}
             }
-            if let Some(site) = try_match_memset_run_at(prog, &body_insns, &body.sites, idx)? {
+            if let Some(site) = try_match_memset_run_at(prog, &body_insns, &body.sites, idx, arch)?
+            {
                 let old_len = site.old_len;
                 scan.sites.push((start, site));
                 idx += old_len;
@@ -136,6 +174,7 @@ fn try_match_memcpy_run_at(
     insns: &[BpfInsn],
     sites: &[InsnSite],
     idx: usize,
+    arch: Arch,
 ) -> anyhow::Result<MatchOutcome> {
     let Some(first) = memcpy_lane_at(insns, idx) else {
         return Ok(MatchOutcome::NoMatch);
@@ -200,7 +239,7 @@ fn try_match_memcpy_run_at(
         }
         seen |= bit;
     }
-    Ok(MatchOutcome::Apply(BulkSite {
+    let site = BulkSite {
         old_len,
         kind: BulkSiteKind::Memcpy {
             dst_base: first.dst_base,
@@ -210,13 +249,21 @@ fn try_match_memcpy_run_at(
             temp_reg: first.tmp_reg,
             chunk_sizes,
         },
-    }))
+    };
+    if !bulk_site_supported_on_arch(&site, arch) {
+        return Ok(MatchOutcome::Skip(
+            "bulk_memory machine kinsn offset is not encodable on target arch".into(),
+            raw_len,
+        ));
+    }
+    Ok(MatchOutcome::Apply(site))
 }
 fn try_match_memset_run_at(
     prog: &ProgramCFG,
     insns: &[BpfInsn],
     sites: &[InsnSite],
     idx: usize,
+    arch: Arch,
 ) -> anyhow::Result<Option<BulkSite>> {
     let Some(first) = memset_lane_at(prog, insns, sites, idx)? else {
         return Ok(None);
@@ -243,25 +290,19 @@ fn try_match_memset_run_at(
     if chunk_sizes.is_empty() {
         return Ok(None);
     }
-    let consumed_widths = &widths[..consumed_lanes];
-    let payload_width = if consumed_widths
-        .iter()
-        .all(|&width| width == consumed_widths[0])
-    {
-        consumed_widths[0]
-    } else {
-        BPF_B
-    };
-    Ok(Some(BulkSite {
+    let site = BulkSite {
         old_len: consumed_lanes,
         kind: BulkSiteKind::Memset {
             base: first.base,
             dst_off: first.off,
-            width: payload_width,
             fill_byte: first.fill_byte,
             chunk_sizes,
         },
-    }))
+    };
+    if !bulk_site_supported_on_arch(&site, arch) {
+        return Ok(None);
+    }
+    Ok(Some(site))
 }
 fn memcpy_lane_at(insns: &[BpfInsn], idx: usize) -> Option<MemcpyLane> {
     let load = insns.get(idx)?;
@@ -320,7 +361,41 @@ fn memset_lane_at(
         fill_byte,
     }))
 }
-fn emit_site_replacement(site: &BulkSite, prog: &ProgramCFG) -> anyhow::Result<Vec<BpfInsn>> {
+fn bulk_site_supported_on_arch(site: &BulkSite, arch: Arch) -> bool {
+    if arch == Arch::X86_64 {
+        return true;
+    }
+    match &site.kind {
+        BulkSiteKind::Memcpy {
+            dst_off,
+            src_off,
+            chunk_sizes,
+            ..
+        } => {
+            let total_bytes: usize = chunk_sizes.iter().sum();
+            (0..total_bytes).all(|idx| {
+                arm64_byte_offset_encodable(*src_off as i32 + idx as i32)
+                    && arm64_byte_offset_encodable(*dst_off as i32 + idx as i32)
+            })
+        }
+        BulkSiteKind::Memset {
+            dst_off,
+            chunk_sizes,
+            ..
+        } => {
+            let total_bytes: usize = chunk_sizes.iter().sum();
+            (0..total_bytes).all(|idx| arm64_byte_offset_encodable(*dst_off as i32 + idx as i32))
+        }
+    }
+}
+fn arm64_byte_offset_encodable(offset: i32) -> bool {
+    (0..=0x0fff).contains(&offset) || (-256..=255).contains(&offset)
+}
+fn emit_site_replacement(
+    site: &BulkSite,
+    prog: &ProgramCFG,
+    arch: Arch,
+) -> anyhow::Result<Vec<BpfInsn>> {
     match &site.kind {
         BulkSiteKind::Memcpy {
             dst_base,
@@ -330,90 +405,106 @@ fn emit_site_replacement(site: &BulkSite, prog: &ProgramCFG) -> anyhow::Result<V
             temp_reg,
             chunk_sizes,
         } => {
-            let mut cur_dst_off = *dst_off as i32;
-            let mut cur_src_off = *src_off as i32;
-            emit_chunked_calls(prog, MEMCPY_TARGET, chunk_sizes, |chunk_size| {
-                let payload = pack_memcpy_payload(
-                    *dst_base,
-                    *src_base,
-                    cur_dst_off as i16,
-                    cur_src_off as i16,
-                    chunk_size as u8,
-                    *temp_reg,
-                );
-                cur_dst_off += chunk_size as i32;
-                cur_src_off += chunk_size as i32;
-                Ok(payload)
-            })
+            let total_bytes: usize = chunk_sizes.iter().sum();
+            emit_memcpy_byte_kinsns(
+                prog,
+                arch,
+                *dst_base,
+                *src_base,
+                *dst_off,
+                *src_off,
+                *temp_reg,
+                total_bytes,
+            )
         }
         BulkSiteKind::Memset {
             base,
             dst_off,
-            width,
             fill_byte,
             chunk_sizes,
         } => {
-            let mut cur_dst_off = *dst_off as i32;
-            emit_chunked_calls(prog, MEMSET_TARGET, chunk_sizes, |chunk_size| {
-                let payload = pack_memset_payload(
-                    *base,
-                    cur_dst_off as i16,
-                    chunk_size as u8,
-                    *width,
-                    *fill_byte,
-                )?;
-                cur_dst_off += chunk_size as i32;
-                Ok(payload)
-            })
+            let total_bytes: usize = chunk_sizes.iter().sum();
+            emit_memset_byte_kinsns(prog, arch, *base, *dst_off, *fill_byte, total_bytes)
         }
     }
 }
-fn emit_chunked_calls(
+fn emit_memcpy_byte_kinsns(
     prog: &ProgramCFG,
-    target: &str,
-    chunk_sizes: &[usize],
-    mut pack_payload: impl FnMut(usize) -> anyhow::Result<u64>,
-) -> anyhow::Result<Vec<BpfInsn>> {
-    let (btf_id, call_off) = prog.kinsn_call(target)?;
-    let mut out = Vec::with_capacity(chunk_sizes.len() * 2);
-    for &chunk_size in chunk_sizes {
-        out.extend_from_slice(&emit_packed_kinsn_call_with_off(
-            pack_payload(chunk_size)?,
-            btf_id,
-            call_off,
-        ));
-    }
-    Ok(out)
-}
-fn pack_memcpy_payload(
+    arch: Arch,
     dst_base: u8,
     src_base: u8,
     dst_off: i16,
     src_off: i16,
-    len: u8,
     temp_reg: u8,
-) -> u64 {
-    BpfInsn::pack_u4(dst_base, 0)
-        | BpfInsn::pack_u4(src_base, 4)
-        | BpfInsn::pack_u16(dst_off as u16, 8)
-        | BpfInsn::pack_u16(src_off as u16, 24)
-        | BpfInsn::pack_u8(len - 1, 40)
-        | BpfInsn::pack_u4(temp_reg, 48)
+    total_bytes: usize,
+) -> anyhow::Result<Vec<BpfInsn>> {
+    let (load_target, store_target) = match arch {
+        Arch::X86_64 => (X86_LOADB_TARGET, X86_STOREB_REG_TARGET),
+        Arch::Aarch64 => (ARM64_LOADB_TARGET, ARM64_STOREB_REG_TARGET),
+    };
+    let mut out = Vec::with_capacity(total_bytes * 4);
+    for idx in 0..total_bytes {
+        let src_off = checked_byte_offset(src_off, idx)?;
+        let dst_off = checked_byte_offset(dst_off, idx)?;
+        out.extend_from_slice(
+            &prog.kinsn_emit(load_target, pack_mem_payload(temp_reg, src_base, src_off))?,
+        );
+        out.extend_from_slice(&prog.kinsn_emit(
+            store_target,
+            pack_store_reg_payload(temp_reg, dst_base, dst_off),
+        )?);
+    }
+    Ok(out)
 }
-fn pack_memset_payload(
+fn emit_memset_byte_kinsns(
+    prog: &ProgramCFG,
+    arch: Arch,
     base: u8,
     dst_off: i16,
-    len: u8,
-    width: u8,
     fill_byte: u8,
-) -> anyhow::Result<u64> {
-    let zero_fill = fill_byte == 0;
-    Ok(BpfInsn::pack_u4(base, 0)
-        | BpfInsn::pack_u16(dst_off as u16, 8)
-        | BpfInsn::pack_u8(len - 1, 24)
-        | BpfInsn::pack_u4(decode_width(width)? as u8, 32)
-        | BpfInsn::pack_u4(zero_fill as u8, 35)
-        | BpfInsn::pack_u8(fill_byte, 36))
+    total_bytes: usize,
+) -> anyhow::Result<Vec<BpfInsn>> {
+    let mut out = Vec::with_capacity(match arch {
+        Arch::X86_64 => total_bytes * 2,
+        Arch::Aarch64 if fill_byte == 0 => total_bytes * 2,
+        Arch::Aarch64 => total_bytes * 4,
+    });
+    for idx in 0..total_bytes {
+        let dst_off = checked_byte_offset(dst_off, idx)?;
+        let payload = pack_store_imm_payload(base, dst_off, fill_byte);
+        match arch {
+            Arch::X86_64 => {
+                out.extend_from_slice(&prog.kinsn_emit(X86_STOREB_IMM_TARGET, payload)?)
+            }
+            Arch::Aarch64 if fill_byte == 0 => {
+                out.extend_from_slice(&prog.kinsn_emit(ARM64_STOREB_WZR_TARGET, payload)?);
+            }
+            Arch::Aarch64 => {
+                out.extend_from_slice(&prog.kinsn_emit(ARM64_MOVZ_W10_IMM_TARGET, payload)?);
+                out.extend_from_slice(&prog.kinsn_emit(ARM64_STOREB_W10_TARGET, payload)?);
+            }
+        }
+    }
+    Ok(out)
+}
+fn checked_byte_offset(base_off: i16, idx: usize) -> anyhow::Result<i16> {
+    let off = base_off as i32 + idx as i32;
+    i16::try_from(off).map_err(|_| anyhow::anyhow!("bulk_memory byte offset {off} exceeds i16"))
+}
+fn pack_mem_payload(dst_reg: u8, base_reg: u8, offset: i16) -> u64 {
+    BpfInsn::pack_u4(dst_reg, 0)
+        | BpfInsn::pack_u4(base_reg, 4)
+        | BpfInsn::pack_u16(offset as u16, 8)
+}
+fn pack_store_reg_payload(src_reg: u8, base_reg: u8, offset: i16) -> u64 {
+    BpfInsn::pack_u4(src_reg, 0)
+        | BpfInsn::pack_u4(base_reg, 4)
+        | BpfInsn::pack_u16(offset as u16, 8)
+}
+fn pack_store_imm_payload(base_reg: u8, offset: i16, fill_byte: u8) -> u64 {
+    BpfInsn::pack_u4(base_reg, 0)
+        | BpfInsn::pack_u16(offset as u16, 4)
+        | BpfInsn::pack_u8(fill_byte, 20)
 }
 fn uniform_chunk_sizes(total_bytes: usize) -> Vec<usize> {
     if total_bytes < MIN_BULK_BYTES {

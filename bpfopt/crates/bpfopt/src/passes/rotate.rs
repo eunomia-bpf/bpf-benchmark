@@ -82,7 +82,10 @@ impl BpfPass for RotatePass {
                         site.shift_amount
                     )
                 })?;
-                Ok((site.old_len, emit_rotate_replacement(prog, ctx.arch, site, shift_amount)?))
+                Ok((
+                    site.old_len,
+                    emit_rotate_replacement(prog, ctx.arch, site, shift_amount)?,
+                ))
             })?;
 
         Ok(PassResult::with_sites(applied, skipped))

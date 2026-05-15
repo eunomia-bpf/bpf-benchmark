@@ -60,6 +60,8 @@ const VERIFIER_LOG: &str = "verifier.log";
 const VERIFY_LOG: &str = "verify.log";
 const STACK_TRACE_VALUE_SIZE: u32 = 127 * 8;
 const STACK_TRACE_MAX_ENTRIES: u32 = 10240;
+const OTEL_TRACER_AMD64: &str =
+    "runner/repos/opentelemetry-ebpf-profiler/support/ebpf/tracer.ebpf.amd64";
 
 #[derive(Parser)]
 #[command(
@@ -266,11 +268,12 @@ fn prepare_workdir(
     let map_values_dir = workdir.join(MAP_VALUES_DIR);
     fs::create_dir_all(&map_values_dir)?;
 
-    let obj_path = prepare_compatible_object(workdir, obj_path)?;
-    let obj = open_bpf_object(&obj_path)?;
+    let compat = prepare_compatible_object(workdir, obj_path)?;
+    let obj = open_bpf_object(&compat.path)?;
     normalize_open_maps(&obj)?;
     let progs = programs(&obj)?;
     normalize_open_programs(&progs)?;
+    let progs = apply_autoload_filter(progs, compat.autoload.as_ref())?;
     let mut log_bufs: Vec<Vec<c_char>> = (0..progs.len()).map(|_| vec![0; LOG_BYTES]).collect();
     for (prog, buf) in progs.iter().zip(log_bufs.iter_mut()) {
         libbpf_ok(
@@ -300,7 +303,7 @@ fn prepare_workdir(
         }
         bail!(
             "libbpf failed to load {}: {}",
-            obj_path.display(),
+            compat.path.display(),
             neg_errno(ret)
         );
     }
@@ -379,18 +382,35 @@ fn prepare_workdir(
     Ok((obj, prepared))
 }
 
-fn prepare_compatible_object(workdir: &Path, obj_path: &Path) -> Result<PathBuf> {
+struct CompatibleObject {
+    path: PathBuf,
+    autoload: Option<BTreeSet<String>>,
+}
+
+fn prepare_compatible_object(workdir: &Path, obj_path: &Path) -> Result<CompatibleObject> {
     let compat_obj = workdir.join(COMPAT_OBJECT);
     let compat_btf = workdir.join(COMPAT_BTF);
+    let otel = otel_split_object(obj_path)?;
+    let source_obj = otel
+        .as_ref()
+        .map(|(path, _)| path.as_path())
+        .unwrap_or(obj_path);
 
     let mut globalize = Command::new("llvm-objcopy");
     globalize
         .arg("--wildcard")
         .arg("--globalize-symbol=tail_*")
-        .arg("--globalize-symbol=perf_unwind_native")
-        .arg("--globalize-symbol=kprobe_unwind_native")
-        .arg(obj_path)
-        .arg(&compat_obj);
+        .arg("--globalize-symbol=perf_unwind_*")
+        .arg("--globalize-symbol=kprobe_unwind_*")
+        .arg("--globalize-symbol=perf_go_labels")
+        .arg("--globalize-symbol=kprobe_go_labels")
+        .arg(source_obj);
+    if otel.is_some() {
+        globalize
+            .arg("--rename-section=perf_event/native_tracer_entry=kprobe/native_tracer_entry")
+            .arg("--rename-section=perf_event/unwind_native=kprobe/unwind_native");
+    }
+    globalize.arg(&compat_obj);
     run_tool(&mut globalize, "llvm-objcopy globalize-symbol")?;
 
     let mut dump_btf = Command::new("llvm-objcopy");
@@ -413,10 +433,66 @@ fn prepare_compatible_object(workdir: &Path, obj_path: &Path) -> Result<PathBuf>
             .arg(&compat_obj)
             .arg(&patched_obj);
         run_tool(&mut update_btf, "llvm-objcopy update .BTF")?;
-        Ok(patched_obj)
+        Ok(CompatibleObject {
+            path: patched_obj,
+            autoload: otel.map(|(_, progs)| progs),
+        })
     } else {
-        Ok(compat_obj)
+        Ok(CompatibleObject {
+            path: compat_obj,
+            autoload: otel.map(|(_, progs)| progs),
+        })
     }
+}
+
+fn otel_split_object(obj_path: &Path) -> Result<Option<(PathBuf, BTreeSet<String>)>> {
+    let Some(file_name) = obj_path.file_name().and_then(|name| name.to_str()) else {
+        return Ok(None);
+    };
+    let progs = match file_name {
+        "otel_generic_probe.bpf.o" => btree_string_set(&["kprobe__generic"]),
+        "otel_native_stack_trace.bpf.o" => btree_string_set(&[
+            "native_tracer_entry",
+            "perf_unwind_native",
+            "kprobe_unwind_native",
+        ]),
+        "otel_sched_monitor.bpf.o" => btree_string_set(&[
+            "tracepoint__sched_process_free",
+            "tracepoint__sched_process_free_pre616",
+        ]),
+        _ => return Ok(None),
+    };
+    let tracer = resolve_repo_path(obj_path, OTEL_TRACER_AMD64);
+    if !tracer.exists() {
+        bail!(
+            "OTel split object {} requires linked tracer {}",
+            obj_path.display(),
+            tracer.display()
+        );
+    }
+    Ok(Some((tracer, progs)))
+}
+
+fn btree_string_set(items: &[&str]) -> BTreeSet<String> {
+    items.iter().map(|item| (*item).to_string()).collect()
+}
+
+fn resolve_repo_path(reference: &Path, relative: &str) -> PathBuf {
+    let direct = PathBuf::from(relative);
+    if direct.exists() {
+        return direct;
+    }
+    if let Some(repo_root) = reference
+        .parent()
+        .and_then(Path::parent)
+        .and_then(Path::parent)
+    {
+        let candidate = repo_root.join(relative);
+        if candidate.exists() {
+            return candidate;
+        }
+    }
+    direct
 }
 
 /// `BPF_OBJ_GET_INFO_BY_FD` for any sized info struct.
@@ -714,6 +790,14 @@ fn normalize_open_programs(progs: &[ProgramRef]) -> Result<()> {
             Some(libbpf_sys::BPF_PROG_TYPE_SCHED_CLS)
         } else if section.starts_with("xdp/") {
             Some(libbpf_sys::BPF_PROG_TYPE_XDP)
+        } else if section.starts_with("perf_event/") {
+            Some(libbpf_sys::BPF_PROG_TYPE_KPROBE)
+        } else if section.starts_with("kprobe/") {
+            Some(libbpf_sys::BPF_PROG_TYPE_KPROBE)
+        } else if section.starts_with("raw_tracepoint/") {
+            Some(libbpf_sys::BPF_PROG_TYPE_RAW_TRACEPOINT)
+        } else if section.starts_with("tracepoint/") {
+            Some(libbpf_sys::BPF_PROG_TYPE_TRACEPOINT)
         } else {
             None
         };
@@ -725,6 +809,36 @@ fn normalize_open_programs(progs: &[ProgramRef]) -> Result<()> {
         }
     }
     Ok(())
+}
+
+fn apply_autoload_filter(
+    progs: Vec<ProgramRef>,
+    allowed: Option<&BTreeSet<String>>,
+) -> Result<Vec<ProgramRef>> {
+    let Some(allowed) = allowed else {
+        return Ok(progs);
+    };
+    let mut loaded = Vec::new();
+    for prog in progs {
+        let autoload = allowed.contains(&prog.name);
+        libbpf_ok(
+            unsafe { libbpf_sys::bpf_program__set_autoload(prog.ptr, autoload) },
+            "bpf_program__set_autoload",
+        )?;
+        if autoload {
+            loaded.push(prog);
+        }
+    }
+    let loaded_names: BTreeSet<&str> = loaded.iter().map(|prog| prog.name.as_str()).collect();
+    let missing: Vec<&str> = allowed
+        .iter()
+        .map(String::as_str)
+        .filter(|name| !loaded_names.contains(name))
+        .collect();
+    if !missing.is_empty() {
+        bail!("compatible object is missing programs: {}", missing.join(","));
+    }
+    Ok(loaded)
 }
 
 fn programs(obj: &BpfObject) -> Result<Vec<ProgramRef>> {

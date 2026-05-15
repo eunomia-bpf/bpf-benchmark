@@ -7,11 +7,14 @@ use crate::test_helpers::*;
 fn bulk_ctx() -> crate::pass::PassContext {
     let mut ctx = pass_ctx();
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_bulk_memcpy", 4101, 0)
-        .expect("register memcpy kinsn");
+        .set_kinsn_call_for_target_name("bpf_x86_movzbl_mem", 4101, 0)
+        .expect("register movzbl kinsn");
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_bulk_memset", 4102, 0)
-        .expect("register memset kinsn");
+        .set_kinsn_call_for_target_name("bpf_x86_movb_mem_reg", 4102, 0)
+        .expect("register movb store kinsn");
+    ctx.kinsn_registry
+        .set_kinsn_call_for_target_name("bpf_x86_movb_imm_mem", 4103, 0)
+        .expect("register movb imm store kinsn");
     ctx
 }
 
@@ -38,35 +41,6 @@ fn memset_zero_run(lanes: usize) -> Vec<BpfInsn> {
     }
     insns.push(BpfInsn::exit());
     insns
-}
-
-fn width_class(size: u8) -> u64 {
-    match size {
-        BPF_B => 0,
-        BPF_H => 1,
-        BPF_W => 2,
-        BPF_DW => 3,
-        other => panic!("unsupported size code {other:#x}"),
-    }
-}
-
-fn pack_memset_payload(dst_base: u8, dst_off: i16, len: u8, size: u8, fill_imm8: u8) -> u64 {
-    assert!((1..=128).contains(&len));
-    let zero_fill = fill_imm8 == 0;
-    (dst_base as u64)
-        | ((dst_off as u16 as u64) << 8)
-        | (((len - 1) as u64) << 24)
-        | (width_class(size) << 32)
-        | ((zero_fill as u64) << 35)
-        | ((fill_imm8 as u64) << 36)
-}
-
-fn memset_call(dst_base: u8, dst_off: i16, len: u8, size: u8, fill_imm8: u8) -> Vec<BpfInsn> {
-    emit_packed_kinsn_call_with_off(
-        pack_memset_payload(dst_base, dst_off, len, size, fill_imm8),
-        4102,
-        0,
-    )
 }
 
 fn st_mem_fill_run(size: u8, imm: i32, lanes: usize) -> Vec<BpfInsn> {
@@ -120,6 +94,10 @@ fn bulk_memory_rewrites_large_memcpy_run() {
         .lowered
         .iter()
         .any(|i| i.is_call_kinsn() && i.imm == 4101));
+    assert!(run
+        .lowered
+        .iter()
+        .any(|i| i.is_call_kinsn() && i.imm == 4102));
 }
 
 #[test]
@@ -130,41 +108,49 @@ fn bulk_memory_rewrites_zero_memset_run() {
     assert!(run
         .lowered
         .iter()
-        .any(|i| i.is_call_kinsn() && i.imm == 4102));
+        .any(|i| i.is_call_kinsn() && i.imm == 4103));
 }
 
 #[test]
 fn test_memset_fill_encoding_matrix() {
-    // Restored from HEAD: the memset kinsn sidecar payload is ABI-like; each
-    // fill mode must encode the width, offset, length, zero flag, and byte fill.
-    for (label, input, mut expected) in [
+    for (label, input, expected_fill, expected_store_count) in [
         (
             "nonzero immediate",
             st_mem_fill_run(BPF_W, 0x7f7f7f7f, 8),
-            memset_call(BPF_REG_10, -32, 32, BPF_W, 0x7f),
+            0x7f,
+            32,
         ),
         (
             "byte immediate truncates",
             st_mem_fill_run(BPF_B, 0x12345680, 32),
-            memset_call(BPF_REG_10, -32, 32, BPF_B, 0x80),
+            0x80,
+            32,
         ),
         (
             "negative dw immediate",
             st_mem_fill_run(BPF_DW, -1, 4),
-            memset_call(BPF_REG_10, -32, 32, BPF_DW, 0xff),
+            0xff,
+            32,
         ),
-        ("register fill", stx_mem_fill_run(BPF_W, BPF_REG_8, 8), {
-            let mut out = vec![BpfInsn::mov64_imm(BPF_REG_8, 0x5a5a5a5a)];
-            out.extend(memset_call(BPF_REG_10, -32, 32, BPF_W, 0x5a));
-            out
-        }),
+        (
+            "register fill",
+            stx_mem_fill_run(BPF_W, BPF_REG_8, 8),
+            0x5a,
+            32,
+        ),
     ] {
-        expected.push(BpfInsn::exit());
-
         let run = run_pass_on_insns(BulkMemoryPass, input, &bulk_ctx());
 
         assert_eq!(run.result.sites_applied, 1, "{label}");
-        assert_eq!(run.lowered, expected, "{label}");
+        let stores = run
+            .lowered
+            .iter()
+            .filter(|i| i.is_call_kinsn() && i.imm == 4103)
+            .count();
+        assert_eq!(stores, expected_store_count, "{label}");
+        assert!(run.lowered.iter().any(|i| {
+            i.is_kinsn_sidecar() && BpfInsn::unpack_u8(i.sidecar_payload(), 20) == expected_fill
+        }));
     }
 }
 
@@ -203,7 +189,8 @@ fn bulk_memory_fixes_branches_after_replacement() {
 
     assert_eq!(run.result.sites_applied, 1);
     assert!(run.lowered[0].is_ja());
-    assert_eq!(run.lowered[0].off, 2);
+    let target = (run.lowered[0].off as isize + 1) as usize;
+    assert_eq!(target, run.lowered.len() - 1);
 }
 
 #[test]

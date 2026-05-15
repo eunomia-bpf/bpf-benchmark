@@ -47,9 +47,13 @@
 #if defined(__aarch64__)
 #define ROTATE_KINSN_MODULE "bpf_arm64_extr"
 #define ROTATE64_KFUNC "bpf_arm64_extr_x"
+#define SELECT_KINSN_MODULE "bpf_arm64_csel"
+#define SELECT_KFUNC "bpf_arm64_csel_ne_rrr"
 #else
 #define ROTATE_KINSN_MODULE "bpf_x86_rotate"
 #define ROTATE64_KFUNC "bpf_x86_rolq_imm"
+#define SELECT_KINSN_MODULE "bpf_x86_cmov"
+#define SELECT_KFUNC "bpf_x86_cmovneq_rr"
 #endif
 
 enum kinsn_module_id {
@@ -143,7 +147,7 @@ static struct kinsn_module_ref g_modules[MOD_CNT] = {
 		.required = true,
 	},
 	[MOD_SELECT] = {
-		.module_name = "bpf_select",
+		.module_name = SELECT_KINSN_MODULE,
 		.btf_fd = -1,
 		.required = true,
 	},
@@ -200,7 +204,7 @@ static struct kinsn_func_ref g_funcs[FUNC_CNT] = {
 		.module_id = MOD_ROTATE,
 	},
 	[FUNC_SELECT] = {
-		.func_name = "bpf_select64",
+		.func_name = SELECT_KFUNC,
 		.module_id = MOD_SELECT,
 	},
 	[FUNC_EXTRACT] = {

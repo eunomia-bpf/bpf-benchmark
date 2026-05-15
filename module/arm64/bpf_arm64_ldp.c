@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT kinsn: pair 128-bit load/store via ARM64 LDP/STP
+ * BpfReJIT arm64 kinsns: LDP/STP.
  */
 
 #include "kinsn_common.h"
 
 __bpf_kfunc_start_defs();
-__bpf_kfunc void bpf_ldp128(void) {}
-__bpf_kfunc void bpf_stp128(void) {}
+__bpf_kfunc void bpf_arm64_ldp_x(void) {}
+__bpf_kfunc void bpf_arm64_stp_x(void) {}
 __bpf_kfunc_end_defs();
 
-BTF_KFUNCS_START(bpf_ldp_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_ldp128)
-BTF_ID_FLAGS(func, bpf_stp128)
-BTF_KFUNCS_END(bpf_ldp_kfunc_ids)
+BTF_KFUNCS_START(bpf_arm64_ldp_kfunc_ids)
+BTF_ID_FLAGS(func, bpf_arm64_ldp_x)
+BTF_ID_FLAGS(func, bpf_arm64_stp_x)
+BTF_KFUNCS_END(bpf_arm64_ldp_kfunc_ids)
 
 static __always_inline bool a64_ldstp_soff_ok(s16 offset)
 {
@@ -188,7 +188,7 @@ static int emit_stp_arm64(u32 *image, int *idx, bool emit,
 	return 1;
 }
 
-const struct bpf_kinsn bpf_ldp128_desc = {
+const struct bpf_kinsn bpf_arm64_ldp_x_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 2,
 	.max_emit_bytes = 4,
@@ -196,7 +196,7 @@ const struct bpf_kinsn bpf_ldp128_desc = {
 	.emit_arm64 = emit_ldp_arm64,
 };
 
-const struct bpf_kinsn bpf_stp128_desc = {
+const struct bpf_kinsn bpf_arm64_stp_x_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 2,
 	.max_emit_bytes = 4,
@@ -204,10 +204,10 @@ const struct bpf_kinsn bpf_stp128_desc = {
 	.emit_arm64 = emit_stp_arm64,
 };
 
-static const struct bpf_kinsn * const bpf_ldp_kinsn_descs[] = {
-	&bpf_ldp128_desc,
-	&bpf_stp128_desc,
+static const struct bpf_kinsn * const bpf_arm64_ldp_kinsn_descs[] = {
+	&bpf_arm64_ldp_x_desc,
+	&bpf_arm64_stp_x_desc,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_ldp, "BpfReJIT kinsn: pair load/store (LDP/STP)",
-		       bpf_ldp_kfunc_ids, bpf_ldp_kinsn_descs);
+DEFINE_KINSN_V2_MODULE(bpf_arm64_ldp, "BpfReJIT arm64 kinsns: LDP/STP",
+		       bpf_arm64_ldp_kfunc_ids, bpf_arm64_ldp_kinsn_descs);

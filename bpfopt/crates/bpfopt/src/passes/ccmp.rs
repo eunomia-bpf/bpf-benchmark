@@ -4,11 +4,33 @@
 use crate::analysis::{BlockId, InsnSite, ProgramCFG, Terminator};
 use crate::insn::*;
 use crate::pass::*;
-pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
-    name: "bpf_ccmp64",
-    register_uses: ccmp_register_uses,
-    register_defs: ccmp_register_defs,
-}];
+pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
+    KinsnDescriptor {
+        name: "bpf_arm64_cmp_x_imm0",
+        register_uses: ccmp_single_register_uses,
+        register_defs: no_regs,
+    },
+    KinsnDescriptor {
+        name: "bpf_arm64_cmp_w_imm0",
+        register_uses: ccmp_single_register_uses,
+        register_defs: no_regs,
+    },
+    KinsnDescriptor {
+        name: "bpf_arm64_ccmp_x_imm0",
+        register_uses: ccmp_single_register_uses,
+        register_defs: no_regs,
+    },
+    KinsnDescriptor {
+        name: "bpf_arm64_ccmp_w_imm0",
+        register_uses: ccmp_single_register_uses,
+        register_defs: no_regs,
+    },
+    KinsnDescriptor {
+        name: "bpf_arm64_cset_x_cond",
+        register_uses: ccmp_register_uses,
+        register_defs: ccmp_register_defs,
+    },
+];
 
 const MIN_CCMP_TERMS: usize = 2;
 const MAX_CCMP_TERMS: usize = 4;
@@ -21,6 +43,9 @@ fn ccmp_register_uses(payload: u64) -> RegSet {
 }
 
 fn ccmp_register_defs(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[0])
+}
+fn ccmp_single_register_uses(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[0])
 }
 
@@ -79,8 +104,6 @@ impl BranchTerm {
 
 impl BpfPass for CcmpPass {
     fn run(&self, prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
-        // ccmp is an arm64-only kinsn; on non-arm64 the target lacks bpf_ccmp64
-        // and the pass produces no sites.
         if ctx.arch != Arch::Aarch64 {
             return PassResult::skipped_pass(prog, "ccmp requires aarch64 target");
         }
@@ -125,19 +148,10 @@ impl BpfPass for CcmpPass {
             return Ok(PassResult::with_sites(0, skipped));
         }
 
-        let (btf_id, kfunc_off) = prog.kinsn_call("bpf_ccmp64")?;
         safe_sites.sort_by_key(|(site, _, _)| site.start_site);
         let mut applied = 0usize;
         for (site, dst_reg, payload) in safe_sites.iter().rev() {
-            if apply_ccmp_site(
-                prog,
-                site,
-                *dst_reg,
-                *payload,
-                btf_id,
-                kfunc_off,
-                &mut skipped,
-            )? {
+            if apply_ccmp_site(prog, site, *dst_reg, *payload, &mut skipped)? {
                 applied += 1;
             }
         }
@@ -151,8 +165,6 @@ fn apply_ccmp_site(
     site: &CcmpSite,
     dst_reg: u8,
     payload: u64,
-    btf_id: i32,
-    kfunc_off: i16,
     skipped: &mut Vec<SiteSkipReason>,
 ) -> anyhow::Result<bool> {
     let mut trial = prog.clone();
@@ -179,7 +191,7 @@ fn apply_ccmp_site(
             anyhow::anyhow!("ccmp merged block {:?} has no insertion site", merged)
         })?,
     };
-    let replacement = emit_packed_kinsn_call_with_off(payload, btf_id, kfunc_off);
+    let replacement = emit_ccmp_kinsns(&trial, site, payload)?;
     if !trial.try_replace_range(replacement_start, merged_sites.len(), replacement, skipped)? {
         return Ok(false);
     }
@@ -199,6 +211,29 @@ fn apply_ccmp_site(
     )?;
     *prog = trial;
     Ok(true)
+}
+
+fn emit_ccmp_kinsns(
+    prog: &ProgramCFG,
+    site: &CcmpSite,
+    cset_payload: u64,
+) -> anyhow::Result<Vec<BpfInsn>> {
+    let cmp_target = match site.width {
+        CcmpWidth::Bpf64 => "bpf_arm64_cmp_x_imm0",
+        CcmpWidth::Bpf32 => "bpf_arm64_cmp_w_imm0",
+    };
+    let ccmp_target = match site.width {
+        CcmpWidth::Bpf64 => "bpf_arm64_ccmp_x_imm0",
+        CcmpWidth::Bpf32 => "bpf_arm64_ccmp_w_imm0",
+    };
+    let mut out = Vec::with_capacity(site.regs.len() * 2 + 2);
+    out.extend_from_slice(&prog.kinsn_emit(cmp_target, BpfInsn::pack_u4(site.regs[0], 0))?);
+    let fail_mode = BpfInsn::pack_u4(site.fail_mode as u8, 4);
+    for &reg in site.regs.iter().skip(1) {
+        out.extend_from_slice(&prog.kinsn_emit(ccmp_target, BpfInsn::pack_u4(reg, 0) | fail_mode)?);
+    }
+    out.extend_from_slice(&prog.kinsn_emit("bpf_arm64_cset_x_cond", cset_payload)?);
+    Ok(out)
 }
 
 fn ccmp_chain_blocks(

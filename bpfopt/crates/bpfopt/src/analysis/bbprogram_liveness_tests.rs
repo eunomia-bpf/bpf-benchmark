@@ -51,10 +51,9 @@ fn bbprogram_liveness_includes_kinsn_implicit_register_uses() {
     // raw call register fields, and must be visible to DCE/liveness.
     let btf_id = 0x1234;
     let payload = BpfInsn::pack_u4(BPF_REG_6, 0)
-        | BpfInsn::pack_u4(BPF_REG_6, 4)
-        | BpfInsn::pack_u4(BPF_REG_0, 8)
-        | BpfInsn::pack_u4(BPF_REG_1, 12);
-    let ctx = ctx_with_kinsn("bpf_select64", btf_id);
+        | BpfInsn::pack_u4(BPF_REG_0, 4)
+        | BpfInsn::pack_u4(BPF_REG_1, 8);
+    let ctx = ctx_with_kinsn("bpf_x86_cmovneq_rr", btf_id);
     let insns = vec![
         BpfInsn::mov64_imm(BPF_REG_6, 0),
         BpfInsn::mov64_imm(BPF_REG_0, 1),

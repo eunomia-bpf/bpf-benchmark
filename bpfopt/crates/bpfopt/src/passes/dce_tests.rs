@@ -9,10 +9,9 @@ fn dce_preserves_kinsn_implicit_register_uses() {
     // P1-F: DCE must not delete values consumed only through a kinsn sidecar.
     let btf_id = 0x1234;
     let payload = BpfInsn::pack_u4(BPF_REG_6, 0)
-        | BpfInsn::pack_u4(BPF_REG_6, 4)
-        | BpfInsn::pack_u4(BPF_REG_0, 8)
-        | BpfInsn::pack_u4(BPF_REG_1, 12);
-    let ctx = ctx_with_kinsn("bpf_select64", btf_id);
+        | BpfInsn::pack_u4(BPF_REG_0, 4)
+        | BpfInsn::pack_u4(BPF_REG_1, 8);
+    let ctx = ctx_with_kinsn("bpf_x86_cmovneq_rr", btf_id);
     let input = vec![
         BpfInsn::mov64_imm(BPF_REG_6, 0),
         BpfInsn::mov64_imm(BPF_REG_0, 1),
@@ -39,13 +38,13 @@ fn dce_preserves_kinsn_implicit_register_uses() {
 
 #[test]
 fn dce_sees_kinsn_implicit_register_defs() {
-    // The old r6 value is dead because bpf_select64 defines r6 via payload[0].
+    // The old r6 value is dead because bpf_arm64_csel_ne_rrr defines r6 via payload[0].
     let btf_id = 0x1234;
     let payload = BpfInsn::pack_u4(BPF_REG_6, 0)
         | BpfInsn::pack_u4(BPF_REG_0, 4)
         | BpfInsn::pack_u4(BPF_REG_1, 8)
         | BpfInsn::pack_u4(BPF_REG_2, 12);
-    let ctx = ctx_with_kinsn("bpf_select64", btf_id);
+    let ctx = ctx_with_kinsn("bpf_arm64_csel_ne_rrr", btf_id);
     let input = vec![
         BpfInsn::mov64_imm(BPF_REG_6, 0),
         BpfInsn::mov64_imm(BPF_REG_0, 1),

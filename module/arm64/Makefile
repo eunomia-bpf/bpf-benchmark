@@ -6,12 +6,13 @@ KDIR ?= $(CURDIR)/../../vendor/linux-framework
 ccflags-y += -I$(src)/../include
 
 obj-m += bpf_arm64_extr.o
-obj-m += bpf_select.o
-obj-m += bpf_ccmp.o
+obj-m += bpf_arm64_csel.o
+obj-m += bpf_arm64_ccmp.o
 obj-m += bpf_arm64_ubfm.o
-obj-m += bpf_endian.o
-obj-m += bpf_ldp.o
-obj-m += bpf_bulk_memory.o
+obj-m += bpf_arm64_ldr.o
+obj-m += bpf_arm64_str.o
+obj-m += bpf_arm64_rev.o
+obj-m += bpf_arm64_ldp.o
 obj-m += bpf_arm64_prfm.o
 
 all:

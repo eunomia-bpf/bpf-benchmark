@@ -96,15 +96,17 @@ fn emit_extract_replacement(
                 "bpf_x86_shrq_imm",
                 reg_imm_payload(site.dst_reg, site.shift_amount),
             )?);
+            if site.bit_len == 64 {
+                return Ok(out);
+            }
             let mask = if site.bit_len == 32 {
                 u32::MAX
             } else {
                 (1u32 << site.bit_len) - 1
             };
-            out.extend_from_slice(&prog.kinsn_emit(
-                "bpf_x86_andl_imm32",
-                reg_imm_payload(site.dst_reg, mask),
-            )?);
+            out.extend_from_slice(
+                &prog.kinsn_emit("bpf_x86_andl_imm32", reg_imm_payload(site.dst_reg, mask))?,
+            );
             Ok(out)
         }
         Arch::Aarch64 => {

@@ -9,8 +9,23 @@ fn jmp_zero(op: u8, class: u8, reg: u8, off: i16) -> BpfInsn {
 }
 
 fn ccmp_ctx() -> crate::pass::PassContext {
-    let mut ctx = ctx_with_kinsn("bpf_ccmp64", 77);
+    let mut ctx = pass_ctx();
     ctx.arch = crate::pass::Arch::Aarch64;
+    ctx.kinsn_registry
+        .set_kinsn_call_for_target_name("bpf_arm64_cmp_x_imm0", 77, 0)
+        .expect("register cmp x");
+    ctx.kinsn_registry
+        .set_kinsn_call_for_target_name("bpf_arm64_cmp_w_imm0", 78, 0)
+        .expect("register cmp w");
+    ctx.kinsn_registry
+        .set_kinsn_call_for_target_name("bpf_arm64_ccmp_x_imm0", 79, 0)
+        .expect("register ccmp x");
+    ctx.kinsn_registry
+        .set_kinsn_call_for_target_name("bpf_arm64_ccmp_w_imm0", 80, 0)
+        .expect("register ccmp w");
+    ctx.kinsn_registry
+        .set_kinsn_call_for_target_name("bpf_arm64_cset_x_cond", 81, 0)
+        .expect("register cset");
     ctx
 }
 
@@ -86,7 +101,11 @@ fn ccmp_emits_kinsn_and_final_branch_on_aarch64() {
     assert!(run.lowered[0].is_kinsn_sidecar());
     assert!(run.lowered[1].is_call_kinsn());
     assert_eq!(run.lowered[1].imm, 77);
-    assert!(run.lowered[2].is_cond_jmp());
+    assert!(run
+        .lowered
+        .iter()
+        .any(|insn| insn.is_call_kinsn() && insn.imm == 81));
+    assert!(run.lowered.iter().any(|insn| insn.is_cond_jmp()));
 }
 
 #[test]

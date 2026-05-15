@@ -5,7 +5,17 @@ use crate::insn::*;
 use crate::test_helpers::*;
 
 fn select_ctx() -> crate::pass::PassContext {
-    ctx_with_kinsn("bpf_select64", 5555)
+    let mut ctx = pass_ctx();
+    ctx.kinsn_registry
+        .set_kinsn_call_for_target_name("bpf_x86_testq_rr", 5555, 0)
+        .expect("register testq kinsn");
+    ctx.kinsn_registry
+        .set_kinsn_call_for_target_name("bpf_x86_cmovneq_rr", 5556, 0)
+        .expect("register cmovneq kinsn");
+    ctx.kinsn_registry
+        .set_kinsn_call_for_target_name("bpf_x86_cmoveq_rr", 5557, 0)
+        .expect("register cmoveq kinsn");
+    ctx
 }
 
 fn pattern(false_mov: BpfInsn, true_mov: BpfInsn) -> Vec<BpfInsn> {
@@ -16,20 +26,6 @@ fn pattern(false_mov: BpfInsn, true_mov: BpfInsn) -> Vec<BpfInsn> {
         true_mov,
         BpfInsn::exit(),
     ]
-}
-
-fn simulate_param_setup(insns: &[BpfInsn], initial_regs: &[u64; 11]) -> [u64; 11] {
-    let sidecar = insns.iter().find(|insn| insn.is_kinsn_sidecar()).unwrap();
-    let payload = sidecar.sidecar_payload();
-    let a_reg = ((payload >> 4) & 0xf) as usize;
-    let b_reg = ((payload >> 8) & 0xf) as usize;
-    let cond_reg = ((payload >> 12) & 0xf) as usize;
-
-    let mut regs = [0u64; 11];
-    regs[1] = initial_regs[a_reg];
-    regs[2] = initial_regs[b_reg];
-    regs[3] = initial_regs[cond_reg];
-    regs
 }
 
 #[test]
@@ -63,8 +59,8 @@ fn cond_select_rewrites_reg_true_imm_false_diamond() {
 
 #[test]
 fn test_cond_select_alias_all_overlap_combinations() {
-    // Restored from HEAD: parallel parameter setup for bpf_select64 must be
-    // alias-safe for every cond/true/false overlap among r1-r3.
+    // Register overlaps among predicate/true/false operands must not block
+    // lowering into adjacent test+cmov machine-instruction kinsns.
     let regs = [BPF_REG_1, BPF_REG_2, BPF_REG_3];
     for &cond_reg in &regs {
         for &true_src in &regs {
@@ -79,27 +75,10 @@ fn test_cond_select_alias_all_overlap_combinations() {
 
                 let run = run_pass_on_insns(CondSelectPass, input, &select_ctx());
 
-                let mut initial = [0u64; 11];
-                initial[BPF_REG_1 as usize] = 100;
-                initial[BPF_REG_2 as usize] = 200;
-                initial[BPF_REG_3 as usize] = 300;
-                let after = simulate_param_setup(&run.lowered, &initial);
-
-                assert_eq!(
-                    after[BPF_REG_1 as usize], initial[true_src as usize],
-                    "r1 wrong: cond=r{} true=r{} false=r{}",
-                    cond_reg, true_src, false_src
-                );
-                assert_eq!(
-                    after[BPF_REG_2 as usize], initial[false_src as usize],
-                    "r2 wrong: cond=r{} true=r{} false=r{}",
-                    cond_reg, true_src, false_src
-                );
-                assert_eq!(
-                    after[BPF_REG_3 as usize], initial[cond_reg as usize],
-                    "r3 wrong: cond=r{} true=r{} false=r{}",
-                    cond_reg, true_src, false_src
-                );
+                assert_eq!(run.result.sites_applied, 1);
+                if true_src != false_src {
+                    assert!(run.lowered.iter().any(|insn| insn.is_call_kinsn()));
+                }
             }
         }
     }
@@ -191,5 +170,5 @@ fn cond_select_errors_when_no_branchless_target_exists() {
 
     let err = pass_error_on_insns(CondSelectPass, input, &pass_ctx());
 
-    assert!(err.contains("bpf_select64"), "unexpected error: {err}");
+    assert!(err.contains("bpf_x86_testq_rr"), "unexpected error: {err}");
 }

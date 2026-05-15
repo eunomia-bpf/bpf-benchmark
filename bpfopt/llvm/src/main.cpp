@@ -35,6 +35,10 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/Target/TargetOptions.h"
+#include "llvm/Transforms/Scalar/DCE.h"
+#include "llvm/Transforms/Scalar/EarlyCSE.h"
+#include "llvm/Transforms/Scalar/SROA.h"
+#include "llvm/Transforms/Utils/Mem2Reg.h"
 
 namespace {
 
@@ -42,8 +46,10 @@ constexpr uint8_t BPF_LD_IMM64 = 0x18;
 constexpr uint8_t BPF_LDX_MEM_H = 0x69;
 constexpr uint8_t BPF_ALU32_MOV_X = 0xbc;
 constexpr uint8_t BPF_ALU32_AND_K = 0x54;
+constexpr uint8_t BPF_JA = 0x05;
 constexpr uint8_t BPF_CALL = 0x85;
 constexpr uint8_t BPF_CALLX = BPF_CALL | 0x08;
+constexpr uint8_t BPF_EXIT = 0x95;
 constexpr uint8_t BPF_PSEUDO_MAP_FD = 1;
 constexpr uint8_t BPF_PSEUDO_MAP_VALUE = 2;
 constexpr uint8_t BPF_PSEUDO_MAP_IDX = 5;
@@ -204,9 +210,44 @@ bool is_jmp32_k(uint8_t code)
 	return (code & 0x07) == 0x06 && code != 0x06;
 }
 
-bool is_jump_class(uint8_t code)
+constexpr uint16_t reg_bit(uint8_t reg)
+{
+	return static_cast<uint16_t>(1u << reg);
+}
+
+bool is_alu_class(uint8_t code)
+{
+	return (code & 0x07) == 0x04 || (code & 0x07) == 0x07;
+}
+
+bool is_jmp_class(uint8_t code)
 {
 	return (code & 0x07) == 0x05 || (code & 0x07) == 0x06;
+}
+
+bool is_pure_alu_def(uint8_t code)
+{
+	return is_alu_class(code);
+}
+
+uint16_t alu_uses(uint8_t code, uint8_t dst, uint8_t src)
+{
+	const uint8_t op = code & 0xf0;
+	uint16_t uses = 0;
+	if (op != 0xb0) {
+		uses |= reg_bit(dst);
+	}
+	if ((code & 0x08) != 0) {
+		uses |= reg_bit(src);
+	}
+	return uses;
+}
+
+void write_noop(std::vector<uint8_t> &insns, size_t pc)
+{
+	std::fill(insns.begin() + pc * INSN_SIZE,
+		  insns.begin() + (pc + 1) * INSN_SIZE, 0);
+	insns[pc * INSN_SIZE] = BPF_JA;
 }
 
 std::vector<uint32_t> parse_u32_csv(const std::string &csv)
@@ -488,6 +529,38 @@ void apply_text_relocations(llvm::object::ObjectFile &object,
 	}
 }
 
+std::vector<uint8_t> extract_text_section(const std::vector<uint8_t> &object_bytes)
+{
+	auto buffer = llvm::MemoryBuffer::getMemBuffer(
+		llvm::StringRef(reinterpret_cast<const char *>(object_bytes.data()),
+				object_bytes.size()),
+		"bpfopt-llvm.o", false);
+	auto object = expected_or_throw(
+		llvm::object::ObjectFile::createObjectFile(
+			buffer->getMemBufferRef()));
+
+	std::optional<std::vector<uint8_t>> empty_text;
+	for (const auto &section : object->sections()) {
+		if (expected_or_throw(section.getName()) != ".text") {
+			continue;
+		}
+		const auto contents = expected_or_throw(section.getContents());
+		std::vector<uint8_t> text(contents.bytes_begin(),
+					  contents.bytes_end());
+		if (text.size() % INSN_SIZE != 0) {
+			throw std::runtime_error(".text size is not a multiple of 8");
+		}
+		if (!text.empty()) {
+			return text;
+		}
+		empty_text = std::move(text);
+	}
+	if (empty_text) {
+		return *empty_text;
+	}
+	throw std::runtime_error("LLVM BPF object has no .text section");
+}
+
 void repair_verifier_range_copies(std::vector<uint8_t> &text)
 {
 	const size_t insn_count = text.size() / INSN_SIZE;
@@ -512,6 +585,119 @@ void repair_verifier_range_copies(std::vector<uint8_t> &text)
 			continue;
 		}
 		set_dst_reg(text, pc + 2, source);
+	}
+}
+
+void eliminate_dead_alu_defs(std::vector<uint8_t> &text)
+{
+	const size_t insn_count = text.size() / INSN_SIZE;
+	std::vector<uint16_t> uses(insn_count), defs(insn_count), live_in(insn_count),
+		live_out(insn_count);
+	std::vector<std::vector<size_t>> succs(insn_count);
+	constexpr uint16_t helper_args = reg_bit(1) | reg_bit(2) | reg_bit(3) |
+					 reg_bit(4) | reg_bit(5);
+	constexpr uint16_t helper_clobbers = reg_bit(0) | helper_args;
+
+	for (size_t pc = 0; pc < insn_count; pc++) {
+		const uint8_t code = text[pc * INSN_SIZE];
+		const uint8_t dst = dst_reg(text, pc);
+		const uint8_t src = src_reg(text, pc);
+		const auto add_fallthrough = [&](size_t next) {
+			if (next < insn_count) {
+				succs[pc].push_back(next);
+			}
+		};
+		const auto add_relative_target = [&]() {
+			const int64_t target = static_cast<int64_t>(pc) + 1 +
+					       static_cast<int64_t>(read_off(text, pc));
+			if (target >= 0 && target < static_cast<int64_t>(insn_count)) {
+				succs[pc].push_back(static_cast<size_t>(target));
+			}
+		};
+
+		if (code == BPF_LD_IMM64) {
+			defs[pc] = reg_bit(dst);
+			add_fallthrough(pc + 2);
+			if (pc + 1 < insn_count) {
+				pc++;
+			}
+			continue;
+		}
+		if (is_alu_class(code)) {
+			defs[pc] = reg_bit(dst);
+			uses[pc] = alu_uses(code, dst, src);
+			add_fallthrough(pc + 1);
+			continue;
+		}
+		switch (code & 0x07) {
+		case 0x01:
+			defs[pc] = reg_bit(dst);
+			uses[pc] = reg_bit(src);
+			add_fallthrough(pc + 1);
+			break;
+		case 0x02:
+			uses[pc] = reg_bit(dst);
+			add_fallthrough(pc + 1);
+			break;
+		case 0x03:
+			uses[pc] = reg_bit(dst) | reg_bit(src);
+			add_fallthrough(pc + 1);
+			break;
+		case 0x05:
+		case 0x06:
+			if (code == BPF_EXIT) {
+				uses[pc] = reg_bit(0);
+			} else if (code == BPF_CALL || code == BPF_CALLX) {
+				uses[pc] = helper_args;
+				defs[pc] = helper_clobbers;
+				add_fallthrough(pc + 1);
+			} else if (code == BPF_JA) {
+				add_relative_target();
+			} else {
+				uses[pc] = reg_bit(dst);
+				if ((code & 0x08) != 0) {
+					uses[pc] |= reg_bit(src);
+				}
+				add_fallthrough(pc + 1);
+				add_relative_target();
+			}
+			break;
+		default:
+			add_fallthrough(pc + 1);
+			break;
+		}
+	}
+
+	bool changed = true;
+	while (changed) {
+		changed = false;
+		for (size_t i = insn_count; i-- > 0;) {
+			uint16_t out = 0;
+			for (const size_t succ : succs[i]) {
+				out |= live_in[succ];
+			}
+			const uint16_t in =
+				static_cast<uint16_t>(uses[i] | (out & ~defs[i]));
+			if (out != live_out[i] || in != live_in[i]) {
+				live_out[i] = out;
+				live_in[i] = in;
+				changed = true;
+			}
+		}
+	}
+
+	for (size_t pc = 0; pc < insn_count; pc++) {
+		const uint8_t code = text[pc * INSN_SIZE];
+		if (code == BPF_LD_IMM64) {
+			pc++;
+			continue;
+		}
+		const uint8_t dst = dst_reg(text, pc);
+		if (dst == 10 || !is_pure_alu_def(code) ||
+		    (live_out[pc] & reg_bit(dst)) != 0) {
+			continue;
+		}
+		write_noop(text, pc);
 	}
 }
 
@@ -551,6 +737,7 @@ extract_relocated_text(const std::vector<uint8_t> &object_bytes,
 			    input.end());
 	}
 	repair_verifier_range_copies(text);
+	eliminate_dead_alu_defs(text);
 	return text;
 }
 
@@ -596,14 +783,39 @@ void optimize_module(llvm::Module &module, llvm::TargetMachine &machine)
 	pipeline.run(module, module_am);
 }
 
-	std::vector<uint8_t> emit_bpf_object(llvm::Module &module, bool optimize_ir)
-	{
-		auto machine = create_bpf_target_machine(
-			llvm::CodeGenOptLevel::Default);
+void promote_register_allocas(llvm::Module &module, llvm::TargetMachine &machine)
+{
+	llvm::LoopAnalysisManager loop_am;
+	llvm::FunctionAnalysisManager function_am;
+	llvm::CGSCCAnalysisManager cgscc_am;
+	llvm::ModuleAnalysisManager module_am;
+	llvm::PassBuilder passes(&machine);
+	passes.registerModuleAnalyses(module_am);
+	passes.registerCGSCCAnalyses(cgscc_am);
+	passes.registerFunctionAnalyses(function_am);
+	passes.registerLoopAnalyses(loop_am);
+	passes.crossRegisterProxies(loop_am, function_am, cgscc_am, module_am);
+
+	llvm::FunctionPassManager function_pipeline;
+	function_pipeline.addPass(llvm::SROAPass(llvm::SROAOptions::PreserveCFG));
+	function_pipeline.addPass(llvm::PromotePass());
+	function_pipeline.addPass(llvm::EarlyCSEPass());
+	function_pipeline.addPass(llvm::DCEPass());
+	llvm::ModulePassManager module_pipeline;
+	module_pipeline.addPass(llvm::createModuleToFunctionPassAdaptor(
+		std::move(function_pipeline)));
+	module_pipeline.run(module, module_am);
+}
+
+std::vector<uint8_t> emit_bpf_object(llvm::Module &module, bool optimize_ir)
+{
+	auto machine = create_bpf_target_machine(llvm::CodeGenOptLevel::Aggressive);
 	module.setTargetTriple("bpfel");
 	module.setDataLayout(machine->createDataLayout());
 	if (optimize_ir) {
 		optimize_module(module, *machine);
+	} else {
+		promote_register_allocas(module, *machine);
 	}
 
 	llvm::SmallVector<char, 0> object_stream;
@@ -673,6 +885,24 @@ std::vector<uint8_t> run_llvm_roundtrip(const std::vector<uint8_t> &input,
 		return extract_relocated_text(emit_bpf_object(module, optimize_ir),
 					      input);
 	});
+}
+
+std::vector<uint8_t> run_llvm_data_roundtrip(const std::vector<uint8_t> &input)
+{
+	if (input.empty() || input.size() % INSN_SIZE != 0) {
+		throw std::runtime_error(
+			"input bytecode length must be a non-empty multiple of 8");
+	}
+	llvm::LLVMContext context;
+	llvm::Module module("bpfopt-llvm-asm", context);
+	auto *data = llvm::ConstantDataArray::get(
+		context, llvm::ArrayRef<uint8_t>(input.data(), input.size()));
+	auto *global = new llvm::GlobalVariable(
+		module, data->getType(), true, llvm::GlobalValue::ExternalLinkage,
+		data, "bpfopt_llvm_roundtrip");
+	global->setSection(".text");
+	global->setAlignment(llvm::Align(8));
+	return extract_text_section(emit_bpf_object(module, false));
 }
 
 uint32_t module_fd_array_base(size_t map_count)
@@ -873,7 +1103,9 @@ void run_pass(Cli &cli)
 	}
 	const auto input = read_all(cli.input);
 	const bool is_noop = *cli.pass == "noop";
-	std::vector<uint8_t> output = run_llvm_roundtrip(input, !is_noop);
+	std::vector<uint8_t> output = is_noop ?
+					      run_llvm_data_roundtrip(input) :
+					      run_llvm_roundtrip(input, true);
 	write_all(cli.output, output);
 	write_report(cli, input, output);
 }

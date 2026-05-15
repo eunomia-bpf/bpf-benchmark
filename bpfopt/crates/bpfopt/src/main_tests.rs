@@ -100,14 +100,14 @@ fn canonicalize_map_refs_checks_idx_range_without_fd_array() {
 #[test]
 fn target_json_disambiguates_module_local_btf_ids_by_call_offset() {
     let target = kinsn_target(&[
-        ("bpf_endian_load16", 128703, 1),
+        ("bpf_x86_movzwl_mem", 128703, 1),
         ("bpf_x86_rolq_imm", 128703, 2),
     ]);
     let registry = kinsn_registry_from_target(&target).unwrap();
 
     assert_eq!(
         registry.lookup_by_kinsn_call(128703, 1).unwrap().name,
-        "bpf_endian_load16"
+        "bpf_x86_movzwl_mem"
     );
     assert_eq!(
         registry.lookup_by_kinsn_call(128703, 2).unwrap().name,
@@ -118,14 +118,14 @@ fn target_json_disambiguates_module_local_btf_ids_by_call_offset() {
 #[test]
 fn target_json_allows_shared_btf_id_when_zero_call_offset_is_first() {
     let target = kinsn_target(&[
-        ("bpf_endian_load16", 128703, 0),
+        ("bpf_x86_movzwl_mem", 128703, 0),
         ("bpf_x86_rolq_imm", 128703, 2),
     ]);
     let registry = kinsn_registry_from_target(&target).unwrap();
 
     assert_eq!(
         registry.lookup_by_kinsn_call(128703, 0).unwrap().name,
-        "bpf_endian_load16"
+        "bpf_x86_movzwl_mem"
     );
     assert_eq!(
         registry.lookup_by_kinsn_call(128703, 2).unwrap().name,
@@ -136,7 +136,7 @@ fn target_json_allows_shared_btf_id_when_zero_call_offset_is_first() {
 #[test]
 fn target_json_rejects_ambiguous_duplicate_kinsn_call_keys() {
     let target = kinsn_target(&[
-        ("bpf_endian_load16", 128703, 1),
+        ("bpf_x86_movzwl_mem", 128703, 1),
         ("bpf_x86_rolq_imm", 128703, 1),
     ]);
 
@@ -154,7 +154,7 @@ fn target_json_requires_call_offset_for_each_kinsn() {
         r#"{
               "arch": "x86_64",
               "kinsns": {
-                "bpf_extract64": { "btf_func_id": 129876 }
+                "bpf_x86_andl_imm32": { "btf_func_id": 129876 }
               }
             }"#,
     )
@@ -177,7 +177,7 @@ fn target_call_offsets_shift_after_map_prefix() {
                 },
             ),
             (
-                "bpf_extract64".to_string(),
+                "bpf_x86_andl_imm32".to_string(),
                 KinsnJson {
                     btf_func_id: 2,
                     btf_id: 200,
@@ -185,7 +185,7 @@ fn target_call_offsets_shift_after_map_prefix() {
                 },
             ),
             (
-                "bpf_select64".to_string(),
+                "bpf_x86_testq_rr".to_string(),
                 KinsnJson {
                     btf_func_id: 3,
                     btf_id: 0,
@@ -198,8 +198,8 @@ fn target_call_offsets_shift_after_map_prefix() {
     shift_target_module_call_offsets_for_map_prefix(&mut target, 5).unwrap();
 
     assert_eq!(target.kinsns["bpf_x86_rolq_imm"].call_offset, 5);
-    assert_eq!(target.kinsns["bpf_extract64"].call_offset, 6);
-    assert_eq!(target.kinsns["bpf_select64"].call_offset, 0);
+    assert_eq!(target.kinsns["bpf_x86_andl_imm32"].call_offset, 6);
+    assert_eq!(target.kinsns["bpf_x86_testq_rr"].call_offset, 0);
 }
 
 #[test]

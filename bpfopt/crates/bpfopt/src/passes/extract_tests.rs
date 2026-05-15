@@ -5,7 +5,14 @@ use crate::insn::*;
 use crate::test_helpers::*;
 
 fn extract_ctx(btf_id: i32) -> crate::pass::PassContext {
-    ctx_with_kinsn("bpf_extract64", btf_id)
+    let mut ctx = pass_ctx();
+    ctx.kinsn_registry
+        .set_kinsn_call_for_target_name("bpf_x86_shrq_imm", btf_id, 0)
+        .expect("register shrq kinsn");
+    ctx.kinsn_registry
+        .set_kinsn_call_for_target_name("bpf_x86_andl_imm32", btf_id + 1, 0)
+        .expect("register andl kinsn");
+    ctx
 }
 
 #[test]
@@ -105,8 +112,11 @@ fn test_extract_pass_branch_fixup() {
 fn extract_preserves_module_call_offset() {
     let mut ctx = pass_ctx();
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_extract64", 7777, 3)
-        .expect("register module kinsn");
+        .set_kinsn_call_for_target_name("bpf_x86_shrq_imm", 7777, 3)
+        .expect("register shrq kinsn");
+    ctx.kinsn_registry
+        .set_kinsn_call_for_target_name("bpf_x86_andl_imm32", 7778, 4)
+        .expect("register andl kinsn");
     let input = vec![
         BpfInsn::alu64_imm(BPF_RSH, BPF_REG_2, 8),
         BpfInsn::alu64_imm(BPF_AND, BPF_REG_2, 0xff),

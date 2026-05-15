@@ -3,11 +3,29 @@
 # Daemon substitutes ${...} vars; runner sends this command verbatim.
 log_level: 1
 kinsns:
-  - name: bpf_bulk_memcpy
+  - name: bpf_x86_movzbl_mem
     aliases:
-      - bpf_memcpy_bulk
-  - name: bpf_bulk_memset
+      - bpf_x86_movzbl_mem
+  - name: bpf_x86_movb_mem_reg
     aliases:
-      - bpf_memset_bulk
+      - bpf_x86_movb_mem_reg
+  - name: bpf_x86_movb_imm_mem
+    aliases:
+      - bpf_x86_movb_imm_mem
+  - name: bpf_arm64_ldrb_mem
+    aliases:
+      - bpf_arm64_ldrb_mem
+  - name: bpf_arm64_strb_mem_reg
+    aliases:
+      - bpf_arm64_strb_mem_reg
+  - name: bpf_arm64_movz_w10_imm
+    aliases:
+      - bpf_arm64_movz_w10_imm
+  - name: bpf_arm64_strb_w10_mem
+    aliases:
+      - bpf_arm64_strb_w10_mem
+  - name: bpf_arm64_strb_wzr_mem
+    aliases:
+      - bpf_arm64_strb_wzr_mem
 command: |
   timeout 6000 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}

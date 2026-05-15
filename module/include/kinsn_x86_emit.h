@@ -43,6 +43,23 @@ static __always_inline bool kinsn_x86_valid(u8 reg)
 	return kinsn_x86_code(reg) != 0xff;
 }
 
+static __always_inline bool kinsn_x86_needs_rex8(u8 reg)
+{
+	switch (reg) {
+	case BPF_REG_1:
+	case BPF_REG_2:
+	case BPF_REG_5:
+	case BPF_REG_7:
+	case BPF_REG_8:
+	case BPF_REG_9:
+	case BPF_REG_10:
+	case KINSN_X86_REG_R9:
+		return true;
+	default:
+		return false;
+	}
+}
+
 static __always_inline void kinsn_emit_u8(u8 *buf, u32 *len, u8 byte)
 {
 	buf[(*len)++] = byte;
@@ -96,6 +113,28 @@ static __always_inline void kinsn_emit_sib_mem(u8 *buf, u32 *len, u8 reg_field,
 
 	kinsn_emit_u8(buf, len, mod | (kinsn_x86_code(reg_field) << 3) | 0x04);
 	kinsn_emit_u8(buf, len, (scale_log2 << 6) | (index_code << 3) | base_code);
+	if (mod == 0x40)
+		kinsn_emit_u8(buf, len, (u8)offset);
+	else if (mod == 0x80)
+		kinsn_emit_s32(buf, len, offset);
+}
+
+static __always_inline void kinsn_emit_modrm_mem(u8 *buf, u32 *len,
+						 u8 reg_field, u8 base_reg,
+						 s16 offset)
+{
+	u8 base_code = kinsn_x86_code(base_reg);
+	u8 mod;
+
+	if (!offset && base_code != 5)
+		mod = 0x00;
+	else if (offset >= -128 && offset <= 127)
+		mod = 0x40;
+	else
+		mod = 0x80;
+
+	kinsn_emit_u8(buf, len, mod | (kinsn_x86_code(reg_field) << 3) |
+		      base_code);
 	if (mod == 0x40)
 		kinsn_emit_u8(buf, len, (u8)offset);
 	else if (mod == 0x80)

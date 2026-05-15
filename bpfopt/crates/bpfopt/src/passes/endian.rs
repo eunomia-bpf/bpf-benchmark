@@ -4,37 +4,105 @@ use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
-        name: "bpf_endian_load16",
-        register_uses: endian_register_uses,
-        register_defs: endian_register_defs,
+        name: "bpf_x86_movzwl_mem",
+        register_uses: endian_load_register_uses,
+        register_defs: endian_load_register_defs,
     },
     KinsnDescriptor {
-        name: "bpf_endian_load32",
-        register_uses: endian_register_uses,
-        register_defs: endian_register_defs,
+        name: "bpf_x86_movl_mem",
+        register_uses: endian_load_register_uses,
+        register_defs: endian_load_register_defs,
     },
     KinsnDescriptor {
-        name: "bpf_endian_load64",
-        register_uses: endian_register_uses,
-        register_defs: endian_register_defs,
+        name: "bpf_x86_movq_mem",
+        register_uses: endian_load_register_uses,
+        register_defs: endian_load_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_x86_rolw_imm",
+        register_uses: endian_unary_register_uses,
+        register_defs: endian_unary_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_x86_bswapl",
+        register_uses: endian_unary_register_uses,
+        register_defs: endian_unary_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_x86_bswapq",
+        register_uses: endian_unary_register_uses,
+        register_defs: endian_unary_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_arm64_ldrh_mem",
+        register_uses: endian_load_register_uses,
+        register_defs: endian_load_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_arm64_ldr_w_mem",
+        register_uses: endian_load_register_uses,
+        register_defs: endian_load_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_arm64_ldr_x_mem",
+        register_uses: endian_load_register_uses,
+        register_defs: endian_load_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_arm64_rev16_w",
+        register_uses: endian_unary_register_uses,
+        register_defs: endian_unary_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_arm64_rev_w",
+        register_uses: endian_unary_register_uses,
+        register_defs: endian_unary_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_arm64_rev_x",
+        register_uses: endian_unary_register_uses,
+        register_defs: endian_unary_register_defs,
     },
 ];
 pub struct EndianFusionPass;
 const BPF_TO_LE: u8 = 0x00;
 const MAX_NARROW_SCAN: usize = 32;
 
-fn endian_target(w: BpfMemWidth) -> Option<&'static str> {
-    match w {
-        BpfMemWidth::H => Some("bpf_endian_load16"),
-        BpfMemWidth::W => Some("bpf_endian_load32"),
-        BpfMemWidth::DW => Some("bpf_endian_load64"),
-        BpfMemWidth::B => None,
+fn endian_load_target(arch: Arch, w: BpfMemWidth) -> Option<&'static str> {
+    match (arch, w) {
+        (Arch::X86_64, BpfMemWidth::H) => Some("bpf_x86_movzwl_mem"),
+        (Arch::X86_64, BpfMemWidth::W) => Some("bpf_x86_movl_mem"),
+        (Arch::X86_64, BpfMemWidth::DW) => Some("bpf_x86_movq_mem"),
+        (Arch::Aarch64, BpfMemWidth::H) => Some("bpf_arm64_ldrh_mem"),
+        (Arch::Aarch64, BpfMemWidth::W) => Some("bpf_arm64_ldr_w_mem"),
+        (Arch::Aarch64, BpfMemWidth::DW) => Some("bpf_arm64_ldr_x_mem"),
+        (_, BpfMemWidth::B) => None,
     }
 }
-fn endian_register_uses(payload: u64) -> RegSet {
+fn endian_swap_target(arch: Arch, w: BpfMemWidth) -> Option<&'static str> {
+    match (arch, w) {
+        (Arch::X86_64, BpfMemWidth::H) => Some("bpf_x86_rolw_imm"),
+        (Arch::X86_64, BpfMemWidth::W) => Some("bpf_x86_bswapl"),
+        (Arch::X86_64, BpfMemWidth::DW) => Some("bpf_x86_bswapq"),
+        (Arch::Aarch64, BpfMemWidth::H) => Some("bpf_arm64_rev16_w"),
+        (Arch::Aarch64, BpfMemWidth::W) => Some("bpf_arm64_rev_w"),
+        (Arch::Aarch64, BpfMemWidth::DW) => Some("bpf_arm64_rev_x"),
+        (_, BpfMemWidth::B) => None,
+    }
+}
+fn endian_supported_width(w: BpfMemWidth) -> bool {
+    !matches!(w, BpfMemWidth::B)
+}
+fn endian_load_register_uses(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[4])
 }
-fn endian_register_defs(payload: u64) -> RegSet {
+fn endian_load_register_defs(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[0])
+}
+fn endian_unary_register_uses(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[0])
+}
+fn endian_unary_register_defs(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[0])
 }
 pub(super) struct EndianFusionSite {
@@ -94,7 +162,7 @@ fn endian_swap_size(insn: &BpfInsn) -> Option<u8> {
         return None;
     }
     let width = BpfMemWidth::from_bytes((insn.imm / 8) as usize)?;
-    (endian_target(width).is_some()).then(|| width.size_opcode())
+    endian_supported_width(width).then(|| width.size_opcode())
 }
 fn is_narrowing(load_size: u8, endian_size: u8) -> bool {
     let load = BpfMemWidth::from_size_opcode(load_size);
@@ -149,7 +217,7 @@ fn offset_is_directly_encodable(arch: Arch, size: u8, offset: i16) -> bool {
             let Some(width) = BpfMemWidth::from_size_opcode(size) else {
                 return false;
             };
-            if endian_target(width).is_none() {
+            if !endian_supported_width(width) {
                 return false;
             }
             let shift = width.aarch64_shift();
@@ -158,44 +226,58 @@ fn offset_is_directly_encodable(arch: Arch, size: u8, offset: i16) -> bool {
         }
     }
 }
+fn endian_reg_payload(dst_reg: u8) -> u64 {
+    BpfInsn::pack_u4(dst_reg, 0)
+}
+fn endian_reg_imm_payload(dst_reg: u8, imm: u8) -> u64 {
+    BpfInsn::pack_u4(dst_reg, 0) | BpfInsn::pack_u8(imm, 8)
+}
+fn append_endian_kinsns(
+    out: &mut Vec<BpfInsn>,
+    prog: &ProgramCFG,
+    dst_reg: u8,
+    base_reg: u8,
+    offset: i16,
+    arch: Arch,
+    size: u8,
+) -> anyhow::Result<()> {
+    let width = BpfMemWidth::from_size_opcode(size)
+        .ok_or_else(|| anyhow::anyhow!("unsupported endian fusion size {}", size))?;
+    let load_name = endian_load_target(arch, width)
+        .ok_or_else(|| anyhow::anyhow!("unsupported endian fusion load size {}", size))?;
+    let swap_name = endian_swap_target(arch, width)
+        .ok_or_else(|| anyhow::anyhow!("unsupported endian fusion swap size {}", size))?;
+
+    out.extend_from_slice(&prog.kinsn_emit(load_name, endian_payload(dst_reg, base_reg, offset))?);
+    let swap_payload = if matches!((arch, width), (Arch::X86_64, BpfMemWidth::H)) {
+        endian_reg_imm_payload(dst_reg, 8)
+    } else {
+        endian_reg_payload(dst_reg)
+    };
+    out.extend_from_slice(&prog.kinsn_emit(swap_name, swap_payload)?);
+    Ok(())
+}
 fn emit_endian_fusion_call(
+    prog: &ProgramCFG,
     dst_reg: u8,
     src_reg: u8,
     offset: i16,
-    btf_id: i32,
-    kfunc_off: i16,
     arch: Arch,
     size: u8,
-) -> Vec<BpfInsn> {
+) -> anyhow::Result<Vec<BpfInsn>> {
     let direct_offset = offset_is_directly_encodable(arch, size, offset);
-    let mut out = Vec::with_capacity(if direct_offset || offset == 0 {
-        2
-    } else if src_reg != dst_reg && src_reg != 10 {
-        4
-    } else if dst_reg == src_reg {
-        3
-    } else {
-        4
-    });
+    let mut out = Vec::new();
     if direct_offset {
-        out.extend_from_slice(&emit_packed_kinsn_call_with_off(
-            endian_payload(dst_reg, src_reg, offset),
-            btf_id,
-            kfunc_off,
-        ));
-        return out;
+        append_endian_kinsns(&mut out, prog, dst_reg, src_reg, offset, arch, size)?;
+        return Ok(out);
     }
     let base_reg = if offset == 0 {
         src_reg
     } else if src_reg != dst_reg && src_reg != 10 {
         out.push(BpfInsn::alu64_imm(BPF_ADD, src_reg, offset as i32));
-        out.extend_from_slice(&emit_packed_kinsn_call_with_off(
-            endian_payload(dst_reg, src_reg, 0),
-            btf_id,
-            kfunc_off,
-        ));
+        append_endian_kinsns(&mut out, prog, dst_reg, src_reg, 0, arch, size)?;
         out.push(BpfInsn::alu64_imm(BPF_ADD, src_reg, -(offset as i32)));
-        return out;
+        return Ok(out);
     } else {
         if dst_reg != src_reg {
             out.push(BpfInsn::mov64_reg(dst_reg, src_reg));
@@ -203,12 +285,8 @@ fn emit_endian_fusion_call(
         out.push(BpfInsn::alu64_imm(BPF_ADD, dst_reg, offset as i32));
         dst_reg
     };
-    out.extend_from_slice(&emit_packed_kinsn_call_with_off(
-        endian_payload(dst_reg, base_reg, 0),
-        btf_id,
-        kfunc_off,
-    ));
-    out
+    append_endian_kinsns(&mut out, prog, dst_reg, base_reg, 0, arch, size)?;
+    Ok(out)
 }
 impl BpfPass for EndianFusionPass {
     fn run(&self, prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
@@ -241,22 +319,15 @@ impl BpfPass for EndianFusionPass {
         let applied =
             apply_candidates_reverse(prog, &candidates, &mut skipped, |prog, start, payload| {
                 let (site, old_len) = payload;
-                let kfunc_name = BpfMemWidth::from_size_opcode(site.size)
-                    .and_then(endian_target)
-                    .ok_or_else(|| {
-                        anyhow::anyhow!("unsupported endian fusion size {}", site.size)
-                    })?;
-                let (btf_id, kfunc_off) = prog.kinsn_call(kfunc_name)?;
                 let preserved = preserved_body_insns(prog, start, old_len.saturating_sub(2))?;
                 let mut replacement = emit_endian_fusion_call(
+                    prog,
                     site.dst_reg,
                     site.src_reg,
                     site.offset,
-                    btf_id,
-                    kfunc_off,
                     ctx.arch,
                     site.size,
-                );
+                )?;
                 replacement.extend_from_slice(&preserved);
                 Ok((*old_len, replacement))
             })?;
