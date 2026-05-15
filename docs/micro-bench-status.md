@@ -208,69 +208,87 @@ These are not LEA problems. They are cases where native code benefits from struc
 
 ## x86 Instruction and Transform Gap
 
-The remaining gap is best understood at two levels. The x86 backend has richer instruction forms than BPF exposes directly, but bpfopt runs before final x86 emission. A profitable transform therefore has to rewrite verifier-facing BPF into a shape that the kernel x86 JIT can already lower well, or encode a kinsn whose module instantiate path expands to verifier-native BPF while the final x86 emitter lowers the same verified semantics more aggressively.
+The gap should now be read with two mechanisms in mind:
 
-The kinsn point is important: the verifier does not need to see an opaque kfunc call. For kinsn-backed transforms, the module instantiate callback supplies the BPF instruction sequence that is verified. The final x86 emitter can then replace that verified sequence with a shorter native form, as long as its semantics match the instantiate sequence. For pointer-derived loads, the issue is therefore not "avoid pointer-load kinsns"; it is "make the instantiate sequence preserve the same verifier-visible pointer arithmetic and `LDX_MEM` load proof."
+- Normal bpfopt passes rewrite verifier-facing BPF into better verifier-facing BPF. The kernel verifier and the normal kernel JIT see the rewritten instruction stream.
+- Machine-level kinsns are a separate path. The verifier sees the module's `instantiate_insn()` BPF expansion; the final x86 emitter lowers the same kinsn to one named x86 instruction form. This is the path used to test whether "native C asm converted to machine-kinsn BPF" can converge to the same final kernel JIT code.
 
-| x86 Codegen Gap | Native Shape Seen in Micro | Current BPF/ReJIT Shape | Transform Direction |
-|---|---|---|---|
-| Wide packet/record loads | `movzwl disp(base,index)`, `movl disp(base)`, `movq disp(base)` | byte-load ladder plus shift/or reconstruction | Expand `wide_mem` from local ladders to whole packet/record field clusters after one bounds proof |
-| Scaled indexed addressing | memory operands using `disp(base,index,scale)` | explicit pointer add chains and partial LEA recovery | Canonicalize `base + i * stride + field_off` so x86 JIT can fold address arithmetic into loads/stores |
-| Endian and rotate idioms | `bswapl`, `roll`, `rolw` | shifts, masks, ors, sometimes recovered by `rotate` | Broaden endian/rotate recognition across width variants and packet-load compositions |
-| Carry/select lowering | `cmovb*` in Katran-style checksum/hash paths | branch or scalar compare/select idioms | Add BPF-level canonical forms where possible; true `cmov`/`adc`/`sbb` likely needs x86 JIT or kinsn lowering |
-| Dense switch/table dispatch | range check plus indexed table load from `.rodata` | large compare tree | Recover switch/value-table structure or teach a later x86 lowering to emit table dispatch |
-| Loop combine/unroll | checksum loop consumes two 16-bit words per trip | one logical word per trip, often byte-composed | Add loop-level combine/unroll recognition for checksum-like bounded loops |
-| Local-call ABI | compact native callees and normal x86 calls | bpf2bpf calls plus BPF register/spill conventions | Inline/specialize small local subprograms, then rerun local cleanup passes |
-| Scheduling/register allocation | native backend schedules across SSA values | BPF register model largely preserved | Only partly solvable in bytecode; deeper wins need final JIT scheduling/allocation work |
+The current handcraft conversion path is intentionally outside the benchmark result schema. `make micro` compiles any `micro/programs/<bench>.handcraft.c` into `<bench>.handcraft.so`; `micro/catalog.py` auto-attaches that object as an extra `kernel_handcraft` runtime for the existing benchmark. There is no separate `_handcraft` benchmark entry. After a successful micro run, `micro/driver.py` writes `micro/programs/<bench>.md` with:
 
-The concrete x86 instruction/form matrix is:
+- original C
+- native C asm
+- original kernel JIT asm
+- llvmbpf JIT asm
+- handcraft C
+- handcraft kernel JIT asm
 
-| x86 Insn/Form | Evidence in Native Micro Code | Closest Existing Pass | Current Coverage in Full Run | Remaining Gap |
-|---|---|---|---|---|
-| `movzbl m8, r32` | common byte loads in packet/string paths | none needed | baseline kernel JIT already emits byte loads | not a target by itself; the issue is when many byte loads should become a wider load |
-| `movzwl m16, r32` | `packet_checksum_fold`, `packet_record_bounds_window`, Katran | `wide_mem` | `wide_mem=186/255` applied/matched | misses some unaligned and cross-field clusters; checksum still consumes one logical word per loop trip |
-| `movl m32, r32` | bounds-window record fields and dense-switch input loads | `wide_mem` | `wide_mem=186/255` | needs whole-record clustering and endian-aware field reconstruction |
-| `movq m64, r64` | Cilium policy payload read, local-call callees | `wide_mem` | `wide_mem=186/255` | needs verified 8-byte packet/record clustering, including inside subprograms |
-| `disp(base,index,scale)` memory operand | Toeplitz table loads and dense switch table load | `lea` + `wide_mem`; possible future indexed-load kinsn | `lea=552/552`, `wide_mem=186/255` | current LEA helps address arithmetic but does not guarantee a final folded memory operand; an indexed-load kinsn could instantiate to pointer arithmetic + `LDX_MEM` and emit one SIB memory load |
-| `leaq disp(base,index,scale), r64` | address setup in all inspected native objects | `lea` | `lea=552/552` | scaled-index/add-chain forms are still mostly structural, not just two-insn add/move patterns |
-| `bswapl` / `bswapq` | Toeplitz uses `bswapl` | `endian_fusion` | `endian_fusion=0/0` in this run | byte-composed network-endian fields are not being normalized into endian ops here |
-| `rolw` | Katran and Toeplitz endian/rotate fragments | `rotate`, partly `endian_fusion` | `rotate=492/492`, `endian_fusion=0/0` | rotate is strong, but endian+rotate combinations and narrower-width forms still leave gaps |
-| `roll` / `rolq` | Katran hash mixing, local-call rotate path | `rotate` | `rotate=492/492` | instruction selection is recovered, but scheduling/register allocation still differs from native |
-| `cmovbq` / `cmovbl` | Katran carry/select path | `cond_select` is adjacent | `cond_select=33/33` | current select matching is not the same as carry-flag based `cmovb*`; true flag reuse may need x86 lowering |
-| `setcc` | observed in `sorted_rule_binary_search` native code (`sete`) | `cond_select` / `ccmp` are adjacent | `cond_select=33/33`; `ccmp=0/87` on x86 because it is aarch64-only | no x86-specific setcc materialization pass today |
-| `adc` / `sbb` | candidate for checksum/carry folding; not observed in selected native snippets | none | no current pass | likely requires final x86 lowering or a kinsn form; BPF bytecode has no flag-carry value model |
-| `cmp; ja; mov table(,idx,8)` | dense switch native lowering | none | no current pass | need switch/value-table recovery or final JIT compare-tree-to-table lowering |
-| `callq` to local functions | local-call fanout native entry and callees | none; `dce` cleans after other transforms | no local-inline pass; `dce=126/126` only removes dead defs | need bpf2bpf local-call inline/specialization before local cleanup passes |
-| `prefetch*` | not part of the selected native-code gap | `prefetch` | `prefetch=9/9` | existing pass covers explicit prefetch sites; not a dominant gap in these case studies |
-| `popcnt` / BMI bit ops | not observed in selected native snippets | none | no current pass | possible future scalar-pattern target, but current evidence does not make it a first-order gap |
+The native-to-handcraft converter can read that generated markdown directly:
 
-The same facts viewed from the existing pass list:
+```sh
+analysis/native_asm_to_handcraft.py \
+  --input micro/programs/siphash_rotate64_mixer.md \
+  --output micro/programs/siphash_rotate64_mixer.handcraft.c
+```
 
-| Existing Pass | x86 Insn/Form It Can Help Reach | Current Full-Run Coverage | What It Does Not Cover Yet |
-|---|---|---:|---|
-| `wide_mem` | `movzwl`, `movl`, `movq` | 186 applied / 255 matched | whole record clusters, some unaligned cases, loop-combined checksum loads |
-| `lea` | `leaq`, simpler address arithmetic feeding memory ops | 552 / 552 | full `disp(base,index,scale)` memory folding and scaled add-chain recovery |
-| `rotate` | `rolw`, `roll`, `rolq`-style idioms | 492 / 492 | endian+rotate fusion, scheduling, register allocation |
-| `endian_fusion` | `bswap*`, endian-normalized loads | 0 / 0 | current micro shapes do not match; byte-composed packet fields remain |
-| `cond_select` | branchless select, potentially `cmov`-like lowering | 33 / 33 | carry-flag `cmovb*`, `setcc`, and final flag reuse |
-| `extract` | bitfield extraction idioms | 33 / 33 | x86 BMI-style `bextr`/specialized bit ops are not currently targeted |
-| `ccmp` | conditional compare, but arm64-oriented | 0 / 87 | not an x86 solution in the current run |
-| `dce` | removes dead scalar/address work after other passes | 126 / 126 | does not create better x86 forms by itself |
-| `bounds_check_merge` | fewer `cmp/jcc` bounds checks | 0 / 0 | no coverage in this micro run; does not solve dense switch or branch layout |
-| `prefetch` | prefetch instruction/kfunc sites | 9 / 9 | not relevant to the dominant native-code gaps here |
-| `bulk_memory` | bulk copy/memory kfunc shape | 0 / 0 | no selected micro gap maps to it yet |
-| `map_inline` | enables constant map-value loads before later cleanup | 0 / 0 sites in micro | micro intentionally avoids helper/map-heavy shapes |
-| `const_prop` | materializes verifier-proven constants before later cleanup | 0 / 567 | not an x86 instruction selector; useful only when facts are safe to materialize |
-| `skb_load_bytes_spec` | skb helper specialization | 0 / 0 | not relevant to current XDP-style micro cases |
-| `branch_flip` | branch layout from real profile data | not in default policy | can help policy trees only with real per-site PGO, not with heuristic fallback |
+Using a temporary `.native.so` disassembly is only useful when the markdown does not exist yet or is stale. Once `micro/programs/<bench>.md` exists, the generated `## Native ASM` section is the right source of truth for the converter.
 
-This separates near-term BPF transforms from lower-level x86 work:
+The current successful handcraft smoke is:
 
-- BPF-level transforms that should be practical first: wider packet/record load clustering, endian/rotate expansion, scaled-index canonicalization, local-call inlining, and selected bounded-loop combine.
-- Structural transforms that need more analysis: dense switch/table recovery, Toeplitz key-table reconstruction, and branch-layout work for policy trees.
-- x86-specific lowering that plain bytecode rewriting probably cannot fully express, but kinsn emitters may: `cmov`/`setcc`/`adc`/`sbb`, indexed memory operands, jump tables, `popcnt` or BMI-style scalar idioms. Real register allocation and final instruction scheduling remain below the current bytecode pass layer.
+```sh
+BENCH="simple simple_packet siphash_rotate64_mixer" SAMPLES=1 WARMUPS=0 INNER_REPEAT=10 make micro
+```
 
-This also explains why code size alone is a weak predictor. `packet_checksum_fold` gets smaller without changing the loop-carried dependence, while `packet_toeplitz_rss_hash` gets faster even with slightly larger code because dependency shape matters more than byte count.
+Result path: `micro/results/x86_kvm_micro_20260515_053902_538703/details/result.json`.
+
+| Benchmark | Native | Kernel | Kernel Handcraft | Handcraft Result | Native-vs-Handcraft JIT Body |
+|---|---:|---:|---:|---:|---:|
+| `simple` | 72 ns | 66 ns | 58 ns | `12345678` | 16 / 16 insns, 0 mismatches |
+| `simple_packet` | 91 ns | 80 ns | 46 ns | `12345678` | 13 / 13 insns, 0 mismatches |
+| `siphash_rotate64_mixer` | 92 ns | 94 ns | 86 ns | `2666935177028490406` | 318 / 318 insns, 0 mismatches |
+
+The instruction counts compare normalized function bodies: kernel wrapper/prologue/epilogue differences are removed, and the expected BPF-JIT register naming difference (`r15` for BPF `r9`) is normalized. This is the first positive result for the handcraft hypothesis: for three cases, the converted kinsn/BPF input verifies, executes correctly, and dumps final x86 code matching native body instruction-for-instruction after mechanical normalization.
+
+The current generated markdown coverage in `micro/programs/` is not full-suite coverage. It exists for cases from completed or earlier selected runs: `simple`, `simple_packet`, `siphash_rotate64_mixer`, `bitmap_popcount_scan`, `packed_header_bitfield_decode`, `packet_toeplitz_rss_hash`, and `trace_event_type_switch_dispatch`. The driver writes these files after the selected micro run completes; failed or not-yet-run benchmarks will not have fresh markdown.
+
+The concrete x86 instruction/form matrix is now:
+
+| x86 Insn/Form | Existing bpfopt Pass Path | Machine-Kinsn Path | Verifier-Facing Instantiation | Current Test Status | Remaining Gap |
+|---|---|---|---|---|---|
+| `leaq` / `leal` | `lea` rewrites BPF address idioms; full run applied `552/552` | `bpf_x86_leaq`, `bpf_x86_leal` | verifier-native `dst = base + index * scale + disp` BPF sequence | used by `simple`, `simple_packet`, `siphash_rotate64_mixer`; JIT body parity passes | scaled add-chain recovery in automatic pass is still narrower than native addressing forms |
+| `rolq imm` | `rotate` recovered `492/492` sites in the full run | `bpf_x86_rolq_imm` | shift/or rotate expansion using a temp register | heavily used by `siphash_rotate64_mixer`; JIT body parity passes | automatic pass still does not solve scheduling/register allocation around rotate-heavy code |
+| `rolw imm`, `rorxl imm` | `rotate` / `endian_fusion` adjacent | `bpf_x86_rolw_imm`, `bpf_x86_rorxl_imm` | width-specific rotate-equivalent BPF | selector exists; needs current handcraft micro coverage | Katran/Toeplitz-style endian+rotate patterns need more conversion coverage |
+| `movzbl/movzwl/movl/movq disp(base), reg` | `wide_mem` applied `186/255` in full run | `bpf_x86_movzbl_mem`, `bpf_x86_movzwl_mem`, `bpf_x86_movl_mem`, `bpf_x86_movq_mem` | direct verifier-safe `LDX_MEM` from the same base/disp | `movq` path used in `siphash_rotate64_mixer`; parity passes | whole-record packet clusters and some unaligned cases still need automatic `wide_mem` work |
+| `movzwl/movl/movq disp(base,index,scale), reg` | partially reachable through `lea` + `wide_mem` | `bpf_x86_movzwl_sib`, `bpf_x86_movl_sib`, `bpf_x86_movq_sib` | temp = index shift; ptr = base + temp; `LDX_MEM` | selectors exist; full current handcraft coverage still pending | Toeplitz table loads and dense-switch table loads are the main targets |
+| `movbe16/movbe32/movbe64 disp(base,index,scale), reg` | intended neighbor of `endian_fusion`; full run had no matched sites | `bpf_x86_movbe16_sib`, `bpf_x86_movbe32_sib`, `bpf_x86_movbe64_sib` | indexed load plus endian conversion | selector exists; needs Toeplitz/packet endian handcraft run | byte-composed network-endian fields are not normalized often enough today |
+| `movb/movw/movl/movq reg, disp(base)` | ordinary BPF stores already map well in many cases | `bpf_x86_movb_mem_reg`, `bpf_x86_movw_mem_reg`, `bpf_x86_movl_mem_reg`, `bpf_x86_movq_mem_reg` | direct verifier-safe `STX_MEM` | selectors exist; direct stores need broader handcraft coverage | packet write paths should be checked against native output case by case |
+| `movb imm, disp(base)` | ordinary BPF immediate stores cover semantics | `bpf_x86_movb_imm_mem` | verifier-safe `ST_MEM` byte store | used by `simple`/`simple_packet`; parity passes | wider immediate stores currently stay ordinary BPF when kernel output is already equivalent |
+| `movq reg, reg` | ordinary BPF move often suffices | `bpf_x86_movq_rr` | verifier-safe register move; module also constrains invalid register overlap cases | selector exists; used by handcraft infrastructure | use only when exact native register move matters after dump comparison |
+| `bswapl` / `bswapq` | `endian_fusion` is the automatic pass path | `bpf_x86_bswapl`, `bpf_x86_bswapq` | byte-order-equivalent BPF operations | selector exists; needs current handcraft micro coverage | key packet-endian cases still need conversion and JIT parity checks |
+| `testq reg,reg` + `cmoveq/cmovneq` | `cond_select` is the automatic branchless-select path | `bpf_x86_testq_rr`, `bpf_x86_cmoveq_rr`, `bpf_x86_cmovneq_rr` | verifier sees explicit boolean/select BPF sequence; final x86 keeps flags-dependent instruction pair | selector exists; must be used with adjacent flag dependency preserved in handcraft | carry-flag `cmovb*`, `setcc`, `adc`, and `sbb` are still missing |
+| `popcntq` | no automatic pass yet | `bpf_x86_popcntq` | scalar popcount fallback sequence | selector exists; bitmap micro handcraft coverage should be refreshed | add automatic scalar-pattern pass only after workload evidence says it matters |
+| `blsiq` / `blsrq` | no automatic pass yet | `bpf_x86_blsiq`, `bpf_x86_blsrq` | `x & -x` / `x & (x - 1)` BPF sequence | selector exists; needs bitmap traversal coverage | same as `popcntq`: useful for bitmap cases, not yet broad |
+| `shrq imm`, `andl imm32` | ordinary BPF ALU often maps acceptably | `bpf_x86_shrq_imm`, `bpf_x86_andl_imm32` | direct BPF ALU operation | selector exists; used when exact native instruction parity requires it | not a high-level transform by itself |
+| `prefetcht0` | `prefetch` pass applied `9/9` in full run | `bpf_x86_prefetcht0` | verifier-safe no-value prefetch semantics | selector exists | not a dominant native-code gap in the inspected cases |
+| `cmp/test + jcc` | ordinary BPF branches already lower to x86 compare/test plus jump | no standalone branch kinsn today | verifier-native BPF branch | used by handcraft converter for bounds and control-flow edges | a branch kinsn would need relocation/current-PC context in the kinsn emit API; do not add unless ordinary BPF cannot dump the same x86 |
+| dense switch jump/table load | no automatic pass | no complete kinsn path yet | compare tree today | `trace_event_type_switch_dispatch` markdown exists, but handcraft parity is not current | needs table recovery or an explicit table-load/jump-table design |
+| local `callq` / bpf2bpf call layout | no automatic local-inline pass | no machine-call kinsn path | bpf2bpf call ABI | not covered by handcraft parity | requires interprocedural transform, not only single-instruction kinsns |
+
+Viewed from pass ownership:
+
+| Existing Pass | Current Role After Machine-Kinsn Work | Still Missing |
+|---|---|---|
+| `lea` | verifier-facing automatic address cleanup; handcraft has exact `leaq/leal` selectors for parity tests | broader scaled-index/add-chain recognition |
+| `wide_mem` | automatic wide-load cleanup; handcraft has direct and SIB load selectors | record-cluster and loop-carried memory patterns |
+| `rotate` | automatic rotate idiom recovery; handcraft has `rolq/rolw/rorxl` selectors | endian+rotate combinations and scheduling |
+| `endian_fusion` | automatic byte-order cleanup path | current micro shapes did not trigger it; handcraft selectors exist for targeted tests |
+| `cond_select` | automatic branchless-select recovery | flag-carry forms (`cmovb*`, `setcc`, `adc`, `sbb`) are not covered |
+| `extract` | automatic bitfield idiom cleanup | BMI-style x86 bit extraction is not covered |
+| `prefetch` | automatic prefetch kinsn path | already covered where explicit prefetch sites exist |
+| `ccmp` | arm64-oriented; not an x86 solution | no x86 condition-code equivalent today |
+| `dce` | cleanup after other passes | does not create native x86 forms itself |
+| `bounds_check_merge`, `bulk_memory`, `map_inline`, `const_prop`, `skb_load_bytes_spec`, `branch_flip` | relevant for other suite shapes, but not the new handcraft parity result | not single x86-instruction parity mechanisms |
+
+This changes the next-step priority. The immediate handcraft work is no longer "invent an indexed-load kinsn" in the abstract; those selectors now exist. The next work is to regenerate markdown from successful selected `make micro` runs, feed those markdown files into the converter, and make the final `Handcraft Kernel JIT ASM` match `Native ASM` for more workload-pattern cases. When the ordinary BPF branch/load/store already dumps the same x86, keep it ordinary BPF. When it does not, add the smallest one-instruction x86 kinsn with a verifier-native instantiate sequence.
 
 ## Case Studies
 

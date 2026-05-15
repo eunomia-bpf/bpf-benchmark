@@ -596,7 +596,7 @@ def patch_branch_offsets(insns: list[NativeInsn], translations: list[Translation
     return patched
 
 
-def write_outputs(insns: list[NativeInsn], translations: list[Translation], output: Path, report: Path) -> None:
+def write_outputs(insns: list[NativeInsn], translations: list[Translation], output: Path) -> None:
     warnings = sum(1 for item in translations if item.status.startswith("warning"))
     output_lines = [
         '#include "handcraft_common.h"',
@@ -608,8 +608,15 @@ def write_outputs(insns: list[NativeInsn], translations: list[Translation], outp
         "",
     ]
     if warnings:
-        output_lines.append(f"/* native asm to handcraft warnings: {warnings}; see generated analysis report. */")
-        output_lines.append("")
+        output_lines.extend([
+            "/*",
+            f" * native asm to handcraft warnings: {warnings}",
+            " *",
+        ])
+        for insn, trans in zip(insns, translations, strict=True):
+            if trans.status.startswith("warning"):
+                output_lines.append(f" * - 0x{insn.addr:x}: {insn.raw} [{trans.status}: {trans.note}]")
+        output_lines.extend([" */", ""])
     output_lines.append("static const struct bpf_insn program[] = {")
     for insn, trans in zip(insns, translations, strict=True):
         prefix = f"    /* 0x{insn.addr:x}: {insn.raw} [{trans.status}: {trans.note}] */"
@@ -620,30 +627,19 @@ def write_outputs(insns: list[NativeInsn], translations: list[Translation], outp
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text("\n".join(output_lines))
 
-    rows = [
-        f"Warnings: {warnings}",
-        "",
-        "| addr | native | status | handcraft / reason |",
-        "|---:|---|---|---|",
-    ]
-    for insn, trans in zip(insns, translations, strict=True):
-        detail = "<br>".join(trans.code) if trans.code else trans.note
-        rows.append(f"| `0x{insn.addr:x}` | `{insn.raw}` | `{trans.status}` | {detail} |")
-    report.parent.mkdir(parents=True, exist_ok=True)
-    report.write_text("# native asm to handcraft analysis\n\n" + "\n".join(rows) + "\n")
-
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", required=True, type=Path, help="native asm plain text or micro md containing a Native ASM section")
     parser.add_argument("--output", required=True, type=Path, help="generated .handcraft.c path")
-    parser.add_argument("--report", type=Path, help="per-instruction markdown report")
+    parser.add_argument("--report", type=Path, help=argparse.SUPPRESS)
     args = parser.parse_args()
+    if args.report is not None:
+        raise SystemExit("--report was removed; warnings are embedded in the generated handcraft C file")
 
     insns = parse_native_asm(args.input.read_text())
     translations = patch_branch_offsets(insns, translate_all(insns))
-    report = args.report or args.output.with_suffix(".analysis.md")
-    write_outputs(insns, translations, args.output, report)
+    write_outputs(insns, translations, args.output)
     warnings = sum(1 for item in translations if item.status.startswith("warning"))
     exact = sum(1 for item in translations if item.status == "exact-kinsn")
     bpf_jit = sum(1 for item in translations if item.status == "bpf-jit")
