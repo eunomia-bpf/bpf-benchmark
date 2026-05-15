@@ -39,6 +39,9 @@
 namespace {
 
 constexpr uint8_t BPF_LD_IMM64 = 0x18;
+constexpr uint8_t BPF_LDX_MEM_H = 0x69;
+constexpr uint8_t BPF_ALU32_MOV_X = 0xbc;
+constexpr uint8_t BPF_ALU32_AND_K = 0x54;
 constexpr uint8_t BPF_CALL = 0x85;
 constexpr uint8_t BPF_CALLX = BPF_CALL | 0x08;
 constexpr uint8_t BPF_PSEUDO_MAP_FD = 1;
@@ -46,6 +49,7 @@ constexpr uint8_t BPF_PSEUDO_MAP_VALUE = 2;
 constexpr uint8_t BPF_PSEUDO_MAP_IDX = 5;
 constexpr uint8_t BPF_PSEUDO_MAP_IDX_VALUE = 6;
 constexpr uint8_t BPF_PSEUDO_CALL = 1;
+constexpr uint8_t BPF_PSEUDO_FUNC = 4;
 constexpr size_t INSN_SIZE = 8;
 
 struct Cli {
@@ -147,6 +151,17 @@ uint8_t src_reg(const std::vector<uint8_t> &insns, size_t pc)
 	return (insns[pc * INSN_SIZE + 1] >> 4) & 0x0f;
 }
 
+uint8_t dst_reg(const std::vector<uint8_t> &insns, size_t pc)
+{
+	return insns[pc * INSN_SIZE + 1] & 0x0f;
+}
+
+void set_dst_reg(std::vector<uint8_t> &insns, size_t pc, uint8_t dst)
+{
+	auto &regs = insns[pc * INSN_SIZE + 1];
+	regs = static_cast<uint8_t>((regs & 0xf0) | (dst & 0x0f));
+}
+
 void set_src_reg(std::vector<uint8_t> &insns, size_t pc, uint8_t src)
 {
 	auto &regs = insns[pc * INSN_SIZE + 1];
@@ -158,6 +173,13 @@ int32_t read_imm(const std::vector<uint8_t> &insns, size_t pc)
 	int32_t imm = 0;
 	std::memcpy(&imm, &insns[pc * INSN_SIZE + 4], sizeof(imm));
 	return imm;
+}
+
+int16_t read_off(const std::vector<uint8_t> &insns, size_t pc)
+{
+	int16_t off = 0;
+	std::memcpy(&off, &insns[pc * INSN_SIZE + 2], sizeof(off));
+	return off;
 }
 
 void write_imm(std::vector<uint8_t> &insns, size_t pc, int32_t imm)
@@ -175,6 +197,16 @@ bool is_map_pseudo(uint8_t src)
 	return src == BPF_PSEUDO_MAP_FD || src == BPF_PSEUDO_MAP_VALUE ||
 	       src == BPF_PSEUDO_MAP_IDX ||
 	       src == BPF_PSEUDO_MAP_IDX_VALUE;
+}
+
+bool is_jmp32_k(uint8_t code)
+{
+	return (code & 0x07) == 0x06 && code != 0x06;
+}
+
+bool is_jump_class(uint8_t code)
+{
+	return (code & 0x07) == 0x05 || (code & 0x07) == 0x06;
 }
 
 std::vector<uint32_t> parse_u32_csv(const std::string &csv)
@@ -307,16 +339,23 @@ std::optional<size_t> subprog_start_pc(const std::vector<uint8_t> &input)
 	const size_t insn_count = input.size() / INSN_SIZE;
 	for (size_t pc = 0; pc < insn_count; pc++) {
 		const uint8_t opcode = input[pc * INSN_SIZE];
-		if ((opcode != BPF_CALL && opcode != BPF_CALLX) ||
-		    src_reg(input, pc) != BPF_PSEUDO_CALL) {
+		std::optional<int64_t> target;
+		if ((opcode == BPF_CALL || opcode == BPF_CALLX) &&
+		    src_reg(input, pc) == BPF_PSEUDO_CALL) {
+			target = static_cast<int64_t>(pc) + 1 +
+				 static_cast<int64_t>(read_imm(input, pc));
+		} else if (opcode == BPF_LD_IMM64 &&
+			   src_reg(input, pc) == BPF_PSEUDO_FUNC) {
+			target = static_cast<int64_t>(read_imm(input, pc));
+			pc++;
+		}
+		if (!target) {
 			continue;
 		}
-		const int64_t target = static_cast<int64_t>(pc) + 1 +
-				       static_cast<int64_t>(read_imm(input, pc));
-		if (target < 0 || target >= static_cast<int64_t>(insn_count)) {
-			throw std::runtime_error("local call target out of range");
+		if (*target < 0 || *target >= static_cast<int64_t>(insn_count)) {
+			throw std::runtime_error("local subprogram target out of range");
 		}
-		const auto target_pc = static_cast<size_t>(target);
+		const auto target_pc = static_cast<size_t>(*target);
 		start = start ? std::min(*start, target_pc) : target_pc;
 	}
 	return start;
@@ -419,6 +458,33 @@ void apply_text_relocations(llvm::object::ObjectFile &object,
 	}
 }
 
+void repair_verifier_range_copies(std::vector<uint8_t> &text)
+{
+	const size_t insn_count = text.size() / INSN_SIZE;
+	for (size_t pc = 1; pc + 3 < insn_count; pc++) {
+		if (text[pc * INSN_SIZE] != BPF_ALU32_MOV_X) {
+			continue;
+		}
+		const uint8_t checked = dst_reg(text, pc);
+		const uint8_t source = src_reg(text, pc);
+		if (checked == source ||
+		    text[(pc - 1) * INSN_SIZE] != BPF_LDX_MEM_H ||
+		    dst_reg(text, pc - 1) != source ||
+		    text[(pc + 1) * INSN_SIZE] != BPF_ALU32_AND_K ||
+		    dst_reg(text, pc + 1) != checked ||
+		    src_reg(text, pc + 1) != 0 ||
+		    read_imm(text, pc + 1) != 0xffff ||
+		    !is_jmp32_k(text[(pc + 2) * INSN_SIZE]) ||
+		    dst_reg(text, pc + 2) != checked ||
+		    src_reg(text, pc + 2) != 0 ||
+		    read_imm(text, pc + 2) < 0 ||
+		    read_imm(text, pc + 2) > 0xffff) {
+			continue;
+		}
+		set_dst_reg(text, pc + 2, source);
+	}
+}
+
 std::vector<uint8_t>
 extract_relocated_text(const std::vector<uint8_t> &object_bytes,
 		       const std::vector<uint8_t> &input)
@@ -454,10 +520,12 @@ extract_relocated_text(const std::vector<uint8_t> &object_bytes,
 		text.insert(text.end(), input.begin() + *subprog_start * INSN_SIZE,
 			    input.end());
 	}
+	repair_verifier_range_copies(text);
 	return text;
 }
 
-std::unique_ptr<llvm::TargetMachine> create_bpf_target_machine()
+std::unique_ptr<llvm::TargetMachine>
+create_bpf_target_machine(llvm::CodeGenOptLevel opt_level)
 {
 	llvm::InitializeAllTargetInfos();
 	llvm::InitializeAllTargets();
@@ -473,7 +541,8 @@ std::unique_ptr<llvm::TargetMachine> create_bpf_target_machine()
 	llvm::TargetOptions options;
 	auto machine = std::unique_ptr<llvm::TargetMachine>(
 		target->createTargetMachine("bpfel", "v3", "", options,
-					    std::nullopt));
+					    std::nullopt, std::nullopt,
+					    opt_level));
 	if (!machine) {
 		throw std::runtime_error("failed to create BPF target machine");
 	}
@@ -497,12 +566,16 @@ void optimize_module(llvm::Module &module, llvm::TargetMachine &machine)
 	pipeline.run(module, module_am);
 }
 
-std::vector<uint8_t> emit_bpf_object(llvm::Module &module)
+std::vector<uint8_t> emit_bpf_object(llvm::Module &module, bool optimize_ir)
 {
-	auto machine = create_bpf_target_machine();
+	auto machine = create_bpf_target_machine(
+		optimize_ir ? llvm::CodeGenOptLevel::Default :
+			      llvm::CodeGenOptLevel::None);
 	module.setTargetTriple("bpfel");
 	module.setDataLayout(machine->createDataLayout());
-	optimize_module(module, *machine);
+	if (optimize_ir) {
+		optimize_module(module, *machine);
+	}
 
 	llvm::SmallVector<char, 0> object_stream;
 	llvm::raw_svector_ostream output(object_stream);
@@ -545,7 +618,7 @@ std::vector<std::string> helper_symbols(const std::vector<uint8_t> &input)
 	return names;
 }
 
-std::vector<uint8_t> run_llvm_roundtrip(const std::vector<uint8_t> &input)
+llvm::orc::ThreadSafeModule generate_llvm_module(const std::vector<uint8_t> &input)
 {
 	if (input.empty() || input.size() % INSN_SIZE != 0) {
 		throw std::runtime_error(
@@ -559,12 +632,17 @@ std::vector<uint8_t> run_llvm_roundtrip(const std::vector<uint8_t> &input)
 	vm.set_kernel_compatible_mode(true);
 
 	bpftime::llvm_bpf_jit_context context(vm);
-	auto module = context.generateModule(helper_symbols(input), {}, false);
-	if (!module) {
-		throw std::runtime_error(llvm_error_string(module.takeError()));
-	}
-	return module->withModuleDo([&](llvm::Module &module) {
-		return extract_relocated_text(emit_bpf_object(module), input);
+	return expected_or_throw(
+		context.generateModule(helper_symbols(input), {}, false));
+}
+
+std::vector<uint8_t> run_llvm_roundtrip(const std::vector<uint8_t> &input,
+					bool optimize_ir)
+{
+	auto module = generate_llvm_module(input);
+	return module.withModuleDo([&](llvm::Module &module) {
+		return extract_relocated_text(emit_bpf_object(module, optimize_ir),
+					      input);
 	});
 }
 
@@ -765,7 +843,8 @@ void run_pass(Cli &cli)
 			"--target-output requires --canonicalize-map-refs");
 	}
 	const auto input = read_all(cli.input);
-	const auto output = run_llvm_roundtrip(input);
+	const bool is_noop = *cli.pass == "noop";
+	std::vector<uint8_t> output = run_llvm_roundtrip(input, !is_noop);
 	write_all(cli.output, output);
 	write_report(cli, input, output);
 }

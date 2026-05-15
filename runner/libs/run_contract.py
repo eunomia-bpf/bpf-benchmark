@@ -331,15 +331,8 @@ def _build_run_config_mapping(
         if not Path(run_vm_executable).is_absolute() and "/" in run_vm_executable:
             run_vm_executable = str((ROOT_DIR / run_vm_executable).resolve())
         _kenv = lambda k, dflt="": _env_or_default(values, k, dflt)
-        suite_vm_class = suite.get("SUITE_VM_CLASS", "")
-        if suite_vm_class == "test":
-            run_vm_cpus = _kenv("VM_CPUS", _resolve_cpu_spec(target.get("TARGET_KVM_TEST_CPUS_SPEC", "auto:0.8")))
-            run_vm_mem = _kenv("VM_MEM", target.get("TARGET_KVM_TEST_MEM", "16G"))
-        elif suite_vm_class == "benchmark":
-            run_vm_cpus = _kenv("VM_CPUS", _resolve_cpu_spec(target.get("TARGET_KVM_BENCH_CPUS_SPEC", "4")))
-            run_vm_mem = _kenv("VM_MEM", target.get("TARGET_KVM_BENCH_MEM", "16G"))
-        elif suite_vm_class:
-            _die(f"unsupported KVM suite class: {suite_vm_class}")
+        run_vm_cpus = _kenv("VM_CPUS", _resolve_cpu_spec(target.get("TARGET_KVM_CPUS_SPEC", "8")))
+        run_vm_mem = _kenv("VM_MEM", target.get("TARGET_KVM_MEM", "64G"))
     else:
         _die(f"unsupported target: {target_name}")
 
@@ -415,5 +408,4 @@ def build_target_config(target_name: str, *, env: dict[str, str] | None = None) 
                                    "RUN_EXECUTOR": target.get("TARGET_EXECUTOR", ""), "RUN_SUITE_NAME": "",
                                    "RUN_TOKEN": run_token, "RUN_NAME_TAG": run_name_tag,
                                    "RUN_AWS_REGION": run_aws_region, "RUN_AWS_PROFILE": run_aws_profile})
-
 

@@ -15,9 +15,9 @@ __bpf_kfunc void bpf_x86_movq_sib(void) {}
 __bpf_kfunc_end_defs();
 
 BTF_KFUNCS_START(bpf_x86_mov_sib_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_x86_movzwl_sib)
 BTF_ID_FLAGS(func, bpf_x86_movl_sib)
 BTF_ID_FLAGS(func, bpf_x86_movq_sib)
+BTF_ID_FLAGS(func, bpf_x86_movzwl_sib)
 BTF_KFUNCS_END(bpf_x86_mov_sib_kfunc_ids)
 
 static __always_inline int decode_mov_sib_payload(u64 payload, u8 *dst_reg,
@@ -178,9 +178,9 @@ const struct bpf_kinsn bpf_x86_movq_sib_desc = {
 };
 
 static const struct bpf_kinsn * const bpf_x86_mov_sib_kinsn_descs[] = {
-	&bpf_x86_movzwl_sib_desc,
 	&bpf_x86_movl_sib_desc,
 	&bpf_x86_movq_sib_desc,
+	&bpf_x86_movzwl_sib_desc,
 };
 
 DEFINE_KINSN_V2_MODULE(bpf_x86_mov_sib,

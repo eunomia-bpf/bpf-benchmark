@@ -115,9 +115,14 @@ test: $(COMMON_DEPS)
 	$(EXECUTOR_INVOKE) $(TARGET) test --test-mode test $(TEST_ARGS_COMMON)
 
 kvm-host-cpu:
-	sudo sh -c 'for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo performance > "$$f"; done'
-	sudo sh -c 'echo 1 > /sys/devices/system/cpu/intel_pstate/no_turbo'
-	sudo sh -c 'for p in /sys/devices/system/cpu/cpufreq/policy[0-7]; do cat "$$p/scaling_max_freq" > "$$p/scaling_min_freq"; done'
+	sudo sh -eu -c '\
+		for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do \
+			echo performance > "$$f"; \
+		done; \
+		echo 1 > /sys/devices/system/cpu/intel_pstate/no_turbo; \
+		for p in /sys/devices/system/cpu/cpufreq/policy[0-7]; do \
+			cat "$$p/scaling_max_freq" > "$$p/scaling_min_freq"; \
+		done'
 
 micro: $(KVM_HOST_SETUP) $(COMMON_DEPS)
 	$(EXECUTOR_INVOKE) $(TARGET) micro $(MICRO_ARGS)

@@ -52,10 +52,14 @@ const TEST_OUTPUT_BIN: &str = "test_output.bin";
 const KATRAN_TEST_INPUT: &str = "corpus/inputs/katran_vip_packet_64.bin";
 const MAP_IDS_JSON: &str = "map-ids.json";
 const MAP_VALUES_DIR: &str = "map-values";
+const COMPAT_OBJECT: &str = "loader-compatible.bpf.o";
+const COMPAT_BTF: &str = "loader-compatible.btf";
 const MAP_DUMP_ENTRY_LIMIT: u32 = 8192;
 const METADATA_JSON: &str = "metadata.json";
 const VERIFIER_LOG: &str = "verifier.log";
 const VERIFY_LOG: &str = "verify.log";
+const STACK_TRACE_VALUE_SIZE: u32 = 127 * 8;
+const STACK_TRACE_MAX_ENTRIES: u32 = 10240;
 
 #[derive(Parser)]
 #[command(
@@ -95,6 +99,9 @@ struct PreparedProgram {
     dir: PathBuf,
     map_ids: Vec<u32>,
     map_fds: Vec<i32>,
+    btf_fd: i32,
+    func_info: Vec<libbpf_sys::bpf_func_info>,
+    line_info: Vec<libbpf_sys::bpf_line_info>,
 }
 
 /// Allocate a workdir. Caller-supplied paths are not cleaned up; tmp dirs are
@@ -209,7 +216,13 @@ fn run(cli: Cli) -> Result<()> {
                 cli.target.as_deref(),
                 &prog.map_ids,
             )?;
-            let fd = verify_workdir(&prog.dir, &prog.map_fds)?;
+            let fd = verify_workdir(
+                &prog.dir,
+                &prog.map_fds,
+                prog.btf_fd,
+                &prog.func_info,
+                &prog.line_info,
+            )?;
             if cli.bpftestrun {
                 run_bpftestrun(fd.as_raw_fd(), &prog.dir, &cli)?;
             }
@@ -253,8 +266,11 @@ fn prepare_workdir(
     let map_values_dir = workdir.join(MAP_VALUES_DIR);
     fs::create_dir_all(&map_values_dir)?;
 
-    let obj = open_bpf_object(obj_path)?;
+    let obj_path = prepare_compatible_object(workdir, obj_path)?;
+    let obj = open_bpf_object(&obj_path)?;
+    normalize_open_maps(&obj)?;
     let progs = programs(&obj)?;
+    normalize_open_programs(&progs)?;
     let mut log_bufs: Vec<Vec<c_char>> = (0..progs.len()).map(|_| vec![0; LOG_BYTES]).collect();
     for (prog, buf) in progs.iter().zip(log_bufs.iter_mut()) {
         libbpf_ok(
@@ -290,6 +306,7 @@ fn prepare_workdir(
     }
 
     let loaded_maps = maps(&obj)?;
+    let btf_fd = unsafe { libbpf_sys::bpf_object__btf_fd(obj.ptr) };
     if katran_maps {
         populate_katran_maps(&loaded_maps)?;
     }
@@ -335,16 +352,71 @@ fn prepare_workdir(
             },
         )?;
         all_map_ids.extend(map_ids.iter().copied());
+        let func_info = unsafe {
+            copy_libbpf_slice(
+                libbpf_sys::bpf_program__func_info(prog.ptr),
+                libbpf_sys::bpf_program__func_info_cnt(prog.ptr),
+            )
+        };
+        let line_info = unsafe {
+            copy_libbpf_slice(
+                libbpf_sys::bpf_program__line_info(prog.ptr),
+                libbpf_sys::bpf_program__line_info_cnt(prog.ptr),
+            )
+        };
         prepared.push(PreparedProgram {
             dir,
             map_ids,
             map_fds,
+            btf_fd,
+            func_info,
+            line_info,
         });
     }
 
     let all_map_ids: Vec<u32> = all_map_ids.into_iter().collect();
     dump_map_snapshots(&all_map_ids, &map_values_dir, &loaded_maps, dump_values)?;
     Ok((obj, prepared))
+}
+
+fn prepare_compatible_object(workdir: &Path, obj_path: &Path) -> Result<PathBuf> {
+    let compat_obj = workdir.join(COMPAT_OBJECT);
+    let compat_btf = workdir.join(COMPAT_BTF);
+
+    let mut globalize = Command::new("llvm-objcopy");
+    globalize
+        .arg("--wildcard")
+        .arg("--globalize-symbol=tail_*")
+        .arg("--globalize-symbol=perf_unwind_native")
+        .arg("--globalize-symbol=kprobe_unwind_native")
+        .arg(obj_path)
+        .arg(&compat_obj);
+    run_tool(&mut globalize, "llvm-objcopy globalize-symbol")?;
+
+    let mut dump_btf = Command::new("llvm-objcopy");
+    dump_btf
+        .arg("--dump-section")
+        .arg(format!(".BTF={}", compat_btf.display()))
+        .arg(&compat_obj);
+    run_tool(&mut dump_btf, "llvm-objcopy dump .BTF")?;
+
+    let mut btf = fs::read(&compat_btf)
+        .with_context(|| format!("failed to read {}", compat_btf.display()))?;
+    if patch_libbpf_pinning_btf(&mut btf)? {
+        fs::write(&compat_btf, &btf)
+            .with_context(|| format!("failed to write {}", compat_btf.display()))?;
+        let patched_obj = workdir.join("loader-compatible-pinning.bpf.o");
+        let mut update_btf = Command::new("llvm-objcopy");
+        update_btf
+            .arg("--update-section")
+            .arg(format!(".BTF={}", compat_btf.display()))
+            .arg(&compat_obj)
+            .arg(&patched_obj);
+        run_tool(&mut update_btf, "llvm-objcopy update .BTF")?;
+        Ok(patched_obj)
+    } else {
+        Ok(compat_obj)
+    }
 }
 
 /// `BPF_OBJ_GET_INFO_BY_FD` for any sized info struct.
@@ -356,6 +428,14 @@ unsafe fn obj_info<T: Default>(fd: i32) -> Result<T> {
         "bpf_obj_get_info_by_fd",
     )?;
     Ok(info)
+}
+
+unsafe fn copy_libbpf_slice<T: Clone>(ptr: *const T, cnt: u32) -> Vec<T> {
+    if ptr.is_null() || cnt == 0 {
+        Vec::new()
+    } else {
+        slice::from_raw_parts(ptr, cnt as usize).to_vec()
+    }
 }
 
 /// Read `runner/config/passes/<pass>/default.yaml`, substitute `${VAR}` tokens
@@ -413,13 +493,22 @@ fn load_pass_command(pass: &str) -> Result<String> {
 
 /// Reload the bytecode produced for `prog_dir` via BPF_PROG_LOAD as a sanity
 /// check, using the shared map snapshots at `map_values_dir`.
-fn verify_workdir(prog_dir: &Path, map_fds: &[i32]) -> Result<OwnedFd> {
-    verify_workdir_with_log_level(prog_dir, map_fds, 1)
+fn verify_workdir(
+    prog_dir: &Path,
+    map_fds: &[i32],
+    btf_fd: i32,
+    func_info: &[libbpf_sys::bpf_func_info],
+    line_info: &[libbpf_sys::bpf_line_info],
+) -> Result<OwnedFd> {
+    verify_workdir_with_log_level(prog_dir, map_fds, btf_fd, func_info, line_info, 1)
 }
 
 fn verify_workdir_with_log_level(
     prog_dir: &Path,
     map_fds: &[i32],
+    btf_fd: i32,
+    func_info: &[libbpf_sys::bpf_func_info],
+    line_info: &[libbpf_sys::bpf_line_info],
     log_level: u32,
 ) -> Result<OwnedFd> {
     let metadata = read_json::<ProgramMetadata>(&prog_dir.join(METADATA_JSON))?;
@@ -433,6 +522,10 @@ fn verify_workdir_with_log_level(
     let mut insns = vec![libbpf_sys::bpf_insn::default(); raw.len() / stride];
     unsafe { ptr::copy_nonoverlapping(raw.as_ptr(), insns.as_mut_ptr().cast(), raw.len()) };
     rewrite_map_indices_to_fds(&mut insns, map_fds)?;
+    let needs_func_info = contains_pseudo_func(&insns);
+    if needs_func_info && (btf_fd < 0 || func_info.is_empty()) {
+        bail!("{} uses BPF_PSEUDO_FUNC but has no func_info", input.display());
+    }
 
     let name = CString::new(metadata.name.as_str())?;
     let license = CString::new("GPL").unwrap();
@@ -446,6 +539,19 @@ fn verify_workdir_with_log_level(
         attach_btf_id: metadata.attach_btf_id,
         ..Default::default()
     };
+    if needs_func_info {
+        opts.prog_btf_fd = btf_fd as u32;
+        opts.func_info = func_info.as_ptr().cast();
+        opts.func_info_cnt =
+            u32::try_from(func_info.len()).context("func_info count exceeds u32")?;
+        opts.func_info_rec_size = mem::size_of::<libbpf_sys::bpf_func_info>() as u32;
+        if !line_info.is_empty() {
+            opts.line_info = line_info.as_ptr().cast();
+            opts.line_info_cnt =
+                u32::try_from(line_info.len()).context("line_info count exceeds u32")?;
+            opts.line_info_rec_size = mem::size_of::<libbpf_sys::bpf_line_info>() as u32;
+        }
+    }
     let fd = unsafe {
         libbpf_sys::bpf_prog_load(
             metadata.prog_type,
@@ -560,6 +666,66 @@ fn open_bpf_object(path: &Path) -> Result<BpfObject> {
     Ok(BpfObject { ptr })
 }
 
+fn normalize_open_maps(obj: &BpfObject) -> Result<()> {
+    let mut prev = ptr::null_mut();
+    loop {
+        let map = unsafe { libbpf_sys::bpf_object__next_map(obj.ptr, prev) };
+        if map.is_null() {
+            break;
+        }
+        libbpf_ok(
+            unsafe { libbpf_sys::bpf_map__set_pin_path(map, ptr::null()) },
+            "bpf_map__set_pin_path",
+        )?;
+        let map_type = unsafe { libbpf_sys::bpf_map__type(map) };
+        if map_type == libbpf_sys::BPF_MAP_TYPE_STACK_TRACE {
+            if unsafe { libbpf_sys::bpf_map__value_size(map) } == 0 {
+                libbpf_ok(
+                    unsafe { libbpf_sys::bpf_map__set_value_size(map, STACK_TRACE_VALUE_SIZE) },
+                    "bpf_map__set_value_size(stack_trace)",
+                )?;
+            }
+            if unsafe { libbpf_sys::bpf_map__max_entries(map) } == 0 {
+                libbpf_ok(
+                    unsafe {
+                        libbpf_sys::bpf_map__set_max_entries(map, STACK_TRACE_MAX_ENTRIES)
+                    },
+                    "bpf_map__set_max_entries(stack_trace)",
+                )?;
+            }
+        }
+        prev = map;
+    }
+    Ok(())
+}
+
+fn normalize_open_programs(progs: &[ProgramRef]) -> Result<()> {
+    for prog in progs {
+        if unsafe { libbpf_sys::bpf_program__type(prog.ptr) } != libbpf_sys::BPF_PROG_TYPE_UNSPEC {
+            continue;
+        }
+        let section = unsafe { libbpf_sys::bpf_program__section_name(prog.ptr) };
+        if section.is_null() {
+            bail!("program {} has a null section name", prog.name);
+        }
+        let section = unsafe { CStr::from_ptr(section) }.to_string_lossy();
+        let prog_type = if section.starts_with("tc/") {
+            Some(libbpf_sys::BPF_PROG_TYPE_SCHED_CLS)
+        } else if section.starts_with("xdp/") {
+            Some(libbpf_sys::BPF_PROG_TYPE_XDP)
+        } else {
+            None
+        };
+        if let Some(prog_type) = prog_type {
+            libbpf_ok(
+                unsafe { libbpf_sys::bpf_program__set_type(prog.ptr, prog_type) },
+                "bpf_program__set_type",
+            )?;
+        }
+    }
+    Ok(())
+}
+
 fn programs(obj: &BpfObject) -> Result<Vec<ProgramRef>> {
     let mut out = Vec::new();
     let mut prev = ptr::null_mut();
@@ -577,9 +743,6 @@ fn programs(obj: &BpfObject) -> Result<Vec<ProgramRef>> {
             .into_owned();
         out.push(ProgramRef { ptr: prog, name });
         prev = prog;
-    }
-    if out.is_empty() {
-        bail!("object has no BPF programs");
     }
     Ok(out)
 }
@@ -668,6 +831,216 @@ fn bpftool_to(args: &[&str], out: &Path) -> Result<()> {
         );
     }
     fs::write(out, &output.stdout).with_context(|| format!("write {}", out.display()))
+}
+
+fn run_tool(command: &mut Command, context: &str) -> Result<()> {
+    let output = command
+        .output()
+        .with_context(|| format!("failed to spawn {context}"))?;
+    if output.status.success() {
+        return Ok(());
+    }
+    bail!(
+        "{context} failed with {}: {}",
+        output.status,
+        String::from_utf8_lossy(&output.stderr).trim()
+    );
+}
+
+#[derive(Clone, Copy)]
+struct BtfType {
+    kind: u32,
+    vlen: u32,
+    type_or_size: u32,
+    members_pos: Option<usize>,
+    array_pos: Option<usize>,
+}
+
+fn patch_libbpf_pinning_btf(btf: &mut [u8]) -> Result<bool> {
+    let magic = read_u16(btf, 0, "BTF magic")?;
+    if magic != 0xeb9f {
+        bail!("unexpected BTF magic 0x{magic:04x}");
+    }
+    let hdr_len = read_u32(btf, 4, "BTF hdr_len")? as usize;
+    let type_off = read_u32(btf, 8, "BTF type_off")? as usize;
+    let type_len = read_u32(btf, 12, "BTF type_len")? as usize;
+    let str_off = read_u32(btf, 16, "BTF str_off")? as usize;
+    let str_len = read_u32(btf, 20, "BTF str_len")? as usize;
+    let types_start = checked_add(hdr_len, type_off, "BTF types offset")?;
+    let types_end = checked_add(types_start, type_len, "BTF types end")?;
+    let strings_start = checked_add(hdr_len, str_off, "BTF strings offset")?;
+    let strings_end = checked_add(strings_start, str_len, "BTF strings end")?;
+    if types_end > btf.len() || strings_end > btf.len() {
+        bail!("BTF header points past section size");
+    }
+
+    let mut types = vec![BtfType {
+        kind: 0,
+        vlen: 0,
+        type_or_size: 0,
+        members_pos: None,
+        array_pos: None,
+    }];
+    let mut pos = types_start;
+    while pos < types_end {
+        let info = read_u32(btf, pos + 4, "BTF type info")?;
+        let kind = (info >> 24) & 0x1f;
+        let vlen = info & 0xffff;
+        let type_or_size = read_u32(btf, pos + 8, "BTF type size/type")?;
+        let base = checked_add(pos, 12, "BTF type body")?;
+        let mut ty = BtfType {
+            kind,
+            vlen,
+            type_or_size,
+            members_pos: None,
+            array_pos: None,
+        };
+        pos = match kind {
+            1 => checked_add(base, 4, "BTF INT")?,
+            2 => base,
+            3 => {
+                ty.array_pos = Some(base);
+                checked_add(base, 12, "BTF ARRAY")?
+            }
+            4 | 5 => {
+                ty.members_pos = Some(base);
+                checked_add(base, checked_mul(vlen as usize, 12, "BTF members")?, "BTF members")?
+            }
+            6 => checked_add(base, checked_mul(vlen as usize, 8, "BTF enum")?, "BTF enum")?,
+            7 | 8 | 9 | 10 | 11 | 12 | 18 => base,
+            13 => checked_add(
+                base,
+                checked_mul(vlen as usize, 8, "BTF func proto")?,
+                "BTF func proto",
+            )?,
+            14 => checked_add(base, 4, "BTF VAR")?,
+            15 => checked_add(
+                base,
+                checked_mul(vlen as usize, 12, "BTF datasec")?,
+                "BTF datasec",
+            )?,
+            16 => base,
+            17 => checked_add(base, 4, "BTF decl tag")?,
+            19 => checked_add(
+                base,
+                checked_mul(vlen as usize, 12, "BTF enum64")?,
+                "BTF enum64",
+            )?,
+            _ => bail!("unsupported BTF kind {kind} at type id {}", types.len()),
+        };
+        if pos > types_end {
+            bail!("BTF type id {} extends past type section", types.len());
+        }
+        types.push(ty);
+    }
+    if pos != types_end {
+        bail!("BTF parser stopped before type section end");
+    }
+
+    let mut changed = false;
+    for ty in &types {
+        if ty.kind != 4 && ty.kind != 5 {
+            continue;
+        }
+        let Some(members_pos) = ty.members_pos else {
+            continue;
+        };
+        for i in 0..ty.vlen as usize {
+            let member = checked_add(
+                members_pos,
+                checked_mul(i, 12, "BTF member index")?,
+                "BTF member offset",
+            )?;
+            let name_off = read_u32(btf, member, "BTF member name")? as usize;
+            if !btf_string_eq(btf, strings_start, str_len, name_off, "pinning")? {
+                continue;
+            }
+            let field_type = read_u32(btf, member + 4, "BTF member type")? as usize;
+            let ptr = types
+                .get(field_type)
+                .ok_or_else(|| anyhow!("BTF pinning field references missing type {field_type}"))?;
+            if ptr.kind != 2 {
+                continue;
+            }
+            let arr_id = ptr.type_or_size as usize;
+            let arr = types
+                .get(arr_id)
+                .ok_or_else(|| anyhow!("BTF pinning ptr references missing type {arr_id}"))?;
+            if arr.kind != 3 {
+                continue;
+            }
+            let nelems_pos = checked_add(
+                arr.array_pos
+                    .ok_or_else(|| anyhow!("BTF ARRAY type {arr_id} has no array body"))?,
+                8,
+                "BTF array nelems",
+            )?;
+            let nelems = read_u32(btf, nelems_pos, "BTF array nelems")?;
+            if nelems != 0 && nelems != 1 {
+                write_u32(btf, nelems_pos, 1, "BTF pinning value")?;
+                changed = true;
+            }
+        }
+    }
+    Ok(changed)
+}
+
+fn btf_string_eq(
+    btf: &[u8],
+    strings_start: usize,
+    str_len: usize,
+    off: usize,
+    expected: &str,
+) -> Result<bool> {
+    if off >= str_len {
+        bail!("BTF string offset {off} exceeds string section length {str_len}");
+    }
+    let start = checked_add(strings_start, off, "BTF string offset")?;
+    let end = checked_add(strings_start, str_len, "BTF strings end")?;
+    let bytes = btf
+        .get(start..end)
+        .ok_or_else(|| anyhow!("BTF string slice is out of bounds"))?;
+    let len = bytes
+        .iter()
+        .position(|&b| b == 0)
+        .ok_or_else(|| anyhow!("BTF string at offset {off} is not NUL-terminated"))?;
+    Ok(&bytes[..len] == expected.as_bytes())
+}
+
+fn read_u16(raw: &[u8], offset: usize, what: &str) -> Result<u16> {
+    let bytes = raw
+        .get(offset..offset + 2)
+        .ok_or_else(|| anyhow!("{what} is out of bounds"))?;
+    let mut out = [0u8; 2];
+    out.copy_from_slice(bytes);
+    Ok(u16::from_le_bytes(out))
+}
+
+fn read_u32(raw: &[u8], offset: usize, what: &str) -> Result<u32> {
+    let bytes = raw
+        .get(offset..offset + 4)
+        .ok_or_else(|| anyhow!("{what} is out of bounds"))?;
+    let mut out = [0u8; 4];
+    out.copy_from_slice(bytes);
+    Ok(u32::from_le_bytes(out))
+}
+
+fn write_u32(raw: &mut [u8], offset: usize, value: u32, what: &str) -> Result<()> {
+    let bytes = raw
+        .get_mut(offset..offset + 4)
+        .ok_or_else(|| anyhow!("{what} is out of bounds"))?;
+    bytes.copy_from_slice(&value.to_le_bytes());
+    Ok(())
+}
+
+fn checked_add(a: usize, b: usize, what: &str) -> Result<usize> {
+    a.checked_add(b)
+        .ok_or_else(|| anyhow!("{what} offset overflow"))
+}
+
+fn checked_mul(a: usize, b: usize, what: &str) -> Result<usize> {
+    a.checked_mul(b)
+        .ok_or_else(|| anyhow!("{what} size overflow"))
 }
 
 fn bytecode_maps(
@@ -774,6 +1147,12 @@ fn is_ldimm64(insn: &libbpf_sys::bpf_insn) -> bool {
     insn.code == (libbpf_sys::BPF_LD | libbpf_sys::BPF_DW | libbpf_sys::BPF_IMM) as u8
 }
 
+fn contains_pseudo_func(insns: &[libbpf_sys::bpf_insn]) -> bool {
+    insns
+        .iter()
+        .any(|insn| is_ldimm64(insn) && insn.src_reg() == libbpf_sys::BPF_PSEUDO_FUNC as u8)
+}
+
 fn read_json<T: for<'de> Deserialize<'de>>(path: &Path) -> Result<T> {
     let bytes = fs::read(path).with_context(|| format!("failed to read {}", path.display()))?;
     serde_json::from_slice(&bytes).with_context(|| format!("failed to parse {}", path.display()))
@@ -877,7 +1256,13 @@ mod tests {
             run_katran_bytecode_pass(prog, &bpfopt, "const_prop", true)?;
             promote_output_to_input(prog)?;
             run_katran_bytecode_pass(prog, &bpfopt, "dce", false)?;
-            let fd = verify_workdir(&prog.dir, &prog.map_fds)?;
+            let fd = verify_workdir(
+                &prog.dir,
+                &prog.map_fds,
+                prog.btf_fd,
+                &prog.func_info,
+                &prog.line_info,
+            )?;
             run_bpftestrun(fd.as_raw_fd(), &prog.dir, &katran_test_cli(1))?;
             assert_katran_forwarding_output(&prog.dir)?;
             run_bpftestrun(fd.as_raw_fd(), &prog.dir, &katran_test_cli(10_000))?;
@@ -962,7 +1347,14 @@ mod tests {
     }
 
     fn refresh_katran_verifier_log(prog: &PreparedProgram) -> Result<()> {
-        drop(verify_workdir_with_log_level(&prog.dir, &prog.map_fds, 2)?);
+        drop(verify_workdir_with_log_level(
+            &prog.dir,
+            &prog.map_fds,
+            prog.btf_fd,
+            &prog.func_info,
+            &prog.line_info,
+            2,
+        )?);
         fs::copy(prog.dir.join(VERIFY_LOG), prog.dir.join(VERIFIER_LOG))
             .with_context(|| format!("failed to promote {} to {}", VERIFY_LOG, VERIFIER_LOG))?;
         Ok(())
