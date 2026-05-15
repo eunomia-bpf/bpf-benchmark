@@ -100,9 +100,7 @@ impl ProgramCFG {
             }
         }
 
-        let mut next = self.clone();
-        next.replace_range_in_place(start.block, start.idx..end, replacement)?;
-        *self = next;
+        self.replace_range_in_place(start.block, start.idx..end, replacement)?;
         Ok(true)
     }
 

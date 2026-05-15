@@ -5,6 +5,7 @@ import argparse
 import os
 import platform
 import random
+import re
 import select
 import signal
 import subprocess
@@ -389,6 +390,16 @@ def _read_text_or_missing(path: Path) -> str:
     return path.read_text() if path.exists() else "not captured"
 
 
+def _strip_objdump_banner(text: str) -> str:
+    lines = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if re.match(r".+:\s+file format\s+\S+", stripped):
+            continue
+        lines.append(line)
+    return "\n".join(lines).strip()
+
+
 def _disassembly(path: Path | None, *, binary: bool = False, symbol: str | None = None) -> str:
     if path is None or not path.exists():
         return "not captured"
@@ -407,7 +418,7 @@ def _disassembly(path: Path | None, *, binary: bool = False, symbol: str | None 
     elif binary:
         raise RuntimeError(f"unsupported objdump machine for JIT dump: {platform.machine()}")
     command.append(str(path))
-    return run_command(command, cwd=ROOT_DIR, timeout=RUNNER_TIMEOUT_SECONDS).stdout
+    return _strip_objdump_banner(run_command(command, cwd=ROOT_DIR, timeout=RUNNER_TIMEOUT_SECONDS).stdout)
 
 
 def write_code_compare_markdown(benchmark: CatalogTarget, artifact_dir: Path) -> None:

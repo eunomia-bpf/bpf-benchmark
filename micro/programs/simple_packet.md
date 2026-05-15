@@ -17,10 +17,6 @@ DEFINE_PACKET_BACKED_XDP_BENCH(simple_packet_xdp, bench_simple_packet)
 
 ## Native ASM
 ```asm
-
-/artifacts/user/micro-programs/x86_64/simple_packet.native.so:     file format elf64-x86-64
-
-
 Disassembly of section .init:
 
 Disassembly of section .plt:
@@ -50,10 +46,6 @@ Disassembly of section .fini:
 
 ## Original Kernel JIT ASM
 ```asm
-
-/home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_053902_538703/details/jit_dumps/simple_packet__kernel__sample00.jited.bin:     file format binary
-
-
 Disassembly of section .data:
 
 0000000000000000 <.data>:
@@ -89,10 +81,6 @@ Disassembly of section .data:
 
 ## llvmbpf JIT ASM
 ```asm
-
-/home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_053902_538703/details/jit_dumps/simple_packet__llvmbpf__sample00.jited.bin:     file format binary
-
-
 Disassembly of section .data:
 
 0000000000000000 <.data>:
@@ -123,7 +111,12 @@ Disassembly of section .data:
      ((__u64)(SCALE) << 12) | ((__u64)(HAS_INDEX) << 14) | \
      ((__u64)(HAS_BASE) << 15) | ((__u64)(__u32)(DISP) << 16))
 
-/* native asm to handcraft warnings: 2; see generated analysis report. */
+/*
+ * native asm to handcraft warnings: 2
+ *
+ * - 0x1100: mov    rcx,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0]
+ * - 0x1103: mov    rdx,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4]
+ */
 
 static const struct bpf_insn program[] = {
     /* 0x1100: mov    rcx,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0] */
@@ -159,10 +152,6 @@ HC_EXPORT_PROGRAM(program)
 
 ## Handcraft Kernel JIT ASM
 ```asm
-
-/home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_053902_538703/details/jit_dumps/simple_packet__kernel_handcraft__sample00.jited.bin:     file format binary
-
-
 Disassembly of section .data:
 
 0000000000000000 <.data>:

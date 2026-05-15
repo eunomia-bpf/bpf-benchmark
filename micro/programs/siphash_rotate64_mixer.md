@@ -116,10 +116,6 @@ DEFINE_STAGED_INPUT_XDP_BENCH(siphash_rotate64_mixer_xdp, bench_siphash_rotate64
 
 ## Native ASM
 ```asm
-
-/artifacts/user/micro-programs/x86_64/siphash_rotate64_mixer.native.so:     file format elf64-x86-64
-
-
 Disassembly of section .init:
 
 Disassembly of section .plt:
@@ -459,10 +455,6 @@ Disassembly of section .fini:
 
 ## Original Kernel JIT ASM
 ```asm
-
-/home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_053902_538703/details/jit_dumps/siphash_rotate64_mixer__kernel__sample00.jited.bin:     file format binary
-
-
 Disassembly of section .data:
 
 0000000000000000 <.data>:
@@ -1479,10 +1471,6 @@ Disassembly of section .data:
 
 ## llvmbpf JIT ASM
 ```asm
-
-/home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_053902_538703/details/jit_dumps/siphash_rotate64_mixer__llvmbpf__sample00.jited.bin:     file format binary
-
-
 Disassembly of section .data:
 
 0000000000000000 <.data>:
@@ -1833,7 +1821,66 @@ Disassembly of section .data:
      ((__u64)(SCALE) << 12) | ((__u64)(HAS_INDEX) << 14) | \
      ((__u64)(HAS_BASE) << 15) | ((__u64)(__u32)(DISP) << 16))
 
-/* native asm to handcraft warnings: 56; see generated analysis report. */
+/*
+ * native asm to handcraft warnings: 56
+ *
+ * - 0x1100: mov    rcx,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0]
+ * - 0x1103: mov    rdx,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4]
+ * - 0x112c: mov    r9,QWORD PTR [rcx+0x8] [warning-reg-remap: direct memory load via x86 kinsn selector; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x113a: xor    rdi,r9 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x11b4: xor    r9,r8 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x11b7: add    r9,rdx [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x11c1: xor    rdx,r9 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x11c4: rol    r9,0x20 [warning-reg-remap: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x11d5: add    r9,r8 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x11ea: xor    r8,r9 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x11ed: add    r9,rdx [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x11f4: xor    rdx,r9 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x11f7: rol    r9,0x20 [warning-reg-remap: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x1205: add    r9,r8 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x121e: xor    rsi,r9 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x1228: xor    r9,rdi [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x1232: xor    r9,r8 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x1235: add    rax,r9 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x1238: rol    r9,0x10 [warning-reg-remap: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x123c: xor    r9,rax [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x123f: add    rsi,r9 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x1242: rol    r9,0x15 [warning-reg-remap: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x1254: xor    r9,rsi [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x1265: add    rax,r9 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x1268: rol    r9,0x10 [warning-reg-remap: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x126c: xor    r9,rax [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x126f: add    rsi,r9 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x1272: rol    r9,0x15 [warning-reg-remap: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x129c: xor    rsi,r9 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x12e7: mov    r9,QWORD PTR [rcx+0x28] [warning-reg-remap: direct memory load via x86 kinsn selector; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x12fc: xor    rdi,r9 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x135c: xor    r9,r8 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x135f: add    r9,rdx [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x1369: xor    rdx,r9 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x136c: rol    r9,0x20 [warning-reg-remap: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x137d: add    r9,r8 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x1392: xor    r8,r9 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x1395: add    r9,rdx [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x139c: xor    rdx,r9 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x139f: rol    r9,0x20 [warning-reg-remap: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x13ad: add    r9,r8 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x13c6: xor    rsi,r9 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x13d0: xor    r9,rdi [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x13da: xor    r9,r8 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x13dd: add    rax,r9 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x13e0: rol    r9,0x10 [warning-reg-remap: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x13e4: xor    r9,rax [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x13e7: add    rsi,r9 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x13ea: rol    r9,0x15 [warning-reg-remap: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x13fc: xor    r9,rsi [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x140d: add    rax,r9 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x1410: rol    r9,0x10 [warning-reg-remap: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x1414: xor    r9,rax [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x1417: add    rsi,r9 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x141a: rol    r9,0x15 [warning-reg-remap: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ * - 0x1444: xor    rsi,r9 [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
+ */
 
 static const struct bpf_insn program[] = {
     /* 0x1100: mov    rcx,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0] */
@@ -2478,10 +2525,6 @@ HC_EXPORT_PROGRAM(program)
 
 ## Handcraft Kernel JIT ASM
 ```asm
-
-/home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_053902_538703/details/jit_dumps/siphash_rotate64_mixer__kernel_handcraft__sample00.jited.bin:     file format binary
-
-
 Disassembly of section .data:
 
 0000000000000000 <.data>:

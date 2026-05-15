@@ -241,14 +241,42 @@ BENCH="simple simple_packet siphash_rotate64_mixer" SAMPLES=1 WARMUPS=0 INNER_RE
 Result path: `micro/results/x86_kvm_micro_20260515_053902_538703/details/result.json`.
 
 | Benchmark | Native | Kernel | Kernel Handcraft | Handcraft Result | Native-vs-Handcraft JIT Body |
-|---|---:|---:|---:|---:|---:|
+|---|---:|---:|---:|---:|---|
 | `simple` | 72 ns | 66 ns | 58 ns | `12345678` | 16 / 16 insns, 0 mismatches |
 | `simple_packet` | 91 ns | 80 ns | 46 ns | `12345678` | 13 / 13 insns, 0 mismatches |
+| `bitmap_popcount_scan` | - | - | verifier load failed | - | native bit-clear popcount loop converted to verifier-visible BPF exceeds the 1,000,000 processed-insn verifier limit; a `popcntq`/`blsrq` handcraft shape would test different native code, not parity with this C native body |
+| `sorted_rule_binary_search` | - | - | pending | - | no fresh markdown/handcraft conversion yet |
+| `bcc_runqlat_log2_histogram_bucket` | - | - | pending | - | no fresh markdown/handcraft conversion yet |
+| `trace_event_type_switch_dispatch` | - | - | not generated | - | native uses RIP-relative jump/table data; current kinsns do not transport `.rodata` tables, while ordinary BPF lowers to a compare tree |
+| `packet_checksum_fold` | - | - | pending | - | no fresh markdown/handcraft conversion yet; expected gap area is carry/fold codegen (`adc`/`sbb`/flag-carry forms are still missing) |
+| `payload_prefix_memcmp_scan` | - | - | pending | - | no fresh markdown/handcraft conversion yet |
+| `packet_vlan_tcpopt_parser` | - | - | pending | - | no fresh markdown/handcraft conversion yet; likely dominated by packet cursor, bounds, and clustered field loads |
+| `bpf_local_call_fanout_dispatch` | - | - | pending | - | no fresh markdown/handcraft conversion yet; local `callq`/bpf2bpf layout is not a single-instruction kinsn problem |
+| `flow_5tuple_rss_hash` | - | - | pending | - | no fresh markdown/handcraft conversion yet; likely packet endian/load plus rotate/hash forms |
+| `katran_lb_consistent_hash_select` | - | - | pending | - | no fresh markdown/handcraft conversion yet; likely packet endian/load, rotate, and carry/select gaps |
+| `cilium_policy_guard_tree_filter` | - | - | pending | - | no fresh markdown/handcraft conversion yet; likely branch-layout/select forms rather than memory-only kinsns |
 | `siphash_rotate64_mixer` | 92 ns | 94 ns | 86 ns | `2666935177028490406` | 318 / 318 insns, 0 mismatches |
+| `packet_record_bounds_window` | - | - | pending | - | no fresh markdown/handcraft conversion yet; likely a good direct-load/bounds-window parity target |
+| `flow_record_field_scan` | - | - | pending | - | no fresh markdown/handcraft conversion yet; likely same-base clustered load target |
+| `packed_header_bitfield_decode` | - | - | not generated | - | converter sees stack-frame/spill code, high native registers, high-byte extracts, and unsupported register-to-register zero-extend forms; needs register/spill strategy before parity run |
+| `bpftrace_string_search_prefix_scan` | - | - | pending | - | no fresh markdown/handcraft conversion yet; likely byte-load/branch/string-loop target |
+| `tracee_syscall_name_table_lookup` | - | - | pending | - | no fresh markdown/handcraft conversion yet; likely sparse table/dispatch gap |
+| `tracee_http_method_prefix_detect` | - | - | pending | - | no fresh markdown/handcraft conversion yet; likely prefix byte-load and branch-chain target |
+| `cilium_socket_lb_service_select` | - | - | pending | - | no fresh markdown/handcraft conversion yet; likely branch/select plus hash math |
+| `bcc_tcpconnect_ipv4_tuple_filter` | - | - | pending | - | no fresh markdown/handcraft conversion yet; likely tuple-field load and branch target |
+| `tetragon_process_event_arg_filter` | - | - | pending | - | no fresh markdown/handcraft conversion yet; likely event-field/string/guard tree target |
+| `otel_stack_frame_unwind_scan` | - | - | pending | - | no fresh markdown/handcraft conversion yet; likely fixed-field load and cursor update target |
+| `cilium_ct_nat_tuple_rewrite` | - | - | pending | - | no fresh markdown/handcraft conversion yet; likely store/load tuple rewrite target |
+| `packet_toeplitz_rss_hash` | - | - | not generated | - | converter currently hits 16-bit register rotate/zero-extend, RIP-relative table bases, unsupported high native regs, `bswap edx`, `not al`, and non-`cmp` flag branches; needs table transport and more instruction/register coverage |
+| `bpftrace_comm_key_fnv_hash` | - | - | pending | - | no fresh markdown/handcraft conversion yet; likely byte/string load plus multiply/xor hash target |
+| `tc_packet_checksum_fold` | - | - | pending | - | no fresh markdown/handcraft conversion yet; same checksum/fold gap as the XDP checksum case, under sched_cls context |
+| `cgroup_skb_hash_chain` | - | - | pending | - | no fresh markdown/handcraft conversion yet; non-XDP context should be checked after XDP handcraft path is stable |
 
 The instruction counts compare normalized function bodies: kernel wrapper/prologue/epilogue differences are removed, and the expected BPF-JIT register naming difference (`r15` for BPF `r9`) is normalized. This is the first positive result for the handcraft hypothesis: for three cases, the converted kinsn/BPF input verifies, executes correctly, and dumps final x86 code matching native body instruction-for-instruction after mechanical normalization.
 
-The current generated markdown coverage in `micro/programs/` is not full-suite coverage. It exists for cases from completed or earlier selected runs: `simple`, `simple_packet`, `siphash_rotate64_mixer`, `bitmap_popcount_scan`, `packed_header_bitfield_decode`, `packet_toeplitz_rss_hash`, and `trace_event_type_switch_dispatch`. The driver writes these files after the selected micro run completes; failed or not-yet-run benchmarks will not have fresh markdown.
+The table intentionally keeps all micro cases in one place. Rows with `pending` do not mean the benchmark is unsupported; they mean there is no fresh generated markdown and no handcraft parity run yet. Current generated markdown coverage in `micro/programs/` exists for cases from completed or earlier selected runs: `simple`, `simple_packet`, `siphash_rotate64_mixer`, `bitmap_popcount_scan`, `packed_header_bitfield_decode`, `packet_toeplitz_rss_hash`, and `trace_event_type_switch_dispatch`. The driver writes these files after the selected micro run completes; failed or not-yet-run benchmarks will not have fresh markdown.
+
+The attempted full-suite refresh `SAMPLES=1 WARMUPS=0 INNER_REPEAT=10 make micro` stopped at `bitmap_popcount_scan` because the VM still used a stale runtime image containing the deleted `bitmap_popcount_scan.handcraft.so`. The source file is absent from `micro/programs/`; the runtime image tar must be regenerated before the full refresh can produce markdown for the remaining rows.
 
 The concrete x86 instruction/form matrix is now:
 

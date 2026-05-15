@@ -2670,13 +2670,16 @@ void run_pass(Cli &cli)
 			"--target-output requires --canonicalize-map-refs");
 	}
 	const auto input = read_all(cli.input);
-	const bool is_noop = *cli.pass == "noop";
 	std::vector<InlineRecord> inlined;
-	std::vector<uint8_t> output = is_noop ?
-					      run_llvm_roundtrip(input, false) :
-					      run_llvm_roundtrip(input, true);
-	if (*cli.pass == "map_inline") {
-		inlined = apply_map_inline_hints(output, cli);
+	std::vector<uint8_t> output;
+	if (*cli.pass == "noop") {
+		output = run_llvm_roundtrip(input, false);
+	} else if (*cli.pass == "map_inline") {
+		auto map_inlined = input;
+		inlined = apply_map_inline_hints(map_inlined, cli);
+		output = run_llvm_roundtrip(map_inlined, true);
+	} else {
+		output = run_llvm_roundtrip(input, true);
 	}
 	write_all(cli.output, output);
 	write_report(cli, input, output, inlined);

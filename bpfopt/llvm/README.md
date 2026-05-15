@@ -45,15 +45,17 @@ offset bounds check that is semantically redundant after LLVM optimization but
 still required for the kernel verifier to prove bounded access. O3 therefore
 needs verifier-aware range-check preservation before it can replace O0.
 
-`map_inline` has a minimal hard-hint implementation. It still performs the
-strict LLVM roundtrip first, then uses pass-local `--map-values`, `--map-ids`,
-and `--inline-hint=<map>:!<key_hex>` inputs to replace matching
-`bpf_map_lookup_elem()` calls with a non-NULL stack pointer to the snapshotted
-map value. The current implementation supports hard hints only; soft hints
-fail fast instead of falling back. Katran `balancer_ingress` passes loader
-verification and `BPF_PROG_TEST_RUN` through the temporary helper
+`map_inline` has a minimal hard-hint implementation. It uses pass-local
+`--map-values`, `--map-ids`, and `--inline-hint=<map>:!<key_hex>` inputs to
+replace matching `bpf_map_lookup_elem()` calls with a non-NULL stack pointer to
+the snapshotted map value, then lifts that inlined bytecode to LLVM IR and runs
+the O3 pipeline before lowering through LLVM's BPF backend. The current
+implementation supports hard hints only; soft hints fail fast instead of
+falling back. Katran `balancer_ingress` passes loader verification and
+`BPF_PROG_TEST_RUN` through the temporary helper
 `docs/tmp/bpfopt_llvm_mapinline_katran_wrapper.sh`, with 16 lookup sites
-reported as inlined. The loader smoke and raw duration samples are recorded in
+reported as inlined and final size `2542 -> 2500` instructions. The loader
+smoke and raw duration samples are recorded in
 `docs/tmp/katran_llvm_loader_perf_20260514.md`.
 
 The local llvmbpf changes are kept to compatibility fixes needed by kernel

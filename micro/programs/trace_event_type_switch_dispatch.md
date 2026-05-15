@@ -111,10 +111,6 @@ DEFINE_STAGED_INPUT_XDP_BENCH(
 
 ## Native ASM
 ```asm
-
-/artifacts/user/micro-programs/x86_64/trace_event_type_switch_dispatch.native.so:     file format elf64-x86-64
-
-
 Disassembly of section .init:
 
 Disassembly of section .plt:
@@ -181,10 +177,6 @@ Disassembly of section .fini:
 
 ## Original Kernel JIT ASM
 ```asm
-
-/home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_033620_169457/details/jit_dumps/trace_event_type_switch_dispatch__kernel__sample00.jited.bin:     file format binary
-
-
 Disassembly of section .data:
 
 0000000000000000 <.data>:
@@ -525,10 +517,6 @@ Disassembly of section .data:
 
 ## llvmbpf JIT ASM
 ```asm
-
-/home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_033620_169457/details/jit_dumps/trace_event_type_switch_dispatch__llvmbpf__sample00.jited.bin:     file format binary
-
-
 Disassembly of section .data:
 
 0000000000000000 <.data>:

@@ -1,0 +1,24 @@
+{
+  "completed_benchmarks": 0,
+  "current_benchmark": "bitmap_popcount_scan",
+  "current_benchmark_index": 1,
+  "current_benchmark_record": {
+    "category": "alu-mix",
+    "description": "Bitmap popcount scan over generated u64 words",
+    "expected_result": 12830754992348206170,
+    "family": "popcount",
+    "hypothesis": "Represents bitmap/set summarization loops common in BPF policy and tracing code",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bitmap_popcount_scan.mem",
+    "io_mode": "staged",
+    "level": "medium",
+    "name": "bitmap_popcount_scan",
+    "runs": [],
+    "tags": [
+      "bitops",
+      "pure-jit"
+    ]
+  },
+  "error_message": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/bitmap_popcount_scan.handcraft.so --program-name bitmap_popcount_scan_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bitmap_popcount_scan.mem --io-mode staged --input-size 2056 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_061346_334201/details/jit_dumps/bitmap_popcount_scan__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_061346_334201/details/jit_dumps/bitmap_popcount_scan__kernel_handcraft__sample00.xlated.bin\nmark_precise: frame0: regs=r1 stack= before 41: (bf) r9 = r5\nmark_precise: frame0: regs=r1 stack= before 40: (25) if r9 > 0x3e goto pc-25\nmark_precise: frame0: regs=r1 stack= before 39: (07) r1 += 1\nmark_precise: frame0: regs=r1 stack= before 38: (bf) r9 = r1\nmark_precise: frame0: parent state regs= stack=:  R0=P254 R1=P19 R2=scalar() R3=pkt(r=2064) R4=scalar() R5=scalar(umin=1,umax=0xffffffffffffffec) R6=256 R9=scalar(umax=0xffffffffffffffec) R10=fp0\n40: R9=24\n41: (bf) r9 = r5                      ; R5=scalar(id=109540,umin=1,umax=0xffffffffffffffe7) R9=scalar(id=109540,umin=1,umax=0xffffffffffffffe7)\n42: (07) r9 += -1                     ; R9=scalar(id=109540-1,umax=0xffffffffffffffe6)\n43: (5f) r5 &= r9\nBPF program is too large. Processed 1000001 insn\nprocessed 1000001 insns (limit 1000000) max_states_per_insn 4 total_states 16554 peak_states 155 mark_read 0\ninitial_load_error=Argument list too long diagnostic_load_error=No space left on device",
+  "status": "error",
+  "total_benchmarks": 1
+}

@@ -10,7 +10,44 @@ use crate::pass::{BranchProfile, BtfInfoRecords, KinsnRegistry, RegKind, RegSet}
 use crate::verifier_log as verifier_facts;
 use crate::verifier_log::VerifierInsn;
 use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
+use std::time::Instant;
+
+// ── Perf-debug timing counters (BPFOPT_TIME=1 to print) ──────────────────
+// Atomics aggregate nanoseconds across all try_replace_range / rebuild
+// invocations on the current thread. `print_and_reset_timing(label)` reads
+// + clears all counters and prints a one-line breakdown.
+pub static T_TRY_REPLACE_NS: AtomicU64 = AtomicU64::new(0);
+pub static T_SPLICE_NS: AtomicU64 = AtomicU64::new(0);
+pub static T_USEDEF_NS: AtomicU64 = AtomicU64::new(0);
+pub static T_LIVENESS_NS: AtomicU64 = AtomicU64::new(0);
+pub static T_LIFTED_NS: AtomicU64 = AtomicU64::new(0);
+pub static T_INVALIDATE_NS: AtomicU64 = AtomicU64::new(0);
+pub static N_TRY_REPLACE: AtomicU64 = AtomicU64::new(0);
+
+pub fn print_and_reset_timing(label: &str) {
+    let count = N_TRY_REPLACE.swap(0, Ordering::Relaxed);
+    let total = T_TRY_REPLACE_NS.swap(0, Ordering::Relaxed);
+    let splice = T_SPLICE_NS.swap(0, Ordering::Relaxed);
+    let usedef = T_USEDEF_NS.swap(0, Ordering::Relaxed);
+    let liveness = T_LIVENESS_NS.swap(0, Ordering::Relaxed);
+    let lifted = T_LIFTED_NS.swap(0, Ordering::Relaxed);
+    let invalidate = T_INVALIDATE_NS.swap(0, Ordering::Relaxed);
+    if count == 0 && total == 0 {
+        return;
+    }
+    eprintln!(
+        "[time {label}] total={}.{:03}ms count={} | splice={}.{:03}ms usedef={}.{:03}ms liveness={}.{:03}ms lifted={}.{:03}ms invalidate={}.{:03}ms",
+        total / 1_000_000, (total / 1_000) % 1_000, count,
+        splice / 1_000_000, (splice / 1_000) % 1_000,
+        usedef / 1_000_000, (usedef / 1_000) % 1_000,
+        liveness / 1_000_000, (liveness / 1_000) % 1_000,
+        lifted / 1_000_000, (lifted / 1_000) % 1_000,
+        invalidate / 1_000_000, (invalidate / 1_000) % 1_000,
+    );
+}
+
 pub(crate) type BtfMetadataMap = BTreeMap<InsnSite, usize>;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct BlockId(pub(crate) usize);
@@ -792,9 +829,15 @@ impl ProgramCFG {
         Ok(())
     }
     fn rebuild_use_def(&mut self) -> anyhow::Result<()> {
+        let t0 = Instant::now();
         self.use_def = UseDefGraph::build(self)?;
+        T_USEDEF_NS.fetch_add(t0.elapsed().as_nanos() as u64, Ordering::Relaxed);
+        let t1 = Instant::now();
         self.rebuild_site_liveness()?;
+        T_LIVENESS_NS.fetch_add(t1.elapsed().as_nanos() as u64, Ordering::Relaxed);
+        let t2 = Instant::now();
         self.rebuild_lifted_reg_facts()?;
+        T_LIFTED_NS.fetch_add(t2.elapsed().as_nanos() as u64, Ordering::Relaxed);
         Ok(())
     }
 
@@ -870,7 +913,9 @@ impl ProgramCFG {
     }
     pub(crate) fn rebuild_use_def_after_mutation(&mut self) -> anyhow::Result<()> {
         self.rebuild_use_def()?;
+        let t = Instant::now();
         self.invalidate_verifier_states();
+        T_INVALIDATE_NS.fetch_add(t.elapsed().as_nanos() as u64, Ordering::Relaxed);
         Ok(())
     }
     pub fn remapped_func_info_records(&self) -> anyhow::Result<Option<BtfInfoRecords>> {
