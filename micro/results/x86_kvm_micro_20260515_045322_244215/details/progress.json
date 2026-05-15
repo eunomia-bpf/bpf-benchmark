@@ -1,0 +1,27 @@
+{
+  "completed_benchmarks": 0,
+  "current_benchmark": "siphash_rotate64_mixer_handcraft",
+  "current_benchmark_index": 1,
+  "current_benchmark_record": {
+    "category": "alu-mix",
+    "description": "Hand-written x86 rol kinsn over SipHash-style input words",
+    "expected_result": 2666935177028490406,
+    "family": "rotate-hash",
+    "hypothesis": "Tests direct rol kinsn lowering on a rotate-heavy hash input",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/siphash_rotate64_mixer.mem",
+    "io_mode": "staged",
+    "level": "handcraft-kinsn",
+    "name": "siphash_rotate64_mixer_handcraft",
+    "runs": [],
+    "tags": [
+      "compute",
+      "rotate",
+      "hash",
+      "handcraft-kinsn",
+      "x86"
+    ]
+  },
+  "error_message": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/siphash_rotate64_mixer_handcraft.handcraft.so --program-name siphash_rotate64_mixer_handcraft_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/siphash_rotate64_mixer.mem --io-mode staged --input-size 64 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_045322_244215/details/jit_dumps/siphash_rotate64_mixer_handcraft__kernel__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_045322_244215/details/jit_dumps/siphash_rotate64_mixer_handcraft__kernel__sample00.xlated.bin\n665: (af) r1 ^= r3                    ; R1=scalar() R3=scalar()\n666: (af) r1 ^= r2                    ; R1=scalar() R2=scalar()\n667: (af) r1 ^= r0                    ; R0=scalar(id=116) R1=scalar()\n668: (7b) *(u64 *)(r4 +0) = r1        ; R1=scalar() R4=pkt(r=72)\n669: (b4) w0 = 2                      ; R0=2\n670: (95) exit\nfrom 9 to 670: R0=0 R1=ctx() R2=pkt(off=72,r=0xfffffffffffffffe) R3=pkt_end() R4=pkt(r=8) R10=fp0\n670: R0=0 R1=ctx() R2=pkt(off=72,r=0xfffffffffffffffe) R3=pkt_end() R4=pkt(r=8) R10=fp0\n670: (95) exit\nfrom 6 to 670: safe\nfrom 3 to 670: safe\nprocessed 669 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0",
+  "status": "error",
+  "total_benchmarks": 1
+}

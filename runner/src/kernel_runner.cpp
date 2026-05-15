@@ -1073,15 +1073,11 @@ handcraft_load_result load_handcraft_program(const cli_options &options)
     }
 
     bpf_prog_load_opts opts = {};
-    std::vector<char> verifier_log(1 << 20);
     opts.sz = sizeof(opts);
     opts.fd_array = fd_array.data();
     opts.fd_array_cnt = static_cast<__u32>(fd_array.size());
-    opts.log_level = 2;
-    opts.log_buf = verifier_log.data();
-    opts.log_size = static_cast<__u32>(verifier_log.size());
 
-    const int program_fd = bpf_prog_load(
+    int program_fd = bpf_prog_load(
         BPF_PROG_TYPE_XDP,
         "micro_kinsn",
         "GPL",
@@ -1089,8 +1085,22 @@ handcraft_load_result load_handcraft_program(const cli_options &options)
         image.insns.size(),
         &opts);
     if (program_fd < 0) {
+        const int initial_error = program_fd;
+        std::vector<char> verifier_log(1 << 20);
+        opts.log_level = 2;
+        opts.log_buf = verifier_log.data();
+        opts.log_size = static_cast<__u32>(verifier_log.size());
+        program_fd = bpf_prog_load(
+            BPF_PROG_TYPE_XDP,
+            "micro_kinsn",
+            "GPL",
+            image.insns.data(),
+            image.insns.size(),
+            &opts);
         fail("bpf_prog_load(handcraft) failed: " + libbpf_error_string(program_fd) +
-             "\n" + verifier_log.data());
+             "\n" + verifier_log.data() +
+             "\ninitial_load_error=" + libbpf_error_string(initial_error) +
+             " diagnostic_load_error=" + libbpf_error_string(program_fd));
     }
     result.program_fd.reset(program_fd);
     result.load_end = std::chrono::steady_clock::now();

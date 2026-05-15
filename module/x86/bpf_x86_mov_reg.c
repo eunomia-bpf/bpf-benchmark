@@ -73,7 +73,7 @@ static int emit_movq_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	if (emit)
 		memcpy(image + *off, buf, len);
 	*off += len;
-	return 1;
+	return len;
 }
 
 const struct bpf_kinsn bpf_x86_movq_rr_desc = {

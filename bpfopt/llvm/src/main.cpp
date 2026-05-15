@@ -758,10 +758,66 @@ void insert_insns_adjusting_jumps(std::vector<uint8_t> &text, size_t insert_pc,
 	}
 	for (size_t pc = 0; pc < insn_count; pc++) {
 		const uint8_t code = text[pc * INSN_SIZE];
-		if (!is_relative_jump(code)) {
-			if (code == BPF_LD_IMM64) {
-				pc++;
+		if ((code == BPF_CALL || code == BPF_CALLX) &&
+		    src_reg(text, pc) == BPF_PSEUDO_CALL) {
+			const int64_t old_pc = static_cast<int64_t>(pc);
+			const int64_t old_target =
+				old_pc + 1 + static_cast<int64_t>(read_imm(text, pc));
+			if (old_target < 0 ||
+			    old_target >= static_cast<int64_t>(insn_count)) {
+				throw std::runtime_error("pseudo-call target out of range");
 			}
+			const int64_t new_pc =
+				old_pc +
+				(pc >= insert_pc ? static_cast<int64_t>(added_insns) :
+						  0);
+			const int64_t new_target =
+				old_target +
+				(old_target >= static_cast<int64_t>(insert_pc) ?
+					 static_cast<int64_t>(added_insns) :
+					 0);
+			const int64_t new_imm = new_target - new_pc - 1;
+			if (new_imm < std::numeric_limits<int32_t>::min() ||
+			    new_imm > std::numeric_limits<int32_t>::max()) {
+				throw std::runtime_error(
+					"pseudo-call offset out of range after insertion");
+			}
+			write_imm(text, pc, static_cast<int32_t>(new_imm));
+			continue;
+		}
+		if (code == BPF_LD_IMM64) {
+			if (src_reg(text, pc) == BPF_PSEUDO_FUNC) {
+				const int64_t old_pc = static_cast<int64_t>(pc);
+				const int64_t old_target =
+					old_pc + 1 +
+					static_cast<int64_t>(read_imm(text, pc));
+				if (old_target < 0 ||
+				    old_target >= static_cast<int64_t>(insn_count)) {
+					throw std::runtime_error(
+						"pseudo-func target out of range");
+				}
+				const int64_t new_pc =
+					old_pc +
+					(pc >= insert_pc ?
+						 static_cast<int64_t>(added_insns) :
+						 0);
+				const int64_t new_target =
+					old_target +
+					(old_target >= static_cast<int64_t>(insert_pc) ?
+						 static_cast<int64_t>(added_insns) :
+						 0);
+				const int64_t new_imm = new_target - new_pc - 1;
+				if (new_imm < std::numeric_limits<int32_t>::min() ||
+				    new_imm > std::numeric_limits<int32_t>::max()) {
+					throw std::runtime_error(
+						"pseudo-func offset out of range after insertion");
+				}
+				write_imm(text, pc, static_cast<int32_t>(new_imm));
+			}
+			pc++;
+			continue;
+		}
+		if (!is_relative_jump(code)) {
 			continue;
 		}
 		const int64_t old_pc = static_cast<int64_t>(pc);
@@ -799,6 +855,120 @@ void insert_insn_adjusting_jumps(std::vector<uint8_t> &text, size_t insert_pc,
 		throw std::runtime_error("invalid BPF instruction insertion");
 	}
 	insert_insns_adjusting_jumps(text, insert_pc, insn);
+}
+
+void delete_insns_adjusting_jumps(std::vector<uint8_t> &text, size_t begin_pc,
+				  size_t end_pc)
+{
+	if (begin_pc >= end_pc || text.size() % INSN_SIZE != 0) {
+		throw std::runtime_error("invalid BPF instruction deletion");
+	}
+	const size_t insn_count = text.size() / INSN_SIZE;
+	if (end_pc > insn_count) {
+		throw std::runtime_error("BPF deletion pc out of range");
+	}
+	const size_t removed_insns = end_pc - begin_pc;
+	const auto remap_pc = [&](int64_t old_pc) -> int64_t {
+		if (old_pc < static_cast<int64_t>(begin_pc)) {
+			return old_pc;
+		}
+		if (old_pc >= static_cast<int64_t>(end_pc)) {
+			return old_pc - static_cast<int64_t>(removed_insns);
+		}
+		return static_cast<int64_t>(begin_pc);
+	};
+	const auto target_is_deleted = [&](int64_t target) {
+		return target >= static_cast<int64_t>(begin_pc) &&
+		       target < static_cast<int64_t>(end_pc);
+	};
+
+	for (size_t pc = 0; pc < insn_count; pc++) {
+		if (pc >= begin_pc && pc < end_pc) {
+			if (text[pc * INSN_SIZE] == BPF_LD_IMM64) {
+				pc++;
+			}
+			continue;
+		}
+		const uint8_t code = text[pc * INSN_SIZE];
+		if ((code == BPF_CALL || code == BPF_CALLX) &&
+		    src_reg(text, pc) == BPF_PSEUDO_CALL) {
+			const int64_t old_pc = static_cast<int64_t>(pc);
+			const int64_t old_target =
+				old_pc + 1 + static_cast<int64_t>(read_imm(text, pc));
+			if (old_target < 0 ||
+			    old_target >= static_cast<int64_t>(insn_count)) {
+				throw std::runtime_error("pseudo-call target out of range");
+			}
+			if (target_is_deleted(old_target)) {
+				throw std::runtime_error(
+					"pseudo-call targets deleted instruction");
+			}
+			const int64_t new_pc = remap_pc(old_pc);
+			const int64_t new_target = remap_pc(old_target);
+			const int64_t new_imm = new_target - new_pc - 1;
+			if (new_imm < std::numeric_limits<int32_t>::min() ||
+			    new_imm > std::numeric_limits<int32_t>::max()) {
+				throw std::runtime_error(
+					"pseudo-call offset out of range after deletion");
+			}
+			write_imm(text, pc, static_cast<int32_t>(new_imm));
+			continue;
+		}
+		if (code == BPF_LD_IMM64) {
+			if (src_reg(text, pc) == BPF_PSEUDO_FUNC) {
+				const int64_t old_pc = static_cast<int64_t>(pc);
+				const int64_t old_target =
+					old_pc + 1 +
+					static_cast<int64_t>(read_imm(text, pc));
+				if (old_target < 0 ||
+				    old_target >= static_cast<int64_t>(insn_count)) {
+					throw std::runtime_error(
+						"pseudo-func target out of range");
+				}
+				if (target_is_deleted(old_target)) {
+					throw std::runtime_error(
+						"pseudo-func targets deleted instruction");
+				}
+				const int64_t new_pc = remap_pc(old_pc);
+				const int64_t new_target = remap_pc(old_target);
+				const int64_t new_imm = new_target - new_pc - 1;
+				if (new_imm < std::numeric_limits<int32_t>::min() ||
+				    new_imm > std::numeric_limits<int32_t>::max()) {
+					throw std::runtime_error(
+						"pseudo-func offset out of range after deletion");
+				}
+				write_imm(text, pc, static_cast<int32_t>(new_imm));
+			}
+			pc++;
+			continue;
+		}
+		if (!is_relative_jump(code)) {
+			continue;
+		}
+		const int64_t old_pc = static_cast<int64_t>(pc);
+		const int64_t old_target =
+			old_pc + 1 + static_cast<int64_t>(read_off(text, pc));
+		if (old_target < 0 ||
+		    old_target >= static_cast<int64_t>(insn_count)) {
+			throw std::runtime_error("relative jump target out of range");
+		}
+		if (target_is_deleted(old_target)) {
+			throw std::runtime_error(
+				"relative jump targets deleted instruction");
+		}
+		const int64_t new_pc = remap_pc(old_pc);
+		const int64_t new_target = remap_pc(old_target);
+		const int64_t new_off = new_target - new_pc - 1;
+		if (new_off < std::numeric_limits<int16_t>::min() ||
+		    new_off > std::numeric_limits<int16_t>::max()) {
+			throw std::runtime_error(
+				"relative jump offset out of range after deletion");
+		}
+		write_off(text, pc, static_cast<int16_t>(new_off));
+	}
+
+	text.erase(text.begin() + begin_pc * INSN_SIZE,
+		   text.begin() + end_pc * INSN_SIZE);
 }
 
 std::vector<std::vector<size_t>>
@@ -2266,10 +2436,18 @@ std::vector<InlineRecord> apply_map_inline_hints(std::vector<uint8_t> &text,
 		write_noop(text, it->call_pc);
 		if (it->null_pc) {
 			if (text[*it->null_pc * INSN_SIZE] == BPF_JNE_K) {
-				text[*it->null_pc * INSN_SIZE] = BPF_JA;
-				set_dst_reg(text, *it->null_pc, 0);
-				set_src_reg(text, *it->null_pc, 0);
-				write_imm(text, *it->null_pc, 0);
+				const int64_t target =
+					static_cast<int64_t>(*it->null_pc) + 1 +
+					static_cast<int64_t>(read_off(text, *it->null_pc));
+				const size_t begin = *it->null_pc + 1;
+				if (target <= static_cast<int64_t>(begin) ||
+				    target > static_cast<int64_t>(text.size() / INSN_SIZE)) {
+					throw std::runtime_error(
+						"map_inline unsupported JNE null-check shape");
+				}
+				delete_insns_adjusting_jumps(text, begin,
+							    static_cast<size_t>(target));
+				write_noop(text, *it->null_pc);
 			} else {
 				write_noop(text, *it->null_pc);
 			}

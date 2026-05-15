@@ -103,6 +103,8 @@ class Translation:
 
 def parse_int(text: str) -> int:
     text = text.strip()
+    if text.startswith("-"):
+        return -parse_int(text[1:])
     return int(text, 16) if text.lower().startswith("0x") else int(text, 10)
 
 
@@ -232,6 +234,8 @@ def parse_mem(text: str) -> tuple[str | None, str | None, int, int] | None:
             reg_name, scale_text = token.split("*", 1)
             index = reg_name
             scale = parse_int(scale_text)
+        elif token == "rip":
+            base = token
         elif reg(token):
             if base is None:
                 base = token
@@ -280,6 +284,22 @@ def translate_cmp_jcc(cmp_insn: NativeInsn, jcc_insn: NativeInsn, placeholder: i
             f"lowered {cmp_insn.raw} + {jcc_insn.raw} to verifier-visible BPF branch",
             target_addr,
         )
+    if "[" in cmp_insn.operands[0] and re.match(r"^-?(0x[0-9a-fA-F]+|\d+)$", cmp_insn.operands[1]):
+        mem = parse_mem(cmp_insn.operands[0])
+        size = size_from_mem(cmp_insn.operands[0]) or "BPF_W"
+        if mem is not None and mem[1] is None:
+            base = bpf_reg(mem[0] or "")
+            tmp = temp_reg(base[0] if base else "")
+            if base is not None and tmp is not None:
+                return Translation(
+                    "bpf-branch",
+                    (
+                        emit_ldx(size, tmp, base[0], mem[3]),
+                        f"HC_RAW(BPF_JMP | {op} | BPF_K, {tmp}, 0, __OFF_{placeholder}__, {parse_int(cmp_insn.operands[1])})",
+                    ),
+                    f"lowered {cmp_insn.raw} + {jcc_insn.raw} to verifier-visible load+branch",
+                    target_addr,
+                )
     return Translation("warning-unmapped", (), f"cannot lower {cmp_insn.raw} + {jcc_insn.raw} to BPF branch")
 
 
@@ -386,6 +406,22 @@ def translate(insn: NativeInsn) -> Translation:
                 (f"HC_KINSN(HC_MEM_PAYLOAD({src_reg[0]}, {base[0]}, {mem[3]}), {target})",),
                 "direct memory store via x86 kinsn selector",
             )
+        if "[" in dst and re.match(r"^-?(0x[0-9a-fA-F]+|\d+)$", src):
+            mem = parse_mem(dst)
+            size = size_from_mem(dst) or "BPF_W"
+            if mem is None or mem[1] is not None:
+                return Translation("warning-unmapped", (), f"store operand {dst} is not a direct base+disp memory reference")
+            base = bpf_reg(mem[0] or "")
+            if base is None:
+                return Translation("warning-unmapped", (), f"store base {mem[0]} is not in the BPF JIT register file")
+            imm = parse_int(src)
+            if size == "BPF_B":
+                return Translation(
+                    "exact-kinsn",
+                    (f"HC_KINSN(HC_STORE_IMM_PAYLOAD({base[0]}, {mem[3]}, {imm}), MICRO_HANDCRAFT_BPF_X86_MOVB_IMM_MEM)",),
+                    "movb immediate memory store via x86 kinsn selector",
+                )
+            return Translation("bpf-jit", (f"HC_ST({size}, {base[0]}, {mem[3]}, {imm})",), "immediate memory store")
     if op == "movzx" and len(ops) == 2:
         size = size_from_mem(ops[1])
         if size not in {"BPF_B", "BPF_H"}:
@@ -449,6 +485,12 @@ def translate(insn: NativeInsn) -> Translation:
         if left and right and left[0] == right[0] and left[1] == 64:
             return Translation("exact-kinsn", (f"HC_KINSN(HC_TEST_PAYLOAD({left[0]}), MICRO_HANDCRAFT_BPF_X86_TESTQ_RR)",), "testq reg,reg kinsn")
         return Translation("warning-unmapped", (), "only testq reg,same-reg is supported")
+    if op == "inc" and len(ops) == 1:
+        dst = bpf_reg(ops[0])
+        if dst:
+            bpf_class = "BPF_ALU64" if dst[1] == 64 else "BPF_ALU"
+            return Translation("bpf-jit", (f"HC_RAW({bpf_class} | BPF_ADD | BPF_K, {dst[0]}, 0, 0, 1)",), "inc lowered to add immediate")
+        return Translation("warning-unmapped", (), f"INC destination {ops[0]} is not in the BPF JIT register file")
     if op in {"cmovne", "cmove"} and len(ops) == 2:
         dst = bpf_reg(ops[0])
         src = bpf_reg(ops[1])
@@ -477,6 +519,24 @@ def translate_all(insns: list[NativeInsn]) -> list[Translation]:
             translations.append(trans)
             pending_cmp = None
             continue
+        if pending_cmp is None and insn.mnemonic in {"je", "jne"} and translations:
+            prior = insns[len(translations) - 1]
+            if prior.mnemonic in {"and", "or", "xor", "add", "sub"} and prior.operands:
+                flag_reg = bpf_reg(prior.operands[0])
+                target_addr = parse_branch_target(insn.operands[0]) if insn.operands else None
+                if flag_reg is not None and target_addr is not None:
+                    op = "BPF_JEQ" if insn.mnemonic == "je" else "BPF_JNE"
+                    trans = Translation(
+                        "bpf-branch",
+                        (f"HC_RAW(BPF_JMP | {op} | BPF_K, {flag_reg[0]}, 0, __OFF_{len(translations)}__, 0)",),
+                        f"lowered flags from {prior.raw} + {insn.raw} to verifier-visible zero branch",
+                        target_addr,
+                    )
+                    warning = translated_reg_warning(insn)
+                    if warning:
+                        trans = Translation(trans.status, trans.code, f"{trans.note}; {warning}", trans.target_addr)
+                    translations.append(trans)
+                    continue
 
         trans = translate(insn)
         if trans.status == "bpf-branch" and trans.code == ("HC_RAW(BPF_JMP | BPF_JA, 0, 0, __OFF_DIRECT__, 0)",):
@@ -523,10 +583,15 @@ def patch_branch_offsets(insns: list[NativeInsn], translations: list[Translation
                 trans.target_addr,
             ))
             continue
-        branch_pc = pc_by_index[index]
-        off = target_pc - (branch_pc + 1)
         placeholder = f"__OFF_{index}__"
-        code = tuple(item.replace(placeholder, str(off)) for item in trans.code)
+        code = []
+        code_pc = pc_by_index[index]
+        for item in trans.code:
+            branch_pc = code_pc
+            off = target_pc - (branch_pc + 1)
+            code.append(item.replace(placeholder, str(off)))
+            code_pc += bpf_insn_len(item)
+        code = tuple(code)
         patched.append(Translation(trans.status, code, trans.note, trans.target_addr))
     return patched
 

@@ -207,7 +207,32 @@ def select_runtimes(names: list[str] | None, suite: SuiteSpec) -> list[RuntimeSp
 def require_suite_artifacts(suite: SuiteSpec) -> None:
     required_paths = [suite.build.runner_binary]
     required_paths.extend(benchmark.object_path for benchmark in suite.benchmarks.values())
+    required_paths.extend(
+        path for benchmark in suite.benchmarks.values()
+        if (path := benchmark.metadata.get("handcraft_object_path")) is not None
+    )
     require_existing_paths(required_paths)
+
+
+def runtimes_for_benchmark(benchmark: CatalogTarget, runtimes: list[RuntimeSpec]) -> list[RuntimeSpec]:
+    allowed_runtime_names = set(benchmark.runtime_names)
+    selected = [
+        runtime for runtime in runtimes
+        if not allowed_runtime_names or runtime.name in allowed_runtime_names
+    ]
+    if benchmark.metadata.get("handcraft_object_path") is not None:
+        kernel_runtime = next((runtime for runtime in selected if runtime.name == "kernel"), None)
+        if kernel_runtime is not None:
+            selected.append(RuntimeSpec(
+                name="kernel_handcraft",
+                label="kernel handcraft",
+                mode="kernel",
+                backend="kernel",
+                policy_mode="stock",
+                default_inner_repeat=kernel_runtime.default_inner_repeat,
+                transport=kernel_runtime.transport,
+            ))
+    return selected
 
 
 def runner_help_text(runner_binary: Path) -> str:
@@ -252,7 +277,13 @@ def build_runner_command(
     else:
         raise RuntimeError(f"unsupported micro runtime mode: {runtime.mode}")
 
-    command.extend(["--program", str(benchmark.object_path)])
+    program_path = benchmark.object_path
+    if runtime.name == "kernel_handcraft":
+        handcraft_path = benchmark.metadata.get("handcraft_object_path")
+        if not isinstance(handcraft_path, Path):
+            raise RuntimeError(f"{benchmark.name} has no handcraft object")
+        program_path = handcraft_path
+    command.extend(["--program", str(program_path)])
     if benchmark.program_names:
         command.extend(["--program-name", benchmark.program_names[0]])
     if memory_file is not None:
@@ -381,18 +412,17 @@ def _disassembly(path: Path | None, *, binary: bool = False, symbol: str | None 
 
 def write_code_compare_markdown(benchmark: CatalogTarget, artifact_dir: Path) -> None:
     base_name = str(benchmark.metadata.get("base_name") or benchmark.name)
-    native_base = str(benchmark.metadata.get("native_baseline") or base_name)
-    native_symbol = benchmark.program_names[0] if native_base == base_name and benchmark.program_names else f"{native_base}_xdp"
-    original_name = native_base if native_base != base_name else benchmark.name
+    native_symbol = benchmark.program_names[0] if benchmark.program_names else f"{base_name}_xdp"
     dump_dir = artifact_dir / "details" / "jit_dumps"
-    handcraft_source = ROOT_DIR / "micro" / "programs" / f"{base_name}.handcraft.c"
+    handcraft_base = benchmark.metadata.get("handcraft_base_name")
+    handcraft_source = ROOT_DIR / "micro" / "programs" / f"{handcraft_base}.handcraft.c" if handcraft_base else None
     sections = [
-        ("Original C", "c", _read_text_or_missing(ROOT_DIR / "micro" / "programs" / f"{native_base}.bpf.c")),
-        ("Native ASM", "asm", _disassembly(benchmark.object_path.parent / f"{native_base}.native.so", symbol=native_symbol)),
-        ("Original Kernel JIT ASM", "asm", _disassembly(dump_dir / f"{_dump_stem(original_name, 'kernel', 0)}.jited.bin", binary=True)),
-        ("llvmbpf JIT ASM", "asm", _disassembly(dump_dir / f"{_dump_stem(original_name, 'llvmbpf', 0)}.jited.bin", binary=True)),
-        ("Handcraft C", "c", _read_text_or_missing(handcraft_source)),
-        ("Handcraft Kernel JIT ASM", "asm", _disassembly(dump_dir / f"{_dump_stem(benchmark.name, 'kernel', 0)}.jited.bin", binary=True) if handcraft_source.exists() else "not captured"),
+        ("Original C", "c", _read_text_or_missing(ROOT_DIR / "micro" / "programs" / f"{base_name}.bpf.c")),
+        ("Native ASM", "asm", _disassembly(benchmark.object_path.parent / f"{base_name}.native.so", symbol=native_symbol)),
+        ("Original Kernel JIT ASM", "asm", _disassembly(dump_dir / f"{_dump_stem(benchmark.name, 'kernel', 0)}.jited.bin", binary=True)),
+        ("llvmbpf JIT ASM", "asm", _disassembly(dump_dir / f"{_dump_stem(benchmark.name, 'llvmbpf', 0)}.jited.bin", binary=True)),
+        ("Handcraft C", "c", _read_text_or_missing(handcraft_source) if handcraft_source else "not captured"),
+        ("Handcraft Kernel JIT ASM", "asm", _disassembly(dump_dir / f"{_dump_stem(benchmark.name, 'kernel_handcraft', 0)}.jited.bin", binary=True) if handcraft_source and handcraft_source.exists() else "not captured"),
     ]
     text = f"# {benchmark.name}\n\n" + "\n\n".join(
         f"## {title}\n```{lang}\n{text.rstrip()}\n```" for title, lang, text in sections
@@ -547,11 +577,7 @@ def main(argv: list[str] | None = None) -> int:
 
         for bench_idx, benchmark in enumerate(benchmarks):
             memory_file = resolve_memory_file(benchmark, args.regenerate_inputs)
-            allowed_runtime_names = set(benchmark.runtime_names)
-            benchmark_runtimes = [
-                runtime for runtime in runtimes
-                if not allowed_runtime_names or runtime.name in allowed_runtime_names
-            ]
+            benchmark_runtimes = runtimes_for_benchmark(benchmark, runtimes)
             if not benchmark_runtimes:
                 raise RuntimeError(
                     f"{benchmark.name} cannot run with selected runtimes: "

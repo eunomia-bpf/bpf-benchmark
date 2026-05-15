@@ -1,0 +1,63 @@
+{
+  "benchmarks": [],
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec"
+  },
+  "defaults": {
+    "inner_repeat": 10,
+    "perf_counters": false,
+    "perf_scope": "full_repeat_raw",
+    "runtime_order_seed": 0,
+    "samples": 1,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "details_dir": "details",
+  "error_message": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/siphash_rotate64_mixer_handcraft.handcraft.so --program-name siphash_rotate64_mixer_handcraft_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/siphash_rotate64_mixer.mem --io-mode staged --input-size 64 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_045951_891034/details/jit_dumps/siphash_rotate64_mixer_handcraft__kernel__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_045951_891034/details/jit_dumps/siphash_rotate64_mixer_handcraft__kernel__sample00.xlated.bin\n666: (af) r1 ^= r2                    ; R1=scalar() R2=scalar()\n667: (af) r1 ^= r0                    ; R0=scalar(id=116) R1=scalar()\n668: (7b) *(u64 *)(r4 +0) = r1        ; R1=scalar() R4=pkt(r=72)\n669: (b4) w0 = 2                      ; R0=2\n670: (95) exit\nfrom 9 to 670: R0=0 R1=ctx() R2=pkt(off=72,r=0xfffffffffffffffe) R3=pkt_end() R4=pkt(r=8) R10=fp0\n670: R0=0 R1=ctx() R2=pkt(off=72,r=0xfffffffffffffffe) R3=pkt_end() R4=pkt(r=8) R10=fp0\n670: (95) exit\nfrom 6 to 670: safe\nfrom 3 to 670: safe\nprocessed 669 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\ninitial_load_error=Unknown error 524 diagnostic_load_error=Unknown error 524",
+  "generated_at": "2026-05-15T04:59:51.891034+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "unknown",
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_root_mods=1 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 panic=-1 virtme.exec=`L3RtcC9iZW5jaG1hcmstZ3Vlc3QtZmdjbWNycTAuc2g=` virtme_chdir=home/yunwei37/workspace/bpf-benchmark rootfstype=9p rootflags=version=9p2000.L,trans=virtio,access=any raid=noautodetect ro debug loglevel=7 panic=30 oops=panic init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init",
+    "kernel_version": "7.0.0-rc2+",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "unknown"
+  },
+  "last_updated_at": "2026-05-15T04:59:51.931734+00:00",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_pure_jit.yaml",
+  "progress": {
+    "completed_benchmarks": 0,
+    "current_benchmark": "siphash_rotate64_mixer_handcraft",
+    "current_benchmark_index": 1,
+    "total_benchmarks": 1
+  },
+  "provenance": {
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 285K",
+    "environment": "vm",
+    "kernel_commit": "unknown",
+    "params": {
+      "inner_repeat": 10,
+      "samples": 1,
+      "warmups": 0
+    },
+    "repo_dirty": false,
+    "repo_git_sha": "unknown",
+    "timestamp": "2026-05-15T04:59:51.891971+00:00"
+  },
+  "run_type": "x86_kvm_micro",
+  "started_at": "2026-05-15T04:59:51.891034+00:00",
+  "status": "error",
+  "suite": "micro_staged_codegen",
+  "toolchains": {
+    "libbpf": {
+      "root": "vendor/libbpf"
+    },
+    "llvmbpf": {
+      "root": "vendor/llvmbpf"
+    }
+  }
+}

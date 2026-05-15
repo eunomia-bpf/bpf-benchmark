@@ -60,15 +60,30 @@ const SNAPSHOT_HEADER: &str = "\
 # progs_with_apply, progs_failed}. The `_total` row aggregates across apps.
 ";
 
+// Gated test: spans 542 programs × ~14 passes and takes several minutes on a
+// release build (cilium ≈100s, otel ≈10min). Opt-in via either
+// BPFOPT_TESTBIN_VERIFY=1 (assert against checked-in YAML) or
+// BPFOPT_TESTBIN_UPDATE=1 (regenerate the YAML). Without either, the test
+// returns immediately so the default `cargo test` stays fast.
 #[test]
 fn testbin_pass_counts_snapshot() -> Result<()> {
+    let verify = std::env::var_os("BPFOPT_TESTBIN_VERIFY").is_some();
+    let update = std::env::var_os("BPFOPT_TESTBIN_UPDATE").is_some();
+    if !verify && !update {
+        eprintln!(
+            "skipped: set BPFOPT_TESTBIN_VERIFY=1 to assert or BPFOPT_TESTBIN_UPDATE=1 to refresh \
+             bpfopt/testbin/applied_counts.yaml"
+        );
+        return Ok(());
+    }
+
     let snapshot = compute_snapshot()?;
     let yaml = render_yaml(&snapshot)?;
     let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../testbin/applied_counts.yaml");
 
-    if std::env::var_os("BPFOPT_TESTBIN_UPDATE").is_some() {
+    if update {
         fs::write(&path, &yaml).with_context(|| format!("write {}", path.display()))?;
-        println!("wrote {}", path.display());
+        eprintln!("wrote {}", path.display());
         return Ok(());
     }
 
@@ -82,7 +97,7 @@ fn testbin_pass_counts_snapshot() -> Result<()> {
              Checked-in:  {}\n\
              Just-computed: {}\n\
              If the change is intentional, refresh with:\n  \
-             BPFOPT_TESTBIN_UPDATE=1 cargo test -p bpfopt --test testbin_pass_counts",
+             BPFOPT_TESTBIN_UPDATE=1 cargo test --release -p bpfopt --test testbin_pass_counts",
             path.display(),
             actual_path.display(),
         );
@@ -114,12 +129,15 @@ fn compute_snapshot() -> Result<Snapshot> {
         collect_program_dirs(&app_dir, &mut prog_dirs)
             .with_context(|| format!("walk {}", app_dir.display()))?;
         prog_dirs.sort();
+        let t_app = std::time::Instant::now();
+        eprintln!("[{}] {} programs", app, prog_dirs.len());
 
         for prog_dir in &prog_dirs {
             let bytes = fs::read(prog_dir.join("canonicalize_output.bin"))
                 .with_context(|| format!("read {}/canonicalize_output.bin", prog_dir.display()))?;
             let insns = decode_insns(&bytes)
                 .with_context(|| format!("decode {}", prog_dir.display()))?;
+            let t_prog = std::time::Instant::now();
 
             for entry in PASS_REGISTRY {
                 if EXCLUDED_PASSES.contains(&entry.name) {
@@ -131,6 +149,7 @@ fn compute_snapshot() -> Result<Snapshot> {
                     .entry(app)
                     .or_default();
                 counts.progs += 1;
+                let t_pass = std::time::Instant::now();
                 match run_pass_on_program(entry, &registry_template, &insns) {
                     Ok(result) => {
                         counts.applied += result.applied;
@@ -142,8 +161,28 @@ fn compute_snapshot() -> Result<Snapshot> {
                     }
                     Err(_) => counts.progs_failed += 1,
                 }
+                let dur = t_pass.elapsed();
+                if dur.as_secs_f64() >= 0.5 {
+                    eprintln!(
+                        "  slow: {} {} insns={} dur={:.2}s",
+                        entry.name,
+                        prog_dir.file_name().unwrap().to_string_lossy(),
+                        insns.len(),
+                        dur.as_secs_f64()
+                    );
+                }
+            }
+            let pd = t_prog.elapsed();
+            if pd.as_secs() >= 5 {
+                eprintln!(
+                    "  prog {} total {:.1}s ({} insns)",
+                    prog_dir.file_name().unwrap().to_string_lossy(),
+                    pd.as_secs_f64(),
+                    insns.len()
+                );
             }
         }
+        eprintln!("  {} done in {:.1}s", app, t_app.elapsed().as_secs_f64());
     }
     Ok(snapshot)
 }

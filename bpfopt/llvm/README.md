@@ -12,6 +12,9 @@ The accepted CLI surface is intentionally narrow:
 ```sh
 bpfopt --canonicalize-map-refs --input in.bin --output out.bin --map-ids 1,2
 bpfopt --pass noop --input in.bin --output out.bin --report report.json --prog-type xdp
+bpfopt --pass map_inline --input in.bin --output out.bin --report report.json \
+  --prog-type xdp --verifier-states verifier.log -- \
+  --map-values map-values --map-ids 1,2 --inline-hint=map_name:!00000000
 ```
 
 `--canonicalize-map-refs` preserves the existing raw bytecode contract. Pass mode
@@ -41,6 +44,17 @@ fails at `cilium_bpf_overlay.bpf.o`. The first observed failure is a map-value
 offset bounds check that is semantically redundant after LLVM optimization but
 still required for the kernel verifier to prove bounded access. O3 therefore
 needs verifier-aware range-check preservation before it can replace O0.
+
+`map_inline` has a minimal hard-hint implementation. It still performs the
+strict LLVM roundtrip first, then uses pass-local `--map-values`, `--map-ids`,
+and `--inline-hint=<map>:!<key_hex>` inputs to replace matching
+`bpf_map_lookup_elem()` calls with a non-NULL stack pointer to the snapshotted
+map value. The current implementation supports hard hints only; soft hints
+fail fast instead of falling back. Katran `balancer_ingress` passes loader
+verification and `BPF_PROG_TEST_RUN` through the temporary helper
+`docs/tmp/bpfopt_llvm_mapinline_katran_wrapper.sh`, with 16 lookup sites
+reported as inlined. The loader smoke and raw duration samples are recorded in
+`docs/tmp/katran_llvm_loader_perf_20260514.md`.
 
 The local llvmbpf changes are kept to compatibility fixes needed by kernel
 bytecode:

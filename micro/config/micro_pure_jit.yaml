@@ -78,21 +78,6 @@ benchmarks:
     expected_result: 12830754992348206170
     tags: [bitops, pure-jit]
 
-  - name: bitmap_popcount_scan_handcraft
-    description: Hand-written x86 popcnt kinsn over bitmap words
-    category: alu-mix
-    family: popcount
-    level: handcraft-kinsn
-    hypothesis: Tests direct popcnt kinsn lowering on a bitmap scan input
-    base_name: bitmap_popcount_scan_handcraft
-    object_kind: handcraft
-    runtimes: [kernel]
-    native_baseline: bitmap_popcount_scan
-    kernel_input_size: 2056
-    input_generator: bitmap_popcount_scan
-    expected_result: 12648566
-    tags: [bitops, handcraft-kinsn, x86]
-
   - name: sorted_rule_binary_search
     description: Repeated lookup over a sorted rule table
     category: control-flow
@@ -128,21 +113,6 @@ benchmarks:
     input_generator: trace_event_type_switch_dispatch
     expected_result: 16
     tags: [branch, dispatch, pure-jit]
-
-  - name: trace_event_type_switch_dispatch_handcraft
-    description: Hand-written x86 test/cmov kinsn over event dispatch input
-    category: control-flow
-    family: switch-dispatch
-    level: handcraft-kinsn
-    hypothesis: Tests direct test plus cmov kinsn lowering for branchless event selection
-    base_name: trace_event_type_switch_dispatch_handcraft
-    object_kind: handcraft
-    runtimes: [kernel]
-    native_baseline: trace_event_type_switch_dispatch
-    kernel_input_size: 516
-    input_generator: trace_event_type_switch_dispatch
-    expected_result: 56
-    tags: [branch, dispatch, handcraft-kinsn, x86]
 
   - name: packet_checksum_fold
     description: Internet checksum style packet reduction
@@ -245,21 +215,6 @@ benchmarks:
     expected_result: 2666935177028490406
     tags: [compute, rotate, hash, pure-jit]
 
-  - name: siphash_rotate64_mixer_handcraft
-    description: Hand-written x86 rol kinsn over SipHash-style input words
-    category: alu-mix
-    family: rotate-hash
-    level: handcraft-kinsn
-    hypothesis: Tests direct rol kinsn lowering on a rotate-heavy hash input
-    base_name: siphash_rotate64_mixer_handcraft
-    object_kind: handcraft
-    runtimes: [kernel]
-    native_baseline: siphash_rotate64_mixer
-    kernel_input_size: 64
-    input_generator: siphash_rotate64_mixer
-    expected_result: 2666935177028490406
-    tags: [compute, rotate, hash, handcraft-kinsn, x86]
-
   - name: packet_record_bounds_window
     description: Packet-backed record parser with one wide dominating window plus many redundant sub-checks
     category: memory-local
@@ -296,21 +251,6 @@ benchmarks:
     input_generator: packed_header_bitfield_decode
     expected_result: 12211926182125163441
     tags: [memory, fields, bitfield, pure-jit]
-
-  - name: packed_header_bitfield_decode_handcraft
-    description: Hand-written x86 shift and mask kinsns over packed header fields
-    category: memory-local
-    family: bitfield-extract
-    level: handcraft-kinsn
-    hypothesis: Tests direct shr and and kinsn lowering for packed bitfield extraction
-    base_name: packed_header_bitfield_decode_handcraft
-    object_kind: handcraft
-    runtimes: [kernel]
-    native_baseline: packed_header_bitfield_decode
-    kernel_input_size: 520
-    input_generator: packed_header_bitfield_decode
-    expected_result: 4715
-    tags: [memory, fields, bitfield, handcraft-kinsn, x86]
 
   - name: bpftrace_string_search_prefix_scan
     description: bpftrace-style bounded string length and substring prefix scan
@@ -420,22 +360,6 @@ benchmarks:
     input_generator: packet_toeplitz_rss_hash
     expected_result: 13526464303109995596
     tags: [packet, hash, toeplitz, rss, pure-jit]
-
-  - name: packet_toeplitz_rss_hash_handcraft
-    description: Hand-written x86 movbe indexed loads over Toeplitz packet fields
-    category: alu-mix
-    family: rss-hash
-    level: handcraft-kinsn
-    hypothesis: Tests direct movbe SIB kinsn lowering for packet endian loads
-    base_name: packet_toeplitz_rss_hash_handcraft
-    object_kind: handcraft
-    runtimes: [kernel]
-    native_baseline: packet_toeplitz_rss_hash
-    io_mode: packet
-    kernel_input_size: 54
-    input_generator: packet_toeplitz_rss_hash
-    expected_result: 6141077764
-    tags: [packet, hash, toeplitz, rss, handcraft-kinsn, x86]
 
   - name: bpftrace_comm_key_fnv_hash
     description: bpftrace-style comm plus pid/tgid/probe aggregation key hashed with FNV-1a

@@ -13,6 +13,7 @@
     HC_RAW(0, 0, 0, 0, (__s32)((__u64)(IMM) >> 32))
 
 #define HC_LDX(SIZE, DST, SRC, OFF) HC_RAW(BPF_LDX | (SIZE) | BPF_MEM, DST, SRC, OFF, 0)
+#define HC_ST(SIZE, DST, OFF, IMM) HC_RAW(BPF_ST | (SIZE) | BPF_MEM, DST, 0, OFF, IMM)
 #define HC_STX(SIZE, DST, SRC, OFF) HC_RAW(BPF_STX | (SIZE) | BPF_MEM, DST, SRC, OFF, 0)
 #define HC_MOV64_REG(DST, SRC) HC_RAW(BPF_ALU64 | BPF_MOV | BPF_X, DST, SRC, 0, 0)
 #define HC_MOV64_IMM(DST, IMM) HC_RAW(BPF_ALU64 | BPF_MOV | BPF_K, DST, 0, 0, IMM)
@@ -40,6 +41,8 @@
 #define HC_REG_REG_PAYLOAD(DST, SRC) ((__u64)(DST) | ((__u64)(SRC) << 4))
 #define HC_MEM_PAYLOAD(REG, BASE, OFF) \
     ((__u64)(REG) | ((__u64)(BASE) << 4) | ((__u64)(__u16)(OFF) << 8))
+#define HC_STORE_IMM_PAYLOAD(BASE, OFF, IMM) \
+    ((__u64)(BASE) | ((__u64)(__u16)(OFF) << 4) | ((__u64)(__u8)(IMM) << 20))
 #define HC_POPCNT_PAYLOAD(DST, SRC, TMP1, TMP2) \
     ((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(TMP1) << 8) | ((__u64)(TMP2) << 12))
 #define HC_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF) \

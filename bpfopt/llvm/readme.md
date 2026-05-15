@@ -24,6 +24,13 @@ bytecode CLI 契约：输入和输出都是 raw `struct bpf_insn[]`，loader 通
   bpftrace、`cilium_bpf_host`、`cilium_bpf_lxc` 能过，但
   `cilium_bpf_overlay.bpf.o` 失败；首个问题是 O3 删除了 verifier 仍需要的
   map-value offset bounds check。
+- `map_inline` 已实现最小 hard-hint 路径：先严格走 LLVM roundtrip，再读取
+  `--map-values`、`--map-ids`、`--inline-hint=<map>:!<key_hex>` 的 snapshot，
+  将 `bpf_map_lookup_elem()` 改写为指向栈上 snapshot value 的非 NULL 指针。
+  soft hint 目前 fail-fast，不做启发式 fallback。Katran `balancer_ingress`
+  通过 `docs/tmp/bpfopt_llvm_mapinline_katran_wrapper.sh` 注入同 runner 配置一致
+  的 hard hints/overlays 后，loader verifier 和 `BPF_PROG_TEST_RUN` 均通过，
+  report 显示 16 个 lookup site 被 inline。
 - llvmbpf 的必要修改已经 push 到
   `origin/codex/bpfopt-llvm-roundtrip-20260515`。
 
