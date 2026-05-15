@@ -346,7 +346,8 @@ std::optional<size_t> subprog_start_pc(const std::vector<uint8_t> &input)
 				 static_cast<int64_t>(read_imm(input, pc));
 		} else if (opcode == BPF_LD_IMM64 &&
 			   src_reg(input, pc) == BPF_PSEUDO_FUNC) {
-			target = static_cast<int64_t>(read_imm(input, pc));
+			target = static_cast<int64_t>(pc) + 1 +
+				 static_cast<int64_t>(read_imm(input, pc));
 			pc++;
 		}
 		if (!target) {
@@ -398,6 +399,33 @@ bool patch_call_symbol(std::vector<uint8_t> &text, size_t pc,
 	return true;
 }
 
+bool patch_func_symbol(std::vector<uint8_t> &text, size_t pc,
+		       std::string_view name,
+		       std::optional<size_t> subprog_start,
+		       size_t generated_insns)
+{
+	constexpr std::string_view prefix = "__llvmbpf_pseudo_func_pc_";
+	if (!name.starts_with(prefix)) {
+		return false;
+	}
+	const size_t target = remap_original_pc(parse_hex_u32(name.substr(prefix.size())),
+						subprog_start,
+						generated_insns);
+	const int64_t imm = static_cast<int64_t>(target) -
+			    static_cast<int64_t>(pc) - 1;
+	if (imm < std::numeric_limits<int32_t>::min() ||
+	    imm > std::numeric_limits<int32_t>::max() ||
+	    pc + 1 >= text.size() / INSN_SIZE ||
+	    text[pc * INSN_SIZE] != BPF_LD_IMM64) {
+		throw std::runtime_error("invalid pseudo-func relocation");
+	}
+	set_src_reg(text, pc, BPF_PSEUDO_FUNC);
+	write_imm(text, pc, static_cast<int32_t>(imm));
+	std::fill(text.begin() + (pc + 1) * INSN_SIZE,
+		  text.begin() + (pc + 2) * INSN_SIZE, 0);
+	return true;
+}
+
 void apply_one_relocation(llvm::object::ObjectFile &object,
 			  const llvm::object::RelocationRef &reloc,
 			  std::vector<uint8_t> &text,
@@ -418,9 +446,11 @@ void apply_one_relocation(llvm::object::ObjectFile &object,
 		}
 		set_src_reg(text, pc, 0);
 		write_imm(text, pc, static_cast<int32_t>(*helper));
-	} else if (!patch_map_symbol(text, pc, name) &&
-		   !patch_call_symbol(text, pc, name, subprog_start,
-				      generated_insns)) {
+		} else if (!patch_map_symbol(text, pc, name) &&
+			   !patch_call_symbol(text, pc, name, subprog_start,
+					      generated_insns) &&
+			   !patch_func_symbol(text, pc, name, subprog_start,
+					      generated_insns)) {
 		throw std::runtime_error("unsupported relocation symbol " +
 					 name + " at offset " +
 					 std::to_string(reloc.getOffset()) +
@@ -566,11 +596,10 @@ void optimize_module(llvm::Module &module, llvm::TargetMachine &machine)
 	pipeline.run(module, module_am);
 }
 
-std::vector<uint8_t> emit_bpf_object(llvm::Module &module, bool optimize_ir)
-{
-	auto machine = create_bpf_target_machine(
-		optimize_ir ? llvm::CodeGenOptLevel::Default :
-			      llvm::CodeGenOptLevel::None);
+	std::vector<uint8_t> emit_bpf_object(llvm::Module &module, bool optimize_ir)
+	{
+		auto machine = create_bpf_target_machine(
+			llvm::CodeGenOptLevel::Default);
 	module.setTargetTriple("bpfel");
 	module.setDataLayout(machine->createDataLayout());
 	if (optimize_ir) {

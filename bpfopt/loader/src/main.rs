@@ -514,17 +514,18 @@ fn verify_workdir_with_log_level(
     let metadata = read_json::<ProgramMetadata>(&prog_dir.join(METADATA_JSON))?;
     let input = prog_dir.join(OUTPUT_BIN);
 
-    let raw = fs::read(&input)?;
-    let stride = mem::size_of::<libbpf_sys::bpf_insn>();
-    if !raw.len().is_multiple_of(stride) {
-        bail!("{} length is not a multiple of 8 bytes", input.display());
-    }
-    let mut insns = vec![libbpf_sys::bpf_insn::default(); raw.len() / stride];
-    unsafe { ptr::copy_nonoverlapping(raw.as_ptr(), insns.as_mut_ptr().cast(), raw.len()) };
+    let mut insns = read_insns(&input)?;
+    let original_insns = read_insns(&prog_dir.join(INPUT_BIN))?;
     rewrite_map_indices_to_fds(&mut insns, map_fds)?;
     let needs_func_info = contains_pseudo_func(&insns);
     if needs_func_info && (btf_fd < 0 || func_info.is_empty()) {
         bail!("{} uses BPF_PSEUDO_FUNC but has no func_info", input.display());
+    }
+    let mut remapped_func_info = Vec::new();
+    let mut use_line_info = line_info;
+    if needs_func_info {
+        remapped_func_info = remap_func_info(func_info, &original_insns, &insns)?;
+        use_line_info = &[];
     }
 
     let name = CString::new(metadata.name.as_str())?;
@@ -541,14 +542,14 @@ fn verify_workdir_with_log_level(
     };
     if needs_func_info {
         opts.prog_btf_fd = btf_fd as u32;
-        opts.func_info = func_info.as_ptr().cast();
+        opts.func_info = remapped_func_info.as_ptr().cast();
         opts.func_info_cnt =
-            u32::try_from(func_info.len()).context("func_info count exceeds u32")?;
+            u32::try_from(remapped_func_info.len()).context("func_info count exceeds u32")?;
         opts.func_info_rec_size = mem::size_of::<libbpf_sys::bpf_func_info>() as u32;
-        if !line_info.is_empty() {
-            opts.line_info = line_info.as_ptr().cast();
+        if !use_line_info.is_empty() {
+            opts.line_info = use_line_info.as_ptr().cast();
             opts.line_info_cnt =
-                u32::try_from(line_info.len()).context("line_info count exceeds u32")?;
+                u32::try_from(use_line_info.len()).context("line_info count exceeds u32")?;
             opts.line_info_rec_size = mem::size_of::<libbpf_sys::bpf_line_info>() as u32;
         }
     }
@@ -1041,6 +1042,64 @@ fn checked_add(a: usize, b: usize, what: &str) -> Result<usize> {
 fn checked_mul(a: usize, b: usize, what: &str) -> Result<usize> {
     a.checked_mul(b)
         .ok_or_else(|| anyhow!("{what} size overflow"))
+}
+
+fn read_insns(path: &Path) -> Result<Vec<libbpf_sys::bpf_insn>> {
+    let raw = fs::read(path).with_context(|| format!("failed to read {}", path.display()))?;
+    let stride = mem::size_of::<libbpf_sys::bpf_insn>();
+    if !raw.len().is_multiple_of(stride) {
+        bail!("{} length is not a multiple of 8 bytes", path.display());
+    }
+    let mut insns = vec![libbpf_sys::bpf_insn::default(); raw.len() / stride];
+    unsafe { ptr::copy_nonoverlapping(raw.as_ptr(), insns.as_mut_ptr().cast(), raw.len()) };
+    Ok(insns)
+}
+
+fn remap_func_info(
+    func_info: &[libbpf_sys::bpf_func_info],
+    original: &[libbpf_sys::bpf_insn],
+    output: &[libbpf_sys::bpf_insn],
+) -> Result<Vec<libbpf_sys::bpf_func_info>> {
+    let Some(old_start) = subprog_start(original)? else {
+        return Ok(func_info.to_vec());
+    };
+    let Some(new_start) = subprog_start(output)? else {
+        bail!("roundtripped bytecode lost BPF_PSEUDO_FUNC target");
+    };
+    let mut remapped = func_info.to_vec();
+    for info in &mut remapped {
+        if info.insn_off >= old_start {
+            info.insn_off = new_start
+                .checked_add(info.insn_off - old_start)
+                .ok_or_else(|| anyhow!("func_info insn_off overflow"))?;
+        }
+    }
+    Ok(remapped)
+}
+
+fn subprog_start(insns: &[libbpf_sys::bpf_insn]) -> Result<Option<u32>> {
+    let mut start = None;
+    for (pc, insn) in insns.iter().enumerate() {
+        let target = if (insn.code == libbpf_sys::BPF_CALL as u8
+            || insn.code == (libbpf_sys::BPF_CALL | 0x08) as u8)
+            && insn.src_reg() == libbpf_sys::BPF_PSEUDO_CALL as u8
+        {
+            Some(pc as i64 + 1 + i64::from(insn.imm))
+        } else if is_ldimm64(insn) && insn.src_reg() == libbpf_sys::BPF_PSEUDO_FUNC as u8 {
+            Some(pc as i64 + 1 + i64::from(insn.imm))
+        } else {
+            None
+        };
+        let Some(target) = target else {
+            continue;
+        };
+        if target < 0 || target >= insns.len() as i64 {
+            bail!("subprogram target {target} at pc {pc} is out of range");
+        }
+        let target = u32::try_from(target).context("subprogram target exceeds u32")?;
+        start = Some(start.map_or(target, |prev: u32| prev.min(target)));
+    }
+    Ok(start)
 }
 
 fn bytecode_maps(

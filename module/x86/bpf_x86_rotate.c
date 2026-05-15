@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT kinsn: ROTATE — rotate lowering for x86-64
+ * BpfReJIT x86 kinsns: ROLQ/RORXL — rotate lowering for x86-64
  */
 
 #include "kinsn_common.h"
 
 __bpf_kfunc_start_defs();
-__bpf_kfunc void bpf_rotate64(void) {}
-__bpf_kfunc void bpf_rotate32(void) {}
+__bpf_kfunc void bpf_x86_rolq_imm(void) {}
+__bpf_kfunc void bpf_x86_rorxl_imm(void) {}
 __bpf_kfunc_end_defs();
 
-BTF_KFUNCS_START(bpf_rotate_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_rotate32)
-BTF_ID_FLAGS(func, bpf_rotate64)
-BTF_KFUNCS_END(bpf_rotate_kfunc_ids)
+BTF_KFUNCS_START(bpf_x86_rotate_kfunc_ids)
+BTF_ID_FLAGS(func, bpf_x86_rorxl_imm)
+BTF_ID_FLAGS(func, bpf_x86_rolq_imm)
+BTF_KFUNCS_END(bpf_x86_rotate_kfunc_ids)
 
 static __always_inline int decode_rotate_payload(u64 payload,
 						 u8 shift_mask,
@@ -120,15 +120,6 @@ static void emit_rex_rr(u8 *buf, u32 *len, bool is64, u8 reg, u8 rm)
 		emit_u8(buf, len, rex);
 }
 
-static void emit_mov_rr(u8 *buf, u32 *len, bool is64, u8 dst_reg, u8 src_reg)
-{
-	emit_rex_rr(buf, len, is64, src_reg, dst_reg);
-	emit_u8(buf, len, 0x89);
-	emit_u8(buf, len, 0xC0 |
-		(kinsn_x86_reg_code(src_reg) << 3) |
-		kinsn_x86_reg_code(dst_reg));
-}
-
 static void emit_rol_imm(u8 *buf, u32 *len, bool is64, u8 dst_reg, u8 imm8)
 {
 	emit_rex_rr(buf, len, is64, 0, dst_reg);
@@ -156,9 +147,8 @@ static void emit_rorx32_imm(u8 *buf, u32 *len, u8 dst_reg, u8 src_reg, u8 imm8)
 	emit_u8(buf, len, imm8);
 }
 
-static int emit_rotate_x86(u8 *image, u32 *off, bool emit,
-			   u64 payload, const struct bpf_prog *prog,
-			   bool is64)
+static int emit_rotate64_x86(u8 *image, u32 *off, bool emit,
+			     u64 payload, const struct bpf_prog *prog)
 {
 	u8 buf[16];
 	u8 dst_reg, src_reg, tmp_reg, shift;
@@ -172,30 +162,20 @@ static int emit_rotate_x86(u8 *image, u32 *off, bool emit,
 	if (emit && !image)
 		return -EINVAL;
 
-	if (is64)
-		err = decode_rotate64_payload(payload, &dst_reg, &src_reg, &tmp_reg, &shift);
-	else
-		err = decode_rotate32_payload(payload, &dst_reg, &src_reg, &tmp_reg, &shift);
+	err = decode_rotate64_payload(payload, &dst_reg, &src_reg, &tmp_reg, &shift);
 	if (err)
 		return err;
-	if (!kinsn_x86_reg_valid(dst_reg) || !kinsn_x86_reg_valid(src_reg))
+	if (dst_reg != src_reg || !shift)
+		return -EINVAL;
+	if (!kinsn_x86_reg_valid(dst_reg))
 		return -EINVAL;
 
-	if (dst_reg != src_reg || (!is64 && !shift))
-		emit_mov_rr(buf, &len, is64, dst_reg, src_reg);
-	if (shift)
-		emit_rol_imm(buf, &len, is64, dst_reg, shift);
+	emit_rol_imm(buf, &len, true, dst_reg, shift);
 
 	if (emit)
 		memcpy(image + *off, buf, len);
 	*off += len;
 	return len;
-}
-
-static int emit_rotate64_x86(u8 *image, u32 *off, bool emit,
-			     u64 payload, const struct bpf_prog *prog)
-{
-	return emit_rotate_x86(image, off, emit, payload, prog, true);
 }
 
 static int emit_rotate32_x86(u8 *image, u32 *off, bool emit,
@@ -227,7 +207,7 @@ static int emit_rotate32_x86(u8 *image, u32 *off, bool emit,
 	return len;
 }
 
-const struct bpf_kinsn bpf_rotate64_desc = {
+const struct bpf_kinsn bpf_x86_rolq_imm_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 5,
 	.max_emit_bytes = 16,
@@ -235,7 +215,7 @@ const struct bpf_kinsn bpf_rotate64_desc = {
 	.emit_x86 = emit_rotate64_x86,
 };
 
-const struct bpf_kinsn bpf_rotate32_desc = {
+const struct bpf_kinsn bpf_x86_rorxl_imm_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 5,
 	.max_emit_bytes = 16,
@@ -243,10 +223,10 @@ const struct bpf_kinsn bpf_rotate32_desc = {
 	.emit_x86 = emit_rotate32_x86,
 };
 
-static const struct bpf_kinsn * const bpf_rotate_kinsn_descs[] = {
-	&bpf_rotate32_desc,
-	&bpf_rotate64_desc,
+static const struct bpf_kinsn * const bpf_x86_rotate_kinsn_descs[] = {
+	&bpf_x86_rorxl_imm_desc,
+	&bpf_x86_rolq_imm_desc,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_rotate, "BpfReJIT kinsn: ROTATE",
-		       bpf_rotate_kfunc_ids, bpf_rotate_kinsn_descs);
+DEFINE_KINSN_V2_MODULE(bpf_x86_rotate, "BpfReJIT x86 kinsns: ROLQ/RORXL",
+		       bpf_x86_rotate_kfunc_ids, bpf_x86_rotate_kinsn_descs);

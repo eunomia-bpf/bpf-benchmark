@@ -4,12 +4,22 @@ use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
-        name: "bpf_rotate64",
+        name: "bpf_x86_rolq_imm",
         register_uses: rotate_register_uses,
         register_defs: rotate_register_defs,
     },
     KinsnDescriptor {
-        name: "bpf_rotate32",
+        name: "bpf_x86_rorxl_imm",
+        register_uses: rotate_register_uses,
+        register_defs: rotate_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_arm64_extr_x",
+        register_uses: rotate_register_uses,
+        register_defs: rotate_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_arm64_extr_w",
         register_uses: rotate_register_uses,
         register_defs: rotate_register_defs,
     },
@@ -25,7 +35,7 @@ fn rotate_register_defs(payload: u64) -> RegSet {
 pub struct RotatePass;
 
 impl BpfPass for RotatePass {
-    fn run(&self, prog: &mut ProgramCFG, _ctx: &PassContext) -> anyhow::Result<PassResult> {
+    fn run(&self, prog: &mut ProgramCFG, ctx: &PassContext) -> anyhow::Result<PassResult> {
         let mut skipped = Vec::new();
         let prog_ref: &ProgramCFG = prog;
         let candidates: Vec<(InsnSite, RotateSite)> = prog_ref
@@ -72,14 +82,7 @@ impl BpfPass for RotatePass {
                         site.shift_amount
                     )
                 })?;
-                let payload = BpfInsn::pack_u4(site.dst_reg, 0)
-                    | BpfInsn::pack_u4(site.val_reg, 4)
-                    | BpfInsn::pack_u8(shift_amount, 8)
-                    | BpfInsn::pack_u4(site.tmp_reg, 16);
-                Ok((
-                    site.old_len,
-                    prog.kinsn_emit(site.width.target_name(), payload)?,
-                ))
+                Ok((site.old_len, emit_rotate_replacement(prog, ctx.arch, site, shift_amount)?))
             })?;
 
         Ok(PassResult::with_sites(applied, skipped))
@@ -129,12 +132,37 @@ impl RotateWidth {
         self as u8
     }
 
-    fn target_name(self) -> &'static str {
-        match self {
-            Self::W32 => "bpf_rotate32",
-            Self::W64 => "bpf_rotate64",
+    fn target_name(self, arch: Arch) -> &'static str {
+        match (arch, self) {
+            (Arch::X86_64, Self::W32) => "bpf_x86_rorxl_imm",
+            (Arch::X86_64, Self::W64) => "bpf_x86_rolq_imm",
+            (Arch::Aarch64, Self::W32) => "bpf_arm64_extr_w",
+            (Arch::Aarch64, Self::W64) => "bpf_arm64_extr_x",
         }
     }
+}
+
+fn emit_rotate_replacement(
+    prog: &ProgramCFG,
+    arch: Arch,
+    site: &RotateSite,
+    shift_amount: u8,
+) -> anyhow::Result<Vec<BpfInsn>> {
+    let mut replacement = Vec::new();
+    let (call_dst, call_src) = if arch == Arch::X86_64 && site.width == RotateWidth::W64 {
+        if site.dst_reg != site.val_reg {
+            replacement.push(BpfInsn::mov64_reg(site.dst_reg, site.val_reg));
+        }
+        (site.dst_reg, site.dst_reg)
+    } else {
+        (site.dst_reg, site.val_reg)
+    };
+    let payload = BpfInsn::pack_u4(call_dst, 0)
+        | BpfInsn::pack_u4(call_src, 4)
+        | BpfInsn::pack_u8(shift_amount, 8)
+        | BpfInsn::pack_u4(site.tmp_reg, 16);
+    replacement.extend_from_slice(&prog.kinsn_emit(site.width.target_name(arch), payload)?);
+    Ok(replacement)
 }
 fn find_provenance_mov(
     insns: &[BpfInsn],

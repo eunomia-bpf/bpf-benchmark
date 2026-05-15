@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT kinsn: PREFETCH - PRFM PLDL1KEEP for ARM64
+ * BpfReJIT arm64 kinsn: PRFM PLDL1KEEP for ARM64
  */
 
 #include "kinsn_common.h"
 
 __bpf_kfunc_start_defs();
-__bpf_kfunc void bpf_prefetch(void) {}
+__bpf_kfunc void bpf_arm64_prfm_pldl1keep(void) {}
 __bpf_kfunc_end_defs();
 
-BTF_KFUNCS_START(bpf_prefetch_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_prefetch)
-BTF_KFUNCS_END(bpf_prefetch_kfunc_ids)
+BTF_KFUNCS_START(bpf_arm64_prfm_kfunc_ids)
+BTF_ID_FLAGS(func, bpf_arm64_prfm_pldl1keep)
+BTF_KFUNCS_END(bpf_arm64_prfm_kfunc_ids)
 
-static __always_inline int decode_prefetch_payload(u64 payload, u8 *ptr_reg)
+static __always_inline int decode_prfm_pldl1keep_payload(u64 payload, u8 *ptr_reg)
 {
 	u8 hint_kind = (payload >> 4) & 0xf;
 
@@ -29,12 +29,12 @@ static __always_inline int decode_prefetch_payload(u64 payload, u8 *ptr_reg)
 	return 0;
 }
 
-static int instantiate_prefetch(u64 payload, struct bpf_insn *insn_buf)
+static int instantiate_prfm_pldl1keep(u64 payload, struct bpf_insn *insn_buf)
 {
 	u8 ptr_reg;
 	int err;
 
-	err = decode_prefetch_payload(payload, &ptr_reg);
+	err = decode_prfm_pldl1keep_payload(payload, &ptr_reg);
 	if (err)
 		return err;
 
@@ -47,7 +47,7 @@ static __always_inline u32 a64_prfm_pldl1keep(u8 rn)
 	return 0xF9800000U | ((u32)rn << 5);
 }
 
-static int emit_prefetch_arm64(u32 *image, int *idx, bool emit,
+static int emit_prfm_pldl1keep_arm64(u32 *image, int *idx, bool emit,
 			       u64 payload, const struct bpf_prog *prog)
 {
 	u8 ptr_reg;
@@ -61,7 +61,7 @@ static int emit_prefetch_arm64(u32 *image, int *idx, bool emit,
 	if (emit && !image)
 		return -EINVAL;
 
-	err = decode_prefetch_payload(payload, &ptr_reg);
+	err = decode_prfm_pldl1keep_payload(payload, &ptr_reg);
 	if (err)
 		return err;
 
@@ -76,17 +76,17 @@ static int emit_prefetch_arm64(u32 *image, int *idx, bool emit,
 	return 1;
 }
 
-const struct bpf_kinsn bpf_prefetch_desc = {
+const struct bpf_kinsn bpf_arm64_prfm_pldl1keep_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
-	.instantiate_insn = instantiate_prefetch,
-	.emit_arm64 = emit_prefetch_arm64,
+	.instantiate_insn = instantiate_prfm_pldl1keep,
+	.emit_arm64 = emit_prfm_pldl1keep_arm64,
 };
 
-static const struct bpf_kinsn * const bpf_prefetch_kinsn_descs[] = {
-	&bpf_prefetch_desc,
+static const struct bpf_kinsn * const bpf_arm64_prfm_kinsn_descs[] = {
+	&bpf_arm64_prfm_pldl1keep_desc,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_prefetch, "BpfReJIT kinsn: PREFETCH (PRFM)",
-		       bpf_prefetch_kfunc_ids, bpf_prefetch_kinsn_descs);
+DEFINE_KINSN_V2_MODULE(bpf_arm64_prfm, "BpfReJIT arm64 kinsn: PRFM PLDL1KEEP",
+		       bpf_arm64_prfm_kfunc_ids, bpf_arm64_prfm_kinsn_descs);

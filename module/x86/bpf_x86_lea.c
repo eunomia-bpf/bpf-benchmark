@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT kinsn: LEA — x86 flagless base/index/displacement add.
+ * BpfReJIT x86 kinsns: LEA — x86 flagless base/index/displacement add.
  *
  * Semantics: dst = (has_base ? base : 0) +
  *		   (has_index ? index << scale_log2 : 0) + disp.
@@ -11,14 +11,14 @@
 #define KINSN_X86_REG_R9 11
 
 __bpf_kfunc_start_defs();
-__bpf_kfunc void bpf_lea64(void) {}
-__bpf_kfunc void bpf_lea32(void) {}
+__bpf_kfunc void bpf_x86_leaq(void) {}
+__bpf_kfunc void bpf_x86_leal(void) {}
 __bpf_kfunc_end_defs();
 
-BTF_KFUNCS_START(bpf_lea_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_lea32)
-BTF_ID_FLAGS(func, bpf_lea64)
-BTF_KFUNCS_END(bpf_lea_kfunc_ids)
+BTF_KFUNCS_START(bpf_x86_lea_kfunc_ids)
+BTF_ID_FLAGS(func, bpf_x86_leal)
+BTF_ID_FLAGS(func, bpf_x86_leaq)
+BTF_KFUNCS_END(bpf_x86_lea_kfunc_ids)
 
 static __always_inline s32 kinsn_payload_s32(u64 payload, u8 shift)
 {
@@ -319,7 +319,7 @@ static int emit_lea32_x86(u8 *image, u32 *off, bool emit,
 	return emit_lea_x86(image, off, emit, payload, prog, false);
 }
 
-const struct bpf_kinsn bpf_lea64_desc = {
+const struct bpf_kinsn bpf_x86_leaq_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 10,
 	.max_emit_bytes = 16,
@@ -327,7 +327,7 @@ const struct bpf_kinsn bpf_lea64_desc = {
 	.emit_x86 = emit_lea64_x86,
 };
 
-const struct bpf_kinsn bpf_lea32_desc = {
+const struct bpf_kinsn bpf_x86_leal_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 10,
 	.max_emit_bytes = 16,
@@ -335,10 +335,10 @@ const struct bpf_kinsn bpf_lea32_desc = {
 	.emit_x86 = emit_lea32_x86,
 };
 
-static const struct bpf_kinsn * const bpf_lea_kinsn_descs[] = {
-	&bpf_lea32_desc,
-	&bpf_lea64_desc,
+static const struct bpf_kinsn * const bpf_x86_lea_kinsn_descs[] = {
+	&bpf_x86_leal_desc,
+	&bpf_x86_leaq_desc,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_lea, "BpfReJIT kinsn: LEA",
-		       bpf_lea_kfunc_ids, bpf_lea_kinsn_descs);
+DEFINE_KINSN_V2_MODULE(bpf_x86_lea, "BpfReJIT x86 kinsns: LEA",
+		       bpf_x86_lea_kfunc_ids, bpf_x86_lea_kinsn_descs);

@@ -5,12 +5,12 @@ use crate::pass::*;
 
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
-        name: "bpf_lea64",
+        name: "bpf_x86_leaq",
         register_uses: lea_register_uses,
         register_defs: lea_register_defs,
     },
     KinsnDescriptor {
-        name: "bpf_lea32",
+        name: "bpf_x86_leal",
         register_uses: lea_register_uses,
         register_defs: lea_register_defs,
     },
@@ -59,8 +59,8 @@ impl LeaWidth {
 
     fn target_name(self) -> &'static str {
         match self {
-            Self::W32 => "bpf_lea32",
-            Self::W64 => "bpf_lea64",
+            Self::W32 => "bpf_x86_leal",
+            Self::W64 => "bpf_x86_leaq",
         }
     }
 }

@@ -79,7 +79,7 @@ fn bbprogram_liveness_includes_kinsn_implicit_register_uses() {
 fn bbprogram_liveness_models_kinsn_implicit_register_defs() {
     let btf_id = 0x1234;
     let payload = BpfInsn::pack_u4(BPF_REG_3, 0) | BpfInsn::pack_u4(BPF_REG_1, 4) | (1 << 15);
-    let ctx = ctx_with_kinsn("bpf_lea64", btf_id);
+    let ctx = ctx_with_kinsn("bpf_x86_leaq", btf_id);
     let insns = vec![
         BpfInsn::mov64_imm(BPF_REG_3, 99),
         BpfInsn::mov64_imm(BPF_REG_1, 7),

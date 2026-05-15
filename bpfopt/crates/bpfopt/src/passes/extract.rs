@@ -2,11 +2,23 @@
 use crate::analysis::{InsnSite, ProgramCFG};
 use crate::insn::*;
 use crate::pass::*;
-pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
-    name: "bpf_extract64",
-    register_uses: extract_register_uses,
-    register_defs: extract_register_defs,
-}];
+pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
+    KinsnDescriptor {
+        name: "bpf_x86_shrq_imm",
+        register_uses: extract_register_uses,
+        register_defs: extract_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_x86_andl_imm32",
+        register_uses: extract_register_uses,
+        register_defs: extract_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_arm64_ubfm_x_imm",
+        register_uses: extract_register_uses,
+        register_defs: extract_register_defs,
+    },
+];
 fn extract_register_uses(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[0])
 }
@@ -66,11 +78,44 @@ impl BpfPass for ExtractPass {
         }
         let applied =
             apply_candidates_reverse(prog, &candidates, &mut skipped, |prog, _start, site| {
-                let payload = BpfInsn::pack_u4(site.dst_reg, 0)
-                    | BpfInsn::pack_u8(site.shift_amount as u8, 8)
-                    | BpfInsn::pack_u8(site.bit_len as u8, 16);
-                Ok((2, prog.kinsn_emit("bpf_extract64", payload)?))
+                Ok((2, emit_extract_replacement(prog, _ctx.arch, site)?))
             })?;
         Ok(PassResult::with_sites(applied, skipped))
     }
+}
+
+fn emit_extract_replacement(
+    prog: &ProgramCFG,
+    arch: Arch,
+    site: &ExtractSite,
+) -> anyhow::Result<Vec<BpfInsn>> {
+    match arch {
+        Arch::X86_64 => {
+            let mut out = Vec::new();
+            out.extend_from_slice(&prog.kinsn_emit(
+                "bpf_x86_shrq_imm",
+                reg_imm_payload(site.dst_reg, site.shift_amount),
+            )?);
+            let mask = if site.bit_len == 32 {
+                u32::MAX
+            } else {
+                (1u32 << site.bit_len) - 1
+            };
+            out.extend_from_slice(&prog.kinsn_emit(
+                "bpf_x86_andl_imm32",
+                reg_imm_payload(site.dst_reg, mask),
+            )?);
+            Ok(out)
+        }
+        Arch::Aarch64 => {
+            let payload = BpfInsn::pack_u4(site.dst_reg, 0)
+                | BpfInsn::pack_u8(site.shift_amount as u8, 8)
+                | BpfInsn::pack_u8(site.bit_len as u8, 16);
+            prog.kinsn_emit("bpf_arm64_ubfm_x_imm", payload)
+        }
+    }
+}
+
+fn reg_imm_payload(dst_reg: u8, imm: u32) -> u64 {
+    BpfInsn::pack_u4(dst_reg, 0) | BpfInsn::pack_u32(imm, 8)
 }

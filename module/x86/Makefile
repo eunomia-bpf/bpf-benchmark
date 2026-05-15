@@ -5,13 +5,13 @@ KDIR ?= $(CURDIR)/../../vendor/linux-framework
 
 ccflags-y += -I$(src)/../include
 
-obj-m += bpf_rotate.o
+obj-m += bpf_x86_rotate.o
 obj-m += bpf_select.o
-obj-m += bpf_extract.o
+obj-m += bpf_x86_alu_imm.o
 obj-m += bpf_endian.o
-obj-m += bpf_lea.o
+obj-m += bpf_x86_lea.o
 obj-m += bpf_bulk_memory.o
-obj-m += bpf_prefetch.o
+obj-m += bpf_x86_prefetch.o
 obj-m += bpf_x86_mov_sib.o
 obj-m += bpf_x86_movbe_sib.o
 obj-m += bpf_x86_popcnt.o

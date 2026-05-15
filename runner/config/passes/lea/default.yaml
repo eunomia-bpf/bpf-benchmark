@@ -3,11 +3,11 @@
 # Daemon substitutes ${...} vars; runner sends this command verbatim.
 log_level: 1
 kinsns:
-  - name: bpf_lea64
+  - name: bpf_x86_leaq
     aliases:
-      - bpf_lea64
-  - name: bpf_lea32
+      - bpf_x86_leaq
+  - name: bpf_x86_leal
     aliases:
-      - bpf_lea32
+      - bpf_x86_leal
 command: |
   timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}

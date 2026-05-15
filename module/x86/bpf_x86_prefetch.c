@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT kinsn: PREFETCH - PREFETCHT0 for x86-64
+ * BpfReJIT x86 kinsn: PREFETCHT0 for x86-64
  */
 
 #include "kinsn_common.h"
 
 __bpf_kfunc_start_defs();
-__bpf_kfunc void bpf_prefetch(void) {}
+__bpf_kfunc void bpf_x86_prefetcht0(void) {}
 __bpf_kfunc_end_defs();
 
-BTF_KFUNCS_START(bpf_prefetch_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_prefetch)
-BTF_KFUNCS_END(bpf_prefetch_kfunc_ids)
+BTF_KFUNCS_START(bpf_x86_prefetch_kfunc_ids)
+BTF_ID_FLAGS(func, bpf_x86_prefetcht0)
+BTF_KFUNCS_END(bpf_x86_prefetch_kfunc_ids)
 
-static __always_inline int decode_prefetch_payload(u64 payload, u8 *ptr_reg)
+static __always_inline int decode_prefetcht0_payload(u64 payload, u8 *ptr_reg)
 {
 	u8 hint_kind = (payload >> 4) & 0xf;
 
@@ -31,12 +31,12 @@ static __always_inline int decode_prefetch_payload(u64 payload, u8 *ptr_reg)
 	return 0;
 }
 
-static int instantiate_prefetch(u64 payload, struct bpf_insn *insn_buf)
+static int instantiate_prefetcht0(u64 payload, struct bpf_insn *insn_buf)
 {
 	u8 ptr_reg;
 	int err;
 
-	err = decode_prefetch_payload(payload, &ptr_reg);
+	err = decode_prefetcht0_payload(payload, &ptr_reg);
 	if (err)
 		return err;
 
@@ -78,7 +78,7 @@ static void emit_prefetcht0_mem(u8 *buf, u32 *len, u8 base_reg)
 	emit_u8(buf, len, 0x08 | rm);
 }
 
-static int emit_prefetch_x86(u8 *image, u32 *off, bool emit,
+static int emit_prefetcht0_x86(u8 *image, u32 *off, bool emit,
 			     u64 payload, const struct bpf_prog *prog)
 {
 	u8 ptr_reg;
@@ -93,7 +93,7 @@ static int emit_prefetch_x86(u8 *image, u32 *off, bool emit,
 	if (emit && !image)
 		return -EINVAL;
 
-	err = decode_prefetch_payload(payload, &ptr_reg);
+	err = decode_prefetcht0_payload(payload, &ptr_reg);
 	if (err)
 		return err;
 
@@ -105,17 +105,17 @@ static int emit_prefetch_x86(u8 *image, u32 *off, bool emit,
 	return len;
 }
 
-const struct bpf_kinsn bpf_prefetch_desc = {
+const struct bpf_kinsn bpf_x86_prefetcht0_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 6,
-	.instantiate_insn = instantiate_prefetch,
-	.emit_x86 = emit_prefetch_x86,
+	.instantiate_insn = instantiate_prefetcht0,
+	.emit_x86 = emit_prefetcht0_x86,
 };
 
-static const struct bpf_kinsn * const bpf_prefetch_kinsn_descs[] = {
-	&bpf_prefetch_desc,
+static const struct bpf_kinsn * const bpf_x86_prefetch_kinsn_descs[] = {
+	&bpf_x86_prefetcht0_desc,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_prefetch, "BpfReJIT kinsn: PREFETCH (PREFETCHT0)",
-		       bpf_prefetch_kfunc_ids, bpf_prefetch_kinsn_descs);
+DEFINE_KINSN_V2_MODULE(bpf_x86_prefetch, "BpfReJIT x86 kinsn: PREFETCHT0",
+		       bpf_x86_prefetch_kfunc_ids, bpf_x86_prefetch_kinsn_descs);

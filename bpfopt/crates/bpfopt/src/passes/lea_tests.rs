@@ -7,10 +7,10 @@ use crate::test_helpers::*;
 fn lea_ctx() -> crate::pass::PassContext {
     let mut ctx = pass_ctx();
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_lea64", 6464, 0)
+        .set_kinsn_call_for_target_name("bpf_x86_leaq", 6464, 0)
         .expect("register lea64");
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_lea32", 3232, 0)
+        .set_kinsn_call_for_target_name("bpf_x86_leal", 3232, 0)
         .expect("register lea32");
     ctx
 }
@@ -138,7 +138,7 @@ fn lea_skips_site_with_interior_branch_target() {
 fn lea_preserves_module_call_offset() {
     let mut ctx = pass_ctx();
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_lea64", 6464, 4)
+        .set_kinsn_call_for_target_name("bpf_x86_leaq", 6464, 4)
         .expect("register lea64 module call");
     let input = vec![
         BpfInsn::mov64_reg(BPF_REG_3, BPF_REG_7),

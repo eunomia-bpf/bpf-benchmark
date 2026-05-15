@@ -44,6 +44,14 @@
 #define X86_KINSN_MODULE_REQUIRED false
 #endif
 
+#if defined(__aarch64__)
+#define ROTATE_KINSN_MODULE "bpf_arm64_extr"
+#define ROTATE64_KFUNC "bpf_arm64_extr_x"
+#else
+#define ROTATE_KINSN_MODULE "bpf_x86_rotate"
+#define ROTATE64_KFUNC "bpf_x86_rolq_imm"
+#endif
+
 enum kinsn_module_id {
 	MOD_ROTATE,
 	MOD_SELECT,
@@ -130,7 +138,7 @@ static bool g_discovered;
 
 static struct kinsn_module_ref g_modules[MOD_CNT] = {
 	[MOD_ROTATE] = {
-		.module_name = "bpf_rotate",
+		.module_name = ROTATE_KINSN_MODULE,
 		.btf_fd = -1,
 		.required = true,
 	},
@@ -160,9 +168,9 @@ static struct kinsn_module_ref g_modules[MOD_CNT] = {
 		.required = ARM64_KINSN_MODULE_REQUIRED,
 	},
 	[MOD_PREFETCH] = {
-		.module_name = "bpf_prefetch",
+		.module_name = "bpf_x86_prefetch",
 		.btf_fd = -1,
-		.required = true,
+		.required = X86_KINSN_MODULE_REQUIRED,
 	},
 	[MOD_X86_MOV_SIB] = {
 		.module_name = "bpf_x86_mov_sib",
@@ -188,7 +196,7 @@ static struct kinsn_module_ref g_modules[MOD_CNT] = {
 
 static struct kinsn_func_ref g_funcs[FUNC_CNT] = {
 	[FUNC_ROTATE] = {
-		.func_name = "bpf_rotate64",
+		.func_name = ROTATE64_KFUNC,
 		.module_id = MOD_ROTATE,
 	},
 	[FUNC_SELECT] = {
@@ -228,7 +236,7 @@ static struct kinsn_func_ref g_funcs[FUNC_CNT] = {
 		.module_id = MOD_LDP,
 	},
 	[FUNC_PREFETCH] = {
-		.func_name = "bpf_prefetch",
+		.func_name = "bpf_x86_prefetcht0",
 		.module_id = MOD_PREFETCH,
 	},
 	[FUNC_X86_MOVZWL_SIB] = {

@@ -4,15 +4,23 @@ use crate::insn::*;
 use crate::pass::*;
 pub(super) const HELPER_MAP_LOOKUP_ELEM: i32 = libbpf_sys::BPF_FUNC_map_lookup_elem as i32;
 const HELPER_XDP_ADJUST_HEAD: i32 = libbpf_sys::BPF_FUNC_xdp_adjust_head as i32;
-const PREFETCH_TARGET_NAME: &str = "bpf_prefetch";
+const X86_PREFETCH_TARGET_NAME: &str = "bpf_x86_prefetcht0";
+const ARM64_PREFETCH_TARGET_NAME: &str = "bpf_arm64_prfm_pldl1keep";
 const TARGET_PREFETCH_DISTANCE: usize = 8;
 const MAX_PREFETCH_DISTANCE: usize = 16;
 const MAP_VALUE_LOOKAHEAD: usize = 64;
-pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[KinsnDescriptor {
-    name: PREFETCH_TARGET_NAME,
-    register_uses: prefetch_register_uses,
-    register_defs: no_regs,
-}];
+pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
+    KinsnDescriptor {
+        name: X86_PREFETCH_TARGET_NAME,
+        register_uses: prefetch_register_uses,
+        register_defs: no_regs,
+    },
+    KinsnDescriptor {
+        name: ARM64_PREFETCH_TARGET_NAME,
+        register_uses: prefetch_register_uses,
+        register_defs: no_regs,
+    },
+];
 fn prefetch_register_uses(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[0])
 }
@@ -72,9 +80,16 @@ impl BpfPass for PrefetchPass {
         let applied =
             apply_candidates_reverse(prog, &pairs, &mut skipped, |prog, _, candidate| {
                 let payload = prefetch_payload(candidate.ptr_reg)?;
-                Ok((0, prog.kinsn_emit(PREFETCH_TARGET_NAME, payload)?))
+                Ok((0, prog.kinsn_emit(prefetch_target_name(ctx.arch), payload)?))
             })?;
         Ok(PassResult::with_sites(applied, skipped))
+    }
+}
+
+fn prefetch_target_name(arch: Arch) -> &'static str {
+    match arch {
+        Arch::X86_64 => X86_PREFETCH_TARGET_NAME,
+        Arch::Aarch64 => ARM64_PREFETCH_TARGET_NAME,
     }
 }
 

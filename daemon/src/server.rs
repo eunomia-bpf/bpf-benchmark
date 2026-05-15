@@ -522,13 +522,13 @@ mod tests {
                 ],
             }],
             "kinsn_probes": [
-                {"name": "bpf_rotate64", "aliases": ["bpf_rotate64"]},
+                {"name": "bpf_x86_rolq_imm", "aliases": ["bpf_x86_rolq_imm"]},
                 {"name": "bpf_select64", "aliases": ["bpf_select64", "bpf_select32"]},
             ],
         }))
         .unwrap();
         assert_eq!(parsed.kinsn_probes.len(), 2);
-        assert_eq!(parsed.kinsn_probes[0].json_name, "bpf_rotate64");
+        assert_eq!(parsed.kinsn_probes[0].json_name, "bpf_x86_rolq_imm");
         assert_eq!(parsed.kinsn_probes[1].probe_names.len(), 2);
         assert_eq!(parsed.plans[0].steps[0].name, "noop");
         assert_eq!(parsed.plans[0].steps[0].log_level, 2);
@@ -539,7 +539,7 @@ mod tests {
         let err = parse_execute_plan(&serde_json::json!({
             "cmd": "execute_plan",
             "programs": [],
-            "kinsn_probes": [{"name": "bpf_rotate64", "aliases": []}],
+            "kinsn_probes": [{"name": "bpf_x86_rolq_imm", "aliases": []}],
         }))
         .unwrap_err();
         assert_eq!(err, "kinsn_probes[0].aliases must not be empty");

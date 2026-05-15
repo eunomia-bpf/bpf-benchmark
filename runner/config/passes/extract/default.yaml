@@ -3,8 +3,14 @@
 # Daemon substitutes ${...} vars; runner sends this command verbatim.
 log_level: 1
 kinsns:
-  - name: bpf_extract64
+  - name: bpf_x86_shrq_imm
     aliases:
-      - bpf_extract64
+      - bpf_x86_shrq_imm
+  - name: bpf_x86_andl_imm32
+    aliases:
+      - bpf_x86_andl_imm32
+  - name: bpf_arm64_ubfm_x_imm
+    aliases:
+      - bpf_arm64_ubfm_x_imm
 command: |
   timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}

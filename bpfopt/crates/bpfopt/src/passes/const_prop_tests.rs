@@ -411,7 +411,7 @@ fn const_prop_rejects_verifier_constants_after_kinsn_direct_reg_def() {
         BpfInsn::add64_imm(BPF_REG_2, 1),
         BpfInsn::exit(),
     ];
-    let mut ctx = ctx_with_kinsn("bpf_rotate64", btf_id);
+    let mut ctx = ctx_with_kinsn("bpf_x86_rolq_imm", btf_id);
     ctx.set_verifier_states_test(vec![verifier_delta_state(
         3,
         HashMap::from([(BPF_REG_2, scalar_reg(42))]),
@@ -434,7 +434,7 @@ fn const_prop_rejects_verifier_constants_after_kinsn_sidecar_noop() {
         BpfInsn::add64_imm(BPF_REG_6, 1),
         BpfInsn::exit(),
     ];
-    let mut ctx = ctx_with_kinsn("bpf_prefetch", btf_id);
+    let mut ctx = ctx_with_kinsn("bpf_x86_prefetcht0", btf_id);
     ctx.set_verifier_states_test(vec![verifier_delta_state(
         3,
         HashMap::from([(BPF_REG_6, scalar_reg(42))]),
@@ -459,7 +459,7 @@ fn const_prop_rejects_verifier_constants_loaded_from_kinsn_divergent_stack() {
         BpfInsn::add64_imm(BPF_REG_7, 1),
         BpfInsn::exit(),
     ];
-    let mut ctx = ctx_with_kinsn("bpf_prefetch", btf_id);
+    let mut ctx = ctx_with_kinsn("bpf_x86_prefetcht0", btf_id);
     ctx.set_verifier_states_test(vec![verifier_delta_state(
         5,
         HashMap::from([(BPF_REG_7, scalar_reg(42))]),

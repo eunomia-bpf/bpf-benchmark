@@ -1434,7 +1434,7 @@ mod tests {
         let mut opened_map_fds = Vec::new();
         let kinsns = HashMap::from([
             (
-                "bpf_rotate64".to_string(),
+                "bpf_x86_rolq_imm".to_string(),
                 TargetKinsnJson {
                     btf_func_id: 129876,
                     btf_id: 101,
@@ -1488,7 +1488,7 @@ mod tests {
     fn rejit_fd_array_builder_uses_btf_placeholder_when_no_maps() {
         let mut opened_btf_fds = Vec::new();
         let kinsns = HashMap::from([(
-            "bpf_rotate64".to_string(),
+            "bpf_x86_rolq_imm".to_string(),
             TargetKinsnJson {
                 btf_func_id: 129876,
                 btf_id: 101,

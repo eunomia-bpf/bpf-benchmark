@@ -5,7 +5,7 @@ use crate::insn::*;
 use crate::test_helpers::*;
 
 fn prefetch_ctx() -> crate::pass::PassContext {
-    ctx_with_kinsn("bpf_prefetch", 7777)
+    ctx_with_kinsn("bpf_x86_prefetcht0", 7777)
 }
 
 fn map_lookup_program() -> Vec<BpfInsn> {

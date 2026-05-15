@@ -3,11 +3,17 @@
 # Daemon substitutes ${...} vars; runner sends this command verbatim.
 log_level: 1
 kinsns:
-  - name: bpf_rotate64
+  - name: bpf_x86_rolq_imm
     aliases:
-      - bpf_rotate64
-  - name: bpf_rotate32
+      - bpf_x86_rolq_imm
+  - name: bpf_x86_rorxl_imm
     aliases:
-      - bpf_rotate32
+      - bpf_x86_rorxl_imm
+  - name: bpf_arm64_extr_x
+    aliases:
+      - bpf_arm64_extr_x
+  - name: bpf_arm64_extr_w
+    aliases:
+      - bpf_arm64_extr_w
 command: |
   timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}

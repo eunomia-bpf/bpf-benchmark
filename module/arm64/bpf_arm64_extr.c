@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * BpfReJIT kinsn: ROTATE - 32/64-bit rotate left via EXTR on ARM64
+ * BpfReJIT arm64 kinsns: EXTR - 32/64-bit rotate left via EXTR on ARM64
  */
 
 #include "kinsn_common.h"
 
 __bpf_kfunc_start_defs();
-__bpf_kfunc void bpf_rotate64(void) {}
-__bpf_kfunc void bpf_rotate32(void) {}
+__bpf_kfunc void bpf_arm64_extr_x(void) {}
+__bpf_kfunc void bpf_arm64_extr_w(void) {}
 __bpf_kfunc_end_defs();
 
-BTF_KFUNCS_START(bpf_rotate_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_rotate32)
-BTF_ID_FLAGS(func, bpf_rotate64)
-BTF_KFUNCS_END(bpf_rotate_kfunc_ids)
+BTF_KFUNCS_START(bpf_arm64_extr_kfunc_ids)
+BTF_ID_FLAGS(func, bpf_arm64_extr_w)
+BTF_ID_FLAGS(func, bpf_arm64_extr_x)
+BTF_KFUNCS_END(bpf_arm64_extr_kfunc_ids)
 
 static __always_inline int decode_rotate_payload(u64 payload,
 						 u8 shift_mask,
@@ -168,7 +168,7 @@ static int emit_rotate32_arm64(u32 *image, int *idx, bool emit,
 	return emit_rotate_arm64(image, idx, emit, payload, prog, false);
 }
 
-const struct bpf_kinsn bpf_rotate64_desc = {
+const struct bpf_kinsn bpf_arm64_extr_x_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 5,
 	.max_emit_bytes = 4,
@@ -176,7 +176,7 @@ const struct bpf_kinsn bpf_rotate64_desc = {
 	.emit_arm64 = emit_rotate64_arm64,
 };
 
-const struct bpf_kinsn bpf_rotate32_desc = {
+const struct bpf_kinsn bpf_arm64_extr_w_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 5,
 	.max_emit_bytes = 4,
@@ -184,10 +184,10 @@ const struct bpf_kinsn bpf_rotate32_desc = {
 	.emit_arm64 = emit_rotate32_arm64,
 };
 
-static const struct bpf_kinsn * const bpf_rotate_kinsn_descs[] = {
-	&bpf_rotate32_desc,
-	&bpf_rotate64_desc,
+static const struct bpf_kinsn * const bpf_arm64_extr_kinsn_descs[] = {
+	&bpf_arm64_extr_w_desc,
+	&bpf_arm64_extr_x_desc,
 };
 
-DEFINE_KINSN_V2_MODULE(bpf_rotate, "BpfReJIT kinsn: ROTATE (EXTR)",
-		       bpf_rotate_kfunc_ids, bpf_rotate_kinsn_descs);
+DEFINE_KINSN_V2_MODULE(bpf_arm64_extr, "BpfReJIT arm64 kinsns: EXTR (EXTR)",
+		       bpf_arm64_extr_kfunc_ids, bpf_arm64_extr_kinsn_descs);
