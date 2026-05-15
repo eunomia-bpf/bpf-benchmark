@@ -406,7 +406,7 @@ fn branch_term(prog: &ProgramCFG, block: BlockId) -> anyhow::Result<Option<Branc
     }))
 }
 
-fn choose_dead_dst_reg(prog: &ProgramCFG, site: &CcmpSite) -> anyhow::Result<Option<u8>> {
+fn choose_dead_dst_reg(prog: &mut ProgramCFG, site: &CcmpSite) -> anyhow::Result<Option<u8>> {
     let last_block = site
         .blocks
         .last()

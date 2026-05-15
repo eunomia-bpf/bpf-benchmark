@@ -11,8 +11,8 @@ mod bbprogram_use_def;
 pub(crate) use crate::verifier_log::VerifierStatesBySite;
 pub(crate) use bbprogram::BtfMetadataMap;
 pub use bbprogram::{
-    BasicBlock, BlockId, FrameId, InsnNode, InsnSite, LiftedRegFact, ProgramCFG, SlotDistance,
-    Terminator,
+    print_and_reset_timing, BasicBlock, BlockId, FrameId, InsnNode, InsnSite, LiftedRegFact,
+    ProgramCFG, SlotDistance, Terminator,
 };
 pub use bbprogram_api::DiamondPattern;
 pub use bbprogram_lift::{

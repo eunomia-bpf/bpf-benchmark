@@ -35,12 +35,22 @@
 
 #define HC_ROTATE_PAYLOAD(DST, SRC, SHIFT, TMP) \
     ((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(SHIFT) << 8) | ((__u64)(TMP) << 16))
+#define HC_ROTATE_CL_PAYLOAD(DST, CNT, TMP_SHIFT, TMP_VALUE) \
+    ((__u64)(DST) | ((__u64)(CNT) << 4) | ((__u64)(TMP_SHIFT) << 8) | ((__u64)(TMP_VALUE) << 12))
 #define HC_REG_IMM_PAYLOAD(DST, IMM) ((__u64)(DST) | ((__u64)(__u32)(IMM) << 8))
+#define HC_REG_PAYLOAD(REG) ((__u64)(REG))
 #define HC_TEST_PAYLOAD(REG) ((__u64)(REG))
 #define HC_CMOV_PAYLOAD(DST, SRC, COND) ((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(COND) << 8))
+#define HC_SETCC_PAYLOAD(DST, COND, TMP) ((__u64)(DST) | ((__u64)(COND) << 4) | ((__u64)(TMP) << 8))
 #define HC_REG_REG_PAYLOAD(DST, SRC) ((__u64)(DST) | ((__u64)(SRC) << 4))
+#define HC_REG_COND_PAYLOAD(DST, COND) ((__u64)(DST) | ((__u64)(COND) << 4))
+#define HC_SHD_PAYLOAD(DST, SRC, IMM, TMP) \
+    ((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(__u8)(IMM) << 8) | ((__u64)(TMP) << 16))
+#define HC_NOT_NARROW_PAYLOAD(DST, TMP) HC_REG_REG_PAYLOAD(DST, TMP)
 #define HC_MEM_PAYLOAD(REG, BASE, OFF) \
     ((__u64)(REG) | ((__u64)(BASE) << 4) | ((__u64)(__u16)(OFF) << 8))
+#define HC_ALU_MEM_PAYLOAD(DST, BASE, OFF, TMP1, TMP2) \
+    (HC_MEM_PAYLOAD(DST, BASE, OFF) | ((__u64)(TMP1) << 24) | ((__u64)(TMP2) << 28))
 #define HC_STORE_IMM_PAYLOAD(BASE, OFF, IMM) \
     ((__u64)(BASE) | ((__u64)(__u16)(OFF) << 4) | ((__u64)(__u8)(IMM) << 20))
 #define HC_POPCNT_PAYLOAD(DST, SRC, TMP1, TMP2) \
@@ -48,8 +58,12 @@
 #define HC_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF) \
     ((__u64)(DST) | ((__u64)(BASE) << 4) | ((__u64)(INDEX) << 8) | \
      ((__u64)(SCALE) << 12) | ((__u64)(__u16)(OFF) << 16))
-#define HC_MOVBE_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF, TMP) \
+#define HC_SIB_TMP_PAYLOAD(DST, BASE, INDEX, SCALE, OFF, TMP) \
     (HC_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF) | ((__u64)(TMP) << 32))
+#define HC_ALU_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF, TMP1, TMP2) \
+    (HC_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF) | ((__u64)(TMP1) << 32) | ((__u64)(TMP2) << 36))
+#define HC_MOVBE_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF, TMP) \
+    HC_SIB_TMP_PAYLOAD(DST, BASE, INDEX, SCALE, OFF, TMP)
 
 #define HC_XDP_PREFIX(INPUT_SIZE, ABORT_OFF) \
     HC_LDX(BPF_W, BPF_REG_6, BPF_REG_1, 0), \

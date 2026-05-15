@@ -137,12 +137,12 @@ fn apply_rewrites(
 }
 
 fn scan_guard_sites(
-    prog: &ProgramCFG,
+    prog: &mut ProgramCFG,
     target_sites: &BTreeSet<InsnSite>,
 ) -> anyhow::Result<ScanResult> {
     let mut result = ScanResult::default();
-    for block in prog.blocks() {
-        let block_sites = prog.sites_in_block_with_terminator(block.id)?;
+    for block in prog.block_ids().collect::<Vec<_>>() {
+        let block_sites = prog.sites_in_block_with_terminator(block)?;
         for (idx, site) in block_sites.iter().copied().enumerate() {
             let setup = (idx >= 2).then(|| (block_sites[idx - 2], block_sites[idx - 1]));
             if let Some(guard) =
@@ -157,7 +157,7 @@ fn scan_guard_sites(
 
 fn detect_guard_candidate(
     site: InsnSite,
-    prog: &ProgramCFG,
+    prog: &mut ProgramCFG,
     target_sites: &BTreeSet<InsnSite>,
     setup: Option<(InsnSite, InsnSite)>,
     skips: &mut Vec<SiteSkipReason>,
@@ -171,8 +171,8 @@ fn detect_guard_candidate(
     let Some((mov_site, add_site)) = setup else {
         return Ok(None);
     };
-    let mov = prog.insn(mov_site)?;
-    let add = prog.insn(add_site)?;
+    let mov = *prog.insn(mov_site)?;
+    let add = *prog.insn(add_site)?;
     if mov.code != (BPF_ALU64 | BPF_MOV | BPF_X) || mov.dst_reg() != cursor_reg {
         return Ok(None);
     }
@@ -258,12 +258,15 @@ fn detect_guard_candidate(
 }
 
 fn cursor_dead_after_compare(
-    prog: &ProgramCFG,
+    prog: &mut ProgramCFG,
     add_site: InsnSite,
     compare_site: InsnSite,
     cursor_reg: u8,
 ) -> bool {
-    let Some(def) = prog.def_sites().find(|def| {
+    let Ok(defs) = prog.def_sites() else {
+        return false;
+    };
+    let Some(def) = defs.into_iter().find(|def| {
         InsnSite {
             block: def.block,
             idx: def.idx,
@@ -272,7 +275,10 @@ fn cursor_dead_after_compare(
     }) else {
         return false;
     };
-    prog.uses_for_def(def).iter().all(|use_site| {
+    let Ok(uses) = prog.uses_for_def(def) else {
+        return false;
+    };
+    uses.iter().all(|use_site| {
         InsnSite {
             block: use_site.block,
             idx: use_site.idx,

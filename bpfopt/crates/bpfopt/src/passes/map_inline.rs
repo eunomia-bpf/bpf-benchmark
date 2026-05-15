@@ -355,21 +355,19 @@ fn find_map_lookup_sites(prog: &ProgramCFG) -> anyhow::Result<Vec<MapLookupSite>
     Ok(sites)
 }
 fn find_map_in_map_chains(
-    prog: &ProgramCFG,
+    prog: &mut ProgramCFG,
     outer_sites: &[MapLookupSite],
 ) -> anyhow::Result<Vec<MapInMapChain>> {
-    outer_sites
-        .iter()
-        .map(|outer_site| find_map_in_map_chain_for_outer(prog, outer_site))
-        .filter_map(|result| match result {
-            Ok(Some(chain)) => Some(Ok(chain)),
-            Ok(None) => None,
-            Err(err) => Some(Err(err)),
-        })
-        .collect()
+    let mut chains = Vec::new();
+    for outer_site in outer_sites {
+        if let Some(chain) = find_map_in_map_chain_for_outer(prog, outer_site)? {
+            chains.push(chain);
+        }
+    }
+    Ok(chains)
 }
 fn find_map_in_map_chain_for_outer(
-    prog: &ProgramCFG,
+    prog: &mut ProgramCFG,
     outer_site: &MapLookupSite,
 ) -> anyhow::Result<Option<MapInMapChain>> {
     let mut alias_regs = HashMap::from([(0u8, 0i16)]);
@@ -380,11 +378,11 @@ fn find_map_in_map_chain_for_outer(
         if alias_regs.is_empty() && alias_stack_slots.is_empty() {
             break;
         }
-        let insn = prog.insn(site)?;
+        let insn = *prog.insn(site)?;
         let allow_null_check = null_check.is_none();
-        if allow_null_check && is_null_check_on_alias(insn, &alias_regs) {
+        if allow_null_check && is_null_check_on_alias(&insn, &alias_regs) {
             null_check = Some(site);
-            let Some(next_site) = non_null_successor_site(prog, site, insn)? else {
+            let Some(next_site) = non_null_successor_site(prog, site, &insn)? else {
                 break;
             };
             if !advance_site_queue_to(&mut scan_sites, next_site) {
@@ -403,15 +401,15 @@ fn find_map_in_map_chain_for_outer(
             }
             break;
         }
-        if let Some((dst_reg, alias_off)) = alias_copy(insn, &alias_regs) {
+        if let Some((dst_reg, alias_off)) = alias_copy(&insn, &alias_regs) {
             if alias_off != 0 {
                 break;
             }
-            kill_defined_alias_regs(&mut alias_regs, insn);
+            kill_defined_alias_regs(&mut alias_regs, &insn);
             alias_regs.insert(dst_reg, alias_off);
             continue;
         }
-        if let Some((stack_off, width)) = resolve_stack_store_slot(prog, site, insn)? {
+        if let Some((stack_off, width)) = resolve_stack_store_slot(prog, site, &insn)? {
             kill_overlapping_alias_stack_slots(&mut alias_stack_slots, stack_off, width);
             if insn.class() == BPF_STX
                 && bpf_mode(insn.code) == BPF_MEM
@@ -422,23 +420,23 @@ fn find_map_in_map_chain_for_outer(
                 continue;
             }
         }
-        if let Some(stack_off) = resolve_stack_load_slot(prog, site, insn)? {
+        if let Some(stack_off) = resolve_stack_load_slot(prog, site, &insn)? {
             if let Some(&alias_off) = alias_stack_slots.get(&stack_off) {
                 alias_stack_slots.remove(&stack_off);
-                kill_defined_alias_regs(&mut alias_regs, insn);
+                kill_defined_alias_regs(&mut alias_regs, &insn);
                 alias_regs.insert(insn.dst_reg(), alias_off);
                 continue;
             }
         }
-        if insn_uses_any_alias(insn, &alias_regs) {
+        if insn_uses_any_alias(&insn, &alias_regs) {
             break;
         }
-        kill_defined_alias_regs(&mut alias_regs, insn);
+        kill_defined_alias_regs(&mut alias_regs, &insn);
     }
     Ok(None)
 }
 fn try_extract_lookup_key_verifier_guided(
-    prog: &ProgramCFG,
+    prog: &mut ProgramCFG,
     call_site: InsnSite,
     key_size: u32,
 ) -> anyhow::Result<std::result::Result<LookupKey, String>> {
@@ -480,7 +478,7 @@ fn constant_key_value(bytes: &[u8]) -> u64 {
     u64::from_le_bytes(buf)
 }
 fn lookup_key_setup_sites(
-    prog: &ProgramCFG,
+    prog: &mut ProgramCFG,
     call_site: InsnSite,
     key_width: usize,
 ) -> anyhow::Result<BTreeSet<InsnSite>> {
@@ -496,7 +494,7 @@ fn lookup_key_setup_sites(
     Ok(sites)
 }
 fn collect_lookup_key_stack_store_sites(
-    prog: &ProgramCFG,
+    prog: &mut ProgramCFG,
     call_site: InsnSite,
     stack_off: i16,
     key_width: usize,
@@ -516,8 +514,8 @@ fn collect_lookup_key_stack_store_sites(
         if scanned == CONST_STACK_VALUE_LOOKBACK_LIMIT {
             break;
         }
-        let insn = prog.insn(site)?;
-        let Some((store_off, width)) = resolve_stack_store_slot(prog, site, insn)? else {
+        let insn = *prog.insn(site)?;
+        let Some((store_off, width)) = resolve_stack_store_slot(prog, site, &insn)? else {
             continue;
         };
         let store_start = i32::from(store_off);
@@ -682,7 +680,7 @@ fn kernel_mutable_reason_for_map(
     })
 }
 fn resolve_inline_hints(
-    prog: &ProgramCFG,
+    prog: &mut ProgramCFG,
     side_input: &MapInlineSideInput<'_>,
     map_info: &MapInfoBySite,
     kernel_mutable_maps: &KernelMutableMaps,
@@ -717,7 +715,7 @@ fn resolve_inline_hints(
     Ok(resolved)
 }
 fn resolve_direct_inline_hint(
-    prog: &ProgramCFG,
+    prog: &mut ProgramCFG,
     side_input: &MapInlineSideInput<'_>,
     map_info: &MapInfoBySite,
     kernel_mutable_maps: &KernelMutableMaps,
@@ -789,7 +787,7 @@ fn resolve_direct_inline_hint(
     }
 }
 fn resolve_deferred_inner_hints(
-    prog: &ProgramCFG,
+    prog: &mut ProgramCFG,
     side_input: &MapInlineSideInput<'_>,
     map_info: &MapInfoBySite,
     kernel_mutable_maps: &KernelMutableMaps,
@@ -860,7 +858,7 @@ fn resolve_deferred_inner_hints(
     Ok(())
 }
 fn resolve_hinted_map_in_map_routes(
-    prog: &ProgramCFG,
+    prog: &mut ProgramCFG,
     side_input: &MapInlineSideInput<'_>,
     map_info: &MapInfoBySite,
     sites: &[MapLookupSite],
@@ -905,7 +903,7 @@ fn resolve_hinted_map_in_map_routes(
     Ok(routes)
 }
 fn deferred_hint_targets_known_map_in_map_inner(
-    prog: &ProgramCFG,
+    prog: &mut ProgramCFG,
     side_input: &MapInlineSideInput<'_>,
     sites: &[MapLookupSite],
     hint: &MapInlineHint,
@@ -1762,7 +1760,7 @@ fn cleanup_map_inline_bbprogram(prog: &mut ProgramCFG) -> anyhow::Result<()> {
     Ok(())
 }
 fn extract_site_constant_key(
-    prog: &ProgramCFG,
+    prog: &mut ProgramCFG,
     call_site: InsnSite,
     info: &MapInfo,
     site_inline_hints: Option<&[ResolvedMapInlineHint]>,
@@ -1897,7 +1895,7 @@ fn build_site_rewrite(
     })))
 }
 fn build_enumerated_uniform_membership_rewrite(
-    prog: &ProgramCFG,
+    prog: &mut ProgramCFG,
     side_input: &MapInlineSideInput<'_>,
     site: &MapLookupSite,
     info: &MapInfo,
@@ -2593,7 +2591,7 @@ fn format_inlined_value_diagnostic(value: &[u8], loads: &[LookupValueLoad]) -> S
     format_bytes_preview(value)
 }
 fn classify_r0_uses_with_options(
-    prog: &ProgramCFG,
+    prog: &mut ProgramCFG,
     start_site: InsnSite,
     allow_helper_calls: bool,
 ) -> anyhow::Result<LookupResultUses> {
@@ -2605,28 +2603,28 @@ fn classify_r0_uses_with_options(
         if alias_regs.is_empty() && alias_stack_slots.is_empty() {
             break;
         }
-        let insn = prog.insn(site)?;
-        let alias_copy = alias_copy(insn, &alias_regs);
+        let insn = *prog.insn(site)?;
+        let alias_copy = alias_copy(&insn, &alias_regs);
         let allow_null_check =
             classification.loads.is_empty() && classification.other_uses.is_empty();
         if let Some((dst_reg, alias_off)) = alias_copy {
             classification.alias_copies.push(site);
-            kill_defined_alias_regs(&mut alias_regs, insn);
+            kill_defined_alias_regs(&mut alias_regs, &insn);
             alias_regs.insert(dst_reg, alias_off);
             continue;
         }
-        if let Some(alias_off) = alias_adjustment(insn, &alias_regs) {
+        if let Some(alias_off) = alias_adjustment(&insn, &alias_regs) {
             classification.alias_copies.push(site);
-            kill_defined_alias_regs(&mut alias_regs, insn);
+            kill_defined_alias_regs(&mut alias_regs, &insn);
             alias_regs.insert(insn.dst_reg(), alias_off);
             continue;
         }
         if allow_null_check
             && classification.null_check.is_none()
-            && is_null_check_on_alias(insn, &alias_regs)
+            && is_null_check_on_alias(&insn, &alias_regs)
         {
             classification.null_check = Some(site);
-            let Some(next_site) = non_null_successor_site(prog, site, insn)? else {
+            let Some(next_site) = non_null_successor_site(prog, site, &insn)? else {
                 break;
             };
             if !advance_site_queue_to(&mut scan_sites, next_site) {
@@ -2636,11 +2634,11 @@ fn classify_r0_uses_with_options(
         }
         if !classification.loads.is_empty()
             && alias_stack_slots.is_empty()
-            && ends_current_use_region(insn, &alias_regs)
+            && ends_current_use_region(&insn, &alias_regs)
         {
             break;
         }
-        if let Some((stack_off, width)) = resolve_stack_store_slot(prog, site, insn)? {
+        if let Some((stack_off, width)) = resolve_stack_store_slot(prog, site, &insn)? {
             kill_overlapping_alias_stack_slots(&mut alias_stack_slots, stack_off, width);
             if insn.class() == BPF_STX
                 && bpf_mode(insn.code) == BPF_MEM
@@ -2652,16 +2650,16 @@ fn classify_r0_uses_with_options(
                 continue;
             }
         }
-        if let Some(stack_off) = resolve_stack_load_slot(prog, site, insn)? {
+        if let Some(stack_off) = resolve_stack_load_slot(prog, site, &insn)? {
             if let Some(&alias_off) = alias_stack_slots.get(&stack_off) {
                 classification.alias_copies.push(site);
-                kill_defined_alias_regs(&mut alias_regs, insn);
+                kill_defined_alias_regs(&mut alias_regs, &insn);
                 alias_regs.insert(insn.dst_reg(), alias_off);
                 continue;
             }
         }
         if insn.is_call() {
-            if insn_uses_any_alias(insn, &alias_regs) {
+            if insn_uses_any_alias(&insn, &alias_regs) {
                 classification.other_uses.push(site);
                 break;
             }
@@ -2690,7 +2688,7 @@ fn classify_r0_uses_with_options(
             let total_off = i32::from(alias_regs[&insn.src_reg()]) + i32::from(insn.off);
             let Ok(total_off) = i16::try_from(total_off) else {
                 classification.other_uses.push(site);
-                kill_defined_alias_regs(&mut alias_regs, insn);
+                kill_defined_alias_regs(&mut alias_regs, &insn);
                 continue;
             };
             classification.loads.push(LookupValueLoad {
@@ -2699,15 +2697,15 @@ fn classify_r0_uses_with_options(
                 size: bpf_size(insn.code),
                 offset: total_off,
             });
-        } else if insn_uses_any_alias(insn, &alias_regs) {
+        } else if insn_uses_any_alias(&insn, &alias_regs) {
             classification.other_uses.push(site);
         }
-        kill_defined_alias_regs(&mut alias_regs, insn);
+        kill_defined_alias_regs(&mut alias_regs, &insn);
     }
     Ok(classification)
 }
 fn resolve_stack_store_slot(
-    prog: &ProgramCFG,
+    prog: &mut ProgramCFG,
     site: InsnSite,
     insn: &BpfInsn,
 ) -> anyhow::Result<Option<(i16, u8)>> {
@@ -2735,7 +2733,7 @@ fn resolve_stack_store_slot(
     Ok(Some((stack_off, width)))
 }
 fn resolve_stack_load_slot(
-    prog: &ProgramCFG,
+    prog: &mut ProgramCFG,
     site: InsnSite,
     insn: &BpfInsn,
 ) -> anyhow::Result<Option<i16>> {

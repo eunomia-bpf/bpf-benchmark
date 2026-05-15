@@ -169,26 +169,28 @@ impl BpfPass for WideMemPass {
             }
             last_hit_end = Some((hit.block, hit_end));
             let body = prog.block_body_view(hit.block)?;
+            let body_sites = body.sites.clone();
+            let body_insns = body.bpf_insns();
             let start_idx = hit.start_idx;
             let start_site = hit.start;
             let site = hit.value;
             reported_starts.insert(start_site);
-            if hit_end > body.sites.len() {
+            if hit_end > body_sites.len() {
                 anyhow::bail!(
                     "wide_mem site at {:?} spans beyond block {:?} body",
                     start_site,
                     hit.block
                 );
             }
-            let has_interior_target = body.sites[start_idx + 1..hit_end]
+            let has_interior_target = body_sites[start_idx + 1..hit_end]
                 .iter()
                 .any(|candidate| branch_targets.contains(candidate));
             if has_interior_target {
                 skipped.push(SiteSkipReason::new(start_site, "interior branch target"));
                 continue;
             }
-            let live_after = prog.live_out_site_checked(body.sites[hit_end - 1])?;
-            let has_live_scratch = body.insns[start_idx..hit_end].iter().any(|insn| {
+            let live_after = prog.live_out_site_checked(body_sites[hit_end - 1])?;
+            let has_live_scratch = body_insns[start_idx..hit_end].iter().any(|insn| {
                 matches!(insn.class(), BPF_ALU64 | BPF_ALU | BPF_LDX)
                     && insn.dst_reg() != site.dst_reg
                     && live_after.contains(&insn.dst_reg())

@@ -11,7 +11,7 @@ fn bbprogram_live_in_marks_register_used_before_local_def() {
         BpfInsn::mov64_imm(BPF_REG_0, 0),
         BpfInsn::exit(),
     ];
-    let prog = lift_test_program(&insns, &pass_ctx());
+    let mut prog = lift_test_program(&insns, &pass_ctx());
 
     assert!(prog.live_in(BlockId(0)).unwrap().contains(&BPF_REG_1));
     assert!(prog.live_in(BlockId(0)).unwrap().contains(&BPF_REG_2));
@@ -25,7 +25,7 @@ fn bbprogram_live_out_propagates_across_branch_successors() {
         BpfInsn::alu64_reg(BPF_ADD, BPF_REG_4, BPF_REG_2),
         BpfInsn::exit(),
     ];
-    let prog = lift_test_program(&insns, &pass_ctx());
+    let mut prog = lift_test_program(&insns, &pass_ctx());
 
     assert!(prog.live_out(BlockId(0)).unwrap().contains(&BPF_REG_2));
     assert!(prog.live_in(BlockId(1)).unwrap().contains(&BPF_REG_3));
@@ -39,7 +39,7 @@ fn bbprogram_liveness_models_helper_call_clobbers() {
         BpfInsn::alu64_reg(BPF_ADD, BPF_REG_6, BPF_REG_1),
         BpfInsn::exit(),
     ];
-    let prog = lift_test_program(&insns, &pass_ctx());
+    let mut prog = lift_test_program(&insns, &pass_ctx());
 
     assert!(!prog.live_out(BlockId(0)).unwrap().contains(&BPF_REG_1));
     assert!(prog.live_in(BlockId(0)).unwrap().contains(&BPF_REG_6));
@@ -62,7 +62,7 @@ fn bbprogram_liveness_includes_kinsn_implicit_register_uses() {
         BpfInsn::call_kinsn_with_off(btf_id, 0),
         BpfInsn::exit(),
     ];
-    let prog = lift_test_program(&insns, &ctx);
+    let mut prog = lift_test_program(&insns, &ctx);
 
     let kinsn_site = InsnSite {
         block: BlockId(0),
@@ -87,7 +87,7 @@ fn bbprogram_liveness_models_kinsn_implicit_register_defs() {
         BpfInsn::alu64_reg(BPF_ADD, BPF_REG_2, BPF_REG_3),
         BpfInsn::exit(),
     ];
-    let prog = lift_test_program(&insns, &ctx);
+    let mut prog = lift_test_program(&insns, &ctx);
 
     let kinsn_site = InsnSite {
         block: BlockId(0),
@@ -108,6 +108,8 @@ fn bbprogram_liveness_recomputes_after_delete_insn() {
     let mut prog = lift_test_program(&insns, &pass_ctx());
     let def = prog
         .def_sites()
+        .expect("def_sites")
+        .into_iter()
         .find(|d| d.block == BlockId(0) && d.reg == BPF_REG_2)
         .expect("r2 def should exist");
 

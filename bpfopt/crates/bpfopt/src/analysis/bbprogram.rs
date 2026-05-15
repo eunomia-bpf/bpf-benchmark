@@ -34,11 +34,11 @@ pub fn print_and_reset_timing(label: &str) {
     let liveness = T_LIVENESS_NS.swap(0, Ordering::Relaxed);
     let lifted = T_LIFTED_NS.swap(0, Ordering::Relaxed);
     let invalidate = T_INVALIDATE_NS.swap(0, Ordering::Relaxed);
-    if count == 0 && total == 0 {
+    if label.is_empty() || (count == 0 && total == 0 && usedef == 0) {
         return;
     }
     eprintln!(
-        "[time {label}] total={}.{:03}ms count={} | splice={}.{:03}ms usedef={}.{:03}ms liveness={}.{:03}ms lifted={}.{:03}ms invalidate={}.{:03}ms",
+        "      [time {label}] try_replace={}.{:03}ms count={} | splice={}.{:03}ms usedef={}.{:03}ms liveness={}.{:03}ms lifted={}.{:03}ms invalidate={}.{:03}ms",
         total / 1_000_000, (total / 1_000) % 1_000, count,
         splice / 1_000_000, (splice / 1_000) % 1_000,
         usedef / 1_000_000, (usedef / 1_000) % 1_000,
@@ -109,6 +109,15 @@ pub struct ProgramCFG {
     pub(crate) func_info: Option<BtfInfoRecords>,
     pub(crate) line_info: Option<BtfInfoRecords>,
     pub(super) prog_type: u32,
+    /// Set true after any in-place bytecode mutation. While dirty,
+    /// `use_def`, every `InsnNode.uses/defs/live_in/live_out/local_reg_state`,
+    /// every `BasicBlock.terminator_*` derived fact may be stale. The next
+    /// `&mut self` read accessor (e.g. `def_sites`, `live_out_site_checked`,
+    /// `reg_fact_at`) calls `ensure_derived_facts_fresh` which rebuilds and
+    /// clears the flag. This defers the O(N^2+) `UseDefGraph::build` cost so
+    /// passes that mutate without re-reading facts pay only one rebuild per
+    /// pass (at lift) instead of one per `try_replace_range`.
+    pub(super) derived_facts_dirty: bool,
 }
 
 impl Clone for ProgramCFG {
@@ -122,6 +131,7 @@ impl Clone for ProgramCFG {
             func_info: self.func_info.clone(),
             line_info: self.line_info.clone(),
             prog_type: self.prog_type,
+            derived_facts_dirty: self.derived_facts_dirty,
         }
     }
 }
@@ -296,6 +306,7 @@ impl ProgramCFG {
             func_info: None,
             line_info: None,
             prog_type: 0,
+            derived_facts_dirty: false,
         };
         prog.rebuild_cfg_edges()?;
         prog.rebuild_use_def()?;
@@ -361,7 +372,7 @@ impl ProgramCFG {
         )
     }
     #[cfg(test)]
-    pub fn live_in(&self, block: BlockId) -> anyhow::Result<RegSet> {
+    pub fn live_in(&mut self, block: BlockId) -> anyhow::Result<RegSet> {
         let first = logical_sites_for_block(self.block(block)?)
             .into_iter()
             .next()
@@ -369,16 +380,17 @@ impl ProgramCFG {
         self.live_in_site_checked(first)
     }
     #[cfg(test)]
-    pub fn live_out(&self, block: BlockId) -> anyhow::Result<RegSet> {
+    pub fn live_out(&mut self, block: BlockId) -> anyhow::Result<RegSet> {
         let last = logical_sites_for_block(self.block(block)?)
             .into_iter()
             .next_back()
             .ok_or_else(|| anyhow::anyhow!("block {:?} has no sites", block))?;
         self.live_out_site_checked(last)
     }
-    pub fn live_in_site_checked(&self, site: InsnSite) -> anyhow::Result<RegSet> {
+    pub fn live_in_site_checked(&mut self, site: InsnSite) -> anyhow::Result<RegSet> {
         self.insn_at(site)
             .ok_or_else(|| anyhow::anyhow!("invalid instruction site {:?}", site))?;
+        self.ensure_derived_facts_fresh()?;
         let block = self
             .blocks
             .get(site.block.0)
@@ -395,9 +407,10 @@ impl ProgramCFG {
                 .ok_or_else(|| anyhow::anyhow!("site liveness missing live_in for {:?}", site))
         }
     }
-    pub fn live_out_site_checked(&self, site: InsnSite) -> anyhow::Result<RegSet> {
+    pub fn live_out_site_checked(&mut self, site: InsnSite) -> anyhow::Result<RegSet> {
         self.insn_at(site)
             .ok_or_else(|| anyhow::anyhow!("invalid instruction site {:?}", site))?;
+        self.ensure_derived_facts_fresh()?;
         let block = self
             .blocks
             .get(site.block.0)
@@ -416,7 +429,8 @@ impl ProgramCFG {
     }
     /// Lift-time linear reg-fact for `reg` at the entry of `site`.
     /// Returns `LiftedRegFact::Unknown` if the site is not tracked.
-    pub fn reg_fact_at(&self, site: InsnSite, reg: u8) -> anyhow::Result<LiftedRegFact> {
+    pub fn reg_fact_at(&mut self, site: InsnSite, reg: u8) -> anyhow::Result<LiftedRegFact> {
+        self.ensure_derived_facts_fresh()?;
         let block = self
             .blocks
             .get(site.block.0)
@@ -432,14 +446,16 @@ impl ProgramCFG {
             .map(|state| state[reg as usize])
             .unwrap_or(LiftedRegFact::Unknown))
     }
-    /// Set the program type and refresh lifted reg facts (their packet-ctx
-    /// layout depends on `prog_type`).
+    /// Set the program type. Lifted reg facts (whose packet-ctx layout
+    /// depends on `prog_type`) are marked dirty and rebuilt lazily on the
+    /// next `reg_fact_at` read.
     pub(crate) fn set_prog_type(&mut self, prog_type: u32) -> anyhow::Result<()> {
         if self.prog_type == prog_type {
             return Ok(());
         }
         self.prog_type = prog_type;
-        self.rebuild_lifted_reg_facts()
+        self.derived_facts_dirty = true;
+        Ok(())
     }
     pub fn map_bindings(&self) -> &[MapBinding] {
         &self.map_bindings
@@ -527,8 +543,13 @@ impl ProgramCFG {
         }
         Ok(())
     }
-    pub fn def_sites(&self) -> impl Iterator<Item = DefSite> + '_ {
-        self.use_def.defs().copied()
+    /// Snapshot of all def sites. `&mut self` because it triggers a lazy
+    /// rebuild of derived facts if a mutation invalidated them; returning
+    /// a `Vec` avoids the borrow-checker pain of an iterator tied to
+    /// `&mut self`.
+    pub fn def_sites(&mut self) -> anyhow::Result<Vec<DefSite>> {
+        self.ensure_derived_facts_fresh()?;
+        Ok(self.use_def.defs().copied().collect())
     }
     /// First in-frame predecessor site (in linear layout order, no CFG) that
     /// defines `reg`. Returns `None` if no such site exists within the frame.
@@ -544,8 +565,9 @@ impl ProgramCFG {
         }
         Ok(None)
     }
-    pub fn uses_for_def(&self, def: DefSite) -> &[crate::analysis::UseSite] {
-        self.use_def.uses_for(def)
+    pub fn uses_for_def(&mut self, def: DefSite) -> anyhow::Result<&[crate::analysis::UseSite]> {
+        self.ensure_derived_facts_fresh()?;
+        Ok(self.use_def.uses_for(def))
     }
     pub fn subprog_blocks(&self, frame: FrameId) -> impl Iterator<Item = BlockId> + '_ {
         self.blocks
@@ -621,11 +643,10 @@ impl ProgramCFG {
     /// Live-out RegSet at the last instruction of a kinsn window starting at
     /// `start` and consuming `len` body sites. Used by passes (today: rotate)
     /// that need to know whether a scratch register survives past the window.
-    pub fn live_out_after_window(&self, start: InsnSite, len: usize) -> anyhow::Result<RegSet> {
+    pub fn live_out_after_window(&mut self, start: InsnSite, len: usize) -> anyhow::Result<RegSet> {
         if len == 0 {
             anyhow::bail!("live_out_after_window len must be > 0 at {:?}", start);
         }
-        let block = self.block(start.block)?;
         let end_idx = start
             .idx
             .checked_add(len)
@@ -637,10 +658,10 @@ impl ProgramCFG {
                     len
                 )
             })?;
-        if end_idx >= block.insns.len() {
+        let body_len = self.block(start.block)?.insns.len();
+        if end_idx >= body_len {
             anyhow::bail!(
-                "live_out_after_window end idx {end_idx} exceeds block body length {}",
-                block.insns.len()
+                "live_out_after_window end idx {end_idx} exceeds block body length {body_len}"
             );
         }
         let end_site = InsnSite {
@@ -829,6 +850,9 @@ impl ProgramCFG {
         Ok(())
     }
     fn rebuild_use_def(&mut self) -> anyhow::Result<()> {
+        // Eager rebuild — used at construction and as the underlying impl of
+        // `ensure_derived_facts_fresh`. All three components are intrinsically
+        // O(N) to O(N^2); deferring them is the caller's responsibility.
         let t0 = Instant::now();
         self.use_def = UseDefGraph::build(self)?;
         T_USEDEF_NS.fetch_add(t0.elapsed().as_nanos() as u64, Ordering::Relaxed);
@@ -838,6 +862,16 @@ impl ProgramCFG {
         let t2 = Instant::now();
         self.rebuild_lifted_reg_facts()?;
         T_LIFTED_NS.fetch_add(t2.elapsed().as_nanos() as u64, Ordering::Relaxed);
+        self.derived_facts_dirty = false;
+        Ok(())
+    }
+
+    /// Called by `&mut self` read accessors before they hand back derived
+    /// facts (use_def, liveness, lifted_reg_facts). No-op when not dirty.
+    pub(super) fn ensure_derived_facts_fresh(&mut self) -> anyhow::Result<()> {
+        if self.derived_facts_dirty {
+            self.rebuild_use_def()?;
+        }
         Ok(())
     }
 
@@ -912,7 +946,12 @@ impl ProgramCFG {
         }
     }
     pub(crate) fn rebuild_use_def_after_mutation(&mut self) -> anyhow::Result<()> {
-        self.rebuild_use_def()?;
+        // Defer the O(N^2+) rebuild. Mark derived facts dirty; the next
+        // `&mut self` read accessor calls `ensure_derived_facts_fresh`.
+        // Verifier states are invalidated eagerly because they're tied to a
+        // specific bytecode shape and silently-stale verifier facts would
+        // mis-drive constant-folding/dead-code/etc.
+        self.derived_facts_dirty = true;
         let t = Instant::now();
         self.invalidate_verifier_states();
         T_INVALIDATE_NS.fetch_add(t.elapsed().as_nanos() as u64, Ordering::Relaxed);
@@ -1739,6 +1778,8 @@ mod tests {
         let mut prog = lift_test_program(&[a[0], a[1], b[0], b[1], BpfInsn::exit()], &ctx);
         let def = prog
             .def_sites()
+            .expect("def_sites")
+            .into_iter()
             .find(|d| d.block == BlockId(0) && d.reg == BPF_REG_1)
             .expect("map fd r1 def should exist");
         prog.delete_insn(def)

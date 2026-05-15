@@ -22,7 +22,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
-use bpfopt::analysis::{lift_with_pass_context, ProgramCFG};
+use bpfopt::analysis::{lift_with_pass_context, print_and_reset_timing, ProgramCFG};
 use bpfopt::insn::BpfInsn;
 use bpfopt::pass::{run_pass_once, KinsnRegistry, PassContext};
 use bpfopt::passes::{PassRegistryEntry, PASS_REGISTRY};
@@ -174,6 +174,14 @@ fn compute_snapshot() -> Result<Snapshot> {
                         insns.len(),
                         dur.as_secs_f64()
                     );
+                    print_and_reset_timing(&format!(
+                        "{} {}",
+                        entry.name,
+                        prog_dir.file_name().unwrap().to_string_lossy()
+                    ));
+                } else {
+                    // discard counters from this fast pass
+                    print_and_reset_timing("");
                 }
             }
             let pd = t_prog.elapsed();

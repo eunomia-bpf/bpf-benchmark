@@ -40,13 +40,13 @@ impl BpfPass for SkbLoadBytesSpecPass {
 }
 
 fn scan_sites(
-    prog: &ProgramCFG,
+    prog: &mut ProgramCFG,
     branch_targets: &BTreeSet<InsnSite>,
 ) -> anyhow::Result<ScanResult> {
     let mut scan = ScanResult::default();
     for block in prog.block_ids().collect::<Vec<_>>() {
         for site in prog.sites_in_block(block)? {
-            let insn = prog.insn(site)?;
+            let insn = *prog.insn(site)?;
             if !insn.is_call() || insn.imm != BPF_FUNC_SKB_LOAD_BYTES {
                 continue;
             }
@@ -67,7 +67,7 @@ fn scan_sites(
 }
 
 fn classify_site(
-    prog: &ProgramCFG,
+    prog: &mut ProgramCFG,
     site: InsnSite,
     is_branch_target: bool,
 ) -> anyhow::Result<Result<RewriteSite, String>> {

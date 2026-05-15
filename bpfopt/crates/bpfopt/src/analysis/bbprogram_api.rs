@@ -3,7 +3,10 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::ops::Range;
+use std::sync::atomic::Ordering;
+use std::time::Instant;
 
+use crate::analysis::bbprogram::{N_TRY_REPLACE, T_SPLICE_NS, T_TRY_REPLACE_NS};
 use crate::analysis::{BasicBlock, BlockId, DefSite, InsnNode, InsnSite, ProgramCFG, Terminator};
 use crate::insn::{insn_width, BpfInsn};
 use crate::pass::SiteSkipReason;
@@ -68,6 +71,7 @@ impl ProgramCFG {
         replacement: Vec<BpfInsn>,
         skipped: &mut Vec<SiteSkipReason>,
     ) -> anyhow::Result<bool> {
+        let t_outer = Instant::now();
         let new_len = replacement.len();
         let block_ref = self.block(start.block)?;
         if start.idx > block_ref.insns.len() {
@@ -101,6 +105,8 @@ impl ProgramCFG {
         }
 
         self.replace_range_in_place(start.block, start.idx..end, replacement)?;
+        T_TRY_REPLACE_NS.fetch_add(t_outer.elapsed().as_nanos() as u64, Ordering::Relaxed);
+        N_TRY_REPLACE.fetch_add(1, Ordering::Relaxed);
         Ok(true)
     }
 
@@ -127,6 +133,7 @@ impl ProgramCFG {
             }
         }
 
+        let t_splice = Instant::now();
         {
             let block_ref = self.block_mut(block)?;
             block_ref
@@ -144,6 +151,7 @@ impl ProgramCFG {
                 second,
             )?;
         }
+        T_SPLICE_NS.fetch_add(t_splice.elapsed().as_nanos() as u64, Ordering::Relaxed);
 
         self.rebuild_use_def_after_mutation()
     }

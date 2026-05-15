@@ -13,8 +13,8 @@ impl BpfPass for DcePass {
 
         loop {
             let mut dead_defs = BTreeSet::new();
-            for def in prog.def_sites() {
-                if prog.uses_for_def(def).is_empty() && is_removable_dead_def(prog, def)? {
+            for def in prog.def_sites()? {
+                if prog.uses_for_def(def)?.is_empty() && is_removable_dead_def(prog, def)? {
                     dead_defs.insert(def);
                 }
             }
