@@ -690,8 +690,9 @@ sample_result run_llvmbpf(const cli_options &options)
     if (!compiled_code.has_value()) {
         fail("llvmbpf native code inspection failed: " + vm.get_error_message());
     }
-    if (options.dump_jit) {
-        const auto dump_path = std::filesystem::path(benchmark_name_for_program(options.program) + ".llvmbpf.bin");
+    if (options.dump_jit || options.dump_jit_path.has_value()) {
+        const auto dump_path = options.dump_jit_path.value_or(
+            std::filesystem::path(benchmark_name_for_program(options.program) + ".llvmbpf.bin"));
         write_binary_file(dump_path, compiled_code->data, compiled_code->size);
     }
 

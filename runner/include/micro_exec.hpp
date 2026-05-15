@@ -56,6 +56,7 @@ struct cli_options {
     bool perf_counters = false;
     std::string perf_scope = "full_repeat_raw";
     bool dump_jit = false;
+    std::optional<std::filesystem::path> dump_jit_path;
     std::optional<std::filesystem::path> dump_xlated;
 };
 

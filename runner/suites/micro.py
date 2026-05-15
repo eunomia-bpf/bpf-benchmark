@@ -63,7 +63,6 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="PMU scope passed through to micro/driver.py.",
     )
     parser.add_argument("--regenerate-inputs", action="store_true", help="Force regeneration of generated inputs.")
-    parser.add_argument("--write-details", action="store_true", help="Write per-sample live_samples detail artifacts.")
     parser.add_argument("--list", action="store_true", help="List benchmarks and runtimes.")
     return parser.parse_args(sys.argv[1:] if argv is None else argv)
 
@@ -116,8 +115,6 @@ def _micro_driver_argv(workspace: Path, args: argparse.Namespace) -> list[str]:
         argv.extend(["--perf-scope", str(args.perf_scope)])
     if args.regenerate_inputs:
         argv.append("--regenerate-inputs")
-    if args.write_details:
-        argv.append("--write-details")
     if args.list:
         argv.append("--list")
     return argv

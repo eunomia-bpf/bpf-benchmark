@@ -1,0 +1,628 @@
+{
+  "benchmarks": [
+    {
+      "category": "alu-mix",
+      "description": "Bitmap popcount scan over generated u64 words",
+      "expected_result": 12830754992348206170,
+      "family": "popcount",
+      "hypothesis": "Represents bitmap/set summarization loops common in BPF policy and tracing code",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bitmap_popcount_scan.mem",
+      "io_mode": "staged",
+      "level": "medium",
+      "name": "bitmap_popcount_scan",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "label": "native",
+          "mode": "native",
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 144
+              },
+              "compile_ns": 42164,
+              "exec_ns": 4952,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 26711,
+                "native_load_ns": 42164
+              },
+              "result": 12830754992348206170,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 4952
+            }
+          ],
+          "timing_source": "clock_monotonic"
+        },
+        {
+          "inner_repeat": 10,
+          "label": "llvmbpf LLVM JIT",
+          "mode": "llvmbpf",
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1040,
+                "native_code_bytes": 142
+              },
+              "compile_ns": 8839771,
+              "exec_cycles": 20510,
+              "exec_ns": 5564,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 494,
+                "jit_compile_ns": 8839771,
+                "memory_prepare_ns": 14199,
+                "program_image_ns": 90631,
+                "vm_load_code_ns": 274
+              },
+              "result": 12830754992348206170,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686248702,
+              "wall_exec_ns": 7931
+            }
+          ],
+          "timing_source": "rdtsc"
+        },
+        {
+          "inner_repeat": 10,
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1040,
+                "native_code_bytes": 561
+              },
+              "compile_ns": 85851541,
+              "exec_cycles": 14708949,
+              "exec_ns": 5579,
+              "jited_prog_len": 561,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 2602,
+                "memory_prepare_ns": 25074,
+                "object_load_ns": 85793779,
+                "object_open_ns": 57762,
+                "prog_run_wall_ns": 39901434,
+                "result_extract_ns": 379
+              },
+              "result": 12830754992348206170,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686220141,
+              "wall_exec_ns": 3990252,
+              "xlated_prog_len": 1040
+            }
+          ],
+          "timing_source": "ktime"
+        }
+      ],
+      "tags": [
+        "bitops",
+        "pure-jit"
+      ]
+    },
+    {
+      "category": "alu-mix",
+      "description": "Hand-written x86 popcnt kinsn over bitmap words",
+      "expected_result": 12648566,
+      "family": "popcount",
+      "hypothesis": "Tests direct popcnt kinsn lowering on a bitmap scan input",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bitmap_popcount_scan.mem",
+      "io_mode": "staged",
+      "level": "handcraft-kinsn",
+      "name": "bitmap_popcount_scan_handcraft",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 256,
+                "native_code_bytes": 123
+              },
+              "compile_ns": 237716,
+              "exec_cycles": 14794594,
+              "exec_ns": 54,
+              "jited_prog_len": 123,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 748,
+                "memory_prepare_ns": 17253,
+                "object_load_ns": 181632,
+                "object_open_ns": 56084,
+                "prog_run_wall_ns": 40133491,
+                "result_extract_ns": 343
+              },
+              "result": 12648566,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686297646,
+              "wall_exec_ns": 4013402,
+              "xlated_prog_len": 256
+            }
+          ],
+          "timing_source": "ktime"
+        }
+      ],
+      "tags": [
+        "bitops",
+        "handcraft-kinsn",
+        "x86"
+      ]
+    },
+    {
+      "category": "control-flow",
+      "description": "Trace event type dispatch over generated 6-bit event IDs",
+      "expected_result": 16,
+      "family": "switch-dispatch",
+      "hypothesis": "Represents event/type dispatch tables seen in tracing filters",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/trace_event_type_switch_dispatch.mem",
+      "io_mode": "staged",
+      "level": "dense-64",
+      "name": "trace_event_type_switch_dispatch",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "label": "native",
+          "mode": "native",
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 170
+              },
+              "compile_ns": 50821,
+              "exec_ns": 230,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 25584,
+                "native_load_ns": 50821
+              },
+              "result": 16,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 230
+            }
+          ],
+          "timing_source": "clock_monotonic"
+        },
+        {
+          "inner_repeat": 10,
+          "label": "llvmbpf LLVM JIT",
+          "mode": "llvmbpf",
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 2568,
+                "native_code_bytes": 1261
+              },
+              "compile_ns": 15458308,
+              "exec_cycles": 2252,
+              "exec_ns": 611,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 430,
+                "jit_compile_ns": 15458308,
+                "memory_prepare_ns": 14447,
+                "program_image_ns": 83382,
+                "vm_load_code_ns": 1237
+              },
+              "result": 16,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686199834,
+              "wall_exec_ns": 2850
+            }
+          ],
+          "timing_source": "rdtsc"
+        },
+        {
+          "inner_repeat": 10,
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 2072,
+                "native_code_bytes": 1621
+              },
+              "compile_ns": 29397186,
+              "exec_cycles": 14691846,
+              "exec_ns": 819,
+              "jited_prog_len": 1621,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 1242,
+                "memory_prepare_ns": 31550,
+                "object_load_ns": 29333926,
+                "object_open_ns": 63260,
+                "prog_run_wall_ns": 39855014,
+                "result_extract_ns": 351
+              },
+              "result": 16,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686205922,
+              "wall_exec_ns": 3985628,
+              "xlated_prog_len": 2072
+            }
+          ],
+          "timing_source": "ktime"
+        }
+      ],
+      "tags": [
+        "branch",
+        "dispatch",
+        "pure-jit"
+      ]
+    },
+    {
+      "category": "control-flow",
+      "description": "Hand-written x86 test/cmov kinsn over event dispatch input",
+      "expected_result": 56,
+      "family": "switch-dispatch",
+      "hypothesis": "Tests direct test plus cmov kinsn lowering for branchless event selection",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/trace_event_type_switch_dispatch.mem",
+      "io_mode": "staged",
+      "level": "handcraft-kinsn",
+      "name": "trace_event_type_switch_dispatch_handcraft",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 144,
+                "native_code_bytes": 80
+              },
+              "compile_ns": 211685,
+              "exec_cycles": 14768513,
+              "exec_ns": 49,
+              "jited_prog_len": 80,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 398,
+                "memory_prepare_ns": 21638,
+                "object_load_ns": 154225,
+                "object_open_ns": 57460,
+                "prog_run_wall_ns": 40063134,
+                "result_extract_ns": 391
+              },
+              "result": 56,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686218033,
+              "wall_exec_ns": 4006413,
+              "xlated_prog_len": 144
+            }
+          ],
+          "timing_source": "ktime"
+        }
+      ],
+      "tags": [
+        "branch",
+        "dispatch",
+        "handcraft-kinsn",
+        "x86"
+      ]
+    },
+    {
+      "category": "alu-mix",
+      "description": "SipHash-like hash mixer using 64-bit rotations",
+      "expected_result": 2666935177028490406,
+      "family": "rotate-hash",
+      "hypothesis": "Captures a realistic rotate-heavy hash mixer used by packet and map-key paths",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/siphash_rotate64_mixer.mem",
+      "io_mode": "staged",
+      "level": "siphash-64",
+      "name": "siphash_rotate64_mixer",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "label": "native",
+          "mode": "native",
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 1130
+              },
+              "compile_ns": 44111,
+              "exec_ns": 110,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 30303,
+                "native_load_ns": 44111
+              },
+              "result": 2666935177028490406,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 110
+            }
+          ],
+          "timing_source": "clock_monotonic"
+        },
+        {
+          "inner_repeat": 10,
+          "label": "llvmbpf LLVM JIT",
+          "mode": "llvmbpf",
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 7936,
+                "native_code_bytes": 1380
+              },
+              "compile_ns": 22508160,
+              "exec_cycles": 345,
+              "exec_ns": 94,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 326,
+                "jit_compile_ns": 22508160,
+                "memory_prepare_ns": 14400,
+                "program_image_ns": 96326,
+                "vm_load_code_ns": 2973
+              },
+              "result": 2666935177028490406,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686250179,
+              "wall_exec_ns": 3079
+            }
+          ],
+          "timing_source": "rdtsc"
+        },
+        {
+          "inner_repeat": 10,
+          "label": "kernel eBPF",
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 7936,
+                "native_code_bytes": 3520
+              },
+              "compile_ns": 447909,
+              "exec_cycles": 14676118,
+              "exec_ns": 160,
+              "jited_prog_len": 3520,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 609,
+                "memory_prepare_ns": 17990,
+                "object_load_ns": 393955,
+                "object_open_ns": 53954,
+                "prog_run_wall_ns": 39812337,
+                "result_extract_ns": 395
+              },
+              "result": 2666935177028490406,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686300434,
+              "wall_exec_ns": 3981259,
+              "xlated_prog_len": 7936
+            }
+          ],
+          "timing_source": "ktime"
+        }
+      ],
+      "tags": [
+        "compute",
+        "rotate",
+        "hash",
+        "pure-jit"
+      ]
+    }
+  ],
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec"
+  },
+  "defaults": {
+    "inner_repeat": 10,
+    "perf_counters": false,
+    "perf_scope": "full_repeat_raw",
+    "runtime_order_seed": 0,
+    "samples": 1,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "details_dir": "details",
+  "error_message": "siphash_rotate64_mixer_handcraft/kernel result mismatch: 4934070464779147397 != 2734860656",
+  "generated_at": "2026-05-15T03:07:17.334264+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "unknown",
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_root_mods=1 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 panic=-1 virtme.exec=`L3RtcC9iZW5jaG1hcmstZ3Vlc3QtZ2JuNmRmd3cuc2g=` virtme_chdir=home/yunwei37/workspace/bpf-benchmark rootfstype=9p rootflags=version=9p2000.L,trans=virtio,access=any raid=noautodetect ro debug loglevel=7 panic=30 oops=panic init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init",
+    "kernel_version": "7.0.0-rc2+",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "unknown"
+  },
+  "last_updated_at": "2026-05-15T03:07:19.917802+00:00",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_pure_jit.yaml",
+  "progress": {
+    "completed_benchmarks": 5,
+    "current_benchmark": "siphash_rotate64_mixer_handcraft",
+    "current_benchmark_index": 6,
+    "total_benchmarks": 10
+  },
+  "provenance": {
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 285K",
+    "environment": "vm",
+    "kernel_commit": "unknown",
+    "params": {
+      "inner_repeat": 10,
+      "samples": 1,
+      "warmups": 0
+    },
+    "repo_dirty": false,
+    "repo_git_sha": "unknown",
+    "timestamp": "2026-05-15T03:07:17.335182+00:00"
+  },
+  "run_type": "x86_kvm_micro",
+  "sample_runtime_orders": {
+    "bitmap_popcount_scan": [
+      [
+        "native",
+        "kernel",
+        "llvmbpf"
+      ]
+    ],
+    "bitmap_popcount_scan_handcraft": [
+      [
+        "kernel"
+      ]
+    ],
+    "siphash_rotate64_mixer": [
+      [
+        "native",
+        "kernel",
+        "llvmbpf"
+      ]
+    ],
+    "trace_event_type_switch_dispatch": [
+      [
+        "native",
+        "kernel",
+        "llvmbpf"
+      ]
+    ],
+    "trace_event_type_switch_dispatch_handcraft": [
+      [
+        "kernel"
+      ]
+    ]
+  },
+  "started_at": "2026-05-15T03:07:17.334264+00:00",
+  "status": "error",
+  "suite": "micro_staged_codegen",
+  "toolchains": {
+    "libbpf": {
+      "root": "vendor/libbpf"
+    },
+    "llvmbpf": {
+      "root": "vendor/llvmbpf"
+    }
+  }
+}

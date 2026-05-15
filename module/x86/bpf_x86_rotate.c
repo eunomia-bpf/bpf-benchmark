@@ -224,8 +224,8 @@ const struct bpf_kinsn bpf_x86_rorxl_imm_desc = {
 };
 
 static const struct bpf_kinsn * const bpf_x86_rotate_kinsn_descs[] = {
-	&bpf_x86_rorxl_imm_desc,
 	&bpf_x86_rolq_imm_desc,
+	&bpf_x86_rorxl_imm_desc,
 };
 
 DEFINE_KINSN_V2_MODULE(bpf_x86_rotate, "BpfReJIT x86 kinsns: ROLQ/RORXL",

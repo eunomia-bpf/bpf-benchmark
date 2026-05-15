@@ -1,5 +1,6 @@
 #include "micro_exec.hpp"
 #include "bpf_helpers.hpp"
+#include "micro_handcraft.h"
 
 #include <arpa/inet.h>
 
@@ -7,6 +8,7 @@
 #include <bpf/btf.h>
 #include <bpf/libbpf.h>
 #include <linux/bpf.h>
+#include <linux/btf.h>
 #include <yaml-cpp/yaml.h>
 
 #include <algorithm>
@@ -19,6 +21,7 @@
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
+#include <dlfcn.h>
 #include <fcntl.h>
 #include <fstream>
 #include <iostream>
@@ -123,6 +126,28 @@ struct object_deleter {
 
 using bpf_object_ptr = std::unique_ptr<bpf_object, object_deleter>;
 
+struct btf_deleter {
+    void operator()(struct btf *obj) const
+    {
+        if (obj != nullptr) {
+            btf__free(obj);
+        }
+    }
+};
+
+using btf_ptr = std::unique_ptr<struct btf, btf_deleter>;
+
+struct dl_deleter {
+    void operator()(void *handle) const
+    {
+        if (handle != nullptr) {
+            dlclose(handle);
+        }
+    }
+};
+
+using dl_ptr = std::unique_ptr<void, dl_deleter>;
+
 class scoped_fd {
   public:
     scoped_fd() = default;
@@ -178,6 +203,19 @@ struct live_fixture_map {
     uint32_t value_size = 0;
     uint32_t map_flags = 0;
     int fd = -1;
+};
+
+struct handcraft_image {
+    std::vector<bpf_insn> insns;
+};
+
+struct handcraft_load_result {
+    scoped_fd program_fd;
+    bpf_prog_info program_info {};
+    std::chrono::steady_clock::time_point open_start {};
+    std::chrono::steady_clock::time_point open_end {};
+    std::chrono::steady_clock::time_point load_start {};
+    std::chrono::steady_clock::time_point load_end {};
 };
 
 bool katran_balancer_fixture_requested(const cli_options &options)
@@ -804,6 +842,100 @@ void maybe_load_map_fixtures(const cli_options &options, bpf_object *object)
     load_map_fixtures(*options.fixture_path, object);
 }
 
+bool program_path_is_handcraft(const std::filesystem::path &path)
+{
+    return path.filename().string().ends_with(".handcraft.so");
+}
+
+struct handcraft_kinsn_desc {
+    int selector = 0;
+    std::string_view module_name;
+    std::string_view func_name;
+};
+
+const handcraft_kinsn_desc &handcraft_kinsn_desc_for_selector(int selector)
+{
+    static constexpr handcraft_kinsn_desc descriptors[] = {
+        {MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM, "bpf_x86_rotate", "bpf_x86_rolq_imm"},
+        {MICRO_HANDCRAFT_BPF_X86_POPCNTQ, "bpf_x86_popcnt", "bpf_x86_popcntq"},
+        {MICRO_HANDCRAFT_BPF_X86_MOVBE32_SIB, "bpf_x86_movbe_sib", "bpf_x86_movbe32_sib"},
+        {MICRO_HANDCRAFT_BPF_X86_SHRQ_IMM, "bpf_x86_alu_imm", "bpf_x86_shrq_imm"},
+        {MICRO_HANDCRAFT_BPF_X86_ANDL_IMM32, "bpf_x86_alu_imm", "bpf_x86_andl_imm32"},
+        {MICRO_HANDCRAFT_BPF_X86_TESTQ_RR, "bpf_x86_cmov", "bpf_x86_testq_rr"},
+        {MICRO_HANDCRAFT_BPF_X86_CMOVNEQ_RR, "bpf_x86_cmov", "bpf_x86_cmovneq_rr"},
+    };
+
+    for (const auto &desc : descriptors) {
+        if (desc.selector == selector) {
+            return desc;
+        }
+    }
+    fail("unknown handcraft kinsn selector: " + std::to_string(selector));
+}
+
+handcraft_image load_handcraft_image(const std::filesystem::path &path)
+{
+    dl_ptr handle(dlopen(path.c_str(), RTLD_NOW | RTLD_LOCAL));
+    if (handle == nullptr) {
+        const char *error = dlerror();
+        fail("dlopen(handcraft) failed: " + std::string(error != nullptr ? error : "unknown error"));
+    }
+
+    dlerror();
+    auto raw_fn = reinterpret_cast<micro_handcraft_get_program_fn>(
+        dlsym(handle.get(), "micro_handcraft_get_program"));
+    const char *symbol_error = dlerror();
+    if (symbol_error != nullptr || raw_fn == nullptr) {
+        fail("dlsym(micro_handcraft_get_program) failed: " +
+             std::string(symbol_error != nullptr ? symbol_error : "missing symbol"));
+    }
+
+    micro_handcraft_program program {};
+    if (raw_fn(&program) != 0) {
+        fail("micro_handcraft_get_program failed");
+    }
+    if (program.insns == nullptr || program.insn_count == 0) {
+        fail("handcraft program returned an empty insn buffer");
+    }
+
+    handcraft_image image;
+    image.insns.assign(program.insns, program.insns + program.insn_count);
+    return image;
+}
+
+scoped_fd find_btf_fd_by_name(std::string_view module_name)
+{
+    __u32 id = 0;
+    for (;;) {
+        const int next_error = bpf_btf_get_next_id(id, &id);
+        if (next_error == -ENOENT) {
+            fail("kernel BTF object not found: " + std::string(module_name));
+        }
+        if (next_error != 0) {
+            fail("bpf_btf_get_next_id failed: " + libbpf_error_string(next_error));
+        }
+
+        scoped_fd fd(bpf_btf_get_fd_by_id(id));
+        if (fd.get() < 0) {
+            fail("bpf_btf_get_fd_by_id failed: " + libbpf_error_string(fd.get()));
+        }
+
+        char name[128] = {};
+        bpf_btf_info info = {};
+        info.name = ptr_to_u64(name);
+        info.name_len = sizeof(name);
+        __u32 info_len = sizeof(info);
+        const int info_error = bpf_btf_get_info_by_fd(fd.get(), &info, &info_len);
+        if (info_error != 0) {
+            fail("bpf_btf_get_info_by_fd failed: " + libbpf_error_string(info_error));
+        }
+
+        if (module_name == name) {
+            return fd;
+        }
+    }
+}
+
 int libbpf_log(enum libbpf_print_level, const char *fmt, va_list args)
 {
     return vfprintf(stderr, fmt, args);
@@ -841,6 +973,99 @@ process_runtime_state &get_process_runtime_state()
 {
     static process_runtime_state state;
     return state;
+}
+
+int find_module_func_btf_id(
+    process_runtime_state &state,
+    std::string_view module_name,
+    std::string_view func_name)
+{
+    const std::string module(module_name);
+    struct btf *raw_module_btf = btf__load_module_btf(module.c_str(), state.vmlinux_btf);
+    const int load_error = libbpf_get_error(raw_module_btf);
+    if (load_error != 0) {
+        fail("btf__load_module_btf(" + module + ") failed: " +
+             libbpf_error_string(load_error));
+    }
+    btf_ptr module_btf(raw_module_btf);
+
+    const std::string func(func_name);
+    const int btf_id = btf__find_by_name_kind(module_btf.get(), func.c_str(), BTF_KIND_FUNC);
+    if (btf_id < 0) {
+        fail("unable to find kinsn function " + module + "::" + func);
+    }
+    return btf_id;
+}
+
+handcraft_load_result load_handcraft_program(const cli_options &options)
+{
+    auto &state = get_process_runtime_state();
+    handcraft_load_result result;
+    result.open_start = std::chrono::steady_clock::now();
+    handcraft_image image = load_handcraft_image(options.program);
+    result.open_end = std::chrono::steady_clock::now();
+
+    std::unordered_map<std::string, int> module_slots;
+    std::unordered_map<std::string, int> func_ids;
+    std::vector<scoped_fd> module_fds;
+    std::vector<int> fd_array(1, -1);
+    bool saw_kinsn_call = false;
+
+    result.load_start = std::chrono::steady_clock::now();
+    for (auto &insn : image.insns) {
+        if (insn.code != (BPF_JMP | BPF_CALL) ||
+            insn.src_reg != BPF_PSEUDO_KINSN_CALL) {
+            continue;
+        }
+
+        saw_kinsn_call = true;
+        const auto &desc = handcraft_kinsn_desc_for_selector(insn.imm);
+        const std::string module_name(desc.module_name);
+        const std::string func_name(desc.func_name);
+        auto slot_it = module_slots.find(module_name);
+        if (slot_it == module_slots.end()) {
+            module_fds.push_back(find_btf_fd_by_name(module_name));
+            fd_array.push_back(module_fds.back().get());
+            slot_it = module_slots.emplace(module_name, static_cast<int>(fd_array.size() - 1)).first;
+        }
+
+        const std::string func_key = module_name + "::" + func_name;
+        auto func_it = func_ids.find(func_key);
+        if (func_it == func_ids.end()) {
+            func_it = func_ids.emplace(
+                func_key,
+                find_module_func_btf_id(state, module_name, func_name)).first;
+        }
+
+        insn.off = static_cast<__s16>(slot_it->second);
+        insn.imm = static_cast<__s32>(func_it->second);
+    }
+    if (!saw_kinsn_call) {
+        fail("handcraft program contains no kinsn calls");
+    }
+    if (fd_array.size() > 1) {
+        fd_array[0] = fd_array[1];
+    }
+
+    bpf_prog_load_opts opts = {};
+    opts.sz = sizeof(opts);
+    opts.fd_array = fd_array.data();
+    opts.fd_array_cnt = static_cast<__u32>(fd_array.size());
+
+    const int program_fd = bpf_prog_load(
+        BPF_PROG_TYPE_XDP,
+        "micro_kinsn",
+        "GPL",
+        image.insns.data(),
+        image.insns.size(),
+        &opts);
+    if (program_fd < 0) {
+        fail("bpf_prog_load(handcraft) failed: " + libbpf_error_string(program_fd));
+    }
+    result.program_fd.reset(program_fd);
+    result.load_end = std::chrono::steady_clock::now();
+    result.program_info = load_prog_info(result.program_fd.get());
+    return result;
 }
 
 bpf_program *find_program(bpf_object *object, const std::optional<std::string> &program_name)
@@ -954,15 +1179,161 @@ uint64_t read_kernel_test_run_result(
 
 void maybe_write_program_dumps(const cli_options &options, int program_fd, const bpf_prog_info &program_info)
 {
-    if (options.dump_jit) {
+    if (options.dump_jit || options.dump_jit_path.has_value()) {
         const auto jited_program = load_jited_program(program_fd, program_info.jited_prog_len);
-        const auto dump_path = std::filesystem::path(
-            benchmark_name_for_program(options.program) + ".kernel.bin");
+        const auto dump_path = options.dump_jit_path.value_or(
+            std::filesystem::path(benchmark_name_for_program(options.program) + ".kernel.bin"));
         write_binary_file(dump_path, jited_program.data(), jited_program.size());
     }
     if (options.dump_xlated.has_value()) {
         const auto xlated_program = load_xlated_program(program_fd, program_info.xlated_prog_len);
         write_binary_file(*options.dump_xlated, xlated_program.data(), xlated_program.size());
+    }
+}
+
+std::vector<sample_result> run_kernel_handcraft(const cli_options &options)
+{
+    initialize_micro_exec_process();
+
+    const auto memory_prepare_start = std::chrono::steady_clock::now();
+    auto input_bytes = materialize_memory(options.memory, options.input_size);
+    const auto memory_prepare_end = std::chrono::steady_clock::now();
+    if (options.input_size != 0 && input_bytes.size() < options.input_size) {
+        input_bytes.resize(options.input_size, 0);
+    }
+
+    auto loaded = load_handcraft_program(options);
+    const int program_fd = loaded.program_fd.get();
+    const auto program_info = loaded.program_info;
+    const std::string effective_io_mode = options.io_mode;
+    if (effective_io_mode != "staged" && effective_io_mode != "packet") {
+        fail("handcraft micro programs require io-mode staged or packet");
+    }
+
+    if (options.signal_control) {
+        std::signal(SIGUSR1, handle_signal_control);
+        std::signal(SIGTERM, handle_signal_control);
+        std::signal(SIGINT, handle_signal_control);
+        std::cout
+            << "{\"status\":\"ready\",\"id\":" << program_info.id
+            << ",\"name\":\"" << json_escape(program_name_from_info(program_info))
+            << "\"}\n" << std::flush;
+    }
+
+    for (;;) {
+    if (options.signal_control) {
+        while (!g_signal_run_requested && !g_signal_stop_requested) {
+            pause();
+        }
+        if (g_signal_stop_requested) {
+            return {};
+        }
+        g_signal_run_requested = 0;
+    }
+
+    std::chrono::steady_clock::time_point exec_input_prepare_start {};
+    std::chrono::steady_clock::time_point exec_input_prepare_end {};
+    std::chrono::steady_clock::time_point result_read_start {};
+    std::chrono::steady_clock::time_point result_read_end {};
+
+    std::vector<uint8_t> packet;
+    std::vector<uint8_t> packet_out;
+    __sk_buff context_out = {};
+    const int result_fd = -1;
+    const uint32_t key = 0;
+
+    const auto packet_kind = resolve_packet_context_kind(program_info.type);
+    const bool result_from_skb_context =
+        packet_kind == packet_context_kind::skb &&
+        (effective_io_mode == "packet" || effective_io_mode == "staged");
+    if (packet_kind == packet_context_kind::none) {
+        fail("handcraft micro program requires an XDP or skb packet context");
+    }
+
+    exec_input_prepare_start = std::chrono::steady_clock::now();
+    packet = options.raw_packet ? input_bytes : build_packet_input(input_bytes, program_info.type);
+    packet_out.assign(packet_output_capacity(options, packet.size()), 0);
+    exec_input_prepare_end = std::chrono::steady_clock::now();
+
+    bpf_test_run_opts test_opts = {};
+    test_opts.sz = sizeof(test_opts);
+    const uint32_t effective_repeat = options.repeat;
+    test_opts.repeat = effective_repeat;
+    test_opts.data_in = packet.data();
+    test_opts.data_size_in = packet.size();
+    test_opts.data_out = packet_out.data();
+    test_opts.data_size_out = packet_out.size();
+    if (result_from_skb_context) {
+        test_opts.ctx_out = &context_out;
+        test_opts.ctx_size_out = sizeof(context_out);
+    }
+
+    const uint64_t tsc_freq_hz = kHasTscMeasurement ? detect_tsc_freq_hz() : 0;
+    kernel_probe_context run_context = {
+        .program_fd = program_fd,
+        .test_opts = &test_opts,
+        .effective_repeat = effective_repeat,
+        .tsc_freq_hz = tsc_freq_hz,
+        .packet_out = &packet_out,
+        .context_out = result_from_skb_context ? &context_out : nullptr,
+        .context_out_size = static_cast<uint32_t>(sizeof(context_out)),
+        .result_fd = result_fd,
+        .result_key = key,
+        .reset_result_map = false,
+    };
+
+    auto run_pass = execute_kernel_measurement_pass(run_context, options);
+    const auto &run_measurement = run_pass.measurement;
+
+    result_read_start = std::chrono::steady_clock::now();
+    const uint64_t result = read_kernel_test_run_result(
+        effective_io_mode,
+        result_from_skb_context,
+        packet_out,
+        context_out,
+        result_fd,
+        key,
+        run_measurement.retval);
+    result_read_end = std::chrono::steady_clock::now();
+
+    const auto final_program_info = load_prog_info(program_fd);
+    maybe_write_program_dumps(options, program_fd, final_program_info);
+
+    sample_result sample;
+    sample.compile_ns =
+        elapsed_ns(loaded.open_start, loaded.open_end) +
+        elapsed_ns(loaded.load_start, loaded.load_end);
+    sample.exec_ns = run_measurement.exec_ns;
+    sample.timing_source = "ktime";
+    sample.timing_source_wall =
+        run_measurement.wall_exec_ns.has_value() ? "rdtsc" : "unavailable";
+    sample.wall_exec_ns = run_measurement.wall_exec_ns;
+    sample.exec_cycles = run_measurement.exec_cycles;
+    sample.tsc_freq_hz =
+        tsc_freq_hz > 0 ? std::optional<uint64_t>(tsc_freq_hz) : std::nullopt;
+    sample.result = result;
+    sample.retval = run_measurement.retval;
+    sample.jited_prog_len = final_program_info.jited_prog_len;
+    sample.xlated_prog_len = final_program_info.xlated_prog_len;
+    sample.code_size = {
+        .bpf_bytecode_bytes = final_program_info.xlated_prog_len,
+        .native_code_bytes = final_program_info.jited_prog_len,
+    };
+    sample.phases_ns = {
+        {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},
+        {"object_open_ns", elapsed_ns(loaded.open_start, loaded.open_end)},
+        {"object_load_ns", elapsed_ns(loaded.load_start, loaded.load_end)},
+        {prepare_phase_name(effective_io_mode), elapsed_ns(exec_input_prepare_start, exec_input_prepare_end)},
+        {"prog_run_wall_ns", elapsed_ns(run_measurement.wall_start, run_measurement.wall_end)},
+        {result_phase_name(effective_io_mode), elapsed_ns(result_read_start, result_read_end)},
+    };
+    sample.perf_counters = std::move(run_pass.perf_counters);
+    if (options.signal_control) {
+        print_json(sample);
+        std::cout << std::flush;
+        continue;
+    }
+    return {std::move(sample)};
     }
 }
 
@@ -977,6 +1348,9 @@ std::vector<sample_result> run_kernel(const cli_options &options)
 {
     // C++ no longer owns prepared state, daemon REJIT, attach-trigger workloads,
     // or batch orchestration. This path is a single load -> TEST_RUN -> JSON exit.
+    if (program_path_is_handcraft(options.program)) {
+        return run_kernel_handcraft(options);
+    }
 
     initialize_micro_exec_process();
 

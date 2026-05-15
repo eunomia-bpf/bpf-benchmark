@@ -9,7 +9,6 @@ import select
 import signal
 import subprocess
 import sys
-from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -84,25 +83,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help="Force regeneration of generated inputs.",
     )
-    parser.add_argument(
-        "--write-details",
-        action="store_true",
-        help="Write per-sample live_samples detail artifacts. Disabled by default for faster runs.",
-    )
     parser.add_argument("--list", action="store_true", help="List benchmarks and runtimes.")
     return parser.parse_args(sys.argv[1:] if argv is None else argv)
-
-
-def format_ns(value: float | int | None) -> str:
-    if value is None:
-        return "n/a"
-    if abs(value - round(value)) < 1e-9:
-        value = int(round(value))
-    if value >= 1_000_000:
-        return f"{value / 1_000_000:.3f} ms"
-    if value >= 1_000:
-        return f"{value / 1_000:.3f} us"
-    return f"{value} ns"
 
 
 def _git_rev_parse(repo_dir: Path, short: bool = False) -> str:
@@ -248,19 +230,6 @@ def build_run_metadata(
     return metadata
 
 
-def _live_sample_relative_path(
-    benchmark_name: str,
-    runtime_name: str,
-    *,
-    sample_index: int,
-) -> str:
-    basename = (
-        f"{sanitize_artifact_token(benchmark_name)}__"
-        f"{sanitize_artifact_token(runtime_name)}__sample{sample_index:02d}.json"
-    )
-    return f"live_samples/{basename}"
-
-
 def build_runner_command(
     *,
     runner_binary: Path,
@@ -271,6 +240,8 @@ def build_runner_command(
     perf_counters: bool,
     perf_scope: str,
     cpu: str | None,
+    dump_jit_path: Path | None = None,
+    dump_xlated_path: Path | None = None,
 ) -> list[str]:
     if runtime.mode == "llvmbpf":
         command = [str(runner_binary), "run-llvmbpf"]
@@ -295,6 +266,10 @@ def build_runner_command(
     if perf_counters:
         command.append("--perf-counters")
         command.extend(["--perf-scope", perf_scope])
+    if dump_jit_path is not None:
+        command.extend(["--dump-jit-path", str(dump_jit_path)])
+    if dump_xlated_path is not None:
+        command.extend(["--dump-xlated", str(dump_xlated_path)])
     if runtime.mode == "kernel_rejit":
         command.append("--signal-control")
 
@@ -364,6 +339,69 @@ def run_rejit_sample(command: list[str], *, cwd: Path, artifact_dir: Path) -> di
                     proc.kill()
                     proc.wait(timeout=5)
     return sample
+
+
+def _dump_stem(benchmark_name: str, runtime_name: str, sample_idx: int | None = None) -> str:
+    stem = f"{sanitize_artifact_token(benchmark_name)}__{sanitize_artifact_token(runtime_name)}"
+    if sample_idx is not None:
+        stem += f"__sample{sample_idx:02d}"
+    return stem
+
+
+def _jit_dump_paths(artifact_dir: Path, stem: str, *, xlated: bool = True) -> tuple[Path, Path | None]:
+    dump_dir = artifact_dir / "details" / "jit_dumps"
+    dump_dir.mkdir(parents=True, exist_ok=True)
+    return dump_dir / f"{stem}.jited.bin", dump_dir / f"{stem}.xlated.bin" if xlated else None
+
+
+def _read_text_or_missing(path: Path) -> str:
+    return path.read_text() if path.exists() else "not captured"
+
+
+def _disassembly(path: Path | None, *, binary: bool = False, symbol: str | None = None) -> str:
+    if path is None or not path.exists():
+        return "not captured"
+    command = ["objdump", "-D" if binary else "-dr"]
+    machine = platform.machine().lower()
+    if symbol:
+        command.append(f"--disassemble={symbol}")
+    if not binary and machine in {"x86_64", "amd64"}:
+        command.append("-Mintel")
+    if binary:
+        command.extend(["-b", "binary"])
+    if machine in {"x86_64", "amd64"}:
+        command.extend(["-m", "i386:x86-64", "-Mintel"])
+    elif machine in {"aarch64", "arm64"}:
+        command.extend(["-m", "aarch64"])
+    elif binary:
+        raise RuntimeError(f"unsupported objdump machine for JIT dump: {platform.machine()}")
+    command.append(str(path))
+    return run_command(command, cwd=ROOT_DIR, timeout=RUNNER_TIMEOUT_SECONDS).stdout
+
+
+def write_code_compare_markdown(benchmark: CatalogTarget, artifact_dir: Path) -> None:
+    base_name = str(benchmark.metadata.get("base_name") or benchmark.name)
+    native_base = str(benchmark.metadata.get("native_baseline") or base_name)
+    native_symbol = benchmark.program_names[0] if native_base == base_name and benchmark.program_names else f"{native_base}_xdp"
+    original_name = native_base if native_base != base_name else benchmark.name
+    dump_dir = artifact_dir / "details" / "jit_dumps"
+    handcraft_source = ROOT_DIR / "micro" / "programs" / f"{base_name}.handcraft.c"
+    sections = [
+        ("Original C", "c", _read_text_or_missing(ROOT_DIR / "micro" / "programs" / f"{native_base}.bpf.c")),
+        ("Native ASM", "asm", _disassembly(benchmark.object_path.parent / f"{native_base}.native.so", symbol=native_symbol)),
+        ("Original Kernel JIT ASM", "asm", _disassembly(dump_dir / f"{_dump_stem(original_name, 'kernel', 0)}.jited.bin", binary=True)),
+        ("llvmbpf JIT ASM", "asm", _disassembly(dump_dir / f"{_dump_stem(original_name, 'llvmbpf', 0)}.jited.bin", binary=True)),
+        ("Handcraft C", "c", _read_text_or_missing(handcraft_source)),
+        ("Handcraft Kernel JIT ASM", "asm", _disassembly(dump_dir / f"{_dump_stem(benchmark.name, 'kernel', 0)}.jited.bin", binary=True) if handcraft_source.exists() else "not captured"),
+    ]
+    out = artifact_dir / "details" / "code_compare" / f"{sanitize_artifact_token(benchmark.name)}.md"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(
+        f"# {benchmark.name}\n\n" + "\n\n".join(
+            f"## {title}\n```{lang}\n{text.rstrip()}\n```" for title, lang, text in sections
+        )
+        + "\n"
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -440,7 +478,6 @@ def main(argv: list[str] | None = None) -> int:
             "shuffle_seed": args.shuffle_seed,
             "runtime_order_seed": runtime_order_seed,
         },
-        "sample_runtime_orders": {},
         "benchmarks": [],
     }
 
@@ -498,11 +535,6 @@ def main(argv: list[str] | None = None) -> int:
             error_message=error_message,
         )
 
-    def flush_sample_details(*, detail_payloads: dict[str, object]) -> None:
-        if not detail_payloads:
-            return
-        session.write(status="running", detail_payloads=detail_payloads)
-
     flush_artifact("running")
 
     try:
@@ -514,6 +546,16 @@ def main(argv: list[str] | None = None) -> int:
 
         for bench_idx, benchmark in enumerate(benchmarks):
             memory_file = resolve_memory_file(benchmark, args.regenerate_inputs)
+            allowed_runtime_names = set(benchmark.runtime_names)
+            benchmark_runtimes = [
+                runtime for runtime in runtimes
+                if not allowed_runtime_names or runtime.name in allowed_runtime_names
+            ]
+            if not benchmark_runtimes:
+                raise RuntimeError(
+                    f"{benchmark.name} cannot run with selected runtimes: "
+                    f"{', '.join(runtime.name for runtime in runtimes)}"
+                )
             benchmark_record = {
                 "name": benchmark.name,
                 "description": benchmark.description,
@@ -536,7 +578,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"[bench] ({bench_idx+1}/{len(benchmarks)}) {benchmark.name}", flush=True)
 
             runtime_samples: dict[str, dict[str, object]] = {}
-            for runtime in runtimes:
+            for runtime in benchmark_runtimes:
                 inner_repeat = args.inner_repeat if args.inner_repeat is not None else runtime.default_inner_repeat
                 runtime_samples[runtime.name] = {
                     "inner_repeat": inner_repeat,
@@ -560,18 +602,24 @@ def main(argv: list[str] | None = None) -> int:
                             f"{sample.get('result')} != {benchmark.expected_result}"
                         )
 
-            sample_runtime_orders: list[list[str]] = []
             for sample_idx in range(samples):
-                if len(runtimes) == 2:
-                    ordered = list(runtimes) if sample_idx % 2 == 0 else list(reversed(runtimes))
+                if len(benchmark_runtimes) == 2:
+                    ordered = list(benchmark_runtimes) if sample_idx % 2 == 0 else list(reversed(benchmark_runtimes))
                 else:
                     rng = random.Random(runtime_order_seed + sample_idx)
-                    ordered = list(runtimes)
+                    ordered = list(benchmark_runtimes)
                     rng.shuffle(ordered)
-                sample_runtime_orders.append([runtime.name for runtime in ordered])
 
                 for runtime in ordered:
                     inner_repeat = int(runtime_samples[runtime.name]["inner_repeat"])
+                    dump_jit_path = None
+                    dump_xlated_path = None
+                    if runtime.mode in {"kernel", "kernel_rejit", "llvmbpf"}:
+                        dump_jit_path, dump_xlated_path = _jit_dump_paths(
+                            artifact_dir,
+                            _dump_stem(benchmark.name, runtime.name, sample_idx),
+                            xlated=runtime.mode in {"kernel", "kernel_rejit"},
+                        )
                     command = build_runner_command(
                         runner_binary=runner_binary,
                         benchmark=benchmark,
@@ -581,6 +629,8 @@ def main(argv: list[str] | None = None) -> int:
                         perf_counters=args.perf_counters,
                         perf_scope=args.perf_scope,
                         cpu=args.cpu,
+                        dump_jit_path=dump_jit_path,
+                        dump_xlated_path=dump_xlated_path,
                     )
                     sample = run_single_sample(command, cwd=ROOT_DIR, artifact_dir=artifact_dir)
                     sample["sample_index"] = sample_idx
@@ -591,42 +641,27 @@ def main(argv: list[str] | None = None) -> int:
                             f"{sample.get('result')} != {benchmark.expected_result}"
                         )
 
-                    detail_payloads: dict[str, object] = {}
-                    if args.write_details:
-                        live_sample_path = _live_sample_relative_path(
-                            benchmark.name,
-                            runtime.name,
-                            sample_index=sample_idx,
-                        )
-                        detail_payloads[live_sample_path] = sample
-
                     runtime_samples[runtime.name]["samples"].append(sample)
-                    flush_sample_details(detail_payloads=detail_payloads)
 
-            results["sample_runtime_orders"][benchmark.name] = sample_runtime_orders
-            for runtime in runtimes:
+            for runtime in benchmark_runtimes:
                 sample_entry = runtime_samples[runtime.name]
                 run_samples = list(sample_entry["samples"])
                 inner_repeat = int(sample_entry["inner_repeat"])
                 result_values = [sample["result"] for sample in run_samples]
-                timing_source = str(run_samples[0].get("timing_source", "unknown")) if run_samples else "unknown"
 
                 run_record: dict[str, Any] = {
                     "runtime": runtime.name,
-                    "label": runtime.label,
                     "mode": runtime.mode,
                     "inner_repeat": inner_repeat,
                     "samples": run_samples,
-                    "timing_source": timing_source,
-                    "result_distribution": dict(Counter(str(value) for value in result_values)),
                 }
                 benchmark_record["runs"].append(run_record)
 
                 last_sample = run_samples[-1] if run_samples else {}
                 print(
                     f"  {runtime.name:10} "
-                    f"compile last {format_ns(int(last_sample.get('compile_ns') or 0))} | "
-                    f"exec last {format_ns(int(last_sample.get('exec_ns') or 0))} | "
+                    f"compile last {int(last_sample.get('compile_ns') or 0)} ns | "
+                    f"exec last {int(last_sample.get('exec_ns') or 0)} ns | "
                     f"result {result_values[-1] if result_values else '?'}"
                 )
                 flush_artifact("running")
@@ -635,6 +670,8 @@ def main(argv: list[str] | None = None) -> int:
             current_benchmark_record = None
             flush_artifact("running")
 
+        for benchmark in benchmarks:
+            write_code_compare_markdown(benchmark, artifact_dir)
         current_benchmark_name = None
         current_benchmark_index = None
         flush_artifact("completed")

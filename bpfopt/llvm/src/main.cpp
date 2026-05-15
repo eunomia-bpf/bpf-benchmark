@@ -37,7 +37,6 @@
 #include "llvm/Target/TargetOptions.h"
 #include "llvm/Transforms/InstCombine/InstCombine.h"
 #include "llvm/Transforms/Scalar/DCE.h"
-#include "llvm/Transforms/Scalar/EarlyCSE.h"
 #include "llvm/Transforms/Scalar/SROA.h"
 #include "llvm/Transforms/Scalar/SimplifyCFG.h"
 #include "llvm/Transforms/Utils/Mem2Reg.h"
@@ -47,9 +46,15 @@ namespace {
 constexpr uint8_t BPF_LD_IMM64 = 0x18;
 constexpr uint8_t BPF_LDX_MEM_H = 0x69;
 constexpr uint8_t BPF_ALU64_ADD_K = 0x07;
+constexpr uint8_t BPF_ALU64_LSH_K = 0x67;
 constexpr uint8_t BPF_ALU64_MOV_X = 0xbf;
+constexpr uint8_t BPF_ALU64_RSH_K = 0x77;
 constexpr uint8_t BPF_ALU32_MOV_X = 0xbc;
 constexpr uint8_t BPF_ALU32_AND_K = 0x54;
+constexpr uint8_t BPF_JMP32_JSGT_K = 0x66;
+constexpr uint8_t BPF_JMP32_JSGE_K = 0x76;
+constexpr uint8_t BPF_JMP32_JSLT_K = 0xc6;
+constexpr uint8_t BPF_JMP32_JSLE_K = 0xd6;
 constexpr uint8_t BPF_JLT_K = 0xa5;
 constexpr uint8_t BPF_JA = 0x05;
 constexpr uint8_t BPF_CALL = 0x85;
@@ -215,6 +220,12 @@ bool is_jmp32_k(uint8_t code)
 	return (code & 0x07) == 0x06 && code != 0x06;
 }
 
+bool is_signed_jmp32_k(uint8_t code)
+{
+	return code == BPF_JMP32_JSGT_K || code == BPF_JMP32_JSGE_K ||
+	       code == BPF_JMP32_JSLT_K || code == BPF_JMP32_JSLE_K;
+}
+
 constexpr uint16_t reg_bit(uint8_t reg)
 {
 	return static_cast<uint16_t>(1u << reg);
@@ -233,6 +244,20 @@ bool is_jmp_class(uint8_t code)
 bool is_pure_alu_def(uint8_t code)
 {
 	return is_alu_class(code);
+}
+
+bool insn_defines_reg(const std::vector<uint8_t> &text, size_t pc, uint8_t reg)
+{
+	const uint8_t code = text[pc * INSN_SIZE];
+	const uint8_t dst = dst_reg(text, pc);
+	if (code == BPF_CALL || code == BPF_CALLX) {
+		return reg <= 5;
+	}
+	if (code == BPF_LD_IMM64 || is_alu_class(code) ||
+	    (code & 0x07) == 0x01) {
+		return dst == reg;
+	}
+	return false;
 }
 
 uint16_t alu_uses(uint8_t code, uint8_t dst, uint8_t src)
@@ -616,6 +641,65 @@ void repair_verifier_range_copies(std::vector<uint8_t> &text)
 	}
 }
 
+void repair_zero_extended_signed_jumps(std::vector<uint8_t> &text)
+{
+	const size_t insn_count = text.size() / INSN_SIZE;
+	std::vector<bool> is_branch_target(insn_count, false);
+	for (size_t pc = 0; pc < insn_count; pc++) {
+		const uint8_t code = text[pc * INSN_SIZE];
+		if (!is_jmp_class(code) || code == BPF_CALL ||
+		    code == BPF_CALLX || code == BPF_EXIT) {
+			continue;
+		}
+		const int64_t target = static_cast<int64_t>(pc) + 1 +
+				       static_cast<int64_t>(read_off(text, pc));
+		if (target >= 0 && target < static_cast<int64_t>(insn_count)) {
+			is_branch_target[static_cast<size_t>(target)] = true;
+		}
+	}
+
+	for (size_t pc = 0; pc < insn_count; pc++) {
+		if (!is_signed_jmp32_k(text[pc * INSN_SIZE]) ||
+		    src_reg(text, pc) != 0 || read_imm(text, pc) != 0 ||
+		    is_branch_target[pc]) {
+			continue;
+		}
+		const uint8_t checked = dst_reg(text, pc);
+		const size_t search_begin = pc > 16 ? pc - 16 : 0;
+		for (size_t q = pc; q-- > search_begin;) {
+			if (q < 2 || text[q * INSN_SIZE] != BPF_ALU64_RSH_K ||
+			    dst_reg(text, q) != checked ||
+			    read_imm(text, q) != 32 ||
+			    text[(q - 1) * INSN_SIZE] != BPF_ALU64_LSH_K ||
+			    dst_reg(text, q - 1) != checked ||
+			    read_imm(text, q - 1) != 32 ||
+			    text[(q - 2) * INSN_SIZE] != BPF_ALU64_MOV_X ||
+			    dst_reg(text, q - 2) != checked) {
+				continue;
+			}
+			const uint8_t source = src_reg(text, q - 2);
+			if (source == checked) {
+				break;
+			}
+			bool valid = true;
+			for (size_t k = q + 1; k < pc; k++) {
+				if (insn_defines_reg(text, k, checked) ||
+				    insn_defines_reg(text, k, source)) {
+					valid = false;
+					break;
+				}
+				if (text[k * INSN_SIZE] == BPF_LD_IMM64) {
+					k++;
+				}
+			}
+			if (valid) {
+				set_dst_reg(text, pc, source);
+			}
+			break;
+		}
+	}
+}
+
 void eliminate_dead_alu_defs(std::vector<uint8_t> &text)
 {
 	const size_t insn_count = text.size() / INSN_SIZE;
@@ -765,6 +849,7 @@ extract_relocated_text(const std::vector<uint8_t> &object_bytes,
 			    input.end());
 	}
 	repair_verifier_range_copies(text);
+	repair_zero_extended_signed_jumps(text);
 	eliminate_dead_alu_defs(text);
 	return text;
 }
@@ -827,7 +912,6 @@ void promote_register_allocas(llvm::Module &module, llvm::TargetMachine &machine
 	llvm::FunctionPassManager function_pipeline;
 	function_pipeline.addPass(llvm::SROAPass(llvm::SROAOptions::PreserveCFG));
 	function_pipeline.addPass(llvm::PromotePass());
-	function_pipeline.addPass(llvm::SimplifyCFGPass());
 	function_pipeline.addPass(llvm::DCEPass());
 	llvm::ModulePassManager module_pipeline;
 	module_pipeline.addPass(llvm::createModuleToFunctionPassAdaptor(

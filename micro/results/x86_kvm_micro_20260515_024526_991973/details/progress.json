@@ -1,0 +1,31 @@
+{
+  "completed_benchmarks": 4,
+  "current_benchmark": "packet_toeplitz_rss_hash_handcraft",
+  "current_benchmark_index": 5,
+  "current_benchmark_record": {
+    "category": "alu-mix",
+    "description": "Hand-written x86 movbe indexed loads over Toeplitz packet fields",
+    "expected_result": 6141077764,
+    "family": "rss-hash",
+    "hypothesis": "Tests direct movbe SIB kinsn lowering for packet endian loads",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_toeplitz_rss_hash.mem",
+    "io_mode": "packet",
+    "level": "handcraft-kinsn",
+    "name": "packet_toeplitz_rss_hash_handcraft",
+    "native_baseline": "packet_toeplitz_rss_hash",
+    "object": "/artifacts/user/micro-programs/x86_64/packet_toeplitz_rss_hash_handcraft.handcraft.so",
+    "object_kind": "handcraft",
+    "runs": [],
+    "tags": [
+      "packet",
+      "hash",
+      "toeplitz",
+      "rss",
+      "handcraft-kinsn",
+      "x86"
+    ]
+  },
+  "error_message": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/packet_toeplitz_rss_hash_handcraft.handcraft.so --program-name packet_toeplitz_rss_hash_handcraft_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_toeplitz_rss_hash.mem --io-mode packet --input-size 54 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_024526_991973/details/jit_dumps/packet_toeplitz_rss_hash_handcraft__kernel__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_024526_991973/details/jit_dumps/packet_toeplitz_rss_hash_handcraft__kernel__sample00.xlated.bin\nlibbpf: loaded kernel BTF from '/sys/kernel/btf/vmlinux'\nbpf_prog_load(handcraft) failed: Invalid argument",
+  "status": "error",
+  "total_benchmarks": 5
+}

@@ -1,0 +1,28 @@
+{
+  "completed_benchmarks": 0,
+  "current_benchmark": "bitmap_popcount_scan_handcraft",
+  "current_benchmark_index": 1,
+  "current_benchmark_record": {
+    "category": "alu-mix",
+    "description": "Hand-written x86 popcnt kinsn over bitmap words",
+    "expected_result": 12648566,
+    "family": "popcount",
+    "hypothesis": "Tests direct popcnt kinsn lowering on a bitmap scan input",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bitmap_popcount_scan.mem",
+    "io_mode": "staged",
+    "level": "handcraft-kinsn",
+    "name": "bitmap_popcount_scan_handcraft",
+    "native_baseline": "bitmap_popcount_scan",
+    "object": "/artifacts/user/micro-programs/x86_64/bitmap_popcount_scan_handcraft.handcraft.so",
+    "object_kind": "handcraft",
+    "runs": [],
+    "tags": [
+      "bitops",
+      "handcraft-kinsn",
+      "x86"
+    ]
+  },
+  "error_message": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/bitmap_popcount_scan_handcraft.handcraft.so --program-name bitmap_popcount_scan_handcraft_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bitmap_popcount_scan.mem --io-mode staged --input-size 2056 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_023501_816192/details/jit_dumps/bitmap_popcount_scan_handcraft__kernel__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_023501_816192/details/jit_dumps/bitmap_popcount_scan_handcraft__kernel__sample00.xlated.bin\nlibbpf: loaded kernel BTF from '/sys/kernel/btf/vmlinux'\nbpf_prog_load(handcraft) failed: Invalid argument",
+  "status": "error",
+  "total_benchmarks": 5
+}

@@ -223,6 +223,8 @@ e2e/cases/tetragon/bin/
 # Micro benchmark result artifacts are tracked for review.
 !micro/results/
 !micro/results/**
+micro/results/*/details/jit_dumps/
+micro/results/*/details/jit_dumps/**
 e2e/cases/katran/bin/
 
 # Paper build artifacts

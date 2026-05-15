@@ -18,8 +18,10 @@ KATRAN_ARTIFACTS_BUILD_RULE_FILE := $(RUNNER_DIR)/mk/katran-artifacts.mk
 MICRO_PROGRAM_SOURCE_ROOT := $(ROOT_DIR)/micro/programs
 MICRO_PROGRAM_OUTPUT_ROOT := $(ACTIVE_ARTIFACT_ROOT)/micro-programs/$(RUN_TARGET_ARCH)
 MICRO_PROGRAM_SRCS = $(shell find "$(MICRO_PROGRAM_SOURCE_ROOT)" -maxdepth 1 -type f -name '*.bpf.c' -print 2>/dev/null)
+MICRO_HANDCRAFT_SRCS = $(shell find "$(MICRO_PROGRAM_SOURCE_ROOT)" -maxdepth 1 -type f -name '*.handcraft.c' -print 2>/dev/null)
 MICRO_PROGRAM_OBJECTS = $(patsubst $(MICRO_PROGRAM_SOURCE_ROOT)/%.bpf.c,$(MICRO_PROGRAM_OUTPUT_ROOT)/%.bpf.o,$(MICRO_PROGRAM_SRCS))
 MICRO_PROGRAM_NATIVE_OBJECTS = $(patsubst $(MICRO_PROGRAM_SOURCE_ROOT)/%.bpf.c,$(MICRO_PROGRAM_OUTPUT_ROOT)/%.native.so,$(MICRO_PROGRAM_SRCS))
+MICRO_PROGRAM_HANDCRAFT_OBJECTS = $(patsubst $(MICRO_PROGRAM_SOURCE_ROOT)/%.handcraft.c,$(MICRO_PROGRAM_OUTPUT_ROOT)/%.handcraft.so,$(MICRO_HANDCRAFT_SRCS))
 RUNNER_BUILD_DIR_ACTIVE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(RUNNER_DIR)/build-arm64-llvmbpf,$(RUNNER_DIR)/build-llvmbpf)
 RUNNER_LIBBPF_BUILD_DIR := $(RUNNER_BUILD_DIR_ACTIVE)/vendor/libbpf
 RUNNER_LIBBPF_OBJDIR := $(RUNNER_LIBBPF_BUILD_DIR)/obj
@@ -100,7 +102,7 @@ RUNNER_LLVMBPF_SOURCE_FILES = $(RUNNER_DIR)/src/llvmbpf_runner.cpp $(shell find 
 RUNNER_SOURCE_FILES = $(RUNNER_CORE_SOURCE_FILES) $(RUNNER_LLVMBPF_SOURCE_FILES)
 TEST_UNITTEST_SOURCE_FILES = $(shell find "$(ROOT_DIR)/tests/unittest" \( -path '*/build' -o -path '*/build-arm64' \) -prune -o -type f -print 2>/dev/null)
 TEST_NEGATIVE_SOURCE_FILES = $(shell find "$(ROOT_DIR)/tests/negative" \( -path '*/build' -o -path '*/build-arm64' \) -prune -o -type f -print 2>/dev/null)
-MICRO_PROGRAM_SOURCE_FILES = $(MICRO_PROGRAM_SRCS) $(shell find "$(MICRO_PROGRAM_SOURCE_ROOT)" -maxdepth 1 -type f \( -name '*.h' -o -name 'Makefile' \) -print 2>/dev/null)
+MICRO_PROGRAM_SOURCE_FILES = $(MICRO_PROGRAM_SRCS) $(MICRO_HANDCRAFT_SRCS) $(shell find "$(MICRO_PROGRAM_SOURCE_ROOT)" -maxdepth 1 -type f \( -name '*.h' -o -name 'Makefile' \) -print 2>/dev/null)
 KINSN_SOURCE_FILES = $(shell find "$(ACTIVE_KINSN_SOURCE_DIR)" "$(ROOT_DIR)/module/include" -type f \( -name '*.c' -o -name '*.h' -o -name 'Makefile' \) -print 2>/dev/null)
 KINSN_SOURCE_FILES_X86 = $(shell find "$(ROOT_DIR)/module/x86" "$(ROOT_DIR)/module/include" -type f \( -name '*.c' -o -name '*.h' -o -name 'Makefile' \) -print 2>/dev/null)
 KINSN_SOURCE_FILES_ARM64 = $(shell find "$(ROOT_DIR)/module/arm64" "$(ROOT_DIR)/module/include" -type f \( -name '*.c' -o -name '*.h' -o -name 'Makefile' \) -print 2>/dev/null)
@@ -389,7 +391,7 @@ image-katran-artifacts image-runner-artifacts image-micro-program-artifacts imag
 else
 image-katran-artifacts: $(ACTIVE_KATRAN_REQUIRED)
 image-runner-artifacts: $(ACTIVE_RUNNER_BINARY)
-image-micro-program-artifacts: $(MICRO_PROGRAM_OBJECTS) $(MICRO_PROGRAM_NATIVE_OBJECTS)
+image-micro-program-artifacts: $(MICRO_PROGRAM_OBJECTS) $(MICRO_PROGRAM_NATIVE_OBJECTS) $(MICRO_PROGRAM_HANDCRAFT_OBJECTS)
 image-test-artifacts: $(ACTIVE_TEST_UNITTEST_PRIMARY) $(ACTIVE_TEST_NEGATIVE_PRIMARY)
 
 $(RUNNER_LIBBPF_A): $(LIBBPF_SOURCE_FILES) $(BUILD_RULE_FILES)
@@ -421,10 +423,10 @@ $(ACTIVE_TEST_NEGATIVE_PRIMARY): $(TEST_NEGATIVE_SOURCE_FILES) $(BUILD_RULE_FILE
 	mkdir -p "$(ACTIVE_TEST_NEGATIVE_BUILD_DIR)"
 	make -C "$(ROOT_DIR)/tests/negative" BUILD_DIR="$(ACTIVE_TEST_NEGATIVE_BUILD_DIR)" CC=gcc
 
-$(MICRO_PROGRAM_OBJECTS) $(MICRO_PROGRAM_NATIVE_OBJECTS) &: $(MICRO_PROGRAM_SOURCE_FILES) $(BUILD_RULE_FILES)
+$(MICRO_PROGRAM_OBJECTS) $(MICRO_PROGRAM_NATIVE_OBJECTS) $(MICRO_PROGRAM_HANDCRAFT_OBJECTS) &: $(MICRO_PROGRAM_SOURCE_FILES) $(BUILD_RULE_FILES)
 	mkdir -p "$(MICRO_PROGRAM_OUTPUT_ROOT)"
 	make -C "$(MICRO_PROGRAM_SOURCE_ROOT)" OUTPUT_DIR="$(MICRO_PROGRAM_OUTPUT_ROOT)" all
-	for path in $(MICRO_PROGRAM_OBJECTS) $(MICRO_PROGRAM_NATIVE_OBJECTS); do test -f "$$path"; done
+	for path in $(MICRO_PROGRAM_OBJECTS) $(MICRO_PROGRAM_NATIVE_OBJECTS) $(MICRO_PROGRAM_HANDCRAFT_OBJECTS); do test -f "$$path"; done
 
 include $(KATRAN_ARTIFACTS_BUILD_RULE_FILE)
 

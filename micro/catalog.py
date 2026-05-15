@@ -100,6 +100,7 @@ class CatalogTarget:
     level: str | None = None
     hypothesis: str | None = None
     tags: tuple[str, ...] = ()
+    runtime_names: tuple[str, ...] = ()
     backends: tuple[str, ...] = ()
     policy_modes: tuple[str, ...] = ()
     transports: tuple[str, ...] = ()
@@ -251,12 +252,20 @@ def _load_micro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
     targets: list[CatalogTarget] = []
     for benchmark in data.get("benchmarks", []):
         base_name = str(benchmark["base_name"])
+        object_kind = str(benchmark.get("object_kind", "bpf"))
+        if object_kind == "bpf":
+            object_path = (program_dir / f"{base_name}.bpf.o").resolve()
+        elif object_kind == "handcraft":
+            object_path = (program_dir / f"{base_name}.handcraft.so").resolve()
+        else:
+            raise ValueError(f"unsupported object_kind for {benchmark['name']}: {object_kind}")
+        runtime_names = tuple(str(runtime) for runtime in benchmark.get("runtimes", ()))
         targets.append(
             CatalogTarget(
                 name=str(benchmark["name"]),
                 description=str(benchmark.get("description", benchmark["name"])),
                 kind="micro",
-                object_path=(program_dir / f"{base_name}.bpf.o").resolve(),
+                object_path=object_path,
                 program_names=(str(benchmark.get("program_name", f"{base_name}_xdp")),),
                 io_mode=str(benchmark.get("io_mode", default_io_mode)),
                 input_size=int(benchmark.get("kernel_input_size", 0) or 0),
@@ -267,10 +276,15 @@ def _load_micro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
                 level=str(benchmark["level"]) if benchmark.get("level") else None,
                 hypothesis=str(benchmark["hypothesis"]) if benchmark.get("hypothesis") else None,
                 tags=tuple(str(tag) for tag in benchmark.get("tags", ())),
+                runtime_names=runtime_names,
                 backends=runtime_backends,
                 policy_modes=runtime_policy_modes,
                 transports=runtime_transports,
-                metadata={"base_name": base_name},
+                metadata={
+                    "base_name": base_name,
+                    "object_kind": object_kind,
+                    "native_baseline": str(benchmark["native_baseline"]) if benchmark.get("native_baseline") else None,
+                },
             )
         )
 

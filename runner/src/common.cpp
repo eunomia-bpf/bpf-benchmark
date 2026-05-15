@@ -15,7 +15,7 @@ std::string usage_text()
         "[--memory <path>] [--fixture-path <path>] [--btf-custom-path <path>] "
         "[--io-mode map|staged|packet|context] [--raw-packet] [--inner-repeat N] "
         "[--warmup N] [--input-size N] [--signal-control] [--perf-counters] "
-        "[--perf-scope full_repeat_raw|full_repeat_avg] [--dump-jit] "
+        "[--perf-scope full_repeat_raw|full_repeat_avg] [--dump-jit] [--dump-jit-path <path>] "
         "[--dump-xlated <path>]\n"
         "  micro_exec run-native [--program <path>|<path>] [--program-name <name>] "
         "[--memory <path>] [--io-mode staged|packet] [--inner-repeat N] [--input-size N]\n"
@@ -23,7 +23,7 @@ std::string usage_text()
         "  micro_exec run-llvmbpf [--program <path>|<path>] [--program-name <name>] "
         "[--memory <path>] [--io-mode map|staged|packet] [--raw-packet] "
         "[--inner-repeat N] [--input-size N] [--perf-counters] "
-        "[--perf-scope full_repeat_raw|full_repeat_avg] [--dump-jit]\n"
+        "[--perf-scope full_repeat_raw|full_repeat_avg] [--dump-jit] [--dump-jit-path <path>]\n"
 #endif
         "  micro_exec list-programs [--program <path>|<path>]";
 }
@@ -310,6 +310,10 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--dump-jit") {
             options.dump_jit = true;
+            continue;
+        }
+        if (current == "--dump-jit-path" && index + 1 < argc) {
+            options.dump_jit_path = std::filesystem::path(argv[++index]);
             continue;
         }
         if (current == "--dump-xlated" && index + 1 < argc) {
