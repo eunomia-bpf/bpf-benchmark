@@ -2817,6 +2817,29 @@ static int test_rejit_x86_movq_sib_apply(void)
 					       prog, ARRAY_SIZE(prog), 0);
 }
 
+static int test_rejit_x86_movq_sib_dst_equals_index_apply(void)
+{
+	struct bpf_insn prog[] = {
+		BPF_LD_IMM64_RAW(BPF_REG_4, 0x10203040ULL),
+		BPF_STX_MEM(BPF_DW, BPF_REG_10, BPF_REG_4, -16),
+		BPF_MOV64_REG(BPF_REG_1, BPF_REG_10),
+		BPF_ALU64_IMM(BPF_ADD, BPF_REG_1, -32),
+		BPF_MOV64_IMM(BPF_REG_3, 2),
+		BPF_KINSN_SIDECAR(KINSN_X86_SIB_TMP_PAYLOAD(BPF_REG_3,
+							    BPF_REG_1,
+							    BPF_REG_3,
+							    3, 0,
+							    BPF_REG_6)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_MOV64_REG(BPF_REG_0, BPF_REG_3),
+		BPF_EXIT_INSN(),
+	};
+
+	return run_single_kinsn_expect_success(
+		"x86_movq_sib_dst_equals_index_apply", MOD_X86_MOV_SIB,
+		FUNC_X86_MOVQ_SIB, prog, ARRAY_SIZE(prog), 0x10203040);
+}
+
 static int test_rejit_x86_movl_sib_jit_emits_mov_sib(void)
 {
 #if defined(__x86_64__)
@@ -3851,6 +3874,8 @@ int main(int argc, char **argv)
 		ret |= test_rejit_x86_movl_sib_apply();
 	if (should_run_test(filter, "x86_movq_sib_apply"))
 		ret |= test_rejit_x86_movq_sib_apply();
+	if (should_run_test(filter, "x86_movq_sib_dst_equals_index_apply"))
+		ret |= test_rejit_x86_movq_sib_dst_equals_index_apply();
 	if (should_run_test(filter, "x86_movl_sib_jit_emits_mov_sib"))
 		ret |= test_rejit_x86_movl_sib_jit_emits_mov_sib();
 	if (should_run_test(filter, "x86_movzbl_sib_jit_emits_movzx_sib"))

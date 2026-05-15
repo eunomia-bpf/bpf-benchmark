@@ -230,7 +230,7 @@ analysis/native_asm_to_handcraft.py \
   --output micro/programs/siphash_rotate64_mixer.handcraft.c
 ```
 
-Using a temporary `.native.so` disassembly is only useful when the markdown does not exist yet or is stale. Once `micro/programs/<bench>.md` exists, the generated `## Native ASM` section is the right source of truth for the converter.
+The generated `micro/programs/<bench>.md` file is the converter input; its `## Native ASM` section is the source of truth.
 
 Current converter inventory after regenerating all 29 checked-in handcraft sources from the generated markdown files:
 
@@ -243,7 +243,7 @@ Current converter inventory after regenerating all 29 checked-in handcraft sourc
 | Padding/nop instructions dropped | 45 |
 | Unsupported / warning instructions kept as comments | 1375 |
 
-The converter is now mechanical again: it does not replace a native instruction cluster with a semantic hand-written BPF state machine. A native instruction is either emitted as a single named machine kinsn, emitted as ordinary BPF when the kernel JIT is expected to produce an acceptable branch/load/store form, or left as an inline warning comment in the generated `.handcraft.c`. Manual edits are allowed only to repair generated source while preserving one native instruction to one handcraft instruction as closely as possible.
+The converter is mechanical: it does not replace a native instruction cluster with a hand-written BPF state machine. A native instruction is either emitted as a single named machine kinsn, emitted as ordinary BPF when the kernel JIT is expected to produce an acceptable branch/load/store form, or left as an inline warning comment in the generated `.handcraft.c`. Manual edits are allowed only to repair generated source while preserving one native instruction to one handcraft instruction as closely as possible.
 
 The main remaining warning classes are native ABI/prologue/spill code, unsupported host registers (`r10/r11/r12/rbp/rsp`), RIP-relative table/data references, missing carry/sign-flag proof, and application context ABI mismatches. Register remapping is still allowed for the handcraft experiment because the goal is final machine-code shape, not strict host-register identity. Control-flow is the least one-to-one part today: `cmp/test` instructions can be emitted as exact kinsns, but a following `jcc` is still usually represented as verifier-visible BPF branch unless and until a branch kinsn with relocation/current-PC support exists.
 
@@ -258,7 +258,7 @@ The regenerated sources currently include these flag-related exact kinsn sites:
 | `sete` / `setge` | 2 |
 | `cmove` / `cmovne` | 0 |
 
-The zero `cmov` count is expected from the current markdown corpus: the visible `cmov` sites either lack an adjacent cmp/test proof after intervening native instructions, use carry condition (`cmovb`), or use operands not currently representable by the converter. Those should be fixed by adding machine-instruction kinsns and proof payloads where possible, not by reintroducing cluster-level semantic handcraft.
+The zero `cmov` count is expected from the current markdown corpus: the visible `cmov` sites either lack an adjacent cmp/test proof after intervening native instructions, use carry condition (`cmovb`), or use operands not currently representable by the converter. Those should be fixed by adding machine-instruction kinsns and proof payloads where possible.
 
 The current per-case handcraft smoke uses:
 
@@ -271,39 +271,37 @@ SAMPLES=1 WARMUPS=0 INNER_REPEAT=1000 BENCH=<case> make micro
 
 | Benchmark | Native | Kernel | Kernel Handcraft | Handcraft Result | Native-vs-Handcraft JIT Body |
 |---|---:|---:|---:|---:|---|
-| `simple` | 2 ns | 10 ns | 10 ns | `12345678` | ok; fresh per-case smoke, JIT size 107 B -> 73 B |
-| `simple_packet` | 2 ns | 11 ns | 6 ns | `12345678` | ok; fresh per-case smoke, JIT size 95 B -> 64 B |
-| `bitmap_popcount_scan` | 463 ns | 1128 ns | 469 ns | `12830754992348206170` | ok; native now emits `popcntq`, handcraft emits `popcntq`, `andb imm8`, and `incq`; JIT size 504 B -> 128 B; remaining body mismatch is the native memory-compare branch shape (`cmp DWORD PTR [rsi],0x100`) vs verifier-visible load+compare (`mov ebx,[rsi]`; `cmp rbx,0x100`) |
-| `sorted_rule_binary_search` | 306 ns | 606 ns | 407 ns | `126` | ok; converter fixed the previous 116-vs-126 mismatch by coalescing native `sete/cmov/or/test/cmov` found-update logic into verifier-visible BPF; JIT size 786 B -> 176 B; remaining mismatch is native scratch-reg `r10/r11` flag code that cannot be one-to-one represented by the current BPF register file |
-| `bcc_runqlat_log2_histogram_bucket` | pending | - | - | - | full-suite rerun in progress | has `cmovb` carry-select warning |
-| `trace_event_type_switch_dispatch` | pending | - | - | - | full-suite rerun in progress | native uses RIP-relative jump/table data |
-| `packet_checksum_fold` | 13343 ns | 17635 ns | 13351 ns | `0` | ok; handcraft kernel body closely matches the native fold loop (`movzx`, `add`, `shr`, `jne`) and cuts JIT size 424 B -> 180 B, xlated 784 B -> 416 B; no new carry kinsn was needed for this workload because the compiler expressed the fold as explicit high/low adds rather than `adc` |
-| `payload_prefix_memcmp_scan` | 57 ns | 99 ns | 60 ns | `9377358970524074984` | ok; converter now maps native byte prefix-loop operations to exact `xorb rr`, `xorb imm8`, and `addb imm8` kinsns, and remaps native `r10` scratch state into verifier-visible BPF; JIT size 565 B -> 525 B, xlated 1112 B -> 1456 B; remaining mismatch is register allocation (`r10` becomes BPF `r6`/`rbx`, `r9` becomes BPF `r9`/`r15`) plus verifier-visible byte compares emitted as register compares |
-| `packet_vlan_tcpopt_parser` | pending | - | - | - | full-suite rerun in progress | pending |
-| `bpf_local_call_fanout_dispatch` | pending | - | - | - | full-suite rerun in progress | local-call layout remains a structural gap |
-| `flow_5tuple_rss_hash` | pending | - | - | - | full-suite rerun in progress | pending |
-| `katran_lb_consistent_hash_select` | pending | - | - | - | full-suite rerun in progress | has `cmovb` carry-select warnings |
-| `cilium_policy_guard_tree_filter` | pending | - | - | - | full-suite rerun in progress | pending |
-| `siphash_rotate64_mixer` | pending | - | - | - | full-suite rerun in progress | expected rotate coverage |
-| `packet_record_bounds_window` | pending | - | - | - | full-suite rerun in progress | pending |
-| `flow_record_field_scan` | pending | - | - | - | full-suite rerun in progress | pending |
-| `packed_header_bitfield_decode` | pending | - | - | - | full-suite rerun in progress | pending |
-| `bpftrace_string_search_prefix_scan` | pending | - | - | - | full-suite rerun in progress | pending |
-| `tracee_syscall_name_table_lookup` | pending | - | - | - | full-suite rerun in progress | pending |
-| `tracee_http_method_prefix_detect` | pending | - | - | - | full-suite rerun in progress | pending |
-| `cilium_socket_lb_service_select` | pending | - | - | - | full-suite rerun in progress | has unsupported `cmove` |
-| `bcc_tcpconnect_ipv4_tuple_filter` | pending | - | - | - | full-suite rerun in progress | has one `setge` exact site and one unsupported `cmove` |
-| `tetragon_process_event_arg_filter` | pending | - | - | - | full-suite rerun in progress | has `sete` exact site and unsupported `cmovne` |
-| `otel_stack_frame_unwind_scan` | pending | - | - | - | full-suite rerun in progress | has unsupported `cmove/cmovne` sites |
-| `cilium_ct_nat_tuple_rewrite` | pending | - | - | - | full-suite rerun in progress | has unsupported `cmovne` sites |
-| `packet_toeplitz_rss_hash` | pending | - | - | - | full-suite rerun in progress | has RIP-relative table and endian/rotate warnings |
-| `bpftrace_comm_key_fnv_hash` | pending | - | - | - | full-suite rerun in progress | has unsupported `cmove` and host-register remaps |
-| `tc_packet_checksum_fold` | pending | - | - | - | full-suite rerun in progress | expected checksum/fold coverage under sched_cls context |
-| `cgroup_skb_hash_chain` | pending | - | - | - | full-suite rerun in progress | pending |
+| `simple` | 2 ns | 6 ns | 6 ns | `12345678` | ok; JIT size 107 B -> 85 B |
+| `simple_packet` | 3 ns | 10 ns | 10 ns | `12345678` | ok; JIT size 95 B -> 72 B |
+| `bitmap_popcount_scan` | 467 ns | 1131 ns | 475 ns | `12830754992348206170` | ok; hot loop matches native shape, JIT size 117 B -> 128 B; one cold `cmp [mem], imm` site is load+cmp |
+| `sorted_rule_binary_search` | 311 ns | 575 ns | failed | `verifier rejected: infinite loop at insn 36` | no handcraft JIT dump |
+| `bcc_runqlat_log2_histogram_bucket` | 1130 ns | 1170 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
+| `trace_event_type_switch_dispatch` | 54 ns | 310 ns | 87 ns | `16` | ok; converter output was minimally repaired for XDP ctx, staged switch table, and `dh`; native 170 B -> handcraft JIT 238 B |
+| `packet_checksum_fold` | 13364 ns | 17651 ns | failed | `verifier rejected: invalid access to packet, off=-3 size=2, R5(id=0,off=-3,r=1040)` | no handcraft JIT dump |
+| `payload_prefix_memcmp_scan` | 50 ns | 114 ns | failed | `verifier rejected: value 1728053766 makes pkt pointer be out of bounds` | no handcraft JIT dump |
+| `packet_vlan_tcpopt_parser` | 8 ns | 14 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
+| `bpf_local_call_fanout_dispatch` | 68 ns | 131 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
+| `flow_5tuple_rss_hash` | 10 ns | 23 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
+| `katran_lb_consistent_hash_select` | 12 ns | 37 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
+| `cilium_policy_guard_tree_filter` | 42 ns | 98 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
+| `siphash_rotate64_mixer` | 27 ns | 72 ns | 30 ns | `2666935177028490406` | ok; JIT size 3520 B -> 1162 B |
+| `packet_record_bounds_window` | 71 ns | 129 ns | failed | `unreachable insn 28; processed 0` | no handcraft JIT dump |
+| `flow_record_field_scan` | 56 ns | 80 ns | failed | `unreachable insn 26; processed 0` | no handcraft JIT dump |
+| `packed_header_bitfield_decode` | 201 ns | 269 ns | failed | `verifier rejected: R5 !read_ok` | no handcraft JIT dump |
+| `bpftrace_string_search_prefix_scan` | 126 ns | 236 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
+| `tracee_syscall_name_table_lookup` | 90 ns | 130 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
+| `tracee_http_method_prefix_detect` | 19 ns | 31 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
+| `cilium_socket_lb_service_select` | 178 ns | 420 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
+| `bcc_tcpconnect_ipv4_tuple_filter` | 65 ns | 147 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
+| `tetragon_process_event_arg_filter` | 120 ns | 189 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
+| `otel_stack_frame_unwind_scan` | 44 ns | 132 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
+| `cilium_ct_nat_tuple_rewrite` | 76 ns | 209 ns | failed | `unreachable insn 83; processed 0` | no handcraft JIT dump |
+| `packet_toeplitz_rss_hash` | 262 ns | 269 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
+| `bpftrace_comm_key_fnv_hash` | 436 ns | 486 ns | failed | `unreachable insn 81; processed 0` | no handcraft JIT dump |
+| `tc_packet_checksum_fold` | 13401 ns | 17682 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
+| `cgroup_skb_hash_chain` | 291 ns | 285 ns | failed | `verifier rejected: invalid bpf_context access off=16 size=4` | no handcraft JIT dump |
 
-The instruction counts compare normalized function bodies: kernel wrapper/prologue/epilogue differences are removed, and the expected BPF-JIT register naming difference (`r15` for BPF `r9`) is normalized. The direct handcraft cases show the positive result for the machine-kinsn hypothesis: converted kinsn/BPF input verifies, executes correctly, and can dump final x86 code matching native body instruction-for-instruction after mechanical normalization. The semantic handcraft rows are deliberately separate: they prove verifier-facing reloadability and isolate which remaining gaps are instruction-level versus ABI/layout/register-pressure problems.
-
-The table intentionally keeps all micro cases in one place. Rows with `pending` do not mean the benchmark is unsupported; they mean there is no fresh generated markdown and no handcraft parity run yet. Current generated markdown coverage in `micro/programs/` exists for cases from completed or earlier selected runs, including the direct parity cases, checksum/string/packet parser cases, and the latest local-call fanout run. The driver writes these files after the selected micro run completes; failed or not-yet-run benchmarks will not have fresh markdown.
+The instruction counts compare normalized function bodies: kernel wrapper/prologue/epilogue differences are removed, and the expected BPF-JIT register naming difference (`r15` for BPF `r9`) is normalized. The table keeps all micro cases in one place and records the current raw outcome: either the handcraft program verifies and produces a kernel JIT dump, or the exact verifier/load failure is shown.
 
 The concrete x86 instruction/form matrix is now:
 
@@ -313,7 +311,7 @@ The concrete x86 instruction/form matrix is now:
 | `rolq imm` | `rotate` recovered `492/492` sites in the full run | `bpf_x86_rolq_imm` | shift/or rotate expansion using a temp register | heavily used by `siphash_rotate64_mixer`; JIT body parity passes | automatic pass still does not solve scheduling/register allocation around rotate-heavy code |
 | `rolw imm`, `rorxl imm` | `rotate` / `endian_fusion` adjacent | `bpf_x86_rolw_imm`, `bpf_x86_rorxl_imm` | width-specific rotate-equivalent BPF | selector exists; needs current handcraft micro coverage | Katran/Toeplitz-style endian+rotate patterns need more conversion coverage |
 | `movzbl/movzwl/movl/movq disp(base), reg` | `wide_mem` applied `186/255` in full run | `bpf_x86_movzbl_mem`, `bpf_x86_movzwl_mem`, `bpf_x86_movl_mem`, `bpf_x86_movq_mem` | direct verifier-safe `LDX_MEM` from the same base/disp | `movq` path used in `siphash_rotate64_mixer`; parity passes | whole-record packet clusters and some unaligned cases still need automatic `wide_mem` work |
-| `movzwl/movl/movq disp(base,index,scale), reg` | partially reachable through `lea` + `wide_mem` | `bpf_x86_movzwl_sib`, `bpf_x86_movl_sib`, `bpf_x86_movq_sib` | temp = index shift; ptr = base + temp; `LDX_MEM` | selectors exist; full current handcraft coverage still pending | Toeplitz table loads and dense-switch table loads are the main targets |
+| `movzwl/movl/movq disp(base,index,scale), reg` | partially reachable through `lea` + `wide_mem` | `bpf_x86_movzwl_sib`, `bpf_x86_movl_sib`, `bpf_x86_movq_sib` | temp = index shift; ptr = base + temp; `LDX_MEM`; optional temp payload handles `dst == base/index` without changing final x86 | `movq_sib` is unit-covered for the `dst == index` verifier case; `bitmap_popcount_scan` emits native indexed-load shape; `trace_event_type_switch_dispatch` keeps the packet-field `movl` SIB exact | static table loads still need a real data/table transport path; dense-switch table load currently uses verifier-visible packet-table repair |
 | `movbe16/movbe32/movbe64 disp(base,index,scale), reg` | intended neighbor of `endian_fusion`; full run had no matched sites | `bpf_x86_movbe16_sib`, `bpf_x86_movbe32_sib`, `bpf_x86_movbe64_sib` | indexed load plus endian conversion | selector exists; needs Toeplitz/packet endian handcraft run | byte-composed network-endian fields are not normalized often enough today |
 | `movb/movw/movl/movq reg, disp(base)` | ordinary BPF stores already map well in many cases | `bpf_x86_movb_mem_reg`, `bpf_x86_movw_mem_reg`, `bpf_x86_movl_mem_reg`, `bpf_x86_movq_mem_reg` | direct verifier-safe `STX_MEM` | selectors exist; direct stores need broader handcraft coverage | packet write paths should be checked against native output case by case |
 | `movb imm, disp(base)` | ordinary BPF immediate stores cover semantics | `bpf_x86_movb_imm_mem` | verifier-safe `ST_MEM` byte store | used by `simple`/`simple_packet`; parity passes | wider immediate stores currently stay ordinary BPF when kernel output is already equivalent |
@@ -324,14 +322,14 @@ The concrete x86 instruction/form matrix is now:
 | `addl/xorl/xorw reg, disp(base)` and `xorb reg, disp(base,index,scale)` | ordinary BPF needs separate load + ALU | `bpf_x86_addl_mem`, `bpf_x86_xorl_mem`, `bpf_x86_xorw_mem`, `bpf_x86_xorb_sib` | verifier sees load + ALU, with upper-bit preservation for byte/word forms | module builds; unit tests compile; converter now covers Toeplitz/Katran/Cilium/string-scan memory-source ALU forms when registers are representable | 64-bit stack-spill ABI forms and unsupported host registers remain outside BPF-level parity |
 | `shldl/shldq/shrdl/shrdq imm` | ordinary BPF expands to shift/or | `bpf_x86_shldl_imm`, `bpf_x86_shldq_imm`, `bpf_x86_shrdl_imm`, `bpf_x86_shrdq_imm` | temp-register shift/or BPF sequence | module builds; unit tests compile; converter maps representable `shld/shrd` forms | current residual `shrd` markdown sites use unsupported native registers |
 | `testq/testb` + `cmoveq/cmovneq` | `cond_select` is the automatic branchless-select path | `bpf_x86_testq_rr`, `bpf_x86_testb_imm`, `bpf_x86_cmoveq_rr`, `bpf_x86_cmovneq_rr` | verifier sees explicit boolean/select BPF sequence; final x86 keeps flags-dependent instruction pair | covered by `sorted_rule_binary_search` outer select; previous wrong-cond bug is fixed | automatic pass still needs proof that no flags/condition dependency is broken |
-| `setne/sete/setge`, `cmovbl/cmovbq`, `sbbl imm0` | no automatic pass yet | `bpf_x86_setne_r`, `bpf_x86_sete_r`, `bpf_x86_setge_r`, `bpf_x86_cmovbl_rr`, `bpf_x86_cmovbq_rr`, `bpf_x86_sbbl_imm0` | verifier uses an explicit condition/carry register in payload; final x86 consumes adjacent flags | modules build; unit tests compile; sorted-rule `sete/cmov` scratch-reg chain is intentionally coalesced to BPF rather than emitted as unsafe exact kinsns | needs a cmp/test proof graph before automatic conversion, otherwise handcraft can silently miscompile carry/flag semantics |
-| `popcntq` | no automatic pass yet | `bpf_x86_popcntq` | scalar popcount fallback sequence | covered by `bitmap_popcount_scan`; handcraft verifies, returns the native result, and dumps `popcnt rdi,rdi` | add automatic scalar-pattern pass only after workload evidence says it matters |
+| `setne/sete/setge`, `cmovbl/cmovbq`, `sbbl imm0` | no automatic pass yet | `bpf_x86_setne_r`, `bpf_x86_sete_r`, `bpf_x86_setge_r`, `bpf_x86_cmovbl_rr`, `bpf_x86_cmovbq_rr`, `bpf_x86_sbbl_imm0` | verifier uses an explicit condition/carry register in payload; final x86 consumes adjacent flags | modules build; unit tests compile; current generated `cmov` sites are still not emitted as exact kinsns unless the converter has a usable adjacent flag proof | needs a cmp/test proof graph before automatic conversion, otherwise handcraft can silently miscompile carry/flag semantics |
+| `popcntq` | no automatic pass yet | `bpf_x86_popcntq` | scalar popcount fallback sequence | covered by `bitmap_popcount_scan`; handcraft verifies, returns the native result, and dumps `popcnt rdi,rdi`; measured 475 ns vs native 467 ns and kernel BPF 1131 ns | add automatic scalar-pattern pass only after workload evidence says it matters |
 | `blsiq` / `blsrq` | no automatic pass yet | `bpf_x86_blsiq`, `bpf_x86_blsrq` | `x & -x` / `x & (x - 1)` BPF sequence | selector exists; needs bitmap traversal coverage | same as `popcntq`: useful for bitmap cases, not yet broad |
 | `andb/xorb/addb imm8`, `xorb r8,r8`, `incq` | ordinary BPF emits wider ALU or `add imm 1` forms | `bpf_x86_andb_imm`, `bpf_x86_xorb_imm`, `bpf_x86_addb_imm`, `bpf_x86_xorb_rr`, `bpf_x86_incq` | byte ops preserve upper bits through temp-register verifier BPF; `xorb imm8` is direct XOR of low mask; `incq` is direct `ADD 1` | `andb`/`incq` covered by `bitmap_popcount_scan`; `xorb`/`addb` covered by `payload_prefix_memcmp_scan`, which now verifies and returns the native result | these are parity-only machine-instruction gaps, not independent high-level transforms |
 | `shrq imm`, `andl imm32`, `sar imm` | ordinary BPF ALU often maps acceptably | `bpf_x86_shrq_imm`, `bpf_x86_andl_imm32`; `sar imm` currently stays ordinary BPF | direct BPF ALU operation | selector exists where needed; converter no longer treats `sar imm` as a missing kinsn | not a high-level transform by itself |
 | `prefetcht0` | `prefetch` pass applied `9/9` in full run | `bpf_x86_prefetcht0` | verifier-safe no-value prefetch semantics | selector exists | not a dominant native-code gap in the inspected cases |
 | `cmp/test + jcc` | ordinary BPF branches already lower to x86 compare/test plus jump | no standalone branch kinsn today | verifier-native BPF branch | used by handcraft converter for bounds and control-flow edges | a branch kinsn would need relocation/current-PC context in the kinsn emit API; do not add unless ordinary BPF cannot dump the same x86 |
-| dense switch jump/table load | no automatic pass | no complete kinsn path yet | compare tree today | `trace_event_type_switch_dispatch` markdown exists, but handcraft parity is not current | needs table recovery or an explicit table-load/jump-table design |
+| dense switch jump/table load | no automatic pass | partial handcraft path only: exact `movl` SIB for input field, verifier-visible repaired table load | compare tree today for normal BPF; handcraft stages the native 512 B switch table after packet payload | `trace_event_type_switch_dispatch` now verifies and runs: native 54 ns, kernel 310 ns, handcraft 87 ns, result `16`; final JIT is close in hot-loop shape but has an extra table-tail bounds proof and no RIP-relative rodata table | needs automatic switch/table recovery and a real rodata/table side channel instead of packet-tail staging |
 | local `callq` / bpf2bpf call layout | no automatic local-inline pass | no machine-call kinsn path | bpf2bpf call ABI | not covered by handcraft parity | requires interprocedural transform, not only single-instruction kinsns |
 
 Viewed from pass ownership:
@@ -414,10 +412,13 @@ The llvmbpf result is the useful clue: LLVM spends more bytes than native but ge
 | llvmbpf | 255 ns | 1261 B |
 | kernel | 289 ns | 1621 B |
 | kernel_rejit | 296 ns | 1531 B |
+| kernel_handcraft | 87 ns | 238 B |
 
 ReJIT shrinks the code but does not speed it up. Native Clang lowers the dense switch into an indexed table load; the BPF/ReJIT path still carries a much larger branch/data-movement shape. This is a structural gap: once the source-level switch has become verifier-friendly BPF branches, local peepholes do not recover the table-dispatch form.
 
 The direct native sequence is a range check and `movq (%rdi,%rdx,8), %rdx` from a 512 B `.rodata` table. The BPF object has hundreds of compare-tree instructions. This should be one of the first next pass investigations because the gap is specific, visible, and tied to a common tracing/event-dispatch pattern.
+
+The handcraft run demonstrates the upper bound for this case without pretending the converter solved table recovery. The source remains the converter output, with small inline repairs: XDP context loads use the verifier-visible 32-bit BPF ctx fields, the native RIP-relative switch table is staged after the packet payload, the table-tail check is made explicit for the verifier, and the high-byte `dh` store is represented as shift plus byte store. The final JIT keeps the native loop's important shape, including `mov r8d,[rcx+rsi-0x3]`, range check on the 6-bit dispatch value, and an indexed table load after the explicit verifier proof. That gets `kernel_handcraft` to `87 ns`, much closer to native `54 ns` than normal kernel `310 ns`, but the remaining `238 B` vs `170 B` gap is exactly the missing rodata/table transport and extra verifier-facing proof code.
 
 ### Checksum Fold
 
@@ -533,6 +534,44 @@ The next pass work should be driven by the mismatches above:
 7. Add an analysis-side script, outside the framework result writer, to reproduce these figures/tables from `metadata.json`.
 8. Add analysis-only reachable native code-size extraction for `.native.so`.
 9. Add a controlled selected-case artifact mode for post-ReJIT `bpftool prog dump jited`, without changing benchmark result payloads.
+
+## Research Direction: kinsn Shadow ISA
+
+The more aggressive handcraft direction is to treat kinsns as a shadow x86 ISA rather than as isolated BPF peephole replacements. In this model every translated x86 instruction has two definitions:
+
+- `instantiate_insn(payload)` emits verifier-visible BPF that simulates one x86 instruction over a shadow x86 machine state.
+- `emit_x86(payload)` emits the native x86 instruction sequence that executes the same instruction over the hidden native state.
+
+The verifier-visible shadow state can use ordinary BPF registers plus reserved ghost stack slots:
+
+| x86 State | Verifier Shadow | Native State |
+|---|---|---|
+| `rax`, `rdi`, `rsi`, `rdx`, `rcx`, `r8`, `rbx`, `r13`, `r14`, `r15` | mapped BPF regs | mapped native regs |
+| extra x86 regs such as `r10`, `r11`, `r12` | fixed ghost stack slots, e.g. `[fp - 8]`, `[fp - 16]`, `[fp - 24]` | hidden native regs |
+| `RFLAGS` / condition state | ghost scalar slots or explicit flag shadow regs | native flags when locally valid, or hidden flag regs |
+
+The kernel verifier only proves the BPF shadow program. Correctness of the native program would come from an external proof obligation:
+
+```text
+Let R relate verifier shadow state and hidden native x86 state.
+
+For every kinsn K(payload):
+  if R(BPF_state, X86_state) holds before K,
+  then executing instantiate_insn(K) on BPF_state
+  and executing emit_x86(K) on X86_state
+  produces states where R still holds.
+```
+
+By induction, if every emitted kinsn preserves `R`, the whole translated program preserves the relation across kinsn boundaries. This makes the cross-kinsn contract a property of the kinsn ABI and its external formal validation, not a new responsibility for the kernel verifier.
+
+Under this spec, ghost stack slots are not required to correspond to real runtime stack memory. They are verifier shadow storage. The native side may keep the corresponding values in hidden x86 registers as long as every instruction that can observe or update that state is represented by a kinsn whose `instantiate_insn()` and `emit_x86()` have been proven equivalent. Calls, tail calls, helper calls, branches, memory operations, flags, and exits are not special exemptions; they need kinsn definitions or boundary adapters in the same shadow-ISA spec.
+
+The intended end state is therefore:
+
+- userspace emits only kinsn-backed x86-shadow IR for the translated region;
+- the kinsn module provides the BPF simulation for verifier admission and the native x86 emitter for execution;
+- a separate formal checker proves the per-kinsn simulation relation and the fixed hidden-layout ABI;
+- differential micro runs remain a practical regression test, but not the source of truth for semantic equivalence.
 
 ## Reference Artifacts
 

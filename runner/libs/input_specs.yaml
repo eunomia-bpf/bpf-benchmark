@@ -47,6 +47,7 @@ trace_event_type_switch_dispatch:
   count: 128
   initial_state: 0x1020304050607080
   mask: 0x3F
+  append_switch_table: true
 
 cgroup_skb_hash_chain:
   kind: hash_chain

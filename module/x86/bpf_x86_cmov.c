@@ -281,7 +281,7 @@ static int instantiate_cmp_rr(u64 payload, struct bpf_insn *insn_buf)
 	if (err)
 		return err;
 
-	insn_buf[0] = BPF_JMP_A(0);
+	insn_buf[0] = BPF_JMP_REG(BPF_JEQ, left_reg, right_reg, 0);
 	return 1;
 }
 
@@ -295,7 +295,7 @@ static int instantiate_cmp_imm(u64 payload, struct bpf_insn *insn_buf)
 	if (err)
 		return err;
 
-	insn_buf[0] = BPF_JMP_A(0);
+	insn_buf[0] = BPF_JMP_IMM(BPF_JEQ, reg, imm, 0);
 	return 1;
 }
 
@@ -308,7 +308,7 @@ static int instantiate_testq_rr(u64 payload, struct bpf_insn *insn_buf)
 	if (err)
 		return err;
 
-	insn_buf[0] = BPF_JMP_A(0);
+	insn_buf[0] = BPF_JMP_IMM(BPF_JEQ, reg, 0, 0);
 	return 1;
 }
 
@@ -321,7 +321,7 @@ static int instantiate_test_rr(u64 payload, struct bpf_insn *insn_buf)
 	if (err)
 		return err;
 
-	insn_buf[0] = BPF_JMP_A(0);
+	insn_buf[0] = BPF_JMP_REG(BPF_JEQ, left_reg, right_reg, 0);
 	return 1;
 }
 
@@ -334,7 +334,7 @@ static int instantiate_testb_imm(u64 payload, struct bpf_insn *insn_buf)
 	if (err)
 		return err;
 
-	insn_buf[0] = BPF_JMP_A(0);
+	insn_buf[0] = BPF_JMP_IMM(BPF_JEQ, reg, imm, 0);
 	return 1;
 }
 

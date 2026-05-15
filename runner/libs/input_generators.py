@@ -79,7 +79,13 @@ def _build_trace_event_type_switch_dispatch(output: Path, spec: dict) -> dict:
     blob = bytearray(struct.pack("<I", count))
     for index in range(count):
         state = _lcg(state); blob.extend(struct.pack("<I", ((state >> 32) ^ index) & mask))
-    output.write_bytes(blob); return {"count": count}
+    if spec.get("append_switch_table", False):
+        table = [56, 43, 57, 28, 14, 61, 10, 58, 2, 63, 49, 36, 19, 42, 37, 46,
+                 34, 62, 47, 6, 29, 21, 15, 40, 38, 26, 17, 41, 33, 31, 23, 52,
+                 25, 39, 11, 27, 53, 4, 24, 48, 32, 50, 7, 35, 8, 44, 51, 59,
+                 45, 0, 9, 3, 13, 20, 30, 18, 1, 54, 22, 16, 60, 5, 12, 55]
+        blob.extend(struct.pack("<" + "Q" * len(table), *table))
+    output.write_bytes(blob); return {"count": count, "bytes": len(blob)}
 
 
 def _build_hash_chain(output: Path, spec: dict) -> dict:

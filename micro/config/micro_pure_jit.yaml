@@ -109,7 +109,7 @@ benchmarks:
     level: dense-64
     hypothesis: Represents event/type dispatch tables seen in tracing filters
     base_name: trace_event_type_switch_dispatch
-    kernel_input_size: 516
+    kernel_input_size: 1028
     input_generator: trace_event_type_switch_dispatch
     expected_result: 16
     tags: [branch, dispatch, pure-jit]

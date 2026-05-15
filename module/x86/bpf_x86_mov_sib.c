@@ -26,23 +26,36 @@ BTF_KFUNCS_END(bpf_x86_mov_sib_kfunc_ids)
 
 static __always_inline int decode_mov_sib_payload(u64 payload, u8 *dst_reg,
 						  u8 *base_reg, u8 *index_reg,
-						  u8 *scale_log2, s16 *offset)
+						  u8 *scale_log2, s16 *offset,
+						  u8 *tmp_reg)
 {
 	*dst_reg = kinsn_payload_reg(payload, 0);
 	*base_reg = kinsn_payload_reg(payload, 4);
 	*index_reg = kinsn_payload_reg(payload, 8);
 	*scale_log2 = (payload >> 12) & 0x3;
 	*offset = kinsn_payload_s16(payload, 16);
+	*tmp_reg = BPF_REG_10;
 
-	if (payload >> 32)
+	if (payload >> 36)
 		return -EINVAL;
 	if (payload & (0x3ULL << 14))
 		return -EINVAL;
 	if (*dst_reg >= BPF_REG_10 || *base_reg > BPF_REG_10 ||
 	    *index_reg >= BPF_REG_10)
 		return -EINVAL;
-	if (*dst_reg == *base_reg || *dst_reg == *index_reg)
-		return -EINVAL;
+	if (payload >> 32) {
+		*tmp_reg = kinsn_payload_reg(payload, 32);
+		if (*tmp_reg >= BPF_REG_10)
+			return -EINVAL;
+		if (*tmp_reg == *dst_reg || *tmp_reg == *base_reg ||
+		    *tmp_reg == *index_reg)
+			return -EINVAL;
+		if (!kinsn_x86_reg_valid(*tmp_reg))
+			return -EINVAL;
+	} else {
+		if (*dst_reg == *base_reg || *dst_reg == *index_reg)
+			return -EINVAL;
+	}
 
 	return 0;
 }
@@ -80,22 +93,23 @@ decode_mov_sib_tmp_payload(u64 payload, u8 *dst_reg, u8 *base_reg,
 
 static int instantiate_mov_sib(u64 payload, struct bpf_insn *insn_buf, u8 size)
 {
-	u8 dst_reg, base_reg, index_reg, scale_log2;
+	u8 dst_reg, base_reg, index_reg, scale_log2, tmp_reg, addr_reg;
 	s16 offset;
 	int add_count;
 	int cnt = 0;
 	int err;
 
 	err = decode_mov_sib_payload(payload, &dst_reg, &base_reg, &index_reg,
-				     &scale_log2, &offset);
+				     &scale_log2, &offset, &tmp_reg);
 	if (err)
 		return err;
 
-	insn_buf[cnt++] = BPF_MOV64_REG(dst_reg, base_reg);
+	addr_reg = tmp_reg == BPF_REG_10 ? dst_reg : tmp_reg;
+	insn_buf[cnt++] = BPF_MOV64_REG(addr_reg, base_reg);
 	add_count = 1 << scale_log2;
 	while (add_count--)
-		insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, dst_reg, index_reg);
-	insn_buf[cnt++] = BPF_LDX_MEM(size, dst_reg, dst_reg, offset);
+		insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, addr_reg, index_reg);
+	insn_buf[cnt++] = BPF_LDX_MEM(size, dst_reg, addr_reg, offset);
 	return cnt;
 }
 
@@ -147,7 +161,7 @@ static int emit_mov_sib_x86(u8 *image, u32 *off, bool emit, u64 payload,
 			    const struct bpf_prog *prog, u8 size)
 {
 	u8 buf[16];
-	u8 dst_reg, base_reg, index_reg, scale_log2;
+	u8 dst_reg, base_reg, index_reg, scale_log2, tmp_reg;
 	s16 offset;
 	u32 len = 0;
 	int err;
@@ -158,9 +172,10 @@ static int emit_mov_sib_x86(u8 *image, u32 *off, bool emit, u64 payload,
 		return -EINVAL;
 
 	err = decode_mov_sib_payload(payload, &dst_reg, &base_reg, &index_reg,
-				     &scale_log2, &offset);
+				     &scale_log2, &offset, &tmp_reg);
 	if (err)
 		return err;
+	(void)tmp_reg;
 
 	dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
 	base_reg = kinsn_x86_reg_for_prog(prog, base_reg);
