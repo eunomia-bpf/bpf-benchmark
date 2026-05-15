@@ -24,7 +24,28 @@ mod wide_mem;
 // integration test). The other pass structs are reached through PASS_REGISTRY.
 pub use noop::NoopPass;
 
-use crate::pass::{BpfPass, KinsnDescriptor};
+use crate::pass::{regs_from_offsets, BpfPass, KinsnDescriptor, RegSet};
+
+pub(crate) const COMMON_KINSN_TARGETS: &[KinsnDescriptor] = &[
+    KinsnDescriptor {
+        name: "bpf_x86_movq_rr",
+        register_uses: mov_rr_register_uses,
+        register_defs: mov_rr_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_arm64_mov_x_rr",
+        register_uses: mov_rr_register_uses,
+        register_defs: mov_rr_register_defs,
+    },
+];
+
+fn mov_rr_register_uses(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[4])
+}
+
+fn mov_rr_register_defs(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[0])
+}
 
 // ── Pass registry ───────────────────────────────────────────────────
 

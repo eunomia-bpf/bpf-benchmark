@@ -48,20 +48,56 @@
 #define ROTATE_KINSN_MODULE "bpf_arm64_extr"
 #define ROTATE64_KFUNC "bpf_arm64_extr_x"
 #define SELECT_KINSN_MODULE "bpf_arm64_csel"
-#define SELECT_KFUNC "bpf_arm64_csel_ne_rrr"
+#define SELECT_TEST_KFUNC "bpf_arm64_tst_rr"
+#define SELECT_MOVE_KFUNC "bpf_arm64_csel_ne_rrr"
+#define EXTRACT_KINSN_MODULE "bpf_arm64_ubfm"
+#define EXTRACT_SHIFT_KFUNC "bpf_arm64_ubfm_x_imm"
+#define EXTRACT_MASK_KFUNC "bpf_arm64_ubfm_x_imm"
+#define ENDIAN_LOAD_MODULE "bpf_arm64_ldr"
+#define ENDIAN_SWAP_MODULE "bpf_arm64_rev"
+#define ENDIAN_LOAD16_KFUNC "bpf_arm64_ldrh_mem"
+#define ENDIAN_LOAD32_KFUNC "bpf_arm64_ldr_w_mem"
+#define ENDIAN_LOAD64_KFUNC "bpf_arm64_ldr_x_mem"
+#define ENDIAN_SWAP16_KFUNC "bpf_arm64_rev16_w"
+#define ENDIAN_SWAP32_KFUNC "bpf_arm64_rev_w"
+#define ENDIAN_SWAP64_KFUNC "bpf_arm64_rev_x"
+#define BULK_LOAD_MODULE "bpf_arm64_ldr"
+#define BULK_STORE_MODULE "bpf_arm64_str"
+#define BULK_LOADB_KFUNC "bpf_arm64_ldrb_mem"
+#define BULK_STOREB_REG_KFUNC "bpf_arm64_strb_mem_reg"
+#define BULK_STOREB_IMM_KFUNC "bpf_arm64_strb_wzr_mem"
 #else
 #define ROTATE_KINSN_MODULE "bpf_x86_rotate"
 #define ROTATE64_KFUNC "bpf_x86_rolq_imm"
 #define SELECT_KINSN_MODULE "bpf_x86_cmov"
-#define SELECT_KFUNC "bpf_x86_cmovneq_rr"
+#define SELECT_TEST_KFUNC "bpf_x86_testq_rr"
+#define SELECT_MOVE_KFUNC "bpf_x86_cmovneq_rr"
+#define EXTRACT_KINSN_MODULE "bpf_x86_alu_imm"
+#define EXTRACT_SHIFT_KFUNC "bpf_x86_shrq_imm"
+#define EXTRACT_MASK_KFUNC "bpf_x86_andl_imm32"
+#define ENDIAN_LOAD_MODULE "bpf_x86_mov_mem"
+#define ENDIAN_SWAP_MODULE "bpf_x86_byteorder"
+#define ENDIAN_LOAD16_KFUNC "bpf_x86_movzwl_mem"
+#define ENDIAN_LOAD32_KFUNC "bpf_x86_movl_mem"
+#define ENDIAN_LOAD64_KFUNC "bpf_x86_movq_mem"
+#define ENDIAN_SWAP16_KFUNC "bpf_x86_rolw_imm"
+#define ENDIAN_SWAP32_KFUNC "bpf_x86_bswapl"
+#define ENDIAN_SWAP64_KFUNC "bpf_x86_bswapq"
+#define BULK_LOAD_MODULE "bpf_x86_mov_mem"
+#define BULK_STORE_MODULE "bpf_x86_mov_store"
+#define BULK_LOADB_KFUNC "bpf_x86_movzbl_mem"
+#define BULK_STOREB_REG_KFUNC "bpf_x86_movb_mem_reg"
+#define BULK_STOREB_IMM_KFUNC "bpf_x86_movb_imm_mem"
 #endif
 
 enum kinsn_module_id {
 	MOD_ROTATE,
 	MOD_SELECT,
 	MOD_EXTRACT,
-	MOD_ENDIAN,
-	MOD_BULK_MEMORY,
+	MOD_ENDIAN_LOAD,
+	MOD_ENDIAN_SWAP,
+	MOD_BULK_LOAD,
+	MOD_BULK_STORE,
 	MOD_LDP,
 	MOD_PREFETCH,
 	MOD_X86_MOV_SIB,
@@ -73,13 +109,19 @@ enum kinsn_module_id {
 
 enum kinsn_func_id {
 	FUNC_ROTATE,
-	FUNC_SELECT,
-	FUNC_EXTRACT,
-	FUNC_ENDIAN16,
-	FUNC_ENDIAN32,
-	FUNC_ENDIAN64,
-	FUNC_MEMCPY_BULK,
-	FUNC_MEMSET_BULK,
+	FUNC_SELECT_TEST,
+	FUNC_SELECT_MOVE,
+	FUNC_EXTRACT_SHIFT,
+	FUNC_EXTRACT_MASK,
+	FUNC_ENDIAN_LOAD16,
+	FUNC_ENDIAN_LOAD32,
+	FUNC_ENDIAN_LOAD64,
+	FUNC_ENDIAN_SWAP16,
+	FUNC_ENDIAN_SWAP32,
+	FUNC_ENDIAN_SWAP64,
+	FUNC_BULK_LOADB,
+	FUNC_BULK_STOREB_REG,
+	FUNC_BULK_STOREB_IMM,
 	FUNC_LDP128,
 	FUNC_STP128,
 	FUNC_PREFETCH,
@@ -152,17 +194,27 @@ static struct kinsn_module_ref g_modules[MOD_CNT] = {
 		.required = true,
 	},
 	[MOD_EXTRACT] = {
-		.module_name = "bpf_extract",
+		.module_name = EXTRACT_KINSN_MODULE,
 		.btf_fd = -1,
 		.required = true,
 	},
-	[MOD_ENDIAN] = {
-		.module_name = "bpf_endian",
+	[MOD_ENDIAN_LOAD] = {
+		.module_name = ENDIAN_LOAD_MODULE,
 		.btf_fd = -1,
 		.required = true,
 	},
-	[MOD_BULK_MEMORY] = {
-		.module_name = "bpf_bulk_memory",
+	[MOD_ENDIAN_SWAP] = {
+		.module_name = ENDIAN_SWAP_MODULE,
+		.btf_fd = -1,
+		.required = true,
+	},
+	[MOD_BULK_LOAD] = {
+		.module_name = BULK_LOAD_MODULE,
+		.btf_fd = -1,
+		.required = true,
+	},
+	[MOD_BULK_STORE] = {
+		.module_name = BULK_STORE_MODULE,
 		.btf_fd = -1,
 		.required = true,
 	},
@@ -203,40 +255,64 @@ static struct kinsn_func_ref g_funcs[FUNC_CNT] = {
 		.func_name = ROTATE64_KFUNC,
 		.module_id = MOD_ROTATE,
 	},
-	[FUNC_SELECT] = {
-		.func_name = SELECT_KFUNC,
+	[FUNC_SELECT_TEST] = {
+		.func_name = SELECT_TEST_KFUNC,
 		.module_id = MOD_SELECT,
 	},
-	[FUNC_EXTRACT] = {
-		.func_name = "bpf_extract64",
+	[FUNC_SELECT_MOVE] = {
+		.func_name = SELECT_MOVE_KFUNC,
+		.module_id = MOD_SELECT,
+	},
+	[FUNC_EXTRACT_SHIFT] = {
+		.func_name = EXTRACT_SHIFT_KFUNC,
 		.module_id = MOD_EXTRACT,
 	},
-	[FUNC_ENDIAN16] = {
-		.func_name = "bpf_endian_load16",
-		.module_id = MOD_ENDIAN,
+	[FUNC_EXTRACT_MASK] = {
+		.func_name = EXTRACT_MASK_KFUNC,
+		.module_id = MOD_EXTRACT,
 	},
-	[FUNC_ENDIAN32] = {
-		.func_name = "bpf_endian_load32",
-		.module_id = MOD_ENDIAN,
+	[FUNC_ENDIAN_LOAD16] = {
+		.func_name = ENDIAN_LOAD16_KFUNC,
+		.module_id = MOD_ENDIAN_LOAD,
 	},
-	[FUNC_ENDIAN64] = {
-		.func_name = "bpf_endian_load64",
-		.module_id = MOD_ENDIAN,
+	[FUNC_ENDIAN_LOAD32] = {
+		.func_name = ENDIAN_LOAD32_KFUNC,
+		.module_id = MOD_ENDIAN_LOAD,
 	},
-	[FUNC_MEMCPY_BULK] = {
-		.func_name = "bpf_memcpy_bulk",
-		.module_id = MOD_BULK_MEMORY,
+	[FUNC_ENDIAN_LOAD64] = {
+		.func_name = ENDIAN_LOAD64_KFUNC,
+		.module_id = MOD_ENDIAN_LOAD,
 	},
-	[FUNC_MEMSET_BULK] = {
-		.func_name = "bpf_memset_bulk",
-		.module_id = MOD_BULK_MEMORY,
+	[FUNC_ENDIAN_SWAP16] = {
+		.func_name = ENDIAN_SWAP16_KFUNC,
+		.module_id = MOD_ENDIAN_SWAP,
+	},
+	[FUNC_ENDIAN_SWAP32] = {
+		.func_name = ENDIAN_SWAP32_KFUNC,
+		.module_id = MOD_ENDIAN_SWAP,
+	},
+	[FUNC_ENDIAN_SWAP64] = {
+		.func_name = ENDIAN_SWAP64_KFUNC,
+		.module_id = MOD_ENDIAN_SWAP,
+	},
+	[FUNC_BULK_LOADB] = {
+		.func_name = BULK_LOADB_KFUNC,
+		.module_id = MOD_BULK_LOAD,
+	},
+	[FUNC_BULK_STOREB_REG] = {
+		.func_name = BULK_STOREB_REG_KFUNC,
+		.module_id = MOD_BULK_STORE,
+	},
+	[FUNC_BULK_STOREB_IMM] = {
+		.func_name = BULK_STOREB_IMM_KFUNC,
+		.module_id = MOD_BULK_STORE,
 	},
 	[FUNC_LDP128] = {
-		.func_name = "bpf_ldp128",
+		.func_name = "bpf_arm64_ldp_x",
 		.module_id = MOD_LDP,
 	},
 	[FUNC_STP128] = {
-		.func_name = "bpf_stp128",
+		.func_name = "bpf_arm64_stp_x",
 		.module_id = MOD_LDP,
 	},
 	[FUNC_PREFETCH] = {
@@ -360,15 +436,38 @@ static int sys_bpf(enum bpf_cmd cmd, union bpf_attr *attr, unsigned int size)
 	((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(SHIFT) << 8) | \
 	 ((__u64)(TMP) << 16))
 
-#define KINSN_SELECT_PAYLOAD(DST, TRUE_REG, FALSE_REG, COND_REG) \
+#define KINSN_TEST_PAYLOAD(REG) ((__u64)(REG))
+
+#if defined(__aarch64__)
+#define KINSN_SELECT_MOVE_PAYLOAD(DST, TRUE_REG, FALSE_REG, COND_REG) \
 	((__u64)(DST) | ((__u64)(TRUE_REG) << 4) | ((__u64)(FALSE_REG) << 8) | \
 	 ((__u64)(COND_REG) << 12))
+#else
+#define KINSN_SELECT_MOVE_PAYLOAD(DST, TRUE_REG, FALSE_REG, COND_REG) \
+	((__u64)(DST) | ((__u64)(TRUE_REG) << 4) | ((__u64)(COND_REG) << 8))
+#endif
 
-#define KINSN_EXTRACT_PAYLOAD(DST, START, LEN) \
+#define KINSN_EXTRACT_U8_PAYLOAD(DST, START, LEN) \
 	((__u64)(DST) | ((__u64)(START) << 8) | ((__u64)(LEN) << 16))
 
-#define KINSN_ENDIAN_PAYLOAD(DST, BASE) \
-	((__u64)(DST) | ((__u64)(BASE) << 4))
+#define KINSN_REG_IMM_PAYLOAD(DST, IMM) \
+	((__u64)(DST) | ((__u64)(IMM) << 8))
+
+#define KINSN_MEM_PAYLOAD(DST, BASE, OFF) \
+	((__u64)(DST) | ((__u64)(BASE) << 4) | ((__u64)(__u16)(OFF) << 8))
+
+#define KINSN_STORE_REG_PAYLOAD(SRC, BASE, OFF) \
+	((__u64)(SRC) | ((__u64)(BASE) << 4) | ((__u64)(__u16)(OFF) << 8))
+
+#define KINSN_STORE_IMM_PAYLOAD(BASE, OFF, IMM) \
+	((__u64)(BASE) | ((__u64)(__u16)(OFF) << 4) | ((__u64)(__u8)(IMM) << 20))
+
+#if defined(__x86_64__)
+#define KINSN_ENDIAN_SWAP16_PAYLOAD(REG) KINSN_REG_IMM_PAYLOAD(REG, 8)
+#else
+#define KINSN_ENDIAN_SWAP16_PAYLOAD(REG) ((__u64)(REG))
+#endif
+#define KINSN_REG_PAYLOAD(REG) ((__u64)(REG))
 
 #define KINSN_X86_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF) \
 	((__u64)(DST) | ((__u64)(BASE) << 4) | ((__u64)(INDEX) << 8) | \
@@ -406,82 +505,6 @@ static const struct bpf_insn prog_ret_1[] = {
 	BPF_MOV64_IMM(BPF_REG_0, 1),
 	BPF_EXIT_INSN(),
 };
-
-static __u64 bulk_width_class(__u8 width)
-{
-	switch (width) {
-	case BPF_B:
-		return 0;
-	case BPF_H:
-		return 1;
-	case BPF_W:
-		return 2;
-	case BPF_DW:
-		return 3;
-	default:
-		return 0xf;
-	}
-}
-
-static __u64 pack_bulk_memcpy_payload_len_field(__u8 dst_base, __u8 src_base,
-						__s16 dst_off, __s16 src_off,
-						__u8 len_field, __u8 tmp_reg)
-{
-	return (__u64)dst_base |
-	       ((__u64)src_base << 4) |
-	       ((__u64)(__u16)dst_off << 8) |
-	       ((__u64)(__u16)src_off << 24) |
-	       ((__u64)len_field << 40) |
-	       ((__u64)tmp_reg << 48);
-}
-
-static __u64 pack_bulk_memcpy_payload(__u8 dst_base, __u8 src_base,
-				      __s16 dst_off, __s16 src_off,
-				      __u8 len, __u8 tmp_reg)
-{
-	return pack_bulk_memcpy_payload_len_field(dst_base, src_base, dst_off,
-						  src_off, len - 1, tmp_reg);
-}
-
-static __u64 pack_bulk_memset_payload_len_field(__u8 dst_base, __u8 val_reg,
-						__s16 dst_off, __u8 len_field,
-						__u8 width, bool value_from_reg,
-						bool zero_fill, __u8 fill_imm8)
-{
-	return (__u64)dst_base |
-	       ((__u64)val_reg << 4) |
-	       ((__u64)(__u16)dst_off << 8) |
-	       ((__u64)len_field << 24) |
-	       (bulk_width_class(width) << 32) |
-	       ((__u64)value_from_reg << 34) |
-	       ((__u64)zero_fill << 35) |
-	       ((__u64)fill_imm8 << 36);
-}
-
-static __u64 pack_bulk_memset_imm_payload(__u8 dst_base, __s16 dst_off,
-					  __u8 len, __u8 width,
-					  __u8 fill_imm8)
-{
-	return pack_bulk_memset_payload_len_field(dst_base, 0, dst_off, len - 1,
-						  width, false, false,
-						  fill_imm8);
-}
-
-static __u64 pack_bulk_memset_reg_payload(__u8 dst_base, __u8 val_reg,
-					  __s16 dst_off, __u8 len,
-					  __u8 width)
-{
-	return pack_bulk_memset_payload_len_field(dst_base, val_reg, dst_off,
-						  len - 1, width, true, false,
-						  0);
-}
-
-static __u64 pack_bulk_memset_zero_payload(__u8 dst_base, __s16 dst_off,
-					   __u8 len, __u8 width)
-{
-	return pack_bulk_memset_payload_len_field(dst_base, 0, dst_off, len - 1,
-						  width, false, true, 0);
-}
 
 static __u64 pack_ldp_pair_payload(__u8 lane0_reg, __u8 lane1_reg,
 				   __u8 base_reg, __s16 offset, __u8 flags)
@@ -1037,6 +1060,61 @@ static void patch_all_kinsns(struct bpf_insn *prog, size_t cnt, __u32 btf_id)
 	}
 }
 
+static int patch_kinsn_sequence(struct bpf_insn *prog, size_t cnt,
+				const enum kinsn_func_id *funcs,
+				size_t func_cnt, int *fd_array,
+				__u32 *fd_array_cnt)
+{
+	int module_slot[MOD_CNT];
+	__u32 slots = 1;
+	size_t patch_idx = 0;
+	size_t i;
+
+	for (i = 0; i < ARRAY_SIZE(module_slot); i++)
+		module_slot[i] = -1;
+	memset(fd_array, 0, sizeof(int) * (MOD_CNT + 1));
+
+	for (i = 0; i < func_cnt; i++) {
+		enum kinsn_module_id module_id = g_funcs[funcs[i]].module_id;
+
+		if (!g_modules[module_id].available)
+			return -1;
+		if (module_slot[module_id] < 0) {
+			module_slot[module_id] = slots;
+			fd_array[slots] = g_modules[module_id].btf_fd;
+			slots++;
+		}
+	}
+	if (slots > 1)
+		fd_array[0] = fd_array[1];
+
+	for (i = 0; i < cnt; i++) {
+		if (prog[i].code == (BPF_JMP | BPF_CALL) &&
+		    prog[i].src_reg == BPF_PSEUDO_KINSN_CALL) {
+			enum kinsn_func_id func_id;
+			enum kinsn_module_id module_id;
+
+			if (patch_idx >= func_cnt)
+				return -1;
+			func_id = funcs[patch_idx++];
+			module_id = g_funcs[func_id].module_id;
+			prog[i].imm = (__s32)g_funcs[func_id].btf_id;
+			prog[i].off = module_slot[module_id];
+		}
+	}
+	if (patch_idx != func_cnt)
+		return -1;
+
+	*fd_array_cnt = slots;
+	return 0;
+}
+
+static bool skip_if_module_unavailable(const char *name,
+				       enum kinsn_module_id module_id);
+static int run_rejit_expect_failure_preserves_original(
+	const char *name, const struct bpf_insn *replacement,
+	__u32 replacement_cnt, const int *fd_array, __u32 fd_array_cnt);
+
 static int run_rejit_expect_success(const char *name,
 				    const struct bpf_insn *replacement,
 				    __u32 replacement_cnt,
@@ -1083,6 +1161,33 @@ static int run_rejit_expect_success(const char *name,
 	close(prog_fd);
 	TEST_PASS(name);
 	return 0;
+}
+
+static int run_kinsn_sequence_expect_success(const char *name,
+					     struct bpf_insn *prog,
+					     __u32 prog_cnt,
+					     const enum kinsn_func_id *funcs,
+					     size_t func_cnt,
+					     __u32 expected_retval)
+{
+	int fd_array[MOD_CNT + 1];
+	__u32 fd_array_cnt;
+	size_t i;
+
+	for (i = 0; i < func_cnt; i++) {
+		if (skip_if_module_unavailable(name,
+					       g_funcs[funcs[i]].module_id))
+			return 0;
+	}
+
+	if (patch_kinsn_sequence(prog, prog_cnt, funcs, func_cnt,
+				 fd_array, &fd_array_cnt) < 0) {
+		TEST_FAIL(name, "failed to patch kinsn sequence");
+		return 1;
+	}
+
+	return run_rejit_expect_success(name, prog, prog_cnt, fd_array,
+					fd_array_cnt, expected_retval);
 }
 
 static int run_rejit_expect_failure_preserves_original(
@@ -1136,13 +1241,6 @@ static bool skip_if_module_unavailable(const char *name,
 	return true;
 }
 
-static bool should_skip_bulk_for_insn_buf_limit(enum kinsn_module_id module_id,
-						const char *log_buf)
-{
-	return module_id == MOD_BULK_MEMORY &&
-	       strstr(log_buf, "exceeds insn_buf size 32") != NULL;
-}
-
 static int run_single_kinsn_expect_success(const char *name,
 					   enum kinsn_module_id module_id,
 					   enum kinsn_func_id func_id,
@@ -1178,12 +1276,6 @@ static int run_single_kinsn_expect_success(const char *name,
 	if (rejit_xdp_prog(prog_fd, prog, prog_cnt, fd_array,
 			   ARRAY_SIZE(fd_array), log_buf,
 			   sizeof(log_buf)) < 0) {
-		if (should_skip_bulk_for_insn_buf_limit(module_id, log_buf)) {
-			close(prog_fd);
-			TEST_SKIP(name, "kernel kinsn proof buffer is limited to 32 insns");
-			return 0;
-		}
-
 		fprintf(stderr, "    verifier log:\n%s\n", log_buf);
 		TEST_FAIL(name, "REJIT failed");
 		close(prog_fd);
@@ -1255,12 +1347,6 @@ static int run_single_kinsn_expect_jit_bytes(const char *name,
 	if (rejit_xdp_prog(prog_fd, prog, prog_cnt, fd_array,
 			   ARRAY_SIZE(fd_array), log_buf,
 			   sizeof(log_buf)) < 0) {
-		if (should_skip_bulk_for_insn_buf_limit(module_id, log_buf)) {
-			close(prog_fd);
-			TEST_SKIP(name, "kernel kinsn proof buffer is limited to 32 insns");
-			return 0;
-		}
-
 		fprintf(stderr, "    verifier log:\n%s\n", log_buf);
 		TEST_FAIL(name, "REJIT failed");
 		close(prog_fd);
@@ -1519,113 +1605,126 @@ static int test_rejit_rotate_invalid_tmp_rejected(void)
 
 static int test_rejit_select_apply(void)
 {
-	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_SELECT].btf_fd);
+	enum kinsn_func_id funcs[] = {
+		FUNC_SELECT_TEST,
+		FUNC_SELECT_MOVE,
+	};
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_1, 11),
 		BPF_MOV64_IMM(BPF_REG_2, 29),
 		BPF_MOV64_IMM(BPF_REG_3, 1),
-		BPF_KINSN_SIDECAR(KINSN_SELECT_PAYLOAD(BPF_REG_0, BPF_REG_1,
-							       BPF_REG_2, BPF_REG_3)),
+		BPF_MOV64_REG(BPF_REG_0, BPF_REG_2),
+		BPF_KINSN_SIDECAR(KINSN_TEST_PAYLOAD(BPF_REG_3)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_SELECT_MOVE_PAYLOAD(
+			BPF_REG_0, BPF_REG_1, BPF_REG_2, BPF_REG_3)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
 
-	patch_single_kinsn(prog, ARRAY_SIZE(prog), g_funcs[FUNC_SELECT].btf_id);
-	return run_rejit_expect_success("select_apply",
-					prog, ARRAY_SIZE(prog),
-					fd_array, ARRAY_SIZE(fd_array), 11);
+	return run_kinsn_sequence_expect_success("select_apply",
+						 prog, ARRAY_SIZE(prog),
+						 funcs, ARRAY_SIZE(funcs), 11);
 }
 
 static int test_rejit_select_arbitrary_dst_reg(void)
 {
-	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_SELECT].btf_fd);
+	enum kinsn_func_id funcs[] = {
+		FUNC_SELECT_TEST,
+		FUNC_SELECT_MOVE,
+	};
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_1, 11),
 		BPF_MOV64_IMM(BPF_REG_2, 29),
 		BPF_MOV64_IMM(BPF_REG_3, 1),
-		BPF_KINSN_SIDECAR(KINSN_SELECT_PAYLOAD(BPF_REG_5, BPF_REG_1,
-							       BPF_REG_2, BPF_REG_3)),
+		BPF_MOV64_REG(BPF_REG_5, BPF_REG_2),
+		BPF_KINSN_SIDECAR(KINSN_TEST_PAYLOAD(BPF_REG_3)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_SELECT_MOVE_PAYLOAD(
+			BPF_REG_5, BPF_REG_1, BPF_REG_2, BPF_REG_3)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_5),
 		BPF_EXIT_INSN(),
 	};
 
-	patch_single_kinsn(prog, ARRAY_SIZE(prog), g_funcs[FUNC_SELECT].btf_id);
-	return run_rejit_expect_success("select_arbitrary_dst_reg",
-					prog, ARRAY_SIZE(prog),
-					fd_array, ARRAY_SIZE(fd_array), 11);
+	return run_kinsn_sequence_expect_success("select_arbitrary_dst_reg",
+						 prog, ARRAY_SIZE(prog),
+						 funcs, ARRAY_SIZE(funcs), 11);
 }
 
 static int test_rejit_endian_apply(void)
 {
-	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_ENDIAN].btf_fd);
+	enum kinsn_func_id funcs[] = {
+		FUNC_ENDIAN_LOAD16,
+		FUNC_ENDIAN_SWAP16,
+	};
 	struct bpf_insn prog[] = {
 		BPF_ST_MEM(BPF_H, BPF_REG_10, -2, 0x1234),
-		BPF_MOV64_REG(BPF_REG_1, BPF_REG_10),
-		BPF_ALU64_IMM(BPF_ADD, BPF_REG_1, -2),
-		BPF_KINSN_SIDECAR(KINSN_ENDIAN_PAYLOAD(BPF_REG_0, BPF_REG_1)),
+		BPF_KINSN_SIDECAR(KINSN_MEM_PAYLOAD(BPF_REG_0, BPF_REG_10, -2)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_ENDIAN_SWAP16_PAYLOAD(BPF_REG_0)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
 
-	patch_single_kinsn(prog, ARRAY_SIZE(prog), g_funcs[FUNC_ENDIAN16].btf_id);
-	return run_rejit_expect_success("endian_apply",
-					prog, ARRAY_SIZE(prog),
-					fd_array, ARRAY_SIZE(fd_array), 0x3412);
+	return run_kinsn_sequence_expect_success("endian_apply",
+						 prog, ARRAY_SIZE(prog),
+						 funcs, ARRAY_SIZE(funcs), 0x3412);
 }
 
 static int test_rejit_endian32_apply(void)
 {
-	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_ENDIAN].btf_fd);
+	enum kinsn_func_id funcs[] = {
+		FUNC_ENDIAN_LOAD32,
+		FUNC_ENDIAN_SWAP32,
+	};
 	struct bpf_insn prog[] = {
 		BPF_ST_MEM(BPF_W, BPF_REG_10, -4, 0x12345678),
-		BPF_MOV64_REG(BPF_REG_1, BPF_REG_10),
-		BPF_ALU64_IMM(BPF_ADD, BPF_REG_1, -4),
-		BPF_KINSN_SIDECAR(KINSN_ENDIAN_PAYLOAD(BPF_REG_0, BPF_REG_1)),
+		BPF_KINSN_SIDECAR(KINSN_MEM_PAYLOAD(BPF_REG_0, BPF_REG_10, -4)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_REG_PAYLOAD(BPF_REG_0)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
 
-	patch_single_kinsn(prog, ARRAY_SIZE(prog), g_funcs[FUNC_ENDIAN32].btf_id);
-	return run_rejit_expect_success("endian32_apply",
-					prog, ARRAY_SIZE(prog),
-					fd_array, ARRAY_SIZE(fd_array), 0x78563412);
+	return run_kinsn_sequence_expect_success("endian32_apply",
+						 prog, ARRAY_SIZE(prog),
+						 funcs, ARRAY_SIZE(funcs),
+						 0x78563412);
 }
 
 static int test_rejit_endian_arbitrary_regs(void)
 {
-	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_ENDIAN].btf_fd);
+	enum kinsn_func_id funcs[] = {
+		FUNC_ENDIAN_LOAD16,
+		FUNC_ENDIAN_SWAP16,
+	};
 	struct bpf_insn prog[] = {
 		BPF_ST_MEM(BPF_H, BPF_REG_10, -2, 0x1234),
-		BPF_MOV64_REG(BPF_REG_6, BPF_REG_10),
-		BPF_ALU64_IMM(BPF_ADD, BPF_REG_6, -2),
-		BPF_KINSN_SIDECAR(KINSN_ENDIAN_PAYLOAD(BPF_REG_7, BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_MEM_PAYLOAD(BPF_REG_7, BPF_REG_10, -2)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_ENDIAN_SWAP16_PAYLOAD(BPF_REG_7)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_7),
 		BPF_EXIT_INSN(),
 	};
 
-	patch_single_kinsn(prog, ARRAY_SIZE(prog), g_funcs[FUNC_ENDIAN16].btf_id);
-	return run_rejit_expect_success("endian_arbitrary_regs",
-					prog, ARRAY_SIZE(prog),
-					fd_array, ARRAY_SIZE(fd_array), 0x3412);
+	return run_kinsn_sequence_expect_success("endian_arbitrary_regs",
+						 prog, ARRAY_SIZE(prog),
+						 funcs, ARRAY_SIZE(funcs), 0x3412);
 }
 
 static int test_rejit_endian_invalid_access_rejected(void)
 {
-	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_ENDIAN].btf_fd);
 	struct bpf_insn prog[] = {
-		BPF_MOV64_REG(BPF_REG_1, BPF_REG_10),
-		BPF_ALU64_IMM(BPF_ADD, BPF_REG_1, -513),
-		BPF_KINSN_SIDECAR(KINSN_ENDIAN_PAYLOAD(BPF_REG_0, BPF_REG_1)),
+		BPF_KINSN_SIDECAR(KINSN_MEM_PAYLOAD(BPF_REG_0, BPF_REG_10, -513)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
 
-	patch_single_kinsn(prog, ARRAY_SIZE(prog), g_funcs[FUNC_ENDIAN16].btf_id);
-	return run_rejit_expect_failure_preserves_original(
-		"endian_invalid_access_rejected", prog, ARRAY_SIZE(prog),
-		fd_array, ARRAY_SIZE(fd_array));
+	return run_single_kinsn_expect_failure(
+		"endian_invalid_access_rejected", MOD_ENDIAN_LOAD,
+		FUNC_ENDIAN_LOAD16, prog, ARRAY_SIZE(prog));
 }
 
 static int test_rejit_x86_movzwl_sib_apply(void)
@@ -1910,128 +2009,106 @@ static int test_rejit_x86_blsiq_jit_emits_blsi(void)
 #endif
 }
 
-static int test_rejit_bulk_memcpy_apply(void)
+static int test_rejit_bulk_byte_copy_apply(void)
 {
-	const __u64 payload = pack_bulk_memcpy_payload(BPF_REG_10, BPF_REG_10,
-						       -128, -96, 32,
-						       BPF_REG_6);
+	enum kinsn_func_id funcs[] = {
+		FUNC_BULK_LOADB, FUNC_BULK_STOREB_REG,
+		FUNC_BULK_LOADB, FUNC_BULK_STOREB_REG,
+		FUNC_BULK_LOADB, FUNC_BULK_STOREB_REG,
+		FUNC_BULK_LOADB, FUNC_BULK_STOREB_REG,
+	};
 	struct bpf_insn prog[] = {
 		BPF_ST_MEM(BPF_W, BPF_REG_10, -96, 0x04030201),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -92, 0x08070605),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -88, 0x0c0b0a09),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -84, 0x100f0e0d),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -80, 0x14131211),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -76, 0x18171615),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -72, 0x1c1b1a19),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -68, 0x201f1e1d),
-		BPF_KINSN_SIDECAR(payload),
+		BPF_KINSN_SIDECAR(KINSN_MEM_PAYLOAD(BPF_REG_6, BPF_REG_10, -96)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_STORE_REG_PAYLOAD(BPF_REG_6, BPF_REG_10, -128)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_MEM_PAYLOAD(BPF_REG_6, BPF_REG_10, -95)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_STORE_REG_PAYLOAD(BPF_REG_6, BPF_REG_10, -127)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_MEM_PAYLOAD(BPF_REG_6, BPF_REG_10, -94)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_STORE_REG_PAYLOAD(BPF_REG_6, BPF_REG_10, -126)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_MEM_PAYLOAD(BPF_REG_6, BPF_REG_10, -93)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_STORE_REG_PAYLOAD(BPF_REG_6, BPF_REG_10, -125)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_LDX_MEM(BPF_W, BPF_REG_1, BPF_REG_10, -128),
 		BPF_EXPECT_EQ_IMM(BPF_REG_1, 0x04030201, 1),
-		BPF_LDX_MEM(BPF_W, BPF_REG_1, BPF_REG_10, -116),
-		BPF_EXPECT_EQ_IMM(BPF_REG_1, 0x100f0e0d, 2),
-		BPF_LDX_MEM(BPF_W, BPF_REG_1, BPF_REG_10, -100),
-		BPF_EXPECT_EQ_IMM(BPF_REG_1, 0x201f1e1d, 3),
-		BPF_EXPECT_EQ_IMM(BPF_REG_6, 0x20, 4),
 		BPF_MOV64_IMM(BPF_REG_0, 0),
 		BPF_EXIT_INSN(),
 	};
 
-	return run_single_kinsn_expect_success("bulk_memcpy_apply",
-					       MOD_BULK_MEMORY,
-					       FUNC_MEMCPY_BULK,
-					       prog, ARRAY_SIZE(prog), 0);
+	return run_kinsn_sequence_expect_success("bulk_byte_copy_apply",
+						 prog, ARRAY_SIZE(prog),
+						 funcs, ARRAY_SIZE(funcs), 0);
 }
 
-static int test_rejit_bulk_memset_reg_apply(void)
+static int test_rejit_bulk_storeb_reg_apply(void)
 {
-	const __u64 payload = pack_bulk_memset_reg_payload(BPF_REG_10, BPF_REG_1,
-							   -128, 32, BPF_W);
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_1, 0x7c),
-		BPF_KINSN_SIDECAR(payload),
+		BPF_KINSN_SIDECAR(KINSN_STORE_REG_PAYLOAD(BPF_REG_1, BPF_REG_10, -128)),
 		BPF_CALL_KINSN(0, 0),
-		BPF_LDX_MEM(BPF_W, BPF_REG_2, BPF_REG_10, -128),
-		BPF_EXPECT_EQ_IMM(BPF_REG_2, 0x7c7c7c7c, 1),
-		BPF_LDX_MEM(BPF_W, BPF_REG_2, BPF_REG_10, -116),
-		BPF_EXPECT_EQ_IMM(BPF_REG_2, 0x7c7c7c7c, 2),
-		BPF_LDX_MEM(BPF_W, BPF_REG_2, BPF_REG_10, -100),
-		BPF_EXPECT_EQ_IMM(BPF_REG_2, 0x7c7c7c7c, 3),
+		BPF_LDX_MEM(BPF_B, BPF_REG_2, BPF_REG_10, -128),
+		BPF_EXPECT_EQ_IMM(BPF_REG_2, 0x7c, 1),
 		BPF_MOV64_IMM(BPF_REG_0, 0),
 		BPF_EXIT_INSN(),
 	};
 
-	return run_single_kinsn_expect_success("bulk_memset_reg_apply",
-					       MOD_BULK_MEMORY,
-					       FUNC_MEMSET_BULK,
+	return run_single_kinsn_expect_success("bulk_storeb_reg_apply",
+					       MOD_BULK_STORE,
+					       FUNC_BULK_STOREB_REG,
 					       prog, ARRAY_SIZE(prog), 0);
 }
 
-static int test_rejit_bulk_memcpy_offset_lower_boundary(void)
+static int test_rejit_bulk_byte_copy_negative_offset_boundary(void)
 {
-	const __u64 payload = pack_bulk_memcpy_payload(BPF_REG_10, BPF_REG_10,
-						       -512, -480, 32,
-						       BPF_REG_6);
+	enum kinsn_func_id funcs[] = {
+		FUNC_BULK_LOADB,
+		FUNC_BULK_STOREB_REG,
+	};
 	struct bpf_insn prog[] = {
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -480, 0x24232221),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -476, 0x28272625),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -472, 0x2c2b2a29),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -468, 0x302f2e2d),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -464, 0x34333231),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -460, 0x38373635),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -456, 0x3c3b3a39),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -452, 0x403f3e3d),
-		BPF_KINSN_SIDECAR(payload),
+		BPF_ST_MEM(BPF_B, BPF_REG_10, -255, 0x42),
+		BPF_KINSN_SIDECAR(KINSN_MEM_PAYLOAD(BPF_REG_6, BPF_REG_10, -255)),
 		BPF_CALL_KINSN(0, 0),
-		BPF_LDX_MEM(BPF_W, BPF_REG_1, BPF_REG_10, -512),
-		BPF_EXPECT_EQ_IMM(BPF_REG_1, 0x24232221, 1),
-		BPF_LDX_MEM(BPF_W, BPF_REG_1, BPF_REG_10, -500),
-		BPF_EXPECT_EQ_IMM(BPF_REG_1, 0x302f2e2d, 2),
-		BPF_LDX_MEM(BPF_W, BPF_REG_1, BPF_REG_10, -484),
-		BPF_EXPECT_EQ_IMM(BPF_REG_1, 0x403f3e3d, 3),
-		BPF_EXPECT_EQ_IMM(BPF_REG_6, 0x40, 4),
+		BPF_KINSN_SIDECAR(KINSN_STORE_REG_PAYLOAD(BPF_REG_6, BPF_REG_10, -254)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_LDX_MEM(BPF_B, BPF_REG_1, BPF_REG_10, -254),
+		BPF_EXPECT_EQ_IMM(BPF_REG_1, 0x42, 1),
 		BPF_MOV64_IMM(BPF_REG_0, 0),
 		BPF_EXIT_INSN(),
 	};
 
-	return run_single_kinsn_expect_success(
-		"bulk_memcpy_offset_lower_boundary", MOD_BULK_MEMORY,
-		FUNC_MEMCPY_BULK, prog, ARRAY_SIZE(prog), 0);
+	return run_kinsn_sequence_expect_success(
+		"bulk_byte_copy_negative_offset_boundary", prog,
+		ARRAY_SIZE(prog), funcs, ARRAY_SIZE(funcs), 0);
 }
 
-static int test_rejit_bulk_memset_max_len_zero_fill(void)
+static int test_rejit_bulk_storeb_zero_apply(void)
 {
-	const __u64 payload = pack_bulk_memset_zero_payload(BPF_REG_10, -128,
-							    128, BPF_DW);
 	struct bpf_insn prog[] = {
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -128, 0x01020304),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -64, 0x11121314),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -4, 0x21222324),
-		BPF_KINSN_SIDECAR(payload),
+		BPF_ST_MEM(BPF_B, BPF_REG_10, -128, 0x7f),
+		BPF_KINSN_SIDECAR(KINSN_STORE_IMM_PAYLOAD(BPF_REG_10, -128, 0)),
 		BPF_CALL_KINSN(0, 0),
-		BPF_LDX_MEM(BPF_W, BPF_REG_1, BPF_REG_10, -128),
+		BPF_LDX_MEM(BPF_B, BPF_REG_1, BPF_REG_10, -128),
 		BPF_EXPECT_EQ_IMM(BPF_REG_1, 0, 1),
-		BPF_LDX_MEM(BPF_W, BPF_REG_1, BPF_REG_10, -64),
-		BPF_EXPECT_EQ_IMM(BPF_REG_1, 0, 2),
-		BPF_LDX_MEM(BPF_B, BPF_REG_1, BPF_REG_10, -1),
-		BPF_EXPECT_EQ_IMM(BPF_REG_1, 0, 3),
 		BPF_MOV64_IMM(BPF_REG_0, 0),
 		BPF_EXIT_INSN(),
 	};
 
-	return run_single_kinsn_expect_success("bulk_memset_max_len_zero_fill",
-					       MOD_BULK_MEMORY,
-					       FUNC_MEMSET_BULK,
+	return run_single_kinsn_expect_success("bulk_storeb_zero_apply",
+					       MOD_BULK_STORE,
+					       FUNC_BULK_STOREB_IMM,
 					       prog, ARRAY_SIZE(prog), 0);
 }
 
-static int test_rejit_bulk_memcpy_zero_length_rejected(void)
+static int test_rejit_bulk_loadb_payload_high_bits_rejected(void)
 {
-	const __u64 payload = pack_bulk_memcpy_payload_len_field(BPF_REG_10,
-								 BPF_REG_10,
-								 -128, -96,
-								 0xff,
-								 BPF_REG_6);
+	const __u64 payload = KINSN_MEM_PAYLOAD(BPF_REG_0, BPF_REG_10, -8) |
+			      (1ULL << 24);
 	struct bpf_insn prog[] = {
 		BPF_KINSN_SIDECAR(payload),
 		BPF_CALL_KINSN(0, 0),
@@ -2040,15 +2117,28 @@ static int test_rejit_bulk_memcpy_zero_length_rejected(void)
 	};
 
 	return run_single_kinsn_expect_failure(
-		"bulk_memcpy_zero_length_rejected", MOD_BULK_MEMORY,
-		FUNC_MEMCPY_BULK, prog, ARRAY_SIZE(prog));
+		"bulk_loadb_payload_high_bits_rejected", MOD_BULK_LOAD,
+		FUNC_BULK_LOADB, prog, ARRAY_SIZE(prog));
 }
 
-static int test_rejit_bulk_memcpy_invalid_tmp_rejected(void)
+static int test_rejit_bulk_loadb_invalid_dst_rejected(void)
 {
-	const __u64 payload = pack_bulk_memcpy_payload(BPF_REG_10, BPF_REG_10,
-						       -128, -96, 32,
-						       BPF_REG_10);
+	struct bpf_insn prog[] = {
+		BPF_KINSN_SIDECAR(KINSN_MEM_PAYLOAD(BPF_REG_10, BPF_REG_10, -8)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_MOV64_IMM(BPF_REG_0, 0),
+		BPF_EXIT_INSN(),
+	};
+
+	return run_single_kinsn_expect_failure(
+		"bulk_loadb_invalid_dst_rejected", MOD_BULK_LOAD,
+		FUNC_BULK_LOADB, prog, ARRAY_SIZE(prog));
+}
+
+static int test_rejit_bulk_storeb_payload_high_bits_rejected(void)
+{
+	const __u64 payload = KINSN_STORE_IMM_PAYLOAD(BPF_REG_10, -8, 0) |
+			      (1ULL << 28);
 	struct bpf_insn prog[] = {
 		BPF_KINSN_SIDECAR(payload),
 		BPF_CALL_KINSN(0, 0),
@@ -2057,178 +2147,77 @@ static int test_rejit_bulk_memcpy_invalid_tmp_rejected(void)
 	};
 
 	return run_single_kinsn_expect_failure(
-		"bulk_memcpy_invalid_tmp_rejected", MOD_BULK_MEMORY,
-		FUNC_MEMCPY_BULK, prog, ARRAY_SIZE(prog));
+		"bulk_storeb_payload_high_bits_rejected", MOD_BULK_STORE,
+		FUNC_BULK_STOREB_IMM, prog, ARRAY_SIZE(prog));
 }
 
-static int test_rejit_bulk_memset_invalid_width_rejected(void)
-{
-	const __u64 payload = pack_bulk_memset_imm_payload(BPF_REG_10, -128, 34,
-							   BPF_DW, 0x5a);
-	struct bpf_insn prog[] = {
-		BPF_KINSN_SIDECAR(payload),
-		BPF_CALL_KINSN(0, 0),
-		BPF_MOV64_IMM(BPF_REG_0, 0),
-		BPF_EXIT_INSN(),
-	};
-
-	return run_single_kinsn_expect_failure(
-		"bulk_memset_invalid_width_rejected", MOD_BULK_MEMORY,
-		FUNC_MEMSET_BULK, prog, ARRAY_SIZE(prog));
-}
-
-static int test_rejit_bulk_memcpy_jit_emits_rep_movsb(void)
+static int test_rejit_bulk_loadb_jit_emits_movzx(void)
 {
 #if defined(__x86_64__)
-	static const __u8 rep_movsb[] = { 0xf3, 0xa4 };
-	const __u64 payload = pack_bulk_memcpy_payload(BPF_REG_10, BPF_REG_10,
-						       -128, -96, 32,
-						       BPF_REG_6);
+	static const __u8 movzx[] = { 0x0f, 0xb6 };
 	struct bpf_insn prog[] = {
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -96, 0x04030201),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -92, 0x08070605),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -88, 0x0c0b0a09),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -84, 0x100f0e0d),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -80, 0x14131211),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -76, 0x18171615),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -72, 0x1c1b1a19),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -68, 0x201f1e1d),
-		BPF_KINSN_SIDECAR(payload),
+		BPF_ST_MEM(BPF_B, BPF_REG_10, -1, 0x34),
+		BPF_KINSN_SIDECAR(KINSN_MEM_PAYLOAD(BPF_REG_0, BPF_REG_10, -1)),
 		BPF_CALL_KINSN(0, 0),
-		BPF_LDX_MEM(BPF_W, BPF_REG_1, BPF_REG_10, -100),
-		BPF_EXPECT_EQ_IMM(BPF_REG_1, 0x201f1e1d, 1),
+		BPF_EXIT_INSN(),
+	};
+
+	return run_single_kinsn_expect_jit_bytes(
+		"bulk_loadb_jit_emits_movzx", MOD_BULK_LOAD,
+		FUNC_BULK_LOADB, prog, ARRAY_SIZE(prog), 0x34,
+		movzx, ARRAY_SIZE(movzx),
+		"MOVZX byte load sequence not found in JIT image");
+#else
+	TEST_SKIP("bulk_loadb_jit_emits_movzx", "x86_64 only");
+	return 0;
+#endif
+}
+
+static int test_rejit_bulk_storeb_reg_jit_emits_mov_store(void)
+{
+#if defined(__x86_64__)
+	static const __u8 mov_store[] = { 0x88 };
+	struct bpf_insn prog[] = {
+		BPF_MOV64_IMM(BPF_REG_1, 0x7c),
+		BPF_KINSN_SIDECAR(KINSN_STORE_REG_PAYLOAD(BPF_REG_1, BPF_REG_10, -8)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_LDX_MEM(BPF_B, BPF_REG_2, BPF_REG_10, -8),
+		BPF_EXPECT_EQ_IMM(BPF_REG_2, 0x7c, 1),
 		BPF_MOV64_IMM(BPF_REG_0, 0),
 		BPF_EXIT_INSN(),
 	};
 
 	return run_single_kinsn_expect_jit_bytes(
-		"bulk_memcpy_jit_emits_rep_movsb", MOD_BULK_MEMORY,
-		FUNC_MEMCPY_BULK, prog, ARRAY_SIZE(prog), 0,
-		rep_movsb, ARRAY_SIZE(rep_movsb),
-		"REP MOVSB sequence not found in JIT image");
+		"bulk_storeb_reg_jit_emits_mov_store", MOD_BULK_STORE,
+		FUNC_BULK_STOREB_REG, prog, ARRAY_SIZE(prog), 0,
+		mov_store, ARRAY_SIZE(mov_store),
+		"MOV byte store sequence not found in JIT image");
 #else
-	TEST_SKIP("bulk_memcpy_jit_emits_rep_movsb", "x86_64 only");
+	TEST_SKIP("bulk_storeb_reg_jit_emits_mov_store", "x86_64 only");
 	return 0;
 #endif
 }
 
-static int test_rejit_bulk_memcpy_kinsn_tmp_r7_saves_r13(void)
+static int test_rejit_bulk_storeb_imm_jit_emits_mov_imm_store(void)
 {
 #if defined(__x86_64__)
-	static const __u8 push_r13[] = { 0x41, 0x55 };
-	static const __u8 pop_r13[] = { 0x41, 0x5d };
-	const __u64 payload = pack_bulk_memcpy_payload(BPF_REG_10, BPF_REG_10,
-						       -128, -96, 32,
-						       BPF_REG_7);
-	const char *name = "bulk_memcpy_kinsn_tmp_r7_saves_r13";
+	static const __u8 mov_imm_store[] = { 0xc6 };
 	struct bpf_insn prog[] = {
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -96, 0x04030201),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -92, 0x08070605),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -88, 0x0c0b0a09),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -84, 0x100f0e0d),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -80, 0x14131211),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -76, 0x18171615),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -72, 0x1c1b1a19),
-		BPF_ST_MEM(BPF_W, BPF_REG_10, -68, 0x201f1e1d),
-		BPF_KINSN_SIDECAR(payload),
+		BPF_KINSN_SIDECAR(KINSN_STORE_IMM_PAYLOAD(BPF_REG_10, -8, 0x5a)),
 		BPF_CALL_KINSN(0, 0),
-		BPF_LDX_MEM(BPF_W, BPF_REG_1, BPF_REG_10, -100),
-		BPF_EXPECT_EQ_IMM(BPF_REG_1, 0x201f1e1d, 1),
-		BPF_MOV64_IMM(BPF_REG_0, 0),
-		BPF_EXIT_INSN(),
-	};
-	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_BULK_MEMORY].btf_fd);
-	char log_buf[LOG_BUF_SIZE];
-	__u32 retval = 0;
-	__u8 *jited = NULL;
-	__u32 jited_len = 0;
-	int prog_fd;
-
-	if (skip_if_module_unavailable(name, MOD_BULK_MEMORY))
-		return 0;
-
-	patch_single_kinsn(prog, ARRAY_SIZE(prog), g_funcs[FUNC_MEMCPY_BULK].btf_id);
-
-	memset(log_buf, 0, sizeof(log_buf));
-	prog_fd = load_xdp_prog(prog_ret_0, ARRAY_SIZE(prog_ret_0),
-				NULL, 0, log_buf, sizeof(log_buf));
-	if (prog_fd < 0) {
-		TEST_FAIL(name, "base load failed");
-		return 1;
-	}
-
-	memset(log_buf, 0, sizeof(log_buf));
-	if (rejit_xdp_prog(prog_fd, prog, ARRAY_SIZE(prog), fd_array,
-			   ARRAY_SIZE(fd_array), log_buf, sizeof(log_buf)) < 0) {
-		if (should_skip_bulk_for_insn_buf_limit(MOD_BULK_MEMORY, log_buf)) {
-			close(prog_fd);
-			TEST_SKIP(name, "kernel kinsn proof buffer is limited to 32 insns");
-			return 0;
-		}
-		fprintf(stderr, "    verifier log:\n%s\n", log_buf);
-		TEST_FAIL(name, "REJIT failed");
-		close(prog_fd);
-		return 1;
-	}
-
-	if (test_run_xdp(prog_fd, &retval) < 0 || retval != 0) {
-		TEST_FAIL(name, "recompiled program returned wrong value");
-		close(prog_fd);
-		return 1;
-	}
-
-	if (get_jited_program(prog_fd, &jited, &jited_len) < 0) {
-		TEST_FAIL(name, "failed to fetch JIT image");
-		close(prog_fd);
-		return 1;
-	}
-
-	if (!find_bytes(jited, jited_len, push_r13, sizeof(push_r13))) {
-		TEST_FAIL(name, "push r13 not found in JIT image");
-		free(jited);
-		close(prog_fd);
-		return 1;
-	}
-
-	if (!find_bytes(jited, jited_len, pop_r13, sizeof(pop_r13))) {
-		TEST_FAIL(name, "pop r13 not found in JIT image");
-		free(jited);
-		close(prog_fd);
-		return 1;
-	}
-
-	free(jited);
-	close(prog_fd);
-	TEST_PASS(name);
-	return 0;
-#else
-	TEST_SKIP("bulk_memcpy_kinsn_tmp_r7_saves_r13", "x86_64 only");
-	return 0;
-#endif
-}
-
-static int test_rejit_bulk_memset_jit_emits_rep_stosb(void)
-{
-#if defined(__x86_64__)
-	static const __u8 rep_stosb[] = { 0xf3, 0xaa };
-	const __u64 payload = pack_bulk_memset_imm_payload(BPF_REG_10, -128, 32,
-							   BPF_W, 0x5a);
-	struct bpf_insn prog[] = {
-		BPF_KINSN_SIDECAR(payload),
-		BPF_CALL_KINSN(0, 0),
-		BPF_LDX_MEM(BPF_W, BPF_REG_1, BPF_REG_10, -100),
-		BPF_EXPECT_EQ_IMM(BPF_REG_1, 0x5a5a5a5a, 1),
+		BPF_LDX_MEM(BPF_B, BPF_REG_1, BPF_REG_10, -8),
+		BPF_EXPECT_EQ_IMM(BPF_REG_1, 0x5a, 1),
 		BPF_MOV64_IMM(BPF_REG_0, 0),
 		BPF_EXIT_INSN(),
 	};
 
 	return run_single_kinsn_expect_jit_bytes(
-		"bulk_memset_jit_emits_rep_stosb", MOD_BULK_MEMORY,
-		FUNC_MEMSET_BULK, prog, ARRAY_SIZE(prog), 0,
-		rep_stosb, ARRAY_SIZE(rep_stosb),
-		"REP STOSB sequence not found in JIT image");
+		"bulk_storeb_imm_jit_emits_mov_imm_store", MOD_BULK_STORE,
+		FUNC_BULK_STOREB_IMM, prog, ARRAY_SIZE(prog), 0,
+		mov_imm_store, ARRAY_SIZE(mov_imm_store),
+		"MOV immediate byte store sequence not found in JIT image");
 #else
-	TEST_SKIP("bulk_memset_jit_emits_rep_stosb", "x86_64 only");
+	TEST_SKIP("bulk_storeb_imm_jit_emits_mov_imm_store", "x86_64 only");
 	return 0;
 #endif
 }
@@ -2317,11 +2306,27 @@ static int test_rejit_ldp128_invalid_flags_rejected(void)
 
 static int test_rejit_extract_range_narrowing(void)
 {
-	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_EXTRACT].btf_fd);
+#if defined(__aarch64__)
+	enum kinsn_func_id funcs[] = {
+		FUNC_EXTRACT_SHIFT,
+	};
+#else
+	enum kinsn_func_id funcs[] = {
+		FUNC_EXTRACT_SHIFT,
+		FUNC_EXTRACT_MASK,
+	};
+#endif
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_2, 0xabcd),
-		BPF_KINSN_SIDECAR(KINSN_EXTRACT_PAYLOAD(BPF_REG_2, 0, 8)),
+	#if defined(__aarch64__)
+		BPF_KINSN_SIDECAR(KINSN_EXTRACT_U8_PAYLOAD(BPF_REG_2, 0, 8)),
 		BPF_CALL_KINSN(0, 0),
+	#else
+		BPF_KINSN_SIDECAR(KINSN_REG_IMM_PAYLOAD(BPF_REG_2, 0)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_REG_IMM_PAYLOAD(BPF_REG_2, 0xff)),
+		BPF_CALL_KINSN(0, 0),
+	#endif
 		BPF_MOV64_REG(BPF_REG_1, BPF_REG_10),
 		BPF_ALU64_IMM(BPF_ADD, BPF_REG_1, -256),
 		BPF_ALU64_REG(BPF_ADD, BPF_REG_1, BPF_REG_2),
@@ -2330,11 +2335,10 @@ static int test_rejit_extract_range_narrowing(void)
 		BPF_EXIT_INSN(),
 	};
 
-	patch_single_kinsn(prog, ARRAY_SIZE(prog), g_funcs[FUNC_EXTRACT].btf_id);
-	return run_rejit_expect_success("extract_range_narrowing",
-					prog, ARRAY_SIZE(prog),
-					fd_array, ARRAY_SIZE(fd_array),
-					XDP_PASS);
+	return run_kinsn_sequence_expect_success("extract_range_narrowing",
+						 prog, ARRAY_SIZE(prog),
+						 funcs, ARRAY_SIZE(funcs),
+						 XDP_PASS);
 }
 
 static bool should_run_test(const char *filter, const char *name)
@@ -2410,26 +2414,26 @@ int main(int argc, char **argv)
 		ret |= test_rejit_x86_blsrq_apply();
 	if (should_run_test(filter, "x86_blsiq_jit_emits_blsi"))
 		ret |= test_rejit_x86_blsiq_jit_emits_blsi();
-	if (should_run_test(filter, "bulk_memcpy_apply"))
-		ret |= test_rejit_bulk_memcpy_apply();
-	if (should_run_test(filter, "bulk_memset_reg_apply"))
-		ret |= test_rejit_bulk_memset_reg_apply();
-	if (should_run_test(filter, "bulk_memcpy_offset_lower_boundary"))
-		ret |= test_rejit_bulk_memcpy_offset_lower_boundary();
-	if (should_run_test(filter, "bulk_memset_max_len_zero_fill"))
-		ret |= test_rejit_bulk_memset_max_len_zero_fill();
-	if (should_run_test(filter, "bulk_memcpy_zero_length_rejected"))
-		ret |= test_rejit_bulk_memcpy_zero_length_rejected();
-	if (should_run_test(filter, "bulk_memcpy_invalid_tmp_rejected"))
-		ret |= test_rejit_bulk_memcpy_invalid_tmp_rejected();
-	if (should_run_test(filter, "bulk_memset_invalid_width_rejected"))
-		ret |= test_rejit_bulk_memset_invalid_width_rejected();
-	if (should_run_test(filter, "bulk_memcpy_jit_emits_rep_movsb"))
-		ret |= test_rejit_bulk_memcpy_jit_emits_rep_movsb();
-	if (should_run_test(filter, "bulk_memcpy_kinsn_tmp_r7_saves_r13"))
-		ret |= test_rejit_bulk_memcpy_kinsn_tmp_r7_saves_r13();
-	if (should_run_test(filter, "bulk_memset_jit_emits_rep_stosb"))
-		ret |= test_rejit_bulk_memset_jit_emits_rep_stosb();
+	if (should_run_test(filter, "bulk_byte_copy_apply"))
+		ret |= test_rejit_bulk_byte_copy_apply();
+	if (should_run_test(filter, "bulk_storeb_reg_apply"))
+		ret |= test_rejit_bulk_storeb_reg_apply();
+	if (should_run_test(filter, "bulk_byte_copy_negative_offset_boundary"))
+		ret |= test_rejit_bulk_byte_copy_negative_offset_boundary();
+	if (should_run_test(filter, "bulk_storeb_zero_apply"))
+		ret |= test_rejit_bulk_storeb_zero_apply();
+	if (should_run_test(filter, "bulk_loadb_payload_high_bits_rejected"))
+		ret |= test_rejit_bulk_loadb_payload_high_bits_rejected();
+	if (should_run_test(filter, "bulk_loadb_invalid_dst_rejected"))
+		ret |= test_rejit_bulk_loadb_invalid_dst_rejected();
+	if (should_run_test(filter, "bulk_storeb_payload_high_bits_rejected"))
+		ret |= test_rejit_bulk_storeb_payload_high_bits_rejected();
+	if (should_run_test(filter, "bulk_loadb_jit_emits_movzx"))
+		ret |= test_rejit_bulk_loadb_jit_emits_movzx();
+	if (should_run_test(filter, "bulk_storeb_reg_jit_emits_mov_store"))
+		ret |= test_rejit_bulk_storeb_reg_jit_emits_mov_store();
+	if (should_run_test(filter, "bulk_storeb_imm_jit_emits_mov_imm_store"))
+		ret |= test_rejit_bulk_storeb_imm_jit_emits_mov_imm_store();
 	if (should_run_test(filter, "ldp128_apply"))
 		ret |= test_rejit_ldp128_apply();
 	if (should_run_test(filter, "stp128_apply"))

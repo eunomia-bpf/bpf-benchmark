@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * Test: select64 register alias correctness (dst == cond)
+ * Test: x86 TEST/CMOV register alias correctness (dst == cond)
  *
  * Loads real BPF programs into the kernel and compares:
  *   (a) plain BPF proof sequence (ordinary JMP/MOV instructions)
- *   (b) kinsn sidecar+call (triggers native x86 CMOV emit via bpf_select module)
+ *   (b) machine-instruction kinsn sequence:
+ *       optional MOVQ, TESTQ, CMOVcc, optional MOVQ
  *
  * The two must produce identical results for all test vectors,
  * especially when dst_reg == cond_reg.
  *
- * Regression test for: x86 emit_select_x86 MOV-before-TEST alias bug.
+ * Regression test for preserving the original condition when lowering select
+ * through machine-level TEST/CMOV kinsns.
  */
 #define _GNU_SOURCE
 
@@ -79,9 +81,13 @@ static int g_pass, g_fail;
 		     (__s16)(((__u64)(PAYLOAD) >> 4) & 0xffff), \
 		     (__s32)(((__u64)(PAYLOAD) >> 20) & 0xffffffffU))
 
-#define KINSN_SELECT_PAYLOAD(DST, TRUE_REG, FALSE_REG, COND_REG) \
-	((__u64)(DST) | ((__u64)(TRUE_REG) << 4) | \
-	 ((__u64)(FALSE_REG) << 8) | ((__u64)(COND_REG) << 12))
+#define KINSN_TEST_PAYLOAD(REG) ((__u64)(REG))
+
+#define KINSN_CMOV_PAYLOAD(DST, SRC, COND_REG) \
+	((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(COND_REG) << 8))
+
+#define KINSN_MOVQ_PAYLOAD(DST, SRC) \
+	((__u64)(DST) | ((__u64)(SRC) << 4))
 
 #define BTF_FD_ARRAY(FD) { (FD), (FD) }
 
@@ -155,7 +161,7 @@ static int test_run_xdp(int prog_fd, __u32 *retval)
 }
 
 /* ------------------------------------------------------------------ */
-/* Minimal BTF discovery for bpf_select module                         */
+/* Minimal BTF discovery for x86 TEST/CMOV/MOV kinsn modules           */
 /* ------------------------------------------------------------------ */
 
 struct btf_header {
@@ -349,46 +355,77 @@ static int find_func_btf_id(const __u8 *data, size_t data_len,
 	return -1;
 }
 
-static int g_select_btf_fd = -1;
-static __u32 g_select_btf_id;
+static int g_cmov_btf_fd = -1;
+static int g_mov_btf_fd = -1;
+static __u32 g_testq_btf_id;
+static __u32 g_cmovneq_btf_id;
+static __u32 g_cmoveq_btf_id;
+static __u32 g_movq_btf_id;
 
-static int discover_select_kinsn(void)
+static int discover_module_func(const char *module_name, const char *func_name,
+				__u32 type_id_bias,
+				int *btf_fd, __u32 *btf_id)
 {
-	__u32 type_id_bias, base_str_off;
+	char path[128];
+	struct btf_header *hdr;
 	__u8 *data;
 	size_t len;
-	struct btf_header *hdr;
+	int fd;
+
+	if (*btf_fd < 0) {
+		fd = bpf_btf_get_fd_by_module_name(module_name);
+		if (fd < 0) {
+			fprintf(stderr, "%s module not loaded\n", module_name);
+			return -1;
+		}
+		*btf_fd = fd;
+	}
+
+	snprintf(path, sizeof(path), "/sys/kernel/btf/%s", module_name);
+	if (read_file(path, &data, &len) < 0) {
+		fprintf(stderr, "cannot read %s\n", path);
+		return -1;
+	}
+	hdr = (struct btf_header *)data;
+	if (find_func_btf_id(data, len, func_name, hdr->str_off, type_id_bias,
+			     btf_id) < 0) {
+		fprintf(stderr, "cannot find %s BTF ID\n", func_name);
+		free(data);
+		return -1;
+	}
+	free(data);
+	return 0;
+}
+
+static int discover_cmov_kinsns(void)
+{
+	__u32 type_id_bias;
 
 	if (get_vmlinux_type_count(&type_id_bias) < 0) {
 		fprintf(stderr, "failed to read vmlinux BTF\n");
 		return -1;
 	}
 
-	g_select_btf_fd = bpf_btf_get_fd_by_module_name("bpf_select");
-	if (g_select_btf_fd < 0) {
-		fprintf(stderr, "bpf_select module not loaded\n");
+	if (discover_module_func("bpf_x86_cmov", "bpf_x86_testq_rr",
+				 type_id_bias,
+				 &g_cmov_btf_fd, &g_testq_btf_id) < 0)
 		return -1;
-	}
-
-	if (read_file("/sys/kernel/btf/bpf_select", &data, &len) < 0) {
-		fprintf(stderr, "cannot read /sys/kernel/btf/bpf_select\n");
+	if (discover_module_func("bpf_x86_cmov", "bpf_x86_cmovneq_rr",
+				 type_id_bias,
+				 &g_cmov_btf_fd, &g_cmovneq_btf_id) < 0)
 		return -1;
-	}
-
-	hdr = (struct btf_header *)data;
-	base_str_off = hdr->str_off;
-
-	if (find_func_btf_id(data, len, "bpf_select64",
-			      base_str_off, type_id_bias,
-			      &g_select_btf_id) < 0) {
-		fprintf(stderr, "cannot find bpf_select64 BTF ID\n");
-		free(data);
+	if (discover_module_func("bpf_x86_cmov", "bpf_x86_cmoveq_rr",
+				 type_id_bias,
+				 &g_cmov_btf_fd, &g_cmoveq_btf_id) < 0)
 		return -1;
-	}
-	free(data);
+	if (discover_module_func("bpf_x86_mov_reg", "bpf_x86_movq_rr",
+				 type_id_bias,
+				 &g_mov_btf_fd, &g_movq_btf_id) < 0)
+		return -1;
 
-	printf("  discovered: bpf_select64 btf_fd=%d btf_id=%u\n",
-	       g_select_btf_fd, g_select_btf_id);
+	printf("  discovered: testq=%u cmovneq=%u cmoveq=%u movq=%u\n",
+	       g_testq_btf_id, g_cmovneq_btf_id, g_cmoveq_btf_id,
+	       g_movq_btf_id);
 	return 0;
 }
 
@@ -401,17 +438,28 @@ static const struct bpf_insn prog_ret_0[] = {
 	BPF_EXIT_INSN(),
 };
 
-static void patch_kinsn(struct bpf_insn *prog, size_t cnt, __u32 btf_id)
+struct kinsn_patch {
+	__u32 btf_id;
+	__s16 call_off;
+};
+
+static int patch_kinsns(struct bpf_insn *prog, size_t cnt,
+			const struct kinsn_patch *patches, size_t patch_cnt)
 {
 	size_t i;
+	size_t patch_idx = 0;
 
 	for (i = 0; i < cnt; i++) {
 		if (prog[i].code == (BPF_JMP | BPF_CALL) &&
 		    prog[i].src_reg == BPF_PSEUDO_KINSN_CALL) {
-			prog[i].imm = (__s32)btf_id;
-			prog[i].off = 1;
+			if (patch_idx >= patch_cnt)
+				return -1;
+			prog[i].imm = (__s32)patches[patch_idx].btf_id;
+			prog[i].off = patches[patch_idx].call_off;
+			patch_idx++;
 		}
 	}
+	return patch_idx == patch_cnt ? 0 : -1;
 }
 
 /* ------------------------------------------------------------------ */
@@ -439,13 +487,16 @@ static int run_bpf_prog(const struct bpf_insn *insns, __u32 cnt, __u32 *retval)
 /* ------------------------------------------------------------------ */
 /* Run kinsn program via REJIT and return result                       */
 /* ------------------------------------------------------------------ */
-static int run_kinsn_prog(struct bpf_insn *insns, __u32 cnt, __u32 *retval)
+static int run_kinsn_prog(struct bpf_insn *insns, __u32 cnt,
+			  const struct kinsn_patch *patches,
+			  size_t patch_cnt, __u32 *retval)
 {
 	char log_buf[LOG_BUF_SIZE];
-	int fd_array[2] = BTF_FD_ARRAY(g_select_btf_fd);
+	int fd_array[3] = { g_cmov_btf_fd, g_cmov_btf_fd, g_mov_btf_fd };
 	int prog_fd;
 
-	patch_kinsn(insns, cnt, g_select_btf_id);
+	if (patch_kinsns(insns, cnt, patches, patch_cnt) < 0)
+		return -1;
 
 	memset(log_buf, 0, sizeof(log_buf));
 	prog_fd = load_xdp_prog(prog_ret_0, ARRAY_SIZE(prog_ret_0),
@@ -490,7 +541,9 @@ struct select_test_vec {
 
 static int run_select_test(const struct select_test_vec *v)
 {
+	struct kinsn_patch patches[8];
 	__u32 bpf_result, kinsn_result;
+	size_t p = 0;
 
 	/*
 	 * Build BPF proof sequence:
@@ -537,13 +590,17 @@ static int run_select_test(const struct select_test_vec *v)
 	 *   MOV treg, treg_val
 	 *   MOV freg, freg_val
 	 *   [MOV cond, cond_val]
-	 *   SIDECAR(SELECT_PAYLOAD(dst, treg, freg, cond))
-	 *   CALL_KINSN
+	 *   machine-level MOVQ/TESTQ/CMOVcc kinsn sequence
 	 *   MOV r0, dst
 	 *   EXIT
 	 */
-	struct bpf_insn kinsn_prog[12];
+	struct bpf_insn kinsn_prog[20];
 	int k = 0;
+#define ADD_KINSN(PAYLOAD, BTF_ID, CALL_OFF) do { \
+	kinsn_prog[k++] = BPF_KINSN_SIDECAR(PAYLOAD); \
+	kinsn_prog[k++] = BPF_CALL_KINSN(0, 0); \
+	patches[p++] = (struct kinsn_patch) { (BTF_ID), (CALL_OFF) }; \
+} while (0)
 
 	kinsn_prog[k++] = BPF_MOV64_IMM(v->dst, v->dst_val);
 	if (v->treg != v->dst)
@@ -553,15 +610,44 @@ static int run_select_test(const struct select_test_vec *v)
 	if (v->cond != v->dst && v->cond != v->treg && v->cond != v->freg)
 		kinsn_prog[k++] = BPF_MOV64_IMM(v->cond, v->cond_val);
 
-	kinsn_prog[k++] = BPF_KINSN_SIDECAR(
-		KINSN_SELECT_PAYLOAD(v->dst, v->treg, v->freg, v->cond));
-	kinsn_prog[k++] = BPF_CALL_KINSN(0, 0);
+	if (v->treg == v->freg) {
+		if (v->dst != v->treg)
+			ADD_KINSN(KINSN_MOVQ_PAYLOAD(v->dst, v->treg),
+				  g_movq_btf_id, 2);
+	} else if (v->dst == v->cond &&
+		   v->dst != v->treg &&
+		   v->dst != v->freg) {
+		__u8 scratch = BPF_REG_9;
+
+		ADD_KINSN(KINSN_MOVQ_PAYLOAD(scratch, v->freg),
+			  g_movq_btf_id, 2);
+		ADD_KINSN(KINSN_TEST_PAYLOAD(v->cond),
+			  g_testq_btf_id, 1);
+		ADD_KINSN(KINSN_CMOV_PAYLOAD(scratch, v->treg, v->cond),
+			  g_cmovneq_btf_id, 1);
+		ADD_KINSN(KINSN_MOVQ_PAYLOAD(v->dst, scratch),
+			  g_movq_btf_id, 2);
+	} else if (v->dst != v->treg) {
+		if (v->dst != v->freg)
+			ADD_KINSN(KINSN_MOVQ_PAYLOAD(v->dst, v->freg),
+				  g_movq_btf_id, 2);
+		ADD_KINSN(KINSN_TEST_PAYLOAD(v->cond),
+			  g_testq_btf_id, 1);
+		ADD_KINSN(KINSN_CMOV_PAYLOAD(v->dst, v->treg, v->cond),
+			  g_cmovneq_btf_id, 1);
+	} else {
+		ADD_KINSN(KINSN_TEST_PAYLOAD(v->cond),
+			  g_testq_btf_id, 1);
+		ADD_KINSN(KINSN_CMOV_PAYLOAD(v->dst, v->freg, v->cond),
+			  g_cmoveq_btf_id, 1);
+	}
 
 	if (v->dst != BPF_REG_0)
 		kinsn_prog[k++] = BPF_MOV64_REG(BPF_REG_0, v->dst);
 	kinsn_prog[k++] = BPF_EXIT_INSN();
+#undef ADD_KINSN
 
-	if (run_kinsn_prog(kinsn_prog, k, &kinsn_result) < 0) {
+	if (run_kinsn_prog(kinsn_prog, k, patches, p, &kinsn_result) < 0) {
 		TEST_FAIL(v->name, "kinsn REJIT load/run failed");
 		return 1;
 	}
@@ -677,8 +763,8 @@ int main(void)
 
 	printf("[select_alias] BPF proof vs kinsn native comparison tests\n");
 
-	if (discover_select_kinsn() < 0) {
-		fprintf(stderr, "FATAL: cannot discover bpf_select kinsn\n");
+	if (discover_cmov_kinsns() < 0) {
+		fprintf(stderr, "FATAL: cannot discover x86 cmov kinsns\n");
 		return 1;
 	}
 
@@ -687,8 +773,10 @@ int main(void)
 
 	printf("\nSummary: %d passed, %d failed\n", g_pass, g_fail);
 
-	if (g_select_btf_fd >= 0)
-		close(g_select_btf_fd);
+	if (g_cmov_btf_fd >= 0)
+		close(g_cmov_btf_fd);
+	if (g_mov_btf_fd >= 0)
+		close(g_mov_btf_fd);
 
 	return ret || g_fail ? 1 : 0;
 }

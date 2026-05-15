@@ -35,17 +35,22 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/Target/TargetOptions.h"
+#include "llvm/Transforms/InstCombine/InstCombine.h"
 #include "llvm/Transforms/Scalar/DCE.h"
 #include "llvm/Transforms/Scalar/EarlyCSE.h"
 #include "llvm/Transforms/Scalar/SROA.h"
+#include "llvm/Transforms/Scalar/SimplifyCFG.h"
 #include "llvm/Transforms/Utils/Mem2Reg.h"
 
 namespace {
 
 constexpr uint8_t BPF_LD_IMM64 = 0x18;
 constexpr uint8_t BPF_LDX_MEM_H = 0x69;
+constexpr uint8_t BPF_ALU64_ADD_K = 0x07;
+constexpr uint8_t BPF_ALU64_MOV_X = 0xbf;
 constexpr uint8_t BPF_ALU32_MOV_X = 0xbc;
 constexpr uint8_t BPF_ALU32_AND_K = 0x54;
+constexpr uint8_t BPF_JLT_K = 0xa5;
 constexpr uint8_t BPF_JA = 0x05;
 constexpr uint8_t BPF_CALL = 0x85;
 constexpr uint8_t BPF_CALLX = BPF_CALL | 0x08;
@@ -586,6 +591,29 @@ void repair_verifier_range_copies(std::vector<uint8_t> &text)
 		}
 		set_dst_reg(text, pc + 2, source);
 	}
+
+	for (size_t pc = 0; pc + 3 < insn_count; pc++) {
+		if (text[pc * INSN_SIZE] != BPF_ALU64_MOV_X ||
+		    text[(pc + 1) * INSN_SIZE] != BPF_ALU64_ADD_K ||
+		    text[(pc + 3) * INSN_SIZE] != BPF_JLT_K) {
+			continue;
+		}
+		const uint8_t adjusted = dst_reg(text, pc);
+		const uint8_t source = src_reg(text, pc);
+		const int32_t add = read_imm(text, pc + 1);
+		const int32_t limit = read_imm(text, pc + 3);
+		if (adjusted == source || dst_reg(text, pc + 1) != adjusted ||
+		    dst_reg(text, pc + 3) != source || src_reg(text, pc + 3) != 0 ||
+		    add < 0 ||
+		    limit > std::numeric_limits<int32_t>::max() - add) {
+			continue;
+		}
+		if (text[(pc + 2) * INSN_SIZE] == BPF_ALU64_MOV_X &&
+		    src_reg(text, pc + 2) == adjusted) {
+			set_dst_reg(text, pc + 3, adjusted);
+			write_imm(text, pc + 3, limit + add);
+		}
+	}
 }
 
 void eliminate_dead_alu_defs(std::vector<uint8_t> &text)
@@ -779,7 +807,7 @@ void optimize_module(llvm::Module &module, llvm::TargetMachine &machine)
 	passes.registerLoopAnalyses(loop_am);
 	passes.crossRegisterProxies(loop_am, function_am, cgscc_am, module_am);
 	auto pipeline = passes.buildPerModuleDefaultPipeline(
-		llvm::OptimizationLevel::O2);
+		llvm::OptimizationLevel::O3);
 	pipeline.run(module, module_am);
 }
 
@@ -799,7 +827,7 @@ void promote_register_allocas(llvm::Module &module, llvm::TargetMachine &machine
 	llvm::FunctionPassManager function_pipeline;
 	function_pipeline.addPass(llvm::SROAPass(llvm::SROAOptions::PreserveCFG));
 	function_pipeline.addPass(llvm::PromotePass());
-	function_pipeline.addPass(llvm::EarlyCSEPass());
+	function_pipeline.addPass(llvm::SimplifyCFGPass());
 	function_pipeline.addPass(llvm::DCEPass());
 	llvm::ModulePassManager module_pipeline;
 	module_pipeline.addPass(llvm::createModuleToFunctionPassAdaptor(
@@ -809,7 +837,9 @@ void promote_register_allocas(llvm::Module &module, llvm::TargetMachine &machine
 
 std::vector<uint8_t> emit_bpf_object(llvm::Module &module, bool optimize_ir)
 {
-	auto machine = create_bpf_target_machine(llvm::CodeGenOptLevel::Aggressive);
+	auto machine = create_bpf_target_machine(
+		optimize_ir ? llvm::CodeGenOptLevel::Aggressive :
+			      llvm::CodeGenOptLevel::Less);
 	module.setTargetTriple("bpfel");
 	module.setDataLayout(machine->createDataLayout());
 	if (optimize_ir) {
@@ -885,24 +915,6 @@ std::vector<uint8_t> run_llvm_roundtrip(const std::vector<uint8_t> &input,
 		return extract_relocated_text(emit_bpf_object(module, optimize_ir),
 					      input);
 	});
-}
-
-std::vector<uint8_t> run_llvm_data_roundtrip(const std::vector<uint8_t> &input)
-{
-	if (input.empty() || input.size() % INSN_SIZE != 0) {
-		throw std::runtime_error(
-			"input bytecode length must be a non-empty multiple of 8");
-	}
-	llvm::LLVMContext context;
-	llvm::Module module("bpfopt-llvm-asm", context);
-	auto *data = llvm::ConstantDataArray::get(
-		context, llvm::ArrayRef<uint8_t>(input.data(), input.size()));
-	auto *global = new llvm::GlobalVariable(
-		module, data->getType(), true, llvm::GlobalValue::ExternalLinkage,
-		data, "bpfopt_llvm_roundtrip");
-	global->setSection(".text");
-	global->setAlignment(llvm::Align(8));
-	return extract_text_section(emit_bpf_object(module, false));
 }
 
 uint32_t module_fd_array_base(size_t map_count)
@@ -1104,7 +1116,7 @@ void run_pass(Cli &cli)
 	const auto input = read_all(cli.input);
 	const bool is_noop = *cli.pass == "noop";
 	std::vector<uint8_t> output = is_noop ?
-					      run_llvm_data_roundtrip(input) :
+					      run_llvm_roundtrip(input, false) :
 					      run_llvm_roundtrip(input, true);
 	write_all(cli.output, output);
 	write_report(cli, input, output);

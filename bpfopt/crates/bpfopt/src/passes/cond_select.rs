@@ -10,11 +10,6 @@ use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
-        name: "bpf_x86_movq_rr",
-        register_uses: mov_rr_register_uses,
-        register_defs: mov_rr_register_defs,
-    },
-    KinsnDescriptor {
         name: "bpf_x86_testq_rr",
         register_uses: test_register_uses,
         register_defs: no_regs,
@@ -28,11 +23,6 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
         name: "bpf_x86_cmoveq_rr",
         register_uses: x86_cmov_register_uses,
         register_defs: cond_select_register_defs,
-    },
-    KinsnDescriptor {
-        name: "bpf_arm64_mov_x_rr",
-        register_uses: mov_rr_register_uses,
-        register_defs: mov_rr_register_defs,
     },
     KinsnDescriptor {
         name: "bpf_arm64_tst_rr",
@@ -62,14 +52,6 @@ fn cond_select_register_defs(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[0])
 }
 
-fn mov_rr_register_uses(payload: u64) -> RegSet {
-    regs_from_offsets(payload, &[4])
-}
-
-fn mov_rr_register_defs(payload: u64) -> RegSet {
-    regs_from_offsets(payload, &[0])
-}
-
 /// COND_SELECT pass: replaces branch+mov diamond patterns with machine-level
 /// compare/select kinsns.
 ///
@@ -96,6 +78,7 @@ struct CondSelectLowering {
     a_reg: u8,
     b_reg: u8,
     cond_reg: u8,
+    x86_result_scratch: Option<u8>,
 }
 
 #[derive(Clone, Copy)]
@@ -139,7 +122,7 @@ impl BpfPass for CondSelectPass {
         for site in sites {
             let live_after = prog.live_out_site_checked(site.end_site)?;
 
-            let lowering = match build_lowering(&site, &live_after) {
+            let lowering = match build_lowering(&site, &live_after, _ctx.arch) {
                 Ok(lowering) => lowering,
                 Err(reason) => {
                     skipped.push(site.skip(reason));
@@ -210,7 +193,21 @@ fn emit_x86_cond_select_kinsns(
     lowering: &CondSelectLowering,
 ) -> anyhow::Result<Vec<BpfInsn>> {
     let mut out = Vec::new();
-        if site.dst_reg != lowering.a_reg {
+    if let Some(scratch) = lowering.x86_result_scratch {
+        out.extend_from_slice(
+            &prog.kinsn_emit("bpf_x86_movq_rr", mov_rr_payload(scratch, lowering.b_reg))?,
+        );
+        out.extend_from_slice(
+            &prog.kinsn_emit("bpf_x86_testq_rr", test_payload(lowering.cond_reg))?,
+        );
+        out.extend_from_slice(&prog.kinsn_emit(
+            "bpf_x86_cmovneq_rr",
+            cmov_payload(scratch, lowering.a_reg, lowering.cond_reg),
+        )?);
+        out.extend_from_slice(
+            &prog.kinsn_emit("bpf_x86_movq_rr", mov_rr_payload(site.dst_reg, scratch))?,
+        );
+    } else if site.dst_reg != lowering.a_reg {
         if site.dst_reg != lowering.b_reg {
             out.extend_from_slice(&prog.kinsn_emit(
                 "bpf_x86_movq_rr",
@@ -502,6 +499,7 @@ fn select_mov_value(insn: &BpfInsn) -> Option<CondSelectValue> {
 fn build_lowering(
     site: &CondSelectSite,
     live_after: &HashSet<u8>,
+    arch: Arch,
 ) -> Result<CondSelectLowering, String> {
     let (mut prefix, cond_reg, inverted) = condition_prefix(site, live_after)?;
     let (a_val, b_val) = if inverted {
@@ -536,7 +534,27 @@ fn build_lowering(
         a_reg: regs[0],
         b_reg: regs[1],
         cond_reg,
+        x86_result_scratch: if arch == Arch::X86_64 {
+            x86_result_scratch(site, live_after, &protected, &allocated, regs)?
+        } else {
+            None
+        },
     })
+}
+
+fn x86_result_scratch(
+    site: &CondSelectSite,
+    live_after: &HashSet<u8>,
+    protected: &[u8],
+    allocated: &[u8],
+    regs: [u8; 2],
+) -> Result<Option<u8>, String> {
+    if site.dst_reg != site.cond.dst_reg() || site.dst_reg == regs[0] || site.dst_reg == regs[1] {
+        return Ok(None);
+    }
+    choose_temp_reg(site, live_after, protected, allocated)
+        .map(Some)
+        .ok_or_else(|| "no dead register available for x86 cond_select result scratch".to_string())
 }
 
 fn condition_prefix(

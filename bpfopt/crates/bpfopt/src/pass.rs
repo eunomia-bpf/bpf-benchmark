@@ -322,22 +322,33 @@ impl KinsnRegistry {
             by_name: HashMap::new(),
             by_call: HashMap::new(),
         };
+        for descriptor in crate::passes::COMMON_KINSN_TARGETS {
+            registry.insert_builtin_descriptor(descriptor)?;
+        }
         for pass in crate::passes::PASS_REGISTRY {
             for descriptor in pass.kinsn_targets {
-                let previous = registry.by_name.insert(
-                    descriptor.name,
-                    RegistryEntry {
-                        btf_id: None,
-                        call_off: 0,
-                        descriptor,
-                    },
-                );
-                if previous.is_some() {
-                    anyhow::bail!("duplicate kinsn target name {}", descriptor.name);
-                }
+                registry.insert_builtin_descriptor(descriptor)?;
             }
         }
         Ok(registry)
+    }
+
+    fn insert_builtin_descriptor(
+        &mut self,
+        descriptor: &'static KinsnDescriptor,
+    ) -> anyhow::Result<()> {
+        let previous = self.by_name.insert(
+            descriptor.name,
+            RegistryEntry {
+                btf_id: None,
+                call_off: 0,
+                descriptor,
+            },
+        );
+        if previous.is_some() {
+            anyhow::bail!("duplicate kinsn target name {}", descriptor.name);
+        }
+        Ok(())
     }
 
     pub fn lookup_by_kinsn_call(

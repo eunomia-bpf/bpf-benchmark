@@ -7,6 +7,9 @@ use crate::test_helpers::*;
 fn select_ctx() -> crate::pass::PassContext {
     let mut ctx = pass_ctx();
     ctx.kinsn_registry
+        .set_kinsn_call_for_target_name("bpf_x86_movq_rr", 5554, 0)
+        .expect("register movq kinsn");
+    ctx.kinsn_registry
         .set_kinsn_call_for_target_name("bpf_x86_testq_rr", 5555, 0)
         .expect("register testq kinsn");
     ctx.kinsn_registry
@@ -82,6 +85,28 @@ fn test_cond_select_alias_all_overlap_combinations() {
             }
         }
     }
+}
+
+#[test]
+fn cond_select_dst_eq_cond_uses_scratch_before_test_cmov() {
+    let input = vec![
+        BpfInsn::jump_imm(BPF_JNE, BPF_REG_1, 0, 2),
+        BpfInsn::mov64_reg(BPF_REG_1, BPF_REG_3),
+        BpfInsn::ja(1),
+        BpfInsn::mov64_reg(BPF_REG_1, BPF_REG_2),
+        BpfInsn::exit(),
+    ];
+
+    let run = run_pass_on_insns(CondSelectPass, input, &select_ctx());
+
+    assert_eq!(run.result.sites_applied, 1);
+    let call_imms: Vec<i32> = run
+        .lowered
+        .iter()
+        .filter(|insn| insn.is_call_kinsn())
+        .map(|insn| insn.imm)
+        .collect();
+    assert_eq!(call_imms, vec![5554, 5555, 5556, 5554]);
 }
 
 #[test]

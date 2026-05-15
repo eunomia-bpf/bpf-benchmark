@@ -5,7 +5,11 @@ use crate::insn::*;
 use crate::test_helpers::*;
 
 fn rotate64_ctx(btf_id: i32) -> crate::pass::PassContext {
-    ctx_with_kinsn("bpf_x86_rolq_imm", btf_id)
+    let mut ctx = ctx_with_kinsn("bpf_x86_rolq_imm", btf_id);
+    ctx.kinsn_registry
+        .set_kinsn_call_for_target_name("bpf_x86_movq_rr", btf_id + 1, 0)
+        .expect("register movq kinsn");
+    ctx
 }
 
 fn rotate32_ctx(btf_id: i32) -> crate::pass::PassContext {
