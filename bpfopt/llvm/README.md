@@ -30,9 +30,17 @@ caller.
 
 Current `noop` uses the O0-oriented path: register allocas are promoted enough
 for LLVM codegen to lower the IR, but the O3 module pipeline is not enabled.
-Non-`noop` pass mode currently enables the O3 pipeline. The expected validation
-order is: first make strict O0 `noop` pass every loader test object, then test
-the same corpus with O3 enabled.
+This is the verifier-compatible mode. On May 15, 2026 it passed all 37
+`bpfopt/testobject` objects through `bpfopt-loader --pass noop --bpfopt
+bpfopt/llvm/build/bpfopt`, covering 378 individual BPF programs.
+
+Non-`noop` pass mode currently enables the O3 pipeline. O3 is not yet
+verifier-compatible across the corpus: using the existing `dce` loader config to
+trigger O3 passes bcc, bpftrace, `cilium_bpf_host`, and `cilium_bpf_lxc`, then
+fails at `cilium_bpf_overlay.bpf.o`. The first observed failure is a map-value
+offset bounds check that is semantically redundant after LLVM optimization but
+still required for the kernel verifier to prove bounded access. O3 therefore
+needs verifier-aware range-check preservation before it can replace O0.
 
 The local llvmbpf changes are kept to compatibility fixes needed by kernel
 bytecode:
@@ -46,6 +54,10 @@ bytecode:
 - attach natural alignment to memory loads/stores emitted from BPF memory ops;
 - compute kernel stack requirements only for the entry function prefix that is
   actually lifted into the generated module.
+
+The llvmbpf changes are published on
+`origin/codex/bpfopt-llvm-roundtrip-20260515` in the upstream llvmbpf
+repository.
 
 Build:
 
@@ -63,4 +75,24 @@ sudo -n bash -lc 'ulimit -l unlimited; bpfopt/target/debug/bpfopt-loader \
   --bpfopt bpfopt/llvm/build/bpfopt \
   --target /tmp/bpfopt-llvm-target.json \
   --workdir /tmp/bpfopt-llvm-work'
+```
+
+Full O0 verifier run used during validation:
+
+```sh
+BASE=/tmp/test-all-noop-strict-llvmbpf-o0
+rm -rf "$BASE"
+mkdir -p "$BASE"
+printf '{"arch":"x86_64","kinsns":{}}\n' >"$BASE/target.json"
+for obj in $(find bpfopt/testobject -maxdepth 1 -type f \
+  \( -name '*.bpf.o' -o -name 'tetragon_*.o' \) | sort); do
+  name=$(basename "$obj")
+  mkdir -p "$BASE/$name"
+  sudo -n bash -lc "ulimit -l unlimited; cd $(pwd); \
+    timeout 900 bpfopt/target/debug/bpfopt-loader \
+      --obj '$obj' --pass noop \
+      --bpfopt bpfopt/llvm/build/bpfopt \
+      --target '$BASE/target.json' \
+      --workdir '$BASE/$name/work'"
+done
 ```

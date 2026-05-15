@@ -394,14 +394,15 @@ def write_code_compare_markdown(benchmark: CatalogTarget, artifact_dir: Path) ->
         ("Handcraft C", "c", _read_text_or_missing(handcraft_source)),
         ("Handcraft Kernel JIT ASM", "asm", _disassembly(dump_dir / f"{_dump_stem(benchmark.name, 'kernel', 0)}.jited.bin", binary=True) if handcraft_source.exists() else "not captured"),
     ]
-    out = artifact_dir / "details" / "code_compare" / f"{sanitize_artifact_token(benchmark.name)}.md"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(
-        f"# {benchmark.name}\n\n" + "\n\n".join(
-            f"## {title}\n```{lang}\n{text.rstrip()}\n```" for title, lang, text in sections
-        )
-        + "\n"
-    )
+    text = f"# {benchmark.name}\n\n" + "\n\n".join(
+        f"## {title}\n```{lang}\n{text.rstrip()}\n```" for title, lang, text in sections
+    ) + "\n"
+    for out in (
+        ROOT_DIR / "micro" / "programs" / f"{sanitize_artifact_token(benchmark.name)}.md",
+        artifact_dir / "details" / "code_compare" / f"{sanitize_artifact_token(benchmark.name)}.md",
+    ):
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(text)
 
 
 def main(argv: list[str] | None = None) -> int:

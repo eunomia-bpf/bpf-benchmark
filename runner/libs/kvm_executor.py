@@ -111,8 +111,18 @@ def suite_command(workspace_root: Path, config: RunConfig, suite_args: list[str]
         "--image", config.remote.runtime_container_image,
         str(image_tar),
     ])
+    post_container_cmd = ""
+    if config.identity.suite_name == "micro":
+        post_container_cmd = """ && bash -lc '
+latest_compare_dir="$(find micro/results -path "*/details/code_compare" -type d -printf "%T@ %p\\n" | sort -nr | awk "NR == 1 { print \\$2; exit }")"
+if [ -n "$latest_compare_dir" ]; then
+    mkdir -p micro/programs
+    cp "$latest_compare_dir"/*.md micro/programs/
+    rm -rf "$latest_compare_dir"
+fi
+'"""
     docker_prelude = _docker_prelude_shell()
-    return f"{mkdir_cmd} && (\n{docker_prelude}\n{install_cmd} && {container_cmd}\n)"
+    return f"{mkdir_cmd} && (\n{docker_prelude}\n{install_cmd} && {container_cmd}{post_container_cmd}\n)"
 
 
 def _optional_int(value: str) -> int | None:

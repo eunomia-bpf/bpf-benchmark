@@ -359,7 +359,6 @@ RUN set -eux; \
         ./runner/src \
         ./runner/include \
         ./runner/CMakeLists.txt \
-        ./micro/programs \
         ./tests/unittest/Makefile \
         ./tests/unittest/module \
         ./tests/unittest/progs \
@@ -422,6 +421,7 @@ COPY --link --from=runner-runtime-artifacts /etc/calico /etc/calico
 COPY --link --from=runner-runtime-artifacts /usr/lib/calico /usr/lib/calico
 COPY --link --from=runner-runtime-artifacts /included-source /included-source
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/runner ${IMAGE_WORKSPACE}/runner
+COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/micro/programs ${IMAGE_WORKSPACE}/micro/programs
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/tests ${IMAGE_WORKSPACE}/tests
 COPY --link --from=runner-runtime-kinsn-artifacts /artifacts/kinsn /artifacts/kinsn
 COPY --link --from=runner-runtime-daemon-artifact /artifacts/rust/usr-local-bin/bpfrejit-daemon /usr/local/bin/bpfrejit-daemon
