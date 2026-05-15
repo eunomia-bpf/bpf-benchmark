@@ -595,7 +595,10 @@ fn verify_workdir_with_log_level(
     rewrite_map_indices_to_fds(&mut insns, map_fds)?;
     let needs_func_info = contains_pseudo_func(&insns);
     if needs_func_info && (btf_fd < 0 || func_info.is_empty()) {
-        bail!("{} uses BPF_PSEUDO_FUNC but has no func_info", input.display());
+        bail!(
+            "{} uses BPF_PSEUDO_FUNC but has no func_info",
+            input.display()
+        );
     }
     let mut remapped_func_info = Vec::new();
     let mut use_line_info = line_info;
@@ -764,9 +767,7 @@ fn normalize_open_maps(obj: &BpfObject) -> Result<()> {
             }
             if unsafe { libbpf_sys::bpf_map__max_entries(map) } == 0 {
                 libbpf_ok(
-                    unsafe {
-                        libbpf_sys::bpf_map__set_max_entries(map, STACK_TRACE_MAX_ENTRIES)
-                    },
+                    unsafe { libbpf_sys::bpf_map__set_max_entries(map, STACK_TRACE_MAX_ENTRIES) },
                     "bpf_map__set_max_entries(stack_trace)",
                 )?;
             }
@@ -836,7 +837,10 @@ fn apply_autoload_filter(
         .filter(|name| !loaded_names.contains(name))
         .collect();
     if !missing.is_empty() {
-        bail!("compatible object is missing programs: {}", missing.join(","));
+        bail!(
+            "compatible object is missing programs: {}",
+            missing.join(",")
+        );
     }
     Ok(loaded)
 }
@@ -1019,7 +1023,11 @@ fn patch_libbpf_pinning_btf(btf: &mut [u8]) -> Result<bool> {
             }
             4 | 5 => {
                 ty.members_pos = Some(base);
-                checked_add(base, checked_mul(vlen as usize, 12, "BTF members")?, "BTF members")?
+                checked_add(
+                    base,
+                    checked_mul(vlen as usize, 12, "BTF members")?,
+                    "BTF members",
+                )?
             }
             6 => checked_add(base, checked_mul(vlen as usize, 8, "BTF enum")?, "BTF enum")?,
             7 | 8 | 9 | 10 | 11 | 12 | 18 => base,

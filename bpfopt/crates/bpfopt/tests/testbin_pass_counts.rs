@@ -87,8 +87,12 @@ fn testbin_pass_counts_snapshot() -> Result<()> {
         return Ok(());
     }
 
-    let expected = fs::read_to_string(&path)
-        .with_context(|| format!("read {} (run with BPFOPT_TESTBIN_UPDATE=1 to create)", path.display()))?;
+    let expected = fs::read_to_string(&path).with_context(|| {
+        format!(
+            "read {} (run with BPFOPT_TESTBIN_UPDATE=1 to create)",
+            path.display()
+        )
+    })?;
     if expected != yaml {
         let actual_path = path.with_extension("yaml.actual");
         fs::write(&actual_path, &yaml).ok();
@@ -135,8 +139,8 @@ fn compute_snapshot() -> Result<Snapshot> {
         for prog_dir in &prog_dirs {
             let bytes = fs::read(prog_dir.join("canonicalize_output.bin"))
                 .with_context(|| format!("read {}/canonicalize_output.bin", prog_dir.display()))?;
-            let insns = decode_insns(&bytes)
-                .with_context(|| format!("decode {}", prog_dir.display()))?;
+            let insns =
+                decode_insns(&bytes).with_context(|| format!("decode {}", prog_dir.display()))?;
             let t_prog = std::time::Instant::now();
 
             for entry in PASS_REGISTRY {
@@ -183,6 +187,16 @@ fn compute_snapshot() -> Result<Snapshot> {
             }
         }
         eprintln!("  {} done in {:.1}s", app, t_app.elapsed().as_secs_f64());
+        // Incremental write after every app so a partial run still produces a
+        // useful YAML (full all-7-app pass takes ~2 hours; observers want to
+        // see progress without waiting for the very last app).
+        if std::env::var_os("BPFOPT_TESTBIN_UPDATE").is_some() {
+            let path =
+                Path::new(env!("CARGO_MANIFEST_DIR")).join("../../testbin/applied_counts.yaml");
+            if let Ok(yaml) = render_yaml(&snapshot) {
+                let _ = fs::write(&path, yaml);
+            }
+        }
     }
     Ok(snapshot)
 }

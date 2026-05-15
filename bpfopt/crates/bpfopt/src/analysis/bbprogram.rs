@@ -5,9 +5,7 @@ use crate::analysis::bbprogram_btf::BtfRecordKind;
 use crate::analysis::bbprogram_btf::{remap_btf_records_view, BtfRemapView};
 use crate::analysis::bbprogram_lower::remap_btf_records_for_lowering;
 use crate::analysis::{DefSite, UseDefGraph};
-use crate::insn::{
-    bpf_class, insn_width, BpfInsn, MapPseudo, BPF_LDX, BPF_REG_10, BPF_ST, BPF_STX,
-};
+use crate::insn::{insn_width, BpfInsn, MapPseudo};
 use crate::pass::{BranchProfile, BtfInfoRecords, KinsnRegistry, RegKind, RegSet};
 use crate::verifier_log as verifier_facts;
 use crate::verifier_log::VerifierInsn;
@@ -1027,12 +1025,6 @@ fn resolve_map_id(
         .position(|fd| *fd == imm)
         .ok_or_else(|| anyhow::anyhow!("failed to resolve map fd order for fd {imm}"))?;
     Ok(map_ids.get(index).copied())
-}
-fn insn_loads_from_stack(insn: &BpfInsn) -> bool {
-    bpf_class(insn.code) == BPF_LDX && insn.src_reg() == BPF_REG_10
-}
-fn insn_stores_to_stack(insn: &BpfInsn) -> bool {
-    matches!(bpf_class(insn.code), BPF_ST | BPF_STX) && insn.dst_reg() == BPF_REG_10
 }
 impl Terminator {
     pub(crate) fn raw_insn(&self) -> Option<&BpfInsn> {

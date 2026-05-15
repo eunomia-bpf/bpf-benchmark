@@ -712,14 +712,11 @@ pub(crate) fn reg_known_constant(
     reg: u8,
     is_32: bool,
 ) -> Option<i64> {
-    // Use ALL reaching state kinds (PcFullState + InsnDeltaState +
-    // BranchDeltaState, excluding EdgeFullState which encodes a state-diff
-    // edge rather than a reached state). If every reaching state agrees on
-    // the same exact value for `reg`, that value is the verifier-proven
-    // constant — sound to substitute. Restricting to InsnDeltaState only
-    // (post-state) misses sites where the verifier emitted PcFullState or
-    // BranchDeltaState but not a per-insn delta.
-    let mut iter = verifier_reg_states(states, reg)?;
+    // Use only InsnDeltaState (the per-PC post-state line) — for an ALU op
+    // at PC, the verifier post-state captures the *result*, while
+    // PcFullState/EdgeFullState capture pre-state on entry. Mixing pre and
+    // post would substitute a stale value for the ALU's destination.
+    let mut iter = verifier_post_insn_reg_states(states, reg)?;
     let first = reg_exact_value_for_width(iter.next()?, is_32)?;
     for state in iter {
         if reg_exact_value_for_width(state, is_32)? != first {
@@ -787,6 +784,29 @@ fn verifier_reg_states(
         return None;
     }
     Some(states.iter().filter_map(move |state| state.regs.get(&reg)))
+}
+
+fn verifier_post_insn_reg_states(
+    states: Option<&[VerifierInsn]>,
+    reg: u8,
+) -> Option<impl Iterator<Item = &RegState>> {
+    let states = states?;
+    let post_states = states
+        .iter()
+        .filter(|state| state.kind == VerifierInsnKind::InsnDeltaState)
+        .collect::<Vec<_>>();
+    if post_states.is_empty()
+        || post_states
+            .iter()
+            .any(|state| !state.regs.contains_key(&reg))
+    {
+        return None;
+    }
+    Some(
+        post_states
+            .into_iter()
+            .filter_map(move |state| state.regs.get(&reg)),
+    )
 }
 
 fn reg_exact_value(state: &RegState) -> Option<u64> {
