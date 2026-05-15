@@ -1,0 +1,24 @@
+{
+  "completed_benchmarks": 2,
+  "current_benchmark": "bitmap_popcount_scan",
+  "current_benchmark_index": 3,
+  "current_benchmark_record": {
+    "category": "alu-mix",
+    "description": "Bitmap popcount scan over generated u64 words",
+    "expected_result": 12830754992348206170,
+    "family": "popcount",
+    "hypothesis": "Represents bitmap/set summarization loops common in BPF policy and tracing code",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bitmap_popcount_scan.mem",
+    "io_mode": "staged",
+    "level": "medium",
+    "name": "bitmap_popcount_scan",
+    "runs": [],
+    "tags": [
+      "bitops",
+      "pure-jit"
+    ]
+  },
+  "error_message": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/bitmap_popcount_scan.handcraft.so --program-name bitmap_popcount_scan_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bitmap_popcount_scan.mem --io-mode staged --input-size 2056 --inner-repeat 1000 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_171713_375042/details/jit_dumps/bitmap_popcount_scan__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_171713_375042/details/jit_dumps/bitmap_popcount_scan__kernel_handcraft__sample00.xlated.bin\nlibbpf: loaded kernel BTF from '/sys/kernel/btf/vmlinux'\nbpf_prog_load(handcraft) failed: Invalid argument\nfunc#0 @0\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument",
+  "status": "error",
+  "total_benchmarks": 29
+}

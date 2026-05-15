@@ -918,6 +918,17 @@ const handcraft_kinsn_desc &handcraft_kinsn_desc_for_selector(int selector)
         {MICRO_HANDCRAFT_BPF_X86_SETE_R, "bpf_x86_cmov", "bpf_x86_sete_r"},
         {MICRO_HANDCRAFT_BPF_X86_SETGE_R, "bpf_x86_cmov", "bpf_x86_setge_r"},
         {MICRO_HANDCRAFT_BPF_X86_SBBL_IMM0, "bpf_x86_alu_imm", "bpf_x86_sbbl_imm0"},
+        {MICRO_HANDCRAFT_BPF_X86_ANDB_IMM, "bpf_x86_alu_imm", "bpf_x86_andb_imm"},
+        {MICRO_HANDCRAFT_BPF_X86_INCQ, "bpf_x86_alu_imm", "bpf_x86_incq"},
+        {MICRO_HANDCRAFT_BPF_X86_ADDB_IMM, "bpf_x86_alu_imm", "bpf_x86_addb_imm"},
+        {MICRO_HANDCRAFT_BPF_X86_XORB_IMM, "bpf_x86_alu_imm", "bpf_x86_xorb_imm"},
+        {MICRO_HANDCRAFT_BPF_X86_XORB_RR, "bpf_x86_alu_imm", "bpf_x86_xorb_rr"},
+        {MICRO_HANDCRAFT_BPF_X86_CMPQ_RR, "bpf_x86_cmov", "bpf_x86_cmpq_rr"},
+        {MICRO_HANDCRAFT_BPF_X86_CMPL_RR, "bpf_x86_cmov", "bpf_x86_cmpl_rr"},
+        {MICRO_HANDCRAFT_BPF_X86_CMPQ_IMM32, "bpf_x86_cmov", "bpf_x86_cmpq_imm32"},
+        {MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32, "bpf_x86_cmov", "bpf_x86_cmpl_imm32"},
+        {MICRO_HANDCRAFT_BPF_X86_CMOVNEL_RR, "bpf_x86_cmov", "bpf_x86_cmovnel_rr"},
+        {MICRO_HANDCRAFT_BPF_X86_CMOVEL_RR, "bpf_x86_cmov", "bpf_x86_cmovel_rr"},
     };
 
     for (const auto &desc : descriptors) {

@@ -469,10 +469,380 @@ Disassembly of section .data:
 
 ## Handcraft C
 ```c
-not captured
+#include "handcraft_common.h"
+
+#define HC_LEA_PAYLOAD(DST, BASE, INDEX, SCALE, HAS_BASE, HAS_INDEX, DISP) \
+    ((__u64)(DST) | ((__u64)(BASE) << 4) | ((__u64)(INDEX) << 8) | \
+     ((__u64)(SCALE) << 12) | ((__u64)(HAS_INDEX) << 14) | \
+     ((__u64)(HAS_BASE) << 15) | ((__u64)(__u32)(DISP) << 16))
+
+/*
+ * Semantic handcraft for packet_record_bounds_window.
+ *
+ * Direct native conversion leaves host ABI stack/register state and
+ * standalone flags branches that are not verifier-visible BPF. This input
+ * starts from verified kernel xlated BPF, restores the verifier-facing XDP
+ * ctx loads, and replaces same-PC-count mov+add address calculations with
+ * x86 leaq kinsns. Branch offsets remain valid.
+ */
+
+static const struct bpf_insn program[] = {
+    HC_RAW(0xb7, BPF_REG_0, BPF_REG_0, 0, 0),
+    /* pc 1: restore verifier-facing XDP data_end load */
+    HC_LDX(BPF_W, BPF_REG_2, BPF_REG_1, 4),
+    /* pc 2: restore verifier-facing XDP data load */
+    HC_LDX(BPF_W, BPF_REG_4, BPF_REG_1, 0),
+    HC_RAW(0x2d, BPF_REG_4, BPF_REG_2, 158, 0),
+    /* pc 4: r1 = r4; r1 += 8; leaq kinsn */
+    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_1, BPF_REG_4, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
+    HC_RAW(0x2d, BPF_REG_1, BPF_REG_2, 155, 0),
+    /* pc 7: r1 = r4; r1 += 784; leaq kinsn */
+    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_1, BPF_REG_4, 0, 0, 1, 0, 784), MICRO_HANDCRAFT_BPF_X86_LEAQ),
+    HC_RAW(0x2d, BPF_REG_1, BPF_REG_2, 152, 0),
+    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 9, 0),
+    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 8),
+    HC_RAW(0x71, BPF_REG_2, BPF_REG_4, 8, 0),
+    HC_RAW(0x4f, BPF_REG_1, BPF_REG_2, 0, 0),
+    HC_RAW(0x71, BPF_REG_2, BPF_REG_4, 10, 0),
+    HC_RAW(0x67, BPF_REG_2, BPF_REG_0, 0, 16),
+    HC_RAW(0x4f, BPF_REG_1, BPF_REG_2, 0, 0),
+    HC_RAW(0x71, BPF_REG_2, BPF_REG_4, 11, 0),
+    HC_RAW(0x67, BPF_REG_2, BPF_REG_0, 0, 24),
+    HC_RAW(0x4f, BPF_REG_1, BPF_REG_2, 0, 0),
+    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 32),
+    HC_RAW(0x77, BPF_REG_1, BPF_REG_0, 0, 32),
+    HC_RAW(0x55, BPF_REG_1, BPF_REG_0, 139, 32),
+    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 13, 0),
+    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 8),
+    HC_RAW(0x71, BPF_REG_2, BPF_REG_4, 12, 0),
+    HC_RAW(0x4f, BPF_REG_1, BPF_REG_2, 0, 0),
+    HC_RAW(0x71, BPF_REG_2, BPF_REG_4, 14, 0),
+    HC_RAW(0x67, BPF_REG_2, BPF_REG_0, 0, 16),
+    HC_RAW(0x4f, BPF_REG_1, BPF_REG_2, 0, 0),
+    HC_RAW(0x71, BPF_REG_2, BPF_REG_4, 15, 0),
+    HC_RAW(0x67, BPF_REG_2, BPF_REG_0, 0, 24),
+    HC_RAW(0x4f, BPF_REG_1, BPF_REG_2, 0, 0),
+    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 32),
+    HC_RAW(0x77, BPF_REG_1, BPF_REG_0, 0, 32),
+    HC_RAW(0x55, BPF_REG_1, BPF_REG_0, 126, 24),
+    HC_RAW(0x18, BPF_REG_6, BPF_REG_0, 0, 1717173651),
+    HC_RAW(0x00, BPF_REG_0, BPF_REG_0, 0, -689373512),
+    HC_RAW(0xb7, BPF_REG_2, BPF_REG_0, 0, 0),
+    HC_RAW(0xb7, BPF_REG_3, BPF_REG_0, 0, 768),
+    HC_RAW(0x7b, BPF_REG_10, BPF_REG_4, -8, 0),
+    HC_RAW(0x07, BPF_REG_4, BPF_REG_0, 0, 20),
+    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 34, 0),
+    HC_RAW(0x67, BPF_REG_9, BPF_REG_0, 0, 32),
+    HC_RAW(0x67, BPF_REG_6, BPF_REG_0, 0, 32),
+    HC_RAW(0x77, BPF_REG_6, BPF_REG_0, 0, 32),
+    HC_RAW(0x4f, BPF_REG_9, BPF_REG_6, 0, 0),
+    HC_RAW(0x0f, BPF_REG_7, BPF_REG_9, 0, 0),
+    HC_RAW(0x67, BPF_REG_8, BPF_REG_0, 0, 32),
+    HC_RAW(0x77, BPF_REG_8, BPF_REG_0, 0, 32),
+    HC_RAW(0xbf, BPF_REG_6, BPF_REG_7, 0, 0),
+    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 19, 0),
+    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 8),
+    HC_RAW(0x71, BPF_REG_7, BPF_REG_4, 18, 0),
+    HC_RAW(0x4f, BPF_REG_1, BPF_REG_7, 0, 0),
+    HC_RAW(0xbf, BPF_REG_7, BPF_REG_2, 0, 0),
+    HC_RAW(0x57, BPF_REG_7, BPF_REG_0, 0, 24),
+    HC_RAW(0x6f, BPF_REG_1, BPF_REG_7, 0, 0),
+    HC_RAW(0xbf, BPF_REG_7, BPF_REG_0, 0, 0),
+    HC_RAW(0x67, BPF_REG_7, BPF_REG_0, 0, 2),
+    HC_RAW(0x57, BPF_REG_7, BPF_REG_0, 0, 28),
+    HC_RAW(0x6f, BPF_REG_8, BPF_REG_7, 0, 0),
+    HC_RAW(0xaf, BPF_REG_6, BPF_REG_8, 0, 0),
+    HC_RAW(0x0f, BPF_REG_6, BPF_REG_1, 0, 0),
+    HC_RAW(0x57, BPF_REG_0, BPF_REG_0, 0, 7),
+    HC_RAW(0xaf, BPF_REG_0, BPF_REG_5, 0, 0),
+    HC_RAW(0xbf, BPF_REG_1, BPF_REG_0, 0, 0),
+    HC_RAW(0xa7, BPF_REG_1, BPF_REG_0, 0, 63),
+    HC_RAW(0xbf, BPF_REG_5, BPF_REG_6, 0, 0),
+    HC_RAW(0x7f, BPF_REG_5, BPF_REG_1, 0, 0),
+    HC_RAW(0x07, BPF_REG_0, BPF_REG_0, 0, 1),
+    HC_RAW(0x6f, BPF_REG_6, BPF_REG_0, 0, 0),
+    HC_RAW(0x4f, BPF_REG_6, BPF_REG_5, 0, 0),
+    HC_RAW(0x07, BPF_REG_4, BPF_REG_0, 0, 24),
+    HC_RAW(0x07, BPF_REG_3, BPF_REG_0, 0, -24),
+    HC_RAW(0x07, BPF_REG_2, BPF_REG_0, 0, 8),
+    HC_RAW(0x15, BPF_REG_2, BPF_REG_0, 62, 256),
+    HC_RAW(0x71, BPF_REG_5, BPF_REG_4, -4, 0),
+    HC_RAW(0x57, BPF_REG_5, BPF_REG_0, 0, 3),
+    HC_RAW(0xbf, BPF_REG_1, BPF_REG_5, 0, 0),
+    HC_RAW(0x47, BPF_REG_1, BPF_REG_0, 0, 24),
+    HC_RAW(0x2d, BPF_REG_1, BPF_REG_3, -9, 0),
+    HC_RAW(0x71, BPF_REG_0, BPF_REG_4, -3, 0),
+    HC_RAW(0x71, BPF_REG_9, BPF_REG_4, 5, 0),
+    HC_RAW(0x67, BPF_REG_9, BPF_REG_0, 0, 8),
+    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 4, 0),
+    HC_RAW(0x4f, BPF_REG_9, BPF_REG_1, 0, 0),
+    HC_RAW(0x71, BPF_REG_7, BPF_REG_4, 1, 0),
+    HC_RAW(0x67, BPF_REG_7, BPF_REG_0, 0, 8),
+    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 0, 0),
+    HC_RAW(0x4f, BPF_REG_7, BPF_REG_1, 0, 0),
+    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 2, 0),
+    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 16),
+    HC_RAW(0x4f, BPF_REG_7, BPF_REG_1, 0, 0),
+    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 3, 0),
+    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 24),
+    HC_RAW(0x4f, BPF_REG_7, BPF_REG_1, 0, 0),
+    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 6, 0),
+    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 16),
+    HC_RAW(0x4f, BPF_REG_9, BPF_REG_1, 0, 0),
+    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 17, 0),
+    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 8),
+    HC_RAW(0x71, BPF_REG_8, BPF_REG_4, 16, 0),
+    HC_RAW(0x4f, BPF_REG_1, BPF_REG_8, 0, 0),
+    HC_RAW(0x71, BPF_REG_8, BPF_REG_4, 7, 0),
+    HC_RAW(0x67, BPF_REG_8, BPF_REG_0, 0, 24),
+    HC_RAW(0x4f, BPF_REG_9, BPF_REG_8, 0, 0),
+    HC_RAW(0x0f, BPF_REG_7, BPF_REG_6, 0, 0),
+    HC_RAW(0x71, BPF_REG_8, BPF_REG_4, 13, 0),
+    HC_RAW(0x67, BPF_REG_8, BPF_REG_0, 0, 8),
+    HC_RAW(0x71, BPF_REG_6, BPF_REG_4, 12, 0),
+    HC_RAW(0x4f, BPF_REG_8, BPF_REG_6, 0, 0),
+    HC_RAW(0x71, BPF_REG_6, BPF_REG_4, 14, 0),
+    HC_RAW(0x67, BPF_REG_6, BPF_REG_0, 0, 16),
+    HC_RAW(0x4f, BPF_REG_8, BPF_REG_6, 0, 0),
+    HC_RAW(0x0f, BPF_REG_7, BPF_REG_9, 0, 0),
+    HC_RAW(0x0f, BPF_REG_7, BPF_REG_1, 0, 0),
+    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 15, 0),
+    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 24),
+    HC_RAW(0x4f, BPF_REG_8, BPF_REG_1, 0, 0),
+    HC_RAW(0x71, BPF_REG_6, BPF_REG_4, 9, 0),
+    HC_RAW(0x67, BPF_REG_6, BPF_REG_0, 0, 8),
+    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 8, 0),
+    HC_RAW(0x4f, BPF_REG_6, BPF_REG_1, 0, 0),
+    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 10, 0),
+    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 16),
+    HC_RAW(0x4f, BPF_REG_6, BPF_REG_1, 0, 0),
+    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 11, 0),
+    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 24),
+    HC_RAW(0x4f, BPF_REG_6, BPF_REG_1, 0, 0),
+    HC_RAW(0xbf, BPF_REG_1, BPF_REG_0, 0, 0),
+    HC_RAW(0x57, BPF_REG_1, BPF_REG_0, 0, 1),
+    HC_RAW(0x15, BPF_REG_1, BPF_REG_0, -90, 0),
+    HC_RAW(0x67, BPF_REG_6, BPF_REG_0, 0, 32),
+    HC_RAW(0x67, BPF_REG_8, BPF_REG_0, 0, 32),
+    HC_RAW(0x77, BPF_REG_8, BPF_REG_0, 0, 32),
+    HC_RAW(0x4f, BPF_REG_6, BPF_REG_8, 0, 0),
+    HC_RAW(0xaf, BPF_REG_7, BPF_REG_6, 0, 0),
+    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, -89, 0),
+    HC_RAW(0xbf, BPF_REG_1, BPF_REG_6, 0, 0),
+    HC_RAW(0x77, BPF_REG_1, BPF_REG_0, 0, 56),
+    HC_RAW(0x79, BPF_REG_2, BPF_REG_10, -8, 0),
+    HC_RAW(0x73, BPF_REG_2, BPF_REG_1, 7, 0),
+    HC_RAW(0xbf, BPF_REG_1, BPF_REG_6, 0, 0),
+    HC_RAW(0x77, BPF_REG_1, BPF_REG_0, 0, 48),
+    HC_RAW(0x73, BPF_REG_2, BPF_REG_1, 6, 0),
+    HC_RAW(0xbf, BPF_REG_1, BPF_REG_6, 0, 0),
+    HC_RAW(0x77, BPF_REG_1, BPF_REG_0, 0, 40),
+    HC_RAW(0x73, BPF_REG_2, BPF_REG_1, 5, 0),
+    HC_RAW(0xbf, BPF_REG_1, BPF_REG_6, 0, 0),
+    HC_RAW(0x77, BPF_REG_1, BPF_REG_0, 0, 32),
+    HC_RAW(0x73, BPF_REG_2, BPF_REG_1, 4, 0),
+    HC_RAW(0xbf, BPF_REG_1, BPF_REG_6, 0, 0),
+    HC_RAW(0x77, BPF_REG_1, BPF_REG_0, 0, 24),
+    HC_RAW(0x73, BPF_REG_2, BPF_REG_1, 3, 0),
+    HC_RAW(0xbf, BPF_REG_1, BPF_REG_6, 0, 0),
+    HC_RAW(0x77, BPF_REG_1, BPF_REG_0, 0, 16),
+    HC_RAW(0x73, BPF_REG_2, BPF_REG_1, 2, 0),
+    HC_RAW(0x73, BPF_REG_2, BPF_REG_6, 0, 0),
+    HC_RAW(0x77, BPF_REG_6, BPF_REG_0, 0, 8),
+    HC_RAW(0x73, BPF_REG_2, BPF_REG_6, 1, 0),
+    HC_RAW(0xb7, BPF_REG_0, BPF_REG_0, 0, 2),
+    HC_RAW(0x95, BPF_REG_0, BPF_REG_0, 0, 0),
+};
+
+HC_EXPORT_PROGRAM(program)
 ```
 
 ## Handcraft Kernel JIT ASM
 ```asm
-not captured
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	0f 1f 44 00 00       	nop    DWORD PTR [rax+rax*1+0x0]
+   5:	0f 1f 00             	nop    DWORD PTR [rax]
+   8:	55                   	push   rbp
+   9:	48 89 e5             	mov    rbp,rsp
+   c:	48 81 ec 08 00 00 00 	sub    rsp,0x8
+  13:	53                   	push   rbx
+  14:	41 55                	push   r13
+  16:	41 56                	push   r14
+  18:	41 57                	push   r15
+  1a:	31 c0                	xor    eax,eax
+  1c:	48 8b 77 08          	mov    rsi,QWORD PTR [rdi+0x8]
+  20:	48 8b 4f 00          	mov    rcx,QWORD PTR [rdi+0x0]
+  24:	48 39 f1             	cmp    rcx,rsi
+  27:	0f 87 90 02 00 00    	ja     0x2bd
+  2d:	48 8d 79 08          	lea    rdi,[rcx+0x8]
+  31:	48 39 f7             	cmp    rdi,rsi
+  34:	0f 87 83 02 00 00    	ja     0x2bd
+  3a:	48 8d b9 10 03 00 00 	lea    rdi,[rcx+0x310]
+  41:	48 39 f7             	cmp    rdi,rsi
+  44:	0f 87 73 02 00 00    	ja     0x2bd
+  4a:	48 0f b6 79 09       	movzx  rdi,BYTE PTR [rcx+0x9]
+  4f:	48 c1 e7 08          	shl    rdi,0x8
+  53:	48 0f b6 71 08       	movzx  rsi,BYTE PTR [rcx+0x8]
+  58:	48 09 f7             	or     rdi,rsi
+  5b:	48 0f b6 71 0a       	movzx  rsi,BYTE PTR [rcx+0xa]
+  60:	48 c1 e6 10          	shl    rsi,0x10
+  64:	48 09 f7             	or     rdi,rsi
+  67:	48 0f b6 71 0b       	movzx  rsi,BYTE PTR [rcx+0xb]
+  6c:	48 c1 e6 18          	shl    rsi,0x18
+  70:	48 09 f7             	or     rdi,rsi
+  73:	48 c1 e7 20          	shl    rdi,0x20
+  77:	48 c1 ef 20          	shr    rdi,0x20
+  7b:	48 83 ff 20          	cmp    rdi,0x20
+  7f:	0f 85 38 02 00 00    	jne    0x2bd
+  85:	48 0f b6 79 0d       	movzx  rdi,BYTE PTR [rcx+0xd]
+  8a:	48 c1 e7 08          	shl    rdi,0x8
+  8e:	48 0f b6 71 0c       	movzx  rsi,BYTE PTR [rcx+0xc]
+  93:	48 09 f7             	or     rdi,rsi
+  96:	48 0f b6 71 0e       	movzx  rsi,BYTE PTR [rcx+0xe]
+  9b:	48 c1 e6 10          	shl    rsi,0x10
+  9f:	48 09 f7             	or     rdi,rsi
+  a2:	48 0f b6 71 0f       	movzx  rsi,BYTE PTR [rcx+0xf]
+  a7:	48 c1 e6 18          	shl    rsi,0x18
+  ab:	48 09 f7             	or     rdi,rsi
+  ae:	48 c1 e7 20          	shl    rdi,0x20
+  b2:	48 c1 ef 20          	shr    rdi,0x20
+  b6:	48 83 ff 18          	cmp    rdi,0x18
+  ba:	0f 85 fd 01 00 00    	jne    0x2bd
+  c0:	48 bb 93 fd 59 66 b8 	movabs rbx,0xd6e8feb86659fd93
+  c7:	fe e8 d6 
+  ca:	31 f6                	xor    esi,esi
+  cc:	ba 00 03 00 00       	mov    edx,0x300
+  d1:	48 89 4d f8          	mov    QWORD PTR [rbp-0x8],rcx
+  d5:	48 83 c1 14          	add    rcx,0x14
+  d9:	e9 8b 00 00 00       	jmp    0x169
+  de:	49 c1 e7 20          	shl    r15,0x20
+  e2:	48 c1 e3 20          	shl    rbx,0x20
+  e6:	48 c1 eb 20          	shr    rbx,0x20
+  ea:	49 09 df             	or     r15,rbx
+  ed:	4d 01 fd             	add    r13,r15
+  f0:	49 c1 e6 20          	shl    r14,0x20
+  f4:	49 c1 ee 20          	shr    r14,0x20
+  f8:	4c 89 eb             	mov    rbx,r13
+  fb:	48 0f b6 79 13       	movzx  rdi,BYTE PTR [rcx+0x13]
+ 100:	48 c1 e7 08          	shl    rdi,0x8
+ 104:	4c 0f b6 69 12       	movzx  r13,BYTE PTR [rcx+0x12]
+ 109:	4c 09 ef             	or     rdi,r13
+ 10c:	49 89 f5             	mov    r13,rsi
+ 10f:	49 83 e5 18          	and    r13,0x18
+ 113:	c4 e2 91 f7 ff       	shlx   rdi,rdi,r13
+ 118:	49 89 c5             	mov    r13,rax
+ 11b:	49 c1 e5 02          	shl    r13,0x2
+ 11f:	49 83 e5 1c          	and    r13,0x1c
+ 123:	c4 42 91 f7 f6       	shlx   r14,r14,r13
+ 128:	4c 31 f3             	xor    rbx,r14
+ 12b:	48 01 fb             	add    rbx,rdi
+ 12e:	48 83 e0 07          	and    rax,0x7
+ 132:	4c 31 c0             	xor    rax,r8
+ 135:	48 89 c7             	mov    rdi,rax
+ 138:	48 83 f7 3f          	xor    rdi,0x3f
+ 13c:	49 89 d8             	mov    r8,rbx
+ 13f:	c4 42 c3 f7 c0       	shrx   r8,r8,rdi
+ 144:	48 83 c0 01          	add    rax,0x1
+ 148:	c4 e2 f9 f7 db       	shlx   rbx,rbx,rax
+ 14d:	4c 09 c3             	or     rbx,r8
+ 150:	48 83 c1 18          	add    rcx,0x18
+ 154:	48 83 c2 e8          	add    rdx,0xffffffffffffffe8
+ 158:	48 83 c6 08          	add    rsi,0x8
+ 15c:	48 81 fe 00 01 00 00 	cmp    rsi,0x100
+ 163:	0f 84 ff 00 00 00    	je     0x268
+ 169:	4c 0f b6 41 fc       	movzx  r8,BYTE PTR [rcx-0x4]
+ 16e:	49 83 e0 03          	and    r8,0x3
+ 172:	4c 89 c7             	mov    rdi,r8
+ 175:	48 83 cf 18          	or     rdi,0x18
+ 179:	48 39 d7             	cmp    rdi,rdx
+ 17c:	77 d2                	ja     0x150
+ 17e:	48 0f b6 41 fd       	movzx  rax,BYTE PTR [rcx-0x3]
+ 183:	4c 0f b6 79 05       	movzx  r15,BYTE PTR [rcx+0x5]
+ 188:	49 c1 e7 08          	shl    r15,0x8
+ 18c:	48 0f b6 79 04       	movzx  rdi,BYTE PTR [rcx+0x4]
+ 191:	49 09 ff             	or     r15,rdi
+ 194:	4c 0f b6 69 01       	movzx  r13,BYTE PTR [rcx+0x1]
+ 199:	49 c1 e5 08          	shl    r13,0x8
+ 19d:	48 0f b6 79 00       	movzx  rdi,BYTE PTR [rcx+0x0]
+ 1a2:	49 09 fd             	or     r13,rdi
+ 1a5:	48 0f b6 79 02       	movzx  rdi,BYTE PTR [rcx+0x2]
+ 1aa:	48 c1 e7 10          	shl    rdi,0x10
+ 1ae:	49 09 fd             	or     r13,rdi
+ 1b1:	48 0f b6 79 03       	movzx  rdi,BYTE PTR [rcx+0x3]
+ 1b6:	48 c1 e7 18          	shl    rdi,0x18
+ 1ba:	49 09 fd             	or     r13,rdi
+ 1bd:	48 0f b6 79 06       	movzx  rdi,BYTE PTR [rcx+0x6]
+ 1c2:	48 c1 e7 10          	shl    rdi,0x10
+ 1c6:	49 09 ff             	or     r15,rdi
+ 1c9:	48 0f b6 79 11       	movzx  rdi,BYTE PTR [rcx+0x11]
+ 1ce:	48 c1 e7 08          	shl    rdi,0x8
+ 1d2:	4c 0f b6 71 10       	movzx  r14,BYTE PTR [rcx+0x10]
+ 1d7:	4c 09 f7             	or     rdi,r14
+ 1da:	4c 0f b6 71 07       	movzx  r14,BYTE PTR [rcx+0x7]
+ 1df:	49 c1 e6 18          	shl    r14,0x18
+ 1e3:	4d 09 f7             	or     r15,r14
+ 1e6:	49 01 dd             	add    r13,rbx
+ 1e9:	4c 0f b6 71 0d       	movzx  r14,BYTE PTR [rcx+0xd]
+ 1ee:	49 c1 e6 08          	shl    r14,0x8
+ 1f2:	48 0f b6 59 0c       	movzx  rbx,BYTE PTR [rcx+0xc]
+ 1f7:	49 09 de             	or     r14,rbx
+ 1fa:	48 0f b6 59 0e       	movzx  rbx,BYTE PTR [rcx+0xe]
+ 1ff:	48 c1 e3 10          	shl    rbx,0x10
+ 203:	49 09 de             	or     r14,rbx
+ 206:	4d 01 fd             	add    r13,r15
+ 209:	49 01 fd             	add    r13,rdi
+ 20c:	48 0f b6 79 0f       	movzx  rdi,BYTE PTR [rcx+0xf]
+ 211:	48 c1 e7 18          	shl    rdi,0x18
+ 215:	49 09 fe             	or     r14,rdi
+ 218:	48 0f b6 59 09       	movzx  rbx,BYTE PTR [rcx+0x9]
+ 21d:	48 c1 e3 08          	shl    rbx,0x8
+ 221:	48 0f b6 79 08       	movzx  rdi,BYTE PTR [rcx+0x8]
+ 226:	48 09 fb             	or     rbx,rdi
+ 229:	48 0f b6 79 0a       	movzx  rdi,BYTE PTR [rcx+0xa]
+ 22e:	48 c1 e7 10          	shl    rdi,0x10
+ 232:	48 09 fb             	or     rbx,rdi
+ 235:	48 0f b6 79 0b       	movzx  rdi,BYTE PTR [rcx+0xb]
+ 23a:	48 c1 e7 18          	shl    rdi,0x18
+ 23e:	48 09 fb             	or     rbx,rdi
+ 241:	48 89 c7             	mov    rdi,rax
+ 244:	48 83 e7 01          	and    rdi,0x1
+ 248:	48 85 ff             	test   rdi,rdi
+ 24b:	0f 84 8d fe ff ff    	je     0xde
+ 251:	48 c1 e3 20          	shl    rbx,0x20
+ 255:	49 c1 e6 20          	shl    r14,0x20
+ 259:	49 c1 ee 20          	shr    r14,0x20
+ 25d:	4c 09 f3             	or     rbx,r14
+ 260:	49 31 dd             	xor    r13,rbx
+ 263:	e9 90 fe ff ff       	jmp    0xf8
+ 268:	48 89 df             	mov    rdi,rbx
+ 26b:	48 c1 ef 38          	shr    rdi,0x38
+ 26f:	48 8b 75 f8          	mov    rsi,QWORD PTR [rbp-0x8]
+ 273:	40 88 7e 07          	mov    BYTE PTR [rsi+0x7],dil
+ 277:	48 89 df             	mov    rdi,rbx
+ 27a:	48 c1 ef 30          	shr    rdi,0x30
+ 27e:	40 88 7e 06          	mov    BYTE PTR [rsi+0x6],dil
+ 282:	48 89 df             	mov    rdi,rbx
+ 285:	48 c1 ef 28          	shr    rdi,0x28
+ 289:	40 88 7e 05          	mov    BYTE PTR [rsi+0x5],dil
+ 28d:	48 89 df             	mov    rdi,rbx
+ 290:	48 c1 ef 20          	shr    rdi,0x20
+ 294:	40 88 7e 04          	mov    BYTE PTR [rsi+0x4],dil
+ 298:	48 89 df             	mov    rdi,rbx
+ 29b:	48 c1 ef 18          	shr    rdi,0x18
+ 29f:	40 88 7e 03          	mov    BYTE PTR [rsi+0x3],dil
+ 2a3:	48 89 df             	mov    rdi,rbx
+ 2a6:	48 c1 ef 10          	shr    rdi,0x10
+ 2aa:	40 88 7e 02          	mov    BYTE PTR [rsi+0x2],dil
+ 2ae:	88 5e 00             	mov    BYTE PTR [rsi+0x0],bl
+ 2b1:	48 c1 eb 08          	shr    rbx,0x8
+ 2b5:	88 5e 01             	mov    BYTE PTR [rsi+0x1],bl
+ 2b8:	b8 02 00 00 00       	mov    eax,0x2
+ 2bd:	41 5f                	pop    r15
+ 2bf:	41 5e                	pop    r14
+ 2c1:	41 5d                	pop    r13
+ 2c3:	5b                   	pop    rbx
+ 2c4:	c9                   	leave
+ 2c5:	c3                   	ret
 ```

@@ -38,11 +38,27 @@
 #define HC_ROTATE_CL_PAYLOAD(DST, CNT, TMP_SHIFT, TMP_VALUE) \
     ((__u64)(DST) | ((__u64)(CNT) << 4) | ((__u64)(TMP_SHIFT) << 8) | ((__u64)(TMP_VALUE) << 12))
 #define HC_REG_IMM_PAYLOAD(DST, IMM) ((__u64)(DST) | ((__u64)(__u32)(IMM) << 8))
+#define HC_REG_IMM_TMP_PAYLOAD(DST, IMM, TMP) \
+    ((__u64)(DST) | ((__u64)(TMP) << 4) | ((__u64)(__u8)(IMM) << 8))
 #define HC_REG_PAYLOAD(REG) ((__u64)(REG))
 #define HC_TEST_PAYLOAD(REG) ((__u64)(REG))
 #define HC_CMOV_PAYLOAD(DST, SRC, COND) ((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(COND) << 8))
 #define HC_SETCC_PAYLOAD(DST, COND, TMP) ((__u64)(DST) | ((__u64)(COND) << 4) | ((__u64)(TMP) << 8))
+#define HC_CMOV_CMP_RR_PAYLOAD(DST, SRC, LHS, RHS, KIND) \
+    ((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(LHS) << 8) | ((__u64)(KIND) << 12) | ((__u64)(RHS) << 16))
+#define HC_CMOV_CMP_IMM_PAYLOAD(DST, SRC, LHS, IMM, KIND) \
+    ((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(LHS) << 8) | ((__u64)(KIND) << 12) | ((__u64)(__u32)(IMM) << 16))
+#define HC_SETCC_CMP_RR_PAYLOAD(DST, LHS, RHS, TMP_HIGH, TMP_CMP, KIND) \
+    ((__u64)(DST) | ((__u64)(LHS) << 4) | ((__u64)(TMP_HIGH) << 8) | ((__u64)(TMP_CMP) << 12) | ((__u64)(KIND) << 16) | ((__u64)(RHS) << 20))
+#define HC_SETCC_CMP_IMM_PAYLOAD(DST, LHS, TMP_HIGH, TMP_CMP, IMM, KIND) \
+    ((__u64)(DST) | ((__u64)(LHS) << 4) | ((__u64)(TMP_HIGH) << 8) | ((__u64)(TMP_CMP) << 12) | ((__u64)(KIND) << 16) | ((__u64)(__u32)(IMM) << 20))
+#define HC_FLAG_CMP_RR64 1
+#define HC_FLAG_CMP_IMM64 2
+#define HC_FLAG_CMP_RR32 3
+#define HC_FLAG_CMP_IMM32 4
 #define HC_REG_REG_PAYLOAD(DST, SRC) ((__u64)(DST) | ((__u64)(SRC) << 4))
+#define HC_REG_REG_TMP_PAYLOAD(DST, SRC, TMP) \
+    ((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(TMP) << 8))
 #define HC_REG_COND_PAYLOAD(DST, COND) ((__u64)(DST) | ((__u64)(COND) << 4))
 #define HC_SHD_PAYLOAD(DST, SRC, IMM, TMP) \
     ((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(__u8)(IMM) << 8) | ((__u64)(TMP) << 16))

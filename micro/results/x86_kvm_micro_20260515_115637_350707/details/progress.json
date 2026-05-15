@@ -1,0 +1,26 @@
+{
+  "completed_benchmarks": 0,
+  "current_benchmark": "tracee_syscall_name_table_lookup",
+  "current_benchmark_index": 1,
+  "current_benchmark_record": {
+    "category": "control-flow",
+    "description": "Tracee-style sparse syscall number to name-table dispatch",
+    "expected_result": 4063733557757466536,
+    "family": "syscall-dispatch",
+    "hypothesis": "Represents sparse syscall lookup and name classification without map/helper dependencies",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/tracee_syscall_name_table_lookup.mem",
+    "io_mode": "staged",
+    "level": "sparse-table",
+    "name": "tracee_syscall_name_table_lookup",
+    "runs": [],
+    "tags": [
+      "tracee",
+      "syscall",
+      "dispatch",
+      "pure-jit"
+    ]
+  },
+  "error_message": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/tracee_syscall_name_table_lookup.handcraft.so --program-name tracee_syscall_name_table_lookup_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/tracee_syscall_name_table_lookup.mem --io-mode staged --input-size 260 --inner-repeat 1000 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_115637_350707/details/jit_dumps/tracee_syscall_name_table_lookup__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_115637_350707/details/jit_dumps/tracee_syscall_name_table_lookup__kernel_handcraft__sample00.xlated.bin\nlibbpf: loaded kernel BTF from '/sys/kernel/btf/vmlinux'\nbpf_prog_load(handcraft) failed: Invalid argument\nfunc#0 @0\nunreachable insn 77\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument",
+  "status": "error",
+  "total_benchmarks": 1
+}

@@ -1,0 +1,27 @@
+{
+  "completed_benchmarks": 0,
+  "current_benchmark": "bcc_runqlat_log2_histogram_bucket",
+  "current_benchmark_index": 1,
+  "current_benchmark_record": {
+    "category": "alu-mix",
+    "description": "bcc runqlat-style log2 latency bucket selection with clamp",
+    "expected_result": 17790125373615940312,
+    "family": "histogram-bucket",
+    "hypothesis": "Mirrors tracing histogram bucket selection without helper/map updates",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bcc_runqlat_log2_histogram_bucket.mem",
+    "io_mode": "staged",
+    "level": "log2-clamp",
+    "name": "bcc_runqlat_log2_histogram_bucket",
+    "runs": [],
+    "tags": [
+      "bcc",
+      "tracing",
+      "log2",
+      "histogram",
+      "pure-jit"
+    ]
+  },
+  "error_message": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/bcc_runqlat_log2_histogram_bucket.handcraft.so --program-name bcc_runqlat_log2_histogram_bucket_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bcc_runqlat_log2_histogram_bucket.mem --io-mode staged --input-size 1032 --inner-repeat 1000 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_092048_189023/details/jit_dumps/bcc_runqlat_log2_histogram_bucket__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_092048_189023/details/jit_dumps/bcc_runqlat_log2_histogram_bucket__kernel_handcraft__sample00.xlated.bin\nlibbpf: loaded kernel BTF from '/sys/kernel/btf/vmlinux'\nbpf_prog_load(handcraft) failed: Invalid argument\nfunc#0 @0\nunreachable insn 130\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument",
+  "status": "error",
+  "total_benchmarks": 1
+}

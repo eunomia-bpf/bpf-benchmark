@@ -1,0 +1,27 @@
+{
+  "completed_benchmarks": 0,
+  "current_benchmark": "bpftrace_string_search_prefix_scan",
+  "current_benchmark_index": 1,
+  "current_benchmark_record": {
+    "category": "memory-local",
+    "description": "bpftrace-style bounded string length and substring prefix scan",
+    "expected_result": 15111065535037762995,
+    "family": "string-scan",
+    "hypothesis": "Represents helper-free string fallback paths with bounded byte loops",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bpftrace_string_search_prefix_scan.mem",
+    "io_mode": "staged",
+    "level": "bounded-strings",
+    "name": "bpftrace_string_search_prefix_scan",
+    "runs": [],
+    "tags": [
+      "bpftrace",
+      "string",
+      "compare",
+      "loop",
+      "pure-jit"
+    ]
+  },
+  "error_message": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/bpftrace_string_search_prefix_scan.handcraft.so --program-name bpftrace_string_search_prefix_scan_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bpftrace_string_search_prefix_scan.mem --io-mode staged --input-size 112 --inner-repeat 1000 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_114739_318374/details/jit_dumps/bpftrace_string_search_prefix_scan__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_114739_318374/details/jit_dumps/bpftrace_string_search_prefix_scan__kernel_handcraft__sample00.xlated.bin\nlibbpf: loaded kernel BTF from '/sys/kernel/btf/vmlinux'\nbpf_prog_load(handcraft) failed: Invalid argument\nfunc#0 @0\nunreachable insn 125\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument",
+  "status": "error",
+  "total_benchmarks": 1
+}

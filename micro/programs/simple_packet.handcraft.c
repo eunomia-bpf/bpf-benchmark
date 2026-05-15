@@ -19,12 +19,14 @@ static const struct bpf_insn program[] = {
     HC_LDX(BPF_W, BPF_REG_3, BPF_REG_1, 4),
     /* 0x1107: xor    eax,eax [bpf-jit: zero idiom] */
     HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_0, 0, 0, 0),
-    /* 0x1109: cmp    rcx,rdx [cmp-state: sets flags; materialized by following jcc when possible] */
+    /* 0x1109: cmp    rcx,rdx [exact-kinsn: cmpq reg,reg kinsn] */
+    HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_4, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x110c: ja     1130 <simple_packet_xdp+0x30> [bpf-branch: lowered cmp    rcx,rdx + ja     1130 <simple_packet_xdp+0x30> to verifier-visible BPF branch] */
-    HC_JMP_REG(BPF_JGT, BPF_REG_4, BPF_REG_3, 10),
+    HC_JMP_REG(BPF_JGT, BPF_REG_4, BPF_REG_3, 12),
     /* 0x110e: lea    rsi,[rcx+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_4, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
-    /* 0x1112: cmp    rsi,rdx [cmp-state: sets flags; materialized by following jcc when possible] */
+    /* 0x1112: cmp    rsi,rdx [exact-kinsn: cmpq reg,reg kinsn] */
+    HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_2, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x1115: ja     1130 <simple_packet_xdp+0x30> [bpf-branch: lowered cmp    rsi,rdx + ja     1130 <simple_packet_xdp+0x30> to verifier-visible BPF branch] */
     HC_JMP_REG(BPF_JGT, BPF_REG_2, BPF_REG_3, 7),
     /* 0x1117: mov    WORD PTR [rcx],0x614e [bpf-jit: immediate memory store] */

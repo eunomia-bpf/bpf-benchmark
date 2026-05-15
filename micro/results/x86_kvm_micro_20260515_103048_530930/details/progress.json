@@ -1,0 +1,27 @@
+{
+  "completed_benchmarks": 0,
+  "current_benchmark": "bpf_local_call_fanout_dispatch",
+  "current_benchmark_index": 1,
+  "current_benchmark_record": {
+    "category": "call-overhead",
+    "description": "Dispatch among four __noinline local subprograms with different pressure profiles",
+    "expected_result": 1171593469689687806,
+    "family": "bpf-local-call",
+    "hypothesis": "Fan-out local calls should stress call-site layout, prologue diversity, and join-point register allocation",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bpf_local_call_fanout_dispatch.mem",
+    "io_mode": "staged",
+    "level": "fanout-4",
+    "name": "bpf_local_call_fanout_dispatch",
+    "runs": [],
+    "tags": [
+      "call",
+      "bpf-to-bpf",
+      "local-call",
+      "reg-pressure",
+      "pure-jit"
+    ]
+  },
+  "error_message": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/bpf_local_call_fanout_dispatch.handcraft.so --program-name bpf_local_call_fanout_dispatch_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bpf_local_call_fanout_dispatch.mem --io-mode staged --input-size 392 --inner-repeat 1000 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_103048_530930/details/jit_dumps/bpf_local_call_fanout_dispatch__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_103048_530930/details/jit_dumps/bpf_local_call_fanout_dispatch__kernel_handcraft__sample00.xlated.bin\n    524: 012.4..... (77) r2 >>= 56\n    525: 012.4..... (67) r4 <<= 8\n    526: 012.4..... (4f) r4 |= r2\n    527: 01..4..... (0f) r1 += r4\n    528: 01........ (af) r0 ^= r1\n    529: 0......... (95) exit\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 0                        ; R0=0\n1: (79) r2 = *(u64 *)(r1 +8)\ninvalid bpf_context access off=8 size=8\nprocessed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\ninitial_load_error=Permission denied diagnostic_load_error=Permission denied",
+  "status": "error",
+  "total_benchmarks": 1
+}

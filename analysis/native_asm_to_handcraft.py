@@ -27,6 +27,8 @@ BPF_REG_BY_X86 = {
     "r14": "BPF_REG_8",
     "r15": "BPF_REG_9",
 }
+EXTRA_BPF_REG_BY_X86: dict[str, str] = {}
+EXTRA_REG_WARNINGS: dict[str, str] = {}
 NON_EXACT_REGS = {
     "r9": "native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15",
 }
@@ -105,6 +107,15 @@ class Translation:
     target_addr: int | None = None
 
 
+@dataclass(frozen=True)
+class FlagProof:
+    source: str
+    lhs: str
+    width: int
+    rhs: str | None = None
+    imm: int | None = None
+
+
 def parse_int(text: str) -> int:
     text = text.strip()
     if text.startswith("-"):
@@ -178,7 +189,7 @@ def bpf_reg(operand: str) -> tuple[str, int, str] | None:
     if parsed is None:
         return None
     base, width = parsed
-    mapped = BPF_REG_BY_X86.get(base)
+    mapped = BPF_REG_BY_X86.get(base) or EXTRA_BPF_REG_BY_X86.get(base)
     if mapped is None:
         return None
     return mapped, width, base
@@ -191,20 +202,38 @@ def translated_reg_warning(insn: NativeInsn) -> str | None:
             parsed = reg(token)
             if parsed and parsed[0] in NON_EXACT_REGS:
                 warnings.append(NON_EXACT_REGS[parsed[0]])
+            if parsed and parsed[0] in EXTRA_REG_WARNINGS:
+                warnings.append(EXTRA_REG_WARNINGS[parsed[0]])
     if not warnings:
         return None
     return "; ".join(dict.fromkeys(warnings))
 
 
 def configure_temp_regs(insns: list[NativeInsn]) -> None:
+    EXTRA_BPF_REG_BY_X86.clear()
+    EXTRA_REG_WARNINGS.clear()
     used: set[str] = set()
+    missing: list[str] = []
     for insn in insns:
         for operand in insn.operands:
             for token in re.findall(r"\b[a-z][a-z0-9]*\b", operand.lower()):
-                mapped = bpf_reg(token)
+                parsed = reg(token)
+                if parsed is None:
+                    continue
+                base = parsed[0]
+                mapped = BPF_REG_BY_X86.get(base)
                 if mapped is not None:
-                    used.add(mapped[0])
+                    used.add(mapped)
+                elif base in {"r10", "r11", "r12"} and base not in missing:
+                    missing.append(base)
     candidates = ["BPF_REG_6", "BPF_REG_7", "BPF_REG_8", "BPF_REG_9", "BPF_REG_5", "BPF_REG_4", "BPF_REG_3"]
+    for base in missing:
+        target = next((reg_name for reg_name in candidates if reg_name not in used), None)
+        if target is None:
+            continue
+        EXTRA_BPF_REG_BY_X86[base] = target
+        EXTRA_REG_WARNINGS[base] = f"native {base} has no exact BPF JIT register; remapped to {target}"
+        used.add(target)
     globals()["TEMP_REG_ORDER"] = [reg_name for reg_name in candidates if reg_name not in used] + candidates
 
 
@@ -347,6 +376,42 @@ def translate_mem_load(dst_op: str, mem_op: str, size: str) -> Translation:
     )
 
 
+def cmp_flag_kind(width: int, has_imm: bool) -> str:
+    if width == 32:
+        return "HC_FLAG_CMP_IMM32" if has_imm else "HC_FLAG_CMP_RR32"
+    return "HC_FLAG_CMP_IMM64" if has_imm else "HC_FLAG_CMP_RR64"
+
+
+def flag_proof_from_cmp(insn: NativeInsn) -> FlagProof | None:
+    if insn.mnemonic != "cmp" or len(insn.operands) != 2:
+        return None
+    lhs = bpf_reg(insn.operands[0])
+    rhs = bpf_reg(insn.operands[1])
+    if lhs and rhs and lhs[1] == rhs[1] and lhs[1] in {32, 64}:
+        return FlagProof("cmp_rr", lhs[0], lhs[1], rhs=rhs[0])
+    if lhs and lhs[1] in {32, 64} and re.match(r"^-?(0x[0-9a-fA-F]+|\d+)$", insn.operands[1]):
+        return FlagProof("cmp_imm", lhs[0], lhs[1], imm=parse_int(insn.operands[1]))
+    return None
+
+
+def flag_proof_from_test(insn: NativeInsn) -> FlagProof | None:
+    if insn.mnemonic != "test" or len(insn.operands) != 2:
+        return None
+    left = bpf_reg(insn.operands[0])
+    right = bpf_reg(insn.operands[1])
+    if left and right and left[0] == right[0] and left[1] == right[1] == 64:
+        return FlagProof("test_reg", left[0], left[1])
+    return None
+
+
+def flags_preserved_by(insn: NativeInsn) -> bool:
+    if insn.mnemonic in {"mov", "movabs", "movzx", "movsx", "lea", "nop", "data16"}:
+        return True
+    if insn.mnemonic == "cs" and insn.operands and insn.operands[0].startswith("nop"):
+        return True
+    return False
+
+
 def translate(insn: NativeInsn) -> Translation:
     op = insn.mnemonic
     ops = insn.operands
@@ -372,8 +437,18 @@ def translate(insn: NativeInsn) -> Translation:
             "lowered direct jmp to verifier-visible BPF jump",
             target_addr,
         )
-    if op == "cmp":
-        return Translation("cmp-state", (), "sets flags; materialized by following jcc when possible")
+    if op == "cmp" and len(ops) == 2:
+        lhs = bpf_reg(ops[0])
+        rhs = bpf_reg(ops[1])
+        if lhs and rhs and lhs[1] == rhs[1] == 64:
+            return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_REG_PAYLOAD({lhs[0]}, {rhs[0]}), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR)",), "cmpq reg,reg kinsn")
+        if lhs and rhs and lhs[1] == rhs[1] == 32:
+            return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_REG_PAYLOAD({lhs[0]}, {rhs[0]}), MICRO_HANDCRAFT_BPF_X86_CMPL_RR)",), "cmpl reg,reg kinsn")
+        if lhs and lhs[1] == 64 and re.match(r"^-?(0x[0-9a-fA-F]+|\d+)$", ops[1]):
+            return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_IMM_PAYLOAD({lhs[0]}, {parse_int(ops[1])}), MICRO_HANDCRAFT_BPF_X86_CMPQ_IMM32)",), "cmpq reg,imm32 kinsn")
+        if lhs and lhs[1] == 32 and re.match(r"^-?(0x[0-9a-fA-F]+|\d+)$", ops[1]):
+            return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_IMM_PAYLOAD({lhs[0]}, {parse_int(ops[1])}), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32)",), "cmpl reg,imm32 kinsn")
+        return Translation("warning-unmapped", (), f"CMP operand form has no current kinsn selector: {insn.raw}")
     if len(ops) == 2 and op in {"mov", "movabs"}:
         dst, src = ops
         dst_reg = bpf_reg(dst)
@@ -581,6 +656,32 @@ def translate(insn: NativeInsn) -> Translation:
             return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_IMM_PAYLOAD({dst[0]}, {parse_int(ops[1])}), MICRO_HANDCRAFT_BPF_X86_SHRQ_IMM)",), "shrq imm kinsn")
         if op == "and" and dst[1] == 32 and re.match(r"^(0x[0-9a-fA-F]+|\d+)$", ops[1]):
             return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_IMM_PAYLOAD({dst[0]}, {parse_int(ops[1])}), MICRO_HANDCRAFT_BPF_X86_ANDL_IMM32)",), "andl imm32 kinsn")
+        if op == "and" and dst[1] == 8 and re.match(r"^(0x[0-9a-fA-F]+|\d+)$", ops[1]):
+            imm = parse_int(ops[1])
+            if imm < 0 or imm > 0xff:
+                return Translation("warning-unmapped", (), f"andb immediate is out of range: {insn.raw}")
+            tmp = temp_reg(dst[0])
+            if tmp is None:
+                return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
+            return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_IMM_TMP_PAYLOAD({dst[0]}, {imm}, {tmp}), MICRO_HANDCRAFT_BPF_X86_ANDB_IMM)",), f"andb imm kinsn; verifier instantiate uses temp {tmp}")
+        if op == "add" and dst[1] == 8 and re.match(r"^(0x[0-9a-fA-F]+|\d+)$", ops[1]):
+            imm = parse_int(ops[1])
+            if imm < 0 or imm > 0xff:
+                return Translation("warning-unmapped", (), f"addb immediate is out of range: {insn.raw}")
+            tmp = temp_reg(dst[0])
+            if tmp is None:
+                return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
+            return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_IMM_TMP_PAYLOAD({dst[0]}, {imm}, {tmp}), MICRO_HANDCRAFT_BPF_X86_ADDB_IMM)",), f"addb imm kinsn; verifier instantiate uses temp {tmp}")
+        if op == "xor" and dst[1] == 8 and re.match(r"^(0x[0-9a-fA-F]+|\d+)$", ops[1]):
+            imm = parse_int(ops[1])
+            if imm < 0 or imm > 0xff:
+                return Translation("warning-unmapped", (), f"xorb immediate is out of range: {insn.raw}")
+            return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_IMM_PAYLOAD({dst[0]}, {imm}), MICRO_HANDCRAFT_BPF_X86_XORB_IMM)",), "xorb imm kinsn")
+        if op == "xor" and dst[1] == 8 and src:
+            tmp = temp_reg(dst[0], src[0])
+            if tmp is None:
+                return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
+            return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_REG_TMP_PAYLOAD({dst[0]}, {src[0]}, {tmp}), MICRO_HANDCRAFT_BPF_X86_XORB_RR)",), f"xorb reg kinsn; verifier instantiate uses temp {tmp}")
         if src:
             return Translation("bpf-jit", (f"HC_RAW({bpf_class} | {ALU_OP[op]} | BPF_X, {dst[0]}, {src[0]}, 0, 0)",), "ALU reg operation")
         if re.match(r"^-?(0x[0-9a-fA-F]+|\d+)$", ops[1]):
@@ -651,15 +752,16 @@ def translate(insn: NativeInsn) -> Translation:
     if op == "inc" and len(ops) == 1:
         dst = bpf_reg(ops[0])
         if dst:
+            if dst[1] == 64:
+                return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_PAYLOAD({dst[0]}), MICRO_HANDCRAFT_BPF_X86_INCQ)",), "incq reg kinsn")
             bpf_class = "BPF_ALU64" if dst[1] == 64 else "BPF_ALU"
             return Translation("bpf-jit", (f"HC_RAW({bpf_class} | BPF_ADD | BPF_K, {dst[0]}, 0, 0, 1)",), "inc lowered to add immediate")
         return Translation("warning-unmapped", (), f"INC destination {ops[0]} is not in the BPF JIT register file")
     if op in {"cmovne", "cmove"} and len(ops) == 2:
         dst = bpf_reg(ops[0])
         src = bpf_reg(ops[1])
-        if dst and src and dst[1] == 64 and src[1] == 64:
-            selector = "MICRO_HANDCRAFT_BPF_X86_CMOVNEQ_RR" if op == "cmovne" else "MICRO_HANDCRAFT_BPF_X86_CMOVEQ_RR"
-            return Translation("exact-kinsn", (f"HC_KINSN(HC_CMOV_PAYLOAD({dst[0]}, {src[0]}, {dst[0]}), {selector})",), "cmov kinsn; cond register must match prior test")
+        if dst and src and dst[1] == src[1] and dst[1] in {32, 64}:
+            return Translation("warning-unmapped", (), f"{op} needs an adjacent test/cmp proof payload")
         return Translation("warning-unmapped", (), f"{op} operands are not supported")
     if op in {"sete", "setne", "setge"}:
         return Translation("warning-unmapped", (), f"{op} is flag-bound; automatic conversion needs an adjacent cmp/test proof")
@@ -670,21 +772,116 @@ def translate(insn: NativeInsn) -> Translation:
     return Translation("warning-unmapped", (), f"unsupported mnemonic or operand form: {insn.raw}")
 
 
+def translate_cmov_with_flags(insn: NativeInsn, flags: FlagProof) -> Translation:
+    dst = bpf_reg(insn.operands[0])
+    src = bpf_reg(insn.operands[1])
+    if dst and src and dst[1] == src[1] and dst[1] in {32, 64}:
+        if dst[1] == 64:
+            selector = "MICRO_HANDCRAFT_BPF_X86_CMOVNEQ_RR" if insn.mnemonic == "cmovne" else "MICRO_HANDCRAFT_BPF_X86_CMOVEQ_RR"
+        else:
+            selector = "MICRO_HANDCRAFT_BPF_X86_CMOVNEL_RR" if insn.mnemonic == "cmovne" else "MICRO_HANDCRAFT_BPF_X86_CMOVEL_RR"
+        if flags.source == "test_reg":
+            return Translation(
+                "exact-kinsn",
+                (f"HC_KINSN(HC_CMOV_PAYLOAD({dst[0]}, {src[0]}, {flags.lhs}), {selector})",),
+                f"cmov kinsn using condition from adjacent test on {flags.lhs}",
+            )
+        if flags.source == "cmp_rr" and flags.rhs is not None:
+            kind = cmp_flag_kind(flags.width, False)
+            return Translation(
+                "exact-kinsn",
+                (f"HC_KINSN(HC_CMOV_CMP_RR_PAYLOAD({dst[0]}, {src[0]}, {flags.lhs}, {flags.rhs}, {kind}), {selector})",),
+                "cmov kinsn using adjacent cmp reg,reg proof payload",
+            )
+        if flags.source == "cmp_imm" and flags.imm is not None:
+            kind = cmp_flag_kind(flags.width, True)
+            return Translation(
+                "exact-kinsn",
+                (f"HC_KINSN(HC_CMOV_CMP_IMM_PAYLOAD({dst[0]}, {src[0]}, {flags.lhs}, {flags.imm}, {kind}), {selector})",),
+                "cmov kinsn using adjacent cmp reg,imm proof payload",
+            )
+    return Translation("warning-unmapped", (), f"{insn.mnemonic} operands or flag proof are not supported")
+
+
+def translate_setcc_with_flags(insn: NativeInsn, flags: FlagProof) -> Translation:
+    if len(insn.operands) != 1:
+        return Translation("warning-unmapped", (), f"{insn.mnemonic} operands are not supported")
+    dst = bpf_reg(insn.operands[0])
+    if dst is None:
+        return Translation("warning-unmapped", (), f"SETcc destination {insn.operands[0]} is not in the BPF JIT register file")
+    selector = {
+        "sete": "MICRO_HANDCRAFT_BPF_X86_SETE_R",
+        "setne": "MICRO_HANDCRAFT_BPF_X86_SETNE_R",
+        "setge": "MICRO_HANDCRAFT_BPF_X86_SETGE_R",
+    }[insn.mnemonic]
+    if flags.source == "test_reg":
+        tmp = temp_reg(dst[0], flags.lhs)
+        if tmp is None or dst[0] == flags.lhs:
+            return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
+        return Translation(
+            "exact-kinsn",
+            (f"HC_KINSN(HC_SETCC_PAYLOAD({dst[0]}, {flags.lhs}, {tmp}), {selector})",),
+            f"setcc kinsn using condition from adjacent test on {flags.lhs}",
+        )
+    if flags.source == "cmp_rr" and flags.rhs is not None:
+        tmp_high = temp_reg(dst[0], flags.lhs, flags.rhs)
+        tmp_cmp = temp_reg(dst[0], flags.lhs, flags.rhs, tmp_high or "")
+        if tmp_high is None or tmp_cmp is None or dst[0] == flags.rhs:
+            return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
+        kind = cmp_flag_kind(flags.width, False)
+        return Translation(
+            "exact-kinsn",
+            (f"HC_KINSN(HC_SETCC_CMP_RR_PAYLOAD({dst[0]}, {flags.lhs}, {flags.rhs}, {tmp_high}, {tmp_cmp}, {kind}), {selector})",),
+            "setcc kinsn using adjacent cmp reg,reg proof payload",
+        )
+    if flags.source == "cmp_imm" and flags.imm is not None:
+        tmp_high = temp_reg(dst[0], flags.lhs)
+        tmp_cmp = temp_reg(dst[0], flags.lhs, tmp_high or "")
+        if tmp_high is None or tmp_cmp is None:
+            return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
+        kind = cmp_flag_kind(flags.width, True)
+        return Translation(
+            "exact-kinsn",
+            (f"HC_KINSN(HC_SETCC_CMP_IMM_PAYLOAD({dst[0]}, {flags.lhs}, {tmp_high}, {tmp_cmp}, {flags.imm}, {kind}), {selector})",),
+            "setcc kinsn using adjacent cmp reg,imm proof payload",
+        )
+    return Translation("warning-unmapped", (), f"{insn.mnemonic} flag proof is not supported")
+
+
 def translate_all(insns: list[NativeInsn]) -> list[Translation]:
     configure_temp_regs(insns)
     translations: list[Translation] = []
     pending_cmp: NativeInsn | None = None
+    pending_flags: FlagProof | None = None
     for insn in insns:
         if insn.mnemonic == "cmp":
             trans = translate(insn)
             translations.append(trans)
             pending_cmp = insn
+            pending_flags = flag_proof_from_cmp(insn)
             continue
         if pending_cmp is not None and insn.mnemonic in JCC_OP:
             trans = translate_cmp_jcc(pending_cmp, insn, len(translations))
             warning = translated_reg_warning(insn)
             if warning:
                 trans = Translation(trans.status, trans.code, f"{trans.note}; {warning}", trans.target_addr)
+            translations.append(trans)
+            pending_cmp = None
+            pending_flags = None
+            continue
+        if pending_flags is not None and insn.mnemonic in {"cmovne", "cmove"}:
+            trans = translate_cmov_with_flags(insn, pending_flags)
+            warning = translated_reg_warning(insn)
+            if warning and trans.status not in {"warning-unmapped", "padding", "cmp-state"}:
+                trans = Translation("warning-reg-remap", trans.code, f"{trans.note}; {warning}", trans.target_addr)
+            translations.append(trans)
+            pending_cmp = None
+            continue
+        if pending_flags is not None and insn.mnemonic in {"sete", "setne", "setge"}:
+            trans = translate_setcc_with_flags(insn, pending_flags)
+            warning = translated_reg_warning(insn)
+            if warning and trans.status not in {"warning-unmapped", "padding", "cmp-state"}:
+                trans = Translation("warning-reg-remap", trans.code, f"{trans.note}; {warning}", trans.target_addr)
             translations.append(trans)
             pending_cmp = None
             continue
@@ -719,7 +916,12 @@ def translate_all(insns: list[NativeInsn]) -> list[Translation]:
         if warning and trans.status not in {"warning-unmapped", "padding", "cmp-state"}:
             trans = Translation("warning-reg-remap", trans.code, f"{trans.note}; {warning}", trans.target_addr)
         translations.append(trans)
-        pending_cmp = None
+        pending_cmp = None if not flags_preserved_by(insn) else pending_cmp
+        next_flags = flag_proof_from_test(insn)
+        if next_flags is not None:
+            pending_flags = next_flags
+        elif not flags_preserved_by(insn):
+            pending_flags = None
     return translations
 
 
@@ -731,10 +933,15 @@ def bpf_insn_len(code: str) -> int:
 
 def patch_branch_offsets(insns: list[NativeInsn], translations: list[Translation]) -> list[Translation]:
     pc_by_addr: dict[int, int] = {}
+    call_pc_by_addr: dict[int, int] = {}
     pc_by_index: list[int] = []
+    sidecar_pcs: set[int] = set()
     pc = 0
     for insn, trans in zip(insns, translations, strict=True):
         pc_by_addr.setdefault(insn.addr, pc)
+        if trans.code and trans.code[0].startswith("HC_KINSN("):
+            sidecar_pcs.add(pc)
+            call_pc_by_addr.setdefault(insn.addr, pc + 1)
         pc_by_index.append(pc)
         pc += sum(bpf_insn_len(code) for code in trans.code)
 
@@ -743,7 +950,7 @@ def patch_branch_offsets(insns: list[NativeInsn], translations: list[Translation
         if trans.target_addr is None:
             patched.append(trans)
             continue
-        target_pc = pc_by_addr.get(trans.target_addr)
+        target_pc = call_pc_by_addr.get(trans.target_addr, pc_by_addr.get(trans.target_addr))
         if target_pc is None:
             patched.append(Translation(
                 "warning-unmapped",
@@ -752,6 +959,8 @@ def patch_branch_offsets(insns: list[NativeInsn], translations: list[Translation
                 trans.target_addr,
             ))
             continue
+        if target_pc in sidecar_pcs:
+            target_pc += 1
         placeholder = f"__OFF_{index}__"
         code = []
         code_pc = pc_by_index[index]

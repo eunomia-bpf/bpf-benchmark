@@ -1,16 +1,15 @@
 #include "common.h"
 
+#ifdef MICRO_NATIVE
+#pragma clang attribute push (__attribute__((target("popcnt"))), apply_to = function)
+#endif
+
 #define BITCOUNT_MAX_COUNT 256U
 #define BITCOUNT_INPUT_SIZE (8U + BITCOUNT_MAX_COUNT * 8U)
 
 static __always_inline u64 micro_popcount64(u64 value)
 {
-    u64 count = 0;
-    for (u32 bit = 0; bit < 64 && value != 0; bit++) {
-        value &= value - 1;
-        count++;
-    }
-    return count;
+    return (u64)__builtin_popcountll(value);
 }
 
 static __always_inline int bench_bitmap_popcount_scan(const u8 *data, u32 len, u64 *out)
@@ -41,3 +40,7 @@ static __always_inline int bench_bitmap_popcount_scan(const u8 *data, u32 len, u
 }
 
 DEFINE_STAGED_INPUT_XDP_BENCH(bitmap_popcount_scan_xdp, bench_bitmap_popcount_scan, bitmap_popcount_scan_input_value, BITCOUNT_INPUT_SIZE)
+
+#ifdef MICRO_NATIVE
+#pragma clang attribute pop
+#endif

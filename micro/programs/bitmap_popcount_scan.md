@@ -4,17 +4,16 @@
 ```c
 #include "common.h"
 
+#ifdef MICRO_NATIVE
+#pragma clang attribute push (__attribute__((target("popcnt"))), apply_to = function)
+#endif
+
 #define BITCOUNT_MAX_COUNT 256U
 #define BITCOUNT_INPUT_SIZE (8U + BITCOUNT_MAX_COUNT * 8U)
 
 static __always_inline u64 micro_popcount64(u64 value)
 {
-    u64 count = 0;
-    for (u32 bit = 0; bit < 64 && value != 0; bit++) {
-        value &= value - 1;
-        count++;
-    }
-    return count;
+    return (u64)__builtin_popcountll(value);
 }
 
 static __always_inline int bench_bitmap_popcount_scan(const u8 *data, u32 len, u64 *out)
@@ -45,6 +44,10 @@ static __always_inline int bench_bitmap_popcount_scan(const u8 *data, u32 len, u
 }
 
 DEFINE_STAGED_INPUT_XDP_BENCH(bitmap_popcount_scan_xdp, bench_bitmap_popcount_scan, bitmap_popcount_scan_input_value, BITCOUNT_INPUT_SIZE)
+
+#ifdef MICRO_NATIVE
+#pragma clang attribute pop
+#endif
 ```
 
 ## Native ASM
@@ -74,35 +77,25 @@ Disassembly of section .text:
     112a:	75 e2                	jne    110e <bitmap_popcount_scan_xdp+0xe>
     112c:	8b 4a 0c             	mov    ecx,DWORD PTR [rdx+0xc]
     112f:	31 c0                	xor    eax,eax
-    1131:	eb 29                	jmp    115c <bitmap_popcount_scan_xdp+0x5c>
-    1133:	66 66 66 66 2e 0f 1f 	data16 data16 data16 cs nop WORD PTR [rax+rax*1+0x0]
-    113a:	84 00 00 00 00 00 
-    1140:	48 01 cf             	add    rdi,rcx
-    1143:	89 c1                	mov    ecx,eax
-    1145:	80 e1 07             	and    cl,0x7
-    1148:	48 d3 ee             	shr    rsi,cl
-    114b:	48 89 f1             	mov    rcx,rsi
-    114e:	48 31 f9             	xor    rcx,rdi
-    1151:	48 ff c0             	inc    rax
-    1154:	48 3d 00 01 00 00    	cmp    rax,0x100
-    115a:	74 2b                	je     1187 <bitmap_popcount_scan_xdp+0x87>
-    115c:	48 8b 74 c2 10       	mov    rsi,QWORD PTR [rdx+rax*8+0x10]
-    1161:	49 89 f0             	mov    r8,rsi
-    1164:	31 ff                	xor    edi,edi
-    1166:	49 31 c8             	xor    r8,rcx
-    1169:	74 d5                	je     1140 <bitmap_popcount_scan_xdp+0x40>
-    116b:	0f 1f 44 00 00       	nop    DWORD PTR [rax+rax*1+0x0]
-    1170:	49 89 f9             	mov    r9,rdi
-    1173:	48 ff c7             	inc    rdi
-    1176:	41 83 f9 3e          	cmp    r9d,0x3e
-    117a:	77 c4                	ja     1140 <bitmap_popcount_scan_xdp+0x40>
-    117c:	4d 8d 48 ff          	lea    r9,[r8-0x1]
-    1180:	4d 21 c8             	and    r8,r9
-    1183:	75 eb                	jne    1170 <bitmap_popcount_scan_xdp+0x70>
-    1185:	eb b9                	jmp    1140 <bitmap_popcount_scan_xdp+0x40>
-    1187:	48 89 0a             	mov    QWORD PTR [rdx],rcx
-    118a:	b8 02 00 00 00       	mov    eax,0x2
-    118f:	c3                   	ret
+    1131:	66 66 66 66 66 66 2e 	data16 data16 data16 data16 data16 cs nop WORD PTR [rax+rax*1+0x0]
+    1138:	0f 1f 84 00 00 00 00 
+    113f:	00 
+    1140:	48 8b 74 c2 10       	mov    rsi,QWORD PTR [rdx+rax*8+0x10]
+    1145:	48 89 f7             	mov    rdi,rsi
+    1148:	48 31 cf             	xor    rdi,rcx
+    114b:	f3 48 0f b8 ff       	popcnt rdi,rdi
+    1150:	48 01 cf             	add    rdi,rcx
+    1153:	89 c1                	mov    ecx,eax
+    1155:	80 e1 07             	and    cl,0x7
+    1158:	48 d3 ee             	shr    rsi,cl
+    115b:	48 89 f1             	mov    rcx,rsi
+    115e:	48 31 f9             	xor    rcx,rdi
+    1161:	48 ff c0             	inc    rax
+    1164:	48 3d 00 01 00 00    	cmp    rax,0x100
+    116a:	75 d4                	jne    1140 <bitmap_popcount_scan_xdp+0x40>
+    116c:	48 89 0a             	mov    QWORD PTR [rdx],rcx
+    116f:	b8 02 00 00 00       	mov    eax,0x2
+    1174:	c3                   	ret
 
 Disassembly of section .fini:
 ```
@@ -116,154 +109,136 @@ Disassembly of section .data:
    5:	0f 1f 00             	nop    DWORD PTR [rax]
    8:	55                   	push   rbp
    9:	48 89 e5             	mov    rbp,rsp
-   c:	48 81 ec 18 00 00 00 	sub    rsp,0x18
-  13:	53                   	push   rbx
-  14:	41 55                	push   r13
-  16:	41 56                	push   r14
-  18:	41 57                	push   r15
-  1a:	31 c0                	xor    eax,eax
-  1c:	48 8b 77 08          	mov    rsi,QWORD PTR [rdi+0x8]
-  20:	48 8b 57 00          	mov    rdx,QWORD PTR [rdi+0x0]
-  24:	48 39 f2             	cmp    rdx,rsi
-  27:	0f 87 fb 01 00 00    	ja     0x228
-  2d:	48 89 d7             	mov    rdi,rdx
-  30:	48 83 c7 08          	add    rdi,0x8
-  34:	48 39 f7             	cmp    rdi,rsi
-  37:	0f 87 eb 01 00 00    	ja     0x228
-  3d:	48 89 d7             	mov    rdi,rdx
-  40:	48 81 c7 10 08 00 00 	add    rdi,0x810
-  47:	48 39 f7             	cmp    rdi,rsi
-  4a:	0f 87 d8 01 00 00    	ja     0x228
-  50:	48 0f b6 7a 09       	movzx  rdi,BYTE PTR [rdx+0x9]
-  55:	48 c1 e7 08          	shl    rdi,0x8
-  59:	48 0f b6 72 08       	movzx  rsi,BYTE PTR [rdx+0x8]
-  5e:	48 09 f7             	or     rdi,rsi
-  61:	48 0f b6 72 0a       	movzx  rsi,BYTE PTR [rdx+0xa]
-  66:	48 c1 e6 10          	shl    rsi,0x10
-  6a:	48 09 f7             	or     rdi,rsi
-  6d:	48 0f b6 72 0b       	movzx  rsi,BYTE PTR [rdx+0xb]
-  72:	48 c1 e6 18          	shl    rsi,0x18
-  76:	48 09 f7             	or     rdi,rsi
-  79:	48 c1 e7 20          	shl    rdi,0x20
-  7d:	48 c1 ef 20          	shr    rdi,0x20
-  81:	48 81 ff 00 01 00 00 	cmp    rdi,0x100
-  88:	0f 85 9a 01 00 00    	jne    0x228
-  8e:	4c 0f b6 72 0d       	movzx  r14,BYTE PTR [rdx+0xd]
-  93:	49 c1 e6 08          	shl    r14,0x8
-  97:	48 0f b6 7a 0c       	movzx  rdi,BYTE PTR [rdx+0xc]
-  9c:	49 09 fe             	or     r14,rdi
-  9f:	48 0f b6 7a 0e       	movzx  rdi,BYTE PTR [rdx+0xe]
-  a4:	48 c1 e7 10          	shl    rdi,0x10
-  a8:	49 09 fe             	or     r14,rdi
-  ab:	48 0f b6 7a 0f       	movzx  rdi,BYTE PTR [rdx+0xf]
-  b0:	48 c1 e7 18          	shl    rdi,0x18
-  b4:	49 09 fe             	or     r14,rdi
-  b7:	31 f6                	xor    esi,esi
-  b9:	48 89 d7             	mov    rdi,rdx
-  bc:	48 83 c7 17          	add    rdi,0x17
-  c0:	48 89 7d f8          	mov    QWORD PTR [rbp-0x8],rdi
-  c4:	48 89 d7             	mov    rdi,rdx
-  c7:	48 83 c7 16          	add    rdi,0x16
-  cb:	48 89 7d f0          	mov    QWORD PTR [rbp-0x10],rdi
-  cf:	49 89 d0             	mov    r8,rdx
-  d2:	49 83 c0 15          	add    r8,0x15
-  d6:	48 89 d0             	mov    rax,rdx
-  d9:	48 83 c0 11          	add    rax,0x11
-  dd:	48 89 55 e8          	mov    QWORD PTR [rbp-0x18],rdx
-  e1:	48 89 d3             	mov    rbx,rdx
-  e4:	48 83 c3 10          	add    rbx,0x10
-  e8:	eb 4a                	jmp    0x134
-  ea:	49 83 c6 01          	add    r14,0x1
-  ee:	49 c1 e5 20          	shl    r13,0x20
-  f2:	49 c1 ed 20          	shr    r13,0x20
-  f6:	49 83 fd 3e          	cmp    r13,0x3e
-  fa:	77 15                	ja     0x111
-  fc:	49 89 ff             	mov    r15,rdi
-  ff:	49 83 c7 ff          	add    r15,0xffffffffffffffff
- 103:	49 21 ff             	and    r15,rdi
- 106:	4d 89 f5             	mov    r13,r14
- 109:	4c 89 ff             	mov    rdi,r15
- 10c:	4d 85 ff             	test   r15,r15
- 10f:	75 d9                	jne    0xea
- 111:	49 01 d6             	add    r14,rdx
- 114:	48 89 f7             	mov    rdi,rsi
- 117:	48 83 e7 07          	and    rdi,0x7
- 11b:	c4 e2 c3 f7 c9       	shrx   rcx,rcx,rdi
- 120:	49 31 ce             	xor    r14,rcx
- 123:	48 83 c6 01          	add    rsi,0x1
- 127:	48 81 fe 00 01 00 00 	cmp    rsi,0x100
- 12e:	0f 84 9d 00 00 00    	je     0x1d1
- 134:	4c 89 f2             	mov    rdx,r14
- 137:	49 89 f5             	mov    r13,rsi
- 13a:	49 c1 e5 03          	shl    r13,0x3
- 13e:	48 89 c7             	mov    rdi,rax
- 141:	4c 01 ef             	add    rdi,r13
- 144:	4c 0f b6 77 03       	movzx  r14,BYTE PTR [rdi+0x3]
- 149:	49 c1 e6 20          	shl    r14,0x20
- 14d:	4c 0f b6 7f 01       	movzx  r15,BYTE PTR [rdi+0x1]
- 152:	49 c1 e7 10          	shl    r15,0x10
- 156:	4d 09 f7             	or     r15,r14
- 159:	4c 0f b6 77 02       	movzx  r14,BYTE PTR [rdi+0x2]
- 15e:	49 c1 e6 18          	shl    r14,0x18
- 162:	48 0f b6 4f 00       	movzx  rcx,BYTE PTR [rdi+0x0]
- 167:	48 c1 e1 08          	shl    rcx,0x8
- 16b:	4c 09 f1             	or     rcx,r14
- 16e:	4c 09 f9             	or     rcx,r15
- 171:	4d 89 c6             	mov    r14,r8
- 174:	4d 01 ee             	add    r14,r13
- 177:	4d 0f b6 76 00       	movzx  r14,BYTE PTR [r14+0x0]
- 17c:	49 c1 e6 28          	shl    r14,0x28
- 180:	4c 09 f1             	or     rcx,r14
- 183:	4c 8b 75 f8          	mov    r14,QWORD PTR [rbp-0x8]
- 187:	4d 01 ee             	add    r14,r13
- 18a:	4d 0f b6 76 00       	movzx  r14,BYTE PTR [r14+0x0]
- 18f:	49 c1 e6 38          	shl    r14,0x38
- 193:	4c 8b 7d f0          	mov    r15,QWORD PTR [rbp-0x10]
- 197:	4d 01 ef             	add    r15,r13
- 19a:	4d 0f b6 7f 00       	movzx  r15,BYTE PTR [r15+0x0]
- 19f:	49 c1 e7 30          	shl    r15,0x30
- 1a3:	4d 09 f7             	or     r15,r14
- 1a6:	4c 09 f9             	or     rcx,r15
- 1a9:	49 89 de             	mov    r14,rbx
- 1ac:	4d 01 ee             	add    r14,r13
- 1af:	4d 0f b6 6e 00       	movzx  r13,BYTE PTR [r14+0x0]
- 1b4:	4c 09 e9             	or     rcx,r13
- 1b7:	48 89 cf             	mov    rdi,rcx
- 1ba:	48 31 d7             	xor    rdi,rdx
- 1bd:	45 31 f6             	xor    r14d,r14d
- 1c0:	48 85 ff             	test   rdi,rdi
- 1c3:	0f 84 48 ff ff ff    	je     0x111
- 1c9:	45 31 ed             	xor    r13d,r13d
- 1cc:	e9 19 ff ff ff       	jmp    0xea
- 1d1:	4c 89 f7             	mov    rdi,r14
- 1d4:	48 c1 ef 38          	shr    rdi,0x38
- 1d8:	48 8b 75 e8          	mov    rsi,QWORD PTR [rbp-0x18]
- 1dc:	40 88 7e 07          	mov    BYTE PTR [rsi+0x7],dil
- 1e0:	4c 89 f7             	mov    rdi,r14
- 1e3:	48 c1 ef 30          	shr    rdi,0x30
- 1e7:	40 88 7e 06          	mov    BYTE PTR [rsi+0x6],dil
- 1eb:	4c 89 f7             	mov    rdi,r14
- 1ee:	48 c1 ef 28          	shr    rdi,0x28
- 1f2:	40 88 7e 05          	mov    BYTE PTR [rsi+0x5],dil
- 1f6:	4c 89 f7             	mov    rdi,r14
- 1f9:	48 c1 ef 20          	shr    rdi,0x20
- 1fd:	40 88 7e 04          	mov    BYTE PTR [rsi+0x4],dil
- 201:	4c 89 f7             	mov    rdi,r14
- 204:	48 c1 ef 18          	shr    rdi,0x18
- 208:	40 88 7e 03          	mov    BYTE PTR [rsi+0x3],dil
- 20c:	4c 89 f7             	mov    rdi,r14
- 20f:	48 c1 ef 10          	shr    rdi,0x10
- 213:	40 88 7e 02          	mov    BYTE PTR [rsi+0x2],dil
- 217:	44 88 76 00          	mov    BYTE PTR [rsi+0x0],r14b
- 21b:	49 c1 ee 08          	shr    r14,0x8
- 21f:	44 88 76 01          	mov    BYTE PTR [rsi+0x1],r14b
- 223:	b8 02 00 00 00       	mov    eax,0x2
- 228:	41 5f                	pop    r15
- 22a:	41 5e                	pop    r14
- 22c:	41 5d                	pop    r13
- 22e:	5b                   	pop    rbx
- 22f:	c9                   	leave
- 230:	c3                   	ret
+   c:	53                   	push   rbx
+   d:	41 55                	push   r13
+   f:	41 56                	push   r14
+  11:	41 57                	push   r15
+  13:	31 c0                	xor    eax,eax
+  15:	48 8b 77 08          	mov    rsi,QWORD PTR [rdi+0x8]
+  19:	48 8b 7f 00          	mov    rdi,QWORD PTR [rdi+0x0]
+  1d:	48 39 f7             	cmp    rdi,rsi
+  20:	0f 87 c9 01 00 00    	ja     0x1ef
+  26:	48 89 fa             	mov    rdx,rdi
+  29:	48 83 c2 08          	add    rdx,0x8
+  2d:	48 39 f2             	cmp    rdx,rsi
+  30:	0f 87 b9 01 00 00    	ja     0x1ef
+  36:	48 89 fa             	mov    rdx,rdi
+  39:	48 81 c2 10 08 00 00 	add    rdx,0x810
+  40:	48 39 f2             	cmp    rdx,rsi
+  43:	0f 87 a6 01 00 00    	ja     0x1ef
+  49:	48 0f b6 77 09       	movzx  rsi,BYTE PTR [rdi+0x9]
+  4e:	48 c1 e6 08          	shl    rsi,0x8
+  52:	48 0f b6 57 08       	movzx  rdx,BYTE PTR [rdi+0x8]
+  57:	48 09 d6             	or     rsi,rdx
+  5a:	48 0f b6 57 0a       	movzx  rdx,BYTE PTR [rdi+0xa]
+  5f:	48 c1 e2 10          	shl    rdx,0x10
+  63:	48 09 d6             	or     rsi,rdx
+  66:	48 0f b6 57 0b       	movzx  rdx,BYTE PTR [rdi+0xb]
+  6b:	48 c1 e2 18          	shl    rdx,0x18
+  6f:	48 09 d6             	or     rsi,rdx
+  72:	48 c1 e6 20          	shl    rsi,0x20
+  76:	48 c1 ee 20          	shr    rsi,0x20
+  7a:	48 81 fe 00 01 00 00 	cmp    rsi,0x100
+  81:	0f 85 68 01 00 00    	jne    0x1ef
+  87:	48 0f b6 77 0d       	movzx  rsi,BYTE PTR [rdi+0xd]
+  8c:	48 c1 e6 08          	shl    rsi,0x8
+  90:	48 0f b6 57 0c       	movzx  rdx,BYTE PTR [rdi+0xc]
+  95:	48 09 d6             	or     rsi,rdx
+  98:	48 0f b6 57 0e       	movzx  rdx,BYTE PTR [rdi+0xe]
+  9d:	48 c1 e2 10          	shl    rdx,0x10
+  a1:	48 09 d6             	or     rsi,rdx
+  a4:	48 0f b6 57 0f       	movzx  rdx,BYTE PTR [rdi+0xf]
+  a9:	48 c1 e2 18          	shl    rdx,0x18
+  ad:	48 09 d6             	or     rsi,rdx
+  b0:	31 d2                	xor    edx,edx
+  b2:	48 89 f9             	mov    rcx,rdi
+  b5:	48 83 c1 17          	add    rcx,0x17
+  b9:	48 b8 33 33 33 33 33 	movabs rax,0x3333333333333333
+  c0:	33 33 33 
+  c3:	49 bd 01 01 01 01 01 	movabs r13,0x101010101010101
+  ca:	01 01 01 
+  cd:	48 bb 55 55 55 55 55 	movabs rbx,0x5555555555555555
+  d4:	55 55 55 
+  d7:	4c 0f b6 71 fd       	movzx  r14,BYTE PTR [rcx-0x3]
+  dc:	49 c1 e6 20          	shl    r14,0x20
+  e0:	4c 0f b6 79 fb       	movzx  r15,BYTE PTR [rcx-0x5]
+  e5:	49 c1 e7 10          	shl    r15,0x10
+  e9:	4d 09 f7             	or     r15,r14
+  ec:	4c 0f b6 41 fc       	movzx  r8,BYTE PTR [rcx-0x4]
+  f1:	49 c1 e0 18          	shl    r8,0x18
+  f5:	4c 0f b6 71 fa       	movzx  r14,BYTE PTR [rcx-0x6]
+  fa:	49 c1 e6 08          	shl    r14,0x8
+  fe:	4d 09 c6             	or     r14,r8
+ 101:	4d 09 fe             	or     r14,r15
+ 104:	4c 0f b6 41 fe       	movzx  r8,BYTE PTR [rcx-0x2]
+ 109:	49 c1 e0 28          	shl    r8,0x28
+ 10d:	4d 09 c6             	or     r14,r8
+ 110:	4c 0f b6 41 00       	movzx  r8,BYTE PTR [rcx+0x0]
+ 115:	49 c1 e0 38          	shl    r8,0x38
+ 119:	4c 0f b6 79 ff       	movzx  r15,BYTE PTR [rcx-0x1]
+ 11e:	49 c1 e7 30          	shl    r15,0x30
+ 122:	4d 09 c7             	or     r15,r8
+ 125:	4d 09 fe             	or     r14,r15
+ 128:	4c 0f b6 41 f9       	movzx  r8,BYTE PTR [rcx-0x7]
+ 12d:	4d 09 c6             	or     r14,r8
+ 130:	4d 89 f0             	mov    r8,r14
+ 133:	49 31 f0             	xor    r8,rsi
+ 136:	4d 89 c7             	mov    r15,r8
+ 139:	49 d1 ef             	shr    r15,1
+ 13c:	49 21 df             	and    r15,rbx
+ 13f:	4d 29 f8             	sub    r8,r15
+ 142:	4d 89 c7             	mov    r15,r8
+ 145:	49 21 c7             	and    r15,rax
+ 148:	49 c1 e8 02          	shr    r8,0x2
+ 14c:	49 21 c0             	and    r8,rax
+ 14f:	4d 01 c7             	add    r15,r8
+ 152:	49 89 d0             	mov    r8,rdx
+ 155:	49 83 e0 07          	and    r8,0x7
+ 159:	c4 42 bb f7 f6       	shrx   r14,r14,r8
+ 15e:	4d 89 f8             	mov    r8,r15
+ 161:	49 c1 e8 04          	shr    r8,0x4
+ 165:	4d 01 c7             	add    r15,r8
+ 168:	49 b8 0f 0f 0f 0f 0f 	movabs r8,0xf0f0f0f0f0f0f0f
+ 16f:	0f 0f 0f 
+ 172:	4d 21 c7             	and    r15,r8
+ 175:	4d 0f af fd          	imul   r15,r13
+ 179:	49 c1 ef 38          	shr    r15,0x38
+ 17d:	49 01 f7             	add    r15,rsi
+ 180:	4d 31 f7             	xor    r15,r14
+ 183:	48 83 c1 08          	add    rcx,0x8
+ 187:	48 83 c2 01          	add    rdx,0x1
+ 18b:	4c 89 fe             	mov    rsi,r15
+ 18e:	48 81 fa 00 01 00 00 	cmp    rdx,0x100
+ 195:	74 05                	je     0x19c
+ 197:	e9 3b ff ff ff       	jmp    0xd7
+ 19c:	4c 89 fe             	mov    rsi,r15
+ 19f:	48 c1 ee 38          	shr    rsi,0x38
+ 1a3:	40 88 77 07          	mov    BYTE PTR [rdi+0x7],sil
+ 1a7:	4c 89 fe             	mov    rsi,r15
+ 1aa:	48 c1 ee 30          	shr    rsi,0x30
+ 1ae:	40 88 77 06          	mov    BYTE PTR [rdi+0x6],sil
+ 1b2:	4c 89 fe             	mov    rsi,r15
+ 1b5:	48 c1 ee 28          	shr    rsi,0x28
+ 1b9:	40 88 77 05          	mov    BYTE PTR [rdi+0x5],sil
+ 1bd:	4c 89 fe             	mov    rsi,r15
+ 1c0:	48 c1 ee 20          	shr    rsi,0x20
+ 1c4:	40 88 77 04          	mov    BYTE PTR [rdi+0x4],sil
+ 1c8:	4c 89 fe             	mov    rsi,r15
+ 1cb:	48 c1 ee 18          	shr    rsi,0x18
+ 1cf:	40 88 77 03          	mov    BYTE PTR [rdi+0x3],sil
+ 1d3:	4c 89 fe             	mov    rsi,r15
+ 1d6:	48 c1 ee 10          	shr    rsi,0x10
+ 1da:	40 88 77 02          	mov    BYTE PTR [rdi+0x2],sil
+ 1de:	44 88 7f 00          	mov    BYTE PTR [rdi+0x0],r15b
+ 1e2:	49 c1 ef 08          	shr    r15,0x8
+ 1e6:	44 88 7f 01          	mov    BYTE PTR [rdi+0x1],r15b
+ 1ea:	b8 02 00 00 00       	mov    eax,0x2
+ 1ef:	41 5f                	pop    r15
+ 1f1:	41 5e                	pop    r14
+ 1f3:	41 5d                	pop    r13
+ 1f5:	5b                   	pop    rbx
+ 1f6:	c9                   	leave
+ 1f7:	c3                   	ret
 ```
 
 ## llvmbpf JIT ASM
@@ -276,54 +251,167 @@ Disassembly of section .data:
    6:	8b 57 04             	mov    edx,DWORD PTR [rdi+0x4]
    9:	31 c0                	xor    eax,eax
    b:	39 d1                	cmp    ecx,edx
-   d:	77 7e                	ja     0x8d
+   d:	77 67                	ja     0x76
    f:	48 8d 71 08          	lea    rsi,[rcx+0x8]
   13:	48 39 d6             	cmp    rsi,rdx
-  16:	77 75                	ja     0x8d
+  16:	77 5e                	ja     0x76
   18:	48 8d b1 10 08 00 00 	lea    rsi,[rcx+0x810]
   1f:	48 39 d6             	cmp    rsi,rdx
-  22:	77 69                	ja     0x8d
+  22:	77 52                	ja     0x76
   24:	81 79 08 00 01 00 00 	cmp    DWORD PTR [rcx+0x8],0x100
-  2b:	75 55                	jne    0x82
-  2d:	8b 51 0c             	mov    edx,DWORD PTR [rcx+0xc]
-  30:	31 c0                	xor    eax,eax
-  32:	eb 2c                	jmp    0x60
-  34:	66 66 66 2e 0f 1f 84 	data16 data16 cs nop WORD PTR [rax+rax*1+0x0]
-  3b:	00 00 00 00 00 
-  40:	bf 40 00 00 00       	mov    edi,0x40
-  45:	48 01 d7             	add    rdi,rdx
-  48:	89 c2                	mov    edx,eax
-  4a:	80 e2 07             	and    dl,0x7
-  4d:	c4 e2 eb f7 d6       	shrx   rdx,rsi,rdx
-  52:	48 31 fa             	xor    rdx,rdi
-  55:	48 ff c0             	inc    rax
-  58:	48 3d 00 01 00 00    	cmp    rax,0x100
-  5e:	74 25                	je     0x85
-  60:	48 8b 74 c1 10       	mov    rsi,QWORD PTR [rcx+rax*8+0x10]
-  65:	49 89 f0             	mov    r8,rsi
-  68:	31 ff                	xor    edi,edi
-  6a:	49 31 d0             	xor    r8,rdx
-  6d:	74 d6                	je     0x45
-  6f:	90                   	nop
-  70:	48 83 ff 3e          	cmp    rdi,0x3e
-  74:	77 ca                	ja     0x40
-  76:	48 ff c7             	inc    rdi
-  79:	c4 c2 b8 f3 c8       	blsr   r8,r8
-  7e:	75 f0                	jne    0x70
-  80:	eb c3                	jmp    0x45
-  82:	31 c0                	xor    eax,eax
-  84:	c3                   	ret
-  85:	48 89 11             	mov    QWORD PTR [rcx],rdx
-  88:	b8 02 00 00 00       	mov    eax,0x2
-  8d:	c3                   	ret
+  2b:	75 4a                	jne    0x77
+  2d:	8b 41 0c             	mov    eax,DWORD PTR [rcx+0xc]
+  30:	48 8d 51 17          	lea    rdx,[rcx+0x17]
+  34:	31 f6                	xor    esi,esi
+  36:	66 2e 0f 1f 84 00 00 	cs nop WORD PTR [rax+rax*1+0x0]
+  3d:	00 00 00 
+  40:	48 8b 7a f9          	mov    rdi,QWORD PTR [rdx-0x7]
+  44:	41 89 f0             	mov    r8d,esi
+  47:	41 80 e0 07          	and    r8b,0x7
+  4b:	c4 62 bb f7 c7       	shrx   r8,rdi,r8
+  50:	48 31 c7             	xor    rdi,rax
+  53:	f3 48 0f b8 ff       	popcnt rdi,rdi
+  58:	48 01 f8             	add    rax,rdi
+  5b:	4c 31 c0             	xor    rax,r8
+  5e:	48 83 c2 08          	add    rdx,0x8
+  62:	48 ff c6             	inc    rsi
+  65:	48 81 fe 00 01 00 00 	cmp    rsi,0x100
+  6c:	75 d2                	jne    0x40
+  6e:	48 89 01             	mov    QWORD PTR [rcx],rax
+  71:	b8 02 00 00 00       	mov    eax,0x2
+  76:	c3                   	ret
+  77:	31 c0                	xor    eax,eax
+  79:	c3                   	ret
 ```
 
 ## Handcraft C
 ```c
-not captured
+#include "handcraft_common.h"
+
+#define HC_LEA_PAYLOAD(DST, BASE, INDEX, SCALE, HAS_BASE, HAS_INDEX, DISP) \
+    ((__u64)(DST) | ((__u64)(BASE) << 4) | ((__u64)(INDEX) << 8) | \
+     ((__u64)(SCALE) << 12) | ((__u64)(HAS_INDEX) << 14) | \
+     ((__u64)(HAS_BASE) << 15) | ((__u64)(__u32)(DISP) << 16))
+
+/*
+ * native asm to handcraft warnings: 2
+ *
+ * - 0x1100: mov    rdx,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0]
+ * - 0x1103: mov    rcx,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4]
+ */
+
+static const struct bpf_insn program[] = {
+    /* 0x1100: mov    rdx,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0] */
+    HC_LDX(BPF_W, BPF_REG_3, BPF_REG_1, 0),
+    /* 0x1103: mov    rcx,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4] */
+    HC_LDX(BPF_W, BPF_REG_4, BPF_REG_1, 4),
+    /* 0x1107: xor    eax,eax [bpf-jit: zero idiom] */
+    HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_0, 0, 0, 0),
+    /* 0x1109: cmp    rdx,rcx [cmp-state: sets flags; materialized by following jcc when possible] */
+    /* 0x110c: jbe    110f <bitmap_popcount_scan_xdp+0xf> [bpf-branch: lowered cmp    rdx,rcx + jbe    110f <bitmap_popcount_scan_xdp+0xf> to verifier-visible BPF branch] */
+    HC_JMP_REG(BPF_JLE, BPF_REG_3, BPF_REG_4, 1),
+    /* 0x110e: ret [bpf-jit: BPF exit; kernel JIT emits the real return sequence] */
+    HC_EXIT(),
+    /* 0x110f: lea    rsi,[rdx+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
+    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_3, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
+    /* 0x1113: cmp    rsi,rcx [cmp-state: sets flags; materialized by following jcc when possible] */
+    /* 0x1116: ja     110e <bitmap_popcount_scan_xdp+0xe> [bpf-branch: lowered cmp    rsi,rcx + ja     110e <bitmap_popcount_scan_xdp+0xe> to verifier-visible BPF branch] */
+    HC_JMP_REG(BPF_JGT, BPF_REG_2, BPF_REG_4, -4),
+    /* 0x1118: lea    rdi,[rdx+0x810] [exact-kinsn: LEA via x86 kinsn selector] */
+    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_1, BPF_REG_3, 0, 0, 1, 0, 2064), MICRO_HANDCRAFT_BPF_X86_LEAQ),
+    /* 0x111f: cmp    rdi,rcx [cmp-state: sets flags; materialized by following jcc when possible] */
+    /* 0x1122: ja     110e <bitmap_popcount_scan_xdp+0xe> [bpf-branch: lowered cmp    rdi,rcx + ja     110e <bitmap_popcount_scan_xdp+0xe> to verifier-visible BPF branch] */
+    HC_JMP_REG(BPF_JGT, BPF_REG_1, BPF_REG_4, -7),
+    /* 0x1124: cmp    DWORD PTR [rsi],0x100 [cmp-state: sets flags; materialized by following jcc when possible] */
+    /* 0x112a: jne    110e <bitmap_popcount_scan_xdp+0xe> [bpf-branch: lowered cmp    DWORD PTR [rsi],0x100 + jne    110e <bitmap_popcount_scan_xdp+0xe> to verifier-visible load+branch] */
+    HC_LDX(BPF_W, BPF_REG_6, BPF_REG_2, 0),
+    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_6, 0, -9, 256),
+    /* 0x112c: mov    ecx,DWORD PTR [rdx+0xc] [exact-kinsn: direct memory load via x86 kinsn selector] */
+    HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_4, BPF_REG_3, 12), MICRO_HANDCRAFT_BPF_X86_MOVL_MEM),
+    /* 0x112f: xor    eax,eax [bpf-jit: zero idiom] */
+    HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_0, 0, 0, 0),
+    /* 0x1131: data16 data16 data16 data16 data16 cs nop WORD PTR [rax+rax*1+0x0] [padding: padding is not part of BPF semantics] */
+    /* 0x1140: mov    rsi,QWORD PTR [rdx+rax*8+0x10] [exact-kinsn: indexed memory load via x86 SIB kinsn] */
+    HC_KINSN(HC_SIB_PAYLOAD(BPF_REG_2, BPF_REG_3, BPF_REG_0, 3, 16), MICRO_HANDCRAFT_BPF_X86_MOVQ_SIB),
+    /* 0x1145: mov    rdi,rsi [exact-kinsn: movq register-to-register kinsn] */
+    HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_1, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_MOVQ_RR),
+    /* 0x1148: xor    rdi,rcx [bpf-jit: ALU reg operation] */
+    HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_1, BPF_REG_4, 0, 0),
+    /* 0x114b: popcnt rdi,rdi [exact-kinsn: popcntq kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
+    HC_KINSN(HC_POPCNT_PAYLOAD(BPF_REG_1, BPF_REG_1, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_POPCNTQ),
+    /* 0x1150: add    rdi,rcx [bpf-jit: ALU reg operation] */
+    HC_RAW(BPF_ALU64 | BPF_ADD | BPF_X, BPF_REG_1, BPF_REG_4, 0, 0),
+    /* 0x1153: mov    ecx,eax [bpf-jit: 32-bit register move] */
+    HC_RAW(BPF_ALU | BPF_MOV | BPF_X, BPF_REG_4, BPF_REG_0, 0, 0),
+    /* 0x1155: and    cl,0x7 [exact-kinsn: andb imm kinsn; verifier instantiate uses temp BPF_REG_6] */
+    HC_KINSN(HC_REG_IMM_TMP_PAYLOAD(BPF_REG_4, 7, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ANDB_IMM),
+    /* 0x1158: shr    rsi,cl [bpf-jit: ALU reg operation] */
+    HC_RAW(BPF_ALU64 | BPF_RSH | BPF_X, BPF_REG_2, BPF_REG_4, 0, 0),
+    /* 0x115b: mov    rcx,rsi [exact-kinsn: movq register-to-register kinsn] */
+    HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_4, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_MOVQ_RR),
+    /* 0x115e: xor    rcx,rdi [bpf-jit: ALU reg operation] */
+    HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_4, BPF_REG_1, 0, 0),
+    /* 0x1161: inc    rax [exact-kinsn: incq reg kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_INCQ),
+    /* 0x1164: cmp    rax,0x100 [cmp-state: sets flags; materialized by following jcc when possible] */
+    /* 0x116a: jne    1140 <bitmap_popcount_scan_xdp+0x40> [bpf-branch: lowered cmp    rax,0x100 + jne    1140 <bitmap_popcount_scan_xdp+0x40> to verifier-visible BPF branch] */
+    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_0, 0, -18, 256),
+    /* 0x116c: mov    QWORD PTR [rdx],rcx [exact-kinsn: direct memory store via x86 kinsn selector] */
+    HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_4, BPF_REG_3, 0), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM_REG),
+    /* 0x116f: mov    eax,0x2 [bpf-jit: 32-bit immediate move] */
+    HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_0, 0, 0, 2),
+    /* 0x1174: ret [bpf-jit: BPF exit; kernel JIT emits the real return sequence] */
+    HC_EXIT(),
+};
+
+HC_EXPORT_PROGRAM(program)
 ```
 
 ## Handcraft Kernel JIT ASM
 ```asm
-not captured
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	0f 1f 44 00 00       	nop    DWORD PTR [rax+rax*1+0x0]
+   5:	0f 1f 00             	nop    DWORD PTR [rax]
+   8:	55                   	push   rbp
+   9:	48 89 e5             	mov    rbp,rsp
+   c:	53                   	push   rbx
+   d:	41 55                	push   r13
+   f:	48 8b 57 00          	mov    rdx,QWORD PTR [rdi+0x0]
+  13:	48 8b 4f 08          	mov    rcx,QWORD PTR [rdi+0x8]
+  17:	31 c0                	xor    eax,eax
+  19:	48 39 ca             	cmp    rdx,rcx
+  1c:	76 05                	jbe    0x23
+  1e:	41 5d                	pop    r13
+  20:	5b                   	pop    rbx
+  21:	c9                   	leave
+  22:	c3                   	ret
+  23:	48 8d 72 08          	lea    rsi,[rdx+0x8]
+  27:	48 39 ce             	cmp    rsi,rcx
+  2a:	77 f2                	ja     0x1e
+  2c:	48 8d ba 10 08 00 00 	lea    rdi,[rdx+0x810]
+  33:	48 39 cf             	cmp    rdi,rcx
+  36:	77 e6                	ja     0x1e
+  38:	8b 5e 00             	mov    ebx,DWORD PTR [rsi+0x0]
+  3b:	48 81 fb 00 01 00 00 	cmp    rbx,0x100
+  42:	75 da                	jne    0x1e
+  44:	8b 4a 0c             	mov    ecx,DWORD PTR [rdx+0xc]
+  47:	31 c0                	xor    eax,eax
+  49:	48 8b 74 c2 10       	mov    rsi,QWORD PTR [rdx+rax*8+0x10]
+  4e:	48 89 f7             	mov    rdi,rsi
+  51:	48 31 cf             	xor    rdi,rcx
+  54:	f3 48 0f b8 ff       	popcnt rdi,rdi
+  59:	48 01 cf             	add    rdi,rcx
+  5c:	89 c1                	mov    ecx,eax
+  5e:	80 e1 07             	and    cl,0x7
+  61:	48 d3 ee             	shr    rsi,cl
+  64:	48 89 f1             	mov    rcx,rsi
+  67:	48 31 f9             	xor    rcx,rdi
+  6a:	48 ff c0             	inc    rax
+  6d:	48 81 f8 00 01 00 00 	cmp    rax,0x100
+  74:	75 d3                	jne    0x49
+  76:	48 89 0a             	mov    QWORD PTR [rdx],rcx
+  79:	b8 02 00 00 00       	mov    eax,0x2
+  7e:	eb 9e                	jmp    0x1e
 ```

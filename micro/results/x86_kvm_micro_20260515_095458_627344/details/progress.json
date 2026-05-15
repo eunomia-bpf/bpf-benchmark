@@ -1,0 +1,27 @@
+{
+  "completed_benchmarks": 0,
+  "current_benchmark": "packet_vlan_tcpopt_parser",
+  "current_benchmark_index": 1,
+  "current_benchmark_record": {
+    "category": "memory-local",
+    "description": "Packet-backed Ethernet plus VLAN plus IPv4 plus TCP parser with options walk",
+    "expected_result": 7124500222221,
+    "family": "parser",
+    "hypothesis": "Variable cursor advancement and repeated bounds checks should magnify packet-parse codegen differences",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_vlan_tcpopt_parser.mem",
+    "io_mode": "packet",
+    "level": "variable-vlan-tcpopts",
+    "name": "packet_vlan_tcpopt_parser",
+    "runs": [],
+    "tags": [
+      "packet",
+      "parse",
+      "bounds",
+      "variable-offsets",
+      "pure-jit"
+    ]
+  },
+  "error_message": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/packet_vlan_tcpopt_parser.handcraft.so --program-name packet_vlan_tcpopt_parser_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_vlan_tcpopt_parser.mem --io-mode packet --input-size 74 --inner-repeat 1000 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_095458_627344/details/jit_dumps/packet_vlan_tcpopt_parser__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_095458_627344/details/jit_dumps/packet_vlan_tcpopt_parser__kernel_handcraft__sample00.xlated.bin\nlibbpf: loaded kernel BTF from '/sys/kernel/btf/vmlinux'\nbpf_prog_load(handcraft) failed: Invalid argument\nfunc#0 @0\nunreachable insn 62\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument",
+  "status": "error",
+  "total_benchmarks": 1
+}

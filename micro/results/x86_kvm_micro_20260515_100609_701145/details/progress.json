@@ -1,0 +1,27 @@
+{
+  "completed_benchmarks": 0,
+  "current_benchmark": "packet_vlan_tcpopt_parser",
+  "current_benchmark_index": 1,
+  "current_benchmark_record": {
+    "category": "memory-local",
+    "description": "Packet-backed Ethernet plus VLAN plus IPv4 plus TCP parser with options walk",
+    "expected_result": 7124500222221,
+    "family": "parser",
+    "hypothesis": "Variable cursor advancement and repeated bounds checks should magnify packet-parse codegen differences",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_vlan_tcpopt_parser.mem",
+    "io_mode": "packet",
+    "level": "variable-vlan-tcpopts",
+    "name": "packet_vlan_tcpopt_parser",
+    "runs": [],
+    "tags": [
+      "packet",
+      "parse",
+      "bounds",
+      "variable-offsets",
+      "pure-jit"
+    ]
+  },
+  "error_message": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/packet_vlan_tcpopt_parser.handcraft.so --program-name packet_vlan_tcpopt_parser_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_vlan_tcpopt_parser.mem --io-mode packet --input-size 74 --inner-repeat 1000 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_100609_701145/details/jit_dumps/packet_vlan_tcpopt_parser__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_100609_701145/details/jit_dumps/packet_vlan_tcpopt_parser__kernel_handcraft__sample00.xlated.bin\n    226: .12..5.... (73) *(u8 *)(r2 +2) = r1\n    227: ..2..5.... (73) *(u8 *)(r2 +0) = r5\n    228: ..2..5.... (77) r5 >>= 8\n    229: ..2..5.... (73) *(u8 *)(r2 +1) = r5\n    230: .......... (b7) r0 = 2\n    231: 0......... (05) goto pc-177\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 0                        ; R0=0\n1: (79) r2 = *(u64 *)(r1 +0)\ninvalid bpf_context access off=0 size=8\nprocessed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\ninitial_load_error=Permission denied diagnostic_load_error=Permission denied",
+  "status": "error",
+  "total_benchmarks": 1
+}

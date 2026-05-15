@@ -1,0 +1,26 @@
+{
+  "completed_benchmarks": 0,
+  "current_benchmark": "flow_5tuple_rss_hash",
+  "current_benchmark_index": 1,
+  "current_benchmark_record": {
+    "category": "alu-mix",
+    "description": "Parse an IPv4 TCP 5-tuple and compute a Jenkins-style flow hash",
+    "expected_result": 11016707074064960918,
+    "family": "packet-hash",
+    "hypothesis": "Endian conversion plus field extraction and rotates should be more workload-realistic than standalone checksum math",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/flow_5tuple_rss_hash.mem",
+    "io_mode": "packet",
+    "level": "flow-5tuple",
+    "name": "flow_5tuple_rss_hash",
+    "runs": [],
+    "tags": [
+      "packet",
+      "hash",
+      "endian",
+      "pure-jit"
+    ]
+  },
+  "error_message": "flow_5tuple_rss_hash/kernel_handcraft result mismatch: 13050461456945643670 != 11016707074064960918",
+  "status": "error",
+  "total_benchmarks": 1
+}

@@ -1,0 +1,26 @@
+{
+  "completed_benchmarks": 0,
+  "current_benchmark": "payload_prefix_memcmp_scan",
+  "current_benchmark_index": 1,
+  "current_benchmark_record": {
+    "category": "memory-local",
+    "description": "Payload prefix comparison over fixed-size candidate records",
+    "expected_result": 9377358970524074984,
+    "family": "byte-compare",
+    "hypothesis": "Represents protocol/string prefix filters with early mismatch exits",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/payload_prefix_memcmp_scan.mem",
+    "io_mode": "staged",
+    "level": "prefix-64",
+    "name": "payload_prefix_memcmp_scan",
+    "runs": [],
+    "tags": [
+      "memory",
+      "compare",
+      "branch",
+      "pure-jit"
+    ]
+  },
+  "error_message": "payload_prefix_memcmp_scan/kernel_handcraft result mismatch: 11069793953901449639 != 9377358970524074984",
+  "status": "error",
+  "total_benchmarks": 1
+}

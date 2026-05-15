@@ -527,6 +527,7 @@ def main(argv: list[str] | None = None) -> int:
     current_benchmark_name: str | None = None
     current_benchmark_index: int | None = None
     current_benchmark_record: dict[str, Any] | None = None
+    benchmark_errors: list[str] = []
 
     def build_artifact_metadata(
         status: str,
@@ -616,49 +617,42 @@ def main(argv: list[str] | None = None) -> int:
             print(f"[bench] ({bench_idx+1}/{len(benchmarks)}) {benchmark.name}", flush=True)
 
             runtime_samples: dict[str, dict[str, object]] = {}
-            for runtime in benchmark_runtimes:
-                inner_repeat = args.inner_repeat if args.inner_repeat is not None else runtime.default_inner_repeat
-                runtime_samples[runtime.name] = {
-                    "inner_repeat": inner_repeat,
-                    "samples": [],
-                }
-                warmup_command = build_runner_command(
-                    runner_binary=runner_binary,
-                    benchmark=benchmark,
-                    runtime=runtime,
-                    inner_repeat=inner_repeat,
-                    memory_file=memory_file,
-                    perf_counters=args.perf_counters,
-                    perf_scope=args.perf_scope,
-                    cpu=args.cpu,
-                )
-                for _ in range(max(0, warmups)):
-                    sample = run_single_sample(warmup_command, cwd=ROOT_DIR, artifact_dir=artifact_dir)
-                    if benchmark.expected_result is not None and sample.get("result") != benchmark.expected_result:
-                        raise RuntimeError(
-                            f"{benchmark.name}/{runtime.name} warmup result mismatch: "
-                            f"{sample.get('result')} != {benchmark.expected_result}"
-                        )
 
-            for sample_idx in range(samples):
-                if len(benchmark_runtimes) == 2:
-                    ordered = list(benchmark_runtimes) if sample_idx % 2 == 0 else list(reversed(benchmark_runtimes))
-                else:
-                    rng = random.Random(runtime_order_seed + sample_idx)
-                    ordered = list(benchmark_runtimes)
-                    rng.shuffle(ordered)
+            def append_runtime_records() -> None:
+                recorded = {run["runtime"] for run in benchmark_record["runs"]}
+                for runtime in benchmark_runtimes:
+                    if runtime.name in recorded:
+                        continue
+                    sample_entry = runtime_samples.get(runtime.name)
+                    if not sample_entry:
+                        continue
+                    run_samples = list(sample_entry["samples"])
+                    if not run_samples:
+                        continue
+                    inner_repeat = int(sample_entry["inner_repeat"])
+                    result_values = [sample["result"] for sample in run_samples]
+                    benchmark_record["runs"].append({
+                        "runtime": runtime.name,
+                        "mode": runtime.mode,
+                        "inner_repeat": inner_repeat,
+                        "samples": run_samples,
+                    })
+                    last_sample = run_samples[-1]
+                    print(
+                        f"  {runtime.name:10} "
+                        f"compile last {int(last_sample.get('compile_ns') or 0)} ns | "
+                        f"exec last {int(last_sample.get('exec_ns') or 0)} ns | "
+                        f"result {result_values[-1] if result_values else '?'}"
+                    )
 
-                for runtime in ordered:
-                    inner_repeat = int(runtime_samples[runtime.name]["inner_repeat"])
-                    dump_jit_path = None
-                    dump_xlated_path = None
-                    if runtime.mode in {"kernel", "kernel_rejit", "llvmbpf"}:
-                        dump_jit_path, dump_xlated_path = _jit_dump_paths(
-                            artifact_dir,
-                            _dump_stem(benchmark.name, runtime.name, sample_idx),
-                            xlated=runtime.mode in {"kernel", "kernel_rejit"},
-                        )
-                    command = build_runner_command(
+            try:
+                for runtime in benchmark_runtimes:
+                    inner_repeat = args.inner_repeat if args.inner_repeat is not None else runtime.default_inner_repeat
+                    runtime_samples[runtime.name] = {
+                        "inner_repeat": inner_repeat,
+                        "samples": [],
+                    }
+                    warmup_command = build_runner_command(
                         runner_binary=runner_binary,
                         benchmark=benchmark,
                         runtime=runtime,
@@ -667,42 +661,63 @@ def main(argv: list[str] | None = None) -> int:
                         perf_counters=args.perf_counters,
                         perf_scope=args.perf_scope,
                         cpu=args.cpu,
-                        dump_jit_path=dump_jit_path,
-                        dump_xlated_path=dump_xlated_path,
                     )
-                    sample = run_single_sample(command, cwd=ROOT_DIR, artifact_dir=artifact_dir)
-                    sample["sample_index"] = sample_idx
+                    for _ in range(max(0, warmups)):
+                        sample = run_single_sample(warmup_command, cwd=ROOT_DIR, artifact_dir=artifact_dir)
+                        if benchmark.expected_result is not None and sample.get("result") != benchmark.expected_result:
+                            raise RuntimeError(
+                                f"{benchmark.name}/{runtime.name} warmup result mismatch: "
+                                f"{sample.get('result')} != {benchmark.expected_result}"
+                            )
 
-                    if benchmark.expected_result is not None and sample.get("result") != benchmark.expected_result:
-                        raise RuntimeError(
-                            f"{benchmark.name}/{runtime.name} result mismatch: "
-                            f"{sample.get('result')} != {benchmark.expected_result}"
+                for sample_idx in range(samples):
+                    if len(benchmark_runtimes) == 2:
+                        ordered = list(benchmark_runtimes) if sample_idx % 2 == 0 else list(reversed(benchmark_runtimes))
+                    else:
+                        rng = random.Random(runtime_order_seed + sample_idx)
+                        ordered = list(benchmark_runtimes)
+                        rng.shuffle(ordered)
+
+                    for runtime in ordered:
+                        inner_repeat = int(runtime_samples[runtime.name]["inner_repeat"])
+                        dump_jit_path = None
+                        dump_xlated_path = None
+                        if runtime.mode in {"kernel", "kernel_rejit", "llvmbpf"}:
+                            dump_jit_path, dump_xlated_path = _jit_dump_paths(
+                                artifact_dir,
+                                _dump_stem(benchmark.name, runtime.name, sample_idx),
+                                xlated=runtime.mode in {"kernel", "kernel_rejit"},
+                            )
+                        command = build_runner_command(
+                            runner_binary=runner_binary,
+                            benchmark=benchmark,
+                            runtime=runtime,
+                            inner_repeat=inner_repeat,
+                            memory_file=memory_file,
+                            perf_counters=args.perf_counters,
+                            perf_scope=args.perf_scope,
+                            cpu=args.cpu,
+                            dump_jit_path=dump_jit_path,
+                            dump_xlated_path=dump_xlated_path,
                         )
+                        sample = run_single_sample(command, cwd=ROOT_DIR, artifact_dir=artifact_dir)
+                        sample["sample_index"] = sample_idx
 
-                    runtime_samples[runtime.name]["samples"].append(sample)
+                        if benchmark.expected_result is not None and sample.get("result") != benchmark.expected_result:
+                            raise RuntimeError(
+                                f"{benchmark.name}/{runtime.name} result mismatch: "
+                                f"{sample.get('result')} != {benchmark.expected_result}"
+                            )
 
-            for runtime in benchmark_runtimes:
-                sample_entry = runtime_samples[runtime.name]
-                run_samples = list(sample_entry["samples"])
-                inner_repeat = int(sample_entry["inner_repeat"])
-                result_values = [sample["result"] for sample in run_samples]
+                        runtime_samples[runtime.name]["samples"].append(sample)
 
-                run_record: dict[str, Any] = {
-                    "runtime": runtime.name,
-                    "mode": runtime.mode,
-                    "inner_repeat": inner_repeat,
-                    "samples": run_samples,
-                }
-                benchmark_record["runs"].append(run_record)
-
-                last_sample = run_samples[-1] if run_samples else {}
-                print(
-                    f"  {runtime.name:10} "
-                    f"compile last {int(last_sample.get('compile_ns') or 0)} ns | "
-                    f"exec last {int(last_sample.get('exec_ns') or 0)} ns | "
-                    f"result {result_values[-1] if result_values else '?'}"
-                )
+                append_runtime_records()
                 flush_artifact("running")
+            except Exception as exc:
+                append_runtime_records()
+                benchmark_record["error"] = str(exc)
+                benchmark_errors.append(f"{benchmark.name}: {exc}")
+                print(f"  error {exc}", flush=True)
 
             results["benchmarks"].append(benchmark_record)
             current_benchmark_record = None
@@ -712,6 +727,9 @@ def main(argv: list[str] | None = None) -> int:
             write_code_compare_markdown(benchmark, artifact_dir)
         current_benchmark_name = None
         current_benchmark_index = None
+        if benchmark_errors:
+            flush_artifact("error", error_message="; ".join(benchmark_errors))
+            return 1
         flush_artifact("completed")
     except Exception as exc:
         flush_artifact("error", error_message=str(exc))

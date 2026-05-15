@@ -19,7 +19,8 @@ bounds_check_merge:
   katran: {progs: 1, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
   otelcol-ebpf-profiler_profiling: {progs: 13, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
   tetragon_observer: {progs: 287, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
-  _total: {progs: 384, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
+  tracee_monitor: {progs: 158, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
+  _total: {progs: 542, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
 bulk_memory:
   bcc_set: {progs: 21, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
   bpftrace_set: {progs: 9, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
@@ -27,7 +28,8 @@ bulk_memory:
   katran: {progs: 1, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
   otelcol-ebpf-profiler_profiling: {progs: 13, applied: 1, matched: 1, skipped: 0, progs_with_apply: 1, progs_failed: 0}
   tetragon_observer: {progs: 287, applied: 171, matched: 171, skipped: 0, progs_with_apply: 81, progs_failed: 0}
-  _total: {progs: 384, applied: 178, matched: 178, skipped: 0, progs_with_apply: 88, progs_failed: 0}
+  tracee_monitor: {progs: 158, applied: 216, matched: 216, skipped: 0, progs_with_apply: 108, progs_failed: 0}
+  _total: {progs: 542, applied: 394, matched: 394, skipped: 0, progs_with_apply: 196, progs_failed: 0}
 ccmp:
   bcc_set: {progs: 21, applied: 0, matched: 21, skipped: 21, progs_with_apply: 0, progs_failed: 0}
   bpftrace_set: {progs: 9, applied: 0, matched: 9, skipped: 9, progs_with_apply: 0, progs_failed: 0}
@@ -35,7 +37,8 @@ ccmp:
   katran: {progs: 1, applied: 0, matched: 1, skipped: 1, progs_with_apply: 0, progs_failed: 0}
   otelcol-ebpf-profiler_profiling: {progs: 13, applied: 0, matched: 13, skipped: 13, progs_with_apply: 0, progs_failed: 0}
   tetragon_observer: {progs: 287, applied: 0, matched: 287, skipped: 287, progs_with_apply: 0, progs_failed: 0}
-  _total: {progs: 384, applied: 0, matched: 384, skipped: 384, progs_with_apply: 0, progs_failed: 0}
+  tracee_monitor: {progs: 158, applied: 0, matched: 158, skipped: 158, progs_with_apply: 0, progs_failed: 0}
+  _total: {progs: 542, applied: 0, matched: 542, skipped: 542, progs_with_apply: 0, progs_failed: 0}
 cond_select:
   bcc_set: {progs: 21, applied: 8, matched: 8, skipped: 0, progs_with_apply: 2, progs_failed: 0}
   bpftrace_set: {progs: 9, applied: 4, matched: 4, skipped: 0, progs_with_apply: 1, progs_failed: 0}
@@ -43,7 +46,8 @@ cond_select:
   katran: {progs: 1, applied: 7, matched: 7, skipped: 0, progs_with_apply: 1, progs_failed: 0}
   otelcol-ebpf-profiler_profiling: {progs: 13, applied: 45, matched: 47, skipped: 2, progs_with_apply: 8, progs_failed: 0}
   tetragon_observer: {progs: 287, applied: 1695, matched: 2003, skipped: 308, progs_with_apply: 171, progs_failed: 0}
-  _total: {progs: 384, applied: 1993, matched: 2313, skipped: 320, progs_with_apply: 227, progs_failed: 0}
+  tracee_monitor: {progs: 158, applied: 408, matched: 418, skipped: 10, progs_with_apply: 116, progs_failed: 0}
+  _total: {progs: 542, applied: 2401, matched: 2731, skipped: 330, progs_with_apply: 343, progs_failed: 0}
 const_prop:
   bcc_set: {progs: 21, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
   bpftrace_set: {progs: 9, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
@@ -51,7 +55,8 @@ const_prop:
   katran: {progs: 1, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
   otelcol-ebpf-profiler_profiling: {progs: 13, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
   tetragon_observer: {progs: 287, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
-  _total: {progs: 384, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
+  tracee_monitor: {progs: 158, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
+  _total: {progs: 542, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
 dce:
   bcc_set: {progs: 21, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
   bpftrace_set: {progs: 9, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
@@ -59,7 +64,8 @@ dce:
   katran: {progs: 1, applied: 5, matched: 5, skipped: 0, progs_with_apply: 1, progs_failed: 0}
   otelcol-ebpf-profiler_profiling: {progs: 13, applied: 19, matched: 19, skipped: 0, progs_with_apply: 2, progs_failed: 0}
   tetragon_observer: {progs: 287, applied: 245, matched: 245, skipped: 0, progs_with_apply: 122, progs_failed: 0}
-  _total: {progs: 384, applied: 580, matched: 580, skipped: 0, progs_with_apply: 157, progs_failed: 0}
+  tracee_monitor: {progs: 158, applied: 903, matched: 903, skipped: 0, progs_with_apply: 108, progs_failed: 0}
+  _total: {progs: 542, applied: 1483, matched: 1483, skipped: 0, progs_with_apply: 265, progs_failed: 0}
 endian_fusion:
   bcc_set: {progs: 21, applied: 1, matched: 1, skipped: 0, progs_with_apply: 1, progs_failed: 0}
   bpftrace_set: {progs: 9, applied: 1, matched: 1, skipped: 0, progs_with_apply: 1, progs_failed: 0}
@@ -67,7 +73,8 @@ endian_fusion:
   katran: {progs: 1, applied: 6, matched: 6, skipped: 0, progs_with_apply: 1, progs_failed: 0}
   otelcol-ebpf-profiler_profiling: {progs: 13, applied: 4, matched: 4, skipped: 0, progs_with_apply: 1, progs_failed: 0}
   tetragon_observer: {progs: 287, applied: 220, matched: 220, skipped: 0, progs_with_apply: 44, progs_failed: 0}
-  _total: {progs: 384, applied: 256, matched: 256, skipped: 0, progs_with_apply: 56, progs_failed: 0}
+  tracee_monitor: {progs: 158, applied: 4, matched: 4, skipped: 0, progs_with_apply: 2, progs_failed: 0}
+  _total: {progs: 542, applied: 260, matched: 260, skipped: 0, progs_with_apply: 58, progs_failed: 0}
 extract:
   bcc_set: {progs: 21, applied: 1, matched: 1, skipped: 0, progs_with_apply: 1, progs_failed: 0}
   bpftrace_set: {progs: 9, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
@@ -75,7 +82,8 @@ extract:
   katran: {progs: 1, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
   otelcol-ebpf-profiler_profiling: {progs: 13, applied: 36, matched: 36, skipped: 0, progs_with_apply: 1, progs_failed: 0}
   tetragon_observer: {progs: 287, applied: 114, matched: 114, skipped: 0, progs_with_apply: 79, progs_failed: 0}
-  _total: {progs: 384, applied: 151, matched: 151, skipped: 0, progs_with_apply: 81, progs_failed: 0}
+  tracee_monitor: {progs: 158, applied: 37, matched: 47, skipped: 10, progs_with_apply: 9, progs_failed: 0}
+  _total: {progs: 542, applied: 188, matched: 198, skipped: 10, progs_with_apply: 90, progs_failed: 0}
 lea:
   bcc_set: {progs: 21, applied: 106, matched: 106, skipped: 0, progs_with_apply: 21, progs_failed: 0}
   bpftrace_set: {progs: 9, applied: 74, matched: 74, skipped: 0, progs_with_apply: 9, progs_failed: 0}
@@ -83,7 +91,8 @@ lea:
   katran: {progs: 1, applied: 122, matched: 122, skipped: 0, progs_with_apply: 1, progs_failed: 0}
   otelcol-ebpf-profiler_profiling: {progs: 13, applied: 3136, matched: 3136, skipped: 0, progs_with_apply: 13, progs_failed: 0}
   tetragon_observer: {progs: 287, applied: 25883, matched: 25883, skipped: 0, progs_with_apply: 287, progs_failed: 0}
-  _total: {progs: 384, applied: 31481, matched: 31481, skipped: 0, progs_with_apply: 381, progs_failed: 0}
+  tracee_monitor: {progs: 158, applied: 38583, matched: 38583, skipped: 0, progs_with_apply: 157, progs_failed: 0}
+  _total: {progs: 542, applied: 70064, matched: 70064, skipped: 0, progs_with_apply: 538, progs_failed: 0}
 noop:
   bcc_set: {progs: 21, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
   bpftrace_set: {progs: 9, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
@@ -91,7 +100,8 @@ noop:
   katran: {progs: 1, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
   otelcol-ebpf-profiler_profiling: {progs: 13, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
   tetragon_observer: {progs: 287, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
-  _total: {progs: 384, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
+  tracee_monitor: {progs: 158, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
+  _total: {progs: 542, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
 prefetch:
   bcc_set: {progs: 21, applied: 3, matched: 3, skipped: 0, progs_with_apply: 3, progs_failed: 0}
   bpftrace_set: {progs: 9, applied: 9, matched: 9, skipped: 0, progs_with_apply: 5, progs_failed: 0}
@@ -99,7 +109,8 @@ prefetch:
   katran: {progs: 1, applied: 38, matched: 38, skipped: 0, progs_with_apply: 1, progs_failed: 0}
   otelcol-ebpf-profiler_profiling: {progs: 13, applied: 415, matched: 415, skipped: 0, progs_with_apply: 13, progs_failed: 0}
   tetragon_observer: {progs: 287, applied: 1526, matched: 1526, skipped: 0, progs_with_apply: 285, progs_failed: 0}
-  _total: {progs: 384, applied: 2381, matched: 2383, skipped: 2, progs_with_apply: 355, progs_failed: 0}
+  tracee_monitor: {progs: 158, applied: 1770, matched: 1770, skipped: 0, progs_with_apply: 128, progs_failed: 0}
+  _total: {progs: 542, applied: 4151, matched: 4153, skipped: 2, progs_with_apply: 483, progs_failed: 0}
 rotate:
   bcc_set: {progs: 21, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
   bpftrace_set: {progs: 9, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
@@ -107,7 +118,8 @@ rotate:
   katran: {progs: 1, applied: 20, matched: 20, skipped: 0, progs_with_apply: 1, progs_failed: 0}
   otelcol-ebpf-profiler_profiling: {progs: 13, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
   tetragon_observer: {progs: 287, applied: 44, matched: 44, skipped: 0, progs_with_apply: 44, progs_failed: 0}
-  _total: {progs: 384, applied: 64, matched: 64, skipped: 0, progs_with_apply: 45, progs_failed: 0}
+  tracee_monitor: {progs: 158, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
+  _total: {progs: 542, applied: 64, matched: 64, skipped: 0, progs_with_apply: 45, progs_failed: 0}
 skb_load_bytes_spec:
   bcc_set: {progs: 21, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
   bpftrace_set: {progs: 9, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
@@ -115,7 +127,8 @@ skb_load_bytes_spec:
   katran: {progs: 1, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
   otelcol-ebpf-profiler_profiling: {progs: 13, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
   tetragon_observer: {progs: 287, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
-  _total: {progs: 384, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
+  tracee_monitor: {progs: 158, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
+  _total: {progs: 542, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
 wide_mem:
   bcc_set: {progs: 21, applied: 0, matched: 0, skipped: 0, progs_with_apply: 0, progs_failed: 0}
   bpftrace_set: {progs: 9, applied: 10, matched: 18, skipped: 8, progs_with_apply: 2, progs_failed: 0}
@@ -123,4 +136,5 @@ wide_mem:
   katran: {progs: 1, applied: 4, matched: 4, skipped: 0, progs_with_apply: 1, progs_failed: 0}
   otelcol-ebpf-profiler_profiling: {progs: 13, applied: 132, matched: 137, skipped: 5, progs_with_apply: 1, progs_failed: 0}
   tetragon_observer: {progs: 287, applied: 2951, matched: 2951, skipped: 0, progs_with_apply: 236, progs_failed: 0}
-  _total: {progs: 384, applied: 3097, matched: 3110, skipped: 13, progs_with_apply: 240, progs_failed: 0}
+  tracee_monitor: {progs: 158, applied: 179, matched: 229, skipped: 50, progs_with_apply: 7, progs_failed: 0}
+  _total: {progs: 542, applied: 3276, matched: 3339, skipped: 63, progs_with_apply: 247, progs_failed: 0}
