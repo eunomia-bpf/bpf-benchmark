@@ -863,6 +863,12 @@ const handcraft_kinsn_desc &handcraft_kinsn_desc_for_selector(int selector)
         {MICRO_HANDCRAFT_BPF_X86_ANDL_IMM32, "bpf_x86_alu_imm", "bpf_x86_andl_imm32"},
         {MICRO_HANDCRAFT_BPF_X86_TESTQ_RR, "bpf_x86_cmov", "bpf_x86_testq_rr"},
         {MICRO_HANDCRAFT_BPF_X86_CMOVNEQ_RR, "bpf_x86_cmov", "bpf_x86_cmovneq_rr"},
+        {MICRO_HANDCRAFT_BPF_X86_CMOVEQ_RR, "bpf_x86_cmov", "bpf_x86_cmoveq_rr"},
+        {MICRO_HANDCRAFT_BPF_X86_LEAQ, "bpf_x86_lea", "bpf_x86_leaq"},
+        {MICRO_HANDCRAFT_BPF_X86_LEAL, "bpf_x86_lea", "bpf_x86_leal"},
+        {MICRO_HANDCRAFT_BPF_X86_MOVZWL_SIB, "bpf_x86_mov_sib", "bpf_x86_movzwl_sib"},
+        {MICRO_HANDCRAFT_BPF_X86_MOVL_SIB, "bpf_x86_mov_sib", "bpf_x86_movl_sib"},
+        {MICRO_HANDCRAFT_BPF_X86_MOVQ_SIB, "bpf_x86_mov_sib", "bpf_x86_movq_sib"},
     };
 
     for (const auto &desc : descriptors) {
@@ -1048,9 +1054,13 @@ handcraft_load_result load_handcraft_program(const cli_options &options)
     }
 
     bpf_prog_load_opts opts = {};
+    std::vector<char> verifier_log(1 << 20);
     opts.sz = sizeof(opts);
     opts.fd_array = fd_array.data();
     opts.fd_array_cnt = static_cast<__u32>(fd_array.size());
+    opts.log_level = 2;
+    opts.log_buf = verifier_log.data();
+    opts.log_size = static_cast<__u32>(verifier_log.size());
 
     const int program_fd = bpf_prog_load(
         BPF_PROG_TYPE_XDP,
@@ -1060,7 +1070,8 @@ handcraft_load_result load_handcraft_program(const cli_options &options)
         image.insns.size(),
         &opts);
     if (program_fd < 0) {
-        fail("bpf_prog_load(handcraft) failed: " + libbpf_error_string(program_fd));
+        fail("bpf_prog_load(handcraft) failed: " + libbpf_error_string(program_fd) +
+             "\n" + verifier_log.data());
     }
     result.program_fd.reset(program_fd);
     result.load_end = std::chrono::steady_clock::now();

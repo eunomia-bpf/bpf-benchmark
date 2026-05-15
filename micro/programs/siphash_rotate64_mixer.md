@@ -460,7 +460,7 @@ Disassembly of section .fini:
 ## Original Kernel JIT ASM
 ```asm
 
-/home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_033620_169457/details/jit_dumps/siphash_rotate64_mixer__kernel__sample00.jited.bin:     file format binary
+/home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_035605_663154/details/jit_dumps/siphash_rotate64_mixer__kernel__sample00.jited.bin:     file format binary
 
 
 Disassembly of section .data:
@@ -1480,7 +1480,7 @@ Disassembly of section .data:
 ## llvmbpf JIT ASM
 ```asm
 
-/home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_033620_169457/details/jit_dumps/siphash_rotate64_mixer__llvmbpf__sample00.jited.bin:     file format binary
+/home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260515_035605_663154/details/jit_dumps/siphash_rotate64_mixer__llvmbpf__sample00.jited.bin:     file format binary
 
 
 Disassembly of section .data:

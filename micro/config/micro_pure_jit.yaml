@@ -257,7 +257,7 @@ benchmarks:
     native_baseline: siphash_rotate64_mixer
     kernel_input_size: 64
     input_generator: siphash_rotate64_mixer
-    expected_result: 4934070464779147397
+    expected_result: 2666935177028490406
     tags: [compute, rotate, hash, handcraft-kinsn, x86]
 
   - name: packet_record_bounds_window
