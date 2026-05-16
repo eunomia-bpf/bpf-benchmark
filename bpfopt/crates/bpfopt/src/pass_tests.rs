@@ -118,7 +118,7 @@ fn remap_btf_metadata_drops_deleted_entries_and_shifts_survivors() {
 fn kinsn_registry_rejects_duplicate_call_keys_for_different_targets() {
     let mut registry = KinsnRegistry::default();
     registry
-        .set_kinsn_call_for_target_name("bpf_x86_rolq_imm", 1234, 0)
+        .set_kinsn_call_for_target_name("bpf_x86_rolq", 1234, 0)
         .unwrap();
 
     let err = registry
@@ -133,7 +133,7 @@ fn kinsn_registry_rejects_negative_btf_id() {
     let mut registry = KinsnRegistry::default();
 
     let err = registry
-        .set_kinsn_call_for_target_name("bpf_x86_rolq_imm", -1, 0)
+        .set_kinsn_call_for_target_name("bpf_x86_rolq", -1, 0)
         .unwrap_err();
 
     assert!(err.to_string().contains("negative btf_id"));
@@ -143,15 +143,15 @@ fn kinsn_registry_rejects_negative_btf_id() {
 fn kinsn_registry_replaces_old_call_key_when_target_moves() {
     let mut registry = KinsnRegistry::default();
     registry
-        .set_kinsn_call_for_target_name("bpf_x86_rolq_imm", 1234, 0)
+        .set_kinsn_call_for_target_name("bpf_x86_rolq", 1234, 0)
         .unwrap();
     registry
-        .set_kinsn_call_for_target_name("bpf_x86_rolq_imm", 5678, 3)
+        .set_kinsn_call_for_target_name("bpf_x86_rolq", 5678, 3)
         .unwrap();
 
     assert!(registry.lookup_by_kinsn_call(1234, 0).is_err());
     assert_eq!(
         registry.lookup_by_kinsn_call(5678, 3).unwrap().name,
-        "bpf_x86_rolq_imm"
+        "bpf_x86_rolq"
     );
 }

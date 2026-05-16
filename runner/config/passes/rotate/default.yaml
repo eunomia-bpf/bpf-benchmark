@@ -4,8 +4,8 @@
 log_level: 1
 kinsns:
   - name: bpf_x86_movq_rr
-  - name: bpf_x86_rolq_imm
-  - name: bpf_x86_rorxl_imm
+  - name: bpf_x86_rolq
+  - name: bpf_x86_rorxl
   - name: bpf_arm64_extr_x
   - name: bpf_arm64_extr_w
 command: |

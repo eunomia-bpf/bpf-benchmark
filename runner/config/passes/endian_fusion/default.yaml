@@ -6,7 +6,7 @@ kinsns:
   - name: bpf_x86_movzwl_mem
   - name: bpf_x86_movl_mem
   - name: bpf_x86_movq_mem
-  - name: bpf_x86_rolw_imm
+  - name: bpf_x86_rolw
   - name: bpf_x86_bswapl
   - name: bpf_x86_bswapq
   - name: bpf_arm64_ldrh_mem

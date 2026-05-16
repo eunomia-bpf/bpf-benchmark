@@ -133,8 +133,10 @@ These are implementation requirements for the handcraft/native-parity path:
   shadow state for verification and physical x86 flags for final native
   execution.
 - Unit tests should check encoded ABI/layout or real selector behavior. Tests
-  that only exercise aliases or tautological name mappings should be removed or
-  replaced by bug-detection tests.
+  that only exercise compatibility names or tautological name mappings should
+  be removed or replaced by bug-detection tests. Register-overlap bugs such as
+  `dst == condition` belong in the main machine-kinsn suite as real
+  instruction-sequence tests, not in standalone compatibility binaries.
 
 ## Hidden Register Users
 
@@ -244,22 +246,16 @@ Current x86 kinsns that are redundant for normal pass output:
 
 | Current kinsn | Existing BPF equivalent | Recommendation |
 |---|---|---|
-| `bpf_x86_movq_rr` | `BPF_MOV64_REG` emits `mov dst, src` | Do not use in passes. Use normal BPF move. |
-| `bpf_x86_movl_rr` | `BPF_MOV32_REG` emits `mov32 dst, src` | Do not use in passes. |
+| `bpf_x86_movq` with rr payload | `BPF_MOV64_REG` emits `mov dst, src` | Do not use in passes. Use normal BPF move. |
+| `bpf_x86_movl` with rr payload | `BPF_MOV32_REG` emits `mov32 dst, src` | Do not use in passes. |
 | `bpf_x86_movswl` | BPF sign-extending `MOV` form emits `movsx` | Usually unnecessary for pass output. |
 | `bpf_x86_shrq_imm` | `BPF_ALU64 RSH K` emits `shr dst, imm` | Redundant for x86 `extract`; keep BPF. |
 | `bpf_x86_andl_imm32` | `BPF_ALU AND K` can emit 32-bit `and dst, imm` | Redundant for x86 `extract`; keep BPF when semantics match. |
 | `bpf_x86_xorl_rr` | `BPF_ALU XOR X` emits `xor dst, src` | Redundant unless strict flag/native-reg simulation needs a kinsn. |
 | `bpf_x86_imulq` | `BPF_ALU64 MUL X` emits `imul dst, src` | Redundant for BPF-safe regs; only handcraft strict mode may need it. |
-| `bpf_x86_movzbl_mem` | `BPF_LDX MEM B` emits `movzx byte [base+off]` | Redundant; use ordinary BPF load. |
-| `bpf_x86_movzwl_mem` | `BPF_LDX MEM H` emits `movzx word [base+off]` | Redundant; use ordinary BPF load. |
-| `bpf_x86_movl_mem` | `BPF_LDX MEM W` emits `mov dword [base+off]` | Redundant; use ordinary BPF load. |
-| `bpf_x86_movq_mem` | `BPF_LDX MEM DW` emits `mov qword [base+off]` | Redundant; use ordinary BPF load. |
-| `bpf_x86_movb_mem_reg` | `BPF_STX MEM B` emits `mov byte [base+off], src` | Redundant; use ordinary BPF store. |
-| `bpf_x86_movw_mem_reg` | `BPF_STX MEM H` emits `mov word [base+off], src` | Redundant; use ordinary BPF store. |
-| `bpf_x86_movl_mem_reg` | `BPF_STX MEM W` emits `mov dword [base+off], src` | Redundant; use ordinary BPF store. |
-| `bpf_x86_movq_mem_reg` | `BPF_STX MEM DW` emits `mov qword [base+off], src` | Redundant; use ordinary BPF store. |
-| `bpf_x86_movb_imm_mem` | `BPF_ST MEM B` emits `mov byte [base+off], imm` | Redundant; use ordinary BPF store. |
+| `bpf_x86_movzbl` / `movzwl` / `movl` / `movq` with direct-memory payload | `BPF_LDX MEM` emits the same direct load when base/disp are verifier-safe | Redundant; use ordinary BPF load unless strict native register parity is required. |
+| `bpf_x86_movb` / `movw` / `movl` / `movq` with store payload | `BPF_STX MEM` emits the same direct store when base/disp are verifier-safe | Redundant; use ordinary BPF store unless strict native register parity is required. |
+| `bpf_x86_movb` with immediate-store payload | `BPF_ST MEM B` emits `mov byte [base+off], imm` | Redundant; use ordinary BPF store. |
 | `bpf_x86_bswapl` | `BPF_END FROM_BE 32` emits `bswap dst32` | Redundant in normal passes. |
 | `bpf_x86_bswapq` | `BPF_END FROM_BE 64` emits `bswap dst64` | Redundant in normal passes. |
 
@@ -272,8 +268,8 @@ because they exist:
 | `bpf_x86_addb`, `bpf_x86_andb`, `bpf_x86_xorb_imm`, `bpf_x86_xorb_rr`, `bpf_x86_orb` | BPF ALU is 32/64-bit, not low-byte ALU. Needed only when the native instruction is really byte-width and byte-width flags/result matter. |
 | `bpf_x86_incq` | BPF can implement `+1` as `add`, but `inc` differs in flag behavior (`CF` unchanged). Needed only when native flags parity matters. |
 | `bpf_x86_not*` | BPF can compute bitwise-not with `xor -1`, but that is not the same machine instruction. Keep for strict native parity, not for ordinary semantic rewrites. |
-| `bpf_x86_movzbl_rr`, `bpf_x86_movzwl_rr` | Same-reg zero-extension has BPF endian/ALU alternatives; cross-reg low-byte/low-word extraction may still need explicit kinsn if exact `movzx` matters. |
-| `bpf_x86_alu_mem` forms like `addl_mem`, `xorl_mem`, `xorw_mem` | BPF has no ALU-with-memory operand, but semantic BPF can load then ALU. Use only for native 1:1 parity. |
+| `bpf_x86_movzbl`, `bpf_x86_movzwl` with rr payload | Same-reg zero-extension has BPF endian/ALU alternatives; cross-reg low-byte/low-word extraction may still need explicit kinsn if exact `movzx` matters. |
+| memory-source forms on `bpf_x86_addl`, `bpf_x86_xorl`, `bpf_x86_xorw`, `bpf_x86_xorb` | BPF has no ALU-with-memory operand, but semantic BPF can load then ALU. Use only for native 1:1 parity, with the operand form carried in payload. |
 
 Current x86 kinsns that are genuinely needed for native-shape coverage:
 
@@ -294,7 +290,7 @@ Current x86 kinsns that are genuinely needed for native-shape coverage:
 
 Pass-level implication:
 
-- `cond_select`: keep `test/cmov` kinsns; the surrounding `movq_rr` kinsns are
+- `cond_select`: keep `test/cmov` kinsns; the surrounding `movq rr-payload` kinsns are
   unnecessary because ordinary BPF `MOV64_REG` emits `mov` and does not clobber
   flags.
 - `extract` on x86: current `shrq_imm + andl_imm32` kinsn lowering is likely
@@ -314,51 +310,36 @@ ordinary BPF already emits. To avoid this, classify every candidate first:
 
 | Class | Meaning | Normal pass policy | Kernel/module policy |
 |---|---|---|---|
-| BPF exact alias | One existing BPF instruction already expresses the operation, and the x86 JIT emits the same instruction shape | Emit ordinary BPF directly | Do not add new native `emit_x86`; optional compatibility alias only |
+| Ordinary-BPF exact form | One existing BPF instruction already expresses the operation, and the x86 JIT emits the same instruction shape | Emit ordinary BPF directly | Do not add a kinsn |
 | Semantic BPF expansion | BPF can prove the semantics but needs multiple BPF instructions or emits a different x86 instruction | Use ordinary BPF when native shape does not matter | kinsn only for strict handcraft/native parity |
 | Machine-only | BPF cannot express the native instruction shape or hidden state | Emit kinsn | Must have verifier proof plus native emit |
 
-Examples of BPF exact aliases:
+Examples of ordinary-BPF exact forms:
 
 | Candidate x86 kinsn | Canonical BPF |
 |---|---|
-| `bpf_x86_movq_rr` | `BPF_MOV64_REG(dst, src)` |
-| `bpf_x86_movl_rr` | `BPF_MOV32_REG(dst, src)` |
+| `bpf_x86_movq` with rr payload | `BPF_MOV64_REG(dst, src)` |
+| `bpf_x86_movl` with rr payload | `BPF_MOV32_REG(dst, src)` |
 | `bpf_x86_mov{zbl,zwl,l,q}_mem` | `BPF_LDX_MEM(B/H/W/DW, dst, base, off)` |
 | `bpf_x86_mov{b,w,l,q}_mem_reg` | `BPF_STX_MEM(B/H/W/DW, base, src, off)` |
-| `bpf_x86_movb_imm_mem` | `BPF_ST_MEM(B, base, off, imm)` |
+| `bpf_x86_movb` with immediate-store payload | `BPF_ST_MEM(B, base, off, imm)` |
 | `bpf_x86_shrq_imm` | `BPF_ALU64_IMM(BPF_RSH, dst, imm)` |
 | `bpf_x86_andl_imm32` | `BPF_ALU32_IMM(BPF_AND, dst, imm)` |
 | `bpf_x86_imulq` | `BPF_ALU64_REG(BPF_MUL, dst, src)` |
 | `bpf_x86_bswapl/q` | `BPF_END FROM_BE 32/64` |
 
-These aliases are useful as documentation and optional backward compatibility,
-but normal passes should not generate them. They should generate the canonical
-BPF instruction directly.
+These forms are not kinsns. Normal passes and the handcraft converter should
+emit the canonical BPF instruction directly when exact native shape is already
+provided by the ordinary x86 BPF JIT.
 
-### Proof-only Forwarding
-
-If an existing kinsn descriptor has `instantiate_insn()` but no `emit_x86()`:
-
-1. The verifier temporarily lowers sidecar+call to the BPF proof sequence.
-2. After proof succeeds, the original kinsn region is restored.
-3. During misc fixups, if the program is JITed but the kinsn has no native emit,
-   the sidecar+call is permanently replaced with the BPF proof sequence.
-4. The ordinary BPF JIT emits final x86 for that BPF sequence.
-
-That makes proof-only forwarding possible for compatibility aliases. However,
-it still requires BTF/kfunc discovery to find the descriptor and call
-`instantiate_insn()`. If compatibility is not needed, the better solution is for
-user space to emit canonical BPF directly and avoid the alias kinsn entirely.
-
-### Where the Alias Table Belongs
+### Where the Equivalence Table Belongs
 
 The BPF-to-x86 equivalence table belongs in user-space selection logic:
 
 - bpfopt passes use it to decide "ordinary BPF or kinsn";
 - the native-asm-to-handcraft converter uses it to decide whether an x86
   instruction can be represented by canonical BPF;
-- tests can assert that exact aliases are not emitted by normal passes.
+- tests can assert that redundant kinsns are not emitted by normal passes.
 
 Putting this policy in the kernel module would duplicate the x86 BPF JIT's
 instruction selector. It also grows the BTF name surface for no performance or
@@ -375,7 +356,7 @@ is represented as a separate kfunc:
 - daemon/bpfopt must maintain a large name-to-BTF-id table.
 - rename or module split becomes a compatibility issue.
 - descriptors, reg use/def metadata, tests, and discovery paths grow with every
-  alias, including aliases that should have been plain BPF.
+  redundant kinsn that should have been plain BPF.
 
 If the project ever wants a full machine-kinsn IR, the better long-term core
 shape is a numeric opcode/descriptor registry rather than BTF-per-kfunc as the
@@ -391,49 +372,18 @@ primary identity:
 For normal bpfopt, avoid the full-machine-IR route unless the instruction is
 machine-only. For handcraft/native parity, a full machine-kinsn IR can be useful
 as a research/control mode, but it should not make normal passes emit redundant
-aliases.
-
-## Alias Macro Shape
-
-A small module-side macro layer can help document and prevent duplication, but
-it should be restricted to BPF exact aliases.
-
-The intended abstraction is "BPF-alias kinsn":
-
-- verifier proof is exactly one existing BPF instruction;
-- descriptor has no native `emit_x86`;
-- final JIT goes through the ordinary BPF JIT after fixup;
-- the alias is marked compatibility/documentation-only, not a normal pass
-  target.
-
-The macro should be kind-specific, not a universal kinsn macro, because payload
-schemas differ by instruction class.
-
-Possible alias macro families:
-
-```text
-DEFINE_ALIAS_RR(name, bpf_class, bpf_op)
-DEFINE_ALIAS_UNARY_END(name, bits)
-DEFINE_ALIAS_REG_IMM(name, bpf_class, bpf_op)
-DEFINE_ALIAS_LDX(name, size)
-DEFINE_ALIAS_STX(name, size)
-DEFINE_ALIAS_ST_IMM(name, size)
-```
-
-These macros would generate the kfunc stub, BTF id entry, `instantiate_insn()`,
-and a descriptor with no native emit. They should not be used for real
-machine-only kinsns.
+kinsns.
 
 ### Why Payload Schemas Differ
 
 The difference is not just field order. The payload determines decoding,
 validation, verifier proof, liveness, and native encoding.
 
-| Schema | Payload | BPF alias? | Reason |
+| Schema | Payload | Ordinary-BPF exact? | Reason |
 |---|---|---|---|
 | RR | `dst, src` | Yes for simple BPF regs | Maps to `MOV`, `MUL`, `XOR`, etc. But if operands may be shadow native regs, payload also needs `tmp`, and proof is no longer one BPF insn. |
-| Unary reg | `reg` | Sometimes | `bswapl/q` aliases to `BPF_END`; `not` and `popcnt` do not. |
-| Reg+imm | `dst, imm` | Sometimes | `shr imm` and `andl imm32` alias; `inc` is not exact because `inc` preserves CF while `add 1` changes CF; byte ops are partial-register operations. |
+| Unary reg | `reg` | Sometimes | `bswapl/q` map to `BPF_END`; `not` and `popcnt` do not. |
+| Reg+imm | `dst, imm` | Sometimes | `shr imm` and `andl imm32` map directly; `inc` is not exact because `inc` preserves CF while `add 1` changes CF; byte ops are partial-register operations. |
 | Base+disp load | `dst, base, off` | Yes | Maps to `BPF_LDX_MEM`; liveness is use `base`, def `dst`. |
 | Base+disp store | `src, base, off` | Yes | Maps to `BPF_STX_MEM`; liveness is use `base,src`, no def. |
 | SIB memory | `dst/base/index/scale/off/tmp...` | No | BPF has no `[base + index * scale + disp]`; proof must compute address in a temp. |
@@ -441,13 +391,9 @@ validation, verifier proof, liveness, and native encoding.
 | Flags producer/consumer | operands plus stack-flag slots and operand-form tags | No | BPF has no architectural flags. `cmp/test` define flags; `cmov/setcc/sbb` consume flags. The selector names the x86 instruction, while the payload carries the operand form. |
 | Shadow reg operand | operand plus temp/shadow slot | No | Verifier proof must load/store stack shadow for native-only regs. |
 
-So the rule for the one-line alias macro is strict:
-
-> Only use it when the verifier proof is exactly one ordinary BPF instruction
-> and no hidden machine state is involved.
-
-Everything else remains a real machine kinsn with explicit payload schema and
-proof code.
+The rule is strict: if an instruction is already an ordinary-BPF exact form,
+emit ordinary BPF. Everything else that matters for strict native parity remains
+a real machine kinsn with explicit payload schema and proof code.
 
 ## Micro Native Register Pressure
 

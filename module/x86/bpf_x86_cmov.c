@@ -1031,7 +1031,7 @@ const struct bpf_kinsn bpf_x86_cmpq_desc = {
 const struct bpf_kinsn bpf_x86_cmpl_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 12 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
-	.max_emit_bytes = 4,
+	.max_emit_bytes = 8,
 	.instantiate_insn = instantiate_cmpl,
 	.emit_x86 = emit_cmpl_x86,
 };

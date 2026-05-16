@@ -156,11 +156,11 @@ static const struct bpf_insn program[] = {
     /* 0x1120: mov    WORD PTR [rcx],0x614e [bpf-jit: immediate memory store] */
     HC_ST(BPF_H, BPF_REG_4, 0, 24910),
     /* 0x1125: mov    BYTE PTR [rcx+0x2],0xbc [exact-kinsn: movb immediate memory store via x86 kinsn selector] */
-    HC_KINSN(HC_STORE_IMM_PAYLOAD(BPF_REG_4, 2, 188), MICRO_HANDCRAFT_BPF_X86_MOVB_IMM_MEM),
+    HC_KINSN(HC_X86_STORE_IMM_PAYLOAD(BPF_REG_4, 2, 188), MICRO_HANDCRAFT_BPF_X86_MOVB),
     /* 0x1129: mov    DWORD PTR [rcx+0x3],0x0 [bpf-jit: immediate memory store] */
     HC_ST(BPF_W, BPF_REG_4, 3, 0),
     /* 0x1130: mov    BYTE PTR [rcx+0x7],0x0 [exact-kinsn: movb immediate memory store via x86 kinsn selector] */
-    HC_KINSN(HC_STORE_IMM_PAYLOAD(BPF_REG_4, 7, 0), MICRO_HANDCRAFT_BPF_X86_MOVB_IMM_MEM),
+    HC_KINSN(HC_X86_STORE_IMM_PAYLOAD(BPF_REG_4, 7, 0), MICRO_HANDCRAFT_BPF_X86_MOVB),
     /* 0x1134: mov    eax,0x2 [bpf-jit: 32-bit immediate move] */
     HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_0, 0, 0, 2),
     /* 0x1139: ret [bpf-jit: BPF exit; kernel JIT emits the real return sequence] */

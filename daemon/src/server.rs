@@ -502,14 +502,14 @@ mod tests {
                 ],
             }],
             "kinsn_probes": [
-                {"name": "bpf_x86_rolq_imm"},
-                {"name": "bpf_x86_testq_rr"},
+                {"name": "bpf_x86_rolq"},
+                {"name": "bpf_x86_testq"},
             ],
         }))
         .unwrap();
         assert_eq!(parsed.kinsn_probes.len(), 2);
-        assert_eq!(parsed.kinsn_probes[0].name, "bpf_x86_rolq_imm");
-        assert_eq!(parsed.kinsn_probes[1].name, "bpf_x86_testq_rr");
+        assert_eq!(parsed.kinsn_probes[0].name, "bpf_x86_rolq");
+        assert_eq!(parsed.kinsn_probes[1].name, "bpf_x86_testq");
         assert_eq!(parsed.plans[0].steps[0].name, "noop");
         assert_eq!(parsed.plans[0].steps[0].log_level, 2);
     }
@@ -519,7 +519,7 @@ mod tests {
         let err = parse_execute_plan(&serde_json::json!({
             "cmd": "execute_plan",
             "programs": [],
-            "kinsn_probes": [{"name": "bpf_x86_rolq_imm", "aliases": []}],
+            "kinsn_probes": [{"name": "bpf_x86_rolq", "aliases": []}],
         }))
         .unwrap_err();
         assert_eq!(

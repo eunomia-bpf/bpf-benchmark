@@ -6,20 +6,21 @@
 #include "kinsn_x86_emit.h"
 
 __bpf_kfunc_start_defs();
-__bpf_kfunc void bpf_x86_roll_cl(void) {}
-__bpf_kfunc void bpf_x86_roll_imm(void) {}
-__bpf_kfunc void bpf_x86_rolq_cl(void) {}
-__bpf_kfunc void bpf_x86_rolq_imm(void) {}
+__bpf_kfunc void bpf_x86_roll(void) {}
+__bpf_kfunc void bpf_x86_rolq(void) {}
 __bpf_kfunc void bpf_x86_rorxl(void) {}
 __bpf_kfunc_end_defs();
 
 BTF_KFUNCS_START(bpf_x86_rotate_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_x86_roll_cl)
-BTF_ID_FLAGS(func, bpf_x86_roll_imm)
-BTF_ID_FLAGS(func, bpf_x86_rolq_cl)
-BTF_ID_FLAGS(func, bpf_x86_rolq_imm)
+BTF_ID_FLAGS(func, bpf_x86_roll)
+BTF_ID_FLAGS(func, bpf_x86_rolq)
 BTF_ID_FLAGS(func, bpf_x86_rorxl)
 BTF_KFUNCS_END(bpf_x86_rotate_kfunc_ids)
+
+enum x86_rotate_form {
+	X86_ROTATE_FORM_RR = 1,
+	X86_ROTATE_FORM_IMM = 2,
+};
 
 struct rotate_payload {
 	u8 dst_reg;
@@ -27,14 +28,21 @@ struct rotate_payload {
 	u8 shift;
 };
 
+static __always_inline u8 rotate_payload_form(u64 payload)
+{
+	return kinsn_payload_decode(payload) & 0xf;
+}
+
 static __always_inline int decode_rotate_payload(u64 payload, u8 shift_mask,
 						 struct rotate_payload *rot)
 {
 	payload = kinsn_payload_decode(payload);
-	rot->shift = ((payload >> 8) & 0xff) & shift_mask;
-	rot->dst_reg = payload & 0xf;
-	rot->src_reg = (payload >> 4) & 0xf;
-	if (payload >> 16)
+	if ((payload & 0xf) != X86_ROTATE_FORM_IMM)
+		return -EINVAL;
+	rot->dst_reg = (payload >> 4) & 0xf;
+	rot->src_reg = (payload >> 8) & 0xf;
+	rot->shift = ((payload >> 12) & 0xff) & shift_mask;
+	if (payload >> 20)
 		return -EINVAL;
 	if (!kinsn_x86_operand_valid(rot->dst_reg) ||
 	    !kinsn_x86_operand_valid(rot->src_reg))
@@ -80,10 +88,13 @@ static __always_inline int decode_rotate_cl_payload(u64 payload,
 						    u8 *dst_reg,
 						    u8 *cnt_reg)
 {
-	*dst_reg = kinsn_payload_reg(payload, 0);
-	*cnt_reg = kinsn_payload_reg(payload, 4);
+	payload = kinsn_payload_decode(payload);
+	if ((payload & 0xf) != X86_ROTATE_FORM_RR)
+		return -EINVAL;
+	*dst_reg = (payload >> 4) & 0xf;
+	*cnt_reg = (payload >> 8) & 0xf;
 
-	if (payload >> 8)
+	if (payload >> 12)
 		return -EINVAL;
 	if (*cnt_reg != BPF_REG_4)
 		return -EINVAL;
@@ -157,6 +168,33 @@ static int instantiate_rotate64(u64 payload, struct bpf_insn *insn_buf)
 static int instantiate_rotate32(u64 payload, struct bpf_insn *insn_buf)
 {
 	return instantiate_rotate(payload, insn_buf, 32);
+}
+
+static int instantiate_rolq_cl(u64 payload, struct bpf_insn *insn_buf);
+static int instantiate_roll_cl(u64 payload, struct bpf_insn *insn_buf);
+
+static int instantiate_rolq(u64 payload, struct bpf_insn *insn_buf)
+{
+	switch (rotate_payload_form(payload)) {
+	case X86_ROTATE_FORM_IMM:
+		return instantiate_rotate64(payload, insn_buf);
+	case X86_ROTATE_FORM_RR:
+		return instantiate_rolq_cl(payload, insn_buf);
+	default:
+		return -EINVAL;
+	}
+}
+
+static int instantiate_roll(u64 payload, struct bpf_insn *insn_buf)
+{
+	switch (rotate_payload_form(payload)) {
+	case X86_ROTATE_FORM_IMM:
+		return instantiate_rotate32(payload, insn_buf);
+	case X86_ROTATE_FORM_RR:
+		return instantiate_roll_cl(payload, insn_buf);
+	default:
+		return -EINVAL;
+	}
 }
 
 static int instantiate_rolq_cl(u64 payload, struct bpf_insn *insn_buf)
@@ -367,36 +405,46 @@ static int emit_roll_cl_x86(u8 *image, u32 *off, bool emit,
 	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
-const struct bpf_kinsn bpf_x86_rolq_imm_desc = {
-	.owner = THIS_MODULE,
-	.max_insn_cnt = 10 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
-	.max_emit_bytes = 16,
-	.instantiate_insn = instantiate_rotate64,
-	.emit_x86 = emit_rotate64_x86,
-};
+static int emit_rolq_x86(u8 *image, u32 *off, bool emit,
+			 u64 payload, const struct bpf_prog *prog)
+{
+	switch (rotate_payload_form(payload)) {
+	case X86_ROTATE_FORM_IMM:
+		return emit_rotate64_x86(image, off, emit, payload, prog);
+	case X86_ROTATE_FORM_RR:
+		return emit_rolq_cl_x86(image, off, emit, payload, prog);
+	default:
+		return -EINVAL;
+	}
+}
 
-const struct bpf_kinsn bpf_x86_rolq_cl_desc = {
+static int emit_roll_x86(u8 *image, u32 *off, bool emit,
+			 u64 payload, const struct bpf_prog *prog)
+{
+	switch (rotate_payload_form(payload)) {
+	case X86_ROTATE_FORM_IMM:
+		return emit_roll_imm_x86(image, off, emit, payload, prog);
+	case X86_ROTATE_FORM_RR:
+		return emit_roll_cl_x86(image, off, emit, payload, prog);
+	default:
+		return -EINVAL;
+	}
+}
+
+const struct bpf_kinsn bpf_x86_rolq_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 15 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
-	.max_emit_bytes = 8,
-	.instantiate_insn = instantiate_rolq_cl,
-	.emit_x86 = emit_rolq_cl_x86,
-};
-
-const struct bpf_kinsn bpf_x86_roll_imm_desc = {
-	.owner = THIS_MODULE,
-	.max_insn_cnt = 10 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
-	.instantiate_insn = instantiate_rotate32,
-	.emit_x86 = emit_roll_imm_x86,
+	.instantiate_insn = instantiate_rolq,
+	.emit_x86 = emit_rolq_x86,
 };
 
-const struct bpf_kinsn bpf_x86_roll_cl_desc = {
+const struct bpf_kinsn bpf_x86_roll_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 15 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
-	.max_emit_bytes = 8,
-	.instantiate_insn = instantiate_roll_cl,
-	.emit_x86 = emit_roll_cl_x86,
+	.max_emit_bytes = 16,
+	.instantiate_insn = instantiate_roll,
+	.emit_x86 = emit_roll_x86,
 };
 
 const struct bpf_kinsn bpf_x86_rorxl_desc = {
@@ -408,10 +456,8 @@ const struct bpf_kinsn bpf_x86_rorxl_desc = {
 };
 
 static const struct bpf_kinsn * const bpf_x86_rotate_kinsn_descs[] = {
-	&bpf_x86_roll_cl_desc,
-	&bpf_x86_roll_imm_desc,
-	&bpf_x86_rolq_cl_desc,
-	&bpf_x86_rolq_imm_desc,
+	&bpf_x86_roll_desc,
+	&bpf_x86_rolq_desc,
 	&bpf_x86_rorxl_desc,
 };
 

@@ -10,8 +10,8 @@ use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
-        name: "bpf_x86_testq_rr",
-        register_uses: test_register_uses,
+        name: "bpf_x86_testq",
+        register_uses: x86_test_register_uses,
         register_defs: no_regs,
     },
     KinsnDescriptor {
@@ -38,6 +38,10 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
 
 fn test_register_uses(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[0])
+}
+
+fn x86_test_register_uses(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[4])
 }
 
 fn cond_select_register_uses(payload: u64) -> RegSet {
@@ -198,7 +202,7 @@ fn emit_x86_cond_select_kinsns(
             &prog.kinsn_emit("bpf_x86_movq_rr", mov_rr_payload(scratch, lowering.b_reg))?,
         );
         out.extend_from_slice(
-            &prog.kinsn_emit("bpf_x86_testq_rr", test_payload(lowering.cond_reg))?,
+            &prog.kinsn_emit("bpf_x86_testq", x86_test_payload(lowering.cond_reg))?,
         );
         out.extend_from_slice(&prog.kinsn_emit(
             "bpf_x86_cmovneq",
@@ -215,7 +219,7 @@ fn emit_x86_cond_select_kinsns(
             )?);
         }
         out.extend_from_slice(
-            &prog.kinsn_emit("bpf_x86_testq_rr", test_payload(lowering.cond_reg))?,
+            &prog.kinsn_emit("bpf_x86_testq", x86_test_payload(lowering.cond_reg))?,
         );
         out.extend_from_slice(&prog.kinsn_emit(
             "bpf_x86_cmovneq",
@@ -223,7 +227,7 @@ fn emit_x86_cond_select_kinsns(
         )?);
     } else {
         out.extend_from_slice(
-            &prog.kinsn_emit("bpf_x86_testq_rr", test_payload(lowering.cond_reg))?,
+            &prog.kinsn_emit("bpf_x86_testq", x86_test_payload(lowering.cond_reg))?,
         );
         out.extend_from_slice(&prog.kinsn_emit(
             "bpf_x86_cmoveq",
@@ -252,6 +256,10 @@ fn emit_arm64_cond_select_kinsns(
 
 fn test_payload(reg: u8) -> u64 {
     BpfInsn::pack_u4(reg, 0)
+}
+
+fn x86_test_payload(reg: u8) -> u64 {
+    BpfInsn::pack_u4(1, 0) | BpfInsn::pack_u4(reg, 4) | BpfInsn::pack_u4(reg, 8)
 }
 
 fn cmov_payload(dst_reg: u8, src_reg: u8, cond_reg: u8) -> u64 {

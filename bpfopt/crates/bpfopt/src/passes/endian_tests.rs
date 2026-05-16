@@ -16,7 +16,7 @@ fn endian_ctx() -> crate::pass::PassContext {
         .set_kinsn_call_for_target_name("bpf_x86_movq_mem", 6464, 0)
         .expect("register movq");
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_x86_rolw_imm", 1617, 0)
+        .set_kinsn_call_for_target_name("bpf_x86_rolw", 1617, 0)
         .expect("register rolw");
     ctx.kinsn_registry
         .set_kinsn_call_for_target_name("bpf_x86_bswapl", 3233, 0)

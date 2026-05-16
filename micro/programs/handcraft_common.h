@@ -37,9 +37,6 @@
     HC_KINSN_SIDECAR(PAYLOAD), \
     HC_KINSN_CALL(SELECTOR)
 
-#define HC_ROTATE_PAYLOAD(DST, SRC, SHIFT) \
-    ((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(SHIFT) << 8))
-#define HC_ROTATE_CL_PAYLOAD(DST, CNT) ((__u64)(DST) | ((__u64)(CNT) << 4))
 #define HC_REG_IMM_PAYLOAD(DST, IMM) ((__u64)(DST) | ((__u64)(__u32)(IMM) << 8))
 #define HC_REG_PAYLOAD(REG) ((__u64)(REG))
 #define HC_CMOV_STACK_PAYLOAD(DST, SRC) \
@@ -55,6 +52,10 @@
 #define HC_X86_FORM_RR 1
 #define HC_X86_FORM_IMM 2
 #define HC_X86_FORM_SIB_RR 3
+#define HC_X86_FORM_MEM 4
+#define HC_X86_FORM_SIB 5
+#define HC_X86_FORM_STORE 6
+#define HC_X86_FORM_STORE_IMM 7
 #define HC_X86_ALU_FORM_RR HC_X86_FORM_RR
 #define HC_X86_ALU_FORM_IMM HC_X86_FORM_IMM
 /* Payloads carry only x86 operands; verifier scratch is private to kinsn modules. */
@@ -62,9 +63,25 @@
     ((__u64)(HC_X86_FORM_RR) | ((__u64)(DST) << 4) | ((__u64)(SRC) << 8))
 #define HC_X86_IMM_PAYLOAD(DST, IMM) \
     ((__u64)(HC_X86_FORM_IMM) | ((__u64)(DST) << 4) | ((__u64)(__u32)(IMM) << 8))
+#define HC_ROTATE_PAYLOAD(DST, SRC, SHIFT) \
+    ((__u64)(HC_X86_FORM_IMM) | ((__u64)(DST) << 4) | ((__u64)(SRC) << 8) | \
+     ((__u64)(__u8)(SHIFT) << 12))
+#define HC_ROTATE_CL_PAYLOAD(DST, CNT) HC_X86_RR_PAYLOAD(DST, CNT)
 #define HC_X86_CMP_SIB_RR_PAYLOAD(BASE, INDEX, SCALE, OFF, RHS) \
     ((__u64)(HC_X86_FORM_SIB_RR) | ((__u64)(BASE) << 4) | ((__u64)(INDEX) << 8) | \
      ((__u64)(SCALE) << 12) | ((__u64)(RHS) << 16) | ((__u64)(__u16)(OFF) << 20))
+#define HC_X86_MEM_PAYLOAD(REG, BASE, OFF) \
+    ((__u64)(HC_X86_FORM_MEM) | ((__u64)(REG) << 4) | \
+     ((__u64)(BASE) << 8) | ((__u64)(__u16)(OFF) << 12))
+#define HC_X86_SIB_PAYLOAD(REG, BASE, INDEX, SCALE, OFF) \
+    ((__u64)(HC_X86_FORM_SIB) | ((__u64)(REG) << 4) | ((__u64)(BASE) << 8) | \
+     ((__u64)(INDEX) << 12) | ((__u64)(SCALE) << 16) | ((__u64)(__u16)(OFF) << 20))
+#define HC_X86_STORE_PAYLOAD(SRC, BASE, OFF) \
+    ((__u64)(HC_X86_FORM_STORE) | ((__u64)(SRC) << 4) | \
+     ((__u64)(BASE) << 8) | ((__u64)(__u16)(OFF) << 12))
+#define HC_X86_STORE_IMM_PAYLOAD(BASE, OFF, IMM) \
+    ((__u64)(HC_X86_FORM_STORE_IMM) | ((__u64)(BASE) << 4) | \
+     ((__u64)(__u16)(OFF) << 8) | ((__u64)(__u8)(IMM) << 24))
 #define HC_X86_ALU_RR_PAYLOAD(DST, SRC) \
     ((__u64)(HC_X86_ALU_FORM_RR) | ((__u64)(DST) << 4) | ((__u64)(SRC) << 8))
 #define HC_X86_ALU_IMM_PAYLOAD(DST, IMM) \
@@ -75,15 +92,13 @@
 #define HC_NOT_NARROW_PAYLOAD(DST) HC_REG_PAYLOAD(DST)
 #define HC_MEM_PAYLOAD(REG, BASE, OFF) \
     ((__u64)(REG) | ((__u64)(BASE) << 4) | ((__u64)(__u16)(OFF) << 8))
-#define HC_ALU_MEM_PAYLOAD(DST, BASE, OFF) HC_MEM_PAYLOAD(DST, BASE, OFF)
-#define HC_STORE_IMM_PAYLOAD(BASE, OFF, IMM) \
-    ((__u64)(BASE) | ((__u64)(__u16)(OFF) << 4) | ((__u64)(__u8)(IMM) << 20))
+#define HC_ALU_MEM_PAYLOAD(DST, BASE, OFF) HC_X86_MEM_PAYLOAD(DST, BASE, OFF)
+#define HC_STORE_IMM_PAYLOAD(BASE, OFF, IMM) HC_X86_STORE_IMM_PAYLOAD(BASE, OFF, IMM)
 #define HC_POPCNT_PAYLOAD(DST, SRC) HC_REG_REG_PAYLOAD(DST, SRC)
 #define HC_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF) \
-    ((__u64)(DST) | ((__u64)(BASE) << 4) | ((__u64)(INDEX) << 8) | \
-     ((__u64)(SCALE) << 12) | ((__u64)(__u16)(OFF) << 16))
+    HC_X86_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF)
 #define HC_ALU_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF) \
-    HC_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF)
+    HC_X86_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF)
 #define HC_CMP_SIB_RR_PAYLOAD(BASE, INDEX, SCALE, OFF, RHS) \
     HC_X86_CMP_SIB_RR_PAYLOAD(BASE, INDEX, SCALE, OFF, RHS)
 #define HC_MOVBE_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF) \

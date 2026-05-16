@@ -4,12 +4,12 @@ use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
-        name: "bpf_x86_rolq_imm",
+        name: "bpf_x86_rolq",
         register_uses: rotate_register_uses,
         register_defs: rotate_register_defs,
     },
     KinsnDescriptor {
-        name: "bpf_x86_rorxl_imm",
+        name: "bpf_x86_rorxl",
         register_uses: rotate_register_uses,
         register_defs: rotate_register_defs,
     },
@@ -26,11 +26,11 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
 ];
 
 fn rotate_register_uses(payload: u64) -> RegSet {
-    regs_from_offsets(payload, &[4])
+    regs_from_offsets(payload, &[8])
 }
 
 fn rotate_register_defs(payload: u64) -> RegSet {
-    regs_from_offsets(payload, &[0])
+    regs_from_offsets(payload, &[4])
 }
 pub struct RotatePass;
 
@@ -137,8 +137,8 @@ impl RotateWidth {
 
     fn target_name(self, arch: Arch) -> &'static str {
         match (arch, self) {
-            (Arch::X86_64, Self::W32) => "bpf_x86_rorxl_imm",
-            (Arch::X86_64, Self::W64) => "bpf_x86_rolq_imm",
+            (Arch::X86_64, Self::W32) => "bpf_x86_rorxl",
+            (Arch::X86_64, Self::W64) => "bpf_x86_rolq",
             (Arch::Aarch64, Self::W32) => "bpf_arm64_extr_w",
             (Arch::Aarch64, Self::W64) => "bpf_arm64_extr_x",
         }
@@ -163,10 +163,10 @@ fn emit_rotate_replacement(
     } else {
         (site.dst_reg, site.val_reg)
     };
-    let payload = BpfInsn::pack_u4(call_dst, 0)
-        | BpfInsn::pack_u4(call_src, 4)
-        | BpfInsn::pack_u8(shift_amount, 8)
-        | BpfInsn::pack_u4(site.tmp_reg, 16);
+    let payload = BpfInsn::pack_u4(2, 0)
+        | BpfInsn::pack_u4(call_dst, 4)
+        | BpfInsn::pack_u4(call_src, 8)
+        | BpfInsn::pack_u8(shift_amount, 12);
     replacement.extend_from_slice(&prog.kinsn_emit(site.width.target_name(arch), payload)?);
     Ok(replacement)
 }

@@ -19,7 +19,7 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
         register_defs: endian_load_register_defs,
     },
     KinsnDescriptor {
-        name: "bpf_x86_rolw_imm",
+        name: "bpf_x86_rolw",
         register_uses: endian_unary_register_uses,
         register_defs: endian_unary_register_defs,
     },
@@ -81,7 +81,7 @@ fn endian_load_target(arch: Arch, w: BpfMemWidth) -> Option<&'static str> {
 }
 fn endian_swap_target(arch: Arch, w: BpfMemWidth) -> Option<&'static str> {
     match (arch, w) {
-        (Arch::X86_64, BpfMemWidth::H) => Some("bpf_x86_rolw_imm"),
+        (Arch::X86_64, BpfMemWidth::H) => Some("bpf_x86_rolw"),
         (Arch::X86_64, BpfMemWidth::W) => Some("bpf_x86_bswapl"),
         (Arch::X86_64, BpfMemWidth::DW) => Some("bpf_x86_bswapq"),
         (Arch::Aarch64, BpfMemWidth::H) => Some("bpf_arm64_rev16_w"),

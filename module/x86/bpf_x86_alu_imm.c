@@ -12,8 +12,8 @@ __bpf_kfunc void bpf_x86_andq(void) {}
 __bpf_kfunc void bpf_x86_andl(void) {}
 __bpf_kfunc void bpf_x86_incq(void) {}
 __bpf_kfunc void bpf_x86_sbbl(void) {}
-__bpf_kfunc void bpf_x86_xorb_imm(void) {}
-__bpf_kfunc void bpf_x86_xorb_rr(void) {}
+__bpf_kfunc void bpf_x86_xorb(void) {}
+__bpf_kfunc void bpf_x86_xorw(void) {}
 __bpf_kfunc void bpf_x86_orb(void) {}
 __bpf_kfunc void bpf_x86_addq(void) {}
 __bpf_kfunc void bpf_x86_addl(void) {}
@@ -51,27 +51,11 @@ BTF_ID_FLAGS(func, bpf_x86_shrl)
 BTF_ID_FLAGS(func, bpf_x86_shrq)
 BTF_ID_FLAGS(func, bpf_x86_subl)
 BTF_ID_FLAGS(func, bpf_x86_subq)
-BTF_ID_FLAGS(func, bpf_x86_xorb_imm)
-BTF_ID_FLAGS(func, bpf_x86_xorb_rr)
+BTF_ID_FLAGS(func, bpf_x86_xorb)
 BTF_ID_FLAGS(func, bpf_x86_xorl)
 BTF_ID_FLAGS(func, bpf_x86_xorq)
+BTF_ID_FLAGS(func, bpf_x86_xorw)
 BTF_KFUNCS_END(bpf_x86_alu_imm_kfunc_ids)
-
-static __always_inline int decode_reg_imm_payload(u64 payload,
-						  u8 *dst_reg,
-						  u32 *imm)
-{
-	payload = kinsn_payload_decode(payload);
-	*dst_reg = kinsn_payload_reg(payload, 0);
-	*imm = (u32)(payload >> 8);
-
-	if (payload >> 40)
-		return -EINVAL;
-	if (!kinsn_x86_operand_valid(*dst_reg))
-		return -EINVAL;
-
-	return 0;
-}
 
 static __always_inline int decode_reg_imm8_payload(u64 payload,
 						   u8 *dst_reg,
@@ -142,12 +126,18 @@ static __always_inline int decode_sbb_payload(u64 payload,
 
 #define KINSN_X86_ALU_FORM_RR		1
 #define KINSN_X86_ALU_FORM_IMM		2
+#define KINSN_X86_ALU_FORM_MEM		4
+#define KINSN_X86_ALU_FORM_SIB		5
 
 struct kinsn_x86_alu_payload {
 	u8 form;
 	u8 dst_reg;
 	u8 src_reg;
+	u8 base_reg;
+	u8 index_reg;
+	u8 scale_log2;
 	s32 imm;
+	s16 offset;
 };
 
 /*
@@ -185,6 +175,35 @@ static __always_inline int decode_x86_alu_payload(u64 payload,
 		return 0;
 	}
 
+	if (alu->form == KINSN_X86_ALU_FORM_MEM) {
+		alu->dst_reg = kinsn_payload_reg(payload, 4);
+		alu->base_reg = kinsn_payload_reg(payload, 8);
+		alu->offset = kinsn_payload_s16(payload, 12);
+		if (payload >> 28)
+			return -EINVAL;
+		if (!kinsn_x86_reg_valid(alu->dst_reg) ||
+		    !kinsn_x86_reg_valid(alu->base_reg))
+			return -EINVAL;
+		return 0;
+	}
+
+	if (alu->form == KINSN_X86_ALU_FORM_SIB) {
+		alu->dst_reg = kinsn_payload_reg(payload, 4);
+		alu->base_reg = kinsn_payload_reg(payload, 8);
+		alu->index_reg = kinsn_payload_reg(payload, 12);
+		alu->scale_log2 = (payload >> 16) & 0x3;
+		alu->offset = kinsn_payload_s16(payload, 20);
+		if (payload >> 36)
+			return -EINVAL;
+		if (payload & (0x3ULL << 18))
+			return -EINVAL;
+		if (!kinsn_x86_reg_valid(alu->dst_reg) ||
+		    !kinsn_x86_reg_valid(alu->base_reg) ||
+		    !kinsn_x86_reg_valid(alu->index_reg))
+			return -EINVAL;
+		return 0;
+	}
+
 	return -EINVAL;
 }
 
@@ -217,6 +236,96 @@ static __always_inline int emit_bpf_alu_imm(struct bpf_insn *insn, u8 op,
 	return 0;
 }
 
+static int instantiate_x86_alu_mem(const struct kinsn_x86_alu_payload *alu,
+				   struct bpf_insn *insn_buf, u8 op,
+				   u8 width)
+{
+	u8 addr_reg, dst_eval_reg, value_reg;
+	u8 load_size = width == 64 ? BPF_DW : BPF_W;
+	u32 scratch_mask = 0;
+	int cnt = 0;
+	int err;
+
+	if (width != 32 && width != 64)
+		return -EINVAL;
+
+	addr_reg = alu->base_reg;
+	dst_eval_reg = alu->dst_reg;
+	value_reg = kinsn_x86_scratch_avoid(alu->dst_reg, alu->base_reg, 0);
+	scratch_mask |= KINSN_X86_SCRATCH_MASK(value_reg);
+	if (kinsn_x86_reg_is_shadowed(alu->base_reg)) {
+		addr_reg = kinsn_x86_scratch_avoid(alu->dst_reg, value_reg, 0);
+		scratch_mask |= KINSN_X86_SCRATCH_MASK(addr_reg);
+	}
+	if (kinsn_x86_reg_is_shadowed(alu->dst_reg)) {
+		dst_eval_reg = kinsn_x86_scratch_avoid(addr_reg, value_reg, 0);
+		scratch_mask |= KINSN_X86_SCRATCH_MASK(dst_eval_reg);
+	}
+
+	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+	if (addr_reg != alu->base_reg)
+		kinsn_x86_read64(insn_buf, &cnt, addr_reg, alu->base_reg);
+	if (dst_eval_reg != alu->dst_reg)
+		kinsn_x86_read64(insn_buf, &cnt, dst_eval_reg, alu->dst_reg);
+	insn_buf[cnt++] = BPF_LDX_MEM(load_size, value_reg, addr_reg,
+				      alu->offset);
+	err = emit_bpf_alu_reg(&insn_buf[cnt++], op, width, dst_eval_reg,
+			       value_reg);
+	if (err)
+		return err;
+	if (dst_eval_reg != alu->dst_reg) {
+		if (width == 32)
+			insn_buf[cnt++] = BPF_MOV32_REG(dst_eval_reg, dst_eval_reg);
+		kinsn_x86_write64(insn_buf, &cnt, alu->dst_reg, dst_eval_reg,
+				  scratch_mask);
+	}
+	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+	return cnt;
+}
+
+static int instantiate_x86_xorw_mem(const struct kinsn_x86_alu_payload *alu,
+				    struct bpf_insn *insn_buf)
+{
+	u8 addr_reg, dst_eval_reg, value_reg, high_reg;
+	u32 scratch_mask = 0;
+	int cnt = 0;
+
+	addr_reg = alu->base_reg;
+	dst_eval_reg = alu->dst_reg;
+	value_reg = kinsn_x86_scratch_avoid(alu->dst_reg, alu->base_reg, 0);
+	high_reg = kinsn_x86_scratch_avoid(alu->dst_reg, alu->base_reg,
+					    value_reg);
+	scratch_mask |= KINSN_X86_SCRATCH_MASK(value_reg) |
+			KINSN_X86_SCRATCH_MASK(high_reg);
+	if (kinsn_x86_reg_is_shadowed(alu->base_reg)) {
+		addr_reg = kinsn_x86_scratch_avoid(value_reg, high_reg, 0);
+		scratch_mask |= KINSN_X86_SCRATCH_MASK(addr_reg);
+	}
+	if (kinsn_x86_reg_is_shadowed(alu->dst_reg)) {
+		dst_eval_reg = kinsn_x86_scratch_avoid(addr_reg, value_reg,
+						       high_reg);
+		scratch_mask |= KINSN_X86_SCRATCH_MASK(dst_eval_reg);
+	}
+
+	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+	if (addr_reg != alu->base_reg)
+		kinsn_x86_read64(insn_buf, &cnt, addr_reg, alu->base_reg);
+	if (dst_eval_reg != alu->dst_reg)
+		kinsn_x86_read64(insn_buf, &cnt, dst_eval_reg, alu->dst_reg);
+	insn_buf[cnt++] = BPF_LDX_MEM(BPF_H, value_reg, addr_reg,
+				      alu->offset);
+	insn_buf[cnt++] = BPF_MOV64_REG(high_reg, dst_eval_reg);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, high_reg, (s32)~0xffff);
+	insn_buf[cnt++] = BPF_ALU64_REG(BPF_XOR, dst_eval_reg, value_reg);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, dst_eval_reg, 0xffff);
+	insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, dst_eval_reg, high_reg);
+	if (dst_eval_reg != alu->dst_reg)
+		kinsn_x86_write64(insn_buf, &cnt, alu->dst_reg, dst_eval_reg,
+				  scratch_mask);
+	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+	return cnt;
+}
+
 static int instantiate_x86_alu(u64 payload, struct bpf_insn *insn_buf,
 			       u8 op, u8 width)
 {
@@ -230,6 +339,12 @@ static int instantiate_x86_alu(u64 payload, struct bpf_insn *insn_buf,
 	err = decode_x86_alu_payload(payload, &decoded);
 	if (err)
 		return err;
+
+	if (alu->form == KINSN_X86_ALU_FORM_MEM)
+		return instantiate_x86_alu_mem(alu, insn_buf, op, width);
+
+	if (alu->form == KINSN_X86_ALU_FORM_SIB)
+		return -EINVAL;
 
 	if (alu->form == KINSN_X86_ALU_FORM_IMM) {
 		if (x86_alu_is_shift(op) &&
@@ -388,15 +503,20 @@ static int instantiate_sbbl_imm0(u64 payload, struct bpf_insn *insn_buf)
 
 static int instantiate_xorb_imm(u64 payload, struct bpf_insn *insn_buf)
 {
+	struct kinsn_x86_alu_payload decoded;
 	u8 dst_reg;
 	u32 imm;
 	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0);
 	int cnt = 0;
 	int err;
 
-	err = decode_reg_imm_payload(payload, &dst_reg, &imm);
+	err = decode_x86_alu_payload(payload, &decoded);
 	if (err)
 		return err;
+	if (decoded.form != KINSN_X86_ALU_FORM_IMM)
+		return -EINVAL;
+	dst_reg = decoded.dst_reg;
+	imm = decoded.imm;
 	if (imm > 0xff)
 		return -EINVAL;
 
@@ -411,15 +531,20 @@ static int instantiate_xorb_imm(u64 payload, struct bpf_insn *insn_buf)
 
 static int instantiate_xorb_rr(u64 payload, struct bpf_insn *insn_buf)
 {
+	struct kinsn_x86_alu_payload decoded;
 	u8 dst_reg, src_reg;
 	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0) |
 			   KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH1);
 	int cnt = 0;
 	int err;
 
-	err = decode_reg_reg_payload(payload, &dst_reg, &src_reg);
+	err = decode_x86_alu_payload(payload, &decoded);
 	if (err)
 		return err;
+	if (decoded.form != KINSN_X86_ALU_FORM_RR)
+		return -EINVAL;
+	dst_reg = decoded.dst_reg;
+	src_reg = decoded.src_reg;
 
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
 	kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0, dst_reg);
@@ -431,6 +556,85 @@ static int instantiate_xorb_rr(u64 payload, struct bpf_insn *insn_buf)
 			  scratch_mask);
 	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
 	return cnt;
+}
+
+static int instantiate_xorb_sib(const struct kinsn_x86_alu_payload *alu,
+				struct bpf_insn *insn_buf)
+{
+	u8 addr_reg, dst_eval_reg, value_reg, high_reg;
+	u32 scratch_mask = 0;
+	int add_count;
+	int cnt = 0;
+
+	addr_reg = kinsn_x86_scratch_avoid(alu->dst_reg, alu->base_reg,
+					   alu->index_reg);
+	value_reg = kinsn_x86_scratch_avoid(alu->dst_reg, alu->base_reg,
+					    addr_reg);
+	high_reg = kinsn_x86_scratch_avoid(alu->dst_reg, addr_reg,
+					    value_reg);
+	scratch_mask |= KINSN_X86_SCRATCH_MASK(addr_reg) |
+			KINSN_X86_SCRATCH_MASK(value_reg) |
+			KINSN_X86_SCRATCH_MASK(high_reg);
+	dst_eval_reg = alu->dst_reg;
+	if (kinsn_x86_reg_is_shadowed(alu->dst_reg)) {
+		dst_eval_reg = kinsn_x86_scratch_avoid(addr_reg, value_reg,
+						       high_reg);
+		scratch_mask |= KINSN_X86_SCRATCH_MASK(dst_eval_reg);
+	}
+
+	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+	kinsn_x86_read64(insn_buf, &cnt, addr_reg, alu->base_reg);
+	kinsn_x86_read64(insn_buf, &cnt, value_reg, alu->index_reg);
+	add_count = 1 << alu->scale_log2;
+	while (add_count--)
+		insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, addr_reg, value_reg);
+	insn_buf[cnt++] = BPF_LDX_MEM(BPF_B, value_reg, addr_reg,
+				      alu->offset);
+	if (dst_eval_reg != alu->dst_reg)
+		kinsn_x86_read64(insn_buf, &cnt, dst_eval_reg, alu->dst_reg);
+	insn_buf[cnt++] = BPF_MOV64_REG(high_reg, dst_eval_reg);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, high_reg, -256);
+	insn_buf[cnt++] = BPF_ALU64_REG(BPF_XOR, dst_eval_reg, value_reg);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, dst_eval_reg, 0xff);
+	insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, dst_eval_reg, high_reg);
+	if (dst_eval_reg != alu->dst_reg)
+		kinsn_x86_write64(insn_buf, &cnt, alu->dst_reg, dst_eval_reg,
+				  scratch_mask);
+	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+	return cnt;
+}
+
+static int instantiate_xorb(u64 payload, struct bpf_insn *insn_buf)
+{
+	struct kinsn_x86_alu_payload decoded;
+	int err;
+
+	err = decode_x86_alu_payload(payload, &decoded);
+	if (err)
+		return err;
+	switch (decoded.form) {
+	case KINSN_X86_ALU_FORM_IMM:
+		return instantiate_xorb_imm(payload, insn_buf);
+	case KINSN_X86_ALU_FORM_RR:
+		return instantiate_xorb_rr(payload, insn_buf);
+	case KINSN_X86_ALU_FORM_SIB:
+		return instantiate_xorb_sib(&decoded, insn_buf);
+	default:
+		return -EINVAL;
+	}
+}
+
+static int instantiate_xorw(u64 payload, struct bpf_insn *insn_buf)
+{
+	struct kinsn_x86_alu_payload decoded;
+	int err;
+
+	err = decode_x86_alu_payload(payload, &decoded);
+	if (err)
+		return err;
+	if (decoded.form != KINSN_X86_ALU_FORM_MEM)
+		return -EINVAL;
+	return instantiate_x86_xorw_mem(&decoded, insn_buf);
 }
 
 static int instantiate_orb_rr(u64 payload, struct bpf_insn *insn_buf)
@@ -457,6 +661,51 @@ static int instantiate_orb_rr(u64 payload, struct bpf_insn *insn_buf)
 	return cnt;
 }
 
+static __always_inline void emit_rex8_mem(u8 *buf, u32 *len, u8 reg_field,
+					  u8 base_reg, u8 index_reg,
+					  bool has_index)
+{
+	u8 rex = 0x40;
+
+	if (kinsn_x86_ext(reg_field))
+		rex |= 0x04;
+	if (has_index && kinsn_x86_ext(index_reg))
+		rex |= 0x02;
+	if (kinsn_x86_ext(base_reg))
+		rex |= 0x01;
+	if (rex != 0x40 || kinsn_x86_needs_rex8(reg_field) ||
+	    (has_index && kinsn_x86_needs_rex8(index_reg)))
+		kinsn_emit_u8(buf, len, rex);
+}
+
+static int emit_alu_mem_x86(u8 *image, u32 *off, bool emit,
+			    const struct kinsn_x86_alu_payload *alu,
+			    const struct bpf_prog *prog, u8 width,
+			    u8 opcode, bool is16, bool is8)
+{
+	u8 buf[16];
+	u8 dst_reg, base_reg;
+	u32 len = 0;
+
+	dst_reg = kinsn_x86_reg_for_prog(prog, alu->dst_reg);
+	base_reg = kinsn_x86_reg_for_prog(prog, alu->base_reg);
+	if (!kinsn_x86_valid(dst_reg) || !kinsn_x86_valid(base_reg))
+		return -EINVAL;
+
+	if (is16)
+		kinsn_emit_u8(buf, &len, 0x66);
+	if (is8)
+		emit_rex8_mem(buf, &len, dst_reg, base_reg, 0, false);
+	else
+		kinsn_emit_rex(buf, &len, width == 64,
+			       kinsn_x86_ext(dst_reg), false,
+			       kinsn_x86_ext(base_reg));
+	kinsn_emit_u8(buf, &len, opcode);
+	kinsn_emit_modrm_mem(buf, &len, dst_reg, base_reg, alu->offset);
+
+	return kinsn_emit_finish(image, off, emit, buf, len);
+}
+
 static int emit_x86_alu(u8 *image, u32 *off, bool emit, u64 payload,
 			const struct bpf_prog *prog, u8 width, u8 op,
 			u8 rr_opcode, u8 imm_group)
@@ -471,6 +720,16 @@ static int emit_x86_alu(u8 *image, u32 *off, bool emit, u64 payload,
 	err = decode_x86_alu_payload(payload, &decoded);
 	if (err)
 		return err;
+
+	if (alu->form == KINSN_X86_ALU_FORM_MEM) {
+		if (x86_alu_is_shift(op))
+			return -EINVAL;
+		return emit_alu_mem_x86(image, off, emit, alu, prog, width,
+					rr_opcode | 0x02, false, false);
+	}
+
+	if (alu->form == KINSN_X86_ALU_FORM_SIB)
+		return -EINVAL;
 
 	dst_reg = kinsn_x86_reg_for_prog(prog, alu->dst_reg);
 	if (!kinsn_x86_valid(dst_reg))
@@ -571,21 +830,49 @@ static int emit_##name##_x86(u8 *image, u32 *off, bool emit,		\
 
 DEFINE_ALU8_IMM_EMIT(addb_imm, 0xc0)
 DEFINE_ALU8_IMM_EMIT(andb_imm, 0xe0)
-DEFINE_ALU8_IMM_EMIT(xorb_imm, 0xf0)
+
+static int emit_xorb_imm_x86(u8 *image, u32 *off, bool emit, u64 payload,
+			     const struct bpf_prog *prog)
+{
+	struct kinsn_x86_alu_payload decoded;
+	u8 buf[4];
+	u8 dst_reg;
+	u32 len = 0;
+	int err;
+
+	err = decode_x86_alu_payload(payload, &decoded);
+	if (err)
+		return err;
+	if (decoded.form != KINSN_X86_ALU_FORM_IMM || decoded.imm > 0xff)
+		return -EINVAL;
+	dst_reg = kinsn_x86_reg_for_prog(prog, decoded.dst_reg);
+	if (!kinsn_x86_valid(dst_reg))
+		return -EINVAL;
+
+	kinsn_emit_rex8_rm(buf, &len, dst_reg);
+	kinsn_emit_u8(buf, &len, 0x80);
+	kinsn_emit_u8(buf, &len, 0xf0 | kinsn_x86_code(dst_reg));
+	kinsn_emit_u8(buf, &len, (u8)decoded.imm);
+
+	return kinsn_emit_finish(image, off, emit, buf, len);
+}
 
 static int emit_xorb_rr_x86(u8 *image, u32 *off, bool emit,
 			    u64 payload, const struct bpf_prog *prog)
 {
+	struct kinsn_x86_alu_payload decoded;
 	u8 buf[4];
 	u8 dst_reg, src_reg;
 	u32 len = 0;
 	int err;
 
-	err = decode_reg_reg_payload(payload, &dst_reg, &src_reg);
+	err = decode_x86_alu_payload(payload, &decoded);
 	if (err)
 		return err;
-	dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
-	src_reg = kinsn_x86_reg_for_prog(prog, src_reg);
+	if (decoded.form != KINSN_X86_ALU_FORM_RR)
+		return -EINVAL;
+	dst_reg = kinsn_x86_reg_for_prog(prog, decoded.dst_reg);
+	src_reg = kinsn_x86_reg_for_prog(prog, decoded.src_reg);
 	if (!kinsn_x86_valid(dst_reg) || !kinsn_x86_valid(src_reg))
 		return -EINVAL;
 
@@ -596,6 +883,65 @@ static int emit_xorb_rr_x86(u8 *image, u32 *off, bool emit,
 		      kinsn_x86_code(dst_reg));
 
 	return kinsn_emit_finish(image, off, emit, buf, len);
+}
+
+static int emit_xorb_sib_x86(u8 *image, u32 *off, bool emit,
+			     const struct kinsn_x86_alu_payload *alu,
+			     const struct bpf_prog *prog)
+{
+	u8 buf[16];
+	u8 dst_reg, base_reg, index_reg;
+	u32 len = 0;
+
+	dst_reg = kinsn_x86_reg_for_prog(prog, alu->dst_reg);
+	base_reg = kinsn_x86_reg_for_prog(prog, alu->base_reg);
+	index_reg = kinsn_x86_reg_for_prog(prog, alu->index_reg);
+	if (!kinsn_x86_valid(dst_reg) || !kinsn_x86_valid(base_reg) ||
+	    !kinsn_x86_valid(index_reg))
+		return -EINVAL;
+
+	emit_rex8_mem(buf, &len, dst_reg, base_reg, index_reg, true);
+	kinsn_emit_u8(buf, &len, 0x32);
+	kinsn_emit_sib_mem(buf, &len, dst_reg, base_reg, index_reg,
+			   alu->scale_log2, alu->offset);
+
+	return kinsn_emit_finish(image, off, emit, buf, len);
+}
+
+static int emit_xorb_x86(u8 *image, u32 *off, bool emit, u64 payload,
+			 const struct bpf_prog *prog)
+{
+	struct kinsn_x86_alu_payload decoded;
+	int err;
+
+	err = decode_x86_alu_payload(payload, &decoded);
+	if (err)
+		return err;
+	switch (decoded.form) {
+	case KINSN_X86_ALU_FORM_IMM:
+		return emit_xorb_imm_x86(image, off, emit, payload, prog);
+	case KINSN_X86_ALU_FORM_RR:
+		return emit_xorb_rr_x86(image, off, emit, payload, prog);
+	case KINSN_X86_ALU_FORM_SIB:
+		return emit_xorb_sib_x86(image, off, emit, &decoded, prog);
+	default:
+		return -EINVAL;
+	}
+}
+
+static int emit_xorw_x86(u8 *image, u32 *off, bool emit, u64 payload,
+			 const struct bpf_prog *prog)
+{
+	struct kinsn_x86_alu_payload decoded;
+	int err;
+
+	err = decode_x86_alu_payload(payload, &decoded);
+	if (err)
+		return err;
+	if (decoded.form != KINSN_X86_ALU_FORM_MEM)
+		return -EINVAL;
+	return emit_alu_mem_x86(image, off, emit, &decoded, prog, 16,
+				0x33, true, false);
 }
 
 static int emit_orb_rr_x86(u8 *image, u32 *off, bool emit,
@@ -699,20 +1045,20 @@ const struct bpf_kinsn bpf_x86_sbbl_desc = {
 	.emit_x86 = emit_sbbl_imm0_x86,
 };
 
-const struct bpf_kinsn bpf_x86_xorb_imm_desc = {
+const struct bpf_kinsn bpf_x86_xorb_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 5 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
-	.max_emit_bytes = 4,
-	.instantiate_insn = instantiate_xorb_imm,
-	.emit_x86 = emit_xorb_imm_x86,
+	.max_insn_cnt = 24 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
+	.max_emit_bytes = 16,
+	.instantiate_insn = instantiate_xorb,
+	.emit_x86 = emit_xorb_x86,
 };
 
-const struct bpf_kinsn bpf_x86_xorb_rr_desc = {
+const struct bpf_kinsn bpf_x86_xorw_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 9 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
-	.max_emit_bytes = 4,
-	.instantiate_insn = instantiate_xorb_rr,
-	.emit_x86 = emit_xorb_rr_x86,
+	.max_insn_cnt = 18 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
+	.max_emit_bytes = 16,
+	.instantiate_insn = instantiate_xorw,
+	.emit_x86 = emit_xorw_x86,
 };
 
 const struct bpf_kinsn bpf_x86_orb_desc = {
@@ -726,8 +1072,8 @@ const struct bpf_kinsn bpf_x86_orb_desc = {
 #define DEFINE_X86_ALU_DESC(name)					\
 const struct bpf_kinsn bpf_x86_##name##_desc = {			\
 	.owner = THIS_MODULE,						\
-	.max_insn_cnt = 9 + KINSN_X86_SAVE_RESTORE_INSN_CNT,						\
-	.max_emit_bytes = 8,						\
+	.max_insn_cnt = 24 + KINSN_X86_SAVE_RESTORE_INSN_CNT,		\
+	.max_emit_bytes = 16,						\
 	.instantiate_insn = instantiate_##name,				\
 	.emit_x86 = emit_##name##_x86,					\
 }
@@ -775,10 +1121,10 @@ static const struct bpf_kinsn * const bpf_x86_alu_imm_kinsn_descs[] = {
 	&bpf_x86_shrq_desc,
 	&bpf_x86_subl_desc,
 	&bpf_x86_subq_desc,
-	&bpf_x86_xorb_imm_desc,
-	&bpf_x86_xorb_rr_desc,
+	&bpf_x86_xorb_desc,
 	&bpf_x86_xorl_desc,
 	&bpf_x86_xorq_desc,
+	&bpf_x86_xorw_desc,
 };
 
 DEFINE_KINSN_V2_MODULE(bpf_x86_alu_imm,

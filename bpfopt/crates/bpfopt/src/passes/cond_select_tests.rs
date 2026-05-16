@@ -10,7 +10,7 @@ fn select_ctx() -> crate::pass::PassContext {
         .set_kinsn_call_for_target_name("bpf_x86_movq_rr", 5554, 0)
         .expect("register movq kinsn");
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_x86_testq_rr", 5555, 0)
+        .set_kinsn_call_for_target_name("bpf_x86_testq", 5555, 0)
         .expect("register testq kinsn");
     ctx.kinsn_registry
         .set_kinsn_call_for_target_name("bpf_x86_cmovneq", 5556, 0)
@@ -195,5 +195,5 @@ fn cond_select_errors_when_no_branchless_target_exists() {
 
     let err = pass_error_on_insns(CondSelectPass, input, &pass_ctx());
 
-    assert!(err.contains("bpf_x86_testq_rr"), "unexpected error: {err}");
+    assert!(err.contains("bpf_x86_testq"), "unexpected error: {err}");
 }
