@@ -6,30 +6,41 @@
 #include "kinsn_common.h"
 
 __bpf_kfunc_start_defs();
-__bpf_kfunc void bpf_arm64_strb_mem_reg(void) {}
-__bpf_kfunc void bpf_arm64_strh_mem_reg(void) {}
-__bpf_kfunc void bpf_arm64_str_w_mem_reg(void) {}
-__bpf_kfunc void bpf_arm64_str_x_mem_reg(void) {}
-__bpf_kfunc void bpf_arm64_strb_wzr_mem(void) {}
+__bpf_kfunc void bpf_arm64_strb(void) {}
+__bpf_kfunc void bpf_arm64_strh(void) {}
+__bpf_kfunc void bpf_arm64_str_w(void) {}
+__bpf_kfunc void bpf_arm64_str_x(void) {}
 __bpf_kfunc_end_defs();
 
 BTF_KFUNCS_START(bpf_arm64_str_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_arm64_str_w_mem_reg)
-BTF_ID_FLAGS(func, bpf_arm64_str_x_mem_reg)
-BTF_ID_FLAGS(func, bpf_arm64_strb_mem_reg)
-BTF_ID_FLAGS(func, bpf_arm64_strb_wzr_mem)
-BTF_ID_FLAGS(func, bpf_arm64_strh_mem_reg)
+BTF_ID_FLAGS(func, bpf_arm64_str_w)
+BTF_ID_FLAGS(func, bpf_arm64_str_x)
+BTF_ID_FLAGS(func, bpf_arm64_strb)
+BTF_ID_FLAGS(func, bpf_arm64_strh)
 BTF_KFUNCS_END(bpf_arm64_str_kfunc_ids)
+
+#define ARM64_STR_FORM_REG	1
+#define ARM64_STR_FORM_ZERO	2
 
 static __always_inline int decode_store_reg_payload(u64 payload, u8 *src_reg,
 						    u8 *base_reg, s16 *offset)
 {
-	*src_reg = kinsn_payload_reg(payload, 0);
-	*base_reg = kinsn_payload_reg(payload, 4);
-	*offset = kinsn_payload_s16(payload, 8);
+	payload = kinsn_payload_decode(payload);
+	if ((payload & 0xf) == ARM64_STR_FORM_REG) {
+		*src_reg = kinsn_payload_reg(payload, 4);
+		*base_reg = kinsn_payload_reg(payload, 8);
+		*offset = kinsn_payload_s16(payload, 12);
 
-	if (payload >> 24)
-		return -EINVAL;
+		if (payload >> 28)
+			return -EINVAL;
+	} else {
+		*src_reg = kinsn_payload_reg(payload, 0);
+		*base_reg = kinsn_payload_reg(payload, 4);
+		*offset = kinsn_payload_s16(payload, 8);
+
+		if (payload >> 24)
+			return -EINVAL;
+	}
 	if (*src_reg >= BPF_REG_10 || *base_reg > BPF_REG_10)
 		return -EINVAL;
 
@@ -39,12 +50,22 @@ static __always_inline int decode_store_reg_payload(u64 payload, u8 *src_reg,
 static __always_inline int decode_store_imm_payload(u64 payload, u8 *base_reg,
 						    s16 *offset, u8 *imm)
 {
-	*base_reg = kinsn_payload_reg(payload, 0);
-	*offset = kinsn_payload_s16(payload, 4);
-	*imm = kinsn_payload_u8(payload, 20);
+	payload = kinsn_payload_decode(payload);
+	if ((payload & 0xf) == ARM64_STR_FORM_ZERO) {
+		*base_reg = kinsn_payload_reg(payload, 4);
+		*offset = kinsn_payload_s16(payload, 8);
+		*imm = kinsn_payload_u8(payload, 24);
 
-	if (payload >> 28)
-		return -EINVAL;
+		if (payload >> 32)
+			return -EINVAL;
+	} else {
+		*base_reg = kinsn_payload_reg(payload, 0);
+		*offset = kinsn_payload_s16(payload, 4);
+		*imm = kinsn_payload_u8(payload, 20);
+
+		if (payload >> 28)
+			return -EINVAL;
+	}
 	if (*base_reg > BPF_REG_10)
 		return -EINVAL;
 
@@ -65,22 +86,26 @@ static int instantiate_store_reg(u64 payload, struct bpf_insn *insn_buf, u8 size
 	return 1;
 }
 
-static int instantiate_strb_mem_reg(u64 payload, struct bpf_insn *insn_buf)
+static int instantiate_strb_zero_mem(u64 payload, struct bpf_insn *insn_buf);
+
+static int instantiate_strb(u64 payload, struct bpf_insn *insn_buf)
 {
+	if ((kinsn_payload_decode(payload) & 0xf) == ARM64_STR_FORM_ZERO)
+		return instantiate_strb_zero_mem(payload, insn_buf);
 	return instantiate_store_reg(payload, insn_buf, BPF_B);
 }
 
-static int instantiate_strh_mem_reg(u64 payload, struct bpf_insn *insn_buf)
+static int instantiate_strh(u64 payload, struct bpf_insn *insn_buf)
 {
 	return instantiate_store_reg(payload, insn_buf, BPF_H);
 }
 
-static int instantiate_str_w_mem_reg(u64 payload, struct bpf_insn *insn_buf)
+static int instantiate_str_w(u64 payload, struct bpf_insn *insn_buf)
 {
 	return instantiate_store_reg(payload, insn_buf, BPF_W);
 }
 
-static int instantiate_str_x_mem_reg(u64 payload, struct bpf_insn *insn_buf)
+static int instantiate_str_x(u64 payload, struct bpf_insn *insn_buf)
 {
 	return instantiate_store_reg(payload, insn_buf, BPF_DW);
 }
@@ -207,25 +232,30 @@ static int emit_store_reg_arm64(u32 *image, int *idx, bool emit, u64 payload,
 	return 1;
 }
 
-static int emit_strb_mem_reg_arm64(u32 *image, int *idx, bool emit,
-				   u64 payload, const struct bpf_prog *prog)
+static int emit_strb_fixed_arm64(u32 *image, int *idx, bool emit, u64 payload,
+				 const struct bpf_prog *prog, u8 src_reg);
+
+static int emit_strb_arm64(u32 *image, int *idx, bool emit,
+			   u64 payload, const struct bpf_prog *prog)
 {
+	if ((kinsn_payload_decode(payload) & 0xf) == ARM64_STR_FORM_ZERO)
+		return emit_strb_fixed_arm64(image, idx, emit, payload, prog, 31);
 	return emit_store_reg_arm64(image, idx, emit, payload, prog, BPF_B);
 }
 
-static int emit_strh_mem_reg_arm64(u32 *image, int *idx, bool emit,
+static int emit_strh_arm64(u32 *image, int *idx, bool emit,
 				   u64 payload, const struct bpf_prog *prog)
 {
 	return emit_store_reg_arm64(image, idx, emit, payload, prog, BPF_H);
 }
 
-static int emit_str_w_mem_reg_arm64(u32 *image, int *idx, bool emit,
+static int emit_str_w_arm64(u32 *image, int *idx, bool emit,
 				    u64 payload, const struct bpf_prog *prog)
 {
 	return emit_store_reg_arm64(image, idx, emit, payload, prog, BPF_W);
 }
 
-static int emit_str_x_mem_reg_arm64(u32 *image, int *idx, bool emit,
+static int emit_str_x_arm64(u32 *image, int *idx, bool emit,
 				    u64 payload, const struct bpf_prog *prog)
 {
 	return emit_store_reg_arm64(image, idx, emit, payload, prog, BPF_DW);
@@ -264,58 +294,43 @@ static int emit_strb_fixed_arm64(u32 *image, int *idx, bool emit, u64 payload,
 	return 1;
 }
 
-static int emit_strb_wzr_mem_arm64(u32 *image, int *idx, bool emit,
-				   u64 payload, const struct bpf_prog *prog)
-{
-	return emit_strb_fixed_arm64(image, idx, emit, payload, prog, 31);
-}
-
-const struct bpf_kinsn bpf_arm64_strb_mem_reg_desc = {
+const struct bpf_kinsn bpf_arm64_strb_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
-	.instantiate_insn = instantiate_strb_mem_reg,
-	.emit_arm64 = emit_strb_mem_reg_arm64,
+	.instantiate_insn = instantiate_strb,
+	.emit_arm64 = emit_strb_arm64,
 };
 
-const struct bpf_kinsn bpf_arm64_strh_mem_reg_desc = {
+const struct bpf_kinsn bpf_arm64_strh_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
-	.instantiate_insn = instantiate_strh_mem_reg,
-	.emit_arm64 = emit_strh_mem_reg_arm64,
+	.instantiate_insn = instantiate_strh,
+	.emit_arm64 = emit_strh_arm64,
 };
 
-const struct bpf_kinsn bpf_arm64_str_w_mem_reg_desc = {
+const struct bpf_kinsn bpf_arm64_str_w_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
-	.instantiate_insn = instantiate_str_w_mem_reg,
-	.emit_arm64 = emit_str_w_mem_reg_arm64,
+	.instantiate_insn = instantiate_str_w,
+	.emit_arm64 = emit_str_w_arm64,
 };
 
-const struct bpf_kinsn bpf_arm64_str_x_mem_reg_desc = {
+const struct bpf_kinsn bpf_arm64_str_x_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
-	.instantiate_insn = instantiate_str_x_mem_reg,
-	.emit_arm64 = emit_str_x_mem_reg_arm64,
-};
-
-const struct bpf_kinsn bpf_arm64_strb_wzr_mem_desc = {
-	.owner = THIS_MODULE,
-	.max_insn_cnt = 1,
-	.max_emit_bytes = 4,
-	.instantiate_insn = instantiate_strb_zero_mem,
-	.emit_arm64 = emit_strb_wzr_mem_arm64,
+	.instantiate_insn = instantiate_str_x,
+	.emit_arm64 = emit_str_x_arm64,
 };
 
 static const struct bpf_kinsn * const bpf_arm64_str_kinsn_descs[] = {
-	&bpf_arm64_str_w_mem_reg_desc,
-	&bpf_arm64_str_x_mem_reg_desc,
-	&bpf_arm64_strb_mem_reg_desc,
-	&bpf_arm64_strb_wzr_mem_desc,
-	&bpf_arm64_strh_mem_reg_desc,
+	&bpf_arm64_str_w_desc,
+	&bpf_arm64_str_x_desc,
+	&bpf_arm64_strb_desc,
+	&bpf_arm64_strh_desc,
 };
 
 DEFINE_KINSN_V2_MODULE(bpf_arm64_str, "BpfReJIT arm64 kinsns: STR",

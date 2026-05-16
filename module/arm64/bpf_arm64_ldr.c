@@ -6,17 +6,17 @@
 #include "kinsn_common.h"
 
 __bpf_kfunc_start_defs();
-__bpf_kfunc void bpf_arm64_ldrb_mem(void) {}
-__bpf_kfunc void bpf_arm64_ldrh_mem(void) {}
-__bpf_kfunc void bpf_arm64_ldr_w_mem(void) {}
-__bpf_kfunc void bpf_arm64_ldr_x_mem(void) {}
+__bpf_kfunc void bpf_arm64_ldrb(void) {}
+__bpf_kfunc void bpf_arm64_ldrh(void) {}
+__bpf_kfunc void bpf_arm64_ldr_w(void) {}
+__bpf_kfunc void bpf_arm64_ldr_x(void) {}
 __bpf_kfunc_end_defs();
 
 BTF_KFUNCS_START(bpf_arm64_ldr_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_arm64_ldr_w_mem)
-BTF_ID_FLAGS(func, bpf_arm64_ldr_x_mem)
-BTF_ID_FLAGS(func, bpf_arm64_ldrb_mem)
-BTF_ID_FLAGS(func, bpf_arm64_ldrh_mem)
+BTF_ID_FLAGS(func, bpf_arm64_ldr_w)
+BTF_ID_FLAGS(func, bpf_arm64_ldr_x)
+BTF_ID_FLAGS(func, bpf_arm64_ldrb)
+BTF_ID_FLAGS(func, bpf_arm64_ldrh)
 BTF_KFUNCS_END(bpf_arm64_ldr_kfunc_ids)
 
 static __always_inline int decode_ldr_payload(u64 payload, u8 *dst_reg,
@@ -198,7 +198,7 @@ static int emit_ldr_x_mem_arm64(u32 *image, int *idx, bool emit, u64 payload,
 	return emit_ldr_arm64(image, idx, emit, payload, prog, BPF_DW);
 }
 
-const struct bpf_kinsn bpf_arm64_ldrh_mem_desc = {
+const struct bpf_kinsn bpf_arm64_ldrh_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
@@ -206,7 +206,7 @@ const struct bpf_kinsn bpf_arm64_ldrh_mem_desc = {
 	.emit_arm64 = emit_ldrh_mem_arm64,
 };
 
-const struct bpf_kinsn bpf_arm64_ldrb_mem_desc = {
+const struct bpf_kinsn bpf_arm64_ldrb_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
@@ -214,7 +214,7 @@ const struct bpf_kinsn bpf_arm64_ldrb_mem_desc = {
 	.emit_arm64 = emit_ldrb_mem_arm64,
 };
 
-const struct bpf_kinsn bpf_arm64_ldr_w_mem_desc = {
+const struct bpf_kinsn bpf_arm64_ldr_w_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
@@ -222,7 +222,7 @@ const struct bpf_kinsn bpf_arm64_ldr_w_mem_desc = {
 	.emit_arm64 = emit_ldr_w_mem_arm64,
 };
 
-const struct bpf_kinsn bpf_arm64_ldr_x_mem_desc = {
+const struct bpf_kinsn bpf_arm64_ldr_x_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
@@ -231,10 +231,10 @@ const struct bpf_kinsn bpf_arm64_ldr_x_mem_desc = {
 };
 
 static const struct bpf_kinsn * const bpf_arm64_ldr_kinsn_descs[] = {
-	&bpf_arm64_ldr_w_mem_desc,
-	&bpf_arm64_ldr_x_mem_desc,
-	&bpf_arm64_ldrb_mem_desc,
-	&bpf_arm64_ldrh_mem_desc,
+	&bpf_arm64_ldr_w_desc,
+	&bpf_arm64_ldr_x_desc,
+	&bpf_arm64_ldrb_desc,
+	&bpf_arm64_ldrh_desc,
 };
 
 DEFINE_KINSN_V2_MODULE(bpf_arm64_ldr, "BpfReJIT arm64 kinsns: LDR",

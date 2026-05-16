@@ -14,7 +14,7 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
         register_defs: x86_alu_register_defs,
     },
     KinsnDescriptor {
-        name: "bpf_arm64_ubfm_x_imm",
+        name: "bpf_arm64_ubfm_x",
         register_uses: extract_register_uses,
         register_defs: extract_register_defs,
     },
@@ -119,7 +119,7 @@ fn emit_extract_replacement(
             let payload = BpfInsn::pack_u4(site.dst_reg, 0)
                 | BpfInsn::pack_u8(site.shift_amount as u8, 8)
                 | BpfInsn::pack_u8(site.bit_len as u8, 16);
-            prog.kinsn_emit("bpf_arm64_ubfm_x_imm", payload)
+            prog.kinsn_emit("bpf_arm64_ubfm_x", payload)
         }
     }
 }

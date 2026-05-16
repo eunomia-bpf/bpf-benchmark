@@ -9,9 +9,9 @@ kinsns:
   - name: bpf_x86_rolw
   - name: bpf_x86_bswapl
   - name: bpf_x86_bswapq
-  - name: bpf_arm64_ldrh_mem
-  - name: bpf_arm64_ldr_w_mem
-  - name: bpf_arm64_ldr_x_mem
+  - name: bpf_arm64_ldrh
+  - name: bpf_arm64_ldr_w
+  - name: bpf_arm64_ldr_x
   - name: bpf_arm64_rev16_w
   - name: bpf_arm64_rev_w
   - name: bpf_arm64_rev_x

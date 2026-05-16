@@ -12,16 +12,16 @@ fn ccmp_ctx() -> crate::pass::PassContext {
     let mut ctx = pass_ctx();
     ctx.arch = crate::pass::Arch::Aarch64;
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_arm64_cmp_x_imm0", 77, 0)
+        .set_kinsn_call_for_target_name("bpf_arm64_cmp_x", 77, 0)
         .expect("register cmp x");
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_arm64_cmp_w_imm0", 78, 0)
+        .set_kinsn_call_for_target_name("bpf_arm64_cmp_w", 78, 0)
         .expect("register cmp w");
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_arm64_ccmp_x_imm0", 79, 0)
+        .set_kinsn_call_for_target_name("bpf_arm64_ccmp_x", 79, 0)
         .expect("register ccmp x");
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_arm64_ccmp_w_imm0", 80, 0)
+        .set_kinsn_call_for_target_name("bpf_arm64_ccmp_w", 80, 0)
         .expect("register ccmp w");
     ctx.kinsn_registry
         .set_kinsn_call_for_target_name("bpf_arm64_cset_x_cond", 81, 0)

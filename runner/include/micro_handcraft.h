@@ -84,6 +84,7 @@
 #define MICRO_HANDCRAFT_BPF_X86_ANDL 93
 #define MICRO_HANDCRAFT_BPF_X86_CMPB 94
 #define MICRO_HANDCRAFT_BPF_X86_SHRB 95
+#define MICRO_HANDCRAFT_BPF_X86_INCL 96
 struct micro_handcraft_program {
     const struct bpf_insn *insns;
     size_t insn_count;

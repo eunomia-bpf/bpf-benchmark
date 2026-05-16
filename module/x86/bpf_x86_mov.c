@@ -134,15 +134,15 @@ static __always_inline int decode_sib(u64 payload, u8 *dst_reg, u8 *base_reg,
 }
 
 static __always_inline int decode_store_imm(u64 payload, u8 *base_reg,
-					    s16 *offset, u8 *imm)
+					    s16 *offset, s32 *imm)
 {
 	payload = kinsn_payload_decode(payload);
-	if (mov_payload_form(payload) != X86_FORM_STORE_IMM || payload >> 32)
+	if (mov_payload_form(payload) != X86_FORM_STORE_IMM || payload >> 56)
 		return -EINVAL;
 
 	*base_reg = kinsn_payload_reg(payload, 4);
 	*offset = kinsn_payload_s16(payload, 8);
-	*imm = kinsn_payload_u8(payload, 24);
+	*imm = kinsn_payload_s32(payload, 24);
 	if (!kinsn_x86_operand_valid(*base_reg))
 		return -EINVAL;
 
@@ -452,17 +452,23 @@ static int instantiate_store_reg(u64 payload, struct bpf_insn *insn_buf, u8 size
 	return cnt;
 }
 
-static int instantiate_movb_imm_store(u64 payload, struct bpf_insn *insn_buf)
+static int instantiate_mov_imm_store(u64 payload, struct bpf_insn *insn_buf,
+				     u8 size)
 {
-	u8 base_reg, addr_reg, imm;
+	u8 base_reg, addr_reg;
 	u32 scratch_mask = 0;
 	s16 offset;
+	s32 imm;
 	int cnt = 0;
 	int err;
 
 	err = decode_store_imm(payload, &base_reg, &offset, &imm);
 	if (err)
 		return err;
+	if (size == BPF_B && (imm < 0 || imm > 0xff))
+		return -EINVAL;
+	if (size == BPF_H && (imm < -32768 || imm > 0xffff))
+		return -EINVAL;
 
 	addr_reg = base_reg;
 	if (kinsn_x86_reg_is_shadowed(base_reg)) {
@@ -471,7 +477,7 @@ static int instantiate_movb_imm_store(u64 payload, struct bpf_insn *insn_buf)
 		kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
 		kinsn_x86_read64(insn_buf, &cnt, addr_reg, base_reg);
 	}
-	insn_buf[cnt++] = BPF_ST_MEM(BPF_B, addr_reg, offset, imm);
+	insn_buf[cnt++] = BPF_ST_MEM(size, addr_reg, offset, imm);
 	if (scratch_mask)
 		kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
 	return cnt;
@@ -485,7 +491,7 @@ static int instantiate_movb(u64 payload, struct bpf_insn *insn_buf)
 	case X86_FORM_STORE:
 		return instantiate_store_reg(payload, insn_buf, BPF_B);
 	case X86_FORM_STORE_IMM:
-		return instantiate_movb_imm_store(payload, insn_buf);
+		return instantiate_mov_imm_store(payload, insn_buf, BPF_B);
 	default:
 		return -EINVAL;
 	}
@@ -493,9 +499,14 @@ static int instantiate_movb(u64 payload, struct bpf_insn *insn_buf)
 
 static int instantiate_movw(u64 payload, struct bpf_insn *insn_buf)
 {
-	if (mov_payload_form(kinsn_payload_decode(payload)) != X86_FORM_STORE)
+	switch (mov_payload_form(kinsn_payload_decode(payload))) {
+	case X86_FORM_STORE:
+		return instantiate_store_reg(payload, insn_buf, BPF_H);
+	case X86_FORM_STORE_IMM:
+		return instantiate_mov_imm_store(payload, insn_buf, BPF_H);
+	default:
 		return -EINVAL;
-	return instantiate_store_reg(payload, insn_buf, BPF_H);
+	}
 }
 
 static int instantiate_movl(u64 payload, struct bpf_insn *insn_buf)
@@ -511,6 +522,8 @@ static int instantiate_movl(u64 payload, struct bpf_insn *insn_buf)
 		return instantiate_mov_sib(payload, insn_buf, BPF_W);
 	case X86_FORM_STORE:
 		return instantiate_store_reg(payload, insn_buf, BPF_W);
+	case X86_FORM_STORE_IMM:
+		return instantiate_mov_imm_store(payload, insn_buf, BPF_W);
 	default:
 		return -EINVAL;
 	}
@@ -529,6 +542,8 @@ static int instantiate_movq(u64 payload, struct bpf_insn *insn_buf)
 		return instantiate_mov_sib(payload, insn_buf, BPF_DW);
 	case X86_FORM_STORE:
 		return instantiate_store_reg(payload, insn_buf, BPF_DW);
+	case X86_FORM_STORE_IMM:
+		return instantiate_mov_imm_store(payload, insn_buf, BPF_DW);
 	default:
 		return -EINVAL;
 	}
@@ -844,27 +859,42 @@ static int emit_store_reg_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
-static int emit_movb_imm_store_x86(u8 *image, u32 *off, bool emit, u64 payload,
-				   const struct bpf_prog *prog)
+static int emit_mov_imm_store_x86(u8 *image, u32 *off, bool emit, u64 payload,
+				  const struct bpf_prog *prog, u8 size)
 {
 	u8 buf[16];
-	u8 base_reg, imm;
+	u8 base_reg;
 	s16 offset;
+	s32 imm;
 	u32 len = 0;
 	int err;
 
 	err = decode_store_imm(payload, &base_reg, &offset, &imm);
 	if (err)
 		return err;
+	if (size == BPF_B && (imm < 0 || imm > 0xff))
+		return -EINVAL;
+	if (size == BPF_H && (imm < -32768 || imm > 0xffff))
+		return -EINVAL;
 
 	base_reg = kinsn_x86_reg_for_prog(prog, base_reg);
 	if (!kinsn_x86_valid(base_reg))
 		return -EINVAL;
 
-	kinsn_emit_rex(buf, &len, false, false, false, kinsn_x86_ext(base_reg));
-	kinsn_emit_u8(buf, &len, 0xc6);
+	if (size == BPF_H)
+		kinsn_emit_u8(buf, &len, 0x66);
+	kinsn_emit_rex(buf, &len, size == BPF_DW, false, false,
+		       kinsn_x86_ext(base_reg));
+	kinsn_emit_u8(buf, &len, size == BPF_B ? 0xc6 : 0xc7);
 	kinsn_emit_modrm_mem(buf, &len, 0, base_reg, offset);
-	kinsn_emit_u8(buf, &len, imm);
+	if (size == BPF_B) {
+		kinsn_emit_u8(buf, &len, (u8)imm);
+	} else if (size == BPF_H) {
+		kinsn_emit_u8(buf, &len, (u8)imm);
+		kinsn_emit_u8(buf, &len, (u8)((u32)imm >> 8));
+	} else {
+		kinsn_emit_s32(buf, &len, imm);
+	}
 
 	return kinsn_emit_finish(image, off, emit, buf, len);
 }
@@ -905,7 +935,8 @@ static int emit_movb_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	case X86_FORM_STORE:
 		return emit_store_reg_x86(image, off, emit, payload, prog, BPF_B);
 	case X86_FORM_STORE_IMM:
-		return emit_movb_imm_store_x86(image, off, emit, payload, prog);
+		return emit_mov_imm_store_x86(image, off, emit, payload, prog,
+					      BPF_B);
 	default:
 		return -EINVAL;
 	}
@@ -914,9 +945,15 @@ static int emit_movb_x86(u8 *image, u32 *off, bool emit, u64 payload,
 static int emit_movw_x86(u8 *image, u32 *off, bool emit, u64 payload,
 			 const struct bpf_prog *prog)
 {
-	if (mov_payload_form(kinsn_payload_decode(payload)) != X86_FORM_STORE)
+	switch (mov_payload_form(kinsn_payload_decode(payload))) {
+	case X86_FORM_STORE:
+		return emit_store_reg_x86(image, off, emit, payload, prog, BPF_H);
+	case X86_FORM_STORE_IMM:
+		return emit_mov_imm_store_x86(image, off, emit, payload, prog,
+					      BPF_H);
+	default:
 		return -EINVAL;
-	return emit_store_reg_x86(image, off, emit, payload, prog, BPF_H);
+	}
 }
 
 static int emit_movl_x86(u8 *image, u32 *off, bool emit, u64 payload,
@@ -933,6 +970,9 @@ static int emit_movl_x86(u8 *image, u32 *off, bool emit, u64 payload,
 		return emit_mov_sib_x86(image, off, emit, payload, prog, BPF_W);
 	case X86_FORM_STORE:
 		return emit_store_reg_x86(image, off, emit, payload, prog, BPF_W);
+	case X86_FORM_STORE_IMM:
+		return emit_mov_imm_store_x86(image, off, emit, payload, prog,
+					      BPF_W);
 	default:
 		return -EINVAL;
 	}
@@ -952,6 +992,9 @@ static int emit_movq_x86(u8 *image, u32 *off, bool emit, u64 payload,
 		return emit_mov_sib_x86(image, off, emit, payload, prog, BPF_DW);
 	case X86_FORM_STORE:
 		return emit_store_reg_x86(image, off, emit, payload, prog, BPF_DW);
+	case X86_FORM_STORE_IMM:
+		return emit_mov_imm_store_x86(image, off, emit, payload, prog,
+					      BPF_DW);
 	default:
 		return -EINVAL;
 	}

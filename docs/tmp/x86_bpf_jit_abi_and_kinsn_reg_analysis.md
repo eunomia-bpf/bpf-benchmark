@@ -76,24 +76,27 @@ then the ordinary BPF JIT emits that proof sequence. That is effectively a
 covered by ordinary BPF, the cleaner policy is even simpler: user space should
 emit ordinary BPF directly and not emit a kinsn at all.
 
-So there are three choices:
+So there are three possible mechanisms:
 
 | Desired behavior | Mechanism | Where it belongs |
 |---|---|---|
-| Use existing BPF JIT lowering | Emit ordinary BPF, no kinsn | User-space pass/converter |
+| Use existing BPF JIT lowering | Emit ordinary BPF, no kinsn | Normal bpfopt pass output |
 | Keep verifier proof but no native machine instruction | `instantiate_insn()` only; kernel patches to BPF proof sequence | Rare macro/proof-only cases, not normal machine kinsn policy |
 | Emit a specific native instruction not expressible by BPF | `instantiate_insn()` plus `emit_x86()`/`emit_arm64()` | kinsn module |
 
-The BPF-to-x86 equivalence table should therefore live in user-space selection
-logic, not in the kinsn module:
+For normal bpfopt passes, the BPF-to-x86 equivalence table should therefore
+live in user-space selection logic, not in the kinsn module:
 
 - normal bpfopt passes should prefer ordinary BPF when the normal BPF JIT
   already emits the desired native instruction;
-- the native-asm-to-handcraft converter should use the same table to decide
-  whether an x86 instruction can be represented by ordinary BPF or requires a
-  kinsn;
 - the kernel module should only implement descriptors for instructions that
   actually need native emit or strict handcraft coverage.
+
+The strict native-asm-to-handcraft converter is different: it is a parity
+experiment, so it should not silently switch to ordinary BPF fallback when a
+machine instruction is missing. It should emit one machine-level kinsn per
+parsed x86 instruction, or leave an explicit warning in the generated C. This
+keeps missing coverage visible.
 
 Putting this policy in the kernel module would make the module duplicate the
 ordinary x86 BPF JIT's instruction selector. Most of those helpers are private
@@ -107,11 +110,10 @@ These are implementation requirements for the handcraft/native-parity path:
 - Generated `micro/programs/*.handcraft.c` files are artifacts, not source
   design. Code-size review should exclude them and focus on the converter,
   runner ABI, module code, and tests.
-- The converter is mechanical: one parsed native instruction becomes either one
-  x86 kinsn selector plus payload, or one ordinary BPF instruction only when the
-  ordinary x86 BPF JIT is already known to emit the same native instruction.
-  Unsupported instructions are emitted as explicit comments in the generated C;
-  they must not be silently converted through semantic fallback sequences.
+- The converter is mechanical: one parsed native instruction becomes one x86
+  kinsn selector plus payload. Unsupported instructions are emitted as explicit
+  comments in the generated C; they must not be silently converted through
+  semantic fallback sequences.
 - User space owns only parsing, selector choice, payload filling, and O(n)
   branch relocation. It must not allocate verifier temporaries, synthesize
   cross-instruction proof state, or remap native registers to make proof easier.
@@ -132,6 +134,17 @@ These are implementation requirements for the handcraft/native-parity path:
   converter must not lower `cmp+jcc` as a semantic pair. Flags are module-owned
   shadow state for verification and physical x86 flags for final native
   execution.
+- Program-level control flow is user-space-owned. For future `jcc/jmp` kinsns,
+  payload should carry already-relocated verifier branch offset and native rel
+  displacement; kernel/module code should validate and emit, not discover
+  targets.
+- Native stack/frame instructions such as `push`, `pop`, and `mov rbp,rsp` are
+  not padding in strict handcraft mode. They need explicit machine-level kinsns
+  or an explicit ABI boundary. `ret` is the BPF program exit boundary and is
+  emitted as `HC_EXIT()`, not as a raw x86 `ret` inside the JIT body. The
+  current unresolved design issue is that `BPF_REG_10` is the verifier frame
+  pointer while native `rbp` is an x86 architectural register; a full copied
+  prologue needs a precise frame-state payload before it is verifier-safe.
 - Unit tests should check encoded ABI/layout or real selector behavior. Tests
   that only exercise compatibility names or tautological name mappings should
   be removed or replaced by bug-detection tests. Register-overlap bugs such as
@@ -266,7 +279,7 @@ because they exist:
 |---|---|
 | `bpf_x86_rolw` | BPF endian-16 emits `ror/rol word, 8` plus zero-extension. A standalone word rotate is useful for strict native parity, but endian pass can usually stay BPF. |
 | `bpf_x86_addb`, `bpf_x86_andb`, `bpf_x86_xorb with immediate payload`, `bpf_x86_xorb with reg-reg payload`, `bpf_x86_orb` | BPF ALU is 32/64-bit, not low-byte ALU. Needed only when the native instruction is really byte-width and byte-width flags/result matter. |
-| `bpf_x86_incq` | BPF can implement `+1` as `add`, but `inc` differs in flag behavior (`CF` unchanged). Needed only when native flags parity matters. |
+| `bpf_x86_incl` / `bpf_x86_incq` | BPF can implement `+1` as `add`, but `inc` differs in flag behavior (`CF` unchanged). Needed when native flags parity matters or when strict handcraft wants the exact machine instruction. |
 | `bpf_x86_not*` | BPF can compute bitwise-not with `xor -1`, but that is not the same machine instruction. Keep for strict native parity, not for ordinary semantic rewrites. |
 | `bpf_x86_movzbl`, `bpf_x86_movzwl` with rr payload | Same-reg zero-extension has BPF endian/ALU alternatives; cross-reg low-byte/low-word extraction may still need explicit kinsn if exact `movzx` matters. |
 | memory-source forms on `bpf_x86_addl`, `bpf_x86_xorl`, `bpf_x86_xorw`, `bpf_x86_xorb` | BPF has no ALU-with-memory operand, but semantic BPF can load then ALU. Use only for native 1:1 parity, with the operand form carried in payload. |

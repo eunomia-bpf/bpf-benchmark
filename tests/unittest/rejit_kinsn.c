@@ -48,24 +48,24 @@
 #define ROTATE_KINSN_MODULE "bpf_arm64_extr"
 #define ROTATE64_KFUNC "bpf_arm64_extr_x"
 #define SELECT_KINSN_MODULE "bpf_arm64_csel"
-#define SELECT_TEST_KFUNC "bpf_arm64_tst_rr"
-#define SELECT_MOVE_KFUNC "bpf_arm64_csel_ne_rrr"
+#define SELECT_TEST_KFUNC "bpf_arm64_tst"
+#define SELECT_MOVE_KFUNC "bpf_arm64_csel_ne"
 #define EXTRACT_KINSN_MODULE "bpf_arm64_ubfm"
-#define EXTRACT_SHIFT_KFUNC "bpf_arm64_ubfm_x_imm"
-#define EXTRACT_MASK_KFUNC "bpf_arm64_ubfm_x_imm"
+#define EXTRACT_SHIFT_KFUNC "bpf_arm64_ubfm_x"
+#define EXTRACT_MASK_KFUNC "bpf_arm64_ubfm_x"
 #define ENDIAN_LOAD_MODULE "bpf_arm64_ldr"
 #define ENDIAN_SWAP_MODULE "bpf_arm64_rev"
-#define ENDIAN_LOAD16_KFUNC "bpf_arm64_ldrh_mem"
-#define ENDIAN_LOAD32_KFUNC "bpf_arm64_ldr_w_mem"
-#define ENDIAN_LOAD64_KFUNC "bpf_arm64_ldr_x_mem"
+#define ENDIAN_LOAD16_KFUNC "bpf_arm64_ldrh"
+#define ENDIAN_LOAD32_KFUNC "bpf_arm64_ldr_w"
+#define ENDIAN_LOAD64_KFUNC "bpf_arm64_ldr_x"
 #define ENDIAN_SWAP16_KFUNC "bpf_arm64_rev16_w"
 #define ENDIAN_SWAP32_KFUNC "bpf_arm64_rev_w"
 #define ENDIAN_SWAP64_KFUNC "bpf_arm64_rev_x"
 #define BULK_LOAD_MODULE "bpf_arm64_ldr"
 #define BULK_STORE_MODULE "bpf_arm64_str"
-#define BULK_LOADB_KFUNC "bpf_arm64_ldrb_mem"
-#define BULK_STOREB_REG_KFUNC "bpf_arm64_strb_mem_reg"
-#define BULK_STOREB_IMM_KFUNC "bpf_arm64_strb_wzr_mem"
+#define BULK_LOADB_KFUNC "bpf_arm64_ldrb"
+#define BULK_STOREB_REG_KFUNC "bpf_arm64_strb"
+#define BULK_STOREB_IMM_KFUNC "bpf_arm64_strb"
 #else
 #define ROTATE_KINSN_MODULE "bpf_x86_rotate"
 #define ROTATE64_KFUNC "bpf_x86_rolq"
@@ -173,6 +173,7 @@ enum kinsn_func_id {
 	FUNC_X86_SETGE,
 	FUNC_X86_SBBL,
 	FUNC_X86_ANDB,
+	FUNC_X86_INCL,
 	FUNC_X86_INCQ,
 	FUNC_X86_ADDB,
 	FUNC_X86_XORB,
@@ -570,6 +571,10 @@ static struct kinsn_func_ref g_funcs[FUNC_CNT] = {
 		.func_name = "bpf_x86_andb",
 		.module_id = MOD_X86_ALU,
 	},
+	[FUNC_X86_INCL] = {
+		.func_name = "bpf_x86_incl",
+		.module_id = MOD_X86_ALU,
+	},
 	[FUNC_X86_INCQ] = {
 		.func_name = "bpf_x86_incq",
 		.module_id = MOD_X86_ALU,
@@ -819,17 +824,19 @@ static int sys_bpf(enum bpf_cmd cmd, union bpf_attr *attr, unsigned int size)
 
 #define KINSN_BULK_STORE_IMM_PAYLOAD(BASE, OFF, IMM) \
 	(7ULL | ((__u64)(BASE) << 4) | ((__u64)(__u16)(OFF) << 8) | \
-	 ((__u64)(__u8)(IMM) << 24))
+	 ((__u64)(__u32)(IMM) << 24))
 #else
 #define KINSN_ENDIAN_LOAD_PAYLOAD(DST, BASE, OFF) \
 	((__u64)(DST) | ((__u64)(BASE) << 4) | ((__u64)(__u16)(OFF) << 8))
 #define KINSN_BULK_LOAD_PAYLOAD(DST, BASE, OFF) \
 	((__u64)(DST) | ((__u64)(BASE) << 4) | ((__u64)(__u16)(OFF) << 8))
 #define KINSN_BULK_STORE_REG_PAYLOAD(SRC, BASE, OFF) \
-	((__u64)(SRC) | ((__u64)(BASE) << 4) | ((__u64)(__u16)(OFF) << 8))
+	(1ULL | ((__u64)(SRC) << 4) | ((__u64)(BASE) << 8) | \
+	 ((__u64)(__u16)(OFF) << 12))
 
 #define KINSN_BULK_STORE_IMM_PAYLOAD(BASE, OFF, IMM) \
-	((__u64)(BASE) | ((__u64)(__u16)(OFF) << 4) | ((__u64)(__u8)(IMM) << 20))
+	(2ULL | ((__u64)(BASE) << 4) | ((__u64)(__u16)(OFF) << 8) | \
+	 ((__u64)(__u8)(IMM) << 24))
 #endif
 
 #if defined(__x86_64__)
@@ -2698,6 +2705,28 @@ static int test_rejit_x86_incq_jit_emits_inc(void)
 #endif
 }
 
+static int test_rejit_x86_incl_jit_emits_inc(void)
+{
+#if defined(__x86_64__)
+	static const __u8 incl[] = { 0xff, 0xc0 };
+	struct bpf_insn prog[] = {
+		BPF_MOV64_IMM(BPF_REG_0, 7),
+		BPF_KINSN_SIDECAR(KINSN_REG_PAYLOAD(BPF_REG_0)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_EXIT_INSN(),
+	};
+
+	return run_single_kinsn_expect_jit_bytes(
+		"x86_incl_jit_emits_inc", MOD_X86_ALU,
+		FUNC_X86_INCL, prog, ARRAY_SIZE(prog), 8,
+		incl, ARRAY_SIZE(incl),
+		"INC r32 sequence not found in JIT image");
+#else
+	TEST_SKIP("x86_incl_jit_emits_inc", "x86_64 only");
+	return 0;
+#endif
+}
+
 static int test_rejit_x86_addb_imm_jit_emits_add(void)
 {
 #if defined(__x86_64__)
@@ -4355,6 +4384,8 @@ int main(int argc, char **argv)
 		ret |= test_rejit_x86_sbbl_jit_emits_sbb();
 	if (should_run_test(filter, "x86_andb_imm_jit_emits_and"))
 		ret |= test_rejit_x86_andb_imm_jit_emits_and();
+	if (should_run_test(filter, "x86_incl_jit_emits_inc"))
+		ret |= test_rejit_x86_incl_jit_emits_inc();
 	if (should_run_test(filter, "x86_incq_jit_emits_inc"))
 		ret |= test_rejit_x86_incq_jit_emits_inc();
 	if (should_run_test(filter, "x86_addb_imm_jit_emits_add"))

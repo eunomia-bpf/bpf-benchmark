@@ -6,11 +6,11 @@
 #include "kinsn_common.h"
 
 __bpf_kfunc_start_defs();
-__bpf_kfunc void bpf_arm64_ubfm_x_imm(void) {}
+__bpf_kfunc void bpf_arm64_ubfm_x(void) {}
 __bpf_kfunc_end_defs();
 
 BTF_KFUNCS_START(bpf_arm64_ubfm_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_arm64_ubfm_x_imm)
+BTF_ID_FLAGS(func, bpf_arm64_ubfm_x)
 BTF_KFUNCS_END(bpf_arm64_ubfm_kfunc_ids)
 
 static __always_inline int decode_extract_payload(u64 payload,
@@ -61,7 +61,7 @@ static inline u32 a64_ubfm_x(u8 rd, u8 rn, u8 immr, u8 imms)
 	       (u32)rd;
 }
 
-static int emit_ubfm_x_imm_arm64(u32 *image, int *idx, bool emit,
+static int emit_ubfm_x_arm64(u32 *image, int *idx, bool emit,
 			      u64 payload, const struct bpf_prog *prog)
 {
 	u8 dst_reg, start, bit_len;
@@ -90,16 +90,16 @@ static int emit_ubfm_x_imm_arm64(u32 *image, int *idx, bool emit,
 	return 1;
 }
 
-const struct bpf_kinsn bpf_arm64_ubfm_x_imm_desc = {
+const struct bpf_kinsn bpf_arm64_ubfm_x_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 2,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_extract,
-	.emit_arm64 = emit_ubfm_x_imm_arm64,
+	.emit_arm64 = emit_ubfm_x_arm64,
 };
 
 static const struct bpf_kinsn * const bpf_arm64_ubfm_kinsn_descs[] = {
-	&bpf_arm64_ubfm_x_imm_desc,
+	&bpf_arm64_ubfm_x_desc,
 };
 
 DEFINE_KINSN_V2_MODULE(bpf_arm64_ubfm, "BpfReJIT arm64 kinsn: UBFM",

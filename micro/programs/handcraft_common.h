@@ -86,7 +86,7 @@
     (HC_X86_STORE_PAYLOAD(SRC, BASE, OFF) | ((__u64)(LANE) << 28))
 #define HC_X86_STORE_IMM_PAYLOAD(BASE, OFF, IMM) \
     ((__u64)(HC_X86_FORM_STORE_IMM) | ((__u64)(BASE) << 4) | \
-     ((__u64)(__u16)(OFF) << 8) | ((__u64)(__u8)(IMM) << 24))
+     ((__u64)(__u16)(OFF) << 8) | ((__u64)(__u32)(IMM) << 24))
 #define HC_X86_ALU_RR_PAYLOAD(DST, SRC) \
     ((__u64)(HC_X86_ALU_FORM_RR) | ((__u64)(DST) << 4) | ((__u64)(SRC) << 8))
 #define HC_X86_ALU_IMM_PAYLOAD(DST, IMM) \

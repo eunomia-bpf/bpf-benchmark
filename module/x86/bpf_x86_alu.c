@@ -10,6 +10,7 @@ __bpf_kfunc void bpf_x86_addb(void) {}
 __bpf_kfunc void bpf_x86_andb(void) {}
 __bpf_kfunc void bpf_x86_andq(void) {}
 __bpf_kfunc void bpf_x86_andl(void) {}
+__bpf_kfunc void bpf_x86_incl(void) {}
 __bpf_kfunc void bpf_x86_incq(void) {}
 __bpf_kfunc void bpf_x86_sbbl(void) {}
 __bpf_kfunc void bpf_x86_xorb(void) {}
@@ -39,6 +40,7 @@ BTF_ID_FLAGS(func, bpf_x86_addq)
 BTF_ID_FLAGS(func, bpf_x86_andb)
 BTF_ID_FLAGS(func, bpf_x86_andl)
 BTF_ID_FLAGS(func, bpf_x86_andq)
+BTF_ID_FLAGS(func, bpf_x86_incl)
 BTF_ID_FLAGS(func, bpf_x86_incq)
 BTF_ID_FLAGS(func, bpf_x86_orb)
 BTF_ID_FLAGS(func, bpf_x86_orl)
@@ -524,7 +526,7 @@ static int instantiate_andb_imm(u64 payload, struct bpf_insn *insn_buf)
 	return cnt;
 }
 
-static int instantiate_incq(u64 payload, struct bpf_insn *insn_buf)
+static int instantiate_inc(u64 payload, struct bpf_insn *insn_buf, u8 width)
 {
 	u8 dst_reg, value_reg;
 	u32 scratch_mask;
@@ -535,8 +537,15 @@ static int instantiate_incq(u64 payload, struct bpf_insn *insn_buf)
 	if (err)
 		return err;
 
-	if (!kinsn_x86_reg_is_shadowed(dst_reg) && !kinsn_x86_is_scratch(dst_reg)) {
-		insn_buf[0] = BPF_ALU64_IMM(BPF_ADD, dst_reg, 1);
+	if (width != 32 && width != 64)
+		return -EINVAL;
+
+	if (!kinsn_x86_reg_is_shadowed(dst_reg) &&
+	    !kinsn_x86_is_scratch(dst_reg)) {
+		if (width == 32)
+			insn_buf[0] = BPF_ALU32_IMM(BPF_ADD, dst_reg, 1);
+		else
+			insn_buf[0] = BPF_ALU64_IMM(BPF_ADD, dst_reg, 1);
 		return 1;
 	}
 
@@ -544,10 +553,23 @@ static int instantiate_incq(u64 payload, struct bpf_insn *insn_buf)
 	scratch_mask = KINSN_X86_SCRATCH_MASK(value_reg);
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
 	kinsn_x86_read64(insn_buf, &cnt, value_reg, dst_reg);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_ADD, value_reg, 1);
+	if (width == 32)
+		insn_buf[cnt++] = BPF_ALU32_IMM(BPF_ADD, value_reg, 1);
+	else
+		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_ADD, value_reg, 1);
 	kinsn_x86_write64(insn_buf, &cnt, dst_reg, value_reg, scratch_mask);
 	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
 	return cnt;
+}
+
+static int instantiate_incl(u64 payload, struct bpf_insn *insn_buf)
+{
+	return instantiate_inc(payload, insn_buf, 32);
+}
+
+static int instantiate_incq(u64 payload, struct bpf_insn *insn_buf)
+{
+	return instantiate_inc(payload, insn_buf, 64);
 }
 
 static int instantiate_sbbl(u64 payload, struct bpf_insn *insn_buf)
@@ -1145,8 +1167,8 @@ static int emit_orb_rr_x86(u8 *image, u32 *off, bool emit,
 	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
-static int emit_incq_x86(u8 *image, u32 *off, bool emit,
-			 u64 payload, const struct bpf_prog *prog)
+static int emit_inc_x86(u8 *image, u32 *off, bool emit, u64 payload,
+			const struct bpf_prog *prog, bool is64)
 {
 	u8 buf[4];
 	u8 dst_reg;
@@ -1161,11 +1183,23 @@ static int emit_incq_x86(u8 *image, u32 *off, bool emit,
 	if (!kinsn_x86_valid(dst_reg))
 		return -EINVAL;
 
-	kinsn_emit_rex_rr(buf, &len, true, 0, dst_reg);
+	kinsn_emit_rex_rr(buf, &len, is64, 0, dst_reg);
 	kinsn_emit_u8(buf, &len, 0xff);
 	kinsn_emit_u8(buf, &len, 0xc0 | kinsn_x86_code(dst_reg));
 
 	return kinsn_emit_finish(image, off, emit, buf, len);
+}
+
+static int emit_incl_x86(u8 *image, u32 *off, bool emit,
+			 u64 payload, const struct bpf_prog *prog)
+{
+	return emit_inc_x86(image, off, emit, payload, prog, false);
+}
+
+static int emit_incq_x86(u8 *image, u32 *off, bool emit,
+			 u64 payload, const struct bpf_prog *prog)
+{
+	return emit_inc_x86(image, off, emit, payload, prog, true);
 }
 
 static int emit_sbbl_x86(u8 *image, u32 *off, bool emit,
@@ -1213,10 +1247,18 @@ const struct bpf_kinsn bpf_x86_andb_desc = {
 
 const struct bpf_kinsn bpf_x86_incq_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 1 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 3 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_incq,
 	.emit_x86 = emit_incq_x86,
+};
+
+const struct bpf_kinsn bpf_x86_incl_desc = {
+	.owner = THIS_MODULE,
+	.max_insn_cnt = 3 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
+	.max_emit_bytes = 4,
+	.instantiate_insn = instantiate_incl,
+	.emit_x86 = emit_incl_x86,
 };
 
 const struct bpf_kinsn bpf_x86_sbbl_desc = {
@@ -1298,6 +1340,7 @@ static const struct bpf_kinsn * const bpf_x86_alu_kinsn_descs[] = {
 	&bpf_x86_andb_desc,
 	&bpf_x86_andl_desc,
 	&bpf_x86_andq_desc,
+	&bpf_x86_incl_desc,
 	&bpf_x86_incq_desc,
 	&bpf_x86_orb_desc,
 	&bpf_x86_orl_desc,

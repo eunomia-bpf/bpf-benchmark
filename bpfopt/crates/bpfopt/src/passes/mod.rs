@@ -68,7 +68,7 @@ pub(crate) const COMMON_KINSN_TARGETS: &[KinsnDescriptor] = &[
         register_defs: x86_mov_register_defs,
     },
     KinsnDescriptor {
-        name: "bpf_arm64_mov_x_rr",
+        name: "bpf_arm64_mov_x",
         register_uses: arm64_mov_register_uses,
         register_defs: arm64_mov_register_defs,
     },

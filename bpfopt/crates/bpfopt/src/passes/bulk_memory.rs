@@ -6,9 +6,10 @@ use crate::pass::*;
 const X86_LOADB_TARGET: &str = "bpf_x86_movzbl";
 const X86_STOREB_REG_TARGET: &str = "bpf_x86_movb";
 const X86_STOREB_IMM_TARGET: &str = "bpf_x86_movb";
-const ARM64_LOADB_TARGET: &str = "bpf_arm64_ldrb_mem";
-const ARM64_STOREB_REG_TARGET: &str = "bpf_arm64_strb_mem_reg";
-const ARM64_STOREB_WZR_TARGET: &str = "bpf_arm64_strb_wzr_mem";
+const ARM64_LOADB_TARGET: &str = "bpf_arm64_ldrb";
+const ARM64_STOREB_TARGET: &str = "bpf_arm64_strb";
+const ARM64_STR_FORM_REG: u8 = 1;
+const ARM64_STR_FORM_ZERO: u8 = 2;
 const MIN_BULK_BYTES: usize = 32;
 const CHUNK_MAX_BYTES: usize = 128;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
@@ -18,13 +19,8 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
         register_defs: load_register_defs,
     },
     KinsnDescriptor {
-        name: ARM64_STOREB_REG_TARGET,
-        register_uses: store_reg_register_uses,
-        register_defs: no_regs,
-    },
-    KinsnDescriptor {
-        name: ARM64_STOREB_WZR_TARGET,
-        register_uses: store_imm_register_uses,
+        name: ARM64_STOREB_TARGET,
+        register_uses: arm64_store_register_uses,
         register_defs: no_regs,
     },
 ];
@@ -34,11 +30,12 @@ fn load_register_uses(payload: u64) -> RegSet {
 fn load_register_defs(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[0])
 }
-fn store_reg_register_uses(payload: u64) -> RegSet {
-    regs_from_offsets(payload, &[0, 4])
-}
-fn store_imm_register_uses(payload: u64) -> RegSet {
-    regs_from_offsets(payload, &[0])
+fn arm64_store_register_uses(payload: u64) -> RegSet {
+    match BpfInsn::unpack_u4(payload, 0) {
+        ARM64_STR_FORM_REG => regs_from_offsets(payload, &[4, 8]),
+        ARM64_STR_FORM_ZERO => regs_from_offsets(payload, &[4]),
+        _ => RegSet::new(),
+    }
 }
 #[derive(Clone, Debug)]
 enum BulkSiteKind {
@@ -421,7 +418,7 @@ fn emit_memcpy_byte_kinsns(
 ) -> anyhow::Result<Vec<BpfInsn>> {
     let (load_target, store_target) = match arch {
         Arch::X86_64 => (X86_LOADB_TARGET, X86_STOREB_REG_TARGET),
-        Arch::Aarch64 => (ARM64_LOADB_TARGET, ARM64_STOREB_REG_TARGET),
+        Arch::Aarch64 => (ARM64_LOADB_TARGET, ARM64_STOREB_TARGET),
     };
     let mut out = Vec::with_capacity(total_bytes * 4);
     for idx in 0..total_bytes {
@@ -457,7 +454,7 @@ fn emit_memset_byte_kinsns(
                 out.extend_from_slice(&prog.kinsn_emit(X86_STOREB_IMM_TARGET, payload)?)
             }
             Arch::Aarch64 if fill_byte == 0 => {
-                out.extend_from_slice(&prog.kinsn_emit(ARM64_STOREB_WZR_TARGET, payload)?);
+                out.extend_from_slice(&prog.kinsn_emit(ARM64_STOREB_TARGET, payload)?);
             }
             Arch::Aarch64 => anyhow::bail!(
                 "arm64 nonzero memset has no single store-immediate machine instruction"
@@ -494,9 +491,10 @@ fn pack_store_reg_payload(arch: Arch, src_reg: u8, base_reg: u8, offset: i16) ->
                 | BpfInsn::pack_u16(offset as u16, 12)
         }
         Arch::Aarch64 => {
-            BpfInsn::pack_u4(src_reg, 0)
-                | BpfInsn::pack_u4(base_reg, 4)
-                | BpfInsn::pack_u16(offset as u16, 8)
+            BpfInsn::pack_u4(ARM64_STR_FORM_REG, 0)
+                | BpfInsn::pack_u4(src_reg, 4)
+                | BpfInsn::pack_u4(base_reg, 8)
+                | BpfInsn::pack_u16(offset as u16, 12)
         }
     }
 }
@@ -509,9 +507,10 @@ fn pack_store_imm_payload(arch: Arch, base_reg: u8, offset: i16, fill_byte: u8) 
                 | BpfInsn::pack_u8(fill_byte, 24)
         }
         Arch::Aarch64 => {
-            BpfInsn::pack_u4(base_reg, 0)
-                | BpfInsn::pack_u16(offset as u16, 4)
-                | BpfInsn::pack_u8(fill_byte, 20)
+            BpfInsn::pack_u4(ARM64_STR_FORM_ZERO, 0)
+                | BpfInsn::pack_u4(base_reg, 4)
+                | BpfInsn::pack_u16(offset as u16, 8)
+                | BpfInsn::pack_u8(fill_byte, 24)
         }
     }
 }

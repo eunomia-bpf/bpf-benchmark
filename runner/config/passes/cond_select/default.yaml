@@ -7,8 +7,8 @@ kinsns:
   - name: bpf_x86_testq
   - name: bpf_x86_cmovneq
   - name: bpf_x86_cmoveq
-  - name: bpf_arm64_mov_x_rr
-  - name: bpf_arm64_tst_rr
-  - name: bpf_arm64_csel_ne_rrr
+  - name: bpf_arm64_mov_x
+  - name: bpf_arm64_tst
+  - name: bpf_arm64_csel_ne
 command: |
   timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}

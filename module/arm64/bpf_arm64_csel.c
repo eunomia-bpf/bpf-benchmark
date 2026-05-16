@@ -6,13 +6,13 @@
 #include "kinsn_common.h"
 
 __bpf_kfunc_start_defs();
-__bpf_kfunc void bpf_arm64_tst_rr(void) {}
-__bpf_kfunc void bpf_arm64_csel_ne_rrr(void) {}
+__bpf_kfunc void bpf_arm64_tst(void) {}
+__bpf_kfunc void bpf_arm64_csel_ne(void) {}
 __bpf_kfunc_end_defs();
 
 BTF_KFUNCS_START(bpf_arm64_csel_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_arm64_csel_ne_rrr)
-BTF_ID_FLAGS(func, bpf_arm64_tst_rr)
+BTF_ID_FLAGS(func, bpf_arm64_csel_ne)
+BTF_ID_FLAGS(func, bpf_arm64_tst)
 BTF_KFUNCS_END(bpf_arm64_csel_kfunc_ids)
 
 #define COND_NE 0x1
@@ -49,7 +49,7 @@ static __always_inline int decode_csel_payload(u64 payload,
 	return 0;
 }
 
-static int instantiate_tst_rr(u64 payload, struct bpf_insn *insn_buf)
+static int instantiate_tst(u64 payload, struct bpf_insn *insn_buf)
 {
 	u8 reg;
 	int err;
@@ -62,7 +62,7 @@ static int instantiate_tst_rr(u64 payload, struct bpf_insn *insn_buf)
 	return 1;
 }
 
-static int instantiate_csel_ne_rrr(u64 payload, struct bpf_insn *insn_buf)
+static int instantiate_csel_ne(u64 payload, struct bpf_insn *insn_buf)
 {
 	u8 dst_reg, true_reg, false_reg, cond_reg;
 	int err;
@@ -93,7 +93,7 @@ static inline u32 a64_csel(u8 rd, u8 rn, u8 rm, u8 cond)
 	       (u32)rd;
 }
 
-static int emit_tst_rr_arm64(u32 *image, int *idx, bool emit,
+static int emit_tst_arm64(u32 *image, int *idx, bool emit,
 			     u64 payload, const struct bpf_prog *prog)
 {
 	u8 reg;
@@ -122,7 +122,7 @@ static int emit_tst_rr_arm64(u32 *image, int *idx, bool emit,
 	return 1;
 }
 
-static int emit_csel_ne_rrr_arm64(u32 *image, int *idx, bool emit,
+static int emit_csel_ne_arm64(u32 *image, int *idx, bool emit,
 				  u64 payload, const struct bpf_prog *prog)
 {
 	u8 dst_reg, true_reg, false_reg, cond_reg;
@@ -156,25 +156,25 @@ static int emit_csel_ne_rrr_arm64(u32 *image, int *idx, bool emit,
 	return 1;
 }
 
-const struct bpf_kinsn bpf_arm64_tst_rr_desc = {
+const struct bpf_kinsn bpf_arm64_tst_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
-	.instantiate_insn = instantiate_tst_rr,
-	.emit_arm64 = emit_tst_rr_arm64,
+	.instantiate_insn = instantiate_tst,
+	.emit_arm64 = emit_tst_arm64,
 };
 
-const struct bpf_kinsn bpf_arm64_csel_ne_rrr_desc = {
+const struct bpf_kinsn bpf_arm64_csel_ne_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 4,
 	.max_emit_bytes = 4,
-	.instantiate_insn = instantiate_csel_ne_rrr,
-	.emit_arm64 = emit_csel_ne_rrr_arm64,
+	.instantiate_insn = instantiate_csel_ne,
+	.emit_arm64 = emit_csel_ne_arm64,
 };
 
 static const struct bpf_kinsn * const bpf_arm64_csel_kinsn_descs[] = {
-	&bpf_arm64_csel_ne_rrr_desc,
-	&bpf_arm64_tst_rr_desc,
+	&bpf_arm64_csel_ne_desc,
+	&bpf_arm64_tst_desc,
 };
 
 DEFINE_KINSN_V2_MODULE(bpf_arm64_csel, "BpfReJIT arm64 kinsns: TST/CSEL",

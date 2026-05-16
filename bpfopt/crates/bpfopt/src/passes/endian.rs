@@ -19,17 +19,17 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
         register_defs: endian_unary_register_defs,
     },
     KinsnDescriptor {
-        name: "bpf_arm64_ldrh_mem",
+        name: "bpf_arm64_ldrh",
         register_uses: endian_load_register_uses,
         register_defs: endian_load_register_defs,
     },
     KinsnDescriptor {
-        name: "bpf_arm64_ldr_w_mem",
+        name: "bpf_arm64_ldr_w",
         register_uses: endian_load_register_uses,
         register_defs: endian_load_register_defs,
     },
     KinsnDescriptor {
-        name: "bpf_arm64_ldr_x_mem",
+        name: "bpf_arm64_ldr_x",
         register_uses: endian_load_register_uses,
         register_defs: endian_load_register_defs,
     },
@@ -58,9 +58,9 @@ fn endian_load_target(arch: Arch, w: BpfMemWidth) -> Option<&'static str> {
         (Arch::X86_64, BpfMemWidth::H) => Some("bpf_x86_movzwl"),
         (Arch::X86_64, BpfMemWidth::W) => Some("bpf_x86_movl"),
         (Arch::X86_64, BpfMemWidth::DW) => Some("bpf_x86_movq"),
-        (Arch::Aarch64, BpfMemWidth::H) => Some("bpf_arm64_ldrh_mem"),
-        (Arch::Aarch64, BpfMemWidth::W) => Some("bpf_arm64_ldr_w_mem"),
-        (Arch::Aarch64, BpfMemWidth::DW) => Some("bpf_arm64_ldr_x_mem"),
+        (Arch::Aarch64, BpfMemWidth::H) => Some("bpf_arm64_ldrh"),
+        (Arch::Aarch64, BpfMemWidth::W) => Some("bpf_arm64_ldr_w"),
+        (Arch::Aarch64, BpfMemWidth::DW) => Some("bpf_arm64_ldr_x"),
         (_, BpfMemWidth::B) => None,
     }
 }

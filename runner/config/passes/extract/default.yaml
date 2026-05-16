@@ -5,6 +5,6 @@ log_level: 1
 kinsns:
   - name: bpf_x86_shrq
   - name: bpf_x86_andl
-  - name: bpf_arm64_ubfm_x_imm
+  - name: bpf_arm64_ubfm_x
 command: |
   timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}

@@ -901,6 +901,7 @@ const handcraft_kinsn_desc &handcraft_kinsn_desc_for_selector(int selector)
         {MICRO_HANDCRAFT_BPF_X86_SETGE, "bpf_x86_cmov", "bpf_x86_setge"},
         {MICRO_HANDCRAFT_BPF_X86_SBBL, "bpf_x86_alu", "bpf_x86_sbbl"},
         {MICRO_HANDCRAFT_BPF_X86_ANDB, "bpf_x86_alu", "bpf_x86_andb"},
+        {MICRO_HANDCRAFT_BPF_X86_INCL, "bpf_x86_alu", "bpf_x86_incl"},
         {MICRO_HANDCRAFT_BPF_X86_INCQ, "bpf_x86_alu", "bpf_x86_incq"},
         {MICRO_HANDCRAFT_BPF_X86_ADDB, "bpf_x86_alu", "bpf_x86_addb"},
         {MICRO_HANDCRAFT_BPF_X86_XORB, "bpf_x86_alu", "bpf_x86_xorb"},

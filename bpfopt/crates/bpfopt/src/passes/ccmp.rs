@@ -6,22 +6,22 @@ use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
-        name: "bpf_arm64_cmp_x_imm0",
+        name: "bpf_arm64_cmp_x",
         register_uses: ccmp_single_register_uses,
         register_defs: no_regs,
     },
     KinsnDescriptor {
-        name: "bpf_arm64_cmp_w_imm0",
+        name: "bpf_arm64_cmp_w",
         register_uses: ccmp_single_register_uses,
         register_defs: no_regs,
     },
     KinsnDescriptor {
-        name: "bpf_arm64_ccmp_x_imm0",
+        name: "bpf_arm64_ccmp_x",
         register_uses: ccmp_single_register_uses,
         register_defs: no_regs,
     },
     KinsnDescriptor {
-        name: "bpf_arm64_ccmp_w_imm0",
+        name: "bpf_arm64_ccmp_w",
         register_uses: ccmp_single_register_uses,
         register_defs: no_regs,
     },
@@ -219,12 +219,12 @@ fn emit_ccmp_kinsns(
     cset_payload: u64,
 ) -> anyhow::Result<Vec<BpfInsn>> {
     let cmp_target = match site.width {
-        CcmpWidth::Bpf64 => "bpf_arm64_cmp_x_imm0",
-        CcmpWidth::Bpf32 => "bpf_arm64_cmp_w_imm0",
+        CcmpWidth::Bpf64 => "bpf_arm64_cmp_x",
+        CcmpWidth::Bpf32 => "bpf_arm64_cmp_w",
     };
     let ccmp_target = match site.width {
-        CcmpWidth::Bpf64 => "bpf_arm64_ccmp_x_imm0",
-        CcmpWidth::Bpf32 => "bpf_arm64_ccmp_w_imm0",
+        CcmpWidth::Bpf64 => "bpf_arm64_ccmp_x",
+        CcmpWidth::Bpf32 => "bpf_arm64_ccmp_w",
     };
     let mut out = Vec::with_capacity(site.regs.len() * 2 + 2);
     out.extend_from_slice(&prog.kinsn_emit(cmp_target, BpfInsn::pack_u4(site.regs[0], 0))?);

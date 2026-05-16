@@ -25,12 +25,12 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
         register_defs: cond_select_register_defs,
     },
     KinsnDescriptor {
-        name: "bpf_arm64_tst_rr",
+        name: "bpf_arm64_tst",
         register_uses: test_register_uses,
         register_defs: no_regs,
     },
     KinsnDescriptor {
-        name: "bpf_arm64_csel_ne_rrr",
+        name: "bpf_arm64_csel_ne",
         register_uses: cond_select_register_uses,
         register_defs: cond_select_register_defs,
     },
@@ -179,7 +179,7 @@ fn emit_cond_select_kinsns(
         return prog.kinsn_emit(
             match arch {
                 Arch::X86_64 => "bpf_x86_movq",
-                Arch::Aarch64 => "bpf_arm64_mov_x_rr",
+                Arch::Aarch64 => "bpf_arm64_mov_x",
             },
             mov_reg_payload(arch, site.dst_reg, lowering.a_reg),
         );
@@ -243,9 +243,9 @@ fn emit_arm64_cond_select_kinsns(
     lowering: &CondSelectLowering,
 ) -> anyhow::Result<Vec<BpfInsn>> {
     let mut out = Vec::new();
-    out.extend_from_slice(&prog.kinsn_emit("bpf_arm64_tst_rr", test_payload(lowering.cond_reg))?);
+    out.extend_from_slice(&prog.kinsn_emit("bpf_arm64_tst", test_payload(lowering.cond_reg))?);
     out.extend_from_slice(&prog.kinsn_emit(
-        "bpf_arm64_csel_ne_rrr",
+        "bpf_arm64_csel_ne",
         BpfInsn::pack_u4(site.dst_reg, 0)
             | BpfInsn::pack_u4(lowering.a_reg, 4)
             | BpfInsn::pack_u4(lowering.b_reg, 8)

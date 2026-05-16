@@ -6,18 +6,18 @@
 #include "kinsn_common.h"
 
 __bpf_kfunc_start_defs();
-__bpf_kfunc void bpf_arm64_cmp_x_imm0(void) {}
-__bpf_kfunc void bpf_arm64_cmp_w_imm0(void) {}
-__bpf_kfunc void bpf_arm64_ccmp_x_imm0(void) {}
-__bpf_kfunc void bpf_arm64_ccmp_w_imm0(void) {}
+__bpf_kfunc void bpf_arm64_cmp_x(void) {}
+__bpf_kfunc void bpf_arm64_cmp_w(void) {}
+__bpf_kfunc void bpf_arm64_ccmp_x(void) {}
+__bpf_kfunc void bpf_arm64_ccmp_w(void) {}
 __bpf_kfunc void bpf_arm64_cset_x_cond(void) {}
 __bpf_kfunc_end_defs();
 
 BTF_KFUNCS_START(bpf_arm64_ccmp_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_arm64_ccmp_w_imm0)
-BTF_ID_FLAGS(func, bpf_arm64_ccmp_x_imm0)
-BTF_ID_FLAGS(func, bpf_arm64_cmp_w_imm0)
-BTF_ID_FLAGS(func, bpf_arm64_cmp_x_imm0)
+BTF_ID_FLAGS(func, bpf_arm64_ccmp_w)
+BTF_ID_FLAGS(func, bpf_arm64_ccmp_x)
+BTF_ID_FLAGS(func, bpf_arm64_cmp_w)
+BTF_ID_FLAGS(func, bpf_arm64_cmp_x)
 BTF_ID_FLAGS(func, bpf_arm64_cset_x_cond)
 BTF_KFUNCS_END(bpf_arm64_ccmp_kfunc_ids)
 
@@ -283,60 +283,60 @@ static int emit_cset_arm64(u32 *image, int *idx, bool emit, u64 payload,
 	return 1;
 }
 
-static int emit_cmp_x_imm0_arm64(u32 *image, int *idx, bool emit,
+static int emit_cmp_x_arm64(u32 *image, int *idx, bool emit,
 				 u64 payload, const struct bpf_prog *prog)
 {
 	return emit_cmp_arm64(image, idx, emit, payload, prog, false);
 }
 
-static int emit_cmp_w_imm0_arm64(u32 *image, int *idx, bool emit,
+static int emit_cmp_w_arm64(u32 *image, int *idx, bool emit,
 				 u64 payload, const struct bpf_prog *prog)
 {
 	return emit_cmp_arm64(image, idx, emit, payload, prog, true);
 }
 
-static int emit_ccmp_x_imm0_arm64(u32 *image, int *idx, bool emit,
+static int emit_ccmp_x_arm64(u32 *image, int *idx, bool emit,
 				  u64 payload, const struct bpf_prog *prog)
 {
 	return emit_ccmp_arm64(image, idx, emit, payload, prog, false);
 }
 
-static int emit_ccmp_w_imm0_arm64(u32 *image, int *idx, bool emit,
+static int emit_ccmp_w_arm64(u32 *image, int *idx, bool emit,
 				  u64 payload, const struct bpf_prog *prog)
 {
 	return emit_ccmp_arm64(image, idx, emit, payload, prog, true);
 }
 
-const struct bpf_kinsn bpf_arm64_cmp_x_imm0_desc = {
+const struct bpf_kinsn bpf_arm64_cmp_x_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_cmp,
-	.emit_arm64 = emit_cmp_x_imm0_arm64,
+	.emit_arm64 = emit_cmp_x_arm64,
 };
 
-const struct bpf_kinsn bpf_arm64_cmp_w_imm0_desc = {
+const struct bpf_kinsn bpf_arm64_cmp_w_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_cmp,
-	.emit_arm64 = emit_cmp_w_imm0_arm64,
+	.emit_arm64 = emit_cmp_w_arm64,
 };
 
-const struct bpf_kinsn bpf_arm64_ccmp_x_imm0_desc = {
+const struct bpf_kinsn bpf_arm64_ccmp_x_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_ccmp,
-	.emit_arm64 = emit_ccmp_x_imm0_arm64,
+	.emit_arm64 = emit_ccmp_x_arm64,
 };
 
-const struct bpf_kinsn bpf_arm64_ccmp_w_imm0_desc = {
+const struct bpf_kinsn bpf_arm64_ccmp_w_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_ccmp,
-	.emit_arm64 = emit_ccmp_w_imm0_arm64,
+	.emit_arm64 = emit_ccmp_w_arm64,
 };
 
 const struct bpf_kinsn bpf_arm64_cset_x_cond_desc = {
@@ -348,10 +348,10 @@ const struct bpf_kinsn bpf_arm64_cset_x_cond_desc = {
 };
 
 static const struct bpf_kinsn * const bpf_arm64_ccmp_kinsn_descs[] = {
-	&bpf_arm64_ccmp_w_imm0_desc,
-	&bpf_arm64_ccmp_x_imm0_desc,
-	&bpf_arm64_cmp_w_imm0_desc,
-	&bpf_arm64_cmp_x_imm0_desc,
+	&bpf_arm64_ccmp_w_desc,
+	&bpf_arm64_ccmp_x_desc,
+	&bpf_arm64_cmp_w_desc,
+	&bpf_arm64_cmp_x_desc,
 	&bpf_arm64_cset_x_cond_desc,
 };
 
