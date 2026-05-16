@@ -246,7 +246,7 @@ fn build_registry() -> Result<KinsnRegistry> {
         .collect();
     // Common targets registered by KinsnRegistry::new() but not listed in any
     // pass's kinsn_targets — keep this in sync with passes/mod.rs:COMMON_KINSN_TARGETS.
-    names.extend(["bpf_x86_movq_rr", "bpf_arm64_mov_x_rr"]);
+    names.extend(["bpf_x86_movq", "bpf_arm64_mov_x_rr"]);
     names.sort();
     names.dedup();
     for (idx, name) in names.iter().enumerate() {

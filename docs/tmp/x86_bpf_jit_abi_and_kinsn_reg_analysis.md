@@ -249,9 +249,9 @@ Current x86 kinsns that are redundant for normal pass output:
 | `bpf_x86_movq` with rr payload | `BPF_MOV64_REG` emits `mov dst, src` | Do not use in passes. Use normal BPF move. |
 | `bpf_x86_movl` with rr payload | `BPF_MOV32_REG` emits `mov32 dst, src` | Do not use in passes. |
 | `bpf_x86_movswl` | BPF sign-extending `MOV` form emits `movsx` | Usually unnecessary for pass output. |
-| `bpf_x86_shrq_imm` | `BPF_ALU64 RSH K` emits `shr dst, imm` | Redundant for x86 `extract`; keep BPF. |
-| `bpf_x86_andl_imm32` | `BPF_ALU AND K` can emit 32-bit `and dst, imm` | Redundant for x86 `extract`; keep BPF when semantics match. |
-| `bpf_x86_xorl_rr` | `BPF_ALU XOR X` emits `xor dst, src` | Redundant unless strict flag/native-reg simulation needs a kinsn. |
+| `bpf_x86_shrq with immediate payload` | `BPF_ALU64 RSH K` emits `shr dst, imm` | Redundant for x86 `extract`; keep BPF. |
+| `bpf_x86_andl with immediate payload` | `BPF_ALU AND K` can emit 32-bit `and dst, imm` | Redundant for x86 `extract`; keep BPF when semantics match. |
+| `bpf_x86_xorl with reg-reg payload` | `BPF_ALU XOR X` emits `xor dst, src` | Redundant unless strict flag/native-reg simulation needs a kinsn. |
 | `bpf_x86_imulq` | `BPF_ALU64 MUL X` emits `imul dst, src` | Redundant for BPF-safe regs; only handcraft strict mode may need it. |
 | `bpf_x86_movzbl` / `movzwl` / `movl` / `movq` with direct-memory payload | `BPF_LDX MEM` emits the same direct load when base/disp are verifier-safe | Redundant; use ordinary BPF load unless strict native register parity is required. |
 | `bpf_x86_movb` / `movw` / `movl` / `movq` with store payload | `BPF_STX MEM` emits the same direct store when base/disp are verifier-safe | Redundant; use ordinary BPF store unless strict native register parity is required. |
@@ -265,7 +265,7 @@ because they exist:
 | Current kinsn | Why conditional |
 |---|---|
 | `bpf_x86_rolw` | BPF endian-16 emits `ror/rol word, 8` plus zero-extension. A standalone word rotate is useful for strict native parity, but endian pass can usually stay BPF. |
-| `bpf_x86_addb`, `bpf_x86_andb`, `bpf_x86_xorb_imm`, `bpf_x86_xorb_rr`, `bpf_x86_orb` | BPF ALU is 32/64-bit, not low-byte ALU. Needed only when the native instruction is really byte-width and byte-width flags/result matter. |
+| `bpf_x86_addb`, `bpf_x86_andb`, `bpf_x86_xorb with immediate payload`, `bpf_x86_xorb with reg-reg payload`, `bpf_x86_orb` | BPF ALU is 32/64-bit, not low-byte ALU. Needed only when the native instruction is really byte-width and byte-width flags/result matter. |
 | `bpf_x86_incq` | BPF can implement `+1` as `add`, but `inc` differs in flag behavior (`CF` unchanged). Needed only when native flags parity matters. |
 | `bpf_x86_not*` | BPF can compute bitwise-not with `xor -1`, but that is not the same machine instruction. Keep for strict native parity, not for ordinary semantic rewrites. |
 | `bpf_x86_movzbl`, `bpf_x86_movzwl` with rr payload | Same-reg zero-extension has BPF endian/ALU alternatives; cross-reg low-byte/low-word extraction may still need explicit kinsn if exact `movzx` matters. |
@@ -279,8 +279,8 @@ Current x86 kinsns that are genuinely needed for native-shape coverage:
 | `bpf_x86_cmov*` | No BPF instruction for conditional move. |
 | `bpf_x86_set*` | No BPF instruction for `setcc`. |
 | `bpf_x86_lea*` | BPF can add, but cannot emit flag-preserving `lea` with full addressing shape. |
-| `bpf_x86_mov*_sib`, `bpf_x86_movsxd` | Normal BPF load/store lacks general `base + index * scale + disp`. |
-| `bpf_x86_movbe*_sib` | No ordinary BPF one-insn `movbe`, especially with SIB addressing. |
+| `bpf_x86_mov* with SIB payload`, `bpf_x86_movsxd` | Normal BPF load/store lacks general `base + index * scale + disp`. |
+| `bpf_x86_movbe* with SIB payload` | No ordinary BPF one-insn `movbe`, especially with SIB addressing. |
 | `bpf_x86_popcntq` | No BPF popcount instruction. |
 | `bpf_x86_blsi*`, `bpf_x86_blsr*` | No BPF BMI1 instruction. |
 | `bpf_x86_prefetcht0` | No BPF prefetch instruction. |
@@ -320,11 +320,11 @@ Examples of ordinary-BPF exact forms:
 |---|---|
 | `bpf_x86_movq` with rr payload | `BPF_MOV64_REG(dst, src)` |
 | `bpf_x86_movl` with rr payload | `BPF_MOV32_REG(dst, src)` |
-| `bpf_x86_mov{zbl,zwl,l,q}_mem` | `BPF_LDX_MEM(B/H/W/DW, dst, base, off)` |
-| `bpf_x86_mov{b,w,l,q}_mem_reg` | `BPF_STX_MEM(B/H/W/DW, base, src, off)` |
+| `bpf_x86_mov{zbl,zwl,l,q} with direct-memory payload` | `BPF_LDX_MEM(B/H/W/DW, dst, base, off)` |
+| `bpf_x86_mov{b,w,l,q} with store payload` | `BPF_STX_MEM(B/H/W/DW, base, src, off)` |
 | `bpf_x86_movb` with immediate-store payload | `BPF_ST_MEM(B, base, off, imm)` |
-| `bpf_x86_shrq_imm` | `BPF_ALU64_IMM(BPF_RSH, dst, imm)` |
-| `bpf_x86_andl_imm32` | `BPF_ALU32_IMM(BPF_AND, dst, imm)` |
+| `bpf_x86_shrq with immediate payload` | `BPF_ALU64_IMM(BPF_RSH, dst, imm)` |
+| `bpf_x86_andl with immediate payload` | `BPF_ALU32_IMM(BPF_AND, dst, imm)` |
 | `bpf_x86_imulq` | `BPF_ALU64_REG(BPF_MUL, dst, src)` |
 | `bpf_x86_bswapl/q` | `BPF_END FROM_BE 32/64` |
 

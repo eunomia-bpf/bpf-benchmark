@@ -7,14 +7,11 @@ use crate::test_helpers::*;
 fn bulk_ctx() -> crate::pass::PassContext {
     let mut ctx = pass_ctx();
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_x86_movzbl_mem", 4101, 0)
+        .set_kinsn_call_for_target_name("bpf_x86_movzbl", 4101, 0)
         .expect("register movzbl kinsn");
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_x86_movb_mem_reg", 4102, 0)
+        .set_kinsn_call_for_target_name("bpf_x86_movb", 4102, 0)
         .expect("register movb store kinsn");
-    ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_x86_movb_imm_mem", 4103, 0)
-        .expect("register movb imm store kinsn");
     ctx
 }
 
@@ -108,7 +105,7 @@ fn bulk_memory_rewrites_zero_memset_run() {
     assert!(run
         .lowered
         .iter()
-        .any(|i| i.is_call_kinsn() && i.imm == 4103));
+        .any(|i| i.is_call_kinsn() && i.imm == 4102));
 }
 
 #[test]
@@ -145,11 +142,11 @@ fn test_memset_fill_encoding_matrix() {
         let stores = run
             .lowered
             .iter()
-            .filter(|i| i.is_call_kinsn() && i.imm == 4103)
+            .filter(|i| i.is_call_kinsn() && i.imm == 4102)
             .count();
         assert_eq!(stores, expected_store_count, "{label}");
         assert!(run.lowered.iter().any(|i| {
-            i.is_kinsn_sidecar() && BpfInsn::unpack_u8(i.sidecar_payload(), 20) == expected_fill
+            i.is_kinsn_sidecar() && BpfInsn::unpack_u8(i.sidecar_payload(), 24) == expected_fill
         }));
     }
 }

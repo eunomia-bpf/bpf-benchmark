@@ -3,30 +3,15 @@ use crate::analysis::{InsnSite, ProgramCFG};
 use crate::insn::*;
 use crate::pass::*;
 
-const X86_LOADB_TARGET: &str = "bpf_x86_movzbl_mem";
-const X86_STOREB_REG_TARGET: &str = "bpf_x86_movb_mem_reg";
-const X86_STOREB_IMM_TARGET: &str = "bpf_x86_movb_imm_mem";
+const X86_LOADB_TARGET: &str = "bpf_x86_movzbl";
+const X86_STOREB_REG_TARGET: &str = "bpf_x86_movb";
+const X86_STOREB_IMM_TARGET: &str = "bpf_x86_movb";
 const ARM64_LOADB_TARGET: &str = "bpf_arm64_ldrb_mem";
 const ARM64_STOREB_REG_TARGET: &str = "bpf_arm64_strb_mem_reg";
 const ARM64_STOREB_WZR_TARGET: &str = "bpf_arm64_strb_wzr_mem";
 const MIN_BULK_BYTES: usize = 32;
 const CHUNK_MAX_BYTES: usize = 128;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
-    KinsnDescriptor {
-        name: X86_LOADB_TARGET,
-        register_uses: load_register_uses,
-        register_defs: load_register_defs,
-    },
-    KinsnDescriptor {
-        name: X86_STOREB_REG_TARGET,
-        register_uses: store_reg_register_uses,
-        register_defs: no_regs,
-    },
-    KinsnDescriptor {
-        name: X86_STOREB_IMM_TARGET,
-        register_uses: store_imm_register_uses,
-        register_defs: no_regs,
-    },
     KinsnDescriptor {
         name: ARM64_LOADB_TARGET,
         register_uses: load_register_uses,
@@ -443,11 +428,11 @@ fn emit_memcpy_byte_kinsns(
         let src_off = checked_byte_offset(src_off, idx)?;
         let dst_off = checked_byte_offset(dst_off, idx)?;
         out.extend_from_slice(
-            &prog.kinsn_emit(load_target, pack_mem_payload(temp_reg, src_base, src_off))?,
+            &prog.kinsn_emit(load_target, pack_mem_payload(arch, temp_reg, src_base, src_off))?,
         );
         out.extend_from_slice(&prog.kinsn_emit(
             store_target,
-            pack_store_reg_payload(temp_reg, dst_base, dst_off),
+            pack_store_reg_payload(arch, temp_reg, dst_base, dst_off),
         )?);
     }
     Ok(out)
@@ -466,7 +451,7 @@ fn emit_memset_byte_kinsns(
     });
     for idx in 0..total_bytes {
         let dst_off = checked_byte_offset(dst_off, idx)?;
-        let payload = pack_store_imm_payload(base, dst_off, fill_byte);
+        let payload = pack_store_imm_payload(arch, base, dst_off, fill_byte);
         match arch {
             Arch::X86_64 => {
                 out.extend_from_slice(&prog.kinsn_emit(X86_STOREB_IMM_TARGET, payload)?)
@@ -485,20 +470,50 @@ fn checked_byte_offset(base_off: i16, idx: usize) -> anyhow::Result<i16> {
     let off = base_off as i32 + idx as i32;
     i16::try_from(off).map_err(|_| anyhow::anyhow!("bulk_memory byte offset {off} exceeds i16"))
 }
-fn pack_mem_payload(dst_reg: u8, base_reg: u8, offset: i16) -> u64 {
-    BpfInsn::pack_u4(dst_reg, 0)
-        | BpfInsn::pack_u4(base_reg, 4)
-        | BpfInsn::pack_u16(offset as u16, 8)
+fn pack_mem_payload(arch: Arch, dst_reg: u8, base_reg: u8, offset: i16) -> u64 {
+    match arch {
+        Arch::X86_64 => {
+            BpfInsn::pack_u4(4, 0)
+                | BpfInsn::pack_u4(dst_reg, 4)
+                | BpfInsn::pack_u4(base_reg, 8)
+                | BpfInsn::pack_u16(offset as u16, 12)
+        }
+        Arch::Aarch64 => {
+            BpfInsn::pack_u4(dst_reg, 0)
+                | BpfInsn::pack_u4(base_reg, 4)
+                | BpfInsn::pack_u16(offset as u16, 8)
+        }
+    }
 }
-fn pack_store_reg_payload(src_reg: u8, base_reg: u8, offset: i16) -> u64 {
-    BpfInsn::pack_u4(src_reg, 0)
-        | BpfInsn::pack_u4(base_reg, 4)
-        | BpfInsn::pack_u16(offset as u16, 8)
+fn pack_store_reg_payload(arch: Arch, src_reg: u8, base_reg: u8, offset: i16) -> u64 {
+    match arch {
+        Arch::X86_64 => {
+            BpfInsn::pack_u4(6, 0)
+                | BpfInsn::pack_u4(src_reg, 4)
+                | BpfInsn::pack_u4(base_reg, 8)
+                | BpfInsn::pack_u16(offset as u16, 12)
+        }
+        Arch::Aarch64 => {
+            BpfInsn::pack_u4(src_reg, 0)
+                | BpfInsn::pack_u4(base_reg, 4)
+                | BpfInsn::pack_u16(offset as u16, 8)
+        }
+    }
 }
-fn pack_store_imm_payload(base_reg: u8, offset: i16, fill_byte: u8) -> u64 {
-    BpfInsn::pack_u4(base_reg, 0)
-        | BpfInsn::pack_u16(offset as u16, 4)
-        | BpfInsn::pack_u8(fill_byte, 20)
+fn pack_store_imm_payload(arch: Arch, base_reg: u8, offset: i16, fill_byte: u8) -> u64 {
+    match arch {
+        Arch::X86_64 => {
+            BpfInsn::pack_u4(7, 0)
+                | BpfInsn::pack_u4(base_reg, 4)
+                | BpfInsn::pack_u16(offset as u16, 8)
+                | BpfInsn::pack_u8(fill_byte, 24)
+        }
+        Arch::Aarch64 => {
+            BpfInsn::pack_u4(base_reg, 0)
+                | BpfInsn::pack_u16(offset as u16, 4)
+                | BpfInsn::pack_u8(fill_byte, 20)
+        }
+    }
 }
 fn uniform_chunk_sizes(total_bytes: usize) -> Vec<usize> {
     if total_bytes < MIN_BULK_BYTES {

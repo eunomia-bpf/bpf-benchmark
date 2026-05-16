@@ -267,7 +267,22 @@ static void emit_lea(u8 *buf, u32 *len, bool is64,
 	kinsn_emit_u8(buf, len, 0x8D);
 
 	if (has_base && !has_index) {
-		kinsn_emit_modrm_mem(buf, len, dst_reg, base_reg, disp);
+		u8 rm = base_code == 4 ? 4 : base_code;
+
+		if (!disp && base_code != 5)
+			mod = 0x00;
+		else if (disp >= -128 && disp <= 127)
+			mod = 0x40;
+		else
+			mod = 0x80;
+
+		kinsn_emit_u8(buf, len, mod | (kinsn_x86_code(dst_reg) << 3) | rm);
+		if (base_code == 4)
+			kinsn_emit_u8(buf, len, (4 << 3) | base_code);
+		if (mod == 0x40)
+			kinsn_emit_u8(buf, len, (u8)disp);
+		else if (mod == 0x80)
+			kinsn_emit_s32(buf, len, disp);
 		return;
 	}
 

@@ -4,21 +4,6 @@ use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
-        name: "bpf_x86_movzwl_mem",
-        register_uses: endian_load_register_uses,
-        register_defs: endian_load_register_defs,
-    },
-    KinsnDescriptor {
-        name: "bpf_x86_movl_mem",
-        register_uses: endian_load_register_uses,
-        register_defs: endian_load_register_defs,
-    },
-    KinsnDescriptor {
-        name: "bpf_x86_movq_mem",
-        register_uses: endian_load_register_uses,
-        register_defs: endian_load_register_defs,
-    },
-    KinsnDescriptor {
         name: "bpf_x86_rolw",
         register_uses: endian_unary_register_uses,
         register_defs: endian_unary_register_defs,
@@ -70,9 +55,9 @@ const MAX_NARROW_SCAN: usize = 32;
 
 fn endian_load_target(arch: Arch, w: BpfMemWidth) -> Option<&'static str> {
     match (arch, w) {
-        (Arch::X86_64, BpfMemWidth::H) => Some("bpf_x86_movzwl_mem"),
-        (Arch::X86_64, BpfMemWidth::W) => Some("bpf_x86_movl_mem"),
-        (Arch::X86_64, BpfMemWidth::DW) => Some("bpf_x86_movq_mem"),
+        (Arch::X86_64, BpfMemWidth::H) => Some("bpf_x86_movzwl"),
+        (Arch::X86_64, BpfMemWidth::W) => Some("bpf_x86_movl"),
+        (Arch::X86_64, BpfMemWidth::DW) => Some("bpf_x86_movq"),
         (Arch::Aarch64, BpfMemWidth::H) => Some("bpf_arm64_ldrh_mem"),
         (Arch::Aarch64, BpfMemWidth::W) => Some("bpf_arm64_ldr_w_mem"),
         (Arch::Aarch64, BpfMemWidth::DW) => Some("bpf_arm64_ldr_x_mem"),
@@ -210,6 +195,12 @@ pub(super) fn endian_payload(dst_reg: u8, base_reg: u8, offset: i16) -> u64 {
         | BpfInsn::pack_u4(base_reg, 4)
         | BpfInsn::pack_u16(offset as u16, 8)
 }
+pub(super) fn x86_mov_mem_payload(dst_reg: u8, base_reg: u8, offset: i16) -> u64 {
+    BpfInsn::pack_u4(4, 0)
+        | BpfInsn::pack_u4(dst_reg, 4)
+        | BpfInsn::pack_u4(base_reg, 8)
+        | BpfInsn::pack_u16(offset as u16, 12)
+}
 fn offset_is_directly_encodable(arch: Arch, size: u8, offset: i16) -> bool {
     match arch {
         Arch::X86_64 => true,
@@ -248,7 +239,11 @@ fn append_endian_kinsns(
     let swap_name = endian_swap_target(arch, width)
         .ok_or_else(|| anyhow::anyhow!("unsupported endian fusion swap size {}", size))?;
 
-    out.extend_from_slice(&prog.kinsn_emit(load_name, endian_payload(dst_reg, base_reg, offset))?);
+    let load_payload = match arch {
+        Arch::X86_64 => x86_mov_mem_payload(dst_reg, base_reg, offset),
+        Arch::Aarch64 => endian_payload(dst_reg, base_reg, offset),
+    };
+    out.extend_from_slice(&prog.kinsn_emit(load_name, load_payload)?);
     let swap_payload = if matches!((arch, width), (Arch::X86_64, BpfMemWidth::H)) {
         endian_reg_imm_payload(dst_reg, 8)
     } else {

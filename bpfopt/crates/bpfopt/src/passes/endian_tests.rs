@@ -7,13 +7,13 @@ use crate::test_helpers::*;
 fn endian_ctx() -> crate::pass::PassContext {
     let mut ctx = pass_ctx();
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_x86_movzwl_mem", 1616, 0)
+        .set_kinsn_call_for_target_name("bpf_x86_movzwl", 1616, 0)
         .expect("register movzwl");
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_x86_movl_mem", 3232, 0)
+        .set_kinsn_call_for_target_name("bpf_x86_movl", 3232, 0)
         .expect("register movl");
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_x86_movq_mem", 6464, 0)
+        .set_kinsn_call_for_target_name("bpf_x86_movq", 6464, 0)
         .expect("register movq");
     ctx.kinsn_registry
         .set_kinsn_call_for_target_name("bpf_x86_rolw", 1617, 0)
@@ -192,7 +192,7 @@ fn test_endian_fusion_pass_branch_fixup() {
 fn endian_preserves_module_call_offset() {
     let mut ctx = pass_ctx();
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_x86_movl_mem", 3232, 2)
+        .set_kinsn_call_for_target_name("bpf_x86_movl", 3232, 2)
         .expect("register movl module call");
     ctx.kinsn_registry
         .set_kinsn_call_for_target_name("bpf_x86_bswapl", 3233, 4)

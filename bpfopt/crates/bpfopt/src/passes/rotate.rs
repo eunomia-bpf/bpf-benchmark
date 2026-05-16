@@ -155,8 +155,8 @@ fn emit_rotate_replacement(
     let (call_dst, call_src) = if arch == Arch::X86_64 && site.width == RotateWidth::W64 {
         if site.dst_reg != site.val_reg {
             replacement.extend_from_slice(&prog.kinsn_emit(
-                "bpf_x86_movq_rr",
-                mov_rr_payload(site.dst_reg, site.val_reg),
+                "bpf_x86_movq",
+                x86_mov_reg_payload(site.dst_reg, site.val_reg),
             )?);
         }
         (site.dst_reg, site.dst_reg)
@@ -171,8 +171,8 @@ fn emit_rotate_replacement(
     Ok(replacement)
 }
 
-fn mov_rr_payload(dst_reg: u8, src_reg: u8) -> u64 {
-    BpfInsn::pack_u4(dst_reg, 0) | BpfInsn::pack_u4(src_reg, 4)
+fn x86_mov_reg_payload(dst_reg: u8, src_reg: u8) -> u64 {
+    BpfInsn::pack_u4(1, 0) | BpfInsn::pack_u4(dst_reg, 4) | BpfInsn::pack_u4(src_reg, 8)
 }
 fn find_provenance_mov(
     insns: &[BpfInsn],

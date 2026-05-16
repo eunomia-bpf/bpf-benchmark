@@ -7,7 +7,7 @@ ccflags-y += -I$(src)/../include
 
 obj-m += bpf_x86_rotate.o
 obj-m += bpf_x86_cmov.o
-obj-m += bpf_x86_alu_imm.o
+obj-m += bpf_x86_alu.o
 obj-m += bpf_x86_mov.o
 obj-m += bpf_x86_byteorder.o
 obj-m += bpf_x86_lea.o

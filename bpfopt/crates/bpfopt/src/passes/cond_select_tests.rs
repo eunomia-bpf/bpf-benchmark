@@ -7,7 +7,7 @@ use crate::test_helpers::*;
 fn select_ctx() -> crate::pass::PassContext {
     let mut ctx = pass_ctx();
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_x86_movq_rr", 5554, 0)
+        .set_kinsn_call_for_target_name("bpf_x86_movq", 5554, 0)
         .expect("register movq kinsn");
     ctx.kinsn_registry
         .set_kinsn_call_for_target_name("bpf_x86_testq", 5555, 0)

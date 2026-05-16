@@ -24,15 +24,17 @@ static __always_inline int decode_movbe_payload(u64 payload,
 						    u8 *index_reg, u8 *scale_log2,
 						    s16 *offset)
 {
-	*dst_reg = kinsn_payload_reg(payload, 0);
-	*base_reg = kinsn_payload_reg(payload, 4);
-	*index_reg = kinsn_payload_reg(payload, 8);
-	*scale_log2 = (payload >> 12) & 0x3;
-	*offset = kinsn_payload_s16(payload, 16);
-
-	if (payload >> 32)
+	payload = kinsn_payload_decode(payload);
+	if ((payload & 0xf) != 5 || payload >> 36)
 		return -EINVAL;
-	if (payload & (0x3ULL << 14))
+
+	*dst_reg = kinsn_payload_reg(payload, 4);
+	*base_reg = kinsn_payload_reg(payload, 8);
+	*index_reg = kinsn_payload_reg(payload, 12);
+	*scale_log2 = (payload >> 16) & 0x3;
+	*offset = kinsn_payload_s16(payload, 20);
+
+	if (payload & (0x3ULL << 18))
 		return -EINVAL;
 	if (*dst_reg >= BPF_REG_10 || *base_reg > BPF_REG_10 ||
 	    *index_reg >= BPF_REG_10)

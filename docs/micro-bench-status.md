@@ -313,12 +313,13 @@ For the handcraft path, generated `*.handcraft.c` files are treated as artifacts
 and excluded from code-size review. The converter is constrained to mechanical
 translation: selector choice, payload fill, and O(n) branch relocation only. It
 must not allocate verifier temps, remap native registers, or lower adjacent
-native instructions as semantic pairs. Selector names should name the x86
-instruction and width; operand forms belong in payloads. Existing `_RR`, `_MEM`,
-`_SIB`, `_IMM`, and `_R` names in the table are current migration debt, not the
-target ABI. Tests that only preserve old compatibility names should
-be deleted; real bugs such as `dst == condition` are kept as compact
-instruction-sequence tests in the main kinsn unittest.
+native instructions as semantic pairs. Selector names now name the x86
+instruction and width; operand forms belong in payloads. The old compatibility
+names that exposed operand form in the selector (`_RR`, `_MEM`, `_SIB`, `_IMM`,
+`_STORE`) were removed from the bpfopt, runner, module, and main kinsn-test
+surfaces. Tests that only preserved old compatibility names were deleted; real
+bugs such as `dst == condition` are kept as compact instruction-sequence tests
+in the main kinsn unittest.
 
 | x86 Insn/Form | Existing bpfopt Pass Path | Machine-Kinsn Path | Verifier-Facing Instantiation | Current Test Status | Remaining Gap |
 |---|---|---|---|---|---|
@@ -341,7 +342,7 @@ instruction-sequence tests in the main kinsn unittest.
 | `setne/sete/setge`, `cmovbl/cmovbq`, `sbbl imm0` | no automatic pass yet | `bpf_x86_setne`, `bpf_x86_sete`, `bpf_x86_setge`, `bpf_x86_cmovbl`, `bpf_x86_cmovbq`, `bpf_x86_sbbl` | verifier uses stack-shadow flags for handcraft; final x86 consumes adjacent physical flags | modules build; unit tests cover `cmovb*` and `setcc`; generated `cmov` sites are exact kinsns now | `setge` still needs full SF/OF proof; `sbb` needs CF stack-shadow payload support before broad handcraft conversion |
 | `popcntq` | no automatic pass yet | `bpf_x86_popcntq` | scalar popcount fallback sequence | covered by `bitmap_popcount_scan`; handcraft verifies, returns the native result, and dumps `popcnt rdi,rdi`; measured 475 ns vs native 467 ns and kernel BPF 1131 ns | add automatic scalar-pattern pass only after workload evidence says it matters |
 | `blsiq` / `blsrq` | no automatic pass yet | `bpf_x86_blsiq`, `bpf_x86_blsrq` | `x & -x` / `x & (x - 1)` BPF sequence | selector exists; needs bitmap traversal coverage | same as `popcntq`: useful for bitmap cases, not yet broad |
-| `andb/xorb/addb imm8`, `xorb r8,r8`, `incq` | ordinary BPF emits wider ALU or `add imm 1` forms | `bpf_x86_andb`, `bpf_x86_xorb_imm`, `bpf_x86_addb`, `bpf_x86_xorb_rr`, `bpf_x86_incq` | byte ops preserve upper bits through temp-register verifier BPF; `xorb imm8` is direct XOR of low mask; `incq` is direct `ADD 1` | `andb`/`incq` covered by `bitmap_popcount_scan`; `xorb`/`addb` covered by `payload_prefix_memcmp_scan`, which now verifies and returns the native result | these are parity-only machine-instruction gaps, not independent high-level transforms |
+| `andb/xorb/addb imm8`, `xorb r8,r8`, `incq` | ordinary BPF emits wider ALU or `add imm 1` forms | `bpf_x86_andb`, `bpf_x86_xorb`, `bpf_x86_addb`, `bpf_x86_incq`; operand form in payload | byte ops preserve upper bits through temp-register verifier BPF; `xorb imm8` is direct XOR of low mask; `incq` is direct `ADD 1` | `andb`/`incq` covered by `bitmap_popcount_scan`; `xorb`/`addb` covered by `payload_prefix_memcmp_scan`, which now verifies and returns the native result | these are parity-only machine-instruction gaps, not independent high-level transforms |
 | `shrq imm`, `andl imm32`, `sar imm` | ordinary BPF ALU often maps acceptably | `bpf_x86_shrq`, `bpf_x86_andl`; `sar imm` currently stays ordinary BPF | direct BPF ALU operation | selector exists where needed; converter no longer treats `sar imm` as a missing kinsn | not a high-level transform by itself |
 | `prefetcht0` | `prefetch` pass applied `9/9` in full run | `bpf_x86_prefetcht0` | verifier-safe no-value prefetch semantics | selector exists | not a dominant native-code gap in the inspected cases |
 | `cmp/test + jcc` | ordinary BPF branches already lower to x86 compare/test plus jump | no standalone branch kinsn today | verifier-native BPF branch | used by handcraft converter for bounds and control-flow edges | a branch kinsn would need relocation/current-PC context in the kinsn emit API; do not add unless ordinary BPF cannot dump the same x86 |

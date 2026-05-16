@@ -3,7 +3,7 @@
 # Daemon substitutes ${...} vars; runner sends this command verbatim.
 log_level: 1
 kinsns:
-  - name: bpf_x86_movq_rr
+  - name: bpf_x86_movq
   - name: bpf_x86_testq
   - name: bpf_x86_cmovneq
   - name: bpf_x86_cmoveq

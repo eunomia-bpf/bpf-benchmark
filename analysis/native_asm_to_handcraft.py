@@ -25,18 +25,18 @@ BPF_REG_BY_X86 = {
     "r10": "HC_X86_R10",
     "r11": "HC_X86_R11",
     "r12": "HC_X86_R12",
-    "rbp": "HC_X86_RBP",
     "rbx": "BPF_REG_6",
     "r13": "BPF_REG_7",
     "r14": "BPF_REG_8",
     "r15": "BPF_REG_9",
 }
 
-REG_ALIAS: dict[str, tuple[str, int]] = {}
-for base, aliases in {
-    "rax": ("rax", "eax", "ax", "al"),
-    "rbx": ("rbx", "ebx", "bx", "bl"),
-    "rcx": ("rcx", "ecx", "cx", "cl"),
+HIGH_BYTE_X86_REGS = {"ah", "bh", "ch", "dh"}
+X86_REG_NAMES: dict[str, tuple[str, int]] = {}
+for base, names in {
+    "rax": ("rax", "eax", "ax", "al", "ah"),
+    "rbx": ("rbx", "ebx", "bx", "bl", "bh"),
+    "rcx": ("rcx", "ecx", "cx", "cl", "ch"),
     "rdx": ("rdx", "edx", "dx", "dl", "dh"),
     "rdi": ("rdi", "edi", "di", "dil"),
     "rsi": ("rsi", "esi", "si", "sil"),
@@ -51,13 +51,13 @@ for base, aliases in {
     "rbp": ("rbp", "ebp", "bp", "bpl"),
     "rsp": ("rsp", "esp", "sp", "spl"),
 }.items():
-    for alias in aliases:
-        width = 64 if alias.startswith("r") and not alias.endswith(("d", "w", "b")) else 32
-        if alias.endswith("w") or alias in {"ax", "bx", "cx", "dx", "di", "si", "bp", "sp"}:
+    for name in names:
+        width = 64 if name.startswith("r") and not name.endswith(("d", "w", "b")) else 32
+        if name.endswith("w") or name in {"ax", "bx", "cx", "dx", "di", "si", "bp", "sp"}:
             width = 16
-        if alias.endswith("b") or alias in {"al", "bl", "cl", "dl", "dh", "dil", "sil", "bpl", "spl"}:
+        if name.endswith("b") or name in HIGH_BYTE_X86_REGS | {"al", "bl", "cl", "dl", "dil", "sil", "bpl", "spl"}:
             width = 8
-        REG_ALIAS[alias] = (base, width)
+        X86_REG_NAMES[name] = (base, width)
 
 OBJ_LINE_RE = re.compile(r"^\s*(?P<addr>[0-9a-f]+):\s+(?P<bytes>(?:[0-9a-f]{2}\s+)+)\s*(?P<asm>.*)$")
 ASM_LINE_RE = re.compile(r"^\s*(?P<mnemonic>[a-z][a-z0-9]*)\s*(?P<operands>.*)$")
@@ -83,6 +83,7 @@ MACHINE_ALU_SELECTOR = {
     ("sub", 32): "MICRO_HANDCRAFT_BPF_X86_SUBL",
     ("and", 64): "MICRO_HANDCRAFT_BPF_X86_ANDQ",
     ("and", 32): "MICRO_HANDCRAFT_BPF_X86_ANDL",
+    ("shr", 8): "MICRO_HANDCRAFT_BPF_X86_SHRB",
     ("xor", 64): "MICRO_HANDCRAFT_BPF_X86_XORQ",
     ("xor", 32): "MICRO_HANDCRAFT_BPF_X86_XORL",
     ("or", 64): "MICRO_HANDCRAFT_BPF_X86_ORQ",
@@ -124,11 +125,24 @@ class Translation:
     target_addr: int | None = None
 
 
+@dataclass(frozen=True)
+class BranchableCmp:
+    lhs: str
+    rhs: str | None
+    imm: int | None
+    width: int
+    raw: str
+
+
 def parse_int(text: str) -> int:
     text = text.strip()
     if text.startswith("-"):
         return -parse_int(text[1:])
     return int(text, 16) if text.lower().startswith("0x") else int(text, 10)
+
+
+def is_int(text: str) -> bool:
+    return re.match(r"^-?(0x[0-9a-fA-F]+|\d+)$", text.strip()) is not None
 
 
 def parse_branch_target(text: str) -> int | None:
@@ -189,7 +203,7 @@ def parse_native_asm(text: str) -> list[NativeInsn]:
 
 
 def reg(operand: str) -> tuple[str, int] | None:
-    return REG_ALIAS.get(operand.strip().lower().lstrip("%"))
+    return X86_REG_NAMES.get(operand.strip().lower().lstrip("%"))
 
 
 def bpf_reg(operand: str) -> tuple[str, int, str] | None:
@@ -201,6 +215,18 @@ def bpf_reg(operand: str) -> tuple[str, int, str] | None:
     if mapped is None:
         return None
     return mapped, width, base
+
+
+def bpf_mem_base(operand: str | None) -> tuple[str, int, str] | None:
+    if operand is None:
+        return None
+    if operand.strip().lower().lstrip("%") == "rbp":
+        return "HC_X86_RBP_STACK_BASE", 64, "rbp"
+    return bpf_reg(operand)
+
+
+def byte_lane(operand: str) -> int:
+    return 1 if operand.strip().lower() in HIGH_BYTE_X86_REGS else 0
 
 
 def is_bpf_reg_name(name: str) -> bool:
@@ -223,12 +249,19 @@ def byte_reg_reg_payload(dst: str, src: str) -> str:
     return f"HC_REG_REG_PAYLOAD({dst}, {src})"
 
 
+def c_s32(value: int) -> str:
+    value &= 0xffffffff
+    if value >= 0x80000000:
+        value -= 0x100000000
+    return str(value)
+
+
 def machine_alu_rr_payload(dst: str, src: str) -> str:
     return f"HC_X86_ALU_RR_PAYLOAD({dst}, {src})"
 
 
 def machine_alu_imm_payload(dst: str, imm: int) -> str:
-    return f"HC_X86_ALU_IMM_PAYLOAD({dst}, {imm})"
+    return f"HC_X86_ALU_IMM_PAYLOAD({dst}, {c_s32(imm)})"
 
 
 def reg_imm_payload(reg_name: str, imm: int) -> str:
@@ -295,7 +328,7 @@ def translate_mem_load(dst_op: str, mem_op: str, size: str) -> Translation:
     base, index, scale, off = mem
     if base is None:
         return Translation("warning-unmapped", (), "RIP/absolute memory is not expressible as verifier-safe BPF memory")
-    base_reg = bpf_reg(base)
+    base_reg = bpf_mem_base(base)
     if base_reg is None:
         return Translation("warning-unmapped", (), f"memory base {base} is not in the BPF JIT register file")
     if base_reg[0] == "BPF_REG_1" and index is None and size == "BPF_DW" and off in {0, 8}:
@@ -338,11 +371,13 @@ def translate(insn: NativeInsn) -> Translation:
         return Translation("padding", (), "xchg ax,ax is nop padding")
     if op in {"push", "pop", "leave"}:
         return Translation("warning-unmapped", (), "native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR")
+    if op == "mov" and ops in {("rbp", "rsp"), ("rsp", "rbp")}:
+        return Translation("warning-unmapped", (), "native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR")
     if op == "ret":
         return Translation("bpf-jit", ("HC_EXIT()",), "BPF exit; kernel JIT emits the real return sequence")
     if op in JCC_OP or op == "jns":
         target_addr = parse_branch_target(ops[0]) if len(ops) == 1 else None
-        note = "jcc needs a machine-level branch kinsn; converter no longer lowers cmp+jcc as a semantic pair"
+        note = "jcc has no immediately preceding branchable cmp/test; needs a machine-level branch kinsn"
         return Translation("warning-unmapped", (), note, target_addr)
     if op == "jmp" and len(ops) == 1:
         target_addr = parse_branch_target(ops[0])
@@ -357,6 +392,24 @@ def translate(insn: NativeInsn) -> Translation:
     if op == "cmp" and len(ops) == 2:
         lhs = bpf_reg(ops[0])
         rhs = bpf_reg(ops[1])
+        if "[" in ops[0] and re.match(r"^-?(0x[0-9a-fA-F]+|\d+)$", ops[1]):
+            mem = parse_mem(ops[0])
+            size = size_from_mem(ops[0])
+            if mem is None or size not in {"BPF_B", "BPF_W", "BPF_DW"}:
+                return Translation("warning-unmapped", (), f"CMP memory immediate form has unsupported size: {insn.raw}")
+            base, index, scale, off = mem
+            if base is None or index is not None:
+                return Translation("warning-unmapped", (), f"CMP memory immediate form is not direct base+disp: {insn.raw}")
+            base_reg = bpf_mem_base(base)
+            if base_reg is None:
+                return Translation("warning-unmapped", (), f"CMP memory base {base} is not in the BPF register file: {insn.raw}")
+            selector = {
+                "BPF_B": "MICRO_HANDCRAFT_BPF_X86_CMPB",
+                "BPF_W": "MICRO_HANDCRAFT_BPF_X86_CMPL",
+                "BPF_DW": "MICRO_HANDCRAFT_BPF_X86_CMPQ",
+            }[size]
+            payload = f"HC_X86_CMP_MEM_IMM_PAYLOAD({base_reg[0]}, {off}, {parse_int(ops[1])})"
+            return Translation("exact-kinsn", (f"HC_KINSN({payload}, {selector})",), "cmp memory,imm kinsn")
         if "[" in ops[0] and rhs and rhs[1] == 64:
             mem = parse_mem(ops[0])
             size = size_from_mem(ops[0])
@@ -365,7 +418,7 @@ def translate(insn: NativeInsn) -> Translation:
             base, index, scale, off = mem
             if base is None or index is None:
                 return Translation("warning-unmapped", (), f"CMP memory source is not indexed SIB: {insn.raw}")
-            base_reg = bpf_reg(base)
+            base_reg = bpf_mem_base(base)
             index_reg = bpf_reg(index)
             slog2 = scale_log2(scale)
             if base_reg is None or index_reg is None or slog2 is None:
@@ -378,12 +431,18 @@ def translate(insn: NativeInsn) -> Translation:
         if lhs and rhs and lhs[1] == rhs[1] == 32:
             payload = f"HC_X86_RR_PAYLOAD({lhs[0]}, {rhs[0]})"
             return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_CMPL)",), "cmpl reg,reg kinsn")
+        if lhs and rhs and lhs[1] == rhs[1] == 8:
+            payload = f"HC_X86_RR_PAYLOAD({lhs[0]}, {rhs[0]})"
+            return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_CMPB)",), "cmpb reg,reg kinsn")
         if lhs and lhs[1] == 64 and re.match(r"^-?(0x[0-9a-fA-F]+|\d+)$", ops[1]):
             payload = f"HC_X86_IMM_PAYLOAD({lhs[0]}, {parse_int(ops[1])})"
             return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_CMPQ)",), "cmpq reg,imm32 kinsn")
         if lhs and lhs[1] == 32 and re.match(r"^-?(0x[0-9a-fA-F]+|\d+)$", ops[1]):
             payload = f"HC_X86_IMM_PAYLOAD({lhs[0]}, {parse_int(ops[1])})"
             return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_CMPL)",), "cmpl reg,imm32 kinsn")
+        if lhs and lhs[1] == 8 and re.match(r"^-?(0x[0-9a-fA-F]+|\d+)$", ops[1]):
+            payload = f"HC_X86_IMM_PAYLOAD({lhs[0]}, {parse_int(ops[1])})"
+            return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_CMPB)",), "cmpb reg,imm8 kinsn")
         return Translation("warning-unmapped", (), f"CMP operand form has no current kinsn selector: {insn.raw}")
     if len(ops) == 2 and op in {"mov", "movabs"}:
         dst, src = ops
@@ -412,16 +471,14 @@ def translate(insn: NativeInsn) -> Translation:
                     return Translation("warning-unmapped", (), f"movabs into {dst_reg[0]} needs an immediate-load kinsn")
                 return Translation("bpf-jit", (f"HC_LD_IMM64_RAW({dst_reg[0]}, 0, 0x{imm & ((1 << 64) - 1):x}ULL)",), "64-bit immediate load")
             if dst_reg[1] == 32:
-                if imm == 0:
-                    payload = machine_alu_rr_payload(dst_reg[0], dst_reg[0])
-                    return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_XORL)",), "movl zero via xorl reg,reg kinsn")
-                if is_shadow_reg_name(dst_reg[0]):
-                    return Translation("warning-unmapped", (), f"movl immediate into {dst_reg[0]} needs a consolidated movl kinsn form")
-                return Translation("bpf-jit", (f"HC_RAW(BPF_ALU | BPF_MOV | BPF_K, {dst_reg[0]}, 0, 0, {imm})",), "32-bit immediate move")
+                payload = f"HC_X86_IMM_PAYLOAD({dst_reg[0]}, {imm})"
+                return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_MOVL)",), "movl immediate kinsn")
             if dst_reg[1] == 64:
-                if is_shadow_reg_name(dst_reg[0]):
-                    return Translation("warning-unmapped", (), f"movq immediate into {dst_reg[0]} needs a consolidated movq kinsn form")
-                return Translation("bpf-jit", (f"HC_MOV64_IMM({dst_reg[0]}, {imm})",), "64-bit immediate move")
+                payload = f"HC_X86_IMM_PAYLOAD({dst_reg[0]}, {imm})"
+                return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_MOVQ)",), "movq immediate kinsn")
+            if dst_reg[1] == 8:
+                payload = f"HC_X86_IMM_PAYLOAD({dst_reg[0]}, {imm})"
+                return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_MOVB)",), "movb immediate kinsn")
             return Translation("warning-unmapped", (), f"mov immediate width {dst_reg[1]} needs a consolidated mov kinsn form")
         mem_size = size_from_mem(src) or ("BPF_DW" if dst_reg and dst_reg[1] == 64 else "BPF_W")
         if dst_reg and "[" in src:
@@ -431,13 +488,16 @@ def translate(insn: NativeInsn) -> Translation:
             size = size_from_mem(dst) or ("BPF_DW" if src_reg[1] == 64 else "BPF_W")
             if mem is None or mem[1] is not None:
                 return Translation("warning-unmapped", (), f"store operand {dst} is not a direct base+disp memory reference")
-            base = bpf_reg(mem[0] or "")
+            base = bpf_mem_base(mem[0])
             if base is None:
                 return Translation("warning-unmapped", (), f"store base {mem[0]} is not in the BPF JIT register file")
             target = DIRECT_STORE_SELECTOR.get(size)
             if target is None:
                 return Translation("bpf-jit", (emit_stx(size, base[0], src_reg[0], mem[3]),), "direct store")
-            payload = f"HC_X86_STORE_PAYLOAD({src_reg[0]}, {base[0]}, {mem[3]})"
+            if size == "BPF_B" and byte_lane(src):
+                payload = f"HC_X86_STORE_BYTE_PAYLOAD({src_reg[0]}, {base[0]}, {mem[3]}, 1)"
+            else:
+                payload = f"HC_X86_STORE_PAYLOAD({src_reg[0]}, {base[0]}, {mem[3]})"
             note = "direct memory store via x86 kinsn selector"
             return Translation(
                 "exact-kinsn",
@@ -449,7 +509,7 @@ def translate(insn: NativeInsn) -> Translation:
             size = size_from_mem(dst) or "BPF_W"
             if mem is None or mem[1] is not None:
                 return Translation("warning-unmapped", (), f"store operand {dst} is not a direct base+disp memory reference")
-            base = bpf_reg(mem[0] or "")
+            base = bpf_mem_base(mem[0])
             if base is None:
                 return Translation("warning-unmapped", (), f"store base {mem[0]} is not in the BPF JIT register file")
             imm = parse_int(src)
@@ -487,7 +547,7 @@ def translate(insn: NativeInsn) -> Translation:
         base, index, scale, off = mem
         if base is None or index is None:
             return Translation("warning-unmapped", (), f"movsxd memory source is not indexed SIB: {ops[1]}")
-        base_reg = bpf_reg(base)
+        base_reg = bpf_mem_base(base)
         index_reg = bpf_reg(index)
         slog2 = scale_log2(scale)
         if base_reg is None or index_reg is None or slog2 is None:
@@ -531,7 +591,7 @@ def translate(insn: NativeInsn) -> Translation:
         dst = bpf_reg(ops[0])
         src = bpf_reg(ops[1])
         if dst and src and dst[1] == 64 and src[1] == 64:
-            return Translation("exact-kinsn", (f"HC_KINSN(HC_POPCNT_PAYLOAD({dst[0]}, {src[0]}), MICRO_HANDCRAFT_BPF_X86_POPCNTQ)",), "popcntq kinsn")
+            return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_REG_PAYLOAD({dst[0]}, {src[0]}), MICRO_HANDCRAFT_BPF_X86_POPCNTQ)",), "popcntq kinsn")
         return Translation("warning-unmapped", (), "only popcntq reg,reg is supported")
     if op == "imul" and len(ops) == 2:
         dst = bpf_reg(ops[0])
@@ -583,8 +643,11 @@ def translate(insn: NativeInsn) -> Translation:
             return Translation("warning-unmapped", (), f"ALU destination {ops[0]} is not in the BPF JIT register file")
         bpf_class = "BPF_ALU64" if dst[1] == 64 else "BPF_ALU"
         selector = MACHINE_ALU_SELECTOR.get((op, dst[1]))
-        if src and selector and op not in {"shl", "shr"}:
-            if dst[1] != src[1]:
+        if src and selector:
+            if op in {"shl", "shr"}:
+                if src[2] != "rcx" or src[1] != 8:
+                    return Translation("warning-unmapped", (), f"{op.upper()} variable count must be CL: {insn.raw}")
+            elif dst[1] != src[1]:
                 return Translation("warning-unmapped", (), f"{op.upper()} width is not supported: {insn.raw}")
             payload = machine_alu_rr_payload(dst[0], src[0])
             return Translation("exact-kinsn", (f"HC_KINSN({payload}, {selector})",), f"{op}{dst[1]} reg kinsn")
@@ -634,24 +697,28 @@ def translate(insn: NativeInsn) -> Translation:
             base, index, scale, off = mem
             if base is None:
                 return Translation("warning-unmapped", (), "ALU RIP/absolute memory source is not verifier-safe BPF memory")
-            base_reg = bpf_reg(base)
+            base_reg = bpf_mem_base(base)
             if base_reg is None:
                 return Translation("warning-unmapped", (), f"ALU memory base {base} is not in the BPF JIT register file")
-            if index is None and op == "xor" and dst[1] == 32 and size == "BPF_W":
-                payload = f"HC_ALU_MEM_PAYLOAD({dst[0]}, {base_reg[0]}, {off})"
-                return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_XORL)",), "xorl memory-source kinsn")
-            if index is None and op == "add" and dst[1] == 32 and size == "BPF_W":
-                payload = f"HC_ALU_MEM_PAYLOAD({dst[0]}, {base_reg[0]}, {off})"
-                return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_ADDL)",), "addl memory-source kinsn")
+            if index is None and selector and dst[1] in {32, 64} and size == ("BPF_DW" if dst[1] == 64 else "BPF_W"):
+                payload = f"HC_X86_MEM_PAYLOAD({dst[0]}, {base_reg[0]}, {off})"
+                return Translation("exact-kinsn", (f"HC_KINSN({payload}, {selector})",), f"{op}{dst[1]} memory-source kinsn")
             if index is None and op == "xor" and dst[1] == 16 and size == "BPF_H":
-                payload = f"HC_ALU_MEM_PAYLOAD({dst[0]}, {base_reg[0]}, {off})"
+                payload = f"HC_X86_MEM_PAYLOAD({dst[0]}, {base_reg[0]}, {off})"
                 return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_XORW)",), "xorw memory-source kinsn")
+            if index is not None and selector and dst[1] in {32, 64} and size == ("BPF_DW" if dst[1] == 64 else "BPF_W"):
+                index_reg = bpf_reg(index)
+                slog2 = scale_log2(scale)
+                if index_reg is None or slog2 is None:
+                    return Translation("warning-unmapped", (), f"ALU SIB index {index} scale {scale} is not expressible")
+                payload = f"HC_X86_SIB_PAYLOAD({dst[0]}, {base_reg[0]}, {index_reg[0]}, {slog2}, {off})"
+                return Translation("exact-kinsn", (f"HC_KINSN({payload}, {selector})",), f"{op}{dst[1]} SIB memory-source kinsn")
             if index is not None and op == "xor" and dst[1] == 8 and size == "BPF_B":
                 index_reg = bpf_reg(index)
                 slog2 = scale_log2(scale)
                 if index_reg is None or slog2 is None:
                     return Translation("warning-unmapped", (), f"ALU SIB index {index} scale {scale} is not expressible")
-                payload = f"HC_ALU_SIB_PAYLOAD({dst[0]}, {base_reg[0]}, {index_reg[0]}, {slog2}, {off})"
+                payload = f"HC_X86_SIB_PAYLOAD({dst[0]}, {base_reg[0]}, {index_reg[0]}, {slog2}, {off})"
                 return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_XORB)",), "xorb SIB memory-source kinsn")
             return Translation("warning-unmapped", (), f"ALU memory source form has no current selector: {insn.raw}")
         return Translation("warning-unmapped", (), f"ALU source {ops[1]} is not supported")
@@ -721,13 +788,66 @@ def translate(insn: NativeInsn) -> Translation:
         return Translation("warning-unmapped", (), f"SETcc destination {ops[0]} is not in the BPF JIT register file")
     if op == "setge":
         return Translation("warning-unmapped", (), "setge needs SF/OF shadow-flag support")
-    if op == "sbb":
-        return Translation("warning-unmapped", (), "sbb needs CF shadow-flag payload support")
+    if op == "sbb" and len(ops) == 2:
+        dst = bpf_reg(ops[0])
+        if dst and dst[1] == 32 and is_int(ops[1]) and parse_int(ops[1]) == 0:
+            return Translation(
+                "exact-kinsn",
+                (f"HC_KINSN(HC_X86_ALU_IMM_PAYLOAD({dst[0]}, 0), MICRO_HANDCRAFT_BPF_X86_SBBL)",),
+                "sbbl imm0 kinsn using module shadow CF",
+            )
+        return Translation("warning-unmapped", (), f"SBB operand form has no current kinsn selector: {insn.raw}")
     return Translation("warning-unmapped", (), f"unsupported mnemonic or operand form: {insn.raw}")
 
 
+def branchable_cmp(insn: NativeInsn) -> BranchableCmp | None:
+    if insn.mnemonic != "cmp" or len(insn.operands) != 2:
+        return None
+
+    lhs = bpf_reg(insn.operands[0])
+    rhs = bpf_reg(insn.operands[1])
+    if lhs and rhs and lhs[1] == rhs[1] and lhs[1] in {32, 64}:
+        return BranchableCmp(lhs[0], rhs[0], None, lhs[1], insn.raw)
+    if lhs and lhs[1] in {32, 64} and is_int(insn.operands[1]):
+        return BranchableCmp(lhs[0], None, parse_int(insn.operands[1]), lhs[1], insn.raw)
+    return None
+
+
+def translate_jcc_from_cmp(insn: NativeInsn, cmp: BranchableCmp) -> Translation:
+    if insn.mnemonic not in JCC_OP or len(insn.operands) != 1:
+        return translate(insn)
+
+    target_addr = parse_branch_target(insn.operands[0])
+    if target_addr is None:
+        return Translation("warning-unmapped", (), f"cannot parse branch target {insn.operands[0]}")
+
+    bpf_class = "BPF_JMP32" if cmp.width == 32 else "BPF_JMP"
+    op = JCC_OP[insn.mnemonic]
+    if cmp.rhs is not None:
+        code = f"HC_RAW({bpf_class} | {op} | BPF_X, {cmp.lhs}, {cmp.rhs}, {BRANCH_OFF}, 0)"
+    else:
+        code = f"HC_RAW({bpf_class} | {op} | BPF_K, {cmp.lhs}, 0, {BRANCH_OFF}, {cmp.imm})"
+    return Translation(
+        "bpf-branch",
+        (code,),
+        f"verifier-visible branch from preceding {cmp.raw}; cmp kinsn is preserved",
+        target_addr,
+    )
+
+
 def translate_all(insns: list[NativeInsn]) -> list[Translation]:
-    return [translate(insn) for insn in insns]
+    translations: list[Translation] = []
+    pending_cmp: BranchableCmp | None = None
+
+    for insn in insns:
+        if pending_cmp is not None and insn.mnemonic in JCC_OP:
+            trans = translate_jcc_from_cmp(insn, pending_cmp)
+        else:
+            trans = translate(insn)
+        translations.append(trans)
+        pending_cmp = branchable_cmp(insn)
+
+    return translations
 
 
 def bpf_insn_len(code: str) -> int:

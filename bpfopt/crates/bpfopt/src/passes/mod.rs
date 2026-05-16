@@ -28,23 +28,76 @@ use crate::pass::{regs_from_offsets, BpfPass, KinsnDescriptor, RegSet};
 
 pub(crate) const COMMON_KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
-        name: "bpf_x86_movq_rr",
-        register_uses: mov_rr_register_uses,
-        register_defs: mov_rr_register_defs,
+        name: "bpf_x86_movb",
+        register_uses: x86_mov_register_uses,
+        register_defs: x86_mov_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_x86_movw",
+        register_uses: x86_mov_register_uses,
+        register_defs: x86_mov_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_x86_movl",
+        register_uses: x86_mov_register_uses,
+        register_defs: x86_mov_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_x86_movq",
+        register_uses: x86_mov_register_uses,
+        register_defs: x86_mov_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_x86_movzbl",
+        register_uses: x86_mov_register_uses,
+        register_defs: x86_mov_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_x86_movzwl",
+        register_uses: x86_mov_register_uses,
+        register_defs: x86_mov_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_x86_movswl",
+        register_uses: x86_mov_register_uses,
+        register_defs: x86_mov_register_defs,
+    },
+    KinsnDescriptor {
+        name: "bpf_x86_movsxd",
+        register_uses: x86_mov_register_uses,
+        register_defs: x86_mov_register_defs,
     },
     KinsnDescriptor {
         name: "bpf_arm64_mov_x_rr",
-        register_uses: mov_rr_register_uses,
-        register_defs: mov_rr_register_defs,
+        register_uses: arm64_mov_register_uses,
+        register_defs: arm64_mov_register_defs,
     },
 ];
 
-fn mov_rr_register_uses(payload: u64) -> RegSet {
+fn arm64_mov_register_uses(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[4])
 }
 
-fn mov_rr_register_defs(payload: u64) -> RegSet {
+fn arm64_mov_register_defs(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[0])
+}
+
+fn x86_mov_register_uses(payload: u64) -> RegSet {
+    match payload & 0xf {
+        1 => regs_from_offsets(payload, &[8]),
+        4 => regs_from_offsets(payload, &[8]),
+        5 => regs_from_offsets(payload, &[8, 12]),
+        6 => regs_from_offsets(payload, &[4, 8]),
+        7 => regs_from_offsets(payload, &[4]),
+        _ => RegSet::new(),
+    }
+}
+
+fn x86_mov_register_defs(payload: u64) -> RegSet {
+    match payload & 0xf {
+        1 | 4 | 5 => regs_from_offsets(payload, &[4]),
+        _ => RegSet::new(),
+    }
 }
 
 // ── Pass registry ───────────────────────────────────────────────────

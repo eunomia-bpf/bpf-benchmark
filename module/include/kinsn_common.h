@@ -66,7 +66,6 @@ static __always_inline u8 kinsn_bpf_size_bits(u8 size)
 #define KINSN_X86_REG_R10	12
 #define KINSN_X86_REG_R11	13
 #define KINSN_X86_REG_R12	14
-#define KINSN_X86_REG_RBP	15
 
 static __always_inline u8 kinsn_x86_reg_code(u8 bpf_reg)
 {
@@ -82,7 +81,6 @@ static __always_inline u8 kinsn_x86_reg_code(u8 bpf_reg)
 		return 3;
 	case BPF_REG_7:
 	case BPF_REG_10:
-	case KINSN_X86_REG_RBP:
 		return 5;
 	case BPF_REG_2:
 	case BPF_REG_8:

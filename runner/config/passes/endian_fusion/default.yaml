@@ -3,9 +3,9 @@
 # Daemon substitutes ${...} vars; runner sends this command verbatim.
 log_level: 1
 kinsns:
-  - name: bpf_x86_movzwl_mem
-  - name: bpf_x86_movl_mem
-  - name: bpf_x86_movq_mem
+  - name: bpf_x86_movzwl
+  - name: bpf_x86_movl
+  - name: bpf_x86_movq
   - name: bpf_x86_rolw
   - name: bpf_x86_bswapl
   - name: bpf_x86_bswapq

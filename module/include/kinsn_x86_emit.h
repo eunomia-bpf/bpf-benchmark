@@ -56,7 +56,6 @@ static __always_inline bool kinsn_x86_needs_rex8(u8 reg)
 	case KINSN_X86_REG_R10:
 	case KINSN_X86_REG_R11:
 	case KINSN_X86_REG_R12:
-	case KINSN_X86_REG_RBP:
 		return true;
 	default:
 		return false;
@@ -93,8 +92,7 @@ static __always_inline bool kinsn_x86_needs_rex8(u8 reg)
 
 static __always_inline bool kinsn_x86_reg_is_shadowed(u8 reg)
 {
-	return (reg >= KINSN_X86_REG_R9 && reg <= KINSN_X86_REG_R12) ||
-	       reg == KINSN_X86_REG_RBP;
+	return reg >= KINSN_X86_REG_R9 && reg <= KINSN_X86_REG_R12;
 }
 
 static __always_inline s16 kinsn_x86_shadow_reg_off(u8 reg)
@@ -124,8 +122,6 @@ static __always_inline s16 kinsn_x86_shadow_reg_off(u8 reg)
 		return KINSN_X86_SHADOW_R11_OFF;
 	case KINSN_X86_REG_R12:
 		return KINSN_X86_SHADOW_R12_OFF;
-	case KINSN_X86_REG_RBP:
-		return KINSN_X86_SHADOW_RBP_OFF;
 	case BPF_REG_7:
 		return KINSN_X86_SHADOW_R13_OFF;
 	case BPF_REG_8:
@@ -373,9 +369,10 @@ static __always_inline void kinsn_emit_sib_mem(u8 *buf, u32 *len, u8 reg_field,
 		kinsn_emit_s32(buf, len, offset);
 }
 
-static __always_inline void kinsn_emit_modrm_mem(u8 *buf, u32 *len,
-						 u8 reg_field, u8 base_reg,
-						 s16 offset)
+static __always_inline void kinsn_emit_modrm_mem_raw(u8 *buf, u32 *len,
+						     u8 reg_field,
+						     u8 base_reg,
+						     s16 offset)
 {
 	u8 base_code = kinsn_x86_code(base_reg);
 	u8 mod;
@@ -387,12 +384,19 @@ static __always_inline void kinsn_emit_modrm_mem(u8 *buf, u32 *len,
 	else
 		mod = 0x80;
 
-	kinsn_emit_u8(buf, len, mod | (kinsn_x86_code(reg_field) << 3) |
-		      base_code);
+	kinsn_emit_u8(buf, len, mod | ((reg_field & 0x7) << 3) | base_code);
 	if (mod == 0x40)
 		kinsn_emit_u8(buf, len, (u8)offset);
 	else if (mod == 0x80)
 		kinsn_emit_s32(buf, len, offset);
+}
+
+static __always_inline void kinsn_emit_modrm_mem(u8 *buf, u32 *len,
+						 u8 reg_field, u8 base_reg,
+						 s16 offset)
+{
+	kinsn_emit_modrm_mem_raw(buf, len, kinsn_x86_code(reg_field),
+				 base_reg, offset);
 }
 
 #endif /* _KINSN_X86_EMIT_H */

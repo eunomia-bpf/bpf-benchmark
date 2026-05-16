@@ -5,7 +5,7 @@ CLANG ?= clang
 REPO_ROOT := $(abspath $(CURDIR)/../..)
 
 CFLAGS := -Wall -Wextra -O2 -g -target bpf $(SYS_INCLUDE_FLAGS) -MMD -MP
-NATIVE_CFLAGS := -Wall -Wextra -O2 -g -fPIC -shared -DMICRO_NATIVE $(SYS_INCLUDE_FLAGS) -MMD -MP
+NATIVE_CFLAGS := -Wall -Wextra -O2 -g -fPIC -shared -DMICRO_NATIVE -fno-omit-frame-pointer $(SYS_INCLUDE_FLAGS) -MMD -MP
 HANDCRAFT_CFLAGS := -Wall -Wextra -O2 -g -fPIC -shared \
 	-I$(REPO_ROOT)/runner/include \
 	-I$(REPO_ROOT)/vendor/libbpf/include/uapi \
