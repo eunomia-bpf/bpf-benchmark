@@ -15,24 +15,24 @@ __bpf_kfunc void bpf_x86_testq_rr(void) {}
 __bpf_kfunc void bpf_x86_testl_rr(void) {}
 __bpf_kfunc void bpf_x86_testb_rr(void) {}
 __bpf_kfunc void bpf_x86_testb_imm(void) {}
-__bpf_kfunc void bpf_x86_cmovnel_rr(void) {}
-__bpf_kfunc void bpf_x86_cmovel_rr(void) {}
-__bpf_kfunc void bpf_x86_cmovneq_rr(void) {}
-__bpf_kfunc void bpf_x86_cmoveq_rr(void) {}
-__bpf_kfunc void bpf_x86_cmovbl_rr(void) {}
-__bpf_kfunc void bpf_x86_cmovbq_rr(void) {}
+__bpf_kfunc void bpf_x86_cmovnel(void) {}
+__bpf_kfunc void bpf_x86_cmovel(void) {}
+__bpf_kfunc void bpf_x86_cmovneq(void) {}
+__bpf_kfunc void bpf_x86_cmoveq(void) {}
+__bpf_kfunc void bpf_x86_cmovbl(void) {}
+__bpf_kfunc void bpf_x86_cmovbq(void) {}
 __bpf_kfunc void bpf_x86_sete_r(void) {}
 __bpf_kfunc void bpf_x86_setge_r(void) {}
 __bpf_kfunc void bpf_x86_setne_r(void) {}
 __bpf_kfunc_end_defs();
 
 BTF_KFUNCS_START(bpf_x86_cmov_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_x86_cmovbl_rr)
-BTF_ID_FLAGS(func, bpf_x86_cmovbq_rr)
-BTF_ID_FLAGS(func, bpf_x86_cmovel_rr)
-BTF_ID_FLAGS(func, bpf_x86_cmoveq_rr)
-BTF_ID_FLAGS(func, bpf_x86_cmovnel_rr)
-BTF_ID_FLAGS(func, bpf_x86_cmovneq_rr)
+BTF_ID_FLAGS(func, bpf_x86_cmovbl)
+BTF_ID_FLAGS(func, bpf_x86_cmovbq)
+BTF_ID_FLAGS(func, bpf_x86_cmovel)
+BTF_ID_FLAGS(func, bpf_x86_cmoveq)
+BTF_ID_FLAGS(func, bpf_x86_cmovnel)
+BTF_ID_FLAGS(func, bpf_x86_cmovneq)
 BTF_ID_FLAGS(func, bpf_x86_cmpl_imm32)
 BTF_ID_FLAGS(func, bpf_x86_cmpl_rr)
 BTF_ID_FLAGS(func, bpf_x86_cmpq_imm32)
@@ -47,31 +47,9 @@ BTF_ID_FLAGS(func, bpf_x86_testl_rr)
 BTF_ID_FLAGS(func, bpf_x86_testq_rr)
 BTF_KFUNCS_END(bpf_x86_cmov_kfunc_ids)
 
-enum x86_flag_proof_kind {
-	X86_FLAG_PROOF_CMP_RR64 = 1,
-	X86_FLAG_PROOF_CMP_IMM64 = 2,
-	X86_FLAG_PROOF_CMP_RR32 = 3,
-	X86_FLAG_PROOF_CMP_IMM32 = 4,
-	X86_FLAG_PROOF_STACK = 5,
+enum x86_flag_payload_kind {
+	X86_FLAG_PAYLOAD_STACK = 5,
 };
-
-static __always_inline bool x86_flag_proof_kind_valid(u8 kind)
-{
-	return kind >= X86_FLAG_PROOF_CMP_RR64 &&
-	       kind <= X86_FLAG_PROOF_CMP_IMM32;
-}
-
-static __always_inline bool x86_flag_proof_kind_rr(u8 kind)
-{
-	return kind == X86_FLAG_PROOF_CMP_RR64 ||
-	       kind == X86_FLAG_PROOF_CMP_RR32;
-}
-
-static __always_inline bool x86_flag_proof_kind_32(u8 kind)
-{
-	return kind == X86_FLAG_PROOF_CMP_RR32 ||
-	       kind == X86_FLAG_PROOF_CMP_IMM32;
-}
 
 static __always_inline bool bpf_reg_ok(u8 reg)
 {
@@ -230,29 +208,14 @@ static __always_inline int decode_cmov_emit_payload(u64 payload,
 			return -EINVAL;
 		return 0;
 	}
-	if (kind == X86_FLAG_PROOF_STACK) {
+	if (kind == X86_FLAG_PAYLOAD_STACK) {
 		if (payload >> 16)
 			return -EINVAL;
 		if (payload & (0xfULL << 8))
 			return -EINVAL;
 		return 0;
 	}
-	if (kinsn_x86_reg_is_shadowed(*dst_reg) ||
-	    kinsn_x86_reg_is_shadowed(*src_reg))
-		return -EINVAL;
-	if (!x86_flag_proof_kind_valid(kind))
-		return -EINVAL;
-	if (!bpf_reg_ok(kinsn_payload_reg(payload, 8)))
-		return -EINVAL;
-	if (x86_flag_proof_kind_rr(kind) &&
-	    !bpf_reg_ok(kinsn_payload_reg(payload, 16)))
-		return -EINVAL;
-	if (!x86_flag_proof_kind_rr(kind) && (payload >> 48))
-		return -EINVAL;
-	if (x86_flag_proof_kind_rr(kind) && (payload >> 20))
-		return -EINVAL;
-
-	return 0;
+	return -EINVAL;
 }
 
 static __always_inline int decode_setcc_payload(u64 payload,
@@ -286,7 +249,7 @@ static __always_inline int decode_setcc_emit_payload(u64 payload, u8 *dst_reg)
 			return -EINVAL;
 		return 0;
 	}
-	if (kind == X86_FLAG_PROOF_STACK) {
+	if (kind == X86_FLAG_PAYLOAD_STACK) {
 		if (payload >> 20)
 			return -EINVAL;
 		if ((payload & (0xfULL << 4)) || (payload & (0xfULL << 8)) ||
@@ -296,23 +259,7 @@ static __always_inline int decode_setcc_emit_payload(u64 payload, u8 *dst_reg)
 			return -EINVAL;
 		return 0;
 	}
-	if (!bpf_reg_ok(*dst_reg))
-		return -EINVAL;
-	if (!x86_flag_proof_kind_valid(kind))
-		return -EINVAL;
-	if (!bpf_reg_ok(kinsn_payload_reg(payload, 4)))
-		return -EINVAL;
-	if ((payload & (0xffULL << 8)) || (payload & (0xfULL << 12)))
-		return -EINVAL;
-	if (x86_flag_proof_kind_rr(kind) &&
-	    !bpf_reg_ok(kinsn_payload_reg(payload, 20)))
-		return -EINVAL;
-	if (!x86_flag_proof_kind_rr(kind) && (payload >> 52))
-		return -EINVAL;
-	if (x86_flag_proof_kind_rr(kind) && (payload >> 24))
-		return -EINVAL;
-
-	return 0;
+	return -EINVAL;
 }
 
 static int instantiate_cmp_rr_flags(u64 payload, struct bpf_insn *insn_buf,
@@ -605,38 +552,6 @@ static int instantiate_cmov_nonzero(u64 payload, struct bpf_insn *insn_buf,
 	return 2;
 }
 
-static int instantiate_cmov_cmp(u64 payload, struct bpf_insn *insn_buf,
-				bool move_on_eq, bool is64)
-{
-	u8 dst_reg = kinsn_payload_reg(payload, 0);
-	u8 src_reg = kinsn_payload_reg(payload, 4);
-	u8 left_reg = kinsn_payload_reg(payload, 8);
-	u8 kind = kinsn_payload_reg(payload, 12);
-	int skip_op = move_on_eq ? BPF_JNE : BPF_JEQ;
-	int err;
-
-	err = decode_cmov_emit_payload(payload, &dst_reg, &src_reg);
-	if (err)
-		return err;
-
-	if (x86_flag_proof_kind_rr(kind)) {
-		u8 right_reg = kinsn_payload_reg(payload, 16);
-
-		insn_buf[0] = x86_flag_proof_kind_32(kind) ?
-			      BPF_JMP32_REG(skip_op, left_reg, right_reg, 1) :
-			      BPF_JMP_REG(skip_op, left_reg, right_reg, 1);
-	} else {
-		s32 imm = kinsn_payload_s32(payload, 16);
-
-		insn_buf[0] = x86_flag_proof_kind_32(kind) ?
-			      BPF_JMP32_IMM(skip_op, left_reg, imm, 1) :
-			      BPF_JMP_IMM(skip_op, left_reg, imm, 1);
-	}
-	insn_buf[1] = is64 ? BPF_MOV64_REG(dst_reg, src_reg) :
-			      BPF_MOV32_REG(dst_reg, src_reg);
-	return 2;
-}
-
 static int instantiate_cmov_stack(u64 payload, struct bpf_insn *insn_buf,
 				  bool move_on_set, bool is64, s16 flag_off)
 {
@@ -700,45 +615,43 @@ static int instantiate_cmov_stack(u64 payload, struct bpf_insn *insn_buf,
 static int instantiate_cmov_eqne(u64 payload, struct bpf_insn *insn_buf,
 				 bool move_on_eq, bool is64)
 {
-	if (kinsn_payload_reg(payload, 12) == X86_FLAG_PROOF_STACK)
+	if (kinsn_payload_reg(payload, 12) == X86_FLAG_PAYLOAD_STACK)
 		return instantiate_cmov_stack(payload, insn_buf, move_on_eq,
 					      is64, KINSN_X86_SHADOW_ZF_OFF);
-	if (kinsn_payload_reg(payload, 12))
-		return instantiate_cmov_cmp(payload, insn_buf, move_on_eq, is64);
 	return instantiate_cmov(payload, insn_buf, move_on_eq);
 }
 
-static int instantiate_cmovnel_rr(u64 payload, struct bpf_insn *insn_buf)
+static int instantiate_cmovnel(u64 payload, struct bpf_insn *insn_buf)
 {
 	return instantiate_cmov_eqne(payload, insn_buf, false, false);
 }
 
-static int instantiate_cmovel_rr(u64 payload, struct bpf_insn *insn_buf)
+static int instantiate_cmovel(u64 payload, struct bpf_insn *insn_buf)
 {
 	return instantiate_cmov_eqne(payload, insn_buf, true, false);
 }
 
-static int instantiate_cmovneq_rr(u64 payload, struct bpf_insn *insn_buf)
+static int instantiate_cmovneq(u64 payload, struct bpf_insn *insn_buf)
 {
 	return instantiate_cmov_eqne(payload, insn_buf, false, true);
 }
 
-static int instantiate_cmoveq_rr(u64 payload, struct bpf_insn *insn_buf)
+static int instantiate_cmoveq(u64 payload, struct bpf_insn *insn_buf)
 {
 	return instantiate_cmov_eqne(payload, insn_buf, true, true);
 }
 
-static int instantiate_cmovbl_rr(u64 payload, struct bpf_insn *insn_buf)
+static int instantiate_cmovbl(u64 payload, struct bpf_insn *insn_buf)
 {
-	if (kinsn_payload_reg(payload, 12) == X86_FLAG_PROOF_STACK)
+	if (kinsn_payload_reg(payload, 12) == X86_FLAG_PAYLOAD_STACK)
 		return instantiate_cmov_stack(payload, insn_buf, true, false,
 					      KINSN_X86_SHADOW_CF_OFF);
 	return instantiate_cmov_nonzero(payload, insn_buf, false);
 }
 
-static int instantiate_cmovbq_rr(u64 payload, struct bpf_insn *insn_buf)
+static int instantiate_cmovbq(u64 payload, struct bpf_insn *insn_buf)
 {
-	if (kinsn_payload_reg(payload, 12) == X86_FLAG_PROOF_STACK)
+	if (kinsn_payload_reg(payload, 12) == X86_FLAG_PAYLOAD_STACK)
 		return instantiate_cmov_stack(payload, insn_buf, true, true,
 					      KINSN_X86_SHADOW_CF_OFF);
 	return instantiate_cmov_nonzero(payload, insn_buf, true);
@@ -771,72 +684,6 @@ static int instantiate_setcc(u64 payload, struct bpf_insn *insn_buf, u8 op)
 	if (kinsn_x86_reg_is_shadowed(cond_reg))
 		kinsn_x86_read64(insn_buf, &cnt, cond_eval_reg, cond_reg);
 	insn_buf[cnt++] = BPF_JMP_IMM(op, cond_eval_reg, 0, 1);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_OR, high_reg, 1);
-	kinsn_x86_write64(insn_buf, &cnt, dst_reg, high_reg, scratch_mask);
-	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
-	return cnt;
-}
-
-static int instantiate_setcc_cmp(u64 payload, struct bpf_insn *insn_buf, u8 op)
-{
-	u8 dst_reg = kinsn_payload_reg(payload, 0);
-	u8 left_reg = kinsn_payload_reg(payload, 4);
-	u8 kind = kinsn_payload_reg(payload, 16);
-	u8 high_reg, left_eval_reg, right_eval_reg;
-	u32 scratch_mask;
-	int cnt = 0;
-
-	if (decode_setcc_emit_payload(payload, &dst_reg))
-		return -EINVAL;
-
-	high_reg = kinsn_x86_scratch_avoid(dst_reg, left_reg, 0);
-	left_eval_reg = left_reg;
-	scratch_mask = KINSN_X86_SCRATCH_MASK(high_reg);
-	if (kinsn_x86_reg_is_shadowed(left_reg)) {
-		left_eval_reg = kinsn_x86_scratch_avoid(dst_reg, left_reg,
-							high_reg);
-		if (left_eval_reg == high_reg)
-			return -EINVAL;
-		scratch_mask |= KINSN_X86_SCRATCH_MASK(left_eval_reg);
-	}
-
-	if (x86_flag_proof_kind_rr(kind)) {
-		u8 right_reg = kinsn_payload_reg(payload, 20);
-
-		right_eval_reg = right_reg;
-		if (kinsn_x86_reg_is_shadowed(right_reg)) {
-			right_eval_reg = kinsn_x86_scratch_avoid4(dst_reg,
-								  left_reg,
-								  high_reg,
-								  left_eval_reg);
-			if (right_eval_reg == high_reg ||
-			    right_eval_reg == left_eval_reg)
-				return -EINVAL;
-			scratch_mask |= KINSN_X86_SCRATCH_MASK(right_eval_reg);
-		}
-		kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-		kinsn_x86_read64(insn_buf, &cnt, high_reg, dst_reg);
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, high_reg, -256);
-		if (kinsn_x86_reg_is_shadowed(left_reg))
-			kinsn_x86_read64(insn_buf, &cnt, left_eval_reg, left_reg);
-		if (kinsn_x86_reg_is_shadowed(right_reg))
-			kinsn_x86_read64(insn_buf, &cnt, right_eval_reg, right_reg);
-		insn_buf[cnt++] = x86_flag_proof_kind_32(kind) ?
-				  BPF_JMP32_REG(op, left_eval_reg, right_eval_reg, 1) :
-				  BPF_JMP_REG(op, left_eval_reg, right_eval_reg, 1);
-	} else {
-		s32 imm = kinsn_payload_s32(payload, 20);
-
-		kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-		kinsn_x86_read64(insn_buf, &cnt, high_reg, dst_reg);
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, high_reg, -256);
-		if (kinsn_x86_reg_is_shadowed(left_reg))
-			kinsn_x86_read64(insn_buf, &cnt, left_eval_reg, left_reg);
-		insn_buf[cnt++] = x86_flag_proof_kind_32(kind) ?
-				  BPF_JMP32_IMM(op, left_eval_reg, imm, 1) :
-				  BPF_JMP_IMM(op, left_eval_reg, imm, 1);
-	}
-
 	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_OR, high_reg, 1);
 	kinsn_x86_write64(insn_buf, &cnt, dst_reg, high_reg, scratch_mask);
 	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
@@ -877,15 +724,13 @@ static int instantiate_setcc_stack(u64 payload, struct bpf_insn *insn_buf,
 static int instantiate_setcc_dispatch(u64 payload, struct bpf_insn *insn_buf,
 				      u8 op)
 {
-	if (kinsn_payload_reg(payload, 16) == X86_FLAG_PROOF_STACK) {
+	if (kinsn_payload_reg(payload, 16) == X86_FLAG_PAYLOAD_STACK) {
 		if (op == BPF_JNE)
 			return instantiate_setcc_stack(payload, insn_buf, true);
 		if (op == BPF_JEQ)
 			return instantiate_setcc_stack(payload, insn_buf, false);
 		return -EINVAL;
 	}
-	if (kinsn_payload_reg(payload, 16))
-		return instantiate_setcc_cmp(payload, insn_buf, op);
 	return instantiate_setcc(payload, insn_buf, op);
 }
 
@@ -1121,37 +966,37 @@ static int emit_cmov_x86(u8 *image, u32 *off, bool emit,
 	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
-static int emit_cmovneq_rr_x86(u8 *image, u32 *off, bool emit,
+static int emit_cmovneq_x86(u8 *image, u32 *off, bool emit,
 			       u64 payload, const struct bpf_prog *prog)
 {
 	return emit_cmov_x86(image, off, emit, payload, prog, 0x45, true);
 }
 
-static int emit_cmovnel_rr_x86(u8 *image, u32 *off, bool emit,
+static int emit_cmovnel_x86(u8 *image, u32 *off, bool emit,
 			       u64 payload, const struct bpf_prog *prog)
 {
 	return emit_cmov_x86(image, off, emit, payload, prog, 0x45, false);
 }
 
-static int emit_cmoveq_rr_x86(u8 *image, u32 *off, bool emit,
+static int emit_cmoveq_x86(u8 *image, u32 *off, bool emit,
 			      u64 payload, const struct bpf_prog *prog)
 {
 	return emit_cmov_x86(image, off, emit, payload, prog, 0x44, true);
 }
 
-static int emit_cmovel_rr_x86(u8 *image, u32 *off, bool emit,
+static int emit_cmovel_x86(u8 *image, u32 *off, bool emit,
 			      u64 payload, const struct bpf_prog *prog)
 {
 	return emit_cmov_x86(image, off, emit, payload, prog, 0x44, false);
 }
 
-static int emit_cmovbl_rr_x86(u8 *image, u32 *off, bool emit,
+static int emit_cmovbl_x86(u8 *image, u32 *off, bool emit,
 			      u64 payload, const struct bpf_prog *prog)
 {
 	return emit_cmov_x86(image, off, emit, payload, prog, 0x42, false);
 }
 
-static int emit_cmovbq_rr_x86(u8 *image, u32 *off, bool emit,
+static int emit_cmovbq_x86(u8 *image, u32 *off, bool emit,
 			      u64 payload, const struct bpf_prog *prog)
 {
 	return emit_cmov_x86(image, off, emit, payload, prog, 0x42, true);
@@ -1269,52 +1114,52 @@ const struct bpf_kinsn bpf_x86_testl_rr_desc = {
 	.emit_x86 = emit_testl_rr_x86,
 };
 
-const struct bpf_kinsn bpf_x86_cmovnel_rr_desc = {
+const struct bpf_kinsn bpf_x86_cmovnel_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 10 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 8,
-	.instantiate_insn = instantiate_cmovnel_rr,
-	.emit_x86 = emit_cmovnel_rr_x86,
+	.instantiate_insn = instantiate_cmovnel,
+	.emit_x86 = emit_cmovnel_x86,
 };
 
-const struct bpf_kinsn bpf_x86_cmovel_rr_desc = {
+const struct bpf_kinsn bpf_x86_cmovel_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 10 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 8,
-	.instantiate_insn = instantiate_cmovel_rr,
-	.emit_x86 = emit_cmovel_rr_x86,
+	.instantiate_insn = instantiate_cmovel,
+	.emit_x86 = emit_cmovel_x86,
 };
 
-const struct bpf_kinsn bpf_x86_cmovneq_rr_desc = {
+const struct bpf_kinsn bpf_x86_cmovneq_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 10 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 8,
-	.instantiate_insn = instantiate_cmovneq_rr,
-	.emit_x86 = emit_cmovneq_rr_x86,
+	.instantiate_insn = instantiate_cmovneq,
+	.emit_x86 = emit_cmovneq_x86,
 };
 
-const struct bpf_kinsn bpf_x86_cmoveq_rr_desc = {
+const struct bpf_kinsn bpf_x86_cmoveq_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 10 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 8,
-	.instantiate_insn = instantiate_cmoveq_rr,
-	.emit_x86 = emit_cmoveq_rr_x86,
+	.instantiate_insn = instantiate_cmoveq,
+	.emit_x86 = emit_cmoveq_x86,
 };
 
-const struct bpf_kinsn bpf_x86_cmovbl_rr_desc = {
+const struct bpf_kinsn bpf_x86_cmovbl_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 10 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 8,
-	.instantiate_insn = instantiate_cmovbl_rr,
-	.emit_x86 = emit_cmovbl_rr_x86,
+	.instantiate_insn = instantiate_cmovbl,
+	.emit_x86 = emit_cmovbl_x86,
 };
 
-const struct bpf_kinsn bpf_x86_cmovbq_rr_desc = {
+const struct bpf_kinsn bpf_x86_cmovbq_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 10 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 8,
-	.instantiate_insn = instantiate_cmovbq_rr,
-	.emit_x86 = emit_cmovbq_rr_x86,
+	.instantiate_insn = instantiate_cmovbq,
+	.emit_x86 = emit_cmovbq_x86,
 };
 
 const struct bpf_kinsn bpf_x86_setne_r_desc = {
@@ -1342,12 +1187,12 @@ const struct bpf_kinsn bpf_x86_setge_r_desc = {
 };
 
 static const struct bpf_kinsn * const bpf_x86_cmov_kinsn_descs[] = {
-	&bpf_x86_cmovbl_rr_desc,
-	&bpf_x86_cmovbq_rr_desc,
-	&bpf_x86_cmovel_rr_desc,
-	&bpf_x86_cmoveq_rr_desc,
-	&bpf_x86_cmovnel_rr_desc,
-	&bpf_x86_cmovneq_rr_desc,
+	&bpf_x86_cmovbl_desc,
+	&bpf_x86_cmovbq_desc,
+	&bpf_x86_cmovel_desc,
+	&bpf_x86_cmoveq_desc,
+	&bpf_x86_cmovnel_desc,
+	&bpf_x86_cmovneq_desc,
 	&bpf_x86_cmpl_imm32_desc,
 	&bpf_x86_cmpl_rr_desc,
 	&bpf_x86_cmpq_imm32_desc,

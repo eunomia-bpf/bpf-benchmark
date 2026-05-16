@@ -119,12 +119,15 @@ Disassembly of section .data:
  */
 
 static const struct bpf_insn program[] = {
+    HC_MOV64_IMM(BPF_REG_6, 0),
+    HC_MOV64_IMM(BPF_REG_7, 0),
+    HC_MOV64_IMM(BPF_REG_8, 0),
     /* 0x1100: mov    rcx,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0] */
     HC_LDX(BPF_W, BPF_REG_4, BPF_REG_1, 0),
     /* 0x1103: mov    rdx,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4] */
     HC_LDX(BPF_W, BPF_REG_3, BPF_REG_1, 4),
-    /* 0x1107: xor    eax,eax [bpf-jit: zero idiom] */
-    HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_0, 0, 0, 0),
+    /* 0x1107: xor    eax,eax [exact-kinsn: xor32 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x1109: cmp    rcx,rdx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_4, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x110c: ja     1130 <simple_packet_xdp+0x30> [bpf-branch: lowered cmp    rcx,rdx + ja     1130 <simple_packet_xdp+0x30> to verifier-visible BPF branch] */
@@ -162,21 +165,30 @@ Disassembly of section .data:
    8:	55                   	push   rbp
    9:	48 89 e5             	mov    rbp,rsp
    c:	48 81 ec 80 01 00 00 	sub    rsp,0x180
-  13:	48 8b 4f 00          	mov    rcx,QWORD PTR [rdi+0x0]
-  17:	48 8b 57 08          	mov    rdx,QWORD PTR [rdi+0x8]
-  1b:	31 c0                	xor    eax,eax
-  1d:	48 39 d1             	cmp    rcx,rdx
-  20:	48 39 d1             	cmp    rcx,rdx
-  23:	77 26                	ja     0x4b
-  25:	48 8d 71 08          	lea    rsi,[rcx+0x8]
-  29:	48 39 d6             	cmp    rsi,rdx
-  2c:	48 39 d6             	cmp    rsi,rdx
-  2f:	77 1a                	ja     0x4b
-  31:	66 c7 41 00 4e 61    	mov    WORD PTR [rcx+0x0],0x614e
-  37:	c6 41 02 bc          	mov    BYTE PTR [rcx+0x2],0xbc
-  3b:	c7 41 03 00 00 00 00 	mov    DWORD PTR [rcx+0x3],0x0
-  42:	c6 41 07 00          	mov    BYTE PTR [rcx+0x7],0x0
-  46:	b8 02 00 00 00       	mov    eax,0x2
-  4b:	c9                   	leave
-  4c:	c3                   	ret
+  13:	53                   	push   rbx
+  14:	41 55                	push   r13
+  16:	41 56                	push   r14
+  18:	31 db                	xor    ebx,ebx
+  1a:	45 31 ed             	xor    r13d,r13d
+  1d:	45 31 f6             	xor    r14d,r14d
+  20:	48 8b 4f 00          	mov    rcx,QWORD PTR [rdi+0x0]
+  24:	48 8b 57 08          	mov    rdx,QWORD PTR [rdi+0x8]
+  28:	31 c0                	xor    eax,eax
+  2a:	48 39 d1             	cmp    rcx,rdx
+  2d:	48 39 d1             	cmp    rcx,rdx
+  30:	77 26                	ja     0x58
+  32:	48 8d 71 08          	lea    rsi,[rcx+0x8]
+  36:	48 39 d6             	cmp    rsi,rdx
+  39:	48 39 d6             	cmp    rsi,rdx
+  3c:	77 1a                	ja     0x58
+  3e:	66 c7 41 00 4e 61    	mov    WORD PTR [rcx+0x0],0x614e
+  44:	c6 41 02 bc          	mov    BYTE PTR [rcx+0x2],0xbc
+  48:	c7 41 03 00 00 00 00 	mov    DWORD PTR [rcx+0x3],0x0
+  4f:	c6 41 07 00          	mov    BYTE PTR [rcx+0x7],0x0
+  53:	b8 02 00 00 00       	mov    eax,0x2
+  58:	41 5e                	pop    r14
+  5a:	41 5d                	pop    r13
+  5c:	5b                   	pop    rbx
+  5d:	c9                   	leave
+  5e:	c3                   	ret
 ```

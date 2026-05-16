@@ -410,11 +410,11 @@ static int discover_cmov_kinsns(void)
 				 type_id_bias,
 				 &g_cmov_btf_fd, &g_testq_btf_id) < 0)
 		return -1;
-	if (discover_module_func("bpf_x86_cmov", "bpf_x86_cmovneq_rr",
+	if (discover_module_func("bpf_x86_cmov", "bpf_x86_cmovneq",
 				 type_id_bias,
 				 &g_cmov_btf_fd, &g_cmovneq_btf_id) < 0)
 		return -1;
-	if (discover_module_func("bpf_x86_cmov", "bpf_x86_cmoveq_rr",
+	if (discover_module_func("bpf_x86_cmov", "bpf_x86_cmoveq",
 				 type_id_bias,
 				 &g_cmov_btf_fd, &g_cmoveq_btf_id) < 0)
 		return -1;

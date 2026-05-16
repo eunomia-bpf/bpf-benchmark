@@ -105,7 +105,7 @@ static const struct bpf_insn program[] = {
     /* 0x1109: cmp    rdx,rcx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_3, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x110c: jbe    110f <tracee_http_method_prefix_detect_xdp+0xf> [bpf-branch: lowered cmp    rdx,rcx + jbe    110f <tracee_http_method_prefix_detect_xdp+0xf> to verifier-visible BPF branch] */
-    HC_JMP_REG(BPF_JLE, BPF_REG_3, BPF_REG_4, 2),
+    HC_JMP_REG(BPF_JLE, BPF_REG_3, BPF_REG_4, 1),
     /* 0x110e: ret [bpf-jit: BPF exit; kernel JIT emits the real return sequence] */
     HC_EXIT(),
     /* 0x110f: lea    rsi,[rdx+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
@@ -172,7 +172,7 @@ static const struct bpf_insn program[] = {
     /* 0x11bf: mov    r9b,0x4c [warning-unmapped: movq immediate into HC_X86_R9 needs an immediate-load kinsn] */
     /* 0x11c2: mov    r11b,0x45 [warning-unmapped: movq immediate into HC_X86_R11 needs an immediate-load kinsn] */
     /* 0x11c5: jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 26, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 25, 0),
     /* 0x11ca: nop    WORD PTR [rax+rax*1+0x0] [padding: padding is not part of BPF semantics] */
     /* 0x11d0: cmp    r10d,0x54 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(HC_X86_R10, 84), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32),
@@ -193,7 +193,7 @@ static const struct bpf_insn program[] = {
     /* 0x1211: mov    bl,0x44 [bpf-jit: 64-bit immediate move] */
     HC_MOV64_IMM(BPF_REG_6, 68),
     /* 0x1213: jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 20, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 19, 0),
     /* 0x1218: cmp    r9b,0x45 [warning-unmapped: CMP operand form has no current kinsn selector: cmp    r9b,0x45] */
     /* 0x121c: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: cannot lower cmp    r9b,0x45 + jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> to BPF branch] */
     /* 0x1222: mov    r9b,0x45 [warning-unmapped: movq immediate into HC_X86_R9 needs an immediate-load kinsn] */
@@ -224,7 +224,7 @@ static const struct bpf_insn program[] = {
     /* 0x1271: mov    bl,0x54 [bpf-jit: 64-bit immediate move] */
     HC_MOV64_IMM(BPF_REG_6, 84),
     /* 0x1273: jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 13, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 12, 0),
     /* 0x1275: mov    r9b,0x54 [warning-unmapped: movq immediate into HC_X86_R9 needs an immediate-load kinsn] */
     /* 0x1278: cmp    BYTE PTR [rax-0x4],0x54 [warning-unmapped: CMP operand form has no current kinsn selector: cmp    BYTE PTR [rax-0x4],0x54] */
     /* 0x127c: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: cannot lower cmp    BYTE PTR [rax-0x4],0x54 + jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> to BPF branch] */
@@ -237,7 +237,7 @@ static const struct bpf_insn program[] = {
     HC_MOV64_IMM(BPF_REG_6, 80),
     /* 0x1292: mov    r11b,0x54 [warning-unmapped: movq immediate into HC_X86_R11 needs an immediate-load kinsn] */
     /* 0x1295: jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 11, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 10, 0),
     /* 0x1297: mov    r9b,0x55 [warning-unmapped: movq immediate into HC_X86_R9 needs an immediate-load kinsn] */
     /* 0x129a: cmp    BYTE PTR [rax-0x4],0x54 [warning-unmapped: CMP operand form has no current kinsn selector: cmp    BYTE PTR [rax-0x4],0x54] */
     /* 0x129e: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: cannot lower cmp    BYTE PTR [rax-0x4],0x54 + jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> to BPF branch] */
@@ -249,7 +249,7 @@ static const struct bpf_insn program[] = {
     /* 0x12b2: mov    bl,0x20 [bpf-jit: 64-bit immediate move] */
     HC_MOV64_IMM(BPF_REG_6, 32),
     /* 0x12b4: jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 9, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 8, 0),
     /* 0x12b6: cs nop WORD PTR [rax+rax*1+0x0] [padding: prefixed nop padding is not part of BPF semantics] */
     /* 0x12c0: mov    r11d,r9d [exact-kinsn: movl register-to-register kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R11, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_MOVL_RR),
@@ -302,7 +302,7 @@ static const struct bpf_insn program[] = {
     /* 0x1315: cmp    rcx,0x9 [exact-kinsn: cmpq reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_4, 9), MICRO_HANDCRAFT_BPF_X86_CMPQ_IMM32),
     /* 0x1319: jne    1150 <tracee_http_method_prefix_detect_xdp+0x50> [bpf-branch: lowered cmp    rcx,0x9 + jne    1150 <tracee_http_method_prefix_detect_xdp+0x50> to verifier-visible BPF branch] */
-    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_4, 0, -84, 9),
+    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_4, 0, -85, 9),
     /* 0x131f: mov    BYTE PTR [rdx],dil [exact-kinsn: direct memory store via x86 kinsn selector] */
     HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_1, BPF_REG_3, 0), MICRO_HANDCRAFT_BPF_X86_MOVB_MEM_REG),
     /* 0x1322: mov    BYTE PTR [rdx+0x1],bh [warning-unmapped: unsupported mnemonic or operand form: mov    BYTE PTR [rdx+0x1],bh] */

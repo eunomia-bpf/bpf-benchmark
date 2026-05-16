@@ -13,10 +13,10 @@ fn select_ctx() -> crate::pass::PassContext {
         .set_kinsn_call_for_target_name("bpf_x86_testq_rr", 5555, 0)
         .expect("register testq kinsn");
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_x86_cmovneq_rr", 5556, 0)
+        .set_kinsn_call_for_target_name("bpf_x86_cmovneq", 5556, 0)
         .expect("register cmovneq kinsn");
     ctx.kinsn_registry
-        .set_kinsn_call_for_target_name("bpf_x86_cmoveq_rr", 5557, 0)
+        .set_kinsn_call_for_target_name("bpf_x86_cmoveq", 5557, 0)
         .expect("register cmoveq kinsn");
     ctx
 }

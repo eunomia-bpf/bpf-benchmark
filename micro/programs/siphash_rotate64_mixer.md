@@ -1829,12 +1829,15 @@ Disassembly of section .data:
  */
 
 static const struct bpf_insn program[] = {
+    HC_MOV64_IMM(BPF_REG_6, 0),
+    HC_MOV64_IMM(BPF_REG_7, 0),
+    HC_MOV64_IMM(BPF_REG_8, 0),
     /* 0x1100: mov    rcx,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0] */
     HC_LDX(BPF_W, BPF_REG_4, BPF_REG_1, 0),
     /* 0x1103: mov    rdx,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4] */
     HC_LDX(BPF_W, BPF_REG_3, BPF_REG_1, 4),
     /* 0x1107: xor    eax,eax [exact-kinsn: xor32 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORL),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x1109: cmp    rcx,rdx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_4, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x110c: ja     1569 <siphash_rotate64_mixer_xdp+0x469> [bpf-branch: lowered cmp    rcx,rdx + ja     1569 <siphash_rotate64_mixer_xdp+0x469> to verifier-visible BPF branch] */
@@ -1851,616 +1854,616 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_2, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x1126: ja     1569 <siphash_rotate64_mixer_xdp+0x469> [bpf-branch: lowered cmp    rsi,rdx + ja     1569 <siphash_rotate64_mixer_xdp+0x469> to verifier-visible BPF branch] */
     HC_JMP_REG(BPF_JGT, BPF_REG_2, BPF_REG_3, 613),
-    /* 0x112c: mov    r9,QWORD PTR [rcx+0x8] [exact-kinsn: direct memory load via x86 kinsn selector; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_MEM_TMP_PAYLOAD(HC_X86_R9, BPF_REG_4, 8, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM),
+    /* 0x112c: mov    r9,QWORD PTR [rcx+0x8] [exact-kinsn: direct memory load via x86 kinsn selector] */
+    HC_KINSN(HC_MEM_PAYLOAD(HC_X86_R9, BPF_REG_4, 8), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM),
     /* 0x1130: movabs rdi,0x7465646279746573 [bpf-jit: 64-bit immediate load] */
     HC_LD_IMM64_RAW(BPF_REG_1, 0, 0x7465646279746573ULL),
-    /* 0x113a: xor    rdi,r9 [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, HC_X86_R9, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x113a: xor    rdi,r9 [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x113d: movabs rdx,0x6c7967656e657261 [bpf-jit: 64-bit immediate load] */
     HC_LD_IMM64_RAW(BPF_REG_3, 0, 0x6c7967656e657261ULL),
     /* 0x1147: add    rdx,rdi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_ADDQ),
     /* 0x114a: movabs rax,0xa60c596fc19fead0 [bpf-jit: 64-bit immediate load] */
     HC_LD_IMM64_RAW(BPF_REG_0, 0, 0xa60c596fc19fead0ULL),
     /* 0x1154: add    rax,rdi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1157: rol    rdi,0x10 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 16, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1157: rol    rdi,0x10 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 16), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x115b: xor    rdi,rdx [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x115e: movabs r8,0xded7d4e2d7dedfc6 [bpf-jit: 64-bit immediate load] */
     HC_LD_IMM64_RAW(BPF_REG_5, 0, 0xded7d4e2d7dedfc6ULL),
     /* 0x1168: add    r8,rdi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x116b: rol    rdi,0x15 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x116b: rol    rdi,0x15 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 21), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x116f: movabs rdx,0xe414a674f0de7325 [bpf-jit: 64-bit immediate load] */
     HC_LD_IMM64_RAW(BPF_REG_3, 0, 0xe414a674f0de7325ULL),
     /* 0x1179: xor    rdx,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x117c: rol    rax,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x117c: rol    rax,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1180: xor    rdi,r8 [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_5, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x1183: add    r8,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1186: rol    rdx,0xd [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1186: rol    rdx,0xd [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x118a: xor    rdx,r8 [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_5, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x118d: rol    r8,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x118d: rol    r8,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1191: add    rax,rdi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1194: rol    rdi,0x10 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 16, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1194: rol    rdi,0x10 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 16), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1198: xor    rdi,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x119b: add    r8,rdi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x119e: rol    rdi,0x15 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x119e: rol    rdi,0x15 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 21), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x11a2: add    rax,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x11a5: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x11a5: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x11a9: mov    rsi,QWORD PTR [rcx+0x10] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_2, BPF_REG_4, 16), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM),
     /* 0x11ad: xor    rdx,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x11b0: rol    rax,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x11b4: xor    r9,r8 [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_5, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x11b7: add    r9,rdx [exact-kinsn: add64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_3, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x11ba: rol    rdx,0xd [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x11b0: rol    rax,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x11b4: xor    r9,r8 [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x11b7: add    r9,rdx [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x11ba: rol    rdx,0xd [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x11be: xor    r8,rsi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x11c1: xor    rdx,r9 [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, HC_X86_R9, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x11c4: rol    r9,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_ROTATE_SHADOW_PAYLOAD(HC_X86_R9, HC_X86_R9, 32, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x11c1: xor    rdx,r9 [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x11c4: rol    r9,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(HC_X86_R9, HC_X86_R9, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x11c8: xor    r8,rdi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x11cb: add    rax,r8 [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_5, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x11ce: rol    r8,0x10 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 16, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x11ce: rol    r8,0x10 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 16), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x11d2: xor    r8,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x11d5: add    r9,r8 [exact-kinsn: add64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_5, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x11d8: rol    r8,0x15 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x11d5: add    r9,r8 [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x11d8: rol    r8,0x15 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 21), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x11dc: add    rax,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x11df: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x11df: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x11e3: xor    rdx,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x11e6: rol    rax,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x11ea: xor    r8,r9 [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, HC_X86_R9, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x11ed: add    r9,rdx [exact-kinsn: add64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_3, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x11f0: rol    rdx,0xd [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x11f4: xor    rdx,r9 [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, HC_X86_R9, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x11f7: rol    r9,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_ROTATE_SHADOW_PAYLOAD(HC_X86_R9, HC_X86_R9, 32, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x11e6: rol    rax,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x11ea: xor    r8,r9 [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x11ed: add    r9,rdx [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x11f0: rol    rdx,0xd [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x11f4: xor    rdx,r9 [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x11f7: rol    r9,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(HC_X86_R9, HC_X86_R9, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x11fb: add    rax,r8 [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_5, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x11fe: rol    r8,0x10 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 16, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x11fe: rol    r8,0x10 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 16), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1202: xor    r8,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x1205: add    r9,r8 [exact-kinsn: add64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_5, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1208: rol    r8,0x15 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1205: add    r9,r8 [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1208: rol    r8,0x15 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 21), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x120c: add    rax,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x120f: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x120f: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1213: mov    rdi,QWORD PTR [rcx+0x18] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_1, BPF_REG_4, 24), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM),
     /* 0x1217: xor    rdx,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x121a: rol    rax,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x121e: xor    rsi,r9 [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, HC_X86_R9, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x121a: rol    rax,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x121e: xor    rsi,r9 [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x1221: add    rsi,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1224: rol    rdx,0xd [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x1228: xor    r9,rdi [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_1, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1224: rol    rdx,0xd [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x1228: xor    r9,rdi [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x122b: xor    rdx,rsi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x122e: rol    rsi,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x1232: xor    r9,r8 [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_5, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x1235: add    rax,r9 [exact-kinsn: add64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, HC_X86_R9, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1238: rol    r9,0x10 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_ROTATE_SHADOW_PAYLOAD(HC_X86_R9, HC_X86_R9, 16, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x123c: xor    r9,rax [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_0, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x123f: add    rsi,r9 [exact-kinsn: add64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, HC_X86_R9, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1242: rol    r9,0x15 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_ROTATE_SHADOW_PAYLOAD(HC_X86_R9, HC_X86_R9, 21, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x122e: rol    rsi,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x1232: xor    r9,r8 [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1235: add    rax,r9 [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1238: rol    r9,0x10 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(HC_X86_R9, HC_X86_R9, 16), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x123c: xor    r9,rax [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x123f: add    rsi,r9 [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1242: rol    r9,0x15 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(HC_X86_R9, HC_X86_R9, 21), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1246: add    rax,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1249: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1249: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x124d: xor    rdx,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x1250: rol    rax,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x1254: xor    r9,rsi [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_2, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1250: rol    rax,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x1254: xor    r9,rsi [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x1257: add    rsi,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x125a: rol    rdx,0xd [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x125a: rol    rdx,0xd [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x125e: xor    rdx,rsi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x1261: rol    rsi,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x1265: add    rax,r9 [exact-kinsn: add64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, HC_X86_R9, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1268: rol    r9,0x10 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_ROTATE_SHADOW_PAYLOAD(HC_X86_R9, HC_X86_R9, 16, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x126c: xor    r9,rax [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_0, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x126f: add    rsi,r9 [exact-kinsn: add64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, HC_X86_R9, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1272: rol    r9,0x15 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_ROTATE_SHADOW_PAYLOAD(HC_X86_R9, HC_X86_R9, 21, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1261: rol    rsi,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x1265: add    rax,r9 [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1268: rol    r9,0x10 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(HC_X86_R9, HC_X86_R9, 16), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x126c: xor    r9,rax [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x126f: add    rsi,r9 [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1272: rol    r9,0x15 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(HC_X86_R9, HC_X86_R9, 21), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1276: add    rax,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1279: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1279: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x127d: mov    r8,QWORD PTR [rcx+0x20] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_5, BPF_REG_4, 32), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM),
     /* 0x1281: xor    rdx,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x1284: rol    rax,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1284: rol    rax,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1288: xor    rdi,rsi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x128b: add    rdi,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x128e: rol    rdx,0xd [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x128e: rol    rdx,0xd [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1292: xor    rsi,r8 [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_5, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x1295: xor    rdx,rdi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x1298: rol    rdi,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x129c: xor    rsi,r9 [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, HC_X86_R9, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1298: rol    rdi,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x129c: xor    rsi,r9 [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x129f: add    rax,rsi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x12a2: rol    rsi,0x10 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 16, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x12a2: rol    rsi,0x10 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 16), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x12a6: xor    rsi,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x12a9: add    rdi,rsi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x12ac: rol    rsi,0x15 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x12ac: rol    rsi,0x15 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 21), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x12b0: add    rax,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x12b3: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x12b3: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x12b7: xor    rdx,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x12ba: rol    rax,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x12ba: rol    rax,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x12be: xor    rsi,rdi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x12c1: add    rdi,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x12c4: rol    rdx,0xd [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x12c4: rol    rdx,0xd [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x12c8: xor    rdx,rdi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x12cb: rol    rdi,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x12cb: rol    rdi,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x12cf: add    rax,rsi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x12d2: rol    rsi,0x10 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 16, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x12d2: rol    rsi,0x10 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 16), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x12d6: xor    rsi,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x12d9: add    rdi,rsi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x12dc: rol    rsi,0x15 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x12dc: rol    rsi,0x15 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 21), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x12e0: add    rax,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x12e3: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x12e7: mov    r9,QWORD PTR [rcx+0x28] [exact-kinsn: direct memory load via x86 kinsn selector; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_MEM_TMP_PAYLOAD(HC_X86_R9, BPF_REG_4, 40, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x12e3: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x12e7: mov    r9,QWORD PTR [rcx+0x28] [exact-kinsn: direct memory load via x86 kinsn selector] */
+    HC_KINSN(HC_MEM_PAYLOAD(HC_X86_R9, BPF_REG_4, 40), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM),
     /* 0x12eb: xor    rdx,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x12ee: rol    rax,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x12ee: rol    rax,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x12f2: xor    r8,rdi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x12f5: add    r8,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x12f8: rol    rdx,0xd [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x12fc: xor    rdi,r9 [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, HC_X86_R9, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x12f8: rol    rdx,0xd [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x12fc: xor    rdi,r9 [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x12ff: xor    rdx,r8 [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_5, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x1302: rol    r8,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1302: rol    r8,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1306: xor    rdi,rsi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x1309: add    rax,rdi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x130c: rol    rdi,0x10 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 16, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x130c: rol    rdi,0x10 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 16), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1310: xor    rdi,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x1313: add    r8,rdi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1316: rol    rdi,0x15 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1316: rol    rdi,0x15 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 21), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x131a: add    rax,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x131d: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x131d: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1321: xor    rdx,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x1324: rol    rax,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1324: rol    rax,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1328: xor    rdi,r8 [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_5, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x132b: add    r8,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x132e: rol    rdx,0xd [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x132e: rol    rdx,0xd [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1332: xor    rdx,r8 [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_5, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x1335: rol    r8,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1335: rol    r8,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1339: add    rax,rdi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x133c: rol    rdi,0x10 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 16, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x133c: rol    rdi,0x10 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 16), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1340: xor    rdi,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x1343: add    r8,rdi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1346: rol    rdi,0x15 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1346: rol    rdi,0x15 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 21), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x134a: add    rax,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x134d: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x134d: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1351: mov    rsi,QWORD PTR [rcx+0x30] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_2, BPF_REG_4, 48), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM),
     /* 0x1355: xor    rdx,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x1358: rol    rax,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x135c: xor    r9,r8 [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_5, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x135f: add    r9,rdx [exact-kinsn: add64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_3, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1362: rol    rdx,0xd [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1358: rol    rax,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x135c: xor    r9,r8 [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x135f: add    r9,rdx [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1362: rol    rdx,0xd [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1366: xor    r8,rsi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x1369: xor    rdx,r9 [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, HC_X86_R9, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x136c: rol    r9,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_ROTATE_SHADOW_PAYLOAD(HC_X86_R9, HC_X86_R9, 32, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1369: xor    rdx,r9 [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x136c: rol    r9,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(HC_X86_R9, HC_X86_R9, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1370: xor    r8,rdi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x1373: add    rax,r8 [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_5, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1376: rol    r8,0x10 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 16, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1376: rol    r8,0x10 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 16), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x137a: xor    r8,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x137d: add    r9,r8 [exact-kinsn: add64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_5, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1380: rol    r8,0x15 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x137d: add    r9,r8 [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1380: rol    r8,0x15 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 21), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1384: add    rax,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1387: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1387: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x138b: xor    rdx,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x138e: rol    rax,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x1392: xor    r8,r9 [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, HC_X86_R9, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x1395: add    r9,rdx [exact-kinsn: add64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_3, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1398: rol    rdx,0xd [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x139c: xor    rdx,r9 [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, HC_X86_R9, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x139f: rol    r9,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_ROTATE_SHADOW_PAYLOAD(HC_X86_R9, HC_X86_R9, 32, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x138e: rol    rax,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x1392: xor    r8,r9 [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1395: add    r9,rdx [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1398: rol    rdx,0xd [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x139c: xor    rdx,r9 [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x139f: rol    r9,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(HC_X86_R9, HC_X86_R9, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x13a3: add    rax,r8 [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_5, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x13a6: rol    r8,0x10 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 16, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x13a6: rol    r8,0x10 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 16), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x13aa: xor    r8,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x13ad: add    r9,r8 [exact-kinsn: add64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_5, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x13b0: rol    r8,0x15 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x13ad: add    r9,r8 [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x13b0: rol    r8,0x15 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 21), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x13b4: add    rax,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x13b7: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x13b7: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x13bb: mov    rdi,QWORD PTR [rcx+0x38] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_1, BPF_REG_4, 56), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM),
     /* 0x13bf: xor    rdx,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x13c2: rol    rax,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x13c6: xor    rsi,r9 [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, HC_X86_R9, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x13c2: rol    rax,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x13c6: xor    rsi,r9 [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x13c9: add    rsi,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x13cc: rol    rdx,0xd [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x13d0: xor    r9,rdi [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_1, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x13cc: rol    rdx,0xd [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x13d0: xor    r9,rdi [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x13d3: xor    rdx,rsi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x13d6: rol    rsi,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x13da: xor    r9,r8 [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_5, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x13dd: add    rax,r9 [exact-kinsn: add64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, HC_X86_R9, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x13e0: rol    r9,0x10 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_ROTATE_SHADOW_PAYLOAD(HC_X86_R9, HC_X86_R9, 16, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x13e4: xor    r9,rax [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_0, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x13e7: add    rsi,r9 [exact-kinsn: add64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, HC_X86_R9, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x13ea: rol    r9,0x15 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_ROTATE_SHADOW_PAYLOAD(HC_X86_R9, HC_X86_R9, 21, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x13d6: rol    rsi,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x13da: xor    r9,r8 [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x13dd: add    rax,r9 [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x13e0: rol    r9,0x10 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(HC_X86_R9, HC_X86_R9, 16), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x13e4: xor    r9,rax [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x13e7: add    rsi,r9 [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x13ea: rol    r9,0x15 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(HC_X86_R9, HC_X86_R9, 21), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x13ee: add    rax,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x13f1: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x13f1: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x13f5: xor    rdx,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x13f8: rol    rax,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x13fc: xor    r9,rsi [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_2, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x13f8: rol    rax,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x13fc: xor    r9,rsi [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x13ff: add    rsi,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1402: rol    rdx,0xd [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1402: rol    rdx,0xd [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1406: xor    rdx,rsi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x1409: rol    rsi,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x140d: add    rax,r9 [exact-kinsn: add64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, HC_X86_R9, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1410: rol    r9,0x10 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_ROTATE_SHADOW_PAYLOAD(HC_X86_R9, HC_X86_R9, 16, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x1414: xor    r9,rax [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_0, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x1417: add    rsi,r9 [exact-kinsn: add64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, HC_X86_R9, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x141a: rol    r9,0x15 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_ROTATE_SHADOW_PAYLOAD(HC_X86_R9, HC_X86_R9, 21, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1409: rol    rsi,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x140d: add    rax,r9 [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1410: rol    r9,0x10 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(HC_X86_R9, HC_X86_R9, 16), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x1414: xor    r9,rax [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1417: add    rsi,r9 [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x141a: rol    r9,0x15 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(HC_X86_R9, HC_X86_R9, 21), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x141e: add    rax,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1421: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1421: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1425: mov    r8,QWORD PTR [rcx+0x40] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_5, BPF_REG_4, 64), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM),
     /* 0x1429: xor    rdx,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x142c: rol    rax,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x142c: rol    rax,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1430: xor    rdi,rsi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x1433: add    rdi,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1436: rol    rdx,0xd [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1436: rol    rdx,0xd [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x143a: xor    rsi,r8 [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_5, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x143d: xor    rdx,rdi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x1440: rol    rdi,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
-    /* 0x1444: xor    rsi,r9 [exact-kinsn: xor64 reg kinsn; verifier instantiate uses temps BPF_REG_6/BPF_REG_7] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, HC_X86_R9, BPF_REG_6, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1440: rol    rdi,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x1444: xor    rsi,r9 [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x1447: add    rax,rsi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x144a: rol    rsi,0x10 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 16, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x144a: rol    rsi,0x10 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 16), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x144e: xor    rsi,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x1451: add    rdi,rsi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1454: rol    rsi,0x15 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1454: rol    rsi,0x15 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 21), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1458: add    rax,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x145b: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x145b: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x145f: xor    rdx,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x1462: rol    rax,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1462: rol    rax,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1466: xor    rsi,rdi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x1469: add    rdi,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x146c: rol    rdx,0xd [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x146c: rol    rdx,0xd [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1470: xor    rdx,rdi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x1473: rol    rdi,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1473: rol    rdi,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1477: add    rax,rsi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x147a: rol    rsi,0x10 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 16, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x147a: rol    rsi,0x10 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 16), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x147e: xor    rsi,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x1481: add    rdi,rsi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1484: rol    rsi,0x15 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1484: rol    rsi,0x15 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 21), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1488: add    rax,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x148b: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x148b: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x148f: xor    rsi,rdi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x1492: xor    rdx,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x1495: rol    rax,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1495: rol    rax,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1499: xor    rdi,r8 [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_5, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x149c: add    rdi,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x149f: rol    rdx,0xd [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x149f: rol    rdx,0xd [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x14a3: xor    rdx,rdi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x14a6: rol    rdi,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x14a6: rol    rdi,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x14aa: xor    rax,0xff [exact-kinsn: xor64 imm kinsn] */
-    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_0, 255, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_0, 255), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x14b0: add    rax,rsi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x14b3: rol    rsi,0x10 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 16, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x14b3: rol    rsi,0x10 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 16), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x14b7: xor    rsi,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x14ba: add    rdi,rsi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x14bd: rol    rsi,0x15 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x14bd: rol    rsi,0x15 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 21), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x14c1: add    rax,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x14c4: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x14c4: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x14c8: xor    rdx,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x14cb: rol    rax,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x14cb: rol    rax,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x14cf: xor    rsi,rdi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x14d2: add    rdi,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x14d5: rol    rdx,0xd [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x14d5: rol    rdx,0xd [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x14d9: xor    rdx,rdi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x14dc: rol    rdi,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x14dc: rol    rdi,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x14e0: add    rax,rsi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x14e3: rol    rsi,0x10 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 16, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x14e3: rol    rsi,0x10 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 16), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x14e7: xor    rsi,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x14ea: add    rdi,rsi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x14ed: rol    rsi,0x15 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x14ed: rol    rsi,0x15 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 21), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x14f1: add    rax,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x14f4: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x14f4: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x14f8: xor    rdx,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x14fb: rol    rax,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x14fb: rol    rax,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x14ff: xor    rsi,rdi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x1502: add    rdi,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1505: rol    rdx,0xd [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1505: rol    rdx,0xd [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1509: xor    rdx,rdi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x150c: rol    rdi,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x150c: rol    rdi,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1510: add    rax,rsi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1513: rol    rsi,0x10 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 16, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1513: rol    rsi,0x10 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 16), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1517: xor    rsi,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x151a: add    rdi,rsi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x151d: rol    rsi,0x15 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x151d: rol    rsi,0x15 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 21), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1521: add    rax,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1524: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1524: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1528: xor    rdx,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x152b: rol    rax,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x152b: rol    rax,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x152f: xor    rsi,rdi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x1532: add    rdi,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x1535: rol    rdx,0xd [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1535: rol    rdx,0xd [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 13), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1539: add    rax,rsi [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x153c: rol    rsi,0x10 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 16, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x153c: rol    rsi,0x10 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 16), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1540: xor    rsi,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
-    /* 0x1543: rol    rsi,0x15 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 21, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1543: rol    rsi,0x15 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_2, BPF_REG_2, 21), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1547: xor    rdx,rdi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_1, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x154a: add    rax,rdx [exact-kinsn: add64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
-    /* 0x154d: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x154d: rol    rdx,0x11 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_3, BPF_REG_3, 17), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1551: mov    rdi,rax [exact-kinsn: movq register-to-register kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_1, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_MOVQ_RR),
-    /* 0x1554: rol    rdi,0x20 [exact-kinsn: rolq imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 32, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
+    /* 0x1554: rol    rdi,0x20 [exact-kinsn: rolq imm kinsn] */
+    HC_KINSN(HC_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 32), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM),
     /* 0x1558: xor    rdi,rdx [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_3, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x155b: xor    rdi,rsi [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x155e: xor    rdi,rax [exact-kinsn: xor64 reg kinsn] */
-    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x1561: mov    QWORD PTR [rcx],rdi [exact-kinsn: direct memory store via x86 kinsn selector] */
     HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_1, BPF_REG_4, 0), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM_REG),
     /* 0x1564: mov    eax,0x2 [bpf-jit: 32-bit immediate move] */
@@ -2484,334 +2487,339 @@ Disassembly of section .data:
    c:	48 81 ec b8 01 00 00 	sub    rsp,0x1b8
   13:	53                   	push   rbx
   14:	41 55                	push   r13
-  16:	48 8b 4f 00          	mov    rcx,QWORD PTR [rdi+0x0]
-  1a:	48 8b 57 08          	mov    rdx,QWORD PTR [rdi+0x8]
-  1e:	31 c0                	xor    eax,eax
-  20:	48 39 d1             	cmp    rcx,rdx
-  23:	48 39 d1             	cmp    rcx,rdx
-  26:	0f 87 5e 04 00 00    	ja     0x48a
-  2c:	48 8d 71 08          	lea    rsi,[rcx+0x8]
-  30:	48 39 d6             	cmp    rsi,rdx
-  33:	48 39 d6             	cmp    rsi,rdx
-  36:	0f 87 4e 04 00 00    	ja     0x48a
-  3c:	48 8d 71 48          	lea    rsi,[rcx+0x48]
-  40:	48 39 d6             	cmp    rsi,rdx
-  43:	48 39 d6             	cmp    rsi,rdx
-  46:	0f 87 3e 04 00 00    	ja     0x48a
-  4c:	4c 8b 49 08          	mov    r9,QWORD PTR [rcx+0x8]
-  50:	48 bf 73 65 74 79 62 	movabs rdi,0x7465646279746573
-  57:	64 65 74 
-  5a:	4c 31 cf             	xor    rdi,r9
-  5d:	48 ba 61 72 65 6e 65 	movabs rdx,0x6c7967656e657261
-  64:	67 79 6c 
-  67:	48 01 fa             	add    rdx,rdi
-  6a:	48 b8 d0 ea 9f c1 6f 	movabs rax,0xa60c596fc19fead0
-  71:	59 0c a6 
-  74:	48 01 f8             	add    rax,rdi
-  77:	48 c1 c7 10          	rol    rdi,0x10
-  7b:	48 31 d7             	xor    rdi,rdx
-  7e:	49 b8 c6 df de d7 e2 	movabs r8,0xded7d4e2d7dedfc6
-  85:	d4 d7 de 
-  88:	49 01 f8             	add    r8,rdi
-  8b:	48 c1 c7 15          	rol    rdi,0x15
-  8f:	48 ba 25 73 de f0 74 	movabs rdx,0xe414a674f0de7325
-  96:	a6 14 e4 
-  99:	48 31 c2             	xor    rdx,rax
-  9c:	48 c1 c0 20          	rol    rax,0x20
-  a0:	4c 31 c7             	xor    rdi,r8
-  a3:	49 01 d0             	add    r8,rdx
-  a6:	48 c1 c2 0d          	rol    rdx,0xd
-  aa:	4c 31 c2             	xor    rdx,r8
-  ad:	49 c1 c0 20          	rol    r8,0x20
-  b1:	48 01 f8             	add    rax,rdi
-  b4:	48 c1 c7 10          	rol    rdi,0x10
-  b8:	48 31 c7             	xor    rdi,rax
-  bb:	49 01 f8             	add    r8,rdi
-  be:	48 c1 c7 15          	rol    rdi,0x15
-  c2:	48 01 d0             	add    rax,rdx
-  c5:	48 c1 c2 11          	rol    rdx,0x11
-  c9:	48 8b 71 10          	mov    rsi,QWORD PTR [rcx+0x10]
-  cd:	48 31 c2             	xor    rdx,rax
-  d0:	48 c1 c0 20          	rol    rax,0x20
-  d4:	4d 31 c1             	xor    r9,r8
-  d7:	49 01 d1             	add    r9,rdx
-  da:	48 c1 c2 0d          	rol    rdx,0xd
-  de:	49 31 f0             	xor    r8,rsi
-  e1:	4c 31 ca             	xor    rdx,r9
-  e4:	49 c1 c1 20          	rol    r9,0x20
-  e8:	49 31 f8             	xor    r8,rdi
-  eb:	4c 01 c0             	add    rax,r8
-  ee:	49 c1 c0 10          	rol    r8,0x10
-  f2:	49 31 c0             	xor    r8,rax
-  f5:	4d 01 c1             	add    r9,r8
-  f8:	49 c1 c0 15          	rol    r8,0x15
-  fc:	48 01 d0             	add    rax,rdx
-  ff:	48 c1 c2 11          	rol    rdx,0x11
- 103:	48 31 c2             	xor    rdx,rax
- 106:	48 c1 c0 20          	rol    rax,0x20
- 10a:	4d 31 c8             	xor    r8,r9
- 10d:	49 01 d1             	add    r9,rdx
- 110:	48 c1 c2 0d          	rol    rdx,0xd
- 114:	4c 31 ca             	xor    rdx,r9
- 117:	49 c1 c1 20          	rol    r9,0x20
- 11b:	4c 01 c0             	add    rax,r8
- 11e:	49 c1 c0 10          	rol    r8,0x10
- 122:	49 31 c0             	xor    r8,rax
- 125:	4d 01 c1             	add    r9,r8
- 128:	49 c1 c0 15          	rol    r8,0x15
- 12c:	48 01 d0             	add    rax,rdx
- 12f:	48 c1 c2 11          	rol    rdx,0x11
- 133:	48 8b 79 18          	mov    rdi,QWORD PTR [rcx+0x18]
- 137:	48 31 c2             	xor    rdx,rax
- 13a:	48 c1 c0 20          	rol    rax,0x20
- 13e:	4c 31 ce             	xor    rsi,r9
- 141:	48 01 d6             	add    rsi,rdx
- 144:	48 c1 c2 0d          	rol    rdx,0xd
- 148:	49 31 f9             	xor    r9,rdi
- 14b:	48 31 f2             	xor    rdx,rsi
- 14e:	48 c1 c6 20          	rol    rsi,0x20
- 152:	4d 31 c1             	xor    r9,r8
- 155:	4c 01 c8             	add    rax,r9
- 158:	49 c1 c1 10          	rol    r9,0x10
- 15c:	49 31 c1             	xor    r9,rax
- 15f:	4c 01 ce             	add    rsi,r9
- 162:	49 c1 c1 15          	rol    r9,0x15
- 166:	48 01 d0             	add    rax,rdx
- 169:	48 c1 c2 11          	rol    rdx,0x11
- 16d:	48 31 c2             	xor    rdx,rax
- 170:	48 c1 c0 20          	rol    rax,0x20
- 174:	49 31 f1             	xor    r9,rsi
- 177:	48 01 d6             	add    rsi,rdx
- 17a:	48 c1 c2 0d          	rol    rdx,0xd
- 17e:	48 31 f2             	xor    rdx,rsi
- 181:	48 c1 c6 20          	rol    rsi,0x20
- 185:	4c 01 c8             	add    rax,r9
- 188:	49 c1 c1 10          	rol    r9,0x10
- 18c:	49 31 c1             	xor    r9,rax
- 18f:	4c 01 ce             	add    rsi,r9
- 192:	49 c1 c1 15          	rol    r9,0x15
- 196:	48 01 d0             	add    rax,rdx
- 199:	48 c1 c2 11          	rol    rdx,0x11
- 19d:	4c 8b 41 20          	mov    r8,QWORD PTR [rcx+0x20]
- 1a1:	48 31 c2             	xor    rdx,rax
- 1a4:	48 c1 c0 20          	rol    rax,0x20
- 1a8:	48 31 f7             	xor    rdi,rsi
- 1ab:	48 01 d7             	add    rdi,rdx
- 1ae:	48 c1 c2 0d          	rol    rdx,0xd
- 1b2:	4c 31 c6             	xor    rsi,r8
- 1b5:	48 31 fa             	xor    rdx,rdi
- 1b8:	48 c1 c7 20          	rol    rdi,0x20
- 1bc:	4c 31 ce             	xor    rsi,r9
- 1bf:	48 01 f0             	add    rax,rsi
- 1c2:	48 c1 c6 10          	rol    rsi,0x10
- 1c6:	48 31 c6             	xor    rsi,rax
- 1c9:	48 01 f7             	add    rdi,rsi
- 1cc:	48 c1 c6 15          	rol    rsi,0x15
- 1d0:	48 01 d0             	add    rax,rdx
- 1d3:	48 c1 c2 11          	rol    rdx,0x11
- 1d7:	48 31 c2             	xor    rdx,rax
- 1da:	48 c1 c0 20          	rol    rax,0x20
- 1de:	48 31 fe             	xor    rsi,rdi
- 1e1:	48 01 d7             	add    rdi,rdx
- 1e4:	48 c1 c2 0d          	rol    rdx,0xd
- 1e8:	48 31 fa             	xor    rdx,rdi
- 1eb:	48 c1 c7 20          	rol    rdi,0x20
- 1ef:	48 01 f0             	add    rax,rsi
- 1f2:	48 c1 c6 10          	rol    rsi,0x10
- 1f6:	48 31 c6             	xor    rsi,rax
- 1f9:	48 01 f7             	add    rdi,rsi
- 1fc:	48 c1 c6 15          	rol    rsi,0x15
- 200:	48 01 d0             	add    rax,rdx
- 203:	48 c1 c2 11          	rol    rdx,0x11
- 207:	4c 8b 49 28          	mov    r9,QWORD PTR [rcx+0x28]
- 20b:	48 31 c2             	xor    rdx,rax
- 20e:	48 c1 c0 20          	rol    rax,0x20
- 212:	49 31 f8             	xor    r8,rdi
- 215:	49 01 d0             	add    r8,rdx
- 218:	48 c1 c2 0d          	rol    rdx,0xd
- 21c:	4c 31 cf             	xor    rdi,r9
- 21f:	4c 31 c2             	xor    rdx,r8
- 222:	49 c1 c0 20          	rol    r8,0x20
- 226:	48 31 f7             	xor    rdi,rsi
- 229:	48 01 f8             	add    rax,rdi
- 22c:	48 c1 c7 10          	rol    rdi,0x10
- 230:	48 31 c7             	xor    rdi,rax
- 233:	49 01 f8             	add    r8,rdi
- 236:	48 c1 c7 15          	rol    rdi,0x15
- 23a:	48 01 d0             	add    rax,rdx
- 23d:	48 c1 c2 11          	rol    rdx,0x11
- 241:	48 31 c2             	xor    rdx,rax
- 244:	48 c1 c0 20          	rol    rax,0x20
- 248:	4c 31 c7             	xor    rdi,r8
- 24b:	49 01 d0             	add    r8,rdx
- 24e:	48 c1 c2 0d          	rol    rdx,0xd
- 252:	4c 31 c2             	xor    rdx,r8
- 255:	49 c1 c0 20          	rol    r8,0x20
- 259:	48 01 f8             	add    rax,rdi
- 25c:	48 c1 c7 10          	rol    rdi,0x10
- 260:	48 31 c7             	xor    rdi,rax
- 263:	49 01 f8             	add    r8,rdi
- 266:	48 c1 c7 15          	rol    rdi,0x15
- 26a:	48 01 d0             	add    rax,rdx
- 26d:	48 c1 c2 11          	rol    rdx,0x11
- 271:	48 8b 71 30          	mov    rsi,QWORD PTR [rcx+0x30]
- 275:	48 31 c2             	xor    rdx,rax
- 278:	48 c1 c0 20          	rol    rax,0x20
- 27c:	4d 31 c1             	xor    r9,r8
- 27f:	49 01 d1             	add    r9,rdx
- 282:	48 c1 c2 0d          	rol    rdx,0xd
- 286:	49 31 f0             	xor    r8,rsi
- 289:	4c 31 ca             	xor    rdx,r9
- 28c:	49 c1 c1 20          	rol    r9,0x20
- 290:	49 31 f8             	xor    r8,rdi
- 293:	4c 01 c0             	add    rax,r8
- 296:	49 c1 c0 10          	rol    r8,0x10
- 29a:	49 31 c0             	xor    r8,rax
- 29d:	4d 01 c1             	add    r9,r8
- 2a0:	49 c1 c0 15          	rol    r8,0x15
- 2a4:	48 01 d0             	add    rax,rdx
- 2a7:	48 c1 c2 11          	rol    rdx,0x11
- 2ab:	48 31 c2             	xor    rdx,rax
- 2ae:	48 c1 c0 20          	rol    rax,0x20
- 2b2:	4d 31 c8             	xor    r8,r9
- 2b5:	49 01 d1             	add    r9,rdx
- 2b8:	48 c1 c2 0d          	rol    rdx,0xd
- 2bc:	4c 31 ca             	xor    rdx,r9
- 2bf:	49 c1 c1 20          	rol    r9,0x20
- 2c3:	4c 01 c0             	add    rax,r8
- 2c6:	49 c1 c0 10          	rol    r8,0x10
- 2ca:	49 31 c0             	xor    r8,rax
- 2cd:	4d 01 c1             	add    r9,r8
- 2d0:	49 c1 c0 15          	rol    r8,0x15
- 2d4:	48 01 d0             	add    rax,rdx
- 2d7:	48 c1 c2 11          	rol    rdx,0x11
- 2db:	48 8b 79 38          	mov    rdi,QWORD PTR [rcx+0x38]
- 2df:	48 31 c2             	xor    rdx,rax
- 2e2:	48 c1 c0 20          	rol    rax,0x20
- 2e6:	4c 31 ce             	xor    rsi,r9
- 2e9:	48 01 d6             	add    rsi,rdx
- 2ec:	48 c1 c2 0d          	rol    rdx,0xd
- 2f0:	49 31 f9             	xor    r9,rdi
- 2f3:	48 31 f2             	xor    rdx,rsi
- 2f6:	48 c1 c6 20          	rol    rsi,0x20
- 2fa:	4d 31 c1             	xor    r9,r8
- 2fd:	4c 01 c8             	add    rax,r9
- 300:	49 c1 c1 10          	rol    r9,0x10
- 304:	49 31 c1             	xor    r9,rax
- 307:	4c 01 ce             	add    rsi,r9
- 30a:	49 c1 c1 15          	rol    r9,0x15
- 30e:	48 01 d0             	add    rax,rdx
- 311:	48 c1 c2 11          	rol    rdx,0x11
- 315:	48 31 c2             	xor    rdx,rax
- 318:	48 c1 c0 20          	rol    rax,0x20
- 31c:	49 31 f1             	xor    r9,rsi
- 31f:	48 01 d6             	add    rsi,rdx
- 322:	48 c1 c2 0d          	rol    rdx,0xd
- 326:	48 31 f2             	xor    rdx,rsi
- 329:	48 c1 c6 20          	rol    rsi,0x20
- 32d:	4c 01 c8             	add    rax,r9
- 330:	49 c1 c1 10          	rol    r9,0x10
- 334:	49 31 c1             	xor    r9,rax
- 337:	4c 01 ce             	add    rsi,r9
- 33a:	49 c1 c1 15          	rol    r9,0x15
- 33e:	48 01 d0             	add    rax,rdx
- 341:	48 c1 c2 11          	rol    rdx,0x11
- 345:	4c 8b 41 40          	mov    r8,QWORD PTR [rcx+0x40]
- 349:	48 31 c2             	xor    rdx,rax
- 34c:	48 c1 c0 20          	rol    rax,0x20
- 350:	48 31 f7             	xor    rdi,rsi
- 353:	48 01 d7             	add    rdi,rdx
- 356:	48 c1 c2 0d          	rol    rdx,0xd
- 35a:	4c 31 c6             	xor    rsi,r8
- 35d:	48 31 fa             	xor    rdx,rdi
- 360:	48 c1 c7 20          	rol    rdi,0x20
- 364:	4c 31 ce             	xor    rsi,r9
- 367:	48 01 f0             	add    rax,rsi
- 36a:	48 c1 c6 10          	rol    rsi,0x10
- 36e:	48 31 c6             	xor    rsi,rax
- 371:	48 01 f7             	add    rdi,rsi
- 374:	48 c1 c6 15          	rol    rsi,0x15
- 378:	48 01 d0             	add    rax,rdx
- 37b:	48 c1 c2 11          	rol    rdx,0x11
- 37f:	48 31 c2             	xor    rdx,rax
- 382:	48 c1 c0 20          	rol    rax,0x20
- 386:	48 31 fe             	xor    rsi,rdi
- 389:	48 01 d7             	add    rdi,rdx
- 38c:	48 c1 c2 0d          	rol    rdx,0xd
- 390:	48 31 fa             	xor    rdx,rdi
- 393:	48 c1 c7 20          	rol    rdi,0x20
- 397:	48 01 f0             	add    rax,rsi
- 39a:	48 c1 c6 10          	rol    rsi,0x10
- 39e:	48 31 c6             	xor    rsi,rax
- 3a1:	48 01 f7             	add    rdi,rsi
- 3a4:	48 c1 c6 15          	rol    rsi,0x15
- 3a8:	48 01 d0             	add    rax,rdx
- 3ab:	48 c1 c2 11          	rol    rdx,0x11
- 3af:	48 31 fe             	xor    rsi,rdi
- 3b2:	48 31 c2             	xor    rdx,rax
- 3b5:	48 c1 c0 20          	rol    rax,0x20
- 3b9:	4c 31 c7             	xor    rdi,r8
- 3bc:	48 01 d7             	add    rdi,rdx
- 3bf:	48 c1 c2 0d          	rol    rdx,0xd
- 3c3:	48 31 fa             	xor    rdx,rdi
- 3c6:	48 c1 c7 20          	rol    rdi,0x20
- 3ca:	48 81 f0 ff 00 00 00 	xor    rax,0xff
- 3d1:	48 01 f0             	add    rax,rsi
- 3d4:	48 c1 c6 10          	rol    rsi,0x10
- 3d8:	48 31 c6             	xor    rsi,rax
- 3db:	48 01 f7             	add    rdi,rsi
- 3de:	48 c1 c6 15          	rol    rsi,0x15
- 3e2:	48 01 d0             	add    rax,rdx
- 3e5:	48 c1 c2 11          	rol    rdx,0x11
- 3e9:	48 31 c2             	xor    rdx,rax
- 3ec:	48 c1 c0 20          	rol    rax,0x20
- 3f0:	48 31 fe             	xor    rsi,rdi
- 3f3:	48 01 d7             	add    rdi,rdx
- 3f6:	48 c1 c2 0d          	rol    rdx,0xd
- 3fa:	48 31 fa             	xor    rdx,rdi
- 3fd:	48 c1 c7 20          	rol    rdi,0x20
- 401:	48 01 f0             	add    rax,rsi
- 404:	48 c1 c6 10          	rol    rsi,0x10
- 408:	48 31 c6             	xor    rsi,rax
- 40b:	48 01 f7             	add    rdi,rsi
- 40e:	48 c1 c6 15          	rol    rsi,0x15
- 412:	48 01 d0             	add    rax,rdx
- 415:	48 c1 c2 11          	rol    rdx,0x11
- 419:	48 31 c2             	xor    rdx,rax
- 41c:	48 c1 c0 20          	rol    rax,0x20
- 420:	48 31 fe             	xor    rsi,rdi
- 423:	48 01 d7             	add    rdi,rdx
- 426:	48 c1 c2 0d          	rol    rdx,0xd
- 42a:	48 31 fa             	xor    rdx,rdi
- 42d:	48 c1 c7 20          	rol    rdi,0x20
- 431:	48 01 f0             	add    rax,rsi
- 434:	48 c1 c6 10          	rol    rsi,0x10
- 438:	48 31 c6             	xor    rsi,rax
- 43b:	48 01 f7             	add    rdi,rsi
- 43e:	48 c1 c6 15          	rol    rsi,0x15
- 442:	48 01 d0             	add    rax,rdx
- 445:	48 c1 c2 11          	rol    rdx,0x11
- 449:	48 31 c2             	xor    rdx,rax
- 44c:	48 c1 c0 20          	rol    rax,0x20
- 450:	48 31 fe             	xor    rsi,rdi
- 453:	48 01 d7             	add    rdi,rdx
- 456:	48 c1 c2 0d          	rol    rdx,0xd
- 45a:	48 01 f0             	add    rax,rsi
- 45d:	48 c1 c6 10          	rol    rsi,0x10
- 461:	48 31 c6             	xor    rsi,rax
- 464:	48 c1 c6 15          	rol    rsi,0x15
- 468:	48 31 fa             	xor    rdx,rdi
- 46b:	48 01 d0             	add    rax,rdx
- 46e:	48 c1 c2 11          	rol    rdx,0x11
- 472:	48 89 c7             	mov    rdi,rax
- 475:	48 c1 c7 20          	rol    rdi,0x20
- 479:	48 31 d7             	xor    rdi,rdx
- 47c:	48 31 f7             	xor    rdi,rsi
- 47f:	48 31 c7             	xor    rdi,rax
- 482:	48 89 39             	mov    QWORD PTR [rcx],rdi
- 485:	b8 02 00 00 00       	mov    eax,0x2
- 48a:	41 5d                	pop    r13
- 48c:	5b                   	pop    rbx
- 48d:	c9                   	leave
- 48e:	c3                   	ret
+  16:	41 56                	push   r14
+  18:	31 db                	xor    ebx,ebx
+  1a:	45 31 ed             	xor    r13d,r13d
+  1d:	45 31 f6             	xor    r14d,r14d
+  20:	48 8b 4f 00          	mov    rcx,QWORD PTR [rdi+0x0]
+  24:	48 8b 57 08          	mov    rdx,QWORD PTR [rdi+0x8]
+  28:	31 c0                	xor    eax,eax
+  2a:	48 39 d1             	cmp    rcx,rdx
+  2d:	48 39 d1             	cmp    rcx,rdx
+  30:	0f 87 5e 04 00 00    	ja     0x494
+  36:	48 8d 71 08          	lea    rsi,[rcx+0x8]
+  3a:	48 39 d6             	cmp    rsi,rdx
+  3d:	48 39 d6             	cmp    rsi,rdx
+  40:	0f 87 4e 04 00 00    	ja     0x494
+  46:	48 8d 71 48          	lea    rsi,[rcx+0x48]
+  4a:	48 39 d6             	cmp    rsi,rdx
+  4d:	48 39 d6             	cmp    rsi,rdx
+  50:	0f 87 3e 04 00 00    	ja     0x494
+  56:	4c 8b 49 08          	mov    r9,QWORD PTR [rcx+0x8]
+  5a:	48 bf 73 65 74 79 62 	movabs rdi,0x7465646279746573
+  61:	64 65 74 
+  64:	4c 31 cf             	xor    rdi,r9
+  67:	48 ba 61 72 65 6e 65 	movabs rdx,0x6c7967656e657261
+  6e:	67 79 6c 
+  71:	48 01 fa             	add    rdx,rdi
+  74:	48 b8 d0 ea 9f c1 6f 	movabs rax,0xa60c596fc19fead0
+  7b:	59 0c a6 
+  7e:	48 01 f8             	add    rax,rdi
+  81:	48 c1 c7 10          	rol    rdi,0x10
+  85:	48 31 d7             	xor    rdi,rdx
+  88:	49 b8 c6 df de d7 e2 	movabs r8,0xded7d4e2d7dedfc6
+  8f:	d4 d7 de 
+  92:	49 01 f8             	add    r8,rdi
+  95:	48 c1 c7 15          	rol    rdi,0x15
+  99:	48 ba 25 73 de f0 74 	movabs rdx,0xe414a674f0de7325
+  a0:	a6 14 e4 
+  a3:	48 31 c2             	xor    rdx,rax
+  a6:	48 c1 c0 20          	rol    rax,0x20
+  aa:	4c 31 c7             	xor    rdi,r8
+  ad:	49 01 d0             	add    r8,rdx
+  b0:	48 c1 c2 0d          	rol    rdx,0xd
+  b4:	4c 31 c2             	xor    rdx,r8
+  b7:	49 c1 c0 20          	rol    r8,0x20
+  bb:	48 01 f8             	add    rax,rdi
+  be:	48 c1 c7 10          	rol    rdi,0x10
+  c2:	48 31 c7             	xor    rdi,rax
+  c5:	49 01 f8             	add    r8,rdi
+  c8:	48 c1 c7 15          	rol    rdi,0x15
+  cc:	48 01 d0             	add    rax,rdx
+  cf:	48 c1 c2 11          	rol    rdx,0x11
+  d3:	48 8b 71 10          	mov    rsi,QWORD PTR [rcx+0x10]
+  d7:	48 31 c2             	xor    rdx,rax
+  da:	48 c1 c0 20          	rol    rax,0x20
+  de:	4d 31 c1             	xor    r9,r8
+  e1:	49 01 d1             	add    r9,rdx
+  e4:	48 c1 c2 0d          	rol    rdx,0xd
+  e8:	49 31 f0             	xor    r8,rsi
+  eb:	4c 31 ca             	xor    rdx,r9
+  ee:	49 c1 c1 20          	rol    r9,0x20
+  f2:	49 31 f8             	xor    r8,rdi
+  f5:	4c 01 c0             	add    rax,r8
+  f8:	49 c1 c0 10          	rol    r8,0x10
+  fc:	49 31 c0             	xor    r8,rax
+  ff:	4d 01 c1             	add    r9,r8
+ 102:	49 c1 c0 15          	rol    r8,0x15
+ 106:	48 01 d0             	add    rax,rdx
+ 109:	48 c1 c2 11          	rol    rdx,0x11
+ 10d:	48 31 c2             	xor    rdx,rax
+ 110:	48 c1 c0 20          	rol    rax,0x20
+ 114:	4d 31 c8             	xor    r8,r9
+ 117:	49 01 d1             	add    r9,rdx
+ 11a:	48 c1 c2 0d          	rol    rdx,0xd
+ 11e:	4c 31 ca             	xor    rdx,r9
+ 121:	49 c1 c1 20          	rol    r9,0x20
+ 125:	4c 01 c0             	add    rax,r8
+ 128:	49 c1 c0 10          	rol    r8,0x10
+ 12c:	49 31 c0             	xor    r8,rax
+ 12f:	4d 01 c1             	add    r9,r8
+ 132:	49 c1 c0 15          	rol    r8,0x15
+ 136:	48 01 d0             	add    rax,rdx
+ 139:	48 c1 c2 11          	rol    rdx,0x11
+ 13d:	48 8b 79 18          	mov    rdi,QWORD PTR [rcx+0x18]
+ 141:	48 31 c2             	xor    rdx,rax
+ 144:	48 c1 c0 20          	rol    rax,0x20
+ 148:	4c 31 ce             	xor    rsi,r9
+ 14b:	48 01 d6             	add    rsi,rdx
+ 14e:	48 c1 c2 0d          	rol    rdx,0xd
+ 152:	49 31 f9             	xor    r9,rdi
+ 155:	48 31 f2             	xor    rdx,rsi
+ 158:	48 c1 c6 20          	rol    rsi,0x20
+ 15c:	4d 31 c1             	xor    r9,r8
+ 15f:	4c 01 c8             	add    rax,r9
+ 162:	49 c1 c1 10          	rol    r9,0x10
+ 166:	49 31 c1             	xor    r9,rax
+ 169:	4c 01 ce             	add    rsi,r9
+ 16c:	49 c1 c1 15          	rol    r9,0x15
+ 170:	48 01 d0             	add    rax,rdx
+ 173:	48 c1 c2 11          	rol    rdx,0x11
+ 177:	48 31 c2             	xor    rdx,rax
+ 17a:	48 c1 c0 20          	rol    rax,0x20
+ 17e:	49 31 f1             	xor    r9,rsi
+ 181:	48 01 d6             	add    rsi,rdx
+ 184:	48 c1 c2 0d          	rol    rdx,0xd
+ 188:	48 31 f2             	xor    rdx,rsi
+ 18b:	48 c1 c6 20          	rol    rsi,0x20
+ 18f:	4c 01 c8             	add    rax,r9
+ 192:	49 c1 c1 10          	rol    r9,0x10
+ 196:	49 31 c1             	xor    r9,rax
+ 199:	4c 01 ce             	add    rsi,r9
+ 19c:	49 c1 c1 15          	rol    r9,0x15
+ 1a0:	48 01 d0             	add    rax,rdx
+ 1a3:	48 c1 c2 11          	rol    rdx,0x11
+ 1a7:	4c 8b 41 20          	mov    r8,QWORD PTR [rcx+0x20]
+ 1ab:	48 31 c2             	xor    rdx,rax
+ 1ae:	48 c1 c0 20          	rol    rax,0x20
+ 1b2:	48 31 f7             	xor    rdi,rsi
+ 1b5:	48 01 d7             	add    rdi,rdx
+ 1b8:	48 c1 c2 0d          	rol    rdx,0xd
+ 1bc:	4c 31 c6             	xor    rsi,r8
+ 1bf:	48 31 fa             	xor    rdx,rdi
+ 1c2:	48 c1 c7 20          	rol    rdi,0x20
+ 1c6:	4c 31 ce             	xor    rsi,r9
+ 1c9:	48 01 f0             	add    rax,rsi
+ 1cc:	48 c1 c6 10          	rol    rsi,0x10
+ 1d0:	48 31 c6             	xor    rsi,rax
+ 1d3:	48 01 f7             	add    rdi,rsi
+ 1d6:	48 c1 c6 15          	rol    rsi,0x15
+ 1da:	48 01 d0             	add    rax,rdx
+ 1dd:	48 c1 c2 11          	rol    rdx,0x11
+ 1e1:	48 31 c2             	xor    rdx,rax
+ 1e4:	48 c1 c0 20          	rol    rax,0x20
+ 1e8:	48 31 fe             	xor    rsi,rdi
+ 1eb:	48 01 d7             	add    rdi,rdx
+ 1ee:	48 c1 c2 0d          	rol    rdx,0xd
+ 1f2:	48 31 fa             	xor    rdx,rdi
+ 1f5:	48 c1 c7 20          	rol    rdi,0x20
+ 1f9:	48 01 f0             	add    rax,rsi
+ 1fc:	48 c1 c6 10          	rol    rsi,0x10
+ 200:	48 31 c6             	xor    rsi,rax
+ 203:	48 01 f7             	add    rdi,rsi
+ 206:	48 c1 c6 15          	rol    rsi,0x15
+ 20a:	48 01 d0             	add    rax,rdx
+ 20d:	48 c1 c2 11          	rol    rdx,0x11
+ 211:	4c 8b 49 28          	mov    r9,QWORD PTR [rcx+0x28]
+ 215:	48 31 c2             	xor    rdx,rax
+ 218:	48 c1 c0 20          	rol    rax,0x20
+ 21c:	49 31 f8             	xor    r8,rdi
+ 21f:	49 01 d0             	add    r8,rdx
+ 222:	48 c1 c2 0d          	rol    rdx,0xd
+ 226:	4c 31 cf             	xor    rdi,r9
+ 229:	4c 31 c2             	xor    rdx,r8
+ 22c:	49 c1 c0 20          	rol    r8,0x20
+ 230:	48 31 f7             	xor    rdi,rsi
+ 233:	48 01 f8             	add    rax,rdi
+ 236:	48 c1 c7 10          	rol    rdi,0x10
+ 23a:	48 31 c7             	xor    rdi,rax
+ 23d:	49 01 f8             	add    r8,rdi
+ 240:	48 c1 c7 15          	rol    rdi,0x15
+ 244:	48 01 d0             	add    rax,rdx
+ 247:	48 c1 c2 11          	rol    rdx,0x11
+ 24b:	48 31 c2             	xor    rdx,rax
+ 24e:	48 c1 c0 20          	rol    rax,0x20
+ 252:	4c 31 c7             	xor    rdi,r8
+ 255:	49 01 d0             	add    r8,rdx
+ 258:	48 c1 c2 0d          	rol    rdx,0xd
+ 25c:	4c 31 c2             	xor    rdx,r8
+ 25f:	49 c1 c0 20          	rol    r8,0x20
+ 263:	48 01 f8             	add    rax,rdi
+ 266:	48 c1 c7 10          	rol    rdi,0x10
+ 26a:	48 31 c7             	xor    rdi,rax
+ 26d:	49 01 f8             	add    r8,rdi
+ 270:	48 c1 c7 15          	rol    rdi,0x15
+ 274:	48 01 d0             	add    rax,rdx
+ 277:	48 c1 c2 11          	rol    rdx,0x11
+ 27b:	48 8b 71 30          	mov    rsi,QWORD PTR [rcx+0x30]
+ 27f:	48 31 c2             	xor    rdx,rax
+ 282:	48 c1 c0 20          	rol    rax,0x20
+ 286:	4d 31 c1             	xor    r9,r8
+ 289:	49 01 d1             	add    r9,rdx
+ 28c:	48 c1 c2 0d          	rol    rdx,0xd
+ 290:	49 31 f0             	xor    r8,rsi
+ 293:	4c 31 ca             	xor    rdx,r9
+ 296:	49 c1 c1 20          	rol    r9,0x20
+ 29a:	49 31 f8             	xor    r8,rdi
+ 29d:	4c 01 c0             	add    rax,r8
+ 2a0:	49 c1 c0 10          	rol    r8,0x10
+ 2a4:	49 31 c0             	xor    r8,rax
+ 2a7:	4d 01 c1             	add    r9,r8
+ 2aa:	49 c1 c0 15          	rol    r8,0x15
+ 2ae:	48 01 d0             	add    rax,rdx
+ 2b1:	48 c1 c2 11          	rol    rdx,0x11
+ 2b5:	48 31 c2             	xor    rdx,rax
+ 2b8:	48 c1 c0 20          	rol    rax,0x20
+ 2bc:	4d 31 c8             	xor    r8,r9
+ 2bf:	49 01 d1             	add    r9,rdx
+ 2c2:	48 c1 c2 0d          	rol    rdx,0xd
+ 2c6:	4c 31 ca             	xor    rdx,r9
+ 2c9:	49 c1 c1 20          	rol    r9,0x20
+ 2cd:	4c 01 c0             	add    rax,r8
+ 2d0:	49 c1 c0 10          	rol    r8,0x10
+ 2d4:	49 31 c0             	xor    r8,rax
+ 2d7:	4d 01 c1             	add    r9,r8
+ 2da:	49 c1 c0 15          	rol    r8,0x15
+ 2de:	48 01 d0             	add    rax,rdx
+ 2e1:	48 c1 c2 11          	rol    rdx,0x11
+ 2e5:	48 8b 79 38          	mov    rdi,QWORD PTR [rcx+0x38]
+ 2e9:	48 31 c2             	xor    rdx,rax
+ 2ec:	48 c1 c0 20          	rol    rax,0x20
+ 2f0:	4c 31 ce             	xor    rsi,r9
+ 2f3:	48 01 d6             	add    rsi,rdx
+ 2f6:	48 c1 c2 0d          	rol    rdx,0xd
+ 2fa:	49 31 f9             	xor    r9,rdi
+ 2fd:	48 31 f2             	xor    rdx,rsi
+ 300:	48 c1 c6 20          	rol    rsi,0x20
+ 304:	4d 31 c1             	xor    r9,r8
+ 307:	4c 01 c8             	add    rax,r9
+ 30a:	49 c1 c1 10          	rol    r9,0x10
+ 30e:	49 31 c1             	xor    r9,rax
+ 311:	4c 01 ce             	add    rsi,r9
+ 314:	49 c1 c1 15          	rol    r9,0x15
+ 318:	48 01 d0             	add    rax,rdx
+ 31b:	48 c1 c2 11          	rol    rdx,0x11
+ 31f:	48 31 c2             	xor    rdx,rax
+ 322:	48 c1 c0 20          	rol    rax,0x20
+ 326:	49 31 f1             	xor    r9,rsi
+ 329:	48 01 d6             	add    rsi,rdx
+ 32c:	48 c1 c2 0d          	rol    rdx,0xd
+ 330:	48 31 f2             	xor    rdx,rsi
+ 333:	48 c1 c6 20          	rol    rsi,0x20
+ 337:	4c 01 c8             	add    rax,r9
+ 33a:	49 c1 c1 10          	rol    r9,0x10
+ 33e:	49 31 c1             	xor    r9,rax
+ 341:	4c 01 ce             	add    rsi,r9
+ 344:	49 c1 c1 15          	rol    r9,0x15
+ 348:	48 01 d0             	add    rax,rdx
+ 34b:	48 c1 c2 11          	rol    rdx,0x11
+ 34f:	4c 8b 41 40          	mov    r8,QWORD PTR [rcx+0x40]
+ 353:	48 31 c2             	xor    rdx,rax
+ 356:	48 c1 c0 20          	rol    rax,0x20
+ 35a:	48 31 f7             	xor    rdi,rsi
+ 35d:	48 01 d7             	add    rdi,rdx
+ 360:	48 c1 c2 0d          	rol    rdx,0xd
+ 364:	4c 31 c6             	xor    rsi,r8
+ 367:	48 31 fa             	xor    rdx,rdi
+ 36a:	48 c1 c7 20          	rol    rdi,0x20
+ 36e:	4c 31 ce             	xor    rsi,r9
+ 371:	48 01 f0             	add    rax,rsi
+ 374:	48 c1 c6 10          	rol    rsi,0x10
+ 378:	48 31 c6             	xor    rsi,rax
+ 37b:	48 01 f7             	add    rdi,rsi
+ 37e:	48 c1 c6 15          	rol    rsi,0x15
+ 382:	48 01 d0             	add    rax,rdx
+ 385:	48 c1 c2 11          	rol    rdx,0x11
+ 389:	48 31 c2             	xor    rdx,rax
+ 38c:	48 c1 c0 20          	rol    rax,0x20
+ 390:	48 31 fe             	xor    rsi,rdi
+ 393:	48 01 d7             	add    rdi,rdx
+ 396:	48 c1 c2 0d          	rol    rdx,0xd
+ 39a:	48 31 fa             	xor    rdx,rdi
+ 39d:	48 c1 c7 20          	rol    rdi,0x20
+ 3a1:	48 01 f0             	add    rax,rsi
+ 3a4:	48 c1 c6 10          	rol    rsi,0x10
+ 3a8:	48 31 c6             	xor    rsi,rax
+ 3ab:	48 01 f7             	add    rdi,rsi
+ 3ae:	48 c1 c6 15          	rol    rsi,0x15
+ 3b2:	48 01 d0             	add    rax,rdx
+ 3b5:	48 c1 c2 11          	rol    rdx,0x11
+ 3b9:	48 31 fe             	xor    rsi,rdi
+ 3bc:	48 31 c2             	xor    rdx,rax
+ 3bf:	48 c1 c0 20          	rol    rax,0x20
+ 3c3:	4c 31 c7             	xor    rdi,r8
+ 3c6:	48 01 d7             	add    rdi,rdx
+ 3c9:	48 c1 c2 0d          	rol    rdx,0xd
+ 3cd:	48 31 fa             	xor    rdx,rdi
+ 3d0:	48 c1 c7 20          	rol    rdi,0x20
+ 3d4:	48 81 f0 ff 00 00 00 	xor    rax,0xff
+ 3db:	48 01 f0             	add    rax,rsi
+ 3de:	48 c1 c6 10          	rol    rsi,0x10
+ 3e2:	48 31 c6             	xor    rsi,rax
+ 3e5:	48 01 f7             	add    rdi,rsi
+ 3e8:	48 c1 c6 15          	rol    rsi,0x15
+ 3ec:	48 01 d0             	add    rax,rdx
+ 3ef:	48 c1 c2 11          	rol    rdx,0x11
+ 3f3:	48 31 c2             	xor    rdx,rax
+ 3f6:	48 c1 c0 20          	rol    rax,0x20
+ 3fa:	48 31 fe             	xor    rsi,rdi
+ 3fd:	48 01 d7             	add    rdi,rdx
+ 400:	48 c1 c2 0d          	rol    rdx,0xd
+ 404:	48 31 fa             	xor    rdx,rdi
+ 407:	48 c1 c7 20          	rol    rdi,0x20
+ 40b:	48 01 f0             	add    rax,rsi
+ 40e:	48 c1 c6 10          	rol    rsi,0x10
+ 412:	48 31 c6             	xor    rsi,rax
+ 415:	48 01 f7             	add    rdi,rsi
+ 418:	48 c1 c6 15          	rol    rsi,0x15
+ 41c:	48 01 d0             	add    rax,rdx
+ 41f:	48 c1 c2 11          	rol    rdx,0x11
+ 423:	48 31 c2             	xor    rdx,rax
+ 426:	48 c1 c0 20          	rol    rax,0x20
+ 42a:	48 31 fe             	xor    rsi,rdi
+ 42d:	48 01 d7             	add    rdi,rdx
+ 430:	48 c1 c2 0d          	rol    rdx,0xd
+ 434:	48 31 fa             	xor    rdx,rdi
+ 437:	48 c1 c7 20          	rol    rdi,0x20
+ 43b:	48 01 f0             	add    rax,rsi
+ 43e:	48 c1 c6 10          	rol    rsi,0x10
+ 442:	48 31 c6             	xor    rsi,rax
+ 445:	48 01 f7             	add    rdi,rsi
+ 448:	48 c1 c6 15          	rol    rsi,0x15
+ 44c:	48 01 d0             	add    rax,rdx
+ 44f:	48 c1 c2 11          	rol    rdx,0x11
+ 453:	48 31 c2             	xor    rdx,rax
+ 456:	48 c1 c0 20          	rol    rax,0x20
+ 45a:	48 31 fe             	xor    rsi,rdi
+ 45d:	48 01 d7             	add    rdi,rdx
+ 460:	48 c1 c2 0d          	rol    rdx,0xd
+ 464:	48 01 f0             	add    rax,rsi
+ 467:	48 c1 c6 10          	rol    rsi,0x10
+ 46b:	48 31 c6             	xor    rsi,rax
+ 46e:	48 c1 c6 15          	rol    rsi,0x15
+ 472:	48 31 fa             	xor    rdx,rdi
+ 475:	48 01 d0             	add    rax,rdx
+ 478:	48 c1 c2 11          	rol    rdx,0x11
+ 47c:	48 89 c7             	mov    rdi,rax
+ 47f:	48 c1 c7 20          	rol    rdi,0x20
+ 483:	48 31 d7             	xor    rdi,rdx
+ 486:	48 31 f7             	xor    rdi,rsi
+ 489:	48 31 c7             	xor    rdi,rax
+ 48c:	48 89 39             	mov    QWORD PTR [rcx],rdi
+ 48f:	b8 02 00 00 00       	mov    eax,0x2
+ 494:	41 5e                	pop    r14
+ 496:	41 5d                	pop    r13
+ 498:	5b                   	pop    rbx
+ 499:	c9                   	leave
+ 49a:	c3                   	ret
 ```

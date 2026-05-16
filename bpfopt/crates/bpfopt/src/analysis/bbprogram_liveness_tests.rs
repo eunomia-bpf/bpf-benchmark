@@ -53,7 +53,7 @@ fn bbprogram_liveness_includes_kinsn_implicit_register_uses() {
     let payload = BpfInsn::pack_u4(BPF_REG_6, 0)
         | BpfInsn::pack_u4(BPF_REG_0, 4)
         | BpfInsn::pack_u4(BPF_REG_1, 8);
-    let ctx = ctx_with_kinsn("bpf_x86_cmovneq_rr", btf_id);
+    let ctx = ctx_with_kinsn("bpf_x86_cmovneq", btf_id);
     let insns = vec![
         BpfInsn::mov64_imm(BPF_REG_6, 0),
         BpfInsn::mov64_imm(BPF_REG_0, 1),

@@ -97,11 +97,11 @@ static const struct bpf_insn program[] = {
     /* 0x113f: cmp    ecx,0x800 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_4, 2048), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32),
     /* 0x1145: je     11df <packet_vlan_tcpopt_parser_xdp+0xdf> [bpf-branch: lowered cmp    ecx,0x800 + je     11df <packet_vlan_tcpopt_parser_xdp+0xdf> to verifier-visible BPF branch] */
-    HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_4, 0, 57, 2048),
+    HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_4, 0, 56, 2048),
     /* 0x114b: cmp    ecx,0x88a8 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_4, 34984), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32),
     /* 0x1151: je     115f <packet_vlan_tcpopt_parser_xdp+0x5f> [bpf-branch: lowered cmp    ecx,0x88a8 + je     115f <packet_vlan_tcpopt_parser_xdp+0x5f> to verifier-visible BPF branch] */
-    HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_4, 0, 4, 34984),
+    HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_4, 0, 3, 34984),
     /* 0x1153: cmp    ecx,0x8100 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_4, 33024), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32),
     /* 0x1159: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [bpf-branch: lowered cmp    ecx,0x8100 + jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> to verifier-visible BPF branch] */
@@ -128,7 +128,7 @@ static const struct bpf_insn program[] = {
     /* 0x118b: cmp    ecx,0x88a8 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_4, 34984), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32),
     /* 0x1191: je     119f <packet_vlan_tcpopt_parser_xdp+0x9f> [bpf-branch: lowered cmp    ecx,0x88a8 + je     119f <packet_vlan_tcpopt_parser_xdp+0x9f> to verifier-visible BPF branch] */
-    HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_4, 0, 4, 34984),
+    HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_4, 0, 3, 34984),
     /* 0x1193: cmp    ecx,0x8100 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_4, 33024), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32),
     /* 0x1199: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [bpf-branch: lowered cmp    ecx,0x8100 + jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> to verifier-visible BPF branch] */
@@ -164,7 +164,7 @@ static const struct bpf_insn program[] = {
     /* 0x11d8: mov    ecx,0x2 [bpf-jit: 32-bit immediate move] */
     HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_4, 0, 0, 2),
     /* 0x11dd: jmp    11ef <packet_vlan_tcpopt_parser_xdp+0xef> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 11, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 10, 0),
     /* 0x11df: xor    esi,esi [exact-kinsn: xor32 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x11e1: xor    ecx,ecx [exact-kinsn: xor32 reg kinsn] */
@@ -224,7 +224,7 @@ static const struct bpf_insn program[] = {
     /* 0x1245: mov    ecx,0x1 [bpf-jit: 32-bit immediate move] */
     HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_4, 0, 0, 1),
     /* 0x124a: jmp    11e3 <packet_vlan_tcpopt_parser_xdp+0xe3> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, -37, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, -38, 0),
     /* 0x124c: lea    r15,[rbx+0x20] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_9, BPF_REG_6, 0, 0, 1, 0, 32), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1250: cmp    r15,r10 [exact-kinsn: cmpq reg,reg kinsn] */

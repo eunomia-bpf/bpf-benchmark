@@ -345,7 +345,7 @@ If the project ever wants a full machine-kinsn IR, the better long-term core
 shape is a numeric opcode/descriptor registry rather than BTF-per-kfunc as the
 primary identity:
 
-- stable opcodes such as `BPF_KINSN_X86_CMOVNEQ_RR`;
+- stable opcodes such as `BPF_KINSN_X86_CMOVNEQ`;
 - descriptor contains arch, payload schema, register use/def, flag use/def,
   max proof length, and max native bytes;
 - verifier core owns proof lowering/restoration;
@@ -402,7 +402,7 @@ validation, verifier proof, liveness, and native encoding.
 | Base+disp store | `src, base, off` | Yes | Maps to `BPF_STX_MEM`; liveness is use `base,src`, no def. |
 | SIB memory | `dst/base/index/scale/off/tmp...` | No | BPF has no `[base + index * scale + disp]`; proof must compute address in a temp. |
 | ALU memory operand | `dst, base, off, tmp...` | No | BPF has no ALU-with-memory operand; proof must load then ALU. |
-| Flags producer/consumer | operands plus flag proof/stack slots/tmp | No | BPF has no architectural flags. `cmp/test` define flags; `cmov/setcc/sbb` consume flags. |
+| Flags producer/consumer | operands plus stack-flag slots and operand-form tags | No | BPF has no architectural flags. `cmp/test` define flags; `cmov/setcc/sbb` consume flags. The selector names the x86 instruction, while the payload carries the operand form. |
 | Shadow reg operand | operand plus temp/shadow slot | No | Verifier proof must load/store stack shadow for native-only regs. |
 
 So the rule for the one-line alias macro is strict:
@@ -477,6 +477,9 @@ Stack-shadow flags are the right verifier-facing model:
 - `cmp/test/add/sub/...` kinsns update a stack slot representing ZF/CF/SF/OF/etc.
 - `cmov/setcc/jcc` instantiate paths read those stack slots and expand to
   verifier-visible BPF branches/selects.
+- User space should not synthesize a separate "adjacent cmp/test proof" payload
+  for flag consumers. The converter's job is to emit native-order producer and
+  consumer kinsns; the module owns the verifier-facing flag state.
 
 But that only proves the BPF simulation. The final x86 path still emits one
 machine instruction per kinsn and reads real CPU flags. Therefore:
@@ -491,6 +494,27 @@ machine instruction per kinsn and reads real CPU flags. Therefore:
 
 This is the main reason `cmp/test` plus `cmov/setcc/jcc` cannot be treated as
 independent instructions unless the region has explicit flag-liveness rules.
+
+## Branch Relocation Boundary
+
+Branches are different from flags. A native `jmp/jcc` operand is a code address,
+so user space must relocate it after translation changes instruction widths.
+That does not require CFG construction:
+
+1. Translate native instructions in order and record the generated BPF PC for
+   each native instruction address.
+2. Use known generated lengths (`1` for ordinary BPF, `2` for sidecar+kinsn
+   call) to build a native-address to BPF-PC table.
+3. Patch each branch offset as `target_bpf_pc - (branch_bpf_pc + 1)`.
+
+This O(n) relocation table is acceptable converter logic. It should not grow
+into dataflow, verifier proof reconstruction, or branch-liveness analysis.
+
+The long-term strict handcraft ABI should still prefer branch kinsns for native
+parity: `cmp/test` updates shadow flags, `jcc` reads shadow flags, and user
+space supplies only the relocated target offset. Until such kinsns exist,
+verifier-visible BPF branches remain a compatibility bridge, but they are not a
+general substitute for one native branch instruction.
 
 ## Option A: Fully Simulate 16 x86 Registers and Flags
 

@@ -39,7 +39,7 @@ static const struct bpf_insn program[] = {
     /* 0x1107: cmp    rax,rcx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_0, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x110a: jbe    111e <cgroup_skb_hash_chain_prog+0x1e> [bpf-branch: lowered cmp    rax,rcx + jbe    111e <cgroup_skb_hash_chain_prog+0x1e> to verifier-visible BPF branch] */
-    HC_JMP_REG(BPF_JLE, BPF_REG_0, BPF_REG_4, 8),
+    HC_JMP_REG(BPF_JLE, BPF_REG_0, BPF_REG_4, 7),
     /* 0x110c: mov    DWORD PTR [rdi+0x10],0xffffffff [bpf-jit: immediate memory store] */
     HC_ST(BPF_W, BPF_REG_1, 16, 4294967295),
     /* 0x1113: xor    eax,eax [exact-kinsn: xor32 reg kinsn] */
@@ -120,7 +120,7 @@ static const struct bpf_insn program[] = {
     /* 0x11c9: cmp    r15,0x8 [exact-kinsn: cmpq reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_9, 8), MICRO_HANDCRAFT_BPF_X86_CMPQ_IMM32),
     /* 0x11cd: jne    11a0 <cgroup_skb_hash_chain_prog+0xa0> [bpf-branch: lowered cmp    r15,0x8 + jne    11a0 <cgroup_skb_hash_chain_prog+0xa0> to verifier-visible BPF branch] */
-    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_9, 0, -24, 8),
+    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_9, 0, -25, 8),
     /* 0x11cf: add    rsi,0x5 [exact-kinsn: add64 imm kinsn] */
     HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_2, 5), MICRO_HANDCRAFT_BPF_X86_ADDQ),
     /* 0x11d3: cmp    r9,0x10 [exact-kinsn: cmpq reg,imm32 kinsn] */

@@ -27,7 +27,7 @@ static const struct bpf_insn program[] = {
     /* 0x1107: cmp    rax,rcx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_0, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x110a: jbe    1121 <tc_packet_checksum_fold_prog+0x21> [bpf-branch: lowered cmp    rax,rcx + jbe    1121 <tc_packet_checksum_fold_prog+0x21> to verifier-visible BPF branch] */
-    HC_JMP_REG(BPF_JLE, BPF_REG_0, BPF_REG_4, 7),
+    HC_JMP_REG(BPF_JLE, BPF_REG_0, BPF_REG_4, 6),
     /* 0x110c: mov    DWORD PTR [rdi+0x10],0xffffffff [bpf-jit: immediate memory store] */
     HC_ST(BPF_W, BPF_REG_1, 16, 4294967295),
     /* 0x1113: mov    eax,0x2 [bpf-jit: 32-bit immediate move] */
@@ -89,7 +89,7 @@ static const struct bpf_insn program[] = {
     /* 0x118c: cmp    rcx,0x200 [exact-kinsn: cmpq reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_4, 512), MICRO_HANDCRAFT_BPF_X86_CMPQ_IMM32),
     /* 0x1193: jne    1160 <tc_packet_checksum_fold_prog+0x60> [bpf-branch: lowered cmp    rcx,0x200 + jne    1160 <tc_packet_checksum_fold_prog+0x60> to verifier-visible BPF branch] */
-    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_4, 0, -24, 512),
+    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_4, 0, -25, 512),
     /* 0x1195: mov    ecx,r8d [exact-kinsn: movl register-to-register kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_4, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_MOVL_RR),
     /* 0x1198: shr    ecx,0x10 [exact-kinsn: shr32 imm kinsn] */
@@ -113,7 +113,7 @@ static const struct bpf_insn program[] = {
     /* 0x11b1: cmp    esi,0x20 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_2, 32), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32),
     /* 0x11b4: jne    1150 <tc_packet_checksum_fold_prog+0x50> [bpf-branch: lowered cmp    esi,0x20 + jne    1150 <tc_packet_checksum_fold_prog+0x50> to verifier-visible BPF branch] */
-    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_2, 0, -49, 32),
+    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_2, 0, -50, 32),
     /* 0x11b6: mov    DWORD PTR [rdi+0x10],edx [exact-kinsn: direct memory store via x86 kinsn selector] */
     HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_3, BPF_REG_1, 16), MICRO_HANDCRAFT_BPF_X86_MOVL_MEM_REG),
     /* 0x11b9: shr    rdx,0x20 [exact-kinsn: shr64 imm kinsn] */

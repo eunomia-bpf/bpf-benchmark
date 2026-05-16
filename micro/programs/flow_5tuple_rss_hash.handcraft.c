@@ -110,7 +110,7 @@ static const struct bpf_insn program[] = {
     /* 0x1191: cmp    ebx,0x11 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_6, 17), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32),
     /* 0x1194: je     119f <flow_5tuple_rss_hash_xdp+0x9f> [bpf-branch: lowered cmp    ebx,0x11 + je     119f <flow_5tuple_rss_hash_xdp+0x9f> to verifier-visible BPF branch] */
-    HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_6, 0, 4, 17),
+    HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_6, 0, 3, 17),
     /* 0x1196: cmp    ebx,0x6 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_6, 6), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32),
     /* 0x1199: jne    1301 <flow_5tuple_rss_hash_xdp+0x201> [bpf-branch: lowered cmp    ebx,0x6 + jne    1301 <flow_5tuple_rss_hash_xdp+0x201> to verifier-visible BPF branch] */

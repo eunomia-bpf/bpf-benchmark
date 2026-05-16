@@ -6,7 +6,7 @@
      ((__u64)(HAS_BASE) << 15) | ((__u64)(__u32)(DISP) << 16))
 
 /*
- * native asm to handcraft warnings: 48
+ * native asm to handcraft warnings: 47
  *
  * - 0x1100: mov    r8,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0]
  * - 0x1103: mov    rcx,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4]
@@ -48,7 +48,6 @@
  * - 0x13b5: mov    r8,QWORD PTR [rsp-0x8] [warning-unmapped: memory base rsp is not in the BPF JIT register file]
  * - 0x13ba: je     1160 <bpftrace_comm_key_fnv_hash_xdp+0x60> [warning-unmapped: standalone x86 branch needs an immediately preceding cmp]
  * - 0x13cd: cmp    BYTE PTR [rdi-0xf],0x70 [warning-unmapped: CMP operand form has no current kinsn selector: cmp    BYTE PTR [rdi-0xf],0x70]
- * - 0x13d1: cmove  r11,rax [warning-unmapped: cmove needs an adjacent test/cmp proof payload]
  * - 0x13da: mov    rax,QWORD PTR [rsp-0x40] [warning-unmapped: memory base rsp is not in the BPF JIT register file]
  * - 0x13e7: pop    rbx [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR]
  * - 0x13e8: pop    r12 [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR]
@@ -71,7 +70,7 @@ static const struct bpf_insn program[] = {
     /* 0x1109: cmp    r8,rcx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_5, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x110c: jbe    110f <bpftrace_comm_key_fnv_hash_xdp+0xf> [bpf-branch: lowered cmp    r8,rcx + jbe    110f <bpftrace_comm_key_fnv_hash_xdp+0xf> to verifier-visible BPF branch] */
-    HC_JMP_REG(BPF_JLE, BPF_REG_5, BPF_REG_4, 2),
+    HC_JMP_REG(BPF_JLE, BPF_REG_5, BPF_REG_4, 1),
     /* 0x110e: ret [bpf-jit: BPF exit; kernel JIT emits the real return sequence] */
     HC_EXIT(),
     /* 0x110f: lea    rdx,[r8+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
@@ -155,7 +154,7 @@ static const struct bpf_insn program[] = {
     /* 0x11a5: cmp    r8,0x20 [exact-kinsn: cmpq reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_5, 32), MICRO_HANDCRAFT_BPF_X86_CMPQ_IMM32),
     /* 0x11a9: je     13da <bpftrace_comm_key_fnv_hash_xdp+0x2da> [bpf-branch: lowered cmp    r8,0x20 + je     13da <bpftrace_comm_key_fnv_hash_xdp+0x2da> to verifier-visible BPF branch] */
-    HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_5, 0, 222, 32),
+    HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_5, 0, 224, 32),
     /* 0x11af: mov    QWORD PTR [rsp-0x8],r8 [warning-unmapped: store base rsp is not in the BPF JIT register file] */
     /* 0x11b4: movzx  r13d,BYTE PTR [rdi-0x1f] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_7, BPF_REG_1, -31), MICRO_HANDCRAFT_BPF_X86_MOVZBL_MEM),
@@ -346,7 +345,7 @@ static const struct bpf_insn program[] = {
     /* 0x1345: jne    1350 <bpftrace_comm_key_fnv_hash_xdp+0x250> [warning-unmapped: standalone x86 branch needs an immediately preceding cmp] */
     /* 0x1347: mov    r9,QWORD PTR [rsp-0x48] [warning-unmapped: memory base rsp is not in the BPF JIT register file] */
     /* 0x134c: jmp    13b1 <bpftrace_comm_key_fnv_hash_xdp+0x2b1> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 41, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 40, 0),
     /* 0x134e: xchg   ax,ax [padding: xchg ax,ax is nop padding] */
     /* 0x1350: shl    r9d,0x18 [exact-kinsn: shl32 imm kinsn] */
     HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(HC_X86_R9, 24), MICRO_HANDCRAFT_BPF_X86_SHLL),
@@ -406,9 +405,10 @@ static const struct bpf_insn program[] = {
     /* 0x13ca: add    rax,r11 [exact-kinsn: add64 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, HC_X86_R11), MICRO_HANDCRAFT_BPF_X86_ADDQ),
     /* 0x13cd: cmp    BYTE PTR [rdi-0xf],0x70 [warning-unmapped: CMP operand form has no current kinsn selector: cmp    BYTE PTR [rdi-0xf],0x70] */
-    /* 0x13d1: cmove  r11,rax [warning-unmapped: cmove needs an adjacent test/cmp proof payload] */
+    /* 0x13d1: cmove  r11,rax [exact-kinsn: cmov kinsn using module shadow flags] */
+    HC_KINSN(HC_CMOV_STACK_PAYLOAD(HC_X86_R11, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_CMOVEQ),
     /* 0x13d5: jmp    1160 <bpftrace_comm_key_fnv_hash_xdp+0x60> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, -267, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, -270, 0),
     /* 0x13da: mov    rax,QWORD PTR [rsp-0x40] [warning-unmapped: memory base rsp is not in the BPF JIT register file] */
     /* 0x13df: mov    QWORD PTR [rax],rsi [exact-kinsn: direct memory store via x86 kinsn selector] */
     HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_2, BPF_REG_0, 0), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM_REG),

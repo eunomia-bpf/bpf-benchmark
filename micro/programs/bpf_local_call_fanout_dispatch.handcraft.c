@@ -68,7 +68,7 @@ static const struct bpf_insn program[] = {
     /* 0x1114: cmp    r14,rcx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_8, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x1117: jbe    1128 <bpf_local_call_fanout_dispatch_xdp+0x28> [bpf-branch: lowered cmp    r14,rcx + jbe    1128 <bpf_local_call_fanout_dispatch_xdp+0x28> to verifier-visible BPF branch] */
-    HC_JMP_REG(BPF_JLE, BPF_REG_8, BPF_REG_4, 2),
+    HC_JMP_REG(BPF_JLE, BPF_REG_8, BPF_REG_4, 1),
     /* 0x1119: add    rsp,0x8 [warning-unmapped: ALU destination rsp is not in the BPF JIT register file] */
     /* 0x111d: pop    rbx [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR] */
     /* 0x111e: pop    r12 [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR] */
@@ -103,7 +103,7 @@ static const struct bpf_insn program[] = {
     /* 0x1162: xor    r13d,r13d [exact-kinsn: xor32 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_7, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x1165: jmp    11a1 <bpf_local_call_fanout_dispatch_xdp+0xa1> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 19, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 18, 0),
     /* 0x1167: nop    WORD PTR [rax+rax*1+0x0] [padding: padding is not part of BPF semantics] */
     /* 0x1170: mov    rsi,QWORD PTR [rsp] [warning-unmapped: memory base rsp is not in the BPF JIT register file] */
     /* 0x1174: mov    ecx,ebp [warning-unmapped: unsupported mnemonic or operand form: mov    ecx,ebp] */
@@ -128,7 +128,7 @@ static const struct bpf_insn program[] = {
     /* 0x1198: cmp    r13,0x80 [exact-kinsn: cmpq reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_7, 128), MICRO_HANDCRAFT_BPF_X86_CMPQ_IMM32),
     /* 0x119f: je     1200 <bpf_local_call_fanout_dispatch_xdp+0x100> [bpf-branch: lowered cmp    r13,0x80 + je     1200 <bpf_local_call_fanout_dispatch_xdp+0x100> to verifier-visible BPF branch] */
-    HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_7, 0, 18, 128),
+    HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_7, 0, 17, 128),
     /* 0x11a1: movzx  ebx,BYTE PTR [r14+r12*1-0x7] [exact-kinsn: indexed memory load via x86 SIB kinsn] */
     HC_KINSN(HC_SIB_PAYLOAD(BPF_REG_6, BPF_REG_8, HC_X86_R12, 0, -7), MICRO_HANDCRAFT_BPF_X86_MOVZBL_SIB),
     /* 0x11a7: and    ebx,0x3 [exact-kinsn: and32 imm kinsn] */
@@ -152,19 +152,19 @@ static const struct bpf_insn program[] = {
     /* 0x11ca: mov    ecx,ebp [warning-unmapped: unsupported mnemonic or operand form: mov    ecx,ebp] */
     /* 0x11cc: call   1210 <local_call_linear> [warning-unmapped: unsupported mnemonic or operand form: call   1210 <local_call_linear>] */
     /* 0x11d1: jmp    117b <bpf_local_call_fanout_dispatch_xdp+0x7b> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, -32, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, -33, 0),
     /* 0x11d3: data16 data16 data16 cs nop WORD PTR [rax+rax*1+0x0] [padding: padding is not part of BPF semantics] */
     /* 0x11e0: mov    rsi,QWORD PTR [rsp] [warning-unmapped: memory base rsp is not in the BPF JIT register file] */
     /* 0x11e4: mov    ecx,ebp [warning-unmapped: unsupported mnemonic or operand form: mov    ecx,ebp] */
     /* 0x11e6: call   12b0 <local_call_crossload> [warning-unmapped: unsupported mnemonic or operand form: call   12b0 <local_call_crossload>] */
     /* 0x11eb: jmp    117b <bpf_local_call_fanout_dispatch_xdp+0x7b> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, -33, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, -34, 0),
     /* 0x11ed: nop    DWORD PTR [rax] [padding: padding is not part of BPF semantics] */
     /* 0x11f0: mov    rsi,QWORD PTR [rsp] [warning-unmapped: memory base rsp is not in the BPF JIT register file] */
     /* 0x11f4: mov    ecx,ebp [warning-unmapped: unsupported mnemonic or operand form: mov    ecx,ebp] */
     /* 0x11f6: call   1340 <local_call_bytes> [warning-unmapped: unsupported mnemonic or operand form: call   1340 <local_call_bytes>] */
     /* 0x11fb: jmp    117b <bpf_local_call_fanout_dispatch_xdp+0x7b> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, -34, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, -35, 0),
     /* 0x1200: mov    QWORD PTR [r14],rdi [exact-kinsn: direct memory store via x86 kinsn selector] */
     HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_1, BPF_REG_8, 0), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM_REG),
     /* 0x1203: mov    eax,0x2 [bpf-jit: 32-bit immediate move] */

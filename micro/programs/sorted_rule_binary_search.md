@@ -496,7 +496,7 @@ static const struct bpf_insn program[] = {
     /* 0x1181: test   r9b,0x1 [warning-reg-remap: testb imm kinsn; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_9, 1), MICRO_HANDCRAFT_BPF_X86_TESTB_IMM),
     /* 0x1185: cmovne rdx,rdi [exact-kinsn: cmov kinsn using condition from adjacent test on BPF_REG_9] */
-    HC_KINSN(HC_CMOV_PAYLOAD(BPF_REG_3, BPF_REG_1, BPF_REG_9), MICRO_HANDCRAFT_BPF_X86_CMOVNEQ_RR),
+    HC_KINSN(HC_CMOV_PAYLOAD(BPF_REG_3, BPF_REG_1, BPF_REG_9), MICRO_HANDCRAFT_BPF_X86_CMOVNEQ),
     /* 0x1189: inc    rax [exact-kinsn: incq reg kinsn] */
     HC_KINSN(HC_REG_PAYLOAD(BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_INCQ),
     /* 0x118c: cmp    rax,0x10 [cmp-state: sets flags; materialized by following jcc when possible] */

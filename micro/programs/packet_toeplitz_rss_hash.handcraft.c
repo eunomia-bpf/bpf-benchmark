@@ -47,7 +47,7 @@ static const struct bpf_insn program[] = {
     /* 0x1109: cmp    rsi,rcx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_2, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x110c: jbe    110f <packet_toeplitz_rss_hash_xdp+0xf> [bpf-branch: lowered cmp    rsi,rcx + jbe    110f <packet_toeplitz_rss_hash_xdp+0xf> to verifier-visible BPF branch] */
-    HC_JMP_REG(BPF_JLE, BPF_REG_2, BPF_REG_4, 2),
+    HC_JMP_REG(BPF_JLE, BPF_REG_2, BPF_REG_4, 1),
     /* 0x110e: ret [bpf-jit: BPF exit; kernel JIT emits the real return sequence] */
     HC_EXIT(),
     /* 0x110f: lea    rdx,[rsi+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
@@ -96,7 +96,7 @@ static const struct bpf_insn program[] = {
     /* 0x1169: xor    ebx,ebx [exact-kinsn: xor32 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_6, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x116b: jmp    1179 <packet_toeplitz_rss_hash_xdp+0x79> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 5, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 4, 0),
     /* 0x116d: nop    DWORD PTR [rax] [padding: padding is not part of BPF semantics] */
     /* 0x1170: xor    eax,ebp [warning-unmapped: ALU source ebp is not supported] */
     /* 0x1172: inc    ebx [bpf-jit: inc lowered to add immediate] */
@@ -104,7 +104,7 @@ static const struct bpf_insn program[] = {
     /* 0x1174: cmp    ebx,0x68 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_6, 104), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32),
     /* 0x1177: je     11d6 <packet_toeplitz_rss_hash_xdp+0xd6> [bpf-branch: lowered cmp    ebx,0x68 + je     11d6 <packet_toeplitz_rss_hash_xdp+0xd6> to verifier-visible BPF branch] */
-    HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_6, 0, 39, 104),
+    HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_6, 0, 38, 104),
     /* 0x1179: mov    edx,ebx [exact-kinsn: movl register-to-register kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_3, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_MOVL_RR),
     /* 0x117b: shr    edx,0x3 [exact-kinsn: shr32 imm kinsn] */
@@ -112,15 +112,15 @@ static const struct bpf_insn program[] = {
     /* 0x117e: cmp    ebx,0x1f [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_6, 31), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32),
     /* 0x1181: jbe    11a0 <packet_toeplitz_rss_hash_xdp+0xa0> [bpf-branch: lowered cmp    ebx,0x1f + jbe    11a0 <packet_toeplitz_rss_hash_xdp+0xa0> to verifier-visible BPF branch] */
-    HC_RAW(BPF_JMP | BPF_JLE | BPF_K, BPF_REG_6, 0, 12, 31),
+    HC_RAW(BPF_JMP | BPF_JLE | BPF_K, BPF_REG_6, 0, 11, 31),
     /* 0x1183: cmp    ebx,0x3f [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_6, 63), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32),
     /* 0x1186: jbe    11a0 <packet_toeplitz_rss_hash_xdp+0xa0> [bpf-branch: lowered cmp    ebx,0x3f + jbe    11a0 <packet_toeplitz_rss_hash_xdp+0xa0> to verifier-visible BPF branch] */
-    HC_RAW(BPF_JMP | BPF_JLE | BPF_K, BPF_REG_6, 0, 9, 63),
+    HC_RAW(BPF_JMP | BPF_JLE | BPF_K, BPF_REG_6, 0, 8, 63),
     /* 0x1188: cmp    ebx,0x4f [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_6, 79), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32),
     /* 0x118b: jbe    11a0 <packet_toeplitz_rss_hash_xdp+0xa0> [bpf-branch: lowered cmp    ebx,0x4f + jbe    11a0 <packet_toeplitz_rss_hash_xdp+0xa0> to verifier-visible BPF branch] */
-    HC_RAW(BPF_JMP | BPF_JLE | BPF_K, BPF_REG_6, 0, 6, 79),
+    HC_RAW(BPF_JMP | BPF_JLE | BPF_K, BPF_REG_6, 0, 5, 79),
     /* 0x118d: mov    rcx,rdi [exact-kinsn: movq register-to-register kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_4, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_MOVQ_RR),
     /* 0x1190: cmp    ebx,0x5f [exact-kinsn: cmpl reg,imm32 kinsn] */

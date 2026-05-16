@@ -5,8 +5,8 @@ log_level: 1
 kinsns:
   - name: bpf_x86_movq_rr
   - name: bpf_x86_testq_rr
-  - name: bpf_x86_cmovneq_rr
-  - name: bpf_x86_cmoveq_rr
+  - name: bpf_x86_cmovneq
+  - name: bpf_x86_cmoveq
   - name: bpf_arm64_mov_x_rr
   - name: bpf_arm64_tst_rr
   - name: bpf_arm64_csel_ne_rrr

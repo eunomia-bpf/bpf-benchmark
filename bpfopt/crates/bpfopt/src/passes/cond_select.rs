@@ -15,12 +15,12 @@ pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
         register_defs: no_regs,
     },
     KinsnDescriptor {
-        name: "bpf_x86_cmovneq_rr",
+        name: "bpf_x86_cmovneq",
         register_uses: x86_cmov_register_uses,
         register_defs: cond_select_register_defs,
     },
     KinsnDescriptor {
-        name: "bpf_x86_cmoveq_rr",
+        name: "bpf_x86_cmoveq",
         register_uses: x86_cmov_register_uses,
         register_defs: cond_select_register_defs,
     },
@@ -201,7 +201,7 @@ fn emit_x86_cond_select_kinsns(
             &prog.kinsn_emit("bpf_x86_testq_rr", test_payload(lowering.cond_reg))?,
         );
         out.extend_from_slice(&prog.kinsn_emit(
-            "bpf_x86_cmovneq_rr",
+            "bpf_x86_cmovneq",
             cmov_payload(scratch, lowering.a_reg, lowering.cond_reg),
         )?);
         out.extend_from_slice(
@@ -218,7 +218,7 @@ fn emit_x86_cond_select_kinsns(
             &prog.kinsn_emit("bpf_x86_testq_rr", test_payload(lowering.cond_reg))?,
         );
         out.extend_from_slice(&prog.kinsn_emit(
-            "bpf_x86_cmovneq_rr",
+            "bpf_x86_cmovneq",
             cmov_payload(site.dst_reg, lowering.a_reg, lowering.cond_reg),
         )?);
     } else {
@@ -226,7 +226,7 @@ fn emit_x86_cond_select_kinsns(
             &prog.kinsn_emit("bpf_x86_testq_rr", test_payload(lowering.cond_reg))?,
         );
         out.extend_from_slice(&prog.kinsn_emit(
-            "bpf_x86_cmoveq_rr",
+            "bpf_x86_cmoveq",
             cmov_payload(site.dst_reg, lowering.b_reg, lowering.cond_reg),
         )?);
     }
