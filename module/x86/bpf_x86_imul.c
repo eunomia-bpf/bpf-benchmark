@@ -21,9 +21,8 @@ static __always_inline int decode_imul_rr_payload(u64 payload, u8 *dst_reg,
 
 	if (payload >> 8)
 		return -EINVAL;
-	if (*dst_reg >= BPF_REG_10 || *src_reg >= BPF_REG_10)
-		return -EINVAL;
-	if (!kinsn_x86_reg_valid(*dst_reg) || !kinsn_x86_reg_valid(*src_reg))
+	if (!kinsn_x86_operand_valid(*dst_reg) ||
+	    !kinsn_x86_operand_valid(*src_reg))
 		return -EINVAL;
 
 	return 0;
@@ -32,14 +31,30 @@ static __always_inline int decode_imul_rr_payload(u64 payload, u8 *dst_reg,
 static int instantiate_imulq_rr(u64 payload, struct bpf_insn *insn_buf)
 {
 	u8 dst_reg, src_reg;
+	u32 scratch_mask;
+	int cnt = 0;
 	int err;
 
 	err = decode_imul_rr_payload(payload, &dst_reg, &src_reg);
 	if (err)
 		return err;
 
-	insn_buf[0] = BPF_ALU64_REG(BPF_MUL, dst_reg, src_reg);
-	return 1;
+	if (!kinsn_x86_reg_is_shadowed(dst_reg) &&
+	    !kinsn_x86_reg_is_shadowed(src_reg)) {
+		insn_buf[0] = BPF_ALU64_REG(BPF_MUL, dst_reg, src_reg);
+		return 1;
+	}
+	scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0) |
+		       KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH1);
+	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+	kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0, dst_reg);
+	kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH1, src_reg);
+	insn_buf[cnt++] = BPF_ALU64_REG(BPF_MUL, KINSN_X86_SCRATCH0,
+					KINSN_X86_SCRATCH1);
+	kinsn_x86_write64(insn_buf, &cnt, dst_reg, KINSN_X86_SCRATCH0,
+			  scratch_mask);
+	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+	return cnt;
 }
 
 static int emit_imulq_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
@@ -71,7 +86,7 @@ static int emit_imulq_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 
 const struct bpf_kinsn bpf_x86_imulq_rr_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 1,
+	.max_insn_cnt = 8 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_imulq_rr,
 	.emit_x86 = emit_imulq_rr_x86,

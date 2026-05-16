@@ -20,28 +20,16 @@ BTF_ID_FLAGS(func, bpf_x86_movzwl_mem)
 BTF_KFUNCS_END(bpf_x86_mov_mem_kfunc_ids)
 
 static __always_inline int decode_mov_mem_payload(u64 payload, u8 *dst_reg,
-						  u8 *base_reg, s16 *offset,
-						  u8 *tmp_reg)
+						  u8 *base_reg, s16 *offset)
 {
 	payload = kinsn_payload_decode(payload);
 	*dst_reg = (payload >> 0) & 0xf;
 	*base_reg = (payload >> 4) & 0xf;
 	*offset = (s16)((payload >> 8) & 0xffff);
-	*tmp_reg = (payload >> 24) & 0xf;
 
-	if (payload >> 28)
+	if (payload >> 24)
 		return -EINVAL;
-	if (*tmp_reg) {
-		u8 shadow_reg = *tmp_reg;
-
-		*tmp_reg = *dst_reg;
-		*dst_reg = shadow_reg;
-	}
 	if (!kinsn_x86_operand_valid(*dst_reg) || *base_reg > BPF_REG_10)
-		return -EINVAL;
-	if (kinsn_x86_reg_is_shadowed(*dst_reg) && !kinsn_bpf_gpr_valid(*tmp_reg))
-		return -EINVAL;
-	if (!kinsn_x86_reg_is_shadowed(*dst_reg) && *tmp_reg)
 		return -EINVAL;
 
 	return 0;
@@ -49,20 +37,24 @@ static __always_inline int decode_mov_mem_payload(u64 payload, u8 *dst_reg,
 
 static int instantiate_mov_mem(u64 payload, struct bpf_insn *insn_buf, u8 size)
 {
-	u8 dst_reg, base_reg, tmp_reg;
+	u8 dst_reg, base_reg;
+	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0);
 	s16 offset;
+	int cnt = 0;
 	int err;
 
-	err = decode_mov_mem_payload(payload, &dst_reg, &base_reg, &offset,
-				     &tmp_reg);
+	err = decode_mov_mem_payload(payload, &dst_reg, &base_reg, &offset);
 	if (err)
 		return err;
 
 	if (kinsn_x86_reg_is_shadowed(dst_reg)) {
-		insn_buf[0] = BPF_LDX_MEM(size, tmp_reg, base_reg, offset);
-		insn_buf[1] = BPF_STX_MEM(BPF_DW, BPF_REG_10, tmp_reg,
-					  kinsn_x86_shadow_reg_off(dst_reg));
-		return 2;
+		kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+		insn_buf[cnt++] = BPF_LDX_MEM(size, KINSN_X86_SCRATCH0,
+					      base_reg, offset);
+		kinsn_x86_write64(insn_buf, &cnt, dst_reg, KINSN_X86_SCRATCH0,
+				  scratch_mask);
+		kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+		return cnt;
 	}
 
 	insn_buf[0] = BPF_LDX_MEM(size, dst_reg, base_reg, offset);
@@ -93,13 +85,12 @@ static int emit_mov_mem_x86(u8 *image, u32 *off, bool emit, u64 payload,
 			    const struct bpf_prog *prog, u8 size)
 {
 	u8 buf[16];
-	u8 dst_reg, base_reg, tmp_reg;
+	u8 dst_reg, base_reg;
 	s16 offset;
 	u32 len = 0;
 	int err;
 
-	err = decode_mov_mem_payload(payload, &dst_reg, &base_reg, &offset,
-				     &tmp_reg);
+	err = decode_mov_mem_payload(payload, &dst_reg, &base_reg, &offset);
 	if (err)
 		return err;
 
@@ -166,7 +157,7 @@ static int emit_movq_mem_x86(u8 *image, u32 *off, bool emit, u64 payload,
 
 const struct bpf_kinsn bpf_x86_movzwl_mem_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 2,
+	.max_insn_cnt = 4 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_movzwl_mem,
 	.emit_x86 = emit_movzwl_mem_x86,
@@ -174,7 +165,7 @@ const struct bpf_kinsn bpf_x86_movzwl_mem_desc = {
 
 const struct bpf_kinsn bpf_x86_movzbl_mem_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 2,
+	.max_insn_cnt = 4 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_movzbl_mem,
 	.emit_x86 = emit_movzbl_mem_x86,
@@ -182,7 +173,7 @@ const struct bpf_kinsn bpf_x86_movzbl_mem_desc = {
 
 const struct bpf_kinsn bpf_x86_movl_mem_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 2,
+	.max_insn_cnt = 4 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_movl_mem,
 	.emit_x86 = emit_movl_mem_x86,
@@ -190,7 +181,7 @@ const struct bpf_kinsn bpf_x86_movl_mem_desc = {
 
 const struct bpf_kinsn bpf_x86_movq_mem_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 2,
+	.max_insn_cnt = 4 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_movq_mem,
 	.emit_x86 = emit_movq_mem_x86,

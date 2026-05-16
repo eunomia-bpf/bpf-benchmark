@@ -186,6 +186,22 @@ enum kinsn_func_id {
 	FUNC_X86_ADDB_IMM,
 	FUNC_X86_XORB_IMM,
 	FUNC_X86_XORB_RR,
+	FUNC_X86_ADDQ,
+	FUNC_X86_ADDL,
+	FUNC_X86_SUBQ,
+	FUNC_X86_SUBL,
+	FUNC_X86_XORQ,
+	FUNC_X86_XORL,
+	FUNC_X86_ORQ,
+	FUNC_X86_ORL,
+	FUNC_X86_SHLQ,
+	FUNC_X86_SHLL,
+	FUNC_X86_SHRQ,
+	FUNC_X86_SHRL,
+	FUNC_X86_SARQ,
+	FUNC_X86_SARL,
+	FUNC_X86_ANDQ,
+	FUNC_X86_ANDL,
 	FUNC_CNT,
 };
 
@@ -615,6 +631,70 @@ static struct kinsn_func_ref g_funcs[FUNC_CNT] = {
 		.func_name = "bpf_x86_xorb_rr",
 		.module_id = MOD_X86_ALU_IMM,
 	},
+	[FUNC_X86_ADDQ] = {
+		.func_name = "bpf_x86_addq",
+		.module_id = MOD_X86_ALU_IMM,
+	},
+	[FUNC_X86_ADDL] = {
+		.func_name = "bpf_x86_addl",
+		.module_id = MOD_X86_ALU_IMM,
+	},
+	[FUNC_X86_SUBQ] = {
+		.func_name = "bpf_x86_subq",
+		.module_id = MOD_X86_ALU_IMM,
+	},
+	[FUNC_X86_SUBL] = {
+		.func_name = "bpf_x86_subl",
+		.module_id = MOD_X86_ALU_IMM,
+	},
+	[FUNC_X86_XORQ] = {
+		.func_name = "bpf_x86_xorq",
+		.module_id = MOD_X86_ALU_IMM,
+	},
+	[FUNC_X86_XORL] = {
+		.func_name = "bpf_x86_xorl",
+		.module_id = MOD_X86_ALU_IMM,
+	},
+	[FUNC_X86_ORQ] = {
+		.func_name = "bpf_x86_orq",
+		.module_id = MOD_X86_ALU_IMM,
+	},
+	[FUNC_X86_ORL] = {
+		.func_name = "bpf_x86_orl",
+		.module_id = MOD_X86_ALU_IMM,
+	},
+	[FUNC_X86_SHLQ] = {
+		.func_name = "bpf_x86_shlq",
+		.module_id = MOD_X86_ALU_IMM,
+	},
+	[FUNC_X86_SHLL] = {
+		.func_name = "bpf_x86_shll",
+		.module_id = MOD_X86_ALU_IMM,
+	},
+	[FUNC_X86_SHRQ] = {
+		.func_name = "bpf_x86_shrq",
+		.module_id = MOD_X86_ALU_IMM,
+	},
+	[FUNC_X86_SHRL] = {
+		.func_name = "bpf_x86_shrl",
+		.module_id = MOD_X86_ALU_IMM,
+	},
+	[FUNC_X86_SARQ] = {
+		.func_name = "bpf_x86_sarq",
+		.module_id = MOD_X86_ALU_IMM,
+	},
+	[FUNC_X86_SARL] = {
+		.func_name = "bpf_x86_sarl",
+		.module_id = MOD_X86_ALU_IMM,
+	},
+	[FUNC_X86_ANDQ] = {
+		.func_name = "bpf_x86_andq",
+		.module_id = MOD_X86_ALU_IMM,
+	},
+	[FUNC_X86_ANDL] = {
+		.func_name = "bpf_x86_andl",
+		.module_id = MOD_X86_ALU_IMM,
+	},
 };
 
 static int sys_bpf(enum bpf_cmd cmd, union bpf_attr *attr, unsigned int size)
@@ -692,13 +772,11 @@ static int sys_bpf(enum bpf_cmd cmd, union bpf_attr *attr, unsigned int size)
 		     (__s16)(((__u64)(PAYLOAD) >> 4) & 0xffff), \
 		     (__s32)(((__u64)(PAYLOAD) >> 20) & 0xffffffffU))
 
-#define KINSN_ROTATE_PAYLOAD(DST, SRC, SHIFT, TMP) \
-	((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(SHIFT) << 8) | \
-	 ((__u64)(TMP) << 16))
+#define KINSN_ROTATE_PAYLOAD(DST, SRC, SHIFT) \
+	((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(SHIFT) << 8))
 
-#define KINSN_ROTATE_CL_PAYLOAD(DST, CNT, TMP_SHIFT, TMP_VALUE) \
-	((__u64)(DST) | ((__u64)(CNT) << 4) | ((__u64)(TMP_SHIFT) << 8) | \
-	 ((__u64)(TMP_VALUE) << 12))
+#define KINSN_ROTATE_CL_PAYLOAD(DST, CNT) \
+	((__u64)(DST) | ((__u64)(CNT) << 4))
 
 #define KINSN_TEST_PAYLOAD(REG) ((__u64)(REG))
 
@@ -711,8 +789,8 @@ static int sys_bpf(enum bpf_cmd cmd, union bpf_attr *attr, unsigned int size)
 	((__u64)(DST) | ((__u64)(TRUE_REG) << 4) | ((__u64)(COND_REG) << 8))
 #endif
 
-#define KINSN_X86_SETCC_PAYLOAD(DST, COND, TMP) \
-	((__u64)(DST) | ((__u64)(COND) << 4) | ((__u64)(TMP) << 8))
+#define KINSN_X86_SETCC_PAYLOAD(DST, COND) \
+	((__u64)(DST) | ((__u64)(COND) << 4))
 #define KINSN_X86_FLAG_CMP_RR64 1
 #define KINSN_X86_FLAG_CMP_IMM64 2
 #define KINSN_X86_FLAG_CMP_RR32 3
@@ -722,15 +800,14 @@ static int sys_bpf(enum bpf_cmd cmd, union bpf_attr *attr, unsigned int size)
 #define KINSN_X86_R10 12
 #define KINSN_X86_R11 13
 #define KINSN_X86_R12 14
-#define KINSN_X86_CMOV_STACK_PAYLOAD(DST, SRC, TMP) \
-	((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(TMP) << 8) | \
+#define KINSN_X86_CMOV_STACK_PAYLOAD(DST, SRC) \
+	((__u64)(DST) | ((__u64)(SRC) << 4) | \
 	 ((__u64)(KINSN_X86_FLAG_STACK) << 12))
 #define KINSN_X86_CMOV_CMP_IMM_PAYLOAD(DST, SRC, LHS, IMM, KIND) \
 	((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(LHS) << 8) | \
 	 ((__u64)(KIND) << 12) | ((__u64)(__u32)(IMM) << 16))
-#define KINSN_X86_SETCC_CMP_IMM_PAYLOAD(DST, LHS, TMP_HIGH, TMP_CMP, IMM, KIND) \
-	((__u64)(DST) | ((__u64)(LHS) << 4) | ((__u64)(TMP_HIGH) << 8) | \
-	 ((__u64)(TMP_CMP) << 12) | ((__u64)(KIND) << 16) | \
+#define KINSN_X86_SETCC_CMP_IMM_PAYLOAD(DST, LHS, IMM, KIND) \
+	((__u64)(DST) | ((__u64)(LHS) << 4) | ((__u64)(KIND) << 16) | \
 	 ((__u64)(__u32)(IMM) << 20))
 
 #define KINSN_EXTRACT_U8_PAYLOAD(DST, START, LEN) \
@@ -739,32 +816,23 @@ static int sys_bpf(enum bpf_cmd cmd, union bpf_attr *attr, unsigned int size)
 #define KINSN_REG_IMM_PAYLOAD(DST, IMM) \
 	((__u64)(DST) | ((__u64)(IMM) << 8))
 #define KINSN_X86_ALU_IMM_PAYLOAD(DST, IMM) \
-	(2ULL | ((__u64)(DST) << 4) | ((__u64)(__u32)(IMM) << 12))
-#define KINSN_REG_IMM_TMP_PAYLOAD(DST, IMM, TMP) \
-	((__u64)(DST) | ((__u64)(TMP) << 4) | ((__u64)(__u8)(IMM) << 8))
+	(2ULL | ((__u64)(DST) << 4) | ((__u64)(__u32)(IMM) << 8))
+#define KINSN_X86_ALU_RR_PAYLOAD(DST, SRC) \
+	(1ULL | ((__u64)(DST) << 4) | ((__u64)(SRC) << 8))
 #define KINSN_REG_REG_PAYLOAD(DST, SRC) \
 	((__u64)(DST) | ((__u64)(SRC) << 4))
-#define KINSN_REG_TMP_PAYLOAD(REG, TMP) \
-	((__u64)(REG) | ((__u64)(TMP) << 4))
-#define KINSN_REG_REG_TMP_PAYLOAD(DST, SRC, TMP) \
-	((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(TMP) << 8))
-#define KINSN_REG_REG_TMP2_PAYLOAD(DST, SRC, TMP_DST, TMP_SRC) \
-	((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(TMP_DST) << 8) | \
-	 ((__u64)(TMP_SRC) << 12))
 
 #define KINSN_REG_COND_PAYLOAD(DST, COND) \
 	((__u64)(DST) | ((__u64)(COND) << 4))
 
-#define KINSN_X86_SHD_PAYLOAD(DST, SRC, IMM, TMP) \
-	((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(__u8)(IMM) << 8) | \
-	 ((__u64)(TMP) << 16))
+#define KINSN_X86_SHD_PAYLOAD(DST, SRC, IMM) \
+	((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(__u8)(IMM) << 8))
 
 #define KINSN_MEM_PAYLOAD(DST, BASE, OFF) \
 	((__u64)(DST) | ((__u64)(BASE) << 4) | ((__u64)(__u16)(OFF) << 8))
 
-#define KINSN_X86_ALU_MEM_PAYLOAD(DST, BASE, OFF, TMP1, TMP2) \
-	(KINSN_MEM_PAYLOAD(DST, BASE, OFF) | ((__u64)(TMP1) << 24) | \
-	 ((__u64)(TMP2) << 28))
+#define KINSN_X86_ALU_MEM_PAYLOAD(DST, BASE, OFF) \
+	KINSN_MEM_PAYLOAD(DST, BASE, OFF)
 
 #define KINSN_STORE_REG_PAYLOAD(SRC, BASE, OFF) \
 	((__u64)(SRC) | ((__u64)(BASE) << 4) | ((__u64)(__u16)(OFF) << 8))
@@ -783,23 +851,15 @@ static int sys_bpf(enum bpf_cmd cmd, union bpf_attr *attr, unsigned int size)
 	((__u64)(DST) | ((__u64)(BASE) << 4) | ((__u64)(INDEX) << 8) | \
 	 ((__u64)(SCALE) << 12) | ((__u64)(__u16)(OFF) << 16))
 
-#define KINSN_X86_MOVBE_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF, TMP) \
-	(KINSN_X86_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF) | \
-	 ((__u64)(TMP) << 32))
+#define KINSN_X86_MOVBE_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF) \
+	KINSN_X86_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF)
 
-#define KINSN_X86_SIB_TMP_PAYLOAD(DST, BASE, INDEX, SCALE, OFF, TMP) \
-	KINSN_X86_MOVBE_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF, TMP)
+#define KINSN_X86_ALU_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF) \
+	KINSN_X86_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF)
 
-#define KINSN_X86_ALU_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF, TMP1, TMP2) \
-	(KINSN_X86_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF) | \
-	 ((__u64)(TMP1) << 32) | ((__u64)(TMP2) << 36))
+#define KINSN_X86_POPCNT_PAYLOAD(DST, SRC) KINSN_REG_REG_PAYLOAD(DST, SRC)
 
-#define KINSN_X86_POPCNT_PAYLOAD(DST, SRC, TMP1, TMP2) \
-	((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(TMP1) << 8) | \
-	 ((__u64)(TMP2) << 12))
-
-#define KINSN_X86_BMI1_PAYLOAD(DST, SRC, TMP) \
-	((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(TMP) << 8))
+#define KINSN_X86_BMI1_PAYLOAD(DST, SRC) KINSN_REG_REG_PAYLOAD(DST, SRC)
 
 #define BPF_EXPECT_EQ_IMM(REG, IMM, RETVAL) \
 	BPF_JMP_IMM(BPF_JEQ, REG, IMM, 2), \
@@ -862,6 +922,17 @@ static int rejit_xdp_prog(int prog_fd, const struct bpf_insn *insns,
 			  size_t log_buf_sz)
 {
 	union bpf_attr attr;
+
+#if defined(__x86_64__)
+	struct bpf_insn prefixed[insn_cnt + 3];
+
+	prefixed[0] = BPF_MOV64_IMM(BPF_REG_6, 0);
+	prefixed[1] = BPF_MOV64_IMM(BPF_REG_7, 0);
+	prefixed[2] = BPF_MOV64_IMM(BPF_REG_8, 0);
+	memcpy(&prefixed[3], insns, insn_cnt * sizeof(*insns));
+	insns = prefixed;
+	insn_cnt += 3;
+#endif
 
 	memset(&attr, 0, sizeof(attr));
 	attr.rejit.prog_fd = prog_fd;
@@ -1817,8 +1888,7 @@ static int test_rejit_rotate_apply(void)
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_1, 1),
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_1),
-		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 1,
-							      BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 1)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -1841,8 +1911,7 @@ static int test_rejit_rotate_jit_emits_rol(void)
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_1, 1),
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_1),
-		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 1,
-							      BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 1)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -1908,9 +1977,7 @@ static int test_rejit_x86_rolq_cl_jit_emits_rol(void)
 		BPF_LD_IMM64_RAW(BPF_REG_0, 0x0123456789abcdefULL),
 		BPF_MOV64_IMM(BPF_REG_4, 8),
 		BPF_KINSN_SIDECAR(KINSN_ROTATE_CL_PAYLOAD(BPF_REG_0,
-							 BPF_REG_4,
-							 BPF_REG_6,
-							 BPF_REG_7)),
+							 BPF_REG_4)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -1933,8 +2000,7 @@ static int test_rejit_x86_roll_imm_jit_emits_rol(void)
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_0, 0x12345678),
 		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_0,
-						       BPF_REG_0, 8,
-						       BPF_REG_6)),
+						       BPF_REG_0, 8)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -1958,9 +2024,7 @@ static int test_rejit_x86_roll_cl_jit_emits_rol(void)
 		BPF_MOV64_IMM(BPF_REG_0, 0x12345678),
 		BPF_MOV64_IMM(BPF_REG_4, 8),
 		BPF_KINSN_SIDECAR(KINSN_ROTATE_CL_PAYLOAD(BPF_REG_0,
-							 BPF_REG_4,
-							 BPF_REG_6,
-							 BPF_REG_7)),
+							 BPF_REG_4)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -1982,8 +2046,7 @@ static int test_rejit_rotate_arbitrary_regs(void)
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_6, 1),
 		BPF_MOV64_REG(BPF_REG_7, BPF_REG_6),
-		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_7, BPF_REG_7, 1,
-							      BPF_REG_8)),
+		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_7, BPF_REG_7, 1)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_7),
 		BPF_EXIT_INSN(),
@@ -2000,8 +2063,7 @@ static int test_rejit_rotate64_width_binding(void)
 	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_ROTATE].btf_fd);
 	struct bpf_insn prog[] = {
 		BPF_LD_IMM64_RAW(BPF_REG_1, 0x0100000000000000ULL),
-		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 8,
-							      BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_1, BPF_REG_1, 8)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_1),
 		BPF_EXIT_INSN(),
@@ -2020,8 +2082,7 @@ static int test_rejit_rotate_r5_preserved(void)
 		BPF_MOV64_IMM(BPF_REG_5, 7),
 		BPF_MOV64_IMM(BPF_REG_1, 1),
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_1),
-		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 1,
-							      BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 1)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_5),
 		BPF_EXIT_INSN(),
@@ -2039,14 +2100,12 @@ static int test_rejit_rotate_restore_preserves_ldimm64_layout(void)
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_1, 1),
 		BPF_MOV64_REG(BPF_REG_5, BPF_REG_1),
-		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 1,
-							      BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_5, BPF_REG_5, 1)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_LD_IMM64_RAW(BPF_REG_7, 0x1122334455667788ULL),
 		BPF_MOV64_IMM(BPF_REG_1, 1),
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_1),
-		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 1,
-							      BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_0, 1)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -2055,23 +2114,6 @@ static int test_rejit_rotate_restore_preserves_ldimm64_layout(void)
 	return run_rejit_expect_success("rotate_restore_preserves_ldimm64_layout",
 					prog, ARRAY_SIZE(prog),
 					fd_array, ARRAY_SIZE(fd_array), 2);
-}
-
-static int test_rejit_rotate_invalid_tmp_rejected(void)
-{
-	int fd_array[2] = BTF_FD_ARRAY(g_modules[MOD_ROTATE].btf_fd);
-	struct bpf_insn prog[] = {
-		BPF_MOV64_IMM(BPF_REG_1, 1),
-		BPF_KINSN_SIDECAR(KINSN_ROTATE_PAYLOAD(BPF_REG_0, BPF_REG_1, 1,
-							      BPF_REG_1)),
-		BPF_CALL_KINSN(0, 0),
-		BPF_EXIT_INSN(),
-	};
-
-	patch_single_kinsn(prog, ARRAY_SIZE(prog), g_funcs[FUNC_ROTATE].btf_id);
-	return run_rejit_expect_failure_preserves_original(
-		"rotate_invalid_tmp_rejected", prog, ARRAY_SIZE(prog),
-		fd_array, ARRAY_SIZE(fd_array));
 }
 
 static int test_rejit_x86_testl_rr_jit_emits_test(void)
@@ -2252,7 +2294,7 @@ static int test_rejit_x86_cmovel_rr_jit_emits_cmove(void)
 		BPF_KINSN_SIDECAR(KINSN_TEST_PAYLOAD(BPF_REG_4)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_KINSN_SIDECAR(KINSN_X86_CMOV_STACK_PAYLOAD(
-			BPF_REG_0, BPF_REG_1, BPF_REG_5)),
+			BPF_REG_0, BPF_REG_1)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -2283,7 +2325,7 @@ static int test_rejit_x86_cmovnel_rr_jit_emits_cmovne(void)
 		BPF_KINSN_SIDECAR(KINSN_TEST_PAYLOAD(BPF_REG_4)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_KINSN_SIDECAR(KINSN_X86_CMOV_STACK_PAYLOAD(
-			BPF_REG_0, BPF_REG_1, BPF_REG_5)),
+			BPF_REG_0, BPF_REG_1)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -2316,7 +2358,7 @@ static int test_rejit_x86_cmovbl_rr_jit_emits_cmovb(void)
 							BPF_REG_5)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_KINSN_SIDECAR(KINSN_X86_CMOV_STACK_PAYLOAD(
-			BPF_REG_0, BPF_REG_1, BPF_REG_6)),
+			BPF_REG_0, BPF_REG_1)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -2349,7 +2391,7 @@ static int test_rejit_x86_cmovbq_rr_jit_emits_cmovb(void)
 							BPF_REG_5)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_KINSN_SIDECAR(KINSN_X86_CMOV_STACK_PAYLOAD(
-			BPF_REG_0, BPF_REG_1, BPF_REG_6)),
+			BPF_REG_0, BPF_REG_1)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -2374,7 +2416,7 @@ static int test_rejit_x86_setne_r_jit_emits_setne(void)
 		BPF_MOV64_IMM(BPF_REG_4, 5),
 		BPF_JMP_IMM(BPF_JNE, BPF_REG_4, 0, 0),
 		BPF_KINSN_SIDECAR(KINSN_X86_SETCC_PAYLOAD(
-			BPF_REG_0, BPF_REG_4, BPF_REG_6)),
+			BPF_REG_0, BPF_REG_4)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -2399,7 +2441,7 @@ static int test_rejit_x86_sete_r_jit_emits_sete(void)
 		BPF_MOV64_IMM(BPF_REG_4, 0),
 		BPF_JMP_IMM(BPF_JEQ, BPF_REG_4, 0, 0),
 		BPF_KINSN_SIDECAR(KINSN_X86_SETCC_PAYLOAD(
-			BPF_REG_2, BPF_REG_4, BPF_REG_6)),
+			BPF_REG_2, BPF_REG_4)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_2),
 		BPF_EXIT_INSN(),
@@ -2425,7 +2467,7 @@ static int test_rejit_x86_setge_r_jit_emits_setge(void)
 		BPF_MOV64_IMM(BPF_REG_4, 5),
 		BPF_JMP_IMM(BPF_JSGE, BPF_REG_4, 0, 0),
 		BPF_KINSN_SIDECAR(KINSN_X86_SETCC_PAYLOAD(
-			BPF_REG_5, BPF_REG_4, BPF_REG_6)),
+			BPF_REG_5, BPF_REG_4)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_5),
 		BPF_EXIT_INSN(),
@@ -2455,7 +2497,7 @@ static int test_rejit_x86_sete_cmp_imm_payload_applies(void)
 		BPF_KINSN_SIDECAR(KINSN_REG_IMM_PAYLOAD(BPF_REG_4, 5)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_KINSN_SIDECAR(KINSN_X86_SETCC_CMP_IMM_PAYLOAD(
-			BPF_REG_2, BPF_REG_4, BPF_REG_6, BPF_REG_7, 5,
+			BPF_REG_2, BPF_REG_4, 5,
 			KINSN_X86_FLAG_CMP_IMM64)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_2),
@@ -2516,7 +2558,7 @@ static int test_rejit_x86_cmov_stack_flags_apply(void)
 		BPF_KINSN_SIDECAR(KINSN_TEST_PAYLOAD(BPF_REG_4)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_KINSN_SIDECAR(KINSN_X86_CMOV_STACK_PAYLOAD(
-			BPF_REG_0, BPF_REG_1, BPF_REG_5)),
+			BPF_REG_0, BPF_REG_1)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_MOV64_IMM(BPF_REG_4, 0),
 		BPF_MOV64_IMM(BPF_REG_5, 1),
@@ -2525,7 +2567,7 @@ static int test_rejit_x86_cmov_stack_flags_apply(void)
 							BPF_REG_5)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_KINSN_SIDECAR(KINSN_X86_CMOV_STACK_PAYLOAD(
-			BPF_REG_2, BPF_REG_1, BPF_REG_6)),
+			BPF_REG_2, BPF_REG_1)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_ALU64_REG(BPF_ADD, BPF_REG_0, BPF_REG_2),
 		BPF_EXIT_INSN(),
@@ -2540,19 +2582,20 @@ static int test_rejit_x86_cmov_stack_flags_apply(void)
 #endif
 }
 
-static int test_rejit_x86_setcc_dst_cond_rejected(void)
+static int test_rejit_x86_setcc_dst_cond_apply(void)
 {
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_0, 1),
+		BPF_JMP_IMM(BPF_JNE, BPF_REG_0, 0, 0),
 		BPF_KINSN_SIDECAR(KINSN_X86_SETCC_PAYLOAD(
-			BPF_REG_0, BPF_REG_0, BPF_REG_6)),
+			BPF_REG_0, BPF_REG_0)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
 
-	return run_single_kinsn_expect_failure(
-		"x86_setcc_dst_cond_rejected", MOD_SELECT,
-		FUNC_X86_SETNE_R, prog, ARRAY_SIZE(prog));
+	return run_single_kinsn_expect_success(
+		"x86_setcc_dst_cond_apply", MOD_SELECT,
+		FUNC_X86_SETNE_R, prog, ARRAY_SIZE(prog), 1);
 }
 
 static int test_rejit_x86_sbbl_imm0_jit_emits_sbb(void)
@@ -2588,8 +2631,7 @@ static int test_rejit_x86_andb_imm_jit_emits_and(void)
 	static const __u8 andb[] = { 0x80, 0xe1, 0x07 };
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_4, 0x1234ff),
-		BPF_KINSN_SIDECAR(KINSN_REG_IMM_TMP_PAYLOAD(
-			BPF_REG_4, 7, BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_REG_IMM_PAYLOAD(BPF_REG_4, 7)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_4),
 		BPF_EXIT_INSN(),
@@ -2634,8 +2676,7 @@ static int test_rejit_x86_addb_imm_jit_emits_add(void)
 	static const __u8 addb[] = { 0x80, 0xc1, 0x11 };
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_4, 0x1234f8),
-		BPF_KINSN_SIDECAR(KINSN_REG_IMM_TMP_PAYLOAD(
-			BPF_REG_4, 0x11, BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_REG_IMM_PAYLOAD(BPF_REG_4, 0x11)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_4),
 		BPF_EXIT_INSN(),
@@ -2683,8 +2724,8 @@ static int test_rejit_x86_xorb_rr_jit_emits_xor(void)
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_4, 0x1234f0),
 		BPF_MOV64_IMM(BPF_REG_3, 0xabcd0f),
-		BPF_KINSN_SIDECAR(KINSN_REG_REG_TMP_PAYLOAD(
-			BPF_REG_4, BPF_REG_3, BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_REG_REG_PAYLOAD(
+			BPF_REG_4, BPF_REG_3)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_4),
 		BPF_EXIT_INSN(),
@@ -2716,7 +2757,7 @@ static int test_rejit_select_apply(void)
 		BPF_CALL_KINSN(0, 0),
 #if defined(__x86_64__)
 		BPF_KINSN_SIDECAR(KINSN_X86_CMOV_STACK_PAYLOAD(
-			BPF_REG_0, BPF_REG_1, BPF_REG_4)),
+			BPF_REG_0, BPF_REG_1)),
 #else
 		BPF_KINSN_SIDECAR(KINSN_SELECT_MOVE_PAYLOAD(
 			BPF_REG_0, BPF_REG_1, BPF_REG_2, BPF_REG_3)),
@@ -2745,7 +2786,7 @@ static int test_rejit_select_arbitrary_dst_reg(void)
 		BPF_CALL_KINSN(0, 0),
 #if defined(__x86_64__)
 		BPF_KINSN_SIDECAR(KINSN_X86_CMOV_STACK_PAYLOAD(
-			BPF_REG_5, BPF_REG_1, BPF_REG_4)),
+			BPF_REG_5, BPF_REG_1)),
 #else
 		BPF_KINSN_SIDECAR(KINSN_SELECT_MOVE_PAYLOAD(
 			BPF_REG_5, BPF_REG_1, BPF_REG_2, BPF_REG_3)),
@@ -2915,12 +2956,12 @@ static int test_rejit_x86_pseudo_reg_movq_roundtrip(void)
 	static const __u8 mov_rax_r10[] = { 0x49, 0x89, 0xc2 };
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_0, 123),
-		BPF_KINSN_SIDECAR(KINSN_REG_REG_TMP_PAYLOAD(
-			KINSN_X86_R10, BPF_REG_0, BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_REG_REG_PAYLOAD(
+			KINSN_X86_R10, BPF_REG_0)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_MOV64_IMM(BPF_REG_0, 0),
-		BPF_KINSN_SIDECAR(KINSN_REG_REG_TMP_PAYLOAD(
-			BPF_REG_0, KINSN_X86_R10, BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_REG_REG_PAYLOAD(
+			BPF_REG_0, KINSN_X86_R10)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -2950,21 +2991,21 @@ static int test_rejit_x86_pseudo_reg_cmp_cmov_apply(void)
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_0, 42),
 		BPF_MOV64_IMM(BPF_REG_1, 17),
-		BPF_KINSN_SIDECAR(KINSN_REG_REG_TMP_PAYLOAD(
-			KINSN_X86_R10, BPF_REG_0, BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_REG_REG_PAYLOAD(
+			KINSN_X86_R10, BPF_REG_0)),
 		BPF_CALL_KINSN(0, 0),
-		BPF_KINSN_SIDECAR(KINSN_REG_REG_TMP_PAYLOAD(
-			KINSN_X86_R11, BPF_REG_1, BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_REG_REG_PAYLOAD(
+			KINSN_X86_R11, BPF_REG_1)),
 		BPF_CALL_KINSN(0, 0),
-		BPF_KINSN_SIDECAR(KINSN_REG_REG_TMP2_PAYLOAD(
-			KINSN_X86_R10, KINSN_X86_R11, BPF_REG_6, BPF_REG_7)),
+		BPF_KINSN_SIDECAR(KINSN_REG_REG_PAYLOAD(
+			KINSN_X86_R10, KINSN_X86_R11)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_KINSN_SIDECAR(KINSN_X86_CMOV_STACK_PAYLOAD(
-			KINSN_X86_R10, KINSN_X86_R11, BPF_REG_6)),
+			KINSN_X86_R10, KINSN_X86_R11)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_MOV64_IMM(BPF_REG_0, 0),
-		BPF_KINSN_SIDECAR(KINSN_REG_REG_TMP_PAYLOAD(
-			BPF_REG_0, KINSN_X86_R10, BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_REG_REG_PAYLOAD(
+			BPF_REG_0, KINSN_X86_R10)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -3074,11 +3115,10 @@ static int test_rejit_x86_movq_sib_dst_equals_index_apply(void)
 		BPF_MOV64_REG(BPF_REG_1, BPF_REG_10),
 		BPF_ALU64_IMM(BPF_ADD, BPF_REG_1, -32),
 		BPF_MOV64_IMM(BPF_REG_3, 2),
-		BPF_KINSN_SIDECAR(KINSN_X86_SIB_TMP_PAYLOAD(BPF_REG_3,
-							    BPF_REG_1,
-							    BPF_REG_3,
-							    3, 0,
-							    BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_X86_SIB_PAYLOAD(BPF_REG_3,
+							BPF_REG_1,
+							BPF_REG_3,
+							3, 0)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_3),
 		BPF_EXIT_INSN(),
@@ -3150,11 +3190,10 @@ static int test_rejit_x86_movsxd_sib_jit_emits_movsxd(void)
 		BPF_MOV64_REG(BPF_REG_1, BPF_REG_10),
 		BPF_ALU64_IMM(BPF_ADD, BPF_REG_1, -32),
 		BPF_MOV64_IMM(BPF_REG_3, 2),
-		BPF_KINSN_SIDECAR(KINSN_X86_SIB_TMP_PAYLOAD(BPF_REG_3,
-							    BPF_REG_1,
-							    BPF_REG_3,
-							    2, 0,
-							    BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_X86_SIB_PAYLOAD(BPF_REG_3,
+							BPF_REG_1,
+							BPF_REG_3,
+							2, 0)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_3),
 		BPF_EXIT_INSN(),
@@ -3180,8 +3219,7 @@ static int test_rejit_x86_movbe16_sib_apply(void)
 		BPF_MOV64_IMM(BPF_REG_2, 2),
 		BPF_MOV64_IMM(BPF_REG_0, 0),
 		BPF_KINSN_SIDECAR(KINSN_X86_MOVBE_SIB_PAYLOAD(BPF_REG_0, BPF_REG_1,
-							       BPF_REG_2, 1, 0,
-							       BPF_REG_6)),
+							       BPF_REG_2, 1, 0)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -3270,8 +3308,8 @@ static int test_rejit_x86_popcntq_apply(void)
 {
 	struct bpf_insn prog[] = {
 		BPF_LD_IMM64_RAW(BPF_REG_1, 0xf0f0f0f0f0f0f0f0ULL),
-		BPF_KINSN_SIDECAR(KINSN_X86_POPCNT_PAYLOAD(BPF_REG_0, BPF_REG_1,
-							   BPF_REG_6, BPF_REG_7)),
+		BPF_KINSN_SIDECAR(KINSN_X86_POPCNT_PAYLOAD(BPF_REG_0,
+							   BPF_REG_1)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -3288,8 +3326,8 @@ static int test_rejit_x86_popcntq_jit_emits_popcnt(void)
 	static const __u8 popcntq[] = { 0xf3, 0x48, 0x0f, 0xb8, 0xc7 };
 	struct bpf_insn prog[] = {
 		BPF_LD_IMM64_RAW(BPF_REG_1, 0xf0f0f0f0f0f0f0f0ULL),
-		BPF_KINSN_SIDECAR(KINSN_X86_POPCNT_PAYLOAD(BPF_REG_0, BPF_REG_1,
-							   BPF_REG_6, BPF_REG_7)),
+		BPF_KINSN_SIDECAR(KINSN_X86_POPCNT_PAYLOAD(BPF_REG_0,
+							   BPF_REG_1)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -3309,8 +3347,8 @@ static int test_rejit_x86_blsiq_apply(void)
 {
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_1, 0x58),
-		BPF_KINSN_SIDECAR(KINSN_X86_BMI1_PAYLOAD(BPF_REG_0, BPF_REG_1,
-							 BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_X86_BMI1_PAYLOAD(BPF_REG_0,
+							 BPF_REG_1)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -3325,8 +3363,8 @@ static int test_rejit_x86_blsrq_apply(void)
 {
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_1, 0x58),
-		BPF_KINSN_SIDECAR(KINSN_X86_BMI1_PAYLOAD(BPF_REG_0, BPF_REG_1,
-							 BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_X86_BMI1_PAYLOAD(BPF_REG_0,
+							 BPF_REG_1)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -3343,8 +3381,8 @@ static int test_rejit_x86_blsiq_jit_emits_blsi(void)
 	static const __u8 blsiq[] = { 0xc4, 0xe2, 0xf8, 0xf3, 0xdf };
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_1, 0x58),
-		BPF_KINSN_SIDECAR(KINSN_X86_BMI1_PAYLOAD(BPF_REG_0, BPF_REG_1,
-							 BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_X86_BMI1_PAYLOAD(BPF_REG_0,
+							 BPF_REG_1)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -3390,8 +3428,7 @@ static int test_rejit_x86_notb_r_jit_emits_not(void)
 	static const __u8 notb[] = { 0xf6, 0xd0 };
 	struct bpf_insn prog[] = {
 		BPF_LD_IMM64_RAW(BPF_REG_0, 0x1234aaULL),
-		BPF_KINSN_SIDECAR(KINSN_REG_REG_PAYLOAD(BPF_REG_0,
-							BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_REG_PAYLOAD(BPF_REG_0)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -3413,8 +3450,7 @@ static int test_rejit_x86_notw_r_jit_emits_not(void)
 	static const __u8 notw[] = { 0x66, 0xf7, 0xd0 };
 	struct bpf_insn prog[] = {
 		BPF_LD_IMM64_RAW(BPF_REG_0, 0x1234abcdULL),
-		BPF_KINSN_SIDECAR(KINSN_REG_REG_PAYLOAD(BPF_REG_0,
-							BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_REG_PAYLOAD(BPF_REG_0)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -3484,7 +3520,7 @@ static int test_rejit_x86_addl_mem_jit_emits_add_mem(void)
 		BPF_MOV64_REG(BPF_REG_1, BPF_REG_10),
 		BPF_MOV64_IMM(BPF_REG_0, 0x12345678),
 		BPF_KINSN_SIDECAR(KINSN_X86_ALU_MEM_PAYLOAD(
-			BPF_REG_0, BPF_REG_1, -16, BPF_REG_6, 0)),
+			BPF_REG_0, BPF_REG_1, -16)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -3509,7 +3545,7 @@ static int test_rejit_x86_xorl_mem_jit_emits_xor_mem(void)
 		BPF_MOV64_REG(BPF_REG_1, BPF_REG_10),
 		BPF_MOV64_IMM(BPF_REG_0, 0x12345678),
 		BPF_KINSN_SIDECAR(KINSN_X86_ALU_MEM_PAYLOAD(
-			BPF_REG_0, BPF_REG_1, -16, BPF_REG_6, 0)),
+			BPF_REG_0, BPF_REG_1, -16)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -3534,8 +3570,7 @@ static int test_rejit_x86_xorw_mem_jit_emits_xor_mem(void)
 		BPF_MOV64_REG(BPF_REG_1, BPF_REG_10),
 		BPF_LD_IMM64_RAW(BPF_REG_0, 0x1234abcdULL),
 		BPF_KINSN_SIDECAR(KINSN_X86_ALU_MEM_PAYLOAD(
-			BPF_REG_0, BPF_REG_1, -16, BPF_REG_6,
-			BPF_REG_7)),
+			BPF_REG_0, BPF_REG_1, -16)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -3562,8 +3597,7 @@ static int test_rejit_x86_xorb_sib_jit_emits_xor_sib(void)
 		BPF_MOV64_IMM(BPF_REG_2, 8),
 		BPF_MOV64_IMM(BPF_REG_6, 0x1234ab),
 		BPF_KINSN_SIDECAR(KINSN_X86_ALU_SIB_PAYLOAD(
-			BPF_REG_6, BPF_REG_1, BPF_REG_2, 0, 0,
-			BPF_REG_7, BPF_REG_8)),
+			BPF_REG_6, BPF_REG_1, BPF_REG_2, 0, 0)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_6),
 		BPF_EXIT_INSN(),
@@ -3588,7 +3622,7 @@ static int test_rejit_x86_shldl_imm_jit_emits_shld(void)
 		BPF_MOV64_IMM(BPF_REG_0, 0x12345678),
 		BPF_MOV64_IMM(BPF_REG_4, 0xf0000000U),
 		BPF_KINSN_SIDECAR(KINSN_X86_SHD_PAYLOAD(
-			BPF_REG_0, BPF_REG_4, 4, BPF_REG_6)),
+			BPF_REG_0, BPF_REG_4, 4)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -3612,7 +3646,7 @@ static int test_rejit_x86_shldq_imm_jit_emits_shld(void)
 		BPF_MOV64_IMM(BPF_REG_4, 0),
 		BPF_LD_IMM64_RAW(BPF_REG_0, 0x8000000000000000ULL),
 		BPF_KINSN_SIDECAR(KINSN_X86_SHD_PAYLOAD(
-			BPF_REG_4, BPF_REG_0, 1, BPF_REG_6)),
+			BPF_REG_4, BPF_REG_0, 1)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_4),
 		BPF_EXIT_INSN(),
@@ -3637,7 +3671,7 @@ static int test_rejit_x86_shrdl_imm_jit_emits_shrd(void)
 		BPF_MOV64_IMM(BPF_REG_0, 0x80000000U),
 		BPF_MOV64_IMM(BPF_REG_4, 1),
 		BPF_KINSN_SIDECAR(KINSN_X86_SHD_PAYLOAD(
-			BPF_REG_0, BPF_REG_4, 1, BPF_REG_6)),
+			BPF_REG_0, BPF_REG_4, 1)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -3661,7 +3695,7 @@ static int test_rejit_x86_shrdq_imm_jit_emits_shrd(void)
 		BPF_MOV64_IMM(BPF_REG_4, 0x10),
 		BPF_LD_IMM64_RAW(BPF_REG_0, 0x100000000ULL),
 		BPF_KINSN_SIDECAR(KINSN_X86_SHD_PAYLOAD(
-			BPF_REG_4, BPF_REG_0, 4, BPF_REG_6)),
+			BPF_REG_4, BPF_REG_0, 4)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_4),
 		BPF_EXIT_INSN(),
@@ -4047,10 +4081,6 @@ int main(int argc, char **argv)
 		ret |= test_rejit_rotate_r5_preserved();
 	if (should_run_test(filter, "rotate_restore_preserves_ldimm64_layout"))
 		ret |= test_rejit_rotate_restore_preserves_ldimm64_layout();
-#if defined(__x86_64__)
-	if (should_run_test(filter, "rotate_invalid_tmp_rejected"))
-		ret |= test_rejit_rotate_invalid_tmp_rejected();
-#endif
 	if (should_run_test(filter, "x86_testl_rr_jit_emits_test"))
 		ret |= test_rejit_x86_testl_rr_jit_emits_test();
 	if (should_run_test(filter, "x86_testb_rr_jit_emits_test"))
@@ -4085,8 +4115,8 @@ int main(int argc, char **argv)
 		ret |= test_rejit_x86_cmove_cmp_imm_payload_applies();
 	if (should_run_test(filter, "x86_cmov_stack_flags_apply"))
 		ret |= test_rejit_x86_cmov_stack_flags_apply();
-	if (should_run_test(filter, "x86_setcc_dst_cond_rejected"))
-		ret |= test_rejit_x86_setcc_dst_cond_rejected();
+	if (should_run_test(filter, "x86_setcc_dst_cond_apply"))
+		ret |= test_rejit_x86_setcc_dst_cond_apply();
 	if (should_run_test(filter, "x86_sbbl_imm0_jit_emits_sbb"))
 		ret |= test_rejit_x86_sbbl_imm0_jit_emits_sbb();
 	if (should_run_test(filter, "x86_andb_imm_jit_emits_and"))

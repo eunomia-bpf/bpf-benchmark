@@ -88,7 +88,7 @@ static int emit_prefetcht0_x86(u8 *image, u32 *off, bool emit,
 
 const struct bpf_kinsn bpf_x86_prefetcht0_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 1,
+	.max_insn_cnt = 1 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 6,
 	.instantiate_insn = instantiate_prefetcht0,
 	.emit_x86 = emit_prefetcht0_x86,

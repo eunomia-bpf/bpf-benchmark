@@ -25,26 +25,19 @@ static __always_inline int decode_not_reg_payload(u64 payload, u8 *dst_reg)
 
 	if (payload >> 4)
 		return -EINVAL;
-	if (*dst_reg >= BPF_REG_10 || !kinsn_x86_reg_valid(*dst_reg))
+	if (!kinsn_x86_operand_valid(*dst_reg))
 		return -EINVAL;
 
 	return 0;
 }
 
-static __always_inline int decode_not_narrow_payload(u64 payload,
-						     u8 *dst_reg,
-						     u8 *tmp_reg)
+static __always_inline int decode_not_narrow_payload(u64 payload, u8 *dst_reg)
 {
 	*dst_reg = kinsn_payload_reg(payload, 0);
-	*tmp_reg = kinsn_payload_reg(payload, 4);
 
-	if (payload >> 8)
+	if (payload >> 4)
 		return -EINVAL;
-	if (*dst_reg >= BPF_REG_10 || *tmp_reg >= BPF_REG_10)
-		return -EINVAL;
-	if (*dst_reg == *tmp_reg)
-		return -EINVAL;
-	if (!kinsn_x86_reg_valid(*dst_reg) || !kinsn_x86_reg_valid(*tmp_reg))
+	if (!kinsn_x86_operand_valid(*dst_reg))
 		return -EINVAL;
 
 	return 0;
@@ -53,19 +46,31 @@ static __always_inline int decode_not_narrow_payload(u64 payload,
 static int instantiate_not_narrow(u64 payload, struct bpf_insn *insn_buf,
 				  u32 mask)
 {
-	u8 dst_reg, tmp_reg;
+	u8 dst_reg;
+	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0) |
+			   KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH1);
 	int cnt = 0;
 	int err;
 
-	err = decode_not_narrow_payload(payload, &dst_reg, &tmp_reg);
+	err = decode_not_narrow_payload(payload, &dst_reg);
 	if (err)
 		return err;
 
-	insn_buf[cnt++] = BPF_MOV64_REG(tmp_reg, dst_reg);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, tmp_reg, ~mask);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_XOR, dst_reg, mask);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, dst_reg, mask);
-	insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, dst_reg, tmp_reg);
+	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+	kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0, dst_reg);
+	insn_buf[cnt++] = BPF_MOV64_REG(KINSN_X86_SCRATCH1,
+					KINSN_X86_SCRATCH0);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, KINSN_X86_SCRATCH1,
+					~mask);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_XOR, KINSN_X86_SCRATCH0,
+					mask);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, KINSN_X86_SCRATCH0,
+					mask);
+	insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, KINSN_X86_SCRATCH0,
+					KINSN_X86_SCRATCH1);
+	kinsn_x86_write64(insn_buf, &cnt, dst_reg, KINSN_X86_SCRATCH0,
+			  scratch_mask);
+	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
 	return cnt;
 }
 
@@ -82,27 +87,49 @@ static int instantiate_notw_r(u64 payload, struct bpf_insn *insn_buf)
 static int instantiate_notl_r(u64 payload, struct bpf_insn *insn_buf)
 {
 	u8 dst_reg;
+	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0);
+	int cnt = 0;
 	int err;
 
 	err = decode_not_reg_payload(payload, &dst_reg);
 	if (err)
 		return err;
 
-	insn_buf[0] = BPF_ALU32_IMM(BPF_XOR, dst_reg, -1);
-	return 1;
+	if (!kinsn_x86_reg_is_shadowed(dst_reg)) {
+		insn_buf[0] = BPF_ALU32_IMM(BPF_XOR, dst_reg, -1);
+		return 1;
+	}
+	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+	kinsn_x86_read32(insn_buf, &cnt, KINSN_X86_SCRATCH0, dst_reg);
+	insn_buf[cnt++] = BPF_ALU32_IMM(BPF_XOR, KINSN_X86_SCRATCH0, -1);
+	kinsn_x86_write32(insn_buf, &cnt, dst_reg, KINSN_X86_SCRATCH0,
+			  scratch_mask);
+	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+	return cnt;
 }
 
 static int instantiate_notq_r(u64 payload, struct bpf_insn *insn_buf)
 {
 	u8 dst_reg;
+	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0);
+	int cnt = 0;
 	int err;
 
 	err = decode_not_reg_payload(payload, &dst_reg);
 	if (err)
 		return err;
 
-	insn_buf[0] = BPF_ALU64_IMM(BPF_XOR, dst_reg, -1);
-	return 1;
+	if (!kinsn_x86_reg_is_shadowed(dst_reg)) {
+		insn_buf[0] = BPF_ALU64_IMM(BPF_XOR, dst_reg, -1);
+		return 1;
+	}
+	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+	kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0, dst_reg);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_XOR, KINSN_X86_SCRATCH0, -1);
+	kinsn_x86_write64(insn_buf, &cnt, dst_reg, KINSN_X86_SCRATCH0,
+			  scratch_mask);
+	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+	return cnt;
 }
 
 static int emit_not_r_x86(u8 *image, u32 *off, bool emit, u64 payload,
@@ -110,12 +137,12 @@ static int emit_not_r_x86(u8 *image, u32 *off, bool emit, u64 payload,
 			  bool is16, bool is8)
 {
 	u8 buf[8];
-	u8 dst_reg, tmp_reg;
+	u8 dst_reg;
 	u32 len = 0;
 	int err;
 
 	if (is8 || is16)
-		err = decode_not_narrow_payload(payload, &dst_reg, &tmp_reg);
+		err = decode_not_narrow_payload(payload, &dst_reg);
 	else
 		err = decode_not_reg_payload(payload, &dst_reg);
 	if (err)
@@ -164,7 +191,7 @@ static int emit_notq_r_x86(u8 *image, u32 *off, bool emit, u64 payload,
 
 const struct bpf_kinsn bpf_x86_notb_r_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 5,
+	.max_insn_cnt = 11 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_notb_r,
 	.emit_x86 = emit_notb_r_x86,
@@ -172,7 +199,7 @@ const struct bpf_kinsn bpf_x86_notb_r_desc = {
 
 const struct bpf_kinsn bpf_x86_notl_r_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 1,
+	.max_insn_cnt = 5 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 3,
 	.instantiate_insn = instantiate_notl_r,
 	.emit_x86 = emit_notl_r_x86,
@@ -180,7 +207,7 @@ const struct bpf_kinsn bpf_x86_notl_r_desc = {
 
 const struct bpf_kinsn bpf_x86_notq_r_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 1,
+	.max_insn_cnt = 5 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 3,
 	.instantiate_insn = instantiate_notq_r,
 	.emit_x86 = emit_notq_r_x86,
@@ -188,7 +215,7 @@ const struct bpf_kinsn bpf_x86_notq_r_desc = {
 
 const struct bpf_kinsn bpf_x86_notw_r_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 5,
+	.max_insn_cnt = 11 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_notw_r,
 	.emit_x86 = emit_notw_r_x86,

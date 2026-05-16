@@ -27,65 +27,25 @@ BTF_KFUNCS_END(bpf_x86_mov_sib_kfunc_ids)
 static __always_inline int decode_mov_sib_payload(u64 payload, u8 *dst_reg,
 						  u8 *base_reg, u8 *index_reg,
 						  u8 *scale_log2, s16 *offset,
-						  u8 *tmp_reg)
+						  bool allow_shadow_dst)
 {
 	*dst_reg = kinsn_payload_reg(payload, 0);
 	*base_reg = kinsn_payload_reg(payload, 4);
 	*index_reg = kinsn_payload_reg(payload, 8);
 	*scale_log2 = (payload >> 12) & 0x3;
 	*offset = kinsn_payload_s16(payload, 16);
-	*tmp_reg = BPF_REG_10;
 
-	if (payload >> 36)
+	if (payload >> 32)
 		return -EINVAL;
 	if (payload & (0x3ULL << 14))
 		return -EINVAL;
-	if (*dst_reg >= BPF_REG_10 || *base_reg > BPF_REG_10 ||
-	    *index_reg >= BPF_REG_10)
+	if (*base_reg > BPF_REG_10 || *index_reg >= BPF_REG_10)
 		return -EINVAL;
-	if (payload >> 32) {
-		*tmp_reg = kinsn_payload_reg(payload, 32);
-		if (*tmp_reg >= BPF_REG_10)
-			return -EINVAL;
-		if (*tmp_reg == *dst_reg || *tmp_reg == *base_reg ||
-		    *tmp_reg == *index_reg)
-			return -EINVAL;
-		if (!kinsn_x86_reg_valid(*tmp_reg))
-			return -EINVAL;
-	} else {
-		if (*dst_reg == *base_reg || *dst_reg == *index_reg)
-			return -EINVAL;
-	}
-
-	return 0;
-}
-
-static __always_inline int
-decode_mov_sib_tmp_payload(u64 payload, u8 *dst_reg, u8 *base_reg,
-			   u8 *index_reg, u8 *scale_log2, s16 *offset,
-			   u8 *tmp_reg)
-{
-	*dst_reg = kinsn_payload_reg(payload, 0);
-	*base_reg = kinsn_payload_reg(payload, 4);
-	*index_reg = kinsn_payload_reg(payload, 8);
-	*scale_log2 = (payload >> 12) & 0x3;
-	*offset = kinsn_payload_s16(payload, 16);
-	*tmp_reg = kinsn_payload_reg(payload, 32);
-
-	if (payload >> 36)
+	if (!allow_shadow_dst && kinsn_x86_reg_is_shadowed(*dst_reg))
 		return -EINVAL;
-	if (payload & (0x3ULL << 14))
-		return -EINVAL;
-	if (*dst_reg >= BPF_REG_10 || *base_reg > BPF_REG_10 ||
-	    *index_reg >= BPF_REG_10 || *tmp_reg >= BPF_REG_10)
-		return -EINVAL;
-	if (*tmp_reg == *dst_reg || *tmp_reg == *base_reg ||
-	    *tmp_reg == *index_reg)
-		return -EINVAL;
-	if (!kinsn_x86_reg_valid(*dst_reg) ||
+	if (!kinsn_x86_operand_valid(*dst_reg) ||
 	    !kinsn_x86_reg_valid(*base_reg) ||
-	    !kinsn_x86_reg_valid(*index_reg) ||
-	    !kinsn_x86_reg_valid(*tmp_reg))
+	    !kinsn_x86_reg_valid(*index_reg))
 		return -EINVAL;
 
 	return 0;
@@ -93,23 +53,41 @@ decode_mov_sib_tmp_payload(u64 payload, u8 *dst_reg, u8 *base_reg,
 
 static int instantiate_mov_sib(u64 payload, struct bpf_insn *insn_buf, u8 size)
 {
-	u8 dst_reg, base_reg, index_reg, scale_log2, tmp_reg, addr_reg;
+	u8 dst_reg, base_reg, index_reg, scale_log2, addr_reg, value_reg;
+	u32 scratch_mask = 0;
 	s16 offset;
 	int add_count;
 	int cnt = 0;
 	int err;
 
 	err = decode_mov_sib_payload(payload, &dst_reg, &base_reg, &index_reg,
-				     &scale_log2, &offset, &tmp_reg);
+				     &scale_log2, &offset, true);
 	if (err)
 		return err;
 
-	addr_reg = tmp_reg == BPF_REG_10 ? dst_reg : tmp_reg;
+	addr_reg = dst_reg;
+	value_reg = dst_reg;
+	if (kinsn_x86_reg_is_shadowed(dst_reg) ||
+	    dst_reg == base_reg || dst_reg == index_reg) {
+		addr_reg = kinsn_x86_scratch_avoid(base_reg, index_reg, 0);
+		scratch_mask = KINSN_X86_SCRATCH_MASK(addr_reg);
+		if (kinsn_x86_reg_is_shadowed(dst_reg)) {
+			value_reg = kinsn_x86_scratch_avoid(base_reg, index_reg,
+							    addr_reg);
+			scratch_mask |= KINSN_X86_SCRATCH_MASK(value_reg);
+		}
+		kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+	}
 	insn_buf[cnt++] = BPF_MOV64_REG(addr_reg, base_reg);
 	add_count = 1 << scale_log2;
 	while (add_count--)
 		insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, addr_reg, index_reg);
-	insn_buf[cnt++] = BPF_LDX_MEM(size, dst_reg, addr_reg, offset);
+	insn_buf[cnt++] = BPF_LDX_MEM(size, value_reg, addr_reg, offset);
+	if (scratch_mask) {
+		kinsn_x86_write64(insn_buf, &cnt, dst_reg, value_reg,
+				  scratch_mask);
+		kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+	}
 	return cnt;
 }
 
@@ -135,25 +113,29 @@ static int instantiate_movq_sib(u64 payload, struct bpf_insn *insn_buf)
 
 static int instantiate_movsxd_sib(u64 payload, struct bpf_insn *insn_buf)
 {
-	u8 dst_reg, base_reg, index_reg, scale_log2, tmp_reg;
+	u8 dst_reg, base_reg, index_reg, scale_log2, addr_reg;
+	u32 scratch_mask;
 	s16 offset;
 	int add_count;
 	int cnt = 0;
 	int err;
 
-	err = decode_mov_sib_tmp_payload(payload, &dst_reg, &base_reg,
-					 &index_reg, &scale_log2, &offset,
-					 &tmp_reg);
+	err = decode_mov_sib_payload(payload, &dst_reg, &base_reg,
+				     &index_reg, &scale_log2, &offset, false);
 	if (err)
 		return err;
 
-	insn_buf[cnt++] = BPF_MOV64_REG(tmp_reg, base_reg);
+	addr_reg = kinsn_x86_scratch_avoid(base_reg, index_reg, dst_reg);
+	scratch_mask = KINSN_X86_SCRATCH_MASK(addr_reg);
+	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+	insn_buf[cnt++] = BPF_MOV64_REG(addr_reg, base_reg);
 	add_count = 1 << scale_log2;
 	while (add_count--)
-		insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, tmp_reg, index_reg);
-	insn_buf[cnt++] = BPF_LDX_MEM(BPF_W, dst_reg, tmp_reg, offset);
+		insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, addr_reg, index_reg);
+	insn_buf[cnt++] = BPF_LDX_MEM(BPF_W, dst_reg, addr_reg, offset);
 	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, dst_reg, 32);
 	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_ARSH, dst_reg, 32);
+	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
 	return cnt;
 }
 
@@ -161,16 +143,15 @@ static int emit_mov_sib_x86(u8 *image, u32 *off, bool emit, u64 payload,
 			    const struct bpf_prog *prog, u8 size)
 {
 	u8 buf[16];
-	u8 dst_reg, base_reg, index_reg, scale_log2, tmp_reg;
+	u8 dst_reg, base_reg, index_reg, scale_log2;
 	s16 offset;
 	u32 len = 0;
 	int err;
 
 	err = decode_mov_sib_payload(payload, &dst_reg, &base_reg, &index_reg,
-				     &scale_log2, &offset, &tmp_reg);
+				     &scale_log2, &offset, true);
 	if (err)
 		return err;
-	(void)tmp_reg;
 
 	dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
 	base_reg = kinsn_x86_reg_for_prog(prog, base_reg);
@@ -240,17 +221,15 @@ static int emit_movsxd_sib_x86(u8 *image, u32 *off, bool emit, u64 payload,
 			       const struct bpf_prog *prog)
 {
 	u8 buf[16];
-	u8 dst_reg, base_reg, index_reg, scale_log2, tmp_reg;
+	u8 dst_reg, base_reg, index_reg, scale_log2;
 	s16 offset;
 	u32 len = 0;
 	int err;
 
-	err = decode_mov_sib_tmp_payload(payload, &dst_reg, &base_reg,
-					 &index_reg, &scale_log2, &offset,
-					 &tmp_reg);
+	err = decode_mov_sib_payload(payload, &dst_reg, &base_reg,
+				     &index_reg, &scale_log2, &offset, false);
 	if (err)
 		return err;
-	(void)tmp_reg;
 
 	dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
 	base_reg = kinsn_x86_reg_for_prog(prog, base_reg);
@@ -270,7 +249,7 @@ static int emit_movsxd_sib_x86(u8 *image, u32 *off, bool emit, u64 payload,
 
 const struct bpf_kinsn bpf_x86_movzbl_sib_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 10,
+	.max_insn_cnt = 14 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_movzbl_sib,
 	.emit_x86 = emit_movzbl_sib_x86,
@@ -278,7 +257,7 @@ const struct bpf_kinsn bpf_x86_movzbl_sib_desc = {
 
 const struct bpf_kinsn bpf_x86_movzwl_sib_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 10,
+	.max_insn_cnt = 14 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_movzwl_sib,
 	.emit_x86 = emit_movzwl_sib_x86,
@@ -286,7 +265,7 @@ const struct bpf_kinsn bpf_x86_movzwl_sib_desc = {
 
 const struct bpf_kinsn bpf_x86_movl_sib_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 10,
+	.max_insn_cnt = 14 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_movl_sib,
 	.emit_x86 = emit_movl_sib_x86,
@@ -294,7 +273,7 @@ const struct bpf_kinsn bpf_x86_movl_sib_desc = {
 
 const struct bpf_kinsn bpf_x86_movq_sib_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 10,
+	.max_insn_cnt = 14 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_movq_sib,
 	.emit_x86 = emit_movq_sib_x86,
@@ -302,7 +281,7 @@ const struct bpf_kinsn bpf_x86_movq_sib_desc = {
 
 const struct bpf_kinsn bpf_x86_movsxd_sib_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 12,
+	.max_insn_cnt = 14 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_movsxd_sib,
 	.emit_x86 = emit_movsxd_sib_x86,

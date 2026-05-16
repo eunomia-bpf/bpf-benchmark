@@ -17,23 +17,14 @@ BTF_ID_FLAGS(func, bpf_x86_bswapq)
 BTF_ID_FLAGS(func, bpf_x86_rolw_imm)
 BTF_KFUNCS_END(bpf_x86_byteorder_kfunc_ids)
 
-static __always_inline int decode_reg_payload(u64 payload, u8 *dst_reg,
-					      u8 *tmp_reg)
+static __always_inline int decode_reg_payload(u64 payload, u8 *dst_reg)
 {
 	payload = kinsn_payload_decode(payload);
 	*dst_reg = kinsn_payload_reg(payload, 0);
-	*tmp_reg = kinsn_payload_reg(payload, 4);
 
-	if (kinsn_x86_reg_is_shadowed(*dst_reg)) {
-		if (payload >> 8)
-			return -EINVAL;
-		if (!kinsn_bpf_gpr_valid(*tmp_reg))
-			return -EINVAL;
-		return 0;
-	}
 	if (payload >> 4)
 		return -EINVAL;
-	if (*dst_reg >= BPF_REG_10 || !kinsn_x86_reg_valid(*dst_reg))
+	if (!kinsn_x86_operand_valid(*dst_reg))
 		return -EINVAL;
 
 	return 0;
@@ -73,20 +64,24 @@ static int instantiate_rolw_imm(u64 payload, struct bpf_insn *insn_buf)
 
 static int instantiate_bswap(u64 payload, struct bpf_insn *insn_buf, u8 bits)
 {
-	u8 dst_reg, tmp_reg;
+	u8 dst_reg;
+	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0);
+	int cnt = 0;
 	int err;
 
-	err = decode_reg_payload(payload, &dst_reg, &tmp_reg);
+	err = decode_reg_payload(payload, &dst_reg);
 	if (err)
 		return err;
 
 	if (kinsn_x86_reg_is_shadowed(dst_reg)) {
-		insn_buf[0] = BPF_LDX_MEM(BPF_DW, tmp_reg, BPF_REG_10,
-					  kinsn_x86_shadow_reg_off(dst_reg));
-		insn_buf[1] = BPF_BSWAP(tmp_reg, bits);
-		insn_buf[2] = BPF_STX_MEM(BPF_DW, BPF_REG_10, tmp_reg,
-					  kinsn_x86_shadow_reg_off(dst_reg));
-		return 3;
+		kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+		kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0,
+				  dst_reg);
+		insn_buf[cnt++] = BPF_BSWAP(KINSN_X86_SCRATCH0, bits);
+		kinsn_x86_write64(insn_buf, &cnt, dst_reg,
+				  KINSN_X86_SCRATCH0, scratch_mask);
+		kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+		return cnt;
 	}
 	insn_buf[0] = BPF_BSWAP(dst_reg, bits);
 	return 1;
@@ -131,16 +126,15 @@ static int emit_bswap_x86(u8 *image, u32 *off, bool emit, u64 payload,
 			  const struct bpf_prog *prog, bool is64)
 {
 	u8 buf[4];
-	u8 dst_reg, tmp_reg;
+	u8 dst_reg;
 	u32 len = 0;
 	int err;
 
 	(void)prog;
 
-	err = decode_reg_payload(payload, &dst_reg, &tmp_reg);
+	err = decode_reg_payload(payload, &dst_reg);
 	if (err)
 		return err;
-	(void)tmp_reg;
 
 	kinsn_emit_rex(buf, &len, is64, false, false, kinsn_x86_ext(dst_reg));
 	kinsn_emit_u8(buf, &len, 0x0f);
@@ -163,7 +157,7 @@ static int emit_bswapq_x86(u8 *image, u32 *off, bool emit, u64 payload,
 
 const struct bpf_kinsn bpf_x86_rolw_imm_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 1,
+	.max_insn_cnt = 1 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 8,
 	.instantiate_insn = instantiate_rolw_imm,
 	.emit_x86 = emit_rolw_imm_x86,
@@ -171,7 +165,7 @@ const struct bpf_kinsn bpf_x86_rolw_imm_desc = {
 
 const struct bpf_kinsn bpf_x86_bswapl_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 3,
+	.max_insn_cnt = 5 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_bswapl,
 	.emit_x86 = emit_bswapl_x86,
@@ -179,7 +173,7 @@ const struct bpf_kinsn bpf_x86_bswapl_desc = {
 
 const struct bpf_kinsn bpf_x86_bswapq_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 3,
+	.max_insn_cnt = 5 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_bswapq,
 	.emit_x86 = emit_bswapq_x86,

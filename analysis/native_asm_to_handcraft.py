@@ -220,96 +220,35 @@ def is_shadow_reg_name(name: str) -> bool:
 
 
 def configure_temp_regs(insns: list[NativeInsn]) -> None:
-    used: set[str] = set()
-    for insn in insns:
-        for operand in insn.operands:
-            for token in re.findall(r"\b[a-z][a-z0-9]*\b", operand.lower()):
-                parsed = reg(token)
-                if parsed is None:
-                    continue
-                base = parsed[0]
-                mapped = BPF_REG_BY_X86.get(base)
-                if mapped is not None and is_bpf_reg_name(mapped):
-                    used.add(mapped)
-    candidates = ["BPF_REG_6", "BPF_REG_7", "BPF_REG_8", "BPF_REG_9", "BPF_REG_5", "BPF_REG_4", "BPF_REG_3"]
-    globals()["TEMP_REG_ORDER"] = [reg_name for reg_name in candidates if reg_name not in used] + candidates
+    return None
 
 
 def reg_reg_payload(dst: str, src: str) -> tuple[str, str]:
-    if is_shadow_reg_name(dst) or is_shadow_reg_name(src):
-        tmp = temp_reg(dst, src)
-        if tmp is None:
-            return "", "no verifier temp register available"
-        return f"HC_REG_REG_TMP_PAYLOAD({dst}, {src}, {tmp})", f"; verifier instantiate uses temp {tmp}"
     return f"HC_REG_REG_PAYLOAD({dst}, {src})", ""
 
 
 def cmp_rr_payload(lhs: str, rhs: str) -> tuple[str, str]:
-    if is_shadow_reg_name(lhs) or is_shadow_reg_name(rhs):
-        tmp_lhs = temp_reg(lhs, rhs)
-        tmp_rhs = temp_reg(lhs, rhs, tmp_lhs or "")
-        if tmp_lhs is None or tmp_rhs is None:
-            return "", "no verifier temp registers available"
-        return f"HC_REG_REG_TMP2_PAYLOAD({lhs}, {rhs}, {tmp_lhs}, {tmp_rhs})", f"; verifier instantiate uses temps {tmp_lhs}/{tmp_rhs}"
     return f"HC_REG_REG_PAYLOAD({lhs}, {rhs})", ""
 
 
 def byte_reg_reg_tmp2_payload(dst: str, src: str) -> tuple[str, str]:
-    if is_shadow_reg_name(dst):
-        tmp_dst = temp_reg(dst, src)
-        tmp_src = temp_reg(dst, src, tmp_dst or "")
-        if tmp_dst is None or tmp_src is None:
-            return "", "no verifier temp registers available"
-        return f"HC_REG_REG_TMP2_PAYLOAD({dst}, {src}, {tmp_dst}, {tmp_src})", f"; verifier instantiate uses temps {tmp_dst}/{tmp_src}"
-    tmp = temp_reg(dst, src)
-    if tmp is None:
-        return "", "no verifier temp register available"
-    return f"HC_REG_REG_TMP_PAYLOAD({dst}, {src}, {tmp})", f"; verifier instantiate uses temp {tmp}"
+    return f"HC_REG_REG_PAYLOAD({dst}, {src})", ""
 
 
 def machine_alu_rr_payload(dst: str, src: str) -> tuple[str, str]:
-    if is_shadow_reg_name(dst) or is_shadow_reg_name(src):
-        tmp_dst = temp_reg(dst, src)
-        tmp_src = temp_reg(dst, src, tmp_dst or "")
-        if tmp_dst is None or tmp_src is None:
-            return "", "no verifier temp registers available"
-        return f"HC_X86_ALU_RR_PAYLOAD({dst}, {src}, {tmp_dst}, {tmp_src})", f"; verifier instantiate uses temps {tmp_dst}/{tmp_src}"
-    return f"HC_X86_ALU_RR_PAYLOAD({dst}, {src}, 0, 0)", ""
+    return f"HC_X86_ALU_RR_PAYLOAD({dst}, {src})", ""
 
 
 def machine_alu_imm_payload(dst: str, imm: int) -> tuple[str, str]:
-    if is_shadow_reg_name(dst):
-        tmp = temp_reg(dst)
-        if tmp is None:
-            return "", "no verifier temp register available"
-        return f"HC_X86_ALU_IMM_PAYLOAD({dst}, {imm}, {tmp})", f"; verifier instantiate uses temp {tmp}"
-    return f"HC_X86_ALU_IMM_PAYLOAD({dst}, {imm}, 0)", ""
+    return f"HC_X86_ALU_IMM_PAYLOAD({dst}, {imm})", ""
 
 
 def reg_imm_payload(reg_name: str, imm: int) -> tuple[str, str]:
-    if is_shadow_reg_name(reg_name):
-        tmp = temp_reg(reg_name)
-        if tmp is None:
-            return "", "no verifier temp register available"
-        return f"HC_REG_TMP_IMM_PAYLOAD({reg_name}, {tmp}, {imm})", f"; verifier instantiate uses temp {tmp}"
     return f"HC_REG_IMM_PAYLOAD({reg_name}, {imm})", ""
 
 
 def reg_payload(reg_name: str) -> tuple[str, str]:
-    if is_shadow_reg_name(reg_name):
-        tmp = temp_reg(reg_name)
-        if tmp is None:
-            return "", "no verifier temp register available"
-        return f"HC_REG_TMP_PAYLOAD({reg_name}, {tmp})", f"; verifier instantiate uses temp {tmp}"
     return f"HC_REG_PAYLOAD({reg_name})", ""
-
-
-def temp_reg(*avoid: str) -> str | None:
-    avoided = set(avoid)
-    for candidate in TEMP_REG_ORDER:
-        if candidate not in avoided:
-            return candidate
-    return None
 
 
 def size_from_mem(text: str) -> str | None:
@@ -384,22 +323,6 @@ def translate_cmp_jcc(cmp_insn: NativeInsn, jcc_insn: NativeInsn, placeholder: i
             f"lowered {cmp_insn.raw} + {jcc_insn.raw} to verifier-visible BPF branch",
             target_addr,
         )
-    if "[" in cmp_insn.operands[0] and re.match(r"^-?(0x[0-9a-fA-F]+|\d+)$", cmp_insn.operands[1]):
-        mem = parse_mem(cmp_insn.operands[0])
-        size = size_from_mem(cmp_insn.operands[0]) or "BPF_W"
-        if mem is not None and mem[1] is None:
-            base = bpf_reg(mem[0] or "")
-            tmp = temp_reg(base[0] if base else "")
-            if base is not None and tmp is not None:
-                return Translation(
-                    "bpf-branch",
-                    (
-                        emit_ldx(size, tmp, base[0], mem[3]),
-                        f"HC_RAW(BPF_JMP | {op} | BPF_K, {tmp}, 0, __OFF_{placeholder}__, {parse_int(cmp_insn.operands[1])})",
-                    ),
-                    f"lowered {cmp_insn.raw} + {jcc_insn.raw} to verifier-visible load+branch",
-                    target_addr,
-                )
     return Translation("warning-unmapped", (), f"cannot lower {cmp_insn.raw} + {jcc_insn.raw} to BPF branch")
 
 
@@ -438,12 +361,6 @@ def translate_mem_load(dst_op: str, mem_op: str, size: str) -> Translation:
         return Translation("bpf-jit", (emit_ldx(size, dst[0], base_reg[0], off),), "direct load; exactness depends on kernel BPF JIT encoding")
     payload = f"HC_MEM_PAYLOAD({dst[0]}, {base_reg[0]}, {off})"
     note = "direct memory load via x86 kinsn selector"
-    if is_shadow_reg_name(dst[0]):
-        tmp = temp_reg(dst[0], base_reg[0])
-        if tmp is None:
-            return Translation("warning-unmapped", (), f"{dst_op}, {mem_op} has no verifier temp for shadow memory load")
-        payload = f"HC_MEM_TMP_PAYLOAD({dst[0]}, {base_reg[0]}, {off}, {tmp})"
-        note = f"direct memory load via x86 kinsn selector; verifier instantiate uses temp {tmp}"
     return Translation(
         "exact-kinsn",
         (f"HC_KINSN({payload}, {target})",),
@@ -594,12 +511,6 @@ def translate(insn: NativeInsn) -> Translation:
                 return Translation("bpf-jit", (emit_stx(size, base[0], src_reg[0], mem[3]),), "direct store")
             payload = f"HC_MEM_PAYLOAD({src_reg[0]}, {base[0]}, {mem[3]})"
             note = "direct memory store via x86 kinsn selector"
-            if is_shadow_reg_name(src_reg[0]):
-                tmp = temp_reg(src_reg[0], base[0])
-                if tmp is None:
-                    return Translation("warning-unmapped", (), f"{dst}, {src} has no verifier temp for shadow memory store")
-                payload = f"HC_STORE_REG_TMP_PAYLOAD({src_reg[0]}, {base[0]}, {mem[3]}, {tmp})"
-                note = f"direct memory store via x86 kinsn selector; verifier instantiate uses temp {tmp}"
             return Translation(
                 "exact-kinsn",
                 (f"HC_KINSN({payload}, {target})",),
@@ -653,11 +564,8 @@ def translate(insn: NativeInsn) -> Translation:
         slog2 = scale_log2(scale)
         if base_reg is None or index_reg is None or slog2 is None:
             return Translation("warning-unmapped", (), f"movsxd SIB operand is not in the BPF register file: {ops[1]}")
-        tmp = temp_reg(dst[0], base_reg[0], index_reg[0])
-        if tmp is None:
-            return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
-        payload = f"HC_SIB_TMP_PAYLOAD({dst[0]}, {base_reg[0]}, {index_reg[0]}, {slog2}, {off}, {tmp})"
-        return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_MOVSXD_SIB)",), f"movsxd SIB kinsn; verifier instantiate uses temp {tmp}")
+        payload = f"HC_SIB_PAYLOAD({dst[0]}, {base_reg[0]}, {index_reg[0]}, {slog2}, {off})"
+        return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_MOVSXD_SIB)",), "movsxd SIB kinsn")
     if op == "lea" and len(ops) == 2:
         dst = bpf_reg(ops[0])
         mem = parse_mem(ops[1])
@@ -670,54 +578,24 @@ def translate(insn: NativeInsn) -> Translation:
         if (base and base_reg is None) or (index and index_reg is None) or slog2 is None:
             return Translation("warning-unmapped", (), f"LEA base/index not in BPF register file: {ops[1]}")
         target = "MICRO_HANDCRAFT_BPF_X86_LEAQ" if dst[1] == 64 else "MICRO_HANDCRAFT_BPF_X86_LEAL"
-        tmp1 = "0"
         note = "LEA via x86 kinsn selector"
-        if is_shadow_reg_name(dst[0]) or (base_reg and is_shadow_reg_name(base_reg[0])) or (index_reg and is_shadow_reg_name(index_reg[0])):
-            tmp1 = temp_reg(dst[0], base_reg[0] if base_reg else "", index_reg[0] if index_reg else "")
-            if tmp1 is None:
-                return Translation("warning-unmapped", (), f"LEA has no free verifier temp: {insn.raw}")
-            note = f"LEA via x86 kinsn selector; verifier instantiate uses temp {tmp1}"
         payload = (
-            f"HC_LEA_TMP_PAYLOAD({dst[0]}, {base_reg[0] if base_reg else 0}, "
+            f"HC_LEA_PAYLOAD({dst[0]}, {base_reg[0] if base_reg else 0}, "
             f"{index_reg[0] if index_reg else 0}, {slog2}, {1 if base_reg else 0}, "
-            f"{1 if index_reg else 0}, {disp}, {tmp1})"
+            f"{1 if index_reg else 0}, {disp})"
         )
         return Translation("exact-kinsn", (f"HC_KINSN({payload}, {target})",), note)
     if op == "rol" and len(ops) == 2:
         dst = bpf_reg(ops[0])
         if dst and ops[1].lower() == "cl" and dst[1] in {32, 64}:
-            tmp_shift = temp_reg(dst[0], "BPF_REG_4")
-            tmp_value = temp_reg(dst[0], "BPF_REG_4", tmp_shift or "")
-            if tmp_shift is None or tmp_value is None:
-                return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
             selector = "MICRO_HANDCRAFT_BPF_X86_ROLQ_CL" if dst[1] == 64 else "MICRO_HANDCRAFT_BPF_X86_ROLL_CL"
             width = "q" if dst[1] == 64 else "l"
-            return Translation("exact-kinsn", (f"HC_KINSN(HC_ROTATE_CL_PAYLOAD({dst[0]}, BPF_REG_4, {tmp_shift}, {tmp_value}), {selector})",), f"rol{width} cl kinsn; verifier instantiate uses temps {tmp_shift}/{tmp_value}")
+            return Translation("exact-kinsn", (f"HC_KINSN(HC_ROTATE_CL_PAYLOAD({dst[0]}, BPF_REG_4), {selector})",), f"rol{width} cl kinsn")
         if dst and re.match(r"^(0x[0-9a-fA-F]+|\d+)$", ops[1]):
             if dst[1] == 64:
-                if is_shadow_reg_name(dst[0]):
-                    tmp_dst = temp_reg(dst[0])
-                    tmp_src = temp_reg(dst[0], tmp_dst or "")
-                    if tmp_dst is None or tmp_src is None:
-                        return Translation("warning-unmapped", (), f"no verifier temp registers available for {insn.raw}")
-                    payload = f"HC_ROTATE_SHADOW_PAYLOAD({dst[0]}, {dst[0]}, {parse_int(ops[1])}, {tmp_dst}, {tmp_src})"
-                    return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM)",), f"rolq imm kinsn; verifier instantiate uses temps {tmp_dst}/{tmp_src}")
-                tmp = temp_reg(dst[0])
-                if tmp is None:
-                    return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
-                return Translation("exact-kinsn", (f"HC_KINSN(HC_ROTATE_PAYLOAD({dst[0]}, {dst[0]}, {parse_int(ops[1])}, {tmp}), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM)",), f"rolq imm kinsn; verifier instantiate uses temp {tmp}")
+                return Translation("exact-kinsn", (f"HC_KINSN(HC_ROTATE_PAYLOAD({dst[0]}, {dst[0]}, {parse_int(ops[1])}), MICRO_HANDCRAFT_BPF_X86_ROLQ_IMM)",), "rolq imm kinsn")
             if dst[1] == 32:
-                if is_shadow_reg_name(dst[0]):
-                    tmp_dst = temp_reg(dst[0])
-                    tmp_src = temp_reg(dst[0], tmp_dst or "")
-                    if tmp_dst is None or tmp_src is None:
-                        return Translation("warning-unmapped", (), f"no verifier temp registers available for {insn.raw}")
-                    payload = f"HC_ROTATE_SHADOW_PAYLOAD({dst[0]}, {dst[0]}, {parse_int(ops[1])}, {tmp_dst}, {tmp_src})"
-                    return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_ROLL_IMM)",), f"roll imm kinsn; verifier instantiate uses temps {tmp_dst}/{tmp_src}")
-                tmp = temp_reg(dst[0])
-                if tmp is None:
-                    return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
-                return Translation("exact-kinsn", (f"HC_KINSN(HC_ROTATE_PAYLOAD({dst[0]}, {dst[0]}, {parse_int(ops[1])}, {tmp}), MICRO_HANDCRAFT_BPF_X86_ROLL_IMM)",), f"roll imm kinsn; verifier instantiate uses temp {tmp}")
+                return Translation("exact-kinsn", (f"HC_KINSN(HC_ROTATE_PAYLOAD({dst[0]}, {dst[0]}, {parse_int(ops[1])}), MICRO_HANDCRAFT_BPF_X86_ROLL_IMM)",), "roll imm kinsn")
             if dst[1] == 16 and parse_int(ops[1]) == 8:
                 return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_IMM_PAYLOAD({dst[0]}, 8), MICRO_HANDCRAFT_BPF_X86_ROLW_IMM)",), "rolw imm8 kinsn")
         return Translation("warning-unmapped", (), f"ROL width/register not supported by current selectors: {ops[0]}")
@@ -725,11 +603,7 @@ def translate(insn: NativeInsn) -> Translation:
         dst = bpf_reg(ops[0])
         src = bpf_reg(ops[1])
         if dst and src and dst[1] == 64 and src[1] == 64:
-            tmp1 = temp_reg(dst[0], src[0])
-            tmp2 = temp_reg(dst[0], src[0], tmp1 or "")
-            if tmp1 is None or tmp2 is None:
-                return Translation("warning-unmapped", (), f"no verifier temp registers available for {insn.raw}")
-            return Translation("exact-kinsn", (f"HC_KINSN(HC_POPCNT_PAYLOAD({dst[0]}, {src[0]}, {tmp1}, {tmp2}), MICRO_HANDCRAFT_BPF_X86_POPCNTQ)",), f"popcntq kinsn; verifier instantiate uses temps {tmp1}/{tmp2}")
+            return Translation("exact-kinsn", (f"HC_KINSN(HC_POPCNT_PAYLOAD({dst[0]}, {src[0]}), MICRO_HANDCRAFT_BPF_X86_POPCNTQ)",), "popcntq kinsn")
         return Translation("warning-unmapped", (), "only popcntq reg,reg is supported")
     if op == "imul" and len(ops) == 2:
         dst = bpf_reg(ops[0])
@@ -742,15 +616,9 @@ def translate(insn: NativeInsn) -> Translation:
         if not dst:
             return Translation("warning-unmapped", (), f"NOT destination {ops[0]} is not in the BPF JIT register file")
         if dst[1] == 8:
-            tmp = temp_reg(dst[0])
-            if tmp is None:
-                return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
-            return Translation("exact-kinsn", (f"HC_KINSN(HC_NOT_NARROW_PAYLOAD({dst[0]}, {tmp}), MICRO_HANDCRAFT_BPF_X86_NOTB_R)",), f"notb reg kinsn; verifier instantiate uses temp {tmp}")
+            return Translation("exact-kinsn", (f"HC_KINSN(HC_NOT_NARROW_PAYLOAD({dst[0]}), MICRO_HANDCRAFT_BPF_X86_NOTB_R)",), "notb reg kinsn")
         if dst[1] == 16:
-            tmp = temp_reg(dst[0])
-            if tmp is None:
-                return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
-            return Translation("exact-kinsn", (f"HC_KINSN(HC_NOT_NARROW_PAYLOAD({dst[0]}, {tmp}), MICRO_HANDCRAFT_BPF_X86_NOTW_R)",), f"notw reg kinsn; verifier instantiate uses temp {tmp}")
+            return Translation("exact-kinsn", (f"HC_KINSN(HC_NOT_NARROW_PAYLOAD({dst[0]}), MICRO_HANDCRAFT_BPF_X86_NOTW_R)",), "notw reg kinsn")
         if dst[1] == 32:
             return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_PAYLOAD({dst[0]}), MICRO_HANDCRAFT_BPF_X86_NOTL_R)",), "notl reg kinsn")
         if dst[1] == 64:
@@ -777,14 +645,11 @@ def translate(insn: NativeInsn) -> Translation:
             return Translation("warning-unmapped", (), f"{op.upper()} width is not supported: {insn.raw}")
         if not re.match(r"^(0x[0-9a-fA-F]+|\d+)$", ops[2]):
             return Translation("warning-unmapped", (), f"{op.upper()} count is not an immediate: {insn.raw}")
-        tmp = temp_reg(dst[0], src[0])
-        if tmp is None:
-            return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
         if op == "shld":
             selector = "MICRO_HANDCRAFT_BPF_X86_SHLDQ_IMM" if dst[1] == 64 else "MICRO_HANDCRAFT_BPF_X86_SHLDL_IMM"
         else:
             selector = "MICRO_HANDCRAFT_BPF_X86_SHRDQ_IMM" if dst[1] == 64 else "MICRO_HANDCRAFT_BPF_X86_SHRDL_IMM"
-        return Translation("exact-kinsn", (f"HC_KINSN(HC_SHD_PAYLOAD({dst[0]}, {src[0]}, {parse_int(ops[2])}, {tmp}), {selector})",), f"{op} imm kinsn; verifier instantiate uses temp {tmp}")
+        return Translation("exact-kinsn", (f"HC_KINSN(HC_SHD_PAYLOAD({dst[0]}, {src[0]}, {parse_int(ops[2])}), {selector})",), f"{op} imm kinsn")
     if op in ALU_OP and len(ops) == 2:
         dst = bpf_reg(ops[0])
         src = bpf_reg(ops[1])
@@ -817,30 +682,19 @@ def translate(insn: NativeInsn) -> Translation:
             imm = parse_int(ops[1])
             if imm < 0 or imm > 0xff:
                 return Translation("warning-unmapped", (), f"andb immediate is out of range: {insn.raw}")
-            tmp = temp_reg(dst[0])
-            if tmp is None:
-                return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
-            return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_IMM_TMP_PAYLOAD({dst[0]}, {imm}, {tmp}), MICRO_HANDCRAFT_BPF_X86_ANDB_IMM)",), f"andb imm kinsn; verifier instantiate uses temp {tmp}")
+            return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_IMM_PAYLOAD({dst[0]}, {imm}), MICRO_HANDCRAFT_BPF_X86_ANDB_IMM)",), "andb imm kinsn")
         if op == "add" and dst[1] == 8 and re.match(r"^(0x[0-9a-fA-F]+|\d+)$", ops[1]):
             imm = parse_int(ops[1])
             if imm < 0 or imm > 0xff:
                 return Translation("warning-unmapped", (), f"addb immediate is out of range: {insn.raw}")
-            tmp = temp_reg(dst[0])
-            if tmp is None:
-                return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
-            return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_IMM_TMP_PAYLOAD({dst[0]}, {imm}, {tmp}), MICRO_HANDCRAFT_BPF_X86_ADDB_IMM)",), f"addb imm kinsn; verifier instantiate uses temp {tmp}")
+            return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_IMM_PAYLOAD({dst[0]}, {imm}), MICRO_HANDCRAFT_BPF_X86_ADDB_IMM)",), "addb imm kinsn")
         if op == "xor" and dst[1] == 8 and re.match(r"^(0x[0-9a-fA-F]+|\d+)$", ops[1]):
             imm = parse_int(ops[1])
             if imm < 0 or imm > 0xff:
                 return Translation("warning-unmapped", (), f"xorb immediate is out of range: {insn.raw}")
             return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_IMM_PAYLOAD({dst[0]}, {imm}), MICRO_HANDCRAFT_BPF_X86_XORB_IMM)",), "xorb imm kinsn")
         if op == "xor" and dst[1] == 8 and src:
-            if is_shadow_reg_name(dst[0]) or is_shadow_reg_name(src[0]):
-                return Translation("warning-unmapped", (), f"xorb with shadow register needs a shadow-aware xorb kinsn")
-            tmp = temp_reg(dst[0], src[0])
-            if tmp is None:
-                return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
-            return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_REG_TMP_PAYLOAD({dst[0]}, {src[0]}, {tmp}), MICRO_HANDCRAFT_BPF_X86_XORB_RR)",), f"xorb reg kinsn; verifier instantiate uses temp {tmp}")
+            return Translation("exact-kinsn", (f"HC_KINSN(HC_REG_REG_PAYLOAD({dst[0]}, {src[0]}), MICRO_HANDCRAFT_BPF_X86_XORB_RR)",), "xorb reg kinsn")
         if op == "or" and dst[1] == 8 and src:
             payload, note = byte_reg_reg_tmp2_payload(dst[0], src[0])
             if not payload:
@@ -866,35 +720,21 @@ def translate(insn: NativeInsn) -> Translation:
             if base_reg is None:
                 return Translation("warning-unmapped", (), f"ALU memory base {base} is not in the BPF JIT register file")
             if index is None and op == "xor" and dst[1] == 32 and size == "BPF_W":
-                tmp = temp_reg(dst[0], base_reg[0])
-                if tmp is None:
-                    return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
-                payload = f"HC_ALU_MEM_PAYLOAD({dst[0]}, {base_reg[0]}, {off}, {tmp}, 0)"
-                return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_XORL_MEM)",), f"xorl memory-source kinsn; verifier instantiate uses temp {tmp}")
+                payload = f"HC_ALU_MEM_PAYLOAD({dst[0]}, {base_reg[0]}, {off})"
+                return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_XORL_MEM)",), "xorl memory-source kinsn")
             if index is None and op == "add" and dst[1] == 32 and size == "BPF_W":
-                tmp = temp_reg(dst[0], base_reg[0])
-                if tmp is None:
-                    return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
-                payload = f"HC_ALU_MEM_PAYLOAD({dst[0]}, {base_reg[0]}, {off}, {tmp}, 0)"
-                return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_ADDL_MEM)",), f"addl memory-source kinsn; verifier instantiate uses temp {tmp}")
+                payload = f"HC_ALU_MEM_PAYLOAD({dst[0]}, {base_reg[0]}, {off})"
+                return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_ADDL_MEM)",), "addl memory-source kinsn")
             if index is None and op == "xor" and dst[1] == 16 and size == "BPF_H":
-                tmp1 = temp_reg(dst[0], base_reg[0])
-                tmp2 = temp_reg(dst[0], base_reg[0], tmp1 or "")
-                if tmp1 is None or tmp2 is None:
-                    return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
-                payload = f"HC_ALU_MEM_PAYLOAD({dst[0]}, {base_reg[0]}, {off}, {tmp1}, {tmp2})"
-                return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_XORW_MEM)",), f"xorw memory-source kinsn; verifier instantiate uses temps {tmp1}/{tmp2}")
+                payload = f"HC_ALU_MEM_PAYLOAD({dst[0]}, {base_reg[0]}, {off})"
+                return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_XORW_MEM)",), "xorw memory-source kinsn")
             if index is not None and op == "xor" and dst[1] == 8 and size == "BPF_B":
                 index_reg = bpf_reg(index)
                 slog2 = scale_log2(scale)
                 if index_reg is None or slog2 is None:
                     return Translation("warning-unmapped", (), f"ALU SIB index {index} scale {scale} is not expressible")
-                tmp1 = temp_reg(dst[0], base_reg[0], index_reg[0])
-                tmp2 = temp_reg(dst[0], base_reg[0], index_reg[0], tmp1 or "")
-                if tmp1 is None or tmp2 is None:
-                    return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
-                payload = f"HC_ALU_SIB_PAYLOAD({dst[0]}, {base_reg[0]}, {index_reg[0]}, {slog2}, {off}, {tmp1}, {tmp2})"
-                return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_XORB_SIB)",), f"xorb SIB memory-source kinsn; verifier instantiate uses temps {tmp1}/{tmp2}")
+                payload = f"HC_ALU_SIB_PAYLOAD({dst[0]}, {base_reg[0]}, {index_reg[0]}, {slog2}, {off})"
+                return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_XORB_SIB)",), "xorb SIB memory-source kinsn")
             return Translation("warning-unmapped", (), f"ALU memory source form has no current selector: {insn.raw}")
         return Translation("warning-unmapped", (), f"ALU source {ops[1]} is not supported")
     if op == "sar" and len(ops) == 2:
@@ -962,9 +802,6 @@ def translate_cmov_with_flags(insn: NativeInsn, flags: FlagProof) -> Translation
     dst = bpf_reg(insn.operands[0])
     src = bpf_reg(insn.operands[1])
     if dst and src and dst[1] == src[1] and dst[1] in {32, 64}:
-        tmp = temp_reg(dst[0], src[0])
-        if tmp is None:
-            return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
         if dst[1] == 64:
             selector = "MICRO_HANDCRAFT_BPF_X86_CMOVNEQ_RR" if insn.mnemonic == "cmovne" else "MICRO_HANDCRAFT_BPF_X86_CMOVEQ_RR"
         else:
@@ -972,8 +809,8 @@ def translate_cmov_with_flags(insn: NativeInsn, flags: FlagProof) -> Translation
         if flags.source in {"test_reg", "cmp_rr", "cmp_imm"}:
             return Translation(
                 "exact-kinsn",
-                (f"HC_KINSN(HC_CMOV_STACK_PAYLOAD({dst[0]}, {src[0]}, {tmp}), {selector})",),
-                f"cmov kinsn using adjacent shadow flags; verifier instantiate uses temp {tmp}",
+                (f"HC_KINSN(HC_CMOV_STACK_PAYLOAD({dst[0]}, {src[0]}), {selector})",),
+                "cmov kinsn using adjacent shadow flags",
             )
     return Translation("warning-unmapped", (), f"{insn.mnemonic} operands or flag proof are not supported")
 
@@ -990,34 +827,23 @@ def translate_setcc_with_flags(insn: NativeInsn, flags: FlagProof) -> Translatio
         "setge": "MICRO_HANDCRAFT_BPF_X86_SETGE_R",
     }[insn.mnemonic]
     if flags.source == "test_reg":
-        tmp = temp_reg(dst[0], flags.lhs)
-        if tmp is None or dst[0] == flags.lhs:
-            return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
         return Translation(
             "exact-kinsn",
-            (f"HC_KINSN(HC_SETCC_PAYLOAD({dst[0]}, {flags.lhs}, {tmp}), {selector})",),
+            (f"HC_KINSN(HC_SETCC_PAYLOAD({dst[0]}, {flags.lhs}), {selector})",),
             f"setcc kinsn using condition from adjacent test on {flags.lhs}",
         )
     if flags.source == "cmp_rr" and flags.rhs is not None:
-        tmp_high = temp_reg(dst[0], flags.lhs, flags.rhs)
-        tmp_cmp = temp_reg(dst[0], flags.lhs, flags.rhs, tmp_high or "")
-        if tmp_high is None or tmp_cmp is None or dst[0] == flags.rhs:
-            return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
         kind = cmp_flag_kind(flags.width, False)
         return Translation(
             "exact-kinsn",
-            (f"HC_KINSN(HC_SETCC_CMP_RR_PAYLOAD({dst[0]}, {flags.lhs}, {flags.rhs}, {tmp_high}, {tmp_cmp}, {kind}), {selector})",),
+            (f"HC_KINSN(HC_SETCC_CMP_RR_PAYLOAD({dst[0]}, {flags.lhs}, {flags.rhs}, {kind}), {selector})",),
             "setcc kinsn using adjacent cmp reg,reg proof payload",
         )
     if flags.source == "cmp_imm" and flags.imm is not None:
-        tmp_high = temp_reg(dst[0], flags.lhs)
-        tmp_cmp = temp_reg(dst[0], flags.lhs, tmp_high or "")
-        if tmp_high is None or tmp_cmp is None:
-            return Translation("warning-unmapped", (), f"no verifier temp register available for {insn.raw}")
         kind = cmp_flag_kind(flags.width, True)
         return Translation(
             "exact-kinsn",
-            (f"HC_KINSN(HC_SETCC_CMP_IMM_PAYLOAD({dst[0]}, {flags.lhs}, {tmp_high}, {tmp_cmp}, {flags.imm}, {kind}), {selector})",),
+            (f"HC_KINSN(HC_SETCC_CMP_IMM_PAYLOAD({dst[0]}, {flags.lhs}, {flags.imm}, {kind}), {selector})",),
             "setcc kinsn using adjacent cmp reg,imm proof payload",
         )
     return Translation("warning-unmapped", (), f"{insn.mnemonic} flag proof is not supported")
@@ -1136,12 +962,9 @@ def write_outputs(insns: list[NativeInsn], translations: list[Translation], outp
         '#include "handcraft_common.h"',
         "",
         "#define HC_LEA_PAYLOAD(DST, BASE, INDEX, SCALE, HAS_BASE, HAS_INDEX, DISP) \\",
-        "    (((__u64)(DST) << 4) | ((__u64)(BASE) << 8) | ((__u64)(INDEX) << 12) | \\",
-        "     ((__u64)(SCALE) << 16) | ((__u64)(HAS_INDEX) << 18) | \\",
-        "     ((__u64)(HAS_BASE) << 19) | ((__u64)(__u32)(DISP) << 20))",
-        "#define HC_LEA_TMP_PAYLOAD(DST, BASE, INDEX, SCALE, HAS_BASE, HAS_INDEX, DISP, TMP) \\",
-        "    (HC_LEA_PAYLOAD(DST, BASE, INDEX, SCALE, HAS_BASE, HAS_INDEX, DISP) | \\",
-        "     (__u64)(TMP))",
+        "    ((__u64)(DST) | ((__u64)(BASE) << 4) | ((__u64)(INDEX) << 8) | \\",
+        "     ((__u64)(SCALE) << 12) | ((__u64)(HAS_INDEX) << 14) | \\",
+        "     ((__u64)(HAS_BASE) << 15) | ((__u64)(__u32)(DISP) << 16))",
         "",
     ]
     if warnings:
@@ -1155,6 +978,11 @@ def write_outputs(insns: list[NativeInsn], translations: list[Translation], outp
                 output_lines.append(f" * - 0x{insn.addr:x}: {insn.raw} [{trans.status}: {trans.note}]")
         output_lines.extend([" */", ""])
     output_lines.append("static const struct bpf_insn program[] = {")
+    output_lines.extend([
+        "    HC_MOV64_IMM(BPF_REG_6, 0),",
+        "    HC_MOV64_IMM(BPF_REG_7, 0),",
+        "    HC_MOV64_IMM(BPF_REG_8, 0),",
+    ])
     for insn, trans in zip(insns, translations, strict=True):
         prefix = f"    /* 0x{insn.addr:x}: {insn.raw} [{trans.status}: {trans.note}] */"
         output_lines.append(prefix)

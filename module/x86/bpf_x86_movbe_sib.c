@@ -19,36 +19,24 @@ BTF_ID_FLAGS(func, bpf_x86_movbe32_sib)
 BTF_ID_FLAGS(func, bpf_x86_movbe64_sib)
 BTF_KFUNCS_END(bpf_x86_movbe_sib_kfunc_ids)
 
-static __always_inline int decode_movbe_sib_payload(u64 payload, bool need_tmp,
+static __always_inline int decode_movbe_sib_payload(u64 payload,
 						    u8 *dst_reg, u8 *base_reg,
 						    u8 *index_reg, u8 *scale_log2,
-						    s16 *offset, u8 *tmp_reg)
+						    s16 *offset)
 {
 	*dst_reg = kinsn_payload_reg(payload, 0);
 	*base_reg = kinsn_payload_reg(payload, 4);
 	*index_reg = kinsn_payload_reg(payload, 8);
 	*scale_log2 = (payload >> 12) & 0x3;
 	*offset = kinsn_payload_s16(payload, 16);
-	*tmp_reg = kinsn_payload_reg(payload, 32);
 
-	if (payload >> 36)
+	if (payload >> 32)
 		return -EINVAL;
 	if (payload & (0x3ULL << 14))
 		return -EINVAL;
 	if (*dst_reg >= BPF_REG_10 || *base_reg > BPF_REG_10 ||
 	    *index_reg >= BPF_REG_10)
 		return -EINVAL;
-	if (*dst_reg == *base_reg || *dst_reg == *index_reg)
-		return -EINVAL;
-	if (need_tmp) {
-		if (*tmp_reg >= BPF_REG_10)
-			return -EINVAL;
-		if (*tmp_reg == *dst_reg || *tmp_reg == *base_reg ||
-		    *tmp_reg == *index_reg)
-			return -EINVAL;
-	} else if (*tmp_reg) {
-		return -EINVAL;
-	}
 
 	return 0;
 }
@@ -56,33 +44,42 @@ static __always_inline int decode_movbe_sib_payload(u64 payload, bool need_tmp,
 static int instantiate_movbe_sib(u64 payload, struct bpf_insn *insn_buf,
 				 u8 size)
 {
-	u8 dst_reg, base_reg, index_reg, scale_log2, tmp_reg;
+	u8 dst_reg, base_reg, index_reg, scale_log2, addr_reg, high_reg;
 	bool need_tmp = size == BPF_H;
+	u32 scratch_mask;
 	s16 offset;
 	int add_count;
 	int cnt = 0;
 	int err;
 
-	err = decode_movbe_sib_payload(payload, need_tmp, &dst_reg, &base_reg,
-				       &index_reg, &scale_log2, &offset,
-				       &tmp_reg);
+	err = decode_movbe_sib_payload(payload, &dst_reg, &base_reg,
+				       &index_reg, &scale_log2, &offset);
 	if (err)
 		return err;
 
+	addr_reg = kinsn_x86_scratch_avoid(dst_reg, base_reg, index_reg);
+	scratch_mask = KINSN_X86_SCRATCH_MASK(addr_reg);
 	if (need_tmp) {
-		insn_buf[cnt++] = BPF_MOV64_REG(tmp_reg, dst_reg);
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_RSH, tmp_reg, 16);
-		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, tmp_reg, 16);
+		high_reg = kinsn_x86_scratch_avoid(dst_reg, base_reg,
+						    addr_reg);
+		scratch_mask |= KINSN_X86_SCRATCH_MASK(high_reg);
+	}
+	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+	if (need_tmp) {
+		insn_buf[cnt++] = BPF_MOV64_REG(high_reg, dst_reg);
+		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_RSH, high_reg, 16);
+		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, high_reg, 16);
 	}
 
-	insn_buf[cnt++] = BPF_MOV64_REG(dst_reg, base_reg);
+	insn_buf[cnt++] = BPF_MOV64_REG(addr_reg, base_reg);
 	add_count = 1 << scale_log2;
 	while (add_count--)
-		insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, dst_reg, index_reg);
-	insn_buf[cnt++] = BPF_LDX_MEM(size, dst_reg, dst_reg, offset);
+		insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, addr_reg, index_reg);
+	insn_buf[cnt++] = BPF_LDX_MEM(size, dst_reg, addr_reg, offset);
 	insn_buf[cnt++] = BPF_BSWAP(dst_reg, kinsn_bpf_size_bits(size));
 	if (need_tmp)
-		insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, dst_reg, tmp_reg);
+		insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, dst_reg, high_reg);
+	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
 	return cnt;
 }
 
@@ -105,8 +102,7 @@ static int emit_movbe_sib_x86(u8 *image, u32 *off, bool emit, u64 payload,
 			      const struct bpf_prog *prog, u8 size)
 {
 	u8 buf[16];
-	u8 dst_reg, base_reg, index_reg, scale_log2, tmp_reg;
-	bool need_tmp = size == BPF_H;
+	u8 dst_reg, base_reg, index_reg, scale_log2;
 	s16 offset;
 	u32 len = 0;
 	int err;
@@ -114,9 +110,8 @@ static int emit_movbe_sib_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	if (!boot_cpu_has(X86_FEATURE_MOVBE))
 		return -EOPNOTSUPP;
 
-	err = decode_movbe_sib_payload(payload, need_tmp, &dst_reg, &base_reg,
-				       &index_reg, &scale_log2, &offset,
-				       &tmp_reg);
+	err = decode_movbe_sib_payload(payload, &dst_reg, &base_reg,
+				       &index_reg, &scale_log2, &offset);
 	if (err)
 		return err;
 
@@ -160,7 +155,7 @@ static int emit_movbe64_sib_x86(u8 *image, u32 *off, bool emit, u64 payload,
 
 const struct bpf_kinsn bpf_x86_movbe16_sib_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 14,
+	.max_insn_cnt = 19 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_movbe16_sib,
 	.emit_x86 = emit_movbe16_sib_x86,
@@ -168,7 +163,7 @@ const struct bpf_kinsn bpf_x86_movbe16_sib_desc = {
 
 const struct bpf_kinsn bpf_x86_movbe32_sib_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 11,
+	.max_insn_cnt = 13 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_movbe32_sib,
 	.emit_x86 = emit_movbe32_sib_x86,
@@ -176,7 +171,7 @@ const struct bpf_kinsn bpf_x86_movbe32_sib_desc = {
 
 const struct bpf_kinsn bpf_x86_movbe64_sib_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 11,
+	.max_insn_cnt = 13 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_movbe64_sib,
 	.emit_x86 = emit_movbe64_sib_x86,
