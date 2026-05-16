@@ -71,7 +71,7 @@ static const struct bpf_insn program[] = {
     /* 0x1140: xor    r8b,0xa5 [exact-kinsn: xorb imm kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_5, 165), MICRO_HANDCRAFT_BPF_X86_XORB_IMM),
     /* 0x1144: add    r8b,0x11 [exact-kinsn: addb imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_5, 17), MICRO_HANDCRAFT_BPF_X86_ADDB_IMM),
+    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_5, 17), MICRO_HANDCRAFT_BPF_X86_ADDB),
     /* 0x1148: cmp    sil,r8b [warning-unmapped: CMP operand form has no current kinsn selector: cmp    sil,r8b] */
     /* 0x114b: jne    1186 <payload_prefix_memcmp_scan_xdp+0x86> [bpf-branch: lowered cmp    sil,r8b + jne    1186 <payload_prefix_memcmp_scan_xdp+0x86> to verifier-visible BPF branch] */
     HC_JMP_REG(BPF_JNE, BPF_REG_2, BPF_REG_5, 25),
@@ -84,16 +84,16 @@ static const struct bpf_insn program[] = {
     /* 0x1158: xor    r8b,0xa5 [exact-kinsn: xorb imm kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_5, 165), MICRO_HANDCRAFT_BPF_X86_XORB_IMM),
     /* 0x115c: add    r8b,0x11 [exact-kinsn: addb imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_5, 17), MICRO_HANDCRAFT_BPF_X86_ADDB_IMM),
+    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_5, 17), MICRO_HANDCRAFT_BPF_X86_ADDB),
     /* 0x1160: add    rax,0x2 [exact-kinsn: add64 imm kinsn] */
     HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_0, 2), MICRO_HANDCRAFT_BPF_X86_ADDQ),
     /* 0x1164: cmp    sil,r8b [warning-unmapped: CMP operand form has no current kinsn selector: cmp    sil,r8b] */
     /* 0x1167: jne    1189 <payload_prefix_memcmp_scan_xdp+0x89> [bpf-branch: lowered cmp    sil,r8b + jne    1189 <payload_prefix_memcmp_scan_xdp+0x89> to verifier-visible BPF branch] */
     HC_JMP_REG(BPF_JNE, BPF_REG_2, BPF_REG_5, 14),
     /* 0x1169: add    dl,0x3a [exact-kinsn: addb imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_3, 58), MICRO_HANDCRAFT_BPF_X86_ADDB_IMM),
+    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_3, 58), MICRO_HANDCRAFT_BPF_X86_ADDB),
     /* 0x116c: add    dil,0x8 [exact-kinsn: addb imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_1, 8), MICRO_HANDCRAFT_BPF_X86_ADDB_IMM),
+    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_1, 8), MICRO_HANDCRAFT_BPF_X86_ADDB),
     /* 0x1170: cmp    rax,0x40 [exact-kinsn: cmpq reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_0, 64), MICRO_HANDCRAFT_BPF_X86_CMPQ_IMM32),
     /* 0x1174: jne    1130 <payload_prefix_memcmp_scan_xdp+0x30> [bpf-branch: lowered cmp    rax,0x40 + jne    1130 <payload_prefix_memcmp_scan_xdp+0x30> to verifier-visible BPF branch] */
@@ -142,7 +142,7 @@ static const struct bpf_insn program[] = {
     /* 0x11d1: xor    r9b,0xa5 [exact-kinsn: xorb imm kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(HC_X86_R9, 165), MICRO_HANDCRAFT_BPF_X86_XORB_IMM),
     /* 0x11d5: add    r9b,0x11 [exact-kinsn: addb imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(HC_X86_R9, 17), MICRO_HANDCRAFT_BPF_X86_ADDB_IMM),
+    HC_KINSN(HC_REG_IMM_PAYLOAD(HC_X86_R9, 17), MICRO_HANDCRAFT_BPF_X86_ADDB),
     /* 0x11d9: cmp    r8b,r9b [warning-unmapped: CMP operand form has no current kinsn selector: cmp    r8b,r9b] */
     /* 0x11dc: jne    1222 <payload_prefix_memcmp_scan_xdp+0x122> [warning-unmapped: cannot lower cmp    r8b,r9b + jne    1222 <payload_prefix_memcmp_scan_xdp+0x122> to BPF branch] */
     /* 0x11de: movzx  r8d,BYTE PTR [rcx+rax*1+0x4d] [exact-kinsn: indexed memory load via x86 SIB kinsn] */
@@ -154,15 +154,15 @@ static const struct bpf_insn program[] = {
     /* 0x11ea: xor    r9b,0xa5 [exact-kinsn: xorb imm kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(HC_X86_R9, 165), MICRO_HANDCRAFT_BPF_X86_XORB_IMM),
     /* 0x11ee: add    r9b,0x11 [exact-kinsn: addb imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(HC_X86_R9, 17), MICRO_HANDCRAFT_BPF_X86_ADDB_IMM),
+    HC_KINSN(HC_REG_IMM_PAYLOAD(HC_X86_R9, 17), MICRO_HANDCRAFT_BPF_X86_ADDB),
     /* 0x11f2: add    rax,0x2 [exact-kinsn: add64 imm kinsn] */
     HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_0, 2), MICRO_HANDCRAFT_BPF_X86_ADDQ),
     /* 0x11f6: cmp    r8b,r9b [warning-unmapped: CMP operand form has no current kinsn selector: cmp    r8b,r9b] */
     /* 0x11f9: jne    1225 <payload_prefix_memcmp_scan_xdp+0x125> [warning-unmapped: cannot lower cmp    r8b,r9b + jne    1225 <payload_prefix_memcmp_scan_xdp+0x125> to BPF branch] */
     /* 0x11fb: add    sil,0x3a [exact-kinsn: addb imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_2, 58), MICRO_HANDCRAFT_BPF_X86_ADDB_IMM),
+    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_2, 58), MICRO_HANDCRAFT_BPF_X86_ADDB),
     /* 0x11ff: add    dil,0x8 [exact-kinsn: addb imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_1, 8), MICRO_HANDCRAFT_BPF_X86_ADDB_IMM),
+    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_1, 8), MICRO_HANDCRAFT_BPF_X86_ADDB),
     /* 0x1203: cmp    rax,0x40 [exact-kinsn: cmpq reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_0, 64), MICRO_HANDCRAFT_BPF_X86_CMPQ_IMM32),
     /* 0x1207: jne    11c0 <payload_prefix_memcmp_scan_xdp+0xc0> [bpf-branch: lowered cmp    rax,0x40 + jne    11c0 <payload_prefix_memcmp_scan_xdp+0xc0> to verifier-visible BPF branch] */
@@ -215,7 +215,7 @@ static const struct bpf_insn program[] = {
     /* 0x1263: xor    r9b,0xa5 [exact-kinsn: xorb imm kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(HC_X86_R9, 165), MICRO_HANDCRAFT_BPF_X86_XORB_IMM),
     /* 0x1267: add    r9b,0x11 [exact-kinsn: addb imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(HC_X86_R9, 17), MICRO_HANDCRAFT_BPF_X86_ADDB_IMM),
+    HC_KINSN(HC_REG_IMM_PAYLOAD(HC_X86_R9, 17), MICRO_HANDCRAFT_BPF_X86_ADDB),
     /* 0x126b: cmp    sil,r9b [warning-unmapped: CMP operand form has no current kinsn selector: cmp    sil,r9b] */
     /* 0x126e: jne    12bd <payload_prefix_memcmp_scan_xdp+0x1bd> [warning-unmapped: cannot lower cmp    sil,r9b + jne    12bd <payload_prefix_memcmp_scan_xdp+0x1bd> to BPF branch] */
     /* 0x1270: movzx  esi,BYTE PTR [rcx+rdx*1+0x8d] [exact-kinsn: indexed memory load via x86 SIB kinsn] */
@@ -227,15 +227,15 @@ static const struct bpf_insn program[] = {
     /* 0x127e: xor    r9b,0xa5 [exact-kinsn: xorb imm kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(HC_X86_R9, 165), MICRO_HANDCRAFT_BPF_X86_XORB_IMM),
     /* 0x1282: add    r9b,0x11 [exact-kinsn: addb imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(HC_X86_R9, 17), MICRO_HANDCRAFT_BPF_X86_ADDB_IMM),
+    HC_KINSN(HC_REG_IMM_PAYLOAD(HC_X86_R9, 17), MICRO_HANDCRAFT_BPF_X86_ADDB),
     /* 0x1286: add    rdx,0x2 [exact-kinsn: add64 imm kinsn] */
     HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_3, 2), MICRO_HANDCRAFT_BPF_X86_ADDQ),
     /* 0x128a: cmp    sil,r9b [warning-unmapped: CMP operand form has no current kinsn selector: cmp    sil,r9b] */
     /* 0x128d: jne    12c0 <payload_prefix_memcmp_scan_xdp+0x1c0> [warning-unmapped: cannot lower cmp    sil,r9b + jne    12c0 <payload_prefix_memcmp_scan_xdp+0x1c0> to BPF branch] */
     /* 0x128f: add    dil,0x3a [exact-kinsn: addb imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_1, 58), MICRO_HANDCRAFT_BPF_X86_ADDB_IMM),
+    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_1, 58), MICRO_HANDCRAFT_BPF_X86_ADDB),
     /* 0x1293: add    r8b,0x8 [exact-kinsn: addb imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_5, 8), MICRO_HANDCRAFT_BPF_X86_ADDB_IMM),
+    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_5, 8), MICRO_HANDCRAFT_BPF_X86_ADDB),
     /* 0x1297: cmp    rdx,0x40 [exact-kinsn: cmpq reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_3, 64), MICRO_HANDCRAFT_BPF_X86_CMPQ_IMM32),
     /* 0x129b: jne    1250 <payload_prefix_memcmp_scan_xdp+0x150> [bpf-branch: lowered cmp    rdx,0x40 + jne    1250 <payload_prefix_memcmp_scan_xdp+0x150> to verifier-visible BPF branch] */

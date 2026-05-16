@@ -80,7 +80,7 @@
 #define ENDIAN_LOAD16_KFUNC "bpf_x86_movzwl_mem"
 #define ENDIAN_LOAD32_KFUNC "bpf_x86_movl_mem"
 #define ENDIAN_LOAD64_KFUNC "bpf_x86_movq_mem"
-#define ENDIAN_SWAP16_KFUNC "bpf_x86_rolw_imm"
+#define ENDIAN_SWAP16_KFUNC "bpf_x86_rolw"
 #define ENDIAN_SWAP32_KFUNC "bpf_x86_bswapl"
 #define ENDIAN_SWAP64_KFUNC "bpf_x86_bswapq"
 #define BULK_LOAD_MODULE "bpf_x86_mov_mem"
@@ -504,23 +504,23 @@ static struct kinsn_func_ref g_funcs[FUNC_CNT] = {
 		.module_id = MOD_X86_MOV_SIB,
 	},
 	[FUNC_X86_MOVSWL_RR] = {
-		.func_name = "bpf_x86_movswl_rr",
+		.func_name = "bpf_x86_movswl",
 		.module_id = MOD_X86_MOV_REG,
 	},
 	[FUNC_X86_MOVSXD_SIB] = {
-		.func_name = "bpf_x86_movsxd_sib",
+		.func_name = "bpf_x86_movsxd",
 		.module_id = MOD_X86_MOV_SIB,
 	},
 	[FUNC_X86_MOVBE16_SIB] = {
-		.func_name = "bpf_x86_movbe16_sib",
+		.func_name = "bpf_x86_movbe16",
 		.module_id = MOD_X86_MOVBE_SIB,
 	},
 	[FUNC_X86_MOVBE32_SIB] = {
-		.func_name = "bpf_x86_movbe32_sib",
+		.func_name = "bpf_x86_movbe32",
 		.module_id = MOD_X86_MOVBE_SIB,
 	},
 	[FUNC_X86_MOVBE64_SIB] = {
-		.func_name = "bpf_x86_movbe64_sib",
+		.func_name = "bpf_x86_movbe64",
 		.module_id = MOD_X86_MOVBE_SIB,
 	},
 	[FUNC_X86_POPCNTQ] = {
@@ -536,23 +536,23 @@ static struct kinsn_func_ref g_funcs[FUNC_CNT] = {
 		.module_id = MOD_X86_BMI1,
 	},
 	[FUNC_X86_IMULQ_RR] = {
-		.func_name = "bpf_x86_imulq_rr",
+		.func_name = "bpf_x86_imulq",
 		.module_id = MOD_X86_IMUL,
 	},
 	[FUNC_X86_NOTB_R] = {
-		.func_name = "bpf_x86_notb_r",
+		.func_name = "bpf_x86_notb",
 		.module_id = MOD_X86_NOT,
 	},
 	[FUNC_X86_NOTW_R] = {
-		.func_name = "bpf_x86_notw_r",
+		.func_name = "bpf_x86_notw",
 		.module_id = MOD_X86_NOT,
 	},
 	[FUNC_X86_NOTL_R] = {
-		.func_name = "bpf_x86_notl_r",
+		.func_name = "bpf_x86_notl",
 		.module_id = MOD_X86_NOT,
 	},
 	[FUNC_X86_NOTQ_R] = {
-		.func_name = "bpf_x86_notq_r",
+		.func_name = "bpf_x86_notq",
 		.module_id = MOD_X86_NOT,
 	},
 	[FUNC_X86_ADDL_MEM] = {
@@ -572,19 +572,19 @@ static struct kinsn_func_ref g_funcs[FUNC_CNT] = {
 		.module_id = MOD_X86_ALU_MEM,
 	},
 	[FUNC_X86_SHLDL_IMM] = {
-		.func_name = "bpf_x86_shldl_imm",
+		.func_name = "bpf_x86_shldl",
 		.module_id = MOD_X86_SHD,
 	},
 	[FUNC_X86_SHLDQ_IMM] = {
-		.func_name = "bpf_x86_shldq_imm",
+		.func_name = "bpf_x86_shldq",
 		.module_id = MOD_X86_SHD,
 	},
 	[FUNC_X86_SHRDL_IMM] = {
-		.func_name = "bpf_x86_shrdl_imm",
+		.func_name = "bpf_x86_shrdl",
 		.module_id = MOD_X86_SHD,
 	},
 	[FUNC_X86_SHRDQ_IMM] = {
-		.func_name = "bpf_x86_shrdq_imm",
+		.func_name = "bpf_x86_shrdq",
 		.module_id = MOD_X86_SHD,
 	},
 	[FUNC_X86_CMOVBL] = {
@@ -596,23 +596,23 @@ static struct kinsn_func_ref g_funcs[FUNC_CNT] = {
 		.module_id = MOD_SELECT,
 	},
 	[FUNC_X86_SETNE_R] = {
-		.func_name = "bpf_x86_setne_r",
+		.func_name = "bpf_x86_setne",
 		.module_id = MOD_SELECT,
 	},
 	[FUNC_X86_SETE_R] = {
-		.func_name = "bpf_x86_sete_r",
+		.func_name = "bpf_x86_sete",
 		.module_id = MOD_SELECT,
 	},
 	[FUNC_X86_SETGE_R] = {
-		.func_name = "bpf_x86_setge_r",
+		.func_name = "bpf_x86_setge",
 		.module_id = MOD_SELECT,
 	},
 	[FUNC_X86_SBBL_IMM0] = {
-		.func_name = "bpf_x86_sbbl_imm0",
+		.func_name = "bpf_x86_sbbl",
 		.module_id = MOD_X86_ALU_IMM,
 	},
 	[FUNC_X86_ANDB_IMM] = {
-		.func_name = "bpf_x86_andb_imm",
+		.func_name = "bpf_x86_andb",
 		.module_id = MOD_X86_ALU_IMM,
 	},
 	[FUNC_X86_INCQ] = {
@@ -620,7 +620,7 @@ static struct kinsn_func_ref g_funcs[FUNC_CNT] = {
 		.module_id = MOD_X86_ALU_IMM,
 	},
 	[FUNC_X86_ADDB_IMM] = {
-		.func_name = "bpf_x86_addb_imm",
+		.func_name = "bpf_x86_addb",
 		.module_id = MOD_X86_ALU_IMM,
 	},
 	[FUNC_X86_XORB_IMM] = {

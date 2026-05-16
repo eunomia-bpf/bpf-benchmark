@@ -91,7 +91,7 @@ static const struct bpf_insn program[] = {
     /* 0x1188: add    ecx,edi [exact-kinsn: add32 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_4, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_ADDL),
     /* 0x118a: not    ecx [exact-kinsn: notl reg kinsn] */
-    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_NOTL_R),
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_NOTL),
     /* 0x118c: movzx  edi,cx [exact-kinsn: movzx r32,r16 kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_1, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_MOVZWL_RR),
     /* 0x118f: mov    ecx,eax [exact-kinsn: movl register-to-register kinsn] */

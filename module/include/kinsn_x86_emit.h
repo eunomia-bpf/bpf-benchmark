@@ -56,6 +56,7 @@ static __always_inline bool kinsn_x86_needs_rex8(u8 reg)
 	case KINSN_X86_REG_R10:
 	case KINSN_X86_REG_R11:
 	case KINSN_X86_REG_R12:
+	case KINSN_X86_REG_RBP:
 		return true;
 	default:
 		return false;
@@ -92,7 +93,8 @@ static __always_inline bool kinsn_x86_needs_rex8(u8 reg)
 
 static __always_inline bool kinsn_x86_reg_is_shadowed(u8 reg)
 {
-	return reg >= KINSN_X86_REG_R9 && reg <= KINSN_X86_REG_R12;
+	return (reg >= KINSN_X86_REG_R9 && reg <= KINSN_X86_REG_R12) ||
+	       reg == KINSN_X86_REG_RBP;
 }
 
 static __always_inline s16 kinsn_x86_shadow_reg_off(u8 reg)
@@ -122,6 +124,8 @@ static __always_inline s16 kinsn_x86_shadow_reg_off(u8 reg)
 		return KINSN_X86_SHADOW_R11_OFF;
 	case KINSN_X86_REG_R12:
 		return KINSN_X86_SHADOW_R12_OFF;
+	case KINSN_X86_REG_RBP:
+		return KINSN_X86_SHADOW_RBP_OFF;
 	case BPF_REG_7:
 		return KINSN_X86_SHADOW_R13_OFF;
 	case BPF_REG_8:

@@ -6,11 +6,11 @@
 #include "kinsn_x86_emit.h"
 
 __bpf_kfunc_start_defs();
-__bpf_kfunc void bpf_x86_imulq_rr(void) {}
+__bpf_kfunc void bpf_x86_imulq(void) {}
 __bpf_kfunc_end_defs();
 
 BTF_KFUNCS_START(bpf_x86_imul_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_x86_imulq_rr)
+BTF_ID_FLAGS(func, bpf_x86_imulq)
 BTF_KFUNCS_END(bpf_x86_imul_kfunc_ids)
 
 static __always_inline int decode_imul_rr_payload(u64 payload, u8 *dst_reg,
@@ -84,7 +84,7 @@ static int emit_imulq_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
-const struct bpf_kinsn bpf_x86_imulq_rr_desc = {
+const struct bpf_kinsn bpf_x86_imulq_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 8 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 4,
@@ -93,7 +93,7 @@ const struct bpf_kinsn bpf_x86_imulq_rr_desc = {
 };
 
 static const struct bpf_kinsn * const bpf_x86_imul_kinsn_descs[] = {
-	&bpf_x86_imulq_rr_desc,
+	&bpf_x86_imulq_desc,
 };
 
 DEFINE_KINSN_V2_MODULE(bpf_x86_imul, "BpfReJIT x86 kinsns: IMUL",

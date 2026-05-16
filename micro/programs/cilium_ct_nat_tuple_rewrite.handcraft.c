@@ -140,7 +140,7 @@ static const struct bpf_insn program[] = {
     /* 0x11a9: shl    rbx,cl [bpf-jit: ALU reg operation] */
     HC_RAW(BPF_ALU64 | BPF_LSH | BPF_X, BPF_REG_6, BPF_REG_4, 0, 0),
     /* 0x11ac: not    al [exact-kinsn: notb reg kinsn] */
-    HC_KINSN(HC_NOT_NARROW_PAYLOAD(BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_NOTB_R),
+    HC_KINSN(HC_NOT_NARROW_PAYLOAD(BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_NOTB),
     /* 0x11ae: mov    ecx,eax [exact-kinsn: movl register-to-register kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_4, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_MOVL_RR),
     /* 0x11b0: shr    r11,cl [warning-unmapped: shr    r11,cl needs a shadow-aware ALU kinsn] */

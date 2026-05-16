@@ -6,15 +6,15 @@
 #include "kinsn_x86_emit.h"
 
 __bpf_kfunc_start_defs();
-__bpf_kfunc void bpf_x86_addb_imm(void) {}
-__bpf_kfunc void bpf_x86_andb_imm(void) {}
+__bpf_kfunc void bpf_x86_addb(void) {}
+__bpf_kfunc void bpf_x86_andb(void) {}
 __bpf_kfunc void bpf_x86_andq(void) {}
 __bpf_kfunc void bpf_x86_andl(void) {}
 __bpf_kfunc void bpf_x86_incq(void) {}
-__bpf_kfunc void bpf_x86_sbbl_imm0(void) {}
+__bpf_kfunc void bpf_x86_sbbl(void) {}
 __bpf_kfunc void bpf_x86_xorb_imm(void) {}
 __bpf_kfunc void bpf_x86_xorb_rr(void) {}
-__bpf_kfunc void bpf_x86_orb_rr(void) {}
+__bpf_kfunc void bpf_x86_orb(void) {}
 __bpf_kfunc void bpf_x86_addq(void) {}
 __bpf_kfunc void bpf_x86_addl(void) {}
 __bpf_kfunc void bpf_x86_subq(void) {}
@@ -32,19 +32,19 @@ __bpf_kfunc void bpf_x86_sarl(void) {}
 __bpf_kfunc_end_defs();
 
 BTF_KFUNCS_START(bpf_x86_alu_imm_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_x86_addb_imm)
+BTF_ID_FLAGS(func, bpf_x86_addb)
 BTF_ID_FLAGS(func, bpf_x86_addl)
 BTF_ID_FLAGS(func, bpf_x86_addq)
-BTF_ID_FLAGS(func, bpf_x86_andb_imm)
+BTF_ID_FLAGS(func, bpf_x86_andb)
 BTF_ID_FLAGS(func, bpf_x86_andl)
 BTF_ID_FLAGS(func, bpf_x86_andq)
 BTF_ID_FLAGS(func, bpf_x86_incq)
-BTF_ID_FLAGS(func, bpf_x86_orb_rr)
+BTF_ID_FLAGS(func, bpf_x86_orb)
 BTF_ID_FLAGS(func, bpf_x86_orl)
 BTF_ID_FLAGS(func, bpf_x86_orq)
 BTF_ID_FLAGS(func, bpf_x86_sarl)
 BTF_ID_FLAGS(func, bpf_x86_sarq)
-BTF_ID_FLAGS(func, bpf_x86_sbbl_imm0)
+BTF_ID_FLAGS(func, bpf_x86_sbbl)
 BTF_ID_FLAGS(func, bpf_x86_shll)
 BTF_ID_FLAGS(func, bpf_x86_shlq)
 BTF_ID_FLAGS(func, bpf_x86_shrl)
@@ -667,7 +667,7 @@ static int emit_sbbl_imm0_x86(u8 *image, u32 *off, bool emit,
 	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
-const struct bpf_kinsn bpf_x86_addb_imm_desc = {
+const struct bpf_kinsn bpf_x86_addb_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 12 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 4,
@@ -675,7 +675,7 @@ const struct bpf_kinsn bpf_x86_addb_imm_desc = {
 	.emit_x86 = emit_addb_imm_x86,
 };
 
-const struct bpf_kinsn bpf_x86_andb_imm_desc = {
+const struct bpf_kinsn bpf_x86_andb_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 10 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 4,
@@ -691,7 +691,7 @@ const struct bpf_kinsn bpf_x86_incq_desc = {
 	.emit_x86 = emit_incq_x86,
 };
 
-const struct bpf_kinsn bpf_x86_sbbl_imm0_desc = {
+const struct bpf_kinsn bpf_x86_sbbl_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 2 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 4,
@@ -715,7 +715,7 @@ const struct bpf_kinsn bpf_x86_xorb_rr_desc = {
 	.emit_x86 = emit_xorb_rr_x86,
 };
 
-const struct bpf_kinsn bpf_x86_orb_rr_desc = {
+const struct bpf_kinsn bpf_x86_orb_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 9 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 4,
@@ -756,19 +756,19 @@ static const struct bpf_kinsn * const bpf_x86_alu_imm_kinsn_descs[] = {
 	 * otherwise a kfunc call gets the wrong kinsn descriptor and fails
 	 * before verifier instruction processing starts.
 	 */
-	&bpf_x86_addb_imm_desc,
+	&bpf_x86_addb_desc,
 	&bpf_x86_addl_desc,
 	&bpf_x86_addq_desc,
-	&bpf_x86_andb_imm_desc,
+	&bpf_x86_andb_desc,
 	&bpf_x86_andl_desc,
 	&bpf_x86_andq_desc,
 	&bpf_x86_incq_desc,
-	&bpf_x86_orb_rr_desc,
+	&bpf_x86_orb_desc,
 	&bpf_x86_orl_desc,
 	&bpf_x86_orq_desc,
 	&bpf_x86_sarl_desc,
 	&bpf_x86_sarq_desc,
-	&bpf_x86_sbbl_imm0_desc,
+	&bpf_x86_sbbl_desc,
 	&bpf_x86_shll_desc,
 	&bpf_x86_shlq_desc,
 	&bpf_x86_shrl_desc,

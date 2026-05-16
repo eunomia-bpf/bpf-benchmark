@@ -50,10 +50,21 @@
 #define HC_X86_R10 12
 #define HC_X86_R11 13
 #define HC_X86_R12 14
+#define HC_X86_RBP 15
 #define HC_REG_REG_PAYLOAD(DST, SRC) ((__u64)(DST) | ((__u64)(SRC) << 4))
-#define HC_X86_ALU_FORM_RR 1
-#define HC_X86_ALU_FORM_IMM 2
+#define HC_X86_FORM_RR 1
+#define HC_X86_FORM_IMM 2
+#define HC_X86_FORM_SIB_RR 3
+#define HC_X86_ALU_FORM_RR HC_X86_FORM_RR
+#define HC_X86_ALU_FORM_IMM HC_X86_FORM_IMM
 /* Payloads carry only x86 operands; verifier scratch is private to kinsn modules. */
+#define HC_X86_RR_PAYLOAD(DST, SRC) \
+    ((__u64)(HC_X86_FORM_RR) | ((__u64)(DST) << 4) | ((__u64)(SRC) << 8))
+#define HC_X86_IMM_PAYLOAD(DST, IMM) \
+    ((__u64)(HC_X86_FORM_IMM) | ((__u64)(DST) << 4) | ((__u64)(__u32)(IMM) << 8))
+#define HC_X86_CMP_SIB_RR_PAYLOAD(BASE, INDEX, SCALE, OFF, RHS) \
+    ((__u64)(HC_X86_FORM_SIB_RR) | ((__u64)(BASE) << 4) | ((__u64)(INDEX) << 8) | \
+     ((__u64)(SCALE) << 12) | ((__u64)(RHS) << 16) | ((__u64)(__u16)(OFF) << 20))
 #define HC_X86_ALU_RR_PAYLOAD(DST, SRC) \
     ((__u64)(HC_X86_ALU_FORM_RR) | ((__u64)(DST) << 4) | ((__u64)(SRC) << 8))
 #define HC_X86_ALU_IMM_PAYLOAD(DST, IMM) \
@@ -74,8 +85,7 @@
 #define HC_ALU_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF) \
     HC_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF)
 #define HC_CMP_SIB_RR_PAYLOAD(BASE, INDEX, SCALE, OFF, RHS) \
-    ((__u64)(BASE) | ((__u64)(INDEX) << 4) | ((__u64)(SCALE) << 8) | \
-     ((__u64)(RHS) << 12) | ((__u64)(__u16)(OFF) << 16))
+    HC_X86_CMP_SIB_RR_PAYLOAD(BASE, INDEX, SCALE, OFF, RHS)
 #define HC_MOVBE_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF) \
     HC_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF)
 

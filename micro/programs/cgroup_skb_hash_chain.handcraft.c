@@ -86,7 +86,7 @@ static const struct bpf_insn program[] = {
     /* 0x1183: mov    rbx,r9 [exact-kinsn: movq register-to-register kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_6, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_MOVQ_RR),
     /* 0x1186: imul   rbx,r10 [exact-kinsn: imulq reg,reg kinsn] */
-    HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_6, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_IMULQ_RR),
+    HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_6, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_IMULQ),
     /* 0x118a: mov    r14,r8 [exact-kinsn: movq register-to-register kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_8, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_MOVQ_RR),
     /* 0x118d: mov    rcx,rsi [exact-kinsn: movq register-to-register kinsn] */
@@ -106,7 +106,7 @@ static const struct bpf_insn program[] = {
     /* 0x11b1: inc    r15 [exact-kinsn: incq reg kinsn] */
     HC_KINSN(HC_REG_PAYLOAD(BPF_REG_9), MICRO_HANDCRAFT_BPF_X86_INCQ),
     /* 0x11b4: imul   r12,r11 [exact-kinsn: imulq reg,reg kinsn] */
-    HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R12, HC_X86_R11), MICRO_HANDCRAFT_BPF_X86_IMULQ_RR),
+    HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R12, HC_X86_R11), MICRO_HANDCRAFT_BPF_X86_IMULQ),
     /* 0x11b8: mov    rdx,r12 [exact-kinsn: movq register-to-register kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_3, HC_X86_R12), MICRO_HANDCRAFT_BPF_X86_MOVQ_RR),
     /* 0x11bb: shr    rdx,0x1d [exact-kinsn: shr64 imm kinsn] */

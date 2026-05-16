@@ -6,7 +6,7 @@
 #include "kinsn_x86_emit.h"
 
 __bpf_kfunc_start_defs();
-__bpf_kfunc void bpf_x86_rolw_imm(void) {}
+__bpf_kfunc void bpf_x86_rolw(void) {}
 __bpf_kfunc void bpf_x86_bswapl(void) {}
 __bpf_kfunc void bpf_x86_bswapq(void) {}
 __bpf_kfunc_end_defs();
@@ -14,7 +14,7 @@ __bpf_kfunc_end_defs();
 BTF_KFUNCS_START(bpf_x86_byteorder_kfunc_ids)
 BTF_ID_FLAGS(func, bpf_x86_bswapl)
 BTF_ID_FLAGS(func, bpf_x86_bswapq)
-BTF_ID_FLAGS(func, bpf_x86_rolw_imm)
+BTF_ID_FLAGS(func, bpf_x86_rolw)
 BTF_KFUNCS_END(bpf_x86_byteorder_kfunc_ids)
 
 static __always_inline int decode_reg_payload(u64 payload, u8 *dst_reg)
@@ -155,7 +155,7 @@ static int emit_bswapq_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	return emit_bswap_x86(image, off, emit, payload, prog, true);
 }
 
-const struct bpf_kinsn bpf_x86_rolw_imm_desc = {
+const struct bpf_kinsn bpf_x86_rolw_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 1 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 8,
@@ -182,7 +182,7 @@ const struct bpf_kinsn bpf_x86_bswapq_desc = {
 static const struct bpf_kinsn * const bpf_x86_byteorder_kinsn_descs[] = {
 	&bpf_x86_bswapl_desc,
 	&bpf_x86_bswapq_desc,
-	&bpf_x86_rolw_imm_desc,
+	&bpf_x86_rolw_desc,
 };
 
 DEFINE_KINSN_V2_MODULE(bpf_x86_byteorder,

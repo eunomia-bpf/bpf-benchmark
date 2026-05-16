@@ -65,7 +65,7 @@ static const struct bpf_insn program[] = {
     /* 0x1121: movzx  ecx,WORD PTR [rsi+0x14] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_4, BPF_REG_2, 20), MICRO_HANDCRAFT_BPF_X86_MOVZWL_MEM),
     /* 0x1125: rol    cx,0x8 [exact-kinsn: rolw imm8 kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_4, 8), MICRO_HANDCRAFT_BPF_X86_ROLW_IMM),
+    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_4, 8), MICRO_HANDCRAFT_BPF_X86_ROLW),
     /* 0x1129: movzx  ecx,cx [exact-kinsn: movzx r32,r16 kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_4, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_MOVZWL_RR),
     /* 0x112c: cmp    ecx,0x800 [exact-kinsn: cmpl reg,imm32 kinsn] */
@@ -75,7 +75,7 @@ static const struct bpf_insn program[] = {
     /* 0x1134: movzx  ecx,BYTE PTR [rsi+0x16] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_4, BPF_REG_2, 22), MICRO_HANDCRAFT_BPF_X86_MOVZBL_MEM),
     /* 0x1138: and    cl,0xf [exact-kinsn: andb imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_4, 15), MICRO_HANDCRAFT_BPF_X86_ANDB_IMM),
+    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_4, 15), MICRO_HANDCRAFT_BPF_X86_ANDB),
     /* 0x113b: cmp    cl,0x5 [warning-unmapped: CMP operand form has no current kinsn selector: cmp    cl,0x5] */
     /* 0x113e: jne    110e <packet_toeplitz_rss_hash_xdp+0xe> [bpf-branch: lowered cmp    cl,0x5 + jne    110e <packet_toeplitz_rss_hash_xdp+0xe> to verifier-visible BPF branch] */
     HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_4, 0, -25, 5),
@@ -210,7 +210,7 @@ static const struct bpf_insn program[] = {
     /* 0x1224: shl    r8,cl [bpf-jit: ALU reg operation] */
     HC_RAW(BPF_ALU64 | BPF_LSH | BPF_X, BPF_REG_5, BPF_REG_4, 0, 0),
     /* 0x1227: not    al [exact-kinsn: notb reg kinsn] */
-    HC_KINSN(HC_NOT_NARROW_PAYLOAD(BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_NOTB_R),
+    HC_KINSN(HC_NOT_NARROW_PAYLOAD(BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_NOTB),
     /* 0x1229: mov    ecx,eax [exact-kinsn: movl register-to-register kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_4, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_MOVL_RR),
     /* 0x122b: shr    rdx,cl [bpf-jit: ALU reg operation] */

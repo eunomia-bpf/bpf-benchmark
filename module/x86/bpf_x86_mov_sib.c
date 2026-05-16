@@ -13,13 +13,13 @@ __bpf_kfunc void bpf_x86_movzbl_sib(void) {}
 __bpf_kfunc void bpf_x86_movzwl_sib(void) {}
 __bpf_kfunc void bpf_x86_movl_sib(void) {}
 __bpf_kfunc void bpf_x86_movq_sib(void) {}
-__bpf_kfunc void bpf_x86_movsxd_sib(void) {}
+__bpf_kfunc void bpf_x86_movsxd(void) {}
 __bpf_kfunc_end_defs();
 
 BTF_KFUNCS_START(bpf_x86_mov_sib_kfunc_ids)
 BTF_ID_FLAGS(func, bpf_x86_movl_sib)
 BTF_ID_FLAGS(func, bpf_x86_movq_sib)
-BTF_ID_FLAGS(func, bpf_x86_movsxd_sib)
+BTF_ID_FLAGS(func, bpf_x86_movsxd)
 BTF_ID_FLAGS(func, bpf_x86_movzbl_sib)
 BTF_ID_FLAGS(func, bpf_x86_movzwl_sib)
 BTF_KFUNCS_END(bpf_x86_mov_sib_kfunc_ids)
@@ -279,7 +279,7 @@ const struct bpf_kinsn bpf_x86_movq_sib_desc = {
 	.emit_x86 = emit_movq_sib_x86,
 };
 
-const struct bpf_kinsn bpf_x86_movsxd_sib_desc = {
+const struct bpf_kinsn bpf_x86_movsxd_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 14 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
@@ -290,7 +290,7 @@ const struct bpf_kinsn bpf_x86_movsxd_sib_desc = {
 static const struct bpf_kinsn * const bpf_x86_mov_sib_kinsn_descs[] = {
 	&bpf_x86_movl_sib_desc,
 	&bpf_x86_movq_sib_desc,
-	&bpf_x86_movsxd_sib_desc,
+	&bpf_x86_movsxd_desc,
 	&bpf_x86_movzbl_sib_desc,
 	&bpf_x86_movzwl_sib_desc,
 };

@@ -6,17 +6,17 @@
 #include "kinsn_x86_emit.h"
 
 __bpf_kfunc_start_defs();
-__bpf_kfunc void bpf_x86_shldl_imm(void) {}
-__bpf_kfunc void bpf_x86_shldq_imm(void) {}
-__bpf_kfunc void bpf_x86_shrdl_imm(void) {}
-__bpf_kfunc void bpf_x86_shrdq_imm(void) {}
+__bpf_kfunc void bpf_x86_shldl(void) {}
+__bpf_kfunc void bpf_x86_shldq(void) {}
+__bpf_kfunc void bpf_x86_shrdl(void) {}
+__bpf_kfunc void bpf_x86_shrdq(void) {}
 __bpf_kfunc_end_defs();
 
 BTF_KFUNCS_START(bpf_x86_shd_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_x86_shldl_imm)
-BTF_ID_FLAGS(func, bpf_x86_shldq_imm)
-BTF_ID_FLAGS(func, bpf_x86_shrdl_imm)
-BTF_ID_FLAGS(func, bpf_x86_shrdq_imm)
+BTF_ID_FLAGS(func, bpf_x86_shldl)
+BTF_ID_FLAGS(func, bpf_x86_shldq)
+BTF_ID_FLAGS(func, bpf_x86_shrdl)
+BTF_ID_FLAGS(func, bpf_x86_shrdq)
 BTF_KFUNCS_END(bpf_x86_shd_kfunc_ids)
 
 static __always_inline int decode_shd_payload(u64 payload, u8 *dst_reg,
@@ -183,7 +183,7 @@ static int emit_shrdq_imm_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	return emit_shd_imm_x86(image, off, emit, payload, prog, true, false);
 }
 
-const struct bpf_kinsn bpf_x86_shldl_imm_desc = {
+const struct bpf_kinsn bpf_x86_shldl_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 9 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 5,
@@ -191,7 +191,7 @@ const struct bpf_kinsn bpf_x86_shldl_imm_desc = {
 	.emit_x86 = emit_shldl_imm_x86,
 };
 
-const struct bpf_kinsn bpf_x86_shldq_imm_desc = {
+const struct bpf_kinsn bpf_x86_shldq_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 9 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 5,
@@ -199,7 +199,7 @@ const struct bpf_kinsn bpf_x86_shldq_imm_desc = {
 	.emit_x86 = emit_shldq_imm_x86,
 };
 
-const struct bpf_kinsn bpf_x86_shrdl_imm_desc = {
+const struct bpf_kinsn bpf_x86_shrdl_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 9 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 5,
@@ -207,7 +207,7 @@ const struct bpf_kinsn bpf_x86_shrdl_imm_desc = {
 	.emit_x86 = emit_shrdl_imm_x86,
 };
 
-const struct bpf_kinsn bpf_x86_shrdq_imm_desc = {
+const struct bpf_kinsn bpf_x86_shrdq_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 9 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 5,
@@ -216,10 +216,10 @@ const struct bpf_kinsn bpf_x86_shrdq_imm_desc = {
 };
 
 static const struct bpf_kinsn * const bpf_x86_shd_kinsn_descs[] = {
-	&bpf_x86_shldl_imm_desc,
-	&bpf_x86_shldq_imm_desc,
-	&bpf_x86_shrdl_imm_desc,
-	&bpf_x86_shrdq_imm_desc,
+	&bpf_x86_shldl_desc,
+	&bpf_x86_shldq_desc,
+	&bpf_x86_shrdl_desc,
+	&bpf_x86_shrdq_desc,
 };
 
 DEFINE_KINSN_V2_MODULE(bpf_x86_shd,

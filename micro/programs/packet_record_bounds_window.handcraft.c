@@ -82,7 +82,7 @@ static const struct bpf_insn program[] = {
     /* 0x1161: lea    ecx,[rax*4+0x0] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_4, 0, BPF_REG_0, 2, 0, 1, 0), MICRO_HANDCRAFT_BPF_X86_LEAL),
     /* 0x1168: and    cl,0x1c [exact-kinsn: andb imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_4, 28), MICRO_HANDCRAFT_BPF_X86_ANDB_IMM),
+    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_4, 28), MICRO_HANDCRAFT_BPF_X86_ANDB),
     /* 0x116b: shl    rbx,cl [bpf-jit: ALU reg operation] */
     HC_RAW(BPF_ALU64 | BPF_LSH | BPF_X, BPF_REG_6, BPF_REG_4, 0, 0),
     /* 0x116e: xor    rbx,r11 [exact-kinsn: xor64 reg kinsn] */
@@ -90,7 +90,7 @@ static const struct bpf_insn program[] = {
     /* 0x1171: mov    ecx,r8d [exact-kinsn: movl register-to-register kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_4, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_MOVL_RR),
     /* 0x1174: and    cl,0x18 [exact-kinsn: andb imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_4, 24), MICRO_HANDCRAFT_BPF_X86_ANDB_IMM),
+    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_4, 24), MICRO_HANDCRAFT_BPF_X86_ANDB),
     /* 0x1177: shl    r9,cl [warning-unmapped: shl    r9,cl needs a shadow-aware ALU kinsn] */
     /* 0x117a: add    r9,rbx [exact-kinsn: add64 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ADDQ),
@@ -104,7 +104,7 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R10, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_MOVQ_RR),
     /* 0x1189: shl    r10,cl [warning-unmapped: shl    r10,cl needs a shadow-aware ALU kinsn] */
     /* 0x118c: not    al [exact-kinsn: notb reg kinsn] */
-    HC_KINSN(HC_NOT_NARROW_PAYLOAD(BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_NOTB_R),
+    HC_KINSN(HC_NOT_NARROW_PAYLOAD(BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_NOTB),
     /* 0x118e: mov    ecx,eax [exact-kinsn: movl register-to-register kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_4, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_MOVL_RR),
     /* 0x1190: shr    r9,cl [warning-unmapped: shr    r9,cl needs a shadow-aware ALU kinsn] */

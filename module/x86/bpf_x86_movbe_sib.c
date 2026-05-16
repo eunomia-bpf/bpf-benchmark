@@ -8,15 +8,15 @@
 #include "kinsn_x86_emit.h"
 
 __bpf_kfunc_start_defs();
-__bpf_kfunc void bpf_x86_movbe16_sib(void) {}
-__bpf_kfunc void bpf_x86_movbe32_sib(void) {}
-__bpf_kfunc void bpf_x86_movbe64_sib(void) {}
+__bpf_kfunc void bpf_x86_movbe16(void) {}
+__bpf_kfunc void bpf_x86_movbe32(void) {}
+__bpf_kfunc void bpf_x86_movbe64(void) {}
 __bpf_kfunc_end_defs();
 
 BTF_KFUNCS_START(bpf_x86_movbe_sib_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_x86_movbe16_sib)
-BTF_ID_FLAGS(func, bpf_x86_movbe32_sib)
-BTF_ID_FLAGS(func, bpf_x86_movbe64_sib)
+BTF_ID_FLAGS(func, bpf_x86_movbe16)
+BTF_ID_FLAGS(func, bpf_x86_movbe32)
+BTF_ID_FLAGS(func, bpf_x86_movbe64)
 BTF_KFUNCS_END(bpf_x86_movbe_sib_kfunc_ids)
 
 static __always_inline int decode_movbe_sib_payload(u64 payload,
@@ -153,7 +153,7 @@ static int emit_movbe64_sib_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	return emit_movbe_sib_x86(image, off, emit, payload, prog, BPF_DW);
 }
 
-const struct bpf_kinsn bpf_x86_movbe16_sib_desc = {
+const struct bpf_kinsn bpf_x86_movbe16_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 19 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
@@ -161,7 +161,7 @@ const struct bpf_kinsn bpf_x86_movbe16_sib_desc = {
 	.emit_x86 = emit_movbe16_sib_x86,
 };
 
-const struct bpf_kinsn bpf_x86_movbe32_sib_desc = {
+const struct bpf_kinsn bpf_x86_movbe32_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 13 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
@@ -169,7 +169,7 @@ const struct bpf_kinsn bpf_x86_movbe32_sib_desc = {
 	.emit_x86 = emit_movbe32_sib_x86,
 };
 
-const struct bpf_kinsn bpf_x86_movbe64_sib_desc = {
+const struct bpf_kinsn bpf_x86_movbe64_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 13 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
@@ -178,9 +178,9 @@ const struct bpf_kinsn bpf_x86_movbe64_sib_desc = {
 };
 
 static const struct bpf_kinsn * const bpf_x86_movbe_sib_kinsn_descs[] = {
-	&bpf_x86_movbe16_sib_desc,
-	&bpf_x86_movbe32_sib_desc,
-	&bpf_x86_movbe64_sib_desc,
+	&bpf_x86_movbe16_desc,
+	&bpf_x86_movbe32_desc,
+	&bpf_x86_movbe64_desc,
 };
 
 DEFINE_KINSN_V2_MODULE(bpf_x86_movbe_sib,

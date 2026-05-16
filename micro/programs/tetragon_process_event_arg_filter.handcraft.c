@@ -140,7 +140,7 @@ static const struct bpf_insn program[] = {
     HC_RAW(BPF_JMP | BPF_JGT | BPF_K, BPF_REG_3, 0, 9, 12),
     /* 0x1194: lea    rsi,[rip+0xe65] [warning-unmapped: LEA base/index not in BPF register file: [rip+0xe65]] */
     /* 0x119b: movsxd rdx,DWORD PTR [rsi+rdx*4] [exact-kinsn: movsxd SIB kinsn] */
-    HC_KINSN(HC_SIB_PAYLOAD(BPF_REG_3, BPF_REG_2, BPF_REG_3, 2, 0), MICRO_HANDCRAFT_BPF_X86_MOVSXD_SIB),
+    HC_KINSN(HC_SIB_PAYLOAD(BPF_REG_3, BPF_REG_2, BPF_REG_3, 2, 0), MICRO_HANDCRAFT_BPF_X86_MOVSXD),
     /* 0x119f: add    rdx,rsi [exact-kinsn: add64 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_ADDQ),
     /* 0x11a2: jmp    rdx [warning-unmapped: cannot parse branch target rdx] */
@@ -234,7 +234,7 @@ static const struct bpf_insn program[] = {
     /* 0x1266: cmp    r9d,0x6873 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(HC_X86_R9, 26739), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32),
     /* 0x126d: sete   sil [exact-kinsn: setcc kinsn using module shadow flags] */
-    HC_KINSN(HC_SETCC_STACK_PAYLOAD(BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_SETE_R),
+    HC_KINSN(HC_SETCC_STACK_PAYLOAD(BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_SETE),
     /* 0x1271: shl    esi,0x2 [exact-kinsn: shl32 imm kinsn] */
     HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_2, 2), MICRO_HANDCRAFT_BPF_X86_SHLL),
     /* 0x1274: data16 data16 cs nop WORD PTR [rax+rax*1+0x0] [padding: padding is not part of BPF semantics] */
@@ -340,7 +340,7 @@ static const struct bpf_insn program[] = {
     /* 0x1358: or     r15,r10 [exact-kinsn: or64 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_9, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_ORQ),
     /* 0x135b: and    al,0x7 [exact-kinsn: andb imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_0, 7), MICRO_HANDCRAFT_BPF_X86_ANDB_IMM),
+    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_0, 7), MICRO_HANDCRAFT_BPF_X86_ANDB),
     /* 0x135d: lea    ecx,[rax+0x1] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_4, BPF_REG_0, 0, 0, 1, 0, 1), MICRO_HANDCRAFT_BPF_X86_LEAL),
     /* 0x1360: mov    rdx,r15 [exact-kinsn: movq register-to-register kinsn] */
@@ -348,7 +348,7 @@ static const struct bpf_insn program[] = {
     /* 0x1363: shl    rdx,cl [bpf-jit: ALU reg operation] */
     HC_RAW(BPF_ALU64 | BPF_LSH | BPF_X, BPF_REG_3, BPF_REG_4, 0, 0),
     /* 0x1366: not    al [exact-kinsn: notb reg kinsn] */
-    HC_KINSN(HC_NOT_NARROW_PAYLOAD(BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_NOTB_R),
+    HC_KINSN(HC_NOT_NARROW_PAYLOAD(BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_NOTB),
     /* 0x1368: mov    ecx,eax [exact-kinsn: movl register-to-register kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_4, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_MOVL_RR),
     /* 0x136a: shr    r15,cl [bpf-jit: ALU reg operation] */
@@ -395,7 +395,7 @@ static const struct bpf_insn program[] = {
     /* 0x13c9: mov    eax,r8d [exact-kinsn: movl register-to-register kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_0, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_MOVL_RR),
     /* 0x13cc: and    al,0x7 [exact-kinsn: andb imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_0, 7), MICRO_HANDCRAFT_BPF_X86_ANDB_IMM),
+    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_0, 7), MICRO_HANDCRAFT_BPF_X86_ANDB),
     /* 0x13ce: lea    ecx,[rax+0x1] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_4, BPF_REG_0, 0, 0, 1, 0, 1), MICRO_HANDCRAFT_BPF_X86_LEAL),
     /* 0x13d1: mov    rsi,rdx [exact-kinsn: movq register-to-register kinsn] */
@@ -403,7 +403,7 @@ static const struct bpf_insn program[] = {
     /* 0x13d4: shl    rsi,cl [bpf-jit: ALU reg operation] */
     HC_RAW(BPF_ALU64 | BPF_LSH | BPF_X, BPF_REG_2, BPF_REG_4, 0, 0),
     /* 0x13d7: not    al [exact-kinsn: notb reg kinsn] */
-    HC_KINSN(HC_NOT_NARROW_PAYLOAD(BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_NOTB_R),
+    HC_KINSN(HC_NOT_NARROW_PAYLOAD(BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_NOTB),
     /* 0x13d9: mov    ecx,eax [exact-kinsn: movl register-to-register kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_4, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_MOVL_RR),
     /* 0x13db: shr    rdx,cl [bpf-jit: ALU reg operation] */

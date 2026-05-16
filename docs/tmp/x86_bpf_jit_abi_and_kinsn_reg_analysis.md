@@ -100,6 +100,42 @@ ordinary x86 BPF JIT's instruction selector. Most of those helpers are private
 to `bpf_jit_comp.c` anyway, so "ask the kernel JIT to emit the native bytes for
 this BPF insn" is not a current module API.
 
+## Current Hard Requirements
+
+These are implementation requirements for the handcraft/native-parity path:
+
+- Generated `micro/programs/*.handcraft.c` files are artifacts, not source
+  design. Code-size review should exclude them and focus on the converter,
+  runner ABI, module code, and tests.
+- The converter is mechanical: one parsed native instruction becomes either one
+  x86 kinsn selector plus payload, or one ordinary BPF instruction only when the
+  ordinary x86 BPF JIT is already known to emit the same native instruction.
+  Unsupported instructions are emitted as explicit comments in the generated C;
+  they must not be silently converted through semantic fallback sequences.
+- User space owns only parsing, selector choice, payload filling, and O(n)
+  branch relocation. It must not allocate verifier temporaries, synthesize
+  cross-instruction proof state, or remap native registers to make proof easier.
+- Verifier scratch registers and shadow-register save/restore are module
+  responsibilities. If a kinsn needs scratch state for its proof, the
+  `instantiate_insn()` implementation owns it; the payload should describe x86
+  operands, not verifier implementation details.
+- Public selector names name the x86 instruction and width only. Operand forms
+  such as register/register, memory, SIB, immediate, or destination-only belong
+  in the payload. New names like `*_RR`, `*_MEM`, `*_SIB`, `*_IMM`, `*_REG`, or
+  `*_R` are forbidden. Existing names with those suffixes are migration debt and
+  should be collapsed into mnemonic-level selectors.
+- One kinsn native emitter emits exactly one x86 instruction. There is no
+  hidden prologue, exit sequence, padding, or multi-instruction macro lowering
+  in `emit_x86()`. Any verifier proof sequence may be longer, but it proves the
+  same single x86 instruction.
+- `cmp/test` and `jcc/cmov/setcc` are separate native instructions. The
+  converter must not lower `cmp+jcc` as a semantic pair. Flags are module-owned
+  shadow state for verification and physical x86 flags for final native
+  execution.
+- Unit tests should check encoded ABI/layout or real selector behavior. Tests
+  that only exercise aliases or tautological name mappings should be removed or
+  replaced by bug-detection tests.
+
 ## Hidden Register Users
 
 | Native register/state | Kernel use | Consequence for kinsn |
@@ -210,11 +246,11 @@ Current x86 kinsns that are redundant for normal pass output:
 |---|---|---|
 | `bpf_x86_movq_rr` | `BPF_MOV64_REG` emits `mov dst, src` | Do not use in passes. Use normal BPF move. |
 | `bpf_x86_movl_rr` | `BPF_MOV32_REG` emits `mov32 dst, src` | Do not use in passes. |
-| `bpf_x86_movswl_rr` | BPF sign-extending `MOV` form emits `movsx` | Usually unnecessary for pass output. |
+| `bpf_x86_movswl` | BPF sign-extending `MOV` form emits `movsx` | Usually unnecessary for pass output. |
 | `bpf_x86_shrq_imm` | `BPF_ALU64 RSH K` emits `shr dst, imm` | Redundant for x86 `extract`; keep BPF. |
 | `bpf_x86_andl_imm32` | `BPF_ALU AND K` can emit 32-bit `and dst, imm` | Redundant for x86 `extract`; keep BPF when semantics match. |
 | `bpf_x86_xorl_rr` | `BPF_ALU XOR X` emits `xor dst, src` | Redundant unless strict flag/native-reg simulation needs a kinsn. |
-| `bpf_x86_imulq_rr` | `BPF_ALU64 MUL X` emits `imul dst, src` | Redundant for BPF-safe regs; only handcraft strict mode may need it. |
+| `bpf_x86_imulq` | `BPF_ALU64 MUL X` emits `imul dst, src` | Redundant for BPF-safe regs; only handcraft strict mode may need it. |
 | `bpf_x86_movzbl_mem` | `BPF_LDX MEM B` emits `movzx byte [base+off]` | Redundant; use ordinary BPF load. |
 | `bpf_x86_movzwl_mem` | `BPF_LDX MEM H` emits `movzx word [base+off]` | Redundant; use ordinary BPF load. |
 | `bpf_x86_movl_mem` | `BPF_LDX MEM W` emits `mov dword [base+off]` | Redundant; use ordinary BPF load. |
@@ -232,8 +268,8 @@ because they exist:
 
 | Current kinsn | Why conditional |
 |---|---|
-| `bpf_x86_rolw_imm` | BPF endian-16 emits `ror/rol word, 8` plus zero-extension. A standalone word rotate is useful for strict native parity, but endian pass can usually stay BPF. |
-| `bpf_x86_addb_imm`, `bpf_x86_andb_imm`, `bpf_x86_xorb_imm`, `bpf_x86_xorb_rr`, `bpf_x86_orb_rr` | BPF ALU is 32/64-bit, not low-byte ALU. Needed only when the native instruction is really byte-width and byte-width flags/result matter. |
+| `bpf_x86_rolw` | BPF endian-16 emits `ror/rol word, 8` plus zero-extension. A standalone word rotate is useful for strict native parity, but endian pass can usually stay BPF. |
+| `bpf_x86_addb`, `bpf_x86_andb`, `bpf_x86_xorb_imm`, `bpf_x86_xorb_rr`, `bpf_x86_orb` | BPF ALU is 32/64-bit, not low-byte ALU. Needed only when the native instruction is really byte-width and byte-width flags/result matter. |
 | `bpf_x86_incq` | BPF can implement `+1` as `add`, but `inc` differs in flag behavior (`CF` unchanged). Needed only when native flags parity matters. |
 | `bpf_x86_not*` | BPF can compute bitwise-not with `xor -1`, but that is not the same machine instruction. Keep for strict native parity, not for ordinary semantic rewrites. |
 | `bpf_x86_movzbl_rr`, `bpf_x86_movzwl_rr` | Same-reg zero-extension has BPF endian/ALU alternatives; cross-reg low-byte/low-word extraction may still need explicit kinsn if exact `movzx` matters. |
@@ -247,13 +283,13 @@ Current x86 kinsns that are genuinely needed for native-shape coverage:
 | `bpf_x86_cmov*` | No BPF instruction for conditional move. |
 | `bpf_x86_set*` | No BPF instruction for `setcc`. |
 | `bpf_x86_lea*` | BPF can add, but cannot emit flag-preserving `lea` with full addressing shape. |
-| `bpf_x86_mov*_sib`, `bpf_x86_movsxd_sib` | Normal BPF load/store lacks general `base + index * scale + disp`. |
+| `bpf_x86_mov*_sib`, `bpf_x86_movsxd` | Normal BPF load/store lacks general `base + index * scale + disp`. |
 | `bpf_x86_movbe*_sib` | No ordinary BPF one-insn `movbe`, especially with SIB addressing. |
 | `bpf_x86_popcntq` | No BPF popcount instruction. |
 | `bpf_x86_blsi*`, `bpf_x86_blsr*` | No BPF BMI1 instruction. |
 | `bpf_x86_prefetcht0` | No BPF prefetch instruction. |
 | `bpf_x86_shld*`, `bpf_x86_shrd*` | No BPF double-precision shift instruction. |
-| `bpf_x86_sbbl_imm0` | Consumes flags; no BPF flags state. |
+| `bpf_x86_sbbl` | Consumes flags; no BPF flags state. |
 | `bpf_x86_rol*/rorx*` | No general BPF rotate instruction. |
 
 Pass-level implication:
@@ -293,7 +329,7 @@ Examples of BPF exact aliases:
 | `bpf_x86_movb_imm_mem` | `BPF_ST_MEM(B, base, off, imm)` |
 | `bpf_x86_shrq_imm` | `BPF_ALU64_IMM(BPF_RSH, dst, imm)` |
 | `bpf_x86_andl_imm32` | `BPF_ALU32_IMM(BPF_AND, dst, imm)` |
-| `bpf_x86_imulq_rr` | `BPF_ALU64_REG(BPF_MUL, dst, src)` |
+| `bpf_x86_imulq` | `BPF_ALU64_REG(BPF_MUL, dst, src)` |
 | `bpf_x86_bswapl/q` | `BPF_END FROM_BE 32/64` |
 
 These aliases are useful as documentation and optional backward compatibility,
@@ -510,11 +546,35 @@ That does not require CFG construction:
 This O(n) relocation table is acceptable converter logic. It should not grow
 into dataflow, verifier proof reconstruction, or branch-liveness analysis.
 
-The long-term strict handcraft ABI should still prefer branch kinsns for native
-parity: `cmp/test` updates shadow flags, `jcc` reads shadow flags, and user
-space supplies only the relocated target offset. Until such kinsns exist,
-verifier-visible BPF branches remain a compatibility bridge, but they are not a
-general substitute for one native branch instruction.
+The kernel module must not own a second relocation pass. It receives only the
+payload for one kinsn. For control-flow kinsns, the payload is allowed to carry
+the already-relocated verifier BPF branch offset and the original native branch
+encoding. The verifier then checks the proof-lowered global BPF program exactly
+as normal BPF: a bad target, an unreachable path, a forbidden subprogram edge, or
+an invalid dataflow state must fail through the ordinary verifier walk.
+
+This means kinsn proof sequences do not need a special "jump stays inside the
+local proof region" rule. That rule was useful for an isolated peephole-kinsn
+model, but it is too strict for a shadow-x86 model where `jcc` is itself a
+machine instruction. The remaining proof-sequence validator rules should only
+reject constructs that would corrupt the kinsn transport ABI itself, such as
+nested sidecars, helper/subprogram calls, exits, and pseudo `ldimm64`.
+
+For raw-byte replay, final x86 branch emission does not need to recompute the
+machine-code target. `jcc rel8/rel32` is PC-relative; if every translated x86
+instruction emits the same byte length in the same order, copying the original
+branch bytes preserves the target. The safety contract is instead:
+
+- user space records the native branch target and relocated BPF target in the
+  payload;
+- the kinsn decoder validates that the raw native branch bytes encode the same
+  target relation;
+- branch targets must land on generated instruction boundaries, never on the
+  `BPF_PSEUDO_KINSN_CALL` half of a sidecar/call bundle;
+- the full verifier proves the proof-lowered BPF CFG.
+
+Until branch kinsns cover every needed form, verifier-visible BPF branches
+remain a compatibility bridge. They are not the end-state native-parity model.
 
 ## Option A: Fully Simulate 16 x86 Registers and Flags
 

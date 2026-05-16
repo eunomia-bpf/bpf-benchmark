@@ -6,17 +6,17 @@
 #include "kinsn_x86_emit.h"
 
 __bpf_kfunc_start_defs();
-__bpf_kfunc void bpf_x86_notb_r(void) {}
-__bpf_kfunc void bpf_x86_notl_r(void) {}
-__bpf_kfunc void bpf_x86_notq_r(void) {}
-__bpf_kfunc void bpf_x86_notw_r(void) {}
+__bpf_kfunc void bpf_x86_notb(void) {}
+__bpf_kfunc void bpf_x86_notl(void) {}
+__bpf_kfunc void bpf_x86_notq(void) {}
+__bpf_kfunc void bpf_x86_notw(void) {}
 __bpf_kfunc_end_defs();
 
 BTF_KFUNCS_START(bpf_x86_not_kfunc_ids)
-BTF_ID_FLAGS(func, bpf_x86_notb_r)
-BTF_ID_FLAGS(func, bpf_x86_notl_r)
-BTF_ID_FLAGS(func, bpf_x86_notq_r)
-BTF_ID_FLAGS(func, bpf_x86_notw_r)
+BTF_ID_FLAGS(func, bpf_x86_notb)
+BTF_ID_FLAGS(func, bpf_x86_notl)
+BTF_ID_FLAGS(func, bpf_x86_notq)
+BTF_ID_FLAGS(func, bpf_x86_notw)
 BTF_KFUNCS_END(bpf_x86_not_kfunc_ids)
 
 static __always_inline int decode_not_reg_payload(u64 payload, u8 *dst_reg)
@@ -189,7 +189,7 @@ static int emit_notq_r_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	return emit_not_r_x86(image, off, emit, payload, prog, true, false, false);
 }
 
-const struct bpf_kinsn bpf_x86_notb_r_desc = {
+const struct bpf_kinsn bpf_x86_notb_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 11 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 4,
@@ -197,7 +197,7 @@ const struct bpf_kinsn bpf_x86_notb_r_desc = {
 	.emit_x86 = emit_notb_r_x86,
 };
 
-const struct bpf_kinsn bpf_x86_notl_r_desc = {
+const struct bpf_kinsn bpf_x86_notl_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 5 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 3,
@@ -205,7 +205,7 @@ const struct bpf_kinsn bpf_x86_notl_r_desc = {
 	.emit_x86 = emit_notl_r_x86,
 };
 
-const struct bpf_kinsn bpf_x86_notq_r_desc = {
+const struct bpf_kinsn bpf_x86_notq_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 5 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 3,
@@ -213,7 +213,7 @@ const struct bpf_kinsn bpf_x86_notq_r_desc = {
 	.emit_x86 = emit_notq_r_x86,
 };
 
-const struct bpf_kinsn bpf_x86_notw_r_desc = {
+const struct bpf_kinsn bpf_x86_notw_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 11 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 4,
@@ -222,10 +222,10 @@ const struct bpf_kinsn bpf_x86_notw_r_desc = {
 };
 
 static const struct bpf_kinsn * const bpf_x86_not_kinsn_descs[] = {
-	&bpf_x86_notb_r_desc,
-	&bpf_x86_notl_r_desc,
-	&bpf_x86_notq_r_desc,
-	&bpf_x86_notw_r_desc,
+	&bpf_x86_notb_desc,
+	&bpf_x86_notl_desc,
+	&bpf_x86_notq_desc,
+	&bpf_x86_notw_desc,
 };
 
 DEFINE_KINSN_V2_MODULE(bpf_x86_not, "BpfReJIT x86 kinsns: NOT",

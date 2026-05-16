@@ -10,7 +10,7 @@ __bpf_kfunc void bpf_x86_roll_cl(void) {}
 __bpf_kfunc void bpf_x86_roll_imm(void) {}
 __bpf_kfunc void bpf_x86_rolq_cl(void) {}
 __bpf_kfunc void bpf_x86_rolq_imm(void) {}
-__bpf_kfunc void bpf_x86_rorxl_imm(void) {}
+__bpf_kfunc void bpf_x86_rorxl(void) {}
 __bpf_kfunc_end_defs();
 
 BTF_KFUNCS_START(bpf_x86_rotate_kfunc_ids)
@@ -18,7 +18,7 @@ BTF_ID_FLAGS(func, bpf_x86_roll_cl)
 BTF_ID_FLAGS(func, bpf_x86_roll_imm)
 BTF_ID_FLAGS(func, bpf_x86_rolq_cl)
 BTF_ID_FLAGS(func, bpf_x86_rolq_imm)
-BTF_ID_FLAGS(func, bpf_x86_rorxl_imm)
+BTF_ID_FLAGS(func, bpf_x86_rorxl)
 BTF_KFUNCS_END(bpf_x86_rotate_kfunc_ids)
 
 struct rotate_payload {
@@ -399,7 +399,7 @@ const struct bpf_kinsn bpf_x86_roll_cl_desc = {
 	.emit_x86 = emit_roll_cl_x86,
 };
 
-const struct bpf_kinsn bpf_x86_rorxl_imm_desc = {
+const struct bpf_kinsn bpf_x86_rorxl_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 10 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
@@ -412,7 +412,7 @@ static const struct bpf_kinsn * const bpf_x86_rotate_kinsn_descs[] = {
 	&bpf_x86_roll_imm_desc,
 	&bpf_x86_rolq_cl_desc,
 	&bpf_x86_rolq_imm_desc,
-	&bpf_x86_rorxl_imm_desc,
+	&bpf_x86_rorxl_desc,
 };
 
 DEFINE_KINSN_V2_MODULE(bpf_x86_rotate, "BpfReJIT x86 kinsns: ROL/RORX",

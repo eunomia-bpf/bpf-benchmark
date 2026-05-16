@@ -149,7 +149,7 @@ static const struct bpf_insn program[] = {
     /* 0x116b: movzx  r10d,r9b [exact-kinsn: movzx r32,r8 kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R10, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_MOVZBL_RR),
     /* 0x116f: movsxd r11,DWORD PTR [rsi+r11*4] [exact-kinsn: movsxd SIB kinsn] */
-    HC_KINSN(HC_SIB_PAYLOAD(HC_X86_R11, BPF_REG_2, HC_X86_R11, 2, 0), MICRO_HANDCRAFT_BPF_X86_MOVSXD_SIB),
+    HC_KINSN(HC_SIB_PAYLOAD(HC_X86_R11, BPF_REG_2, HC_X86_R11, 2, 0), MICRO_HANDCRAFT_BPF_X86_MOVSXD),
     /* 0x1173: add    r11,rsi [exact-kinsn: add64 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R11, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_ADDQ),
     /* 0x1176: jmp    r11 [warning-unmapped: cannot parse branch target r11] */
@@ -266,7 +266,7 @@ static const struct bpf_insn program[] = {
     /* 0x12d6: lea    r15,[rcx+0xa] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_9, BPF_REG_4, 0, 0, 1, 0, 10), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x12da: imul   r14,r15 [exact-kinsn: imulq reg,reg kinsn] */
-    HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_8, BPF_REG_9), MICRO_HANDCRAFT_BPF_X86_IMULQ_RR),
+    HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_8, BPF_REG_9), MICRO_HANDCRAFT_BPF_X86_IMULQ),
     /* 0x12de: add    rdi,r14 [exact-kinsn: add64 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_8), MICRO_HANDCRAFT_BPF_X86_ADDQ),
     /* 0x12e1: shl    rbx,0x20 [exact-kinsn: shl64 imm kinsn] */

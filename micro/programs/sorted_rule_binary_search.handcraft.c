@@ -68,11 +68,11 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R11, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_MOVQ_RR),
     /* 0x1156: cmp    QWORD PTR [rcx+r8*8+0x10],rsi [warning-unmapped: CMP operand form has no current kinsn selector: cmp    QWORD PTR [rcx+r8*8+0x10],rsi] */
     /* 0x115b: sete   r9b [exact-kinsn: setcc kinsn using module shadow flags] */
-    HC_KINSN(HC_SETCC_STACK_PAYLOAD(HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_SETE_R),
+    HC_KINSN(HC_SETCC_STACK_PAYLOAD(HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_SETE),
     /* 0x115f: cmove  rdi,r8 [exact-kinsn: cmov kinsn using module shadow flags] */
     HC_KINSN(HC_CMOV_STACK_PAYLOAD(BPF_REG_1, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_CMOVEQ),
     /* 0x1163: or     r9b,r10b [exact-kinsn: orb reg kinsn] */
-    HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R9, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_ORB_RR),
+    HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R9, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_ORB),
     /* 0x1166: test   r10b,0x1 [exact-kinsn: testb imm kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(HC_X86_R10, 1), MICRO_HANDCRAFT_BPF_X86_TESTB_IMM),
     /* 0x116a: cmovne rdi,r11 [exact-kinsn: cmov kinsn using module shadow flags] */

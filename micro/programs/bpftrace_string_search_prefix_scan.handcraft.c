@@ -171,7 +171,7 @@ static const struct bpf_insn program[] = {
     /* 0x122d: xor    bl,BYTE PTR [rcx+r8*1+0x11] [exact-kinsn: xorb SIB memory-source kinsn] */
     HC_KINSN(HC_ALU_SIB_PAYLOAD(BPF_REG_6, BPF_REG_4, BPF_REG_5, 0, 17), MICRO_HANDCRAFT_BPF_X86_XORB_SIB),
     /* 0x1232: or     r11b,bl [exact-kinsn: orb reg kinsn] */
-    HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R11, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ORB_RR),
+    HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R11, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ORB),
     /* 0x1235: cmp    esi,0x3 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_2, 3), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32),
     /* 0x1238: jb     11f0 <bpftrace_string_search_prefix_scan_xdp+0xf0> [bpf-branch: lowered cmp    esi,0x3 + jb     11f0 <bpftrace_string_search_prefix_scan_xdp+0xf0> to verifier-visible BPF branch] */
@@ -181,7 +181,7 @@ static const struct bpf_insn program[] = {
     /* 0x123e: xor    bl,BYTE PTR [rcx+r8*1+0x12] [exact-kinsn: xorb SIB memory-source kinsn] */
     HC_KINSN(HC_ALU_SIB_PAYLOAD(BPF_REG_6, BPF_REG_4, BPF_REG_5, 0, 18), MICRO_HANDCRAFT_BPF_X86_XORB_SIB),
     /* 0x1243: or     r11b,bl [exact-kinsn: orb reg kinsn] */
-    HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R11, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ORB_RR),
+    HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R11, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ORB),
     /* 0x1246: cmp    esi,0x4 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_2, 4), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32),
     /* 0x1249: jb     11f0 <bpftrace_string_search_prefix_scan_xdp+0xf0> [bpf-branch: lowered cmp    esi,0x4 + jb     11f0 <bpftrace_string_search_prefix_scan_xdp+0xf0> to verifier-visible BPF branch] */
@@ -191,7 +191,7 @@ static const struct bpf_insn program[] = {
     /* 0x124f: xor    bl,BYTE PTR [rcx+r8*1+0x13] [exact-kinsn: xorb SIB memory-source kinsn] */
     HC_KINSN(HC_ALU_SIB_PAYLOAD(BPF_REG_6, BPF_REG_4, BPF_REG_5, 0, 19), MICRO_HANDCRAFT_BPF_X86_XORB_SIB),
     /* 0x1254: or     r11b,bl [exact-kinsn: orb reg kinsn] */
-    HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R11, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ORB_RR),
+    HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R11, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ORB),
     /* 0x1257: cmp    esi,0x5 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_2, 5), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32),
     /* 0x125a: jb     11f0 <bpftrace_string_search_prefix_scan_xdp+0xf0> [bpf-branch: lowered cmp    esi,0x5 + jb     11f0 <bpftrace_string_search_prefix_scan_xdp+0xf0> to verifier-visible BPF branch] */
@@ -201,7 +201,7 @@ static const struct bpf_insn program[] = {
     /* 0x1260: xor    bl,BYTE PTR [rcx+r8*1+0x14] [exact-kinsn: xorb SIB memory-source kinsn] */
     HC_KINSN(HC_ALU_SIB_PAYLOAD(BPF_REG_6, BPF_REG_4, BPF_REG_5, 0, 20), MICRO_HANDCRAFT_BPF_X86_XORB_SIB),
     /* 0x1265: or     r11b,bl [exact-kinsn: orb reg kinsn] */
-    HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R11, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ORB_RR),
+    HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R11, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ORB),
     /* 0x1268: cmp    esi,0x6 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_2, 6), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32),
     /* 0x126b: jb     11f0 <bpftrace_string_search_prefix_scan_xdp+0xf0> [bpf-branch: lowered cmp    esi,0x6 + jb     11f0 <bpftrace_string_search_prefix_scan_xdp+0xf0> to verifier-visible BPF branch] */
@@ -211,7 +211,7 @@ static const struct bpf_insn program[] = {
     /* 0x1271: xor    bl,BYTE PTR [rcx+r8*1+0x15] [exact-kinsn: xorb SIB memory-source kinsn] */
     HC_KINSN(HC_ALU_SIB_PAYLOAD(BPF_REG_6, BPF_REG_4, BPF_REG_5, 0, 21), MICRO_HANDCRAFT_BPF_X86_XORB_SIB),
     /* 0x1276: or     r11b,bl [exact-kinsn: orb reg kinsn] */
-    HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R11, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ORB_RR),
+    HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R11, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ORB),
     /* 0x1279: cmp    esi,0x7 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_2, 7), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32),
     /* 0x127c: jb     11f0 <bpftrace_string_search_prefix_scan_xdp+0xf0> [bpf-branch: lowered cmp    esi,0x7 + jb     11f0 <bpftrace_string_search_prefix_scan_xdp+0xf0> to verifier-visible BPF branch] */
@@ -221,7 +221,7 @@ static const struct bpf_insn program[] = {
     /* 0x1286: xor    bl,BYTE PTR [rcx+r8*1+0x16] [exact-kinsn: xorb SIB memory-source kinsn] */
     HC_KINSN(HC_ALU_SIB_PAYLOAD(BPF_REG_6, BPF_REG_4, BPF_REG_5, 0, 22), MICRO_HANDCRAFT_BPF_X86_XORB_SIB),
     /* 0x128b: or     r11b,bl [exact-kinsn: orb reg kinsn] */
-    HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R11, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ORB_RR),
+    HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R11, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ORB),
     /* 0x128e: cmp    esi,0x8 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_2, 8), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32),
     /* 0x1291: jb     11f0 <bpftrace_string_search_prefix_scan_xdp+0xf0> [bpf-branch: lowered cmp    esi,0x8 + jb     11f0 <bpftrace_string_search_prefix_scan_xdp+0xf0> to verifier-visible BPF branch] */
@@ -231,7 +231,7 @@ static const struct bpf_insn program[] = {
     /* 0x129b: xor    bl,BYTE PTR [rcx+r8*1+0x17] [exact-kinsn: xorb SIB memory-source kinsn] */
     HC_KINSN(HC_ALU_SIB_PAYLOAD(BPF_REG_6, BPF_REG_4, BPF_REG_5, 0, 23), MICRO_HANDCRAFT_BPF_X86_XORB_SIB),
     /* 0x12a0: or     r11b,bl [exact-kinsn: orb reg kinsn] */
-    HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R11, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ORB_RR),
+    HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_R11, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ORB),
     /* 0x12a3: jmp    11f0 <bpftrace_string_search_prefix_scan_xdp+0xf0> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
     HC_RAW(BPF_JMP | BPF_JA, 0, 0, -83, 0),
     /* 0x12a8: cmp    r8,0x60 [exact-kinsn: cmpq reg,imm32 kinsn] */

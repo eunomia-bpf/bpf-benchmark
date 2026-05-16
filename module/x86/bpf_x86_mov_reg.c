@@ -8,7 +8,7 @@
 __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_x86_movl_rr(void) {}
 __bpf_kfunc void bpf_x86_movq_rr(void) {}
-__bpf_kfunc void bpf_x86_movswl_rr(void) {}
+__bpf_kfunc void bpf_x86_movswl(void) {}
 __bpf_kfunc void bpf_x86_movzbl_rr(void) {}
 __bpf_kfunc void bpf_x86_movzwl_rr(void) {}
 __bpf_kfunc_end_defs();
@@ -16,7 +16,7 @@ __bpf_kfunc_end_defs();
 BTF_KFUNCS_START(bpf_x86_mov_reg_kfunc_ids)
 BTF_ID_FLAGS(func, bpf_x86_movl_rr)
 BTF_ID_FLAGS(func, bpf_x86_movq_rr)
-BTF_ID_FLAGS(func, bpf_x86_movswl_rr)
+BTF_ID_FLAGS(func, bpf_x86_movswl)
 BTF_ID_FLAGS(func, bpf_x86_movzbl_rr)
 BTF_ID_FLAGS(func, bpf_x86_movzwl_rr)
 BTF_KFUNCS_END(bpf_x86_mov_reg_kfunc_ids)
@@ -309,7 +309,7 @@ const struct bpf_kinsn bpf_x86_movzwl_rr_desc = {
 	.emit_x86 = emit_movzwl_rr_x86,
 };
 
-const struct bpf_kinsn bpf_x86_movswl_rr_desc = {
+const struct bpf_kinsn bpf_x86_movswl_desc = {
 	.owner = THIS_MODULE,
 	.max_insn_cnt = 6 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 4,
@@ -320,7 +320,7 @@ const struct bpf_kinsn bpf_x86_movswl_rr_desc = {
 static const struct bpf_kinsn * const bpf_x86_mov_reg_kinsn_descs[] = {
 	&bpf_x86_movl_rr_desc,
 	&bpf_x86_movq_rr_desc,
-	&bpf_x86_movswl_rr_desc,
+	&bpf_x86_movswl_desc,
 	&bpf_x86_movzbl_rr_desc,
 	&bpf_x86_movzwl_rr_desc,
 };
