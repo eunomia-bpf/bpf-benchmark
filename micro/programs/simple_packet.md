@@ -125,12 +125,14 @@ static const struct bpf_insn program[] = {
     HC_LDX(BPF_W, BPF_REG_3, BPF_REG_1, 4),
     /* 0x1107: xor    eax,eax [bpf-jit: zero idiom] */
     HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_0, 0, 0, 0),
-    /* 0x1109: cmp    rcx,rdx [cmp-state: sets flags; materialized by following jcc when possible] */
+    /* 0x1109: cmp    rcx,rdx [exact-kinsn: cmpq reg,reg kinsn] */
+    HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_4, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x110c: ja     1130 <simple_packet_xdp+0x30> [bpf-branch: lowered cmp    rcx,rdx + ja     1130 <simple_packet_xdp+0x30> to verifier-visible BPF branch] */
-    HC_JMP_REG(BPF_JGT, BPF_REG_4, BPF_REG_3, 10),
+    HC_JMP_REG(BPF_JGT, BPF_REG_4, BPF_REG_3, 12),
     /* 0x110e: lea    rsi,[rcx+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_4, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
-    /* 0x1112: cmp    rsi,rdx [cmp-state: sets flags; materialized by following jcc when possible] */
+    /* 0x1112: cmp    rsi,rdx [exact-kinsn: cmpq reg,reg kinsn] */
+    HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_2, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x1115: ja     1130 <simple_packet_xdp+0x30> [bpf-branch: lowered cmp    rsi,rdx + ja     1130 <simple_packet_xdp+0x30> to verifier-visible BPF branch] */
     HC_JMP_REG(BPF_JGT, BPF_REG_2, BPF_REG_3, 7),
     /* 0x1117: mov    WORD PTR [rcx],0x614e [bpf-jit: immediate memory store] */
@@ -159,19 +161,22 @@ Disassembly of section .data:
    5:	0f 1f 00             	nop    DWORD PTR [rax]
    8:	55                   	push   rbp
    9:	48 89 e5             	mov    rbp,rsp
-   c:	48 8b 4f 00          	mov    rcx,QWORD PTR [rdi+0x0]
-  10:	48 8b 57 08          	mov    rdx,QWORD PTR [rdi+0x8]
-  14:	31 c0                	xor    eax,eax
-  16:	48 39 d1             	cmp    rcx,rdx
-  19:	77 23                	ja     0x3e
-  1b:	48 8d 71 08          	lea    rsi,[rcx+0x8]
-  1f:	48 39 d6             	cmp    rsi,rdx
-  22:	77 1a                	ja     0x3e
-  24:	66 c7 41 00 4e 61    	mov    WORD PTR [rcx+0x0],0x614e
-  2a:	c6 41 02 bc          	mov    BYTE PTR [rcx+0x2],0xbc
-  2e:	c7 41 03 00 00 00 00 	mov    DWORD PTR [rcx+0x3],0x0
-  35:	c6 41 07 00          	mov    BYTE PTR [rcx+0x7],0x0
-  39:	b8 02 00 00 00       	mov    eax,0x2
-  3e:	c9                   	leave
-  3f:	c3                   	ret
+   c:	48 81 ec 80 01 00 00 	sub    rsp,0x180
+  13:	48 8b 4f 00          	mov    rcx,QWORD PTR [rdi+0x0]
+  17:	48 8b 57 08          	mov    rdx,QWORD PTR [rdi+0x8]
+  1b:	31 c0                	xor    eax,eax
+  1d:	48 39 d1             	cmp    rcx,rdx
+  20:	48 39 d1             	cmp    rcx,rdx
+  23:	77 26                	ja     0x4b
+  25:	48 8d 71 08          	lea    rsi,[rcx+0x8]
+  29:	48 39 d6             	cmp    rsi,rdx
+  2c:	48 39 d6             	cmp    rsi,rdx
+  2f:	77 1a                	ja     0x4b
+  31:	66 c7 41 00 4e 61    	mov    WORD PTR [rcx+0x0],0x614e
+  37:	c6 41 02 bc          	mov    BYTE PTR [rcx+0x2],0xbc
+  3b:	c7 41 03 00 00 00 00 	mov    DWORD PTR [rcx+0x3],0x0
+  42:	c6 41 07 00          	mov    BYTE PTR [rcx+0x7],0x0
+  46:	b8 02 00 00 00       	mov    eax,0x2
+  4b:	c9                   	leave
+  4c:	c3                   	ret
 ```

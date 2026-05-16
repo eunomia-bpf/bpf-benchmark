@@ -43,7 +43,11 @@
 #define HC_REG_PAYLOAD(REG) ((__u64)(REG))
 #define HC_TEST_PAYLOAD(REG) ((__u64)(REG))
 #define HC_CMOV_PAYLOAD(DST, SRC, COND) ((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(COND) << 8))
+#define HC_CMOV_STACK_PAYLOAD(DST, SRC, TMP) \
+    ((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(TMP) << 8) | ((__u64)(HC_FLAG_STACK) << 12))
 #define HC_SETCC_PAYLOAD(DST, COND, TMP) ((__u64)(DST) | ((__u64)(COND) << 4) | ((__u64)(TMP) << 8))
+#define HC_SETCC_STACK_PAYLOAD(DST, TMP_HIGH, TMP_FLAG) \
+    ((__u64)(DST) | ((__u64)(TMP_HIGH) << 4) | ((__u64)(TMP_FLAG) << 8) | ((__u64)(HC_FLAG_STACK) << 16))
 #define HC_CMOV_CMP_RR_PAYLOAD(DST, SRC, LHS, RHS, KIND) \
     ((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(LHS) << 8) | ((__u64)(KIND) << 12) | ((__u64)(RHS) << 16))
 #define HC_CMOV_CMP_IMM_PAYLOAD(DST, SRC, LHS, IMM, KIND) \
@@ -56,7 +60,17 @@
 #define HC_FLAG_CMP_IMM64 2
 #define HC_FLAG_CMP_RR32 3
 #define HC_FLAG_CMP_IMM32 4
+#define HC_FLAG_STACK 5
+#define HC_X86_R9 11
+#define HC_X86_R10 12
+#define HC_X86_R11 13
+#define HC_X86_R12 14
 #define HC_REG_REG_PAYLOAD(DST, SRC) ((__u64)(DST) | ((__u64)(SRC) << 4))
+#define HC_REG_REG_TMP2_PAYLOAD(DST, SRC, TMP_DST, TMP_SRC) \
+    ((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(TMP_DST) << 8) | ((__u64)(TMP_SRC) << 12))
+#define HC_REG_TMP_PAYLOAD(REG, TMP) ((__u64)(REG) | ((__u64)(TMP) << 4))
+#define HC_REG_TMP_IMM_PAYLOAD(REG, TMP, IMM) \
+    ((__u64)(REG) | ((__u64)(TMP) << 4) | ((__u64)(__u32)(IMM) << 8))
 #define HC_REG_REG_TMP_PAYLOAD(DST, SRC, TMP) \
     ((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(TMP) << 8))
 #define HC_REG_COND_PAYLOAD(DST, COND) ((__u64)(DST) | ((__u64)(COND) << 4))
@@ -78,6 +92,11 @@
     (HC_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF) | ((__u64)(TMP) << 32))
 #define HC_ALU_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF, TMP1, TMP2) \
     (HC_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF) | ((__u64)(TMP1) << 32) | ((__u64)(TMP2) << 36))
+#define HC_CMP_SIB_RR_PAYLOAD(BASE, INDEX, SCALE, OFF, RHS, ADDR_TMP, VALUE_TMP, RHS_TMP) \
+    ((__u64)(BASE) | ((__u64)(INDEX) << 4) | ((__u64)(SCALE) << 8) | \
+     ((__u64)(RHS) << 12) | ((__u64)(__u16)(OFF) << 16) | \
+     ((__u64)(ADDR_TMP) << 32) | ((__u64)(VALUE_TMP) << 36) | \
+     ((__u64)(RHS_TMP) << 40))
 #define HC_MOVBE_SIB_PAYLOAD(DST, BASE, INDEX, SCALE, OFF, TMP) \
     HC_SIB_TMP_PAYLOAD(DST, BASE, INDEX, SCALE, OFF, TMP)
 

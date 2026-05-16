@@ -4,8 +4,6 @@
 
 #include "kinsn_common.h"
 
-#define KINSN_X86_REG_R9 11
-
 static __always_inline s32 kinsn_payload_s32(u64 payload, u8 shift)
 {
 	return (s32)((u32)(payload >> shift));
@@ -54,10 +52,85 @@ static __always_inline bool kinsn_x86_needs_rex8(u8 reg)
 	case BPF_REG_9:
 	case BPF_REG_10:
 	case KINSN_X86_REG_R9:
+	case KINSN_X86_REG_R10:
+	case KINSN_X86_REG_R11:
+	case KINSN_X86_REG_R12:
 		return true;
 	default:
 		return false;
 	}
+}
+
+#define KINSN_X86_SHADOW_RAX_OFF	-512
+#define KINSN_X86_SHADOW_RCX_OFF	-504
+#define KINSN_X86_SHADOW_RDX_OFF	-496
+#define KINSN_X86_SHADOW_RBX_OFF	-488
+#define KINSN_X86_SHADOW_RSP_OFF	-480
+#define KINSN_X86_SHADOW_RBP_OFF	-472
+#define KINSN_X86_SHADOW_RSI_OFF	-464
+#define KINSN_X86_SHADOW_RDI_OFF	-456
+#define KINSN_X86_SHADOW_R8_OFF		-448
+#define KINSN_X86_SHADOW_R9_OFF		-440
+#define KINSN_X86_SHADOW_R10_OFF	-432
+#define KINSN_X86_SHADOW_R11_OFF	-424
+#define KINSN_X86_SHADOW_R12_OFF	-416
+#define KINSN_X86_SHADOW_R13_OFF	-408
+#define KINSN_X86_SHADOW_R14_OFF	-400
+#define KINSN_X86_SHADOW_R15_OFF	-392
+#define KINSN_X86_SHADOW_ZF_OFF		-384
+#define KINSN_X86_SHADOW_CF_OFF		-380
+
+static __always_inline bool kinsn_x86_reg_is_shadowed(u8 reg)
+{
+	return reg >= KINSN_X86_REG_R9 && reg <= KINSN_X86_REG_R12;
+}
+
+static __always_inline s16 kinsn_x86_shadow_reg_off(u8 reg)
+{
+	switch (reg) {
+	case BPF_REG_0:
+		return KINSN_X86_SHADOW_RAX_OFF;
+	case BPF_REG_4:
+		return KINSN_X86_SHADOW_RCX_OFF;
+	case BPF_REG_3:
+		return KINSN_X86_SHADOW_RDX_OFF;
+	case BPF_REG_6:
+		return KINSN_X86_SHADOW_RBX_OFF;
+	case BPF_REG_10:
+		return KINSN_X86_SHADOW_RBP_OFF;
+	case BPF_REG_2:
+		return KINSN_X86_SHADOW_RSI_OFF;
+	case BPF_REG_1:
+		return KINSN_X86_SHADOW_RDI_OFF;
+	case BPF_REG_5:
+		return KINSN_X86_SHADOW_R8_OFF;
+	case KINSN_X86_REG_R9:
+		return KINSN_X86_SHADOW_R9_OFF;
+	case KINSN_X86_REG_R10:
+		return KINSN_X86_SHADOW_R10_OFF;
+	case KINSN_X86_REG_R11:
+		return KINSN_X86_SHADOW_R11_OFF;
+	case KINSN_X86_REG_R12:
+		return KINSN_X86_SHADOW_R12_OFF;
+	case BPF_REG_7:
+		return KINSN_X86_SHADOW_R13_OFF;
+	case BPF_REG_8:
+		return KINSN_X86_SHADOW_R14_OFF;
+	case BPF_REG_9:
+		return KINSN_X86_SHADOW_R15_OFF;
+	default:
+		return 0;
+	}
+}
+
+static __always_inline bool kinsn_bpf_gpr_valid(u8 reg)
+{
+	return reg < BPF_REG_10 && kinsn_x86_reg_valid(reg);
+}
+
+static __always_inline bool kinsn_x86_operand_valid(u8 reg)
+{
+	return kinsn_x86_valid(reg);
 }
 
 static __always_inline void kinsn_emit_u8(u8 *buf, u32 *len, u8 byte)

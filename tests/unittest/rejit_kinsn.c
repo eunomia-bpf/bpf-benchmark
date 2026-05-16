@@ -128,6 +128,8 @@ enum kinsn_func_id {
 	FUNC_X86_CMPL_IMM32,
 	FUNC_X86_CMOVNEL_RR,
 	FUNC_X86_CMOVEL_RR,
+	FUNC_X86_CMOVNEQ_RR,
+	FUNC_X86_CMOVEQ_RR,
 #endif
 	FUNC_SELECT_TEST,
 	FUNC_SELECT_MOVE,
@@ -147,6 +149,7 @@ enum kinsn_func_id {
 	FUNC_PREFETCH,
 	FUNC_X86_MOVZBL_RR,
 	FUNC_X86_MOVZWL_RR,
+	FUNC_X86_MOVQ_RR,
 	FUNC_X86_MOVZBL_SIB,
 	FUNC_X86_MOVZWL_SIB,
 	FUNC_X86_MOVL_SIB,
@@ -383,6 +386,14 @@ static struct kinsn_func_ref g_funcs[FUNC_CNT] = {
 		.func_name = "bpf_x86_cmovel_rr",
 		.module_id = MOD_SELECT,
 	},
+	[FUNC_X86_CMOVNEQ_RR] = {
+		.func_name = "bpf_x86_cmovneq_rr",
+		.module_id = MOD_SELECT,
+	},
+	[FUNC_X86_CMOVEQ_RR] = {
+		.func_name = "bpf_x86_cmoveq_rr",
+		.module_id = MOD_SELECT,
+	},
 #endif
 	[FUNC_SELECT_TEST] = {
 		.func_name = SELECT_TEST_KFUNC,
@@ -454,6 +465,10 @@ static struct kinsn_func_ref g_funcs[FUNC_CNT] = {
 	},
 	[FUNC_X86_MOVZWL_RR] = {
 		.func_name = "bpf_x86_movzwl_rr",
+		.module_id = MOD_X86_MOV_REG,
+	},
+	[FUNC_X86_MOVQ_RR] = {
+		.func_name = "bpf_x86_movq_rr",
 		.module_id = MOD_X86_MOV_REG,
 	},
 	[FUNC_X86_MOVZBL_SIB] = {
@@ -702,6 +717,14 @@ static int sys_bpf(enum bpf_cmd cmd, union bpf_attr *attr, unsigned int size)
 #define KINSN_X86_FLAG_CMP_IMM64 2
 #define KINSN_X86_FLAG_CMP_RR32 3
 #define KINSN_X86_FLAG_CMP_IMM32 4
+#define KINSN_X86_FLAG_STACK 5
+#define KINSN_X86_R9 11
+#define KINSN_X86_R10 12
+#define KINSN_X86_R11 13
+#define KINSN_X86_R12 14
+#define KINSN_X86_CMOV_STACK_PAYLOAD(DST, SRC, TMP) \
+	((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(TMP) << 8) | \
+	 ((__u64)(KINSN_X86_FLAG_STACK) << 12))
 #define KINSN_X86_CMOV_CMP_IMM_PAYLOAD(DST, SRC, LHS, IMM, KIND) \
 	((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(LHS) << 8) | \
 	 ((__u64)(KIND) << 12) | ((__u64)(__u32)(IMM) << 16))
@@ -719,8 +742,13 @@ static int sys_bpf(enum bpf_cmd cmd, union bpf_attr *attr, unsigned int size)
 	((__u64)(DST) | ((__u64)(TMP) << 4) | ((__u64)(__u8)(IMM) << 8))
 #define KINSN_REG_REG_PAYLOAD(DST, SRC) \
 	((__u64)(DST) | ((__u64)(SRC) << 4))
+#define KINSN_REG_TMP_PAYLOAD(REG, TMP) \
+	((__u64)(REG) | ((__u64)(TMP) << 4))
 #define KINSN_REG_REG_TMP_PAYLOAD(DST, SRC, TMP) \
 	((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(TMP) << 8))
+#define KINSN_REG_REG_TMP2_PAYLOAD(DST, SRC, TMP_DST, TMP_SRC) \
+	((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(TMP_DST) << 8) | \
+	 ((__u64)(TMP_SRC) << 12))
 
 #define KINSN_REG_COND_PAYLOAD(DST, COND) \
 	((__u64)(DST) | ((__u64)(COND) << 4))
@@ -1669,6 +1697,78 @@ static int run_single_kinsn_expect_jit_bytes(const char *name,
 	return 0;
 }
 
+static int run_kinsn_sequence_expect_jit_bytes(const char *name,
+					       struct bpf_insn *prog,
+					       __u32 prog_cnt,
+					       const enum kinsn_func_id *funcs,
+					       size_t func_cnt,
+					       __u32 expected_retval,
+					       const __u8 *needle,
+					       __u32 needle_len,
+					       const char *missing_reason)
+{
+	int fd_array[MOD_CNT + 1];
+	__u32 fd_array_cnt;
+	char log_buf[LOG_BUF_SIZE];
+	__u8 *jited = NULL;
+	__u32 jited_len = 0;
+	__u32 retval = 0;
+	int prog_fd;
+	size_t i;
+
+	for (i = 0; i < func_cnt; i++) {
+		if (skip_if_module_unavailable(name,
+					       g_funcs[funcs[i]].module_id))
+			return 0;
+	}
+	if (patch_kinsn_sequence(prog, prog_cnt, funcs, func_cnt,
+				 fd_array, &fd_array_cnt) < 0) {
+		TEST_FAIL(name, "failed to patch kinsn sequence");
+		return 1;
+	}
+
+	memset(log_buf, 0, sizeof(log_buf));
+	prog_fd = load_xdp_prog(prog_ret_0, ARRAY_SIZE(prog_ret_0),
+				NULL, 0, log_buf, sizeof(log_buf));
+	if (prog_fd < 0) {
+		TEST_FAIL(name, "base load failed");
+		return 1;
+	}
+	memset(log_buf, 0, sizeof(log_buf));
+	if (rejit_xdp_prog(prog_fd, prog, prog_cnt, fd_array,
+			   fd_array_cnt, log_buf, sizeof(log_buf)) < 0) {
+		fprintf(stderr, "    verifier log:\n%s\n", log_buf);
+		TEST_FAIL(name, "REJIT failed");
+		close(prog_fd);
+		return 1;
+	}
+	if (test_run_xdp(prog_fd, &retval) < 0 || retval != expected_retval) {
+		char msg[128];
+
+		snprintf(msg, sizeof(msg), "retval=%u expected=%u",
+			 retval, expected_retval);
+		TEST_FAIL(name, msg);
+		close(prog_fd);
+		return 1;
+	}
+	if (get_jited_program(prog_fd, &jited, &jited_len) < 0) {
+		TEST_FAIL(name, "failed to fetch JIT image");
+		close(prog_fd);
+		return 1;
+	}
+	if (!find_bytes(jited, jited_len, needle, needle_len)) {
+		TEST_FAIL(name, missing_reason);
+		free(jited);
+		close(prog_fd);
+		return 1;
+	}
+
+	free(jited);
+	close(prog_fd);
+	TEST_PASS(name);
+	return 0;
+}
+
 static int test_kinsn_discovery(void)
 {
 	const char *name = "kinsn_discovery";
@@ -2046,7 +2146,7 @@ static int test_rejit_x86_cmpq_rr_jit_emits_cmp(void)
 #if defined(__x86_64__)
 	static const __u8 cmpq_rr[] = { 0x48, 0x39, 0xf8 };
 	struct bpf_insn prog[] = {
-		BPF_MOV64_IMM(BPF_REG_0, 7),
+		BPF_MOV64_IMM(BPF_REG_0, 2),
 		BPF_MOV64_IMM(BPF_REG_1, 5),
 		BPF_KINSN_SIDECAR(KINSN_REG_REG_PAYLOAD(BPF_REG_0,
 							BPF_REG_1)),
@@ -2056,7 +2156,7 @@ static int test_rejit_x86_cmpq_rr_jit_emits_cmp(void)
 
 	return run_single_kinsn_expect_jit_bytes(
 		"x86_cmpq_rr_jit_emits_cmp", MOD_SELECT,
-		FUNC_X86_CMPQ_RR, prog, ARRAY_SIZE(prog), 7,
+		FUNC_X86_CMPQ_RR, prog, ARRAY_SIZE(prog), 2,
 		cmpq_rr, ARRAY_SIZE(cmpq_rr),
 		"CMP r64,r64 sequence not found in JIT image");
 #else
@@ -2070,7 +2170,7 @@ static int test_rejit_x86_cmpl_rr_jit_emits_cmp(void)
 #if defined(__x86_64__)
 	static const __u8 cmpl_rr[] = { 0x39, 0xf8 };
 	struct bpf_insn prog[] = {
-		BPF_MOV64_IMM(BPF_REG_0, 7),
+		BPF_MOV64_IMM(BPF_REG_0, 2),
 		BPF_MOV64_IMM(BPF_REG_1, 5),
 		BPF_KINSN_SIDECAR(KINSN_REG_REG_PAYLOAD(BPF_REG_0,
 							BPF_REG_1)),
@@ -2080,7 +2180,7 @@ static int test_rejit_x86_cmpl_rr_jit_emits_cmp(void)
 
 	return run_single_kinsn_expect_jit_bytes(
 		"x86_cmpl_rr_jit_emits_cmp", MOD_SELECT,
-		FUNC_X86_CMPL_RR, prog, ARRAY_SIZE(prog), 7,
+		FUNC_X86_CMPL_RR, prog, ARRAY_SIZE(prog), 2,
 		cmpl_rr, ARRAY_SIZE(cmpl_rr),
 		"CMP r32,r32 sequence not found in JIT image");
 #else
@@ -2094,7 +2194,7 @@ static int test_rejit_x86_cmpq_imm32_jit_emits_cmp(void)
 #if defined(__x86_64__)
 	static const __u8 cmpq_imm[] = { 0x48, 0x81, 0xf8, 0x78, 0x56, 0x34, 0x12 };
 	struct bpf_insn prog[] = {
-		BPF_MOV64_IMM(BPF_REG_0, 7),
+		BPF_MOV64_IMM(BPF_REG_0, 2),
 		BPF_KINSN_SIDECAR(KINSN_REG_IMM_PAYLOAD(BPF_REG_0,
 							0x12345678)),
 		BPF_CALL_KINSN(0, 0),
@@ -2103,7 +2203,7 @@ static int test_rejit_x86_cmpq_imm32_jit_emits_cmp(void)
 
 	return run_single_kinsn_expect_jit_bytes(
 		"x86_cmpq_imm32_jit_emits_cmp", MOD_SELECT,
-		FUNC_X86_CMPQ_IMM32, prog, ARRAY_SIZE(prog), 7,
+		FUNC_X86_CMPQ_IMM32, prog, ARRAY_SIZE(prog), 2,
 		cmpq_imm, ARRAY_SIZE(cmpq_imm),
 		"CMP r64,imm32 sequence not found in JIT image");
 #else
@@ -2117,7 +2217,7 @@ static int test_rejit_x86_cmpl_imm32_jit_emits_cmp(void)
 #if defined(__x86_64__)
 	static const __u8 cmpl_imm[] = { 0x81, 0xf8, 0x78, 0x56, 0x34, 0x12 };
 	struct bpf_insn prog[] = {
-		BPF_MOV64_IMM(BPF_REG_0, 7),
+		BPF_MOV64_IMM(BPF_REG_0, 2),
 		BPF_KINSN_SIDECAR(KINSN_REG_IMM_PAYLOAD(BPF_REG_0,
 							0x12345678)),
 		BPF_CALL_KINSN(0, 0),
@@ -2126,7 +2226,7 @@ static int test_rejit_x86_cmpl_imm32_jit_emits_cmp(void)
 
 	return run_single_kinsn_expect_jit_bytes(
 		"x86_cmpl_imm32_jit_emits_cmp", MOD_SELECT,
-		FUNC_X86_CMPL_IMM32, prog, ARRAY_SIZE(prog), 7,
+		FUNC_X86_CMPL_IMM32, prog, ARRAY_SIZE(prog), 2,
 		cmpl_imm, ARRAY_SIZE(cmpl_imm),
 		"CMP r32,imm32 sequence not found in JIT image");
 #else
@@ -2138,20 +2238,26 @@ static int test_rejit_x86_cmpl_imm32_jit_emits_cmp(void)
 static int test_rejit_x86_cmovel_rr_jit_emits_cmove(void)
 {
 #if defined(__x86_64__)
+	enum kinsn_func_id funcs[] = {
+		FUNC_SELECT_TEST,
+		FUNC_X86_CMOVEL_RR,
+	};
 	static const __u8 cmovel[] = { 0x0f, 0x44, 0xc7 };
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_0, 10),
 		BPF_MOV64_IMM(BPF_REG_1, 20),
 		BPF_MOV64_IMM(BPF_REG_4, 0),
-		BPF_KINSN_SIDECAR(KINSN_SELECT_MOVE_PAYLOAD(
-			BPF_REG_0, BPF_REG_1, 0, BPF_REG_4)),
+		BPF_KINSN_SIDECAR(KINSN_TEST_PAYLOAD(BPF_REG_4)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_X86_CMOV_STACK_PAYLOAD(
+			BPF_REG_0, BPF_REG_1, BPF_REG_5)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
 
-	return run_single_kinsn_expect_jit_bytes(
-		"x86_cmovel_rr_jit_emits_cmove", MOD_SELECT,
-		FUNC_X86_CMOVEL_RR, prog, ARRAY_SIZE(prog), 20,
+	return run_kinsn_sequence_expect_jit_bytes(
+		"x86_cmovel_rr_jit_emits_cmove", prog, ARRAY_SIZE(prog),
+		funcs, ARRAY_SIZE(funcs), 20,
 		cmovel, ARRAY_SIZE(cmovel),
 		"CMOVE r32,r32 sequence not found in JIT image");
 #else
@@ -2163,20 +2269,26 @@ static int test_rejit_x86_cmovel_rr_jit_emits_cmove(void)
 static int test_rejit_x86_cmovnel_rr_jit_emits_cmovne(void)
 {
 #if defined(__x86_64__)
+	enum kinsn_func_id funcs[] = {
+		FUNC_SELECT_TEST,
+		FUNC_X86_CMOVNEL_RR,
+	};
 	static const __u8 cmovnel[] = { 0x0f, 0x45, 0xc7 };
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_0, 10),
 		BPF_MOV64_IMM(BPF_REG_1, 20),
 		BPF_MOV64_IMM(BPF_REG_4, 1),
-		BPF_KINSN_SIDECAR(KINSN_SELECT_MOVE_PAYLOAD(
-			BPF_REG_0, BPF_REG_1, 0, BPF_REG_4)),
+		BPF_KINSN_SIDECAR(KINSN_TEST_PAYLOAD(BPF_REG_4)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_X86_CMOV_STACK_PAYLOAD(
+			BPF_REG_0, BPF_REG_1, BPF_REG_5)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
 
-	return run_single_kinsn_expect_jit_bytes(
-		"x86_cmovnel_rr_jit_emits_cmovne", MOD_SELECT,
-		FUNC_X86_CMOVNEL_RR, prog, ARRAY_SIZE(prog), 20,
+	return run_kinsn_sequence_expect_jit_bytes(
+		"x86_cmovnel_rr_jit_emits_cmovne", prog, ARRAY_SIZE(prog),
+		funcs, ARRAY_SIZE(funcs), 20,
 		cmovnel, ARRAY_SIZE(cmovnel),
 		"CMOVNE r32,r32 sequence not found in JIT image");
 #else
@@ -2188,23 +2300,28 @@ static int test_rejit_x86_cmovnel_rr_jit_emits_cmovne(void)
 static int test_rejit_x86_cmovbl_rr_jit_emits_cmovb(void)
 {
 #if defined(__x86_64__)
+	enum kinsn_func_id funcs[] = {
+		FUNC_X86_CMPQ_RR,
+		FUNC_X86_CMOVBL_RR,
+	};
 	static const __u8 cmovbl[] = { 0x0f, 0x42, 0xc7 };
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_0, 10),
 		BPF_MOV64_IMM(BPF_REG_1, 20),
 		BPF_MOV64_IMM(BPF_REG_4, 0),
 		BPF_MOV64_IMM(BPF_REG_5, 1),
-		BPF_MOV64_IMM(BPF_REG_6, 1),
-		BPF_JMP_REG(BPF_JLT, BPF_REG_4, BPF_REG_5, 0),
-		BPF_KINSN_SIDECAR(KINSN_SELECT_MOVE_PAYLOAD(
-			BPF_REG_0, BPF_REG_1, 0, BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_REG_REG_PAYLOAD(BPF_REG_4,
+							BPF_REG_5)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_X86_CMOV_STACK_PAYLOAD(
+			BPF_REG_0, BPF_REG_1, BPF_REG_6)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
 
-	return run_single_kinsn_expect_jit_bytes(
-		"x86_cmovbl_rr_jit_emits_cmovb", MOD_SELECT,
-		FUNC_X86_CMOVBL_RR, prog, ARRAY_SIZE(prog), 20,
+	return run_kinsn_sequence_expect_jit_bytes(
+		"x86_cmovbl_rr_jit_emits_cmovb", prog, ARRAY_SIZE(prog),
+		funcs, ARRAY_SIZE(funcs), 20,
 		cmovbl, ARRAY_SIZE(cmovbl),
 		"CMOVB r32,r32 sequence not found in JIT image");
 #else
@@ -2216,23 +2333,28 @@ static int test_rejit_x86_cmovbl_rr_jit_emits_cmovb(void)
 static int test_rejit_x86_cmovbq_rr_jit_emits_cmovb(void)
 {
 #if defined(__x86_64__)
+	enum kinsn_func_id funcs[] = {
+		FUNC_X86_CMPQ_RR,
+		FUNC_X86_CMOVBQ_RR,
+	};
 	static const __u8 cmovbq[] = { 0x48, 0x0f, 0x42, 0xc7 };
 	struct bpf_insn prog[] = {
 		BPF_MOV64_IMM(BPF_REG_0, 10),
 		BPF_MOV64_IMM(BPF_REG_1, 20),
 		BPF_MOV64_IMM(BPF_REG_4, 0),
 		BPF_MOV64_IMM(BPF_REG_5, 1),
-		BPF_MOV64_IMM(BPF_REG_6, 1),
-		BPF_JMP_REG(BPF_JLT, BPF_REG_4, BPF_REG_5, 0),
-		BPF_KINSN_SIDECAR(KINSN_SELECT_MOVE_PAYLOAD(
-			BPF_REG_0, BPF_REG_1, 0, BPF_REG_6)),
+		BPF_KINSN_SIDECAR(KINSN_REG_REG_PAYLOAD(BPF_REG_4,
+							BPF_REG_5)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_X86_CMOV_STACK_PAYLOAD(
+			BPF_REG_0, BPF_REG_1, BPF_REG_6)),
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
 
-	return run_single_kinsn_expect_jit_bytes(
-		"x86_cmovbq_rr_jit_emits_cmovb", MOD_SELECT,
-		FUNC_X86_CMOVBQ_RR, prog, ARRAY_SIZE(prog), 20,
+	return run_kinsn_sequence_expect_jit_bytes(
+		"x86_cmovbq_rr_jit_emits_cmovb", prog, ARRAY_SIZE(prog),
+		funcs, ARRAY_SIZE(funcs), 20,
 		cmovbq, ARRAY_SIZE(cmovbq),
 		"CMOVB r64,r64 sequence not found in JIT image");
 #else
@@ -2372,6 +2494,46 @@ static int test_rejit_x86_cmove_cmp_imm_payload_applies(void)
 		funcs, ARRAY_SIZE(funcs), 20);
 #else
 	TEST_SKIP("x86_cmove_cmp_imm_payload_applies", "x86_64 only");
+	return 0;
+#endif
+}
+
+static int test_rejit_x86_cmov_stack_flags_apply(void)
+{
+#if defined(__x86_64__)
+	enum kinsn_func_id funcs[] = {
+		FUNC_SELECT_TEST,
+		FUNC_SELECT_MOVE,
+		FUNC_X86_CMPQ_RR,
+		FUNC_X86_CMOVBQ_RR,
+	};
+	struct bpf_insn prog[] = {
+		BPF_MOV64_IMM(BPF_REG_0, 10),
+		BPF_MOV64_IMM(BPF_REG_1, 20),
+		BPF_MOV64_IMM(BPF_REG_4, 1),
+		BPF_KINSN_SIDECAR(KINSN_TEST_PAYLOAD(BPF_REG_4)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_X86_CMOV_STACK_PAYLOAD(
+			BPF_REG_0, BPF_REG_1, BPF_REG_5)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_MOV64_IMM(BPF_REG_4, 0),
+		BPF_MOV64_IMM(BPF_REG_5, 1),
+		BPF_MOV64_IMM(BPF_REG_2, 7),
+		BPF_KINSN_SIDECAR(KINSN_REG_REG_PAYLOAD(BPF_REG_4,
+							BPF_REG_5)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_X86_CMOV_STACK_PAYLOAD(
+			BPF_REG_2, BPF_REG_1, BPF_REG_6)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_ALU64_REG(BPF_ADD, BPF_REG_0, BPF_REG_2),
+		BPF_EXIT_INSN(),
+	};
+
+	return run_kinsn_sequence_expect_success(
+		"x86_cmov_stack_flags_apply", prog, ARRAY_SIZE(prog),
+		funcs, ARRAY_SIZE(funcs), 40);
+#else
+	TEST_SKIP("x86_cmov_stack_flags_apply", "x86_64 only");
 	return 0;
 #endif
 }
@@ -2550,8 +2712,13 @@ static int test_rejit_select_apply(void)
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_2),
 		BPF_KINSN_SIDECAR(KINSN_TEST_PAYLOAD(BPF_REG_3)),
 		BPF_CALL_KINSN(0, 0),
+#if defined(__x86_64__)
+		BPF_KINSN_SIDECAR(KINSN_X86_CMOV_STACK_PAYLOAD(
+			BPF_REG_0, BPF_REG_1, BPF_REG_4)),
+#else
 		BPF_KINSN_SIDECAR(KINSN_SELECT_MOVE_PAYLOAD(
 			BPF_REG_0, BPF_REG_1, BPF_REG_2, BPF_REG_3)),
+#endif
 		BPF_CALL_KINSN(0, 0),
 		BPF_EXIT_INSN(),
 	};
@@ -2574,8 +2741,13 @@ static int test_rejit_select_arbitrary_dst_reg(void)
 		BPF_MOV64_REG(BPF_REG_5, BPF_REG_2),
 		BPF_KINSN_SIDECAR(KINSN_TEST_PAYLOAD(BPF_REG_3)),
 		BPF_CALL_KINSN(0, 0),
+#if defined(__x86_64__)
+		BPF_KINSN_SIDECAR(KINSN_X86_CMOV_STACK_PAYLOAD(
+			BPF_REG_5, BPF_REG_1, BPF_REG_4)),
+#else
 		BPF_KINSN_SIDECAR(KINSN_SELECT_MOVE_PAYLOAD(
 			BPF_REG_5, BPF_REG_1, BPF_REG_2, BPF_REG_3)),
+#endif
 		BPF_CALL_KINSN(0, 0),
 		BPF_MOV64_REG(BPF_REG_0, BPF_REG_5),
 		BPF_EXIT_INSN(),
@@ -2727,6 +2899,81 @@ static int test_rejit_x86_movswl_rr_jit_emits_movsx(void)
 		"MOVSX r32,r16 sequence not found in JIT image");
 #else
 	TEST_SKIP("x86_movswl_rr_jit_emits_movsx", "x86_64 only");
+	return 0;
+#endif
+}
+
+static int test_rejit_x86_pseudo_reg_movq_roundtrip(void)
+{
+#if defined(__x86_64__)
+	enum kinsn_func_id funcs[] = {
+		FUNC_X86_MOVQ_RR,
+		FUNC_X86_MOVQ_RR,
+	};
+	static const __u8 mov_rax_r10[] = { 0x49, 0x89, 0xc2 };
+	struct bpf_insn prog[] = {
+		BPF_MOV64_IMM(BPF_REG_0, 123),
+		BPF_KINSN_SIDECAR(KINSN_REG_REG_TMP_PAYLOAD(
+			KINSN_X86_R10, BPF_REG_0, BPF_REG_6)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_MOV64_IMM(BPF_REG_0, 0),
+		BPF_KINSN_SIDECAR(KINSN_REG_REG_TMP_PAYLOAD(
+			BPF_REG_0, KINSN_X86_R10, BPF_REG_6)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_EXIT_INSN(),
+	};
+
+	return run_kinsn_sequence_expect_jit_bytes(
+		"x86_pseudo_reg_movq_roundtrip", prog, ARRAY_SIZE(prog),
+		funcs, ARRAY_SIZE(funcs), 123,
+		mov_rax_r10, ARRAY_SIZE(mov_rax_r10),
+		"MOV r64,r64 into native r10 sequence not found in JIT image");
+#else
+	TEST_SKIP("x86_pseudo_reg_movq_roundtrip", "x86_64 only");
+	return 0;
+#endif
+}
+
+static int test_rejit_x86_pseudo_reg_cmp_cmov_apply(void)
+{
+#if defined(__x86_64__)
+	enum kinsn_func_id funcs[] = {
+		FUNC_X86_MOVQ_RR,
+		FUNC_X86_MOVQ_RR,
+		FUNC_X86_CMPQ_RR,
+		FUNC_X86_CMOVNEQ_RR,
+		FUNC_X86_MOVQ_RR,
+	};
+	static const __u8 cmovne_r11_r10[] = { 0x4d, 0x0f, 0x45, 0xd3 };
+	struct bpf_insn prog[] = {
+		BPF_MOV64_IMM(BPF_REG_0, 42),
+		BPF_MOV64_IMM(BPF_REG_1, 17),
+		BPF_KINSN_SIDECAR(KINSN_REG_REG_TMP_PAYLOAD(
+			KINSN_X86_R10, BPF_REG_0, BPF_REG_6)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_REG_REG_TMP_PAYLOAD(
+			KINSN_X86_R11, BPF_REG_1, BPF_REG_6)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_REG_REG_TMP2_PAYLOAD(
+			KINSN_X86_R10, KINSN_X86_R11, BPF_REG_6, BPF_REG_7)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_X86_CMOV_STACK_PAYLOAD(
+			KINSN_X86_R10, KINSN_X86_R11, BPF_REG_6)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_MOV64_IMM(BPF_REG_0, 0),
+		BPF_KINSN_SIDECAR(KINSN_REG_REG_TMP_PAYLOAD(
+			BPF_REG_0, KINSN_X86_R10, BPF_REG_6)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_EXIT_INSN(),
+	};
+
+	return run_kinsn_sequence_expect_jit_bytes(
+		"x86_pseudo_reg_cmp_cmov_apply", prog, ARRAY_SIZE(prog),
+		funcs, ARRAY_SIZE(funcs), 17,
+		cmovne_r11_r10, ARRAY_SIZE(cmovne_r11_r10),
+		"CMOVNE r64,r64 over native r10/r11 sequence not found in JIT image");
+#else
+	TEST_SKIP("x86_pseudo_reg_cmp_cmov_apply", "x86_64 only");
 	return 0;
 #endif
 }
@@ -3834,6 +4081,8 @@ int main(int argc, char **argv)
 		ret |= test_rejit_x86_sete_cmp_imm_payload_applies();
 	if (should_run_test(filter, "x86_cmove_cmp_imm_payload_applies"))
 		ret |= test_rejit_x86_cmove_cmp_imm_payload_applies();
+	if (should_run_test(filter, "x86_cmov_stack_flags_apply"))
+		ret |= test_rejit_x86_cmov_stack_flags_apply();
 	if (should_run_test(filter, "x86_setcc_dst_cond_rejected"))
 		ret |= test_rejit_x86_setcc_dst_cond_rejected();
 	if (should_run_test(filter, "x86_sbbl_imm0_jit_emits_sbb"))
@@ -3866,6 +4115,10 @@ int main(int argc, char **argv)
 		ret |= test_rejit_x86_movzwl_rr_jit_emits_movzx();
 	if (should_run_test(filter, "x86_movswl_rr_jit_emits_movsx"))
 		ret |= test_rejit_x86_movswl_rr_jit_emits_movsx();
+	if (should_run_test(filter, "x86_pseudo_reg_movq_roundtrip"))
+		ret |= test_rejit_x86_pseudo_reg_movq_roundtrip();
+	if (should_run_test(filter, "x86_pseudo_reg_cmp_cmov_apply"))
+		ret |= test_rejit_x86_pseudo_reg_cmp_cmov_apply();
 	if (should_run_test(filter, "x86_movzbl_sib_apply"))
 		ret |= test_rejit_x86_movzbl_sib_apply();
 	if (should_run_test(filter, "x86_movzwl_sib_apply"))

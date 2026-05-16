@@ -6,22 +6,16 @@
      ((__u64)(HAS_BASE) << 15) | ((__u64)(__u32)(DISP) << 16))
 
 /*
- * native asm to handcraft warnings: 15
+ * native asm to handcraft warnings: 9
  *
  * - 0x1100: mov    rcx,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0]
  * - 0x1103: mov    rdx,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4]
  * - 0x1124: cmp    DWORD PTR [rcx+0x8],0x20 [warning-unmapped: CMP operand form has no current kinsn selector: cmp    DWORD PTR [rcx+0x8],0x20]
  * - 0x112a: cmp    DWORD PTR [rcx+0xc],0x10 [warning-unmapped: CMP operand form has no current kinsn selector: cmp    DWORD PTR [rcx+0xc],0x10]
- * - 0x114d: xor    r9d,r9d [warning-reg-remap: zero idiom; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
- * - 0x1150: mov    r10d,r9d [warning-reg-remap: 32-bit register move; native r10 has no exact BPF JIT register; remapped to BPF_REG_6; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
- * - 0x1153: mov    r11,rdi [warning-reg-remap: movq register-to-register kinsn; native r11 has no exact BPF JIT register; remapped to BPF_REG_7]
  * - 0x1156: cmp    QWORD PTR [rcx+r8*8+0x10],rsi [warning-unmapped: CMP operand form has no current kinsn selector: cmp    QWORD PTR [rcx+r8*8+0x10],rsi]
  * - 0x115b: sete   r9b [warning-unmapped: sete is flag-bound; automatic conversion needs an adjacent cmp/test proof]
  * - 0x115f: cmove  rdi,r8 [warning-unmapped: cmove needs an adjacent test/cmp proof payload]
- * - 0x1163: or     r9b,r10b [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15; native r10 has no exact BPF JIT register; remapped to BPF_REG_6]
- * - 0x1166: test   r10b,0x1 [warning-reg-remap: testb imm kinsn; native r10 has no exact BPF JIT register; remapped to BPF_REG_6]
  * - 0x116a: cmovne rdi,r11 [warning-unmapped: cmovne needs an adjacent test/cmp proof payload]
- * - 0x1181: test   r9b,0x1 [warning-reg-remap: testb imm kinsn; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15]
  * - 0x1185: cmovne rdx,rdi [warning-unmapped: cmovne needs an adjacent test/cmp proof payload]
  */
 
@@ -52,12 +46,12 @@ static const struct bpf_insn program[] = {
     HC_JMP_REG(BPF_JGT, BPF_REG_2, BPF_REG_3, -11),
     /* 0x1124: cmp    DWORD PTR [rcx+0x8],0x20 [warning-unmapped: CMP operand form has no current kinsn selector: cmp    DWORD PTR [rcx+0x8],0x20] */
     /* 0x1128: jne    110e <sorted_rule_binary_search_xdp+0xe> [bpf-branch: lowered cmp    DWORD PTR [rcx+0x8],0x20 + jne    110e <sorted_rule_binary_search_xdp+0xe> to verifier-visible load+branch] */
-    HC_LDX(BPF_W, BPF_REG_8, BPF_REG_4, 8),
-    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_8, 0, -13, 32),
+    HC_LDX(BPF_W, BPF_REG_6, BPF_REG_4, 8),
+    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_6, 0, -13, 32),
     /* 0x112a: cmp    DWORD PTR [rcx+0xc],0x10 [warning-unmapped: CMP operand form has no current kinsn selector: cmp    DWORD PTR [rcx+0xc],0x10] */
     /* 0x112e: jne    110e <sorted_rule_binary_search_xdp+0xe> [bpf-branch: lowered cmp    DWORD PTR [rcx+0xc],0x10 + jne    110e <sorted_rule_binary_search_xdp+0xe> to verifier-visible load+branch] */
-    HC_LDX(BPF_W, BPF_REG_8, BPF_REG_4, 12),
-    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_8, 0, -15, 16),
+    HC_LDX(BPF_W, BPF_REG_6, BPF_REG_4, 12),
+    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_6, 0, -15, 16),
     /* 0x1130: xor    eax,eax [bpf-jit: zero idiom] */
     HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_0, 0, 0, 0),
     /* 0x1132: xor    edx,edx [bpf-jit: zero idiom] */
@@ -69,19 +63,19 @@ static const struct bpf_insn program[] = {
     HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_5, 0, 0, 0),
     /* 0x114b: xor    edi,edi [bpf-jit: zero idiom] */
     HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_1, 0, 0, 0),
-    /* 0x114d: xor    r9d,r9d [warning-reg-remap: zero idiom; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15] */
-    HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_9, 0, 0, 0),
-    /* 0x1150: mov    r10d,r9d [warning-reg-remap: 32-bit register move; native r10 has no exact BPF JIT register; remapped to BPF_REG_6; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15] */
-    HC_RAW(BPF_ALU | BPF_MOV | BPF_X, BPF_REG_6, BPF_REG_9, 0, 0),
-    /* 0x1153: mov    r11,rdi [warning-reg-remap: movq register-to-register kinsn; native r11 has no exact BPF JIT register; remapped to BPF_REG_7] */
-    HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_7, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_MOVQ_RR),
+    /* 0x114d: xor    r9d,r9d [bpf-jit: zero idiom] */
+    HC_RAW(BPF_ALU | BPF_MOV | BPF_K, HC_X86_R9, 0, 0, 0),
+    /* 0x1150: mov    r10d,r9d [bpf-jit: 32-bit register move] */
+    HC_RAW(BPF_ALU | BPF_MOV | BPF_X, HC_X86_R10, HC_X86_R9, 0, 0),
+    /* 0x1153: mov    r11,rdi [exact-kinsn: movq register-to-register kinsn; verifier instantiate uses temp BPF_REG_6] */
+    HC_KINSN(HC_REG_REG_TMP_PAYLOAD(HC_X86_R11, BPF_REG_1, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_MOVQ_RR),
     /* 0x1156: cmp    QWORD PTR [rcx+r8*8+0x10],rsi [warning-unmapped: CMP operand form has no current kinsn selector: cmp    QWORD PTR [rcx+r8*8+0x10],rsi] */
     /* 0x115b: sete   r9b [warning-unmapped: sete is flag-bound; automatic conversion needs an adjacent cmp/test proof] */
     /* 0x115f: cmove  rdi,r8 [warning-unmapped: cmove needs an adjacent test/cmp proof payload] */
-    /* 0x1163: or     r9b,r10b [warning-reg-remap: ALU reg operation; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15; native r10 has no exact BPF JIT register; remapped to BPF_REG_6] */
-    HC_RAW(BPF_ALU | BPF_OR | BPF_X, BPF_REG_9, BPF_REG_6, 0, 0),
-    /* 0x1166: test   r10b,0x1 [warning-reg-remap: testb imm kinsn; native r10 has no exact BPF JIT register; remapped to BPF_REG_6] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_6, 1), MICRO_HANDCRAFT_BPF_X86_TESTB_IMM),
+    /* 0x1163: or     r9b,r10b [bpf-jit: ALU reg operation] */
+    HC_RAW(BPF_ALU | BPF_OR | BPF_X, HC_X86_R9, HC_X86_R10, 0, 0),
+    /* 0x1166: test   r10b,0x1 [exact-kinsn: testb imm kinsn; verifier instantiate uses temp BPF_REG_6] */
+    HC_KINSN(HC_REG_TMP_IMM_PAYLOAD(HC_X86_R10, BPF_REG_6, 1), MICRO_HANDCRAFT_BPF_X86_TESTB_IMM),
     /* 0x116a: cmovne rdi,r11 [warning-unmapped: cmovne needs an adjacent test/cmp proof payload] */
     /* 0x116e: inc    r8 [exact-kinsn: incq reg kinsn] */
     HC_KINSN(HC_REG_PAYLOAD(BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_INCQ),
@@ -95,8 +89,8 @@ static const struct bpf_insn program[] = {
     HC_RAW(BPF_ALU64 | BPF_ADD | BPF_K, BPF_REG_2, 0, 0, 32),
     /* 0x117e: xor    rdx,rsi [bpf-jit: ALU reg operation] */
     HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_3, BPF_REG_2, 0, 0),
-    /* 0x1181: test   r9b,0x1 [warning-reg-remap: testb imm kinsn; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_9, 1), MICRO_HANDCRAFT_BPF_X86_TESTB_IMM),
+    /* 0x1181: test   r9b,0x1 [exact-kinsn: testb imm kinsn; verifier instantiate uses temp BPF_REG_6] */
+    HC_KINSN(HC_REG_TMP_IMM_PAYLOAD(HC_X86_R9, BPF_REG_6, 1), MICRO_HANDCRAFT_BPF_X86_TESTB_IMM),
     /* 0x1185: cmovne rdx,rdi [warning-unmapped: cmovne needs an adjacent test/cmp proof payload] */
     /* 0x1189: inc    rax [exact-kinsn: incq reg kinsn] */
     HC_KINSN(HC_REG_PAYLOAD(BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_INCQ),

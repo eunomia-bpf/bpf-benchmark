@@ -1889,17 +1889,20 @@ static const struct bpf_insn program[] = {
     HC_LDX(BPF_W, BPF_REG_3, BPF_REG_1, 4),
     /* 0x1107: xor    eax,eax [bpf-jit: zero idiom] */
     HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_0, 0, 0, 0),
-    /* 0x1109: cmp    rcx,rdx [cmp-state: sets flags; materialized by following jcc when possible] */
+    /* 0x1109: cmp    rcx,rdx [exact-kinsn: cmpq reg,reg kinsn] */
+    HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_4, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x110c: ja     1569 <siphash_rotate64_mixer_xdp+0x469> [bpf-branch: lowered cmp    rcx,rdx + ja     1569 <siphash_rotate64_mixer_xdp+0x469> to verifier-visible BPF branch] */
-    HC_JMP_REG(BPF_JGT, BPF_REG_4, BPF_REG_3, 444),
+    HC_JMP_REG(BPF_JGT, BPF_REG_4, BPF_REG_3, 448),
     /* 0x1112: lea    rsi,[rcx+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_4, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
-    /* 0x1116: cmp    rsi,rdx [cmp-state: sets flags; materialized by following jcc when possible] */
+    /* 0x1116: cmp    rsi,rdx [exact-kinsn: cmpq reg,reg kinsn] */
+    HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_2, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x1119: ja     1569 <siphash_rotate64_mixer_xdp+0x469> [bpf-branch: lowered cmp    rsi,rdx + ja     1569 <siphash_rotate64_mixer_xdp+0x469> to verifier-visible BPF branch] */
-    HC_JMP_REG(BPF_JGT, BPF_REG_2, BPF_REG_3, 441),
+    HC_JMP_REG(BPF_JGT, BPF_REG_2, BPF_REG_3, 443),
     /* 0x111f: lea    rsi,[rcx+0x48] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_4, 0, 0, 1, 0, 72), MICRO_HANDCRAFT_BPF_X86_LEAQ),
-    /* 0x1123: cmp    rsi,rdx [cmp-state: sets flags; materialized by following jcc when possible] */
+    /* 0x1123: cmp    rsi,rdx [exact-kinsn: cmpq reg,reg kinsn] */
+    HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_2, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x1126: ja     1569 <siphash_rotate64_mixer_xdp+0x469> [bpf-branch: lowered cmp    rsi,rdx + ja     1569 <siphash_rotate64_mixer_xdp+0x469> to verifier-visible BPF branch] */
     HC_JMP_REG(BPF_JGT, BPF_REG_2, BPF_REG_3, 438),
     /* 0x112c: mov    r9,QWORD PTR [rcx+0x8] [warning-reg-remap: direct memory load via x86 kinsn selector; native r9 has no exact BPF JIT register; remapped to BPF_REG_9/final r15] */
@@ -2532,333 +2535,337 @@ Disassembly of section .data:
    5:	0f 1f 00             	nop    DWORD PTR [rax]
    8:	55                   	push   rbp
    9:	48 89 e5             	mov    rbp,rsp
-   c:	53                   	push   rbx
-   d:	41 57                	push   r15
-   f:	48 8b 4f 00          	mov    rcx,QWORD PTR [rdi+0x0]
-  13:	48 8b 57 08          	mov    rdx,QWORD PTR [rdi+0x8]
-  17:	31 c0                	xor    eax,eax
-  19:	48 39 d1             	cmp    rcx,rdx
-  1c:	0f 87 57 04 00 00    	ja     0x479
-  22:	48 8d 71 08          	lea    rsi,[rcx+0x8]
-  26:	48 39 d6             	cmp    rsi,rdx
-  29:	0f 87 4a 04 00 00    	ja     0x479
-  2f:	48 8d 71 48          	lea    rsi,[rcx+0x48]
+   c:	48 81 ec 80 01 00 00 	sub    rsp,0x180
+  13:	53                   	push   rbx
+  14:	41 57                	push   r15
+  16:	48 8b 4f 00          	mov    rcx,QWORD PTR [rdi+0x0]
+  1a:	48 8b 57 08          	mov    rdx,QWORD PTR [rdi+0x8]
+  1e:	31 c0                	xor    eax,eax
+  20:	48 39 d1             	cmp    rcx,rdx
+  23:	48 39 d1             	cmp    rcx,rdx
+  26:	0f 87 5d 04 00 00    	ja     0x489
+  2c:	48 8d 71 08          	lea    rsi,[rcx+0x8]
+  30:	48 39 d6             	cmp    rsi,rdx
   33:	48 39 d6             	cmp    rsi,rdx
-  36:	0f 87 3d 04 00 00    	ja     0x479
-  3c:	4c 8b 79 08          	mov    r15,QWORD PTR [rcx+0x8]
-  40:	48 bf 73 65 74 79 62 	movabs rdi,0x7465646279746573
-  47:	64 65 74 
-  4a:	4c 31 ff             	xor    rdi,r15
-  4d:	48 ba 61 72 65 6e 65 	movabs rdx,0x6c7967656e657261
-  54:	67 79 6c 
-  57:	48 01 fa             	add    rdx,rdi
-  5a:	48 b8 d0 ea 9f c1 6f 	movabs rax,0xa60c596fc19fead0
-  61:	59 0c a6 
-  64:	48 01 f8             	add    rax,rdi
-  67:	48 c1 c7 10          	rol    rdi,0x10
-  6b:	48 31 d7             	xor    rdi,rdx
-  6e:	49 b8 c6 df de d7 e2 	movabs r8,0xded7d4e2d7dedfc6
-  75:	d4 d7 de 
-  78:	49 01 f8             	add    r8,rdi
-  7b:	48 c1 c7 15          	rol    rdi,0x15
-  7f:	48 ba 25 73 de f0 74 	movabs rdx,0xe414a674f0de7325
-  86:	a6 14 e4 
-  89:	48 31 c2             	xor    rdx,rax
-  8c:	48 c1 c0 20          	rol    rax,0x20
-  90:	4c 31 c7             	xor    rdi,r8
-  93:	49 01 d0             	add    r8,rdx
-  96:	48 c1 c2 0d          	rol    rdx,0xd
-  9a:	4c 31 c2             	xor    rdx,r8
-  9d:	49 c1 c0 20          	rol    r8,0x20
-  a1:	48 01 f8             	add    rax,rdi
-  a4:	48 c1 c7 10          	rol    rdi,0x10
-  a8:	48 31 c7             	xor    rdi,rax
-  ab:	49 01 f8             	add    r8,rdi
-  ae:	48 c1 c7 15          	rol    rdi,0x15
-  b2:	48 01 d0             	add    rax,rdx
-  b5:	48 c1 c2 11          	rol    rdx,0x11
-  b9:	48 8b 71 10          	mov    rsi,QWORD PTR [rcx+0x10]
-  bd:	48 31 c2             	xor    rdx,rax
-  c0:	48 c1 c0 20          	rol    rax,0x20
-  c4:	4d 31 c7             	xor    r15,r8
-  c7:	49 01 d7             	add    r15,rdx
-  ca:	48 c1 c2 0d          	rol    rdx,0xd
-  ce:	49 31 f0             	xor    r8,rsi
-  d1:	4c 31 fa             	xor    rdx,r15
-  d4:	49 c1 c7 20          	rol    r15,0x20
-  d8:	49 31 f8             	xor    r8,rdi
-  db:	4c 01 c0             	add    rax,r8
-  de:	49 c1 c0 10          	rol    r8,0x10
-  e2:	49 31 c0             	xor    r8,rax
-  e5:	4d 01 c7             	add    r15,r8
-  e8:	49 c1 c0 15          	rol    r8,0x15
-  ec:	48 01 d0             	add    rax,rdx
-  ef:	48 c1 c2 11          	rol    rdx,0x11
-  f3:	48 31 c2             	xor    rdx,rax
-  f6:	48 c1 c0 20          	rol    rax,0x20
-  fa:	4d 31 f8             	xor    r8,r15
-  fd:	49 01 d7             	add    r15,rdx
- 100:	48 c1 c2 0d          	rol    rdx,0xd
- 104:	4c 31 fa             	xor    rdx,r15
- 107:	49 c1 c7 20          	rol    r15,0x20
- 10b:	4c 01 c0             	add    rax,r8
- 10e:	49 c1 c0 10          	rol    r8,0x10
- 112:	49 31 c0             	xor    r8,rax
- 115:	4d 01 c7             	add    r15,r8
- 118:	49 c1 c0 15          	rol    r8,0x15
- 11c:	48 01 d0             	add    rax,rdx
- 11f:	48 c1 c2 11          	rol    rdx,0x11
- 123:	48 8b 79 18          	mov    rdi,QWORD PTR [rcx+0x18]
- 127:	48 31 c2             	xor    rdx,rax
- 12a:	48 c1 c0 20          	rol    rax,0x20
- 12e:	4c 31 fe             	xor    rsi,r15
- 131:	48 01 d6             	add    rsi,rdx
- 134:	48 c1 c2 0d          	rol    rdx,0xd
- 138:	49 31 ff             	xor    r15,rdi
- 13b:	48 31 f2             	xor    rdx,rsi
- 13e:	48 c1 c6 20          	rol    rsi,0x20
- 142:	4d 31 c7             	xor    r15,r8
- 145:	4c 01 f8             	add    rax,r15
- 148:	49 c1 c7 10          	rol    r15,0x10
- 14c:	49 31 c7             	xor    r15,rax
- 14f:	4c 01 fe             	add    rsi,r15
- 152:	49 c1 c7 15          	rol    r15,0x15
- 156:	48 01 d0             	add    rax,rdx
- 159:	48 c1 c2 11          	rol    rdx,0x11
- 15d:	48 31 c2             	xor    rdx,rax
- 160:	48 c1 c0 20          	rol    rax,0x20
- 164:	49 31 f7             	xor    r15,rsi
- 167:	48 01 d6             	add    rsi,rdx
- 16a:	48 c1 c2 0d          	rol    rdx,0xd
- 16e:	48 31 f2             	xor    rdx,rsi
- 171:	48 c1 c6 20          	rol    rsi,0x20
- 175:	4c 01 f8             	add    rax,r15
- 178:	49 c1 c7 10          	rol    r15,0x10
- 17c:	49 31 c7             	xor    r15,rax
- 17f:	4c 01 fe             	add    rsi,r15
- 182:	49 c1 c7 15          	rol    r15,0x15
- 186:	48 01 d0             	add    rax,rdx
- 189:	48 c1 c2 11          	rol    rdx,0x11
- 18d:	4c 8b 41 20          	mov    r8,QWORD PTR [rcx+0x20]
- 191:	48 31 c2             	xor    rdx,rax
- 194:	48 c1 c0 20          	rol    rax,0x20
- 198:	48 31 f7             	xor    rdi,rsi
- 19b:	48 01 d7             	add    rdi,rdx
- 19e:	48 c1 c2 0d          	rol    rdx,0xd
- 1a2:	4c 31 c6             	xor    rsi,r8
- 1a5:	48 31 fa             	xor    rdx,rdi
- 1a8:	48 c1 c7 20          	rol    rdi,0x20
- 1ac:	4c 31 fe             	xor    rsi,r15
- 1af:	48 01 f0             	add    rax,rsi
- 1b2:	48 c1 c6 10          	rol    rsi,0x10
- 1b6:	48 31 c6             	xor    rsi,rax
- 1b9:	48 01 f7             	add    rdi,rsi
- 1bc:	48 c1 c6 15          	rol    rsi,0x15
- 1c0:	48 01 d0             	add    rax,rdx
- 1c3:	48 c1 c2 11          	rol    rdx,0x11
- 1c7:	48 31 c2             	xor    rdx,rax
- 1ca:	48 c1 c0 20          	rol    rax,0x20
- 1ce:	48 31 fe             	xor    rsi,rdi
- 1d1:	48 01 d7             	add    rdi,rdx
- 1d4:	48 c1 c2 0d          	rol    rdx,0xd
- 1d8:	48 31 fa             	xor    rdx,rdi
- 1db:	48 c1 c7 20          	rol    rdi,0x20
- 1df:	48 01 f0             	add    rax,rsi
- 1e2:	48 c1 c6 10          	rol    rsi,0x10
- 1e6:	48 31 c6             	xor    rsi,rax
- 1e9:	48 01 f7             	add    rdi,rsi
- 1ec:	48 c1 c6 15          	rol    rsi,0x15
- 1f0:	48 01 d0             	add    rax,rdx
- 1f3:	48 c1 c2 11          	rol    rdx,0x11
- 1f7:	4c 8b 79 28          	mov    r15,QWORD PTR [rcx+0x28]
- 1fb:	48 31 c2             	xor    rdx,rax
- 1fe:	48 c1 c0 20          	rol    rax,0x20
- 202:	49 31 f8             	xor    r8,rdi
- 205:	49 01 d0             	add    r8,rdx
- 208:	48 c1 c2 0d          	rol    rdx,0xd
- 20c:	4c 31 ff             	xor    rdi,r15
- 20f:	4c 31 c2             	xor    rdx,r8
- 212:	49 c1 c0 20          	rol    r8,0x20
- 216:	48 31 f7             	xor    rdi,rsi
- 219:	48 01 f8             	add    rax,rdi
- 21c:	48 c1 c7 10          	rol    rdi,0x10
- 220:	48 31 c7             	xor    rdi,rax
- 223:	49 01 f8             	add    r8,rdi
- 226:	48 c1 c7 15          	rol    rdi,0x15
- 22a:	48 01 d0             	add    rax,rdx
- 22d:	48 c1 c2 11          	rol    rdx,0x11
- 231:	48 31 c2             	xor    rdx,rax
- 234:	48 c1 c0 20          	rol    rax,0x20
- 238:	4c 31 c7             	xor    rdi,r8
- 23b:	49 01 d0             	add    r8,rdx
- 23e:	48 c1 c2 0d          	rol    rdx,0xd
- 242:	4c 31 c2             	xor    rdx,r8
- 245:	49 c1 c0 20          	rol    r8,0x20
- 249:	48 01 f8             	add    rax,rdi
- 24c:	48 c1 c7 10          	rol    rdi,0x10
- 250:	48 31 c7             	xor    rdi,rax
- 253:	49 01 f8             	add    r8,rdi
- 256:	48 c1 c7 15          	rol    rdi,0x15
- 25a:	48 01 d0             	add    rax,rdx
- 25d:	48 c1 c2 11          	rol    rdx,0x11
- 261:	48 8b 71 30          	mov    rsi,QWORD PTR [rcx+0x30]
- 265:	48 31 c2             	xor    rdx,rax
- 268:	48 c1 c0 20          	rol    rax,0x20
- 26c:	4d 31 c7             	xor    r15,r8
- 26f:	49 01 d7             	add    r15,rdx
- 272:	48 c1 c2 0d          	rol    rdx,0xd
- 276:	49 31 f0             	xor    r8,rsi
- 279:	4c 31 fa             	xor    rdx,r15
- 27c:	49 c1 c7 20          	rol    r15,0x20
- 280:	49 31 f8             	xor    r8,rdi
- 283:	4c 01 c0             	add    rax,r8
- 286:	49 c1 c0 10          	rol    r8,0x10
- 28a:	49 31 c0             	xor    r8,rax
- 28d:	4d 01 c7             	add    r15,r8
- 290:	49 c1 c0 15          	rol    r8,0x15
- 294:	48 01 d0             	add    rax,rdx
- 297:	48 c1 c2 11          	rol    rdx,0x11
- 29b:	48 31 c2             	xor    rdx,rax
- 29e:	48 c1 c0 20          	rol    rax,0x20
- 2a2:	4d 31 f8             	xor    r8,r15
- 2a5:	49 01 d7             	add    r15,rdx
- 2a8:	48 c1 c2 0d          	rol    rdx,0xd
- 2ac:	4c 31 fa             	xor    rdx,r15
- 2af:	49 c1 c7 20          	rol    r15,0x20
- 2b3:	4c 01 c0             	add    rax,r8
- 2b6:	49 c1 c0 10          	rol    r8,0x10
- 2ba:	49 31 c0             	xor    r8,rax
- 2bd:	4d 01 c7             	add    r15,r8
- 2c0:	49 c1 c0 15          	rol    r8,0x15
- 2c4:	48 01 d0             	add    rax,rdx
- 2c7:	48 c1 c2 11          	rol    rdx,0x11
- 2cb:	48 8b 79 38          	mov    rdi,QWORD PTR [rcx+0x38]
- 2cf:	48 31 c2             	xor    rdx,rax
- 2d2:	48 c1 c0 20          	rol    rax,0x20
- 2d6:	4c 31 fe             	xor    rsi,r15
- 2d9:	48 01 d6             	add    rsi,rdx
- 2dc:	48 c1 c2 0d          	rol    rdx,0xd
- 2e0:	49 31 ff             	xor    r15,rdi
- 2e3:	48 31 f2             	xor    rdx,rsi
- 2e6:	48 c1 c6 20          	rol    rsi,0x20
- 2ea:	4d 31 c7             	xor    r15,r8
- 2ed:	4c 01 f8             	add    rax,r15
- 2f0:	49 c1 c7 10          	rol    r15,0x10
- 2f4:	49 31 c7             	xor    r15,rax
- 2f7:	4c 01 fe             	add    rsi,r15
- 2fa:	49 c1 c7 15          	rol    r15,0x15
- 2fe:	48 01 d0             	add    rax,rdx
- 301:	48 c1 c2 11          	rol    rdx,0x11
- 305:	48 31 c2             	xor    rdx,rax
- 308:	48 c1 c0 20          	rol    rax,0x20
- 30c:	49 31 f7             	xor    r15,rsi
- 30f:	48 01 d6             	add    rsi,rdx
- 312:	48 c1 c2 0d          	rol    rdx,0xd
- 316:	48 31 f2             	xor    rdx,rsi
- 319:	48 c1 c6 20          	rol    rsi,0x20
- 31d:	4c 01 f8             	add    rax,r15
- 320:	49 c1 c7 10          	rol    r15,0x10
- 324:	49 31 c7             	xor    r15,rax
- 327:	4c 01 fe             	add    rsi,r15
- 32a:	49 c1 c7 15          	rol    r15,0x15
- 32e:	48 01 d0             	add    rax,rdx
- 331:	48 c1 c2 11          	rol    rdx,0x11
- 335:	4c 8b 41 40          	mov    r8,QWORD PTR [rcx+0x40]
- 339:	48 31 c2             	xor    rdx,rax
- 33c:	48 c1 c0 20          	rol    rax,0x20
- 340:	48 31 f7             	xor    rdi,rsi
- 343:	48 01 d7             	add    rdi,rdx
- 346:	48 c1 c2 0d          	rol    rdx,0xd
- 34a:	4c 31 c6             	xor    rsi,r8
- 34d:	48 31 fa             	xor    rdx,rdi
- 350:	48 c1 c7 20          	rol    rdi,0x20
- 354:	4c 31 fe             	xor    rsi,r15
- 357:	48 01 f0             	add    rax,rsi
- 35a:	48 c1 c6 10          	rol    rsi,0x10
- 35e:	48 31 c6             	xor    rsi,rax
- 361:	48 01 f7             	add    rdi,rsi
- 364:	48 c1 c6 15          	rol    rsi,0x15
- 368:	48 01 d0             	add    rax,rdx
- 36b:	48 c1 c2 11          	rol    rdx,0x11
- 36f:	48 31 c2             	xor    rdx,rax
- 372:	48 c1 c0 20          	rol    rax,0x20
- 376:	48 31 fe             	xor    rsi,rdi
- 379:	48 01 d7             	add    rdi,rdx
- 37c:	48 c1 c2 0d          	rol    rdx,0xd
- 380:	48 31 fa             	xor    rdx,rdi
- 383:	48 c1 c7 20          	rol    rdi,0x20
- 387:	48 01 f0             	add    rax,rsi
- 38a:	48 c1 c6 10          	rol    rsi,0x10
- 38e:	48 31 c6             	xor    rsi,rax
- 391:	48 01 f7             	add    rdi,rsi
- 394:	48 c1 c6 15          	rol    rsi,0x15
- 398:	48 01 d0             	add    rax,rdx
- 39b:	48 c1 c2 11          	rol    rdx,0x11
- 39f:	48 31 fe             	xor    rsi,rdi
- 3a2:	48 31 c2             	xor    rdx,rax
- 3a5:	48 c1 c0 20          	rol    rax,0x20
- 3a9:	4c 31 c7             	xor    rdi,r8
- 3ac:	48 01 d7             	add    rdi,rdx
- 3af:	48 c1 c2 0d          	rol    rdx,0xd
- 3b3:	48 31 fa             	xor    rdx,rdi
- 3b6:	48 c1 c7 20          	rol    rdi,0x20
- 3ba:	48 35 ff 00 00 00    	xor    rax,0xff
- 3c0:	48 01 f0             	add    rax,rsi
- 3c3:	48 c1 c6 10          	rol    rsi,0x10
- 3c7:	48 31 c6             	xor    rsi,rax
- 3ca:	48 01 f7             	add    rdi,rsi
- 3cd:	48 c1 c6 15          	rol    rsi,0x15
- 3d1:	48 01 d0             	add    rax,rdx
- 3d4:	48 c1 c2 11          	rol    rdx,0x11
- 3d8:	48 31 c2             	xor    rdx,rax
- 3db:	48 c1 c0 20          	rol    rax,0x20
- 3df:	48 31 fe             	xor    rsi,rdi
- 3e2:	48 01 d7             	add    rdi,rdx
- 3e5:	48 c1 c2 0d          	rol    rdx,0xd
- 3e9:	48 31 fa             	xor    rdx,rdi
- 3ec:	48 c1 c7 20          	rol    rdi,0x20
- 3f0:	48 01 f0             	add    rax,rsi
- 3f3:	48 c1 c6 10          	rol    rsi,0x10
- 3f7:	48 31 c6             	xor    rsi,rax
- 3fa:	48 01 f7             	add    rdi,rsi
- 3fd:	48 c1 c6 15          	rol    rsi,0x15
- 401:	48 01 d0             	add    rax,rdx
- 404:	48 c1 c2 11          	rol    rdx,0x11
- 408:	48 31 c2             	xor    rdx,rax
- 40b:	48 c1 c0 20          	rol    rax,0x20
- 40f:	48 31 fe             	xor    rsi,rdi
- 412:	48 01 d7             	add    rdi,rdx
- 415:	48 c1 c2 0d          	rol    rdx,0xd
- 419:	48 31 fa             	xor    rdx,rdi
- 41c:	48 c1 c7 20          	rol    rdi,0x20
- 420:	48 01 f0             	add    rax,rsi
- 423:	48 c1 c6 10          	rol    rsi,0x10
- 427:	48 31 c6             	xor    rsi,rax
- 42a:	48 01 f7             	add    rdi,rsi
- 42d:	48 c1 c6 15          	rol    rsi,0x15
- 431:	48 01 d0             	add    rax,rdx
- 434:	48 c1 c2 11          	rol    rdx,0x11
- 438:	48 31 c2             	xor    rdx,rax
- 43b:	48 c1 c0 20          	rol    rax,0x20
- 43f:	48 31 fe             	xor    rsi,rdi
- 442:	48 01 d7             	add    rdi,rdx
- 445:	48 c1 c2 0d          	rol    rdx,0xd
- 449:	48 01 f0             	add    rax,rsi
- 44c:	48 c1 c6 10          	rol    rsi,0x10
- 450:	48 31 c6             	xor    rsi,rax
- 453:	48 c1 c6 15          	rol    rsi,0x15
- 457:	48 31 fa             	xor    rdx,rdi
- 45a:	48 01 d0             	add    rax,rdx
- 45d:	48 c1 c2 11          	rol    rdx,0x11
- 461:	48 89 c7             	mov    rdi,rax
- 464:	48 c1 c7 20          	rol    rdi,0x20
- 468:	48 31 d7             	xor    rdi,rdx
- 46b:	48 31 f7             	xor    rdi,rsi
- 46e:	48 31 c7             	xor    rdi,rax
- 471:	48 89 39             	mov    QWORD PTR [rcx],rdi
- 474:	b8 02 00 00 00       	mov    eax,0x2
- 479:	41 5f                	pop    r15
- 47b:	5b                   	pop    rbx
- 47c:	c9                   	leave
- 47d:	c3                   	ret
+  36:	0f 87 4d 04 00 00    	ja     0x489
+  3c:	48 8d 71 48          	lea    rsi,[rcx+0x48]
+  40:	48 39 d6             	cmp    rsi,rdx
+  43:	48 39 d6             	cmp    rsi,rdx
+  46:	0f 87 3d 04 00 00    	ja     0x489
+  4c:	4c 8b 79 08          	mov    r15,QWORD PTR [rcx+0x8]
+  50:	48 bf 73 65 74 79 62 	movabs rdi,0x7465646279746573
+  57:	64 65 74 
+  5a:	4c 31 ff             	xor    rdi,r15
+  5d:	48 ba 61 72 65 6e 65 	movabs rdx,0x6c7967656e657261
+  64:	67 79 6c 
+  67:	48 01 fa             	add    rdx,rdi
+  6a:	48 b8 d0 ea 9f c1 6f 	movabs rax,0xa60c596fc19fead0
+  71:	59 0c a6 
+  74:	48 01 f8             	add    rax,rdi
+  77:	48 c1 c7 10          	rol    rdi,0x10
+  7b:	48 31 d7             	xor    rdi,rdx
+  7e:	49 b8 c6 df de d7 e2 	movabs r8,0xded7d4e2d7dedfc6
+  85:	d4 d7 de 
+  88:	49 01 f8             	add    r8,rdi
+  8b:	48 c1 c7 15          	rol    rdi,0x15
+  8f:	48 ba 25 73 de f0 74 	movabs rdx,0xe414a674f0de7325
+  96:	a6 14 e4 
+  99:	48 31 c2             	xor    rdx,rax
+  9c:	48 c1 c0 20          	rol    rax,0x20
+  a0:	4c 31 c7             	xor    rdi,r8
+  a3:	49 01 d0             	add    r8,rdx
+  a6:	48 c1 c2 0d          	rol    rdx,0xd
+  aa:	4c 31 c2             	xor    rdx,r8
+  ad:	49 c1 c0 20          	rol    r8,0x20
+  b1:	48 01 f8             	add    rax,rdi
+  b4:	48 c1 c7 10          	rol    rdi,0x10
+  b8:	48 31 c7             	xor    rdi,rax
+  bb:	49 01 f8             	add    r8,rdi
+  be:	48 c1 c7 15          	rol    rdi,0x15
+  c2:	48 01 d0             	add    rax,rdx
+  c5:	48 c1 c2 11          	rol    rdx,0x11
+  c9:	48 8b 71 10          	mov    rsi,QWORD PTR [rcx+0x10]
+  cd:	48 31 c2             	xor    rdx,rax
+  d0:	48 c1 c0 20          	rol    rax,0x20
+  d4:	4d 31 c7             	xor    r15,r8
+  d7:	49 01 d7             	add    r15,rdx
+  da:	48 c1 c2 0d          	rol    rdx,0xd
+  de:	49 31 f0             	xor    r8,rsi
+  e1:	4c 31 fa             	xor    rdx,r15
+  e4:	49 c1 c7 20          	rol    r15,0x20
+  e8:	49 31 f8             	xor    r8,rdi
+  eb:	4c 01 c0             	add    rax,r8
+  ee:	49 c1 c0 10          	rol    r8,0x10
+  f2:	49 31 c0             	xor    r8,rax
+  f5:	4d 01 c7             	add    r15,r8
+  f8:	49 c1 c0 15          	rol    r8,0x15
+  fc:	48 01 d0             	add    rax,rdx
+  ff:	48 c1 c2 11          	rol    rdx,0x11
+ 103:	48 31 c2             	xor    rdx,rax
+ 106:	48 c1 c0 20          	rol    rax,0x20
+ 10a:	4d 31 f8             	xor    r8,r15
+ 10d:	49 01 d7             	add    r15,rdx
+ 110:	48 c1 c2 0d          	rol    rdx,0xd
+ 114:	4c 31 fa             	xor    rdx,r15
+ 117:	49 c1 c7 20          	rol    r15,0x20
+ 11b:	4c 01 c0             	add    rax,r8
+ 11e:	49 c1 c0 10          	rol    r8,0x10
+ 122:	49 31 c0             	xor    r8,rax
+ 125:	4d 01 c7             	add    r15,r8
+ 128:	49 c1 c0 15          	rol    r8,0x15
+ 12c:	48 01 d0             	add    rax,rdx
+ 12f:	48 c1 c2 11          	rol    rdx,0x11
+ 133:	48 8b 79 18          	mov    rdi,QWORD PTR [rcx+0x18]
+ 137:	48 31 c2             	xor    rdx,rax
+ 13a:	48 c1 c0 20          	rol    rax,0x20
+ 13e:	4c 31 fe             	xor    rsi,r15
+ 141:	48 01 d6             	add    rsi,rdx
+ 144:	48 c1 c2 0d          	rol    rdx,0xd
+ 148:	49 31 ff             	xor    r15,rdi
+ 14b:	48 31 f2             	xor    rdx,rsi
+ 14e:	48 c1 c6 20          	rol    rsi,0x20
+ 152:	4d 31 c7             	xor    r15,r8
+ 155:	4c 01 f8             	add    rax,r15
+ 158:	49 c1 c7 10          	rol    r15,0x10
+ 15c:	49 31 c7             	xor    r15,rax
+ 15f:	4c 01 fe             	add    rsi,r15
+ 162:	49 c1 c7 15          	rol    r15,0x15
+ 166:	48 01 d0             	add    rax,rdx
+ 169:	48 c1 c2 11          	rol    rdx,0x11
+ 16d:	48 31 c2             	xor    rdx,rax
+ 170:	48 c1 c0 20          	rol    rax,0x20
+ 174:	49 31 f7             	xor    r15,rsi
+ 177:	48 01 d6             	add    rsi,rdx
+ 17a:	48 c1 c2 0d          	rol    rdx,0xd
+ 17e:	48 31 f2             	xor    rdx,rsi
+ 181:	48 c1 c6 20          	rol    rsi,0x20
+ 185:	4c 01 f8             	add    rax,r15
+ 188:	49 c1 c7 10          	rol    r15,0x10
+ 18c:	49 31 c7             	xor    r15,rax
+ 18f:	4c 01 fe             	add    rsi,r15
+ 192:	49 c1 c7 15          	rol    r15,0x15
+ 196:	48 01 d0             	add    rax,rdx
+ 199:	48 c1 c2 11          	rol    rdx,0x11
+ 19d:	4c 8b 41 20          	mov    r8,QWORD PTR [rcx+0x20]
+ 1a1:	48 31 c2             	xor    rdx,rax
+ 1a4:	48 c1 c0 20          	rol    rax,0x20
+ 1a8:	48 31 f7             	xor    rdi,rsi
+ 1ab:	48 01 d7             	add    rdi,rdx
+ 1ae:	48 c1 c2 0d          	rol    rdx,0xd
+ 1b2:	4c 31 c6             	xor    rsi,r8
+ 1b5:	48 31 fa             	xor    rdx,rdi
+ 1b8:	48 c1 c7 20          	rol    rdi,0x20
+ 1bc:	4c 31 fe             	xor    rsi,r15
+ 1bf:	48 01 f0             	add    rax,rsi
+ 1c2:	48 c1 c6 10          	rol    rsi,0x10
+ 1c6:	48 31 c6             	xor    rsi,rax
+ 1c9:	48 01 f7             	add    rdi,rsi
+ 1cc:	48 c1 c6 15          	rol    rsi,0x15
+ 1d0:	48 01 d0             	add    rax,rdx
+ 1d3:	48 c1 c2 11          	rol    rdx,0x11
+ 1d7:	48 31 c2             	xor    rdx,rax
+ 1da:	48 c1 c0 20          	rol    rax,0x20
+ 1de:	48 31 fe             	xor    rsi,rdi
+ 1e1:	48 01 d7             	add    rdi,rdx
+ 1e4:	48 c1 c2 0d          	rol    rdx,0xd
+ 1e8:	48 31 fa             	xor    rdx,rdi
+ 1eb:	48 c1 c7 20          	rol    rdi,0x20
+ 1ef:	48 01 f0             	add    rax,rsi
+ 1f2:	48 c1 c6 10          	rol    rsi,0x10
+ 1f6:	48 31 c6             	xor    rsi,rax
+ 1f9:	48 01 f7             	add    rdi,rsi
+ 1fc:	48 c1 c6 15          	rol    rsi,0x15
+ 200:	48 01 d0             	add    rax,rdx
+ 203:	48 c1 c2 11          	rol    rdx,0x11
+ 207:	4c 8b 79 28          	mov    r15,QWORD PTR [rcx+0x28]
+ 20b:	48 31 c2             	xor    rdx,rax
+ 20e:	48 c1 c0 20          	rol    rax,0x20
+ 212:	49 31 f8             	xor    r8,rdi
+ 215:	49 01 d0             	add    r8,rdx
+ 218:	48 c1 c2 0d          	rol    rdx,0xd
+ 21c:	4c 31 ff             	xor    rdi,r15
+ 21f:	4c 31 c2             	xor    rdx,r8
+ 222:	49 c1 c0 20          	rol    r8,0x20
+ 226:	48 31 f7             	xor    rdi,rsi
+ 229:	48 01 f8             	add    rax,rdi
+ 22c:	48 c1 c7 10          	rol    rdi,0x10
+ 230:	48 31 c7             	xor    rdi,rax
+ 233:	49 01 f8             	add    r8,rdi
+ 236:	48 c1 c7 15          	rol    rdi,0x15
+ 23a:	48 01 d0             	add    rax,rdx
+ 23d:	48 c1 c2 11          	rol    rdx,0x11
+ 241:	48 31 c2             	xor    rdx,rax
+ 244:	48 c1 c0 20          	rol    rax,0x20
+ 248:	4c 31 c7             	xor    rdi,r8
+ 24b:	49 01 d0             	add    r8,rdx
+ 24e:	48 c1 c2 0d          	rol    rdx,0xd
+ 252:	4c 31 c2             	xor    rdx,r8
+ 255:	49 c1 c0 20          	rol    r8,0x20
+ 259:	48 01 f8             	add    rax,rdi
+ 25c:	48 c1 c7 10          	rol    rdi,0x10
+ 260:	48 31 c7             	xor    rdi,rax
+ 263:	49 01 f8             	add    r8,rdi
+ 266:	48 c1 c7 15          	rol    rdi,0x15
+ 26a:	48 01 d0             	add    rax,rdx
+ 26d:	48 c1 c2 11          	rol    rdx,0x11
+ 271:	48 8b 71 30          	mov    rsi,QWORD PTR [rcx+0x30]
+ 275:	48 31 c2             	xor    rdx,rax
+ 278:	48 c1 c0 20          	rol    rax,0x20
+ 27c:	4d 31 c7             	xor    r15,r8
+ 27f:	49 01 d7             	add    r15,rdx
+ 282:	48 c1 c2 0d          	rol    rdx,0xd
+ 286:	49 31 f0             	xor    r8,rsi
+ 289:	4c 31 fa             	xor    rdx,r15
+ 28c:	49 c1 c7 20          	rol    r15,0x20
+ 290:	49 31 f8             	xor    r8,rdi
+ 293:	4c 01 c0             	add    rax,r8
+ 296:	49 c1 c0 10          	rol    r8,0x10
+ 29a:	49 31 c0             	xor    r8,rax
+ 29d:	4d 01 c7             	add    r15,r8
+ 2a0:	49 c1 c0 15          	rol    r8,0x15
+ 2a4:	48 01 d0             	add    rax,rdx
+ 2a7:	48 c1 c2 11          	rol    rdx,0x11
+ 2ab:	48 31 c2             	xor    rdx,rax
+ 2ae:	48 c1 c0 20          	rol    rax,0x20
+ 2b2:	4d 31 f8             	xor    r8,r15
+ 2b5:	49 01 d7             	add    r15,rdx
+ 2b8:	48 c1 c2 0d          	rol    rdx,0xd
+ 2bc:	4c 31 fa             	xor    rdx,r15
+ 2bf:	49 c1 c7 20          	rol    r15,0x20
+ 2c3:	4c 01 c0             	add    rax,r8
+ 2c6:	49 c1 c0 10          	rol    r8,0x10
+ 2ca:	49 31 c0             	xor    r8,rax
+ 2cd:	4d 01 c7             	add    r15,r8
+ 2d0:	49 c1 c0 15          	rol    r8,0x15
+ 2d4:	48 01 d0             	add    rax,rdx
+ 2d7:	48 c1 c2 11          	rol    rdx,0x11
+ 2db:	48 8b 79 38          	mov    rdi,QWORD PTR [rcx+0x38]
+ 2df:	48 31 c2             	xor    rdx,rax
+ 2e2:	48 c1 c0 20          	rol    rax,0x20
+ 2e6:	4c 31 fe             	xor    rsi,r15
+ 2e9:	48 01 d6             	add    rsi,rdx
+ 2ec:	48 c1 c2 0d          	rol    rdx,0xd
+ 2f0:	49 31 ff             	xor    r15,rdi
+ 2f3:	48 31 f2             	xor    rdx,rsi
+ 2f6:	48 c1 c6 20          	rol    rsi,0x20
+ 2fa:	4d 31 c7             	xor    r15,r8
+ 2fd:	4c 01 f8             	add    rax,r15
+ 300:	49 c1 c7 10          	rol    r15,0x10
+ 304:	49 31 c7             	xor    r15,rax
+ 307:	4c 01 fe             	add    rsi,r15
+ 30a:	49 c1 c7 15          	rol    r15,0x15
+ 30e:	48 01 d0             	add    rax,rdx
+ 311:	48 c1 c2 11          	rol    rdx,0x11
+ 315:	48 31 c2             	xor    rdx,rax
+ 318:	48 c1 c0 20          	rol    rax,0x20
+ 31c:	49 31 f7             	xor    r15,rsi
+ 31f:	48 01 d6             	add    rsi,rdx
+ 322:	48 c1 c2 0d          	rol    rdx,0xd
+ 326:	48 31 f2             	xor    rdx,rsi
+ 329:	48 c1 c6 20          	rol    rsi,0x20
+ 32d:	4c 01 f8             	add    rax,r15
+ 330:	49 c1 c7 10          	rol    r15,0x10
+ 334:	49 31 c7             	xor    r15,rax
+ 337:	4c 01 fe             	add    rsi,r15
+ 33a:	49 c1 c7 15          	rol    r15,0x15
+ 33e:	48 01 d0             	add    rax,rdx
+ 341:	48 c1 c2 11          	rol    rdx,0x11
+ 345:	4c 8b 41 40          	mov    r8,QWORD PTR [rcx+0x40]
+ 349:	48 31 c2             	xor    rdx,rax
+ 34c:	48 c1 c0 20          	rol    rax,0x20
+ 350:	48 31 f7             	xor    rdi,rsi
+ 353:	48 01 d7             	add    rdi,rdx
+ 356:	48 c1 c2 0d          	rol    rdx,0xd
+ 35a:	4c 31 c6             	xor    rsi,r8
+ 35d:	48 31 fa             	xor    rdx,rdi
+ 360:	48 c1 c7 20          	rol    rdi,0x20
+ 364:	4c 31 fe             	xor    rsi,r15
+ 367:	48 01 f0             	add    rax,rsi
+ 36a:	48 c1 c6 10          	rol    rsi,0x10
+ 36e:	48 31 c6             	xor    rsi,rax
+ 371:	48 01 f7             	add    rdi,rsi
+ 374:	48 c1 c6 15          	rol    rsi,0x15
+ 378:	48 01 d0             	add    rax,rdx
+ 37b:	48 c1 c2 11          	rol    rdx,0x11
+ 37f:	48 31 c2             	xor    rdx,rax
+ 382:	48 c1 c0 20          	rol    rax,0x20
+ 386:	48 31 fe             	xor    rsi,rdi
+ 389:	48 01 d7             	add    rdi,rdx
+ 38c:	48 c1 c2 0d          	rol    rdx,0xd
+ 390:	48 31 fa             	xor    rdx,rdi
+ 393:	48 c1 c7 20          	rol    rdi,0x20
+ 397:	48 01 f0             	add    rax,rsi
+ 39a:	48 c1 c6 10          	rol    rsi,0x10
+ 39e:	48 31 c6             	xor    rsi,rax
+ 3a1:	48 01 f7             	add    rdi,rsi
+ 3a4:	48 c1 c6 15          	rol    rsi,0x15
+ 3a8:	48 01 d0             	add    rax,rdx
+ 3ab:	48 c1 c2 11          	rol    rdx,0x11
+ 3af:	48 31 fe             	xor    rsi,rdi
+ 3b2:	48 31 c2             	xor    rdx,rax
+ 3b5:	48 c1 c0 20          	rol    rax,0x20
+ 3b9:	4c 31 c7             	xor    rdi,r8
+ 3bc:	48 01 d7             	add    rdi,rdx
+ 3bf:	48 c1 c2 0d          	rol    rdx,0xd
+ 3c3:	48 31 fa             	xor    rdx,rdi
+ 3c6:	48 c1 c7 20          	rol    rdi,0x20
+ 3ca:	48 35 ff 00 00 00    	xor    rax,0xff
+ 3d0:	48 01 f0             	add    rax,rsi
+ 3d3:	48 c1 c6 10          	rol    rsi,0x10
+ 3d7:	48 31 c6             	xor    rsi,rax
+ 3da:	48 01 f7             	add    rdi,rsi
+ 3dd:	48 c1 c6 15          	rol    rsi,0x15
+ 3e1:	48 01 d0             	add    rax,rdx
+ 3e4:	48 c1 c2 11          	rol    rdx,0x11
+ 3e8:	48 31 c2             	xor    rdx,rax
+ 3eb:	48 c1 c0 20          	rol    rax,0x20
+ 3ef:	48 31 fe             	xor    rsi,rdi
+ 3f2:	48 01 d7             	add    rdi,rdx
+ 3f5:	48 c1 c2 0d          	rol    rdx,0xd
+ 3f9:	48 31 fa             	xor    rdx,rdi
+ 3fc:	48 c1 c7 20          	rol    rdi,0x20
+ 400:	48 01 f0             	add    rax,rsi
+ 403:	48 c1 c6 10          	rol    rsi,0x10
+ 407:	48 31 c6             	xor    rsi,rax
+ 40a:	48 01 f7             	add    rdi,rsi
+ 40d:	48 c1 c6 15          	rol    rsi,0x15
+ 411:	48 01 d0             	add    rax,rdx
+ 414:	48 c1 c2 11          	rol    rdx,0x11
+ 418:	48 31 c2             	xor    rdx,rax
+ 41b:	48 c1 c0 20          	rol    rax,0x20
+ 41f:	48 31 fe             	xor    rsi,rdi
+ 422:	48 01 d7             	add    rdi,rdx
+ 425:	48 c1 c2 0d          	rol    rdx,0xd
+ 429:	48 31 fa             	xor    rdx,rdi
+ 42c:	48 c1 c7 20          	rol    rdi,0x20
+ 430:	48 01 f0             	add    rax,rsi
+ 433:	48 c1 c6 10          	rol    rsi,0x10
+ 437:	48 31 c6             	xor    rsi,rax
+ 43a:	48 01 f7             	add    rdi,rsi
+ 43d:	48 c1 c6 15          	rol    rsi,0x15
+ 441:	48 01 d0             	add    rax,rdx
+ 444:	48 c1 c2 11          	rol    rdx,0x11
+ 448:	48 31 c2             	xor    rdx,rax
+ 44b:	48 c1 c0 20          	rol    rax,0x20
+ 44f:	48 31 fe             	xor    rsi,rdi
+ 452:	48 01 d7             	add    rdi,rdx
+ 455:	48 c1 c2 0d          	rol    rdx,0xd
+ 459:	48 01 f0             	add    rax,rsi
+ 45c:	48 c1 c6 10          	rol    rsi,0x10
+ 460:	48 31 c6             	xor    rsi,rax
+ 463:	48 c1 c6 15          	rol    rsi,0x15
+ 467:	48 31 fa             	xor    rdx,rdi
+ 46a:	48 01 d0             	add    rax,rdx
+ 46d:	48 c1 c2 11          	rol    rdx,0x11
+ 471:	48 89 c7             	mov    rdi,rax
+ 474:	48 c1 c7 20          	rol    rdi,0x20
+ 478:	48 31 d7             	xor    rdi,rdx
+ 47b:	48 31 f7             	xor    rdi,rsi
+ 47e:	48 31 c7             	xor    rdi,rax
+ 481:	48 89 39             	mov    QWORD PTR [rcx],rdi
+ 484:	b8 02 00 00 00       	mov    eax,0x2
+ 489:	41 5f                	pop    r15
+ 48b:	5b                   	pop    rbx
+ 48c:	c9                   	leave
+ 48d:	c3                   	ret
 ```

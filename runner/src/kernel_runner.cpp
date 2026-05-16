@@ -929,6 +929,10 @@ const handcraft_kinsn_desc &handcraft_kinsn_desc_for_selector(int selector)
         {MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32, "bpf_x86_cmov", "bpf_x86_cmpl_imm32"},
         {MICRO_HANDCRAFT_BPF_X86_CMOVNEL_RR, "bpf_x86_cmov", "bpf_x86_cmovnel_rr"},
         {MICRO_HANDCRAFT_BPF_X86_CMOVEL_RR, "bpf_x86_cmov", "bpf_x86_cmovel_rr"},
+        {MICRO_HANDCRAFT_BPF_X86_CMPQ_SIB_RR, "bpf_x86_cmov", "bpf_x86_cmpq_sib_rr"},
+        {MICRO_HANDCRAFT_BPF_X86_MOVL_RR, "bpf_x86_mov_reg", "bpf_x86_movl_rr"},
+        {MICRO_HANDCRAFT_BPF_X86_XORL_RR, "bpf_x86_alu_imm", "bpf_x86_xorl_rr"},
+        {MICRO_HANDCRAFT_BPF_X86_ORB_RR, "bpf_x86_alu_imm", "bpf_x86_orb_rr"},
     };
 
     for (const auto &desc : descriptors) {
