@@ -105,16 +105,6 @@ static int instantiate_notq_r(u64 payload, struct bpf_insn *insn_buf)
 	return 1;
 }
 
-static __always_inline void emit_rex8_r(u8 *buf, u32 *len, u8 rm)
-{
-	u8 rex = 0x40;
-
-	if (kinsn_x86_ext(rm))
-		rex |= 0x01;
-	if (rex != 0x40 || kinsn_x86_needs_rex8(rm))
-		kinsn_emit_u8(buf, len, rex);
-}
-
 static int emit_not_r_x86(u8 *image, u32 *off, bool emit, u64 payload,
 			  const struct bpf_prog *prog, bool is64,
 			  bool is16, bool is8)
@@ -123,11 +113,6 @@ static int emit_not_r_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	u8 dst_reg, tmp_reg;
 	u32 len = 0;
 	int err;
-
-	if (!off)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
 
 	if (is8 || is16)
 		err = decode_not_narrow_payload(payload, &dst_reg, &tmp_reg);
@@ -143,17 +128,14 @@ static int emit_not_r_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	if (is16)
 		kinsn_emit_u8(buf, &len, 0x66);
 	if (is8)
-		emit_rex8_r(buf, &len, dst_reg);
+		kinsn_emit_rex8_rm(buf, &len, dst_reg);
 	else
 		kinsn_emit_rex(buf, &len, is64, false, false,
 			       kinsn_x86_ext(dst_reg));
 	kinsn_emit_u8(buf, &len, is8 ? 0xf6 : 0xf7);
 	kinsn_emit_u8(buf, &len, 0xd0 | kinsn_x86_code(dst_reg));
 
-	if (emit)
-		memcpy(image + *off, buf, len);
-	*off += len;
-	return len;
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 static int emit_notb_r_x86(u8 *image, u32 *off, bool emit, u64 payload,

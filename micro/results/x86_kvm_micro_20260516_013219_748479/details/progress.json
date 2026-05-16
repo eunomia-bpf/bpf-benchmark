@@ -1,0 +1,9 @@
+{
+  "completed_benchmarks": 1,
+  "current_benchmark": null,
+  "current_benchmark_index": null,
+  "current_benchmark_record": null,
+  "error_message": "sorted_rule_binary_search: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/sorted_rule_binary_search.handcraft.so --program-name sorted_rule_binary_search_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/sorted_rule_binary_search.mem --io-mode staged --input-size 392 --inner-repeat 1000 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260516_013219_748479/details/jit_dumps/sorted_rule_binary_search__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260516_013219_748479/details/jit_dumps/sorted_rule_binary_search__kernel_handcraft__sample00.xlated.bin\nlibbpf: loaded kernel BTF from '/sys/kernel/btf/vmlinux'\nbpf_prog_load(handcraft) failed: Invalid argument\nfunc#0 @0\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument",
+  "status": "error",
+  "total_benchmarks": 1
+}

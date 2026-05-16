@@ -154,7 +154,7 @@ fn target_json_requires_call_offset_for_each_kinsn() {
         r#"{
               "arch": "x86_64",
               "kinsns": {
-                "bpf_x86_andl_imm32": { "btf_func_id": 129876 }
+                "bpf_x86_andl": { "btf_func_id": 129876 }
               }
             }"#,
     )
@@ -177,7 +177,7 @@ fn target_call_offsets_shift_after_map_prefix() {
                 },
             ),
             (
-                "bpf_x86_andl_imm32".to_string(),
+                "bpf_x86_andl".to_string(),
                 KinsnJson {
                     btf_func_id: 2,
                     btf_id: 200,
@@ -198,7 +198,7 @@ fn target_call_offsets_shift_after_map_prefix() {
     shift_target_module_call_offsets_for_map_prefix(&mut target, 5).unwrap();
 
     assert_eq!(target.kinsns["bpf_x86_rolq_imm"].call_offset, 5);
-    assert_eq!(target.kinsns["bpf_x86_andl_imm32"].call_offset, 6);
+    assert_eq!(target.kinsns["bpf_x86_andl"].call_offset, 6);
     assert_eq!(target.kinsns["bpf_x86_testq_rr"].call_offset, 0);
 }
 

@@ -24,6 +24,7 @@ BTF_KFUNCS_END(bpf_x86_mov_reg_kfunc_ids)
 static __always_inline int decode_mov_rr_payload(u64 payload, u8 *dst_reg,
 						 u8 *src_reg, u8 *tmp_reg)
 {
+	payload = kinsn_payload_decode(payload);
 	*dst_reg = kinsn_payload_reg(payload, 0);
 	*src_reg = kinsn_payload_reg(payload, 4);
 	*tmp_reg = kinsn_payload_reg(payload, 8);
@@ -192,11 +193,6 @@ static int emit_movq_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	u32 len = 0;
 	int err;
 
-	if (!off)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_mov_rr_payload(payload, &dst_reg, &src_reg, &(u8){ 0 });
 	if (err)
 		return err;
@@ -212,10 +208,7 @@ static int emit_movq_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 		      (kinsn_x86_code(src_reg) << 3) |
 		      kinsn_x86_code(dst_reg));
 
-	if (emit)
-		memcpy(image + *off, buf, len);
-	*off += len;
-	return len;
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 static int emit_movl_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
@@ -225,11 +218,6 @@ static int emit_movl_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	u8 buf[4];
 	u32 len = 0;
 	int err;
-
-	if (!off)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
 
 	err = decode_mov_rr_payload(payload, &dst_reg, &src_reg, &(u8){ 0 });
 	if (err)
@@ -246,22 +234,7 @@ static int emit_movl_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 		      (kinsn_x86_code(src_reg) << 3) |
 		      kinsn_x86_code(dst_reg));
 
-	if (emit)
-		memcpy(image + *off, buf, len);
-	*off += len;
-	return len;
-}
-
-static void emit_movzbl_rex(u8 *buf, u32 *len, u8 dst_reg, u8 src_reg)
-{
-	u8 rex = 0x40;
-
-	if (kinsn_x86_ext(dst_reg))
-		rex |= 0x04;
-	if (kinsn_x86_ext(src_reg))
-		rex |= 0x01;
-	if (rex != 0x40 || kinsn_x86_needs_rex8(src_reg))
-		kinsn_emit_u8(buf, len, rex);
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 static int emit_movzx_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
@@ -273,11 +246,6 @@ static int emit_movzx_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	u32 len = 0;
 	int err;
 
-	if (!off)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_mov_rr_payload(payload, &dst_reg, &src_reg, &(u8){ 0 });
 	if (err)
 		return err;
@@ -288,7 +256,7 @@ static int emit_movzx_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 		return -EINVAL;
 
 	if (src_is_byte)
-		emit_movzbl_rex(buf, &len, dst_reg, src_reg);
+		kinsn_emit_rex8(buf, &len, dst_reg, src_reg, true, false, true);
 	else
 		kinsn_emit_rex_rr(buf, &len, false, dst_reg, src_reg);
 	kinsn_emit_u8(buf, &len, 0x0f);
@@ -297,10 +265,7 @@ static int emit_movzx_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 		      (kinsn_x86_code(dst_reg) << 3) |
 		      kinsn_x86_code(src_reg));
 
-	if (emit)
-		memcpy(image + *off, buf, len);
-	*off += len;
-	return len;
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 static int emit_movzbl_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,

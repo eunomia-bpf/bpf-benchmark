@@ -105,10 +105,6 @@ static int emit_bmi1_x86(u8 *image, u32 *off, bool emit, u64 payload,
 
 	(void)prog;
 
-	if (!off)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
 	if (!boot_cpu_has(X86_FEATURE_BMI1))
 		return -EOPNOTSUPP;
 
@@ -120,10 +116,7 @@ static int emit_bmi1_x86(u8 *image, u32 *off, bool emit, u64 payload,
 
 	emit_bmi1_rr(buf, &len, dst_reg, src_reg, opcode_ext);
 
-	if (emit)
-		memcpy(image + *off, buf, len);
-	*off += len;
-	return len;
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 static int emit_blsiq_x86(u8 *image, u32 *off, bool emit, u64 payload,

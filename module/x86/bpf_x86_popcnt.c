@@ -95,10 +95,6 @@ static int emit_popcntq_x86(u8 *image, u32 *off, bool emit, u64 payload,
 
 	(void)prog;
 
-	if (!off)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
 	if (!boot_cpu_has(X86_FEATURE_POPCNT))
 		return -EOPNOTSUPP;
 
@@ -117,10 +113,7 @@ static int emit_popcntq_x86(u8 *image, u32 *off, bool emit, u64 payload,
 		       (kinsn_x86_code(dst_reg) << 3) |
 		       kinsn_x86_code(src_reg));
 
-	if (emit)
-		memcpy(image + *off, buf, len);
-	*off += len;
-	return len;
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 const struct bpf_kinsn bpf_x86_popcntq_desc = {

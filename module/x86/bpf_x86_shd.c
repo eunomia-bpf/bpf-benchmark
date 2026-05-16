@@ -109,11 +109,6 @@ static int emit_shd_imm_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	u32 len = 0;
 	int err;
 
-	if (!off)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_shd_payload(payload, &dst_reg, &src_reg, &imm, &tmp_reg);
 	if (err)
 		return err;
@@ -135,10 +130,7 @@ static int emit_shd_imm_x86(u8 *image, u32 *off, bool emit, u64 payload,
 		      kinsn_x86_code(dst_reg));
 	kinsn_emit_u8(buf, &len, imm);
 
-	if (emit)
-		memcpy(image + *off, buf, len);
-	*off += len;
-	return len;
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 static int emit_shldl_imm_x86(u8 *image, u32 *off, bool emit, u64 payload,

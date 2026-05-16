@@ -122,7 +122,7 @@ fn kinsn_registry_rejects_duplicate_call_keys_for_different_targets() {
         .unwrap();
 
     let err = registry
-        .set_kinsn_call_for_target_name("bpf_x86_andl_imm32", 1234, 0)
+        .set_kinsn_call_for_target_name("bpf_x86_andl", 1234, 0)
         .unwrap_err();
 
     assert!(err.to_string().contains("already registered"));

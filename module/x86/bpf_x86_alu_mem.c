@@ -197,11 +197,6 @@ static int emit_alu_mem_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	u32 len = 0;
 	int err;
 
-	if (!off)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_alu_mem_payload(payload, &dst_reg, &base_reg, &offset,
 				     &tmp1_reg, &tmp2_reg, is16);
 	if (err)
@@ -224,10 +219,7 @@ static int emit_alu_mem_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	kinsn_emit_u8(buf, &len, opcode);
 	kinsn_emit_modrm_mem(buf, &len, dst_reg, base_reg, offset);
 
-	if (emit)
-		memcpy(image + *off, buf, len);
-	*off += len;
-	return len;
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 static int emit_addl_mem_x86(u8 *image, u32 *off, bool emit, u64 payload,
@@ -261,11 +253,6 @@ static int emit_xorb_sib_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	u32 len = 0;
 	int err;
 
-	if (!off)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_alu_sib_payload(payload, &dst_reg, &base_reg, &index_reg,
 				     &scale_log2, &offset, &addr_tmp_reg,
 				     &value_tmp_reg);
@@ -286,10 +273,7 @@ static int emit_xorb_sib_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	kinsn_emit_sib_mem(buf, &len, dst_reg, base_reg, index_reg,
 			   scale_log2, offset);
 
-	if (emit)
-		memcpy(image + *off, buf, len);
-	*off += len;
-	return len;
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 const struct bpf_kinsn bpf_x86_addl_mem_desc = {

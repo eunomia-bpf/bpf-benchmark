@@ -1,0 +1,9 @@
+{
+  "completed_benchmarks": 1,
+  "current_benchmark": null,
+  "current_benchmark_index": null,
+  "current_benchmark_record": null,
+  "error_message": "sorted_rule_binary_search: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/sorted_rule_binary_search.handcraft.so --program-name sorted_rule_binary_search_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/sorted_rule_binary_search.mem --io-mode staged --input-size 392 --inner-repeat 1000 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260516_005620_015644/details/jit_dumps/sorted_rule_binary_search__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260516_005620_015644/details/jit_dumps/sorted_rule_binary_search__kernel_handcraft__sample00.xlated.bin\nmark_precise: frame0: regs=r0 stack= before 37: (0f) r2 += r0\nmark_precise: frame0: regs=r0 stack= before 36: (0f) r2 += r0\nmark_precise: frame0: regs=r0 stack= before 35: (bf) r2 = r4\nmark_precise: frame0: parent state regs= stack=:  R0=P0 R1=ctx() R2=pkt(off=400,r=401) R3=0 R4=pkt(r=401) R6=16 R10=fp0 fp-384=mmmmmmmm\n44: R0=0 R2=pkt(r=401)\n44: (79) r2 = *(u64 *)(r2 +272)       ; R2=scalar()\n45: (b4) w5 = 0                       ; R5=0\n46: (b4) w1 = 0                       ; R1=0\n47: (b4) w11 = 0\nR11 is invalid\nprocessed 48 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument",
+  "status": "error",
+  "total_benchmarks": 1
+}

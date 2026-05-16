@@ -132,8 +132,8 @@ static const struct bpf_insn program[] = {
     HC_LDX(BPF_W, BPF_REG_4, BPF_REG_1, 0),
     /* 0x1103: mov    rdx,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4] */
     HC_LDX(BPF_W, BPF_REG_3, BPF_REG_1, 4),
-    /* 0x1107: xor    eax,eax [bpf-jit: zero idiom] */
-    HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_0, 0, 0, 0),
+    /* 0x1107: xor    eax,eax [exact-kinsn: xor32 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x1109: cmp    rcx,rdx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_4, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x110c: ja     1139 <simple_xdp+0x39> [bpf-branch: lowered cmp    rcx,rdx + ja     1139 <simple_xdp+0x39> to verifier-visible BPF branch] */

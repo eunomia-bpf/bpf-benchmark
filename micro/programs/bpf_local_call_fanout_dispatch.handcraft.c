@@ -1,12 +1,15 @@
 #include "handcraft_common.h"
 
 #define HC_LEA_PAYLOAD(DST, BASE, INDEX, SCALE, HAS_BASE, HAS_INDEX, DISP) \
-    ((__u64)(DST) | ((__u64)(BASE) << 4) | ((__u64)(INDEX) << 8) | \
-     ((__u64)(SCALE) << 12) | ((__u64)(HAS_INDEX) << 14) | \
-     ((__u64)(HAS_BASE) << 15) | ((__u64)(__u32)(DISP) << 16))
+    (((__u64)(DST) << 4) | ((__u64)(BASE) << 8) | ((__u64)(INDEX) << 12) | \
+     ((__u64)(SCALE) << 16) | ((__u64)(HAS_INDEX) << 18) | \
+     ((__u64)(HAS_BASE) << 19) | ((__u64)(__u32)(DISP) << 20))
+#define HC_LEA_TMP_PAYLOAD(DST, BASE, INDEX, SCALE, HAS_BASE, HAS_INDEX, DISP, TMP) \
+    (HC_LEA_PAYLOAD(DST, BASE, INDEX, SCALE, HAS_BASE, HAS_INDEX, DISP) | \
+     (__u64)(TMP))
 
 /*
- * native asm to handcraft warnings: 39
+ * native asm to handcraft warnings: 36
  *
  * - 0x1100: push   rbp [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR]
  * - 0x1101: push   r15 [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR]
@@ -27,16 +30,13 @@
  * - 0x112c: mov    QWORD PTR [rsp],rdx [warning-unmapped: store base rsp is not in the BPF JIT register file]
  * - 0x1141: cmp    DWORD PTR [r14+0x8],0x10 [warning-unmapped: CMP operand form has no current kinsn selector: cmp    DWORD PTR [r14+0x8],0x10]
  * - 0x1148: cmp    DWORD PTR [r14+0xc],0x18 [warning-unmapped: CMP operand form has no current kinsn selector: cmp    DWORD PTR [r14+0xc],0x18]
- * - 0x115c: mov    r12d,0x17 [warning-reg-remap: 32-bit immediate move; native r12 has no exact BPF JIT register; remapped to BPF_REG_5]
+ * - 0x115c: mov    r12d,0x17 [warning-unmapped: movl immediate into HC_X86_R12 needs an immediate-load kinsn]
  * - 0x1170: mov    rsi,QWORD PTR [rsp] [warning-unmapped: memory base rsp is not in the BPF JIT register file]
  * - 0x1174: mov    ecx,ebp [warning-unmapped: unsupported mnemonic or operand form: mov    ecx,ebp]
  * - 0x1176: call   1260 <local_call_pressure> [warning-unmapped: unsupported mnemonic or operand form: call   1260 <local_call_pressure>]
  * - 0x1184: mov    edi,ebp [warning-unmapped: unsupported mnemonic or operand form: mov    edi,ebp]
- * - 0x1194: add    r12,0x18 [warning-reg-remap: ALU imm operation; native r12 has no exact BPF JIT register; remapped to BPF_REG_5]
- * - 0x11a1: movzx  ebx,BYTE PTR [r14+r12*1-0x7] [warning-reg-remap: indexed memory load via x86 SIB kinsn; native r12 has no exact BPF JIT register; remapped to BPF_REG_5]
  * - 0x11aa: mov    ebp,DWORD PTR [r14+r12*1-0x3] [warning-unmapped: unsupported mnemonic or operand form: mov    ebp,DWORD PTR [r14+r12*1-0x3]]
  * - 0x11af: xor    ebp,r15d [warning-unmapped: ALU destination ebp is not in the BPF JIT register file]
- * - 0x11b2: lea    rdx,[r12-0xf] [warning-reg-remap: LEA via x86 kinsn selector; native r12 has no exact BPF JIT register; remapped to BPF_REG_5]
  * - 0x11c4: jne    11f0 <bpf_local_call_fanout_dispatch_xdp+0xf0> [warning-unmapped: standalone x86 branch needs an immediately preceding cmp]
  * - 0x11c6: mov    rsi,QWORD PTR [rsp] [warning-unmapped: memory base rsp is not in the BPF JIT register file]
  * - 0x11ca: mov    ecx,ebp [warning-unmapped: unsupported mnemonic or operand form: mov    ecx,ebp]
@@ -61,8 +61,8 @@ static const struct bpf_insn program[] = {
     HC_LDX(BPF_W, BPF_REG_8, BPF_REG_1, 0),
     /* 0x110e: mov    rcx,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4] */
     HC_LDX(BPF_W, BPF_REG_4, BPF_REG_1, 4),
-    /* 0x1112: xor    eax,eax [bpf-jit: zero idiom] */
-    HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_0, 0, 0, 0),
+    /* 0x1112: xor    eax,eax [exact-kinsn: xor32 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x1114: cmp    r14,rcx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_8, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x1117: jbe    1128 <bpf_local_call_fanout_dispatch_xdp+0x28> [bpf-branch: lowered cmp    r14,rcx + jbe    1128 <bpf_local_call_fanout_dispatch_xdp+0x28> to verifier-visible BPF branch] */
@@ -77,69 +77,68 @@ static const struct bpf_insn program[] = {
     /* 0x1127: ret [bpf-jit: BPF exit; kernel JIT emits the real return sequence] */
     HC_EXIT(),
     /* 0x1128: lea    rdx,[r14+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
-    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_3, BPF_REG_8, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
+    HC_KINSN(HC_LEA_TMP_PAYLOAD(BPF_REG_3, BPF_REG_8, 0, 0, 1, 0, 8, 0), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x112c: mov    QWORD PTR [rsp],rdx [warning-unmapped: store base rsp is not in the BPF JIT register file] */
     /* 0x1130: cmp    rdx,rcx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_3, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x1133: ja     1119 <bpf_local_call_fanout_dispatch_xdp+0x19> [bpf-branch: lowered cmp    rdx,rcx + ja     1119 <bpf_local_call_fanout_dispatch_xdp+0x19> to verifier-visible BPF branch] */
     HC_JMP_REG(BPF_JGT, BPF_REG_3, BPF_REG_4, -6),
     /* 0x1135: lea    rdx,[r14+0x190] [exact-kinsn: LEA via x86 kinsn selector] */
-    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_3, BPF_REG_8, 0, 0, 1, 0, 400), MICRO_HANDCRAFT_BPF_X86_LEAQ),
+    HC_KINSN(HC_LEA_TMP_PAYLOAD(BPF_REG_3, BPF_REG_8, 0, 0, 1, 0, 400, 0), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x113c: cmp    rdx,rcx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_3, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_CMPQ_RR),
     /* 0x113f: ja     1119 <bpf_local_call_fanout_dispatch_xdp+0x19> [bpf-branch: lowered cmp    rdx,rcx + ja     1119 <bpf_local_call_fanout_dispatch_xdp+0x19> to verifier-visible BPF branch] */
     HC_JMP_REG(BPF_JGT, BPF_REG_3, BPF_REG_4, -11),
     /* 0x1141: cmp    DWORD PTR [r14+0x8],0x10 [warning-unmapped: CMP operand form has no current kinsn selector: cmp    DWORD PTR [r14+0x8],0x10] */
     /* 0x1146: jne    1119 <bpf_local_call_fanout_dispatch_xdp+0x19> [bpf-branch: lowered cmp    DWORD PTR [r14+0x8],0x10 + jne    1119 <bpf_local_call_fanout_dispatch_xdp+0x19> to verifier-visible load+branch] */
-    HC_LDX(BPF_W, BPF_REG_6, BPF_REG_8, 8),
-    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_6, 0, -13, 16),
+    HC_LDX(BPF_W, BPF_REG_5, BPF_REG_8, 8),
+    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_5, 0, -13, 16),
     /* 0x1148: cmp    DWORD PTR [r14+0xc],0x18 [warning-unmapped: CMP operand form has no current kinsn selector: cmp    DWORD PTR [r14+0xc],0x18] */
     /* 0x114d: jne    1119 <bpf_local_call_fanout_dispatch_xdp+0x19> [bpf-branch: lowered cmp    DWORD PTR [r14+0xc],0x18 + jne    1119 <bpf_local_call_fanout_dispatch_xdp+0x19> to verifier-visible load+branch] */
-    HC_LDX(BPF_W, BPF_REG_6, BPF_REG_8, 12),
-    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_6, 0, -15, 24),
+    HC_LDX(BPF_W, BPF_REG_5, BPF_REG_8, 12),
+    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_5, 0, -15, 24),
     /* 0x114f: movabs rdi,0x243f6a8885a308d3 [bpf-jit: 64-bit immediate load] */
     HC_LD_IMM64_RAW(BPF_REG_1, 0, 0x243f6a8885a308d3ULL),
-    /* 0x1159: xor    r15d,r15d [bpf-jit: zero idiom] */
-    HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_9, 0, 0, 0),
-    /* 0x115c: mov    r12d,0x17 [warning-reg-remap: 32-bit immediate move; native r12 has no exact BPF JIT register; remapped to BPF_REG_5] */
-    HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_5, 0, 0, 23),
-    /* 0x1162: xor    r13d,r13d [bpf-jit: zero idiom] */
-    HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_7, 0, 0, 0),
+    /* 0x1159: xor    r15d,r15d [exact-kinsn: xor32 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_9, BPF_REG_9, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORL),
+    /* 0x115c: mov    r12d,0x17 [warning-unmapped: movl immediate into HC_X86_R12 needs an immediate-load kinsn] */
+    /* 0x1162: xor    r13d,r13d [exact-kinsn: xor32 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_7, BPF_REG_7, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x1165: jmp    11a1 <bpf_local_call_fanout_dispatch_xdp+0xa1> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 13, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 19, 0),
     /* 0x1167: nop    WORD PTR [rax+rax*1+0x0] [padding: padding is not part of BPF semantics] */
     /* 0x1170: mov    rsi,QWORD PTR [rsp] [warning-unmapped: memory base rsp is not in the BPF JIT register file] */
     /* 0x1174: mov    ecx,ebp [warning-unmapped: unsupported mnemonic or operand form: mov    ecx,ebp] */
     /* 0x1176: call   1260 <local_call_pressure> [warning-unmapped: unsupported mnemonic or operand form: call   1260 <local_call_pressure>] */
-    /* 0x117b: mov    ecx,r13d [bpf-jit: 32-bit register move] */
-    HC_RAW(BPF_ALU | BPF_MOV | BPF_X, BPF_REG_4, BPF_REG_7, 0, 0),
-    /* 0x117e: and    cl,0x38 [exact-kinsn: andb imm kinsn; verifier instantiate uses temp BPF_REG_6] */
-    HC_KINSN(HC_REG_IMM_TMP_PAYLOAD(BPF_REG_4, 56, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ANDB_IMM),
+    /* 0x117b: mov    ecx,r13d [exact-kinsn: movl register-to-register kinsn] */
+    HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_4, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_MOVL_RR),
+    /* 0x117e: and    cl,0x38 [exact-kinsn: andb imm kinsn; verifier instantiate uses temp BPF_REG_5] */
+    HC_KINSN(HC_REG_IMM_TMP_PAYLOAD(BPF_REG_4, 56, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_ANDB_IMM),
     /* 0x1181: shl    rbx,cl [bpf-jit: ALU reg operation] */
     HC_RAW(BPF_ALU64 | BPF_LSH | BPF_X, BPF_REG_6, BPF_REG_4, 0, 0),
     /* 0x1184: mov    edi,ebp [warning-unmapped: unsupported mnemonic or operand form: mov    edi,ebp] */
-    /* 0x1186: add    rdi,rbx [bpf-jit: ALU reg operation] */
-    HC_RAW(BPF_ALU64 | BPF_ADD | BPF_X, BPF_REG_1, BPF_REG_6, 0, 0),
-    /* 0x1189: xor    rdi,rax [bpf-jit: ALU reg operation] */
-    HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_1, BPF_REG_0, 0, 0),
-    /* 0x118c: add    r13,0x8 [bpf-jit: ALU imm operation] */
-    HC_RAW(BPF_ALU64 | BPF_ADD | BPF_K, BPF_REG_7, 0, 0, 8),
-    /* 0x1190: add    r15d,0x10 [bpf-jit: ALU imm operation] */
-    HC_RAW(BPF_ALU | BPF_ADD | BPF_K, BPF_REG_9, 0, 0, 16),
-    /* 0x1194: add    r12,0x18 [warning-reg-remap: ALU imm operation; native r12 has no exact BPF JIT register; remapped to BPF_REG_5] */
-    HC_RAW(BPF_ALU64 | BPF_ADD | BPF_K, BPF_REG_5, 0, 0, 24),
+    /* 0x1186: add    rdi,rbx [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_6, 0, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1189: xor    rdi,rax [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_0, 0, 0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x118c: add    r13,0x8 [exact-kinsn: add64 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_7, 8, 0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1190: add    r15d,0x10 [exact-kinsn: add32 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_9, 16, 0), MICRO_HANDCRAFT_BPF_X86_ADDL),
+    /* 0x1194: add    r12,0x18 [exact-kinsn: add64 imm kinsn; verifier instantiate uses temp BPF_REG_5] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(HC_X86_R12, 24, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_ADDQ),
     /* 0x1198: cmp    r13,0x80 [exact-kinsn: cmpq reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_7, 128), MICRO_HANDCRAFT_BPF_X86_CMPQ_IMM32),
     /* 0x119f: je     1200 <bpf_local_call_fanout_dispatch_xdp+0x100> [bpf-branch: lowered cmp    r13,0x80 + je     1200 <bpf_local_call_fanout_dispatch_xdp+0x100> to verifier-visible BPF branch] */
     HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_7, 0, 18, 128),
-    /* 0x11a1: movzx  ebx,BYTE PTR [r14+r12*1-0x7] [warning-reg-remap: indexed memory load via x86 SIB kinsn; native r12 has no exact BPF JIT register; remapped to BPF_REG_5] */
-    HC_KINSN(HC_SIB_PAYLOAD(BPF_REG_6, BPF_REG_8, BPF_REG_5, 0, -7), MICRO_HANDCRAFT_BPF_X86_MOVZBL_SIB),
-    /* 0x11a7: and    ebx,0x3 [exact-kinsn: andl imm32 kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_6, 3), MICRO_HANDCRAFT_BPF_X86_ANDL_IMM32),
+    /* 0x11a1: movzx  ebx,BYTE PTR [r14+r12*1-0x7] [exact-kinsn: indexed memory load via x86 SIB kinsn] */
+    HC_KINSN(HC_SIB_PAYLOAD(BPF_REG_6, BPF_REG_8, HC_X86_R12, 0, -7), MICRO_HANDCRAFT_BPF_X86_MOVZBL_SIB),
+    /* 0x11a7: and    ebx,0x3 [exact-kinsn: and32 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_6, 3, 0), MICRO_HANDCRAFT_BPF_X86_ANDL),
     /* 0x11aa: mov    ebp,DWORD PTR [r14+r12*1-0x3] [warning-unmapped: unsupported mnemonic or operand form: mov    ebp,DWORD PTR [r14+r12*1-0x3]] */
     /* 0x11af: xor    ebp,r15d [warning-unmapped: ALU destination ebp is not in the BPF JIT register file] */
-    /* 0x11b2: lea    rdx,[r12-0xf] [warning-reg-remap: LEA via x86 kinsn selector; native r12 has no exact BPF JIT register; remapped to BPF_REG_5] */
-    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_3, BPF_REG_5, 0, 0, 1, 0, -15), MICRO_HANDCRAFT_BPF_X86_LEAQ),
+    /* 0x11b2: lea    rdx,[r12-0xf] [exact-kinsn: LEA via x86 kinsn selector; verifier instantiate uses temp BPF_REG_5] */
+    HC_KINSN(HC_LEA_TMP_PAYLOAD(BPF_REG_3, HC_X86_R12, 0, 0, 1, 0, -15, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x11b7: cmp    rbx,0x2 [exact-kinsn: cmpq reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_6, 2), MICRO_HANDCRAFT_BPF_X86_CMPQ_IMM32),
     /* 0x11bb: je     11e0 <bpf_local_call_fanout_dispatch_xdp+0xe0> [bpf-branch: lowered cmp    rbx,0x2 + je     11e0 <bpf_local_call_fanout_dispatch_xdp+0xe0> to verifier-visible BPF branch] */
@@ -147,7 +146,7 @@ static const struct bpf_insn program[] = {
     /* 0x11bd: cmp    ebx,0x1 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_6, 1), MICRO_HANDCRAFT_BPF_X86_CMPL_IMM32),
     /* 0x11c0: je     1170 <bpf_local_call_fanout_dispatch_xdp+0x70> [bpf-branch: lowered cmp    ebx,0x1 + je     1170 <bpf_local_call_fanout_dispatch_xdp+0x70> to verifier-visible BPF branch] */
-    HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_6, 0, -24, 1),
+    HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_6, 0, -30, 1),
     /* 0x11c2: test   ebx,ebx [exact-kinsn: testl reg,reg kinsn] */
     HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_6, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_TESTL_RR),
     /* 0x11c4: jne    11f0 <bpf_local_call_fanout_dispatch_xdp+0xf0> [warning-unmapped: standalone x86 branch needs an immediately preceding cmp] */
@@ -155,25 +154,25 @@ static const struct bpf_insn program[] = {
     /* 0x11ca: mov    ecx,ebp [warning-unmapped: unsupported mnemonic or operand form: mov    ecx,ebp] */
     /* 0x11cc: call   1210 <local_call_linear> [warning-unmapped: unsupported mnemonic or operand form: call   1210 <local_call_linear>] */
     /* 0x11d1: jmp    117b <bpf_local_call_fanout_dispatch_xdp+0x7b> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, -27, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, -32, 0),
     /* 0x11d3: data16 data16 data16 cs nop WORD PTR [rax+rax*1+0x0] [padding: padding is not part of BPF semantics] */
     /* 0x11e0: mov    rsi,QWORD PTR [rsp] [warning-unmapped: memory base rsp is not in the BPF JIT register file] */
     /* 0x11e4: mov    ecx,ebp [warning-unmapped: unsupported mnemonic or operand form: mov    ecx,ebp] */
     /* 0x11e6: call   12b0 <local_call_crossload> [warning-unmapped: unsupported mnemonic or operand form: call   12b0 <local_call_crossload>] */
     /* 0x11eb: jmp    117b <bpf_local_call_fanout_dispatch_xdp+0x7b> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, -28, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, -33, 0),
     /* 0x11ed: nop    DWORD PTR [rax] [padding: padding is not part of BPF semantics] */
     /* 0x11f0: mov    rsi,QWORD PTR [rsp] [warning-unmapped: memory base rsp is not in the BPF JIT register file] */
     /* 0x11f4: mov    ecx,ebp [warning-unmapped: unsupported mnemonic or operand form: mov    ecx,ebp] */
     /* 0x11f6: call   1340 <local_call_bytes> [warning-unmapped: unsupported mnemonic or operand form: call   1340 <local_call_bytes>] */
     /* 0x11fb: jmp    117b <bpf_local_call_fanout_dispatch_xdp+0x7b> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, -29, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, -34, 0),
     /* 0x1200: mov    QWORD PTR [r14],rdi [exact-kinsn: direct memory store via x86 kinsn selector] */
     HC_KINSN(HC_MEM_PAYLOAD(BPF_REG_1, BPF_REG_8, 0), MICRO_HANDCRAFT_BPF_X86_MOVQ_MEM_REG),
     /* 0x1203: mov    eax,0x2 [bpf-jit: 32-bit immediate move] */
     HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_0, 0, 0, 2),
     /* 0x1208: jmp    1119 <bpf_local_call_fanout_dispatch_xdp+0x19> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, -54, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, -61, 0),
 };
 
 HC_EXPORT_PROGRAM(program)

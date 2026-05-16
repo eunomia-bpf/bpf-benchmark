@@ -50,11 +50,6 @@ static int emit_imulq_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	u32 len = 0;
 	int err;
 
-	if (!off)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_imul_rr_payload(payload, &dst_reg, &src_reg);
 	if (err)
 		return err;
@@ -71,10 +66,7 @@ static int emit_imulq_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 		      (kinsn_x86_code(dst_reg) << 3) |
 		      kinsn_x86_code(src_reg));
 
-	if (emit)
-		memcpy(image + *off, buf, len);
-	*off += len;
-	return len;
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 const struct bpf_kinsn bpf_x86_imulq_rr_desc = {

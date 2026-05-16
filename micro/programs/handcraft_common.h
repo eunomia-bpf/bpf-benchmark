@@ -23,18 +23,25 @@
 #define HC_EXIT() HC_RAW(BPF_JMP | BPF_EXIT, 0, 0, 0, 0)
 
 #define HC_KINSN_CALL(SELECTOR) HC_RAW(BPF_JMP | BPF_CALL, 0, BPF_PSEUDO_KINSN_CALL, 0, SELECTOR)
+#define HC_KINSN_WIRE_PAYLOAD(PAYLOAD) \
+    ((((__u64)(PAYLOAD) & 0xf) > BPF_REG_10) ? \
+     ((__u64)BPF_REG_10 | (((__u64)(PAYLOAD) & 0xf) << 4) | (((__u64)(PAYLOAD) >> 4) << 8)) : \
+     (__u64)(PAYLOAD))
 #define HC_KINSN_SIDECAR(PAYLOAD) \
     HC_RAW(BPF_ALU64 | BPF_MOV | BPF_K, \
-           (__u8)((__u64)(PAYLOAD) & 0xf), \
+           (__u8)(HC_KINSN_WIRE_PAYLOAD(PAYLOAD) & 0xf), \
            BPF_PSEUDO_KINSN_SIDECAR, \
-           (__s16)(((__u64)(PAYLOAD) >> 4) & 0xffff), \
-           (__s32)(((__u64)(PAYLOAD) >> 20) & 0xffffffffU))
+           (__s16)((HC_KINSN_WIRE_PAYLOAD(PAYLOAD) >> 4) & 0xffff), \
+           (__s32)((HC_KINSN_WIRE_PAYLOAD(PAYLOAD) >> 20) & 0xffffffffU))
 #define HC_KINSN(PAYLOAD, SELECTOR) \
     HC_KINSN_SIDECAR(PAYLOAD), \
     HC_KINSN_CALL(SELECTOR)
 
 #define HC_ROTATE_PAYLOAD(DST, SRC, SHIFT, TMP) \
     ((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(SHIFT) << 8) | ((__u64)(TMP) << 16))
+#define HC_ROTATE_SHADOW_PAYLOAD(DST, SRC, SHIFT, TMP_DST, TMP_SRC) \
+    ((__u64)(TMP_DST) | ((__u64)(TMP_SRC) << 4) | ((__u64)(SHIFT) << 8) | \
+     ((__u64)(DST) << 20) | ((__u64)(SRC) << 24))
 #define HC_ROTATE_CL_PAYLOAD(DST, CNT, TMP_SHIFT, TMP_VALUE) \
     ((__u64)(DST) | ((__u64)(CNT) << 4) | ((__u64)(TMP_SHIFT) << 8) | ((__u64)(TMP_VALUE) << 12))
 #define HC_REG_IMM_PAYLOAD(DST, IMM) ((__u64)(DST) | ((__u64)(__u32)(IMM) << 8))
@@ -68,6 +75,19 @@
 #define HC_REG_REG_PAYLOAD(DST, SRC) ((__u64)(DST) | ((__u64)(SRC) << 4))
 #define HC_REG_REG_TMP2_PAYLOAD(DST, SRC, TMP_DST, TMP_SRC) \
     ((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(TMP_DST) << 8) | ((__u64)(TMP_SRC) << 12))
+#define HC_X86_ALU_FORM_RR 1
+#define HC_X86_ALU_FORM_IMM 2
+/*
+ * Consolidated machine-ALU payloads keep the kinsn name at the x86
+ * mnemonic+width level: bpf_x86_addq is one final addq instruction, with the
+ * operand form selected here. Verifier-side temps are only proof material.
+ */
+#define HC_X86_ALU_RR_PAYLOAD(DST, SRC, TMP_DST, TMP_SRC) \
+    ((__u64)(HC_X86_ALU_FORM_RR) | ((__u64)(DST) << 4) | ((__u64)(SRC) << 8) | \
+     ((__u64)(TMP_DST) << 12) | ((__u64)(TMP_SRC) << 16))
+#define HC_X86_ALU_IMM_PAYLOAD(DST, IMM, TMP) \
+    ((__u64)(HC_X86_ALU_FORM_IMM) | ((__u64)(DST) << 4) | ((__u64)(TMP) << 8) | \
+     ((__u64)(__u32)(IMM) << 12))
 #define HC_REG_TMP_PAYLOAD(REG, TMP) ((__u64)(REG) | ((__u64)(TMP) << 4))
 #define HC_REG_TMP_IMM_PAYLOAD(REG, TMP, IMM) \
     ((__u64)(REG) | ((__u64)(TMP) << 4) | ((__u64)(__u32)(IMM) << 8))
@@ -79,6 +99,10 @@
 #define HC_NOT_NARROW_PAYLOAD(DST, TMP) HC_REG_REG_PAYLOAD(DST, TMP)
 #define HC_MEM_PAYLOAD(REG, BASE, OFF) \
     ((__u64)(REG) | ((__u64)(BASE) << 4) | ((__u64)(__u16)(OFF) << 8))
+#define HC_MEM_TMP_PAYLOAD(REG, BASE, OFF, TMP) \
+    ((__u64)(TMP) | ((__u64)(BASE) << 4) | ((__u64)(__u16)(OFF) << 8) | ((__u64)(REG) << 24))
+#define HC_STORE_REG_TMP_PAYLOAD(REG, BASE, OFF, TMP) \
+    (HC_MEM_PAYLOAD(REG, BASE, OFF) | ((__u64)(TMP) << 24))
 #define HC_ALU_MEM_PAYLOAD(DST, BASE, OFF, TMP1, TMP2) \
     (HC_MEM_PAYLOAD(DST, BASE, OFF) | ((__u64)(TMP1) << 24) | ((__u64)(TMP2) << 28))
 #define HC_STORE_IMM_PAYLOAD(BASE, OFF, IMM) \

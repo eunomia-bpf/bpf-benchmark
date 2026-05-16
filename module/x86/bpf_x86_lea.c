@@ -6,9 +6,7 @@
  *		   (has_index ? index << scale_log2 : 0) + disp.
  */
 
-#include "kinsn_common.h"
-
-#define KINSN_X86_REG_R9 11
+#include "kinsn_x86_emit.h"
 
 __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_x86_leaq(void) {}
@@ -20,11 +18,6 @@ BTF_ID_FLAGS(func, bpf_x86_leal)
 BTF_ID_FLAGS(func, bpf_x86_leaq)
 BTF_KFUNCS_END(bpf_x86_lea_kfunc_ids)
 
-static __always_inline s32 kinsn_payload_s32(u64 payload, u8 shift)
-{
-	return (s32)((u32)(payload >> shift));
-}
-
 static __always_inline int decode_lea_payload(u64 payload,
 					      u8 *dst_reg,
 					      u8 *base_reg,
@@ -32,41 +25,137 @@ static __always_inline int decode_lea_payload(u64 payload,
 					      u8 *scale_log2,
 					      bool *has_base,
 					      bool *has_index,
-					      s32 *disp)
+					      s32 *disp,
+					      u8 *tmp_reg)
 {
-	*dst_reg = kinsn_payload_reg(payload, 0);
-	*base_reg = kinsn_payload_reg(payload, 4);
-	*index_reg = kinsn_payload_reg(payload, 8);
-	*scale_log2 = kinsn_payload_reg(payload, 12) & 0x3;
-	*has_index = (payload >> 14) & 1;
-	*has_base = (payload >> 15) & 1;
-	*disp = kinsn_payload_s32(payload, 16);
+	payload = kinsn_payload_decode(payload);
+	*tmp_reg = kinsn_payload_reg(payload, 0);
+	*dst_reg = kinsn_payload_reg(payload, 4);
+	*base_reg = kinsn_payload_reg(payload, 8);
+	*index_reg = kinsn_payload_reg(payload, 12);
+	*scale_log2 = kinsn_payload_reg(payload, 16) & 0x3;
+	*has_index = (payload >> 18) & 1;
+	*has_base = (payload >> 19) & 1;
+	*disp = kinsn_payload_s32(payload, 20);
 
-	if (payload >> 48)
+	if (payload >> 52)
 		return -EINVAL;
-	if (*dst_reg > BPF_REG_10)
+	if (!kinsn_x86_operand_valid(*dst_reg))
 		return -EINVAL;
 	if (*has_base) {
-		if (*base_reg > BPF_REG_10)
+		if (!kinsn_x86_operand_valid(*base_reg))
 			return -EINVAL;
 	} else {
 		if (*base_reg)
 			return -EINVAL;
 	}
 	if (*has_index) {
-		if (*index_reg > BPF_REG_10)
+		if (!kinsn_x86_operand_valid(*index_reg))
 			return -EINVAL;
 	} else {
 		if (*index_reg || *scale_log2)
 			return -EINVAL;
 	}
+	if (kinsn_x86_reg_is_shadowed(*dst_reg) ||
+	    (*has_base && kinsn_x86_reg_is_shadowed(*base_reg)) ||
+	    (*has_index && kinsn_x86_reg_is_shadowed(*index_reg))) {
+		if (!kinsn_bpf_gpr_valid(*tmp_reg))
+			return -EINVAL;
+		if ((!kinsn_x86_reg_is_shadowed(*dst_reg) && *tmp_reg == *dst_reg) ||
+		    (*has_base && !kinsn_x86_reg_is_shadowed(*base_reg) &&
+		     *tmp_reg == *base_reg) ||
+		    (*has_index && !kinsn_x86_reg_is_shadowed(*index_reg) &&
+		     *tmp_reg == *index_reg))
+			return -EINVAL;
+	} else if (*tmp_reg) {
+		return -EINVAL;
+	}
 
 	return 0;
 }
 
+static __always_inline struct bpf_insn lea_mov(u8 width, u8 dst, u8 src)
+{
+	return width == 64 ? BPF_MOV64_REG(dst, src) : BPF_MOV32_REG(dst, src);
+}
+
+static __always_inline struct bpf_insn lea_mov_imm(u8 width, u8 dst, s32 imm)
+{
+	return width == 64 ? BPF_MOV64_IMM(dst, imm) : BPF_MOV32_IMM(dst, imm);
+}
+
+static __always_inline struct bpf_insn lea_alu_imm(u8 width, u8 op, u8 dst,
+						   s32 imm)
+{
+	return width == 64 ? BPF_ALU64_IMM(op, dst, imm) :
+			     BPF_ALU32_IMM(op, dst, imm);
+}
+
+static __always_inline struct bpf_insn lea_alu_reg(u8 width, u8 op, u8 dst,
+						   u8 src)
+{
+	return width == 64 ? BPF_ALU64_REG(op, dst, src) :
+			     BPF_ALU32_REG(op, dst, src);
+}
+
+static int instantiate_lea_shadow(struct bpf_insn *insn_buf, u8 width,
+				  u8 dst_reg, u8 base_reg, u8 index_reg,
+				  u8 scale_log2, bool has_base,
+				  bool has_index, s32 disp, u8 tmp_reg)
+{
+	int cnt = 0;
+
+	if (has_base) {
+		if (kinsn_x86_reg_is_shadowed(base_reg))
+			insn_buf[cnt++] = BPF_LDX_MEM(BPF_DW, tmp_reg,
+						      BPF_REG_10,
+						      kinsn_x86_shadow_reg_off(base_reg));
+		else
+			insn_buf[cnt++] = lea_mov(width, tmp_reg, base_reg);
+	} else if (has_index) {
+		if (kinsn_x86_reg_is_shadowed(index_reg))
+			insn_buf[cnt++] = BPF_LDX_MEM(BPF_DW, tmp_reg,
+						      BPF_REG_10,
+						      kinsn_x86_shadow_reg_off(index_reg));
+		else
+			insn_buf[cnt++] = lea_mov(width, tmp_reg, index_reg);
+		if (scale_log2)
+			insn_buf[cnt++] = lea_alu_imm(width, BPF_LSH,
+						      tmp_reg, scale_log2);
+	} else {
+		insn_buf[cnt++] = lea_mov_imm(width, tmp_reg, disp);
+	}
+
+	if (has_base && has_index) {
+		if (kinsn_x86_reg_is_shadowed(index_reg))
+			return -EINVAL;
+		if (scale_log2) {
+			int add_count = 1 << scale_log2;
+
+			while (add_count--)
+				insn_buf[cnt++] = lea_alu_reg(width, BPF_ADD,
+							      tmp_reg, index_reg);
+		} else {
+			insn_buf[cnt++] = lea_alu_reg(width, BPF_ADD, tmp_reg,
+						      index_reg);
+		}
+	}
+
+	if (disp && (has_base || has_index))
+		insn_buf[cnt++] = lea_alu_imm(width, BPF_ADD, tmp_reg, disp);
+	if (width == 32)
+		insn_buf[cnt++] = BPF_MOV32_REG(tmp_reg, tmp_reg);
+	if (kinsn_x86_reg_is_shadowed(dst_reg))
+		insn_buf[cnt++] = BPF_STX_MEM(BPF_DW, BPF_REG_10, tmp_reg,
+					      kinsn_x86_shadow_reg_off(dst_reg));
+	else
+		insn_buf[cnt++] = lea_mov(width, dst_reg, tmp_reg);
+	return cnt;
+}
+
 static int instantiate_lea64(u64 payload, struct bpf_insn *insn_buf)
 {
-	u8 dst_reg, base_reg, index_reg, scale_log2;
+	u8 dst_reg, base_reg, index_reg, scale_log2, tmp_reg;
 	bool has_base, has_index;
 	s32 disp;
 	int add_count;
@@ -74,9 +163,14 @@ static int instantiate_lea64(u64 payload, struct bpf_insn *insn_buf)
 	int err;
 
 	err = decode_lea_payload(payload, &dst_reg, &base_reg, &index_reg,
-				 &scale_log2, &has_base, &has_index, &disp);
+				 &scale_log2, &has_base, &has_index, &disp,
+				 &tmp_reg);
 	if (err)
 		return err;
+	if (tmp_reg)
+		return instantiate_lea_shadow(insn_buf, 64, dst_reg, base_reg,
+					      index_reg, scale_log2, has_base,
+					      has_index, disp, tmp_reg);
 
 	if (has_base && has_index && dst_reg == index_reg && dst_reg != base_reg) {
 		if (scale_log2)
@@ -115,7 +209,7 @@ static int instantiate_lea64(u64 payload, struct bpf_insn *insn_buf)
 
 static int instantiate_lea32(u64 payload, struct bpf_insn *insn_buf)
 {
-	u8 dst_reg, base_reg, index_reg, scale_log2;
+	u8 dst_reg, base_reg, index_reg, scale_log2, tmp_reg;
 	bool has_base, has_index;
 	s32 disp;
 	int add_count;
@@ -123,9 +217,14 @@ static int instantiate_lea32(u64 payload, struct bpf_insn *insn_buf)
 	int err;
 
 	err = decode_lea_payload(payload, &dst_reg, &base_reg, &index_reg,
-				 &scale_log2, &has_base, &has_index, &disp);
+				 &scale_log2, &has_base, &has_index, &disp,
+				 &tmp_reg);
 	if (err)
 		return err;
+	if (tmp_reg)
+		return instantiate_lea_shadow(insn_buf, 32, dst_reg, base_reg,
+					      index_reg, scale_log2, has_base,
+					      has_index, disp, tmp_reg);
 
 	if (has_base && has_index && dst_reg == base_reg && dst_reg == index_reg) {
 		insn_buf[cnt++] = BPF_ALU32_IMM(BPF_MUL, dst_reg, (1 << scale_log2) + 1);
@@ -156,92 +255,21 @@ static int instantiate_lea32(u64 payload, struct bpf_insn *insn_buf)
 	return cnt;
 }
 
-static void emit_u8(u8 *buf, u32 *len, u8 byte)
-{
-	buf[(*len)++] = byte;
-}
-
-static void emit_s32(u8 *buf, u32 *len, s32 value)
-{
-	memcpy(buf + *len, &value, sizeof(value));
-	*len += sizeof(value);
-}
-
-static __always_inline bool lea_prog_uses_priv_stack(const struct bpf_prog *prog)
-{
-	return prog && prog->aux && prog->aux->priv_stack_ptr;
-}
-
-static __always_inline u8 lea_x86_reg_for_prog(const struct bpf_prog *prog,
-					       u8 bpf_reg)
-{
-	if (bpf_reg == BPF_REG_10 && lea_prog_uses_priv_stack(prog))
-		return KINSN_X86_REG_R9;
-	return bpf_reg;
-}
-
-static __always_inline u8 lea_x86_reg_code(u8 reg)
-{
-	if (reg == KINSN_X86_REG_R9)
-		return 1;
-	return kinsn_x86_reg_code(reg);
-}
-
-static __always_inline bool lea_x86_reg_ext(u8 reg)
-{
-	if (reg == KINSN_X86_REG_R9)
-		return true;
-	return kinsn_x86_reg_ext(reg);
-}
-
-static __always_inline bool lea_x86_reg_valid(u8 reg)
-{
-	return lea_x86_reg_code(reg) != 0xff;
-}
-
-static void emit_rex_lea(u8 *buf, u32 *len, bool is64,
-			 u8 dst_reg, u8 base_reg, u8 index_reg,
-			 bool has_base, bool has_index)
-{
-	u8 rex = 0x40;
-
-	if (is64)
-		rex |= 0x08;
-	if (lea_x86_reg_ext(dst_reg))
-		rex |= 0x04;
-	if (has_index && lea_x86_reg_ext(index_reg))
-		rex |= 0x02;
-	if (has_base && lea_x86_reg_ext(base_reg))
-		rex |= 0x01;
-	if (rex != 0x40)
-		emit_u8(buf, len, rex);
-}
-
 static void emit_lea(u8 *buf, u32 *len, bool is64,
 		     u8 dst_reg, u8 base_reg, u8 index_reg,
 		     u8 scale_log2, bool has_base, bool has_index, s32 disp)
 {
-	u8 base_code = has_base ? lea_x86_reg_code(base_reg) : 5;
-	u8 index_code = has_index ? lea_x86_reg_code(index_reg) : 4;
+	u8 base_code = has_base ? kinsn_x86_code(base_reg) : 5;
+	u8 index_code = has_index ? kinsn_x86_code(index_reg) : 4;
 	u8 mod;
 
-	emit_rex_lea(buf, len, is64, dst_reg, base_reg, index_reg,
-		     has_base, has_index);
-	emit_u8(buf, len, 0x8D);
+	kinsn_emit_rex(buf, len, is64, kinsn_x86_ext(dst_reg),
+		       has_index && kinsn_x86_ext(index_reg),
+		       has_base && kinsn_x86_ext(base_reg));
+	kinsn_emit_u8(buf, len, 0x8D);
 
 	if (has_base && !has_index) {
-		if (!disp && base_code != 5)
-			mod = 0x00;
-		else if (disp >= -128 && disp <= 127)
-			mod = 0x40;
-		else
-			mod = 0x80;
-
-		emit_u8(buf, len, mod | (lea_x86_reg_code(dst_reg) << 3) | base_code);
-		if (mod == 0x40)
-			emit_u8(buf, len, (u8)disp);
-		else if (mod == 0x80)
-			emit_s32(buf, len, disp);
+		kinsn_emit_modrm_mem(buf, len, dst_reg, base_reg, disp);
 		return;
 	}
 
@@ -254,12 +282,12 @@ static void emit_lea(u8 *buf, u32 *len, bool is64,
 	else
 		mod = 0x80;
 
-	emit_u8(buf, len, mod | (lea_x86_reg_code(dst_reg) << 3) | 0x04);
-	emit_u8(buf, len, (scale_log2 << 6) | (index_code << 3) | base_code);
+	kinsn_emit_u8(buf, len, mod | (kinsn_x86_code(dst_reg) << 3) | 0x04);
+	kinsn_emit_u8(buf, len, (scale_log2 << 6) | (index_code << 3) | base_code);
 	if (mod == 0x40)
-		emit_u8(buf, len, (u8)disp);
+		kinsn_emit_u8(buf, len, (u8)disp);
 	else if (mod == 0x80 || !has_base)
-		emit_s32(buf, len, disp);
+		kinsn_emit_s32(buf, len, disp);
 }
 
 static int emit_lea_x86(u8 *image, u32 *off, bool emit,
@@ -267,7 +295,7 @@ static int emit_lea_x86(u8 *image, u32 *off, bool emit,
 			bool is64)
 {
 	u8 buf[16];
-	u8 dst_reg, base_reg, index_reg, scale_log2;
+	u8 dst_reg, base_reg, index_reg, scale_log2, tmp_reg;
 	bool has_base, has_index;
 	s32 disp;
 	u32 len = 0;
@@ -275,36 +303,30 @@ static int emit_lea_x86(u8 *image, u32 *off, bool emit,
 
 	(void)prog;
 
-	if (!off)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_lea_payload(payload, &dst_reg, &base_reg, &index_reg,
-				 &scale_log2, &has_base, &has_index, &disp);
+				 &scale_log2, &has_base, &has_index, &disp,
+				 &tmp_reg);
 	if (err)
 		return err;
+	(void)tmp_reg;
 
-	dst_reg = lea_x86_reg_for_prog(prog, dst_reg);
+	dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
 	if (has_base)
-		base_reg = lea_x86_reg_for_prog(prog, base_reg);
+		base_reg = kinsn_x86_reg_for_prog(prog, base_reg);
 	if (has_index)
-		index_reg = lea_x86_reg_for_prog(prog, index_reg);
+		index_reg = kinsn_x86_reg_for_prog(prog, index_reg);
 
-	if (!lea_x86_reg_valid(dst_reg))
+	if (!kinsn_x86_valid(dst_reg))
 		return -EINVAL;
-	if (has_base && !lea_x86_reg_valid(base_reg))
+	if (has_base && !kinsn_x86_valid(base_reg))
 		return -EINVAL;
-	if (has_index && !lea_x86_reg_valid(index_reg))
+	if (has_index && !kinsn_x86_valid(index_reg))
 		return -EINVAL;
 
 	emit_lea(buf, &len, is64, dst_reg, base_reg, index_reg,
 		 scale_log2, has_base, has_index, disp);
 
-	if (emit)
-		memcpy(image + *off, buf, len);
-	*off += len;
-	return len;
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 static int emit_lea64_x86(u8 *image, u32 *off, bool emit,

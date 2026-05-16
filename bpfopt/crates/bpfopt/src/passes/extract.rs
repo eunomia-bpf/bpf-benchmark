@@ -4,14 +4,14 @@ use crate::insn::*;
 use crate::pass::*;
 pub(super) const KINSN_TARGETS: &[KinsnDescriptor] = &[
     KinsnDescriptor {
-        name: "bpf_x86_shrq_imm",
-        register_uses: extract_register_uses,
-        register_defs: extract_register_defs,
+        name: "bpf_x86_shrq",
+        register_uses: x86_alu_register_uses,
+        register_defs: x86_alu_register_defs,
     },
     KinsnDescriptor {
-        name: "bpf_x86_andl_imm32",
-        register_uses: extract_register_uses,
-        register_defs: extract_register_defs,
+        name: "bpf_x86_andl",
+        register_uses: x86_alu_register_uses,
+        register_defs: x86_alu_register_defs,
     },
     KinsnDescriptor {
         name: "bpf_arm64_ubfm_x_imm",
@@ -24,6 +24,12 @@ fn extract_register_uses(payload: u64) -> RegSet {
 }
 fn extract_register_defs(payload: u64) -> RegSet {
     regs_from_offsets(payload, &[0])
+}
+fn x86_alu_register_uses(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[4])
+}
+fn x86_alu_register_defs(payload: u64) -> RegSet {
+    regs_from_offsets(payload, &[4])
 }
 pub struct ExtractPass;
 pub(super) struct ExtractSite {
@@ -93,8 +99,8 @@ fn emit_extract_replacement(
         Arch::X86_64 => {
             let mut out = Vec::new();
             out.extend_from_slice(&prog.kinsn_emit(
-                "bpf_x86_shrq_imm",
-                reg_imm_payload(site.dst_reg, site.shift_amount),
+                "bpf_x86_shrq",
+                x86_alu_imm_payload(site.dst_reg, site.shift_amount),
             )?);
             if site.bit_len == 64 {
                 return Ok(out);
@@ -105,7 +111,7 @@ fn emit_extract_replacement(
                 (1u32 << site.bit_len) - 1
             };
             out.extend_from_slice(
-                &prog.kinsn_emit("bpf_x86_andl_imm32", reg_imm_payload(site.dst_reg, mask))?,
+                &prog.kinsn_emit("bpf_x86_andl", x86_alu_imm_payload(site.dst_reg, mask))?,
             );
             Ok(out)
         }
@@ -118,6 +124,6 @@ fn emit_extract_replacement(
     }
 }
 
-fn reg_imm_payload(dst_reg: u8, imm: u32) -> u64 {
-    BpfInsn::pack_u4(dst_reg, 0) | BpfInsn::pack_u32(imm, 8)
+fn x86_alu_imm_payload(dst_reg: u8, imm: u32) -> u64 {
+    BpfInsn::pack_u4(2, 0) | BpfInsn::pack_u4(dst_reg, 4) | BpfInsn::pack_u32(imm, 12)
 }

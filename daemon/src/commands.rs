@@ -1442,7 +1442,7 @@ mod tests {
                 },
             ),
             (
-                "bpf_x86_andl_imm32".to_string(),
+                "bpf_x86_andl".to_string(),
                 TargetKinsnJson {
                     btf_func_id: 129876,
                     btf_id: 202,
@@ -1516,7 +1516,7 @@ mod tests {
     #[test]
     fn rejit_fd_array_builder_rejects_missing_module_slot() {
         let kinsns = HashMap::from([(
-            "bpf_x86_andl_imm32".to_string(),
+            "bpf_x86_andl".to_string(),
             TargetKinsnJson {
                 btf_func_id: 129876,
                 btf_id: 202,
@@ -1542,7 +1542,7 @@ mod tests {
     fn rejit_fd_array_builder_rejects_conflicting_module_offsets() {
         let kinsns = HashMap::from([
             (
-                "bpf_x86_andl_imm32".to_string(),
+                "bpf_x86_andl".to_string(),
                 TargetKinsnJson {
                     btf_func_id: 129876,
                     btf_id: 202,

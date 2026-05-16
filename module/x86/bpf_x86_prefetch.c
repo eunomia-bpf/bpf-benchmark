@@ -3,7 +3,7 @@
  * BpfReJIT x86 kinsn: PREFETCHT0 for x86-64
  */
 
-#include "kinsn_common.h"
+#include "kinsn_x86_emit.h"
 
 __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_x86_prefetcht0(void) {}
@@ -44,38 +44,27 @@ static int instantiate_prefetcht0(u64 payload, struct bpf_insn *insn_buf)
 	return 1;
 }
 
-static void emit_u8(u8 *buf, u32 *len, u8 byte)
-{
-	buf[(*len)++] = byte;
-}
-
-static void emit_rex_b(u8 *buf, u32 *len, u8 base_reg)
-{
-	if (kinsn_x86_reg_ext(base_reg))
-		emit_u8(buf, len, 0x41);
-}
-
 static void emit_prefetcht0_mem(u8 *buf, u32 *len, u8 base_reg)
 {
 	u8 rm = kinsn_x86_reg_code(base_reg);
 
-	emit_rex_b(buf, len, base_reg);
-	emit_u8(buf, len, 0x0F);
-	emit_u8(buf, len, 0x18);
+	kinsn_emit_rex(buf, len, false, false, false, kinsn_x86_ext(base_reg));
+	kinsn_emit_u8(buf, len, 0x0F);
+	kinsn_emit_u8(buf, len, 0x18);
 
 	if (rm == 4) {
-		emit_u8(buf, len, 0x0C);
-		emit_u8(buf, len, 0x24);
+		kinsn_emit_u8(buf, len, 0x0C);
+		kinsn_emit_u8(buf, len, 0x24);
 		return;
 	}
 
 	if (rm == 5) {
-		emit_u8(buf, len, 0x4D);
-		emit_u8(buf, len, 0);
+		kinsn_emit_u8(buf, len, 0x4D);
+		kinsn_emit_u8(buf, len, 0);
 		return;
 	}
 
-	emit_u8(buf, len, 0x08 | rm);
+	kinsn_emit_u8(buf, len, 0x08 | rm);
 }
 
 static int emit_prefetcht0_x86(u8 *image, u32 *off, bool emit,
@@ -88,21 +77,13 @@ static int emit_prefetcht0_x86(u8 *image, u32 *off, bool emit,
 
 	(void)prog;
 
-	if (!off)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_prefetcht0_payload(payload, &ptr_reg);
 	if (err)
 		return err;
 
 	emit_prefetcht0_mem(buf, &len, ptr_reg);
 
-	if (emit)
-		memcpy(image + *off, buf, len);
-	*off += len;
-	return len;
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 const struct bpf_kinsn bpf_x86_prefetcht0_desc = {

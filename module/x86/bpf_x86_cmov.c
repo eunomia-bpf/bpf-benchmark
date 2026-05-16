@@ -88,6 +88,7 @@ static __always_inline int decode_cmp_rr_payload(u64 payload, u8 *left_reg,
 						 u8 *left_tmp_reg,
 						 u8 *right_tmp_reg)
 {
+	payload = kinsn_payload_decode(payload);
 	*left_reg = kinsn_payload_reg(payload, 0);
 	*right_reg = kinsn_payload_reg(payload, 4);
 	*left_tmp_reg = kinsn_payload_reg(payload, 8);
@@ -128,6 +129,7 @@ static __always_inline int decode_cmp_rr_payload(u64 payload, u8 *left_reg,
 static __always_inline int decode_cmp_imm_payload(u64 payload, u8 *reg,
 						  u8 *tmp_reg, s32 *imm)
 {
+	payload = kinsn_payload_decode(payload);
 	*reg = kinsn_payload_reg(payload, 0);
 	*tmp_reg = kinsn_payload_reg(payload, 4);
 	*imm = kinsn_payload_s32(payload, 8);
@@ -157,6 +159,7 @@ static __always_inline int decode_cmp_sib_rr_payload(u64 payload,
 						     u8 *value_tmp_reg,
 						     u8 *rhs_tmp_reg)
 {
+	payload = kinsn_payload_decode(payload);
 	*base_reg = kinsn_payload_reg(payload, 0);
 	*index_reg = kinsn_payload_reg(payload, 4);
 	*scale_log2 = (payload >> 8) & 0x3;
@@ -195,6 +198,7 @@ static __always_inline int decode_cmp_sib_rr_payload(u64 payload,
 static __always_inline int decode_test_payload(u64 payload, u8 *reg,
 					       u8 *tmp_reg)
 {
+	payload = kinsn_payload_decode(payload);
 	*reg = kinsn_payload_reg(payload, 0);
 	*tmp_reg = kinsn_payload_reg(payload, 4);
 
@@ -218,6 +222,7 @@ static __always_inline int decode_test_rr_payload(u64 payload,
 						  u8 *left_tmp_reg,
 						  u8 *right_tmp_reg)
 {
+	payload = kinsn_payload_decode(payload);
 	*left_reg = kinsn_payload_reg(payload, 0);
 	*right_reg = kinsn_payload_reg(payload, 4);
 	*left_tmp_reg = kinsn_payload_reg(payload, 8);
@@ -252,6 +257,7 @@ static __always_inline int decode_testb_imm_payload(u64 payload,
 						    u8 *tmp_reg,
 						    u8 *imm)
 {
+	payload = kinsn_payload_decode(payload);
 	*reg = kinsn_payload_reg(payload, 0);
 	*tmp_reg = kinsn_payload_reg(payload, 4);
 	*imm = kinsn_payload_u8(payload, 8);
@@ -275,6 +281,7 @@ static __always_inline int decode_cmov_payload(u64 payload,
 					       u8 *src_reg,
 					       u8 *cond_reg)
 {
+	payload = kinsn_payload_decode(payload);
 	*dst_reg = kinsn_payload_reg(payload, 0);
 	*src_reg = kinsn_payload_reg(payload, 4);
 	*cond_reg = kinsn_payload_reg(payload, 8);
@@ -295,6 +302,7 @@ static __always_inline int decode_cmov_emit_payload(u64 payload,
 						    u8 *dst_reg,
 						    u8 *src_reg)
 {
+	payload = kinsn_payload_decode(payload);
 	u8 kind = kinsn_payload_reg(payload, 12);
 
 	*dst_reg = kinsn_payload_reg(payload, 0);
@@ -345,6 +353,7 @@ static __always_inline int decode_setcc_payload(u64 payload,
 						u8 *cond_reg,
 						u8 *tmp_reg)
 {
+	payload = kinsn_payload_decode(payload);
 	*dst_reg = kinsn_payload_reg(payload, 0);
 	*cond_reg = kinsn_payload_reg(payload, 4);
 	*tmp_reg = kinsn_payload_reg(payload, 8);
@@ -368,6 +377,7 @@ static __always_inline int decode_setcc_payload(u64 payload,
 
 static __always_inline int decode_setcc_emit_payload(u64 payload, u8 *dst_reg)
 {
+	payload = kinsn_payload_decode(payload);
 	u8 kind = kinsn_payload_reg(payload, 16);
 
 	*dst_reg = kinsn_payload_reg(payload, 0);
@@ -931,48 +941,6 @@ static int instantiate_setge_r(u64 payload, struct bpf_insn *insn_buf)
 	return instantiate_setcc_dispatch(payload, insn_buf, BPF_JSLT);
 }
 
-static void emit_u8(u8 *buf, u32 *len, u8 byte)
-{
-	buf[(*len)++] = byte;
-}
-
-static void emit_rex_rr(u8 *buf, u32 *len, bool is64, u8 reg, u8 rm)
-{
-	u8 rex = 0x40;
-
-	if (is64)
-		rex |= 0x08;
-	if (kinsn_x86_reg_ext(reg))
-		rex |= 0x04;
-	if (kinsn_x86_reg_ext(rm))
-		rex |= 0x01;
-	if (rex != 0x40)
-		emit_u8(buf, len, rex);
-}
-
-static void emit_rex8_rr(u8 *buf, u32 *len, u8 reg, u8 rm)
-{
-	u8 rex = 0x40;
-
-	if (kinsn_x86_reg_ext(reg))
-		rex |= 0x04;
-	if (kinsn_x86_reg_ext(rm))
-		rex |= 0x01;
-	if (rex != 0x40 || kinsn_x86_needs_rex8(reg) ||
-	    kinsn_x86_needs_rex8(rm))
-		emit_u8(buf, len, rex);
-}
-
-static void emit_rex8_r(u8 *buf, u32 *len, u8 rm)
-{
-	u8 rex = 0x40;
-
-	if (kinsn_x86_reg_ext(rm))
-		rex |= 0x01;
-	if (rex != 0x40 || kinsn_x86_needs_rex8(rm))
-		emit_u8(buf, len, rex);
-}
-
 static int emit_testq_rr_x86(u8 *image, u32 *off, bool emit,
 			     u64 payload, const struct bpf_prog *prog)
 {
@@ -983,26 +951,18 @@ static int emit_testq_rr_x86(u8 *image, u32 *off, bool emit,
 
 	(void)prog;
 
-	if (!off)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_test_payload(payload, &reg, &tmp_reg);
 	if (err)
 		return err;
 	(void)tmp_reg;
 
-	emit_rex_rr(buf, &len, true, reg, reg);
-	emit_u8(buf, &len, 0x85);
-	emit_u8(buf, &len, 0xC0 |
+	kinsn_emit_rex_rr(buf, &len, true, reg, reg);
+	kinsn_emit_u8(buf, &len, 0x85);
+	kinsn_emit_u8(buf, &len, 0xC0 |
 		(kinsn_x86_reg_code(reg) << 3) |
 		kinsn_x86_reg_code(reg));
 
-	if (emit)
-		memcpy(image + *off, buf, len);
-	*off += len;
-	return len;
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 static int emit_cmp_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
@@ -1015,11 +975,6 @@ static int emit_cmp_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 
 	(void)prog;
 
-	if (!off)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_cmp_rr_payload(payload, &left_reg, &right_reg,
 				    &left_tmp_reg, &right_tmp_reg);
 	if (err)
@@ -1027,16 +982,13 @@ static int emit_cmp_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	(void)left_tmp_reg;
 	(void)right_tmp_reg;
 
-	emit_rex_rr(buf, &len, is64, right_reg, left_reg);
-	emit_u8(buf, &len, 0x39);
-	emit_u8(buf, &len, 0xC0 |
+	kinsn_emit_rex_rr(buf, &len, is64, right_reg, left_reg);
+	kinsn_emit_u8(buf, &len, 0x39);
+	kinsn_emit_u8(buf, &len, 0xC0 |
 		(kinsn_x86_reg_code(right_reg) << 3) |
 		kinsn_x86_reg_code(left_reg));
 
-	if (emit)
-		memcpy(image + *off, buf, len);
-	*off += len;
-	return len;
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 static int emit_cmp_imm_x86(u8 *image, u32 *off, bool emit, u64 payload,
@@ -1050,25 +1002,17 @@ static int emit_cmp_imm_x86(u8 *image, u32 *off, bool emit, u64 payload,
 
 	(void)prog;
 
-	if (!off)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_cmp_imm_payload(payload, &reg, &tmp_reg, &imm);
 	if (err)
 		return err;
 	(void)tmp_reg;
 
-	emit_rex_rr(buf, &len, is64, 0, reg);
-	emit_u8(buf, &len, 0x81);
-	emit_u8(buf, &len, 0xF8 | kinsn_x86_reg_code(reg));
+	kinsn_emit_rex_rr(buf, &len, is64, 0, reg);
+	kinsn_emit_u8(buf, &len, 0x81);
+	kinsn_emit_u8(buf, &len, 0xF8 | kinsn_x86_reg_code(reg));
 	kinsn_emit_s32(buf, &len, imm);
 
-	if (emit)
-		memcpy(image + *off, buf, len);
-	*off += len;
-	return len;
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 static int emit_cmpq_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
@@ -1105,11 +1049,6 @@ static int emit_cmpq_sib_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	u32 len = 0;
 	int err;
 
-	if (!off)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_cmp_sib_rr_payload(payload, &base_reg, &index_reg,
 					&scale_log2, &offset, &rhs_reg,
 					&addr_tmp_reg, &value_tmp_reg,
@@ -1133,10 +1072,7 @@ static int emit_cmpq_sib_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	kinsn_emit_sib_mem(buf, &len, rhs_reg, base_reg, index_reg,
 			   scale_log2, offset);
 
-	if (emit)
-		memcpy(image + *off, buf, len);
-	*off += len;
-	return len;
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 static int emit_test_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
@@ -1149,11 +1085,6 @@ static int emit_test_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 
 	(void)prog;
 
-	if (!off)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_test_rr_payload(payload, &left_reg, &right_reg,
 				     &left_tmp_reg, &right_tmp_reg);
 	if (err)
@@ -1164,18 +1095,15 @@ static int emit_test_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 		return -EINVAL;
 
 	if (is_byte)
-		emit_rex8_rr(buf, &len, right_reg, left_reg);
+		kinsn_emit_rex8_rr(buf, &len, right_reg, left_reg);
 	else
-		emit_rex_rr(buf, &len, false, right_reg, left_reg);
-	emit_u8(buf, &len, is_byte ? 0x84 : 0x85);
-	emit_u8(buf, &len, 0xC0 |
+		kinsn_emit_rex_rr(buf, &len, false, right_reg, left_reg);
+	kinsn_emit_u8(buf, &len, is_byte ? 0x84 : 0x85);
+	kinsn_emit_u8(buf, &len, 0xC0 |
 		(kinsn_x86_reg_code(right_reg) << 3) |
 		kinsn_x86_reg_code(left_reg));
 
-	if (emit)
-		memcpy(image + *off, buf, len);
-	*off += len;
-	return len;
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 static int emit_testb_rr_x86(u8 *image, u32 *off, bool emit,
@@ -1200,11 +1128,6 @@ static int emit_testb_imm_x86(u8 *image, u32 *off, bool emit,
 
 	(void)prog;
 
-	if (!off)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_testb_imm_payload(payload, &reg, &tmp_reg, &imm);
 	if (err)
 		return err;
@@ -1213,19 +1136,16 @@ static int emit_testb_imm_x86(u8 *image, u32 *off, bool emit,
 		return -EINVAL;
 
 	if (reg == BPF_REG_0) {
-		emit_u8(buf, &len, 0xa8);
-		emit_u8(buf, &len, imm);
+		kinsn_emit_u8(buf, &len, 0xa8);
+		kinsn_emit_u8(buf, &len, imm);
 	} else {
-		emit_rex8_r(buf, &len, reg);
-		emit_u8(buf, &len, 0xf6);
-		emit_u8(buf, &len, 0xc0 | kinsn_x86_reg_code(reg));
-		emit_u8(buf, &len, imm);
+		kinsn_emit_rex8_rm(buf, &len, reg);
+		kinsn_emit_u8(buf, &len, 0xf6);
+		kinsn_emit_u8(buf, &len, 0xc0 | kinsn_x86_reg_code(reg));
+		kinsn_emit_u8(buf, &len, imm);
 	}
 
-	if (emit)
-		memcpy(image + *off, buf, len);
-	*off += len;
-	return len;
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 static int emit_cmov_x86(u8 *image, u32 *off, bool emit,
@@ -1239,26 +1159,18 @@ static int emit_cmov_x86(u8 *image, u32 *off, bool emit,
 
 	(void)prog;
 
-	if (!off)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_cmov_emit_payload(payload, &dst_reg, &src_reg);
 	if (err)
 		return err;
 
-	emit_rex_rr(buf, &len, is64, dst_reg, src_reg);
-	emit_u8(buf, &len, 0x0F);
-	emit_u8(buf, &len, cc);
-	emit_u8(buf, &len, 0xC0 |
+	kinsn_emit_rex_rr(buf, &len, is64, dst_reg, src_reg);
+	kinsn_emit_u8(buf, &len, 0x0F);
+	kinsn_emit_u8(buf, &len, cc);
+	kinsn_emit_u8(buf, &len, 0xC0 |
 		(kinsn_x86_reg_code(dst_reg) << 3) |
 		kinsn_x86_reg_code(src_reg));
 
-	if (emit)
-		memcpy(image + *off, buf, len);
-	*off += len;
-	return len;
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 static int emit_cmovneq_rr_x86(u8 *image, u32 *off, bool emit,
@@ -1307,24 +1219,16 @@ static int emit_setcc_x86(u8 *image, u32 *off, bool emit, u64 payload,
 
 	(void)prog;
 
-	if (!off)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_setcc_emit_payload(payload, &dst_reg);
 	if (err)
 		return err;
 
-	emit_rex8_r(buf, &len, dst_reg);
-	emit_u8(buf, &len, 0x0f);
-	emit_u8(buf, &len, cc);
-	emit_u8(buf, &len, 0xc0 | kinsn_x86_reg_code(dst_reg));
+	kinsn_emit_rex8_rm(buf, &len, dst_reg);
+	kinsn_emit_u8(buf, &len, 0x0f);
+	kinsn_emit_u8(buf, &len, cc);
+	kinsn_emit_u8(buf, &len, 0xc0 | kinsn_x86_reg_code(dst_reg));
 
-	if (emit)
-		memcpy(image + *off, buf, len);
-	*off += len;
-	return len;
+	return kinsn_emit_finish(image, off, emit, buf, len);
 }
 
 static int emit_setne_r_x86(u8 *image, u32 *off, bool emit, u64 payload,

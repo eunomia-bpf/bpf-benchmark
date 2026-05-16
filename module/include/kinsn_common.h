@@ -14,18 +14,36 @@
 #include <linux/module.h>
 #include <linux/string.h>
 
+static __always_inline bool kinsn_payload_wire_escaped(u64 payload)
+{
+	u8 marker = payload & 0xf;
+	u8 original_low = (payload >> 4) & 0xf;
+
+	return marker == BPF_REG_10 && original_low >= 11 && original_low <= 14;
+}
+
+static __always_inline u64 kinsn_payload_decode(u64 payload)
+{
+	if (!kinsn_payload_wire_escaped(payload))
+		return payload;
+	return ((payload >> 8) << 4) | ((payload >> 4) & 0xf);
+}
+
 static __always_inline u8 kinsn_payload_reg(u64 payload, u8 shift)
 {
+	payload = kinsn_payload_decode(payload);
 	return (payload >> shift) & 0xf;
 }
 
 static __always_inline u8 kinsn_payload_u8(u64 payload, u8 shift)
 {
+	payload = kinsn_payload_decode(payload);
 	return (payload >> shift) & 0xff;
 }
 
 static __always_inline s16 kinsn_payload_s16(u64 payload, u8 shift)
 {
+	payload = kinsn_payload_decode(payload);
 	return (s16)((payload >> shift) & 0xffff);
 }
 

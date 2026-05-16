@@ -73,8 +73,8 @@
 #define SELECT_TEST_KFUNC "bpf_x86_testq_rr"
 #define SELECT_MOVE_KFUNC "bpf_x86_cmovneq_rr"
 #define EXTRACT_KINSN_MODULE "bpf_x86_alu_imm"
-#define EXTRACT_SHIFT_KFUNC "bpf_x86_shrq_imm"
-#define EXTRACT_MASK_KFUNC "bpf_x86_andl_imm32"
+#define EXTRACT_SHIFT_KFUNC "bpf_x86_shrq"
+#define EXTRACT_MASK_KFUNC "bpf_x86_andl"
 #define ENDIAN_LOAD_MODULE "bpf_x86_mov_mem"
 #define ENDIAN_SWAP_MODULE "bpf_x86_byteorder"
 #define ENDIAN_LOAD16_KFUNC "bpf_x86_movzwl_mem"
@@ -738,6 +738,8 @@ static int sys_bpf(enum bpf_cmd cmd, union bpf_attr *attr, unsigned int size)
 
 #define KINSN_REG_IMM_PAYLOAD(DST, IMM) \
 	((__u64)(DST) | ((__u64)(IMM) << 8))
+#define KINSN_X86_ALU_IMM_PAYLOAD(DST, IMM) \
+	(2ULL | ((__u64)(DST) << 4) | ((__u64)(__u32)(IMM) << 12))
 #define KINSN_REG_IMM_TMP_PAYLOAD(DST, IMM, TMP) \
 	((__u64)(DST) | ((__u64)(TMP) << 4) | ((__u64)(__u8)(IMM) << 8))
 #define KINSN_REG_REG_PAYLOAD(DST, SRC) \
@@ -3989,9 +3991,9 @@ static int test_rejit_extract_range_narrowing(void)
 		BPF_KINSN_SIDECAR(KINSN_EXTRACT_U8_PAYLOAD(BPF_REG_2, 0, 8)),
 		BPF_CALL_KINSN(0, 0),
 	#else
-		BPF_KINSN_SIDECAR(KINSN_REG_IMM_PAYLOAD(BPF_REG_2, 0)),
+		BPF_KINSN_SIDECAR(KINSN_X86_ALU_IMM_PAYLOAD(BPF_REG_2, 0)),
 		BPF_CALL_KINSN(0, 0),
-		BPF_KINSN_SIDECAR(KINSN_REG_IMM_PAYLOAD(BPF_REG_2, 0xff)),
+		BPF_KINSN_SIDECAR(KINSN_X86_ALU_IMM_PAYLOAD(BPF_REG_2, 0xff)),
 		BPF_CALL_KINSN(0, 0),
 	#endif
 		BPF_MOV64_REG(BPF_REG_1, BPF_REG_10),

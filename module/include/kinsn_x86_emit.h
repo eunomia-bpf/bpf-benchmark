@@ -6,6 +6,7 @@
 
 static __always_inline s32 kinsn_payload_s32(u64 payload, u8 shift)
 {
+	payload = kinsn_payload_decode(payload);
 	return (s32)((u32)(payload >> shift));
 }
 
@@ -167,6 +168,46 @@ static __always_inline void kinsn_emit_rex_rr(u8 *buf, u32 *len, bool is64,
 {
 	kinsn_emit_rex(buf, len, is64, kinsn_x86_ext(reg), false,
 		       kinsn_x86_ext(rm));
+}
+
+static __always_inline void kinsn_emit_rex8(u8 *buf, u32 *len, u8 reg, u8 rm,
+					    bool has_reg, bool force_reg,
+					    bool force_rm)
+{
+	u8 rex = 0x40;
+
+	if (has_reg && kinsn_x86_ext(reg))
+		rex |= 0x04;
+	if (kinsn_x86_ext(rm))
+		rex |= 0x01;
+	if (rex != 0x40 ||
+	    (force_reg && kinsn_x86_needs_rex8(reg)) ||
+	    (force_rm && kinsn_x86_needs_rex8(rm)))
+		kinsn_emit_u8(buf, len, rex);
+}
+
+static __always_inline void kinsn_emit_rex8_rm(u8 *buf, u32 *len, u8 rm)
+{
+	kinsn_emit_rex8(buf, len, 0, rm, false, false, true);
+}
+
+static __always_inline void kinsn_emit_rex8_rr(u8 *buf, u32 *len,
+					       u8 reg, u8 rm)
+{
+	kinsn_emit_rex8(buf, len, reg, rm, true, true, true);
+}
+
+static __always_inline int kinsn_emit_finish(u8 *image, u32 *off, bool emit,
+					     u8 *buf, u32 len)
+{
+	if (!off)
+		return -EINVAL;
+	if (emit && !image)
+		return -EINVAL;
+	if (emit)
+		memcpy(image + *off, buf, len);
+	*off += len;
+	return len;
 }
 
 static __always_inline void kinsn_emit_sib_mem(u8 *buf, u32 *len, u8 reg_field,
