@@ -134,8 +134,13 @@ x86_l_119c:
 	X86_VM_LOOP_OP(x86_exec_cmp_imm, X86_OP_CMP_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 32ULL);
 x86_l_119f:
 	/* 0x119f: jne    1140 <packet_checksum_fold_xdp+0x40> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
+	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE)) {
+		if (__x86_vm_state.rax == 32) {
+			loop->next = 0xbeef;
+			return 1;
+		}
 		return 0;
+	}
 	loop->next = 0x11a1;
 	return 1;
 	#undef __x86_vm_state
@@ -169,7 +174,7 @@ x86_l_110c:
 		goto x86_l_110f;
 x86_l_110e:
 	/* 0x110e: ret */
-	X86_VM_RET_RAX();
+	return 13;
 x86_l_110f:
 	/* 0x110f: lea    rsi,[rdx+0x8] */
 	X86_VM_RUN_OP(x86_exec_lea, X86_OP_LEA, X86_RSI, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);
@@ -229,16 +234,16 @@ x86_l_1140:
 	(&__x86_loop)->data_end = __x86_vm_data_end;
 	if (bpf_loop(32, x86_loop_1140_1140_cb, (&__x86_loop), 0) < 0) {
 		(&__x86_loop)->failed = __LINE__;
-		return XDP_ABORTED;
+		return 14;
 	}
 	if ((&__x86_loop)->failed)
-		return XDP_ABORTED;
+		return 10;
 	if ((&__x86_loop)->done)
-		X86_VM_RET_RAX();
+		return 11;
 	if ((&__x86_loop)->next == 0x11a1) {
 		goto x86_l_11a1;
 	}
-	return XDP_ABORTED;
+	return 100 + ((__u32)(&__x86_loop)->state.zf * 10) + ((__u32)(&__x86_loop)->state.rax & 0xf);
 x86_l_11a1:
 	/* 0x11a1: mov    QWORD PTR [rdx],rsi */
 	X86_VM_RUN_OP(x86_exec_mov_store_reg, X86_OP_MOV_STORE_REG, X86_RDX, X86_RSI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);
@@ -252,7 +257,7 @@ x86_l_11aa:
 	/* 0x11aa: ret */
 	X86_VM_RET_RAX();
 	#undef __x86_vm_state
-	return XDP_ABORTED;
+	return 15;
 }
 
 X86_VM_LICENSE();

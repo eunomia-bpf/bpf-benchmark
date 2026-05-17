@@ -99,69 +99,71 @@ Current active track: generated-C interpreter proof path first. The JSON-linker
 path is recorded below, but it is paused until generated-C coverage stays
 stable.
 
-Latest complete generated-C batch:
+Latest complete generated-C batch after removing benchmark-name special
+renderers:
 
 ```sh
 sudo -n python3 ebpf-vm/x86/micro-prog/run_micro_interpreter_batch.py \
   --native-source object-no-jump-tables --no-build-loader \
-  --markdown /tmp/reversejit-generated-c-status-$(id -u)-final.md
+  --markdown /tmp/reversejit-current-micro-status-$(id -u).md
 ```
 
-Result: all 29 selected micro programs loaded in the kernel, passed
-`BPF_PROG_TEST_RUN`, and matched expected output/retval.
+Result: 26 of 29 selected micro programs loaded in the kernel, passed
+`BPF_PROG_TEST_RUN`, and matched expected output/retval. The remaining three
+failures are verifier/proof-shape issues after removing Python special
+renderers, not benchmark-name dispatch in the generator.
 
-| Micro program | Status |
-| --- | --- |
-| `simple` | ok |
-| `simple_packet` | ok |
-| `bitmap_popcount_scan` | ok |
-| `sorted_rule_binary_search` | ok |
-| `bcc_runqlat_log2_histogram_bucket` | ok |
-| `trace_event_type_switch_dispatch` | ok |
-| `packet_checksum_fold` | ok |
-| `payload_prefix_memcmp_scan` | ok |
-| `packet_vlan_tcpopt_parser` | ok |
-| `bpf_local_call_fanout_dispatch` | ok |
-| `flow_5tuple_rss_hash` | ok |
-| `katran_lb_consistent_hash_select` | ok |
-| `cilium_policy_guard_tree_filter` | ok |
-| `siphash_rotate64_mixer` | ok |
-| `packet_record_bounds_window` | ok |
-| `flow_record_field_scan` | ok |
-| `packed_header_bitfield_decode` | ok |
-| `bpftrace_string_search_prefix_scan` | ok |
-| `tracee_syscall_name_table_lookup` | ok |
-| `tracee_http_method_prefix_detect` | ok |
-| `cilium_socket_lb_service_select` | ok |
-| `bcc_tcpconnect_ipv4_tuple_filter` | ok |
-| `tetragon_process_event_arg_filter` | ok |
-| `otel_stack_frame_unwind_scan` | ok |
-| `cilium_ct_nat_tuple_rewrite` | ok |
-| `packet_toeplitz_rss_hash` | ok |
-| `bpftrace_comm_key_fnv_hash` | ok |
-| `tc_packet_checksum_fold` | ok |
-| `cgroup_skb_hash_chain` | ok |
+| Micro program | Status | Note |
+| --- | --- | --- |
+| `simple` | ok |  |
+| `simple_packet` | ok |  |
+| `bitmap_popcount_scan` | ok |  |
+| `sorted_rule_binary_search` | ok |  |
+| `bcc_runqlat_log2_histogram_bucket` | ok |  |
+| `trace_event_type_switch_dispatch` | ok |  |
+| `packet_checksum_fold` | fail | Runtime returns `0` instead of XDP `2`; generic nested-loop proof path exits through an abort/early-return-equivalent path. |
+| `payload_prefix_memcmp_scan` | ok |  |
+| `packet_vlan_tcpopt_parser` | ok |  |
+| `bpf_local_call_fanout_dispatch` | fail | Verifier processed-insn limit is exceeded (`E2BIG`, surfaced by libbpf as `Argument list too long`). |
+| `flow_5tuple_rss_hash` | ok |  |
+| `katran_lb_consistent_hash_select` | ok |  |
+| `cilium_policy_guard_tree_filter` | ok |  |
+| `siphash_rotate64_mixer` | ok |  |
+| `packet_record_bounds_window` | ok |  |
+| `flow_record_field_scan` | ok |  |
+| `packed_header_bitfield_decode` | ok |  |
+| `bpftrace_string_search_prefix_scan` | fail | Generic interpreter loop still exceeds verifier processed-insn limit (`E2BIG`). |
+| `tracee_syscall_name_table_lookup` | ok |  |
+| `tracee_http_method_prefix_detect` | ok |  |
+| `cilium_socket_lb_service_select` | ok |  |
+| `bcc_tcpconnect_ipv4_tuple_filter` | ok |  |
+| `tetragon_process_event_arg_filter` | ok |  |
+| `otel_stack_frame_unwind_scan` | ok |  |
+| `cilium_ct_nat_tuple_rewrite` | ok |  |
+| `packet_toeplitz_rss_hash` | ok |  |
+| `bpftrace_comm_key_fnv_hash` | ok |  |
+| `tc_packet_checksum_fold` | ok | Return value is `0` by TC ABI, as declared in `micro_pure_jit.yaml`. |
+| `cgroup_skb_hash_chain` | ok | Return value is `1` by cgroup skb ABI, as declared in `micro_pure_jit.yaml`. |
 
-The immediate generated-C target is complete. JSON-link completion is a
-separate next experiment.
+The immediate generated-C target is now cleaner but not complete. JSON-link
+completion is a separate next experiment.
 
-Active generator rule: Python must not rewrite native return semantics or
-replace one native instruction with custom BPF semantics. A native `ret` is
-emitted as `X86_VM_RET_RAX();`; any harness/program-type return mapping belongs
-in the interpreter/header or in the test harness expectation, not in
-per-program Python code. The targeted runner now checks native ABI return values
-for TC (`0`) and cgroup skb (`1`) instead of forcing generated proof programs to
-return `XDP_PASS`.
+Active generator rule: Python must not rewrite native return semantics, branch
+semantics, or opcode semantics. A native `ret` is emitted as
+`X86_VM_RET_RAX();`; one native instruction becomes one interpreter-helper step
+plus explicit native branch/return structure. Program-type return mapping lives
+in `micro/config/micro_pure_jit.yaml` via `expected_retval`, and the runner
+reuses that metadata for XDP (`2` default), TC (`0`), and cgroup skb (`1`).
 
 Generated-C migration todo:
 
 | Item | Status | Completion check |
 | --- | --- | --- |
-| Native return ABI lives in C/header, not Python | done | `ret` emits `X86_VM_RET_RAX();`; runner checks native retval per program family. |
-| Move checksum loop/memory proof out of Python | done | `packet_checksum_fold` and `tc_packet_checksum_fold` load and test-run through C-authored checksum helpers/templates. |
-| Move local-call loop/callee proof out of Python | pending | `bpf_local_call_fanout_dispatch` still passes after the special renderer is reduced to mechanical scheduling. |
-| Move string-search bounded scan proof out of Python | done | `bpftrace_string_search_prefix_scan` no longer hits verifier processed-insn limit and returns the expected result. |
-| Run full generated-C batch | done | All selected micro programs load, test-run, and match expected output/retval. |
+| Native return ABI lives in metadata/header, not Python rewrites | done | `ret` emits `X86_VM_RET_RAX();`; runner checks `expected_retval` from YAML. |
+| Remove benchmark-name renderers from Python | done | `generate_micro_proofs.py` no longer dispatches on `packet_checksum_fold`, `bpftrace_string_search_prefix_scan`, `bpf_local_call_fanout_dispatch`, or other benchmark names. |
+| Remove stale C special templates | done | Unused checksum/string-scan C helper templates were deleted from `x86_vm_bpf.h`; the header now contains generic VM plumbing only. |
+| Generic loop lowering | partial | Structural loop detection lowers selected high-pressure loops to `bpf_loop`, but three micro programs still need a cleaner verifier proof shape. |
+| Run full generated-C batch | partial | 26/29 selected micro programs currently pass. |
 
 ## JSON-Linker Todo
 
@@ -487,16 +489,16 @@ This prototype has already exposed several verifier-facing design constraints:
   incomplete for native direct calls. The generator now rebuilds the native
   object and disassembles call-target symbols when the markdown `## Native ASM`
   block has unresolved call targets.
-- `bpf_local_call_fanout_dispatch` now loads and returns the expected result in
-  the generated-C path, but the current special renderer is still a prototype
-  shape. Its call/loop handling should be moved toward C-authored interpreter
-  helpers so Python remains a mechanical native-instruction scheduler.
-- `bpftrace_string_search_prefix_scan` no longer exceeds the verifier
-  instruction processing limit after moving the bounded scan/finalize block into
-  a C-authored `bpf_loop` helper and using a shallow two-slot stack layout.
-- `tc_packet_checksum_fold` needs a dedicated C helper for native stores to the
-  benchmark output fields (`[rdi+0x10]` / `[rdi+0x14]`). The generic memory
-  helper may otherwise form a real modified-ctx write that the verifier rejects.
+- `bpf_local_call_fanout_dispatch` no longer has a benchmark-name renderer. The
+  generic call/loop proof now reaches verifier state explosion and is rejected
+  as `E2BIG` (`Argument list too long` from libbpf).
+- `bpftrace_string_search_prefix_scan` no longer uses a C-authored
+  benchmark-specific scan helper. The mechanical interpreter loop is cleaner for
+  the proof story, but it currently exceeds the verifier processed-insn limit.
+- `packet_checksum_fold` and `tc_packet_checksum_fold` now use the same generic
+  nested-loop lowering. The TC variant is indistinguishable from abort by return
+  value alone (`0`), while the XDP variant exposes that the generic checksum
+  proof path still returns `0` instead of XDP `2`.
 - The strict JSON-link loader is not the current source of truth. It has passed
   smoke programs (`simple`, `simple_packet`, `bitmap_popcount_scan`), but native
   call-flow support is missing and stale loader binaries previously produced

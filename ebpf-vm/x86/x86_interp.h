@@ -1557,6 +1557,14 @@ static __always_inline int x86_load_mem(struct x86_state *state,
 	}
 #endif
 #ifdef X86_VM_ENABLE_PACKET_REG_FASTPATH
+	if (insn->src == X86_RCX && state->tag_rcx == X86_PTR_PACKET) {
+		if (!state->p_rcx)
+			return X86_INTERP_TRAP;
+		return x86_load_packet(state, insn->dst, data, data_end,
+				       state->p_rcx, disp, mem_width,
+				       insn->flags,
+				       insn->op == X86_OP_MOVSX_LOAD);
+	}
 	if (insn->src == X86_RSI && state->tag_rsi == X86_PTR_PACKET) {
 		if (!state->p_rsi)
 			return X86_INTERP_TRAP;
@@ -1651,6 +1659,12 @@ static __always_inline int x86_read_mem_value(struct x86_state *state,
 	}
 #endif
 #ifdef X86_VM_ENABLE_PACKET_REG_FASTPATH
+	if (base_reg == X86_RCX && state->tag_rcx == X86_PTR_PACKET) {
+		if (!state->p_rcx)
+			return X86_INTERP_TRAP;
+		return x86_read_packet_value(data, data_end, state->p_rcx,
+					     disp, width, value);
+	}
 	if (base_reg == X86_RSI && state->tag_rsi == X86_PTR_PACKET) {
 		if (!state->p_rsi)
 			return X86_INTERP_TRAP;
@@ -1713,6 +1727,18 @@ static __always_inline int x86_store_mem(struct x86_state *state,
 	}
 #endif
 #ifdef X86_VM_ENABLE_PACKET_REG_FASTPATH
+	if (insn->dst == X86_RCX && state->tag_rcx == X86_PTR_PACKET) {
+		if (!state->p_rcx)
+			return X86_INTERP_TRAP;
+		if (insn->op == X86_OP_MOV_STORE_IMM)
+			return x86_store_packet_imm(data, data_end,
+						    state->p_rcx, disp,
+						    insn->flags,
+						    x86_store_imm_value(insn->imm));
+		return x86_store_packet_reg(state, insn->src, data, data_end,
+					    state->p_rcx, disp, insn->flags,
+					    insn->aux);
+	}
 	if (insn->dst == X86_RSI && state->tag_rsi == X86_PTR_PACKET) {
 		if (!state->p_rsi)
 			return X86_INTERP_TRAP;

@@ -1315,6 +1315,8 @@ def render_program(name: str, insns: list[NativeInsn],
         and branch_target(insn.operands[0]) in addrs
     }
     lines: list[str] = []
+    if subfunctions:
+        lines.append('#define X86_VM_ENABLE_PACKET_REG_FASTPATH 1')
     if has_rodata:
         lines.append('#define X86_VM_ENABLE_RODATA 1')
     if has_stack:

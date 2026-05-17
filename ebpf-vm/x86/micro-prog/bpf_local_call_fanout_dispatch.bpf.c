@@ -1,3 +1,4 @@
+#define X86_VM_ENABLE_PACKET_REG_FASTPATH 1
 #define X86_VM_ENABLE_STACK 1
 #include "../x86_vm_bpf.h"
 

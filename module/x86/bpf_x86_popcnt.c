@@ -18,6 +18,7 @@ BTF_KFUNCS_END(bpf_x86_popcnt_kfunc_ids)
 static __always_inline int decode_popcnt_payload(u64 payload, u8 *dst_reg,
 						 u8 *src_reg)
 {
+	payload = kinsn_payload_decode(payload);
 	*dst_reg = kinsn_payload_reg(payload, 0);
 	*src_reg = kinsn_payload_reg(payload, 4);
 
