@@ -1076,17 +1076,28 @@ def proof_insn_len(code: str) -> int:
 def relocate_branch_offsets(insns: list[NativeInsn], translations: list[Translation]) -> list[Translation]:
     pc_by_addr: dict[int, int] = {}
     pc_by_index: list[int] = []
-    proof_pc_by_addr: dict[int, int] = {}
-    proof_pc_by_index: list[int] = []
+    index_by_addr: dict[int, int] = {}
+    bpf_lens: list[int] = []
+    proof_lens: list[int] = []
     pc = 0
-    proof_pc = 0
-    for insn, trans in zip(insns, translations, strict=True):
+    for index, (insn, trans) in enumerate(zip(insns, translations, strict=True)):
         pc_by_addr.setdefault(insn.addr, pc)
-        proof_pc_by_addr.setdefault(insn.addr, proof_pc)
+        index_by_addr.setdefault(insn.addr, index)
         pc_by_index.append(pc)
-        proof_pc_by_index.append(proof_pc)
-        pc += sum(bpf_insn_len(code) for code in trans.code)
-        proof_pc += sum(proof_insn_len(code) for code in trans.code)
+        bpf_len = sum(bpf_insn_len(code) for code in trans.code)
+        proof_len = sum(proof_insn_len(code) for code in trans.code)
+        bpf_lens.append(bpf_len)
+        proof_lens.append(proof_len)
+        pc += bpf_len
+
+    def kinsn_stage_delta(source_index: int, target_index: int) -> int:
+        source_pc = sum(bpf_lens[:source_index])
+        if target_index <= source_index:
+            target_pc = sum(bpf_lens[:target_index])
+        else:
+            target_pc = source_pc + proof_lens[source_index]
+            target_pc += sum(proof_lens[source_index + 1:target_index])
+        return target_pc - source_pc
 
     patched: list[Translation] = []
     for index, trans in enumerate(translations):
@@ -1104,15 +1115,13 @@ def relocate_branch_offsets(insns: list[NativeInsn], translations: list[Translat
             continue
         code = []
         code_pc = pc_by_index[index]
-        proof_code_pc = proof_pc_by_index[index]
         for item in trans.code:
             if item.startswith("HC_KINSN("):
-                delta = proof_pc_by_addr[trans.target_addr] - proof_code_pc
+                delta = kinsn_stage_delta(index, index_by_addr[trans.target_addr])
             else:
                 delta = target_pc - code_pc
             code.append(item.replace(BRANCH_DELTA, str(delta)))
             code_pc += bpf_insn_len(item)
-            proof_code_pc += proof_insn_len(item)
         code = tuple(code)
         patched.append(Translation(trans.status, code, trans.note, trans.target_addr))
     return patched

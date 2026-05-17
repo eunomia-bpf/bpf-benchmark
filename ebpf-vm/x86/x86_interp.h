@@ -104,15 +104,18 @@
 #define X86_PTR_CTX 1U
 #define X86_PTR_PACKET 2U
 #define X86_PTR_PACKET_END 3U
+#define X86_PTR_RODATA 4U
 
 #define X86_MEM_AUX(INDEX, SCALE_LOG2) \
 	(((__u32)(INDEX) & 0xffU) | (((__u32)(SCALE_LOG2) & 0xffU) << 8))
 #define X86_MEM_AUX_FULL(INDEX, SCALE_LOG2, MEM_WIDTH)                    \
 	(X86_MEM_AUX((INDEX), (SCALE_LOG2)) |                             \
 	 (((__u32)(MEM_WIDTH) & 0xffU) << 16))
+#define X86_REG_AUX_SRC_SHIFT(SHIFT) (((__u32)(SHIFT) & 0xffU) << 24)
 #define X86_MEM_AUX_INDEX(AUX) ((__u8)((AUX) & 0xffU))
 #define X86_MEM_AUX_SCALE_LOG2(AUX) ((__u8)(((AUX) >> 8) & 0xffU))
 #define X86_MEM_AUX_MEM_WIDTH(AUX) ((__u8)(((AUX) >> 16) & 0xffU))
+#define X86_REG_AUX_GET_SRC_SHIFT(AUX) ((__u8)(((AUX) >> 24) & 0xffU))
 
 struct x86_insn {
 	__u8 op;
@@ -790,6 +793,289 @@ static __always_inline int x86_load_packet(struct x86_state *state,
 	return x86_write_reg_width(state, dst, value, write_width);
 }
 
+#ifdef X86_VM_ENABLE_RODATA
+static __always_inline int x86_rodata_trace_event_switch(__u64 index,
+							 __u64 *out)
+{
+	if (index == 0) {
+		*out = 56;
+		return 0;
+	}
+	if (index == 1) {
+		*out = 43;
+		return 0;
+	}
+	if (index == 2) {
+		*out = 57;
+		return 0;
+	}
+	if (index == 3) {
+		*out = 28;
+		return 0;
+	}
+	if (index == 4) {
+		*out = 14;
+		return 0;
+	}
+	if (index == 5) {
+		*out = 61;
+		return 0;
+	}
+	if (index == 6) {
+		*out = 10;
+		return 0;
+	}
+	if (index == 7) {
+		*out = 58;
+		return 0;
+	}
+	if (index == 8) {
+		*out = 2;
+		return 0;
+	}
+	if (index == 9) {
+		*out = 63;
+		return 0;
+	}
+	if (index == 10) {
+		*out = 49;
+		return 0;
+	}
+	if (index == 11) {
+		*out = 36;
+		return 0;
+	}
+	if (index == 12) {
+		*out = 19;
+		return 0;
+	}
+	if (index == 13) {
+		*out = 42;
+		return 0;
+	}
+	if (index == 14) {
+		*out = 37;
+		return 0;
+	}
+	if (index == 15) {
+		*out = 46;
+		return 0;
+	}
+	if (index == 16) {
+		*out = 34;
+		return 0;
+	}
+	if (index == 17) {
+		*out = 62;
+		return 0;
+	}
+	if (index == 18) {
+		*out = 47;
+		return 0;
+	}
+	if (index == 19) {
+		*out = 6;
+		return 0;
+	}
+	if (index == 20) {
+		*out = 29;
+		return 0;
+	}
+	if (index == 21) {
+		*out = 21;
+		return 0;
+	}
+	if (index == 22) {
+		*out = 15;
+		return 0;
+	}
+	if (index == 23) {
+		*out = 40;
+		return 0;
+	}
+	if (index == 24) {
+		*out = 38;
+		return 0;
+	}
+	if (index == 25) {
+		*out = 26;
+		return 0;
+	}
+	if (index == 26) {
+		*out = 17;
+		return 0;
+	}
+	if (index == 27) {
+		*out = 41;
+		return 0;
+	}
+	if (index == 28) {
+		*out = 33;
+		return 0;
+	}
+	if (index == 29) {
+		*out = 31;
+		return 0;
+	}
+	if (index == 30) {
+		*out = 23;
+		return 0;
+	}
+	if (index == 31) {
+		*out = 52;
+		return 0;
+	}
+	if (index == 32) {
+		*out = 25;
+		return 0;
+	}
+	if (index == 33) {
+		*out = 39;
+		return 0;
+	}
+	if (index == 34) {
+		*out = 11;
+		return 0;
+	}
+	if (index == 35) {
+		*out = 27;
+		return 0;
+	}
+	if (index == 36) {
+		*out = 53;
+		return 0;
+	}
+	if (index == 37) {
+		*out = 4;
+		return 0;
+	}
+	if (index == 38) {
+		*out = 24;
+		return 0;
+	}
+	if (index == 39) {
+		*out = 48;
+		return 0;
+	}
+	if (index == 40) {
+		*out = 32;
+		return 0;
+	}
+	if (index == 41) {
+		*out = 50;
+		return 0;
+	}
+	if (index == 42) {
+		*out = 7;
+		return 0;
+	}
+	if (index == 43) {
+		*out = 35;
+		return 0;
+	}
+	if (index == 44) {
+		*out = 8;
+		return 0;
+	}
+	if (index == 45) {
+		*out = 44;
+		return 0;
+	}
+	if (index == 46) {
+		*out = 51;
+		return 0;
+	}
+	if (index == 47) {
+		*out = 59;
+		return 0;
+	}
+	if (index == 48) {
+		*out = 45;
+		return 0;
+	}
+	if (index == 49) {
+		*out = 0;
+		return 0;
+	}
+	if (index == 50) {
+		*out = 9;
+		return 0;
+	}
+	if (index == 51) {
+		*out = 3;
+		return 0;
+	}
+	if (index == 52) {
+		*out = 13;
+		return 0;
+	}
+	if (index == 53) {
+		*out = 20;
+		return 0;
+	}
+	if (index == 54) {
+		*out = 30;
+		return 0;
+	}
+	if (index == 55) {
+		*out = 18;
+		return 0;
+	}
+	if (index == 56) {
+		*out = 1;
+		return 0;
+	}
+	if (index == 57) {
+		*out = 54;
+		return 0;
+	}
+	if (index == 58) {
+		*out = 22;
+		return 0;
+	}
+	if (index == 59) {
+		*out = 16;
+		return 0;
+	}
+	if (index == 60) {
+		*out = 60;
+		return 0;
+	}
+	if (index == 61) {
+		*out = 5;
+		return 0;
+	}
+	if (index == 62) {
+		*out = 12;
+		return 0;
+	}
+	if (index == 63) {
+		*out = 55;
+		return 0;
+	}
+	return X86_INTERP_TRAP;
+}
+
+static __always_inline int x86_load_rodata(struct x86_state *state,
+					   __u8 dst, __u64 base,
+					   __s64 disp, __u8 load_width,
+					   __u8 write_width, __u8 sign_extend)
+{
+	__u64 value = 0;
+
+	if (base == 3782 && load_width == X86_WIDTH_64 &&
+	    disp >= 0 && disp < 512 && (disp & 7) == 0) {
+		if (x86_rodata_trace_event_switch((__u64)disp >> 3,
+						  &value) < 0)
+			return X86_INTERP_TRAP;
+		if (sign_extend)
+			value = x86_sign_extend(value, load_width);
+		return x86_write_reg_width(state, dst, value, write_width);
+	}
+	return X86_INTERP_TRAP;
+}
+#endif
+
 static __always_inline int x86_store_packet_imm(void *data, void *data_end,
 						void *base, __s64 disp,
 						__u8 width, __u64 value)
@@ -812,12 +1098,16 @@ static __always_inline int x86_store_packet_imm(void *data, void *data_end,
 static __always_inline int x86_store_packet_reg(struct x86_state *state,
 						__u8 src, void *data,
 						void *data_end, void *base,
-						__s64 disp, __u8 width)
+						__s64 disp, __u8 width,
+						__u32 aux)
 {
 	__u64 value;
+	__u8 src_shift = X86_REG_AUX_GET_SRC_SHIFT(aux);
 
 	if (x86_read_reg(state, src, &value) < 0)
 		return X86_INTERP_TRAP;
+	if (src_shift != 0)
+		value >>= src_shift;
 	return x86_store_packet_imm(data, data_end, base, disp, width, value);
 }
 
@@ -846,6 +1136,17 @@ static __always_inline int x86_load_mem(struct x86_state *state,
 		return x86_load_packet(state, insn->dst, data, data_end, base,
 				       disp, mem_width, insn->flags,
 				       insn->op == X86_OP_MOVSX_LOAD);
+#ifdef X86_VM_ENABLE_RODATA
+	if (tag == X86_PTR_RODATA) {
+		__u64 base_value = 0;
+
+		if (x86_read_reg(state, insn->src, &base_value) < 0)
+			return X86_INTERP_TRAP;
+		return x86_load_rodata(state, insn->dst, base_value, disp,
+				       mem_width, insn->flags,
+				       insn->op == X86_OP_MOVSX_LOAD);
+	}
+#endif
 	return X86_INTERP_TRAP;
 }
 
@@ -870,7 +1171,7 @@ static __always_inline int x86_store_mem(struct x86_state *state,
 					    insn->flags,
 					    x86_store_imm_value(insn->imm));
 	return x86_store_packet_reg(state, insn->src, data, data_end, base,
-				    disp, insn->flags);
+				    disp, insn->flags, insn->aux);
 }
 
 static __always_inline int x86_cmp_mem_imm(struct x86_state *state,
@@ -961,6 +1262,16 @@ static __always_inline int x86_exec_one(struct x86_state *state,
 	    insn->op == X86_OP_MOV_STORE_REG)
 		return x86_store_mem(state, insn, data, data_end);
 	if (insn->op == X86_OP_LEA) {
+#ifdef X86_VM_ENABLE_RODATA
+		if (width == X86_WIDTH_64 && insn->src == X86_REG_NONE &&
+		    insn->aux == X86_PTR_RODATA) {
+			if (x86_write_reg_width(state, insn->dst, insn->imm,
+						width) < 0)
+				return X86_INTERP_TRAP;
+			return x86_write_ptr_reg(state, insn->dst, 0,
+						 X86_PTR_RODATA);
+		}
+#endif
 		if (x86_read_reg(state, insn->src, &src_value) < 0)
 			src_value = 0;
 		if (width == X86_WIDTH_64 &&

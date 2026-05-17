@@ -19,9 +19,16 @@
 	})
 
 #define X86_VM_EXEC(STATE, OP, DST, SRC, FLAGS, AUX, IMM)                  \
-	x86_exec_one((STATE),                                                  \
-		     &X86_VM_INSN((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)), \
-		     __x86_vm_data, __x86_vm_data_end)
+	({                                                                 \
+		__x86_vm_insn.op = (OP);                                    \
+		__x86_vm_insn.dst = (DST);                                  \
+		__x86_vm_insn.src = (SRC);                                  \
+		__x86_vm_insn.flags = (FLAGS);                              \
+		__x86_vm_insn.aux = (AUX);                                  \
+		__x86_vm_insn.imm = (IMM);                                  \
+		x86_exec_one((STATE), &__x86_vm_insn, __x86_vm_data,        \
+			     __x86_vm_data_end);                            \
+	})
 
 static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
 						   __u64 value)
@@ -46,6 +53,7 @@ static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
 		void *__x86_vm_data = (void *)(long)(CTX)->data;            \
 		void *__x86_vm_data_end = (void *)(long)(CTX)->data_end;    \
 		struct x86_state __x86_vm_state = {};                       \
+		struct x86_insn __x86_vm_insn = {};                         \
 		x86_init_state(&__x86_vm_state, (void *)(CTX));             \
 		int __x86_vm_ret = 0;
 
@@ -53,6 +61,7 @@ static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
 	void *__x86_vm_data = (void *)(long)(CTX)->data;                    \
 	void *__x86_vm_data_end = (void *)(long)(CTX)->data_end;            \
 	struct x86_state __x86_vm_state = {};                               \
+	struct x86_insn __x86_vm_insn = {};                                 \
 	x86_init_state(&__x86_vm_state, (void *)(CTX))
 
 #define X86_VM_STEP(OP, DST, SRC, FLAGS, AUX, IMM)                          \

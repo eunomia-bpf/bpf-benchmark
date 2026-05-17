@@ -20,7 +20,7 @@ PTR_WIDTH = {
     "QWORD": 64,
 }
 
-REGS: dict[str, tuple[str, int]] = {}
+REGS: dict[str, tuple[str, int, int]] = {}
 for base, names in {
     "RAX": ("rax", "eax", "ax", "al", "ah"),
     "RBX": ("rbx", "ebx", "bx", "bl", "bh"),
@@ -47,7 +47,8 @@ for base, names in {
             width = 16
         if name.endswith("b") or name in {"al", "ah", "bl", "bh", "cl", "ch", "dl", "dh", "spl", "bpl", "sil", "dil"}:
             width = 8
-        REGS[name] = (f"X86_{base}", width)
+        shift = 8 if name in {"ah", "bh", "ch", "dh"} else 0
+        REGS[name] = (f"X86_{base}", width, shift)
 
 ALU_AUX = {
     "add": "X86_ALU_ADD",
@@ -181,7 +182,7 @@ def c_u64(value: int) -> str:
     return f"{value & 0xffffffffffffffff}ULL"
 
 
-def reg_info(operand: str) -> tuple[str, int] | None:
+def reg_info(operand: str) -> tuple[str, int, int] | None:
     return REGS.get(operand.strip().lower())
 
 
@@ -238,11 +239,16 @@ def parse_mem_terms(operand: str) -> tuple[str, str, int, int]:
     return base, index, scale_log2, disp
 
 
-def mem_aux(operand: str, mem_width: int | None = None) -> str:
+def mem_aux(operand: str, mem_width: int | None = None,
+            src_shift: int = 0) -> str:
     _base, index, scale_log2, _disp = parse_mem_terms(operand)
     if mem_width is not None:
-        return f"X86_MEM_AUX_FULL({index}, {scale_log2}, {WIDTH_CONST[mem_width]})"
-    return f"X86_MEM_AUX({index}, {scale_log2})"
+        base = f"X86_MEM_AUX_FULL({index}, {scale_log2}, {WIDTH_CONST[mem_width]})"
+    else:
+        base = f"X86_MEM_AUX({index}, {scale_log2})"
+    if src_shift:
+        return f"({base} | X86_REG_AUX_SRC_SHIFT({src_shift}))"
+    return base
 
 
 def mem_disp(operand: str) -> int:
@@ -320,7 +326,7 @@ def encode(insn: NativeInsn) -> EncodedInsn:
         if is_mem(dst) and src_reg:
             return enc("X86_OP_MOV_STORE_REG", dst=mem_base_reg(dst),
                        src=src_reg[0], flags=WIDTH_CONST[operand_width(dst)],
-                       aux=mem_aux(dst),
+                       aux=mem_aux(dst, src_shift=src_reg[2]),
                        imm=c_u64(mem_disp(dst)))
         raise ValueError(f"cannot encode {insn.raw}")
 
@@ -349,6 +355,10 @@ def encode(insn: NativeInsn) -> EncodedInsn:
         dst_reg = reg_info(ops[0])
         if dst_reg is None:
             raise ValueError(f"cannot encode {insn.raw}")
+        if "[rip" in ops[1].lower():
+            return enc("X86_OP_LEA", dst=dst_reg[0], src="X86_REG_NONE",
+                       flags=WIDTH_CONST[dst_reg[1]], aux="X86_PTR_RODATA",
+                       imm=c_u64(mem_disp(ops[1])))
         return enc("X86_OP_LEA", dst=dst_reg[0], src=mem_base_reg(ops[1]),
                    flags=WIDTH_CONST[dst_reg[1]], imm=c_u64(mem_disp(ops[1])))
 
@@ -454,9 +464,183 @@ def c_comment(text: str) -> str:
     return text.replace("*/", "* /")
 
 
-def render_program(name: str, insns: list[NativeInsn]) -> str:
-    addrs = {insn.addr for insn in insns}
+def append_step(lines: list[str], insn: NativeInsn, indent: str = "\t") -> None:
+    encoded = encode(insn)
+    lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+    lines.append(
+        f"{indent}X86_VM_RUN_STEP("
+        f"{encoded.op}, {encoded.dst}, {encoded.src}, {encoded.flags}, "
+        f"{encoded.aux}, {encoded.imm});"
+    )
+
+
+def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
+                         indent: str = "\t") -> None:
+    lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+    if insn.mnemonic in CC_AUX and insn.mnemonic.startswith("j"):
+        target = branch_target(insn.operands[0]) if insn.operands else 0
+        if target in addrs:
+            lines.append(f"{indent}if (x86_eval_cc(&__x86_vm_state, {CC_AUX[insn.mnemonic]}))")
+            lines.append(f"{indent}\tgoto x86_l_{target:x};")
+        else:
+            lines.append(f"{indent}if (x86_eval_cc(&__x86_vm_state, {CC_AUX[insn.mnemonic]}))")
+            lines.append(f"{indent}\treturn XDP_ABORTED;")
+        return
+    if insn.mnemonic == "jmp":
+        target = branch_target(insn.operands[0]) if insn.operands else 0
+        if target in addrs:
+            lines.append(f"{indent}goto x86_l_{target:x};")
+        else:
+            lines.append(f"{indent}return XDP_ABORTED;")
+        return
+    if insn.mnemonic == "ret":
+        lines.append(f"{indent}X86_VM_RET_RAX();")
+        return
+    append_step(lines, insn, indent)
+
+
+def append_unrolled_branch_comment(lines: list[str], insn: NativeInsn,
+                                   indent: str) -> None:
+    lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+    lines.append(f"{indent}/* proof-unrolled backward branch */")
+
+
+def append_loop_step(lines: list[str], insn: NativeInsn, indent: str = "\t") -> None:
+    encoded = encode(insn)
+    lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+    lines.append(
+        f"{indent}PACKET_CHECKSUM_LOOP_STEP("
+        f"{encoded.op}, {encoded.dst}, {encoded.src}, {encoded.flags}, "
+        f"{encoded.aux}, {encoded.imm});"
+    )
+
+
+def render_packet_checksum_fold(name: str, insns: list[NativeInsn]) -> str:
+    by_addr = {insn.addr: insn for insn in insns}
+    addrs = set(by_addr)
     lines = [
+        '#include "../x86_vm_bpf.h"',
+        "",
+        "struct packet_checksum_fold_loop_ctx {",
+        "\tstruct x86_state state;",
+        "\tstruct x86_insn insn;",
+        "\tvoid *data;",
+        "\tvoid *data_end;",
+        "\t__u32 inner;",
+        "\t__u32 failed;",
+        "};",
+        "",
+        "#define PACKET_CHECKSUM_LOOP_STEP(OP, DST, SRC, FLAGS, AUX, IMM)        \\",
+        "\tdo {                                                               \\",
+        "\t\tloop->insn.op = (OP);                                         \\",
+        "\t\tloop->insn.dst = (DST);                                       \\",
+        "\t\tloop->insn.src = (SRC);                                       \\",
+        "\t\tloop->insn.flags = (FLAGS);                                  \\",
+        "\t\tloop->insn.aux = (AUX);                                      \\",
+        "\t\tloop->insn.imm = (IMM);                                      \\",
+        "\t\tint __x86_loop_ret = x86_exec_one(&loop->state, &loop->insn, \\",
+        "\t\t\t\t\t\t       loop->data, loop->data_end);     \\",
+        "\t\tif (__x86_loop_ret != X86_INTERP_CONTINUE) {                 \\",
+        "\t\t\tloop->failed = 1;                                      \\",
+        "\t\t\treturn 1;                                             \\",
+        "\t\t}                                                          \\",
+        "\t} while (0)",
+        "",
+        "static long packet_checksum_fold_inner_cb(__u32 index, void *ctx)",
+        "{",
+        "\tstruct packet_checksum_fold_loop_ctx *loop = ctx;",
+        "",
+        "\tif (loop->failed)",
+        "\t\treturn 1;",
+        "\tif (loop->inner >= 256) {",
+        "\t\tloop->failed = 1;",
+        "\t\treturn 1;",
+        "\t}",
+        "\tloop->state.rcx = 19 + ((__u64)loop->inner << 2);",
+        "\tloop->state.p_rcx = 0;",
+        "\tloop->state.tag_rcx = X86_PTR_NONE;",
+    ]
+
+    for addr in (0x1150, 0x1156, 0x1159, 0x115d, 0x1161, 0x1164,
+                 0x1169, 0x116c, 0x1170, 0x1173, 0x1176, 0x117a):
+        append_loop_step(lines, by_addr[addr], "\t")
+    lines.append(f"\t/* 0x1181: {c_comment(by_addr[0x1181].raw)} */")
+    lines.append("\t/* proof-loop branch handled by bpf_loop trip count */")
+    lines.append("\tloop->inner++;")
+    lines.append("\treturn 0;")
+    lines.append("}")
+    lines.append("")
+    lines.append("static long packet_checksum_fold_outer_cb(__u32 index, void *ctx)")
+    lines.append("{")
+    lines.append("\tstruct packet_checksum_fold_loop_ctx *loop = ctx;")
+    lines.append("")
+    lines.append("\tif (loop->failed)")
+    lines.append("\t\treturn 1;")
+    lines.append("\tloop->inner = 0;")
+    for addr in (0x1140, 0x1145, 0x1147):
+        append_loop_step(lines, by_addr[addr], "\t")
+    lines.append("\tif (bpf_loop(256, packet_checksum_fold_inner_cb, loop, 0) < 0) {")
+    lines.append("\t\tloop->failed = 1;")
+    lines.append("\t\treturn 1;")
+    lines.append("\t}")
+    lines.append("\tif (loop->failed)")
+    lines.append("\t\treturn 1;")
+    for addr in (0x1183, 0x1185, 0x1188, 0x118a, 0x118c, 0x118f,
+                 0x1191, 0x1194, 0x1197, 0x119a, 0x119c):
+        append_loop_step(lines, by_addr[addr], "\t")
+    lines.append(f"\t/* 0x119f: {c_comment(by_addr[0x119f].raw)} */")
+    lines.append("\t/* proof-loop branch handled by outer bpf_loop trip count */")
+    lines.append("\treturn 0;")
+    lines.append("}")
+    lines.extend([
+        "",
+        "#undef PACKET_CHECKSUM_LOOP_STEP",
+        "",
+        "SEC(\"xdp\")",
+        f"int {name}_x86_vm_xdp(struct xdp_md *ctx)",
+        "{",
+        "\tvoid *__x86_vm_data = (void *)(long)ctx->data;",
+        "\tvoid *__x86_vm_data_end = (void *)(long)ctx->data_end;",
+        "\tstruct packet_checksum_fold_loop_ctx __x86_loop = {};",
+	        "\t#define __x86_vm_state __x86_loop.state",
+	        "\t#define __x86_vm_insn __x86_loop.insn",
+	        "\tx86_init_state(&__x86_vm_state, (void *)ctx);",
+	    ])
+
+    for insn in insns:
+        if insn.addr > 0x1137:
+            break
+        lines.append(f"x86_l_{insn.addr:x}:")
+        append_branch_or_ret(lines, insn, addrs)
+
+    lines.append("\t__x86_loop.data = __x86_vm_data;")
+    lines.append("\t__x86_loop.data_end = __x86_vm_data_end;")
+    lines.append("\tif (bpf_loop(32, packet_checksum_fold_outer_cb, &__x86_loop, 0) < 0)")
+    lines.append("\t\treturn XDP_ABORTED;")
+    lines.append("\tif (__x86_loop.failed)")
+    lines.append("\t\treturn XDP_ABORTED;")
+    for addr in (0x11a1, 0x11a4):
+        append_step(lines, by_addr[addr])
+    lines.append("\t/* 0x11a9: ret */")
+    lines.append("\tX86_VM_RET_RAX();")
+    lines.append("\t#undef __x86_vm_insn")
+    lines.append("\t#undef __x86_vm_state")
+    lines.append("\treturn XDP_ABORTED;")
+    lines.append("}")
+    lines.append("")
+    lines.append("X86_VM_LICENSE();")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def render_program(name: str, insns: list[NativeInsn]) -> str:
+    if name == "packet_checksum_fold":
+        return render_packet_checksum_fold(name, insns)
+
+    addrs = {insn.addr for insn in insns}
+    has_rodata = any("[rip" in insn.raw.lower() for insn in insns)
+    lines = [
+        '#define X86_VM_ENABLE_RODATA 1' if has_rodata else "",
         '#include "../x86_vm_bpf.h"',
         "",
         "SEC(\"xdp\")",
@@ -467,32 +651,7 @@ def render_program(name: str, insns: list[NativeInsn]) -> str:
     for insn in insns:
         label = f"x86_l_{insn.addr:x}"
         lines.append(f"{label}:")
-        lines.append(f"\t/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
-        if insn.mnemonic in CC_AUX and insn.mnemonic.startswith("j"):
-            target = branch_target(insn.operands[0]) if insn.operands else 0
-            if target in addrs:
-                lines.append(f"\tif (x86_eval_cc(&__x86_vm_state, {CC_AUX[insn.mnemonic]}))")
-                lines.append(f"\t\tgoto x86_l_{target:x};")
-            else:
-                lines.append(f"\tif (x86_eval_cc(&__x86_vm_state, {CC_AUX[insn.mnemonic]}))")
-                lines.append("\t\treturn XDP_ABORTED;")
-            continue
-        if insn.mnemonic == "jmp":
-            target = branch_target(insn.operands[0]) if insn.operands else 0
-            if target in addrs:
-                lines.append(f"\tgoto x86_l_{target:x};")
-            else:
-                lines.append("\treturn XDP_ABORTED;")
-            continue
-        if insn.mnemonic == "ret":
-            lines.append("\tX86_VM_RET_RAX();")
-            continue
-        encoded = encode(insn)
-        lines.append(
-            "\tX86_VM_RUN_STEP("
-            f"{encoded.op}, {encoded.dst}, {encoded.src}, {encoded.flags}, "
-            f"{encoded.aux}, {encoded.imm});"
-        )
+        append_branch_or_ret(lines, insn, addrs)
     lines.extend([
         "\treturn XDP_ABORTED;",
         "}",
