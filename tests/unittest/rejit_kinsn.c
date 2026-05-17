@@ -110,6 +110,7 @@ enum kinsn_module_id {
 	MOD_X86_ALU,
 	MOD_X86_SHD,
 	MOD_X86_STACK,
+	MOD_X86_BRANCH,
 	MOD_CNT,
 };
 
@@ -203,6 +204,8 @@ enum kinsn_func_id {
 	FUNC_X86_ANDL,
 	FUNC_X86_POPQ,
 	FUNC_X86_PUSHQ,
+	FUNC_X86_JNE,
+	FUNC_X86_JMP,
 	FUNC_CNT,
 };
 
@@ -344,6 +347,11 @@ static struct kinsn_module_ref g_modules[MOD_CNT] = {
 	},
 	[MOD_X86_STACK] = {
 		.module_name = "bpf_x86_stack",
+		.btf_fd = -1,
+		.required = X86_KINSN_MODULE_REQUIRED,
+	},
+	[MOD_X86_BRANCH] = {
+		.module_name = "bpf_x86_branch",
 		.btf_fd = -1,
 		.required = X86_KINSN_MODULE_REQUIRED,
 	},
@@ -692,6 +700,14 @@ static struct kinsn_func_ref g_funcs[FUNC_CNT] = {
 		.func_name = "bpf_x86_andl",
 		.module_id = MOD_X86_ALU,
 	},
+	[FUNC_X86_JNE] = {
+		.func_name = "bpf_x86_jne",
+		.module_id = MOD_X86_BRANCH,
+	},
+	[FUNC_X86_JMP] = {
+		.func_name = "bpf_x86_jmp",
+		.module_id = MOD_X86_BRANCH,
+	},
 	[FUNC_X86_POPQ] = {
 		.func_name = "bpf_x86_popq",
 		.module_id = MOD_X86_STACK,
@@ -861,6 +877,9 @@ static int sys_bpf(enum bpf_cmd cmd, union bpf_attr *attr, unsigned int size)
 		 ((__u64)(__u16)(OFF) << 20))
 	#define KINSN_REG_REG_PAYLOAD(DST, SRC) \
 		((__u64)(DST) | ((__u64)(SRC) << 4))
+	#define KINSN_X86_BRANCH_PAYLOAD(PC_DELTA, X86_DISP, NEAR) \
+		((__u64)(NEAR) | ((__u64)(__u16)(PC_DELTA) << 4) | \
+		 ((__u64)(__u32)(X86_DISP) << 20))
 
 #define KINSN_REG_COND_PAYLOAD(DST, COND) \
 	((__u64)(DST) | ((__u64)(COND) << 4))
@@ -3021,6 +3040,53 @@ static int test_rejit_x86_shlb_imm_jit_emits_shl(void)
 #endif
 }
 
+static int test_rejit_x86_jne_short_jit_emits_jne(void)
+{
+#if defined(__x86_64__)
+	static const __u8 jne[] = { 0x75, 0x00 };
+	const enum kinsn_func_id funcs[] = { FUNC_X86_CMPQ, FUNC_X86_JNE };
+	struct bpf_insn prog[] = {
+		BPF_MOV64_IMM(BPF_REG_0, 5),
+		BPF_KINSN_SIDECAR(KINSN_X86_IMM_PAYLOAD(BPF_REG_0, 5)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_KINSN_SIDECAR(KINSN_X86_BRANCH_PAYLOAD(2, 0, 0)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_MOV64_IMM(BPF_REG_0, 123),
+		BPF_EXIT_INSN(),
+	};
+
+	return run_kinsn_sequence_expect_jit_bytes(
+		"x86_jne_short_jit_emits_jne", prog, ARRAY_SIZE(prog),
+		funcs, ARRAY_SIZE(funcs), 123, jne, ARRAY_SIZE(jne),
+		"JNE rel8 sequence not found in JIT image");
+#else
+	TEST_SKIP("x86_jne_short_jit_emits_jne", "x86_64 only");
+	return 0;
+#endif
+}
+
+static int test_rejit_x86_jmp_short_jit_emits_jmp(void)
+{
+#if defined(__x86_64__)
+	static const __u8 jmp[] = { 0xe9, 0x00, 0x00, 0x00, 0x00 };
+	struct bpf_insn prog[] = {
+		BPF_KINSN_SIDECAR(KINSN_X86_BRANCH_PAYLOAD(2, 0, 1)),
+		BPF_CALL_KINSN(0, 0),
+		BPF_MOV64_IMM(BPF_REG_0, 123),
+		BPF_EXIT_INSN(),
+	};
+
+	return run_single_kinsn_expect_jit_bytes(
+		"x86_jmp_short_jit_emits_jmp", MOD_X86_BRANCH,
+		FUNC_X86_JMP, prog, ARRAY_SIZE(prog), 123,
+		jmp, ARRAY_SIZE(jmp),
+		"JMP rel8 sequence not found in JIT image");
+#else
+	TEST_SKIP("x86_jmp_short_jit_emits_jmp", "x86_64 only");
+	return 0;
+#endif
+}
+
 static int test_rejit_x86_xorb_imm_jit_emits_xor(void)
 {
 #if defined(__x86_64__)
@@ -4825,6 +4891,10 @@ int main(int argc, char **argv)
 		ret |= test_rejit_x86_orw_rr_jit_emits_or();
 	if (should_run_test(filter, "x86_shlb_imm_jit_emits_shl"))
 		ret |= test_rejit_x86_shlb_imm_jit_emits_shl();
+	if (should_run_test(filter, "x86_jne_short_jit_emits_jne"))
+		ret |= test_rejit_x86_jne_short_jit_emits_jne();
+	if (should_run_test(filter, "x86_jmp_short_jit_emits_jmp"))
+		ret |= test_rejit_x86_jmp_short_jit_emits_jmp();
 	if (should_run_test(filter, "x86_xorb_imm_jit_emits_xor"))
 		ret |= test_rejit_x86_xorb_imm_jit_emits_xor();
 	if (should_run_test(filter, "x86_xorb_rr_jit_emits_xor"))

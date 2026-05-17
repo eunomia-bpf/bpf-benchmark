@@ -6,49 +6,12 @@
      ((__u64)(HAS_BASE) << 15) | ((__u64)(__u32)(DISP) << 16))
 
 /*
- * native asm to handcraft warnings: 41
+ * native asm to handcraft warnings: 4
  *
  * - 0x1100: mov    rdx,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0]
  * - 0x1103: mov    rcx,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4]
- * - 0x110c: jbe    110f <tracee_http_method_prefix_detect_xdp+0xf> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1116: ja     110e <tracee_http_method_prefix_detect_xdp+0xe> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1122: ja     110e <tracee_http_method_prefix_detect_xdp+0xe> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1128: jne    110e <tracee_http_method_prefix_detect_xdp+0xe> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x112e: jne    110e <tracee_http_method_prefix_detect_xdp+0xe> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
  * - 0x1148: lea    rsi,[rip+0xeb1] [warning-unmapped: LEA base/index not in BPF register file: [rip+0xeb1]]
- * - 0x1165: ja     12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
  * - 0x1176: jmp    r11 [warning-unmapped: needs a machine-level x86 indirect-branch kinsn for target r11]
- * - 0x117d: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x118a: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1194: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x119e: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x11a8: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x11b3: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x11c5: jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf> [warning-unmapped: needs a machine-level x86 branch kinsn]
- * - 0x11d4: je     1275 <tracee_http_method_prefix_detect_xdp+0x175> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x11de: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x11eb: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x11f5: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1202: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1213: jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf> [warning-unmapped: needs a machine-level x86 branch kinsn]
- * - 0x121c: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1229: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1236: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1242: jmp    12af <tracee_http_method_prefix_detect_xdp+0x1af> [warning-unmapped: needs a machine-level x86 branch kinsn]
- * - 0x1248: je     1297 <tracee_http_method_prefix_detect_xdp+0x197> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x124e: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1257: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x125d: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1266: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1273: jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf> [warning-unmapped: needs a machine-level x86 branch kinsn]
- * - 0x127c: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1282: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1288: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1295: jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf> [warning-unmapped: needs a machine-level x86 branch kinsn]
- * - 0x129e: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x12a7: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x12b4: jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf> [warning-unmapped: needs a machine-level x86 branch kinsn]
- * - 0x1319: jne    1150 <tracee_http_method_prefix_detect_xdp+0x50> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
  */
 
 static const struct bpf_insn program[] = {
@@ -62,25 +25,30 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x1109: cmp    rdx,rcx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_3, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x110c: jbe    110f <tracee_http_method_prefix_detect_xdp+0xf> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x110c: jbe    110f <tracee_http_method_prefix_detect_xdp+0xf> [exact-kinsn: jbe branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(3, 1, 0), MICRO_HANDCRAFT_BPF_X86_JBE),
     /* 0x110e: ret [abi-boundary: native ret maps to the BPF program exit boundary] */
     HC_EXIT(),
     /* 0x110f: lea    rsi,[rdx+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_3, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1113: cmp    rsi,rcx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_2, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1116: ja     110e <tracee_http_method_prefix_detect_xdp+0xe> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1116: ja     110e <tracee_http_method_prefix_detect_xdp+0xe> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-5, -10, 0), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x1118: lea    rsi,[rdx+0x90] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_3, 0, 0, 1, 0, 144), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x111f: cmp    rsi,rcx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_2, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1122: ja     110e <tracee_http_method_prefix_detect_xdp+0xe> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1122: ja     110e <tracee_http_method_prefix_detect_xdp+0xe> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-11, -22, 0), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x1124: cmp    DWORD PTR [rdx+0x8],0x8 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_3, 8, 8), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x1128: jne    110e <tracee_http_method_prefix_detect_xdp+0xe> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1128: jne    110e <tracee_http_method_prefix_detect_xdp+0xe> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-15, -28, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x112a: cmp    DWORD PTR [rdx+0xc],0x10 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_3, 12, 16), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x112e: jne    110e <tracee_http_method_prefix_detect_xdp+0xe> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x112e: jne    110e <tracee_http_method_prefix_detect_xdp+0xe> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-19, -34, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x1130: push   r15 [exact-kinsn: pushq kinsn] */
     HC_KINSN(HC_REG_PAYLOAD(BPF_REG_9), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
     /* 0x1132: push   r14 [exact-kinsn: pushq kinsn] */
@@ -105,7 +73,8 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_LEA_PAYLOAD(HC_X86_R11, BPF_REG_5, 0, 0, 1, 0, -68), MICRO_HANDCRAFT_BPF_X86_LEAL),
     /* 0x1161: cmp    r11d,0xc [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 12), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x1165: ja     12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1165: ja     12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(170, 341, 1), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x116b: movzx  r10d,r9b [exact-kinsn: movzx r32,r8 kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(HC_X86_R10, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
     /* 0x116f: movsxd r11,DWORD PTR [rsi+r11*4] [exact-kinsn: movsxd SIB kinsn] */
@@ -115,137 +84,167 @@ static const struct bpf_insn program[] = {
     /* 0x1176: jmp    r11 [warning-unmapped: needs a machine-level x86 indirect-branch kinsn for target r11] */
     /* 0x1179: cmp    r9b,0x45 [exact-kinsn: cmpb reg,imm8 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R9, 69), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x117d: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x117d: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(160, 317, 1), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x1183: mov    r9b,0x45 [exact-kinsn: movb immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R9, 69), MICRO_HANDCRAFT_BPF_X86_MOVB),
     /* 0x1186: cmp    BYTE PTR [rax-0x4],0x4c [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_0, -4, 76), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x118a: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x118a: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(154, 304, 1), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x1190: cmp    BYTE PTR [rax-0x3],0x45 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_0, -3, 69), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x1194: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1194: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(150, 294, 1), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x119a: cmp    BYTE PTR [rax-0x2],0x54 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_0, -2, 84), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x119e: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x119e: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(146, 284, 1), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x11a4: cmp    BYTE PTR [rax-0x1],0x45 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_0, -1, 69), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x11a8: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x11a8: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(142, 274, 1), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x11ae: mov    bl,0x45 [exact-kinsn: movb immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 69), MICRO_HANDCRAFT_BPF_X86_MOVB),
     /* 0x11b0: cmp    BYTE PTR [rax],0x20 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_0, 0, 32), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x11b3: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x11b3: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(136, 263, 1), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x11b9: mov    r10d,0x4 [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R10, 4), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x11bf: mov    r9b,0x4c [exact-kinsn: movb immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R9, 76), MICRO_HANDCRAFT_BPF_X86_MOVB),
     /* 0x11c2: mov    r11b,0x45 [exact-kinsn: movb immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 69), MICRO_HANDCRAFT_BPF_X86_MOVB),
-    /* 0x11c5: jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf> [warning-unmapped: needs a machine-level x86 branch kinsn] */
+    /* 0x11c5: jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf> [exact-kinsn: jmp branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(136, 261, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x11ca: nop    WORD PTR [rax+rax*1+0x0] [padding: padding is not part of BPF semantics] */
     /* 0x11d0: cmp    r10d,0x54 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R10, 84), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x11d4: je     1275 <tracee_http_method_prefix_detect_xdp+0x175> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x11d4: je     1275 <tracee_http_method_prefix_detect_xdp+0x175> [exact-kinsn: je branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(82, 155, 1), MICRO_HANDCRAFT_BPF_X86_JE),
     /* 0x11da: cmp    r10d,0x45 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R10, 69), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x11de: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x11de: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(120, 220, 1), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x11e4: mov    r9b,0x45 [exact-kinsn: movb immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R9, 69), MICRO_HANDCRAFT_BPF_X86_MOVB),
     /* 0x11e7: cmp    BYTE PTR [rax-0x4],0x41 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_0, -4, 65), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x11eb: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x11eb: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(114, 207, 1), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x11f1: cmp    BYTE PTR [rax-0x3],0x44 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_0, -3, 68), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x11f5: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x11f5: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(110, 197, 1), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x11fb: mov    r11b,0x45 [exact-kinsn: movb immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 69), MICRO_HANDCRAFT_BPF_X86_MOVB),
     /* 0x11fe: cmp    BYTE PTR [rax-0x2],0x20 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_0, -2, 32), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x1202: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1202: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(104, 184, 1), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x1208: mov    r10d,0x5 [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R10, 5), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x120e: mov    r9b,0x41 [exact-kinsn: movb immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R9, 65), MICRO_HANDCRAFT_BPF_X86_MOVB),
     /* 0x1211: mov    bl,0x44 [exact-kinsn: movb immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 68), MICRO_HANDCRAFT_BPF_X86_MOVB),
-    /* 0x1213: jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf> [warning-unmapped: needs a machine-level x86 branch kinsn] */
+    /* 0x1213: jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf> [exact-kinsn: jmp branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(104, 183, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x1218: cmp    r9b,0x45 [exact-kinsn: cmpb reg,imm8 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R9, 69), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x121c: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x121c: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(92, 158, 1), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x1222: mov    r9b,0x45 [exact-kinsn: movb immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R9, 69), MICRO_HANDCRAFT_BPF_X86_MOVB),
     /* 0x1225: cmp    BYTE PTR [rax-0x4],0x54 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_0, -4, 84), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x1229: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1229: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(86, 145, 1), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x122f: mov    r11b,0x45 [exact-kinsn: movb immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 69), MICRO_HANDCRAFT_BPF_X86_MOVB),
     /* 0x1232: cmp    BYTE PTR [rax-0x3],0x20 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_0, -3, 32), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x1236: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1236: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(80, 132, 1), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x123c: mov    r10d,0x1 [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R10, 1), MICRO_HANDCRAFT_BPF_X86_MOVL),
-    /* 0x1242: jmp    12af <tracee_http_method_prefix_detect_xdp+0x1af> [warning-unmapped: needs a machine-level x86 branch kinsn] */
+    /* 0x1242: jmp    12af <tracee_http_method_prefix_detect_xdp+0x1af> [exact-kinsn: jmp branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(70, 107, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x1244: cmp    r10d,0x55 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R10, 85), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x1248: je     1297 <tracee_http_method_prefix_detect_xdp+0x197> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1248: je     1297 <tracee_http_method_prefix_detect_xdp+0x197> [exact-kinsn: je branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(52, 77, 0), MICRO_HANDCRAFT_BPF_X86_JE),
     /* 0x124a: cmp    r10d,0x4f [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R10, 79), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x124e: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x124e: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(68, 112, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x1250: mov    r9b,0x4f [exact-kinsn: movb immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R9, 79), MICRO_HANDCRAFT_BPF_X86_MOVB),
     /* 0x1253: cmp    BYTE PTR [rax-0x4],0x53 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_0, -4, 83), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x1257: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1257: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(62, 103, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x1259: cmp    BYTE PTR [rax-0x3],0x54 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_0, -3, 84), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x125d: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x125d: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(58, 97, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x125f: mov    r11b,0x4f [exact-kinsn: movb immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 79), MICRO_HANDCRAFT_BPF_X86_MOVB),
     /* 0x1262: cmp    BYTE PTR [rax-0x2],0x20 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_0, -2, 32), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x1266: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1266: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(52, 88, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x1268: mov    r10d,0x2 [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R10, 2), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x126e: mov    r9b,0x53 [exact-kinsn: movb immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R9, 83), MICRO_HANDCRAFT_BPF_X86_MOVB),
     /* 0x1271: mov    bl,0x54 [exact-kinsn: movb immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 84), MICRO_HANDCRAFT_BPF_X86_MOVB),
-    /* 0x1273: jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf> [warning-unmapped: needs a machine-level x86 branch kinsn] */
+    /* 0x1273: jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf> [exact-kinsn: jmp branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(52, 90, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x1275: mov    r9b,0x54 [exact-kinsn: movb immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R9, 84), MICRO_HANDCRAFT_BPF_X86_MOVB),
     /* 0x1278: cmp    BYTE PTR [rax-0x4],0x54 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_0, -4, 84), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x127c: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x127c: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(38, 66, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x127e: cmp    BYTE PTR [rax-0x3],0x50 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_0, -3, 80), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x1282: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1282: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(34, 60, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x1284: cmp    BYTE PTR [rax-0x2],0x2f [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_0, -2, 47), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x1288: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1288: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(30, 54, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x128a: mov    r10d,0x6 [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R10, 6), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x1290: mov    bl,0x50 [exact-kinsn: movb immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 80), MICRO_HANDCRAFT_BPF_X86_MOVB),
     /* 0x1292: mov    r11b,0x54 [exact-kinsn: movb immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 84), MICRO_HANDCRAFT_BPF_X86_MOVB),
-    /* 0x1295: jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf> [warning-unmapped: needs a machine-level x86 branch kinsn] */
+    /* 0x1295: jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf> [exact-kinsn: jmp branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(30, 56, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x1297: mov    r9b,0x55 [exact-kinsn: movb immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R9, 85), MICRO_HANDCRAFT_BPF_X86_MOVB),
     /* 0x129a: cmp    BYTE PTR [rax-0x4],0x54 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_0, -4, 84), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x129e: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x129e: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(16, 32, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x12a0: mov    r11b,0x55 [exact-kinsn: movb immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 85), MICRO_HANDCRAFT_BPF_X86_MOVB),
     /* 0x12a3: cmp    BYTE PTR [rax-0x3],0x20 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_0, -3, 32), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x12a7: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x12a7: jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(10, 23, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x12a9: mov    r10d,0x3 [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R10, 3), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x12af: mov    r9b,0x54 [exact-kinsn: movb immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R9, 84), MICRO_HANDCRAFT_BPF_X86_MOVB),
     /* 0x12b2: mov    bl,0x20 [exact-kinsn: movb immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 32), MICRO_HANDCRAFT_BPF_X86_MOVB),
-    /* 0x12b4: jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf> [warning-unmapped: needs a machine-level x86 branch kinsn] */
+    /* 0x12b4: jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf> [exact-kinsn: jmp branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(10, 25, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x12b6: cs nop WORD PTR [rax+rax*1+0x0] [padding: prefixed nop padding is not part of BPF semantics] */
     /* 0x12c0: mov    r11d,r9d [exact-kinsn: movl register-to-register kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(HC_X86_R11, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_MOVL),
@@ -297,7 +296,8 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_REG_PAYLOAD(BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_INCQ),
     /* 0x1315: cmp    rcx,0x9 [exact-kinsn: cmpq reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 9), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1319: jne    1150 <tracee_http_method_prefix_detect_xdp+0x50> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1319: jne    1150 <tracee_http_method_prefix_detect_xdp+0x50> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-230, -463, 1), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x131f: mov    BYTE PTR [rdx],dil [exact-kinsn: direct memory store via x86 kinsn selector] */
     HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_1, BPF_REG_3, 0), MICRO_HANDCRAFT_BPF_X86_MOVB),
     /* 0x1322: mov    BYTE PTR [rdx+0x1],bh [exact-kinsn: direct memory store via x86 kinsn selector] */

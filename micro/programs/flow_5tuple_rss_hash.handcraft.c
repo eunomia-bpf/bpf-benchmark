@@ -6,21 +6,10 @@
      ((__u64)(HAS_BASE) << 15) | ((__u64)(__u32)(DISP) << 16))
 
 /*
- * native asm to handcraft warnings: 13
+ * native asm to handcraft warnings: 2
  *
  * - 0x1100: mov    rcx,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0]
  * - 0x1103: mov    rdx,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4]
- * - 0x110c: ja     130f <flow_5tuple_rss_hash_xdp+0x20f> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1119: ja     130f <flow_5tuple_rss_hash_xdp+0x20f> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1126: ja     130f <flow_5tuple_rss_hash_xdp+0x20f> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1148: jne    1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1155: ja     1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1169: jne    1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1176: jb     1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1183: ja     1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1199: je     11a4 <flow_5tuple_rss_hash_xdp+0xa4> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x119e: jne    1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x11ab: ja     1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
  */
 
 static const struct bpf_insn program[] = {
@@ -34,17 +23,20 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x1109: cmp    rcx,rdx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x110c: ja     130f <flow_5tuple_rss_hash_xdp+0x20f> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x110c: ja     130f <flow_5tuple_rss_hash_xdp+0x20f> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(300, 509, 1), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x1112: lea    rsi,[rcx+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_4, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1116: cmp    rsi,rdx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_2, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1119: ja     130f <flow_5tuple_rss_hash_xdp+0x20f> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1119: ja     130f <flow_5tuple_rss_hash_xdp+0x20f> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(294, 496, 1), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x111f: lea    rsi,[rcx+0x16] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_4, 0, 0, 1, 0, 22), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1123: cmp    rsi,rdx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_2, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1126: ja     130f <flow_5tuple_rss_hash_xdp+0x20f> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1126: ja     130f <flow_5tuple_rss_hash_xdp+0x20f> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(288, 483, 1), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x112c: push   rbp [exact-kinsn: pushq kinsn] */
     HC_KINSN(HC_REG_PAYLOAD(HC_X86_RBP), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
     /* 0x112d: mov    rbp,rsp [exact-kinsn: movq frame-register kinsn] */
@@ -65,12 +57,14 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_1, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_MOVZWL),
     /* 0x1142: cmp    edi,0x800 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_1, 2048), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x1148: jne    1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1148: jne    1307 <flow_5tuple_rss_hash_xdp+0x207> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(256, 441, 1), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x114e: lea    rdi,[rcx+0x2a] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_1, BPF_REG_4, 0, 0, 1, 0, 42), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1152: cmp    rdi,rdx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_1, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1155: ja     1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1155: ja     1307 <flow_5tuple_rss_hash_xdp+0x207> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(250, 428, 1), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x115b: movzx  edi,BYTE PTR [rsi] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_X86_MEM_PAYLOAD(BPF_REG_1, BPF_REG_2, 0), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
     /* 0x115e: mov    r8d,edi [exact-kinsn: movl register-to-register kinsn] */
@@ -79,17 +73,20 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_5, 240), MICRO_HANDCRAFT_BPF_X86_ANDB),
     /* 0x1165: cmp    r8b,0x40 [exact-kinsn: cmpb reg,imm8 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_5, 64), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x1169: jne    1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1169: jne    1307 <flow_5tuple_rss_hash_xdp+0x207> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(240, 408, 1), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x116f: and    edi,0xf [exact-kinsn: and32 imm kinsn] */
     HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_1, 15), MICRO_HANDCRAFT_BPF_X86_ANDL),
     /* 0x1172: cmp    dil,0x5 [exact-kinsn: cmpb reg,imm8 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_1, 5), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x1176: jb     1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1176: jb     1307 <flow_5tuple_rss_hash_xdp+0x207> [exact-kinsn: jb branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(234, 395, 1), MICRO_HANDCRAFT_BPF_X86_JB),
     /* 0x117c: lea    rsi,[rsi+rdi*4] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_2, BPF_REG_1, 2, 1, 1, 0), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1180: cmp    rsi,rdx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_2, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1183: ja     1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1183: ja     1307 <flow_5tuple_rss_hash_xdp+0x207> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(228, 382, 1), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x1189: movzx  r11d,BYTE PTR [rcx+0x18] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_X86_MEM_PAYLOAD(HC_X86_R11, BPF_REG_4, 24), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
     /* 0x118e: movzx  edi,BYTE PTR [rcx+0x19] [exact-kinsn: direct memory load via x86 kinsn selector] */
@@ -98,15 +95,18 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_MEM_PAYLOAD(BPF_REG_6, BPF_REG_4, 31), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
     /* 0x1196: cmp    ebx,0x11 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 17), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x1199: je     11a4 <flow_5tuple_rss_hash_xdp+0xa4> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1199: je     11a4 <flow_5tuple_rss_hash_xdp+0xa4> [exact-kinsn: je branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(6, 9, 0), MICRO_HANDCRAFT_BPF_X86_JE),
     /* 0x119b: cmp    ebx,0x6 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 6), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x119e: jne    1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x119e: jne    1307 <flow_5tuple_rss_hash_xdp+0x207> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(214, 355, 1), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x11a4: lea    r8,[rsi+0x4] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_5, BPF_REG_2, 0, 0, 1, 0, 4), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x11a8: cmp    r8,rdx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_5, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x11ab: ja     1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x11ab: ja     1307 <flow_5tuple_rss_hash_xdp+0x207> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(208, 342, 1), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x11b1: mov    eax,r11d [exact-kinsn: movl register-to-register kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_0, HC_X86_R11), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x11b4: shl    eax,0x8 [exact-kinsn: shl32 imm kinsn] */

@@ -63,7 +63,7 @@ for base, names in {
 
 OBJ_LINE_RE = re.compile(r"^\s*(?P<addr>[0-9a-f]+):\s+(?P<bytes>(?:[0-9a-f]{2}\s+)+)\s*(?P<asm>.*)$")
 ASM_LINE_RE = re.compile(r"^\s*(?P<mnemonic>[a-z][a-z0-9]*)\s*(?P<operands>.*)$")
-BRANCH_OFF = "__BRANCH_OFF__"
+BRANCH_DELTA = "__BRANCH_DELTA__"
 SIZE_BY_PTR = {"BYTE": "BPF_B", "WORD": "BPF_H", "DWORD": "BPF_W", "QWORD": "BPF_DW"}
 DIRECT_LOAD_SELECTOR = {
     "BPF_B": "MICRO_HANDCRAFT_BPF_X86_MOVZBL",
@@ -118,6 +118,20 @@ JCC_OP = {
     "jno": "BPF_JEQ",
     "jp": "BPF_JNE",
     "jnp": "BPF_JEQ",
+}
+JCC_SELECTOR = {
+    "ja": "MICRO_HANDCRAFT_BPF_X86_JA",
+    "jae": "MICRO_HANDCRAFT_BPF_X86_JAE",
+    "jb": "MICRO_HANDCRAFT_BPF_X86_JB",
+    "jbe": "MICRO_HANDCRAFT_BPF_X86_JBE",
+    "je": "MICRO_HANDCRAFT_BPF_X86_JE",
+    "jne": "MICRO_HANDCRAFT_BPF_X86_JNE",
+    "jg": "MICRO_HANDCRAFT_BPF_X86_JG",
+    "jge": "MICRO_HANDCRAFT_BPF_X86_JGE",
+    "jl": "MICRO_HANDCRAFT_BPF_X86_JL",
+    "jle": "MICRO_HANDCRAFT_BPF_X86_JLE",
+    "js": "MICRO_HANDCRAFT_BPF_X86_JS",
+    "jns": "MICRO_HANDCRAFT_BPF_X86_JNS",
 }
 
 
@@ -434,13 +448,23 @@ def translate(insn: NativeInsn) -> Translation:
         return Translation("abi-boundary", ("HC_EXIT()",), "native ret maps to the BPF program exit boundary")
     if op in JCC_OP:
         target_addr = parse_branch_target(ops[0]) if len(ops) == 1 else None
-        note = "needs a machine-level x86 conditional-branch kinsn"
-        return Translation("warning-unmapped", (), note, target_addr)
+        selector = JCC_SELECTOR.get(op)
+        if target_addr is None:
+            return Translation("warning-unmapped", (), f"cannot parse x86 branch target: {insn.raw}")
+        if selector is None:
+            return Translation("warning-unmapped", (), f"{op} needs shadow flag support before it can be a branch kinsn", target_addr)
+        disp = target_addr - (insn.addr + insn.size)
+        near = 1 if insn.size >= 6 else 0
+        payload = f"HC_X86_BRANCH_PAYLOAD({BRANCH_DELTA}, {disp}, {near})"
+        return Translation("exact-kinsn", (f"HC_KINSN({payload}, {selector})",), f"{op} branch kinsn", target_addr)
     if op == "jmp" and len(ops) == 1:
         target_addr = parse_branch_target(ops[0])
         if target_addr is None:
             return Translation("warning-unmapped", (), f"needs a machine-level x86 indirect-branch kinsn for target {ops[0]}")
-        return Translation("warning-unmapped", (), "needs a machine-level x86 branch kinsn", target_addr)
+        disp = target_addr - (insn.addr + insn.size)
+        near = 1 if insn.size >= 5 else 0
+        payload = f"HC_X86_BRANCH_PAYLOAD({BRANCH_DELTA}, {disp}, {near})"
+        return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_JMP)",), "jmp branch kinsn", target_addr)
     if op == "cmp" and len(ops) == 2:
         lhs = bpf_reg(ops[0])
         rhs = bpf_reg(ops[1])
@@ -942,8 +966,8 @@ def relocate_branch_offsets(insns: list[NativeInsn], translations: list[Translat
         code = []
         code_pc = pc_by_index[index]
         for item in trans.code:
-            off = target_pc - (code_pc + 1)
-            code.append(item.replace(BRANCH_OFF, str(off)))
+            delta = target_pc - code_pc
+            code.append(item.replace(BRANCH_DELTA, str(delta)))
             code_pc += bpf_insn_len(item)
         code = tuple(code)
         patched.append(Translation(trans.status, code, trans.note, trans.target_addr))

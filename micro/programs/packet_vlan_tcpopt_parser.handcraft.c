@@ -6,45 +6,11 @@
      ((__u64)(HAS_BASE) << 15) | ((__u64)(__u32)(DISP) << 16))
 
 /*
- * native asm to handcraft warnings: 37
+ * native asm to handcraft warnings: 3
  *
  * - 0x1100: mov    rdx,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0]
  * - 0x1103: mov    r10,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4]
- * - 0x110c: ja     1244 <packet_vlan_tcpopt_parser_xdp+0x144> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1119: ja     1244 <packet_vlan_tcpopt_parser_xdp+0x144> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1126: ja     1244 <packet_vlan_tcpopt_parser_xdp+0x144> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1145: je     11df <packet_vlan_tcpopt_parser_xdp+0xdf> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1151: je     115f <packet_vlan_tcpopt_parser_xdp+0x5f> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1159: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1166: ja     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1185: je     1245 <packet_vlan_tcpopt_parser_xdp+0x145> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1191: je     119f <packet_vlan_tcpopt_parser_xdp+0x9f> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1199: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x11a6: ja     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x11bd: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x11c6: ja     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x11dd: jmp    11ef <packet_vlan_tcpopt_parser_xdp+0xef> [warning-unmapped: needs a machine-level x86 branch kinsn]
- * - 0x11ea: ja     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x11fe: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1207: jb     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1210: ja     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1217: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1220: ja     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x122b: jb     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x123c: jbe    124c <packet_vlan_tcpopt_parser_xdp+0x14c> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x124a: jmp    11e3 <packet_vlan_tcpopt_parser_xdp+0xe3> [warning-unmapped: needs a machine-level x86 branch kinsn]
- * - 0x1253: ja     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1259: jb     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x125f: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1265: jb     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x126b: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1271: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1277: jb     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x127d: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1283: jb     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1289: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
  * - 0x131c: movabs r9,0x144000000 [warning-unmapped: movabs into HC_X86_R9 needs a machine-level immediate-load kinsn]
- * - 0x1363: jmp    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 branch kinsn]
  */
 
 static const struct bpf_insn program[] = {
@@ -58,17 +24,20 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x1109: cmp    rdx,r10 [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_3, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x110c: ja     1244 <packet_vlan_tcpopt_parser_xdp+0x144> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x110c: ja     1244 <packet_vlan_tcpopt_parser_xdp+0x144> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(172, 306, 1), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x1112: lea    rcx,[rdx+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_4, BPF_REG_3, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1116: cmp    rcx,r10 [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1119: ja     1244 <packet_vlan_tcpopt_parser_xdp+0x144> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1119: ja     1244 <packet_vlan_tcpopt_parser_xdp+0x144> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(166, 293, 1), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x111f: lea    r9,[rdx+0x16] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(HC_X86_R9, BPF_REG_3, 0, 0, 1, 0, 22), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1123: cmp    r9,r10 [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(HC_X86_R9, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1126: ja     1244 <packet_vlan_tcpopt_parser_xdp+0x144> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1126: ja     1244 <packet_vlan_tcpopt_parser_xdp+0x144> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(160, 280, 1), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x112c: push   rbp [exact-kinsn: pushq kinsn] */
     HC_KINSN(HC_REG_PAYLOAD(HC_X86_RBP), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
     /* 0x112d: push   r15 [exact-kinsn: pushq kinsn] */
@@ -87,18 +56,22 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x113f: cmp    ecx,0x800 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 2048), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x1145: je     11df <packet_vlan_tcpopt_parser_xdp+0xdf> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1145: je     11df <packet_vlan_tcpopt_parser_xdp+0xdf> [exact-kinsn: je branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(72, 148, 1), MICRO_HANDCRAFT_BPF_X86_JE),
     /* 0x114b: cmp    ecx,0x88a8 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 34984), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x1151: je     115f <packet_vlan_tcpopt_parser_xdp+0x5f> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1151: je     115f <packet_vlan_tcpopt_parser_xdp+0x5f> [exact-kinsn: je branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(6, 12, 0), MICRO_HANDCRAFT_BPF_X86_JE),
     /* 0x1153: cmp    ecx,0x8100 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 33024), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x1159: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1159: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(124, 223, 1), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x115f: lea    r9,[rdx+0x1a] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(HC_X86_R9, BPF_REG_3, 0, 0, 1, 0, 26), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1163: cmp    r9,r10 [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(HC_X86_R9, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1166: ja     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1166: ja     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(118, 210, 1), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x116c: movzx  esi,WORD PTR [rdx+0x16] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_X86_MEM_PAYLOAD(BPF_REG_2, BPF_REG_3, 22), MICRO_HANDCRAFT_BPF_X86_MOVZWL),
     /* 0x1170: movzx  ecx,WORD PTR [rdx+0x18] [exact-kinsn: direct memory load via x86 kinsn selector] */
@@ -111,18 +84,22 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_MOVZWL),
     /* 0x117f: cmp    ecx,0x800 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 2048), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x1185: je     1245 <packet_vlan_tcpopt_parser_xdp+0x145> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1185: je     1245 <packet_vlan_tcpopt_parser_xdp+0x145> [exact-kinsn: je branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(113, 186, 1), MICRO_HANDCRAFT_BPF_X86_JE),
     /* 0x118b: cmp    ecx,0x88a8 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 34984), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x1191: je     119f <packet_vlan_tcpopt_parser_xdp+0x9f> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1191: je     119f <packet_vlan_tcpopt_parser_xdp+0x9f> [exact-kinsn: je branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(6, 12, 0), MICRO_HANDCRAFT_BPF_X86_JE),
     /* 0x1193: cmp    ecx,0x8100 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 33024), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x1199: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1199: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(96, 159, 1), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x119f: lea    rcx,[rdx+0x1e] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_4, BPF_REG_3, 0, 0, 1, 0, 30), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x11a3: cmp    rcx,r10 [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x11a6: ja     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x11a6: ja     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(90, 146, 1), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x11ac: movzx  ecx,WORD PTR [rdx+0x1c] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_X86_MEM_PAYLOAD(BPF_REG_4, BPF_REG_3, 28), MICRO_HANDCRAFT_BPF_X86_MOVZWL),
     /* 0x11b0: rol    cx,0x8 [exact-kinsn: rolw imm8 kinsn] */
@@ -131,12 +108,14 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_MOVZWL),
     /* 0x11b7: cmp    ecx,0x800 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 2048), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x11bd: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x11bd: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(80, 127, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x11bf: lea    rcx,[rdx+0x32] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_4, BPF_REG_3, 0, 0, 1, 0, 50), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x11c3: cmp    rcx,r10 [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x11c6: ja     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x11c6: ja     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(74, 118, 0), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x11c8: lea    r9,[rdx+0x1e] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(HC_X86_R9, BPF_REG_3, 0, 0, 1, 0, 30), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x11cc: movzx  ecx,WORD PTR [rdx+0x1a] [exact-kinsn: direct memory load via x86 kinsn selector] */
@@ -147,7 +126,8 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_5, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_MOVZWL),
     /* 0x11d8: mov    ecx,0x2 [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 2), MICRO_HANDCRAFT_BPF_X86_MOVL),
-    /* 0x11dd: jmp    11ef <packet_vlan_tcpopt_parser_xdp+0xef> [warning-unmapped: needs a machine-level x86 branch kinsn] */
+    /* 0x11dd: jmp    11ef <packet_vlan_tcpopt_parser_xdp+0xef> [exact-kinsn: jmp branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(14, 16, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x11df: xor    esi,esi [exact-kinsn: xor32 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x11e1: xor    ecx,ecx [exact-kinsn: xor32 reg kinsn] */
@@ -156,7 +136,8 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_1, HC_X86_R9, 0, 0, 1, 0, 20), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x11e7: cmp    rdi,r10 [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_1, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x11ea: ja     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x11ea: ja     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(52, 82, 0), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x11ec: xor    r8d,r8d [exact-kinsn: xor32 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x11ef: movzx  edi,BYTE PTR [r9] [exact-kinsn: direct memory load via x86 kinsn selector] */
@@ -167,30 +148,36 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_REG_IMM_PAYLOAD(HC_X86_R11, 240), MICRO_HANDCRAFT_BPF_X86_ANDB),
     /* 0x11fa: cmp    r11b,0x40 [exact-kinsn: cmpb reg,imm8 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 64), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x11fe: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x11fe: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(40, 62, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x1200: and    edi,0xf [exact-kinsn: and32 imm kinsn] */
     HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_1, 15), MICRO_HANDCRAFT_BPF_X86_ANDL),
     /* 0x1203: cmp    dil,0x5 [exact-kinsn: cmpb reg,imm8 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_1, 5), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x1207: jb     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1207: jb     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: jb branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(34, 53, 0), MICRO_HANDCRAFT_BPF_X86_JB),
     /* 0x1209: lea    rbx,[r9+rdi*4] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_6, HC_X86_R9, BPF_REG_1, 2, 1, 1, 0), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x120d: cmp    rbx,r10 [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_6, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1210: ja     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1210: ja     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(28, 44, 0), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x1212: cmp    BYTE PTR [r9+0x9],0x6 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(HC_X86_R9, 9, 6), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x1217: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1217: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(24, 37, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x1219: lea    r14,[rbx+0x14] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_8, BPF_REG_6, 0, 0, 1, 0, 20), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x121d: cmp    r14,r10 [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_8, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1220: ja     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1220: ja     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(18, 28, 0), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x1222: movzx  r11d,BYTE PTR [rbx+0xc] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_X86_MEM_PAYLOAD(HC_X86_R11, BPF_REG_6, 12), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
     /* 0x1227: cmp    r11,0x50 [exact-kinsn: cmpq reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 80), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x122b: jb     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x122b: jb     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: jb branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(12, 17, 0), MICRO_HANDCRAFT_BPF_X86_JB),
     /* 0x122d: shr    r11d,0x2 [exact-kinsn: shr32 imm kinsn] */
     HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(HC_X86_R11, 2), MICRO_HANDCRAFT_BPF_X86_SHRL),
     /* 0x1231: and    r11d,0xfffffffc [exact-kinsn: and32 imm kinsn] */
@@ -199,7 +186,8 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_9, BPF_REG_6, HC_X86_R11, 0, 1, 1, 0), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1239: cmp    r15,r10 [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_9, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x123c: jbe    124c <packet_vlan_tcpopt_parser_xdp+0x14c> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x123c: jbe    124c <packet_vlan_tcpopt_parser_xdp+0x14c> [exact-kinsn: jbe branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(15, 14, 0), MICRO_HANDCRAFT_BPF_X86_JBE),
     /* 0x123e: pop    rbx [exact-kinsn: popq kinsn] */
     HC_KINSN(HC_REG_PAYLOAD(BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_POPQ),
     /* 0x123f: pop    r14 [exact-kinsn: popq kinsn] */
@@ -212,39 +200,50 @@ static const struct bpf_insn program[] = {
     HC_EXIT(),
     /* 0x1245: mov    ecx,0x1 [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 1), MICRO_HANDCRAFT_BPF_X86_MOVL),
-    /* 0x124a: jmp    11e3 <packet_vlan_tcpopt_parser_xdp+0xe3> [warning-unmapped: needs a machine-level x86 branch kinsn] */
+    /* 0x124a: jmp    11e3 <packet_vlan_tcpopt_parser_xdp+0xe3> [exact-kinsn: jmp branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-67, -105, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x124c: lea    r15,[rbx+0x20] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_9, BPF_REG_6, 0, 0, 1, 0, 32), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1250: cmp    r15,r10 [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_9, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1253: ja     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1253: ja     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-17, -23, 0), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x1255: cmp    r11b,0x20 [exact-kinsn: cmpb reg,imm8 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 32), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x1259: jb     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1259: jb     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: jb branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-21, -29, 0), MICRO_HANDCRAFT_BPF_X86_JB),
     /* 0x125b: cmp    BYTE PTR [r14],0x2 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_8, 0, 2), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x125f: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x125f: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-25, -35, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x1261: cmp    BYTE PTR [rbx+0x15],0x4 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_6, 21, 4), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x1265: jb     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1265: jb     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: jb branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-29, -41, 0), MICRO_HANDCRAFT_BPF_X86_JB),
     /* 0x1267: cmp    BYTE PTR [rbx+0x18],0x1 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_6, 24, 1), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x126b: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x126b: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-33, -47, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x126d: cmp    BYTE PTR [rbx+0x19],0x3 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_6, 25, 3), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x1271: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1271: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-37, -53, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x1273: cmp    BYTE PTR [rbx+0x1a],0x3 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_6, 26, 3), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x1277: jb     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1277: jb     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: jb branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-41, -59, 0), MICRO_HANDCRAFT_BPF_X86_JB),
     /* 0x1279: cmp    BYTE PTR [rbx+0x1c],0x4 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_6, 28, 4), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x127d: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x127d: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-45, -65, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x127f: cmp    BYTE PTR [rbx+0x1d],0x2 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_6, 29, 2), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x1283: jb     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1283: jb     123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: jb branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-49, -71, 0), MICRO_HANDCRAFT_BPF_X86_JB),
     /* 0x1285: cmp    BYTE PTR [rbx+0x1e],0x1 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_6, 30, 1), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x1289: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1289: jne    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: jne branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-53, -77, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x128b: shl    rdi,0x2 [exact-kinsn: shl64 imm kinsn] */
     HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_1, 2), MICRO_HANDCRAFT_BPF_X86_SHLQ),
     /* 0x128f: movzx  eax,WORD PTR [r9+0x2] [exact-kinsn: direct memory load via x86 kinsn selector] */
@@ -356,7 +355,8 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_STORE_PAYLOAD(HC_X86_R9, BPF_REG_3, 0), MICRO_HANDCRAFT_BPF_X86_MOVQ),
     /* 0x135e: mov    eax,0x2 [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_0, 2), MICRO_HANDCRAFT_BPF_X86_MOVL),
-    /* 0x1363: jmp    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [warning-unmapped: needs a machine-level x86 branch kinsn] */
+    /* 0x1363: jmp    123e <packet_vlan_tcpopt_parser_xdp+0x13e> [exact-kinsn: jmp branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-164, -298, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
 };
 
 HC_EXPORT_PROGRAM(program)

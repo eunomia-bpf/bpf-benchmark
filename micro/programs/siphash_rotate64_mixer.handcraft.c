@@ -6,13 +6,10 @@
      ((__u64)(HAS_BASE) << 15) | ((__u64)(__u32)(DISP) << 16))
 
 /*
- * native asm to handcraft warnings: 5
+ * native asm to handcraft warnings: 2
  *
  * - 0x1100: mov    rcx,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0]
  * - 0x1103: mov    rdx,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4]
- * - 0x110c: ja     1569 <siphash_rotate64_mixer_xdp+0x469> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1119: ja     1569 <siphash_rotate64_mixer_xdp+0x469> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
- * - 0x1126: ja     1569 <siphash_rotate64_mixer_xdp+0x469> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
  */
 
 static const struct bpf_insn program[] = {
@@ -26,17 +23,20 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x1109: cmp    rcx,rdx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x110c: ja     1569 <siphash_rotate64_mixer_xdp+0x469> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x110c: ja     1569 <siphash_rotate64_mixer_xdp+0x469> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(623, 1111, 1), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x1112: lea    rsi,[rcx+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_4, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1116: cmp    rsi,rdx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_2, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1119: ja     1569 <siphash_rotate64_mixer_xdp+0x469> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1119: ja     1569 <siphash_rotate64_mixer_xdp+0x469> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(617, 1098, 1), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x111f: lea    rsi,[rcx+0x48] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_4, 0, 0, 1, 0, 72), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1123: cmp    rsi,rdx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_2, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1126: ja     1569 <siphash_rotate64_mixer_xdp+0x469> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x1126: ja     1569 <siphash_rotate64_mixer_xdp+0x469> [exact-kinsn: ja branch kinsn] */
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(611, 1085, 1), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x112c: mov    r9,QWORD PTR [rcx+0x8] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_X86_MEM_PAYLOAD(HC_X86_R9, BPF_REG_4, 8), MICRO_HANDCRAFT_BPF_X86_MOVQ),
     /* 0x1130: movabs rdi,0x7465646279746573 [exact-bpf: movabs via BPF_LD_IMM64; x86 JIT emits movabs] */

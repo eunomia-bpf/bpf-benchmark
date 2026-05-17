@@ -935,6 +935,19 @@ const handcraft_kinsn_desc &handcraft_kinsn_desc_for_selector(int selector)
         {MICRO_HANDCRAFT_BPF_X86_TESTW, "bpf_x86_cmov", "bpf_x86_testw"},
         {MICRO_HANDCRAFT_BPF_X86_POPQ, "bpf_x86_stack", "bpf_x86_popq"},
         {MICRO_HANDCRAFT_BPF_X86_PUSHQ, "bpf_x86_stack", "bpf_x86_pushq"},
+        {MICRO_HANDCRAFT_BPF_X86_JA, "bpf_x86_branch", "bpf_x86_ja"},
+        {MICRO_HANDCRAFT_BPF_X86_JAE, "bpf_x86_branch", "bpf_x86_jae"},
+        {MICRO_HANDCRAFT_BPF_X86_JB, "bpf_x86_branch", "bpf_x86_jb"},
+        {MICRO_HANDCRAFT_BPF_X86_JBE, "bpf_x86_branch", "bpf_x86_jbe"},
+        {MICRO_HANDCRAFT_BPF_X86_JE, "bpf_x86_branch", "bpf_x86_je"},
+        {MICRO_HANDCRAFT_BPF_X86_JNE, "bpf_x86_branch", "bpf_x86_jne"},
+        {MICRO_HANDCRAFT_BPF_X86_JG, "bpf_x86_branch", "bpf_x86_jg"},
+        {MICRO_HANDCRAFT_BPF_X86_JGE, "bpf_x86_branch", "bpf_x86_jge"},
+        {MICRO_HANDCRAFT_BPF_X86_JL, "bpf_x86_branch", "bpf_x86_jl"},
+        {MICRO_HANDCRAFT_BPF_X86_JLE, "bpf_x86_branch", "bpf_x86_jle"},
+        {MICRO_HANDCRAFT_BPF_X86_JS, "bpf_x86_branch", "bpf_x86_js"},
+        {MICRO_HANDCRAFT_BPF_X86_JNS, "bpf_x86_branch", "bpf_x86_jns"},
+        {MICRO_HANDCRAFT_BPF_X86_JMP, "bpf_x86_branch", "bpf_x86_jmp"},
     };
 
     for (const auto &desc : descriptors) {

@@ -85,6 +85,7 @@ static __always_inline bool kinsn_x86_needs_rex8(u8 reg)
 #define KINSN_X86_SCRATCH_R7_OFF	-368
 #define KINSN_X86_SCRATCH_R8_OFF	-360
 #define KINSN_X86_SHADOW_GE_OFF		-352
+#define KINSN_X86_SHADOW_SF_OFF		-348
 
 #define KINSN_X86_SCRATCH0		BPF_REG_6
 #define KINSN_X86_SCRATCH1		BPF_REG_7
