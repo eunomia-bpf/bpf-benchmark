@@ -660,6 +660,7 @@ x86_l_13ef:
 x86_l_13f0:
 	/* 0x13f0: ret */
 	X86_VM_RET_RAX();
+
 	return XDP_ABORTED;
 }
 

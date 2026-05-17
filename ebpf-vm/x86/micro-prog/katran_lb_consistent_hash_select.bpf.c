@@ -1606,6 +1606,7 @@ x86_l_189b:
 x86_l_18a1:
 	/* 0x18a1: jmp    15f2 <katran_lb_consistent_hash_select_xdp+0x4f2> */
 	goto x86_l_15f2;
+
 	return XDP_ABORTED;
 }
 

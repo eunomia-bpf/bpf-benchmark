@@ -41,6 +41,8 @@ class Result:
 
 def load_benches() -> list[Bench]:
     data = yaml.safe_load(CONFIG.read_text())
+    defaults = data.get("benchmark_defaults", {})
+    default_retval = int(defaults.get("expected_retval", 2))
     benches: list[Bench] = []
     for item in data["benchmarks"]:
         expected = item.get("expected_result")
@@ -48,19 +50,10 @@ def load_benches() -> list[Bench]:
         if expected is None or generator is None:
             continue
         name = item["name"]
+        expected_retval = int(item.get("expected_retval", default_retval))
         benches.append(Bench(name, generator, int(expected),
-                             expected_native_retval(name)))
+                             expected_retval))
     return benches
-
-
-def expected_native_retval(name: str) -> int:
-    src = REPO_ROOT / "micro" / "programs" / f"{name}.bpf.c"
-    text = src.read_text()
-    if "TC_BENCH" in text:
-        return 0
-    if "CGROUP_SKB_BENCH" in text:
-        return 1
-    return 2
 
 
 def run_cmd(cmd: list[str], *, timeout: int, capture: bool = True) -> subprocess.CompletedProcess[str]:

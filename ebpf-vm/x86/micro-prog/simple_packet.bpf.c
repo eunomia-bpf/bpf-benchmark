@@ -58,6 +58,7 @@ x86_l_1134:
 x86_l_1135:
 	/* 0x1135: ret */
 	X86_VM_RET_RAX();
+
 	return XDP_ABORTED;
 }
 

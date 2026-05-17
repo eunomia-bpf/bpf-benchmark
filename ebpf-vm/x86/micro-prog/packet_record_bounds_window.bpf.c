@@ -247,6 +247,7 @@ x86_l_11f7:
 x86_l_11f8:
 	/* 0x11f8: ret */
 	X86_VM_RET_RAX();
+
 	return XDP_ABORTED;
 }
 

@@ -22,6 +22,7 @@ defaults:
 
 benchmark_defaults:
   io_mode: staged
+  expected_retval: 2
 
 analysis:
   baseline_benchmark: simple
@@ -387,6 +388,7 @@ benchmarks:
     # Same checksum fold as `checksum`; the repeated XOR cancels to zero despite
     # non-zero generated input.
     expected_result: 0
+    expected_retval: 0
     tags: [tc, pure-jit, non-xdp, kernel-only]
 
   - name: cgroup_skb_hash_chain
@@ -401,4 +403,5 @@ benchmarks:
     kernel_input_size: 72
     input_generator: cgroup_skb_hash_chain
     expected_result: 12027228624407116210
+    expected_retval: 1
     tags: [cgroup-skb, pure-jit, non-xdp, kernel-only]

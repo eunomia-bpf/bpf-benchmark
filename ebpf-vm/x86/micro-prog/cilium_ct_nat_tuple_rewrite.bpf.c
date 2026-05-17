@@ -356,6 +356,7 @@ x86_l_1282:
 x86_l_1283:
 	/* 0x1283: ret */
 	X86_VM_RET_RAX();
+
 	return XDP_ABORTED;
 }
 

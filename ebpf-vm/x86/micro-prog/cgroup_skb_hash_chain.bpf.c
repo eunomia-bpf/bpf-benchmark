@@ -210,6 +210,7 @@ x86_l_11ed:
 x86_l_11f0:
 	/* 0x11f0: ret */
 	X86_VM_RET_RAX();
+
 	return XDP_ABORTED;
 }
 

@@ -580,6 +580,7 @@ x86_l_138e:
 x86_l_138f:
 	/* 0x138f: ret */
 	X86_VM_RET_RAX();
+
 	return XDP_ABORTED;
 }
 

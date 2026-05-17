@@ -1113,6 +1113,9 @@ static __always_inline int x86_promote_index_packet_base(struct x86_state *state
 							 __u8 *tag,
 							 __s64 *disp)
 {
+#ifndef X86_VM_ENABLE_INDEX_PACKET_PROMOTE
+	return 0;
+#else
 	__u8 index = X86_MEM_AUX_INDEX(aux);
 	__u8 scale_log2 = X86_MEM_AUX_SCALE_LOG2(aux);
 	void *index_ptr = 0;
@@ -1132,6 +1135,7 @@ static __always_inline int x86_promote_index_packet_base(struct x86_state *state
 	*tag = X86_PTR_PACKET;
 	*disp += (__s64)base_value;
 	return 0;
+#endif
 }
 
 static __always_inline int x86_packet_bounds(void *data, void *data_end,
@@ -1553,7 +1557,7 @@ static __always_inline int x86_load_mem(struct x86_state *state,
 	}
 #endif
 #ifdef X86_VM_ENABLE_PACKET_REG_FASTPATH
-	if (insn->src == X86_RSI) {
+	if (insn->src == X86_RSI && state->tag_rsi == X86_PTR_PACKET) {
 		if (!state->p_rsi)
 			return X86_INTERP_TRAP;
 		return x86_load_packet(state, insn->dst, data, data_end,
@@ -1562,7 +1566,8 @@ static __always_inline int x86_load_mem(struct x86_state *state,
 				       insn->op == X86_OP_MOVSX_LOAD);
 	}
 	if (X86_MEM_AUX_INDEX(insn->aux) == X86_RSI &&
-	    X86_MEM_AUX_SCALE_LOG2(insn->aux) == 0) {
+	    X86_MEM_AUX_SCALE_LOG2(insn->aux) == 0 &&
+	    state->tag_rsi == X86_PTR_PACKET) {
 		__u64 base_value = 0;
 
 		if (!state->p_rsi)
@@ -1646,14 +1651,15 @@ static __always_inline int x86_read_mem_value(struct x86_state *state,
 	}
 #endif
 #ifdef X86_VM_ENABLE_PACKET_REG_FASTPATH
-	if (base_reg == X86_RSI) {
+	if (base_reg == X86_RSI && state->tag_rsi == X86_PTR_PACKET) {
 		if (!state->p_rsi)
 			return X86_INTERP_TRAP;
 		return x86_read_packet_value(data, data_end, state->p_rsi,
 					     disp, width, value);
 	}
 	if (X86_MEM_AUX_INDEX(aux) == X86_RSI &&
-	    X86_MEM_AUX_SCALE_LOG2(aux) == 0) {
+	    X86_MEM_AUX_SCALE_LOG2(aux) == 0 &&
+	    state->tag_rsi == X86_PTR_PACKET) {
 		__u64 base_value = 0;
 
 		if (!state->p_rsi)
@@ -1707,12 +1713,13 @@ static __always_inline int x86_store_mem(struct x86_state *state,
 	}
 #endif
 #ifdef X86_VM_ENABLE_PACKET_REG_FASTPATH
-	if (insn->dst == X86_RSI) {
+	if (insn->dst == X86_RSI && state->tag_rsi == X86_PTR_PACKET) {
 		if (!state->p_rsi)
 			return X86_INTERP_TRAP;
 		if (insn->op == X86_OP_MOV_STORE_IMM)
-			return x86_store_packet_imm(data, data_end, state->p_rsi,
-						    disp, insn->flags,
+			return x86_store_packet_imm(data, data_end,
+						    state->p_rsi, disp,
+						    insn->flags,
 						    x86_store_imm_value(insn->imm));
 		return x86_store_packet_reg(state, insn->src, data, data_end,
 					    state->p_rsi, disp, insn->flags,

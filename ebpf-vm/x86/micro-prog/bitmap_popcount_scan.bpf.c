@@ -118,6 +118,7 @@ x86_l_1174:
 x86_l_1175:
 	/* 0x1175: ret */
 	X86_VM_RET_RAX();
+
 	return XDP_ABORTED;
 }
 

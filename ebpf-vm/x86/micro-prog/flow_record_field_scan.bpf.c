@@ -279,6 +279,7 @@ x86_l_1217:
 x86_l_1218:
 	/* 0x1218: ret */
 	X86_VM_RET_RAX();
+
 	return XDP_ABORTED;
 }
 

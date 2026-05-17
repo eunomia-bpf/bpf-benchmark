@@ -14,7 +14,7 @@ musl: libbpfrejit_shim_musl.so
 libbpfrejit_shim_musl.so: libbpfrejit_shim.c
 	docker run --rm -v $$PWD:/work:rw alpine:latest sh -c \
 	  "apk add --no-cache gcc musl-dev linux-headers > /dev/null && \
-	   gcc -O2 -fPIC -shared /work/libbpfrejit_shim.c \
+	   gcc -O2 -fPIC -D_GNU_SOURCE -shared /work/libbpfrejit_shim.c \
 	     -o /work/libbpfrejit_shim_musl.so -ldl -lpthread"
 
 # Run the shim against each of the 7 corpus app binaries inside the existing
@@ -40,11 +40,17 @@ docker-survey: libbpfrejit_shim.so libbpfrejit_shim_musl.so
 	  preload_musl="/tmp/libbpfrejit_shim_musl.so"; \
 	  count_pat() { grep -c "$$1" "$$2" 2>/dev/null | head -1; }; \
 	  run_one() { \
-	    local name="$$1"; local preload="$$2"; shift 2; \
+	    local name="$$1"; local preload="$$2"; local duration="$$3"; shift 3; \
 	    local log="/tmp/shim_$$name.log"; \
 	    rm -f "$$log"; touch "$$log"; \
-	    BPFREJIT_SHIM_LOG="$$log" BPFREJIT_SHIM_DIR=/tmp/shim_dumps \
-	      LD_PRELOAD="$$preload" "$$@" > /dev/null 2>&1 || true; \
+	    ( BPFREJIT_SHIM_LOG="$$log" BPFREJIT_SHIM_DIR=/tmp/shim_dumps \
+	        LD_PRELOAD="$$preload" "$$@" ) > /dev/null 2>&1 & \
+	    local app_pid=$$!; \
+	    sleep "$$duration"; \
+	    kill -TERM "$$app_pid" 2>/dev/null; \
+	    sleep 0.3; \
+	    kill -KILL "$$app_pid" 2>/dev/null; \
+	    wait "$$app_pid" 2>/dev/null; \
 	    local prog_load=$$(count_pat "BPF_PROG_LOAD type=" "$$log"); \
 	    local link_create=$$(count_pat "BPF_LINK_CREATE " "$$log"); \
 	    local link_update=$$(count_pat "BPF_LINK_UPDATE " "$$log"); \
@@ -57,15 +63,15 @@ docker-survey: libbpfrejit_shim.so libbpfrejit_shim_musl.so
 	      "$$name" "$$lines" "$$prog_load" "$$link_create" "$$link_update" "$$prog_attach" "$$pfopen" "$$rtopen" "$$setbpf"; \
 	  }; \
 	  echo "--- per-app capture summary ---"; \
-	  run_one bpftool        $$preload_glibc bpftool prog list; \
-	  run_one bpftrace       $$preload_glibc timeout 3 bpftrace -e "tracepoint:syscalls:sys_enter_openat { @[comm] = count(); }"; \
-	  run_one bcc_execsnoop  $$preload_glibc timeout 3 /usr/sbin/execsnoop-bpfcc; \
-	  run_one bcc_opensnoop  $$preload_glibc timeout 3 /usr/sbin/opensnoop-bpfcc; \
-	  run_one bcc_capable    $$preload_glibc timeout 5 /usr/sbin/capable-bpfcc; \
-	  run_one tracee         $$preload_musl  timeout 8 /artifacts/tracee/bin/tracee --events execve --output none --metrics-listen-address ""; \
-	  run_one tetragon       $$preload_glibc timeout 5 /artifacts/tetragon/bin/tetragon --bpf-lib /var/lib/tetragon; \
-	  run_one cilium_agent   $$preload_glibc timeout 3 /usr/local/bin/cilium-agent --help; \
-	  run_one katran         $$preload_glibc timeout 3 /artifacts/user/repo-artifacts/x86_64/katran/bin/katran_server_grpc --help; \
+	  run_one bpftool        $$preload_glibc 1 bpftool prog list; \
+	  run_one bpftrace       $$preload_glibc 4 bpftrace -e "tracepoint:syscalls:sys_enter_openat { @[comm] = count(); }"; \
+	  run_one bcc_execsnoop  $$preload_glibc 5 /usr/sbin/execsnoop-bpfcc; \
+	  run_one bcc_opensnoop  $$preload_glibc 5 /usr/sbin/opensnoop-bpfcc; \
+	  run_one bcc_capable    $$preload_glibc 8 /usr/sbin/capable-bpfcc; \
+	  run_one tracee         $$preload_musl  6 /artifacts/tracee/bin/tracee --events execve --output none; \
+	  run_one tetragon       $$preload_glibc 5 /artifacts/tetragon/bin/tetragon --bpf-lib /var/lib/tetragon; \
+	  run_one cilium_agent   $$preload_glibc 3 /usr/local/bin/cilium-agent --help; \
+	  run_one katran         $$preload_glibc 3 /artifacts/user/repo-artifacts/x86_64/katran/bin/katran_server_grpc --help; \
 	  echo ""; \
 	  echo "--- sample log heads ---"; \
 	  for f in /tmp/shim_*.log; do \

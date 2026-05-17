@@ -36,6 +36,7 @@ class Bench:
     name: str
     input_generator: str
     expected_result: int
+    expected_retval: int
 
 
 @dataclass
@@ -47,13 +48,17 @@ class Result:
 
 def load_benches() -> list[Bench]:
     data = yaml.safe_load(CONFIG.read_text())
+    defaults = data.get("benchmark_defaults", {})
+    default_retval = int(defaults.get("expected_retval", 2))
     benches: list[Bench] = []
     for item in data["benchmarks"]:
         expected = item.get("expected_result")
         generator = item.get("input_generator")
         if expected is None or generator is None:
             continue
-        benches.append(Bench(item["name"], generator, int(expected)))
+        expected_retval = int(item.get("expected_retval", default_retval))
+        benches.append(Bench(item["name"], generator, int(expected),
+                             expected_retval))
     return benches
 
 
@@ -114,6 +119,8 @@ def run_json(bench: Bench, sudo: bool) -> Result:
         str(input_path),
         "--expected-result",
         str(bench.expected_result),
+        "--expect-retval",
+        str(bench.expected_retval),
     ]
     if sudo and os.geteuid() != 0:
         cmd = ["sudo", "-n", *cmd]

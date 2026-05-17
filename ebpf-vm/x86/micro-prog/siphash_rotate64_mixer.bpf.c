@@ -974,6 +974,7 @@ x86_l_156d:
 x86_l_156e:
 	/* 0x156e: ret */
 	X86_VM_RET_RAX();
+
 	return XDP_ABORTED;
 }
 

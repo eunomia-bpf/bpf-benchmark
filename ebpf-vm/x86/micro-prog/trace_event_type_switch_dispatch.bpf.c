@@ -1215,6 +1215,7 @@ x86_l_1768:
 x86_l_1769:
 	/* 0x1769: ret */
 	X86_VM_RET_RAX();
+
 	return XDP_ABORTED;
 }
 

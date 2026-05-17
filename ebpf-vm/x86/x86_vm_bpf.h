@@ -154,6 +154,31 @@ static __always_inline __u32 x86_vm_ret_rax(struct x86_state *state)
 
 #define X86_VM_RET_RAX() return x86_vm_ret_rax(&__x86_vm_state)
 
+struct x86_vm_loop_ctx {
+	struct x86_state state;
+	void *data;
+	void *data_end;
+	__u32 failed;
+	__u32 done;
+	__u32 next;
+};
+
+#define X86_VM_LOOP_OP(HELPER, OP, DST, SRC, FLAGS, AUX, IMM)              \
+	do {                                                               \
+		int __x86_vm_step_ret =                                    \
+			X86_VM_EXEC_HELPER(HELPER, &__x86_vm_state, (OP),   \
+					   (DST), (SRC), (FLAGS), (AUX),   \
+					   (IMM));                         \
+		if (__x86_vm_step_ret < 0) {                               \
+			loop->failed = __LINE__;                           \
+			return 1;                                          \
+		}                                                          \
+		if (__x86_vm_step_ret == X86_INTERP_DONE) {                \
+			loop->done = 1;                                    \
+			return 1;                                          \
+		}                                                          \
+	} while (0)
+
 static __always_inline int
 x86_vm_store_ctx_output32_imm(struct x86_state *state, void *data,
 			      void *data_end, __u32 off, __u32 value)

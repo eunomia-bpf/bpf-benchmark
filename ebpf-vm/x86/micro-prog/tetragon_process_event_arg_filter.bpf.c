@@ -685,6 +685,7 @@ x86_l_1416:
 x86_l_1417:
 	/* 0x1417: ret */
 	X86_VM_RET_RAX();
+
 	return XDP_ABORTED;
 }
 

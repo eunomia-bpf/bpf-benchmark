@@ -311,6 +311,7 @@ x86_l_1248:
 x86_l_1249:
 	/* 0x1249: ret */
 	X86_VM_RET_RAX();
+
 	return XDP_ABORTED;
 }
 

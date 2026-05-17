@@ -429,6 +429,7 @@ x86_l_130d:
 x86_l_130e:
 	/* 0x130e: ret */
 	X86_VM_RET_RAX();
+
 	return XDP_ABORTED;
 }
 

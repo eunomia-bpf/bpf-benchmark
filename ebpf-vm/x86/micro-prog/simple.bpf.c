@@ -68,6 +68,7 @@ x86_l_113d:
 x86_l_113e:
 	/* 0x113e: ret */
 	X86_VM_RET_RAX();
+
 	return XDP_ABORTED;
 }
 

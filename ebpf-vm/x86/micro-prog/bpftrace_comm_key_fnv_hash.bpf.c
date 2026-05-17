@@ -634,6 +634,7 @@ x86_l_13ea:
 x86_l_13eb:
 	/* 0x13eb: ret */
 	X86_VM_RET_RAX();
+
 	return XDP_ABORTED;
 }
 

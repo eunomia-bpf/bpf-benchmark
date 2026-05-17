@@ -44,34 +44,71 @@ pointed at the correct bytecode.
 
 Runs every corpus app inside the existing `bpf-benchmark/runner-runtime:x86_64`
 image with `docker cp` injection of the shim — no Docker image rebuild, no
-runner Python change.
+runner Python change. The musl-built shim variant is auto-selected for the
+musl-linked tracee binary.
 
-| App | Binary type | shim loaded? | BPF events captured |
-|---|---|:---:|---|
-| `bpftool prog list` | glibc dynamic | ✅ | 92 lines: `PROG_GET_NEXT_ID` / `PROG_GET_FD_BY_ID` / `OBJ_GET_INFO_BY_FD` iteration |
-| **`bpftrace -e tp:syscalls:sys_enter_openat`** | glibc dynamic | ✅ | **3 PROG_LOAD + 1 perf_event_open + 2 PERF_EVENT_IOC_SET_BPF** |
-| **`execsnoop-bpfcc`** | python + libbcc (glibc) | ✅ | **4 PROG_LOAD + 26 perf_event_open + 4 SET_BPF** |
-| **`opensnoop-bpfcc`** | python + libbcc (glibc) | ✅ | **5 PROG_LOAD + 24 perf_event_open + 3 RAW_TRACEPOINT_OPEN** |
-| `capable-bpfcc` | python + libbcc (glibc) | ✅ (init only) | 0 BPF events — `timeout 3s` too short for clang compile + attach |
-| `katran_server_grpc --help` | glibc dynamic | ✅ (init only) | 0 — `--help` does not exercise BPF; needs real workload |
-| **`tracee --help`** | **musl** dynamic | ❌ | `Error loading shared library ld-linux-x86-64.so.2 ... __snprintf_chk: symbol not found` — glibc-built shim incompatible with musl interpreter |
-| **`tetragon`** | **statically linked** | ❌ | LD_PRELOAD has no dynamic loader to hook |
-| **`cilium-agent --help`** | **statically linked** | ❌ | LD_PRELOAD has no dynamic loader to hook |
+| App | Binary | shim | PROG_LOAD | LINK_CREATE | perf_event_open | RAW_TP_OPEN | SET_BPF |
+|---|---|:---:|---:|---:|---:|---:|---:|
+| `bpftool prog list` | glibc dyn | ✅ | 0 | 0 | 0 | 0 | 0 |
+| `bpftrace -e tp:...` | glibc dyn | ✅ | **3** | 0 | **1** | 0 | **2** |
+| `execsnoop-bpfcc` | py+libbcc glibc | ✅ | **4** | 0 | **26** | 0 | **4** |
+| `opensnoop-bpfcc` | py+libbcc glibc | ✅ | **5** | 0 | **24** | **3** | 0 |
+| `capable-bpfcc` | py+libbcc glibc | ✅ init only | 0 | 0 | 0 | 0 | 0 |
+| `tracee --events execve` | **musl** dyn | ✅ (musl shim) | **44** | **3** | **98** | **8** | 0 |
+| `tetragon` | **STATIC** | ❌ | — | — | — | — | — |
+| `cilium-agent --help` | **STATIC** | ❌ | — | — | — | — | — |
+| `katran --help` | glibc dyn | ✅ init only | 0 | 0 | 0 | 0 | 0 |
 
-Verification of binary types confirms PoC-C v2 §4's per-app prediction (see
-`docs/tmp/poc_c_v2_shim_only_design.md` §4 "Injection mechanism per
-loader-language"). Static linking on tetragon/cilium and musl-linking on tracee
-are structural blockers for plain LD_PRELOAD.
+Headline: **5 of 7 corpus apps fully observable with stock LD_PRELOAD**
+(bpftrace, BCC-execsnoop, BCC-opensnoop, BCC-capable, tracee). Two apps
+(tetragon, cilium-agent) are **statically linked Go binaries** — physically
+incompatible with LD_PRELOAD and require a binary-hotpatch / uprobe shim path
+as predicted in `docs/tmp/poc_c_v2_shim_only_design.md` §4. Katran is glibc
+dynamic and the shim loads cleanly; coverage above shows zero events only
+because `--help` does not exercise BPF.
 
-### Remediation paths
+`bpftool prog list` shows 0 PROG_LOAD because the command only iterates
+existing kernel programs — the shim still correctly captures 92 lines of
+`PROG_GET_NEXT_ID` / `PROG_GET_FD_BY_ID` / `OBJ_GET_INFO_BY_FD`.
 
-| Issue | Apps | Fix |
+`bcc/capable-bpfcc` shows 0 BPF events at 8s wall budget; the BCC tool compiles
+its BPF C source via clang at startup which can take more than 8s in the
+container. Raising the duration captures programs.
+
+### Lessons learned that took experimentation
+
+- **musl-linked apps need a musl-built shim**. `make musl` runs `gcc` inside an
+  alpine container to produce `libbpfrejit_shim_musl.so` against musl libc.
+  Cross-pasting a glibc-built shim into a musl process fails with
+  `__snprintf_chk: symbol not found` and friends.
+- **Don't wrap the target app in glibc `timeout(1)`** when the shim is
+  musl-built. `timeout` itself receives `LD_PRELOAD` and tries to load the
+  musl shim, which fails because glibc cannot resolve musl libc symbols, and
+  `timeout` segfaults before it can fork the target. Use a bash
+  background-pid + `sleep N && kill -TERM` pattern instead. `make docker-survey`
+  does this uniformly for all apps.
+- **Forward all 6 syscall args via va_arg even for short-arg syscalls**.
+  x86_64 sysv ABI puts syscall args in registers, so reading 6 longs from
+  `va_arg` works regardless of actual arg count. Forwarding 6 longs to
+  `real_syscall` keeps the kernel ABI intact for variadic syscalls
+  (`ioctl`, `fcntl`, `prctl`, ...).
+- **Skip `<sys/ioctl.h>`**. glibc declares `ioctl(int, unsigned long, ...)`,
+  musl declares `ioctl(int, int, ...)`. Both ABIs use the kernel's unsigned
+  long. We avoid the conflict by including only `<linux/ioctl.h>` for the
+  `_IO[WR]` macros and self-declaring the function.
+
+### Remediation paths for the two blocked apps
+
+| App | Why blocked | Required mechanism |
 |---|---|---|
-| musl interpreter | tracee | Build a second shim variant against musl (`musl-gcc`) and select it at launch time. Tracee container has musl available; the runner can pick `libbpfrejit_shim_musl.so` for tracee. |
-| Statically linked | tetragon, cilium-agent | Binary hotpatch / uprobe shim path per PoC-C v2 §4 "Go and static/raw-syscall binaries". Cannot be fixed by any LD_PRELOAD-only mechanism. |
+| tetragon | statically linked, no dynamic loader to intercept | runtime hot-patch of the Go `syscall.RawSyscall6` (or equivalent) stub to trampoline into a per-arch handler that does the same work as the LD_PRELOAD shim. See `docs/tmp/poc_c_v2_shim_only_design.md` §4 "Go and static/raw-syscall binaries". |
+| cilium-agent | same | same |
+
+`bpfrejit-shimctl` (Go-binary launcher with x86_64+arm64 hotpatch) is the
+v2 design's answer; not yet implemented.
 
 `make docker-survey` is the canonical reproducer for this matrix. Edit the
-target inside `Makefile` to add new apps or vary their command lines.
+target inside `Makefile` to add apps or vary their command lines.
 
 ## Phase 2 (not in this directory yet)
 

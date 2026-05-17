@@ -156,6 +156,7 @@ x86_l_119a:
 x86_l_119b:
 	/* 0x119b: ret */
 	X86_VM_RET_RAX();
+
 	return XDP_ABORTED;
 }
 

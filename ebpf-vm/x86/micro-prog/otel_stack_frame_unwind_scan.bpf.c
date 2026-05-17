@@ -373,6 +373,7 @@ x86_l_1297:
 x86_l_1298:
 	/* 0x1298: ret */
 	X86_VM_RET_RAX();
+
 	return XDP_ABORTED;
 }
 

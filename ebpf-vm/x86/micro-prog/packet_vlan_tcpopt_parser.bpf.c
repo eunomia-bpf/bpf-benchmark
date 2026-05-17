@@ -552,6 +552,7 @@ x86_l_1363:
 x86_l_1368:
 	/* 0x1368: jmp    1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
 	goto x86_l_1241;
+
 	return XDP_ABORTED;
 }
 

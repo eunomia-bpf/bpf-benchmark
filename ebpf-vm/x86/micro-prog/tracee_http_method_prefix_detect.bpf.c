@@ -553,6 +553,7 @@ x86_l_1383:
 x86_l_1384:
 	/* 0x1384: ret */
 	X86_VM_RET_RAX();
+
 	return XDP_ABORTED;
 }
 

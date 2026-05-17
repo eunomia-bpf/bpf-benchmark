@@ -397,6 +397,7 @@ x86_l_12ae:
 x86_l_12af:
 	/* 0x12af: ret */
 	X86_VM_RET_RAX();
+
 	return XDP_ABORTED;
 }
 
