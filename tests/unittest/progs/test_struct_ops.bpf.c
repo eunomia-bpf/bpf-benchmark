@@ -38,5 +38,5 @@ struct tcp_congestion_ops test_tcp_ops = {
 	.ssthresh	= (void *)test_ssthresh,
 	.cong_avoid	= (void *)test_cong_avoid,
 	.undo_cwnd	= (void *)test_undo_cwnd,
-	.name		= "bpf_rejit_test",
+	.name		= "bpf_opt_test",
 };

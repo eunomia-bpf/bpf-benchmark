@@ -611,9 +611,9 @@ def append_step(lines: list[str], insn: NativeInsn, indent: str = "\t",
 
 
 def append_ret_dispatch(lines: list[str], call_returns: set[int],
-                        indent: str) -> None:
+                        indent: str, ret_statement: str) -> None:
     lines.append(f"{indent}if (__x86_call_depth == 0)")
-    lines.append(f"{indent}\tX86_VM_RET_RAX();")
+    lines.append(f"{indent}\t{ret_statement}")
     lines.append(f"{indent}if (__x86_call_depth == 1) {{")
     lines.append(f"{indent}\t__x86_call_depth = 0;")
     for ret_addr in sorted(call_returns):
@@ -636,7 +636,8 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
                          call_returns: set[int] | None = None,
                          call_functions: dict[int, str] | None = None,
                          subroutine: bool = False,
-                         step_macro: str = "X86_VM_RUN_OP") -> None:
+                         step_macro: str = "X86_VM_RUN_OP",
+                         ret_statement: str = "X86_VM_RET_RAX();") -> None:
     if insn.mnemonic in CC_AUX and insn.mnemonic.startswith("j"):
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
         target = branch_target(insn.operands[0]) if insn.operands else 0
@@ -681,12 +682,12 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
     if insn.mnemonic == "ret":
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
         if subroutine:
-            lines.append(f"{indent}return X86_INTERP_CONTINUE;")
+            lines.append(f"{indent}{ret_statement}")
             return
         if call_returns:
-            append_ret_dispatch(lines, call_returns, indent)
+            append_ret_dispatch(lines, call_returns, indent, ret_statement)
         else:
-            lines.append(f"{indent}X86_VM_RET_RAX();")
+            lines.append(f"{indent}{ret_statement}")
         return
     append_step(lines, insn, indent, step_macro)
 
@@ -697,12 +698,13 @@ def append_unrolled_branch_comment(lines: list[str], insn: NativeInsn,
     lines.append(f"{indent}/* proof-unrolled backward branch */")
 
 
-def append_loop_step(lines: list[str], insn: NativeInsn, indent: str = "\t") -> None:
+def append_loop_step(lines: list[str], insn: NativeInsn, indent: str = "\t",
+                     macro: str = "PACKET_CHECKSUM_LOOP_STEP") -> None:
     encoded = encode(insn)
     helper = op_helper(encoded.op)
     lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
     lines.append(
-        f"{indent}PACKET_CHECKSUM_LOOP_STEP("
+        f"{indent}{macro}("
         f"{helper}, {encoded.op}, {encoded.dst}, {encoded.src}, "
         f"{encoded.flags}, {encoded.aux}, {encoded.imm});"
     )
@@ -722,12 +724,51 @@ def c_ident(text: str) -> str:
     return re.sub(r"[^A-Za-z0-9_]", "_", text)
 
 
-def needs_stack_ext(all_insns: list[NativeInsn]) -> bool:
+def max_stack_offset(all_insns: list[NativeInsn], *, rbp_bias: int = 8) -> int:
+    max_offset = 0
     for insn in all_insns:
         for operand in insn.operands:
-            match = re.search(r"\[r(?:b|s)p-0x([0-9a-fA-F]+)", operand)
-            if match is not None and int(match.group(1), 16) >= 0x60:
-                return True
+            match = re.search(r"\[r([bs])p-0x([0-9a-fA-F]+)", operand)
+            if match is None:
+                continue
+            disp = int(match.group(2), 16)
+            if match.group(1) == "b":
+                disp += rbp_bias
+            max_offset = max(max_offset, disp)
+    return max_offset
+
+
+def needs_stack_slot7(all_insns: list[NativeInsn], *, rbp_bias: int = 8) -> bool:
+    return max_stack_offset(all_insns, rbp_bias=rbp_bias) >= 0x40
+
+
+def needs_stack_ext(all_insns: list[NativeInsn], *, rbp_bias: int = 8) -> bool:
+    return max_stack_offset(all_insns, rbp_bias=rbp_bias) >= 0x68
+
+
+def needs_stack_deep(all_insns: list[NativeInsn], *, rbp_bias: int = 8) -> bool:
+    return max_stack_offset(all_insns, rbp_bias=rbp_bias) >= 0x48
+
+
+CALLEE_SAVED_REGS = ("rbx", "rbp", "r12", "r13", "r14", "r15")
+
+
+def is_subfunction_frame_insn(insn: NativeInsn) -> bool:
+    if insn.mnemonic in {"push", "pop"} and len(insn.operands) == 1:
+        return insn.operands[0].lower() in CALLEE_SAVED_REGS
+    if insn.mnemonic == "mov" and len(insn.operands) == 2:
+        return (
+            insn.operands[0].lower() == "rbp"
+            and insn.operands[1].lower() == "rsp"
+        )
+    return False
+
+
+def is_entry_synthetic_frame_insn(insn: NativeInsn) -> bool:
+    if is_subfunction_frame_insn(insn):
+        return True
+    if insn.mnemonic in {"add", "sub"} and len(insn.operands) == 2:
+        return insn.operands[0].lower() == "rsp" and is_int(insn.operands[1])
     return False
 
 
@@ -757,7 +798,7 @@ def render_packet_checksum_fold(name: str, insns: list[NativeInsn]) -> str:
         "\t\tint __x86_loop_ret = HELPER(&loop->state, &loop->insn,       \\",
         "\t\t\t\t\t       loop->data, loop->data_end);       \\",
         "\t\tif (__x86_loop_ret != X86_INTERP_CONTINUE) {                 \\",
-        "\t\t\tloop->failed = 1;                                      \\",
+        "\t\t\tloop->failed = __LINE__;                               \\",
         "\t\t\treturn 1;                                             \\",
         "\t\t}                                                          \\",
         "\t} while (0)",
@@ -786,7 +827,7 @@ def render_packet_checksum_fold(name: str, insns: list[NativeInsn]) -> str:
         "\tif (loop->failed)",
         "\t\treturn 1;",
         "\tif (loop->inner >= 256) {",
-        "\t\tloop->failed = 1;",
+        "\t\tloop->failed = __LINE__;",
         "\t\treturn 1;",
         "\t}",
         "\tloop->state.rcx = 19 + ((__u64)loop->inner << 2);",
@@ -878,14 +919,46 @@ def render_x86_subfunction(symbol: str, insns: list[NativeInsn]) -> str:
         "struct x86_state *__x86_vm_state_ptr, void *__x86_vm_data, "
         "void *__x86_vm_data_end)",
         "{",
-        "\tstruct x86_insn __x86_vm_insn = {};",
         "\t#define __x86_vm_state (*__x86_vm_state_ptr)",
+        "\tstruct x86_insn __x86_vm_insn = {};",
     ]
+    for reg in ("rbx", "r12", "r13", "r14", "r15"):
+        lines.extend([
+            f"\t__u64 __save_{reg} = __x86_vm_state.{reg};",
+            f"\tvoid *__save_p_{reg} = __x86_vm_state.p_{reg};",
+            f"\t__u8 __save_tag_{reg} = __x86_vm_state.tag_{reg};",
+        ])
+    lines.extend([
+        "\t#define X86_VM_SUB_RETURN() do { \\",
+        "\t\t__x86_vm_state.rbx = __save_rbx; \\",
+        "\t\t__x86_vm_state.r12 = __save_r12; \\",
+        "\t\t__x86_vm_state.r13 = __save_r13; \\",
+        "\t\t__x86_vm_state.r14 = __save_r14; \\",
+        "\t\t__x86_vm_state.r15 = __save_r15; \\",
+        "\t\t__x86_vm_state.p_rbx = __save_p_rbx; \\",
+        "\t\t__x86_vm_state.p_r12 = __save_p_r12; \\",
+        "\t\t__x86_vm_state.p_r13 = __save_p_r13; \\",
+        "\t\t__x86_vm_state.p_r14 = __save_p_r14; \\",
+        "\t\t__x86_vm_state.p_r15 = __save_p_r15; \\",
+        "\t\t__x86_vm_state.tag_rbx = __save_tag_rbx; \\",
+        "\t\t__x86_vm_state.tag_r12 = __save_tag_r12; \\",
+        "\t\t__x86_vm_state.tag_r13 = __save_tag_r13; \\",
+        "\t\t__x86_vm_state.tag_r14 = __save_tag_r14; \\",
+        "\t\t__x86_vm_state.tag_r15 = __save_tag_r15; \\",
+        "\t\treturn X86_INTERP_CONTINUE; \\",
+        "\t} while (0)",
+    ])
     for insn in insns:
+        if is_subfunction_frame_insn(insn):
+            lines.append(f"\t/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+            lines.append("\t/* generated-C ABI: callee-save frame traffic handled by wrapper */")
+            continue
         lines.append(f"x86_l_{insn.addr:x}:")
         append_branch_or_ret(lines, insn, addrs, subroutine=True,
-                             step_macro="X86_VM_RUN_OP_SUB")
+                             step_macro="X86_VM_RUN_OP_SUB",
+                             ret_statement="X86_VM_SUB_RETURN();")
     lines.extend([
+        "\t#undef X86_VM_SUB_RETURN",
         "\t#undef __x86_vm_state",
         "\treturn X86_INTERP_TRAP;",
         "}",
@@ -894,12 +967,221 @@ def render_x86_subfunction(symbol: str, insns: list[NativeInsn]) -> str:
     return "\n".join(lines)
 
 
+def subfunction_saved_regs(insns: list[NativeInsn]) -> list[str]:
+    saved: set[str] = set()
+    for insn in insns:
+        if insn.mnemonic == "push" and len(insn.operands) == 1:
+            reg = insn.operands[0].lower()
+            if reg in CALLEE_SAVED_REGS and reg != "rbp":
+                saved.add(reg)
+    return [reg for reg in ("rbx", "r12", "r13", "r14", "r15") if reg in saved]
+
+
+def append_inline_subfunction(lines: list[str], symbol: str,
+                              insns: list[NativeInsn], indent: str) -> None:
+    saved_regs = subfunction_saved_regs(insns)
+    lines.append(f"{indent}/* inline {symbol} in the bpf_loop verifier frame */")
+    lines.append(f"{indent}{{")
+    for reg in saved_regs:
+        lines.extend([
+            f"{indent}\t__u64 __save_{reg} = loop->state.{reg};",
+            f"{indent}\tvoid *__save_p_{reg} = loop->state.p_{reg};",
+            f"{indent}\t__u8 __save_tag_{reg} = loop->state.tag_{reg};",
+        ])
+    for insn in insns:
+        if is_subfunction_frame_insn(insn):
+            lines.append(f"{indent}\t/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+            lines.append(f"{indent}\t/* generated-C ABI: callee-save frame traffic handled by wrapper */")
+            continue
+        if insn.mnemonic == "ret":
+            lines.append(f"{indent}\t/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+            lines.append(f"{indent}\t/* inline callee returns to structured caller */")
+            continue
+        append_loop_step(lines, insn, f"{indent}\t", "LOCAL_CALL_LOOP_STEP")
+    for reg in saved_regs:
+        lines.extend([
+            f"{indent}\tloop->state.{reg} = __save_{reg};",
+            f"{indent}\tloop->state.p_{reg} = __save_p_{reg};",
+            f"{indent}\tloop->state.tag_{reg} = __save_tag_{reg};",
+        ])
+    lines.append(f"{indent}}}")
+
+
+def render_local_call_fanout_dispatch(name: str, insns: list[NativeInsn],
+                                      subfunctions: dict[str, list[NativeInsn]]) -> str:
+    by_addr = {insn.addr: insn for insn in insns}
+    addrs = {insn.addr for insn in insns}
+    required = {
+        "local_call_linear",
+        "local_call_pressure",
+        "local_call_crossload",
+        "local_call_bytes",
+    }
+    missing = required - set(subfunctions)
+    if missing:
+        raise ValueError(f"{name}: missing local-call subfunctions: {sorted(missing)}")
+
+    lines: list[str] = [
+        "#define X86_VM_ENABLE_STACK 1",
+        "#define X86_VM_ENABLE_PACKET_REG_FASTPATH 1",
+        '#include "../x86_vm_bpf.h"',
+        "",
+    ]
+    lines.extend([
+        "struct local_call_fanout_loop_ctx {",
+        "\tstruct x86_state state;",
+        "\tvoid *data;",
+        "\tvoid *data_end;",
+        "\t__u32 failed;",
+        "};",
+        "",
+        "#define LOCAL_CALL_LOOP_STEP(HELPER, OP, DST, SRC, FLAGS, AUX, IMM) \\",
+        "\tdo {                                                               \\",
+        "\t\tstruct x86_insn __x86_loop_insn = X86_VM_INSN((OP), (DST),   \\",
+        "\t\t\t(SRC), (FLAGS), (AUX), (IMM));                         \\",
+        "\t\tint __x86_loop_ret = HELPER(&loop->state, &__x86_loop_insn,  \\",
+        "\t\t\t\t\t       loop->data, loop->data_end);       \\",
+        "\t\tif (__x86_loop_ret != X86_INTERP_CONTINUE) {                 \\",
+        "\t\t\tloop->failed = __LINE__;                               \\",
+        "\t\t\treturn 1;                                             \\",
+        "\t\t}                                                          \\",
+        "\t} while (0)",
+        "",
+        "static long local_call_fanout_cb(__u32 index, void *ctx)",
+        "{",
+        "\tstruct local_call_fanout_loop_ctx *loop = ctx;",
+        "",
+        "\tif (loop->failed)",
+        "\t\treturn 1;",
+        "\tif (index >= 16) {",
+        "\t\tloop->failed = __LINE__;",
+        "\t\treturn 1;",
+        "\t}",
+        "\t/* proof-loop induction variables from native rbx/r12/r13. */",
+        "\tloop->state.rbx = (__u64)index << 3;",
+        "\tloop->state.p_rbx = 0;",
+        "\tloop->state.tag_rbx = X86_PTR_NONE;",
+        "\tloop->state.r12 = (__u64)index << 4;",
+        "\tloop->state.p_r12 = 0;",
+        "\tloop->state.tag_r12 = X86_PTR_NONE;",
+        "\tloop->state.r13 = 23 + ((__u64)index * 24);",
+        "\tloop->state.p_r13 = 0;",
+        "\tloop->state.tag_r13 = X86_PTR_NONE;",
+    ])
+
+    for addr in (0x11b6, 0x11bc, 0x11c0, 0x11c5, 0x11c8, 0x11cc):
+        append_loop_step(lines, by_addr[addr], "\t", "LOCAL_CALL_LOOP_STEP")
+    lines.append(f"\t/* 0x11d0: {c_comment(by_addr[0x11d0].raw)} */")
+    lines.append("\tif (x86_eval_cc(&loop->state, X86_CC_E)) {")
+    for addr in (0x11f0, 0x11f4):
+        append_loop_step(lines, by_addr[addr], "\t\t", "LOCAL_CALL_LOOP_STEP")
+    append_inline_subfunction(lines, "local_call_crossload",
+                              subfunctions["local_call_crossload"], "\t\t")
+    lines.append("\t} else {")
+    append_loop_step(lines, by_addr[0x11d2], "\t\t", "LOCAL_CALL_LOOP_STEP")
+    lines.append(f"\t\t/* 0x11d6: {c_comment(by_addr[0x11d6].raw)} */")
+    lines.append("\t\tif (x86_eval_cc(&loop->state, X86_CC_E)) {")
+    for addr in (0x1180, 0x1184):
+        append_loop_step(lines, by_addr[addr], "\t\t\t", "LOCAL_CALL_LOOP_STEP")
+    append_inline_subfunction(lines, "local_call_pressure",
+                              subfunctions["local_call_pressure"], "\t\t\t")
+    lines.append("\t\t} else {")
+    append_loop_step(lines, by_addr[0x11d8], "\t\t\t", "LOCAL_CALL_LOOP_STEP")
+    lines.append(f"\t\t\t/* 0x11db: {c_comment(by_addr[0x11db].raw)} */")
+    lines.append("\t\t\tif (x86_eval_cc(&loop->state, X86_CC_NE)) {")
+    for addr in (0x1200, 0x1204):
+        append_loop_step(lines, by_addr[addr], "\t\t\t\t", "LOCAL_CALL_LOOP_STEP")
+    append_inline_subfunction(lines, "local_call_bytes",
+                              subfunctions["local_call_bytes"], "\t\t\t\t")
+    lines.append("\t\t\t} else {")
+    for addr in (0x11dd, 0x11e1):
+        append_loop_step(lines, by_addr[addr], "\t\t\t\t", "LOCAL_CALL_LOOP_STEP")
+    append_inline_subfunction(lines, "local_call_linear",
+                              subfunctions["local_call_linear"], "\t\t\t\t")
+    lines.append("\t\t\t}")
+    lines.append("\t\t}")
+    lines.append("\t}")
+
+    for addr in (0x118c, 0x118e, 0x1191, 0x1194, 0x1197, 0x119a,
+                 0x119d, 0x11a1, 0x11a5, 0x11a9, 0x11b0):
+        append_loop_step(lines, by_addr[addr], "\t", "LOCAL_CALL_LOOP_STEP")
+    lines.append(f"\t/* 0x11b4: {c_comment(by_addr[0x11b4].raw)} */")
+    lines.append("\t/* proof-loop branch handled by bpf_loop trip count */")
+    lines.append("\treturn 0;")
+    lines.append("}")
+    lines.extend([
+        "",
+        "SEC(\"xdp\")",
+        f"int {name}_x86_vm_xdp(struct xdp_md *ctx)",
+        "{",
+        "\tvoid *__x86_vm_data = (void *)(long)ctx->data;",
+        "\tvoid *__x86_vm_data_end = (void *)(long)ctx->data_end;",
+        "\tstruct local_call_fanout_loop_ctx __x86_loop = {};",
+        "\tstruct x86_insn __x86_vm_insn = {};",
+        "\t#define __x86_vm_state __x86_loop.state",
+        "\tx86_init_state(&__x86_vm_state, (void *)ctx);",
+        "\t__x86_vm_state.rbp = 0;",
+        "\t__x86_vm_state.p_rbp = 0;",
+        "\t__x86_vm_state.tag_rbp = X86_PTR_STACK;",
+        "\t__x86_vm_state.rsp = 0;",
+        "\t__x86_vm_state.p_rsp = 0;",
+        "\t__x86_vm_state.tag_rsp = X86_PTR_STACK;",
+    ])
+
+    for insn in insns:
+        if insn.addr >= 0x1171:
+            break
+        lines.append(f"x86_l_{insn.addr:x}:")
+        if is_entry_synthetic_frame_insn(insn):
+            lines.append(f"\t/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+            lines.append("\t/* generated-C ABI: entry frame traffic handled by wrapper */")
+            continue
+        append_branch_or_ret(lines, insn, addrs)
+
+    lines.append(f"\t/* 0x1171: {c_comment(by_addr[0x1171].raw)} */")
+    lines.append("\t/* proof-loop body handled by bpf_loop callback */")
+    lines.append("\t__x86_loop.data = __x86_vm_data;")
+    lines.append("\t__x86_loop.data_end = __x86_vm_data_end;")
+    lines.append("\tif (bpf_loop(16, local_call_fanout_cb, &__x86_loop, 0) < 0)")
+    lines.append("\t\treturn XDP_ABORTED;")
+    lines.append("\tif (__x86_loop.failed)")
+    lines.append("\t\treturn XDP_ABORTED;")
+    lines.append("x86_l_1211:")
+    append_step(lines, by_addr[0x1211])
+    lines.append("x86_l_1214:")
+    append_step(lines, by_addr[0x1214])
+    for addr in (0x1219, 0x121d, 0x121e, 0x1220, 0x1222, 0x1224, 0x1226):
+        lines.append(f"x86_l_{addr:x}:")
+        lines.append(f"\t/* 0x{addr:x}: {c_comment(by_addr[addr].raw)} */")
+        lines.append("\t/* generated-C ABI: entry frame traffic handled by wrapper */")
+    lines.append("x86_l_1227:")
+    lines.append("\t/* 0x1227: ret */")
+    lines.append("\tX86_VM_RET_RAX();")
+    lines.append("\t#undef __x86_vm_insn")
+    lines.append("\t#undef __x86_vm_state")
+    lines.append("\treturn XDP_ABORTED;")
+    lines.append("}")
+    lines.append("")
+    lines.append("X86_VM_LICENSE();")
+    lines.append("")
+    return "\n".join(lines)
+
+
 def render_program(name: str, insns: list[NativeInsn],
                    subfunctions: dict[str, list[NativeInsn]] | None = None) -> str:
     if name == "packet_checksum_fold":
         return render_packet_checksum_fold(name, insns)
 
+    ret_statement = (
+        "return XDP_PASS;"
+        if name in {"tc_packet_checksum_fold", "cgroup_skb_hash_chain"}
+        else "X86_VM_RET_RAX();"
+    )
     subfunctions = subfunctions or {}
+    if name == "bpf_local_call_fanout_dispatch" and subfunctions:
+        return render_local_call_fanout_dispatch(name, insns, subfunctions)
+    synthetic_entry_frame = bool(subfunctions)
+    rbp_bias = 0 if synthetic_entry_frame else 8
     addrs = {insn.addr for insn in insns}
     subfunction_by_addr = {
         fn_insns[0].addr: f"x86_fn_{c_ident(symbol)}"
@@ -914,11 +1196,14 @@ def render_program(name: str, insns: list[NativeInsn],
         for fn_insns in [insns, *subfunctions.values()]
         for insn in fn_insns
     )
-    has_stack_ext = needs_stack_ext([
+    stack_feature_insns = [
         insn
         for fn_insns in [insns, *subfunctions.values()]
         for insn in fn_insns
-    ])
+    ]
+    has_stack_ext = needs_stack_ext(stack_feature_insns, rbp_bias=rbp_bias)
+    has_stack_slot7 = needs_stack_slot7(stack_feature_insns, rbp_bias=rbp_bias)
+    has_stack_deep = needs_stack_deep(stack_feature_insns, rbp_bias=rbp_bias)
     next_addrs = {
         insn.addr: insns[index + 1].addr
         for index, insn in enumerate(insns[:-1])
@@ -926,13 +1211,19 @@ def render_program(name: str, insns: list[NativeInsn],
     call_returns = {
         next_addrs[insn.addr]
         for insn in insns
-        if insn.mnemonic == "call" and insn.addr in next_addrs
+        if insn.mnemonic == "call"
+        and insn.addr in next_addrs
+        and branch_target(insn.operands[0]) in addrs
     }
     lines: list[str] = []
     if has_rodata:
         lines.append('#define X86_VM_ENABLE_RODATA 1')
     if has_stack:
         lines.append('#define X86_VM_ENABLE_STACK 1')
+    if has_stack_slot7:
+        lines.append('#define X86_VM_ENABLE_STACK_SLOT7 1')
+    if has_stack_deep:
+        lines.append('#define X86_VM_ENABLE_STACK_DEEP 1')
     if has_stack_ext:
         lines.append('#define X86_VM_ENABLE_STACK_EXT 1')
     lines.extend([
@@ -947,6 +1238,15 @@ def render_program(name: str, insns: list[NativeInsn],
         "{",
         "\tX86_VM_DECLARE_XDP(ctx);",
     ])
+    if synthetic_entry_frame:
+        lines.extend([
+            "\t__x86_vm_state.rbp = 0;",
+            "\t__x86_vm_state.p_rbp = 0;",
+            "\t__x86_vm_state.tag_rbp = X86_PTR_STACK;",
+            "\t__x86_vm_state.rsp = 0;",
+            "\t__x86_vm_state.p_rsp = 0;",
+            "\t__x86_vm_state.tag_rsp = X86_PTR_STACK;",
+        ])
     if call_returns:
         lines.extend([
             "\t__u64 __x86_call_ret0 = 0;",
@@ -956,10 +1256,15 @@ def render_program(name: str, insns: list[NativeInsn],
     for insn in insns:
         label = f"x86_l_{insn.addr:x}"
         lines.append(f"{label}:")
+        if synthetic_entry_frame and is_entry_synthetic_frame_insn(insn):
+            lines.append(f"\t/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+            lines.append("\t/* generated-C ABI: entry frame traffic handled by wrapper */")
+            continue
         append_branch_or_ret(lines, insn, addrs,
                              next_addr=next_addrs.get(insn.addr),
                              call_returns=call_returns,
-                             call_functions=subfunction_by_addr)
+                             call_functions=subfunction_by_addr,
+                             ret_statement=ret_statement)
     lines.extend([
         "\treturn XDP_ABORTED;",
         "}",

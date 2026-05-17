@@ -135,6 +135,11 @@ struct x86_insn {
 #define X86_VM_ENABLE_STACK_DEEP 1
 #endif
 #endif
+#ifdef X86_VM_ENABLE_STACK_DEEP
+#ifndef X86_VM_ENABLE_STACK_SLOT7
+#define X86_VM_ENABLE_STACK_SLOT7 1
+#endif
+#endif
 
 struct x86_state {
 	__u64 rax;
@@ -197,7 +202,9 @@ struct x86_state {
 	__u64 stack4;
 	__u64 stack5;
 	__u64 stack6;
+#ifdef X86_VM_ENABLE_STACK_SLOT7
 	__u64 stack7;
+#endif
 #ifdef X86_VM_ENABLE_STACK_DEEP
 	__u64 stack8;
 	__u64 stack9;
@@ -217,7 +224,9 @@ struct x86_state {
 	void *p_stack4;
 	void *p_stack5;
 	void *p_stack6;
+#ifdef X86_VM_ENABLE_STACK_SLOT7
 	void *p_stack7;
+#endif
 #ifdef X86_VM_ENABLE_STACK_DEEP
 	void *p_stack8;
 	void *p_stack9;
@@ -231,7 +240,9 @@ struct x86_state {
 	__u8 tag_stack4;
 	__u8 tag_stack5;
 	__u8 tag_stack6;
+#ifdef X86_VM_ENABLE_STACK_SLOT7
 	__u8 tag_stack7;
+#endif
 #ifdef X86_VM_ENABLE_STACK_DEEP
 	__u8 tag_stack8;
 	__u8 tag_stack9;
@@ -679,7 +690,9 @@ static __always_inline int x86_stack_write_raw(struct x86_state *state,
 	X86_STACK_WRITE_SLOT(-40, stack4, p_stack4, tag_stack4);
 	X86_STACK_WRITE_SLOT(-48, stack5, p_stack5, tag_stack5);
 	X86_STACK_WRITE_SLOT(-56, stack6, p_stack6, tag_stack6);
+#ifdef X86_VM_ENABLE_STACK_SLOT7
 	X86_STACK_WRITE_SLOT(-64, stack7, p_stack7, tag_stack7);
+#endif
 #ifdef X86_VM_ENABLE_STACK_DEEP
 	X86_STACK_WRITE_SLOT(-72, stack8, p_stack8, tag_stack8);
 	X86_STACK_WRITE_SLOT(-80, stack9, p_stack9, tag_stack9);
@@ -740,7 +753,9 @@ static __always_inline int x86_stack_read_raw(struct x86_state *state,
 	X86_STACK_READ_SLOT(-40, stack4, p_stack4, tag_stack4);
 	X86_STACK_READ_SLOT(-48, stack5, p_stack5, tag_stack5);
 	X86_STACK_READ_SLOT(-56, stack6, p_stack6, tag_stack6);
+#ifdef X86_VM_ENABLE_STACK_SLOT7
 	X86_STACK_READ_SLOT(-64, stack7, p_stack7, tag_stack7);
+#endif
 #ifdef X86_VM_ENABLE_STACK_DEEP
 	X86_STACK_READ_SLOT(-72, stack8, p_stack8, tag_stack8);
 	X86_STACK_READ_SLOT(-80, stack9, p_stack9, tag_stack9);
@@ -1076,6 +1091,34 @@ static __always_inline int x86_mem_offset(struct x86_state *state,
 	return 0;
 }
 
+static __always_inline int x86_promote_index_packet_base(struct x86_state *state,
+							 __u8 base_reg,
+							 __u32 aux,
+							 void **base,
+							 __u8 *tag,
+							 __s64 *disp)
+{
+	__u8 index = X86_MEM_AUX_INDEX(aux);
+	__u8 scale_log2 = X86_MEM_AUX_SCALE_LOG2(aux);
+	void *index_ptr = 0;
+	__u8 index_tag = X86_PTR_NONE;
+	__u64 base_value = 0;
+
+	if (*tag != X86_PTR_NONE || index == X86_REG_NONE || scale_log2 != 0)
+		return 0;
+	if (x86_read_ptr_reg(state, index, &index_ptr, &index_tag) < 0)
+		return 0;
+	if (index_tag != X86_PTR_PACKET)
+		return 0;
+	if (base_reg != X86_REG_NONE &&
+	    x86_read_reg(state, base_reg, &base_value) < 0)
+		return X86_INTERP_TRAP;
+	*base = index_ptr;
+	*tag = X86_PTR_PACKET;
+	*disp += (__s64)base_value;
+	return 0;
+}
+
 static __always_inline int x86_packet_bounds(void *data, void *data_end,
 					     void *ptr, __s64 disp,
 					     __u8 width, __u8 **out)
@@ -1083,12 +1126,18 @@ static __always_inline int x86_packet_bounds(void *data, void *data_end,
 	__u8 *p = ptr;
 	__u8 *start = data;
 	__u8 *end = data_end;
-	__u8 *addr = p + disp;
+	__u64 off;
+	__u8 *addr;
 	__u8 size = width;
 
 	if (size != X86_WIDTH_8 && size != X86_WIDTH_16 &&
 	    size != X86_WIDTH_32 && size != X86_WIDTH_64)
 		return X86_INTERP_TRAP;
+	if (disp < 0)
+		return X86_INTERP_TRAP;
+	off = (__u64)disp;
+	asm volatile("" : "+r"(off));
+	addr = p + off;
 	if (addr < start || addr + size > end)
 		return X86_INTERP_TRAP;
 	*out = addr;
@@ -1465,14 +1514,12 @@ static __always_inline int x86_load_mem(struct x86_state *state,
 	__s64 disp = x86_simm(insn->imm);
 	__u8 mem_width = X86_MEM_AUX_MEM_WIDTH(insn->aux);
 
-	if (x86_read_ptr_reg(state, insn->src, &base, &tag) < 0)
-		return X86_INTERP_TRAP;
 	if (x86_mem_offset(state, insn->aux, disp, &disp) < 0)
 		return X86_INTERP_TRAP;
 	if (mem_width == 0)
 		mem_width = insn->flags;
 #ifdef X86_VM_ENABLE_STACK
-	if (insn->src == X86_RSP) {
+	if (insn->src == X86_RSP || insn->src == X86_RBP) {
 		__u64 base_value = 0;
 
 		if (x86_read_reg(state, insn->src, &base_value) < 0)
@@ -1482,6 +1529,40 @@ static __always_inline int x86_load_mem(struct x86_state *state,
 				      insn->flags);
 	}
 #endif
+#ifdef X86_VM_ENABLE_PACKET_REG_FASTPATH
+	if (insn->src == X86_RSI) {
+		if (!state->p_rsi)
+			return X86_INTERP_TRAP;
+		return x86_load_packet(state, insn->dst, data, data_end,
+				       state->p_rsi, disp, mem_width,
+				       insn->flags,
+				       insn->op == X86_OP_MOVSX_LOAD);
+	}
+	if (X86_MEM_AUX_INDEX(insn->aux) == X86_RSI &&
+	    X86_MEM_AUX_SCALE_LOG2(insn->aux) == 0) {
+		__u64 base_value = 0;
+
+		if (!state->p_rsi)
+			return X86_INTERP_TRAP;
+		if (insn->src != X86_REG_NONE &&
+		    x86_read_reg(state, insn->src, &base_value) < 0)
+			return X86_INTERP_TRAP;
+		return x86_load_packet(state, insn->dst, data, data_end,
+				       state->p_rsi,
+				       disp + (__s64)base_value, mem_width,
+				       insn->flags,
+				       insn->op == X86_OP_MOVSX_LOAD);
+	}
+#endif
+	if (insn->src == X86_REG_NONE) {
+		base = 0;
+		tag = X86_PTR_NONE;
+	} else if (x86_read_ptr_reg(state, insn->src, &base, &tag) < 0) {
+		return X86_INTERP_TRAP;
+	}
+	if (x86_promote_index_packet_base(state, insn->src, insn->aux,
+					  &base, &tag, &disp) < 0)
+		return X86_INTERP_TRAP;
 	if (tag == X86_PTR_CTX && insn->src == X86_RDI && disp == 0)
 		return x86_write_ptr_reg(state, insn->dst, data,
 					 X86_PTR_PACKET);
@@ -1527,12 +1608,10 @@ static __always_inline int x86_read_mem_value(struct x86_state *state,
 	__u8 tag;
 	__s64 disp = x86_simm(imm);
 
-	if (x86_read_ptr_reg(state, base_reg, &base, &tag) < 0)
-		return X86_INTERP_TRAP;
 	if (x86_mem_offset(state, aux, disp, &disp) < 0)
 		return X86_INTERP_TRAP;
 #ifdef X86_VM_ENABLE_STACK
-	if (tag == X86_PTR_STACK) {
+	if (base_reg == X86_RSP || base_reg == X86_RBP) {
 		__u64 stack_base = 0;
 		void *ptr = 0;
 		__u8 ptr_tag = X86_PTR_NONE;
@@ -1543,6 +1622,36 @@ static __always_inline int x86_read_mem_value(struct x86_state *state,
 					  width, value, &ptr, &ptr_tag);
 	}
 #endif
+#ifdef X86_VM_ENABLE_PACKET_REG_FASTPATH
+	if (base_reg == X86_RSI) {
+		if (!state->p_rsi)
+			return X86_INTERP_TRAP;
+		return x86_read_packet_value(data, data_end, state->p_rsi,
+					     disp, width, value);
+	}
+	if (X86_MEM_AUX_INDEX(aux) == X86_RSI &&
+	    X86_MEM_AUX_SCALE_LOG2(aux) == 0) {
+		__u64 base_value = 0;
+
+		if (!state->p_rsi)
+			return X86_INTERP_TRAP;
+		if (base_reg != X86_REG_NONE &&
+		    x86_read_reg(state, base_reg, &base_value) < 0)
+			return X86_INTERP_TRAP;
+		return x86_read_packet_value(data, data_end, state->p_rsi,
+					     disp + (__s64)base_value,
+					     width, value);
+	}
+#endif
+	if (base_reg == X86_REG_NONE) {
+		base = 0;
+		tag = X86_PTR_NONE;
+	} else if (x86_read_ptr_reg(state, base_reg, &base, &tag) < 0) {
+		return X86_INTERP_TRAP;
+	}
+	if (x86_promote_index_packet_base(state, base_reg, aux, &base, &tag,
+					  &disp) < 0)
+		return X86_INTERP_TRAP;
 	if (tag == X86_PTR_PACKET)
 		return x86_read_packet_value(data, data_end, base, disp, width,
 					     value);
@@ -1559,34 +1668,43 @@ static __always_inline int x86_store_mem(struct x86_state *state,
 			     x86_store_imm_disp(insn->imm) :
 			     x86_simm(insn->imm);
 
-	if (x86_read_ptr_reg(state, insn->dst, &base, &tag) < 0)
-		return X86_INTERP_TRAP;
 	if (x86_mem_offset(state, insn->aux, disp, &disp) < 0)
 		return X86_INTERP_TRAP;
 #ifdef X86_VM_ENABLE_STACK
-	if (insn->dst == X86_RSP) {
+	if (insn->dst == X86_RSP || insn->dst == X86_RBP) {
 		__u64 base_value = 0;
 
 		if (insn->op == X86_OP_MOV_STORE_IMM)
 			return X86_INTERP_TRAP;
 		if (x86_read_reg(state, insn->dst, &base_value) < 0)
 			return X86_INTERP_TRAP;
-			return x86_store_stack_reg(state, insn->src,
-						   (__s64)base_value + disp,
-						   insn->flags, insn->aux);
-	}
-	if (tag == X86_PTR_STACK) {
-		__u64 base_value = 0;
-
-		if (insn->op == X86_OP_MOV_STORE_IMM)
-			return X86_INTERP_TRAP;
-		if (x86_read_reg(state, insn->dst, &base_value) < 0)
-			return X86_INTERP_TRAP;
-			return x86_store_stack_reg(state, insn->src,
-						   (__s64)base_value + disp,
-						   insn->flags, insn->aux);
+		return x86_store_stack_reg(state, insn->src,
+					   (__s64)base_value + disp,
+					   insn->flags, insn->aux);
 	}
 #endif
+#ifdef X86_VM_ENABLE_PACKET_REG_FASTPATH
+	if (insn->dst == X86_RSI) {
+		if (!state->p_rsi)
+			return X86_INTERP_TRAP;
+		if (insn->op == X86_OP_MOV_STORE_IMM)
+			return x86_store_packet_imm(data, data_end, state->p_rsi,
+						    disp, insn->flags,
+						    x86_store_imm_value(insn->imm));
+		return x86_store_packet_reg(state, insn->src, data, data_end,
+					    state->p_rsi, disp, insn->flags,
+					    insn->aux);
+	}
+#endif
+	if (insn->dst == X86_REG_NONE) {
+		base = 0;
+		tag = X86_PTR_NONE;
+	} else if (x86_read_ptr_reg(state, insn->dst, &base, &tag) < 0) {
+		return X86_INTERP_TRAP;
+	}
+	if (x86_promote_index_packet_base(state, insn->dst, insn->aux,
+					  &base, &tag, &disp) < 0)
+		return X86_INTERP_TRAP;
 	if (tag == X86_PTR_CTX && insn->dst == X86_RDI &&
 	    (disp == 16 || disp == 20) && insn->flags == X86_WIDTH_32) {
 		__u64 value = x86_store_imm_value(insn->imm);

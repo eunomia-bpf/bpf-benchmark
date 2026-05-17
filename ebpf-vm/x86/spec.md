@@ -220,8 +220,9 @@ This is not arbitrary x86. It is x86 under the ReverseJIT ABI: pointer-valued
 registers have capability meaning, and direct native execution must be proven to
 refine the same capability/offset behavior.
 
-Current validation status: the strict JSON-link path passes all 29 micro
-programs with this pipeline:
+Current validation status: the strict JSON-link path is paused. It has passed
+the smoke set (`simple`, `simple_packet`, `bitmap_popcount_scan`) with this
+pipeline:
 
 ```text
 python native disassembly decoder
@@ -234,4 +235,7 @@ python native disassembly decoder
 The key verifier engineering point is that the C-authored template body is
 inlined into the main program after the loader loads constant `packed_args` and
 `imm` values. That keeps the helper semantics in C while still letting the
-kernel verifier prune unreachable width/op/address-mode branches.
+kernel verifier prune unreachable width/op/address-mode branches. Native
+call/return CFG linking is not implemented in the JSON linker yet, so the
+current source of truth for full micro coverage is the older generated-C
+interpreter path.

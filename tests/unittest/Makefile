@@ -62,25 +62,24 @@ $(shell $(1) -v -E - </dev/null 2>&1 \
 endef
 CLANG_SYS_INCLUDES := $(call get_sys_includes,$(CLANG))
 
-# Auto-discover all rejit_*.c test sources — no manual lists to maintain.
-TEST_SRCS := $(wildcard $(UNITTEST_DIR)/rejit_*.c)
+# Auto-discover host test sources — no manual lists to maintain.
+TEST_SRCS := $(wildcard $(UNITTEST_DIR)/*_test.c)
 TESTS := $(patsubst $(UNITTEST_DIR)/%.c,%,$(TEST_SRCS))
 TEST_BINS := $(addprefix $(BUILD_DIR)/,$(TESTS))
 
 # Also discover module-level tests in module/ subdirectory.
-MODULE_TEST_SRCS := $(wildcard $(UNITTEST_DIR)/module/rejit_*.c)
+MODULE_TEST_SRCS := $(wildcard $(UNITTEST_DIR)/module/*_test.c)
 MODULE_TESTS := $(patsubst $(UNITTEST_DIR)/module/%.c,module/%,$(MODULE_TEST_SRCS))
 MODULE_TEST_BINS := $(addprefix $(BUILD_DIR)/,$(MODULE_TESTS))
 
 BPF_PROGS_DIR := $(UNITTEST_DIR)/progs
 BPF_SRCS := $(wildcard $(BPF_PROGS_DIR)/*.bpf.c)
 BPF_OBJS := $(patsubst $(BPF_PROGS_DIR)/%.bpf.c,$(BUILD_DIR)/progs/%.bpf.o,$(BPF_SRCS))
-ALIAS_BPF_OBJS := $(BUILD_DIR)/progs/test_hotswap_struct_ops_late_rollback.bpf.o
-DEPFILES := $(TEST_BINS:=.d) $(MODULE_TEST_BINS:=.d) $(BPF_OBJS:=.d) $(ALIAS_BPF_OBJS:=.d)
+DEPFILES := $(TEST_BINS:=.d) $(MODULE_TEST_BINS:=.d) $(BPF_OBJS:=.d)
 
 .PHONY: all clean run
 
-all: $(TEST_BINS) $(MODULE_TEST_BINS) $(BPF_OBJS) $(ALIAS_BPF_OBJS)
+all: $(TEST_BINS) $(MODULE_TEST_BINS) $(BPF_OBJS)
 
 # Unified build rule: all tests get libbpf includes and link flags.
 # Tests that don't use libbpf symbols won't pull anything in (static archive).
@@ -115,9 +114,6 @@ endif
 
 $(BUILD_DIR)/progs/%.bpf.o: $(BPF_PROGS_DIR)/%.bpf.c $(LIBBPF_HDR) $(VMLINUX_HDR) | $(BUILD_DIR)/progs
 	$(CLANG) $(BPF_CFLAGS) -MMD -MP -MF $@.d -MT $@ $(BPF_INCLUDES) $(CLANG_SYS_INCLUDES) -c $< -o $@
-
-$(BUILD_DIR)/progs/test_hotswap_struct_ops_late_rollback.bpf.o: $(BPF_PROGS_DIR)/test_hotswap_struct_ops.bpf.c $(LIBBPF_HDR) $(VMLINUX_HDR) | $(BUILD_DIR)/progs
-	$(CLANG) $(BPF_CFLAGS) -DHOTSWAP_STRUCT_OPS_NAME=\"rjhtslr\" -MMD -MP -MF $@.d -MT $@ $(BPF_INCLUDES) $(CLANG_SYS_INCLUDES) -c $< -o $@
 
 $(BUILD_DIR) $(BUILD_DIR)/progs $(BUILD_DIR)/module $(VMLINUX_INCLUDE_DIR):
 	mkdir -p $@

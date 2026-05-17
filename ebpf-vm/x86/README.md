@@ -95,6 +95,25 @@ Register numbers follow the usual x86 encoding order: `rax=0`, `rcx=1`,
 
 ## Micro Program Status
 
+Current active track: finish the generated-C interpreter proof path first.
+The JSON-linker path is recorded below, but it is paused until generated-C
+coverage is stable.
+
+The last complete generated-C batch (`run_micro_interpreter_batch.py
+--native-source object-no-jump-tables`) loaded and returned the expected result
+for 25 of 29 micro programs. A later targeted rerun fixed
+`cgroup_skb_hash_chain`, so the remaining known generated-C blockers are:
+
+| Micro program | Current generated-C status | Required work |
+| --- | --- | --- |
+| `bpf_local_call_fanout_dispatch` | compile-fail after enabling deep ghost stack for native calls | Do not expand the whole entry stack model. Lower generated C subfunctions with an ABI-preserving callee-save wrapper and skip their native prologue/epilogue stack traffic. |
+| `bpftrace_string_search_prefix_scan` | verifier/load fail: instruction processing limit (`Argument list too long`) | Canonicalize the bounded string-search loop into a verifier-friendly helper shape instead of emitting the full branch-heavy native CFG. |
+| `tc_packet_checksum_fold` | verifier/load fail: `Bad address` | Reuse the checksum-loop canonicalization used by `packet_checksum_fold`, with TC/cgroup context-output handling. |
+
+The immediate implementation target is therefore: generated-C path loads in the
+kernel, passes `BPF_PROG_TEST_RUN`, and returns the expected result for every
+micro program. JSON-link completion is a separate next experiment.
+
 ## JSON-Linker Todo
 
 Completion criteria for this experiment are stricter than the generated-C
@@ -213,7 +232,8 @@ This is still a linker, not a Python BPF emitter: Python selects helper IDs and
 operands, C defines helper semantics, and the Rust loader only links bytecode,
 rewrites local exits, resolves CFG branches, and supplies constant arguments.
 Inlining the C-authored arg templates keeps verifier constants visible in one
-frame; this is what makes the current 29/29 micro batch pass.
+frame. At the moment this has only been validated for the strict JSON smoke set
+listed above; native call/return CFG linking is still missing.
 
 Active JSON-link rules:
 
@@ -255,10 +275,10 @@ LLVM constant propagation over a generic opcode dispatch. This matters for the
 real ReverseJIT path: once eBPF instructions are appended directly, there is no
 second user-space compiler pass that can prune a large `switch`.
 
-This change removed all current XDP compile-fail cases in the generated micro
-proof batch. It did not make every program safe or equivalent: large explicit
-control-flow graphs can still exceed verifier limits, and several cases now
-surface real interpreter semantic gaps as result mismatches or retval 0.
+This change removed the original broad class of XDP compile-fail cases in the
+generated micro proof batch. It did not make every program safe or equivalent:
+large explicit control-flow graphs can still exceed verifier limits, and the
+remaining failures are tracked in the generated-C status table above.
 
 ## JSON Bytecode Plan
 
@@ -416,14 +436,17 @@ This prototype has already exposed several verifier-facing design constraints:
   incomplete for native direct calls. The generator now rebuilds the native
   object and disassembles call-target symbols when the markdown `## Native ASM`
   block has unresolved call targets.
-- The current full local-call proof still fails verifier complexity:
-  `The sequence of 8193 jumps is too complex`. Splitting call targets into BPF
-  subprograms and direct opcode-helper dispatch makes clang compile quickly, but
-  the generated native control-flow graph is still too branch-heavy for the
-  verifier.
+- The current full local-call proof should not model callee frame setup by
+  extending the entry ghost stack. Generated C subfunctions need their own
+  callee-save wrapper and should skip native prologue/epilogue stack traffic;
+  otherwise the BPF stack model grows past verifier/compiler limits.
 - `bpftrace_string_search_prefix_scan` still exceeds the verifier instruction
   processing limit. It now fails at verifier load rather than clang compile:
   `BPF program is too large. Processed 1000001 insn`.
+- The strict JSON-link loader is not the current source of truth. It has passed
+  smoke programs (`simple`, `simple_packet`, `bitmap_popcount_scan`), but native
+  call-flow support is missing and stale loader binaries previously produced
+  misleading status if `--no-build-loader` was used.
 
 For formal verification, clang optimization is not part of the trusted
 argument. This C implementation is a prototype for finding the VM semantics and
