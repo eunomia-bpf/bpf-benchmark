@@ -18,7 +18,6 @@ from pathlib import Path
 from typing import Any
 
 import generate_micro_proofs as cgen
-import reversejit_bpf_templates as bpf_templates
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -293,6 +292,7 @@ def linked_program(functions: dict[str, list[cgen.NativeInsn]],
     records: list[dict[str, Any]] = []
     for index, (symbol, role, insn) in enumerate(flat):
         encoded = cgen.encode(insn)
+        helper = cgen.op_helper(encoded.op)
         numeric = {
             "op": eval_numeric(encoded.op) & 0xFF,
             "dst": eval_numeric(encoded.dst) & 0xFF,
@@ -321,6 +321,7 @@ def linked_program(functions: dict[str, list[cgen.NativeInsn]],
             "function_role": role,
             "addr": f"0x{insn.addr:x}",
             "asm": insn.raw,
+            "helper": helper,
             "flow": flow,
             "target": target,
             "next": index + 1,
@@ -331,6 +332,40 @@ def linked_program(functions: dict[str, list[cgen.NativeInsn]],
         "entry_index": 0,
         "max_steps": max(4096, len(records) * 32),
         "insns": records,
+    }
+
+
+def c_template_plan(linked: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "kind": "c_authored_interpreter_helper_sequence",
+        "granularity": "instruction_class",
+        "dispatch": (
+            "direct scheduled helper calls; no runtime switch over arbitrary "
+            "guest opcodes"
+        ),
+        "alu_policy": (
+            "ALU instructions share x86_exec_alu_imm/x86_exec_alu_reg/"
+            "x86_exec_alu_mem, with X86_ALU_* in aux"
+        ),
+        "control_flow_source": "linked_program.flow/target",
+        "steps": [
+            {
+                "index": record["index"],
+                "asm": record["asm"],
+                "helper": record["helper"],
+                "args": {
+                    "op": record["op"],
+                    "dst": record["dst"],
+                    "src": record["src"],
+                    "flags": record["flags"],
+                    "aux": record["aux"],
+                    "imm": record["imm"],
+                },
+                "flow": record["flow"],
+                "target": record["target"],
+            }
+            for record in linked["insns"]
+        ],
     }
 
 
@@ -407,11 +442,12 @@ def build_artifact(md_path: Path, *, native_source: str) -> dict[str, Any]:
             "loader_role": "schema_check_concat_resolve_fixups_load",
             "fixups": [],
         },
+        "verifier_templates": c_template_plan(linked),
+        "linker_status": (
+            "pending: Rust linker still needs to consume C-authored helper "
+            "templates; JSON intentionally contains no hardcoded BPF insns"
+        ),
     }
-    try:
-        artifact["bpf_program"] = bpf_templates.build_bpf_program(linked["insns"])
-    except bpf_templates.UnsupportedTemplate as err:
-        artifact["bpf_program_error"] = str(err)
     return artifact
 
 

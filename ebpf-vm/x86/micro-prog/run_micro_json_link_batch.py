@@ -93,6 +93,7 @@ def generate_json(benches: list[Bench], only_was_set: bool, native_source: str) 
 
 
 def build_loader() -> None:
+    require_ok(["make", "-C", str(REPO_ROOT / "ebpf-vm" / "x86"), "build-templates"], timeout=300)
     require_ok(["cargo", "build", "--manifest-path", str(LOADER_MANIFEST)], timeout=300)
 
 
@@ -123,7 +124,7 @@ def run_json(bench: Bench, sudo: bool) -> Result:
     if result.returncode == 0:
         return Result(bench.name, "ok", "")
     note = compact_error(result.stderr or result.stdout)
-    status = "template-missing" if "has no bpf_program section" in note else "run-fail"
+    status = "linker-missing" if "has no bpf_program section" in note else "run-fail"
     return Result(bench.name, status, note)
 
 

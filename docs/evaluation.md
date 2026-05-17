@@ -492,3 +492,67 @@ Reading the table:
    - analysis each prog, check source code and disasm.
 - Sometimes kernel panic still exists.
 
+
+
+## Appendix: Katran 4-pass measurement matrix (2026-05-17)
+
+### Per-pass apply counts (corpus/build/x86_64/katran/balancer.bpf.o, framework 7.0-rc2 kernel)
+
+| path | map_inline applied/matched | const_prop applied/matched | dce applied/matched | insn 2542 → final |
+|---|---:|---:|---:|---:|
+| loader test (no `reals` hint) | 10 / 67 | 26 / 168 | 61 / 61 | 2542 → 2454 |
+| **loader test + `--inline-hint=reals:!01000000`** | **16 / 67** | **30 / 150** | **65 / 65** | **2542 → 2391** |
+| **corpus daemon** | **16 / 67** | **30 / 150** | **65 / 65** | **2542 → 2391** |
+
+Loader's six previously-skipped sites (PC 1041, 1311, 1524, 1702, 1746, 2018) all
+target `reals` lookups; adding `--inline-hint=reals:!01000000` aligns loader to
+corpus byte-for-byte.
+
+### Per-iteration timing (stats counter = `bpf_prog_stats.nsecs / cnt`)
+
+| run | bytecode (final insn) | method | stats | bl ns | po ns | ratio | improvement |
+|---|---|---|---|---:|---:|---:|---:|
+| host loader, host 6.15 | 2454 (no reals hint) | PROG_TEST_RUN | 0 | 115 | 28 | 0.243 | +75.7 % |
+| VM loader, framework 7.0-rc2 | 2454 (no reals hint) | PROG_TEST_RUN | 0 | 79 | 28 | 0.354 | +64.6 % |
+| VM loader, framework 7.0-rc2 | 2454 (no reals hint) | PROG_TEST_RUN | 1 | 125 | 82 | 0.656 | +34.4 % |
+| VM loader, framework 7.0-rc2 | 2391 (reals hint) | PROG_TEST_RUN | 1 | 125 | 82 | 0.656 | +34.4 % |
+| VM loader, framework 7.0-rc2 | 2391 (reals hint) | pktgen UDP + TCP VIP (mismatch → early-return XDP_PASS) on v0↔v1 veth | 1 | — | 52 | — | — |
+| VM loader, framework 7.0-rc2 | 2391 (reals hint) | pktgen UDP + TCP VIP (mismatch) on corpus-replicated katran topology (3 netns chain) | 1 | — | 52 | — | — |
+| **VM loader, framework 7.0-rc2** | **2391 (reals hint)** | **pktgen UDP + UDP VIP (full LB path) on v0↔v1 veth** | **1** | — | **98–101** | — | — |
+| **corpus pktgen** | **2391** | pktgen UDP + UDP VIP (full LB path) on katran real iface | 1 | 121 | **107** | **0.882** | **+11.8 %** |
+
+### BPF stats accounting overhead (kernel 7.0-rc2, idle 64-byte VIP packet)
+
+| program | bytecode size | stats=0 ns/iter | stats=1 ns/iter | overhead |
+|---|---:|---:|---:|---:|
+| trivial XDP_DROP (5 insn) | 40 B | — | — | — |
+| trivial XDP_DROP (PROG_TEST_RUN) | 40 B | — | 23 | — |
+| trivial XDP_DROP (pktgen veth native XDP) | 40 B | — | 24 | — |
+| katran balancer_ingress (final 2391 insn) | 8488 B jited | 31 | 75 | +44 ns |
+| katran balancer_ingress (final 2391 insn, 4 CPU concurrent) | 8488 B jited | 31 | ~100 | +69 ns |
+
+### Pre-loaded BPF program ns/run distribution (corpus 0517_034332, 145 progs ≥100 runs)
+
+| bucket | progs | share |
+|---|---:|---:|
+| < 50 ns | 5 | 3.4 % |
+| 50–100 ns | 13 | 9.0 % |
+| 100–200 ns | 20 | 13.8 % |
+| 200–500 ns | 43 | 29.7 % |
+| 500–1000 ns | 44 | 30.3 % |
+| 1000–5000 ns | 18 | 12.4 % |
+| 5000+ ns | 2 | 1.4 % |
+
+min 25.7 ns / median 438.5 ns / mean 693.7 ns / max 7816 ns.
+
+### Pass yaml log_level (corpus daemon orchestration)
+
+| pass yaml | log_level | meaning |
+|---|---:|---|
+| `noop/default.yaml` | 1 | output verifier log fed to next pass |
+| `map_inline/default.yaml` | 2 | output verifier log fed to const_prop |
+| `const_prop/default.yaml` | 2 | output verifier log fed to dce |
+| `dce/default.yaml` | 1 | terminal, no downstream consumer |
+
+Loader test uses log_level=2 throughout (`prepare_workdir(initial_log_level=2)` and
+`verify_workdir_with_log_level(_, _, _, _, _, 2)`).

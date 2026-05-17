@@ -1,0 +1,26 @@
+{
+  "completed_benchmarks": 25,
+  "current_benchmark": "packet_toeplitz_rss_hash",
+  "current_benchmark_index": 26,
+  "current_benchmark_record": {
+    "category": "alu-mix",
+    "description": "Packet-backed IPv4 TCP Toeplitz RSS hash over a 5-tuple",
+    "expected_result": 13526464303109995596,
+    "family": "rss-hash",
+    "hypothesis": "Adds NIC/RSS-style Toeplitz hashing, a different packet hash family from Jenkins and SipHash-like mixers",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_toeplitz_rss_hash.mem",
+    "io_mode": "packet",
+    "level": "toeplitz-ipv4-tcp",
+    "name": "packet_toeplitz_rss_hash",
+    "runs": [],
+    "tags": [
+      "packet",
+      "hash",
+      "toeplitz",
+      "rss",
+      "pure-jit"
+    ]
+  },
+  "status": "running",
+  "total_benchmarks": 29
+}

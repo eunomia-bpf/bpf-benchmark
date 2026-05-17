@@ -1268,7 +1268,7 @@ fn populate_katran_maps(maps: &[MapRef]) -> Result<()> {
     let mut vip = [0u8; 20];
     vip[..4].copy_from_slice(&[10, 100, 1, 1]);
     vip[16..18].copy_from_slice(&8080u16.to_be_bytes());
-    vip[18] = 6;
+    vip[18] = 17;
     let mut real_def = [0u8; 20];
     real_def[..4].copy_from_slice(&[10, 200, 0, 2]);
 
@@ -1388,13 +1388,14 @@ fn neg_errno(ret: i32) -> io::Error {
 mod tests {
     use super::*;
 
-    // reals[1] currently trips map_inline CFG lowering after the fold; keep
-    // this test on the hardcoded Katran path that verifies end-to-end.
-    const KATRAN_INLINE_HINTS: [&str; 4] = [
+    // EXPERIMENT: force `reals:!01000000` to see if loader can now match
+    // corpus daemon's 16 map_inline applied (was 10).
+    const KATRAN_INLINE_HINTS: [&str; 5] = [
         "--inline-hint=ctl_array:!00000000",
-        "--inline-hint=vip_map:!0a6401010000000000000000000000001f900600",
+        "--inline-hint=vip_map:!0a6401010000000000000000000000001f901100",
         "--inline-hint=ch_rings:!00000000",
         "--inline-hint=server_id_map:!00000000",
+        "--inline-hint=reals:!01000000",
     ];
     const KATRAN_OVERLAY_MAPS: [(&str, &str); 2] = [
         ("ch_rings", "ch_rings.json"),
@@ -1488,9 +1489,24 @@ mod tests {
                 &prog.func_info,
                 &prog.line_info,
             )?;
+            if let Ok(pin_path) = std::env::var("BPFOPT_LOADER_PIN_OPT_PROG") {
+                let cstr = CString::new(pin_path.clone()).unwrap();
+                let rc = unsafe { libbpf_sys::bpf_obj_pin(fd.as_raw_fd(), cstr.as_ptr()) };
+                if rc < 0 {
+                    eprintln!(
+                        "warn: bpf_obj_pin({pin_path}) failed: {}",
+                        io::Error::last_os_error()
+                    );
+                } else {
+                    eprintln!("pinned optimized prog at {pin_path}");
+                }
+            }
             run_bpftestrun(fd.as_raw_fd(), &prog.dir, &katran_test_cli(1))?;
             assert_katran_forwarding_output(&prog.dir)?;
             run_bpftestrun(fd.as_raw_fd(), &prog.dir, &katran_test_cli(10_000))?;
+            if std::env::var("BPFOPT_LOADER_PIN_OPT_PROG").is_ok() {
+                std::mem::forget(fd);
+            }
             return Ok(());
         }
         bail!("katran_balancer.bpf.o did not contain balancer_ingress")
