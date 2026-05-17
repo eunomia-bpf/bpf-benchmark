@@ -1,0 +1,196 @@
+{
+  "benchmarks": [
+    {
+      "category": "alu-mix",
+      "description": "Parse an IPv4 TCP 5-tuple and compute a Jenkins-style flow hash",
+      "error": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/flow_5tuple_rss_hash.handcraft.so --program-name flow_5tuple_rss_hash_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/flow_5tuple_rss_hash.mem --io-mode packet --input-size 54 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260517_052219_462163/details/jit_dumps/flow_5tuple_rss_hash__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260517_052219_462163/details/jit_dumps/flow_5tuple_rss_hash__kernel_handcraft__sample00.xlated.bin\n1092: (79) r7 = *(u64 *)(r10 -440)    ; R7=scalar(id=14,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-440=scalar(id=14,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n1093: (1c) w6 -= w7                   ; R6=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=scalar(id=14,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n1094: (bc) w6 = w6                    ; R6=scalar(id=15,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n1095: (bf) r3 = r6                    ; R3=scalar(id=15,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=scalar(id=15,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n1096: (79) r8 = *(u64 *)(r10 -360)    ; R8=0 R10=fp0 fp-360=0\n1097: (79) r7 = *(u64 *)(r10 -368)    ; R7=0 R10=fp0 fp-368=0\n1098: (79) r6 = *(u64 *)(r10 -376)    ; R6=0 R10=fp0 fp-376=0\n1099: (64) w0 <<= 16                  ; R0=0\n1100: (64) w2 <<= 8\nR2 32-bit pointer arithmetic prohibited\nprocessed 352 insns (limit 1000000) max_states_per_insn 0 total_states 13 peak_states 13 mark_read 0\ninitial_load_error=Permission denied diagnostic_load_error=Permission denied",
+      "expected_result": 11016707074064960918,
+      "family": "packet-hash",
+      "hypothesis": "Endian conversion plus field extraction and rotates should be more workload-realistic than standalone checksum math",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/flow_5tuple_rss_hash.mem",
+      "io_mode": "packet",
+      "level": "flow-5tuple",
+      "name": "flow_5tuple_rss_hash",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "mode": "native",
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 528
+              },
+              "compile_ns": 55262,
+              "exec_ns": 82,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 26739,
+                "native_load_ns": 55262
+              },
+              "result": 11016707074064960918,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 82
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "llvmbpf",
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 2088,
+                "native_code_bytes": 633
+              },
+              "compile_ns": 13513622,
+              "exec_cycles": 209,
+              "exec_ns": 57,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "jit_compile_ns": 13513622,
+                "memory_prepare_ns": 16323,
+                "packet_prepare_ns": 312,
+                "program_image_ns": 92281,
+                "vm_load_code_ns": 204
+              },
+              "result": 11016707074064960918,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686257382,
+              "wall_exec_ns": 2241
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 2088,
+                "native_code_bytes": 1009
+              },
+              "compile_ns": 360037,
+              "exec_cycles": 22124961,
+              "exec_ns": 75,
+              "jited_prog_len": 1009,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 24092,
+                "object_load_ns": 298145,
+                "object_open_ns": 61892,
+                "packet_prepare_ns": 780,
+                "prog_run_wall_ns": 60020374,
+                "result_extract_ns": 546
+              },
+              "result": 11016707074064960918,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686229918,
+              "wall_exec_ns": 6002057,
+              "xlated_prog_len": 2088
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "packet",
+        "hash",
+        "endian",
+        "pure-jit"
+      ]
+    }
+  ],
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec"
+  },
+  "defaults": {
+    "inner_repeat": 10,
+    "perf_counters": false,
+    "perf_scope": "full_repeat_raw",
+    "runtime_order_seed": 0,
+    "samples": 1,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "details_dir": "details",
+  "error_message": "flow_5tuple_rss_hash: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/flow_5tuple_rss_hash.handcraft.so --program-name flow_5tuple_rss_hash_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/flow_5tuple_rss_hash.mem --io-mode packet --input-size 54 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260517_052219_462163/details/jit_dumps/flow_5tuple_rss_hash__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260517_052219_462163/details/jit_dumps/flow_5tuple_rss_hash__kernel_handcraft__sample00.xlated.bin\n1092: (79) r7 = *(u64 *)(r10 -440)    ; R7=scalar(id=14,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-440=scalar(id=14,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n1093: (1c) w6 -= w7                   ; R6=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R7=scalar(id=14,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n1094: (bc) w6 = w6                    ; R6=scalar(id=15,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n1095: (bf) r3 = r6                    ; R3=scalar(id=15,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R6=scalar(id=15,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n1096: (79) r8 = *(u64 *)(r10 -360)    ; R8=0 R10=fp0 fp-360=0\n1097: (79) r7 = *(u64 *)(r10 -368)    ; R7=0 R10=fp0 fp-368=0\n1098: (79) r6 = *(u64 *)(r10 -376)    ; R6=0 R10=fp0 fp-376=0\n1099: (64) w0 <<= 16                  ; R0=0\n1100: (64) w2 <<= 8\nR2 32-bit pointer arithmetic prohibited\nprocessed 352 insns (limit 1000000) max_states_per_insn 0 total_states 13 peak_states 13 mark_read 0\ninitial_load_error=Permission denied diagnostic_load_error=Permission denied",
+  "generated_at": "2026-05-17T05:22:19.462163+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "unknown",
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_root_mods=1 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 panic=-1 virtme.exec=`L3RtcC9iZW5jaG1hcmstZ3Vlc3QtaGwzcmtyajEuc2g=` virtme_chdir=home/yunwei37/workspace/bpf-benchmark rootfstype=9p rootflags=version=9p2000.L,trans=virtio,access=any raid=noautodetect ro debug loglevel=7 panic=30 oops=panic init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init",
+    "kernel_version": "7.0.0-rc2+",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "unknown"
+  },
+  "last_updated_at": "2026-05-17T05:22:19.964588+00:00",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_pure_jit.yaml",
+  "progress": {
+    "completed_benchmarks": 1,
+    "current_benchmark": null,
+    "current_benchmark_index": null,
+    "total_benchmarks": 1
+  },
+  "provenance": {
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 285K",
+    "environment": "vm",
+    "kernel_commit": "unknown",
+    "params": {
+      "inner_repeat": 10,
+      "samples": 1,
+      "warmups": 0
+    },
+    "repo_dirty": false,
+    "repo_git_sha": "unknown",
+    "timestamp": "2026-05-17T05:22:19.462900+00:00"
+  },
+  "run_type": "x86_kvm_micro",
+  "started_at": "2026-05-17T05:22:19.462163+00:00",
+  "status": "error",
+  "suite": "micro_staged_codegen",
+  "toolchains": {
+    "libbpf": {
+      "root": "vendor/libbpf"
+    },
+    "llvmbpf": {
+      "root": "vendor/llvmbpf"
+    }
+  }
+}

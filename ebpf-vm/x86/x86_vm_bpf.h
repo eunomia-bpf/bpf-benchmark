@@ -87,6 +87,18 @@ static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
 				__x86_vm_ret = __x86_vm_step_ret;              \
 		}
 
+#define X86_VM_STEP_OP(HELPER, OP, DST, SRC, FLAGS, AUX, IMM)              \
+		if (__x86_vm_ret == 0) {                                      \
+			int __x86_vm_step_ret =                               \
+				X86_VM_EXEC_HELPER(HELPER, &__x86_vm_state,    \
+						   (OP), (DST), (SRC),        \
+						   (FLAGS), (AUX), (IMM));    \
+			if (__x86_vm_step_ret == X86_INTERP_DONE)              \
+				__x86_vm_ret = X86_INTERP_DONE;                \
+			else if (__x86_vm_step_ret < 0)                        \
+				__x86_vm_ret = __x86_vm_step_ret;              \
+		}
+
 #define X86_VM_RUN_STEP(OP, DST, SRC, FLAGS, AUX, IMM)                      \
 	do {                                                               \
 		int __x86_vm_step_ret =                                    \

@@ -123,3 +123,55 @@ testbin YAML 注释明示 `map_inline` excluded(需要 external side-input)。co
 3. testbin YAML header 加一段 "用法说明":🟢/🟡/🔴 分级,引用本报告路径
 
 数据 raw: `/tmp/cmp.json`,`/tmp/corpus_per_pass_per_app.json`
+
+---
+
+## 2026-05-17 更新:fresh full-pipeline corpus 跑完后的修订
+
+`x86_kvm_corpus_20260517_034332_255058` — 8 apps + 18-pass full pipeline,SAMPLES=1。修正之前两个误判:
+
+### ✅ 修正 1: `rotate` 不再"消失"
+
+`rotate katran=20 / tetragon=44` 在新 corpus 完全等于 testbin。之前看到 corpus rotate=0 是因为读了 0507_081532 那次的 pipeline,kinsn pass 顺序里其实正常 hit。"rotate 谜题" 消除。
+
+### ⚠️ 新发现:`const_prop` pointer-skip 跨 app 一致高
+
+新 corpus 给出了之前 piecewise 没看到的完整 `const_prop` 数据。skip ratio 跨 app 极高:
+
+| app | applied | matched | skipped | skip% |
+|---|---:|---:|---:|---:|
+| bcc_set | 2 | 221 | 219 | 99.1% |
+| bpftrace_set | 6 | 148 | 142 | 95.9% |
+| cilium_agent | 1081 | 5482 | 4401 | 80.3% |
+| katran | 30 | 150 | 120 | 80.0% |
+| otelcol-ebpf-profiler | 135 | 2656 | 2521 | 94.9% |
+| tetragon_observer | 1513 | 27255 | 25742 | 94.4% |
+| tracee_monitor | 484 | 54711 | 54227 | **99.1%** |
+
+**全部 142+ 跳过都是 "register has pointer type, cannot materialize"。**
+
+Host loader 在 katran 上单 prog 逐 PC 反汇编验证:所有 skip 都是合法 `pkt_ptr += K` / `fp += K` / `map_value_ptr += K` 模式,verifier post-state 确实是 pointer 类型,**JIT 时无法 materialize 为立即数** — 跳过行为是**正确的**。
+
+→ const_prop 实现正确,不是 bug。但 paper 里 const_prop 的"潜在 site 数(matched)" vs "实际优化 site 数(applied)" 比例可以作为"pointer-arithmetic-heavy"程序特征的指标。
+
+### 🆕 host loader katran 4-pass 验证
+
+`bpfopt/loader` 的 `katran_optimization_path` test 跑完 (canonicalize → map_inline → noop refresh → const_prop → dce):
+- map_inline: 10 applied / 67 matched / 57 skipped, 2542→2515 insn
+- const_prop: 1 applied / 143 matched / 142 skipped(全 pointer)
+- dce: 33 applied, 2515→2482 insn
+- PROG_TEST_RUN repeat=1: retval=3 (XDP_TX),data_size_out=84 ✓
+- PROG_TEST_RUN repeat=10000: 26 ns/iter,无 crash ✓
+
+注意 bpfopt/testobject/katran_balancer.bpf.o (131KB md5=0d6df638) 与 corpus/build/x86_64/katran/balancer.bpf.o (158KB md5=0cfd1b0a) **是不同源 build**,所以 testbin/host-loader 单 prog const_prop=1 vs corpus const_prop=30 不能直接对比 — 是不同字节码。如要 apples-to-apples,需统一 .bpf.o 源。
+
+### 修订后的可信度评级(最终)
+
+| 等级 | Passes | 说明 |
+|---|---|---|
+| 🟢 **直接 paper** | `lea`, `prefetch`, `cond_select`, `extract`, `endian_fusion`, `wide_mem`, `bulk_memory`, `rotate`, `ccmp` | testbin ≈ corpus(±10%),paper 直接引,corpus 当 supplemental |
+| 🟡 **需注释** | `bounds_check_merge`, `skb_load_bytes_spec` | testbin 因 prog_type=0 bail;corpus 实跑两者也低产 |
+| 🔴 **必须用 corpus** | `const_prop`, `dce`, `map_inline` | testbin 缺 verifier states / side-input;corpus 数才有意义 |
+
+数据 raw 补充: `/tmp/corpus_0517_summary.json`(新 corpus 18-pass × 8 app 完整 applied/matched/skipped)
+

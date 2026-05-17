@@ -22,8 +22,9 @@
     ]
   },
   "details_dir": "details",
-  "generated_at": "2026-05-17T03:43:32.256723+00:00",
-  "last_updated_at": "2026-05-17T04:03:31.689893+00:00",
+  "error_message": "corpus suite reported errors",
+  "generated_at": "2026-05-17T04:27:50.360155+00:00",
+  "last_updated_at": "2026-05-17T04:27:50.360151+00:00",
   "launcher_boot_id": "7d81a0da-ca65-4a39-a65e-6322d1a08a9d",
   "launcher_pid": 1792,
   "launcher_start_ticks": 13615,
@@ -31,7 +32,7 @@
   "run_type": "x86_kvm_corpus",
   "samples": 1,
   "started_at": "2026-05-17T03:43:32.255058+00:00",
-  "status": "running",
+  "status": "error",
   "suite": "corpus",
   "workload_seconds": 15.0
 }

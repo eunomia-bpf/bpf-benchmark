@@ -110,6 +110,21 @@ static __always_inline void sign_extend_narrow(struct bpf_insn *insn_buf,
 	insn_buf[(*cnt)++] = BPF_ALU64_IMM(BPF_ARSH, reg, shift);
 }
 
+static __always_inline void read32_scalar_snapshot(struct bpf_insn *insn_buf,
+						   int *cnt, u8 dst_reg,
+						   u8 src_reg, s16 stack_off)
+{
+	if (kinsn_x86_reg_is_shadowed(src_reg) || kinsn_x86_is_scratch(src_reg)) {
+		insn_buf[(*cnt)++] = BPF_MOV64_IMM(dst_reg, 0);
+		kinsn_x86_read32(insn_buf, cnt, dst_reg, src_reg);
+		return;
+	}
+
+	insn_buf[(*cnt)++] = BPF_STX_MEM(BPF_W, BPF_REG_10, src_reg, stack_off);
+	insn_buf[(*cnt)++] = BPF_MOV64_IMM(dst_reg, 0);
+	insn_buf[(*cnt)++] = BPF_LDX_MEM(BPF_W, dst_reg, BPF_REG_10, stack_off);
+}
+
 static __always_inline int decode_cmp_rr_payload(u64 payload, u8 *left_reg,
 						 u8 *right_reg)
 {
@@ -562,13 +577,13 @@ static int instantiate_cmp_narrow_rr_flags(u64 payload, struct bpf_insn *insn_bu
 		kinsn_x86_read64_arch(insn_buf, &cnt, KINSN_X86_SCRATCH1,
 				      right_reg);
 	} else {
-		kinsn_x86_read32(insn_buf, &cnt, KINSN_X86_SCRATCH0,
-				 left_reg);
-		kinsn_x86_read32(insn_buf, &cnt, KINSN_X86_SCRATCH1,
-				 right_reg);
+		read32_scalar_snapshot(insn_buf, &cnt, KINSN_X86_SCRATCH0,
+				       left_reg, KINSN_X86_PROOF_LHS_OFF);
+		read32_scalar_snapshot(insn_buf, &cnt, KINSN_X86_SCRATCH1,
+				       right_reg, KINSN_X86_PROOF_RHS_OFF);
 	}
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, KINSN_X86_SCRATCH0, mask);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, KINSN_X86_SCRATCH1, mask);
+	insn_buf[cnt++] = BPF_ALU32_IMM(BPF_AND, KINSN_X86_SCRATCH0, mask);
+	insn_buf[cnt++] = BPF_ALU32_IMM(BPF_AND, KINSN_X86_SCRATCH1, mask);
 	insn_buf[cnt++] = BPF_ST_MEM(BPF_W, BPF_REG_10,
 				     KINSN_X86_SHADOW_ZF_OFF, 0);
 	insn_buf[cnt++] = BPF_JMP_REG(BPF_JNE, KINSN_X86_SCRATCH0,
@@ -577,8 +592,8 @@ static int instantiate_cmp_narrow_rr_flags(u64 payload, struct bpf_insn *insn_bu
 				     KINSN_X86_SHADOW_ZF_OFF, 1);
 	insn_buf[cnt++] = BPF_ST_MEM(BPF_W, BPF_REG_10,
 				     KINSN_X86_SHADOW_CF_OFF, 0);
-	insn_buf[cnt++] = BPF_JMP_REG(BPF_JGE, KINSN_X86_SCRATCH0,
-				      KINSN_X86_SCRATCH1, 1);
+	insn_buf[cnt++] = BPF_JMP32_REG(BPF_JGE, KINSN_X86_SCRATCH0,
+					KINSN_X86_SCRATCH1, 1);
 	insn_buf[cnt++] = BPF_ST_MEM(BPF_W, BPF_REG_10,
 				     KINSN_X86_SHADOW_CF_OFF, 1);
 	sign_extend_narrow(insn_buf, &cnt, KINSN_X86_SCRATCH0,
@@ -607,13 +622,35 @@ static int instantiate_cmpb_imm_flags(u64 payload, struct bpf_insn *insn_buf)
 		return -EINVAL;
 
 	arch_reg = payload_form(payload) == X86_OPERAND_FORM_ARCH_IMM;
+	if (!arch_reg && !kinsn_x86_reg_is_shadowed(reg) &&
+	    !kinsn_x86_is_scratch(reg)) {
+		insn_buf[cnt++] = BPF_STX_MEM(BPF_DW, BPF_REG_10, reg,
+					      KINSN_X86_PROOF_LHS_OFF);
+		insn_buf[cnt++] = BPF_ALU32_IMM(BPF_AND, reg, 0xff);
+		insn_buf[cnt++] = BPF_ST_MEM(BPF_W, BPF_REG_10,
+					     KINSN_X86_SHADOW_ZF_OFF, 0);
+		insn_buf[cnt++] = BPF_JMP32_IMM(BPF_JNE, reg, imm, 1);
+		insn_buf[cnt++] = BPF_ST_MEM(BPF_W, BPF_REG_10,
+					     KINSN_X86_SHADOW_ZF_OFF, 1);
+		insn_buf[cnt++] = BPF_ST_MEM(BPF_W, BPF_REG_10,
+					     KINSN_X86_SHADOW_CF_OFF, 0);
+		insn_buf[cnt++] = BPF_JMP32_IMM(BPF_JGE, reg, imm, 1);
+		insn_buf[cnt++] = BPF_ST_MEM(BPF_W, BPF_REG_10,
+					     KINSN_X86_SHADOW_CF_OFF, 1);
+		sign_extend_narrow(insn_buf, &cnt, reg, 8);
+		store_cmp_sge_imm(insn_buf, &cnt, reg, (s8)imm, false);
+		insn_buf[cnt++] = BPF_LDX_MEM(BPF_DW, reg, BPF_REG_10,
+					      KINSN_X86_PROOF_LHS_OFF);
+		return cnt;
+	}
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
 	if (arch_reg)
 		kinsn_x86_read64_arch(insn_buf, &cnt, KINSN_X86_SCRATCH0,
 				      reg);
 	else
-		kinsn_x86_read32(insn_buf, &cnt, KINSN_X86_SCRATCH0, reg);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, KINSN_X86_SCRATCH0, 0xff);
+		read32_scalar_snapshot(insn_buf, &cnt, KINSN_X86_SCRATCH0,
+				       reg, KINSN_X86_PROOF_LHS_OFF);
+	insn_buf[cnt++] = BPF_ALU32_IMM(BPF_AND, KINSN_X86_SCRATCH0, 0xff);
 	insn_buf[cnt++] = BPF_ST_MEM(BPF_W, BPF_REG_10,
 				     KINSN_X86_SHADOW_ZF_OFF, 0);
 	insn_buf[cnt++] = BPF_JMP_IMM(BPF_JNE, KINSN_X86_SCRATCH0, imm, 1);
@@ -621,7 +658,7 @@ static int instantiate_cmpb_imm_flags(u64 payload, struct bpf_insn *insn_buf)
 				     KINSN_X86_SHADOW_ZF_OFF, 1);
 	insn_buf[cnt++] = BPF_ST_MEM(BPF_W, BPF_REG_10,
 				     KINSN_X86_SHADOW_CF_OFF, 0);
-	insn_buf[cnt++] = BPF_JMP_IMM(BPF_JGE, KINSN_X86_SCRATCH0, imm, 1);
+	insn_buf[cnt++] = BPF_JMP32_IMM(BPF_JGE, KINSN_X86_SCRATCH0, imm, 1);
 	insn_buf[cnt++] = BPF_ST_MEM(BPF_W, BPF_REG_10,
 				     KINSN_X86_SHADOW_CF_OFF, 1);
 	sign_extend_narrow(insn_buf, &cnt, KINSN_X86_SCRATCH0, 8);
@@ -647,13 +684,35 @@ static int instantiate_cmpw_imm_flags(u64 payload, struct bpf_insn *insn_buf)
 		return -EINVAL;
 
 	arch_reg = payload_form(payload) == X86_OPERAND_FORM_ARCH_IMM;
+	if (!arch_reg && !kinsn_x86_reg_is_shadowed(reg) &&
+	    !kinsn_x86_is_scratch(reg)) {
+		insn_buf[cnt++] = BPF_STX_MEM(BPF_DW, BPF_REG_10, reg,
+					      KINSN_X86_PROOF_LHS_OFF);
+		insn_buf[cnt++] = BPF_ALU32_IMM(BPF_AND, reg, 0xffff);
+		insn_buf[cnt++] = BPF_ST_MEM(BPF_W, BPF_REG_10,
+					     KINSN_X86_SHADOW_ZF_OFF, 0);
+		insn_buf[cnt++] = BPF_JMP32_IMM(BPF_JNE, reg, imm, 1);
+		insn_buf[cnt++] = BPF_ST_MEM(BPF_W, BPF_REG_10,
+					     KINSN_X86_SHADOW_ZF_OFF, 1);
+		insn_buf[cnt++] = BPF_ST_MEM(BPF_W, BPF_REG_10,
+					     KINSN_X86_SHADOW_CF_OFF, 0);
+		insn_buf[cnt++] = BPF_JMP32_IMM(BPF_JGE, reg, imm, 1);
+		insn_buf[cnt++] = BPF_ST_MEM(BPF_W, BPF_REG_10,
+					     KINSN_X86_SHADOW_CF_OFF, 1);
+		sign_extend_narrow(insn_buf, &cnt, reg, 16);
+		store_cmp_sge_imm(insn_buf, &cnt, reg, (s16)imm, false);
+		insn_buf[cnt++] = BPF_LDX_MEM(BPF_DW, reg, BPF_REG_10,
+					      KINSN_X86_PROOF_LHS_OFF);
+		return cnt;
+	}
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
 	if (arch_reg)
 		kinsn_x86_read64_arch(insn_buf, &cnt, KINSN_X86_SCRATCH0,
 				      reg);
 	else
-		kinsn_x86_read32(insn_buf, &cnt, KINSN_X86_SCRATCH0, reg);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, KINSN_X86_SCRATCH0,
+		read32_scalar_snapshot(insn_buf, &cnt, KINSN_X86_SCRATCH0,
+				       reg, KINSN_X86_PROOF_LHS_OFF);
+	insn_buf[cnt++] = BPF_ALU32_IMM(BPF_AND, KINSN_X86_SCRATCH0,
 					0xffff);
 	insn_buf[cnt++] = BPF_ST_MEM(BPF_W, BPF_REG_10,
 				     KINSN_X86_SHADOW_ZF_OFF, 0);
@@ -663,8 +722,8 @@ static int instantiate_cmpw_imm_flags(u64 payload, struct bpf_insn *insn_buf)
 				     KINSN_X86_SHADOW_ZF_OFF, 1);
 	insn_buf[cnt++] = BPF_ST_MEM(BPF_W, BPF_REG_10,
 				     KINSN_X86_SHADOW_CF_OFF, 0);
-	insn_buf[cnt++] = BPF_JMP_IMM(BPF_JGE, KINSN_X86_SCRATCH0,
-				      imm, 1);
+	insn_buf[cnt++] = BPF_JMP32_IMM(BPF_JGE, KINSN_X86_SCRATCH0,
+					imm, 1);
 	insn_buf[cnt++] = BPF_ST_MEM(BPF_W, BPF_REG_10,
 				     KINSN_X86_SHADOW_CF_OFF, 1);
 	sign_extend_narrow(insn_buf, &cnt, KINSN_X86_SCRATCH0, 16);

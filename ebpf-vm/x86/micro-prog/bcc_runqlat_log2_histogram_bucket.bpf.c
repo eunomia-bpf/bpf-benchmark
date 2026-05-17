@@ -52,25 +52,31 @@ x86_l_112a:
 	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
 		goto x86_l_110e;
 x86_l_112c:
-	/* 0x112c: push   r15 */
-	X86_VM_RUN_OP(x86_exec_push, X86_OP_PUSH, X86_REG_NONE, X86_R15, X86_WIDTH_64, 0, 0);
-x86_l_112e:
-	/* 0x112e: push   r14 */
-	X86_VM_RUN_OP(x86_exec_push, X86_OP_PUSH, X86_REG_NONE, X86_R14, X86_WIDTH_64, 0, 0);
+	/* 0x112c: push   rbp */
+	X86_VM_RUN_OP(x86_exec_push, X86_OP_PUSH, X86_REG_NONE, X86_RBP, X86_WIDTH_64, 0, 0);
+x86_l_112d:
+	/* 0x112d: mov    rbp,rsp */
+	X86_VM_RUN_OP(x86_exec_mov_reg, X86_OP_MOV_REG, X86_RBP, X86_RSP, X86_WIDTH_64, 0, 0);
 x86_l_1130:
-	/* 0x1130: push   rbx */
-	X86_VM_RUN_OP(x86_exec_push, X86_OP_PUSH, X86_REG_NONE, X86_RBX, X86_WIDTH_64, 0, 0);
-x86_l_1131:
-	/* 0x1131: mov    edi,DWORD PTR [rsi+0xc] */
-	X86_VM_RUN_OP(x86_exec_mov_load, X86_OP_MOV_LOAD, X86_RDI, X86_RSI, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 12ULL);
+	/* 0x1130: push   r15 */
+	X86_VM_RUN_OP(x86_exec_push, X86_OP_PUSH, X86_REG_NONE, X86_R15, X86_WIDTH_64, 0, 0);
+x86_l_1132:
+	/* 0x1132: push   r14 */
+	X86_VM_RUN_OP(x86_exec_push, X86_OP_PUSH, X86_REG_NONE, X86_R14, X86_WIDTH_64, 0, 0);
 x86_l_1134:
-	/* 0x1134: xor    eax,eax */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_RAX, X86_RAX, X86_WIDTH_32, X86_ALU_XOR, 0);
-x86_l_1136:
-	/* 0x1136: jmp    1164 <bcc_runqlat_log2_histogram_bucket_xdp+0x64> */
-	goto x86_l_1164;
+	/* 0x1134: push   rbx */
+	X86_VM_RUN_OP(x86_exec_push, X86_OP_PUSH, X86_REG_NONE, X86_RBX, X86_WIDTH_64, 0, 0);
+x86_l_1135:
+	/* 0x1135: mov    edi,DWORD PTR [rsi+0xc] */
+	X86_VM_RUN_OP(x86_exec_mov_load, X86_OP_MOV_LOAD, X86_RDI, X86_RSI, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 12ULL);
 x86_l_1138:
-	/* 0x1138: nop    DWORD PTR [rax+rax*1+0x0] */
+	/* 0x1138: xor    eax,eax */
+	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_RAX, X86_RAX, X86_WIDTH_32, X86_ALU_XOR, 0);
+x86_l_113a:
+	/* 0x113a: jmp    1164 <bcc_runqlat_log2_histogram_bucket_xdp+0x64> */
+	goto x86_l_1164;
+x86_l_113c:
+	/* 0x113c: nop    DWORD PTR [rax+0x0] */
 	X86_VM_RUN_OP(x86_exec_nop, X86_OP_NOP, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_1140:
 	/* 0x1140: shl    rax,0x3 */
@@ -300,7 +306,10 @@ x86_l_1246:
 	/* 0x1246: pop    r15 */
 	X86_VM_RUN_OP(x86_exec_pop, X86_OP_POP, X86_R15, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_1248:
-	/* 0x1248: ret */
+	/* 0x1248: pop    rbp */
+	X86_VM_RUN_OP(x86_exec_pop, X86_OP_POP, X86_RBP, X86_REG_NONE, X86_WIDTH_64, 0, 0);
+x86_l_1249:
+	/* 0x1249: ret */
 	X86_VM_RET_RAX();
 	return XDP_ABORTED;
 }

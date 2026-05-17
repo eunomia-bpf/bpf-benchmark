@@ -278,9 +278,10 @@ static int instantiate_movl_reg(u64 payload, struct bpf_insn *insn_buf)
 	if (!dst_shadowed && !src_shadowed) {
 		insn_buf[0] = BPF_STX_MEM(BPF_W, BPF_REG_10, src_reg,
 					  KINSN_X86_PROOF_LHS_OFF);
-		insn_buf[1] = BPF_LDX_MEM(BPF_W, dst_reg, BPF_REG_10,
+		insn_buf[1] = BPF_MOV64_IMM(dst_reg, 0);
+		insn_buf[2] = BPF_LDX_MEM(BPF_W, dst_reg, BPF_REG_10,
 					  KINSN_X86_PROOF_LHS_OFF);
-		return 2;
+		return 3;
 	}
 
 	value_reg = dst_shadowed ? KINSN_X86_SCRATCH0 : dst_reg;

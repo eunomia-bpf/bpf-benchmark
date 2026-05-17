@@ -554,7 +554,7 @@ fn build_lowering(
         b_reg: regs[1],
         cond_reg,
         x86_result_scratch: if arch == Arch::X86_64 {
-            x86_result_scratch(site, live_after, &protected, &allocated, regs)?
+            x86_result_scratch(site, cond_reg, live_after, &protected, &allocated, regs)?
         } else {
             None
         },
@@ -563,12 +563,19 @@ fn build_lowering(
 
 fn x86_result_scratch(
     site: &CondSelectSite,
+    cond_reg: u8,
     live_after: &HashSet<u8>,
     protected: &[u8],
     allocated: &[u8],
     regs: [u8; 2],
 ) -> Result<Option<u8>, String> {
-    if site.dst_reg != site.cond.dst_reg() || site.dst_reg == regs[0] || site.dst_reg == regs[1] {
+    // The no-scratch x86 lowering emits `movq dst, b_reg` before `testq cond_reg`,
+    // so dst must not alias the predicate. `cond_reg` may be either the original
+    // jump's dst_reg or the synthetic predicate built by `condition_prefix()`;
+    // both cases must trip the hazard. Skip when dst is already either operand
+    // (the movq is then identity or absorbed into the cmov source).
+    let aliases_predicate = site.dst_reg == site.cond.dst_reg() || site.dst_reg == cond_reg;
+    if !aliases_predicate || site.dst_reg == regs[0] || site.dst_reg == regs[1] {
         return Ok(None);
     }
     choose_temp_reg(site, live_after, protected, allocated)

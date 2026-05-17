@@ -35,18 +35,20 @@ int x86_vm_hardcoded_xdp(struct xdp_md *ctx)
 {
 	return X86_VM_BEGIN_XDP(ctx)
 	/* 0x0: mov rax, 12345678 */
-	X86_VM_STEP(X86_OP_MOV_IMM64, X86_RAX, 0, 0, 0, 12345678ULL)
+	X86_VM_STEP_OP(x86_exec_mov_imm, X86_OP_MOV_IMM64, X86_RAX, 0, 0, 0,
+		       12345678ULL)
 	/* 0x5: ret */
-	X86_VM_STEP(X86_OP_RET, 0, 0, 0, 0, 0)
+	X86_VM_STEP_OP(x86_exec_ret, X86_OP_RET, 0, 0, 0, 0, 0)
 	X86_VM_END_XDP();
 }
 ```
 
 The program is not a global variable, is not a local BPF stack array, and is not
 emitted as a `.rodata` map. Each instruction field is a compile-time immediate,
-but each step still executes the same `x86_exec_one()` interpreter semantics.
-This is intentionally not a JIT-shaped prototype: the generated `.bpf.c` fixes
-the guest instruction stream, while `x86_interp.h` remains the VM.
+and the generator explicitly selects the interpreter helper for that opcode
+(`x86_exec_mov_load`, `x86_exec_alu_reg`, etc.). This is intentionally not a
+JIT-shaped prototype: generated `.bpf.c` fixes the guest instruction stream, but
+each step still calls VM semantics in `x86_interp.h`.
 
 ## Build And Run
 
@@ -93,11 +95,75 @@ Register numbers follow the usual x86 encoding order: `rax=0`, `rcx=1`,
 
 ## Micro Program Status
 
-Status comes from the current generated x86 interpreter-proof batch using
-`BPF_PROG_TEST_RUN`. `ok` means compile, verifier load, run, and expected-result
-check all passed. `run-fail` means the object compiled but verifier load or
-runtime result check failed. `compile-fail` means clang could not produce the
-BPF object in the current proof shape.
+## JSON-Linker Todo
+
+Completion criteria for this experiment are stricter than the generated-C
+prototype: every micro program must go through `python -> JSON proof -> Rust
+loader bytecode link -> BPF_PROG_LOAD -> BPF_PROG_TEST_RUN`, with no per-micro
+`.bpf.c` compile step after the JSON exists.
+
+| Item | Status | Note |
+| --- | --- | --- |
+| JSON proof schema contains numeric instruction fields | done | Loader does not parse C macros. |
+| JSON proof schema contains BPF labels/fixups | done | `bpf_program.insns[]` carries encoded BPF instructions plus symbolic branch targets. |
+| Rust loader is only a BPF linker | done | It links encoded BPF instructions and does not contain `emit_x86_*` semantics. |
+| Build reusable eBPF interpreter/helper bytecode | partial | Current prototype has a small Python template instantiator for `simple/simple_packet`; this is the proof target, not loader logic. |
+| Batch runner uses JSON path as the pass/fail source | done | `run_micro_json_link_batch.py` runs JSON -> loader -> verifier/test_run. |
+| All 29 micro programs load and return expected result | partial | 2/29 pass on the template path; the rest are marked `template-missing` until templates are added. |
+
+Current JSON-template batch status:
+
+| Micro program | JSON-link status | Note |
+| --- | --- | --- |
+| `simple` | ok | JSON carries `bpf_program`; loader links, loads, and test-runs result `12345678`. |
+| `simple_packet` | ok | Same template coverage as `simple`. |
+| all other micro programs | template-missing | JSON still contains parsed native `linked_program`, but no `bpf_program` until the relevant frozen templates are implemented. |
+
+JSON-template completion todo:
+
+| Micro program | Status | Next missing template/class |
+| --- | --- | --- |
+| `simple` | done | |
+| `simple_packet` | done | |
+| `bitmap_popcount_scan` | in-progress | `jbe`, `cmp_mem_imm`, packet load, `popcnt`, ALU templates |
+| `sorted_rule_binary_search` | todo | after bitmap base templates |
+| `bcc_runqlat_log2_histogram_bucket` | todo | after bitmap base templates |
+| `trace_event_type_switch_dispatch` | todo | branch/control templates |
+| `packet_checksum_fold` | todo | memory + ALU templates |
+| `payload_prefix_memcmp_scan` | todo | compare-memory templates |
+| `packet_vlan_tcpopt_parser` | todo | parser memory/control templates |
+| `bpf_local_call_fanout_dispatch` | todo | local-call templates |
+| `flow_5tuple_rss_hash` | todo | packet parser + hash ALU templates |
+| `katran_lb_consistent_hash_select` | todo | larger memory/hash template set |
+| `cilium_policy_guard_tree_filter` | todo | branch + memory templates |
+| `siphash_rotate64_mixer` | todo | rotate/64-bit ALU templates |
+| `packet_record_bounds_window` | todo | bounds + memory templates |
+| `flow_record_field_scan` | todo | indexed memory + bitfield templates |
+| `packed_header_bitfield_decode` | todo | bitfield templates |
+| `bpftrace_string_search_prefix_scan` | todo | byte memory + branch templates |
+| `tracee_syscall_name_table_lookup` | todo | lookup/control templates |
+| `tracee_http_method_prefix_detect` | todo | prefix compare templates |
+| `cilium_socket_lb_service_select` | todo | memory/hash/control templates |
+| `bcc_tcpconnect_ipv4_tuple_filter` | todo | tuple parser templates |
+| `tetragon_process_event_arg_filter` | todo | stack/local memory templates |
+| `otel_stack_frame_unwind_scan` | todo | stack/frame scan templates |
+| `cilium_ct_nat_tuple_rewrite` | todo | packet rewrite templates |
+| `packet_toeplitz_rss_hash` | todo | bit loop/hash templates |
+| `bpftrace_comm_key_fnv_hash` | todo | stack/string hash templates |
+| `tc_packet_checksum_fold` | todo | skb-style context templates |
+| `cgroup_skb_hash_chain` | todo | skb-style context templates |
+
+The deliberate next step is not to add x86 semantics to the loader. Each new
+coverage increment should add or extend a named template in the template layer,
+then prove that template against the x86 small-step rule it claims to implement.
+
+Status comes from `run_micro_interpreter_batch.py`, which regenerates the
+interpreter proof sources, compiles each object, loads it into the kernel, runs
+`BPF_PROG_TEST_RUN`, and checks the configured micro `expected_result`. `ok`
+means compile, verifier load, run, and expected-result check all passed.
+`run-fail` means the object compiled but verifier load or runtime result check
+failed. `compile-fail` means clang could not produce the BPF object in the
+current proof shape.
 
 | Micro program | Input mode | Expected result | Status | Note |
 | --- | --- | ---: | --- | --- |
@@ -110,26 +176,162 @@ BPF object in the current proof shape.
 | `packet_checksum_fold` | `packet` | `0` | ok | loop canonicalized for verifier |
 | `payload_prefix_memcmp_scan` | `packet` | `9377358970524074984` | ok | fixed LEA base+index*scale |
 | `packet_vlan_tcpopt_parser` | `packet` | `7124500222221` | ok | |
-| `bpf_local_call_fanout_dispatch` | `packet` | `1171593469689687806` | run-fail | verifier complexity: 8193 jumps |
+| `bpf_local_call_fanout_dispatch` | `packet` | `1171593469689687806` | run-fail | verifier/load failure: `Bad address` |
 | `flow_5tuple_rss_hash` | `packet` | `11016707074064960918` | ok | |
-| `katran_lb_consistent_hash_select` | `packet` | `5895923248507644458` | compile-fail | clang stuck on huge generic proof |
-| `cilium_policy_guard_tree_filter` | `packet` | `5333736376993440184` | run-fail | needs log triage |
-| `siphash_rotate64_mixer` | `packet` | `2666935177028490406` | compile-fail | clang stuck on huge generic proof |
+| `katran_lb_consistent_hash_select` | `packet` | `5895923248507644458` | run-fail | result mismatch: got `6629546624778309567` |
+| `cilium_policy_guard_tree_filter` | `packet` | `5333736376993440184` | run-fail | result mismatch: got `17913587278510197141` |
+| `siphash_rotate64_mixer` | `packet` | `2666935177028490406` | ok | direct helper dispatch fixed compile-fail |
 | `packet_record_bounds_window` | `packet` | `1610777047308888911` | ok | |
 | `flow_record_field_scan` | `packet` | `9354240374969449171` | ok | |
-| `packed_header_bitfield_decode` | `packet` | `12211926182125163441` | compile-fail | clang stuck on huge generic proof |
-| `bpftrace_string_search_prefix_scan` | `packet` | `15111065535037762995` | run-fail | needs log triage |
-| `tracee_syscall_name_table_lookup` | `packet` | `4063733557757466536` | run-fail | needs rodata/table support |
-| `tracee_http_method_prefix_detect` | `packet` | `11562433829591280482` | run-fail | needs rodata/table support |
-| `cilium_socket_lb_service_select` | `packet` | `2868565165525030065` | run-fail | needs log triage |
+| `packed_header_bitfield_decode` | `packet` | `12211926182125163441` | ok | direct helper dispatch fixed compile-fail |
+| `bpftrace_string_search_prefix_scan` | `packet` | `15111065535037762995` | run-fail | verifier/load failure: `Argument list too long` |
+| `tracee_syscall_name_table_lookup` | `packet` | `4063733557757466536` | run-fail | unexpected XDP retval 0 |
+| `tracee_http_method_prefix_detect` | `packet` | `11562433829591280482` | run-fail | unexpected XDP retval 0 |
+| `cilium_socket_lb_service_select` | `packet` | `2868565165525030065` | run-fail | result mismatch: got `2807766570555528369` |
 | `bcc_tcpconnect_ipv4_tuple_filter` | `packet` | `18109187572642697766` | ok | |
-| `tetragon_process_event_arg_filter` | `packet` | `12641586655603153431` | compile-fail | clang stuck on huge generic proof |
+| `tetragon_process_event_arg_filter` | `packet` | `12641586655603153431` | run-fail | unexpected XDP retval 0 |
 | `otel_stack_frame_unwind_scan` | `packet` | `12043289854646947360` | run-fail | unexpected XDP retval 0 |
 | `cilium_ct_nat_tuple_rewrite` | `packet` | `14199193300769829204` | run-fail | unexpected XDP retval 0 |
 | `packet_toeplitz_rss_hash` | `packet` | `13526464303109995596` | run-fail | unexpected XDP retval 0 |
-| `bpftrace_comm_key_fnv_hash` | `packet` | `8524536671075880526` | compile-fail | clang killed after >4 min on huge generic proof |
-| `tc_packet_checksum_fold` | `staged` | `0` | not-run | current loader only runs XDP proof objects |
-| `cgroup_skb_hash_chain` | `staged` | `12027228624407116210` | not-run | current loader only runs XDP proof objects |
+| `bpftrace_comm_key_fnv_hash` | `packet` | `8524536671075880526` | run-fail | unexpected XDP retval 0 |
+| `tc_packet_checksum_fold` | `staged` | `0` | run-fail | verifier/load failure: `Bad address` |
+| `cgroup_skb_hash_chain` | `staged` | `12027228624407116210` | run-fail | unexpected XDP retval 0 |
+
+## Direct Helper Dispatch
+
+The current generator emits direct interpreter-helper calls:
+
+```c
+X86_VM_RUN_OP(x86_exec_mov_load, X86_OP_MOV_LOAD, ...);
+```
+
+That helper choice is made by the generator from decoded native ASM, not by
+LLVM constant propagation over a generic opcode dispatch. This matters for the
+real ReverseJIT path: once eBPF instructions are appended directly, there is no
+second user-space compiler pass that can prune a large `switch`.
+
+This change removed all current XDP compile-fail cases in the generated micro
+proof batch. It did not make every program safe or equivalent: large explicit
+control-flow graphs can still exceed verifier limits, and several cases now
+surface real interpreter semantic gaps as result mismatches or retval 0.
+
+## JSON Bytecode Plan
+
+This is a separate experimental path from the current generated `.bpf.c`
+prototype. The core idea is to keep the interpreter semantics in C, but move
+per-program specialization out of C source generation and into an explicit
+bytecode-linking artifact.
+
+## Formalization Constraint
+
+The loader must not become an x86-to-BPF JIT compiler. If the Rust loader grows
+functions such as `emit_x86_cmp_mem_imm`, `emit_x86_popcnt`, or
+`emit_x86_alu_imm`, then the thing to verify becomes a compiler-sized semantic
+translator rather than a small linker. That defeats the purpose of this
+experiment: the user requirement is that the x86-to-BPF conversion remains
+small enough to audit and eventually formalize.
+
+The intended split is therefore stricter:
+
+- The loader only understands already-encoded BPF instructions, labels, branch
+  fixups, program metadata, and load/test-run plumbing.
+- x86 semantics live in a fixed template/interpreter library. Each template is
+  the unit of proof: under the VM state relation, one template refines one x86
+  small-step rule.
+- Python may select templates for concrete x86 instructions and fill operands,
+  but that selection must stay declarative and table-driven. It should not
+  become a second large compiler hidden in the loader.
+- Native direct execution is allowed only after a separate equivalence bridge
+  proves that the native sequence and the verifier-facing BPF template sequence
+  implement the same ABI, state layout, and memory/capability behavior.
+
+This is why the interpreter/template path can be simpler than kinsn: the kernel
+does not learn new instruction semantics, and the trusted kernel-side mechanism
+can stay close to ordinary BPF loading. The complexity is concentrated in a
+small set of reusable templates whose contracts can be proven once and reused
+across micro programs.
+
+The split is:
+
+1. C owns the interpreter/helper semantics: guest register state, flags, memory
+   capability checks, and opcode helpers such as `x86_exec_mov_load` and
+   `x86_exec_alu_reg`.
+2. Python parses native ASM, selects the concrete interpreter helper for each
+   guest instruction, instantiates eBPF bytecode fragments, and emits a JSON
+   proof artifact.
+3. The JSON carries encoded eBPF fragments, helper/subprogram symbols, concrete
+   immediates, labels, branch targets, fixups, expected result metadata, and
+   enough source annotation to audit the native instruction that produced each
+   fragment.
+4. The loader concatenates fixed bytecode fragments, links them against the
+   interpreter/helper bytecode, resolves local branch/call fixups, attaches
+   metadata such as license/program type/name, and loads the finished BPF
+   program.
+
+The loader should stay a thin bytecode linker, ideally around 100-200 lines for
+the splicing path. It must not decode x86, choose opcode semantics, run
+constant propagation, optimize control flow, or silently rewrite verifier
+semantics. Those decisions belong in the Python generator/template layer where
+they can be tested and later formalized.
+
+In this model, "helper link" means linking against verifier-visible BPF
+subprograms or inlined bytecode blocks from the interpreter library. It does not
+mean adding new kernel helpers. The final verifier input is still one ordinary
+eBPF program assembled from fixed pieces.
+
+A minimal JSON shape is enough:
+
+```json
+{
+  "name": "simple",
+  "prog_type": "xdp",
+  "entry": "simple_x86_vm_xdp",
+  "insns": [
+    {
+      "asm": "0x1100: mov rcx,QWORD PTR [rdi]",
+      "helper": "x86_exec_mov_load",
+      "op": "X86_OP_MOV_LOAD",
+      "dst": "X86_RCX",
+      "src": "X86_RDI",
+      "flags": "X86_WIDTH_64",
+      "aux": "X86_MEM_AUX(X86_REG_NONE, 0)",
+      "imm": 0
+    }
+  ],
+  "labels": { "x86_l_1100": 0 },
+  "fixups": []
+}
+```
+
+For an even smaller loader, JSON can contain encoded `struct bpf_insn` arrays
+plus symbolic fixups instead of high-level opcode fields. Then the loader only
+checks the schema, appends fragments, resolves fixups, and calls the BPF load
+API. That is the cleanest direction for the hard constraint that appended eBPF
+instructions will not pass through a second user-space compiler.
+
+The JSON experiment has a separate generator from the existing `.bpf.c`
+generator:
+
+```sh
+python3 ebpf-vm/x86/micro-prog/generate_micro_json_proofs.py
+```
+
+It writes artifacts to
+`ebpf-vm/x86/micro-prog/build/json-proofs/`. The old
+`generate_micro_proofs.py` path remains the C-source prototype path; it should
+not grow JSON/linker responsibilities.
+
+The trusted boundary for this experiment is intentionally narrow:
+
+- C interpreter helpers define the verifier-facing semantics and are the units
+  to prove against the x86 subset spec.
+- Python/template generation is responsible for producing a concrete proof
+  program for a concrete native instruction stream.
+- The loader is a mechanical linker. Its correctness obligation is byte-level
+  assembly, symbol resolution, and BPF load attributes, not x86 semantics.
+- Native execution is accepted only if a separate translation-validation or
+  formal equivalence check proves that the native artifact follows the same ABI,
+  helper sequence, and hidden state layout as the eBPF proof artifact.
 
 ## Clang Optimization Check
 
@@ -144,9 +346,9 @@ levels:
 
 So “turn optimization off to make proof simpler” is not viable for this C
 interpreter shape. Without optimization, clang keeps too much generic VM state on
-the BPF stack. The practical prototype needs at least enough optimization for
-constant propagation and dead branch pruning, while the formal argument should
-not trust that optimization as semantics.
+the BPF stack. The practical C prototype still needs `-O1`/`-O2` for sane BPF
+code shape, but the direct-helper generator no longer relies on compiler
+constant propagation to select opcode semantics.
 
 ## Current Issues
 
@@ -172,12 +374,12 @@ This prototype has already exposed several verifier-facing design constraints:
   block has unresolved call targets.
 - The current full local-call proof still fails verifier complexity:
   `The sequence of 8193 jumps is too complex`. Splitting call targets into BPF
-  subprograms makes clang compile, but each instruction still expands through
-  the generic `x86_exec_one` branch tree. Staying interpreter-shaped means the
-  next design step is not per-op BPF codegen; it is making the interpreter
-  verifier-friendly by construction, for example splitting opcode families into
-  smaller semantic helpers and generating only the interpreter dispatch needed by
-  the fixed program.
+  subprograms and direct opcode-helper dispatch makes clang compile quickly, but
+  the generated native control-flow graph is still too branch-heavy for the
+  verifier.
+- `bpftrace_string_search_prefix_scan` still exceeds the verifier instruction
+  processing limit. It now fails at verifier load rather than clang compile:
+  `BPF program is too large. Processed 1000001 insn`.
 
 For formal verification, clang optimization is not part of the trusted
 argument. This C implementation is a prototype for finding the VM semantics and
@@ -185,8 +387,8 @@ verifier constraints. A cleaner proof story for the interpreter-only route is:
 
 - Specify the guest x86 subset state: registers, flags, safe packet/stack/table
   memory capabilities, and termination behavior.
-- Specify `x86_exec_one()` for each supported opcode and prove that the C/eBPF
-  interpreter step implements that relation.
+- Specify each opcode helper (`x86_exec_mov_load`, `x86_exec_alu_reg`, etc.) and
+  prove that the eBPF helper body implements that relation.
 - Generate only a fixed guest instruction stream, not replacement BPF semantics;
   the verifier proves memory safety of executing that fixed stream through the
   interpreter.
@@ -196,5 +398,6 @@ verifier constraints. A cleaner proof story for the interpreter-only route is:
 The key constraint is that dynamic guest bytecode is hostile to the verifier:
 accepting arbitrary input makes opcode dispatch, memory tags, and loop state
 input-dependent. The current proof shape therefore hardcodes the instruction
-sequence as immediates, which lets clang/verifier prune unreachable interpreter
-branches while preserving the interpreter programming model.
+sequence as immediates and directly names the helper for each opcode. That keeps
+the interpreter programming model without depending on a later compiler pass to
+discover which opcode branch is reachable.

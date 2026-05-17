@@ -1,3 +1,4 @@
+#define X86_VM_ENABLE_STACK 1
 #include "../x86_vm_bpf.h"
 
 SEC("xdp")
@@ -67,13 +68,19 @@ x86_l_1143:
 	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
 		goto x86_l_110c;
 x86_l_1145:
-	/* 0x1145: xor    esi,esi */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_RSI, X86_RSI, X86_WIDTH_32, X86_ALU_XOR, 0);
-x86_l_1147:
-	/* 0x1147: xor    edx,edx */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_RDX, X86_RDX, X86_WIDTH_32, X86_ALU_XOR, 0);
+	/* 0x1145: push   rbp */
+	X86_VM_RUN_OP(x86_exec_push, X86_OP_PUSH, X86_REG_NONE, X86_RBP, X86_WIDTH_64, 0, 0);
+x86_l_1146:
+	/* 0x1146: mov    rbp,rsp */
+	X86_VM_RUN_OP(x86_exec_mov_reg, X86_OP_MOV_REG, X86_RBP, X86_RSP, X86_WIDTH_64, 0, 0);
 x86_l_1149:
-	/* 0x1149: nop    DWORD PTR [rax+0x0] */
+	/* 0x1149: xor    esi,esi */
+	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_RSI, X86_RSI, X86_WIDTH_32, X86_ALU_XOR, 0);
+x86_l_114b:
+	/* 0x114b: xor    edx,edx */
+	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_RDX, X86_RDX, X86_WIDTH_32, X86_ALU_XOR, 0);
+x86_l_114d:
+	/* 0x114d: nop    DWORD PTR [rax] */
 	X86_VM_RUN_OP(x86_exec_nop, X86_OP_NOP, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_1150:
 	/* 0x1150: xor    ecx,ecx */
@@ -171,10 +178,13 @@ x86_l_11bd:
 	/* 0x11bd: xor    eax,eax */
 	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_RAX, X86_RAX, X86_WIDTH_32, X86_ALU_XOR, 0);
 x86_l_11bf:
-	/* 0x11bf: mov    DWORD PTR [rdi+0x14],edx */
+	/* 0x11bf: pop    rbp */
+	X86_VM_RUN_OP(x86_exec_pop, X86_OP_POP, X86_RBP, X86_REG_NONE, X86_WIDTH_64, 0, 0);
+x86_l_11c0:
+	/* 0x11c0: mov    DWORD PTR [rdi+0x14],edx */
 	X86_VM_RUN_OP(x86_exec_mov_store_reg, X86_OP_MOV_STORE_REG, X86_RDI, X86_RDX, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 20ULL);
-x86_l_11c2:
-	/* 0x11c2: ret */
+x86_l_11c3:
+	/* 0x11c3: ret */
 	X86_VM_RET_RAX();
 	return XDP_ABORTED;
 }

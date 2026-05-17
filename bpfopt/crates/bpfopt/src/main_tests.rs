@@ -99,10 +99,7 @@ fn canonicalize_map_refs_checks_idx_range_without_fd_array() {
 
 #[test]
 fn target_json_disambiguates_module_local_btf_ids_by_call_offset() {
-    let target = kinsn_target(&[
-        ("bpf_x86_movzwl", 128703, 1),
-        ("bpf_x86_rolq", 128703, 2),
-    ]);
+    let target = kinsn_target(&[("bpf_x86_movzwl", 128703, 1), ("bpf_x86_rolq", 128703, 2)]);
     let registry = kinsn_registry_from_target(&target).unwrap();
 
     assert_eq!(
@@ -117,10 +114,7 @@ fn target_json_disambiguates_module_local_btf_ids_by_call_offset() {
 
 #[test]
 fn target_json_allows_shared_btf_id_when_zero_call_offset_is_first() {
-    let target = kinsn_target(&[
-        ("bpf_x86_movzwl", 128703, 0),
-        ("bpf_x86_rolq", 128703, 2),
-    ]);
+    let target = kinsn_target(&[("bpf_x86_movzwl", 128703, 0), ("bpf_x86_rolq", 128703, 2)]);
     let registry = kinsn_registry_from_target(&target).unwrap();
 
     assert_eq!(
@@ -135,10 +129,7 @@ fn target_json_allows_shared_btf_id_when_zero_call_offset_is_first() {
 
 #[test]
 fn target_json_rejects_ambiguous_duplicate_kinsn_call_keys() {
-    let target = kinsn_target(&[
-        ("bpf_x86_movzwl", 128703, 1),
-        ("bpf_x86_rolq", 128703, 1),
-    ]);
+    let target = kinsn_target(&[("bpf_x86_movzwl", 128703, 1), ("bpf_x86_rolq", 128703, 1)]);
 
     let err = kinsn_registry_from_target(&target).unwrap_err();
 

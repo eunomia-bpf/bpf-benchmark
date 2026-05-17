@@ -154,6 +154,15 @@ BRANCH_DIRECT_PROOF_LEN = 14
 BRANCH_PROOF_FLAGS = "HC_X86_BRANCH_PROOF_FLAGS"
 BRANCH_PROOF_CMP_RR = "HC_X86_BRANCH_PROOF_CMP_RR"
 DIRECT_CMP_JCC = {"ja", "jae", "jb", "jbe", "je", "jne", "jg", "jge", "jl", "jle"}
+X86_PSEUDO_REG_TOKENS = (
+    "HC_X86_R9",
+    "HC_X86_R10",
+    "HC_X86_R11",
+    "HC_X86_R12",
+    "HC_X86_RBP",
+    "HC_X86_RSP",
+)
+SCRATCH_BPF_REG_TOKENS = {"BPF_REG_6", "BPF_REG_7", "BPF_REG_8"}
 
 
 @dataclass(frozen=True)
@@ -1003,6 +1012,8 @@ def translate_all(insns: list[NativeInsn]) -> list[Translation]:
 
 
 def bpf_insn_len(code: str) -> int:
+    if code.startswith("HC_INIT_X86_STACK("):
+        return 3
     if code.startswith("HC_LD_IMM64_RAW("):
         return 2
     if code.startswith("HC_KINSN("):
@@ -1137,10 +1148,35 @@ def kinsn_selector(code: str) -> str | None:
     return head[1].strip().rstrip(")")
 
 
+def has_x86_pseudo_reg(code: str) -> bool:
+    return any(token in code for token in X86_PSEUDO_REG_TOKENS)
+
+
+def payload_args(code: str, macro: str) -> list[str]:
+    match = re.search(rf"{re.escape(macro)}\(([^)]*)\)", code)
+    if not match:
+        return []
+    return [item.strip() for item in match.group(1).split(",")]
+
+
+def payload_arg_is_scratch(code: str, macro: str, index: int) -> bool:
+    args = payload_args(code, macro)
+    return len(args) > index and args[index] in SCRATCH_BPF_REG_TOKENS
+
+
+def payload_arg_is_pseudo(code: str, macro: str, index: int) -> bool:
+    args = payload_args(code, macro)
+    return len(args) > index and args[index] in X86_PSEUDO_REG_TOKENS
+
+
 def proof_insn_len(code: str) -> int:
     selector = kinsn_selector(code)
     if selector is None:
         return bpf_insn_len(code)
+    if selector == "MICRO_HANDCRAFT_BPF_X86_PUSHQ":
+        return 11
+    if selector == "MICRO_HANDCRAFT_BPF_X86_POPQ":
+        return 12
     if selector in BRANCH_PROOF_LEN:
         if "HC_X86_BRANCH_PROOF_PAYLOAD" in code and BRANCH_PROOF_CMP_RR in code:
             return BRANCH_DIRECT_PROOF_LEN
@@ -1155,7 +1191,11 @@ def proof_insn_len(code: str) -> int:
             arch = "HC_X86_CMP_ARCH_MEM_IMM_PAYLOAD" in code
             return 16 + (2 if narrow else 0) + (1 if arch else 0)
         if selector in {"MICRO_HANDCRAFT_BPF_X86_CMPB", "MICRO_HANDCRAFT_BPF_X86_CMPW"}:
-            return 23 if "HC_X86_RR_PAYLOAD" in code or "HC_X86_ARCH_RR_PAYLOAD" in code else 19
+            if "HC_X86_ARCH_RR_PAYLOAD" in code:
+                return 23
+            if "HC_X86_RR_PAYLOAD" in code:
+                return 27
+            return 19 if "HC_X86_ARCH_IMM_PAYLOAD" in code else 14
         if "HC_X86_ARCH_RR_PAYLOAD" in code:
             return 17 + code.count("HC_X86_R")
         if "HC_X86_ARCH_IMM_PAYLOAD" in code or ("HC_X86_IMM_PAYLOAD" in code and "HC_X86_R" in code):
@@ -1169,25 +1209,38 @@ def proof_insn_len(code: str) -> int:
                     "MICRO_HANDCRAFT_BPF_X86_MOVL", "MICRO_HANDCRAFT_BPF_X86_MOVQ"}:
         if "HC_X86_STORE_IMM_PAYLOAD" in code:
             return 1
-        if "HC_X86_IMM_PAYLOAD" in code and "HC_X86_R" not in code:
+        if "HC_X86_FRAME_PAYLOAD" in code:
+            return 8
+        if "HC_X86_IMM_PAYLOAD" in code and not has_x86_pseudo_reg(code):
             return 1
-        if "HC_X86_RR_PAYLOAD" in code and "HC_X86_R" not in code:
-            return 1 if selector != "MICRO_HANDCRAFT_BPF_X86_MOVL" else 2
-        if "HC_X86_MEM_PAYLOAD" in code and "HC_X86_R" not in code:
-            return 1
+        if "HC_X86_RR_PAYLOAD" in code and not has_x86_pseudo_reg(code):
+            return 1 if selector != "MICRO_HANDCRAFT_BPF_X86_MOVL" else 3
+        if "HC_X86_MEM_PAYLOAD" in code and not has_x86_pseudo_reg(code):
+            return 8 if payload_arg_is_scratch(code, "HC_X86_MEM_PAYLOAD", 0) else 1
         return 8
     if selector in {"MICRO_HANDCRAFT_BPF_X86_MOVZBL", "MICRO_HANDCRAFT_BPF_X86_MOVZWL"}:
-        if "HC_X86_MEM_PAYLOAD" in code and "HC_X86_R" not in code:
-            return 1
-        if "HC_X86_RR_PAYLOAD" in code and "HC_X86_R" not in code:
+        if "HC_X86_MEM_PAYLOAD" in code and not has_x86_pseudo_reg(code):
+            return 8 if payload_arg_is_scratch(code, "HC_X86_MEM_PAYLOAD", 0) else 1
+        if "HC_X86_RR_PAYLOAD" in code and not has_x86_pseudo_reg(code):
+            return 2
+        if "HC_X86_RR_PAYLOAD" in code and not payload_arg_is_pseudo(code, "HC_X86_RR_PAYLOAD", 0):
             return 2
         return 10
     if selector in {"MICRO_HANDCRAFT_BPF_X86_LEAQ", "MICRO_HANDCRAFT_BPF_X86_LEAL"}:
-        if "HC_X86_R" not in code:
+        if not has_x86_pseudo_reg(code):
             return 2
-        return 9
+        return 11
+    if selector in {"MICRO_HANDCRAFT_BPF_X86_ROLL", "MICRO_HANDCRAFT_BPF_X86_ROLQ"}:
+        if "HC_ROTATE_PAYLOAD" in code:
+            return 12
+        return 16
+    if selector.startswith("MICRO_HANDCRAFT_BPF_X86_") and selector[-1:] in {"L", "Q"}:
+        if "HC_X86_ALU_IMM_PAYLOAD" in code:
+            return 9 if has_x86_pseudo_reg(code) else 1
+        if "HC_X86_ALU_RR_PAYLOAD" in code:
+            return 11 if has_x86_pseudo_reg(code) else 1
     if "MICRO_HANDCRAFT_BPF_X86_" in selector:
-        if "HC_X86_R" in code:
+        if has_x86_pseudo_reg(code):
             return 8
         return 1
     return 2

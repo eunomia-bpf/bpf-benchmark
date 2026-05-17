@@ -1,11 +1,6 @@
 {
-  "apps_done": 6,
-  "last_app": "katran/wrk",
-  "last_app_status": "ok",
-  "last_updated_at": "2026-05-17T04:03:31.687283+00:00",
-  "samples": 1,
-  "status": "running",
-  "suite": "corpus",
-  "total_apps": 8,
-  "workload_seconds": 15.0
+  "error_message": "corpus suite reported errors",
+  "failed_at": "2026-05-17T04:27:50.360144+00:00",
+  "status": "error",
+  "suite": "corpus"
 }

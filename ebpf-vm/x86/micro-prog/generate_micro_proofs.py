@@ -234,15 +234,19 @@ def unresolved_call_symbols(insns: list[NativeInsn]) -> list[str]:
     return symbols
 
 
-def native_object_path(name: str) -> Path:
-    out_dir = Path("/tmp/bpf-benchmark-micro-native")
+def native_object_path(name: str, *, no_jump_tables: bool = False) -> Path:
+    out_dir = Path("/tmp/bpf-benchmark-micro-native-nojt" if no_jump_tables
+                   else "/tmp/bpf-benchmark-micro-native")
     so_path = out_dir / f"{name}.native.so"
-    subprocess.run(
-        ["make", "-C", str(MICRO_PROGRAMS), f"OUTPUT_DIR={out_dir}", str(so_path)],
-        cwd=REPO_ROOT,
-        check=True,
-        stdout=subprocess.DEVNULL,
-    )
+    cmd = ["make", "-C", str(MICRO_PROGRAMS), f"OUTPUT_DIR={out_dir}"]
+    if no_jump_tables:
+        cmd.append(
+            "NATIVE_CFLAGS=-Wall -Wextra -O2 -g -fPIC -shared "
+            "-DMICRO_NATIVE -fno-omit-frame-pointer -fno-jump-tables "
+            "-MMD -MP"
+        )
+    cmd.append(str(so_path))
+    subprocess.run(cmd, cwd=REPO_ROOT, check=True, stdout=subprocess.DEVNULL)
     return so_path
 
 
@@ -257,14 +261,34 @@ def parse_native_symbol(so_path: Path, symbol: str) -> list[NativeInsn]:
     return parse_asm_text(result.stdout)
 
 
-def parse_full_native_functions(name: str, symbols: list[str]) -> dict[str, list[NativeInsn]]:
-    so_path = native_object_path(name)
+def parse_first_native_symbol(so_path: Path, symbols: list[str]) -> tuple[str, list[NativeInsn]]:
+    for symbol in symbols:
+        insns = parse_native_symbol(so_path, symbol)
+        if insns:
+            return symbol, insns
+    raise ValueError(f"{so_path}: none of the native symbols exist: {symbols}")
+
+
+def parse_full_native_functions(name: str, symbols: list[str],
+                                *, no_jump_tables: bool = False) -> dict[str, list[NativeInsn]]:
+    so_path = native_object_path(name, no_jump_tables=no_jump_tables)
+    entry_symbol, entry_insns = parse_first_native_symbol(
+        so_path, [f"{name}_xdp", f"{name}_prog"]
+    )
     out: dict[str, list[NativeInsn]] = {
-        f"{name}_xdp": parse_native_symbol(so_path, f"{name}_xdp"),
+        entry_symbol: entry_insns,
     }
     for symbol in symbols:
         out[symbol] = parse_native_symbol(so_path, symbol)
     return out
+
+
+def parse_entry_native_function(name: str, *, no_jump_tables: bool) -> list[NativeInsn]:
+    so_path = native_object_path(name, no_jump_tables=no_jump_tables)
+    _symbol, insns = parse_first_native_symbol(
+        so_path, [f"{name}_xdp", f"{name}_prog"]
+    )
+    return insns
 
 
 def parse_int(text: str) -> int:
@@ -698,6 +722,15 @@ def c_ident(text: str) -> str:
     return re.sub(r"[^A-Za-z0-9_]", "_", text)
 
 
+def needs_stack_ext(all_insns: list[NativeInsn]) -> bool:
+    for insn in all_insns:
+        for operand in insn.operands:
+            match = re.search(r"\[r(?:b|s)p-0x([0-9a-fA-F]+)", operand)
+            if match is not None and int(match.group(1), 16) >= 0x60:
+                return True
+    return False
+
+
 def render_packet_checksum_fold(name: str, insns: list[NativeInsn]) -> str:
     by_addr = {insn.addr: insn for insn in insns}
     addrs = set(by_addr)
@@ -881,6 +914,11 @@ def render_program(name: str, insns: list[NativeInsn],
         for fn_insns in [insns, *subfunctions.values()]
         for insn in fn_insns
     )
+    has_stack_ext = needs_stack_ext([
+        insn
+        for fn_insns in [insns, *subfunctions.values()]
+        for insn in fn_insns
+    ])
     next_addrs = {
         insn.addr: insns[index + 1].addr
         for index, insn in enumerate(insns[:-1])
@@ -895,6 +933,8 @@ def render_program(name: str, insns: list[NativeInsn],
         lines.append('#define X86_VM_ENABLE_RODATA 1')
     if has_stack:
         lines.append('#define X86_VM_ENABLE_STACK 1')
+    if has_stack_ext:
+        lines.append('#define X86_VM_ENABLE_STACK_EXT 1')
     lines.extend([
         '#include "../x86_vm_bpf.h"',
         "",
@@ -930,13 +970,22 @@ def render_program(name: str, insns: list[NativeInsn],
     return "\n".join(lines)
 
 
-def write_one(md_path: Path, out_dir: Path) -> Path:
+def write_one(md_path: Path, out_dir: Path, *,
+              native_source: str = "markdown") -> Path:
     name = md_path.stem
-    insns = parse_native_asm(md_path)
+    no_jump_tables = native_source == "object-no-jump-tables"
+    if native_source == "markdown":
+        insns = parse_native_asm(md_path)
+    elif no_jump_tables:
+        insns = parse_entry_native_function(name, no_jump_tables=True)
+    else:
+        raise ValueError(f"unknown native source: {native_source}")
     missing_symbols = unresolved_call_symbols(insns)
     subfunctions: dict[str, list[NativeInsn]] = {}
     if missing_symbols:
-        native_functions = parse_full_native_functions(name, missing_symbols)
+        native_functions = parse_full_native_functions(
+            name, missing_symbols, no_jump_tables=no_jump_tables
+        )
         insns = native_functions.pop(f"{name}_xdp")
         subfunctions = native_functions
     if not insns:
@@ -951,6 +1000,12 @@ def main() -> int:
     parser.add_argument("--micro-programs", type=Path, default=MICRO_PROGRAMS)
     parser.add_argument("--output-dir", type=Path, default=OUT_DIR)
     parser.add_argument("--only", nargs="*", help="optional micro benchmark stem list")
+    parser.add_argument(
+        "--native-source",
+        choices=("markdown", "object-no-jump-tables"),
+        default="markdown",
+        help="where to read native x86 disassembly from",
+    )
     args = parser.parse_args()
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -959,7 +1014,8 @@ def main() -> int:
     for md_path in sorted(args.micro_programs.glob("*.md")):
         if only and md_path.stem not in only:
             continue
-        written.append(write_one(md_path, args.output_dir))
+        written.append(write_one(md_path, args.output_dir,
+                                 native_source=args.native_source))
 
     for path in written:
         print(path)

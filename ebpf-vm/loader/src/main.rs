@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::env;
 use std::ffi::{c_void, CString};
 use std::fs;
@@ -9,25 +10,27 @@ use std::path::PathBuf;
 use std::process;
 use std::ptr;
 
+use serde::Deserialize;
+
 const XVM_MAGIC: u32 = 0x314d5658;
 const XVM_OUTPUT_OFF: usize = 0;
 const XVM_HEADER_OFF: usize = 8;
 const XVM_CODE_OFF: usize = 16;
 const XVM_INSN_SIZE: usize = 16;
 const XVM_MAX_INSNS: usize = 32;
-
 const XVM_OP_MOV_IMM64: u8 = 0x01;
 const XVM_OP_RET: u8 = 0xff;
-
 const XVM_RAX: u8 = 0;
 
+const BPF_PROG_TYPE_XDP: u32 = 6;
 const XDP_PASS: u32 = 2;
 const SIMPLE_EXPECTED: u64 = 12_345_678;
 
 type Result<T> = std::result::Result<T, String>;
 
 struct Cli {
-    object: PathBuf,
+    object: Option<PathBuf>,
+    json: Option<PathBuf>,
     case_name: String,
     expected_result: Option<u64>,
     expect_retval: u32,
@@ -37,8 +40,43 @@ struct Cli {
     repeat: i32,
 }
 
+#[derive(Deserialize)]
+struct JsonProof {
+    bpf_program: Option<JsonBpfProgram>,
+}
+
+#[derive(Deserialize)]
+struct JsonBpfProgram {
+    insns: Vec<JsonBpfInsn>,
+}
+
+#[derive(Deserialize)]
+struct JsonBpfInsn {
+    code: u8,
+    dst: u8,
+    src: u8,
+    #[serde(default)]
+    off: i16,
+    imm: i32,
+    #[serde(default)]
+    label: Option<String>,
+    #[serde(default)]
+    target: Option<String>,
+    #[serde(default)]
+    comment: Option<String>,
+}
+
 struct BpfObject {
     ptr: *mut c_void,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy)]
+struct BpfInsn {
+    code: u8,
+    regs: u8,
+    off: i16,
+    imm: i32,
 }
 
 #[repr(C)]
@@ -111,26 +149,43 @@ fn main() {
 
 fn run() -> Result<()> {
     let cli = parse_cli()?;
-    let mut object = open_object(&cli.object)?;
-    load_object(&mut object)?;
-    let prog_fd = program_fd(&object, &cli.program)?;
+    let json_mode = cli.json.is_some();
+    let (prog_fd, loaded_name): (c_int, String) = if let Some(json) = &cli.json {
+        let insns = build_json_linked_program(json)?;
+        (load_raw_xdp_program(&cli.program, &insns)?, json.display().to_string())
+    } else {
+        let object_path = cli
+            .object
+            .as_ref()
+            .ok_or_else(|| "--object or --json is required".to_string())?;
+        let mut object = open_object(object_path)?;
+        load_object(&mut object)?;
+        let fd = program_fd(&object, &cli.program)?;
+        if cli.load_only {
+            println!(
+                "loaded object={} program={} fd={}",
+                object_path.display(),
+                cli.program,
+                fd
+            );
+            return Ok(());
+        }
+        std::mem::forget(object);
+        (fd, object_path.display().to_string())
+    };
 
     if cli.load_only {
         println!(
-            "loaded object={} program={} fd={}",
-            cli.object.display(),
-            cli.program,
-            prog_fd
+            "loaded input={} program={} fd={}",
+            loaded_name, cli.program, prog_fd
         );
         return Ok(());
     }
+
     let mut input = if let Some(path) = &cli.input {
         build_packet_input(path)?
     } else {
-        match cli.case_name.as_str() {
-            "simple" => build_simple_case(),
-            other => return Err(format!("unsupported case: {other}")),
-        }
+        build_default_case_input(&cli.case_name, json_mode)?
     };
     let mut output = input.clone();
     let mut opts = BpfTestRunOpts {
@@ -177,6 +232,7 @@ fn run() -> Result<()> {
 fn parse_cli() -> Result<Cli> {
     let mut args = env::args().skip(1);
     let mut object = None;
+    let mut json = None;
     let mut case_name = String::from("simple");
     let mut expected_result = None;
     let mut expect_retval = XDP_PASS;
@@ -191,6 +247,12 @@ fn parse_cli() -> Result<Cli> {
                 object = Some(PathBuf::from(
                     args.next()
                         .ok_or_else(|| "--object requires a path".to_string())?,
+                ));
+            }
+            "--json" => {
+                json = Some(PathBuf::from(
+                    args.next()
+                        .ok_or_else(|| "--json requires a path".to_string())?,
                 ));
             }
             "--case" => {
@@ -249,10 +311,13 @@ fn parse_cli() -> Result<Cli> {
         }
     }
 
-    let object = object.ok_or_else(|| "--object requires a path".to_string())?;
+    if object.is_some() == json.is_some() {
+        return Err("exactly one of --object or --json is required".to_string());
+    }
 
     Ok(Cli {
         object,
+        json,
         case_name,
         expected_result,
         expect_retval,
@@ -265,7 +330,7 @@ fn parse_cli() -> Result<Cli> {
 
 fn print_help() {
     println!(
-        "Usage: ebpf-vm-loader --object <vm.bpf.o> [--program x86_vm_xdp] [--load-only] [--case simple|--input payload.mem --expected-result N] [--repeat N]"
+        "Usage: ebpf-vm-loader (--object <vm.bpf.o>|--json proof.json) [--program x86_vm_xdp] [--load-only] [--case simple|--input payload.mem --expected-result N] [--repeat N]"
     );
 }
 
@@ -311,6 +376,121 @@ fn program_fd(object: &BpfObject, name: &str) -> Result<i32> {
     Ok(fd)
 }
 
+fn build_json_linked_program(path: &PathBuf) -> Result<Vec<BpfInsn>> {
+    let text = fs::read_to_string(path).map_err(|err| format!("read {}: {err}", path.display()))?;
+    let proof: JsonProof =
+        serde_json::from_str(&text).map_err(|err| format!("parse {}: {err}", path.display()))?;
+    let program = proof
+        .bpf_program
+        .as_ref()
+        .ok_or_else(|| format!("{} has no bpf_program section", path.display()))?;
+    link_bpf_program(program)
+}
+
+fn link_bpf_program(program: &JsonBpfProgram) -> Result<Vec<BpfInsn>> {
+    let mut labels = HashMap::new();
+    for (index, insn) in program.insns.iter().enumerate() {
+        if let Some(label) = &insn.label {
+            if labels.insert(label.as_str(), index).is_some() {
+                return Err(format!("duplicate BPF label: {label}"));
+            }
+        }
+    }
+
+    let mut out = Vec::with_capacity(program.insns.len());
+    for insn in &program.insns {
+        let _comment = &insn.comment;
+        out.push(BpfInsn {
+            code: insn.code,
+            regs: (insn.dst & 0x0f) | ((insn.src & 0x0f) << 4),
+            off: insn.off,
+            imm: insn.imm,
+        });
+    }
+
+    for (index, insn) in program.insns.iter().enumerate() {
+        if let Some(target) = &insn.target {
+            let target_index = *labels
+                .get(target.as_str())
+                .ok_or_else(|| format!("missing BPF label: {target}"))?;
+            let off = target_index as isize - index as isize - 1;
+            if off < i16::MIN as isize || off > i16::MAX as isize {
+                return Err(format!("branch offset out of range at insn {index}: {off}"));
+            }
+            out[index].off = off as i16;
+        }
+    }
+
+    Ok(out)
+}
+
+fn load_raw_xdp_program(name: &str, insns: &[BpfInsn]) -> Result<c_int> {
+    let c_name = CString::new(name).map_err(|_| format!("program name contains NUL: {name}"))?;
+    let license = CString::new("GPL").expect("static license");
+    let mut opts = libbpf_sys::bpf_prog_load_opts {
+        sz: mem::size_of::<libbpf_sys::bpf_prog_load_opts>() as libbpf_sys::size_t,
+        ..Default::default()
+    };
+    let fd = unsafe {
+        libbpf_sys::bpf_prog_load(
+            BPF_PROG_TYPE_XDP,
+            c_name.as_ptr(),
+            license.as_ptr(),
+            insns.as_ptr().cast::<libbpf_sys::bpf_insn>(),
+            insns.len() as libbpf_sys::size_t,
+            &mut opts,
+        )
+    };
+    if fd >= 0 {
+        return Ok(fd);
+    }
+
+    let mut log_buf = vec![0 as c_char; 16 * 1024 * 1024];
+    let mut opts = libbpf_sys::bpf_prog_load_opts {
+        sz: mem::size_of::<libbpf_sys::bpf_prog_load_opts>() as libbpf_sys::size_t,
+        log_level: 2,
+        log_size: log_buf.len() as u32,
+        log_buf: log_buf.as_mut_ptr(),
+        ..Default::default()
+    };
+    let diagnostic_fd = unsafe {
+        libbpf_sys::bpf_prog_load(
+            BPF_PROG_TYPE_XDP,
+            c_name.as_ptr(),
+            license.as_ptr(),
+            insns.as_ptr().cast::<libbpf_sys::bpf_insn>(),
+            insns.len() as libbpf_sys::size_t,
+            &mut opts,
+        )
+    };
+    if diagnostic_fd >= 0 {
+        return Ok(diagnostic_fd);
+    }
+    let verifier = log_buf_to_string(&log_buf);
+    Err(format!(
+        "bpf_prog_load JSON-linked program failed: {}\n{}",
+        io::Error::last_os_error(),
+        verifier
+    ))
+}
+
+fn log_buf_to_string(log_buf: &[c_char]) -> String {
+    let nul = log_buf.iter().position(|ch| *ch == 0).unwrap_or(log_buf.len());
+    let bytes: Vec<u8> = log_buf[..nul].iter().map(|ch| *ch as u8).collect();
+    String::from_utf8_lossy(&bytes).into_owned()
+}
+
+fn build_default_case_input(case_name: &str, json_mode: bool) -> Result<Vec<u8>> {
+    if json_mode {
+        let path = PathBuf::from("micro/generated-inputs").join(format!("{case_name}.mem"));
+        return build_packet_input(&path);
+    }
+    match case_name {
+        "simple" => Ok(build_simple_case()),
+        other => Err(format!("unsupported case without --input: {other}")),
+    }
+}
+
 fn build_simple_case() -> Vec<u8> {
     let mut data = vec![0u8; XVM_CODE_OFF + 2 * XVM_INSN_SIZE];
     write_le_u32(&mut data[XVM_HEADER_OFF..XVM_HEADER_OFF + 4], XVM_MAGIC);
@@ -322,7 +502,7 @@ fn build_simple_case() -> Vec<u8> {
 
 fn build_packet_input(path: &PathBuf) -> Result<Vec<u8>> {
     let payload = fs::read(path).map_err(|err| format!("read {}: {err}", path.display()))?;
-    let mut data = vec![0u8; XVM_OUTPUT_OFF + 8 + payload.len()];
+    let mut data = vec![XVM_OUTPUT_OFF as u8; XVM_OUTPUT_OFF + 8 + payload.len()];
     data[8..].copy_from_slice(&payload);
     Ok(data)
 }

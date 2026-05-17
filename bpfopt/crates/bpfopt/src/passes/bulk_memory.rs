@@ -424,9 +424,10 @@ fn emit_memcpy_byte_kinsns(
     for idx in 0..total_bytes {
         let src_off = checked_byte_offset(src_off, idx)?;
         let dst_off = checked_byte_offset(dst_off, idx)?;
-        out.extend_from_slice(
-            &prog.kinsn_emit(load_target, pack_mem_payload(arch, temp_reg, src_base, src_off))?,
-        );
+        out.extend_from_slice(&prog.kinsn_emit(
+            load_target,
+            pack_mem_payload(arch, temp_reg, src_base, src_off),
+        )?);
         out.extend_from_slice(&prog.kinsn_emit(
             store_target,
             pack_store_reg_payload(arch, temp_reg, dst_base, dst_off),

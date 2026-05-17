@@ -1421,7 +1421,9 @@ mod tests {
         let obj = root.join("bpfopt/testobject/katran_balancer.bpf.o");
         let bpfopt = root.join(BPFOPT_BIN);
         let overlay_dir = root.join("runner/config/passes/map_inline/overlays/katran");
-        let diag_dir = std::env::var("BPFOPT_LOADER_DIAG_WORKDIR").ok().map(PathBuf::from);
+        let diag_dir = std::env::var("BPFOPT_LOADER_DIAG_WORKDIR")
+            .ok()
+            .map(PathBuf::from);
         let workdir = WorkDir::open(diag_dir)?;
         let map_values_dir = workdir.path.join(MAP_VALUES_DIR);
         let (_obj, prepared) = prepare_workdir(&workdir.path, &obj, true, true, 2)?;
@@ -1430,16 +1432,52 @@ mod tests {
             if metadata.name != "balancer_ingress" {
                 continue;
             }
+            // BASELINE measurement: PROG_TEST_RUN on un-optimized bytecode.
+            fs::copy(
+                prog.dir.join(CANONICALIZE_INPUT_BIN),
+                prog.dir.join(INPUT_BIN),
+            )?;
+            fs::copy(
+                prog.dir.join(CANONICALIZE_INPUT_BIN),
+                prog.dir.join(OUTPUT_BIN),
+            )?;
+            let baseline_fd = verify_workdir(
+                &prog.dir,
+                &prog.map_fds,
+                prog.btf_fd,
+                &prog.func_info,
+                &prog.line_info,
+            )?;
+            eprintln!("=== BASELINE PROG_TEST_RUN repeat=10000 ===");
+            run_bpftestrun(baseline_fd.as_raw_fd(), &prog.dir, &katran_test_cli(10_000))?;
+            fs::copy(
+                prog.dir.join(TEST_RUN_JSON),
+                prog.dir.join("test_run_baseline.json"),
+            )?;
+            drop(baseline_fd);
             canonicalize_program(prog, &bpfopt)?;
-            fs::copy(prog.dir.join(REPORT_JSON), prog.dir.join("report_canonicalize.json")).ok();
+            fs::copy(
+                prog.dir.join(REPORT_JSON),
+                prog.dir.join("report_canonicalize.json"),
+            )
+            .ok();
             write_katran_overlays(&map_values_dir, &overlay_dir)?;
             run_katran_map_inline(prog, &map_values_dir, &bpfopt)?;
-            fs::copy(prog.dir.join(REPORT_JSON), prog.dir.join("report_map_inline.json"))?;
+            fs::copy(
+                prog.dir.join(REPORT_JSON),
+                prog.dir.join("report_map_inline.json"),
+            )?;
             refresh_katran_verifier_log(prog)?;
-            fs::copy(prog.dir.join(VERIFIER_LOG), prog.dir.join("verifier_after_map_inline.log"))?;
+            fs::copy(
+                prog.dir.join(VERIFIER_LOG),
+                prog.dir.join("verifier_after_map_inline.log"),
+            )?;
             promote_output_to_input(prog)?;
             run_katran_bytecode_pass(prog, &bpfopt, "const_prop", true)?;
-            fs::copy(prog.dir.join(REPORT_JSON), prog.dir.join("report_const_prop.json"))?;
+            fs::copy(
+                prog.dir.join(REPORT_JSON),
+                prog.dir.join("report_const_prop.json"),
+            )?;
             promote_output_to_input(prog)?;
             run_katran_bytecode_pass(prog, &bpfopt, "dce", false)?;
             fs::copy(prog.dir.join(REPORT_JSON), prog.dir.join("report_dce.json"))?;

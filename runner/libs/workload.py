@@ -769,6 +769,27 @@ def _cilium_endpoint_topology() -> tuple[_CiliumEndpoint, _CiliumEndpoint] | Non
     return endpoints[0], endpoints[1]
 
 
+def _wait_for_http_endpoint(url: str, namespace: str | None, max_wait_s: float = 60.0) -> None:
+    # Post-ReJIT cilium reattaches xdp+tc programs; that reattach window can leave
+    # the dataplane briefly unreachable. Probe with curl until 2xx or deadline.
+    curl = which("curl") or "/usr/bin/curl"
+    probe = [curl, "-s", "-o", "/dev/null", "-w", "%{http_code}", "--connect-timeout", "1", "--max-time", "2", url]
+    if namespace:
+        probe = _namespaced_client_command(namespace, probe)
+    deadline = time.monotonic() + max_wait_s
+    last = ""
+    while time.monotonic() < deadline:
+        try:
+            result = run_command(probe, check=False, timeout=3.0)
+            last = (result.stdout or "").strip()
+            if last.startswith("2"):
+                return
+        except Exception as exc:
+            last = str(exc)
+        time.sleep(0.2)
+    raise RuntimeError(f"endpoint {url} not ready after {max_wait_s}s (last={last!r})")
+
+
 def _run_wrk_http_load(
     wrk_binary: str,
     url: str,
@@ -780,20 +801,22 @@ def _run_wrk_http_load(
     workload_name: str,
 ) -> WorkloadResult:
 
-    # `--timeout 1s` bounds wrk's per-socket wait so a broken endpoint cannot
-    # leave a request hanging until the subprocess deadline.
+    _wait_for_http_endpoint(url, namespace)
+    # `--timeout 5s` bounds wrk's per-socket wait. 1s was too aggressive: a slow
+    # first connect after a post-ReJIT BPF attach window could hang every socket
+    # and exhaust the subprocess deadline.
     command = [
         wrk_binary,
         f"-t{int(threads)}",
         f"-c{int(connections)}",
         f"-d{int(seconds)}s",
-        "--timeout", "1s",
+        "--timeout", "5s",
         url,
     ]
     if namespace:
         command = _namespaced_client_command(namespace, command)
     start = time.monotonic()
-    completed = run_command(command, check=False, timeout=float(seconds) + 30)
+    completed = run_command(command, check=False, timeout=float(seconds) + 60)
     elapsed = time.monotonic() - start
     if completed.returncode != 0:
         raise RuntimeError(
