@@ -208,19 +208,45 @@ def mem_base_reg(operand: str) -> str:
     return parsed[0] if parsed is not None else "X86_REG_NONE"
 
 
-def mem_disp(operand: str) -> int:
+def parse_mem_terms(operand: str) -> tuple[str, str, int, int]:
     inner_match = re.search(r"\[(.*?)\]", operand)
     if inner_match is None:
-        return 0
-    inner = inner_match.group(1).replace("-", "+-")
+        return "X86_REG_NONE", "X86_REG_NONE", 0, 0
+    inner = inner_match.group(1).replace(" ", "").replace("-", "+-")
+    base = "X86_REG_NONE"
+    index = "X86_REG_NONE"
+    scale_log2 = 0
     disp = 0
-    for part in inner.split("+"):
-        part = part.strip()
-        if not part or "*" in part or reg_info(part) is not None:
+    for part in filter(None, inner.split("+")):
+        if "*" in part:
+            reg_text, scale_text = part.split("*", 1)
+            parsed = reg_info(reg_text)
+            if parsed is not None:
+                index = parsed[0]
+            scale = parse_int(scale_text)
+            scale_log2 = {1: 0, 2: 1, 4: 2, 8: 3}.get(scale, 0)
+            continue
+        parsed = reg_info(part)
+        if parsed is not None:
+            if base == "X86_REG_NONE":
+                base = parsed[0]
+            else:
+                index = parsed[0]
             continue
         if is_int(part):
             disp += parse_int(part)
-    return disp
+    return base, index, scale_log2, disp
+
+
+def mem_aux(operand: str, mem_width: int | None = None) -> str:
+    _base, index, scale_log2, _disp = parse_mem_terms(operand)
+    if mem_width is not None:
+        return f"X86_MEM_AUX_FULL({index}, {scale_log2}, {WIDTH_CONST[mem_width]})"
+    return f"X86_MEM_AUX({index}, {scale_log2})"
+
+
+def mem_disp(operand: str) -> int:
+    return parse_mem_terms(operand)[3]
 
 
 def branch_target(operand: str) -> int:
@@ -284,14 +310,17 @@ def encode(insn: NativeInsn) -> EncodedInsn:
         if dst_reg and is_mem(src):
             return enc("X86_OP_MOV_LOAD", dst=dst_reg[0], src=mem_base_reg(src),
                        flags=WIDTH_CONST[operand_width(src, dst_reg[1])],
+                       aux=mem_aux(src),
                        imm=c_u64(mem_disp(src)))
         if is_mem(dst) and is_int(src):
             return enc("X86_OP_MOV_STORE_IMM", dst=mem_base_reg(dst),
                        flags=WIDTH_CONST[operand_width(dst)],
+                       aux=mem_aux(dst),
                        imm=c_u64(parse_int(src) + (mem_disp(dst) << 32)))
         if is_mem(dst) and src_reg:
             return enc("X86_OP_MOV_STORE_REG", dst=mem_base_reg(dst),
                        src=src_reg[0], flags=WIDTH_CONST[operand_width(dst)],
+                       aux=mem_aux(dst),
                        imm=c_u64(mem_disp(dst)))
         raise ValueError(f"cannot encode {insn.raw}")
 
@@ -303,11 +332,15 @@ def encode(insn: NativeInsn) -> EncodedInsn:
         if dst_reg is None:
             raise ValueError(f"cannot encode {insn.raw}")
         if src_reg:
-            return enc("X86_OP_MOV_REG", dst=dst_reg[0], src=src_reg[0],
-                       flags=WIDTH_CONST[dst_reg[1]])
+            return enc("X86_OP_MOVSX_REG" if op in {"movsx", "movsxd"} else "X86_OP_MOVZX_REG",
+                       dst=dst_reg[0], src=src_reg[0],
+                       flags=WIDTH_CONST[dst_reg[1]], aux=WIDTH_CONST[src_reg[1]])
         if is_mem(ops[1]):
-            return enc("X86_OP_MOV_LOAD", dst=dst_reg[0], src=mem_base_reg(ops[1]),
-                       flags=WIDTH_CONST[dst_reg[1]], imm=c_u64(mem_disp(ops[1])))
+            mem_width = operand_width(ops[1], 32 if op == "movsxd" else dst_reg[1])
+            return enc("X86_OP_MOVSX_LOAD" if op in {"movsx", "movsxd"} else "X86_OP_MOV_LOAD",
+                       dst=dst_reg[0], src=mem_base_reg(ops[1]),
+                       flags=WIDTH_CONST[dst_reg[1]], aux=mem_aux(ops[1], mem_width),
+                       imm=c_u64(mem_disp(ops[1])))
         raise ValueError(f"cannot encode {insn.raw}")
 
     if op == "lea":
@@ -332,6 +365,18 @@ def encode(insn: NativeInsn) -> EncodedInsn:
         if dst_reg and src_reg:
             return enc("X86_OP_CMP_REG" if op == "cmp" else "X86_OP_TEST_REG",
                        dst=dst_reg[0], src=src_reg[0], flags=WIDTH_CONST[dst_reg[1]])
+        if op == "cmp" and is_mem(ops[0]) and src_reg:
+            return enc("X86_OP_CMP_MEM_REG",
+                       dst=mem_base_reg(ops[0]), src=src_reg[0],
+                       flags=WIDTH_CONST[operand_width(ops[0], src_reg[1])],
+                       aux=mem_aux(ops[0]),
+                       imm=c_u64(mem_disp(ops[0])))
+        if is_mem(ops[0]) and is_int(ops[1]):
+            return enc("X86_OP_CMP_MEM_IMM" if op == "cmp" else "X86_OP_TEST_MEM_IMM",
+                       dst=mem_base_reg(ops[0]),
+                       flags=WIDTH_CONST[operand_width(ops[0], width)],
+                       aux=mem_aux(ops[0]),
+                       imm=c_u64(parse_int(ops[1]) + (mem_disp(ops[0]) << 32)))
         if is_mem(ops[0]) or is_mem(ops[1]):
             return enc("X86_OP_NOP", flags=WIDTH_CONST[width])
         raise ValueError(f"cannot encode {insn.raw}")
@@ -410,24 +455,46 @@ def c_comment(text: str) -> str:
 
 
 def render_program(name: str, insns: list[NativeInsn]) -> str:
+    addrs = {insn.addr for insn in insns}
     lines = [
         '#include "../x86_vm_bpf.h"',
         "",
         "SEC(\"xdp\")",
         f"int {name}_x86_vm_xdp(struct xdp_md *ctx)",
         "{",
-        "\treturn X86_VM_BEGIN_XDP(ctx)",
+        "\tX86_VM_DECLARE_XDP(ctx);",
     ]
     for insn in insns:
-        encoded = encode(insn)
+        label = f"x86_l_{insn.addr:x}"
+        lines.append(f"{label}:")
         lines.append(f"\t/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+        if insn.mnemonic in CC_AUX and insn.mnemonic.startswith("j"):
+            target = branch_target(insn.operands[0]) if insn.operands else 0
+            if target in addrs:
+                lines.append(f"\tif (x86_eval_cc(&__x86_vm_state, {CC_AUX[insn.mnemonic]}))")
+                lines.append(f"\t\tgoto x86_l_{target:x};")
+            else:
+                lines.append(f"\tif (x86_eval_cc(&__x86_vm_state, {CC_AUX[insn.mnemonic]}))")
+                lines.append("\t\treturn XDP_ABORTED;")
+            continue
+        if insn.mnemonic == "jmp":
+            target = branch_target(insn.operands[0]) if insn.operands else 0
+            if target in addrs:
+                lines.append(f"\tgoto x86_l_{target:x};")
+            else:
+                lines.append("\treturn XDP_ABORTED;")
+            continue
+        if insn.mnemonic == "ret":
+            lines.append("\tX86_VM_RET_RAX();")
+            continue
+        encoded = encode(insn)
         lines.append(
-            "\tX86_VM_STEP("
+            "\tX86_VM_RUN_STEP("
             f"{encoded.op}, {encoded.dst}, {encoded.src}, {encoded.flags}, "
-            f"{encoded.aux}, {encoded.imm})"
+            f"{encoded.aux}, {encoded.imm});"
         )
     lines.extend([
-        "\tX86_VM_END_XDP();",
+        "\treturn XDP_ABORTED;",
         "}",
         "",
         "X86_VM_LICENSE();",

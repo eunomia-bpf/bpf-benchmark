@@ -1,5 +1,6 @@
 use std::env;
 use std::ffi::{c_void, CString};
+use std::fs;
 use std::io;
 use std::mem;
 use std::os::raw::{c_char, c_int, c_long};
@@ -28,6 +29,9 @@ type Result<T> = std::result::Result<T, String>;
 struct Cli {
     object: PathBuf,
     case_name: String,
+    expected_result: Option<u64>,
+    expect_retval: u32,
+    input: Option<PathBuf>,
     load_only: bool,
     program: String,
     repeat: i32,
@@ -119,9 +123,13 @@ fn run() -> Result<()> {
         );
         return Ok(());
     }
-    let mut input = match cli.case_name.as_str() {
-        "simple" => build_simple_case(),
-        other => return Err(format!("unsupported case: {other}")),
+    let mut input = if let Some(path) = &cli.input {
+        build_packet_input(path)?
+    } else {
+        match cli.case_name.as_str() {
+            "simple" => build_simple_case(),
+            other => return Err(format!("unsupported case: {other}")),
+        }
     };
     let mut output = input.clone();
     let mut opts = BpfTestRunOpts {
@@ -140,17 +148,21 @@ fn run() -> Result<()> {
             io::Error::last_os_error()
         ));
     }
-    if opts.retval != XDP_PASS {
-        return Err(format!("unexpected XDP retval: {}", opts.retval));
+    if opts.retval != cli.expect_retval {
+        return Err(format!(
+            "unexpected XDP retval: got {}, expected {}",
+            opts.retval, cli.expect_retval
+        ));
     }
     if opts.data_size_out < 8 {
         return Err(format!("short data_size_out: {}", opts.data_size_out));
     }
 
     let result = read_le_u64(&output[XVM_OUTPUT_OFF..XVM_OUTPUT_OFF + 8]);
-    if result != SIMPLE_EXPECTED {
+    let expected_result = cli.expected_result.unwrap_or(SIMPLE_EXPECTED);
+    if result != expected_result {
         return Err(format!(
-            "simple result mismatch: got {result}, expected {SIMPLE_EXPECTED}"
+            "result mismatch: got {result}, expected {expected_result}"
         ));
     }
 
@@ -165,6 +177,9 @@ fn parse_cli() -> Result<Cli> {
     let mut args = env::args().skip(1);
     let mut object = None;
     let mut case_name = String::from("simple");
+    let mut expected_result = None;
+    let mut expect_retval = XDP_PASS;
+    let mut input = None;
     let mut load_only = false;
     let mut program = String::from("x86_vm_xdp");
     let mut repeat = 1;
@@ -181,6 +196,30 @@ fn parse_cli() -> Result<Cli> {
                 case_name = args
                     .next()
                     .ok_or_else(|| "--case requires a name".to_string())?;
+            }
+            "--expected-result" => {
+                let value = args
+                    .next()
+                    .ok_or_else(|| "--expected-result requires a u64".to_string())?;
+                expected_result = Some(
+                    value
+                        .parse::<u64>()
+                        .map_err(|err| format!("invalid --expected-result {value}: {err}"))?,
+                );
+            }
+            "--expect-retval" => {
+                let value = args
+                    .next()
+                    .ok_or_else(|| "--expect-retval requires a u32".to_string())?;
+                expect_retval = value
+                    .parse::<u32>()
+                    .map_err(|err| format!("invalid --expect-retval {value}: {err}"))?;
+            }
+            "--input" => {
+                input = Some(PathBuf::from(
+                    args.next()
+                        .ok_or_else(|| "--input requires a path".to_string())?,
+                ));
             }
             "--load-only" => {
                 load_only = true;
@@ -213,6 +252,9 @@ fn parse_cli() -> Result<Cli> {
     Ok(Cli {
         object,
         case_name,
+        expected_result,
+        expect_retval,
+        input,
         load_only,
         program,
         repeat,
@@ -221,7 +263,7 @@ fn parse_cli() -> Result<Cli> {
 
 fn print_help() {
     println!(
-        "Usage: ebpf-vm-loader --object <vm.bpf.o> [--load-only] [--case simple] [--program x86_vm_xdp] [--repeat N]"
+        "Usage: ebpf-vm-loader --object <vm.bpf.o> [--load-only] [--case simple|--input payload.mem --expected-result N] [--program x86_vm_xdp] [--repeat N]"
     );
 }
 
@@ -274,6 +316,13 @@ fn build_simple_case() -> Vec<u8> {
     encode_insn(&mut data, 0, XVM_OP_MOV_IMM64, XVM_RAX, 0, SIMPLE_EXPECTED);
     encode_insn(&mut data, 1, XVM_OP_RET, 0, 0, 0);
     data
+}
+
+fn build_packet_input(path: &PathBuf) -> Result<Vec<u8>> {
+    let payload = fs::read(path).map_err(|err| format!("read {}: {err}", path.display()))?;
+    let mut data = vec![0u8; XVM_OUTPUT_OFF + 8 + payload.len()];
+    data[8..].copy_from_slice(&payload);
+    Ok(data)
 }
 
 fn encode_insn(data: &mut [u8], index: usize, op: u8, dst: u8, src: u8, imm: u64) {

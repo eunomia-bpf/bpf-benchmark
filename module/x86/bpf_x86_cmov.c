@@ -412,6 +412,10 @@ static int instantiate_cmp_rr_flags(u64 payload, struct bpf_insn *insn_buf,
 			kinsn_x86_read64(insn_buf, &cnt, right_eval_reg,
 					 right_reg);
 	}
+	insn_buf[cnt++] = BPF_STX_MEM(BPF_DW, BPF_REG_10, left_eval_reg,
+				      KINSN_X86_PROOF_LHS_OFF);
+	insn_buf[cnt++] = BPF_STX_MEM(BPF_DW, BPF_REG_10, right_eval_reg,
+				      KINSN_X86_PROOF_RHS_OFF);
 	insn_buf[cnt++] = BPF_ST_MEM(BPF_W, BPF_REG_10,
 				     KINSN_X86_SHADOW_ZF_OFF, 0);
 	insn_buf[cnt++] = is32 ? BPF_JMP32_REG(BPF_JNE, left_eval_reg, right_eval_reg, 1) :
@@ -459,6 +463,10 @@ static int instantiate_cmp_imm_flags(u64 payload, struct bpf_insn *insn_buf,
 		else
 			kinsn_x86_read64(insn_buf, &cnt, eval_reg, reg);
 	}
+	insn_buf[cnt++] = BPF_STX_MEM(BPF_DW, BPF_REG_10, eval_reg,
+				      KINSN_X86_PROOF_LHS_OFF);
+	insn_buf[cnt++] = BPF_ST_MEM(BPF_DW, BPF_REG_10,
+				     KINSN_X86_PROOF_RHS_OFF, imm);
 	insn_buf[cnt++] = BPF_ST_MEM(BPF_W, BPF_REG_10,
 				     KINSN_X86_SHADOW_ZF_OFF, 0);
 	insn_buf[cnt++] = is32 ? BPF_JMP32_IMM(BPF_JNE, eval_reg, imm, 1) :

@@ -148,6 +148,10 @@ BRANCH_PROOF_LEN = {
     "MICRO_HANDCRAFT_BPF_X86_JNS": 13,
     "MICRO_HANDCRAFT_BPF_X86_JMP": 1,
 }
+BRANCH_DIRECT_PROOF_LEN = 14
+BRANCH_PROOF_FLAGS = "HC_X86_BRANCH_PROOF_FLAGS"
+BRANCH_PROOF_CMP_RR = "HC_X86_BRANCH_PROOF_CMP_RR"
+DIRECT_CMP_JCC = {"ja", "jae", "jb", "jbe", "je", "jne", "jg", "jge", "jl", "jle"}
 
 
 @dataclass(frozen=True)
@@ -461,6 +465,11 @@ def translate(insn: NativeInsn) -> Translation:
         return Translation("exact-kinsn", (f"HC_KINSN(HC_X86_FRAME_PAYLOAD({dst}, {src}), MICRO_HANDCRAFT_BPF_X86_MOVQ)",), "movq frame-register kinsn")
     if op == "ret":
         return Translation("abi-boundary", ("HC_EXIT()",), "native ret maps to the BPF program exit boundary")
+    if op == "call" and len(ops) == 1:
+        target_addr = parse_branch_target(ops[0])
+        if target_addr is None:
+            return Translation("warning-unmapped", (), f"cannot parse x86 call target: {insn.raw}")
+        return Translation("abi-boundary", (f"HC_CALL({BRANCH_DELTA})",), "native direct call maps to BPF pseudo call", target_addr)
     if op in JCC_OP:
         target_addr = parse_branch_target(ops[0]) if len(ops) == 1 else None
         selector = JCC_SELECTOR.get(op)
@@ -945,8 +954,49 @@ def translate(insn: NativeInsn) -> Translation:
     return Translation("warning-unmapped", (), f"unsupported mnemonic or operand form: {insn.raw}")
 
 
+def jcc_proof_from_flag_producer(branch: NativeInsn, producer: NativeInsn) -> tuple[bool, str] | None:
+    if branch.mnemonic not in DIRECT_CMP_JCC:
+        return None
+    if producer.mnemonic != "cmp" or len(producer.operands) != 2:
+        return None
+    lhs = bpf_reg(producer.operands[0])
+    rhs = bpf_reg(producer.operands[1])
+    if lhs is None or rhs is None or lhs[1] != rhs[1] or lhs[1] not in {32, 64}:
+        if lhs is None or lhs[1] not in {32, 64} or not is_int(producer.operands[1]):
+            return None
+        return lhs[1] == 32, BRANCH_PROOF_CMP_RR
+    return lhs[1] == 32, BRANCH_PROOF_CMP_RR
+
+
 def translate_all(insns: list[NativeInsn]) -> list[Translation]:
-    return [translate(insn) for insn in insns]
+    translations: list[Translation] = []
+    flag_producer: NativeInsn | None = None
+    for insn in insns:
+        trans = translate(insn)
+        if insn.mnemonic in JCC_OP and flag_producer is not None:
+            proof = jcc_proof_from_flag_producer(insn, flag_producer)
+            if proof is not None:
+                is32, proof_kind = proof
+                code = tuple(
+                    item.replace(
+                        "HC_X86_BRANCH_PAYLOAD(",
+                        f"HC_X86_BRANCH_PROOF_PAYLOAD(",
+                    ).replace(
+                        ")",
+                        f", {1 if is32 else 0}, {proof_kind})",
+                        1,
+                    ) if item.startswith("HC_KINSN(HC_X86_BRANCH_PAYLOAD(") else item
+                    for item in trans.code
+                )
+                trans = Translation(trans.status, code,
+                                    f"{trans.note}; verifier proof from preceding {flag_producer.mnemonic}",
+                                    trans.target_addr)
+        translations.append(trans)
+        if insn.mnemonic in {"cmp", "test"}:
+            flag_producer = insn
+        elif insn.mnemonic in ALU_OP or insn.mnemonic in {"imul", "popcnt", "sbb", "inc", "rol", "shl", "shr", "sar"}:
+            flag_producer = None
+    return translations
 
 
 
@@ -972,6 +1022,8 @@ def proof_insn_len(code: str) -> int:
     if selector is None:
         return bpf_insn_len(code)
     if selector in BRANCH_PROOF_LEN:
+        if "HC_X86_BRANCH_PROOF_PAYLOAD" in code and BRANCH_PROOF_CMP_RR in code:
+            return BRANCH_DIRECT_PROOF_LEN
         return BRANCH_PROOF_LEN[selector]
     if "MICRO_HANDCRAFT_BPF_X86_CMP" in selector:
         if "HC_X86_CMP_SIB_RR_PAYLOAD" in code:
@@ -985,10 +1037,12 @@ def proof_insn_len(code: str) -> int:
         if selector in {"MICRO_HANDCRAFT_BPF_X86_CMPB", "MICRO_HANDCRAFT_BPF_X86_CMPW"}:
             return 23 if "HC_X86_RR_PAYLOAD" in code or "HC_X86_ARCH_RR_PAYLOAD" in code else 19
         if "HC_X86_ARCH_RR_PAYLOAD" in code:
-            return 15 + code.count("HC_X86_R")
-        if "HC_X86_ARCH_IMM_PAYLOAD" in code:
-            return 15 + (1 if "HC_X86_R" in code else 0)
-        return 15
+            return 17 + code.count("HC_X86_R")
+        if "HC_X86_ARCH_IMM_PAYLOAD" in code or ("HC_X86_IMM_PAYLOAD" in code and "HC_X86_R" in code):
+            return 18
+        if "HC_X86_IMM_PAYLOAD" in code:
+            return 17
+        return 17
     if "MICRO_HANDCRAFT_BPF_X86_TEST" in selector:
         return 12
     if selector in {"MICRO_HANDCRAFT_BPF_X86_MOVB", "MICRO_HANDCRAFT_BPF_X86_MOVW",

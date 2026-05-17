@@ -30,16 +30,19 @@ Disassembly of section .text:
     1103:	48 8b 57 08          	mov    rdx,QWORD PTR [rdi+0x8]
     1107:	31 c0                	xor    eax,eax
     1109:	48 39 d1             	cmp    rcx,rdx
-    110c:	77 22                	ja     1130 <simple_packet_xdp+0x30>
+    110c:	77 27                	ja     1135 <simple_packet_xdp+0x35>
     110e:	48 8d 71 08          	lea    rsi,[rcx+0x8]
     1112:	48 39 d6             	cmp    rsi,rdx
-    1115:	77 19                	ja     1130 <simple_packet_xdp+0x30>
-    1117:	66 c7 01 4e 61       	mov    WORD PTR [rcx],0x614e
-    111c:	c6 41 02 bc          	mov    BYTE PTR [rcx+0x2],0xbc
-    1120:	c7 41 03 00 00 00 00 	mov    DWORD PTR [rcx+0x3],0x0
-    1127:	c6 41 07 00          	mov    BYTE PTR [rcx+0x7],0x0
-    112b:	b8 02 00 00 00       	mov    eax,0x2
-    1130:	c3                   	ret
+    1115:	77 1e                	ja     1135 <simple_packet_xdp+0x35>
+    1117:	55                   	push   rbp
+    1118:	48 89 e5             	mov    rbp,rsp
+    111b:	66 c7 01 4e 61       	mov    WORD PTR [rcx],0x614e
+    1120:	c6 41 02 bc          	mov    BYTE PTR [rcx+0x2],0xbc
+    1124:	c7 41 03 00 00 00 00 	mov    DWORD PTR [rcx+0x3],0x0
+    112b:	c6 41 07 00          	mov    BYTE PTR [rcx+0x7],0x0
+    112f:	b8 02 00 00 00       	mov    eax,0x2
+    1134:	5d                   	pop    rbp
+    1135:	c3                   	ret
 
 Disassembly of section .fini:
 ```
@@ -111,44 +114,38 @@ Disassembly of section .data:
      ((__u64)(SCALE) << 12) | ((__u64)(HAS_INDEX) << 14) | \
      ((__u64)(HAS_BASE) << 15) | ((__u64)(__u32)(DISP) << 16))
 
-/*
- * native asm to handcraft warnings: 2
- *
- * - 0x1100: mov    rcx,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0]
- * - 0x1103: mov    rdx,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4]
- */
-
 static const struct bpf_insn program[] = {
+    HC_INIT_X86_STACK(),
     HC_MOV64_IMM(BPF_REG_6, 0),
     HC_MOV64_IMM(BPF_REG_7, 0),
     HC_MOV64_IMM(BPF_REG_8, 0),
-    /* 0x1100: mov    rcx,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0] */
+    /* 0x1100: mov    rcx,QWORD PTR [rdi] [context-abi: native xdp_md 64-bit field at off 0 maps to BPF XDP u32 ctx field at off 0] */
     HC_LDX(BPF_W, BPF_REG_4, BPF_REG_1, 0),
-    /* 0x1103: mov    rdx,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4] */
+    /* 0x1103: mov    rdx,QWORD PTR [rdi+0x8] [context-abi: native xdp_md 64-bit field at off 8 maps to BPF XDP u32 ctx field at off 4] */
     HC_LDX(BPF_W, BPF_REG_3, BPF_REG_1, 4),
     /* 0x1107: xor    eax,eax [exact-kinsn: xor32 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x1109: cmp    rcx,rdx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x110c: ja     1130 <simple_packet_xdp+0x30> [bpf-branch: verifier-visible branch from preceding cmp    rcx,rdx; cmp kinsn is preserved] */
-    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_4, BPF_REG_3, 13, 0),
+    /* 0x110c: ja     1130 <simple_packet_xdp+0x30> [exact-kinsn: ja branch kinsn; verifier proof from preceding cmp] */
+    HC_KINSN(HC_X86_BRANCH_PROOF_PAYLOAD(52, 34, 0, 0, HC_X86_BRANCH_PROOF_CMP_RR), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x110e: lea    rsi,[rcx+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_4, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1112: cmp    rsi,rdx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_2, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1115: ja     1130 <simple_packet_xdp+0x30> [bpf-branch: verifier-visible branch from preceding cmp    rsi,rdx; cmp kinsn is preserved] */
-    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_2, BPF_REG_3, 8, 0),
-    /* 0x1117: mov    WORD PTR [rcx],0x614e [bpf-jit: immediate memory store] */
-    HC_ST(BPF_H, BPF_REG_4, 0, 24910),
+    /* 0x1115: ja     1130 <simple_packet_xdp+0x30> [exact-kinsn: ja branch kinsn; verifier proof from preceding cmp] */
+    HC_KINSN(HC_X86_BRANCH_PROOF_PAYLOAD(19, 25, 0, 0, HC_X86_BRANCH_PROOF_CMP_RR), MICRO_HANDCRAFT_BPF_X86_JA),
+    /* 0x1117: mov    WORD PTR [rcx],0x614e [exact-kinsn: mov immediate memory store via x86 kinsn selector] */
+    HC_KINSN(HC_X86_STORE_IMM_PAYLOAD(BPF_REG_4, 0, 24910), MICRO_HANDCRAFT_BPF_X86_MOVW),
     /* 0x111c: mov    BYTE PTR [rcx+0x2],0xbc [exact-kinsn: movb immediate memory store via x86 kinsn selector] */
     HC_KINSN(HC_X86_STORE_IMM_PAYLOAD(BPF_REG_4, 2, 188), MICRO_HANDCRAFT_BPF_X86_MOVB),
-    /* 0x1120: mov    DWORD PTR [rcx+0x3],0x0 [bpf-jit: immediate memory store] */
-    HC_ST(BPF_W, BPF_REG_4, 3, 0),
+    /* 0x1120: mov    DWORD PTR [rcx+0x3],0x0 [exact-kinsn: mov immediate memory store via x86 kinsn selector] */
+    HC_KINSN(HC_X86_STORE_IMM_PAYLOAD(BPF_REG_4, 3, 0), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x1127: mov    BYTE PTR [rcx+0x7],0x0 [exact-kinsn: movb immediate memory store via x86 kinsn selector] */
     HC_KINSN(HC_X86_STORE_IMM_PAYLOAD(BPF_REG_4, 7, 0), MICRO_HANDCRAFT_BPF_X86_MOVB),
     /* 0x112b: mov    eax,0x2 [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_0, 2), MICRO_HANDCRAFT_BPF_X86_MOVL),
-    /* 0x1130: ret [bpf-jit: BPF exit; kernel JIT emits the real return sequence] */
+    /* 0x1130: ret [abi-boundary: native ret maps to the BPF program exit boundary] */
     HC_EXIT(),
 };
 
@@ -164,31 +161,32 @@ Disassembly of section .data:
    5:	0f 1f 00             	nop    DWORD PTR [rax]
    8:	55                   	push   rbp
    9:	48 89 e5             	mov    rbp,rsp
-   c:	48 81 ec 80 01 00 00 	sub    rsp,0x180
+   c:	48 81 ec e0 01 00 00 	sub    rsp,0x1e0
   13:	53                   	push   rbx
   14:	41 55                	push   r13
   16:	41 56                	push   r14
-  18:	31 db                	xor    ebx,ebx
-  1a:	45 31 ed             	xor    r13d,r13d
-  1d:	45 31 f6             	xor    r14d,r14d
-  20:	48 8b 4f 00          	mov    rcx,QWORD PTR [rdi+0x0]
-  24:	48 8b 57 08          	mov    rdx,QWORD PTR [rdi+0x8]
-  28:	31 c0                	xor    eax,eax
-  2a:	48 39 d1             	cmp    rcx,rdx
-  2d:	48 39 d1             	cmp    rcx,rdx
-  30:	77 27                	ja     0x59
-  32:	48 8d 71 08          	lea    rsi,[rcx+0x8]
-  36:	48 39 d6             	cmp    rsi,rdx
-  39:	48 39 d6             	cmp    rsi,rdx
-  3c:	77 1b                	ja     0x59
-  3e:	66 c7 41 00 4e 61    	mov    WORD PTR [rcx+0x0],0x614e
-  44:	c6 41 02 bc          	mov    BYTE PTR [rcx+0x2],0xbc
-  48:	c7 41 03 00 00 00 00 	mov    DWORD PTR [rcx+0x3],0x0
-  4f:	c6 41 07 00          	mov    BYTE PTR [rcx+0x7],0x0
-  53:	c7 c0 02 00 00 00    	mov    eax,0x2
-  59:	41 5e                	pop    r14
-  5b:	41 5d                	pop    r13
-  5d:	5b                   	pop    rbx
-  5e:	c9                   	leave
-  5f:	c3                   	ret
+  18:	48 89 eb             	mov    rbx,rbp
+  1b:	48 83 c3 80          	add    rbx,0xffffffffffffff80
+  1f:	48 89 9d 20 fe ff ff 	mov    QWORD PTR [rbp-0x1e0],rbx
+  26:	31 db                	xor    ebx,ebx
+  28:	45 31 ed             	xor    r13d,r13d
+  2b:	45 31 f6             	xor    r14d,r14d
+  2e:	48 8b 4f 00          	mov    rcx,QWORD PTR [rdi+0x0]
+  32:	48 8b 57 08          	mov    rdx,QWORD PTR [rdi+0x8]
+  36:	31 c0                	xor    eax,eax
+  38:	48 39 d1             	cmp    rcx,rdx
+  3b:	77 22                	ja     0x5f
+  3d:	48 8d 71 08          	lea    rsi,[rcx+0x8]
+  41:	48 39 d6             	cmp    rsi,rdx
+  44:	77 19                	ja     0x5f
+  46:	66 c7 01 4e 61       	mov    WORD PTR [rcx],0x614e
+  4b:	c6 41 02 bc          	mov    BYTE PTR [rcx+0x2],0xbc
+  4f:	c7 41 03 00 00 00 00 	mov    DWORD PTR [rcx+0x3],0x0
+  56:	c6 41 07 00          	mov    BYTE PTR [rcx+0x7],0x0
+  5a:	c7 c0 02 00 00 00    	mov    eax,0x2
+  60:	41 5e                	pop    r14
+  62:	41 5d                	pop    r13
+  64:	5b                   	pop    rbx
+  65:	c9                   	leave
+  66:	c3                   	ret
 ```

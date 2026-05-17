@@ -56,6 +56,11 @@ enum x86_branch_cond {
 	X86_BRANCH_JNS,
 };
 
+enum x86_branch_proof_kind {
+	X86_BRANCH_PROOF_FLAGS = 0,
+	X86_BRANCH_PROOF_CMP_RR = 1,
+};
+
 static __always_inline s16 branch_delta(u64 payload)
 {
 	return kinsn_payload_s16(payload, 4);
@@ -70,7 +75,19 @@ static __always_inline s32 branch_x86_disp(u64 payload)
 static __always_inline bool branch_x86_near(u64 payload)
 {
 	payload = kinsn_payload_decode(payload);
-	return payload & 0xf;
+	return payload & 0x1;
+}
+
+static __always_inline bool branch_is32(u64 payload)
+{
+	payload = kinsn_payload_decode(payload);
+	return payload & 0x2;
+}
+
+static __always_inline u8 branch_proof_kind(u64 payload)
+{
+	payload = kinsn_payload_decode(payload);
+	return (payload >> 2) & 0x3;
 }
 
 static __always_inline void load_flag(struct bpf_insn *insn_buf, int *cnt,
@@ -105,13 +122,86 @@ static __always_inline int branch_on_bool(u64 payload, struct bpf_insn *insn_buf
 	return 0;
 }
 
+static __always_inline int branch_cmp_rr_op(enum x86_branch_cond cond)
+{
+	switch (cond) {
+	case X86_BRANCH_JA:
+		return BPF_JGT;
+	case X86_BRANCH_JAE:
+		return BPF_JGE;
+	case X86_BRANCH_JB:
+		return BPF_JLT;
+	case X86_BRANCH_JBE:
+		return BPF_JLE;
+	case X86_BRANCH_JE:
+		return BPF_JEQ;
+	case X86_BRANCH_JNE:
+		return BPF_JNE;
+	case X86_BRANCH_JG:
+		return BPF_JSGT;
+	case X86_BRANCH_JGE:
+		return BPF_JSGE;
+	case X86_BRANCH_JL:
+		return BPF_JSLT;
+	case X86_BRANCH_JLE:
+		return BPF_JSLE;
+	case X86_BRANCH_JS:
+	case X86_BRANCH_JNS:
+		return -EINVAL;
+	}
+	return -EINVAL;
+}
+
+static int branch_on_cmp_rr_snapshot(u64 payload, struct bpf_insn *insn_buf,
+				     u8 op)
+{
+	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0) |
+			   KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH1) |
+			   KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH2);
+	int cond_idx, skip_idx, taken_idx, ja_idx, end_idx;
+	int cnt = 0;
+	s16 delta;
+
+	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+	insn_buf[cnt++] = BPF_LDX_MEM(BPF_DW, KINSN_X86_SCRATCH0,
+				      BPF_REG_10, KINSN_X86_PROOF_LHS_OFF);
+	insn_buf[cnt++] = BPF_LDX_MEM(BPF_DW, KINSN_X86_SCRATCH1,
+				      BPF_REG_10, KINSN_X86_PROOF_RHS_OFF);
+	cond_idx = cnt;
+	insn_buf[cnt++] = branch_is32(payload) ?
+		BPF_JMP32_REG(op, KINSN_X86_SCRATCH0, KINSN_X86_SCRATCH1, 0) :
+		BPF_JMP_REG(op, KINSN_X86_SCRATCH0, KINSN_X86_SCRATCH1, 0);
+	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+	skip_idx = cnt;
+	insn_buf[cnt++] = BPF_JMP_A(0);
+	taken_idx = cnt;
+	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+	ja_idx = cnt;
+	insn_buf[cnt++] = BPF_JMP_A(0);
+	end_idx = cnt;
+
+	insn_buf[cond_idx].off = taken_idx - cond_idx - 1;
+	insn_buf[skip_idx] = BPF_JMP_A(end_idx - skip_idx - 1);
+	delta = branch_delta(payload);
+	insn_buf[ja_idx] = BPF_JMP_A(delta - ja_idx - 1);
+	return cnt;
+}
+
 static int instantiate_jcc(u64 payload, struct bpf_insn *insn_buf,
 			   enum x86_branch_cond cond)
 {
 	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0) |
 			   KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH1) |
 			   KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH2);
+	int cmp_rr_op;
 	int cnt = 0;
+
+	if (branch_proof_kind(payload) == X86_BRANCH_PROOF_CMP_RR) {
+		cmp_rr_op = branch_cmp_rr_op(cond);
+		if (cmp_rr_op >= 0)
+			return branch_on_cmp_rr_snapshot(payload, insn_buf,
+							 cmp_rr_op);
+	}
 
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
 	switch (cond) {

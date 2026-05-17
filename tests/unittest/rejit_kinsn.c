@@ -877,9 +877,14 @@ static int sys_bpf(enum bpf_cmd cmd, union bpf_attr *attr, unsigned int size)
 		 ((__u64)(__u16)(OFF) << 20))
 	#define KINSN_REG_REG_PAYLOAD(DST, SRC) \
 		((__u64)(DST) | ((__u64)(SRC) << 4))
-	#define KINSN_X86_BRANCH_PAYLOAD(PC_DELTA, X86_DISP, NEAR) \
-		((__u64)(NEAR) | ((__u64)(__u16)(PC_DELTA) << 4) | \
+	#define KINSN_X86_BRANCH_PROOF_FLAGS 0
+	#define KINSN_X86_BRANCH_PROOF_PAYLOAD(PC_DELTA, X86_DISP, NEAR, IS32, PROOF) \
+		(((__u64)(NEAR) & 1) | (((__u64)(IS32) & 1) << 1) | \
+		 (((__u64)(PROOF) & 3) << 2) | ((__u64)(__u16)(PC_DELTA) << 4) | \
 		 ((__u64)(__u32)(X86_DISP) << 20))
+	#define KINSN_X86_BRANCH_PAYLOAD(PC_DELTA, X86_DISP, NEAR) \
+		KINSN_X86_BRANCH_PROOF_PAYLOAD(PC_DELTA, X86_DISP, NEAR, 0, \
+					       KINSN_X86_BRANCH_PROOF_FLAGS)
 
 #define KINSN_REG_COND_PAYLOAD(DST, COND) \
 	((__u64)(DST) | ((__u64)(COND) << 4))

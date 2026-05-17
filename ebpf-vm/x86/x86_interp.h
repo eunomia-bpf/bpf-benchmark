@@ -30,6 +30,12 @@
 #define X86_OP_DIV 0x1aU
 #define X86_OP_SHLD_IMM 0x1bU
 #define X86_OP_SHRD_IMM 0x1cU
+#define X86_OP_CMP_MEM_IMM 0x1dU
+#define X86_OP_TEST_MEM_IMM 0x1eU
+#define X86_OP_CMP_MEM_REG 0x1fU
+#define X86_OP_MOVZX_REG 0x20U
+#define X86_OP_MOVSX_REG 0x21U
+#define X86_OP_MOVSX_LOAD 0x22U
 #define X86_OP_RET 0xffU
 
 #define X86_OP_MOV_IMM64 X86_OP_MOV_IMM
@@ -98,6 +104,15 @@
 #define X86_PTR_CTX 1U
 #define X86_PTR_PACKET 2U
 #define X86_PTR_PACKET_END 3U
+
+#define X86_MEM_AUX(INDEX, SCALE_LOG2) \
+	(((__u32)(INDEX) & 0xffU) | (((__u32)(SCALE_LOG2) & 0xffU) << 8))
+#define X86_MEM_AUX_FULL(INDEX, SCALE_LOG2, MEM_WIDTH)                    \
+	(X86_MEM_AUX((INDEX), (SCALE_LOG2)) |                             \
+	 (((__u32)(MEM_WIDTH) & 0xffU) << 16))
+#define X86_MEM_AUX_INDEX(AUX) ((__u8)((AUX) & 0xffU))
+#define X86_MEM_AUX_SCALE_LOG2(AUX) ((__u8)(((AUX) >> 8) & 0xffU))
+#define X86_MEM_AUX_MEM_WIDTH(AUX) ((__u8)(((AUX) >> 16) & 0xffU))
 
 struct x86_insn {
 	__u8 op;
@@ -194,6 +209,19 @@ static __always_inline __u32 x86_width_bits(__u8 width)
 static __always_inline __u64 x86_apply_width(__u64 value, __u8 width)
 {
 	return value & x86_width_mask(width);
+}
+
+static __always_inline __u64 x86_sign_extend(__u64 value, __u8 width)
+{
+	__u64 narrowed = x86_apply_width(value, width);
+
+	if (width == X86_WIDTH_8)
+		return (__u64)(__s64)(__s8)narrowed;
+	if (width == X86_WIDTH_16)
+		return (__u64)(__s64)(__s16)narrowed;
+	if (width == X86_WIDTH_32)
+		return (__u64)(__s64)(__s32)narrowed;
+	return narrowed;
 }
 
 static __always_inline void x86_clear_ptr_reg(struct x86_state *state,
@@ -700,6 +728,25 @@ static __always_inline __s32 x86_store_imm_disp(__u64 value)
 	return (__s32)(value >> 32);
 }
 
+static __always_inline int x86_mem_offset(struct x86_state *state,
+					  __u32 aux, __s64 disp,
+					  __s64 *out)
+{
+	__u8 index = X86_MEM_AUX_INDEX(aux);
+	__u8 scale_log2 = X86_MEM_AUX_SCALE_LOG2(aux);
+	__u64 index_value = 0;
+
+	*out = disp;
+	if (index == X86_REG_NONE)
+		return 0;
+	if (scale_log2 > 3)
+		return X86_INTERP_TRAP;
+	if (x86_read_reg(state, index, &index_value) < 0)
+		return X86_INTERP_TRAP;
+	*out += (__s64)(index_value << scale_log2);
+	return 0;
+}
+
 static __always_inline int x86_packet_bounds(void *data, void *data_end,
 					     void *ptr, __s64 disp,
 					     __u8 width, __u8 **out)
@@ -722,27 +769,30 @@ static __always_inline int x86_packet_bounds(void *data, void *data_end,
 static __always_inline int x86_load_packet(struct x86_state *state,
 					   __u8 dst, void *data,
 					   void *data_end, void *base,
-					   __s64 disp, __u8 width)
+					   __s64 disp, __u8 load_width,
+					   __u8 write_width, __u8 sign_extend)
 {
 	__u8 *addr;
 	__u64 value = 0;
 
-	if (x86_packet_bounds(data, data_end, base, disp, width, &addr) < 0)
+	if (x86_packet_bounds(data, data_end, base, disp, load_width, &addr) < 0)
 		return X86_INTERP_TRAP;
-	if (width == X86_WIDTH_8)
+	if (load_width == X86_WIDTH_8)
 		value = *(__u8 *)addr;
-	else if (width == X86_WIDTH_16)
+	else if (load_width == X86_WIDTH_16)
 		value = *(__u16 *)addr;
-	else if (width == X86_WIDTH_32)
+	else if (load_width == X86_WIDTH_32)
 		value = *(__u32 *)addr;
 	else
 		value = *(__u64 *)addr;
-	return x86_write_reg_width(state, dst, value, width);
+	if (sign_extend)
+		value = x86_sign_extend(value, load_width);
+	return x86_write_reg_width(state, dst, value, write_width);
 }
 
 static __always_inline int x86_store_packet_imm(void *data, void *data_end,
 						void *base, __s64 disp,
-						__u8 width, __u32 value)
+						__u8 width, __u64 value)
 {
 	__u8 *addr;
 
@@ -778,8 +828,11 @@ static __always_inline int x86_load_mem(struct x86_state *state,
 	void *base;
 	__u8 tag;
 	__s64 disp = x86_simm(insn->imm);
+	__u8 mem_width = X86_MEM_AUX_MEM_WIDTH(insn->aux);
 
 	if (x86_read_ptr_reg(state, insn->src, &base, &tag) < 0)
+		return X86_INTERP_TRAP;
+	if (x86_mem_offset(state, insn->aux, disp, &disp) < 0)
 		return X86_INTERP_TRAP;
 	if (tag == X86_PTR_CTX && insn->src == X86_RDI && disp == 0)
 		return x86_write_ptr_reg(state, insn->dst, data,
@@ -787,9 +840,12 @@ static __always_inline int x86_load_mem(struct x86_state *state,
 	if (tag == X86_PTR_CTX && insn->src == X86_RDI && disp == 8)
 		return x86_write_ptr_reg(state, insn->dst, data_end,
 					 X86_PTR_PACKET_END);
+	if (mem_width == 0)
+		mem_width = insn->flags;
 	if (tag == X86_PTR_PACKET)
 		return x86_load_packet(state, insn->dst, data, data_end, base,
-				       disp, insn->flags);
+				       disp, mem_width, insn->flags,
+				       insn->op == X86_OP_MOVSX_LOAD);
 	return X86_INTERP_TRAP;
 }
 
@@ -799,19 +855,66 @@ static __always_inline int x86_store_mem(struct x86_state *state,
 {
 	void *base;
 	__u8 tag;
-	__s64 disp = x86_simm(insn->imm);
+	__s64 disp = insn->op == X86_OP_MOV_STORE_IMM ?
+			     x86_store_imm_disp(insn->imm) :
+			     x86_simm(insn->imm);
 
 	if (x86_read_ptr_reg(state, insn->dst, &base, &tag) < 0)
+		return X86_INTERP_TRAP;
+	if (x86_mem_offset(state, insn->aux, disp, &disp) < 0)
 		return X86_INTERP_TRAP;
 	if (tag != X86_PTR_PACKET)
 		return X86_INTERP_TRAP;
 	if (insn->op == X86_OP_MOV_STORE_IMM)
-		return x86_store_packet_imm(data, data_end, base,
-					    x86_store_imm_disp(insn->imm),
+		return x86_store_packet_imm(data, data_end, base, disp,
 					    insn->flags,
 					    x86_store_imm_value(insn->imm));
 	return x86_store_packet_reg(state, insn->src, data, data_end, base,
 				    disp, insn->flags);
+}
+
+static __always_inline int x86_cmp_mem_imm(struct x86_state *state,
+					   const struct x86_insn *insn,
+					   void *data, void *data_end)
+{
+	void *base;
+	__u8 tag;
+	__s64 disp = insn->op == X86_OP_CMP_MEM_REG ?
+			     x86_simm(insn->imm) :
+			     x86_store_imm_disp(insn->imm);
+	__u8 *addr;
+	__u64 value = 0;
+	__u64 imm = x86_store_imm_value(insn->imm);
+
+	if (x86_read_ptr_reg(state, insn->dst, &base, &tag) < 0)
+		return X86_INTERP_TRAP;
+	if (x86_mem_offset(state, insn->aux, disp, &disp) < 0)
+		return X86_INTERP_TRAP;
+	if (tag != X86_PTR_PACKET)
+		return X86_INTERP_TRAP;
+	if (x86_packet_bounds(data, data_end, base, disp, insn->flags, &addr) < 0)
+		return X86_INTERP_TRAP;
+	if (insn->flags == X86_WIDTH_8)
+		value = *(__u8 *)addr;
+	else if (insn->flags == X86_WIDTH_16)
+		value = *(__u16 *)addr;
+	else if (insn->flags == X86_WIDTH_32)
+		value = *(__u32 *)addr;
+	else
+		value = *(__u64 *)addr;
+	if (insn->op == X86_OP_CMP_MEM_REG) {
+		if (x86_read_reg(state, insn->src, &imm) < 0)
+			return X86_INTERP_TRAP;
+		x86_set_sub_flags(state, value, imm, value - imm,
+				  insn->flags);
+		return X86_INTERP_CONTINUE;
+	}
+	if (insn->op == X86_OP_TEST_MEM_IMM)
+		x86_set_logic_flags(state, value & imm, insn->flags);
+	else
+		x86_set_sub_flags(state, value, imm, value - imm,
+				  insn->flags);
+	return X86_INTERP_CONTINUE;
 }
 
 static __always_inline int x86_exec_one(struct x86_state *state,
@@ -841,7 +944,18 @@ static __always_inline int x86_exec_one(struct x86_state *state,
 						 src_tag);
 		return X86_INTERP_CONTINUE;
 	}
-	if (insn->op == X86_OP_MOV_LOAD)
+	if (insn->op == X86_OP_MOVZX_REG || insn->op == X86_OP_MOVSX_REG) {
+		__u8 src_width = insn->aux ? insn->aux : width;
+
+		if (x86_read_reg(state, insn->src, &src_value) < 0)
+			return X86_INTERP_TRAP;
+		if (insn->op == X86_OP_MOVSX_REG)
+			src_value = x86_sign_extend(src_value, src_width);
+		else
+			src_value = x86_apply_width(src_value, src_width);
+		return x86_write_reg_width(state, insn->dst, src_value, width);
+	}
+	if (insn->op == X86_OP_MOV_LOAD || insn->op == X86_OP_MOVSX_LOAD)
 		return x86_load_mem(state, insn, data, data_end);
 	if (insn->op == X86_OP_MOV_STORE_IMM ||
 	    insn->op == X86_OP_MOV_STORE_REG)
@@ -926,6 +1040,10 @@ static __always_inline int x86_exec_one(struct x86_state *state,
 				  dst_value - src_value, width);
 		return X86_INTERP_CONTINUE;
 	}
+	if (insn->op == X86_OP_CMP_MEM_IMM ||
+	    insn->op == X86_OP_CMP_MEM_REG ||
+	    insn->op == X86_OP_TEST_MEM_IMM)
+		return x86_cmp_mem_imm(state, insn, data, data_end);
 	if (insn->op == X86_OP_TEST_IMM) {
 		if (x86_read_reg(state, insn->dst, &dst_value) < 0)
 			return X86_INTERP_TRAP;

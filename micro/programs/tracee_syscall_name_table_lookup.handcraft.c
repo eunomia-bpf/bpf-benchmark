@@ -6,10 +6,8 @@
      ((__u64)(HAS_BASE) << 15) | ((__u64)(__u32)(DISP) << 16))
 
 /*
- * native asm to handcraft warnings: 8
+ * native asm to handcraft warnings: 6
  *
- * - 0x1100: mov    rdx,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0]
- * - 0x1103: mov    rcx,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4]
  * - 0x114a: lea    r10,[rip+0xeaf] [warning-unmapped: LEA base/index not in BPF register file: [rip+0xeaf]]
  * - 0x1158: lea    r15,[rip+0x111d] [warning-unmapped: LEA base/index not in BPF register file: [rip+0x111d]]
  * - 0x1169: movabs rbp,0x74613274617473 [warning-unmapped: movabs into HC_X86_RBP needs a machine-level immediate-load kinsn]
@@ -23,32 +21,34 @@ static const struct bpf_insn program[] = {
     HC_MOV64_IMM(BPF_REG_6, 0),
     HC_MOV64_IMM(BPF_REG_7, 0),
     HC_MOV64_IMM(BPF_REG_8, 0),
-    /* 0x1100: mov    rdx,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0] */
-    /* 0x1103: mov    rcx,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4] */
+    /* 0x1100: mov    rdx,QWORD PTR [rdi] [context-abi: native xdp_md 64-bit field at off 0 maps to BPF XDP u32 ctx field at off 0] */
+    HC_LDX(BPF_W, BPF_REG_3, BPF_REG_1, 0),
+    /* 0x1103: mov    rcx,QWORD PTR [rdi+0x8] [context-abi: native xdp_md 64-bit field at off 8 maps to BPF XDP u32 ctx field at off 4] */
+    HC_LDX(BPF_W, BPF_REG_4, BPF_REG_1, 4),
     /* 0x1107: xor    eax,eax [exact-kinsn: xor32 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x1109: cmp    rdx,rcx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_3, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x110c: jbe    110f <tracee_syscall_name_table_lookup_xdp+0xf> [exact-kinsn: jbe branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(3, 1, 0), MICRO_HANDCRAFT_BPF_X86_JBE),
+    /* 0x110c: jbe    110f <tracee_syscall_name_table_lookup_xdp+0xf> [exact-kinsn: jbe branch kinsn; verifier proof from preceding cmp] */
+    HC_KINSN(HC_X86_BRANCH_PROOF_PAYLOAD(15, 1, 0, 0, HC_X86_BRANCH_PROOF_CMP_RR), MICRO_HANDCRAFT_BPF_X86_JBE),
     /* 0x110e: ret [abi-boundary: native ret maps to the BPF program exit boundary] */
     HC_EXIT(),
     /* 0x110f: lea    rsi,[rdx+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_3, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1113: cmp    rsi,rcx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_2, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1116: ja     110e <tracee_syscall_name_table_lookup_xdp+0xe> [exact-kinsn: ja branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-5, -10, 0), MICRO_HANDCRAFT_BPF_X86_JA),
+    /* 0x1116: ja     110e <tracee_syscall_name_table_lookup_xdp+0xe> [exact-kinsn: ja branch kinsn; verifier proof from preceding cmp] */
+    HC_KINSN(HC_X86_BRANCH_PROOF_PAYLOAD(-20, -10, 0, 0, HC_X86_BRANCH_PROOF_CMP_RR), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x1118: lea    rdi,[rdx+0x10c] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_1, BPF_REG_3, 0, 0, 1, 0, 268), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x111f: cmp    rdi,rcx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_1, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1122: ja     110e <tracee_syscall_name_table_lookup_xdp+0xe> [exact-kinsn: ja branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-11, -22, 0), MICRO_HANDCRAFT_BPF_X86_JA),
+    /* 0x1122: ja     110e <tracee_syscall_name_table_lookup_xdp+0xe> [exact-kinsn: ja branch kinsn; verifier proof from preceding cmp] */
+    HC_KINSN(HC_X86_BRANCH_PROOF_PAYLOAD(-53, -22, 0, 0, HC_X86_BRANCH_PROOF_CMP_RR), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x1124: cmp    DWORD PTR [rsi],0x40 [exact-kinsn: cmp memory,imm kinsn] */
     HC_KINSN(HC_X86_CMP_MEM_IMM_PAYLOAD(BPF_REG_2, 0, 64), MICRO_HANDCRAFT_BPF_X86_CMPL),
     /* 0x1127: jne    110e <tracee_syscall_name_table_lookup_xdp+0xe> [exact-kinsn: jne branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-15, -27, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-83, -27, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x1129: push   rbp [exact-kinsn: pushq kinsn] */
     HC_KINSN(HC_REG_PAYLOAD(HC_X86_RBP), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
     /* 0x112a: push   r15 [exact-kinsn: pushq kinsn] */
@@ -92,12 +92,12 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_ORL),
     /* 0x119c: cmp    eax,0xd8 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_0, 216), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x11a1: jg     11c0 <tracee_syscall_name_table_lookup_xdp+0xc0> [exact-kinsn: jg branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(16, 29, 0), MICRO_HANDCRAFT_BPF_X86_JG),
+    /* 0x11a1: jg     11c0 <tracee_syscall_name_table_lookup_xdp+0xc0> [exact-kinsn: jg branch kinsn; verifier proof from preceding cmp] */
+    HC_KINSN(HC_X86_BRANCH_PROOF_PAYLOAD(71, 29, 0, 1, HC_X86_BRANCH_PROOF_CMP_RR), MICRO_HANDCRAFT_BPF_X86_JG),
     /* 0x11a3: cmp    eax,0x9e [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_0, 158), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x11a8: ja     1218 <tracee_syscall_name_table_lookup_xdp+0x118> [exact-kinsn: ja branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(48, 110, 0), MICRO_HANDCRAFT_BPF_X86_JA),
+    /* 0x11a8: ja     1218 <tracee_syscall_name_table_lookup_xdp+0x118> [exact-kinsn: ja branch kinsn; verifier proof from preceding cmp] */
+    HC_KINSN(HC_X86_BRANCH_PROOF_PAYLOAD(207, 110, 0, 1, HC_X86_BRANCH_PROOF_CMP_RR), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x11aa: mov    ecx,eax [exact-kinsn: movl register-to-register kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x11ac: movsxd rcx,DWORD PTR [r10+rcx*4] [exact-kinsn: movsxd SIB kinsn] */
@@ -108,18 +108,18 @@ static const struct bpf_insn program[] = {
     /* 0x11b5: mov    ecx,0x72656164 [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 1919246692), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x11ba: jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200> [exact-kinsn: jmp branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(121, 321, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(294, 321, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x11bf: nop [padding: padding is not part of BPF semantics] */
     /* 0x11c0: cmp    eax,0x140 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_0, 320), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x11c5: jg     11ea <tracee_syscall_name_table_lookup_xdp+0xea> [exact-kinsn: jg branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(15, 35, 0), MICRO_HANDCRAFT_BPF_X86_JG),
+    /* 0x11c5: jg     11ea <tracee_syscall_name_table_lookup_xdp+0xea> [exact-kinsn: jg branch kinsn; verifier proof from preceding cmp] */
+    HC_KINSN(HC_X86_BRANCH_PROOF_PAYLOAD(52, 35, 0, 1, HC_X86_BRANCH_PROOF_CMP_RR), MICRO_HANDCRAFT_BPF_X86_JG),
     /* 0x11c7: lea    ecx,[rax-0x101] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_4, BPF_REG_0, 0, 0, 1, 0, -257), MICRO_HANDCRAFT_BPF_X86_LEAL),
     /* 0x11cd: cmp    ecx,0x22 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 34), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x11d0: ja     1202 <tracee_syscall_name_table_lookup_xdp+0x102> [exact-kinsn: ja branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(21, 48, 0), MICRO_HANDCRAFT_BPF_X86_JA),
+    /* 0x11d0: ja     1202 <tracee_syscall_name_table_lookup_xdp+0x102> [exact-kinsn: ja branch kinsn; verifier proof from preceding cmp] */
+    HC_KINSN(HC_X86_BRANCH_PROOF_PAYLOAD(83, 48, 0, 1, HC_X86_BRANCH_PROOF_CMP_RR), MICRO_HANDCRAFT_BPF_X86_JA),
     /* 0x11d2: movsxd rcx,DWORD PTR [r15+rcx*4] [exact-kinsn: movsxd SIB kinsn] */
     HC_KINSN(HC_X86_SIB_PAYLOAD(BPF_REG_4, BPF_REG_9, BPF_REG_4, 2, 0), MICRO_HANDCRAFT_BPF_X86_MOVSXD),
     /* 0x11d6: add    rcx,r15 [exact-kinsn: add64 reg kinsn] */
@@ -128,43 +128,43 @@ static const struct bpf_insn program[] = {
     /* 0x11db: movabs rcx,0x74616e65706f [exact-bpf: movabs via BPF_LD_IMM64; x86 JIT emits movabs] */
     HC_LD_IMM64_RAW(BPF_REG_4, 0, 127961812791407ULL),
     /* 0x11e5: jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200> [exact-kinsn: jmp branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(104, 278, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(225, 278, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x11ea: cmp    eax,0x141 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_0, 321), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x11ef: je     1246 <tracee_syscall_name_table_lookup_xdp+0x146> [exact-kinsn: je branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(36, 85, 0), MICRO_HANDCRAFT_BPF_X86_JE),
+    /* 0x11ef: je     1246 <tracee_syscall_name_table_lookup_xdp+0x146> [exact-kinsn: je branch kinsn; verifier proof from preceding cmp] */
+    HC_KINSN(HC_X86_BRANCH_PROOF_PAYLOAD(142, 85, 0, 1, HC_X86_BRANCH_PROOF_CMP_RR), MICRO_HANDCRAFT_BPF_X86_JE),
     /* 0x11f1: cmp    eax,0x14c [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_0, 332), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x11f6: jne    1250 <tracee_syscall_name_table_lookup_xdp+0x150> [exact-kinsn: jne branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(36, 88, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
+    /* 0x11f6: jne    1250 <tracee_syscall_name_table_lookup_xdp+0x150> [exact-kinsn: jne branch kinsn; verifier proof from preceding cmp] */
+    HC_KINSN(HC_X86_BRANCH_PROOF_PAYLOAD(113, 88, 0, 1, HC_X86_BRANCH_PROOF_CMP_RR), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x11f8: mov    ecx,0x78746173 [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 2020893043), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x11fd: jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200> [exact-kinsn: jmp branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(92, 254, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(161, 254, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x1202: cmp    eax,0xd9 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_0, 217), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x1207: jne    1250 <tracee_syscall_name_table_lookup_xdp+0x150> [exact-kinsn: jne branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(28, 71, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
+    /* 0x1207: jne    1250 <tracee_syscall_name_table_lookup_xdp+0x150> [exact-kinsn: jne branch kinsn; verifier proof from preceding cmp] */
+    HC_KINSN(HC_X86_BRANCH_PROOF_PAYLOAD(80, 71, 0, 1, HC_X86_BRANCH_PROOF_CMP_RR), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x1209: movabs rcx,0x646461746567 [exact-bpf: movabs via BPF_LD_IMM64; x86 JIT emits movabs] */
     HC_LD_IMM64_RAW(BPF_REG_4, 0, 110382294525287ULL),
     /* 0x1213: jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200> [exact-kinsn: jmp branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(85, 232, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(127, 232, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x1218: cmp    eax,0xca [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_0, 202), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x121d: jne    1250 <tracee_syscall_name_table_lookup_xdp+0x150> [exact-kinsn: jne branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(21, 49, 0), MICRO_HANDCRAFT_BPF_X86_JNE),
+    /* 0x121d: jne    1250 <tracee_syscall_name_table_lookup_xdp+0x150> [exact-kinsn: jne branch kinsn; verifier proof from preceding cmp] */
+    HC_KINSN(HC_X86_BRANCH_PROOF_PAYLOAD(46, 49, 0, 1, HC_X86_BRANCH_PROOF_CMP_RR), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x121f: movabs rcx,0x786574756655 [exact-bpf: movabs via BPF_LD_IMM64; x86 JIT emits movabs] */
     HC_LD_IMM64_RAW(BPF_REG_4, 0, 132377140880981ULL),
     /* 0x1229: jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200> [exact-kinsn: jmp branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(78, 210, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(93, 210, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x122e: mov    rcx,r13 [exact-kinsn: movq register-to-register kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_MOVQ),
     /* 0x1231: jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200> [exact-kinsn: jmp branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(74, 202, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(84, 202, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x1236: mov    rcx,rbp [exact-kinsn: movq register-to-register kinsn] */
     HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(BPF_REG_4, HC_X86_RBP), MICRO_HANDCRAFT_BPF_X86_MOVQ),
     /* 0x1239: jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200> [exact-kinsn: jmp branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(70, 194, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(75, 194, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x123e: mov    rcx,r9 [exact-kinsn: movq register-to-register kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_MOVQ),
     /* 0x1241: jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200> [exact-kinsn: jmp branch kinsn] */
@@ -172,7 +172,7 @@ static const struct bpf_insn program[] = {
     /* 0x1246: mov    ecx,0x706662 [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 7366242), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x124b: jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200> [exact-kinsn: jmp branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(62, 176, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(64, 176, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x1250: mov    eax,eax [exact-kinsn: movl register-to-register kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_0, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x1252: movabs rcx,0x9e3779b185ebca87 [exact-bpf: movabs via BPF_LD_IMM64; x86 JIT emits movabs] */
@@ -182,15 +182,15 @@ static const struct bpf_insn program[] = {
     /* 0x1260: xor    r14,rax [exact-kinsn: xor64 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_8, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x1263: jmp    132f <tracee_syscall_name_table_lookup_xdp+0x22f> [exact-kinsn: jmp branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(87, 199, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(125, 199, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x1268: movabs rcx,0x657663657865 [exact-bpf: movabs via BPF_LD_IMM64; x86 JIT emits movabs] */
     HC_LD_IMM64_RAW(BPF_REG_4, 0, 111559148140645ULL),
     /* 0x1272: jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200> [exact-kinsn: jmp branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(50, 137, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(48, 137, 1), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x1277: movabs rcx,0x6469707467 [exact-bpf: movabs via BPF_LD_IMM64; x86 JIT emits movabs] */
     HC_LD_IMM64_RAW(BPF_REG_4, 0, 431265707111ULL),
     /* 0x1281: jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200> [exact-kinsn: jmp branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(47, 125, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(45, 125, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x1283: mov    ecx,0x70616d6d [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 1885433197), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x1288: jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200> [exact-kinsn: jmp branch kinsn] */
@@ -210,31 +210,31 @@ static const struct bpf_insn program[] = {
     /* 0x12ae: mov    ecx,0x6e65706f [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 1852141679), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x12b3: jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200> [exact-kinsn: jmp branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(30, 75, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(32, 75, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x12b5: mov    rcx,rsi [exact-kinsn: movq register-to-register kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_MOVQ),
     /* 0x12b8: jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200> [exact-kinsn: jmp branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(26, 70, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(23, 70, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x12ba: mov    ecx,0x6b726f66 [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 1802661734), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x12bf: jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200> [exact-kinsn: jmp branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(22, 63, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(21, 63, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x12c1: mov    ecx,0x74697865 [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 1953069157), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x12c6: jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200> [exact-kinsn: jmp branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(18, 56, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(19, 56, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x12c8: mov    rcx,r11 [exact-kinsn: movq register-to-register kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, HC_X86_R11), MICRO_HANDCRAFT_BPF_X86_MOVQ),
     /* 0x12cb: jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200> [exact-kinsn: jmp branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(14, 51, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(10, 51, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x12cd: movabs rcx,0x6b6e696c55 [exact-bpf: movabs via BPF_LD_IMM64; x86 JIT emits movabs] */
     HC_LD_IMM64_RAW(BPF_REG_4, 0, 461413903445ULL),
     /* 0x12d7: jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200> [exact-kinsn: jmp branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(11, 39, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(7, 39, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x12d9: mov    ecx,0x6b72626b [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 1802658411), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x12de: jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200> [exact-kinsn: jmp branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(7, 32, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
+    HC_KINSN(HC_X86_BRANCH_PAYLOAD(5, 32, 0), MICRO_HANDCRAFT_BPF_X86_JMP),
     /* 0x12e0: mov    ecx,0x69646863 [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 1768188003), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x12e5: jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200> [exact-kinsn: jmp branch kinsn] */
@@ -280,8 +280,8 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_REG_PAYLOAD(BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_INCQ),
     /* 0x1332: cmp    r8,0x40 [exact-kinsn: cmpq reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_5, 64), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1336: jne    1180 <tracee_syscall_name_table_lookup_xdp+0x80> [exact-kinsn: jne branch kinsn] */
-    HC_KINSN(HC_X86_BRANCH_PAYLOAD(-189, -444, 1), MICRO_HANDCRAFT_BPF_X86_JNE),
+    /* 0x1336: jne    1180 <tracee_syscall_name_table_lookup_xdp+0x80> [exact-kinsn: jne branch kinsn; verifier proof from preceding cmp] */
+    HC_KINSN(HC_X86_BRANCH_PROOF_PAYLOAD(-507, -444, 1, 0, HC_X86_BRANCH_PROOF_CMP_RR), MICRO_HANDCRAFT_BPF_X86_JNE),
     /* 0x133c: mov    QWORD PTR [rdx],r14 [exact-kinsn: direct memory store via x86 kinsn selector] */
     HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_8, BPF_REG_3, 0), MICRO_HANDCRAFT_BPF_X86_MOVQ),
     /* 0x133f: mov    eax,0x2 [exact-kinsn: movl immediate kinsn] */

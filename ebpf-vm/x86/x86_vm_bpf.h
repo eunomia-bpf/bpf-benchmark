@@ -49,6 +49,12 @@ static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
 		x86_init_state(&__x86_vm_state, (void *)(CTX));             \
 		int __x86_vm_ret = 0;
 
+#define X86_VM_DECLARE_XDP(CTX)                                             \
+	void *__x86_vm_data = (void *)(long)(CTX)->data;                    \
+	void *__x86_vm_data_end = (void *)(long)(CTX)->data_end;            \
+	struct x86_state __x86_vm_state = {};                               \
+	x86_init_state(&__x86_vm_state, (void *)(CTX))
+
 #define X86_VM_STEP(OP, DST, SRC, FLAGS, AUX, IMM)                          \
 		if (__x86_vm_ret == 0) {                                      \
 			int __x86_vm_step_ret =                               \
@@ -60,12 +66,32 @@ static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
 				__x86_vm_ret = __x86_vm_step_ret;              \
 		}
 
+#define X86_VM_RUN_STEP(OP, DST, SRC, FLAGS, AUX, IMM)                      \
+	do {                                                               \
+		int __x86_vm_step_ret =                                    \
+			X86_VM_EXEC(&__x86_vm_state, (OP), (DST), (SRC),    \
+				     (FLAGS), (AUX), (IMM));                 \
+		if (__x86_vm_step_ret < 0)                                 \
+			return XDP_ABORTED;                                \
+		if (__x86_vm_step_ret == X86_INTERP_DONE)                  \
+			return (__u32)__x86_vm_state.rax;                  \
+	} while (0)
+
+#define X86_VM_RET_RAX() return (__u32)__x86_vm_state.rax
+
 #define X86_VM_END_XDP()                                                    \
 		int __x86_vm_xdp_ret = XDP_PASS;                         \
 		if (__x86_vm_ret < 0 ||                                      \
 		    x86_vm_write_result_u64(__x86_vm_data,                   \
 					    __x86_vm_data_end,             \
 					    __x86_vm_state.rax) < 0)       \
+			__x86_vm_xdp_ret = XDP_ABORTED;                    \
+		__x86_vm_xdp_ret;                                           \
+	})
+
+#define X86_VM_END_XDP_RET_RAX()                                            \
+		int __x86_vm_xdp_ret = (__u32)__x86_vm_state.rax;          \
+		if (__x86_vm_ret < 0)                                      \
 			__x86_vm_xdp_ret = XDP_ABORTED;                    \
 		__x86_vm_xdp_ret;                                           \
 	})
