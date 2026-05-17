@@ -1118,6 +1118,12 @@ static int emit_x86_alu(u8 *image, u32 *off, bool emit, u64 payload,
 			kinsn_emit_u8(buf, &len, 0xc0 | (imm_group << 3) |
 				      kinsn_x86_code(dst_reg));
 			kinsn_emit_u8(buf, &len, (u8)alu->imm);
+		} else if (alu->imm >= S8_MIN && alu->imm <= S8_MAX) {
+			kinsn_emit_rex_rr(buf, &len, width == 64, 0, dst_reg);
+			kinsn_emit_u8(buf, &len, 0x83);
+			kinsn_emit_u8(buf, &len, 0xc0 | (imm_group << 3) |
+				      kinsn_x86_code(dst_reg));
+			kinsn_emit_u8(buf, &len, (u8)alu->imm);
 		} else {
 			kinsn_emit_rex_rr(buf, &len, width == 64, 0, dst_reg);
 			kinsn_emit_u8(buf, &len, 0x81);

@@ -1,4 +1,3 @@
-
 #include "../x86_vm_bpf.h"
 
 SEC("xdp")
@@ -26,7 +25,7 @@ x86_l_110e:
 	X86_VM_RET_RAX();
 x86_l_110f:
 	/* 0x110f: lea    rsi,[rcx+0x8] */
-	X86_VM_RUN_STEP(X86_OP_LEA, X86_RSI, X86_RCX, X86_WIDTH_64, 0, 8ULL);
+	X86_VM_RUN_STEP(X86_OP_LEA, X86_RSI, X86_RCX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);
 x86_l_1113:
 	/* 0x1113: cmp    rsi,rdx */
 	X86_VM_RUN_STEP(X86_OP_CMP_REG, X86_RSI, X86_RDX, X86_WIDTH_64, 0, 0);
@@ -36,7 +35,7 @@ x86_l_1116:
 		goto x86_l_110e;
 x86_l_1118:
 	/* 0x1118: lea    rsi,[rcx+0x190] */
-	X86_VM_RUN_STEP(X86_OP_LEA, X86_RSI, X86_RCX, X86_WIDTH_64, 0, 400ULL);
+	X86_VM_RUN_STEP(X86_OP_LEA, X86_RSI, X86_RCX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 400ULL);
 x86_l_111f:
 	/* 0x111f: cmp    rsi,rdx */
 	X86_VM_RUN_STEP(X86_OP_CMP_REG, X86_RSI, X86_RDX, X86_WIDTH_64, 0, 0);

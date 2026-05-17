@@ -21,11 +21,13 @@ Checklist:
 
 - [x] Refactor VM API to per-instruction macros with no `const struct x86_insn[]`
       stack array.
-- [ ] Add generator script in `ebpf-vm/x86/micro-prog/`.
-- [ ] Generate all micro `.bpf.c` proof artifacts from `## Native ASM`.
+- [x] Add generator script in `ebpf-vm/x86/micro-prog/`.
+- [x] Generate all micro `.bpf.c` proof artifacts from `## Native ASM`.
 - [ ] Add enough x86 opcode encodings and parser support for every native ASM
       instruction found in the 29 micro programs.
 - [ ] Build every generated BPF object.
 - [ ] Load every generated BPF object with `BPF_PROG_TEST_RUN` to confirm verifier
       acceptance.
-- [ ] Record any verifier failures as concrete unsupported VM/parser defects.
+- [x] Record current verifier failures as concrete unsupported VM/parser defects.
+- [ ] Replace the branchy generic interpreter expansion with generated per-op BPF
+      semantics for large programs such as `bpf_local_call_fanout_dispatch`.

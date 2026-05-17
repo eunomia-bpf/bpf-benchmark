@@ -86,6 +86,17 @@ static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
 			return (__u32)__x86_vm_state.rax;                  \
 	} while (0)
 
+#define X86_VM_RUN_STEP_SUB(OP, DST, SRC, FLAGS, AUX, IMM)                  \
+	do {                                                               \
+		int __x86_vm_step_ret =                                    \
+			X86_VM_EXEC(&__x86_vm_state, (OP), (DST), (SRC),    \
+				     (FLAGS), (AUX), (IMM));                 \
+		if (__x86_vm_step_ret < 0)                                 \
+			return X86_INTERP_TRAP;                            \
+		if (__x86_vm_step_ret == X86_INTERP_DONE)                  \
+			return X86_INTERP_CONTINUE;                        \
+	} while (0)
+
 #define X86_VM_RET_RAX() return (__u32)__x86_vm_state.rax
 
 #define X86_VM_END_XDP()                                                    \

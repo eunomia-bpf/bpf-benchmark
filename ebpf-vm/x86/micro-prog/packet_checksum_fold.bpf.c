@@ -25,6 +25,23 @@ struct packet_checksum_fold_loop_ctx {
 		}                                                          \
 	} while (0)
 
+#define PACKET_CHECKSUM_LOAD_U16(REG, PTR_REG, TAG_REG, OFF_EXPR) \
+	do {                                                           \
+		__u32 __packet_off = (OFF_EXPR);                         \
+		if (__packet_off > 1038) {                              \
+			loop->failed = 1;                                  \
+			return 1;                                         \
+		}                                                      \
+		__u8 *__packet_addr = (__u8 *)loop->data + __packet_off; \
+		if (__packet_addr + X86_WIDTH_16 > (__u8 *)loop->data_end) { \
+			loop->failed = 1;                                  \
+			return 1;                                         \
+		}                                                      \
+		loop->state.REG = *(__u16 *)__packet_addr;             \
+		loop->state.PTR_REG = 0;                               \
+		loop->state.TAG_REG = X86_PTR_NONE;                    \
+	} while (0)
+
 static long packet_checksum_fold_inner_cb(__u32 index, void *ctx)
 {
 	struct packet_checksum_fold_loop_ctx *loop = ctx;
@@ -39,7 +56,7 @@ static long packet_checksum_fold_inner_cb(__u32 index, void *ctx)
 	loop->state.p_rcx = 0;
 	loop->state.tag_rcx = X86_PTR_NONE;
 	/* 0x1150: movzx  r8d,WORD PTR [rdx+rcx*1-0x3] */
-	PACKET_CHECKSUM_LOOP_STEP(X86_OP_MOV_LOAD, X86_R8, X86_RDX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_RCX, 0, X86_WIDTH_16), 18446744073709551613ULL);
+	PACKET_CHECKSUM_LOAD_U16(r8, p_r8, tag_r8, 16 + (loop->inner << 2));
 	/* 0x1156: add    r8d,edi */
 	PACKET_CHECKSUM_LOOP_STEP(X86_OP_ALU_REG, X86_R8, X86_RDI, X86_WIDTH_32, X86_ALU_ADD, 0);
 	/* 0x1159: movzx  edi,r8w */
@@ -49,7 +66,7 @@ static long packet_checksum_fold_inner_cb(__u32 index, void *ctx)
 	/* 0x1161: add    r8d,edi */
 	PACKET_CHECKSUM_LOOP_STEP(X86_OP_ALU_REG, X86_R8, X86_RDI, X86_WIDTH_32, X86_ALU_ADD, 0);
 	/* 0x1164: movzx  edi,WORD PTR [rdx+rcx*1-0x1] */
-	PACKET_CHECKSUM_LOOP_STEP(X86_OP_MOV_LOAD, X86_RDI, X86_RDX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_RCX, 0, X86_WIDTH_16), 18446744073709551615ULL);
+	PACKET_CHECKSUM_LOAD_U16(rdi, p_rdi, tag_rdi, 18 + (loop->inner << 2));
 	/* 0x1169: add    edi,r8d */
 	PACKET_CHECKSUM_LOOP_STEP(X86_OP_ALU_REG, X86_RDI, X86_R8, X86_WIDTH_32, X86_ALU_ADD, 0);
 	/* 0x116c: movzx  r8d,di */
@@ -127,18 +144,14 @@ int packet_checksum_fold_x86_vm_xdp(struct xdp_md *ctx)
 	x86_init_state(&__x86_vm_state, (void *)ctx);
 x86_l_1100:
 	/* 0x1100: mov    rdx,QWORD PTR [rdi] */
-	/* 0x1100: mov    rdx,QWORD PTR [rdi] */
 	X86_VM_RUN_STEP(X86_OP_MOV_LOAD, X86_RDX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);
 x86_l_1103:
-	/* 0x1103: mov    rcx,QWORD PTR [rdi+0x8] */
 	/* 0x1103: mov    rcx,QWORD PTR [rdi+0x8] */
 	X86_VM_RUN_STEP(X86_OP_MOV_LOAD, X86_RCX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);
 x86_l_1107:
 	/* 0x1107: xor    eax,eax */
-	/* 0x1107: xor    eax,eax */
 	X86_VM_RUN_STEP(X86_OP_ALU_REG, X86_RAX, X86_RAX, X86_WIDTH_32, X86_ALU_XOR, 0);
 x86_l_1109:
-	/* 0x1109: cmp    rdx,rcx */
 	/* 0x1109: cmp    rdx,rcx */
 	X86_VM_RUN_STEP(X86_OP_CMP_REG, X86_RDX, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_110c:
@@ -150,10 +163,8 @@ x86_l_110e:
 	X86_VM_RET_RAX();
 x86_l_110f:
 	/* 0x110f: lea    rsi,[rdx+0x8] */
-	/* 0x110f: lea    rsi,[rdx+0x8] */
-	X86_VM_RUN_STEP(X86_OP_LEA, X86_RSI, X86_RDX, X86_WIDTH_64, 0, 8ULL);
+	X86_VM_RUN_STEP(X86_OP_LEA, X86_RSI, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);
 x86_l_1113:
-	/* 0x1113: cmp    rsi,rcx */
 	/* 0x1113: cmp    rsi,rcx */
 	X86_VM_RUN_STEP(X86_OP_CMP_REG, X86_RSI, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_1116:
@@ -162,10 +173,8 @@ x86_l_1116:
 		goto x86_l_110e;
 x86_l_1118:
 	/* 0x1118: lea    rsi,[rdx+0x410] */
-	/* 0x1118: lea    rsi,[rdx+0x410] */
-	X86_VM_RUN_STEP(X86_OP_LEA, X86_RSI, X86_RDX, X86_WIDTH_64, 0, 1040ULL);
+	X86_VM_RUN_STEP(X86_OP_LEA, X86_RSI, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 1040ULL);
 x86_l_111f:
-	/* 0x111f: cmp    rsi,rcx */
 	/* 0x111f: cmp    rsi,rcx */
 	X86_VM_RUN_STEP(X86_OP_CMP_REG, X86_RSI, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_1122:
@@ -174,14 +183,12 @@ x86_l_1122:
 		goto x86_l_110e;
 x86_l_1124:
 	/* 0x1124: cmp    DWORD PTR [rdx+0x8],0x20 */
-	/* 0x1124: cmp    DWORD PTR [rdx+0x8],0x20 */
 	X86_VM_RUN_STEP(X86_OP_CMP_MEM_IMM, X86_RDX, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 34359738400ULL);
 x86_l_1128:
 	/* 0x1128: jne    110e <packet_checksum_fold_xdp+0xe> */
 	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
 		goto x86_l_110e;
 x86_l_112a:
-	/* 0x112a: cmp    DWORD PTR [rdx+0xc],0x200 */
 	/* 0x112a: cmp    DWORD PTR [rdx+0xc],0x200 */
 	X86_VM_RUN_STEP(X86_OP_CMP_MEM_IMM, X86_RDX, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 51539608064ULL);
 x86_l_1131:
@@ -190,14 +197,11 @@ x86_l_1131:
 		goto x86_l_110e;
 x86_l_1133:
 	/* 0x1133: xor    eax,eax */
-	/* 0x1133: xor    eax,eax */
 	X86_VM_RUN_STEP(X86_OP_ALU_REG, X86_RAX, X86_RAX, X86_WIDTH_32, X86_ALU_XOR, 0);
 x86_l_1135:
 	/* 0x1135: xor    esi,esi */
-	/* 0x1135: xor    esi,esi */
 	X86_VM_RUN_STEP(X86_OP_ALU_REG, X86_RSI, X86_RSI, X86_WIDTH_32, X86_ALU_XOR, 0);
 x86_l_1137:
-	/* 0x1137: nop    WORD PTR [rax+rax*1+0x0] */
 	/* 0x1137: nop    WORD PTR [rax+rax*1+0x0] */
 	X86_VM_RUN_STEP(X86_OP_NOP, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 	__x86_loop.data = __x86_vm_data;

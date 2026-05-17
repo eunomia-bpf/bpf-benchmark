@@ -1,0 +1,24 @@
+{
+  "completed_benchmarks": 0,
+  "current_benchmark": "sorted_rule_binary_search",
+  "current_benchmark_index": 1,
+  "current_benchmark_record": {
+    "category": "control-flow",
+    "description": "Repeated lookup over a sorted rule table",
+    "expected_result": 126,
+    "family": "search",
+    "hypothesis": "Captures verifier-friendly bounded rule lookup without map/helper dependencies",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/sorted_rule_binary_search.mem",
+    "io_mode": "staged",
+    "level": "medium",
+    "name": "sorted_rule_binary_search",
+    "runs": [],
+    "tags": [
+      "branch",
+      "search",
+      "pure-jit"
+    ]
+  },
+  "status": "running",
+  "total_benchmarks": 1
+}

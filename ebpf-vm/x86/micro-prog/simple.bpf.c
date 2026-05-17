@@ -1,4 +1,4 @@
-
+#define X86_VM_ENABLE_STACK 1
 #include "../x86_vm_bpf.h"
 
 SEC("xdp")
@@ -23,7 +23,7 @@ x86_l_110c:
 		goto x86_l_113e;
 x86_l_110e:
 	/* 0x110e: lea    rsi,[rcx+0x8] */
-	X86_VM_RUN_STEP(X86_OP_LEA, X86_RSI, X86_RCX, X86_WIDTH_64, 0, 8ULL);
+	X86_VM_RUN_STEP(X86_OP_LEA, X86_RSI, X86_RCX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);
 x86_l_1112:
 	/* 0x1112: cmp    rsi,rdx */
 	X86_VM_RUN_STEP(X86_OP_CMP_REG, X86_RSI, X86_RDX, X86_WIDTH_64, 0, 0);
@@ -33,7 +33,7 @@ x86_l_1115:
 		goto x86_l_113e;
 x86_l_1117:
 	/* 0x1117: lea    rsi,[rcx+0x48] */
-	X86_VM_RUN_STEP(X86_OP_LEA, X86_RSI, X86_RCX, X86_WIDTH_64, 0, 72ULL);
+	X86_VM_RUN_STEP(X86_OP_LEA, X86_RSI, X86_RCX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 72ULL);
 x86_l_111b:
 	/* 0x111b: cmp    rsi,rdx */
 	X86_VM_RUN_STEP(X86_OP_CMP_REG, X86_RSI, X86_RDX, X86_WIDTH_64, 0, 0);

@@ -1,4 +1,4 @@
-
+#define X86_VM_ENABLE_STACK 1
 #include "../x86_vm_bpf.h"
 
 SEC("xdp")
@@ -26,7 +26,7 @@ x86_l_110e:
 	X86_VM_RET_RAX();
 x86_l_110f:
 	/* 0x110f: lea    rsi,[rdx+0x8] */
-	X86_VM_RUN_STEP(X86_OP_LEA, X86_RSI, X86_RDX, X86_WIDTH_64, 0, 8ULL);
+	X86_VM_RUN_STEP(X86_OP_LEA, X86_RSI, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);
 x86_l_1113:
 	/* 0x1113: cmp    rsi,rcx */
 	X86_VM_RUN_STEP(X86_OP_CMP_REG, X86_RSI, X86_RCX, X86_WIDTH_64, 0, 0);
@@ -36,7 +36,7 @@ x86_l_1116:
 		goto x86_l_110e;
 x86_l_1118:
 	/* 0x1118: lea    rdi,[rdx+0x810] */
-	X86_VM_RUN_STEP(X86_OP_LEA, X86_RDI, X86_RDX, X86_WIDTH_64, 0, 2064ULL);
+	X86_VM_RUN_STEP(X86_OP_LEA, X86_RDI, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 2064ULL);
 x86_l_111f:
 	/* 0x111f: cmp    rdi,rcx */
 	X86_VM_RUN_STEP(X86_OP_CMP_REG, X86_RDI, X86_RCX, X86_WIDTH_64, 0, 0);
@@ -52,13 +52,19 @@ x86_l_112a:
 	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
 		goto x86_l_110e;
 x86_l_112c:
-	/* 0x112c: mov    ecx,DWORD PTR [rdx+0xc] */
+	/* 0x112c: push   rbp */
+	X86_VM_RUN_STEP(X86_OP_PUSH, X86_REG_NONE, X86_RBP, X86_WIDTH_64, 0, 0);
+x86_l_112d:
+	/* 0x112d: mov    rbp,rsp */
+	X86_VM_RUN_STEP(X86_OP_MOV_REG, X86_RBP, X86_RSP, X86_WIDTH_64, 0, 0);
+x86_l_1130:
+	/* 0x1130: mov    ecx,DWORD PTR [rdx+0xc] */
 	X86_VM_RUN_STEP(X86_OP_MOV_LOAD, X86_RCX, X86_RDX, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 12ULL);
-x86_l_112f:
-	/* 0x112f: xor    eax,eax */
+x86_l_1133:
+	/* 0x1133: xor    eax,eax */
 	X86_VM_RUN_STEP(X86_OP_ALU_REG, X86_RAX, X86_RAX, X86_WIDTH_32, X86_ALU_XOR, 0);
-x86_l_1131:
-	/* 0x1131: data16 data16 data16 data16 data16 cs nop WORD PTR [rax+rax*1+0x0] */
+x86_l_1135:
+	/* 0x1135: data16 cs nop WORD PTR [rax+rax*1+0x0] */
 	X86_VM_RUN_STEP(X86_OP_NOP, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_1140:
 	/* 0x1140: mov    rsi,QWORD PTR [rdx+rax*8+0x10] */
@@ -107,7 +113,10 @@ x86_l_116f:
 	/* 0x116f: mov    eax,0x2 */
 	X86_VM_RUN_STEP(X86_OP_MOV_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
 x86_l_1174:
-	/* 0x1174: ret */
+	/* 0x1174: pop    rbp */
+	X86_VM_RUN_STEP(X86_OP_POP, X86_RBP, X86_REG_NONE, X86_WIDTH_64, 0, 0);
+x86_l_1175:
+	/* 0x1175: ret */
 	X86_VM_RET_RAX();
 	return XDP_ABORTED;
 }

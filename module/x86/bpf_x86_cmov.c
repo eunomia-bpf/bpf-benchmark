@@ -1353,6 +1353,21 @@ static int emit_cmp_imm_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	if (err)
 		return err;
 
+	if (imm >= S8_MIN && imm <= S8_MAX) {
+		kinsn_emit_rex_rr(buf, &len, is64, 0, reg);
+		kinsn_emit_u8(buf, &len, 0x83);
+		kinsn_emit_u8(buf, &len, 0xF8 | kinsn_x86_reg_code(reg));
+		kinsn_emit_u8(buf, &len, (u8)imm);
+		return kinsn_emit_finish(image, off, emit, buf, len);
+	}
+
+	if (reg == BPF_REG_0) {
+		kinsn_emit_rex_rr(buf, &len, is64, 0, reg);
+		kinsn_emit_u8(buf, &len, 0x3D);
+		kinsn_emit_s32(buf, &len, imm);
+		return kinsn_emit_finish(image, off, emit, buf, len);
+	}
+
 	kinsn_emit_rex_rr(buf, &len, is64, 0, reg);
 	kinsn_emit_u8(buf, &len, 0x81);
 	kinsn_emit_u8(buf, &len, 0xF8 | kinsn_x86_reg_code(reg));

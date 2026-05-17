@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -138,9 +139,9 @@ def split_operands(text: str) -> tuple[str, ...]:
     return tuple(parts)
 
 
-def parse_native_asm(md_path: Path) -> list[NativeInsn]:
+def parse_asm_text(text: str) -> list[NativeInsn]:
     insns: list[NativeInsn] = []
-    for line in extract_native_asm(md_path.read_text()).splitlines():
+    for line in text.splitlines():
         if ":" not in line:
             continue
         prefix, rest = line.split(":", 1)
@@ -165,6 +166,65 @@ def parse_native_asm(md_path: Path) -> list[NativeInsn]:
             )
         )
     return insns
+
+
+def parse_native_asm(md_path: Path) -> list[NativeInsn]:
+    return parse_asm_text(extract_native_asm(md_path.read_text()))
+
+
+def call_symbol(insn: NativeInsn) -> str | None:
+    if insn.mnemonic != "call":
+        return None
+    match = re.search(r"<([^>+]+)", insn.raw)
+    return match.group(1) if match is not None else None
+
+
+def unresolved_call_symbols(insns: list[NativeInsn]) -> list[str]:
+    addrs = {insn.addr for insn in insns}
+    symbols: list[str] = []
+    for insn in insns:
+        if insn.mnemonic != "call":
+            continue
+        target = branch_target(insn.operands[0]) if insn.operands else 0
+        if target in addrs:
+            continue
+        symbol = call_symbol(insn)
+        if symbol is not None and symbol not in symbols:
+            symbols.append(symbol)
+    return symbols
+
+
+def native_object_path(name: str) -> Path:
+    out_dir = Path("/tmp/bpf-benchmark-micro-native")
+    so_path = out_dir / f"{name}.native.so"
+    subprocess.run(
+        ["make", "-C", str(MICRO_PROGRAMS), f"OUTPUT_DIR={out_dir}", str(so_path)],
+        cwd=REPO_ROOT,
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
+    return so_path
+
+
+def parse_native_symbol(so_path: Path, symbol: str) -> list[NativeInsn]:
+    result = subprocess.run(
+        ["objdump", "-dr", "-Mintel", f"--disassemble={symbol}", str(so_path)],
+        cwd=REPO_ROOT,
+        check=True,
+        text=True,
+        stdout=subprocess.PIPE,
+    )
+    return parse_asm_text(result.stdout)
+
+
+def parse_full_native_functions(name: str, symbols: list[str]) -> dict[str, list[NativeInsn]]:
+    so_path = native_object_path(name)
+    out: dict[str, list[NativeInsn]] = {
+        f"{name}_xdp": parse_native_symbol(so_path, f"{name}_xdp"),
+    }
+    for symbol in symbols:
+        out[symbol] = parse_native_symbol(so_path, symbol)
+    return out
 
 
 def parse_int(text: str) -> int:
@@ -202,11 +262,7 @@ def operand_width(operand: str, default: int = 64) -> int:
 
 
 def mem_base_reg(operand: str) -> str:
-    match = re.search(r"\[([a-z0-9]+)", operand.lower())
-    if match is None:
-        return "X86_REG_NONE"
-    parsed = reg_info(match.group(1))
-    return parsed[0] if parsed is not None else "X86_REG_NONE"
+    return parse_mem_terms(operand)[0]
 
 
 def parse_mem_terms(operand: str) -> tuple[str, str, int, int]:
@@ -360,7 +416,8 @@ def encode(insn: NativeInsn) -> EncodedInsn:
                        flags=WIDTH_CONST[dst_reg[1]], aux="X86_PTR_RODATA",
                        imm=c_u64(mem_disp(ops[1])))
         return enc("X86_OP_LEA", dst=dst_reg[0], src=mem_base_reg(ops[1]),
-                   flags=WIDTH_CONST[dst_reg[1]], imm=c_u64(mem_disp(ops[1])))
+                   flags=WIDTH_CONST[dst_reg[1]], aux=mem_aux(ops[1]),
+                   imm=c_u64(mem_disp(ops[1])))
 
     if op in {"cmp", "test"}:
         if len(ops) != 2:
@@ -412,6 +469,12 @@ def encode(insn: NativeInsn) -> EncodedInsn:
         if dst_reg and src_reg:
             return enc("X86_OP_ALU_REG", dst=dst_reg[0], src=src_reg[0],
                        flags=WIDTH_CONST[dst_reg[1]], aux=ALU_AUX[op])
+        if dst_reg and is_mem(ops[1]):
+            return enc("X86_OP_ALU_MEM", dst=dst_reg[0],
+                       src=mem_base_reg(ops[1]),
+                       flags=WIDTH_CONST[dst_reg[1]],
+                       aux=f"({mem_aux(ops[1], operand_width(ops[1], dst_reg[1]))} | X86_MEM_AUX_ALU_OP({ALU_AUX[op]}))",
+                       imm=c_u64(mem_disp(ops[1])))
         if is_mem(ops[0]) or is_mem(ops[1]):
             return enc("X86_OP_NOP", flags=WIDTH_CONST[operand_width(ops[0])],
                        aux=ALU_AUX[op])
@@ -464,20 +527,46 @@ def c_comment(text: str) -> str:
     return text.replace("*/", "* /")
 
 
-def append_step(lines: list[str], insn: NativeInsn, indent: str = "\t") -> None:
+def append_step(lines: list[str], insn: NativeInsn, indent: str = "\t",
+                step_macro: str = "X86_VM_RUN_STEP") -> None:
     encoded = encode(insn)
     lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
     lines.append(
-        f"{indent}X86_VM_RUN_STEP("
+        f"{indent}{step_macro}("
         f"{encoded.op}, {encoded.dst}, {encoded.src}, {encoded.flags}, "
         f"{encoded.aux}, {encoded.imm});"
     )
 
 
+def append_ret_dispatch(lines: list[str], call_returns: set[int],
+                        indent: str) -> None:
+    lines.append(f"{indent}if (__x86_call_depth == 0)")
+    lines.append(f"{indent}\tX86_VM_RET_RAX();")
+    lines.append(f"{indent}if (__x86_call_depth == 1) {{")
+    lines.append(f"{indent}\t__x86_call_depth = 0;")
+    for ret_addr in sorted(call_returns):
+        lines.append(f"{indent}\tif (__x86_call_ret0 == 0x{ret_addr:x})")
+        lines.append(f"{indent}\t\tgoto x86_l_{ret_addr:x};")
+    lines.append(f"{indent}\treturn XDP_ABORTED;")
+    lines.append(f"{indent}}}")
+    lines.append(f"{indent}if (__x86_call_depth == 2) {{")
+    lines.append(f"{indent}\t__x86_call_depth = 1;")
+    for ret_addr in sorted(call_returns):
+        lines.append(f"{indent}\tif (__x86_call_ret1 == 0x{ret_addr:x})")
+        lines.append(f"{indent}\t\tgoto x86_l_{ret_addr:x};")
+    lines.append(f"{indent}\treturn XDP_ABORTED;")
+    lines.append(f"{indent}}}")
+    lines.append(f"{indent}return XDP_ABORTED;")
+
+
 def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
-                         indent: str = "\t") -> None:
-    lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+                         indent: str = "\t", next_addr: int | None = None,
+                         call_returns: set[int] | None = None,
+                         call_functions: dict[int, str] | None = None,
+                         subroutine: bool = False,
+                         step_macro: str = "X86_VM_RUN_STEP") -> None:
     if insn.mnemonic in CC_AUX and insn.mnemonic.startswith("j"):
+        lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
         target = branch_target(insn.operands[0]) if insn.operands else 0
         if target in addrs:
             lines.append(f"{indent}if (x86_eval_cc(&__x86_vm_state, {CC_AUX[insn.mnemonic]}))")
@@ -487,16 +576,47 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
             lines.append(f"{indent}\treturn XDP_ABORTED;")
         return
     if insn.mnemonic == "jmp":
+        lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
         target = branch_target(insn.operands[0]) if insn.operands else 0
         if target in addrs:
             lines.append(f"{indent}goto x86_l_{target:x};")
         else:
             lines.append(f"{indent}return XDP_ABORTED;")
         return
-    if insn.mnemonic == "ret":
-        lines.append(f"{indent}X86_VM_RET_RAX();")
+    if insn.mnemonic == "call":
+        lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+        target = branch_target(insn.operands[0]) if insn.operands else 0
+        if call_functions and target in call_functions:
+            lines.append(
+                f"{indent}if ({call_functions[target]}(&__x86_vm_state, "
+                f"__x86_vm_data, __x86_vm_data_end) < 0)"
+            )
+            lines.append(f"{indent}\treturn XDP_ABORTED;")
+            return
+        if target in addrs and next_addr is not None:
+            lines.append(f"{indent}if (__x86_call_depth == 0) {{")
+            lines.append(f"{indent}\t__x86_call_ret0 = 0x{next_addr:x};")
+            lines.append(f"{indent}\t__x86_call_depth = 1;")
+            lines.append(f"{indent}\tgoto x86_l_{target:x};")
+            lines.append(f"{indent}}}")
+            lines.append(f"{indent}if (__x86_call_depth == 1) {{")
+            lines.append(f"{indent}\t__x86_call_ret1 = 0x{next_addr:x};")
+            lines.append(f"{indent}\t__x86_call_depth = 2;")
+            lines.append(f"{indent}\tgoto x86_l_{target:x};")
+            lines.append(f"{indent}}}")
+        lines.append(f"{indent}return XDP_ABORTED;")
         return
-    append_step(lines, insn, indent)
+    if insn.mnemonic == "ret":
+        lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+        if subroutine:
+            lines.append(f"{indent}return X86_INTERP_CONTINUE;")
+            return
+        if call_returns:
+            append_ret_dispatch(lines, call_returns, indent)
+        else:
+            lines.append(f"{indent}X86_VM_RET_RAX();")
+        return
+    append_step(lines, insn, indent, step_macro)
 
 
 def append_unrolled_branch_comment(lines: list[str], insn: NativeInsn,
@@ -513,6 +633,20 @@ def append_loop_step(lines: list[str], insn: NativeInsn, indent: str = "\t") -> 
         f"{encoded.op}, {encoded.dst}, {encoded.src}, {encoded.flags}, "
         f"{encoded.aux}, {encoded.imm});"
     )
+
+
+def append_packet_checksum_load(lines: list[str], insn: NativeInsn, reg: str,
+                                offset_expr: str,
+                                indent: str = "\t") -> None:
+    lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+    lines.append(
+        f"{indent}PACKET_CHECKSUM_LOAD_U16({reg}, p_{reg}, tag_{reg}, "
+        f"{offset_expr});"
+    )
+
+
+def c_ident(text: str) -> str:
+    return re.sub(r"[^A-Za-z0-9_]", "_", text)
 
 
 def render_packet_checksum_fold(name: str, insns: list[NativeInsn]) -> str:
@@ -546,6 +680,23 @@ def render_packet_checksum_fold(name: str, insns: list[NativeInsn]) -> str:
         "\t\t}                                                          \\",
         "\t} while (0)",
         "",
+        "#define PACKET_CHECKSUM_LOAD_U16(REG, PTR_REG, TAG_REG, OFF_EXPR) \\",
+        "\tdo {                                                           \\",
+        "\t\t__u32 __packet_off = (OFF_EXPR);                         \\",
+        "\t\tif (__packet_off > 1038) {                              \\",
+        "\t\t\tloop->failed = 1;                                  \\",
+        "\t\t\treturn 1;                                         \\",
+        "\t\t}                                                      \\",
+        "\t\t__u8 *__packet_addr = (__u8 *)loop->data + __packet_off; \\",
+        "\t\tif (__packet_addr + X86_WIDTH_16 > (__u8 *)loop->data_end) { \\",
+        "\t\t\tloop->failed = 1;                                  \\",
+        "\t\t\treturn 1;                                         \\",
+        "\t\t}                                                      \\",
+        "\t\tloop->state.REG = *(__u16 *)__packet_addr;             \\",
+        "\t\tloop->state.PTR_REG = 0;                               \\",
+        "\t\tloop->state.TAG_REG = X86_PTR_NONE;                    \\",
+        "\t} while (0)",
+        "",
         "static long packet_checksum_fold_inner_cb(__u32 index, void *ctx)",
         "{",
         "\tstruct packet_checksum_fold_loop_ctx *loop = ctx;",
@@ -561,8 +712,13 @@ def render_packet_checksum_fold(name: str, insns: list[NativeInsn]) -> str:
         "\tloop->state.tag_rcx = X86_PTR_NONE;",
     ]
 
-    for addr in (0x1150, 0x1156, 0x1159, 0x115d, 0x1161, 0x1164,
-                 0x1169, 0x116c, 0x1170, 0x1173, 0x1176, 0x117a):
+    append_packet_checksum_load(lines, by_addr[0x1150], "r8",
+                                "16 + (loop->inner << 2)", "\t")
+    for addr in (0x1156, 0x1159, 0x115d, 0x1161):
+        append_loop_step(lines, by_addr[addr], "\t")
+    append_packet_checksum_load(lines, by_addr[0x1164], "rdi",
+                                "18 + (loop->inner << 2)", "\t")
+    for addr in (0x1169, 0x116c, 0x1170, 0x1173, 0x1176, 0x117a):
         append_loop_step(lines, by_addr[addr], "\t")
     lines.append(f"\t/* 0x1181: {c_comment(by_addr[0x1181].raw)} */")
     lines.append("\t/* proof-loop branch handled by bpf_loop trip count */")
@@ -633,25 +789,88 @@ def render_packet_checksum_fold(name: str, insns: list[NativeInsn]) -> str:
     return "\n".join(lines)
 
 
-def render_program(name: str, insns: list[NativeInsn]) -> str:
+def render_x86_subfunction(symbol: str, insns: list[NativeInsn]) -> str:
+    addrs = {insn.addr for insn in insns}
+    lines = [
+        f"static __noinline int x86_fn_{c_ident(symbol)}("
+        "struct x86_state *__x86_vm_state_ptr, void *__x86_vm_data, "
+        "void *__x86_vm_data_end)",
+        "{",
+        "\tstruct x86_insn __x86_vm_insn = {};",
+        "\t#define __x86_vm_state (*__x86_vm_state_ptr)",
+    ]
+    for insn in insns:
+        lines.append(f"x86_l_{insn.addr:x}:")
+        append_branch_or_ret(lines, insn, addrs, subroutine=True,
+                             step_macro="X86_VM_RUN_STEP_SUB")
+    lines.extend([
+        "\t#undef __x86_vm_state",
+        "\treturn X86_INTERP_TRAP;",
+        "}",
+        "",
+    ])
+    return "\n".join(lines)
+
+
+def render_program(name: str, insns: list[NativeInsn],
+                   subfunctions: dict[str, list[NativeInsn]] | None = None) -> str:
     if name == "packet_checksum_fold":
         return render_packet_checksum_fold(name, insns)
 
+    subfunctions = subfunctions or {}
     addrs = {insn.addr for insn in insns}
+    subfunction_by_addr = {
+        fn_insns[0].addr: f"x86_fn_{c_ident(symbol)}"
+        for symbol, fn_insns in subfunctions.items()
+        if fn_insns
+    }
     has_rodata = any("[rip" in insn.raw.lower() for insn in insns)
-    lines = [
-        '#define X86_VM_ENABLE_RODATA 1' if has_rodata else "",
+    has_stack = any(
+        insn.mnemonic in {"push", "pop"} or
+        "[rsp" in insn.raw.lower() or
+        "[rbp" in insn.raw.lower()
+        for fn_insns in [insns, *subfunctions.values()]
+        for insn in fn_insns
+    )
+    next_addrs = {
+        insn.addr: insns[index + 1].addr
+        for index, insn in enumerate(insns[:-1])
+    }
+    call_returns = {
+        next_addrs[insn.addr]
+        for insn in insns
+        if insn.mnemonic == "call" and insn.addr in next_addrs
+    }
+    lines: list[str] = []
+    if has_rodata:
+        lines.append('#define X86_VM_ENABLE_RODATA 1')
+    if has_stack:
+        lines.append('#define X86_VM_ENABLE_STACK 1')
+    lines.extend([
         '#include "../x86_vm_bpf.h"',
         "",
+    ])
+    for symbol, fn_insns in subfunctions.items():
+        lines.append(render_x86_subfunction(symbol, fn_insns))
+    lines.extend([
         "SEC(\"xdp\")",
         f"int {name}_x86_vm_xdp(struct xdp_md *ctx)",
         "{",
         "\tX86_VM_DECLARE_XDP(ctx);",
-    ]
+    ])
+    if call_returns:
+        lines.extend([
+            "\t__u64 __x86_call_ret0 = 0;",
+            "\t__u64 __x86_call_ret1 = 0;",
+            "\t__u32 __x86_call_depth = 0;",
+        ])
     for insn in insns:
         label = f"x86_l_{insn.addr:x}"
         lines.append(f"{label}:")
-        append_branch_or_ret(lines, insn, addrs)
+        append_branch_or_ret(lines, insn, addrs,
+                             next_addr=next_addrs.get(insn.addr),
+                             call_returns=call_returns,
+                             call_functions=subfunction_by_addr)
     lines.extend([
         "\treturn XDP_ABORTED;",
         "}",
@@ -665,10 +884,16 @@ def render_program(name: str, insns: list[NativeInsn]) -> str:
 def write_one(md_path: Path, out_dir: Path) -> Path:
     name = md_path.stem
     insns = parse_native_asm(md_path)
+    missing_symbols = unresolved_call_symbols(insns)
+    subfunctions: dict[str, list[NativeInsn]] = {}
+    if missing_symbols:
+        native_functions = parse_full_native_functions(name, missing_symbols)
+        insns = native_functions.pop(f"{name}_xdp")
+        subfunctions = native_functions
     if not insns:
         raise ValueError(f"{md_path}: no native instructions parsed")
     output = out_dir / f"{name}.bpf.c"
-    output.write_text(render_program(name, insns))
+    output.write_text(render_program(name, insns, subfunctions))
     return output
 
 
