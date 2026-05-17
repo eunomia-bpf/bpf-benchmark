@@ -52,7 +52,7 @@ static const struct bpf_insn program[] = {
     HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-20) - 1),
     /* 0x112f: push   rbx [exact-kinsn: pushq kinsn] */
     HC_KINSN(HC_REG_PAYLOAD(BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
-    /* 0x1130: movabs r8,0x9e3779b97f4a7c15 [exact-bpf: movabs via verifier-visible BPF shadow write] */
+    /* 0x1130: movabs r8,0x9e3779b97f4a7c15 [exact-bpf: movabs via verifier-visible BPF immediate load] */
     HC_LD_IMM64_RAW(BPF_REG_5, 0, 0x9e3779b97f4a7c15ULL),
     /* 0x113a: xor    esi,esi [exact-kinsn: xor32 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_XORL),

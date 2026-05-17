@@ -8,6 +8,7 @@ CFLAGS := -Wall -Wextra -O2 -g -target bpf $(SYS_INCLUDE_FLAGS) -MMD -MP
 NATIVE_CFLAGS := -Wall -Wextra -O2 -g -fPIC -shared -DMICRO_NATIVE \
 	-fomit-frame-pointer -mno-red-zone -fno-stack-protector \
 	-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
+	-mllvm -switch-to-lookup=false \
 	$(SYS_INCLUDE_FLAGS) -MMD -MP
 HANDCRAFT_CFLAGS := -Wall -Wextra -O2 -g -fPIC -shared \
 	-I$(REPO_ROOT)/runner/include \

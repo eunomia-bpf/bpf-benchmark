@@ -130,6 +130,12 @@ struct x86_insn {
 	__u64 imm;
 };
 
+#ifdef X86_VM_ENABLE_STACK_EXT
+#ifndef X86_VM_ENABLE_STACK_DEEP
+#define X86_VM_ENABLE_STACK_DEEP 1
+#endif
+#endif
+
 struct x86_state {
 	__u64 rax;
 	__u64 rcx;
@@ -192,10 +198,12 @@ struct x86_state {
 	__u64 stack5;
 	__u64 stack6;
 	__u64 stack7;
+#ifdef X86_VM_ENABLE_STACK_DEEP
 	__u64 stack8;
 	__u64 stack9;
 	__u64 stack10;
 	__u64 stack11;
+#endif
 #ifdef X86_VM_ENABLE_STACK_EXT
 	__u64 stack12;
 	__u64 stack13;
@@ -210,10 +218,12 @@ struct x86_state {
 	void *p_stack5;
 	void *p_stack6;
 	void *p_stack7;
+#ifdef X86_VM_ENABLE_STACK_DEEP
 	void *p_stack8;
 	void *p_stack9;
 	void *p_stack10;
 	void *p_stack11;
+#endif
 	__u8 tag_stack0;
 	__u8 tag_stack1;
 	__u8 tag_stack2;
@@ -222,10 +232,12 @@ struct x86_state {
 	__u8 tag_stack5;
 	__u8 tag_stack6;
 	__u8 tag_stack7;
+#ifdef X86_VM_ENABLE_STACK_DEEP
 	__u8 tag_stack8;
 	__u8 tag_stack9;
 	__u8 tag_stack10;
 	__u8 tag_stack11;
+#endif
 #endif
 };
 
@@ -668,10 +680,12 @@ static __always_inline int x86_stack_write_raw(struct x86_state *state,
 	X86_STACK_WRITE_SLOT(-48, stack5, p_stack5, tag_stack5);
 	X86_STACK_WRITE_SLOT(-56, stack6, p_stack6, tag_stack6);
 	X86_STACK_WRITE_SLOT(-64, stack7, p_stack7, tag_stack7);
+#ifdef X86_VM_ENABLE_STACK_DEEP
 	X86_STACK_WRITE_SLOT(-72, stack8, p_stack8, tag_stack8);
 	X86_STACK_WRITE_SLOT(-80, stack9, p_stack9, tag_stack9);
 	X86_STACK_WRITE_SLOT(-88, stack10, p_stack10, tag_stack10);
 	X86_STACK_WRITE_SLOT(-96, stack11, p_stack11, tag_stack11);
+#endif
 #undef X86_STACK_WRITE_SLOT
 #ifdef X86_VM_ENABLE_STACK_EXT
 #define X86_STACK_WRITE_EXT(BASE, VALUE_FIELD)                              \
@@ -727,10 +741,12 @@ static __always_inline int x86_stack_read_raw(struct x86_state *state,
 	X86_STACK_READ_SLOT(-48, stack5, p_stack5, tag_stack5);
 	X86_STACK_READ_SLOT(-56, stack6, p_stack6, tag_stack6);
 	X86_STACK_READ_SLOT(-64, stack7, p_stack7, tag_stack7);
+#ifdef X86_VM_ENABLE_STACK_DEEP
 	X86_STACK_READ_SLOT(-72, stack8, p_stack8, tag_stack8);
 	X86_STACK_READ_SLOT(-80, stack9, p_stack9, tag_stack9);
 	X86_STACK_READ_SLOT(-88, stack10, p_stack10, tag_stack10);
 	X86_STACK_READ_SLOT(-96, stack11, p_stack11, tag_stack11);
+#endif
 #undef X86_STACK_READ_SLOT
 #ifdef X86_VM_ENABLE_STACK_EXT
 #define X86_STACK_READ_EXT(BASE, VALUE_FIELD)                               \
@@ -1571,6 +1587,21 @@ static __always_inline int x86_store_mem(struct x86_state *state,
 						   insn->flags, insn->aux);
 	}
 #endif
+	if (tag == X86_PTR_CTX && insn->dst == X86_RDI &&
+	    (disp == 16 || disp == 20) && insn->flags == X86_WIDTH_32) {
+		__u64 value = x86_store_imm_value(insn->imm);
+		__s64 out_off = disp == 16 ? 0 : 4;
+		__u8 src_shift = X86_REG_AUX_GET_SRC_SHIFT(insn->aux);
+
+		if (insn->op != X86_OP_MOV_STORE_IMM) {
+			if (x86_read_reg(state, insn->src, &value) < 0)
+				return X86_INTERP_TRAP;
+			if (src_shift != 0)
+				value >>= src_shift;
+		}
+		return x86_store_packet_imm(data, data_end, data, out_off,
+					    X86_WIDTH_32, value);
+	}
 	if (tag != X86_PTR_PACKET)
 		return X86_INTERP_TRAP;
 	if (insn->op == X86_OP_MOV_STORE_IMM)

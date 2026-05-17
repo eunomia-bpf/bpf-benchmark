@@ -156,13 +156,13 @@ static const struct bpf_insn program[] = {
     HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
     HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (111) - 1),
     HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    /* 0x11bf: movabs rax,0x4f82338baed89116 [exact-bpf: movabs via verifier-visible BPF shadow write] */
+    /* 0x11bf: movabs rax,0x4f82338baed89116 [exact-bpf: movabs via verifier-visible BPF immediate load] */
     HC_LD_IMM64_RAW(BPF_REG_0, 0, 0x4f82338baed89116ULL),
     /* 0x11c9: mov    r9d,edi [exact-kinsn: movl register-to-register kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(HC_X86_R9, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x11cc: lea    r10d,[rsi+0x3] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(HC_X86_R10, BPF_REG_2, 0, 0, 1, 0, 3), MICRO_HANDCRAFT_BPF_X86_LEAL),
-    /* 0x11d0: movabs rdi,0xd1b54a32d192ed03 [exact-bpf: movabs via verifier-visible BPF shadow write] */
+    /* 0x11d0: movabs rdi,0xd1b54a32d192ed03 [exact-bpf: movabs via verifier-visible BPF immediate load] */
     HC_LD_IMM64_RAW(BPF_REG_1, 0, 0xd1b54a32d192ed03ULL),
     /* 0x11da: add    rdi,r10 [exact-kinsn: add64 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_ADDQ),

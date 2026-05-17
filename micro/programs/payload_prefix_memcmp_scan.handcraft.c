@@ -110,7 +110,7 @@ static const struct bpf_insn program[] = {
     HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_0, 0, (-54) - 1, 64),
     /* 0x1176: movzx  eax,BYTE PTR [rcx+0x4b] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_X86_MEM_PAYLOAD(BPF_REG_0, BPF_REG_4, 75), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
-    /* 0x117a: movabs rdx,0xf43e9fde8cf6b51c [exact-bpf: movabs via verifier-visible BPF shadow write] */
+    /* 0x117a: movabs rdx,0xf43e9fde8cf6b51c [exact-bpf: movabs via verifier-visible BPF immediate load] */
     HC_LD_IMM64_RAW(BPF_REG_3, 0, 0xf43e9fde8cf6b51cULL),
     /* 0x1184: jmp    11a7 <payload_prefix_memcmp_scan_xdp+0xa7> [exact-bpf: native jmp maps to ordinary BPF JA] */
     HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (17) - 1),
@@ -120,7 +120,7 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_0, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x118b: lea    rax,[rax+rax*4] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_0, BPF_REG_0, BPF_REG_0, 2, 1, 1, 0), MICRO_HANDCRAFT_BPF_X86_LEAQ),
-    /* 0x118f: movabs rdx,0x6a09e667f3bcc909 [exact-bpf: movabs via verifier-visible BPF shadow write] */
+    /* 0x118f: movabs rdx,0x6a09e667f3bcc909 [exact-bpf: movabs via verifier-visible BPF immediate load] */
     HC_LD_IMM64_RAW(BPF_REG_3, 0, 0x6a09e667f3bcc909ULL),
     /* 0x1199: add    rdx,rax [exact-kinsn: add64 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_ADDQ),
@@ -202,7 +202,7 @@ static const struct bpf_insn program[] = {
     /* 0x1203: cmp    rax,0x40 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
     /* 0x1207: jne    11c0 <payload_prefix_memcmp_scan_xdp+0xc0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
     HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_0, 0, (-54) - 1, 64),
-    /* 0x1209: movabs rax,0x9e3779b97f4a7c16 [exact-bpf: movabs via verifier-visible BPF shadow write] */
+    /* 0x1209: movabs rax,0x9e3779b97f4a7c16 [exact-bpf: movabs via verifier-visible BPF immediate load] */
     HC_LD_IMM64_RAW(BPF_REG_0, 0, 0x9e3779b97f4a7c16ULL),
     /* 0x1213: xor    rdx,rax [exact-kinsn: xor64 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
@@ -300,7 +300,7 @@ static const struct bpf_insn program[] = {
     /* 0x1297: cmp    rdx,0x40 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
     /* 0x129b: jne    1250 <payload_prefix_memcmp_scan_xdp+0x150> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
     HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_3, 0, (-54) - 1, 64),
-    /* 0x129d: movabs rdx,0x9e3779b97f4a7c16 [exact-bpf: movabs via verifier-visible BPF shadow write] */
+    /* 0x129d: movabs rdx,0x9e3779b97f4a7c16 [exact-bpf: movabs via verifier-visible BPF immediate load] */
     HC_LD_IMM64_RAW(BPF_REG_3, 0, 0x9e3779b97f4a7c16ULL),
     /* 0x12a7: or     rdx,0x1 [exact-kinsn: or64 imm kinsn] */
     HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_3, 1), MICRO_HANDCRAFT_BPF_X86_ORQ),
