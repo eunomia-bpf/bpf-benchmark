@@ -4,8 +4,10 @@ This directory holds proof-of-concept interpreters for the ReverseJIT research
 direction.
 
 The goal is deliberately narrow: use a real eBPF program as a verifier-facing VM
-for a native-like instruction stream, then execute it through `BPF_PROG_TEST_RUN`
-with the instruction stream supplied as packet input.
+for a native-like instruction stream, then execute it through
+`BPF_PROG_TEST_RUN`. Current x86 proof artifacts hardcode the guest instruction
+stream in the `.bpf.c` source so the verifier sees a fixed program, while packet
+input supplies only the benchmark data.
 
 Current layout:
 

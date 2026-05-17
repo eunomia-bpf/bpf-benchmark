@@ -562,9 +562,9 @@ static int instantiate_cmp_narrow_rr_flags(u64 payload, struct bpf_insn *insn_bu
 		kinsn_x86_read64_arch(insn_buf, &cnt, KINSN_X86_SCRATCH1,
 				      right_reg);
 	} else {
-		kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0,
+		kinsn_x86_read32(insn_buf, &cnt, KINSN_X86_SCRATCH0,
 				 left_reg);
-		kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH1,
+		kinsn_x86_read32(insn_buf, &cnt, KINSN_X86_SCRATCH1,
 				 right_reg);
 	}
 	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, KINSN_X86_SCRATCH0, mask);
@@ -612,7 +612,7 @@ static int instantiate_cmpb_imm_flags(u64 payload, struct bpf_insn *insn_buf)
 		kinsn_x86_read64_arch(insn_buf, &cnt, KINSN_X86_SCRATCH0,
 				      reg);
 	else
-		kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0, reg);
+		kinsn_x86_read32(insn_buf, &cnt, KINSN_X86_SCRATCH0, reg);
 	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, KINSN_X86_SCRATCH0, 0xff);
 	insn_buf[cnt++] = BPF_ST_MEM(BPF_W, BPF_REG_10,
 				     KINSN_X86_SHADOW_ZF_OFF, 0);
@@ -652,7 +652,7 @@ static int instantiate_cmpw_imm_flags(u64 payload, struct bpf_insn *insn_buf)
 		kinsn_x86_read64_arch(insn_buf, &cnt, KINSN_X86_SCRATCH0,
 				      reg);
 	else
-		kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0, reg);
+		kinsn_x86_read32(insn_buf, &cnt, KINSN_X86_SCRATCH0, reg);
 	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, KINSN_X86_SCRATCH0,
 					0xffff);
 	insn_buf[cnt++] = BPF_ST_MEM(BPF_W, BPF_REG_10,

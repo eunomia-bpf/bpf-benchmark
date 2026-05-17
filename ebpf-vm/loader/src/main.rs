@@ -114,6 +114,7 @@ fn run() -> Result<()> {
     let mut object = open_object(&cli.object)?;
     load_object(&mut object)?;
     let prog_fd = program_fd(&object, &cli.program)?;
+
     if cli.load_only {
         println!(
             "loaded object={} program={} fd={}",
@@ -248,7 +249,8 @@ fn parse_cli() -> Result<Cli> {
         }
     }
 
-    let object = object.ok_or_else(|| "--object is required".to_string())?;
+    let object = object.ok_or_else(|| "--object requires a path".to_string())?;
+
     Ok(Cli {
         object,
         case_name,
@@ -263,7 +265,7 @@ fn parse_cli() -> Result<Cli> {
 
 fn print_help() {
     println!(
-        "Usage: ebpf-vm-loader --object <vm.bpf.o> [--load-only] [--case simple|--input payload.mem --expected-result N] [--program x86_vm_xdp] [--repeat N]"
+        "Usage: ebpf-vm-loader --object <vm.bpf.o> [--program x86_vm_xdp] [--load-only] [--case simple|--input payload.mem --expected-result N] [--repeat N]"
     );
 }
 

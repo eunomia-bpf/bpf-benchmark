@@ -1172,7 +1172,7 @@ def proof_insn_len(code: str) -> int:
         if "HC_X86_IMM_PAYLOAD" in code and "HC_X86_R" not in code:
             return 1
         if "HC_X86_RR_PAYLOAD" in code and "HC_X86_R" not in code:
-            return 1
+            return 1 if selector != "MICRO_HANDCRAFT_BPF_X86_MOVL" else 2
         if "HC_X86_MEM_PAYLOAD" in code and "HC_X86_R" not in code:
             return 1
         return 8
@@ -1274,6 +1274,7 @@ def write_outputs(insns: list[NativeInsn], translations: list[Translation], outp
         "    HC_MOV64_IMM(BPF_REG_6, 0),",
         "    HC_MOV64_IMM(BPF_REG_7, 0),",
         "    HC_MOV64_IMM(BPF_REG_8, 0),",
+        "    HC_MOV64_IMM(BPF_REG_9, 0),",
     ])
     for insn, trans in zip(insns, translations, strict=True):
         prefix = f"    /* 0x{insn.addr:x}: {insn.raw} [{trans.status}: {trans.note}] */"

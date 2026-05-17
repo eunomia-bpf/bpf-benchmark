@@ -275,29 +275,29 @@ SAMPLES=1 WARMUPS=0 INNER_REPEAT=1000 BENCH=<case> make micro
 |---|---:|---:|---:|---:|---|
 | `simple` | 2 ns | 6 ns | 6 ns | `12345678` | ok; JIT size 107 B -> 85 B |
 | `simple_packet` | 3 ns | 10 ns | 10 ns | `12345678` | ok; JIT size 95 B -> 72 B |
-| `bitmap_popcount_scan` | 467 ns | 1131 ns | 475 ns | `12830754992348206170` | ok; hot loop matches native shape, JIT size 117 B -> 128 B; one cold `cmp [mem], imm` site is load+cmp |
+| `bitmap_popcount_scan` | 569 ns | 1186 ns | 539 ns | `12830754992348206170` | ok in `micro/results/x86_kvm_micro_20260517_032553_113545`; handcraft JIT size 162 B |
 | `sorted_rule_binary_search` | 311 ns | 575 ns | failed | `verifier rejected: infinite loop at insn 36` | no handcraft JIT dump |
-| `bcc_runqlat_log2_histogram_bucket` | 1130 ns | 1170 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
+| `bcc_runqlat_log2_histogram_bucket` | 1399 ns | 1685 ns | failed | `unreachable insn 714` | latest strict-handcraft run reached verifier CFG check; no handcraft JIT dump |
 | `trace_event_type_switch_dispatch` | 54 ns | 310 ns | 87 ns | `16` | ok; converter output was minimally repaired for XDP ctx, staged switch table, and `dh`; native 170 B -> handcraft JIT 238 B |
-| `packet_checksum_fold` | 13364 ns | 17651 ns | failed | `verifier rejected: invalid access to packet, off=-3 size=2, R5(id=0,off=-3,r=1040)` | no handcraft JIT dump |
+| `packet_checksum_fold` | 13346 ns | 18342 ns | 13409 ns | `0` | ok in `micro/results/x86_kvm_micro_20260517_033930_836000`; `movl imm` now emits native-length `b8+rd imm32`; JIT size 424 B -> 209 B |
 | `payload_prefix_memcmp_scan` | 50 ns | 114 ns | failed | `verifier rejected: value 1728053766 makes pkt pointer be out of bounds` | no handcraft JIT dump |
 | `packet_vlan_tcpopt_parser` | 8 ns | 14 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
 | `bpf_local_call_fanout_dispatch` | 68 ns | 131 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
-| `flow_5tuple_rss_hash` | 10 ns | 23 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
-| `katran_lb_consistent_hash_select` | 12 ns | 37 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
-| `cilium_policy_guard_tree_filter` | 42 ns | 98 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
+| `flow_5tuple_rss_hash` | 78 ns | 144 ns | failed | `R9 !read_ok` | latest strict-handcraft run exposes a shadow native-reg proof bug at verifier PC 129 |
+| `katran_lb_consistent_hash_select` | 127 ns | 148 ns | failed | `EINVAL; processed 0 insns` | latest strict-handcraft run still fails before verifier walk; no handcraft JIT dump |
+| `cilium_policy_guard_tree_filter` | 188 ns | 293 ns | failed | `unreachable insn 566` | latest strict-handcraft run reached verifier CFG check; no handcraft JIT dump |
 | `siphash_rotate64_mixer` | 36 ns | 66 ns | 49 ns | `2666935177028490406` | ok; consolidated `addq/xorq` machine-ALU kinsns fixed shadow-reg ALU loss; JIT size 3520 B -> 1167 B |
 | `packet_record_bounds_window` | 71 ns | 129 ns | failed | `unreachable insn 28; processed 0` | no handcraft JIT dump |
-| `flow_record_field_scan` | 56 ns | 80 ns | failed | `unreachable insn 26; processed 0` | no handcraft JIT dump |
-| `packed_header_bitfield_decode` | 201 ns | 269 ns | failed | `verifier rejected: R5 !read_ok` | no handcraft JIT dump |
-| `bpftrace_string_search_prefix_scan` | 126 ns | 236 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
+| `flow_record_field_scan` | 182 ns | 161 ns | failed | `unreachable insn 556` | latest strict-handcraft run reached verifier CFG check; no handcraft JIT dump |
+| `packed_header_bitfield_decode` | 286 ns | 572 ns | failed | `EINVAL; processed 0 insns` | latest strict-handcraft run still fails before verifier walk; no handcraft JIT dump |
+| `bpftrace_string_search_prefix_scan` | 205 ns | 462 ns | failed | `unreachable insn 358` | latest strict-handcraft run reached verifier CFG check; no handcraft JIT dump |
 | `tracee_syscall_name_table_lookup` | 90 ns | 130 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
 | `tracee_http_method_prefix_detect` | 19 ns | 31 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
 | `cilium_socket_lb_service_select` | 178 ns | 420 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
-| `bcc_tcpconnect_ipv4_tuple_filter` | 65 ns | 147 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
+| `bcc_tcpconnect_ipv4_tuple_filter` | 226 ns | 429 ns | failed | `unreachable insn 475` | latest strict-handcraft run reached verifier CFG check; no handcraft JIT dump |
 | `tetragon_process_event_arg_filter` | 120 ns | 189 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
 | `otel_stack_frame_unwind_scan` | 44 ns | 132 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
-| `cilium_ct_nat_tuple_rewrite` | 76 ns | 209 ns | failed | `unreachable insn 83; processed 0` | no handcraft JIT dump |
+| `cilium_ct_nat_tuple_rewrite` | 226 ns | 478 ns | failed | `EINVAL; processed 0 insns` | latest strict-handcraft run still fails before verifier walk; no handcraft JIT dump |
 | `packet_toeplitz_rss_hash` | 262 ns | 269 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
 | `bpftrace_comm_key_fnv_hash` | 436 ns | 486 ns | failed | `unreachable insn 81; processed 0` | no handcraft JIT dump |
 | `tc_packet_checksum_fold` | 13401 ns | 17682 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |

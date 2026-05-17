@@ -18,16 +18,28 @@
 		.imm = (IMM),                                               \
 	})
 
+#define X86_VM_LOAD_INSN(OP, DST, SRC, FLAGS, AUX, IMM)                    \
+	do {                                                               \
+		__x86_vm_insn.op = (OP);                                   \
+		__x86_vm_insn.dst = (DST);                                 \
+		__x86_vm_insn.src = (SRC);                                 \
+		__x86_vm_insn.flags = (FLAGS);                             \
+		__x86_vm_insn.aux = (AUX);                                 \
+		__x86_vm_insn.imm = (IMM);                                 \
+	} while (0)
+
 #define X86_VM_EXEC(STATE, OP, DST, SRC, FLAGS, AUX, IMM)                  \
 	({                                                                 \
-		__x86_vm_insn.op = (OP);                                    \
-		__x86_vm_insn.dst = (DST);                                  \
-		__x86_vm_insn.src = (SRC);                                  \
-		__x86_vm_insn.flags = (FLAGS);                              \
-		__x86_vm_insn.aux = (AUX);                                  \
-		__x86_vm_insn.imm = (IMM);                                  \
+		X86_VM_LOAD_INSN((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
 		x86_exec_one((STATE), &__x86_vm_insn, __x86_vm_data,        \
 			     __x86_vm_data_end);                            \
+	})
+
+#define X86_VM_EXEC_HELPER(HELPER, STATE, OP, DST, SRC, FLAGS, AUX, IMM)   \
+	({                                                                 \
+		X86_VM_LOAD_INSN((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+		HELPER((STATE), &__x86_vm_insn, __x86_vm_data,              \
+		       __x86_vm_data_end);                                  \
 	})
 
 static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
@@ -86,11 +98,35 @@ static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
 			return (__u32)__x86_vm_state.rax;                  \
 	} while (0)
 
+#define X86_VM_RUN_OP(HELPER, OP, DST, SRC, FLAGS, AUX, IMM)               \
+	do {                                                               \
+		int __x86_vm_step_ret =                                    \
+			X86_VM_EXEC_HELPER(HELPER, &__x86_vm_state, (OP),   \
+					   (DST), (SRC), (FLAGS), (AUX),   \
+					   (IMM));                         \
+		if (__x86_vm_step_ret < 0)                                 \
+			return XDP_ABORTED;                                \
+		if (__x86_vm_step_ret == X86_INTERP_DONE)                  \
+			return (__u32)__x86_vm_state.rax;                  \
+	} while (0)
+
 #define X86_VM_RUN_STEP_SUB(OP, DST, SRC, FLAGS, AUX, IMM)                  \
 	do {                                                               \
 		int __x86_vm_step_ret =                                    \
 			X86_VM_EXEC(&__x86_vm_state, (OP), (DST), (SRC),    \
 				     (FLAGS), (AUX), (IMM));                 \
+		if (__x86_vm_step_ret < 0)                                 \
+			return X86_INTERP_TRAP;                            \
+		if (__x86_vm_step_ret == X86_INTERP_DONE)                  \
+			return X86_INTERP_CONTINUE;                        \
+	} while (0)
+
+#define X86_VM_RUN_OP_SUB(HELPER, OP, DST, SRC, FLAGS, AUX, IMM)           \
+	do {                                                               \
+		int __x86_vm_step_ret =                                    \
+			X86_VM_EXEC_HELPER(HELPER, &__x86_vm_state, (OP),   \
+					   (DST), (SRC), (FLAGS), (AUX),   \
+					   (IMM));                         \
 		if (__x86_vm_step_ret < 0)                                 \
 			return X86_INTERP_TRAP;                            \
 		if (__x86_vm_step_ret == X86_INTERP_DONE)                  \

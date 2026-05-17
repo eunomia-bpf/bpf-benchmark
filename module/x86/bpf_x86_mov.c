@@ -276,8 +276,11 @@ static int instantiate_movl_reg(u64 payload, struct bpf_insn *insn_buf)
 	dst_shadowed = arch_reg ? kinsn_x86_arch_reg_is_shadowed(dst_reg) :
 				  kinsn_x86_reg_is_shadowed(dst_reg);
 	if (!dst_shadowed && !src_shadowed) {
-		insn_buf[0] = BPF_MOV32_REG(dst_reg, src_reg);
-		return 1;
+		insn_buf[0] = BPF_STX_MEM(BPF_W, BPF_REG_10, src_reg,
+					  KINSN_X86_PROOF_LHS_OFF);
+		insn_buf[1] = BPF_LDX_MEM(BPF_W, dst_reg, BPF_REG_10,
+					  KINSN_X86_PROOF_LHS_OFF);
+		return 2;
 	}
 
 	value_reg = dst_shadowed ? KINSN_X86_SCRATCH0 : dst_reg;
@@ -873,10 +876,16 @@ static int emit_mov_imm_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	if (!kinsn_x86_valid(dst_reg))
 		return -EINVAL;
 
-	kinsn_emit_rex_rr(buf, &len, is64, 0, dst_reg);
-	kinsn_emit_u8(buf, &len, 0xc7);
-	kinsn_emit_u8(buf, &len, 0xc0 | kinsn_x86_code(dst_reg));
-	kinsn_emit_s32(buf, &len, imm);
+	if (!is64) {
+		kinsn_emit_rex_rr(buf, &len, false, 0, dst_reg);
+		kinsn_emit_u8(buf, &len, 0xb8 | kinsn_x86_code(dst_reg));
+		kinsn_emit_s32(buf, &len, imm);
+	} else {
+		kinsn_emit_rex_rr(buf, &len, true, 0, dst_reg);
+		kinsn_emit_u8(buf, &len, 0xc7);
+		kinsn_emit_u8(buf, &len, 0xc0 | kinsn_x86_code(dst_reg));
+		kinsn_emit_s32(buf, &len, imm);
+	}
 
 	return kinsn_emit_finish(image, off, emit, buf, len);
 }

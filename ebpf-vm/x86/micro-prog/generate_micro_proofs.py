@@ -95,6 +95,46 @@ WIDTH_CONST = {
     64: "X86_WIDTH_64",
 }
 
+OP_HELPERS = {
+    "X86_OP_NOP": "x86_exec_nop",
+    "X86_OP_MOV_IMM": "x86_exec_mov_imm",
+    "X86_OP_MOV_REG": "x86_exec_mov_reg",
+    "X86_OP_ADD_IMM": "x86_exec_add_imm",
+    "X86_OP_ADD_REG": "x86_exec_add_reg",
+    "X86_OP_XOR_REG": "x86_exec_xor_reg",
+    "X86_OP_MOV_LOAD": "x86_exec_mov_load",
+    "X86_OP_MOV_STORE_IMM": "x86_exec_mov_store_imm",
+    "X86_OP_MOV_STORE_REG": "x86_exec_mov_store_reg",
+    "X86_OP_LEA": "x86_exec_lea",
+    "X86_OP_ALU_IMM": "x86_exec_alu_imm",
+    "X86_OP_ALU_REG": "x86_exec_alu_reg",
+    "X86_OP_CMP_IMM": "x86_exec_cmp_imm",
+    "X86_OP_CMP_REG": "x86_exec_cmp_reg",
+    "X86_OP_TEST_IMM": "x86_exec_test_imm",
+    "X86_OP_TEST_REG": "x86_exec_test_reg",
+    "X86_OP_JCC": "x86_exec_jcc",
+    "X86_OP_JMP": "x86_exec_jmp",
+    "X86_OP_PUSH": "x86_exec_push",
+    "X86_OP_POP": "x86_exec_pop",
+    "X86_OP_CALL": "x86_exec_call",
+    "X86_OP_CMOV": "x86_exec_cmov",
+    "X86_OP_SETCC": "x86_exec_setcc",
+    "X86_OP_BSWAP": "x86_exec_bswap",
+    "X86_OP_POPCNT": "x86_exec_popcnt",
+    "X86_OP_XCHG": "x86_exec_xchg",
+    "X86_OP_DIV": "x86_exec_div",
+    "X86_OP_SHLD_IMM": "x86_exec_shld_imm",
+    "X86_OP_SHRD_IMM": "x86_exec_shrd_imm",
+    "X86_OP_CMP_MEM_IMM": "x86_exec_cmp_mem_imm",
+    "X86_OP_TEST_MEM_IMM": "x86_exec_test_mem_imm",
+    "X86_OP_CMP_MEM_REG": "x86_exec_cmp_mem_reg",
+    "X86_OP_MOVZX_REG": "x86_exec_movzx_reg",
+    "X86_OP_MOVSX_REG": "x86_exec_movsx_reg",
+    "X86_OP_MOVSX_LOAD": "x86_exec_movsx_load",
+    "X86_OP_ALU_MEM": "x86_exec_alu_mem",
+    "X86_OP_RET": "x86_exec_ret",
+}
+
 
 @dataclass(frozen=True)
 class NativeInsn:
@@ -527,14 +567,22 @@ def c_comment(text: str) -> str:
     return text.replace("*/", "* /")
 
 
+def op_helper(op: str) -> str:
+    try:
+        return OP_HELPERS[op]
+    except KeyError as err:
+        raise ValueError(f"missing interpreter helper for {op}") from err
+
+
 def append_step(lines: list[str], insn: NativeInsn, indent: str = "\t",
-                step_macro: str = "X86_VM_RUN_STEP") -> None:
+                step_macro: str = "X86_VM_RUN_OP") -> None:
     encoded = encode(insn)
+    helper = op_helper(encoded.op)
     lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
     lines.append(
         f"{indent}{step_macro}("
-        f"{encoded.op}, {encoded.dst}, {encoded.src}, {encoded.flags}, "
-        f"{encoded.aux}, {encoded.imm});"
+        f"{helper}, {encoded.op}, {encoded.dst}, {encoded.src}, "
+        f"{encoded.flags}, {encoded.aux}, {encoded.imm});"
     )
 
 
@@ -564,7 +612,7 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
                          call_returns: set[int] | None = None,
                          call_functions: dict[int, str] | None = None,
                          subroutine: bool = False,
-                         step_macro: str = "X86_VM_RUN_STEP") -> None:
+                         step_macro: str = "X86_VM_RUN_OP") -> None:
     if insn.mnemonic in CC_AUX and insn.mnemonic.startswith("j"):
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
         target = branch_target(insn.operands[0]) if insn.operands else 0
@@ -627,11 +675,12 @@ def append_unrolled_branch_comment(lines: list[str], insn: NativeInsn,
 
 def append_loop_step(lines: list[str], insn: NativeInsn, indent: str = "\t") -> None:
     encoded = encode(insn)
+    helper = op_helper(encoded.op)
     lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
     lines.append(
         f"{indent}PACKET_CHECKSUM_LOOP_STEP("
-        f"{encoded.op}, {encoded.dst}, {encoded.src}, {encoded.flags}, "
-        f"{encoded.aux}, {encoded.imm});"
+        f"{helper}, {encoded.op}, {encoded.dst}, {encoded.src}, "
+        f"{encoded.flags}, {encoded.aux}, {encoded.imm});"
     )
 
 
@@ -664,7 +713,7 @@ def render_packet_checksum_fold(name: str, insns: list[NativeInsn]) -> str:
         "\t__u32 failed;",
         "};",
         "",
-        "#define PACKET_CHECKSUM_LOOP_STEP(OP, DST, SRC, FLAGS, AUX, IMM)        \\",
+        "#define PACKET_CHECKSUM_LOOP_STEP(HELPER, OP, DST, SRC, FLAGS, AUX, IMM) \\",
         "\tdo {                                                               \\",
         "\t\tloop->insn.op = (OP);                                         \\",
         "\t\tloop->insn.dst = (DST);                                       \\",
@@ -672,8 +721,8 @@ def render_packet_checksum_fold(name: str, insns: list[NativeInsn]) -> str:
         "\t\tloop->insn.flags = (FLAGS);                                  \\",
         "\t\tloop->insn.aux = (AUX);                                      \\",
         "\t\tloop->insn.imm = (IMM);                                      \\",
-        "\t\tint __x86_loop_ret = x86_exec_one(&loop->state, &loop->insn, \\",
-        "\t\t\t\t\t\t       loop->data, loop->data_end);     \\",
+        "\t\tint __x86_loop_ret = HELPER(&loop->state, &loop->insn,       \\",
+        "\t\t\t\t\t       loop->data, loop->data_end);       \\",
         "\t\tif (__x86_loop_ret != X86_INTERP_CONTINUE) {                 \\",
         "\t\t\tloop->failed = 1;                                      \\",
         "\t\t\treturn 1;                                             \\",
@@ -802,7 +851,7 @@ def render_x86_subfunction(symbol: str, insns: list[NativeInsn]) -> str:
     for insn in insns:
         lines.append(f"x86_l_{insn.addr:x}:")
         append_branch_or_ret(lines, insn, addrs, subroutine=True,
-                             step_macro="X86_VM_RUN_STEP_SUB")
+                             step_macro="X86_VM_RUN_OP_SUB")
     lines.extend([
         "\t#undef __x86_vm_state",
         "\treturn X86_INTERP_TRAP;",
