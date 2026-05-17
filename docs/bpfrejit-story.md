@@ -1,6 +1,6 @@
 # BpfReJIT Paper Story
 
-> 本文档从 `kernel-jit-optimization-plan.md` 提取论文叙事相关内容，聚焦 principle、story 结构和证据链。
+> 本文档从 `rejit-speculative-optimization-ebpf.md` 提取论文叙事相关内容，聚焦 principle、story 结构和证据链。
 > 不含任务追踪、编辑规则等工程信息。
 
 ---

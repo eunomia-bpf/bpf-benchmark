@@ -29,6 +29,7 @@ class Bench:
     name: str
     input_generator: str
     expected_result: int
+    expected_retval: int
 
 
 @dataclass
@@ -46,8 +47,20 @@ def load_benches() -> list[Bench]:
         generator = item.get("input_generator")
         if expected is None or generator is None:
             continue
-        benches.append(Bench(item["name"], generator, int(expected)))
+        name = item["name"]
+        benches.append(Bench(name, generator, int(expected),
+                             expected_native_retval(name)))
     return benches
+
+
+def expected_native_retval(name: str) -> int:
+    src = REPO_ROOT / "micro" / "programs" / f"{name}.bpf.c"
+    text = src.read_text()
+    if "TC_BENCH" in text:
+        return 0
+    if "CGROUP_SKB_BENCH" in text:
+        return 1
+    return 2
 
 
 def run_cmd(cmd: list[str], *, timeout: int, capture: bool = True) -> subprocess.CompletedProcess[str]:
@@ -136,6 +149,8 @@ def run_object(bench: Bench, sudo: bool) -> Result:
         str(input_path),
         "--expected-result",
         str(bench.expected_result),
+        "--expect-retval",
+        str(bench.expected_retval),
     ]
     if sudo and os.geteuid() != 0:
         cmd = ["sudo", "-n", *cmd]

@@ -232,15 +232,17 @@ $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_MANIFEST_ARM64) &: $(HOST_KERNEL_SOURCE
 # kinsn .ko build against the fork kernel; kbuild MO= dir is reused across runs for
 # incremental builds. Only the publish dir (HOST_KINSN_DIR_*) is wiped each run.
 $(HOST_KINSN_KO_FILES_X86) &: $(HOST_KERNEL_MANIFEST_X86) $(KINSN_SOURCE_FILES_X86) $(BUILD_RULE_FILES)
+	rm -rf "$(HOST_KINSN_DIR_X86)"
 	mkdir -p "$(HOST_KINSN_DIR_X86)" "$(HOST_BUILD_ROOT)/kinsn-build/x86_64"
 	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 M="$(ROOT_DIR)/module/x86" MO="$(HOST_BUILD_ROOT)/kinsn-build/x86_64" modules -j"$(IMAGE_BUILD_JOBS)"
-	install -m 0644 "$(HOST_BUILD_ROOT)/kinsn-build/x86_64"/*.ko "$(HOST_KINSN_DIR_X86)/"
+	for mod in $(HOST_KINSN_MODULES_X86); do install -m 0644 "$(HOST_BUILD_ROOT)/kinsn-build/x86_64/$$mod.ko" "$(HOST_KINSN_DIR_X86)/"; done
 
 $(HOST_KINSN_KO_FILES_ARM64) &: $(HOST_KERNEL_MANIFEST_ARM64) $(KINSN_SOURCE_FILES_ARM64) $(BUILD_RULE_FILES)
 	@command -v aarch64-linux-gnu-gcc >/dev/null
+	rm -rf "$(HOST_KINSN_DIR_ARM64)"
 	mkdir -p "$(HOST_KINSN_DIR_ARM64)" "$(HOST_BUILD_ROOT)/kinsn-build/arm64"
 	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- M="$(ROOT_DIR)/module/arm64" MO="$(HOST_BUILD_ROOT)/kinsn-build/arm64" modules -j"$(IMAGE_BUILD_JOBS)"
-	install -m 0644 "$(HOST_BUILD_ROOT)/kinsn-build/arm64"/*.ko "$(HOST_KINSN_DIR_ARM64)/"
+	for mod in $(HOST_KINSN_MODULES_ARM64); do install -m 0644 "$(HOST_BUILD_ROOT)/kinsn-build/arm64/$$mod.ko" "$(HOST_KINSN_DIR_ARM64)/"; done
 
 $(X86_KATRAN_ARTIFACTS_IMAGE_TAR): $(KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES)
 	@mkdir -p "$(dir $@)"

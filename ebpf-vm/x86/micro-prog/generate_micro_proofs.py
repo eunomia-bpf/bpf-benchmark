@@ -1172,11 +1172,7 @@ def render_program(name: str, insns: list[NativeInsn],
     if name == "packet_checksum_fold":
         return render_packet_checksum_fold(name, insns)
 
-    ret_statement = (
-        "return XDP_PASS;"
-        if name in {"tc_packet_checksum_fold", "cgroup_skb_hash_chain"}
-        else "X86_VM_RET_RAX();"
-    )
+    ret_statement = "X86_VM_RET_RAX();"
     subfunctions = subfunctions or {}
     if name == "bpf_local_call_fanout_dispatch" and subfunctions:
         return render_local_call_fanout_dispatch(name, insns, subfunctions)

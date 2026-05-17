@@ -1,7 +1,34 @@
-# BpfReJIT: Dynamic, Extensible Compilation Framework for Kernel eBPF
+# Speculative eBPF Optimization (BpfReJIT)
 
-> 本文档是 BpfReJIT 论文的单一 hub。
-> **论文核心方向：构建一个最小化、动态、可扩展的内核编译框架，让 deployed eBPF 从一次性静态编译，变成可在线、透明、runtime-guided specialization 的执行环境。Paper 必须展示真实程序上的可测量加速和安全加固能力。**
+Status: paper-line hub for idea #1.
+
+## Project Context: Three Sister Ideas
+
+This research project produces three distinct papers that share a single
+evaluation setup (the `bpf-benchmark` corpus, micro suite, and measurement
+infrastructure) but address different problems with different designs.
+
+| # | Idea | Hub doc |
+|---|---|---|
+| 1 | **Speculative eBPF optimization** (this doc) — runtime userspace-guided rewriting of live eBPF programs | `docs/rejit-speculative-optimization-ebpf.md` |
+| 2 | Kinsn — new OS abstraction, brings eBPF close to hardware | `docs/kinsn-idea.md` |
+| 3 | ReverseJIT / ReverseInterpreter — x86/arm interpreter or JIT written in eBPF | `docs/reverse-jit.md` |
+
+The three ideas are not incremental versions of one design. Each picks a
+different problem and a different point in the trust / kernel-surface /
+coverage space.
+
+**Scope of this doc (idea #1)**: BPF-to-BPF rewrite passes applied to
+already-loaded eBPF programs, driven by userspace `bpfopt` + `bpfrejit-daemon`,
+swapping in optimized bytecode. The current implementation uses the project
+fork's `BPF_PROG_REJIT` syscall; the design is evolving toward stock-kernel
+attachment-update mechanisms (see `docs/tmp/userspace_speculative_opt_design.md`,
+`docs/tmp/poc_a_katran_pidfd_swap.md`, `docs/tmp/poc_b_bcc_perf_event_swap.md`).
+Kinsn-introducing passes (rotate, cond_select, extract, endian fusion,
+prefetch, pair load/store, bulk memory, ccmp, lea) belong to the kinsn paper
+line and are referenced here but designed in `docs/kinsn-idea.md`.
+
+> **论文核心方向：构建一个最小化、动态、可扩展的 eBPF 优化框架，让 deployed eBPF 从一次性静态编译，变成可在线、透明、runtime-guided specialization 的执行环境。Paper 必须展示真实程序上的可测量加速能力。**
 > **编辑规则**：
 > - **⚠️ 未经用户明确同意，禁止修改内核代码（vendor/linux-framework）。** 所有内核改动必须先调研→用户确认→再实施。codex/agent prompt 必须包含此约束。
 > - 未经用户明确要求，禁止 git commit / git push。
@@ -37,9 +64,10 @@ eBPF is widely adopted in production for observability, networking, and customiz
 
 | Topic | File | Purpose |
 | --- | --- | --- |
-| **Plan + design hub (this doc)** | `docs/kernel-jit-optimization-plan.md` | OSDI '26 plan, architecture, methodology, task tracking |
-| Plan archive (history) | `docs/kernel-jit-optimization-plan-record-old.md` | superseded plan snapshots (v1 task table, v3 phase 进度 等) |
-| Task archive | `docs/kernel-jit-optimization-plan-task-archive.md` | retired task table (#1-#303 v1 era) |
+| **Plan + design hub (this doc)** | `docs/rejit-speculative-optimization-ebpf.md` | OSDI '26 plan, architecture, methodology, task tracking |
+| Kinsn paper-line hub | `docs/kinsn-idea.md` | idea #2 framing |
+| ReverseJIT paper-line hub | `docs/reverse-jit.md` | idea #3 framing |
+| Task history | `git log` | retired task tables and superseded plan snapshots are recovered from git history (v1 archive 文件已删除) |
 | **bpfopt-suite v3 design (authoritative)** | `docs/tmp/bpfopt_design_v3.md` | CLI-first Unix pipeline 架构（daemon owns kernel calls，bpfopt 是 pure bytecode CLI） |
 | Benchmark framework | `docs/benchmark-framework-design.md` | corpus / micro suite layout |
 | Benchmark runtime | `docs/benchmark-runtime-architecture.md` | container/VM runtime model |
@@ -120,10 +148,13 @@ BpfReJIT 的设计基于三个层次的 insight：
 - 增加和修改内核 BPF syscall 功能，允许**获取 BPF bytecode**（`BPF_PROG_GET_ORIGINAL`）和**重新验证编译一个 BPF 程序并原地替换**（`BPF_PROG_REJIT`）。
 - REJIT 接受**完整的新 BPF bytecode**（不是 patch）→ 内核运行完整的 `bpf_check()` + JIT → 在同一个 `struct bpf_prog` 上原子替换 image。
 
-**组件 2：kinsn —— 平台特定指令扩展机制**（内核源码改动，Patch 2 + 内核模块）
-- 允许注册 **kinsn**：一种为平台特定指令或扩展定义验证语义并让 JIT 发射它们的方式。
-- **实现**：kinsn 复用已有的 kfunc 基础设施：新的 `KF_INLINE_EMIT` flag 使 JIT 调用 module 提供的 emit 回调，而不是生成普通函数调用。复用了 kfunc 已有的 verifier 验证、BTF 类型系统和 module 生命周期管理。
-- 最小内核模块为每个平台定义 kfunc 风格的 kinsn，包含验证函数和 JIT emit 函数（x86、arm64 等）。
+**组件 2：kinsn 平台特定指令扩展机制**(独立论文线,见 `docs/kinsn-idea.md`)
+- 本论文(idea #1)的核心组件只有组件 1(REJIT syscall)和组件 3(bpfopt-suite)。
+- kinsn 是 idea #2 的研究内容。两者在工程上 compose:启用 kinsn 框架的部署
+  可以在 daemon pipeline 里加入 kinsn-introducing pass(`rotate`、`cond_select`
+  等);未启用 kinsn 的部署仅用纯 BPF-to-BPF rewrite pass,也能跑全部
+  speculative 优化路径。
+- 论文 framing 上两条线各自独立,本文档不把 kinsn 列为必需组件。
 
 **组件 3：用户态 bpfopt-suite**
 - `bpfopt` 作为零内核依赖的纯 bytecode optimizer，优化入口是 `--pass <name>` 单 pass CLI。
@@ -218,6 +249,11 @@ BpfReJIT 的设计基于三个层次的 insight：
 ## 3. 变换分类
 
 ### 3.1 性能优化变换
+
+> **论文边界提醒**:`kinsn = 是` 的行属于 idea #2(Kinsn 论文线),
+> 详细设计见 `docs/kinsn-idea.md` 和 `docs/kinsn-design.md`。本论文(idea #1,
+> Speculative eBPF Optimization)的核心是 `kinsn = 否` 的纯 BPF-to-BPF rewrite
+> pass。表格保留全部行作为完整 pass 清单参考。
 
 | 变换 | kinsn? | 状态 | 说明 | Corpus 证据（2026-03-24） |
 |------|:---:|:---:|------|------|
@@ -378,19 +414,22 @@ Correctness（用户态工具链负责）：
   用户态变换有 bug → 程序行为可能变 → 但内核安全不受影响（fail-safe）
 ```
 
-### 4.4 kinsn 机制
+### 4.4 kinsn 机制(本论文非主线)
 
-**kinsn** 是 BpfReJIT 引入的平台特定指令扩展机制。kinsn IS-A kfunc，额外绑定 `bpf_kinsn_ops`，定义**执行语义**（JIT emit）和**验证语义**（verifier modeling）。
+kinsn 是 BpfReJIT daemon 在内核侧引入的另一项工作,但作为独立论文(idea #2)
+处理。本文档只把它当作可选的下游 pass 集合来引用:
 
-**核心设计**：module 同时定义 "emit 什么 native 指令" 和 "verifier 如何建模这条指令"。verifier 不需要 per-kinsn 特例代码。新增 kinsn = 新 module，零 verifier 改动。
+- 概念定位与论文 framing: `docs/kinsn-idea.md`
+- 详细机制设计: `docs/kinsn-design.md`
+- 形式化语义: `docs/kinsn-formal-semantics.md`
 
-**`bpf_kinsn_ops`** 包含三类回调：`model_call`（返回声明式 `bpf_kinsn_effect`，含 clobber_mask/result range/tnum/mem_accesses）、`decode_call`/`validate_call`（编码解析和校验）、`emit_x86`/`emit_arm64`（JIT 发射）。
+本论文的默认 pipeline 是纯 BPF-to-BPF 的 rewrite pass(§3.1 中所有 `kinsn = 否`
+的行: `map_inline`、`const_prop`、`dce`、`bounds_check_merge`、`branch_flip`、
+`skb_load_bytes_spec`、`wide_mem` 等)。这些 pass 不需要 kinsn 框架,也不需要
+per-arch kinsn 模块。
 
-Packed（sidecar pseudo-insn + CALL pair，零 argument setup，N→1 指令替换）。
-
-**安全模型**：module 提供声明式 effect，verifier core 负责应用（clobber/range/tnum/subreg_def/mem_access）。不暴露 `bpf_reg_state` 给 module。`KF_KINSN` flag 标记 kfunc 为 kinsn，与 KF_ACQUIRE/KF_RELEASE/KF_SLEEPABLE 互斥。
-
-详细设计文档：`docs/tmp/20260323/kinsn_ops_design_20260323.md`。实现审计：`docs/tmp/20260323/kinsn_implementation_review_20260323.md`。
+如果部署同时启用 kinsn 框架,本文档的 daemon 可在 pipeline 中加入 kinsn-introducing
+pass;两条 paper 线在工程上 compose,但在论文 framing 上各自独立。
 
 ### 4.5 Kernel 文件布局（`vendor/linux-framework/` rejit-v2 分支）
 
@@ -766,8 +805,7 @@ make clean
 
 任务追踪已迁移到 git history。每个任务的详细记录在 commit messages 和 `docs/tmp/` 报告中。
 
-- **v1 历史记录（#1 - #303）**：`docs/kernel-jit-optimization-plan-record-old.md`
-- **v2 任务记录（#304 - #673）**：`docs/kernel-jit-optimization-plan-task-archive.md`
+- **历史记录（v1 #1 - #303 / v2 #304 - #673）**：归档在 git history;原 archive 文件已随 rename 一起淘汰
 - **当前任务**：用 `git log --oneline` 查看
 - **2026-05-05 changed flag deletion follow-up**：`docs/tmp/changed-flag-deletion-20260505.md`
 - **调研报告**：`docs/tmp/` 按日期组织

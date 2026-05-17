@@ -145,7 +145,12 @@ static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
 			return X86_INTERP_CONTINUE;                        \
 	} while (0)
 
-#define X86_VM_RET_RAX() return (__u32)__x86_vm_state.rax
+static __always_inline __u32 x86_vm_ret_rax(struct x86_state *state)
+{
+	return (__u32)state->rax;
+}
+
+#define X86_VM_RET_RAX() return x86_vm_ret_rax(&__x86_vm_state)
 
 #define X86_VM_END_XDP()                                                    \
 		int __x86_vm_xdp_ret = XDP_PASS;                         \

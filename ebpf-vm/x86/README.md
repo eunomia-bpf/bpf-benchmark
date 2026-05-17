@@ -101,18 +101,26 @@ coverage is stable.
 
 The last complete generated-C batch (`run_micro_interpreter_batch.py
 --native-source object-no-jump-tables`) loaded and returned the expected result
-for 25 of 29 micro programs. A later targeted rerun fixed
-`cgroup_skb_hash_chain`, so the remaining known generated-C blockers are:
+for 25 of 29 micro programs. Later targeted reruns fixed
+`cgroup_skb_hash_chain` and `bpf_local_call_fanout_dispatch`, so the remaining
+known generated-C blockers are:
 
 | Micro program | Current generated-C status | Required work |
 | --- | --- | --- |
-| `bpf_local_call_fanout_dispatch` | compile-fail after enabling deep ghost stack for native calls | Do not expand the whole entry stack model. Lower generated C subfunctions with an ABI-preserving callee-save wrapper and skip their native prologue/epilogue stack traffic. |
-| `bpftrace_string_search_prefix_scan` | verifier/load fail: instruction processing limit (`Argument list too long`) | Canonicalize the bounded string-search loop into a verifier-friendly helper shape instead of emitting the full branch-heavy native CFG. |
-| `tc_packet_checksum_fold` | verifier/load fail: `Bad address` | Reuse the checksum-loop canonicalization used by `packet_checksum_fold`, with TC/cgroup context-output handling. |
+| `bpftrace_string_search_prefix_scan` | verifier/load fail: instruction processing limit (`Argument list too long`) | Move the verifier-friendly bounded string-search shape into C interpreter/helper code, not Python semantic rewriting. |
+| `tc_packet_checksum_fold` | verifier/load fail: `Bad address` | Move checksum memory-loop handling into interpreter/helper code. Python must keep `ret` and instruction sequencing one-to-one. |
 
 The immediate implementation target is therefore: generated-C path loads in the
 kernel, passes `BPF_PROG_TEST_RUN`, and returns the expected result for every
 micro program. JSON-link completion is a separate next experiment.
+
+Active generator rule: Python must not rewrite native return semantics or
+replace one native instruction with custom BPF semantics. A native `ret` is
+emitted as `X86_VM_RET_RAX();`; any harness/program-type return mapping belongs
+in the interpreter/header or in the test harness expectation, not in
+per-program Python code. The targeted runner now checks native ABI return values
+for TC (`0`) and cgroup skb (`1`) instead of forcing generated proof programs to
+return `XDP_PASS`.
 
 ## JSON-Linker Todo
 
@@ -422,12 +430,15 @@ This prototype has already exposed several verifier-facing design constraints:
   arrays become BPF stack pressure, so generated proof sources use one immediate
   macro call per native instruction.
 - The verifier does not reliably recover packet ranges from a generic
-  `packet + variable_index + negative_disp` helper. `packet_checksum_fold`
-  needed loop canonicalization from `rdx + rcx - 3/-1` to the equivalent
-  positive offsets `packet + 16/18 + 4*i`.
-- Input-dependent interpreter loops are a state-explosion risk. The current
-  generator hardcodes the instruction sequence and normalizes known bounded
-  loops so the verifier sees constants and bounded `bpf_loop` trip counts.
+  `packet + variable_index + negative_disp` helper. Earlier prototype code
+  handled `packet_checksum_fold` by Python loop canonicalization, but that is
+  now treated as a non-final workaround. The final shape should expose the
+  verifier-friendly memory proof through C interpreter/helper code.
+- Input-dependent interpreter loops are a state-explosion risk. The generator
+  should still hardcode the instruction sequence, but it must stay mechanical:
+  one native instruction becomes one helper step plus explicit native
+  branch/return structure. Bounded-loop proof obligations need to live in
+  interpreter/helper templates, not in Python semantic rewrites.
 - Native stack state must be modeled explicitly for programs with `push`, `pop`,
   or `[rsp]` accesses. A generic pointer-tag path made the verifier explore
   impossible `rsp`-as-packet states, so RSP stack accesses now need dedicated
@@ -436,10 +447,10 @@ This prototype has already exposed several verifier-facing design constraints:
   incomplete for native direct calls. The generator now rebuilds the native
   object and disassembles call-target symbols when the markdown `## Native ASM`
   block has unresolved call targets.
-- The current full local-call proof should not model callee frame setup by
-  extending the entry ghost stack. Generated C subfunctions need their own
-  callee-save wrapper and should skip native prologue/epilogue stack traffic;
-  otherwise the BPF stack model grows past verifier/compiler limits.
+- `bpf_local_call_fanout_dispatch` now loads and returns the expected result in
+  the generated-C path, but the current special renderer is still a prototype
+  shape. Its call/loop handling should be moved toward C-authored interpreter
+  helpers so Python remains a mechanical native-instruction scheduler.
 - `bpftrace_string_search_prefix_scan` still exceeds the verifier instruction
   processing limit. It now fails at verifier load rather than clang compile:
   `BPF program is too large. Processed 1000001 insn`.

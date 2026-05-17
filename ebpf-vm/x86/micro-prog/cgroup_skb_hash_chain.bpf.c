@@ -32,7 +32,7 @@ x86_l_111a:
 	X86_VM_RUN_OP(x86_exec_mov_store_reg, X86_OP_MOV_STORE_REG, X86_RDI, X86_RDX, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 20ULL);
 x86_l_111d:
 	/* 0x111d: ret */
-	return XDP_PASS;
+	X86_VM_RET_RAX();
 x86_l_111e:
 	/* 0x111e: lea    rdx,[rax+0x8] */
 	X86_VM_RUN_OP(x86_exec_lea, X86_OP_LEA, X86_RDX, X86_RAX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);
@@ -209,7 +209,7 @@ x86_l_11ed:
 	X86_VM_RUN_OP(x86_exec_mov_store_reg, X86_OP_MOV_STORE_REG, X86_RDI, X86_RDX, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 20ULL);
 x86_l_11f0:
 	/* 0x11f0: ret */
-	return XDP_PASS;
+	X86_VM_RET_RAX();
 	return XDP_ABORTED;
 }
 
