@@ -133,6 +133,21 @@ JCC_SELECTOR = {
     "js": "MICRO_HANDCRAFT_BPF_X86_JS",
     "jns": "MICRO_HANDCRAFT_BPF_X86_JNS",
 }
+BRANCH_PROOF_LEN = {
+    "MICRO_HANDCRAFT_BPF_X86_JA": 15,
+    "MICRO_HANDCRAFT_BPF_X86_JAE": 13,
+    "MICRO_HANDCRAFT_BPF_X86_JB": 12,
+    "MICRO_HANDCRAFT_BPF_X86_JBE": 14,
+    "MICRO_HANDCRAFT_BPF_X86_JE": 12,
+    "MICRO_HANDCRAFT_BPF_X86_JNE": 13,
+    "MICRO_HANDCRAFT_BPF_X86_JG": 15,
+    "MICRO_HANDCRAFT_BPF_X86_JGE": 12,
+    "MICRO_HANDCRAFT_BPF_X86_JL": 13,
+    "MICRO_HANDCRAFT_BPF_X86_JLE": 14,
+    "MICRO_HANDCRAFT_BPF_X86_JS": 12,
+    "MICRO_HANDCRAFT_BPF_X86_JNS": 13,
+    "MICRO_HANDCRAFT_BPF_X86_JMP": 1,
+}
 
 
 @dataclass(frozen=True)
@@ -395,9 +410,9 @@ def translate_mem_load(dst_op: str, mem_op: str, size: str) -> Translation:
     if base_reg[0] == "BPF_REG_1" and index is None and size == "BPF_DW" and off in {0, 8}:
         bpf_off = 0 if off == 0 else 4
         return Translation(
-            "warning-context-abi",
-            (),
-            f"native xdp_md uses 64-bit host pointer field at off {off}; BPF XDP ctx uses u32 field at off {bpf_off}",
+            "context-abi",
+            (f"HC_LDX(BPF_W, {dst[0]}, BPF_REG_1, {bpf_off})",),
+            f"native xdp_md 64-bit field at off {off} maps to BPF XDP u32 ctx field at off {bpf_off}",
         )
     if index is not None:
         index_reg = bpf_reg(index)
@@ -930,24 +945,159 @@ def translate(insn: NativeInsn) -> Translation:
     return Translation("warning-unmapped", (), f"unsupported mnemonic or operand form: {insn.raw}")
 
 
+def translate_jcc_from_previous(branch: NativeInsn, producer: NativeInsn | None) -> Translation | None:
+    if producer is None or len(branch.operands) != 1:
+        return None
+    target_addr = parse_branch_target(branch.operands[0])
+    if target_addr is None:
+        return None
+
+    op = JCC_OP.get(branch.mnemonic)
+    if op is None:
+        return None
+
+    if producer.mnemonic == "cmp" and len(producer.operands) == 2:
+        lhs = bpf_reg(producer.operands[0])
+        rhs = bpf_reg(producer.operands[1])
+        if lhs and rhs and lhs[1] == rhs[1]:
+            cls = "BPF_JMP32" if lhs[1] == 32 else "BPF_JMP"
+            return Translation(
+                "verifier-branch",
+                (f"HC_RAW({cls} | {op} | BPF_X, {lhs[0]}, {rhs[0]}, {BRANCH_DELTA}, 0)",),
+                f"{branch.mnemonic} verifier branch from preceding cmp",
+                target_addr,
+            )
+        if lhs and is_int(producer.operands[1]):
+            imm = parse_int(producer.operands[1])
+            cls = "BPF_JMP32" if lhs[1] == 32 else "BPF_JMP"
+            return Translation(
+                "verifier-branch",
+                (f"HC_RAW({cls} | {op} | BPF_K, {lhs[0]}, 0, {BRANCH_DELTA}, {imm})",),
+                f"{branch.mnemonic} verifier branch from preceding cmp",
+                target_addr,
+            )
+
+    if producer.mnemonic == "test" and len(producer.operands) == 2:
+        lhs = bpf_reg(producer.operands[0])
+        rhs = bpf_reg(producer.operands[1])
+        if lhs and rhs and lhs[0] == rhs[0]:
+            if branch.mnemonic not in {"je", "jne", "js", "jns"}:
+                return None
+            cls = "BPF_JMP32" if lhs[1] == 32 else "BPF_JMP"
+            return Translation(
+                "verifier-branch",
+                (f"HC_RAW({cls} | {op} | BPF_K, {lhs[0]}, 0, {BRANCH_DELTA}, 0)",),
+                f"{branch.mnemonic} verifier branch from preceding test",
+                target_addr,
+            )
+
+    return None
+
+
 def translate_all(insns: list[NativeInsn]) -> list[Translation]:
-    return [translate(insn) for insn in insns]
+    translations: list[Translation] = []
+    previous_flag_producer: NativeInsn | None = None
+    for insn in insns:
+        if insn.mnemonic in JCC_OP:
+            branch = translate_jcc_from_previous(insn, previous_flag_producer)
+            if branch is not None:
+                translations.append(branch)
+                previous_flag_producer = None
+                continue
+        trans = translate(insn)
+        translations.append(trans)
+        previous_flag_producer = insn if insn.mnemonic in {"cmp", "test"} else None
+    return translations
+
+
+def branch_placeholder_is_bpf_off(code: str) -> bool:
+    return code.startswith("HC_RAW(BPF_JMP")
+
 
 
 def bpf_insn_len(code: str) -> int:
+    if code.startswith("HC_LD_IMM64_RAW("):
+        return 2
     if code.startswith("HC_KINSN("):
         return 2
     return 1
 
 
+def kinsn_selector(code: str) -> str | None:
+    if not code.startswith("HC_KINSN("):
+        return None
+    head = code.rsplit(",", 1)
+    if len(head) != 2:
+        return None
+    return head[1].strip().rstrip(")")
+
+
+def proof_insn_len(code: str) -> int:
+    selector = kinsn_selector(code)
+    if selector is None:
+        return bpf_insn_len(code)
+    if selector in BRANCH_PROOF_LEN:
+        return BRANCH_PROOF_LEN[selector]
+    if "MICRO_HANDCRAFT_BPF_X86_CMP" in selector:
+        if "HC_X86_CMP_SIB_RR_PAYLOAD" in code:
+            match = re.search(r"HC_X86_CMP_SIB_RR_PAYLOAD\([^,]+,[^,]+,\s*([^,]+),", code)
+            add_count = 1 << int(match.group(1), 0) if match else 1
+            return 17 + add_count + (1 if "HC_X86_R" in code else 0)
+        if "HC_X86_CMP_MEM_IMM_PAYLOAD" in code or "HC_X86_CMP_ARCH_MEM_IMM_PAYLOAD" in code:
+            narrow = selector in {"MICRO_HANDCRAFT_BPF_X86_CMPB", "MICRO_HANDCRAFT_BPF_X86_CMPW"}
+            arch = "HC_X86_CMP_ARCH_MEM_IMM_PAYLOAD" in code
+            return 16 + (2 if narrow else 0) + (1 if arch else 0)
+        if selector in {"MICRO_HANDCRAFT_BPF_X86_CMPB", "MICRO_HANDCRAFT_BPF_X86_CMPW"}:
+            return 23 if "HC_X86_RR_PAYLOAD" in code or "HC_X86_ARCH_RR_PAYLOAD" in code else 19
+        if "HC_X86_ARCH_RR_PAYLOAD" in code:
+            return 15 + code.count("HC_X86_R")
+        if "HC_X86_ARCH_IMM_PAYLOAD" in code:
+            return 15 + (1 if "HC_X86_R" in code else 0)
+        return 15
+    if "MICRO_HANDCRAFT_BPF_X86_TEST" in selector:
+        return 12
+    if selector in {"MICRO_HANDCRAFT_BPF_X86_MOVB", "MICRO_HANDCRAFT_BPF_X86_MOVW",
+                    "MICRO_HANDCRAFT_BPF_X86_MOVL", "MICRO_HANDCRAFT_BPF_X86_MOVQ"}:
+        if "HC_X86_STORE_IMM_PAYLOAD" in code:
+            return 1
+        if "HC_X86_IMM_PAYLOAD" in code and "HC_X86_R" not in code:
+            return 1
+        if "HC_X86_RR_PAYLOAD" in code and "HC_X86_R" not in code:
+            return 1
+        if "HC_X86_MEM_PAYLOAD" in code and "HC_X86_R" not in code:
+            return 1
+        return 8
+    if selector in {"MICRO_HANDCRAFT_BPF_X86_MOVZBL", "MICRO_HANDCRAFT_BPF_X86_MOVZWL"}:
+        if "HC_X86_MEM_PAYLOAD" in code and "HC_X86_R" not in code:
+            return 1
+        if "HC_X86_RR_PAYLOAD" in code and "HC_X86_R" not in code:
+            return 2
+        return 10
+    if selector in {"MICRO_HANDCRAFT_BPF_X86_LEAQ", "MICRO_HANDCRAFT_BPF_X86_LEAL"}:
+        if "HC_X86_R" not in code:
+            return 2
+        return 9
+    if "MICRO_HANDCRAFT_BPF_X86_" in selector:
+        if "HC_X86_R" in code:
+            return 8
+        return 1
+    return 2
+
+
 def relocate_branch_offsets(insns: list[NativeInsn], translations: list[Translation]) -> list[Translation]:
     pc_by_addr: dict[int, int] = {}
     pc_by_index: list[int] = []
+    proof_pc_by_addr: dict[int, int] = {}
+    proof_pc_by_index: list[int] = []
     pc = 0
+    proof_pc = 0
     for insn, trans in zip(insns, translations, strict=True):
         pc_by_addr.setdefault(insn.addr, pc)
+        proof_pc_by_addr.setdefault(insn.addr, proof_pc)
         pc_by_index.append(pc)
+        proof_pc_by_index.append(proof_pc)
         pc += sum(bpf_insn_len(code) for code in trans.code)
+        proof_pc += sum(proof_insn_len(code) for code in trans.code)
 
     patched: list[Translation] = []
     for index, trans in enumerate(translations):
@@ -965,10 +1115,17 @@ def relocate_branch_offsets(insns: list[NativeInsn], translations: list[Translat
             continue
         code = []
         code_pc = pc_by_index[index]
+        proof_code_pc = proof_pc_by_index[index]
         for item in trans.code:
-            delta = target_pc - code_pc
+            if item.startswith("HC_KINSN("):
+                delta = proof_pc_by_addr[trans.target_addr] - proof_code_pc
+            elif branch_placeholder_is_bpf_off(item):
+                delta = target_pc - code_pc - 1
+            else:
+                delta = target_pc - code_pc
             code.append(item.replace(BRANCH_DELTA, str(delta)))
             code_pc += bpf_insn_len(item)
+            proof_code_pc += proof_insn_len(item)
         code = tuple(code)
         patched.append(Translation(trans.status, code, trans.note, trans.target_addr))
     return patched

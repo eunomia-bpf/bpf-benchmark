@@ -73,15 +73,6 @@ static __always_inline bool branch_x86_near(u64 payload)
 	return payload & 0xf;
 }
 
-static __always_inline s16 proof_branch_delta(u64 payload, int proof_len)
-{
-	s16 delta = branch_delta(payload);
-
-	if (delta > 0)
-		delta += proof_len - 2;
-	return delta;
-}
-
 static __always_inline void load_flag(struct bpf_insn *insn_buf, int *cnt,
 				      u8 dst, s16 off)
 {
@@ -109,8 +100,8 @@ static __always_inline int branch_on_bool(u64 payload, struct bpf_insn *insn_buf
 				  KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0) |
 				  KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH1) |
 				  KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH2));
-	delta = proof_branch_delta(payload, *cnt);
-	insn_buf[ja_idx] = BPF_JMP_A(delta - ja_idx - 3);
+	delta = branch_delta(payload);
+	insn_buf[ja_idx] = BPF_JMP_A(delta - ja_idx - 1);
 	return 0;
 }
 
@@ -209,7 +200,7 @@ static int instantiate_jcc(u64 payload, struct bpf_insn *insn_buf,
 
 static int instantiate_jmp(u64 payload, struct bpf_insn *insn_buf)
 {
-	insn_buf[0] = BPF_JMP_A(proof_branch_delta(payload, 1) - 1);
+	insn_buf[0] = BPF_JMP_A(branch_delta(payload) - 1);
 	return 1;
 }
 

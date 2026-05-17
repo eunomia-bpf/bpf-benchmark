@@ -2,6 +2,8 @@ use std::env;
 use std::ffi::{c_void, CString};
 use std::io;
 use std::mem;
+use std::os::raw::{c_char, c_int, c_long};
+use std::os::unix::ffi::OsStrExt;
 use std::path::PathBuf;
 use std::process;
 use std::ptr;
@@ -31,13 +33,66 @@ struct Cli {
 }
 
 struct BpfObject {
-    ptr: *mut libbpf_sys::bpf_object,
+    ptr: *mut c_void,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy)]
+struct BpfTestRunOpts {
+    sz: usize,
+    data_in: *const c_void,
+    data_out: *mut c_void,
+    data_size_in: u32,
+    data_size_out: u32,
+    ctx_in: *const c_void,
+    ctx_out: *mut c_void,
+    ctx_size_in: u32,
+    ctx_size_out: u32,
+    retval: u32,
+    repeat: c_int,
+    duration: u32,
+    flags: u32,
+    cpu: u32,
+    batch_size: u32,
+}
+
+impl Default for BpfTestRunOpts {
+    fn default() -> Self {
+        Self {
+            sz: mem::size_of::<Self>(),
+            data_in: ptr::null(),
+            data_out: ptr::null_mut(),
+            data_size_in: 0,
+            data_size_out: 0,
+            ctx_in: ptr::null(),
+            ctx_out: ptr::null_mut(),
+            ctx_size_in: 0,
+            ctx_size_out: 0,
+            retval: 0,
+            repeat: 0,
+            duration: 0,
+            flags: 0,
+            cpu: 0,
+            batch_size: 0,
+        }
+    }
+}
+
+#[link(name = "bpf")]
+extern "C" {
+    fn bpf_object__open_file(path: *const c_char, opts: *const c_void) -> *mut c_void;
+    fn bpf_object__close(obj: *mut c_void);
+    fn bpf_object__load(obj: *mut c_void) -> c_int;
+    fn bpf_object__find_program_by_name(obj: *const c_void, name: *const c_char) -> *mut c_void;
+    fn bpf_program__fd(prog: *const c_void) -> c_int;
+    fn bpf_prog_test_run_opts(prog_fd: c_int, opts: *mut BpfTestRunOpts) -> c_int;
+    fn libbpf_get_error(ptr: *const c_void) -> c_long;
 }
 
 impl Drop for BpfObject {
     fn drop(&mut self) {
         if !self.ptr.is_null() {
-            unsafe { libbpf_sys::bpf_object__close(self.ptr) };
+            unsafe { bpf_object__close(self.ptr) };
         }
     }
 }
@@ -59,8 +114,7 @@ fn run() -> Result<()> {
         other => return Err(format!("unsupported case: {other}")),
     };
     let mut output = input.clone();
-    let mut opts = libbpf_sys::bpf_test_run_opts {
-        sz: mem::size_of::<libbpf_sys::bpf_test_run_opts>() as libbpf_sys::size_t,
+    let mut opts = BpfTestRunOpts {
         data_in: input.as_mut_ptr().cast::<c_void>(),
         data_out: output.as_mut_ptr().cast::<c_void>(),
         data_size_in: input.len() as u32,
@@ -69,7 +123,7 @@ fn run() -> Result<()> {
         ..Default::default()
     };
 
-    let ret = unsafe { libbpf_sys::bpf_prog_test_run_opts(prog_fd, &mut opts) };
+    let ret = unsafe { bpf_prog_test_run_opts(prog_fd, &mut opts) };
     if ret != 0 {
         return Err(format!(
             "bpf_prog_test_run_opts failed: {}",
@@ -152,18 +206,14 @@ fn parse_cli() -> Result<Cli> {
 
 fn print_help() {
     println!(
-        "Usage: x86-ebpf-vm-loader --object <x86_vm.bpf.o> [--case simple] [--program x86_vm_xdp] [--repeat N]"
+        "Usage: ebpf-vm-loader --object <vm.bpf.o> [--case simple] [--program x86_vm_xdp] [--repeat N]"
     );
 }
 
 fn open_object(path: &PathBuf) -> Result<BpfObject> {
-    let c_path = CString::new(path.as_os_str().as_encoded_bytes())
+    let c_path = CString::new(path.as_os_str().as_bytes())
         .map_err(|_| format!("path contains NUL byte: {}", path.display()))?;
-    let opts = libbpf_sys::bpf_object_open_opts {
-        sz: mem::size_of::<libbpf_sys::bpf_object_open_opts>() as libbpf_sys::size_t,
-        ..Default::default()
-    };
-    let obj = unsafe { libbpf_sys::bpf_object__open_file(c_path.as_ptr(), &opts) };
+    let obj = unsafe { bpf_object__open_file(c_path.as_ptr(), ptr::null()) };
     if obj.is_null() {
         return Err(format!(
             "failed to open {}: {}",
@@ -171,7 +221,7 @@ fn open_object(path: &PathBuf) -> Result<BpfObject> {
             io::Error::last_os_error()
         ));
     }
-    let err = unsafe { libbpf_sys::libbpf_get_error(obj.cast::<c_void>()) };
+    let err = unsafe { libbpf_get_error(obj.cast::<c_void>()) };
     if err != 0 {
         return Err(format!("failed to open {}: libbpf error {err}", path.display()));
     }
@@ -179,7 +229,7 @@ fn open_object(path: &PathBuf) -> Result<BpfObject> {
 }
 
 fn load_object(object: &mut BpfObject) -> Result<()> {
-    let ret = unsafe { libbpf_sys::bpf_object__load(object.ptr) };
+    let ret = unsafe { bpf_object__load(object.ptr) };
     if ret != 0 {
         return Err(format!(
             "bpf_object__load failed: {}",
@@ -191,11 +241,11 @@ fn load_object(object: &mut BpfObject) -> Result<()> {
 
 fn program_fd(object: &BpfObject, name: &str) -> Result<i32> {
     let c_name = CString::new(name).map_err(|_| format!("program name contains NUL: {name}"))?;
-    let prog = unsafe { libbpf_sys::bpf_object__find_program_by_name(object.ptr, c_name.as_ptr()) };
+    let prog = unsafe { bpf_object__find_program_by_name(object.ptr, c_name.as_ptr()) };
     if prog.is_null() {
         return Err(format!("program not found in object: {name}"));
     }
-    let fd = unsafe { libbpf_sys::bpf_program__fd(prog) };
+    let fd = unsafe { bpf_program__fd(prog) };
     if fd < 0 {
         return Err(format!("invalid fd for program {name}: {fd}"));
     }

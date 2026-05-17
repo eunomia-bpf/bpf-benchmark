@@ -36,10 +36,12 @@ require the user to submit a proof. The user submits only instructions from a
 kernel-defined dual-semantics ISA. The verifier-visible semantics are already
 eBPF, so the existing eBPF verifier remains the proof checker for safety.
 
-ReverseJIT is also not ordinary translation validation in the critical safety
-path. Translation validation can still be useful for offline validation of the
-kernel implementation, but the intended runtime safety contract does not require
-each user program to carry a per-program equivalence proof.
+ReverseJIT is also not "userspace says this native blob is equivalent, trust
+me". It needs a kernel-trusted binding between verifier-visible semantics and
+native execution semantics. That binding can be a kernel-defined instruction ABI,
+a formally verified translator in the trusted computing base, or a certificate
+checker. What it does not require is a human-written proof supplied by every
+user program.
 
 The critical distinction is:
 
@@ -112,6 +114,103 @@ trusted for safety. The trusted parts are:
 - the architecture-specific native emitters;
 - the ABI rules that prevent native code from observing or mutating state not
   represented in the verifier semantics.
+
+## Safety Transfer Argument
+
+The strongest safety argument is a refinement argument:
+
+```text
+native program P
+  -> translate(P) = eBPF program B
+  -> verifier accepts B
+  -> trusted equivalence proof: P refines B under the ReverseJIT ABI
+  -> execute P
+```
+
+If the verifier proves `B` safe, and the trusted equivalence proof says every
+observable behavior of `P` is allowed by `B`, then `P` inherits the eBPF safety
+property:
+
+```text
+safe(B) and P refines B => safe(P)
+```
+
+This is the precise reason direct native execution can be safe. The native code
+does not become safe merely because some separate eBPF VM was verified. It
+becomes safe because the kernel's trusted mechanism establishes that the native
+program being executed is the same program, semantically, as the verifier-accepted
+eBPF program.
+
+There are several possible bindings:
+
+- kernel-owned dual-semantics instructions: each payload has one
+  `instantiate_insn()` and one native emitter, both owned by the kernel/module
+  ABI;
+- kernel-generated native code: the kernel JIT emits `P` from verified `B`, which
+  is the ordinary BPF JIT model;
+- trusted verified translator: a kernel-trusted component translates `P` to `B`
+  or `B` to `P`, and its correctness proof is part of the TCB;
+- certificate checking: userspace submits `P`, `B`, and an equivalence
+  certificate that the kernel checks before executing `P`.
+
+What is not a security boundary:
+
+```text
+userspace submits safe B
+userspace also submits arbitrary unsafe P
+kernel verifies B
+kernel executes P without checking or owning the P == B binding
+```
+
+That construction is unsafe because the verified artifact and the executed
+artifact are not connected inside the kernel trust boundary.
+
+Native memory operations are safe only under this refinement relation. For
+example, an executed native instruction such as:
+
+```asm
+mov rax, [rdi + 8]
+```
+
+is safe if the equivalence proof ties `rdi + 8` to a verifier-approved BPF
+pointer access with the same bounds, object, and fault behavior. It is not safe
+if verifier-visible `rdi` is only a scalar guest offset while native `rdi` is
+used by the CPU as a raw kernel virtual address. In that case the native program
+does not refine the verified eBPF program.
+
+This means ReverseJIT does not inherently require extra SFI on the final native
+path. SFI is only one way to make native memory operations match a sandboxed VM
+semantics. If the original x86 program is already safe under an eBPF-like ABI,
+and the verifier-facing translation faithfully represents the real x86 semantics
+that will execute, then verifier acceptance of `B` plus equivalence `P == B` is
+enough:
+
+```text
+original x86 already follows verifier-safe pointer/bounds rules
+faithful x86-to-eBPF translation passes verifier
+trusted equivalence says executed x86 is that same semantics
+=> no extra SFI is needed
+```
+
+The important failure mode is an unfaithful translation. For example, translating
+an x86 memory access into a sandboxed interpreter operation:
+
+```text
+guest_addr = rax
+if guest_addr + 8 > guest_mem_size: trap
+load guest_mem[guest_addr]
+```
+
+proves the safety of sandboxed x86 VM semantics, not the safety of directly
+executing:
+
+```asm
+mov rbx, [rax]
+```
+
+against the real kernel address space. Direct execution is safe only when the
+eBPF artifact checked by the verifier is a faithful model of the native code that
+will actually run.
 
 ## State Model
 
@@ -200,8 +299,9 @@ the runtime path if the goal is native performance.
 
 If the eBPF VM is actually executed, performance is interpreter performance. If
 the eBPF VM is only verifier-facing and native x86 is executed instead, then the
-system still needs a trusted binding between the verified eBPF semantics and the
-native execution semantics.
+VM is a semantic witness, not the security mechanism by itself. The security
+mechanism is the trusted proof that the executed native program refines the
+verified VM/eBPF semantics.
 
 ReverseJIT makes that binding part of the kernel instruction ABI:
 
@@ -222,14 +322,18 @@ That work checks a user-provided proof for native code. ReverseJIT instead uses
 the existing eBPF verifier over verifier-visible semantics and does not require
 the user to provide a proof.
 
-Translation validation is related, but mostly as an offline or implementation
-validation technique:
+Translation validation is related in two different ways. For the kernel-defined
+dual-semantics instruction model, it can be an offline implementation validation
+technique:
 
 - validate that a native emitter implements the same semantics as
   `instantiate_insn()`;
 - validate that a frontend lowering to ReverseJIT preserves source semantics.
 
-It is not the core runtime safety mechanism.
+For a more aggressive "submit native `P` plus verifier artifact `B`" model,
+translation validation or certificate checking becomes the core binding
+mechanism. The important distinction is that the checked fact is equivalence
+`P == B`; the eBPF verifier still checks the safety of `B`.
 
 Native Client, RockSalt, and native machine-code validators are related because
 they safely execute native code. Their safety model validates or restricts native
@@ -284,6 +388,8 @@ For a strong systems paper, the evaluation needs to show:
 The idea is viable, but the risks are sharp:
 
 - If native code is arbitrary, this collapses back into PCC or native validation.
+- If the kernel does not own or check the binding between verified eBPF and
+  executed native code, the safety argument does not hold.
 - If only a few instructions are covered, the work looks like superinstructions.
 - If helper/call/stack boundaries are underspecified, the safety claim is weak.
 - If native emitters are large and ad hoc, the TCB story becomes difficult.

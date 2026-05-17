@@ -9,16 +9,48 @@ The initial smoke case mirrors `micro/programs/simple.bpf.c`:
 *out = 12345678ULL;
 ```
 
-The Rust loader builds a packet containing:
+The hardcoded verifier artifact represents this x86-like instruction sequence:
 
 ```text
 mov rax, 12345678
 ret
 ```
 
-The BPF program interprets the packet instruction stream, writes `rax` to the
+The BPF program interprets the hardcoded instruction stream, writes `rax` to the
 first eight packet bytes, and returns `XDP_PASS`. The loader runs it with
 `BPF_PROG_TEST_RUN` and checks that the output value is `12345678`.
+
+The instruction sequence is hardcoded in the `.bpf.c` file, while all VM
+machinery lives in headers.
+
+The specialized artifact is the more relevant ReverseJIT direction. It uses a
+single include plus a local instruction array inside the program entry:
+
+```c
+#include "x86_vm_bpf.h"
+
+#define SIMPLE_X86_PROG_LEN 2
+
+#define SIMPLE_X86_PROG_INIT                                                \
+	{                                                                   \
+		{ X86_OP_MOV_IMM64, X86_RAX, 0, 0, 0, 12345678ULL },       \
+		{ X86_OP_RET, 0, 0, 0, 0, 0 },                              \
+	}
+
+SEC("xdp")
+int x86_vm_hardcoded_xdp(struct xdp_md *ctx)
+{
+	const struct x86_insn prog[SIMPLE_X86_PROG_LEN] = SIMPLE_X86_PROG_INIT;
+
+	return X86_VM_RUN_XDP(ctx, prog, SIMPLE_X86_PROG_LEN);
+}
+```
+
+The program is not a global variable and is not emitted as a `.rodata` map.
+`x86_vm_bpf.h` includes the BPF entry helpers, result writer, and unrolled
+interpreter runner. `x86_interp.h` contains the instruction semantics. LLVM
+currently folds the two-instruction `simple` case into straight-line BPF that
+writes `12345678` directly.
 
 ## Build And Run
 
@@ -28,27 +60,29 @@ make -C ebpf-vm/x86 run
 
 This is a functional prototype, not a benchmark entrypoint.
 
-## Input ABI
+If unprivileged BPF is disabled, build as the normal user and run the loader with
+privilege:
 
-Packet layout:
-
-```text
-0x00..0x07: output slot, overwritten with little-endian rax
-0x08..0x0b: magic "XVM1"
-0x0c..0x0d: instruction count
-0x0e..0x0f: reserved
-0x10..    : fixed 16-byte instruction records
+```sh
+make -C ebpf-vm/x86 build
+sudo ebpf-vm/loader/target/debug/ebpf-vm-loader \
+  --object ebpf-vm/x86/build/x86_vm_hardcoded.bpf.o \
+  --program x86_vm_hardcoded_xdp \
+  --case simple
 ```
 
-Instruction record:
+Observed smoke result:
 
 ```text
-byte 0: opcode
-byte 1: dst register
-byte 2: src register
-byte 3: flags/reserved
-byte 4..7: reserved / future branch offset
-byte 8..15: little-endian immediate
+case=simple retval=2 result=12345678 repeat=1 data_size_out=48
+```
+
+Object inspection for the hardcoded artifact:
+
+```text
+no .maps section
+no .rodata section
+xdp section size: 0xa0 bytes
 ```
 
 Supported opcodes:

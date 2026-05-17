@@ -1,0 +1,11 @@
+[package]
+name = "ebpf-vm-loader"
+version = "0.1.0"
+edition = "2021"
+description = "Rust loader for eBPF VM prototypes"
+
+[[bin]]
+name = "ebpf-vm-loader"
+path = "src/main.rs"
+
+[dependencies]

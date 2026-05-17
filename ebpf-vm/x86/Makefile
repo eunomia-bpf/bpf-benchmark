@@ -1,8 +1,8 @@
 ROOT_DIR := ../..
 BUILD_DIR := build
-BPF_OBJ := $(BUILD_DIR)/x86_vm.bpf.o
-LOADER_MANIFEST := loader/Cargo.toml
-LOADER_BIN := loader/target/debug/x86-ebpf-vm-loader
+BPF_OBJ := $(BUILD_DIR)/x86_vm_hardcoded.bpf.o
+LOADER_MANIFEST := ../loader/Cargo.toml
+LOADER_BIN := ../loader/target/debug/ebpf-vm-loader
 
 CLANG ?= clang
 CARGO ?= cargo
@@ -12,16 +12,16 @@ CARGO ?= cargo
 build: $(BPF_OBJ)
 	$(CARGO) build --manifest-path $(LOADER_MANIFEST)
 
-$(BPF_OBJ): x86_vm.bpf.c xvm_abi.h
+$(BPF_OBJ): x86_vm_hardcoded.bpf.c x86_vm_bpf.h x86_interp.h
 	mkdir -p $(BUILD_DIR)
 	$(CLANG) -g -O2 -target bpf -D__TARGET_ARCH_x86 \
 		-I$(ROOT_DIR)/vendor/libbpf/include/uapi \
 		-I$(ROOT_DIR)/vendor/libbpf/src \
 		-I/usr/include/x86_64-linux-gnu \
-		-c x86_vm.bpf.c -o $(BPF_OBJ)
+		-c x86_vm_hardcoded.bpf.c -o $(BPF_OBJ)
 
 run: build
-	$(LOADER_BIN) --object $(BPF_OBJ) --case simple
+	$(LOADER_BIN) --object $(BPF_OBJ) --program x86_vm_hardcoded_xdp --case simple
 
 clean:
-	rm -rf $(BUILD_DIR) loader/target
+	rm -rf $(BUILD_DIR) ../loader/target

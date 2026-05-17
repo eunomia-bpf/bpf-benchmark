@@ -9,7 +9,9 @@ with the instruction stream supplied as packet input.
 
 Current layout:
 
-- `x86/`: minimal x86-like VM prototype with a Rust loader.
+- `loader/`: shared Rust loader that opens a BPF object and runs
+  `BPF_PROG_TEST_RUN`.
+- `x86/`: minimal x86-like VM prototype and hardcoded/simple verifier artifact.
 - `arm64/`: placeholder for the matching arm64 VM shape.
 
 This is not part of the benchmark framework and does not write benchmark result
