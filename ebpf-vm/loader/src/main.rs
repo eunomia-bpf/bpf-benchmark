@@ -28,6 +28,7 @@ type Result<T> = std::result::Result<T, String>;
 struct Cli {
     object: PathBuf,
     case_name: String,
+    load_only: bool,
     program: String,
     repeat: i32,
 }
@@ -109,6 +110,15 @@ fn run() -> Result<()> {
     let mut object = open_object(&cli.object)?;
     load_object(&mut object)?;
     let prog_fd = program_fd(&object, &cli.program)?;
+    if cli.load_only {
+        println!(
+            "loaded object={} program={} fd={}",
+            cli.object.display(),
+            cli.program,
+            prog_fd
+        );
+        return Ok(());
+    }
     let mut input = match cli.case_name.as_str() {
         "simple" => build_simple_case(),
         other => return Err(format!("unsupported case: {other}")),
@@ -155,6 +165,7 @@ fn parse_cli() -> Result<Cli> {
     let mut args = env::args().skip(1);
     let mut object = None;
     let mut case_name = String::from("simple");
+    let mut load_only = false;
     let mut program = String::from("x86_vm_xdp");
     let mut repeat = 1;
 
@@ -170,6 +181,9 @@ fn parse_cli() -> Result<Cli> {
                 case_name = args
                     .next()
                     .ok_or_else(|| "--case requires a name".to_string())?;
+            }
+            "--load-only" => {
+                load_only = true;
             }
             "--program" => {
                 program = args
@@ -199,6 +213,7 @@ fn parse_cli() -> Result<Cli> {
     Ok(Cli {
         object,
         case_name,
+        load_only,
         program,
         repeat,
     })
@@ -206,7 +221,7 @@ fn parse_cli() -> Result<Cli> {
 
 fn print_help() {
     println!(
-        "Usage: ebpf-vm-loader --object <vm.bpf.o> [--case simple] [--program x86_vm_xdp] [--repeat N]"
+        "Usage: ebpf-vm-loader --object <vm.bpf.o> [--load-only] [--case simple] [--program x86_vm_xdp] [--repeat N]"
     );
 }
 

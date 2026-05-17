@@ -8,6 +8,21 @@
 
 #define X86_VM_OUTPUT_OFF 0U
 
+#define X86_VM_INSN(OP, DST, SRC, FLAGS, AUX, IMM)                         \
+	((struct x86_insn){                                                 \
+		.op = (OP),                                                 \
+		.dst = (DST),                                               \
+		.src = (SRC),                                               \
+		.flags = (FLAGS),                                           \
+		.aux = (AUX),                                               \
+		.imm = (IMM),                                               \
+	})
+
+#define X86_VM_EXEC(STATE, OP, DST, SRC, FLAGS, AUX, IMM)                  \
+	x86_exec_one((STATE),                                                  \
+		     &X86_VM_INSN((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)), \
+		     __x86_vm_data, __x86_vm_data_end)
+
 static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
 						   __u64 value)
 {
@@ -26,41 +41,32 @@ static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
 	return 0;
 }
 
-#define X86_VM_RUN_PROGRAM(STATE, PROG, PROG_LEN)                         \
-	({                                                                \
-		int __x86_vm_ret = 0;                                      \
-		__u32 __x86_vm_pc;                                        \
-		_Pragma("clang loop unroll(full)")                         \
-		for (__x86_vm_pc = 0; __x86_vm_pc < (PROG_LEN);            \
-		     __x86_vm_pc++) {                                      \
-			int __x86_vm_step_ret =                           \
-				x86_exec_one((STATE), &(PROG)[__x86_vm_pc]); \
-			if (__x86_vm_step_ret == X86_INTERP_DONE)          \
-				break;                                    \
-			if (__x86_vm_step_ret < 0) {                       \
-				__x86_vm_ret = __x86_vm_step_ret;          \
-				break;                                    \
-			}                                                 \
-		}                                                         \
-		__x86_vm_ret;                                             \
-	})
-
-#define X86_VM_RUN_XDP(CTX, PROG, PROG_LEN)                                \
+#define X86_VM_BEGIN_XDP(CTX)                                               \
 	({                                                                 \
 		void *__x86_vm_data = (void *)(long)(CTX)->data;            \
 		void *__x86_vm_data_end = (void *)(long)(CTX)->data_end;    \
 		struct x86_state __x86_vm_state = {};                       \
-		int __x86_vm_ret;                                           \
-		int __x86_vm_xdp_ret;                                       \
-		__x86_vm_ret =                                              \
-			X86_VM_RUN_PROGRAM(&__x86_vm_state, PROG, PROG_LEN); \
-		if (__x86_vm_ret < 0 ||                                     \
-		    x86_vm_write_result_u64(__x86_vm_data,                  \
+		x86_init_state(&__x86_vm_state, (void *)(CTX));             \
+		int __x86_vm_ret = 0;
+
+#define X86_VM_STEP(OP, DST, SRC, FLAGS, AUX, IMM)                          \
+		if (__x86_vm_ret == 0) {                                      \
+			int __x86_vm_step_ret =                               \
+				X86_VM_EXEC(&__x86_vm_state, (OP), (DST),      \
+					     (SRC), (FLAGS), (AUX), (IMM));    \
+			if (__x86_vm_step_ret == X86_INTERP_DONE)              \
+				__x86_vm_ret = X86_INTERP_DONE;                \
+			else if (__x86_vm_step_ret < 0)                        \
+				__x86_vm_ret = __x86_vm_step_ret;              \
+		}
+
+#define X86_VM_END_XDP()                                                    \
+		int __x86_vm_xdp_ret = XDP_PASS;                         \
+		if (__x86_vm_ret < 0 ||                                      \
+		    x86_vm_write_result_u64(__x86_vm_data,                   \
 					    __x86_vm_data_end,             \
 					    __x86_vm_state.rax) < 0)       \
 			__x86_vm_xdp_ret = XDP_ABORTED;                    \
-		else                                                           \
-			__x86_vm_xdp_ret = XDP_PASS;                       \
 		__x86_vm_xdp_ret;                                           \
 	})
 

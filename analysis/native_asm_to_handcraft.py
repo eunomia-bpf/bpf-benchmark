@@ -945,73 +945,8 @@ def translate(insn: NativeInsn) -> Translation:
     return Translation("warning-unmapped", (), f"unsupported mnemonic or operand form: {insn.raw}")
 
 
-def translate_jcc_from_previous(branch: NativeInsn, producer: NativeInsn | None) -> Translation | None:
-    if producer is None or len(branch.operands) != 1:
-        return None
-    target_addr = parse_branch_target(branch.operands[0])
-    if target_addr is None:
-        return None
-
-    op = JCC_OP.get(branch.mnemonic)
-    if op is None:
-        return None
-
-    if producer.mnemonic == "cmp" and len(producer.operands) == 2:
-        lhs = bpf_reg(producer.operands[0])
-        rhs = bpf_reg(producer.operands[1])
-        if lhs and rhs and lhs[1] == rhs[1]:
-            cls = "BPF_JMP32" if lhs[1] == 32 else "BPF_JMP"
-            return Translation(
-                "verifier-branch",
-                (f"HC_RAW({cls} | {op} | BPF_X, {lhs[0]}, {rhs[0]}, {BRANCH_DELTA}, 0)",),
-                f"{branch.mnemonic} verifier branch from preceding cmp",
-                target_addr,
-            )
-        if lhs and is_int(producer.operands[1]):
-            imm = parse_int(producer.operands[1])
-            cls = "BPF_JMP32" if lhs[1] == 32 else "BPF_JMP"
-            return Translation(
-                "verifier-branch",
-                (f"HC_RAW({cls} | {op} | BPF_K, {lhs[0]}, 0, {BRANCH_DELTA}, {imm})",),
-                f"{branch.mnemonic} verifier branch from preceding cmp",
-                target_addr,
-            )
-
-    if producer.mnemonic == "test" and len(producer.operands) == 2:
-        lhs = bpf_reg(producer.operands[0])
-        rhs = bpf_reg(producer.operands[1])
-        if lhs and rhs and lhs[0] == rhs[0]:
-            if branch.mnemonic not in {"je", "jne", "js", "jns"}:
-                return None
-            cls = "BPF_JMP32" if lhs[1] == 32 else "BPF_JMP"
-            return Translation(
-                "verifier-branch",
-                (f"HC_RAW({cls} | {op} | BPF_K, {lhs[0]}, 0, {BRANCH_DELTA}, 0)",),
-                f"{branch.mnemonic} verifier branch from preceding test",
-                target_addr,
-            )
-
-    return None
-
-
 def translate_all(insns: list[NativeInsn]) -> list[Translation]:
-    translations: list[Translation] = []
-    previous_flag_producer: NativeInsn | None = None
-    for insn in insns:
-        if insn.mnemonic in JCC_OP:
-            branch = translate_jcc_from_previous(insn, previous_flag_producer)
-            if branch is not None:
-                translations.append(branch)
-                previous_flag_producer = None
-                continue
-        trans = translate(insn)
-        translations.append(trans)
-        previous_flag_producer = insn if insn.mnemonic in {"cmp", "test"} else None
-    return translations
-
-
-def branch_placeholder_is_bpf_off(code: str) -> bool:
-    return code.startswith("HC_RAW(BPF_JMP")
+    return [translate(insn) for insn in insns]
 
 
 
@@ -1119,8 +1054,6 @@ def relocate_branch_offsets(insns: list[NativeInsn], translations: list[Translat
         for item in trans.code:
             if item.startswith("HC_KINSN("):
                 delta = proof_pc_by_addr[trans.target_addr] - proof_code_pc
-            elif branch_placeholder_is_bpf_off(item):
-                delta = target_pc - code_pc - 1
             else:
                 delta = target_pc - code_pc
             code.append(item.replace(BRANCH_DELTA, str(delta)))
