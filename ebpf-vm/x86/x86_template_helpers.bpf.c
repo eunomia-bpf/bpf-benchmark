@@ -1055,6 +1055,94 @@ __noinline int x86_tmpl_ret(struct x86_state *state,
 	return X86_INTERP_DONE;
 }
 
+static __always_inline int x86_link_read_reg_fast(const struct x86_state *state,
+						  __u8 reg, __u64 *out)
+{
+	if (reg > X86_R15)
+		return X86_INTERP_TRAP;
+	*out = *((const __u64 *)state + reg);
+	return 0;
+}
+
+static __always_inline int x86_link_write_reg_width_fast(
+	struct x86_state *state, __u8 reg, __u64 value, __u8 width)
+{
+	__u64 old_value = 0;
+	__u64 next_value = value;
+
+	if (reg > X86_R15)
+		return X86_INTERP_TRAP;
+	if (width == X86_WIDTH_8 || width == X86_WIDTH_16) {
+		old_value = *((__u64 *)state + reg);
+		next_value = (old_value & ~x86_width_mask(width)) |
+			     (value & x86_width_mask(width));
+	} else if (width == X86_WIDTH_32) {
+		next_value = (__u32)value;
+	}
+	*((__u64 *)state + reg) = next_value;
+	*((__u64 *)&state->p_rax + reg) = X86_PTR_NONE;
+	return 0;
+}
+
+static __always_inline __u8 x86_link_read_tag_fast(
+	const struct x86_state *state, __u8 reg)
+{
+	if (reg > X86_R15)
+		return X86_PTR_NONE;
+	return *((const __u64 *)&state->p_rax + reg);
+}
+
+static __always_inline int x86_link_write_tag_fast(struct x86_state *state,
+						   __u8 reg, __u8 tag)
+{
+	if (reg > X86_R15)
+		return X86_INTERP_TRAP;
+	*((__u64 *)&state->p_rax + reg) = tag;
+	return X86_INTERP_CONTINUE;
+}
+
+static __always_inline int x86_link_clear_tag_fast(struct x86_state *state,
+						   __u8 reg)
+{
+	return x86_link_write_tag_fast(state, reg, X86_PTR_NONE);
+}
+
+static __always_inline int x86_link_write_scalar_fast(struct x86_state *state,
+						      __u8 reg, __u64 value,
+						      __u8 width)
+{
+	if (x86_link_write_reg_width_fast(state, reg, value, width) < 0)
+		return X86_INTERP_TRAP;
+	return x86_link_clear_tag_fast(state, reg);
+}
+
+static __always_inline int x86_link_mem_offset_fast(struct x86_state *state,
+						    __u32 aux, __s64 disp,
+						    __s64 *out)
+{
+	__u8 index = X86_MEM_AUX_INDEX(aux);
+	__u8 scale_log2 = X86_MEM_AUX_SCALE_LOG2(aux);
+	__u64 index_value = 0;
+
+	*out = disp;
+	if (index == X86_REG_NONE)
+		return 0;
+	if (scale_log2 > 3)
+		return X86_INTERP_TRAP;
+	if (x86_link_read_reg_fast(state, index, &index_value) < 0)
+		return X86_INTERP_TRAP;
+	*out += (__s64)(index_value << scale_log2);
+	return 0;
+}
+
+#define x86_read_reg x86_link_read_reg_fast
+#define x86_write_reg_width x86_link_write_reg_width_fast
+#define x86_link_read_tag x86_link_read_tag_fast
+#define x86_link_write_tag x86_link_write_tag_fast
+#define x86_link_clear_tag x86_link_clear_tag_fast
+#define x86_link_write_scalar x86_link_write_scalar_fast
+#define x86_mem_offset x86_link_mem_offset_fast
+
 __noinline int x86_tmpl_arg_mov_imm(struct x86_state *state,
 				    void *data, void *data_end,
 				    __u64 packed, __u64 imm)
@@ -1151,8 +1239,10 @@ __noinline int x86_tmpl_arg_mov_load(struct x86_state *state,
 	__u8 dst = x86_arg_dst(packed);
 	__u8 src = x86_arg_src(packed);
 	__u8 width = x86_arg_flags(packed);
+	__u32 aux = x86_arg_aux(packed);
 	__u8 base_tag = x86_link_read_tag(state, src);
 	__u64 base = 0;
+	__s64 disp = x86_simm(imm);
 	__u8 *end;
 	__u64 value = 0;
 
@@ -1176,31 +1266,29 @@ __noinline int x86_tmpl_arg_mov_load(struct x86_state *state,
 		return X86_INTERP_TRAP;
 	if (x86_read_reg(state, src, &base) < 0)
 		return X86_INTERP_TRAP;
+	if (x86_mem_offset(state, aux, disp, &disp) < 0)
+		return X86_INTERP_TRAP;
 	if (width == X86_WIDTH_8) {
-		if (x86_link_packet_end_const(data, data_end, base,
-					      x86_simm(imm), X86_WIDTH_8,
-					      &end) < 0)
+		if (x86_link_packet_end_const(data, data_end, base, disp,
+					      X86_WIDTH_8, &end) < 0)
 			return X86_INTERP_TRAP;
 		x86_link_barrier_var(end);
 		value = *(__u8 *)(end - 1);
 	} else if (width == X86_WIDTH_16) {
-		if (x86_link_packet_end_const(data, data_end, base,
-					      x86_simm(imm), X86_WIDTH_16,
-					      &end) < 0)
+		if (x86_link_packet_end_const(data, data_end, base, disp,
+					      X86_WIDTH_16, &end) < 0)
 			return X86_INTERP_TRAP;
 		x86_link_barrier_var(end);
 		value = *(__u16 *)(end - 2);
 	} else if (width == X86_WIDTH_32) {
-		if (x86_link_packet_end_const(data, data_end, base,
-					      x86_simm(imm), X86_WIDTH_32,
-					      &end) < 0)
+		if (x86_link_packet_end_const(data, data_end, base, disp,
+					      X86_WIDTH_32, &end) < 0)
 			return X86_INTERP_TRAP;
 		x86_link_barrier_var(end);
 		value = *(__u32 *)(end - 4);
 	} else if (width == X86_WIDTH_64) {
-		if (x86_link_packet_end_const(data, data_end, base,
-					      x86_simm(imm), X86_WIDTH_64,
-					      &end) < 0)
+		if (x86_link_packet_end_const(data, data_end, base, disp,
+					      X86_WIDTH_64, &end) < 0)
 			return X86_INTERP_TRAP;
 		x86_link_barrier_var(end);
 		value = *(__u64 *)(end - 8);
@@ -1378,6 +1466,142 @@ __noinline int x86_tmpl_arg_alu_mem(struct x86_state *state,
 	x86_set_alu_flags(state, dst_value, mem_value, result, alu, width);
 	return x86_link_write_scalar(state, dst, result, width);
 }
+
+#define X86_ARG_ALU_IMM_TEMPLATE(NAME, ALU_OP)                             \
+	__noinline int x86_tmpl_arg_alu_imm_##NAME(                       \
+		struct x86_state *state, void *data, void *data_end,       \
+		__u64 packed, __u64 imm)                                  \
+	{                                                                  \
+		__u8 dst = x86_arg_dst(packed);                            \
+		__u8 width = x86_arg_flags(packed);                        \
+		__u8 tag = x86_link_read_tag(state, dst);                  \
+		__u64 lhs = 0;                                             \
+		__u64 rhs = imm;                                           \
+		__u64 result;                                              \
+		if (!width)                                                \
+			width = X86_WIDTH_64;                              \
+		if (x86_link_check_width(width) < 0)                       \
+			return X86_INTERP_TRAP;                            \
+		if (x86_read_reg(state, dst, &lhs) < 0)                    \
+			return X86_INTERP_TRAP;                            \
+		if ((ALU_OP) == X86_ALU_SBB)                               \
+			rhs += state->cf;                                  \
+		result = x86_alu_result(lhs, rhs, (ALU_OP), width);        \
+		x86_set_alu_flags(state, lhs, rhs, result, (ALU_OP),       \
+				  width);                                  \
+		if (x86_write_reg_width(state, dst, result, width) < 0)    \
+			return X86_INTERP_TRAP;                            \
+		if (width == X86_WIDTH_64 &&                               \
+		    (tag == X86_PTR_PACKET || tag == X86_PTR_PACKET_END) && \
+		    ((ALU_OP) == X86_ALU_ADD || (ALU_OP) == X86_ALU_SUB))   \
+			return x86_link_write_tag(state, dst, tag);        \
+		return x86_link_clear_tag(state, dst);                     \
+	}
+
+#define X86_ARG_ALU_REG_TEMPLATE(NAME, ALU_OP)                              \
+	__noinline int x86_tmpl_arg_alu_reg_##NAME(                       \
+		struct x86_state *state, void *data, void *data_end,       \
+		__u64 packed, __u64 imm)                                  \
+	{                                                                  \
+		__u8 dst = x86_arg_dst(packed);                            \
+		__u8 src = x86_arg_src(packed);                            \
+		__u8 width = x86_arg_flags(packed);                        \
+		__u8 dst_tag = x86_link_read_tag(state, dst);              \
+		__u8 src_tag = x86_link_read_tag(state, src);              \
+		__u64 lhs = 0;                                             \
+		__u64 rhs = 0;                                             \
+		__u64 result;                                              \
+		__u8 result_tag = X86_PTR_NONE;                            \
+		if (!width)                                                \
+			width = X86_WIDTH_64;                              \
+		if (x86_link_check_width(width) < 0)                       \
+			return X86_INTERP_TRAP;                            \
+		if (x86_read_reg(state, dst, &lhs) < 0 ||                  \
+		    x86_read_reg(state, src, &rhs) < 0)                    \
+			return X86_INTERP_TRAP;                            \
+		if ((ALU_OP) == X86_ALU_SBB)                               \
+			rhs += state->cf;                                  \
+		result = x86_alu_result(lhs, rhs, (ALU_OP), width);        \
+		x86_set_alu_flags(state, lhs, rhs, result, (ALU_OP),       \
+				  width);                                  \
+		if (width == X86_WIDTH_64 && (ALU_OP) == X86_ALU_ADD &&    \
+		    dst_tag == X86_PTR_NONE &&                             \
+		    (src_tag == X86_PTR_PACKET ||                          \
+		     src_tag == X86_PTR_PACKET_END))                       \
+			result_tag = src_tag;                              \
+		else if (width == X86_WIDTH_64 &&                          \
+			 ((ALU_OP) == X86_ALU_ADD ||                      \
+			  (ALU_OP) == X86_ALU_SUB) &&                     \
+			 (dst_tag == X86_PTR_PACKET ||                    \
+			  dst_tag == X86_PTR_PACKET_END))                 \
+			result_tag = dst_tag;                              \
+		if (x86_write_reg_width(state, dst, result, width) < 0)    \
+			return X86_INTERP_TRAP;                            \
+		return x86_link_write_tag(state, dst, result_tag);         \
+	}
+
+#define X86_ARG_ALU_MEM_TEMPLATE(NAME, ALU_OP)                              \
+	__noinline int x86_tmpl_arg_alu_mem_##NAME(                       \
+		struct x86_state *state, void *data, void *data_end,       \
+		__u64 packed, __u64 imm)                                  \
+	{                                                                  \
+		__u8 dst = x86_arg_dst(packed);                            \
+		__u8 src = x86_arg_src(packed);                            \
+		__u8 width = x86_arg_flags(packed);                        \
+		__u32 aux = x86_arg_aux(packed);                           \
+		__u8 base_tag = x86_link_read_tag(state, src);             \
+		__u64 dst_value = 0;                                       \
+		__u64 mem_value = 0;                                       \
+		__u64 base = 0;                                            \
+		__u64 result = 0;                                          \
+		__s64 disp = x86_simm(imm);                                \
+		if (!width)                                                \
+			width = X86_WIDTH_64;                              \
+		if (base_tag != X86_PTR_PACKET)                            \
+			return X86_INTERP_TRAP;                            \
+		if (x86_read_reg(state, dst, &dst_value) < 0 ||            \
+		    x86_read_reg(state, src, &base) < 0)                   \
+			return X86_INTERP_TRAP;                            \
+		if (x86_mem_offset(state, aux, disp, &disp) < 0)           \
+			return X86_INTERP_TRAP;                            \
+		if (x86_link_read_packet(data, data_end, base, disp,       \
+					 width, &mem_value) < 0)          \
+			return X86_INTERP_TRAP;                            \
+		if ((ALU_OP) == X86_ALU_SBB)                               \
+			mem_value += state->cf;                            \
+		result = x86_alu_result(dst_value, mem_value, (ALU_OP),    \
+					width);                            \
+		x86_set_alu_flags(state, dst_value, mem_value, result,     \
+				  (ALU_OP), width);                       \
+		return x86_link_write_scalar(state, dst, result, width);   \
+	}
+
+X86_ARG_ALU_IMM_TEMPLATE(add, X86_ALU_ADD)
+X86_ARG_ALU_IMM_TEMPLATE(sub, X86_ALU_SUB)
+X86_ARG_ALU_IMM_TEMPLATE(xor, X86_ALU_XOR)
+X86_ARG_ALU_IMM_TEMPLATE(or, X86_ALU_OR)
+X86_ARG_ALU_IMM_TEMPLATE(and, X86_ALU_AND)
+X86_ARG_ALU_IMM_TEMPLATE(shl, X86_ALU_SHL)
+X86_ARG_ALU_IMM_TEMPLATE(shr, X86_ALU_SHR)
+X86_ARG_ALU_IMM_TEMPLATE(sar, X86_ALU_SAR)
+X86_ARG_ALU_IMM_TEMPLATE(rol, X86_ALU_ROL)
+X86_ARG_ALU_IMM_TEMPLATE(inc, X86_ALU_INC)
+X86_ARG_ALU_IMM_TEMPLATE(not, X86_ALU_NOT)
+X86_ARG_ALU_IMM_TEMPLATE(sbb, X86_ALU_SBB)
+
+X86_ARG_ALU_REG_TEMPLATE(add, X86_ALU_ADD)
+X86_ARG_ALU_REG_TEMPLATE(sub, X86_ALU_SUB)
+X86_ARG_ALU_REG_TEMPLATE(xor, X86_ALU_XOR)
+X86_ARG_ALU_REG_TEMPLATE(or, X86_ALU_OR)
+X86_ARG_ALU_REG_TEMPLATE(and, X86_ALU_AND)
+X86_ARG_ALU_REG_TEMPLATE(shl, X86_ALU_SHL)
+X86_ARG_ALU_REG_TEMPLATE(shr, X86_ALU_SHR)
+X86_ARG_ALU_REG_TEMPLATE(rol, X86_ALU_ROL)
+X86_ARG_ALU_REG_TEMPLATE(imul, X86_ALU_IMUL)
+
+X86_ARG_ALU_MEM_TEMPLATE(add, X86_ALU_ADD)
+X86_ARG_ALU_MEM_TEMPLATE(xor, X86_ALU_XOR)
+X86_ARG_ALU_MEM_TEMPLATE(or, X86_ALU_OR)
 
 __noinline int x86_tmpl_arg_cmp_imm(struct x86_state *state,
 				    void *data, void *data_end,

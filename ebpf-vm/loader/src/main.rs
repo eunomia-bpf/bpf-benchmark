@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::env;
 use std::ffi::{c_void, CString};
 use std::fs;
@@ -46,20 +46,17 @@ const BPF_MOV64_REG: u8 = 0xbf;
 const BPF_ADD64_IMM: u8 = 0x07;
 const BPF_LDX_MEM_W: u8 = 0x61;
 const BPF_LDX_MEM_DW: u8 = 0x79;
-const BPF_ST_MEM_B: u8 = 0x72;
-const BPF_ST_MEM_W: u8 = 0x62;
 const BPF_ST_MEM_DW: u8 = 0x7a;
 const BPF_JA: u8 = 0x05;
+const BPF_JGT_IMM: u8 = 0x25;
 const BPF_JNE_IMM: u8 = 0x55;
 
 const X86_STATE_STACK_OFF: i16 = -432;
 const X86_STATE_SIZE: i16 = 280;
-const X86_INSN_STACK_OFF: i16 = -144;
+const X86_LOOP_COUNTER_BASE_OFF: i16 = -144;
 const X86_CTX_STACK_OFF: i16 = -448;
 const X86_STATE_RAX_OFF: i16 = 0;
 const X86_STATE_P_RDI_OFF: i16 = 184;
-const X86_INSN_AUX_OFF: i16 = X86_INSN_STACK_OFF + 4;
-const X86_INSN_IMM_OFF: i16 = X86_INSN_STACK_OFF + 8;
 const X86_PTR_CTX: i32 = 1;
 
 type Result<T> = std::result::Result<T, String>;
@@ -110,7 +107,7 @@ struct JsonVerifierTemplates {
     steps: Vec<JsonTemplateStep>,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 struct JsonTemplateStep {
     index: usize,
     helper: String,
@@ -119,7 +116,7 @@ struct JsonTemplateStep {
     target: usize,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 struct JsonTemplateArgs {
     op: u8,
     dst: u8,
@@ -172,13 +169,17 @@ struct TemplateCatalog {
 struct Linker {
     insns: Vec<BpfInsn>,
     branch_fixups: Vec<(usize, LinkTarget)>,
-    template_call_fixups: Vec<(usize, String)>,
-    used_templates: Vec<String>,
-    used_template_set: HashSet<String>,
+    loop_guards: HashMap<usize, LoopGuard>,
 }
 
 enum LinkTarget {
     Step(usize),
+}
+
+#[derive(Clone, Copy)]
+struct LoopGuard {
+    off: i16,
+    bound: i32,
 }
 
 #[repr(C)]
@@ -549,45 +550,45 @@ fn link_bpf_program(program: &JsonBpfProgram) -> Result<Vec<BpfInsn>> {
 }
 
 fn json_template_steps(proof: &JsonProof) -> Option<Vec<JsonTemplateStep>> {
-    if let Some(templates) = &proof.verifier_templates {
+    if let Some(linked) = &proof.linked_program {
         return Some(
-            templates
-                .steps
+            linked
+                .insns
                 .iter()
-                .map(|step| JsonTemplateStep {
-                    index: step.index,
-                    helper: step.helper.clone(),
+                .map(|insn| JsonTemplateStep {
+                    index: insn.index,
+                    helper: insn.helper.clone(),
                     args: JsonTemplateArgs {
-                        op: step.args.op,
-                        dst: step.args.dst,
-                        src: step.args.src,
-                        flags: step.args.flags,
-                        aux: step.args.aux,
-                        imm: step.args.imm,
+                        op: insn.op,
+                        dst: insn.dst,
+                        src: insn.src,
+                        flags: insn.flags,
+                        aux: insn.aux,
+                        imm: insn.imm,
                     },
-                    flow: step.flow,
-                    target: step.target,
+                    flow: insn.flow,
+                    target: insn.target,
                 })
                 .collect(),
         );
     }
-    proof.linked_program.as_ref().map(|linked| {
-        linked
-            .insns
+    proof.verifier_templates.as_ref().map(|templates| {
+        templates
+            .steps
             .iter()
-            .map(|insn| JsonTemplateStep {
-                index: insn.index,
-                helper: insn.helper.clone(),
+            .map(|step| JsonTemplateStep {
+                index: step.index,
+                helper: step.helper.clone(),
                 args: JsonTemplateArgs {
-                    op: insn.op,
-                    dst: insn.dst,
-                    src: insn.src,
-                    flags: insn.flags,
-                    aux: insn.aux,
-                    imm: insn.imm,
+                    op: step.args.op,
+                    dst: step.args.dst,
+                    src: step.args.src,
+                    flags: step.args.flags,
+                    aux: step.args.aux,
+                    imm: step.args.imm,
                 },
-                flow: insn.flow,
-                target: insn.target,
+                flow: step.flow,
+                target: step.target,
             })
             .collect()
     })
@@ -597,6 +598,8 @@ fn link_template_program(
     steps: &[JsonTemplateStep],
     catalog: &TemplateCatalog,
 ) -> Result<Vec<BpfInsn>> {
+    let steps = expand_counted_loops(steps)?;
+    let steps = steps.as_slice();
     if steps.is_empty() {
         return Err("JSON template program has no steps".to_string());
     }
@@ -609,16 +612,216 @@ fn link_template_program(
         }
     }
 
-    let mut linker = Linker::new();
+    let reachable = reachable_template_steps(steps)?;
+    let loop_guards = loop_guards(steps, &reachable)?;
+    let mut linker = Linker::new(loop_guards);
     linker.emit_prologue();
-    let mut step_offsets = Vec::with_capacity(steps.len());
+    let mut step_offsets = vec![None; steps.len()];
     for step in steps {
-        step_offsets.push(linker.insns.len());
+        if !reachable[step.index] {
+            continue;
+        }
+        step_offsets[step.index] = Some(linker.insns.len());
         linker.emit_step(step, catalog)?;
     }
-    let template_offsets = linker.append_template_subprograms(catalog)?;
-    linker.resolve(step_offsets, template_offsets)?;
+    linker.resolve(step_offsets)?;
     Ok(linker.insns)
+}
+
+fn expand_counted_loops(steps: &[JsonTemplateStep]) -> Result<Vec<JsonTemplateStep>> {
+    let mut current = steps.to_vec();
+    loop {
+        let Some((target, jcc_index, bound)) = find_expandable_loop(&current) else {
+            return Ok(current);
+        };
+        current = expand_one_counted_loop(&current, target, jcc_index, bound)?;
+    }
+}
+
+fn find_expandable_loop(steps: &[JsonTemplateStep]) -> Option<(usize, usize, usize)> {
+    for step in steps {
+        if step.flow != FLOW_JCC || step.target >= step.index || step.args.aux != 5 {
+            continue;
+        }
+        let cmp_index = step.index.checked_sub(1)?;
+        let cmp = steps.get(cmp_index)?;
+        if cmp.helper != "x86_exec_cmp_imm" || cmp.args.imm == 0 || cmp.args.imm > 512 {
+            continue;
+        }
+        if steps[step.target..cmp_index]
+            .iter()
+            .any(|body_step| body_step.flow != FLOW_NORMAL)
+        {
+            continue;
+        }
+        let body_len = cmp_index.saturating_sub(step.target);
+        let bound = cmp.args.imm as usize;
+        if body_len == 0 || body_len.saturating_mul(bound) > 4096 {
+            continue;
+        }
+        return Some((step.target, step.index, bound));
+    }
+    None
+}
+
+fn expand_one_counted_loop(
+    steps: &[JsonTemplateStep],
+    target: usize,
+    jcc_index: usize,
+    bound: usize,
+) -> Result<Vec<JsonTemplateStep>> {
+    let cmp_index = jcc_index
+        .checked_sub(1)
+        .ok_or_else(|| format!("bad counted loop jcc index: {jcc_index}"))?;
+    let mut out = Vec::new();
+    let mut old_to_new = HashMap::new();
+    let mut index = 0usize;
+    while index < steps.len() {
+        if index == target {
+            old_to_new.insert(target, out.len());
+            for _ in 0..bound {
+                for old in target..cmp_index {
+                    let mut clone = steps[old].clone();
+                    clone.flow = FLOW_NORMAL;
+                    clone.target = 0;
+                    out.push(clone);
+                }
+            }
+            let mut cmp = steps[cmp_index].clone();
+            cmp.flow = FLOW_NORMAL;
+            cmp.target = 0;
+            out.push(cmp);
+            index = jcc_index + 1;
+            continue;
+        }
+        old_to_new.entry(index).or_insert(out.len());
+        out.push(steps[index].clone());
+        index += 1;
+    }
+
+    for (new_index, step) in out.iter_mut().enumerate() {
+        step.index = new_index;
+        if matches!(step.flow, FLOW_JCC | FLOW_JMP | FLOW_CALL) {
+            step.target = *old_to_new
+                .get(&step.target)
+                .ok_or_else(|| format!("expanded CFG target was removed: {}", step.target))?;
+        }
+    }
+    Ok(out)
+}
+
+fn reachable_template_steps(steps: &[JsonTemplateStep]) -> Result<Vec<bool>> {
+    let mut reachable = vec![false; steps.len()];
+    let mut stack = vec![0usize];
+    while let Some(index) = stack.pop() {
+        let Some(step) = steps.get(index) else {
+            return Err(format!("CFG step out of range: {index}"));
+        };
+        if reachable[index] {
+            continue;
+        }
+        reachable[index] = true;
+        match step.flow {
+            FLOW_NORMAL => {
+                if index + 1 < steps.len() {
+                    stack.push(index + 1);
+                }
+            }
+            FLOW_JCC => {
+                if step.target >= steps.len() {
+                    return Err(format!(
+                        "conditional branch target out of range at step {}: {}",
+                        step.index, step.target
+                    ));
+                }
+                stack.push(step.target);
+                if index + 1 < steps.len() {
+                    stack.push(index + 1);
+                }
+            }
+            FLOW_JMP => {
+                if step.target >= steps.len() {
+                    return Err(format!(
+                        "branch target out of range at step {}: {}",
+                        step.index, step.target
+                    ));
+                }
+                stack.push(step.target);
+            }
+            FLOW_CALL => {
+                if step.target >= steps.len() {
+                    return Err(format!(
+                        "call target out of range at step {}: {}",
+                        step.index, step.target
+                    ));
+                }
+                stack.push(step.target);
+                if index + 1 < steps.len() {
+                    stack.push(index + 1);
+                }
+            }
+            FLOW_RET => {}
+            other => return Err(format!("unsupported flow {other} at step {}", step.index)),
+        }
+    }
+    Ok(reachable)
+}
+
+fn loop_guards(
+    steps: &[JsonTemplateStep],
+    reachable: &[bool],
+) -> Result<HashMap<usize, LoopGuard>> {
+    let mut loops = Vec::new();
+    for step in steps {
+        if !reachable[step.index]
+            || step.flow != FLOW_JCC
+            || step.target >= step.index
+            || steps
+                .get(step.target)
+                .is_some_and(|target| target.flow == FLOW_RET)
+        {
+            continue;
+        }
+        loops.push((step.index, step.target, loop_base_bound(steps, step.index)));
+    }
+    if loops.len() > 16 {
+        return Err(format!(
+            "too many verifier loop guards: {} exceeds 16 stack slots",
+            loops.len()
+        ));
+    }
+
+    let mut out = HashMap::new();
+    for (slot, (index, target, base_bound)) in loops.iter().enumerate() {
+        let mut bound = *base_bound as u64;
+        for (other_index, other_target, other_bound) in &loops {
+            if other_index == index {
+                continue;
+            }
+            if *other_target <= *target && *index <= *other_index {
+                bound = bound.saturating_mul(*other_bound as u64);
+            }
+        }
+        let bound = bound.min(8192) as i32;
+        out.insert(
+            *index,
+            LoopGuard {
+                off: X86_LOOP_COUNTER_BASE_OFF + (slot as i16 * 8),
+                bound,
+            },
+        );
+    }
+    Ok(out)
+}
+
+fn loop_base_bound(steps: &[JsonTemplateStep], jcc_index: usize) -> i32 {
+    let Some(prev) = jcc_index.checked_sub(1).and_then(|index| steps.get(index)) else {
+        return 1024;
+    };
+    if prev.helper == "x86_exec_cmp_imm" && prev.args.imm <= 8191 {
+        return (prev.args.imm as i32) + 1;
+    }
+    1024
 }
 
 fn template_symbol(helper: &str) -> String {
@@ -634,8 +837,15 @@ fn template_symbol(helper: &str) -> String {
     }
 }
 
-fn arg_template_symbol(helper: &str) -> String {
-    template_symbol(helper).replacen("x86_tmpl_", "x86_tmpl_arg_", 1)
+fn arg_template_symbol(helper: &str, args: &JsonTemplateArgs) -> Result<String> {
+    let base = template_symbol(helper).replacen("x86_tmpl_", "x86_tmpl_arg_", 1);
+    match base.as_str() {
+        "x86_tmpl_arg_alu_imm" | "x86_tmpl_arg_alu_reg" => {
+            Ok(format!("{base}_{}", alu_suffix(args.aux as u8)?))
+        }
+        "x86_tmpl_arg_alu_mem" => Ok(format!("{base}_{}", alu_suffix((args.aux >> 24) as u8)?)),
+        _ => Ok(base),
+    }
 }
 
 fn packed_template_args(args: &JsonTemplateArgs) -> u64 {
@@ -644,6 +854,25 @@ fn packed_template_args(args: &JsonTemplateArgs) -> u64 {
         | ((args.src as u64) << 16)
         | ((args.flags as u64) << 24)
         | ((args.aux as u64) << 32)
+}
+
+fn alu_suffix(alu: u8) -> Result<&'static str> {
+    match alu {
+        0 => Ok("add"),
+        1 => Ok("sub"),
+        2 => Ok("xor"),
+        3 => Ok("or"),
+        4 => Ok("and"),
+        5 => Ok("shl"),
+        6 => Ok("shr"),
+        7 => Ok("sar"),
+        8 => Ok("rol"),
+        9 => Ok("imul"),
+        10 => Ok("inc"),
+        11 => Ok("not"),
+        12 => Ok("sbb"),
+        other => Err(format!("unsupported ALU selector: {other}")),
+    }
 }
 
 impl TemplateCatalog {
@@ -724,13 +953,11 @@ fn dump_bpf_insns(path: &PathBuf, insns: &[BpfInsn]) -> Result<()> {
 }
 
 impl Linker {
-    fn new() -> Self {
+    fn new(loop_guards: HashMap<usize, LoopGuard>) -> Self {
         Self {
             insns: Vec::new(),
             branch_fixups: Vec::new(),
-            template_call_fixups: Vec::new(),
-            used_templates: Vec::new(),
-            used_template_set: HashSet::new(),
+            loop_guards,
         }
     }
 
@@ -761,6 +988,11 @@ impl Linker {
         for off in (X86_STATE_STACK_OFF..X86_STATE_STACK_OFF + X86_STATE_SIZE).step_by(8) {
             self.emit_st_mem_dw(BPF_REG_FP, off, 0);
         }
+        let loop_counter_offsets: Vec<i16> =
+            self.loop_guards.values().map(|guard| guard.off).collect();
+        for off in loop_counter_offsets {
+            self.emit_st_mem_dw(BPF_REG_FP, off, 0);
+        }
         self.emit_st_mem_dw(9, X86_STATE_P_RDI_OFF, X86_PTR_CTX);
         self.emit_reload_link_regs();
     }
@@ -775,7 +1007,11 @@ impl Linker {
             FLOW_JCC => {
                 self.emit_helper_step(step, catalog)?;
                 self.emit_trap_check_local();
-                self.emit_jne_imm_fixup(0, 0, LinkTarget::Step(step.target));
+                if let Some(guard) = self.loop_guards.get(&step.index).copied() {
+                    self.emit_guarded_jcc(guard, LinkTarget::Step(step.target));
+                } else {
+                    self.emit_jne_imm_fixup(0, 0, LinkTarget::Step(step.target));
+                }
             }
             FLOW_JMP => {
                 self.emit_jump(LinkTarget::Step(step.target));
@@ -822,18 +1058,38 @@ impl Linker {
         self.emit_mov64_reg(3, 7);
         self.emit_ldimm64(4, packed_template_args(&step.args));
         self.emit_ldimm64(5, step.args.imm);
-        self.emit_template_call(&arg_template_symbol(&step.helper), catalog)
+        self.emit_template_inline(&arg_template_symbol(&step.helper, &step.args)?, catalog)
     }
 
-    fn emit_template_call(&mut self, symbol: &str, catalog: &TemplateCatalog) -> Result<()> {
-        if !catalog.functions.contains_key(symbol) {
-            return Err(format!("template helper missing from C object: {symbol}"));
+    fn emit_template_inline(&mut self, symbol: &str, catalog: &TemplateCatalog) -> Result<()> {
+        let body = catalog
+            .functions
+            .get(symbol)
+            .ok_or_else(|| format!("template helper missing from C object: {symbol}"))?;
+        let mut exits = Vec::new();
+        for (offset, insn) in body.iter().enumerate() {
+            if insn.code == BPF_CALL_INSN && ((insn.regs >> 4) & 0x0f) == BPF_PSEUDO_CALL {
+                return Err(format!(
+                    "template fragment {symbol} contains unresolved BPF subprogram call at body insn {offset}"
+                ));
+            }
+            if insn.code == BPF_EXIT_INSN {
+                let index = self.emit(BPF_JA, 0, 0, 0, 0);
+                exits.push(index);
+            } else {
+                self.emit_raw(*insn);
+            }
         }
-        if self.used_template_set.insert(symbol.to_string()) {
-            self.used_templates.push(symbol.to_string());
+        let after = self.insns.len();
+        for index in exits {
+            let off = after as isize - index as isize - 1;
+            if off < i16::MIN as isize || off > i16::MAX as isize {
+                return Err(format!(
+                    "template fragment exit offset out of range in {symbol}: {off}"
+                ));
+            }
+            self.insns[index].off = off as i16;
         }
-        let index = self.emit(BPF_CALL_INSN, 0, BPF_PSEUDO_CALL, 0, 0);
-        self.template_call_fixups.push((index, symbol.to_string()));
         self.emit_reload_link_regs();
         Ok(())
     }
@@ -846,16 +1102,6 @@ impl Linker {
         self.emit_add64_imm(9, X86_STATE_STACK_OFF as i32);
     }
 
-    fn emit_insn_record(&mut self, args: &JsonTemplateArgs) {
-        self.emit_st_mem_b(BPF_REG_FP, X86_INSN_STACK_OFF, args.op as i32);
-        self.emit_st_mem_b(BPF_REG_FP, X86_INSN_STACK_OFF + 1, args.dst as i32);
-        self.emit_st_mem_b(BPF_REG_FP, X86_INSN_STACK_OFF + 2, args.src as i32);
-        self.emit_st_mem_b(BPF_REG_FP, X86_INSN_STACK_OFF + 3, args.flags as i32);
-        self.emit_st_mem_w(BPF_REG_FP, X86_INSN_AUX_OFF, args.aux as i32);
-        self.emit_ldimm64(0, args.imm);
-        self.emit_stx_mem_dw(BPF_REG_FP, 0, X86_INSN_IMM_OFF);
-    }
-
     fn emit_jump(&mut self, target: LinkTarget) {
         let index = self.emit(BPF_JA, 0, 0, 0, 0);
         self.branch_fixups.push((index, target));
@@ -864,6 +1110,20 @@ impl Linker {
     fn emit_jne_imm_fixup(&mut self, dst: u8, imm: i32, target: LinkTarget) {
         let index = self.emit(BPF_JNE_IMM, dst, 0, 0, imm);
         self.branch_fixups.push((index, target));
+    }
+
+    fn emit_guarded_jcc(&mut self, guard: LoopGuard, target: LinkTarget) {
+        self.emit(BPF_JNE_IMM, 0, 0, 1, 0);
+        let fallthrough = self.emit(BPF_JA, 0, 0, 0, 0);
+        self.emit_ldx_mem_dw(1, BPF_REG_FP, guard.off);
+        self.emit_add64_imm(1, 1);
+        self.emit_stx_mem_dw(BPF_REG_FP, 1, guard.off);
+        self.emit(BPF_JGT_IMM, 1, 0, 1, guard.bound);
+        self.emit_jump(target);
+        self.emit_abort_local();
+        let after = self.insns.len();
+        let off = after as isize - fallthrough as isize - 1;
+        self.insns[fallthrough].off = off as i16;
     }
 
     fn emit_mov64_imm(&mut self, dst: u8, imm: i32) {
@@ -886,14 +1146,6 @@ impl Linker {
         self.emit(BPF_LDX_MEM_DW, dst, src, off, 0);
     }
 
-    fn emit_st_mem_b(&mut self, dst: u8, off: i16, imm: i32) {
-        self.emit(BPF_ST_MEM_B, dst, 0, off, imm);
-    }
-
-    fn emit_st_mem_w(&mut self, dst: u8, off: i16, imm: i32) {
-        self.emit(BPF_ST_MEM_W, dst, 0, off, imm);
-    }
-
     fn emit_st_mem_dw(&mut self, dst: u8, off: i16, imm: i32) {
         self.emit(BPF_ST_MEM_DW, dst, 0, off, imm);
     }
@@ -911,59 +1163,19 @@ impl Linker {
         self.emit(BPF_EXIT_INSN, 0, 0, 0, 0);
     }
 
-    fn append_template_subprograms(
-        &mut self,
-        catalog: &TemplateCatalog,
-    ) -> Result<HashMap<String, usize>> {
-        let mut offsets = HashMap::new();
-        for symbol in self.used_templates.clone() {
-            let body = catalog
-                .functions
-                .get(&symbol)
-                .ok_or_else(|| format!("template helper missing from C object: {symbol}"))?;
-            for (offset, insn) in body.iter().enumerate() {
-                if insn.code == BPF_CALL_INSN && ((insn.regs >> 4) & 0x0f) == BPF_PSEUDO_CALL {
-                    return Err(format!(
-                        "template subprogram {symbol} contains unresolved BPF subprogram call at body insn {offset}"
-                    ));
-                }
-            }
-            offsets.insert(symbol, self.insns.len());
-            for insn in body {
-                self.emit_raw(*insn);
-            }
-        }
-        Ok(offsets)
-    }
-
-    fn resolve(
-        &mut self,
-        step_offsets: Vec<usize>,
-        template_offsets: HashMap<String, usize>,
-    ) -> Result<()> {
+    fn resolve(&mut self, step_offsets: Vec<Option<usize>>) -> Result<()> {
         for (index, target) in &self.branch_fixups {
             let target_index = match target {
-                LinkTarget::Step(step) => *step_offsets
+                LinkTarget::Step(step) => step_offsets
                     .get(*step)
-                    .ok_or_else(|| format!("branch target step out of range: {step}"))?,
+                    .ok_or_else(|| format!("branch target step out of range: {step}"))?
+                    .ok_or_else(|| format!("branch target step was not emitted: {step}"))?,
             };
             let off = target_index as isize - *index as isize - 1;
             if off < i16::MIN as isize || off > i16::MAX as isize {
                 return Err(format!("branch offset out of range at insn {index}: {off}"));
             }
             self.insns[*index].off = off as i16;
-        }
-        for (index, symbol) in &self.template_call_fixups {
-            let target_index = *template_offsets
-                .get(symbol)
-                .ok_or_else(|| format!("template call target missing: {symbol}"))?;
-            let off = target_index as isize - *index as isize - 1;
-            if off < i32::MIN as isize || off > i32::MAX as isize {
-                return Err(format!(
-                    "template call offset out of range at insn {index}: {off}"
-                ));
-            }
-            self.insns[*index].imm = off as i32;
         }
         Ok(())
     }

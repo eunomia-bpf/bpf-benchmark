@@ -423,13 +423,12 @@ def _disassembly(path: Path | None, *, binary: bool = False, symbol: str | None 
 
 def write_code_compare_markdown(benchmark: CatalogTarget, artifact_dir: Path) -> None:
     base_name = str(benchmark.metadata.get("base_name") or benchmark.name)
-    native_symbol = benchmark.program_names[0] if benchmark.program_names else f"{base_name}_xdp"
     dump_dir = artifact_dir / "details" / "jit_dumps"
     handcraft_base = benchmark.metadata.get("handcraft_base_name")
     handcraft_source = ROOT_DIR / "micro" / "programs" / f"{handcraft_base}.handcraft.c" if handcraft_base else None
     sections = [
         ("Original C", "c", _read_text_or_missing(ROOT_DIR / "micro" / "programs" / f"{base_name}.bpf.c")),
-        ("Native ASM", "asm", _disassembly(benchmark.object_path.parent / f"{base_name}.native.so", symbol=native_symbol)),
+        ("Native ASM", "asm", _disassembly(benchmark.object_path.parent / f"{base_name}.native.so")),
         ("Original Kernel JIT ASM", "asm", _disassembly(dump_dir / f"{_dump_stem(benchmark.name, 'kernel', 0)}.jited.bin", binary=True)),
         ("llvmbpf JIT ASM", "asm", _disassembly(dump_dir / f"{_dump_stem(benchmark.name, 'llvmbpf', 0)}.jited.bin", binary=True)),
         ("Handcraft C", "c", _read_text_or_missing(handcraft_source) if handcraft_source else "not captured"),

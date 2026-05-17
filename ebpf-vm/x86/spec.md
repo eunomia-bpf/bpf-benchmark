@@ -170,9 +170,11 @@ The loader must:
 2. reject unsupported helper names or unsupported flow kinds;
 3. load C-authored template bytecode from `x86_template_helpers.bpf.o`;
 4. create a main BPF glue program with fixed CFG;
-5. fill `struct x86_insn` arguments for each step;
-6. inline the selected C-authored template body;
-7. patch template loads of `op/dst/src/flags/aux` to JSON constants;
+5. load `packed_args` and `imm` constants for each step into BPF argument
+   registers;
+6. inline the selected C-authored `x86_tmpl_arg_*` template body;
+7. rewrite template-local `exit` instructions into fall-through jumps back to
+   linker glue;
 8. resolve all branch offsets;
 9. call `BPF_PROG_LOAD` and `BPF_PROG_TEST_RUN`.
 
@@ -217,3 +219,19 @@ contract.
 This is not arbitrary x86. It is x86 under the ReverseJIT ABI: pointer-valued
 registers have capability meaning, and direct native execution must be proven to
 refine the same capability/offset behavior.
+
+Current validation status: the strict JSON-link path passes all 29 micro
+programs with this pipeline:
+
+```text
+python native disassembly decoder
+  -> JSON schedule with helper IDs and numeric arguments
+  -> Rust loader inline-links C-authored `x86_tmpl_arg_*` bytecode
+  -> BPF_PROG_LOAD
+  -> BPF_PROG_TEST_RUN expected-result check
+```
+
+The key verifier engineering point is that the C-authored template body is
+inlined into the main program after the loader loads constant `packed_args` and
+`imm` values. That keeps the helper semantics in C while still letting the
+kernel verifier prune unreachable width/op/address-mode branches.

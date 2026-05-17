@@ -306,6 +306,10 @@ def is_bpf_reg_name(name: str) -> bool:
     return name.startswith("BPF_REG_")
 
 
+def is_runtime_bpf_reg_name(name: str) -> bool:
+    return is_bpf_reg_name(name) and name != "BPF_REG_10"
+
+
 def is_shadow_reg_name(name: str) -> bool:
     return name.startswith("HC_X86_")
 
@@ -343,17 +347,17 @@ def c_u64(value: int) -> str:
 
 
 def movabs_bpf(dst: tuple[str, int, str], imm: int) -> tuple[str, ...] | None:
-    if is_bpf_reg_name(dst[0]) and dst[0] != "BPF_REG_10":
+    if is_runtime_bpf_reg_name(dst[0]):
         return (f"HC_LD_IMM64_RAW({dst[0]}, 0, {c_u64(imm)})",)
     off = SHADOW_REG_OFF_BY_TOKEN.get(dst[0])
-    if off is None:
-        return None
-    return (
-        save_branch_scratch(),
-        f"HC_LD_IMM64_RAW(BPF_REG_6, 0, {c_u64(imm)})",
-        f"HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, {off})",
-        restore_branch_scratch(),
-    )
+    if off is not None:
+        return (
+            save_branch_scratch(),
+            f"HC_LD_IMM64_RAW(BPF_REG_6, 0, {c_u64(imm)})",
+            f"HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, {off})",
+            restore_branch_scratch(),
+        )
+    return None
 
 
 def sign_extend_32_to_64_bpf(dst: tuple[str, int, str], src: tuple[str, int, str]) -> tuple[str, ...] | None:
@@ -465,14 +469,14 @@ def restore_branch_scratch_r7() -> str:
 
 
 def load_operand_to_scratch(src: tuple[str, int, str], scratch: str) -> tuple[str, ...] | None:
+    if is_runtime_bpf_reg_name(src[0]):
+        if src[0] == scratch:
+            return ()
+        return (f"HC_MOV64_REG({scratch}, {src[0]})",)
     off = SHADOW_REG_OFF_BY_TOKEN.get(src[0])
     if off is not None:
         size = "BPF_W" if src[1] == 32 else "BPF_DW"
         return (f"HC_LDX({size}, {scratch}, BPF_REG_10, {off})",)
-    if is_bpf_reg_name(src[0]):
-        if src[0] == scratch:
-            return ()
-        return (f"HC_MOV64_REG({scratch}, {src[0]})",)
     return None
 
 
@@ -612,10 +616,21 @@ def load_mem_to_scratch(mem_op: str, scratch: str) -> tuple[str, ...] | None:
     if base_reg is None:
         return None
     if index is None:
+        base_off = SHADOW_REG_OFF_BY_TOKEN.get(base_reg[0])
+        if base_off is not None:
+            return (
+                f"HC_LDX(BPF_DW, {scratch}, BPF_REG_10, {base_off})",
+                f"HC_LDX({size}, {scratch}, {scratch}, {off})",
+            )
+        if not is_runtime_bpf_reg_name(base_reg[0]):
+            return None
         return (f"HC_LDX({size}, {scratch}, {base_reg[0]}, {off})",)
     index_reg = bpf_reg(index)
     slog2 = scale_log2(scale)
-    if index_reg is None or slog2 is None:
+    if (index_reg is None or slog2 is None or
+            not is_runtime_bpf_reg_name(base_reg[0]) or
+            not is_runtime_bpf_reg_name(index_reg[0]) or
+            base_reg[0] == scratch or index_reg[0] == scratch):
         return None
     return (
         f"HC_MOV64_REG({scratch}, {index_reg[0]})",
@@ -676,29 +691,29 @@ def branch_mem_reg(op: str, mem_op: str, rhs: tuple[str, int, str]) -> tuple[str
 
 
 def branch_cmp_imm(op: str, lhs: tuple[str, int, str], imm: int) -> tuple[str, ...] | None:
-    if is_bpf_reg_name(lhs[0]) and lhs[0] != "BPF_REG_10" and lhs[1] in {32, 64}:
+    if is_runtime_bpf_reg_name(lhs[0]) and lhs[1] in {32, 64}:
         return (bpf_jmp_imm(op, lhs, imm),)
-    if lhs[1] in {32, 64}:
+    if load_operand_to_scratch(lhs, "BPF_REG_6") is not None and lhs[1] in {8, 16, 32, 64}:
         return branch_scratch_imm(op, lhs, imm)
-    if lhs[1] in {8, 16}:
-        return branch_scratch_imm_width(op, lhs, imm, lhs[1])
     return None
 
 
 def branch_cmp_reg(op: str, lhs: tuple[str, int, str], rhs: tuple[str, int, str]) -> tuple[str, ...] | None:
     if lhs[1] != rhs[1] or lhs[1] not in {8, 16, 32, 64}:
         return None
-    if (is_bpf_reg_name(lhs[0]) and lhs[0] != "BPF_REG_10" and
-            is_bpf_reg_name(rhs[0]) and rhs[0] != "BPF_REG_10" and
+    if (is_runtime_bpf_reg_name(lhs[0]) and
+            is_runtime_bpf_reg_name(rhs[0]) and
             lhs[1] in {32, 64}):
         return (bpf_jmp_reg(op, lhs, rhs),)
-    if lhs[1] in {8, 16}:
+    if (load_operand_to_scratch(lhs, "BPF_REG_6") is not None and
+            load_operand_to_scratch(rhs, "BPF_REG_7") is not None and
+            lhs[1] in {8, 16, 32, 64}):
         return branch_scratch_reg_width(op, lhs, rhs, lhs[1])
-    return branch_scratch_reg(op, lhs, rhs)
+    return None
 
 
 def branch_test_imm(lhs: tuple[str, int, str], imm: int, want_set: bool) -> tuple[str, ...] | None:
-    if is_bpf_reg_name(lhs[0]) and lhs[0] != "BPF_REG_10" and lhs[1] in {32, 64}:
+    if is_runtime_bpf_reg_name(lhs[0]) and lhs[1] in {32, 64}:
         if want_set:
             return (f"HC_RAW(BPF_JMP | BPF_JSET | BPF_K, {lhs[0]}, 0, {BRANCH_OFF}, {c_s32(imm)})",)
         return (
@@ -774,6 +789,8 @@ def branch_mem_test_sign(mem_op: str, want_set: bool) -> tuple[str, ...] | None:
 
 def branch_test_reg(lhs: tuple[str, int, str], rhs: tuple[str, int, str], want_set: bool) -> tuple[str, ...] | None:
     if lhs[1] != rhs[1] or lhs[1] not in {8, 16, 32, 64}:
+        return None
+    if not is_runtime_bpf_reg_name(lhs[0]) or not is_runtime_bpf_reg_name(rhs[0]):
         return None
     lhs_load = load_operand_to_scratch(lhs, "BPF_REG_6")
     rhs_load = load_operand_to_scratch(rhs, "BPF_REG_7")
@@ -1039,7 +1056,7 @@ def translate(insn: NativeInsn) -> Translation:
                 code = movabs_bpf(dst_reg, imm)
                 if code is None:
                     return Translation("warning-unmapped", (), f"movabs into {dst_reg[0]} needs a writable x86 shadow slot")
-                return Translation("exact-bpf", code, "movabs via verifier-visible BPF shadow write")
+                return Translation("exact-bpf", code, "movabs via verifier-visible BPF immediate load")
             if dst_reg[1] == 32:
                 payload = x86_imm_payload(dst_reg, imm)
                 return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_MOVL)",), "movl immediate kinsn")
@@ -1530,35 +1547,37 @@ def direct_bpf_jcc(branch: NativeInsn, producer: NativeInsn | None) -> tuple[str
         return None
     if code is None:
         return None
-    # Ordinary BPF branches execute after kinsn restore, so they may only read
-    # BPF-visible runtime state. Shadow x86 registers live only in verifier
-    # proof slots unless a machine branch kinsn consumes the real native flags.
-    if any(f", {off})" in item or f", {off}," in item for item in code for off in SHADOW_REG_OFFSETS):
-        return None
     return code
 
 
 def translate_all(insns: list[NativeInsn]) -> list[Translation]:
     translations: list[Translation] = []
-    flag_producer: NativeInsn | None = None
-    for insn in insns:
+    flag_producer: tuple[int, NativeInsn] | None = None
+    for index, insn in enumerate(insns):
         trans = translate(insn)
         if insn.mnemonic in JCC_OP:
             if flag_producer is None:
                 trans = Translation("control-flow-gap", (), f"{insn.mnemonic} has no verifier-visible flag producer", trans.target_addr)
             else:
-                code = direct_bpf_jcc(insn, flag_producer)
+                producer_index, producer = flag_producer
+                code = direct_bpf_jcc(insn, producer)
                 if code is not None:
                     trans = Translation("exact-bpf", code,
-                                        f"{insn.mnemonic} ordinary BPF branch from preceding {flag_producer.mnemonic}",
+                                        f"{insn.mnemonic} ordinary BPF branch from preceding {producer.mnemonic}",
                                         trans.target_addr)
+                    if producer.mnemonic in {"cmp", "test"} and producer_index == index - 1:
+                        translations[producer_index] = Translation(
+                            "absorbed-control-flow",
+                            (),
+                            f"{producer.mnemonic} folded into following ordinary BPF {insn.mnemonic}",
+                        )
                 else:
-                    trans = Translation("control-flow-gap", (), f"{insn.mnemonic} after {flag_producer.mnemonic} has no direct BPF branch form", trans.target_addr)
+                    trans = Translation("control-flow-gap", (), f"{insn.mnemonic} after {producer.mnemonic} has no direct BPF branch form", trans.target_addr)
         translations.append(trans)
         if insn.mnemonic in {"cmp", "test"}:
-            flag_producer = insn
+            flag_producer = (index, insn)
         elif insn.mnemonic in ALU_OP or insn.mnemonic in {"inc", "shl", "shr", "sar"}:
-            flag_producer = insn
+            flag_producer = (index, insn)
         elif insn.mnemonic in {"imul", "popcnt", "sbb", "rol", "div"}:
             flag_producer = None
     return translations
@@ -1676,7 +1695,7 @@ def main() -> int:
     fatal = [
         (insn, trans)
         for insn, trans in zip(insns, translations, strict=True)
-        if not trans.code and trans.status != "padding"
+        if not trans.code and trans.status not in {"padding", "absorbed-control-flow"}
     ]
     if fatal:
         for insn, trans in fatal:
