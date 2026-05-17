@@ -50,9 +50,6 @@ static __always_inline int decode_rotate_payload(u64 payload, u8 shift_mask,
 	if (!kinsn_x86_operand_valid(rot->dst_reg) ||
 	    !kinsn_x86_operand_valid(rot->src_reg))
 		return -EINVAL;
-	if ((payload & 0xf) == X86_ROTATE_FORM_ARCH_IMM &&
-	    rot->dst_reg != BPF_REG_10 && rot->src_reg != BPF_REG_10)
-		return -EINVAL;
 	return 0;
 }
 
@@ -107,10 +104,6 @@ static __always_inline int decode_rotate_cl_payload(u64 payload,
 		return -EINVAL;
 	if (!kinsn_x86_operand_valid(*dst_reg))
 		return -EINVAL;
-	if ((payload & 0xf) == X86_ROTATE_FORM_ARCH_RR &&
-	    *dst_reg != BPF_REG_10)
-		return -EINVAL;
-
 	return 0;
 }
 
@@ -251,7 +244,11 @@ static int instantiate_rolq_cl(u64 payload, struct bpf_insn *insn_buf)
 	else
 		kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0,
 				 dst_reg);
-	insn_buf[cnt++] = BPF_MOV64_REG(KINSN_X86_SCRATCH1, cnt_reg);
+	if (arch_reg)
+		kinsn_x86_read64_arch(insn_buf, &cnt, KINSN_X86_SCRATCH1,
+				      cnt_reg);
+	else
+		insn_buf[cnt++] = BPF_MOV64_REG(KINSN_X86_SCRATCH1, cnt_reg);
 	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, KINSN_X86_SCRATCH1, 63);
 	insn_buf[cnt++] = BPF_MOV64_REG(KINSN_X86_SCRATCH2,
 					KINSN_X86_SCRATCH0);
@@ -295,7 +292,11 @@ static int instantiate_roll_cl(u64 payload, struct bpf_insn *insn_buf)
 	else
 		kinsn_x86_read32(insn_buf, &cnt, KINSN_X86_SCRATCH0,
 				 dst_reg);
-	insn_buf[cnt++] = BPF_MOV32_REG(KINSN_X86_SCRATCH1, cnt_reg);
+	if (arch_reg)
+		kinsn_x86_read32_arch(insn_buf, &cnt, KINSN_X86_SCRATCH1,
+				      cnt_reg);
+	else
+		insn_buf[cnt++] = BPF_MOV32_REG(KINSN_X86_SCRATCH1, cnt_reg);
 	insn_buf[cnt++] = BPF_ALU32_IMM(BPF_AND, KINSN_X86_SCRATCH1, 31);
 	insn_buf[cnt++] = BPF_MOV32_REG(KINSN_X86_SCRATCH2,
 					KINSN_X86_SCRATCH0);

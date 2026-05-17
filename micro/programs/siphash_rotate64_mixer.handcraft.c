@@ -19,17 +19,20 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x1109: cmp    rcx,rdx [absorbed-control-flow: cmp folded into following ordinary BPF ja] */
     /* 0x110c: ja     1569 <siphash_rotate64_mixer_xdp+0x469> [exact-bpf: ja ordinary BPF branch from preceding cmp] */
-    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_4, BPF_REG_3, (621) - 1, 0),
+    HC_RAW(BPF_JMP | BPF_JLE | BPF_X, BPF_REG_4, BPF_REG_3, 1, 0),
+    HC_EXIT(),
     /* 0x1112: lea    rsi,[rcx+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_4, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1116: cmp    rsi,rdx [absorbed-control-flow: cmp folded into following ordinary BPF ja] */
     /* 0x1119: ja     1569 <siphash_rotate64_mixer_xdp+0x469> [exact-bpf: ja ordinary BPF branch from preceding cmp] */
-    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_2, BPF_REG_3, (618) - 1, 0),
+    HC_RAW(BPF_JMP | BPF_JLE | BPF_X, BPF_REG_2, BPF_REG_3, 1, 0),
+    HC_EXIT(),
     /* 0x111f: lea    rsi,[rcx+0x48] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_4, 0, 0, 1, 0, 72), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1123: cmp    rsi,rdx [absorbed-control-flow: cmp folded into following ordinary BPF ja] */
     /* 0x1126: ja     1569 <siphash_rotate64_mixer_xdp+0x469> [exact-bpf: ja ordinary BPF branch from preceding cmp] */
-    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_2, BPF_REG_3, (615) - 1, 0),
+    HC_RAW(BPF_JMP | BPF_JLE | BPF_X, BPF_REG_2, BPF_REG_3, 1, 0),
+    HC_EXIT(),
     /* 0x112c: mov    r9,QWORD PTR [rcx+0x8] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_X86_MEM_PAYLOAD(HC_X86_R9, BPF_REG_4, 8), MICRO_HANDCRAFT_BPF_X86_MOVQ),
     /* 0x1130: movabs rdi,0x7465646279746573 [exact-bpf: movabs via verifier-visible BPF immediate load] */

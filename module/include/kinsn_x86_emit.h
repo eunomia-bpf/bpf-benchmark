@@ -142,7 +142,7 @@ static __always_inline s16 kinsn_x86_shadow_reg_off(u8 reg)
 
 static __always_inline bool kinsn_x86_arch_reg_is_shadowed(u8 reg)
 {
-	return reg == BPF_REG_10 || kinsn_x86_reg_is_shadowed(reg);
+	return kinsn_x86_shadow_reg_off(reg) != 0;
 }
 
 static __always_inline bool kinsn_x86_is_scratch(u8 reg)

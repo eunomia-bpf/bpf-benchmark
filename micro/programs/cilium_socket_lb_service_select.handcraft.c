@@ -26,30 +26,24 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_3, BPF_REG_5, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1113: cmp    rdx,rcx [absorbed-control-flow: cmp folded into following ordinary BPF ja] */
     /* 0x1116: ja     110e <cilium_socket_lb_service_select_xdp+0xe> [exact-bpf: ja ordinary BPF branch from preceding cmp] */
-    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_3, BPF_REG_4, (-3) - 1, 0),
+    HC_RAW(BPF_JMP | BPF_JLE | BPF_X, BPF_REG_3, BPF_REG_4, 1, 0),
+    HC_EXIT(),
     /* 0x1118: lea    rdx,[r8+0x610] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_3, BPF_REG_5, 0, 0, 1, 0, 1552), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x111f: cmp    rdx,rcx [absorbed-control-flow: cmp folded into following ordinary BPF ja] */
     /* 0x1122: ja     110e <cilium_socket_lb_service_select_xdp+0xe> [exact-bpf: ja ordinary BPF branch from preceding cmp] */
-    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_3, BPF_REG_4, (-6) - 1, 0),
+    HC_RAW(BPF_JMP | BPF_JLE | BPF_X, BPF_REG_3, BPF_REG_4, 1, 0),
+    HC_EXIT(),
     /* 0x1124: cmp    DWORD PTR [r8+0x8],0x40 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
     /* 0x1129: jne    110e <cilium_socket_lb_service_select_xdp+0xe> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
-    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
     HC_LDX(BPF_W, BPF_REG_6, BPF_REG_5, 8),
-    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 64),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-13) - 1),
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_6, 0, 1, 64),
+    HC_EXIT(),
     /* 0x112b: cmp    DWORD PTR [r8+0xc],0x18 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
     /* 0x1130: jne    110e <cilium_socket_lb_service_select_xdp+0xe> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
-    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
     HC_LDX(BPF_W, BPF_REG_6, BPF_REG_5, 12),
-    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 24),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-20) - 1),
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_6, 0, 1, 24),
+    HC_EXIT(),
     /* 0x1132: push   rbp [exact-kinsn: pushq kinsn] */
     HC_KINSN(HC_REG_PAYLOAD(HC_X86_RBP), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
     /* 0x1133: push   r15 [exact-kinsn: pushq kinsn] */
@@ -67,7 +61,7 @@ static const struct bpf_insn program[] = {
     /* 0x1148: xor    r10d,r10d [exact-kinsn: xor32 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R10, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x114b: jmp    116e <cilium_socket_lb_service_select_xdp+0x6e> [exact-bpf: native jmp maps to ordinary BPF JA] */
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (20) - 1),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (18) - 1, 0),
     /* 0x114d: nop    DWORD PTR [rax] [padding: padding is not part of BPF semantics] */
     /* 0x1150: shl    r11,0x20 [exact-kinsn: shl64 imm kinsn] */
     HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(HC_X86_R11, 32), MICRO_HANDCRAFT_BPF_X86_SHLQ),
@@ -83,13 +77,10 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(HC_X86_R9, 24), MICRO_HANDCRAFT_BPF_X86_ADDQ),
     /* 0x1164: cmp    r10,0x40 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
     /* 0x1168: je     125c <cilium_socket_lb_service_select_xdp+0x15c> [exact-bpf: je ordinary BPF branch from preceding cmp] */
-    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -432),
-    HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_6, 0, 2, 64),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (158) - 1),
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_6, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_6, 0, 1, 64),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 1, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (143) - 1, 0),
     /* 0x116e: mov    eax,DWORD PTR [r9-0x13] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_X86_MEM_PAYLOAD(BPF_REG_0, HC_X86_R9, -19), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x1172: movzx  ebx,WORD PTR [r9-0xd] [exact-kinsn: direct memory load via x86 kinsn selector] */
@@ -114,30 +105,21 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_CMOV_ARCH_STACK_PAYLOAD(HC_X86_RBP, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_CMOVEL),
     /* 0x119b: test   dl,cl [absorbed-control-flow: test folded into following ordinary BPF jne] */
     /* 0x119d: jne    1150 <cilium_socket_lb_service_select_xdp+0x50> [exact-bpf: jne ordinary BPF branch from preceding test] */
-    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
-    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_7, -368),
     HC_MOV64_REG(BPF_REG_6, BPF_REG_3),
     HC_MOV64_REG(BPF_REG_7, BPF_REG_4),
     HC_ALU64_REG(BPF_AND, BPF_REG_6, BPF_REG_7),
     HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xff),
-    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_6, 0, 3, 0),
-    HC_LDX(BPF_DW, BPF_REG_7, BPF_REG_10, -368),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 3),
-    HC_LDX(BPF_DW, BPF_REG_7, BPF_REG_10, -368),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-53) - 1),
+    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_6, 0, 1, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 1, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-45) - 1, 0),
     /* 0x119f: movzx  r12d,WORD PTR [r9-0x9] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_X86_MEM_PAYLOAD(HC_X86_R12, HC_X86_R9, -9), MICRO_HANDCRAFT_BPF_X86_MOVZWL),
     /* 0x11a4: test   r12w,r12w [absorbed-control-flow: test folded into following ordinary BPF je] */
     /* 0x11a8: je     1150 <cilium_socket_lb_service_select_xdp+0x50> [exact-bpf: je ordinary BPF branch from preceding test] */
-    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -416),
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_6, HC_X86_R12), MICRO_HANDCRAFT_BPF_X86_MOVL),
     HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xffff),
-    HC_RAW(BPF_JMP | BPF_JSET | BPF_K, BPF_REG_6, 0, 2, 65535),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-61) - 1),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP | BPF_JSET | BPF_K, BPF_REG_6, 0, 1, 65535),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-52) - 1, 0),
     /* 0x11aa: mov    r14d,DWORD PTR [r9-0x3] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_X86_MEM_PAYLOAD(BPF_REG_8, HC_X86_R9, -3), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x11ae: movzx  ecx,WORD PTR [r9-0xf] [exact-kinsn: direct memory load via x86 kinsn selector] */
@@ -174,7 +156,7 @@ static const struct bpf_insn program[] = {
     /* 0x11e1: add    rdi,rcx [exact-kinsn: add64 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_ADDQ),
     /* 0x11e4: jmp    115d <cilium_socket_lb_service_select_xdp+0x5d> [exact-bpf: native jmp maps to ordinary BPF JA] */
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-87) - 1),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-77) - 1, 0),
     /* 0x11e9: nop    DWORD PTR [rax+0x0] [padding: padding is not part of BPF semantics] */
     /* 0x11f0: xor    edx,ebp [exact-kinsn: xor32 reg kinsn] */
     HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(BPF_REG_3, HC_X86_RBP), MICRO_HANDCRAFT_BPF_X86_XORL),
@@ -196,16 +178,8 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_0, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x1206: xor    edx,edx [exact-kinsn: xor32 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_XORL),
-    /* 0x1208: div    r12d [exact-bpf: div r/m32 via verifier-visible BPF quotient/remainder] */
-    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
-    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_7, -368),
-    HC_LDX(BPF_W, BPF_REG_7, BPF_REG_10, -416),
-    HC_MOV64_REG(BPF_REG_6, BPF_REG_0),
-    HC_RAW(BPF_ALU | BPF_MOD | BPF_X, BPF_REG_6, BPF_REG_7, 0, 0),
-    HC_RAW(BPF_ALU | BPF_DIV | BPF_X, BPF_REG_0, BPF_REG_7, 0, 0),
-    HC_RAW(BPF_ALU | BPF_MOV | BPF_X, BPF_REG_3, BPF_REG_6, 0, 0),
-    HC_LDX(BPF_DW, BPF_REG_7, BPF_REG_10, -368),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    /* 0x1208: div    r12d [exact-kinsn: divl reg kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(HC_X86_R12), MICRO_HANDCRAFT_BPF_X86_DIVL),
     /* 0x120b: inc    edx [exact-kinsn: incl reg kinsn] */
     HC_KINSN(HC_REG_PAYLOAD(BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_INCL),
     /* 0x120d: shl    r15d,0x1d [exact-kinsn: shl32 imm kinsn] */
@@ -257,7 +231,7 @@ static const struct bpf_insn program[] = {
     /* 0x1254: xor    rdi,rsi [exact-kinsn: xor64 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x1257: jmp    115d <cilium_socket_lb_service_select_xdp+0x5d> [exact-bpf: native jmp maps to ordinary BPF JA] */
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-167) - 1),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-150) - 1, 0),
     /* 0x125c: mov    QWORD PTR [r8],rdi [exact-kinsn: direct memory store via x86 kinsn selector] */
     HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_1, BPF_REG_5, 0), MICRO_HANDCRAFT_BPF_X86_MOVQ),
     /* 0x125f: mov    eax,0x2 [exact-kinsn: movl immediate kinsn] */

@@ -834,6 +834,8 @@ def render_tc_packet_checksum_fold(name: str, insns: list[NativeInsn]) -> str:
         if insn.addr >= 0x1150:
             break
         lines.append(f"x86_l_{insn.addr:x}:")
+        if append_tc_ctx_output_store(lines, insn):
+            continue
         append_branch_or_ret(lines, insn, addrs)
 
     lines.append("x86_l_1150:")
@@ -847,6 +849,8 @@ def render_tc_packet_checksum_fold(name: str, insns: list[NativeInsn]) -> str:
         if insn.addr <= 0x11b4:
             continue
         lines.append(f"x86_l_{insn.addr:x}:")
+        if append_tc_ctx_output_store(lines, insn):
+            continue
         append_branch_or_ret(lines, insn, addrs)
 
     lines.append("\t#undef __x86_vm_state")
@@ -856,6 +860,32 @@ def render_tc_packet_checksum_fold(name: str, insns: list[NativeInsn]) -> str:
     lines.append("X86_VM_LICENSE();")
     lines.append("")
     return "\n".join(lines)
+
+
+def append_tc_ctx_output_store(lines: list[str], insn: NativeInsn,
+                               indent: str = "\t") -> bool:
+    if insn.mnemonic != "mov" or len(insn.operands) != 2:
+        return False
+    dst = insn.operands[0].lower()
+    if dst not in {"dword ptr [rdi+0x10]", "dword ptr [rdi+0x14]"}:
+        return False
+    off = mem_disp(insn.operands[0])
+    lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+    if is_int(insn.operands[1]):
+        lines.append(
+            f"{indent}X86_VM_RUN_CTX_OUTPUT_IMM32({c_u64(off)}, "
+            f"{c_u64(parse_int(insn.operands[1]))});"
+        )
+        return True
+    src = reg_info(insn.operands[1])
+    if not src:
+        return False
+    encoded = encode(insn)
+    lines.append(
+        f"{indent}X86_VM_RUN_CTX_OUTPUT_REG32({src[0]}, {c_u64(off)}, "
+        f"{encoded.aux});"
+    )
+    return True
 
 
 def render_bpftrace_string_search_prefix_scan(name: str,
@@ -875,6 +905,7 @@ def render_bpftrace_string_search_prefix_scan(name: str,
         "\tvoid *__x86_vm_data = (void *)(long)ctx->data;",
         "\tvoid *__x86_vm_data_end = (void *)(long)ctx->data_end;",
         "\tstruct x86_vm_bpftrace_scan_ctx __x86_scan = {};",
+        "\tstruct x86_insn __x86_vm_insn = {};",
         "\t#define __x86_vm_state __x86_scan.state",
         "\tx86_init_state(&__x86_vm_state, (void *)ctx);",
     ]

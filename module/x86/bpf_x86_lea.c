@@ -25,6 +25,7 @@ static __always_inline int decode_lea_payload(u64 payload,
 					      u8 *scale_log2,
 					      bool *has_base,
 					      bool *has_index,
+					      bool *arch_reg,
 					      s32 *disp)
 {
 	payload = kinsn_payload_decode(payload);
@@ -35,8 +36,9 @@ static __always_inline int decode_lea_payload(u64 payload,
 	*has_index = (payload >> 14) & 1;
 	*has_base = (payload >> 15) & 1;
 	*disp = kinsn_payload_s32(payload, 16);
+	*arch_reg = (payload >> 48) & 1;
 
-	if (payload >> 48)
+	if (payload >> 49)
 		return -EINVAL;
 	if (!kinsn_x86_operand_valid(*dst_reg))
 		return -EINVAL;
@@ -84,7 +86,7 @@ static __always_inline struct bpf_insn lea_alu_reg(u8 width, u8 op, u8 dst,
 static int instantiate_lea_shadow(struct bpf_insn *insn_buf, u8 width,
 				  u8 dst_reg, u8 base_reg, u8 index_reg,
 				  u8 scale_log2, bool has_base,
-				  bool has_index, s32 disp)
+				  bool has_index, bool arch_reg, s32 disp)
 {
 	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0) |
 			   KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH1);
@@ -92,7 +94,11 @@ static int instantiate_lea_shadow(struct bpf_insn *insn_buf, u8 width,
 
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
 	if (has_base && has_index) {
-		if (kinsn_x86_reg_is_shadowed(index_reg))
+		if (arch_reg)
+			kinsn_x86_read64_arch(insn_buf, &cnt,
+					      KINSN_X86_SCRATCH1,
+					      index_reg);
+		else if (kinsn_x86_reg_is_shadowed(index_reg))
 			kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH1,
 					  index_reg);
 		else
@@ -101,14 +107,22 @@ static int instantiate_lea_shadow(struct bpf_insn *insn_buf, u8 width,
 	}
 
 	if (has_base) {
-		if (kinsn_x86_reg_is_shadowed(base_reg))
+		if (arch_reg)
+			kinsn_x86_read64_arch(insn_buf, &cnt,
+					      KINSN_X86_SCRATCH0,
+					      base_reg);
+		else if (kinsn_x86_reg_is_shadowed(base_reg))
 			kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0,
 					  base_reg);
 		else
 			insn_buf[cnt++] = lea_mov(width, KINSN_X86_SCRATCH0,
 						  base_reg);
 	} else if (has_index) {
-		if (kinsn_x86_reg_is_shadowed(index_reg))
+		if (arch_reg)
+			kinsn_x86_read64_arch(insn_buf, &cnt,
+					      KINSN_X86_SCRATCH0,
+					      index_reg);
+		else if (kinsn_x86_reg_is_shadowed(index_reg))
 			kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0,
 					  index_reg);
 		else
@@ -139,9 +153,15 @@ static int instantiate_lea_shadow(struct bpf_insn *insn_buf, u8 width,
 	if (width == 32)
 		insn_buf[cnt++] = BPF_MOV32_REG(KINSN_X86_SCRATCH0,
 						KINSN_X86_SCRATCH0);
-	if (width == 32)
+	if (width == 32 && arch_reg)
+		kinsn_x86_write32_arch(insn_buf, &cnt, dst_reg,
+				       KINSN_X86_SCRATCH0, scratch_mask);
+	else if (width == 32)
 		kinsn_x86_write32(insn_buf, &cnt, dst_reg,
 				  KINSN_X86_SCRATCH0, scratch_mask);
+	else if (arch_reg)
+		kinsn_x86_write64_arch(insn_buf, &cnt, dst_reg,
+				       KINSN_X86_SCRATCH0, scratch_mask);
 	else
 		kinsn_x86_write64(insn_buf, &cnt, dst_reg,
 				  KINSN_X86_SCRATCH0, scratch_mask);
@@ -152,22 +172,24 @@ static int instantiate_lea_shadow(struct bpf_insn *insn_buf, u8 width,
 static int instantiate_lea64(u64 payload, struct bpf_insn *insn_buf)
 {
 	u8 dst_reg, base_reg, index_reg, scale_log2;
-	bool has_base, has_index;
+	bool has_base, has_index, arch_reg;
 	s32 disp;
 	int add_count;
 	int cnt = 0;
 	int err;
 
 	err = decode_lea_payload(payload, &dst_reg, &base_reg, &index_reg,
-				 &scale_log2, &has_base, &has_index, &disp);
+				 &scale_log2, &has_base, &has_index,
+				 &arch_reg, &disp);
 	if (err)
 		return err;
-	if (kinsn_x86_reg_is_shadowed(dst_reg) ||
+	if (arch_reg ||
+	    kinsn_x86_reg_is_shadowed(dst_reg) ||
 	    (has_base && kinsn_x86_reg_is_shadowed(base_reg)) ||
 	    (has_index && kinsn_x86_reg_is_shadowed(index_reg)))
 		return instantiate_lea_shadow(insn_buf, 64, dst_reg, base_reg,
 					      index_reg, scale_log2, has_base,
-					      has_index, disp);
+					      has_index, arch_reg, disp);
 
 	if (has_base && has_index && dst_reg == index_reg && dst_reg != base_reg) {
 		if (scale_log2)
@@ -207,22 +229,24 @@ static int instantiate_lea64(u64 payload, struct bpf_insn *insn_buf)
 static int instantiate_lea32(u64 payload, struct bpf_insn *insn_buf)
 {
 	u8 dst_reg, base_reg, index_reg, scale_log2;
-	bool has_base, has_index;
+	bool has_base, has_index, arch_reg;
 	s32 disp;
 	int add_count;
 	int cnt = 0;
 	int err;
 
 	err = decode_lea_payload(payload, &dst_reg, &base_reg, &index_reg,
-				 &scale_log2, &has_base, &has_index, &disp);
+				 &scale_log2, &has_base, &has_index,
+				 &arch_reg, &disp);
 	if (err)
 		return err;
-	if (kinsn_x86_reg_is_shadowed(dst_reg) ||
+	if (arch_reg ||
+	    kinsn_x86_reg_is_shadowed(dst_reg) ||
 	    (has_base && kinsn_x86_reg_is_shadowed(base_reg)) ||
 	    (has_index && kinsn_x86_reg_is_shadowed(index_reg)))
 		return instantiate_lea_shadow(insn_buf, 32, dst_reg, base_reg,
 					      index_reg, scale_log2, has_base,
-					      has_index, disp);
+					      has_index, arch_reg, disp);
 
 	if (has_base && has_index && dst_reg == base_reg && dst_reg == index_reg) {
 		insn_buf[cnt++] = BPF_ALU32_IMM(BPF_MUL, dst_reg, (1 << scale_log2) + 1);
@@ -309,7 +333,7 @@ static int emit_lea_x86(u8 *image, u32 *off, bool emit,
 {
 	u8 buf[16];
 	u8 dst_reg, base_reg, index_reg, scale_log2;
-	bool has_base, has_index;
+	bool has_base, has_index, arch_reg;
 	s32 disp;
 	u32 len = 0;
 	int err;
@@ -317,15 +341,18 @@ static int emit_lea_x86(u8 *image, u32 *off, bool emit,
 	(void)prog;
 
 	err = decode_lea_payload(payload, &dst_reg, &base_reg, &index_reg,
-				 &scale_log2, &has_base, &has_index, &disp);
+				 &scale_log2, &has_base, &has_index,
+				 &arch_reg, &disp);
 	if (err)
 		return err;
 
-	dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
-	if (has_base)
-		base_reg = kinsn_x86_reg_for_prog(prog, base_reg);
-	if (has_index)
-		index_reg = kinsn_x86_reg_for_prog(prog, index_reg);
+	if (!arch_reg) {
+		dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
+		if (has_base)
+			base_reg = kinsn_x86_reg_for_prog(prog, base_reg);
+		if (has_index)
+			index_reg = kinsn_x86_reg_for_prog(prog, index_reg);
+	}
 
 	if (!kinsn_x86_valid(dst_reg))
 		return -EINVAL;

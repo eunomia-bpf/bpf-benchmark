@@ -26,35 +26,33 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_4, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1113: cmp    rsi,rdx [absorbed-control-flow: cmp folded into following ordinary BPF ja] */
     /* 0x1116: ja     110e <sorted_rule_binary_search_xdp+0xe> [exact-bpf: ja ordinary BPF branch from preceding cmp] */
-    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_2, BPF_REG_3, (-3) - 1, 0),
+    HC_RAW(BPF_JMP | BPF_JLE | BPF_X, BPF_REG_2, BPF_REG_3, 1, 0),
+    HC_EXIT(),
     /* 0x1118: lea    rsi,[rcx+0x190] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_4, 0, 0, 1, 0, 400), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x111f: cmp    rsi,rdx [absorbed-control-flow: cmp folded into following ordinary BPF ja] */
     /* 0x1122: ja     110e <sorted_rule_binary_search_xdp+0xe> [exact-bpf: ja ordinary BPF branch from preceding cmp] */
-    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_2, BPF_REG_3, (-6) - 1, 0),
+    HC_RAW(BPF_JMP | BPF_JLE | BPF_X, BPF_REG_2, BPF_REG_3, 1, 0),
+    HC_EXIT(),
     /* 0x1124: cmp    DWORD PTR [rcx+0x8],0x20 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
     /* 0x1128: jne    110e <sorted_rule_binary_search_xdp+0xe> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
-    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
     HC_LDX(BPF_W, BPF_REG_6, BPF_REG_4, 8),
-    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 32),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-13) - 1),
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_6, 0, 1, 32),
+    HC_EXIT(),
     /* 0x112a: cmp    DWORD PTR [rcx+0xc],0x10 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
     /* 0x112e: jne    110e <sorted_rule_binary_search_xdp+0xe> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
-    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
     HC_LDX(BPF_W, BPF_REG_6, BPF_REG_4, 12),
-    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 16),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-20) - 1),
-    /* 0x1130: xor    eax,eax [exact-kinsn: xor32 reg kinsn] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_6, 0, 1, 16),
+    HC_EXIT(),
+    /* 0x1130: push   rbp [exact-kinsn: pushq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(HC_X86_RBP), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
+    /* 0x1131: mov    rbp,rsp [exact-kinsn: movq frame-register kinsn] */
+    HC_KINSN(HC_X86_FRAME_PAYLOAD(HC_X86_RBP, HC_X86_RSP), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x1134: xor    eax,eax [exact-kinsn: xor32 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORL),
-    /* 0x1132: xor    edx,edx [exact-kinsn: xor32 reg kinsn] */
+    /* 0x1136: xor    edx,edx [exact-kinsn: xor32 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_3, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_XORL),
-    /* 0x1134: data16 data16 cs nop WORD PTR [rax+rax*1+0x0] [padding: padding is not part of BPF semantics] */
+    /* 0x1138: nop    DWORD PTR [rax+rax*1+0x0] [padding: padding is not part of BPF semantics] */
     /* 0x1140: mov    rsi,QWORD PTR [rcx+rax*8+0x110] [exact-kinsn: indexed memory load via x86 SIB kinsn] */
     HC_KINSN(HC_X86_SIB_PAYLOAD(BPF_REG_2, BPF_REG_4, BPF_REG_0, 3, 272), MICRO_HANDCRAFT_BPF_X86_MOVQ),
     /* 0x1148: xor    r8d,r8d [exact-kinsn: xor32 reg kinsn] */
@@ -103,7 +101,9 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_3, BPF_REG_4, 0), MICRO_HANDCRAFT_BPF_X86_MOVQ),
     /* 0x1195: mov    eax,0x2 [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_0, 2), MICRO_HANDCRAFT_BPF_X86_MOVL),
-    /* 0x119a: ret [abi-boundary: native ret maps to the BPF program exit boundary] */
+    /* 0x119a: pop    rbp [exact-kinsn: popq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(HC_X86_RBP), MICRO_HANDCRAFT_BPF_X86_POPQ),
+    /* 0x119b: ret [abi-boundary: native ret maps to the BPF program exit boundary] */
     HC_EXIT(),
 };
 

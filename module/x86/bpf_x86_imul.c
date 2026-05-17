@@ -16,8 +16,9 @@ BTF_KFUNCS_END(bpf_x86_imul_kfunc_ids)
 static __always_inline int decode_imul_rr_payload(u64 payload, u8 *dst_reg,
 						  u8 *src_reg)
 {
-	*dst_reg = kinsn_payload_reg(payload, 0);
-	*src_reg = kinsn_payload_reg(payload, 4);
+	payload = kinsn_payload_decode(payload);
+	*dst_reg = payload & 0xf;
+	*src_reg = (payload >> 4) & 0xf;
 
 	if (payload >> 8)
 		return -EINVAL;

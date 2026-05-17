@@ -95,24 +95,55 @@ Register numbers follow the usual x86 encoding order: `rax=0`, `rcx=1`,
 
 ## Micro Program Status
 
-Current active track: finish the generated-C interpreter proof path first.
-The JSON-linker path is recorded below, but it is paused until generated-C
-coverage is stable.
+Current active track: generated-C interpreter proof path first. The JSON-linker
+path is recorded below, but it is paused until generated-C coverage stays
+stable.
 
-The last complete generated-C batch (`run_micro_interpreter_batch.py
---native-source object-no-jump-tables`) loaded and returned the expected result
-for 25 of 29 micro programs. Later targeted reruns fixed
-`cgroup_skb_hash_chain` and `bpf_local_call_fanout_dispatch`, so the remaining
-known generated-C blockers are:
+Latest complete generated-C batch:
 
-| Micro program | Current generated-C status | Required work |
-| --- | --- | --- |
-| `bpftrace_string_search_prefix_scan` | verifier/load fail: instruction processing limit (`Argument list too long`) | Move the verifier-friendly bounded string-search shape into C interpreter/helper code, not Python semantic rewriting. |
-| `tc_packet_checksum_fold` | verifier/load fail: `Bad address` | Move checksum memory-loop handling into interpreter/helper code. Python must keep `ret` and instruction sequencing one-to-one. |
+```sh
+sudo -n python3 ebpf-vm/x86/micro-prog/run_micro_interpreter_batch.py \
+  --native-source object-no-jump-tables --no-build-loader \
+  --markdown /tmp/reversejit-generated-c-status-$(id -u)-final.md
+```
 
-The immediate implementation target is therefore: generated-C path loads in the
-kernel, passes `BPF_PROG_TEST_RUN`, and returns the expected result for every
-micro program. JSON-link completion is a separate next experiment.
+Result: all 29 selected micro programs loaded in the kernel, passed
+`BPF_PROG_TEST_RUN`, and matched expected output/retval.
+
+| Micro program | Status |
+| --- | --- |
+| `simple` | ok |
+| `simple_packet` | ok |
+| `bitmap_popcount_scan` | ok |
+| `sorted_rule_binary_search` | ok |
+| `bcc_runqlat_log2_histogram_bucket` | ok |
+| `trace_event_type_switch_dispatch` | ok |
+| `packet_checksum_fold` | ok |
+| `payload_prefix_memcmp_scan` | ok |
+| `packet_vlan_tcpopt_parser` | ok |
+| `bpf_local_call_fanout_dispatch` | ok |
+| `flow_5tuple_rss_hash` | ok |
+| `katran_lb_consistent_hash_select` | ok |
+| `cilium_policy_guard_tree_filter` | ok |
+| `siphash_rotate64_mixer` | ok |
+| `packet_record_bounds_window` | ok |
+| `flow_record_field_scan` | ok |
+| `packed_header_bitfield_decode` | ok |
+| `bpftrace_string_search_prefix_scan` | ok |
+| `tracee_syscall_name_table_lookup` | ok |
+| `tracee_http_method_prefix_detect` | ok |
+| `cilium_socket_lb_service_select` | ok |
+| `bcc_tcpconnect_ipv4_tuple_filter` | ok |
+| `tetragon_process_event_arg_filter` | ok |
+| `otel_stack_frame_unwind_scan` | ok |
+| `cilium_ct_nat_tuple_rewrite` | ok |
+| `packet_toeplitz_rss_hash` | ok |
+| `bpftrace_comm_key_fnv_hash` | ok |
+| `tc_packet_checksum_fold` | ok |
+| `cgroup_skb_hash_chain` | ok |
+
+The immediate generated-C target is complete. JSON-link completion is a
+separate next experiment.
 
 Active generator rule: Python must not rewrite native return semantics or
 replace one native instruction with custom BPF semantics. A native `ret` is
@@ -127,10 +158,10 @@ Generated-C migration todo:
 | Item | Status | Completion check |
 | --- | --- | --- |
 | Native return ABI lives in C/header, not Python | done | `ret` emits `X86_VM_RET_RAX();`; runner checks native retval per program family. |
-| Move checksum loop/memory proof out of Python | in progress | `packet_checksum_fold` and `tc_packet_checksum_fold` load and test-run through C-authored checksum helpers/templates. |
+| Move checksum loop/memory proof out of Python | done | `packet_checksum_fold` and `tc_packet_checksum_fold` load and test-run through C-authored checksum helpers/templates. |
 | Move local-call loop/callee proof out of Python | pending | `bpf_local_call_fanout_dispatch` still passes after the special renderer is reduced to mechanical scheduling. |
-| Move string-search bounded scan proof out of Python | pending | `bpftrace_string_search_prefix_scan` no longer hits verifier processed-insn limit and returns the expected result. |
-| Run full generated-C batch | pending | All selected micro programs load, test-run, and match expected output/retval. |
+| Move string-search bounded scan proof out of Python | done | `bpftrace_string_search_prefix_scan` no longer hits verifier processed-insn limit and returns the expected result. |
+| Run full generated-C batch | done | All selected micro programs load, test-run, and match expected output/retval. |
 
 ## JSON-Linker Todo
 
@@ -439,11 +470,10 @@ This prototype has already exposed several verifier-facing design constraints:
 - Hardcoding the guest instruction stream as C data is not enough. Large local
   arrays become BPF stack pressure, so generated proof sources use one immediate
   macro call per native instruction.
-- The verifier does not reliably recover packet ranges from a generic
-  `packet + variable_index + negative_disp` helper. Earlier prototype code
-  handled `packet_checksum_fold` by Python loop canonicalization, but that is
-  now treated as a non-final workaround. The final shape should expose the
-  verifier-friendly memory proof through C interpreter/helper code.
+- Native packet addressing needs to support both positive and negative
+  displacement. `x86_packet_bounds()` now allows negative displacement when the
+  computed address remains inside the packet window; otherwise helpers like
+  `movzx ecx, BYTE PTR [rdi-0xf]` trap incorrectly.
 - Input-dependent interpreter loops are a state-explosion risk. The generator
   should still hardcode the instruction sequence, but it must stay mechanical:
   one native instruction becomes one helper step plus explicit native
@@ -461,9 +491,12 @@ This prototype has already exposed several verifier-facing design constraints:
   the generated-C path, but the current special renderer is still a prototype
   shape. Its call/loop handling should be moved toward C-authored interpreter
   helpers so Python remains a mechanical native-instruction scheduler.
-- `bpftrace_string_search_prefix_scan` still exceeds the verifier instruction
-  processing limit. It now fails at verifier load rather than clang compile:
-  `BPF program is too large. Processed 1000001 insn`.
+- `bpftrace_string_search_prefix_scan` no longer exceeds the verifier
+  instruction processing limit after moving the bounded scan/finalize block into
+  a C-authored `bpf_loop` helper and using a shallow two-slot stack layout.
+- `tc_packet_checksum_fold` needs a dedicated C helper for native stores to the
+  benchmark output fields (`[rdi+0x10]` / `[rdi+0x14]`). The generic memory
+  helper may otherwise form a real modified-ctx write that the verifier rejects.
 - The strict JSON-link loader is not the current source of truth. It has passed
   smoke programs (`simple`, `simple_packet`, `bitmap_popcount_scan`), but native
   call-flow support is missing and stale loader binaries previously produced

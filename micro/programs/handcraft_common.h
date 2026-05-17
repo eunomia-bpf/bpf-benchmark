@@ -47,6 +47,16 @@
 #define HC_SETCC_STACK_PAYLOAD(DST) ((__u64)(DST) | ((__u64)(HC_FLAG_STACK) << 16))
 #define HC_FLAG_STACK 5
 #define HC_FLAG_ARCH_STACK 6
+#define HC_X86_RAX BPF_REG_0
+#define HC_X86_RDI BPF_REG_1
+#define HC_X86_RSI BPF_REG_2
+#define HC_X86_RDX BPF_REG_3
+#define HC_X86_RCX BPF_REG_4
+#define HC_X86_R8 BPF_REG_5
+#define HC_X86_RBX BPF_REG_6
+#define HC_X86_R13 BPF_REG_7
+#define HC_X86_R14 BPF_REG_8
+#define HC_X86_R15 BPF_REG_9
 #define HC_X86_R9 11
 #define HC_X86_R10 12
 #define HC_X86_R11 13
@@ -67,6 +77,9 @@
 #define HC_X86_FORM_ARCH_STORE_IMM 11
 #define HC_X86_FORM_ARCH_RR 12
 #define HC_X86_FORM_ARCH_IMM 13
+#define HC_X86_FORM_ARCH_SIB 14
+#define HC_X86_FORM_ARCH_TO_BPF_RR 15
+#define HC_X86_FORM_BPF_TO_ARCH_RR HC_X86_FORM_SIB_RR
 #define HC_X86_ALU_FORM_RR HC_X86_FORM_RR
 #define HC_X86_ALU_FORM_IMM HC_X86_FORM_IMM
 /* Payloads carry only x86 operands; verifier scratch is private to kinsn modules. */
@@ -74,6 +87,10 @@
     ((__u64)(HC_X86_FORM_RR) | ((__u64)(DST) << 4) | ((__u64)(SRC) << 8))
 #define HC_X86_ARCH_RR_PAYLOAD(DST, SRC) \
     ((__u64)(HC_X86_FORM_ARCH_RR) | ((__u64)(DST) << 4) | ((__u64)(SRC) << 8))
+#define HC_X86_ARCH_TO_BPF_RR_PAYLOAD(DST, SRC) \
+    ((__u64)(HC_X86_FORM_ARCH_TO_BPF_RR) | ((__u64)(DST) << 4) | ((__u64)(SRC) << 8))
+#define HC_X86_BPF_TO_ARCH_RR_PAYLOAD(DST, SRC) \
+    ((__u64)(HC_X86_FORM_BPF_TO_ARCH_RR) | ((__u64)(DST) << 4) | ((__u64)(SRC) << 8))
 #define HC_X86_IMM_PAYLOAD(DST, IMM) \
     ((__u64)(HC_X86_FORM_IMM) | ((__u64)(DST) << 4) | ((__u64)(__u32)(IMM) << 8))
 #define HC_X86_ARCH_IMM_PAYLOAD(DST, IMM) \
@@ -105,6 +122,9 @@
      ((__u64)(BASE) << 8) | ((__u64)(__u16)(OFF) << 12))
 #define HC_X86_SIB_PAYLOAD(REG, BASE, INDEX, SCALE, OFF) \
     ((__u64)(HC_X86_FORM_SIB) | ((__u64)(REG) << 4) | ((__u64)(BASE) << 8) | \
+     ((__u64)(INDEX) << 12) | ((__u64)(SCALE) << 16) | ((__u64)(__u16)(OFF) << 20))
+#define HC_X86_ARCH_SIB_PAYLOAD(REG, BASE, INDEX, SCALE, OFF) \
+    ((__u64)(HC_X86_FORM_ARCH_SIB) | ((__u64)(REG) << 4) | ((__u64)(BASE) << 8) | \
      ((__u64)(INDEX) << 12) | ((__u64)(SCALE) << 16) | ((__u64)(__u16)(OFF) << 20))
 #define HC_X86_STORE_PAYLOAD(SRC, BASE, OFF) \
     ((__u64)(HC_X86_FORM_STORE) | ((__u64)(SRC) << 4) | \

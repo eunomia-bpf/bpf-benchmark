@@ -1,0 +1,9 @@
+{
+  "completed_benchmarks": 1,
+  "current_benchmark": null,
+  "current_benchmark_index": null,
+  "current_benchmark_record": null,
+  "error_message": "payload_prefix_memcmp_scan: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/payload_prefix_memcmp_scan.handcraft.so --program-name payload_prefix_memcmp_scan_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/payload_prefix_memcmp_scan.mem --io-mode staged --input-size 196 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260517_224528_577720/details/jit_dumps/payload_prefix_memcmp_scan__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260517_224528_577720/details/jit_dumps/payload_prefix_memcmp_scan__kernel_handcraft__sample00.xlated.bin\n29: (7b) *(u64 *)(r10 -512) = r6      ; R6=0 R10=fp0 fp-512=0\n30: (79) r8 = *(u64 *)(r10 -360)      ; R8=0 R10=fp0 fp-360=0\n31: (79) r7 = *(u64 *)(r10 -368)      ; R7=0 R10=fp0 fp-368=0\n32: (79) r6 = *(u64 *)(r10 -376)      ; R6=pkt_end() R10=fp0 fp-376=pkt_end()\n33: (79) r6 = *(u64 *)(r10 -504)      ; R6=pkt(r=0) R10=fp0 fp-504=pkt(r=0)\n34: (79) r7 = *(u64 *)(r10 -496)      ; R7=pkt_end() R10=fp0 fp-496=pkt_end()\n35: (bd) if r6 <= r7 goto pc+1        ; R6=pkt(r=0xfffffffffffffffe) R7=pkt_end()\n36: (05) goto pc+1\n38: (95) exit\nR0 !read_ok\nprocessed 38 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\ninitial_load_error=Permission denied diagnostic_load_error=Permission denied",
+  "status": "error",
+  "total_benchmarks": 1
+}

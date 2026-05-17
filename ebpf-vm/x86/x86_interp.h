@@ -1148,11 +1148,19 @@ static __always_inline int x86_packet_bounds(void *data, void *data_end,
 	if (size != X86_WIDTH_8 && size != X86_WIDTH_16 &&
 	    size != X86_WIDTH_32 && size != X86_WIDTH_64)
 		return X86_INTERP_TRAP;
-	if (disp < 0)
-		return X86_INTERP_TRAP;
-	off = (__u64)disp;
-	asm volatile("" : "+r"(off));
-	addr = p + off;
+	if (disp < 0) {
+		off = (__u64)-disp;
+		if (off > 4096)
+			return X86_INTERP_TRAP;
+		asm volatile("" : "+r"(off));
+		addr = p - off;
+	} else {
+		off = (__u64)disp;
+		if (off > 4096)
+			return X86_INTERP_TRAP;
+		asm volatile("" : "+r"(off));
+		addr = p + off;
+	}
 	if (addr < start || addr + size > end)
 		return X86_INTERP_TRAP;
 	*out = addr;

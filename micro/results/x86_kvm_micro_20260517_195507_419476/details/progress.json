@@ -1,0 +1,26 @@
+{
+  "completed_benchmarks": 0,
+  "current_benchmark": "cilium_socket_lb_service_select",
+  "current_benchmark_index": 1,
+  "current_benchmark_record": {
+    "category": "alu-mix",
+    "description": "Cilium socket LB service selection over protocol, port range, wildcard, and backend count",
+    "expected_result": 2868565165525030065,
+    "family": "socket-lb",
+    "hypothesis": "Captures protocol/port/range/wildcard decision trees plus backend selection math",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/cilium_socket_lb_service_select.mem",
+    "io_mode": "staged",
+    "level": "service-select",
+    "name": "cilium_socket_lb_service_select",
+    "runs": [],
+    "tags": [
+      "cilium",
+      "socket-lb",
+      "branch",
+      "hash",
+      "pure-jit"
+    ]
+  },
+  "status": "running",
+  "total_benchmarks": 1
+}

@@ -30,17 +30,15 @@
 
 #define X86_VM_EXEC(STATE, OP, DST, SRC, FLAGS, AUX, IMM)                  \
 	({                                                                 \
-		struct x86_insn __x86_vm_exec_insn = X86_VM_INSN(           \
-			(OP), (DST), (SRC), (FLAGS), (AUX), (IMM));         \
-		x86_exec_one((STATE), &__x86_vm_exec_insn, __x86_vm_data,   \
+		X86_VM_LOAD_INSN((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+		x86_exec_one((STATE), &__x86_vm_insn, __x86_vm_data,        \
 			     __x86_vm_data_end);                            \
 	})
 
 #define X86_VM_EXEC_HELPER(HELPER, STATE, OP, DST, SRC, FLAGS, AUX, IMM)   \
 	({                                                                 \
-		struct x86_insn __x86_vm_exec_insn = X86_VM_INSN(           \
-			(OP), (DST), (SRC), (FLAGS), (AUX), (IMM));         \
-		HELPER((STATE), &__x86_vm_exec_insn, __x86_vm_data,         \
+		X86_VM_LOAD_INSN((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+		HELPER((STATE), &__x86_vm_insn, __x86_vm_data,              \
 		       __x86_vm_data_end);                                  \
 	})
 
@@ -107,7 +105,7 @@ static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
 			X86_VM_EXEC(&__x86_vm_state, (OP), (DST), (SRC),    \
 				     (FLAGS), (AUX), (IMM));                 \
 		if (__x86_vm_step_ret < 0)                                 \
-			return XDP_ABORTED;                                \
+			X86_VM_TRAP_RETURN();                             \
 		if (__x86_vm_step_ret == X86_INTERP_DONE)                  \
 			return (__u32)__x86_vm_state.rax;                  \
 	} while (0)
@@ -119,7 +117,7 @@ static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
 					   (DST), (SRC), (FLAGS), (AUX),   \
 					   (IMM));                         \
 		if (__x86_vm_step_ret < 0)                                 \
-			return XDP_ABORTED;                                \
+			X86_VM_TRAP_RETURN();                             \
 		if (__x86_vm_step_ret == X86_INTERP_DONE)                  \
 			return (__u32)__x86_vm_state.rax;                  \
 	} while (0)
@@ -152,7 +150,52 @@ static __always_inline __u32 x86_vm_ret_rax(struct x86_state *state)
 	return (__u32)state->rax;
 }
 
+#define X86_VM_TRAP_RETURN() return XDP_ABORTED
+
 #define X86_VM_RET_RAX() return x86_vm_ret_rax(&__x86_vm_state)
+
+static __always_inline int
+x86_vm_store_ctx_output32_imm(struct x86_state *state, void *data,
+			      void *data_end, __u32 off, __u32 value)
+{
+	if (state->tag_rdi != X86_PTR_CTX || (off != 16 && off != 20))
+		return X86_INTERP_TRAP;
+	return x86_store_packet_imm(data, data_end, data, off == 16 ? 0 : 4,
+				    X86_WIDTH_32, value);
+}
+
+static __always_inline int
+x86_vm_store_ctx_output32_reg(struct x86_state *state, void *data,
+			      void *data_end, __u8 src, __u32 off, __u32 aux)
+{
+	__u64 value = 0;
+	__u8 src_shift = X86_REG_AUX_GET_SRC_SHIFT(aux);
+
+	if (x86_read_reg(state, src, &value) < 0)
+		return X86_INTERP_TRAP;
+	if (src_shift != 0)
+		value >>= src_shift;
+	return x86_vm_store_ctx_output32_imm(state, data, data_end, off,
+					     (__u32)value);
+}
+
+#define X86_VM_RUN_CTX_OUTPUT_IMM32(OFF, VALUE)                              \
+	do {                                                                 \
+		if (x86_vm_store_ctx_output32_imm(&__x86_vm_state,           \
+						  __x86_vm_data,             \
+						  __x86_vm_data_end,         \
+						  (OFF), (VALUE)) < 0)       \
+			X86_VM_TRAP_RETURN();                                 \
+	} while (0)
+
+#define X86_VM_RUN_CTX_OUTPUT_REG32(SRC, OFF, AUX)                           \
+	do {                                                                 \
+		if (x86_vm_store_ctx_output32_reg(&__x86_vm_state,           \
+						  __x86_vm_data,             \
+						  __x86_vm_data_end, (SRC),  \
+						  (OFF), (AUX)) < 0)         \
+			X86_VM_TRAP_RETURN();                                 \
+	} while (0)
 
 struct x86_vm_checksum_loop_ctx {
 	struct x86_state state;

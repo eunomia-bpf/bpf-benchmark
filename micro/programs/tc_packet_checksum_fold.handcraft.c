@@ -11,21 +11,21 @@ static const struct bpf_insn program[] = {
     HC_MOV64_IMM(BPF_REG_7, 0),
     HC_MOV64_IMM(BPF_REG_8, 0),
     HC_MOV64_IMM(BPF_REG_9, 0),
-    /* 0x1100: mov    rax,QWORD PTR [rdi] [context-abi: native xdp_md 64-bit field at off 0 maps to BPF XDP u32 ctx field at off 0] */
-    HC_LDX(BPF_W, BPF_REG_0, BPF_REG_1, 0),
-    /* 0x1103: mov    rcx,QWORD PTR [rdi+0x8] [context-abi: native xdp_md 64-bit field at off 8 maps to BPF XDP u32 ctx field at off 4] */
-    HC_LDX(BPF_W, BPF_REG_4, BPF_REG_1, 4),
+    /* 0x1100: mov    rax,QWORD PTR [rdi] [context-abi: native skb shim field at off 0 maps to __sk_buff u32 ctx field at off 76] */
+    HC_LDX(BPF_W, BPF_REG_0, BPF_REG_1, 76),
+    /* 0x1103: mov    rcx,QWORD PTR [rdi+0x8] [context-abi: native skb shim field at off 8 maps to __sk_buff u32 ctx field at off 80] */
+    HC_LDX(BPF_W, BPF_REG_4, BPF_REG_1, 80),
     /* 0x1107: cmp    rax,rcx [absorbed-control-flow: cmp folded into following ordinary BPF jbe] */
     /* 0x110a: jbe    1121 <tc_packet_checksum_fold_prog+0x21> [exact-bpf: jbe ordinary BPF branch from preceding cmp] */
     HC_RAW(BPF_JMP | BPF_JLE | BPF_X, BPF_REG_0, BPF_REG_4, (10) - 1, 0),
-    /* 0x110c: mov    DWORD PTR [rdi+0x10],0xffffffff [exact-kinsn: mov immediate memory store via x86 kinsn selector] */
-    HC_KINSN(HC_X86_STORE_IMM_PAYLOAD(BPF_REG_1, 16, 4294967295), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x110c: mov    DWORD PTR [rdi+0x10],0xffffffff [context-abi: native skb shim cb store at off 16 maps to __sk_buff cb field at off 48] */
+    HC_KINSN(HC_X86_STORE_IMM_PAYLOAD(BPF_REG_1, 48, 4294967295), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x1113: mov    eax,0x2 [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_0, 2), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x1118: mov    edx,0xffffffff [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_3, 4294967295), MICRO_HANDCRAFT_BPF_X86_MOVL),
-    /* 0x111d: mov    DWORD PTR [rdi+0x14],edx [exact-kinsn: direct memory store via x86 kinsn selector] */
-    HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_3, BPF_REG_1, 20), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x111d: mov    DWORD PTR [rdi+0x14],edx [context-abi: native skb shim cb store at off 20 maps to __sk_buff cb field at off 52] */
+    HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_3, BPF_REG_1, 52), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x1120: ret [abi-boundary: native ret maps to the BPF program exit boundary] */
     HC_EXIT(),
     /* 0x1121: lea    rdx,[rax+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
@@ -40,22 +40,16 @@ static const struct bpf_insn program[] = {
     HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_3, BPF_REG_4, (-14) - 1, 0),
     /* 0x1136: cmp    DWORD PTR [rax+0x8],0x20 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
     /* 0x113a: jne    110c <tc_packet_checksum_fold_prog+0xc> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
-    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
     HC_LDX(BPF_W, BPF_REG_6, BPF_REG_0, 8),
-    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 32),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-21) - 1),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 1, 32),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 1, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-18) - 1, 0),
     /* 0x113c: cmp    DWORD PTR [rax+0xc],0x200 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
     /* 0x1143: jne    110c <tc_packet_checksum_fold_prog+0xc> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
-    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
     HC_LDX(BPF_W, BPF_REG_6, BPF_REG_0, 12),
-    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 512),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-28) - 1),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 1, 512),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 1, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-22) - 1, 0),
     /* 0x1145: xor    esi,esi [exact-kinsn: xor32 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x1147: xor    edx,edx [exact-kinsn: xor32 reg kinsn] */
@@ -114,14 +108,14 @@ static const struct bpf_insn program[] = {
     /* 0x11b1: cmp    esi,0x20 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
     /* 0x11b4: jne    1150 <tc_packet_checksum_fold_prog+0x50> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
     HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (-47) - 1, 32),
-    /* 0x11b6: mov    DWORD PTR [rdi+0x10],edx [exact-kinsn: direct memory store via x86 kinsn selector] */
-    HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_3, BPF_REG_1, 16), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x11b6: mov    DWORD PTR [rdi+0x10],edx [context-abi: native skb shim cb store at off 16 maps to __sk_buff cb field at off 48] */
+    HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_3, BPF_REG_1, 48), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x11b9: shr    rdx,0x20 [exact-kinsn: shr64 imm kinsn] */
     HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_3, 32), MICRO_HANDCRAFT_BPF_X86_SHRQ),
     /* 0x11bd: xor    eax,eax [exact-kinsn: xor32 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORL),
-    /* 0x11bf: mov    DWORD PTR [rdi+0x14],edx [exact-kinsn: direct memory store via x86 kinsn selector] */
-    HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_3, BPF_REG_1, 20), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x11bf: mov    DWORD PTR [rdi+0x14],edx [context-abi: native skb shim cb store at off 20 maps to __sk_buff cb field at off 52] */
+    HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_3, BPF_REG_1, 52), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x11c2: ret [abi-boundary: native ret maps to the BPF program exit boundary] */
     HC_EXIT(),
 };

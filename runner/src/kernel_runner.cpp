@@ -218,6 +218,21 @@ struct handcraft_load_result {
     std::chrono::steady_clock::time_point load_end {};
 };
 
+program_image load_handcraft_reference_image(
+    const std::filesystem::path &handcraft_path,
+    const std::optional<std::string> &program_name)
+{
+    auto reference_path = handcraft_path;
+    const auto filename = reference_path.filename().string();
+    constexpr std::string_view suffix = ".handcraft.so";
+    if (!filename.ends_with(suffix)) {
+        fail("handcraft program path does not end with .handcraft.so");
+    }
+    reference_path.replace_filename(
+        filename.substr(0, filename.size() - suffix.size()) + ".bpf.o");
+    return load_program_image(reference_path, program_name);
+}
+
 bool katran_balancer_fixture_requested(const cli_options &options)
 {
     return options.program_name.has_value() &&
@@ -931,6 +946,7 @@ const handcraft_kinsn_desc &handcraft_kinsn_desc_for_selector(int selector)
         {MICRO_HANDCRAFT_BPF_X86_SARL, "bpf_x86_alu", "bpf_x86_sarl"},
         {MICRO_HANDCRAFT_BPF_X86_ANDQ, "bpf_x86_alu", "bpf_x86_andq"},
         {MICRO_HANDCRAFT_BPF_X86_ANDL, "bpf_x86_alu", "bpf_x86_andl"},
+        {MICRO_HANDCRAFT_BPF_X86_DIVL, "bpf_x86_alu", "bpf_x86_divl"},
         {MICRO_HANDCRAFT_BPF_X86_SHRB, "bpf_x86_alu", "bpf_x86_shrb"},
         {MICRO_HANDCRAFT_BPF_X86_TESTW, "bpf_x86_cmov", "bpf_x86_testw"},
         {MICRO_HANDCRAFT_BPF_X86_POPQ, "bpf_x86_stack", "bpf_x86_popq"},
@@ -1123,9 +1139,13 @@ handcraft_load_result load_handcraft_program(const cli_options &options)
     opts.sz = sizeof(opts);
     opts.fd_array = fd_array.data();
     opts.fd_array_cnt = static_cast<__u32>(fd_array.size());
+    const auto reference_image =
+        load_handcraft_reference_image(options.program, options.program_name);
+    opts.expected_attach_type =
+        static_cast<enum bpf_attach_type>(reference_image.expected_attach_type);
 
     int program_fd = bpf_prog_load(
-        BPF_PROG_TYPE_XDP,
+        static_cast<enum bpf_prog_type>(reference_image.prog_type),
         "micro_kinsn",
         "GPL",
         image.insns.data(),
@@ -1138,7 +1158,7 @@ handcraft_load_result load_handcraft_program(const cli_options &options)
         opts.log_buf = verifier_log.data();
         opts.log_size = static_cast<__u32>(verifier_log.size());
         program_fd = bpf_prog_load(
-            BPF_PROG_TYPE_XDP,
+            static_cast<enum bpf_prog_type>(reference_image.prog_type),
             "micro_kinsn",
             "GPL",
             image.insns.data(),

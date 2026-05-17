@@ -64,22 +64,16 @@ static const struct bpf_insn program[] = {
     HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_3, BPF_REG_4, (-22) - 1, 0),
     /* 0x1141: cmp    DWORD PTR [r14+0x8],0x10 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
     /* 0x1146: jne    1119 <bpf_local_call_fanout_dispatch_xdp+0x19> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
-    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
     HC_LDX(BPF_W, BPF_REG_6, BPF_REG_8, 8),
-    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 16),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-29) - 1),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 1, 16),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 1),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-26) - 1),
     /* 0x1148: cmp    DWORD PTR [r14+0xc],0x18 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
     /* 0x114d: jne    1119 <bpf_local_call_fanout_dispatch_xdp+0x19> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
-    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
     HC_LDX(BPF_W, BPF_REG_6, BPF_REG_8, 12),
-    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 24),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-36) - 1),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 1, 24),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 1),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-30) - 1),
     /* 0x114f: movabs rdi,0x243f6a8885a308d3 [exact-bpf: movabs via verifier-visible BPF immediate load] */
     HC_LD_IMM64_RAW(BPF_REG_1, 0, 0x243f6a8885a308d3ULL),
     /* 0x1159: xor    r15d,r15d [exact-kinsn: xor32 reg kinsn] */
@@ -160,7 +154,7 @@ static const struct bpf_insn program[] = {
     /* 0x11f4: mov    ecx,ebp [exact-kinsn: movl register-to-register kinsn] */
     HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(BPF_REG_4, HC_X86_RBP), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x11f6: call   1340 <local_call_bytes> [abi-boundary: native direct call maps to BPF pseudo call] */
-    HC_CALL(176),
+    HC_CALL(174),
     /* 0x11fb: jmp    117b <bpf_local_call_fanout_dispatch_xdp+0x7b> [exact-bpf: native jmp maps to ordinary BPF JA] */
     HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-49) - 1),
     /* 0x1200: mov    QWORD PTR [r14],rdi [exact-kinsn: direct memory store via x86 kinsn selector] */
@@ -168,7 +162,7 @@ static const struct bpf_insn program[] = {
     /* 0x1203: mov    eax,0x2 [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_0, 2), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x1208: jmp    1119 <bpf_local_call_fanout_dispatch_xdp+0x19> [exact-bpf: native jmp maps to ordinary BPF JA] */
-    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-105) - 1),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-99) - 1),
     /* 0x120d: nop    DWORD PTR [rax] [padding: padding is not part of BPF semantics] */
     /* 0x1210: mov    r8d,ecx [exact-kinsn: movl register-to-register kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_5, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_MOVL),
@@ -273,12 +267,10 @@ static const struct bpf_insn program[] = {
     /* 0x12c0: movzx  r9d,BYTE PTR [rsi+rax*1+0x4] [exact-kinsn: indexed memory load via x86 SIB kinsn] */
     HC_KINSN(HC_X86_SIB_PAYLOAD(HC_X86_R9, BPF_REG_2, BPF_REG_0, 0, 4), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
     /* 0x12c6: movsxd r11,ecx [exact-bpf: movsxd reg32 via verifier-visible BPF sign extension] */
-    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
     HC_MOV64_REG(BPF_REG_6, BPF_REG_4),
     HC_ALU64_IMM(BPF_LSH, BPF_REG_6, 32),
     HC_ALU64_IMM(BPF_ARSH, BPF_REG_6, 32),
     HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -424),
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
     /* 0x12c9: movzx  r10d,BYTE PTR [rsi+r11*1+0x1] [exact-kinsn: indexed memory load via x86 SIB kinsn] */
     HC_KINSN(HC_X86_SIB_PAYLOAD(HC_X86_R10, BPF_REG_2, HC_X86_R11, 0, 1), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
     /* 0x12cf: add    rdi,QWORD PTR [rsi+rax*1+0x8] [exact-kinsn: add64 SIB memory-source kinsn] */

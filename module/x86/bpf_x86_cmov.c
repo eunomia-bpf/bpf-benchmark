@@ -139,10 +139,6 @@ static __always_inline int decode_cmp_rr_payload(u64 payload, u8 *left_reg,
 		return -EINVAL;
 	if (!bpf_reg_ok(*left_reg) || !bpf_reg_ok(*right_reg))
 		return -EINVAL;
-	if ((payload & 0xf) == X86_OPERAND_FORM_ARCH_RR &&
-	    *left_reg != BPF_REG_10 && *right_reg != BPF_REG_10)
-		return -EINVAL;
-
 	return 0;
 }
 
@@ -160,10 +156,6 @@ static __always_inline int decode_cmp_imm_payload(u64 payload, u8 *reg,
 		return -EINVAL;
 	if (!bpf_reg_ok(*reg))
 		return -EINVAL;
-	if ((payload & 0xf) == X86_OPERAND_FORM_ARCH_IMM &&
-	    *reg != BPF_REG_10)
-		return -EINVAL;
-
 	return 0;
 }
 
@@ -210,10 +202,6 @@ static __always_inline int decode_cmp_mem_imm_payload(u64 payload,
 	*imm = kinsn_payload_s32(payload, 24);
 	if (*base_reg > BPF_REG_10 || !kinsn_x86_reg_valid(*base_reg))
 		return -EINVAL;
-	if ((payload & 0xf) == X86_OPERAND_FORM_ARCH_MEM_IMM &&
-	    *base_reg != BPF_REG_10)
-		return -EINVAL;
-
 	return 0;
 }
 
@@ -232,10 +220,6 @@ static __always_inline int decode_test_rr_payload(u64 payload,
 		return -EINVAL;
 	if (!bpf_reg_ok(*left_reg) || !bpf_reg_ok(*right_reg))
 		return -EINVAL;
-	if ((payload & 0xf) == X86_OPERAND_FORM_ARCH_RR &&
-	    *left_reg != BPF_REG_10 && *right_reg != BPF_REG_10)
-		return -EINVAL;
-
 	return 0;
 }
 
@@ -254,10 +238,6 @@ static __always_inline int decode_testb_imm_payload(u64 payload,
 		return -EINVAL;
 	if (!bpf_reg_ok(*reg))
 		return -EINVAL;
-	if ((payload & 0xf) == X86_OPERAND_FORM_ARCH_IMM &&
-	    *reg != BPF_REG_10)
-		return -EINVAL;
-
 	return 0;
 }
 
@@ -327,9 +307,6 @@ static __always_inline int decode_cmov_emit_payload(u64 payload,
 		if (payload >> 16)
 			return -EINVAL;
 		if (payload & (0xfULL << 8))
-			return -EINVAL;
-		if (kind == X86_FLAG_PAYLOAD_ARCH_STACK &&
-		    *dst_reg != BPF_REG_10 && *src_reg != BPF_REG_10)
 			return -EINVAL;
 		return 0;
 	}
@@ -1229,8 +1206,9 @@ static int instantiate_cmovbq(u64 payload, struct bpf_insn *insn_buf)
 
 static int instantiate_setcc(u64 payload, struct bpf_insn *insn_buf, u8 op)
 {
-	u8 dst_reg, cond_reg, high_reg, cond_eval_reg;
+	u8 dst_reg, cond_reg, high_reg, cond_eval_reg, value_reg;
 	u32 scratch_mask;
+	bool dst_stacked;
 	int cnt = 0;
 	int err;
 
@@ -1238,24 +1216,44 @@ static int instantiate_setcc(u64 payload, struct bpf_insn *insn_buf, u8 op)
 	if (err)
 		return err;
 
+	dst_stacked = kinsn_x86_reg_is_shadowed(dst_reg) ||
+		      kinsn_x86_is_scratch(dst_reg);
 	high_reg = kinsn_x86_scratch_avoid(dst_reg, cond_reg, 0);
+	value_reg = dst_stacked ?
+		    kinsn_x86_scratch_avoid(dst_reg, cond_reg, high_reg) :
+		    high_reg;
 	cond_eval_reg = cond_reg;
 	scratch_mask = KINSN_X86_SCRATCH_MASK(high_reg);
+	if (dst_stacked) {
+		if (value_reg == high_reg)
+			return -EINVAL;
+		scratch_mask |= KINSN_X86_SCRATCH_MASK(value_reg);
+	}
 	if (kinsn_x86_reg_is_shadowed(cond_reg)) {
-		cond_eval_reg = kinsn_x86_scratch_avoid(dst_reg, cond_reg,
-							high_reg);
-		if (cond_eval_reg == high_reg)
+		cond_eval_reg = kinsn_x86_scratch_avoid4(dst_reg, cond_reg,
+							 high_reg, value_reg);
+		if (cond_eval_reg == high_reg || cond_eval_reg == value_reg)
 			return -EINVAL;
 		scratch_mask |= KINSN_X86_SCRATCH_MASK(cond_eval_reg);
 	}
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	kinsn_x86_read64(insn_buf, &cnt, high_reg, dst_reg);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, high_reg, -256);
+	insn_buf[cnt++] = BPF_MOV64_IMM(value_reg, 0);
+	if (dst_stacked) {
+		kinsn_x86_read64(insn_buf, &cnt, high_reg, dst_reg);
+		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, high_reg, -256);
+	}
 	if (kinsn_x86_reg_is_shadowed(cond_reg))
 		kinsn_x86_read64(insn_buf, &cnt, cond_eval_reg, cond_reg);
 	insn_buf[cnt++] = BPF_JMP_IMM(op, cond_eval_reg, 0, 1);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_OR, high_reg, 1);
-	kinsn_x86_write64(insn_buf, &cnt, dst_reg, high_reg, scratch_mask);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_OR, value_reg, 1);
+	if (dst_stacked) {
+		insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, high_reg, value_reg);
+		kinsn_x86_write64(insn_buf, &cnt, dst_reg, high_reg,
+				  scratch_mask);
+	} else {
+		kinsn_x86_write64(insn_buf, &cnt, dst_reg, value_reg,
+				  scratch_mask);
+	}
 	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
 	return cnt;
 }
@@ -1266,27 +1264,39 @@ static int instantiate_setcc_stack_flag(u64 payload, struct bpf_insn *insn_buf,
 	u8 dst_reg = kinsn_payload_reg(payload, 0);
 	u8 tmp_high_reg, tmp_flag_reg;
 	u32 scratch_mask;
+	bool dst_stacked;
 	int cnt = 0;
 
 	if (decode_setcc_emit_payload(payload, &dst_reg))
 		return -EINVAL;
 
+	dst_stacked = kinsn_x86_reg_is_shadowed(dst_reg) ||
+		      kinsn_x86_is_scratch(dst_reg);
 	tmp_high_reg = kinsn_x86_scratch_avoid(dst_reg, 0, 0);
 	tmp_flag_reg = kinsn_x86_scratch_avoid(dst_reg, tmp_high_reg, 0);
 	if (tmp_high_reg == tmp_flag_reg)
 		return -EINVAL;
-	scratch_mask = KINSN_X86_SCRATCH_MASK(tmp_high_reg) |
-		       KINSN_X86_SCRATCH_MASK(tmp_flag_reg);
+	scratch_mask = KINSN_X86_SCRATCH_MASK(tmp_flag_reg);
+	if (dst_stacked)
+		scratch_mask |= KINSN_X86_SCRATCH_MASK(tmp_high_reg);
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	kinsn_x86_read64(insn_buf, &cnt, tmp_high_reg, dst_reg);
-	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, tmp_high_reg, -256);
+	if (dst_stacked) {
+		kinsn_x86_read64(insn_buf, &cnt, tmp_high_reg, dst_reg);
+		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, tmp_high_reg, -256);
+	}
 	insn_buf[cnt++] = BPF_LDX_MEM(BPF_W, tmp_flag_reg, BPF_REG_10,
 				      flag_off);
 	if (invert)
 		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_XOR, tmp_flag_reg, 1);
-	insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, tmp_high_reg, tmp_flag_reg);
-	kinsn_x86_write64(insn_buf, &cnt, dst_reg, tmp_high_reg,
-			  scratch_mask);
+	if (dst_stacked) {
+		insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, tmp_high_reg,
+						tmp_flag_reg);
+		kinsn_x86_write64(insn_buf, &cnt, dst_reg, tmp_high_reg,
+				  scratch_mask);
+	} else {
+		kinsn_x86_write64(insn_buf, &cnt, dst_reg, tmp_flag_reg,
+				  scratch_mask);
+	}
 	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
 	return cnt;
 }

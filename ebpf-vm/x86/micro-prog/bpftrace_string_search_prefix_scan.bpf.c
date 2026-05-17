@@ -8,6 +8,7 @@ int bpftrace_string_search_prefix_scan_x86_vm_xdp(struct xdp_md *ctx)
 	void *__x86_vm_data = (void *)(long)ctx->data;
 	void *__x86_vm_data_end = (void *)(long)ctx->data_end;
 	struct x86_vm_bpftrace_scan_ctx __x86_scan = {};
+	struct x86_insn __x86_vm_insn = {};
 	#define __x86_vm_state __x86_scan.state
 	x86_init_state(&__x86_vm_state, (void *)ctx);
 x86_l_1100:

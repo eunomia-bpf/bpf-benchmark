@@ -19,6 +19,38 @@ namespace {
 
 constexpr uint8_t k_bpf_ld_imm64 = BPF_LD | BPF_DW | BPF_IMM;
 
+bool infer_program_abi_from_section(const char *section_name,
+                                    enum bpf_prog_type &prog_type,
+                                    enum bpf_attach_type &attach_type)
+{
+    if (section_name == nullptr) {
+        return false;
+    }
+
+    const std::string_view section(section_name);
+    if (section == "cgroup_skb/ingress") {
+        prog_type = BPF_PROG_TYPE_CGROUP_SKB;
+        attach_type = BPF_CGROUP_INET_INGRESS;
+        return true;
+    }
+    if (section == "cgroup_skb/egress") {
+        prog_type = BPF_PROG_TYPE_CGROUP_SKB;
+        attach_type = BPF_CGROUP_INET_EGRESS;
+        return true;
+    }
+
+    enum bpf_prog_type inferred_prog_type = BPF_PROG_TYPE_UNSPEC;
+    enum bpf_attach_type inferred_attach_type = attach_type;
+    if (libbpf_prog_type_by_name(section_name, &inferred_prog_type, &inferred_attach_type) != 0) {
+        return false;
+    }
+    if (prog_type == BPF_PROG_TYPE_UNSPEC) {
+        prog_type = inferred_prog_type;
+    }
+    attach_type = inferred_attach_type;
+    return true;
+}
+
 struct object_deleter {
     void operator()(bpf_object *obj) const
     {
@@ -568,14 +600,7 @@ std::vector<program_descriptor> list_programs(const std::filesystem::path &path)
         enum bpf_prog_type prog_type = bpf_program__type(program);
         enum bpf_attach_type attach_type = bpf_program__expected_attach_type(program);
 
-        if (prog_type == BPF_PROG_TYPE_UNSPEC && section_name != nullptr) {
-            enum bpf_prog_type inferred_prog_type = BPF_PROG_TYPE_UNSPEC;
-            enum bpf_attach_type inferred_attach_type = attach_type;
-            if (libbpf_prog_type_by_name(section_name, &inferred_prog_type, &inferred_attach_type) == 0) {
-                prog_type = inferred_prog_type;
-                attach_type = inferred_attach_type;
-            }
-        }
+        infer_program_abi_from_section(section_name, prog_type, attach_type);
 
         const char *prog_type_name = libbpf_bpf_prog_type_str(prog_type);
         const char *attach_type_name = libbpf_bpf_attach_type_str(attach_type);
@@ -629,14 +654,11 @@ program_image load_program_image(const std::filesystem::path &path, const std::o
     image.prog_type = static_cast<uint32_t>(bpf_program__type(program));
     image.expected_attach_type = static_cast<uint32_t>(bpf_program__expected_attach_type(program));
 
-    if (image.prog_type == 0) {
-        enum bpf_prog_type inferred_prog_type = BPF_PROG_TYPE_UNSPEC;
-        enum bpf_attach_type inferred_attach_type = static_cast<enum bpf_attach_type>(image.expected_attach_type);
-        if (libbpf_prog_type_by_name(section_name, &inferred_prog_type, &inferred_attach_type) == 0) {
-            image.prog_type = static_cast<uint32_t>(inferred_prog_type);
-            image.expected_attach_type = static_cast<uint32_t>(inferred_attach_type);
-        }
-    }
+    enum bpf_prog_type prog_type = static_cast<enum bpf_prog_type>(image.prog_type);
+    enum bpf_attach_type attach_type = static_cast<enum bpf_attach_type>(image.expected_attach_type);
+    infer_program_abi_from_section(section_name, prog_type, attach_type);
+    image.prog_type = static_cast<uint32_t>(prog_type);
+    image.expected_attach_type = static_cast<uint32_t>(attach_type);
 
     const auto *insns = bpf_program__insns(program);
     const size_t insn_count = bpf_program__insn_cnt(program);
