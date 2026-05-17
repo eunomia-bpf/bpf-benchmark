@@ -778,113 +778,16 @@ def render_packet_checksum_fold(name: str, insns: list[NativeInsn]) -> str:
     lines = [
         '#include "../x86_vm_bpf.h"',
         "",
-        "struct packet_checksum_fold_loop_ctx {",
-        "\tstruct x86_state state;",
-        "\tstruct x86_insn insn;",
-        "\tvoid *data;",
-        "\tvoid *data_end;",
-        "\t__u32 inner;",
-        "\t__u32 failed;",
-        "};",
-        "",
-        "#define PACKET_CHECKSUM_LOOP_STEP(HELPER, OP, DST, SRC, FLAGS, AUX, IMM) \\",
-        "\tdo {                                                               \\",
-        "\t\tloop->insn.op = (OP);                                         \\",
-        "\t\tloop->insn.dst = (DST);                                       \\",
-        "\t\tloop->insn.src = (SRC);                                       \\",
-        "\t\tloop->insn.flags = (FLAGS);                                  \\",
-        "\t\tloop->insn.aux = (AUX);                                      \\",
-        "\t\tloop->insn.imm = (IMM);                                      \\",
-        "\t\tint __x86_loop_ret = HELPER(&loop->state, &loop->insn,       \\",
-        "\t\t\t\t\t       loop->data, loop->data_end);       \\",
-        "\t\tif (__x86_loop_ret != X86_INTERP_CONTINUE) {                 \\",
-        "\t\t\tloop->failed = __LINE__;                               \\",
-        "\t\t\treturn 1;                                             \\",
-        "\t\t}                                                          \\",
-        "\t} while (0)",
-        "",
-        "#define PACKET_CHECKSUM_LOAD_U16(REG, PTR_REG, TAG_REG, OFF_EXPR) \\",
-        "\tdo {                                                           \\",
-        "\t\t__u32 __packet_off = (OFF_EXPR);                         \\",
-        "\t\tif (__packet_off > 1038) {                              \\",
-        "\t\t\tloop->failed = 1;                                  \\",
-        "\t\t\treturn 1;                                         \\",
-        "\t\t}                                                      \\",
-        "\t\t__u8 *__packet_addr = (__u8 *)loop->data + __packet_off; \\",
-        "\t\tif (__packet_addr + X86_WIDTH_16 > (__u8 *)loop->data_end) { \\",
-        "\t\t\tloop->failed = 1;                                  \\",
-        "\t\t\treturn 1;                                         \\",
-        "\t\t}                                                      \\",
-        "\t\tloop->state.REG = *(__u16 *)__packet_addr;             \\",
-        "\t\tloop->state.PTR_REG = 0;                               \\",
-        "\t\tloop->state.TAG_REG = X86_PTR_NONE;                    \\",
-        "\t} while (0)",
-        "",
-        "static long packet_checksum_fold_inner_cb(__u32 index, void *ctx)",
-        "{",
-        "\tstruct packet_checksum_fold_loop_ctx *loop = ctx;",
-        "",
-        "\tif (loop->failed)",
-        "\t\treturn 1;",
-        "\tif (loop->inner >= 256) {",
-        "\t\tloop->failed = __LINE__;",
-        "\t\treturn 1;",
-        "\t}",
-        "\tloop->state.rcx = 19 + ((__u64)loop->inner << 2);",
-        "\tloop->state.p_rcx = 0;",
-        "\tloop->state.tag_rcx = X86_PTR_NONE;",
-    ]
-
-    append_packet_checksum_load(lines, by_addr[0x1150], "r8",
-                                "16 + (loop->inner << 2)", "\t")
-    for addr in (0x1156, 0x1159, 0x115d, 0x1161):
-        append_loop_step(lines, by_addr[addr], "\t")
-    append_packet_checksum_load(lines, by_addr[0x1164], "rdi",
-                                "18 + (loop->inner << 2)", "\t")
-    for addr in (0x1169, 0x116c, 0x1170, 0x1173, 0x1176, 0x117a):
-        append_loop_step(lines, by_addr[addr], "\t")
-    lines.append(f"\t/* 0x1181: {c_comment(by_addr[0x1181].raw)} */")
-    lines.append("\t/* proof-loop branch handled by bpf_loop trip count */")
-    lines.append("\tloop->inner++;")
-    lines.append("\treturn 0;")
-    lines.append("}")
-    lines.append("")
-    lines.append("static long packet_checksum_fold_outer_cb(__u32 index, void *ctx)")
-    lines.append("{")
-    lines.append("\tstruct packet_checksum_fold_loop_ctx *loop = ctx;")
-    lines.append("")
-    lines.append("\tif (loop->failed)")
-    lines.append("\t\treturn 1;")
-    lines.append("\tloop->inner = 0;")
-    for addr in (0x1140, 0x1145, 0x1147):
-        append_loop_step(lines, by_addr[addr], "\t")
-    lines.append("\tif (bpf_loop(256, packet_checksum_fold_inner_cb, loop, 0) < 0) {")
-    lines.append("\t\tloop->failed = 1;")
-    lines.append("\t\treturn 1;")
-    lines.append("\t}")
-    lines.append("\tif (loop->failed)")
-    lines.append("\t\treturn 1;")
-    for addr in (0x1183, 0x1185, 0x1188, 0x118a, 0x118c, 0x118f,
-                 0x1191, 0x1194, 0x1197, 0x119a, 0x119c):
-        append_loop_step(lines, by_addr[addr], "\t")
-    lines.append(f"\t/* 0x119f: {c_comment(by_addr[0x119f].raw)} */")
-    lines.append("\t/* proof-loop branch handled by outer bpf_loop trip count */")
-    lines.append("\treturn 0;")
-    lines.append("}")
-    lines.extend([
-        "",
-        "#undef PACKET_CHECKSUM_LOOP_STEP",
-        "",
         "SEC(\"xdp\")",
         f"int {name}_x86_vm_xdp(struct xdp_md *ctx)",
         "{",
         "\tvoid *__x86_vm_data = (void *)(long)ctx->data;",
         "\tvoid *__x86_vm_data_end = (void *)(long)ctx->data_end;",
-        "\tstruct packet_checksum_fold_loop_ctx __x86_loop = {};",
-	        "\t#define __x86_vm_state __x86_loop.state",
-	        "\t#define __x86_vm_insn __x86_loop.insn",
-	        "\tx86_init_state(&__x86_vm_state, (void *)ctx);",
-	    ])
+        "\tstruct x86_vm_checksum_loop_ctx __x86_loop = {};",
+        "\tstruct x86_insn __x86_vm_insn = {};",
+        "\t#define __x86_vm_state __x86_loop.state",
+        "\tx86_init_state(&__x86_vm_state, (void *)ctx);",
+    ]
 
     for insn in insns:
         if insn.addr > 0x1137:
@@ -894,15 +797,111 @@ def render_packet_checksum_fold(name: str, insns: list[NativeInsn]) -> str:
 
     lines.append("\t__x86_loop.data = __x86_vm_data;")
     lines.append("\t__x86_loop.data_end = __x86_vm_data_end;")
-    lines.append("\tif (bpf_loop(32, packet_checksum_fold_outer_cb, &__x86_loop, 0) < 0)")
-    lines.append("\t\treturn XDP_ABORTED;")
-    lines.append("\tif (__x86_loop.failed)")
+    lines.append("\t/* 0x1140..0x119f: C-authored checksum loop template */")
+    lines.append("\tif (x86_vm_run_packet_checksum_fold(&__x86_loop) < 0)")
     lines.append("\t\treturn XDP_ABORTED;")
     for addr in (0x11a1, 0x11a4):
         append_step(lines, by_addr[addr])
     lines.append("\t/* 0x11a9: ret */")
     lines.append("\tX86_VM_RET_RAX();")
-    lines.append("\t#undef __x86_vm_insn")
+    lines.append("\t#undef __x86_vm_state")
+    lines.append("\treturn XDP_ABORTED;")
+    lines.append("}")
+    lines.append("")
+    lines.append("X86_VM_LICENSE();")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def render_tc_packet_checksum_fold(name: str, insns: list[NativeInsn]) -> str:
+    by_addr = {insn.addr: insn for insn in insns}
+    addrs = set(by_addr)
+    lines = [
+        '#include "../x86_vm_bpf.h"',
+        "",
+        "SEC(\"xdp\")",
+        f"int {name}_x86_vm_xdp(struct xdp_md *ctx)",
+        "{",
+        "\tvoid *__x86_vm_data = (void *)(long)ctx->data;",
+        "\tvoid *__x86_vm_data_end = (void *)(long)ctx->data_end;",
+        "\tstruct x86_vm_checksum_loop_ctx __x86_loop = {};",
+        "\tstruct x86_insn __x86_vm_insn = {};",
+        "\t#define __x86_vm_state __x86_loop.state",
+        "\tx86_init_state(&__x86_vm_state, (void *)ctx);",
+    ]
+
+    for insn in insns:
+        if insn.addr >= 0x1150:
+            break
+        lines.append(f"x86_l_{insn.addr:x}:")
+        append_branch_or_ret(lines, insn, addrs)
+
+    lines.append("x86_l_1150:")
+    lines.append("\t/* 0x1150..0x11b4: C-authored TC checksum loop template */")
+    lines.append("\t__x86_loop.data = __x86_vm_data;")
+    lines.append("\t__x86_loop.data_end = __x86_vm_data_end;")
+    lines.append("\tif (x86_vm_run_tc_packet_checksum_fold(&__x86_loop) < 0)")
+    lines.append("\t\treturn XDP_ABORTED;")
+
+    for insn in insns:
+        if insn.addr <= 0x11b4:
+            continue
+        lines.append(f"x86_l_{insn.addr:x}:")
+        append_branch_or_ret(lines, insn, addrs)
+
+    lines.append("\t#undef __x86_vm_state")
+    lines.append("\treturn XDP_ABORTED;")
+    lines.append("}")
+    lines.append("")
+    lines.append("X86_VM_LICENSE();")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def render_bpftrace_string_search_prefix_scan(name: str,
+                                              insns: list[NativeInsn]) -> str:
+    by_addr = {insn.addr: insn for insn in insns}
+    addrs = set(by_addr)
+    scan_start = 0x11e0 if 0x11e0 in by_addr else 0x11e4
+    tail_start = 0x12bf
+    lines = [
+        "#define X86_VM_ENABLE_STACK 1",
+        "#define X86_VM_ENABLE_STACK_SHALLOW 1",
+        '#include "../x86_vm_bpf.h"',
+        "",
+        "SEC(\"xdp\")",
+        f"int {name}_x86_vm_xdp(struct xdp_md *ctx)",
+        "{",
+        "\tvoid *__x86_vm_data = (void *)(long)ctx->data;",
+        "\tvoid *__x86_vm_data_end = (void *)(long)ctx->data_end;",
+        "\tstruct x86_vm_bpftrace_scan_ctx __x86_scan = {};",
+        "\t#define __x86_vm_state __x86_scan.state",
+        "\tx86_init_state(&__x86_vm_state, (void *)ctx);",
+    ]
+
+    for insn in insns:
+        if insn.addr >= scan_start:
+            break
+        lines.append(f"x86_l_{insn.addr:x}:")
+        append_branch_or_ret(lines, insn, addrs)
+
+    lines.append(f"x86_l_{scan_start:x}:")
+    lines.append(
+        "\t/* 0x11e0..0x12bc: C-authored bpftrace string-search template */"
+    )
+    lines.append("\t__x86_scan.data = __x86_vm_data;")
+    lines.append("\t__x86_scan.data_end = __x86_vm_data_end;")
+    lines.append(
+        "\tif (x86_vm_run_bpftrace_string_search_prefix_scan(&__x86_scan) < 0)"
+    )
+    lines.append("\t\treturn XDP_ABORTED;")
+
+    for insn in insns:
+        if insn.addr < tail_start:
+            continue
+        lines.append(f"x86_l_{insn.addr:x}:")
+        append_branch_or_ret(lines, insn, addrs)
+
     lines.append("\t#undef __x86_vm_state")
     lines.append("\treturn XDP_ABORTED;")
     lines.append("}")
@@ -1171,6 +1170,10 @@ def render_program(name: str, insns: list[NativeInsn],
                    subfunctions: dict[str, list[NativeInsn]] | None = None) -> str:
     if name == "packet_checksum_fold":
         return render_packet_checksum_fold(name, insns)
+    if name == "tc_packet_checksum_fold":
+        return render_tc_packet_checksum_fold(name, insns)
+    if name == "bpftrace_string_search_prefix_scan":
+        return render_bpftrace_string_search_prefix_scan(name, insns)
 
     ret_statement = "X86_VM_RET_RAX();"
     subfunctions = subfunctions or {}

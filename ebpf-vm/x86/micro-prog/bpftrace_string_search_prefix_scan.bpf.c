@@ -1,10 +1,15 @@
 #define X86_VM_ENABLE_STACK 1
+#define X86_VM_ENABLE_STACK_SHALLOW 1
 #include "../x86_vm_bpf.h"
 
 SEC("xdp")
 int bpftrace_string_search_prefix_scan_x86_vm_xdp(struct xdp_md *ctx)
 {
-	X86_VM_DECLARE_XDP(ctx);
+	void *__x86_vm_data = (void *)(long)ctx->data;
+	void *__x86_vm_data_end = (void *)(long)ctx->data_end;
+	struct x86_vm_bpftrace_scan_ctx __x86_scan = {};
+	#define __x86_vm_state __x86_scan.state
+	x86_init_state(&__x86_vm_state, (void *)ctx);
 x86_l_1100:
 	/* 0x1100: mov    rcx,QWORD PTR [rdi] */
 	X86_VM_RUN_OP(x86_exec_mov_load, X86_OP_MOV_LOAD, X86_RCX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);
@@ -199,191 +204,11 @@ x86_l_11e1:
 	/* 0x11e1: xor    r8d,r8d */
 	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_R8, X86_R8, X86_WIDTH_32, X86_ALU_XOR, 0);
 x86_l_11e4:
-	/* 0x11e4: jmp    1209 <bpftrace_string_search_prefix_scan_xdp+0x109> */
-	goto x86_l_1209;
-x86_l_11e6:
-	/* 0x11e6: cs nop WORD PTR [rax+rax*1+0x0] */
-	X86_VM_RUN_OP(x86_exec_nop, X86_OP_NOP, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, 0);
-x86_l_11f0:
-	/* 0x11f0: test   r11b,r11b */
-	X86_VM_RUN_OP(x86_exec_test_reg, X86_OP_TEST_REG, X86_R11, X86_R11, X86_WIDTH_8, 0, 0);
-x86_l_11f3:
-	/* 0x11f3: je     12a8 <bpftrace_string_search_prefix_scan_xdp+0x1a8> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_E))
-		goto x86_l_12a8;
-x86_l_11f9:
-	/* 0x11f9: inc    r8 */
-	X86_VM_RUN_OP(x86_exec_alu_imm, X86_OP_ALU_IMM, X86_R8, X86_REG_NONE, X86_WIDTH_64, X86_ALU_INC, 1);
-x86_l_11fc:
-	/* 0x11fc: add    rdi,r10 */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_RDI, X86_R10, X86_WIDTH_64, X86_ALU_ADD, 0);
-x86_l_11ff:
-	/* 0x11ff: cmp    r8,0x59 */
-	X86_VM_RUN_OP(x86_exec_cmp_imm, X86_OP_CMP_IMM, X86_R8, X86_REG_NONE, X86_WIDTH_64, 0, 89ULL);
-x86_l_1203:
-	/* 0x1203: je     12bf <bpftrace_string_search_prefix_scan_xdp+0x1bf> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_E))
-		goto x86_l_12bf;
-x86_l_1209:
-	/* 0x1209: lea    r11,[rsi+r8*1] */
-	X86_VM_RUN_OP(x86_exec_lea, X86_OP_LEA, X86_R11, X86_RSI, X86_WIDTH_64, X86_MEM_AUX(X86_R8, 0), 0ULL);
-x86_l_120d:
-	/* 0x120d: cmp    r11,r9 */
-	X86_VM_RUN_OP(x86_exec_cmp_reg, X86_OP_CMP_REG, X86_R11, X86_R9, X86_WIDTH_64, 0, 0);
-x86_l_1210:
-	/* 0x1210: ja     11f9 <bpftrace_string_search_prefix_scan_xdp+0xf9> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_A))
-		goto x86_l_11f9;
-x86_l_1212:
-	/* 0x1212: test   rsi,rsi */
-	X86_VM_RUN_OP(x86_exec_test_reg, X86_OP_TEST_REG, X86_RSI, X86_RSI, X86_WIDTH_64, 0, 0);
-x86_l_1215:
-	/* 0x1215: je     12a8 <bpftrace_string_search_prefix_scan_xdp+0x1a8> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_E))
-		goto x86_l_12a8;
-x86_l_121b:
-	/* 0x121b: movzx  r11d,BYTE PTR [rcx+r8*1+0x10] */
-	X86_VM_RUN_OP(x86_exec_mov_load, X86_OP_MOV_LOAD, X86_R11, X86_RCX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_R8, 0, X86_WIDTH_8), 16ULL);
-x86_l_1221:
-	/* 0x1221: xor    r11b,dl */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_R11, X86_RDX, X86_WIDTH_8, X86_ALU_XOR, 0);
-x86_l_1224:
-	/* 0x1224: cmp    esi,0x2 */
-	X86_VM_RUN_OP(x86_exec_cmp_imm, X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
-x86_l_1227:
-	/* 0x1227: jb     11f0 <bpftrace_string_search_prefix_scan_xdp+0xf0> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_B))
-		goto x86_l_11f0;
-x86_l_1229:
-	/* 0x1229: movzx  ebx,BYTE PTR [rcx+0x71] */
-	X86_VM_RUN_OP(x86_exec_mov_load, X86_OP_MOV_LOAD, X86_RBX, X86_RCX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 113ULL);
-x86_l_122d:
-	/* 0x122d: xor    bl,BYTE PTR [rcx+r8*1+0x11] */
-	X86_VM_RUN_OP(x86_exec_alu_mem, X86_OP_ALU_MEM, X86_RBX, X86_RCX, X86_WIDTH_8, (X86_MEM_AUX_FULL(X86_R8, 0, X86_WIDTH_8) | X86_MEM_AUX_ALU_OP(X86_ALU_XOR)), 17ULL);
-x86_l_1232:
-	/* 0x1232: or     r11b,bl */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_R11, X86_RBX, X86_WIDTH_8, X86_ALU_OR, 0);
-x86_l_1235:
-	/* 0x1235: cmp    esi,0x3 */
-	X86_VM_RUN_OP(x86_exec_cmp_imm, X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 3ULL);
-x86_l_1238:
-	/* 0x1238: jb     11f0 <bpftrace_string_search_prefix_scan_xdp+0xf0> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_B))
-		goto x86_l_11f0;
-x86_l_123a:
-	/* 0x123a: movzx  ebx,BYTE PTR [rcx+0x72] */
-	X86_VM_RUN_OP(x86_exec_mov_load, X86_OP_MOV_LOAD, X86_RBX, X86_RCX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 114ULL);
-x86_l_123e:
-	/* 0x123e: xor    bl,BYTE PTR [rcx+r8*1+0x12] */
-	X86_VM_RUN_OP(x86_exec_alu_mem, X86_OP_ALU_MEM, X86_RBX, X86_RCX, X86_WIDTH_8, (X86_MEM_AUX_FULL(X86_R8, 0, X86_WIDTH_8) | X86_MEM_AUX_ALU_OP(X86_ALU_XOR)), 18ULL);
-x86_l_1243:
-	/* 0x1243: or     r11b,bl */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_R11, X86_RBX, X86_WIDTH_8, X86_ALU_OR, 0);
-x86_l_1246:
-	/* 0x1246: cmp    esi,0x4 */
-	X86_VM_RUN_OP(x86_exec_cmp_imm, X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 4ULL);
-x86_l_1249:
-	/* 0x1249: jb     11f0 <bpftrace_string_search_prefix_scan_xdp+0xf0> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_B))
-		goto x86_l_11f0;
-x86_l_124b:
-	/* 0x124b: movzx  ebx,BYTE PTR [rcx+0x73] */
-	X86_VM_RUN_OP(x86_exec_mov_load, X86_OP_MOV_LOAD, X86_RBX, X86_RCX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 115ULL);
-x86_l_124f:
-	/* 0x124f: xor    bl,BYTE PTR [rcx+r8*1+0x13] */
-	X86_VM_RUN_OP(x86_exec_alu_mem, X86_OP_ALU_MEM, X86_RBX, X86_RCX, X86_WIDTH_8, (X86_MEM_AUX_FULL(X86_R8, 0, X86_WIDTH_8) | X86_MEM_AUX_ALU_OP(X86_ALU_XOR)), 19ULL);
-x86_l_1254:
-	/* 0x1254: or     r11b,bl */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_R11, X86_RBX, X86_WIDTH_8, X86_ALU_OR, 0);
-x86_l_1257:
-	/* 0x1257: cmp    esi,0x5 */
-	X86_VM_RUN_OP(x86_exec_cmp_imm, X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 5ULL);
-x86_l_125a:
-	/* 0x125a: jb     11f0 <bpftrace_string_search_prefix_scan_xdp+0xf0> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_B))
-		goto x86_l_11f0;
-x86_l_125c:
-	/* 0x125c: movzx  ebx,BYTE PTR [rcx+0x74] */
-	X86_VM_RUN_OP(x86_exec_mov_load, X86_OP_MOV_LOAD, X86_RBX, X86_RCX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 116ULL);
-x86_l_1260:
-	/* 0x1260: xor    bl,BYTE PTR [rcx+r8*1+0x14] */
-	X86_VM_RUN_OP(x86_exec_alu_mem, X86_OP_ALU_MEM, X86_RBX, X86_RCX, X86_WIDTH_8, (X86_MEM_AUX_FULL(X86_R8, 0, X86_WIDTH_8) | X86_MEM_AUX_ALU_OP(X86_ALU_XOR)), 20ULL);
-x86_l_1265:
-	/* 0x1265: or     r11b,bl */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_R11, X86_RBX, X86_WIDTH_8, X86_ALU_OR, 0);
-x86_l_1268:
-	/* 0x1268: cmp    esi,0x6 */
-	X86_VM_RUN_OP(x86_exec_cmp_imm, X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 6ULL);
-x86_l_126b:
-	/* 0x126b: jb     11f0 <bpftrace_string_search_prefix_scan_xdp+0xf0> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_B))
-		goto x86_l_11f0;
-x86_l_126d:
-	/* 0x126d: movzx  ebx,BYTE PTR [rcx+0x75] */
-	X86_VM_RUN_OP(x86_exec_mov_load, X86_OP_MOV_LOAD, X86_RBX, X86_RCX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 117ULL);
-x86_l_1271:
-	/* 0x1271: xor    bl,BYTE PTR [rcx+r8*1+0x15] */
-	X86_VM_RUN_OP(x86_exec_alu_mem, X86_OP_ALU_MEM, X86_RBX, X86_RCX, X86_WIDTH_8, (X86_MEM_AUX_FULL(X86_R8, 0, X86_WIDTH_8) | X86_MEM_AUX_ALU_OP(X86_ALU_XOR)), 21ULL);
-x86_l_1276:
-	/* 0x1276: or     r11b,bl */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_R11, X86_RBX, X86_WIDTH_8, X86_ALU_OR, 0);
-x86_l_1279:
-	/* 0x1279: cmp    esi,0x7 */
-	X86_VM_RUN_OP(x86_exec_cmp_imm, X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 7ULL);
-x86_l_127c:
-	/* 0x127c: jb     11f0 <bpftrace_string_search_prefix_scan_xdp+0xf0> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_B))
-		goto x86_l_11f0;
-x86_l_1282:
-	/* 0x1282: movzx  ebx,BYTE PTR [rcx+0x76] */
-	X86_VM_RUN_OP(x86_exec_mov_load, X86_OP_MOV_LOAD, X86_RBX, X86_RCX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 118ULL);
-x86_l_1286:
-	/* 0x1286: xor    bl,BYTE PTR [rcx+r8*1+0x16] */
-	X86_VM_RUN_OP(x86_exec_alu_mem, X86_OP_ALU_MEM, X86_RBX, X86_RCX, X86_WIDTH_8, (X86_MEM_AUX_FULL(X86_R8, 0, X86_WIDTH_8) | X86_MEM_AUX_ALU_OP(X86_ALU_XOR)), 22ULL);
-x86_l_128b:
-	/* 0x128b: or     r11b,bl */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_R11, X86_RBX, X86_WIDTH_8, X86_ALU_OR, 0);
-x86_l_128e:
-	/* 0x128e: cmp    esi,0x8 */
-	X86_VM_RUN_OP(x86_exec_cmp_imm, X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 8ULL);
-x86_l_1291:
-	/* 0x1291: jb     11f0 <bpftrace_string_search_prefix_scan_xdp+0xf0> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_B))
-		goto x86_l_11f0;
-x86_l_1297:
-	/* 0x1297: movzx  ebx,BYTE PTR [rcx+0x77] */
-	X86_VM_RUN_OP(x86_exec_mov_load, X86_OP_MOV_LOAD, X86_RBX, X86_RCX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 119ULL);
-x86_l_129b:
-	/* 0x129b: xor    bl,BYTE PTR [rcx+r8*1+0x17] */
-	X86_VM_RUN_OP(x86_exec_alu_mem, X86_OP_ALU_MEM, X86_RBX, X86_RCX, X86_WIDTH_8, (X86_MEM_AUX_FULL(X86_R8, 0, X86_WIDTH_8) | X86_MEM_AUX_ALU_OP(X86_ALU_XOR)), 23ULL);
-x86_l_12a0:
-	/* 0x12a0: or     r11b,bl */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_R11, X86_RBX, X86_WIDTH_8, X86_ALU_OR, 0);
-x86_l_12a3:
-	/* 0x12a3: jmp    11f0 <bpftrace_string_search_prefix_scan_xdp+0xf0> */
-	goto x86_l_11f0;
-x86_l_12a8:
-	/* 0x12a8: cmp    r8,0x60 */
-	X86_VM_RUN_OP(x86_exec_cmp_imm, X86_OP_CMP_IMM, X86_R8, X86_REG_NONE, X86_WIDTH_64, 0, 96ULL);
-x86_l_12ac:
-	/* 0x12ac: je     12bf <bpftrace_string_search_prefix_scan_xdp+0x1bf> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_E))
-		goto x86_l_12bf;
-x86_l_12ae:
-	/* 0x12ae: shl    rsi,0x20 */
-	X86_VM_RUN_OP(x86_exec_alu_imm, X86_OP_ALU_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_64, X86_ALU_SHL, 32ULL);
-x86_l_12b2:
-	/* 0x12b2: add    rsi,r8 */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_RSI, X86_R8, X86_WIDTH_64, X86_ALU_ADD, 0);
-x86_l_12b5:
-	/* 0x12b5: rol    rsi,0x3 */
-	X86_VM_RUN_OP(x86_exec_alu_imm, X86_OP_ALU_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_64, X86_ALU_ROL, 3ULL);
-x86_l_12b9:
-	/* 0x12b9: xor    rdi,rsi */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_RDI, X86_RSI, X86_WIDTH_64, X86_ALU_XOR, 0);
-x86_l_12bc:
-	/* 0x12bc: mov    rax,rdi */
-	X86_VM_RUN_OP(x86_exec_mov_reg, X86_OP_MOV_REG, X86_RAX, X86_RDI, X86_WIDTH_64, 0, 0);
+	/* 0x11e0..0x12bc: C-authored bpftrace string-search template */
+	__x86_scan.data = __x86_vm_data;
+	__x86_scan.data_end = __x86_vm_data_end;
+	if (x86_vm_run_bpftrace_string_search_prefix_scan(&__x86_scan) < 0)
+		return XDP_ABORTED;
 x86_l_12bf:
 	/* 0x12bf: mov    QWORD PTR [rcx],rax */
 	X86_VM_RUN_OP(x86_exec_mov_store_reg, X86_OP_MOV_STORE_REG, X86_RCX, X86_RAX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);
@@ -399,6 +224,7 @@ x86_l_12c8:
 x86_l_12c9:
 	/* 0x12c9: ret */
 	X86_VM_RET_RAX();
+	#undef __x86_vm_state
 	return XDP_ABORTED;
 }
 

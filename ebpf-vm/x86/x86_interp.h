@@ -140,6 +140,11 @@ struct x86_insn {
 #define X86_VM_ENABLE_STACK_SLOT7 1
 #endif
 #endif
+#ifdef X86_VM_ENABLE_STACK_SHALLOW
+#undef X86_VM_ENABLE_STACK_SLOT7
+#undef X86_VM_ENABLE_STACK_DEEP
+#undef X86_VM_ENABLE_STACK_EXT
+#endif
 
 struct x86_state {
 	__u64 rax;
@@ -197,11 +202,13 @@ struct x86_state {
 #ifdef X86_VM_ENABLE_STACK
 	__u64 stack0;
 	__u64 stack1;
+#ifndef X86_VM_ENABLE_STACK_SHALLOW
 	__u64 stack2;
 	__u64 stack3;
 	__u64 stack4;
 	__u64 stack5;
 	__u64 stack6;
+#endif
 #ifdef X86_VM_ENABLE_STACK_SLOT7
 	__u64 stack7;
 #endif
@@ -219,11 +226,13 @@ struct x86_state {
 #endif
 	void *p_stack0;
 	void *p_stack1;
+#ifndef X86_VM_ENABLE_STACK_SHALLOW
 	void *p_stack2;
 	void *p_stack3;
 	void *p_stack4;
 	void *p_stack5;
 	void *p_stack6;
+#endif
 #ifdef X86_VM_ENABLE_STACK_SLOT7
 	void *p_stack7;
 #endif
@@ -235,11 +244,13 @@ struct x86_state {
 #endif
 	__u8 tag_stack0;
 	__u8 tag_stack1;
+#ifndef X86_VM_ENABLE_STACK_SHALLOW
 	__u8 tag_stack2;
 	__u8 tag_stack3;
 	__u8 tag_stack4;
 	__u8 tag_stack5;
 	__u8 tag_stack6;
+#endif
 #ifdef X86_VM_ENABLE_STACK_SLOT7
 	__u8 tag_stack7;
 #endif
@@ -685,11 +696,13 @@ static __always_inline int x86_stack_write_raw(struct x86_state *state,
 
 	X86_STACK_WRITE_SLOT(-8, stack0, p_stack0, tag_stack0);
 	X86_STACK_WRITE_SLOT(-16, stack1, p_stack1, tag_stack1);
+#ifndef X86_VM_ENABLE_STACK_SHALLOW
 	X86_STACK_WRITE_SLOT(-24, stack2, p_stack2, tag_stack2);
 	X86_STACK_WRITE_SLOT(-32, stack3, p_stack3, tag_stack3);
 	X86_STACK_WRITE_SLOT(-40, stack4, p_stack4, tag_stack4);
 	X86_STACK_WRITE_SLOT(-48, stack5, p_stack5, tag_stack5);
 	X86_STACK_WRITE_SLOT(-56, stack6, p_stack6, tag_stack6);
+#endif
 #ifdef X86_VM_ENABLE_STACK_SLOT7
 	X86_STACK_WRITE_SLOT(-64, stack7, p_stack7, tag_stack7);
 #endif
@@ -748,11 +761,13 @@ static __always_inline int x86_stack_read_raw(struct x86_state *state,
 
 	X86_STACK_READ_SLOT(-8, stack0, p_stack0, tag_stack0);
 	X86_STACK_READ_SLOT(-16, stack1, p_stack1, tag_stack1);
+#ifndef X86_VM_ENABLE_STACK_SHALLOW
 	X86_STACK_READ_SLOT(-24, stack2, p_stack2, tag_stack2);
 	X86_STACK_READ_SLOT(-32, stack3, p_stack3, tag_stack3);
 	X86_STACK_READ_SLOT(-40, stack4, p_stack4, tag_stack4);
 	X86_STACK_READ_SLOT(-48, stack5, p_stack5, tag_stack5);
 	X86_STACK_READ_SLOT(-56, stack6, p_stack6, tag_stack6);
+#endif
 #ifdef X86_VM_ENABLE_STACK_SLOT7
 	X86_STACK_READ_SLOT(-64, stack7, p_stack7, tag_stack7);
 #endif

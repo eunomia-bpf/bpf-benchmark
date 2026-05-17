@@ -64,8 +64,6 @@ for base, names in {
 OBJ_LINE_RE = re.compile(r"^\s*(?P<addr>[0-9a-f]+):\s+(?P<bytes>(?:[0-9a-f]{2}\s+)+)\s*(?P<asm>.*)$")
 ASM_LINE_RE = re.compile(r"^\s*(?P<mnemonic>[a-z][a-z0-9]*)\s*(?P<operands>.*)$")
 BRANCH_DELTA = "__BRANCH_DELTA__"
-X86_DISP = "__X86_DISP__"
-X86_NEAR = "__X86_NEAR__"
 SIZE_BY_PTR = {"BYTE": "BPF_B", "WORD": "BPF_H", "DWORD": "BPF_W", "QWORD": "BPF_DW"}
 DIRECT_LOAD_SELECTOR = {
     "BPF_B": "MICRO_HANDCRAFT_BPF_X86_MOVZBL",
@@ -121,39 +119,6 @@ JCC_OP = {
     "jp": "BPF_JNE",
     "jnp": "BPF_JEQ",
 }
-JCC_SELECTOR = {
-    "ja": "MICRO_HANDCRAFT_BPF_X86_JA",
-    "jae": "MICRO_HANDCRAFT_BPF_X86_JAE",
-    "jb": "MICRO_HANDCRAFT_BPF_X86_JB",
-    "jbe": "MICRO_HANDCRAFT_BPF_X86_JBE",
-    "je": "MICRO_HANDCRAFT_BPF_X86_JE",
-    "jne": "MICRO_HANDCRAFT_BPF_X86_JNE",
-    "jg": "MICRO_HANDCRAFT_BPF_X86_JG",
-    "jge": "MICRO_HANDCRAFT_BPF_X86_JGE",
-    "jl": "MICRO_HANDCRAFT_BPF_X86_JL",
-    "jle": "MICRO_HANDCRAFT_BPF_X86_JLE",
-    "js": "MICRO_HANDCRAFT_BPF_X86_JS",
-    "jns": "MICRO_HANDCRAFT_BPF_X86_JNS",
-}
-BRANCH_PROOF_LEN = {
-    "MICRO_HANDCRAFT_BPF_X86_JA": 15,
-    "MICRO_HANDCRAFT_BPF_X86_JAE": 13,
-    "MICRO_HANDCRAFT_BPF_X86_JB": 12,
-    "MICRO_HANDCRAFT_BPF_X86_JBE": 14,
-    "MICRO_HANDCRAFT_BPF_X86_JE": 12,
-    "MICRO_HANDCRAFT_BPF_X86_JNE": 13,
-    "MICRO_HANDCRAFT_BPF_X86_JG": 15,
-    "MICRO_HANDCRAFT_BPF_X86_JGE": 12,
-    "MICRO_HANDCRAFT_BPF_X86_JL": 13,
-    "MICRO_HANDCRAFT_BPF_X86_JLE": 14,
-    "MICRO_HANDCRAFT_BPF_X86_JS": 12,
-    "MICRO_HANDCRAFT_BPF_X86_JNS": 13,
-    "MICRO_HANDCRAFT_BPF_X86_JMP": 1,
-}
-BRANCH_DIRECT_PROOF_LEN = 14
-BRANCH_PROOF_FLAGS = "HC_X86_BRANCH_PROOF_FLAGS"
-BRANCH_PROOF_CMP_RR = "HC_X86_BRANCH_PROOF_CMP_RR"
-DIRECT_CMP_JCC = {"ja", "jae", "jb", "jbe", "je", "jne", "jg", "jge", "jl", "jle"}
 X86_PSEUDO_REG_TOKENS = (
     "HC_X86_R9",
     "HC_X86_R10",
@@ -487,19 +452,14 @@ def translate(insn: NativeInsn) -> Translation:
         return Translation("abi-boundary", (f"HC_CALL({BRANCH_DELTA})",), "native direct call maps to BPF pseudo call", target_addr)
     if op in JCC_OP:
         target_addr = parse_branch_target(ops[0]) if len(ops) == 1 else None
-        selector = JCC_SELECTOR.get(op)
         if target_addr is None:
             return Translation("warning-unmapped", (), f"cannot parse x86 branch target: {insn.raw}")
-        if selector is None:
-            return Translation("warning-unmapped", (), f"{op} needs shadow flag support before it can be a branch kinsn", target_addr)
-        payload = f"HC_X86_BRANCH_PAYLOAD({BRANCH_DELTA}, {X86_DISP}, {X86_NEAR})"
-        return Translation("exact-kinsn", (f"HC_KINSN({payload}, {selector})",), f"{op} branch kinsn", target_addr)
+        return Translation("control-flow-gap", (), f"{op} must be emitted as ordinary BPF control-flow; branch kinsns are not supported", target_addr)
     if op == "jmp" and len(ops) == 1:
         target_addr = parse_branch_target(ops[0])
         if target_addr is None:
-            return Translation("warning-unmapped", (), f"needs a machine-level x86 indirect-branch kinsn for target {ops[0]}")
-        payload = f"HC_X86_BRANCH_PAYLOAD({BRANCH_DELTA}, {X86_DISP}, {X86_NEAR})"
-        return Translation("exact-kinsn", (f"HC_KINSN({payload}, MICRO_HANDCRAFT_BPF_X86_JMP)",), "jmp branch kinsn", target_addr)
+            return Translation("control-flow-gap", (), f"indirect jmp must stay ordinary BPF control-flow: {ops[0]}")
+        return Translation("exact-bpf", (bpf_ja(),), "native jmp maps to ordinary BPF JA", target_addr)
     if op == "cmp" and len(ops) == 2:
         lhs = bpf_reg(ops[0])
         rhs = bpf_reg(ops[1])
@@ -965,48 +925,10 @@ def translate(insn: NativeInsn) -> Translation:
     return Translation("warning-unmapped", (), f"unsupported mnemonic or operand form: {insn.raw}")
 
 
-def jcc_proof_from_flag_producer(branch: NativeInsn, producer: NativeInsn) -> tuple[bool, str] | None:
-    if branch.mnemonic not in DIRECT_CMP_JCC:
-        return None
-    if producer.mnemonic != "cmp" or len(producer.operands) != 2:
-        return None
-    lhs = bpf_reg(producer.operands[0])
-    rhs = bpf_reg(producer.operands[1])
-    if lhs is None or rhs is None or lhs[1] != rhs[1] or lhs[1] not in {32, 64}:
-        if lhs is None or lhs[1] not in {32, 64} or not is_int(producer.operands[1]):
-            return None
-        return lhs[1] == 32, BRANCH_PROOF_CMP_RR
-    return lhs[1] == 32, BRANCH_PROOF_CMP_RR
-
-
 def translate_all(insns: list[NativeInsn]) -> list[Translation]:
     translations: list[Translation] = []
-    flag_producer: NativeInsn | None = None
     for insn in insns:
-        trans = translate(insn)
-        if insn.mnemonic in JCC_OP and flag_producer is not None:
-            proof = jcc_proof_from_flag_producer(insn, flag_producer)
-            if proof is not None:
-                is32, proof_kind = proof
-                code = tuple(
-                    item.replace(
-                        "HC_X86_BRANCH_PAYLOAD(",
-                        f"HC_X86_BRANCH_PROOF_PAYLOAD(",
-                    ).replace(
-                        ")",
-                        f", {1 if is32 else 0}, {proof_kind})",
-                        1,
-                    ) if item.startswith("HC_KINSN(HC_X86_BRANCH_PAYLOAD(") else item
-                    for item in trans.code
-                )
-                trans = Translation(trans.status, code,
-                                    f"{trans.note}; verifier proof from preceding {flag_producer.mnemonic}",
-                                    trans.target_addr)
-        translations.append(trans)
-        if insn.mnemonic in {"cmp", "test"}:
-            flag_producer = insn
-        elif insn.mnemonic in ALU_OP or insn.mnemonic in {"imul", "popcnt", "sbb", "inc", "rol", "shl", "shr", "sar"}:
-            flag_producer = None
+        translations.append(translate(insn))
     return translations
 
 
@@ -1021,256 +943,15 @@ def bpf_insn_len(code: str) -> int:
     return 1
 
 
-def branch_native_len(insn: NativeInsn, near: int) -> int:
-    if insn.mnemonic == "jmp":
-        return 5 if near else 2
-    if insn.mnemonic in JCC_OP:
-        return 6 if near else 2
-    return insn.size
-
-
-def branch_initial_near(insn: NativeInsn) -> int:
-    if insn.mnemonic == "jmp":
-        return 1 if insn.size >= 5 else 0
-    if insn.mnemonic in JCC_OP:
-        return 1 if insn.size >= 6 else 0
-    return 0
-
-
-def exit_epilogue_len(translations: list[Translation]) -> int:
-    used = {6, 7, 8}
-    for trans in translations:
-        for code in trans.code:
-            if "BPF_REG_9" in code:
-                used.add(9)
-    pop_len = {6: 1, 7: 2, 8: 2, 9: 2}
-    return sum(pop_len[reg] for reg in sorted(used)) + 2
-
-
-def x86_layout(insns: list[NativeInsn], translations: list[Translation],
-               near_by_index: dict[int, int]) -> tuple[list[int], list[int]]:
-    first_exit = next((i for i, item in enumerate(insns) if item.mnemonic == "ret"), None)
-    epilogue_len = exit_epilogue_len(translations)
-    exit_len_by_index: dict[int, int] = {}
-    offsets: list[int] = []
-
-    for _ in range(4):
-        offsets = []
-        off = 0
-        cleanup = None if first_exit is None else offsets[first_exit] if first_exit < len(offsets) else None
-        for index, (insn, trans) in enumerate(zip(insns, translations, strict=True)):
-            offsets.append(off)
-            if insn.mnemonic == "ret":
-                if index == first_exit:
-                    length = epilogue_len
-                    cleanup = off
-                else:
-                    target = cleanup if cleanup is not None else 0
-                    short_disp = target - (off + 2)
-                    length = 2 if -128 <= short_disp <= 127 else 5
-                exit_len_by_index[index] = length
-            elif insn.mnemonic in JCC_OP or insn.mnemonic == "jmp":
-                length = branch_native_len(insn, near_by_index.get(index, branch_initial_near(insn)))
-            elif trans.status == "padding" or trans.status.startswith("warning"):
-                length = 0
-            elif trans.status == "abi-boundary" and any(code.startswith("HC_CALL(") for code in trans.code):
-                length = 5
-            elif trans.status == "exact-bpf" and any(code.startswith("HC_LD_IMM64_RAW(") for code in trans.code):
-                length = 10
-            elif trans.status == "context-abi":
-                length = max(insn.size, 4)
-            else:
-                length = insn.size
-            off += length
-
-    lengths = []
-    for index, insn in enumerate(insns):
-        if insn.mnemonic == "ret":
-            lengths.append(exit_len_by_index.get(index, epilogue_len))
-        elif insn.mnemonic in JCC_OP or insn.mnemonic == "jmp":
-            lengths.append(branch_native_len(insn, near_by_index.get(index, branch_initial_near(insn))))
-        else:
-            next_off = offsets[index + 1] if index + 1 < len(offsets) else off
-            lengths.append(next_off - offsets[index])
-    return offsets, lengths
-
-
-def relocate_x86_branches(insns: list[NativeInsn], translations: list[Translation],
-                          index_by_addr: dict[int, int]) -> list[Translation]:
-    near_by_index = {
-        index: branch_initial_near(insn)
-        for index, insn in enumerate(insns)
-        if insn.mnemonic in JCC_OP or insn.mnemonic == "jmp"
-    }
-
-    for _ in range(4):
-        offsets, lengths = x86_layout(insns, translations, near_by_index)
-        changed = False
-        for index, trans in enumerate(translations):
-            if trans.target_addr is None or index not in near_by_index:
-                continue
-            target_index = index_by_addr.get(trans.target_addr)
-            if target_index is None:
-                continue
-            short_len = branch_native_len(insns[index], 0)
-            short_disp = offsets[target_index] - (offsets[index] + short_len)
-            want_near = 0 if -128 <= short_disp <= 127 else 1
-            if near_by_index[index] != want_near:
-                near_by_index[index] = want_near
-                changed = True
-        if not changed:
-            break
-
-    offsets, lengths = x86_layout(insns, translations, near_by_index)
-    patched: list[Translation] = []
-    for index, trans in enumerate(translations):
-        if trans.target_addr is None or index not in near_by_index:
-            patched.append(trans)
-            continue
-        target_index = index_by_addr.get(trans.target_addr)
-        if target_index is None:
-            patched.append(trans)
-            continue
-        disp = offsets[target_index] - (offsets[index] + lengths[index])
-        near = near_by_index[index]
-        code = tuple(item.replace(X86_DISP, str(disp)).replace(X86_NEAR, str(near))
-                     for item in trans.code)
-        patched.append(Translation(trans.status, code, trans.note, trans.target_addr))
-    return patched
-
-
-def kinsn_selector(code: str) -> str | None:
-    if not code.startswith("HC_KINSN("):
-        return None
-    head = code.rsplit(",", 1)
-    if len(head) != 2:
-        return None
-    return head[1].strip().rstrip(")")
-
-
-def has_x86_pseudo_reg(code: str) -> bool:
-    return any(token in code for token in X86_PSEUDO_REG_TOKENS)
-
-
-def payload_args(code: str, macro: str) -> list[str]:
-    match = re.search(rf"{re.escape(macro)}\(([^)]*)\)", code)
-    if not match:
-        return []
-    return [item.strip() for item in match.group(1).split(",")]
-
-
-def payload_arg_is_scratch(code: str, macro: str, index: int) -> bool:
-    args = payload_args(code, macro)
-    return len(args) > index and args[index] in SCRATCH_BPF_REG_TOKENS
-
-
-def payload_arg_is_pseudo(code: str, macro: str, index: int) -> bool:
-    args = payload_args(code, macro)
-    return len(args) > index and args[index] in X86_PSEUDO_REG_TOKENS
-
-
-def proof_insn_len(code: str) -> int:
-    selector = kinsn_selector(code)
-    if selector is None:
-        return bpf_insn_len(code)
-    if selector == "MICRO_HANDCRAFT_BPF_X86_PUSHQ":
-        return 11
-    if selector == "MICRO_HANDCRAFT_BPF_X86_POPQ":
-        return 12
-    if selector in BRANCH_PROOF_LEN:
-        if "HC_X86_BRANCH_PROOF_PAYLOAD" in code and BRANCH_PROOF_CMP_RR in code:
-            return BRANCH_DIRECT_PROOF_LEN
-        return BRANCH_PROOF_LEN[selector]
-    if "MICRO_HANDCRAFT_BPF_X86_CMP" in selector:
-        if "HC_X86_CMP_SIB_RR_PAYLOAD" in code:
-            match = re.search(r"HC_X86_CMP_SIB_RR_PAYLOAD\([^,]+,[^,]+,\s*([^,]+),", code)
-            add_count = 1 << int(match.group(1), 0) if match else 1
-            return 17 + add_count + (1 if "HC_X86_R" in code else 0)
-        if "HC_X86_CMP_MEM_IMM_PAYLOAD" in code or "HC_X86_CMP_ARCH_MEM_IMM_PAYLOAD" in code:
-            narrow = selector in {"MICRO_HANDCRAFT_BPF_X86_CMPB", "MICRO_HANDCRAFT_BPF_X86_CMPW"}
-            arch = "HC_X86_CMP_ARCH_MEM_IMM_PAYLOAD" in code
-            return 16 + (2 if narrow else 0) + (1 if arch else 0)
-        if selector in {"MICRO_HANDCRAFT_BPF_X86_CMPB", "MICRO_HANDCRAFT_BPF_X86_CMPW"}:
-            if "HC_X86_ARCH_RR_PAYLOAD" in code:
-                return 23
-            if "HC_X86_RR_PAYLOAD" in code:
-                return 27
-            return 19 if "HC_X86_ARCH_IMM_PAYLOAD" in code else 14
-        if "HC_X86_ARCH_RR_PAYLOAD" in code:
-            return 17 + code.count("HC_X86_R")
-        if "HC_X86_ARCH_IMM_PAYLOAD" in code or ("HC_X86_IMM_PAYLOAD" in code and "HC_X86_R" in code):
-            return 18
-        if "HC_X86_IMM_PAYLOAD" in code:
-            return 17
-        return 17
-    if "MICRO_HANDCRAFT_BPF_X86_TEST" in selector:
-        return 12
-    if selector in {"MICRO_HANDCRAFT_BPF_X86_MOVB", "MICRO_HANDCRAFT_BPF_X86_MOVW",
-                    "MICRO_HANDCRAFT_BPF_X86_MOVL", "MICRO_HANDCRAFT_BPF_X86_MOVQ"}:
-        if "HC_X86_STORE_IMM_PAYLOAD" in code:
-            return 1
-        if "HC_X86_FRAME_PAYLOAD" in code:
-            return 8
-        if "HC_X86_IMM_PAYLOAD" in code and not has_x86_pseudo_reg(code):
-            return 1
-        if "HC_X86_RR_PAYLOAD" in code and not has_x86_pseudo_reg(code):
-            return 1 if selector != "MICRO_HANDCRAFT_BPF_X86_MOVL" else 3
-        if "HC_X86_MEM_PAYLOAD" in code and not has_x86_pseudo_reg(code):
-            return 8 if payload_arg_is_scratch(code, "HC_X86_MEM_PAYLOAD", 0) else 1
-        return 8
-    if selector in {"MICRO_HANDCRAFT_BPF_X86_MOVZBL", "MICRO_HANDCRAFT_BPF_X86_MOVZWL"}:
-        if "HC_X86_MEM_PAYLOAD" in code and not has_x86_pseudo_reg(code):
-            return 8 if payload_arg_is_scratch(code, "HC_X86_MEM_PAYLOAD", 0) else 1
-        if "HC_X86_RR_PAYLOAD" in code and not has_x86_pseudo_reg(code):
-            return 2
-        if "HC_X86_RR_PAYLOAD" in code and not payload_arg_is_pseudo(code, "HC_X86_RR_PAYLOAD", 0):
-            return 2
-        return 10
-    if selector in {"MICRO_HANDCRAFT_BPF_X86_LEAQ", "MICRO_HANDCRAFT_BPF_X86_LEAL"}:
-        if not has_x86_pseudo_reg(code):
-            return 2
-        return 11
-    if selector in {"MICRO_HANDCRAFT_BPF_X86_ROLL", "MICRO_HANDCRAFT_BPF_X86_ROLQ"}:
-        if "HC_ROTATE_PAYLOAD" in code:
-            return 12
-        return 16
-    if selector.startswith("MICRO_HANDCRAFT_BPF_X86_") and selector[-1:] in {"L", "Q"}:
-        if "HC_X86_ALU_IMM_PAYLOAD" in code:
-            return 9 if has_x86_pseudo_reg(code) else 1
-        if "HC_X86_ALU_RR_PAYLOAD" in code:
-            return 11 if has_x86_pseudo_reg(code) else 1
-    if "MICRO_HANDCRAFT_BPF_X86_" in selector:
-        if has_x86_pseudo_reg(code):
-            return 8
-        return 1
-    return 2
-
-
 def relocate_branch_offsets(insns: list[NativeInsn], translations: list[Translation]) -> list[Translation]:
     pc_by_addr: dict[int, int] = {}
     pc_by_index: list[int] = []
-    index_by_addr: dict[int, int] = {}
-    bpf_lens: list[int] = []
-    proof_lens: list[int] = []
     pc = 0
     for index, (insn, trans) in enumerate(zip(insns, translations, strict=True)):
         pc_by_addr.setdefault(insn.addr, pc)
-        index_by_addr.setdefault(insn.addr, index)
         pc_by_index.append(pc)
         bpf_len = sum(bpf_insn_len(code) for code in trans.code)
-        proof_len = sum(proof_insn_len(code) for code in trans.code)
-        bpf_lens.append(bpf_len)
-        proof_lens.append(proof_len)
         pc += bpf_len
-
-    def kinsn_stage_delta(source_index: int, target_index: int) -> int:
-        source_pc = sum(bpf_lens[:source_index])
-        if target_index <= source_index:
-            target_pc = sum(bpf_lens[:target_index])
-        else:
-            target_pc = source_pc + proof_lens[source_index]
-            target_pc += sum(proof_lens[source_index + 1:target_index])
-        return target_pc - source_pc
 
     patched: list[Translation] = []
     for index, trans in enumerate(translations):
@@ -1289,15 +970,14 @@ def relocate_branch_offsets(insns: list[NativeInsn], translations: list[Translat
         code = []
         code_pc = pc_by_index[index]
         for item in trans.code:
-            if item.startswith("HC_KINSN("):
-                delta = kinsn_stage_delta(index, index_by_addr[trans.target_addr])
-            else:
-                delta = target_pc - code_pc
+            if item.startswith("HC_KINSN(") and BRANCH_DELTA in item:
+                raise ValueError(f"kinsn payload cannot carry program branch target: 0x{insns[index].addr:x}")
+            delta = target_pc - code_pc
             code.append(item.replace(BRANCH_DELTA, str(delta)))
             code_pc += bpf_insn_len(item)
         code = tuple(code)
         patched.append(Translation(trans.status, code, trans.note, trans.target_addr))
-    return relocate_x86_branches(insns, patched, index_by_addr)
+    return patched
 
 
 def write_outputs(insns: list[NativeInsn], translations: list[Translation], output: Path) -> None:

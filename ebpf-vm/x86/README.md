@@ -122,6 +122,16 @@ per-program Python code. The targeted runner now checks native ABI return values
 for TC (`0`) and cgroup skb (`1`) instead of forcing generated proof programs to
 return `XDP_PASS`.
 
+Generated-C migration todo:
+
+| Item | Status | Completion check |
+| --- | --- | --- |
+| Native return ABI lives in C/header, not Python | done | `ret` emits `X86_VM_RET_RAX();`; runner checks native retval per program family. |
+| Move checksum loop/memory proof out of Python | in progress | `packet_checksum_fold` and `tc_packet_checksum_fold` load and test-run through C-authored checksum helpers/templates. |
+| Move local-call loop/callee proof out of Python | pending | `bpf_local_call_fanout_dispatch` still passes after the special renderer is reduced to mechanical scheduling. |
+| Move string-search bounded scan proof out of Python | pending | `bpftrace_string_search_prefix_scan` no longer hits verifier processed-insn limit and returns the expected result. |
+| Run full generated-C batch | pending | All selected micro programs load, test-run, and match expected output/retval. |
+
 ## JSON-Linker Todo
 
 Completion criteria for this experiment are stricter than the generated-C

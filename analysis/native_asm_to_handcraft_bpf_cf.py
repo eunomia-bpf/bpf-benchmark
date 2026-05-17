@@ -473,10 +473,11 @@ def load_operand_to_scratch(src: tuple[str, int, str], scratch: str) -> tuple[st
         if src[0] == scratch:
             return ()
         return (f"HC_MOV64_REG({scratch}, {src[0]})",)
-    off = SHADOW_REG_OFF_BY_TOKEN.get(src[0])
-    if off is not None:
-        size = "BPF_W" if src[1] == 32 else "BPF_DW"
-        return (f"HC_LDX({size}, {scratch}, BPF_REG_10, {off})",)
+    if src[0] in SHADOW_REG_OFF_BY_TOKEN:
+        dst = (scratch, 64, "rbx" if scratch == "BPF_REG_6" else "r13")
+        macro = "HC_X86_ARCH_RR_PAYLOAD" if arch_payload((dst, src)) else "HC_X86_RR_PAYLOAD"
+        selector = "MICRO_HANDCRAFT_BPF_X86_MOVQ" if src[1] == 64 else "MICRO_HANDCRAFT_BPF_X86_MOVL"
+        return (f"HC_KINSN({macro}({scratch}, {src[0]}), {selector})",)
     return None
 
 
@@ -616,12 +617,11 @@ def load_mem_to_scratch(mem_op: str, scratch: str) -> tuple[str, ...] | None:
     if base_reg is None:
         return None
     if index is None:
-        base_off = SHADOW_REG_OFF_BY_TOKEN.get(base_reg[0])
-        if base_off is not None:
-            return (
-                f"HC_LDX(BPF_DW, {scratch}, BPF_REG_10, {base_off})",
-                f"HC_LDX({size}, {scratch}, {scratch}, {off})",
-            )
+        if base_reg[0] in SHADOW_REG_OFF_BY_TOKEN:
+            base_load = load_operand_to_scratch((base_reg[0], 64, base_reg[2]), scratch)
+            if base_load is None:
+                return None
+            return (*base_load, f"HC_LDX({size}, {scratch}, {scratch}, {off})")
         if not is_runtime_bpf_reg_name(base_reg[0]):
             return None
         return (f"HC_LDX({size}, {scratch}, {base_reg[0]}, {off})",)

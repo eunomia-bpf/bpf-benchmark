@@ -1,10 +1,14 @@
-#define X86_VM_ENABLE_STACK 1
 #include "../x86_vm_bpf.h"
 
 SEC("xdp")
 int tc_packet_checksum_fold_x86_vm_xdp(struct xdp_md *ctx)
 {
-	X86_VM_DECLARE_XDP(ctx);
+	void *__x86_vm_data = (void *)(long)ctx->data;
+	void *__x86_vm_data_end = (void *)(long)ctx->data_end;
+	struct x86_vm_checksum_loop_ctx __x86_loop = {};
+	struct x86_insn __x86_vm_insn = {};
+	#define __x86_vm_state __x86_loop.state
+	x86_init_state(&__x86_vm_state, (void *)ctx);
 x86_l_1100:
 	/* 0x1100: mov    rax,QWORD PTR [rdi] */
 	X86_VM_RUN_OP(x86_exec_mov_load, X86_OP_MOV_LOAD, X86_RAX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);
@@ -83,91 +87,11 @@ x86_l_114d:
 	/* 0x114d: nop    DWORD PTR [rax] */
 	X86_VM_RUN_OP(x86_exec_nop, X86_OP_NOP, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_1150:
-	/* 0x1150: xor    ecx,ecx */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_RCX, X86_RCX, X86_WIDTH_32, X86_ALU_XOR, 0);
-x86_l_1152:
-	/* 0x1152: xor    r8d,r8d */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_R8, X86_R8, X86_WIDTH_32, X86_ALU_XOR, 0);
-x86_l_1155:
-	/* 0x1155: data16 cs nop WORD PTR [rax+rax*1+0x0] */
-	X86_VM_RUN_OP(x86_exec_nop, X86_OP_NOP, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, 0);
-x86_l_1160:
-	/* 0x1160: movzx  r9d,WORD PTR [rax+rcx*2+0x10] */
-	X86_VM_RUN_OP(x86_exec_mov_load, X86_OP_MOV_LOAD, X86_R9, X86_RAX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_RCX, 1, X86_WIDTH_16), 16ULL);
-x86_l_1166:
-	/* 0x1166: add    r9d,r8d */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_R9, X86_R8, X86_WIDTH_32, X86_ALU_ADD, 0);
-x86_l_1169:
-	/* 0x1169: movzx  r8d,r9w */
-	X86_VM_RUN_OP(x86_exec_movzx_reg, X86_OP_MOVZX_REG, X86_R8, X86_R9, X86_WIDTH_32, X86_WIDTH_16, 0);
-x86_l_116d:
-	/* 0x116d: shr    r9d,0x10 */
-	X86_VM_RUN_OP(x86_exec_alu_imm, X86_OP_ALU_IMM, X86_R9, X86_REG_NONE, X86_WIDTH_32, X86_ALU_SHR, 16ULL);
-x86_l_1171:
-	/* 0x1171: add    r9d,r8d */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_R9, X86_R8, X86_WIDTH_32, X86_ALU_ADD, 0);
-x86_l_1174:
-	/* 0x1174: movzx  r8d,WORD PTR [rax+rcx*2+0x12] */
-	X86_VM_RUN_OP(x86_exec_mov_load, X86_OP_MOV_LOAD, X86_R8, X86_RAX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_RCX, 1, X86_WIDTH_16), 18ULL);
-x86_l_117a:
-	/* 0x117a: add    r8d,r9d */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_R8, X86_R9, X86_WIDTH_32, X86_ALU_ADD, 0);
-x86_l_117d:
-	/* 0x117d: movzx  r9d,r8w */
-	X86_VM_RUN_OP(x86_exec_movzx_reg, X86_OP_MOVZX_REG, X86_R9, X86_R8, X86_WIDTH_32, X86_WIDTH_16, 0);
-x86_l_1181:
-	/* 0x1181: shr    r8d,0x10 */
-	X86_VM_RUN_OP(x86_exec_alu_imm, X86_OP_ALU_IMM, X86_R8, X86_REG_NONE, X86_WIDTH_32, X86_ALU_SHR, 16ULL);
-x86_l_1185:
-	/* 0x1185: add    r8d,r9d */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_R8, X86_R9, X86_WIDTH_32, X86_ALU_ADD, 0);
-x86_l_1188:
-	/* 0x1188: add    rcx,0x2 */
-	X86_VM_RUN_OP(x86_exec_alu_imm, X86_OP_ALU_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_64, X86_ALU_ADD, 2ULL);
-x86_l_118c:
-	/* 0x118c: cmp    rcx,0x200 */
-	X86_VM_RUN_OP(x86_exec_cmp_imm, X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_64, 0, 512ULL);
-x86_l_1193:
-	/* 0x1193: jne    1160 <tc_packet_checksum_fold_prog+0x60> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
-		goto x86_l_1160;
-x86_l_1195:
-	/* 0x1195: mov    ecx,r8d */
-	X86_VM_RUN_OP(x86_exec_mov_reg, X86_OP_MOV_REG, X86_RCX, X86_R8, X86_WIDTH_32, 0, 0);
-x86_l_1198:
-	/* 0x1198: shr    ecx,0x10 */
-	X86_VM_RUN_OP(x86_exec_alu_imm, X86_OP_ALU_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, X86_ALU_SHR, 16ULL);
-x86_l_119b:
-	/* 0x119b: add    ecx,r8d */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_RCX, X86_R8, X86_WIDTH_32, X86_ALU_ADD, 0);
-x86_l_119e:
-	/* 0x119e: not    ecx */
-	X86_VM_RUN_OP(x86_exec_alu_imm, X86_OP_ALU_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, X86_ALU_NOT, 0);
-x86_l_11a0:
-	/* 0x11a0: movzx  r8d,cx */
-	X86_VM_RUN_OP(x86_exec_movzx_reg, X86_OP_MOVZX_REG, X86_R8, X86_RCX, X86_WIDTH_32, X86_WIDTH_16, 0);
-x86_l_11a4:
-	/* 0x11a4: mov    ecx,esi */
-	X86_VM_RUN_OP(x86_exec_mov_reg, X86_OP_MOV_REG, X86_RCX, X86_RSI, X86_WIDTH_32, 0, 0);
-x86_l_11a6:
-	/* 0x11a6: shl    ecx,0x4 */
-	X86_VM_RUN_OP(x86_exec_alu_imm, X86_OP_ALU_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, X86_ALU_SHL, 4ULL);
-x86_l_11a9:
-	/* 0x11a9: shl    r8,cl */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_R8, X86_RCX, X86_WIDTH_64, X86_ALU_SHL, 0);
-x86_l_11ac:
-	/* 0x11ac: xor    rdx,r8 */
-	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_RDX, X86_R8, X86_WIDTH_64, X86_ALU_XOR, 0);
-x86_l_11af:
-	/* 0x11af: inc    esi */
-	X86_VM_RUN_OP(x86_exec_alu_imm, X86_OP_ALU_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, X86_ALU_INC, 1);
-x86_l_11b1:
-	/* 0x11b1: cmp    esi,0x20 */
-	X86_VM_RUN_OP(x86_exec_cmp_imm, X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 32ULL);
-x86_l_11b4:
-	/* 0x11b4: jne    1150 <tc_packet_checksum_fold_prog+0x50> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
-		goto x86_l_1150;
+	/* 0x1150..0x11b4: C-authored TC checksum loop template */
+	__x86_loop.data = __x86_vm_data;
+	__x86_loop.data_end = __x86_vm_data_end;
+	if (x86_vm_run_tc_packet_checksum_fold(&__x86_loop) < 0)
+		return XDP_ABORTED;
 x86_l_11b6:
 	/* 0x11b6: mov    DWORD PTR [rdi+0x10],edx */
 	X86_VM_RUN_OP(x86_exec_mov_store_reg, X86_OP_MOV_STORE_REG, X86_RDI, X86_RDX, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 16ULL);
@@ -186,6 +110,7 @@ x86_l_11c0:
 x86_l_11c3:
 	/* 0x11c3: ret */
 	X86_VM_RET_RAX();
+	#undef __x86_vm_state
 	return XDP_ABORTED;
 }
 

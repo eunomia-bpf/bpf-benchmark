@@ -52,31 +52,25 @@ x86_l_1127:
 	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
 		goto x86_l_110e;
 x86_l_1129:
-	/* 0x1129: push   rbp */
-	X86_VM_RUN_OP(x86_exec_push, X86_OP_PUSH, X86_REG_NONE, X86_RBP, X86_WIDTH_64, 0, 0);
-x86_l_112a:
-	/* 0x112a: mov    rbp,rsp */
-	X86_VM_RUN_OP(x86_exec_mov_reg, X86_OP_MOV_REG, X86_RBP, X86_RSP, X86_WIDTH_64, 0, 0);
-x86_l_112d:
-	/* 0x112d: push   rbx */
+	/* 0x1129: push   rbx */
 	X86_VM_RUN_OP(x86_exec_push, X86_OP_PUSH, X86_REG_NONE, X86_RBX, X86_WIDTH_64, 0, 0);
-x86_l_112e:
-	/* 0x112e: lea    rdi,[rdx+0x1b] */
+x86_l_112a:
+	/* 0x112a: lea    rdi,[rdx+0x1b] */
 	X86_VM_RUN_OP(x86_exec_lea, X86_OP_LEA, X86_RDI, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 27ULL);
-x86_l_1132:
-	/* 0x1132: movabs rsi,0xe7037ed1a0b428db */
+x86_l_112e:
+	/* 0x112e: movabs rsi,0xe7037ed1a0b428db */
 	X86_VM_RUN_OP(x86_exec_mov_imm, X86_OP_MOV_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_64, 0, 16646288086500911323ULL);
-x86_l_113c:
-	/* 0x113c: xor    r8d,r8d */
+x86_l_1138:
+	/* 0x1138: xor    r8d,r8d */
 	X86_VM_RUN_OP(x86_exec_alu_reg, X86_OP_ALU_REG, X86_R8, X86_R8, X86_WIDTH_32, X86_ALU_XOR, 0);
-x86_l_113f:
-	/* 0x113f: jmp    117f <cilium_policy_guard_tree_filter_xdp+0x7f> */
+x86_l_113b:
+	/* 0x113b: jmp    117f <cilium_policy_guard_tree_filter_xdp+0x7f> */
 	goto x86_l_117f;
-x86_l_1141:
-	/* 0x1141: shl    rcx,0x30 */
+x86_l_113d:
+	/* 0x113d: shl    rcx,0x30 */
 	X86_VM_RUN_OP(x86_exec_alu_imm, X86_OP_ALU_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_64, X86_ALU_SHL, 48ULL);
-x86_l_1145:
-	/* 0x1145: data16 cs nop WORD PTR [rax+rax*1+0x0] */
+x86_l_1141:
+	/* 0x1141: data16 data16 data16 data16 data16 cs nop WORD PTR [rax+rax*1+0x0] */
 	X86_VM_RUN_OP(x86_exec_nop, X86_OP_NOP, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_1150:
 	/* 0x1150: xor    rax,rcx */
@@ -273,9 +267,9 @@ x86_l_1224:
 	/* 0x1224: cmp    r10b,0x1 */
 	X86_VM_RUN_OP(x86_exec_cmp_imm, X86_OP_CMP_IMM, X86_R10, X86_REG_NONE, X86_WIDTH_8, 0, 1ULL);
 x86_l_1228:
-	/* 0x1228: je     1141 <cilium_policy_guard_tree_filter_xdp+0x41> */
+	/* 0x1228: je     113d <cilium_policy_guard_tree_filter_xdp+0x3d> */
 	if (x86_eval_cc(&__x86_vm_state, X86_CC_E))
-		goto x86_l_1141;
+		goto x86_l_113d;
 x86_l_122e:
 	/* 0x122e: shl    r9,0x28 */
 	X86_VM_RUN_OP(x86_exec_alu_imm, X86_OP_ALU_IMM, X86_R9, X86_REG_NONE, X86_WIDTH_64, X86_ALU_SHL, 40ULL);
@@ -346,10 +340,7 @@ x86_l_1274:
 	/* 0x1274: pop    rbx */
 	X86_VM_RUN_OP(x86_exec_pop, X86_OP_POP, X86_RBX, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_1275:
-	/* 0x1275: pop    rbp */
-	X86_VM_RUN_OP(x86_exec_pop, X86_OP_POP, X86_RBP, X86_REG_NONE, X86_WIDTH_64, 0, 0);
-x86_l_1276:
-	/* 0x1276: ret */
+	/* 0x1275: ret */
 	X86_VM_RET_RAX();
 	return XDP_ABORTED;
 }
