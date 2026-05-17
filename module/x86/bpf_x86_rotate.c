@@ -20,6 +20,8 @@ BTF_KFUNCS_END(bpf_x86_rotate_kfunc_ids)
 enum x86_rotate_form {
 	X86_ROTATE_FORM_RR = 1,
 	X86_ROTATE_FORM_IMM = 2,
+	X86_ROTATE_FORM_ARCH_RR = 12,
+	X86_ROTATE_FORM_ARCH_IMM = 13,
 };
 
 struct rotate_payload {
@@ -37,7 +39,8 @@ static __always_inline int decode_rotate_payload(u64 payload, u8 shift_mask,
 						 struct rotate_payload *rot)
 {
 	payload = kinsn_payload_decode(payload);
-	if ((payload & 0xf) != X86_ROTATE_FORM_IMM)
+	if ((payload & 0xf) != X86_ROTATE_FORM_IMM &&
+	    (payload & 0xf) != X86_ROTATE_FORM_ARCH_IMM)
 		return -EINVAL;
 	rot->dst_reg = (payload >> 4) & 0xf;
 	rot->src_reg = (payload >> 8) & 0xf;
@@ -46,6 +49,9 @@ static __always_inline int decode_rotate_payload(u64 payload, u8 shift_mask,
 		return -EINVAL;
 	if (!kinsn_x86_operand_valid(rot->dst_reg) ||
 	    !kinsn_x86_operand_valid(rot->src_reg))
+		return -EINVAL;
+	if ((payload & 0xf) == X86_ROTATE_FORM_ARCH_IMM &&
+	    rot->dst_reg != BPF_REG_10 && rot->src_reg != BPF_REG_10)
 		return -EINVAL;
 	return 0;
 }
@@ -89,7 +95,8 @@ static __always_inline int decode_rotate_cl_payload(u64 payload,
 						    u8 *cnt_reg)
 {
 	payload = kinsn_payload_decode(payload);
-	if ((payload & 0xf) != X86_ROTATE_FORM_RR)
+	if ((payload & 0xf) != X86_ROTATE_FORM_RR &&
+	    (payload & 0xf) != X86_ROTATE_FORM_ARCH_RR)
 		return -EINVAL;
 	*dst_reg = (payload >> 4) & 0xf;
 	*cnt_reg = (payload >> 8) & 0xf;
@@ -99,6 +106,9 @@ static __always_inline int decode_rotate_cl_payload(u64 payload,
 	if (*cnt_reg != BPF_REG_4)
 		return -EINVAL;
 	if (!kinsn_x86_operand_valid(*dst_reg))
+		return -EINVAL;
+	if ((payload & 0xf) == X86_ROTATE_FORM_ARCH_RR &&
+	    *dst_reg != BPF_REG_10)
 		return -EINVAL;
 
 	return 0;
@@ -128,6 +138,7 @@ static int instantiate_rotate(u64 payload, struct bpf_insn *insn_buf, u8 width)
 	struct rotate_payload rot;
 	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0) |
 			   KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH1);
+	bool arch_reg;
 	int cnt = 0;
 	int err;
 
@@ -135,8 +146,14 @@ static int instantiate_rotate(u64 payload, struct bpf_insn *insn_buf, u8 width)
 	if (err)
 		return err;
 
+	arch_reg = rotate_payload_form(payload) == X86_ROTATE_FORM_ARCH_IMM;
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0, rot.src_reg);
+	if (arch_reg)
+		kinsn_x86_read64_arch(insn_buf, &cnt, KINSN_X86_SCRATCH0,
+				      rot.src_reg);
+	else
+		kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0,
+				 rot.src_reg);
 	if (rot.shift) {
 		insn_buf[cnt++] = rotate_mov(width, KINSN_X86_SCRATCH1,
 					     KINSN_X86_SCRATCH0);
@@ -150,12 +167,23 @@ static int instantiate_rotate(u64 payload, struct bpf_insn *insn_buf, u8 width)
 						 KINSN_X86_SCRATCH0,
 						 KINSN_X86_SCRATCH1);
 	}
-	if (width == 32)
-		kinsn_x86_write32(insn_buf, &cnt, rot.dst_reg,
-				  KINSN_X86_SCRATCH0, scratch_mask);
-	else
-		kinsn_x86_write64(insn_buf, &cnt, rot.dst_reg,
-				  KINSN_X86_SCRATCH0, scratch_mask);
+	if (width == 32) {
+		if (arch_reg)
+			kinsn_x86_write32_arch(insn_buf, &cnt, rot.dst_reg,
+					       KINSN_X86_SCRATCH0,
+					       scratch_mask);
+		else
+			kinsn_x86_write32(insn_buf, &cnt, rot.dst_reg,
+					  KINSN_X86_SCRATCH0, scratch_mask);
+	} else {
+		if (arch_reg)
+			kinsn_x86_write64_arch(insn_buf, &cnt, rot.dst_reg,
+					       KINSN_X86_SCRATCH0,
+					       scratch_mask);
+		else
+			kinsn_x86_write64(insn_buf, &cnt, rot.dst_reg,
+					  KINSN_X86_SCRATCH0, scratch_mask);
+	}
 	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
 	return cnt;
 }
@@ -177,8 +205,10 @@ static int instantiate_rolq(u64 payload, struct bpf_insn *insn_buf)
 {
 	switch (rotate_payload_form(payload)) {
 	case X86_ROTATE_FORM_IMM:
+	case X86_ROTATE_FORM_ARCH_IMM:
 		return instantiate_rotate64(payload, insn_buf);
 	case X86_ROTATE_FORM_RR:
+	case X86_ROTATE_FORM_ARCH_RR:
 		return instantiate_rolq_cl(payload, insn_buf);
 	default:
 		return -EINVAL;
@@ -189,8 +219,10 @@ static int instantiate_roll(u64 payload, struct bpf_insn *insn_buf)
 {
 	switch (rotate_payload_form(payload)) {
 	case X86_ROTATE_FORM_IMM:
+	case X86_ROTATE_FORM_ARCH_IMM:
 		return instantiate_rotate32(payload, insn_buf);
 	case X86_ROTATE_FORM_RR:
+	case X86_ROTATE_FORM_ARCH_RR:
 		return instantiate_roll_cl(payload, insn_buf);
 	default:
 		return -EINVAL;
@@ -203,6 +235,7 @@ static int instantiate_rolq_cl(u64 payload, struct bpf_insn *insn_buf)
 	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0) |
 			   KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH1) |
 			   KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH2);
+	bool arch_reg;
 	int cnt = 0;
 	int err;
 
@@ -210,8 +243,14 @@ static int instantiate_rolq_cl(u64 payload, struct bpf_insn *insn_buf)
 	if (err)
 		return err;
 
+	arch_reg = rotate_payload_form(payload) == X86_ROTATE_FORM_ARCH_RR;
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0, dst_reg);
+	if (arch_reg)
+		kinsn_x86_read64_arch(insn_buf, &cnt, KINSN_X86_SCRATCH0,
+				      dst_reg);
+	else
+		kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0,
+				 dst_reg);
 	insn_buf[cnt++] = BPF_MOV64_REG(KINSN_X86_SCRATCH1, cnt_reg);
 	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, KINSN_X86_SCRATCH1, 63);
 	insn_buf[cnt++] = BPF_MOV64_REG(KINSN_X86_SCRATCH2,
@@ -224,8 +263,12 @@ static int instantiate_rolq_cl(u64 payload, struct bpf_insn *insn_buf)
 					KINSN_X86_SCRATCH1);
 	insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, KINSN_X86_SCRATCH0,
 					KINSN_X86_SCRATCH2);
-	kinsn_x86_write64(insn_buf, &cnt, dst_reg, KINSN_X86_SCRATCH0,
-			  scratch_mask);
+	if (arch_reg)
+		kinsn_x86_write64_arch(insn_buf, &cnt, dst_reg,
+				       KINSN_X86_SCRATCH0, scratch_mask);
+	else
+		kinsn_x86_write64(insn_buf, &cnt, dst_reg,
+				  KINSN_X86_SCRATCH0, scratch_mask);
 	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
 	return cnt;
 }
@@ -236,6 +279,7 @@ static int instantiate_roll_cl(u64 payload, struct bpf_insn *insn_buf)
 	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0) |
 			   KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH1) |
 			   KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH2);
+	bool arch_reg;
 	int cnt = 0;
 	int err;
 
@@ -243,8 +287,14 @@ static int instantiate_roll_cl(u64 payload, struct bpf_insn *insn_buf)
 	if (err)
 		return err;
 
+	arch_reg = rotate_payload_form(payload) == X86_ROTATE_FORM_ARCH_RR;
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	kinsn_x86_read32(insn_buf, &cnt, KINSN_X86_SCRATCH0, dst_reg);
+	if (arch_reg)
+		kinsn_x86_read32_arch(insn_buf, &cnt, KINSN_X86_SCRATCH0,
+				      dst_reg);
+	else
+		kinsn_x86_read32(insn_buf, &cnt, KINSN_X86_SCRATCH0,
+				 dst_reg);
 	insn_buf[cnt++] = BPF_MOV32_REG(KINSN_X86_SCRATCH1, cnt_reg);
 	insn_buf[cnt++] = BPF_ALU32_IMM(BPF_AND, KINSN_X86_SCRATCH1, 31);
 	insn_buf[cnt++] = BPF_MOV32_REG(KINSN_X86_SCRATCH2,
@@ -257,8 +307,12 @@ static int instantiate_roll_cl(u64 payload, struct bpf_insn *insn_buf)
 					KINSN_X86_SCRATCH1);
 	insn_buf[cnt++] = BPF_ALU32_REG(BPF_OR, KINSN_X86_SCRATCH0,
 					KINSN_X86_SCRATCH2);
-	kinsn_x86_write32(insn_buf, &cnt, dst_reg, KINSN_X86_SCRATCH0,
-			  scratch_mask);
+	if (arch_reg)
+		kinsn_x86_write32_arch(insn_buf, &cnt, dst_reg,
+				       KINSN_X86_SCRATCH0, scratch_mask);
+	else
+		kinsn_x86_write32(insn_buf, &cnt, dst_reg,
+				  KINSN_X86_SCRATCH0, scratch_mask);
 	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
 	return cnt;
 }
@@ -410,8 +464,10 @@ static int emit_rolq_x86(u8 *image, u32 *off, bool emit,
 {
 	switch (rotate_payload_form(payload)) {
 	case X86_ROTATE_FORM_IMM:
+	case X86_ROTATE_FORM_ARCH_IMM:
 		return emit_rotate64_x86(image, off, emit, payload, prog);
 	case X86_ROTATE_FORM_RR:
+	case X86_ROTATE_FORM_ARCH_RR:
 		return emit_rolq_cl_x86(image, off, emit, payload, prog);
 	default:
 		return -EINVAL;
@@ -423,8 +479,10 @@ static int emit_roll_x86(u8 *image, u32 *off, bool emit,
 {
 	switch (rotate_payload_form(payload)) {
 	case X86_ROTATE_FORM_IMM:
+	case X86_ROTATE_FORM_ARCH_IMM:
 		return emit_roll_imm_x86(image, off, emit, payload, prog);
 	case X86_ROTATE_FORM_RR:
+	case X86_ROTATE_FORM_ARCH_RR:
 		return emit_roll_cl_x86(image, off, emit, payload, prog);
 	default:
 		return -EINVAL;

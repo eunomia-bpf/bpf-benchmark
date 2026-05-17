@@ -138,13 +138,25 @@ These are implementation requirements for the handcraft/native-parity path:
   payload should carry already-relocated verifier branch offset and native rel
   displacement; kernel/module code should validate and emit, not discover
   targets.
+- The current sidecar wire format carries 52 payload bits
+  (`dst_reg` + `off` + `imm`). Exact `movabs r64, imm64` therefore needs a
+  payload ABI extension or a separate literal transport; it cannot be made exact
+  by adding only another mnemonic selector.
+- Ordinary BPF-register `movabs` may stay as `BPF_LD_IMM64` when dump
+  comparison confirms the kernel JIT already emits the same native `movabs`.
+  That is an explicit existing-BPF equivalence, not a converter fallback. The
+  unresolved case is `movabs` into module shadow/native-only registers such as
+  `r9/r10/r11/r12/rbp/rsp`, because those destinations need a kinsn payload and
+  the current sidecar cannot carry the full 64-bit immediate.
 - Native stack/frame instructions such as `push`, `pop`, and `mov rbp,rsp` are
-  not padding in strict handcraft mode. They need explicit machine-level kinsns
-  or an explicit ABI boundary. `ret` is the BPF program exit boundary and is
-  emitted as `HC_EXIT()`, not as a raw x86 `ret` inside the JIT body. The
-  current unresolved design issue is that `BPF_REG_10` is the verifier frame
-  pointer while native `rbp` is an x86 architectural register; a full copied
-  prologue needs a precise frame-state payload before it is verifier-safe.
+  not padding in strict handcraft mode. `pushq/popq` are represented by
+  machine-level kinsns, `rsp` is a first-class payload register (`15`), and
+  `mov rbp,rsp` / `mov rsp,rbp` use a frame payload on `bpf_x86_movq`. `ret` is
+  the BPF program exit boundary and is emitted as `HC_EXIT()`, not as a raw x86
+  `ret` inside the JIT body. The remaining unresolved design issue is native
+  `rbp` as a general data register: `BPF_REG_10` is also verifier FP, so broad
+  `rbp` ALU/memory operands need a precise payload extension or form-specific
+  native-rbp encoding before they are verifier-safe.
 - Unit tests should check encoded ABI/layout or real selector behavior. Tests
   that only exercise compatibility names or tautological name mappings should
   be removed or replaced by bug-detection tests. Register-overlap bugs such as
@@ -278,7 +290,7 @@ because they exist:
 | Current kinsn | Why conditional |
 |---|---|
 | `bpf_x86_rolw` | BPF endian-16 emits `ror/rol word, 8` plus zero-extension. A standalone word rotate is useful for strict native parity, but endian pass can usually stay BPF. |
-| `bpf_x86_addb`, `bpf_x86_andb`, `bpf_x86_xorb with immediate payload`, `bpf_x86_xorb with reg-reg payload`, `bpf_x86_orb` | BPF ALU is 32/64-bit, not low-byte ALU. Needed only when the native instruction is really byte-width and byte-width flags/result matter. |
+| `bpf_x86_addb`, `bpf_x86_subb`, `bpf_x86_andb`, `bpf_x86_xorb`, `bpf_x86_orb`, `bpf_x86_orw`, `bpf_x86_shlb` | BPF ALU is 32/64-bit, not byte/word ALU. Needed only when the native instruction is really narrow-width and narrow-width flags/result matter. |
 | `bpf_x86_incl` / `bpf_x86_incq` | BPF can implement `+1` as `add`, but `inc` differs in flag behavior (`CF` unchanged). Needed when native flags parity matters or when strict handcraft wants the exact machine instruction. |
 | `bpf_x86_not*` | BPF can compute bitwise-not with `xor -1`, but that is not the same machine instruction. Keep for strict native parity, not for ordinary semantic rewrites. |
 | `bpf_x86_movzbl`, `bpf_x86_movzwl` with rr payload | Same-reg zero-extension has BPF endian/ALU alternatives; cross-reg low-byte/low-word extraction may still need explicit kinsn if exact `movzx` matters. |
@@ -469,7 +481,10 @@ uses BPF-reserved/native-only registers in most micro programs.
 
 Stack-shadow flags are the right verifier-facing model:
 
-- `cmp/test/add/sub/...` kinsns update a stack slot representing ZF/CF/SF/OF/etc.
+- `cmp/test/add/sub/...` kinsns update module-owned stack slots representing
+  reusable flag or condition state. Today `cmp*` writes ZF, CF, and a signed-ge
+  condition slot used by `setge`; narrow compares sign-extend before updating
+  the signed condition.
 - `cmov/setcc/jcc` instantiate paths read those stack slots and expand to
   verifier-visible BPF branches/selects.
 - User space should not synthesize a separate "adjacent cmp/test proof" payload

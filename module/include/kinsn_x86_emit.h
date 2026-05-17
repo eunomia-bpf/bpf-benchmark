@@ -56,6 +56,7 @@ static __always_inline bool kinsn_x86_needs_rex8(u8 reg)
 	case KINSN_X86_REG_R10:
 	case KINSN_X86_REG_R11:
 	case KINSN_X86_REG_R12:
+	case KINSN_X86_REG_RSP:
 		return true;
 	default:
 		return false;
@@ -83,6 +84,7 @@ static __always_inline bool kinsn_x86_needs_rex8(u8 reg)
 #define KINSN_X86_SCRATCH_R6_OFF	-376
 #define KINSN_X86_SCRATCH_R7_OFF	-368
 #define KINSN_X86_SCRATCH_R8_OFF	-360
+#define KINSN_X86_SHADOW_GE_OFF		-352
 
 #define KINSN_X86_SCRATCH0		BPF_REG_6
 #define KINSN_X86_SCRATCH1		BPF_REG_7
@@ -92,7 +94,7 @@ static __always_inline bool kinsn_x86_needs_rex8(u8 reg)
 
 static __always_inline bool kinsn_x86_reg_is_shadowed(u8 reg)
 {
-	return reg >= KINSN_X86_REG_R9 && reg <= KINSN_X86_REG_R12;
+	return reg >= KINSN_X86_REG_R9 && reg <= KINSN_X86_REG_RSP;
 }
 
 static __always_inline s16 kinsn_x86_shadow_reg_off(u8 reg)
@@ -106,6 +108,8 @@ static __always_inline s16 kinsn_x86_shadow_reg_off(u8 reg)
 		return KINSN_X86_SHADOW_RDX_OFF;
 	case BPF_REG_6:
 		return KINSN_X86_SHADOW_RBX_OFF;
+	case KINSN_X86_REG_RSP:
+		return KINSN_X86_SHADOW_RSP_OFF;
 	case BPF_REG_10:
 		return KINSN_X86_SHADOW_RBP_OFF;
 	case BPF_REG_2:
@@ -131,6 +135,11 @@ static __always_inline s16 kinsn_x86_shadow_reg_off(u8 reg)
 	default:
 		return 0;
 	}
+}
+
+static __always_inline bool kinsn_x86_arch_reg_is_shadowed(u8 reg)
+{
+	return reg == BPF_REG_10 || kinsn_x86_reg_is_shadowed(reg);
 }
 
 static __always_inline bool kinsn_x86_is_scratch(u8 reg)
@@ -260,6 +269,54 @@ static __always_inline void kinsn_x86_write32(struct bpf_insn *insn_buf,
 	(void)saved_mask;
 }
 
+static __always_inline void kinsn_x86_read64_arch(struct bpf_insn *insn_buf,
+						  int *cnt, u8 dst_reg,
+						  u8 src_reg)
+{
+	if (kinsn_x86_arch_reg_is_shadowed(src_reg))
+		insn_buf[(*cnt)++] = BPF_LDX_MEM(BPF_DW, dst_reg, BPF_REG_10,
+						 kinsn_x86_shadow_reg_off(src_reg));
+	else
+		kinsn_x86_read64(insn_buf, cnt, dst_reg, src_reg);
+}
+
+static __always_inline void kinsn_x86_read32_arch(struct bpf_insn *insn_buf,
+						  int *cnt, u8 dst_reg,
+						  u8 src_reg)
+{
+	if (kinsn_x86_arch_reg_is_shadowed(src_reg))
+		insn_buf[(*cnt)++] = BPF_LDX_MEM(BPF_DW, dst_reg, BPF_REG_10,
+						 kinsn_x86_shadow_reg_off(src_reg));
+	else
+		kinsn_x86_read32(insn_buf, cnt, dst_reg, src_reg);
+}
+
+static __always_inline void kinsn_x86_write64_arch(struct bpf_insn *insn_buf,
+						   int *cnt, u8 dst_reg,
+						   u8 value_reg,
+						   u32 saved_mask)
+{
+	if (kinsn_x86_arch_reg_is_shadowed(dst_reg))
+		insn_buf[(*cnt)++] = BPF_STX_MEM(BPF_DW, BPF_REG_10, value_reg,
+						 kinsn_x86_shadow_reg_off(dst_reg));
+	else
+		kinsn_x86_write64(insn_buf, cnt, dst_reg, value_reg,
+				  saved_mask);
+}
+
+static __always_inline void kinsn_x86_write32_arch(struct bpf_insn *insn_buf,
+						   int *cnt, u8 dst_reg,
+						   u8 value_reg,
+						   u32 saved_mask)
+{
+	if (kinsn_x86_arch_reg_is_shadowed(dst_reg))
+		insn_buf[(*cnt)++] = BPF_STX_MEM(BPF_DW, BPF_REG_10, value_reg,
+						 kinsn_x86_shadow_reg_off(dst_reg));
+	else
+		kinsn_x86_write32(insn_buf, cnt, dst_reg, value_reg,
+				  saved_mask);
+}
+
 static __always_inline bool kinsn_bpf_gpr_valid(u8 reg)
 {
 	return reg < BPF_REG_10 && kinsn_x86_reg_valid(reg);
@@ -327,6 +384,11 @@ static __always_inline void kinsn_emit_rex8_rm(u8 *buf, u32 *len, u8 rm)
 	kinsn_emit_rex8(buf, len, 0, rm, false, false, true);
 }
 
+static __always_inline void kinsn_emit_rex8_mem(u8 *buf, u32 *len, u8 base)
+{
+	kinsn_emit_rex8(buf, len, 0, base, false, false, false);
+}
+
 static __always_inline void kinsn_emit_rex8_rr(u8 *buf, u32 *len,
 					       u8 reg, u8 rm)
 {
@@ -385,6 +447,8 @@ static __always_inline void kinsn_emit_modrm_mem_raw(u8 *buf, u32 *len,
 		mod = 0x80;
 
 	kinsn_emit_u8(buf, len, mod | ((reg_field & 0x7) << 3) | base_code);
+	if (base_code == 4)
+		kinsn_emit_u8(buf, len, 0x24);
 	if (mod == 0x40)
 		kinsn_emit_u8(buf, len, (u8)offset);
 	else if (mod == 0x80)

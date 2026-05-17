@@ -6,57 +6,57 @@
      ((__u64)(HAS_BASE) << 15) | ((__u64)(__u32)(DISP) << 16))
 
 /*
- * native asm to handcraft warnings: 15
+ * native asm to handcraft warnings: 13
  *
  * - 0x1100: mov    rcx,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0]
  * - 0x1103: mov    rdx,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4]
- * - 0x112c: push   rbp [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR]
- * - 0x112d: mov    rbp,rsp [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR]
- * - 0x1130: push   r15 [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR]
- * - 0x1132: push   r14 [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR]
- * - 0x1134: push   r12 [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR]
- * - 0x1136: push   rbx [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR]
- * - 0x1169: jne    1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: jcc has no immediately preceding branchable cmp/test; needs a machine-level branch kinsn]
- * - 0x1176: jb     1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: jcc has no immediately preceding branchable cmp/test; needs a machine-level branch kinsn]
- * - 0x1307: pop    rbx [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR]
- * - 0x1308: pop    r12 [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR]
- * - 0x130a: pop    r14 [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR]
- * - 0x130c: pop    r15 [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR]
- * - 0x130e: pop    rbp [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR]
+ * - 0x110c: ja     130f <flow_5tuple_rss_hash_xdp+0x20f> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
+ * - 0x1119: ja     130f <flow_5tuple_rss_hash_xdp+0x20f> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
+ * - 0x1126: ja     130f <flow_5tuple_rss_hash_xdp+0x20f> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
+ * - 0x1148: jne    1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
+ * - 0x1155: ja     1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
+ * - 0x1169: jne    1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
+ * - 0x1176: jb     1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
+ * - 0x1183: ja     1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
+ * - 0x1199: je     11a4 <flow_5tuple_rss_hash_xdp+0xa4> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
+ * - 0x119e: jne    1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
+ * - 0x11ab: ja     1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn]
  */
 
 static const struct bpf_insn program[] = {
+    HC_INIT_X86_STACK(),
     HC_MOV64_IMM(BPF_REG_6, 0),
     HC_MOV64_IMM(BPF_REG_7, 0),
     HC_MOV64_IMM(BPF_REG_8, 0),
     /* 0x1100: mov    rcx,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0] */
-    HC_LDX(BPF_W, BPF_REG_4, BPF_REG_1, 0),
     /* 0x1103: mov    rdx,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4] */
-    HC_LDX(BPF_W, BPF_REG_3, BPF_REG_1, 4),
     /* 0x1107: xor    eax,eax [exact-kinsn: xor32 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x1109: cmp    rcx,rdx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x110c: ja     130f <flow_5tuple_rss_hash_xdp+0x20f> [bpf-branch: verifier-visible branch from preceding cmp    rcx,rdx; cmp kinsn is preserved] */
-    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_4, BPF_REG_3, 264, 0),
+    /* 0x110c: ja     130f <flow_5tuple_rss_hash_xdp+0x20f> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
     /* 0x1112: lea    rsi,[rcx+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_4, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1116: cmp    rsi,rdx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_2, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1119: ja     130f <flow_5tuple_rss_hash_xdp+0x20f> [bpf-branch: verifier-visible branch from preceding cmp    rsi,rdx; cmp kinsn is preserved] */
-    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_2, BPF_REG_3, 259, 0),
+    /* 0x1119: ja     130f <flow_5tuple_rss_hash_xdp+0x20f> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
     /* 0x111f: lea    rsi,[rcx+0x16] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_4, 0, 0, 1, 0, 22), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1123: cmp    rsi,rdx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_2, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1126: ja     130f <flow_5tuple_rss_hash_xdp+0x20f> [bpf-branch: verifier-visible branch from preceding cmp    rsi,rdx; cmp kinsn is preserved] */
-    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_2, BPF_REG_3, 254, 0),
-    /* 0x112c: push   rbp [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR] */
-    /* 0x112d: mov    rbp,rsp [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR] */
-    /* 0x1130: push   r15 [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR] */
-    /* 0x1132: push   r14 [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR] */
-    /* 0x1134: push   r12 [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR] */
-    /* 0x1136: push   rbx [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR] */
+    /* 0x1126: ja     130f <flow_5tuple_rss_hash_xdp+0x20f> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
+    /* 0x112c: push   rbp [exact-kinsn: pushq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(HC_X86_RBP), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
+    /* 0x112d: mov    rbp,rsp [exact-kinsn: movq frame-register kinsn] */
+    HC_KINSN(HC_X86_FRAME_PAYLOAD(HC_X86_RBP, HC_X86_RSP), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x1130: push   r15 [exact-kinsn: pushq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_9), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
+    /* 0x1132: push   r14 [exact-kinsn: pushq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_8), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
+    /* 0x1134: push   r12 [exact-kinsn: pushq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(HC_X86_R12), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
+    /* 0x1136: push   rbx [exact-kinsn: pushq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
     /* 0x1137: movzx  edi,WORD PTR [rcx+0x14] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_X86_MEM_PAYLOAD(BPF_REG_1, BPF_REG_4, 20), MICRO_HANDCRAFT_BPF_X86_MOVZWL),
     /* 0x113b: rol    di,0x8 [exact-kinsn: rolw imm8 kinsn] */
@@ -65,14 +65,12 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_1, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_MOVZWL),
     /* 0x1142: cmp    edi,0x800 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_1, 2048), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x1148: jne    1307 <flow_5tuple_rss_hash_xdp+0x207> [bpf-branch: verifier-visible branch from preceding cmp    edi,0x800; cmp kinsn is preserved] */
-    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_1, 0, 245, 2048),
+    /* 0x1148: jne    1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
     /* 0x114e: lea    rdi,[rcx+0x2a] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_1, BPF_REG_4, 0, 0, 1, 0, 42), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1152: cmp    rdi,rdx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_1, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1155: ja     1307 <flow_5tuple_rss_hash_xdp+0x207> [bpf-branch: verifier-visible branch from preceding cmp    rdi,rdx; cmp kinsn is preserved] */
-    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_1, BPF_REG_3, 240, 0),
+    /* 0x1155: ja     1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
     /* 0x115b: movzx  edi,BYTE PTR [rsi] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_X86_MEM_PAYLOAD(BPF_REG_1, BPF_REG_2, 0), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
     /* 0x115e: mov    r8d,edi [exact-kinsn: movl register-to-register kinsn] */
@@ -81,18 +79,17 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_5, 240), MICRO_HANDCRAFT_BPF_X86_ANDB),
     /* 0x1165: cmp    r8b,0x40 [exact-kinsn: cmpb reg,imm8 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_5, 64), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x1169: jne    1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: jcc has no immediately preceding branchable cmp/test; needs a machine-level branch kinsn] */
+    /* 0x1169: jne    1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
     /* 0x116f: and    edi,0xf [exact-kinsn: and32 imm kinsn] */
     HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_1, 15), MICRO_HANDCRAFT_BPF_X86_ANDL),
     /* 0x1172: cmp    dil,0x5 [exact-kinsn: cmpb reg,imm8 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_1, 5), MICRO_HANDCRAFT_BPF_X86_CMPB),
-    /* 0x1176: jb     1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: jcc has no immediately preceding branchable cmp/test; needs a machine-level branch kinsn] */
+    /* 0x1176: jb     1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
     /* 0x117c: lea    rsi,[rsi+rdi*4] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_2, BPF_REG_1, 2, 1, 1, 0), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1180: cmp    rsi,rdx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_2, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x1183: ja     1307 <flow_5tuple_rss_hash_xdp+0x207> [bpf-branch: verifier-visible branch from preceding cmp    rsi,rdx; cmp kinsn is preserved] */
-    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_2, BPF_REG_3, 223, 0),
+    /* 0x1183: ja     1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
     /* 0x1189: movzx  r11d,BYTE PTR [rcx+0x18] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_X86_MEM_PAYLOAD(HC_X86_R11, BPF_REG_4, 24), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
     /* 0x118e: movzx  edi,BYTE PTR [rcx+0x19] [exact-kinsn: direct memory load via x86 kinsn selector] */
@@ -101,18 +98,15 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_MEM_PAYLOAD(BPF_REG_6, BPF_REG_4, 31), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
     /* 0x1196: cmp    ebx,0x11 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 17), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x1199: je     11a4 <flow_5tuple_rss_hash_xdp+0xa4> [bpf-branch: verifier-visible branch from preceding cmp    ebx,0x11; cmp kinsn is preserved] */
-    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_6, 0, 3, 17),
+    /* 0x1199: je     11a4 <flow_5tuple_rss_hash_xdp+0xa4> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
     /* 0x119b: cmp    ebx,0x6 [exact-kinsn: cmpl reg,imm32 kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 6), MICRO_HANDCRAFT_BPF_X86_CMPL),
-    /* 0x119e: jne    1307 <flow_5tuple_rss_hash_xdp+0x207> [bpf-branch: verifier-visible branch from preceding cmp    ebx,0x6; cmp kinsn is preserved] */
-    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 211, 6),
+    /* 0x119e: jne    1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
     /* 0x11a4: lea    r8,[rsi+0x4] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_5, BPF_REG_2, 0, 0, 1, 0, 4), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x11a8: cmp    r8,rdx [exact-kinsn: cmpq reg,reg kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_5, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_CMPQ),
-    /* 0x11ab: ja     1307 <flow_5tuple_rss_hash_xdp+0x207> [bpf-branch: verifier-visible branch from preceding cmp    r8,rdx; cmp kinsn is preserved] */
-    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_5, BPF_REG_3, 206, 0),
+    /* 0x11ab: ja     1307 <flow_5tuple_rss_hash_xdp+0x207> [warning-unmapped: needs a machine-level x86 conditional-branch kinsn] */
     /* 0x11b1: mov    eax,r11d [exact-kinsn: movl register-to-register kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_0, HC_X86_R11), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x11b4: shl    eax,0x8 [exact-kinsn: shl32 imm kinsn] */
@@ -319,12 +313,17 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_3, BPF_REG_4, 7), MICRO_HANDCRAFT_BPF_X86_MOVB),
     /* 0x1302: mov    eax,0x2 [exact-kinsn: movl immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_0, 2), MICRO_HANDCRAFT_BPF_X86_MOVL),
-    /* 0x1307: pop    rbx [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR] */
-    /* 0x1308: pop    r12 [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR] */
-    /* 0x130a: pop    r14 [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR] */
-    /* 0x130c: pop    r15 [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR] */
-    /* 0x130e: pop    rbp [warning-unmapped: native stack-frame instruction belongs to ABI/prologue, not BPF verifier IR] */
-    /* 0x130f: ret [bpf-jit: BPF exit; kernel JIT emits the real return sequence] */
+    /* 0x1307: pop    rbx [exact-kinsn: popq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_POPQ),
+    /* 0x1308: pop    r12 [exact-kinsn: popq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(HC_X86_R12), MICRO_HANDCRAFT_BPF_X86_POPQ),
+    /* 0x130a: pop    r14 [exact-kinsn: popq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_8), MICRO_HANDCRAFT_BPF_X86_POPQ),
+    /* 0x130c: pop    r15 [exact-kinsn: popq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_9), MICRO_HANDCRAFT_BPF_X86_POPQ),
+    /* 0x130e: pop    rbp [exact-kinsn: popq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(HC_X86_RBP), MICRO_HANDCRAFT_BPF_X86_POPQ),
+    /* 0x130f: ret [abi-boundary: native ret maps to the BPF program exit boundary] */
     HC_EXIT(),
 };
 

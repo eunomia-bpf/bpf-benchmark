@@ -905,9 +905,11 @@ const handcraft_kinsn_desc &handcraft_kinsn_desc_for_selector(int selector)
         {MICRO_HANDCRAFT_BPF_X86_INCQ, "bpf_x86_alu", "bpf_x86_incq"},
         {MICRO_HANDCRAFT_BPF_X86_ADDB, "bpf_x86_alu", "bpf_x86_addb"},
         {MICRO_HANDCRAFT_BPF_X86_XORB, "bpf_x86_alu", "bpf_x86_xorb"},
+        {MICRO_HANDCRAFT_BPF_X86_SUBB, "bpf_x86_alu", "bpf_x86_subb"},
         {MICRO_HANDCRAFT_BPF_X86_CMPQ, "bpf_x86_cmov", "bpf_x86_cmpq"},
         {MICRO_HANDCRAFT_BPF_X86_CMPL, "bpf_x86_cmov", "bpf_x86_cmpl"},
         {MICRO_HANDCRAFT_BPF_X86_CMPB, "bpf_x86_cmov", "bpf_x86_cmpb"},
+        {MICRO_HANDCRAFT_BPF_X86_CMPW, "bpf_x86_cmov", "bpf_x86_cmpw"},
         {MICRO_HANDCRAFT_BPF_X86_CMOVNEL, "bpf_x86_cmov", "bpf_x86_cmovnel"},
         {MICRO_HANDCRAFT_BPF_X86_CMOVEL, "bpf_x86_cmov", "bpf_x86_cmovel"},
         {MICRO_HANDCRAFT_BPF_X86_ORB, "bpf_x86_alu", "bpf_x86_orb"},
@@ -919,8 +921,10 @@ const handcraft_kinsn_desc &handcraft_kinsn_desc_for_selector(int selector)
         {MICRO_HANDCRAFT_BPF_X86_XORL, "bpf_x86_alu", "bpf_x86_xorl"},
         {MICRO_HANDCRAFT_BPF_X86_ORQ, "bpf_x86_alu", "bpf_x86_orq"},
         {MICRO_HANDCRAFT_BPF_X86_ORL, "bpf_x86_alu", "bpf_x86_orl"},
+        {MICRO_HANDCRAFT_BPF_X86_ORW, "bpf_x86_alu", "bpf_x86_orw"},
         {MICRO_HANDCRAFT_BPF_X86_SHLQ, "bpf_x86_alu", "bpf_x86_shlq"},
         {MICRO_HANDCRAFT_BPF_X86_SHLL, "bpf_x86_alu", "bpf_x86_shll"},
+        {MICRO_HANDCRAFT_BPF_X86_SHLB, "bpf_x86_alu", "bpf_x86_shlb"},
         {MICRO_HANDCRAFT_BPF_X86_SHRQ, "bpf_x86_alu", "bpf_x86_shrq"},
         {MICRO_HANDCRAFT_BPF_X86_SHRL, "bpf_x86_alu", "bpf_x86_shrl"},
         {MICRO_HANDCRAFT_BPF_X86_SARQ, "bpf_x86_alu", "bpf_x86_sarq"},
@@ -928,6 +932,9 @@ const handcraft_kinsn_desc &handcraft_kinsn_desc_for_selector(int selector)
         {MICRO_HANDCRAFT_BPF_X86_ANDQ, "bpf_x86_alu", "bpf_x86_andq"},
         {MICRO_HANDCRAFT_BPF_X86_ANDL, "bpf_x86_alu", "bpf_x86_andl"},
         {MICRO_HANDCRAFT_BPF_X86_SHRB, "bpf_x86_alu", "bpf_x86_shrb"},
+        {MICRO_HANDCRAFT_BPF_X86_TESTW, "bpf_x86_cmov", "bpf_x86_testw"},
+        {MICRO_HANDCRAFT_BPF_X86_POPQ, "bpf_x86_stack", "bpf_x86_popq"},
+        {MICRO_HANDCRAFT_BPF_X86_PUSHQ, "bpf_x86_stack", "bpf_x86_pushq"},
     };
 
     for (const auto &desc : descriptors) {

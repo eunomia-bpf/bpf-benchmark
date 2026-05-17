@@ -20,16 +20,21 @@ BTF_ID_FLAGS(func, bpf_x86_shrdq)
 BTF_KFUNCS_END(bpf_x86_shd_kfunc_ids)
 
 static __always_inline int decode_shd_payload(u64 payload, u8 *dst_reg,
-					      u8 *src_reg, u8 *imm)
+					      u8 *src_reg, u8 *imm,
+					      bool *arch_reg)
 {
+	payload = kinsn_payload_decode(payload);
 	*dst_reg = kinsn_payload_reg(payload, 0);
 	*src_reg = kinsn_payload_reg(payload, 4);
 	*imm = kinsn_payload_u8(payload, 8);
+	*arch_reg = !!(payload & (1ULL << 16));
 
-	if (payload >> 16)
+	if (payload >> 17)
 		return -EINVAL;
 	if (!kinsn_x86_operand_valid(*dst_reg) ||
 	    !kinsn_x86_operand_valid(*src_reg))
+		return -EINVAL;
+	if (*arch_reg && *dst_reg != BPF_REG_10 && *src_reg != BPF_REG_10)
 		return -EINVAL;
 
 	return 0;
@@ -42,10 +47,12 @@ static int instantiate_shd_imm(u64 payload, struct bpf_insn *insn_buf,
 	u8 width = is64 ? 64 : 32;
 	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0) |
 			   KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH1);
+	bool arch_reg;
 	int cnt = 0;
 	int err;
 
-	err = decode_shd_payload(payload, &dst_reg, &src_reg, &imm);
+	err = decode_shd_payload(payload, &dst_reg, &src_reg, &imm,
+				 &arch_reg);
 	if (err)
 		return err;
 	if (imm == 0 || imm >= width)
@@ -53,10 +60,17 @@ static int instantiate_shd_imm(u64 payload, struct bpf_insn *insn_buf,
 
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
 	if (is64) {
-		kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0,
-				  dst_reg);
-		kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH1,
-				  src_reg);
+		if (arch_reg) {
+			kinsn_x86_read64_arch(insn_buf, &cnt,
+					      KINSN_X86_SCRATCH0, dst_reg);
+			kinsn_x86_read64_arch(insn_buf, &cnt,
+					      KINSN_X86_SCRATCH1, src_reg);
+		} else {
+			kinsn_x86_read64(insn_buf, &cnt,
+					 KINSN_X86_SCRATCH0, dst_reg);
+			kinsn_x86_read64(insn_buf, &cnt,
+					 KINSN_X86_SCRATCH1, src_reg);
+		}
 		if (left) {
 			insn_buf[cnt++] = BPF_ALU64_IMM(BPF_RSH,
 							KINSN_X86_SCRATCH1,
@@ -75,13 +89,25 @@ static int instantiate_shd_imm(u64 payload, struct bpf_insn *insn_buf,
 		insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR,
 						KINSN_X86_SCRATCH0,
 						KINSN_X86_SCRATCH1);
-		kinsn_x86_write64(insn_buf, &cnt, dst_reg,
-				  KINSN_X86_SCRATCH0, scratch_mask);
+		if (arch_reg)
+			kinsn_x86_write64_arch(insn_buf, &cnt, dst_reg,
+					       KINSN_X86_SCRATCH0,
+					       scratch_mask);
+		else
+			kinsn_x86_write64(insn_buf, &cnt, dst_reg,
+					  KINSN_X86_SCRATCH0, scratch_mask);
 	} else {
-		kinsn_x86_read32(insn_buf, &cnt, KINSN_X86_SCRATCH0,
-				  dst_reg);
-		kinsn_x86_read32(insn_buf, &cnt, KINSN_X86_SCRATCH1,
-				  src_reg);
+		if (arch_reg) {
+			kinsn_x86_read32_arch(insn_buf, &cnt,
+					      KINSN_X86_SCRATCH0, dst_reg);
+			kinsn_x86_read32_arch(insn_buf, &cnt,
+					      KINSN_X86_SCRATCH1, src_reg);
+		} else {
+			kinsn_x86_read32(insn_buf, &cnt,
+					 KINSN_X86_SCRATCH0, dst_reg);
+			kinsn_x86_read32(insn_buf, &cnt,
+					 KINSN_X86_SCRATCH1, src_reg);
+		}
 		if (left) {
 			insn_buf[cnt++] = BPF_ALU32_IMM(BPF_RSH,
 							KINSN_X86_SCRATCH1,
@@ -100,8 +126,13 @@ static int instantiate_shd_imm(u64 payload, struct bpf_insn *insn_buf,
 		insn_buf[cnt++] = BPF_ALU32_REG(BPF_OR,
 						KINSN_X86_SCRATCH0,
 						KINSN_X86_SCRATCH1);
-		kinsn_x86_write32(insn_buf, &cnt, dst_reg,
-				  KINSN_X86_SCRATCH0, scratch_mask);
+		if (arch_reg)
+			kinsn_x86_write32_arch(insn_buf, &cnt, dst_reg,
+					       KINSN_X86_SCRATCH0,
+					       scratch_mask);
+		else
+			kinsn_x86_write32(insn_buf, &cnt, dst_reg,
+					  KINSN_X86_SCRATCH0, scratch_mask);
 	}
 	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
 	return cnt;
@@ -133,17 +164,21 @@ static int emit_shd_imm_x86(u8 *image, u32 *off, bool emit, u64 payload,
 {
 	u8 buf[8];
 	u8 dst_reg, src_reg, imm;
+	bool arch_reg;
 	u32 len = 0;
 	int err;
 
-	err = decode_shd_payload(payload, &dst_reg, &src_reg, &imm);
+	err = decode_shd_payload(payload, &dst_reg, &src_reg, &imm,
+				 &arch_reg);
 	if (err)
 		return err;
 	if (imm == 0 || imm >= (is64 ? 64 : 32))
 		return -EINVAL;
 
-	dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
-	src_reg = kinsn_x86_reg_for_prog(prog, src_reg);
+	if (!arch_reg) {
+		dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
+		src_reg = kinsn_x86_reg_for_prog(prog, src_reg);
+	}
 	if (!kinsn_x86_valid(dst_reg) || !kinsn_x86_valid(src_reg))
 		return -EINVAL;
 

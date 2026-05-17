@@ -1,6 +1,6 @@
 # Micro Benchmark Evaluation Status
 
-Last updated: 2026-05-15
+Last updated: 2026-05-16
 
 This document is the current evaluation note for the micro benchmark suite. It is written as an evaluation-section draft: what was measured, how it was measured, what the result says, and where the remaining native-code gap comes from.
 
@@ -236,12 +236,12 @@ Current converter inventory after regenerating all 29 checked-in handcraft sourc
 
 | Metric | Count |
 |---|---:|
-| Native instructions parsed | 3657 |
-| Exact machine-kinsn translations | 934 |
-| Ordinary BPF translations expected to JIT acceptably | 918 |
-| Verifier-visible BPF branches | 385 |
+| Native instructions parsed | 3660 |
+| Exact machine-kinsn translations | 3002 |
+| Ordinary BPF translations expected to JIT exactly | 49 |
+| ABI-boundary instructions | 50 |
 | Padding/nop instructions dropped | 45 |
-| Unsupported / warning instructions kept as comments | 1375 |
+| Unsupported / warning instructions kept as comments | 514 |
 
 The converter is mechanical: it does not replace a native instruction cluster with a hand-written BPF state machine. A native instruction is either emitted as a single named machine kinsn, emitted as ordinary BPF when the kernel JIT is expected to produce an acceptable branch/load/store form, or left as an inline warning comment in the generated `.handcraft.c`. Manual edits are allowed only to repair generated source while preserving one native instruction to one handcraft instruction as closely as possible.
 
@@ -249,20 +249,18 @@ The branch rule is deliberately narrower than CFG construction. User space may k
 
 Flags have the opposite ownership. The converter should not build a `cmp/test` adjacency proof for `setcc/cmov/jcc`. Flag-producing kinsns update module-owned stack-shadow flag slots in their verifier-facing `instantiate_insn()`, and flag-consuming kinsns read those slots. User space should only emit the flag producer and consumer kinsns in native order plus the branch relocation offset. The `cmov*` machine selectors were renamed from operand-form names like `cmovneq_rr` to instruction names like `cmovneq`; the payload carries whether the operands are ordinary regs, shadow regs, or another supported form.
 
-The main remaining warning classes are native ABI/prologue/spill code, unsupported host registers (`r10/r11/r12/rbp/rsp`), RIP-relative table/data references, incomplete shadow-flag coverage for carry/sign/overflow consumers, and application context ABI mismatches. Register remapping is no longer converter policy: unsupported native registers must be represented by module-owned shadow state or reported as missing instruction/register support. Control-flow is the least one-to-one part today: `cmp/test` instructions can be emitted as exact kinsns, but a following `jcc` is still usually represented as verifier-visible BPF branch unless and until a branch kinsn can read module shadow flags and use the user-space relocation offset.
+The main remaining warning classes are program-level control flow (`jcc`, direct/indirect `jmp`), shadow-register `movabs` immediates that exceed the current sidecar payload capacity, RIP-relative table/data references, local native `call`, and one unsafe unsigned `div` site. Register remapping is no longer converter policy: unsupported native registers must be represented by module-owned shadow state or reported as missing instruction/register support. `cmp/test` instructions can be emitted as exact kinsns, and `setge` now has a stack-shadow proof path through the signed-ge condition slot; branch kinsns still require a separate control-flow ABI rather than a converter-side semantic fallback.
 
 The regenerated sources currently include these flag-related exact kinsn sites:
 
 | Kinsn selector family | Generated sites |
 |---|---:|
-| `cmpq reg,reg` | 106 |
-| `cmpl reg,reg` | 1 |
-| `cmpq imm32` | 43 |
-| `cmpl imm32` | 74 |
-| `sete` / `setne` / `setge` | 4 |
-| `cmove` / `cmovne` / `cmovb` | 20 |
+| `cmpq` / `cmpl` / `cmpw` / `cmpb` | 319 |
+| `testq` / `testl` / `testw` / `testb` | 29 |
+| `sete` / `setne` / `setge` | 5 |
+| `cmove` / `cmovne` / `cmovb` | 22 |
 
-The `cmov` count now reflects direct stack-shadow-flag payload emission. Missing flag cases are module feature gaps: unsupported flag kind, unsupported operand/register form, or a missing branch kinsn.
+The `setcc` and `cmov` counts now reflect direct stack-shadow-flag payload emission. Missing flag cases are module feature gaps: unsupported condition kind, unsupported operand/register form, or a missing branch kinsn.
 
 The current per-case handcraft smoke uses:
 
@@ -322,6 +320,19 @@ Tests that only preserved old compatibility names were deleted; real bugs such
 as `dst == condition` are kept as compact instruction-sequence tests in the main
 kinsn unittest.
 
+Strict converter scan status after the latest cleanup: every `micro/programs/*.md`
+was translated with warnings embedded directly in the generated C. The largest
+remaining warning classes are now architectural gaps, not hidden fallbacks:
+`jcc/jmp` control flow, native `rbp` as a general-purpose register, 64-bit
+`movabs` immediates that exceed the current sidecar payload capacity, XDP
+native-host context-field ABI differences, and a small tail of byte/word ALU or
+compare forms. `packet_checksum_fold` now maps native `inc eax` to
+`bpf_x86_incl` instead of lowering it through ordinary BPF. The follow-up stack
+scan after adding `rsp` and stack kinsns maps `pushq/popq`,
+`mov rbp,rsp`/`mov rsp,rbp`, and `[rsp+disp]` memory operands directly; the
+remaining register warnings are concentrated on native `rbp` data uses such as
+`movzx ebp,[...]`, `xor ebp,*`, `test bpl,*`, and `rol bp,8`.
+
 | x86 Insn/Form | Existing bpfopt Pass Path | Machine-Kinsn Path | Verifier-Facing Instantiation | Current Test Status | Remaining Gap |
 |---|---|---|---|---|---|
 | `leaq` / `leal` | `lea` rewrites BPF address idioms; full run applied `552/552` | `bpf_x86_leaq`, `bpf_x86_leal` | verifier-native `dst = base + index * scale + disp` BPF sequence | used by `simple`, `simple_packet`, `siphash_rotate64_mixer`; JIT body parity passes | scaled add-chain recovery in automatic pass is still narrower than native addressing forms |
@@ -338,16 +349,17 @@ kinsn unittest.
 | `movswl reg,reg` and `movsxd disp(base,index,scale),reg` | no automatic pass yet | `bpf_x86_movswl`, `bpf_x86_movsxd` | sign-extension BPF sequence (`load/move + lsh + arsh`) | module builds; unit tests compile; converter now maps current `movsx/movsxd` opportunities when registers are representable | unsupported native registers still block some table/dispatch cases |
 | `addl/xorl/xorw reg, disp(base)` and `xorb reg, disp(base,index,scale)` | ordinary BPF needs separate load + ALU | `bpf_x86_addl`, `bpf_x86_xorl`, `bpf_x86_xorw`, `bpf_x86_xorb` | verifier sees load + ALU, with upper-bit preservation for byte/word forms | module builds; unit tests compile; converter now covers Toeplitz/Katran/Cilium/string-scan memory-source ALU forms when registers are representable | 64-bit stack-spill ABI forms and unsupported host registers remain outside BPF-level parity |
 | `shldl/shldq/shrdl/shrdq imm` | ordinary BPF expands to shift/or | `bpf_x86_shldl`, `bpf_x86_shldq`, `bpf_x86_shrdl`, `bpf_x86_shrdq` | temp-register shift/or BPF sequence | module builds; unit tests compile; converter maps representable `shld/shrd` forms | current residual `shrd` markdown sites use unsupported native registers |
-| `addq/addl/subq/subl/xorq/xorl/orq/orl/shl/shr/sar imm-or-reg` | ordinary BPF ALU maps only BPF-register-visible cases; shadow native regs need explicit proof state | `bpf_x86_addq`, `bpf_x86_addl`, `bpf_x86_subq`, `bpf_x86_subl`, `bpf_x86_xorq`, `bpf_x86_xorl`, `bpf_x86_orq`, `bpf_x86_orl`, `bpf_x86_shlq`, `bpf_x86_shll`, `bpf_x86_shrq`, `bpf_x86_shrl`, `bpf_x86_sarq`, `bpf_x86_sarl` | one consolidated payload records operand form; verifier loads/stores shadow regs from stack only for proof, final emit remains one x86 ALU instruction | `siphash_rotate64_mixer` now verifies and returns native result: native 36 ns, kernel 66 ns, handcraft 49 ns | byte-width ALU and variable-count shifts still need the same consolidated treatment; keep `btf_id_set` and descriptor arrays in resolved BTF-id order |
+| `addq/addl/subq/subl/xorq/xorl/orq/orl/shl/shr/sar imm-or-reg` | ordinary BPF ALU maps only BPF-register-visible cases; shadow native regs need explicit proof state | `bpf_x86_addq`, `bpf_x86_addl`, `bpf_x86_subq`, `bpf_x86_subl`, `bpf_x86_xorq`, `bpf_x86_xorl`, `bpf_x86_orq`, `bpf_x86_orl`, `bpf_x86_shlq`, `bpf_x86_shll`, `bpf_x86_shrq`, `bpf_x86_shrl`, `bpf_x86_sarq`, `bpf_x86_sarl` | one consolidated payload records operand form; verifier loads/stores shadow regs from stack only for proof, final emit remains one x86 ALU instruction | `siphash_rotate64_mixer` now verifies and returns native result: native 36 ns, kernel 66 ns, handcraft 49 ns | keep `btf_id_set` and descriptor arrays in resolved BTF-id order; uncommon operand forms should be added to the same mnemonic selector, not as `_rr/_imm/_mem` aliases |
+| `cmpq/cmpl/cmpw/cmpb` and `testq/testl/testw/testb` | BPF branches normally fuse compare/test with branch, but do not leave reusable flags | `bpf_x86_cmp*`, `bpf_x86_test*` | `cmp*` updates ZF, CF, and a signed-ge condition slot; narrow compares sign-extend for the signed condition; `test*` updates ZF/CF | module builds; unit tests cover 8/16/32/64-bit cmp/test forms including `testb [mem], imm`; converter emits current cmp/test sites directly | branch consumers still need machine branch ABI; broader SF/OF consumers should extend the same shadow-flag model |
 | `testq/testb` + `cmoveq/cmovneq` | `cond_select` is the automatic branchless-select path | `bpf_x86_testq`, `bpf_x86_testb`, `bpf_x86_cmoveq`, `bpf_x86_cmovneq` | verifier uses module shadow flags for handcraft, and the legacy cond-reg payload for the automatic `cond_select` proof path; final x86 emits one `cmov*` instruction | covered by unit tests, including `dst == condition` overlap; converter emits `cmov` sites directly with stack-shadow-flag payloads | automatic pass still needs proof that no flags/condition dependency is broken before it can use the shadow-flag mode |
-| `setne/sete/setge`, `cmovbl/cmovbq`, `sbbl imm0` | no automatic pass yet | `bpf_x86_setne`, `bpf_x86_sete`, `bpf_x86_setge`, `bpf_x86_cmovbl`, `bpf_x86_cmovbq`, `bpf_x86_sbbl` | verifier uses stack-shadow flags for handcraft; final x86 consumes adjacent physical flags | modules build; unit tests cover `cmovb*` and `setcc`; generated `cmov` sites are exact kinsns now | `setge` still needs full SF/OF proof; `sbb` needs CF stack-shadow payload support before broad handcraft conversion |
+| `setne/sete/setge`, `cmovbl/cmovbq`, `sbbl imm0` | no automatic pass yet | `bpf_x86_setne`, `bpf_x86_sete`, `bpf_x86_setge`, `bpf_x86_cmovbl`, `bpf_x86_cmovbq`, `bpf_x86_sbbl` | verifier uses stack-shadow flags/conditions for handcraft; final x86 consumes adjacent physical flags | modules build; unit tests cover `cmovb*`, `setcc`, and `cmpl; setge` true/false stack-shadow proof; generated `setge`/`cmov` sites are exact kinsns now | `sbb` needs broader CF stack-shadow payload support before broad handcraft conversion |
 | `popcntq` | no automatic pass yet | `bpf_x86_popcntq` | scalar popcount fallback sequence | covered by `bitmap_popcount_scan`; handcraft verifies, returns the native result, and dumps `popcnt rdi,rdi`; measured 475 ns vs native 467 ns and kernel BPF 1131 ns | add automatic scalar-pattern pass only after workload evidence says it matters |
 | `blsiq` / `blsrq` | no automatic pass yet | `bpf_x86_blsiq`, `bpf_x86_blsrq` | `x & -x` / `x & (x - 1)` BPF sequence | selector exists; needs bitmap traversal coverage | same as `popcntq`: useful for bitmap cases, not yet broad |
-| `andb/xorb/addb imm8`, `xorb r8,r8`, `incl/incq` | ordinary BPF emits wider ALU or `add imm 1` forms | `bpf_x86_andb`, `bpf_x86_xorb`, `bpf_x86_addb`, `bpf_x86_incl`, `bpf_x86_incq`; operand form in payload | byte ops preserve upper bits through temp-register verifier BPF; `xorb imm8` is direct XOR of low mask; `incl/incq` are direct `ADD 1` proof forms | `andb`/`incq` covered by `bitmap_popcount_scan`; `incl` added for native `inc eax` sites; `xorb`/`addb` covered by `payload_prefix_memcmp_scan`, which now verifies and returns the native result | these are parity-only machine-instruction gaps, not independent high-level transforms |
+| `andb/xorb/addb/subb/orw/shlb`, `xorb r8,r8`, `incl/incq` | ordinary BPF emits wider ALU or `add imm 1` forms | `bpf_x86_andb`, `bpf_x86_xorb`, `bpf_x86_addb`, `bpf_x86_subb`, `bpf_x86_orw`, `bpf_x86_shlb`, `bpf_x86_incl`, `bpf_x86_incq`; operand form in payload | byte/word ops preserve upper bits through temp-register verifier BPF; `incl/incq` are direct `ADD 1` proof forms | unit tests cover newly exposed `subb`, `orw`, and `shlb`; converter no longer warns for the corresponding native forms seen in checked-in handcraft sources | these are parity-only machine-instruction gaps, not independent high-level transforms |
 | `shrq imm`, `andl imm32`, `sar imm` | ordinary BPF ALU often maps acceptably | `bpf_x86_shrq`, `bpf_x86_andl`; `sar imm` currently stays ordinary BPF | direct BPF ALU operation | selector exists where needed; converter no longer treats `sar imm` as a missing kinsn | not a high-level transform by itself |
 | `prefetcht0` | `prefetch` pass applied `9/9` in full run | `bpf_x86_prefetcht0` | verifier-safe no-value prefetch semantics | selector exists | not a dominant native-code gap in the inspected cases |
 | `cmp/test + jcc` | ordinary BPF branches lower to compare/test plus jump as one BPF semantic unit | `cmp/test` kinsns exist; standalone `jcc/jmp` kinsns are still missing | strict handcraft now warns instead of synthesizing a BPF branch from the preceding compare | converter no longer has `BranchableCmp`/`cmp+jcc` fallback; branch-heavy handcraft cases remain blocked until branch kinsns or an explicit ABI boundary exist | branch payload must carry verifier branch offset and native rel displacement; kernel must not do relocation |
-| `pushq` / `popq`, `mov rbp,rsp`, `ret` | ordinary BPF prologue/epilogue is generated by the kernel JIT, not by BPF bytecode | missing explicit machine-level stack/frame kinsns; `ret` is handled as the explicit BPF exit boundary | strict handcraft now warns for stack-frame instructions; it no longer treats native prologue/epilogue as ignorable padding | current converter exposes push/pop/rbp-rsp as blockers in generated comments and emits `HC_EXIT()` for `ret` | `BPF_REG_10` currently means verifier FP while native `rbp` is an x86 architectural register; full prologue copying needs a precise frame-state payload before it can be verifier-safe |
+| `pushq` / `popq`, `mov rbp,rsp`, `[rsp+disp]`, `ret` | ordinary BPF prologue/epilogue is generated by the kernel JIT, not by BPF bytecode | `bpf_x86_pushq`, `bpf_x86_popq`, and `bpf_x86_movq` frame payload; `rsp` is payload register `15`; `ret` is the explicit BPF exit boundary | verifier uses a stack-shadow `RSP` slot initialized by handcraft prelude and stack-shadow `RBP` only for frame moves; final emit is one `pushq`, `popq`, or `movq` instruction | module builds; converter no longer warns for `push/pop`, `mov rbp,rsp`, `mov rsp,rbp`, or `[rsp+disp]`; unit tests cover `push/pop` and frame-move proof paths | native `rbp` as a general data register still needs payload ABI work because `BPF_REG_10` is also verifier FP |
 | dense switch jump/table load | no automatic pass | partial handcraft path only: exact `movl` SIB for input field, verifier-visible repaired table load | compare tree today for normal BPF; handcraft stages the native 512 B switch table after packet payload | `trace_event_type_switch_dispatch` now verifies and runs: native 54 ns, kernel 310 ns, handcraft 87 ns, result `16`; final JIT is close in hot-loop shape but has an extra table-tail bounds proof and no RIP-relative rodata table | needs automatic switch/table recovery and a real rodata/table side channel instead of packet-tail staging |
 | local `callq` / bpf2bpf call layout | no automatic local-inline pass | no machine-call kinsn path | bpf2bpf call ABI | not covered by handcraft parity | requires interprocedural transform, not only single-instruction kinsns |
 
