@@ -749,7 +749,9 @@ fn rewrite(
     Ok(RewriteResult { blob, relocs: Vec::new() })
 }
 
-/// Helper trampoline body. Encoded as:
+/// Walk the ELF .text relocations attached to the bytes we just encoded.
+///
+/// Helper trampoline layout emitted inline at each unique helper reloc:
 ///
 ///     ff 25 00 00 00 00          jmp QWORD PTR [rip+0]   ; 6 bytes
 ///     <u64 absolute helper addr>                          ; 8 bytes
@@ -758,9 +760,7 @@ fn rewrite(
 /// which holds the absolute kernel address of the helper. Total: 14 bytes
 /// per unique helper. Multiple PLT32 call sites targeting the same
 /// helper share a single trampoline.
-const TRAMPOLINE_LEN: usize = 14;
-
-/// Walk the ELF .text relocations attached to the bytes we just encoded.
+///
 /// For each PLT32 helper reloc, emit (or reuse) a tail trampoline and
 /// rewrite the call disp32 in the body to point at it.
 fn apply_elf_relocations(
@@ -1083,135 +1083,9 @@ fn apply_elf_relocations(
         }
     }
 
-    let _ = TRAMPOLINE_LEN; // referenced by the design comment / future map path.
     Ok(())
 }
 
-/// Legacy: kept for cargo deadcode warning silence; superseded by
-/// apply_elf_relocations. To be deleted in a follow-up.
-#[allow(dead_code)]
-fn collect_elf_relocations(
-    elf: &object::File,
-    layouts: &[SymbolLayout],
-    helper_addrs: &HashMap<String, u64>,
-    map_addrs: &HashMap<String, u64>,
-) -> Result<Vec<RelocRecord>> {
-    if layouts.is_empty() {
-        return Ok(Vec::new());
-    }
-    // All included symbols live in the same section (.text in a typical
-    // -c -o foo.o build). Group them by section to walk that section's
-    // relocations once. In practice we only ever see one section.
-    let mut sections: HashMap<object::SectionIndex, Vec<&SymbolLayout>> = HashMap::new();
-    for layout in layouts {
-        sections
-            .entry(layout.sym.section_index)
-            .or_default()
-            .push(layout);
-    }
-
-    let mut out: Vec<RelocRecord> = Vec::new();
-    for (section_index, layouts_in_sec) in &sections {
-        let section = elf
-            .section_by_index(*section_index)
-            .with_context(|| format!("section {:?}", section_index))?;
-        for (reloc_offset, reloc) in section.relocations() {
-            // Find which included symbol's byte range this reloc falls in.
-            let owning_layout = layouts_in_sec.iter().find(|l| {
-                reloc_offset >= l.sym.address && reloc_offset < l.sym.address + l.sym.size
-            });
-            let Some(layout) = owning_layout else { continue };
-
-            // Resolve target symbol name.
-            let target_name: String = match reloc.target() {
-                RelocationTarget::Symbol(idx) => {
-                    let sym = elf
-                        .symbol_by_index(idx)
-                        .with_context(|| format!("reloc target symbol {idx:?}"))?;
-                    sym.name()
-                        .map_err(|e| anyhow!("reloc target symbol name: {e}"))?
-                        .to_string()
-                }
-                _ => continue,
-            };
-
-            // Raw ELF r_type for precise matching.
-            let r_type = match reloc.flags() {
-                RelocationFlags::Elf { r_type } => r_type,
-                _ => continue,
-            };
-
-            // Local offset of the patch site within the owning symbol.
-            let local_patch_off = reloc_offset - layout.sym.address;
-
-            match r_type {
-                // R_X86_64_PLT32 = 4. clang emits this for `call helper`.
-                // The reloc offset is the byte position of the 4-byte
-                // disp32 field; the 0xE8 opcode sits at offset-1.
-                4 => {
-                    let helper_addr = match helper_addrs.get(&target_name) {
-                        Some(a) => *a,
-                        None => bail!(
-                            "PLT32 relocation against unknown helper {}: \
-                             pass --helper {}=0x... on the command line",
-                            target_name,
-                            target_name
-                        ),
-                    };
-                    let opcode_local_off = local_patch_off
-                        .checked_sub(1)
-                        .ok_or_else(|| anyhow!("PLT32 reloc at offset 0?"))?;
-                    let insn_idx = layout
-                        .insn_local_ip
-                        .iter()
-                        .position(|&ip| ip == opcode_local_off)
-                        .ok_or_else(|| {
-                            anyhow!(
-                                "PLT32 reloc at {:#x} (opcode at {:#x}) does not align \
-                                 with any decoded instruction in symbol {}",
-                                local_patch_off,
-                                opcode_local_off,
-                                layout.sym.name
-                            )
-                        })?;
-                    let new_opcode_off = layout.base_in_blob
-                        + layout.new_offset_in_sym[insn_idx] as usize;
-                    out.push(RelocRecord {
-                        offset: u32::try_from(new_opcode_off)
-                            .context("new_opcode_off exceeds u32")?,
-                        kind: RelocKind::CallRel32 as u32,
-                        target: helper_addr,
-                    });
-                }
-                // R_X86_64_REX_GOTPCRELX = 42, R_X86_64_GOTPCRELX = 41,
-                // R_X86_64_GOTPCREL = 9. clang emits these for &my_map
-                // accesses through GOT. Stage 2 will splice a literal
-                // pool entry into the blob and rewrite the disp32; for
-                // the first POC we only support helper PLT32 relocs.
-                9 | 41 | 42 => {
-                    if !map_addrs.contains_key(&target_name) {
-                        bail!(
-                            "GOT-relative relocation against unknown map symbol {}",
-                            target_name
-                        );
-                    }
-                    bail!(
-                        "map relocations (GOTPCREL against {}) not yet implemented in this POC",
-                        target_name
-                    );
-                }
-                _ => bail!(
-                    "unsupported relocation r_type={} against symbol {} (offset {:#x})",
-                    r_type,
-                    target_name,
-                    reloc_offset
-                ),
-            }
-        }
-    }
-    let _ = map_addrs; // silence unused warning until maps are wired in
-    Ok(out)
-}
 
 fn containing_symbol(included: &[SymInfo], address: u64) -> Option<u64> {
     for s in included {

@@ -118,6 +118,15 @@ constant propagation may specialize fixed `(op, dst, src, aux, imm)` records so
 the kernel verifier can analyze the eBPF program, but the correctness statement
 is over the C-authored interpreter/helper relation above.
 
+Compile-cost fixes must preserve this boundary. Python may continue to emit the
+simple native instruction stream and label metadata, but it must not grow
+program-shape logic to make a hard case easier for clang or the verifier. Any
+compile-cost reduction belongs in the C-authored interpreter/header/macro layer:
+helper factoring, inline/noinline boundaries, macro shape, state layout, and
+ISA-semantics factoring are valid places to change. Python-side helper
+selection, loop recognition, control-flow reconstruction, state specialization,
+or benchmark-specific workarounds are outside this spec.
+
 ### Arithmetic And Flags
 
 Arithmetic helpers update destination register values using x86 width rules:

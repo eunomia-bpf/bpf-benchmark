@@ -110,10 +110,18 @@ Latest complete generated-C batch after removing benchmark-name special
 renderers and moving loop/ABI capability protocol into C-authored helpers:
 
 ```sh
-sudo -n python3 ebpf-vm/x86/micro-prog/run_micro_interpreter_batch.py \
-  --native-source object-no-jump-tables --no-build-loader \
-  --markdown /tmp/reversejit-current-micro-status-$(id -u).md
+python3 ebpf-vm/x86/micro-prog/run_micro_interpreter_batch.py \
+  --native-source object-no-jump-tables --no-build-loader
 ```
+
+`run_micro_interpreter_batch.py` is the single active generated-C batch entry.
+It records `compile_s` in the Python harness and parses loader-reported
+`verify_s`/`test_s`, where `verify_s` is measured inside the Rust loader around
+`bpf_object__load()` or raw `bpf_prog_load()`. It runs in parallel by default
+with `--jobs min(8, ncpu)`; use `--jobs 1` only when a serial run is needed.
+Unless `--markdown` is specified, each run writes a timestamped result file
+under `ebpf-vm/x86/results/README-<timestamp>.md`; do not write status output to
+`/tmp`.
 
 The batch harness must not kill `clang` because compilation is slow. Clang
 compile time is part of the experiment surface for large generated verifier
@@ -135,10 +143,11 @@ The same two programs fail verifier load with `E2BIG`; all other programs load,
 run, and match expected result/retval.
 
 `current` is the active C-dispatch path (`generate_micro_proofs.py` +
-`x86_vm_bpf.h`). `helper-selection` is the restored backup path
-(`generate_micro_proofs_helper_selection.py` + `x86_vm_bpf_helper_selection.h`)
-used only as a compile-cost baseline. The helper-selection data was collected
-with `--jobs 8 --run-label parallel8`. Current rows are a combined run: the
+`x86_vm_bpf.h`). `helper-selection` is historical baseline data from the
+restored backup path (`generate_micro_proofs_helper_selection.py` +
+`x86_vm_bpf_helper_selection.h`); the separate compile-cost measurement script
+has been removed so new runs use only `run_micro_interpreter_batch.py`. Current
+rows are a combined run from before this consolidation: the
 first five rows and `trace_event_type_switch_dispatch` came from the no-timeout
 sequential run; the remaining rows came from `--jobs 8 --run-label
 parallel8-rest`. Parallel wall times include CPU contention by design; they are
@@ -215,7 +224,7 @@ specific generated-C spelling.
 Python LOC check for this cleanup and backup:
 
 ```text
-generate_micro_proofs.py:                  1763 -> 774 lines
+generate_micro_proofs.py:                  1763 -> 776 lines
 generate_micro_proofs_helper_selection.py: backup at 1503 lines
 x86_vm_bpf.h:                            202 -> 642 lines
 x86_vm_bpf_helper_selection.h:           backup at 533 lines
@@ -224,7 +233,8 @@ x86_vm_bpf_helper_selection.h:           backup at 533 lines
 The line movement is intentional: proof protocol complexity is being moved out
 of Python and into the C-authored interpreter/header where it can be specified
 and eventually verified with the helper semantics. The helper-selection backup is
-kept only as compile-cost evidence for this experiment.
+kept only as historical compile-cost evidence for this experiment; new
+generated-C timing runs use `run_micro_interpreter_batch.py`.
 
 The immediate generated-C target is now cleaner but not complete. JSON-link
 completion is a separate next experiment.
@@ -258,6 +268,14 @@ expected retval/result, and input selection. Python must not own loop lowering,
 call lowering, liveness, state-shape selection, helper selection, or
 verifier-workaround logic. Those belong in C-authored interpreter/spec code
 where they can be written once, specified, and eventually verified.
+
+Compile-cost reduction rule: keep the Python side simple even when clang
+compile time is high. Any attempt to reduce compile cost must happen inside the
+C-authored interpreter/header/macro layer, for example by changing helper
+structure, inline boundaries, macro shape, verifier-visible state layout, or
+instruction semantics factoring. Do not move control-flow reconstruction,
+helper selection, loop-shape analysis, state specialization, or benchmark
+workarounds back into Python to make a hard case compile faster.
 
 The aborted `__noinline -> __always_inline` plus `bpf_loop -> C for-loop`
 experiment showed why this line matters: doing that transformation in
@@ -588,8 +606,8 @@ the BPF stack. The practical C prototype still needs `-O1`/`-O2` for sane BPF
 code shape. The active generator now passes fixed opcode operands into
 C-authored dispatch; clang constant propagation is an engineering mechanism for
 making that C shape verifier-friendly, not part of the correctness argument. The
-restored direct-helper generator is retained only as the compile-cost baseline
-recorded above.
+restored direct-helper generator is retained only as historical compile-cost
+baseline evidence recorded above.
 
 ## Current Issues
 

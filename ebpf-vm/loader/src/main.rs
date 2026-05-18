@@ -9,6 +9,7 @@ use std::os::unix::ffi::OsStrExt;
 use std::path::PathBuf;
 use std::process;
 use std::ptr;
+use std::time::Instant;
 
 use libbpf_sys::{bpf_object_open_opts, size_t};
 use object::{Object, ObjectSection, ObjectSymbol};
@@ -263,19 +264,31 @@ fn main() {
 fn run() -> Result<()> {
     let cli = parse_cli()?;
     let json_mode = cli.json.is_some();
+    let verify_s: f64;
     let (prog_fd, loaded_name): (c_int, String) = if let Some(json) = &cli.json {
         let linked = build_json_linked_program(json, &cli.template_object)?;
-        (
-            load_raw_xdp_program(&cli.program, &linked.insns)?,
-            json.display().to_string(),
-        )
+        let start = Instant::now();
+        let fd = match load_raw_xdp_program(&cli.program, &linked.insns) {
+            Ok(fd) => fd,
+            Err(err) => {
+                print_timing(start.elapsed().as_secs_f64(), 0.0);
+                return Err(err);
+            }
+        };
+        verify_s = start.elapsed().as_secs_f64();
+        (fd, json.display().to_string())
     } else {
         let object_path = cli
             .object
             .as_ref()
             .ok_or_else(|| "--object or --json is required".to_string())?;
         let mut object = open_object(object_path, cli.verifier_log.clone())?;
-        load_object(&mut object)?;
+        let start = Instant::now();
+        if let Err(err) = load_object(&mut object) {
+            print_timing(start.elapsed().as_secs_f64(), 0.0);
+            return Err(err);
+        }
+        verify_s = start.elapsed().as_secs_f64();
         let fd = program_fd(&object, &cli.program)?;
         if cli.load_only {
             println!(
@@ -284,6 +297,7 @@ fn run() -> Result<()> {
                 cli.program,
                 fd
             );
+            print_timing(verify_s, 0.0);
             return Ok(());
         }
         std::mem::forget(object);
@@ -295,6 +309,7 @@ fn run() -> Result<()> {
             "loaded input={} program={} fd={}",
             loaded_name, cli.program, prog_fd
         );
+        print_timing(verify_s, 0.0);
         return Ok(());
     }
 
@@ -313,26 +328,32 @@ fn run() -> Result<()> {
         ..Default::default()
     };
 
+    let start = Instant::now();
     let ret = unsafe { bpf_prog_test_run_opts(prog_fd, &mut opts) };
+    let test_s = start.elapsed().as_secs_f64();
     if ret != 0 {
+        print_timing(verify_s, test_s);
         return Err(format!(
             "bpf_prog_test_run_opts failed: {}",
             io::Error::last_os_error()
         ));
     }
     if opts.retval != cli.expect_retval {
+        print_timing(verify_s, test_s);
         return Err(format!(
             "unexpected XDP retval: got {}, expected {}",
             opts.retval, cli.expect_retval
         ));
     }
     if opts.data_size_out < 8 {
+        print_timing(verify_s, test_s);
         return Err(format!("short data_size_out: {}", opts.data_size_out));
     }
 
     let result = read_le_u64(&output[XVM_OUTPUT_OFF..XVM_OUTPUT_OFF + 8]);
     let expected_result = cli.expected_result.unwrap_or(SIMPLE_EXPECTED);
     if result != expected_result {
+        print_timing(verify_s, test_s);
         return Err(format!(
             "result mismatch: got {result}, expected {expected_result}"
         ));
@@ -342,7 +363,12 @@ fn run() -> Result<()> {
         "case={} retval={} result={} repeat={} data_size_out={}",
         cli.case_name, opts.retval, result, cli.repeat, opts.data_size_out
     );
+    print_timing(verify_s, test_s);
     Ok(())
+}
+
+fn print_timing(verify_s: f64, test_s: f64) {
+    println!("timing verify_s={verify_s:.6} test_s={test_s:.6}");
 }
 
 fn parse_cli() -> Result<Cli> {
