@@ -351,7 +351,81 @@ struct LinkerOutput {
 struct CompanionLoad {
     bpf_object *obj = nullptr;
     std::unordered_map<std::string, uint64_t> map_addrs;
+    /* Set when at least one map in the program is a BPF_MAP_TYPE_HASH;
+     * carries the kernel address of __htab_map_lookup_elem and the
+     * post-call `add rax, imm` offset (key offset within struct
+     * htab_elem) as extracted from the BPF JIT image. Used to feed
+     * native-link's --inline-hash-lookup flag so userspace code matches
+     * the kernel JIT's inlined HASH lookup sequence and closes the
+     * ~3x gap against `call bpf_map_lookup_elem`. */
+    bool hash_inline_set = false;
+    uint64_t hash_htab_addr = 0;
+    uint32_t hash_key_offset = 0;
 };
+
+/* Walk the JITted x86 bytes of a BPF program and find the first
+ * `call rel32` whose target equals `htab_addr` (the kernel inlines
+ * `__htab_map_lookup_elem` here). Read the bytes immediately after that
+ * call to extract the `add rax, imm` offset the kernel emitted -- this
+ * is exactly the value we need to feed native-link so its inline
+ * sequence matches. Returns 0 if no inlined HASH lookup is found in
+ * this JIT image. */
+uint32_t extract_htab_key_offset(const std::vector<uint8_t> &jit, uint64_t jit_va_base,
+                                 uint64_t htab_addr)
+{
+    if (htab_addr == 0) return 0;
+    /* The runner doesn't know jit_va_base (the kernel VA of the JIT
+     * image start); since we only need ABSOLUTE_TARGET = (jit_va_base +
+     * call_offset + 5 + rel32), and rel32 is a signed 32-bit offset
+     * from the byte AFTER the call, we instead search for the
+     * post-call `add rax, imm` pattern paired with the `call`-to-
+     * absolute-symbol mapping the kernel module gave us via the JIT
+     * image's actual VA. For Stage 2 POC we approximate: the BPF JIT
+     * emits a SINGLE inlined `bpf_map_lookup_elem` site per program in
+     * our test cases, and it is the only `call rel32` whose immediate
+     * `add rax, imm` follows. Scan for that shape. */
+    (void)jit_va_base;
+    for (size_t i = 0; i + 5 <= jit.size(); i++) {
+        if (jit[i] != 0xE8) continue;
+        /* candidate `call rel32` site; check whether bytes immediately
+         * after the 5-byte call match the inlined `test rax, rax; je;
+         * add rax, imm` sequence the kernel BPF JIT emits for an
+         * inlined HASH map lookup. */
+        size_t p = i + 5;
+        if (p + 9 > jit.size()) continue;
+        /* test rax, rax = 48 85 c0 */
+        if (jit[p] != 0x48 || jit[p+1] != 0x85 || jit[p+2] != 0xC0) continue;
+        /* je rel8 = 74 NN  -or-  je rel32 = 0f 84 NN NN NN NN */
+        size_t je_len;
+        if (jit[p+3] == 0x74) {
+            je_len = 2;
+        } else if (jit[p+3] == 0x0F && jit[p+4] == 0x84) {
+            je_len = 6;
+        } else {
+            continue;
+        }
+        size_t q = p + 3 + je_len;
+        if (q + 4 > jit.size()) continue;
+        /* add rax, imm8  = 48 83 c0 imm8         (4 bytes)
+         * add rax, imm32 = 48 81 c0 imm32        (7 bytes, /0 form)
+         *               or 48 05 imm32           (6 bytes, rax-special) */
+        if (jit[q] == 0x48 && jit[q+1] == 0x83 && jit[q+2] == 0xC0) {
+            return jit[q+3];
+        }
+        if (jit[q] == 0x48 && jit[q+1] == 0x81 && jit[q+2] == 0xC0
+            && q + 7 <= jit.size()) {
+            uint32_t v;
+            std::memcpy(&v, &jit[q+3], 4);
+            return v;
+        }
+        if (jit[q] == 0x48 && jit[q+1] == 0x05 && q + 6 <= jit.size()) {
+            uint32_t v;
+            std::memcpy(&v, &jit[q+2], 4);
+            return v;
+        }
+    }
+    return 0;
+}
 
 CompanionLoad load_bpf_companion(const std::filesystem::path &elf_path)
 {
@@ -465,6 +539,57 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &elf_path)
         }
     }
 
+    /* Inline-hash detection: if any map in the program is a HASH map,
+     * record __htab_map_lookup_elem's kernel address and the post-call
+     * `add rax, imm` offset extracted from the JIT image so native-link
+     * can emit the same inline sequence. POC scope: at most one HASH
+     * map per program (matches our test corpus). */
+    bool has_hash_map = false;
+    map = nullptr;
+    bpf_object__for_each_map(map, obj) {
+        if (bpf_map__type(map) == BPF_MAP_TYPE_HASH) {
+            has_hash_map = true;
+            break;
+        }
+    }
+    if (has_hash_map) {
+        uint64_t htab_addr = kallsyms_lookup("__htab_map_lookup_elem");
+        if (htab_addr == 0) {
+            fail("__htab_map_lookup_elem not in /proc/kallsyms; "
+                 "is kallsyms restricted? need CAP_SYSLOG or "
+                 "sysctl kernel.kptr_restrict=0");
+        }
+        /* Walk every program and look for the inlined HASH lookup
+         * sequence in its JIT image. We take the first hit; in our
+         * test corpus there's exactly one HASH lookup per program. */
+        uint32_t key_offset = 0;
+        bpf_program *p2 = nullptr;
+        bpf_object__for_each_program(p2, obj) {
+            int pfd = bpf_program__fd(p2);
+            if (pfd < 0) continue;
+            bpf_prog_info pi = {};
+            __u32 pi_len = sizeof(pi);
+            if (bpf_obj_get_info_by_fd(pfd, &pi, &pi_len) < 0
+                || pi.jited_prog_len == 0) continue;
+            std::vector<uint8_t> jit(pi.jited_prog_len);
+            bpf_prog_info pi2 = {};
+            pi2.jited_prog_len = pi.jited_prog_len;
+            pi2.jited_prog_insns = reinterpret_cast<uintptr_t>(jit.data());
+            pi_len = sizeof(pi2);
+            if (bpf_obj_get_info_by_fd(pfd, &pi2, &pi_len) < 0) continue;
+            key_offset = extract_htab_key_offset(jit, 0, htab_addr);
+            if (key_offset != 0) break;
+        }
+        if (key_offset == 0) {
+            fail("HASH map present but could not extract htab key offset "
+                 "from JIT image -- the kernel BPF JIT may not have "
+                 "inlined the lookup");
+        }
+        out.hash_inline_set = true;
+        out.hash_htab_addr = htab_addr;
+        out.hash_key_offset = key_offset;
+    }
+
     out.obj = obj;
     return out;
 }
@@ -472,7 +597,8 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &elf_path)
 LinkerOutput invoke_native_link(const cli_options &options,
                                 const std::filesystem::path &elf_path,
                                 const std::string &symbol_name,
-                                const std::unordered_map<std::string, uint64_t> &map_addrs)
+                                const std::unordered_map<std::string, uint64_t> &map_addrs,
+                                const CompanionLoad &companion)
 {
     std::vector<std::string> argv;
     argv.push_back(native_link_binary(options).string());
@@ -504,6 +630,14 @@ LinkerOutput invoke_native_link(const cli_options &options,
         std::snprintf(buf, sizeof(buf), "%s=0x%lx", kv.first.c_str(),
                       (unsigned long)kv.second);
         argv.push_back("--map");
+        argv.push_back(buf);
+    }
+    if (companion.hash_inline_set) {
+        char buf[96];
+        std::snprintf(buf, sizeof(buf), "0x%lx,%u",
+                      (unsigned long)companion.hash_htab_addr,
+                      (unsigned)companion.hash_key_offset);
+        argv.push_back("--inline-hash-lookup");
         argv.push_back(buf);
     }
 
@@ -568,7 +702,7 @@ std::vector<sample_result> run_kernel_native_lab(const cli_options &options)
          * by raw kernel pointer through a literal-pool slot. */
         companion = load_bpf_companion(options.program);
         LinkerOutput lo = invoke_native_link(
-            options, options.program, symbol, companion.map_addrs);
+            options, options.program, symbol, companion.map_addrs, companion);
         blob = read_blob_file(lo.blob);
         std::ifstream rf(lo.relocs, std::ios::binary);
         if (rf) {

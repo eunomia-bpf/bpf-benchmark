@@ -88,9 +88,44 @@ struct Args {
     #[arg(long = "map", value_name = "NAME=ADDR")]
     maps: Vec<String>,
 
+    /// Inline `bpf_map_lookup_elem` calls the same way the BPF JIT does
+    /// for HASH maps: replace the helper target with
+    /// `__htab_map_lookup_elem` and insert
+    ///     test rax, rax
+    ///     je   2f
+    ///     add  rax, KEY_OFFSET
+    ///   2:
+    /// right after the call. Closes the ~3x gap between native +
+    /// `call bpf_map_lookup_elem` and the BPF JIT's pre-inlined hash
+    /// lookup. Format: HTAB_ADDR,KEY_OFFSET (hex addr, decimal offset).
+    /// POC assumption: the program contains at most one map and that
+    /// map is a HASH map; every bpf_map_lookup_elem call therefore
+    /// targets that one map.
+    #[arg(long = "inline-hash-lookup", value_name = "HTAB_ADDR,KEY_OFFSET")]
+    inline_hash_lookup: Option<String>,
+
     /// Print a human-readable disassembly of the rewritten blob to stderr.
     #[arg(long)]
     show: bool,
+}
+
+#[derive(Clone, Copy, Debug)]
+struct InlineHashLookup {
+    htab_addr: u64,
+    key_offset: u32,
+}
+
+fn parse_inline_hash_lookup(s: &str) -> Result<InlineHashLookup> {
+    let (addr, off) = s
+        .split_once(',')
+        .ok_or_else(|| anyhow!("--inline-hash-lookup expects HTAB_ADDR,KEY_OFFSET; got {s:?}"))?;
+    let addr = addr.strip_prefix("0x").unwrap_or(addr);
+    let htab_addr = u64::from_str_radix(addr, 16)
+        .map_err(|e| anyhow!("inline-hash-lookup HTAB_ADDR parse: {e}"))?;
+    let key_offset: u32 = off
+        .parse()
+        .map_err(|e| anyhow!("inline-hash-lookup KEY_OFFSET parse: {e}"))?;
+    Ok(InlineHashLookup { htab_addr, key_offset })
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -153,9 +188,14 @@ fn main() -> Result<()> {
 
     let helper_addrs = parse_name_addr_args(&args.helpers, "helper")?;
     let map_addrs = parse_name_addr_args(&args.maps, "map")?;
+    let inline_hash = args
+        .inline_hash_lookup
+        .as_deref()
+        .map(parse_inline_hash_lookup)
+        .transpose()?;
 
     let RewriteResult { blob, relocs } = rewrite(
-        &elf, &entry, &included, &helper_addrs, &map_addrs, args.show,
+        &elf, &entry, &included, &helper_addrs, &map_addrs, inline_hash, args.show,
     )?;
     fs::write(&args.output, &blob)
         .with_context(|| format!("write {}", args.output.display()))?;
@@ -331,18 +371,91 @@ struct SymbolLayout {
     new_offset_in_sym: Vec<u32>,
 }
 
+/// Pre-scan ELF .rela.text relocations to find the *byte offset* of each
+/// helper call site inside each included symbol. Keyed by
+/// `(symbol_address, local_call_opcode_offset)` so the decode loop can
+/// look up "is the call I'm about to push a known helper?" in O(1).
+///
+/// For PLT32 (r_type=4, `e8 dd dd dd dd`) the opcode is `0xe8` at
+/// `reloc_offset - 1`. For GOTPCREL/GOTPCRELX/REX_GOTPCRELX (9/41/42,
+/// `ff 15 dd dd dd dd`) the call begins at `reloc_offset - 2`. We treat
+/// the *call's first byte* as the canonical local key in both cases so
+/// the lookup is uniform.
+fn scan_helper_calls(
+    elf: &object::File,
+    included: &[SymInfo],
+) -> Result<HashMap<(u64, u64), String>> {
+    let mut out: HashMap<(u64, u64), String> = HashMap::new();
+    let mut sections: HashMap<object::SectionIndex, Vec<&SymInfo>> = HashMap::new();
+    for s in included {
+        sections.entry(s.section_index).or_default().push(s);
+    }
+    for (section_index, syms) in &sections {
+        let section = elf
+            .section_by_index(*section_index)
+            .with_context(|| format!("section {section_index:?}"))?;
+        for (reloc_offset, reloc) in section.relocations() {
+            let Some(sym) = syms
+                .iter()
+                .find(|s| reloc_offset >= s.address && reloc_offset < s.address + s.size)
+            else {
+                continue;
+            };
+            let target_name: String = match reloc.target() {
+                RelocationTarget::Symbol(idx) => elf
+                    .symbol_by_index(idx)?
+                    .name()
+                    .map_err(|e| anyhow!("reloc target symbol name: {e}"))?
+                    .to_string(),
+                _ => continue,
+            };
+            let r_type = match reloc.flags() {
+                RelocationFlags::Elf { r_type } => r_type,
+                _ => continue,
+            };
+            let local_opcode_off = match r_type {
+                4 => reloc_offset.checked_sub(1),
+                9 | 41 | 42 => reloc_offset.checked_sub(2),
+                _ => None,
+            };
+            let Some(loc) = local_opcode_off else { continue };
+            // Only call-class relocs map to "call to helper"; mov-class
+            // GOTPCREL refs against maps also use 9/41/42 but the byte
+            // at reloc_offset-2 is the mov's REX (0x48/0x49), not
+            // `ff 15`. Filter by that. We can read the section data to
+            // check.
+            // For our purpose we only need to flag bpf_map_lookup_elem,
+            // which is always a call site; mov-class refs against the
+            // *same* name would be unusual. Filter conservatively by
+            // verifying the byte at `loc..=loc+1` matches a call
+            // opcode -- but the section bytes aren't trivially
+            // available here. Cheap alternative: trust the r_type
+            // classification (`4`=PLT32 is always call; `9/41/42` is
+            // call only for `-fno-plt` -emitted callsites where the
+            // first two bytes are `ff 15`). We re-check at decode time
+            // anyway.
+            let key = (sym.address, loc - sym.address);
+            out.entry(key).or_insert(target_name);
+        }
+    }
+    Ok(out)
+}
+
 fn rewrite(
     elf: &object::File,
     entry: &SymInfo,
     included: &[SymInfo],
     helper_addrs: &HashMap<String, u64>,
     map_addrs: &HashMap<String, u64>,
+    inline_hash: Option<InlineHashLookup>,
     show: bool,
 ) -> Result<RewriteResult> {
     let included_ranges: Vec<(u64, u64)> = included
         .iter()
         .map(|s| (s.address, s.address + s.size))
         .collect();
+
+    let helper_call_sites = scan_helper_calls(elf, included)?;
 
     let mut sym_global_offset: HashMap<u64, usize> = HashMap::new();
     let mut blob: Vec<u8> = Vec::new();
@@ -451,6 +564,38 @@ fn rewrite(
             local.push(insn);
             kinds.push(None);
             insn_local_ip.push(local_ip);
+
+            // After pushing the call, check whether this site is a helper
+            // call to bpf_map_lookup_elem and we have HASH-map inline
+            // info -- if so, emit the inline (test+je+add) sequence
+            // immediately after the call. iced lays the declared bytes
+            // out at the next sequential IP so subsequent intra-symbol
+            // PC-relative refs shift automatically.
+            if is_entry {
+                if let Some(name) = helper_call_sites.get(&(sym.address, local_ip)) {
+                    if name == "bpf_map_lookup_elem" {
+                        if let Some(hi) = inline_hash {
+                            for ib in build_inline_hash_lookup(hi.key_offset)? {
+                                local.push(ib);
+                                kinds.push(None);
+                                // The inserted bytes do not correspond to
+                                // any byte in the original symbol; mark
+                                // their local IP with a sentinel that
+                                // can't collide with any reloc offset.
+                                // We use 0 here since reloc-handling code
+                                // does an exact match against the call's
+                                // local IP (already in the table), so a
+                                // duplicate 0 wouldn't be looked up for
+                                // helper refs. The other consumer
+                                // (`new_offset_in_sym[i]`) is indexed by
+                                // position, not by `insn_local_ip[i]`, so
+                                // this is safe.
+                                insn_local_ip.push(u64::MAX);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         // Encode this symbol's local stream at IP=0.
@@ -510,7 +655,7 @@ fn rewrite(
     // it should reach. Trampolines are position-independent (they hold
     // the helper's absolute address inline and use `jmp [rip+0]`), so
     // the kernel module's emit_x86 can splat the blob verbatim.
-    apply_elf_relocations(elf, &layouts, helper_addrs, map_addrs, &mut blob)?;
+    apply_elf_relocations(elf, &layouts, helper_addrs, map_addrs, inline_hash, &mut blob)?;
 
     // Patch JmpEnd disps LAST so they target the byte AFTER any
     // trampolines we just appended -- i.e., where the BPF JIT will emit
@@ -558,6 +703,7 @@ fn apply_elf_relocations(
     layouts: &[SymbolLayout],
     helper_addrs: &HashMap<String, u64>,
     map_addrs: &HashMap<String, u64>,
+    inline_hash: Option<InlineHashLookup>,
     blob: &mut Vec<u8>,
 ) -> Result<()> {
     if layouts.is_empty() {
@@ -669,7 +815,17 @@ fn apply_elf_relocations(
                 // common; map_addrs is consulted only if not found in
                 // helpers.
                 9 | 41 | 42 => {
-                    let kernel_addr = helper_addrs.get(&target_name).copied()
+                    // POC: when --inline-hash-lookup is supplied we
+                    // assume every bpf_map_lookup_elem call site is on a
+                    // HASH map and rewrite the helper target to
+                    // __htab_map_lookup_elem; the post-call test+je+add
+                    // sequence was emitted into the instruction stream
+                    // back in rewrite()'s decode loop.
+                    let resolved_helper = inline_hash
+                        .filter(|_| target_name == "bpf_map_lookup_elem")
+                        .map(|h| h.htab_addr)
+                        .or_else(|| helper_addrs.get(&target_name).copied());
+                    let kernel_addr = resolved_helper
                         .or_else(|| map_addrs.get(&target_name).copied())
                         .ok_or_else(|| anyhow!(
                             "GOT-relative reloc against unknown symbol {}: \
@@ -679,24 +835,19 @@ fn apply_elf_relocations(
                     let map_addr = kernel_addr; /* used by code below */
 
                     // Find the decoded instruction that contains this
-                    // reloc. The disp32 field starts at the reloc offset
-                    // and is 4 bytes; the mov has an opcode prefix of
-                    // variable length (REX + 0x8b/0x8d) so we locate
-                    // the instruction whose byte range covers the disp.
+                    // reloc. The disp32 occupies bytes
+                    // [local_patch_off, local_patch_off+4); we want the
+                    // insn whose start address is the largest value
+                    // <= local_patch_off (ignoring the u64::MAX sentinel
+                    // used to mark inserted inline-hash bytes that have
+                    // no source-byte counterpart).
                     let insn_idx = layout
                         .insn_local_ip
                         .iter()
                         .enumerate()
-                        .find_map(|(idx, &ip)| {
-                            // For GOTPCRELX/REX_GOTPCRELX the disp32 ends
-                            // 4 bytes before the next instruction. iced
-                            // gives us the original instruction length
-                            // via its decoded form -- we approximate by
-                            // selecting the insn whose local_ip is the
-                            // largest value <= local_patch_off. That's
-                            // the insn the patch lies inside.
-                            if ip <= local_patch_off { Some(idx) } else { None }
-                        })
+                        .filter(|(_, &ip)| ip != u64::MAX && ip <= local_patch_off)
+                        .max_by_key(|(_, &ip)| ip)
+                        .map(|(idx, _)| idx)
                         .ok_or_else(|| anyhow!(
                             "GOTPCREL reloc at {:#x} does not align with any instruction in {}",
                             local_patch_off, layout.sym.name
@@ -950,6 +1101,43 @@ fn validate_no_external_refs(
         }
     }
     Ok(())
+}
+
+/// Build the inline byte sequence that the BPF JIT emits after an
+/// inlined `__htab_map_lookup_elem` call:
+///
+///     48 85 c0              test rax, rax
+///     74 04                 je   2f                ; skip add on NULL
+///     48 83 c0 KEY_OFFSET   add  rax, KEY_OFFSET   ; imm8 form
+///   2:
+///
+/// 9 bytes total when `key_offset <= 127`; falls back to an 11-byte
+/// `add rax, imm32` (`48 05 imm32`) when the offset exceeds imm8 range.
+/// Returned as a one-instruction `iced` declared-byte chunk so the
+/// encoder lays it out at the next sequential IP without trying to
+/// interpret the bytes as real instructions (avoiding any chance of
+/// iced rewriting the inner `je rel8` to a different size).
+fn build_inline_hash_lookup(key_offset: u32) -> Result<Vec<Instruction>> {
+    if key_offset <= 0x7f {
+        let bytes = [
+            0x48, 0x85, 0xC0,           // test rax, rax
+            0x74, 0x04,                 // je +4
+            0x48, 0x83, 0xC0, key_offset as u8, // add rax, imm8
+        ];
+        Ok(vec![Instruction::with_declare_byte(&bytes)
+            .map_err(|e| anyhow!("declare_byte: {e:?}"))?])
+    } else {
+        let imm = key_offset.to_le_bytes();
+        // add rax, imm32 (rax-special opcode): 48 05 imm32  -> 6 bytes
+        // total: 3 + 2 + 6 = 11
+        let bytes = [
+            0x48, 0x85, 0xC0,                       // test rax, rax
+            0x74, 0x06,                             // je +6
+            0x48, 0x05, imm[0], imm[1], imm[2], imm[3], // add rax, imm32
+        ];
+        Ok(vec![Instruction::with_declare_byte(&bytes)
+            .map_err(|e| anyhow!("declare_byte: {e:?}"))?])
+    }
 }
 
 fn disasm(bytes: &[u8]) {

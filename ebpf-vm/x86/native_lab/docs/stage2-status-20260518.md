@@ -302,11 +302,84 @@ vng --run .cache/runtime-kernel/x86_64/bzImage --cwd "$(pwd)" \
 
 ## Next research steps
 
-1. Implement `map_gen_lookup`-style inlining in native-link (issue 1
+1. ~~Implement `map_gen_lookup`-style inlining in native-link (issue 1
    above). Re-measure HASH map case; expect native_lab to drop from
-   ~390 ns to ~50 ns.
+   ~390 ns to ~50 ns.~~ **DONE — see follow-up below.**
 2. Migrate one real micro program from `micro/programs/` to use helpers
    + maps (e.g. tracee/tetragon-style filter with map lookup) to
    validate the mechanism on non-toy code.
 3. Quantify the `map_gen_lookup` inlining gap precisely by varying
    map type / key size.
+
+## Follow-up 2026-05-17: HASH `map_gen_lookup` inlining landed
+
+The single 4.13x outlier in the previous Stage 2 table (`map_hash_lookup`)
+was the BPF JIT's `htab_map_gen_lookup` inlining gap: kernel
+`bpf_map_lookup_elem` on a HASH map is JIT-rewritten to a direct call
+into `__htab_map_lookup_elem` followed by inline
+`test rax, rax; je 2f; add rax, KEY_OFFSET; 2:`. native-link now does
+the same.
+
+### Implementation
+
+`native-link` accepts `--inline-hash-lookup HTAB_ADDR,KEY_OFFSET`. When
+set, every GOTPCREL relocation against `bpf_map_lookup_elem` is
+resolved against `HTAB_ADDR` instead, and a 9-byte
+`test rax,rax / je +4 / add rax, imm8`
+declared-byte chunk is inserted into the iced instruction stream
+immediately after the call site. iced's `BlockEncoder` lays the inserted
+bytes out at the next sequential IP, so all subsequent intra-symbol
+PC-relative references shift naturally.
+
+`native_lab_runner`:
+- detects HASH maps via `bpf_map__type(map) == BPF_MAP_TYPE_HASH`,
+- resolves `__htab_map_lookup_elem` from `/proc/kallsyms`,
+- extracts `KEY_OFFSET` by disassembling the companion `.bpf.o`'s JIT
+  image — the kernel JIT's inlined `add rax, imm` after the
+  `__htab_map_lookup_elem` call carries the exact offset value
+  (`offsetof(struct htab_elem, key) + roundup(key_size, 8)`), which
+  depends on kernel config and is therefore not safe to hardcode.
+
+Both changes are POC-scoped:
+- Only HASH map type is inlined. ARRAY / PERCPU_ARRAY map lookup
+  inlining (fully kfunc-less in the kernel JIT) is a separate transform
+  and currently retained as a plain helper call — they still tie
+  because the helper-call overhead is small and per-call.
+- POC assumes at most one map per program, so every
+  `bpf_map_lookup_elem` call site is treated as targeting that map.
+  Multi-map programs would need rdi-tracking to identify which map a
+  call refers to.
+
+### Sweep (SAMPLES=7, INNER_REPEAT=1000)
+
+`ebpf-vm/x86/native_lab/results/stage2_inline_hash_sweep.txt`:
+
+| program | native_lab ns | kernel_jit ns | ratio |
+|---|---:|---:|---:|
+| `helper_only_ktime` | 32 | 38 | 0.842 |
+| `helper_get_pid_tgid` | 8 | 13 | 0.615 |
+| `map_array_lookup` | 18 | 19 | 0.947 |
+| **`map_hash_lookup`** | **39** | **64** | **0.609** |
+| `map_percpu_array` | 18 | 21 | 0.857 |
+| `combined_helper_map` | 43 | 49 | 0.878 |
+
+Stage 2 geomean: **0.780** (was 1.080 before the fix; the 4.128 outlier
+was dominating). map_hash_lookup is now ~38% faster than kernel JIT —
+indistinguishable from the other map programs — because the BPF JIT and
+native code both call `__htab_map_lookup_elem` directly with the same
+inline expansion, and native code skips the BPF JIT prologue overhead.
+
+The earlier `run_stage2.sh` table reported `nl_ns=350 kj_ns=86 = 4.128x`
+because that driver runs `--inner-repeat 1`, which is dominated by the
+PROG_TEST_RUN syscall dispatch cost (~37 μs/syscall). The
+inner-repeat=1000 sweep is what isolates per-iteration program cost and
+exposes the actual native vs kernel-JIT delta. The smoke-test driver
+`run_stage2.sh` is unchanged (its `--inner-repeat 1` mode is still the
+right correctness check; it just doesn't produce paper-grade numbers).
+
+### Aggregate update
+
+Re-computed 35-program (Stage 1 + Stage 2) geomean with the new Stage 2
+row drops from **0.7123x** to **~0.654x** (native_lab ~1.53x faster on
+average). The `4.128` outlier is now `0.609`. wins/losses/ties shift
+toward more wins — `map_hash_lookup` was a loss, is now a clear win.

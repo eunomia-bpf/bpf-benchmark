@@ -1,0 +1,9 @@
+[vm] kernel: 7.0.0-rc2+
+program                         native_lab_ns  kernel_jit_ns         ratio
+---------------------------------------------------------------------------
+helper_only_ktime                         32            38         0.842
+helper_get_pid_tgid                        8            13         0.615
+map_array_lookup                          18            19         0.947
+map_hash_lookup                           39            64         0.609
+map_percpu_array                          18            21         0.857
+combined_helper_map                       43            49         0.878
