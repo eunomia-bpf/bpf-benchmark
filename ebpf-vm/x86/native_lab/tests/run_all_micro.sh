@@ -18,7 +18,8 @@ KO="$REPO/.cache/repo-build/host/kinsn/x86_64/bpf_x86_native_lab.ko"
 PROGRAMS_DIR="$REPO/micro/programs"
 GENERATED_DIR="$REPO/micro/generated-inputs"
 YAML="$REPO/micro/config/micro_pure_jit.yaml"
-INNER_REPEAT="${INNER_REPEAT:-1000}"
+INNER_REPEAT="${INNER_REPEAT:-100000}"
+SAMPLES="${SAMPLES:-15}"
 
 echo "[vm] kernel: $(uname -r)" >&2
 mount -t debugfs none /sys/kernel/debug 2>/dev/null || true
@@ -45,6 +46,7 @@ PROGRAMS_DIR = "$PROGRAMS_DIR"
 GENERATED_DIR = "$GENERATED_DIR"
 YAML = "$YAML"
 INNER_REPEAT = "$INNER_REPEAT"
+SAMPLES = int("$SAMPLES")
 
 import yaml as pyyaml  # type: ignore
 
@@ -75,6 +77,17 @@ def native_lab_prog_type_for(tags, expected_retval):
     return "xdp"
 
 
+def _median_exec_ns(samples):
+    """Sort the per-sample dicts by exec_ns and return the median entry.
+    A sample with an error has no exec_ns -> sorts last; if all samples
+    errored we just return the first one so the caller sees the error."""
+    valid = [s for s in samples if isinstance(s.get("exec_ns"), int)]
+    if not valid:
+        return samples[0]
+    valid.sort(key=lambda s: s["exec_ns"])
+    return valid[len(valid) // 2]
+
+
 def run_native_lab(name, base_name, input_size, expected_retval, tags, input_generator):
     so_path = os.path.join(PROGRAMS_DIR, base_name + ".native.so")
     if not os.path.exists(so_path):
@@ -100,13 +113,18 @@ def run_native_lab(name, base_name, input_size, expected_retval, tags, input_gen
         "--inner-repeat", INNER_REPEAT,
         "--native-lab-prog-type", pt,
     ]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
-    if proc.returncode != 0:
-        return {"error": "run_failed", "stderr": proc.stderr.strip()[-2000:]}
-    last = [ln for ln in proc.stdout.splitlines() if ln.startswith("{")]
-    if not last:
-        return {"error": "no_json", "stdout": proc.stdout[-500:]}
-    return json.loads(last[-1])
+    samples = []
+    for _ in range(SAMPLES):
+        proc = subprocess.run(cmd, capture_output=True, text=True)
+        if proc.returncode != 0:
+            samples.append({"error": "run_failed", "stderr": proc.stderr.strip()[-2000:]})
+            continue
+        last = [ln for ln in proc.stdout.splitlines() if ln.startswith("{")]
+        if not last:
+            samples.append({"error": "no_json", "stdout": proc.stdout[-500:]})
+            continue
+        samples.append(json.loads(last[-1]))
+    return _median_exec_ns(samples)
 
 def run_kernel_baseline(name, base_name, input_size, io_mode, expected_retval, input_generator):
     bpf_o = os.path.join(PROGRAMS_DIR, base_name + ".bpf.o")
@@ -123,13 +141,26 @@ def run_kernel_baseline(name, base_name, input_size, io_mode, expected_retval, i
         "--inner-repeat", INNER_REPEAT,
         "--io-mode", io_mode,
     ]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
-    if proc.returncode != 0:
-        return {"error": "run_failed", "stderr": proc.stderr.strip()[-2000:]}
-    last = [ln for ln in proc.stdout.splitlines() if ln.startswith("{")]
-    if not last:
-        return {"error": "no_json", "stdout": proc.stdout[-500:]}
-    return json.loads(last[-1])
+    samples = []
+    for _ in range(SAMPLES):
+        proc = subprocess.run(cmd, capture_output=True, text=True)
+        if proc.returncode != 0:
+            samples.append({"error": "run_failed", "stderr": proc.stderr.strip()[-2000:]})
+            continue
+        last = [ln for ln in proc.stdout.splitlines() if ln.startswith("{")]
+        if not last:
+            samples.append({"error": "no_json", "stdout": proc.stdout[-500:]})
+            continue
+        samples.append(json.loads(last[-1]))
+    return _median_exec_ns(samples)
+
+# Each (prog, runtime) result is written to its own file under
+# /tmp/stage1-sweep-out/ as raw JSON. At the end we concatenate them.
+# This avoids vng's serial-console stdout race that occasionally
+# corrupts JSON boundaries when two writes land in the same VT buffer.
+OUTDIR = "/tmp/stage1-sweep-out"
+os.makedirs(OUTDIR, exist_ok=True)
+manifest = []
 
 # Skip non-xdp benchmarks (tc / cgroup_skb need different stub).
 for b in cfg["benchmarks"]:
@@ -144,10 +175,24 @@ for b in cfg["benchmarks"]:
 
     ig = b.get("input_generator", base)
     nl = run_native_lab(name, base, isize, er, tags, ig)
-    sys.stdout.write(json.dumps({"program": name, "runtime": "native_lab", **nl}) + "\n")
-    sys.stdout.flush()
+    nl_path = os.path.join(OUTDIR, f"{name}.native_lab.json")
+    with open(nl_path, "w") as f:
+        json.dump({"program": name, "runtime": "native_lab", **nl}, f)
+    manifest.append(nl_path)
 
     kj = run_kernel_baseline(name, base, isize, io_mode, er, ig)
-    sys.stdout.write(json.dumps({"program": name, "runtime": "kernel_jit", **kj}) + "\n")
-    sys.stdout.flush()
+    kj_path = os.path.join(OUTDIR, f"{name}.kernel_jit.json")
+    with open(kj_path, "w") as f:
+        json.dump({"program": name, "runtime": "kernel_jit", **kj}, f)
+    manifest.append(kj_path)
+
+# Concatenate every per-entry JSON to stdout as proper JSONL (one
+# object per line, separated by '\n'). Read each whole file, strip
+# trailing whitespace, write + newline. Robust against any VT
+# interleaving since we're now flushing one well-formed unit at a
+# time, not a mid-write fragment.
+for p in manifest:
+    with open(p) as f:
+        sys.stdout.write(f.read().strip() + "\n")
+sys.stdout.flush()
 PYEOF

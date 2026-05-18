@@ -351,51 +351,50 @@ struct LinkerOutput {
 struct CompanionLoad {
     bpf_object *obj = nullptr;
     std::unordered_map<std::string, uint64_t> map_addrs;
-    /* Set when at least one map in the program is a BPF_MAP_TYPE_HASH;
-     * carries the kernel address of __htab_map_lookup_elem and the
-     * post-call `add rax, imm` offset (key offset within struct
-     * htab_elem) as extracted from the BPF JIT image. Used to feed
-     * native-link's --inline-hash-lookup flag so userspace code matches
-     * the kernel JIT's inlined HASH lookup sequence and closes the
-     * ~3x gap against `call bpf_map_lookup_elem`. */
-    bool hash_inline_set = false;
-    uint64_t hash_htab_addr = 0;
-    uint32_t hash_key_offset = 0;
+    /* Per-call-site spec for every `bpf_map_lookup_elem` invocation in
+     * the entry program, listed in BPF-source order. Each entry is a
+     * (target_kernel_address, key_offset) pair. native-link routes the
+     * i-th `bpf_map_lookup_elem` call site to this entry; key_offset>0
+     * additionally triggers a 9- or 11-byte post-call inline sequence
+     * `test rax,rax; je; add rax, KEY_OFFSET` matching the kernel BPF
+     * JIT's `map_gen_lookup` expansion.
+     *
+     * The pair is decided per-call from the map type discovered by
+     * walking the program's BPF source bytecode (track r1's binding
+     * through the most recent BPF_LD_IMM64 pseudo_map_fd) and the
+     * per-kernel `offsetof(struct htab_elem, key)` extracted from any
+     * one HASH map's JIT-emitted `add rax, imm` immediate. Maps whose
+     * type is ARRAY / PERCPU_ARRAY / LRU_HASH / PERCPU_HASH / dynamic
+     * stay on the plain helper (target=bpf_map_lookup_elem, offset=0)
+     * since (a) kernel either fully inlines them away into LEA (ARRAY)
+     * or (b) doesn't have a map_gen_lookup callback for them. */
+    struct LookupSite {
+        uint64_t target_addr;
+        uint32_t key_offset;
+    };
+    std::vector<LookupSite> lookup_sites;
 };
 
-/* Walk the JITted x86 bytes of a BPF program and find the first
- * `call rel32` whose target equals `htab_addr` (the kernel inlines
- * `__htab_map_lookup_elem` here). Read the bytes immediately after that
- * call to extract the `add rax, imm` offset the kernel emitted -- this
- * is exactly the value we need to feed native-link so its inline
- * sequence matches. Returns 0 if no inlined HASH lookup is found in
- * this JIT image. */
-uint32_t extract_htab_key_offset(const std::vector<uint8_t> &jit, uint64_t jit_va_base,
-                                 uint64_t htab_addr)
+/* Walk the JITted x86 bytes of a BPF program. Find any `call rel32`
+ * whose post-call bytes match the kernel BPF JIT's inlined HASH lookup
+ * sequence:
+ *     test rax,rax  ;  je <2f>  ;  add rax, KEY_OFFSET  ;  2:
+ * Return the first KEY_OFFSET we observe. We don't need to verify the
+ * call target equals __htab_map_lookup_elem (which would require
+ * jited_ksyms VA computation); the post-call test/je/add shape is
+ * specific enough to kernel `htab_map_gen_lookup`. Returns 0 if the
+ * pattern isn't found.
+ *
+ * KEY_OFFSET = `offsetof(struct htab_elem, key) + roundup(map.key_size,
+ * 8)` for the map whose lookup got inlined here. Subtract the rounded
+ * key_size of that map to derive the kernel-constant base. */
+uint32_t extract_htab_inline_offset(const std::vector<uint8_t> &jit)
 {
-    if (htab_addr == 0) return 0;
-    /* The runner doesn't know jit_va_base (the kernel VA of the JIT
-     * image start); since we only need ABSOLUTE_TARGET = (jit_va_base +
-     * call_offset + 5 + rel32), and rel32 is a signed 32-bit offset
-     * from the byte AFTER the call, we instead search for the
-     * post-call `add rax, imm` pattern paired with the `call`-to-
-     * absolute-symbol mapping the kernel module gave us via the JIT
-     * image's actual VA. For Stage 2 POC we approximate: the BPF JIT
-     * emits a SINGLE inlined `bpf_map_lookup_elem` site per program in
-     * our test cases, and it is the only `call rel32` whose immediate
-     * `add rax, imm` follows. Scan for that shape. */
-    (void)jit_va_base;
     for (size_t i = 0; i + 5 <= jit.size(); i++) {
         if (jit[i] != 0xE8) continue;
-        /* candidate `call rel32` site; check whether bytes immediately
-         * after the 5-byte call match the inlined `test rax, rax; je;
-         * add rax, imm` sequence the kernel BPF JIT emits for an
-         * inlined HASH map lookup. */
         size_t p = i + 5;
         if (p + 9 > jit.size()) continue;
-        /* test rax, rax = 48 85 c0 */
         if (jit[p] != 0x48 || jit[p+1] != 0x85 || jit[p+2] != 0xC0) continue;
-        /* je rel8 = 74 NN  -or-  je rel32 = 0f 84 NN NN NN NN */
         size_t je_len;
         if (jit[p+3] == 0x74) {
             je_len = 2;
@@ -406,9 +405,6 @@ uint32_t extract_htab_key_offset(const std::vector<uint8_t> &jit, uint64_t jit_v
         }
         size_t q = p + 3 + je_len;
         if (q + 4 > jit.size()) continue;
-        /* add rax, imm8  = 48 83 c0 imm8         (4 bytes)
-         * add rax, imm32 = 48 81 c0 imm32        (7 bytes, /0 form)
-         *               or 48 05 imm32           (6 bytes, rax-special) */
         if (jit[q] == 0x48 && jit[q+1] == 0x83 && jit[q+2] == 0xC0) {
             return jit[q+3];
         }
@@ -425,6 +421,65 @@ uint32_t extract_htab_key_offset(const std::vector<uint8_t> &jit, uint64_t jit_v
         }
     }
     return 0;
+}
+
+/* Walk a BPF program's original (pre-verifier) bytecode and identify,
+ * for each `BPF_CALL bpf_map_lookup_elem`, which map fd is currently
+ * bound to r1 (the map argument). Returns -1 in the slot when the
+ * binding is ambiguous (dynamic / spilled / unrecognized pattern); the
+ * caller treats that as "kernel BPF JIT couldn't inline either, so
+ * fall back to the plain bpf_map_lookup_elem helper" -- which is what
+ * the kernel does too.
+ *
+ * Tracking is intentionally minimal:
+ *   - LD_IMM64 with src_reg=BPF_PSEUDO_MAP_FD binds dst_reg -> imm (map fd).
+ *   - ALU64|MOV|X copies the binding from src_reg to dst_reg.
+ *   - Any other write to a register clears that register's binding.
+ *   - CALL clobbers r0..r5.
+ * This matches the simple "load map fd into r1 just before the call"
+ * pattern clang emits at -O2 for the test programs and most real
+ * BPF code. Anything fancier (spill/reload via stack, conditional
+ * map selection) falls through to fd=-1 -> no inline. */
+std::vector<int> walk_lookup_call_maps(const struct bpf_insn *insns, size_t cnt)
+{
+    std::vector<int> sites;
+    int reg_map_fd[11];
+    for (int i = 0; i < 11; i++) reg_map_fd[i] = -1;
+    for (size_t i = 0; i < cnt; i++) {
+        const struct bpf_insn &in = insns[i];
+        uint8_t code = in.code;
+        if (code == (BPF_LD | BPF_DW | BPF_IMM)) {
+            if (in.dst_reg < 11) {
+                reg_map_fd[in.dst_reg] =
+                    (in.src_reg == BPF_PSEUDO_MAP_FD) ? (int)in.imm : -1;
+            }
+            i++; /* skip second slot (high 32 bits of imm64) */
+            continue;
+        }
+        if (code == (BPF_ALU64 | BPF_MOV | BPF_X)) {
+            if (in.dst_reg < 11 && in.src_reg < 11) {
+                reg_map_fd[in.dst_reg] = reg_map_fd[in.src_reg];
+            } else if (in.dst_reg < 11) {
+                reg_map_fd[in.dst_reg] = -1;
+            }
+            continue;
+        }
+        if (code == (BPF_JMP | BPF_CALL)) {
+            if (in.imm == BPF_FUNC_map_lookup_elem) {
+                sites.push_back(reg_map_fd[1]);
+            }
+            for (int r = 0; r <= 5; r++) reg_map_fd[r] = -1;
+            continue;
+        }
+        /* Conservative: invalidate dst_reg for any other ALU/LDX/JMP-class
+         * insn that writes a reg. Stores (BPF_STX/BPF_ST) don't write
+         * dst_reg, conditional jumps don't either. */
+        uint8_t cls = BPF_CLASS(code);
+        if (cls == BPF_ALU || cls == BPF_ALU64 || cls == BPF_LDX) {
+            if (in.dst_reg < 11) reg_map_fd[in.dst_reg] = -1;
+        }
+    }
+    return sites;
 }
 
 CompanionLoad load_bpf_companion(const std::filesystem::path &elf_path)
@@ -539,52 +594,43 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &elf_path)
         }
     }
 
-    /* Inline-hash detection: if the program contains exactly ONE map
-     * AND that map is BPF_MAP_TYPE_HASH, record the inline metadata so
-     * native-link can rewrite `bpf_map_lookup_elem` into the inlined
-     * `__htab_map_lookup_elem` + `test rax,rax; je; add rax, KEY_OFFSET`
-     * sequence the kernel BPF JIT emits.
-     *
-     * Why the single-map restriction (POC): every
-     * `bpf_map_lookup_elem` call site in the program shares ONE
-     * literal-pool entry (keyed by the symbol name in native-link).
-     * Replacing that pool's value with `__htab_map_lookup_elem`'s
-     * address routes EVERY call site to the htab function -- which is
-     * correct only if all those call sites target HASH maps. With a
-     * single HASH map per program that's guaranteed; with a mixed
-     * map population an ARRAY/PERCPU lookup would be misrouted into
-     * `__htab_map_lookup_elem` followed by `add rax, KEY_OFFSET`
-     * (wrong target + wrong post-call arithmetic). Per-call-site map
-     * resolution (rdi def-use backtrace) would lift this restriction,
-     * but is out of scope for the Stage 2 POC. */
-    bool has_hash_map = false;
-    bool has_non_hash_map = false;
-    int map_count = 0;
-    map = nullptr;
-    bpf_object__for_each_map(map, obj) {
-        map_count++;
-        auto t = bpf_map__type(map);
-        if (t == BPF_MAP_TYPE_HASH) {
-            has_hash_map = true;
-        } else {
-            has_non_hash_map = true;
+    /* Build per-call-site lookup spec for the entry program. We walk
+     * the BPF source bytecode in order (verifier-friendly programs
+     * have explicit BPF_LD_IMM64 pseudo_map_fd bindings just before
+     * each lookup call), pair each `bpf_map_lookup_elem` call with
+     * the map fd in r1, look up that map's type, and emit a per-site
+     * (target_addr, key_offset) pair. native-link consumes the list
+     * via repeatable --lookup-site flags and uses each entry to route
+     * the i-th call to its own literal-pool entry (avoiding the
+     * single-shared-pool limitation that previously forced every
+     * `bpf_map_lookup_elem` site to share one target). */
+    {
+        /* Collect map metadata by fd for quick lookup. */
+        struct MapMeta { std::string name; int type; uint32_t key_size; };
+        std::unordered_map<int, MapMeta> meta_by_fd;
+        map = nullptr;
+        bpf_object__for_each_map(map, obj) {
+            int fd = bpf_map__fd(map);
+            if (fd >= 0) {
+                meta_by_fd[fd] = MapMeta{
+                    std::string(bpf_map__name(map)),
+                    (int)bpf_map__type(map),
+                    bpf_map__key_size(map),
+                };
+            }
         }
-    }
-    bool inline_eligible = (map_count == 1) && has_hash_map && !has_non_hash_map;
-    if (inline_eligible) {
-        uint64_t htab_addr = kallsyms_lookup("__htab_map_lookup_elem");
-        if (htab_addr == 0) {
-            fail("__htab_map_lookup_elem not in /proc/kallsyms; "
-                 "is kallsyms restricted? need CAP_SYSLOG or "
-                 "sysctl kernel.kptr_restrict=0");
-        }
-        /* Walk every program and look for the inlined HASH lookup
-         * sequence in its JIT image. We take the first hit; in our
-         * test corpus there's exactly one HASH lookup per program. */
-        uint32_t key_offset = 0;
-        bpf_program *p2 = nullptr;
-        bpf_object__for_each_program(p2, obj) {
-            int pfd = bpf_program__fd(p2);
+
+        /* Extract htab_elem.key offset (kernel constant) from JIT once.
+         * Search across all programs for the inlined HASH lookup
+         * pattern; the first match gives us
+         *   add_imm = offsetof(htab_elem, key) + roundup(map.key_size, 8)
+         * We then derive `htab_elem_key_offset_base` by subtracting the
+         * rounded key_size of the first HASH map. All other HASH maps
+         * compute their own key_offset = base + roundup(key_size, 8). */
+        uint32_t observed_inline_offset = 0;
+        bpf_program *pj = nullptr;
+        bpf_object__for_each_program(pj, obj) {
+            int pfd = bpf_program__fd(pj);
             if (pfd < 0) continue;
             bpf_prog_info pi = {};
             __u32 pi_len = sizeof(pi);
@@ -596,17 +642,75 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &elf_path)
             pi2.jited_prog_insns = reinterpret_cast<uintptr_t>(jit.data());
             pi_len = sizeof(pi2);
             if (bpf_obj_get_info_by_fd(pfd, &pi2, &pi_len) < 0) continue;
-            key_offset = extract_htab_key_offset(jit, 0, htab_addr);
-            if (key_offset != 0) break;
+            observed_inline_offset = extract_htab_inline_offset(jit);
+            if (observed_inline_offset != 0) break;
         }
-        if (key_offset == 0) {
-            fail("HASH map present but could not extract htab key offset "
-                 "from JIT image -- the kernel BPF JIT may not have "
-                 "inlined the lookup");
+
+        uint64_t htab_addr = kallsyms_lookup("__htab_map_lookup_elem");
+        uint64_t plain_addr = kallsyms_lookup("bpf_map_lookup_elem");
+        if (plain_addr == 0) {
+            fail("bpf_map_lookup_elem not in /proc/kallsyms");
         }
-        out.hash_inline_set = true;
-        out.hash_htab_addr = htab_addr;
-        out.hash_key_offset = key_offset;
+
+        /* Derive htab_elem.key base from the first HASH map's
+         * observed inline offset. If the program has no HASH map (or
+         * kernel didn't inline any lookup), `observed_inline_offset`
+         * is 0 and we skip all inlining. */
+        uint32_t htab_key_base = 0;
+        bool have_base = false;
+        if (observed_inline_offset != 0) {
+            uint32_t first_hash_key_rounded = 0;
+            map = nullptr;
+            bpf_object__for_each_map(map, obj) {
+                if (bpf_map__type(map) == BPF_MAP_TYPE_HASH) {
+                    uint32_t ks = bpf_map__key_size(map);
+                    first_hash_key_rounded = (ks + 7) & ~7u;
+                    break;
+                }
+            }
+            if (first_hash_key_rounded > 0
+                && observed_inline_offset >= first_hash_key_rounded) {
+                htab_key_base = observed_inline_offset - first_hash_key_rounded;
+                have_base = true;
+            }
+        }
+
+        /* Walk the entry program's BPF source bytecode and build the
+         * per-call-site spec list. Entry program is identified by
+         * libbpf as the first program in iteration order in our test
+         * .bpf.o files; pick it explicitly via the first program. */
+        bpf_program *entry_prog = nullptr;
+        bpf_object__for_each_program(prog, obj) {
+            entry_prog = prog;
+            break;
+        }
+        if (entry_prog) {
+            const struct bpf_insn *insns = bpf_program__insns(entry_prog);
+            size_t insn_cnt = bpf_program__insn_cnt(entry_prog);
+            std::vector<int> call_maps = walk_lookup_call_maps(insns, insn_cnt);
+            for (int fd : call_maps) {
+                CompanionLoad::LookupSite site{plain_addr, 0};
+                auto it = (fd >= 0) ? meta_by_fd.find(fd) : meta_by_fd.end();
+                if (it != meta_by_fd.end()) {
+                    int t = it->second.type;
+                    if (t == BPF_MAP_TYPE_HASH && have_base && htab_addr != 0) {
+                        uint32_t rounded = (it->second.key_size + 7) & ~7u;
+                        site.target_addr = htab_addr;
+                        site.key_offset = htab_key_base + rounded;
+                    }
+                    /* Other map types: kernel may have inline expansions
+                     * (LRU_HASH on >=5.7, PERCPU_HASH on some kernels,
+                     * ARRAY fully inlined to LEA). For POC we keep
+                     * the plain bpf_map_lookup_elem call site (no
+                     * inline) for everything except plain HASH; the
+                     * cost is correctness-preserving and bounded
+                     * (~20-30 ns per non-HASH lookup vs the
+                     * kernel JIT). Extending to LRU_HASH/PERCPU_HASH
+                     * is a follow-up. */
+                }
+                out.lookup_sites.push_back(site);
+            }
+        }
     }
 
     out.obj = obj;
@@ -651,12 +755,14 @@ LinkerOutput invoke_native_link(const cli_options &options,
         argv.push_back("--map");
         argv.push_back(buf);
     }
-    if (companion.hash_inline_set) {
+    for (size_t i = 0; i < companion.lookup_sites.size(); i++) {
+        const auto &s = companion.lookup_sites[i];
         char buf[96];
-        std::snprintf(buf, sizeof(buf), "0x%lx,%u",
-                      (unsigned long)companion.hash_htab_addr,
-                      (unsigned)companion.hash_key_offset);
-        argv.push_back("--inline-hash-lookup");
+        std::snprintf(buf, sizeof(buf), "%zu=0x%lx,%u",
+                      i,
+                      (unsigned long)s.target_addr,
+                      (unsigned)s.key_offset);
+        argv.push_back("--lookup-site");
         argv.push_back(buf);
     }
 

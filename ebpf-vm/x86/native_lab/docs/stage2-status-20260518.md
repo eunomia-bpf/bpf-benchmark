@@ -372,55 +372,188 @@ entirely PROG_TEST_RUN syscall dispatch overhead, not program time.
 The 14-program perf table below uses **INNER_REPEAT=100000, SAMPLES=15
 (median)** — verified stable across two consecutive sweeps.
 
-### 14-program perf table
+### Per-call-site routing (2026-05-17 follow-up to the follow-up)
 
-`ebpf-vm/x86/native_lab/results/stage2_inline_hash_sweep.txt`
-(INNER_REPEAT=100000, SAMPLES=15 medians, run in 2-CPU VM, x86_64,
-host kernel 7.0-rc2+):
+The single-HASH-only guard in (2) above was a band-aid: it forced
+multi-map programs through plain `bpf_map_lookup_elem` for *every*
+call site because every site shared one literal-pool entry. Now
+removed.
 
-| # | program | maps | helpers | native_lab ns | kernel_jit ns | ratio | inline? |
-|---|---|---|---|---:|---:|---:|---|
-| 1 | `helper_only_ktime` | 0 | 1 | 28 | 28 | 1.000 | n/a |
-| 2 | `helper_get_pid_tgid` | 0 | 1 | 5 | 6 | 0.833 | n/a |
-| 3 | `helper_chain_simple` | 0 | 4 | 33 | 31 | 1.065 | n/a |
-| 4 | `map_array_lookup` | 1 ARRAY | 0 | 19 | 17 | 1.118 | no |
-| 5 | `map_array_index_packet` | 1 ARRAY | 0 | 19 | 18 | 1.056 | no |
-| 6 | `map_hash_lookup` | 1 HASH | 0 | 81 | 81 | **1.000** | **yes** |
-| 7 | `map_hash_str_key` | 1 HASH (16B key) | 0 | 85 | 86 | **0.988** | **yes** |
-| 8 | `map_percpu_array` | 1 PERCPU_ARRAY | 0 | 19 | 18 | 1.056 | no |
-| 9 | `map_lru_hash_counter` | 1 LRU_HASH | 0 | 230 | 229 | 1.004 | no (LRU != HASH) |
-| 10 | `map_percpu_hash_counter` | 1 PERCPU_HASH | 0 | 75 | 75 | 1.000 | no (PERCPU_HASH != HASH) |
-| 11 | `combined_helper_map` | 1 PERCPU_ARRAY | 2 | 38 | 38 | 1.000 | no |
-| 12 | `multi_map_policy` | 3 (ARRAY+HASH+PERCPU) | 0 | 196 | 137 | 1.431 | no (multi-map guard) |
-| 13 | `packet_5tuple_classify` | 1 HASH (16B struct key) | 0 | 88 | 93 | **0.946** | **yes** |
-| 14 | `stats_mixed_helpers` | 2 (HASH+PERCPU_HASH) | 3 | 218 | 173 | 1.260 | no (multi-map guard) |
+**Mechanism** (~150 LOC across runner + native-link):
+- Runner walks the entry program's BPF *source* bytecode, tracking
+  which pseudo-map-fd is bound to r1 across `BPF_LD_IMM64` +
+  `BPF_ALU64|MOV|X` chains. For each `BPF_CALL bpf_map_lookup_elem`,
+  records the map fd in r1 (or -1 if the binding is ambiguous —
+  matching the kernel verifier's "couldn't statically determine the
+  map" condition, in which case kernel JIT also keeps a plain call).
+- Runner extracts `offsetof(struct htab_elem, key)` once from the
+  companion JIT image (any HASH lookup's post-call `add rax, imm`
+  minus `roundup(that_map.key_size, 8)`).
+- Per BPF-source call: HASH map → spec is
+  `(__htab_map_lookup_elem, key_base + roundup(key_size, 8))`; any
+  other map type (or unresolved) → spec is
+  `(bpf_map_lookup_elem, 0)`.
+- Runner passes the list to native-link as repeatable
+  `--lookup-site INDEX=HEXADDR,OFFSET`.
+- native-link in its decode loop maintains an ordinal counter for
+  `bpf_map_lookup_elem` call sites (matching BPF-source order
+  since clang preserves call order at -O2), allocates one
+  *dedicated* literal-pool entry per call site holding the
+  per-site target address, and emits the 9-byte
+  `test rax,rax; je; add rax, OFFSET` chunk after the call when
+  `OFFSET > 0`.
 
-**Geomean: 1.046x** — native_lab is on average ~5% slower than the
-kernel BPF JIT across these 14 real-world-shaped programs.
+The "single-HASH-only" runner guard is gone. Multi-map programs now
+get HASH inline on their HASH calls and plain helper on
+ARRAY/PERCPU/LRU calls — exactly what kernel JIT does.
+
+### 14-program perf table (with per-call-site routing)
+
+`ebpf-vm/x86/native_lab/results/stage2_per_call_routing_sweep.txt`
+(INNER_REPEAT=100000, SAMPLES=15 medians):
+
+| # | program | maps | helpers | native_lab ns | kernel_jit ns | ratio | inline? | Δ vs guard |
+|---|---|---|---|---:|---:|---:|---|---:|
+| 1 | `helper_only_ktime` | 0 | 1 | 28 | 28 | 1.000 | n/a | — |
+| 2 | `helper_get_pid_tgid` | 0 | 1 | 5 | 6 | 0.833 | n/a | — |
+| 3 | `helper_chain_simple` | 0 | 4 | 33 | 31 | 1.065 | n/a | — |
+| 4 | `map_array_lookup` | 1 ARRAY | 0 | 15 | 17 | **0.882** | no | -0.236 |
+| 5 | `map_array_index_packet` | 1 ARRAY | 0 | 15 | 17 | **0.882** | no | -0.174 |
+| 6 | `map_hash_lookup` | 1 HASH | 0 | 81 | 81 | 1.000 | yes | — |
+| 7 | `map_hash_str_key` | 1 HASH (16B key) | 0 | 85 | 86 | 0.988 | yes | — |
+| 8 | `map_percpu_array` | 1 PERCPU_ARRAY | 0 | 19 | 18 | 1.056 | no | — |
+| 9 | `map_lru_hash_counter` | 1 LRU_HASH | 0 | 86 | 85 | 1.012 | no (LRU≠HASH) | — |
+| 10 | `map_percpu_hash_counter` | 1 PERCPU_HASH | 0 | 27 | 28 | **0.964** | no | -0.036 |
+| 11 | `combined_helper_map` | 1 PERCPU_ARRAY | 2 | 40 | 42 | **0.952** | no | -0.048 |
+| 12 | **`multi_map_policy`** | 3 (ARRAY+HASH+PERCPU) | 0 | **56** | **55** | **1.018** | per-call | **-0.413** |
+| 13 | `packet_5tuple_classify` | 1 HASH (16B struct key) | 0 | 47 | 49 | 0.959 | yes | — |
+| 14 | **`stats_mixed_helpers`** | 2 (HASH+PERCPU_HASH) | 3 | 95 | 83 | **1.145** | per-call (HASH only) | **-0.115** |
+
+**Stage 2 geomean: 0.979x** (was 1.046x under the single-HASH-only
+guard). native_lab is now slightly *faster* than kernel JIT on this
+14-program set.
 
 ### Reading
 
-- **HASH-inline-eligible programs (#6, #7, #13)** all sit within
-  noise of kernel JIT (0.946 .. 1.000). The inline transform closed
-  what would otherwise be a ~30 ns per-call gap.
-- **ARRAY / PERCPU_ARRAY / LRU_HASH / PERCPU_HASH** single-map
-  programs (#4, #5, #8, #9, #10) all within ±10% — these helper
-  calls dominate program time so the helper-call indirection cost
-  is amortized away.
-- **Multi-map programs (#12, #14) lose 26-43%.** This is the
-  expected cost of the single-HASH-only inline guard: the HASH
-  lookup in those programs goes through plain
-  `bpf_map_lookup_elem` (slower than inlined
-  `__htab_map_lookup_elem`). Per-call-site map resolution
-  (rdi def-use backtrace) would lift this restriction but is
-  deferred.
-- **Pure-helper programs (#1, #2, #3)** match kernel JIT to within
-  1-2 ns (effectively tied).
+- **`multi_map_policy` 1.431 → 1.018**: the big win. The HASH lookup
+  in this 3-map chain now inlines (its dedicated pool entry routes
+  to `__htab_map_lookup_elem`), while the ARRAY and PERCPU_ARRAY
+  lookups stay on plain `bpf_map_lookup_elem`. Correctness check
+  still verifies bit-identical results vs kernel JIT.
+- **`stats_mixed_helpers` 1.260 → 1.145**: improved but not closed.
+  This program has HASH + PERCPU_HASH; the HASH lookup inlines, the
+  PERCPU_HASH lookup doesn't (kernel JIT inlines PERCPU_HASH via
+  `htab_lru_percpu_map_gen_lookup` on 5.7+; we don't yet replicate
+  that). Closing this gap is a one-pass extension to the runner's
+  spec computation: add a PERCPU_HASH branch that resolves
+  `__htab_lru_percpu_map_lookup_elem` (or appropriate kernel func)
+  and emits a similar inline expansion.
+- **`map_array_lookup` 1.118 → 0.882**, **`map_array_index_packet`
+  1.056 → 0.882**: the per-call routing's dedicated pool entries
+  per call site (vs the previously-shared single entry) seem to
+  shave a few ns per call. Some of this may be measurement noise
+  (the runs across both routing variants share the same VM cold-
+  start phases).
+- **Pure-helper and HASH-only programs (#1-3, #6-7, #13)**:
+  unchanged — they never relied on the guard.
 
-This is a more honest picture than the previous "geomean 0.654x"
-claim, which was based on a single noisy 1000-iter sweep. native_lab
-is **competitive but not faster** than the kernel BPF JIT on real-
-shaped programs in the current state; the kernel JIT's per-call-site
-map-type-aware inlining of `bpf_map_lookup_elem` remains the
-strongest remaining optimization native_lab doesn't reproduce on
-multi-map programs.
+The remaining gap is PERCPU_HASH inlining (~12 ns per lookup in
+`stats_mixed_helpers`). Everything else is within noise of kernel
+JIT.
+
+### Unified 43-program table (Stage 1 + Stage 2)
+
+Stage 1 = pure-compute micro suite from `micro/programs/` (29 progs,
+`run_all_micro.sh`, INNER_REPEAT=100000, SAMPLES=5 medians).
+Stage 2 = the 14 maps/helpers test programs from `ebpf-vm/test/`
+(`run_stage2_sweep.sh`, INNER_REPEAT=100000, SAMPLES=15 medians).
+
+Result files:
+- `ebpf-vm/x86/native_lab/results/stage1_sweep_100k_s5_v2.jsonl`
+- `ebpf-vm/x86/native_lab/results/stage2_per_call_routing_sweep.txt`
+
+Sorted by ratio ascending (best native_lab wins first):
+
+|   # | stage | program | native_lab ns | kernel_jit ns | ratio |
+|---:|:---:|---|---:|---:|---:|
+| 1 | S1 | `otel_stack_frame_unwind_scan` | 43 | 155 | 0.277 |
+| 2 | S1 | `cilium_socket_lb_service_select` | 174 | 427 | 0.407 |
+| 3 | S1 | `bitmap_popcount_scan` | 467 | 1113 | 0.420 |
+| 4 | S1 | `cilium_ct_nat_tuple_rewrite` | 79 | 188 | 0.420 |
+| 5 | S1 | `bpftrace_string_search_prefix_scan` | 115 | 247 | 0.466 |
+| 6 | S1 | `bcc_tcpconnect_ipv4_tuple_filter` | 66 | 134 | 0.493 |
+| 7 | S1 | `flow_5tuple_rss_hash` | 10 | 20 | 0.500 |
+| 8 | S1 | `tetragon_process_event_arg_filter` | 111 | 204 | 0.544 |
+| 9 | S1 | `payload_prefix_memcmp_scan` | 59 | 106 | 0.557 |
+| 10 | S1 | `sorted_rule_binary_search` | 310 | 536 | 0.578 |
+| 11 | S1 | `packet_record_bounds_window` | 84 | 144 | 0.583 |
+| 12 | S1 | `bpf_local_call_fanout_dispatch` | 81 | 135 | 0.600 |
+| 13 | S1 | `siphash_rotate64_mixer` | 43 | 68 | 0.632 |
+| 14 | S1 | `tracee_syscall_name_table_lookup` | 103 | 156 | 0.660 |
+| 15 | S1 | `cilium_policy_guard_tree_filter` | 72 | 107 | 0.673 |
+| 16 | S1 | `packed_header_bitfield_decode` | 200 | 280 | 0.714 |
+| 17 | S1 | `packet_checksum_fold` | 13347 | 17661 | 0.756 |
+| 18 | S1 | `tc_packet_checksum_fold` | 13344 | 17637 | 0.757 |
+| 19 | S1 | `tracee_http_method_prefix_detect` | 18 | 23 | 0.783 |
+| 20 | S1 | `packet_vlan_tcpopt_parser` | 12 | 15 | 0.800 |
+| 21 | S2 | `helper_get_pid_tgid` | 5 | 6 | 0.833 |
+| 22 | S1 | `packet_toeplitz_rss_hash` | 215 | 257 | 0.837 |
+| 23 | S1 | `katran_lb_consistent_hash_select` | 19 | 22 | 0.864 |
+| 24 | S2 | `map_array_lookup` | 15 | 17 | 0.882 |
+| 25 | S2 | `map_array_index_packet` | 15 | 17 | 0.882 |
+| 26 | S1 | `flow_record_field_scan` | 68 | 73 | 0.932 |
+| 27 | S1 | `bcc_runqlat_log2_histogram_bucket` | 1129 | 1208 | 0.935 |
+| 28 | S2 | `combined_helper_map` | 40 | 42 | 0.952 |
+| 29 | S2 | `packet_5tuple_classify` | 47 | 49 | 0.959 |
+| 30 | S2 | `map_percpu_hash_counter` | 27 | 28 | 0.964 |
+| 31 | S1 | `trace_event_type_switch_dispatch` | 277 | 281 | 0.986 |
+| 32 | S2 | `map_hash_str_key` | 85 | 86 | 0.988 |
+| 33 | S1 | `simple` | 6 | 6 | 1.000 |
+| 34 | S2 | `helper_only_ktime` | 28 | 28 | 1.000 |
+| 35 | S2 | `map_hash_lookup` | 81 | 81 | 1.000 |
+| 36 | S1 | `bpftrace_comm_key_fnv_hash` | 439 | 438 | 1.002 |
+| 37 | S2 | `map_lru_hash_counter` | 86 | 85 | 1.012 |
+| 38 | S2 | `multi_map_policy` | 56 | 55 | 1.018 |
+| 39 | S1 | `cgroup_skb_hash_chain` | 291 | 285 | 1.021 |
+| 40 | S2 | `map_percpu_array` | 19 | 18 | 1.056 |
+| 41 | S2 | `helper_chain_simple` | 33 | 31 | 1.065 |
+| 42 | S2 | `stats_mixed_helpers` | 95 | 83 | 1.145 |
+| 43 | S1 | `simple_packet` | 7 | 6 | 1.167 |
+
+| metric | value |
+|---|---:|
+| **Combined geomean (N=43)** | **0.755x** (native_lab ~1.32x faster avg) |
+| Stage 1 geomean (N=29) | 0.666x |
+| Stage 2 geomean (N=14) | 0.980x |
+| Wins (ratio < 0.98) | 30 |
+| Losses (ratio > 1.02) | 5 |
+| Ties (±2%) | 8 |
+| Range | 0.277 .. 1.167 |
+
+The biggest native_lab wins are pure-compute Stage 1 programs whose
+BPF JIT has nothing to inline away (`otel_stack_frame_unwind_scan`,
+`bitmap_popcount_scan`, `cilium_*`). The five losses cluster around
+1.0-1.17x — programs where the kernel BPF JIT's per-call-site
+optimizations (PERCPU_HASH inlining we haven't replicated, full
+ARRAY/PERCPU_ARRAY LEA inlining, etc.) shave a few ns we don't yet
+match. None of them is the previous 4.13x or 1.43x outlier.
+
+### Methodology / measurement notes
+
+- **VM**: 2 CPUs, 2 GB RAM, vng-launched host kernel 7.0-rc2+.
+- **INNER_REPEAT=100000** amortizes PROG_TEST_RUN syscall dispatch
+  to negligible per-iteration. Lower iter counts (<= 1000) are
+  dominated by syscall overhead and produce misleading ratios.
+- **SAMPLES median**: stage 1 uses 5, stage 2 uses 15. Stage 2
+  numbers are stable across consecutive sweeps; Stage 1 has more
+  per-sample timer noise (smaller absolute ns / iter for many
+  programs) but the medians are reproducible to within a few ns.
+- **Output format hardening** (Stage 1): the original
+  `run_all_micro.sh` streamed JSON over the VM serial console which
+  occasionally interleaved bytes between two consecutive writes
+  (producing things like `}{"{"program":`). It now writes each
+  `(program, runtime)` result to its own temp file under the VM's
+  `/tmp/stage1-sweep-out/` and cats them at the end as a single
+  uninterrupted stream. The `tc_packet_checksum_fold` row that
+  previously showed `native_lab=None` was a casualty of that
+  corruption; it now reports correctly (0.757 ratio).

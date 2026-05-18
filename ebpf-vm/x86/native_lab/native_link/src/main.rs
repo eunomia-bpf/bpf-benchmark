@@ -88,21 +88,31 @@ struct Args {
     #[arg(long = "map", value_name = "NAME=ADDR")]
     maps: Vec<String>,
 
-    /// Inline `bpf_map_lookup_elem` calls the same way the BPF JIT does
-    /// for HASH maps: replace the helper target with
-    /// `__htab_map_lookup_elem` and insert
-    ///     test rax, rax
-    ///     je   2f
-    ///     add  rax, KEY_OFFSET
-    ///   2:
-    /// right after the call. Closes the ~3x gap between native +
-    /// `call bpf_map_lookup_elem` and the BPF JIT's pre-inlined hash
-    /// lookup. Format: HTAB_ADDR,KEY_OFFSET (hex addr, decimal offset).
-    /// POC assumption: the program contains at most one map and that
-    /// map is a HASH map; every bpf_map_lookup_elem call therefore
-    /// targets that one map.
-    #[arg(long = "inline-hash-lookup", value_name = "HTAB_ADDR,KEY_OFFSET")]
-    inline_hash_lookup: Option<String>,
+    /// Per-call-site spec for every `bpf_map_lookup_elem` site in the
+    /// entry program, given in BPF-source order. The runner walks the
+    /// companion `.bpf.o`'s bytecode to identify which map each call
+    /// uses, looks up that map's type, and produces one of these for
+    /// each site:
+    ///
+    ///   - HASH map call: ADDR = `__htab_map_lookup_elem`'s kernel
+    ///     address, OFFSET = `offsetof(struct htab_elem, key) +
+    ///     roundup(map.key_size, 8)`. native-link allocates a
+    ///     dedicated literal-pool entry, routes the `call *[rip+disp]`
+    ///     to that entry, and inserts a 9- or 11-byte
+    ///     `test rax,rax; je; add rax, OFFSET` chunk after the call.
+    ///   - Non-HASH map call: ADDR = `bpf_map_lookup_elem`'s kernel
+    ///     address, OFFSET = 0. Same routing, no inline.
+    ///
+    /// Format: INDEX=HEXADDR,OFFSET. INDEX is the zero-based BPF-source
+    /// ordinal of this `bpf_map_lookup_elem` call. Repeatable.
+    ///
+    /// When zero `--lookup-site` flags are supplied, every
+    /// `bpf_map_lookup_elem` call falls back to the shared
+    /// `--helper bpf_map_lookup_elem=ADDR` pool with no inline (legacy
+    /// behavior, used by the standalone `tests/run_micro_one.sh`
+    /// driver that doesn't know about the bytecode oracle).
+    #[arg(long = "lookup-site", value_name = "INDEX=HEXADDR,OFFSET")]
+    lookup_sites: Vec<String>,
 
     /// Print a human-readable disassembly of the rewritten blob to stderr.
     #[arg(long)]
@@ -110,22 +120,45 @@ struct Args {
 }
 
 #[derive(Clone, Copy, Debug)]
-struct InlineHashLookup {
-    htab_addr: u64,
+struct LookupSiteSpec {
+    /// Kernel address the call should route to. For HASH this is
+    /// `__htab_map_lookup_elem`; for non-HASH it's the public
+    /// `bpf_map_lookup_elem`.
+    target_addr: u64,
+    /// Post-call `add rax, OFFSET` immediate. Zero means no inline.
     key_offset: u32,
 }
 
-fn parse_inline_hash_lookup(s: &str) -> Result<InlineHashLookup> {
-    let (addr, off) = s
-        .split_once(',')
-        .ok_or_else(|| anyhow!("--inline-hash-lookup expects HTAB_ADDR,KEY_OFFSET; got {s:?}"))?;
-    let addr = addr.strip_prefix("0x").unwrap_or(addr);
-    let htab_addr = u64::from_str_radix(addr, 16)
-        .map_err(|e| anyhow!("inline-hash-lookup HTAB_ADDR parse: {e}"))?;
-    let key_offset: u32 = off
-        .parse()
-        .map_err(|e| anyhow!("inline-hash-lookup KEY_OFFSET parse: {e}"))?;
-    Ok(InlineHashLookup { htab_addr, key_offset })
+fn parse_lookup_sites(args: &[String]) -> Result<Vec<LookupSiteSpec>> {
+    let mut by_index: Vec<(usize, LookupSiteSpec)> = Vec::new();
+    for a in args {
+        let (idx_s, payload) = a.split_once('=').ok_or_else(|| {
+            anyhow!("--lookup-site expects INDEX=HEXADDR,OFFSET; got {a:?}")
+        })?;
+        let idx: usize = idx_s
+            .parse()
+            .map_err(|e| anyhow!("--lookup-site INDEX parse: {e}"))?;
+        let (addr_s, off_s) = payload.split_once(',').ok_or_else(|| {
+            anyhow!("--lookup-site payload missing offset; got {payload:?}")
+        })?;
+        let addr_s = addr_s.strip_prefix("0x").unwrap_or(addr_s);
+        let target_addr = u64::from_str_radix(addr_s, 16)
+            .map_err(|e| anyhow!("--lookup-site ADDR parse: {e}"))?;
+        let key_offset: u32 = off_s
+            .parse()
+            .map_err(|e| anyhow!("--lookup-site OFFSET parse: {e}"))?;
+        by_index.push((idx, LookupSiteSpec { target_addr, key_offset }));
+    }
+    by_index.sort_by_key(|(i, _)| *i);
+    for (expected, (i, _)) in by_index.iter().enumerate() {
+        if *i != expected {
+            bail!(
+                "--lookup-site indices must be contiguous 0..N-1; missing index {expected}, \
+                 found {i} at position {expected}"
+            );
+        }
+    }
+    Ok(by_index.into_iter().map(|(_, s)| s).collect())
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -188,14 +221,10 @@ fn main() -> Result<()> {
 
     let helper_addrs = parse_name_addr_args(&args.helpers, "helper")?;
     let map_addrs = parse_name_addr_args(&args.maps, "map")?;
-    let inline_hash = args
-        .inline_hash_lookup
-        .as_deref()
-        .map(parse_inline_hash_lookup)
-        .transpose()?;
+    let lookup_sites = parse_lookup_sites(&args.lookup_sites)?;
 
     let RewriteResult { blob, relocs } = rewrite(
-        &elf, &entry, &included, &helper_addrs, &map_addrs, inline_hash, args.show,
+        &elf, &entry, &included, &helper_addrs, &map_addrs, &lookup_sites, args.show,
     )?;
     fs::write(&args.output, &blob)
         .with_context(|| format!("write {}", args.output.display()))?;
@@ -447,7 +476,7 @@ fn rewrite(
     included: &[SymInfo],
     helper_addrs: &HashMap<String, u64>,
     map_addrs: &HashMap<String, u64>,
-    inline_hash: Option<InlineHashLookup>,
+    lookup_sites: &[LookupSiteSpec],
     show: bool,
 ) -> Result<RewriteResult> {
     let included_ranges: Vec<(u64, u64)> = included
@@ -461,6 +490,13 @@ fn rewrite(
     let mut blob: Vec<u8> = Vec::new();
     let mut patches: Vec<PatchInfo> = Vec::new();
     let mut layouts: Vec<SymbolLayout> = Vec::new();
+    // For each `bpf_map_lookup_elem` call site encountered in
+    // entry-symbol byte order, record (symbol_addr, local_call_offset)
+    // -> spec_index. Filled during the decode loop; consumed by
+    // apply_elf_relocations to route each call to its own dedicated
+    // literal-pool entry holding the per-site target address.
+    let mut lookup_call_ordinal: HashMap<(u64, u64), usize> = HashMap::new();
+    let mut lookup_call_counter: usize = 0;
 
     for sym in included {
         let is_entry = sym.address == entry.address;
@@ -571,34 +607,39 @@ fn rewrite(
             kinds.push(None);
             insn_local_ip.push(local_ip);
 
-            // After pushing the call, check whether this site is a helper
-            // call to bpf_map_lookup_elem and we have HASH-map inline
-            // info -- if so, emit the inline (test+je+add) sequence
-            // immediately after the call. iced lays the declared bytes
-            // out at the next sequential IP so subsequent intra-symbol
-            // PC-relative refs shift automatically.
+            // After pushing the call, decide per-call-site whether to
+            // emit the inline (test+je+add) HASH-lookup sequence. We
+            // index `lookup_sites` by the BPF-source ordinal of this
+            // `bpf_map_lookup_elem` call (passed in by the runner; see
+            // `--lookup-site` docs). Clang preserves call order between
+            // BPF and native compilation paths, so the i-th
+            // `bpf_map_lookup_elem` call in the native code corresponds
+            // to the i-th `BPF_CALL bpf_map_lookup_elem` in the BPF
+            // bytecode.
             if is_entry {
                 if let Some(name) = helper_call_sites.get(&(sym.address, local_ip)) {
                     if name == "bpf_map_lookup_elem" {
-                        if let Some(hi) = inline_hash {
-                            for ib in build_inline_hash_lookup(hi.key_offset)? {
-                                local.push(ib);
-                                kinds.push(None);
-                                // The inserted bytes do not correspond to
-                                // any byte in the original symbol; mark
-                                // their local IP with a sentinel that
-                                // can't collide with any reloc offset.
-                                // We use 0 here since reloc-handling code
-                                // does an exact match against the call's
-                                // local IP (already in the table), so a
-                                // duplicate 0 wouldn't be looked up for
-                                // helper refs. The other consumer
-                                // (`new_offset_in_sym[i]`) is indexed by
-                                // position, not by `insn_local_ip[i]`, so
-                                // this is safe.
-                                insn_local_ip.push(u64::MAX);
+                        let ordinal = lookup_call_counter;
+                        lookup_call_counter += 1;
+                        lookup_call_ordinal.insert((sym.address, local_ip), ordinal);
+                        if let Some(spec) = lookup_sites.get(ordinal) {
+                            if spec.key_offset > 0 {
+                                for ib in build_inline_hash_lookup(spec.key_offset)? {
+                                    local.push(ib);
+                                    kinds.push(None);
+                                    // The inserted bytes have no source-byte
+                                    // counterpart in the symbol. Sentinel
+                                    // u64::MAX excludes them from
+                                    // local_ip-keyed lookups in reloc
+                                    // handling.
+                                    insn_local_ip.push(u64::MAX);
+                                }
                             }
                         }
+                        // No spec for this ordinal -> falls through to
+                        // shared `bpf_map_lookup_elem` pool entry in
+                        // apply_elf_relocations (legacy / standalone
+                        // linker invocation).
                     }
                 }
             }
@@ -671,7 +712,15 @@ fn rewrite(
     // it should reach. Trampolines are position-independent (they hold
     // the helper's absolute address inline and use `jmp [rip+0]`), so
     // the kernel module's emit_x86 can splat the blob verbatim.
-    apply_elf_relocations(elf, &layouts, helper_addrs, map_addrs, inline_hash, &mut blob)?;
+    apply_elf_relocations(
+        elf,
+        &layouts,
+        helper_addrs,
+        map_addrs,
+        lookup_sites,
+        &lookup_call_ordinal,
+        &mut blob,
+    )?;
 
     // Patch JmpEnd disps LAST so they target the byte AFTER any
     // trampolines we just appended -- i.e., where the BPF JIT will emit
@@ -719,7 +768,8 @@ fn apply_elf_relocations(
     layouts: &[SymbolLayout],
     helper_addrs: &HashMap<String, u64>,
     map_addrs: &HashMap<String, u64>,
-    inline_hash: Option<InlineHashLookup>,
+    lookup_sites: &[LookupSiteSpec],
+    lookup_call_ordinal: &HashMap<(u64, u64), usize>,
     blob: &mut Vec<u8>,
 ) -> Result<()> {
     if layouts.is_empty() {
@@ -839,23 +889,47 @@ fn apply_elf_relocations(
                 // common; map_addrs is consulted only if not found in
                 // helpers.
                 9 | 41 | 42 => {
-                    // POC: when --inline-hash-lookup is supplied we
-                    // assume every bpf_map_lookup_elem call site is on a
-                    // HASH map and rewrite the helper target to
-                    // __htab_map_lookup_elem; the post-call test+je+add
-                    // sequence was emitted into the instruction stream
-                    // back in rewrite()'s decode loop.
-                    let resolved_helper = inline_hash
-                        .filter(|_| target_name == "bpf_map_lookup_elem")
-                        .map(|h| h.htab_addr)
-                        .or_else(|| helper_addrs.get(&target_name).copied());
-                    let kernel_addr = resolved_helper
-                        .or_else(|| map_addrs.get(&target_name).copied())
-                        .ok_or_else(|| anyhow!(
-                            "GOT-relative reloc against unknown symbol {}: \
-                             pass --helper {}=0x... or --map {}=0x... on the command line",
-                            target_name, target_name, target_name
-                        ))?;
+                    // Per-call-site routing for `bpf_map_lookup_elem`.
+                    // If the runner supplied a `--lookup-site` for
+                    // this call's BPF-source ordinal, route this site
+                    // to a *dedicated* pool entry holding the
+                    // per-site target (`__htab_map_lookup_elem` for
+                    // HASH maps, plain `bpf_map_lookup_elem`
+                    // otherwise). This avoids the old single-shared-
+                    // pool-entry limitation that forced all
+                    // `bpf_map_lookup_elem` calls to share one target,
+                    // and lets multi-map programs get HASH-inline on
+                    // their HASH lookups while keeping ARRAY/PERCPU
+                    // lookups on the plain helper.
+                    let mut dedicated_pool_addr: Option<u64> = None;
+                    if target_name == "bpf_map_lookup_elem" {
+                        // The reloc offset points at the disp32 of the
+                        // 6-byte indirect call (`ff 15 dd dd dd dd`);
+                        // the call's opcode is 2 bytes earlier.
+                        let call_local_off = local_patch_off.wrapping_sub(2);
+                        if let Some(&ord) = lookup_call_ordinal
+                            .get(&(layout.sym.address, call_local_off))
+                        {
+                            if let Some(spec) = lookup_sites.get(ord) {
+                                dedicated_pool_addr = Some(spec.target_addr);
+                            }
+                        }
+                    }
+                    let kernel_addr = if let Some(a) = dedicated_pool_addr {
+                        a
+                    } else {
+                        helper_addrs
+                            .get(&target_name)
+                            .copied()
+                            .or_else(|| map_addrs.get(&target_name).copied())
+                            .ok_or_else(|| {
+                                anyhow!(
+                                "GOT-relative reloc against unknown symbol {}: \
+                                 pass --helper {}=0x... or --map {}=0x... on the command line",
+                                target_name, target_name, target_name
+                            )
+                            })?
+                    };
                     let map_addr = kernel_addr; /* used by code below */
 
                     // Find the decoded instruction that contains this
@@ -881,8 +955,18 @@ fn apply_elf_relocations(
                     let off_within_insn = (local_patch_off - layout.insn_local_ip[insn_idx]) as usize;
                     let disp32_off = new_insn_off + off_within_insn;
 
-                    // Reserve / reuse a pool entry.
-                    let pool_off = if let Some(&off) = map_pool_entry.get(&target_name) {
+                    // Reserve / reuse a pool entry. For
+                    // per-call-site routed `bpf_map_lookup_elem` we
+                    // always allocate a *fresh* entry (each call site
+                    // can route to a different target), 8 bytes per
+                    // site. For everything else (helpers shared across
+                    // many call sites, map pointers shared across
+                    // load/lookup sequences) one entry is sufficient.
+                    let pool_off = if dedicated_pool_addr.is_some() {
+                        let off = blob.len();
+                        blob.extend_from_slice(&map_addr.to_le_bytes());
+                        off
+                    } else if let Some(&off) = map_pool_entry.get(&target_name) {
                         off
                     } else {
                         let off = blob.len();
