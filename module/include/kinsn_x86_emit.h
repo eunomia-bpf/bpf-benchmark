@@ -10,17 +10,11 @@ static __always_inline s32 kinsn_payload_s32(u64 payload, u8 shift)
 	return (s32)((u32)(payload >> shift));
 }
 
-static __always_inline bool kinsn_x86_prog_uses_priv_stack(const struct bpf_prog *prog)
-{
-	return prog && prog->aux && prog->aux->priv_stack_ptr;
-}
-
 static __always_inline u8 kinsn_x86_reg_for_prog(const struct bpf_prog *prog,
-						 u8 bpf_reg)
+						 u8 x86_reg)
 {
-	if (bpf_reg == BPF_REG_10 && kinsn_x86_prog_uses_priv_stack(prog))
-		return KINSN_X86_REG_R9;
-	return bpf_reg;
+	(void)prog;
+	return x86_reg;
 }
 
 static __always_inline u8 kinsn_x86_code(u8 reg)
@@ -97,7 +91,8 @@ static __always_inline bool kinsn_x86_needs_rex8(u8 reg)
 
 static __always_inline bool kinsn_x86_reg_is_shadowed(u8 reg)
 {
-	return reg >= KINSN_X86_REG_R9 && reg <= KINSN_X86_REG_RSP;
+	return reg <= BPF_REG_10 ||
+	       (reg >= KINSN_X86_REG_R9 && reg <= KINSN_X86_REG_RSP);
 }
 
 static __always_inline s16 kinsn_x86_shadow_reg_off(u8 reg)
@@ -254,6 +249,8 @@ static __always_inline void kinsn_x86_write64(struct bpf_insn *insn_buf,
 						 kinsn_x86_scratch_off(dst_reg));
 	else if (dst_reg != value_reg)
 		insn_buf[(*cnt)++] = BPF_MOV64_REG(dst_reg, value_reg);
+	if (dst_reg == BPF_REG_0 && value_reg != BPF_REG_0)
+		insn_buf[(*cnt)++] = BPF_MOV64_REG(BPF_REG_0, value_reg);
 	(void)saved_mask;
 }
 
@@ -269,6 +266,8 @@ static __always_inline void kinsn_x86_write32(struct bpf_insn *insn_buf,
 						 kinsn_x86_scratch_off(dst_reg));
 	else if (dst_reg != value_reg)
 		insn_buf[(*cnt)++] = BPF_MOV32_REG(dst_reg, value_reg);
+	if (dst_reg == BPF_REG_0 && value_reg != BPF_REG_0)
+		insn_buf[(*cnt)++] = BPF_MOV32_REG(BPF_REG_0, value_reg);
 	(void)saved_mask;
 }
 

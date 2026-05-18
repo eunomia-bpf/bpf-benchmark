@@ -1,0 +1,9 @@
+{
+  "completed_benchmarks": 2,
+  "current_benchmark": null,
+  "current_benchmark_index": null,
+  "current_benchmark_record": null,
+  "error_message": "simple: simple/kernel_handcraft result mismatch: 0 != 12345678; bitmap_popcount_scan: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/bitmap_popcount_scan.handcraft.so --program-name bitmap_popcount_scan_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bitmap_popcount_scan.mem --io-mode staged --input-size 2056 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_012058_418011/details/jit_dumps/bitmap_popcount_scan__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_012058_418011/details/jit_dumps/bitmap_popcount_scan__kernel_handcraft__sample00.xlated.bin\nlibbpf: sec 'xdp': found program 'bitmap_popcount_scan_xdp' at insn offset 0 (0 bytes), code size 116 insns (928 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /artifacts/user/micro-programs/x86_64/bitmap_popcount_scan.bpf.o is GPL\nlibbpf: elf: section(15) .BTF, size 1309, link 0, flags 0, type=1\nlibbpf: elf: section(17) .BTF.ext, size 1216, link 0, flags 0, type=1\nlibbpf: elf: section(25) .symtab, size 408, link 1, flags 0, type=2\nlibbpf: looking for externs among 17 symbols...\nlibbpf: collected 0 externs total\nbpf_prog_load(handcraft) failed: Invalid argument\nfunc#0 @0\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument",
+  "status": "error",
+  "total_benchmarks": 2
+}

@@ -297,27 +297,41 @@ return 1;
 for the specific native exit taken. No exact-trip fallback may be used unless a
 separate theorem proves priority among exits.
 
+### Non-Active PC-Dispatch Experiment
+
+The active implementation does not contain a loop `pc` field and does not emit
+pc-dispatch basic-block callbacks. That experiment was removed from the active
+generator because it moved CFG scheduling complexity into Python and did not
+fix the two remaining verifier `E2BIG` failures.
+
+Any future pc-dispatch rule must be C-authored or bytecode-template-authored
+and must be added back to this spec before use. It is not part of the current
+proof contract.
+
 ## 7. Loop Frame Preservation
 
 The loop callback may widen verifier knowledge of stack-carried ghost fields.
-The generator is allowed to reassert a ghost capability after a loop only when a
-static write-set proves the corresponding concrete register is not written by
-the loop.
+The active implementation handles the `rdi` case in the C loop protocol instead
+of Python write-set insertion.
 
 Current implemented frame rule:
 
 ```text
-If X86_RDI is not in loop_written_regs(loop),
-then after bpf_loop returns:
-  state.rdi     = saved_rdi
-  state.p_rdi   = saved_p_rdi
-  state.tag_rdi = saved_tag_rdi
+During a loop callback:
+  X86_VM_LOOP_OP marks loop.rdi_written when an opcode writes X86_RDI.
+  X86_VM_LOOP_CALL marks loop.rdi_written for native direct calls.
+
+After bpf_loop returns:
+  if loop.rdi_written == 0:
+    state.rdi     = saved_rdi
+    state.p_rdi   = saved_p_rdi
+    state.tag_rdi = saved_tag_rdi
 ```
 
-This is valid because the restore changes only fields that are unchanged by the
-native loop. For concrete x86 correctness, the restore is observationally a
-no-op. For verifier correctness, it preserves the ghost capability needed by
-later memory helpers.
+This is valid for paths where the C loop protocol records no RDI write. For
+concrete x86 correctness, the restore is observationally a no-op on those paths.
+For verifier correctness, it preserves the ghost capability needed by later
+memory helpers.
 
 ## 8. Entry Context Capability Preservation
 
@@ -329,23 +343,24 @@ mov [rdi + 16], reg
 mov [rdi + 20], reg
 ```
 
-The generator may reassert:
+The C-authored `X86_VM_RUN_OP` macro calls `x86_vm_prepare_ctx_output()` before
+executing each non-loop helper. For ABI output stores, that helper reasserts:
 
 ```c
 state.p_rdi = (void *)ctx;
 state.tag_rdi = X86_PTR_CTX;
 ```
 
-immediately before such an output store only if static write-set analysis proves
-that `rdi` has not been written since program entry.
+immediately before the store helper executes. The generator does not contain a
+benchmark-specific or store-specific renderer for this.
 
 Proof obligation:
 
 ```text
-If the native instruction prefix from entry to pc does not write rdi,
-then rdi still denotes the entry ctx capability at pc. Reasserting the ghost
-capability before executing the store helper is observationally a no-op for
-the concrete x86 state.
+For any accepted program path that reaches an ABI output store, rdi must still
+denote the entry ctx capability at that point, or the store must be covered by an
+explicit ABI-output theorem. Reasserting the ghost capability before executing
+the store helper must be observationally a no-op for the concrete x86 state.
 ```
 
 This rule is not tied to a specific benchmark or loop exit shape.
@@ -371,7 +386,7 @@ the generator must satisfy:
 3. Any omitted native instruction must be covered by an explicit theorem
    (for example synthetic frame traffic in generated call wrappers).
 
-4. Any ghost restore must be justified by a write-set/frame theorem.
+4. Any ghost restore must be justified by a C helper/frame theorem.
 
 5. No rule may depend on:
    - benchmark name,
@@ -391,6 +406,7 @@ These are not acceptable final assumptions; they are work items.
 | RODATA model | Specify each generated read-only table and prove indexed reads match the native constants. |
 | Stack model bounds | Prove every modeled stack access maps to the correct x86 stack slot after synthetic frame rewrites. |
 | Multi-exit loop state explosion | Add a theorem or structural lowering for priority among exits before using exact-trip fallback on multi-exit loops. |
+| Paused PC-dispatch experiment | If revived, implement it as a C/template proof rule rather than Python CFG scheduling. It is not active now. |
+| ABI output-store theorem | `x86_vm_prepare_ctx_output()` is C-authored, but the final proof still must show accepted paths reach `[rdi+16/20]` stores only when `rdi` denotes entry ctx, or explicitly define that ABI store as a semantic rule. |
 | Native call loops | Prove or refactor loop callbacks that call large generated subfunctions without exceeding verifier complexity. |
 | JSON-linker equivalence | Reuse this spec after JSON bytecode linking stops going through clang. |
-

@@ -6,6 +6,12 @@ table plus a geometric-mean ratio summary. Per CLAUDE.md, this script
 lives outside the benchmark framework and does no in-framework
 aggregation; it operates on the raw sample_result payloads emitted by
 micro_exec.
+
+A program is *measurable* only when both runtimes produced matching
+(`result`, `retval`) tuples. Programs whose context layout makes the
+native compilation see a different memory image than the kernel BPF
+runtime (currently `tc_*` and `cgroup_skb_*`) report MISMATCH and are
+excluded from the geomean.
 """
 import json
 import math
@@ -28,10 +34,11 @@ def main() -> int:
         by_prog.setdefault(prog, {})[rt] = rec
 
     print(f"{'program':<46s}  {'native_lab':>12s}  {'kernel_jit':>12s}  "
-          f"{'ratio':>8s}  result_ok")
+          f"{'ratio':>8s}  status")
     print("-" * 92)
     ratios = []
-    valid = 0
+    mismatches: list[str] = []
+    errors: list[str] = []
     skipped = 0
     for prog, rts in sorted(by_prog.items()):
         nl = rts.get("native_lab", {})
@@ -43,21 +50,24 @@ def main() -> int:
         if "error" in nl or "error" in kj:
             err = nl.get("error") or kj.get("error")
             print(f"{prog:<46s}  ERROR ({err})")
+            errors.append(prog)
             continue
         nl_ns = nl.get("exec_ns", 0)
         kj_ns = kj.get("exec_ns", 0)
-        nl_result = nl.get("result")
-        kj_result = kj.get("result")
-        result_ok = nl_result == kj_result and nl["retval"] == kj["retval"]
+        result_ok = nl.get("result") == kj.get("result") and \
+                    nl.get("retval") == kj.get("retval")
+        status = "OK" if result_ok else "MISMATCH"
+        if not result_ok:
+            mismatches.append(prog)
         if nl_ns == 0 or kj_ns == 0:
             print(f"{prog:<46s}  {nl_ns:>12d}  {kj_ns:>12d}  "
-                  f"{'-':>8s}  {'OK' if result_ok else 'MISMATCH'}")
+                  f"{'-':>8s}  {status}")
             continue
         ratio = nl_ns / kj_ns
-        ratios.append(ratio)
-        valid += 1
+        if result_ok:
+            ratios.append(ratio)
         print(f"{prog:<46s}  {nl_ns:>12d}  {kj_ns:>12d}  "
-              f"{ratio:>8.3f}  {'OK' if result_ok else 'MISMATCH'}")
+              f"{ratio:>8.3f}  {status}")
 
     print()
     if ratios:
@@ -65,14 +75,29 @@ def main() -> int:
         wins = sum(1 for r in ratios if r < 1.0)
         losses = sum(1 for r in ratios if r > 1.0)
         ties = sum(1 for r in ratios if r == 1.0)
-        print(f"Per-program ratio (native_lab / kernel_jit):")
+        print(f"Per-program ratio (native_lab / kernel_jit), validated runs only:")
         print(f"  geomean = {gmean:.4f}x  ({'native_lab faster' if gmean < 1 else 'kernel_jit faster'})")
         print(f"  range   = {min(ratios):.3f} .. {max(ratios):.3f}")
         print(f"  wins (native_lab faster) = {wins}")
         print(f"  losses (kernel_jit faster) = {losses}")
         print(f"  ties = {ties}")
-        print(f"  programs measured = {valid}")
-        print(f"  programs skipped = {skipped}")
+        print(f"  programs validated = {len(ratios)}")
+    if mismatches:
+        print()
+        print(f"Excluded from geomean (output identity check failed):")
+        for p in mismatches:
+            print(f"  {p}")
+        print("  -- typically tc/cgroup_skb programs whose kernel ctx is")
+        print("     `struct sk_buff` (data/data_end at deep offsets), but")
+        print("     the userspace MICRO_NATIVE build assumed xdp_md-style")
+        print("     offsets 0/8. Both runtimes execute; only their views of")
+        print("     ctx diverge, so the comparison is not apples-to-apples.")
+    if errors:
+        print()
+        print(f"Errored: {len(errors)} ({', '.join(errors)})")
+    if skipped:
+        print()
+        print(f"Skipped: {skipped}")
     return 0
 
 

@@ -196,6 +196,7 @@ static __always_inline int decode_sib(u64 payload, u8 *dst_reg, u8 *base_reg,
 {
 	u8 form;
 
+	(void)allow_shadow_dst;
 	payload = kinsn_payload_decode(payload);
 	form = mov_payload_form(payload);
 	if ((form != X86_FORM_SIB && form != X86_FORM_ARCH_SIB) ||
@@ -208,9 +209,6 @@ static __always_inline int decode_sib(u64 payload, u8 *dst_reg, u8 *base_reg,
 	*scale_log2 = (payload >> 16) & 0x3;
 	*offset = kinsn_payload_s16(payload, 20);
 	if (payload & (0x3ULL << 18))
-		return -EINVAL;
-	if (!allow_shadow_dst && form != X86_FORM_ARCH_SIB &&
-	    kinsn_x86_reg_is_shadowed(*dst_reg))
 		return -EINVAL;
 	if (!kinsn_x86_operand_valid(*dst_reg) ||
 	    !kinsn_x86_operand_valid(*base_reg) ||
@@ -868,6 +866,7 @@ static int instantiate_movzwl(u64 payload, struct bpf_insn *insn_buf)
 
 static int instantiate_movsxd(u64 payload, struct bpf_insn *insn_buf)
 {
+	struct mov_rr_payload rr;
 	u8 dst_reg, base_reg, index_reg, scale_log2;
 	u8 addr_reg = KINSN_X86_SCRATCH0;
 	u8 index_eval_reg = KINSN_X86_SCRATCH1;
@@ -878,6 +877,35 @@ static int instantiate_movsxd(u64 payload, struct bpf_insn *insn_buf)
 	int cnt = 0;
 	int err;
 	bool arch_regs;
+
+	if (mov_payload_form(kinsn_payload_decode(payload)) == X86_FORM_RR ||
+	    mov_payload_form(kinsn_payload_decode(payload)) == X86_FORM_ARCH_RR) {
+		err = decode_rr_any(payload, &rr);
+		if (err)
+			return err;
+		scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0);
+		kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+		if (rr.src_arch)
+			kinsn_x86_read64_arch(insn_buf, &cnt,
+					      KINSN_X86_SCRATCH0,
+					      rr.src_reg);
+		else
+			kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0,
+					 rr.src_reg);
+		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH,
+						KINSN_X86_SCRATCH0, 32);
+		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_ARSH,
+						KINSN_X86_SCRATCH0, 32);
+		if (rr.dst_arch)
+			kinsn_x86_write64_arch(insn_buf, &cnt, rr.dst_reg,
+					       KINSN_X86_SCRATCH0,
+					       scratch_mask);
+		else
+			kinsn_x86_write64(insn_buf, &cnt, rr.dst_reg,
+					  KINSN_X86_SCRATCH0, scratch_mask);
+		kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+		return cnt;
+	}
 
 	err = decode_sib(payload, &dst_reg, &base_reg, &index_reg, &scale_log2,
 			 &offset, false);
@@ -1471,12 +1499,32 @@ static int emit_movswl_x86(u8 *image, u32 *off, bool emit, u64 payload,
 static int emit_movsxd_x86(u8 *image, u32 *off, bool emit, u64 payload,
 			   const struct bpf_prog *prog)
 {
+	struct mov_rr_payload rr;
 	u8 buf[16];
 	u8 dst_reg, base_reg, index_reg, scale_log2;
 	s16 offset;
 	u32 len = 0;
 	int err;
 	bool arch_regs;
+
+	if (mov_payload_form(kinsn_payload_decode(payload)) == X86_FORM_RR ||
+	    mov_payload_form(kinsn_payload_decode(payload)) == X86_FORM_ARCH_RR) {
+		err = decode_rr_any(payload, &rr);
+		if (err)
+			return err;
+		dst_reg = rr.dst_arch ? rr.dst_reg :
+				 kinsn_x86_reg_for_prog(prog, rr.dst_reg);
+		base_reg = rr.src_arch ? rr.src_reg :
+				  kinsn_x86_reg_for_prog(prog, rr.src_reg);
+		if (!kinsn_x86_valid(dst_reg) || !kinsn_x86_valid(base_reg))
+			return -EINVAL;
+		kinsn_emit_rex_rr(buf, &len, true, dst_reg, base_reg);
+		kinsn_emit_u8(buf, &len, 0x63);
+		kinsn_emit_u8(buf, &len, 0xc0 |
+			      (kinsn_x86_code(dst_reg) << 3) |
+			      kinsn_x86_code(base_reg));
+		return kinsn_emit_finish(image, off, emit, buf, len);
+	}
 
 	err = decode_sib(payload, &dst_reg, &base_reg, &index_reg, &scale_log2,
 			 &offset, false);

@@ -179,7 +179,8 @@ int find_kfunc_btf_id()
     return id;
 }
 
-int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks)
+int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
+                   uint32_t prog_type_value)
 {
     if (chunks == 0) {
         fail("chunks must be > 0");
@@ -210,7 +211,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks)
     int fd_array[2] = {mod_btf_fd, mod_btf_fd};
     std::vector<char> log_buf(32 * 1024, '\0');
     union bpf_attr attr = {};
-    attr.prog_type = BPF_PROG_TYPE_XDP;
+    attr.prog_type = prog_type_value;
     attr.insn_cnt = static_cast<uint32_t>(insns.size());
     attr.insns = reinterpret_cast<uintptr_t>(insns.data());
     attr.license = reinterpret_cast<uintptr_t>("GPL");
@@ -270,10 +271,21 @@ std::vector<sample_result> run_kernel_native_lab(const cli_options &options)
     uint32_t chunks = upload_blob(blob);
     const auto upload_end = std::chrono::steady_clock::now();
 
+    uint32_t prog_type_value = BPF_PROG_TYPE_XDP;
+    if (options.native_lab_prog_type == "xdp") {
+        prog_type_value = BPF_PROG_TYPE_XDP;
+    } else if (options.native_lab_prog_type == "sched_cls") {
+        prog_type_value = BPF_PROG_TYPE_SCHED_CLS;
+    } else if (options.native_lab_prog_type == "cgroup_skb") {
+        prog_type_value = BPF_PROG_TYPE_CGROUP_SKB;
+    } else {
+        fail("unsupported --native-lab-prog-type: " + options.native_lab_prog_type);
+    }
+
     const auto prog_load_start = std::chrono::steady_clock::now();
     int mod_btf_fd = find_module_btf_fd();
     int kfunc_id = find_kfunc_btf_id();
-    int prog_fd = load_stub_prog(kfunc_id, mod_btf_fd, chunks);
+    int prog_fd = load_stub_prog(kfunc_id, mod_btf_fd, chunks, prog_type_value);
     const auto prog_load_end = std::chrono::steady_clock::now();
     close(mod_btf_fd);
 

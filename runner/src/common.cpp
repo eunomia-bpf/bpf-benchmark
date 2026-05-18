@@ -286,6 +286,10 @@ cli_options parse_args(int argc, char **argv)
             options.raw_packet = true;
             continue;
         }
+        if (current == "--native-lab-prog-type" && index + 1 < argc) {
+            options.native_lab_prog_type = argv[++index];
+            continue;
+        }
         if (current == "--signal-control") {
             options.signal_control = true;
             continue;

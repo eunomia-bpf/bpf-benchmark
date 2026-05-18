@@ -34,7 +34,10 @@ docker-survey: libbpfrejit_shim.so libbpfrejit_shim_musl.so
 	docker cp libbpfrejit_shim_musl.so $$CID:/tmp/libbpfrejit_shim_musl.so; \
 	docker start $$CID > /dev/null; \
 	trap "docker stop $$CID > /dev/null 2>&1" EXIT; \
-	docker exec $$CID bash -c '\
+	docker exec \
+	  -e RUN_BPFOPT_PASSES="$(RUN_BPFOPT_PASSES)" \
+	  -e SHIM_TICK_MS="$(SHIM_TICK_MS)" \
+	  $$CID bash -c '\
 	  mkdir -p /tmp/shim_dumps; \
 	  preload_glibc="/tmp/libbpfrejit_shim.so"; \
 	  preload_musl="/tmp/libbpfrejit_shim_musl.so"; \

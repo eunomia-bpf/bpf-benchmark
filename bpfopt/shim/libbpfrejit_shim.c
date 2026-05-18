@@ -31,6 +31,8 @@
 #include <signal.h>
 #include <spawn.h>
 #include <stdarg.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 #include <sys/wait.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -451,6 +453,8 @@ static void on_raw_tp_open(const union bpf_attr *attr) {
 
 static void sigusr1_handler(int sig);   /* forward decl */
 static void *worker_thread(void *arg);  /* forward decl */
+static void *socket_thread(void *arg);  /* forward decl */
+static void run_bpfopt_on_all_progs(const char *pass_list); /* forward */
 
 __attribute__((constructor)) static void shim_init(void) {
     real_syscall = dlsym(RTLD_NEXT, "syscall");
@@ -490,6 +494,14 @@ __attribute__((constructor)) static void shim_init(void) {
     pthread_t tid;
     pthread_create(&tid, NULL, worker_thread, NULL);
     pthread_detach(tid);
+
+    /* Socket server thread — per-pid daemon-compatible socket.
+     * Disable by setting BPFREJIT_SHIM_SOCK_DISABLE=1. */
+    if (!getenv("BPFREJIT_SHIM_SOCK_DISABLE")) {
+        pthread_t stid;
+        pthread_create(&stid, NULL, socket_thread, NULL);
+        pthread_detach(stid);
+    }
 }
 
 /* Intercept syscall(2). */
@@ -868,12 +880,28 @@ static int run_bpfopt_pass(const char *pass, const char *in_path,
         NULL,
     };
 
+    /* Build a clean env for the subprocess: drop LD_PRELOAD so bpfopt is not
+     * itself shimmed (recursive). Keep everything else. */
+    size_t n_env = 0;
+    while (environ[n_env]) n_env++;
+    char **clean_env = (char **)calloc(n_env + 1, sizeof(char *));
+    if (!clean_env)
+        return -1;
+    size_t j = 0;
+    for (size_t i = 0; i < n_env; i++) {
+        if (strncmp(environ[i], "LD_PRELOAD=", 11) == 0)
+            continue;
+        clean_env[j++] = environ[i];
+    }
+    clean_env[j] = NULL;
+
     pid_t pid;
     int rc;
     if (access(bpfopt, X_OK) == 0)
-        rc = posix_spawn(&pid, bpfopt, NULL, NULL, argv, environ);
+        rc = posix_spawn(&pid, bpfopt, NULL, NULL, argv, clean_env);
     else
-        rc = posix_spawnp(&pid, "bpfopt", NULL, NULL, argv, environ);
+        rc = posix_spawnp(&pid, "bpfopt", NULL, NULL, argv, clean_env);
+    free(clean_env);
     if (rc != 0) {
         log_line("bpfopt spawn failed: rc=%d path=%s", rc, bpfopt);
         return -1;
@@ -958,15 +986,17 @@ static void run_bpfopt_on_all_progs(const char *pass_list) {
     for (size_t i = 0; i < n; i++) {
         if (!progs[i].bytecode_path[0])
             continue;
+        /* Per-prog output keyed by kernel_prog_id (NOT by bytecode hash), so
+         * each program instance gets its own record even when multiple progs
+         * share identical bytecode. CLAUDE.md forbids filtering or
+         * deduplicating BPF programs out of the optimization pipeline. */
         char out_path[320], report_path[320];
-        snprintf(out_path, sizeof(out_path), "%s/bpfrejit_%d_%016lx_%s.bpf",
-                 dir, getpid(), progs[i].hash, pass_buf);
+        snprintf(out_path, sizeof(out_path),
+                 "%s/bpfrejit_%d_prog%u_%016lx_%s.bpf", dir, getpid(),
+                 progs[i].kernel_prog_id, progs[i].hash, pass_buf);
         snprintf(report_path, sizeof(report_path),
-                 "%s/bpfrejit_%d_%016lx_%s.json", dir, getpid(),
-                 progs[i].hash, pass_buf);
-        /* Skip if already done for this hash. */
-        if (access(out_path, F_OK) == 0)
-            continue;
+                 "%s/bpfrejit_%d_prog%u_%016lx_%s.json", dir, getpid(),
+                 progs[i].kernel_prog_id, progs[i].hash, pass_buf);
         int rc = run_bpfopt_pass(pass_buf, progs[i].bytecode_path, out_path,
                                  report_path, progs[i].prog_type);
         if (rc == 0) {
@@ -985,6 +1015,217 @@ static void run_bpfopt_on_all_progs(const char *pass_list) {
     if (ok || fail)
         log_line("bpfopt pass=%s summary: ok=%d fail=%d total=%zu", pass_buf,
                  ok, fail, n);
+}
+
+/* =========================================================================
+ * Socket server thread — Plan A: per-pid socket reusing daemon JSON protocol.
+ *
+ * Path: $BPFREJIT_SHIM_SOCK_DIR/shim-<pid>.sock (default /var/run/bpfrejit/)
+ *
+ * Protocol (line-delimited JSON, one request per line, one response per line,
+ * same shape as the existing bpfrejit-daemon at daemon/src/server.rs):
+ *
+ *   request:  {"cmd": "list_progs"}
+ *   response: {"ok": true, "progs": [{"id": <kernel_prog_id>, "name": "...",
+ *               "type": <prog_type>, "insn_cnt": ..., "hash": "...",
+ *               "bytecode_path": "..."}]}
+ *
+ *   request:  {"cmd": "optimize", "enabled_passes": ["noop"]}
+ *   response: {"ok": true, "passes": ["noop"]}
+ *             (invokes bpfopt on all tracked progs; result via shim log)
+ *
+ *   request:  {"cmd": "dump_state"}
+ *   response: {"ok": true, "path": "/tmp/dumps/state_<pid>.json"}
+ *
+ * Unknown cmd → {"ok": false, "error": "unknown cmd"}.
+ *
+ * Parsing is intentionally a tiny ad-hoc tokenizer; it accepts the field
+ * subset listed above and ignores everything else. ===================== */
+
+static int unix_socket_listen(const char *path) {
+    int fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (fd < 0)
+        return -1;
+    struct sockaddr_un addr;
+    memset(&addr, 0, sizeof(addr));
+    addr.sun_family = AF_UNIX;
+    snprintf(addr.sun_path, sizeof(addr.sun_path), "%s", path);
+    unlink(path);
+    if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+        real_close(fd);
+        return -1;
+    }
+    if (listen(fd, 8) < 0) {
+        real_close(fd);
+        return -1;
+    }
+    return fd;
+}
+
+/* Extract a quoted string after `"key":`. Returns 1 on success and writes up
+ * to out_sz-1 bytes + NUL to out. */
+static int json_get_str(const char *json, const char *key, char *out,
+                        size_t out_sz) {
+    char needle[64];
+    snprintf(needle, sizeof(needle), "\"%s\"", key);
+    const char *p = strstr(json, needle);
+    if (!p)
+        return 0;
+    p = strchr(p + strlen(needle), ':');
+    if (!p)
+        return 0;
+    p++;
+    while (*p == ' ' || *p == '\t')
+        p++;
+    if (*p != '"')
+        return 0;
+    p++;
+    size_t i = 0;
+    while (*p && *p != '"' && i + 1 < out_sz)
+        out[i++] = *p++;
+    out[i] = 0;
+    return 1;
+}
+
+static void emit_list_progs(int cli) {
+    pthread_mutex_lock(&state_mutex);
+    /* Estimate buffer size: ~256 bytes per prog. */
+    size_t cap = 4096;
+    char *buf = (char *)malloc(cap);
+    if (!buf) {
+        pthread_mutex_unlock(&state_mutex);
+        return;
+    }
+    size_t len = 0;
+    len += snprintf(buf + len, cap - len, "{\"ok\":true,\"progs\":[");
+    int first = 1;
+    for (int b = 0; b < OBJ_TABLE_BUCKETS; b++) {
+        for (struct obj_entry *e = obj_table[b]; e; e = e->next) {
+            if (e->kind != OBJ_PROG)
+                continue;
+            if (cap - len < 512) {
+                cap *= 2;
+                char *nb = (char *)realloc(buf, cap);
+                if (!nb)
+                    break;
+                buf = nb;
+            }
+            len += snprintf(
+                buf + len, cap - len,
+                "%s{\"id\":%u,\"name\":\"%s\",\"type\":%u,\"insn_cnt\":%u,"
+                "\"hash\":\"%016lx\",\"bytecode_path\":\"%s\"}",
+                first ? "" : ",", e->u.prog.kernel_prog_id, e->u.prog.name,
+                e->u.prog.prog_type, e->u.prog.insn_cnt, e->u.prog.hash,
+                e->u.prog.bytecode_path);
+            first = 0;
+        }
+    }
+    pthread_mutex_unlock(&state_mutex);
+    len += snprintf(buf + len, cap - len, "]}\n");
+    if (write(cli, buf, len) < 0) { /* best effort */ }
+    free(buf);
+}
+
+static void emit_optimize(int cli, const char *json) {
+    char passes[128] = {0};
+    if (!json_get_str(json, "enabled_passes", passes, sizeof(passes))) {
+        /* `enabled_passes` may be an array of strings; accept that too. */
+        const char *p = strstr(json, "\"enabled_passes\"");
+        if (p) {
+            p = strchr(p, '[');
+            if (p) {
+                p++;
+                size_t i = 0;
+                while (*p && *p != ']' && i + 1 < sizeof(passes)) {
+                    if (*p != '"' && *p != ' ' && *p != ',')
+                        passes[i++] = *p;
+                    if (*p == '"' && i > 0 && passes[i - 1] != ',') {
+                        /* end of one name; insert comma if more coming */
+                        const char *q = p + 1;
+                        while (*q == ' ')
+                            q++;
+                        if (*q == ',')
+                            passes[i++] = ',';
+                    }
+                    p++;
+                }
+                passes[i] = 0;
+            }
+        }
+    }
+    if (!passes[0])
+        snprintf(passes, sizeof(passes), "noop");
+    run_bpfopt_on_all_progs(passes);
+    dprintf(cli, "{\"ok\":true,\"passes\":\"%s\"}\n", passes);
+}
+
+static void emit_dump_state(int cli) {
+    dump_state_json();
+    const char *dir = getenv("BPFREJIT_SHIM_DIR");
+    if (!dir)
+        dir = "/tmp";
+    dprintf(cli, "{\"ok\":true,\"path\":\"%s/state_%d.json\"}\n", dir,
+            getpid());
+}
+
+static void handle_client(int cli) {
+    char buf[8192];
+    ssize_t n = read(cli, buf, sizeof(buf) - 1);
+    if (n <= 0)
+        return;
+    buf[n] = 0;
+    char cmd[64] = {0};
+    if (!json_get_str(buf, "cmd", cmd, sizeof(cmd))) {
+        dprintf(cli, "{\"ok\":false,\"error\":\"missing cmd\"}\n");
+        return;
+    }
+    log_line("socket: cmd=%s", cmd);
+    if (strcmp(cmd, "list_progs") == 0)
+        emit_list_progs(cli);
+    else if (strcmp(cmd, "optimize") == 0 ||
+             strcmp(cmd, "execute_plan") == 0)
+        emit_optimize(cli, buf);
+    else if (strcmp(cmd, "dump_state") == 0)
+        emit_dump_state(cli);
+    else
+        dprintf(cli, "{\"ok\":false,\"error\":\"unknown cmd: %s\"}\n", cmd);
+}
+
+static void *socket_thread(void *arg) {
+    (void)arg;
+    const char *dir = getenv("BPFREJIT_SHIM_SOCK_DIR");
+    if (!dir)
+        dir = "/var/run/bpfrejit";
+    mkdir(dir, 0755);
+    char path[256];
+    snprintf(path, sizeof(path), "%s/shim-%d.sock", dir, getpid());
+    int srv = unix_socket_listen(path);
+    if (srv < 0) {
+        /* Fallback to /tmp if the default dir is not writable. */
+        snprintf(path, sizeof(path), "/tmp/bpfrejit-shim-%d.sock", getpid());
+        srv = unix_socket_listen(path);
+        if (srv < 0) {
+            log_line("socket: failed to bind, server disabled errno=%d",
+                     errno);
+            return NULL;
+        }
+    }
+    log_line("socket: listening on %s", path);
+    sigset_t mask;
+    sigfillset(&mask);
+    pthread_sigmask(SIG_BLOCK, &mask, NULL);
+    while (1) {
+        int cli = accept(srv, NULL, NULL);
+        if (cli < 0) {
+            if (errno == EINTR)
+                continue;
+            break;
+        }
+        handle_client(cli);
+        real_close(cli);
+    }
+    real_close(srv);
+    return NULL;
 }
 
 /* Worker thread:

@@ -110,23 +110,125 @@ v2 design's answer; not yet implemented.
 `make docker-survey` is the canonical reproducer for this matrix. Edit the
 target inside `Makefile` to add apps or vary their command lines.
 
-## Phase 2 (not in this directory yet)
+## Phase 2 (active — bpfopt subprocess + per-pid socket)
 
-Active optimization. The shim worker thread will:
+Worker thread invokes `bpfopt --pass <name>` as a subprocess on every
+captured prog. Verified end-to-end on `make docker-noop-e2e` (2026-05-17):
 
-1. wait `N` seconds after the last observed `BPF_PROG_LOAD`,
-2. invoke `bpfopt --pass <name>` as a CLI subprocess with the dumped bytecode
-   as stdin,
-3. submit the rewritten bytecode via a fresh `BPF_PROG_LOAD` (in-process),
-4. apply the per-attach swap recipe (`BPF_LINK_UPDATE` / `PERF_EVENT_IOC_SET_BPF`
-   with detach-and-reopen / `BPF_MAP_UPDATE_ELEM` for PROG_ARRAY slots),
-5. record the `logical_id → {original_prog_id, candidate_prog_id}` mapping for
-   the benchmark runner to read.
+| App | PROG_LOAD captured | bpfopt OK | identity match | notes |
+|---|---:|---:|---:|---|
+| bpftrace | 3 | 4 | 100% | worker re-runs each tick, no dedup |
+| bcc/execsnoop | 4 | 6 | 100% | |
+| bcc/opensnoop | 5 | 6 | 100% | |
+| **tracee (musl)** | **44** | **35** | **100%** | musl shim, biggest tracer captured |
+
+Worker pipeline (`libbpfrejit_shim.c::run_bpfopt_on_all_progs`):
+
+1. Snapshot tracked progs from state table under `state_mutex`.
+2. For each prog with non-empty bytecode dump:
+   - Compose `out_path` and `report_path` keyed by `kernel_prog_id` AND
+     `hash` (no dedup — every prog instance gets its own record per the
+     CLAUDE.md no-filtering rule).
+   - `posix_spawn(bpfopt, --pass <name> --input … --output … --report …)`.
+     The subprocess env strips `LD_PRELOAD` so bpfopt itself is not shimmed.
+   - Log OK/FAIL with kernel_prog_id and hash.
+3. Emit per-tick summary line `bpfopt pass=X summary: ok=N fail=M total=K`.
+
+### Socket server — Plan A, daemon protocol compatible
+
+Each shim instance binds a per-pid unix socket:
+
+```
+${BPFREJIT_SHIM_SOCK_DIR:-/var/run/bpfrejit}/shim-<pid>.sock
+```
+
+Line-delimited JSON requests; commands and shape mirror the existing daemon
+at `daemon/src/server.rs`:
+
+```json
+// list_progs — enumerate all tracked BPF programs
+{"cmd": "list_progs"}
+// → {"ok": true, "progs": [{"id": <kernel_prog_id>, "name": "...",
+//                            "type": <prog_type>, "insn_cnt": ...,
+//                            "hash": "...", "bytecode_path": "..."}]}
+
+// optimize — run pass list on every tracked prog (synchronous)
+{"cmd": "optimize", "enabled_passes": ["noop"]}
+// → {"ok": true, "passes": "noop"}
+
+// dump_state — write state JSON to disk and return path
+{"cmd": "dump_state"}
+// → {"ok": true, "path": "/tmp/dumps/state_<pid>.json"}
+```
+
+The runner is expected to enumerate `${BPFREJIT_SHIM_SOCK_DIR}/shim-*.sock`
+or use a small `bpfrejit-router` process at the existing daemon path
+`/var/tmp/bpfrejit-daemon.sock` that routes by `app_pid` (see
+`docs/tmp/poc_c_v2_shim_only_design.md` §6 / Socket Plan A). Routing is out
+of scope for this directory.
+
+### YAML config — runner → env vars
+
+The shim itself reads env vars only. The runner converts per-app yaml config
+to env vars before launching the app. Helper at `shim_env_from_yaml.py`:
+
+```python
+from bpfopt.shim.shim_env_from_yaml import merge_shim_env
+env = merge_shim_env(base_env=os.environ, shim_cfg=app_cfg.get("shim"))
+subprocess.Popen([...], env=env)
+```
+
+YAML schema (all keys optional):
+
+```yaml
+shim:
+  passes: [noop, dce]            # → BPFREJIT_SHIM_RUN_BPFOPT="noop,dce"
+  tick_ms: 1500                  # → BPFREJIT_SHIM_TICK_MS
+  periodic_dump_ms: 0            # → BPFREJIT_SHIM_PERIODIC_DUMP_MS (0=off)
+  bpfopt_path: /usr/local/bin/bpfopt
+  sock_dir: /var/run/bpfrejit
+  sock_disable: false
+  log_path: /tmp/bpfrejit_shim.log
+  dump_dir: /tmp/bpfrejit_shim_dumps
+  preload_path: /path/to/libbpfrejit_shim.so  # → LD_PRELOAD
+```
+
+CLI form (no python in pipeline):
+
+```bash
+cat shim.yaml | python3 shim_env_from_yaml.py > shim.env
+source shim.env && LD_PRELOAD=... target_app
+```
+
+### What Phase 2 in this directory does NOT yet do
+
+- Submit a candidate `BPF_PROG_LOAD` with rewritten bytecode (the noop output
+  exists on disk but is not re-loaded into the kernel).
+- Apply per-attach swap recipes (`BPF_LINK_UPDATE`, `PERF_EVENT_IOC_SET_BPF`
+  with detach-and-reopen, `BPF_MAP_UPDATE_ELEM` for PROG_ARRAY).
+- Emit `.swaps.jsonl` swap log mapping `logical_id ↔ {old, new}` prog ids.
+- Cover static Go binaries (tetragon, cilium-agent, otel-profiler). See
+  `docs/tmp/poc_e_vendor_replace_x_sys_design.md` for the planned
+  vendor-replace path.
+
+## Environment variables
+
+| variable | default | purpose |
+|---|---|---|
+| `BPFREJIT_SHIM_LOG` | `/tmp/bpfrejit_shim.log` | append-only structured log |
+| `BPFREJIT_SHIM_DIR` | `/tmp` | dir for per-load bytecode dumps + reports |
+| `BPFREJIT_SHIM_RUN_BPFOPT` | (unset = disabled) | comma-list of passes to run via bpfopt subprocess |
+| `BPFREJIT_BPFOPT_PATH` | `/usr/local/bin/bpfopt` | path to bpfopt binary |
+| `BPFREJIT_SHIM_TICK_MS` | `2000` | worker thread cadence |
+| `BPFREJIT_SHIM_PERIODIC_DUMP_MS` | `0` | periodic state JSON dump (0=off) |
+| `BPFREJIT_SHIM_SOCK_DIR` | `/var/run/bpfrejit` | per-pid socket dir |
+| `BPFREJIT_SHIM_SOCK_DISABLE` | (unset) | set to `1` to disable socket server |
+| `BPFREJIT_SHIM_HOLD_S` | `0` | (selftest only) hold N seconds before exit |
 
 Design references:
 - `docs/tmp/poc_c_bpf_syscall_shim_design.md` (v1: daemon + shim).
-- `docs/tmp/poc_c_v2_shim_only_design.md` (v2: shim-only, daemon eliminated;
-  in progress at time of writing).
+- `docs/tmp/poc_c_v2_shim_only_design.md` (v2: shim-only, daemon eliminated).
+- `docs/tmp/poc_e_vendor_replace_x_sys_design.md` (Tier 4: static Go).
 - `docs/rejit-speculative-optimization-ebpf.md` (idea #1 paper-line hub).
 
 ## Non-goals (Phase 1 + Phase 2)
@@ -141,12 +243,13 @@ Design references:
   optimization in this lifetime.
 - Replacing upstream apps. The shim is loaded into the real upstream binary
   (Tracee, Tetragon, Katran, Cilium, bpftrace, BCC, OTel) via `LD_PRELOAD` or
-  (for Go binaries) the `bpfrejit-shimctl` hotpatch wrapper.
+  (for Go binaries) the planned vendor-replace path.
 
 ## Files
 
 | file | purpose |
 |---|---|
-| `libbpfrejit_shim.c` | LD_PRELOAD library |
+| `libbpfrejit_shim.c` | LD_PRELOAD library (Phase 1 + 1.5 + 2) |
 | `selftest.c` | synthetic-load PoC, exercises capture path without root |
-| `Makefile` | `all` / `smoke` / `selftest-run` / `clean` |
+| `shim_env_from_yaml.py` | runner-side yaml→env translator |
+| `Makefile` | `all` / `musl` / `smoke` / `selftest-run` / `docker-survey` / `docker-noop-e2e` |

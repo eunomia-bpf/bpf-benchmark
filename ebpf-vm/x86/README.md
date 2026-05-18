@@ -100,7 +100,7 @@ path is recorded below, but it is paused until generated-C coverage stays
 stable.
 
 Latest complete generated-C batch after removing benchmark-name special
-renderers:
+renderers and moving loop/ABI capability protocol into C-authored helpers:
 
 ```sh
 sudo -n python3 ebpf-vm/x86/micro-prog/run_micro_interpreter_batch.py \
@@ -113,6 +113,17 @@ Result: 27 of 29 selected micro programs loaded in the kernel, passed
 failures are verifier/proof-shape issues after removing Python special
 renderers, not benchmark-name dispatch in the generator.
 
+Python LOC check for this cleanup:
+
+```text
+generate_micro_proofs.py: 1763 -> 1472 lines
+x86_vm_bpf.h:           202 -> 316 lines
+```
+
+The line movement is intentional: proof protocol complexity is being moved out
+of Python and into the C-authored interpreter/header where it can be specified
+and eventually verified with the helper semantics.
+
 | Micro program | Status | Note |
 | --- | --- | --- |
 | `simple` | ok |  |
@@ -124,7 +135,7 @@ renderers, not benchmark-name dispatch in the generator.
 | `packet_checksum_fold` | ok | XDP return value is `2`; exact-bound loop back-edges now use verifier-visible callback index fallback instead of aborting at bound exhaustion. |
 | `payload_prefix_memcmp_scan` | ok |  |
 | `packet_vlan_tcpopt_parser` | ok |  |
-| `bpf_local_call_fanout_dispatch` | fail | Verifier processed-insn limit is exceeded (`E2BIG`, surfaced by libbpf as `Argument list too long`). |
+| `bpf_local_call_fanout_dispatch` | fail | Mechanical `bpf_loop` lowering still exceeds the verifier processed-insn limit (`E2BIG`) because the callback joins large native-call helper state. |
 | `flow_5tuple_rss_hash` | ok |  |
 | `katran_lb_consistent_hash_select` | ok |  |
 | `cilium_policy_guard_tree_filter` | ok |  |
@@ -132,7 +143,7 @@ renderers, not benchmark-name dispatch in the generator.
 | `packet_record_bounds_window` | ok |  |
 | `flow_record_field_scan` | ok |  |
 | `packed_header_bitfield_decode` | ok |  |
-| `bpftrace_string_search_prefix_scan` | fail | Generic interpreter loop still exceeds verifier processed-insn limit (`E2BIG`). |
+| `bpftrace_string_search_prefix_scan` | fail | Mechanical `bpf_loop` lowering still exceeds the verifier processed-insn limit (`E2BIG`) because repeated generic memory/ALU helpers create too many states. |
 | `tracee_syscall_name_table_lookup` | ok |  |
 | `tracee_http_method_prefix_detect` | ok |  |
 | `cilium_socket_lb_service_select` | ok |  |
@@ -151,7 +162,7 @@ completion is a separate next experiment.
 The formalization target for the generated-C path is
 [`intepreter-spec.md`](./intepreter-spec.md). That spec is intentionally tied to
 the current code: instruction helper steps, exact-trip loop lowering, loop
-frame preservation, and entry `rdi` context-capability preservation are named
+frame preservation, and ABI output-store capability preservation are named
 proof obligations rather than benchmark-specific fixes.
 
 Active generator rule: Python must not rewrite native return semantics, branch
@@ -168,15 +179,16 @@ Generated-C migration todo:
 | Native return ABI lives in metadata/header, not Python rewrites | done | `ret` emits `X86_VM_RET_RAX();`; runner checks `expected_retval` from YAML. |
 | Remove benchmark-name renderers from Python | done | `generate_micro_proofs.py` no longer dispatches on `packet_checksum_fold`, `bpftrace_string_search_prefix_scan`, `bpf_local_call_fanout_dispatch`, or other benchmark names. |
 | Remove stale C special templates | done | Unused checksum/string-scan C helper templates were deleted from `x86_vm_bpf.h`; the header now contains generic VM plumbing only. |
-| Generic loop lowering | partial | Structural loop detection lowers selected high-pressure loops to `bpf_loop`, but two micro programs still need a cleaner verifier proof shape. |
+| Move proof protocol out of Python | partial | Python pc-dispatch and ctx-store write-set insertion were removed; loop RDI restore, native-call loop marking, and ABI output-store preparation now live in `x86_vm_bpf.h`. |
+| Generic loop lowering | partial | Structural loop detection lowers selected high-pressure loops to `bpf_loop`; two micro programs still need a cleaner C typed-helper/state-abstraction proof shape. |
 | Run full generated-C batch | partial | 27/29 selected micro programs currently pass. |
 
 Remaining generated-C failures:
 
 | Micro program | Current blocker | Required proof-shape change |
 | --- | --- | --- |
-| `bpf_local_call_fanout_dispatch` | The loop callback calls several large generated native subfunctions (`local_call_*`); verifier state explodes across callback state plus subfunction call states. | A native-call loop theorem or structural outliner that summarizes call effects without hiding x86 semantics in Python. |
-| `bpftrace_string_search_prefix_scan` | The loop callback is a large multi-exit string-scan body with many prefix-comparison branches; the mechanical interpreter form exceeds verifier complexity. | A multi-exit loop theorem that preserves exit priority, or a structural split of the repeated compare block into a provable helper/template. |
+| `bpf_local_call_fanout_dispatch` | The callback still joins states across large generated native subfunctions (`local_call_*`) and exceeds the verifier processed-insn limit. | A C-authored typed helper/template boundary for native-call summaries, or a state abstraction that keeps x86 semantics in C while reducing verifier joins. |
+| `bpftrace_string_search_prefix_scan` | Repeated prefix-compare blocks still expand generic memory/ALU helpers enough to exceed the verifier processed-insn limit. | A C-authored helper/template for repeated byte-compare/or basic blocks, or a less pointer-state-heavy memory model for loop callbacks. |
 
 ## JSON-Linker Todo
 
@@ -502,19 +514,24 @@ This prototype has already exposed several verifier-facing design constraints:
   incomplete for native direct calls. The generator now rebuilds the native
   object and disassembles call-target symbols when the markdown `## Native ASM`
   block has unresolved call targets.
-- `bpf_local_call_fanout_dispatch` no longer has a benchmark-name renderer. The
-  generic call/loop proof now reaches verifier state explosion and is rejected
-  as `E2BIG` (`Argument list too long` from libbpf).
+- `bpf_local_call_fanout_dispatch` no longer has a benchmark-name renderer.
+  The active generator no longer uses Python pc-dispatch. Large generated native
+  subfunctions still push the verifier past `E2BIG` (`Argument list too long`
+  from libbpf), so the next fix must be a C-authored typed call summary or state
+  abstraction.
 - `bpftrace_string_search_prefix_scan` no longer uses a C-authored
-  benchmark-specific scan helper. The mechanical interpreter loop is cleaner for
-  the proof story, but it currently exceeds the verifier processed-insn limit.
+  benchmark-specific scan helper. Repeated generic memory/ALU helper expansion
+  still exceeds the verifier processed-insn limit, so the next fix must be a
+  reusable C helper/template for the repeated byte-compare/or shape rather than
+  another Python renderer.
 - `packet_checksum_fold` and `tc_packet_checksum_fold` now use the same generic
   nested-loop lowering and both pass. The XDP variant needs the exact-trip
   callback-index theorem so exhausting the static trip count reaches the native
-  exit path and returns XDP `2`. The TC variant additionally needs loop/program
-  frame-preservation for the entry `rdi` context capability; the generator now
-  restores that ghost capability only when write-set analysis proves `rdi` was
-  not modified.
+  exit path and returns XDP `2`. The TC variant additionally needs
+  loop/program frame-preservation for the entry `rdi` context capability. That
+  protocol now lives in `x86_vm_bpf.h`: loop callbacks track RDI writes in the C
+  loop context, and ABI output stores call `x86_vm_prepare_ctx_output()` from
+  `X86_VM_RUN_OP`.
 - The strict JSON-link loader is not the current source of truth. It has passed
   smoke programs (`simple`, `simple_packet`, `bitmap_popcount_scan`), but native
   call-flow support is missing and stale loader binaries previously produced

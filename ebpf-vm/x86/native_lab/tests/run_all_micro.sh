@@ -54,11 +54,32 @@ with open(YAML) as f:
 bench_default = cfg.get("benchmark_defaults", {})
 default_retval = bench_default.get("expected_retval", 2)
 
-def run_native_lab(name, base_name, input_size, expected_retval):
+def native_symbol_for(base_name, tags):
+    """Match the SEC name the .bpf.c macro emits (xdp / tc / cgroup_skb).
+    For non-xdp programs the symbol is whatever the bench yaml's
+    `program_name` overrides spell out -- we treat unknown bases as xdp.
+    """
+    if "non-xdp" in tags:
+        # tc / cgroup_skb benchmarks set `program_name` in yaml to the
+        # actual function name; we receive `base_name` here which IS that
+        # function name when io_mode != staged or expected_retval != 2.
+        return base_name + "_prog"
+    return base_name + "_xdp"
+
+
+def native_lab_prog_type_for(tags, expected_retval):
+    if "tc" in tags:
+        return "sched_cls"
+    if "cgroup-skb" in tags or "cgroup_skb" in tags:
+        return "cgroup_skb"
+    return "xdp"
+
+
+def run_native_lab(name, base_name, input_size, expected_retval, tags, input_generator):
     so_path = os.path.join(PROGRAMS_DIR, base_name + ".native.so")
     if not os.path.exists(so_path):
         return {"error": f"missing {so_path}"}
-    sym = base_name + "_xdp"
+    sym = native_symbol_for(base_name, tags)
     blob = f"/tmp/{base_name}.native.bin"
     link = subprocess.run(
         [LINKER, "--input", so_path, "--symbol", sym, "--output", blob],
@@ -67,13 +88,17 @@ def run_native_lab(name, base_name, input_size, expected_retval):
     if link.returncode != 0:
         return {"error": "linker_failed", "stderr": link.stderr.strip()}
 
-    mem = os.path.join(GENERATED_DIR, base_name + ".mem")
+    # input_generator names the .mem file -- multiple benchmarks (e.g.
+    # tc_packet_checksum_fold and packet_checksum_fold) share one input.
+    mem = os.path.join(GENERATED_DIR, input_generator + ".mem")
+    pt = native_lab_prog_type_for(tags, expected_retval)
     cmd = [
         MICRO_EXEC, "run-native-lab",
         "--program", blob,
         "--memory", mem,
         "--input-size", str(input_size),
         "--inner-repeat", INNER_REPEAT,
+        "--native-lab-prog-type", pt,
     ]
     proc = subprocess.run(cmd, capture_output=True, text=True)
     if proc.returncode != 0:
@@ -83,11 +108,13 @@ def run_native_lab(name, base_name, input_size, expected_retval):
         return {"error": "no_json", "stdout": proc.stdout[-500:]}
     return json.loads(last[-1])
 
-def run_kernel_baseline(name, base_name, input_size, io_mode, expected_retval):
+def run_kernel_baseline(name, base_name, input_size, io_mode, expected_retval, input_generator):
     bpf_o = os.path.join(PROGRAMS_DIR, base_name + ".bpf.o")
     if not os.path.exists(bpf_o):
         return {"error": f"missing {bpf_o}"}
-    mem = os.path.join(GENERATED_DIR, base_name + ".mem")
+    # input_generator names the .mem file -- multiple benchmarks (e.g.
+    # tc_packet_checksum_fold and packet_checksum_fold) share one input.
+    mem = os.path.join(GENERATED_DIR, input_generator + ".mem")
     cmd = [
         MICRO_EXEC, "test-run",
         "--program", bpf_o,
@@ -113,23 +140,14 @@ for b in cfg["benchmarks"]:
     er = int(b.get("expected_retval", default_retval))
     tags = b.get("tags", [])
 
-    # Skip programs whose stub-type doesn't match (tc / cgroup_skb).
-    if "non-xdp" in tags:
-        sys.stdout.write(json.dumps({
-            "program": name, "runtime": "native_lab", "skip": "non-xdp"
-        }) + "\n")
-        sys.stdout.write(json.dumps({
-            "program": name, "runtime": "kernel_jit", "skip": "non-xdp"
-        }) + "\n")
-        continue
+    print(f"[run] {name} (base={base}, input={isize}, io={io_mode}, expected_retval={er}, tags={tags})", file=sys.stderr)
 
-    print(f"[run] {name} (base={base}, input={isize}, io={io_mode}, expected_retval={er})", file=sys.stderr)
-
-    nl = run_native_lab(name, base, isize, er)
+    ig = b.get("input_generator", base)
+    nl = run_native_lab(name, base, isize, er, tags, ig)
     sys.stdout.write(json.dumps({"program": name, "runtime": "native_lab", **nl}) + "\n")
     sys.stdout.flush()
 
-    kj = run_kernel_baseline(name, base, isize, io_mode, er)
+    kj = run_kernel_baseline(name, base, isize, io_mode, er, ig)
     sys.stdout.write(json.dumps({"program": name, "runtime": "kernel_jit", **kj}) + "\n")
     sys.stdout.flush()
 PYEOF

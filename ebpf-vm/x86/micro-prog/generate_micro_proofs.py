@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import re
 import subprocess
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from pathlib import Path
 
 
@@ -165,9 +165,6 @@ class LoopSpec:
     raw_bound: int
     exit_addrs: tuple[int, ...]
     index_exit_fallback: bool
-    written_regs: tuple[str, ...]
-    pc_dispatch: bool
-    callback_bound: int
 
 
 def extract_native_asm(text: str) -> str:
@@ -682,11 +679,7 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
         target = branch_target(insn.operands[0]) if insn.operands else 0
         if call_functions and target in call_functions:
-            lines.append(
-                f"{indent}if ({call_functions[target]}(&__x86_vm_state, "
-                f"__x86_vm_data, __x86_vm_data_end) < 0)"
-            )
-            lines.append(f"{indent}\treturn XDP_ABORTED;")
+            lines.append(f"{indent}X86_VM_RUN_CALL({call_functions[target]});")
             return
         if target in addrs and next_addr is not None:
             lines.append(f"{indent}if (__x86_call_depth == 0) {{")
@@ -809,22 +802,6 @@ def loop_exit_addrs(spec: LoopSpec, insns: list[NativeInsn],
     return tuple(sorted(exits))
 
 
-def loop_written_regs(spec: LoopSpec, insns: list[NativeInsn]) -> tuple[str, ...]:
-    written: set[str] = set()
-    for insn in insns:
-        if not loop_contains(spec, insn.addr) or not insn.operands:
-            continue
-        parsed = reg_info(insn.operands[0])
-        if parsed is not None and writes_reg(insn, parsed[0]):
-            written.add(parsed[0])
-        if insn.mnemonic == "call":
-            written.update({
-                "X86_RAX", "X86_RCX", "X86_RDX", "X86_RSI", "X86_RDI",
-                "X86_R8", "X86_R9", "X86_R10", "X86_R11",
-            })
-    return tuple(sorted(written))
-
-
 def loop_contains(spec: LoopSpec, addr: int) -> bool:
     return spec.region_start <= addr <= spec.region_end
 
@@ -909,9 +886,6 @@ def detect_large_loops(insns: list[NativeInsn]) -> list[LoopSpec]:
             raw_bound=raw_bound,
             exit_addrs=(),
             index_exit_fallback=False,
-            written_regs=(),
-            pc_dispatch=False,
-            callback_bound=min(bound, 4096),
         )
         exit_addrs = loop_exit_addrs(provisional, insns, next_addrs)
         candidates.append(
@@ -925,9 +899,6 @@ def detect_large_loops(insns: list[NativeInsn]) -> list[LoopSpec]:
                 raw_bound=provisional.raw_bound,
                 exit_addrs=exit_addrs,
                 index_exit_fallback=len(exit_addrs) == 1,
-                written_regs=loop_written_regs(provisional, insns),
-                pc_dispatch=False,
-                callback_bound=provisional.bound,
             )
         )
 
@@ -953,28 +924,8 @@ def detect_large_loops(insns: list[NativeInsn]) -> list[LoopSpec]:
         if previous is None or loop_span(spec) > loop_span(previous):
             by_emit[spec.emit_at] = spec
 
-    final_specs = sorted(by_emit.values(),
-                         key=lambda item: (item.region_start, -item.region_end))
-    adjusted: list[LoopSpec] = []
-    for spec in final_specs:
-        has_nested = any(
-            other is not spec
-            and loop_contains(spec, other.region_start)
-            and loop_contains(spec, other.region_end)
-            for other in final_specs
-        )
-        pc_dispatch = not has_nested and loop_has_layout_backedge(spec, insns)
-        callback_bound = spec.bound
-        if pc_dispatch:
-            block_count = max(1, len(loop_basic_block_starts(spec, insns,
-                                                             next_addrs)))
-            callback_bound = min(max(spec.bound, spec.bound * block_count),
-                                 4096)
-        adjusted.append(
-            replace(spec, pc_dispatch=pc_dispatch,
-                    callback_bound=callback_bound)
-        )
-    return adjusted
+    return sorted(by_emit.values(),
+                  key=lambda item: (item.region_start, -item.region_end))
 
 
 def loop_insns(spec: LoopSpec, insns: list[NativeInsn]) -> list[NativeInsn]:
@@ -1066,8 +1017,7 @@ def append_loop_fallthrough(lines: list[str], spec: LoopSpec,
 
 
 def append_loop_exit(lines: list[str], target: int, indent: str) -> None:
-    lines.append(f"{indent}loop->next = 0x{target:x};")
-    lines.append(f"{indent}return 1;")
+    lines.append(f"{indent}X86_VM_LOOP_EXIT(0x{target:x});")
 
 
 def append_loop_branch_or_ret(lines: list[str], spec: LoopSpec, insn: NativeInsn,
@@ -1111,229 +1061,25 @@ def append_loop_branch_or_ret(lines: list[str], spec: LoopSpec, insn: NativeInsn
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
         target = branch_target(insn.operands[0]) if insn.operands else 0
         if target not in call_functions:
-            lines.append(f"{indent}loop->failed = __LINE__;")
-            lines.append(f"{indent}return 1;")
+            lines.append(f"{indent}X86_VM_LOOP_FAIL();")
             return
-        lines.append(
-            f"{indent}if ({call_functions[target]}(&__x86_vm_state, "
-            f"__x86_vm_data, __x86_vm_data_end) < 0) {{"
-        )
-        lines.append(f"{indent}\tloop->failed = __LINE__;")
-        lines.append(f"{indent}\treturn 1;")
-        lines.append(f"{indent}}}")
+        lines.append(f"{indent}X86_VM_LOOP_CALL({call_functions[target]});")
         append_loop_fallthrough(lines, spec, next_addr, indent,
                                 physical_next=physical_next)
         return
     if insn.mnemonic == "ret":
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
-        lines.append(f"{indent}loop->done = 1;")
-        lines.append(f"{indent}return 1;")
+        lines.append(f"{indent}X86_VM_LOOP_RET();")
         return
     append_step(lines, insn, indent, "X86_VM_LOOP_OP")
     append_loop_fallthrough(lines, spec, next_addr, indent,
                             physical_next=physical_next)
 
 
-def loop_internal_successors(spec: LoopSpec, insn: NativeInsn,
-                             next_addr: int | None) -> list[int]:
-    successors: list[int] = []
-    if insn.mnemonic in CC_AUX and insn.mnemonic.startswith("j"):
-        target = branch_target(insn.operands[0]) if insn.operands else 0
-        for candidate in (target, next_addr):
-            if candidate is None or candidate == spec.entry:
-                continue
-            if loop_contains(spec, candidate):
-                successors.append(candidate)
-        return successors
-    if insn.mnemonic == "jmp":
-        target = branch_target(insn.operands[0]) if insn.operands else 0
-        if target and target != spec.entry and loop_contains(spec, target):
-            successors.append(target)
-        return successors
-    if insn.mnemonic == "ret":
-        return successors
-    if next_addr is not None and next_addr != spec.entry and loop_contains(spec, next_addr):
-        successors.append(next_addr)
-    return successors
-
-
-def loop_basic_block_starts(spec: LoopSpec, insns: list[NativeInsn],
-                            next_addrs: dict[int, int]) -> set[int]:
-    starts = {spec.entry}
-    for insn in insns:
-        if not loop_contains(spec, insn.addr):
-            continue
-        if insn.mnemonic in CC_AUX and insn.mnemonic.startswith("j"):
-            target = branch_target(insn.operands[0]) if insn.operands else 0
-            if target and loop_contains(spec, target):
-                starts.add(target)
-            next_addr = next_addrs.get(insn.addr)
-            if next_addr is not None and loop_contains(spec, next_addr):
-                starts.add(next_addr)
-        elif insn.mnemonic == "jmp":
-            target = branch_target(insn.operands[0]) if insn.operands else 0
-            if target and loop_contains(spec, target):
-                starts.add(target)
-    return starts
-
-
-def loop_has_layout_backedge(spec: LoopSpec, insns: list[NativeInsn]) -> bool:
-    for insn in insns:
-        if not loop_contains(spec, insn.addr):
-            continue
-        if not is_control_branch(insn) or not insn.operands:
-            continue
-        target = branch_target(insn.operands[0])
-        if target and target != spec.entry and loop_contains(spec, target) and target < insn.addr:
-            return True
-    return False
-
-
-def loop_cfg_order(spec: LoopSpec, insns: list[NativeInsn],
-                   next_addrs: dict[int, int]) -> list[NativeInsn]:
-    by_addr = {
-        insn.addr: insn
-        for insn in insns
-        if loop_contains(spec, insn.addr)
-    }
-    visiting: set[int] = set()
-    visited: set[int] = set()
-    postorder: list[int] = []
-
-    def dfs(addr: int) -> None:
-        if addr not in by_addr or addr in visited or addr in visiting:
-            return
-        visiting.add(addr)
-        insn = by_addr[addr]
-        for succ in loop_internal_successors(spec, insn, next_addrs.get(addr)):
-            dfs(succ)
-        visiting.remove(addr)
-        visited.add(addr)
-        postorder.append(addr)
-
-    dfs(spec.entry)
-    for addr in sorted(by_addr):
-        dfs(addr)
-    return [by_addr[addr] for addr in reversed(postorder)]
-
-
-def append_loop_pc_transfer(lines: list[str], spec: LoopSpec,
-                            target: int | None, indent: str) -> None:
-    if target is None:
-        lines.append(f"{indent}loop->failed = __LINE__;")
-        lines.append(f"{indent}return 1;")
-    elif not loop_contains(spec, target):
-        append_loop_exit(lines, target, indent)
-    else:
-        lines.append(f"{indent}loop->pc = 0x{target:x};")
-        lines.append(f"{indent}return 0;")
-
-
-def render_loop_pc_dispatch_callback(spec: LoopSpec, insns: list[NativeInsn],
-                                     next_addrs: dict[int, int],
-                                     call_functions: dict[int, str]) -> str:
-    by_addr = {
-        insn.addr: insn
-        for insn in insns
-        if loop_contains(spec, insn.addr)
-    }
-    starts = loop_basic_block_starts(spec, insns, next_addrs)
-    ordered_starts = [
-        insn.addr for insn in loop_cfg_order(spec, insns, next_addrs)
-        if insn.addr in starts
-    ]
-    for addr in sorted(starts):
-        if addr not in ordered_starts:
-            ordered_starts.append(addr)
-
-    lines = [
-        f"static long {spec.ident}_cb(__u32 __x86_loop_index, void *ctx)",
-        "{",
-        "\tstruct x86_vm_loop_ctx *loop = ctx;",
-        "\tvoid *__x86_vm_data = loop->data;",
-        "\tvoid *__x86_vm_data_end = loop->data_end;",
-        "\tstruct x86_insn __x86_vm_insn = {};",
-        "\t#define __x86_vm_state loop->state",
-        "",
-        "\t(void)__x86_loop_index;",
-        "\tif (loop->failed || loop->done || loop->next)",
-        "\t\treturn 1;",
-    ]
-    for addr in ordered_starts:
-        lines.append(f"\tif (loop->pc == 0x{addr:x})")
-        lines.append(f"\t\tgoto x86_l_{addr:x};")
-    lines.extend([
-        "\tloop->failed = __LINE__;",
-        "\treturn 1;",
-    ])
-
-    for start in ordered_starts:
-        addr = start
-        lines.append(f"x86_l_{addr:x}:")
-        while True:
-            insn = by_addr.get(addr)
-            if insn is None:
-                lines.append("\tloop->failed = __LINE__;")
-                lines.append("\treturn 1;")
-                break
-            next_addr = next_addrs.get(addr)
-            if insn.mnemonic in CC_AUX and insn.mnemonic.startswith("j"):
-                lines.append(f"\t/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
-                target = branch_target(insn.operands[0]) if insn.operands else 0
-                cond = f"x86_eval_cc(&__x86_vm_state, {CC_AUX[insn.mnemonic]})"
-                lines.append(f"\tif ({cond}) {{")
-                append_loop_pc_transfer(lines, spec, target, "\t\t")
-                lines.append("\t}")
-                append_loop_pc_transfer(lines, spec, next_addr, "\t")
-                break
-            if insn.mnemonic == "jmp":
-                lines.append(f"\t/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
-                target = branch_target(insn.operands[0]) if insn.operands else 0
-                append_loop_pc_transfer(lines, spec, target, "\t")
-                break
-            if insn.mnemonic == "call":
-                lines.append(f"\t/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
-                target = branch_target(insn.operands[0]) if insn.operands else 0
-                if target not in call_functions:
-                    lines.append("\tloop->failed = __LINE__;")
-                    lines.append("\treturn 1;")
-                    break
-                lines.append(
-                    f"\tif ({call_functions[target]}(&__x86_vm_state, "
-                    f"__x86_vm_data, __x86_vm_data_end) < 0) {{"
-                )
-                lines.append("\t\tloop->failed = __LINE__;")
-                lines.append("\t\treturn 1;")
-                lines.append("\t}")
-            elif insn.mnemonic == "ret":
-                lines.append(f"\t/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
-                lines.append("\tloop->done = 1;")
-                lines.append("\treturn 1;")
-                break
-            else:
-                append_step(lines, insn, "\t", "X86_VM_LOOP_OP")
-
-            if next_addr is None or not loop_contains(spec, next_addr) or next_addr in starts:
-                append_loop_pc_transfer(lines, spec, next_addr, "\t")
-                break
-            addr = next_addr
-
-    lines.extend([
-        "\t#undef __x86_vm_state",
-        "\treturn 0;",
-        "}",
-        "",
-    ])
-    return "\n".join(lines)
-
-
 def render_loop_callback(spec: LoopSpec, insns: list[NativeInsn],
                          next_addrs: dict[int, int],
                          call_functions: dict[int, str],
                          loop_specs: list[LoopSpec]) -> str:
-    if spec.pc_dispatch:
-        return render_loop_pc_dispatch_callback(spec, insns, next_addrs,
-                                                call_functions)
     nested_by_emit = {
         child.emit_at: child
         for child in loop_specs
@@ -1356,12 +1102,7 @@ def render_loop_callback(spec: LoopSpec, insns: list[NativeInsn],
     ]
     if spec.entry != spec.region_start:
         lines.append(f"\tgoto x86_l_{spec.entry:x};")
-    has_nested = bool(nested_by_emit)
-    body_insns = (
-        loop_cfg_order(spec, insns, next_addrs)
-        if not has_nested and loop_has_layout_backedge(spec, insns)
-        else loop_insns(spec, insns)
-    )
+    body_insns = loop_insns(spec, insns)
     physical_next_by_addr = {
         insn.addr: body_insns[index + 1].addr
         for index, insn in enumerate(body_insns[:-1])
@@ -1400,34 +1141,19 @@ def append_loop_call(lines: list[str], spec: LoopSpec,
                      parent: LoopSpec | None = None) -> None:
     abort_statement = "return 1;" if in_callback else "return XDP_ABORTED;"
     done_statement = "return 1;" if in_callback else "X86_VM_RET_RAX();"
-    preserve_rdi = "X86_RDI" not in spec.written_regs
     save_name = f"__x86_loop_save_{spec.region_start:x}_{spec.entry:x}"
     lines.extend([
-        f"{indent}{ctx_name}->failed = 0;",
-        f"{indent}{ctx_name}->done = 0;",
-        f"{indent}{ctx_name}->next = 0;",
-        f"{indent}{ctx_name}->pc = 0x{spec.entry:x};",
-        f"{indent}{ctx_name}->data = __x86_vm_data;",
-        f"{indent}{ctx_name}->data_end = __x86_vm_data_end;",
+        f"{indent}struct x86_vm_reg_save {save_name}_rdi = {{}};",
+        f"{indent}x86_vm_loop_prepare({ctx_name}, __x86_vm_data, "
+        f"__x86_vm_data_end, &{save_name}_rdi);",
     ])
-    if preserve_rdi:
-        lines.extend([
-            f"{indent}__u64 {save_name}_rdi = {ctx_name}->state.rdi;",
-            f"{indent}void *{save_name}_p_rdi = {ctx_name}->state.p_rdi;",
-            f"{indent}__u8 {save_name}_tag_rdi = {ctx_name}->state.tag_rdi;",
-        ])
     lines.extend([
-        f"{indent}if (bpf_loop({spec.callback_bound}, {spec.ident}_cb, {ctx_name}, 0) < 0) {{",
+        f"{indent}if (bpf_loop({spec.bound}, {spec.ident}_cb, {ctx_name}, 0) < 0) {{",
         f"{indent}\t{ctx_name}->failed = __LINE__;",
         f"{indent}\t{abort_statement}",
         f"{indent}}}",
+        f"{indent}x86_vm_loop_restore_rdi({ctx_name}, &{save_name}_rdi);",
     ])
-    if preserve_rdi:
-        lines.extend([
-            f"{indent}{ctx_name}->state.rdi = {save_name}_rdi;",
-            f"{indent}{ctx_name}->state.p_rdi = {save_name}_p_rdi;",
-            f"{indent}{ctx_name}->state.tag_rdi = {save_name}_tag_rdi;",
-        ])
     lines.extend([
         f"{indent}if ({ctx_name}->failed)",
         f"{indent}\t{abort_statement}",
@@ -1475,19 +1201,6 @@ def needs_stack_ext(all_insns: list[NativeInsn], *, rbp_bias: int = 8) -> bool:
 
 def needs_stack_deep(all_insns: list[NativeInsn], *, rbp_bias: int = 8) -> bool:
     return max_stack_offset(all_insns, rbp_bias=rbp_bias) >= 0x48
-
-
-def insns_write_reg(all_insns: list[NativeInsn], reg: str) -> bool:
-    return any(writes_reg(insn, reg) for insn in all_insns)
-
-
-def is_ctx_output_store(insn: NativeInsn) -> bool:
-    if insn.mnemonic != "mov" or len(insn.operands) != 2:
-        return False
-    if not is_mem(insn.operands[0]):
-        return False
-    base, _index, _scale_log2, disp = parse_mem_terms(insn.operands[0])
-    return base == "X86_RDI" and disp in {16, 20}
 
 
 CALLEE_SAVED_REGS = ("rbx", "rbp", "r12", "r13", "r14", "r15")
@@ -1595,7 +1308,6 @@ def render_program(name: str, insns: list[NativeInsn],
     has_stack_ext = needs_stack_ext(stack_feature_insns, rbp_bias=rbp_bias)
     has_stack_slot7 = needs_stack_slot7(stack_feature_insns, rbp_bias=rbp_bias)
     has_stack_deep = needs_stack_deep(stack_feature_insns, rbp_bias=rbp_bias)
-    entry_rdi_preserved = not insns_write_reg(stack_feature_insns, "X86_RDI")
     next_addrs = {
         insn.addr: insns[index + 1].addr
         for index, insn in enumerate(insns[:-1])
@@ -1617,8 +1329,6 @@ def render_program(name: str, insns: list[NativeInsn],
         and branch_target(insn.operands[0]) in addrs
     }
     lines: list[str] = []
-    if subfunctions:
-        lines.append('#define X86_VM_ENABLE_PACKET_REG_FASTPATH 1')
     if has_rodata:
         lines.append('#define X86_VM_ENABLE_RODATA 1')
     if has_stack:
@@ -1645,6 +1355,7 @@ def render_program(name: str, insns: list[NativeInsn],
     ])
     if loop_specs:
         lines.extend([
+            "\tvoid *__x86_vm_ctx = (void *)ctx;",
             "\tvoid *__x86_vm_data = (void *)(long)ctx->data;",
             "\tvoid *__x86_vm_data_end = (void *)(long)ctx->data_end;",
             "\tstruct x86_vm_loop_ctx __x86_loop = {};",
@@ -1686,10 +1397,6 @@ def render_program(name: str, insns: list[NativeInsn],
             lines.append(f"\t/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
             lines.append("\t/* generated-C ABI: entry frame traffic handled by wrapper */")
             continue
-        if entry_rdi_preserved and is_ctx_output_store(insn):
-            lines.append("\t/* generated-C ABI: RDI ctx capability preserved by write-set analysis */")
-            lines.append("\t__x86_vm_state.p_rdi = (void *)ctx;")
-            lines.append("\t__x86_vm_state.tag_rdi = X86_PTR_CTX;")
         append_branch_or_ret(lines, insn, addrs,
                              next_addr=next_addrs.get(insn.addr),
                              call_returns=call_returns,

@@ -81,16 +81,13 @@ x86_l_1147:
 x86_l_1150:
 	/* 0x1150: movzx  r8d,WORD PTR [rdx+rcx*1-0x3] */
 	/* nested verifier loop lowering */
-	loop->failed = 0;
-	loop->done = 0;
-	loop->next = 0;
-	loop->pc = 0x1150;
-	loop->data = __x86_vm_data;
-	loop->data_end = __x86_vm_data_end;
+	struct x86_vm_reg_save __x86_loop_save_1150_1150_rdi = {};
+	x86_vm_loop_prepare(loop, __x86_vm_data, __x86_vm_data_end, &__x86_loop_save_1150_1150_rdi);
 	if (bpf_loop(256, x86_loop_1150_1150_cb, loop, 0) < 0) {
 		loop->failed = __LINE__;
 		return 1;
 	}
+	x86_vm_loop_restore_rdi(loop, &__x86_loop_save_1150_1150_rdi);
 	if (loop->failed)
 		return 1;
 	if (loop->done)
@@ -136,8 +133,7 @@ x86_l_119c:
 x86_l_119f:
 	/* 0x119f: jne    1140 <packet_checksum_fold_xdp+0x40> */
 	if (__x86_loop_index + 1 >= 32) {
-		loop->next = 0x11a1;
-		return 1;
+		X86_VM_LOOP_EXIT(0x11a1);
 	}
 	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
 		return 0;
@@ -150,6 +146,7 @@ x86_l_119f:
 SEC("xdp")
 int packet_checksum_fold_x86_vm_xdp(struct xdp_md *ctx)
 {
+	void *__x86_vm_ctx = (void *)ctx;
 	void *__x86_vm_data = (void *)(long)ctx->data;
 	void *__x86_vm_data_end = (void *)(long)ctx->data_end;
 	struct x86_vm_loop_ctx __x86_loop = {};
@@ -227,16 +224,13 @@ x86_l_113b:
 x86_l_1140:
 	/* 0x1140: mov    ecx,0x13 */
 	/* verifier loop lowering: bpf_loop callback preserves x86 steps */
-	(&__x86_loop)->failed = 0;
-	(&__x86_loop)->done = 0;
-	(&__x86_loop)->next = 0;
-	(&__x86_loop)->pc = 0x1140;
-	(&__x86_loop)->data = __x86_vm_data;
-	(&__x86_loop)->data_end = __x86_vm_data_end;
+	struct x86_vm_reg_save __x86_loop_save_1140_1140_rdi = {};
+	x86_vm_loop_prepare((&__x86_loop), __x86_vm_data, __x86_vm_data_end, &__x86_loop_save_1140_1140_rdi);
 	if (bpf_loop(32, x86_loop_1140_1140_cb, (&__x86_loop), 0) < 0) {
 		(&__x86_loop)->failed = __LINE__;
 		return XDP_ABORTED;
 	}
+	x86_vm_loop_restore_rdi((&__x86_loop), &__x86_loop_save_1140_1140_rdi);
 	if ((&__x86_loop)->failed)
 		return XDP_ABORTED;
 	if ((&__x86_loop)->done)
