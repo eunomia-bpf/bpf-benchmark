@@ -22,22 +22,35 @@ BTF_KFUNCS_END(bpf_x86_movbe_kfunc_ids)
 static __always_inline int decode_movbe_payload(u64 payload,
 						    u8 *dst_reg, u8 *base_reg,
 						    u8 *index_reg, u8 *scale_log2,
-						    s16 *offset)
+						    s16 *offset, bool *indexed)
 {
 	payload = kinsn_payload_decode(payload);
-	if ((payload & 0xf) != 5 || payload >> 36)
+	if ((payload & 0xf) == 4) {
+		if (payload >> 28)
+			return -EINVAL;
+		*dst_reg = kinsn_payload_reg(payload, 4);
+		*base_reg = kinsn_payload_reg(payload, 8);
+		*index_reg = 0;
+		*scale_log2 = 0;
+		*offset = kinsn_payload_s16(payload, 12);
+		*indexed = false;
+	} else if ((payload & 0xf) == 5) {
+		if (payload >> 36)
+			return -EINVAL;
+		*dst_reg = kinsn_payload_reg(payload, 4);
+		*base_reg = kinsn_payload_reg(payload, 8);
+		*index_reg = kinsn_payload_reg(payload, 12);
+		*scale_log2 = (payload >> 16) & 0x3;
+		*offset = kinsn_payload_s16(payload, 20);
+		*indexed = true;
+		if (payload & (0x3ULL << 18))
+			return -EINVAL;
+	} else {
 		return -EINVAL;
+	}
 
-	*dst_reg = kinsn_payload_reg(payload, 4);
-	*base_reg = kinsn_payload_reg(payload, 8);
-	*index_reg = kinsn_payload_reg(payload, 12);
-	*scale_log2 = (payload >> 16) & 0x3;
-	*offset = kinsn_payload_s16(payload, 20);
-
-	if (payload & (0x3ULL << 18))
-		return -EINVAL;
 	if (*dst_reg >= BPF_REG_10 || *base_reg > BPF_REG_10 ||
-	    *index_reg >= BPF_REG_10)
+	    (*indexed && *index_reg >= BPF_REG_10))
 		return -EINVAL;
 
 	return 0;
@@ -48,6 +61,7 @@ static int instantiate_movbe_indexed(u64 payload, struct bpf_insn *insn_buf,
 {
 	u8 dst_reg, base_reg, index_reg, scale_log2, addr_reg, high_reg;
 	bool need_tmp = size == BPF_H;
+	bool indexed;
 	u32 scratch_mask;
 	s16 offset;
 	int add_count;
@@ -55,7 +69,8 @@ static int instantiate_movbe_indexed(u64 payload, struct bpf_insn *insn_buf,
 	int err;
 
 	err = decode_movbe_payload(payload, &dst_reg, &base_reg,
-				       &index_reg, &scale_log2, &offset);
+				       &index_reg, &scale_log2, &offset,
+				       &indexed);
 	if (err)
 		return err;
 
@@ -74,9 +89,12 @@ static int instantiate_movbe_indexed(u64 payload, struct bpf_insn *insn_buf,
 	}
 
 	insn_buf[cnt++] = BPF_MOV64_REG(addr_reg, base_reg);
-	add_count = 1 << scale_log2;
-	while (add_count--)
-		insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, addr_reg, index_reg);
+	if (indexed) {
+		add_count = 1 << scale_log2;
+		while (add_count--)
+			insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, addr_reg,
+							index_reg);
+	}
 	insn_buf[cnt++] = BPF_LDX_MEM(size, dst_reg, addr_reg, offset);
 	insn_buf[cnt++] = BPF_BSWAP(dst_reg, kinsn_bpf_size_bits(size));
 	if (need_tmp)
@@ -105,6 +123,7 @@ static int emit_movbe_indexed_x86(u8 *image, u32 *off, bool emit, u64 payload,
 {
 	u8 buf[16];
 	u8 dst_reg, base_reg, index_reg, scale_log2;
+	bool indexed;
 	s16 offset;
 	u32 len = 0;
 	int err;
@@ -113,15 +132,17 @@ static int emit_movbe_indexed_x86(u8 *image, u32 *off, bool emit, u64 payload,
 		return -EOPNOTSUPP;
 
 	err = decode_movbe_payload(payload, &dst_reg, &base_reg,
-				       &index_reg, &scale_log2, &offset);
+				       &index_reg, &scale_log2, &offset,
+				       &indexed);
 	if (err)
 		return err;
 
 	dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
 	base_reg = kinsn_x86_reg_for_prog(prog, base_reg);
-	index_reg = kinsn_x86_reg_for_prog(prog, index_reg);
+	if (indexed)
+		index_reg = kinsn_x86_reg_for_prog(prog, index_reg);
 	if (!kinsn_x86_valid(dst_reg) || !kinsn_x86_valid(base_reg) ||
-	    !kinsn_x86_valid(index_reg))
+	    (indexed && !kinsn_x86_valid(index_reg)))
 		return -EINVAL;
 
 	if (size == BPF_H)
@@ -131,8 +152,11 @@ static int emit_movbe_indexed_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	kinsn_emit_u8(buf, &len, 0x0f);
 	kinsn_emit_u8(buf, &len, 0x38);
 	kinsn_emit_u8(buf, &len, 0xf0);
-	kinsn_emit_sib_mem(buf, &len, dst_reg, base_reg, index_reg,
-			   scale_log2, offset);
+	if (indexed)
+		kinsn_emit_sib_mem(buf, &len, dst_reg, base_reg, index_reg,
+				   scale_log2, offset);
+	else
+		kinsn_emit_modrm_mem(buf, &len, dst_reg, base_reg, offset);
 
 	return kinsn_emit_finish(image, off, emit, buf, len);
 }

@@ -4,10 +4,9 @@
 //! Scans live kernel BPF programs for optimization sites and can apply
 //! bytecode rewrites via BPF_PROG_REJIT.
 
-mod bpf;
-mod commands;
-mod server;
-mod syscall;
+// Modules live in lib.rs so kinsnprober (bpfopt/kinsnprober) can reuse them
+// without duplicating the BTF probe code.
+use bpfrejit_daemon::server;
 
 use anyhow::Result;
 use clap::Parser;

@@ -1086,16 +1086,6 @@ fn apply_elf_relocations(
     Ok(())
 }
 
-
-fn containing_symbol(included: &[SymInfo], address: u64) -> Option<u64> {
-    for s in included {
-        if address >= s.address && address < s.address + s.size {
-            return Some(s.address);
-        }
-    }
-    None
-}
-
 fn is_return(insn: &Instruction) -> bool {
     matches!(
         insn.code(),

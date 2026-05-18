@@ -30,7 +30,7 @@ fn remove_socket_file_if_present(socket_path: &str) -> Result<()> {
     }
 }
 
-pub(crate) fn cmd_serve(socket_path: &str) -> Result<()> {
+pub fn cmd_serve(socket_path: &str) -> Result<()> {
     use std::os::unix::net::UnixListener;
 
     register_signal_handlers();

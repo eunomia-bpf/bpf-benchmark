@@ -48,13 +48,13 @@ pub(crate) struct ProgramSnapshot {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
-pub(crate) struct TargetJson {
+pub struct TargetJson {
     pub(crate) arch: String,
     pub(crate) kinsns: BTreeMap<String, TargetKinsnJson>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
-pub(crate) struct TargetKinsnJson {
+pub struct TargetKinsnJson {
     pub(crate) btf_func_id: i32,
     pub(crate) btf_id: u32,
     /// Non-zero REJIT fd_array index where this BTF module's fd lives.
@@ -64,7 +64,7 @@ pub(crate) struct TargetKinsnJson {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct KinsnProbeTarget {
+pub struct KinsnProbeTarget {
     pub(crate) name: String,
 }
 
@@ -85,7 +85,7 @@ pub(crate) fn snapshot_program(prog_id: u32) -> Result<ProgramSnapshot> {
     })
 }
 
-pub(crate) fn target_json_for_probes(targets: &[KinsnProbeTarget]) -> Result<TargetJson> {
+pub fn target_json_for_probes(targets: &[KinsnProbeTarget]) -> Result<TargetJson> {
     if targets.is_empty() {
         return Ok(TargetJson {
             arch: detect_arch(),
@@ -95,7 +95,7 @@ pub(crate) fn target_json_for_probes(targets: &[KinsnProbeTarget]) -> Result<Tar
     probe_target_json(targets)
 }
 
-pub(crate) fn probe_target_json(targets: &[KinsnProbeTarget]) -> Result<TargetJson> {
+pub fn probe_target_json(targets: &[KinsnProbeTarget]) -> Result<TargetJson> {
     if targets.is_empty() {
         bail!("target probing requested with no kinsn targets");
     }

@@ -202,6 +202,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
 
 [[package]]
+name = "kinsnprober"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "libbpf-sys",
+ "libc",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "libbpf-sys"
 version = "1.7.0+v1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

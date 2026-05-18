@@ -116,7 +116,9 @@ impl ProgramCFG {
         range: Range<usize>,
         replacement: Vec<BpfInsn>,
     ) -> anyhow::Result<()> {
-        let old_len = range
+        // Reject a descending range; the value itself is unused, the
+        // checked_sub here is purely validation.
+        range
             .end
             .checked_sub(range.start)
             .ok_or_else(|| anyhow::anyhow!("invalid descending range {:?}", range))?;
@@ -141,7 +143,6 @@ impl ProgramCFG {
                 .splice(range.clone(), new_insns.iter().cloned().map(InsnNode::from));
         }
 
-        let _ = old_len;
         for (idx, second) in new_second_slots {
             self.insert_ldimm64_second_slot(
                 InsnSite {

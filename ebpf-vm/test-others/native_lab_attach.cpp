@@ -549,19 +549,17 @@ int attach_raw_tp(int prog_fd, const char *tp_name, NlSession *out)
     return 0;
 }
 
-} // namespace
-
-int nl_load_and_attach(const char *bpf_o_path,
-                       const char *prog_name,
-                       const char *mode,
-                       const char *target,
-                       int pid,
-                       NlSession *out)
+/* Steps (1)-(6) of the native_lab attach pipeline: load the companion
+ * .bpf.o, extract the map's kernel address from its JIT image, resolve
+ * helpers via kallsyms, invoke native-link, upload the blob+relocs into
+ * the kinsn module's debugfs, and BPF_PROG_LOAD the (sidecar; call
+ * kinsn)*N; exit stub program with the supplied prog_type. The caller
+ * runs the attach step appropriate for its event type. */
+int nl_load_only(const char *bpf_o_path, const char *prog_name,
+                 uint32_t prog_type, NlSession *out)
 {
     *out = NlSession{};
 
-    /* (1) Load companion .bpf.o via libbpf so the kernel allocates
-     * count_map and JIT-rewrites the program with the map's kernel ptr. */
     bpf_object *obj = bpf_object__open_file(bpf_o_path, nullptr);
     if (!obj || libbpf_get_error(obj)) {
         std::fprintf(stderr, "nl: bpf_object__open_file %s\n", bpf_o_path);
@@ -587,14 +585,11 @@ int nl_load_and_attach(const char *bpf_o_path,
         return -1;
     }
     int companion_prog_fd = bpf_program__fd(prog);
-
-    /* (2) Pull the map's kernel ptr out of the companion's JIT image. */
     uint64_t map_kaddr = 0;
     if (extract_single_map_kernel_addr(companion_prog_fd, &map_kaddr) != 0) {
         return -1;
     }
 
-    /* (3) Resolve helpers via kallsyms. */
     std::vector<std::string> helper_args;
     for (const char *h : kHelpers) {
         uint64_t addr = kallsyms_lookup(h);
@@ -608,7 +603,6 @@ int nl_load_and_attach(const char *bpf_o_path,
         helper_args.emplace_back(buf);
     }
 
-    /* (4) Invoke native-link. */
     std::string native_o = native_o_from_bpf_o(bpf_o_path);
     char tmpl_blob[] = "/tmp/nl_others_XXXXXX.blob";
     char tmpl_rel[] = "/tmp/nl_others_XXXXXX.relocs";
@@ -622,9 +616,8 @@ int nl_load_and_attach(const char *bpf_o_path,
     out->blob_path = tmpl_blob;
     out->relocs_path = tmpl_rel;
 
-    std::string link_bin = native_link_binary();
     std::vector<std::string> argv = {
-        link_bin,
+        native_link_binary(),
         "--input", native_o,
         "--symbol", prog_name,
         "--output", out->blob_path,
@@ -641,29 +634,27 @@ int nl_load_and_attach(const char *bpf_o_path,
         argv.emplace_back("--map");
         argv.emplace_back(buf);
     }
-    int rc = run_subprocess(argv);
-    if (rc != 0) {
-        std::fprintf(stderr, "nl: native-link rc=%d\n", rc);
+    if (run_subprocess(argv) != 0) {
+        std::fprintf(stderr, "nl: native-link failed\n");
         return -1;
     }
 
-    /* (5) Upload blob + relocs to bpf_x86_native_lab debugfs. */
     ensure_debugfs_mounted();
-    std::vector<uint8_t> blob;
+    std::vector<uint8_t> blob, relocs;
     {
         std::ifstream f(out->blob_path, std::ios::binary);
-        blob.assign(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
+        blob.assign(std::istreambuf_iterator<char>(f),
+                    std::istreambuf_iterator<char>());
     }
-    std::vector<uint8_t> relocs;
     {
         std::ifstream f(out->relocs_path, std::ios::binary);
-        relocs.assign(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
+        relocs.assign(std::istreambuf_iterator<char>(f),
+                      std::istreambuf_iterator<char>());
     }
     uint32_t chunks = 0;
     if (upload_blob(blob, &chunks) != 0) return -1;
     if (upload_relocs(relocs) != 0) return -1;
 
-    /* (6) Build + load the stub program with the right prog_type. */
     int mod_btf_fd = find_module_btf_fd();
     if (mod_btf_fd < 0) return -1;
     int kfunc_id = find_kfunc_btf_id();
@@ -671,21 +662,31 @@ int nl_load_and_attach(const char *bpf_o_path,
         close(mod_btf_fd);
         return -1;
     }
-    uint32_t pt = map_prog_type(mode);
-    if (pt == 0) {
-        close(mod_btf_fd);
-        return -1;
-    }
-    out->prog_fd = load_stub_prog(kfunc_id, mod_btf_fd, chunks, pt, out->count_map_fd);
+    out->prog_fd = load_stub_prog(kfunc_id, mod_btf_fd, chunks,
+                                  prog_type, out->count_map_fd);
     close(mod_btf_fd);
-    if (out->prog_fd < 0) return -1;
+    return (out->prog_fd < 0) ? -1 : 0;
+}
+
+} // namespace
+
+int nl_load_and_attach(const char *bpf_o_path,
+                       const char *prog_name,
+                       const char *mode,
+                       const char *target,
+                       int pid,
+                       NlSession *out)
+{
+    uint32_t pt = map_prog_type(mode);
+    if (pt == 0) return -1;
+    if (nl_load_only(bpf_o_path, prog_name, pt, out) != 0) return -1;
 
     /* (7) Attach via the event-driven path for the requested mode.
      *
      * For uprobe, the caller is expected to use the _at variant since
-     * symbol resolution at this layer (nm-based) is fragile inside the
-     * VM overlay. We keep the name-based mode rejected with a clear
-     * error rather than silently failing. */
+     * symbol resolution at this layer is fragile inside the VM overlay.
+     * We keep the name-based mode rejected with a clear error rather
+     * than silently failing. */
     if (std::strcmp(mode, "kprobe") == 0) {
         return attach_kprobe(out->prog_fd, target, out);
     } else if (std::strcmp(mode, "raw_tp") == 0) {
@@ -705,92 +706,12 @@ int nl_load_and_attach_uprobe_at(const char *bpf_o_path,
                                  int pid,
                                  NlSession *out)
 {
-    /* Use the shared loader for steps (1)-(6), then run the uprobe-
-     * attach using the runtime address path instead of the name path. */
-    int rc = nl_load_and_attach(bpf_o_path, prog_name, "raw_tp",
-                                "__nl_placeholder_no_attach", pid, out);
-    /* The above call will fail at attach time (we passed raw_tp with a
-     * bogus target). We accept that and re-run only the load steps
-     * via a different code path — simpler to just inline what we need. */
-    (void)rc;
-    nl_close(out);
-    *out = NlSession{};
-
-    /* Re-execute load steps (1)-(6) inline, then call attach_uprobe_at. */
-    bpf_object *obj = bpf_object__open_file(bpf_o_path, nullptr);
-    if (!obj || libbpf_get_error(obj)) {
-        std::fprintf(stderr, "nl: bpf_object__open_file %s\n", bpf_o_path);
-        return -1;
-    }
-    if (bpf_object__load(obj) != 0) {
-        std::fprintf(stderr, "nl: bpf_object__load: %s\n", std::strerror(errno));
-        bpf_object__close(obj);
-        return -1;
-    }
-    out->companion = obj;
-    bpf_map *cm = bpf_object__find_map_by_name(obj, "count_map");
-    if (!cm) return -1;
-    out->count_map_fd = bpf_map__fd(cm);
-    bpf_program *prog = bpf_object__find_program_by_name(obj, prog_name);
-    if (!prog) return -1;
-    int companion_prog_fd = bpf_program__fd(prog);
-    uint64_t map_kaddr = 0;
-    if (extract_single_map_kernel_addr(companion_prog_fd, &map_kaddr) != 0) return -1;
-
-    std::vector<std::string> helper_args;
-    for (const char *h : kHelpers) {
-        uint64_t addr = kallsyms_lookup(h);
-        if (addr == 0) { std::fprintf(stderr, "nl: kallsyms miss %s\n", h); return -1; }
-        char buf[160];
-        std::snprintf(buf, sizeof(buf), "%s=0x%lx", h, static_cast<unsigned long>(addr));
-        helper_args.emplace_back(buf);
-    }
-
-    std::string native_o = native_o_from_bpf_o(bpf_o_path);
-    char tmpl_blob[] = "/tmp/nl_others_XXXXXX.blob";
-    char tmpl_rel[] = "/tmp/nl_others_XXXXXX.relocs";
-    int b_fd = mkstemps(tmpl_blob, 5);
-    int r_fd = mkstemps(tmpl_rel, 7);
-    if (b_fd < 0 || r_fd < 0) return -1;
-    close(b_fd); close(r_fd);
-    out->blob_path = tmpl_blob;
-    out->relocs_path = tmpl_rel;
-    std::vector<std::string> argv = {
-        native_link_binary(),
-        "--input", native_o, "--symbol", prog_name,
-        "--output", out->blob_path, "--output-relocs", out->relocs_path,
-    };
-    for (auto &h : helper_args) { argv.emplace_back("--helper"); argv.push_back(h); }
-    {
-        char buf[64];
-        std::snprintf(buf, sizeof(buf), "count_map=0x%lx", static_cast<unsigned long>(map_kaddr));
-        argv.emplace_back("--map"); argv.emplace_back(buf);
-    }
-    if (run_subprocess(argv) != 0) { std::fprintf(stderr, "nl: native-link failed\n"); return -1; }
-
-    ensure_debugfs_mounted();
-    std::vector<uint8_t> blob, relocs;
-    {
-        std::ifstream f(out->blob_path, std::ios::binary);
-        blob.assign(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
-    }
-    {
-        std::ifstream f(out->relocs_path, std::ios::binary);
-        relocs.assign(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
-    }
-    uint32_t chunks = 0;
-    if (upload_blob(blob, &chunks) != 0) return -1;
-    if (upload_relocs(relocs) != 0) return -1;
-
-    int mod_btf_fd = find_module_btf_fd();
-    if (mod_btf_fd < 0) return -1;
-    int kfunc_id = find_kfunc_btf_id();
-    if (kfunc_id < 0) { close(mod_btf_fd); return -1; }
-    out->prog_fd = load_stub_prog(kfunc_id, mod_btf_fd, chunks,
-                                  BPF_PROG_TYPE_KPROBE, out->count_map_fd);
-    close(mod_btf_fd);
-    if (out->prog_fd < 0) return -1;
-
+    /* uprobe stub programs share prog_type=BPF_PROG_TYPE_KPROBE with
+     * kprobe (the perf_event_open path differentiates the two, not the
+     * verifier). Load via the shared loader and run the addr-based
+     * uprobe attach. */
+    if (nl_load_only(bpf_o_path, prog_name,
+                     BPF_PROG_TYPE_KPROBE, out) != 0) return -1;
     return attach_uprobe_at(out->prog_fd,
                             reinterpret_cast<uint64_t>(func_addr), pid, out);
 }

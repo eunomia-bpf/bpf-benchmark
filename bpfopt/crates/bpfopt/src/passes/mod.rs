@@ -24,6 +24,7 @@ mod wide_mem;
 // integration test). The other pass structs are reached through PASS_REGISTRY.
 pub use noop::NoopPass;
 
+use crate::insn::BpfInsn;
 use crate::pass::{regs_from_offsets, BpfPass, KinsnDescriptor, RegSet};
 
 pub(crate) const COMMON_KINSN_TARGETS: &[KinsnDescriptor] = &[
@@ -98,6 +99,20 @@ fn x86_mov_register_defs(payload: u64) -> RegSet {
         1 | 4 | 5 => regs_from_offsets(payload, &[4]),
         _ => RegSet::new(),
     }
+}
+
+/// Payload constructors for the `x86_mov` / `arm64_mov` kinsn targets.
+/// Shared between any pass that emits a register-to-register move via
+/// the kinsn dispatch (cond_select diamond fold-back, rotate provenance
+/// rewrite, etc.). The `x86_mov` payload's low nibble selects the
+/// variant (1 = REG-REG mov, see x86_mov_register_uses); `arm64_mov`
+/// is a single-variant target.
+pub(super) fn x86_mov_reg_payload(dst_reg: u8, src_reg: u8) -> u64 {
+    BpfInsn::pack_u4(1, 0) | BpfInsn::pack_u4(dst_reg, 4) | BpfInsn::pack_u4(src_reg, 8)
+}
+
+pub(super) fn arm64_mov_reg_payload(dst_reg: u8, src_reg: u8) -> u64 {
+    BpfInsn::pack_u4(dst_reg, 0) | BpfInsn::pack_u4(src_reg, 4)
 }
 
 // ── Pass registry ───────────────────────────────────────────────────

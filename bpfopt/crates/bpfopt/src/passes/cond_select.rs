@@ -199,7 +199,7 @@ fn emit_x86_cond_select_kinsns(
     let mut out = Vec::new();
     if let Some(scratch) = lowering.x86_result_scratch {
         out.extend_from_slice(
-            &prog.kinsn_emit("bpf_x86_movq", x86_mov_reg_payload(scratch, lowering.b_reg))?,
+            &prog.kinsn_emit("bpf_x86_movq", super::x86_mov_reg_payload(scratch, lowering.b_reg))?,
         );
         out.extend_from_slice(
             &prog.kinsn_emit("bpf_x86_testq", x86_test_payload(lowering.cond_reg))?,
@@ -209,13 +209,13 @@ fn emit_x86_cond_select_kinsns(
             cmov_payload(scratch, lowering.a_reg, lowering.cond_reg),
         )?);
         out.extend_from_slice(
-            &prog.kinsn_emit("bpf_x86_movq", x86_mov_reg_payload(site.dst_reg, scratch))?,
+            &prog.kinsn_emit("bpf_x86_movq", super::x86_mov_reg_payload(site.dst_reg, scratch))?,
         );
     } else if site.dst_reg != lowering.a_reg {
         if site.dst_reg != lowering.b_reg {
             out.extend_from_slice(&prog.kinsn_emit(
                 "bpf_x86_movq",
-                x86_mov_reg_payload(site.dst_reg, lowering.b_reg),
+                super::x86_mov_reg_payload(site.dst_reg, lowering.b_reg),
             )?);
         }
         out.extend_from_slice(
@@ -268,17 +268,9 @@ fn cmov_payload(dst_reg: u8, src_reg: u8, cond_reg: u8) -> u64 {
 
 fn mov_reg_payload(arch: Arch, dst_reg: u8, src_reg: u8) -> u64 {
     match arch {
-        Arch::X86_64 => x86_mov_reg_payload(dst_reg, src_reg),
-        Arch::Aarch64 => arm64_mov_reg_payload(dst_reg, src_reg),
+        Arch::X86_64 => super::x86_mov_reg_payload(dst_reg, src_reg),
+        Arch::Aarch64 => super::arm64_mov_reg_payload(dst_reg, src_reg),
     }
-}
-
-fn arm64_mov_reg_payload(dst_reg: u8, src_reg: u8) -> u64 {
-    BpfInsn::pack_u4(dst_reg, 0) | BpfInsn::pack_u4(src_reg, 4)
-}
-
-fn x86_mov_reg_payload(dst_reg: u8, src_reg: u8) -> u64 {
-    BpfInsn::pack_u4(1, 0) | BpfInsn::pack_u4(dst_reg, 4) | BpfInsn::pack_u4(src_reg, 8)
 }
 
 fn diamond_pattern_for_site(
