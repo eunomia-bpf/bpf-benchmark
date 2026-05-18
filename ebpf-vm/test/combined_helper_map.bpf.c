@@ -2,13 +2,16 @@
  * Stage 2 POC: realistic mini program using a helper + a map together.
  *
  *   key  = bpf_get_smp_processor_id()
- *   ts   = bpf_ktime_get_ns()
- *   map[key] = ts
+ *   tag  = bpf_get_current_uid_gid()      // deterministic across runtimes
+ *   map[key] = tag
  *   read map[key] back, write to packet
  *
- * Same shape as a per-CPU timestamping benchmark. Native and BPF paths
- * should write the same ts value to the same map slot (since the prog
- * runs to completion without preemption on a TEST_RUN invocation).
+ * Per-cpu tagging shape: per-cpu slot keyed by smp_id, value derived
+ * from a process-identity helper. `bpf_get_current_uid_gid()` is
+ * chosen over `bpf_ktime_get_ns()` so the stored value is bit-
+ * identical between the native_lab and kernel TEST_RUN calls (both
+ * run as root), making result-equality a real invariant rather than
+ * a near-miss-with-tolerance.
  */
 #include "include/native_helpers.h"
 
@@ -28,8 +31,8 @@ SEC("xdp") int combined_helper_map(struct xdp_md *ctx)
     }
 
     __u32 cpu = bpf_get_smp_processor_id();
-    __u64 ts = bpf_ktime_get_ns();
-    bpf_map_update_elem(&cpu_ts, &cpu, &ts, 0);
+    __u64 tag = bpf_get_current_uid_gid();
+    bpf_map_update_elem(&cpu_ts, &cpu, &tag, 0);
 
     __u64 *got = bpf_map_lookup_elem(&cpu_ts, &cpu);
     __u64 out = got ? *got : 0;

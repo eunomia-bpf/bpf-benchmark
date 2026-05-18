@@ -1,15 +1,25 @@
 /*
- * Stage 2 test: chain of pure-helper calls, no maps.
+ * Stage 2 test: chain of 4 distinct deterministic helper calls.
  *
- * Exercises 4 distinct helpers (ktime, pid_tgid, smp_id, uid_gid)
- * folded together with XOR. Real-world shape: a tracer that mixes
- * timestamp + identity bits into a single observation token. The
- * result is non-deterministic (ktime / pid_tgid drift across iters),
- * so the test driver only checks XDP_PASS + nonzero result.
+ * Exercises uid_gid + map_update + map_lookup + map_delete on a
+ * single-slot HASH map. The stored value is `bpf_get_current_uid_gid()`
+ * which is identical between the native_lab and kernel TEST_RUN
+ * processes (both run as root), and lookup returns exactly what
+ * update wrote, so result is bit-identical across runtimes -- a real
+ * correctness invariant rather than a non-deterministic loose check.
  *
- * Maps: none.   Helpers: 4.   Inline-eligible: no (no HASH map).
+ * Replaces an earlier ktime/prandom-XOR chain that varied by design.
+ *
+ * Maps: 1 (HASH).   Helpers: 4.   Inline-eligible: yes (HASH map).
  */
 #include "include/native_helpers.h"
+
+struct {
+    __uint(type, BPF_MAP_TYPE_HASH);
+    __uint(max_entries, 1);
+    __type(key, __u32);
+    __type(value, __u64);
+} chain_h SEC(".maps");
 
 SEC("xdp") int helper_chain_simple(struct xdp_md *ctx)
 {
@@ -19,11 +29,13 @@ SEC("xdp") int helper_chain_simple(struct xdp_md *ctx)
         return XDP_ABORTED;
     }
 
-    __u64 v = bpf_ktime_get_ns();
-    v ^= bpf_get_current_pid_tgid();
-    v ^= ((__u64)bpf_get_smp_processor_id() << 32);
-    v ^= bpf_get_current_uid_gid();
-    micro_write_u64_le(data, v);
+    __u32 key = 0;
+    __u64 tag = bpf_get_current_uid_gid();
+    bpf_map_update_elem(&chain_h, &key, &tag, 0);
+    __u64 *got = bpf_map_lookup_elem(&chain_h, &key);
+    __u64 out = got ? *got : 0;
+    bpf_map_delete_elem(&chain_h, &key);
+    micro_write_u64_le(data, out);
     return XDP_PASS;
 }
 

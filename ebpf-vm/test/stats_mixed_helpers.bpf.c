@@ -5,12 +5,16 @@
  * Real-world shape: a tetragon/tracee-style stats aggregator that
  * tags each observation with (pid_tgid mod K) into a HASH bucket
  * for cross-cpu aggregation and bumps a PERCPU_HASH per-cpu rate
- * counter at the same time. Mixes deterministic and helper-derived
- * inputs.
+ * counter at the same time.
  *
  * Multi-map (HASH + PERCPU_HASH) so native-link inline is disabled;
- * both lookups go through plain `bpf_map_lookup_elem`. Result depends
- * on `bpf_ktime_get_ns()` -> non-deterministic; loose check.
+ * both lookups go through plain `bpf_map_lookup_elem`. Stored tag is
+ * `bpf_get_current_uid_gid()` (deterministic across runtimes, both
+ * run as root) rather than `bpf_ktime_get_ns()` (advances between
+ * the two TEST_RUN calls), so the XOR of the two re-reads is a
+ * stable, bit-identical value `uid_gid ^ 1` across native_lab and
+ * kernel runs even though pid_tgid and smp_id route them to
+ * different bucket slots.
  *
  * Maps: 2 (HASH + PERCPU_HASH).   Helpers: 3.
  * Inline-eligible: no (multi-map).
@@ -41,9 +45,9 @@ SEC("xdp") int stats_mixed_helpers(struct xdp_md *ctx)
 
     __u32 bucket = (__u32)(bpf_get_current_pid_tgid() & 0x3F);
     __u32 cpu    = bpf_get_smp_processor_id() & 0x3F;
-    __u64 ts     = bpf_ktime_get_ns();
+    __u64 tag    = bpf_get_current_uid_gid();
 
-    bpf_map_update_elem(&stats_h, &bucket, &ts, 0);
+    bpf_map_update_elem(&stats_h, &bucket, &tag, 0);
     __u64 one = 1;
     bpf_map_update_elem(&rate_pcpu, &cpu, &one, 0);
 

@@ -47,37 +47,32 @@ runtimes:
     sudo: true
 
 benchmarks:
-  # Pure helpers, no maps.
-  - name: helper_only_ktime
-    description: One bpf_ktime_get_ns call
-    category: helpers
-    family: time
-    level: tiny
-    hypothesis: Captures helper-call overhead floor for a single time read
-    base_name: helper_only_ktime
-    program_name: helper_only_ktime
-    kernel_input_size: 64
-    input_generator: stage2_zero64
-    tags: [stage2, helpers, time]
-
-  - name: helper_get_pid_tgid
-    description: One bpf_get_current_pid_tgid call
+  # Pure helpers + one trivial single-slot HASH map. Deterministic.
+  # Note: `helper_only_ktime.bpf.c` and `helper_get_pid_tgid.bpf.c`
+  # still compile but are not listed here -- their helpers (ktime,
+  # pid_tgid) return values that differ between the two TEST_RUN
+  # invocations, so they can't be verified by bit-exact result
+  # comparison. Single-helper-overhead-floor coverage is provided by
+  # `helper_only_uid_gid` (uid_gid is identical across runtimes when
+  # both run as root, which the micro suite always does via sudo).
+  - name: helper_only_uid_gid
+    description: One bpf_get_current_uid_gid call
     category: helpers
     family: identity
     level: tiny
-    hypothesis: Captures helper-call overhead for a single identity read
-    base_name: helper_get_pid_tgid
-    program_name: helper_get_pid_tgid
+    hypothesis: Captures helper-call overhead floor for a single deterministic identity read; uid_gid is bit-identical between native_lab and kernel TEST_RUN (both run as root)
+    base_name: helper_only_uid_gid
+    program_name: helper_only_uid_gid
     kernel_input_size: 64
     input_generator: stage2_zero64
     tags: [stage2, helpers, identity]
 
   - name: helper_chain_simple
-    description: Four mixed helpers XOR-folded together
+    description: uid_gid + 3 HASH map ops chained (update/lookup/delete)
     category: helpers
     family: chain
     level: small
-    hypothesis: Mixes time / identity / cpu helper outputs as a tracing-style observation token
+    hypothesis: 4 distinct deterministic helpers exercise the dispatch path; lookup returns what update wrote so result is bit-identical across runtimes
     base_name: helper_chain_simple
     program_name: helper_chain_simple
     kernel_input_size: 64
@@ -170,11 +165,11 @@ benchmarks:
     tags: [stage2, maps, percpu_hash]
 
   - name: combined_helper_map
-    description: bpf_get_smp_processor_id + ktime feeding PERCPU_ARRAY
+    description: bpf_get_smp_processor_id + uid_gid feeding PERCPU_ARRAY
     category: maps
     family: percpu_array
     level: medium
-    hypothesis: Realistic per-cpu timestamping workload
+    hypothesis: Per-cpu tagging workload; stored value is uid_gid (deterministic across runtimes) so result is bit-identical between native_lab and kernel
     base_name: combined_helper_map
     program_name: combined_helper_map
     kernel_input_size: 64
@@ -210,7 +205,7 @@ benchmarks:
     category: maps
     family: multi_map
     level: large
-    hypothesis: Real-shape program with mixed map types and several helpers
+    hypothesis: Real-shape program with mixed map types; stored tag is uid_gid (deterministic across runtimes) so result is bit-identical even though pid/smp route to different bucket slots
     base_name: stats_mixed_helpers
     program_name: stats_mixed_helpers
     kernel_input_size: 64

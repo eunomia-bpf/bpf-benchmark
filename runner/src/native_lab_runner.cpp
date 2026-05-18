@@ -60,6 +60,8 @@ constexpr const char *kSupportedHelpers[] = {
     "bpf_get_current_pid_tgid",
     "bpf_get_current_uid_gid",
     "bpf_get_smp_processor_id",
+    "bpf_get_prandom_u32",
+    "bpf_probe_read_kernel",
     "bpf_map_lookup_elem",
     "bpf_map_update_elem",
     "bpf_map_delete_elem",
