@@ -61,10 +61,25 @@ extern char **environ;
 #define PERF_EVENT_IOC_QUERY_BPF _IOWR('$', 10, struct perf_event_query_bpf *)
 #endif
 
-/* Resolved real symbols, set in shim_init(). */
+/* Resolved real symbols. Filled at shim_init() but every interceptor must
+ * also handle the case where the symbol is still NULL — heavy C++ runtime
+ * apps (katran's folly/grpc) call syscall(3) from their own constructors,
+ * which can race ahead of our constructor depending on dynamic init order. */
 static long (*real_syscall)(long, ...);
 static int (*real_ioctl)(int, unsigned long, ...);
 static int (*real_close)(int);
+
+/* Resolve any not-yet-resolved real symbols. Called at the top of every
+ * interceptor so that apps which call syscall(3)/ioctl(2)/close(2) from a
+ * constructor that runs before ours (folly/grpc/etc.) don't see NULL. */
+static void ensure_syms_resolved(void) {
+    if (!real_syscall)
+        real_syscall = (long (*)(long, ...))dlsym(RTLD_NEXT, "syscall");
+    if (!real_ioctl)
+        real_ioctl = (int (*)(int, unsigned long, ...))dlsym(RTLD_NEXT, "ioctl");
+    if (!real_close)
+        real_close = (int (*)(int))dlsym(RTLD_NEXT, "close");
+}
 
 static FILE *log_file;
 static pthread_mutex_t log_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -122,9 +137,9 @@ struct prog_data {
     /* Per-prog execute_step state: lazily filled on first call. */
     int canonicalized;          /* 1 once --canonicalize-map-refs has run */
     int step_seq;               /* incremented every successful execute_step */
-    uint32_t *used_map_ids;     /* heap, kernel ids of progam's used maps */
-    uint32_t *used_map_types;   /* heap, map_type per used_map_ids entry */
-    uint32_t nr_map_ids;        /* length of used_map_ids/used_map_types */
+    /* Per-prog flag: did we already run `bpfopt --canonicalize-map-refs`?
+     * Map fd lists are not cached per-prog — they come from a fresh
+     * obj_table snapshot at execute_step time. */
 };
 
 struct map_data {
@@ -461,6 +476,7 @@ long syscall(long number, ...) {
      * unused-but-not-passed va_args is UB but practically safe on x86_64
      * because syscall(2) callers always pass through the same register
      * convention. We do not introspect args for non-bpf syscalls. */
+    ensure_syms_resolved();
     va_list ap;
     va_start(ap, number);
     long a0 = va_arg(ap, long);
@@ -593,6 +609,7 @@ long syscall(long number, ...) {
 
 /* Intercept ioctl(2) to catch PERF_EVENT_IOC_SET_BPF on perf_event fds. */
 int ioctl(int fd, unsigned long request, ...) {
+    ensure_syms_resolved();
     void *arg;
     va_list ap;
     va_start(ap, request);
@@ -634,6 +651,7 @@ int ioctl(int fd, unsigned long request, ...) {
 
 /* Intercept close(2): release the table entry if any. */
 int close(int fd) {
+    ensure_syms_resolved();
     if (!in_shim && fd >= 0) {
         pthread_mutex_lock(&state_mutex);
         obj_remove(fd);
@@ -920,72 +938,36 @@ static int map_type_needs_dump(uint32_t t) {
            t == BPF_MAP_TYPE_HASH_OF_MAPS;
 }
 
-/* Query a map's type (BPF_OBJ_GET_INFO_BY_FD on the map fd). */
-static int query_map_type(uint32_t map_id, uint32_t *type_out) {
-    union bpf_attr a = {0};
-    a.map_id = map_id;
-    long fd = real_syscall(SYS_bpf, BPF_MAP_GET_FD_BY_ID, &a, sizeof(a));
-    if (fd < 0) return -1;
-    struct bpf_map_info info;
-    memset(&info, 0, sizeof(info));
-    union bpf_attr ia = {0};
-    ia.info.bpf_fd = (uint32_t)fd;
-    ia.info.info_len = sizeof(info);
-    ia.info.info = (uintptr_t)&info;
-    long r = real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &ia, sizeof(ia));
-    real_close((int)fd);
-    if (r < 0) return -1;
-    *type_out = info.type;
-    return 0;
-}
-
-/* Populate p->used_map_ids / used_map_types / nr_map_ids by re-issuing
- * BPF_OBJ_GET_INFO_BY_FD on the program with a sized map_ids buffer. Two-pass
- * protocol: first call with nr_map_ids=0 returns the required size in
- * info.nr_map_ids, second call fills the array. */
-static int populate_used_maps(struct prog_data *p) {
-    if (!p->kernel_prog_id) return -1;
-    union bpf_attr ga = {0};
-    ga.prog_id = p->kernel_prog_id;
-    long pfd = real_syscall(SYS_bpf, BPF_PROG_GET_FD_BY_ID, &ga, sizeof(ga));
-    if (pfd < 0) return -1;
-
-    struct bpf_prog_info info;
-    memset(&info, 0, sizeof(info));
-    union bpf_attr ia = {0};
-    ia.info.bpf_fd = (uint32_t)pfd;
-    ia.info.info_len = sizeof(info);
-    ia.info.info = (uintptr_t)&info;
-    long r = real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &ia, sizeof(ia));
-    if (r < 0) { real_close((int)pfd); return -1; }
-
-    uint32_t n = info.nr_map_ids;
-    uint32_t *ids = NULL;
-    uint32_t *types = NULL;
-    if (n > 0) {
-        ids = (uint32_t *)calloc(n, sizeof(uint32_t));
-        types = (uint32_t *)calloc(n, sizeof(uint32_t));
-        if (!ids || !types) { free(ids); free(types); real_close((int)pfd); return -1; }
-        memset(&info, 0, sizeof(info));
-        info.nr_map_ids = n;
-        info.map_ids = (uintptr_t)ids;
-        memset(&ia, 0, sizeof(ia));
-        ia.info.bpf_fd = (uint32_t)pfd;
-        ia.info.info_len = sizeof(info);
-        ia.info.info = (uintptr_t)&info;
-        r = real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &ia, sizeof(ia));
-        if (r < 0) { free(ids); free(types); real_close((int)pfd); return -1; }
-        for (uint32_t i = 0; i < n; i++) {
-            if (query_map_type(ids[i], &types[i]) < 0)
-                types[i] = 0; /* unknown — will skip dump */
+/* Snapshot all currently-open map fds from the shim's state table. We
+ * already intercept BPF_MAP_CREATE / BPF_MAP_GET_FD_BY_ID and track every
+ * map fd the loader has; that's the authoritative source. No bytecode
+ * inspection, no kernel queries.
+ *
+ * Caller frees both arrays. Caller must hold state_mutex. */
+static int snapshot_map_fds_from_obj_table(uint32_t **fds_out,
+                                           uint32_t **types_out,
+                                           uint32_t *n_out) {
+    uint32_t cap = 16;
+    uint32_t *fds = (uint32_t *)calloc(cap, sizeof(uint32_t));
+    uint32_t *types = (uint32_t *)calloc(cap, sizeof(uint32_t));
+    if (!fds || !types) { free(fds); free(types); return -1; }
+    uint32_t n = 0;
+    for (int b = 0; b < OBJ_TABLE_BUCKETS; b++) {
+        for (struct obj_entry *e = obj_table[b]; e; e = e->next) {
+            if (e->kind != OBJ_MAP) continue;
+            if (n == cap) {
+                cap *= 2;
+                uint32_t *nf = (uint32_t *)realloc(fds, cap * sizeof(uint32_t));
+                uint32_t *nt = (uint32_t *)realloc(types, cap * sizeof(uint32_t));
+                if (!nf || !nt) { free(nf ? nf : fds); free(nt ? nt : types); return -1; }
+                fds = nf; types = nt;
+            }
+            fds[n] = (uint32_t)e->fd;
+            types[n] = e->u.map.map_type;
+            n++;
         }
     }
-    real_close((int)pfd);
-    free(p->used_map_ids);
-    free(p->used_map_types);
-    p->used_map_ids = ids;
-    p->used_map_types = types;
-    p->nr_map_ids = n;
+    *fds_out = fds; *types_out = types; *n_out = n;
     return 0;
 }
 
@@ -1016,24 +998,38 @@ static int run_bpftool_to_file(char *const argv[], const char *out_path) {
     return (WIFEXITED(st) && WEXITSTATUS(st) == 0) ? 0 : -1;
 }
 
-/* Write per-map snapshots into map_values_dir. Mirrors daemon's
- * write_bpftool_map_snapshots: always show, dump only for needs_dump types. */
+/* Write per-map snapshots into map_values_dir. File names use the loader-fd
+ * token (so they line up with bpfopt's --map-ids CSV); bpftool itself wants
+ * the kernel map id, so we translate fd → kernel id on the spot via
+ * BPF_OBJ_GET_INFO_BY_FD. Skip the dump for types where bpftool produces
+ * nothing useful (PROG_ARRAY / RINGBUF / ...). */
 static void write_map_snapshots(const char *map_values_dir,
-                                const uint32_t *ids, const uint32_t *types,
-                                uint32_t n) {
+                                const uint32_t *loader_fds,
+                                const uint32_t *types, uint32_t n) {
     mkdir(map_values_dir, 0755);
     for (uint32_t i = 0; i < n; i++) {
+        /* bpftool wants a kernel map id, not a process fd. Inline the
+         * fd → kernel-id resolution here; we don't store kernel ids in
+         * obj_table so this is the only place we ever look them up. */
+        struct bpf_map_info info;
+        memset(&info, 0, sizeof(info));
+        union bpf_attr ia = {0};
+        ia.info.bpf_fd = loader_fds[i];
+        ia.info.info_len = sizeof(info);
+        ia.info.info = (uintptr_t)&info;
+        long r = real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &ia, sizeof(ia));
+        if (r < 0 || info.id == 0) continue; /* fd closed since snapshot */
         char id_str[16];
-        snprintf(id_str, sizeof(id_str), "%u", ids[i]);
+        snprintf(id_str, sizeof(id_str), "%u", info.id);
         char show_path[512], dump_path[512];
         snprintf(show_path, sizeof(show_path), "%s/map-%u.show.json",
-                 map_values_dir, ids[i]);
+                 map_values_dir, loader_fds[i]);
         char *const show_argv[] = {"bpftool", "-j", "map", "show", "id",
                                    id_str, NULL};
         (void)run_bpftool_to_file(show_argv, show_path);
         if (!map_type_needs_dump(types[i])) continue;
         snprintf(dump_path, sizeof(dump_path), "%s/map-%u.dump.json",
-                 map_values_dir, ids[i]);
+                 map_values_dir, loader_fds[i]);
         char *const dump_argv[] = {"bpftool", "-j", "map", "dump", "id",
                                    id_str, NULL};
         (void)run_bpftool_to_file(dump_argv, dump_path);
@@ -1041,9 +1037,11 @@ static void write_map_snapshots(const char *map_values_dir,
 }
 
 /* Invoke `bpfopt --canonicalize-map-refs ...`. Writes canonicalized bytecode
- * to out_path. Returns 0 on success. */
+ * to out_path. Captures stdout+stderr into `log_path` (if non-NULL) so a
+ * caller can surface the failure reason. Returns 0 on success. */
 static int run_canonicalize(const char *input_path, const char *out_path,
-                            const char *target_json, const char *map_ids_csv) {
+                            const char *target_json, const char *map_ids_csv,
+                            const char *log_path) {
     char *const argv[] = {
         "bpfopt", "--canonicalize-map-refs",
         "--input", (char *)input_path,
@@ -1061,9 +1059,19 @@ static int run_canonicalize(const char *input_path, const char *out_path,
         if (strncmp(environ[i], "LD_PRELOAD=", 11) != 0)
             clean_env[j++] = environ[i];
     if (clean_env) clean_env[j] = NULL;
+    posix_spawn_file_actions_t fa;
+    int fa_inited = 0;
+    if (log_path && posix_spawn_file_actions_init(&fa) == 0) {
+        fa_inited = 1;
+        posix_spawn_file_actions_addopen(&fa, STDOUT_FILENO, log_path,
+                                         O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        posix_spawn_file_actions_addopen(&fa, STDERR_FILENO, log_path,
+                                         O_WRONLY | O_APPEND, 0);
+    }
     pid_t pid;
-    int rc = posix_spawnp(&pid, "bpfopt", NULL, NULL, argv,
+    int rc = posix_spawnp(&pid, "bpfopt", fa_inited ? &fa : NULL, NULL, argv,
                           clean_env ? clean_env : environ);
+    if (fa_inited) posix_spawn_file_actions_destroy(&fa);
     free(clean_env);
     if (rc != 0) return -1;
     int st = 0;
@@ -1093,17 +1101,21 @@ static void capture_verifier_states(const struct prog_data *p,
     real_close(bfd);
     if (rd != (ssize_t)bytes) { free(insns); return; }
 
-    /* Reconstruct fd_array from kernel map ids — required because canonicalize
-     * rewrote BPF_PSEUDO_MAP_FD refs into BPF_PSEUDO_MAP_IDX. */
+    /* Reconstruct fd_array — required because canonicalize rewrote
+     * BPF_PSEUDO_MAP_FD refs into BPF_PSEUDO_MAP_IDX. The token in
+     * used_map_ids is a loader fd; we run inside the loader process so we
+     * can dup it directly. If the loader has since closed the fd, fall back
+     * to BPF_OBJ_GET_INFO_BY_FD + BPF_MAP_GET_FD_BY_ID, but that path needs
+     * a kernel id we no longer cache — accept fd_array[i] = -1 in that case
+     * (rare; verifier will reject and the candidate load fails cleanly). */
     int *fd_array = NULL;
     if (p->nr_map_ids > 0) {
         fd_array = (int *)calloc(p->nr_map_ids, sizeof(int));
         if (!fd_array) { free(insns); return; }
         for (uint32_t i = 0; i < p->nr_map_ids; i++) {
-            union bpf_attr ga = {0};
-            ga.map_id = p->used_map_ids[i];
-            long fd = real_syscall(SYS_bpf, BPF_MAP_GET_FD_BY_ID, &ga, sizeof(ga));
-            fd_array[i] = (fd < 0) ? -1 : (int)fd;
+            int loader_fd = (int)p->used_map_ids[i];
+            int dup_fd = (loader_fd >= 0) ? dup(loader_fd) : -1;
+            fd_array[i] = dup_fd;
         }
     }
 
@@ -1288,10 +1300,16 @@ done:
              prog_type_short_name(pd->prog_type));
     memcpy(prog_name, pd->name, sizeof(prog_name));
     prog_type_num = pd->prog_type;
-    /* Lazy: populate used_map_ids on first execute_step. */
-    if (!pd->used_map_ids && pd->nr_map_ids == 0 && pd->kernel_prog_id) {
-        populate_used_maps(pd);
-    }
+	/* Lazy: populate used_map_ids on first execute_step. */
+	if (!pd->used_map_ids && pd->nr_map_ids == 0 && pd->kernel_prog_id) {
+		if (extract_used_map_fds(pd) != 0) {
+			pthread_mutex_unlock(&state_mutex);
+			dprintf(cli,
+			        "{\"ok\":false,\"error\":\"failed to extract used map fds for prog_id %u\"}\n",
+			        want_id);
+			return;
+		}
+	}
     /* Local copies of map metadata so we can drop the lock for slow work. */
     uint32_t nr_maps = pd->nr_map_ids;
     uint32_t *local_ids = NULL, *local_types = NULL;
@@ -1359,11 +1377,42 @@ done:
      * Subsequent calls reuse cur as the input. */
     char input_path[320] = {0};
     if (!canonicalized) {
-        if (run_canonicalize(original_bc, cur, target_json, map_ids_csv) != 0) {
+        char canon_log[320];
+        snprintf(canon_log, sizeof(canon_log), "%s/canonicalize.log", workdir);
+        if (run_canonicalize(original_bc, cur, target_json, map_ids_csv,
+                             canon_log) != 0) {
+            /* Surface the bpfopt stderr/stdout tail. */
+            char err_tail[1024] = {0};
+            int lfd = open(canon_log, O_RDONLY);
+            if (lfd >= 0) {
+                struct stat lst;
+                if (fstat(lfd, &lst) == 0 && lst.st_size > 0) {
+                    off_t off = lst.st_size > 512 ? lst.st_size - 512 : 0;
+                    lseek(lfd, off, SEEK_SET);
+                    char raw[513];
+                    ssize_t n = read(lfd, raw, sizeof(raw) - 1);
+                    if (n > 0) {
+                        raw[n] = 0;
+                        size_t o = 0;
+                        for (ssize_t i = 0; i < n && o + 8 < sizeof(err_tail); i++) {
+                            unsigned char c = raw[i];
+                            if (c == '"' || c == '\\') {
+                                err_tail[o++] = '\\'; err_tail[o++] = c;
+                            } else if (c == '\n') {
+                                err_tail[o++] = '\\'; err_tail[o++] = 'n';
+                            } else if (c >= 0x20) {
+                                err_tail[o++] = c;
+                            }
+                        }
+                        err_tail[o] = 0;
+                    }
+                }
+                real_close(lfd);
+            }
             dprintf(cli,
                     "{\"ok\":false,\"exit_code\":-1,\"error\":"
-                    "\"bpfopt --canonicalize-map-refs failed for prog %u\"}\n",
-                    want_id);
+                    "\"bpfopt --canonicalize-map-refs failed for prog %u: %s\"}\n",
+                    want_id, err_tail);
             free(local_ids); free(local_types);
             return;
         }
