@@ -265,6 +265,17 @@ The hard constraints for this experiment are:
 - Kernel/module code treats userspace input as untrusted. Invalid selector, invalid operand namespace, impossible register encoding, or malformed payload must fail load or verification; it must not rely on "the converter did the right thing" for safety.
 - Benchmark execution remains `make micro`; direct component execution is only used for inspection/build-debug, not as a benchmark result source.
 
+Current experiment log, 2026-05-18:
+
+- Goal: test whether native x86 from micro C can be mechanically converted into handcraft BPF with machine-level kinsns for non-control-flow instructions, while keeping all program-level control flow as ordinary verifier-visible BPF.
+- Current working subset: 6 / 29 handcraft cases are documented as passing (`simple`, `simple_packet`, `bitmap_popcount_scan`, `trace_event_type_switch_dispatch`, `packet_checksum_fold`, `siphash_rotate64_mixer`).
+- Latest focused case: `bcc_runqlat_log2_histogram_bucket`, run with `SAMPLES=1 WARMUPS=0 INNER_REPEAT=10 BENCH="bcc_runqlat_log2_histogram_bucket" make micro`.
+- Latest bcc result: `native=1600 ns`, `kernel=1420 ns`, `kernel_handcraft` load rejected with `processed 1000001 insns` in `micro/results/x86_kvm_micro_20260518_035204_272971`.
+- What improved: removing shadow-flag lowering for branch-only `cmp/test` and visible `cmp; cmovb` reduced verifier state pressure from `max_states_per_insn=37` to `8`.
+- Current blocker: variable-shift/scalar-only kinsn proof inside the bounded hash loop still expands into a verifier state space that exceeds the processed-insn limit. The latest log lands near `r6 <<= r7`.
+- Design debt observed in this experiment: the converter has grown into a small semantic lowerer for `cmp/test`, `jcc`, `cmov`, snapshots, and BPF-readable operand materialization. That is useful for diagnosis but is not the desired final boundary. The final converter should shrink back toward selector choice, x86 operand payload fill, and raw BPF branch relocation only.
+- Current conclusion: this path is useful as a native-parity probe, but the active converter is not yet clean enough to call the model complete. The next cleanup should reduce userspace semantic lowering and tighten module proof sequences for scalar ALU/shift kinsns before expanding to more cases.
+
 Flags are not used for program-level control flow in the active converter. For packet bounds and other verifier-critical branches, the branch must be a verifier-visible raw BPF comparison over the values the verifier can track. The verifier does not infer `data <= data_end` from a scalar shadow flag such as `flag = data <= data_end; if (!flag) abort`, so shadow-flag `jcc` lowering is forbidden. The same pressure appears in tight loops with `cmp; cmov`: stack-shadow flag slots multiply verifier states, so `cmove` / `cmovne` / `cmovb` are being moved to ordinary BPF conditional-move sequences when their producer `cmp/test` is visible. `setcc` and `sbb` are still flag-consumer cleanup items.
 
 The practical issues hit during this cleanup and the chosen fixes are:

@@ -60,6 +60,13 @@ struct cli_options {
     std::optional<std::filesystem::path> dump_xlated;
     /* native_lab-only: xdp | sched_cls | cgroup_skb. Defaults to xdp. */
     std::string native_lab_prog_type = "xdp";
+    /* native_lab Stage 2: native_lab function symbol to extract when the
+     * input is a .native.o ELF rather than a pre-linked blob.bin.
+     * Defaults to the ELF basename. */
+    std::string native_lab_symbol;
+    /* Override the path of the native-link binary. Empty -> use repo
+     * default. */
+    std::string native_lab_linker_path;
 };
 
 struct timing_phase {

@@ -28,10 +28,15 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <iterator>
+#include <sstream>
 #include <string>
+#include <sys/wait.h>
+#include <unordered_map>
 #include <vector>
 
 namespace {
@@ -42,8 +47,23 @@ constexpr const char *kModuleBtfPath = "/sys/kernel/btf/bpf_x86_native_lab";
 constexpr const char *kVmlinuxBtfPath = "/sys/kernel/btf/vmlinux";
 constexpr const char *kDebugfsDir = "/sys/kernel/debug";
 constexpr const char *kBlobPathFmt = "/sys/kernel/debug/bpf_x86_native_lab/blob%u";
+constexpr const char *kRelocsPathFmt = "/sys/kernel/debug/bpf_x86_native_lab/blob%u.relocs";
 constexpr uint32_t kChunkBytes = 128;
 constexpr uint32_t kMaxBlobs = 64;
+
+/* Stage 2: BPF helpers whose addresses we resolve from /proc/kallsyms
+ * and pass to native-link. This is the smallest set our POC test
+ * programs need; expand as new helpers show up in new tests. */
+constexpr const char *kSupportedHelpers[] = {
+    "bpf_ktime_get_ns",
+    "bpf_ktime_get_boot_ns",
+    "bpf_get_current_pid_tgid",
+    "bpf_get_current_uid_gid",
+    "bpf_get_smp_processor_id",
+    "bpf_map_lookup_elem",
+    "bpf_map_update_elem",
+    "bpf_map_delete_elem",
+};
 
 #ifndef BPF_PSEUDO_KINSN_SIDECAR
 #define BPF_PSEUDO_KINSN_SIDECAR 3
@@ -59,6 +79,29 @@ void ensure_debugfs_mounted()
         return;
     }
     (void)mount("none", kDebugfsDir, "debugfs", 0, nullptr);
+}
+
+void upload_relocs(const std::vector<uint8_t> &relocs, uint32_t chunk_id_for_relocs)
+{
+    /* The .relocs side-band is bound to blob<id>; we always attach it
+     * to blob 0 (chunk 0) since for Stage 2 single-chunk blobs the
+     * relocations target only the first chunk. Larger blobs would need
+     * per-chunk reloc tables -- defer until needed. */
+    if (relocs.empty()) {
+        return;
+    }
+    char path[160];
+    snprintf(path, sizeof(path), kRelocsPathFmt, chunk_id_for_relocs);
+    int fd = open(path, O_WRONLY | O_TRUNC);
+    if (fd < 0) {
+        fail(std::string("open ") + path + ": " + std::strerror(errno));
+    }
+    ssize_t n = write(fd, relocs.data(), relocs.size());
+    int saved = errno;
+    close(fd);
+    if (n != static_cast<ssize_t>(relocs.size())) {
+        fail(std::string("write ") + path + ": " + std::strerror(saved));
+    }
 }
 
 uint32_t upload_blob(const std::vector<uint8_t> &blob)
@@ -211,6 +254,269 @@ std::vector<uint8_t> read_blob_file(const std::filesystem::path &path)
                                 std::istreambuf_iterator<char>());
 }
 
+bool file_is_elf(const std::filesystem::path &path)
+{
+    std::ifstream f(path, std::ios::binary);
+    if (!f) return false;
+    char m[4] = {};
+    f.read(m, 4);
+    return m[0] == 0x7f && m[1] == 'E' && m[2] == 'L' && m[3] == 'F';
+}
+
+/* Look up a symbol address in /proc/kallsyms. Returns 0 on miss. The
+ * caller must enable kallsyms readability (kptr_restrict=0 or CAP_SYSLOG;
+ * VM has root). */
+uint64_t kallsyms_lookup(const std::string &name)
+{
+    std::ifstream f("/proc/kallsyms");
+    if (!f) {
+        fail("open /proc/kallsyms: " + std::string(std::strerror(errno)));
+    }
+    std::string line;
+    while (std::getline(f, line)) {
+        /* Format: "<hex_addr> <type> <name> [<module>]" */
+        if (line.size() < 17) continue;
+        size_t addr_end = line.find(' ');
+        if (addr_end == std::string::npos) continue;
+        size_t type_pos = addr_end + 1;
+        if (type_pos >= line.size()) continue;
+        size_t name_start = type_pos + 2;
+        if (name_start >= line.size()) continue;
+        size_t name_end = line.find_first_of(" \t\n", name_start);
+        std::string sym_name = line.substr(
+            name_start,
+            (name_end == std::string::npos) ? std::string::npos : name_end - name_start);
+        if (sym_name == name) {
+            uint64_t addr = std::strtoull(line.c_str(), nullptr, 16);
+            return addr;
+        }
+    }
+    return 0;
+}
+
+/* Spawn the native-link binary with the supplied argv. Returns
+ * subprocess exit code. */
+int run_subprocess(const std::vector<std::string> &argv)
+{
+    if (argv.empty()) return -1;
+    std::vector<char *> raw;
+    raw.reserve(argv.size() + 1);
+    for (auto &s : argv) {
+        raw.push_back(const_cast<char *>(s.c_str()));
+    }
+    raw.push_back(nullptr);
+
+    pid_t pid = fork();
+    if (pid < 0) return -1;
+    if (pid == 0) {
+        /* child */
+        execv(raw[0], raw.data());
+        std::fprintf(stderr, "execv %s failed: %s\n", raw[0], std::strerror(errno));
+        _exit(127);
+    }
+    int status = 0;
+    if (waitpid(pid, &status, 0) < 0) return -1;
+    if (!WIFEXITED(status)) return -1;
+    return WEXITSTATUS(status);
+}
+
+/* Path to the native-link binary. The runner invokes it via fork+exec
+ * (per project rule "native_lab_runner can only call linker from the
+ * command line"). For now we hard-code the path under the repo build
+ * dir; --native-link-binary on the CLI overrides. */
+std::filesystem::path native_link_binary(const cli_options &options)
+{
+    if (!options.native_lab_linker_path.empty()) {
+        return options.native_lab_linker_path;
+    }
+    /* Default: relative to CWD where the runner is invoked from. */
+    return "ebpf-vm/x86/native_lab/native_link/target/release/native-link";
+}
+
+/* Stage 2: given an ELF .native.o input, resolve helper kernel addresses
+ * via /proc/kallsyms, invoke native-link as a subprocess to produce
+ * blob + relocs files. Returns paths to those files. */
+struct LinkerOutput {
+    std::filesystem::path blob;
+    std::filesystem::path relocs;
+};
+
+/* If a sibling `.bpf.o` lives next to the `.native.o`, libbpf-load it
+ * so the kernel allocates the maps and verifier rewrites pseudo_ld_imm64
+ * with kernel pointers. Read those pointers back from xlated bytecode +
+ * cross-reference against the original bytecode's fd to produce a
+ * (map_name -> kernel ptr) table. The caller MUST keep the returned
+ * bpf_object alive while the native_lab runs -- closing it frees the
+ * maps. */
+struct CompanionLoad {
+    bpf_object *obj = nullptr;
+    std::unordered_map<std::string, uint64_t> map_addrs;
+};
+
+CompanionLoad load_bpf_companion(const std::filesystem::path &elf_path)
+{
+    /* Derive sibling: replace ".native.o" suffix with ".bpf.o". */
+    CompanionLoad out{};
+    std::string s = elf_path.string();
+    const std::string from = ".native.o";
+    auto pos = s.rfind(from);
+    if (pos == std::string::npos) {
+        return out; /* not a .native.o; no companion */
+    }
+    std::string bpf_path = s.substr(0, pos) + ".bpf.o";
+    struct stat st {};
+    if (stat(bpf_path.c_str(), &st) != 0) {
+        return out; /* no sibling; native blob must be helper-only */
+    }
+
+    bpf_object *obj = bpf_object__open_file(bpf_path.c_str(), nullptr);
+    if (!obj || libbpf_get_error(obj)) {
+        fail(std::string("bpf_object__open_file ") + bpf_path);
+    }
+    if (bpf_object__load(obj) != 0) {
+        bpf_object__close(obj);
+        fail(std::string("bpf_object__load ") + bpf_path + ": "
+             + std::strerror(errno));
+    }
+
+    std::unordered_map<int, std::string> name_by_fd;
+    bpf_map *map = nullptr;
+    bpf_object__for_each_map(map, obj) {
+        int fd = bpf_map__fd(map);
+        if (fd >= 0) {
+            name_by_fd[fd] = std::string(bpf_map__name(map));
+        }
+    }
+
+    bpf_program *prog = nullptr;
+    bpf_object__for_each_program(prog, obj) {
+        int prog_fd = bpf_program__fd(prog);
+        if (prog_fd < 0) continue;
+        const struct bpf_insn *orig = bpf_program__insns(prog);
+        size_t orig_cnt = bpf_program__insn_cnt(prog);
+
+        /* First call: get xlated_prog_len. */
+        bpf_prog_info info = {};
+        __u32 info_len = sizeof(info);
+        if (bpf_obj_get_info_by_fd(prog_fd, &info, &info_len) < 0) continue;
+        size_t xlated_cnt = info.xlated_prog_len / sizeof(bpf_insn);
+        if (xlated_cnt == 0) continue;
+        std::vector<bpf_insn> xlated(xlated_cnt);
+        bpf_prog_info info2 = {};
+        info2.xlated_prog_len = (uint32_t)(xlated_cnt * sizeof(bpf_insn));
+        info2.xlated_prog_insns = reinterpret_cast<uintptr_t>(xlated.data());
+        info_len = sizeof(info2);
+        if (bpf_obj_get_info_by_fd(prog_fd, &info2, &info_len) < 0) continue;
+
+        (void)xlated_cnt; (void)xlated; /* xlated path retained for future use */
+        /* Kernel sanitizes xlated bytecode for ld_imm64 map refs (the
+         * imm is overwritten with map->id, not the kernel ptr). Read
+         * the JITted x86 bytes instead -- they aren't sanitized -- and
+         * find every `movabs reg, imm64` whose imm64 lies in the
+         * canonical kernel upper half. JIT emits exactly one such
+         * movabs per PSEUDO_MAP_FD ld_imm64 (helpers go through
+         * `call rel32`, not movabs). Pair them with the corresponding
+         * map fd in ORIG by ordinal position. */
+        bpf_prog_info info_j = {};
+        __u32 info_j_len = sizeof(info_j);
+        if (bpf_obj_get_info_by_fd(prog_fd, &info_j, &info_j_len) < 0
+            || info_j.jited_prog_len == 0) continue;
+        std::vector<uint8_t> jit(info_j.jited_prog_len);
+        bpf_prog_info info_j2 = {};
+        info_j2.jited_prog_len = info_j.jited_prog_len;
+        info_j2.jited_prog_insns = reinterpret_cast<uintptr_t>(jit.data());
+        info_j_len = sizeof(info_j2);
+        if (bpf_obj_get_info_by_fd(prog_fd, &info_j2, &info_j_len) < 0) continue;
+
+        std::vector<int> orig_fds;
+        for (size_t i = 0; i + 1 < orig_cnt; i++) {
+            if (orig[i].code == (BPF_LD | BPF_DW | BPF_IMM)
+                && orig[i].src_reg == BPF_PSEUDO_MAP_FD) {
+                orig_fds.push_back(orig[i].imm);
+            }
+        }
+
+        std::vector<uint64_t> jit_map_ptrs;
+        /* x86_64 movabs reg, imm64 encoding:
+         *   REX.W=1 (0x48), B=0 -> registers rax..rdi:  48 b8+r <imm64>
+         *   REX.W=1, B=1         -> registers r8..r15: 49 b8+r <imm64>
+         * Total length is 10 bytes; imm64 occupies the last 8 bytes. */
+        for (size_t i = 0; i + 10 <= jit.size(); i++) {
+            uint8_t r1 = jit[i];
+            uint8_t r2 = jit[i + 1];
+            if ((r1 != 0x48 && r1 != 0x49) || r2 < 0xB8 || r2 > 0xBF) continue;
+            uint64_t imm = 0;
+            std::memcpy(&imm, jit.data() + i + 2, 8);
+            if ((imm >> 47) != 0x1FFFFull) continue; /* not canonical kernel high */
+            jit_map_ptrs.push_back(imm);
+            i += 9; /* advance past this 10-byte movabs */
+        }
+
+        if (orig_fds.size() != jit_map_ptrs.size()) {
+            std::fprintf(stderr,
+                "[native_lab] warning: orig has %zu PSEUDO_MAP_FD ld_imm64 but "
+                "jited has %zu kernel-half movabs imm64; map mapping may be wrong\n",
+                orig_fds.size(), jit_map_ptrs.size());
+        }
+        for (size_t k = 0; k < std::min(orig_fds.size(), jit_map_ptrs.size()); k++) {
+            auto it = name_by_fd.find(orig_fds[k]);
+            if (it == name_by_fd.end()) continue;
+            out.map_addrs[it->second] = jit_map_ptrs[k];
+        }
+    }
+
+    out.obj = obj;
+    return out;
+}
+
+LinkerOutput invoke_native_link(const cli_options &options,
+                                const std::filesystem::path &elf_path,
+                                const std::string &symbol_name,
+                                const std::unordered_map<std::string, uint64_t> &map_addrs)
+{
+    std::vector<std::string> argv;
+    argv.push_back(native_link_binary(options).string());
+    argv.push_back("--input");
+    argv.push_back(elf_path.string());
+    argv.push_back("--symbol");
+    argv.push_back(symbol_name);
+
+    std::string base = "/tmp/native_lab_" + std::to_string(getpid()) + "_"
+                       + elf_path.stem().string();
+    LinkerOutput out{};
+    out.blob = base + ".blob.bin";
+    out.relocs = base + ".relocs.bin";
+    argv.push_back("--output");
+    argv.push_back(out.blob.string());
+    argv.push_back("--output-relocs");
+    argv.push_back(out.relocs.string());
+
+    for (const char *h : kSupportedHelpers) {
+        uint64_t addr = kallsyms_lookup(h);
+        if (addr == 0) continue;
+        char buf[128];
+        std::snprintf(buf, sizeof(buf), "%s=0x%lx", h, (unsigned long)addr);
+        argv.push_back("--helper");
+        argv.push_back(buf);
+    }
+    for (const auto &kv : map_addrs) {
+        char buf[160];
+        std::snprintf(buf, sizeof(buf), "%s=0x%lx", kv.first.c_str(),
+                      (unsigned long)kv.second);
+        argv.push_back("--map");
+        argv.push_back(buf);
+    }
+
+    int rc = run_subprocess(argv);
+    if (rc != 0) {
+        std::ostringstream msg;
+        msg << "native-link failed (rc=" << rc << "): ";
+        for (auto &a : argv) msg << a << " ";
+        fail(msg.str());
+    }
+    return out;
+}
+
 uint32_t prog_type_from_option(const std::string &name)
 {
     if (name == "xdp") return BPF_PROG_TYPE_XDP;
@@ -243,13 +549,41 @@ std::vector<sample_result> run_kernel_native_lab(const cli_options &options)
     std::vector<uint8_t> packet_out(packet_output_capacity(options, packet.size()), 0);
     const auto pkt_prepare_end = std::chrono::steady_clock::now();
 
+    /* Stage 2: if the input is an ELF .o, invoke native-link as a
+     * subprocess to resolve helper relocations against /proc/kallsyms
+     * and produce a blob+relocs pair. Otherwise (Stage 1 path) read the
+     * pre-linked blob.bin directly. */
     const auto blob_read_start = std::chrono::steady_clock::now();
-    auto blob = read_blob_file(options.program);
+    std::vector<uint8_t> blob;
+    std::vector<uint8_t> relocs;
+    CompanionLoad companion{};
+    if (file_is_elf(options.program)) {
+        std::string symbol = options.native_lab_symbol;
+        if (symbol.empty()) {
+            symbol = options.program.stem().string();
+        }
+        /* Load sibling .bpf.o as an address oracle (if it exists). The
+         * bpf_object stays open for the entire native_lab run so the
+         * kernel maps it owns remain valid -- our blob references them
+         * by raw kernel pointer through a literal-pool slot. */
+        companion = load_bpf_companion(options.program);
+        LinkerOutput lo = invoke_native_link(
+            options, options.program, symbol, companion.map_addrs);
+        blob = read_blob_file(lo.blob);
+        std::ifstream rf(lo.relocs, std::ios::binary);
+        if (rf) {
+            relocs.assign(std::istreambuf_iterator<char>(rf),
+                          std::istreambuf_iterator<char>());
+        }
+    } else {
+        blob = read_blob_file(options.program);
+    }
     const auto blob_read_end = std::chrono::steady_clock::now();
 
     const auto upload_start = std::chrono::steady_clock::now();
     ensure_debugfs_mounted();
     uint32_t chunks = upload_blob(blob);
+    upload_relocs(relocs, /*chunk_id_for_relocs=*/0);
     const auto upload_end = std::chrono::steady_clock::now();
 
     const auto prog_load_start = std::chrono::steady_clock::now();
@@ -308,6 +642,12 @@ std::vector<sample_result> run_kernel_native_lab(const cli_options &options)
     std::memcpy(&result_word, packet_out.data() + result_off, sizeof(result_word));
 
     close(prog_fd);
+    /* Companion bpf_object stays open until here so the maps it owns
+     * remain valid for the entire test_run. Close now that we have
+     * read out the result. */
+    if (companion.obj) {
+        bpf_object__close(companion.obj);
+    }
 
     sample_result sample;
     sample.compile_ns = elapsed_ns(blob_read_start, blob_read_end)

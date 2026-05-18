@@ -48,9 +48,33 @@
  */
 #define NATIVE_LAB_MAX_BLOB_BYTES	128
 
+/*
+ * Stage 2 side-band relocations:
+ *
+ * Userspace native-link can't compute disp32 for a `call rel32`
+ * targeting a kernel helper, because that disp depends on where the BPF
+ * JIT will splat the blob. The blob ships with disp32 == 0 placeholders
+ * and a separate `relocs` array describing each patch site. After
+ * memcpy'ing the blob bytes into the JIT image, emit_x86 walks the
+ * relocs and rewrites each disp32 in place.
+ *
+ * relocs are uploaded via a sibling debugfs file blob<N>.relocs whose
+ * payload is a tightly packed array of `struct native_lab_reloc_record`.
+ */
+#define NATIVE_LAB_RELOC_CALL_REL32	1
+#define NATIVE_LAB_MAX_RELOCS		32
+
+struct native_lab_reloc_record {
+	__u32 offset;   /* byte offset of the call instruction (E8) in blob */
+	__u32 kind;     /* NATIVE_LAB_RELOC_* */
+	__u64 target;   /* absolute kernel address */
+};
+
 struct native_blob {
 	u8 *bytes;
 	size_t len;
+	struct native_lab_reloc_record *relocs;
+	size_t reloc_count;
 };
 
 static struct native_blob blobs[NATIVE_LAB_MAX_BLOBS];
@@ -115,7 +139,7 @@ static int instantiate_native_lab(u64 payload, struct bpf_insn *insn_buf)
 static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 			       const struct bpf_prog *prog)
 {
-	struct native_blob snapshot = { 0 };
+	size_t snapshot_len = 0;
 	u32 blob_id;
 	int err;
 
@@ -125,30 +149,56 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	if (err)
 		return err;
 
-	/*
-	 * The JIT calls emit_x86 twice per kinsn: once to measure with
-	 * emit=false, once for real with emit=true. The blob registry can be
-	 * mutated between those calls by another thread; snapshot the entry
-	 * under the lock so both calls observe the same length.
-	 */
 	mutex_lock(&blobs_lock);
 	if (blobs[blob_id].bytes && blobs[blob_id].len) {
-		snapshot.len = blobs[blob_id].len;
+		snapshot_len = blobs[blob_id].len;
 		if (emit) {
-			if (snapshot.len > NATIVE_LAB_MAX_BLOB_BYTES) {
+			u8 *emit_at = image + *off;
+			size_t i;
+
+			if (snapshot_len > NATIVE_LAB_MAX_BLOB_BYTES) {
 				mutex_unlock(&blobs_lock);
 				return -E2BIG;
 			}
-			memcpy(image + *off, blobs[blob_id].bytes, snapshot.len);
+			memcpy(emit_at, blobs[blob_id].bytes, snapshot_len);
+
+			/*
+			 * Apply each side-band relocation. The call-rel32
+			 * disp is target - rip_after_call = target -
+			 * (emit_at + call_offset + 5).
+			 */
+			for (i = 0; i < blobs[blob_id].reloc_count; i++) {
+				const struct native_lab_reloc_record *r =
+					&blobs[blob_id].relocs[i];
+				if (r->kind != NATIVE_LAB_RELOC_CALL_REL32)
+					continue;
+				if ((size_t)r->offset + 5 > snapshot_len)
+					continue; /* invalid; skip defensively */
+				/*
+				 * blob byte at r->offset is the 0xE8 opcode;
+				 * the disp32 field occupies offset+1 .. +5.
+				 */
+				if (emit_at[r->offset] != 0xE8)
+					continue; /* not a call rel32 */
+				{
+					u64 patch_va = (u64)emit_at + r->offset + 1;
+					u64 rip_after = patch_va + 4;
+					s64 disp64 = (s64)r->target - (s64)rip_after;
+					s32 disp = (s32)disp64;
+					if ((s64)disp != disp64)
+						continue; /* out of i32 range; skip */
+					memcpy((void *)patch_va, &disp, 4);
+				}
+			}
 		}
 	}
 	mutex_unlock(&blobs_lock);
 
-	if (!snapshot.len)
+	if (!snapshot_len)
 		return -ENOENT;
 
-	*off += snapshot.len;
-	return snapshot.len;
+	*off += snapshot_len;
+	return snapshot_len;
 }
 
 const struct bpf_kinsn bpf_x86_native_lab_desc = {
@@ -201,8 +251,53 @@ static ssize_t blob_write(struct file *file, const char __user *ubuf,
 
 	mutex_lock(&blobs_lock);
 	kfree(blobs[priv->id].bytes);
+	/* Reuploading the blob invalidates any previously uploaded relocs. */
+	kfree(blobs[priv->id].relocs);
+	blobs[priv->id].relocs = NULL;
+	blobs[priv->id].reloc_count = 0;
 	blobs[priv->id].bytes = kbuf;
 	blobs[priv->id].len = len;
+	mutex_unlock(&blobs_lock);
+
+	*ppos = len;
+	return len;
+}
+
+/*
+ * relocs debugfs file: whole-file write of a packed array of
+ * native_lab_reloc_record. Truncate to 0 to clear.
+ */
+static ssize_t relocs_write(struct file *file, const char __user *ubuf,
+			    size_t len, loff_t *ppos)
+{
+	struct blob_file_priv *priv = file->private_data;
+	struct native_lab_reloc_record *kbuf = NULL;
+	size_t count;
+
+	if (!capable(CAP_SYS_ADMIN))
+		return -EPERM;
+	if (*ppos)
+		return -EINVAL;
+	if (len % sizeof(struct native_lab_reloc_record))
+		return -EINVAL;
+	count = len / sizeof(struct native_lab_reloc_record);
+	if (count > NATIVE_LAB_MAX_RELOCS)
+		return -E2BIG;
+
+	if (len) {
+		kbuf = kmalloc(len, GFP_KERNEL);
+		if (!kbuf)
+			return -ENOMEM;
+		if (copy_from_user(kbuf, ubuf, len)) {
+			kfree(kbuf);
+			return -EFAULT;
+		}
+	}
+
+	mutex_lock(&blobs_lock);
+	kfree(blobs[priv->id].relocs);
+	blobs[priv->id].relocs = kbuf;
+	blobs[priv->id].reloc_count = count;
 	mutex_unlock(&blobs_lock);
 
 	*ppos = len;
@@ -260,6 +355,14 @@ static const struct file_operations blob_fops = {
 	.llseek = default_llseek,
 };
 
+static const struct file_operations relocs_fops = {
+	.owner = THIS_MODULE,
+	.open = blob_open,
+	.release = blob_release,
+	.write = relocs_write,
+	.llseek = default_llseek,
+};
+
 static int __init bpf_x86_native_lab_debugfs_init(void)
 {
 	long i;
@@ -269,11 +372,14 @@ static int __init bpf_x86_native_lab_debugfs_init(void)
 		return PTR_ERR(debugfs_root);
 
 	for (i = 0; i < NATIVE_LAB_MAX_BLOBS; i++) {
-		char name[16];
+		char name[24];
 
 		scnprintf(name, sizeof(name), "blob%ld", i);
 		debugfs_create_file(name, 0600, debugfs_root, (void *)i,
 				    &blob_fops);
+		scnprintf(name, sizeof(name), "blob%ld.relocs", i);
+		debugfs_create_file(name, 0600, debugfs_root, (void *)i,
+				    &relocs_fops);
 	}
 	return 0;
 }
@@ -288,8 +394,11 @@ static void bpf_x86_native_lab_debugfs_exit(void)
 	mutex_lock(&blobs_lock);
 	for (i = 0; i < NATIVE_LAB_MAX_BLOBS; i++) {
 		kfree(blobs[i].bytes);
+		kfree(blobs[i].relocs);
 		blobs[i].bytes = NULL;
 		blobs[i].len = 0;
+		blobs[i].relocs = NULL;
+		blobs[i].reloc_count = 0;
 	}
 	mutex_unlock(&blobs_lock);
 }

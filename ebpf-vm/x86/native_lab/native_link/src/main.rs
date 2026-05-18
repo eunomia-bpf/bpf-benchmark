@@ -48,7 +48,7 @@ use iced_x86::{
     BlockEncoder, BlockEncoderOptions, Code, Decoder, DecoderOptions, FlowControl,
     Instruction, InstructionBlock, OpKind, Register,
 };
-use object::{Object, ObjectSection, ObjectSymbol};
+use object::{Object, ObjectSection, ObjectSymbol, RelocationFlags, RelocationTarget};
 use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
@@ -68,9 +68,50 @@ struct Args {
     #[arg(long)]
     output: PathBuf,
 
+    /// Output path for the side-band relocations table consumed by the
+    /// kernel module at splat time. Omit if the input has no external
+    /// helper or map references.
+    #[arg(long)]
+    output_relocs: Option<PathBuf>,
+
+    /// BPF helper to kernel-address mapping. Repeatable.
+    /// Format: NAME=HEXADDR (e.g. bpf_ktime_get_ns=0xffffffff81234567).
+    /// Each PLT32 relocation in the input ELF against a listed name is
+    /// converted to a side-band CALL_REL32 reloc with the given target.
+    #[arg(long = "helper", value_name = "NAME=ADDR")]
+    helpers: Vec<String>,
+
+    /// BPF map symbol to kernel-pointer mapping. Repeatable.
+    /// Format: NAME=HEXADDR. Each GOTPCREL/PC32 relocation against the
+    /// listed name is satisfied by appending a u64 literal-pool entry to
+    /// the blob and rewriting the mov disp32 to point at it.
+    #[arg(long = "map", value_name = "NAME=ADDR")]
+    maps: Vec<String>,
+
     /// Print a human-readable disassembly of the rewritten blob to stderr.
     #[arg(long)]
     show: bool,
+}
+
+#[derive(Clone, Copy, Debug)]
+enum RelocKind {
+    /// `call rel32` — patch disp32 at splat time using the target's
+    /// kernel address (the kernel module computes the exact disp32 once
+    /// it knows where the blob will sit in the JIT image).
+    CallRel32 = 1,
+}
+
+/// A side-band relocation record. The on-disk layout must stay in sync
+/// with `struct native_lab_reloc_record` in
+/// module/x86/bpf_x86_native_lab.c (offset:u32, kind:u32, target:u64 —
+/// 16 bytes, little-endian). We serialize byte-by-byte below rather than
+/// transmuting from a `#[repr(C, packed)]` struct, so plain alignment is
+/// fine.
+#[derive(Clone, Copy, Debug)]
+struct RelocRecord {
+    offset: u32,
+    kind: u32,
+    target: u64,
 }
 
 #[derive(Debug, Clone)]
@@ -110,15 +151,57 @@ fn main() -> Result<()> {
         );
     }
 
-    let out = rewrite(&elf, &entry, &included, args.show)?;
-    fs::write(&args.output, &out)
+    let helper_addrs = parse_name_addr_args(&args.helpers, "helper")?;
+    let map_addrs = parse_name_addr_args(&args.maps, "map")?;
+
+    let RewriteResult { blob, relocs } = rewrite(
+        &elf, &entry, &included, &helper_addrs, &map_addrs, args.show,
+    )?;
+    fs::write(&args.output, &blob)
         .with_context(|| format!("write {}", args.output.display()))?;
     eprintln!(
-        "native-link: wrote {} bytes -> {}",
-        out.len(),
-        args.output.display()
+        "native-link: wrote {} bytes -> {} ({} relocs)",
+        blob.len(),
+        args.output.display(),
+        relocs.len()
     );
+
+    if let Some(path) = &args.output_relocs {
+        let mut buf = Vec::with_capacity(relocs.len() * std::mem::size_of::<RelocRecord>());
+        for r in &relocs {
+            // Pack into 16 bytes: u32 offset | u32 kind | u64 target, LE.
+            buf.extend_from_slice(&r.offset.to_le_bytes());
+            buf.extend_from_slice(&r.kind.to_le_bytes());
+            buf.extend_from_slice(&r.target.to_le_bytes());
+        }
+        fs::write(path, &buf)
+            .with_context(|| format!("write {}", path.display()))?;
+        eprintln!(
+            "native-link: wrote {} relocs -> {}",
+            relocs.len(),
+            path.display()
+        );
+    } else if !relocs.is_empty() {
+        bail!(
+            "{} relocations recorded but --output-relocs was not given",
+            relocs.len()
+        );
+    }
     Ok(())
+}
+
+fn parse_name_addr_args(args: &[String], kind: &str) -> Result<HashMap<String, u64>> {
+    let mut out = HashMap::new();
+    for a in args {
+        let (name, addr) = a
+            .split_once('=')
+            .ok_or_else(|| anyhow!("invalid --{kind} {a:?}; expected NAME=HEXADDR"))?;
+        let addr = addr.strip_prefix("0x").unwrap_or(addr);
+        let addr = u64::from_str_radix(addr, 16)
+            .map_err(|e| anyhow!("invalid --{kind} {a:?}: {e}"))?;
+        out.insert(name.to_string(), addr);
+    }
+    Ok(out)
 }
 
 fn find_symbol_by_name(elf: &object::File, name: &str) -> Result<SymInfo> {
@@ -227,12 +310,35 @@ struct PatchInfo {
     kind: PatchKind,
 }
 
+pub struct RewriteResult {
+    pub blob: Vec<u8>,
+    pub relocs: Vec<RelocRecord>,
+}
+
+/// Per-symbol record kept across the decode/encode phases so that ELF
+/// relocations at original byte offsets can be remapped to the right
+/// position in the final blob layout.
+struct SymbolLayout {
+    sym: SymInfo,
+    base_in_blob: usize,
+    /// Local-IP-space (i.e. byte offset within the symbol's source bytes)
+    /// of each decoded instruction that survived (alignment NOPs are
+    /// dropped, RETs are replaced -- but the placeholder JMP keeps the
+    /// original RET's local IP).
+    insn_local_ip: Vec<u64>,
+    /// Offset of each surviving instruction's first byte within this
+    /// symbol's encoded slice, as reported by iced after encoding.
+    new_offset_in_sym: Vec<u32>,
+}
+
 fn rewrite(
     elf: &object::File,
     entry: &SymInfo,
     included: &[SymInfo],
+    helper_addrs: &HashMap<String, u64>,
+    map_addrs: &HashMap<String, u64>,
     show: bool,
-) -> Result<Vec<u8>> {
+) -> Result<RewriteResult> {
     let included_ranges: Vec<(u64, u64)> = included
         .iter()
         .map(|s| (s.address, s.address + s.size))
@@ -241,6 +347,7 @@ fn rewrite(
     let mut sym_global_offset: HashMap<u64, usize> = HashMap::new();
     let mut blob: Vec<u8> = Vec::new();
     let mut patches: Vec<PatchInfo> = Vec::new();
+    let mut layouts: Vec<SymbolLayout> = Vec::new();
 
     for sym in included {
         let is_entry = sym.address == entry.address;
@@ -252,9 +359,13 @@ fn rewrite(
         let mut decoder = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE);
 
         // Side table: per-entry patch kind, paired with each kept Instruction
-        // in the symbol-local stream.
+        // in the symbol-local stream. `insn_local_ip` records the byte
+        // offset (relative to the symbol start) where each kept
+        // instruction originally lived; ELF relocations are recorded in
+        // this same coordinate space.
         let mut local: Vec<Instruction> = Vec::new();
         let mut kinds: Vec<Option<PatchKind>> = Vec::new();
+        let mut insn_local_ip: Vec<u64> = Vec::new();
 
         while decoder.can_decode() {
             let mut insn = decoder.decode();
@@ -298,34 +409,48 @@ fn rewrite(
                 jmp.set_ip(local_ip);
                 local.push(jmp);
                 kinds.push(Some(PatchKind::JmpEnd));
+                insn_local_ip.push(local_ip);
                 continue;
             }
 
-            // Cross-symbol call: keep the instruction encoded as-is (iced
-            // emits e8 dd dd dd dd with whatever disp it computes); we
-            // overwrite the 4 disp bytes after concat using the original
-            // target's containing symbol.
+            // Cross-symbol call: a real `call <subprog>` lands exactly at
+            // that subprog's first byte (sym.address). Patched post-encode
+            // against the symbol's global offset.
+            //
+            // A `call rel32` whose ELF reloc carries disp32=0 placeholder
+            // (PLT32 against a helper) decodes as `call next_ip` -- target
+            // falls *inside* the current symbol but is NOT a symbol entry.
+            // We must NOT treat those as cross-symbol calls; the ELF reloc
+            // pass below picks them up instead.
             if matches!(insn.flow_control(), FlowControl::Call) && original_target != 0 {
-                // Set near_branch64 to local_ip so iced encodes disp=0
-                // (within rel32 range). The patch step rewrites it.
-                let next = local_ip.wrapping_add(5);
-                insn.set_near_branch64(next);
-                let target_sym = containing_symbol(included, original_target).ok_or_else(|| {
-                    anyhow!(
-                        "call from {} to {:#x} has no containing included symbol",
-                        sym.name,
-                        original_target
-                    )
-                })?;
-                local.push(insn);
-                kinds.push(Some(PatchKind::Call {
-                    target_symbol_address: target_sym,
-                }));
-                continue;
+                let target_is_symbol_entry =
+                    included.iter().any(|s| s.address == original_target);
+                if target_is_symbol_entry {
+                    let next = local_ip.wrapping_add(5);
+                    insn.set_near_branch64(next);
+                    local.push(insn);
+                    kinds.push(Some(PatchKind::Call {
+                        target_symbol_address: original_target,
+                    }));
+                    insn_local_ip.push(local_ip);
+                    continue;
+                }
+                // Else: keep verbatim. ELF reloc pass handles helpers; any
+                // other intra-symbol "call" with non-entry target would be
+                // a self-referential placeholder, which the assembler does
+                // not normally emit.
             }
 
+            // Helper PLT32 placeholder: clang emits `call rel32` with the
+            // 4 disp32 bytes left as 0 for the linker (us) to fill in.
+            // iced sees disp=0 -> near_branch_target = next_ip, which IS
+            // inside the symbol, so validate_no_external_refs passes. We
+            // keep the instruction as-is; the ELF .rela.text pass below
+            // emits a side-band reloc that the kernel module patches at
+            // splat time.
             local.push(insn);
             kinds.push(None);
+            insn_local_ip.push(local_ip);
         }
 
         // Encode this symbol's local stream at IP=0.
@@ -353,43 +478,380 @@ fn rewrite(
                 kind: *kind,
             });
         }
+        layouts.push(SymbolLayout {
+            sym: sym.clone(),
+            base_in_blob: sym_base,
+            insn_local_ip,
+            new_offset_in_sym: encoded.new_instruction_offsets.clone(),
+        });
         blob.extend_from_slice(&encoded.code_buffer);
     }
 
+    // Apply intra-blob Call patches first (cross-symbol direct calls);
+    // those need only `sym_global_offset` which is already known.
+    for p in &patches {
+        if let PatchKind::Call { target_symbol_address } = p.kind {
+            let off = p.global_offset;
+            if off + 5 > blob.len() || blob[off] != 0xE8 {
+                bail!("CALL at off {off:#x} did not encode as Call_rel32_64");
+            }
+            let target_global = *sym_global_offset
+                .get(&target_symbol_address)
+                .ok_or_else(|| anyhow!("call target sym addr not in index map"))?;
+            let disp = target_global as i64 - (off + 5) as i64;
+            let d = i32::try_from(disp)
+                .map_err(|_| anyhow!("call disp {disp} exceeds i32"))?;
+            blob[off + 1..off + 5].copy_from_slice(&d.to_le_bytes());
+        }
+    }
+
+    // Stage 2: append helper trampolines to the tail of the blob and
+    // patch each in-body `call rel32` disp to point at the trampoline
+    // it should reach. Trampolines are position-independent (they hold
+    // the helper's absolute address inline and use `jmp [rip+0]`), so
+    // the kernel module's emit_x86 can splat the blob verbatim.
+    apply_elf_relocations(elf, &layouts, helper_addrs, map_addrs, &mut blob)?;
+
+    // Patch JmpEnd disps LAST so they target the byte AFTER any
+    // trampolines we just appended -- i.e., where the BPF JIT will emit
+    // the next BPF insn's code (the `exit` epilogue in our stub). A
+    // rewritten `ret` inside the function body lands at the BPF JIT
+    // epilogue and skips the trampolines along the way.
     let end_offset = blob.len() as i64;
     for p in &patches {
-        let off = p.global_offset;
-        match p.kind {
-            PatchKind::JmpEnd => {
-                if off + 5 > blob.len() || blob[off] != 0xE9 {
-                    bail!(
-                        "JmpEnd placeholder at off {off:#x} did not encode as Jmp_rel32_64"
-                    );
-                }
-                let disp = end_offset - (off + 5) as i64;
-                let d = i32::try_from(disp)
-                    .map_err(|_| anyhow!("jmp_end disp {disp} exceeds i32"))?;
-                blob[off + 1..off + 5].copy_from_slice(&d.to_le_bytes());
+        if let PatchKind::JmpEnd = p.kind {
+            let off = p.global_offset;
+            if off + 5 > blob.len() || blob[off] != 0xE9 {
+                bail!(
+                    "JmpEnd placeholder at off {off:#x} did not encode as Jmp_rel32_64"
+                );
             }
-            PatchKind::Call { target_symbol_address } => {
-                if off + 5 > blob.len() || blob[off] != 0xE8 {
-                    bail!("CALL at off {off:#x} did not encode as Call_rel32_64");
-                }
-                let target_global = *sym_global_offset
-                    .get(&target_symbol_address)
-                    .ok_or_else(|| anyhow!("call target sym addr not in index map"))?;
-                let disp = target_global as i64 - (off + 5) as i64;
-                let d = i32::try_from(disp)
-                    .map_err(|_| anyhow!("call disp {disp} exceeds i32"))?;
-                blob[off + 1..off + 5].copy_from_slice(&d.to_le_bytes());
-            }
+            let disp = end_offset - (off + 5) as i64;
+            let d = i32::try_from(disp)
+                .map_err(|_| anyhow!("jmp_end disp {disp} exceeds i32"))?;
+            blob[off + 1..off + 5].copy_from_slice(&d.to_le_bytes());
         }
     }
 
     if show {
         disasm(&blob);
     }
-    Ok(blob)
+    Ok(RewriteResult { blob, relocs: Vec::new() })
+}
+
+/// Helper trampoline body. Encoded as:
+///
+///     ff 25 00 00 00 00          jmp QWORD PTR [rip+0]   ; 6 bytes
+///     <u64 absolute helper addr>                          ; 8 bytes
+///
+/// The `[rip+0]` operand resolves to the byte right after the jmp itself,
+/// which holds the absolute kernel address of the helper. Total: 14 bytes
+/// per unique helper. Multiple PLT32 call sites targeting the same
+/// helper share a single trampoline.
+const TRAMPOLINE_LEN: usize = 14;
+
+/// Walk the ELF .text relocations attached to the bytes we just encoded.
+/// For each PLT32 helper reloc, emit (or reuse) a tail trampoline and
+/// rewrite the call disp32 in the body to point at it.
+fn apply_elf_relocations(
+    elf: &object::File,
+    layouts: &[SymbolLayout],
+    helper_addrs: &HashMap<String, u64>,
+    map_addrs: &HashMap<String, u64>,
+    blob: &mut Vec<u8>,
+) -> Result<()> {
+    if layouts.is_empty() {
+        return Ok(());
+    }
+
+    // Group symbols by ELF section so we walk each section's relocations
+    // once (in practice always .text).
+    let mut sections: HashMap<object::SectionIndex, Vec<&SymbolLayout>> = HashMap::new();
+    for layout in layouts {
+        sections
+            .entry(layout.sym.section_index)
+            .or_default()
+            .push(layout);
+    }
+
+    // Cache: helper symbol name -> trampoline byte offset in blob.
+    let mut helper_trampoline: HashMap<String, usize> = HashMap::new();
+    // Cache: map symbol name -> literal-pool entry byte offset in blob.
+    let mut map_pool_entry: HashMap<String, usize> = HashMap::new();
+
+    for (section_index, layouts_in_sec) in &sections {
+        let section = elf
+            .section_by_index(*section_index)
+            .with_context(|| format!("section {:?}", section_index))?;
+        for (reloc_offset, reloc) in section.relocations() {
+            let owning_layout = layouts_in_sec.iter().find(|l| {
+                reloc_offset >= l.sym.address && reloc_offset < l.sym.address + l.sym.size
+            });
+            let Some(layout) = owning_layout else { continue };
+
+            let target_name: String = match reloc.target() {
+                RelocationTarget::Symbol(idx) => elf
+                    .symbol_by_index(idx)
+                    .with_context(|| format!("reloc target symbol {idx:?}"))?
+                    .name()
+                    .map_err(|e| anyhow!("reloc target symbol name: {e}"))?
+                    .to_string(),
+                _ => continue,
+            };
+
+            let r_type = match reloc.flags() {
+                RelocationFlags::Elf { r_type } => r_type,
+                _ => continue,
+            };
+
+            // Local offset of the patch site within the owning symbol.
+            let local_patch_off = reloc_offset - layout.sym.address;
+
+            match r_type {
+                // R_X86_64_PLT32 = 4: clang's `call helper`. Reloc offset
+                // points at the 4-byte disp32 field; the 0xE8 opcode is
+                // at offset-1.
+                4 => {
+                    let helper_addr = *helper_addrs
+                        .get(&target_name)
+                        .ok_or_else(|| anyhow!(
+                            "PLT32 reloc against unknown helper {}: \
+                             pass --helper {}=0x... on the command line",
+                            target_name, target_name
+                        ))?;
+                    let opcode_local_off = local_patch_off
+                        .checked_sub(1)
+                        .ok_or_else(|| anyhow!("PLT32 reloc at offset 0?"))?;
+                    let insn_idx = layout
+                        .insn_local_ip
+                        .iter()
+                        .position(|&ip| ip == opcode_local_off)
+                        .ok_or_else(|| anyhow!(
+                            "PLT32 reloc at {:#x} (opcode at {:#x}) does not align \
+                             with any decoded instruction in symbol {}",
+                            local_patch_off, opcode_local_off, layout.sym.name
+                        ))?;
+                    let new_opcode_off =
+                        layout.base_in_blob + layout.new_offset_in_sym[insn_idx] as usize;
+
+                    // Reserve / reuse a trampoline.
+                    let tramp_off = if let Some(&off) = helper_trampoline.get(&target_name) {
+                        off
+                    } else {
+                        let off = blob.len();
+                        // jmp [rip+0] ; ff 25 00 00 00 00
+                        blob.extend_from_slice(&[0xFF, 0x25, 0x00, 0x00, 0x00, 0x00]);
+                        // .quad helper_addr (LE)
+                        blob.extend_from_slice(&helper_addr.to_le_bytes());
+                        helper_trampoline.insert(target_name.clone(), off);
+                        off
+                    };
+
+                    // Patch the call's disp32 = tramp_off - (call_op + 5).
+                    let rip_after_call = (new_opcode_off + 5) as i64;
+                    let disp = tramp_off as i64 - rip_after_call;
+                    let d = i32::try_from(disp)
+                        .map_err(|_| anyhow!("call disp {disp} exceeds i32"))?;
+                    let disp32_off = new_opcode_off + 1;
+                    blob[disp32_off..disp32_off + 4]
+                        .copy_from_slice(&d.to_le_bytes());
+                }
+                // GOT-relative map references (R_X86_64_GOTPCREL=9,
+                // _GOTPCRELX=41, _REX_GOTPCRELX=42). clang emits these
+                // as `mov reg, [rip+disp32]` -- a 7-byte instruction
+                // whose disp32 field starts at reloc_offset. We append
+                // an 8-byte literal-pool entry holding the map kernel
+                // pointer at the end of the blob, then patch the disp32
+                // to point at it.
+                9 | 41 | 42 => {
+                    let map_addr = *map_addrs.get(&target_name).ok_or_else(|| anyhow!(
+                        "GOT-relative reloc against unknown map symbol {}: \
+                         pass --map {}=0x... on the command line",
+                        target_name, target_name
+                    ))?;
+
+                    // Find the decoded instruction that contains this
+                    // reloc. The disp32 field starts at the reloc offset
+                    // and is 4 bytes; the mov has an opcode prefix of
+                    // variable length (REX + 0x8b/0x8d) so we locate
+                    // the instruction whose byte range covers the disp.
+                    let insn_idx = layout
+                        .insn_local_ip
+                        .iter()
+                        .enumerate()
+                        .find_map(|(idx, &ip)| {
+                            // For GOTPCRELX/REX_GOTPCRELX the disp32 ends
+                            // 4 bytes before the next instruction. iced
+                            // gives us the original instruction length
+                            // via its decoded form -- we approximate by
+                            // selecting the insn whose local_ip is the
+                            // largest value <= local_patch_off. That's
+                            // the insn the patch lies inside.
+                            if ip <= local_patch_off { Some(idx) } else { None }
+                        })
+                        .ok_or_else(|| anyhow!(
+                            "GOTPCREL reloc at {:#x} does not align with any instruction in {}",
+                            local_patch_off, layout.sym.name
+                        ))?;
+                    let new_insn_off =
+                        layout.base_in_blob + layout.new_offset_in_sym[insn_idx] as usize;
+                    let off_within_insn = (local_patch_off - layout.insn_local_ip[insn_idx]) as usize;
+                    let disp32_off = new_insn_off + off_within_insn;
+
+                    // Reserve / reuse a pool entry.
+                    let pool_off = if let Some(&off) = map_pool_entry.get(&target_name) {
+                        off
+                    } else {
+                        let off = blob.len();
+                        blob.extend_from_slice(&map_addr.to_le_bytes());
+                        map_pool_entry.insert(target_name.clone(), off);
+                        off
+                    };
+
+                    // mov reg, [rip+disp32]: disp32 = pool_off - (disp32_off + 4)
+                    let rip_after = (disp32_off + 4) as i64;
+                    let disp = pool_off as i64 - rip_after;
+                    let d = i32::try_from(disp)
+                        .map_err(|_| anyhow!("map disp {disp} exceeds i32"))?;
+                    blob[disp32_off..disp32_off + 4]
+                        .copy_from_slice(&d.to_le_bytes());
+                }
+                _ => bail!(
+                    "unsupported relocation r_type={} against symbol {} (offset {:#x})",
+                    r_type, target_name, reloc_offset
+                ),
+            }
+        }
+    }
+
+    let _ = TRAMPOLINE_LEN; // referenced by the design comment / future map path.
+    Ok(())
+}
+
+/// Legacy: kept for cargo deadcode warning silence; superseded by
+/// apply_elf_relocations. To be deleted in a follow-up.
+#[allow(dead_code)]
+fn collect_elf_relocations(
+    elf: &object::File,
+    layouts: &[SymbolLayout],
+    helper_addrs: &HashMap<String, u64>,
+    map_addrs: &HashMap<String, u64>,
+) -> Result<Vec<RelocRecord>> {
+    if layouts.is_empty() {
+        return Ok(Vec::new());
+    }
+    // All included symbols live in the same section (.text in a typical
+    // -c -o foo.o build). Group them by section to walk that section's
+    // relocations once. In practice we only ever see one section.
+    let mut sections: HashMap<object::SectionIndex, Vec<&SymbolLayout>> = HashMap::new();
+    for layout in layouts {
+        sections
+            .entry(layout.sym.section_index)
+            .or_default()
+            .push(layout);
+    }
+
+    let mut out: Vec<RelocRecord> = Vec::new();
+    for (section_index, layouts_in_sec) in &sections {
+        let section = elf
+            .section_by_index(*section_index)
+            .with_context(|| format!("section {:?}", section_index))?;
+        for (reloc_offset, reloc) in section.relocations() {
+            // Find which included symbol's byte range this reloc falls in.
+            let owning_layout = layouts_in_sec.iter().find(|l| {
+                reloc_offset >= l.sym.address && reloc_offset < l.sym.address + l.sym.size
+            });
+            let Some(layout) = owning_layout else { continue };
+
+            // Resolve target symbol name.
+            let target_name: String = match reloc.target() {
+                RelocationTarget::Symbol(idx) => {
+                    let sym = elf
+                        .symbol_by_index(idx)
+                        .with_context(|| format!("reloc target symbol {idx:?}"))?;
+                    sym.name()
+                        .map_err(|e| anyhow!("reloc target symbol name: {e}"))?
+                        .to_string()
+                }
+                _ => continue,
+            };
+
+            // Raw ELF r_type for precise matching.
+            let r_type = match reloc.flags() {
+                RelocationFlags::Elf { r_type } => r_type,
+                _ => continue,
+            };
+
+            // Local offset of the patch site within the owning symbol.
+            let local_patch_off = reloc_offset - layout.sym.address;
+
+            match r_type {
+                // R_X86_64_PLT32 = 4. clang emits this for `call helper`.
+                // The reloc offset is the byte position of the 4-byte
+                // disp32 field; the 0xE8 opcode sits at offset-1.
+                4 => {
+                    let helper_addr = match helper_addrs.get(&target_name) {
+                        Some(a) => *a,
+                        None => bail!(
+                            "PLT32 relocation against unknown helper {}: \
+                             pass --helper {}=0x... on the command line",
+                            target_name,
+                            target_name
+                        ),
+                    };
+                    let opcode_local_off = local_patch_off
+                        .checked_sub(1)
+                        .ok_or_else(|| anyhow!("PLT32 reloc at offset 0?"))?;
+                    let insn_idx = layout
+                        .insn_local_ip
+                        .iter()
+                        .position(|&ip| ip == opcode_local_off)
+                        .ok_or_else(|| {
+                            anyhow!(
+                                "PLT32 reloc at {:#x} (opcode at {:#x}) does not align \
+                                 with any decoded instruction in symbol {}",
+                                local_patch_off,
+                                opcode_local_off,
+                                layout.sym.name
+                            )
+                        })?;
+                    let new_opcode_off = layout.base_in_blob
+                        + layout.new_offset_in_sym[insn_idx] as usize;
+                    out.push(RelocRecord {
+                        offset: u32::try_from(new_opcode_off)
+                            .context("new_opcode_off exceeds u32")?,
+                        kind: RelocKind::CallRel32 as u32,
+                        target: helper_addr,
+                    });
+                }
+                // R_X86_64_REX_GOTPCRELX = 42, R_X86_64_GOTPCRELX = 41,
+                // R_X86_64_GOTPCREL = 9. clang emits these for &my_map
+                // accesses through GOT. Stage 2 will splice a literal
+                // pool entry into the blob and rewrite the disp32; for
+                // the first POC we only support helper PLT32 relocs.
+                9 | 41 | 42 => {
+                    if !map_addrs.contains_key(&target_name) {
+                        bail!(
+                            "GOT-relative relocation against unknown map symbol {}",
+                            target_name
+                        );
+                    }
+                    bail!(
+                        "map relocations (GOTPCREL against {}) not yet implemented in this POC",
+                        target_name
+                    );
+                }
+                _ => bail!(
+                    "unsupported relocation r_type={} against symbol {} (offset {:#x})",
+                    r_type,
+                    target_name,
+                    reloc_offset
+                ),
+            }
+        }
+    }
+    let _ = map_addrs; // silence unused warning until maps are wired in
+    Ok(out)
 }
 
 fn containing_symbol(included: &[SymInfo], address: u64) -> Option<u64> {

@@ -290,6 +290,14 @@ cli_options parse_args(int argc, char **argv)
             options.native_lab_prog_type = argv[++index];
             continue;
         }
+        if (current == "--native-lab-symbol" && index + 1 < argc) {
+            options.native_lab_symbol = argv[++index];
+            continue;
+        }
+        if (current == "--native-lab-linker" && index + 1 < argc) {
+            options.native_lab_linker_path = argv[++index];
+            continue;
+        }
         if (current == "--signal-control") {
             options.signal_control = true;
             continue;
