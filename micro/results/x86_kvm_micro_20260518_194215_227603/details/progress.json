@@ -1,0 +1,9 @@
+{
+  "completed_benchmarks": 14,
+  "current_benchmark": null,
+  "current_benchmark_index": null,
+  "current_benchmark_record": null,
+  "error_message": "helper_chain_simple: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec run-native-lab --program /artifacts/user/stage2-programs/x86_64/helper_chain_simple.bpf.o --program-name helper_chain_simple --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem --io-mode packet --input-size 64 --inner-repeat 100\nnative-link: entry=helper_chain_simple (140 bytes), 1 reachable symbol(s) total\n  - helper_chain_simple (vaddr 0x0, 140 bytes) [entry]\nError: GOT-relative reloc against unknown symbol bpf_get_prandom_u32: pass --helper bpf_get_prandom_u32=0x... or --map bpf_get_prandom_u32=0x... on the command line\nnative-link failed (rc=1): /usr/local/bin/native-link --input /artifacts/user/stage2-programs/x86_64/helper_chain_simple.native.o --symbol helper_chain_simple --output /tmp/native_lab_1752_helper_chain_simple.native.blob.bin --output-relocs /tmp/native_lab_1752_helper_chain_simple.native.relocs.bin --helper bpf_ktime_get_ns=0xffffffff874b94c0 --helper bpf_ktime_get_boot_ns=0xffffffff874b94e0 --helper bpf_get_current_pid_tgid=0xffffffff874b93d0 --helper bpf_get_current_uid_gid=0xffffffff874b95a0 --helper bpf_get_smp_processor_id=0xffffffff874b91e0 --helper bpf_probe_read_kernel=0xffffffff87463720 --helper bpf_map_lookup_elem=0xffffffff874b9090 --helper bpf_map_update_elem=0xffffffff874b90c0 --helper bpf_map_delete_elem=0xffffffff874b90f0",
+  "status": "error",
+  "total_benchmarks": 14
+}

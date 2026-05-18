@@ -115,6 +115,8 @@ docs/reference/papers/*.pdf
 
 # Track summary files inside details/, ignore large per-program detail payloads.
 **/results/*/details/*
+micro/results/llvm_kinsn_*/*.bpf.d
+micro/results/llvm_kinsn_*/*.bpf.o
 !**/results/*/details/result.json
 !**/results/*/details/*.md
 !**/results/*/details/*/*.md

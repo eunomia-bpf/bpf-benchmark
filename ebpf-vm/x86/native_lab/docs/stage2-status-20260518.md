@@ -22,35 +22,68 @@ end-to-end sweep on the BpfReJIT fork kernel:
 
 ## Test programs in `ebpf-vm/test/`
 
+Reproduce via `make micro SUITE=micro/config/micro_stage2.yaml RUNTIMES="native_lab kernel" SAMPLES=3 INNER_REPEAT=10000 WARMUPS=2`.
+
 | program | coverage |
 |---|---|
-| `helper_only_ktime` | one `bpf_ktime_get_ns()` call |
-| `helper_get_pid_tgid` | `bpf_get_current_pid_tgid()` |
+| `helper_only_uid_gid` | one `bpf_get_current_uid_gid()` call (deterministic baseline) |
+| `helper_chain_simple` | uid_gid + map_update + map_lookup + map_delete on 1-slot HASH |
 | `map_array_lookup` | `BPF_MAP_TYPE_ARRAY` update + lookup |
+| `map_array_index_packet` | ARRAY indexed by a packet byte |
 | `map_hash_lookup` | `BPF_MAP_TYPE_HASH` update + lookup |
+| `map_hash_str_key` | HASH with a 16-byte string-shaped key |
 | `map_percpu_array` | `BPF_MAP_TYPE_PERCPU_ARRAY` |
-| `combined_helper_map` | `bpf_get_smp_processor_id` + ktime + percpu map |
+| `map_lru_hash_counter` | `BPF_MAP_TYPE_LRU_HASH` per-key counter |
+| `map_percpu_hash_counter` | `BPF_MAP_TYPE_PERCPU_HASH` per-key counter |
+| `combined_helper_map` | smp_processor_id + uid_gid → PERCPU_ARRAY |
+| `multi_map_policy` | ARRAY + HASH + PERCPU_ARRAY chain (cilium-style policy) |
+| `packet_5tuple_classify` | HASH keyed by a 5-tuple struct parsed from packet |
+| `stats_mixed_helpers` | HASH + PERCPU_HASH + 3 helpers (tetragon-style aggregator) |
 
-All six pass the smoke test. Three (`map_array_lookup`, `map_hash_lookup`,
-`map_percpu_array`) produce bit-identical `result` words between
-native_lab and kernel_jit runtimes, proving both runtimes hit the same
-kernel map instance with the same value semantics.
+All 13 produce bit-identical `result` words between native_lab and
+kernel runtimes. The yaml suite deliberately excludes
+`helper_only_ktime.bpf.c` and `helper_get_pid_tgid.bpf.c` (the .bpf.c
+files still build) because `bpf_ktime_get_ns` and
+`bpf_get_current_pid_tgid` return values that differ between the two
+TEST_RUN invocations and therefore cannot be verified by exact-equality
+comparison — keeping them out of the default suite is what lets the
+suite double as a correctness check, not just a perf sweep.
 
-## Baseline numbers (from `results/stage2_sweep.txt`)
+## Baseline numbers — `make micro` 2026-05-18, SAMPLES=3 INNER_REPEAT=10000 WARMUPS=2
 
 ```
-program                native_lab    kernel_jit   ratio   verdict
+program                    native_lab    kernel    ratio (NL/K, <1 = NL faster)
+                            min / med    min / med    min   med
 ─────────────────────────────────────────────────────────────────
-helper_only_ktime        55 ns         55 ns      1.00x   tied
-helper_get_pid_tgid      38 ns         38 ns      1.00x   tied
-map_array_lookup         43 ns         44 ns      0.98x   tied (BPF JIT inlines ARRAY lookup)
-map_hash_lookup         390 ns         77 ns      5.06x   native much slower ⚠️
-map_percpu_array         42 ns         43 ns      0.98x   tied (BPF JIT inlines PERCPU_ARRAY lookup)
-combined_helper_map      67 ns         78 ns      0.86x   native slightly faster
+helper_only_uid_gid           7 /  8 ns   9 /  9 ns   0.78  0.89
+helper_chain_simple          72 / 74 ns  71 / 73 ns   1.01  1.01
+map_array_lookup             15 / 16 ns  17 / 17 ns   0.88  0.94
+map_array_index_packet       16 / 18 ns  17 / 17 ns   0.94  1.06
+map_hash_lookup              31 / 32 ns  31 / 35 ns   1.00  0.91
+map_hash_str_key             32 / 33 ns  35 / 36 ns   0.91  0.92
+map_percpu_array             15 / 16 ns  17 / 17 ns   0.88  0.94
+map_lru_hash_counter         86 / 86 ns  85 / 86 ns   1.01  1.00
+map_percpu_hash_counter      27 / 28 ns  30 / 30 ns   0.90  0.93
+combined_helper_map          17 / 17 ns  19 / 19 ns   0.89  0.89
+multi_map_policy             46 / 49 ns  45 / 47 ns   1.02  1.04
+packet_5tuple_classify       39 / 39 ns  41 / 41 ns   0.95  0.95
+stats_mixed_helpers          64 / 67 ns  60 / 62 ns   1.07  1.08
+─────────────────────────────────────────────────────────────────
+geomean over 13 programs                              0.940 0.966
 ```
 
-(Numbers vary 5-10% across runs; the 5x gap on `map_hash_lookup` is
-consistent and dominates.)
+native_lab is comparable to (slightly faster than) kernel JIT on this
+suite. The earlier 5x gap on `map_hash_lookup` is gone — per-call-site
+inline routing (see commit `c43a7e43`) now lets HASH lookups use the
+same in-kernel `__htab_map_lookup_elem` fast path the kernel JIT does
+via its `map_gen_lookup` callback. Compile cost is 110–115 ms for
+native_lab (clang -O2 + `native-link` relocation pipeline) vs 0.3–0.4
+ms for the kernel JIT.
+
+Environment caveats (visible as `[WARN]` lines in the run): KVM with
+unknown CPU governor, turbo enabled, no CPU affinity. Numbers are
+single-digit ns at the lower end and dominated by KVM scheduling
+jitter rather than codegen quality.
 
 ## Where the gaps come from
 

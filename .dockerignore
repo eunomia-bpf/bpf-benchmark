@@ -80,6 +80,11 @@ bpfopt/target/**
 !bpfopt/target/aarch64-unknown-linux-gnu/release/bpfopt
 !bpfopt/target/aarch64-unknown-linux-gnu/release/bpfprof
 
+llvm-backend/llvm
+llvm-backend/llvm/**
+llvm-backend/build-*
+llvm-backend/build-*/**
+
 vendor/llvmbpf/build
 vendor/linux
 vendor/linux/**

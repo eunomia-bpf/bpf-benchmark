@@ -1,0 +1,1404 @@
+{
+  "benchmarks": [
+    {
+      "category": "helpers",
+      "description": "One bpf_ktime_get_ns call",
+      "expected_result": null,
+      "family": "time",
+      "hypothesis": "Captures helper-call overhead floor for a single time read; canonical varies-by-design measurement (ktime advances between two TEST_RUN calls)",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "level": "tiny",
+      "name": "helper_only_ktime",
+      "runs": [
+        {
+          "inner_repeat": 100,
+          "mode": "native_lab",
+          "runtime": "native_lab",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 44
+              },
+              "compile_ns": 69384409,
+              "exec_ns": 40,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 58161514,
+                "blob_upload_ns": 20802,
+                "memory_prepare_ns": 32336,
+                "packet_prepare_ns": 677,
+                "prog_load_ns": 11202093,
+                "prog_run_wall_ns": 64840060
+              },
+              "result": 153740343493,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 64840060
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 240,
+                "native_code_bytes": 124
+              },
+              "compile_ns": 272220,
+              "exec_cycles": 1466309,
+              "exec_ns": 58,
+              "jited_prog_len": 124,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 24544,
+                "object_load_ns": 195453,
+                "object_open_ns": 76767,
+                "packet_prepare_ns": 466,
+                "prog_run_wall_ns": 39777376,
+                "result_extract_ns": 377
+              },
+              "result": 154080137629,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686138191,
+              "wall_exec_ns": 397790,
+              "xlated_prog_len": 240
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "helpers",
+        "time"
+      ]
+    },
+    {
+      "category": "helpers",
+      "description": "One bpf_get_current_pid_tgid call",
+      "expected_result": null,
+      "family": "identity",
+      "hypothesis": "Captures helper-call overhead for a single identity read",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "level": "tiny",
+      "name": "helper_get_pid_tgid",
+      "runs": [
+        {
+          "inner_repeat": 100,
+          "mode": "native_lab",
+          "runtime": "native_lab",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 44
+              },
+              "compile_ns": 65654967,
+              "exec_ns": 14,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 57337080,
+                "blob_upload_ns": 17931,
+                "memory_prepare_ns": 26857,
+                "packet_prepare_ns": 565,
+                "prog_load_ns": 8299956,
+                "prog_run_wall_ns": 55664977
+              },
+              "result": 7662221657848,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 55664977
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 240,
+                "native_code_bytes": 124
+              },
+              "compile_ns": 276037,
+              "exec_cycles": 1476293,
+              "exec_ns": 11,
+              "jited_prog_len": 124,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 40120,
+                "object_load_ns": 201850,
+                "object_open_ns": 74187,
+                "packet_prepare_ns": 633,
+                "prog_run_wall_ns": 40048000,
+                "result_extract_ns": 487
+              },
+              "result": 7670811592442,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686242724,
+              "wall_exec_ns": 400487,
+              "xlated_prog_len": 240
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "helpers",
+        "identity"
+      ]
+    },
+    {
+      "category": "helpers",
+      "description": "Four mixed helpers XOR-folded together",
+      "expected_result": null,
+      "family": "chain",
+      "hypothesis": "Mixes time / identity / cpu helper outputs as a tracing-style observation token",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "level": "small",
+      "name": "helper_chain_simple",
+      "runs": [
+        {
+          "inner_repeat": 100,
+          "mode": "native_lab",
+          "runtime": "native_lab",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 167
+              },
+              "compile_ns": 65943220,
+              "exec_ns": 84,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 57494223,
+                "blob_upload_ns": 21477,
+                "memory_prepare_ns": 24434,
+                "packet_prepare_ns": 497,
+                "prog_load_ns": 8427520,
+                "prog_run_wall_ns": 43709660
+              },
+              "result": 7529189062693,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 43709660
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 336,
+                "native_code_bytes": 189
+              },
+              "compile_ns": 277222,
+              "exec_cycles": 2210539,
+              "exec_ns": 46,
+              "jited_prog_len": 189,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 23871,
+                "object_load_ns": 193055,
+                "object_open_ns": 84167,
+                "packet_prepare_ns": 475,
+                "prog_run_wall_ns": 59966157,
+                "result_extract_ns": 413
+              },
+              "result": 7551003993193,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686256518,
+              "wall_exec_ns": 599670,
+              "xlated_prog_len": 336
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "helpers",
+        "chain"
+      ]
+    },
+    {
+      "category": "maps",
+      "description": "BPF_MAP_TYPE_ARRAY write then lookup at fixed key",
+      "expected_result": null,
+      "family": "array",
+      "hypothesis": "Baseline ARRAY map case; kernel JIT fully inlines the lookup, native_lab still calls bpf_map_lookup_elem",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "level": "small",
+      "name": "map_array_lookup",
+      "runs": [
+        {
+          "inner_repeat": 100,
+          "mode": "native_lab",
+          "runtime": "native_lab",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 151
+              },
+              "compile_ns": 65786189,
+              "exec_ns": 26,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 57400073,
+                "blob_upload_ns": 20449,
+                "memory_prepare_ns": 27114,
+                "packet_prepare_ns": 659,
+                "prog_load_ns": 8365667,
+                "prog_run_wall_ns": 71580063
+              },
+              "result": 16045690984503050241,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 71580063
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 440,
+                "native_code_bytes": 244
+              },
+              "compile_ns": 323288,
+              "exec_cycles": 1474941,
+              "exec_ns": 23,
+              "jited_prog_len": 244,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 27222,
+                "object_load_ns": 229934,
+                "object_open_ns": 93354,
+                "packet_prepare_ns": 552,
+                "prog_run_wall_ns": 40012349,
+                "result_extract_ns": 585
+              },
+              "result": 16045690984503050241,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686224613,
+              "wall_exec_ns": 400122,
+              "xlated_prog_len": 440
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "array"
+      ]
+    },
+    {
+      "category": "maps",
+      "description": "ARRAY map indexed by a packet byte",
+      "expected_result": null,
+      "family": "array",
+      "hypothesis": "Per-port / per-bucket counter shape with packet-driven index",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "level": "small",
+      "name": "map_array_index_packet",
+      "runs": [
+        {
+          "inner_repeat": 100,
+          "mode": "native_lab",
+          "runtime": "native_lab",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 155
+              },
+              "compile_ns": 65764478,
+              "exec_ns": 22,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 57406056,
+                "blob_upload_ns": 17285,
+                "memory_prepare_ns": 37483,
+                "packet_prepare_ns": 682,
+                "prog_load_ns": 8341137,
+                "prog_run_wall_ns": 60810011
+              },
+              "result": 16045690984503098046,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 60810011
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 464,
+                "native_code_bytes": 253
+              },
+              "compile_ns": 346928,
+              "exec_cycles": 1470021,
+              "exec_ns": 26,
+              "jited_prog_len": 253,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 27522,
+                "object_load_ns": 253737,
+                "object_open_ns": 93191,
+                "packet_prepare_ns": 532,
+                "prog_run_wall_ns": 39878654,
+                "result_extract_ns": 424
+              },
+              "result": 16045690984503098046,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686169104,
+              "wall_exec_ns": 398794,
+              "xlated_prog_len": 464
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "array",
+        "packet-derived-key"
+      ]
+    },
+    {
+      "category": "maps",
+      "description": "BPF_MAP_TYPE_HASH write then lookup at fixed u32 key",
+      "expected_result": null,
+      "family": "hash",
+      "hypothesis": "Baseline HASH case; both runtimes go through __htab_map_lookup_elem (kernel via JIT inline, native_lab via per-call-site routing)",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "level": "small",
+      "name": "map_hash_lookup",
+      "runs": [
+        {
+          "inner_repeat": 100,
+          "mode": "native_lab",
+          "runtime": "native_lab",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 160
+              },
+              "compile_ns": 66114053,
+              "exec_ns": 49,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 57763126,
+                "blob_upload_ns": 27120,
+                "memory_prepare_ns": 28734,
+                "packet_prepare_ns": 491,
+                "prog_load_ns": 8323807,
+                "prog_run_wall_ns": 55496456
+              },
+              "result": 1234605616436508552,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 55496456
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 416,
+                "native_code_bytes": 235
+              },
+              "compile_ns": 329990,
+              "exec_cycles": 2209798,
+              "exec_ns": 73,
+              "jited_prog_len": 235,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 26848,
+                "object_load_ns": 238684,
+                "object_open_ns": 91306,
+                "packet_prepare_ns": 438,
+                "prog_run_wall_ns": 59946206,
+                "result_extract_ns": 932
+              },
+              "result": 1234605616436508552,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686250475,
+              "wall_exec_ns": 599470,
+              "xlated_prog_len": 416
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "hash",
+        "inline-eligible"
+      ]
+    },
+    {
+      "category": "maps",
+      "description": "HASH map with a 16-byte string-shaped key",
+      "expected_result": null,
+      "family": "hash",
+      "hypothesis": "Exercises HASH inline with a larger KEY_OFFSET (16-byte key vs 4-byte)",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "level": "small",
+      "name": "map_hash_str_key",
+      "runs": [
+        {
+          "inner_repeat": 100,
+          "mode": "native_lab",
+          "runtime": "native_lab",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 180
+              },
+              "compile_ns": 66335742,
+              "exec_ns": 52,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 57851677,
+                "blob_upload_ns": 18056,
+                "memory_prepare_ns": 27712,
+                "packet_prepare_ns": 530,
+                "prog_load_ns": 8466009,
+                "prog_run_wall_ns": 61315063
+              },
+              "result": 18369614221520256751,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 61315063
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 448,
+                "native_code_bytes": 255
+              },
+              "compile_ns": 405585,
+              "exec_cycles": 1479778,
+              "exec_ns": 75,
+              "jited_prog_len": 255,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 26829,
+                "object_load_ns": 290795,
+                "object_open_ns": 114790,
+                "packet_prepare_ns": 417,
+                "prog_run_wall_ns": 40142929,
+                "result_extract_ns": 541
+              },
+              "result": 18369614221520256751,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686253168,
+              "wall_exec_ns": 401431,
+              "xlated_prog_len": 448
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "hash",
+        "inline-eligible",
+        "large-key"
+      ]
+    },
+    {
+      "category": "maps",
+      "description": "PERCPU_ARRAY write then lookup",
+      "expected_result": null,
+      "family": "percpu_array",
+      "hypothesis": "Per-cpu counter shape; kernel JIT fully inlines (LEA + per-cpu offset), native_lab calls helper",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "level": "small",
+      "name": "map_percpu_array",
+      "runs": [
+        {
+          "inner_repeat": 100,
+          "mode": "native_lab",
+          "runtime": "native_lab",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 151
+              },
+              "compile_ns": 65687861,
+              "exec_ns": 31,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 57325199,
+                "blob_upload_ns": 17253,
+                "memory_prepare_ns": 31066,
+                "packet_prepare_ns": 544,
+                "prog_load_ns": 8345409,
+                "prog_run_wall_ns": 58057628
+              },
+              "result": 18369614221190019774,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 58057628
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 464,
+                "native_code_bytes": 263
+              },
+              "compile_ns": 303148,
+              "exec_cycles": 1469456,
+              "exec_ns": 37,
+              "jited_prog_len": 263,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 23710,
+                "object_load_ns": 217501,
+                "object_open_ns": 85647,
+                "packet_prepare_ns": 453,
+                "prog_run_wall_ns": 39863000,
+                "result_extract_ns": 478
+              },
+              "result": 18369614221190019774,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686188922,
+              "wall_exec_ns": 398638,
+              "xlated_prog_len": 464
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "percpu"
+      ]
+    },
+    {
+      "category": "maps",
+      "description": "LRU_HASH per-key counter (delete + update + lookup write-back)",
+      "expected_result": null,
+      "family": "lru_hash",
+      "hypothesis": "Bounded per-key counter pattern (cilium-CT / tetragon-throttle shape)",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "level": "medium",
+      "name": "map_lru_hash_counter",
+      "runs": [
+        {
+          "inner_repeat": 100,
+          "mode": "native_lab",
+          "runtime": "native_lab",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 171
+              },
+              "compile_ns": 65743227,
+              "exec_ns": 109,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 57338776,
+                "blob_upload_ns": 17582,
+                "memory_prepare_ns": 24793,
+                "packet_prepare_ns": 478,
+                "prog_load_ns": 8386869,
+                "prog_run_wall_ns": 59870647
+              },
+              "result": 1,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 59870647
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 472,
+                "native_code_bytes": 265
+              },
+              "compile_ns": 339754,
+              "exec_cycles": 1475679,
+              "exec_ns": 109,
+              "jited_prog_len": 265,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 39261,
+                "object_load_ns": 248787,
+                "object_open_ns": 90967,
+                "packet_prepare_ns": 469,
+                "prog_run_wall_ns": 40031868,
+                "result_extract_ns": 415
+              },
+              "result": 1,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686242119,
+              "wall_exec_ns": 400321,
+              "xlated_prog_len": 472
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "lru_hash"
+      ]
+    },
+    {
+      "category": "maps",
+      "description": "PERCPU_HASH per-key counter (update + lookup write-back)",
+      "expected_result": null,
+      "family": "percpu_hash",
+      "hypothesis": "Lock-free per-cpu counter table (cilium nodeport / tetragon rate)",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "level": "medium",
+      "name": "map_percpu_hash_counter",
+      "runs": [
+        {
+          "inner_repeat": 100,
+          "mode": "native_lab",
+          "runtime": "native_lab",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 151
+              },
+              "compile_ns": 65996978,
+              "exec_ns": 53,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 57525791,
+                "blob_upload_ns": 21412,
+                "memory_prepare_ns": 26162,
+                "packet_prepare_ns": 651,
+                "prog_load_ns": 8449775,
+                "prog_run_wall_ns": 53326249
+              },
+              "result": 1,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 53326249
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 432,
+                "native_code_bytes": 246
+              },
+              "compile_ns": 369001,
+              "exec_cycles": 1471145,
+              "exec_ns": 68,
+              "jited_prog_len": 246,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 26250,
+                "object_load_ns": 279168,
+                "object_open_ns": 89833,
+                "packet_prepare_ns": 479,
+                "prog_run_wall_ns": 39908644,
+                "result_extract_ns": 540
+              },
+              "result": 1,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686209021,
+              "wall_exec_ns": 399094,
+              "xlated_prog_len": 432
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "percpu_hash"
+      ]
+    },
+    {
+      "category": "maps",
+      "description": "bpf_get_smp_processor_id + uid_gid feeding PERCPU_ARRAY",
+      "expected_result": null,
+      "family": "percpu_array",
+      "hypothesis": "Per-cpu tagging workload; stored value is uid_gid (deterministic across runtimes) so result is bit-identical between native_lab and kernel",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "level": "medium",
+      "name": "combined_helper_map",
+      "runs": [
+        {
+          "inner_repeat": 100,
+          "mode": "native_lab",
+          "runtime": "native_lab",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 165
+              },
+              "compile_ns": 66389606,
+              "exec_ns": 40,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 57765883,
+                "blob_upload_ns": 22031,
+                "memory_prepare_ns": 22823,
+                "packet_prepare_ns": 523,
+                "prog_load_ns": 8601692,
+                "prog_run_wall_ns": 87458633
+              },
+              "result": 0,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 87458633
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 472,
+                "native_code_bytes": 270
+              },
+              "compile_ns": 354123,
+              "exec_cycles": 1472009,
+              "exec_ns": 45,
+              "jited_prog_len": 270,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 27442,
+                "object_load_ns": 261977,
+                "object_open_ns": 92146,
+                "packet_prepare_ns": 498,
+                "prog_run_wall_ns": 39932353,
+                "result_extract_ns": 477
+              },
+              "result": 0,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686190522,
+              "wall_exec_ns": 399331,
+              "xlated_prog_len": 472
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "percpu",
+        "helpers"
+      ]
+    },
+    {
+      "category": "maps",
+      "description": "ARRAY + HASH + PERCPU_ARRAY chain (cilium-style policy lookup)",
+      "expected_result": null,
+      "family": "multi_map",
+      "hypothesis": "Exercises per-call-site routing -- HASH inlines, ARRAY/PERCPU stay on plain helper",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "level": "large",
+      "name": "multi_map_policy",
+      "runs": [
+        {
+          "inner_repeat": 100,
+          "mode": "native_lab",
+          "runtime": "native_lab",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 344
+              },
+              "compile_ns": 66053988,
+              "exec_ns": 68,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 57601646,
+                "blob_upload_ns": 25961,
+                "memory_prepare_ns": 29005,
+                "packet_prepare_ns": 481,
+                "prog_load_ns": 8426381,
+                "prog_run_wall_ns": 64459439
+              },
+              "result": 1311768465173141112,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 64459439
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 832,
+                "native_code_bytes": 447
+              },
+              "compile_ns": 370795,
+              "exec_cycles": 1476954,
+              "exec_ns": 63,
+              "jited_prog_len": 447,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 23587,
+                "object_load_ns": 278357,
+                "object_open_ns": 92438,
+                "packet_prepare_ns": 458,
+                "prog_run_wall_ns": 40066000,
+                "result_extract_ns": 387
+              },
+              "result": 1311768465173141112,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686247485,
+              "wall_exec_ns": 400666,
+              "xlated_prog_len": 832
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "multi-map"
+      ]
+    },
+    {
+      "category": "maps",
+      "description": "HASH map keyed by a 16-byte 5-tuple struct parsed from packet",
+      "expected_result": null,
+      "family": "hash",
+      "hypothesis": "Cilium / katran connection-classifier shape",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "level": "large",
+      "name": "packet_5tuple_classify",
+      "runs": [
+        {
+          "inner_repeat": 100,
+          "mode": "native_lab",
+          "runtime": "native_lab",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 201
+              },
+              "compile_ns": 66084675,
+              "exec_ns": 51,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 57791434,
+                "blob_upload_ns": 20859,
+                "memory_prepare_ns": 28716,
+                "packet_prepare_ns": 542,
+                "prog_load_ns": 8272382,
+                "prog_run_wall_ns": 56812259
+              },
+              "result": 3405691582,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 56812259
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 432,
+                "native_code_bytes": 239
+              },
+              "compile_ns": 334880,
+              "exec_cycles": 1473954,
+              "exec_ns": 123,
+              "jited_prog_len": 239,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 22500,
+                "object_load_ns": 246370,
+                "object_open_ns": 88510,
+                "packet_prepare_ns": 591,
+                "prog_run_wall_ns": 39985246,
+                "result_extract_ns": 594
+              },
+              "result": 3405691582,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686208909,
+              "wall_exec_ns": 399856,
+              "xlated_prog_len": 432
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "hash",
+        "inline-eligible",
+        "packet-derived-key"
+      ]
+    },
+    {
+      "category": "maps",
+      "description": "HASH + PERCPU_HASH + 3 helpers (tetragon-style stats aggregator)",
+      "expected_result": null,
+      "family": "multi_map",
+      "hypothesis": "Real-shape program with mixed map types; stored tag is uid_gid (deterministic across runtimes) so result is bit-identical even though pid/smp route to different bucket slots",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "level": "large",
+      "name": "stats_mixed_helpers",
+      "runs": [
+        {
+          "inner_repeat": 100,
+          "mode": "native_lab",
+          "runtime": "native_lab",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 272
+              },
+              "compile_ns": 66026283,
+              "exec_ns": 100,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 57675449,
+                "blob_upload_ns": 24792,
+                "memory_prepare_ns": 23081,
+                "packet_prepare_ns": 500,
+                "prog_load_ns": 8326042,
+                "prog_run_wall_ns": 94712474
+              },
+              "result": 1,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 94712474
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 648,
+                "native_code_bytes": 364
+              },
+              "compile_ns": 380976,
+              "exec_cycles": 1473572,
+              "exec_ns": 147,
+              "jited_prog_len": 364,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 27267,
+                "object_load_ns": 281786,
+                "object_open_ns": 99190,
+                "packet_prepare_ns": 460,
+                "prog_run_wall_ns": 39973961,
+                "result_extract_ns": 375
+              },
+              "result": 1,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686255223,
+              "wall_exec_ns": 399748,
+              "xlated_prog_len": 648
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "multi-map",
+        "helpers"
+      ]
+    }
+  ],
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec"
+  },
+  "defaults": {
+    "inner_repeat": 100,
+    "perf_counters": false,
+    "perf_scope": "full_repeat_raw",
+    "runtime_order_seed": 0,
+    "samples": 1,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "generated_at": "2026-05-18T19:36:19.218712+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "unknown",
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_root_mods=1 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 panic=-1 virtme.exec=`L3RtcC9iZW5jaG1hcmstZ3Vlc3QtMmZmal84OHMuc2g=` virtme_chdir=home/yunwei37/workspace/bpf-benchmark rootfstype=9p rootflags=version=9p2000.L,trans=virtio,access=any raid=noautodetect ro debug loglevel=7 panic=30 oops=panic init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init",
+    "kernel_version": "7.0.0-rc2+",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "unknown"
+  },
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_stage2.yaml",
+  "provenance": {
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 285K",
+    "environment": "vm",
+    "kernel_commit": "unknown",
+    "params": {
+      "inner_repeat": 100,
+      "samples": 1,
+      "warmups": 0
+    },
+    "repo_dirty": false,
+    "repo_git_sha": "unknown",
+    "timestamp": "2026-05-18T19:36:19.219842+00:00"
+  },
+  "suite": "micro_stage2_maps_helpers",
+  "toolchains": {
+    "libbpf": {
+      "root": "vendor/libbpf"
+    },
+    "llvmbpf": {
+      "root": "vendor/llvmbpf"
+    }
+  }
+}
