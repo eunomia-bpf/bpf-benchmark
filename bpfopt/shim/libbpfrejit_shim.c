@@ -116,6 +116,15 @@ struct prog_data {
      * inside load_attr is unambiguous and the file in bytecode_path is also
      * available for the bpfopt CLI). */
     struct bpf_insn *insns;
+    /* License string (deep copy from attr->license user pointer). Needed for
+     * candidate BPF_PROG_LOAD(log_level=2) verifier-state probes. */
+    char license[64];
+    /* Per-prog execute_step state: lazily filled on first call. */
+    int canonicalized;          /* 1 once --canonicalize-map-refs has run */
+    int step_seq;               /* incremented every successful execute_step */
+    uint32_t *used_map_ids;     /* heap, kernel ids of progam's used maps */
+    uint32_t *used_map_types;   /* heap, map_type per used_map_ids entry */
+    uint32_t nr_map_ids;        /* length of used_map_ids/used_map_types */
 };
 
 struct map_data {
@@ -171,6 +180,12 @@ static struct obj_entry *obj_find(int fd) {
     return NULL;
 }
 
+static void free_prog_data(struct prog_data *p) {
+    free(p->insns);
+    free(p->used_map_ids);
+    free(p->used_map_types);
+}
+
 /* Caller must hold state_mutex. Replaces any existing entry for fd. */
 static void obj_insert(struct obj_entry *e) {
     unsigned b = obj_bucket(e->fd);
@@ -180,7 +195,7 @@ static void obj_insert(struct obj_entry *e) {
         if ((*prev)->fd == e->fd) {
             struct obj_entry *dead = *prev;
             *prev = dead->next;
-            if (dead->kind == OBJ_PROG) free(dead->u.prog.insns);
+            if (dead->kind == OBJ_PROG) free_prog_data(&dead->u.prog);
             free(dead);
         } else {
             prev = &(*prev)->next;
@@ -198,7 +213,7 @@ static void obj_remove(int fd) {
         if ((*prev)->fd == fd) {
             struct obj_entry *dead = *prev;
             *prev = dead->next;
-            if (dead->kind == OBJ_PROG) free(dead->u.prog.insns);
+            if (dead->kind == OBJ_PROG) free_prog_data(&dead->u.prog);
             free(dead);
             return;
         }
@@ -344,6 +359,15 @@ static struct obj_entry *capture_prog_load(const union bpf_attr *attr) {
     e->u.prog.attach_btf_id = attr->attach_btf_id;
     e->u.prog.load_attr = *attr;
     e->u.prog.insns = copy;
+    /* Deep-copy license (app-owned user string, lifetime unknown after the
+     * call returns). Required to later issue candidate BPF_PROG_LOAD calls
+     * for verifier-state capture. */
+    const char *lic = (const char *)(uintptr_t)attr->license;
+    if (lic) {
+        size_t n = strnlen(lic, sizeof(e->u.prog.license) - 1);
+        memcpy(e->u.prog.license, lic, n);
+        e->u.prog.license[n] = 0;
+    }
     if (path[0]) memcpy(e->u.prog.bytecode_path, path, sizeof(path));
     return e;
 }
@@ -740,7 +764,9 @@ static int unix_socket_listen(const char *path) {
     return fd;
 }
 
-/* Extract a quoted string after `"key":`. Returns 1 on success and writes up
+/* Extract a quoted string after `"key":` with JSON escape decoding. Handles
+ * \", \\, \n, \t, \r, \/, \b, \f, \uXXXX (BMP only — non-BMP unsupported,
+ * shell commands are ASCII in practice). Returns 1 on success and writes up
  * to out_sz-1 bytes + NUL to out. */
 static int json_get_str(const char *json, const char *key, char *out,
                         size_t out_sz) {
@@ -759,8 +785,47 @@ static int json_get_str(const char *json, const char *key, char *out,
         return 0;
     p++;
     size_t i = 0;
-    while (*p && *p != '"' && i + 1 < out_sz)
+    while (*p && *p != '"' && i + 1 < out_sz) {
+        if (*p == '\\' && p[1]) {
+            char c = 0;
+            switch (p[1]) {
+            case '"': c = '"'; break;
+            case '\\': c = '\\'; break;
+            case '/': c = '/'; break;
+            case 'b': c = '\b'; break;
+            case 'f': c = '\f'; break;
+            case 'n': c = '\n'; break;
+            case 'r': c = '\r'; break;
+            case 't': c = '\t'; break;
+            case 'u': {
+                /* \uXXXX — accept ASCII subset; non-ASCII encoded as raw 0
+                 * which would break the command, but shell commands are
+                 * ASCII in practice. */
+                if (p[2] && p[3] && p[4] && p[5]) {
+                    unsigned v = 0;
+                    for (int k = 0; k < 4; k++) {
+                        char h = p[2 + k];
+                        v <<= 4;
+                        if (h >= '0' && h <= '9') v |= (h - '0');
+                        else if (h >= 'a' && h <= 'f') v |= 10 + (h - 'a');
+                        else if (h >= 'A' && h <= 'F') v |= 10 + (h - 'A');
+                        else { v = 0; break; }
+                    }
+                    out[i++] = (char)(v & 0xff);
+                    p += 6;
+                    continue;
+                }
+                c = 'u';
+                break;
+            }
+            default: c = p[1]; break;
+            }
+            out[i++] = c;
+            p += 2;
+            continue;
+        }
         out[i++] = *p++;
+    }
     out[i] = 0;
     return 1;
 }
@@ -845,6 +910,307 @@ static void substitute_vars(char *out, size_t out_sz, const char *in,
     out[o] = 0;
 }
 
+/* --- daemon-parity helpers (MAP_IDS / MAP_VALUES / canonicalize / VERIFIER_STATES) --- */
+
+/* Mirror of daemon's needs_bpftool_map_dump. */
+static int map_type_needs_dump(uint32_t t) {
+    return t == BPF_MAP_TYPE_HASH || t == BPF_MAP_TYPE_ARRAY ||
+           t == BPF_MAP_TYPE_PERCPU_ARRAY || t == BPF_MAP_TYPE_LRU_HASH ||
+           t == BPF_MAP_TYPE_LPM_TRIE || t == BPF_MAP_TYPE_ARRAY_OF_MAPS ||
+           t == BPF_MAP_TYPE_HASH_OF_MAPS;
+}
+
+/* Query a map's type (BPF_OBJ_GET_INFO_BY_FD on the map fd). */
+static int query_map_type(uint32_t map_id, uint32_t *type_out) {
+    union bpf_attr a = {0};
+    a.map_id = map_id;
+    long fd = real_syscall(SYS_bpf, BPF_MAP_GET_FD_BY_ID, &a, sizeof(a));
+    if (fd < 0) return -1;
+    struct bpf_map_info info;
+    memset(&info, 0, sizeof(info));
+    union bpf_attr ia = {0};
+    ia.info.bpf_fd = (uint32_t)fd;
+    ia.info.info_len = sizeof(info);
+    ia.info.info = (uintptr_t)&info;
+    long r = real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &ia, sizeof(ia));
+    real_close((int)fd);
+    if (r < 0) return -1;
+    *type_out = info.type;
+    return 0;
+}
+
+/* Populate p->used_map_ids / used_map_types / nr_map_ids by re-issuing
+ * BPF_OBJ_GET_INFO_BY_FD on the program with a sized map_ids buffer. Two-pass
+ * protocol: first call with nr_map_ids=0 returns the required size in
+ * info.nr_map_ids, second call fills the array. */
+static int populate_used_maps(struct prog_data *p) {
+    if (!p->kernel_prog_id) return -1;
+    union bpf_attr ga = {0};
+    ga.prog_id = p->kernel_prog_id;
+    long pfd = real_syscall(SYS_bpf, BPF_PROG_GET_FD_BY_ID, &ga, sizeof(ga));
+    if (pfd < 0) return -1;
+
+    struct bpf_prog_info info;
+    memset(&info, 0, sizeof(info));
+    union bpf_attr ia = {0};
+    ia.info.bpf_fd = (uint32_t)pfd;
+    ia.info.info_len = sizeof(info);
+    ia.info.info = (uintptr_t)&info;
+    long r = real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &ia, sizeof(ia));
+    if (r < 0) { real_close((int)pfd); return -1; }
+
+    uint32_t n = info.nr_map_ids;
+    uint32_t *ids = NULL;
+    uint32_t *types = NULL;
+    if (n > 0) {
+        ids = (uint32_t *)calloc(n, sizeof(uint32_t));
+        types = (uint32_t *)calloc(n, sizeof(uint32_t));
+        if (!ids || !types) { free(ids); free(types); real_close((int)pfd); return -1; }
+        memset(&info, 0, sizeof(info));
+        info.nr_map_ids = n;
+        info.map_ids = (uintptr_t)ids;
+        memset(&ia, 0, sizeof(ia));
+        ia.info.bpf_fd = (uint32_t)pfd;
+        ia.info.info_len = sizeof(info);
+        ia.info.info = (uintptr_t)&info;
+        r = real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &ia, sizeof(ia));
+        if (r < 0) { free(ids); free(types); real_close((int)pfd); return -1; }
+        for (uint32_t i = 0; i < n; i++) {
+            if (query_map_type(ids[i], &types[i]) < 0)
+                types[i] = 0; /* unknown — will skip dump */
+        }
+    }
+    real_close((int)pfd);
+    free(p->used_map_ids);
+    free(p->used_map_types);
+    p->used_map_ids = ids;
+    p->used_map_types = types;
+    p->nr_map_ids = n;
+    return 0;
+}
+
+static void format_map_ids_csv(uint32_t *ids, uint32_t n, char *out, size_t out_sz) {
+    if (n == 0 || !ids) { snprintf(out, out_sz, "0"); return; }
+    size_t o = 0;
+    for (uint32_t i = 0; i < n && o + 16 < out_sz; i++)
+        o += snprintf(out + o, out_sz - o, "%s%u", i ? "," : "", ids[i]);
+}
+
+/* Run `bpftool <args...>` redirecting stdout to `out_path`. Returns 0 on
+ * exit 0, else -1. Args must be NULL-terminated. */
+static int run_bpftool_to_file(char *const argv[], const char *out_path) {
+    posix_spawn_file_actions_t fa;
+    if (posix_spawn_file_actions_init(&fa) != 0) return -1;
+    posix_spawn_file_actions_addopen(&fa, STDOUT_FILENO, out_path,
+                                     O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    /* /dev/null for stderr to keep the log tidy; bpftool warnings can be
+     * inspected via the saved JSON file if missing. */
+    posix_spawn_file_actions_addopen(&fa, STDERR_FILENO, "/dev/null",
+                                     O_WRONLY, 0);
+    pid_t pid;
+    int rc = posix_spawnp(&pid, argv[0], &fa, NULL, argv, environ);
+    posix_spawn_file_actions_destroy(&fa);
+    if (rc != 0) return -1;
+    int st = 0;
+    waitpid(pid, &st, 0);
+    return (WIFEXITED(st) && WEXITSTATUS(st) == 0) ? 0 : -1;
+}
+
+/* Write per-map snapshots into map_values_dir. Mirrors daemon's
+ * write_bpftool_map_snapshots: always show, dump only for needs_dump types. */
+static void write_map_snapshots(const char *map_values_dir,
+                                const uint32_t *ids, const uint32_t *types,
+                                uint32_t n) {
+    mkdir(map_values_dir, 0755);
+    for (uint32_t i = 0; i < n; i++) {
+        char id_str[16];
+        snprintf(id_str, sizeof(id_str), "%u", ids[i]);
+        char show_path[512], dump_path[512];
+        snprintf(show_path, sizeof(show_path), "%s/map-%u.show.json",
+                 map_values_dir, ids[i]);
+        char *const show_argv[] = {"bpftool", "-j", "map", "show", "id",
+                                   id_str, NULL};
+        (void)run_bpftool_to_file(show_argv, show_path);
+        if (!map_type_needs_dump(types[i])) continue;
+        snprintf(dump_path, sizeof(dump_path), "%s/map-%u.dump.json",
+                 map_values_dir, ids[i]);
+        char *const dump_argv[] = {"bpftool", "-j", "map", "dump", "id",
+                                   id_str, NULL};
+        (void)run_bpftool_to_file(dump_argv, dump_path);
+    }
+}
+
+/* Invoke `bpfopt --canonicalize-map-refs ...`. Writes canonicalized bytecode
+ * to out_path. Returns 0 on success. */
+static int run_canonicalize(const char *input_path, const char *out_path,
+                            const char *target_json, const char *map_ids_csv) {
+    char *const argv[] = {
+        "bpfopt", "--canonicalize-map-refs",
+        "--input", (char *)input_path,
+        "--output", (char *)out_path,
+        "--map-ids", (char *)map_ids_csv,
+        "--target", (char *)target_json,
+        "--target-output", (char *)target_json,
+        NULL};
+    /* Strip LD_PRELOAD so the bpfopt child doesn't re-attach the shim. */
+    size_t n_env = 0;
+    while (environ[n_env]) n_env++;
+    char **clean_env = (char **)calloc(n_env + 1, sizeof(char *));
+    size_t j = 0;
+    for (size_t i = 0; clean_env && i < n_env; i++)
+        if (strncmp(environ[i], "LD_PRELOAD=", 11) != 0)
+            clean_env[j++] = environ[i];
+    if (clean_env) clean_env[j] = NULL;
+    pid_t pid;
+    int rc = posix_spawnp(&pid, "bpfopt", NULL, NULL, argv,
+                          clean_env ? clean_env : environ);
+    free(clean_env);
+    if (rc != 0) return -1;
+    int st = 0;
+    waitpid(pid, &st, 0);
+    return (WIFEXITED(st) && WEXITSTATUS(st) == 0) ? 0 : -1;
+}
+
+/* Issue a stock BPF_PROG_LOAD with the pass-output bytecode + log_level=2 to
+ * capture verifier states. Writes the verifier log to log_path. The probe fd
+ * is closed; we never run the probe program. Failures fall through silently
+ * (the log path will exist with whatever the kernel wrote before bailing). */
+static void capture_verifier_states(const struct prog_data *p,
+                                    const char *bytecode_path,
+                                    const char *log_path) {
+    int bfd = open(bytecode_path, O_RDONLY);
+    if (bfd < 0) return;
+    struct stat st;
+    if (fstat(bfd, &st) != 0 || st.st_size <= 0 ||
+        (st.st_size % (off_t)sizeof(struct bpf_insn)) != 0) {
+        real_close(bfd);
+        return;
+    }
+    size_t bytes = (size_t)st.st_size;
+    struct bpf_insn *insns = (struct bpf_insn *)malloc(bytes);
+    if (!insns) { real_close(bfd); return; }
+    ssize_t rd = read(bfd, insns, bytes);
+    real_close(bfd);
+    if (rd != (ssize_t)bytes) { free(insns); return; }
+
+    /* Reconstruct fd_array from kernel map ids — required because canonicalize
+     * rewrote BPF_PSEUDO_MAP_FD refs into BPF_PSEUDO_MAP_IDX. */
+    int *fd_array = NULL;
+    if (p->nr_map_ids > 0) {
+        fd_array = (int *)calloc(p->nr_map_ids, sizeof(int));
+        if (!fd_array) { free(insns); return; }
+        for (uint32_t i = 0; i < p->nr_map_ids; i++) {
+            union bpf_attr ga = {0};
+            ga.map_id = p->used_map_ids[i];
+            long fd = real_syscall(SYS_bpf, BPF_MAP_GET_FD_BY_ID, &ga, sizeof(ga));
+            fd_array[i] = (fd < 0) ? -1 : (int)fd;
+        }
+    }
+
+    /* 16 MB log buffer matches daemon's REJIT_VERBOSE_LOG_BUF_SIZE. */
+    size_t log_buf_size = 16 * 1024 * 1024;
+    char *log_buf = (char *)malloc(log_buf_size);
+    if (!log_buf) {
+        free(insns);
+        if (fd_array) {
+            for (uint32_t i = 0; i < p->nr_map_ids; i++)
+                if (fd_array[i] >= 0) real_close(fd_array[i]);
+            free(fd_array);
+        }
+        return;
+    }
+    log_buf[0] = 0;
+
+    union bpf_attr a;
+    memset(&a, 0, sizeof(a));
+    a.prog_type = p->prog_type;
+    a.insns = (uintptr_t)insns;
+    a.insn_cnt = (uint32_t)(bytes / sizeof(struct bpf_insn));
+    a.license = (uintptr_t)p->license;
+    a.expected_attach_type = p->expected_attach_type;
+    a.attach_btf_id = p->attach_btf_id;
+    a.prog_flags = p->load_attr.prog_flags;
+    a.kern_version = p->load_attr.kern_version;
+    a.log_level = 2;
+    a.log_buf = (uintptr_t)log_buf;
+    a.log_size = (uint32_t)log_buf_size;
+    if (fd_array) {
+        a.fd_array = (uintptr_t)fd_array;
+    }
+
+    long pfd = real_syscall(SYS_bpf, BPF_PROG_LOAD, &a, sizeof(a));
+    /* Whether the verifier accepted or rejected, the log was populated. */
+    int saved_errno = errno;
+    size_t lg = strnlen(log_buf, log_buf_size);
+    int wfd = open(log_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (wfd >= 0) {
+        (void)!write(wfd, log_buf, lg);
+        real_close(wfd);
+    }
+    if (pfd >= 0) real_close((int)pfd);
+    if (fd_array) {
+        for (uint32_t i = 0; i < p->nr_map_ids; i++)
+            if (fd_array[i] >= 0) real_close(fd_array[i]);
+        free(fd_array);
+    }
+    free(log_buf);
+    free(insns);
+    errno = saved_errno;
+}
+
+/* Base64-encode `bytes` into a heap string (NUL-terminated). Caller frees. */
+static char *base64_encode_alloc(const uint8_t *bytes, size_t n) {
+    static const char tbl[] =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    size_t out_n = ((n + 2) / 3) * 4;
+    char *out = (char *)malloc(out_n + 1);
+    if (!out) return NULL;
+    size_t o = 0;
+    for (size_t i = 0; i < n; i += 3) {
+        uint32_t v = (uint32_t)bytes[i] << 16;
+        v |= (i + 1 < n) ? ((uint32_t)bytes[i + 1] << 8) : 0;
+        v |= (i + 2 < n) ? (uint32_t)bytes[i + 2] : 0;
+        out[o++] = tbl[(v >> 18) & 0x3f];
+        out[o++] = tbl[(v >> 12) & 0x3f];
+        out[o++] = (i + 1 < n) ? tbl[(v >> 6) & 0x3f] : '=';
+        out[o++] = (i + 2 < n) ? tbl[v & 0x3f] : '=';
+    }
+    out[o] = 0;
+    return out;
+}
+
+/* Tar a workdir into base64 and return the encoded string. Caller frees.
+ * Uses /bin/tar via posix_spawnp + a temp file. */
+static char *tar_workdir_b64(const char *workdir) {
+    char tar_path[320];
+    snprintf(tar_path, sizeof(tar_path), "%s.tar.gz", workdir);
+    char *const argv[] = {"tar", "-czf", tar_path, "-C", "/", (char *)(workdir + 1), NULL};
+    posix_spawn_file_actions_t fa;
+    if (posix_spawn_file_actions_init(&fa) != 0) return NULL;
+    posix_spawn_file_actions_addopen(&fa, STDOUT_FILENO, "/dev/null", O_WRONLY, 0);
+    posix_spawn_file_actions_addopen(&fa, STDERR_FILENO, "/dev/null", O_WRONLY, 0);
+    pid_t pid;
+    int rc = posix_spawnp(&pid, "tar", &fa, NULL, argv, environ);
+    posix_spawn_file_actions_destroy(&fa);
+    if (rc != 0) return NULL;
+    int st = 0;
+    waitpid(pid, &st, 0);
+    if (!(WIFEXITED(st) && WEXITSTATUS(st) == 0)) return NULL;
+    int fd = open(tar_path, O_RDONLY);
+    if (fd < 0) return NULL;
+    struct stat sb;
+    if (fstat(fd, &sb) != 0 || sb.st_size <= 0) { real_close(fd); return NULL; }
+    uint8_t *buf = (uint8_t *)malloc((size_t)sb.st_size);
+    if (!buf) { real_close(fd); return NULL; }
+    ssize_t rd = read(fd, buf, (size_t)sb.st_size);
+    real_close(fd);
+    unlink(tar_path);
+    if (rd != sb.st_size) { free(buf); return NULL; }
+    char *b64 = base64_encode_alloc(buf, (size_t)rd);
+    free(buf);
+    return b64;
+}
+
 /* execute_step — daemon-style RPC. Runner sends a pre-resolved shell command
  * (read from runner/config/passes/<pass>/default.yaml), shim substitutes
  * shim-owned vars and runs /bin/sh -c verbatim. Mirrors daemon's contract at
@@ -852,12 +1218,12 @@ static void substitute_vars(char *out, size_t out_sz, const char *in,
  *
  *   request:  {"cmd":"execute_step","prog_id":<u32>,"command":"<sh>",
  *              "step_seq":<int optional>}
- *   response: {"ok":<bool>,"exit_code":<int>,"output":"<path>","report":"<path>"}
+ *   response: {"ok":<bool>,"exit_code":<int>,"output":"<path>","report":"<path>",
+ *              "bpfopt_ms":<u64>,"program":{...},"workdir_tar_b64":"..."}
  */
 static void emit_execute_step(int cli, const char *json) {
     char prog_id_str[32] = {0};
     char command[4096] = {0};
-    /* prog_id is a number; reuse json_get_str by also accepting unquoted. */
     const char *p = strstr(json, "\"prog_id\"");
     if (p && (p = strchr(p, ':'))) {
         p++;
@@ -874,51 +1240,177 @@ static void emit_execute_step(int cli, const char *json) {
     }
     uint32_t want_id = (uint32_t)strtoul(prog_id_str, NULL, 10);
 
-    /* Look up prog in state table. */
-    char input_path[256] = {0}, prog_type_name[32] = "socket_filter";
+    /* Snapshot of prog state under lock — fields we read are stable enough
+     * to copy out, but per-prog mutable state (canonicalized flag, step_seq,
+     * used_map_ids array) must be updated back into the entry below. */
+    char original_bc[256] = {0}, prog_type_name[32] = "socket_filter";
+    char prog_name[17] = {0};
+    uint32_t prog_type_num = 0;
+    int found = 0;
     pthread_mutex_lock(&state_mutex);
-    for (int b = 0; b < OBJ_TABLE_BUCKETS; b++) {
+    struct prog_data *pd = NULL;
+    for (int b = 0; b < OBJ_TABLE_BUCKETS && !pd; b++) {
         for (struct obj_entry *e = obj_table[b]; e; e = e->next) {
-            if (e->kind == OBJ_PROG &&
-                e->u.prog.kernel_prog_id == want_id) {
-                snprintf(input_path, sizeof(input_path), "%s",
-                         e->u.prog.bytecode_path);
-                snprintf(prog_type_name, sizeof(prog_type_name), "%s",
-                         prog_type_short_name(e->u.prog.prog_type));
-                goto found;
+            if (e->kind == OBJ_PROG && e->u.prog.kernel_prog_id == want_id) {
+                pd = &e->u.prog;
+                break;
             }
         }
     }
-found:
-    pthread_mutex_unlock(&state_mutex);
-    if (!input_path[0]) {
-        dprintf(cli, "{\"ok\":false,\"error\":\"prog_id %u not tracked\"}\n",
-                want_id);
+    if (!pd) {
+        /* Surface the set we DO track so the caller can diagnose why discovery
+         * and shim state diverged (process re-exec, libbpf fork, prog id
+         * raced past OBJ_GET_INFO_BY_FD resolve, etc.). Cap at ~30 ids in the
+         * error message to avoid blowing up the JSON line. */
+        char tracked[512];
+        size_t to = 0;
+        int n_listed = 0;
+        for (int b = 0; b < OBJ_TABLE_BUCKETS && to + 16 < sizeof(tracked); b++) {
+            for (struct obj_entry *e = obj_table[b]; e; e = e->next) {
+                if (e->kind != OBJ_PROG) continue;
+                if (n_listed >= 30) goto done;
+                to += snprintf(tracked + to, sizeof(tracked) - to, "%s%u",
+                               n_listed ? "," : "", e->u.prog.kernel_prog_id);
+                n_listed++;
+            }
+        }
+done:
+        tracked[to] = 0;
+        pthread_mutex_unlock(&state_mutex);
+        dprintf(cli,
+                "{\"ok\":false,\"error\":\"prog_id %u not tracked by shim "
+                "pid=%d; tracked=[%s] (n=%d)\"}\n",
+                want_id, getpid(), tracked, n_listed);
         return;
     }
+    snprintf(original_bc, sizeof(original_bc), "%s", pd->bytecode_path);
+    snprintf(prog_type_name, sizeof(prog_type_name), "%s",
+             prog_type_short_name(pd->prog_type));
+    memcpy(prog_name, pd->name, sizeof(prog_name));
+    prog_type_num = pd->prog_type;
+    /* Lazy: populate used_map_ids on first execute_step. */
+    if (!pd->used_map_ids && pd->nr_map_ids == 0 && pd->kernel_prog_id) {
+        populate_used_maps(pd);
+    }
+    /* Local copies of map metadata so we can drop the lock for slow work. */
+    uint32_t nr_maps = pd->nr_map_ids;
+    uint32_t *local_ids = NULL, *local_types = NULL;
+    if (nr_maps > 0) {
+        local_ids = (uint32_t *)calloc(nr_maps, sizeof(uint32_t));
+        local_types = (uint32_t *)calloc(nr_maps, sizeof(uint32_t));
+        if (local_ids && local_types) {
+            memcpy(local_ids, pd->used_map_ids, nr_maps * sizeof(uint32_t));
+            memcpy(local_types, pd->used_map_types, nr_maps * sizeof(uint32_t));
+        } else {
+            free(local_ids); free(local_types);
+            local_ids = local_types = NULL;
+            nr_maps = 0;
+        }
+    }
+    int canonicalized = pd->canonicalized;
+    int step_seq = pd->step_seq;
+    /* Take a copy of prog_data needed by verifier-state capture. */
+    struct prog_data probe_meta = *pd;
+    probe_meta.insns = NULL; /* don't share heap ownership */
+    probe_meta.used_map_ids = local_ids;
+    probe_meta.used_map_types = local_types;
+    probe_meta.nr_map_ids = nr_maps;
+    pthread_mutex_unlock(&state_mutex);
+    found = 1;
+    (void)found;
 
     const char *dir = getenv("BPFREJIT_SHIM_DIR");
     if (!dir) dir = "/tmp";
-    const char *target = getenv("BPFREJIT_TARGET");
-    if (!target) target = "x86";
-    char workdir[280], output[320], report[320];
+    const char *arch = getenv("BPFREJIT_TARGET_ARCH");
+    if (!arch) arch = "x86_64";
+    char workdir[280], cur[320], nxt[320], report[320], target_json[320];
+    char map_values_dir[320], verifier_log[320];
     snprintf(workdir, sizeof(workdir), "%s/work_%u", dir, want_id);
     mkdir(workdir, 0755);
-    snprintf(output, sizeof(output), "%s/output.bin", workdir);
+    snprintf(cur, sizeof(cur), "%s/output.bin", workdir);
+    snprintf(nxt, sizeof(nxt), "%s/output.next.bin", workdir);
     snprintf(report, sizeof(report), "%s/report.json", workdir);
+    snprintf(target_json, sizeof(target_json), "%s/target.json", workdir);
+    snprintf(map_values_dir, sizeof(map_values_dir), "%s/map-values", workdir);
 
-    const char *vars[][2] = {
+    /* ${TARGET} is a JSON file path (bpfopt --target reads a TargetJson with
+     * arch + kinsns map). For the stock-kernel shim path there are no kinsns
+     * loaded; emit a minimal target.json with just the arch field. */
+    struct stat tst;
+    if (stat(target_json, &tst) != 0) {
+        int fd = open(target_json, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        if (fd >= 0) {
+            char buf[64];
+            int n = snprintf(buf, sizeof(buf),
+                             "{\"arch\":\"%s\",\"kinsns\":{}}\n", arch);
+            (void)!write(fd, buf, n);
+            close(fd);
+        }
+    }
+
+    /* Format MAP_IDS CSV — "0" when prog has no maps (matches daemon). */
+    char map_ids_csv[1024];
+    format_map_ids_csv(local_ids, nr_maps, map_ids_csv, sizeof(map_ids_csv));
+
+    /* First-time setup for this prog:
+     *   1. bpfopt --canonicalize-map-refs (in -> cur)
+     *   2. bpftool map snapshots into $workdir/map-values
+     *   3. mark canonicalized=1, store back
+     * Subsequent calls reuse cur as the input. */
+    char input_path[320] = {0};
+    if (!canonicalized) {
+        if (run_canonicalize(original_bc, cur, target_json, map_ids_csv) != 0) {
+            dprintf(cli,
+                    "{\"ok\":false,\"exit_code\":-1,\"error\":"
+                    "\"bpfopt --canonicalize-map-refs failed for prog %u\"}\n",
+                    want_id);
+            free(local_ids); free(local_types);
+            return;
+        }
+        write_map_snapshots(map_values_dir, local_ids, local_types, nr_maps);
+        canonicalized = 1;
+        pthread_mutex_lock(&state_mutex);
+        if (pd) pd->canonicalized = 1;
+        pthread_mutex_unlock(&state_mutex);
+    }
+    snprintf(input_path, sizeof(input_path), "%s", cur);
+
+    /* Two verifier-log paths, matching daemon semantics:
+     *   verifier_states_in  -> ${VERIFIER_STATES} for the current step. It
+     *      points to the log written by the previous successful step. For
+     *      step_seq==0 we use a sentinel path that intentionally does not
+     *      exist (`verifier_log_initial.log`); state-producing passes like
+     *      `noop` ignore the input, and any pass requiring real states will
+     *      surface ENOENT — same contract as the daemon (which also writes
+     *      nothing initial).
+     *   verifier_log        -> path to write *this* step's states to after
+     *      bpfopt succeeds. */
+    char verifier_states_in[320];
+    if (step_seq == 0)
+        snprintf(verifier_states_in, sizeof(verifier_states_in),
+                 "%s/verifier_log_initial.log", workdir);
+    else
+        snprintf(verifier_states_in, sizeof(verifier_states_in),
+                 "%s/verifier_log_step%d.log", workdir, step_seq - 1);
+    snprintf(verifier_log, sizeof(verifier_log),
+             "%s/verifier_log_step%d.log", workdir, step_seq);
+
+    unlink(nxt); /* ensure stale tmp doesn't bleed in */
+
+    const char *vars[10][2] = {
         {"PROG_ID", prog_id_str},
         {"PROG_TYPE", prog_type_name},
         {"INPUT", input_path},
-        {"OUTPUT", output},
+        {"OUTPUT", nxt},
         {"REPORT", report},
         {"WORKDIR", workdir},
-        {"TARGET", target},
+        {"TARGET", target_json},
+        {"MAP_IDS", map_ids_csv},
+        {"MAP_VALUES", map_values_dir},
+        {"VERIFIER_STATES", verifier_states_in},
     };
     char resolved[4200];
-    substitute_vars(resolved, sizeof(resolved), command,
-                    vars, sizeof(vars) / sizeof(vars[0]));
+    substitute_vars(resolved, sizeof(resolved), command, vars, 10);
 
     /* /bin/sh -c <resolved> with LD_PRELOAD stripped. */
     size_t n_env = 0;
@@ -930,24 +1422,134 @@ found:
             clean_env[j++] = environ[i];
     if (clean_env) clean_env[j] = NULL;
 
+    /* Redirect bpfopt stdout+stderr to a per-step log file so we can surface
+     * its diagnostic output via the JSON response. Daemon callers expect
+     * meaningful error text, not a bare exit code. */
+    char subproc_log[320];
+    snprintf(subproc_log, sizeof(subproc_log), "%s/step%d.log", workdir,
+             step_seq);
     char *const argv[] = {"/bin/sh", "-c", resolved, NULL};
+    struct timespec t0, t1;
+    clock_gettime(CLOCK_MONOTONIC, &t0);
+    posix_spawn_file_actions_t fa;
+    int fa_inited = 0;
+    if (posix_spawn_file_actions_init(&fa) == 0) {
+        fa_inited = 1;
+        posix_spawn_file_actions_addopen(&fa, STDOUT_FILENO, subproc_log,
+                                         O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        posix_spawn_file_actions_addopen(&fa, STDERR_FILENO, subproc_log,
+                                         O_WRONLY | O_APPEND, 0);
+    }
     pid_t pid;
-    int rc = posix_spawn(&pid, "/bin/sh", NULL, NULL, argv,
+    int rc = posix_spawn(&pid, "/bin/sh", fa_inited ? &fa : NULL, NULL, argv,
                          clean_env ? clean_env : environ);
+    if (fa_inited) posix_spawn_file_actions_destroy(&fa);
     free(clean_env);
     if (rc != 0) {
         dprintf(cli, "{\"ok\":false,\"error\":\"spawn failed rc=%d\"}\n", rc);
+        free(local_ids); free(local_types);
         return;
     }
     int status = 0;
     waitpid(pid, &status, 0);
+    clock_gettime(CLOCK_MONOTONIC, &t1);
+    uint64_t bpfopt_ms = (uint64_t)(t1.tv_sec - t0.tv_sec) * 1000ULL +
+                         (uint64_t)((t1.tv_nsec - t0.tv_nsec) / 1000000);
     int ok = WIFEXITED(status) && WEXITSTATUS(status) == 0;
     int code = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
-    log_line("execute_step prog_id=%u exit=%d output=%s",
-             want_id, code, output);
-    dprintf(cli,
-            "{\"ok\":%s,\"exit_code\":%d,\"output\":\"%s\",\"report\":\"%s\"}\n",
-            ok ? "true" : "false", code, output, report);
+
+    /* Promote nxt -> cur and capture verifier states on a successful step
+     * that produced new bytecode. Empty nxt (utility step) keeps cur. */
+    struct stat nst;
+    uint32_t final_insn_count = probe_meta.insn_cnt;
+    if (ok && stat(nxt, &nst) == 0 && nst.st_size > 0) {
+        capture_verifier_states(&probe_meta, nxt, verifier_log);
+        rename(nxt, cur);
+        final_insn_count = (uint32_t)(nst.st_size / sizeof(struct bpf_insn));
+        pthread_mutex_lock(&state_mutex);
+        if (pd) pd->step_seq = step_seq + 1;
+        pthread_mutex_unlock(&state_mutex);
+    } else {
+        unlink(nxt);
+    }
+
+    char *tar_b64 = NULL;
+    if (!ok) tar_b64 = tar_workdir_b64(workdir);
+
+    /* On failure, surface the last N bytes of bpfopt stdout+stderr as a
+     * JSON-escaped string so the runner can log a useful diagnostic without
+     * needing access to the workdir. */
+    char err_msg[2048] = {0};
+    if (!ok) {
+        int lfd = open(subproc_log, O_RDONLY);
+        if (lfd >= 0) {
+            struct stat lst;
+            if (fstat(lfd, &lst) == 0 && lst.st_size > 0) {
+                off_t off = lst.st_size > 1024 ? lst.st_size - 1024 : 0;
+                lseek(lfd, off, SEEK_SET);
+                char raw[1024];
+                ssize_t n = read(lfd, raw, sizeof(raw) - 1);
+                if (n > 0) {
+                    raw[n] = 0;
+                    /* JSON-escape: replace ", \, control chars. */
+                    size_t o = 0;
+                    for (ssize_t i = 0; i < n && o + 8 < sizeof(err_msg); i++) {
+                        unsigned char c = raw[i];
+                        if (c == '"' || c == '\\') {
+                            err_msg[o++] = '\\';
+                            err_msg[o++] = c;
+                        } else if (c == '\n') {
+                            err_msg[o++] = '\\';
+                            err_msg[o++] = 'n';
+                        } else if (c == '\r') {
+                            err_msg[o++] = '\\';
+                            err_msg[o++] = 'r';
+                        } else if (c == '\t') {
+                            err_msg[o++] = '\\';
+                            err_msg[o++] = 't';
+                        } else if (c >= 0x20) {
+                            err_msg[o++] = c;
+                        }
+                    }
+                    err_msg[o] = 0;
+                }
+            }
+            real_close(lfd);
+        }
+    }
+
+    log_line("execute_step prog_id=%u exit=%d ms=%lu seq=%d output=%s",
+             want_id, code, (unsigned long)bpfopt_ms, step_seq, cur);
+
+    /* Build response with daemon-parity fields. */
+    size_t cap = 8192 + (tar_b64 ? strlen(tar_b64) : 0);
+    char *resp = (char *)malloc(cap);
+    if (!resp) {
+        dprintf(cli, "{\"ok\":false,\"error\":\"oom building response\"}\n");
+        free(tar_b64);
+        free(local_ids); free(local_types);
+        return;
+    }
+    size_t roff = 0;
+    roff += snprintf(resp + roff, cap - roff,
+                     "{\"ok\":%s,\"exit_code\":%d,\"output\":\"%s\","
+                     "\"report\":\"%s\",\"bpfopt_ms\":%lu,"
+                     "\"program\":{\"prog_id\":%u,\"prog_name\":\"%s\","
+                     "\"prog_type\":%u,\"orig_insn_count\":%u,"
+                     "\"final_insn_count\":%u}",
+                     ok ? "true" : "false", code, cur, report,
+                     (unsigned long)bpfopt_ms, want_id, prog_name,
+                     prog_type_num, probe_meta.insn_cnt, final_insn_count);
+    if (!ok && err_msg[0])
+        roff += snprintf(resp + roff, cap - roff, ",\"error\":\"%s\"", err_msg);
+    if (tar_b64)
+        roff += snprintf(resp + roff, cap - roff,
+                         ",\"workdir_tar_b64\":\"%s\"", tar_b64);
+    roff += snprintf(resp + roff, cap - roff, "}\n");
+    (void)!write(cli, resp, roff);
+    free(resp);
+    free(tar_b64);
+    free(local_ids); free(local_types);
 }
 
 static void emit_dump_state(int cli) {
