@@ -10,3 +10,7 @@
 [submodule "docs/paper"]
 	path = docs/paper
 	url = https://github.com/yunwei37/bpfrejit-paper
+[submodule "llvm-backend/llvm"]
+	path = llvm-backend/llvm
+	url = https://github.com/eunomia-bpf/bpf-kinsn-llvm.git
+	branch = main
