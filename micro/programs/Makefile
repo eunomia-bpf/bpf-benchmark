@@ -10,18 +10,7 @@ NATIVE_CFLAGS := -Wall -Wextra -O2 -g -fPIC -shared -fno-plt -DMICRO_NATIVE \
 	-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
 	-mllvm -switch-to-lookup=false \
 	$(SYS_INCLUDE_FLAGS) -MMD -MP
-# -fno-plt is mirrored from ebpf-vm/test/Makefile for consistency. The
-# Stage 1 micro programs are pure-compute (no helper/map references), so
-# this flag has no observable effect on their generated .text bytes --
-# we set it so the build flags don't diverge between Stage 1 and 2.
-HANDCRAFT_CFLAGS := -Wall -Wextra -O2 -g -fPIC -shared \
-	-I$(REPO_ROOT)/runner/include \
-	-I$(REPO_ROOT)/vendor/libbpf/include/uapi \
-	-I$(REPO_ROOT)/vendor/libbpf/include \
-	$(SYS_INCLUDE_FLAGS) -MMD -MP
-
 BPF_SRCS := $(wildcard *.bpf.c)
-HANDCRAFT_SRCS := $(wildcard *.handcraft.c)
 BPF_OBJS := $(patsubst %.bpf.c,$(OUTPUT_DIR)/%.bpf.o,$(BPF_SRCS))
 
 # Native_lab support: the userspace .native.so reads kernel ctx structs
@@ -34,12 +23,10 @@ KERNEL_OFFSETS := $(OUTPUT_DIR)/kernel_offsets.h
 BPF_DEPS := $(patsubst %.bpf.c,$(OUTPUT_DIR)/%.bpf.d,$(BPF_SRCS))
 NATIVE_SOS := $(patsubst %.bpf.c,$(OUTPUT_DIR)/%.native.so,$(BPF_SRCS))
 NATIVE_DEPS := $(patsubst %.bpf.c,$(OUTPUT_DIR)/%.native.d,$(BPF_SRCS))
-HANDCRAFT_SOS := $(patsubst %.handcraft.c,$(OUTPUT_DIR)/%.handcraft.so,$(HANDCRAFT_SRCS))
-HANDCRAFT_DEPS := $(patsubst %.handcraft.c,$(OUTPUT_DIR)/%.handcraft.d,$(HANDCRAFT_SRCS))
 
 .PHONY: all clean
 
-all: $(BPF_OBJS) $(NATIVE_SOS) $(HANDCRAFT_SOS)
+all: $(BPF_OBJS) $(NATIVE_SOS)
 
 $(OUTPUT_DIR)/%.bpf.o: %.bpf.c | $(OUTPUT_DIR)
 	$(CLANG) $(CFLAGS) -MF "$(OUTPUT_DIR)/$*.bpf.d" -MT "$@" -c -o "$@" "$<"
@@ -70,23 +57,18 @@ $(NATIVE_SOS): $(KERNEL_OFFSETS)
 $(OUTPUT_DIR)/%.native.so: %.bpf.c $(KERNEL_OFFSETS) | $(OUTPUT_DIR)
 	$(CLANG) $(NATIVE_CFLAGS) -I"$(OUTPUT_DIR)" -MF "$(OUTPUT_DIR)/$*.native.d" -MT "$@" -o "$@" "$<"
 
-$(OUTPUT_DIR)/%.handcraft.so: %.handcraft.c | $(OUTPUT_DIR)
-	$(CLANG) $(HANDCRAFT_CFLAGS) -MF "$(OUTPUT_DIR)/$*.handcraft.d" -MT "$@" -o "$@" "$<"
-
 $(OUTPUT_DIR):
 	mkdir -p "$@"
 
 clean:
 	rm -f \
 		"$(OUTPUT_DIR)"/*.bpf.o \
-		"$(OUTPUT_DIR)"/*.bpf.d \
-		"$(OUTPUT_DIR)"/*.native.so \
-		"$(OUTPUT_DIR)"/*.native.d \
-		"$(OUTPUT_DIR)"/*.handcraft.so \
-		"$(OUTPUT_DIR)"/*.handcraft.d \
-		"$(OUTPUT_DIR)"/*.bpf.bin \
-		"$(OUTPUT_DIR)"/*.directive.bin \
-		"$(OUTPUT_DIR)"/*.policy.bin \
-		"$(OUTPUT_DIR)"/kernel_offsets.h
+			"$(OUTPUT_DIR)"/*.bpf.d \
+			"$(OUTPUT_DIR)"/*.native.so \
+			"$(OUTPUT_DIR)"/*.native.d \
+			"$(OUTPUT_DIR)"/*.bpf.bin \
+			"$(OUTPUT_DIR)"/*.directive.bin \
+			"$(OUTPUT_DIR)"/*.policy.bin \
+			"$(OUTPUT_DIR)"/kernel_offsets.h
 
--include $(BPF_DEPS) $(NATIVE_DEPS) $(HANDCRAFT_DEPS)
+-include $(BPF_DEPS) $(NATIVE_DEPS)

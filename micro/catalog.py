@@ -254,11 +254,6 @@ def _load_micro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
         base_name = str(benchmark["base_name"])
         object_path = (program_dir / f"{base_name}.bpf.o").resolve()
         runtime_names = tuple(str(runtime) for runtime in benchmark.get("runtimes", ()))
-        handcraft_base_name = None
-        handcraft_object_path = None
-        if (REPO_ROOT / "micro" / "programs" / f"{base_name}.handcraft.c").exists():
-            handcraft_base_name = base_name
-            handcraft_object_path = (program_dir / f"{handcraft_base_name}.handcraft.so").resolve()
         targets.append(
             CatalogTarget(
                 name=str(benchmark["name"]),
@@ -281,8 +276,6 @@ def _load_micro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
                 transports=runtime_transports,
                 metadata={
                     "base_name": base_name,
-                    "handcraft_base_name": handcraft_base_name,
-                    "handcraft_object_path": handcraft_object_path,
                 },
             )
         )
