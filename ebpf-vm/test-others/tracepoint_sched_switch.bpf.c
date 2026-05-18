@@ -11,8 +11,7 @@
  *     relocations, so a CTX-agnostic program is the simplest case
  *     to start with.
  */
-#include <linux/bpf.h>
-#include <bpf/bpf_helpers.h>
+#include "include/native_helpers.h"
 
 struct {
     __uint(type, BPF_MAP_TYPE_HASH);

@@ -64,21 +64,62 @@ $(OUTPUT_DIR)/%.bpf.o: %.bpf.c | $(OUTPUT_DIR)
 $(OUTPUT_DIR)/%.native.o: %.bpf.c | $(OUTPUT_DIR)
 	$(CLANG) $(NATIVE_CFLAGS) -MF "$(OUTPUT_DIR)/$*.native.d" -MT "$@" -o "$@" "$<"
 
-# Disable frame-pointer omission for the runner so the uprobe target is
-# easy to spot in objdump; otherwise -O2 may inline it even with
-# __attribute__((noinline)) on older clang. Build with `cc` (host) for
-# the runner binary.
-$(RUNNER): runner.c | $(OUTPUT_DIR)
-	cc -O2 -g -Wall -Wextra -fno-omit-frame-pointer \
-	    $(LIBBPF_CFLAGS) -o "$@" runner.c $(LIBBPF_LDFLAGS)
+# C++ runner that exercises BOTH the kernel-JIT path (libbpf) and the
+# native_lab kinsn path (via native_lab_attach.cpp), then reports
+# per-call handler overhead for each. -fno-omit-frame-pointer keeps the
+# uprobe target visible in symbols even at -O2.
+$(RUNNER): runner.cpp native_lab_attach.cpp native_lab_attach.hpp | $(OUTPUT_DIR)
+	c++ -O2 -g -Wall -Wextra -std=c++17 -fno-omit-frame-pointer \
+	    $(LIBBPF_CFLAGS) -o "$@" runner.cpp native_lab_attach.cpp \
+	    $(LIBBPF_LDFLAGS)
 
 test: all
-	@echo "=== kprobe ==="
-	sudo "$(RUNNER)" "$(OUTPUT_DIR)/kprobe_getpid.bpf.o" kprobe
-	@echo "=== uprobe ==="
-	sudo "$(RUNNER)" "$(OUTPUT_DIR)/uprobe_self.bpf.o" uprobe
-	@echo "=== raw_tracepoint ==="
-	sudo "$(RUNNER)" "$(OUTPUT_DIR)/tracepoint_sched_switch.bpf.o" raw_tp
+	sudo "$(RUNNER)"
+
+# Boot virtme-ng with the bench framework's kinsn-aware kernel + insmod
+# the bpf_x86_native_lab .ko, then run the perf-compare runner.
+# Requires `make image-bpfopt-host-artifacts` (the regular bench build)
+# to have produced the kernel + modules under .cache/. Host's Ubuntu
+# kernel doesn't ship the kinsn / BPF_PROG_REJIT framework, so the
+# native_lab leg fails outside the framework VM -- this is the canonical
+# way to exercise it standalone.
+KIMG := $(REPO_ROOT)/.cache/runtime-kernel/x86_64/bzImage
+KINSN_KO_DIR := $(REPO_ROOT)/.cache/repo-build/host/kinsn/x86_64
+NATIVE_LINK_HOST := $(REPO_ROOT)/ebpf-vm/x86/native_lab/native_link/target/release/native-link
+
+VM_SCRIPT := $(OUTPUT_DIR)/run-in-vm.sh
+test-vm: all $(VM_SCRIPT)
+	@if [ ! -f "$(KIMG)" ]; then \
+	    echo "framework kernel missing: $(KIMG)"; \
+	    echo "run \`make corpus\` (or any bench target) once to populate the cache."; \
+	    exit 1; \
+	fi
+	@if [ ! -f "$(NATIVE_LINK_HOST)" ]; then \
+	    echo "native-link binary missing: $(NATIVE_LINK_HOST)"; \
+	    echo "run \`(cd ebpf-vm/x86/native_lab/native_link && cargo build --release)\`."; \
+	    exit 1; \
+	fi
+	vng --run "$(KIMG)" --cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" \
+	    --overlay-rwdir /tmp --disable-monitor \
+	    --append "loglevel=7 panic=30 oops=panic" \
+	    --exec "$(VM_SCRIPT)"
+
+# Script the VM runs at boot. Loads kinsn modules, then invokes the
+# perf-compare runner with the host-built native-link binary path
+# threaded through via an env var.
+$(VM_SCRIPT): | $(OUTPUT_DIR)
+	@printf '%s\n' \
+	    '#!/bin/bash' \
+	    'set -eu' \
+	    'cd "$(CURDIR)"' \
+	    'for ko in $(KINSN_KO_DIR)/bpf_*.ko; do' \
+	    '    [ "$$(basename "$$ko" .ko)" = "bpf_barrier" ] && continue' \
+	    '    insmod "$$ko" 2>/dev/null || true' \
+	    'done' \
+	    'export BPFREJIT_NATIVE_LINK_BINARY="$(NATIVE_LINK_HOST)"' \
+	    '"$(RUNNER)"' \
+	    > "$@"
+	@chmod +x "$@"
 
 clean:
 	rm -rf $(OUTPUT_DIR)

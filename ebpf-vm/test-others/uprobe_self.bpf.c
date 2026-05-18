@@ -7,8 +7,7 @@
  *
  * Counts entries into a single-slot HASH map keyed by 0.
  */
-#include <linux/bpf.h>
-#include <bpf/bpf_helpers.h>
+#include "include/native_helpers.h"
 
 struct {
     __uint(type, BPF_MAP_TYPE_HASH);

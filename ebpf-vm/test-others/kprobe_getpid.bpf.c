@@ -13,8 +13,7 @@
  * requires a separate attach pipeline, exercised here for the first
  * time.
  */
-#include <linux/bpf.h>
-#include <bpf/bpf_helpers.h>
+#include "include/native_helpers.h"
 
 struct {
     __uint(type, BPF_MAP_TYPE_HASH);
