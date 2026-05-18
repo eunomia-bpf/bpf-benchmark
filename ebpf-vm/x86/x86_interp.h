@@ -108,6 +108,11 @@
 #define X86_PTR_RODATA 4U
 #define X86_PTR_STACK 5U
 
+#define X86_CTX_DATA_OFF 0LL
+#define X86_CTX_DATA_END_OFF 8LL
+#define X86_SKB_LEN_OFF 0x70LL
+#define X86_SKB_DATA_OFF 0xd0LL
+
 #define X86_MEM_AUX(INDEX, SCALE_LOG2) \
 	(((__u32)(INDEX) & 0xffU) | (((__u32)(SCALE_LOG2) & 0xffU) << 8))
 #define X86_MEM_AUX_FULL(INDEX, SCALE_LOG2, MEM_WIDTH)                    \
@@ -1599,10 +1604,12 @@ static __always_inline int x86_load_mem(struct x86_state *state,
 	if (x86_promote_index_packet_base(state, insn->src, insn->aux,
 					  &base, &tag, &disp) < 0)
 		return X86_INTERP_TRAP;
-	if (tag == X86_PTR_CTX && insn->src == X86_RDI && disp == 0)
+	if (tag == X86_PTR_CTX && insn->src == X86_RDI &&
+	    (disp == X86_CTX_DATA_OFF || disp == X86_SKB_DATA_OFF))
 		return x86_write_ptr_reg(state, insn->dst, data,
 					 X86_PTR_PACKET);
-	if (tag == X86_PTR_CTX && insn->src == X86_RDI && disp == 8)
+	if (tag == X86_PTR_CTX && insn->src == X86_RDI &&
+	    disp == X86_CTX_DATA_END_OFF)
 		return x86_write_ptr_reg(state, insn->dst, data_end,
 					 X86_PTR_PACKET_END);
 #ifdef X86_VM_ENABLE_STACK
@@ -1695,6 +1702,11 @@ static __always_inline int x86_read_mem_value(struct x86_state *state,
 	if (x86_promote_index_packet_base(state, base_reg, aux, &base, &tag,
 					  &disp) < 0)
 		return X86_INTERP_TRAP;
+	if (tag == X86_PTR_CTX && base_reg == X86_RDI &&
+	    disp == X86_SKB_LEN_OFF && width == X86_WIDTH_32) {
+		*value = (__u32)((__u64)data_end - (__u64)data);
+		return 0;
+	}
 	if (tag == X86_PTR_PACKET)
 		return x86_read_packet_value(data, data_end, base, disp, width,
 					     value);
@@ -1803,6 +1815,20 @@ static __always_inline int x86_cmp_mem_imm(struct x86_state *state,
 		return X86_INTERP_TRAP;
 	if (x86_mem_offset(state, insn->aux, disp, &disp) < 0)
 		return X86_INTERP_TRAP;
+	if (tag == X86_PTR_CTX && insn->dst == X86_RDI &&
+	    disp == X86_SKB_LEN_OFF && insn->flags == X86_WIDTH_32) {
+		value = (__u32)((__u64)data_end - (__u64)data);
+		if (insn->op == X86_OP_CMP_MEM_REG) {
+			if (x86_read_reg(state, insn->src, &imm) < 0)
+				return X86_INTERP_TRAP;
+		}
+		if (insn->op == X86_OP_TEST_MEM_IMM)
+			x86_set_logic_flags(state, value & imm, insn->flags);
+		else
+			x86_set_sub_flags(state, value, imm, value - imm,
+					  insn->flags);
+		return X86_INTERP_CONTINUE;
+	}
 	if (tag != X86_PTR_PACKET)
 		return X86_INTERP_TRAP;
 	if (x86_packet_bounds(data, data_end, base, disp, insn->flags, &addr) < 0)

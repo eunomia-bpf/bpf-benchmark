@@ -647,6 +647,7 @@ def _run_suite_lifecycle_sessions(
                     prog_names_by_id[pid] = pname
             result.rejit_result = active_daemon_session.apply_rejit(
                 result.rejit_prog_ids,
+                app_pid=int(session.runner.pid or 0),
                 enabled_passes=apply_enabled_passes,
                 failure_artifacts_dir=prepared_daemon_session.failure_artifacts_dir,
                 app_name=yaml_app_name,

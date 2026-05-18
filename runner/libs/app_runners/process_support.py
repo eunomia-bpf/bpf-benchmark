@@ -200,9 +200,16 @@ class ManagedProcessSession:
         self.before_ids: set[int] = set()
 
     def __enter__(self) -> "ManagedProcessSession":
+        from ..agent import _shim_env_for, _SHIM_SOCK_DIR
         merged_env = dict(os.environ)
+        # Inject LD_PRELOAD + shim socket dir based on the target binary's libc
+        # variant, same contract as agent.start_agent for bpftrace/bcc/tracee.
+        # Without this, katran's ManagedProcessSession spawns without the shim
+        # and apply_rejit can't find a per-pid socket.
+        merged_env.update(_shim_env_for(self.command[0]))
         if self.env is not None:
             merged_env.update(self.env)
+        os.makedirs(_SHIM_SOCK_DIR, exist_ok=True)
         self.before_ids = {
             int(record.get("id", 0) or 0)
             for record in bpftool_prog_show_records()

@@ -113,10 +113,11 @@ runner/inventory.json
 runner/corpus/results/
 docs/reference/papers/*.pdf
 
+micro/results/*/*.bpf.d
+micro/results/*/*.bpf.o
+
 # Track summary files inside details/, ignore large per-program detail payloads.
 **/results/*/details/*
-micro/results/llvm_kinsn_*/*.bpf.d
-micro/results/llvm_kinsn_*/*.bpf.o
 !**/results/*/details/result.json
 !**/results/*/details/*.md
 !**/results/*/details/*/*.md
@@ -230,6 +231,21 @@ micro/results/*/details/jit_dumps/
 micro/results/*/details/jit_dumps/**
 micro/results/*/details/code_compare/
 micro/results/*/details/code_compare/**
+micro/results/llvm_kinsn_programs_*/*.bpf.d
+micro/results/llvm_kinsn_programs_*/*.bpf.ll
+micro/results/llvm_kinsn_programs_*/*.bpf.o
+micro/results/llvm_kinsn_programs_*/*.h
+micro/results/llvm_kinsn_programs_*/*.native.d
+micro/results/llvm_kinsn_programs_*/*.so
+micro/results/llvm_kinsn_programs_*/*.o
+micro/results/llvm_nokinsn_programs_*/*.bpf.d
+micro/results/llvm_nokinsn_programs_*/*.bpf.ll
+micro/results/llvm_nokinsn_programs_*/*.h
+micro/results/llvm_nokinsn_programs_*/*.bpf.o
+micro/results/llvm_nokinsn_programs_*/*.native.d
+micro/results/llvm_nokinsn_programs_*/*.so
+micro/results/llvm_nokinsn_programs_*/*.o
+micro/programs/*.md
 e2e/cases/katran/bin/
 
 # Paper build artifacts

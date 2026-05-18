@@ -120,6 +120,67 @@ compile time is part of the experiment surface for large generated verifier
 artifacts; a slow compile should be observed, not converted into a synthetic
 compile-fail timeout.
 
+Current observation: after removing Python helper selection, some large
+generated-C artifacts can keep `clang -O2 -target bpf` busy for tens of minutes
+while it tries to specialize the C-authored interpreter dispatch. That is a real
+cost of the cleaner proof boundary, not a reason for the harness to kill clang.
+If this remains too expensive, the next design change must still keep helper
+selection out of Python; it should use C-authored templates/macros or a smaller
+interpreter state shape.
+
+### Micro Compile And Verify Matrix
+
+Last full-run baseline before the generator shrink: both variants are 27/29.
+The same two programs fail verifier load with `E2BIG`; all other programs load,
+run, and match expected result/retval.
+
+`current` is the active C-dispatch path (`generate_micro_proofs.py` +
+`x86_vm_bpf.h`). `helper-selection` is the restored backup path
+(`generate_micro_proofs_helper_selection.py` + `x86_vm_bpf_helper_selection.h`)
+used only as a compile-cost baseline. The helper-selection data was collected
+with `--jobs 8 --run-label parallel8`. Current rows are a combined run: the
+first five rows and `trace_event_type_switch_dispatch` came from the no-timeout
+sequential run; the remaining rows came from `--jobs 8 --run-label
+parallel8-rest`. Parallel wall times include CPU contention by design; they are
+recorded as the observed experiment cost. After this baseline, the active
+generator was reduced from 1423 to 774 lines by removing Python-owned
+`bpf_loop` lowering, internal call-return stack lowering, Markdown ASM input,
+and stack-depth feature selection, then adding C-owned branch fuel and native
+subfunction protocols. The full batch has not been rerun on that reduced
+generator yet.
+
+| Micro program | Status | Current clang s | Current verify s | Current verify | Helper clang s | Helper verify s | Helper verify | Note |
+| --- | --- | ---: | ---: | --- | ---: | ---: | --- | --- |
+| `simple` | ok | 12.355 | 0.013 | ok | 0.202 | 0.013 | ok |  |
+| `simple_packet` | ok | 5.159 | 0.015 | ok | 0.184 | 0.015 | ok |  |
+| `bitmap_popcount_scan` | ok | 42.873 | 0.040 | ok | 0.414 | 0.037 | ok |  |
+| `sorted_rule_binary_search` | ok | 95.229 | 0.146 | ok | 0.581 | 0.187 | ok |  |
+| `bcc_runqlat_log2_histogram_bucket` | ok | 604.283 | 0.841 | ok | 1.917 | 0.947 | ok |  |
+| `trace_event_type_switch_dispatch` | ok | 5080.961 | 1.113 | ok | 1.451 | 0.908 | ok |  |
+| `packet_checksum_fold` | ok | 26.586 | 0.684 | ok | 0.381 | 0.523 | ok | XDP retval 2. |
+| `payload_prefix_memcmp_scan` | ok | 996.500 | 0.103 | ok | 3.193 | 0.029 | ok |  |
+| `packet_vlan_tcpopt_parser` | ok | 789.335 | 0.093 | ok | 3.257 | 0.019 | ok |  |
+| `bpf_local_call_fanout_dispatch` | fail | 196.136 | 3.307 | run-fail | 1.748 | 2.542 | run-fail | Verifier E2BIG in both variants. |
+| `flow_5tuple_rss_hash` | ok | 1036.762 | 0.016 | ok | 4.854 | 0.017 | ok |  |
+| `katran_lb_consistent_hash_select` | ok | 7549.586 | 0.027 | ok | 22.169 | 0.020 | ok |  |
+| `cilium_policy_guard_tree_filter` | ok | 839.188 | 0.053 | ok | 3.178 | 0.046 | ok |  |
+| `siphash_rotate64_mixer` | ok | 5818.407 | 0.027 | ok | 24.311 | 0.016 | ok |  |
+| `packet_record_bounds_window` | ok | 366.625 | 0.054 | ok | 1.347 | 0.037 | ok |  |
+| `flow_record_field_scan` | ok | 408.265 | 0.034 | ok | 1.713 | 0.028 | ok |  |
+| `packed_header_bitfield_decode` | ok | 4407.615 | 0.122 | ok | 14.250 | 0.121 | ok |  |
+| `bpftrace_string_search_prefix_scan` | fail | 114.663 | 3.479 | run-fail | 0.677 | 2.589 | run-fail | Verifier E2BIG in both variants. |
+| `tracee_syscall_name_table_lookup` | ok | 1862.937 | 0.120 | ok | 1.347 | 0.121 | ok |  |
+| `tracee_http_method_prefix_detect` | ok | 1237.278 | 0.028 | ok | 1.911 | 0.029 | ok |  |
+| `cilium_socket_lb_service_select` | ok | 1147.972 | 0.252 | ok | 2.584 | 0.159 | ok |  |
+| `bcc_tcpconnect_ipv4_tuple_filter` | ok | 1095.224 | 0.099 | ok | 2.335 | 0.082 | ok |  |
+| `tetragon_process_event_arg_filter` | ok | 5107.060 | 0.588 | ok | 18.292 | 0.531 | ok |  |
+| `otel_stack_frame_unwind_scan` | ok | 1075.482 | 0.119 | ok | 2.424 | 0.047 | ok |  |
+| `cilium_ct_nat_tuple_rewrite` | ok | 1189.184 | 0.076 | ok | 3.420 | 0.077 | ok |  |
+| `packet_toeplitz_rss_hash` | ok | 2178.522 | 0.435 | ok | 2.290 | 0.052 | ok |  |
+| `bpftrace_comm_key_fnv_hash` | ok | 5063.579 | 0.079 | ok | 24.316 | 0.094 | ok |  |
+| `tc_packet_checksum_fold` | ok | 19.151 | 0.497 | ok | 0.404 | 0.648 | ok | TC retval 0. |
+| `cgroup_skb_hash_chain` | ok | 247.091 | 0.028 | ok | 0.923 | 0.026 | ok | cgroup skb retval 1; native SKB ctx offsets modeled in C interpreter. |
+
 For failing objects, capture the kernel verifier log through the loader:
 
 ```sh
@@ -131,53 +192,39 @@ sudo -n ebpf-vm/loader/target/debug/ebpf-vm-loader \
   --verifier-log /tmp/bpf_local_call_fanout_dispatch.verifier.log
 ```
 
-Result: 27 of 29 selected micro programs loaded in the kernel, passed
-`BPF_PROG_TEST_RUN`, and matched expected output/retval. The remaining two
-failures are verifier/proof-shape issues after removing Python special
-renderers, not benchmark-name dispatch in the generator.
+### Direct BPF Control For The Two Verifier Failures
 
-Python LOC check for this cleanup:
+The two remaining failures are verifier-complexity failures introduced by the
+x86-VM proof shape, not evidence that the original micro programs are rejected.
+As a control, the original `micro/programs/*.bpf.c` objects were compiled and
+loaded with the same loader, same generated inputs, same expected result, and
+same XDP retval on 2026-05-18. Both direct eBPF programs pass verifier and
+`BPF_PROG_TEST_RUN`.
+
+| Micro program | Direct eBPF result | Direct load/test s | Direct static BPF insns | Direct verifier processed / total / peak / max-state | x86 VM result | x86 VM load/test s | x86 VM static BPF insns | x86 VM verifier processed / total / peak / max-state | Reason |
+| --- | --- | ---: | ---: | --- | --- | ---: | ---: | --- | --- |
+| `bpf_local_call_fanout_dispatch` | ok | 0.03 | 528 | `9572 / 120 / 70 / 10` | `E2BIG` | 3.307 | 2341 | `1000001 / 30881 / 1834 / 33` | Native 16-record loop dispatches into four local-call targets. The x86-VM lowering carries a full register/flag/pointer-tag state through generated native subfunctions and then joins at common return blocks, so verifier work grows until the global processed-insn limit is hit. |
+| `bpftrace_string_search_prefix_scan` | ok | 0.07 | 200 | `21394 / 546 / 143 / 47` | `E2BIG` | 3.479 | 1487 | `1000001 / 49269 / 1178 / 94` | The prefix scan is a bounded byte loop in direct eBPF, but the x86-VM proof repeats byte loads, x86 flag updates, pointer-tag checks, and loop callback state joins for each compare step. That increases `max_states_per_insn` and `mark_read` until the processed-insn limit is hit. |
+
+The backup `helper-selection` path has the same verifier failure signature for
+these two programs (`Processed 1000001 insn` with the same state counts), even
+though its clang compile time is much lower. That confirms the immediate
+blocker is the verifier-visible state shape, not Python helper selection or a
+specific generated-C spelling.
+
+Python LOC check for this cleanup and backup:
 
 ```text
-generate_micro_proofs.py: 1763 -> 1421 lines
-x86_vm_bpf.h:           202 -> 522 lines
+generate_micro_proofs.py:                  1763 -> 774 lines
+generate_micro_proofs_helper_selection.py: backup at 1503 lines
+x86_vm_bpf.h:                            202 -> 642 lines
+x86_vm_bpf_helper_selection.h:           backup at 533 lines
 ```
 
 The line movement is intentional: proof protocol complexity is being moved out
 of Python and into the C-authored interpreter/header where it can be specified
-and eventually verified with the helper semantics.
-
-| Micro program | Status | Note |
-| --- | --- | --- |
-| `simple` | ok |  |
-| `simple_packet` | ok |  |
-| `bitmap_popcount_scan` | ok |  |
-| `sorted_rule_binary_search` | ok |  |
-| `bcc_runqlat_log2_histogram_bucket` | ok |  |
-| `trace_event_type_switch_dispatch` | ok |  |
-| `packet_checksum_fold` | ok | XDP return value is `2`; exact-bound loop back-edges now use verifier-visible callback index fallback instead of aborting at bound exhaustion. |
-| `payload_prefix_memcmp_scan` | ok |  |
-| `packet_vlan_tcpopt_parser` | ok |  |
-| `bpf_local_call_fanout_dispatch` | fail | Verifier `E2BIG`: `Processed 1000001 insn`, limit `1000000`, `max_states_per_insn 33`, `total_states 30881`; log: `/tmp/bpf_local_call_fanout_dispatch.verifier.log`. |
-| `flow_5tuple_rss_hash` | ok |  |
-| `katran_lb_consistent_hash_select` | ok |  |
-| `cilium_policy_guard_tree_filter` | ok |  |
-| `siphash_rotate64_mixer` | ok |  |
-| `packet_record_bounds_window` | ok |  |
-| `flow_record_field_scan` | ok |  |
-| `packed_header_bitfield_decode` | ok |  |
-| `bpftrace_string_search_prefix_scan` | fail | Verifier `E2BIG`: `Processed 1000001 insn`, limit `1000000`, `max_states_per_insn 95`, `total_states 49270`; log: `/tmp/bpftrace_string_search_prefix_scan.verifier.log`. |
-| `tracee_syscall_name_table_lookup` | ok |  |
-| `tracee_http_method_prefix_detect` | ok |  |
-| `cilium_socket_lb_service_select` | ok |  |
-| `bcc_tcpconnect_ipv4_tuple_filter` | ok |  |
-| `tetragon_process_event_arg_filter` | ok |  |
-| `otel_stack_frame_unwind_scan` | ok |  |
-| `cilium_ct_nat_tuple_rewrite` | ok |  |
-| `packet_toeplitz_rss_hash` | ok |  |
-| `bpftrace_comm_key_fnv_hash` | ok |  |
-| `tc_packet_checksum_fold` | ok | Return value is `0` by TC ABI, as declared in `micro_pure_jit.yaml`. |
-| `cgroup_skb_hash_chain` | ok | Return value is `1` by cgroup skb ABI, as declared in `micro_pure_jit.yaml`. |
+and eventually verified with the helper semantics. The helper-selection backup is
+kept only as compile-cost evidence for this experiment.
 
 The immediate generated-C target is now cleaner but not complete. JSON-link
 completion is a separate next experiment.
@@ -190,28 +237,54 @@ proof obligations rather than benchmark-specific fixes.
 
 Active generator rule: Python must not rewrite native return semantics, branch
 semantics, or opcode semantics. A native `ret` is emitted as
-`X86_VM_RET_RAX();`; one native instruction becomes one interpreter-helper step
+`X86_VM_X86_RET();`; one native instruction becomes one interpreter-helper step
 plus explicit native branch/return structure. Program-type return mapping lives
 in `micro/config/micro_pure_jit.yaml` via `expected_retval`, and the runner
 reuses that metadata for XDP (`2` default), TC (`0`), and cgroup skb (`1`).
+
+C macro and inline-helper boundary rule: C may use macros, `__always_inline`,
+`__builtin_constant_p`, and clang constant propagation to specialize local x86
+ISA semantics such as opcode, register, width, memory operand, and flag
+handling. C must not become a hidden cross-instruction renderer: no
+benchmark-name logic, no algorithm reconstruction, no semantic shortcut for a
+known output store, and no program-shape-specific rewrite that is not an x86
+instruction semantics rule. Python remains a one-to-one producer of native x86
+instruction steps and explicit native control-flow labels.
+
+Generator complexity rule: the Python proof generator must stay below 800
+lines. Its only semantic output should be a simple native stream such as
+`label: insn` plus metadata needed to preserve labels, native operands,
+expected retval/result, and input selection. Python must not own loop lowering,
+call lowering, liveness, state-shape selection, helper selection, or
+verifier-workaround logic. Those belong in C-authored interpreter/spec code
+where they can be written once, specified, and eventually verified.
+
+The aborted `__noinline -> __always_inline` plus `bpf_loop -> C for-loop`
+experiment showed why this line matters: doing that transformation in
+`generate_micro_proofs.py` only adds more Python-owned lowering logic. The
+current generator shrink instead removed Python `bpf_loop` lowering and
+internal call-return stack lowering outright. C now consumes the simple labeled
+instruction stream through ISA-level branch/call/return macros
+(`X86_VM_X86_JCC`, `X86_VM_X86_JMP`, `X86_VM_X86_CALL`,
+`X86_VM_X86_RET`): branch macros lower native x86 control flow to C labels and
+`goto`, backward edges consume C-owned verifier fuel, and subfunction
+callee-save/restore lives in `x86_vm_bpf.h`.
 
 Generated-C migration todo:
 
 | Item | Status | Completion check |
 | --- | --- | --- |
-| Native return ABI lives in metadata/header, not Python rewrites | done | `ret` emits `X86_VM_RET_RAX();`; runner checks `expected_retval` from YAML. |
+| Native return ABI lives in metadata/header, not Python rewrites | done | `ret` emits `X86_VM_X86_RET();`; runner checks `expected_retval` from YAML. |
 | Remove benchmark-name renderers from Python | done | `generate_micro_proofs.py` no longer dispatches on `packet_checksum_fold`, `bpftrace_string_search_prefix_scan`, `bpf_local_call_fanout_dispatch`, or other benchmark names. |
 | Remove stale C special templates | done | Unused checksum/string-scan C helper templates were deleted from `x86_vm_bpf.h`; the header now contains generic VM plumbing only. |
-| Move proof protocol out of Python | partial | Python pc-dispatch and ctx-store write-set insertion were removed; loop RDI restore, native-call loop marking, and ABI output-store preparation now live in `x86_vm_bpf.h`. |
-| Generic loop lowering | partial | Structural loop detection lowers selected high-pressure loops to `bpf_loop`; two micro programs still need a cleaner C typed-helper/state-abstraction proof shape. |
-| Run full generated-C batch | partial | 27/29 selected micro programs currently pass. |
+| Move proof protocol out of Python | partial | Python pc-dispatch, ctx-store write-set insertion, `bpf_loop` lowering, internal call-return stack lowering, and stack-depth feature selection were removed; remaining Python CFG work is label/branch emission only. |
+| C-owned loop/call protocol | partial | `X86_VM_X86_JCC/JMP` own backward-edge fuel guards; `X86_VM_X86_CALL` and `X86_VM_SUB_BEGIN/X86_VM_X86_SUB_RET` own native call lowering and callee-save/restore. Verifier cost is still being measured. |
+| Shrink Python generator below 800 lines | done | `generate_micro_proofs.py` is 774 lines after moving loop/call proof details into C-authored protocol macros. |
+| Run full generated-C batch after generator shrink | pending | Last full baseline remains 27/29 before the shrink; rerun in progress after the C-owned loop/call protocol. |
 
-Remaining generated-C failures:
-
-| Micro program | Current blocker | Required proof-shape change |
-| --- | --- | --- |
-| `bpf_local_call_fanout_dispatch` | The callback joins states across generated native subfunctions (`local_call_*`) until the verifier hits `Processed 1000001 insn` (`max_states_per_insn 33`). | Reduce verifier-visible state joins while preserving one-instruction interpreter semantics; do not move helper selection into Python. |
-| `bpftrace_string_search_prefix_scan` | Repeated prefix-compare memory/ALU steps hit `Processed 1000001 insn` with higher state fanout (`max_states_per_insn 95`). | Reduce pointer/flag state churn in C-authored interpreter helpers or loop state abstraction; do not replace it with a Python renderer. |
+The remaining generated-C failures are already reflected in the main matrix.
+The next fix must reduce verifier-visible state joins in C-authored helper or
+loop-state abstractions without moving helper selection back into Python.
 
 ## JSON-Linker Todo
 
@@ -512,8 +585,11 @@ levels:
 So “turn optimization off to make proof simpler” is not viable for this C
 interpreter shape. Without optimization, clang keeps too much generic VM state on
 the BPF stack. The practical C prototype still needs `-O1`/`-O2` for sane BPF
-code shape, but the direct-helper generator no longer relies on compiler
-constant propagation to select opcode semantics.
+code shape. The active generator now passes fixed opcode operands into
+C-authored dispatch; clang constant propagation is an engineering mechanism for
+making that C shape verifier-friendly, not part of the correctness argument. The
+restored direct-helper generator is retained only as the compile-cost baseline
+recorded above.
 
 ## Current Issues
 
@@ -561,6 +637,12 @@ This prototype has already exposed several verifier-facing design constraints:
   smoke programs (`simple`, `simple_packet`, `bitmap_popcount_scan`), but native
   call-flow support is missing and stale loader binaries previously produced
   misleading status if `--no-build-loader` was used.
+- The object-native SKB path must model the ABI translation in C, not Python:
+  `ctx+0xd0` maps to packet `data`, and `ctx+0x70` maps to packet length for
+  the generated native `sk_buff` stand-in. This is now in `x86_interp.h`.
+- `mov [mem], imm` packs the low 32 bits as the immediate and the high 32 bits
+  as the displacement. Negative immediates must not sign-extend into the
+  displacement field; the generator now masks both fields before packing.
 
 For formal verification, clang optimization is not part of the trusted
 argument. This C implementation is a prototype for finding the VM semantics and
@@ -579,6 +661,7 @@ verifier constraints. A cleaner proof story for the interpreter-only route is:
 The key constraint is that dynamic guest bytecode is hostile to the verifier:
 accepting arbitrary input makes opcode dispatch, memory tags, and loop state
 input-dependent. The current proof shape therefore hardcodes the instruction
-sequence as immediates and directly names the helper for each opcode. That keeps
-the interpreter programming model without depending on a later compiler pass to
-discover which opcode branch is reachable.
+sequence as immediates and passes opcode/operand constants into C-authored
+dispatch. Clang may constant-propagate those constants so the verifier sees a
+smaller program, but correctness must come from the C helper semantics and the
+fixed instruction stream, not from trusting an optimizer proof.

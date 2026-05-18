@@ -19,6 +19,10 @@ namespace {
 
 constexpr uint8_t k_bpf_ld_imm64 = BPF_LD | BPF_DW | BPF_IMM;
 
+#ifndef BPF_PSEUDO_KINSN_CALL
+#define BPF_PSEUDO_KINSN_CALL 4
+#endif
+
 bool infer_program_abi_from_section(const char *section_name,
                                     enum bpf_prog_type &prog_type,
                                     enum bpf_attach_type &attach_type)
@@ -179,6 +183,37 @@ const function_symbol *find_function_symbol(
         }
     }
     return nullptr;
+}
+
+const function_symbol *find_function_symbol_by_name(
+    const std::vector<function_symbol> &functions,
+    const std::string &name)
+{
+    const function_symbol *found = nullptr;
+    for (const auto &function : functions) {
+        if (function.name != name) {
+            continue;
+        }
+        if (found != nullptr) {
+            fail("program symbol is ambiguous: " + name);
+        }
+        found = &function;
+    }
+    return found;
+}
+
+std::string section_name_by_index(Elf *elf, size_t shstrndx, size_t section_index)
+{
+    Elf_Scn *section = elf_getscn(elf, section_index);
+    if (section == nullptr) {
+        fail("unable to resolve ELF section while resolving section name");
+    }
+    const auto shdr = get_section_header_or_fail(section, "resolving section name");
+    const char *name = elf_strptr(elf, shstrndx, shdr.sh_name);
+    if (name == nullptr) {
+        fail("unable to resolve ELF section name");
+    }
+    return name;
 }
 
 Elf_Scn *get_section_or_fail(Elf *elf, size_t section_index, const char *context)
@@ -477,7 +512,8 @@ void patch_program_relocations(
     const std::vector<section_slice> &slices,
     const std::unordered_map<std::string, uint32_t> &map_ids,
     const std::unordered_map<size_t, std::unordered_set<size_t>> &function_entries_by_section,
-    std::vector<uint8_t> &code)
+    std::vector<uint8_t> &code,
+    std::vector<kinsn_call_relocation> &kinsn_calls)
 {
     auto *insns = reinterpret_cast<bpf_insn *>(code.data());
     const size_t insn_count = code.size() / sizeof(bpf_insn);
@@ -515,6 +551,21 @@ void patch_program_relocations(
                 fail("gelf_getsym failed");
             }
             const char *symbol_name = elf_strptr(elf, symtab.shdr.sh_link, sym.st_name);
+
+            if (relocation->type == R_BPF_64_32 &&
+                insns[*insn_index].code == (BPF_JMP | BPF_CALL) &&
+                sym.st_shndx == SHN_UNDEF &&
+                symbol_name != nullptr &&
+                std::string_view(symbol_name).starts_with("bpf_x86_")) {
+                insns[*insn_index].src_reg = BPF_PSEUDO_KINSN_CALL;
+                insns[*insn_index].off = 0;
+                insns[*insn_index].imm = 0;
+                kinsn_calls.push_back({
+                    .insn_index = static_cast<uint64_t>(*insn_index),
+                    .name = symbol_name,
+                });
+                continue;
+            }
 
             if (symbol_name != nullptr) {
                 const auto map_iter = map_ids.find(symbol_name);
@@ -628,62 +679,6 @@ program_image load_program_image(const std::filesystem::path &path, const std::o
         fail("libelf initialization failed");
     }
 
-    bpf_object_open_opts open_opts = {};
-    open_opts.sz = sizeof(open_opts);
-    bpf_object *raw_object = bpf_object__open_file(path.c_str(), &open_opts);
-    const int open_error = libbpf_get_error(raw_object);
-    if (open_error != 0) {
-        fail("bpf_object__open_file failed: " + libbpf_error_string(open_error));
-    }
-    bpf_object_ptr object(raw_object);
-
-    bpf_program *program = find_program(object.get(), program_name);
-    const char *selected_program_name = bpf_program__name(program);
-    if (selected_program_name == nullptr) {
-        fail("unable to resolve selected program name");
-    }
-
-    // Use libbpf to identify the program section and extract map metadata.
-    const char *section_name = bpf_program__section_name(program);
-    if (section_name == nullptr) {
-        fail("unable to resolve program section name");
-    }
-
-    program_image image;
-    image.program_name = selected_program_name;
-    image.prog_type = static_cast<uint32_t>(bpf_program__type(program));
-    image.expected_attach_type = static_cast<uint32_t>(bpf_program__expected_attach_type(program));
-
-    enum bpf_prog_type prog_type = static_cast<enum bpf_prog_type>(image.prog_type);
-    enum bpf_attach_type attach_type = static_cast<enum bpf_attach_type>(image.expected_attach_type);
-    infer_program_abi_from_section(section_name, prog_type, attach_type);
-    image.prog_type = static_cast<uint32_t>(prog_type);
-    image.expected_attach_type = static_cast<uint32_t>(attach_type);
-
-    const auto *insns = bpf_program__insns(program);
-    const size_t insn_count = bpf_program__insn_cnt(program);
-    if (insns == nullptr || insn_count == 0) {
-        fail("program contains no instructions: " + path.string());
-    }
-
-    image.code.resize(insn_count * sizeof(bpf_insn));
-    std::memcpy(image.code.data(), insns, image.code.size());
-
-    std::unordered_map<std::string, uint32_t> map_ids;
-    const bpf_map *map = nullptr;
-    uint32_t next_map_id = 0;
-    while ((map = bpf_object__next_map(object.get(), map)) != nullptr) {
-        map_spec spec;
-        spec.id = next_map_id++;
-        spec.name = bpf_map__name(map);
-        spec.type = bpf_map__type(map);
-        spec.key_size = bpf_map__key_size(map);
-        spec.value_size = bpf_map__value_size(map);
-        spec.max_entries = bpf_map__max_entries(map);
-        image.maps.push_back(spec);
-        map_ids.emplace(spec.name, spec.id);
-    }
-
     auto fd = open_readonly(path);
     Elf *elf = elf_begin(*fd, ELF_C_READ, nullptr);
     if (elf == nullptr) {
@@ -696,35 +691,52 @@ program_image load_program_image(const std::filesystem::path &path, const std::o
         fail("elf_getshdrstrndx failed for " + path.string());
     }
 
+    program_image image;
     image.license = read_string_section_or_fail(elf, shstrndx, "license");
 
-    size_t target_section_index = 0;
-    Elf_Scn *section = nullptr;
-    while ((section = elf_nextscn(elf, section)) != nullptr) {
-        GElf_Shdr shdr {};
-        if (gelf_getshdr(section, &shdr) == nullptr) {
-            elf_end(elf);
-            fail("gelf_getshdr failed while searching section");
-        }
-        const char *name = elf_strptr(elf, shstrndx, shdr.sh_name);
-        if (name != nullptr && std::string(name) == section_name) {
-            target_section_index = elf_ndxscn(section);
-            break;
-        }
-    }
-
-    if (target_section_index == 0) {
-        elf_end(elf);
-        fail("unable to find target program section in ELF");
-    }
-
     const auto function_symbols = collect_function_symbols(elf);
-    const function_symbol *selected_symbol =
-        find_function_symbol(function_symbols, target_section_index, selected_program_name);
+    const function_symbol *selected_symbol = nullptr;
+    if (program_name.has_value()) {
+        selected_symbol = find_function_symbol_by_name(function_symbols, *program_name);
+    } else if (!function_symbols.empty()) {
+        selected_symbol = &function_symbols.front();
+    }
     if (selected_symbol == nullptr) {
         elf_end(elf);
         fail("unable to find selected program symbol in ELF");
     }
+    const size_t target_section_index = selected_symbol->section_index;
+    const std::string section_name = section_name_by_index(elf, shstrndx, target_section_index);
+
+    image.program_name = selected_symbol->name;
+    enum bpf_prog_type prog_type = BPF_PROG_TYPE_UNSPEC;
+    enum bpf_attach_type attach_type = static_cast<enum bpf_attach_type>(0);
+    if (!infer_program_abi_from_section(section_name.c_str(), prog_type, attach_type) ||
+        prog_type == BPF_PROG_TYPE_UNSPEC) {
+        elf_end(elf);
+        fail("unable to infer BPF program type from section '" + section_name + "'");
+    }
+    image.prog_type = static_cast<uint32_t>(prog_type);
+    image.expected_attach_type = static_cast<uint32_t>(attach_type);
+
+    Elf_Scn *target_section = get_section_or_fail(elf, target_section_index, "copying selected program");
+    Elf_Data *target_data = elf_getdata(target_section, nullptr);
+    if (target_data == nullptr || target_data->d_buf == nullptr) {
+        elf_end(elf);
+        fail("unable to read selected program section contents");
+    }
+    if (selected_symbol->offset_bytes + selected_symbol->size_bytes > target_data->d_size ||
+        selected_symbol->size_bytes % sizeof(bpf_insn) != 0) {
+        elf_end(elf);
+        fail("selected program symbol has invalid BPF instruction bounds");
+    }
+    image.code.resize(selected_symbol->size_bytes);
+    std::memcpy(
+        image.code.data(),
+        static_cast<const uint8_t *>(target_data->d_buf) + selected_symbol->offset_bytes,
+        image.code.size());
+
+    std::unordered_map<std::string, uint32_t> map_ids;
 
     std::vector<section_slice> code_slices;
     code_slices.push_back(
@@ -741,7 +753,13 @@ program_image load_program_image(const std::filesystem::path &path, const std::o
     }
 
     const auto function_entries_by_section = collect_function_entries_by_section(function_symbols, code_slices);
-    patch_program_relocations(elf, code_slices, map_ids, function_entries_by_section, image.code);
+    patch_program_relocations(
+        elf,
+        code_slices,
+        map_ids,
+        function_entries_by_section,
+        image.code,
+        image.kinsn_calls);
     elf_end(elf);
     return image;
 }

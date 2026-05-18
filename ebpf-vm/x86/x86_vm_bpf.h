@@ -8,6 +8,10 @@
 #define X86_VM_ENABLE_PACKET_REG_FASTPATH 1
 #endif
 
+#ifndef X86_VM_LOOP_FUEL
+#define X86_VM_LOOP_FUEL 4096U
+#endif
+
 #include "x86_interp.h"
 
 #define X86_VM_OUTPUT_OFF 0U
@@ -137,6 +141,7 @@ static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
 	void *__x86_vm_data_end = (void *)(long)(CTX)->data_end;            \
 	struct x86_state __x86_vm_state = {};                               \
 	struct x86_insn __x86_vm_insn = {};                                 \
+	__u32 __x86_vm_loop_fuel = X86_VM_LOOP_FUEL;                       \
 	x86_init_state(&__x86_vm_state, (void *)(CTX))
 
 #define X86_VM_STEP(OP, DST, SRC, FLAGS, AUX, IMM)                          \
@@ -185,7 +190,7 @@ static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
 			return (__u32)__x86_vm_state.rax;                  \
 	} while (0)
 
-#define X86_VM_RUN_CALL(FN)                                                 \
+#define X86_VM_X86_CALL(FN)                                                 \
 	do {                                                                 \
 		if (FN(&__x86_vm_state, __x86_vm_data, __x86_vm_data_end) < \
 		    0)                                                       \
@@ -221,7 +226,49 @@ static __always_inline __u32 x86_vm_ret_rax(struct x86_state *state)
 
 #define X86_VM_TRAP_RETURN() return XDP_ABORTED
 
-#define X86_VM_RET_RAX() return x86_vm_ret_rax(&__x86_vm_state)
+#define X86_VM_X86_RET() return x86_vm_ret_rax(&__x86_vm_state)
+
+#define X86_VM_X86_BACKEDGE_GUARD(CURRENT, TARGET)                          \
+	do {                                                                 \
+		if ((__u64)(TARGET) <= (__u64)(CURRENT)) {                    \
+			if (__x86_vm_loop_fuel == 0)                          \
+				X86_VM_TRAP_RETURN();                         \
+			__x86_vm_loop_fuel--;                                \
+		}                                                            \
+	} while (0)
+
+#define X86_VM_X86_JMP(CURRENT, TARGET, LABEL)                              \
+	do {                                                                 \
+		X86_VM_X86_BACKEDGE_GUARD((CURRENT), (TARGET));               \
+		goto LABEL;                                                   \
+	} while (0)
+
+#define X86_VM_X86_JCC(CC, CURRENT, TARGET, LABEL)                           \
+	do {                                                                 \
+		if (x86_eval_cc(&__x86_vm_state, (CC)))                       \
+			X86_VM_X86_JMP((CURRENT), (TARGET), LABEL);           \
+	} while (0)
+
+#define X86_VM_X86_SUB_BACKEDGE_GUARD(CURRENT, TARGET)                      \
+	do {                                                                 \
+		if ((__u64)(TARGET) <= (__u64)(CURRENT)) {                    \
+			if (__x86_vm_loop_fuel == 0)                          \
+				return X86_INTERP_TRAP;                       \
+			__x86_vm_loop_fuel--;                                \
+		}                                                            \
+	} while (0)
+
+#define X86_VM_X86_SUB_JMP(CURRENT, TARGET, LABEL)                          \
+	do {                                                                 \
+		X86_VM_X86_SUB_BACKEDGE_GUARD((CURRENT), (TARGET));           \
+		goto LABEL;                                                   \
+	} while (0)
+
+#define X86_VM_X86_SUB_JCC(CC, CURRENT, TARGET, LABEL)                       \
+	do {                                                                 \
+		if (x86_eval_cc(&__x86_vm_state, (CC)))                       \
+			X86_VM_X86_SUB_JMP((CURRENT), (TARGET), LABEL);       \
+	} while (0)
 
 struct x86_vm_loop_ctx {
 	struct x86_state state;
@@ -238,6 +285,79 @@ struct x86_vm_reg_save {
 	void *ptr;
 	__u8 tag;
 };
+
+struct x86_vm_callee_saved {
+	__u64 rbx;
+	__u64 r12;
+	__u64 r13;
+	__u64 r14;
+	__u64 r15;
+	void *p_rbx;
+	void *p_r12;
+	void *p_r13;
+	void *p_r14;
+	void *p_r15;
+	__u8 tag_rbx;
+	__u8 tag_r12;
+	__u8 tag_r13;
+	__u8 tag_r14;
+	__u8 tag_r15;
+};
+
+static __always_inline void
+x86_vm_save_callee(struct x86_vm_callee_saved *saved,
+		   const struct x86_state *state)
+{
+	saved->rbx = state->rbx;
+	saved->r12 = state->r12;
+	saved->r13 = state->r13;
+	saved->r14 = state->r14;
+	saved->r15 = state->r15;
+	saved->p_rbx = state->p_rbx;
+	saved->p_r12 = state->p_r12;
+	saved->p_r13 = state->p_r13;
+	saved->p_r14 = state->p_r14;
+	saved->p_r15 = state->p_r15;
+	saved->tag_rbx = state->tag_rbx;
+	saved->tag_r12 = state->tag_r12;
+	saved->tag_r13 = state->tag_r13;
+	saved->tag_r14 = state->tag_r14;
+	saved->tag_r15 = state->tag_r15;
+}
+
+static __always_inline void
+x86_vm_restore_callee(struct x86_state *state,
+		      const struct x86_vm_callee_saved *saved)
+{
+	state->rbx = saved->rbx;
+	state->r12 = saved->r12;
+	state->r13 = saved->r13;
+	state->r14 = saved->r14;
+	state->r15 = saved->r15;
+	state->p_rbx = saved->p_rbx;
+	state->p_r12 = saved->p_r12;
+	state->p_r13 = saved->p_r13;
+	state->p_r14 = saved->p_r14;
+	state->p_r15 = saved->p_r15;
+	state->tag_rbx = saved->tag_rbx;
+	state->tag_r12 = saved->tag_r12;
+	state->tag_r13 = saved->tag_r13;
+	state->tag_r14 = saved->tag_r14;
+	state->tag_r15 = saved->tag_r15;
+}
+
+#define X86_VM_SUB_BEGIN()                                                  \
+	struct x86_insn __x86_vm_insn = {};                                 \
+	__u32 __x86_vm_loop_fuel = X86_VM_LOOP_FUEL;                       \
+	struct x86_vm_callee_saved __x86_vm_callee_saved = {};              \
+	x86_vm_save_callee(&__x86_vm_callee_saved, &__x86_vm_state)
+
+#define X86_VM_X86_SUB_RET()                                                \
+	do {                                                                 \
+		x86_vm_restore_callee(&__x86_vm_state,                       \
+				      &__x86_vm_callee_saved);              \
+		return X86_INTERP_CONTINUE;                                  \
+	} while (0)
 
 static __always_inline int x86_vm_op_writes_reg(__u8 op, __u8 dst, __u8 src,
 						__u8 reg)

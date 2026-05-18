@@ -1,4 +1,7 @@
 #define X86_VM_ENABLE_STACK 1
+#define X86_VM_ENABLE_STACK_SLOT7 1
+#define X86_VM_ENABLE_STACK_DEEP 1
+#define X86_VM_ENABLE_STACK_EXT 1
 #include "../x86_vm_bpf.h"
 
 SEC("xdp")
@@ -19,8 +22,7 @@ x86_l_1109:
 	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RDX, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_110c:
 	/* 0x110c: ja     1247 <packet_vlan_tcpopt_parser_xdp+0x147> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_A))
-		goto x86_l_1247;
+	X86_VM_X86_JCC(X86_CC_A, 0x110c, 0x1247, x86_l_1247);
 x86_l_1112:
 	/* 0x1112: lea    rcx,[rdx+0x8] */
 	X86_VM_RUN_OP(X86_OP_LEA, X86_RCX, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);
@@ -29,8 +31,7 @@ x86_l_1116:
 	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RCX, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_1119:
 	/* 0x1119: ja     1247 <packet_vlan_tcpopt_parser_xdp+0x147> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_A))
-		goto x86_l_1247;
+	X86_VM_X86_JCC(X86_CC_A, 0x1119, 0x1247, x86_l_1247);
 x86_l_111f:
 	/* 0x111f: lea    r9,[rdx+0x16] */
 	X86_VM_RUN_OP(X86_OP_LEA, X86_R9, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 22ULL);
@@ -39,8 +40,7 @@ x86_l_1123:
 	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_R9, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_1126:
 	/* 0x1126: ja     1247 <packet_vlan_tcpopt_parser_xdp+0x147> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_A))
-		goto x86_l_1247;
+	X86_VM_X86_JCC(X86_CC_A, 0x1126, 0x1247, x86_l_1247);
 x86_l_112c:
 	/* 0x112c: push   rbp */
 	X86_VM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_RBP, X86_WIDTH_64, 0, 0);
@@ -73,22 +73,19 @@ x86_l_1142:
 	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 2048ULL);
 x86_l_1148:
 	/* 0x1148: je     11e2 <packet_vlan_tcpopt_parser_xdp+0xe2> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_E))
-		goto x86_l_11e2;
+	X86_VM_X86_JCC(X86_CC_E, 0x1148, 0x11e2, x86_l_11e2);
 x86_l_114e:
 	/* 0x114e: cmp    ecx,0x88a8 */
 	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 34984ULL);
 x86_l_1154:
 	/* 0x1154: je     1162 <packet_vlan_tcpopt_parser_xdp+0x62> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_E))
-		goto x86_l_1162;
+	X86_VM_X86_JCC(X86_CC_E, 0x1154, 0x1162, x86_l_1162);
 x86_l_1156:
 	/* 0x1156: cmp    ecx,0x8100 */
 	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 33024ULL);
 x86_l_115c:
 	/* 0x115c: jne    1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_NE, 0x115c, 0x1241, x86_l_1241);
 x86_l_1162:
 	/* 0x1162: lea    r9,[rdx+0x1a] */
 	X86_VM_RUN_OP(X86_OP_LEA, X86_R9, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 26ULL);
@@ -97,8 +94,7 @@ x86_l_1166:
 	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_R9, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_1169:
 	/* 0x1169: ja     1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_A))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_A, 0x1169, 0x1241, x86_l_1241);
 x86_l_116f:
 	/* 0x116f: movzx  esi,WORD PTR [rdx+0x16] */
 	X86_VM_RUN_OP(X86_OP_MOV_LOAD, X86_RSI, X86_RDX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_16), 22ULL);
@@ -119,22 +115,19 @@ x86_l_1182:
 	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 2048ULL);
 x86_l_1188:
 	/* 0x1188: je     1248 <packet_vlan_tcpopt_parser_xdp+0x148> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_E))
-		goto x86_l_1248;
+	X86_VM_X86_JCC(X86_CC_E, 0x1188, 0x1248, x86_l_1248);
 x86_l_118e:
 	/* 0x118e: cmp    ecx,0x88a8 */
 	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 34984ULL);
 x86_l_1194:
 	/* 0x1194: je     11a2 <packet_vlan_tcpopt_parser_xdp+0xa2> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_E))
-		goto x86_l_11a2;
+	X86_VM_X86_JCC(X86_CC_E, 0x1194, 0x11a2, x86_l_11a2);
 x86_l_1196:
 	/* 0x1196: cmp    ecx,0x8100 */
 	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 33024ULL);
 x86_l_119c:
 	/* 0x119c: jne    1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_NE, 0x119c, 0x1241, x86_l_1241);
 x86_l_11a2:
 	/* 0x11a2: lea    rcx,[rdx+0x1e] */
 	X86_VM_RUN_OP(X86_OP_LEA, X86_RCX, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 30ULL);
@@ -143,8 +136,7 @@ x86_l_11a6:
 	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RCX, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_11a9:
 	/* 0x11a9: ja     1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_A))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_A, 0x11a9, 0x1241, x86_l_1241);
 x86_l_11af:
 	/* 0x11af: movzx  ecx,WORD PTR [rdx+0x1c] */
 	X86_VM_RUN_OP(X86_OP_MOV_LOAD, X86_RCX, X86_RDX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_16), 28ULL);
@@ -159,8 +151,7 @@ x86_l_11ba:
 	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 2048ULL);
 x86_l_11c0:
 	/* 0x11c0: jne    1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_NE, 0x11c0, 0x1241, x86_l_1241);
 x86_l_11c2:
 	/* 0x11c2: lea    rcx,[rdx+0x32] */
 	X86_VM_RUN_OP(X86_OP_LEA, X86_RCX, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 50ULL);
@@ -169,8 +160,7 @@ x86_l_11c6:
 	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RCX, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_11c9:
 	/* 0x11c9: ja     1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_A))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_A, 0x11c9, 0x1241, x86_l_1241);
 x86_l_11cb:
 	/* 0x11cb: lea    r9,[rdx+0x1e] */
 	X86_VM_RUN_OP(X86_OP_LEA, X86_R9, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 30ULL);
@@ -188,7 +178,7 @@ x86_l_11db:
 	X86_VM_RUN_OP(X86_OP_MOV_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
 x86_l_11e0:
 	/* 0x11e0: jmp    11f2 <packet_vlan_tcpopt_parser_xdp+0xf2> */
-	goto x86_l_11f2;
+	X86_VM_X86_JMP(0x11e0, 0x11f2, x86_l_11f2);
 x86_l_11e2:
 	/* 0x11e2: xor    esi,esi */
 	X86_VM_RUN_OP(X86_OP_ALU_REG, X86_RSI, X86_RSI, X86_WIDTH_32, X86_ALU_XOR, 0);
@@ -203,8 +193,7 @@ x86_l_11ea:
 	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RDI, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_11ed:
 	/* 0x11ed: ja     1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_A))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_A, 0x11ed, 0x1241, x86_l_1241);
 x86_l_11ef:
 	/* 0x11ef: xor    r8d,r8d */
 	X86_VM_RUN_OP(X86_OP_ALU_REG, X86_R8, X86_R8, X86_WIDTH_32, X86_ALU_XOR, 0);
@@ -222,8 +211,7 @@ x86_l_11fd:
 	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_R11, X86_REG_NONE, X86_WIDTH_8, 0, 64ULL);
 x86_l_1201:
 	/* 0x1201: jne    1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_NE, 0x1201, 0x1241, x86_l_1241);
 x86_l_1203:
 	/* 0x1203: and    edi,0xf */
 	X86_VM_RUN_OP(X86_OP_ALU_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, X86_ALU_AND, 15ULL);
@@ -232,8 +220,7 @@ x86_l_1206:
 	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_8, 0, 5ULL);
 x86_l_120a:
 	/* 0x120a: jb     1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_B))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_B, 0x120a, 0x1241, x86_l_1241);
 x86_l_120c:
 	/* 0x120c: lea    rbx,[r9+rdi*4] */
 	X86_VM_RUN_OP(X86_OP_LEA, X86_RBX, X86_R9, X86_WIDTH_64, X86_MEM_AUX(X86_RDI, 2), 0ULL);
@@ -242,15 +229,13 @@ x86_l_1210:
 	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RBX, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_1213:
 	/* 0x1213: ja     1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_A))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_A, 0x1213, 0x1241, x86_l_1241);
 x86_l_1215:
 	/* 0x1215: cmp    BYTE PTR [r9+0x9],0x6 */
 	X86_VM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_R9, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 38654705670ULL);
 x86_l_121a:
 	/* 0x121a: jne    1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_NE, 0x121a, 0x1241, x86_l_1241);
 x86_l_121c:
 	/* 0x121c: lea    r14,[rbx+0x14] */
 	X86_VM_RUN_OP(X86_OP_LEA, X86_R14, X86_RBX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 20ULL);
@@ -259,8 +244,7 @@ x86_l_1220:
 	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_R14, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_1223:
 	/* 0x1223: ja     1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_A))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_A, 0x1223, 0x1241, x86_l_1241);
 x86_l_1225:
 	/* 0x1225: movzx  r11d,BYTE PTR [rbx+0xc] */
 	X86_VM_RUN_OP(X86_OP_MOV_LOAD, X86_R11, X86_RBX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 12ULL);
@@ -269,8 +253,7 @@ x86_l_122a:
 	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_R11, X86_REG_NONE, X86_WIDTH_64, 0, 80ULL);
 x86_l_122e:
 	/* 0x122e: jb     1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_B))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_B, 0x122e, 0x1241, x86_l_1241);
 x86_l_1230:
 	/* 0x1230: shr    r11d,0x2 */
 	X86_VM_RUN_OP(X86_OP_ALU_IMM, X86_R11, X86_REG_NONE, X86_WIDTH_32, X86_ALU_SHR, 2ULL);
@@ -285,8 +268,7 @@ x86_l_123c:
 	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_R15, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_123f:
 	/* 0x123f: jbe    124f <packet_vlan_tcpopt_parser_xdp+0x14f> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_BE))
-		goto x86_l_124f;
+	X86_VM_X86_JCC(X86_CC_BE, 0x123f, 0x124f, x86_l_124f);
 x86_l_1241:
 	/* 0x1241: pop    rbx */
 	X86_VM_RUN_OP(X86_OP_POP, X86_RBX, X86_REG_NONE, X86_WIDTH_64, 0, 0);
@@ -301,13 +283,13 @@ x86_l_1246:
 	X86_VM_RUN_OP(X86_OP_POP, X86_RBP, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_1247:
 	/* 0x1247: ret */
-	X86_VM_RET_RAX();
+	X86_VM_X86_RET();
 x86_l_1248:
 	/* 0x1248: mov    ecx,0x1 */
 	X86_VM_RUN_OP(X86_OP_MOV_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 1ULL);
 x86_l_124d:
 	/* 0x124d: jmp    11e6 <packet_vlan_tcpopt_parser_xdp+0xe6> */
-	goto x86_l_11e6;
+	X86_VM_X86_JMP(0x124d, 0x11e6, x86_l_11e6);
 x86_l_124f:
 	/* 0x124f: lea    r15,[rbx+0x20] */
 	X86_VM_RUN_OP(X86_OP_LEA, X86_R15, X86_RBX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 32ULL);
@@ -316,71 +298,61 @@ x86_l_1253:
 	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_R15, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_1256:
 	/* 0x1256: ja     1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_A))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_A, 0x1256, 0x1241, x86_l_1241);
 x86_l_1258:
 	/* 0x1258: cmp    r11b,0x20 */
 	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_R11, X86_REG_NONE, X86_WIDTH_8, 0, 32ULL);
 x86_l_125c:
 	/* 0x125c: jb     1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_B))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_B, 0x125c, 0x1241, x86_l_1241);
 x86_l_125e:
 	/* 0x125e: cmp    BYTE PTR [r14],0x2 */
 	X86_VM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_R14, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 2ULL);
 x86_l_1262:
 	/* 0x1262: jne    1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_NE, 0x1262, 0x1241, x86_l_1241);
 x86_l_1264:
 	/* 0x1264: cmp    BYTE PTR [rbx+0x15],0x4 */
 	X86_VM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 90194313220ULL);
 x86_l_1268:
 	/* 0x1268: jb     1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_B))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_B, 0x1268, 0x1241, x86_l_1241);
 x86_l_126a:
 	/* 0x126a: cmp    BYTE PTR [rbx+0x18],0x1 */
 	X86_VM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 103079215105ULL);
 x86_l_126e:
 	/* 0x126e: jne    1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_NE, 0x126e, 0x1241, x86_l_1241);
 x86_l_1270:
 	/* 0x1270: cmp    BYTE PTR [rbx+0x19],0x3 */
 	X86_VM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 107374182403ULL);
 x86_l_1274:
 	/* 0x1274: jne    1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_NE, 0x1274, 0x1241, x86_l_1241);
 x86_l_1276:
 	/* 0x1276: cmp    BYTE PTR [rbx+0x1a],0x3 */
 	X86_VM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 111669149699ULL);
 x86_l_127a:
 	/* 0x127a: jb     1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_B))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_B, 0x127a, 0x1241, x86_l_1241);
 x86_l_127c:
 	/* 0x127c: cmp    BYTE PTR [rbx+0x1c],0x4 */
 	X86_VM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 120259084292ULL);
 x86_l_1280:
 	/* 0x1280: jne    1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_NE, 0x1280, 0x1241, x86_l_1241);
 x86_l_1282:
 	/* 0x1282: cmp    BYTE PTR [rbx+0x1d],0x2 */
 	X86_VM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 124554051586ULL);
 x86_l_1286:
 	/* 0x1286: jb     1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_B))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_B, 0x1286, 0x1241, x86_l_1241);
 x86_l_1288:
 	/* 0x1288: cmp    BYTE PTR [rbx+0x1e],0x1 */
 	X86_VM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 128849018881ULL);
 x86_l_128c:
 	/* 0x128c: jne    1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
-		goto x86_l_1241;
+	X86_VM_X86_JCC(X86_CC_NE, 0x128c, 0x1241, x86_l_1241);
 x86_l_128e:
 	/* 0x128e: shl    rdi,0x2 */
 	X86_VM_RUN_OP(X86_OP_ALU_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_64, X86_ALU_SHL, 2ULL);
@@ -551,8 +523,7 @@ x86_l_1363:
 	X86_VM_RUN_OP(X86_OP_MOV_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
 x86_l_1368:
 	/* 0x1368: jmp    1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
-	goto x86_l_1241;
-
+	X86_VM_X86_JMP(0x1368, 0x1241, x86_l_1241);
 	return XDP_ABORTED;
 }
 

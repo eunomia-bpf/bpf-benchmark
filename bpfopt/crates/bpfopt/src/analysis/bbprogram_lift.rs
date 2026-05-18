@@ -194,12 +194,39 @@ pub fn canonicalize_map_refs_to_idx(
     original_loader_fd_array: Option<&[i32]>,
     map_ids: &[u32],
 ) -> Result<()> {
-    let fd_to_map_index = collect_fd_form_map_refs(insns)?;
+    canonicalize_map_refs_to_idx_with_mapping(
+        insns,
+        original_loader_fd_array,
+        map_ids,
+        None,
+    )
+}
+
+/// `fd_to_id`, if provided, lets the caller (e.g. an LD_PRELOAD shim that
+/// captures `BPF_PSEUDO_MAP_FD imm = loader_fd` instructions) tell bpfopt
+/// "this loader fd value corresponds to this kernel map id". Multiple fds
+/// pointing to the same kernel map collapse to a single fd_array slot, and
+/// the resulting bytecode imm = position-of-kid-in-map_ids.
+///
+/// When `fd_to_id` is None the function preserves the original daemon
+/// semantics: bytecode imm IS already the kernel id (verifier-rewritten
+/// via `BPF_PROG_GET_ORIGINAL`), unique imm values get sequential indices.
+pub fn canonicalize_map_refs_to_idx_with_mapping(
+    insns: &mut [BpfInsn],
+    original_loader_fd_array: Option<&[i32]>,
+    map_ids: &[u32],
+    fd_to_id: Option<&HashMap<i32, u32>>,
+) -> Result<()> {
+    let fd_to_map_index = collect_fd_form_map_refs(insns, fd_to_id, map_ids)?;
     if fd_to_map_index.is_empty() && !contains_idx_form_map_ref(insns)? {
         return Ok(());
     }
 
-    if fd_to_map_index.len() > map_ids.len() {
+    // With a fd→id mapping the index is bounded by map_ids.len() because
+    // multiple fds collapse to one idx; without mapping it's bounded the
+    // same way (first-seen sequential <= map_ids.len()).
+    let used_slots = fd_to_map_index.values().copied().max().map(|m| m + 1).unwrap_or(0);
+    if used_slots > map_ids.len() {
         anyhow::bail!(
             "canonicalize_map_refs_to_idx: bytecode references {} unique loader map fds but prog_info has {} map ids",
             fd_to_map_index.len(),
@@ -252,7 +279,20 @@ pub fn canonicalize_map_refs_to_idx(
     Ok(())
 }
 
-fn collect_fd_form_map_refs(insns: &[BpfInsn]) -> Result<HashMap<i32, usize>> {
+fn collect_fd_form_map_refs(
+    insns: &[BpfInsn],
+    fd_to_id: Option<&HashMap<i32, u32>>,
+    map_ids: &[u32],
+) -> Result<HashMap<i32, usize>> {
+    // When a fd→kernel_id mapping is supplied, every fd is routed to the
+    // position of its kid in map_ids — so the N-loader-fds-→-1-kid pattern
+    // (libbpf with deduped maps, tracee, etc.) collapses to a single slot.
+    // Without mapping, fall back to "unique fd value → sequential idx".
+    let kid_to_pos: HashMap<u32, usize> = if fd_to_id.is_some() {
+        map_ids.iter().enumerate().map(|(i, &k)| (k, i)).collect()
+    } else {
+        HashMap::new()
+    };
     let mut fd_to_map_index = HashMap::new();
     let mut i = 0;
     while i < insns.len() {
@@ -266,8 +306,23 @@ fn collect_fd_form_map_refs(insns: &[BpfInsn]) -> Result<HashMap<i32, usize>> {
                         "canonicalize_map_refs_to_idx: truncated LD_IMM64 map reference at pc {i}"
                     );
                 }
-                let next_index = fd_to_map_index.len();
-                fd_to_map_index.entry(insns[i].imm).or_insert(next_index);
+                let fd = insns[i].imm;
+                let idx = if let Some(mapping) = fd_to_id {
+                    let kid = mapping.get(&fd).copied().ok_or_else(|| {
+                        anyhow::anyhow!(
+                            "canonicalize_map_refs_to_idx: loader fd {fd} not in fd-to-id mapping"
+                        )
+                    })?;
+                    kid_to_pos.get(&kid).copied().ok_or_else(|| {
+                        anyhow::anyhow!(
+                            "canonicalize_map_refs_to_idx: kernel id {kid} not in --map-ids"
+                        )
+                    })?
+                } else {
+                    let next = fd_to_map_index.len();
+                    *fd_to_map_index.entry(fd).or_insert(next)
+                };
+                fd_to_map_index.insert(fd, idx);
             }
             i += 2;
             continue;

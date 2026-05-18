@@ -554,9 +554,9 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
                          call_functions: dict[int, str] | None = None,
                          subroutine: bool = False,
                          step_macro: str = "X86_VM_RUN_OP",
-                         ret_statement: str = "X86_VM_RET_RAX();") -> None:
-    branch_macro = "X86_VM_SUB_JCC" if subroutine else "X86_VM_JCC"
-    goto_macro = "X86_VM_SUB_GOTO" if subroutine else "X86_VM_GOTO"
+                         ret_statement: str = "X86_VM_X86_RET();") -> None:
+    branch_macro = "X86_VM_X86_SUB_JCC" if subroutine else "X86_VM_X86_JCC"
+    jump_macro = "X86_VM_X86_SUB_JMP" if subroutine else "X86_VM_X86_JMP"
     abort_statement = "return X86_INTERP_TRAP;" if subroutine else "return XDP_ABORTED;"
     if insn.mnemonic in CC_AUX and insn.mnemonic.startswith("j"):
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
@@ -575,7 +575,7 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
         target = branch_target(insn.operands[0]) if insn.operands else 0
         if target in addrs:
             lines.append(
-                f"{indent}{goto_macro}(0x{insn.addr:x}, 0x{target:x}, "
+                f"{indent}{jump_macro}(0x{insn.addr:x}, 0x{target:x}, "
                 f"x86_l_{target:x});"
             )
         else:
@@ -585,7 +585,7 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
         target = branch_target(insn.operands[0]) if insn.operands else 0
         if call_functions and target in call_functions:
-            lines.append(f"{indent}X86_VM_RUN_CALL({call_functions[target]});")
+            lines.append(f"{indent}X86_VM_X86_CALL({call_functions[target]});")
             return
         lines.append(f"{indent}{abort_statement}")
         return
@@ -640,7 +640,7 @@ def render_x86_subfunction(symbol: str, insns: list[NativeInsn]) -> str:
         lines.append(f"x86_l_{insn.addr:x}:")
         append_branch_or_ret(lines, insn, addrs, subroutine=True,
                              step_macro="X86_VM_RUN_OP_SUB",
-                             ret_statement="X86_VM_SUB_RETURN();")
+                             ret_statement="X86_VM_X86_SUB_RET();")
     lines.extend([
         "\t#undef __x86_vm_state",
         "\treturn X86_INTERP_TRAP;",
@@ -652,7 +652,7 @@ def render_x86_subfunction(symbol: str, insns: list[NativeInsn]) -> str:
 
 def render_program(name: str, insns: list[NativeInsn],
                    subfunctions: dict[str, list[NativeInsn]] | None = None) -> str:
-    ret_statement = "X86_VM_RET_RAX();"
+    ret_statement = "X86_VM_X86_RET();"
     subfunctions = subfunctions or {}
     synthetic_entry_frame = bool(subfunctions)
     addrs = {insn.addr for insn in insns}

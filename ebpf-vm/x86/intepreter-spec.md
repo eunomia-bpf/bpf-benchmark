@@ -173,16 +173,7 @@ observe the modeled packet/output/stack domains.
 Conditional native branches are emitted as:
 
 ```c
-if (x86_eval_cc(&state, cc))
-    goto target;
-```
-
-or, inside a loop callback:
-
-```c
-if (x86_eval_cc(&state, cc)) {
-    ...
-}
+X86_VM_X86_JCC(cc, current_pc, target_pc, target_label);
 ```
 
 The proof obligation is:
@@ -192,10 +183,39 @@ x86_eval_cc(state, cc) equals the x86 condition-code predicate over
 state.cf/state.zf/state.sf/state.of.
 ```
 
+Unconditional native branches are emitted as:
+
+```c
+X86_VM_X86_JMP(current_pc, target_pc, target_label);
+```
+
+These are x86 instruction-lowering macros, not a separate VM instruction set.
+The generated operation is still native `jcc`/`jmp`; the C-authored macro owns
+the verifier lowering to `goto target_label` and the loop proof protocol. If
+`target_pc <= current_pc`, the edge is treated as a verifier-visible backedge
+and consumes one unit from `__x86_vm_loop_fuel`. If fuel reaches zero, the proof
+program traps. Python does not infer loop bounds, induction variables, exits, or
+callback state. It only supplies the native current/target addresses and target
+label.
+
+The semantic theorem for this fuel guard is:
+
+```text
+For a generated proof program with fuel F, if native execution from the same
+entry state reaches every taken backward edge fewer than F times before the
+program returns or traps, then the fuel-guarded C proof program follows the same
+native control-flow path. Fuel exhaustion is outside the proved equivalence
+domain and is reported as Trap.
+```
+
+The fuel value is a C/spec parameter (`X86_VM_LOOP_FUEL`, default `4096`), not a
+Python-derived bound. Raising or lowering it is a proof-surface change and must
+be recorded with verifier cost.
+
 Native `ret` is emitted as:
 
 ```c
-X86_VM_RET_RAX();
+X86_VM_X86_RET();
 ```
 
 This returns the low 32 bits of `rax` to the BPF test-run ABI. Program-type
@@ -212,18 +232,47 @@ static __noinline int x86_fn_<symbol>(
     struct x86_state *state, void *data, void *data_end);
 ```
 
+The native call site is emitted as:
+
+```c
+X86_VM_X86_CALL(x86_fn_<symbol>);
+```
+
+The generated subfunction body starts with:
+
+```c
+X86_VM_SUB_BEGIN();
+```
+
+and every native callee `ret` is emitted as:
+
+```c
+X86_VM_X86_SUB_RET();
+```
+
+`X86_VM_SUB_BEGIN()` / `X86_VM_X86_SUB_RET()` are C-authored protocol macros.
+They save and restore the SysV callee-saved register set and associated ghost
+pointer capabilities:
+
+```text
+rbx r12 r13 r14 r15
+```
+
+Subfunction branches use the subfunction branch macros:
+
+```c
+X86_VM_X86_SUB_JCC(cc, current_pc, target_pc, target_label);
+X86_VM_X86_SUB_JMP(current_pc, target_pc, target_label);
+```
+
+which apply the same C-owned fuel guard as entry-function branches and return
+`X86_INTERP_TRAP` on fuel exhaustion.
+
 The subfunction proof obligation is:
 
 ```text
 Executing x86_fn_symbol from state S is equivalent to executing the native
 callee instruction stream from its entry until its native ret.
-```
-
-Current generated subfunctions save and restore the SysV callee-saved register
-set:
-
-```text
-rbx rbp r12 r13 r14 r15
 ```
 
 If a callee relies on stack-frame traffic that the wrapper suppresses, the
@@ -232,89 +281,25 @@ is observationally equivalent under the modeled stack ABI.
 
 ## 6. Loop Lowering
 
-The generator may lower a native counted loop to:
+The active generator does not lower loops to `bpf_loop` and does not perform
+loop-shape analysis. Native loops remain native labels plus branch macros. The
+C-authored fuel guard in `X86_VM_X86_JCC/JMP` is the active loop proof protocol.
 
-```c
-bpf_loop(bound, callback, &loop_ctx, 0)
-```
+The generator must not choose loop treatment based on return value, benchmark
+name, observed failure, or per-loop Python analysis. Future optimized loop
+protocols must be C-authored or bytecode-template-authored and added back to
+this spec before use.
 
-This is allowed only when a static loop analysis has identified:
-
-```text
-region_start
-region_end
-entry
-exit_addrs
-induction register iv
-init value
-positive step
-cmp limit
-backedge condition
-bound = ceil((limit - init) / step)
-```
-
-The lowering theorem is:
-
-```text
-If the native loop starts in a state satisfying the induction invariant,
-and each callback execution implements exactly one native loop iteration,
-then bpf_loop(bound, callback, ctx, 0) implements the native loop until
-the first native exit.
-```
-
-### Exact-Trip Backedge Rule
-
-For a single-exit loop with exact trip count:
-
-```text
-len(exit_addrs) == 1
-bound == raw_bound
-```
-
-the callback may emit:
-
-```c
-if (__x86_loop_index + 1 >= bound) {
-    loop->next = exit_addr;
-    return 1;
-}
-if (native_backedge_condition)
-    return 0;
-```
-
-This is not a benchmark-specific correction. It is justified by the theorem:
-
-```text
-At callback index bound - 1, after executing the native loop body and the
-native compare instruction, the native backedge condition is false and control
-falls through to exit_addr.
-```
-
-The generator must not choose this rule based on return value, benchmark name,
-or observed failure.
-
-### Multi-Exit Loops
-
-For multi-exit loops, callback code must set:
-
-```c
-loop->next = native_exit_addr;
-return 1;
-```
-
-for the specific native exit taken. No exact-trip fallback may be used unless a
-separate theorem proves priority among exits.
-
-### Non-Active PC-Dispatch Experiment
+### Non-Active Loop Experiments
 
 The active implementation does not contain a loop `pc` field and does not emit
 pc-dispatch basic-block callbacks. That experiment was removed from the active
 generator because it moved CFG scheduling complexity into Python and did not
 fix the two remaining verifier `E2BIG` failures.
 
-Any future pc-dispatch rule must be C-authored or bytecode-template-authored
-and must be added back to this spec before use. It is not part of the current
-proof contract.
+The previous Python-generated `bpf_loop(bound, callback, &loop_ctx, 0)` lowering
+has also been removed from the active generator for the same reason. It is not
+part of the current proof contract.
 
 ## 7. Loop Frame Preservation
 

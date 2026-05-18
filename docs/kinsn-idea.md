@@ -129,6 +129,30 @@ Detailed mechanism design lives in `docs/kinsn-design.md`. Brief sketch:
 
 Formal semantics: `docs/kinsn-formal-semantics.md`.
 
+### 4.1 Kernel source touchpoints (rejit-v2 branch / kinsn subset)
+
+The kinsn subset of the `vendor/linux-framework/rejit-v2` branch — i.e. the
+kinsn-only kernel surface — touches the following files. (REJIT-specific
+files belong to the orthogonal speculative-optimization line and are
+intentionally excluded from this paper; see `docs/reverse-jit.md` discussion
+of the kernel-ABI variant and `docs/kinsn-only` branch in the kernel
+worktree.)
+
+| 文件 | 职责 |
+|------|------|
+| `include/linux/bpf.h` | `bpf_kinsn_ops` / `bpf_kinsn_effect` / `bpf_kinsn_call` structs, registration API |
+| `include/linux/bpf_verifier.h` | kinsn verifier helper structs |
+| `include/linux/btf.h` | `KF_KINSN` flag |
+| `include/uapi/linux/bpf.h` + `tools/include/uapi/linux/bpf.h` | `BPF_PSEUDO_KINSN_SIDECAR` + `BPF_PSEUDO_KINSN_CALL` enum extensions |
+| `kernel/bpf/btf.c` | kinsn BTF id resolution |
+| `kernel/bpf/verifier.c` | kinsn registration / lookup, `model_call` verifier flow, sidecar decode |
+| `kernel/bpf/disasm.c` | kinsn disasm support |
+| `arch/x86/net/bpf_jit_comp.c` | x86 JIT CALL-case kinsn inline dispatch |
+| `arch/arm64/net/bpf_jit_comp.c` | arm64 JIT kinsn inline dispatch |
+
+Net diff size (kinsn-only branch on top of stock 7.0-rc baseline):
+**+869 / -101 LOC across 10 files**(零 REJIT 引用,纯 kinsn surface)。
+
 ## 5. Coverage And Decisions
 
 The kinsn surface is intentionally bounded. Coverage decisions are driven by

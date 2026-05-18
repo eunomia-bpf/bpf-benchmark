@@ -1,4 +1,7 @@
 #define X86_VM_ENABLE_STACK 1
+#define X86_VM_ENABLE_STACK_SLOT7 1
+#define X86_VM_ENABLE_STACK_DEEP 1
+#define X86_VM_ENABLE_STACK_EXT 1
 #include "../x86_vm_bpf.h"
 
 SEC("xdp")
@@ -19,8 +22,7 @@ x86_l_1109:
 	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RCX, X86_RDX, X86_WIDTH_64, 0, 0);
 x86_l_110c:
 	/* 0x110c: ja     1135 <simple_packet_xdp+0x35> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_A))
-		goto x86_l_1135;
+	X86_VM_X86_JCC(X86_CC_A, 0x110c, 0x1135, x86_l_1135);
 x86_l_110e:
 	/* 0x110e: lea    rsi,[rcx+0x8] */
 	X86_VM_RUN_OP(X86_OP_LEA, X86_RSI, X86_RCX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);
@@ -29,8 +31,7 @@ x86_l_1112:
 	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RSI, X86_RDX, X86_WIDTH_64, 0, 0);
 x86_l_1115:
 	/* 0x1115: ja     1135 <simple_packet_xdp+0x35> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_A))
-		goto x86_l_1135;
+	X86_VM_X86_JCC(X86_CC_A, 0x1115, 0x1135, x86_l_1135);
 x86_l_1117:
 	/* 0x1117: push   rbp */
 	X86_VM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_RBP, X86_WIDTH_64, 0, 0);
@@ -57,8 +58,7 @@ x86_l_1134:
 	X86_VM_RUN_OP(X86_OP_POP, X86_RBP, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_1135:
 	/* 0x1135: ret */
-	X86_VM_RET_RAX();
-
+	X86_VM_X86_RET();
 	return XDP_ABORTED;
 }
 

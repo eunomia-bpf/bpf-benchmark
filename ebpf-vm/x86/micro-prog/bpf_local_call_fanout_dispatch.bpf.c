@@ -1,43 +1,13 @@
 #define X86_VM_ENABLE_STACK 1
+#define X86_VM_ENABLE_STACK_SLOT7 1
+#define X86_VM_ENABLE_STACK_DEEP 1
+#define X86_VM_ENABLE_STACK_EXT 1
 #include "../x86_vm_bpf.h"
 
 static __noinline int x86_fn_local_call_pressure(struct x86_state *__x86_vm_state_ptr, void *__x86_vm_data, void *__x86_vm_data_end)
 {
 	#define __x86_vm_state (*__x86_vm_state_ptr)
-	struct x86_insn __x86_vm_insn = {};
-	__u64 __save_rbx = __x86_vm_state.rbx;
-	void *__save_p_rbx = __x86_vm_state.p_rbx;
-	__u8 __save_tag_rbx = __x86_vm_state.tag_rbx;
-	__u64 __save_r12 = __x86_vm_state.r12;
-	void *__save_p_r12 = __x86_vm_state.p_r12;
-	__u8 __save_tag_r12 = __x86_vm_state.tag_r12;
-	__u64 __save_r13 = __x86_vm_state.r13;
-	void *__save_p_r13 = __x86_vm_state.p_r13;
-	__u8 __save_tag_r13 = __x86_vm_state.tag_r13;
-	__u64 __save_r14 = __x86_vm_state.r14;
-	void *__save_p_r14 = __x86_vm_state.p_r14;
-	__u8 __save_tag_r14 = __x86_vm_state.tag_r14;
-	__u64 __save_r15 = __x86_vm_state.r15;
-	void *__save_p_r15 = __x86_vm_state.p_r15;
-	__u8 __save_tag_r15 = __x86_vm_state.tag_r15;
-	#define X86_VM_SUB_RETURN() do { \
-		__x86_vm_state.rbx = __save_rbx; \
-		__x86_vm_state.r12 = __save_r12; \
-		__x86_vm_state.r13 = __save_r13; \
-		__x86_vm_state.r14 = __save_r14; \
-		__x86_vm_state.r15 = __save_r15; \
-		__x86_vm_state.p_rbx = __save_p_rbx; \
-		__x86_vm_state.p_r12 = __save_p_r12; \
-		__x86_vm_state.p_r13 = __save_p_r13; \
-		__x86_vm_state.p_r14 = __save_p_r14; \
-		__x86_vm_state.p_r15 = __save_p_r15; \
-		__x86_vm_state.tag_rbx = __save_tag_rbx; \
-		__x86_vm_state.tag_r12 = __save_tag_r12; \
-		__x86_vm_state.tag_r13 = __save_tag_r13; \
-		__x86_vm_state.tag_r14 = __save_tag_r14; \
-		__x86_vm_state.tag_r15 = __save_tag_r15; \
-		return X86_INTERP_CONTINUE; \
-	} while (0)
+	X86_VM_SUB_BEGIN();
 	/* 0x1280: push   rbp */
 	/* generated-C ABI: callee-save frame traffic handled by wrapper */
 	/* 0x1281: mov    rbp,rsp */
@@ -106,8 +76,7 @@ x86_l_12ca:
 	/* generated-C ABI: callee-save frame traffic handled by wrapper */
 x86_l_12ce:
 	/* 0x12ce: ret */
-	X86_VM_SUB_RETURN();
-	#undef X86_VM_SUB_RETURN
+	X86_VM_X86_SUB_RET();
 	#undef __x86_vm_state
 	return X86_INTERP_TRAP;
 }
@@ -115,40 +84,7 @@ x86_l_12ce:
 static __noinline int x86_fn_local_call_linear(struct x86_state *__x86_vm_state_ptr, void *__x86_vm_data, void *__x86_vm_data_end)
 {
 	#define __x86_vm_state (*__x86_vm_state_ptr)
-	struct x86_insn __x86_vm_insn = {};
-	__u64 __save_rbx = __x86_vm_state.rbx;
-	void *__save_p_rbx = __x86_vm_state.p_rbx;
-	__u8 __save_tag_rbx = __x86_vm_state.tag_rbx;
-	__u64 __save_r12 = __x86_vm_state.r12;
-	void *__save_p_r12 = __x86_vm_state.p_r12;
-	__u8 __save_tag_r12 = __x86_vm_state.tag_r12;
-	__u64 __save_r13 = __x86_vm_state.r13;
-	void *__save_p_r13 = __x86_vm_state.p_r13;
-	__u8 __save_tag_r13 = __x86_vm_state.tag_r13;
-	__u64 __save_r14 = __x86_vm_state.r14;
-	void *__save_p_r14 = __x86_vm_state.p_r14;
-	__u8 __save_tag_r14 = __x86_vm_state.tag_r14;
-	__u64 __save_r15 = __x86_vm_state.r15;
-	void *__save_p_r15 = __x86_vm_state.p_r15;
-	__u8 __save_tag_r15 = __x86_vm_state.tag_r15;
-	#define X86_VM_SUB_RETURN() do { \
-		__x86_vm_state.rbx = __save_rbx; \
-		__x86_vm_state.r12 = __save_r12; \
-		__x86_vm_state.r13 = __save_r13; \
-		__x86_vm_state.r14 = __save_r14; \
-		__x86_vm_state.r15 = __save_r15; \
-		__x86_vm_state.p_rbx = __save_p_rbx; \
-		__x86_vm_state.p_r12 = __save_p_r12; \
-		__x86_vm_state.p_r13 = __save_p_r13; \
-		__x86_vm_state.p_r14 = __save_p_r14; \
-		__x86_vm_state.p_r15 = __save_p_r15; \
-		__x86_vm_state.tag_rbx = __save_tag_rbx; \
-		__x86_vm_state.tag_r12 = __save_tag_r12; \
-		__x86_vm_state.tag_r13 = __save_tag_r13; \
-		__x86_vm_state.tag_r14 = __save_tag_r14; \
-		__x86_vm_state.tag_r15 = __save_tag_r15; \
-		return X86_INTERP_CONTINUE; \
-	} while (0)
+	X86_VM_SUB_BEGIN();
 	/* 0x1230: push   rbp */
 	/* generated-C ABI: callee-save frame traffic handled by wrapper */
 	/* 0x1231: mov    rbp,rsp */
@@ -220,8 +156,7 @@ x86_l_1278:
 	/* generated-C ABI: callee-save frame traffic handled by wrapper */
 x86_l_127c:
 	/* 0x127c: ret */
-	X86_VM_SUB_RETURN();
-	#undef X86_VM_SUB_RETURN
+	X86_VM_X86_SUB_RET();
 	#undef __x86_vm_state
 	return X86_INTERP_TRAP;
 }
@@ -229,40 +164,7 @@ x86_l_127c:
 static __noinline int x86_fn_local_call_crossload(struct x86_state *__x86_vm_state_ptr, void *__x86_vm_data, void *__x86_vm_data_end)
 {
 	#define __x86_vm_state (*__x86_vm_state_ptr)
-	struct x86_insn __x86_vm_insn = {};
-	__u64 __save_rbx = __x86_vm_state.rbx;
-	void *__save_p_rbx = __x86_vm_state.p_rbx;
-	__u8 __save_tag_rbx = __x86_vm_state.tag_rbx;
-	__u64 __save_r12 = __x86_vm_state.r12;
-	void *__save_p_r12 = __x86_vm_state.p_r12;
-	__u8 __save_tag_r12 = __x86_vm_state.tag_r12;
-	__u64 __save_r13 = __x86_vm_state.r13;
-	void *__save_p_r13 = __x86_vm_state.p_r13;
-	__u8 __save_tag_r13 = __x86_vm_state.tag_r13;
-	__u64 __save_r14 = __x86_vm_state.r14;
-	void *__save_p_r14 = __x86_vm_state.p_r14;
-	__u8 __save_tag_r14 = __x86_vm_state.tag_r14;
-	__u64 __save_r15 = __x86_vm_state.r15;
-	void *__save_p_r15 = __x86_vm_state.p_r15;
-	__u8 __save_tag_r15 = __x86_vm_state.tag_r15;
-	#define X86_VM_SUB_RETURN() do { \
-		__x86_vm_state.rbx = __save_rbx; \
-		__x86_vm_state.r12 = __save_r12; \
-		__x86_vm_state.r13 = __save_r13; \
-		__x86_vm_state.r14 = __save_r14; \
-		__x86_vm_state.r15 = __save_r15; \
-		__x86_vm_state.p_rbx = __save_p_rbx; \
-		__x86_vm_state.p_r12 = __save_p_r12; \
-		__x86_vm_state.p_r13 = __save_p_r13; \
-		__x86_vm_state.p_r14 = __save_p_r14; \
-		__x86_vm_state.p_r15 = __save_p_r15; \
-		__x86_vm_state.tag_rbx = __save_tag_rbx; \
-		__x86_vm_state.tag_r12 = __save_tag_r12; \
-		__x86_vm_state.tag_r13 = __save_tag_r13; \
-		__x86_vm_state.tag_r14 = __save_tag_r14; \
-		__x86_vm_state.tag_r15 = __save_tag_r15; \
-		return X86_INTERP_CONTINUE; \
-	} while (0)
+	X86_VM_SUB_BEGIN();
 	/* 0x12d0: push   rbp */
 	/* generated-C ABI: callee-save frame traffic handled by wrapper */
 	/* 0x12d1: mov    rbp,rsp */
@@ -387,8 +289,7 @@ x86_l_1353:
 	/* generated-C ABI: callee-save frame traffic handled by wrapper */
 x86_l_135a:
 	/* 0x135a: ret */
-	X86_VM_SUB_RETURN();
-	#undef X86_VM_SUB_RETURN
+	X86_VM_X86_SUB_RET();
 	#undef __x86_vm_state
 	return X86_INTERP_TRAP;
 }
@@ -396,40 +297,7 @@ x86_l_135a:
 static __noinline int x86_fn_local_call_bytes(struct x86_state *__x86_vm_state_ptr, void *__x86_vm_data, void *__x86_vm_data_end)
 {
 	#define __x86_vm_state (*__x86_vm_state_ptr)
-	struct x86_insn __x86_vm_insn = {};
-	__u64 __save_rbx = __x86_vm_state.rbx;
-	void *__save_p_rbx = __x86_vm_state.p_rbx;
-	__u8 __save_tag_rbx = __x86_vm_state.tag_rbx;
-	__u64 __save_r12 = __x86_vm_state.r12;
-	void *__save_p_r12 = __x86_vm_state.p_r12;
-	__u8 __save_tag_r12 = __x86_vm_state.tag_r12;
-	__u64 __save_r13 = __x86_vm_state.r13;
-	void *__save_p_r13 = __x86_vm_state.p_r13;
-	__u8 __save_tag_r13 = __x86_vm_state.tag_r13;
-	__u64 __save_r14 = __x86_vm_state.r14;
-	void *__save_p_r14 = __x86_vm_state.p_r14;
-	__u8 __save_tag_r14 = __x86_vm_state.tag_r14;
-	__u64 __save_r15 = __x86_vm_state.r15;
-	void *__save_p_r15 = __x86_vm_state.p_r15;
-	__u8 __save_tag_r15 = __x86_vm_state.tag_r15;
-	#define X86_VM_SUB_RETURN() do { \
-		__x86_vm_state.rbx = __save_rbx; \
-		__x86_vm_state.r12 = __save_r12; \
-		__x86_vm_state.r13 = __save_r13; \
-		__x86_vm_state.r14 = __save_r14; \
-		__x86_vm_state.r15 = __save_r15; \
-		__x86_vm_state.p_rbx = __save_p_rbx; \
-		__x86_vm_state.p_r12 = __save_p_r12; \
-		__x86_vm_state.p_r13 = __save_p_r13; \
-		__x86_vm_state.p_r14 = __save_p_r14; \
-		__x86_vm_state.p_r15 = __save_p_r15; \
-		__x86_vm_state.tag_rbx = __save_tag_rbx; \
-		__x86_vm_state.tag_r12 = __save_tag_r12; \
-		__x86_vm_state.tag_r13 = __save_tag_r13; \
-		__x86_vm_state.tag_r14 = __save_tag_r14; \
-		__x86_vm_state.tag_r15 = __save_tag_r15; \
-		return X86_INTERP_CONTINUE; \
-	} while (0)
+	X86_VM_SUB_BEGIN();
 	/* 0x1360: push   rbp */
 	/* generated-C ABI: callee-save frame traffic handled by wrapper */
 	/* 0x1361: mov    rbp,rsp */
@@ -594,164 +462,15 @@ x86_l_1429:
 	/* generated-C ABI: callee-save frame traffic handled by wrapper */
 x86_l_142f:
 	/* 0x142f: ret */
-	X86_VM_SUB_RETURN();
-	#undef X86_VM_SUB_RETURN
+	X86_VM_X86_SUB_RET();
 	#undef __x86_vm_state
 	return X86_INTERP_TRAP;
-}
-
-static long x86_loop_1180_11b6_cb(__u32 __x86_loop_index, void *ctx)
-{
-	struct x86_vm_loop_ctx *loop = ctx;
-	void *__x86_vm_data = loop->data;
-	void *__x86_vm_data_end = loop->data_end;
-	struct x86_insn __x86_vm_insn = {};
-	#define __x86_vm_state loop->state
-
-	(void)__x86_loop_index;
-	if (loop->failed || loop->done || loop->next)
-		return 1;
-	goto x86_l_11b6;
-x86_l_1180:
-	/* 0x1180: mov    rsi,QWORD PTR [rbp-0x30] */
-	X86_VM_LOOP_OP(X86_OP_MOV_LOAD, X86_RSI, X86_RBP, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 18446744073709551568ULL);
-x86_l_1184:
-	/* 0x1184: mov    ecx,r14d */
-	X86_VM_LOOP_OP(X86_OP_MOV_REG, X86_RCX, X86_R14, X86_WIDTH_32, 0, 0);
-x86_l_1187:
-	/* 0x1187: call   1280 <local_call_pressure> */
-	X86_VM_LOOP_CALL(x86_fn_local_call_pressure);
-x86_l_118c:
-	/* 0x118c: mov    ecx,ebx */
-	X86_VM_LOOP_OP(X86_OP_MOV_REG, X86_RCX, X86_RBX, X86_WIDTH_32, 0, 0);
-x86_l_118e:
-	/* 0x118e: and    cl,0x38 */
-	X86_VM_LOOP_OP(X86_OP_ALU_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_8, X86_ALU_AND, 56ULL);
-x86_l_1191:
-	/* 0x1191: shl    r15,cl */
-	X86_VM_LOOP_OP(X86_OP_ALU_REG, X86_R15, X86_RCX, X86_WIDTH_64, X86_ALU_SHL, 0);
-x86_l_1194:
-	/* 0x1194: mov    edi,r14d */
-	X86_VM_LOOP_OP(X86_OP_MOV_REG, X86_RDI, X86_R14, X86_WIDTH_32, 0, 0);
-x86_l_1197:
-	/* 0x1197: add    rdi,r15 */
-	X86_VM_LOOP_OP(X86_OP_ALU_REG, X86_RDI, X86_R15, X86_WIDTH_64, X86_ALU_ADD, 0);
-x86_l_119a:
-	/* 0x119a: xor    rdi,rax */
-	X86_VM_LOOP_OP(X86_OP_ALU_REG, X86_RDI, X86_RAX, X86_WIDTH_64, X86_ALU_XOR, 0);
-x86_l_119d:
-	/* 0x119d: add    rbx,0x8 */
-	X86_VM_LOOP_OP(X86_OP_ALU_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_64, X86_ALU_ADD, 8ULL);
-x86_l_11a1:
-	/* 0x11a1: add    r12d,0x10 */
-	X86_VM_LOOP_OP(X86_OP_ALU_IMM, X86_R12, X86_REG_NONE, X86_WIDTH_32, X86_ALU_ADD, 16ULL);
-x86_l_11a5:
-	/* 0x11a5: add    r13,0x18 */
-	X86_VM_LOOP_OP(X86_OP_ALU_IMM, X86_R13, X86_REG_NONE, X86_WIDTH_64, X86_ALU_ADD, 24ULL);
-x86_l_11a9:
-	/* 0x11a9: cmp    rbx,0x80 */
-	X86_VM_LOOP_OP(X86_OP_CMP_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_64, 0, 128ULL);
-x86_l_11b0:
-	/* 0x11b0: mov    rsi,QWORD PTR [rbp-0x38] */
-	X86_VM_LOOP_OP(X86_OP_MOV_LOAD, X86_RSI, X86_RBP, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 18446744073709551560ULL);
-x86_l_11b4:
-	/* 0x11b4: je     1211 <bpf_local_call_fanout_dispatch_xdp+0x111> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_E)) {
-		X86_VM_LOOP_EXIT(0x1211);
-	}
-	return 0;
-x86_l_11b6:
-	/* 0x11b6: movzx  r15d,BYTE PTR [rsi+r13*1-0x7] */
-	X86_VM_LOOP_OP(X86_OP_MOV_LOAD, X86_R15, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_R13, 0, X86_WIDTH_8), 18446744073709551609ULL);
-x86_l_11bc:
-	/* 0x11bc: and    r15d,0x3 */
-	X86_VM_LOOP_OP(X86_OP_ALU_IMM, X86_R15, X86_REG_NONE, X86_WIDTH_32, X86_ALU_AND, 3ULL);
-x86_l_11c0:
-	/* 0x11c0: mov    r14d,DWORD PTR [rsi+r13*1-0x3] */
-	X86_VM_LOOP_OP(X86_OP_MOV_LOAD, X86_R14, X86_RSI, X86_WIDTH_32, X86_MEM_AUX(X86_R13, 0), 18446744073709551613ULL);
-x86_l_11c5:
-	/* 0x11c5: xor    r14d,r12d */
-	X86_VM_LOOP_OP(X86_OP_ALU_REG, X86_R14, X86_R12, X86_WIDTH_32, X86_ALU_XOR, 0);
-x86_l_11c8:
-	/* 0x11c8: lea    rdx,[r13-0xf] */
-	X86_VM_LOOP_OP(X86_OP_LEA, X86_RDX, X86_R13, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 18446744073709551601ULL);
-x86_l_11cc:
-	/* 0x11cc: cmp    r15,0x2 */
-	X86_VM_LOOP_OP(X86_OP_CMP_IMM, X86_R15, X86_REG_NONE, X86_WIDTH_64, 0, 2ULL);
-x86_l_11d0:
-	/* 0x11d0: je     11f0 <bpf_local_call_fanout_dispatch_xdp+0xf0> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_E))
-		goto x86_l_11f0;
-x86_l_11d2:
-	/* 0x11d2: cmp    r15d,0x1 */
-	X86_VM_LOOP_OP(X86_OP_CMP_IMM, X86_R15, X86_REG_NONE, X86_WIDTH_32, 0, 1ULL);
-x86_l_11d6:
-	/* 0x11d6: je     1180 <bpf_local_call_fanout_dispatch_xdp+0x80> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_E))
-		goto x86_l_1180;
-x86_l_11d8:
-	/* 0x11d8: test   r15d,r15d */
-	X86_VM_LOOP_OP(X86_OP_TEST_REG, X86_R15, X86_R15, X86_WIDTH_32, 0, 0);
-x86_l_11db:
-	/* 0x11db: jne    1200 <bpf_local_call_fanout_dispatch_xdp+0x100> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
-		goto x86_l_1200;
-x86_l_11dd:
-	/* 0x11dd: mov    rsi,QWORD PTR [rbp-0x30] */
-	X86_VM_LOOP_OP(X86_OP_MOV_LOAD, X86_RSI, X86_RBP, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 18446744073709551568ULL);
-x86_l_11e1:
-	/* 0x11e1: mov    ecx,r14d */
-	X86_VM_LOOP_OP(X86_OP_MOV_REG, X86_RCX, X86_R14, X86_WIDTH_32, 0, 0);
-x86_l_11e4:
-	/* 0x11e4: call   1230 <local_call_linear> */
-	X86_VM_LOOP_CALL(x86_fn_local_call_linear);
-x86_l_11e9:
-	/* 0x11e9: jmp    118c <bpf_local_call_fanout_dispatch_xdp+0x8c> */
-	goto x86_l_118c;
-x86_l_11eb:
-	/* 0x11eb: nop    DWORD PTR [rax+rax*1+0x0] */
-	X86_VM_LOOP_OP(X86_OP_NOP, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, 0);
-x86_l_11f0:
-	/* 0x11f0: mov    rsi,QWORD PTR [rbp-0x30] */
-	X86_VM_LOOP_OP(X86_OP_MOV_LOAD, X86_RSI, X86_RBP, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 18446744073709551568ULL);
-x86_l_11f4:
-	/* 0x11f4: mov    ecx,r14d */
-	X86_VM_LOOP_OP(X86_OP_MOV_REG, X86_RCX, X86_R14, X86_WIDTH_32, 0, 0);
-x86_l_11f7:
-	/* 0x11f7: call   12d0 <local_call_crossload> */
-	X86_VM_LOOP_CALL(x86_fn_local_call_crossload);
-x86_l_11fc:
-	/* 0x11fc: jmp    118c <bpf_local_call_fanout_dispatch_xdp+0x8c> */
-	goto x86_l_118c;
-x86_l_11fe:
-	/* 0x11fe: xchg   ax,ax */
-	X86_VM_LOOP_OP(X86_OP_XCHG, X86_RAX, X86_RAX, X86_WIDTH_16, 0, 0);
-x86_l_1200:
-	/* 0x1200: mov    rsi,QWORD PTR [rbp-0x30] */
-	X86_VM_LOOP_OP(X86_OP_MOV_LOAD, X86_RSI, X86_RBP, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 18446744073709551568ULL);
-x86_l_1204:
-	/* 0x1204: mov    ecx,r14d */
-	X86_VM_LOOP_OP(X86_OP_MOV_REG, X86_RCX, X86_R14, X86_WIDTH_32, 0, 0);
-x86_l_1207:
-	/* 0x1207: call   1360 <local_call_bytes> */
-	X86_VM_LOOP_CALL(x86_fn_local_call_bytes);
-x86_l_120c:
-	/* 0x120c: jmp    118c <bpf_local_call_fanout_dispatch_xdp+0x8c> */
-	goto x86_l_118c;
-	#undef __x86_vm_state
-	return 0;
 }
 
 SEC("xdp")
 int bpf_local_call_fanout_dispatch_x86_vm_xdp(struct xdp_md *ctx)
 {
-	void *__x86_vm_ctx = (void *)ctx;
-	void *__x86_vm_data = (void *)(long)ctx->data;
-	void *__x86_vm_data_end = (void *)(long)ctx->data_end;
-	struct x86_vm_loop_ctx __x86_loop = {};
-	struct x86_insn __x86_vm_insn = {};
-	#define __x86_vm_state __x86_loop.state
-	x86_init_state(&__x86_vm_state, (void *)ctx);
+	X86_VM_DECLARE_XDP(ctx);
 	__x86_vm_state.rbp = 0;
 	__x86_vm_state.p_rbp = 0;
 	__x86_vm_state.tag_rbp = X86_PTR_STACK;
@@ -772,8 +491,7 @@ x86_l_1109:
 	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RSI, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_110c:
 	/* 0x110c: ja     1227 <bpf_local_call_fanout_dispatch_xdp+0x127> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_A))
-		goto x86_l_1227;
+	X86_VM_X86_JCC(X86_CC_A, 0x110c, 0x1227, x86_l_1227);
 x86_l_1112:
 	/* 0x1112: push   rbp */
 	/* generated-C ABI: entry frame traffic handled by wrapper */
@@ -809,8 +527,7 @@ x86_l_112b:
 	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RDX, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_112e:
 	/* 0x112e: ja     1219 <bpf_local_call_fanout_dispatch_xdp+0x119> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_A))
-		goto x86_l_1219;
+	X86_VM_X86_JCC(X86_CC_A, 0x112e, 0x1219, x86_l_1219);
 x86_l_1134:
 	/* 0x1134: lea    rdx,[rsi+0x190] */
 	X86_VM_RUN_OP(X86_OP_LEA, X86_RDX, X86_RSI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 400ULL);
@@ -819,22 +536,19 @@ x86_l_113b:
 	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RDX, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_113e:
 	/* 0x113e: ja     1219 <bpf_local_call_fanout_dispatch_xdp+0x119> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_A))
-		goto x86_l_1219;
+	X86_VM_X86_JCC(X86_CC_A, 0x113e, 0x1219, x86_l_1219);
 x86_l_1144:
 	/* 0x1144: cmp    DWORD PTR [rsi+0x8],0x10 */
 	X86_VM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 34359738384ULL);
 x86_l_1148:
 	/* 0x1148: jne    1219 <bpf_local_call_fanout_dispatch_xdp+0x119> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
-		goto x86_l_1219;
+	X86_VM_X86_JCC(X86_CC_NE, 0x1148, 0x1219, x86_l_1219);
 x86_l_114e:
 	/* 0x114e: cmp    DWORD PTR [rsi+0xc],0x18 */
 	X86_VM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 51539607576ULL);
 x86_l_1152:
 	/* 0x1152: jne    1219 <bpf_local_call_fanout_dispatch_xdp+0x119> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
-		goto x86_l_1219;
+	X86_VM_X86_JCC(X86_CC_NE, 0x1152, 0x1219, x86_l_1219);
 x86_l_1158:
 	/* 0x1158: movabs rdi,0x243f6a8885a308d3 */
 	X86_VM_RUN_OP(X86_OP_MOV_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_64, 0, 2611923443488327891ULL);
@@ -852,25 +566,130 @@ x86_l_116d:
 	X86_VM_RUN_OP(X86_OP_MOV_STORE_REG, X86_RBP, X86_RSI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 18446744073709551560ULL);
 x86_l_1171:
 	/* 0x1171: jmp    11b6 <bpf_local_call_fanout_dispatch_xdp+0xb6> */
-	/* verifier loop lowering: bpf_loop callback preserves x86 steps */
-	struct x86_vm_reg_save __x86_loop_save_1180_11b6_rdi = {};
-	x86_vm_loop_prepare((&__x86_loop), __x86_vm_data, __x86_vm_data_end, &__x86_loop_save_1180_11b6_rdi);
-	if (bpf_loop(16, x86_loop_1180_11b6_cb, (&__x86_loop), 0) < 0) {
-		(&__x86_loop)->failed = __LINE__;
-		return XDP_ABORTED;
-	}
-	x86_vm_loop_restore_rdi((&__x86_loop), &__x86_loop_save_1180_11b6_rdi);
-	if ((&__x86_loop)->failed)
-		return XDP_ABORTED;
-	if ((&__x86_loop)->done)
-		X86_VM_RET_RAX();
-	if ((&__x86_loop)->next == 0x1211) {
-		goto x86_l_1211;
-	}
-	return XDP_ABORTED;
+	X86_VM_X86_JMP(0x1171, 0x11b6, x86_l_11b6);
 x86_l_1173:
 	/* 0x1173: data16 data16 data16 cs nop WORD PTR [rax+rax*1+0x0] */
 	X86_VM_RUN_OP(X86_OP_NOP, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, 0);
+x86_l_1180:
+	/* 0x1180: mov    rsi,QWORD PTR [rbp-0x30] */
+	X86_VM_RUN_OP(X86_OP_MOV_LOAD, X86_RSI, X86_RBP, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 18446744073709551568ULL);
+x86_l_1184:
+	/* 0x1184: mov    ecx,r14d */
+	X86_VM_RUN_OP(X86_OP_MOV_REG, X86_RCX, X86_R14, X86_WIDTH_32, 0, 0);
+x86_l_1187:
+	/* 0x1187: call   1280 <local_call_pressure> */
+	X86_VM_X86_CALL(x86_fn_local_call_pressure);
+x86_l_118c:
+	/* 0x118c: mov    ecx,ebx */
+	X86_VM_RUN_OP(X86_OP_MOV_REG, X86_RCX, X86_RBX, X86_WIDTH_32, 0, 0);
+x86_l_118e:
+	/* 0x118e: and    cl,0x38 */
+	X86_VM_RUN_OP(X86_OP_ALU_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_8, X86_ALU_AND, 56ULL);
+x86_l_1191:
+	/* 0x1191: shl    r15,cl */
+	X86_VM_RUN_OP(X86_OP_ALU_REG, X86_R15, X86_RCX, X86_WIDTH_64, X86_ALU_SHL, 0);
+x86_l_1194:
+	/* 0x1194: mov    edi,r14d */
+	X86_VM_RUN_OP(X86_OP_MOV_REG, X86_RDI, X86_R14, X86_WIDTH_32, 0, 0);
+x86_l_1197:
+	/* 0x1197: add    rdi,r15 */
+	X86_VM_RUN_OP(X86_OP_ALU_REG, X86_RDI, X86_R15, X86_WIDTH_64, X86_ALU_ADD, 0);
+x86_l_119a:
+	/* 0x119a: xor    rdi,rax */
+	X86_VM_RUN_OP(X86_OP_ALU_REG, X86_RDI, X86_RAX, X86_WIDTH_64, X86_ALU_XOR, 0);
+x86_l_119d:
+	/* 0x119d: add    rbx,0x8 */
+	X86_VM_RUN_OP(X86_OP_ALU_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_64, X86_ALU_ADD, 8ULL);
+x86_l_11a1:
+	/* 0x11a1: add    r12d,0x10 */
+	X86_VM_RUN_OP(X86_OP_ALU_IMM, X86_R12, X86_REG_NONE, X86_WIDTH_32, X86_ALU_ADD, 16ULL);
+x86_l_11a5:
+	/* 0x11a5: add    r13,0x18 */
+	X86_VM_RUN_OP(X86_OP_ALU_IMM, X86_R13, X86_REG_NONE, X86_WIDTH_64, X86_ALU_ADD, 24ULL);
+x86_l_11a9:
+	/* 0x11a9: cmp    rbx,0x80 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_64, 0, 128ULL);
+x86_l_11b0:
+	/* 0x11b0: mov    rsi,QWORD PTR [rbp-0x38] */
+	X86_VM_RUN_OP(X86_OP_MOV_LOAD, X86_RSI, X86_RBP, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 18446744073709551560ULL);
+x86_l_11b4:
+	/* 0x11b4: je     1211 <bpf_local_call_fanout_dispatch_xdp+0x111> */
+	X86_VM_X86_JCC(X86_CC_E, 0x11b4, 0x1211, x86_l_1211);
+x86_l_11b6:
+	/* 0x11b6: movzx  r15d,BYTE PTR [rsi+r13*1-0x7] */
+	X86_VM_RUN_OP(X86_OP_MOV_LOAD, X86_R15, X86_RSI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_R13, 0, X86_WIDTH_8), 18446744073709551609ULL);
+x86_l_11bc:
+	/* 0x11bc: and    r15d,0x3 */
+	X86_VM_RUN_OP(X86_OP_ALU_IMM, X86_R15, X86_REG_NONE, X86_WIDTH_32, X86_ALU_AND, 3ULL);
+x86_l_11c0:
+	/* 0x11c0: mov    r14d,DWORD PTR [rsi+r13*1-0x3] */
+	X86_VM_RUN_OP(X86_OP_MOV_LOAD, X86_R14, X86_RSI, X86_WIDTH_32, X86_MEM_AUX(X86_R13, 0), 18446744073709551613ULL);
+x86_l_11c5:
+	/* 0x11c5: xor    r14d,r12d */
+	X86_VM_RUN_OP(X86_OP_ALU_REG, X86_R14, X86_R12, X86_WIDTH_32, X86_ALU_XOR, 0);
+x86_l_11c8:
+	/* 0x11c8: lea    rdx,[r13-0xf] */
+	X86_VM_RUN_OP(X86_OP_LEA, X86_RDX, X86_R13, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 18446744073709551601ULL);
+x86_l_11cc:
+	/* 0x11cc: cmp    r15,0x2 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_R15, X86_REG_NONE, X86_WIDTH_64, 0, 2ULL);
+x86_l_11d0:
+	/* 0x11d0: je     11f0 <bpf_local_call_fanout_dispatch_xdp+0xf0> */
+	X86_VM_X86_JCC(X86_CC_E, 0x11d0, 0x11f0, x86_l_11f0);
+x86_l_11d2:
+	/* 0x11d2: cmp    r15d,0x1 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_R15, X86_REG_NONE, X86_WIDTH_32, 0, 1ULL);
+x86_l_11d6:
+	/* 0x11d6: je     1180 <bpf_local_call_fanout_dispatch_xdp+0x80> */
+	X86_VM_X86_JCC(X86_CC_E, 0x11d6, 0x1180, x86_l_1180);
+x86_l_11d8:
+	/* 0x11d8: test   r15d,r15d */
+	X86_VM_RUN_OP(X86_OP_TEST_REG, X86_R15, X86_R15, X86_WIDTH_32, 0, 0);
+x86_l_11db:
+	/* 0x11db: jne    1200 <bpf_local_call_fanout_dispatch_xdp+0x100> */
+	X86_VM_X86_JCC(X86_CC_NE, 0x11db, 0x1200, x86_l_1200);
+x86_l_11dd:
+	/* 0x11dd: mov    rsi,QWORD PTR [rbp-0x30] */
+	X86_VM_RUN_OP(X86_OP_MOV_LOAD, X86_RSI, X86_RBP, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 18446744073709551568ULL);
+x86_l_11e1:
+	/* 0x11e1: mov    ecx,r14d */
+	X86_VM_RUN_OP(X86_OP_MOV_REG, X86_RCX, X86_R14, X86_WIDTH_32, 0, 0);
+x86_l_11e4:
+	/* 0x11e4: call   1230 <local_call_linear> */
+	X86_VM_X86_CALL(x86_fn_local_call_linear);
+x86_l_11e9:
+	/* 0x11e9: jmp    118c <bpf_local_call_fanout_dispatch_xdp+0x8c> */
+	X86_VM_X86_JMP(0x11e9, 0x118c, x86_l_118c);
+x86_l_11eb:
+	/* 0x11eb: nop    DWORD PTR [rax+rax*1+0x0] */
+	X86_VM_RUN_OP(X86_OP_NOP, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, 0);
+x86_l_11f0:
+	/* 0x11f0: mov    rsi,QWORD PTR [rbp-0x30] */
+	X86_VM_RUN_OP(X86_OP_MOV_LOAD, X86_RSI, X86_RBP, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 18446744073709551568ULL);
+x86_l_11f4:
+	/* 0x11f4: mov    ecx,r14d */
+	X86_VM_RUN_OP(X86_OP_MOV_REG, X86_RCX, X86_R14, X86_WIDTH_32, 0, 0);
+x86_l_11f7:
+	/* 0x11f7: call   12d0 <local_call_crossload> */
+	X86_VM_X86_CALL(x86_fn_local_call_crossload);
+x86_l_11fc:
+	/* 0x11fc: jmp    118c <bpf_local_call_fanout_dispatch_xdp+0x8c> */
+	X86_VM_X86_JMP(0x11fc, 0x118c, x86_l_118c);
+x86_l_11fe:
+	/* 0x11fe: xchg   ax,ax */
+	X86_VM_RUN_OP(X86_OP_XCHG, X86_RAX, X86_RAX, X86_WIDTH_16, 0, 0);
+x86_l_1200:
+	/* 0x1200: mov    rsi,QWORD PTR [rbp-0x30] */
+	X86_VM_RUN_OP(X86_OP_MOV_LOAD, X86_RSI, X86_RBP, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 18446744073709551568ULL);
+x86_l_1204:
+	/* 0x1204: mov    ecx,r14d */
+	X86_VM_RUN_OP(X86_OP_MOV_REG, X86_RCX, X86_R14, X86_WIDTH_32, 0, 0);
+x86_l_1207:
+	/* 0x1207: call   1360 <local_call_bytes> */
+	X86_VM_X86_CALL(x86_fn_local_call_bytes);
+x86_l_120c:
+	/* 0x120c: jmp    118c <bpf_local_call_fanout_dispatch_xdp+0x8c> */
+	X86_VM_X86_JMP(0x120c, 0x118c, x86_l_118c);
 x86_l_1211:
 	/* 0x1211: mov    QWORD PTR [rsi],rdi */
 	X86_VM_RUN_OP(X86_OP_MOV_STORE_REG, X86_RSI, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);
@@ -900,8 +719,7 @@ x86_l_1226:
 	/* generated-C ABI: entry frame traffic handled by wrapper */
 x86_l_1227:
 	/* 0x1227: ret */
-	X86_VM_RET_RAX();
-	#undef __x86_vm_state
+	X86_VM_X86_RET();
 	return XDP_ABORTED;
 }
 

@@ -158,8 +158,7 @@ def prepare_daemon_session(
     failure_artifacts_dir: Path | None = None,
 ) -> PreparedDaemonSession:
     metadata = copy.deepcopy(getattr(daemon_session, "kinsn_metadata", {}) or {})
-    if not metadata:
-        raise RuntimeError("daemon session did not capture kinsn metadata")
+    # Stock-kernel shim path has no kinsn modules; an empty dict is valid.
     metadata["daemon_binary"] = relpath(daemon_session.daemon_binary.resolve())
     return PreparedDaemonSession(session=daemon_session, metadata=metadata, failure_artifacts_dir=failure_artifacts_dir)
 
@@ -268,6 +267,7 @@ def run_lifecycle_sessions(
                         prog_names_by_id[pid] = pname
                 result.rejit_result = active_daemon_session.apply_rejit(
                     result.rejit_prog_ids,
+                    app_pid=int(session.runner.pid or 0),
                     enabled_passes=apply_enabled_passes,
                     failure_artifacts_dir=daemon_session.failure_artifacts_dir,
                     app_name=yaml_app_name,

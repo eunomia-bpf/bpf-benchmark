@@ -36,6 +36,14 @@ struct Cli {
     /// Output target platform JSON file after canonicalization-time rewrites.
     #[arg(long, value_name = "FILE")]
     target_output: Option<PathBuf>,
+    /// Optional JSON file mapping each loader-side fd value (as it appears in
+    /// `BPF_PSEUDO_MAP_FD imm`) to its kernel map id. Required when the
+    /// captured bytecode came from a stock-kernel intercept (LD_PRELOAD shim)
+    /// where the loader uses several distinct fds for the same underlying
+    /// kernel map. Format: `{"5": 265, "7": 265, "9": 100}` (string keys, u32
+    /// values). When omitted, bpfopt keeps daemon semantics (imm = kid).
+    #[arg(long, value_name = "FILE")]
+    fd_to_id: Option<PathBuf>,
     /// Pass-local args. Must follow `--` and are parsed by the selected pass.
     #[arg(last = true, num_args = 0.., allow_hyphen_values = true)]
     pass_args: Vec<String>,
@@ -91,13 +99,21 @@ fn run_main() -> Result<()> {
         if !cli.pass_args.is_empty() {
             bail!("pass-local args require --pass <name>");
         }
-        return run_canonicalize_map_refs(&cli.common, &cli.map_ids, cli.target_output.as_deref());
+        return run_canonicalize_map_refs(
+            &cli.common,
+            &cli.map_ids,
+            cli.target_output.as_deref(),
+            cli.fd_to_id.as_deref(),
+        );
     }
     if !cli.map_ids.is_empty() {
         bail!("--map-ids requires --canonicalize-map-refs or a pass-local use after --");
     }
     if cli.target_output.is_some() {
         bail!("--target-output requires --canonicalize-map-refs");
+    }
+    if cli.fd_to_id.is_some() {
+        bail!("--fd-to-id requires --canonicalize-map-refs");
     }
 
     let pass = cli
@@ -112,6 +128,7 @@ fn run_canonicalize_map_refs(
     common: &CommonArgs,
     map_ids: &[u32],
     target_output: Option<&Path>,
+    fd_to_id_path: Option<&Path>,
 ) -> Result<()> {
     if common.report.is_some() {
         bail!("--canonicalize-map-refs does not produce --report");
@@ -121,8 +138,30 @@ fn run_canonicalize_map_refs(
         (Some(_), None) => bail!("--canonicalize-map-refs --target requires --target-output"),
         (None, Some(_)) => bail!("--target-output requires --target"),
     }
+    let fd_to_id_map: Option<std::collections::HashMap<i32, u32>> = match fd_to_id_path {
+        Some(path) => {
+            // JSON shape: {"5": 265, "7": 265, ...} (string keys to keep
+            // serde compatible with arbitrary loader fd ranges).
+            let raw: std::collections::HashMap<String, u32> =
+                read_json_file(path, "fd-to-id mapping")?;
+            let mut out = std::collections::HashMap::with_capacity(raw.len());
+            for (k, v) in raw {
+                let fd: i32 = k.parse().with_context(|| {
+                    format!("fd-to-id mapping has non-numeric loader fd key {k:?}")
+                })?;
+                out.insert(fd, v);
+            }
+            Some(out)
+        }
+        None => None,
+    };
     let mut insns = read_bytecode(common.input.as_deref())?;
-    bpfopt::analysis::canonicalize_map_refs_to_idx(&mut insns, None, map_ids)?;
+    bpfopt::analysis::canonicalize_map_refs_to_idx_with_mapping(
+        &mut insns,
+        None,
+        map_ids,
+        fd_to_id_map.as_ref(),
+    )?;
     if let (Some(target), Some(target_output)) = (common.target.as_deref(), target_output) {
         let mut target_json: TargetJson = read_json_file(target, "target.json")?;
         bpfopt::analysis::shift_target_module_call_offsets_for_map_prefix(
