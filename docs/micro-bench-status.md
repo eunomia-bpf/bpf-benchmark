@@ -213,168 +213,21 @@ The gap should now be read with two mechanisms in mind:
 - Normal bpfopt passes rewrite verifier-facing BPF into better verifier-facing BPF. The kernel verifier and the normal kernel JIT see the rewritten instruction stream.
 - Machine-level kinsns are a separate path. The verifier sees the module's `instantiate_insn()` BPF expansion; the final x86 emitter lowers the same kinsn to one named x86 instruction form. This is the path used to test whether "native C asm converted to machine-kinsn BPF" can converge to the same final kernel JIT code.
 
-The current handcraft conversion path is intentionally outside the benchmark result schema. `make micro` compiles any `micro/programs/<bench>.handcraft.c` into `<bench>.handcraft.so`; `micro/catalog.py` auto-attaches that object as an extra `kernel_handcraft` runtime for the existing benchmark. There is no separate `_handcraft` benchmark entry. After a successful micro run, `micro/driver.py` writes `micro/programs/<bench>.md` with:
+The native-asm-to-handcraft converter experiment is archived under
+`micro/programs/converter/`. The archived files include generated markdown
+reports, generated `*.handcraft.c` programs, the converter scripts, and a
+standalone writeup of the failure modes and lessons learned. The conclusion is
+that the converter is useful as an offline native-parity oracle, but it should
+not be the production path: it grew into a small semantic lowerer for
+`cmp/test`, `jcc`, `cmov`, operand snapshots, and native-register
+materialization, while tight-loop scalar proofs still exceeded verifier limits.
 
-- original C
-- native C asm
-- original kernel JIT asm
-- llvmbpf JIT asm
-- handcraft C
-- handcraft kernel JIT asm
+Current kinsn work should therefore use kinsns as basic-block-local
+superinstructions emitted by bpfopt or an LLVM backend, not as a complete x86
+execution model.
 
-The active native-to-handcraft converter can read that generated markdown directly:
-
-```sh
-analysis/native_asm_to_handcraft_bpf_cf.py \
-  --input micro/programs/siphash_rotate64_mixer.md \
-  --output micro/programs/siphash_rotate64_mixer.handcraft.c
-```
-
-The generated `micro/programs/<bench>.md` file is the converter input; its `## Native ASM` section is the source of truth.
-
-Current converter inventory after regenerating all 29 checked-in handcraft sources from the generated markdown files:
-
-| Metric | Count |
-|---|---:|
-| Native instructions parsed | 4285 |
-| Exact machine-kinsn translations | 2895 |
-| Ordinary BPF translations, mostly control-flow and context ABI | 732 |
-| `cmp/test` instructions consumed by raw BPF branches | 478 |
-| ABI-boundary instructions (`call` / `ret`) | 58 |
-| Padding/nop instructions dropped | 56 |
-| Unsupported / warning instructions kept as comments | 0 |
-
-The converter is deliberately narrow. Non-control-flow x86 instructions are emitted as single named machine kinsns when a selector exists. Control-flow is not a kinsn path: `jcc`, `jmp`, local `call`, and `ret` are emitted as ordinary BPF branch/call/exit instructions. A `cmp` or `test` whose only consumer is the immediately following `jcc` may be consumed into that raw BPF branch, because a BPF branch is itself a compare-and-branch instruction. This is not a verifier proof object and it is not a branch kinsn.
-
-The branch rule is assembler-style relocation only. User space keeps a native instruction address to generated BPF PC table and patches ordinary BPF `off` fields in O(n). It does not put verifier proof offsets, native targets, or relocated branch targets into kinsn payloads. Kernel/module code must not trust userspace-provided control-flow metadata; the normal verifier checks the final raw BPF CFG.
-
-The current safety boundary is:
-
-- No `jcc` / `jmp` / branch kinsn selectors in the active handcraft path.
-- Kinsn payloads carry x86 operands and operand-form tags only. They do not carry verifier proof facts.
-- The module validates payload fields and returns `-EINVAL` for invalid encodings; malformed userspace input must not crash the kernel.
-- The converter does not allocate native registers, remap registers, choose verifier temps, or synthesize multi-instruction semantic fallbacks for missing machine instructions.
-- Native-only registers are represented by module-owned shadow state. Raw BPF branches may read real BPF-mapped registers directly; they must not branch on stale shadow slots when the final native execution uses the live physical register.
-- `call` and `exit` stay ordinary BPF ABI boundaries. ReJIT is not involved in this handcraft path.
-
-The hard constraints for this experiment are:
-
-- The handcraft converter is not a proof generator. It may choose a kinsn selector, fill x86 operand payloads, and patch ordinary BPF branch offsets; it must not pass verifier proof offsets, abstract states, target PCs, liveness, or scratch-register choices to the kernel.
-- Every non-control-flow machine kinsn is a one-x86-instruction final emitter. Operand form belongs in payload, not in selector aliases such as `_rr`, `_mem`, `_sib`, `_imm`, or `_store`.
-- All program-level control flow is ordinary verifier-visible BPF: conditional branches, unconditional branches, local calls, and exits. This intentionally gives up final `cmp/test; jcc` native parity until a separate control-flow ABI is designed.
-- Kernel/module code treats userspace input as untrusted. Invalid selector, invalid operand namespace, impossible register encoding, or malformed payload must fail load or verification; it must not rely on "the converter did the right thing" for safety.
-- Benchmark execution remains `make micro`; direct component execution is only used for inspection/build-debug, not as a benchmark result source.
-
-Current experiment log, 2026-05-18:
-
-- Goal: test whether native x86 from micro C can be mechanically converted into handcraft BPF with machine-level kinsns for non-control-flow instructions, while keeping all program-level control flow as ordinary verifier-visible BPF.
-- Current working subset: 6 / 29 handcraft cases are documented as passing (`simple`, `simple_packet`, `bitmap_popcount_scan`, `trace_event_type_switch_dispatch`, `packet_checksum_fold`, `siphash_rotate64_mixer`).
-- Latest focused case: `bcc_runqlat_log2_histogram_bucket`, run with `SAMPLES=1 WARMUPS=0 INNER_REPEAT=10 BENCH="bcc_runqlat_log2_histogram_bucket" make micro`.
-- Latest bcc result: `native=1600 ns`, `kernel=1420 ns`, `kernel_handcraft` load rejected with `processed 1000001 insns` in `micro/results/x86_kvm_micro_20260518_035204_272971`.
-- What improved: removing shadow-flag lowering for branch-only `cmp/test` and visible `cmp; cmovb` reduced verifier state pressure from `max_states_per_insn=37` to `8`.
-- Current blocker: variable-shift/scalar-only kinsn proof inside the bounded hash loop still expands into a verifier state space that exceeds the processed-insn limit. The latest log lands near `r6 <<= r7`.
-- Design debt observed in this experiment: the converter has grown into a small semantic lowerer for `cmp/test`, `jcc`, `cmov`, snapshots, and BPF-readable operand materialization. That is useful for diagnosis but is not the desired final boundary. The final converter should shrink back toward selector choice, x86 operand payload fill, and raw BPF branch relocation only.
-- Current conclusion: this path is useful as a native-parity probe, but the active converter is not yet clean enough to call the model complete. The next cleanup should reduce userspace semantic lowering and tighten module proof sequences for scalar ALU/shift kinsns before expanding to more cases.
-
-Flags are not used for program-level control flow in the active converter. For packet bounds and other verifier-critical branches, the branch must be a verifier-visible raw BPF comparison over the values the verifier can track. The verifier does not infer `data <= data_end` from a scalar shadow flag such as `flag = data <= data_end; if (!flag) abort`, so shadow-flag `jcc` lowering is forbidden. The same pressure appears in tight loops with `cmp; cmov`: stack-shadow flag slots multiply verifier states, so `cmove` / `cmovne` / `cmovb` are being moved to ordinary BPF conditional-move sequences when their producer `cmp/test` is visible. `setcc` and `sbb` are still flag-consumer cleanup items.
-
-The practical issues hit during this cleanup and the chosen fixes are:
-
-| Issue | Symptom | Fix / Rule |
-|---|---|---|
-| Branch kinsn / proof-offset payloads | User space would have to provide verifier-facing branch offsets that are not x86 operands | Deleted from the active model; all control flow is raw BPF branch/call/exit |
-| Shadow-flag packet bounds | Verifier cannot recover pointer range proof from a scalar flag slot | Packet bounds branches are direct raw BPF comparisons, not shadow-flag branches |
-| Stale shadow register on raw branch | `simple` aborted before packet stores because the branch read shadow `rsi` after final `lea` updated physical `rsi` | Branch lowering now reads real BPF-mapped x86 regs directly; kinsn proof writes mapped results back to real BPF regs as well as shadow slots |
-| Native-only register branch operand | Branches over `r9/r10/r11/r12/rsp` cannot read the verifier shadow slot at runtime, because final x86 does not execute `instantiate_insn()` stores | The converter inserts a normal `mov` machine kinsn to copy that physical x86 register into a BPF-readable scratch register, then emits a raw BPF branch over the scratch |
-| Non-adjacent `cmp/test ... jcc` | Example: `cmp rdx,3; mov rdx,r9; ja loop`; the branch needs the compare operands as they were at `cmp`, not after intervening flag-transparent instructions | The converter snapshots branch operands into fixed BPF stack slots at the `cmp/test` site and emits a raw BPF branch from that snapshot; it never reads module shadow flags for `jcc` |
-| `cmp; cmov` shadow flags in loops | `bcc_runqlat_log2_histogram_bucket` hit the verifier 1M processed-insn limit with `fp-352` / shadow signed-ge state in the loop; `max_states_per_insn` was 37 | The active converter now lowers visible `cmove` / `cmovne` / `cmovb` producers to verifier-visible BPF conditional moves and removes the corresponding `cmp/cmov` shadow-flag kinsns from regenerated sources |
-| Exact scalar ALU proof in loops | After removing shadow flags, the same bcc case still hits the 1M verifier processed-insn limit; the latest log lands in variable-shift proof (`r6 <<= r7`) with `max_states_per_insn=8` | Remaining blocker: scalar-only machine-kinsn proofs inside bounded loops are still too exact/large for verifier pruning. This is no longer a branch/flag provenance bug; it needs either tighter proof sequences or a sound abstraction boundary for scalar-only shadow state |
-| `ret` materialization mismatch | Raw BPF `exit` observes `r0`, while x86 `ret` observes `rax` | `ret` is raw `HC_EXIT()`; kinsn writes to `rax` also materialize `BPF_REG_0` when the register is BPF-mapped |
-| Scratch save in subprograms | Unconditional save of `r6/r7/r8` can read uninitialized callee-frame regs | Still under cleanup; the safe end state is module-private scratch that never exposes userspace temp selection and does not read uninitialized verifier regs |
-| Generated source vs runtime artifact skew | A `make micro` smoke can report a `.so` code size that does not match the current regenerated `.handcraft.c`, causing stale verifier/load errors to look like current converter failures | Treat these as build-artifact freshness bugs first: generated `micro/programs/*.d/*.o/*.so/*.bin` and `kernel_offsets.h` are excluded from the Docker context, the handcraft source is regenerated, and the program is rebuilt through the `make micro` image path before recording verifier errors as design/runtime failures |
-
-The regenerated sources currently include these flag-related exact kinsn sites:
-
-| Kinsn selector family | Generated sites |
-|---|---:|
-| `cmpq` / `cmpl` / `cmpw` / `cmpb` | 319 |
-| `testq` / `testl` / `testw` / `testb` | 29 |
-| `sete` / `setne` / `setge` | 5 |
-| `cmove` / `cmovne` / `cmovb` | 22 |
-
-The old `setcc` / `cmov` count row reflected direct stack-shadow-flag payload emission. That is no longer the desired steady state for visible `cmp/test` producers in loops: `cmov` is being handled like branch lowering, with ordinary BPF verifier-visible comparisons and a conditional move of the destination value. Missing flag cases are still module/converter feature gaps, but they are not handled by adding branch kinsns in the active path.
-
-The current per-case handcraft smoke uses:
-
-```sh
-SAMPLES=1 WARMUPS=0 INNER_REPEAT=1000 BENCH=<case> make micro
-```
-
-![Micro handcraft status](tmp/micro-handcraft-status.png)
-
-
-| Benchmark | Native | Kernel | Kernel Handcraft | Handcraft Result | Native-vs-Handcraft JIT Body |
-|---|---:|---:|---:|---:|---|
-| `simple` | 86 ns | 44 ns | 72 ns | `12345678` | ok in `micro/results/x86_kvm_micro_20260518_014107_386095`; raw BPF branch path validated after stale-shadow fix |
-| `simple_packet` | 3 ns | 10 ns | 10 ns | `12345678` | ok; JIT size 95 B -> 72 B |
-| `bitmap_popcount_scan` | 569 ns | 1186 ns | 539 ns | `12830754992348206170` | ok in `micro/results/x86_kvm_micro_20260517_032553_113545`; handcraft JIT size 162 B |
-| `sorted_rule_binary_search` | 311 ns | 575 ns | failed | `verifier rejected: infinite loop at insn 36` | no handcraft JIT dump |
-| `bcc_runqlat_log2_histogram_bucket` | 1600 ns | 1420 ns | failed | `processed 1000001 insns` | latest run `micro/results/x86_kvm_micro_20260518_035204_272971`; branch-only `cmp/test` and `cmp; cmovb` shadow flags were removed, reducing `max_states_per_insn` from 37 to 8, but variable-shift/scalar proof in the loop still exceeds the verifier processed-insn limit |
-| `trace_event_type_switch_dispatch` | 54 ns | 310 ns | 87 ns | `16` | ok; converter output was minimally repaired for XDP ctx, staged switch table, and `dh`; native 170 B -> handcraft JIT 238 B |
-| `packet_checksum_fold` | 13346 ns | 18342 ns | 13409 ns | `0` | ok in `micro/results/x86_kvm_micro_20260517_033930_836000`; `movl imm` now emits native-length `b8+rd imm32`; JIT size 424 B -> 209 B |
-| `payload_prefix_memcmp_scan` | 50 ns | 114 ns | failed | `verifier rejected: value 1728053766 makes pkt pointer be out of bounds` | no handcraft JIT dump |
-| `packet_vlan_tcpopt_parser` | 8 ns | 14 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
-| `bpf_local_call_fanout_dispatch` | 68 ns | 131 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
-| `flow_5tuple_rss_hash` | 78 ns | 144 ns | failed | `R9 !read_ok` | latest strict-handcraft run exposes a shadow native-reg proof bug at verifier PC 129 |
-| `katran_lb_consistent_hash_select` | 127 ns | 148 ns | failed | `EINVAL; processed 0 insns` | latest strict-handcraft run still fails before verifier walk; no handcraft JIT dump |
-| `cilium_policy_guard_tree_filter` | 188 ns | 293 ns | failed | `unreachable insn 566` | latest strict-handcraft run reached verifier CFG check; no handcraft JIT dump |
-| `siphash_rotate64_mixer` | 36 ns | 66 ns | 49 ns | `2666935177028490406` | ok; consolidated `addq/xorq` machine-ALU kinsns fixed shadow-reg ALU loss; JIT size 3520 B -> 1167 B |
-| `packet_record_bounds_window` | 71 ns | 129 ns | failed | `unreachable insn 28; processed 0` | no handcraft JIT dump |
-| `flow_record_field_scan` | 182 ns | 161 ns | failed | `unreachable insn 556` | latest strict-handcraft run reached verifier CFG check; no handcraft JIT dump |
-| `packed_header_bitfield_decode` | 286 ns | 572 ns | failed | `EINVAL; processed 0 insns` | latest strict-handcraft run still fails before verifier walk; no handcraft JIT dump |
-| `bpftrace_string_search_prefix_scan` | 205 ns | 462 ns | failed | `unreachable insn 358` | latest strict-handcraft run reached verifier CFG check; no handcraft JIT dump |
-| `tracee_syscall_name_table_lookup` | 90 ns | 130 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
-| `tracee_http_method_prefix_detect` | 19 ns | 31 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
-| `cilium_socket_lb_service_select` | 178 ns | 420 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
-| `bcc_tcpconnect_ipv4_tuple_filter` | 226 ns | 429 ns | failed | `unreachable insn 475` | latest strict-handcraft run reached verifier CFG check; no handcraft JIT dump |
-| `tetragon_process_event_arg_filter` | 120 ns | 189 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
-| `otel_stack_frame_unwind_scan` | 44 ns | 132 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
-| `cilium_ct_nat_tuple_rewrite` | 226 ns | 478 ns | failed | `EINVAL; processed 0 insns` | latest strict-handcraft run still fails before verifier walk; no handcraft JIT dump |
-| `packet_toeplitz_rss_hash` | 262 ns | 269 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
-| `bpftrace_comm_key_fnv_hash` | 436 ns | 486 ns | failed | `unreachable insn 81; processed 0` | no handcraft JIT dump |
-| `tc_packet_checksum_fold` | 13401 ns | 17682 ns | failed | `load failed before verifier walk: processed 0 insns` | no handcraft JIT dump |
-| `cgroup_skb_hash_chain` | 291 ns | 285 ns | failed | `verifier rejected: invalid bpf_context access off=16 size=4` | no handcraft JIT dump |
-
-The instruction counts compare normalized function bodies: kernel wrapper/prologue/epilogue differences are removed, and the expected BPF-JIT register naming difference (`r15` for BPF `r9`) is normalized. The table keeps all micro cases in one place and records the current raw outcome: either the handcraft program verifies and produces a kernel JIT dump, or the exact verifier/load failure is shown.
-
-The concrete x86 instruction/form matrix is now:
-
-For the handcraft path, generated `*.handcraft.c` files are treated as artifacts
-and excluded from code-size review. The converter is constrained to mechanical
-translation: selector choice, payload fill, and O(n) branch relocation only. It
-must not allocate verifier temps, remap native registers, lower adjacent native
-instructions as semantic pairs, or emit ordinary BPF fallback sequences for
-missing machine instructions. Selector names now name the x86 instruction and
-width; operand forms belong in payloads. The old compatibility names that
-exposed operand form in the selector (`_RR`, `_MEM`, `_SIB`, `_IMM`, `_STORE`)
-were removed from the bpfopt, runner, module, and main kinsn-test surfaces.
-Tests that only preserved old compatibility names were deleted; real bugs such
-as `dst == condition` are kept as compact instruction-sequence tests in the main
-kinsn unittest.
-
-Strict converter scan status after the latest cleanup: every
-`micro/programs/*.md` translates with zero embedded warnings in the generated C.
-That does not mean every handcraft program verifies or returns the right result.
-It means unsupported control flow is no longer hidden behind branch kinsns or
-proof-offset payloads; the remaining failures are ordinary verifier/runtime
-failures in the generated raw-BPF-plus-kinsn program. Current open classes are
-scratch-register proof state across subprograms, native-only register values
-that must cross a raw BPF branch, context ABI differences between native host
-structs and BPF program contexts, and final-native parity loss from using raw
-BPF branches instead of machine `jcc`. The first two branch-value bugs are now
-handled by BPF-readable register materialization and branch operand snapshots;
-the remaining risk is scratch liveness/clobbering rather than stale shadow
-state.
+The concrete x86 instruction/form matrix from the archived converter experiment
+is retained below only as instruction-set guidance:
 
 | x86 Insn/Form | Existing bpfopt Pass Path | Machine-Kinsn Path | Verifier-Facing Instantiation | Current Test Status | Remaining Gap |
 |---|---|---|---|---|---|
