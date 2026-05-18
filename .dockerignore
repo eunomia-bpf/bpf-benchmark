@@ -40,6 +40,11 @@ micro/build-*/**
 micro/jit-dumps
 micro/jit-dumps/**
 micro/programs/*.md
+micro/programs/*.d
+micro/programs/*.o
+micro/programs/*.so
+micro/programs/*.bin
+micro/programs/kernel_offsets.h
 micro/programs/.cache
 micro/programs/.cache/**
 daemon/target

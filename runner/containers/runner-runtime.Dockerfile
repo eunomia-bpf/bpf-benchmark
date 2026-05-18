@@ -315,6 +315,7 @@ ARG KERNEL_IMAGE_NAME
 ARG KERNEL_MANIFEST_JSON
 
 COPY --link --from=runner-runtime-host-kernel-image /${KERNEL_IMAGE_NAME} /artifacts/kernel/${KERNEL_IMAGE_NAME}
+COPY --link --from=runner-runtime-host-kernel-offsets /kernel_offsets.h /artifacts/kernel/kernel_offsets.h
 COPY --link --from=runner-runtime-host-kernel-modules / /artifacts/modules
 RUN mkdir -p /artifacts && printf '%s\n' "${KERNEL_MANIFEST_JSON}" > /artifacts/manifest.json
 

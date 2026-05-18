@@ -3,9 +3,9 @@
 
 This is intentionally separate from generate_micro_proofs.py, which emits
 generated .bpf.c sources. This script only writes JSON artifacts for the planned
-bytecode-linker path: C owns interpreter/helper semantics, Python selects helper
-definitions for a fixed native instruction stream, and the loader later links
-those definitions with verifier-visible BPF helper bytecode.
+bytecode-linker path: C owns interpreter/template semantics, Python only records
+the fixed native instruction stream, and the loader later links those records
+with verifier-visible BPF template bytecode.
 """
 
 from __future__ import annotations
@@ -29,6 +29,7 @@ FLOW_JCC = 1
 FLOW_JMP = 2
 FLOW_CALL = 3
 FLOW_RET = 4
+INTERPRETER_STEP = "x86_vm_interpreter_step"
 
 NUMERIC_CONSTS = {
     "X86_OP_NOP": 0x00,
@@ -225,7 +226,6 @@ def control_flow(insn: cgen.NativeInsn, encoded: cgen.EncodedInsn) -> dict[str, 
 
 def encoded_insn(function: str, index: int, insn: cgen.NativeInsn) -> dict[str, Any]:
     encoded = cgen.encode(insn)
-    helper = cgen.op_helper(encoded.op)
     entry: dict[str, Any] = {
         "index": index,
         "addr": f"0x{insn.addr:x}",
@@ -233,7 +233,7 @@ def encoded_insn(function: str, index: int, insn: cgen.NativeInsn) -> dict[str, 
         "asm": insn.raw,
         "mnemonic": insn.mnemonic,
         "operands": list(insn.operands),
-        "helper": helper,
+        "helper": INTERPRETER_STEP,
         "op": encoded.op,
         "dst": encoded.dst,
         "src": encoded.src,
@@ -241,9 +241,9 @@ def encoded_insn(function: str, index: int, insn: cgen.NativeInsn) -> dict[str, 
         "aux": encoded.aux,
         "imm": encoded.imm,
         "fragment": {
-            "kind": "interpreter_helper_call",
+            "kind": "interpreter_step",
             "function": function,
-            "helper_symbol": helper,
+            "helper_symbol": INTERPRETER_STEP,
             "argument_record": {
                 "op": encoded.op,
                 "dst": encoded.dst,
@@ -292,7 +292,6 @@ def linked_program(functions: dict[str, list[cgen.NativeInsn]],
     records: list[dict[str, Any]] = []
     for index, (symbol, role, insn) in enumerate(flat):
         encoded = cgen.encode(insn)
-        helper = cgen.op_helper(encoded.op)
         numeric = {
             "op": eval_numeric(encoded.op) & 0xFF,
             "dst": eval_numeric(encoded.dst) & 0xFF,
@@ -321,7 +320,7 @@ def linked_program(functions: dict[str, list[cgen.NativeInsn]],
             "function_role": role,
             "addr": f"0x{insn.addr:x}",
             "asm": insn.raw,
-            "helper": helper,
+            "helper": INTERPRETER_STEP,
             "flow": flow,
             "target": target,
             "next": index + 1,
@@ -340,13 +339,10 @@ def c_template_plan(linked: dict[str, Any]) -> dict[str, Any]:
         "kind": "c_authored_interpreter_helper_sequence",
         "granularity": "instruction_class",
         "dispatch": (
-            "direct scheduled helper calls; no runtime switch over arbitrary "
-            "guest opcodes"
+            "C-authored interpreter/template dispatch from opcode/operand "
+            "records; Python does not select x86_exec_* helpers"
         ),
-        "alu_policy": (
-            "ALU instructions share x86_exec_alu_imm/x86_exec_alu_reg/"
-            "x86_exec_alu_mem, with X86_ALU_* in aux"
-        ),
+        "alu_policy": "ALU semantics are selected inside C from opcode/aux",
         "control_flow_source": "linked_program.flow/target",
         "steps": [
             {

@@ -21,22 +21,22 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_RAX, HC_X86_RAX), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x1109: cmp    rcx,rdx [control-flow-operand: cmp folded into BPF branch] */
     /* 0x110c: ja     1569 <siphash_rotate64_mixer_xdp+0x469> [exact-bpf: ja as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RCX_OFF),
-    HC_LDX(BPF_DW, BPF_REG_7, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RCX),
+    HC_MOV64_REG(BPF_REG_7, HC_X86_RDX),
     HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_6, BPF_REG_7, (630) - 1, 0),
     /* 0x1112: lea    rsi,[rcx+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(HC_X86_RSI, HC_X86_RCX, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1116: cmp    rsi,rdx [control-flow-operand: cmp folded into BPF branch] */
     /* 0x1119: ja     1569 <siphash_rotate64_mixer_xdp+0x469> [exact-bpf: ja as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RSI_OFF),
-    HC_LDX(BPF_DW, BPF_REG_7, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RSI),
+    HC_MOV64_REG(BPF_REG_7, HC_X86_RDX),
     HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_6, BPF_REG_7, (625) - 1, 0),
     /* 0x111f: lea    rsi,[rcx+0x48] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(HC_X86_RSI, HC_X86_RCX, 0, 0, 1, 0, 72), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1123: cmp    rsi,rdx [control-flow-operand: cmp folded into BPF branch] */
     /* 0x1126: ja     1569 <siphash_rotate64_mixer_xdp+0x469> [exact-bpf: ja as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RSI_OFF),
-    HC_LDX(BPF_DW, BPF_REG_7, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RSI),
+    HC_MOV64_REG(BPF_REG_7, HC_X86_RDX),
     HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_6, BPF_REG_7, (620) - 1, 0),
     /* 0x112c: mov    r9,QWORD PTR [rcx+0x8] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_X86_MEM_PAYLOAD(HC_X86_R9, HC_X86_RCX, 8), MICRO_HANDCRAFT_BPF_X86_MOVQ),

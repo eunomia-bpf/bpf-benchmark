@@ -1,5 +1,6 @@
 #include "micro_exec.hpp"
 #include "bpf_helpers.hpp"
+#include "kernel_test_run.hpp"
 #include "micro_handcraft.h"
 
 #include <arpa/inet.h>
@@ -450,6 +451,8 @@ void initialize_katran_test_fixture(bpf_object *object)
     }
 }
 
+} // namespace
+
 size_t packet_output_capacity(const cli_options &options, size_t packet_size)
 {
     if (katran_balancer_fixture_requested(options)) {
@@ -457,6 +460,8 @@ size_t packet_output_capacity(const cli_options &options, size_t packet_size)
     }
     return packet_size;
 }
+
+namespace {
 
 void reset_kernel_probe_state(kernel_probe_context &context)
 {
@@ -1224,6 +1229,8 @@ bool skb_payload_starts_after_l2(uint32_t prog_type)
     return prog_type == BPF_PROG_TYPE_CGROUP_SKB;
 }
 
+} // namespace
+
 std::vector<uint8_t> build_packet_input(const std::vector<uint8_t> &input_bytes, uint32_t prog_type)
 {
     const size_t prefix_offset =
@@ -1242,6 +1249,8 @@ std::vector<uint8_t> build_packet_input(const std::vector<uint8_t> &input_bytes,
     return packet;
 }
 
+namespace {
+
 uint64_t read_u64_result(const uint8_t *data, size_t length)
 {
     if (length < sizeof(uint64_t)) {
@@ -1258,6 +1267,8 @@ uint64_t read_skb_result(const __sk_buff &ctx)
            (static_cast<uint64_t>(ctx.cb[1]) << 32);
 }
 
+} // namespace
+
 uint64_t read_kernel_test_run_result(
     std::string_view effective_io_mode,
     bool result_from_skb_context,
@@ -1269,21 +1280,35 @@ uint64_t read_kernel_test_run_result(
 {
     if (effective_io_mode == "packet" || effective_io_mode == "staged") {
         if (result_from_skb_context) {
-            return read_skb_result(context_out);
+            // read_skb_result + read_u64_result live in the kernel_runner
+            // anonymous namespace; both are file-scope helpers reused here.
+            return static_cast<uint64_t>(context_out.cb[0]) |
+                   (static_cast<uint64_t>(context_out.cb[1]) << 32);
         }
-        return read_u64_result(packet_out.data(), packet_out.size());
+        if (packet_out.size() < sizeof(uint64_t)) {
+            fail("result buffer shorter than 8 bytes");
+        }
+        uint64_t result = 0;
+        std::memcpy(&result, packet_out.data(), sizeof(result));
+        return result;
     }
 
     if (effective_io_mode == "context") {
         return retval;
     }
 
+    if (result_fd < 0) {
+        fail("read_kernel_test_run_result: result_fd unavailable for io_mode "
+             + std::string(effective_io_mode));
+    }
     uint64_t result = 0;
     if (bpf_map_lookup_elem(result_fd, &key, &result) != 0) {
         fail("bpf_map_lookup_elem(result_map) failed: " + std::string(strerror(errno)));
     }
     return result;
 }
+
+namespace {
 
 void maybe_write_program_dumps(const cli_options &options, int program_fd, const bpf_prog_info &program_info)
 {

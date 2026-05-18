@@ -21,8 +21,8 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_RAX, HC_X86_RAX), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x1109: cmp    rsi,rcx [control-flow-operand: cmp folded into BPF branch] */
     /* 0x110c: jbe    110f <packet_toeplitz_rss_hash_xdp+0xf> [exact-bpf: jbe as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RSI_OFF),
-    HC_LDX(BPF_DW, BPF_REG_7, BPF_REG_10, HC_X86_SHADOW_RCX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RSI),
+    HC_MOV64_REG(BPF_REG_7, HC_X86_RCX),
     HC_RAW(BPF_JMP | BPF_JLE | BPF_X, BPF_REG_6, BPF_REG_7, (2) - 1, 0),
     /* 0x110e: ret [abi-boundary: native ret materializes x86 rax to BPF r0 then exits] */
     HC_EXIT(),
@@ -30,15 +30,15 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_LEA_PAYLOAD(HC_X86_RDX, HC_X86_RSI, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1113: cmp    rdx,rcx [control-flow-operand: cmp folded into BPF branch] */
     /* 0x1116: ja     110e <packet_toeplitz_rss_hash_xdp+0xe> [exact-bpf: ja as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
-    HC_LDX(BPF_DW, BPF_REG_7, BPF_REG_10, HC_X86_SHADOW_RCX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
+    HC_MOV64_REG(BPF_REG_7, HC_X86_RCX),
     HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_6, BPF_REG_7, (-5) - 1, 0),
     /* 0x1118: lea    rdx,[rsi+0x3e] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(HC_X86_RDX, HC_X86_RSI, 0, 0, 1, 0, 62), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x111c: cmp    rdx,rcx [control-flow-operand: cmp folded into BPF branch] */
     /* 0x111f: ja     110e <packet_toeplitz_rss_hash_xdp+0xe> [exact-bpf: ja as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
-    HC_LDX(BPF_DW, BPF_REG_7, BPF_REG_10, HC_X86_SHADOW_RCX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
+    HC_MOV64_REG(BPF_REG_7, HC_X86_RCX),
     HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_6, BPF_REG_7, (-10) - 1, 0),
     /* 0x1121: movzx  ecx,WORD PTR [rsi+0x14] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_X86_MEM_PAYLOAD(HC_X86_RCX, HC_X86_RSI, 20), MICRO_HANDCRAFT_BPF_X86_MOVZWL),
@@ -48,7 +48,7 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_RR_PAYLOAD(HC_X86_RCX, HC_X86_RCX), MICRO_HANDCRAFT_BPF_X86_MOVZWL),
     /* 0x112c: cmp    ecx,0x800 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x1132: jne    110e <packet_toeplitz_rss_hash_xdp+0xe> [exact-bpf: jne as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RCX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RCX),
     HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, (-18) - 1, 2048),
     /* 0x1134: movzx  ecx,BYTE PTR [rsi+0x16] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_X86_MEM_PAYLOAD(HC_X86_RCX, HC_X86_RSI, 22), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
@@ -56,12 +56,12 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(HC_X86_RCX, 15), MICRO_HANDCRAFT_BPF_X86_ANDB),
     /* 0x113b: cmp    cl,0x5 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x113e: jne    110e <packet_toeplitz_rss_hash_xdp+0xe> [exact-bpf: jne as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RCX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RCX),
     HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xff),
     HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_6, 0, (-25) - 1, 5),
     /* 0x1140: cmp    BYTE PTR [rsi+0x1f],0x6 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x1144: jne    110e <packet_toeplitz_rss_hash_xdp+0xe> [exact-bpf: jne as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RSI_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RSI),
     HC_LDX(BPF_B, BPF_REG_6, BPF_REG_6, 31),
     HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xff),
     HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_6, 0, (-29) - 1, 6),
@@ -74,7 +74,7 @@ static const struct bpf_insn program[] = {
     /* 0x1150: xor    r9d,r9d [exact-kinsn: xor32 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_XORL),
     /* 0x1153: jmp    117c <packet_toeplitz_rss_hash_xdp+0x7c> [exact-bpf: native jmp maps to ordinary BPF JA] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (19) - 1, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (20) - 1, 0),
     /* 0x1155: mov    r11d,0xc2 [exact-kinsn: mov32 immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 194), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x115b: nop    DWORD PTR [rax+rax*1+0x0] [padding: padding is not part of BPF semantics] */
@@ -94,29 +94,29 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R9, 0), MICRO_HANDCRAFT_BPF_X86_INCL),
     /* 0x1172: cmp    r9d,0x68 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x1176: je     1389 <packet_toeplitz_rss_hash_xdp+0x289> [exact-bpf: je as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_R9_OFF),
-    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_6, 0, (183) - 1, 104),
+    HC_KINSN(HC_X86_RR_PAYLOAD(HC_X86_RBX, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_6, 0, (188) - 1, 104),
     /* 0x117c: mov    edx,r9d [exact-kinsn: mov32 register-to-register kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(HC_X86_RDX, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x117f: shr    edx,0x3 [exact-kinsn: shr32 imm kinsn] */
     HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(HC_X86_RDX, 3), MICRO_HANDCRAFT_BPF_X86_SHRL),
     /* 0x1182: cmp    r9d,0x1f [control-flow-operand: cmp folded into BPF branch] */
     /* 0x1186: jbe    11a0 <packet_toeplitz_rss_hash_xdp+0xa0> [exact-bpf: jbe as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_R9_OFF),
-    HC_RAW(BPF_JMP32 | BPF_JLE | BPF_K, BPF_REG_6, 0, (9) - 1, 31),
+    HC_KINSN(HC_X86_RR_PAYLOAD(HC_X86_RBX, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    HC_RAW(BPF_JMP32 | BPF_JLE | BPF_K, BPF_REG_6, 0, (12) - 1, 31),
     /* 0x1188: cmp    r9d,0x3f [control-flow-operand: cmp folded into BPF branch] */
     /* 0x118c: jbe    11a0 <packet_toeplitz_rss_hash_xdp+0xa0> [exact-bpf: jbe as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_R9_OFF),
-    HC_RAW(BPF_JMP32 | BPF_JLE | BPF_K, BPF_REG_6, 0, (7) - 1, 63),
+    HC_KINSN(HC_X86_RR_PAYLOAD(HC_X86_RBX, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    HC_RAW(BPF_JMP32 | BPF_JLE | BPF_K, BPF_REG_6, 0, (9) - 1, 63),
     /* 0x118e: cmp    r9d,0x4f [control-flow-operand: cmp folded into BPF branch] */
     /* 0x1192: jbe    11a0 <packet_toeplitz_rss_hash_xdp+0xa0> [exact-bpf: jbe as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_R9_OFF),
-    HC_RAW(BPF_JMP32 | BPF_JLE | BPF_K, BPF_REG_6, 0, (5) - 1, 79),
+    HC_KINSN(HC_X86_RR_PAYLOAD(HC_X86_RBX, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    HC_RAW(BPF_JMP32 | BPF_JLE | BPF_K, BPF_REG_6, 0, (6) - 1, 79),
     /* 0x1194: mov    rcx,rdi [exact-kinsn: mov64 register-to-register kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(HC_X86_RCX, HC_X86_RDI), MICRO_HANDCRAFT_BPF_X86_MOVQ),
     /* 0x1197: cmp    r9d,0x5f [control-flow-operand: cmp folded into BPF branch] */
     /* 0x119b: ja     11a5 <packet_toeplitz_rss_hash_xdp+0xa5> [exact-bpf: ja as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_R9_OFF),
+    HC_KINSN(HC_X86_RR_PAYLOAD(HC_X86_RBX, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_MOVL),
     HC_RAW(BPF_JMP32 | BPF_JGT | BPF_K, BPF_REG_6, 0, (5) - 1, 95),
     /* 0x119d: nop    DWORD PTR [rax] [padding: padding is not part of BPF semantics] */
     /* 0x11a0: mov    ecx,edx [exact-kinsn: mov32 register-to-register kinsn] */
@@ -133,24 +133,24 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R10, HC_X86_RCX), MICRO_HANDCRAFT_BPF_X86_SHLL),
     /* 0x11b2: test   r10b,r10b [control-flow-operand: test folded into BPF branch] */
     /* 0x11b5: jns    116f <packet_toeplitz_rss_hash_xdp+0x6f> [exact-bpf: jns as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_R10_OFF),
+    HC_KINSN(HC_X86_RR_PAYLOAD(HC_X86_RBX, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_MOVQ),
     HC_RAW(BPF_JMP | BPF_JSET | BPF_K, BPF_REG_6, 0, 1, 128),
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-32) - 1, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-38) - 1, 0),
     /* 0x11b7: cmp    edx,0x5 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x11ba: jle    11e0 <packet_toeplitz_rss_hash_xdp+0xe0> [exact-bpf: jle as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP32 | BPF_JSLE | BPF_K, BPF_REG_6, 0, (12) - 1, 5),
     /* 0x11bc: cmp    edx,0x8 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x11bf: jle    1203 <packet_toeplitz_rss_hash_xdp+0x103> [exact-bpf: jle as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP32 | BPF_JSLE | BPF_K, BPF_REG_6, 0, (22) - 1, 8),
     /* 0x11c1: cmp    edx,0xa [control-flow-operand: cmp folded into BPF branch] */
     /* 0x11c4: jg     123d <packet_toeplitz_rss_hash_xdp+0x13d> [exact-bpf: jg as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_6, 0, (38) - 1, 10),
     /* 0x11c6: cmp    edx,0x9 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x11c9: jne    1288 <packet_toeplitz_rss_hash_xdp+0x188> [exact-bpf: jne as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, (63) - 1, 9),
     /* 0x11cf: mov    r11d,0x43 [exact-kinsn: mov32 immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 67), MICRO_HANDCRAFT_BPF_X86_MOVL),
@@ -160,16 +160,16 @@ static const struct bpf_insn program[] = {
     HC_RAW(BPF_JMP | BPF_JA, 0, 0, (77) - 1, 0),
     /* 0x11e0: cmp    edx,0x2 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x11e3: jg     121e <packet_toeplitz_rss_hash_xdp+0x11e> [exact-bpf: jg as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_6, 0, (20) - 1, 2),
     /* 0x11e5: test   edx,edx [control-flow-operand: test folded into BPF branch] */
     /* 0x11e7: je     125e <packet_toeplitz_rss_hash_xdp+0x15e> [exact-bpf: je as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP | BPF_JSET | BPF_K, BPF_REG_6, 0, 1, -1),
     HC_RAW(BPF_JMP | BPF_JA, 0, 0, (38) - 1, 0),
     /* 0x11e9: cmp    edx,0x1 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x11ec: jne    12a4 <packet_toeplitz_rss_hash_xdp+0x1a4> [exact-bpf: jne as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, (61) - 1, 1),
     /* 0x11f2: mov    r11d,0x25 [exact-kinsn: mov32 immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 37), MICRO_HANDCRAFT_BPF_X86_MOVL),
@@ -179,11 +179,11 @@ static const struct bpf_insn program[] = {
     HC_RAW(BPF_JMP | BPF_JA, 0, 0, (65) - 1, 0),
     /* 0x1203: cmp    edx,0x6 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x1206: je     1250 <packet_toeplitz_rss_hash_xdp+0x150> [exact-bpf: je as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_6, 0, (24) - 1, 6),
     /* 0x1208: cmp    edx,0x7 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x120b: jne    127a <packet_toeplitz_rss_hash_xdp+0x17a> [exact-bpf: jne as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, (37) - 1, 7),
     /* 0x120d: mov    r11d,0x25 [exact-kinsn: mov32 immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 37), MICRO_HANDCRAFT_BPF_X86_MOVL),
@@ -193,11 +193,11 @@ static const struct bpf_insn program[] = {
     HC_RAW(BPF_JMP | BPF_JA, 0, 0, (56) - 1, 0),
     /* 0x121e: cmp    edx,0x3 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x1221: je     126c <packet_toeplitz_rss_hash_xdp+0x16c> [exact-bpf: je as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_6, 0, (25) - 1, 3),
     /* 0x1223: cmp    edx,0x4 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x1226: jne    12b2 <packet_toeplitz_rss_hash_xdp+0x1b2> [exact-bpf: jne as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, (48) - 1, 4),
     /* 0x122c: mov    r11d,0xc2 [exact-kinsn: mov32 immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 194), MICRO_HANDCRAFT_BPF_X86_MOVL),
@@ -207,7 +207,7 @@ static const struct bpf_insn program[] = {
     HC_RAW(BPF_JMP | BPF_JA, 0, 0, (47) - 1, 0),
     /* 0x123d: cmp    edx,0xb [control-flow-operand: cmp folded into BPF branch] */
     /* 0x1240: jne    1296 <packet_toeplitz_rss_hash_xdp+0x196> [exact-bpf: jne as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, (31) - 1, 11),
     /* 0x1242: mov    r11d,0x8f [exact-kinsn: mov32 immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 143), MICRO_HANDCRAFT_BPF_X86_MOVL),
@@ -266,102 +266,102 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R10, HC_X86_R11), MICRO_HANDCRAFT_BPF_X86_ORL),
     /* 0x12c3: test   ecx,ecx [control-flow-operand: test folded into BPF branch] */
     /* 0x12c5: je     116c <packet_toeplitz_rss_hash_xdp+0x6c> [exact-bpf: je as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RCX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RCX),
     HC_RAW(BPF_JMP | BPF_JSET | BPF_K, BPF_REG_6, 0, 1, -1),
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-128) - 1, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-134) - 1, 0),
     /* 0x12cb: shl    r10d,cl [exact-kinsn: shl32 reg kinsn] */
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R10, HC_X86_RCX), MICRO_HANDCRAFT_BPF_X86_SHLL),
     /* 0x12ce: mov    r11d,0x25 [exact-kinsn: mov32 immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 37), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x12d4: cmp    edx,0x5 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x12d7: jle    12f3 <packet_toeplitz_rss_hash_xdp+0x1f3> [exact-bpf: jle as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP32 | BPF_JSLE | BPF_K, BPF_REG_6, 0, (10) - 1, 5),
     /* 0x12d9: cmp    edx,0x8 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x12dc: jle    1310 <packet_toeplitz_rss_hash_xdp+0x210> [exact-bpf: jle as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP32 | BPF_JSLE | BPF_K, BPF_REG_6, 0, (18) - 1, 8),
     /* 0x12de: cmp    edx,0xa [control-flow-operand: cmp folded into BPF branch] */
     /* 0x12e1: jg     1342 <packet_toeplitz_rss_hash_xdp+0x242> [exact-bpf: jg as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_6, 0, (30) - 1, 10),
     /* 0x12e3: cmp    edx,0x9 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x12e6: jne    135d <packet_toeplitz_rss_hash_xdp+0x25d> [exact-bpf: jne as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, (36) - 1, 9),
     /* 0x12e8: mov    r11d,0xa3 [exact-kinsn: mov32 immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 163), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x12ee: jmp    1160 <packet_toeplitz_rss_hash_xdp+0x60> [exact-bpf: native jmp maps to ordinary BPF JA] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-153) - 1, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-159) - 1, 0),
     /* 0x12f3: cmp    edx,0x2 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x12f6: jg     1329 <packet_toeplitz_rss_hash_xdp+0x229> [exact-bpf: jg as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_6, 0, (16) - 1, 2),
     /* 0x12f8: test   edx,edx [control-flow-operand: test folded into BPF branch] */
     /* 0x12fa: je     1160 <packet_toeplitz_rss_hash_xdp+0x60> [exact-bpf: je as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP | BPF_JSET | BPF_K, BPF_REG_6, 0, 1, -1),
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-158) - 1, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-164) - 1, 0),
     /* 0x1300: cmp    edx,0x1 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x1303: jne    1373 <packet_toeplitz_rss_hash_xdp+0x273> [exact-bpf: jne as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, (32) - 1, 1),
     /* 0x1305: mov    r11d,0x5b [exact-kinsn: mov32 immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 91), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x130b: jmp    1160 <packet_toeplitz_rss_hash_xdp+0x60> [exact-bpf: native jmp maps to ordinary BPF JA] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-163) - 1, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-169) - 1, 0),
     /* 0x1310: cmp    edx,0x6 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x1313: je     1160 <packet_toeplitz_rss_hash_xdp+0x60> [exact-bpf: je as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
-    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_6, 0, (-165) - 1, 6),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_6, 0, (-171) - 1, 6),
     /* 0x1319: cmp    edx,0x7 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x131c: jne    1352 <packet_toeplitz_rss_hash_xdp+0x252> [exact-bpf: jne as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, (16) - 1, 7),
     /* 0x131e: mov    r11d,0x3d [exact-kinsn: mov32 immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 61), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x1324: jmp    1160 <packet_toeplitz_rss_hash_xdp+0x60> [exact-bpf: native jmp maps to ordinary BPF JA] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-170) - 1, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-176) - 1, 0),
     /* 0x1329: cmp    edx,0x3 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x132c: je     1155 <packet_toeplitz_rss_hash_xdp+0x55> [exact-bpf: je as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
-    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_6, 0, (-174) - 1, 3),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_6, 0, (-180) - 1, 3),
     /* 0x1332: cmp    edx,0x4 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x1335: jne    137e <packet_toeplitz_rss_hash_xdp+0x27e> [exact-bpf: jne as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, (21) - 1, 4),
     /* 0x1337: mov    r11d,0x41 [exact-kinsn: mov32 immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 65), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x133d: jmp    1160 <packet_toeplitz_rss_hash_xdp+0x60> [exact-bpf: native jmp maps to ordinary BPF JA] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-177) - 1, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-183) - 1, 0),
     /* 0x1342: cmp    edx,0xb [control-flow-operand: cmp folded into BPF branch] */
     /* 0x1345: jne    1368 <packet_toeplitz_rss_hash_xdp+0x268> [exact-bpf: jne as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
     HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, (10) - 1, 11),
     /* 0x1347: mov    r11d,0xb0 [exact-kinsn: mov32 immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 176), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x134d: jmp    1160 <packet_toeplitz_rss_hash_xdp+0x60> [exact-bpf: native jmp maps to ordinary BPF JA] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-182) - 1, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-188) - 1, 0),
     /* 0x1352: mov    r11d,0x43 [exact-kinsn: mov32 immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 67), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x1358: jmp    1160 <packet_toeplitz_rss_hash_xdp+0x60> [exact-bpf: native jmp maps to ordinary BPF JA] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-185) - 1, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-191) - 1, 0),
     /* 0x135d: mov    r11d,0x8f [exact-kinsn: mov32 immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 143), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x1363: jmp    1160 <packet_toeplitz_rss_hash_xdp+0x60> [exact-bpf: native jmp maps to ordinary BPF JA] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-188) - 1, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-194) - 1, 0),
     /* 0x1368: mov    r11d,0xd0 [exact-kinsn: mov32 immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 208), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x136e: jmp    1160 <packet_toeplitz_rss_hash_xdp+0x60> [exact-bpf: native jmp maps to ordinary BPF JA] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-191) - 1, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-197) - 1, 0),
     /* 0x1373: mov    r11d,0xe [exact-kinsn: mov32 immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 14), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x1379: jmp    1160 <packet_toeplitz_rss_hash_xdp+0x60> [exact-bpf: native jmp maps to ordinary BPF JA] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-194) - 1, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-200) - 1, 0),
     /* 0x137e: mov    r11d,0x67 [exact-kinsn: mov32 immediate kinsn] */
     HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 103), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x1384: jmp    1160 <packet_toeplitz_rss_hash_xdp+0x60> [exact-bpf: native jmp maps to ordinary BPF JA] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-197) - 1, 0),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-203) - 1, 0),
     /* 0x1389: mov    edx,DWORD PTR [rsi+0x26] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_X86_MEM_PAYLOAD(HC_X86_RDX, HC_X86_RSI, 38), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x138c: movzx  ecx,BYTE PTR [rsi+0x2a] [exact-kinsn: direct memory load via x86 kinsn selector] */

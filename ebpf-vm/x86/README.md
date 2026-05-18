@@ -35,20 +35,27 @@ int x86_vm_hardcoded_xdp(struct xdp_md *ctx)
 {
 	return X86_VM_BEGIN_XDP(ctx)
 	/* 0x0: mov rax, 12345678 */
-	X86_VM_STEP_OP(x86_exec_mov_imm, X86_OP_MOV_IMM64, X86_RAX, 0, 0, 0,
-		       12345678ULL)
+	X86_VM_STEP_OP(X86_OP_MOV_IMM64, X86_RAX, 0, 0, 0, 12345678ULL)
 	/* 0x5: ret */
-	X86_VM_STEP_OP(x86_exec_ret, X86_OP_RET, 0, 0, 0, 0, 0)
+	X86_VM_STEP_OP(X86_OP_RET, 0, 0, 0, 0, 0)
 	X86_VM_END_XDP();
 }
 ```
 
 The program is not a global variable, is not a local BPF stack array, and is not
-emitted as a `.rodata` map. Each instruction field is a compile-time immediate,
-and the generator explicitly selects the interpreter helper for that opcode
-(`x86_exec_mov_load`, `x86_exec_alu_reg`, etc.). This is intentionally not a
-JIT-shaped prototype: generated `.bpf.c` fixes the guest instruction stream, but
-each step still calls VM semantics in `x86_interp.h`.
+emitted as a `.rodata` map. Each instruction field is a compile-time immediate.
+The generator must only encode the native instruction as opcode/operand
+constants; helper selection, packet-memory fast paths, and verifier-friendly
+typed execution stay inside the C-authored interpreter/header. This is
+intentionally not a JIT-shaped prototype: generated `.bpf.c` fixes the guest
+instruction stream, but each step still executes VM semantics in
+`x86_interp.h` / `x86_vm_bpf.h`.
+
+Clang inlining and constant propagation are allowed as an engineering mechanism
+for making the normal eBPF verifier accept the proof program. They are not the
+correctness boundary. Correctness is stated over the C-authored interpreter
+semantics: one encoded x86 instruction refines one x86 step. The compiler is
+only used to specialize that same semantics for verifier analysis.
 
 ## Build And Run
 
@@ -108,6 +115,22 @@ sudo -n python3 ebpf-vm/x86/micro-prog/run_micro_interpreter_batch.py \
   --markdown /tmp/reversejit-current-micro-status-$(id -u).md
 ```
 
+The batch harness must not kill `clang` because compilation is slow. Clang
+compile time is part of the experiment surface for large generated verifier
+artifacts; a slow compile should be observed, not converted into a synthetic
+compile-fail timeout.
+
+For failing objects, capture the kernel verifier log through the loader:
+
+```sh
+sudo -n ebpf-vm/loader/target/debug/ebpf-vm-loader \
+  --object ebpf-vm/x86/micro-prog/build/bpf_local_call_fanout_dispatch.bpf.o \
+  --program bpf_local_call_fanout_dispatch_x86_vm_xdp \
+  --case bpf_local_call_fanout_dispatch \
+  --load-only \
+  --verifier-log /tmp/bpf_local_call_fanout_dispatch.verifier.log
+```
+
 Result: 27 of 29 selected micro programs loaded in the kernel, passed
 `BPF_PROG_TEST_RUN`, and matched expected output/retval. The remaining two
 failures are verifier/proof-shape issues after removing Python special
@@ -116,8 +139,8 @@ renderers, not benchmark-name dispatch in the generator.
 Python LOC check for this cleanup:
 
 ```text
-generate_micro_proofs.py: 1763 -> 1472 lines
-x86_vm_bpf.h:           202 -> 316 lines
+generate_micro_proofs.py: 1763 -> 1421 lines
+x86_vm_bpf.h:           202 -> 522 lines
 ```
 
 The line movement is intentional: proof protocol complexity is being moved out
@@ -135,7 +158,7 @@ and eventually verified with the helper semantics.
 | `packet_checksum_fold` | ok | XDP return value is `2`; exact-bound loop back-edges now use verifier-visible callback index fallback instead of aborting at bound exhaustion. |
 | `payload_prefix_memcmp_scan` | ok |  |
 | `packet_vlan_tcpopt_parser` | ok |  |
-| `bpf_local_call_fanout_dispatch` | fail | Mechanical `bpf_loop` lowering still exceeds the verifier processed-insn limit (`E2BIG`) because the callback joins large native-call helper state. |
+| `bpf_local_call_fanout_dispatch` | fail | Verifier `E2BIG`: `Processed 1000001 insn`, limit `1000000`, `max_states_per_insn 33`, `total_states 30881`; log: `/tmp/bpf_local_call_fanout_dispatch.verifier.log`. |
 | `flow_5tuple_rss_hash` | ok |  |
 | `katran_lb_consistent_hash_select` | ok |  |
 | `cilium_policy_guard_tree_filter` | ok |  |
@@ -143,7 +166,7 @@ and eventually verified with the helper semantics.
 | `packet_record_bounds_window` | ok |  |
 | `flow_record_field_scan` | ok |  |
 | `packed_header_bitfield_decode` | ok |  |
-| `bpftrace_string_search_prefix_scan` | fail | Mechanical `bpf_loop` lowering still exceeds the verifier processed-insn limit (`E2BIG`) because repeated generic memory/ALU helpers create too many states. |
+| `bpftrace_string_search_prefix_scan` | fail | Verifier `E2BIG`: `Processed 1000001 insn`, limit `1000000`, `max_states_per_insn 95`, `total_states 49270`; log: `/tmp/bpftrace_string_search_prefix_scan.verifier.log`. |
 | `tracee_syscall_name_table_lookup` | ok |  |
 | `tracee_http_method_prefix_detect` | ok |  |
 | `cilium_socket_lb_service_select` | ok |  |
@@ -187,8 +210,8 @@ Remaining generated-C failures:
 
 | Micro program | Current blocker | Required proof-shape change |
 | --- | --- | --- |
-| `bpf_local_call_fanout_dispatch` | The callback still joins states across large generated native subfunctions (`local_call_*`) and exceeds the verifier processed-insn limit. | A C-authored typed helper/template boundary for native-call summaries, or a state abstraction that keeps x86 semantics in C while reducing verifier joins. |
-| `bpftrace_string_search_prefix_scan` | Repeated prefix-compare blocks still expand generic memory/ALU helpers enough to exceed the verifier processed-insn limit. | A C-authored helper/template for repeated byte-compare/or basic blocks, or a less pointer-state-heavy memory model for loop callbacks. |
+| `bpf_local_call_fanout_dispatch` | The callback joins states across generated native subfunctions (`local_call_*`) until the verifier hits `Processed 1000001 insn` (`max_states_per_insn 33`). | Reduce verifier-visible state joins while preserving one-instruction interpreter semantics; do not move helper selection into Python. |
+| `bpftrace_string_search_prefix_scan` | Repeated prefix-compare memory/ALU steps hit `Processed 1000001 insn` with higher state fanout (`max_states_per_insn 95`). | Reduce pointer/flag state churn in C-authored interpreter helpers or loop state abstraction; do not replace it with a Python renderer. |
 
 ## JSON-Linker Todo
 
@@ -338,23 +361,25 @@ loader link, verifier load, test run, and expected-result check all passed.
 The active completion target for now is the generated-C interpreter path below,
 not the JSON linker.
 
-## Direct Helper Dispatch
+## Interpreter Dispatch Boundary
 
-The current generator emits direct interpreter-helper calls:
+The generator emits mechanical interpreter steps:
 
 ```c
-X86_VM_RUN_OP(x86_exec_mov_load, X86_OP_MOV_LOAD, ...);
+X86_VM_RUN_OP(X86_OP_MOV_LOAD, X86_RCX, X86_RDI, X86_WIDTH_64, aux, imm);
 ```
 
-That helper choice is made by the generator from decoded native ASM, not by
-LLVM constant propagation over a generic opcode dispatch. This matters for the
-real ReverseJIT path: once eBPF instructions are appended directly, there is no
-second user-space compiler pass that can prune a large `switch`.
+Python does not choose `x86_exec_*` helpers. C macros dispatch to the
+C-authored interpreter, and may use typed fast paths when opcode/operand
+constants prove that the fast path is the same x86 step. This keeps the formal
+object small: the proof obligation is the C interpreter/helper semantics, not a
+Python helper-selection policy.
 
-This change removed the original broad class of XDP compile-fail cases in the
-generated micro proof batch. It did not make every program safe or equivalent:
-large explicit control-flow graphs can still exceed verifier limits, and the
-remaining failures are tracked in the generated-C status table above.
+For the eventual bytecode-link path there will be no second user-space compiler
+pass after program constants are attached. Any fast path that relies on
+compile-time constants must therefore correspond to a C-authored template or
+macro that the linker can splice unchanged, rather than Python rewriting
+instruction semantics.
 
 ## JSON Bytecode Plan
 

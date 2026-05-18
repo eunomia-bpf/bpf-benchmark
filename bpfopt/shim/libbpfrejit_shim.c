@@ -1,25 +1,23 @@
 /*
- * libbpfrejit_shim.so — LD_PRELOAD observation + state-tracking shim for BPF.
+ * libbpfrejit_shim.so — LD_PRELOAD interception + state shim for BPF apps.
  *
- * Phase 1 (intercept + log):
- *   wrap syscall(2)/ioctl(2)/perf_event_open(2)/close(2)/dup2/dup3 in libc.
- *   For each observed BPF/perf control-plane call: log, then pass through.
+ * Intercept layer wraps syscall(2)/ioctl(2)/perf_event_open(2)/close(2) in
+ * libc. For each observed BPF/perf control-plane call: log, then pass through.
  *
- * Phase 1.5 (state tables — this file):
- *   maintain in-process tables of every BPF object whose fd lives in this
- *   process: programs, maps, links, perf_event handles. Tables are keyed by
- *   app-side fd. Each entry records the kernel-side id (resolved via
- *   BPF_OBJ_GET_INFO_BY_FD), the original load attr (for prog), and the
- *   attach relationship (for link / perf_event). close() / dup2() / dup3()
- *   maintain table consistency. SIGUSR1 dumps tables as JSON.
+ * State tables (keyed by app-side fd) record every BPF object whose fd lives
+ * in this process: programs, maps, links, perf_event handles. Each entry
+ * records the kernel-side id (resolved via BPF_OBJ_GET_INFO_BY_FD), the
+ * original load attr (for prog), and the attach relationship (for link /
+ * perf_event). close() maintains table consistency.
  *
- * Phase 2 (not yet): bpfopt subprocess pipeline, candidate BPF_PROG_LOAD with
- *   captured attr, per-attach swap recipe.
+ * Per-pid socket implements daemon-protocol RPCs (list_progs / execute_step /
+ * dump_state). Optimization is runner-driven: the runner reads its yaml,
+ * resolves a shell command, sends it via execute_step; the shim substitutes
+ * ${VAR}s and runs /bin/sh -c.
  *
  * Usage:
  *   gcc -shared -fPIC -O2 libbpfrejit_shim.c -o libbpfrejit_shim.so -ldl -lpthread
  *   BPFREJIT_SHIM_LOG=/tmp/shim.log LD_PRELOAD=./libbpfrejit_shim.so <app>
- *   kill -USR1 <pid>     # dump state to BPFREJIT_SHIM_DIR/state_<pid>.json
  */
 
 #include <dlfcn.h>
@@ -67,8 +65,6 @@ extern char **environ;
 static long (*real_syscall)(long, ...);
 static int (*real_ioctl)(int, unsigned long, ...);
 static int (*real_close)(int);
-static int (*real_dup2)(int, int);
-static int (*real_dup3)(int, int, int);
 
 static FILE *log_file;
 static pthread_mutex_t log_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -250,79 +246,24 @@ static void log_line(const char *fmt, ...) {
     pthread_mutex_unlock(&log_mutex);
 }
 
-static const char *bpf_cmd_name(int cmd) {
-    switch (cmd) {
-    case BPF_MAP_CREATE: return "MAP_CREATE";
-    case BPF_MAP_LOOKUP_ELEM: return "MAP_LOOKUP_ELEM";
-    case BPF_MAP_UPDATE_ELEM: return "MAP_UPDATE_ELEM";
-    case BPF_MAP_DELETE_ELEM: return "MAP_DELETE_ELEM";
-    case BPF_MAP_GET_NEXT_KEY: return "MAP_GET_NEXT_KEY";
-    case BPF_PROG_LOAD: return "PROG_LOAD";
-    case BPF_OBJ_PIN: return "OBJ_PIN";
-    case BPF_OBJ_GET: return "OBJ_GET";
-    case BPF_PROG_ATTACH: return "PROG_ATTACH";
-    case BPF_PROG_DETACH: return "PROG_DETACH";
-    case BPF_PROG_TEST_RUN: return "PROG_TEST_RUN";
-    case BPF_PROG_GET_NEXT_ID: return "PROG_GET_NEXT_ID";
-    case BPF_MAP_GET_NEXT_ID: return "MAP_GET_NEXT_ID";
-    case BPF_PROG_GET_FD_BY_ID: return "PROG_GET_FD_BY_ID";
-    case BPF_MAP_GET_FD_BY_ID: return "MAP_GET_FD_BY_ID";
-    case BPF_OBJ_GET_INFO_BY_FD: return "OBJ_GET_INFO_BY_FD";
-    case BPF_PROG_QUERY: return "PROG_QUERY";
-    case BPF_RAW_TRACEPOINT_OPEN: return "RAW_TRACEPOINT_OPEN";
-    case BPF_BTF_LOAD: return "BTF_LOAD";
-    case BPF_BTF_GET_FD_BY_ID: return "BTF_GET_FD_BY_ID";
-    case BPF_TASK_FD_QUERY: return "TASK_FD_QUERY";
-    case BPF_MAP_LOOKUP_AND_DELETE_ELEM: return "MAP_LOOKUP_AND_DELETE_ELEM";
-    case BPF_MAP_FREEZE: return "MAP_FREEZE";
-    case BPF_BTF_GET_NEXT_ID: return "BTF_GET_NEXT_ID";
-    case BPF_LINK_CREATE: return "LINK_CREATE";
-    case BPF_LINK_UPDATE: return "LINK_UPDATE";
-    case BPF_LINK_GET_FD_BY_ID: return "LINK_GET_FD_BY_ID";
-    case BPF_LINK_GET_NEXT_ID: return "LINK_GET_NEXT_ID";
-    case BPF_ENABLE_STATS: return "ENABLE_STATS";
-    case BPF_ITER_CREATE: return "ITER_CREATE";
-    case BPF_LINK_DETACH: return "LINK_DETACH";
-    case BPF_PROG_BIND_MAP: return "PROG_BIND_MAP";
-    default: return "UNKNOWN";
-    }
-}
-
-static const char *prog_type_name(uint32_t t) {
+/* Map BPF_PROG_TYPE_* enum to bpfopt's --prog-type short name. Used in log
+ * lines and as the ${PROG_TYPE} variable when substituting runner-supplied
+ * command templates. */
+static const char *prog_type_short_name(uint32_t t) {
     switch (t) {
-    case BPF_PROG_TYPE_SOCKET_FILTER: return "SOCKET_FILTER";
-    case BPF_PROG_TYPE_KPROBE: return "KPROBE";
-    case BPF_PROG_TYPE_SCHED_CLS: return "SCHED_CLS";
-    case BPF_PROG_TYPE_SCHED_ACT: return "SCHED_ACT";
-    case BPF_PROG_TYPE_TRACEPOINT: return "TRACEPOINT";
-    case BPF_PROG_TYPE_XDP: return "XDP";
-    case BPF_PROG_TYPE_PERF_EVENT: return "PERF_EVENT";
-    case BPF_PROG_TYPE_CGROUP_SKB: return "CGROUP_SKB";
-    case BPF_PROG_TYPE_CGROUP_SOCK: return "CGROUP_SOCK";
-    case BPF_PROG_TYPE_LWT_IN: return "LWT_IN";
-    case BPF_PROG_TYPE_LWT_OUT: return "LWT_OUT";
-    case BPF_PROG_TYPE_LWT_XMIT: return "LWT_XMIT";
-    case BPF_PROG_TYPE_SOCK_OPS: return "SOCK_OPS";
-    case BPF_PROG_TYPE_SK_SKB: return "SK_SKB";
-    case BPF_PROG_TYPE_CGROUP_DEVICE: return "CGROUP_DEVICE";
-    case BPF_PROG_TYPE_SK_MSG: return "SK_MSG";
-    case BPF_PROG_TYPE_RAW_TRACEPOINT: return "RAW_TRACEPOINT";
-    case BPF_PROG_TYPE_CGROUP_SOCK_ADDR: return "CGROUP_SOCK_ADDR";
-    case BPF_PROG_TYPE_LWT_SEG6LOCAL: return "LWT_SEG6LOCAL";
-    case BPF_PROG_TYPE_LIRC_MODE2: return "LIRC_MODE2";
-    case BPF_PROG_TYPE_SK_REUSEPORT: return "SK_REUSEPORT";
-    case BPF_PROG_TYPE_FLOW_DISSECTOR: return "FLOW_DISSECTOR";
-    case BPF_PROG_TYPE_CGROUP_SYSCTL: return "CGROUP_SYSCTL";
-    case BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE: return "RAW_TRACEPOINT_WRITABLE";
-    case BPF_PROG_TYPE_CGROUP_SOCKOPT: return "CGROUP_SOCKOPT";
-    case BPF_PROG_TYPE_TRACING: return "TRACING";
-    case BPF_PROG_TYPE_STRUCT_OPS: return "STRUCT_OPS";
-    case BPF_PROG_TYPE_EXT: return "EXT";
-    case BPF_PROG_TYPE_LSM: return "LSM";
-    case BPF_PROG_TYPE_SK_LOOKUP: return "SK_LOOKUP";
-    case BPF_PROG_TYPE_SYSCALL: return "SYSCALL";
-    case BPF_PROG_TYPE_NETFILTER: return "NETFILTER";
-    default: return "UNKNOWN";
+    case BPF_PROG_TYPE_SOCKET_FILTER: return "socket_filter";
+    case BPF_PROG_TYPE_KPROBE: return "kprobe";
+    case BPF_PROG_TYPE_SCHED_CLS: return "sched_cls";
+    case BPF_PROG_TYPE_SCHED_ACT: return "sched_act";
+    case BPF_PROG_TYPE_TRACEPOINT: return "tracepoint";
+    case BPF_PROG_TYPE_XDP: return "xdp";
+    case BPF_PROG_TYPE_PERF_EVENT: return "perf_event";
+    case BPF_PROG_TYPE_CGROUP_SKB: return "cgroup_skb";
+    case BPF_PROG_TYPE_CGROUP_SOCK: return "cgroup_sock";
+    case BPF_PROG_TYPE_RAW_TRACEPOINT: return "raw_tracepoint";
+    case BPF_PROG_TYPE_TRACING: return "tracing";
+    case BPF_PROG_TYPE_LSM: return "lsm";
+    default: return "socket_filter";
     }
 }
 
@@ -383,8 +324,8 @@ static struct obj_entry *capture_prog_load(const union bpf_attr *attr) {
     }
     log_line("BPF_PROG_LOAD type=%u (%s) name=%s insn_cnt=%u hash=%016lx "
              "license=%s expected_attach=%u attach_btf_id=%u",
-             attr->prog_type, prog_type_name(attr->prog_type), name, insn_cnt,
-             hash, (const char *)(uintptr_t)attr->license,
+             attr->prog_type, prog_type_short_name(attr->prog_type), name,
+             insn_cnt, hash, (const char *)(uintptr_t)attr->license,
              attr->expected_attach_type, attr->attach_btf_id);
     if (!copy && insn_cnt > 0)
         return NULL; /* OOM: drop state, keep log */
@@ -451,17 +392,13 @@ static void on_raw_tp_open(const union bpf_attr *attr) {
              attr->raw_tracepoint.prog_fd);
 }
 
-static void sigusr1_handler(int sig);   /* forward decl */
 static void *worker_thread(void *arg);  /* forward decl */
 static void *socket_thread(void *arg);  /* forward decl */
-static void run_bpfopt_on_all_progs(const char *pass_list); /* forward */
 
 __attribute__((constructor)) static void shim_init(void) {
     real_syscall = dlsym(RTLD_NEXT, "syscall");
     real_ioctl = dlsym(RTLD_NEXT, "ioctl");
     real_close = dlsym(RTLD_NEXT, "close");
-    real_dup2 = dlsym(RTLD_NEXT, "dup2");
-    real_dup3 = dlsym(RTLD_NEXT, "dup3");
 
     /* Auto-create the bytecode dump dir. */
     const char *dir = getenv("BPFREJIT_SHIM_DIR");
@@ -479,16 +416,6 @@ __attribute__((constructor)) static void shim_init(void) {
         if (n > 0) exe[n] = 0;
         log_line("shim_init pid=%d exe=%s", getpid(), exe);
     }
-
-    /* SIGUSR1 → dump JSON snapshot. NOTE: Go runtime hijacks SIGUSR1 after
-     * its own init runs, so this is unreliable for Go apps; for those use
-     * BPFREJIT_SHIM_PERIODIC_DUMP_MS instead. C/C++ apps still get the
-     * signal-driven dump. */
-    struct sigaction sa;
-    memset(&sa, 0, sizeof(sa));
-    sa.sa_handler = sigusr1_handler;
-    sa.sa_flags = SA_RESTART;
-    sigaction(SIGUSR1, &sa, NULL);
 
     /* Periodic dump worker, if enabled by env. */
     pthread_t tid;
@@ -590,7 +517,7 @@ long syscall(long number, ...) {
             on_raw_tp_open(attr);
             break;
         default:
-            log_line("bpf cmd=%d (%s) size=%u", cmd, bpf_cmd_name(cmd), size);
+            log_line("bpf cmd=%d size=%u", cmd, size);
             break;
         }
         in_shim = 0;
@@ -696,70 +623,9 @@ int close(int fd) {
     return ret;
 }
 
-/* Intercept dup2(2): duplicate table entry to the new fd. */
-int dup2(int oldfd, int newfd) {
-    in_shim = 1;
-    int ret = real_dup2(oldfd, newfd);
-    int saved_errno = errno;
-    in_shim = 0;
-    if (ret >= 0 && !in_shim) {
-        pthread_mutex_lock(&state_mutex);
-        struct obj_entry *src = obj_find(oldfd);
-        if (src) {
-            struct obj_entry *copy =
-                (struct obj_entry *)calloc(1, sizeof(*copy));
-            if (copy) {
-                *copy = *src;
-                copy->fd = ret;
-                copy->next = NULL;
-                if (copy->kind == OBJ_PROG && src->u.prog.insns) {
-                    size_t bytes = (size_t)src->u.prog.insn_cnt *
-                                   sizeof(struct bpf_insn);
-                    copy->u.prog.insns = (struct bpf_insn *)malloc(bytes);
-                    if (copy->u.prog.insns)
-                        memcpy(copy->u.prog.insns, src->u.prog.insns, bytes);
-                }
-                obj_insert(copy);
-            }
-        }
-        pthread_mutex_unlock(&state_mutex);
-    }
-    errno = saved_errno;
-    return ret;
-}
-
-int dup3(int oldfd, int newfd, int flags) {
-    in_shim = 1;
-    int ret = real_dup3(oldfd, newfd, flags);
-    int saved_errno = errno;
-    in_shim = 0;
-    if (ret >= 0 && !in_shim) {
-        pthread_mutex_lock(&state_mutex);
-        struct obj_entry *src = obj_find(oldfd);
-        if (src) {
-            struct obj_entry *copy =
-                (struct obj_entry *)calloc(1, sizeof(*copy));
-            if (copy) {
-                *copy = *src;
-                copy->fd = ret;
-                copy->next = NULL;
-                if (copy->kind == OBJ_PROG && src->u.prog.insns) {
-                    size_t bytes = (size_t)src->u.prog.insn_cnt *
-                                   sizeof(struct bpf_insn);
-                    copy->u.prog.insns = (struct bpf_insn *)malloc(bytes);
-                    if (copy->u.prog.insns)
-                        memcpy(copy->u.prog.insns, src->u.prog.insns, bytes);
-                }
-                obj_insert(copy);
-            }
-        }
-        pthread_mutex_unlock(&state_mutex);
-    }
-    errno = saved_errno;
-    return ret;
-}
-
-/* SIGUSR1 handler: write a JSON snapshot of all tracked objects. */
+/* Write a JSON snapshot of all tracked objects.
+ * Invoked by the periodic worker thread (BPFREJIT_SHIM_PERIODIC_DUMP_MS) and
+ * by the `dump_state` socket RPC. */
 static void dump_state_json(void) {
     const char *dir = getenv("BPFREJIT_SHIM_DIR");
     if (!dir) dir = "/tmp";
@@ -827,194 +693,6 @@ static void dump_state_json(void) {
     fprintf(f, "\n  ]\n}\n");
     fclose(f);
     log_line("state dumped to %s", path);
-}
-
-static void sigusr1_handler(int sig) {
-    (void)sig;
-    dump_state_json();
-}
-
-/* Phase 2: run `bpfopt --pass <name>` as a subprocess against a captured
- * bytecode file. Returns 0 on success and sets *out_path to a heap string
- * (caller frees) with the result path. Returns -1 on failure.
- *
- * Invocation:
- *   $BPFOPT --pass <pass> --input <in> --output <out> --report <report>
- *           --prog-type <prog_type_name>
- *
- * Path discovery: $BPFREJIT_BPFOPT_PATH, then /usr/local/bin/bpfopt, then
- * looks on PATH via posix_spawnp.
- */
-static const char *prog_type_short_name(uint32_t t) {
-    switch (t) {
-    case BPF_PROG_TYPE_SOCKET_FILTER: return "socket_filter";
-    case BPF_PROG_TYPE_KPROBE: return "kprobe";
-    case BPF_PROG_TYPE_SCHED_CLS: return "sched_cls";
-    case BPF_PROG_TYPE_SCHED_ACT: return "sched_act";
-    case BPF_PROG_TYPE_TRACEPOINT: return "tracepoint";
-    case BPF_PROG_TYPE_XDP: return "xdp";
-    case BPF_PROG_TYPE_PERF_EVENT: return "perf_event";
-    case BPF_PROG_TYPE_CGROUP_SKB: return "cgroup_skb";
-    case BPF_PROG_TYPE_CGROUP_SOCK: return "cgroup_sock";
-    case BPF_PROG_TYPE_RAW_TRACEPOINT: return "raw_tracepoint";
-    case BPF_PROG_TYPE_TRACING: return "tracing";
-    case BPF_PROG_TYPE_LSM: return "lsm";
-    default: return "socket_filter"; /* safe-ish fallback for noop pass */
-    }
-}
-
-static int run_bpfopt_pass(const char *pass, const char *in_path,
-                           const char *out_path, const char *report_path,
-                           uint32_t prog_type) {
-    const char *bpfopt = getenv("BPFREJIT_BPFOPT_PATH");
-    if (!bpfopt || !*bpfopt)
-        bpfopt = "/usr/local/bin/bpfopt";
-    const char *prog_type_arg = prog_type_short_name(prog_type);
-    char *const argv[] = {
-        (char *)bpfopt,
-        "--pass", (char *)pass,
-        "--input", (char *)in_path,
-        "--output", (char *)out_path,
-        "--report", (char *)report_path,
-        "--prog-type", (char *)prog_type_arg,
-        NULL,
-    };
-
-    /* Build a clean env for the subprocess: drop LD_PRELOAD so bpfopt is not
-     * itself shimmed (recursive). Keep everything else. */
-    size_t n_env = 0;
-    while (environ[n_env]) n_env++;
-    char **clean_env = (char **)calloc(n_env + 1, sizeof(char *));
-    if (!clean_env)
-        return -1;
-    size_t j = 0;
-    for (size_t i = 0; i < n_env; i++) {
-        if (strncmp(environ[i], "LD_PRELOAD=", 11) == 0)
-            continue;
-        clean_env[j++] = environ[i];
-    }
-    clean_env[j] = NULL;
-
-    pid_t pid;
-    int rc;
-    if (access(bpfopt, X_OK) == 0)
-        rc = posix_spawn(&pid, bpfopt, NULL, NULL, argv, clean_env);
-    else
-        rc = posix_spawnp(&pid, "bpfopt", NULL, NULL, argv, clean_env);
-    free(clean_env);
-    if (rc != 0) {
-        log_line("bpfopt spawn failed: rc=%d path=%s", rc, bpfopt);
-        return -1;
-    }
-    int status = 0;
-    if (waitpid(pid, &status, 0) < 0) {
-        log_line("bpfopt waitpid failed errno=%d", errno);
-        return -1;
-    }
-    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
-        log_line("bpfopt nonzero exit: status=0x%x", status);
-        return -1;
-    }
-    return 0;
-}
-
-/* Snapshot tracked progs (under state_mutex) and return a malloced array.
- * Each entry is a self-contained copy; caller frees the array and the path
- * strings. */
-struct prog_snapshot {
-    uint32_t kernel_prog_id;
-    uint32_t prog_type;
-    uint32_t insn_cnt;
-    uint64_t hash;
-    char name[17];
-    char bytecode_path[256];
-};
-static struct prog_snapshot *snapshot_progs(size_t *n_out) {
-    pthread_mutex_lock(&state_mutex);
-    size_t n = 0;
-    for (int b = 0; b < OBJ_TABLE_BUCKETS; b++)
-        for (struct obj_entry *e = obj_table[b]; e; e = e->next)
-            if (e->kind == OBJ_PROG && e->u.prog.insn_cnt > 0)
-                n++;
-    struct prog_snapshot *arr =
-        (struct prog_snapshot *)calloc(n, sizeof(*arr));
-    if (!arr) {
-        pthread_mutex_unlock(&state_mutex);
-        *n_out = 0;
-        return NULL;
-    }
-    size_t i = 0;
-    for (int b = 0; b < OBJ_TABLE_BUCKETS; b++) {
-        for (struct obj_entry *e = obj_table[b]; e; e = e->next) {
-            if (e->kind == OBJ_PROG && e->u.prog.insn_cnt > 0) {
-                arr[i].kernel_prog_id = e->u.prog.kernel_prog_id;
-                arr[i].prog_type = e->u.prog.prog_type;
-                arr[i].insn_cnt = e->u.prog.insn_cnt;
-                arr[i].hash = e->u.prog.hash;
-                memcpy(arr[i].name, e->u.prog.name, sizeof(arr[i].name));
-                memcpy(arr[i].bytecode_path, e->u.prog.bytecode_path,
-                       sizeof(arr[i].bytecode_path));
-                i++;
-            }
-        }
-    }
-    pthread_mutex_unlock(&state_mutex);
-    *n_out = i;
-    return arr;
-}
-
-/* Run bpfopt pass list on every tracked prog. Outputs go to
- * $BPFREJIT_SHIM_DIR/bpfrejit_<pid>_<hash>_<pass>.bpf and …_<pass>.json. */
-static void run_bpfopt_on_all_progs(const char *pass_list) {
-    const char *dir = getenv("BPFREJIT_SHIM_DIR");
-    if (!dir) dir = "/tmp";
-
-    size_t n = 0;
-    struct prog_snapshot *progs = snapshot_progs(&n);
-    if (!progs || n == 0) {
-        free(progs);
-        return;
-    }
-
-    /* pass_list is comma-separated; for PoC we accept a single pass. */
-    char pass_buf[64];
-    snprintf(pass_buf, sizeof(pass_buf), "%s", pass_list);
-    char *comma = strchr(pass_buf, ',');
-    if (comma) *comma = 0; /* TODO: real pipeline */
-
-    int ok = 0, fail = 0;
-    for (size_t i = 0; i < n; i++) {
-        if (!progs[i].bytecode_path[0])
-            continue;
-        /* Per-prog output keyed by kernel_prog_id (NOT by bytecode hash), so
-         * each program instance gets its own record even when multiple progs
-         * share identical bytecode. CLAUDE.md forbids filtering or
-         * deduplicating BPF programs out of the optimization pipeline. */
-        char out_path[320], report_path[320];
-        snprintf(out_path, sizeof(out_path),
-                 "%s/bpfrejit_%d_prog%u_%016lx_%s.bpf", dir, getpid(),
-                 progs[i].kernel_prog_id, progs[i].hash, pass_buf);
-        snprintf(report_path, sizeof(report_path),
-                 "%s/bpfrejit_%d_prog%u_%016lx_%s.json", dir, getpid(),
-                 progs[i].kernel_prog_id, progs[i].hash, pass_buf);
-        int rc = run_bpfopt_pass(pass_buf, progs[i].bytecode_path, out_path,
-                                 report_path, progs[i].prog_type);
-        if (rc == 0) {
-            ok++;
-            log_line("bpfopt pass=%s kernel_prog_id=%u hash=%016lx "
-                     "out=%s report=%s OK",
-                     pass_buf, progs[i].kernel_prog_id, progs[i].hash,
-                     out_path, report_path);
-        } else {
-            fail++;
-            log_line("bpfopt pass=%s kernel_prog_id=%u hash=%016lx FAIL",
-                     pass_buf, progs[i].kernel_prog_id, progs[i].hash);
-        }
-    }
-    free(progs);
-    if (ok || fail)
-        log_line("bpfopt pass=%s summary: ok=%d fail=%d total=%zu", pass_buf,
-                 ok, fail, n);
 }
 
 /* =========================================================================
@@ -1126,37 +804,150 @@ static void emit_list_progs(int cli) {
     free(buf);
 }
 
-static void emit_optimize(int cli, const char *json) {
-    char passes[128] = {0};
-    if (!json_get_str(json, "enabled_passes", passes, sizeof(passes))) {
-        /* `enabled_passes` may be an array of strings; accept that too. */
-        const char *p = strstr(json, "\"enabled_passes\"");
-        if (p) {
-            p = strchr(p, '[');
-            if (p) {
-                p++;
-                size_t i = 0;
-                while (*p && *p != ']' && i + 1 < sizeof(passes)) {
-                    if (*p != '"' && *p != ' ' && *p != ',')
-                        passes[i++] = *p;
-                    if (*p == '"' && i > 0 && passes[i - 1] != ',') {
-                        /* end of one name; insert comma if more coming */
-                        const char *q = p + 1;
-                        while (*q == ' ')
-                            q++;
-                        if (*q == ',')
-                            passes[i++] = ',';
+/* Substitute ${VAR} occurrences in `in` to `out`. Vars known: PROG_ID,
+ * PROG_TYPE, INPUT, OUTPUT, REPORT, WORKDIR, TARGET. Unknown vars stay as
+ * literal ${VAR} (so /bin/sh's own expansion can still see them via env). */
+static void substitute_vars(char *out, size_t out_sz, const char *in,
+                            const char *vars[][2], size_t n_vars) {
+    size_t o = 0;
+    for (size_t i = 0; in[i] && o + 1 < out_sz;) {
+        if (in[i] == '$' && in[i + 1] == '{') {
+            const char *end = strchr(in + i + 2, '}');
+            if (end) {
+                size_t name_len = end - (in + i + 2);
+                int replaced = 0;
+                for (size_t k = 0; k < n_vars; k++) {
+                    if (strlen(vars[k][0]) == name_len &&
+                        strncmp(in + i + 2, vars[k][0], name_len) == 0) {
+                        size_t rl = strlen(vars[k][1]);
+                        if (o + rl >= out_sz)
+                            rl = out_sz - 1 - o;
+                        memcpy(out + o, vars[k][1], rl);
+                        o += rl;
+                        replaced = 1;
+                        break;
                     }
-                    p++;
                 }
-                passes[i] = 0;
+                i = end - in + 1;
+                if (!replaced) {
+                    /* leave ${VAR} literal so shell can substitute */
+                    size_t lit_len = name_len + 3;
+                    if (o + lit_len >= out_sz)
+                        lit_len = out_sz - 1 - o;
+                    memcpy(out + o, in + i - lit_len, lit_len);
+                    o += lit_len;
+                }
+                continue;
+            }
+        }
+        out[o++] = in[i++];
+    }
+    out[o] = 0;
+}
+
+/* execute_step — daemon-style RPC. Runner sends a pre-resolved shell command
+ * (read from runner/config/passes/<pass>/default.yaml), shim substitutes
+ * shim-owned vars and runs /bin/sh -c verbatim. Mirrors daemon's contract at
+ * daemon/src/commands.rs:execute_one + daemon/src/server.rs:execute_plan.
+ *
+ *   request:  {"cmd":"execute_step","prog_id":<u32>,"command":"<sh>",
+ *              "step_seq":<int optional>}
+ *   response: {"ok":<bool>,"exit_code":<int>,"output":"<path>","report":"<path>"}
+ */
+static void emit_execute_step(int cli, const char *json) {
+    char prog_id_str[32] = {0};
+    char command[4096] = {0};
+    /* prog_id is a number; reuse json_get_str by also accepting unquoted. */
+    const char *p = strstr(json, "\"prog_id\"");
+    if (p && (p = strchr(p, ':'))) {
+        p++;
+        while (*p == ' ' || *p == '\t' || *p == '"') p++;
+        size_t i = 0;
+        while ((*p >= '0' && *p <= '9') && i + 1 < sizeof(prog_id_str))
+            prog_id_str[i++] = *p++;
+        prog_id_str[i] = 0;
+    }
+    if (!json_get_str(json, "command", command, sizeof(command)) ||
+        !prog_id_str[0]) {
+        dprintf(cli, "{\"ok\":false,\"error\":\"missing prog_id or command\"}\n");
+        return;
+    }
+    uint32_t want_id = (uint32_t)strtoul(prog_id_str, NULL, 10);
+
+    /* Look up prog in state table. */
+    char input_path[256] = {0}, prog_type_name[32] = "socket_filter";
+    pthread_mutex_lock(&state_mutex);
+    for (int b = 0; b < OBJ_TABLE_BUCKETS; b++) {
+        for (struct obj_entry *e = obj_table[b]; e; e = e->next) {
+            if (e->kind == OBJ_PROG &&
+                e->u.prog.kernel_prog_id == want_id) {
+                snprintf(input_path, sizeof(input_path), "%s",
+                         e->u.prog.bytecode_path);
+                snprintf(prog_type_name, sizeof(prog_type_name), "%s",
+                         prog_type_short_name(e->u.prog.prog_type));
+                goto found;
             }
         }
     }
-    if (!passes[0])
-        snprintf(passes, sizeof(passes), "noop");
-    run_bpfopt_on_all_progs(passes);
-    dprintf(cli, "{\"ok\":true,\"passes\":\"%s\"}\n", passes);
+found:
+    pthread_mutex_unlock(&state_mutex);
+    if (!input_path[0]) {
+        dprintf(cli, "{\"ok\":false,\"error\":\"prog_id %u not tracked\"}\n",
+                want_id);
+        return;
+    }
+
+    const char *dir = getenv("BPFREJIT_SHIM_DIR");
+    if (!dir) dir = "/tmp";
+    const char *target = getenv("BPFREJIT_TARGET");
+    if (!target) target = "x86";
+    char workdir[280], output[320], report[320];
+    snprintf(workdir, sizeof(workdir), "%s/work_%u", dir, want_id);
+    mkdir(workdir, 0755);
+    snprintf(output, sizeof(output), "%s/output.bin", workdir);
+    snprintf(report, sizeof(report), "%s/report.json", workdir);
+
+    const char *vars[][2] = {
+        {"PROG_ID", prog_id_str},
+        {"PROG_TYPE", prog_type_name},
+        {"INPUT", input_path},
+        {"OUTPUT", output},
+        {"REPORT", report},
+        {"WORKDIR", workdir},
+        {"TARGET", target},
+    };
+    char resolved[4200];
+    substitute_vars(resolved, sizeof(resolved), command,
+                    vars, sizeof(vars) / sizeof(vars[0]));
+
+    /* /bin/sh -c <resolved> with LD_PRELOAD stripped. */
+    size_t n_env = 0;
+    while (environ[n_env]) n_env++;
+    char **clean_env = (char **)calloc(n_env + 1, sizeof(char *));
+    size_t j = 0;
+    for (size_t i = 0; clean_env && i < n_env; i++)
+        if (strncmp(environ[i], "LD_PRELOAD=", 11) != 0)
+            clean_env[j++] = environ[i];
+    if (clean_env) clean_env[j] = NULL;
+
+    char *const argv[] = {"/bin/sh", "-c", resolved, NULL};
+    pid_t pid;
+    int rc = posix_spawn(&pid, "/bin/sh", NULL, NULL, argv,
+                         clean_env ? clean_env : environ);
+    free(clean_env);
+    if (rc != 0) {
+        dprintf(cli, "{\"ok\":false,\"error\":\"spawn failed rc=%d\"}\n", rc);
+        return;
+    }
+    int status = 0;
+    waitpid(pid, &status, 0);
+    int ok = WIFEXITED(status) && WEXITSTATUS(status) == 0;
+    int code = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+    log_line("execute_step prog_id=%u exit=%d output=%s",
+             want_id, code, output);
+    dprintf(cli,
+            "{\"ok\":%s,\"exit_code\":%d,\"output\":\"%s\",\"report\":\"%s\"}\n",
+            ok ? "true" : "false", code, output, report);
 }
 
 static void emit_dump_state(int cli) {
@@ -1182,9 +973,8 @@ static void handle_client(int cli) {
     log_line("socket: cmd=%s", cmd);
     if (strcmp(cmd, "list_progs") == 0)
         emit_list_progs(cli);
-    else if (strcmp(cmd, "optimize") == 0 ||
-             strcmp(cmd, "execute_plan") == 0)
-        emit_optimize(cli, buf);
+    else if (strcmp(cmd, "execute_step") == 0)
+        emit_execute_step(cli, buf);
     else if (strcmp(cmd, "dump_state") == 0)
         emit_dump_state(cli);
     else
@@ -1228,48 +1018,24 @@ static void *socket_thread(void *arg) {
     return NULL;
 }
 
-/* Worker thread:
- *
- *   1. periodically dump state JSON (env: BPFREJIT_SHIM_PERIODIC_DUMP_MS, ms)
- *   2. periodically invoke `bpfopt --pass <name>` on captured bytecode
- *      (env: BPFREJIT_SHIM_RUN_BPFOPT=<comma-list of passes>;
- *       e.g. BPFREJIT_SHIM_RUN_BPFOPT=noop)
- *
- * Both feed off the same tick. Default tick = 2000ms.
- */
+/* Worker thread: optional periodic state JSON dump
+ * (env: BPFREJIT_SHIM_PERIODIC_DUMP_MS, ms). Optimization itself is driven
+ * by the runner over the socket via execute_step, not by this thread. */
 static void *worker_thread(void *arg) {
     (void)arg;
-    int dump_ms = 0;
     const char *dump_env = getenv("BPFREJIT_SHIM_PERIODIC_DUMP_MS");
-    if (dump_env)
-        dump_ms = atoi(dump_env);
-    const char *passes = getenv("BPFREJIT_SHIM_RUN_BPFOPT");
-    int tick_ms = 2000;
-    const char *tick_env = getenv("BPFREJIT_SHIM_TICK_MS");
-    if (tick_env) {
-        int v = atoi(tick_env);
-        if (v > 0) tick_ms = v;
-    }
-    /* If neither feature is enabled, exit. */
-    if (dump_ms <= 0 && (!passes || !*passes))
+    int dump_ms = dump_env ? atoi(dump_env) : 0;
+    if (dump_ms <= 0)
         return NULL;
-    /* Block all signals on this thread so Go-runtime / async-signal-driven
-     * apps do not wake nanosleep with EINTR every microsecond. */
     sigset_t mask;
     sigfillset(&mask);
     pthread_sigmask(SIG_BLOCK, &mask, NULL);
-    int elapsed_ms = 0;
     while (1) {
-        struct timespec ts, rem;
-        ts.tv_sec = tick_ms / 1000;
-        ts.tv_nsec = (long)(tick_ms % 1000) * 1000000L;
+        struct timespec ts = {dump_ms / 1000,
+                              (long)(dump_ms % 1000) * 1000000L}, rem;
         while (nanosleep(&ts, &rem) == -1 && errno == EINTR)
             ts = rem;
-        elapsed_ms += tick_ms;
-        if (dump_ms > 0 && elapsed_ms % dump_ms < tick_ms)
-            dump_state_json();
-        if (passes && *passes)
-            run_bpfopt_on_all_progs(passes);
+        dump_state_json();
     }
     return NULL;
 }

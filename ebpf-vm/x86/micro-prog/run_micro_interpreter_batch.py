@@ -56,7 +56,7 @@ def load_benches() -> list[Bench]:
     return benches
 
 
-def run_cmd(cmd: list[str], *, timeout: int, capture: bool = True) -> subprocess.CompletedProcess[str]:
+def run_cmd(cmd: list[str], *, timeout: int | None, capture: bool = True) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         cmd,
         cwd=REPO_ROOT,
@@ -117,10 +117,7 @@ def compile_object(bench: Bench) -> Result | None:
         "-o",
         str(obj),
     ]
-    try:
-        result = run_cmd(cmd, timeout=240)
-    except subprocess.TimeoutExpired:
-        return Result(bench.name, "compile-fail", "clang timeout")
+    result = run_cmd(cmd, timeout=None)
     if result.returncode != 0:
         err = compact_error(result.stderr or result.stdout or "clang failed")
         return Result(bench.name, "compile-fail", err)

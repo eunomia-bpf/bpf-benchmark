@@ -95,47 +95,6 @@ WIDTH_CONST = {
     64: "X86_WIDTH_64",
 }
 
-OP_HELPERS = {
-    "X86_OP_NOP": "x86_exec_nop",
-    "X86_OP_MOV_IMM": "x86_exec_mov_imm",
-    "X86_OP_MOV_REG": "x86_exec_mov_reg",
-    "X86_OP_ADD_IMM": "x86_exec_add_imm",
-    "X86_OP_ADD_REG": "x86_exec_add_reg",
-    "X86_OP_XOR_REG": "x86_exec_xor_reg",
-    "X86_OP_MOV_LOAD": "x86_exec_mov_load",
-    "X86_OP_MOV_STORE_IMM": "x86_exec_mov_store_imm",
-    "X86_OP_MOV_STORE_REG": "x86_exec_mov_store_reg",
-    "X86_OP_LEA": "x86_exec_lea",
-    "X86_OP_ALU_IMM": "x86_exec_alu_imm",
-    "X86_OP_ALU_REG": "x86_exec_alu_reg",
-    "X86_OP_CMP_IMM": "x86_exec_cmp_imm",
-    "X86_OP_CMP_REG": "x86_exec_cmp_reg",
-    "X86_OP_TEST_IMM": "x86_exec_test_imm",
-    "X86_OP_TEST_REG": "x86_exec_test_reg",
-    "X86_OP_JCC": "x86_exec_jcc",
-    "X86_OP_JMP": "x86_exec_jmp",
-    "X86_OP_PUSH": "x86_exec_push",
-    "X86_OP_POP": "x86_exec_pop",
-    "X86_OP_CALL": "x86_exec_call",
-    "X86_OP_CMOV": "x86_exec_cmov",
-    "X86_OP_SETCC": "x86_exec_setcc",
-    "X86_OP_BSWAP": "x86_exec_bswap",
-    "X86_OP_POPCNT": "x86_exec_popcnt",
-    "X86_OP_XCHG": "x86_exec_xchg",
-    "X86_OP_DIV": "x86_exec_div",
-    "X86_OP_SHLD_IMM": "x86_exec_shld_imm",
-    "X86_OP_SHRD_IMM": "x86_exec_shrd_imm",
-    "X86_OP_CMP_MEM_IMM": "x86_exec_cmp_mem_imm",
-    "X86_OP_TEST_MEM_IMM": "x86_exec_test_mem_imm",
-    "X86_OP_CMP_MEM_REG": "x86_exec_cmp_mem_reg",
-    "X86_OP_MOVZX_REG": "x86_exec_movzx_reg",
-    "X86_OP_MOVSX_REG": "x86_exec_movsx_reg",
-    "X86_OP_MOVSX_LOAD": "x86_exec_movsx_load",
-    "X86_OP_ALU_MEM": "x86_exec_alu_mem",
-    "X86_OP_RET": "x86_exec_ret",
-}
-
-
 @dataclass(frozen=True)
 class NativeInsn:
     addr: int
@@ -610,21 +569,13 @@ def c_comment(text: str) -> str:
     return text.replace("*/", "* /")
 
 
-def op_helper(op: str) -> str:
-    try:
-        return OP_HELPERS[op]
-    except KeyError as err:
-        raise ValueError(f"missing interpreter helper for {op}") from err
-
-
 def append_step(lines: list[str], insn: NativeInsn, indent: str = "\t",
                 step_macro: str = "X86_VM_RUN_OP") -> None:
     encoded = encode(insn)
-    helper = op_helper(encoded.op)
     lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
     lines.append(
         f"{indent}{step_macro}("
-        f"{helper}, {encoded.op}, {encoded.dst}, {encoded.src}, "
+        f"{encoded.op}, {encoded.dst}, {encoded.src}, "
         f"{encoded.flags}, {encoded.aux}, {encoded.imm});"
     )
 

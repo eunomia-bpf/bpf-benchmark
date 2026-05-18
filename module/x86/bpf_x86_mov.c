@@ -30,6 +30,8 @@ struct mov_rr_payload {
 	u8 src_reg;
 	bool dst_arch;
 	bool src_arch;
+	bool dst_raw_bpf;
+	bool src_raw_bpf;
 };
 
 __bpf_kfunc_start_defs();
@@ -71,6 +73,16 @@ static __always_inline bool mov_form_src_arch(u8 form)
 	return form == X86_FORM_ARCH_RR || form == X86_FORM_ARCH_TO_BPF_RR;
 }
 
+static __always_inline bool mov_form_dst_raw_bpf(u8 form)
+{
+	return form == X86_FORM_ARCH_TO_BPF_RR;
+}
+
+static __always_inline bool mov_form_src_raw_bpf(u8 form)
+{
+	return form == X86_FORM_BPF_TO_ARCH_RR;
+}
+
 static __always_inline int decode_rr_any(u64 payload,
 					 struct mov_rr_payload *rr)
 {
@@ -89,8 +101,13 @@ static __always_inline int decode_rr_any(u64 payload,
 	rr->src_reg = kinsn_payload_reg(payload, 8);
 	rr->dst_arch = mov_form_dst_arch(form);
 	rr->src_arch = mov_form_src_arch(form);
+	rr->dst_raw_bpf = mov_form_dst_raw_bpf(form);
+	rr->src_raw_bpf = mov_form_src_raw_bpf(form);
 	if (!kinsn_x86_operand_valid(rr->dst_reg) ||
 	    !kinsn_x86_operand_valid(rr->src_reg))
+		return -EINVAL;
+	if ((rr->dst_raw_bpf && rr->dst_reg >= BPF_REG_10) ||
+	    (rr->src_raw_bpf && rr->src_reg >= BPF_REG_10))
 		return -EINVAL;
 
 	return 0;
@@ -238,13 +255,17 @@ static __always_inline int decode_store_imm(u64 payload, u8 expected_form,
 static __always_inline int instantiate_movq_value(u8 dst_reg, u8 src_reg,
 						  struct bpf_insn *insn_buf,
 						  bool dst_arch,
-						  bool src_arch)
+						  bool src_arch,
+						  bool dst_raw_bpf,
+						  bool src_raw_bpf)
 {
 	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0);
-	bool src_shadowed = src_arch ? kinsn_x86_arch_reg_is_shadowed(src_reg) :
-				       kinsn_x86_reg_is_shadowed(src_reg);
-	bool dst_shadowed = dst_arch ? kinsn_x86_arch_reg_is_shadowed(dst_reg) :
-				       kinsn_x86_reg_is_shadowed(dst_reg);
+	bool src_shadowed = !src_raw_bpf &&
+			    (src_arch ? kinsn_x86_arch_reg_is_shadowed(src_reg) :
+					kinsn_x86_reg_is_shadowed(src_reg));
+	bool dst_shadowed = !dst_raw_bpf &&
+			    (dst_arch ? kinsn_x86_arch_reg_is_shadowed(dst_reg) :
+					kinsn_x86_reg_is_shadowed(dst_reg));
 	int cnt = 0;
 
 	if (!src_shadowed && !dst_shadowed) {
@@ -252,14 +273,18 @@ static __always_inline int instantiate_movq_value(u8 dst_reg, u8 src_reg,
 		return 1;
 	}
 	if (!dst_shadowed) {
-		if (src_arch)
+		if (src_raw_bpf)
+			insn_buf[cnt++] = BPF_MOV64_REG(dst_reg, src_reg);
+		else if (src_arch)
 			kinsn_x86_read64_arch(insn_buf, &cnt, dst_reg, src_reg);
 		else
 			kinsn_x86_read64(insn_buf, &cnt, dst_reg, src_reg);
 		return cnt ? cnt : 1;
 	}
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	if (src_arch)
+	if (src_raw_bpf)
+		insn_buf[cnt++] = BPF_MOV64_REG(KINSN_X86_SCRATCH0, src_reg);
+	else if (src_arch)
 		kinsn_x86_read64_arch(insn_buf, &cnt, KINSN_X86_SCRATCH0,
 				      src_reg);
 	else
@@ -285,7 +310,8 @@ static int instantiate_movq_reg(u64 payload, struct bpf_insn *insn_buf)
 		return err;
 
 	return instantiate_movq_value(rr.dst_reg, rr.src_reg, insn_buf,
-				      rr.dst_arch, rr.src_arch);
+				      rr.dst_arch, rr.src_arch,
+				      rr.dst_raw_bpf, rr.src_raw_bpf);
 }
 
 static int instantiate_movl_reg(u64 payload, struct bpf_insn *insn_buf)
@@ -301,10 +327,12 @@ static int instantiate_movl_reg(u64 payload, struct bpf_insn *insn_buf)
 	if (err)
 		return err;
 
-	src_shadowed = rr.src_arch ? kinsn_x86_arch_reg_is_shadowed(rr.src_reg) :
-				     kinsn_x86_reg_is_shadowed(rr.src_reg);
-	dst_shadowed = rr.dst_arch ? kinsn_x86_arch_reg_is_shadowed(rr.dst_reg) :
-				     kinsn_x86_reg_is_shadowed(rr.dst_reg);
+	src_shadowed = !rr.src_raw_bpf &&
+		       (rr.src_arch ? kinsn_x86_arch_reg_is_shadowed(rr.src_reg) :
+				      kinsn_x86_reg_is_shadowed(rr.src_reg));
+	dst_shadowed = !rr.dst_raw_bpf &&
+		       (rr.dst_arch ? kinsn_x86_arch_reg_is_shadowed(rr.dst_reg) :
+				      kinsn_x86_reg_is_shadowed(rr.dst_reg));
 	if (!dst_shadowed && !src_shadowed) {
 		insn_buf[0] = BPF_STX_MEM(BPF_W, BPF_REG_10, rr.src_reg,
 					  KINSN_X86_PROOF_LHS_OFF);
@@ -317,7 +345,9 @@ static int instantiate_movl_reg(u64 payload, struct bpf_insn *insn_buf)
 	value_reg = dst_shadowed ? KINSN_X86_SCRATCH0 : rr.dst_reg;
 	if (dst_shadowed)
 		kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	if (rr.src_arch)
+	if (rr.src_raw_bpf)
+		insn_buf[cnt++] = BPF_MOV32_REG(value_reg, rr.src_reg);
+	else if (rr.src_arch)
 		kinsn_x86_read32_arch(insn_buf, &cnt, value_reg, rr.src_reg);
 	else
 		kinsn_x86_read32(insn_buf, &cnt, value_reg, rr.src_reg);

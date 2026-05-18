@@ -293,7 +293,7 @@ static int instantiate_x86_alu_sib(const struct kinsn_x86_alu_payload *alu,
 	int cnt = 0;
 	int err;
 
-	if (width != 32 && width != 64)
+	if (width != 8 && width != 32 && width != 64)
 		return -EINVAL;
 
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
@@ -1589,7 +1589,7 @@ const struct bpf_kinsn bpf_x86_andb_desc = {
 
 const struct bpf_kinsn bpf_x86_incb_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 8 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 12 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_incb,
 	.emit_x86 = emit_incb_x86,
@@ -1597,7 +1597,7 @@ const struct bpf_kinsn bpf_x86_incb_desc = {
 
 const struct bpf_kinsn bpf_x86_incq_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 3 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 4 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_incq,
 	.emit_x86 = emit_incq_x86,
@@ -1605,7 +1605,7 @@ const struct bpf_kinsn bpf_x86_incq_desc = {
 
 const struct bpf_kinsn bpf_x86_incl_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 3 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 4 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 4,
 	.instantiate_insn = instantiate_incl,
 	.emit_x86 = emit_incl_x86,

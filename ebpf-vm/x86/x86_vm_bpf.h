@@ -32,18 +32,75 @@
 		__x86_vm_insn.imm = (IMM);                                 \
 	} while (0)
 
+#define X86_VM_MEM_OP_SRC_BASE(OP)                                         \
+	((OP) == X86_OP_MOV_LOAD || (OP) == X86_OP_MOVSX_LOAD ||           \
+	 (OP) == X86_OP_ALU_MEM)
+
+#define X86_VM_MEM_OP_DST_BASE(OP)                                         \
+	((OP) == X86_OP_MOV_STORE_IMM || (OP) == X86_OP_MOV_STORE_REG ||    \
+	 (OP) == X86_OP_CMP_MEM_IMM || (OP) == X86_OP_TEST_MEM_IMM ||       \
+	 (OP) == X86_OP_CMP_MEM_REG)
+
+#define X86_VM_MEM_BASE_REG(OP, DST, SRC)                                  \
+	(X86_VM_MEM_OP_SRC_BASE(OP) ? (SRC) :                              \
+	 X86_VM_MEM_OP_DST_BASE(OP) ? (DST) : X86_REG_NONE)
+
+#define X86_VM_PACKET_FASTPATH_CANDIDATE(OP, DST, SRC)                    \
+	(X86_VM_MEM_BASE_REG((OP), (DST), (SRC)) != X86_REG_NONE &&        \
+	 X86_VM_MEM_BASE_REG((OP), (DST), (SRC)) != X86_RDI &&             \
+	 X86_VM_MEM_BASE_REG((OP), (DST), (SRC)) != X86_RBP &&             \
+	 X86_VM_MEM_BASE_REG((OP), (DST), (SRC)) != X86_RSP)
+
+#define X86_VM_EXEC_PACKET(STATE, OP)                                      \
+	({                                                                 \
+		int __x86_vm_packet_ret = X86_INTERP_TRAP;                 \
+		if ((OP) == X86_OP_MOV_LOAD || (OP) == X86_OP_MOVSX_LOAD)  \
+			__x86_vm_packet_ret =                              \
+				x86_exec_mov_load_packet((STATE),           \
+							 &__x86_vm_insn,    \
+							 __x86_vm_data,     \
+							 __x86_vm_data_end);\
+		else if ((OP) == X86_OP_MOV_STORE_IMM)                    \
+			__x86_vm_packet_ret =                              \
+				x86_exec_mov_store_imm_packet(               \
+					(STATE), &__x86_vm_insn,              \
+					__x86_vm_data, __x86_vm_data_end);    \
+		else if ((OP) == X86_OP_MOV_STORE_REG)                    \
+			__x86_vm_packet_ret =                              \
+				x86_exec_mov_store_reg_packet(               \
+					(STATE), &__x86_vm_insn,              \
+					__x86_vm_data, __x86_vm_data_end);    \
+		else if ((OP) == X86_OP_ALU_MEM)                          \
+			__x86_vm_packet_ret =                              \
+				x86_exec_alu_mem_packet((STATE),             \
+							&__x86_vm_insn,      \
+							__x86_vm_data,       \
+							__x86_vm_data_end);  \
+		else if ((OP) == X86_OP_CMP_MEM_IMM)                      \
+			__x86_vm_packet_ret =                              \
+				x86_exec_cmp_mem_imm_packet(                 \
+					(STATE), &__x86_vm_insn,              \
+					__x86_vm_data, __x86_vm_data_end);    \
+		else if ((OP) == X86_OP_TEST_MEM_IMM)                     \
+			__x86_vm_packet_ret =                              \
+				x86_exec_test_mem_imm_packet(                \
+					(STATE), &__x86_vm_insn,              \
+					__x86_vm_data, __x86_vm_data_end);    \
+		else if ((OP) == X86_OP_CMP_MEM_REG)                      \
+			__x86_vm_packet_ret =                              \
+				x86_exec_cmp_mem_reg_packet(                 \
+					(STATE), &__x86_vm_insn,              \
+					__x86_vm_data, __x86_vm_data_end);    \
+		__x86_vm_packet_ret;                                      \
+	})
+
 #define X86_VM_EXEC(STATE, OP, DST, SRC, FLAGS, AUX, IMM)                  \
 	({                                                                 \
 		X86_VM_LOAD_INSN((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
-		x86_exec_one((STATE), &__x86_vm_insn, __x86_vm_data,        \
-			     __x86_vm_data_end);                            \
-	})
-
-#define X86_VM_EXEC_HELPER(HELPER, STATE, OP, DST, SRC, FLAGS, AUX, IMM)   \
-	({                                                                 \
-		X86_VM_LOAD_INSN((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
-		HELPER((STATE), &__x86_vm_insn, __x86_vm_data,              \
-		       __x86_vm_data_end);                                  \
+		X86_VM_PACKET_FASTPATH_CANDIDATE((OP), (DST), (SRC)) ?     \
+			X86_VM_EXEC_PACKET((STATE), (OP)) :                 \
+			x86_exec_one((STATE), &__x86_vm_insn,               \
+				     __x86_vm_data, __x86_vm_data_end);     \
 	})
 
 static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
@@ -93,12 +150,11 @@ static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
 				__x86_vm_ret = __x86_vm_step_ret;              \
 		}
 
-#define X86_VM_STEP_OP(HELPER, OP, DST, SRC, FLAGS, AUX, IMM)              \
+#define X86_VM_STEP_OP(OP, DST, SRC, FLAGS, AUX, IMM)                      \
 		if (__x86_vm_ret == 0) {                                      \
 			int __x86_vm_step_ret =                               \
-				X86_VM_EXEC_HELPER(HELPER, &__x86_vm_state,    \
-						   (OP), (DST), (SRC),        \
-						   (FLAGS), (AUX), (IMM));    \
+				X86_VM_EXEC(&__x86_vm_state, (OP), (DST),      \
+					     (SRC), (FLAGS), (AUX), (IMM));    \
 			if (__x86_vm_step_ret == X86_INTERP_DONE)              \
 				__x86_vm_ret = X86_INTERP_DONE;                \
 			else if (__x86_vm_step_ret < 0)                        \
@@ -116,14 +172,13 @@ static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
 			return (__u32)__x86_vm_state.rax;                  \
 	} while (0)
 
-#define X86_VM_RUN_OP(HELPER, OP, DST, SRC, FLAGS, AUX, IMM)               \
+#define X86_VM_RUN_OP(OP, DST, SRC, FLAGS, AUX, IMM)                       \
 	do {                                                               \
 		x86_vm_prepare_ctx_output(&__x86_vm_state, __x86_vm_ctx,    \
 					  (OP), (DST), (FLAGS), (IMM));      \
 		int __x86_vm_step_ret =                                    \
-			X86_VM_EXEC_HELPER(HELPER, &__x86_vm_state, (OP),   \
-					   (DST), (SRC), (FLAGS), (AUX),   \
-					   (IMM));                         \
+			X86_VM_EXEC(&__x86_vm_state, (OP), (DST), (SRC),   \
+				     (FLAGS), (AUX), (IMM));                \
 		if (__x86_vm_step_ret < 0)                                 \
 			X86_VM_TRAP_RETURN();                             \
 		if (__x86_vm_step_ret == X86_INTERP_DONE)                  \
@@ -148,12 +203,11 @@ static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
 			return X86_INTERP_CONTINUE;                        \
 	} while (0)
 
-#define X86_VM_RUN_OP_SUB(HELPER, OP, DST, SRC, FLAGS, AUX, IMM)           \
+#define X86_VM_RUN_OP_SUB(OP, DST, SRC, FLAGS, AUX, IMM)                   \
 	do {                                                               \
 		int __x86_vm_step_ret =                                    \
-			X86_VM_EXEC_HELPER(HELPER, &__x86_vm_state, (OP),   \
-					   (DST), (SRC), (FLAGS), (AUX),   \
-					   (IMM));                         \
+			X86_VM_EXEC(&__x86_vm_state, (OP), (DST), (SRC),   \
+				     (FLAGS), (AUX), (IMM));                \
 		if (__x86_vm_step_ret < 0)                                 \
 			return X86_INTERP_TRAP;                            \
 		if (__x86_vm_step_ret == X86_INTERP_DONE)                  \
@@ -232,6 +286,155 @@ x86_vm_prepare_ctx_output(struct x86_state *state, void *ctx, __u8 op,
 	state->tag_rdi = X86_PTR_CTX;
 }
 
+static __always_inline int
+x86_vm_read_packet_mem_value(struct x86_state *state, __u8 base_reg, __u32 aux,
+			     __s64 disp, void *data, void *data_end,
+			     __u8 width, __u64 *value)
+{
+	void *base = 0;
+	__u8 tag = X86_PTR_NONE;
+
+	if (x86_mem_offset(state, aux, disp, &disp) < 0)
+		return X86_INTERP_TRAP;
+	if (x86_read_ptr_reg(state, base_reg, &base, &tag) < 0)
+		return X86_INTERP_TRAP;
+	if (tag != X86_PTR_PACKET || !base)
+		return X86_INTERP_TRAP;
+	return x86_read_packet_value(data, data_end, base, disp, width, value);
+}
+
+static __always_inline int
+x86_exec_mov_load_packet(struct x86_state *state, const struct x86_insn *insn,
+			 void *data, void *data_end)
+{
+	__u8 mem_width = X86_MEM_AUX_MEM_WIDTH(insn->aux);
+	void *base = 0;
+	__u8 tag = X86_PTR_NONE;
+	__s64 disp = x86_simm(insn->imm);
+
+	if (!mem_width)
+		mem_width = insn->flags;
+	if (x86_mem_offset(state, insn->aux, disp, &disp) < 0)
+		return X86_INTERP_TRAP;
+	if (x86_read_ptr_reg(state, insn->src, &base, &tag) < 0)
+		return X86_INTERP_TRAP;
+	if (tag != X86_PTR_PACKET || !base)
+		return X86_INTERP_TRAP;
+	return x86_load_packet(state, insn->dst, data, data_end, base, disp,
+			       mem_width, insn->flags,
+			       insn->op == X86_OP_MOVSX_LOAD);
+}
+
+static __always_inline int
+x86_exec_alu_mem_packet(struct x86_state *state, const struct x86_insn *insn,
+			void *data, void *data_end)
+{
+	__u8 width = insn->flags ? insn->flags : X86_WIDTH_64;
+	__u8 alu = X86_MEM_AUX_GET_ALU_OP(insn->aux);
+	__u64 dst_value = 0;
+	__u64 mem_value = 0;
+	__u64 result = 0;
+
+	if (x86_read_reg(state, insn->dst, &dst_value) < 0)
+		return X86_INTERP_TRAP;
+	if (x86_vm_read_packet_mem_value(state, insn->src, insn->aux,
+					 x86_simm(insn->imm), data, data_end,
+					 width, &mem_value) < 0)
+		return X86_INTERP_TRAP;
+	if (alu == X86_ALU_SBB)
+		mem_value += state->cf;
+	result = x86_alu_result(dst_value, mem_value, alu, width);
+	x86_set_alu_flags(state, dst_value, mem_value, result, alu, width);
+	return x86_write_reg_width(state, insn->dst, result, width);
+}
+
+static __always_inline int
+x86_exec_cmp_mem_packet(struct x86_state *state, const struct x86_insn *insn,
+			void *data, void *data_end)
+{
+	__u64 lhs = 0;
+	__u64 rhs = x86_store_imm_value(insn->imm);
+	__s64 disp = insn->op == X86_OP_CMP_MEM_REG ?
+			     x86_simm(insn->imm) :
+			     x86_store_imm_disp(insn->imm);
+
+	if (x86_vm_read_packet_mem_value(state, insn->dst, insn->aux,
+					 disp, data, data_end, insn->flags,
+					 &lhs) < 0)
+		return X86_INTERP_TRAP;
+	if (insn->op == X86_OP_CMP_MEM_REG &&
+	    x86_read_reg(state, insn->src, &rhs) < 0)
+		return X86_INTERP_TRAP;
+	if (insn->op == X86_OP_TEST_MEM_IMM) {
+		x86_set_logic_flags(state, lhs & rhs, insn->flags);
+		return X86_INTERP_CONTINUE;
+	}
+	x86_set_sub_flags(state, lhs, rhs, lhs - rhs, insn->flags);
+	return X86_INTERP_CONTINUE;
+}
+
+static __always_inline int
+x86_exec_cmp_mem_imm_packet(struct x86_state *state,
+			    const struct x86_insn *insn, void *data,
+			    void *data_end)
+{
+	return x86_exec_cmp_mem_packet(state, insn, data, data_end);
+}
+
+static __always_inline int
+x86_exec_cmp_mem_reg_packet(struct x86_state *state,
+			    const struct x86_insn *insn, void *data,
+			    void *data_end)
+{
+	return x86_exec_cmp_mem_packet(state, insn, data, data_end);
+}
+
+static __always_inline int
+x86_exec_test_mem_imm_packet(struct x86_state *state,
+			     const struct x86_insn *insn, void *data,
+			     void *data_end)
+{
+	return x86_exec_cmp_mem_packet(state, insn, data, data_end);
+}
+
+static __always_inline int
+x86_exec_mov_store_reg_packet(struct x86_state *state,
+			      const struct x86_insn *insn, void *data,
+			      void *data_end)
+{
+	void *base = 0;
+	__u8 tag = X86_PTR_NONE;
+	__s64 disp = x86_simm(insn->imm);
+
+	if (x86_mem_offset(state, insn->aux, disp, &disp) < 0)
+		return X86_INTERP_TRAP;
+	if (x86_read_ptr_reg(state, insn->dst, &base, &tag) < 0)
+		return X86_INTERP_TRAP;
+	if (tag != X86_PTR_PACKET || !base)
+		return X86_INTERP_TRAP;
+	return x86_store_packet_reg(state, insn->src, data, data_end, base,
+				    disp, insn->flags, insn->aux);
+}
+
+static __always_inline int
+x86_exec_mov_store_imm_packet(struct x86_state *state,
+			      const struct x86_insn *insn, void *data,
+			      void *data_end)
+{
+	void *base = 0;
+	__u8 tag = X86_PTR_NONE;
+	__s64 disp = x86_store_imm_disp(insn->imm);
+
+	if (x86_mem_offset(state, insn->aux, disp, &disp) < 0)
+		return X86_INTERP_TRAP;
+	if (x86_read_ptr_reg(state, insn->dst, &base, &tag) < 0)
+		return X86_INTERP_TRAP;
+	if (tag != X86_PTR_PACKET || !base)
+		return X86_INTERP_TRAP;
+	return x86_store_packet_imm(data, data_end, base, disp, insn->flags,
+				    x86_store_imm_value(insn->imm));
+}
+
 static __always_inline void
 x86_vm_loop_prepare(struct x86_vm_loop_ctx *loop, void *data, void *data_end,
 		    struct x86_vm_reg_save *save_rdi)
@@ -276,14 +479,13 @@ x86_vm_loop_restore_rdi(struct x86_vm_loop_ctx *loop,
 		return 1;                                                    \
 	} while (0)
 
-#define X86_VM_LOOP_OP(HELPER, OP, DST, SRC, FLAGS, AUX, IMM)              \
+#define X86_VM_LOOP_OP(OP, DST, SRC, FLAGS, AUX, IMM)                      \
 	do {                                                               \
 		if (x86_vm_op_writes_reg((OP), (DST), (SRC), X86_RDI))     \
 			loop->rdi_written = 1;                            \
 		int __x86_vm_step_ret =                                    \
-			X86_VM_EXEC_HELPER(HELPER, &__x86_vm_state, (OP),   \
-					   (DST), (SRC), (FLAGS), (AUX),   \
-					   (IMM));                         \
+			X86_VM_EXEC(&__x86_vm_state, (OP), (DST), (SRC),   \
+				     (FLAGS), (AUX), (IMM));                \
 		if (__x86_vm_step_ret < 0)                                 \
 			X86_VM_LOOP_FAIL();                                \
 		if (__x86_vm_step_ret == X86_INTERP_DONE)                  \

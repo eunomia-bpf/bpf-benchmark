@@ -19,8 +19,8 @@ static const struct bpf_insn program[] = {
     HC_STX(BPF_DW, BPF_REG_10, HC_X86_RCX, HC_X86_SHADOW_RCX_OFF),
     /* 0x1107: cmp    rax,rcx [control-flow-operand: cmp folded into BPF branch] */
     /* 0x110a: jbe    111e <cgroup_skb_hash_chain_prog+0x1e> [exact-bpf: jbe as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RAX_OFF),
-    HC_LDX(BPF_DW, BPF_REG_7, BPF_REG_10, HC_X86_SHADOW_RCX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RAX),
+    HC_MOV64_REG(BPF_REG_7, HC_X86_RCX),
     HC_RAW(BPF_JMP | BPF_JLE | BPF_X, BPF_REG_6, BPF_REG_7, (10) - 1, 0),
     /* 0x110c: mov    DWORD PTR [rdi+0x10],0xffffffff [context-abi: native skb shim cb store at off 16 maps to __sk_buff cb field at off 48] */
     HC_KINSN(HC_X86_STORE_IMM_PAYLOAD(HC_X86_RDI, 48, 4294967295), MICRO_HANDCRAFT_BPF_X86_MOVL),
@@ -36,24 +36,24 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_LEA_PAYLOAD(HC_X86_RDX, HC_X86_RAX, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x1122: cmp    rdx,rcx [control-flow-operand: cmp folded into BPF branch] */
     /* 0x1125: ja     110c <cgroup_skb_hash_chain_prog+0xc> [exact-bpf: ja as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
-    HC_LDX(BPF_DW, BPF_REG_7, BPF_REG_10, HC_X86_SHADOW_RCX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
+    HC_MOV64_REG(BPF_REG_7, HC_X86_RCX),
     HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_6, BPF_REG_7, (-13) - 1, 0),
     /* 0x1127: lea    rdx,[rax+0x50] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(HC_X86_RDX, HC_X86_RAX, 0, 0, 1, 0, 80), MICRO_HANDCRAFT_BPF_X86_LEAQ),
     /* 0x112b: cmp    rdx,rcx [control-flow-operand: cmp folded into BPF branch] */
     /* 0x112e: ja     110c <cgroup_skb_hash_chain_prog+0xc> [exact-bpf: ja as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RDX_OFF),
-    HC_LDX(BPF_DW, BPF_REG_7, BPF_REG_10, HC_X86_SHADOW_RCX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RDX),
+    HC_MOV64_REG(BPF_REG_7, HC_X86_RCX),
     HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_6, BPF_REG_7, (-18) - 1, 0),
     /* 0x1130: cmp    DWORD PTR [rax+0x8],0x10 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x1134: jne    110c <cgroup_skb_hash_chain_prog+0xc> [exact-bpf: jne as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RAX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RAX),
     HC_LDX(BPF_W, BPF_REG_6, BPF_REG_6, 8),
     HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, (-21) - 1, 16),
     /* 0x1136: cmp    DWORD PTR [rax+0xc],0x8 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x113a: jne    110c <cgroup_skb_hash_chain_prog+0xc> [exact-bpf: jne as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_RAX_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_RAX),
     HC_LDX(BPF_W, BPF_REG_6, BPF_REG_6, 12),
     HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, (-24) - 1, 8),
     /* 0x113c: push   r15 [exact-kinsn: pushq kinsn] */
@@ -120,14 +120,14 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R14, HC_X86_R8), MICRO_HANDCRAFT_BPF_X86_ADDQ),
     /* 0x11c9: cmp    r15,0x8 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x11cd: jne    11a0 <cgroup_skb_hash_chain_prog+0xa0> [exact-bpf: jne as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_R15_OFF),
+    HC_MOV64_REG(BPF_REG_6, HC_X86_R15),
     HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_6, 0, (-25) - 1, 8),
     /* 0x11cf: add    rsi,0x5 [exact-kinsn: add64 imm kinsn] */
     HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(HC_X86_RSI, 5), MICRO_HANDCRAFT_BPF_X86_ADDQ),
     /* 0x11d3: cmp    r9,0x10 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x11d7: jne    1180 <cgroup_skb_hash_chain_prog+0x80> [exact-bpf: jne as ordinary BPF branch] */
-    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_R9_OFF),
-    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_6, 0, (-41) - 1, 16),
+    HC_KINSN(HC_X86_RR_PAYLOAD(HC_X86_RBX, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_6, 0, (-42) - 1, 16),
     /* 0x11d9: mov    DWORD PTR [rdi+0x10],edx [context-abi: native skb shim cb store at off 16 maps to __sk_buff cb field at off 48] */
     HC_KINSN(HC_X86_STORE_PAYLOAD(HC_X86_RDX, HC_X86_RDI, 48), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x11dc: shr    rdx,0x20 [exact-kinsn: shr64 imm kinsn] */

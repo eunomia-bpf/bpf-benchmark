@@ -138,42 +138,80 @@ performance win at the inserted sites.
 
 **Implemented kinsns** (default policy on the corresponding architecture):
 
-| Kinsn | Arch | Status | Headline site evidence |
-|---|---|---|---|
-| `bpf_rotate64` | x86 / arm64 | shipped | 701 sites |
-| `bpf_select64` (CMOV/CSEL) | x86 / arm64 | shipped, policy-sensitive | corpus applied |
-| `bpf_extract64` (BEXTR/UBFX) | x86 / arm64 | shipped | 524 sites |
-| `bpf_endian` (MOVBE / rev16/32/64) | x86 / arm64 | shipped | 256 sites |
-| `bpf_ldp128` / `bpf_stp128` | arm64 | shipped (arm64 only) | many adjacent-pair sites |
-| `bpf_bulk_memory` | x86 / arm64 | shipped | corpus 40B/74B/360B/464B runs |
-| `bpf_ccmp` | arm64 | designed (first wave) | 4957 sites, 6228 saved branches |
-| `bpf_prefetch` | x86 / arm64 | shipped, default pass | 17391 map_lookup deref sites |
-| `bpf_lea` | x86 only | experimental | adjacent MOV+ADD sites |
+| Kinsn | Arch | Status | Site evidence | Design / research refs |
+|---|---|---|---|---|
+| `bpf_rotate64` | x86 / arm64 | shipped | 701 sites, 15 applied (shift+or → RORX) | — |
+| `bpf_select64` (CMOV/CSEL) | x86 / arm64 | shipped, **policy-sensitive** | 12 corpus applied (branch+mov → CMOV) | policy: predictable input → CMOV slower; unpredictable → faster |
+| `bpf_extract64` (BEXTR/UBFX) | x86 / arm64 | shipped | 524 sites, 4 applied (shift+and → BEXTR) | — |
+| `bpf_endian` (MOVBE / rev16/32/64) | x86 / arm64 | shipped | 256 sites, 17 corpus applied (load+bswap → MOVBE) | — |
+| `bpf_ldp128` / `bpf_stp128` | **arm64 only** | shipped | ARM64 corpus store-pair density high; current JIT 0 LDP/STP | `arm64_ldp_stp_kinsn_design_20260326.md`, `arm64_bpf_ldp_module_report_20260326.md`; x86 dispatched to `rep movsb` (see `x86_128bit_wide_loadstore_design_20260326.md`) |
+| `bpf_bulk_memory` | x86 / arm64 | shipped | corpus 40 / 74 / 360 / 464 B 连续 copy/zero runs | `simd_kinsn_design_20260324.md`; x86 用 `rep movsb/stosb`,ARM64 用 LDP/STP,均 no-FPU |
+| `bpf_ccmp` | arm64 | designed (first wave) | **4957 sites, 6228 saved branches** | `arm64_kinsn_research_20260329.md`;restricted first wave,避免通用变长 compare-chain |
+| `bpf_prefetch` (PrefetchV2) | x86 / arm64 | shipped, default pass | 17391 `map_lookup_elem` + 21 `map_lookup_percpu_elem` 潜在 site;hot+missy site 预期 2.5-25ns/exec | `docs/tmp/p89_prefetchv2_impl.md`, `memory_hints_kinsn_research_20260329.md`, `prefetch_kinsn_design_20260329.md` |
+| `bpf_lea{32,64}` | **x86 only** | experimental | Katran `lea` 122 applied, bytes 13629→13277, BPF counter ratio 1.0487 | `docs/tmp/lea_kinsn_design_census_20260513.md`(详 §5.1 scoped-down decision) |
 
-**Explicitly not pursued** (with rationale; details in respective research
-reports under `docs/tmp/`):
+**Explicitly not pursued / deferred** (with rationale + research refs):
 
-| Candidate | Reason |
-|---|---|
-| POPCNT / CLZ / CTZ | Corpus has 0 supportable sites. |
-| CRC32 | Broad coverage low; loxilb-only path. |
-| PDEP / PEXT | 0 corpus sites. |
-| SHRX / SHLX | No incremental win on OoO CPUs. |
-| MADD / MSUB | MSUB 0 direct sites; MADD low priority. |
-| RDTSC / RDTSCP | Semantics not portable for transparent rewrite. |
-| ADC / SBB | 0 carry-chain sites in 917 .bpf.o. |
-| SETcc / CSET | Designed but not yet implemented; 9417 sites; queue. |
-| ANDN | 0 strict 3-insn sites; all real hits need liveness proof. |
-| BLSI / BLSR / BLSMSK | 0 sites in supported apps. |
-| PAUSE / YIELD | Kernel spinlock helper already PAUSE/WFE inside. |
-| FPU SIMD | Per-call FPU context cost exceeds expected gain at corpus byte sizes. |
-| NT store | No streaming-write pattern in corpus. |
+| Candidate | Site evidence | Reason / research ref |
+|---|---|---|
+| POPCNT / CLZ / CTZ | 0 site | clang 已展开 `__builtin_popcount` 为高效位操作序列。`bit_ops_kinsn_research_20260329.md` |
+| CRC32 | loxilb SCTP CRC32C: 2 个 byte-update site | broad corpus 覆盖低;若做,第一版 CRC32C-only no-FPU scalar backend + loxilb-targeted `step8/step64` idiom pass。`crc32_kinsn_research_20260329.md` |
+| PDEP / PEXT | 0 site | corpus 无 site。`bit_ops_kinsn_research_20260329.md` |
+| SHRX / SHLX | 0 incremental gain | OoO CPU 上无增量收益。`bit_ops_kinsn_research_20260329.md` |
+| MADD / MSUB | MADD 47 direct sites;MSUB 0 direct sites | MADD 仅二级优化;MSUB 宽松形式需 liveness/semantic work,不进 first wave。`arm64_kinsn_research_20260329.md` |
+| UBFX / BFI | UBFX 321 total / 74 with-copy;BFI 0 | UBFX 应扩展现有 `extract` pass 覆盖 copy form;BFI 0 site 不做。`arm64_kinsn_research_20260329.md` |
+| RDTSC / RDTSCP | 不适合默认 | cycles 不是 portable monotonic ns;不适合 `bpf_ktime_get_ns()` 透明 rewrite;若做应显式 opt-in。`rdtsc_adc_kinsn_research_20260329.md` |
+| ADC / SBB | 917 个 `.bpf.o` 扫描:add carry-chain 0、sub borrow-chain 0 | 短期不进默认 pipeline。`rdtsc_adc_kinsn_research_20260329.md` |
+| SETcc / CSET | **supported runtime corpus 9417 sites**(Tetragon 8832、Cilium 401、Calico 91、BCC 79);raw census 28653 sites | 比较结果直接存 0/1,不需要 branch+mov。standalone boolean-set 不被现 `COND_SELECT` 覆盖,应独立 kinsn。**调研完成待实现**:`docs/tmp/setcc_cset_kinsn_research_20260430.md` |
+| ANDN | 957 个 `.bpf.o` 扫描:去重后 45 sites(Tracee 30 + Cilium 14) | 全部需 liveness proof;热路径上限 ~1.0M site/s × 2 cycles ≈ 0.07% 单核增量。不做第一波。`docs/tmp/andn_kinsn_research_20260430.md` |
+| BLSI / BLSR / BLSMSK | 957 个 `.bpf.o` 扫描:BLSI 3 + BLSR 3 + BLSMSK 0(全部来自已移除 scx_lavd_main);supported app 为 0 | 当前 8-app corpus 无 exact site,后续 phase。`docs/tmp/bls_kinsn_research_20260430.md` |
+| PAUSE / YIELD | corpus 几乎无 BPF-level busy-wait | 内核 BPF spinlock helper 内部已有 PAUSE/WFE,kinsn 无增量价值。`pause_yield_kinsn_research_20260329.md` |
+| FPU SIMD (x86) | x86 corpus 绝大多数 copy/store ≤128B,break-even ≥数百字节 | `kernel_fpu_begin/end` XSAVE/XRSTOR ~200-800 cycles,pair load/store 远超收益。`simd_fpu_kinsn_deep_research_20260326.md` |
+| NEON SIMD (arm64) | 仅 ≥1KiB + `may_use_simd()` 可考虑 | no-FPU LDP/STP 优先;Linux crypto 模式(per-op fpu_begin/end)不适用于 BPF 细粒度调用。同上 |
+| NT store | corpus 无明确 streaming write 场景 | 不值得。`memory_hints_kinsn_research_20260329.md` |
+| Region kinsn(寄存器扩展) | Cilium/Calico Jenkins/hash 信号,Tetragon byte-pack/decoder;上界 census 24/1/175 clusters | 高寄存器压力代码段包装为 region kinsn。首版限定 pure scalar N→1 无内存/stack/packet/map 写、无 helper/call,等 kinsn v3 / region ABI 收敛。`docs/tmp/region_kinsn_research_20260430.md` |
+| 除法强度削减(常量除数 → shift+mul) | 957 .bpf.o:DIV/MOD 共 1269 sites,K 812 / X 457;Cilium `/1e9` 占 553 | 纯 bytecode 需 64×64→128 mulhi emulation,先等 per-site profile 或 native mulhi/kinsn。`docs/tmp/division_reduction_research_20260430.md` |
 
 Decision rule: a new kinsn must have non-trivial supported-corpus site count
 (rough floor: hundreds), an isolable performance win at the inserted sites
 larger than the I-cache and verifier-rerun cost of insertion, and a
 verifier-friendly declarative effect. Without all three, the proposal stays
 in the "not pursued" bucket.
+
+### 5.1 LEA / address-generation scoped-down decision (2026-05-13)
+
+详细 design doc: `docs/tmp/lea_kinsn_design_census_20260513.md`.
+
+**Status**: implemented as an x86-only kinsn experiment. **Do not pursue
+the core kernel-JIT peephole path** under the project no-core-JIT-change
+policy. ARM64 does not implement LEA and should not advertise
+`bpf_lea{32,64}`.
+
+Combined census:
+
+- Runtime `testbin`: strict non-overlap sites are **13,321 total** (Tracee
+  6,405, Tetragon 6,363, OTEL 470, Cilium 79, Katran 4). Static-scalar
+  first wave would be 10,922 sites across 4 apps. All strict runtime sites
+  are plain pattern `a` (`MOV+ADD`); scaled-index, scaled+disp, and
+  add-imm-chain are 0.
+- Generated `testobject`: strict BPF sites are 6,999 total across all
+  7 apps (6,995 pattern `a`, 4 pattern `b`, 0 pattern `c`, 0 pattern `d`).
+- Native `testccode/*.x86.s`: 42,153 `lea` instructions, but 36,991 are
+  simple base+disp address materialization. **BPF-object strict/native
+  ratio is 16.6%**.
+- Katran contradiction resolved: actual native Katran count is 225, while
+  Katran BPF strict count is 4. The native richness is x86 address-mode
+  materialization, not bytecode-level arithmetic LEA.
+
+Implication: the remaining BPF-level opportunity is adjacent `MOV+ADD`.
+A core JIT peephole would lower it most directly, but that path is ruled
+out by the no-core-JIT-change policy. The implemented kinsn-only route
+preserves that boundary and lets userspace own replacement policy. It
+reduces final x86 instruction count/code size for matched sites, but the
+dominant pattern remains 2 BPF slots after packed-sidecar replacement and
+does not recover the native address-mode LEAs that motivated the
+investigation. Treat LEA as **experimental** until post-hoc performance
+evidence shows a runtime win.
 
 ## 6. Relation To The Other Two Ideas
 

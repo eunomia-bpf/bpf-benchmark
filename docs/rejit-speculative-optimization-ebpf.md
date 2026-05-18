@@ -18,15 +18,16 @@ The three ideas are not incremental versions of one design. Each picks a
 different problem and a different point in the trust / kernel-surface /
 coverage space.
 
-**Scope of this doc (idea #1)**: BPF-to-BPF rewrite passes applied to
-already-loaded eBPF programs, driven by userspace `bpfopt` + `bpfrejit-daemon`,
-swapping in optimized bytecode. The current implementation uses the project
-fork's `BPF_PROG_REJIT` syscall; the design is evolving toward stock-kernel
-attachment-update mechanisms (see `docs/tmp/userspace_speculative_opt_design.md`,
-`docs/tmp/poc_a_katran_pidfd_swap.md`, `docs/tmp/poc_b_bcc_perf_event_swap.md`).
+**Scope of this doc (idea #1)**: speculative BPF-to-BPF rewrite passes
+applied to live eBPF programs, driven by a userspace **LD_PRELOAD shim**
+(`bpfopt/shim/`) that intercepts BPF syscalls in real upstream apps,
+captures original bytecode, and exposes a per-pid socket on which the
+runner sends shell-encoded `bpfopt --pass <name>` commands. Optimization
+is **stock-kernel**: zero kernel patches, no `BPF_PROG_REJIT` syscall, no
+out-of-tree daemon. The shim is the only persistent userspace component.
 Kinsn-introducing passes (rotate, cond_select, extract, endian fusion,
-prefetch, pair load/store, bulk memory, ccmp, lea) belong to the kinsn paper
-line and are referenced here but designed in `docs/kinsn-idea.md`.
+prefetch, pair load/store, bulk memory, ccmp, lea) belong to the kinsn
+paper line (idea #2) and are **not in scope here**; see `docs/kinsn-idea.md`.
 
 > **论文核心方向：构建一个最小化、动态、可扩展的 eBPF 优化框架，让 deployed eBPF 从一次性静态编译，变成可在线、透明、runtime-guided specialization 的执行环境。Paper 必须展示真实程序上的可测量加速能力。**
 > **编辑规则**：
@@ -64,20 +65,19 @@ eBPF is widely adopted in production for observability, networking, and customiz
 
 | Topic | File | Purpose |
 | --- | --- | --- |
-| **Plan + design hub (this doc)** | `docs/rejit-speculative-optimization-ebpf.md` | OSDI '26 plan, architecture, methodology, task tracking |
-| Kinsn paper-line hub | `docs/kinsn-idea.md` | idea #2 framing |
-| ReverseJIT paper-line hub | `docs/reverse-jit.md` | idea #3 framing |
-| Task history | `git log` | retired task tables and superseded plan snapshots are recovered from git history (v1 archive 文件已删除) |
-| **bpfopt-suite v3 design (authoritative)** | `docs/tmp/bpfopt_design_v3.md` | CLI-first Unix pipeline 架构（daemon owns kernel calls，bpfopt 是 pure bytecode CLI） |
+| **Plan + design hub (this doc)** | `docs/rejit-speculative-optimization-ebpf.md` | paper plan, architecture, methodology, task tracking |
+| Sister idea hubs (separate paper lines) | `docs/kinsn-idea.md`, `docs/reverse-jit.md` | idea #2 / #3 framing |
+| Task history | `git log` | retired task tables and superseded plan snapshots are recovered from git history |
+| Shim implementation | `bpfopt/shim/README.md` | LD_PRELOAD shim + per-pid socket + execute_step RPC |
+| Userspace-only design notes | `docs/tmp/userspace_speculative_opt_design.md`, `docs/tmp/poc_a_katran_pidfd_swap.md`, `docs/tmp/poc_b_bcc_perf_event_swap.md`, `docs/tmp/poc_c_v2_shim_only_design.md`, `docs/tmp/poc_e_vendor_replace_x_sys_design.md` | per-attach-type swap recipes, static-Go fallback |
 | Benchmark framework | `docs/benchmark-framework-design.md` | corpus / micro suite layout |
 | Benchmark runtime | `docs/benchmark-runtime-architecture.md` | container/VM runtime model |
 | Story / pitch | `docs/bpfrejit-story.md` | high-level narrative |
-| Kinsn mechanism | `docs/kinsn-design.md` | KF_INLINE_EMIT design + 7 kinsn 列表 |
 | eBPF research plan | `docs/ebpf-bench-research-plan.md` | research methodology + 项目目标 |
-| GHCR image cache | `docs/ghcr-image-cache.md` | base image strategy（kernel-fork / katran-artifacts pull-first） |
+| GHCR image cache | `docs/ghcr-image-cache.md` | base image strategy |
 | Docker build cache | `docs/docker-build-cache-gc.md` | local docker cache 生命周期 |
-| Paper writeup | `docs/paper/` (submodule) | OSDI '26 paper LaTeX source |
-| Ad-hoc reports | `docs/tmp/` | 大量 (~500) 临时调研/调试报告（按日期组织，rotate-investigation / kvm-5kinsn-error-analysis 等） |
+| Paper writeup | `docs/paper/` (submodule) | paper LaTeX source |
+| Ad-hoc reports | `docs/tmp/` | 临时调研/调试报告(按日期组织) |
 
 ---
 
@@ -87,9 +87,11 @@ eBPF is widely adopted in production for observability, networking, and customiz
 
 **背景。** Linux 内核 eBPF 已在生产环境广泛使用：网络（Cilium、Katran）、可观测（Tracee、Tetragon）、安全执行（KRSI/BPF LSM）、调度（sched_ext）。
 
+**Paper anchor — speculative optimization。** 本论文把 bpfopt 定位成 **eBPF 上的 speculative optimization 系统**，对应到 30 年的 JIT speculation 文献:**Self [Chambers&Ungar OOPSLA'91] 的 polymorphic inline cache、HotSpot 的 tier 分层 + PGO、V8 TurboFan 的 OSR-based deoptimization、CoreJIT [POPL'21] 的 formally verified speculation/deopt**。bpfopt 在 eBPF 这个新 substrate 上重做这套技术,**且因为内核 verifier 的存在,deopt 的工程量比传统 JIT 小一个量级**(详 §1.4 Insight 3 与 §4 系统架构)。
+
 **问题。** 与成熟的用户态运行时（JVM、WASM、LLVM 后端）相比，eBPF 存在两大不足：
 
-1. **缺乏优化**：没有平台特定指令扩展（RORX、CMOV、BEXTR、LEA），没有运行时信息引导的 PGO 或动态 JIT 重编译（如 JVM 分层编译），没有对 frozen map 的常量传播，没有基于 workload profile 的分支重排，没有数据布局优化。
+1. **缺乏 speculative / runtime-guided 优化**：没有平台特定指令扩展（RORX、CMOV、BEXTR、LEA），没有运行时信息引导的 PGO 或动态 JIT 重编译（如 JVM 分层编译、V8 TurboFan），没有基于 workload profile 的分支重排、运行时常量特化、热点 map 内联,没有数据布局优化。**核心 missing piece 不是某个具体优化,而是"profile → 特化 → guard → re-specialize"这一整套 speculative 优化循环**。
 2. **缺乏安全/安全加固**：没有运行时 Spectre 缓解注入，没有对有漏洞 BPF 程序的 live patching，没有对运行中程序的透明安全策略执行。
 
 **证据。** 实验表明，对于相同的 BPF 源代码，llvmbpf（bpftime 用户态 LLVM JIT）相比内核 JIT 可实现 **30-40% 的性能提升**和 **50% 的二进制大小缩减**。
@@ -115,73 +117,97 @@ BpfReJIT 的设计基于三个层次的 insight：
 >
 > eBPF 的内核 JIT **完全没有这些能力**。它是刚性的、单体的、平台无关的。我们需要一个**最小化的、动态的、可扩展的内核编译框架——类似 LLVM 的 pass 基础设施但面向 OS 内核**——为内核驻留的 eBPF 程序提供同样的可扩展、运行时引导的优化能力。
 
-#### Insight 2: 微内核启发的关注点分离 —— "什么能优化" vs "如何优化"
+#### Insight 2: Runner / shim / bpfopt 三角分工 —— "什么时候优化" vs "用什么命令优化" vs "怎么改 bytecode"
 
-> 类似微内核将机制与策略分离，BpfReJIT 将 JIT 编译分为两个关注点：
+> bpfopt 系统**完全在用户态**,内核改动为零。三个角色严格 dumb-executor 边界:
 >
-> - **内核组件**（最小化，~550 行代码（不含注释））：通过轻量级内核模块为每个平台定义**"什么能被优化"**——平台特定的指令定义，包含验证语义和 native 发射回调（**kinsn**）。这是**机制**。
-> - **用户态 bpfopt-suite**（Unix CLI 工具链）：通过编译 pass 和 shell/file pipeline 定义**"如何优化"**——基于静态分析、平台能力和运行时 profiling 数据（类似 JVM 的动态 JIT 重编译 + PGO）。这是**策略**。
+> - **Runner**(yaml 阅读者 + orchestrator):读 `runner/config/passes/<pass>/default.yaml`,把命令模板里的 `${INPUT}/${OUTPUT}/${REPORT}/${PROG_TYPE}/...` 由 runner 解析或交给 shim 替换,通过 per-pid unix 套接字向 shim 发 `execute_step` 命令。决定"什么时候优化"。
+> - **Shim**(LD_PRELOAD 注入 app 的 `.so`):透明拦截 app 的 BPF syscall,落 bytecode + 维护 prog/map/link/perf state table。收到 runner 命令后**无条件 `/bin/sh -c <command>`**(env 里删 LD_PRELOAD 避免自递归)。决定"在 app 进程内怎么执行命令"。
+> - **bpfopt CLI**(纯 bytecode 重写器):stdin/stdout 传 `struct bpf_insn[]`,跑一个 `--pass <name>`,无 syscall 依赖,无 kernel 知识。决定"怎么改 bytecode"。
 >
-> 新优化 = 新 module + bpfopt-suite 更新，零内核改动。这是让 LLVM pass 基础设施成功的可扩展性模型，现在应用到 OS 内核。
+> 新增优化 = 新写一个 `bpfopt` pass + 在 `runner/config/passes/<pass>/default.yaml` 描述命令模板。**零 shim 改动、零内核改动**。这是让 LLVM pass 基础设施成功的可扩展性模型,搬到 stock-kernel + 用户态的 form。
 
 #### Insight 3: Safety ≠ Correctness —— 与内核 eBPF 安全模型对齐
 
 > 不同于 JVM 或 LLVM 的编译框架必须同时保证**安全性和正确性**，BpfReJIT **将正确性与安全性分离**，与已有的内核 eBPF 安全模型对齐：
 >
-> - **内核组件保证安全性**：不会破坏内核。已有的 BPF verifier 对通过 REJIT 提交的任何新 bytecode 提供与 BPF_PROG_LOAD 完全相同的安全保证。不需要编写新的 validator 或证明 pass 的正确性。
+> - **内核 verifier 专注 safety**:不会破坏内核。每个 bpfopt 重写的 bytecode 通过 **stock `BPF_PROG_LOAD`** 重交内核 verifier(没有 REJIT syscall,没有任何项目-fork 内核改动);verifier 接受 = 跟原始 load 完全相同的 safety 保证。bpfopt 不写 validator,不证 pass 正确性。
 > - **用户态工具链负责正确性**：编译变换保持程序语义。如果 pass 或 orchestration 脚本有 bug，程序行为可能改变，但内核安全不受影响（fail-safe）。
 >
-> 这种分离之所以可能，是因为 BPF 有强制性的 verifier——这是原生内核代码等系统所没有的属性（livepatch 必须完全信任 patch 作者）。这正是 eBPF 特别适合 post-load 可扩展编译框架的原因。
+> **Verifier-state-driven specialization(关键 mechanism)**:基于 safety 分离,bpfopt 把 kernel verifier 同时当作:
+>
+> (A) **Safety certifier**:每个重写都过 verifier,verifier 的接受证书 = safety 保证。bpfopt 不需要自己证 safety。
+>
+> (B) **Static analyzer**:verifier 在 `log_level=2` 下输出每条指令处的**抽象解释状态**(tnum / numeric range / pointer provenance / bounds / alignment)。**bpfopt 把这些状态直接当 compiler IR 读**,驱动 constant propagation、dead branch elimination、bounds tightening、specialized code emission。
+>
+> Role (B) 是 bpfopt 真正区别于 K2 [SIGCOMM'21] / Merlin [ASPLOS'24] / EPSO [ASE'25] 的 design point — 他们都自己跑一套 abstract interpreter(K2 用 SMT,Merlin/EPSO 自己分析)再交 verifier 验。**bpfopt 砍掉了自己那一份 analyzer**,直接吃 verifier 已经算出来的 tnum / range。这条 design 之所以可行,是因为 eBPF verifier 比一般 JIT 的 type system 富一档(value-level abstract interpretation 不只 type check)。
+>
+> 三种 specialization 凑出 paper 的可操作 contribution:
+>
+> 1. **Speculative specialization**:profile 出运行时 invariant(map 热点 key、配置常量、循环实际 bound、分支倾向),用 inline guard 保护的 fast path 特化,guard miss 时走 inline slow path 并触发异步 re-specialize(详 §4 two-tier deopt)。
+> 2. **Verifier-feedback compilation**:用 verifier 的 tnum/range 在用户态再跑一轮 const_prop / dce / bounds_check_merge,等价于把 verifier 已经做过的 work amortize 到优化层。
 
 ### 1.6 设计目标
 
-1. **可扩展（Extensible）**：最小内核改动（~550 行代码（不含注释）），支持大量 pass。新优化 = 新 module + bpfopt-suite 更新，零内核改动。
-2. **透明（Transparent）**：对所有 eBPF 应用、loader 和其他 eBPF 工具/涉及的子系统完全透明。不需要 .bpf.o，不需要改应用。
-3. **安全（Safe）**：框架不影响内核安全模型。Verifier 验证所有变换。
-4. **零开销和更好性能（Zero overhead & better performance）**：特化后的程序运行在与原始加载完全相同的执行路径上，零稳态运行时开销。
+1. **零内核改动**:stock kernel,没有 REJIT syscall,没有 out-of-tree daemon,没有 kinsn 内核模块,BTF/CO-RE 全保留。新增优化 = 新 `bpfopt` pass + 新 yaml,完全用户态。
+2. **可扩展(Extensible)**:每个 pass 是一个独立 CLI 调用,pass 间用 file pipeline 串接。Runner 通过 yaml 描述命令模板,shim 不需要任何 pass 知识。
+3. **透明(Transparent)**:对所有 eBPF 应用、loader 和其他 eBPF 工具完全透明 — `LD_PRELOAD=libbpfrejit_shim.so` 注入 + 控制 app 启动。不需要 .bpf.o,不需要改应用代码。(静态 Go 二进制 fallback 见 PoC-E。)
+4. **安全(Safe)**:每次重新提交都过 stock verifier。bpfopt 不影响内核安全模型。
+5. **稳态零开销**:guard miss 罕见时,specialized 程序运行路径开销仅 1-2 条额外 BPF 指令(inline guard);其余跟原始 program 一样跑。
 
 ### 1.7 三组件设计
 
-设计和实现由 **3 个组件**组成：
+完全用户态,**stock kernel,零内核改动**。三个组件:
 
-**组件 1：内核 syscall 扩展**（内核源码改动，Patch 1）
-- 增加和修改内核 BPF syscall 功能，允许**获取 BPF bytecode**（`BPF_PROG_GET_ORIGINAL`）和**重新验证编译一个 BPF 程序并原地替换**（`BPF_PROG_REJIT`）。
-- REJIT 接受**完整的新 BPF bytecode**（不是 patch）→ 内核运行完整的 `bpf_check()` + JIT → 在同一个 `struct bpf_prog` 上原子替换 image。
+**组件 1:LD_PRELOAD shim — `bpfopt/shim/libbpfrejit_shim.so`**
 
-**组件 2：kinsn 平台特定指令扩展机制**(独立论文线,见 `docs/kinsn-idea.md`)
-- 本论文(idea #1)的核心组件只有组件 1(REJIT syscall)和组件 3(bpfopt-suite)。
-- kinsn 是 idea #2 的研究内容。两者在工程上 compose:启用 kinsn 框架的部署
-  可以在 daemon pipeline 里加入 kinsn-introducing pass(`rotate`、`cond_select`
-  等);未启用 kinsn 的部署仅用纯 BPF-to-BPF rewrite pass,也能跑全部
-  speculative 优化路径。
-- 论文 framing 上两条线各自独立,本文档不把 kinsn 列为必需组件。
+注入到 app 进程的 dumb executor。三件事:
+- **拦截** libc 的 `syscall(SYS_bpf, ...)`、`perf_event_open(2)`、`ioctl(2)`、`close(2)`,捕获每次 `BPF_PROG_LOAD` 的原始 bytecode + attr,落盘成 `<dir>/bpfrejit_<pid>_<hash>.bpf`,在 in-process state table 里跟 `kernel_prog_id`(via `OBJ_GET_INFO_BY_FD`)关联。
+- **bind** per-pid 套接字 `/var/run/bpfrejit/shim-<pid>.sock`,实现 `list_progs` / `execute_step` / `dump_state` 三个 RPC(协议照搬现有 daemon 的 JSON 形态)。
+- **执行**:`execute_step` 收到 runner 发的 shell command 模板,替换 `${VAR}` 后 `posix_spawn("/bin/sh", "-c", ...)`,subprocess env 里删 `LD_PRELOAD` 避免自递归。
 
-**组件 3：用户态 bpfopt-suite**
-- `bpfopt` 作为零内核依赖的纯 bytecode optimizer，优化入口是 `--pass <name>` 单 pass CLI。
-- `bpfprof` 保持 standalone CLI，负责 profile 采集。
-- `bpfget` 是 daemon-owned library，负责读取 bytecode/metadata/map 信息和 target probing；per-pass ReJIT 由 daemon 通过 `kernel-sys` 直接执行。
-- `bpfrejit-daemon` 保留 runner socket 边界和 live program watch，进程内持有 prog/map fd；字节码变换仍只通过外部 `bpfopt` CLI，主路径逐 pass 直接 `BPF_PROG_REJIT`。
+shim 不知道 yaml,不知道有哪些 pass,不知道 `bpfopt` 是什么 — 就是一个**通用 syscall hook + state table + shell executor**。语言 C,~1000 行 + musl 变体。
+
+**组件 2:`bpfopt` — 纯 bytecode CLI**
+
+stdin/stdout 传 raw `struct bpf_insn[]`,一次跑一个 `--pass <name>`,零 syscall 依赖。`--input/--output/--report` 走文件,`--map-values/--verifier-states/--profile` 作 side-input。当前已实现 `noop`、`map_inline`、`const_prop`、`dce`、`bounds_check_merge`、`branch_flip`、`skb_load_bytes_spec`、`wide_mem` 等。
+
+**组件 3:Runner Python orchestration**
+
+读 `runner/config/passes/<pass>/default.yaml` 中的命令模板,通过 per-pid shim socket 发 `execute_step`。负责 yaml 解析、profile lifecycle、measurement、pass 序列。**不写新代码** — 沿用现有 `runner/libs/rejit_plan.py:build_execute_plan_payload()` 的 yaml→JSON 协议,只是把 daemon 的 socket 换成 shim 的 per-pid socket(router 转发或 runner 直接枚举,见 PoC-C v2 §6)。
+
+> **谁知道什么**:
+> - shim:对单个 app 进程的拦截 + state 完整知识;不知 yaml、不知 pass 名字
+> - bpfopt CLI:对单个 pass 的 bytecode 重写完整知识;不知任何 app/runtime 状态
+> - Runner:对 pass 顺序 / yaml / profile 完整知识;不知任何拦截细节
+
+**static Go 二进制 fallback**:tetragon / cilium-agent / otelcol-profiler 静态 Go binary 不能 LD_PRELOAD,通过 `golang.org/x/sys/unix` 的 vendor-replace fork(详 `docs/tmp/poc_e_vendor_replace_x_sys_design.md`)在编译时注入同一份 shim handler ABI。Static Go 不在 idea #1 的主线评估,作为 fallback 列出。
 
 ### 1.8 类比定位
 
 | 系统 | 类比 | 关键差异 |
 |------|------|----------|
-| **LLVM Pass** | 编译时 IR 变换，可扩展 | 我们是 **运行时 post-load**，safety 由 verifier 保证而非 pass 正确性 |
-| **JVM HotSpot** | 运行时分层编译 + PGO | 我们在 **OS 内核级别**，安全模型更强（kernel verifier vs bytecode verifier） |
-| **Linux livepatch** | 运行时内核代码替换 | 我们有 **verifier 安全保证**，livepatch 没有 |
-| **K2/Merlin/EPSO** | BPF bytecode 优化 | 他们是 **compile-time pre-load**，需要原始 .bpf.o，不 transparent，不支持 PGO |
-| **BCF (SOSP'25)** | Certificate-backed verification | 他们 offload verification，我们 offload optimization |
+| **Self / PIC** [Chambers&Ungar OOPSLA'91, Hölzle et al PLDI'91] | polymorphic inline cache 风格的 inline guard + slow-path fallback | bpfopt 的 deopt mechanism **更像 PIC 而非 OSR** — 见 §4 two-tier deopt |
+| **JVM HotSpot tiered + PGO** | 运行时分层编译 + profile-guided respec | 我们在 **OS 内核级别**;deopt 单位是程序版本(BPF_LINK_UPDATE 原子换),不是 stack frame |
+| **V8 TurboFan + OSR** | speculative compilation + on-stack replacement | **我们不需要 OSR**:eBPF run-to-completion 语义 → inline slow path 替代 OSR(见 §4) |
+| **CoreJIT** [POPL'21] | formally verified speculation/deopt | 我们用 stock verifier 当 safety oracle,把"证 deopt path safe"这事 outsource 给 verifier |
+| **LLVM Pass** | 编译时 IR 变换,可扩展 | 我们是 **运行时 post-load + speculative**,verifier 当 safety oracle |
+| **Linux livepatch** | 运行时内核代码替换 | 我们有 **verifier 强制 safety**;livepatch 完全信任 patch 作者 |
+| **K2/Merlin/EPSO** | BPF bytecode 优化 | 他们 **offline / static / single-version**,bpfopt **online / profile-driven / multi-version + guard** |
+| **BCF** [SOSP'25] | certificate-backed verification | 他们 offload verification,我们 offload optimization;两者正交可叠加 |
 
-#### 与 existing work 的关键差异
+#### 与 eBPF 现有工作的关键差异(扩展轴)
 
-| 系统 | 时机 | 执行位置 | 目的 | 需要 .bpf.o? | Transparent? | Runtime PGO? | 安全保证 |
-|------|------|----------|------|:---:|:---:|:---:|----------|
-| K2 (SIGCOMM'21) | pre-load | 用户态 | 性能优化 | 是 | 否 | 否 | SMT solver |
-| Merlin (ASPLOS'24) | pre-load | 用户态 | 性能优化 | 是 | 否 | 否 | 编译器正确性 |
-| EPSO (ASE'25) | pre-load | 用户态 | 性能优化 | 是 | 否 | 否 | 编译器正确性 |
-| ePass (LPC'25 原型) | load/verify | 内核态 | 优化 + 运行时执行加强 | 是 | 否 | 否 | in-kernel pass |
-| BCF (SOSP'25) | load-time | 用户态+内核 | verifier 加强 | 是 | 否 | 否 | certificate |
-| **BpfReJIT** | **post-load** | **用户态+内核** | **性能优化+安全加固** | **否** | **是** | **是** | **kernel verifier** |
+| 系统 | 时机 | 优化版本数 | Profile-driven? | 触发 deopt? | 需要 .bpf.o? | Transparent? | Runtime PGO? | 安全保证 |
+|------|------|:---:|:---:|:---:|:---:|:---:|:---:|----------|
+| K2 (SIGCOMM'21) | offline / pre-load | 单版本 | 否 | 否 | 是 | 否 | 否 | SMT solver |
+| Merlin (ASPLOS'24) | offline / pre-load | 单版本 | 否 | 否 | 是 | 否 | 否 | 编译器正确性 |
+| EPSO (ASE'25) | offline / pre-load | 单版本 | 否 | 否 | 是 | 否 | 否 | 编译器正确性 |
+| ePass (LPC'25 原型) | load/verify | 单版本 | 否 | 否 | 是 | 否 | 否 | in-kernel pass |
+| BCF (SOSP'25) | load-time | 单版本 | 否 | 否 | 是 | 否 | 否 | certificate |
+| **bpfopt(本论文)** | **online / post-load** | **多版本** | **✅** | **✅ inline guard + async respec** | **否** | **✅** | **✅** | **kernel verifier** |
+
+加粗的三轴(**online / multi-version / profile-driven + deopt**)是 bpfopt 跟所有现有 eBPF 优化工作的本质差异 — 不只是时机不同,更是设计哲学不同。
 
 ### 1.9 四种用途
 
@@ -194,130 +220,77 @@ BpfReJIT 的设计基于三个层次的 insight：
 | **恶意程序阻断** | 检测恶意 BPF prog → 替换为 no-op/安全版本 → 在线热修复，危险 helper 防火墙 | ⏸ future work |
 | **运行时可观测** | 给 hot path 插入 tracing，不改应用代码 | ⏸ future work |
 
-### 1.10 Why Userspace and kernel module (详细理由)
+### 1.10 Why Userspace-only (详细理由)
 
 | 理由 | 说明 |
 |------|------|
-| **可更新性** | userspace bpfopt-suite 可随时更新优化策略，无需等 kernel release cycle |
-| **上游接受成本** | kernel patch 审核周期长（月~年级），优化逐个上游不现实；BpfReJIT 让优化以 userspace CLI 工具链形式即时部署 |
-| **算法迭代** | 优化 pattern 需要反复实验和迭代；kernel 代码一旦合入很难改，userspace 可以快速迭代而不影响 kernel 稳定性 |
-| **程序级组合** | 局部有利的变换可能全局有害（I-cache cliff），userspace 做全局预算 |
-| **Workload 适应** | 分支可预测性、hot path 等取决于运行时数据分布，不是静态信息 |
+| **零内核改动** | stock kernel,任何 6.x 即可,不需要 fork、不需要 patch upstream、不需要等内核发行版 |
+| **可更新性** | 用户态 bpfopt + shim + runner 可任意时刻更新优化策略,不绑 kernel release cycle |
+| **算法迭代** | 优化 pattern 需要反复实验,用户态可快速迭代而不影响内核稳定性 |
+| **程序级组合** | 局部有利的变换可能全局有害(I-cache cliff),userspace 做全局预算和 phase-aware 调度 |
+| **Workload 适应** | 分支可预测性、hot path、map 热点分布取决于运行时数据,**只能 online speculate** |
 | **Fleet 管理** | A/B testing、gradual rollout、per-deployment customization |
-| **所有权** | service owner 控制优化策略（Cilium/Katran），不是 kernel maintainer |
-| **覆盖面** | kernel JIT 中有数十个可优化点，不可能全部逐一 patch 上游；统一框架一次性覆盖 |
-| **安全管理** | 同一框架可做安全加固、恶意程序阻断，不需要单独系统 |
+| **所有权** | service owner(Cilium/Katran/Tracee 等)控制各自的优化策略,不是 kernel maintainer |
+| **覆盖面** | kernel JIT 有几十个可优化点,统一 userspace 框架一次覆盖,无需逐个 patch 上游 |
+| **BTF/CO-RE 完整保留** | 不动 verifier 不动 JIT,upstream BTF 一致性约束自动满足 |
 
 ### 1.11 核心设计约束
 
-1. **Safety/correctness 分离**：kernel verifier 保证 safety（内核不崩溃），correctness 由用户态 bpfopt-suite 和 orchestration 脚本负责
-2. **Kernel 改动最小化**：核心内核接口只加一次（~550 LOC（不含注释）），新优化/新 arch 全部以 module + CLI 工具方式部署
-3. **完全透明**：不需要 .bpf.o，不需要改应用/loader，不需要 detach/reattach
-4. **零运行时开销**：变换后的程序和原始加载路径完全一样快
-5. **Fail-safe**：每个 pass 都通过 `BPF_PROG_REJIT` 内核 re-verify；失败的 pass 不 commit，返回错误并保留前 K 个已成功 commit 的 partial 优化状态。daemon 不做 `BPF_PROG_LOAD` dry-run，也不做隐藏式回滚/fallback
-6. **BPF_PROG_REJIT 接受完整的新 BPF bytecode**，不是 patch format — daemon 通过 `kernel-sys` 提交整段新程序，kernel 走标准 verify 路径
-7. **Mandatory Falsification**：如果 fixed kernel heuristics 在所有测试硬件和 workload 上恢复相同收益，正确结论是"用 kernel peepholes"，不是发布 userspace-guided interface
-8. **`bpfopt` 零 syscall 依赖**：`bpfopt` 只读写 raw `struct bpf_insn[]` bytecode；所有 raw BPF syscall 都在 `kernel-sys` 内实现，并由 daemon-owned `bpfget`、daemon 主体或 `bpfprof` CLI 调用。
-9. **Pipeline 是 bpfopt shell/file 协议 + daemon in-memory kernel state**：`bpfopt --pass <name>` stdin/stdout 只传 raw binary bytecode，profile/verifier states/map values/report 等 `bpfopt` side-input/output 走文件；prog info、snapshot-owned map fd、minimal fd_array 在 daemon 进程内传递。
-10. **Daemon 是 runner 稳定边界**：`bpfrejit-daemon` watch 新程序、维护 runner socket，并进程内编排 live snapshot、per-pass side-input 准备和 per-pass ReJIT；benchmark runner Python 不直接改成调 kernel-facing CLI。
+1. **Safety / correctness 架构分离**:stock kernel verifier 是 safety 的唯一 authority。bpfopt 不写 validator,不证 pass 正确性 — verifier 接受即 safety 保证(§1.4 Insight 3)。
+2. **零内核改动**:不加 syscall、不动 verifier、不加 kinsn 模块。任何 6.x stock kernel 都能跑。
+3. **透明 LD_PRELOAD shim**:不需要 .bpf.o、不需要改应用/loader,不需要 detach/reattach。静态 Go 二进制走 vendor-replace fallback(PoC-E)。
+4. **稳态零开销**:inline guard 1-2 条 BPF 指令,verifier 接受后跟原始 program 同样路径执行;guard miss 才走 inline slow path。
+5. **Fail-safe**:每次 candidate `BPF_PROG_LOAD` 走 stock verifier。失败就丢弃,保留上一次成功版本;原程序持续运行,不破坏 in-flight invocation。
+6. **`bpfopt` 零 syscall 依赖**:`bpfopt` 只读写 raw `struct bpf_insn[]`,所有 BPF syscall 由 shim 在 app 进程内调,跟 bpfopt 隔离。
+7. **Pipeline 协议**:`bpfopt --pass <name>` stdin/stdout 传 raw binary bytecode,side-input/output(profile / verifier-states / map values / report)走文件。Runner 把 yaml 命令模板通过 shim 套接字发到 app 进程,shim 替换 `${VAR}` 后 `/bin/sh -c`。
+8. **Shim 是 dumb executor**:不知道 yaml,不知道 pass 名字。所有 pass 知识在 `bpfopt` + `runner/config/passes/*.yaml`,跟 shim 解耦。
+9. **Runner 稳定边界**:沿用现有 `runner/libs/rejit_plan.py:build_execute_plan_payload()` 的 yaml→JSON 协议,把"发给 daemon"换成"发给每个 app 的 shim socket"。Benchmark runner Python 改动最小。
 
-
----
-
-## 2. Characterization 证据摘要
-
-| 证据 | 数值 |
-|------|------|
-| Exec time geomean (L/K) — **characterization gap** | **0.609x** (56 pure-JIT, strict 30×1000); 0.849x (31 pure-JIT, old 3×100)。注意：这是 llvmbpf vs stock kernel 的 gap 上界，不是 BpfReJIT 改进 |
-| BpfReJIT micro improvement (recompile/stock) | **v2 (2026-03-23, post BTF+mapfd+pattern fixes)**: 62/62 valid, **49 applied**（wide_mem only，kinsn pass 待 verifier 改动后激活），0 correctness mismatch。Daemon **303 tests**。**关键发现**：rotate/cond_select pattern matcher 已修复（真实 bytecode 匹配），extract/endian caller-saved save/restore 已实现，但根本方案是 kinsn operand-encoded ALU 语义（见 #417）。v1 参考: blind 1.028x, fixed-policy 1.049x |
-| Code size geomean (L/K) | 0.496x |
-| Byte-recompose 占 kernel surplus | 50.7%，2.24x 时间惩罚 |
-| cmov 差距 | llvmbpf 31 vs kernel 0 |
-| Prologue/epilogue 占 surplus | 18.5% |
-| branch_layout 输入敏感性 | predictable 0.225x vs random 0.326x，差 44.6% |
-| Real-program code-size | 0.618x geomean (36 unique) |
-| Real-program exec-time | 0.514x geomean (14 unique) |
-| Corpus directive coverage (5 fam) | 143/560 objects with sites, **14593** total sites（5 families, per-section）|
-| Corpus v6 full recompile (blind) | 166 targets, **163 measured pairs**, 92 applied, exec geomean **0.868x**, code-size 0.999x, wins 40 / regressions 107 |
-| Corpus v2 fixed policy recompile | 156 measured pairs, 91 applied, exec geomean **0.875x**, wins 45 / losses 101。vs blind +0.8%, vs v1 tuned -2.6% |
-| Corpus 8-family census | 157/560 corpus objects with sites, **16535** total sites（8 families, per-section）。新: endian=1386, bflip=2264, zeroext=0（x86-64 预期） |
-| Pass ablation | 仅 InstCombinePass + SimplifyCFGPass 有效 |
-| cmov 消融 | switch_dispatch +26%，binary_search +12%；bounds_ladder -18%，large_mixed -24% |
-
----
 
 ## 3. 变换分类
 
 ### 3.1 性能优化变换
 
-> **论文边界提醒**:`kinsn = 是` 的行属于 idea #2(Kinsn 论文线),
-> 详细设计见 `docs/kinsn-idea.md` 和 `docs/kinsn-design.md`。本论文(idea #1,
-> Speculative eBPF Optimization)的核心是 `kinsn = 否` 的纯 BPF-to-BPF rewrite
-> pass。表格保留全部行作为完整 pass 清单参考。
+> **范围说明**:本表只列**纯 BPF-to-BPF rewrite pass**(即不依赖任何内核 patch / kinsn 框架的 pass)。所有依赖 kinsn 的变换(`rotate`、`cond_select`、`extract`、`endian_fusion`、`prefetch`、`ldp_stp`、`bulk_memory`、`ccmp`、`lea` 等)属于 idea #2,见 `docs/kinsn-idea.md`,**不在本论文范围**。
 
-| 变换 | kinsn? | 状态 | 说明 | Corpus 证据（2026-03-24） |
+#### Speculative 分类(本论文 framing)
+
+每个 pass 都属于以下三类之一:
+
+| 类型 | 定义 | 需要 guard? | Deopt 方式 | 典型 pass |
+|---|---|:---:|---|---|
+| **A. Unconditional rewrite** | 输入输出语义恒等的纯 bytecode 重写,不依赖任何 runtime invariant | 不需要 | 无需 deopt | `wide_mem`, `dce`, `bounds_check_merge`, `skb_load_bytes_spec` |
+| **B. Verifier-feedback compilation** | 用 verifier 的 tnum/range 做 const_prop / branch fold(verifier-state 当 IR) | 不需要(verifier 已证)| 无需 deopt | `const_prop` |
+| **C. Speculative specialization**(本论文 hero) | 基于 runtime profile 推测一个 invariant,生成 inline guard + fast path + inline slow path | 需要(Tier 1)| §4.3.5 two-tier(guard miss 走 inline slow path,async respec)| `map_inline`(热 key)、`branch_flip`(profile-driven 重排)、未来的 `loop_bound_spec`、`runtime_const_burn`、`cold_branch_prune`、`tail_call_chain_fuse`、`helper_call_elision`、`map_repr_switch` |
+
+C 类是本论文跟所有 prior eBPF 优化(K2/Merlin/EPSO)的关键差异:**他们都是 A 类 + 部分 B 类**(单版本 + offline + static),**bpfopt 加入 C 类**(多版本 + online + profile-driven + guard-protected,见 §1.8 比较表)。
+
+> **新 pass 设计原则**:看 candidate transformation 是不是依赖运行时观测的 invariant — 如果是,设计成 C 类 + inline guard。即使 invariant 在某些 deployment 恒为真(典型 const burn 场景),也仍生成 guard,代价 1-2 条指令,换来 fail-safe 与 verifier 自动认证。
+
+| 变换 | 类 | 状态 | 说明 | Corpus 证据 |
 |------|:---:|:---:|------|------|
-| **WIDE_MEM** | 否 | ✅ 已实现 | byte load+shift+or → 已有 BPF wide load 指令。占 kernel surplus 50.7% | 49/62 micro applied |
-| **ROTATE** | 是 | ✅ 已实现 | shift+or → `bpf_rotate64()` kinsn → JIT emit RORX | 701 sites, 15 applied |
-| **COND_SELECT** | 是 | ✅ 已实现 | branch+mov → `bpf_select64()` kinsn → JIT emit CMOV。policy-sensitive | 12 corpus applied |
-| **BITFIELD_EXTRACT** | 是 | ✅ 已实现 | shift+and → `bpf_extract64()` kinsn → JIT emit BEXTR | 524 sites, 4 applied |
-| **BRANCH_FLIP** | 否 | ✅ 已实现；Paper B PGO pass（非默认） | if/else body 重排。policy-sensitive；默认 benchmark profile 不启用。显式启用时要求 `bpfprof --per-site` 真实 profile；缺 program/site PMU 数据直接 exit 1，无 heuristic fallback | 非默认 benchmark pass |
-| **ENDIAN_FUSION** | 可选 | ✅ 已实现 | load+bswap → combined kinsn → JIT emit MOVBE | 256 sites, 17 corpus applied |
-| **Dynamic map inlining** | 否 | ✅ pass 已实现；daemon in-process wiring 已接入 | Paper benchmark 模型：snapshot once → inline → ReJIT → measure；不做 production invalidation polling | **11556 个 map_lookup site；Katran 22→2 条（-91%）；Tetragon 447→2（-99.6%）**。daemon-owned `bpfget` snapshot 直接持有 map fd 并生成 `bpfopt map-inline --map-values` side-input；daemon 从 `map_inline` report 的 `(map_id,key)` 结合 snapshot 生成 `inlined_map_entries`。设计：`dynamic_map_inlining_design_20260324.md` |
-| **Verifier const prop** | 否 | ✅ 已实现 | `log_level=2` → tnum/range 常量 → `MOV imm` → branch folding。verifier-in-the-loop 已接入（#624） | **23% verifier state 含精确常量；62.5% 分支和立即数比较** |
-| **DCE** | 否 | ✅ 已实现 | const prop / map inline 后的 unreachable block / dead store 消除 | bpfopt DCE 让更多条件变常量 |
-| **Bounds check merge** | 否 | ✅ 已实现 | ~~冗余 check 删除~~ → **guard window merge / hoisting**。合并小窗口为大窗口 | **42 guard sites，严格冗余=0%，但 83.3% 可合并（ladder 结构）**。实现：`BoundsCheckMergePass`。**测试**：`cargo test bounds_check` 14/14、`cargo test` 365 pass/12 ignored、`make daemon`、`make daemon-tests`。**commit**：`639926cb28e9`。调研：`bounds_check_elimination_research_20260324.md` |
-| **128-bit LDP/STP** | 是 | ✅ module 已实现 | **ARM64**：相邻 load/store pair → `bpf_ldp128`/`bpf_stp128` kinsn → JIT emit LDP/STP，不碰 FPU。**x86**：pair load/store 用 `two mov` 即可（SSE/AVX 不值得——FPU context 开销远大于收益），bulk memcpy 走 `rep movsb`。**论文 story**：同一优化在不同架构有完全不同的 cost model（ARM64 免费 vs x86 需 FPU），体现 platform-aware kinsn 设计价值 | **ARM64 corpus store 对密度高，当前 JIT 完全没 LDP/STP**。设计：`arm64_ldp_stp_kinsn_design_20260326.md`、`x86_128bit_wide_loadstore_design_20260326.md`。调研：`128bit_wide_loadstore_research_20260324.md`。**module report**：`arm64_bpf_ldp_module_report_20260326.md`。**commit**：`d29d9b6427ab` |
-| **Bulk memory kinsn** | 是 | ✅ x86 + ARM64 kinsn modules 已实现 | ~~SIMD~~ → v1 用 `rep movsb/stosb` (x86) / `LDP/STP` (ARM64)，不碰 FPU | **corpus 有 40B/74B/360B/464B 连续 copy/zero run**。设计：`simd_kinsn_design_20260324.md`、`x86_128bit_wide_loadstore_design_20260326.md`。**测试**：`cargo test ... bulk_memory` **16/16**、`cargo test ...` **395 pass / 12 ignored**、`make daemon-tests`。**pass commit**：`958bab4528b2`。**module reports**：`x86_bpf_bulk_memory_module_report_20260326.md`、`arm64_bpf_bulk_memory_module_report_20260326.md`。**module commit**：`d29d9b6427ab`。 |
-| **ADDR_CALC (LEA)** | 是 | 🧪 x86-only kInsn experiment | x86 `lea` only；ARM64 不实现/不 advertise。2026-05-13 combined census changes the old native-C conclusion: native x86 has many LEAs, but most are address-mode materialization, while BPF bytecode exposes almost only adjacent `MOV dst, base; ADD dst, src`. Current userspace pass rewrites that adjacent form to `bpf_lea{32,64}`; the x86 kinsn ABI supports full base/index/scale/disp LEA semantics. No core kernel-JIT peephole. Katran evidence: `lea` applies 122 and reduces JIT bytes, but standalone runtime ROI is not proven; `lea,dce` needs isolation before any production-positive claim. | `docs/tmp/lea_kinsn_design_census_20260513.md`：testbin strict **13,321** sites（all pattern `a`; static-scalar **10,922**）；testobject strict **6,999** sites / native x86 **42,153** LEAs（BPF/native **16.6%**）；Katran native **225** vs BPF strict **4**（**1.8%**）；targeted Katran `lea` **122 applied**, bytes **13629→13277**, BPF counter ratio **1.048680** |
-| **Helper call specialization** | 否/可选 | 📝 值得做 | `skb_load_bytes → direct packet access` 是 P0 纯 bytecode rewrite；`probe_read_kernel` 一般情形不能当普通 load peephole，需 safe-load contract/内核支持 | **590 skb_load_bytes site（Cilium 428）；25296 probe_read_kernel site 但风险高**。调研：`helper_call_inlining_research_20260324.md` |
-| **Frozen map inlining** | 否 | ❌ 不做 | BPF_MAP_FREEZE 后只读 map → 常量 MOV | **调研结论：真实 workload 无显式 freeze，hot-path lookup ≈ 0** |
-| **Subprog inline** | 否 | ⏸ 不在当前 OSDI 主线 | bytecode 层 budgeted inline 有实验价值，但 x86 bpf2bpf baseline 已是 direct call；收益来自 call-boundary elimination / cross-boundary opt。**REJIT 元数据 blocker**：UAPI 不接受新 func_info/line_info；PGO selective inline 留作后续实验 | **834 调用点 / 67 对象(11.8%)；分布高度集中**。调研：`subprog_inline_research_20260326.md` |
-| **Const propagation** | 否 | ↗ 归入 #424 | 利用 frozen map / runtime invariants 做常量折叠 | 归入 verifier const prop |
-| **SIMD (FPU)** | 是 | ❌ 不进 OSDI 主线 | **x86 SIMD 不做**：`kernel_fpu_begin/end` XSAVE/XRSTOR 开销 ~200-800 cycles，pair load/store 场景下远超收益；**ARM64 NEON 条件性 Phase 2**：仅 ≥1KiB + `may_use_simd()` 成立时考虑，no-FPU `LDP/STP` 优先。Linux crypto 模式（per-operation fpu_begin/end）不适用于 BPF 的细粒度调用 | **深度调研结论：x86 break-even ≥数百字节且需整次 BPF 调用摊销一次 FPU context；corpus 中绝大多数 copy/store ≤128B，不满足条件**。调研：`simd_fpu_kinsn_deep_research_20260326.md` |
-| **Tail-call specialization** | 否 | 📝 值得做 | **Phase 1**：dynamic-key monomorphic/oligomorphic PIC（guarded constant-key fast path），复用 kernel `map_poke_run()`。**Blocker**：缺 site-local key profiling，`poke_tab` shape check 需放宽 | **537 sites / 31 对象(5.46%)；Cilium 216、Tetragon 118、Tracee 49；upstream 已有 constant-key direct jump → 论文新意在 dynamic-key PIC；break-even 命中率 ~8%**。调研：`tail_call_specialization_research_20260326.md` |
-| **Spill/fill 消除** | 否 | ❌ 不做 | 冗余 spill/fill 消除 | **内核已有 KF_FASTCALL，增量收益低** |
-| **POPCNT/CLZ/CTZ** | 是 | ❌ 不做 | corpus 无可支撑的 pattern site。clang 已将 `__builtin_popcount` 展开为高效位操作序列，无循环可替换。调研：`bit_ops_kinsn_research_20260329.md` | 0 site |
-| **CRC32** | 是 | ⏸ 专项值得；不做默认 pass | broad corpus 覆盖低，不进默认 pipeline；若做，第一版应是 **CRC32C-only**、no-FPU scalar backend、loxilb 定向 `step8/step64` idiom pass。`bpf_csum_diff` 等 helper 更广泛但走 helper 路径。调研：`crc32_kinsn_research_20260329.md` | loxilb SCTP CRC32C：2 个 byte-update site |
-| **CCMP** | 是 | 📝 值得做 | **ARM64 独有**。conditional compare chain；restricted first wave，避免通用变长 compare-chain kinsn。调研：`arm64_kinsn_research_20260329.md` | **4957 sites，6228 saved branches** |
-| **Prefetch** | 是 | ✅ PrefetchV2 已实现；默认 Paper A pass | x86 `PREFETCHT0` + ARM64 `PRFM`。纯 hint kinsn。默认结构识别 packet direct access 与 `map_lookup_elem` 返回 value 的首次 deref；有 per-site PMU 数据时作为 hot/missy site filter，缺 PMU 不阻止 emit。实现报告：`docs/tmp/p89_prefetchv2_impl.md`。调研：`memory_hints_kinsn_research_20260329.md`。设计：`prefetch_kinsn_design_20260329.md`（历史 profile-gated 方案）。 | 17391 `map_lookup_elem` + 21 `map_lookup_percpu_elem` 潜在 site；hot+missy site 预期 2.5-25ns/exec |
-| **NT store** | 是 | ❌ 不做 | 当前 corpus 无明确 streaming write 场景。调研：`memory_hints_kinsn_research_20260329.md` | 不值得 |
-| **PDEP/PEXT** | 是 | ❌ 不做 | corpus 无 site。调研：`bit_ops_kinsn_research_20260329.md` | 0 site |
-| **SHRX/SHLX** | 是 | ❌ 不做 | OoO CPU 上无增量收益。调研：`bit_ops_kinsn_research_20260329.md` | 不值得 |
-| **MADD/MSUB** | 是 | ⏸ MADD 低优先；MSUB 暂缓 | ARM64 独有。`MADD` 可以做但只是二级优化；`MSUB` direct site 为 0，宽松形式需要额外 liveness/semantic work，不进 first wave。调研：`arm64_kinsn_research_20260329.md` | MADD 47 direct sites；MSUB 0 direct sites |
-| **UBFX/BFI** | 是 | 📝 UBFX 补强；BFI 不做 | `UBFX` 不该作为新 ARM64-only target，而应扩展现有 `extract` pass 覆盖 copy form；`BFI` strong canonical site 为 0，不做。调研：`arm64_kinsn_research_20260329.md` | UBFX 321 total / 74 with-copy；BFI 0 |
-| **RDTSC** | 是 | ❌ 不做 | x86 `RDTSC`/`RDTSCP` 需求强但语义不等价：cycles 不是 portable monotonic ns；不适合把 `bpf_ktime_get_ns()` 透明 rewrite。若未来要做，应是显式 opt-in timing primitive。调研：`rdtsc_adc_kinsn_research_20260329.md` | 不进 OSDI 主线 / 默认 pipeline |
-| **ADC/SBB** | 是 | ❌ 不做 | x86 `ADC`/`SBB` 语义上合格，但当前 corpus 没有需求信号；短期不进默认 pipeline，只作为 future work 或专项 benchmark。调研：`rdtsc_adc_kinsn_research_20260329.md` | 917 个 `.bpf.o` 扫描：add carry-chain 0、sub borrow-chain 0 |
-| **SETcc/CSET** | 是 | 📝 调研完成（待实现） | x86 `SETcc` + ARM64 `CSET`。比较结果直接存 0/1，不需要 branch+mov。standalone boolean-set 不被当前 `COND_SELECT` 覆盖，应做独立 kinsn。调研：`docs/tmp/setcc_cset_kinsn_research_20260430.md` | supported runtime corpus **9417 sites**（Tetragon 8832、Cilium 401、Calico 91、BCC 79）；`corpus/bcf` + `runner/repos` raw census **28653 sites** |
-| **ANDN** | 是 | ❌ 不做第一波 | x86 BMI1 `ANDN` + ARM64 `BIC` 语义干净，但当前 corpus 没有无需 liveness 的严格 3-insn site；真实命中全是 `xor -1; and` / `tmp=b; xor; out=a; and` 局部形态 | `957` 个 `.bpf.o` 扫描：去重后 `45` sites，支持 app 为 Tracee `30` + Cilium `14`，另 scx `1`（已移除）；全部需要 liveness proof。热路径上限约 `1.0M` site/s，按 `2 cycles/site` 也只有约 `0.07%` 单核。调研：`docs/tmp/andn_kinsn_research_20260430.md` |
-| **BLSI/BLSR/BLSMSK** | 是 | ⏸ 后续 phase | x86 BMI1 isolate/reset/mask lowest set bit。BLSI/BLSR 对 bitmap traversal 语义合适，但当前支持的 8-app corpus 无 exact site；不进默认 Paper A queue | `957` 个 `.bpf.o` 扫描：BLSI `3`、BLSR `3`、BLSMSK `0`，全部来自已移除 `scx_lavd_main.bpf.o`；支持 app 为 `0`。调研：`docs/tmp/bls_kinsn_research_20260430.md` |
-| **除法强度削减** | 否 | ⏸ 后续 phase | 常量除数 → shift+multiply trick。内核 verifier/JIT 不做通用强度削减；但支持 app 命中几乎全是 64-bit `/1e9`，纯 bytecode 需要 64x64→128 multiply-high emulation，先等 per-site profile 或 native mulhi/kInsn 方案。调研：`docs/tmp/division_reduction_research_20260430.md` | `957` 个 `.bpf.o` 扫描：DIV/MOD 共 `1269` sites，K `812` / X `457`；支持 app K `649`，power-of-two K `0`，Cilium `/1e9` 占 `553`。 |
-| **PAUSE/YIELD** | 是 | ❌ 不做 | x86 `PAUSE` + ARM64 `YIELD`。内核 BPF spin lock helper 内部已有 PAUSE/WFE，kinsn 无增量价值。调研：`pause_yield_kinsn_research_20260329.md` | corpus 中几乎无 BPF-level busy-wait |
-| **寄存器重分配** | 否 | 📝 调研完成（待实现） | BPF bytecode 层面的 R1-R5→R6-R9 live-range 重分配，删除跨 helper 的 caller-saved spill/fill；不同于下方 native `REJIT spill-to-register` | supported runtime corpus：62,406 matched pairs，59,297 跨 helper（95.0%），Tetragon+Tracee 占 91.7%；需新增 reaching-def/live-interval/interference 分析。调研：`docs/tmp/register_realloc_research_20260430.md` |
-| **REJIT spill-to-register** | kernel 机制 | 📝 设计完成；值得做 | REJIT 接受可选 reg_map，`bpfrejit` 提交少量热点 spill slot → native register 映射。任意 BPF→native reg_map 不现实；**x86 只剩 R12**（1 个），**ARM64 有 x23/x24**（2 个）。Verifier 不需要改。分阶段：ARM64 先做 → x86 → 受限 reg_map。调研：`rejit_register_mapping_research_20260329.md`（790 行） | 受限 spill-to-register |
-| **Region kinsn（寄存器扩展）** | 是 | ⏸ 后续 phase | 高寄存器压力的代码段包装为 region kinsn，emit callback 内部用 native 寄存器。首版应限定 pure scalar N→1、无内存/stack/packet/map 写、无 helper/call，等待 kinsn v3 / region ABI 收敛后再实现 | 调研完成：`docs/tmp/region_kinsn_research_20260430.md`；结论为 Cilium/Calico 有 Jenkins/hash 信号，Tetragon 多为 byte-pack/decoder，上界 census 24/1/175 clusters，但不进当前默认 pipeline |
-| **Stack-slot coalescing** | 否 | ❌ 不做（静态版无 site）；⏸ verifier-state 版可作 future work | 静态 scalar-only 调研：178 objects / 775 functions / 16,053 stack slots，conservative gate 后 918 安全 slot **0 coalescable pairs / 0 saved bytes**。安全 slot 都是长生命周期 save slot（live range 全 overlap），短生命周期 slot 都是 helper-visible / address-taken / partial-overlap / pointer spill | 实测 census：`docs/tmp/stack_coalesce_census_20260506.md`。Top blocker：address_taken_unknown_size 12297 / helper_memory_arg 9345 / partial_overlap_access 9213。verifier-state-driven 版本可窄化 helper memory range / 区分 scalar vs pointer spill，但静态版不应进 first wave |
-| **Strength reduction (mul/mod by const)** | 否 | ❌ 不做（LLVM 已 reduce） | `mul by power-of-2 → lsh`、`mod pow2 → and`：实测 supported corpus 178 obj / 775 functions / 2.2M insn 找到 **0 MUL pow2 / 0 MOD pow2 sites**。LLVM 在源码层已 reduce，BPF bytecode 直接是 LSH/AND 形态。DIV pow2 supported apps 也 0 sites（`division_reduction_research_20260430.md`）。kernel 也不重写 | 实测 census：`docs/tmp/strength_reduction_census_20260506.md`。requested roots scan 也 0 sites |
-| **PHI-style merge simplification** | 否 | ⏸ second wave (imm-only first) | 不同 path 后 reg 一致的合并简化。supported corpus census：121,556 CFG merge points → **1,316 all-assign-same-imm sites** + 61 copy-same-reg + 85 same-alu-op + 46 strict diamond subset。kernel verifier 只 join state 不重写 bytecode | 实测：`docs/tmp/phi_merge_census_20260506.md`。imm-only 安全且 site 数可观；copy-reg / alu-op 需要 verifier-state interference 分析；diamond 多被 LLVM 或 cond_select 覆盖。**second-wave 候选** |
-| **Loop-invariant code motion (LICM)** | 否 | ⏸ second wave (stack-load-only, verifier-state-gated) | open-coded 循环里把不变量提到循环外。supported corpus census：934 open-coded loops + 49 `bpf_loop` (kernel 已 inline) → **118 unique stack-load LICM sites**（全部是 invariant stack reload to callee-saved），0 constant-load / 0 map_lookup / 0 ALU LICM | 实测：`docs/tmp/licm_census_20260506.md`。Top contributors: tetragon 108 / tracee 10。仅 stack-reload 候选；safety 需 verifier stack-state / helper-memory bounds。**second-wave 候选** |
-| **Local instruction scheduling** | 否 | ❌ 不做 | 同 BB 内 pure ALU 指令调度。risk 高（跨 memory/helper boundary 危险），收益 low-medium | overlap 报告候选 #6 评估为 "Low/medium payoff, High risk"，不在第一波 |
-| **Helper inline beyond map_inline** | 否 | ❌ 不做（主要 helper 已被 kernel inline） | `bpf_jiffies64`（`verifier.c:24384-24407`）、`bpf_get_smp_processor_id`（`:18618-18632`）、current_task helpers（`:24409-24443`）、ARM64 `arch/arm64/net/bpf_jit_comp.c:3213-3222` 都已 inline | overlap 报告候选 #7。新候选需窄 whitelist + 每调用 stability proof。risk 高 |
-
-#### LEA / address-generation scoped-down decision (2026-05-13)
-
-Design doc: `docs/tmp/lea_kinsn_design_census_20260513.md`.
-
-Status: implemented as an x86-only kinsn experiment. Do not pursue the core kernel-JIT peephole path under the current project constraint: kinsn is the chosen mechanism precisely to avoid editing the core kernel JIT. ARM64 does not implement LEA and should not advertise `bpf_lea{32,64}`.
-
-Combined census:
-- Runtime `testbin`: strict non-overlap sites are 13,321 total (Tracee 6,405, Tetragon 6,363, OTEL 470, Cilium 79, Katran 4). Static-scalar first wave would be 10,922 sites across 4 apps. All strict runtime sites are plain pattern `a` (`MOV+ADD`); scaled-index, scaled+disp, and add-imm-chain are 0.
-- Generated `testobject`: strict BPF sites are 6,999 total across all 7 apps (6,995 pattern `a`, 4 pattern `b`, 0 pattern `c`, 0 pattern `d`).
-- Native `testccode/*.x86.s`: 42,153 `lea` instructions, but 36,991 are simple base+disp address materialization. BPF-object strict/native ratio is 16.6%.
-- Katran contradiction resolved: actual native Katran count is 225, while Katran BPF strict count is 4. The native richness is x86 address-mode materialization, not bytecode-level arithmetic LEA.
-
-Implication: the remaining BPF-level opportunity is adjacent `MOV+ADD`. A core JIT peephole would lower it most directly, but that path is ruled out by the no-core-JIT-change policy. The implemented kinsn-only route preserves that boundary and lets userspace own replacement policy. It reduces final x86 instruction count/code size for matched sites, but the dominant pattern remains 2 BPF slots after packed-sidecar replacement and does not recover the native address-mode LEAs that motivated the investigation. Treat LEA as experimental until post-hoc performance evidence shows a runtime win.
-
-`branch_flip` 属于 Paper B：基于 profile/info 的 speculative runtime optimization。P88 已将 `bpfprof --per-site` 接到真实 `bpf_get_branch_snapshot()` LBR 数据；Rust pass 删除 heuristic fallback 并要求每个候选 site 有真实 `branch_count`/`branch_misses`/`miss_rate`/direction 数据。daemon socket 不再管理 profile lifecycle 或向 `bpfopt` 注入 profile path；`branch_flip` 的 profile side-input 只存在于显式 `bpfopt` CLI 边界。Paper A 默认优化仍是 kinsn 主线；daemon 默认 12-pass policy 包含 `prefetch`，但不包含 `branch_flip`。`branch_flip` 是否进入 benchmark policy 等 Paper B profile 数据后再决定。
+| **WIDE_MEM** | A | ✅ 已实现 | byte load+shift+or → 已有 BPF wide load 指令。占 kernel surplus 50.7% | 49/62 micro applied |
+| **BRANCH_FLIP** | C | ✅ 已实现;profile-guided | if/else body 重排。policy-sensitive;显式启用时要求 `bpfprof --per-site` 真实 profile;缺 PMU 数据直接 exit 1,无 heuristic fallback | profile-driven pass |
+| **Dynamic map inlining** | C | ✅ 已实现 | snapshot once → inline 热 key → guard(key 等于热 key) → fast path 用 inline const,slow path 调 `map_lookup_elem` | **11556 个 map_lookup site;Katran 22→2 条(-91%);Tetragon 447→2(-99.6%)**。设计:`dynamic_map_inlining_design_20260324.md` |
+| **Verifier const prop** | B | ✅ 已实现 | `log_level=2` → tnum/range 常量 → `MOV imm` → branch folding。Verifier-state-driven 的范式实例(§1.4 Insight 3) | **23% verifier state 含精确常量;62.5% 分支和立即数比较** |
+| **DCE** | A | ✅ 已实现 | const prop / map inline 后的 unreachable block / dead store 消除 | bpfopt DCE 让更多条件变常量 |
+| **Bounds check merge** | A | ✅ 已实现 | guard window merge / hoisting,合并小窗口为大窗口 | **42 guard sites,严格冗余=0%,但 83.3% 可合并(ladder 结构)**。实现:`BoundsCheckMergePass` |
+| **`skb_load_bytes` → direct packet access** | A | 📝 值得做 | helper call specialization 的 P0 case;纯 bytecode rewrite | **590 skb_load_bytes site(Cilium 428)**。调研:`helper_call_inlining_research_20260324.md` |
+| **Runtime-constant burn-in** | C | 📝 待实现 | 观测稳定的 map cell / 配置 / helper 返回值 → 编进 bytecode 当 immediate + guard | 未来工作 |
+| **Loop bound specialization** | C | 📝 待实现 | profile 出实际 iteration count → 重写为 unrolled / tighter-bounded 版本 + guard | 直击 K2/EPSO 打不到的 verifier conservative loop bound 空间 |
+| **Cold branch pruning** | C | 📝 待实现 | observed-never-taken 分支 → trap-and-reload guard | 跟 `branch_flip` 互补 |
+| **Map representation switching** | C | 📝 future work | hash map 实际只有 N 条 entry 时 → array-backed lookup + guard | 未来工作;V8 object shape 类比 |
+| **Frozen map inlining** | A | ❌ 不做 | BPF_MAP_FREEZE 后只读 map → 常量 MOV | **真实 workload 无显式 freeze,hot-path lookup ≈ 0** |
+| **Subprog inline** | A/C | ⏸ 不在主线 | bytecode 层 budgeted inline。**REJIT 元数据 blocker** 在 stock-kernel + LD_PRELOAD shim 路径下不再适用(shim 在 PROG_LOAD 拦截层重发整 prog,无 func_info/line_info UAPI 增量),PGO selective inline 留作后续实验 | **834 调用点 / 67 对象(11.8%)**。调研:`subprog_inline_research_20260326.md` |
+| **Spill/fill 消除** | A | ❌ 不做 | 冗余 spill/fill 消除 | 内核已有 KF_FASTCALL,增量收益低 |
+| **除法强度削减** | A | ⏸ 后续 | 常量除数 → shift+multiply。支持 app 命中几乎全是 64-bit `/1e9`,纯 bytecode 需要 64x64→128 multiply-high emulation,先等 per-site profile 数据 | DIV/MOD 共 `1269` sites,Cilium `/1e9` 占 `553`。调研:`docs/tmp/division_reduction_research_20260430.md` |
+| **寄存器重分配** | A | 📝 待实现 | BPF bytecode 层面 R1-R5→R6-R9 live-range 重分配,删除跨 helper caller-saved spill/fill | **62,406 matched pairs,59,297 跨 helper(95.0%),Tetragon+Tracee 占 91.7%**。调研:`docs/tmp/register_realloc_research_20260430.md` |
+| **Stack-slot coalescing** | A/C | ⏸ verifier-state 版作 future work | 静态版调研:**0 coalescable pairs**(安全 slot 都是长生命周期 save slot)。verifier-state-driven 版可窄化 helper memory range,但静态版不进 first wave | 实测:`docs/tmp/stack_coalesce_census_20260506.md` |
+| **PHI-style merge** | A/B | ⏸ second wave | 不同 path 后 reg 一致的合并简化。imm-only 安全且 site 数可观;copy-reg / alu-op 需要 verifier-state interference 分析 | **121,556 CFG merge points → 1,316 all-assign-same-imm sites + 61 copy-same-reg + 85 same-alu-op + 46 strict diamond**。实测:`docs/tmp/phi_merge_census_20260506.md` |
+| **Loop-invariant code motion (LICM)** | A/B | ⏸ second wave | open-coded 循环里把不变量提到循环外。仅 stack-reload 候选;safety 需 verifier stack-state / helper-memory bounds | **934 open-coded loops → 118 unique stack-load LICM sites**。实测:`docs/tmp/licm_census_20260506.md` |
+| **Strength reduction (mul/mod by const)** | A | ❌ 不做 | LLVM 已在源码层 reduce,BPF bytecode 直接是 LSH/AND 形态 | 实测:`docs/tmp/strength_reduction_census_20260506.md`(0 sites) |
+| **Local instruction scheduling** | A | ❌ 不做 | 同 BB 内 pure ALU 指令调度。risk 高,收益 low-medium | 不在第一波 |
+| **Helper inline beyond map_inline** | A | ❌ 不做 | `bpf_jiffies64` / `bpf_get_smp_processor_id` / current_task helpers 等已被 kernel inline | 新候选需窄 whitelist + 每调用 stability proof |
 
 ### 3.2 安全加固变换（暂不在 OSDI 评估范围）
 
@@ -325,7 +298,7 @@ Implication: the remaining BPF-level opportunity is adjacent `MOV+ADD`. A core J
 
 | 变换 | 状态 | 说明 |
 |------|:---:|------|
-| **Spectre 缓解注入** | ⏸ 暂不评估 | SpeculationBarrierPass + bpf_barrier kinsn。代码保留 |
+| **Spectre 缓解注入** | ⏸ 暂不评估 | SpeculationBarrierPass(用户态 `bpfopt` pass 插入 `BPF_NOSPEC`)。代码保留 |
 | **LFENCE/BPF_NOSPEC 消除** | ⏸ 暂不评估 | corpus 861 程序实测 BPF_ST_NOSPEC = 0 |
 | **危险 helper 防火墙** | ⏸ 暂不评估 | DangerousHelperFirewallPass。代码保留 |
 | **BPF 程序漏洞热修复** | ⏸ 暂不评估 | LivePatchPass。代码保留 |
@@ -339,67 +312,99 @@ Implication: the remaining BPF-level opportunity is adjacent `MOV+ADD`. A core J
 
 ## 4. 系统架构
 
-### 4.1 两套正交接口，三组件架构
+### 4.1 系统架构 — 全用户态 stock-kernel
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│  Component 3: bpfopt-suite v3                                │
-│  Defines "HOW to optimize" — daemon + bpfopt/bpfprof CLIs    │
-│                                                              │
-│  runner socket → daemon snapshot → bpfopt pass(es)           │
-│                         │         ↘ direct BPF_PROG_REJIT    │
-│                         │           bpfget + kernel-sys      │
-│                         ↑                                    │
-│                  bpfprof profile CLI                         │
-│                                                              │
-│  Daemon watches events, preserves runner protocol, and       │
-│  never transforms bytecode in-process.                       │
-└───────┬────────────┬────────────┬───────────────┬────────────┘
-        │            │            │               │
-   GET_NEXT_ID  GET_ORIGINAL                 PROG_REJIT
-        │            │            │               │
-┌───────▼────────────▼────────────▼───────────────▼────────────┐
-│  Component 1: Kernel Syscall Extensions                      │
-│                                                              │
-│  BPF_PROG_GET_ORIGINAL  → 返回 load 时保存的原始 bytecode     │
-│                                                              │
-│  BPF_PROG_REJIT          → 接受完整新 BPF bytecode            │
-│    │  bpf_check()        → 完整 re-verify（标准路径）          │
-│    │  bpf_int_jit_compile() → re-JIT（含 kinsn 展开）         │
-│    │  image swap         → 原子替换 JIT image（同一 struct     │
-│    │                       bpf_prog，零 attach 变化）          │
-│    └  fail → 什么都不改，返回 verifier log                     │
-│                                                              │
-│  Component 2: kinsn — Platform-Specific Instruction Modules  │
-│  Defines "WHAT CAN be optimized" — per-platform capabilities │
-│    Implementation: kinsn via KF_INLINE_EMIT                  │
-│    → verifier: check_kfunc_call()（零改动）                   │
-│    → JIT: emit 自定义 native 序列（而非 CALL）                 │
-│    → fallback: emit 普通 CALL（module 未加载时）               │
-│                                                              │
-└──────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  Runner (Python, 现有 corpus/micro 框架不变)                    │
+│                                                                 │
+│  - 读 runner/config/passes/<pass>/default.yaml                  │
+│  - rejit_plan.build_execute_plan_payload() 把 yaml.command      │
+│    塞进 JSON                                                    │
+│  - 通过 per-pid socket 发 execute_step 给目标 app 的 shim       │
+│  - 现有 daemon socket 协议复用,只是 socket path 变成 per-pid    │
+└──────────────────┬──────────────────────────────────────────────┘
+                   │  unix socket: /var/run/bpfrejit/shim-<pid>.sock
+                   │  {"cmd":"execute_step","prog_id":N,
+                   │   "command":"timeout 6000 bpfopt --pass noop
+                   │              --input ${INPUT} --output ${OUTPUT}
+                   │              --report ${REPORT} ..."}
+                   ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  App process (Tracee / Tetragon / Katran / Cilium / bpftrace /  │
+│               BCC / otelcol-ebpf-profiler 等真实 upstream 二进制) │
+│                                                                 │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │  libbpfrejit_shim.so  (LD_PRELOAD-inject, ~1000 行 C)     │  │
+│  │                                                           │  │
+│  │  intercept thread (同步 syscall path):                    │  │
+│  │    syscall(SYS_bpf, BPF_PROG_LOAD, ...) ── 落 bytecode    │  │
+│  │      ── OBJ_GET_INFO_BY_FD → kernel_prog_id              │  │
+│  │      ── obj_insert into prog/map/link/perf state table   │  │
+│  │    perf_event_open(2), ioctl(2), close(2) 同样拦截       │  │
+│  │                                                           │  │
+│  │  socket thread:                                          │  │
+│  │    /var/run/bpfrejit/shim-<pid>.sock                     │  │
+│  │    execute_step → 替换 ${VAR} → posix_spawn /bin/sh -c   │  │
+│  │      (env 删 LD_PRELOAD,避免 bpfopt 自己被 shim 拦截)    │  │
+│  │                                                           │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│              │                                                  │
+│              │  fork+exec(/bin/sh -c "bpfopt --pass ...")       │
+│              ↓                                                  │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │  bpfopt (pure bytecode CLI, 零 syscall)                  │  │
+│  │  stdin: struct bpf_insn[]   stdout: rewritten insn[]     │  │
+│  │  --pass <name>  --input  --output  --report              │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│              │                                                  │
+│              │  rewritten bytecode → shim 后续做 candidate      │
+│              │  BPF_PROG_LOAD(stock) → 成功后 link_update /      │
+│              │  PERF_EVENT_IOC_SET_BPF 等 swap recipe(详 PoC-C v2)│
+│              ↓                                                  │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │  Stock kernel — verifier + JIT + attach 接口             │  │
+│  │  零 patch:无 BPF_PROG_REJIT / 无 GET_ORIGINAL syscall    │  │
+│  │  无 kinsn 模块。candidate prog 跟原始 prog 经同一         │  │
+│  │  bpf_check() + bpf_int_jit_compile() 路径                │  │
+│  └───────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### 4.2 bpfopt-suite v3 工作流
+**所有 BPF syscall(包括 candidate `BPF_PROG_LOAD`、`BPF_LINK_UPDATE`、`PERF_EVENT_IOC_SET_BPF`)都从 app 进程内发出**,因为这些操作需要触及 app 进程的 fd table。Runner / 外部进程在 stock kernel 下无法跨进程拿 app 的 fd ownership(详 `docs/tmp/poc_b_bcc_perf_event_swap.md`),这是 shim 必须在 app 进程内的根本原因。
 
-v3 per-pass ReJIT 后，runner 边界仍是 daemon socket；bytecode transform 仍是 CLI/file protocol，kernel-facing state 不跨进程序列化。
+### 4.2 工作流
 
 ```
-1. runner optimize request       → daemon socket JSON
-2. daemon bpfget library         → in-memory ProgramSnapshot: bytecode, prog info, map ids/metadata
-3. daemon pass loop              → 固定 12 pass，逐个调用 bpfopt --pass <name>
-4. daemon fd_array builder       → used_maps 顺序 map fd；不追加 BTF fd
-5. daemon per-pass ReJIT         → 每个 pass 输出立即 BPF_PROG_REJIT；kernel re-verify → re-JIT → image swap
-6. verifier states               → 解析本次 ReJIT log_level=2 verifier log，供后续 pass 使用
+1. App 启动(LD_PRELOAD=libbpfrejit_shim.so)
+   shim_init → 建 state table → bind socket → 起 worker 线程
+2. App 自然加载 BPF
+   shim 拦截每次 BPF_PROG_LOAD,落原始 bytecode + 关联 kernel_prog_id
+3. Runner 决定 optimize
+   读 yaml,sequence pass(默认 policy 见 runner/config/passes/)
+4. 每个 pass:
+   runner ───execute_step(prog_id, shell command)──► shim socket
+   shim:替换 ${INPUT}=<bytecode_path>, ${OUTPUT}=workdir/out.bin,
+         ${REPORT}=workdir/report.json, ${PROG_TYPE}=..., ${TARGET}=...
+   shim:/bin/sh -c <substituted> → 内部 fork bpfopt CLI
+   bpfopt:读 stdin/--input,跑 --pass,写 stdout/--output + --report
+5. (Phase 2 swap,待实现):
+   shim 用 candidate bytecode 调 stock BPF_PROG_LOAD
+   按 attach 类型走 swap recipe(LINK_UPDATE / SET_BPF / map_update_elem)
+6. Runner 读 bpf_stats 测 exec_ns,记 logical_id ↔ {old, new} prog_id 映射
 ```
 
-典型 runner path：
+`runner/config/passes/noop/default.yaml` 的真实 command(已在仓库):
 
-```bash
-printf '{"cmd":"optimize","prog_ids":[123],"enabled_passes":["map_inline","dce"]}\n' | socat - /var/run/bpfrejit.sock
+```yaml
+log_level: 1
+command: |
+  timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} \
+                       --report ${REPORT} --prog-type ${PROG_TYPE} \
+                       --target ${TARGET}
 ```
 
-默认 12-pass policy 中 `map_inline` / `const_prop` 使用前一个成功 pass 的 ReJIT verifier log 生成 `verifier-states.json`。缺失 states 的 pass 记录 `skipped_missing_states` 并继续后续 pass；解析不到 states 仍是错误，不允许空 states fallback。
+Shim 把 yaml 的 `command` 字段视作 opaque shell text,只替换 `${VAR}` 然后 `/bin/sh -c`。**Shim 不知道 `bpfopt` 是什么、也不知道 `noop` 是什么**;新 pass 加进来只需要写一个 yaml + 一个 `bpfopt` pass,shim/Makefile/Dockerfile 零改动。
 
 ### 4.3 安全模型
 
@@ -410,85 +415,53 @@ Safety（kernel 保证）：
 
 Correctness（用户态工具链负责）：
   bpfopt pass 和 orchestration 脚本确保变换保持程序语义
-  手段：differential testing、kernel ReJIT verifier result、gradual rollout、per-pass failure inspection
+  手段:differential testing、stock kernel verifier result(per-candidate-load)、gradual rollout、per-pass failure inspection
   用户态变换有 bug → 程序行为可能变 → 但内核安全不受影响（fail-safe）
 ```
 
-### 4.4 kinsn 机制(本论文非主线)
+### 4.3.5 Two-tier deoptimization 机制
 
-kinsn 是 BpfReJIT daemon 在内核侧引入的另一项工作,但作为独立论文(idea #2)
-处理。本文档只把它当作可选的下游 pass 集合来引用:
+bpfopt 是 speculative optimizer,**每个 speculative specialization 必须配对一个 deopt path**。传统 JIT(V8/HotSpot)用 **on-stack replacement(OSR)** 在 speculation 失效时把当前 stack frame 翻译回 interpreter 继续跑;**bpfopt 不需要 OSR**,因为 eBPF 程序天然 run-to-completion(每次 event 触发跑一遍完整 program,中途不暂停)。换来的是更简单的 deopt mechanism:
 
-- 概念定位与论文 framing: `docs/kinsn-idea.md`
-- 详细机制设计: `docs/kinsn-design.md`
-- 形式化语义: `docs/kinsn-formal-semantics.md`
+**Tier 1 — Inline guard fast/slow path(per-invocation)**
 
-本论文的默认 pipeline 是纯 BPF-to-BPF 的 rewrite pass(§3.1 中所有 `kinsn = 否`
-的行: `map_inline`、`const_prop`、`dce`、`bounds_check_merge`、`branch_flip`、
-`skb_load_bytes_spec`、`wide_mem` 等)。这些 pass 不需要 kinsn 框架,也不需要
-per-arch kinsn 模块。
+> Speculation 编进 bytecode 时**自带 slow path fallback**。比如 specialize "map 热点 key = K"时,生成的代码长这样:
+>
+> ```
+>   if (key == K)        # guard,一两条 BPF 指令
+>       <inline 编译进来的 hot value>
+>   else
+>       slow_path:        # 原 map_lookup_elem 走这条
+>       call BPF_FUNC_map_lookup_elem
+> ```
+>
+> Guard 每次 invocation 都跑(开销 ≈ 1-2 条指令),guard miss 时走同一 program version 里的 slow path,**不切换程序、不重新 verify**。这跟 **Self / PIC 时代的 inline cache** 同构,跟 V8 的 OSR-based deopt 不同。
+>
+> 这层处理 **per-packet / per-invocation** 的特化失效 — guard 极便宜、miss 极罕见时就划算。
 
-如果部署同时启用 kinsn 框架,本文档的 daemon 可在 pipeline 中加入 kinsn-introducing
-pass;两条 paper 线在工程上 compose,但在论文 framing 上各自独立。
+**Tier 2 — Async respecialization(phase-shift)**
 
-### 4.5 Kernel 文件布局（`vendor/linux-framework/` rejit-v2 分支）
+> Shim worker 线程后台监控 guard miss rate。如果 invariant 真的长时间漂移(workload phase 变化、配置更新、新 hot key 出现),累积的 miss 信号触发 runner 重发 `execute_step`,**异步重 specialize**:
+>
+> ```
+> shim 观测 guard miss rate > threshold
+>   → 通过 socket 告知 runner / runner 主动 poll
+>   → runner 重发 execute_step(同一 prog,新 profile)
+>   → shim 拿 candidate bytecode 调 stock BPF_PROG_LOAD
+>   → kernel verifier 重过(safety 重新认证)
+>   → 按 attach 类型走 swap recipe(LINK_UPDATE / SET_BPF detach+reopen /
+>      MAP_UPDATE_ELEM PROG_ARRAY slot 等,详 PoC-C v2)
+> ```
+>
+> 这层处理 **phase-level** 的特化失效。延迟是 ms-100ms 级,**只有 miss rate 真升上来才触发**,稳态零开销。
 
-| 文件 | 职责 | 组件 |
-|------|------|------|
-| `include/linux/bpf.h` | `bpf_kinsn_ops`/`bpf_kinsn_effect`/`bpf_kinsn_call` 结构体、注册 API、`bpf_tramp_user` | kinsn + syscall |
-| `include/linux/bpf_verifier.h` | kinsn verifier 辅助结构体 | kinsn |
-| `include/linux/btf.h` | `KF_KINSN` flag（替代 KF_INLINE_EMIT） | kinsn |
-| `include/uapi/linux/bpf.h` | `BPF_PROG_REJIT` cmd、`orig_prog_insns`、`fd_array` | syscall |
-| `kernel/bpf/syscall.c` | GET_ORIGINAL、REJIT 入口、swap、multi-subprog layout match | syscall |
-| `kernel/bpf/verifier.c` | kinsn 注册/查找、model_call verifier 通用流程、sidecar decode、load 时保存原始 bytecode | kinsn + syscall |
-| `kernel/bpf/trampoline.c` | REJIT 后 trampoline refresh（fentry/fexit/freplace） | syscall |
-| `kernel/bpf/dispatcher.c` | REJIT 后 XDP dispatcher refresh | syscall |
-| `kernel/bpf/core.c` | `bpf_tramp_user` 初始化 | syscall |
-| `arch/x86/net/bpf_jit_comp.c` | JIT CALL case kinsn inline dispatch | kinsn |
-| `arch/arm64/net/bpf_jit_comp.c` | ARM64 JIT kinsn inline dispatch | kinsn |
-| `net/core/filter.c` | `bpf_prog_refresh_xdp()` wrapper | syscall |
+**为什么不需要 OSR**
 
-### 4.6 bpfopt-suite v3 设计约束
+OSR 在 V8 里的存在是因为 JS 函数可以跑很久(循环、长 call chain),speculation 失效时不能等当前调用结束。eBPF 程序每次 invocation 微秒级、run-to-completion,**guard miss 时让这次 invocation 走 inline slow path 完成就行**,不需要 mid-execution 切版本。这条 design 让 deopt 工程量比 V8 OSR 小一个数量级 — **没有 stack frame 翻译、没有 deopt metadata 表、没有 safe-point 标注**。Paper 里要明确 articulate 这个 saving 是 eBPF execution model 天然给的红利。
 
-权威设计文档是 `docs/tmp/bpfopt_design_v3.md`。本文档中任何 bpfopt/daemon 设计都必须服从 v3。
+**两层 + verifier 的关系**
 
-2026-05-01 per-pass ReJIT 重构后，v3 的权威边界是：`bpfopt` / `bpfprof` 保持 CLI，`bpfget` 是 daemon-owned in-process library，每个 pass 的 `BPF_PROG_REJIT(log_level=2)` 由 daemon 通过 `kernel-sys` 直接执行。`bpfverify` / `bpfrejit` crate 和 daemon thin dry-run module 已删除。
-
-- **`bpfopt` 是纯 bytecode CLI**：不直接调用 BPF syscall；stdin/stdout 传 raw `struct bpf_insn[]` binary；必须显式传 `--pass <name>`，一次只跑一个 pass；`--target`、`--profile`、`--verifier-states`、`--map-values`、`--report` 等 side-input/output 全部走文件。
-- **`bpfprof` 是独立 profile CLI**：PMU profiling 和 per-site branch profile 仍由外部 CLI 输出文件；daemon socket 不管理 profile lifecycle，也不把 profile path 传给 `bpfopt`。
-- **kernel-facing 功能在 daemon 进程内**：`bpfget` 读取 live program bytecode/metadata/map info；daemon 只从 `prog_info.used_maps` 构造 in-memory map fd array；每个 pass 的 ReJIT 直接调用 `kernel_sys::prog_rejit()`。
-- **daemon 是 runner socket + kernel syscall orchestrator**：保留 socket + JSON 协议，watch 新程序、维护 session 生命周期；收到 optimize 请求后只 fork+exec `bpfopt` 做 bytecode transform。
-- **主路径不 dry-run**：daemon 不调用 `BPF_PROG_LOAD` 接受 candidate。kernel 在每次 `BPF_PROG_REJIT` 内 re-verify；失败记录到对应 pass detail。
-- **verifier states 来自真实 ReJIT log**：默认 12-pass policy 包含 `map_inline` / `const_prop`。daemon 解析前一个成功 per-pass ReJIT 的 `log_level=2` verifier log 生成 `verifier-states.json`。缺失 states 记录 per-pass skip 并继续；parse 失败直接 error，不允许空结果 fallback。
-- **main ReJIT 无 watchdog**：`BPF_PROG_REJIT` 是同步 syscall，daemon 不加 timeout；kernel verifier hang 会卡住 daemon。当前选择文档化接受该限制，不加 subprocess fallback。
-- **安全 pass 不在 OSDI 范围**：`speculation_barrier`、`dangerous_helper_firewall`、`live_patch` 不在默认 pipeline。
-- **结构化 per-pass 记录**：每个 program 的每个 pass 记录 `pass`/`status`/`sites_applied`/`insn_delta` 等事实字段；pass ReJIT errno 记录在该 pass detail 中，已成功 ReJIT 的 bytecode 保持提交。
-- **Benchmark runner Python 保持不动**：v3 迁移采用 §8 方案 B，`runner/libs/`、`corpus/`、`micro/` 继续走 daemon socket + JSON 稳定边界；daemon 内部适配到 CLI。v3 迁移期只允许 runner bug fix 和 stale test data 更新。
-
-#### Fail-fast 原则：禁止 dead code / fallback / silence
-
-`CLAUDE.md` 的 **Fail-Fast: No Dead Code, Fallback, or Silenced Errors** 是当前实现约束：能力缺失、syscall/IO/parse 失败、无法生成完整结果时都必须 exit 1 并向 stderr 给出友好错误，不能用降级路径、空结果或 warning 继续掩盖问题。所有 fn、struct、字段、常量都必须有真实调用方；`#[allow(dead_code)]` 标注对象要删除，test-only helper 改用 `#[cfg(test)]`。daemon-owned target probing 缺少 kinsn/BTF 能力时必须失败，不能生成空 capability fallback。`bpfprof` PMU 不可用时必须 fail-fast；P88 后 per-site branch profile 字段为必填，缺真实 site 数据时 `bpfprof`/`branch_flip` 必须 exit 1。`kernel-sys` 不保留 `BPF_PROG_LOAD` dry-run compatibility wrapper；无真实调用方的 wrapper 应删除而不是保留兼容层。`BpfInsn` 的 `#[allow(dead_code)]` helper 要改成 `#[cfg(test)]` 或删除，`PassManager::pass_count` / `pass_names` 这类无调用方 API 也要清理。
-
-#### CLI 之间不交叉依赖
-
-`CLAUDE.md` 的 **No CLI Cross-Dependencies** 是实现约束。剩余 standalone CLI binary crate（`bpfopt`、`bpfprof`、`bpfrejit-daemon`）之间不能有 runtime dependency，也不能有 compile-time path-dependency。`bpfget` 是 daemon-owned library crate，不是 CLI crate；`bpfverify` / `bpfrejit` crate 已删除；共享 syscall/data access 必须通过 `kernel-sys`。
-
-当前实现状态：`bpfrejit-daemon` 不依赖 `bpfopt` 的 lib 部分；daemon 通过 `kernel-sys` 和 `bpfget` 访问 live BPF state，优化变换通过 `bpfopt` CLI 完成。`bpfprof` 保持 standalone CLI，不经过 daemon socket。
-
-#### 依赖 libbpf-rs，不自己 wrap
-
-`CLAUDE.md` 的 **Use libbpf-rs/libbpf-sys, Don't Re-Wrap** 覆盖实现层依赖选择。只要 `libbpf-rs`/`libbpf-sys` 已经提供 BPF syscall wrapper、`struct bpf_insn`、BPF opcode 常量或 prog type enum，就必须直接使用它们，避免手写 wrapper 引入 `bpf_attr` 和 kABI 漂移错误。唯一必须自写的是项目 fork 的自定义 syscall：`BPF_PROG_REJIT` 和 `BPF_PROG_GET_ORIGINAL`，因为上游 libbpf 不支持。v3 §11 中“libbpf 直接链接（未来走 fork+exec）”是早期保守限制，本文档记录的新规则和 `docs/tmp/bpfopt_design_v3.md` 已经覆盖它。
-
-#### kernel-sys 是唯一 syscall 入口
-
-`kernel-sys` 是 bpfopt-suite 内唯一直接调用 BPF syscall 的 crate。`bpfopt` 可以依赖 `kernel-sys` 获取 `bpf_insn` 类型、opcode 常量、prog type 枚举等纯数据 API，不再要求 `bpfopt` 完全不依赖 `kernel-sys`。`bpfopt` 仍然不能直接调用 `libc::syscall(SYS_bpf, ...)`，也不能用其它方式绕过 `kernel-sys` 调 BPF syscall。`bpfprof`、`bpfrejit-daemon`、daemon-owned `bpfget` 同样只能通过 `kernel-sys` 调 BPF syscall。`kernel-sys` 内部对标准 BPF 命令使用 `libbpf-rs`/`libbpf-sys`，只对 fork 自定义命令 `BPF_PROG_REJIT` 和 `BPF_PROG_GET_ORIGINAL` 用 `libc::syscall` 自行 wrap。
-
-实现阶段：
-
-1. **Phase 1：核心 bytecode CLI**。保留 `bpfopt`，实现 `bpfopt --pass <name>` 单 pass CLI 和 `list-passes`。
-2. **Phase 2：kernel syscall libs + profile CLI**。`bpfprof` 保持 CLI；`bpfget` 归 daemon-owned library；per-pass ReJIT orchestration 在 daemon 内直接调 `kernel-sys`。
-3. **Phase 3：集成**。runner Python 保持 daemon socket + JSON 边界，daemon 内部链接 kernel-facing libs，只 fork+exec `bpfopt`；`bpfprof` 保持 daemon 外 standalone CLI。
-4. **Phase 4：增强**。完善 target probing、kinsn BTF capability 扩展。
+Tier 1 的 fast/slow path 都在**同一个 verifier-accepted program version** 里,所以两条 path 都是 safe。Tier 2 的新 version 重交 stock verifier,verifier 接受才生效。**两层都不需要 bpfopt 自己证 safety**,继续吃 verifier 当 oracle(§1.4 Insight 3)。
 
 ---
 
@@ -530,7 +503,6 @@ pass;两条 paper 线在工程上 compose,但在论文 framing 上各自独立�
 - **每个 corpus 程序必须有 exec_ns**。没有 "code size only" fallback。不能测 exec_ns 的程序不进 corpus。
 - **BPF 程序用它在生产中被使用的方式来测量**。有原生应用的程序（Tracee/Tetragon/Katran/BCC/bpftrace/scx/KubeArmor）必须用 app-native loader，不用 generic libbpf。
 - **两种测量路径，没有第三种**：(1) App-native：真实应用加载+触发 BPF，`bpf_enable_stats` 读 per-program exec_ns；(2) TEST_RUN：`BPF_PROG_TEST_RUN` 直接测，仅限 XDP/TC/socket_filter 等支持的 prog_type。
-- **kinsn module 证据**：corpus artifact 必须包含 kinsn module 加载状态（loaded_modules/failed_modules/daemon discovery log）。
 - **ARM64 默认走 AWS 远端**（t4g.small bench / t4g.micro test），不在本地 QEMU 跑 Python。
 - **AWS 成本约束**（硬性规则）：所有 AWS 跑（smoke + authoritative）默认 `t3.small` x86 / `t4g.small` arm64（2 vCPU/2GB），test suite 用 `t3.micro` / `t4g.micro`。**`medium` 是绝对上限，仅允许作为 OOM 修复手段；禁止升级到 medium 以上**（不允许 c5/c6g、不允许 xlarge/2xlarge、不允许为 variance/并行/任何 SAMPLES 而升级）。variance 噪声 / 吞吐限制 / CPU credit throttling 必须通过代码优化（缩 workload、减少 tracing、降低并发 pass）解决，**不能换大机器**。spot instance 优先用于非时间敏感 run。SAMPLES 上限 = 3，paper-grade 由 per-program `min_runs ≥ 100` filter 决定，不靠 SAMPLES 拉到 30。
 - **统计要求**：报告必须同时给 applied-only geomean 和 all-comparable geomean + sample count + comparison exclusion reasons。repeat ≥ 50，论文级 ≥ 500。
@@ -552,10 +524,10 @@ pass;两条 paper 线在工程上 compose,但在论文 framing 上各自独立�
   - **Loader**（谁加载 BPF）：原生 app（tracee, bcc/execsnoop, katran_server, libbpf-bootstrap/minimal, systemd, ...）。每个 repo 的程序必须由该 repo 自己的可执行文件加载。
   - **Workload driver**（什么触发 BPF 执行）：app 自身事件、exec_storm、fio、network_traffic 等。Workload 是独立维度，可叠加。
   - **Measurement**（读什么指标）：bpf_stats per-program exec_ns（corpus）以及原始 app throughput/latency/error counters
-- **生命周期单元是 loader instance**：一个 loader instance = 一个可执行进程加载的所有 BPF 程序。Tracee 是一个 loader（启动一次加载 30+ BPF 程序）；BCC 的每个 tool（execsnoop, opensnoop, ...）是独立 loader（各加载 1-2 个 BPF 程序）；Katran 是一个 loader。Orchestrator 按 loader instance 分组，每个 instance 一次 start→measure→REJIT→measure→stop 生命周期。
+- **生命周期单元是 loader instance**：一个 loader instance = 一个可执行进程加载的所有 BPF 程序。Tracee 是一个 loader（启动一次加载 30+ BPF 程序）；BCC 的每个 tool（execsnoop, opensnoop, ...）是独立 loader（各加载 1-2 个 BPF 程序）；Katran 是一个 loader。Orchestrator 按 loader instance 分组，每个 instance 一次 start→measure→optimize→measure→stop 生命周期(optimize 由 runner 通过 per-pid shim socket 触发,见 §4)。
 - **缺 runner 的 repo 必须补 runner**：不能标"不可测"然后跳过。没有 runner 是实现缺口，不是分类问题。
 - **禁止在 object (.bpf.o) 层级做规划/分流/调度**：object 是编译产物的打包格式，对测量无意义。Orchestrator 的调度单元是 loader instance（app），不是 object。YAML 里不出现 .bpf.o 路径。program 通过 bpf_stats/get_next_id 在运行时自动发现，不需要预先枚举。
-- **YAML 只列 app，不列 object/program**：YAML 定义 app（loader instance），每个 app 指定 runner + workload。启动 app 后通过 bpf_stats/get_next_id 自动发现所属 BPF 程序并测量，不需要在 YAML 里枚举 .bpf.o 或 program name。这和“单 daemon session + 运行时发现 live program”的当前架构一致；Object 只是编译产物的打包格式，和调度/测量无关。
+- **YAML 只列 app，不列 object/program**：YAML 定义 app（loader instance），每个 app 指定 runner + workload。启动 app 后通过 `list_progs` shim socket RPC 自动发现该 app 加载的 BPF 程序并测量,不需要在 YAML 里枚举 .bpf.o 或 program name。Object 只是编译产物的打包格式,和调度/测量无关。
 - **YAML 定义 corpus app workload**：每个 app 指定 runner + workload。Corpus 读 bpf_stats exec_ns，并把原始 app workload metrics 放进 per-app JSON。
 - **YAML schema**：
   ```yaml
@@ -574,13 +546,13 @@ pass;两条 paper 线在工程上 compose,但在论文 framing 上各自独立�
       workload:
         corpus: test_run       # corpus: BPF_PROG_TEST_RUN 精确测
   ```
-- **Corpus TEST_RUN 走 Python + bpftool + ctypes**：`bpftool prog loadall/run/show` + `bpf_enable_stats` 直接测 live kernel program，同一加载实例上对比 baseline/rejit
-- **micro 仍保留极简 C++ tool**：`micro_exec test-run` 只服务 isolated micro benchmark，没有 batch orchestration、没有 prepared state、没有 daemon 通信
-- **Python Orchestrator 是 corpus benchmark 的唯一编排者**：协调 app runner + daemon + bpftool/bpf_stats 的顺序
+- **Corpus TEST_RUN 走 Python + bpftool + ctypes**：`bpftool prog loadall/run/show` + `bpf_enable_stats` 直接测 live kernel program,同一加载实例上对比 baseline / post-optimize
+- **micro 仍保留极简 C++ tool**：`micro_exec test-run` 只服务 isolated micro benchmark,没有 batch orchestration、没有 prepared state、没有 shim 通信
+- **Python Orchestrator 是 corpus benchmark 的唯一编排者**：协调 app runner + shim socket + bpftool/bpf_stats 的顺序
 - **每个测量单元是一个 loader instance**：没有跨 loader 的共享 state
 - **并行在 orchestrator 层**：不同 loader instance 之间可并行（prepare 阶段），测量阶段串行避免 CPU 竞争噪声
 - **Makefile 是唯一入口**：所有 benchmark 从 `make vm-*` 触发
-- **Same-image paired measurement**：load→baseline exec_ns→daemon REJIT→rejit exec_ns，同一加载实例上对比
+- **Same-image paired measurement**:load→baseline exec_ns→shim execute_step optimize→post exec_ns,同一加载实例上对比
 
 #### 组件职责
 
@@ -605,53 +577,56 @@ pass;两条 paper 线在工程上 compose,但在论文 framing 上各自独立�
 │    workload.run(seconds=10)                              │
 │    baseline = read_bpf_stats(prog_ids)                   │
 │                                                          │
-│    daemon.optimize(prog_ids)                              │
+│    shim_socket.execute_step(prog_ids, command)            │
 │    workload.run(seconds=10)                              │
-│    rejit = read_bpf_stats(prog_ids)                      │
+│    post = read_bpf_stats(prog_ids)                       │
 │                                                          │
 │    loader.stop()                                         │
-│    report(prog_ids, baseline, rejit)                     │
+│    report(prog_ids, baseline, post)                      │
 │                                                          │
-│  不做：BPF 加载、触发、测量实现、daemon 通信细节          │
+│  不做:BPF 加载、触发、测量实现、shim 内部细节            │
 └────────┬─────────────────┬──────────────┬───────────────┘
          │                 │              │
-┌────────▼────────┐  ┌─────▼─────┐  ┌─────▼──────────────┐
-│  Loader +       │  │  Daemon   │  │  bpftool +         │
-│  Workload       │  │  (Rust)   │  │  bpf_stats         │
-│                 │  │           │  │                    │
-│  负责：         │  │  负责：   │  │  负责：            │
-│  start app      │  │  REJIT    │  │  prog loadall/run  │
-│  run workload   │  │  优化     │  │  prog show + stats │
-│  stop app       │  │           │  │  返回 exec_ns      │
-│                 │  │  不做：   │  │                    │
-│  不做：         │  │  测量     │  │  不做：            │
-│  BPF 加载       │  │  加载     │  │  daemon 通信       │
-│  直接测量       │  │  触发     │  │  编排              │
-│  优化           │  │           │  │  app 生命周期      │
-└─────────────────┘  └───────────┘  └────────────────────┘
+┌────────▼────────┐  ┌─────▼──────┐  ┌────▼────────────────┐
+│  Loader +       │  │  Shim (C,  │  │  bpftool +          │
+│  Workload       │  │   in-app)  │  │  bpf_stats          │
+│                 │  │            │  │                     │
+│  负责:          │  │  负责:     │  │  负责:              │
+│  start app      │  │  intercept │  │  prog loadall/run   │
+│  run workload   │  │  执行命令  │  │  prog show + stats  │
+│  stop app       │  │  swap     │  │  返回 exec_ns       │
+│                 │  │            │  │                     │
+│  不做:          │  │  不做:     │  │  不做:              │
+│  BPF 加载       │  │  yaml 解析 │  │  shim 通信          │
+│  直接测量       │  │  pass 调度 │  │  编排                │
+│  优化           │  │  测量      │  │  app 生命周期       │
+└─────────────────┘  └────────────┘  └─────────────────────┘
 ```
 
 #### App-native 测量流程
 
 ```
-Orchestrator                App Runner              Daemon           bpf_stats
-    │                          │                      │                 │
-    ├── start(repo) ──────────►│ start app            │                 │
-    │                          │ (app loads BPF)      │                 │
-    │◄── prog_ids ─────────────┤                      │                 │
-    │                          │                      │                 │
-    ├── enable_bpf_stats ─────────────────────────────────────────────►│
-    ├── run_workload(10s) ────►│ exec storm / packets │                 │
-    ├── read_stats ───────────────────────────────────────────────────►│ baseline exec_ns
-    │                          │                      │                 │
-    ├── optimize(prog_ids) ───────────────────────────►│ REJIT          │
-    │                          │                      │                 │
-    ├── run_workload(10s) ────►│ exec storm / packets │                 │
-    ├── read_stats ───────────────────────────────────────────────────►│ rejit exec_ns
-    │                          │                      │                 │
-    ├── stop() ───────────────►│ cleanup              │                 │
-    │                          │                      │                 │
-    ├── report(baseline, rejit)│                      │                 │
+Orchestrator              App + shim                                  bpf_stats
+    │                       │                                            │
+    ├── start(repo) ───────►│ LD_PRELOAD=shim.so, app starts             │
+    │                       │ (shim binds /var/run/bpfrejit/shim-<pid>.sock)
+    │                       │ app loads BPF; shim intercepts + tracks   │
+    │◄── list_progs ────────┤                                            │
+    │                       │                                            │
+    ├── enable_bpf_stats ───────────────────────────────────────────────►│
+    ├── workload.run(10s) ─►│ app drives events                          │
+    ├── read_stats ─────────────────────────────────────────────────────►│ baseline exec_ns
+    │                       │                                            │
+    ├── execute_step(...) ─►│ shim: subst ${VAR} → /bin/sh -c bpfopt    │
+    │                       │ shim: candidate BPF_PROG_LOAD + swap      │
+    │                       │ (Phase 2 swap recipe per attach type)      │
+    │                       │                                            │
+    ├── workload.run(10s) ─►│                                            │
+    ├── read_stats ─────────────────────────────────────────────────────►│ post exec_ns
+    │                       │                                            │
+    ├── stop() ────────────►│ cleanup                                    │
+    │                       │                                            │
+    ├── report(baseline, post)                                           │
 ```
 
 #### Corpus App Runner Layer
@@ -685,119 +660,56 @@ runner/                     # 共享基础设施
     results.py              #     JSON result 解析/聚合
     statistics.py           #     median/geomean/CI/Wilcoxon
     vm.py                   #     vng boot/exec helpers
-    rejit.py                #     daemon socket 通信
+    rejit.py                #     per-pid shim socket 通信(沿用现有 daemon JSON 协议)
     bpf_stats.py            #     bpf_enable_stats + read per-program stats
-  src/                      #   C++ micro_exec（仅 TEST_RUN + llvmbpf）
+  src/                      #   C++ micro_exec(仅 TEST_RUN + llvmbpf)
   scripts/                  #   AWS/ARM64 远端脚本
 
 corpus/                     # Corpus 评估层
-  config/macro_corpus.yaml  #   程序列表 + 测量方式（app_native | test_run）
-  driver.py                 #   调度：app_runner 或 micro_exec → 聚合结果
+  config/macro_corpus.yaml  #   程序列表 + 测量方式(app_native | test_run)
+  driver.py                 #   调度:app_runner 或 micro_exec → 聚合结果
 
 micro/                      # Micro 评估层
   programs/                 #   62 个 BPF .bpf.c
   driver.py                 #   调度 micro_exec
 
-daemon/                     # BpfReJIT daemon（Rust，serve-only）
-module/                     # kinsn 内核模块
+bpfopt/shim/                # LD_PRELOAD shim(C)+ musl variant
+bpfopt/crates/bpfopt/       # bpfopt CLI(Rust,纯 bytecode rewriter)
+runner/config/passes/       # 每个 pass 的 yaml 命令模板
 ```
 
 详细设计文档见 `docs/tmp/20260320/benchmark-framework-design_20260320.md`。
 
 ---
 
-## 6. Kernel 分支与开发环境
+## 6. 开发环境
 
-### 6.1 分支清单（`vendor/linux-framework`）
+**零内核改动**:任何 6.x stock kernel 都能跑。Repo 内 `vendor/linux` submodule 只为 selftest / micro / corpus 提供一个固定 baseline kernel,**不存在 fork 分支**。
 
-| 分支 | 用途 | 状态 |
-|------|------|:---:|
-| `master` | upstream 7.0-rc2 stock baseline | 基准 |
-| `rejit-v2` | **主力**：v2 架构 — syscall (GET_ORIGINAL + REJIT) + kinsn (KF_INLINE_EMIT) + multi-subprog + trampoline/XDP refresh（~650 LOC kernel，VM 26/26 + safety 20/20 PASS） | ✅ |
-| `jit-directive-v4` | 已被 v2 取代：v4 框架（BPF_PROG_JIT_RECOMPILE + 4 directives，稳定基线） | 已被 v2 取代 |
-| `jit-directive-v5` | 已被 v2 取代：v5 声明式 pattern + canonical lowering（基于 v4） | 已被 v2 取代 |
-| `jit-fixed-baselines` | 对照：CONFIG_BPF_JIT_FIXED_{ROTATE,WIDE_MEM,LEA,CMOV} | ✅ |
-| `jit-directive-poc-v2` | 历史：POC v2 cmov_select 单 directive | 已被 v4 取代 |
-| `jit-directive-poc` | 历史：POC v1 wide_load（方向错误）| 已弃用 |
-
-### 6.2 Worktree 布局
-
-- `vendor/linux` — 当前工作目录（可切换分支）
-- `vendor/linux-framework` — `rejit-v2` 分支（v2 架构主力开发，永驻）
-- `vendor/linux-baseline` — `master` worktree（stock 7.0-rc2，永驻）
-
-> 注：`vendor/linux-framework` 原先跟踪 `jit-directive-v5`（已被 v2 取代），现切换为 `rejit-v2`。
-
-### 6.3 开发环境
+### 6.1 开发栈
 
 ```
-VM:        QEMU/KVM + virtme-ng
-Kernel:    vendor/linux (v7.0-rc2) as submodule
-JIT file:  arch/x86/net/bpf_jit_comp.c
-Benchmark: micro/driver.py + micro_exec via BPF_PROG_TEST_RUN
-Baseline:  host 6.15.11 + VM 7.0-rc2
-CI:        GitHub Actions ARM64 + x86 (manual trigger)
-VM 使用:   make -j$(nproc) bzImage && vng --run <worktree>/arch/x86/boot/bzImage --exec "..."
+VM:        QEMU/KVM + virtme-ng(或裸跑 docker --privileged)
+Kernel:    任何 stock 6.x(linux >= 6.7 推荐,有完整 link_update / SET_BPF 支持)
+Shim:      bpfopt/shim/libbpfrejit_shim.so + libbpfrejit_shim_musl.so
+bpfopt:    bpfopt/target/release/bpfopt(stock,无 syscall 依赖)
+Benchmark: micro/driver.py + micro_exec via BPF_PROG_TEST_RUN; corpus/driver.py via app_runners
+CI:        GitHub Actions ARM64 + x86(manual trigger)
 ```
 
-> v1 注：`jit-fixed-baselines` 分支仅用于 v1 对照实验，v2 不使用。
-
-### 6.4 Root Makefile 一键命令速查
-
-根目录 `Makefile` 提供一键构建+测试。所有 VM 目标自动依赖 bzImage。
-
-#### 构建目标
+### 6.2 Root Makefile 一键命令速查
 
 | 命令 | 作用 |
 |------|------|
-| `make vm-test` | canonical 本地 x86 KVM 测试入口；按 contract 自动准备 runner/daemon/test artifacts |
+| `make` (in `bpfopt/shim/`) | 构建 glibc shim |
+| `make musl` (in `bpfopt/shim/`) | 在 alpine docker 里构建 musl shim(tracee 需要) |
+| `make selftest-run` (in `bpfopt/shim/`) | 合成 PROG_LOAD selftest |
+| `make smoke` (in `bpfopt/shim/`) | 对 `bpftool prog list` 跑 LD_PRELOAD smoke |
+| `make vm-test` | canonical 本地 x86 KVM 测试入口 |
 | `make vm-micro` | canonical 本地 x86 KVM micro benchmark 入口 |
-| `make aws-arm64-test` | canonical AWS ARM64 测试入口 |
-| `make aws-x86-test` | canonical AWS x86 测试入口 |
-| `make aws-arm64-corpus` / `make aws-x86-corpus` | literal AWS corpus aliases，等价于对应架构的 `aws-*-benchmark AWS_*_BENCH_MODE=corpus` |
-| `make __kernel` | 内部 x86 kernel 构建 helper；不属于公开控制面 |
-
-#### 快速验证（无需 VM）
-
-| 命令 | 作用 |
-|------|------|
-| `python3 micro/driver.py --bench simple --runtime llvmbpf --samples 1 --warmups 0 --inner-repeat 10` | 本地 llvmbpf smoke test (simple, 1 iter, 10 repeat) |
-| `make check` | 运行根入口定义的静态回归门禁（当前仅 Python contract tests） |
-
-#### VM 目标（需要 bzImage + vng）
-
-| 命令 | 作用 |
-|------|------|
-| `make vm-selftest` | VM 中跑 repo 自己的 unittest `rejit_*` 集合，并追加 negative tests (`adversarial_rejit` + `fuzz_rejit`) |
-| `make vm-micro-smoke` | VM 中跑 micro smoke (simple + load_byte_recompose + cmov_dense, llvmbpf + kernel) |
-| `make vm-micro` | VM 中跑全量 micro suite (llvmbpf + kernel, 默认 3iter/1warm/100rep) |
-| `make vm-corpus` | 跑 corpus batch（单 VM batch，daemon serve 常驻，用 policy，默认 3 samples） |
-| `make vm-all` | = `vm-test` + `vm-micro` + `vm-corpus`（完整 VM 验证） |
-| `make validate` | = `check` + `vm-test` + `vm-micro-smoke`（最小 VM 验证） |
-
-#### 可调参数
-
-```bash
-make vm-micro SAMPLES=10 WARMUPS=2 INNER_REPEAT=500      # strict run
-make vm-micro BZIMAGE=/path/to/other/bzImage              # 自定义 kernel
-make vm-corpus SAMPLES=10                                 # 快速 corpus
-```
-
-#### 典型工作流
-
-```bash
-# 改完代码后最小验证
-make check                    # 本地：编译 + daemon tests + smoke
-
-# 改完 kernel 后
-make kernel && make validate  # 重编 bzImage + 本地验证 + VM smoke
-
-# 全量评估
-make vm-all                   # 跑全部 micro + corpus
-
-# 清理
-make clean
-```
+| `make vm-corpus` | 跑 corpus batch(默认 3 samples) |
+| `make aws-arm64-test` / `make aws-x86-test` | canonical AWS 测试入口 |
+| `make check` | 静态回归门禁(Python contract tests) |
 
 ---
 

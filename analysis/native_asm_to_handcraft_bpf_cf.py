@@ -79,6 +79,10 @@ CMP_JCC_OP = {
     "jl": "BPF_JSLT", "jle": "BPF_JSLE",
 }
 JCC_OP = set(CMP_JCC_OP) | {"js", "jns"}
+FLAG_TRANSPARENT_OPS = {
+    "mov", "movabs", "lea", "nop", "data16", "endbr64", "cs", "xchg",
+    "push", "pop",
+}
 CONTEXT_KIND = "xdp"
 SKB_DATA_OFF = 76
 SKB_DATA_END_OFF = 80
@@ -104,6 +108,12 @@ SHADOW_OFF_BY_X86 = {
 }
 RAW_BPF_WRITABLE_X86 = {
     "rax", "rdi", "rsi", "rdx", "rcx", "r8", "rbx", "r13", "r14", "r15",
+}
+X86_BY_BPF_SCRATCH = {
+    "BPF_REG_6": "HC_X86_RBX",
+    "BPF_REG_7": "HC_X86_R13",
+    "BPF_REG_8": "HC_X86_R14",
+    "BPF_REG_9": "HC_X86_R15",
 }
 @dataclass(frozen=True)
 class NativeInsn:
@@ -345,10 +355,24 @@ def branch_cmp(op: str, width: int, src: str, imm: int | None) -> str:
     return f"HC_RAW({cls} | {op} | {mode}, BPF_REG_6, {rhs}, {BRANCH_OFF}, {val})"
 
 
+def branch_cmp_from(reg_name: str, op: str, width: int, src: str, imm: int | None) -> str:
+    cls = "BPF_JMP32" if width == 32 else "BPF_JMP"
+    mode = "BPF_X" if imm is None else "BPF_K"
+    rhs = src if imm is None else "0"
+    val = 0 if imm is None else c_s32(imm)
+    return f"HC_RAW({cls} | {op} | {mode}, {reg_name}, {rhs}, {BRANCH_OFF}, {val})"
+
+
 def load_branch_value(operand: str, scratch: str) -> tuple[tuple[str, ...], int] | None:
     dst = bpf_reg(operand)
     if dst:
-        return ((f"HC_LDX(BPF_DW, {scratch}, BPF_REG_10, {SHADOW_OFF_BY_X86[dst[2]]})",), dst[1])
+        if dst[2] in RAW_BPF_WRITABLE_X86:
+            return ((f"HC_MOV64_REG({scratch}, {dst[0]})",), dst[1])
+        scratch_x86 = X86_BY_BPF_SCRATCH.get(scratch)
+        if scratch_x86 is None:
+            return None
+        selector = "MICRO_HANDCRAFT_BPF_X86_MOVL" if dst[1] == 32 else "MICRO_HANDCRAFT_BPF_X86_MOVQ"
+        return ((f"HC_KINSN(HC_X86_ARCH_TO_BPF_RR_PAYLOAD({scratch}, {dst[0]}), {selector})",), dst[1])
     mem = parse_mem(operand)
     size = size_from_mem(operand)
     width = width_of_size(size)
@@ -358,8 +382,16 @@ def load_branch_value(operand: str, scratch: str) -> tuple[tuple[str, ...], int]
     base_reg = bpf_mem_base(base)
     if base_reg is None or index is not None:
         return None
+    if base_reg[2] not in RAW_BPF_WRITABLE_X86:
+        scratch_x86 = X86_BY_BPF_SCRATCH.get(scratch)
+        if scratch_x86 is None:
+            return None
+        return ((
+            f"HC_KINSN(HC_X86_ARCH_TO_BPF_RR_PAYLOAD({scratch}, {base_reg[0]}), MICRO_HANDCRAFT_BPF_X86_MOVQ)",
+            f"HC_LDX({size}, {scratch}, {scratch}, {off})",
+        ), width)
     return ((
-        f"HC_LDX(BPF_DW, {scratch}, BPF_REG_10, {SHADOW_OFF_BY_X86[base_reg[2]]})",
+        f"HC_MOV64_REG({scratch}, {base_reg[0]})",
         f"HC_LDX({size}, {scratch}, {scratch}, {off})",
     ), width)
 
@@ -382,6 +414,68 @@ def lower_cmp_jcc(branch: NativeInsn, cmp: NativeInsn) -> tuple[str, ...] | None
         return None
     return (*lhs_code, *rhs[0], *lhs_norm, *normalize_branch_reg("BPF_REG_7", width, signed),
             branch_cmp(op, width, "BPF_REG_7", None))
+
+
+def snapshot_cmp(cmp: NativeInsn) -> tuple[str, ...] | None:
+    if cmp.mnemonic not in {"cmp", "test"} or len(cmp.operands) != 2:
+        return None
+    lhs = load_branch_value(cmp.operands[0], "BPF_REG_6")
+    if lhs is None:
+        return None
+    code = [*lhs[0], "HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, HC_X86_BRANCH_LHS_OFF)"]
+    if cmp.mnemonic == "cmp" and not is_int(cmp.operands[1]):
+        rhs = load_branch_value(cmp.operands[1], "BPF_REG_7")
+        if rhs is None or rhs[1] != lhs[1]:
+            return None
+        code.extend(rhs[0])
+        code.append("HC_STX(BPF_DW, BPF_REG_10, BPF_REG_7, HC_X86_BRANCH_RHS_OFF)")
+    return tuple(code)
+
+
+def lower_saved_cmp_jcc(branch: NativeInsn, cmp: NativeInsn) -> tuple[str, ...] | None:
+    op = CMP_JCC_OP.get(branch.mnemonic)
+    if op is None or cmp.mnemonic != "cmp" or len(cmp.operands) != 2:
+        return None
+    lhs = load_branch_value(cmp.operands[0], "BPF_REG_6")
+    if lhs is None:
+        return None
+    width = lhs[1]
+    signed = signed_jmp(op)
+    code = ["HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_BRANCH_LHS_OFF)"]
+    code.extend(normalize_branch_reg("BPF_REG_6", width, signed))
+    if is_int(cmp.operands[1]):
+        imm = signed_width_value(parse_int(cmp.operands[1]), width) if signed else parse_int(cmp.operands[1]) & ((1 << width) - 1)
+        code.append(branch_cmp(op, width, "0", imm))
+        return tuple(code)
+    rhs = load_branch_value(cmp.operands[1], "BPF_REG_7")
+    if rhs is None or rhs[1] != width:
+        return None
+    code.append("HC_LDX(BPF_DW, BPF_REG_7, BPF_REG_10, HC_X86_BRANCH_RHS_OFF)")
+    code.extend(normalize_branch_reg("BPF_REG_7", width, signed))
+    code.append(branch_cmp(op, width, "BPF_REG_7", None))
+    return tuple(code)
+
+
+def lower_saved_test_jcc(branch: NativeInsn, test: NativeInsn) -> tuple[str, ...] | None:
+    if test.mnemonic != "test" or len(test.operands) != 2 or branch.mnemonic not in {"je", "jne", "js", "jns"}:
+        return None
+    lhs = load_branch_value(test.operands[0], "BPF_REG_6")
+    if lhs is None:
+        return None
+    width = lhs[1]
+    if branch.mnemonic in {"js", "jns"}:
+        mask = 1 << (width - 1)
+    elif is_int(test.operands[1]):
+        mask = parse_int(test.operands[1])
+    elif test.operands[0] == test.operands[1]:
+        mask = (1 << width) - 1
+    else:
+        return None
+    load = "HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, HC_X86_BRANCH_LHS_OFF)"
+    jset = f"HC_RAW(BPF_JMP | BPF_JSET | BPF_K, BPF_REG_6, 0, {BRANCH_OFF}, {c_s32(mask)})"
+    if branch.mnemonic in {"jne", "js"}:
+        return (load, jset)
+    return (load, f"HC_RAW(BPF_JMP | BPF_JSET | BPF_K, BPF_REG_6, 0, 1, {c_s32(mask)})", bpf_ja())
 
 
 def lower_test_jcc(branch: NativeInsn, test: NativeInsn) -> tuple[str, ...] | None:
@@ -419,57 +513,6 @@ def lower_result_jcc(branch: NativeInsn, producer: NativeInsn) -> tuple[str, ...
     op = "BPF_JEQ" if branch.mnemonic == "je" else "BPF_JNE"
     return (*code, *normalize_branch_reg("BPF_REG_6", width, False),
             branch_cmp(op, width, "0", 0))
-
-
-def lower_flag_jcc(branch: NativeInsn) -> tuple[str, ...] | None:
-    op = branch.mnemonic
-    if op in {"je", "jne"}:
-        cmp_op = "BPF_JNE" if op == "je" else "BPF_JEQ"
-        return (
-            "HC_LDX(BPF_W, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_ZF_OFF)",
-            f"HC_RAW(BPF_JMP | {cmp_op} | BPF_K, BPF_REG_6, 0, {BRANCH_OFF}, 0)",
-        )
-    if op in {"jb", "jae"}:
-        cmp_op = "BPF_JNE" if op == "jb" else "BPF_JEQ"
-        return (
-            "HC_LDX(BPF_W, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_CF_OFF)",
-            f"HC_RAW(BPF_JMP | {cmp_op} | BPF_K, BPF_REG_6, 0, {BRANCH_OFF}, 0)",
-        )
-    if op in {"jl", "jge"}:
-        cmp_op = "BPF_JEQ" if op == "jl" else "BPF_JNE"
-        return (
-            "HC_LDX(BPF_W, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_GE_OFF)",
-            f"HC_RAW(BPF_JMP | {cmp_op} | BPF_K, BPF_REG_6, 0, {BRANCH_OFF}, 0)",
-        )
-    if op == "ja":
-        return (
-            "HC_LDX(BPF_W, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_CF_OFF)",
-            "HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 0)",
-            "HC_LDX(BPF_W, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_ZF_OFF)",
-            f"HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_6, 0, {BRANCH_OFF}, 0)",
-        )
-    if op == "jbe":
-        return (
-            "HC_LDX(BPF_W, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_CF_OFF)",
-            f"HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_6, 0, {BRANCH_OFF}, 0)",
-            "HC_LDX(BPF_W, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_ZF_OFF)",
-            f"HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_6, 0, {BRANCH_OFF}, 0)",
-        )
-    if op == "jg":
-        return (
-            "HC_LDX(BPF_W, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_GE_OFF)",
-            "HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_6, 0, 2, 0)",
-            "HC_LDX(BPF_W, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_ZF_OFF)",
-            f"HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_6, 0, {BRANCH_OFF}, 0)",
-        )
-    if op == "jle":
-        return (
-            "HC_LDX(BPF_W, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_GE_OFF)",
-            f"HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_6, 0, {BRANCH_OFF}, 0)",
-            "HC_LDX(BPF_W, BPF_REG_6, BPF_REG_10, HC_X86_SHADOW_ZF_OFF)",
-            f"HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_6, 0, {BRANCH_OFF}, 0)",
-        )
-    return None
 
 
 def reg_payload(reg_name: str) -> str:
@@ -988,9 +1031,38 @@ def translate(insn: NativeInsn) -> Translation:
 
 
 def translate_all(insns: list[NativeInsn]) -> list[Translation]:
+    def flag_source(index: int) -> int | None:
+        cursor = index - 1
+        while cursor >= 0:
+            mnemonic = insns[cursor].mnemonic
+            if mnemonic in {"cmp", "test"}:
+                return cursor
+            if mnemonic in FLAG_TRANSPARENT_OPS:
+                cursor -= 1
+                continue
+            return None
+        return None
+
+    jcc_source = {
+        index: flag_source(index)
+        for index, insn in enumerate(insns)
+        if insn.mnemonic in JCC_OP
+    }
+    snapshot_sources = {
+        source
+        for index, source in jcc_source.items()
+        if source is not None and source != index - 1
+    }
+
     out: list[Translation] = []
     for index, insn in enumerate(insns):
         trans = translate(insn)
+        if index in snapshot_sources:
+            snapshot = snapshot_cmp(insn)
+            if snapshot is not None:
+                trans = Translation(trans.status, (*trans.code, *snapshot),
+                                    f"{trans.note}; branch operands snapshotted",
+                                    trans.target_addr)
         if insn.mnemonic in JCC_OP and index > 0:
             prev = insns[index - 1]
             code = lower_cmp_jcc(insn, prev)
@@ -1000,8 +1072,12 @@ def translate_all(insns: list[NativeInsn]) -> list[Translation]:
                 consume_prev = code is not None and prev.mnemonic == "test"
             if code is None:
                 code = lower_result_jcc(insn, prev)
-            if code is None and out and out[-1].status == "exact-kinsn":
-                code = lower_flag_jcc(insn)
+            source = jcc_source.get(index)
+            if code is None and source is not None and source != index - 1:
+                producer = insns[source]
+                code = lower_saved_cmp_jcc(insn, producer)
+                if code is None:
+                    code = lower_saved_test_jcc(insn, producer)
             if code is not None:
                 trans = Translation("exact-bpf", code, f"{insn.mnemonic} as ordinary BPF branch", trans.target_addr)
                 if consume_prev:

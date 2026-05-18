@@ -10,6 +10,7 @@ use std::path::PathBuf;
 use std::process;
 use std::ptr;
 
+use libbpf_sys::{bpf_object_open_opts, size_t};
 use object::{Object, ObjectSection, ObjectSymbol};
 use serde::Deserialize;
 
@@ -58,6 +59,7 @@ const X86_CTX_STACK_OFF: i16 = -448;
 const X86_STATE_RAX_OFF: i16 = 0;
 const X86_STATE_P_RDI_OFF: i16 = 184;
 const X86_PTR_CTX: i32 = 1;
+const VERIFIER_LOG_SIZE: usize = 128 * 1024 * 1024;
 
 type Result<T> = std::result::Result<T, String>;
 
@@ -72,6 +74,7 @@ struct Cli {
     program: String,
     repeat: i32,
     template_object: PathBuf,
+    verifier_log: Option<PathBuf>,
 }
 
 #[derive(Deserialize)]
@@ -151,6 +154,12 @@ struct LinkedProgram {
 
 struct BpfObject {
     ptr: *mut c_void,
+    verifier_log: Option<VerifierLog>,
+}
+
+struct VerifierLog {
+    path: PathBuf,
+    buf: Vec<u8>,
 }
 
 #[repr(C)]
@@ -226,7 +235,8 @@ impl Default for BpfTestRunOpts {
 
 #[link(name = "bpf")]
 extern "C" {
-    fn bpf_object__open_file(path: *const c_char, opts: *const c_void) -> *mut c_void;
+    fn bpf_object__open_file(path: *const c_char, opts: *const bpf_object_open_opts)
+        -> *mut c_void;
     fn bpf_object__close(obj: *mut c_void);
     fn bpf_object__load(obj: *mut c_void) -> c_int;
     fn bpf_object__find_program_by_name(obj: *const c_void, name: *const c_char) -> *mut c_void;
@@ -264,7 +274,7 @@ fn run() -> Result<()> {
             .object
             .as_ref()
             .ok_or_else(|| "--object or --json is required".to_string())?;
-        let mut object = open_object(object_path)?;
+        let mut object = open_object(object_path, cli.verifier_log.clone())?;
         load_object(&mut object)?;
         let fd = program_fd(&object, &cli.program)?;
         if cli.load_only {
@@ -347,6 +357,7 @@ fn parse_cli() -> Result<Cli> {
     let mut program = String::from("x86_vm_xdp");
     let mut repeat = 1;
     let mut template_object = PathBuf::from(DEFAULT_TEMPLATE_OBJECT);
+    let mut verifier_log = None;
 
     while let Some(arg) = args.next() {
         match arg.as_str() {
@@ -416,6 +427,12 @@ fn parse_cli() -> Result<Cli> {
                         .ok_or_else(|| "--template-object requires a path".to_string())?,
                 );
             }
+            "--verifier-log" => {
+                verifier_log =
+                    Some(PathBuf::from(args.next().ok_or_else(|| {
+                        "--verifier-log requires a path".to_string()
+                    })?));
+            }
             "-h" | "--help" => {
                 print_help();
                 process::exit(0);
@@ -439,19 +456,36 @@ fn parse_cli() -> Result<Cli> {
         program,
         repeat,
         template_object,
+        verifier_log,
     })
 }
 
 fn print_help() {
     println!(
-        "Usage: ebpf-vm-loader (--object <vm.bpf.o>|--json proof.json) [--template-object helpers.bpf.o] [--program x86_vm_xdp] [--load-only] [--case simple|--input payload.mem --expected-result N] [--repeat N]"
+        "Usage: ebpf-vm-loader (--object <vm.bpf.o>|--json proof.json) [--template-object helpers.bpf.o] [--program x86_vm_xdp] [--load-only] [--verifier-log log.txt] [--case simple|--input payload.mem --expected-result N] [--repeat N]"
     );
 }
 
-fn open_object(path: &PathBuf) -> Result<BpfObject> {
+fn open_object(path: &PathBuf, verifier_log_path: Option<PathBuf>) -> Result<BpfObject> {
     let c_path = CString::new(path.as_os_str().as_bytes())
         .map_err(|_| format!("path contains NUL byte: {}", path.display()))?;
-    let obj = unsafe { bpf_object__open_file(c_path.as_ptr(), ptr::null()) };
+    let mut verifier_log = verifier_log_path.map(|path| VerifierLog {
+        path,
+        buf: vec![0; VERIFIER_LOG_SIZE],
+    });
+    let opts = verifier_log.as_mut().map(|log| {
+        let mut opts = bpf_object_open_opts::default();
+        opts.sz = mem::size_of::<bpf_object_open_opts>() as size_t;
+        opts.kernel_log_buf = log.buf.as_mut_ptr().cast::<c_char>();
+        opts.kernel_log_size = log.buf.len() as size_t;
+        opts.kernel_log_level = 1;
+        opts
+    });
+    let opts_ptr = opts
+        .as_ref()
+        .map(|opts| opts as *const bpf_object_open_opts)
+        .unwrap_or(ptr::null());
+    let obj = unsafe { bpf_object__open_file(c_path.as_ptr(), opts_ptr) };
     if obj.is_null() {
         return Err(format!(
             "failed to open {}: {}",
@@ -466,18 +500,37 @@ fn open_object(path: &PathBuf) -> Result<BpfObject> {
             path.display()
         ));
     }
-    Ok(BpfObject { ptr: obj })
+    Ok(BpfObject {
+        ptr: obj,
+        verifier_log,
+    })
 }
 
 fn load_object(object: &mut BpfObject) -> Result<()> {
     let ret = unsafe { bpf_object__load(object.ptr) };
+    let log_path = flush_verifier_log(object)?;
     if ret != 0 {
-        return Err(format!(
-            "bpf_object__load failed: {}",
-            io::Error::last_os_error()
-        ));
+        let mut message = format!("bpf_object__load failed: {}", io::Error::last_os_error());
+        if let Some(path) = log_path {
+            message.push_str(&format!("; verifier log: {}", path.display()));
+        }
+        return Err(message);
     }
     Ok(())
+}
+
+fn flush_verifier_log(object: &BpfObject) -> Result<Option<PathBuf>> {
+    let Some(log) = object.verifier_log.as_ref() else {
+        return Ok(None);
+    };
+    let end = log
+        .buf
+        .iter()
+        .position(|byte| *byte == 0)
+        .unwrap_or(log.buf.len());
+    fs::write(&log.path, &log.buf[..end])
+        .map_err(|err| format!("write verifier log {}: {err}", log.path.display()))?;
+    Ok(Some(log.path.clone()))
 }
 
 fn program_fd(object: &BpfObject, name: &str) -> Result<i32> {

@@ -75,6 +75,8 @@
 #define HC_X86_SHADOW_CF_OFF  -380
 #define HC_X86_SHADOW_GE_OFF  -352
 #define HC_X86_SHADOW_SF_OFF  -348
+#define HC_X86_BRANCH_LHS_OFF -344
+#define HC_X86_BRANCH_RHS_OFF -336
 
 #define HC_X86_FORM_RR 1
 #define HC_X86_FORM_IMM 2
@@ -84,13 +86,29 @@
 #define HC_X86_FORM_STORE 6
 #define HC_X86_FORM_STORE_IMM 7
 #define HC_X86_FORM_FRAME 8
+#define HC_X86_FORM_ARCH_MEM 9
+#define HC_X86_FORM_ARCH_STORE 10
+#define HC_X86_FORM_ARCH_STORE_IMM 11
+#define HC_X86_FORM_ARCH_RR 12
+#define HC_X86_FORM_ARCH_IMM 13
+#define HC_X86_FORM_ARCH_SIB 14
+#define HC_X86_FORM_ARCH_TO_BPF_RR 15
+#define HC_X86_FORM_BPF_TO_ARCH_RR HC_X86_FORM_SIB_RR
 #define HC_X86_ALU_FORM_RR HC_X86_FORM_RR
 #define HC_X86_ALU_FORM_IMM HC_X86_FORM_IMM
 /* Payloads carry only x86 operands; verifier scratch is private to kinsn modules. */
 #define HC_X86_RR_PAYLOAD(DST, SRC) \
     ((__u64)(HC_X86_FORM_RR) | ((__u64)(DST) << 4) | ((__u64)(SRC) << 8))
+#define HC_X86_ARCH_RR_PAYLOAD(DST, SRC) \
+    ((__u64)(HC_X86_FORM_ARCH_RR) | ((__u64)(DST) << 4) | ((__u64)(SRC) << 8))
+#define HC_X86_ARCH_TO_BPF_RR_PAYLOAD(DST, SRC) \
+    ((__u64)(HC_X86_FORM_ARCH_TO_BPF_RR) | ((__u64)(DST) << 4) | ((__u64)(SRC) << 8))
+#define HC_X86_BPF_TO_ARCH_RR_PAYLOAD(DST, SRC) \
+    ((__u64)(HC_X86_FORM_BPF_TO_ARCH_RR) | ((__u64)(DST) << 4) | ((__u64)(SRC) << 8))
 #define HC_X86_IMM_PAYLOAD(DST, IMM) \
     ((__u64)(HC_X86_FORM_IMM) | ((__u64)(DST) << 4) | ((__u64)(__u32)(IMM) << 8))
+#define HC_X86_ARCH_IMM_PAYLOAD(DST, IMM) \
+    ((__u64)(HC_X86_FORM_ARCH_IMM) | ((__u64)(DST) << 4) | ((__u64)(__u32)(IMM) << 8))
 #define HC_X86_FRAME_PAYLOAD(DST, SRC) \
     ((__u64)(HC_X86_FORM_FRAME) | ((__u64)(DST) << 4) | ((__u64)(SRC) << 8))
 #define HC_ROTATE_PAYLOAD(DST, SRC, SHIFT) \
@@ -106,16 +124,28 @@
 #define HC_X86_MEM_PAYLOAD(REG, BASE, OFF) \
     ((__u64)(HC_X86_FORM_MEM) | ((__u64)(REG) << 4) | \
      ((__u64)(BASE) << 8) | ((__u64)(__u16)(OFF) << 12))
+#define HC_X86_ARCH_MEM_PAYLOAD(REG, BASE, OFF) \
+    ((__u64)(HC_X86_FORM_ARCH_MEM) | ((__u64)(REG) << 4) | \
+     ((__u64)(BASE) << 8) | ((__u64)(__u16)(OFF) << 12))
 #define HC_X86_SIB_PAYLOAD(REG, BASE, INDEX, SCALE, OFF) \
     ((__u64)(HC_X86_FORM_SIB) | ((__u64)(REG) << 4) | ((__u64)(BASE) << 8) | \
      ((__u64)(INDEX) << 12) | ((__u64)(SCALE) << 16) | ((__u64)(__u16)(OFF) << 20))
+#define HC_X86_ARCH_SIB_PAYLOAD(REG, BASE, INDEX, SCALE, OFF) \
+    ((__u64)(HC_X86_FORM_ARCH_SIB) | ((__u64)(REG) << 4) | ((__u64)(BASE) << 8) | \
+     ((__u64)(INDEX) << 12) | ((__u64)(SCALE) << 16) | ((__u64)(__u16)(OFF) << 20))
 #define HC_X86_STORE_PAYLOAD(SRC, BASE, OFF) \
     ((__u64)(HC_X86_FORM_STORE) | ((__u64)(SRC) << 4) | \
+     ((__u64)(BASE) << 8) | ((__u64)(__u16)(OFF) << 12))
+#define HC_X86_ARCH_STORE_PAYLOAD(SRC, BASE, OFF) \
+    ((__u64)(HC_X86_FORM_ARCH_STORE) | ((__u64)(SRC) << 4) | \
      ((__u64)(BASE) << 8) | ((__u64)(__u16)(OFF) << 12))
 #define HC_X86_STORE_BYTE_PAYLOAD(SRC, BASE, OFF, LANE) \
     (HC_X86_STORE_PAYLOAD(SRC, BASE, OFF) | ((__u64)(LANE) << 28))
 #define HC_X86_STORE_IMM_PAYLOAD(BASE, OFF, IMM) \
     ((__u64)(HC_X86_FORM_STORE_IMM) | ((__u64)(BASE) << 4) | \
+     ((__u64)(__u16)(OFF) << 8) | ((__u64)(__u32)(IMM) << 24))
+#define HC_X86_ARCH_STORE_IMM_PAYLOAD(BASE, OFF, IMM) \
+    ((__u64)(HC_X86_FORM_ARCH_STORE_IMM) | ((__u64)(BASE) << 4) | \
      ((__u64)(__u16)(OFF) << 8) | ((__u64)(__u32)(IMM) << 24))
 #define HC_X86_ALU_RR_PAYLOAD(DST, SRC) \
     ((__u64)(HC_X86_ALU_FORM_RR) | ((__u64)(DST) << 4) | ((__u64)(SRC) << 8))

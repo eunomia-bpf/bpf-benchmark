@@ -95,6 +95,11 @@ static __always_inline bool kinsn_x86_reg_is_shadowed(u8 reg)
 	       (reg >= KINSN_X86_REG_R9 && reg <= KINSN_X86_REG_RSP);
 }
 
+static __always_inline bool kinsn_x86_reg_is_bpf_writable(u8 reg)
+{
+	return reg < BPF_REG_10;
+}
+
 static __always_inline s16 kinsn_x86_shadow_reg_off(u8 reg)
 {
 	switch (reg) {
@@ -249,8 +254,8 @@ static __always_inline void kinsn_x86_write64(struct bpf_insn *insn_buf,
 						 kinsn_x86_scratch_off(dst_reg));
 	else if (dst_reg != value_reg)
 		insn_buf[(*cnt)++] = BPF_MOV64_REG(dst_reg, value_reg);
-	if (dst_reg == BPF_REG_0 && value_reg != BPF_REG_0)
-		insn_buf[(*cnt)++] = BPF_MOV64_REG(BPF_REG_0, value_reg);
+	if (kinsn_x86_reg_is_bpf_writable(dst_reg) && dst_reg != value_reg)
+		insn_buf[(*cnt)++] = BPF_MOV64_REG(dst_reg, value_reg);
 	(void)saved_mask;
 }
 
@@ -266,8 +271,8 @@ static __always_inline void kinsn_x86_write32(struct bpf_insn *insn_buf,
 						 kinsn_x86_scratch_off(dst_reg));
 	else if (dst_reg != value_reg)
 		insn_buf[(*cnt)++] = BPF_MOV32_REG(dst_reg, value_reg);
-	if (dst_reg == BPF_REG_0 && value_reg != BPF_REG_0)
-		insn_buf[(*cnt)++] = BPF_MOV32_REG(BPF_REG_0, value_reg);
+	if (kinsn_x86_reg_is_bpf_writable(dst_reg) && dst_reg != value_reg)
+		insn_buf[(*cnt)++] = BPF_MOV32_REG(dst_reg, value_reg);
 	(void)saved_mask;
 }
 

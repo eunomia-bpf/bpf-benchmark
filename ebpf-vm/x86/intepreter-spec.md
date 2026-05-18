@@ -83,32 +83,40 @@ For every generated native instruction `I` at address `pc`, the generator emits
 exactly one interpreter helper step, except for branches, calls, returns, and
 named lowering rules in this document.
 
-The helper call has the form:
+The interpreter step has the form:
 
 ```c
-X86_VM_RUN_OP(helper, op, dst, src, width, aux, imm);
+X86_VM_RUN_OP(op, dst, src, width, aux, imm);
 ```
 
 or inside a loop callback:
 
 ```c
-X86_VM_LOOP_OP(helper, op, dst, src, width, aux, imm);
+X86_VM_LOOP_OP(op, dst, src, width, aux, imm);
 ```
 
 The generated tuple `(op, dst, src, width, aux, imm)` is the encoded form of the
-native instruction. The helper must implement the following relation:
+native instruction. C-authored interpreter macros may dispatch to typed helpers
+or fast paths when compile-time constants prove the same x86 step, but Python
+does not select those helpers. The C interpreter step must implement the
+following relation:
 
 ```text
 step(I, XState_in, Mem_in) = XState_out, Mem_out, Continue | Done | Trap
 ```
 
-The proof obligation for each helper is:
+The proof obligation for each C interpreter step/helper is:
 
 ```text
 For every supported native instruction I encoded as args,
 helper(args, XState_in, Mem_in) implements the same state transition as
 the x86 ISA rule for I, restricted to the modeled memory/capability domain.
 ```
+
+Compiler optimization is not part of the semantic proof. Clang inlining and
+constant propagation may specialize fixed `(op, dst, src, aux, imm)` records so
+the kernel verifier can analyze the eBPF program, but the correctness statement
+is over the C-authored interpreter/helper relation above.
 
 ### Arithmetic And Flags
 

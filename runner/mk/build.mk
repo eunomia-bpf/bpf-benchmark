@@ -81,12 +81,16 @@ ACTIVE_KINSN_SOURCE_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ROOT_DIR)/m
 HOST_BUILD_ROOT := $(ACTIVE_BUILD_ARTIFACT_ROOT)/repo-build/host
 HOST_KERNEL_BUILD_DIR_X86 := $(HOST_BUILD_ROOT)/kernel/x86_64
 HOST_KERNEL_BUILD_DIR_ARM64 := $(HOST_BUILD_ROOT)/kernel/arm64
+HOST_KERNEL_OFFSETS_DIR_X86 := $(HOST_BUILD_ROOT)/kernel-offsets/x86_64
+HOST_KERNEL_OFFSETS_DIR_ARM64 := $(HOST_BUILD_ROOT)/kernel-offsets/arm64
 HOST_KINSN_DIR_X86 := $(HOST_BUILD_ROOT)/kinsn/x86_64
 HOST_KINSN_DIR_ARM64 := $(HOST_BUILD_ROOT)/kinsn/arm64
 HOST_KERNEL_IMAGE_X86 := $(HOST_KERNEL_BUILD_DIR_X86)/arch/x86/boot/bzImage
 HOST_KERNEL_IMAGE_ARM64 := $(HOST_KERNEL_BUILD_DIR_ARM64)/arch/arm64/boot/vmlinuz.efi
 HOST_KERNEL_MANIFEST_X86 := $(HOST_KERNEL_BUILD_DIR_X86)/manifest.json
 HOST_KERNEL_MANIFEST_ARM64 := $(HOST_KERNEL_BUILD_DIR_ARM64)/manifest.json
+HOST_KERNEL_OFFSETS_X86 := $(HOST_KERNEL_OFFSETS_DIR_X86)/kernel_offsets.h
+HOST_KERNEL_OFFSETS_ARM64 := $(HOST_KERNEL_OFFSETS_DIR_ARM64)/kernel_offsets.h
 HOST_KINSN_MODULES_X86 := $(patsubst %.o,%,$(shell awk '/^obj-m[[:space:]]*\+=/ { print $$3 }' "$(ROOT_DIR)/module/x86/Makefile" 2>/dev/null))
 HOST_KINSN_MODULES_ARM64 := $(patsubst %.o,%,$(shell awk '/^obj-m[[:space:]]*\+=/ { print $$3 }' "$(ROOT_DIR)/module/arm64/Makefile" 2>/dev/null))
 HOST_KINSN_KO_FILES_X86 := $(addprefix $(HOST_KINSN_DIR_X86)/,$(addsuffix .ko,$(HOST_KINSN_MODULES_X86)))
@@ -229,6 +233,14 @@ $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_MANIFEST_ARM64) &: $(HOST_KERNEL_SOURCE
 	rel=$$(cat "$(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/kernel.release"); \
 		printf '{"kernel_release":"%s","target_arch":"arm64","kernel_image":"vmlinuz.efi"}\n' "$$rel" >"$(HOST_KERNEL_MANIFEST_ARM64)"
 
+$(HOST_KERNEL_OFFSETS_X86): $(HOST_KERNEL_BUILD_DIR_X86)/vmlinux $(MICRO_PROGRAM_SOURCE_ROOT)/Makefile
+	@mkdir -p "$(HOST_KERNEL_OFFSETS_DIR_X86)"
+	$(MAKE) -C "$(MICRO_PROGRAM_SOURCE_ROOT)" OUTPUT_DIR="$(HOST_KERNEL_OFFSETS_DIR_X86)" KERNEL_VMLINUX="$<" "$@"
+
+$(HOST_KERNEL_OFFSETS_ARM64): $(HOST_KERNEL_BUILD_DIR_ARM64)/vmlinux $(MICRO_PROGRAM_SOURCE_ROOT)/Makefile
+	@mkdir -p "$(HOST_KERNEL_OFFSETS_DIR_ARM64)"
+	$(MAKE) -C "$(MICRO_PROGRAM_SOURCE_ROOT)" OUTPUT_DIR="$(HOST_KERNEL_OFFSETS_DIR_ARM64)" KERNEL_VMLINUX="$<" "$@"
+
 # kinsn .ko build against the fork kernel; kbuild MO= dir is reused across runs for
 # incremental builds. Only the publish dir (HOST_KINSN_DIR_*) is wiped each run.
 $(HOST_KINSN_KO_FILES_X86) &: $(HOST_KERNEL_MANIFEST_X86) $(KINSN_SOURCE_FILES_X86) $(BUILD_RULE_FILES)
@@ -278,13 +290,14 @@ $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR): $(KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES)
 	fi
 	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(ARM64_KATRAN_ARTIFACTS_IMAGE)"; mv -f "$$tmp" "$@"
 
-$(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(X86_KATRAN_ARTIFACTS_IMAGE_TAR) $(HOST_KERNEL_MANIFEST_X86) $(HOST_KINSN_KO_FILES_X86) $(X86_DAEMON_BINARY) $(X86_BPFOPT_BINARIES)
+$(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(X86_KATRAN_ARTIFACTS_IMAGE_TAR) $(HOST_KERNEL_MANIFEST_X86) $(HOST_KERNEL_OFFSETS_X86) $(HOST_KINSN_KO_FILES_X86) $(X86_DAEMON_BINARY) $(X86_BPFOPT_BINARIES)
 	@mkdir -p "$(dir $@)"
 	docker load -i "$(X86_KATRAN_ARTIFACTS_IMAGE_TAR)"
 	docker build --platform linux/amd64 \
 		--target runner-runtime \
 		--build-context runner-runtime-katran-upstream=docker-image://$(X86_KATRAN_ARTIFACTS_IMAGE) \
 		--build-context runner-runtime-host-kernel-image="$(HOST_KERNEL_BUILD_DIR_X86)/arch/x86/boot" \
+		--build-context runner-runtime-host-kernel-offsets="$(HOST_KERNEL_OFFSETS_DIR_X86)" \
 		--build-context runner-runtime-host-kernel-modules="$(HOST_KERNEL_BUILD_DIR_X86)/modules-install/lib/modules" \
 		--build-context runner-runtime-host-kinsn-artifacts="$(HOST_KINSN_DIR_X86)" \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
@@ -297,13 +310,14 @@ $(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(X86_KATRA
 		-t "$(X86_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(X86_RUNNER_RUNTIME_IMAGE)"; mv -f "$$tmp" "$@"
 
-$(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR) $(HOST_KERNEL_MANIFEST_ARM64) $(HOST_KINSN_KO_FILES_ARM64) $(ARM64_DAEMON_BINARY) $(ARM64_BPFOPT_BINARIES)
+$(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR) $(HOST_KERNEL_MANIFEST_ARM64) $(HOST_KERNEL_OFFSETS_ARM64) $(HOST_KINSN_KO_FILES_ARM64) $(ARM64_DAEMON_BINARY) $(ARM64_BPFOPT_BINARIES)
 	@mkdir -p "$(dir $@)"
 	docker load -i "$(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR)"
 	docker build --platform linux/arm64 \
 		--target runner-runtime \
 		--build-context runner-runtime-katran-upstream=docker-image://$(ARM64_KATRAN_ARTIFACTS_IMAGE) \
 		--build-context runner-runtime-host-kernel-image="$(HOST_KERNEL_BUILD_DIR_ARM64)/arch/arm64/boot" \
+		--build-context runner-runtime-host-kernel-offsets="$(HOST_KERNEL_OFFSETS_DIR_ARM64)" \
 		--build-context runner-runtime-host-kernel-modules="$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install/lib/modules" \
 		--build-context runner-runtime-host-kinsn-artifacts="$(HOST_KINSN_DIR_ARM64)" \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
@@ -429,7 +443,7 @@ $(ACTIVE_TEST_NEGATIVE_PRIMARY): $(TEST_NEGATIVE_SOURCE_FILES) $(BUILD_RULE_FILE
 
 $(MICRO_PROGRAM_OBJECTS) $(MICRO_PROGRAM_NATIVE_OBJECTS) $(MICRO_PROGRAM_HANDCRAFT_OBJECTS) &: $(MICRO_PROGRAM_SOURCE_FILES) $(BUILD_RULE_FILES)
 	mkdir -p "$(MICRO_PROGRAM_OUTPUT_ROOT)"
-	make -C "$(MICRO_PROGRAM_SOURCE_ROOT)" OUTPUT_DIR="$(MICRO_PROGRAM_OUTPUT_ROOT)" all
+	make -C "$(MICRO_PROGRAM_SOURCE_ROOT)" OUTPUT_DIR="$(MICRO_PROGRAM_OUTPUT_ROOT)" KERNEL_OFFSETS_INPUT="/artifacts/kernel/kernel_offsets.h" all
 	for path in $(MICRO_PROGRAM_OBJECTS) $(MICRO_PROGRAM_NATIVE_OBJECTS) $(MICRO_PROGRAM_HANDCRAFT_OBJECTS); do test -f "$$path"; done
 
 include $(KATRAN_ARTIFACTS_BUILD_RULE_FILE)
