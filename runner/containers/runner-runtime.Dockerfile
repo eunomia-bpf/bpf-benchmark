@@ -338,6 +338,7 @@ COPY runner/CMakeLists.txt ./runner/CMakeLists.txt
 COPY runner/include ./runner/include
 COPY runner/src ./runner/src
 COPY micro/programs ./micro/programs
+COPY ebpf-vm/test ./ebpf-vm/test
 COPY tests/unittest ./tests/unittest
 COPY tests/negative ./tests/negative
 
@@ -353,6 +354,7 @@ RUN set -eux; \
     bpftool version; \
     make image-runner-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
     CLANG=/usr/bin/clang make image-micro-program-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
+    CLANG=/usr/bin/clang make image-stage2-program-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
     PATH="/usr/bin:${PATH}" make image-test-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
     rm -rf \
         /tmp/bpf-benchmark-build \
@@ -399,12 +401,19 @@ FROM runner-runtime-runtime-base AS runner-runtime-bpfopt-artifacts
 # CLI (x86_64 from bpfopt/target/release/, arm64 from
 # bpfopt/target/aarch64-unknown-linux-gnu/release/).
 ARG BPFOPT_HOST_BIN_DIR=bpfopt/target/release
+# NATIVE_LINK_HOST_BIN is the host-built native-link binary. It lives under
+# ebpf-vm/x86/native_lab/native_link/target/release/ regardless of target
+# arch (native-link runs as an x86 host-side build tool inside the runtime
+# container, not on the target architecture).
+ARG NATIVE_LINK_HOST_BIN=ebpf-vm/x86/native_lab/native_link/target/release/native-link
 
 COPY ${BPFOPT_HOST_BIN_DIR}/bpfopt /tmp/bpfopt
+COPY ${NATIVE_LINK_HOST_BIN} /tmp/native-link
 RUN set -eux; \
     install -d /artifacts/rust/usr-local-bin; \
     install -m 0755 /tmp/bpfopt /artifacts/rust/usr-local-bin/; \
-    rm /tmp/bpfopt
+    install -m 0755 /tmp/native-link /artifacts/rust/usr-local-bin/; \
+    rm /tmp/bpfopt /tmp/native-link
 
 FROM runner-runtime-runtime-base AS runner-runtime
 
@@ -423,6 +432,7 @@ COPY --link --from=runner-runtime-artifacts /usr/lib/calico /usr/lib/calico
 COPY --link --from=runner-runtime-artifacts /included-source /included-source
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/runner ${IMAGE_WORKSPACE}/runner
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/micro/programs ${IMAGE_WORKSPACE}/micro/programs
+COPY --link --from=runner-runtime-artifacts /artifacts/user/stage2-programs /artifacts/user/stage2-programs
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/tests ${IMAGE_WORKSPACE}/tests
 COPY --link --from=runner-runtime-kinsn-artifacts /artifacts/kinsn /artifacts/kinsn
 COPY --link --from=runner-runtime-daemon-artifact /artifacts/rust/usr-local-bin/bpfrejit-daemon /usr/local/bin/bpfrejit-daemon
@@ -451,6 +461,15 @@ RUN set -eux; \
 
 COPY --link corpus/bcf ./corpus/bcf
 COPY --link runner/assets ./runner/assets
+
+# LD_PRELOAD shim — installed at a fixed path so start_agent can inject it
+# without needing a workspace-relative lookup at runtime. Two variants:
+# glibc for the ubuntu base apps (bpftrace, bcc, katran, ...) and musl for
+# tracee's alpine-built binary. Build artifacts come from
+# bpfopt/shim/Makefile via the host runtime-image rule.
+RUN mkdir -p /usr/local/lib/bpfrejit
+COPY --link bpfopt/shim/libbpfrejit_shim.so      /usr/local/lib/bpfrejit/libbpfrejit_shim.so
+COPY --link bpfopt/shim/libbpfrejit_shim_musl.so /usr/local/lib/bpfrejit/libbpfrejit_shim_musl.so
 COPY runner/__init__.py runner/repos.yaml ./runner/
 COPY runner/config ./runner/config
 COPY runner/libs ./runner/libs

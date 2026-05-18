@@ -36,6 +36,10 @@ def _build_plain_bytes(output: Path, spec: dict) -> dict:
     n = spec["count"]; output.write_bytes(bytes(range(n))); return {"bytes": n}
 
 
+def _build_zero_bytes(output: Path, spec: dict) -> dict:
+    n = spec["count"]; output.write_bytes(bytes(n)); return {"bytes": n}
+
+
 def _build_lcg_u64_ii(output: Path, spec: dict) -> dict:
     count = spec["count"]
     seed = spec.get("seed", 0)
@@ -101,6 +105,7 @@ def _build_hash_chain(output: Path, spec: dict) -> dict:
 _KIND_BUILDERS = {
     "lcg_words_q": _build_lcg_words_q,
     "plain_bytes": _build_plain_bytes,
+    "zero_bytes": _build_zero_bytes,
     "lcg_u64_ii": _build_lcg_u64_ii,
     "lcg_u16_ii": _build_lcg_u16_ii,
     "trace_event_type_switch_dispatch": _build_trace_event_type_switch_dispatch,

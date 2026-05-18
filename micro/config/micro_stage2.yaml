@@ -1,0 +1,218 @@
+# Stage 2 micro suite: BPF programs that exercise helpers and maps.
+# Companion to micro/config/micro_pure_jit.yaml (which is pure-compute).
+#
+# Built by `make -C ebpf-vm/test`; products land in `ebpf-vm/test/build/`.
+# Each .bpf.c yields a .bpf.o (canonical micro program object) plus a
+# .native.o (clang-x86-64 object the native-lab linker consumes).
+#
+# Reproduce: `make micro SUITE=micro/config/micro_stage2.yaml \
+#                       RUNTIMES="native_lab kernel" SAMPLES=15 INNER_REPEAT=100000`
+suite_name: micro_stage2_maps_helpers
+
+paths:
+  # In-container path comes from BPFREJIT_MICRO_PROGRAM_DIR (set by
+  # runner/suites/micro.py); this fallback is the conventional host
+  # cache path used when running `python -m micro.driver` directly.
+  program_dir: .cache/micro-programs/x86_64
+
+toolchains:
+  llvmbpf:
+    root: vendor/llvmbpf
+  libbpf:
+    root: vendor/libbpf
+
+build:
+  runner_binary: runner/build/micro_exec
+
+defaults:
+  samples: 15
+  warmups: 2
+  inner_repeat: 100000
+  runtimes: [native_lab, kernel]
+  output: micro/results/dev/stage2.json
+
+benchmark_defaults:
+  io_mode: packet
+  expected_retval: 2
+
+runtimes:
+  - name: kernel
+    label: kernel eBPF
+    mode: kernel
+    sudo: true
+
+  - name: native_lab
+    label: native code via bpf_x86_native_lab kinsn
+    mode: native_lab
+    sudo: true
+
+benchmarks:
+  # Pure helpers, no maps.
+  - name: helper_only_ktime
+    description: One bpf_ktime_get_ns call
+    category: helpers
+    family: time
+    level: tiny
+    hypothesis: Captures helper-call overhead floor for a single time read
+    base_name: helper_only_ktime
+    program_name: helper_only_ktime
+    kernel_input_size: 64
+    input_generator: stage2_zero64
+    tags: [stage2, helpers, time]
+
+  - name: helper_get_pid_tgid
+    description: One bpf_get_current_pid_tgid call
+    category: helpers
+    family: identity
+    level: tiny
+    hypothesis: Captures helper-call overhead for a single identity read
+    base_name: helper_get_pid_tgid
+    program_name: helper_get_pid_tgid
+    kernel_input_size: 64
+    input_generator: stage2_zero64
+    tags: [stage2, helpers, identity]
+
+  - name: helper_chain_simple
+    description: Four mixed helpers XOR-folded together
+    category: helpers
+    family: chain
+    level: small
+    hypothesis: Mixes time / identity / cpu helper outputs as a tracing-style observation token
+    base_name: helper_chain_simple
+    program_name: helper_chain_simple
+    kernel_input_size: 64
+    input_generator: stage2_zero64
+    tags: [stage2, helpers, chain]
+
+  # Single map, simple update+lookup pattern.
+  - name: map_array_lookup
+    description: BPF_MAP_TYPE_ARRAY write then lookup at fixed key
+    category: maps
+    family: array
+    level: small
+    hypothesis: Baseline ARRAY map case; kernel JIT fully inlines the lookup, native_lab still calls bpf_map_lookup_elem
+    base_name: map_array_lookup
+    program_name: map_array_lookup
+    kernel_input_size: 64
+    input_generator: stage2_zero64
+    tags: [stage2, maps, array]
+
+  - name: map_array_index_packet
+    description: ARRAY map indexed by a packet byte
+    category: maps
+    family: array
+    level: small
+    hypothesis: Per-port / per-bucket counter shape with packet-driven index
+    base_name: map_array_index_packet
+    program_name: map_array_index_packet
+    kernel_input_size: 64
+    input_generator: stage2_zero64
+    tags: [stage2, maps, array, packet-derived-key]
+
+  - name: map_hash_lookup
+    description: BPF_MAP_TYPE_HASH write then lookup at fixed u32 key
+    category: maps
+    family: hash
+    level: small
+    hypothesis: Baseline HASH case; both runtimes go through __htab_map_lookup_elem (kernel via JIT inline, native_lab via per-call-site routing)
+    base_name: map_hash_lookup
+    program_name: map_hash_lookup
+    kernel_input_size: 64
+    input_generator: stage2_zero64
+    tags: [stage2, maps, hash, inline-eligible]
+
+  - name: map_hash_str_key
+    description: HASH map with a 16-byte string-shaped key
+    category: maps
+    family: hash
+    level: small
+    hypothesis: Exercises HASH inline with a larger KEY_OFFSET (16-byte key vs 4-byte)
+    base_name: map_hash_str_key
+    program_name: map_hash_str_key
+    kernel_input_size: 64
+    input_generator: stage2_zero64
+    tags: [stage2, maps, hash, inline-eligible, large-key]
+
+  - name: map_percpu_array
+    description: PERCPU_ARRAY write then lookup
+    category: maps
+    family: percpu_array
+    level: small
+    hypothesis: Per-cpu counter shape; kernel JIT fully inlines (LEA + per-cpu offset), native_lab calls helper
+    base_name: map_percpu_array
+    program_name: map_percpu_array
+    kernel_input_size: 64
+    input_generator: stage2_zero64
+    tags: [stage2, maps, percpu]
+
+  - name: map_lru_hash_counter
+    description: LRU_HASH per-key counter (delete + update + lookup write-back)
+    category: maps
+    family: lru_hash
+    level: medium
+    hypothesis: Bounded per-key counter pattern (cilium-CT / tetragon-throttle shape)
+    base_name: map_lru_hash_counter
+    program_name: map_lru_hash_counter
+    kernel_input_size: 64
+    input_generator: stage2_zero64
+    tags: [stage2, maps, lru_hash]
+
+  - name: map_percpu_hash_counter
+    description: PERCPU_HASH per-key counter (update + lookup write-back)
+    category: maps
+    family: percpu_hash
+    level: medium
+    hypothesis: Lock-free per-cpu counter table (cilium nodeport / tetragon rate)
+    base_name: map_percpu_hash_counter
+    program_name: map_percpu_hash_counter
+    kernel_input_size: 64
+    input_generator: stage2_zero64
+    tags: [stage2, maps, percpu_hash]
+
+  - name: combined_helper_map
+    description: bpf_get_smp_processor_id + ktime feeding PERCPU_ARRAY
+    category: maps
+    family: percpu_array
+    level: medium
+    hypothesis: Realistic per-cpu timestamping workload
+    base_name: combined_helper_map
+    program_name: combined_helper_map
+    kernel_input_size: 64
+    input_generator: stage2_zero64
+    tags: [stage2, maps, percpu, helpers]
+
+  - name: multi_map_policy
+    description: ARRAY + HASH + PERCPU_ARRAY chain (cilium-style policy lookup)
+    category: maps
+    family: multi_map
+    level: large
+    hypothesis: Exercises per-call-site routing -- HASH inlines, ARRAY/PERCPU stay on plain helper
+    base_name: multi_map_policy
+    program_name: multi_map_policy
+    kernel_input_size: 64
+    input_generator: stage2_zero64
+    tags: [stage2, maps, multi-map]
+
+  - name: packet_5tuple_classify
+    description: HASH map keyed by a 16-byte 5-tuple struct parsed from packet
+    category: maps
+    family: hash
+    level: large
+    hypothesis: Cilium / katran connection-classifier shape
+    base_name: packet_5tuple_classify
+    program_name: packet_5tuple_classify
+    kernel_input_size: 64
+    input_generator: stage2_zero64
+    tags: [stage2, maps, hash, inline-eligible, packet-derived-key]
+
+  - name: stats_mixed_helpers
+    description: HASH + PERCPU_HASH + 3 helpers (tetragon-style stats aggregator)
+    category: maps
+    family: multi_map
+    level: large
+    hypothesis: Real-shape program with mixed map types and several helpers
+    base_name: stats_mixed_helpers
+    program_name: stats_mixed_helpers
+    kernel_input_size: 64
+    input_generator: stage2_zero64
+    tags: [stage2, maps, multi-map, helpers]

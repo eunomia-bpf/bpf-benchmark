@@ -84,7 +84,7 @@ RUN_TOKEN ?= $(shell head -c 32 /dev/urandom 2>/dev/null | tr -dc 'a-z0-9' | hea
 export RUN_TOKEN TARGET
 
 # micro and test suites still consume legacy CLI args until their drivers migrate.
-MICRO_ARGS = --samples "$(SAMPLES)" --warmups "$(or $(WARMUPS),0)" --inner-repeat "$(or $(INNER_REPEAT),1000)" $(foreach b,$(BENCH),--bench "$(b)")
+MICRO_ARGS = --samples "$(SAMPLES)" --warmups "$(or $(WARMUPS),0)" --inner-repeat "$(or $(INNER_REPEAT),1000)" $(foreach b,$(BENCH),--bench "$(b)") $(if $(SUITE),--suite "$(SUITE)") $(foreach r,$(RUNTIMES),--runtime "$(r)")
 TEST_ARGS_COMMON = --fuzz-rounds "$(FUZZ_ROUNDS)"
 
 .PHONY: check validate daemon-tests lint clean \

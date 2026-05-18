@@ -8,12 +8,15 @@ from pathlib import Path
 
 from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail
+from runner.libs.kinsn import load_kinsn_modules
 from runner.libs.workspace_layout import (
     kernel_modules_root,
+    kinsn_module_dir,
     micro_program_root,
     runner_binary_path,
     runtime_path_value,
     runtime_repo_artifact_root,
+    stage2_program_root,
 )
 from runner.suites._common import (
     add_common_args,
@@ -128,6 +131,12 @@ def _run_micro_suite(workspace: Path, args: argparse.Namespace) -> None:
 
     if args.program_dir:
         program_dir = resolve_workspace_path(workspace, args.program_dir)
+    elif args.suite and "stage2" in Path(args.suite).name:
+        # The Stage 2 maps/helpers suite (micro/config/micro_stage2.yaml)
+        # consumes programs built from ebpf-vm/test/ that live under a
+        # parallel artifact tree. Detected here by the suite filename so
+        # users don't have to pass --program-dir explicitly.
+        program_dir = stage2_program_root(workspace, args.target_arch)
     else:
         program_dir = micro_program_root(workspace, args.target_arch)
     if args.runner_binary:
@@ -141,6 +150,24 @@ def _run_micro_suite(workspace: Path, args: argparse.Namespace) -> None:
 
     env["BPFREJIT_MICRO_PROGRAM_DIR"] = str(program_dir)
     env["BPFREJIT_MICRO_RUNNER_BINARY"] = str(runner_binary)
+
+    # When `native_lab` is among the requested runtimes, every kinsn `.ko`
+    # under the kernel-modules dir must be resident (the runner's
+    # run-native-lab subcommand splats into `bpf_x86_native_lab.ko`). Load
+    # them up-front, mirroring `runner/suites/test.py`. We always load (no
+    # filtering by selected runtimes) because the modules are tiny and
+    # idempotent; this also makes downstream `BPFREJIT_BENCH_PASSES` use
+    # work without extra wiring.
+    module_dir = kinsn_module_dir(workspace, args.target_arch)
+    if module_dir.is_dir():
+        expected = sorted(
+            path.stem
+            for path in module_dir.glob("bpf_*.ko")
+            if path.is_file() and path.stem != "bpf_barrier"
+        )
+        if expected:
+            load_kinsn_modules(expected, module_dir=module_dir)
+
     command = [python_bin, str(workspace / "micro" / "driver.py"), *_micro_driver_argv(workspace, args)]
     run_checked(command, cwd=workspace, env=env, die=_die)
 

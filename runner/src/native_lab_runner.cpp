@@ -322,14 +322,27 @@ int run_subprocess(const std::vector<std::string> &argv)
 
 /* Path to the native-link binary. The runner invokes it via fork+exec
  * (per project rule "native_lab_runner can only call linker from the
- * command line"). For now we hard-code the path under the repo build
- * dir; --native-link-binary on the CLI overrides. */
+ * command line"). Resolution order:
+ *   1. `--native-lab-linker` CLI override.
+ *   2. `BPFREJIT_NATIVE_LINK_BINARY` env var.
+ *   3. `/usr/local/bin/native-link` if it exists (runtime container
+ *      installs the host-built binary here).
+ *   4. host repo build path (local non-container debugging). */
 std::filesystem::path native_link_binary(const cli_options &options)
 {
     if (!options.native_lab_linker_path.empty()) {
         return options.native_lab_linker_path;
     }
-    /* Default: relative to CWD where the runner is invoked from. */
+    if (const char *e = std::getenv("BPFREJIT_NATIVE_LINK_BINARY")) {
+        if (e[0] != '\0') {
+            return e;
+        }
+    }
+    const std::filesystem::path image_path = "/usr/local/bin/native-link";
+    std::error_code ec;
+    if (std::filesystem::exists(image_path, ec)) {
+        return image_path;
+    }
     return "ebpf-vm/x86/native_lab/native_link/target/release/native-link";
 }
 
@@ -482,20 +495,70 @@ std::vector<int> walk_lookup_call_maps(const struct bpf_insn *insns, size_t cnt)
     return sites;
 }
 
-CompanionLoad load_bpf_companion(const std::filesystem::path &elf_path)
+/* Normalize the `--program` argument to (companion_bpf_o, native_input).
+ *
+ * The `make micro` pipeline passes the canonical `.bpf.o` path; the
+ * legacy direct-invocation pattern (deprecated, no scripts use it any
+ * more) passed `.native.o` or `.native.so` directly. Both work:
+ *   - `.bpf.o`        → companion = arg;   native_input = sibling `.native.o` if present, else `.native.so`.
+ *   - `.native.{o,so}` → native_input = arg; companion = sibling `.bpf.o` if present, else empty.
+ *
+ * `companion_bpf_o` may be empty when no `.bpf.o` exists alongside; that
+ * is fine for pure-compute programs (Stage 1 of the micro suite) which
+ * have no maps or helpers and thus need no kernel-address resolution. */
+struct NativeLabPaths {
+    std::filesystem::path companion_bpf_o;
+    std::filesystem::path native_input;
+};
+
+NativeLabPaths resolve_native_lab_paths(const std::filesystem::path &program)
 {
-    /* Derive sibling: replace ".native.o" suffix with ".bpf.o". */
-    CompanionLoad out{};
-    std::string s = elf_path.string();
-    const std::string from = ".native.o";
-    auto pos = s.rfind(from);
-    if (pos == std::string::npos) {
-        return out; /* not a .native.o; no companion */
+    NativeLabPaths out;
+    std::string s = program.string();
+
+    auto strip_suffix = [](std::string &str, const char *sfx) -> bool {
+        size_t n = std::strlen(sfx);
+        if (str.size() >= n && std::memcmp(str.data() + str.size() - n, sfx, n) == 0) {
+            str.resize(str.size() - n);
+            return true;
+        }
+        return false;
+    };
+
+    std::string base = s;
+    if (strip_suffix(base, ".bpf.o")) {
+        out.companion_bpf_o = program;
+        std::filesystem::path no = base + ".native.o";
+        std::filesystem::path nso = base + ".native.so";
+        if (std::filesystem::exists(no)) {
+            out.native_input = no;
+        } else if (std::filesystem::exists(nso)) {
+            out.native_input = nso;
+        } else {
+            fail("native_lab: no .native.o or .native.so sibling for " + s);
+        }
+    } else if (strip_suffix(base, ".native.o") || strip_suffix(base, ".native.so")) {
+        out.native_input = program;
+        std::filesystem::path bpfo = base + ".bpf.o";
+        if (std::filesystem::exists(bpfo)) {
+            out.companion_bpf_o = bpfo;
+        }
+    } else {
+        fail("native_lab: --program must end in .bpf.o, .native.o, or .native.so: " + s);
     }
-    std::string bpf_path = s.substr(0, pos) + ".bpf.o";
+    return out;
+}
+
+CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
+{
+    /* `bpf_o_path` is the `.bpf.o` companion directly. Returns an empty
+     * CompanionLoad if the file doesn't exist (pure-compute programs
+     * without maps/helpers don't need a companion). */
+    CompanionLoad out{};
     struct stat st {};
+    std::string bpf_path = bpf_o_path.string();
     if (stat(bpf_path.c_str(), &st) != 0) {
-        return out; /* no sibling; native blob must be helper-only */
+        return out; /* no companion; native blob must be helper-free */
     }
 
     bpf_object *obj = bpf_object__open_file(bpf_path.c_str(), nullptr);
@@ -817,17 +880,37 @@ std::vector<sample_result> run_kernel_native_lab(const cli_options &options)
     std::vector<uint8_t> relocs;
     CompanionLoad companion{};
     if (file_is_elf(options.program)) {
-        std::string symbol = options.native_lab_symbol;
-        if (symbol.empty()) {
-            symbol = options.program.stem().string();
+        /* Resolve `.bpf.o` (companion, for map-ptr + per-call lookup
+         * spec) and `.native.{o,so}` (native-link input) from whichever
+         * suffix the caller passed. The micro pipeline passes `.bpf.o`;
+         * direct invocations may pass `.native.{o,so}`. */
+        auto paths = resolve_native_lab_paths(options.program);
+
+        /* Symbol selection precedence:
+         *   1. `--program-name <X>` (micro pipeline canonical)
+         *   2. `--native-lab-symbol <X>` (legacy flag, still accepted)
+         *   3. derive from native_input filename stem, stripping a
+         *      trailing `.native` segment if present. */
+        std::string symbol;
+        if (options.program_name && !options.program_name->empty()) {
+            symbol = *options.program_name;
+        } else if (!options.native_lab_symbol.empty()) {
+            symbol = options.native_lab_symbol;
+        } else {
+            std::string stem = paths.native_input.stem().string();
+            const std::string nat = ".native";
+            if (stem.size() >= nat.size()
+                && stem.compare(stem.size() - nat.size(), nat.size(), nat) == 0) {
+                stem.resize(stem.size() - nat.size());
+            }
+            symbol = stem;
         }
-        /* Load sibling .bpf.o as an address oracle (if it exists). The
-         * bpf_object stays open for the entire native_lab run so the
-         * kernel maps it owns remain valid -- our blob references them
-         * by raw kernel pointer through a literal-pool slot. */
-        companion = load_bpf_companion(options.program);
+
+        if (!paths.companion_bpf_o.empty()) {
+            companion = load_bpf_companion(paths.companion_bpf_o);
+        }
         LinkerOutput lo = invoke_native_link(
-            options, options.program, symbol, companion.map_addrs, companion);
+            options, paths.native_input, symbol, companion.map_addrs, companion);
         blob = read_blob_file(lo.blob);
         std::ifstream rf(lo.relocs, std::ios::binary);
         if (rf) {

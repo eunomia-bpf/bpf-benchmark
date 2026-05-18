@@ -20,6 +20,20 @@ MICRO_PROGRAM_OUTPUT_ROOT := $(ACTIVE_ARTIFACT_ROOT)/micro-programs/$(RUN_TARGET
 MICRO_PROGRAM_SRCS = $(shell find "$(MICRO_PROGRAM_SOURCE_ROOT)" -maxdepth 1 -type f -name '*.bpf.c' -print 2>/dev/null)
 MICRO_PROGRAM_OBJECTS = $(patsubst $(MICRO_PROGRAM_SOURCE_ROOT)/%.bpf.c,$(MICRO_PROGRAM_OUTPUT_ROOT)/%.bpf.o,$(MICRO_PROGRAM_SRCS))
 MICRO_PROGRAM_NATIVE_OBJECTS = $(patsubst $(MICRO_PROGRAM_SOURCE_ROOT)/%.bpf.c,$(MICRO_PROGRAM_OUTPUT_ROOT)/%.native.so,$(MICRO_PROGRAM_SRCS))
+
+# Stage 2 (maps + helpers) test programs. Source is in ebpf-vm/test/;
+# build output lands under <artifact-root>/stage2-programs/<arch>/. Each
+# .bpf.c produces a .bpf.o (canonical micro program object the kernel JIT
+# consumes via libbpf) plus a .native.o (clang-x86-64 object the
+# native-link tool consumes; external helper/map symbol relocations stay
+# in .rela.text for runtime patching against kallsyms-resolved kernel
+# addresses).
+STAGE2_PROGRAM_SOURCE_ROOT := $(ROOT_DIR)/ebpf-vm/test
+STAGE2_PROGRAM_OUTPUT_ROOT := $(ACTIVE_ARTIFACT_ROOT)/stage2-programs/$(RUN_TARGET_ARCH)
+STAGE2_PROGRAM_SRCS = $(shell find "$(STAGE2_PROGRAM_SOURCE_ROOT)" -maxdepth 1 -type f -name '*.bpf.c' -print 2>/dev/null)
+STAGE2_PROGRAM_OBJECTS = $(patsubst $(STAGE2_PROGRAM_SOURCE_ROOT)/%.bpf.c,$(STAGE2_PROGRAM_OUTPUT_ROOT)/%.bpf.o,$(STAGE2_PROGRAM_SRCS))
+STAGE2_PROGRAM_NATIVE_OBJECTS = $(patsubst $(STAGE2_PROGRAM_SOURCE_ROOT)/%.bpf.c,$(STAGE2_PROGRAM_OUTPUT_ROOT)/%.native.o,$(STAGE2_PROGRAM_SRCS))
+STAGE2_PROGRAM_SOURCE_FILES = $(STAGE2_PROGRAM_SRCS) $(shell find "$(STAGE2_PROGRAM_SOURCE_ROOT)" -maxdepth 2 -type f \( -name '*.h' -o -name 'Makefile' \) -print 2>/dev/null)
 RUNNER_BUILD_DIR_ACTIVE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(RUNNER_DIR)/build-arm64-llvmbpf,$(RUNNER_DIR)/build-llvmbpf)
 RUNNER_LIBBPF_BUILD_DIR := $(RUNNER_BUILD_DIR_ACTIVE)/vendor/libbpf
 RUNNER_LIBBPF_OBJDIR := $(RUNNER_LIBBPF_BUILD_DIR)/obj
@@ -44,6 +58,14 @@ X86_BPFOPT_BIN_DIR := $(ROOT_DIR)/bpfopt/target/release
 ARM64_BPFOPT_BIN_DIR := $(ROOT_DIR)/bpfopt/target/$(ARM64_RUST_TARGET)/release
 X86_BPFOPT_BINARIES := $(addprefix $(X86_BPFOPT_BIN_DIR)/,bpfopt)
 ARM64_BPFOPT_BINARIES := $(addprefix $(ARM64_BPFOPT_BIN_DIR)/,bpfopt)
+
+# native-link (Rust binary, separate cargo workspace under ebpf-vm/x86/...).
+# Built on host alongside bpfopt; the runner-runtime image COPYs it to
+# /usr/local/bin/native-link. native_lab_runner finds it via that fixed
+# path when running inside the container.
+NATIVE_LINK_SRC_DIR := $(ROOT_DIR)/ebpf-vm/x86/native_lab/native_link
+NATIVE_LINK_BINARY := $(NATIVE_LINK_SRC_DIR)/target/release/native-link
+NATIVE_LINK_SOURCE_FILES = $(shell find "$(NATIVE_LINK_SRC_DIR)/src" -type f -name '*.rs' -print 2>/dev/null) $(NATIVE_LINK_SRC_DIR)/Cargo.toml
 ACTIVE_BPFOPT_BINARY_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_BPFOPT_BIN_DIR),$(X86_BPFOPT_BIN_DIR))
 ACTIVE_BPFOPT_BINARIES := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_BPFOPT_BINARIES),$(X86_BPFOPT_BINARIES))
 ACTIVE_RUNNER_BINARY := $(RUNNER_BUILD_DIR_ACTIVE)/micro_exec
@@ -98,6 +120,11 @@ ACTIVE_KATRAN_REQUIRED := $(REPO_KATRAN_ROOT)/bin/katran_server_grpc $(REPO_KATR
 REQUIRE_IMAGE_BUILD = @if [ "$(BPFREJIT_IMAGE_BUILD)" != "1" ]; then echo "$@ must be run from the runner Dockerfile with BPFREJIT_IMAGE_BUILD=1" >&2; exit 1; fi
 
 BPFOPT_SOURCE_FILES = $(shell find "$(ROOT_DIR)/bpfopt/crates" -type f \( -name '*.rs' -o -name 'Cargo.toml' \) -print 2>/dev/null) $(ROOT_DIR)/bpfopt/Cargo.toml $(ROOT_DIR)/bpfopt/Cargo.lock
+BPFOPT_SHIM_DIR := $(ROOT_DIR)/bpfopt/shim
+BPFOPT_SHIM_SOURCE_FILES = $(BPFOPT_SHIM_DIR)/libbpfrejit_shim.c $(BPFOPT_SHIM_DIR)/Makefile
+BPFOPT_SHIM_GLIBC := $(BPFOPT_SHIM_DIR)/libbpfrejit_shim.so
+BPFOPT_SHIM_MUSL := $(BPFOPT_SHIM_DIR)/libbpfrejit_shim_musl.so
+BPFOPT_SHIM_ARTIFACTS := $(BPFOPT_SHIM_GLIBC) $(BPFOPT_SHIM_MUSL)
 DAEMON_SOURCE_FILES = $(shell find "$(ROOT_DIR)/daemon/src" "$(ROOT_DIR)/daemon/crates" -type f 2>/dev/null) $(ROOT_DIR)/daemon/Cargo.toml $(ROOT_DIR)/daemon/Cargo.lock $(ROOT_DIR)/daemon/Makefile
 RUNNER_CORE_SOURCE_FILES = $(shell find "$(RUNNER_DIR)/src" "$(RUNNER_DIR)/include" -type f ! -name 'llvmbpf_runner.cpp' 2>/dev/null) $(RUNNER_DIR)/CMakeLists.txt
 RUNNER_LLVMBPF_SOURCE_FILES = $(RUNNER_DIR)/src/llvmbpf_runner.cpp $(shell find "$(ROOT_DIR)/vendor/llvmbpf/include" "$(ROOT_DIR)/vendor/llvmbpf/src" -type f 2>/dev/null)
@@ -180,14 +207,14 @@ KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES = $(ROOT_DIR)/Makefile $(KATRAN_ARTIFACTS_BU
 	$(KATRAN_ARTIFACTS_CONTAINERFILE) $(DOCKERIGNORE_FILE) $(KATRAN_SOURCE_FILES) $(BPFTOOL_SOURCE_FILES)
 RUNNER_RUNTIME_IMAGE_SOURCE_FILES = $(BUILD_RULE_FILES) $(RUNNER_RUNTIME_CONTAINERFILE) $(DOCKERIGNORE_FILE) \
 	$(DAEMON_SOURCE_FILES) $(BPFOPT_SOURCE_FILES) $(RUNNER_SOURCE_FILES) $(TEST_UNITTEST_SOURCE_FILES) $(TEST_NEGATIVE_SOURCE_FILES) \
-	$(MICRO_PROGRAM_SOURCE_FILES) $(KINSN_SOURCE_FILES) \
+	$(MICRO_PROGRAM_SOURCE_FILES) $(STAGE2_PROGRAM_SOURCE_FILES) $(KINSN_SOURCE_FILES) \
 	$(LIBBPF_SOURCE_FILES) $(VENDOR_LINUX_RUNTIME_SOURCE_FILES) $(RUNNER_SCRIPT_SOURCE_FILES)
 RUNNER_RUNTIME_IMAGE_LAYER_FILES = $(RUNNER_RUNTIME_SOURCE_FILES) $(MICRO_RUNTIME_SOURCE_FILES) \
 	$(CORPUS_RUNTIME_SOURCE_FILES)
 RUNNER_RUNTIME_IMAGE_INPUT_FILES = $(RUNNER_RUNTIME_IMAGE_SOURCE_FILES) $(RUNNER_RUNTIME_IMAGE_LAYER_FILES)
 BUILD_INPUT_SOURCE_FILES = $(sort \
 	$(DAEMON_SOURCE_FILES) $(BPFOPT_SOURCE_FILES) $(RUNNER_SOURCE_FILES) $(TEST_UNITTEST_SOURCE_FILES) $(TEST_NEGATIVE_SOURCE_FILES) \
-	$(MICRO_PROGRAM_SOURCE_FILES) $(KINSN_SOURCE_FILES) $(KATRAN_SOURCE_FILES) \
+	$(MICRO_PROGRAM_SOURCE_FILES) $(STAGE2_PROGRAM_SOURCE_FILES) $(KINSN_SOURCE_FILES) $(KATRAN_SOURCE_FILES) \
 	$(LIBBPF_SOURCE_FILES) $(VENDOR_LINUX_RUNTIME_SOURCE_FILES) \
 	$(RUNNER_RUNTIME_SOURCE_FILES) $(RUNNER_SCRIPT_SOURCE_FILES) $(MICRO_RUNTIME_SOURCE_FILES) $(CORPUS_RUNTIME_SOURCE_FILES) \
 	$(KERNEL_BUILD_META_FILES) $(KERNEL_SOURCE_FILES) \
@@ -288,7 +315,7 @@ $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR): $(KATRAN_ARTIFACTS_IMAGE_SOURCE_FILES)
 	fi
 	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(ARM64_KATRAN_ARTIFACTS_IMAGE)"; mv -f "$$tmp" "$@"
 
-$(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(X86_KATRAN_ARTIFACTS_IMAGE_TAR) $(HOST_KERNEL_MANIFEST_X86) $(HOST_KERNEL_OFFSETS_X86) $(HOST_KINSN_KO_FILES_X86) $(X86_DAEMON_BINARY) $(X86_BPFOPT_BINARIES)
+$(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(X86_KATRAN_ARTIFACTS_IMAGE_TAR) $(HOST_KERNEL_MANIFEST_X86) $(HOST_KERNEL_OFFSETS_X86) $(HOST_KINSN_KO_FILES_X86) $(X86_DAEMON_BINARY) $(X86_BPFOPT_BINARIES) $(BPFOPT_SHIM_ARTIFACTS) $(NATIVE_LINK_BINARY) $(STAGE2_PROGRAM_SOURCE_FILES)
 	@mkdir -p "$(dir $@)"
 	docker load -i "$(X86_KATRAN_ARTIFACTS_IMAGE_TAR)"
 	docker build --platform linux/amd64 \
@@ -308,7 +335,7 @@ $(X86_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(X86_KATRA
 		-t "$(X86_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	tmp="$@.$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(X86_RUNNER_RUNTIME_IMAGE)"; mv -f "$$tmp" "$@"
 
-$(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR) $(HOST_KERNEL_MANIFEST_ARM64) $(HOST_KERNEL_OFFSETS_ARM64) $(HOST_KINSN_KO_FILES_ARM64) $(ARM64_DAEMON_BINARY) $(ARM64_BPFOPT_BINARIES)
+$(ARM64_RUNNER_RUNTIME_IMAGE_TAR): $(RUNNER_RUNTIME_IMAGE_INPUT_FILES) $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR) $(HOST_KERNEL_MANIFEST_ARM64) $(HOST_KERNEL_OFFSETS_ARM64) $(HOST_KINSN_KO_FILES_ARM64) $(ARM64_DAEMON_BINARY) $(ARM64_BPFOPT_BINARIES) $(BPFOPT_SHIM_ARTIFACTS)
 	@mkdir -p "$(dir $@)"
 	docker load -i "$(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR)"
 	docker build --platform linux/arm64 \
@@ -361,6 +388,16 @@ $(X86_BPFOPT_BINARIES) &: $(BPFOPT_SOURCE_FILES) $(BUILD_RULE_FILES)
 	cargo build --release --workspace --target-dir "$(ROOT_DIR)/bpfopt/target" --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml" \
 		-p bpfopt
 
+$(NATIVE_LINK_BINARY): $(NATIVE_LINK_SOURCE_FILES) $(BUILD_RULE_FILES)
+	cargo build --release --manifest-path "$(NATIVE_LINK_SRC_DIR)/Cargo.toml"
+
+# LD_PRELOAD shim — glibc + musl variants. Built on host (glibc via gcc;
+# musl via the alpine docker container per bpfopt/shim/Makefile target).
+$(BPFOPT_SHIM_GLIBC): $(BPFOPT_SHIM_SOURCE_FILES)
+	$(MAKE) -C $(BPFOPT_SHIM_DIR) libbpfrejit_shim.so
+$(BPFOPT_SHIM_MUSL): $(BPFOPT_SHIM_SOURCE_FILES)
+	$(MAKE) -C $(BPFOPT_SHIM_DIR) musl
+
 AARCH64_SYSROOT_DIR := $(ROOT_DIR)/.cache/aarch64-sysroot
 AARCH64_SYSROOT_MARKER := $(AARCH64_SYSROOT_DIR)/usr/include/libelf.h
 AARCH64_SYSROOT_DEB_PACKAGES := \
@@ -406,6 +443,9 @@ else
 image-katran-artifacts: $(ACTIVE_KATRAN_REQUIRED)
 image-runner-artifacts: $(ACTIVE_RUNNER_BINARY)
 image-micro-program-artifacts: $(MICRO_PROGRAM_OBJECTS) $(MICRO_PROGRAM_NATIVE_OBJECTS)
+
+image-stage2-program-artifacts: $(STAGE2_PROGRAM_OBJECTS) $(STAGE2_PROGRAM_NATIVE_OBJECTS)
+.PHONY: image-stage2-program-artifacts
 image-test-artifacts: $(ACTIVE_TEST_UNITTEST_PRIMARY) $(ACTIVE_TEST_NEGATIVE_PRIMARY)
 
 $(RUNNER_LIBBPF_A): $(LIBBPF_SOURCE_FILES) $(BUILD_RULE_FILES)
@@ -443,6 +483,20 @@ $(MICRO_PROGRAM_OBJECTS) $(MICRO_PROGRAM_NATIVE_OBJECTS) &: $(MICRO_PROGRAM_SOUR
 	mkdir -p "$(MICRO_PROGRAM_OUTPUT_ROOT)"
 	make -C "$(MICRO_PROGRAM_SOURCE_ROOT)" OUTPUT_DIR="$(MICRO_PROGRAM_OUTPUT_ROOT)" KERNEL_OFFSETS_INPUT="/artifacts/kernel/kernel_offsets.h" all
 	for path in $(MICRO_PROGRAM_OBJECTS) $(MICRO_PROGRAM_NATIVE_OBJECTS); do test -f "$$path"; done
+
+# Stage 2 build rule. The ebpf-vm/test/Makefile resolves
+# KERNEL_OFFSETS by recursing into micro/programs (its
+# `$(MAKE) -C $(MICRO_PROGRAMS_DIR) $@` step). Inside the runner-runtime
+# artifacts container we already have a pre-built kernel_offsets.h at
+# /artifacts/kernel/, so we pre-copy it to micro/programs/ before invoking
+# the Stage 2 Makefile to avoid an extra pahole run.
+$(STAGE2_PROGRAM_OBJECTS) $(STAGE2_PROGRAM_NATIVE_OBJECTS) &: $(STAGE2_PROGRAM_SOURCE_FILES) $(BUILD_RULE_FILES)
+	mkdir -p "$(STAGE2_PROGRAM_OUTPUT_ROOT)"
+	if [ -f /artifacts/kernel/kernel_offsets.h ]; then \
+	    cp -f /artifacts/kernel/kernel_offsets.h "$(MICRO_PROGRAM_SOURCE_ROOT)/kernel_offsets.h"; \
+	fi
+	make -C "$(STAGE2_PROGRAM_SOURCE_ROOT)" OUTPUT_DIR="$(STAGE2_PROGRAM_OUTPUT_ROOT)" all
+	for path in $(STAGE2_PROGRAM_OBJECTS) $(STAGE2_PROGRAM_NATIVE_OBJECTS); do test -f "$$path"; done
 
 include $(KATRAN_ARTIFACTS_BUILD_RULE_FILE)
 

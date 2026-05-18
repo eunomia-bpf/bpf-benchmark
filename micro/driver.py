@@ -256,6 +256,16 @@ def build_runner_command(
         command = [str(runner_binary), "run-llvmbpf"]
     elif runtime.mode == "native":
         command = [str(runner_binary), "run-native"]
+    elif runtime.mode == "native_lab":
+        command = [str(runner_binary), "run-native-lab"]
+        # Pick the native_lab program type from benchmark tags so the
+        # runner builds the right BPF stub (XDP vs sched_cls vs cgroup_skb).
+        tags = set(benchmark.tags)
+        if "tc" in tags:
+            command.extend(["--native-lab-prog-type", "sched_cls"])
+        elif "cgroup_skb" in tags or "cgroup-skb" in tags:
+            command.extend(["--native-lab-prog-type", "cgroup_skb"])
+        # else: default xdp
     elif runtime.mode in {"kernel", "kernel_rejit"}:
         command = [str(runner_binary), "test-run"]
     else:
@@ -329,6 +339,7 @@ def run_rejit_sample(command: list[str], *, cwd: Path, artifact_dir: Path) -> di
             passes = benchmark_rejit_enabled_passes()
             rejit_result = daemon.apply_rejit(
                 [prog_id],
+                app_pid=int(proc.pid),
                 enabled_passes=passes,
                 prog_names_by_id={prog_id: str(ready.get("name") or "micro")},
             )

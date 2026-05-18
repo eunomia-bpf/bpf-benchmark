@@ -8,6 +8,10 @@ simple_packet:
   kind: plain_bytes
   count: 64
 
+stage2_zero64:
+  kind: zero_bytes
+  count: 64
+
 siphash_rotate64_mixer:
   kind: lcg_words_q
   word_count: 8

@@ -41,6 +41,11 @@ runtimes:
     mode: kernel
     sudo: true
 
+  - name: native_lab
+    label: native code via bpf_x86_native_lab kinsn
+    mode: native_lab
+    sudo: true
+
 benchmarks:
   - name: simple
     description: Return-only baseline

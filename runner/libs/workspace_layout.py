@@ -52,6 +52,16 @@ def micro_program_root(workspace: Path, target_arch: str) -> Path:
         return image_artifact_root(target_arch, "micro-programs")
     return _cache(runtime_workspace(workspace), target_arch, "micro-programs")
 
+
+def stage2_program_root(workspace: Path, target_arch: str) -> Path:
+    """ebpf-vm/test/-built Stage 2 (maps + helpers) program artifacts.
+    Mirrors `micro_program_root` but under a separate sub-tree so the
+    Stage 1 pure-compute build doesn't have to care about helper extern
+    relocations."""
+    if inside_runtime_image():
+        return image_artifact_root(target_arch, "stage2-programs")
+    return _cache(runtime_workspace(workspace), target_arch, "stage2-programs")
+
 def daemon_binary_path(workspace: Path, target_arch: str) -> Path:
     return _p(runtime_workspace(workspace), target_arch, "daemon_binary_path")
 
