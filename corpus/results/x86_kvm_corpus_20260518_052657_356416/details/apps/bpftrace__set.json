@@ -1,0 +1,3097 @@
+{
+  "app": "bpftrace/set",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 769,
+        "bytes_xlated": 1360,
+        "id": 9,
+        "name": "cap_capable",
+        "run_cnt_delta": 2760091,
+        "run_time_ns_delta": 696464058,
+        "type": "kprobe"
+      },
+      "15": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 15,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 795588,
+        "run_time_ns_delta": 121305682,
+        "type": "tracepoint"
+      },
+      "16": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 16,
+        "name": "tracepoint_sched_sched_wakeup_new",
+        "run_cnt_delta": 34065,
+        "run_time_ns_delta": 9020485,
+        "type": "tracepoint"
+      },
+      "17": {
+        "bytes_jited": 515,
+        "bytes_xlated": 896,
+        "id": 17,
+        "name": "sched_switch",
+        "run_cnt_delta": 1043497,
+        "run_time_ns_delta": 255601024,
+        "type": "tracepoint"
+      },
+      "23": {
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 23,
+        "name": "block_io_start",
+        "run_cnt_delta": 26690,
+        "run_time_ns_delta": 50561500,
+        "type": "tracepoint"
+      },
+      "24": {
+        "bytes_jited": 931,
+        "bytes_xlated": 1576,
+        "id": 24,
+        "name": "block_io_done",
+        "run_cnt_delta": 27119,
+        "run_time_ns_delta": 59307938,
+        "type": "tracepoint"
+      },
+      "30": {
+        "bytes_jited": 362,
+        "bytes_xlated": 680,
+        "id": 30,
+        "name": "1",
+        "run_cnt_delta": 12,
+        "run_time_ns_delta": 19413,
+        "type": "perf_event"
+      },
+      "31": {
+        "bytes_jited": 140,
+        "bytes_xlated": 224,
+        "id": 31,
+        "name": "vfs_create",
+        "run_cnt_delta": 4776490,
+        "run_time_ns_delta": 384618458,
+        "type": "kprobe"
+      },
+      "38": {
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 38,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 297183,
+        "run_time_ns_delta": 198418365,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "4",
+          "--eventfd",
+          "4",
+          "--get",
+          "4",
+          "--prctl",
+          "4",
+          "--set",
+          "4",
+          "--dup",
+          "4",
+          "--kill",
+          "4",
+          "--sigfd",
+          "4",
+          "--signal",
+          "4",
+          "--pty",
+          "4",
+          "--itimer",
+          "4",
+          "--timerfd",
+          "4",
+          "--exec",
+          "4",
+          "--fork",
+          "4",
+          "--vfork",
+          "4",
+          "--clone",
+          "4",
+          "--ptrace",
+          "4",
+          "--futex",
+          "4",
+          "--sem",
+          "4",
+          "--aio",
+          "4",
+          "--aiol",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--io",
+          "4",
+          "--iomix",
+          "4",
+          "--iomix-bytes",
+          "128M",
+          "--io-uring",
+          "4",
+          "--sync-file",
+          "4",
+          "--epoll",
+          "4",
+          "--netdev",
+          "4",
+          "--sctp",
+          "1",
+          "--sock",
+          "4",
+          "--sockdiag",
+          "4",
+          "--sockfd",
+          "4",
+          "--sockpair",
+          "4",
+          "--sockmany",
+          "4",
+          "--udp",
+          "4",
+          "--udp-flood",
+          "4",
+          "--mmap",
+          "4",
+          "--mmap-bytes",
+          "16M",
+          "--mprotect",
+          "4",
+          "--mremap",
+          "4",
+          "--mremap-bytes",
+          "16M",
+          "--madvise",
+          "4",
+          "--access",
+          "4",
+          "--chdir",
+          "4",
+          "--chmod",
+          "4",
+          "--chown",
+          "4",
+          "--dentry",
+          "4",
+          "--dir",
+          "4",
+          "--dirmany",
+          "4",
+          "--fallocate",
+          "4",
+          "--fallocate-bytes",
+          "128M",
+          "--file-ioctl",
+          "4",
+          "--filename",
+          "4",
+          "--flock",
+          "4",
+          "--fpunch",
+          "4",
+          "--fpunch-bytes",
+          "32M",
+          "--fstat",
+          "4",
+          "--getdent",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--inotify",
+          "4",
+          "--open",
+          "4",
+          "--open-max",
+          "1024",
+          "--rename",
+          "4",
+          "--touch",
+          "4",
+          "--utime",
+          "4",
+          "--link",
+          "4",
+          "--symlink",
+          "4",
+          "--mknod",
+          "4",
+          "--fcntl",
+          "4",
+          "--epoll-port",
+          "14310",
+          "--sctp-port",
+          "14410",
+          "--sock-port",
+          "14510",
+          "--sockfd-port",
+          "14610",
+          "--timeout",
+          "10s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/cfd8o"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "eventfd",
+            "get",
+            "prctl",
+            "set",
+            "dup",
+            "kill",
+            "sigfd",
+            "signal",
+            "pty",
+            "itimer",
+            "timerfd",
+            "exec",
+            "fork",
+            "vfork",
+            "clone",
+            "ptrace",
+            "futex",
+            "sem",
+            "aio",
+            "aiol",
+            "hdd",
+            "io",
+            "iomix",
+            "io-uring",
+            "sync-file",
+            "epoll",
+            "netdev",
+            "sctp",
+            "sock",
+            "sockdiag",
+            "sockfd",
+            "sockpair",
+            "sockmany",
+            "udp",
+            "udp-flood",
+            "mmap",
+            "mprotect",
+            "mremap",
+            "madvise",
+            "access",
+            "chdir",
+            "chmod",
+            "chown",
+            "dentry",
+            "dir",
+            "dirmany",
+            "fallocate",
+            "file-ioctl",
+            "filename",
+            "flock",
+            "fpunch",
+            "fstat",
+            "getdent",
+            "hdd",
+            "inotify",
+            "open",
+            "rename",
+            "touch",
+            "utime",
+            "link",
+            "symlink",
+            "mknod",
+            "fcntl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 12.053462295999992,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [15422] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [15422] setting to a 10 secs run per stressor\nstress-ng: info:  [15422] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd, 4 fork, 4 vfork, 4 clone, 4 ptrace, 4 futex, 4 sem, 4 aio, 4 aiol, 4 hdd, 4 io, 4 iomix, 4 io-uring, 4 sync-file, 4 epoll, 4 netdev, 1 sctp, 4 sock, 4 sockdiag, 4 sockfd, 4 sockpair, 4 sockmany, 4 udp, 4 udp-flood, 4 mmap, 4 mprotect, 4 mremap, 4 madvise, 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [15422] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [15630] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: info:  [16118] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [16026] dentry: 82646 dentries allocated\nstress-ng: metrc: [15422] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [15422]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [15422] cap              937159     10.04      0.30      1.16     93327.42      642857.53\nstress-ng: metrc: [15422] eventfd          135715     10.18      0.11      0.86     13327.83      140427.90\nstress-ng: metrc: [15422] get                 535     10.29      0.04      0.72        51.99         702.94\nstress-ng: metrc: [15422] prctl               707     10.06      0.18      0.53        70.28         992.98\nstress-ng: metrc: [15422] set               72107     10.41      0.12      1.25      6928.35       52614.80\nstress-ng: metrc: [15422] dup                 122     11.31      0.06      0.27        10.78         380.04\nstress-ng: metrc: [15422] kill              25587     10.55      0.04      1.11      2426.07       22408.02\nstress-ng: metrc: [15422] sigfd           2489997     10.67      0.31      2.01    233415.46     1074053.72\nstress-ng: metrc: [15422] signal                0     10.14      0.00      0.00         0.00           0.00\nstress-ng: metrc: [15422] pty                  42     10.67      0.10      1.37         3.93          28.58\nstress-ng: metrc: [15422] itimer              165     10.18      0.25      0.94        16.21         139.05\nstress-ng: metrc: [15422] timerfd          135741     11.65      0.00      1.08     11650.01      124981.01\nstress-ng: metrc: [15422] fork                842     10.21      0.24      0.50        82.48        1139.35\nstress-ng: metrc: [15422] vfork             16883     10.01      0.23      0.39      1686.04       27374.01\nstress-ng: metrc: [15422] clone               221     10.40      0.19      0.69        21.26         250.60\nstress-ng: metrc: [15422] ptrace           127691     10.56      0.02      0.85     12093.30      146990.91\nstress-ng: metrc: [15422] futex             54594     21.33      0.34      1.31      2559.78       33221.97\nstress-ng: metrc: [15422] sem                 636     10.32      0.01      0.03        61.61       19572.84\nstress-ng: metrc: [15422] aio                6010     11.48      0.00      0.09       523.73       65962.77\nstress-ng: metrc: [15422] aiol               1251     11.60      0.04      0.16       107.87        6501.57\nstress-ng: metrc: [15422] hdd               18525     11.32      0.24      0.41      1635.85       28882.04\nstress-ng: metrc: [15422] io                   38     11.66      0.01      0.03         3.26         876.51\nstress-ng: metrc: [15422] iomix              3422     11.66      0.19      2.75       293.52        1163.96\nstress-ng: metrc: [15422] io-uring           6528     11.52      0.00      0.41       566.47       15871.86\nstress-ng: metrc: [15422] sync-file            44     11.22      0.01      0.10         3.92         397.75\nstress-ng: metrc: [15422] epoll               298     11.34      0.03      0.06        26.28        3138.86\nstress-ng: metrc: [15422] netdev          1449387     10.99      0.17      1.05    131935.09     1185511.18\nstress-ng: metrc: [15422] sctp              30694     10.01      0.01      0.22      3066.94      133985.20\nstress-ng: metrc: [15422] sock               1237     10.75      0.04      0.73       115.05        1601.66\nstress-ng: metrc: [15422] sockdiag        5693101     10.17      0.03      0.99    559602.46     5575169.44\nstress-ng: metrc: [15422] sockfd           246372     10.88      0.06      0.87     22634.64      267583.91\nstress-ng: metrc: [15422] sockpair          62867     10.64      0.03      0.33      5907.24      174895.33\nstress-ng: metrc: [15422] sockmany          33081     10.44      0.02      1.19      3167.92       27224.18\nstress-ng: metrc: [15422] udp               50007     10.27      0.04      1.22      4870.20       39805.71\nstress-ng: metrc: [15422] udp-flood        907103     10.20      0.11      1.40     88926.62      602127.72\nstress-ng: metrc: [15422] mmap                920     10.44      0.03      1.34        88.13         670.67\nstress-ng: metrc: [15422] mprotect        6213574     10.46      1.55      8.62    593829.54      611205.58\nstress-ng: metrc: [15422] mremap             1272     10.26      0.04      1.40       124.01         887.64\nstress-ng: metrc: [15422] madvise              33     11.08      0.11      1.33         2.98          22.91\nstress-ng: metrc: [15422] access             4329     11.13      0.06      0.44       389.10        8651.22\nstress-ng: metrc: [15422] chdir                 4     11.12      0.00      0.39         0.36          10.27\nstress-ng: metrc: [15422] chmod                38     11.10      0.00      0.10         3.42         392.18\nstress-ng: metrc: [15422] chown               118     11.12      0.00      0.06        10.61        1835.23\nstress-ng: metrc: [15422] dentry             6459     10.96      0.03      0.22       589.51       25379.47\nstress-ng: metrc: [15422] dir                2466     11.05      0.04      0.27       223.12        8128.98\nstress-ng: metrc: [15422] dirmany            4945     10.90      0.00      0.16       453.48       31821.72\nstress-ng: metrc: [15422] fallocate             0     11.05      0.01      0.04         0.00           0.00\nstress-ng: metrc: [15422] file-ioctl        19900     10.87      0.05      0.23      1831.30       72024.73\nstress-ng: metrc: [15422] filename           1111     10.70      0.02      0.30       103.84        3533.74\nstress-ng: metrc: [15422] flock            112557     10.82      0.03      0.04     10398.37     1561751.61\nstress-ng: metrc: [15422] fpunch                0     10.85      0.01      0.14         0.00           0.00\nstress-ng: metrc: [15422] fstat              3549     10.07      0.08      0.94       352.44        3476.59\nstress-ng: metrc: [15422] getdent           34578     10.33      0.02      0.65      3346.63       51812.34\nstress-ng: metrc: [15422] hdd                5918     10.63      0.07      0.12       556.84       30940.39\nstress-ng: metrc: [15422] inotify               4     10.64      0.00      0.01         0.38         301.14\nstress-ng: metrc: [15422] open               1281     10.86      0.02      0.03       117.98       27011.07\nstress-ng: metrc: [15422] rename             2113     10.73      0.01      0.01       196.92       93351.01\nstress-ng: metrc: [15422] touch             10682     11.00      0.02      0.29       971.18       34455.62\nstress-ng: metrc: [15422] utime             13395     10.86      0.01      0.27      1233.35       46592.60\nstress-ng: metrc: [15422] link                  4     10.80      0.02      0.18         0.37          20.52\nstress-ng: metrc: [15422] symlink               4     10.78      0.01      0.19         0.37          20.06\nstress-ng: metrc: [15422] mknod                42     11.03      0.00      0.02         3.81        1653.93\nstress-ng: metrc: [15422] fcntl             11652     10.03      0.02      0.26      1161.32       40381.36\nstress-ng: info:  [15422] skipped: 4: exec (4)\nstress-ng: info:  [15422] passed: 249: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (1) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [15422] failed: 0\nstress-ng: info:  [15422] metrics untrustworthy: 0\nstress-ng: info:  [15422] successful run completed in 12.04 secs",
+        "workload_name": "stress_ng_os_io_network"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 769,
+        "bytes_xlated": 1360,
+        "id": 9,
+        "name": "cap_capable",
+        "run_cnt_delta": 1667501,
+        "run_time_ns_delta": 657530854,
+        "type": "kprobe"
+      },
+      "15": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 15,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 211105,
+        "run_time_ns_delta": 75049116,
+        "type": "tracepoint"
+      },
+      "16": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 16,
+        "name": "tracepoint_sched_sched_wakeup_new",
+        "run_cnt_delta": 9064,
+        "run_time_ns_delta": 1923810,
+        "type": "tracepoint"
+      },
+      "17": {
+        "bytes_jited": 515,
+        "bytes_xlated": 896,
+        "id": 17,
+        "name": "sched_switch",
+        "run_cnt_delta": 498911,
+        "run_time_ns_delta": 197796107,
+        "type": "tracepoint"
+      },
+      "23": {
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 23,
+        "name": "block_io_start",
+        "run_cnt_delta": 6847,
+        "run_time_ns_delta": 5907344,
+        "type": "tracepoint"
+      },
+      "24": {
+        "bytes_jited": 931,
+        "bytes_xlated": 1576,
+        "id": 24,
+        "name": "block_io_done",
+        "run_cnt_delta": 6896,
+        "run_time_ns_delta": 37259768,
+        "type": "tracepoint"
+      },
+      "30": {
+        "bytes_jited": 362,
+        "bytes_xlated": 680,
+        "id": 30,
+        "name": "1",
+        "run_cnt_delta": 23,
+        "run_time_ns_delta": 36626,
+        "type": "perf_event"
+      },
+      "31": {
+        "bytes_jited": 140,
+        "bytes_xlated": 224,
+        "id": 31,
+        "name": "vfs_create",
+        "run_cnt_delta": 3045034,
+        "run_time_ns_delta": 656356689,
+        "type": "kprobe"
+      },
+      "38": {
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 38,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 45359,
+        "run_time_ns_delta": 262773788,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "4",
+          "--eventfd",
+          "4",
+          "--get",
+          "4",
+          "--prctl",
+          "4",
+          "--set",
+          "4",
+          "--dup",
+          "4",
+          "--kill",
+          "4",
+          "--sigfd",
+          "4",
+          "--signal",
+          "4",
+          "--pty",
+          "4",
+          "--itimer",
+          "4",
+          "--timerfd",
+          "4",
+          "--exec",
+          "4",
+          "--fork",
+          "4",
+          "--vfork",
+          "4",
+          "--clone",
+          "4",
+          "--ptrace",
+          "4",
+          "--futex",
+          "4",
+          "--sem",
+          "4",
+          "--aio",
+          "4",
+          "--aiol",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--io",
+          "4",
+          "--iomix",
+          "4",
+          "--iomix-bytes",
+          "128M",
+          "--io-uring",
+          "4",
+          "--sync-file",
+          "4",
+          "--epoll",
+          "4",
+          "--netdev",
+          "4",
+          "--sctp",
+          "1",
+          "--sock",
+          "4",
+          "--sockdiag",
+          "4",
+          "--sockfd",
+          "4",
+          "--sockpair",
+          "4",
+          "--sockmany",
+          "4",
+          "--udp",
+          "4",
+          "--udp-flood",
+          "4",
+          "--mmap",
+          "4",
+          "--mmap-bytes",
+          "16M",
+          "--mprotect",
+          "4",
+          "--mremap",
+          "4",
+          "--mremap-bytes",
+          "16M",
+          "--madvise",
+          "4",
+          "--access",
+          "4",
+          "--chdir",
+          "4",
+          "--chmod",
+          "4",
+          "--chown",
+          "4",
+          "--dentry",
+          "4",
+          "--dir",
+          "4",
+          "--dirmany",
+          "4",
+          "--fallocate",
+          "4",
+          "--fallocate-bytes",
+          "128M",
+          "--file-ioctl",
+          "4",
+          "--filename",
+          "4",
+          "--flock",
+          "4",
+          "--fpunch",
+          "4",
+          "--fpunch-bytes",
+          "32M",
+          "--fstat",
+          "4",
+          "--getdent",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--inotify",
+          "4",
+          "--open",
+          "4",
+          "--open-max",
+          "1024",
+          "--rename",
+          "4",
+          "--touch",
+          "4",
+          "--utime",
+          "4",
+          "--link",
+          "4",
+          "--symlink",
+          "4",
+          "--mknod",
+          "4",
+          "--fcntl",
+          "4",
+          "--epoll-port",
+          "15334",
+          "--sctp-port",
+          "15434",
+          "--sock-port",
+          "15534",
+          "--sockfd-port",
+          "15634",
+          "--timeout",
+          "10s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/cfd8o"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "eventfd",
+            "get",
+            "prctl",
+            "set",
+            "dup",
+            "kill",
+            "sigfd",
+            "signal",
+            "pty",
+            "itimer",
+            "timerfd",
+            "exec",
+            "fork",
+            "vfork",
+            "clone",
+            "ptrace",
+            "futex",
+            "sem",
+            "aio",
+            "aiol",
+            "hdd",
+            "io",
+            "iomix",
+            "io-uring",
+            "sync-file",
+            "epoll",
+            "netdev",
+            "sctp",
+            "sock",
+            "sockdiag",
+            "sockfd",
+            "sockpair",
+            "sockmany",
+            "udp",
+            "udp-flood",
+            "mmap",
+            "mprotect",
+            "mremap",
+            "madvise",
+            "access",
+            "chdir",
+            "chmod",
+            "chown",
+            "dentry",
+            "dir",
+            "dirmany",
+            "fallocate",
+            "file-ioctl",
+            "filename",
+            "flock",
+            "fpunch",
+            "fstat",
+            "getdent",
+            "hdd",
+            "inotify",
+            "open",
+            "rename",
+            "touch",
+            "utime",
+            "link",
+            "symlink",
+            "mknod",
+            "fcntl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 22.391371202000016,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [21428] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [21428] setting to a 10 secs run per stressor\nstress-ng: info:  [21428] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd, 4 fork, 4 vfork, 4 clone, 4 ptrace, 4 futex, 4 sem, 4 aio, 4 aiol, 4 hdd, 4 io, 4 iomix, 4 io-uring, 4 sync-file, 4 epoll, 4 netdev, 1 sctp, 4 sock, 4 sockdiag, 4 sockfd, 4 sockpair, 4 sockmany, 4 udp, 4 udp-flood, 4 mmap, 4 mprotect, 4 mremap, 4 madvise, 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [21428] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [21554] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: warn:  [21653] dirmany: no files were created in /var/tmp/bpfrejit-runtime/cfd8o/tmp-stress-ng-dirmany-21653-3\nstress-ng: warn:  [21650] dirmany: no files were created in /var/tmp/bpfrejit-runtime/cfd8o/tmp-stress-ng-dirmany-21650-0\nstress-ng: warn:  [21652] dirmany: no files were created in /var/tmp/bpfrejit-runtime/cfd8o/tmp-stress-ng-dirmany-21652-2\nstress-ng: warn:  [21651] dirmany: no files were created in /var/tmp/bpfrejit-runtime/cfd8o/tmp-stress-ng-dirmany-21651-1\nstress-ng: info:  [21630] chdir: removing 8192 directories\nstress-ng: info:  [21690] open: using a maximum of 1024 file descriptors\nstress-ng: metrc: [21428] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [21428]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [21428] cap              511423     11.03      0.20      0.97     46353.56      437765.83\nstress-ng: metrc: [21428] eventfd           23858     11.74      0.03      1.09      2031.54       21273.88\nstress-ng: metrc: [21428] get                  10     11.16      0.04      0.05         0.90         112.91\nstress-ng: metrc: [21428] prctl                16     10.62      0.06      0.00         1.51         268.71\nstress-ng: metrc: [21428] set               24587     11.23      0.12      1.37      2189.09       16493.63\nstress-ng: metrc: [21428] dup                  11     13.78      0.01      0.03         0.80         234.81\nstress-ng: metrc: [21428] kill              13494     11.86      0.04      3.55      1137.87        3760.09\nstress-ng: metrc: [21428] sigfd            715537     12.33      0.35      1.49     58036.72      389997.08\nstress-ng: metrc: [21428] signal                0     11.22      0.07      0.34         0.00           0.00\nstress-ng: metrc: [21428] pty                  20     11.72      0.05      0.79         1.71          23.86\nstress-ng: metrc: [21428] itimer              252     10.80      0.29      1.38        23.34         150.64\nstress-ng: metrc: [21428] timerfd           87040     12.51      0.03      0.98      6959.29       85903.24\nstress-ng: metrc: [21428] fork                 33     11.31      0.18      0.01         2.92         172.95\nstress-ng: metrc: [21428] vfork                11     11.34      0.00      0.00         0.97        4126.03\nstress-ng: metrc: [21428] clone                51     11.21      0.04      2.32         4.55          21.60\nstress-ng: metrc: [21428] ptrace            15723     10.44      0.08      0.26      1506.49       45597.97\nstress-ng: metrc: [21428] futex                44     21.40      0.44      1.52         2.06          22.49\nstress-ng: metrc: [21428] sem                 462     10.62      0.00      0.00        43.50       96774.19\nstress-ng: metrc: [21428] aio                 140     11.87      0.00      0.00        11.80       42879.02\nstress-ng: metrc: [21428] aiol                  0     15.24      0.20      0.07         0.00           0.00\nstress-ng: metrc: [21428] hdd                1612     11.88      0.02      0.04       135.68       23818.32\nstress-ng: metrc: [21428] io                    4     10.48      0.00      0.00         0.38        1153.40\nstress-ng: metrc: [21428] iomix                15     17.11      0.14      3.27         0.88           4.40\nstress-ng: metrc: [21428] io-uring              0     15.23      0.02      0.00         0.00           0.00\nstress-ng: metrc: [21428] sync-file             0     15.34      0.00      0.01         0.00           0.00\nstress-ng: metrc: [21428] epoll                 0     11.18      0.03      0.02         0.00           0.00\nstress-ng: metrc: [21428] netdev           299810     10.90      0.90      2.73     27508.07       82475.73\nstress-ng: metrc: [21428] sctp               4347     10.02      0.01      0.01       434.00      211811.14\nstress-ng: metrc: [21428] sock                269     11.09      0.01      0.40        24.26         657.21\nstress-ng: metrc: [21428] sockdiag        4604217     10.42      0.01      0.89    441657.70     5114500.99\nstress-ng: metrc: [21428] sockfd                0     10.55      0.00      0.02         0.00           0.00\nstress-ng: metrc: [21428] sockpair             99     11.46      0.08      1.02         8.64          90.16\nstress-ng: metrc: [21428] sockmany           5036     11.06      0.02      0.34       455.41       13869.27\nstress-ng: metrc: [21428] udp                   0     11.59      0.00      2.27         0.00           0.00\nstress-ng: metrc: [21428] udp-flood        361891     10.16      0.04      1.15     35621.33      304382.75\nstress-ng: metrc: [21428] mmap                266     10.78      0.03      0.57        24.67         447.58\nstress-ng: metrc: [21428] mprotect        1288010     12.01      0.46      6.30    107225.12      190700.49\nstress-ng: metrc: [21428] mremap              744     10.71      0.03      3.03        69.44         242.52\nstress-ng: metrc: [21428] madvise               2     13.71      0.00      0.62         0.15           3.21\nstress-ng: metrc: [21428] access              170     14.72      0.01      0.04        11.55        3977.17\nstress-ng: metrc: [21428] chdir                 4     12.07      0.01      0.09         0.33          38.83\nstress-ng: metrc: [21428] chmod                 1     15.09      0.00      0.01         0.07          85.59\nstress-ng: metrc: [21428] chown                 1     12.89      0.00      0.00         0.08         363.37\nstress-ng: metrc: [21428] dentry             1924     13.43      0.01      0.34       143.22        5460.84\nstress-ng: metrc: [21428] dir                 432     16.55      0.12      1.11        26.10         352.48\nstress-ng: metrc: [21428] dirmany               0     12.05      0.00      0.00         0.00           0.00\nstress-ng: metrc: [21428] fallocate             0     11.69      0.01      0.00         0.00           0.00\nstress-ng: metrc: [21428] file-ioctl            4     14.09      0.00      0.00         0.28         687.99\nstress-ng: metrc: [21428] filename              0     14.74      0.00      0.08         0.00           0.00\nstress-ng: metrc: [21428] flock                 0     14.51      0.00      0.03         0.00           0.00\nstress-ng: metrc: [21428] fpunch                0     11.97      0.00      0.00         0.00           0.00\nstress-ng: metrc: [21428] fstat              2110     11.40      0.29      1.84       185.11         988.98\nstress-ng: metrc: [21428] getdent           34332     11.27      0.01      0.51      3046.80       66824.20\nstress-ng: metrc: [21428] hdd                   0     11.91      0.00      0.00         0.00           0.00\nstress-ng: metrc: [21428] inotify               4     11.78      0.00      0.00         0.34        4048.58\nstress-ng: metrc: [21428] open                  0     15.60      0.02      0.01         0.00           0.00\nstress-ng: metrc: [21428] rename            48698     11.65      0.02      1.01      4179.64       47182.54\nstress-ng: metrc: [21428] touch             37028     11.26      0.05      1.64      3287.20       21927.96\nstress-ng: metrc: [21428] utime             65268     10.64      0.07      1.82      6134.72       34410.02\nstress-ng: metrc: [21428] link                 34     10.13      0.21      4.82         3.36           6.76\nstress-ng: metrc: [21428] symlink              10     10.45      0.17      4.36         0.96           2.21\nstress-ng: metrc: [21428] mknod               108     10.65      0.00      0.11        10.14         961.38\nstress-ng: metrc: [21428] fcntl             90961     10.77      0.15      1.14      8447.67       70289.44\nstress-ng: info:  [21428] skipped: 4: exec (4)\nstress-ng: info:  [21428] passed: 249: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (1) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [21428] failed: 0\nstress-ng: info:  [21428] metrics untrustworthy: 0\nstress-ng: info:  [21428] successful run completed in 22.37 secs",
+        "workload_name": "stress_ng_os_io_network"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "15": {
+        "error_message": null,
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "const_prop_alu_materialized=0"
+              ],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 0,
+              "sites_matched": 4,
+              "sites_skipped": 4,
+              "skip_reasons": {
+                "register has pointer type, cannot materialize": 4
+              },
+              "skipped_sites": [
+                {
+                  "pc": 9,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 10,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 11,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 12,
+                  "reason": "register has pointer type, cannot materialize"
+                }
+              ]
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET}",
+              "log_level": 1,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "dce",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "lea"
+            }
+          }
+        ],
+        "prog_id": 15,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 15,
+          "prog_name": "sched_wakeup",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "16": {
+        "error_message": null,
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "const_prop_alu_materialized=0"
+              ],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 0,
+              "sites_matched": 4,
+              "sites_skipped": 4,
+              "skip_reasons": {
+                "register has pointer type, cannot materialize": 4
+              },
+              "skipped_sites": [
+                {
+                  "pc": 9,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 10,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 11,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 12,
+                  "reason": "register has pointer type, cannot materialize"
+                }
+              ]
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET}",
+              "log_level": 1,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "dce",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "lea"
+            }
+          }
+        ],
+        "prog_id": 16,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 16,
+          "prog_name": "tracepoint_sched_sched_wakeup_new",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "17": {
+        "error_message": null,
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 106,
+              "insn_count_before": 106,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=29: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=7",
+                "site at PC=80: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=8"
+              ],
+              "insn_count_after": 106,
+              "insn_count_before": 106,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 2,
+              "sites_skipped": 2,
+              "skip_reasons": {
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=7": 1,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=8": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 29,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=7"
+                },
+                {
+                  "pc": 80,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=8"
+                }
+              ]
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "const_prop_alu_materialized=4"
+              ],
+              "insn_count_after": 106,
+              "insn_count_before": 106,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 4,
+              "sites_matched": 18,
+              "sites_skipped": 14,
+              "skip_reasons": {
+                "register has pointer type, cannot materialize": 14
+              },
+              "skipped_sites": [
+                {
+                  "pc": 11,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 12,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 13,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 14,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 27,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 28,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 78,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 79,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 90,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 91,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 92,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 93,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 102,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 103,
+                  "reason": "register has pointer type, cannot materialize"
+                }
+              ]
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET}",
+              "log_level": 1,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "removed 3 dead defs"
+              ],
+              "insn_count_after": 103,
+              "insn_count_before": 106,
+              "insn_delta": -3,
+              "pass": "dce",
+              "sites_applied": 3,
+              "sites_matched": 3,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 103,
+              "insn_count_before": 103,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 103,
+              "insn_count_before": 103,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "exit_code=1 error=error: kinsn target bpf_x86_movq not registered\n",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          }
+        ],
+        "prog_id": 17,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 17,
+          "prog_name": "sched_switch",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "23": {
+        "error_message": null,
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "const_prop_alu_materialized=0"
+              ],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 0,
+              "sites_matched": 14,
+              "sites_skipped": 14,
+              "skip_reasons": {
+                "register has pointer type, cannot materialize": 14
+              },
+              "skipped_sites": [
+                {
+                  "pc": 9,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 10,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 11,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 12,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 25,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 26,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 27,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 28,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 33,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 34,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 35,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 44,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 45,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 46,
+                  "reason": "register has pointer type, cannot materialize"
+                }
+              ]
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET}",
+              "log_level": 1,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "dce",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "lea"
+            }
+          }
+        ],
+        "prog_id": 23,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 23,
+          "prog_name": "block_io_start",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "24": {
+        "error_message": null,
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 181,
+              "insn_count_before": 181,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=9: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=14",
+                "site at PC=31: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=31: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(3), idx: 15 } has no verifier state for r2",
+                "site at PC=50: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=12",
+                "site at PC=114: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=13",
+                "site at PC=128: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=14",
+                "site at PC=149: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=149: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(13), idx: 4 } has no verifier state for r2"
+              ],
+              "insn_count_after": 181,
+              "insn_count_before": 181,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 6,
+              "sites_skipped": 6,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 2,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=12": 1,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=13": 1,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=14": 2
+              },
+              "skipped_sites": [
+                {
+                  "pc": 9,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=14"
+                },
+                {
+                  "pc": 31,
+                  "reason": "lookup key is not available from verifier-guided state"
+                },
+                {
+                  "pc": 50,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=12"
+                },
+                {
+                  "pc": 114,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=13"
+                },
+                {
+                  "pc": 128,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=14"
+                },
+                {
+                  "pc": 149,
+                  "reason": "lookup key is not available from verifier-guided state"
+                }
+              ]
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "const_prop_alu_materialized=0"
+              ],
+              "insn_count_after": 181,
+              "insn_count_before": 181,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 0,
+              "sites_matched": 20,
+              "sites_skipped": 20,
+              "skip_reasons": {
+                "register has pointer type, cannot materialize": 20
+              },
+              "skipped_sites": [
+                {
+                  "pc": 7,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 8,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 29,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 30,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 48,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 49,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 112,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 113,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 126,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 127,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 137,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 138,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 147,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 148,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 159,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 160,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 168,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 169,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 177,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 178,
+                  "reason": "register has pointer type, cannot materialize"
+                }
+              ]
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET}",
+              "log_level": 1,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 181,
+              "insn_count_before": 181,
+              "insn_delta": 0,
+              "pass": "dce",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 181,
+              "insn_count_before": 181,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 181,
+              "insn_count_before": 181,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 181,
+              "insn_count_before": 181,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 181,
+              "insn_count_before": 181,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 181,
+              "insn_count_before": 181,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "lea"
+            }
+          }
+        ],
+        "prog_id": 24,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 24,
+          "prog_name": "block_io_done",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "30": {
+        "error_message": null,
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=17: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=17: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(1), idx: 4 } has no verifier state for r2",
+                "site at PC=40: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=40: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(5), idx: 5 } has no verifier state for r2",
+                "site at PC=61: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=61: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(9), idx: 4 } has no verifier state for r2"
+              ],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 3,
+              "sites_skipped": 3,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 3
+              },
+              "skipped_sites": [
+                {
+                  "pc": 17,
+                  "reason": "lookup key is not available from verifier-guided state"
+                },
+                {
+                  "pc": 40,
+                  "reason": "lookup key is not available from verifier-guided state"
+                },
+                {
+                  "pc": 61,
+                  "reason": "lookup key is not available from verifier-guided state"
+                }
+              ]
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "const_prop_alu_materialized=0"
+              ],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 0,
+              "sites_matched": 12,
+              "sites_skipped": 12,
+              "skip_reasons": {
+                "register has pointer type, cannot materialize": 12
+              },
+              "skipped_sites": [
+                {
+                  "pc": 6,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 7,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 15,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 16,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 27,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 28,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 38,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 39,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 49,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 50,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 59,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 60,
+                  "reason": "register has pointer type, cannot materialize"
+                }
+              ]
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET}",
+              "log_level": 1,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "dce",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "lea"
+            }
+          }
+        ],
+        "prog_id": 30,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 30,
+          "prog_name": "1",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "31": {
+        "error_message": null,
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=6: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=19"
+              ],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 1,
+              "sites_skipped": 1,
+              "skip_reasons": {
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=19": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 6,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=19"
+                }
+              ]
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "const_prop_alu_materialized=0"
+              ],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 0,
+              "sites_matched": 6,
+              "sites_skipped": 6,
+              "skip_reasons": {
+                "register has pointer type, cannot materialize": 6
+              },
+              "skipped_sites": [
+                {
+                  "pc": 4,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 5,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 16,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 17,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 18,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 19,
+                  "reason": "register has pointer type, cannot materialize"
+                }
+              ]
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET}",
+              "log_level": 1,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "dce",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "lea"
+            }
+          }
+        ],
+        "prog_id": 31,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 31,
+          "prog_name": "vfs_create",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "38": {
+        "error_message": null,
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=19: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=23",
+                "site at PC=75: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=23",
+                "site at PC=87: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=23",
+                "site at PC=114: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=25",
+                "site at PC=122: skip reason: map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=24",
+                "site at PC=337: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=337: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(27), idx: 4 } has no verifier state for r2",
+                "site at PC=377: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=377: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(31), idx: 5 } has no verifier state for r2"
+              ],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 7,
+              "sites_skipped": 7,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 2,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=23": 3,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=24": 1,
+                "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=25": 1
+              },
+              "skipped_sites": [
+                {
+                  "pc": 19,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=23"
+                },
+                {
+                  "pc": 75,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=23"
+                },
+                {
+                  "pc": 87,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=23"
+                },
+                {
+                  "pc": 114,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=25"
+                },
+                {
+                  "pc": 122,
+                  "reason": "map kernel-mutable: bytecode contains BPF_FUNC_map_update_elem/delete_elem/push_elem/pop_elem on map_id=24"
+                },
+                {
+                  "pc": 337,
+                  "reason": "lookup key is not available from verifier-guided state"
+                },
+                {
+                  "pc": 377,
+                  "reason": "lookup key is not available from verifier-guided state"
+                }
+              ]
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "const_prop_alu_materialized=2"
+              ],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 2,
+              "sites_matched": 56,
+              "sites_skipped": 54,
+              "skip_reasons": {
+                "register has pointer type, cannot materialize": 54
+              },
+              "skipped_sites": [
+                {
+                  "pc": 17,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 18,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 30,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 31,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 32,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 33,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 46,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 47,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 48,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 49,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 55,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 56,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 57,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 63,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 64,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 65,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 73,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 74,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 85,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 86,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 95,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 96,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 103,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 104,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 112,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 113,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 120,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 121,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 174,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 175,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 230,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 231,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 246,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 247,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 253,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 254,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 325,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 326,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 335,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 336,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 345,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 346,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 354,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 355,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 364,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 365,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 375,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 376,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 384,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 385,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 390,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 391,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 396,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 397,
+                  "reason": "register has pointer type, cannot materialize"
+                }
+              ]
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET}",
+              "log_level": 1,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "dce",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "exit_code=1 error=error: kinsn target bpf_x86_movzwl not registered\n",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          }
+        ],
+        "prog_id": 38,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 38,
+          "prog_name": "tcp_set_state",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "9": {
+        "error_message": null,
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "site at PC=19: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=19: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(1), idx: 4 } has no verifier state for r2",
+                "site at PC=52: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=52: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(3), idx: 28 } has no verifier state for r2",
+                "site at PC=150: skip reason: lookup key is not available from verifier-guided state",
+                "site at PC=150: verifier-guided key extraction failed: lookup call at InsnSite { block: BlockId(7), idx: 4 } has no verifier state for r2"
+              ],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "map_inline",
+              "sites_applied": 0,
+              "sites_matched": 3,
+              "sites_skipped": 3,
+              "skip_reasons": {
+                "lookup key is not available from verifier-guided state": 3
+              },
+              "skipped_sites": [
+                {
+                  "pc": 19,
+                  "reason": "lookup key is not available from verifier-guided state"
+                },
+                {
+                  "pc": 52,
+                  "reason": "lookup key is not available from verifier-guided state"
+                },
+                {
+                  "pc": 150,
+                  "reason": "lookup key is not available from verifier-guided state"
+                }
+              ]
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [
+                "const_prop_alu_materialized=0"
+              ],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "const_prop",
+              "sites_applied": 0,
+              "sites_matched": 12,
+              "sites_skipped": 12,
+              "skip_reasons": {
+                "register has pointer type, cannot materialize": 12
+              },
+              "skipped_sites": [
+                {
+                  "pc": 8,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 9,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 17,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 18,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 38,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 39,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 50,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 51,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 138,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 139,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 148,
+                  "reason": "register has pointer type, cannot materialize"
+                },
+                {
+                  "pc": 149,
+                  "reason": "register has pointer type, cannot materialize"
+                }
+              ]
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET}",
+              "log_level": 1,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "dce",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "rotate",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "cond_select",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "extract",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "endian_fusion",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "exit_code=1 error=error: kinsn target bpf_x86_leaq not registered\n",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "lea"
+            }
+          }
+        ],
+        "prog_id": 9,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 9,
+          "prog_name": "cap_capable",
+          "prog_type": 0
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bpftrace_set",
+  "selected_workload": "stress_ng_os_io_network",
+  "status": "ok"
+}

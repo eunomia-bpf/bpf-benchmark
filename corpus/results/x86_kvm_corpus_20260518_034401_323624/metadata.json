@@ -1,0 +1,21 @@
+{
+  "config": {
+    "enabled_passes": [
+      "noop"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "daemon session did not capture kinsn metadata",
+  "generated_at": "2026-05-18T03:44:01.334986+00:00",
+  "last_updated_at": "2026-05-18T03:44:01.334983+00:00",
+  "launcher_boot_id": "97941afe-1329-4d6f-8f62-5288c6ec49c1",
+  "launcher_pid": 1701,
+  "launcher_start_ticks": 13324,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "run_type": "x86_kvm_corpus",
+  "samples": 1,
+  "started_at": "2026-05-18T03:44:01.323624+00:00",
+  "status": "error",
+  "suite": "corpus",
+  "workload_seconds": 10.0
+}

@@ -1,0 +1,197 @@
+{
+  "benchmarks": [
+    {
+      "category": "alu-mix",
+      "description": "bcc runqlat-style log2 latency bucket selection with clamp",
+      "error": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/bcc_runqlat_log2_histogram_bucket.handcraft.so --program-name bcc_runqlat_log2_histogram_bucket_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bcc_runqlat_log2_histogram_bucket.mem --io-mode staged --input-size 1032 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_031356_232200/details/jit_dumps/bcc_runqlat_log2_histogram_bucket__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_031356_232200/details/jit_dumps/bcc_runqlat_log2_histogram_bucket__kernel_handcraft__sample00.xlated.bin\nmark_precise: frame0: regs= stack=-432 before 416: (79) r7 = *(u64 *)(r10 -432)\nmark_precise: frame0: regs= stack=-432 before 415: (79) r6 = *(u64 *)(r10 -400)\nmark_precise: frame0: regs= stack=-432 before 414: (7b) *(u64 *)(r10 -368) = r7\nmark_precise: frame0: regs= stack=-432 before 413: (7b) *(u64 *)(r10 -376) = r6\nmark_precise: frame0: regs= stack=-432 before 412: (79) r6 = *(u64 *)(r10 -376)\nmark_precise: frame0: regs= stack=-432 before 411: (79) r7 = *(u64 *)(r10 -368)\nmark_precise: frame0: regs= stack=-432 before 410: (7b) *(u64 *)(r10 -432) = r6\nmark_precise: frame0: regs=r6 stack= before 409: (07) r6 += 1\nmark_precise: frame0: regs=r6 stack= before 408: (79) r6 = *(u64 *)(r10 -512)\nmath between pkt pointer and register with unbounded min value is not allowed\nprocessed 477 insns (limit 1000000) max_states_per_insn 1 total_states 8 peak_states 8 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument",
+      "expected_result": 17790125373615940312,
+      "family": "histogram-bucket",
+      "hypothesis": "Mirrors tracing histogram bucket selection without helper/map updates",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bcc_runqlat_log2_histogram_bucket.mem",
+      "io_mode": "staged",
+      "level": "log2-clamp",
+      "name": "bcc_runqlat_log2_histogram_bucket",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "mode": "native",
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 329
+              },
+              "compile_ns": 52570,
+              "exec_ns": 1452,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 25355,
+                "native_load_ns": 52570
+              },
+              "result": 17790125373615940312,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 1452
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "llvmbpf",
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1416,
+                "native_code_bytes": 434
+              },
+              "compile_ns": 12511616,
+              "exec_cycles": 4302,
+              "exec_ns": 1167,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 507,
+                "jit_compile_ns": 12511616,
+                "memory_prepare_ns": 18508,
+                "program_image_ns": 103154,
+                "vm_load_code_ns": 377
+              },
+              "result": 17790125373615940312,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3685949321,
+              "wall_exec_ns": 4929
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1368,
+                "native_code_bytes": 716
+              },
+              "compile_ns": 61400750,
+              "exec_cycles": 14705741,
+              "exec_ns": 1452,
+              "jited_prog_len": 716,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 1949,
+                "memory_prepare_ns": 34408,
+                "object_load_ns": 61333817,
+                "object_open_ns": 66933,
+                "prog_run_wall_ns": 39895127,
+                "result_extract_ns": 876
+              },
+              "result": 17790125373615940312,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3685858071,
+              "wall_exec_ns": 3989774,
+              "xlated_prog_len": 1368
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "bcc",
+        "tracing",
+        "log2",
+        "histogram",
+        "pure-jit"
+      ]
+    }
+  ],
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec"
+  },
+  "defaults": {
+    "inner_repeat": 10,
+    "perf_counters": false,
+    "perf_scope": "full_repeat_raw",
+    "runtime_order_seed": 0,
+    "samples": 1,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "details_dir": "details",
+  "error_message": "bcc_runqlat_log2_histogram_bucket: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/bcc_runqlat_log2_histogram_bucket.handcraft.so --program-name bcc_runqlat_log2_histogram_bucket_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bcc_runqlat_log2_histogram_bucket.mem --io-mode staged --input-size 1032 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_031356_232200/details/jit_dumps/bcc_runqlat_log2_histogram_bucket__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_031356_232200/details/jit_dumps/bcc_runqlat_log2_histogram_bucket__kernel_handcraft__sample00.xlated.bin\nmark_precise: frame0: regs= stack=-432 before 416: (79) r7 = *(u64 *)(r10 -432)\nmark_precise: frame0: regs= stack=-432 before 415: (79) r6 = *(u64 *)(r10 -400)\nmark_precise: frame0: regs= stack=-432 before 414: (7b) *(u64 *)(r10 -368) = r7\nmark_precise: frame0: regs= stack=-432 before 413: (7b) *(u64 *)(r10 -376) = r6\nmark_precise: frame0: regs= stack=-432 before 412: (79) r6 = *(u64 *)(r10 -376)\nmark_precise: frame0: regs= stack=-432 before 411: (79) r7 = *(u64 *)(r10 -368)\nmark_precise: frame0: regs= stack=-432 before 410: (7b) *(u64 *)(r10 -432) = r6\nmark_precise: frame0: regs=r6 stack= before 409: (07) r6 += 1\nmark_precise: frame0: regs=r6 stack= before 408: (79) r6 = *(u64 *)(r10 -512)\nmath between pkt pointer and register with unbounded min value is not allowed\nprocessed 477 insns (limit 1000000) max_states_per_insn 1 total_states 8 peak_states 8 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument",
+  "generated_at": "2026-05-18T03:13:56.232200+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "unknown",
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_root_mods=1 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 panic=-1 virtme.exec=`L3RtcC9iZW5jaG1hcmstZ3Vlc3QtdXUzaHY4aHAuc2g=` virtme_chdir=home/yunwei37/workspace/bpf-benchmark rootfstype=9p rootflags=version=9p2000.L,trans=virtio,access=any raid=noautodetect ro debug loglevel=7 panic=30 oops=panic init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init",
+    "kernel_version": "7.0.0-rc2+",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "unknown"
+  },
+  "last_updated_at": "2026-05-18T03:13:56.733478+00:00",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_pure_jit.yaml",
+  "progress": {
+    "completed_benchmarks": 1,
+    "current_benchmark": null,
+    "current_benchmark_index": null,
+    "total_benchmarks": 1
+  },
+  "provenance": {
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 285K",
+    "environment": "vm",
+    "kernel_commit": "unknown",
+    "params": {
+      "inner_repeat": 10,
+      "samples": 1,
+      "warmups": 0
+    },
+    "repo_dirty": false,
+    "repo_git_sha": "unknown",
+    "timestamp": "2026-05-18T03:13:56.233129+00:00"
+  },
+  "run_type": "x86_kvm_micro",
+  "started_at": "2026-05-18T03:13:56.232200+00:00",
+  "status": "error",
+  "suite": "micro_staged_codegen",
+  "toolchains": {
+    "libbpf": {
+      "root": "vendor/libbpf"
+    },
+    "llvmbpf": {
+      "root": "vendor/llvmbpf"
+    }
+  }
+}

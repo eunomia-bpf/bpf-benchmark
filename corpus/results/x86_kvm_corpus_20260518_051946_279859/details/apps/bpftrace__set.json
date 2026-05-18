@@ -1,0 +1,1144 @@
+{
+  "app": "bpftrace/set",
+  "baseline": {
+    "bpf": {
+      "10": {
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 10,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 334496,
+        "run_time_ns_delta": 229560333,
+        "type": "kprobe"
+      },
+      "20": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 20,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 1329120,
+        "run_time_ns_delta": 246626996,
+        "type": "tracepoint"
+      },
+      "23": {
+        "bytes_jited": 362,
+        "bytes_xlated": 680,
+        "id": 23,
+        "name": "1",
+        "run_cnt_delta": 13,
+        "run_time_ns_delta": 31300,
+        "type": "perf_event"
+      },
+      "24": {
+        "bytes_jited": 140,
+        "bytes_xlated": 224,
+        "id": 24,
+        "name": "vfs_create",
+        "run_cnt_delta": 5819658,
+        "run_time_ns_delta": 368080017,
+        "type": "kprobe"
+      },
+      "25": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 25,
+        "name": "tracepoint_sched_sched_wakeup_new",
+        "run_cnt_delta": 37701,
+        "run_time_ns_delta": 12393832,
+        "type": "tracepoint"
+      },
+      "26": {
+        "bytes_jited": 515,
+        "bytes_xlated": 896,
+        "id": 26,
+        "name": "sched_switch",
+        "run_cnt_delta": 1767966,
+        "run_time_ns_delta": 348763219,
+        "type": "tracepoint"
+      },
+      "31": {
+        "bytes_jited": 769,
+        "bytes_xlated": 1360,
+        "id": 31,
+        "name": "cap_capable",
+        "run_cnt_delta": 2465265,
+        "run_time_ns_delta": 927782671,
+        "type": "kprobe"
+      },
+      "37": {
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 37,
+        "name": "block_io_start",
+        "run_cnt_delta": 49998,
+        "run_time_ns_delta": 39775093,
+        "type": "tracepoint"
+      },
+      "38": {
+        "bytes_jited": 931,
+        "bytes_xlated": 1576,
+        "id": 38,
+        "name": "block_io_done",
+        "run_cnt_delta": 50442,
+        "run_time_ns_delta": 138505245,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "4",
+          "--eventfd",
+          "4",
+          "--get",
+          "4",
+          "--prctl",
+          "4",
+          "--set",
+          "4",
+          "--dup",
+          "4",
+          "--kill",
+          "4",
+          "--sigfd",
+          "4",
+          "--signal",
+          "4",
+          "--pty",
+          "4",
+          "--itimer",
+          "4",
+          "--timerfd",
+          "4",
+          "--exec",
+          "4",
+          "--fork",
+          "4",
+          "--vfork",
+          "4",
+          "--clone",
+          "4",
+          "--ptrace",
+          "4",
+          "--futex",
+          "4",
+          "--sem",
+          "4",
+          "--aio",
+          "4",
+          "--aiol",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--io",
+          "4",
+          "--iomix",
+          "4",
+          "--iomix-bytes",
+          "128M",
+          "--io-uring",
+          "4",
+          "--sync-file",
+          "4",
+          "--epoll",
+          "4",
+          "--netdev",
+          "4",
+          "--sctp",
+          "1",
+          "--sock",
+          "4",
+          "--sockdiag",
+          "4",
+          "--sockfd",
+          "4",
+          "--sockpair",
+          "4",
+          "--sockmany",
+          "4",
+          "--udp",
+          "4",
+          "--udp-flood",
+          "4",
+          "--mmap",
+          "4",
+          "--mmap-bytes",
+          "16M",
+          "--mprotect",
+          "4",
+          "--mremap",
+          "4",
+          "--mremap-bytes",
+          "16M",
+          "--madvise",
+          "4",
+          "--access",
+          "4",
+          "--chdir",
+          "4",
+          "--chmod",
+          "4",
+          "--chown",
+          "4",
+          "--dentry",
+          "4",
+          "--dir",
+          "4",
+          "--dirmany",
+          "4",
+          "--fallocate",
+          "4",
+          "--fallocate-bytes",
+          "128M",
+          "--file-ioctl",
+          "4",
+          "--filename",
+          "4",
+          "--flock",
+          "4",
+          "--fpunch",
+          "4",
+          "--fpunch-bytes",
+          "32M",
+          "--fstat",
+          "4",
+          "--getdent",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--inotify",
+          "4",
+          "--open",
+          "4",
+          "--open-max",
+          "1024",
+          "--rename",
+          "4",
+          "--touch",
+          "4",
+          "--utime",
+          "4",
+          "--link",
+          "4",
+          "--symlink",
+          "4",
+          "--mknod",
+          "4",
+          "--fcntl",
+          "4",
+          "--epoll-port",
+          "14314",
+          "--sctp-port",
+          "14414",
+          "--sock-port",
+          "14514",
+          "--sockfd-port",
+          "14614",
+          "--timeout",
+          "10s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/h7tra"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "eventfd",
+            "get",
+            "prctl",
+            "set",
+            "dup",
+            "kill",
+            "sigfd",
+            "signal",
+            "pty",
+            "itimer",
+            "timerfd",
+            "exec",
+            "fork",
+            "vfork",
+            "clone",
+            "ptrace",
+            "futex",
+            "sem",
+            "aio",
+            "aiol",
+            "hdd",
+            "io",
+            "iomix",
+            "io-uring",
+            "sync-file",
+            "epoll",
+            "netdev",
+            "sctp",
+            "sock",
+            "sockdiag",
+            "sockfd",
+            "sockpair",
+            "sockmany",
+            "udp",
+            "udp-flood",
+            "mmap",
+            "mprotect",
+            "mremap",
+            "madvise",
+            "access",
+            "chdir",
+            "chmod",
+            "chown",
+            "dentry",
+            "dir",
+            "dirmany",
+            "fallocate",
+            "file-ioctl",
+            "filename",
+            "flock",
+            "fpunch",
+            "fstat",
+            "getdent",
+            "hdd",
+            "inotify",
+            "open",
+            "rename",
+            "touch",
+            "utime",
+            "link",
+            "symlink",
+            "mknod",
+            "fcntl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 14.086379309000023,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [14403] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [14403] setting to a 10 secs run per stressor\nstress-ng: info:  [14403] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd, 4 fork, 4 vfork, 4 clone, 4 ptrace, 4 futex, 4 sem, 4 aio, 4 aiol, 4 hdd, 4 io, 4 iomix, 4 io-uring, 4 sync-file, 4 epoll, 4 netdev, 1 sctp, 4 sock, 4 sockdiag, 4 sockfd, 4 sockpair, 4 sockmany, 4 udp, 4 udp-flood, 4 mmap, 4 mprotect, 4 mremap, 4 madvise, 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [14403] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [14717] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: fail:  [15290] sockfd: connect failed, errno=2 (No such file or directory)\nstress-ng: fail:  [15291] sockfd: connect failed, errno=2 (No such file or directory)\nstress-ng: fail:  [15289] sockfd: connect failed, errno=2 (No such file or directory)\nstress-ng: warn:  [14752] sockfd: WARNING: finished prematurely after just 3.92 secs\nstress-ng: warn:  [14751] sockfd: WARNING: finished prematurely after just 3.94 secs\nstress-ng: warn:  [14753] sockfd: WARNING: finished prematurely after just 4.69 secs\nstress-ng: info:  [15086] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [15026] chdir: removing 8192 directories\nstress-ng: info:  [15038] dentry: 2457 dentries allocated\nstress-ng: metrc: [14403] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [14403]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [14403] cap             1788935     10.22      0.64      2.70    175031.27      534861.44\nstress-ng: metrc: [14403] eventfd          315040     10.07      0.21      2.15     31280.53      133680.26\nstress-ng: metrc: [14403] get                 229     10.19      0.03      0.92        22.48         241.69\nstress-ng: metrc: [14403] prctl               804     10.12      0.45      0.77        79.43         658.49\nstress-ng: metrc: [14403] set               43135     10.51      0.22      1.54      4105.79       24535.05\nstress-ng: metrc: [14403] dup                  62     12.85      0.02      0.92         4.82          65.59\nstress-ng: metrc: [14403] kill              26328     10.47      0.03      1.22      2513.73       21191.72\nstress-ng: metrc: [14403] sigfd           1804318     10.48      0.43      1.74    172087.70      830492.86\nstress-ng: metrc: [14403] signal                0     10.10      0.04      0.05         0.00           0.00\nstress-ng: metrc: [14403] pty                  36     10.16      0.02      0.86         3.54          40.97\nstress-ng: metrc: [14403] itimer              263     10.16      0.46      1.36        25.89         145.09\nstress-ng: metrc: [14403] timerfd           10240     11.51      0.00      0.15       889.94       69005.95\nstress-ng: metrc: [14403] fork                571     10.06      0.11      0.66        56.76         740.72\nstress-ng: metrc: [14403] vfork             22007     10.03      0.23      0.50      2193.26       30227.86\nstress-ng: metrc: [14403] clone               338     10.24      0.16      0.98        33.02         297.80\nstress-ng: metrc: [14403] ptrace           201719     10.10      0.03      1.12     19962.92      174718.98\nstress-ng: metrc: [14403] futex             80562     20.26      0.31      1.61      3975.95       41975.33\nstress-ng: metrc: [14403] sem              165566     10.05      0.05      0.07     16474.79     1451798.46\nstress-ng: metrc: [14403] aio                2212     11.25      0.01      0.03       196.60       57512.81\nstress-ng: metrc: [14403] aiol                325     11.85      0.03      0.07        27.43        3343.07\nstress-ng: metrc: [14403] hdd               12614     11.46      0.13      0.31      1100.23       28747.83\nstress-ng: metrc: [14403] io                   12     12.13      0.00      0.02         0.99         564.07\nstress-ng: metrc: [14403] iomix              1760     12.19      0.25      2.36       144.34         674.01\nstress-ng: metrc: [14403] io-uring           3868     12.00      0.00      0.30       322.43       13021.60\nstress-ng: metrc: [14403] sync-file            23     11.64      0.00      0.09         1.98         250.62\nstress-ng: metrc: [14403] epoll               390     10.89      0.04      0.24        35.82        1393.41\nstress-ng: metrc: [14403] netdev           766271     10.18      0.11      0.59     75277.00     1086983.23\nstress-ng: metrc: [14403] sctp               2462     10.01      0.00      0.01       245.94      202984.58\nstress-ng: metrc: [14403] sock               1359     10.22      0.03      0.86       132.95        1523.23\nstress-ng: metrc: [14403] sockdiag        7309733     10.27      0.01      1.44    711722.52     5015708.46\nstress-ng: metrc: [14403] sockfd            35753      4.76      0.02      0.15      7510.26      207992.04\nstress-ng: metrc: [14403] sockpair          16691     10.13      0.03      0.33      1646.99       47523.46\nstress-ng: metrc: [14403] sockmany          37646     10.59      0.03      1.38      3553.87       26647.81\nstress-ng: metrc: [14403] udp               93235     10.30      0.03      1.56      9053.42       58613.85\nstress-ng: metrc: [14403] udp-flood        628408     10.20      0.14      1.10     61629.78      507357.56\nstress-ng: metrc: [14403] mmap                995     10.10      0.09      1.59        98.50         592.50\nstress-ng: metrc: [14403] mprotect        5004742     10.64      1.28      6.92    470415.24      610552.92\nstress-ng: metrc: [14403] mremap             1001     10.18      0.02      1.02        98.33         960.36\nstress-ng: metrc: [14403] madvise              41     11.17      0.10      1.91         3.67          20.38\nstress-ng: metrc: [14403] access             4389     11.41      0.04      0.57       384.58        7174.31\nstress-ng: metrc: [14403] chdir                 4     11.04      0.00      0.41         0.36           9.72\nstress-ng: metrc: [14403] chmod                60     11.24      0.00      0.09         5.34         684.31\nstress-ng: metrc: [14403] chown                47     11.12      0.00      0.12         4.23         406.50\nstress-ng: metrc: [14403] dentry             8064     11.23      0.01      0.26       718.39       29268.19\nstress-ng: metrc: [14403] dir                3832     11.33      0.05      1.12       338.28        3283.55\nstress-ng: metrc: [14403] dirmany            5722     10.96      0.01      0.17       522.10       32070.22\nstress-ng: metrc: [14403] fallocate             0     11.19      0.00      0.05         0.00           0.00\nstress-ng: metrc: [14403] file-ioctl        19395     10.89      0.01      0.25      1781.01       73065.71\nstress-ng: metrc: [14403] filename            667     10.88      0.02      0.24        61.29        2567.87\nstress-ng: metrc: [14403] flock           1253049     10.81      0.26      0.47    115904.69     1710623.75\nstress-ng: metrc: [14403] fpunch                0     10.83      0.06      0.19         0.00           0.00\nstress-ng: metrc: [14403] fstat              3220     10.01      0.03      0.67       321.64        4639.41\nstress-ng: metrc: [14403] getdent          121324     10.07      0.06      1.04     12042.42      109555.05\nstress-ng: metrc: [14403] hdd                6962     10.87      0.08      0.13       640.69       32626.93\nstress-ng: metrc: [14403] inotify               6     10.85      0.00      0.07         0.55          86.89\nstress-ng: metrc: [14403] open               4096     11.10      0.01      0.09       369.05       42720.07\nstress-ng: metrc: [14403] rename            13340     10.91      0.00      0.11      1222.39      114548.72\nstress-ng: metrc: [14403] touch             19475     10.60      0.01      0.71      1837.00       27160.19\nstress-ng: metrc: [14403] utime             28109     10.05      0.02      0.52      2795.99       51567.91\nstress-ng: metrc: [14403] link                  4     10.24      0.02      0.43         0.39           8.87\nstress-ng: metrc: [14403] symlink               4     10.28      0.02      0.55         0.39           6.98\nstress-ng: metrc: [14403] mknod                 9     10.29      0.00      0.01         0.88         746.83\nstress-ng: metrc: [14403] fcntl              9105     10.03      0.01      0.13       907.98       66173.91\nstress-ng: info:  [14403] skipped: 4: exec (4)\nstress-ng: info:  [14403] passed: 249: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (1) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [14403] failed: 0\nstress-ng: info:  [14403] metrics untrustworthy: 0\nstress-ng: info:  [14403] successful run completed in 14.07 secs",
+        "workload_name": "stress_ng_os_io_network"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "10": {
+        "bytes_jited": 2017,
+        "bytes_xlated": 3384,
+        "id": 10,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 78833,
+        "run_time_ns_delta": 81817796,
+        "type": "kprobe"
+      },
+      "20": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 20,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 693070,
+        "run_time_ns_delta": 210076245,
+        "type": "tracepoint"
+      },
+      "23": {
+        "bytes_jited": 362,
+        "bytes_xlated": 680,
+        "id": 23,
+        "name": "1",
+        "run_cnt_delta": 20,
+        "run_time_ns_delta": 60890,
+        "type": "perf_event"
+      },
+      "24": {
+        "bytes_jited": 140,
+        "bytes_xlated": 224,
+        "id": 24,
+        "name": "vfs_create",
+        "run_cnt_delta": 4533684,
+        "run_time_ns_delta": 460417406,
+        "type": "kprobe"
+      },
+      "25": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 25,
+        "name": "tracepoint_sched_sched_wakeup_new",
+        "run_cnt_delta": 6648,
+        "run_time_ns_delta": 2388816,
+        "type": "tracepoint"
+      },
+      "26": {
+        "bytes_jited": 515,
+        "bytes_xlated": 896,
+        "id": 26,
+        "name": "sched_switch",
+        "run_cnt_delta": 849237,
+        "run_time_ns_delta": 452238992,
+        "type": "tracepoint"
+      },
+      "31": {
+        "bytes_jited": 769,
+        "bytes_xlated": 1360,
+        "id": 31,
+        "name": "cap_capable",
+        "run_cnt_delta": 1950338,
+        "run_time_ns_delta": 899054869,
+        "type": "kprobe"
+      },
+      "37": {
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 37,
+        "name": "block_io_start",
+        "run_cnt_delta": 48623,
+        "run_time_ns_delta": 59587381,
+        "type": "tracepoint"
+      },
+      "38": {
+        "bytes_jited": 931,
+        "bytes_xlated": 1576,
+        "id": 38,
+        "name": "block_io_done",
+        "run_cnt_delta": 48798,
+        "run_time_ns_delta": 199449392,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "4",
+          "--eventfd",
+          "4",
+          "--get",
+          "4",
+          "--prctl",
+          "4",
+          "--set",
+          "4",
+          "--dup",
+          "4",
+          "--kill",
+          "4",
+          "--sigfd",
+          "4",
+          "--signal",
+          "4",
+          "--pty",
+          "4",
+          "--itimer",
+          "4",
+          "--timerfd",
+          "4",
+          "--exec",
+          "4",
+          "--fork",
+          "4",
+          "--vfork",
+          "4",
+          "--clone",
+          "4",
+          "--ptrace",
+          "4",
+          "--futex",
+          "4",
+          "--sem",
+          "4",
+          "--aio",
+          "4",
+          "--aiol",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--io",
+          "4",
+          "--iomix",
+          "4",
+          "--iomix-bytes",
+          "128M",
+          "--io-uring",
+          "4",
+          "--sync-file",
+          "4",
+          "--epoll",
+          "4",
+          "--netdev",
+          "4",
+          "--sctp",
+          "1",
+          "--sock",
+          "4",
+          "--sockdiag",
+          "4",
+          "--sockfd",
+          "4",
+          "--sockpair",
+          "4",
+          "--sockmany",
+          "4",
+          "--udp",
+          "4",
+          "--udp-flood",
+          "4",
+          "--mmap",
+          "4",
+          "--mmap-bytes",
+          "16M",
+          "--mprotect",
+          "4",
+          "--mremap",
+          "4",
+          "--mremap-bytes",
+          "16M",
+          "--madvise",
+          "4",
+          "--access",
+          "4",
+          "--chdir",
+          "4",
+          "--chmod",
+          "4",
+          "--chown",
+          "4",
+          "--dentry",
+          "4",
+          "--dir",
+          "4",
+          "--dirmany",
+          "4",
+          "--fallocate",
+          "4",
+          "--fallocate-bytes",
+          "128M",
+          "--file-ioctl",
+          "4",
+          "--filename",
+          "4",
+          "--flock",
+          "4",
+          "--fpunch",
+          "4",
+          "--fpunch-bytes",
+          "32M",
+          "--fstat",
+          "4",
+          "--getdent",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--inotify",
+          "4",
+          "--open",
+          "4",
+          "--open-max",
+          "1024",
+          "--rename",
+          "4",
+          "--touch",
+          "4",
+          "--utime",
+          "4",
+          "--link",
+          "4",
+          "--symlink",
+          "4",
+          "--mknod",
+          "4",
+          "--fcntl",
+          "4",
+          "--epoll-port",
+          "15338",
+          "--sctp-port",
+          "15438",
+          "--sock-port",
+          "15538",
+          "--sockfd-port",
+          "15638",
+          "--timeout",
+          "10s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/h7tra"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "eventfd",
+            "get",
+            "prctl",
+            "set",
+            "dup",
+            "kill",
+            "sigfd",
+            "signal",
+            "pty",
+            "itimer",
+            "timerfd",
+            "exec",
+            "fork",
+            "vfork",
+            "clone",
+            "ptrace",
+            "futex",
+            "sem",
+            "aio",
+            "aiol",
+            "hdd",
+            "io",
+            "iomix",
+            "io-uring",
+            "sync-file",
+            "epoll",
+            "netdev",
+            "sctp",
+            "sock",
+            "sockdiag",
+            "sockfd",
+            "sockpair",
+            "sockmany",
+            "udp",
+            "udp-flood",
+            "mmap",
+            "mprotect",
+            "mremap",
+            "madvise",
+            "access",
+            "chdir",
+            "chmod",
+            "chown",
+            "dentry",
+            "dir",
+            "dirmany",
+            "fallocate",
+            "file-ioctl",
+            "filename",
+            "flock",
+            "fpunch",
+            "fstat",
+            "getdent",
+            "hdd",
+            "inotify",
+            "open",
+            "rename",
+            "touch",
+            "utime",
+            "link",
+            "symlink",
+            "mknod",
+            "fcntl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 19.554704858000008,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [25826] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [25826] setting to a 10 secs run per stressor\nstress-ng: info:  [25826] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd, 4 fork, 4 vfork, 4 clone, 4 ptrace, 4 futex, 4 sem, 4 aio, 4 aiol, 4 hdd, 4 io, 4 iomix, 4 io-uring, 4 sync-file, 4 epoll, 4 netdev, 1 sctp, 4 sock, 4 sockdiag, 4 sockfd, 4 sockpair, 4 sockmany, 4 udp, 4 udp-flood, 4 mmap, 4 mprotect, 4 mremap, 4 madvise, 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [25826] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [26198] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: info:  [27708] open: using a maximum of 1024 file descriptors\nstress-ng: metrc: [25826] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [25826]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [25826] cap              590404     10.28      0.49      1.36     57435.61      319192.68\nstress-ng: metrc: [25826] eventfd           68339     10.56      0.03      0.62      6468.47      104862.99\nstress-ng: metrc: [25826] get                  55     11.40      0.04      0.78         4.83          66.87\nstress-ng: metrc: [25826] prctl               202     10.58      0.16      0.87        19.09         195.90\nstress-ng: metrc: [25826] set               38213     10.61      0.22      0.87      3600.01       34962.50\nstress-ng: metrc: [25826] dup                  45     16.95      0.25      0.66         2.65          49.32\nstress-ng: metrc: [25826] kill              24946     10.69      0.06      1.07      2333.46       22027.68\nstress-ng: metrc: [25826] sigfd           1979780     11.59      0.37      2.28    170826.92      746886.68\nstress-ng: metrc: [25826] signal                0     10.10      0.00      0.00         0.00           0.00\nstress-ng: metrc: [25826] pty                 290     10.29      0.01      1.40        28.17         205.82\nstress-ng: metrc: [25826] itimer              193     10.71      0.43      1.51        18.03          99.59\nstress-ng: metrc: [25826] timerfd           91136     16.93      0.02      1.09      5383.86       82137.06\nstress-ng: metrc: [25826] fork                264     10.80      0.03      0.61        24.45         410.52\nstress-ng: metrc: [25826] vfork               879     10.32      0.23      0.17        85.16        2188.80\nstress-ng: metrc: [25826] clone               112     11.47      0.13      1.10         9.77          91.22\nstress-ng: metrc: [25826] ptrace           169392     11.16      0.05      1.60     15172.43      102722.64\nstress-ng: metrc: [25826] futex             10894     21.80      0.15      1.10       499.64        8657.44\nstress-ng: metrc: [25826] sem                 469     10.49      0.01      0.00        44.72       35218.14\nstress-ng: metrc: [25826] aio                1508     18.31      0.03      0.03        82.38       22238.94\nstress-ng: metrc: [25826] aiol                440     18.39      0.12      0.06        23.92        2433.01\nstress-ng: metrc: [25826] hdd               10002     16.19      0.14      0.52       617.63       14973.35\nstress-ng: metrc: [25826] io                    8     16.75      0.00      0.07         0.48         121.36\nstress-ng: metrc: [25826] iomix               748     18.41      0.34      4.67        40.63         149.42\nstress-ng: metrc: [25826] io-uring             62     14.87      0.03      0.00         4.17        2140.59\nstress-ng: metrc: [25826] sync-file            12     14.62      0.02      0.04         0.82         207.28\nstress-ng: metrc: [25826] epoll              1020     11.77      0.00      0.32        86.66        3164.65\nstress-ng: metrc: [25826] netdev           473942     11.50      0.09      0.41     41212.74      949389.73\nstress-ng: metrc: [25826] sctp              40307     10.15      0.03      0.11      3972.84      277896.90\nstress-ng: metrc: [25826] sock               1147     11.73      0.02      0.79        97.79        1410.03\nstress-ng: metrc: [25826] sockdiag        5653544     10.57      0.04      1.46    535058.66     3754147.89\nstress-ng: metrc: [25826] sockfd           130951     11.45      0.06      0.48     11436.42      243246.00\nstress-ng: metrc: [25826] sockpair            196     11.35      0.02      0.66        17.26         289.89\nstress-ng: metrc: [25826] sockmany           8761     11.11      0.02      0.41       788.92       20599.72\nstress-ng: metrc: [25826] udp                1249     10.25      0.00      0.31       121.84        3944.43\nstress-ng: metrc: [25826] udp-flood        335684     10.74      0.02      0.74     31244.00      441345.69\nstress-ng: metrc: [25826] mmap                481     10.33      0.00      1.05        46.58         454.37\nstress-ng: metrc: [25826] mprotect        2783407     10.77      0.87      5.28    258377.89      452304.09\nstress-ng: metrc: [25826] mremap              587     10.37      0.04      1.26        56.59         452.15\nstress-ng: metrc: [25826] madvise               7     17.31      0.02      1.27         0.40           5.42\nstress-ng: metrc: [25826] access             7791     13.14      0.17      1.91       592.86        3749.53\nstress-ng: metrc: [25826] chdir                30     12.54      0.11      2.02         2.39          14.06\nstress-ng: metrc: [25826] chmod                33     12.09      0.04      0.17         2.73         158.52\nstress-ng: metrc: [25826] chown                12     11.44      0.07      0.04         1.05         108.69\nstress-ng: metrc: [25826] dentry             6145     11.58      0.03      0.21       530.84       25864.86\nstress-ng: metrc: [25826] dir                9572     11.91      0.02      1.25       803.75        7516.61\nstress-ng: metrc: [25826] dirmany            2393     10.62      0.00      0.13       225.24       18838.96\nstress-ng: metrc: [25826] fallocate             0     11.84      0.01      0.04         0.00           0.00\nstress-ng: metrc: [25826] file-ioctl        62430     11.39      0.11      0.77      5479.56       70803.26\nstress-ng: metrc: [25826] filename           1420     11.38      0.02      0.49       124.82        2773.76\nstress-ng: metrc: [25826] flock            796468     10.22      0.18      0.55     77913.45     1097908.72\nstress-ng: metrc: [25826] fpunch                0     11.80      0.01      0.95         0.00           0.00\nstress-ng: metrc: [25826] fstat              1133     10.04      0.07      0.84       112.84        1244.22\nstress-ng: metrc: [25826] getdent          350545     10.01      0.39      4.25     35006.52       75462.95\nstress-ng: metrc: [25826] hdd                3462     11.76      0.08      0.20       294.36       12131.07\nstress-ng: metrc: [25826] inotify               4     12.06      0.00      0.10         0.33          40.13\nstress-ng: metrc: [25826] open               4096     12.25      0.04      0.14       334.32       22060.05\nstress-ng: metrc: [25826] rename            46824     11.02      0.02      0.39      4249.34      114991.31\nstress-ng: metrc: [25826] touch             32099     10.80      0.04      0.74      2972.75       40871.55\nstress-ng: metrc: [25826] utime             22262     10.41      0.04      0.40      2137.55       50776.06\nstress-ng: metrc: [25826] link                  4     10.65      0.02      0.34         0.38          11.09\nstress-ng: metrc: [25826] symlink               4     11.93      0.08      1.67         0.34           2.28\nstress-ng: metrc: [25826] mknod                18     11.96      0.00      0.00         1.50        5205.32\nstress-ng: metrc: [25826] fcntl             13023     11.51      0.08      0.35      1131.61       29868.44\nstress-ng: info:  [25826] skipped: 4: exec (4)\nstress-ng: info:  [25826] passed: 249: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (1) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [25826] failed: 0\nstress-ng: info:  [25826] metrics untrustworthy: 0\nstress-ng: info:  [25826] successful run completed in 19.52 secs",
+        "workload_name": "stress_ng_os_io_network"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "10": {
+        "error_message": null,
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 401,
+              "insn_count_before": 401,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "exit_code=1 error=error: failed to read verifier states from /tmp/work_10/verifier_log_step1.log: No such file or directory (os error 2)\n",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 10,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 10,
+          "prog_name": "tcp_set_state",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "20": {
+        "error_message": null,
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "exit_code=1 error=error: failed to read verifier states from /tmp/work_20/verifier_log_step1.log: No such file or directory (os error 2)\n",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 20,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 20,
+          "prog_name": "sched_wakeup",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "23": {
+        "error_message": null,
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 67,
+              "insn_count_before": 67,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "exit_code=1 error=error: failed to read verifier states from /tmp/work_23/verifier_log_step1.log: No such file or directory (os error 2)\n",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 23,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 23,
+          "prog_name": "1",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "24": {
+        "error_message": null,
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 24,
+              "insn_count_before": 24,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "exit_code=1 error=error: failed to read verifier states from /tmp/work_24/verifier_log_step1.log: No such file or directory (os error 2)\n",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 24,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 24,
+          "prog_name": "vfs_create",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "25": {
+        "error_message": null,
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 17,
+              "insn_count_before": 17,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "exit_code=1 error=error: failed to read verifier states from /tmp/work_25/verifier_log_step1.log: No such file or directory (os error 2)\n",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 25,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 25,
+          "prog_name": "tracepoint_sched_sched_wakeup_new",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "26": {
+        "error_message": null,
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 106,
+              "insn_count_before": 106,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 106,
+              "insn_count_before": 106,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "exit_code=1 error=error: failed to read verifier states from /tmp/work_26/verifier_log_step1.log: No such file or directory (os error 2)\n",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 26,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 26,
+          "prog_name": "sched_switch",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "31": {
+        "error_message": null,
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 156,
+              "insn_count_before": 156,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "exit_code=1 error=error: failed to read verifier states from /tmp/work_31/verifier_log_step1.log: No such file or directory (os error 2)\n",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 31,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 31,
+          "prog_name": "cap_capable",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "37": {
+        "error_message": null,
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 51,
+              "insn_count_before": 51,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "exit_code=1 error=error: failed to read verifier states from /tmp/work_37/verifier_log_step1.log: No such file or directory (os error 2)\n",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 37,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 37,
+          "prog_name": "block_io_start",
+          "prog_type": 0
+        },
+        "status": "error"
+      },
+      "38": {
+        "error_message": null,
+        "passes": [
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 181,
+              "insn_count_before": 181,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 181,
+              "insn_count_before": 181,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "exit_code=1 error=error: failed to read verifier states from /tmp/work_38/verifier_log_step1.log: No such file or directory (os error 2)\n",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          }
+        ],
+        "prog_id": 38,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 38,
+          "prog_name": "block_io_done",
+          "prog_type": 0
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bpftrace_set",
+  "selected_workload": "stress_ng_os_io_network",
+  "status": "ok"
+}
