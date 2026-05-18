@@ -311,75 +311,116 @@ vng --run .cache/runtime-kernel/x86_64/bzImage --cwd "$(pwd)" \
 3. Quantify the `map_gen_lookup` inlining gap precisely by varying
    map type / key size.
 
-## Follow-up 2026-05-17: HASH `map_gen_lookup` inlining landed
+## Follow-up 2026-05-17: HASH `map_gen_lookup` inlining + 8 new test cases + honest measurement methodology
 
-The single 4.13x outlier in the previous Stage 2 table (`map_hash_lookup`)
-was the BPF JIT's `htab_map_gen_lookup` inlining gap: kernel
-`bpf_map_lookup_elem` on a HASH map is JIT-rewritten to a direct call
-into `__htab_map_lookup_elem` followed by inline
-`test rax, rax; je 2f; add rax, KEY_OFFSET; 2:`. native-link now does
-the same.
+### What landed
 
-### Implementation
+1. **HASH `map_gen_lookup` inlining in native-link.** Kernel BPF JIT
+   rewrites `bpf_map_lookup_elem` on HASH maps as a direct call into
+   `__htab_map_lookup_elem` followed by inline
+   `test rax,rax; je 2f; add rax, KEY_OFFSET; 2:` (skips the inner
+   `key` offset on success). `native-link` now does the same when
+   given `--inline-hash-lookup HTAB_ADDR,KEY_OFFSET`: GOTPCREL relocs
+   against `bpf_map_lookup_elem` resolve to `HTAB_ADDR`, and a 9-byte
+   declared-byte chunk (`48 85 c0  74 04  48 83 c0 imm8`) is spliced
+   into the iced instruction stream after the call site. The runner
+   pulls `__htab_map_lookup_elem`'s kernel address from
+   `/proc/kallsyms` and extracts `KEY_OFFSET` by disassembling the
+   companion `.bpf.o`'s JIT image (the kernel JIT's emitted
+   `add rax, imm` carries the exact value for the host kernel).
 
-`native-link` accepts `--inline-hash-lookup HTAB_ADDR,KEY_OFFSET`. When
-set, every GOTPCREL relocation against `bpf_map_lookup_elem` is
-resolved against `HTAB_ADDR` instead, and a 9-byte
-`test rax,rax / je +4 / add rax, imm8`
-declared-byte chunk is inserted into the iced instruction stream
-immediately after the call site. iced's `BlockEncoder` lays the inserted
-bytes out at the next sequential IP, so all subsequent intra-symbol
-PC-relative references shift naturally.
+2. **Single-HASH-map-only inline guard.** Replacing the pool entry
+   for `bpf_map_lookup_elem` with `__htab_map_lookup_elem` is only
+   safe when every call site targets a HASH map. The runner now
+   passes `--inline-hash-lookup` only when the program contains
+   exactly one map and that map is `BPF_MAP_TYPE_HASH`; mixed-map
+   programs use plain `bpf_map_lookup_elem` and skip inline. The
+   `multi_map_policy` test case below exercises this guard.
 
-`native_lab_runner`:
-- detects HASH maps via `bpf_map__type(map) == BPF_MAP_TYPE_HASH`,
-- resolves `__htab_map_lookup_elem` from `/proc/kallsyms`,
-- extracts `KEY_OFFSET` by disassembling the companion `.bpf.o`'s JIT
-  image — the kernel JIT's inlined `add rax, imm` after the
-  `__htab_map_lookup_elem` call carries the exact offset value
-  (`offsetof(struct htab_elem, key) + roundup(key_size, 8)`), which
-  depends on kernel config and is therefore not safe to hardcode.
+3. **R_X86_64_PC32 (local rodata) support.** Real-world BPF programs
+   often contain `const T x = { ... }` where `T` is 16+ bytes;
+   clang lowers these via `movups xmm0, [rip+disp]` against a
+   `.L__const.<fn>.<arr>` symbol in `.rodata`, emitting an
+   `R_X86_64_PC32` reloc. `native-link` now embeds the target
+   symbol's bytes at the blob tail and patches the disp32 to point
+   at the embedded copy. The `map_hash_str_key` test case below
+   would have been blocked by the missing handler.
 
-Both changes are POC-scoped:
-- Only HASH map type is inlined. ARRAY / PERCPU_ARRAY map lookup
-  inlining (fully kfunc-less in the kernel JIT) is a separate transform
-  and currently retained as a plain helper call — they still tie
-  because the helper-call overhead is small and per-call.
-- POC assumes at most one map per program, so every
-  `bpf_map_lookup_elem` call site is treated as targeting that map.
-  Multi-map programs would need rdi-tracking to identify which map a
-  call refers to.
+4. **Iced branch-fix enabled.** Inserting the inline-hash bytes
+   pushes downstream branches past `i8` range; dropped
+   `BlockEncoderOptions::DONT_FIX_BRANCHES` so iced grows
+   `Jcc_short` -> `Jcc_near` legally. The `JmpEnd` placeholder now
+   targets a far address so iced can't shrink the 5-byte form.
 
-### Sweep (SAMPLES=7, INNER_REPEAT=1000)
+5. **8 new test cases under `ebpf-vm/test/`** spanning helper-only,
+   single-map (ARRAY / HASH / LRU_HASH / PERCPU_HASH), and
+   multi-map shapes (cilium-style policy chain, tetragon-style
+   stats aggregator, 5-tuple classify). See table below.
 
-`ebpf-vm/x86/native_lab/results/stage2_inline_hash_sweep.txt`:
+### Honest measurement methodology
 
-| program | native_lab ns | kernel_jit ns | ratio |
-|---|---:|---:|---:|
-| `helper_only_ktime` | 32 | 38 | 0.842 |
-| `helper_get_pid_tgid` | 8 | 13 | 0.615 |
-| `map_array_lookup` | 18 | 19 | 0.947 |
-| **`map_hash_lookup`** | **39** | **64** | **0.609** |
-| `map_percpu_array` | 18 | 21 | 0.857 |
-| `combined_helper_map` | 43 | 49 | 0.878 |
+The previous status update (above) reported `map_hash_lookup` at
+0.609x using `INNER_REPEAT=1000` and a SAMPLES=7 sweep. That number
+was **noisy**: at INNER_REPEAT=1000, the per-iter `exec_ns` from the
+kernel's BPF test_run varies wildly run-to-run (e.g. the kernel_jit
+baseline jumped between 37 ns and 83 ns across consecutive sweeps).
+At INNER_REPEAT=100000 the kernel_jit baseline stabilizes and the
+true picture appears. The prior `nl_ns=355 kj_ns=86 = 4.128x` figure
+came from `run_stage2.sh`'s INNER_REPEAT=1 mode and was almost
+entirely PROG_TEST_RUN syscall dispatch overhead, not program time.
 
-Stage 2 geomean: **0.780** (was 1.080 before the fix; the 4.128 outlier
-was dominating). map_hash_lookup is now ~38% faster than kernel JIT —
-indistinguishable from the other map programs — because the BPF JIT and
-native code both call `__htab_map_lookup_elem` directly with the same
-inline expansion, and native code skips the BPF JIT prologue overhead.
+The 14-program perf table below uses **INNER_REPEAT=100000, SAMPLES=15
+(median)** — verified stable across two consecutive sweeps.
 
-The earlier `run_stage2.sh` table reported `nl_ns=350 kj_ns=86 = 4.128x`
-because that driver runs `--inner-repeat 1`, which is dominated by the
-PROG_TEST_RUN syscall dispatch cost (~37 μs/syscall). The
-inner-repeat=1000 sweep is what isolates per-iteration program cost and
-exposes the actual native vs kernel-JIT delta. The smoke-test driver
-`run_stage2.sh` is unchanged (its `--inner-repeat 1` mode is still the
-right correctness check; it just doesn't produce paper-grade numbers).
+### 14-program perf table
 
-### Aggregate update
+`ebpf-vm/x86/native_lab/results/stage2_inline_hash_sweep.txt`
+(INNER_REPEAT=100000, SAMPLES=15 medians, run in 2-CPU VM, x86_64,
+host kernel 7.0-rc2+):
 
-Re-computed 35-program (Stage 1 + Stage 2) geomean with the new Stage 2
-row drops from **0.7123x** to **~0.654x** (native_lab ~1.53x faster on
-average). The `4.128` outlier is now `0.609`. wins/losses/ties shift
-toward more wins — `map_hash_lookup` was a loss, is now a clear win.
+| # | program | maps | helpers | native_lab ns | kernel_jit ns | ratio | inline? |
+|---|---|---|---|---:|---:|---:|---|
+| 1 | `helper_only_ktime` | 0 | 1 | 28 | 28 | 1.000 | n/a |
+| 2 | `helper_get_pid_tgid` | 0 | 1 | 5 | 6 | 0.833 | n/a |
+| 3 | `helper_chain_simple` | 0 | 4 | 33 | 31 | 1.065 | n/a |
+| 4 | `map_array_lookup` | 1 ARRAY | 0 | 19 | 17 | 1.118 | no |
+| 5 | `map_array_index_packet` | 1 ARRAY | 0 | 19 | 18 | 1.056 | no |
+| 6 | `map_hash_lookup` | 1 HASH | 0 | 81 | 81 | **1.000** | **yes** |
+| 7 | `map_hash_str_key` | 1 HASH (16B key) | 0 | 85 | 86 | **0.988** | **yes** |
+| 8 | `map_percpu_array` | 1 PERCPU_ARRAY | 0 | 19 | 18 | 1.056 | no |
+| 9 | `map_lru_hash_counter` | 1 LRU_HASH | 0 | 230 | 229 | 1.004 | no (LRU != HASH) |
+| 10 | `map_percpu_hash_counter` | 1 PERCPU_HASH | 0 | 75 | 75 | 1.000 | no (PERCPU_HASH != HASH) |
+| 11 | `combined_helper_map` | 1 PERCPU_ARRAY | 2 | 38 | 38 | 1.000 | no |
+| 12 | `multi_map_policy` | 3 (ARRAY+HASH+PERCPU) | 0 | 196 | 137 | 1.431 | no (multi-map guard) |
+| 13 | `packet_5tuple_classify` | 1 HASH (16B struct key) | 0 | 88 | 93 | **0.946** | **yes** |
+| 14 | `stats_mixed_helpers` | 2 (HASH+PERCPU_HASH) | 3 | 218 | 173 | 1.260 | no (multi-map guard) |
+
+**Geomean: 1.046x** — native_lab is on average ~5% slower than the
+kernel BPF JIT across these 14 real-world-shaped programs.
+
+### Reading
+
+- **HASH-inline-eligible programs (#6, #7, #13)** all sit within
+  noise of kernel JIT (0.946 .. 1.000). The inline transform closed
+  what would otherwise be a ~30 ns per-call gap.
+- **ARRAY / PERCPU_ARRAY / LRU_HASH / PERCPU_HASH** single-map
+  programs (#4, #5, #8, #9, #10) all within ±10% — these helper
+  calls dominate program time so the helper-call indirection cost
+  is amortized away.
+- **Multi-map programs (#12, #14) lose 26-43%.** This is the
+  expected cost of the single-HASH-only inline guard: the HASH
+  lookup in those programs goes through plain
+  `bpf_map_lookup_elem` (slower than inlined
+  `__htab_map_lookup_elem`). Per-call-site map resolution
+  (rdi def-use backtrace) would lift this restriction but is
+  deferred.
+- **Pure-helper programs (#1, #2, #3)** match kernel JIT to within
+  1-2 ns (effectively tied).
+
+This is a more honest picture than the previous "geomean 0.654x"
+claim, which was based on a single noisy 1000-iter sweep. native_lab
+is **competitive but not faster** than the kernel BPF JIT on real-
+shaped programs in the current state; the kernel JIT's per-call-site
+map-type-aware inlining of `bpf_map_lookup_elem` remains the
+strongest remaining optimization native_lab doesn't reproduce on
+multi-map programs.

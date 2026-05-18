@@ -13,8 +13,8 @@ LINKER="$REPO/ebpf-vm/x86/native_lab/native_link/target/release/native-link"
 TEST_DIR="$REPO/ebpf-vm/test"
 BUILD_DIR="$TEST_DIR/build"
 INPUT_SIZE=64
-INNER_REPEAT=${INNER_REPEAT:-1000}
-SAMPLES=${SAMPLES:-5}
+INNER_REPEAT=${INNER_REPEAT:-100000}
+SAMPLES=${SAMPLES:-15}
 
 echo "[vm] kernel: $(uname -r)"
 mount -t debugfs none /sys/kernel/debug 2>/dev/null || true
@@ -25,7 +25,25 @@ fi
 INPUT_BIN=/tmp/stage2_input.bin
 dd if=/dev/zero of="$INPUT_BIN" bs=1 count=$INPUT_SIZE >/dev/null 2>&1
 
-PROGS="helper_only_ktime helper_get_pid_tgid map_array_lookup map_hash_lookup map_percpu_array combined_helper_map"
+# 14 programs total: 6 original POC + 8 added 2026-05-17 to cover
+# realistic shapes (LRU/PERCPU_HASH, multi-map chains, packet-driven
+# struct keys, mixed helpers + maps). Sorted simple -> complex.
+PROGS="
+helper_only_ktime
+helper_get_pid_tgid
+helper_chain_simple
+map_array_lookup
+map_array_index_packet
+map_hash_lookup
+map_hash_str_key
+map_percpu_array
+map_lru_hash_counter
+map_percpu_hash_counter
+combined_helper_map
+multi_map_policy
+packet_5tuple_classify
+stats_mixed_helpers
+"
 
 printf "%-30s  %12s  %12s  %12s\n" "program" "native_lab_ns" "kernel_jit_ns" "ratio"
 printf -- "---------------------------------------------------------------------------\n"

@@ -33,6 +33,9 @@ extern unsigned long long bpf_ktime_get_boot_ns(void);
 extern unsigned long long bpf_get_current_pid_tgid(void);
 extern unsigned int       bpf_get_smp_processor_id(void);
 extern unsigned long long bpf_get_current_uid_gid(void);
+extern unsigned int       bpf_get_prandom_u32(void);
+extern long               bpf_probe_read_kernel(void *dst, unsigned int size,
+                                                 const void *unsafe_ptr);
 
 /* libbpf macros used in the map struct declaration. In native mode we
  * just need the struct to exist as a global symbol; field layout is
@@ -44,9 +47,13 @@ extern unsigned long long bpf_get_current_uid_gid(void);
 #define __type(name, val) typeof(val) *name
 #endif
 #ifndef BPF_MAP_TYPE_ARRAY
-#define BPF_MAP_TYPE_ARRAY        2
-#define BPF_MAP_TYPE_HASH         1
-#define BPF_MAP_TYPE_PERCPU_ARRAY 6
+#define BPF_MAP_TYPE_UNSPEC        0
+#define BPF_MAP_TYPE_HASH          1
+#define BPF_MAP_TYPE_ARRAY         2
+#define BPF_MAP_TYPE_PERCPU_HASH   5
+#define BPF_MAP_TYPE_PERCPU_ARRAY  6
+#define BPF_MAP_TYPE_LRU_HASH      9
+#define BPF_MAP_TYPE_LRU_PERCPU_HASH 10
 #endif
 
 #else /* !MICRO_NATIVE */

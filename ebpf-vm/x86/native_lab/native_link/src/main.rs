@@ -512,13 +512,19 @@ fn rewrite(
             }
 
             // RET in the entry function -> placeholder Jmp_rel32_64. The
-            // target IP is set to 0 just so iced has something legal to
-            // encode; the disp32 gets overwritten after layout.
+            // target IP is set to a value far enough from the per-symbol
+            // layout IP-space [0, sym.size) that iced -- which, with
+            // branch-fixing enabled, will SHRINK rel32 to rel8 when the
+            // disp fits in i8 -- has to keep the 5-byte rel32 form.
+            // The post-encode patcher relies on every JmpEnd site being
+            // `e9 dd dd dd dd` so it can rewrite the 4-byte disp; a
+            // shrunken `eb rel8` would break that assumption.
+            const JMP_END_PLACEHOLDER_TARGET: u64 = 0x4000_0000;
             if is_return(&insn) && is_entry {
                 let mut jmp = Instruction::default();
                 jmp.set_code(Code::Jmp_rel32_64);
                 jmp.set_op0_kind(OpKind::NearBranch64);
-                jmp.set_near_branch64(0);
+                jmp.set_near_branch64(JMP_END_PLACEHOLDER_TARGET);
                 jmp.set_ip(local_ip);
                 local.push(jmp);
                 kinds.push(Some(PatchKind::JmpEnd));
@@ -600,11 +606,21 @@ fn rewrite(
 
         // Encode this symbol's local stream at IP=0.
         let block = InstructionBlock::new(&local, 0);
+        // We intentionally do NOT set DONT_FIX_BRANCHES: the inline-hash
+        // declared-byte insertion can push subsequent intra-symbol
+        // branches out of i8 range, and we want iced to legally grow
+        // `Jcc_short` -> `Jcc_near` (rel8 -> rel32) when that happens.
+        // Already-long forms (Jmp_rel32_64 used by our JmpEnd
+        // placeholder, indirect calls/movs) are not affected by the
+        // grow path -- iced only upgrades short branches, never
+        // shrinks long ones. The byte offsets we patch later come from
+        // `new_instruction_offsets`, which reflects the post-relayout
+        // positions, so JmpEnd / cross-sym Call / GOTPCREL patches
+        // stay correct.
         let encoded = BlockEncoder::encode(
             64,
             block,
-            BlockEncoderOptions::DONT_FIX_BRANCHES
-                | BlockEncoderOptions::RETURN_NEW_INSTRUCTION_OFFSETS,
+            BlockEncoderOptions::RETURN_NEW_INSTRUCTION_OFFSETS,
         )
         .map_err(|e| anyhow!("iced BlockEncoder failed for {}: {e:?}", sym.name))?;
 
@@ -724,6 +740,12 @@ fn apply_elf_relocations(
     let mut helper_trampoline: HashMap<String, usize> = HashMap::new();
     // Cache: map symbol name -> literal-pool entry byte offset in blob.
     let mut map_pool_entry: HashMap<String, usize> = HashMap::new();
+    // Cache: local rodata/data symbol name -> embedded copy offset.
+    // R_X86_64_PC32 against a `.L__const.<fn>.<arr>` symbol (clang puts
+    // small const initializers there for 16+ byte loads via SSE) is
+    // satisfied by copying the symbol's bytes to the blob tail and
+    // patching the rip-relative disp32 in the loading insn.
+    let mut local_data_embed: HashMap<String, usize> = HashMap::new();
 
     for (section_index, layouts_in_sec) in &sections {
         let section = elf
@@ -735,15 +757,17 @@ fn apply_elf_relocations(
             });
             let Some(layout) = owning_layout else { continue };
 
-            let target_name: String = match reloc.target() {
-                RelocationTarget::Symbol(idx) => elf
-                    .symbol_by_index(idx)
-                    .with_context(|| format!("reloc target symbol {idx:?}"))?
-                    .name()
-                    .map_err(|e| anyhow!("reloc target symbol name: {e}"))?
-                    .to_string(),
+            let target_sym_idx = match reloc.target() {
+                RelocationTarget::Symbol(idx) => idx,
                 _ => continue,
             };
+            let target_sym = elf
+                .symbol_by_index(target_sym_idx)
+                .with_context(|| format!("reloc target symbol {target_sym_idx:?}"))?;
+            let target_name: String = target_sym
+                .name()
+                .map_err(|e| anyhow!("reloc target symbol name: {e}"))?
+                .to_string();
 
             let r_type = match reloc.flags() {
                 RelocationFlags::Elf { r_type } => r_type,
@@ -872,6 +896,98 @@ fn apply_elf_relocations(
                     let disp = pool_off as i64 - rip_after;
                     let d = i32::try_from(disp)
                         .map_err(|_| anyhow!("map disp {disp} exceeds i32"))?;
+                    blob[disp32_off..disp32_off + 4]
+                        .copy_from_slice(&d.to_le_bytes());
+                }
+                // R_X86_64_PC32 = 2: PC-relative reference to a local
+                // symbol. clang emits this for `movups xmm0, [rip+disp]`
+                // / `lea rax, [rip+disp]` against an anonymous rodata
+                // constant (e.g. `.L__const.<fn>.<arr>` produced when a
+                // function-local `const T x = { ... }` is 16+ bytes and
+                // clang lowers it via SSE/AVX). We embed the symbol's
+                // raw bytes at the tail of the blob and patch the
+                // disp32 to point at the embedded copy.
+                //
+                // R_X86_64_32S = 11 falls into the same category for
+                // absolute references; we accept it on the same
+                // mechanism (PC-relative form here -- clang shouldn't
+                // be emitting 32S in -fPIC code, but handle defensively).
+                2 => {
+                    let target_section_idx = target_sym
+                        .section_index()
+                        .ok_or_else(|| anyhow!(
+                            "PC32 reloc target {} has no section",
+                            target_name
+                        ))?;
+                    let target_section = elf
+                        .section_by_index(target_section_idx)
+                        .with_context(|| format!("PC32 target section {target_section_idx:?}"))?;
+                    let target_data = target_section
+                        .data()
+                        .with_context(|| format!("read section {target_section_idx:?} data"))?;
+                    let sec_base = target_section.address();
+                    let sym_off_in_sec = target_sym
+                        .address()
+                        .checked_sub(sec_base)
+                        .ok_or_else(|| anyhow!(
+                            "PC32 target {} below section base",
+                            target_name
+                        ))?;
+                    let sym_size = target_sym.size();
+                    if sym_size == 0 {
+                        bail!(
+                            "PC32 target {} has zero size; cannot embed",
+                            target_name
+                        );
+                    }
+                    let end = sym_off_in_sec
+                        .checked_add(sym_size)
+                        .ok_or_else(|| anyhow!("PC32 target size overflow"))?;
+                    let sym_bytes = target_data
+                        .get(sym_off_in_sec as usize..end as usize)
+                        .ok_or_else(|| anyhow!(
+                            "PC32 target {} bytes out of section bounds",
+                            target_name
+                        ))?
+                        .to_vec();
+
+                    let embed_off = if let Some(&off) = local_data_embed.get(&target_name) {
+                        off
+                    } else {
+                        let off = blob.len();
+                        blob.extend_from_slice(&sym_bytes);
+                        local_data_embed.insert(target_name.clone(), off);
+                        off
+                    };
+
+                    // Find the decoded instruction whose byte range
+                    // covers `local_patch_off`. Same scheme as the
+                    // GOTPCREL handler.
+                    let insn_idx = layout
+                        .insn_local_ip
+                        .iter()
+                        .enumerate()
+                        .filter(|(_, &ip)| ip != u64::MAX && ip <= local_patch_off)
+                        .max_by_key(|(_, &ip)| ip)
+                        .map(|(idx, _)| idx)
+                        .ok_or_else(|| anyhow!(
+                            "PC32 reloc at {:#x} does not align with any instruction in {}",
+                            local_patch_off, layout.sym.name
+                        ))?;
+                    let new_insn_off =
+                        layout.base_in_blob + layout.new_offset_in_sym[insn_idx] as usize;
+                    let off_within_insn =
+                        (local_patch_off - layout.insn_local_ip[insn_idx]) as usize;
+                    let disp32_off = new_insn_off + off_within_insn;
+
+                    // Standard PC32 patch: S + A - P, where S = embed_off,
+                    // A = reloc.addend() (typically -4 for rip-relative
+                    // loads since the CPU's rip is 4 bytes past the
+                    // disp32 field), P = disp32_off.
+                    let addend = reloc.addend();
+                    let disp = embed_off as i64 + addend - disp32_off as i64;
+                    let d = i32::try_from(disp)
+                        .map_err(|_| anyhow!("PC32 disp {disp} exceeds i32"))?;
                     blob[disp32_off..disp32_off + 4]
                         .copy_from_slice(&d.to_le_bytes());
                 }

@@ -539,20 +539,39 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &elf_path)
         }
     }
 
-    /* Inline-hash detection: if any map in the program is a HASH map,
-     * record __htab_map_lookup_elem's kernel address and the post-call
-     * `add rax, imm` offset extracted from the JIT image so native-link
-     * can emit the same inline sequence. POC scope: at most one HASH
-     * map per program (matches our test corpus). */
+    /* Inline-hash detection: if the program contains exactly ONE map
+     * AND that map is BPF_MAP_TYPE_HASH, record the inline metadata so
+     * native-link can rewrite `bpf_map_lookup_elem` into the inlined
+     * `__htab_map_lookup_elem` + `test rax,rax; je; add rax, KEY_OFFSET`
+     * sequence the kernel BPF JIT emits.
+     *
+     * Why the single-map restriction (POC): every
+     * `bpf_map_lookup_elem` call site in the program shares ONE
+     * literal-pool entry (keyed by the symbol name in native-link).
+     * Replacing that pool's value with `__htab_map_lookup_elem`'s
+     * address routes EVERY call site to the htab function -- which is
+     * correct only if all those call sites target HASH maps. With a
+     * single HASH map per program that's guaranteed; with a mixed
+     * map population an ARRAY/PERCPU lookup would be misrouted into
+     * `__htab_map_lookup_elem` followed by `add rax, KEY_OFFSET`
+     * (wrong target + wrong post-call arithmetic). Per-call-site map
+     * resolution (rdi def-use backtrace) would lift this restriction,
+     * but is out of scope for the Stage 2 POC. */
     bool has_hash_map = false;
+    bool has_non_hash_map = false;
+    int map_count = 0;
     map = nullptr;
     bpf_object__for_each_map(map, obj) {
-        if (bpf_map__type(map) == BPF_MAP_TYPE_HASH) {
+        map_count++;
+        auto t = bpf_map__type(map);
+        if (t == BPF_MAP_TYPE_HASH) {
             has_hash_map = true;
-            break;
+        } else {
+            has_non_hash_map = true;
         }
     }
-    if (has_hash_map) {
+    bool inline_eligible = (map_count == 1) && has_hash_map && !has_non_hash_map;
+    if (inline_eligible) {
         uint64_t htab_addr = kallsyms_lookup("__htab_map_lookup_elem");
         if (htab_addr == 0) {
             fail("__htab_map_lookup_elem not in /proc/kallsyms; "

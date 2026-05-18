@@ -30,7 +30,7 @@ fi
 # helpers that read state (ktime, pid, smp_id), the values can differ
 # slightly between two consecutive runs -- those are smoke-tested with
 # "nonzero" / "retval==XDP_PASS" only.
-PROGS="helper_only_ktime helper_get_pid_tgid map_array_lookup map_hash_lookup map_percpu_array combined_helper_map"
+PROGS="helper_only_ktime helper_get_pid_tgid helper_chain_simple map_array_lookup map_array_index_packet map_hash_lookup map_hash_str_key map_percpu_array map_lru_hash_counter map_percpu_hash_counter combined_helper_map multi_map_policy packet_5tuple_classify stats_mixed_helpers"
 
 # Per-program smoke check spec: strict | loose.
 # strict = result + retval must match across runtimes.
@@ -98,7 +98,7 @@ for P in $PROGS; do
         STATUS="RETVAL_BAD"
     fi
     case "$P" in
-        helper_get_pid_tgid|helper_only_ktime|combined_helper_map)
+        helper_get_pid_tgid|helper_only_ktime|helper_chain_simple|combined_helper_map|stats_mixed_helpers)
             # Programs whose result depends on per-run state (ktime,
             # pid_tgid, CPU index) -- both runtimes observe in their own
             # subprocess at different wall times, so values legitimately
@@ -108,7 +108,7 @@ for P in $PROGS; do
                 STATUS="ZERO_RESULT"
             fi
             ;;
-        map_*)
+        map_*|multi_map_*|packet_*)
             # Map-mediated lookup of a freshly-written deterministic value.
             # Both runtimes must produce the exact same u64.
             if [ "$NATIVE_RESULT" != "$KERNEL_RESULT" ]; then
