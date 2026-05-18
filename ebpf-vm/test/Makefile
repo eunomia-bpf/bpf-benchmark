@@ -30,11 +30,17 @@ BPF_CFLAGS := -Wall -Wextra -O2 -g -target bpf $(SYS_INCLUDE_FLAGS) -MMD -MP
 #   -fno-jump-tables / -mllvm -switch-to-lookup=false:
 #                       inherited from the Stage 1 micro/programs native
 #                       build flags.
-NATIVE_CFLAGS := -Wall -Wextra -O2 -g -fPIC -c -DMICRO_NATIVE \
+NATIVE_CFLAGS := -Wall -Wextra -O2 -g -fPIC -c -fno-plt -DMICRO_NATIVE \
     -fomit-frame-pointer -mno-red-zone -fno-stack-protector \
     -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
     -mllvm -switch-to-lookup=false \
     $(SYS_INCLUDE_FLAGS) -MMD -MP
+# -fno-plt makes clang emit `call *[rip+disp32]` (6 bytes,
+# R_X86_64_GOTPCREL reloc) for external function calls instead of
+# `call rel32` (5 bytes, R_X86_64_PLT32). native-link patches the
+# disp32 to point at a literal-pool entry holding the helper's kernel
+# address -- same path it uses for map pointers. No trampoline needed
+# (saves ~5 cycles + 6 bytes per unique helper).
 
 # Reuse the kernel_offsets.h that micro/programs generates from BTF, so
 # the SKB context offset helpers from common.h work in this tree too.

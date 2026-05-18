@@ -5,11 +5,15 @@ CLANG ?= clang
 REPO_ROOT := $(abspath $(CURDIR)/../..)
 
 CFLAGS := -Wall -Wextra -O2 -g -target bpf $(SYS_INCLUDE_FLAGS) -MMD -MP
-NATIVE_CFLAGS := -Wall -Wextra -O2 -g -fPIC -shared -DMICRO_NATIVE \
+NATIVE_CFLAGS := -Wall -Wextra -O2 -g -fPIC -shared -fno-plt -DMICRO_NATIVE \
 	-fomit-frame-pointer -mno-red-zone -fno-stack-protector \
 	-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
 	-mllvm -switch-to-lookup=false \
 	$(SYS_INCLUDE_FLAGS) -MMD -MP
+# -fno-plt is mirrored from ebpf-vm/test/Makefile for consistency. The
+# Stage 1 micro programs are pure-compute (no helper/map references), so
+# this flag has no observable effect on their generated .text bytes --
+# we set it so the build flags don't diverge between Stage 1 and 2.
 HANDCRAFT_CFLAGS := -Wall -Wextra -O2 -g -fPIC -shared \
 	-I$(REPO_ROOT)/runner/include \
 	-I$(REPO_ROOT)/vendor/libbpf/include/uapi \

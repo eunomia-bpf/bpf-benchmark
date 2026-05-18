@@ -1,0 +1,12 @@
+[vm] kernel: 7.0.0-rc2+
+
+program                          native_lab_ret   kernel_jit_ret  status
+------------------------------------------------------------------------------
+helper_only_ktime                             2                2  OK (nl_ns=55 kj_ns=55 nl_res=2269701538 kj_res=2783258922)
+helper_get_pid_tgid                           2                2  OK (nl_ns=38 kj_ns=38 nl_res=4681514353730 kj_res=4754528797779)
+map_array_lookup                              2                2  OK (nl_ns=43 kj_ns=44 nl_res=16045690984503050241 kj_res=16045690984503050241)
+map_hash_lookup                               2                2  OK (nl_ns=390 kj_ns=77 nl_res=1234605616436508552 kj_res=1234605616436508552)
+map_percpu_array                              2                2  OK (nl_ns=42 kj_ns=43 nl_res=18369614221190019774 kj_res=18369614221190019774)
+combined_helper_map                           2                2  OK (nl_ns=67 kj_ns=78 nl_res=7609710616 kj_res=8076886155)
+
+[OK] all Stage 2 programs passed

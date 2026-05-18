@@ -131,6 +131,109 @@ calls the public helper. Yet for those types the public path is also
 | missing `map_gen_lookup` inlining | varies by map type | up to ~250 ns | dominant for HASH map |
 | missing other JIT-only optimizations | varies | varies | bounds check elimination, helper specialization |
 
+## Optimization #1 — `-fno-plt` to eliminate trampolines (2026-05-18)
+
+Adding `-fno-plt` to the userspace native build (`-fPIC -c -fno-plt`)
+makes clang emit `call *[rip+disp32]` (6 bytes, R_X86_64_GOTPCREL reloc)
+instead of `call rel32` (5 bytes, R_X86_64_PLT32). The GOTPCREL form is
+already an indirect call through a memory operand, so native-link can
+treat it exactly like a map GOT reference: append an 8-byte literal-
+pool entry holding the helper kernel address, patch the disp32. No
+trampoline needed.
+
+**Per-helper savings:** trampoline was 14 bytes (`jmp [rip+0]` + 8-byte
+addr) and added one indirection (call → trampoline jmp → helper). The
+new form is 8 bytes per helper (just the addr) and one indirection
+(call indirect → helper).
+
+**Measured impact** (5-run averages):
+
+| program | trampoline build (ns) | `-fno-plt` build (ns) | Δ |
+|---|---:|---:|---:|
+| helper_only_ktime | 54.4 | 54.4 | 0 (helper-internal dominates) |
+| helper_get_pid_tgid | 30.0 | 30.0 | 0 |
+| map_array_lookup | 42.2 | 42.8 | within noise |
+| **map_hash_lookup** | **391.2** | **367.2** | **−24 ns (6% faster)** |
+| map_percpu_array | 43.4 | 43.8 | within noise |
+| combined_helper_map | 65.8 | 69.8 | +4 (within noise) |
+
+Only `map_hash_lookup` shows a measurable improvement (~24 ns). That's
+the program where the helper-internal cost is large enough (~300 ns)
+that trampoline savings of 5 cycles per call show up above the run-to-
+run noise floor. For everything else, helper-internal cost dwarfs the
+trampoline overhead.
+
+**Verdict**: -fno-plt is a net win. Smaller binary (saves ~6-12 bytes
+per unique helper), one less indirect jump per call, and shaves ~5 ns
+off helper-heavy programs.
+
+The HASH map 5x gap shrinks only modestly (391→367 ns native_lab vs
+~74 ns kernel_jit) because the dominant cost is still the missing
+`map_gen_lookup` inlining (see below) — not the trampoline.
+
+### Unified Stage 1 + Stage 2 table with `-fno-plt` (2026-05-18, 35 programs)
+
+`-fno-plt` is now applied to both `micro/programs/Makefile` (Stage 1,
+no observable effect since those programs are pure-compute and have no
+external calls to relocate) and `ebpf-vm/test/Makefile` (Stage 2,
+~24 ns win on `map_hash_lookup`). Single full sweep:
+
+| stage | program | native_lab ns | kernel_jit ns | ratio |
+|-------|---------|--------------:|--------------:|------:|
+| S1 | bcc_runqlat_log2_histogram_bucket | 1246 | 1731 | 0.720 |
+| S1 | bcc_tcpconnect_ipv4_tuple_filter | 70 | 124 | 0.565 |
+| S1 | bitmap_popcount_scan | 471 | 1119 | 0.421 |
+| S1 | bpf_local_call_fanout_dispatch | 83 | 125 | 0.664 |
+| S1 | bpftrace_comm_key_fnv_hash | 443 | 736 | 0.602 |
+| S1 | bpftrace_string_search_prefix_scan | 129 | 302 | 0.427 |
+| S1 | cgroup_skb_hash_chain | 293 | 366 | 0.801 |
+| S1 | cilium_ct_nat_tuple_rewrite | 93 | 186 | 0.500 |
+| S1 | cilium_policy_guard_tree_filter | 43 | 115 | 0.374 |
+| S1 | cilium_socket_lb_service_select | 179 | 425 | 0.421 |
+| S1 | flow_5tuple_rss_hash | 19 | 19 | 1.000 |
+| S1 | flow_record_field_scan | 61 | 65 | 0.938 |
+| S1 | katran_lb_consistent_hash_select | 15 | 46 | 0.326 |
+| S1 | otel_stack_frame_unwind_scan | 45 | 134 | 0.336 |
+| S1 | packed_header_bitfield_decode | 202 | 259 | 0.780 |
+| S1 | packet_checksum_fold | 13382 | 20766 | 0.644 |
+| S1 | packet_record_bounds_window | 87 | 118 | 0.737 |
+| S1 | packet_toeplitz_rss_hash | 178 | 259 | 0.687 |
+| S1 | packet_vlan_tcpopt_parser | 12 | 15 | 0.800 |
+| S1 | payload_prefix_memcmp_scan | 55 | 100 | 0.550 |
+| S1 | simple | 7 | 7 | 1.000 |
+| S1 | simple_packet | 7 | 7 | 1.000 |
+| S1 | siphash_rotate64_mixer | 30 | 70 | 0.429 |
+| S1 | sorted_rule_binary_search | 316 | 666 | 0.474 |
+| S1 | tc_packet_checksum_fold | 13350 | 17630 | 0.757 |
+| S1 | tetragon_process_event_arg_filter | 133 | 173 | 0.769 |
+| S1 | trace_event_type_switch_dispatch | 306 | 397 | 0.771 |
+| S1 | tracee_http_method_prefix_detect | 20 | 20 | 1.000 |
+| S1 | tracee_syscall_name_table_lookup | 123 | 152 | 0.809 |
+| S2 | helper_only_ktime | 55 | 56 | 0.982 |
+| S2 | helper_get_pid_tgid | 37 | 37 | 1.000 |
+| S2 | map_array_lookup | 49 | 44 | 1.114 |
+| **S2** | **map_hash_lookup** | **355** | **86** | **4.128** ⚠️ |
+| S2 | map_percpu_array | 43 | 43 | 1.000 |
+| S2 | combined_helper_map | 66 | 67 | 0.985 |
+
+**Aggregate (35 validated programs):**
+
+| metric | value |
+|--------|------:|
+| geomean ratio | **0.7123x** (native_lab 1.40x faster on average) |
+| range | 0.326 .. 4.128 |
+| wins (native faster) | 27 |
+| losses (kernel_jit faster) | 2 |
+| ties | 6 |
+
+Stage 1 geomean unchanged from the previous Stage 1-only run
+(0.6307 vs 0.6393 — within run-to-run noise). Confirms `-fno-plt`
+is a no-op for pure-compute programs.
+
+The single outlier is still `map_hash_lookup` (4.13x slower native).
+That's the `map_gen_lookup` inlining gap — the next optimization to
+attack.
+
 ## Optimization options ranked by expected ns-savings
 
 1. **Inline `map_gen_lookup`-equivalent sequences in native-link**

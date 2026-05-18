@@ -656,19 +656,27 @@ fn apply_elf_relocations(
                     blob[disp32_off..disp32_off + 4]
                         .copy_from_slice(&d.to_le_bytes());
                 }
-                // GOT-relative map references (R_X86_64_GOTPCREL=9,
+                // GOT-relative references (R_X86_64_GOTPCREL=9,
                 // _GOTPCRELX=41, _REX_GOTPCRELX=42). clang emits these
-                // as `mov reg, [rip+disp32]` -- a 7-byte instruction
-                // whose disp32 field starts at reloc_offset. We append
-                // an 8-byte literal-pool entry holding the map kernel
-                // pointer at the end of the blob, then patch the disp32
-                // to point at it.
+                // for both `&my_map` (mov reg, [rip+disp32] -- 7 byte)
+                // and, with -fno-plt, for `call helper` (call *[rip+
+                // disp32] -- 6 byte). The reloc offset points at the
+                // 4-byte disp32 field for both. We append an 8-byte
+                // literal-pool entry holding the symbol's kernel address
+                // at the end of the blob and patch the disp32.
+                //
+                // We try helper_addrs first because helpers are more
+                // common; map_addrs is consulted only if not found in
+                // helpers.
                 9 | 41 | 42 => {
-                    let map_addr = *map_addrs.get(&target_name).ok_or_else(|| anyhow!(
-                        "GOT-relative reloc against unknown map symbol {}: \
-                         pass --map {}=0x... on the command line",
-                        target_name, target_name
-                    ))?;
+                    let kernel_addr = helper_addrs.get(&target_name).copied()
+                        .or_else(|| map_addrs.get(&target_name).copied())
+                        .ok_or_else(|| anyhow!(
+                            "GOT-relative reloc against unknown symbol {}: \
+                             pass --helper {}=0x... or --map {}=0x... on the command line",
+                            target_name, target_name, target_name
+                        ))?;
+                    let map_addr = kernel_addr; /* used by code below */
 
                     // Find the decoded instruction that contains this
                     // reloc. The disp32 field starts at the reloc offset
@@ -899,9 +907,17 @@ fn validate_no_external_refs(
             );
         }
     }
-    if matches!(fc, FlowControl::IndirectCall | FlowControl::IndirectBranch) {
+    /* Indirect branches (jump tables) are still rejected: clang's
+     * `-fno-jump-tables` flag eliminates them, so any that show up
+     * here are something else and likely unsafe to splat.
+     *
+     * Indirect calls are ALLOWED -- with `-fno-plt`, clang emits
+     * `call *[rip+disp32]` against a R_X86_64_GOTPCREL reloc for every
+     * external function call. The relocation handler points the disp32
+     * at an in-blob literal pool entry holding the kernel address. */
+    if matches!(fc, FlowControl::IndirectBranch) {
         bail!(
-            "instruction at IP {:#x} is an indirect call/branch; rebuild with -fno-jump-tables",
+            "instruction at IP {:#x} is an indirect branch; rebuild with -fno-jump-tables",
             insn.ip()
         );
     }
