@@ -8,6 +8,9 @@
 
 #include "kinsn_x86_emit.h"
 
+#define KINSN_X86_LEA_FORM_REG		1
+#define KINSN_X86_LEA_FORM_ARCH_REG	9
+
 __bpf_kfunc_start_defs();
 __bpf_kfunc void bpf_x86_leaq(void) {}
 __bpf_kfunc void bpf_x86_leal(void) {}
@@ -29,16 +32,20 @@ static __always_inline int decode_lea_payload(u64 payload,
 					      s32 *disp)
 {
 	payload = kinsn_payload_decode(payload);
-	*dst_reg = kinsn_payload_reg(payload, 0);
-	*base_reg = kinsn_payload_reg(payload, 4);
-	*index_reg = kinsn_payload_reg(payload, 8);
-	*scale_log2 = (payload >> 12) & 0x3;
-	*has_index = (payload >> 14) & 1;
-	*has_base = (payload >> 15) & 1;
-	*disp = kinsn_payload_s32(payload, 16);
-	*arch_reg = (payload >> 48) & 1;
+	if ((payload & 0xf) != KINSN_X86_LEA_FORM_REG &&
+	    (payload & 0xf) != KINSN_X86_LEA_FORM_ARCH_REG)
+		return -EINVAL;
 
-	if (payload >> 49)
+	*arch_reg = (payload & 0xf) == KINSN_X86_LEA_FORM_ARCH_REG;
+	*dst_reg = kinsn_payload_reg(payload, 4);
+	*base_reg = kinsn_payload_reg(payload, 8);
+	*index_reg = kinsn_payload_reg(payload, 12);
+	*scale_log2 = (payload >> 16) & 0x3;
+	*has_index = (payload >> 18) & 1;
+	*has_base = (payload >> 19) & 1;
+	*disp = (s32)((u32)(payload >> 20));
+
+	if (payload >> 52)
 		return -EINVAL;
 	if (!kinsn_x86_operand_valid(*dst_reg))
 		return -EINVAL;

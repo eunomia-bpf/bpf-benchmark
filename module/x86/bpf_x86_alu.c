@@ -342,6 +342,7 @@ static int instantiate_x86_shift_cl(const struct kinsn_x86_alu_payload *alu,
 	u8 count_reg = KINSN_X86_SCRATCH1;
 	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0) |
 			   KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH1);
+	bool arch_reg = x86_alu_uses_arch_reg(alu->form);
 	int cnt = 0;
 	int err;
 
@@ -349,8 +350,13 @@ static int instantiate_x86_shift_cl(const struct kinsn_x86_alu_payload *alu,
 		return -EINVAL;
 
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	kinsn_x86_read64(insn_buf, &cnt, dst_eval_reg, alu->dst_reg);
-	kinsn_x86_read64(insn_buf, &cnt, count_reg, alu->src_reg);
+	if (arch_reg) {
+		kinsn_x86_read64_arch(insn_buf, &cnt, dst_eval_reg, alu->dst_reg);
+		kinsn_x86_read64_arch(insn_buf, &cnt, count_reg, alu->src_reg);
+	} else {
+		kinsn_x86_read64(insn_buf, &cnt, dst_eval_reg, alu->dst_reg);
+		kinsn_x86_read64(insn_buf, &cnt, count_reg, alu->src_reg);
+	}
 	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, count_reg, width - 1);
 	err = emit_bpf_alu_reg(&insn_buf[cnt++], op, width, dst_eval_reg,
 			       count_reg);
@@ -358,8 +364,12 @@ static int instantiate_x86_shift_cl(const struct kinsn_x86_alu_payload *alu,
 		return err;
 	if (width == 32)
 		insn_buf[cnt++] = BPF_MOV32_REG(dst_eval_reg, dst_eval_reg);
-	kinsn_x86_write64(insn_buf, &cnt, alu->dst_reg, dst_eval_reg,
-			  scratch_mask);
+	if (arch_reg)
+		kinsn_x86_write64_arch(insn_buf, &cnt, alu->dst_reg,
+				       dst_eval_reg, scratch_mask);
+	else
+		kinsn_x86_write64(insn_buf, &cnt, alu->dst_reg, dst_eval_reg,
+				  scratch_mask);
 	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
 	return cnt;
 }

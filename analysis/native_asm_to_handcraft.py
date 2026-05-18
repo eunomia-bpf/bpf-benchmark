@@ -986,9 +986,10 @@ def write_outputs(insns: list[NativeInsn], translations: list[Translation], outp
         '#include "handcraft_common.h"',
         "",
         "#define HC_LEA_PAYLOAD(DST, BASE, INDEX, SCALE, HAS_BASE, HAS_INDEX, DISP) \\",
-        "    ((__u64)(DST) | ((__u64)(BASE) << 4) | ((__u64)(INDEX) << 8) | \\",
-        "     ((__u64)(SCALE) << 12) | ((__u64)(HAS_INDEX) << 14) | \\",
-        "     ((__u64)(HAS_BASE) << 15) | ((__u64)(__u32)(DISP) << 16))",
+        "    ((__u64)(HC_X86_FORM_ARCH_MEM) | ((__u64)(DST) << 4) | \\",
+        "     ((__u64)(BASE) << 8) | ((__u64)(INDEX) << 12) | \\",
+        "     ((__u64)(SCALE) << 16) | ((__u64)(HAS_INDEX) << 18) | \\",
+        "     ((__u64)(HAS_BASE) << 19) | ((__u64)(__u32)(DISP) << 20))",
         "",
     ]
     if warnings:

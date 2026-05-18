@@ -121,6 +121,9 @@
 #define HC_X86_CMP_MEM_IMM_PAYLOAD(BASE, OFF, IMM) \
     ((__u64)(HC_X86_FORM_MEM) | ((__u64)(BASE) << 4) | \
      ((__u64)(__u16)(OFF) << 8) | ((__u64)(__u32)(IMM) << 24))
+#define HC_X86_CMP_ARCH_MEM_IMM_PAYLOAD(BASE, OFF, IMM) \
+    ((__u64)(HC_X86_FORM_ARCH_MEM) | ((__u64)(BASE) << 4) | \
+     ((__u64)(__u16)(OFF) << 8) | ((__u64)(__u32)(IMM) << 24))
 #define HC_X86_MEM_PAYLOAD(REG, BASE, OFF) \
     ((__u64)(HC_X86_FORM_MEM) | ((__u64)(REG) << 4) | \
      ((__u64)(BASE) << 8) | ((__u64)(__u16)(OFF) << 12))
