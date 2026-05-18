@@ -6,8 +6,6 @@ import os
 import platform
 import random
 import re
-import select
-import signal
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -35,13 +33,11 @@ from runner.libs.environment import (
     validate_publication_environment,
 )
 from runner.libs.results import parse_last_json_line
-from runner.libs.rejit import DaemonSession, benchmark_rejit_enabled_passes
 from runner.libs.run_artifacts import (
     ArtifactSession,
     derive_run_type,
     sanitize_artifact_token,
 )
-from runner.libs.workspace_layout import daemon_binary_path
 
 
 DEFAULT_RUNTIME_ORDER_SEED = 0
@@ -266,7 +262,7 @@ def build_runner_command(
         elif "cgroup_skb" in tags or "cgroup-skb" in tags:
             command.extend(["--native-lab-prog-type", "cgroup_skb"])
         # else: default xdp
-    elif runtime.mode in {"kernel", "kernel_rejit"}:
+    elif runtime.mode == "kernel":
         command = [str(runner_binary), "test-run"]
     else:
         raise RuntimeError(f"unsupported micro runtime mode: {runtime.mode}")
@@ -289,9 +285,6 @@ def build_runner_command(
         command.extend(["--dump-jit-path", str(dump_jit_path)])
     if dump_xlated_path is not None:
         command.extend(["--dump-xlated", str(dump_xlated_path)])
-    if runtime.mode == "kernel_rejit":
-        command.append("--signal-control")
-
     if cpu:
         return ["taskset", "-c", str(cpu), *command]
     return command
@@ -301,10 +294,7 @@ def run_single_sample(
     command: list[str],
     *,
     cwd: Path,
-    artifact_dir: Path,
 ) -> dict[str, Any]:
-    if "--signal-control" in command:
-        return run_rejit_sample(command, cwd=cwd, artifact_dir=artifact_dir)
     completed = run_command(
         command,
         cwd=cwd,
@@ -320,45 +310,6 @@ def run_single_sample(
     if not isinstance(payload, dict):
         raise RuntimeError(f"micro_exec returned non-object JSON for {' '.join(command)}")
     return dict(payload)
-
-
-def run_rejit_sample(command: list[str], *, cwd: Path, artifact_dir: Path) -> dict[str, Any]:
-    arch = os.environ.get("RUN_TARGET_ARCH", "").strip() or platform.machine()
-    proc: subprocess.Popen[str] | None = None
-    daemon_dir = artifact_dir / "details"
-    with DaemonSession.start(
-        daemon_binary_path(ROOT_DIR, arch),
-        stdout_path=daemon_dir / "daemon.stdout.log",
-        stderr_path=daemon_dir / "daemon.stderr.log",
-    ) as daemon:
-        try:
-            proc = subprocess.Popen(command, cwd=cwd, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            assert proc.stdout is not None
-            ready = dict(parse_last_json_line(proc.stdout.readline(), label="kernel_rejit ready"))
-            prog_id = int(ready["id"])
-            passes = benchmark_rejit_enabled_passes()
-            rejit_result = daemon.apply_rejit(
-                [prog_id],
-                app_pid=int(proc.pid),
-                enabled_passes=passes,
-                prog_names_by_id={prog_id: str(ready.get("name") or "micro")},
-            )
-            os.kill(proc.pid, signal.SIGUSR1)
-            readable, _, _ = select.select([proc.stdout], [], [], RUNNER_TIMEOUT_SECONDS)
-            if not readable:
-                raise RuntimeError("kernel_rejit micro_exec timed out")
-            sample = dict(parse_last_json_line(proc.stdout.readline(), label="kernel_rejit micro_exec"))
-            sample["passes"] = passes
-            sample["rejit_result"] = rejit_result
-        finally:
-            if proc is not None and proc.poll() is None:
-                proc.terminate()
-                try:
-                    proc.wait(timeout=5)
-                except subprocess.TimeoutExpired:
-                    proc.kill()
-                    proc.wait(timeout=5)
-    return sample
 
 
 def _dump_stem(benchmark_name: str, runtime_name: str, sample_idx: int | None = None) -> str:
@@ -421,12 +372,9 @@ def write_code_compare_markdown(benchmark: CatalogTarget, artifact_dir: Path) ->
     text = f"# {benchmark.name}\n\n" + "\n\n".join(
         f"## {title}\n```{lang}\n{text.rstrip()}\n```" for title, lang, text in sections
     ) + "\n"
-    for out in (
-        ROOT_DIR / "micro" / "programs" / f"{sanitize_artifact_token(benchmark.name)}.md",
-        artifact_dir / "details" / "code_compare" / f"{sanitize_artifact_token(benchmark.name)}.md",
-    ):
-        out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(text)
+    out = artifact_dir / "details" / "code_compare" / f"{sanitize_artifact_token(benchmark.name)}.md"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(text)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -443,8 +391,6 @@ def main(argv: list[str] | None = None) -> int:
 
     benchmarks = select_benchmarks(args.benches, suite)
     runtimes = select_runtimes(args.runtimes, suite)
-    if os.environ.get("BPFREJIT_BENCH_PASSES", "").strip():
-        runtimes.append(RuntimeSpec("kernel_rejit", "kernel eBPF + ReJIT", "kernel_rejit", "kernel", "stock"))
     if args.shuffle_seed is not None:
         random.Random(args.shuffle_seed).shuffle(benchmarks)
     runtime_order_seed = args.shuffle_seed if args.shuffle_seed is not None else DEFAULT_RUNTIME_ORDER_SEED
@@ -646,7 +592,7 @@ def main(argv: list[str] | None = None) -> int:
                         cpu=args.cpu,
                     )
                     for _ in range(max(0, warmups)):
-                        sample = run_single_sample(warmup_command, cwd=ROOT_DIR, artifact_dir=artifact_dir)
+                        sample = run_single_sample(warmup_command, cwd=ROOT_DIR)
                         if benchmark.expected_result is not None and sample.get("result") != benchmark.expected_result:
                             raise RuntimeError(
                                 f"{benchmark.name}/{runtime.name} warmup result mismatch: "
@@ -665,11 +611,11 @@ def main(argv: list[str] | None = None) -> int:
                         inner_repeat = int(runtime_samples[runtime.name]["inner_repeat"])
                         dump_jit_path = None
                         dump_xlated_path = None
-                        if runtime.mode in {"kernel", "kernel_rejit", "llvmbpf"}:
+                        if runtime.mode in {"kernel", "llvmbpf"}:
                             dump_jit_path, dump_xlated_path = _jit_dump_paths(
                                 artifact_dir,
                                 _dump_stem(benchmark.name, runtime.name, sample_idx),
-                                xlated=runtime.mode in {"kernel", "kernel_rejit"},
+                                xlated=runtime.mode == "kernel",
                             )
                         command = build_runner_command(
                             runner_binary=runner_binary,
@@ -683,7 +629,7 @@ def main(argv: list[str] | None = None) -> int:
                             dump_jit_path=dump_jit_path,
                             dump_xlated_path=dump_xlated_path,
                         )
-                        sample = run_single_sample(command, cwd=ROOT_DIR, artifact_dir=artifact_dir)
+                        sample = run_single_sample(command, cwd=ROOT_DIR)
                         sample["sample_index"] = sample_idx
 
                         if benchmark.expected_result is not None and sample.get("result") != benchmark.expected_result:

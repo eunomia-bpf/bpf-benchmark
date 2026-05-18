@@ -5,6 +5,7 @@
 #include <arpa/inet.h>
 
 #include <bpf/bpf.h>
+#include <bpf/btf.h>
 #include <bpf/libbpf.h>
 #include <linux/bpf.h>
 #include <yaml-cpp/yaml.h>
@@ -15,7 +16,6 @@
 #include <cctype>
 #include <chrono>
 #include <cmath>
-#include <csignal>
 #include <cstdio>
 #include <cstring>
 #include <fcntl.h>
@@ -43,14 +43,11 @@ constexpr uint32_t kKatranRealNum = 1;
 constexpr uint32_t kKatranVipFlags = 1U << 1;
 constexpr uint32_t kKatranChRingSize = 65537;
 constexpr size_t kKatranEncapHeadroom = 64;
-volatile std::sig_atomic_t g_signal_run_requested = 0;
-volatile std::sig_atomic_t g_signal_stop_requested = 0;
+constexpr const char *kVmlinuxBtfPath = "/sys/kernel/btf/vmlinux";
 
-void handle_signal_control(int signo)
-{
-    if (signo == SIGUSR1) g_signal_run_requested = 1;
-    else g_signal_stop_requested = 1;
-}
+#ifndef BPF_PSEUDO_KINSN_CALL
+#define BPF_PSEUDO_KINSN_CALL 4
+#endif
 
 #if defined(__x86_64__) || defined(__i386__)
 constexpr bool kHasTscMeasurement = true;
@@ -121,6 +118,23 @@ struct object_deleter {
 };
 
 using bpf_object_ptr = std::unique_ptr<bpf_object, object_deleter>;
+
+struct fd_deleter {
+    void operator()(int *fd) const
+    {
+        if (fd != nullptr && *fd >= 0) {
+            close(*fd);
+        }
+        delete fd;
+    }
+};
+
+using unique_fd = std::unique_ptr<int, fd_deleter>;
+
+struct resolved_kinsn_call {
+    int btf_func_id = 0;
+    int fd_array_slot = 0;
+};
 
 enum class packet_context_kind {
     none,
@@ -834,26 +848,6 @@ std::vector<uint8_t> build_packet_input(const std::vector<uint8_t> &input_bytes,
     return packet;
 }
 
-namespace {
-
-uint64_t read_u64_result(const uint8_t *data, size_t length)
-{
-    if (length < sizeof(uint64_t)) {
-        fail("result buffer shorter than 8 bytes");
-    }
-    uint64_t result = 0;
-    std::memcpy(&result, data, sizeof(result));
-    return result;
-}
-
-uint64_t read_skb_result(const __sk_buff &ctx)
-{
-    return static_cast<uint64_t>(ctx.cb[0]) |
-           (static_cast<uint64_t>(ctx.cb[1]) << 32);
-}
-
-} // namespace
-
 uint64_t read_kernel_test_run_result(
     std::string_view effective_io_mode,
     bool result_from_skb_context,
@@ -865,8 +859,6 @@ uint64_t read_kernel_test_run_result(
 {
     if (effective_io_mode == "packet" || effective_io_mode == "staged") {
         if (result_from_skb_context) {
-            // read_skb_result + read_u64_result live in the kernel_runner
-            // anonymous namespace; both are file-scope helpers reused here.
             return static_cast<uint64_t>(context_out.cb[0]) |
                    (static_cast<uint64_t>(context_out.cb[1]) << 32);
         }
@@ -909,18 +901,187 @@ void maybe_write_program_dumps(const cli_options &options, int program_fd, const
     }
 }
 
-} // namespace
-
-void initialize_micro_exec_process()
+std::string btf_name_for_fd(int fd)
 {
+    bpf_btf_info info = {};
+    char name[128] = {};
+    info.name = reinterpret_cast<uintptr_t>(name);
+    info.name_len = sizeof(name);
+    uint32_t info_len = sizeof(info);
+    if (bpf_obj_get_info_by_fd(fd, &info, &info_len) != 0) {
+        fail("bpf_obj_get_info_by_fd(BTF) failed: " + std::string(strerror(errno)));
+    }
+    return name;
 }
+
+std::unordered_map<std::string, resolved_kinsn_call> resolve_kinsn_calls(
+    const std::vector<kinsn_call_relocation> &calls,
+    std::vector<unique_fd> &owned_btf_fds,
+    std::vector<int> &fd_array)
+{
+    std::unordered_map<std::string, resolved_kinsn_call> resolved;
+    std::vector<std::string> unresolved;
+    for (const auto &call : calls) {
+        if (!resolved.contains(call.name) &&
+            std::find(unresolved.begin(), unresolved.end(), call.name) == unresolved.end()) {
+            unresolved.push_back(call.name);
+        }
+    }
+    if (unresolved.empty()) {
+        return resolved;
+    }
+
+    btf *vmlinux = btf__parse(kVmlinuxBtfPath, nullptr);
+    if (libbpf_get_error(vmlinux)) {
+        fail("btf__parse vmlinux: " + std::string(strerror(static_cast<int>(-libbpf_get_error(vmlinux)))));
+    }
+
+    std::unordered_map<std::string, int> module_slots;
+    uint32_t id = 0;
+    while (!unresolved.empty()) {
+        uint32_t next = 0;
+        if (bpf_btf_get_next_id(id, &next) < 0) {
+            if (errno == ENOENT) {
+                break;
+            }
+            btf__free(vmlinux);
+            fail("bpf_btf_get_next_id: " + std::string(strerror(errno)));
+        }
+        id = next;
+
+        int fd = bpf_btf_get_fd_by_id(id);
+        if (fd < 0) {
+            continue;
+        }
+        const std::string module_name = btf_name_for_fd(fd);
+        if (!module_name.starts_with("bpf_")) {
+            close(fd);
+            continue;
+        }
+
+        const std::string module_btf_path = "/sys/kernel/btf/" + module_name;
+        btf *module_btf = btf__parse_split(module_btf_path.c_str(), vmlinux);
+        if (libbpf_get_error(module_btf)) {
+            close(fd);
+            continue;
+        }
+
+        bool keep_fd = false;
+        for (auto it = unresolved.begin(); it != unresolved.end();) {
+            const int func_id = btf__find_by_name_kind(module_btf, it->c_str(), BTF_KIND_FUNC);
+            if (func_id < 0) {
+                ++it;
+                continue;
+            }
+            auto slot_it = module_slots.find(module_name);
+            if (slot_it == module_slots.end()) {
+                const int slot = static_cast<int>(owned_btf_fds.size()) + 1;
+                slot_it = module_slots.emplace(module_name, slot).first;
+                owned_btf_fds.emplace_back(new int(fd));
+                keep_fd = true;
+            }
+            resolved.emplace(*it, resolved_kinsn_call{
+                .btf_func_id = func_id,
+                .fd_array_slot = slot_it->second,
+            });
+            it = unresolved.erase(it);
+        }
+
+        btf__free(module_btf);
+        if (!keep_fd) {
+            close(fd);
+        }
+    }
+    btf__free(vmlinux);
+
+    if (!unresolved.empty()) {
+        std::string names;
+        for (const auto &name : unresolved) {
+            if (!names.empty()) {
+                names += ", ";
+            }
+            names += name;
+        }
+        fail("unable to resolve kinsn BTF functions: " + names);
+    }
+
+    if (!owned_btf_fds.empty()) {
+        fd_array.reserve(owned_btf_fds.size() + 1);
+        fd_array.push_back(*owned_btf_fds.front());
+        for (const auto &fd_ptr : owned_btf_fds) {
+            fd_array.push_back(*fd_ptr);
+        }
+    }
+    return resolved;
+}
+
+int load_raw_kinsn_program(program_image &image)
+{
+    if (!image.maps.empty()) {
+        fail("raw kinsn micro loader does not support maps");
+    }
+    if (image.code.empty() || image.code.size() % sizeof(bpf_insn) != 0) {
+        fail("raw kinsn micro loader received invalid BPF instruction image");
+    }
+
+    auto *insns = reinterpret_cast<bpf_insn *>(image.code.data());
+    const size_t insn_count = image.code.size() / sizeof(bpf_insn);
+    std::vector<unique_fd> owned_btf_fds;
+    std::vector<int> fd_array;
+    const auto resolved = resolve_kinsn_calls(image.kinsn_calls, owned_btf_fds, fd_array);
+    for (const auto &call : image.kinsn_calls) {
+        if (call.insn_index >= insn_count) {
+            fail("kinsn relocation points beyond program image");
+        }
+        auto target = resolved.find(call.name);
+        if (target == resolved.end()) {
+            fail("internal error: unresolved kinsn relocation " + call.name);
+        }
+        auto &insn = insns[call.insn_index];
+        if (insn.code != (BPF_JMP | BPF_CALL) || insn.src_reg != BPF_PSEUDO_KINSN_CALL) {
+            fail("kinsn relocation does not point at a kinsn call instruction");
+        }
+        insn.off = static_cast<int16_t>(target->second.fd_array_slot);
+        insn.imm = target->second.btf_func_id;
+    }
+
+    LIBBPF_OPTS(bpf_prog_load_opts, opts,
+        .expected_attach_type = static_cast<bpf_attach_type>(image.expected_attach_type),
+        .fd_array = fd_array.empty() ? nullptr : fd_array.data(),
+    );
+    opts.fd_array_cnt = static_cast<__u32>(fd_array.size());
+    int fd = bpf_prog_load(
+        static_cast<bpf_prog_type>(image.prog_type),
+        image.program_name.c_str(),
+        image.license.c_str(),
+        insns,
+        insn_count,
+        &opts);
+    if (fd < 0) {
+        std::vector<char> log_buf(4 * 1024 * 1024, '\0');
+        opts.log_level = 1;
+        opts.log_size = static_cast<__u32>(log_buf.size());
+        opts.log_buf = log_buf.data();
+        fd = bpf_prog_load(
+            static_cast<bpf_prog_type>(image.prog_type),
+            image.program_name.c_str(),
+            image.license.c_str(),
+            insns,
+            insn_count,
+            &opts);
+    }
+    if (fd < 0) {
+        const char *log = opts.log_buf ? opts.log_buf : "";
+        fail("bpf_prog_load(raw kinsn): " + std::string(strerror(errno)) +
+             "\nverifier log:\n" + log);
+    }
+    return fd;
+}
+
+} // namespace
 
 std::vector<sample_result> run_kernel(const cli_options &options)
 {
-    // C++ no longer owns prepared state, daemon REJIT, attach-trigger workloads,
-    // or batch orchestration. This path is a single load -> TEST_RUN -> JSON exit.
-    initialize_micro_exec_process();
-
     const auto memory_prepare_start = std::chrono::steady_clock::now();
     auto input_bytes = materialize_memory(options.memory, options.input_size);
     const auto memory_prepare_end = std::chrono::steady_clock::now();
@@ -929,62 +1090,69 @@ std::vector<sample_result> run_kernel(const cli_options &options)
     }
 
     const auto object_open_start = std::chrono::steady_clock::now();
-    bpf_object_open_opts open_opts = {};
-    open_opts.sz = sizeof(open_opts);
-    if (options.btf_custom_path.has_value()) {
-        open_opts.btf_custom_path = options.btf_custom_path->c_str();
-    }
-    bpf_object *raw_object = bpf_object__open_file(options.program.c_str(), &open_opts);
-    const int open_error = libbpf_get_error(raw_object);
-    if (open_error != 0) {
-        fail("bpf_object__open_file failed: " + libbpf_error_string(open_error));
-    }
-    const auto object_open_end = std::chrono::steady_clock::now();
+    program_image raw_image = load_program_image(options.program, options.program_name);
+    const bool raw_kinsn_program = !raw_image.kinsn_calls.empty();
+    bpf_object_ptr object;
+    unique_fd raw_program_fd;
+    int program_fd = -1;
+    std::string effective_io_mode;
+    clock_type::time_point object_open_end {};
+    clock_type::time_point object_load_start {};
+    clock_type::time_point object_load_end {};
 
-    bpf_object_ptr object(raw_object);
-    configure_autoload(object.get(), options);
+    if (raw_kinsn_program) {
+        if (options.btf_custom_path.has_value()) {
+            fail("raw kinsn micro loader does not support custom BTF paths");
+        }
+        if (katran_balancer_fixture_requested(options)) {
+            fail("raw kinsn micro loader does not support Katran map fixtures");
+        }
+        if (options.fixture_path.has_value()) {
+            fail("raw kinsn micro loader does not support map fixtures");
+        }
+        object_open_end = std::chrono::steady_clock::now();
+        object_load_start = std::chrono::steady_clock::now();
+        raw_program_fd.reset(new int(load_raw_kinsn_program(raw_image)));
+        program_fd = *raw_program_fd;
+        object_load_end = std::chrono::steady_clock::now();
+        effective_io_mode = options.io_mode;
+    } else {
+        bpf_object_open_opts open_opts = {};
+        open_opts.sz = sizeof(open_opts);
+        if (options.btf_custom_path.has_value()) {
+            open_opts.btf_custom_path = options.btf_custom_path->c_str();
+        }
+        bpf_object *raw_object = bpf_object__open_file(options.program.c_str(), &open_opts);
+        const int open_error = libbpf_get_error(raw_object);
+        if (open_error != 0) {
+            fail("bpf_object__open_file failed: " + libbpf_error_string(open_error));
+        }
+        object_open_end = std::chrono::steady_clock::now();
 
-    const auto object_load_start = std::chrono::steady_clock::now();
-    const int load_error = bpf_object__load(object.get());
-    if (load_error != 0) {
-        fail("bpf_object__load failed: " + libbpf_error_string(-load_error));
+        object.reset(raw_object);
+        configure_autoload(object.get(), options);
+
+        object_load_start = std::chrono::steady_clock::now();
+        const int load_error = bpf_object__load(object.get());
+        if (load_error != 0) {
+            fail("bpf_object__load failed: " + libbpf_error_string(-load_error));
+        }
+        object_load_end = std::chrono::steady_clock::now();
+        effective_io_mode = resolve_effective_io_mode(options.io_mode, object.get());
+
+        if (katran_balancer_fixture_requested(options)) {
+            initialize_katran_test_fixture(object.get());
+        }
+        maybe_load_map_fixtures(options, object.get());
+
+        bpf_program *prog = find_program(object.get(), options.program_name);
+        program_fd = bpf_program__fd(prog);
+        if (program_fd < 0) {
+            fail("unable to obtain program fd");
+        }
     }
-    const auto object_load_end = std::chrono::steady_clock::now();
 
-    const std::string effective_io_mode = resolve_effective_io_mode(options.io_mode, object.get());
-
-    if (katran_balancer_fixture_requested(options)) {
-        initialize_katran_test_fixture(object.get());
-    }
-    maybe_load_map_fixtures(options, object.get());
-
-    bpf_program *prog = find_program(object.get(), options.program_name);
-    const int program_fd = bpf_program__fd(prog);
-    if (program_fd < 0) {
-        fail("unable to obtain program fd");
-    }
     const auto program_info = load_prog_info(program_fd);
-
-    if (options.signal_control) {
-        std::signal(SIGUSR1, handle_signal_control);
-        std::signal(SIGTERM, handle_signal_control);
-        std::signal(SIGINT, handle_signal_control);
-        std::cout
-            << "{\"status\":\"ready\",\"id\":" << program_info.id
-            << ",\"name\":\"" << json_escape(program_name_from_info(program_info))
-            << "\"}\n" << std::flush;
-    }
-
-    for (;;) {
-    if (options.signal_control) {
-        while (!g_signal_run_requested && !g_signal_stop_requested) {
-            pause();
-        }
-        if (g_signal_stop_requested) {
-            return {};
-        }
-        g_signal_run_requested = 0;
-    }
 
     std::chrono::steady_clock::time_point exec_input_prepare_start {};
     std::chrono::steady_clock::time_point exec_input_prepare_end {};
@@ -1004,6 +1172,9 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         (effective_io_mode == "packet" || effective_io_mode == "staged");
 
     if (effective_io_mode == "map") {
+        if (raw_kinsn_program) {
+            fail("raw kinsn micro loader does not support io-mode map");
+        }
         bpf_map *input_map = bpf_object__find_map_by_name(object.get(), "input_map");
         bpf_map *result_map = bpf_object__find_map_by_name(object.get(), "result_map");
         if (result_map == nullptr) {
@@ -1146,11 +1317,5 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         {result_phase_name(effective_io_mode), elapsed_ns(result_read_start, result_read_end)},
     };
     sample.perf_counters = std::move(run_pass.perf_counters);
-    if (options.signal_control) {
-        print_json(sample);
-        std::cout << std::flush;
-        continue;
-    }
     return {std::move(sample)};
-    }
 }

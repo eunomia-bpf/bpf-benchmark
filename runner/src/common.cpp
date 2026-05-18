@@ -14,7 +14,7 @@ std::string usage_text()
         "  micro_exec test-run [--program <path>|<path>] [--program-name <name>] "
         "[--memory <path>] [--fixture-path <path>] [--btf-custom-path <path>] "
         "[--io-mode map|staged|packet|context] [--raw-packet] [--inner-repeat N] "
-        "[--warmup N] [--input-size N] [--signal-control] [--perf-counters] "
+        "[--warmup N] [--input-size N] [--perf-counters] "
         "[--perf-scope full_repeat_raw|full_repeat_avg] [--dump-jit] [--dump-jit-path <path>] "
         "[--dump-xlated <path>]\n"
         "  micro_exec run-native [--program <path>|<path>] [--program-name <name>] "
@@ -296,10 +296,6 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--native-lab-linker" && index + 1 < argc) {
             options.native_lab_linker_path = argv[++index];
-            continue;
-        }
-        if (current == "--signal-control") {
-            options.signal_control = true;
             continue;
         }
         if (current == "--inner-repeat" && index + 1 < argc) {

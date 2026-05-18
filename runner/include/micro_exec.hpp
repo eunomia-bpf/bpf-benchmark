@@ -21,9 +21,15 @@ struct map_spec {
     uint32_t max_entries = 0;
 };
 
+struct kinsn_call_relocation {
+    uint64_t insn_index = 0;
+    std::string name;
+};
+
 struct program_image {
     std::vector<uint8_t> code;
     std::vector<map_spec> maps;
+    std::vector<kinsn_call_relocation> kinsn_calls;
     std::string program_name;
     std::string license;
     uint32_t prog_type = 0;
@@ -49,7 +55,6 @@ struct cli_options {
     std::optional<std::string> program_name;
     std::string io_mode = "map";
     bool raw_packet = false;
-    bool signal_control = false;
     uint32_t repeat = 1;
     uint32_t warmup_repeat = 5;
     uint32_t input_size = 0;
@@ -126,7 +131,6 @@ std::vector<program_descriptor> list_programs(const std::filesystem::path &path)
 program_image load_program_image(
     const std::filesystem::path &path,
     const std::optional<std::string> &program_name = std::nullopt);
-void initialize_micro_exec_process();
 std::vector<sample_result> run_kernel(const cli_options &options);
 sample_result run_llvmbpf(const cli_options &options);
 sample_result run_native(const cli_options &options);

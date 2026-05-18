@@ -854,8 +854,6 @@ uint32_t prog_type_from_option(const std::string &name)
 
 std::vector<sample_result> run_kernel_native_lab(const cli_options &options)
 {
-    initialize_micro_exec_process();
-
     const auto memory_prepare_start = std::chrono::steady_clock::now();
     auto input_bytes = materialize_memory(options.memory, options.input_size);
     if (options.input_size != 0 && input_bytes.size() < options.input_size) {
