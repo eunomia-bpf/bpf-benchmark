@@ -1,0 +1,19 @@
+[package]
+name = "native-link"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[[bin]]
+name = "native-link"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+iced-x86 = { version = "1.21", features = ["decoder", "encoder", "block_encoder", "instr_info"] }
+object = { version = "0.36", default-features = false, features = ["read", "elf", "std"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

@@ -1,0 +1,2266 @@
+{
+  "benchmarks": [
+    {
+      "category": "alu-mix",
+      "description": "bcc runqlat-style log2 latency bucket selection with clamp",
+      "error": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/bcc_runqlat_log2_histogram_bucket.handcraft.so --program-name bcc_runqlat_log2_histogram_bucket_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bcc_runqlat_log2_histogram_bucket.mem --io-mode staged --input-size 1032 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/bcc_runqlat_log2_histogram_bucket__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/bcc_runqlat_log2_histogram_bucket__kernel_handcraft__sample00.xlated.bin\n279: (54) w6 &= 1048575               ; R6=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xfffff,var_off=(0x0; 0xfffff))\n280: (7b) *(u64 *)(r10 -496) = r6     ; R6=scalar(id=10,smin=smin32=0,smax=umax=smax32=umax32=0xfffff,var_off=(0x0; 0xfffff)) R10=fp0 fp-496=scalar(id=10,smin=smin32=0,smax=umax=smax32=umax32=0xfffff,var_off=(0x0; 0xfffff))\n281: (79) r8 = *(u64 *)(r10 -360)     ; R8=0 R10=fp0 fp-360=0\n282: (79) r7 = *(u64 *)(r10 -368)     ; R7=pkt_end() R10=fp0 fp-368=pkt_end()\n283: (79) r6 = *(u64 *)(r10 -376)     ; R6=128 R10=fp0 fp-376=128\n284: (79) r6 = *(u64 *)(r10 -496)     ; R6=scalar(id=10,smin=smin32=0,smax=umax=smax32=umax32=0xfffff,var_off=(0x0; 0xfffff)) R10=fp0 fp-496=scalar(id=10,smin=smin32=0,smax=umax=smax32=umax32=0xfffff,var_off=(0x0; 0xfffff))\n285: (bc) w6 = w6                     ; R6=scalar(id=10,smin=smin32=0,smax=umax=smax32=umax32=0xfffff,var_off=(0x0; 0xfffff))\n286: (16) if w6 == 0x0 goto pc+79     ; R6=scalar(id=10,smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=0xfffff,var_off=(0x0; 0xfffff)) fp-496=scalar(id=10,smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=0xfffff,var_off=(0x0; 0xfffff))\n287: (07) r3 += 1\nR3 !read_ok\nprocessed 210 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0\ninitial_load_error=Permission denied diagnostic_load_error=Permission denied",
+      "expected_result": 17790125373615940312,
+      "family": "histogram-bucket",
+      "hypothesis": "Mirrors tracing histogram bucket selection without helper/map updates",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bcc_runqlat_log2_histogram_bucket.mem",
+      "io_mode": "staged",
+      "level": "log2-clamp",
+      "name": "bcc_runqlat_log2_histogram_bucket",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "mode": "native",
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 329
+              },
+              "compile_ns": 52262,
+              "exec_ns": 1354,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 26005,
+                "native_load_ns": 52262
+              },
+              "result": 17790125373615940312,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 1354
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "llvmbpf",
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1416,
+                "native_code_bytes": 434
+              },
+              "compile_ns": 11994276,
+              "exec_cycles": 7046,
+              "exec_ns": 1911,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 425,
+                "jit_compile_ns": 11994276,
+                "memory_prepare_ns": 17425,
+                "program_image_ns": 92211,
+                "vm_load_code_ns": 173
+              },
+              "result": 17790125373615940312,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686254428,
+              "wall_exec_ns": 4283
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1368,
+                "native_code_bytes": 716
+              },
+              "compile_ns": 61454306,
+              "exec_cycles": 14777492,
+              "exec_ns": 1372,
+              "jited_prog_len": 716,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 1710,
+                "memory_prepare_ns": 25653,
+                "object_load_ns": 61395830,
+                "object_open_ns": 58476,
+                "prog_run_wall_ns": 40088323,
+                "result_extract_ns": 400
+              },
+              "result": 17790125373615940312,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686080510,
+              "wall_exec_ns": 4008999,
+              "xlated_prog_len": 1368
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "bcc",
+        "tracing",
+        "log2",
+        "histogram",
+        "pure-jit"
+      ]
+    },
+    {
+      "category": "memory-local",
+      "description": "Payload prefix comparison over fixed-size candidate records",
+      "error": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/payload_prefix_memcmp_scan.handcraft.so --program-name payload_prefix_memcmp_scan_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/payload_prefix_memcmp_scan.mem --io-mode staged --input-size 196 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/payload_prefix_memcmp_scan__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/payload_prefix_memcmp_scan__kernel_handcraft__sample00.xlated.bin\n61: (2d) if r6 > r7 goto pc-26        ; R6=pkt(off=204,r=204) R7=pkt_end()\n62: (79) r6 = *(u64 *)(r10 -464)      ; R6=pkt(off=8,r=204) R10=fp0 fp-464=pkt(off=8,r=204)\n63: (61) r6 = *(u32 *)(r6 +0)         ; R6=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n64: (56) if w6 != 0x3 goto pc-29      ; R6=3\n65: (7b) *(u64 *)(r10 -376) = r6      ; R6=3 R10=fp0 fp-376=3\n66: (7b) *(u64 *)(r10 -368) = r7      ; R7=pkt_end() R10=fp0 fp-368=pkt_end()\n67: (7b) *(u64 *)(r10 -360) = r8      ; R8=0 R10=fp0 fp-360=0\n68: (79) r6 = *(u64 *)(r10 -496)      ; R6=pkt_end() R10=fp0 fp-496=pkt_end()\n69: (57) r6 &= -256\nR6 pointer arithmetic on pkt_end prohibited\nprocessed 70 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\ninitial_load_error=Permission denied diagnostic_load_error=Permission denied",
+      "expected_result": 9377358970524074984,
+      "family": "byte-compare",
+      "hypothesis": "Represents protocol/string prefix filters with early mismatch exits",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/payload_prefix_memcmp_scan.mem",
+      "io_mode": "staged",
+      "level": "prefix-64",
+      "name": "payload_prefix_memcmp_scan",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "mode": "native",
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 494
+              },
+              "compile_ns": 51975,
+              "exec_ns": 137,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 24736,
+                "native_load_ns": 51975
+              },
+              "result": 9377358970524074984,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 137
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "llvmbpf",
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1112,
+                "native_code_bytes": 469
+              },
+              "compile_ns": 10786193,
+              "exec_cycles": 413,
+              "exec_ns": 112,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 385,
+                "jit_compile_ns": 10786193,
+                "memory_prepare_ns": 15010,
+                "program_image_ns": 94291,
+                "vm_load_code_ns": 168
+              },
+              "result": 9377358970524074984,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686251672,
+              "wall_exec_ns": 2285
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1112,
+                "native_code_bytes": 565
+              },
+              "compile_ns": 791829,
+              "exec_cycles": 22191047,
+              "exec_ns": 280,
+              "jited_prog_len": 565,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 388,
+                "memory_prepare_ns": 23397,
+                "object_load_ns": 736559,
+                "object_open_ns": 55270,
+                "prog_run_wall_ns": 60199468,
+                "result_extract_ns": 713
+              },
+              "result": 9377358970524074984,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686256918,
+              "wall_exec_ns": 6019940,
+              "xlated_prog_len": 1112
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "memory",
+        "compare",
+        "branch",
+        "pure-jit"
+      ]
+    },
+    {
+      "category": "memory-local",
+      "description": "Packet-backed Ethernet plus VLAN plus IPv4 plus TCP parser with options walk",
+      "error": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/packet_vlan_tcpopt_parser.handcraft.so --program-name packet_vlan_tcpopt_parser_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_vlan_tcpopt_parser.mem --io-mode packet --input-size 74 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/packet_vlan_tcpopt_parser__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/packet_vlan_tcpopt_parser__kernel_handcraft__sample00.xlated.bin\nlibbpf: sec 'xdp': found program 'packet_vlan_tcpopt_parser_xdp' at insn offset 0 (0 bytes), code size 232 insns (1856 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /artifacts/user/micro-programs/x86_64/packet_vlan_tcpopt_parser.bpf.o is GPL\nlibbpf: elf: section(15) .BTF, size 2190, link 0, flags 0, type=1\nlibbpf: elf: section(17) .BTF.ext, size 1632, link 0, flags 0, type=1\nlibbpf: elf: section(25) .symtab, size 456, link 1, flags 0, type=2\nlibbpf: looking for externs among 19 symbols...\nlibbpf: collected 0 externs total\nbpf_prog_load(handcraft) failed: Invalid argument\nfunc#0 @0\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument",
+      "expected_result": 7124500222221,
+      "family": "parser",
+      "hypothesis": "Variable cursor advancement and repeated bounds checks should magnify packet-parse codegen differences",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_vlan_tcpopt_parser.mem",
+      "io_mode": "packet",
+      "level": "variable-vlan-tcpopts",
+      "name": "packet_vlan_tcpopt_parser",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "mode": "native",
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 616
+              },
+              "compile_ns": 48405,
+              "exec_ns": 81,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 29997,
+                "native_load_ns": 48405
+              },
+              "result": 7124500222221,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 81
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "llvmbpf",
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1856,
+                "native_code_bytes": 640
+              },
+              "compile_ns": 12102449,
+              "exec_cycles": 648,
+              "exec_ns": 176,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "jit_compile_ns": 12102449,
+                "memory_prepare_ns": 16485,
+                "packet_prepare_ns": 285,
+                "program_image_ns": 84846,
+                "vm_load_code_ns": 1141
+              },
+              "result": 7124500222221,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3685280294,
+              "wall_exec_ns": 6523
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1856,
+                "native_code_bytes": 1110
+              },
+              "compile_ns": 450334,
+              "exec_cycles": 14682428,
+              "exec_ns": 67,
+              "jited_prog_len": 1110,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 28295,
+                "object_load_ns": 390249,
+                "object_open_ns": 60085,
+                "packet_prepare_ns": 634,
+                "prog_run_wall_ns": 39829649,
+                "result_extract_ns": 313
+              },
+              "result": 7124500222221,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686147074,
+              "wall_exec_ns": 3983137,
+              "xlated_prog_len": 1856
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "packet",
+        "parse",
+        "bounds",
+        "variable-offsets",
+        "pure-jit"
+      ]
+    },
+    {
+      "category": "alu-mix",
+      "description": "Katran IPv4 TCP VIP path with local fixture lookups and consistent-hash backend selection",
+      "error": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/katran_lb_consistent_hash_select.handcraft.so --program-name katran_lb_consistent_hash_select_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/katran_lb_consistent_hash_select.mem --io-mode packet --input-size 54 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/katran_lb_consistent_hash_select__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/katran_lb_consistent_hash_select__kernel_handcraft__sample00.xlated.bin\nlibbpf: sec 'xdp': found program 'katran_lb_consistent_hash_select_xdp' at insn offset 0 (0 bytes), code size 872 insns (6976 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /artifacts/user/micro-programs/x86_64/katran_lb_consistent_hash_select.bpf.o is GPL\nlibbpf: elf: section(15) .BTF, size 2782, link 0, flags 0, type=1\nlibbpf: elf: section(17) .BTF.ext, size 4752, link 0, flags 0, type=1\nlibbpf: elf: section(25) .symtab, size 792, link 1, flags 0, type=2\nlibbpf: looking for externs among 33 symbols...\nlibbpf: collected 0 externs total\nbpf_prog_load(handcraft) failed: Invalid argument\nfunc#0 @0\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument",
+      "expected_result": 5895923248507644458,
+      "family": "packet-load-balancer",
+      "hypothesis": "A helper-free Katran-shaped path should expose realistic parse, hash, selection, and encap ALU patterns",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/katran_lb_consistent_hash_select.mem",
+      "io_mode": "packet",
+      "level": "katran-hotpath",
+      "name": "katran_lb_consistent_hash_select",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "mode": "native",
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 1947
+              },
+              "compile_ns": 53626,
+              "exec_ns": 113,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 31638,
+                "native_load_ns": 53626
+              },
+              "result": 5895923248507644458,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 113
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "llvmbpf",
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 6976,
+                "native_code_bytes": 1824
+              },
+              "compile_ns": 30093691,
+              "exec_cycles": 199,
+              "exec_ns": 54,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "jit_compile_ns": 30093691,
+                "memory_prepare_ns": 12623,
+                "packet_prepare_ns": 349,
+                "program_image_ns": 114836,
+                "vm_load_code_ns": 1281
+              },
+              "result": 5895923248507644458,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686163788,
+              "wall_exec_ns": 3209
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 6832,
+                "native_code_bytes": 3463
+              },
+              "compile_ns": 625594,
+              "exec_cycles": 14753618,
+              "exec_ns": 103,
+              "jited_prog_len": 3463,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 30864,
+                "object_load_ns": 568171,
+                "object_open_ns": 57423,
+                "packet_prepare_ns": 653,
+                "prog_run_wall_ns": 40022814,
+                "result_extract_ns": 402
+              },
+              "result": 5895923248507644458,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686182104,
+              "wall_exec_ns": 4002411,
+              "xlated_prog_len": 6832
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "packet",
+        "katran",
+        "hash",
+        "endian",
+        "pure-jit"
+      ]
+    },
+    {
+      "category": "memory-local",
+      "description": "Packet-backed record parser with one wide dominating window plus many redundant sub-checks",
+      "error": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/packet_record_bounds_window.handcraft.so --program-name packet_record_bounds_window_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_record_bounds_window.mem --io-mode packet --input-size 776 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/packet_record_bounds_window__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/packet_record_bounds_window__kernel_handcraft__sample00.xlated.bin\n178: (bc) w6 = w6                     ; R6=scalar(id=22,smin=smin32=0,smax=umax=smax32=umax32=1016,var_off=(0x0; 0x3f8))\n179: (7b) *(u64 *)(r10 -504) = r6     ; R6=scalar(id=22,smin=smin32=0,smax=umax=smax32=umax32=1016,var_off=(0x0; 0x3f8)) R10=fp0 fp-504=scalar(id=22,smin=smin32=0,smax=umax=smax32=umax32=1016,var_off=(0x0; 0x3f8))\n180: (79) r8 = *(u64 *)(r10 -360)     ; R8=0 R10=fp0 fp-360=0\n181: (79) r7 = *(u64 *)(r10 -368)     ; R7=scalar(id=5,smin=umin=smin32=umin32=24,smax=umax=smax32=umax32=27,var_off=(0x18; 0x3)) R10=fp0 fp-368=scalar(id=5,smin=umin=smin32=umin32=24,smax=umax=smax32=umax32=27,var_off=(0x18; 0x3))\n182: (79) r6 = *(u64 *)(r10 -376)     ; R6=scalar(id=6,smin=smin32=0,smax=umax=smax32=umax32=254,var_off=(0x0; 0xfe)) R10=fp0 fp-376=scalar(id=6,smin=smin32=0,smax=umax=smax32=umax32=254,var_off=(0x0; 0xfe))\n183: (7b) *(u64 *)(r10 -376) = r6     ; R6=scalar(id=6,smin=smin32=0,smax=umax=smax32=umax32=254,var_off=(0x0; 0xfe)) R10=fp0 fp-376=scalar(id=6,smin=smin32=0,smax=umax=smax32=umax32=254,var_off=(0x0; 0xfe))\n184: (7b) *(u64 *)(r10 -368) = r7     ; R7=scalar(id=5,smin=umin=smin32=umin32=24,smax=umax=smax32=umax32=27,var_off=(0x18; 0x3)) R10=fp0 fp-368=scalar(id=5,smin=umin=smin32=umin32=24,smax=umax=smax32=umax32=27,var_off=(0x18; 0x3))\n185: (7b) *(u64 *)(r10 -360) = r8     ; R8=0 R10=fp0 fp-360=0\n186: (bf) r6 = r4\nR4 !read_ok\nprocessed 303 insns (limit 1000000) max_states_per_insn 0 total_states 5 peak_states 5 mark_read 0\ninitial_load_error=Permission denied diagnostic_load_error=Permission denied",
+      "expected_result": 1610777047308888911,
+      "family": "bounds-density",
+      "hypothesis": "Dominating range checks should create a clean target for redundant bounds-check elimination",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_record_bounds_window.mem",
+      "io_mode": "packet",
+      "level": "redundant-window",
+      "name": "packet_record_bounds_window",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "mode": "native",
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 248
+              },
+              "compile_ns": 53839,
+              "exec_ns": 176,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 26553,
+                "native_load_ns": 53839
+              },
+              "result": 1610777047308888911,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 176
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "llvmbpf",
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1304,
+                "native_code_bytes": 280
+              },
+              "compile_ns": 9992678,
+              "exec_cycles": 737,
+              "exec_ns": 200,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "jit_compile_ns": 9992678,
+                "memory_prepare_ns": 15934,
+                "packet_prepare_ns": 304,
+                "program_image_ns": 89256,
+                "vm_load_code_ns": 158
+              },
+              "result": 1610777047308888911,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3685963494,
+              "wall_exec_ns": 4340
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1304,
+                "native_code_bytes": 716
+              },
+              "compile_ns": 1178353,
+              "exec_cycles": 14752898,
+              "exec_ns": 301,
+              "jited_prog_len": 716,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 24425,
+                "object_load_ns": 1115857,
+                "object_open_ns": 62496,
+                "packet_prepare_ns": 761,
+                "prog_run_wall_ns": 40021250,
+                "result_extract_ns": 472
+              },
+              "result": 1610777047308888911,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686258072,
+              "wall_exec_ns": 4002134,
+              "xlated_prog_len": 1304
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "packet",
+        "bounds",
+        "redundant-checks",
+        "pure-jit"
+      ]
+    },
+    {
+      "category": "memory-local",
+      "description": "Packed header bitfield extraction over staged two-word records",
+      "error": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/packed_header_bitfield_decode.handcraft.so --program-name packed_header_bitfield_decode_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packed_header_bitfield_decode.mem --io-mode staged --input-size 520 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/packed_header_bitfield_decode__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/packed_header_bitfield_decode__kernel_handcraft__sample00.xlated.bin\nlibbpf: sec 'xdp': found program 'packed_header_bitfield_decode_xdp' at insn offset 0 (0 bytes), code size 247 insns (1976 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /artifacts/user/micro-programs/x86_64/packed_header_bitfield_decode.bpf.o is GPL\nlibbpf: elf: section(15) .BTF, size 2361, link 0, flags 0, type=1\nlibbpf: elf: section(17) .BTF.ext, size 2224, link 0, flags 0, type=1\nlibbpf: elf: section(25) .symtab, size 408, link 1, flags 0, type=2\nlibbpf: looking for externs among 17 symbols...\nlibbpf: collected 0 externs total\nbpf_prog_load(handcraft) failed: Invalid argument\nfunc#0 @0\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument",
+      "expected_result": 12211926182125163441,
+      "family": "bitfield-extract",
+      "hypothesis": "Repeated constant shift-and-mask extracts should reward compact canonical extract lowering over packed inputs",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packed_header_bitfield_decode.mem",
+      "io_mode": "staged",
+      "level": "packed-records",
+      "name": "packed_header_bitfield_decode",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "mode": "native",
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 665
+              },
+              "compile_ns": 48304,
+              "exec_ns": 280,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 22676,
+                "native_load_ns": 48304
+              },
+              "result": 12211926182125163441,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 280
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "llvmbpf",
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1976,
+                "native_code_bytes": 740
+              },
+              "compile_ns": 13921098,
+              "exec_cycles": 1482,
+              "exec_ns": 402,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 435,
+                "jit_compile_ns": 13921098,
+                "memory_prepare_ns": 16094,
+                "program_image_ns": 85073,
+                "vm_load_code_ns": 195
+              },
+              "result": 12211926182125163441,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686199892,
+              "wall_exec_ns": 2941
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1976,
+                "native_code_bytes": 1012
+              },
+              "compile_ns": 914129,
+              "exec_cycles": 14733925,
+              "exec_ns": 538,
+              "jited_prog_len": 1012,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 696,
+                "memory_prepare_ns": 35923,
+                "object_load_ns": 847981,
+                "object_open_ns": 66148,
+                "prog_run_wall_ns": 39970705,
+                "result_extract_ns": 401
+              },
+              "result": 12211926182125163441,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686051042,
+              "wall_exec_ns": 3997211,
+              "xlated_prog_len": 1976
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "memory",
+        "fields",
+        "bitfield",
+        "pure-jit"
+      ]
+    },
+    {
+      "category": "control-flow",
+      "description": "Tracee-style sparse syscall number to name-table dispatch",
+      "error": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/tracee_syscall_name_table_lookup.handcraft.so --program-name tracee_syscall_name_table_lookup_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/tracee_syscall_name_table_lookup.mem --io-mode staged --input-size 260 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/tracee_syscall_name_table_lookup__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/tracee_syscall_name_table_lookup__kernel_handcraft__sample00.xlated.bin\nmark_precise: frame0: regs=r5 stack= before 128: (0f) r6 += r7\nmark_precise: frame0: regs=r5 stack= before 127: (0f) r6 += r7\nmark_precise: frame0: regs=r5 stack= before 126: (0f) r6 += r7\nmark_precise: frame0: regs=r5 stack= before 125: (bf) r7 = r5\nmark_precise: frame0: regs=r5 stack= before 124: (bf) r6 = r3\nmark_precise: frame0: regs=r5 stack= before 123: (7b) *(u64 *)(r10 -360) = r8\nmark_precise: frame0: regs=r5 stack= before 122: (7b) *(u64 *)(r10 -368) = r7\nmark_precise: frame0: regs=r5 stack= before 121: (7b) *(u64 *)(r10 -376) = r6\nmark_precise: frame0: parent state regs= stack=:  R0=0 R1=pkt(off=268,r=268) R2=0x65736f6c63 R3=pkt(r=268) R4=pkt_end() R5=P0 R6=0x74616b6e696c6e75 R7=0x6a09e667f3bcc909 R8=0x74613274617473 R9=0x646461746567 R10=fp0 fp-136=scalar() fp-144=scalar() fp-152=scalar() fp-160=scalar() fp-168=scalar() fp-176=scalar() fp-360=0 fp-368=0x6a09e667f3bcc909 fp-376=0x74616b6e696c6e75 fp-416=0x647466656e676973 fp-424=0x74616e65706f fp-440=0x6574697277 fp-480=fp-176\nR6 pointer arithmetic with >>= operator prohibited\nprocessed 232 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0\ninitial_load_error=Permission denied diagnostic_load_error=Permission denied",
+      "expected_result": 4063733557757466536,
+      "family": "syscall-dispatch",
+      "hypothesis": "Represents sparse syscall lookup and name classification without map/helper dependencies",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/tracee_syscall_name_table_lookup.mem",
+      "io_mode": "staged",
+      "level": "sparse-table",
+      "name": "tracee_syscall_name_table_lookup",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "mode": "native",
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 806
+              },
+              "compile_ns": 49401,
+              "exec_ns": 353,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 23823,
+                "native_load_ns": 49401
+              },
+              "result": 4063733557757466536,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 353
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "llvmbpf",
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1552,
+                "native_code_bytes": 929
+              },
+              "compile_ns": 11566728,
+              "exec_cycles": 1269,
+              "exec_ns": 344,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 521,
+                "jit_compile_ns": 11566728,
+                "memory_prepare_ns": 12083,
+                "program_image_ns": 99925,
+                "vm_load_code_ns": 185
+              },
+              "result": 4063733557757466536,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686183971,
+              "wall_exec_ns": 3345
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1536,
+                "native_code_bytes": 1017
+              },
+              "compile_ns": 8829049,
+              "exec_cycles": 14772476,
+              "exec_ns": 472,
+              "jited_prog_len": 1017,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 977,
+                "memory_prepare_ns": 36189,
+                "object_load_ns": 8766826,
+                "object_open_ns": 62223,
+                "prog_run_wall_ns": 40074097,
+                "result_extract_ns": 407
+              },
+              "result": 4063733557757466536,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686015395,
+              "wall_exec_ns": 4007709,
+              "xlated_prog_len": 1536
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "tracee",
+        "syscall",
+        "dispatch",
+        "pure-jit"
+      ]
+    },
+    {
+      "category": "alu-mix",
+      "description": "Cilium socket LB service selection over protocol, port range, wildcard, and backend count",
+      "error": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/cilium_socket_lb_service_select.handcraft.so --program-name cilium_socket_lb_service_select_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/cilium_socket_lb_service_select.mem --io-mode staged --input-size 1544 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/cilium_socket_lb_service_select__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/cilium_socket_lb_service_select__kernel_handcraft__sample00.xlated.bin\nlibbpf: sec 'xdp': found program 'cilium_socket_lb_service_select_xdp' at insn offset 0 (0 bytes), code size 249 insns (1992 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /artifacts/user/micro-programs/x86_64/cilium_socket_lb_service_select.bpf.o is GPL\nlibbpf: elf: section(15) .BTF, size 1847, link 0, flags 0, type=1\nlibbpf: elf: section(17) .BTF.ext, size 1424, link 0, flags 0, type=1\nlibbpf: elf: section(25) .symtab, size 600, link 1, flags 0, type=2\nlibbpf: looking for externs among 25 symbols...\nlibbpf: collected 0 externs total\nbpf_prog_load(handcraft) failed: Invalid argument\nfunc#0 @0\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument",
+      "expected_result": 2868565165525030065,
+      "family": "socket-lb",
+      "hypothesis": "Captures protocol/port/range/wildcard decision trees plus backend selection math",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/cilium_socket_lb_service_select.mem",
+      "io_mode": "staged",
+      "level": "service-select",
+      "name": "cilium_socket_lb_service_select",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "mode": "native",
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 365
+              },
+              "compile_ns": 50987,
+              "exec_ns": 283,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 24649,
+                "native_load_ns": 50987
+              },
+              "result": 2868565165525030065,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 283
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "llvmbpf",
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1992,
+                "native_code_bytes": 442
+              },
+              "compile_ns": 12344570,
+              "exec_cycles": 1400,
+              "exec_ns": 380,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 458,
+                "jit_compile_ns": 12344570,
+                "memory_prepare_ns": 20138,
+                "program_image_ns": 94547,
+                "vm_load_code_ns": 1323
+              },
+              "result": 2868565165525030065,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686245318,
+              "wall_exec_ns": 2986
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 2000,
+                "native_code_bytes": 1081
+              },
+              "compile_ns": 5436210,
+              "exec_cycles": 14734863,
+              "exec_ns": 853,
+              "jited_prog_len": 1081,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 821,
+                "memory_prepare_ns": 29291,
+                "object_load_ns": 5371373,
+                "object_open_ns": 64837,
+                "prog_run_wall_ns": 39971849,
+                "result_extract_ns": 363
+              },
+              "result": 2868565165525030065,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686144183,
+              "wall_exec_ns": 3997365,
+              "xlated_prog_len": 2000
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "cilium",
+        "socket-lb",
+        "branch",
+        "hash",
+        "pure-jit"
+      ]
+    },
+    {
+      "category": "control-flow",
+      "description": "bcc tcpconnect-style IPv4 tuple event filter over pid, uid, netns, and port class",
+      "error": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/bcc_tcpconnect_ipv4_tuple_filter.handcraft.so --program-name bcc_tcpconnect_ipv4_tuple_filter_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bcc_tcpconnect_ipv4_tuple_filter.mem --io-mode staged --input-size 776 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/bcc_tcpconnect_ipv4_tuple_filter__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/bcc_tcpconnect_ipv4_tuple_filter__kernel_handcraft__sample00.xlated.bin\nmark_precise: frame0: regs= stack=-456 before 337: (45) if r6 & 0x1 goto pc+1\nmark_precise: frame0: parent state regs= stack=:  R1=ctx(off=30) R6=scalar(id=307,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=pkt_end() R8=0 R9=0 R10=fp0 fp-136=scalar() fp-144=scalar() fp-152=scalar() fp-160=scalar() fp-360=0 fp-368=pkt_end() fp-376=2 fp-432=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-440=2 fp-448=scalar(smin=0x8000000078bd9819,smax=0x7fffffff78bd9819,umin=smin32=umin32=0x78bd9819,umax=0xffffffff78bd9819,smax32=umax32=0x78bd9819,var_off=(0x78bd9819; 0xffffffff00000000)) fp-456=P0 fp-464=pkt(off=759,r=784) fp-472=scalar(id=307,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) fp-480=fp-160 fp-488=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-496=pkt(r=784) fp-504=2 fp-512=443\n189: R6=0\n190: (7b) *(u64 *)(r10 -376) = r6     ; R6=0 R10=fp0 fp-376=0\n191: (7b) *(u64 *)(r10 -368) = r7     ; R7=pkt_end() R10=fp0 fp-368=pkt_end()\n192: (7b) *(u64 *)(r10 -360) = r8     ; R8=0 R10=fp0 fp-360=0\n193: (79) r6 = *(u64 *)(r10 -464)     ; R6=pkt(off=807,r=784) R10=fp0 fp-464=pkt(off=807,r=784)\n194: (69) r7 = *(u16 *)(r6 -5)\ninvalid access to packet, off=802 size=2, R6(id=0,off=802,r=784)\nR6 offset is outside of the packet\nprocessed 3696 insns (limit 1000000) max_states_per_insn 4 total_states 69 peak_states 69 mark_read 0\ninitial_load_error=Permission denied diagnostic_load_error=Permission denied",
+      "expected_result": 18109187572642697766,
+      "family": "tracing-tuple-filter",
+      "hypothesis": "Captures tracing event tuple filtering without packet parsing, maps, or helpers",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bcc_tcpconnect_ipv4_tuple_filter.mem",
+      "io_mode": "staged",
+      "level": "ipv4-connect",
+      "name": "bcc_tcpconnect_ipv4_tuple_filter",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "mode": "native",
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 430
+              },
+              "compile_ns": 49129,
+              "exec_ns": 217,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 23491,
+                "native_load_ns": 49129
+              },
+              "result": 18109187572642697766,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 217
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "llvmbpf",
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1808,
+                "native_code_bytes": 554
+              },
+              "compile_ns": 12284471,
+              "exec_cycles": 671,
+              "exec_ns": 182,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 283,
+                "jit_compile_ns": 12284471,
+                "memory_prepare_ns": 15079,
+                "program_image_ns": 86704,
+                "vm_load_code_ns": 177
+              },
+              "result": 18109187572642697766,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686207986,
+              "wall_exec_ns": 2467
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1808,
+                "native_code_bytes": 1003
+              },
+              "compile_ns": 2785752,
+              "exec_cycles": 14724957,
+              "exec_ns": 265,
+              "jited_prog_len": 1003,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 837,
+                "memory_prepare_ns": 24337,
+                "object_load_ns": 2727087,
+                "object_open_ns": 58665,
+                "prog_run_wall_ns": 39945751,
+                "result_extract_ns": 403
+              },
+              "result": 18109187572642697766,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686233083,
+              "wall_exec_ns": 3994581,
+              "xlated_prog_len": 1808
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "bcc",
+        "tracing",
+        "tuple",
+        "branch",
+        "pure-jit"
+      ]
+    },
+    {
+      "category": "alu-mix",
+      "description": "Cilium conntrack/NAT tuple rewrite with direction swap, rev NAT id, identity, and lifetime fields",
+      "error": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/cilium_ct_nat_tuple_rewrite.handcraft.so --program-name cilium_ct_nat_tuple_rewrite_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/cilium_ct_nat_tuple_rewrite.mem --io-mode staged --input-size 1032 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/cilium_ct_nat_tuple_rewrite__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/cilium_ct_nat_tuple_rewrite__kernel_handcraft__sample00.xlated.bin\nlibbpf: sec 'xdp': found program 'cilium_ct_nat_tuple_rewrite_xdp' at insn offset 0 (0 bytes), code size 226 insns (1808 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /artifacts/user/micro-programs/x86_64/cilium_ct_nat_tuple_rewrite.bpf.o is GPL\nlibbpf: elf: section(15) .BTF, size 1848, link 0, flags 0, type=1\nlibbpf: elf: section(17) .BTF.ext, size 1952, link 0, flags 0, type=1\nlibbpf: elf: section(25) .symtab, size 528, link 1, flags 0, type=2\nlibbpf: looking for externs among 22 symbols...\nlibbpf: collected 0 externs total\nbpf_prog_load(handcraft) failed: Invalid argument\nfunc#0 @0\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument",
+      "expected_result": 14199193300769829204,
+      "family": "ct-nat-rewrite",
+      "hypothesis": "Represents datapath tuple rewrite and CT/NAT metadata mixing distinct from service selection",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/cilium_ct_nat_tuple_rewrite.mem",
+      "io_mode": "staged",
+      "level": "tuple-rewrite",
+      "name": "cilium_ct_nat_tuple_rewrite",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "mode": "native",
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 370
+              },
+              "compile_ns": 59054,
+              "exec_ns": 350,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 24087,
+                "native_load_ns": 59054
+              },
+              "result": 14199193300769829204,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 350
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "llvmbpf",
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1808,
+                "native_code_bytes": 453
+              },
+              "compile_ns": 11683053,
+              "exec_cycles": 857,
+              "exec_ns": 233,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 489,
+                "jit_compile_ns": 11683053,
+                "memory_prepare_ns": 14926,
+                "program_image_ns": 93415,
+                "vm_load_code_ns": 204
+              },
+              "result": 14199193300769829204,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686248353,
+              "wall_exec_ns": 3248
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1808,
+                "native_code_bytes": 958
+              },
+              "compile_ns": 1778096,
+              "exec_cycles": 14703986,
+              "exec_ns": 454,
+              "jited_prog_len": 958,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 828,
+                "memory_prepare_ns": 26862,
+                "object_load_ns": 1714846,
+                "object_open_ns": 63250,
+                "prog_run_wall_ns": 39889211,
+                "result_extract_ns": 411
+              },
+              "result": 14199193300769829204,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686259223,
+              "wall_exec_ns": 3988864,
+              "xlated_prog_len": 1808
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "cilium",
+        "conntrack",
+        "nat",
+        "tuple",
+        "pure-jit"
+      ]
+    },
+    {
+      "category": "alu-mix",
+      "description": "bpftrace-style comm plus pid/tgid/probe aggregation key hashed with FNV-1a",
+      "error": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/bpftrace_comm_key_fnv_hash.handcraft.so --program-name bpftrace_comm_key_fnv_hash_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bpftrace_comm_key_fnv_hash.mem --io-mode staged --input-size 1032 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/bpftrace_comm_key_fnv_hash__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/bpftrace_comm_key_fnv_hash__kernel_handcraft__sample00.xlated.bin\nlibbpf: sec 'xdp': found program 'bpftrace_comm_key_fnv_hash_xdp' at insn offset 0 (0 bytes), code size 234 insns (1872 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /artifacts/user/micro-programs/x86_64/bpftrace_comm_key_fnv_hash.bpf.o is GPL\nlibbpf: elf: section(15) .BTF, size 1608, link 0, flags 0, type=1\nlibbpf: elf: section(17) .BTF.ext, size 2560, link 0, flags 0, type=1\nlibbpf: elf: section(25) .symtab, size 456, link 1, flags 0, type=2\nlibbpf: looking for externs among 19 symbols...\nlibbpf: collected 0 externs total\nbpf_prog_load(handcraft) failed: Invalid argument\nfunc#0 @0\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument",
+      "expected_result": 8524536671075880526,
+      "family": "tracing-key-hash",
+      "hypothesis": "Adds lightweight string/tuple aggregation key hashing distinct from packet-oriented hash paths",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bpftrace_comm_key_fnv_hash.mem",
+      "io_mode": "staged",
+      "level": "fnv1a-comm-key",
+      "name": "bpftrace_comm_key_fnv_hash",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "mode": "native",
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 773
+              },
+              "compile_ns": 47787,
+              "exec_ns": 544,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 25327,
+                "native_load_ns": 47787
+              },
+              "result": 8524536671075880526,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 544
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "llvmbpf",
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1872,
+                "native_code_bytes": 769
+              },
+              "compile_ns": 12710430,
+              "exec_cycles": 2678,
+              "exec_ns": 727,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 455,
+                "jit_compile_ns": 12710430,
+                "memory_prepare_ns": 14858,
+                "program_image_ns": 85764,
+                "vm_load_code_ns": 1315
+              },
+              "result": 8524536671075880526,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686134753,
+              "wall_exec_ns": 4053
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1872,
+                "native_code_bytes": 994
+              },
+              "compile_ns": 2331490,
+              "exec_cycles": 14713661,
+              "exec_ns": 479,
+              "jited_prog_len": 994,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 1196,
+                "memory_prepare_ns": 33814,
+                "object_load_ns": 2266101,
+                "object_open_ns": 65389,
+                "prog_run_wall_ns": 39914050,
+                "result_extract_ns": 332
+              },
+              "result": 8524536671075880526,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3685932704,
+              "wall_exec_ns": 3991842,
+              "xlated_prog_len": 1872
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "bpftrace",
+        "tracing",
+        "hash",
+        "string",
+        "pure-jit"
+      ]
+    },
+    {
+      "category": "call-overhead",
+      "description": "Dispatch among four __noinline local subprograms with different pressure profiles",
+      "error": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/bpf_local_call_fanout_dispatch.handcraft.so --program-name bpf_local_call_fanout_dispatch_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bpf_local_call_fanout_dispatch.mem --io-mode staged --input-size 392 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/bpf_local_call_fanout_dispatch__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/bpf_local_call_fanout_dispatch__kernel_handcraft__sample00.xlated.bin\nmark_precise: frame0: regs= stack=-416 before 270: (79) r7 = *(u64 *)(r10 -416)\nmark_precise: frame0: regs= stack=-416 before 269: (79) r6 = *(u64 *)(r10 -360)\nmark_precise: frame0: regs= stack=-416 before 268: (7b) *(u64 *)(r10 -360) = r8\nmark_precise: frame0: regs= stack=-416 before 267: (7b) *(u64 *)(r10 -368) = r7\nmark_precise: frame0: regs= stack=-416 before 266: (7b) *(u64 *)(r10 -376) = r6\nmark_precise: frame0: parent state regs= stack=:  R0=0 R1=0x243f6a8885a308d3 R3=pkt(off=400,r=400) R4=pkt_end() R6=24 R7=0 R8=pkt(r=400) R9=0 R10=fp0 fp-136=scalar() fp-144=scalar() fp-152=scalar() fp-160=scalar() fp-168=scalar() fp-176=scalar() fp-184=pkt(off=8,r=400) fp-360=pkt(r=400) fp-368=0 fp-376=24 fp-416=P23 fp-480=fp-184\n284: R6=pkt(off=23,r=400) R7=23\n284: (61) r8 = *(u32 *)(r6 -3)        ; R6=pkt(off=23,r=400) R8=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n285: (bf) r10 = r8\nframe pointer is read only\nprocessed 216 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0\ninitial_load_error=Permission denied diagnostic_load_error=Permission denied",
+      "expected_result": 1171593469689687806,
+      "family": "bpf-local-call",
+      "hypothesis": "Fan-out local calls should stress call-site layout, prologue diversity, and join-point register allocation",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bpf_local_call_fanout_dispatch.mem",
+      "io_mode": "staged",
+      "level": "fanout-4",
+      "name": "bpf_local_call_fanout_dispatch",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "mode": "native",
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 269
+              },
+              "compile_ns": 50158,
+              "exec_ns": 183,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 27823,
+                "native_load_ns": 50158
+              },
+              "result": 1171593469689687806,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 183
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "llvmbpf",
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 4240,
+                "native_code_bytes": 869
+              },
+              "compile_ns": 19949107,
+              "exec_cycles": 415,
+              "exec_ns": 113,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 532,
+                "jit_compile_ns": 19949107,
+                "memory_prepare_ns": 14002,
+                "program_image_ns": 103001,
+                "vm_load_code_ns": 1139
+              },
+              "result": 1171593469689687806,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686032243,
+              "wall_exec_ns": 3000
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 4240,
+                "native_code_bytes": 2173
+              },
+              "compile_ns": 1658506,
+              "exec_cycles": 14653984,
+              "exec_ns": 201,
+              "jited_prog_len": 2173,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 899,
+                "memory_prepare_ns": 31562,
+                "object_load_ns": 1580455,
+                "object_open_ns": 78051,
+                "prog_run_wall_ns": 39753448,
+                "result_extract_ns": 907
+              },
+              "result": 1171593469689687806,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686249809,
+              "wall_exec_ns": 3975310,
+              "xlated_prog_len": 4240
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "call",
+        "bpf-to-bpf",
+        "local-call",
+        "reg-pressure",
+        "pure-jit"
+      ]
+    },
+    {
+      "category": "control-flow",
+      "description": "Tetragon process-event argument, namespace, capability, and action filter",
+      "error": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/tetragon_process_event_arg_filter.handcraft.so --program-name tetragon_process_event_arg_filter_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/tetragon_process_event_arg_filter.mem --io-mode staged --input-size 1032 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/tetragon_process_event_arg_filter__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/tetragon_process_event_arg_filter__kernel_handcraft__sample00.xlated.bin\n94: (7b) *(u64 *)(r10 -480) = r6      ; R6=fp-176 R10=fp0 fp-480=fp-176\n95: (79) r8 = *(u64 *)(r10 -360)      ; R8=0 R10=fp0 fp-360=0\n96: (79) r7 = *(u64 *)(r10 -368)      ; R7=0 R10=fp0 fp-368=0\n97: (79) r6 = *(u64 *)(r10 -376)      ; R6=0 R10=fp0 fp-376=0\n98: (7b) *(u64 *)(r10 -376) = r6      ; R6=0 R10=fp0 fp-376=0\n99: (7b) *(u64 *)(r10 -368) = r7      ; R7=0 R10=fp0 fp-368=0\n100: (7b) *(u64 *)(r10 -360) = r8     ; R8=0 R10=fp0 fp-360=0\n101: (79) r6 = *(u64 *)(r10 -480)     ; R6=fp-176 R10=fp0 fp-480=fp-176\n102: (17) r6 -= 64\nR6 subtraction from stack pointer prohibited\nprocessed 99 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0\ninitial_load_error=Permission denied diagnostic_load_error=Permission denied",
+      "expected_result": 12641586655603153431,
+      "family": "security-event-filter",
+      "hypothesis": "Represents security policy event filtering over process metadata and argument signatures",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/tetragon_process_event_arg_filter.mem",
+      "io_mode": "staged",
+      "level": "process-args",
+      "name": "tetragon_process_event_arg_filter",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "mode": "native",
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 802
+              },
+              "compile_ns": 49550,
+              "exec_ns": 351,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 19601,
+                "native_load_ns": 49550
+              },
+              "result": 12641586655603153431,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 351
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "llvmbpf",
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 2296,
+                "native_code_bytes": 878
+              },
+              "compile_ns": 14649739,
+              "exec_cycles": 1511,
+              "exec_ns": 410,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 549,
+                "jit_compile_ns": 14649739,
+                "memory_prepare_ns": 17679,
+                "program_image_ns": 91177,
+                "vm_load_code_ns": 1289
+              },
+              "result": 12641586655603153431,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686227185,
+              "wall_exec_ns": 2924
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 2296,
+                "native_code_bytes": 1260
+              },
+              "compile_ns": 7284782,
+              "exec_cycles": 14782982,
+              "exec_ns": 352,
+              "jited_prog_len": 1260,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 1039,
+                "memory_prepare_ns": 29500,
+                "object_load_ns": 7220723,
+                "object_open_ns": 64059,
+                "prog_run_wall_ns": 40102643,
+                "result_extract_ns": 515
+              },
+              "result": 12641586655603153431,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686273299,
+              "wall_exec_ns": 4010278,
+              "xlated_prog_len": 2296
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "tetragon",
+        "security",
+        "branch",
+        "string",
+        "pure-jit"
+      ]
+    },
+    {
+      "category": "memory-local",
+      "description": "OpenTelemetry profiler-style stack frame unwind scan over frame deltas and symbol hashes",
+      "error": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/otel_stack_frame_unwind_scan.handcraft.so --program-name otel_stack_frame_unwind_scan_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/otel_stack_frame_unwind_scan.mem --io-mode staged --input-size 584 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/otel_stack_frame_unwind_scan__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/otel_stack_frame_unwind_scan__kernel_handcraft__sample00.xlated.bin\n144: (7b) *(u64 *)(r10 -368) = r7     ; R7=0 R10=fp0 fp-368=0\n145: (7b) *(u64 *)(r10 -360) = r8     ; R8=0 R10=fp0 fp-360=0\n146: (61) r6 = *(u32 *)(r1 -15)       ; R1=pkt(off=39,r=592) R6=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n147: (7b) *(u64 *)(r10 -360) = r6     ; R6=scalar(id=6,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-360=scalar(id=6,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n148: (79) r8 = *(u64 *)(r10 -360)     ; R8=scalar(id=6,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-360=scalar(id=6,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n149: (79) r7 = *(u64 *)(r10 -368)     ; R7=0 R10=fp0 fp-368=0\n150: (79) r6 = *(u64 *)(r10 -376)     ; R6=0 R10=fp0 fp-376=0\n151: (61) r9 = *(u32 *)(r1 -11)       ; R1=pkt(off=39,r=592) R9=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n152: (69) r10 = *(u16 *)(r1 -7)\nframe pointer is read only\nprocessed 118 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0\ninitial_load_error=Permission denied diagnostic_load_error=Permission denied",
+      "expected_result": 12043289854646947360,
+      "family": "profiler-unwind",
+      "hypothesis": "Captures profiler unwind cursor updates and frame classification without helper dependencies",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/otel_stack_frame_unwind_scan.mem",
+      "io_mode": "staged",
+      "level": "frame-scan",
+      "name": "otel_stack_frame_unwind_scan",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "mode": "native",
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 387
+              },
+              "compile_ns": 47276,
+              "exec_ns": 168,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 22138,
+                "native_load_ns": 47276
+              },
+              "result": 12043289854646947360,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 168
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "llvmbpf",
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1960,
+                "native_code_bytes": 690
+              },
+              "compile_ns": 12755326,
+              "exec_cycles": 1020,
+              "exec_ns": 277,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 303,
+                "jit_compile_ns": 12755326,
+                "memory_prepare_ns": 13736,
+                "program_image_ns": 93217,
+                "vm_load_code_ns": 184
+              },
+              "result": 12043289854646947360,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686147899,
+              "wall_exec_ns": 3128
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1944,
+                "native_code_bytes": 1065
+              },
+              "compile_ns": 2394365,
+              "exec_cycles": 14703519,
+              "exec_ns": 259,
+              "jited_prog_len": 1065,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 839,
+                "memory_prepare_ns": 29547,
+                "object_load_ns": 2329382,
+                "object_open_ns": 64983,
+                "prog_run_wall_ns": 39888295,
+                "result_extract_ns": 342
+              },
+              "result": 12043289854646947360,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686228970,
+              "wall_exec_ns": 3988770,
+              "xlated_prog_len": 1944
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "otel",
+        "profiler",
+        "stack",
+        "fields",
+        "pure-jit"
+      ]
+    },
+    {
+      "category": "control-flow",
+      "description": "Trace event type dispatch over generated 6-bit event IDs",
+      "expected_result": 16,
+      "family": "switch-dispatch",
+      "hypothesis": "Represents event/type dispatch tables seen in tracing filters",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/trace_event_type_switch_dispatch.mem",
+      "io_mode": "staged",
+      "level": "dense-64",
+      "name": "trace_event_type_switch_dispatch",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "mode": "native",
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 1641
+              },
+              "compile_ns": 49720,
+              "exec_ns": 904,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 22940,
+                "native_load_ns": 49720
+              },
+              "result": 16,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 904
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "llvmbpf",
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 2568,
+                "native_code_bytes": 1261
+              },
+              "compile_ns": 15337153,
+              "exec_cycles": 2312,
+              "exec_ns": 627,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 427,
+                "jit_compile_ns": 15337153,
+                "memory_prepare_ns": 14792,
+                "program_image_ns": 93305,
+                "vm_load_code_ns": 236
+              },
+              "result": 16,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686261825,
+              "wall_exec_ns": 2940
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 2072,
+                "native_code_bytes": 1621
+              },
+              "compile_ns": 29826414,
+              "exec_cycles": 22103718,
+              "exec_ns": 874,
+              "jited_prog_len": 1621,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 1993,
+                "memory_prepare_ns": 24483,
+                "object_load_ns": 29764344,
+                "object_open_ns": 62070,
+                "prog_run_wall_ns": 59961461,
+                "result_extract_ns": 507
+              },
+              "result": 16,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686177296,
+              "wall_exec_ns": 5996380,
+              "xlated_prog_len": 2072
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "kernel",
+          "runtime": "kernel_handcraft",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 2976,
+                "native_code_bytes": 1715
+              },
+              "compile_ns": 73834689,
+              "exec_cycles": 14725656,
+              "exec_ns": 1287,
+              "jited_prog_len": 1715,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 2441,
+                "memory_prepare_ns": 20797,
+                "object_load_ns": 73774655,
+                "object_open_ns": 60034,
+                "prog_run_wall_ns": 39947919,
+                "result_extract_ns": 374
+              },
+              "result": 16,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3685960939,
+              "wall_exec_ns": 3995066,
+              "xlated_prog_len": 2976
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "branch",
+        "dispatch",
+        "pure-jit"
+      ]
+    },
+    {
+      "category": "memory-local",
+      "description": "Tracee net_l7_is_http-style HTTP method prefix detection",
+      "expected_result": 11562433829591280482,
+      "family": "protocol-prefix",
+      "hypothesis": "Represents protocol prefix chains over packet/string bytes",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/tracee_http_method_prefix_detect.mem",
+      "io_mode": "staged",
+      "level": "http-methods",
+      "name": "tracee_http_method_prefix_detect",
+      "runs": [
+        {
+          "inner_repeat": 10,
+          "mode": "native",
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 644
+              },
+              "compile_ns": 54450,
+              "exec_ns": 138,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 23706,
+                "native_load_ns": 54450
+              },
+              "result": 11562433829591280482,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 138
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "llvmbpf",
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1344,
+                "native_code_bytes": 716
+              },
+              "compile_ns": 12207515,
+              "exec_cycles": 309,
+              "exec_ns": 84,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 334,
+                "jit_compile_ns": 12207515,
+                "memory_prepare_ns": 16244,
+                "program_image_ns": 82467,
+                "vm_load_code_ns": 196
+              },
+              "result": 11562433829591280482,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3686269293,
+              "wall_exec_ns": 2031
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1344,
+                "native_code_bytes": 906
+              },
+              "compile_ns": 852152,
+              "exec_cycles": 14718374,
+              "exec_ns": 97,
+              "jited_prog_len": 906,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 651,
+                "memory_prepare_ns": 25450,
+                "object_load_ns": 790881,
+                "object_open_ns": 61271,
+                "prog_run_wall_ns": 39928164,
+                "result_extract_ns": 396
+              },
+              "result": 11562433829591280482,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686243918,
+              "wall_exec_ns": 3992784,
+              "xlated_prog_len": 1344
+            }
+          ]
+        },
+        {
+          "inner_repeat": 10,
+          "mode": "kernel",
+          "runtime": "kernel_handcraft",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 3200,
+                "native_code_bytes": 1579
+              },
+              "compile_ns": 2936217,
+              "exec_cycles": 14810696,
+              "exec_ns": 172,
+              "jited_prog_len": 1579,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 488,
+                "memory_prepare_ns": 21770,
+                "object_load_ns": 2875543,
+                "object_open_ns": 60674,
+                "prog_run_wall_ns": 40178382,
+                "result_extract_ns": 464
+              },
+              "result": 11562433829591280482,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686202345,
+              "wall_exec_ns": 4017874,
+              "xlated_prog_len": 3200
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "tracee",
+        "http",
+        "string",
+        "branch",
+        "pure-jit"
+      ]
+    }
+  ],
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec"
+  },
+  "defaults": {
+    "inner_repeat": 10,
+    "perf_counters": false,
+    "perf_scope": "full_repeat_raw",
+    "runtime_order_seed": 0,
+    "samples": 1,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "details_dir": "details",
+  "error_message": "bcc_runqlat_log2_histogram_bucket: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/bcc_runqlat_log2_histogram_bucket.handcraft.so --program-name bcc_runqlat_log2_histogram_bucket_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bcc_runqlat_log2_histogram_bucket.mem --io-mode staged --input-size 1032 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/bcc_runqlat_log2_histogram_bucket__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/bcc_runqlat_log2_histogram_bucket__kernel_handcraft__sample00.xlated.bin\n279: (54) w6 &= 1048575               ; R6=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xfffff,var_off=(0x0; 0xfffff))\n280: (7b) *(u64 *)(r10 -496) = r6     ; R6=scalar(id=10,smin=smin32=0,smax=umax=smax32=umax32=0xfffff,var_off=(0x0; 0xfffff)) R10=fp0 fp-496=scalar(id=10,smin=smin32=0,smax=umax=smax32=umax32=0xfffff,var_off=(0x0; 0xfffff))\n281: (79) r8 = *(u64 *)(r10 -360)     ; R8=0 R10=fp0 fp-360=0\n282: (79) r7 = *(u64 *)(r10 -368)     ; R7=pkt_end() R10=fp0 fp-368=pkt_end()\n283: (79) r6 = *(u64 *)(r10 -376)     ; R6=128 R10=fp0 fp-376=128\n284: (79) r6 = *(u64 *)(r10 -496)     ; R6=scalar(id=10,smin=smin32=0,smax=umax=smax32=umax32=0xfffff,var_off=(0x0; 0xfffff)) R10=fp0 fp-496=scalar(id=10,smin=smin32=0,smax=umax=smax32=umax32=0xfffff,var_off=(0x0; 0xfffff))\n285: (bc) w6 = w6                     ; R6=scalar(id=10,smin=smin32=0,smax=umax=smax32=umax32=0xfffff,var_off=(0x0; 0xfffff))\n286: (16) if w6 == 0x0 goto pc+79     ; R6=scalar(id=10,smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=0xfffff,var_off=(0x0; 0xfffff)) fp-496=scalar(id=10,smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=0xfffff,var_off=(0x0; 0xfffff))\n287: (07) r3 += 1\nR3 !read_ok\nprocessed 210 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0\ninitial_load_error=Permission denied diagnostic_load_error=Permission denied; payload_prefix_memcmp_scan: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/payload_prefix_memcmp_scan.handcraft.so --program-name payload_prefix_memcmp_scan_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/payload_prefix_memcmp_scan.mem --io-mode staged --input-size 196 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/payload_prefix_memcmp_scan__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/payload_prefix_memcmp_scan__kernel_handcraft__sample00.xlated.bin\n61: (2d) if r6 > r7 goto pc-26        ; R6=pkt(off=204,r=204) R7=pkt_end()\n62: (79) r6 = *(u64 *)(r10 -464)      ; R6=pkt(off=8,r=204) R10=fp0 fp-464=pkt(off=8,r=204)\n63: (61) r6 = *(u32 *)(r6 +0)         ; R6=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n64: (56) if w6 != 0x3 goto pc-29      ; R6=3\n65: (7b) *(u64 *)(r10 -376) = r6      ; R6=3 R10=fp0 fp-376=3\n66: (7b) *(u64 *)(r10 -368) = r7      ; R7=pkt_end() R10=fp0 fp-368=pkt_end()\n67: (7b) *(u64 *)(r10 -360) = r8      ; R8=0 R10=fp0 fp-360=0\n68: (79) r6 = *(u64 *)(r10 -496)      ; R6=pkt_end() R10=fp0 fp-496=pkt_end()\n69: (57) r6 &= -256\nR6 pointer arithmetic on pkt_end prohibited\nprocessed 70 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\ninitial_load_error=Permission denied diagnostic_load_error=Permission denied; packet_vlan_tcpopt_parser: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/packet_vlan_tcpopt_parser.handcraft.so --program-name packet_vlan_tcpopt_parser_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_vlan_tcpopt_parser.mem --io-mode packet --input-size 74 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/packet_vlan_tcpopt_parser__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/packet_vlan_tcpopt_parser__kernel_handcraft__sample00.xlated.bin\nlibbpf: sec 'xdp': found program 'packet_vlan_tcpopt_parser_xdp' at insn offset 0 (0 bytes), code size 232 insns (1856 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /artifacts/user/micro-programs/x86_64/packet_vlan_tcpopt_parser.bpf.o is GPL\nlibbpf: elf: section(15) .BTF, size 2190, link 0, flags 0, type=1\nlibbpf: elf: section(17) .BTF.ext, size 1632, link 0, flags 0, type=1\nlibbpf: elf: section(25) .symtab, size 456, link 1, flags 0, type=2\nlibbpf: looking for externs among 19 symbols...\nlibbpf: collected 0 externs total\nbpf_prog_load(handcraft) failed: Invalid argument\nfunc#0 @0\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument; katran_lb_consistent_hash_select: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/katran_lb_consistent_hash_select.handcraft.so --program-name katran_lb_consistent_hash_select_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/katran_lb_consistent_hash_select.mem --io-mode packet --input-size 54 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/katran_lb_consistent_hash_select__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/katran_lb_consistent_hash_select__kernel_handcraft__sample00.xlated.bin\nlibbpf: sec 'xdp': found program 'katran_lb_consistent_hash_select_xdp' at insn offset 0 (0 bytes), code size 872 insns (6976 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /artifacts/user/micro-programs/x86_64/katran_lb_consistent_hash_select.bpf.o is GPL\nlibbpf: elf: section(15) .BTF, size 2782, link 0, flags 0, type=1\nlibbpf: elf: section(17) .BTF.ext, size 4752, link 0, flags 0, type=1\nlibbpf: elf: section(25) .symtab, size 792, link 1, flags 0, type=2\nlibbpf: looking for externs among 33 symbols...\nlibbpf: collected 0 externs total\nbpf_prog_load(handcraft) failed: Invalid argument\nfunc#0 @0\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument; packet_record_bounds_window: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/packet_record_bounds_window.handcraft.so --program-name packet_record_bounds_window_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_record_bounds_window.mem --io-mode packet --input-size 776 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/packet_record_bounds_window__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/packet_record_bounds_window__kernel_handcraft__sample00.xlated.bin\n178: (bc) w6 = w6                     ; R6=scalar(id=22,smin=smin32=0,smax=umax=smax32=umax32=1016,var_off=(0x0; 0x3f8))\n179: (7b) *(u64 *)(r10 -504) = r6     ; R6=scalar(id=22,smin=smin32=0,smax=umax=smax32=umax32=1016,var_off=(0x0; 0x3f8)) R10=fp0 fp-504=scalar(id=22,smin=smin32=0,smax=umax=smax32=umax32=1016,var_off=(0x0; 0x3f8))\n180: (79) r8 = *(u64 *)(r10 -360)     ; R8=0 R10=fp0 fp-360=0\n181: (79) r7 = *(u64 *)(r10 -368)     ; R7=scalar(id=5,smin=umin=smin32=umin32=24,smax=umax=smax32=umax32=27,var_off=(0x18; 0x3)) R10=fp0 fp-368=scalar(id=5,smin=umin=smin32=umin32=24,smax=umax=smax32=umax32=27,var_off=(0x18; 0x3))\n182: (79) r6 = *(u64 *)(r10 -376)     ; R6=scalar(id=6,smin=smin32=0,smax=umax=smax32=umax32=254,var_off=(0x0; 0xfe)) R10=fp0 fp-376=scalar(id=6,smin=smin32=0,smax=umax=smax32=umax32=254,var_off=(0x0; 0xfe))\n183: (7b) *(u64 *)(r10 -376) = r6     ; R6=scalar(id=6,smin=smin32=0,smax=umax=smax32=umax32=254,var_off=(0x0; 0xfe)) R10=fp0 fp-376=scalar(id=6,smin=smin32=0,smax=umax=smax32=umax32=254,var_off=(0x0; 0xfe))\n184: (7b) *(u64 *)(r10 -368) = r7     ; R7=scalar(id=5,smin=umin=smin32=umin32=24,smax=umax=smax32=umax32=27,var_off=(0x18; 0x3)) R10=fp0 fp-368=scalar(id=5,smin=umin=smin32=umin32=24,smax=umax=smax32=umax32=27,var_off=(0x18; 0x3))\n185: (7b) *(u64 *)(r10 -360) = r8     ; R8=0 R10=fp0 fp-360=0\n186: (bf) r6 = r4\nR4 !read_ok\nprocessed 303 insns (limit 1000000) max_states_per_insn 0 total_states 5 peak_states 5 mark_read 0\ninitial_load_error=Permission denied diagnostic_load_error=Permission denied; packed_header_bitfield_decode: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/packed_header_bitfield_decode.handcraft.so --program-name packed_header_bitfield_decode_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packed_header_bitfield_decode.mem --io-mode staged --input-size 520 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/packed_header_bitfield_decode__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/packed_header_bitfield_decode__kernel_handcraft__sample00.xlated.bin\nlibbpf: sec 'xdp': found program 'packed_header_bitfield_decode_xdp' at insn offset 0 (0 bytes), code size 247 insns (1976 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /artifacts/user/micro-programs/x86_64/packed_header_bitfield_decode.bpf.o is GPL\nlibbpf: elf: section(15) .BTF, size 2361, link 0, flags 0, type=1\nlibbpf: elf: section(17) .BTF.ext, size 2224, link 0, flags 0, type=1\nlibbpf: elf: section(25) .symtab, size 408, link 1, flags 0, type=2\nlibbpf: looking for externs among 17 symbols...\nlibbpf: collected 0 externs total\nbpf_prog_load(handcraft) failed: Invalid argument\nfunc#0 @0\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument; tracee_syscall_name_table_lookup: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/tracee_syscall_name_table_lookup.handcraft.so --program-name tracee_syscall_name_table_lookup_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/tracee_syscall_name_table_lookup.mem --io-mode staged --input-size 260 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/tracee_syscall_name_table_lookup__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/tracee_syscall_name_table_lookup__kernel_handcraft__sample00.xlated.bin\nmark_precise: frame0: regs=r5 stack= before 128: (0f) r6 += r7\nmark_precise: frame0: regs=r5 stack= before 127: (0f) r6 += r7\nmark_precise: frame0: regs=r5 stack= before 126: (0f) r6 += r7\nmark_precise: frame0: regs=r5 stack= before 125: (bf) r7 = r5\nmark_precise: frame0: regs=r5 stack= before 124: (bf) r6 = r3\nmark_precise: frame0: regs=r5 stack= before 123: (7b) *(u64 *)(r10 -360) = r8\nmark_precise: frame0: regs=r5 stack= before 122: (7b) *(u64 *)(r10 -368) = r7\nmark_precise: frame0: regs=r5 stack= before 121: (7b) *(u64 *)(r10 -376) = r6\nmark_precise: frame0: parent state regs= stack=:  R0=0 R1=pkt(off=268,r=268) R2=0x65736f6c63 R3=pkt(r=268) R4=pkt_end() R5=P0 R6=0x74616b6e696c6e75 R7=0x6a09e667f3bcc909 R8=0x74613274617473 R9=0x646461746567 R10=fp0 fp-136=scalar() fp-144=scalar() fp-152=scalar() fp-160=scalar() fp-168=scalar() fp-176=scalar() fp-360=0 fp-368=0x6a09e667f3bcc909 fp-376=0x74616b6e696c6e75 fp-416=0x647466656e676973 fp-424=0x74616e65706f fp-440=0x6574697277 fp-480=fp-176\nR6 pointer arithmetic with >>= operator prohibited\nprocessed 232 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0\ninitial_load_error=Permission denied diagnostic_load_error=Permission denied; cilium_socket_lb_service_select: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/cilium_socket_lb_service_select.handcraft.so --program-name cilium_socket_lb_service_select_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/cilium_socket_lb_service_select.mem --io-mode staged --input-size 1544 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/cilium_socket_lb_service_select__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/cilium_socket_lb_service_select__kernel_handcraft__sample00.xlated.bin\nlibbpf: sec 'xdp': found program 'cilium_socket_lb_service_select_xdp' at insn offset 0 (0 bytes), code size 249 insns (1992 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /artifacts/user/micro-programs/x86_64/cilium_socket_lb_service_select.bpf.o is GPL\nlibbpf: elf: section(15) .BTF, size 1847, link 0, flags 0, type=1\nlibbpf: elf: section(17) .BTF.ext, size 1424, link 0, flags 0, type=1\nlibbpf: elf: section(25) .symtab, size 600, link 1, flags 0, type=2\nlibbpf: looking for externs among 25 symbols...\nlibbpf: collected 0 externs total\nbpf_prog_load(handcraft) failed: Invalid argument\nfunc#0 @0\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument; bcc_tcpconnect_ipv4_tuple_filter: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/bcc_tcpconnect_ipv4_tuple_filter.handcraft.so --program-name bcc_tcpconnect_ipv4_tuple_filter_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bcc_tcpconnect_ipv4_tuple_filter.mem --io-mode staged --input-size 776 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/bcc_tcpconnect_ipv4_tuple_filter__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/bcc_tcpconnect_ipv4_tuple_filter__kernel_handcraft__sample00.xlated.bin\nmark_precise: frame0: regs= stack=-456 before 337: (45) if r6 & 0x1 goto pc+1\nmark_precise: frame0: parent state regs= stack=:  R1=ctx(off=30) R6=scalar(id=307,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R7=pkt_end() R8=0 R9=0 R10=fp0 fp-136=scalar() fp-144=scalar() fp-152=scalar() fp-160=scalar() fp-360=0 fp-368=pkt_end() fp-376=2 fp-432=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-440=2 fp-448=scalar(smin=0x8000000078bd9819,smax=0x7fffffff78bd9819,umin=smin32=umin32=0x78bd9819,umax=0xffffffff78bd9819,smax32=umax32=0x78bd9819,var_off=(0x78bd9819; 0xffffffff00000000)) fp-456=P0 fp-464=pkt(off=759,r=784) fp-472=scalar(id=307,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) fp-480=fp-160 fp-488=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-496=pkt(r=784) fp-504=2 fp-512=443\n189: R6=0\n190: (7b) *(u64 *)(r10 -376) = r6     ; R6=0 R10=fp0 fp-376=0\n191: (7b) *(u64 *)(r10 -368) = r7     ; R7=pkt_end() R10=fp0 fp-368=pkt_end()\n192: (7b) *(u64 *)(r10 -360) = r8     ; R8=0 R10=fp0 fp-360=0\n193: (79) r6 = *(u64 *)(r10 -464)     ; R6=pkt(off=807,r=784) R10=fp0 fp-464=pkt(off=807,r=784)\n194: (69) r7 = *(u16 *)(r6 -5)\ninvalid access to packet, off=802 size=2, R6(id=0,off=802,r=784)\nR6 offset is outside of the packet\nprocessed 3696 insns (limit 1000000) max_states_per_insn 4 total_states 69 peak_states 69 mark_read 0\ninitial_load_error=Permission denied diagnostic_load_error=Permission denied; cilium_ct_nat_tuple_rewrite: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/cilium_ct_nat_tuple_rewrite.handcraft.so --program-name cilium_ct_nat_tuple_rewrite_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/cilium_ct_nat_tuple_rewrite.mem --io-mode staged --input-size 1032 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/cilium_ct_nat_tuple_rewrite__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/cilium_ct_nat_tuple_rewrite__kernel_handcraft__sample00.xlated.bin\nlibbpf: sec 'xdp': found program 'cilium_ct_nat_tuple_rewrite_xdp' at insn offset 0 (0 bytes), code size 226 insns (1808 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /artifacts/user/micro-programs/x86_64/cilium_ct_nat_tuple_rewrite.bpf.o is GPL\nlibbpf: elf: section(15) .BTF, size 1848, link 0, flags 0, type=1\nlibbpf: elf: section(17) .BTF.ext, size 1952, link 0, flags 0, type=1\nlibbpf: elf: section(25) .symtab, size 528, link 1, flags 0, type=2\nlibbpf: looking for externs among 22 symbols...\nlibbpf: collected 0 externs total\nbpf_prog_load(handcraft) failed: Invalid argument\nfunc#0 @0\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument; bpftrace_comm_key_fnv_hash: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/bpftrace_comm_key_fnv_hash.handcraft.so --program-name bpftrace_comm_key_fnv_hash_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bpftrace_comm_key_fnv_hash.mem --io-mode staged --input-size 1032 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/bpftrace_comm_key_fnv_hash__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/bpftrace_comm_key_fnv_hash__kernel_handcraft__sample00.xlated.bin\nlibbpf: sec 'xdp': found program 'bpftrace_comm_key_fnv_hash_xdp' at insn offset 0 (0 bytes), code size 234 insns (1872 bytes)\nlibbpf: elf: section(4) license, size 4, link 0, flags 3, type=1\nlibbpf: license of /artifacts/user/micro-programs/x86_64/bpftrace_comm_key_fnv_hash.bpf.o is GPL\nlibbpf: elf: section(15) .BTF, size 1608, link 0, flags 0, type=1\nlibbpf: elf: section(17) .BTF.ext, size 2560, link 0, flags 0, type=1\nlibbpf: elf: section(25) .symtab, size 456, link 1, flags 0, type=2\nlibbpf: looking for externs among 19 symbols...\nlibbpf: collected 0 externs total\nbpf_prog_load(handcraft) failed: Invalid argument\nfunc#0 @0\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\ninitial_load_error=Invalid argument diagnostic_load_error=Invalid argument; bpf_local_call_fanout_dispatch: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/bpf_local_call_fanout_dispatch.handcraft.so --program-name bpf_local_call_fanout_dispatch_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bpf_local_call_fanout_dispatch.mem --io-mode staged --input-size 392 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/bpf_local_call_fanout_dispatch__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/bpf_local_call_fanout_dispatch__kernel_handcraft__sample00.xlated.bin\nmark_precise: frame0: regs= stack=-416 before 270: (79) r7 = *(u64 *)(r10 -416)\nmark_precise: frame0: regs= stack=-416 before 269: (79) r6 = *(u64 *)(r10 -360)\nmark_precise: frame0: regs= stack=-416 before 268: (7b) *(u64 *)(r10 -360) = r8\nmark_precise: frame0: regs= stack=-416 before 267: (7b) *(u64 *)(r10 -368) = r7\nmark_precise: frame0: regs= stack=-416 before 266: (7b) *(u64 *)(r10 -376) = r6\nmark_precise: frame0: parent state regs= stack=:  R0=0 R1=0x243f6a8885a308d3 R3=pkt(off=400,r=400) R4=pkt_end() R6=24 R7=0 R8=pkt(r=400) R9=0 R10=fp0 fp-136=scalar() fp-144=scalar() fp-152=scalar() fp-160=scalar() fp-168=scalar() fp-176=scalar() fp-184=pkt(off=8,r=400) fp-360=pkt(r=400) fp-368=0 fp-376=24 fp-416=P23 fp-480=fp-184\n284: R6=pkt(off=23,r=400) R7=23\n284: (61) r8 = *(u32 *)(r6 -3)        ; R6=pkt(off=23,r=400) R8=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n285: (bf) r10 = r8\nframe pointer is read only\nprocessed 216 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0\ninitial_load_error=Permission denied diagnostic_load_error=Permission denied; tetragon_process_event_arg_filter: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/tetragon_process_event_arg_filter.handcraft.so --program-name tetragon_process_event_arg_filter_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/tetragon_process_event_arg_filter.mem --io-mode staged --input-size 1032 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/tetragon_process_event_arg_filter__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/tetragon_process_event_arg_filter__kernel_handcraft__sample00.xlated.bin\n94: (7b) *(u64 *)(r10 -480) = r6      ; R6=fp-176 R10=fp0 fp-480=fp-176\n95: (79) r8 = *(u64 *)(r10 -360)      ; R8=0 R10=fp0 fp-360=0\n96: (79) r7 = *(u64 *)(r10 -368)      ; R7=0 R10=fp0 fp-368=0\n97: (79) r6 = *(u64 *)(r10 -376)      ; R6=0 R10=fp0 fp-376=0\n98: (7b) *(u64 *)(r10 -376) = r6      ; R6=0 R10=fp0 fp-376=0\n99: (7b) *(u64 *)(r10 -368) = r7      ; R7=0 R10=fp0 fp-368=0\n100: (7b) *(u64 *)(r10 -360) = r8     ; R8=0 R10=fp0 fp-360=0\n101: (79) r6 = *(u64 *)(r10 -480)     ; R6=fp-176 R10=fp0 fp-480=fp-176\n102: (17) r6 -= 64\nR6 subtraction from stack pointer prohibited\nprocessed 99 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0\ninitial_load_error=Permission denied diagnostic_load_error=Permission denied; otel_stack_frame_unwind_scan: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /artifacts/user/micro-programs/x86_64/otel_stack_frame_unwind_scan.handcraft.so --program-name otel_stack_frame_unwind_scan_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/otel_stack_frame_unwind_scan.mem --io-mode staged --input-size 584 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/otel_stack_frame_unwind_scan__kernel_handcraft__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260518_000157_814593/details/jit_dumps/otel_stack_frame_unwind_scan__kernel_handcraft__sample00.xlated.bin\n144: (7b) *(u64 *)(r10 -368) = r7     ; R7=0 R10=fp0 fp-368=0\n145: (7b) *(u64 *)(r10 -360) = r8     ; R8=0 R10=fp0 fp-360=0\n146: (61) r6 = *(u32 *)(r1 -15)       ; R1=pkt(off=39,r=592) R6=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n147: (7b) *(u64 *)(r10 -360) = r6     ; R6=scalar(id=6,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-360=scalar(id=6,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n148: (79) r8 = *(u64 *)(r10 -360)     ; R8=scalar(id=6,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-360=scalar(id=6,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n149: (79) r7 = *(u64 *)(r10 -368)     ; R7=0 R10=fp0 fp-368=0\n150: (79) r6 = *(u64 *)(r10 -376)     ; R6=0 R10=fp0 fp-376=0\n151: (61) r9 = *(u32 *)(r1 -11)       ; R1=pkt(off=39,r=592) R9=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n152: (69) r10 = *(u16 *)(r1 -7)\nframe pointer is read only\nprocessed 118 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0\ninitial_load_error=Permission denied diagnostic_load_error=Permission denied",
+  "generated_at": "2026-05-18T00:01:57.814593+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "unknown",
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_root_mods=1 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 panic=-1 virtme.exec=`L3RtcC9iZW5jaG1hcmstZ3Vlc3QtdjgwejVkazEuc2g=` virtme_chdir=home/yunwei37/workspace/bpf-benchmark rootfstype=9p rootflags=version=9p2000.L,trans=virtio,access=any raid=noautodetect ro debug loglevel=7 panic=30 oops=panic init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init",
+    "kernel_version": "7.0.0-rc2+",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "unknown"
+  },
+  "last_updated_at": "2026-05-18T00:02:06.392467+00:00",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_pure_jit.yaml",
+  "progress": {
+    "completed_benchmarks": 16,
+    "current_benchmark": null,
+    "current_benchmark_index": null,
+    "total_benchmarks": 16
+  },
+  "provenance": {
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 285K",
+    "environment": "vm",
+    "kernel_commit": "unknown",
+    "params": {
+      "inner_repeat": 10,
+      "samples": 1,
+      "warmups": 0
+    },
+    "repo_dirty": false,
+    "repo_git_sha": "unknown",
+    "timestamp": "2026-05-18T00:01:57.815507+00:00"
+  },
+  "run_type": "x86_kvm_micro",
+  "started_at": "2026-05-18T00:01:57.814593+00:00",
+  "status": "error",
+  "suite": "micro_staged_codegen",
+  "toolchains": {
+    "libbpf": {
+      "root": "vendor/libbpf"
+    },
+    "llvmbpf": {
+      "root": "vendor/llvmbpf"
+    }
+  }
+}

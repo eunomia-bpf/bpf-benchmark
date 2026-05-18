@@ -108,8 +108,8 @@ sudo -n python3 ebpf-vm/x86/micro-prog/run_micro_interpreter_batch.py \
   --markdown /tmp/reversejit-current-micro-status-$(id -u).md
 ```
 
-Result: 26 of 29 selected micro programs loaded in the kernel, passed
-`BPF_PROG_TEST_RUN`, and matched expected output/retval. The remaining three
+Result: 27 of 29 selected micro programs loaded in the kernel, passed
+`BPF_PROG_TEST_RUN`, and matched expected output/retval. The remaining two
 failures are verifier/proof-shape issues after removing Python special
 renderers, not benchmark-name dispatch in the generator.
 
@@ -121,7 +121,7 @@ renderers, not benchmark-name dispatch in the generator.
 | `sorted_rule_binary_search` | ok |  |
 | `bcc_runqlat_log2_histogram_bucket` | ok |  |
 | `trace_event_type_switch_dispatch` | ok |  |
-| `packet_checksum_fold` | fail | Runtime returns `0` instead of XDP `2`; generic nested-loop proof path exits through an abort/early-return-equivalent path. |
+| `packet_checksum_fold` | ok | XDP return value is `2`; exact-bound loop back-edges now use verifier-visible callback index fallback instead of aborting at bound exhaustion. |
 | `payload_prefix_memcmp_scan` | ok |  |
 | `packet_vlan_tcpopt_parser` | ok |  |
 | `bpf_local_call_fanout_dispatch` | fail | Verifier processed-insn limit is exceeded (`E2BIG`, surfaced by libbpf as `Argument list too long`). |
@@ -162,8 +162,8 @@ Generated-C migration todo:
 | Native return ABI lives in metadata/header, not Python rewrites | done | `ret` emits `X86_VM_RET_RAX();`; runner checks `expected_retval` from YAML. |
 | Remove benchmark-name renderers from Python | done | `generate_micro_proofs.py` no longer dispatches on `packet_checksum_fold`, `bpftrace_string_search_prefix_scan`, `bpf_local_call_fanout_dispatch`, or other benchmark names. |
 | Remove stale C special templates | done | Unused checksum/string-scan C helper templates were deleted from `x86_vm_bpf.h`; the header now contains generic VM plumbing only. |
-| Generic loop lowering | partial | Structural loop detection lowers selected high-pressure loops to `bpf_loop`, but three micro programs still need a cleaner verifier proof shape. |
-| Run full generated-C batch | partial | 26/29 selected micro programs currently pass. |
+| Generic loop lowering | partial | Structural loop detection lowers selected high-pressure loops to `bpf_loop`, but two micro programs still need a cleaner verifier proof shape. |
+| Run full generated-C batch | partial | 27/29 selected micro programs currently pass. |
 
 ## JSON-Linker Todo
 
@@ -496,9 +496,11 @@ This prototype has already exposed several verifier-facing design constraints:
   benchmark-specific scan helper. The mechanical interpreter loop is cleaner for
   the proof story, but it currently exceeds the verifier processed-insn limit.
 - `packet_checksum_fold` and `tc_packet_checksum_fold` now use the same generic
-  nested-loop lowering. The TC variant is indistinguishable from abort by return
-  value alone (`0`), while the XDP variant exposes that the generic checksum
-  proof path still returns `0` instead of XDP `2`.
+  nested-loop lowering and both pass. The XDP variant needs a verifier-visible
+  exact-bound callback-index fallback on the loop back-edge so exhausting the
+  static trip count reaches the native exit path and returns XDP `2`; the TC
+  variant keeps the normal `next` path because its exit starts with a modeled
+  ctx/output store through `rdi`.
 - The strict JSON-link loader is not the current source of truth. It has passed
   smoke programs (`simple`, `simple_packet`, `bitmap_popcount_scan`), but native
   call-flow support is missing and stale loader binaries previously produced

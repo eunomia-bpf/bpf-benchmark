@@ -217,23 +217,10 @@ def require_suite_artifacts(suite: SuiteSpec) -> None:
 
 def runtimes_for_benchmark(benchmark: CatalogTarget, runtimes: list[RuntimeSpec]) -> list[RuntimeSpec]:
     allowed_runtime_names = set(benchmark.runtime_names)
-    selected = [
+    return [
         runtime for runtime in runtimes
         if not allowed_runtime_names or runtime.name in allowed_runtime_names
     ]
-    if benchmark.metadata.get("handcraft_object_path") is not None:
-        kernel_runtime = next((runtime for runtime in selected if runtime.name == "kernel"), None)
-        if kernel_runtime is not None:
-            selected.append(RuntimeSpec(
-                name="kernel_handcraft",
-                label="kernel handcraft",
-                mode="kernel",
-                backend="kernel",
-                policy_mode="stock",
-                default_inner_repeat=kernel_runtime.default_inner_repeat,
-                transport=kernel_runtime.transport,
-            ))
-    return selected
 
 
 def runner_help_text(runner_binary: Path) -> str:

@@ -50,8 +50,9 @@ x86_l_118c:
 	X86_VM_LOOP_OP(x86_exec_cmp_imm, X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_64, 0, 512ULL);
 x86_l_1193:
 	/* 0x1193: jne    1160 <tc_packet_checksum_fold_prog+0x60> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
+	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE)) {
 		return 0;
+	}
 	loop->next = 0x1195;
 	return 1;
 	#undef __x86_vm_state
@@ -134,8 +135,9 @@ x86_l_11b1:
 	X86_VM_LOOP_OP(x86_exec_cmp_imm, X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 32ULL);
 x86_l_11b4:
 	/* 0x11b4: jne    1150 <tc_packet_checksum_fold_prog+0x50> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
+	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE)) {
 		return 0;
+	}
 	loop->next = 0x11b6;
 	return 1;
 	#undef __x86_vm_state

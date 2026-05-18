@@ -80,7 +80,6 @@ CMP_JCC_OP = {
     "jl": "BPF_JSLT", "jle": "BPF_JSLE",
 }
 JCC_OP = set(CMP_JCC_OP) | {"js", "jns"}
-FLAG_OFF = {"zf": -384, "cf": -380, "ge": -352, "sf": -348}
 CONTEXT_KIND = "xdp"
 SKB_DATA_OFF = 76
 SKB_DATA_END_OFF = 80
@@ -414,34 +413,6 @@ def lower_result_jcc(branch: NativeInsn, producer: NativeInsn) -> tuple[str, ...
     op = "BPF_JEQ" if branch.mnemonic == "je" else "BPF_JNE"
     return (*code, *normalize_branch_reg("BPF_REG_6", width, False),
             branch_cmp(op, width, "0", 0))
-
-
-def flag_eq(value: int, off: str = BRANCH_OFF) -> str:
-    return f"HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_6, 0, {off}, {value})"
-
-
-def flag_ne(value: int, off: str) -> str:
-    return f"HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_6, 0, {off}, {value})"
-
-
-def flag_load(flag: str) -> str:
-    return f"HC_LDX(BPF_W, BPF_REG_6, BPF_REG_10, {FLAG_OFF[flag]})"
-
-
-def flag_branch_jcc(op: str) -> tuple[str, ...] | None:
-    if op in {"je", "jne", "jb", "jae", "jge", "jl", "js", "jns"}:
-        flag, value = {
-            "je": ("zf", 1), "jne": ("zf", 0), "jb": ("cf", 1), "jae": ("cf", 0),
-            "jge": ("ge", 1), "jl": ("ge", 0), "js": ("sf", 1), "jns": ("sf", 0),
-        }[op]
-        return (flag_load(flag), flag_eq(value))
-    if op in {"jbe", "jle"}:
-        flag, value = ("cf", 1) if op == "jbe" else ("ge", 0)
-        return (flag_load(flag), flag_eq(value), flag_load("zf"), flag_eq(1))
-    if op in {"ja", "jg"}:
-        flag, value = ("cf", 0) if op == "ja" else ("ge", 1)
-        return (flag_load(flag), flag_ne(value, "3"), flag_load("zf"), flag_ne(0, "1"), bpf_ja())
-    return None
 
 
 def reg_payload(reg_name: str) -> str:
@@ -984,7 +955,6 @@ def translate(insn: NativeInsn) -> Translation:
 
 def translate_all(insns: list[NativeInsn]) -> list[Translation]:
     out: list[Translation] = []
-    flags_alive = False
     for index, insn in enumerate(insns):
         trans = translate(insn)
         if insn.mnemonic in JCC_OP and index > 0:
@@ -996,19 +966,12 @@ def translate_all(insns: list[NativeInsn]) -> list[Translation]:
                 consume_prev = code is not None and prev.mnemonic == "test"
             if code is None:
                 code = lower_result_jcc(insn, prev)
-            if code is None and flags_alive:
-                code = flag_branch_jcc(insn.mnemonic)
             if code is not None:
                 trans = Translation("exact-bpf", code, f"{insn.mnemonic} as ordinary BPF branch", trans.target_addr)
                 if consume_prev:
                     out[-1] = Translation("control-flow-operand", (), f"{prev.mnemonic} folded into BPF branch")
-                    flags_alive = False
             out.append(trans)
             continue
-        if insn.mnemonic in {"cmp", "test"}:
-            flags_alive = trans.status == "exact-kinsn"
-        elif insn.mnemonic in ALU_OP | {"sar", "rol", "ror", "inc", "dec", "imul", "popcnt", "not", "bswap"}:
-            flags_alive = False
         out.append(trans)
     return out
 

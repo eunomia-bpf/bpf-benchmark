@@ -164,6 +164,7 @@ class LoopSpec:
     bound: int
     raw_bound: int
     exit_addrs: tuple[int, ...]
+    index_exit_fallback: bool
 
 
 def extract_native_asm(text: str) -> str:
@@ -805,6 +806,17 @@ def loop_exit_addrs(spec: LoopSpec, insns: list[NativeInsn],
     return tuple(sorted(exits))
 
 
+def loop_exit_allows_index_fallback(insn_by_addr: dict[int, NativeInsn],
+                                    exit_addr: int) -> bool:
+    insn = insn_by_addr.get(exit_addr)
+    if insn is None or insn.mnemonic != "mov" or not insn.operands:
+        return True
+    if not is_mem(insn.operands[0]):
+        return True
+    base, _index, _scale_log2, _disp = parse_mem_terms(insn.operands[0])
+    return base != "X86_RDI"
+
+
 def loop_contains(spec: LoopSpec, addr: int) -> bool:
     return spec.region_start <= addr <= spec.region_end
 
@@ -888,7 +900,9 @@ def detect_large_loops(insns: list[NativeInsn]) -> list[LoopSpec]:
             bound=min(bound, 4096),
             raw_bound=raw_bound,
             exit_addrs=(),
+            index_exit_fallback=False,
         )
+        exit_addrs = loop_exit_addrs(provisional, insns, next_addrs)
         candidates.append(
             LoopSpec(
                 ident=provisional.ident,
@@ -898,7 +912,12 @@ def detect_large_loops(insns: list[NativeInsn]) -> list[LoopSpec]:
                 emit_at=provisional.emit_at,
                 bound=provisional.bound,
                 raw_bound=provisional.raw_bound,
-                exit_addrs=loop_exit_addrs(provisional, insns, next_addrs),
+                exit_addrs=exit_addrs,
+                index_exit_fallback=(
+                    len(exit_addrs) == 1 and
+                    loop_exit_allows_index_fallback(insn_by_addr,
+                                                    exit_addrs[0])
+                ),
             )
         )
 
@@ -1026,8 +1045,14 @@ def append_loop_branch_or_ret(lines: list[str], spec: LoopSpec, insn: NativeInsn
         target = branch_target(insn.operands[0]) if insn.operands else 0
         cond = f"x86_eval_cc(&__x86_vm_state, {CC_AUX[insn.mnemonic]})"
         if target == spec.entry and target <= insn.addr:
-            lines.append(f"{indent}if ({cond})")
+            lines.append(f"{indent}if ({cond}) {{")
+            if spec.index_exit_fallback and spec.bound == spec.raw_bound:
+                exit_addr = spec.exit_addrs[0]
+                lines.append(f"{indent}\tif (__x86_loop_index + 1 >= {spec.bound}) {{")
+                append_loop_exit(lines, exit_addr, indent + "\t\t")
+                lines.append(f"{indent}\t}}")
             lines.append(f"{indent}\treturn 0;")
+            lines.append(f"{indent}}}")
         elif loop_contains(spec, target):
             lines.append(f"{indent}if ({cond})")
             lines.append(f"{indent}\tgoto x86_l_{target:x};")

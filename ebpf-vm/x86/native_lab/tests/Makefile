@@ -2,10 +2,12 @@
 CFLAGS  ?= -O2 -Wall -Wextra -g
 LDLIBS  := -lbpf -lelf -lz
 
+all: poc
+
 poc: poc.c
 	$(CC) $(CFLAGS) -o $@ $< $(LDLIBS)
 
 clean:
 	rm -f poc
 
-.PHONY: clean
+.PHONY: all clean
