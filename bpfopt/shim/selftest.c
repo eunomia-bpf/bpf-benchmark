@@ -15,6 +15,7 @@
 #include <linux/bpf.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/syscall.h>
 #include <unistd.h>
@@ -41,6 +42,14 @@ int main(void) {
     } else {
         printf("PROG_LOAD succeeded fd=%ld\n", fd);
         close((int)fd);
+    }
+
+    /* Hold so the shim worker thread can tick. Default 0 = exit immediately. */
+    const char *hold = getenv("BPFREJIT_SHIM_HOLD_S");
+    int s = hold ? atoi(hold) : 0;
+    if (s > 0) {
+        printf("holding for %d s so shim worker can run\n", s);
+        sleep(s);
     }
     return 0;
 }

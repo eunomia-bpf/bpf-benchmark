@@ -148,6 +148,12 @@ renderers, not benchmark-name dispatch in the generator.
 The immediate generated-C target is now cleaner but not complete. JSON-link
 completion is a separate next experiment.
 
+The formalization target for the generated-C path is
+[`intepreter-spec.md`](./intepreter-spec.md). That spec is intentionally tied to
+the current code: instruction helper steps, exact-trip loop lowering, loop
+frame preservation, and entry `rdi` context-capability preservation are named
+proof obligations rather than benchmark-specific fixes.
+
 Active generator rule: Python must not rewrite native return semantics, branch
 semantics, or opcode semantics. A native `ret` is emitted as
 `X86_VM_RET_RAX();`; one native instruction becomes one interpreter-helper step
@@ -164,6 +170,13 @@ Generated-C migration todo:
 | Remove stale C special templates | done | Unused checksum/string-scan C helper templates were deleted from `x86_vm_bpf.h`; the header now contains generic VM plumbing only. |
 | Generic loop lowering | partial | Structural loop detection lowers selected high-pressure loops to `bpf_loop`, but two micro programs still need a cleaner verifier proof shape. |
 | Run full generated-C batch | partial | 27/29 selected micro programs currently pass. |
+
+Remaining generated-C failures:
+
+| Micro program | Current blocker | Required proof-shape change |
+| --- | --- | --- |
+| `bpf_local_call_fanout_dispatch` | The loop callback calls several large generated native subfunctions (`local_call_*`); verifier state explodes across callback state plus subfunction call states. | A native-call loop theorem or structural outliner that summarizes call effects without hiding x86 semantics in Python. |
+| `bpftrace_string_search_prefix_scan` | The loop callback is a large multi-exit string-scan body with many prefix-comparison branches; the mechanical interpreter form exceeds verifier complexity. | A multi-exit loop theorem that preserves exit priority, or a structural split of the repeated compare block into a provable helper/template. |
 
 ## JSON-Linker Todo
 
@@ -496,11 +509,12 @@ This prototype has already exposed several verifier-facing design constraints:
   benchmark-specific scan helper. The mechanical interpreter loop is cleaner for
   the proof story, but it currently exceeds the verifier processed-insn limit.
 - `packet_checksum_fold` and `tc_packet_checksum_fold` now use the same generic
-  nested-loop lowering and both pass. The XDP variant needs a verifier-visible
-  exact-bound callback-index fallback on the loop back-edge so exhausting the
-  static trip count reaches the native exit path and returns XDP `2`; the TC
-  variant keeps the normal `next` path because its exit starts with a modeled
-  ctx/output store through `rdi`.
+  nested-loop lowering and both pass. The XDP variant needs the exact-trip
+  callback-index theorem so exhausting the static trip count reaches the native
+  exit path and returns XDP `2`. The TC variant additionally needs loop/program
+  frame-preservation for the entry `rdi` context capability; the generator now
+  restores that ghost capability only when write-set analysis proves `rdi` was
+  not modified.
 - The strict JSON-link loader is not the current source of truth. It has passed
   smoke programs (`simple`, `simple_packet`, `bitmap_popcount_scan`), but native
   call-flow support is missing and stale loader binaries previously produced

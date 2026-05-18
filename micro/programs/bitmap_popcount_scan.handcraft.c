@@ -48,15 +48,11 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_ARCH_TO_BPF_RR_PAYLOAD(BPF_REG_6, HC_X86_RSI), MICRO_HANDCRAFT_BPF_X86_MOVQ),
     HC_LDX(BPF_W, BPF_REG_6, BPF_REG_6, 0),
     HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, (-20) - 1, 256),
-    /* 0x112c: push   rbp [exact-kinsn: pushq kinsn] */
-    HC_KINSN(HC_REG_PAYLOAD(HC_X86_RBP), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
-    /* 0x112d: mov    rbp,rsp [exact-kinsn: movq frame-register kinsn] */
-    HC_KINSN(HC_X86_FRAME_PAYLOAD(HC_X86_RBP, HC_X86_RSP), MICRO_HANDCRAFT_BPF_X86_MOVQ),
-    /* 0x1130: mov    ecx,DWORD PTR [rdx+0xc] [exact-kinsn: direct memory load via x86 kinsn selector] */
+    /* 0x112c: mov    ecx,DWORD PTR [rdx+0xc] [exact-kinsn: direct memory load via x86 kinsn selector] */
     HC_KINSN(HC_X86_ARCH_MEM_PAYLOAD(HC_X86_RCX, HC_X86_RDX, 12), MICRO_HANDCRAFT_BPF_X86_MOVL),
-    /* 0x1133: xor    eax,eax [exact-kinsn: xor32 reg kinsn] */
+    /* 0x112f: xor    eax,eax [exact-kinsn: xor32 reg kinsn] */
     HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RAX, HC_X86_RAX), MICRO_HANDCRAFT_BPF_X86_XORL),
-    /* 0x1135: data16 cs nop WORD PTR [rax+rax*1+0x0] [padding: padding is not part of BPF semantics] */
+    /* 0x1131: data16 data16 data16 data16 data16 cs nop WORD PTR [rax+rax*1+0x0] [padding: padding is not part of BPF semantics] */
     /* 0x1140: mov    rsi,QWORD PTR [rdx+rax*8+0x10] [exact-kinsn: indexed memory load via x86 SIB kinsn] */
     HC_KINSN(HC_X86_ARCH_SIB_PAYLOAD(HC_X86_RSI, HC_X86_RDX, HC_X86_RAX, 3, 16), MICRO_HANDCRAFT_BPF_X86_MOVQ),
     /* 0x1145: mov    rdi,rsi [exact-kinsn: mov64 register-to-register kinsn] */
@@ -64,13 +60,13 @@ static const struct bpf_insn program[] = {
     /* 0x1148: xor    rdi,rcx [exact-kinsn: xor64 reg kinsn] */
     HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RDI, HC_X86_RCX), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x114b: popcnt rdi,rdi [exact-kinsn: popcntq kinsn] */
-    HC_KINSN(HC_REG_REG_PAYLOAD(HC_X86_RDI, HC_X86_RDI), MICRO_HANDCRAFT_BPF_X86_POPCNTQ),
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RDI, HC_X86_RDI), MICRO_HANDCRAFT_BPF_X86_POPCNTQ),
     /* 0x1150: add    rdi,rcx [exact-kinsn: add64 reg kinsn] */
     HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RDI, HC_X86_RCX), MICRO_HANDCRAFT_BPF_X86_ADDQ),
     /* 0x1153: mov    ecx,eax [exact-kinsn: mov32 register-to-register kinsn] */
     HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RCX, HC_X86_RAX), MICRO_HANDCRAFT_BPF_X86_MOVL),
     /* 0x1155: and    cl,0x7 [exact-kinsn: andb imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(HC_X86_RCX, 7), MICRO_HANDCRAFT_BPF_X86_ANDB),
+    HC_KINSN(HC_X86_ARCH_IMM_PAYLOAD(HC_X86_RCX, 7), MICRO_HANDCRAFT_BPF_X86_ANDB),
     /* 0x1158: shr    rsi,cl [exact-kinsn: shr64 reg kinsn] */
     HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RSI, HC_X86_RCX), MICRO_HANDCRAFT_BPF_X86_SHRQ),
     /* 0x115b: mov    rcx,rsi [exact-kinsn: mov64 register-to-register kinsn] */
@@ -78,7 +74,7 @@ static const struct bpf_insn program[] = {
     /* 0x115e: xor    rcx,rdi [exact-kinsn: xor64 reg kinsn] */
     HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RCX, HC_X86_RDI), MICRO_HANDCRAFT_BPF_X86_XORQ),
     /* 0x1161: inc    rax [exact-kinsn: incq reg kinsn] */
-    HC_KINSN(HC_REG_PAYLOAD(HC_X86_RAX), MICRO_HANDCRAFT_BPF_X86_INCQ),
+    HC_KINSN(HC_X86_ARCH_IMM_PAYLOAD(HC_X86_RAX, 0), MICRO_HANDCRAFT_BPF_X86_INCQ),
     /* 0x1164: cmp    rax,0x100 [control-flow-operand: cmp folded into BPF branch] */
     /* 0x116a: jne    1140 <bitmap_popcount_scan_xdp+0x40> [exact-bpf: jne as ordinary BPF branch] */
     HC_KINSN(HC_X86_ARCH_TO_BPF_RR_PAYLOAD(BPF_REG_6, HC_X86_RAX), MICRO_HANDCRAFT_BPF_X86_MOVQ),
@@ -87,9 +83,7 @@ static const struct bpf_insn program[] = {
     HC_KINSN(HC_X86_ARCH_STORE_PAYLOAD(HC_X86_RCX, HC_X86_RDX, 0), MICRO_HANDCRAFT_BPF_X86_MOVQ),
     /* 0x116f: mov    eax,0x2 [exact-kinsn: mov32 immediate kinsn] */
     HC_KINSN(HC_X86_ARCH_IMM_PAYLOAD(HC_X86_RAX, 2), MICRO_HANDCRAFT_BPF_X86_MOVL),
-    /* 0x1174: pop    rbp [exact-kinsn: popq kinsn] */
-    HC_KINSN(HC_REG_PAYLOAD(HC_X86_RBP), MICRO_HANDCRAFT_BPF_X86_POPQ),
-    /* 0x1175: ret [abi-boundary: native ret materializes x86 rax to BPF r0 then exits] */
+    /* 0x1174: ret [abi-boundary: native ret materializes x86 rax to BPF r0 then exits] */
     HC_KINSN(HC_X86_ARCH_TO_BPF_RR_PAYLOAD(BPF_REG_0, HC_X86_RAX), MICRO_HANDCRAFT_BPF_X86_MOVQ),
     HC_EXIT(),
 };

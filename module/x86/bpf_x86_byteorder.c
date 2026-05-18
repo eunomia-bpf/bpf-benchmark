@@ -17,12 +17,20 @@ BTF_ID_FLAGS(func, bpf_x86_bswapq)
 BTF_ID_FLAGS(func, bpf_x86_rolw)
 BTF_KFUNCS_END(bpf_x86_byteorder_kfunc_ids)
 
-static __always_inline int decode_reg_payload(u64 payload, u8 *dst_reg)
+#define X86_FORM_IMM		2
+#define X86_FORM_ARCH_IMM	13
+
+static __always_inline int decode_reg_payload(u64 payload, u8 *dst_reg,
+					      bool *arch_reg)
 {
 	payload = kinsn_payload_decode(payload);
-	*dst_reg = kinsn_payload_reg(payload, 0);
+	*arch_reg = (payload & 0xf) == X86_FORM_ARCH_IMM;
+	if ((payload & 0xf) != X86_FORM_IMM &&
+	    (payload & 0xf) != X86_FORM_ARCH_IMM)
+		return -EINVAL;
+	*dst_reg = kinsn_payload_reg(payload, 4);
 
-	if (payload >> 4)
+	if (payload >> 8)
 		return -EINVAL;
 	if (!kinsn_x86_operand_valid(*dst_reg))
 		return -EINVAL;
@@ -34,19 +42,16 @@ static __always_inline int decode_reg_imm_payload(u64 payload, u8 *dst_reg,
 						  u8 *imm, bool *arch_reg)
 {
 	payload = kinsn_payload_decode(payload);
-	*dst_reg = kinsn_payload_reg(payload, 0);
+	*arch_reg = (payload & 0xf) == X86_FORM_ARCH_IMM;
+	if ((payload & 0xf) != X86_FORM_IMM &&
+	    (payload & 0xf) != X86_FORM_ARCH_IMM)
+		return -EINVAL;
+	*dst_reg = kinsn_payload_reg(payload, 4);
 	*imm = kinsn_payload_u8(payload, 8);
-	*arch_reg = !!(payload & (1ULL << 16));
 
-	if (payload >> 17)
+	if (payload >> 16)
 		return -EINVAL;
-	if (payload & (0xfULL << 4))
-		return -EINVAL;
-	if (!*arch_reg && *dst_reg >= BPF_REG_10)
-		return -EINVAL;
-	if (*arch_reg && *dst_reg != BPF_REG_10)
-		return -EINVAL;
-	if (!kinsn_x86_reg_valid(*dst_reg))
+	if (!kinsn_x86_operand_valid(*dst_reg))
 		return -EINVAL;
 
 	return 0;
@@ -85,20 +90,30 @@ static int instantiate_bswap(u64 payload, struct bpf_insn *insn_buf, u8 bits)
 {
 	u8 dst_reg;
 	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0);
+	bool arch_reg;
 	int cnt = 0;
 	int err;
 
-	err = decode_reg_payload(payload, &dst_reg);
+	err = decode_reg_payload(payload, &dst_reg, &arch_reg);
 	if (err)
 		return err;
 
-	if (kinsn_x86_reg_is_shadowed(dst_reg)) {
+	if (arch_reg || kinsn_x86_reg_is_shadowed(dst_reg)) {
 		kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-		kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0,
-				  dst_reg);
+		if (arch_reg)
+			kinsn_x86_read64_arch(insn_buf, &cnt,
+					      KINSN_X86_SCRATCH0, dst_reg);
+		else
+			kinsn_x86_read64(insn_buf, &cnt,
+					  KINSN_X86_SCRATCH0, dst_reg);
 		insn_buf[cnt++] = BPF_BSWAP(KINSN_X86_SCRATCH0, bits);
-		kinsn_x86_write64(insn_buf, &cnt, dst_reg,
-				  KINSN_X86_SCRATCH0, scratch_mask);
+		if (arch_reg)
+			kinsn_x86_write64_arch(insn_buf, &cnt, dst_reg,
+					       KINSN_X86_SCRATCH0,
+					       scratch_mask);
+		else
+			kinsn_x86_write64(insn_buf, &cnt, dst_reg,
+					  KINSN_X86_SCRATCH0, scratch_mask);
 		kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
 		return cnt;
 	}
@@ -125,13 +140,13 @@ static int emit_rolw_imm_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	u32 len = 0;
 	int err;
 
-	(void)prog;
-
 	err = decode_reg_imm_payload(payload, &dst_reg, &imm, &arch_reg);
 	if (err)
 		return err;
 	if (imm != 8)
 		return -EINVAL;
+	if (!arch_reg)
+		dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
 
 	kinsn_emit_u8(buf, &len, 0x66);
 	kinsn_emit_rex(buf, &len, false, false, false, kinsn_x86_ext(dst_reg));
@@ -147,14 +162,15 @@ static int emit_bswap_x86(u8 *image, u32 *off, bool emit, u64 payload,
 {
 	u8 buf[4];
 	u8 dst_reg;
+	bool arch_reg;
 	u32 len = 0;
 	int err;
 
-	(void)prog;
-
-	err = decode_reg_payload(payload, &dst_reg);
+	err = decode_reg_payload(payload, &dst_reg, &arch_reg);
 	if (err)
 		return err;
+	if (!arch_reg)
+		dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
 
 	kinsn_emit_rex(buf, &len, is64, false, false, kinsn_x86_ext(dst_reg));
 	kinsn_emit_u8(buf, &len, 0x0f);

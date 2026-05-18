@@ -105,11 +105,85 @@ DEFINE_FIXED_PACKET_BACKED_XDP_BENCH(
 ```asm
 Disassembly of section .init:
 
+0000000000001000 <_init>:
+    1000:	f3 0f 1e fa          	endbr64
+    1004:	48 83 ec 08          	sub    rsp,0x8
+    1008:	48 8b 05 c1 2f 00 00 	mov    rax,QWORD PTR [rip+0x2fc1]        # 3fd0 <__gmon_start__@Base>
+    100f:	48 85 c0             	test   rax,rax
+    1012:	74 02                	je     1016 <_init+0x16>
+    1014:	ff d0                	call   rax
+    1016:	48 83 c4 08          	add    rsp,0x8
+    101a:	c3                   	ret
+
 Disassembly of section .plt:
+
+0000000000001020 <.plt>:
+    1020:	ff 35 ca 2f 00 00    	push   QWORD PTR [rip+0x2fca]        # 3ff0 <_GLOBAL_OFFSET_TABLE_+0x8>
+    1026:	ff 25 cc 2f 00 00    	jmp    QWORD PTR [rip+0x2fcc]        # 3ff8 <_GLOBAL_OFFSET_TABLE_+0x10>
+    102c:	0f 1f 40 00          	nop    DWORD PTR [rax+0x0]
 
 Disassembly of section .plt.got:
 
+0000000000001030 <__cxa_finalize@plt>:
+    1030:	ff 25 aa 2f 00 00    	jmp    QWORD PTR [rip+0x2faa]        # 3fe0 <__cxa_finalize@GLIBC_2.2.5>
+    1036:	66 90                	xchg   ax,ax
+
 Disassembly of section .text:
+
+0000000000001040 <deregister_tm_clones>:
+    1040:	48 8d 3d c9 2f 00 00 	lea    rdi,[rip+0x2fc9]        # 4010 <__TMC_END__>
+    1047:	48 8d 05 c2 2f 00 00 	lea    rax,[rip+0x2fc2]        # 4010 <__TMC_END__>
+    104e:	48 39 f8             	cmp    rax,rdi
+    1051:	74 15                	je     1068 <deregister_tm_clones+0x28>
+    1053:	48 8b 05 6e 2f 00 00 	mov    rax,QWORD PTR [rip+0x2f6e]        # 3fc8 <_ITM_deregisterTMCloneTable@Base>
+    105a:	48 85 c0             	test   rax,rax
+    105d:	74 09                	je     1068 <deregister_tm_clones+0x28>
+    105f:	ff e0                	jmp    rax
+    1061:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
+    1068:	c3                   	ret
+    1069:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
+
+0000000000001070 <register_tm_clones>:
+    1070:	48 8d 3d 99 2f 00 00 	lea    rdi,[rip+0x2f99]        # 4010 <__TMC_END__>
+    1077:	48 8d 35 92 2f 00 00 	lea    rsi,[rip+0x2f92]        # 4010 <__TMC_END__>
+    107e:	48 29 fe             	sub    rsi,rdi
+    1081:	48 89 f0             	mov    rax,rsi
+    1084:	48 c1 ee 3f          	shr    rsi,0x3f
+    1088:	48 c1 f8 03          	sar    rax,0x3
+    108c:	48 01 c6             	add    rsi,rax
+    108f:	48 d1 fe             	sar    rsi,1
+    1092:	74 14                	je     10a8 <register_tm_clones+0x38>
+    1094:	48 8b 05 3d 2f 00 00 	mov    rax,QWORD PTR [rip+0x2f3d]        # 3fd8 <_ITM_registerTMCloneTable@Base>
+    109b:	48 85 c0             	test   rax,rax
+    109e:	74 08                	je     10a8 <register_tm_clones+0x38>
+    10a0:	ff e0                	jmp    rax
+    10a2:	66 0f 1f 44 00 00    	nop    WORD PTR [rax+rax*1+0x0]
+    10a8:	c3                   	ret
+    10a9:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
+
+00000000000010b0 <__do_global_dtors_aux>:
+    10b0:	f3 0f 1e fa          	endbr64
+    10b4:	80 3d 51 2f 00 00 00 	cmp    BYTE PTR [rip+0x2f51],0x0        # 400c <completed.0>
+    10bb:	75 2b                	jne    10e8 <__do_global_dtors_aux+0x38>
+    10bd:	55                   	push   rbp
+    10be:	48 83 3d 1a 2f 00 00 	cmp    QWORD PTR [rip+0x2f1a],0x0        # 3fe0 <__cxa_finalize@GLIBC_2.2.5>
+    10c5:	00 
+    10c6:	48 89 e5             	mov    rbp,rsp
+    10c9:	74 0c                	je     10d7 <__do_global_dtors_aux+0x27>
+    10cb:	48 8b 3d 2e 2f 00 00 	mov    rdi,QWORD PTR [rip+0x2f2e]        # 4000 <__dso_handle>
+    10d2:	e8 59 ff ff ff       	call   1030 <__cxa_finalize@plt>
+    10d7:	e8 64 ff ff ff       	call   1040 <deregister_tm_clones>
+    10dc:	c6 05 29 2f 00 00 01 	mov    BYTE PTR [rip+0x2f29],0x1        # 400c <completed.0>
+    10e3:	5d                   	pop    rbp
+    10e4:	c3                   	ret
+    10e5:	0f 1f 00             	nop    DWORD PTR [rax]
+    10e8:	c3                   	ret
+    10e9:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
+
+00000000000010f0 <frame_dummy>:
+    10f0:	f3 0f 1e fa          	endbr64
+    10f4:	e9 77 ff ff ff       	jmp    1070 <register_tm_clones>
+    10f9:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
 
 0000000000001100 <packet_record_bounds_window_xdp>:
     1100:	48 8b 17             	mov    rdx,QWORD PTR [rdi]
@@ -190,6 +264,12 @@ Disassembly of section .text:
     11f7:	c3                   	ret
 
 Disassembly of section .fini:
+
+00000000000011f8 <_fini>:
+    11f8:	f3 0f 1e fa          	endbr64
+    11fc:	48 83 ec 08          	sub    rsp,0x8
+    1200:	48 83 c4 08          	add    rsp,0x8
+    1204:	c3                   	ret
 ```
 
 ## Original Kernel JIT ASM
@@ -475,183 +555,177 @@ Disassembly of section .data:
     ((__u64)(DST) | ((__u64)(BASE) << 4) | ((__u64)(INDEX) << 8) | \
      ((__u64)(SCALE) << 12) | ((__u64)(HAS_INDEX) << 14) | \
      ((__u64)(HAS_BASE) << 15) | ((__u64)(__u32)(DISP) << 16))
-
-/*
- * Semantic handcraft for packet_record_bounds_window.
- *
- * Direct native conversion leaves host ABI stack/register state and
- * standalone flags branches that are not verifier-visible BPF. This input
- * starts from verified kernel xlated BPF, restores the verifier-facing XDP
- * ctx loads, and replaces same-PC-count mov+add address calculations with
- * x86 leaq kinsns. Branch offsets remain valid.
- */
+#define HC_LEA_ARCH_PAYLOAD(DST, BASE, INDEX, SCALE, HAS_BASE, HAS_INDEX, DISP) \
+    (HC_LEA_PAYLOAD(DST, BASE, INDEX, SCALE, HAS_BASE, HAS_INDEX, DISP) | (1ULL << 48))
 
 static const struct bpf_insn program[] = {
-    HC_RAW(0xb7, BPF_REG_0, BPF_REG_0, 0, 0),
-    /* pc 1: restore verifier-facing XDP data_end load */
-    HC_LDX(BPF_W, BPF_REG_2, BPF_REG_1, 4),
-    /* pc 2: restore verifier-facing XDP data load */
-    HC_LDX(BPF_W, BPF_REG_4, BPF_REG_1, 0),
-    HC_RAW(0x2d, BPF_REG_4, BPF_REG_2, 158, 0),
-    /* pc 4: r1 = r4; r1 += 8; leaq kinsn */
-    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_1, BPF_REG_4, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
-    HC_RAW(0x2d, BPF_REG_1, BPF_REG_2, 155, 0),
-    /* pc 7: r1 = r4; r1 += 784; leaq kinsn */
-    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_1, BPF_REG_4, 0, 0, 1, 0, 784), MICRO_HANDCRAFT_BPF_X86_LEAQ),
-    HC_RAW(0x2d, BPF_REG_1, BPF_REG_2, 152, 0),
-    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 9, 0),
-    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 8),
-    HC_RAW(0x71, BPF_REG_2, BPF_REG_4, 8, 0),
-    HC_RAW(0x4f, BPF_REG_1, BPF_REG_2, 0, 0),
-    HC_RAW(0x71, BPF_REG_2, BPF_REG_4, 10, 0),
-    HC_RAW(0x67, BPF_REG_2, BPF_REG_0, 0, 16),
-    HC_RAW(0x4f, BPF_REG_1, BPF_REG_2, 0, 0),
-    HC_RAW(0x71, BPF_REG_2, BPF_REG_4, 11, 0),
-    HC_RAW(0x67, BPF_REG_2, BPF_REG_0, 0, 24),
-    HC_RAW(0x4f, BPF_REG_1, BPF_REG_2, 0, 0),
-    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 32),
-    HC_RAW(0x77, BPF_REG_1, BPF_REG_0, 0, 32),
-    HC_RAW(0x55, BPF_REG_1, BPF_REG_0, 139, 32),
-    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 13, 0),
-    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 8),
-    HC_RAW(0x71, BPF_REG_2, BPF_REG_4, 12, 0),
-    HC_RAW(0x4f, BPF_REG_1, BPF_REG_2, 0, 0),
-    HC_RAW(0x71, BPF_REG_2, BPF_REG_4, 14, 0),
-    HC_RAW(0x67, BPF_REG_2, BPF_REG_0, 0, 16),
-    HC_RAW(0x4f, BPF_REG_1, BPF_REG_2, 0, 0),
-    HC_RAW(0x71, BPF_REG_2, BPF_REG_4, 15, 0),
-    HC_RAW(0x67, BPF_REG_2, BPF_REG_0, 0, 24),
-    HC_RAW(0x4f, BPF_REG_1, BPF_REG_2, 0, 0),
-    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 32),
-    HC_RAW(0x77, BPF_REG_1, BPF_REG_0, 0, 32),
-    HC_RAW(0x55, BPF_REG_1, BPF_REG_0, 126, 24),
-    HC_RAW(0x18, BPF_REG_6, BPF_REG_0, 0, 1717173651),
-    HC_RAW(0x00, BPF_REG_0, BPF_REG_0, 0, -689373512),
-    HC_RAW(0xb7, BPF_REG_2, BPF_REG_0, 0, 0),
-    HC_RAW(0xb7, BPF_REG_3, BPF_REG_0, 0, 768),
-    HC_RAW(0x7b, BPF_REG_10, BPF_REG_4, -8, 0),
-    HC_RAW(0x07, BPF_REG_4, BPF_REG_0, 0, 20),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 34, 0),
-    HC_RAW(0x67, BPF_REG_9, BPF_REG_0, 0, 32),
-    HC_RAW(0x67, BPF_REG_6, BPF_REG_0, 0, 32),
-    HC_RAW(0x77, BPF_REG_6, BPF_REG_0, 0, 32),
-    HC_RAW(0x4f, BPF_REG_9, BPF_REG_6, 0, 0),
-    HC_RAW(0x0f, BPF_REG_7, BPF_REG_9, 0, 0),
-    HC_RAW(0x67, BPF_REG_8, BPF_REG_0, 0, 32),
-    HC_RAW(0x77, BPF_REG_8, BPF_REG_0, 0, 32),
-    HC_RAW(0xbf, BPF_REG_6, BPF_REG_7, 0, 0),
-    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 19, 0),
-    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 8),
-    HC_RAW(0x71, BPF_REG_7, BPF_REG_4, 18, 0),
-    HC_RAW(0x4f, BPF_REG_1, BPF_REG_7, 0, 0),
-    HC_RAW(0xbf, BPF_REG_7, BPF_REG_2, 0, 0),
-    HC_RAW(0x57, BPF_REG_7, BPF_REG_0, 0, 24),
-    HC_RAW(0x6f, BPF_REG_1, BPF_REG_7, 0, 0),
-    HC_RAW(0xbf, BPF_REG_7, BPF_REG_0, 0, 0),
-    HC_RAW(0x67, BPF_REG_7, BPF_REG_0, 0, 2),
-    HC_RAW(0x57, BPF_REG_7, BPF_REG_0, 0, 28),
-    HC_RAW(0x6f, BPF_REG_8, BPF_REG_7, 0, 0),
-    HC_RAW(0xaf, BPF_REG_6, BPF_REG_8, 0, 0),
-    HC_RAW(0x0f, BPF_REG_6, BPF_REG_1, 0, 0),
-    HC_RAW(0x57, BPF_REG_0, BPF_REG_0, 0, 7),
-    HC_RAW(0xaf, BPF_REG_0, BPF_REG_5, 0, 0),
-    HC_RAW(0xbf, BPF_REG_1, BPF_REG_0, 0, 0),
-    HC_RAW(0xa7, BPF_REG_1, BPF_REG_0, 0, 63),
-    HC_RAW(0xbf, BPF_REG_5, BPF_REG_6, 0, 0),
-    HC_RAW(0x7f, BPF_REG_5, BPF_REG_1, 0, 0),
-    HC_RAW(0x07, BPF_REG_0, BPF_REG_0, 0, 1),
-    HC_RAW(0x6f, BPF_REG_6, BPF_REG_0, 0, 0),
-    HC_RAW(0x4f, BPF_REG_6, BPF_REG_5, 0, 0),
-    HC_RAW(0x07, BPF_REG_4, BPF_REG_0, 0, 24),
-    HC_RAW(0x07, BPF_REG_3, BPF_REG_0, 0, -24),
-    HC_RAW(0x07, BPF_REG_2, BPF_REG_0, 0, 8),
-    HC_RAW(0x15, BPF_REG_2, BPF_REG_0, 62, 256),
-    HC_RAW(0x71, BPF_REG_5, BPF_REG_4, -4, 0),
-    HC_RAW(0x57, BPF_REG_5, BPF_REG_0, 0, 3),
-    HC_RAW(0xbf, BPF_REG_1, BPF_REG_5, 0, 0),
-    HC_RAW(0x47, BPF_REG_1, BPF_REG_0, 0, 24),
-    HC_RAW(0x2d, BPF_REG_1, BPF_REG_3, -9, 0),
-    HC_RAW(0x71, BPF_REG_0, BPF_REG_4, -3, 0),
-    HC_RAW(0x71, BPF_REG_9, BPF_REG_4, 5, 0),
-    HC_RAW(0x67, BPF_REG_9, BPF_REG_0, 0, 8),
-    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 4, 0),
-    HC_RAW(0x4f, BPF_REG_9, BPF_REG_1, 0, 0),
-    HC_RAW(0x71, BPF_REG_7, BPF_REG_4, 1, 0),
-    HC_RAW(0x67, BPF_REG_7, BPF_REG_0, 0, 8),
-    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 0, 0),
-    HC_RAW(0x4f, BPF_REG_7, BPF_REG_1, 0, 0),
-    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 2, 0),
-    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 16),
-    HC_RAW(0x4f, BPF_REG_7, BPF_REG_1, 0, 0),
-    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 3, 0),
-    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 24),
-    HC_RAW(0x4f, BPF_REG_7, BPF_REG_1, 0, 0),
-    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 6, 0),
-    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 16),
-    HC_RAW(0x4f, BPF_REG_9, BPF_REG_1, 0, 0),
-    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 17, 0),
-    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 8),
-    HC_RAW(0x71, BPF_REG_8, BPF_REG_4, 16, 0),
-    HC_RAW(0x4f, BPF_REG_1, BPF_REG_8, 0, 0),
-    HC_RAW(0x71, BPF_REG_8, BPF_REG_4, 7, 0),
-    HC_RAW(0x67, BPF_REG_8, BPF_REG_0, 0, 24),
-    HC_RAW(0x4f, BPF_REG_9, BPF_REG_8, 0, 0),
-    HC_RAW(0x0f, BPF_REG_7, BPF_REG_6, 0, 0),
-    HC_RAW(0x71, BPF_REG_8, BPF_REG_4, 13, 0),
-    HC_RAW(0x67, BPF_REG_8, BPF_REG_0, 0, 8),
-    HC_RAW(0x71, BPF_REG_6, BPF_REG_4, 12, 0),
-    HC_RAW(0x4f, BPF_REG_8, BPF_REG_6, 0, 0),
-    HC_RAW(0x71, BPF_REG_6, BPF_REG_4, 14, 0),
-    HC_RAW(0x67, BPF_REG_6, BPF_REG_0, 0, 16),
-    HC_RAW(0x4f, BPF_REG_8, BPF_REG_6, 0, 0),
-    HC_RAW(0x0f, BPF_REG_7, BPF_REG_9, 0, 0),
-    HC_RAW(0x0f, BPF_REG_7, BPF_REG_1, 0, 0),
-    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 15, 0),
-    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 24),
-    HC_RAW(0x4f, BPF_REG_8, BPF_REG_1, 0, 0),
-    HC_RAW(0x71, BPF_REG_6, BPF_REG_4, 9, 0),
-    HC_RAW(0x67, BPF_REG_6, BPF_REG_0, 0, 8),
-    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 8, 0),
-    HC_RAW(0x4f, BPF_REG_6, BPF_REG_1, 0, 0),
-    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 10, 0),
-    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 16),
-    HC_RAW(0x4f, BPF_REG_6, BPF_REG_1, 0, 0),
-    HC_RAW(0x71, BPF_REG_1, BPF_REG_4, 11, 0),
-    HC_RAW(0x67, BPF_REG_1, BPF_REG_0, 0, 24),
-    HC_RAW(0x4f, BPF_REG_6, BPF_REG_1, 0, 0),
-    HC_RAW(0xbf, BPF_REG_1, BPF_REG_0, 0, 0),
-    HC_RAW(0x57, BPF_REG_1, BPF_REG_0, 0, 1),
-    HC_RAW(0x15, BPF_REG_1, BPF_REG_0, -90, 0),
-    HC_RAW(0x67, BPF_REG_6, BPF_REG_0, 0, 32),
-    HC_RAW(0x67, BPF_REG_8, BPF_REG_0, 0, 32),
-    HC_RAW(0x77, BPF_REG_8, BPF_REG_0, 0, 32),
-    HC_RAW(0x4f, BPF_REG_6, BPF_REG_8, 0, 0),
-    HC_RAW(0xaf, BPF_REG_7, BPF_REG_6, 0, 0),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, -89, 0),
-    HC_RAW(0xbf, BPF_REG_1, BPF_REG_6, 0, 0),
-    HC_RAW(0x77, BPF_REG_1, BPF_REG_0, 0, 56),
-    HC_RAW(0x79, BPF_REG_2, BPF_REG_10, -8, 0),
-    HC_RAW(0x73, BPF_REG_2, BPF_REG_1, 7, 0),
-    HC_RAW(0xbf, BPF_REG_1, BPF_REG_6, 0, 0),
-    HC_RAW(0x77, BPF_REG_1, BPF_REG_0, 0, 48),
-    HC_RAW(0x73, BPF_REG_2, BPF_REG_1, 6, 0),
-    HC_RAW(0xbf, BPF_REG_1, BPF_REG_6, 0, 0),
-    HC_RAW(0x77, BPF_REG_1, BPF_REG_0, 0, 40),
-    HC_RAW(0x73, BPF_REG_2, BPF_REG_1, 5, 0),
-    HC_RAW(0xbf, BPF_REG_1, BPF_REG_6, 0, 0),
-    HC_RAW(0x77, BPF_REG_1, BPF_REG_0, 0, 32),
-    HC_RAW(0x73, BPF_REG_2, BPF_REG_1, 4, 0),
-    HC_RAW(0xbf, BPF_REG_1, BPF_REG_6, 0, 0),
-    HC_RAW(0x77, BPF_REG_1, BPF_REG_0, 0, 24),
-    HC_RAW(0x73, BPF_REG_2, BPF_REG_1, 3, 0),
-    HC_RAW(0xbf, BPF_REG_1, BPF_REG_6, 0, 0),
-    HC_RAW(0x77, BPF_REG_1, BPF_REG_0, 0, 16),
-    HC_RAW(0x73, BPF_REG_2, BPF_REG_1, 2, 0),
-    HC_RAW(0x73, BPF_REG_2, BPF_REG_6, 0, 0),
-    HC_RAW(0x77, BPF_REG_6, BPF_REG_0, 0, 8),
-    HC_RAW(0x73, BPF_REG_2, BPF_REG_6, 1, 0),
-    HC_RAW(0xb7, BPF_REG_0, BPF_REG_0, 0, 2),
-    HC_RAW(0x95, BPF_REG_0, BPF_REG_0, 0, 0),
+    HC_INIT_X86_STACK(),
+    HC_MOV64_IMM(BPF_REG_6, 0),
+    HC_MOV64_IMM(BPF_REG_7, 0),
+    HC_MOV64_IMM(BPF_REG_8, 0),
+    HC_MOV64_IMM(BPF_REG_9, 0),
+    /* 0x1100: mov    rdx,QWORD PTR [rdi] [context-abi: native xdp_md 64-bit field at off 0 maps to BPF XDP u32 ctx field at off 0] */
+    HC_LDX(BPF_W, BPF_REG_6, BPF_REG_1, 0),
+    HC_KINSN(HC_X86_BPF_TO_ARCH_RR_PAYLOAD(HC_X86_RDX, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x1103: mov    rcx,QWORD PTR [rdi+0x8] [context-abi: native xdp_md 64-bit field at off 8 maps to BPF XDP u32 ctx field at off 4] */
+    HC_LDX(BPF_W, BPF_REG_6, BPF_REG_1, 4),
+    HC_KINSN(HC_X86_BPF_TO_ARCH_RR_PAYLOAD(HC_X86_RCX, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x1107: xor    eax,eax [exact-kinsn: xor32 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RAX, HC_X86_RAX), MICRO_HANDCRAFT_BPF_X86_XORL),
+    /* 0x1109: cmp    rdx,rcx [control-flow-operand: cmp folded into BPF branch] */
+    /* 0x110c: jbe    110f <packet_record_bounds_window_xdp+0xf> [exact-bpf: jbe as ordinary BPF branch] */
+    HC_KINSN(HC_X86_ARCH_TO_BPF_RR_PAYLOAD(BPF_REG_6, HC_X86_RDX), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    HC_KINSN(HC_X86_ARCH_TO_BPF_RR_PAYLOAD(BPF_REG_7, HC_X86_RCX), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    HC_RAW(BPF_JMP | BPF_JLE | BPF_X, BPF_REG_6, BPF_REG_7, (4) - 1, 0),
+    /* 0x110e: ret [abi-boundary: native ret materializes x86 rax to BPF r0 then exits] */
+    HC_KINSN(HC_X86_ARCH_TO_BPF_RR_PAYLOAD(BPF_REG_0, HC_X86_RAX), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    HC_EXIT(),
+    /* 0x110f: lea    rsi,[rdx+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
+    HC_KINSN(HC_LEA_ARCH_PAYLOAD(HC_X86_RSI, HC_X86_RDX, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
+    /* 0x1113: cmp    rsi,rcx [control-flow-operand: cmp folded into BPF branch] */
+    /* 0x1116: ja     110e <packet_record_bounds_window_xdp+0xe> [exact-bpf: ja as ordinary BPF branch] */
+    HC_KINSN(HC_X86_ARCH_TO_BPF_RR_PAYLOAD(BPF_REG_6, HC_X86_RSI), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    HC_KINSN(HC_X86_ARCH_TO_BPF_RR_PAYLOAD(BPF_REG_7, HC_X86_RCX), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_6, BPF_REG_7, (-9) - 1, 0),
+    /* 0x1118: lea    rsi,[rdx+0x310] [exact-kinsn: LEA via x86 kinsn selector] */
+    HC_KINSN(HC_LEA_ARCH_PAYLOAD(HC_X86_RSI, HC_X86_RDX, 0, 0, 1, 0, 784), MICRO_HANDCRAFT_BPF_X86_LEAQ),
+    /* 0x111f: cmp    rsi,rcx [control-flow-operand: cmp folded into BPF branch] */
+    /* 0x1122: ja     110e <packet_record_bounds_window_xdp+0xe> [exact-bpf: ja as ordinary BPF branch] */
+    HC_KINSN(HC_X86_ARCH_TO_BPF_RR_PAYLOAD(BPF_REG_6, HC_X86_RSI), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    HC_KINSN(HC_X86_ARCH_TO_BPF_RR_PAYLOAD(BPF_REG_7, HC_X86_RCX), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_6, BPF_REG_7, (-16) - 1, 0),
+    /* 0x1124: cmp    DWORD PTR [rdx+0x8],0x20 [control-flow-operand: cmp folded into BPF branch] */
+    /* 0x1128: jne    110e <packet_record_bounds_window_xdp+0xe> [exact-bpf: jne as ordinary BPF branch] */
+    HC_KINSN(HC_X86_ARCH_TO_BPF_RR_PAYLOAD(BPF_REG_6, HC_X86_RDX), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    HC_LDX(BPF_W, BPF_REG_6, BPF_REG_6, 8),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, (-20) - 1, 32),
+    /* 0x112a: cmp    DWORD PTR [rdx+0xc],0x18 [control-flow-operand: cmp folded into BPF branch] */
+    /* 0x112e: jne    110e <packet_record_bounds_window_xdp+0xe> [exact-bpf: jne as ordinary BPF branch] */
+    HC_KINSN(HC_X86_ARCH_TO_BPF_RR_PAYLOAD(BPF_REG_6, HC_X86_RDX), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    HC_LDX(BPF_W, BPF_REG_6, BPF_REG_6, 12),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, (-24) - 1, 24),
+    /* 0x1130: push   r14 [exact-kinsn: pushq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(HC_X86_R14), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
+    /* 0x1132: push   rbx [exact-kinsn: pushq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(HC_X86_RBX), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
+    /* 0x1133: lea    rsi,[rdx+0x27] [exact-kinsn: LEA via x86 kinsn selector] */
+    HC_KINSN(HC_LEA_ARCH_PAYLOAD(HC_X86_RSI, HC_X86_RDX, 0, 0, 1, 0, 39), MICRO_HANDCRAFT_BPF_X86_LEAQ),
+    /* 0x1137: movabs r9,0xd6e8feb86659fd93 [exact-bpf: movabs via verifier-visible BPF immediate load] */
+    HC_LD_IMM64_RAW(BPF_REG_6, 0, 0xd6e8feb86659fd93ULL),
+    HC_KINSN(HC_X86_BPF_TO_ARCH_RR_PAYLOAD(HC_X86_R9, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x1141: mov    edi,0x300 [exact-kinsn: mov32 immediate kinsn] */
+    HC_KINSN(HC_X86_ARCH_IMM_PAYLOAD(HC_X86_RDI, 768), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1146: xor    r8d,r8d [exact-kinsn: xor32 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_R8, HC_X86_R8), MICRO_HANDCRAFT_BPF_X86_XORL),
+    /* 0x1149: jmp    11a4 <packet_record_bounds_window_xdp+0xa4> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (54) - 1, 0),
+    /* 0x114b: nop    DWORD PTR [rax+rax*1+0x0] [padding: padding is not part of BPF semantics] */
+    /* 0x1150: shl    r14,0x20 [exact-kinsn: shl64 imm kinsn] */
+    HC_KINSN(HC_X86_ARCH_IMM_PAYLOAD(HC_X86_R14, 32), MICRO_HANDCRAFT_BPF_X86_SHLQ),
+    /* 0x1154: mov    ecx,ecx [exact-kinsn: mov32 register-to-register kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RCX, HC_X86_RCX), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1156: or     rcx,r14 [exact-kinsn: or64 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RCX, HC_X86_R14), MICRO_HANDCRAFT_BPF_X86_ORQ),
+    /* 0x1159: add    r11,rcx [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_R11, HC_X86_RCX), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x115c: movzx  r9d,WORD PTR [rsi-0x1] [exact-kinsn: direct memory load via x86 kinsn selector] */
+    HC_KINSN(HC_X86_ARCH_MEM_PAYLOAD(HC_X86_R9, HC_X86_RSI, -1), MICRO_HANDCRAFT_BPF_X86_MOVZWL),
+    /* 0x1161: lea    ecx,[rax*4+0x0] [exact-kinsn: LEA via x86 kinsn selector] */
+    HC_KINSN(HC_LEA_ARCH_PAYLOAD(HC_X86_RCX, 0, HC_X86_RAX, 2, 0, 1, 0), MICRO_HANDCRAFT_BPF_X86_LEAL),
+    /* 0x1168: and    cl,0x1c [exact-kinsn: andb imm kinsn] */
+    HC_KINSN(HC_REG_IMM_PAYLOAD(HC_X86_RCX, 28), MICRO_HANDCRAFT_BPF_X86_ANDB),
+    /* 0x116b: shl    rbx,cl [exact-kinsn: shl64 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RBX, HC_X86_RCX), MICRO_HANDCRAFT_BPF_X86_SHLQ),
+    /* 0x116e: xor    rbx,r11 [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RBX, HC_X86_R11), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1171: mov    ecx,r8d [exact-kinsn: mov32 register-to-register kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RCX, HC_X86_R8), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1174: and    cl,0x18 [exact-kinsn: andb imm kinsn] */
+    HC_KINSN(HC_REG_IMM_PAYLOAD(HC_X86_RCX, 24), MICRO_HANDCRAFT_BPF_X86_ANDB),
+    /* 0x1177: shl    r9,cl [exact-kinsn: shl64 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_R9, HC_X86_RCX), MICRO_HANDCRAFT_BPF_X86_SHLQ),
+    /* 0x117a: add    r9,rbx [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_R9, HC_X86_RBX), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x117d: and    eax,0x7 [exact-kinsn: and32 imm kinsn] */
+    HC_KINSN(HC_X86_ARCH_IMM_PAYLOAD(HC_X86_RAX, 7), MICRO_HANDCRAFT_BPF_X86_ANDL),
+    /* 0x1180: xor    eax,r10d [exact-kinsn: xor32 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RAX, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_XORL),
+    /* 0x1183: lea    ecx,[rax+0x1] [exact-kinsn: LEA via x86 kinsn selector] */
+    HC_KINSN(HC_LEA_ARCH_PAYLOAD(HC_X86_RCX, HC_X86_RAX, 0, 0, 1, 0, 1), MICRO_HANDCRAFT_BPF_X86_LEAL),
+    /* 0x1186: mov    r10,r9 [exact-kinsn: mov64 register-to-register kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_R10, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x1189: shl    r10,cl [exact-kinsn: shl64 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_R10, HC_X86_RCX), MICRO_HANDCRAFT_BPF_X86_SHLQ),
+    /* 0x118c: not    al [exact-kinsn: not8 reg kinsn] */
+    HC_KINSN(HC_NOT_NARROW_PAYLOAD(HC_X86_RAX), MICRO_HANDCRAFT_BPF_X86_NOTB),
+    /* 0x118e: mov    ecx,eax [exact-kinsn: mov32 register-to-register kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RCX, HC_X86_RAX), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1190: shr    r9,cl [exact-kinsn: shr64 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_R9, HC_X86_RCX), MICRO_HANDCRAFT_BPF_X86_SHRQ),
+    /* 0x1193: or     r9,r10 [exact-kinsn: or64 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_R9, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_ORQ),
+    /* 0x1196: add    r8,0x8 [exact-kinsn: add64 imm kinsn] */
+    HC_KINSN(HC_X86_ARCH_IMM_PAYLOAD(HC_X86_R8, 8), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x119a: add    rsi,0x18 [exact-kinsn: add64 imm kinsn] */
+    HC_KINSN(HC_X86_ARCH_IMM_PAYLOAD(HC_X86_RSI, 24), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x119e: add    rdi,0xffffffffffffffe8 [exact-kinsn: add64 imm kinsn] */
+    HC_KINSN(HC_X86_ARCH_IMM_PAYLOAD(HC_X86_RDI, -24), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x11a2: je     11ec <packet_record_bounds_window_xdp+0xec> [exact-bpf: je as ordinary BPF branch] */
+    HC_KINSN(HC_X86_ARCH_TO_BPF_RR_PAYLOAD(BPF_REG_6, HC_X86_RDI), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_6, 0, (41) - 1, 0),
+    /* 0x11a4: movzx  r10d,BYTE PTR [rsi-0x17] [exact-kinsn: direct memory load via x86 kinsn selector] */
+    HC_KINSN(HC_X86_ARCH_MEM_PAYLOAD(HC_X86_R10, HC_X86_RSI, -23), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
+    /* 0x11a9: and    r10d,0x3 [exact-kinsn: and32 imm kinsn] */
+    HC_KINSN(HC_X86_ARCH_IMM_PAYLOAD(HC_X86_R10, 3), MICRO_HANDCRAFT_BPF_X86_ANDL),
+    /* 0x11ad: lea    rax,[r10+0x18] [exact-kinsn: LEA via x86 kinsn selector] */
+    HC_KINSN(HC_LEA_ARCH_PAYLOAD(HC_X86_RAX, HC_X86_R10, 0, 0, 1, 0, 24), MICRO_HANDCRAFT_BPF_X86_LEAQ),
+    /* 0x11b1: cmp    rdi,rax [control-flow-operand: cmp folded into BPF branch] */
+    /* 0x11b4: jb     1196 <packet_record_bounds_window_xdp+0x96> [exact-bpf: jb as ordinary BPF branch] */
+    HC_KINSN(HC_X86_ARCH_TO_BPF_RR_PAYLOAD(BPF_REG_6, HC_X86_RDI), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    HC_KINSN(HC_X86_ARCH_TO_BPF_RR_PAYLOAD(BPF_REG_7, HC_X86_RAX), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    HC_RAW(BPF_JMP | BPF_JLT | BPF_X, BPF_REG_6, BPF_REG_7, (-19) - 1, 0),
+    /* 0x11b6: movzx  eax,BYTE PTR [rsi-0x16] [exact-kinsn: direct memory load via x86 kinsn selector] */
+    HC_KINSN(HC_X86_ARCH_MEM_PAYLOAD(HC_X86_RAX, HC_X86_RSI, -22), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
+    /* 0x11ba: mov    ebx,DWORD PTR [rsi-0x13] [exact-kinsn: direct memory load via x86 kinsn selector] */
+    HC_KINSN(HC_X86_ARCH_MEM_PAYLOAD(HC_X86_RBX, HC_X86_RSI, -19), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x11bd: mov    r14d,DWORD PTR [rsi-0xf] [exact-kinsn: direct memory load via x86 kinsn selector] */
+    HC_KINSN(HC_X86_ARCH_MEM_PAYLOAD(HC_X86_R14, HC_X86_RSI, -15), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x11c1: mov    ecx,DWORD PTR [rsi-0xb] [exact-kinsn: direct memory load via x86 kinsn selector] */
+    HC_KINSN(HC_X86_ARCH_MEM_PAYLOAD(HC_X86_RCX, HC_X86_RSI, -11), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x11c4: movzx  r11d,WORD PTR [rsi-0x3] [exact-kinsn: direct memory load via x86 kinsn selector] */
+    HC_KINSN(HC_X86_ARCH_MEM_PAYLOAD(HC_X86_R11, HC_X86_RSI, -3), MICRO_HANDCRAFT_BPF_X86_MOVZWL),
+    /* 0x11c9: add    rbx,r9 [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RBX, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x11cc: add    r11,r14 [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_R11, HC_X86_R14), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x11cf: add    r11,rbx [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_R11, HC_X86_RBX), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x11d2: mov    ebx,DWORD PTR [rsi-0x7] [exact-kinsn: direct memory load via x86 kinsn selector] */
+    HC_KINSN(HC_X86_ARCH_MEM_PAYLOAD(HC_X86_RBX, HC_X86_RSI, -7), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x11d5: test   al,0x1 [control-flow-operand: test folded into BPF branch] */
+    /* 0x11d7: je     1150 <packet_record_bounds_window_xdp+0x50> [exact-bpf: je as ordinary BPF branch] */
+    HC_KINSN(HC_X86_ARCH_TO_BPF_RR_PAYLOAD(BPF_REG_6, HC_X86_RAX), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    HC_RAW(BPF_JMP | BPF_JSET | BPF_K, BPF_REG_6, 0, 1, 1),
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-85) - 1, 0),
+    /* 0x11dd: shl    rcx,0x20 [exact-kinsn: shl64 imm kinsn] */
+    HC_KINSN(HC_X86_ARCH_IMM_PAYLOAD(HC_X86_RCX, 32), MICRO_HANDCRAFT_BPF_X86_SHLQ),
+    /* 0x11e1: or     rcx,rbx [exact-kinsn: or64 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RCX, HC_X86_RBX), MICRO_HANDCRAFT_BPF_X86_ORQ),
+    /* 0x11e4: xor    r11,rcx [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_R11, HC_X86_RCX), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x11e7: jmp    115c <packet_record_bounds_window_xdp+0x5c> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP | BPF_JA, 0, 0, (-84) - 1, 0),
+    /* 0x11ec: mov    QWORD PTR [rdx],r9 [exact-kinsn: direct memory store via x86 kinsn selector] */
+    HC_KINSN(HC_X86_ARCH_STORE_PAYLOAD(HC_X86_R9, HC_X86_RDX, 0), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x11ef: mov    eax,0x2 [exact-kinsn: mov32 immediate kinsn] */
+    HC_KINSN(HC_X86_ARCH_IMM_PAYLOAD(HC_X86_RAX, 2), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x11f4: pop    rbx [exact-kinsn: popq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(HC_X86_RBX), MICRO_HANDCRAFT_BPF_X86_POPQ),
+    /* 0x11f5: pop    r14 [exact-kinsn: popq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(HC_X86_R14), MICRO_HANDCRAFT_BPF_X86_POPQ),
+    /* 0x11f7: ret [abi-boundary: native ret materializes x86 rax to BPF r0 then exits] */
+    HC_KINSN(HC_X86_ARCH_TO_BPF_RR_PAYLOAD(BPF_REG_0, HC_X86_RAX), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    HC_EXIT(),
 };
 
 HC_EXPORT_PROGRAM(program)
@@ -659,190 +733,5 @@ HC_EXPORT_PROGRAM(program)
 
 ## Handcraft Kernel JIT ASM
 ```asm
-Disassembly of section .data:
-
-0000000000000000 <.data>:
-   0:	0f 1f 44 00 00       	nop    DWORD PTR [rax+rax*1+0x0]
-   5:	0f 1f 00             	nop    DWORD PTR [rax]
-   8:	55                   	push   rbp
-   9:	48 89 e5             	mov    rbp,rsp
-   c:	48 81 ec 08 00 00 00 	sub    rsp,0x8
-  13:	53                   	push   rbx
-  14:	41 55                	push   r13
-  16:	41 56                	push   r14
-  18:	41 57                	push   r15
-  1a:	31 c0                	xor    eax,eax
-  1c:	48 8b 77 08          	mov    rsi,QWORD PTR [rdi+0x8]
-  20:	48 8b 4f 00          	mov    rcx,QWORD PTR [rdi+0x0]
-  24:	48 39 f1             	cmp    rcx,rsi
-  27:	0f 87 90 02 00 00    	ja     0x2bd
-  2d:	48 8d 79 08          	lea    rdi,[rcx+0x8]
-  31:	48 39 f7             	cmp    rdi,rsi
-  34:	0f 87 83 02 00 00    	ja     0x2bd
-  3a:	48 8d b9 10 03 00 00 	lea    rdi,[rcx+0x310]
-  41:	48 39 f7             	cmp    rdi,rsi
-  44:	0f 87 73 02 00 00    	ja     0x2bd
-  4a:	48 0f b6 79 09       	movzx  rdi,BYTE PTR [rcx+0x9]
-  4f:	48 c1 e7 08          	shl    rdi,0x8
-  53:	48 0f b6 71 08       	movzx  rsi,BYTE PTR [rcx+0x8]
-  58:	48 09 f7             	or     rdi,rsi
-  5b:	48 0f b6 71 0a       	movzx  rsi,BYTE PTR [rcx+0xa]
-  60:	48 c1 e6 10          	shl    rsi,0x10
-  64:	48 09 f7             	or     rdi,rsi
-  67:	48 0f b6 71 0b       	movzx  rsi,BYTE PTR [rcx+0xb]
-  6c:	48 c1 e6 18          	shl    rsi,0x18
-  70:	48 09 f7             	or     rdi,rsi
-  73:	48 c1 e7 20          	shl    rdi,0x20
-  77:	48 c1 ef 20          	shr    rdi,0x20
-  7b:	48 83 ff 20          	cmp    rdi,0x20
-  7f:	0f 85 38 02 00 00    	jne    0x2bd
-  85:	48 0f b6 79 0d       	movzx  rdi,BYTE PTR [rcx+0xd]
-  8a:	48 c1 e7 08          	shl    rdi,0x8
-  8e:	48 0f b6 71 0c       	movzx  rsi,BYTE PTR [rcx+0xc]
-  93:	48 09 f7             	or     rdi,rsi
-  96:	48 0f b6 71 0e       	movzx  rsi,BYTE PTR [rcx+0xe]
-  9b:	48 c1 e6 10          	shl    rsi,0x10
-  9f:	48 09 f7             	or     rdi,rsi
-  a2:	48 0f b6 71 0f       	movzx  rsi,BYTE PTR [rcx+0xf]
-  a7:	48 c1 e6 18          	shl    rsi,0x18
-  ab:	48 09 f7             	or     rdi,rsi
-  ae:	48 c1 e7 20          	shl    rdi,0x20
-  b2:	48 c1 ef 20          	shr    rdi,0x20
-  b6:	48 83 ff 18          	cmp    rdi,0x18
-  ba:	0f 85 fd 01 00 00    	jne    0x2bd
-  c0:	48 bb 93 fd 59 66 b8 	movabs rbx,0xd6e8feb86659fd93
-  c7:	fe e8 d6 
-  ca:	31 f6                	xor    esi,esi
-  cc:	ba 00 03 00 00       	mov    edx,0x300
-  d1:	48 89 4d f8          	mov    QWORD PTR [rbp-0x8],rcx
-  d5:	48 83 c1 14          	add    rcx,0x14
-  d9:	e9 8b 00 00 00       	jmp    0x169
-  de:	49 c1 e7 20          	shl    r15,0x20
-  e2:	48 c1 e3 20          	shl    rbx,0x20
-  e6:	48 c1 eb 20          	shr    rbx,0x20
-  ea:	49 09 df             	or     r15,rbx
-  ed:	4d 01 fd             	add    r13,r15
-  f0:	49 c1 e6 20          	shl    r14,0x20
-  f4:	49 c1 ee 20          	shr    r14,0x20
-  f8:	4c 89 eb             	mov    rbx,r13
-  fb:	48 0f b6 79 13       	movzx  rdi,BYTE PTR [rcx+0x13]
- 100:	48 c1 e7 08          	shl    rdi,0x8
- 104:	4c 0f b6 69 12       	movzx  r13,BYTE PTR [rcx+0x12]
- 109:	4c 09 ef             	or     rdi,r13
- 10c:	49 89 f5             	mov    r13,rsi
- 10f:	49 83 e5 18          	and    r13,0x18
- 113:	c4 e2 91 f7 ff       	shlx   rdi,rdi,r13
- 118:	49 89 c5             	mov    r13,rax
- 11b:	49 c1 e5 02          	shl    r13,0x2
- 11f:	49 83 e5 1c          	and    r13,0x1c
- 123:	c4 42 91 f7 f6       	shlx   r14,r14,r13
- 128:	4c 31 f3             	xor    rbx,r14
- 12b:	48 01 fb             	add    rbx,rdi
- 12e:	48 83 e0 07          	and    rax,0x7
- 132:	4c 31 c0             	xor    rax,r8
- 135:	48 89 c7             	mov    rdi,rax
- 138:	48 83 f7 3f          	xor    rdi,0x3f
- 13c:	49 89 d8             	mov    r8,rbx
- 13f:	c4 42 c3 f7 c0       	shrx   r8,r8,rdi
- 144:	48 83 c0 01          	add    rax,0x1
- 148:	c4 e2 f9 f7 db       	shlx   rbx,rbx,rax
- 14d:	4c 09 c3             	or     rbx,r8
- 150:	48 83 c1 18          	add    rcx,0x18
- 154:	48 83 c2 e8          	add    rdx,0xffffffffffffffe8
- 158:	48 83 c6 08          	add    rsi,0x8
- 15c:	48 81 fe 00 01 00 00 	cmp    rsi,0x100
- 163:	0f 84 ff 00 00 00    	je     0x268
- 169:	4c 0f b6 41 fc       	movzx  r8,BYTE PTR [rcx-0x4]
- 16e:	49 83 e0 03          	and    r8,0x3
- 172:	4c 89 c7             	mov    rdi,r8
- 175:	48 83 cf 18          	or     rdi,0x18
- 179:	48 39 d7             	cmp    rdi,rdx
- 17c:	77 d2                	ja     0x150
- 17e:	48 0f b6 41 fd       	movzx  rax,BYTE PTR [rcx-0x3]
- 183:	4c 0f b6 79 05       	movzx  r15,BYTE PTR [rcx+0x5]
- 188:	49 c1 e7 08          	shl    r15,0x8
- 18c:	48 0f b6 79 04       	movzx  rdi,BYTE PTR [rcx+0x4]
- 191:	49 09 ff             	or     r15,rdi
- 194:	4c 0f b6 69 01       	movzx  r13,BYTE PTR [rcx+0x1]
- 199:	49 c1 e5 08          	shl    r13,0x8
- 19d:	48 0f b6 79 00       	movzx  rdi,BYTE PTR [rcx+0x0]
- 1a2:	49 09 fd             	or     r13,rdi
- 1a5:	48 0f b6 79 02       	movzx  rdi,BYTE PTR [rcx+0x2]
- 1aa:	48 c1 e7 10          	shl    rdi,0x10
- 1ae:	49 09 fd             	or     r13,rdi
- 1b1:	48 0f b6 79 03       	movzx  rdi,BYTE PTR [rcx+0x3]
- 1b6:	48 c1 e7 18          	shl    rdi,0x18
- 1ba:	49 09 fd             	or     r13,rdi
- 1bd:	48 0f b6 79 06       	movzx  rdi,BYTE PTR [rcx+0x6]
- 1c2:	48 c1 e7 10          	shl    rdi,0x10
- 1c6:	49 09 ff             	or     r15,rdi
- 1c9:	48 0f b6 79 11       	movzx  rdi,BYTE PTR [rcx+0x11]
- 1ce:	48 c1 e7 08          	shl    rdi,0x8
- 1d2:	4c 0f b6 71 10       	movzx  r14,BYTE PTR [rcx+0x10]
- 1d7:	4c 09 f7             	or     rdi,r14
- 1da:	4c 0f b6 71 07       	movzx  r14,BYTE PTR [rcx+0x7]
- 1df:	49 c1 e6 18          	shl    r14,0x18
- 1e3:	4d 09 f7             	or     r15,r14
- 1e6:	49 01 dd             	add    r13,rbx
- 1e9:	4c 0f b6 71 0d       	movzx  r14,BYTE PTR [rcx+0xd]
- 1ee:	49 c1 e6 08          	shl    r14,0x8
- 1f2:	48 0f b6 59 0c       	movzx  rbx,BYTE PTR [rcx+0xc]
- 1f7:	49 09 de             	or     r14,rbx
- 1fa:	48 0f b6 59 0e       	movzx  rbx,BYTE PTR [rcx+0xe]
- 1ff:	48 c1 e3 10          	shl    rbx,0x10
- 203:	49 09 de             	or     r14,rbx
- 206:	4d 01 fd             	add    r13,r15
- 209:	49 01 fd             	add    r13,rdi
- 20c:	48 0f b6 79 0f       	movzx  rdi,BYTE PTR [rcx+0xf]
- 211:	48 c1 e7 18          	shl    rdi,0x18
- 215:	49 09 fe             	or     r14,rdi
- 218:	48 0f b6 59 09       	movzx  rbx,BYTE PTR [rcx+0x9]
- 21d:	48 c1 e3 08          	shl    rbx,0x8
- 221:	48 0f b6 79 08       	movzx  rdi,BYTE PTR [rcx+0x8]
- 226:	48 09 fb             	or     rbx,rdi
- 229:	48 0f b6 79 0a       	movzx  rdi,BYTE PTR [rcx+0xa]
- 22e:	48 c1 e7 10          	shl    rdi,0x10
- 232:	48 09 fb             	or     rbx,rdi
- 235:	48 0f b6 79 0b       	movzx  rdi,BYTE PTR [rcx+0xb]
- 23a:	48 c1 e7 18          	shl    rdi,0x18
- 23e:	48 09 fb             	or     rbx,rdi
- 241:	48 89 c7             	mov    rdi,rax
- 244:	48 83 e7 01          	and    rdi,0x1
- 248:	48 85 ff             	test   rdi,rdi
- 24b:	0f 84 8d fe ff ff    	je     0xde
- 251:	48 c1 e3 20          	shl    rbx,0x20
- 255:	49 c1 e6 20          	shl    r14,0x20
- 259:	49 c1 ee 20          	shr    r14,0x20
- 25d:	4c 09 f3             	or     rbx,r14
- 260:	49 31 dd             	xor    r13,rbx
- 263:	e9 90 fe ff ff       	jmp    0xf8
- 268:	48 89 df             	mov    rdi,rbx
- 26b:	48 c1 ef 38          	shr    rdi,0x38
- 26f:	48 8b 75 f8          	mov    rsi,QWORD PTR [rbp-0x8]
- 273:	40 88 7e 07          	mov    BYTE PTR [rsi+0x7],dil
- 277:	48 89 df             	mov    rdi,rbx
- 27a:	48 c1 ef 30          	shr    rdi,0x30
- 27e:	40 88 7e 06          	mov    BYTE PTR [rsi+0x6],dil
- 282:	48 89 df             	mov    rdi,rbx
- 285:	48 c1 ef 28          	shr    rdi,0x28
- 289:	40 88 7e 05          	mov    BYTE PTR [rsi+0x5],dil
- 28d:	48 89 df             	mov    rdi,rbx
- 290:	48 c1 ef 20          	shr    rdi,0x20
- 294:	40 88 7e 04          	mov    BYTE PTR [rsi+0x4],dil
- 298:	48 89 df             	mov    rdi,rbx
- 29b:	48 c1 ef 18          	shr    rdi,0x18
- 29f:	40 88 7e 03          	mov    BYTE PTR [rsi+0x3],dil
- 2a3:	48 89 df             	mov    rdi,rbx
- 2a6:	48 c1 ef 10          	shr    rdi,0x10
- 2aa:	40 88 7e 02          	mov    BYTE PTR [rsi+0x2],dil
- 2ae:	88 5e 00             	mov    BYTE PTR [rsi+0x0],bl
- 2b1:	48 c1 eb 08          	shr    rbx,0x8
- 2b5:	88 5e 01             	mov    BYTE PTR [rsi+0x1],bl
- 2b8:	b8 02 00 00 00       	mov    eax,0x2
- 2bd:	41 5f                	pop    r15
- 2bf:	41 5e                	pop    r14
- 2c1:	41 5d                	pop    r13
- 2c3:	5b                   	pop    rbx
- 2c4:	c9                   	leave
- 2c5:	c3                   	ret
+not captured
 ```

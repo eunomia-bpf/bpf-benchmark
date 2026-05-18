@@ -19,23 +19,20 @@ BTF_ID_FLAGS(func, bpf_x86_notq)
 BTF_ID_FLAGS(func, bpf_x86_notw)
 BTF_KFUNCS_END(bpf_x86_not_kfunc_ids)
 
-static __always_inline int decode_not_reg_payload(u64 payload, u8 *dst_reg)
+#define X86_FORM_IMM		2
+#define X86_FORM_ARCH_IMM	13
+
+static __always_inline int decode_not_payload(u64 payload, u8 *dst_reg,
+					      bool *arch_reg)
 {
-	*dst_reg = kinsn_payload_reg(payload, 0);
-
-	if (payload >> 4)
+	payload = kinsn_payload_decode(payload);
+	*arch_reg = (payload & 0xf) == X86_FORM_ARCH_IMM;
+	if ((payload & 0xf) != X86_FORM_IMM &&
+	    (payload & 0xf) != X86_FORM_ARCH_IMM)
 		return -EINVAL;
-	if (!kinsn_x86_operand_valid(*dst_reg))
-		return -EINVAL;
+	*dst_reg = kinsn_payload_reg(payload, 4);
 
-	return 0;
-}
-
-static __always_inline int decode_not_narrow_payload(u64 payload, u8 *dst_reg)
-{
-	*dst_reg = kinsn_payload_reg(payload, 0);
-
-	if (payload >> 4)
+	if (payload >> 8)
 		return -EINVAL;
 	if (!kinsn_x86_operand_valid(*dst_reg))
 		return -EINVAL;
@@ -49,15 +46,21 @@ static int instantiate_not_narrow(u64 payload, struct bpf_insn *insn_buf,
 	u8 dst_reg;
 	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0) |
 			   KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH1);
+	bool arch_reg;
 	int cnt = 0;
 	int err;
 
-	err = decode_not_narrow_payload(payload, &dst_reg);
+	err = decode_not_payload(payload, &dst_reg, &arch_reg);
 	if (err)
 		return err;
 
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0, dst_reg);
+	if (arch_reg)
+		kinsn_x86_read64_arch(insn_buf, &cnt, KINSN_X86_SCRATCH0,
+				      dst_reg);
+	else
+		kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0,
+				 dst_reg);
 	insn_buf[cnt++] = BPF_MOV64_REG(KINSN_X86_SCRATCH1,
 					KINSN_X86_SCRATCH0);
 	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, KINSN_X86_SCRATCH1,
@@ -68,8 +71,12 @@ static int instantiate_not_narrow(u64 payload, struct bpf_insn *insn_buf,
 					mask);
 	insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, KINSN_X86_SCRATCH0,
 					KINSN_X86_SCRATCH1);
-	kinsn_x86_write64(insn_buf, &cnt, dst_reg, KINSN_X86_SCRATCH0,
-			  scratch_mask);
+	if (arch_reg)
+		kinsn_x86_write64_arch(insn_buf, &cnt, dst_reg,
+				       KINSN_X86_SCRATCH0, scratch_mask);
+	else
+		kinsn_x86_write64(insn_buf, &cnt, dst_reg,
+				  KINSN_X86_SCRATCH0, scratch_mask);
 	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
 	return cnt;
 }
@@ -88,22 +95,32 @@ static int instantiate_notl_r(u64 payload, struct bpf_insn *insn_buf)
 {
 	u8 dst_reg;
 	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0);
+	bool arch_reg;
 	int cnt = 0;
 	int err;
 
-	err = decode_not_reg_payload(payload, &dst_reg);
+	err = decode_not_payload(payload, &dst_reg, &arch_reg);
 	if (err)
 		return err;
 
-	if (!kinsn_x86_reg_is_shadowed(dst_reg)) {
+	if (!arch_reg && !kinsn_x86_reg_is_shadowed(dst_reg)) {
 		insn_buf[0] = BPF_ALU32_IMM(BPF_XOR, dst_reg, -1);
 		return 1;
 	}
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	kinsn_x86_read32(insn_buf, &cnt, KINSN_X86_SCRATCH0, dst_reg);
+	if (arch_reg)
+		kinsn_x86_read32_arch(insn_buf, &cnt, KINSN_X86_SCRATCH0,
+				      dst_reg);
+	else
+		kinsn_x86_read32(insn_buf, &cnt, KINSN_X86_SCRATCH0,
+				 dst_reg);
 	insn_buf[cnt++] = BPF_ALU32_IMM(BPF_XOR, KINSN_X86_SCRATCH0, -1);
-	kinsn_x86_write32(insn_buf, &cnt, dst_reg, KINSN_X86_SCRATCH0,
-			  scratch_mask);
+	if (arch_reg)
+		kinsn_x86_write32_arch(insn_buf, &cnt, dst_reg,
+				       KINSN_X86_SCRATCH0, scratch_mask);
+	else
+		kinsn_x86_write32(insn_buf, &cnt, dst_reg,
+				  KINSN_X86_SCRATCH0, scratch_mask);
 	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
 	return cnt;
 }
@@ -112,22 +129,32 @@ static int instantiate_notq_r(u64 payload, struct bpf_insn *insn_buf)
 {
 	u8 dst_reg;
 	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0);
+	bool arch_reg;
 	int cnt = 0;
 	int err;
 
-	err = decode_not_reg_payload(payload, &dst_reg);
+	err = decode_not_payload(payload, &dst_reg, &arch_reg);
 	if (err)
 		return err;
 
-	if (!kinsn_x86_reg_is_shadowed(dst_reg)) {
+	if (!arch_reg && !kinsn_x86_reg_is_shadowed(dst_reg)) {
 		insn_buf[0] = BPF_ALU64_IMM(BPF_XOR, dst_reg, -1);
 		return 1;
 	}
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
-	kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0, dst_reg);
+	if (arch_reg)
+		kinsn_x86_read64_arch(insn_buf, &cnt, KINSN_X86_SCRATCH0,
+				      dst_reg);
+	else
+		kinsn_x86_read64(insn_buf, &cnt, KINSN_X86_SCRATCH0,
+				 dst_reg);
 	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_XOR, KINSN_X86_SCRATCH0, -1);
-	kinsn_x86_write64(insn_buf, &cnt, dst_reg, KINSN_X86_SCRATCH0,
-			  scratch_mask);
+	if (arch_reg)
+		kinsn_x86_write64_arch(insn_buf, &cnt, dst_reg,
+				       KINSN_X86_SCRATCH0, scratch_mask);
+	else
+		kinsn_x86_write64(insn_buf, &cnt, dst_reg,
+				  KINSN_X86_SCRATCH0, scratch_mask);
 	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
 	return cnt;
 }
@@ -138,17 +165,16 @@ static int emit_not_r_x86(u8 *image, u32 *off, bool emit, u64 payload,
 {
 	u8 buf[8];
 	u8 dst_reg;
+	bool arch_reg;
 	u32 len = 0;
 	int err;
 
-	if (is8 || is16)
-		err = decode_not_narrow_payload(payload, &dst_reg);
-	else
-		err = decode_not_reg_payload(payload, &dst_reg);
+	err = decode_not_payload(payload, &dst_reg, &arch_reg);
 	if (err)
 		return err;
 
-	dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
+	if (!arch_reg)
+		dst_reg = kinsn_x86_reg_for_prog(prog, dst_reg);
 	if (!kinsn_x86_valid(dst_reg))
 		return -EINVAL;
 

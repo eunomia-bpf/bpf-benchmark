@@ -344,7 +344,8 @@ static __always_inline int decode_setcc_emit_payload(u64 payload, u8 *dst_reg)
 			return -EINVAL;
 		return 0;
 	}
-	if (kind == X86_FLAG_PAYLOAD_STACK) {
+	if (kind == X86_FLAG_PAYLOAD_STACK ||
+	    kind == X86_FLAG_PAYLOAD_ARCH_STACK) {
 		if (payload >> 20)
 			return -EINVAL;
 		if ((payload & (0xfULL << 4)) || (payload & (0xfULL << 8)) ||
@@ -1264,13 +1265,15 @@ static int instantiate_setcc_stack_flag(u64 payload, struct bpf_insn *insn_buf,
 	u8 dst_reg = kinsn_payload_reg(payload, 0);
 	u8 tmp_high_reg, tmp_flag_reg;
 	u32 scratch_mask;
-	bool dst_stacked;
+	bool dst_stacked, arch_reg;
 	int cnt = 0;
 
 	if (decode_setcc_emit_payload(payload, &dst_reg))
 		return -EINVAL;
 
-	dst_stacked = kinsn_x86_reg_is_shadowed(dst_reg) ||
+	arch_reg = kinsn_payload_reg(payload, 16) ==
+		   X86_FLAG_PAYLOAD_ARCH_STACK;
+	dst_stacked = arch_reg || kinsn_x86_reg_is_shadowed(dst_reg) ||
 		      kinsn_x86_is_scratch(dst_reg);
 	tmp_high_reg = kinsn_x86_scratch_avoid(dst_reg, 0, 0);
 	tmp_flag_reg = kinsn_x86_scratch_avoid(dst_reg, tmp_high_reg, 0);
@@ -1281,7 +1284,11 @@ static int instantiate_setcc_stack_flag(u64 payload, struct bpf_insn *insn_buf,
 		scratch_mask |= KINSN_X86_SCRATCH_MASK(tmp_high_reg);
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
 	if (dst_stacked) {
-		kinsn_x86_read64(insn_buf, &cnt, tmp_high_reg, dst_reg);
+		if (arch_reg)
+			kinsn_x86_read64_arch(insn_buf, &cnt, tmp_high_reg,
+					      dst_reg);
+		else
+			kinsn_x86_read64(insn_buf, &cnt, tmp_high_reg, dst_reg);
 		insn_buf[cnt++] = BPF_ALU64_IMM(BPF_AND, tmp_high_reg, -256);
 	}
 	insn_buf[cnt++] = BPF_LDX_MEM(BPF_W, tmp_flag_reg, BPF_REG_10,
@@ -1291,8 +1298,12 @@ static int instantiate_setcc_stack_flag(u64 payload, struct bpf_insn *insn_buf,
 	if (dst_stacked) {
 		insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, tmp_high_reg,
 						tmp_flag_reg);
-		kinsn_x86_write64(insn_buf, &cnt, dst_reg, tmp_high_reg,
-				  scratch_mask);
+		if (arch_reg)
+			kinsn_x86_write64_arch(insn_buf, &cnt, dst_reg,
+					       tmp_high_reg, scratch_mask);
+		else
+			kinsn_x86_write64(insn_buf, &cnt, dst_reg,
+					  tmp_high_reg, scratch_mask);
 	} else {
 		kinsn_x86_write64(insn_buf, &cnt, dst_reg, tmp_flag_reg,
 				  scratch_mask);
@@ -1304,7 +1315,8 @@ static int instantiate_setcc_stack_flag(u64 payload, struct bpf_insn *insn_buf,
 static int instantiate_setcc_dispatch(u64 payload, struct bpf_insn *insn_buf,
 				      u8 op)
 {
-	if (kinsn_payload_reg(payload, 16) == X86_FLAG_PAYLOAD_STACK) {
+	if (kinsn_payload_reg(payload, 16) == X86_FLAG_PAYLOAD_STACK ||
+	    kinsn_payload_reg(payload, 16) == X86_FLAG_PAYLOAD_ARCH_STACK) {
 		if (op == BPF_JNE)
 			return instantiate_setcc_stack_flag(payload, insn_buf,
 							   KINSN_X86_SHADOW_ZF_OFF,

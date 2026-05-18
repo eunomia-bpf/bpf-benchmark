@@ -92,11 +92,85 @@ DEFINE_STAGED_INPUT_XDP_BENCH(
 ```asm
 Disassembly of section .init:
 
+0000000000001000 <_init>:
+    1000:	f3 0f 1e fa          	endbr64
+    1004:	48 83 ec 08          	sub    rsp,0x8
+    1008:	48 8b 05 c1 2f 00 00 	mov    rax,QWORD PTR [rip+0x2fc1]        # 3fd0 <__gmon_start__@Base>
+    100f:	48 85 c0             	test   rax,rax
+    1012:	74 02                	je     1016 <_init+0x16>
+    1014:	ff d0                	call   rax
+    1016:	48 83 c4 08          	add    rsp,0x8
+    101a:	c3                   	ret
+
 Disassembly of section .plt:
+
+0000000000001020 <.plt>:
+    1020:	ff 35 ca 2f 00 00    	push   QWORD PTR [rip+0x2fca]        # 3ff0 <_GLOBAL_OFFSET_TABLE_+0x8>
+    1026:	ff 25 cc 2f 00 00    	jmp    QWORD PTR [rip+0x2fcc]        # 3ff8 <_GLOBAL_OFFSET_TABLE_+0x10>
+    102c:	0f 1f 40 00          	nop    DWORD PTR [rax+0x0]
 
 Disassembly of section .plt.got:
 
+0000000000001030 <__cxa_finalize@plt>:
+    1030:	ff 25 aa 2f 00 00    	jmp    QWORD PTR [rip+0x2faa]        # 3fe0 <__cxa_finalize@GLIBC_2.2.5>
+    1036:	66 90                	xchg   ax,ax
+
 Disassembly of section .text:
+
+0000000000001040 <deregister_tm_clones>:
+    1040:	48 8d 3d c9 2f 00 00 	lea    rdi,[rip+0x2fc9]        # 4010 <__TMC_END__>
+    1047:	48 8d 05 c2 2f 00 00 	lea    rax,[rip+0x2fc2]        # 4010 <__TMC_END__>
+    104e:	48 39 f8             	cmp    rax,rdi
+    1051:	74 15                	je     1068 <deregister_tm_clones+0x28>
+    1053:	48 8b 05 6e 2f 00 00 	mov    rax,QWORD PTR [rip+0x2f6e]        # 3fc8 <_ITM_deregisterTMCloneTable@Base>
+    105a:	48 85 c0             	test   rax,rax
+    105d:	74 09                	je     1068 <deregister_tm_clones+0x28>
+    105f:	ff e0                	jmp    rax
+    1061:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
+    1068:	c3                   	ret
+    1069:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
+
+0000000000001070 <register_tm_clones>:
+    1070:	48 8d 3d 99 2f 00 00 	lea    rdi,[rip+0x2f99]        # 4010 <__TMC_END__>
+    1077:	48 8d 35 92 2f 00 00 	lea    rsi,[rip+0x2f92]        # 4010 <__TMC_END__>
+    107e:	48 29 fe             	sub    rsi,rdi
+    1081:	48 89 f0             	mov    rax,rsi
+    1084:	48 c1 ee 3f          	shr    rsi,0x3f
+    1088:	48 c1 f8 03          	sar    rax,0x3
+    108c:	48 01 c6             	add    rsi,rax
+    108f:	48 d1 fe             	sar    rsi,1
+    1092:	74 14                	je     10a8 <register_tm_clones+0x38>
+    1094:	48 8b 05 3d 2f 00 00 	mov    rax,QWORD PTR [rip+0x2f3d]        # 3fd8 <_ITM_registerTMCloneTable@Base>
+    109b:	48 85 c0             	test   rax,rax
+    109e:	74 08                	je     10a8 <register_tm_clones+0x38>
+    10a0:	ff e0                	jmp    rax
+    10a2:	66 0f 1f 44 00 00    	nop    WORD PTR [rax+rax*1+0x0]
+    10a8:	c3                   	ret
+    10a9:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
+
+00000000000010b0 <__do_global_dtors_aux>:
+    10b0:	f3 0f 1e fa          	endbr64
+    10b4:	80 3d 51 2f 00 00 00 	cmp    BYTE PTR [rip+0x2f51],0x0        # 400c <completed.0>
+    10bb:	75 2b                	jne    10e8 <__do_global_dtors_aux+0x38>
+    10bd:	55                   	push   rbp
+    10be:	48 83 3d 1a 2f 00 00 	cmp    QWORD PTR [rip+0x2f1a],0x0        # 3fe0 <__cxa_finalize@GLIBC_2.2.5>
+    10c5:	00 
+    10c6:	48 89 e5             	mov    rbp,rsp
+    10c9:	74 0c                	je     10d7 <__do_global_dtors_aux+0x27>
+    10cb:	48 8b 3d 2e 2f 00 00 	mov    rdi,QWORD PTR [rip+0x2f2e]        # 4000 <__dso_handle>
+    10d2:	e8 59 ff ff ff       	call   1030 <__cxa_finalize@plt>
+    10d7:	e8 64 ff ff ff       	call   1040 <deregister_tm_clones>
+    10dc:	c6 05 29 2f 00 00 01 	mov    BYTE PTR [rip+0x2f29],0x1        # 400c <completed.0>
+    10e3:	5d                   	pop    rbp
+    10e4:	c3                   	ret
+    10e5:	0f 1f 00             	nop    DWORD PTR [rax]
+    10e8:	c3                   	ret
+    10e9:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
+
+00000000000010f0 <frame_dummy>:
+    10f0:	f3 0f 1e fa          	endbr64
+    10f4:	e9 77 ff ff ff       	jmp    1070 <register_tm_clones>
+    10f9:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
 
 0000000000001100 <tracee_http_method_prefix_detect_xdp>:
     1100:	48 8b 17             	mov    rdx,QWORD PTR [rdi]
@@ -115,161 +189,170 @@ Disassembly of section .text:
     1128:	75 e4                	jne    110e <tracee_http_method_prefix_detect_xdp+0xe>
     112a:	83 7a 0c 10          	cmp    DWORD PTR [rdx+0xc],0x10
     112e:	75 de                	jne    110e <tracee_http_method_prefix_detect_xdp+0xe>
-    1130:	41 57                	push   r15
-    1132:	41 56                	push   r14
-    1134:	53                   	push   rbx
-    1135:	48 8d 42 16          	lea    rax,[rdx+0x16]
-    1139:	48 bb 2f 64 bd 78 64 	movabs rbx,0xa0761d6478bd642f
-    1140:	1d 76 a0 
-    1143:	b9 01 00 00 00       	mov    ecx,0x1
-    1148:	48 8d 35 b1 0e 00 00 	lea    rsi,[rip+0xeb1]        # 2000 <_fini+0xc98>
-    114f:	90                   	nop
-    1150:	48 89 df             	mov    rdi,rbx
-    1153:	44 0f b6 40 fa       	movzx  r8d,BYTE PTR [rax-0x6]
-    1158:	44 0f b6 48 fb       	movzx  r9d,BYTE PTR [rax-0x5]
-    115d:	45 8d 58 bc          	lea    r11d,[r8-0x44]
-    1161:	41 83 fb 0c          	cmp    r11d,0xc
-    1165:	0f 87 55 01 00 00    	ja     12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    116b:	45 0f b6 d1          	movzx  r10d,r9b
-    116f:	4e 63 1c 9e          	movsxd r11,DWORD PTR [rsi+r11*4]
-    1173:	49 01 f3             	add    r11,rsi
-    1176:	41 ff e3             	jmp    r11
-    1179:	41 80 f9 45          	cmp    r9b,0x45
-    117d:	0f 85 3d 01 00 00    	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    1183:	41 b1 45             	mov    r9b,0x45
-    1186:	80 78 fc 4c          	cmp    BYTE PTR [rax-0x4],0x4c
-    118a:	0f 85 30 01 00 00    	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    1190:	80 78 fd 45          	cmp    BYTE PTR [rax-0x3],0x45
-    1194:	0f 85 26 01 00 00    	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    119a:	80 78 fe 54          	cmp    BYTE PTR [rax-0x2],0x54
-    119e:	0f 85 1c 01 00 00    	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    11a4:	80 78 ff 45          	cmp    BYTE PTR [rax-0x1],0x45
-    11a8:	0f 85 12 01 00 00    	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    11ae:	b3 45                	mov    bl,0x45
-    11b0:	80 38 20             	cmp    BYTE PTR [rax],0x20
-    11b3:	0f 85 07 01 00 00    	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    11b9:	41 ba 04 00 00 00    	mov    r10d,0x4
-    11bf:	41 b1 4c             	mov    r9b,0x4c
-    11c2:	41 b3 45             	mov    r11b,0x45
-    11c5:	e9 05 01 00 00       	jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf>
-    11ca:	66 0f 1f 44 00 00    	nop    WORD PTR [rax+rax*1+0x0]
-    11d0:	41 83 fa 54          	cmp    r10d,0x54
-    11d4:	0f 84 9b 00 00 00    	je     1275 <tracee_http_method_prefix_detect_xdp+0x175>
-    11da:	41 83 fa 45          	cmp    r10d,0x45
-    11de:	0f 85 dc 00 00 00    	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    11e4:	41 b1 45             	mov    r9b,0x45
-    11e7:	80 78 fc 41          	cmp    BYTE PTR [rax-0x4],0x41
-    11eb:	0f 85 cf 00 00 00    	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    11f1:	80 78 fd 44          	cmp    BYTE PTR [rax-0x3],0x44
-    11f5:	0f 85 c5 00 00 00    	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    11fb:	41 b3 45             	mov    r11b,0x45
-    11fe:	80 78 fe 20          	cmp    BYTE PTR [rax-0x2],0x20
-    1202:	0f 85 b8 00 00 00    	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    1208:	41 ba 05 00 00 00    	mov    r10d,0x5
-    120e:	41 b1 41             	mov    r9b,0x41
-    1211:	b3 44                	mov    bl,0x44
-    1213:	e9 b7 00 00 00       	jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf>
-    1218:	41 80 f9 45          	cmp    r9b,0x45
-    121c:	0f 85 9e 00 00 00    	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    1222:	41 b1 45             	mov    r9b,0x45
-    1225:	80 78 fc 54          	cmp    BYTE PTR [rax-0x4],0x54
-    1229:	0f 85 91 00 00 00    	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    122f:	41 b3 45             	mov    r11b,0x45
-    1232:	80 78 fd 20          	cmp    BYTE PTR [rax-0x3],0x20
-    1236:	0f 85 84 00 00 00    	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    123c:	41 ba 01 00 00 00    	mov    r10d,0x1
-    1242:	eb 6b                	jmp    12af <tracee_http_method_prefix_detect_xdp+0x1af>
-    1244:	41 83 fa 55          	cmp    r10d,0x55
-    1248:	74 4d                	je     1297 <tracee_http_method_prefix_detect_xdp+0x197>
-    124a:	41 83 fa 4f          	cmp    r10d,0x4f
-    124e:	75 70                	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    1250:	41 b1 4f             	mov    r9b,0x4f
-    1253:	80 78 fc 53          	cmp    BYTE PTR [rax-0x4],0x53
-    1257:	75 67                	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    1259:	80 78 fd 54          	cmp    BYTE PTR [rax-0x3],0x54
-    125d:	75 61                	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    125f:	41 b3 4f             	mov    r11b,0x4f
-    1262:	80 78 fe 20          	cmp    BYTE PTR [rax-0x2],0x20
-    1266:	75 58                	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    1268:	41 ba 02 00 00 00    	mov    r10d,0x2
-    126e:	41 b1 53             	mov    r9b,0x53
-    1271:	b3 54                	mov    bl,0x54
-    1273:	eb 5a                	jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf>
-    1275:	41 b1 54             	mov    r9b,0x54
-    1278:	80 78 fc 54          	cmp    BYTE PTR [rax-0x4],0x54
-    127c:	75 42                	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    127e:	80 78 fd 50          	cmp    BYTE PTR [rax-0x3],0x50
-    1282:	75 3c                	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    1284:	80 78 fe 2f          	cmp    BYTE PTR [rax-0x2],0x2f
-    1288:	75 36                	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    128a:	41 ba 06 00 00 00    	mov    r10d,0x6
-    1290:	b3 50                	mov    bl,0x50
-    1292:	41 b3 54             	mov    r11b,0x54
-    1295:	eb 38                	jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf>
-    1297:	41 b1 55             	mov    r9b,0x55
-    129a:	80 78 fc 54          	cmp    BYTE PTR [rax-0x4],0x54
-    129e:	75 20                	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    12a0:	41 b3 55             	mov    r11b,0x55
-    12a3:	80 78 fd 20          	cmp    BYTE PTR [rax-0x3],0x20
-    12a7:	75 17                	jne    12c0 <tracee_http_method_prefix_detect_xdp+0x1c0>
-    12a9:	41 ba 03 00 00 00    	mov    r10d,0x3
-    12af:	41 b1 54             	mov    r9b,0x54
-    12b2:	b3 20                	mov    bl,0x20
-    12b4:	eb 19                	jmp    12cf <tracee_http_method_prefix_detect_xdp+0x1cf>
-    12b6:	66 2e 0f 1f 84 00 00 	cs nop WORD PTR [rax+rax*1+0x0]
-    12bd:	00 00 00 
-    12c0:	45 89 cb             	mov    r11d,r9d
-    12c3:	44 0f b6 48 fc       	movzx  r9d,BYTE PTR [rax-0x4]
-    12c8:	0f b6 58 fd          	movzx  ebx,BYTE PTR [rax-0x3]
-    12cc:	45 31 d2             	xor    r10d,r10d
-    12cf:	0f b6 db             	movzx  ebx,bl
-    12d2:	45 8d 72 01          	lea    r14d,[r10+0x1]
-    12d6:	4c 8d 79 0a          	lea    r15,[rcx+0xa]
-    12da:	4d 0f af f7          	imul   r14,r15
-    12de:	4c 01 f7             	add    rdi,r14
-    12e1:	48 c1 e3 20          	shl    rbx,0x20
-    12e5:	45 0f b6 c9          	movzx  r9d,r9b
-    12e9:	41 c1 e1 18          	shl    r9d,0x18
-    12ed:	45 0f b6 db          	movzx  r11d,r11b
-    12f1:	41 c1 e3 10          	shl    r11d,0x10
-    12f5:	41 c1 e0 08          	shl    r8d,0x8
-    12f9:	45 09 d8             	or     r8d,r11d
-    12fc:	45 09 c8             	or     r8d,r9d
-    12ff:	49 09 d8             	or     r8,rbx
-    1302:	44 89 d3             	mov    ebx,r10d
-    1305:	4c 09 c3             	or     rbx,r8
-    1308:	48 d3 e3             	shl    rbx,cl
-    130b:	48 31 fb             	xor    rbx,rdi
-    130e:	48 83 c0 10          	add    rax,0x10
-    1312:	48 ff c1             	inc    rcx
-    1315:	48 83 f9 09          	cmp    rcx,0x9
-    1319:	0f 85 31 fe ff ff    	jne    1150 <tracee_http_method_prefix_detect_xdp+0x50>
-    131f:	40 88 3a             	mov    BYTE PTR [rdx],dil
-    1322:	88 7a 01             	mov    BYTE PTR [rdx+0x1],bh
-    1325:	89 d8                	mov    eax,ebx
-    1327:	c1 e8 10             	shr    eax,0x10
-    132a:	88 42 02             	mov    BYTE PTR [rdx+0x2],al
-    132d:	89 d8                	mov    eax,ebx
-    132f:	c1 e8 18             	shr    eax,0x18
-    1332:	88 42 03             	mov    BYTE PTR [rdx+0x3],al
-    1335:	48 89 d8             	mov    rax,rbx
-    1338:	48 c1 e8 20          	shr    rax,0x20
-    133c:	88 42 04             	mov    BYTE PTR [rdx+0x4],al
-    133f:	48 89 d8             	mov    rax,rbx
-    1342:	48 c1 e8 28          	shr    rax,0x28
-    1346:	88 42 05             	mov    BYTE PTR [rdx+0x5],al
-    1349:	48 89 d8             	mov    rax,rbx
-    134c:	48 c1 e8 30          	shr    rax,0x30
-    1350:	88 42 06             	mov    BYTE PTR [rdx+0x6],al
-    1353:	48 c1 eb 38          	shr    rbx,0x38
-    1357:	88 5a 07             	mov    BYTE PTR [rdx+0x7],bl
-    135a:	b8 02 00 00 00       	mov    eax,0x2
-    135f:	5b                   	pop    rbx
-    1360:	41 5e                	pop    r14
-    1362:	41 5f                	pop    r15
-    1364:	c3                   	ret
+    1130:	41 56                	push   r14
+    1132:	53                   	push   rbx
+    1133:	48 8d 42 16          	lea    rax,[rdx+0x16]
+    1137:	48 bb 2f 64 bd 78 64 	movabs rbx,0xa0761d6478bd642f
+    113e:	1d 76 a0 
+    1141:	b9 01 00 00 00       	mov    ecx,0x1
+    1146:	66 2e 0f 1f 84 00 00 	cs nop WORD PTR [rax+rax*1+0x0]
+    114d:	00 00 00 
+    1150:	48 89 de             	mov    rsi,rbx
+    1153:	0f b6 78 fa          	movzx  edi,BYTE PTR [rax-0x6]
+    1157:	44 0f b6 40 fb       	movzx  r8d,BYTE PTR [rax-0x5]
+    115c:	83 ff 47             	cmp    edi,0x47
+    115f:	7f 4f                	jg     11b0 <tracee_http_method_prefix_detect_xdp+0xb0>
+    1161:	83 ff 44             	cmp    edi,0x44
+    1164:	0f 84 a5 00 00 00    	je     120f <tracee_http_method_prefix_detect_xdp+0x10f>
+    116a:	83 ff 47             	cmp    edi,0x47
+    116d:	0f 85 6d 01 00 00    	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    1173:	41 80 f8 45          	cmp    r8b,0x45
+    1177:	0f 85 63 01 00 00    	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    117d:	41 b0 45             	mov    r8b,0x45
+    1180:	80 78 fc 54          	cmp    BYTE PTR [rax-0x4],0x54
+    1184:	0f 85 56 01 00 00    	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    118a:	41 b2 45             	mov    r10b,0x45
+    118d:	80 78 fd 20          	cmp    BYTE PTR [rax-0x3],0x20
+    1191:	0f 85 49 01 00 00    	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    1197:	41 b9 01 00 00 00    	mov    r9d,0x1
+    119d:	e9 09 01 00 00       	jmp    12ab <tracee_http_method_prefix_detect_xdp+0x1ab>
+    11a2:	66 66 66 66 66 2e 0f 	data16 data16 data16 data16 cs nop WORD PTR [rax+rax*1+0x0]
+    11a9:	1f 84 00 00 00 00 00 
+    11b0:	45 0f b6 c8          	movzx  r9d,r8b
+    11b4:	83 ff 48             	cmp    edi,0x48
+    11b7:	0f 84 a4 00 00 00    	je     1261 <tracee_http_method_prefix_detect_xdp+0x161>
+    11bd:	83 ff 50             	cmp    edi,0x50
+    11c0:	0f 85 1a 01 00 00    	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    11c6:	41 83 f9 55          	cmp    r9d,0x55
+    11ca:	0f 84 c3 00 00 00    	je     1293 <tracee_http_method_prefix_detect_xdp+0x193>
+    11d0:	41 83 f9 4f          	cmp    r9d,0x4f
+    11d4:	0f 85 06 01 00 00    	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    11da:	41 b0 4f             	mov    r8b,0x4f
+    11dd:	80 78 fc 53          	cmp    BYTE PTR [rax-0x4],0x53
+    11e1:	0f 85 f9 00 00 00    	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    11e7:	80 78 fd 54          	cmp    BYTE PTR [rax-0x3],0x54
+    11eb:	0f 85 ef 00 00 00    	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    11f1:	41 b2 4f             	mov    r10b,0x4f
+    11f4:	80 78 fe 20          	cmp    BYTE PTR [rax-0x2],0x20
+    11f8:	0f 85 e2 00 00 00    	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    11fe:	41 b9 02 00 00 00    	mov    r9d,0x2
+    1204:	41 b0 53             	mov    r8b,0x53
+    1207:	41 b3 54             	mov    r11b,0x54
+    120a:	e9 e1 00 00 00       	jmp    12f0 <tracee_http_method_prefix_detect_xdp+0x1f0>
+    120f:	41 80 f8 45          	cmp    r8b,0x45
+    1213:	0f 85 c7 00 00 00    	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    1219:	41 b0 45             	mov    r8b,0x45
+    121c:	80 78 fc 4c          	cmp    BYTE PTR [rax-0x4],0x4c
+    1220:	0f 85 ba 00 00 00    	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    1226:	80 78 fd 45          	cmp    BYTE PTR [rax-0x3],0x45
+    122a:	0f 85 b0 00 00 00    	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    1230:	80 78 fe 54          	cmp    BYTE PTR [rax-0x2],0x54
+    1234:	0f 85 a6 00 00 00    	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    123a:	80 78 ff 45          	cmp    BYTE PTR [rax-0x1],0x45
+    123e:	0f 85 9c 00 00 00    	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    1244:	41 b3 45             	mov    r11b,0x45
+    1247:	80 38 20             	cmp    BYTE PTR [rax],0x20
+    124a:	0f 85 90 00 00 00    	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    1250:	41 b9 04 00 00 00    	mov    r9d,0x4
+    1256:	41 b0 4c             	mov    r8b,0x4c
+    1259:	41 b2 45             	mov    r10b,0x45
+    125c:	e9 8f 00 00 00       	jmp    12f0 <tracee_http_method_prefix_detect_xdp+0x1f0>
+    1261:	41 83 f9 54          	cmp    r9d,0x54
+    1265:	74 4c                	je     12b3 <tracee_http_method_prefix_detect_xdp+0x1b3>
+    1267:	41 83 f9 45          	cmp    r9d,0x45
+    126b:	75 73                	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    126d:	41 b0 45             	mov    r8b,0x45
+    1270:	80 78 fc 41          	cmp    BYTE PTR [rax-0x4],0x41
+    1274:	75 6a                	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    1276:	80 78 fd 44          	cmp    BYTE PTR [rax-0x3],0x44
+    127a:	75 64                	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    127c:	41 b2 45             	mov    r10b,0x45
+    127f:	80 78 fe 20          	cmp    BYTE PTR [rax-0x2],0x20
+    1283:	75 5b                	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    1285:	41 b9 05 00 00 00    	mov    r9d,0x5
+    128b:	41 b0 41             	mov    r8b,0x41
+    128e:	41 b3 44             	mov    r11b,0x44
+    1291:	eb 5d                	jmp    12f0 <tracee_http_method_prefix_detect_xdp+0x1f0>
+    1293:	41 b0 55             	mov    r8b,0x55
+    1296:	80 78 fc 54          	cmp    BYTE PTR [rax-0x4],0x54
+    129a:	75 44                	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    129c:	41 b2 55             	mov    r10b,0x55
+    129f:	80 78 fd 20          	cmp    BYTE PTR [rax-0x3],0x20
+    12a3:	75 3b                	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    12a5:	41 b9 03 00 00 00    	mov    r9d,0x3
+    12ab:	41 b0 54             	mov    r8b,0x54
+    12ae:	41 b3 20             	mov    r11b,0x20
+    12b1:	eb 3d                	jmp    12f0 <tracee_http_method_prefix_detect_xdp+0x1f0>
+    12b3:	41 b0 54             	mov    r8b,0x54
+    12b6:	80 78 fc 54          	cmp    BYTE PTR [rax-0x4],0x54
+    12ba:	75 24                	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    12bc:	80 78 fd 50          	cmp    BYTE PTR [rax-0x3],0x50
+    12c0:	75 1e                	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    12c2:	80 78 fe 2f          	cmp    BYTE PTR [rax-0x2],0x2f
+    12c6:	75 18                	jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0>
+    12c8:	41 b9 06 00 00 00    	mov    r9d,0x6
+    12ce:	41 b3 50             	mov    r11b,0x50
+    12d1:	41 b2 54             	mov    r10b,0x54
+    12d4:	eb 1a                	jmp    12f0 <tracee_http_method_prefix_detect_xdp+0x1f0>
+    12d6:	66 2e 0f 1f 84 00 00 	cs nop WORD PTR [rax+rax*1+0x0]
+    12dd:	00 00 00 
+    12e0:	45 89 c2             	mov    r10d,r8d
+    12e3:	44 0f b6 40 fc       	movzx  r8d,BYTE PTR [rax-0x4]
+    12e8:	44 0f b6 58 fd       	movzx  r11d,BYTE PTR [rax-0x3]
+    12ed:	45 31 c9             	xor    r9d,r9d
+    12f0:	45 0f b6 db          	movzx  r11d,r11b
+    12f4:	41 8d 59 01          	lea    ebx,[r9+0x1]
+    12f8:	4c 8d 71 0a          	lea    r14,[rcx+0xa]
+    12fc:	49 0f af de          	imul   rbx,r14
+    1300:	48 01 de             	add    rsi,rbx
+    1303:	49 c1 e3 20          	shl    r11,0x20
+    1307:	45 0f b6 c0          	movzx  r8d,r8b
+    130b:	41 c1 e0 18          	shl    r8d,0x18
+    130f:	45 0f b6 d2          	movzx  r10d,r10b
+    1313:	41 c1 e2 10          	shl    r10d,0x10
+    1317:	c1 e7 08             	shl    edi,0x8
+    131a:	44 09 d7             	or     edi,r10d
+    131d:	44 09 c7             	or     edi,r8d
+    1320:	4c 09 df             	or     rdi,r11
+    1323:	44 89 cb             	mov    ebx,r9d
+    1326:	48 09 fb             	or     rbx,rdi
+    1329:	48 d3 e3             	shl    rbx,cl
+    132c:	48 31 f3             	xor    rbx,rsi
+    132f:	48 83 c0 10          	add    rax,0x10
+    1333:	48 ff c1             	inc    rcx
+    1336:	48 83 f9 09          	cmp    rcx,0x9
+    133a:	0f 85 10 fe ff ff    	jne    1150 <tracee_http_method_prefix_detect_xdp+0x50>
+    1340:	40 88 32             	mov    BYTE PTR [rdx],sil
+    1343:	88 7a 01             	mov    BYTE PTR [rdx+0x1],bh
+    1346:	89 d8                	mov    eax,ebx
+    1348:	c1 e8 10             	shr    eax,0x10
+    134b:	88 42 02             	mov    BYTE PTR [rdx+0x2],al
+    134e:	89 d8                	mov    eax,ebx
+    1350:	c1 e8 18             	shr    eax,0x18
+    1353:	88 42 03             	mov    BYTE PTR [rdx+0x3],al
+    1356:	48 89 d8             	mov    rax,rbx
+    1359:	48 c1 e8 20          	shr    rax,0x20
+    135d:	88 42 04             	mov    BYTE PTR [rdx+0x4],al
+    1360:	48 89 d8             	mov    rax,rbx
+    1363:	48 c1 e8 28          	shr    rax,0x28
+    1367:	88 42 05             	mov    BYTE PTR [rdx+0x5],al
+    136a:	48 89 d8             	mov    rax,rbx
+    136d:	48 c1 e8 30          	shr    rax,0x30
+    1371:	88 42 06             	mov    BYTE PTR [rdx+0x6],al
+    1374:	48 c1 eb 38          	shr    rbx,0x38
+    1378:	88 5a 07             	mov    BYTE PTR [rdx+0x7],bl
+    137b:	b8 02 00 00 00       	mov    eax,0x2
+    1380:	5b                   	pop    rbx
+    1381:	41 5e                	pop    r14
+    1383:	c3                   	ret
 
 Disassembly of section .fini:
+
+0000000000001384 <_fini>:
+    1384:	f3 0f 1e fa          	endbr64
+    1388:	48 83 ec 08          	sub    rsp,0x8
+    138c:	48 83 c4 08          	add    rsp,0x8
+    1390:	c3                   	ret
 ```
 
 ## Original Kernel JIT ASM
@@ -682,184 +765,484 @@ Disassembly of section .data:
      ((__u64)(SCALE) << 12) | ((__u64)(HAS_INDEX) << 14) | \
      ((__u64)(HAS_BASE) << 15) | ((__u64)(__u32)(DISP) << 16))
 
-/*
- * Semantic handcraft for tracee_http_method_prefix_detect.
- * Source: ordinary kernel xlated BPF from the failing handcraft smoke.
- * The stale direct-native handcraft failed verifier with unreachable instructions.
- * Restores XDP ctx loads and replaces same-PC-count pointer address adds with leaq.
- */
-
 static const struct bpf_insn program[] = {
-    HC_RAW(0xb7, BPF_REG_0, BPF_REG_0, 0, 0), /* pc 0 */
-    /* pc 1: XDP data_end ctx load for handcraft loader */
-    HC_LDX(BPF_W, BPF_REG_2, BPF_REG_1, 4),
-    /* pc 2: XDP data ctx load for handcraft loader */
-    HC_LDX(BPF_W, BPF_REG_1, BPF_REG_1, 0),
-    HC_RAW(0x2d, BPF_REG_1, BPF_REG_2, 163, 0), /* pc 3 */
-    /* pc 4-5: r3 = r1 + 8; x86 leaq */
-    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_3, BPF_REG_1, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
-    HC_RAW(0x2d, BPF_REG_3, BPF_REG_2, 160, 0), /* pc 6 */
-    /* pc 7-8: r3 = r1 + 144; x86 leaq */
-    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_3, BPF_REG_1, 0, 0, 1, 0, 144), MICRO_HANDCRAFT_BPF_X86_LEAQ),
-    HC_RAW(0x2d, BPF_REG_3, BPF_REG_2, 157, 0), /* pc 9 */
-    HC_RAW(0x71, BPF_REG_2, BPF_REG_1, 9, 0), /* pc 10 */
-    HC_RAW(0x67, BPF_REG_2, BPF_REG_0, 0, 8), /* pc 11 */
-    HC_RAW(0x71, BPF_REG_3, BPF_REG_1, 8, 0), /* pc 12 */
-    HC_RAW(0x4f, BPF_REG_2, BPF_REG_3, 0, 0), /* pc 13 */
-    HC_RAW(0x71, BPF_REG_3, BPF_REG_1, 10, 0), /* pc 14 */
-    HC_RAW(0x67, BPF_REG_3, BPF_REG_0, 0, 16), /* pc 15 */
-    HC_RAW(0x4f, BPF_REG_2, BPF_REG_3, 0, 0), /* pc 16 */
-    HC_RAW(0x71, BPF_REG_3, BPF_REG_1, 11, 0), /* pc 17 */
-    HC_RAW(0x67, BPF_REG_3, BPF_REG_0, 0, 24), /* pc 18 */
-    HC_RAW(0x4f, BPF_REG_2, BPF_REG_3, 0, 0), /* pc 19 */
-    HC_RAW(0x67, BPF_REG_2, BPF_REG_0, 0, 32), /* pc 20 */
-    HC_RAW(0x77, BPF_REG_2, BPF_REG_0, 0, 32), /* pc 21 */
-    HC_RAW(0x55, BPF_REG_2, BPF_REG_0, 144, 8), /* pc 22 */
-    HC_RAW(0x71, BPF_REG_2, BPF_REG_1, 13, 0), /* pc 23 */
-    HC_RAW(0x67, BPF_REG_2, BPF_REG_0, 0, 8), /* pc 24 */
-    HC_RAW(0x71, BPF_REG_3, BPF_REG_1, 12, 0), /* pc 25 */
-    HC_RAW(0x4f, BPF_REG_2, BPF_REG_3, 0, 0), /* pc 26 */
-    HC_RAW(0x71, BPF_REG_3, BPF_REG_1, 14, 0), /* pc 27 */
-    HC_RAW(0x67, BPF_REG_3, BPF_REG_0, 0, 16), /* pc 28 */
-    HC_RAW(0x4f, BPF_REG_2, BPF_REG_3, 0, 0), /* pc 29 */
-    HC_RAW(0x71, BPF_REG_3, BPF_REG_1, 15, 0), /* pc 30 */
-    HC_RAW(0x67, BPF_REG_3, BPF_REG_0, 0, 24), /* pc 31 */
-    HC_RAW(0x4f, BPF_REG_2, BPF_REG_3, 0, 0), /* pc 32 */
-    HC_RAW(0x67, BPF_REG_2, BPF_REG_0, 0, 32), /* pc 33 */
-    HC_RAW(0x77, BPF_REG_2, BPF_REG_0, 0, 32), /* pc 34 */
-    HC_RAW(0x55, BPF_REG_2, BPF_REG_0, 131, 16), /* pc 35 */
-    HC_RAW(0x18, BPF_REG_3, BPF_REG_0, 0, 2025677871), /* pc 36 */
-    HC_RAW(0x00, BPF_REG_0, BPF_REG_0, 0, -1602871964), /* pc 37 */
-    HC_RAW(0xb7, BPF_REG_2, BPF_REG_0, 0, 1), /* pc 38 */
-    /* pc 39-40: r4 = r1 + 22; x86 leaq */
-    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_4, BPF_REG_1, 0, 0, 1, 0, 22), MICRO_HANDCRAFT_BPF_X86_LEAQ),
-    HC_RAW(0xbf, BPF_REG_5, BPF_REG_3, 0, 0), /* pc 41 */
-    HC_RAW(0x71, BPF_REG_3, BPF_REG_4, -5, 0), /* pc 42 */
-    HC_RAW(0x71, BPF_REG_0, BPF_REG_4, -6, 0), /* pc 43 */
-    HC_RAW(0x65, BPF_REG_0, BPF_REG_0, 13, 71), /* pc 44 */
-    HC_RAW(0x15, BPF_REG_0, BPF_REG_0, 28, 68), /* pc 45 */
-    HC_RAW(0x15, BPF_REG_0, BPF_REG_0, 1, 71), /* pc 46 */
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 74, 0), /* pc 47 */
-    HC_RAW(0x55, BPF_REG_3, BPF_REG_0, 73, 69), /* pc 48 */
-    HC_RAW(0xb7, BPF_REG_3, BPF_REG_0, 0, 69), /* pc 49 */
-    HC_RAW(0x71, BPF_REG_6, BPF_REG_4, -4, 0), /* pc 50 */
-    HC_RAW(0x55, BPF_REG_6, BPF_REG_0, 70, 84), /* pc 51 */
-    HC_RAW(0xb7, BPF_REG_6, BPF_REG_0, 0, 1), /* pc 52 */
-    HC_RAW(0xb7, BPF_REG_8, BPF_REG_0, 0, 84), /* pc 53 */
-    HC_RAW(0xb7, BPF_REG_7, BPF_REG_0, 0, 32), /* pc 54 */
-    HC_RAW(0x71, BPF_REG_9, BPF_REG_4, -3, 0), /* pc 55 */
-    HC_RAW(0x15, BPF_REG_9, BPF_REG_0, 68, 32), /* pc 56 */
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 64, 0), /* pc 57 */
-    HC_RAW(0x15, BPF_REG_0, BPF_REG_0, 31, 72), /* pc 58 */
-    HC_RAW(0x15, BPF_REG_0, BPF_REG_0, 1, 80), /* pc 59 */
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 61, 0), /* pc 60 */
-    HC_RAW(0x15, BPF_REG_3, BPF_REG_0, 41, 85), /* pc 61 */
-    HC_RAW(0x55, BPF_REG_3, BPF_REG_0, 59, 79), /* pc 62 */
-    HC_RAW(0xb7, BPF_REG_3, BPF_REG_0, 0, 79), /* pc 63 */
-    HC_RAW(0x71, BPF_REG_6, BPF_REG_4, -4, 0), /* pc 64 */
-    HC_RAW(0x55, BPF_REG_6, BPF_REG_0, 56, 83), /* pc 65 */
-    HC_RAW(0x71, BPF_REG_6, BPF_REG_4, -3, 0), /* pc 66 */
-    HC_RAW(0x55, BPF_REG_6, BPF_REG_0, 54, 84), /* pc 67 */
-    HC_RAW(0xb7, BPF_REG_6, BPF_REG_0, 0, 2), /* pc 68 */
-    HC_RAW(0xb7, BPF_REG_8, BPF_REG_0, 0, 83), /* pc 69 */
-    HC_RAW(0xb7, BPF_REG_7, BPF_REG_0, 0, 84), /* pc 70 */
-    HC_RAW(0x71, BPF_REG_9, BPF_REG_4, -2, 0), /* pc 71 */
-    HC_RAW(0x15, BPF_REG_9, BPF_REG_0, 52, 32), /* pc 72 */
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 48, 0), /* pc 73 */
-    HC_RAW(0x55, BPF_REG_3, BPF_REG_0, 47, 69), /* pc 74 */
-    HC_RAW(0xb7, BPF_REG_3, BPF_REG_0, 0, 69), /* pc 75 */
-    HC_RAW(0x71, BPF_REG_6, BPF_REG_4, -4, 0), /* pc 76 */
-    HC_RAW(0x55, BPF_REG_6, BPF_REG_0, 44, 76), /* pc 77 */
-    HC_RAW(0x71, BPF_REG_6, BPF_REG_4, -3, 0), /* pc 78 */
-    HC_RAW(0x55, BPF_REG_6, BPF_REG_0, 42, 69), /* pc 79 */
-    HC_RAW(0x71, BPF_REG_6, BPF_REG_4, -2, 0), /* pc 80 */
-    HC_RAW(0x55, BPF_REG_6, BPF_REG_0, 40, 84), /* pc 81 */
-    HC_RAW(0x71, BPF_REG_6, BPF_REG_4, -1, 0), /* pc 82 */
-    HC_RAW(0x55, BPF_REG_6, BPF_REG_0, 38, 69), /* pc 83 */
-    HC_RAW(0xb7, BPF_REG_6, BPF_REG_0, 0, 4), /* pc 84 */
-    HC_RAW(0xb7, BPF_REG_8, BPF_REG_0, 0, 76), /* pc 85 */
-    HC_RAW(0x71, BPF_REG_9, BPF_REG_4, 0, 0), /* pc 86 */
-    HC_RAW(0xb7, BPF_REG_7, BPF_REG_0, 0, 69), /* pc 87 */
-    HC_RAW(0x15, BPF_REG_9, BPF_REG_0, 36, 32), /* pc 88 */
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 32, 0), /* pc 89 */
-    HC_RAW(0x15, BPF_REG_3, BPF_REG_0, 21, 84), /* pc 90 */
-    HC_RAW(0x55, BPF_REG_3, BPF_REG_0, 30, 69), /* pc 91 */
-    HC_RAW(0xb7, BPF_REG_3, BPF_REG_0, 0, 69), /* pc 92 */
-    HC_RAW(0x71, BPF_REG_6, BPF_REG_4, -4, 0), /* pc 93 */
-    HC_RAW(0x55, BPF_REG_6, BPF_REG_0, 27, 65), /* pc 94 */
-    HC_RAW(0x71, BPF_REG_6, BPF_REG_4, -3, 0), /* pc 95 */
-    HC_RAW(0x55, BPF_REG_6, BPF_REG_0, 25, 68), /* pc 96 */
-    HC_RAW(0xb7, BPF_REG_6, BPF_REG_0, 0, 5), /* pc 97 */
-    HC_RAW(0xb7, BPF_REG_8, BPF_REG_0, 0, 65), /* pc 98 */
-    HC_RAW(0xb7, BPF_REG_7, BPF_REG_0, 0, 68), /* pc 99 */
-    HC_RAW(0x71, BPF_REG_9, BPF_REG_4, -2, 0), /* pc 100 */
-    HC_RAW(0x15, BPF_REG_9, BPF_REG_0, 23, 32), /* pc 101 */
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 19, 0), /* pc 102 */
-    HC_RAW(0xb7, BPF_REG_3, BPF_REG_0, 0, 85), /* pc 103 */
-    HC_RAW(0x71, BPF_REG_6, BPF_REG_4, -4, 0), /* pc 104 */
-    HC_RAW(0x55, BPF_REG_6, BPF_REG_0, 16, 84), /* pc 105 */
-    HC_RAW(0xb7, BPF_REG_6, BPF_REG_0, 0, 3), /* pc 106 */
-    HC_RAW(0xb7, BPF_REG_8, BPF_REG_0, 0, 84), /* pc 107 */
-    HC_RAW(0xb7, BPF_REG_7, BPF_REG_0, 0, 32), /* pc 108 */
-    HC_RAW(0x71, BPF_REG_9, BPF_REG_4, -3, 0), /* pc 109 */
-    HC_RAW(0x15, BPF_REG_9, BPF_REG_0, 14, 32), /* pc 110 */
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 10, 0), /* pc 111 */
-    HC_RAW(0xb7, BPF_REG_3, BPF_REG_0, 0, 84), /* pc 112 */
-    HC_RAW(0x71, BPF_REG_6, BPF_REG_4, -4, 0), /* pc 113 */
-    HC_RAW(0x55, BPF_REG_6, BPF_REG_0, 7, 84), /* pc 114 */
-    HC_RAW(0x71, BPF_REG_6, BPF_REG_4, -3, 0), /* pc 115 */
-    HC_RAW(0x55, BPF_REG_6, BPF_REG_0, 5, 80), /* pc 116 */
-    HC_RAW(0xb7, BPF_REG_6, BPF_REG_0, 0, 6), /* pc 117 */
-    HC_RAW(0xb7, BPF_REG_7, BPF_REG_0, 0, 80), /* pc 118 */
-    HC_RAW(0x71, BPF_REG_9, BPF_REG_4, -2, 0), /* pc 119 */
-    HC_RAW(0xb7, BPF_REG_8, BPF_REG_0, 0, 84), /* pc 120 */
-    HC_RAW(0x15, BPF_REG_9, BPF_REG_0, 3, 47), /* pc 121 */
-    HC_RAW(0xb7, BPF_REG_6, BPF_REG_0, 0, 0), /* pc 122 */
-    HC_RAW(0x71, BPF_REG_7, BPF_REG_4, -3, 0), /* pc 123 */
-    HC_RAW(0x71, BPF_REG_8, BPF_REG_4, -4, 0), /* pc 124 */
-    HC_RAW(0x67, BPF_REG_0, BPF_REG_0, 0, 8), /* pc 125 */
-    HC_RAW(0x67, BPF_REG_3, BPF_REG_0, 0, 16), /* pc 126 */
-    HC_RAW(0x4f, BPF_REG_3, BPF_REG_0, 0, 0), /* pc 127 */
-    /* pc 128-129: r0 = r6 + 1; x86 leaq */
-    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_0, BPF_REG_6, 0, 0, 1, 0, 1), MICRO_HANDCRAFT_BPF_X86_LEAQ),
-    /* pc 130-131: r9 = r2 + 10; x86 leaq */
-    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_9, BPF_REG_2, 0, 0, 1, 0, 10), MICRO_HANDCRAFT_BPF_X86_LEAQ),
-    HC_RAW(0x2f, BPF_REG_9, BPF_REG_0, 0, 0), /* pc 132 */
-    HC_RAW(0x0f, BPF_REG_5, BPF_REG_9, 0, 0), /* pc 133 */
-    HC_RAW(0x67, BPF_REG_8, BPF_REG_0, 0, 24), /* pc 134 */
-    HC_RAW(0x4f, BPF_REG_3, BPF_REG_8, 0, 0), /* pc 135 */
-    HC_RAW(0x67, BPF_REG_7, BPF_REG_0, 0, 32), /* pc 136 */
-    HC_RAW(0x4f, BPF_REG_3, BPF_REG_7, 0, 0), /* pc 137 */
-    HC_RAW(0x4f, BPF_REG_3, BPF_REG_6, 0, 0), /* pc 138 */
-    HC_RAW(0x07, BPF_REG_4, BPF_REG_0, 0, 16), /* pc 139 */
-    HC_RAW(0x6f, BPF_REG_3, BPF_REG_2, 0, 0), /* pc 140 */
-    HC_RAW(0xaf, BPF_REG_3, BPF_REG_5, 0, 0), /* pc 141 */
-    HC_RAW(0x07, BPF_REG_2, BPF_REG_0, 0, 1), /* pc 142 */
-    HC_RAW(0x15, BPF_REG_2, BPF_REG_0, 1, 9), /* pc 143 */
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, -104, 0), /* pc 144 */
-    HC_RAW(0x73, BPF_REG_1, BPF_REG_5, 0, 0), /* pc 145 */
-    HC_RAW(0xbf, BPF_REG_2, BPF_REG_3, 0, 0), /* pc 146 */
-    HC_RAW(0x77, BPF_REG_2, BPF_REG_0, 0, 56), /* pc 147 */
-    HC_RAW(0x73, BPF_REG_1, BPF_REG_2, 7, 0), /* pc 148 */
-    HC_RAW(0xbf, BPF_REG_2, BPF_REG_3, 0, 0), /* pc 149 */
-    HC_RAW(0x77, BPF_REG_2, BPF_REG_0, 0, 48), /* pc 150 */
-    HC_RAW(0x73, BPF_REG_1, BPF_REG_2, 6, 0), /* pc 151 */
-    HC_RAW(0xbf, BPF_REG_2, BPF_REG_3, 0, 0), /* pc 152 */
-    HC_RAW(0x77, BPF_REG_2, BPF_REG_0, 0, 40), /* pc 153 */
-    HC_RAW(0x73, BPF_REG_1, BPF_REG_2, 5, 0), /* pc 154 */
-    HC_RAW(0xbf, BPF_REG_2, BPF_REG_3, 0, 0), /* pc 155 */
-    HC_RAW(0x77, BPF_REG_2, BPF_REG_0, 0, 32), /* pc 156 */
-    HC_RAW(0x73, BPF_REG_1, BPF_REG_2, 4, 0), /* pc 157 */
-    HC_RAW(0xbf, BPF_REG_2, BPF_REG_3, 0, 0), /* pc 158 */
-    HC_RAW(0x77, BPF_REG_2, BPF_REG_0, 0, 24), /* pc 159 */
-    HC_RAW(0x73, BPF_REG_1, BPF_REG_2, 3, 0), /* pc 160 */
-    HC_RAW(0xbf, BPF_REG_2, BPF_REG_3, 0, 0), /* pc 161 */
-    HC_RAW(0x77, BPF_REG_2, BPF_REG_0, 0, 16), /* pc 162 */
-    HC_RAW(0x73, BPF_REG_1, BPF_REG_2, 2, 0), /* pc 163 */
-    HC_RAW(0x77, BPF_REG_3, BPF_REG_0, 0, 8), /* pc 164 */
-    HC_RAW(0x73, BPF_REG_1, BPF_REG_3, 1, 0), /* pc 165 */
-    HC_RAW(0xb7, BPF_REG_0, BPF_REG_0, 0, 2), /* pc 166 */
-    HC_RAW(0x95, BPF_REG_0, BPF_REG_0, 0, 0), /* pc 167 */
+    HC_INIT_X86_STACK(),
+    HC_MOV64_IMM(BPF_REG_6, 0),
+    HC_MOV64_IMM(BPF_REG_7, 0),
+    HC_MOV64_IMM(BPF_REG_8, 0),
+    HC_MOV64_IMM(BPF_REG_9, 0),
+    /* 0x1100: mov    rdx,QWORD PTR [rdi] [context-abi: native xdp_md 64-bit field at off 0 maps to BPF XDP u32 ctx field at off 0] */
+    HC_LDX(BPF_W, BPF_REG_3, BPF_REG_1, 0),
+    /* 0x1103: mov    rcx,QWORD PTR [rdi+0x8] [context-abi: native xdp_md 64-bit field at off 8 maps to BPF XDP u32 ctx field at off 4] */
+    HC_LDX(BPF_W, BPF_REG_4, BPF_REG_1, 4),
+    /* 0x1107: xor    eax,eax [exact-kinsn: xor32 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORL),
+    /* 0x1109: cmp    rdx,rcx [absorbed-control-flow: cmp folded into following ordinary BPF jbe] */
+    /* 0x110c: jbe    110f <tracee_http_method_prefix_detect_xdp+0xf> [exact-bpf: jbe ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP | BPF_JLE | BPF_X, BPF_REG_3, BPF_REG_4, (2) - 1, 0),
+    /* 0x110e: ret [abi-boundary: native ret maps to the BPF program exit boundary] */
+    HC_EXIT(),
+    /* 0x110f: lea    rsi,[rdx+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
+    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_3, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
+    /* 0x1113: cmp    rsi,rcx [absorbed-control-flow: cmp folded into following ordinary BPF ja] */
+    /* 0x1116: ja     110e <tracee_http_method_prefix_detect_xdp+0xe> [exact-bpf: ja ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_2, BPF_REG_4, (-3) - 1, 0),
+    /* 0x1118: lea    rsi,[rdx+0x90] [exact-kinsn: LEA via x86 kinsn selector] */
+    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_3, 0, 0, 1, 0, 144), MICRO_HANDCRAFT_BPF_X86_LEAQ),
+    /* 0x111f: cmp    rsi,rcx [absorbed-control-flow: cmp folded into following ordinary BPF ja] */
+    /* 0x1122: ja     110e <tracee_http_method_prefix_detect_xdp+0xe> [exact-bpf: ja ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_2, BPF_REG_4, (-6) - 1, 0),
+    /* 0x1124: cmp    DWORD PTR [rdx+0x8],0x8 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1128: jne    110e <tracee_http_method_prefix_detect_xdp+0xe> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LDX(BPF_W, BPF_REG_6, BPF_REG_3, 8),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 8),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-13) - 1),
+    /* 0x112a: cmp    DWORD PTR [rdx+0xc],0x10 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x112e: jne    110e <tracee_http_method_prefix_detect_xdp+0xe> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LDX(BPF_W, BPF_REG_6, BPF_REG_3, 12),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 16),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-20) - 1),
+    /* 0x1130: push   r14 [exact-kinsn: pushq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_8), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
+    /* 0x1132: push   rbx [exact-kinsn: pushq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
+    /* 0x1133: lea    rax,[rdx+0x16] [exact-kinsn: LEA via x86 kinsn selector] */
+    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_0, BPF_REG_3, 0, 0, 1, 0, 22), MICRO_HANDCRAFT_BPF_X86_LEAQ),
+    /* 0x1137: movabs rbx,0xa0761d6478bd642f [exact-bpf: movabs via verifier-visible BPF immediate load] */
+    HC_LD_IMM64_RAW(BPF_REG_6, 0, 0xa0761d6478bd642fULL),
+    /* 0x1141: mov    ecx,0x1 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 1), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1146: cs nop WORD PTR [rax+rax*1+0x0] [padding: prefixed nop padding is not part of BPF semantics] */
+    /* 0x1150: mov    rsi,rbx [exact-kinsn: movq register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_2, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x1153: movzx  edi,BYTE PTR [rax-0x6] [exact-kinsn: direct memory load via x86 kinsn selector] */
+    HC_KINSN(HC_X86_MEM_PAYLOAD(BPF_REG_1, BPF_REG_0, -6), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
+    /* 0x1157: movzx  r8d,BYTE PTR [rax-0x5] [exact-kinsn: direct memory load via x86 kinsn selector] */
+    HC_KINSN(HC_X86_MEM_PAYLOAD(BPF_REG_5, BPF_REG_0, -5), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
+    /* 0x115c: cmp    edi,0x47 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x115f: jg     11b0 <tracee_http_method_prefix_detect_xdp+0xb0> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_1, 0, (33) - 1, 71),
+    /* 0x1161: cmp    edi,0x44 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x1164: je     120f <tracee_http_method_prefix_detect_xdp+0x10f> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_1, 0, (87) - 1, 68),
+    /* 0x116a: cmp    edi,0x47 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x116d: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_1, 0, (255) - 1, 71),
+    /* 0x1173: cmp    r8b,0x45 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1177: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_MOV64_REG(BPF_REG_6, BPF_REG_5),
+    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 69),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (248) - 1),
+    /* 0x117d: mov    r8b,0x45 [exact-kinsn: movb immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_5, 69), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x1180: cmp    BYTE PTR [rax-0x4],0x54 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1184: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LDX(BPF_B, BPF_REG_6, BPF_REG_0, -4),
+    HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xff),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 84),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (238) - 1),
+    /* 0x118a: mov    r10b,0x45 [exact-kinsn: movb immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R10, 69), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x118d: cmp    BYTE PTR [rax-0x3],0x20 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1191: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LDX(BPF_B, BPF_REG_6, BPF_REG_0, -3),
+    HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xff),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 32),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (228) - 1),
+    /* 0x1197: mov    r9d,0x1 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R9, 1), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x119d: jmp    12ab <tracee_http_method_prefix_detect_xdp+0x1ab> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (187) - 1),
+    /* 0x11a2: data16 data16 data16 data16 cs nop WORD PTR [rax+rax*1+0x0] [padding: padding is not part of BPF semantics] */
+    /* 0x11b0: movzx  r9d,r8b [exact-kinsn: movzx r32,r8 kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(HC_X86_R9, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
+    /* 0x11b4: cmp    edi,0x48 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x11b7: je     1261 <tracee_http_method_prefix_detect_xdp+0x161> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_1, 0, (111) - 1, 72),
+    /* 0x11bd: cmp    edi,0x50 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x11c0: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_1, 0, (221) - 1, 80),
+    /* 0x11c6: cmp    r9d,0x55 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x11ca: je     1293 <tracee_http_method_prefix_detect_xdp+0x193> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_6, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_6, 0, 2, 85),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (153) - 1),
+    /* 0x11d0: cmp    r9d,0x4f [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x11d4: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_6, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 79),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (205) - 1),
+    /* 0x11da: mov    r8b,0x4f [exact-kinsn: movb immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_5, 79), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x11dd: cmp    BYTE PTR [rax-0x4],0x53 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x11e1: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LDX(BPF_B, BPF_REG_6, BPF_REG_0, -4),
+    HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xff),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 83),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (195) - 1),
+    /* 0x11e7: cmp    BYTE PTR [rax-0x3],0x54 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x11eb: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LDX(BPF_B, BPF_REG_6, BPF_REG_0, -3),
+    HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xff),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 84),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (187) - 1),
+    /* 0x11f1: mov    r10b,0x4f [exact-kinsn: movb immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R10, 79), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x11f4: cmp    BYTE PTR [rax-0x2],0x20 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x11f8: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LDX(BPF_B, BPF_REG_6, BPF_REG_0, -2),
+    HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xff),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 32),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (177) - 1),
+    /* 0x11fe: mov    r9d,0x2 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R9, 2), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1204: mov    r8b,0x53 [exact-kinsn: movb immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_5, 83), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x1207: mov    r11b,0x54 [exact-kinsn: movb immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 84), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x120a: jmp    12f0 <tracee_http_method_prefix_detect_xdp+0x1f0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (178) - 1),
+    /* 0x120f: cmp    r8b,0x45 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1213: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_MOV64_REG(BPF_REG_6, BPF_REG_5),
+    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 69),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (163) - 1),
+    /* 0x1219: mov    r8b,0x45 [exact-kinsn: movb immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_5, 69), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x121c: cmp    BYTE PTR [rax-0x4],0x4c [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1220: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LDX(BPF_B, BPF_REG_6, BPF_REG_0, -4),
+    HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xff),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 76),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (153) - 1),
+    /* 0x1226: cmp    BYTE PTR [rax-0x3],0x45 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x122a: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LDX(BPF_B, BPF_REG_6, BPF_REG_0, -3),
+    HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xff),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 69),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (145) - 1),
+    /* 0x1230: cmp    BYTE PTR [rax-0x2],0x54 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1234: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LDX(BPF_B, BPF_REG_6, BPF_REG_0, -2),
+    HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xff),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 84),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (137) - 1),
+    /* 0x123a: cmp    BYTE PTR [rax-0x1],0x45 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x123e: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LDX(BPF_B, BPF_REG_6, BPF_REG_0, -1),
+    HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xff),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 69),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (129) - 1),
+    /* 0x1244: mov    r11b,0x45 [exact-kinsn: movb immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 69), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x1247: cmp    BYTE PTR [rax],0x20 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x124a: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LDX(BPF_B, BPF_REG_6, BPF_REG_0, 0),
+    HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xff),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 32),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (119) - 1),
+    /* 0x1250: mov    r9d,0x4 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R9, 4), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1256: mov    r8b,0x4c [exact-kinsn: movb immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_5, 76), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x1259: mov    r10b,0x45 [exact-kinsn: movb immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R10, 69), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x125c: jmp    12f0 <tracee_http_method_prefix_detect_xdp+0x1f0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (120) - 1),
+    /* 0x1261: cmp    r9d,0x54 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x1265: je     12b3 <tracee_http_method_prefix_detect_xdp+0x1b3> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_6, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_6, 0, 2, 84),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (71) - 1),
+    /* 0x1267: cmp    r9d,0x45 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x126b: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_6, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 69),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (96) - 1),
+    /* 0x126d: mov    r8b,0x45 [exact-kinsn: movb immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_5, 69), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x1270: cmp    BYTE PTR [rax-0x4],0x41 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1274: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LDX(BPF_B, BPF_REG_6, BPF_REG_0, -4),
+    HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xff),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 65),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (86) - 1),
+    /* 0x1276: cmp    BYTE PTR [rax-0x3],0x44 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x127a: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LDX(BPF_B, BPF_REG_6, BPF_REG_0, -3),
+    HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xff),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 68),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (78) - 1),
+    /* 0x127c: mov    r10b,0x45 [exact-kinsn: movb immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R10, 69), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x127f: cmp    BYTE PTR [rax-0x2],0x20 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1283: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LDX(BPF_B, BPF_REG_6, BPF_REG_0, -2),
+    HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xff),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 32),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (68) - 1),
+    /* 0x1285: mov    r9d,0x5 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R9, 5), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x128b: mov    r8b,0x41 [exact-kinsn: movb immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_5, 65), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x128e: mov    r11b,0x44 [exact-kinsn: movb immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 68), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x1291: jmp    12f0 <tracee_http_method_prefix_detect_xdp+0x1f0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (69) - 1),
+    /* 0x1293: mov    r8b,0x55 [exact-kinsn: movb immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_5, 85), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x1296: cmp    BYTE PTR [rax-0x4],0x54 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x129a: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LDX(BPF_B, BPF_REG_6, BPF_REG_0, -4),
+    HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xff),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 84),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (51) - 1),
+    /* 0x129c: mov    r10b,0x55 [exact-kinsn: movb immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R10, 85), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x129f: cmp    BYTE PTR [rax-0x3],0x20 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x12a3: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LDX(BPF_B, BPF_REG_6, BPF_REG_0, -3),
+    HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xff),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 32),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (41) - 1),
+    /* 0x12a5: mov    r9d,0x3 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R9, 3), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x12ab: mov    r8b,0x54 [exact-kinsn: movb immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_5, 84), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x12ae: mov    r11b,0x20 [exact-kinsn: movb immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 32), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x12b1: jmp    12f0 <tracee_http_method_prefix_detect_xdp+0x1f0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (42) - 1),
+    /* 0x12b3: mov    r8b,0x54 [exact-kinsn: movb immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_5, 84), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x12b6: cmp    BYTE PTR [rax-0x4],0x54 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x12ba: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LDX(BPF_B, BPF_REG_6, BPF_REG_0, -4),
+    HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xff),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 84),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (24) - 1),
+    /* 0x12bc: cmp    BYTE PTR [rax-0x3],0x50 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x12c0: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LDX(BPF_B, BPF_REG_6, BPF_REG_0, -3),
+    HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xff),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 80),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (16) - 1),
+    /* 0x12c2: cmp    BYTE PTR [rax-0x2],0x2f [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x12c6: jne    12e0 <tracee_http_method_prefix_detect_xdp+0x1e0> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LDX(BPF_B, BPF_REG_6, BPF_REG_0, -2),
+    HC_ALU64_IMM(BPF_AND, BPF_REG_6, 0xff),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 47),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (8) - 1),
+    /* 0x12c8: mov    r9d,0x6 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R9, 6), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x12ce: mov    r11b,0x50 [exact-kinsn: movb immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R11, 80), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x12d1: mov    r10b,0x54 [exact-kinsn: movb immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(HC_X86_R10, 84), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x12d4: jmp    12f0 <tracee_http_method_prefix_detect_xdp+0x1f0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (9) - 1),
+    /* 0x12d6: cs nop WORD PTR [rax+rax*1+0x0] [padding: prefixed nop padding is not part of BPF semantics] */
+    /* 0x12e0: mov    r10d,r8d [exact-kinsn: movl register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(HC_X86_R10, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x12e3: movzx  r8d,BYTE PTR [rax-0x4] [exact-kinsn: direct memory load via x86 kinsn selector] */
+    HC_KINSN(HC_X86_MEM_PAYLOAD(BPF_REG_5, BPF_REG_0, -4), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
+    /* 0x12e8: movzx  r11d,BYTE PTR [rax-0x3] [exact-kinsn: direct memory load via x86 kinsn selector] */
+    HC_KINSN(HC_X86_MEM_PAYLOAD(HC_X86_R11, BPF_REG_0, -3), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
+    /* 0x12ed: xor    r9d,r9d [exact-kinsn: xor32 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R9, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_XORL),
+    /* 0x12f0: movzx  r11d,r11b [exact-kinsn: movzx r32,r8 kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(HC_X86_R11, HC_X86_R11), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
+    /* 0x12f4: lea    ebx,[r9+0x1] [exact-kinsn: LEA via x86 kinsn selector] */
+    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_6, HC_X86_R9, 0, 0, 1, 0, 1), MICRO_HANDCRAFT_BPF_X86_LEAL),
+    /* 0x12f8: lea    r14,[rcx+0xa] [exact-kinsn: LEA via x86 kinsn selector] */
+    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_8, BPF_REG_4, 0, 0, 1, 0, 10), MICRO_HANDCRAFT_BPF_X86_LEAQ),
+    /* 0x12fc: imul   rbx,r14 [exact-kinsn: imulq reg,reg kinsn] */
+    HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_6, BPF_REG_8), MICRO_HANDCRAFT_BPF_X86_IMULQ),
+    /* 0x1300: add    rsi,rbx [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_2, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1303: shl    r11,0x20 [exact-kinsn: shl64 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(HC_X86_R11, 32), MICRO_HANDCRAFT_BPF_X86_SHLQ),
+    /* 0x1307: movzx  r8d,r8b [exact-kinsn: movzx r32,r8 kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_5, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
+    /* 0x130b: shl    r8d,0x18 [exact-kinsn: shl32 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_5, 24), MICRO_HANDCRAFT_BPF_X86_SHLL),
+    /* 0x130f: movzx  r10d,r10b [exact-kinsn: movzx r32,r8 kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(HC_X86_R10, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
+    /* 0x1313: shl    r10d,0x10 [exact-kinsn: shl32 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(HC_X86_R10, 16), MICRO_HANDCRAFT_BPF_X86_SHLL),
+    /* 0x1317: shl    edi,0x8 [exact-kinsn: shl32 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_1, 8), MICRO_HANDCRAFT_BPF_X86_SHLL),
+    /* 0x131a: or     edi,r10d [exact-kinsn: or32 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_ORL),
+    /* 0x131d: or     edi,r8d [exact-kinsn: or32 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_ORL),
+    /* 0x1320: or     rdi,r11 [exact-kinsn: or64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, HC_X86_R11), MICRO_HANDCRAFT_BPF_X86_ORQ),
+    /* 0x1323: mov    ebx,r9d [exact-kinsn: movl register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_6, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1326: or     rbx,rdi [exact-kinsn: or64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_6, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_ORQ),
+    /* 0x1329: shl    rbx,cl [exact-kinsn: shl64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_6, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_SHLQ),
+    /* 0x132c: xor    rbx,rsi [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_6, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x132f: add    rax,0x10 [exact-kinsn: add64 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_0, 16), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1333: inc    rcx [exact-kinsn: incq reg kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_INCQ),
+    /* 0x1336: cmp    rcx,0x9 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x133a: jne    1150 <tracee_http_method_prefix_detect_xdp+0x50> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_4, 0, (-311) - 1, 9),
+    /* 0x1340: mov    BYTE PTR [rdx],sil [exact-kinsn: direct memory store via x86 kinsn selector] */
+    HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_2, BPF_REG_3, 0), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x1343: mov    BYTE PTR [rdx+0x1],bh [exact-kinsn: direct memory store via x86 kinsn selector] */
+    HC_KINSN(HC_X86_STORE_BYTE_PAYLOAD(BPF_REG_6, BPF_REG_3, 1, 1), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x1346: mov    eax,ebx [exact-kinsn: movl register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_0, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1348: shr    eax,0x10 [exact-kinsn: shr32 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_0, 16), MICRO_HANDCRAFT_BPF_X86_SHRL),
+    /* 0x134b: mov    BYTE PTR [rdx+0x2],al [exact-kinsn: direct memory store via x86 kinsn selector] */
+    HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_0, BPF_REG_3, 2), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x134e: mov    eax,ebx [exact-kinsn: movl register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_0, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1350: shr    eax,0x18 [exact-kinsn: shr32 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_0, 24), MICRO_HANDCRAFT_BPF_X86_SHRL),
+    /* 0x1353: mov    BYTE PTR [rdx+0x3],al [exact-kinsn: direct memory store via x86 kinsn selector] */
+    HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_0, BPF_REG_3, 3), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x1356: mov    rax,rbx [exact-kinsn: movq register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_0, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x1359: shr    rax,0x20 [exact-kinsn: shr64 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_0, 32), MICRO_HANDCRAFT_BPF_X86_SHRQ),
+    /* 0x135d: mov    BYTE PTR [rdx+0x4],al [exact-kinsn: direct memory store via x86 kinsn selector] */
+    HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_0, BPF_REG_3, 4), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x1360: mov    rax,rbx [exact-kinsn: movq register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_0, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x1363: shr    rax,0x28 [exact-kinsn: shr64 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_0, 40), MICRO_HANDCRAFT_BPF_X86_SHRQ),
+    /* 0x1367: mov    BYTE PTR [rdx+0x5],al [exact-kinsn: direct memory store via x86 kinsn selector] */
+    HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_0, BPF_REG_3, 5), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x136a: mov    rax,rbx [exact-kinsn: movq register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_0, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x136d: shr    rax,0x30 [exact-kinsn: shr64 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_0, 48), MICRO_HANDCRAFT_BPF_X86_SHRQ),
+    /* 0x1371: mov    BYTE PTR [rdx+0x6],al [exact-kinsn: direct memory store via x86 kinsn selector] */
+    HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_0, BPF_REG_3, 6), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x1374: shr    rbx,0x38 [exact-kinsn: shr64 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_6, 56), MICRO_HANDCRAFT_BPF_X86_SHRQ),
+    /* 0x1378: mov    BYTE PTR [rdx+0x7],bl [exact-kinsn: direct memory store via x86 kinsn selector] */
+    HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_6, BPF_REG_3, 7), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x137b: mov    eax,0x2 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_0, 2), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1380: pop    rbx [exact-kinsn: popq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_POPQ),
+    /* 0x1381: pop    r14 [exact-kinsn: popq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_8), MICRO_HANDCRAFT_BPF_X86_POPQ),
+    /* 0x1383: ret [abi-boundary: native ret maps to the BPF program exit boundary] */
+    HC_EXIT(),
 };
 
 HC_EXPORT_PROGRAM(program)
@@ -867,218 +1250,5 @@ HC_EXPORT_PROGRAM(program)
 
 ## Handcraft Kernel JIT ASM
 ```asm
-Disassembly of section .data:
-
-0000000000000000 <.data>:
-   0:	0f 1f 44 00 00       	nop    DWORD PTR [rax+rax*1+0x0]
-   5:	0f 1f 00             	nop    DWORD PTR [rax]
-   8:	55                   	push   rbp
-   9:	48 89 e5             	mov    rbp,rsp
-   c:	53                   	push   rbx
-   d:	41 55                	push   r13
-   f:	41 56                	push   r14
-  11:	41 57                	push   r15
-  13:	31 c0                	xor    eax,eax
-  15:	48 8b 77 08          	mov    rsi,QWORD PTR [rdi+0x8]
-  19:	48 8b 7f 00          	mov    rdi,QWORD PTR [rdi+0x0]
-  1d:	48 39 f7             	cmp    rdi,rsi
-  20:	0f 87 4c 03 00 00    	ja     0x372
-  26:	48 8d 57 08          	lea    rdx,[rdi+0x8]
-  2a:	48 39 f2             	cmp    rdx,rsi
-  2d:	0f 87 3f 03 00 00    	ja     0x372
-  33:	48 8d 97 90 00 00 00 	lea    rdx,[rdi+0x90]
-  3a:	48 39 f2             	cmp    rdx,rsi
-  3d:	0f 87 2f 03 00 00    	ja     0x372
-  43:	48 0f b6 77 09       	movzx  rsi,BYTE PTR [rdi+0x9]
-  48:	48 c1 e6 08          	shl    rsi,0x8
-  4c:	48 0f b6 57 08       	movzx  rdx,BYTE PTR [rdi+0x8]
-  51:	48 09 d6             	or     rsi,rdx
-  54:	48 0f b6 57 0a       	movzx  rdx,BYTE PTR [rdi+0xa]
-  59:	48 c1 e2 10          	shl    rdx,0x10
-  5d:	48 09 d6             	or     rsi,rdx
-  60:	48 0f b6 57 0b       	movzx  rdx,BYTE PTR [rdi+0xb]
-  65:	48 c1 e2 18          	shl    rdx,0x18
-  69:	48 09 d6             	or     rsi,rdx
-  6c:	48 c1 e6 20          	shl    rsi,0x20
-  70:	48 c1 ee 20          	shr    rsi,0x20
-  74:	48 83 fe 08          	cmp    rsi,0x8
-  78:	0f 85 f4 02 00 00    	jne    0x372
-  7e:	48 0f b6 77 0d       	movzx  rsi,BYTE PTR [rdi+0xd]
-  83:	48 c1 e6 08          	shl    rsi,0x8
-  87:	48 0f b6 57 0c       	movzx  rdx,BYTE PTR [rdi+0xc]
-  8c:	48 09 d6             	or     rsi,rdx
-  8f:	48 0f b6 57 0e       	movzx  rdx,BYTE PTR [rdi+0xe]
-  94:	48 c1 e2 10          	shl    rdx,0x10
-  98:	48 09 d6             	or     rsi,rdx
-  9b:	48 0f b6 57 0f       	movzx  rdx,BYTE PTR [rdi+0xf]
-  a0:	48 c1 e2 18          	shl    rdx,0x18
-  a4:	48 09 d6             	or     rsi,rdx
-  a7:	48 c1 e6 20          	shl    rsi,0x20
-  ab:	48 c1 ee 20          	shr    rsi,0x20
-  af:	48 83 fe 10          	cmp    rsi,0x10
-  b3:	0f 85 b9 02 00 00    	jne    0x372
-  b9:	48 ba 2f 64 bd 78 64 	movabs rdx,0xa0761d6478bd642f
-  c0:	1d 76 a0 
-  c3:	be 01 00 00 00       	mov    esi,0x1
-  c8:	48 8d 4f 16          	lea    rcx,[rdi+0x16]
-  cc:	49 89 d0             	mov    r8,rdx
-  cf:	48 0f b6 51 fb       	movzx  rdx,BYTE PTR [rcx-0x5]
-  d4:	48 0f b6 41 fa       	movzx  rax,BYTE PTR [rcx-0x6]
-  d9:	48 83 f8 47          	cmp    rax,0x47
-  dd:	7f 58                	jg     0x137
-  df:	48 83 f8 44          	cmp    rax,0x44
-  e3:	0f 84 bf 00 00 00    	je     0x1a8
-  e9:	48 83 f8 47          	cmp    rax,0x47
-  ed:	74 05                	je     0xf4
-  ef:	e9 da 01 00 00       	jmp    0x2ce
-  f4:	48 83 fa 45          	cmp    rdx,0x45
-  f8:	0f 85 d0 01 00 00    	jne    0x2ce
-  fe:	ba 45 00 00 00       	mov    edx,0x45
- 103:	48 0f b6 59 fc       	movzx  rbx,BYTE PTR [rcx-0x4]
- 108:	48 83 fb 54          	cmp    rbx,0x54
- 10c:	0f 85 bc 01 00 00    	jne    0x2ce
- 112:	bb 01 00 00 00       	mov    ebx,0x1
- 117:	41 be 54 00 00 00    	mov    r14d,0x54
- 11d:	41 bd 20 00 00 00    	mov    r13d,0x20
- 123:	4c 0f b6 79 fd       	movzx  r15,BYTE PTR [rcx-0x3]
- 128:	49 83 ff 20          	cmp    r15,0x20
- 12c:	0f 84 a8 01 00 00    	je     0x2da
- 132:	e9 97 01 00 00       	jmp    0x2ce
- 137:	48 83 f8 48          	cmp    rax,0x48
- 13b:	0f 84 d7 00 00 00    	je     0x218
- 141:	48 83 f8 50          	cmp    rax,0x50
- 145:	74 05                	je     0x14c
- 147:	e9 82 01 00 00       	jmp    0x2ce
- 14c:	48 83 fa 55          	cmp    rdx,0x55
- 150:	0f 84 13 01 00 00    	je     0x269
- 156:	48 83 fa 4f          	cmp    rdx,0x4f
- 15a:	0f 85 6e 01 00 00    	jne    0x2ce
- 160:	ba 4f 00 00 00       	mov    edx,0x4f
- 165:	48 0f b6 59 fc       	movzx  rbx,BYTE PTR [rcx-0x4]
- 16a:	48 83 fb 53          	cmp    rbx,0x53
- 16e:	0f 85 5a 01 00 00    	jne    0x2ce
- 174:	48 0f b6 59 fd       	movzx  rbx,BYTE PTR [rcx-0x3]
- 179:	48 83 fb 54          	cmp    rbx,0x54
- 17d:	0f 85 4b 01 00 00    	jne    0x2ce
- 183:	bb 02 00 00 00       	mov    ebx,0x2
- 188:	41 be 53 00 00 00    	mov    r14d,0x53
- 18e:	41 bd 54 00 00 00    	mov    r13d,0x54
- 194:	4c 0f b6 79 fe       	movzx  r15,BYTE PTR [rcx-0x2]
- 199:	49 83 ff 20          	cmp    r15,0x20
- 19d:	0f 84 37 01 00 00    	je     0x2da
- 1a3:	e9 26 01 00 00       	jmp    0x2ce
- 1a8:	48 83 fa 45          	cmp    rdx,0x45
- 1ac:	0f 85 1c 01 00 00    	jne    0x2ce
- 1b2:	ba 45 00 00 00       	mov    edx,0x45
- 1b7:	48 0f b6 59 fc       	movzx  rbx,BYTE PTR [rcx-0x4]
- 1bc:	48 83 fb 4c          	cmp    rbx,0x4c
- 1c0:	0f 85 08 01 00 00    	jne    0x2ce
- 1c6:	48 0f b6 59 fd       	movzx  rbx,BYTE PTR [rcx-0x3]
- 1cb:	48 83 fb 45          	cmp    rbx,0x45
- 1cf:	0f 85 f9 00 00 00    	jne    0x2ce
- 1d5:	48 0f b6 59 fe       	movzx  rbx,BYTE PTR [rcx-0x2]
- 1da:	48 83 fb 54          	cmp    rbx,0x54
- 1de:	0f 85 ea 00 00 00    	jne    0x2ce
- 1e4:	48 0f b6 59 ff       	movzx  rbx,BYTE PTR [rcx-0x1]
- 1e9:	48 83 fb 45          	cmp    rbx,0x45
- 1ed:	0f 85 db 00 00 00    	jne    0x2ce
- 1f3:	bb 04 00 00 00       	mov    ebx,0x4
- 1f8:	41 be 4c 00 00 00    	mov    r14d,0x4c
- 1fe:	4c 0f b6 79 00       	movzx  r15,BYTE PTR [rcx+0x0]
- 203:	41 bd 45 00 00 00    	mov    r13d,0x45
- 209:	49 83 ff 20          	cmp    r15,0x20
- 20d:	0f 84 c7 00 00 00    	je     0x2da
- 213:	e9 b6 00 00 00       	jmp    0x2ce
- 218:	48 83 fa 54          	cmp    rdx,0x54
- 21c:	74 79                	je     0x297
- 21e:	48 83 fa 45          	cmp    rdx,0x45
- 222:	0f 85 a6 00 00 00    	jne    0x2ce
- 228:	ba 45 00 00 00       	mov    edx,0x45
- 22d:	48 0f b6 59 fc       	movzx  rbx,BYTE PTR [rcx-0x4]
- 232:	48 83 fb 41          	cmp    rbx,0x41
- 236:	0f 85 92 00 00 00    	jne    0x2ce
- 23c:	48 0f b6 59 fd       	movzx  rbx,BYTE PTR [rcx-0x3]
- 241:	48 83 fb 44          	cmp    rbx,0x44
- 245:	0f 85 83 00 00 00    	jne    0x2ce
- 24b:	bb 05 00 00 00       	mov    ebx,0x5
- 250:	41 be 41 00 00 00    	mov    r14d,0x41
- 256:	41 bd 44 00 00 00    	mov    r13d,0x44
- 25c:	4c 0f b6 79 fe       	movzx  r15,BYTE PTR [rcx-0x2]
- 261:	49 83 ff 20          	cmp    r15,0x20
- 265:	74 73                	je     0x2da
- 267:	eb 65                	jmp    0x2ce
- 269:	ba 55 00 00 00       	mov    edx,0x55
- 26e:	48 0f b6 59 fc       	movzx  rbx,BYTE PTR [rcx-0x4]
- 273:	48 83 fb 54          	cmp    rbx,0x54
- 277:	75 55                	jne    0x2ce
- 279:	bb 03 00 00 00       	mov    ebx,0x3
- 27e:	41 be 54 00 00 00    	mov    r14d,0x54
- 284:	41 bd 20 00 00 00    	mov    r13d,0x20
- 28a:	4c 0f b6 79 fd       	movzx  r15,BYTE PTR [rcx-0x3]
- 28f:	49 83 ff 20          	cmp    r15,0x20
- 293:	74 45                	je     0x2da
- 295:	eb 37                	jmp    0x2ce
- 297:	ba 54 00 00 00       	mov    edx,0x54
- 29c:	48 0f b6 59 fc       	movzx  rbx,BYTE PTR [rcx-0x4]
- 2a1:	48 83 fb 54          	cmp    rbx,0x54
- 2a5:	75 27                	jne    0x2ce
- 2a7:	48 0f b6 59 fd       	movzx  rbx,BYTE PTR [rcx-0x3]
- 2ac:	48 83 fb 50          	cmp    rbx,0x50
- 2b0:	75 1c                	jne    0x2ce
- 2b2:	bb 06 00 00 00       	mov    ebx,0x6
- 2b7:	41 bd 50 00 00 00    	mov    r13d,0x50
- 2bd:	4c 0f b6 79 fe       	movzx  r15,BYTE PTR [rcx-0x2]
- 2c2:	41 be 54 00 00 00    	mov    r14d,0x54
- 2c8:	49 83 ff 2f          	cmp    r15,0x2f
- 2cc:	74 0c                	je     0x2da
- 2ce:	31 db                	xor    ebx,ebx
- 2d0:	4c 0f b6 69 fd       	movzx  r13,BYTE PTR [rcx-0x3]
- 2d5:	4c 0f b6 71 fc       	movzx  r14,BYTE PTR [rcx-0x4]
- 2da:	48 c1 e0 08          	shl    rax,0x8
- 2de:	48 c1 e2 10          	shl    rdx,0x10
- 2e2:	48 09 c2             	or     rdx,rax
- 2e5:	48 8d 43 01          	lea    rax,[rbx+0x1]
- 2e9:	4c 8d 7e 0a          	lea    r15,[rsi+0xa]
- 2ed:	4c 0f af f8          	imul   r15,rax
- 2f1:	4d 01 f8             	add    r8,r15
- 2f4:	49 c1 e6 18          	shl    r14,0x18
- 2f8:	4c 09 f2             	or     rdx,r14
- 2fb:	49 c1 e5 20          	shl    r13,0x20
- 2ff:	4c 09 ea             	or     rdx,r13
- 302:	48 09 da             	or     rdx,rbx
- 305:	48 83 c1 10          	add    rcx,0x10
- 309:	c4 e2 c9 f7 d2       	shlx   rdx,rdx,rsi
- 30e:	4c 31 c2             	xor    rdx,r8
- 311:	48 83 c6 01          	add    rsi,0x1
- 315:	48 83 fe 09          	cmp    rsi,0x9
- 319:	74 05                	je     0x320
- 31b:	e9 ac fd ff ff       	jmp    0xcc
- 320:	44 88 47 00          	mov    BYTE PTR [rdi+0x0],r8b
- 324:	48 89 d6             	mov    rsi,rdx
- 327:	48 c1 ee 38          	shr    rsi,0x38
- 32b:	40 88 77 07          	mov    BYTE PTR [rdi+0x7],sil
- 32f:	48 89 d6             	mov    rsi,rdx
- 332:	48 c1 ee 30          	shr    rsi,0x30
- 336:	40 88 77 06          	mov    BYTE PTR [rdi+0x6],sil
- 33a:	48 89 d6             	mov    rsi,rdx
- 33d:	48 c1 ee 28          	shr    rsi,0x28
- 341:	40 88 77 05          	mov    BYTE PTR [rdi+0x5],sil
- 345:	48 89 d6             	mov    rsi,rdx
- 348:	48 c1 ee 20          	shr    rsi,0x20
- 34c:	40 88 77 04          	mov    BYTE PTR [rdi+0x4],sil
- 350:	48 89 d6             	mov    rsi,rdx
- 353:	48 c1 ee 18          	shr    rsi,0x18
- 357:	40 88 77 03          	mov    BYTE PTR [rdi+0x3],sil
- 35b:	48 89 d6             	mov    rsi,rdx
- 35e:	48 c1 ee 10          	shr    rsi,0x10
- 362:	40 88 77 02          	mov    BYTE PTR [rdi+0x2],sil
- 366:	48 c1 ea 08          	shr    rdx,0x8
- 36a:	88 57 01             	mov    BYTE PTR [rdi+0x1],dl
- 36d:	b8 02 00 00 00       	mov    eax,0x2
- 372:	41 5f                	pop    r15
- 374:	41 5e                	pop    r14
- 376:	41 5d                	pop    r13
- 378:	5b                   	pop    rbx
- 379:	c9                   	leave
- 37a:	c3                   	ret
+not captured
 ```

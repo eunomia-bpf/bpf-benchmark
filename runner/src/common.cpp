@@ -33,6 +33,7 @@ void validate_cli_options(const cli_options &options)
     const bool supported_command =
         options.command == "test-run" ||
         options.command == "run-native" ||
+        options.command == "run-native-lab" ||
         options.command == "list-programs"
 #ifdef MICRO_EXEC_ENABLE_LLVMBPF
         || options.command == "run-llvmbpf"
@@ -50,6 +51,7 @@ void validate_cli_options(const cli_options &options)
     }
     if ((options.command == "test-run"
          || options.command == "run-native"
+         || options.command == "run-native-lab"
 #ifdef MICRO_EXEC_ENABLE_LLVMBPF
          || options.command == "run-llvmbpf"
 #endif

@@ -29,7 +29,9 @@
 #include <linux/perf_event.h>
 #include <pthread.h>
 #include <signal.h>
+#include <spawn.h>
 #include <stdarg.h>
+#include <sys/wait.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -44,6 +46,8 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+
+extern char **environ;
 
 #ifndef SYS_perf_event_open
 #define SYS_perf_event_open 298 /* x86_64 */
@@ -818,28 +822,213 @@ static void sigusr1_handler(int sig) {
     dump_state_json();
 }
 
-/* Worker thread: every BPFREJIT_SHIM_PERIODIC_DUMP_MS milliseconds, write
- * the state JSON. Default off (0 = disabled). Set the env var to enable.
- * This is also the home for the Phase 2 bpfopt+swap pipeline. */
+/* Phase 2: run `bpfopt --pass <name>` as a subprocess against a captured
+ * bytecode file. Returns 0 on success and sets *out_path to a heap string
+ * (caller frees) with the result path. Returns -1 on failure.
+ *
+ * Invocation:
+ *   $BPFOPT --pass <pass> --input <in> --output <out> --report <report>
+ *           --prog-type <prog_type_name>
+ *
+ * Path discovery: $BPFREJIT_BPFOPT_PATH, then /usr/local/bin/bpfopt, then
+ * looks on PATH via posix_spawnp.
+ */
+static const char *prog_type_short_name(uint32_t t) {
+    switch (t) {
+    case BPF_PROG_TYPE_SOCKET_FILTER: return "socket_filter";
+    case BPF_PROG_TYPE_KPROBE: return "kprobe";
+    case BPF_PROG_TYPE_SCHED_CLS: return "sched_cls";
+    case BPF_PROG_TYPE_SCHED_ACT: return "sched_act";
+    case BPF_PROG_TYPE_TRACEPOINT: return "tracepoint";
+    case BPF_PROG_TYPE_XDP: return "xdp";
+    case BPF_PROG_TYPE_PERF_EVENT: return "perf_event";
+    case BPF_PROG_TYPE_CGROUP_SKB: return "cgroup_skb";
+    case BPF_PROG_TYPE_CGROUP_SOCK: return "cgroup_sock";
+    case BPF_PROG_TYPE_RAW_TRACEPOINT: return "raw_tracepoint";
+    case BPF_PROG_TYPE_TRACING: return "tracing";
+    case BPF_PROG_TYPE_LSM: return "lsm";
+    default: return "socket_filter"; /* safe-ish fallback for noop pass */
+    }
+}
+
+static int run_bpfopt_pass(const char *pass, const char *in_path,
+                           const char *out_path, const char *report_path,
+                           uint32_t prog_type) {
+    const char *bpfopt = getenv("BPFREJIT_BPFOPT_PATH");
+    if (!bpfopt || !*bpfopt)
+        bpfopt = "/usr/local/bin/bpfopt";
+    const char *prog_type_arg = prog_type_short_name(prog_type);
+    char *const argv[] = {
+        (char *)bpfopt,
+        "--pass", (char *)pass,
+        "--input", (char *)in_path,
+        "--output", (char *)out_path,
+        "--report", (char *)report_path,
+        "--prog-type", (char *)prog_type_arg,
+        NULL,
+    };
+
+    pid_t pid;
+    int rc;
+    if (access(bpfopt, X_OK) == 0)
+        rc = posix_spawn(&pid, bpfopt, NULL, NULL, argv, environ);
+    else
+        rc = posix_spawnp(&pid, "bpfopt", NULL, NULL, argv, environ);
+    if (rc != 0) {
+        log_line("bpfopt spawn failed: rc=%d path=%s", rc, bpfopt);
+        return -1;
+    }
+    int status = 0;
+    if (waitpid(pid, &status, 0) < 0) {
+        log_line("bpfopt waitpid failed errno=%d", errno);
+        return -1;
+    }
+    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+        log_line("bpfopt nonzero exit: status=0x%x", status);
+        return -1;
+    }
+    return 0;
+}
+
+/* Snapshot tracked progs (under state_mutex) and return a malloced array.
+ * Each entry is a self-contained copy; caller frees the array and the path
+ * strings. */
+struct prog_snapshot {
+    uint32_t kernel_prog_id;
+    uint32_t prog_type;
+    uint32_t insn_cnt;
+    uint64_t hash;
+    char name[17];
+    char bytecode_path[256];
+};
+static struct prog_snapshot *snapshot_progs(size_t *n_out) {
+    pthread_mutex_lock(&state_mutex);
+    size_t n = 0;
+    for (int b = 0; b < OBJ_TABLE_BUCKETS; b++)
+        for (struct obj_entry *e = obj_table[b]; e; e = e->next)
+            if (e->kind == OBJ_PROG && e->u.prog.insn_cnt > 0)
+                n++;
+    struct prog_snapshot *arr =
+        (struct prog_snapshot *)calloc(n, sizeof(*arr));
+    if (!arr) {
+        pthread_mutex_unlock(&state_mutex);
+        *n_out = 0;
+        return NULL;
+    }
+    size_t i = 0;
+    for (int b = 0; b < OBJ_TABLE_BUCKETS; b++) {
+        for (struct obj_entry *e = obj_table[b]; e; e = e->next) {
+            if (e->kind == OBJ_PROG && e->u.prog.insn_cnt > 0) {
+                arr[i].kernel_prog_id = e->u.prog.kernel_prog_id;
+                arr[i].prog_type = e->u.prog.prog_type;
+                arr[i].insn_cnt = e->u.prog.insn_cnt;
+                arr[i].hash = e->u.prog.hash;
+                memcpy(arr[i].name, e->u.prog.name, sizeof(arr[i].name));
+                memcpy(arr[i].bytecode_path, e->u.prog.bytecode_path,
+                       sizeof(arr[i].bytecode_path));
+                i++;
+            }
+        }
+    }
+    pthread_mutex_unlock(&state_mutex);
+    *n_out = i;
+    return arr;
+}
+
+/* Run bpfopt pass list on every tracked prog. Outputs go to
+ * $BPFREJIT_SHIM_DIR/bpfrejit_<pid>_<hash>_<pass>.bpf and …_<pass>.json. */
+static void run_bpfopt_on_all_progs(const char *pass_list) {
+    const char *dir = getenv("BPFREJIT_SHIM_DIR");
+    if (!dir) dir = "/tmp";
+
+    size_t n = 0;
+    struct prog_snapshot *progs = snapshot_progs(&n);
+    if (!progs || n == 0) {
+        free(progs);
+        return;
+    }
+
+    /* pass_list is comma-separated; for PoC we accept a single pass. */
+    char pass_buf[64];
+    snprintf(pass_buf, sizeof(pass_buf), "%s", pass_list);
+    char *comma = strchr(pass_buf, ',');
+    if (comma) *comma = 0; /* TODO: real pipeline */
+
+    int ok = 0, fail = 0;
+    for (size_t i = 0; i < n; i++) {
+        if (!progs[i].bytecode_path[0])
+            continue;
+        char out_path[320], report_path[320];
+        snprintf(out_path, sizeof(out_path), "%s/bpfrejit_%d_%016lx_%s.bpf",
+                 dir, getpid(), progs[i].hash, pass_buf);
+        snprintf(report_path, sizeof(report_path),
+                 "%s/bpfrejit_%d_%016lx_%s.json", dir, getpid(),
+                 progs[i].hash, pass_buf);
+        /* Skip if already done for this hash. */
+        if (access(out_path, F_OK) == 0)
+            continue;
+        int rc = run_bpfopt_pass(pass_buf, progs[i].bytecode_path, out_path,
+                                 report_path, progs[i].prog_type);
+        if (rc == 0) {
+            ok++;
+            log_line("bpfopt pass=%s kernel_prog_id=%u hash=%016lx "
+                     "out=%s report=%s OK",
+                     pass_buf, progs[i].kernel_prog_id, progs[i].hash,
+                     out_path, report_path);
+        } else {
+            fail++;
+            log_line("bpfopt pass=%s kernel_prog_id=%u hash=%016lx FAIL",
+                     pass_buf, progs[i].kernel_prog_id, progs[i].hash);
+        }
+    }
+    free(progs);
+    if (ok || fail)
+        log_line("bpfopt pass=%s summary: ok=%d fail=%d total=%zu", pass_buf,
+                 ok, fail, n);
+}
+
+/* Worker thread:
+ *
+ *   1. periodically dump state JSON (env: BPFREJIT_SHIM_PERIODIC_DUMP_MS, ms)
+ *   2. periodically invoke `bpfopt --pass <name>` on captured bytecode
+ *      (env: BPFREJIT_SHIM_RUN_BPFOPT=<comma-list of passes>;
+ *       e.g. BPFREJIT_SHIM_RUN_BPFOPT=noop)
+ *
+ * Both feed off the same tick. Default tick = 2000ms.
+ */
 static void *worker_thread(void *arg) {
     (void)arg;
-    const char *ms_env = getenv("BPFREJIT_SHIM_PERIODIC_DUMP_MS");
-    int ms = ms_env ? atoi(ms_env) : 0;
-    if (ms <= 0)
+    int dump_ms = 0;
+    const char *dump_env = getenv("BPFREJIT_SHIM_PERIODIC_DUMP_MS");
+    if (dump_env)
+        dump_ms = atoi(dump_env);
+    const char *passes = getenv("BPFREJIT_SHIM_RUN_BPFOPT");
+    int tick_ms = 2000;
+    const char *tick_env = getenv("BPFREJIT_SHIM_TICK_MS");
+    if (tick_env) {
+        int v = atoi(tick_env);
+        if (v > 0) tick_ms = v;
+    }
+    /* If neither feature is enabled, exit. */
+    if (dump_ms <= 0 && (!passes || !*passes))
         return NULL;
     /* Block all signals on this thread so Go-runtime / async-signal-driven
      * apps do not wake nanosleep with EINTR every microsecond. */
     sigset_t mask;
     sigfillset(&mask);
     pthread_sigmask(SIG_BLOCK, &mask, NULL);
+    int elapsed_ms = 0;
     while (1) {
         struct timespec ts, rem;
-        ts.tv_sec = ms / 1000;
-        ts.tv_nsec = (long)(ms % 1000) * 1000000L;
-        /* Loop on EINTR; do not poll-spin. */
+        ts.tv_sec = tick_ms / 1000;
+        ts.tv_nsec = (long)(tick_ms % 1000) * 1000000L;
         while (nanosleep(&ts, &rem) == -1 && errno == EINTR)
             ts = rem;
-        dump_state_json();
+        elapsed_ms += tick_ms;
+        if (dump_ms > 0 && elapsed_ms % dump_ms < tick_ms)
+            dump_state_json();
+        if (passes && *passes)
+            run_bpfopt_on_all_progs(passes);
     }
     return NULL;
 }

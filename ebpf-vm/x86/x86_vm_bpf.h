@@ -161,6 +161,7 @@ struct x86_vm_loop_ctx {
 	__u32 failed;
 	__u32 done;
 	__u32 next;
+	__u32 pc;
 };
 
 #define X86_VM_LOOP_OP(HELPER, OP, DST, SRC, FLAGS, AUX, IMM)              \

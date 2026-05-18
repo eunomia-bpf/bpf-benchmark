@@ -45,6 +45,8 @@
 #define HC_CMOV_ARCH_STACK_PAYLOAD(DST, SRC) \
     ((__u64)(DST) | ((__u64)(SRC) << 4) | ((__u64)(HC_FLAG_ARCH_STACK) << 12))
 #define HC_SETCC_STACK_PAYLOAD(DST) ((__u64)(DST) | ((__u64)(HC_FLAG_STACK) << 16))
+#define HC_SETCC_ARCH_STACK_PAYLOAD(DST) \
+    ((__u64)(DST) | ((__u64)(HC_FLAG_ARCH_STACK) << 16))
 #define HC_FLAG_STACK 5
 #define HC_FLAG_ARCH_STACK 6
 #define HC_X86_RAX BPF_REG_0

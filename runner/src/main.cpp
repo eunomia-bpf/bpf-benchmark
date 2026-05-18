@@ -19,6 +19,10 @@ int main(int argc, char **argv)
             print_json(run_native(options));
             return 0;
         }
+        if (options.command == "run-native-lab") {
+            print_json(run_kernel_native_lab(options));
+            return 0;
+        }
 #ifdef MICRO_EXEC_ENABLE_LLVMBPF
         if (options.command == "run-llvmbpf") {
             print_json(run_llvmbpf(options));

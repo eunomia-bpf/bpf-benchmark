@@ -78,11 +78,85 @@ DEFINE_STAGED_INPUT_XDP_BENCH(
 ```asm
 Disassembly of section .init:
 
+0000000000001000 <_init>:
+    1000:	f3 0f 1e fa          	endbr64
+    1004:	48 83 ec 08          	sub    rsp,0x8
+    1008:	48 8b 05 c1 2f 00 00 	mov    rax,QWORD PTR [rip+0x2fc1]        # 3fd0 <__gmon_start__@Base>
+    100f:	48 85 c0             	test   rax,rax
+    1012:	74 02                	je     1016 <_init+0x16>
+    1014:	ff d0                	call   rax
+    1016:	48 83 c4 08          	add    rsp,0x8
+    101a:	c3                   	ret
+
 Disassembly of section .plt:
+
+0000000000001020 <.plt>:
+    1020:	ff 35 ca 2f 00 00    	push   QWORD PTR [rip+0x2fca]        # 3ff0 <_GLOBAL_OFFSET_TABLE_+0x8>
+    1026:	ff 25 cc 2f 00 00    	jmp    QWORD PTR [rip+0x2fcc]        # 3ff8 <_GLOBAL_OFFSET_TABLE_+0x10>
+    102c:	0f 1f 40 00          	nop    DWORD PTR [rax+0x0]
 
 Disassembly of section .plt.got:
 
+0000000000001030 <__cxa_finalize@plt>:
+    1030:	ff 25 aa 2f 00 00    	jmp    QWORD PTR [rip+0x2faa]        # 3fe0 <__cxa_finalize@GLIBC_2.2.5>
+    1036:	66 90                	xchg   ax,ax
+
 Disassembly of section .text:
+
+0000000000001040 <deregister_tm_clones>:
+    1040:	48 8d 3d c9 2f 00 00 	lea    rdi,[rip+0x2fc9]        # 4010 <__TMC_END__>
+    1047:	48 8d 05 c2 2f 00 00 	lea    rax,[rip+0x2fc2]        # 4010 <__TMC_END__>
+    104e:	48 39 f8             	cmp    rax,rdi
+    1051:	74 15                	je     1068 <deregister_tm_clones+0x28>
+    1053:	48 8b 05 6e 2f 00 00 	mov    rax,QWORD PTR [rip+0x2f6e]        # 3fc8 <_ITM_deregisterTMCloneTable@Base>
+    105a:	48 85 c0             	test   rax,rax
+    105d:	74 09                	je     1068 <deregister_tm_clones+0x28>
+    105f:	ff e0                	jmp    rax
+    1061:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
+    1068:	c3                   	ret
+    1069:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
+
+0000000000001070 <register_tm_clones>:
+    1070:	48 8d 3d 99 2f 00 00 	lea    rdi,[rip+0x2f99]        # 4010 <__TMC_END__>
+    1077:	48 8d 35 92 2f 00 00 	lea    rsi,[rip+0x2f92]        # 4010 <__TMC_END__>
+    107e:	48 29 fe             	sub    rsi,rdi
+    1081:	48 89 f0             	mov    rax,rsi
+    1084:	48 c1 ee 3f          	shr    rsi,0x3f
+    1088:	48 c1 f8 03          	sar    rax,0x3
+    108c:	48 01 c6             	add    rsi,rax
+    108f:	48 d1 fe             	sar    rsi,1
+    1092:	74 14                	je     10a8 <register_tm_clones+0x38>
+    1094:	48 8b 05 3d 2f 00 00 	mov    rax,QWORD PTR [rip+0x2f3d]        # 3fd8 <_ITM_registerTMCloneTable@Base>
+    109b:	48 85 c0             	test   rax,rax
+    109e:	74 08                	je     10a8 <register_tm_clones+0x38>
+    10a0:	ff e0                	jmp    rax
+    10a2:	66 0f 1f 44 00 00    	nop    WORD PTR [rax+rax*1+0x0]
+    10a8:	c3                   	ret
+    10a9:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
+
+00000000000010b0 <__do_global_dtors_aux>:
+    10b0:	f3 0f 1e fa          	endbr64
+    10b4:	80 3d 51 2f 00 00 00 	cmp    BYTE PTR [rip+0x2f51],0x0        # 400c <completed.0>
+    10bb:	75 2b                	jne    10e8 <__do_global_dtors_aux+0x38>
+    10bd:	55                   	push   rbp
+    10be:	48 83 3d 1a 2f 00 00 	cmp    QWORD PTR [rip+0x2f1a],0x0        # 3fe0 <__cxa_finalize@GLIBC_2.2.5>
+    10c5:	00 
+    10c6:	48 89 e5             	mov    rbp,rsp
+    10c9:	74 0c                	je     10d7 <__do_global_dtors_aux+0x27>
+    10cb:	48 8b 3d 2e 2f 00 00 	mov    rdi,QWORD PTR [rip+0x2f2e]        # 4000 <__dso_handle>
+    10d2:	e8 59 ff ff ff       	call   1030 <__cxa_finalize@plt>
+    10d7:	e8 64 ff ff ff       	call   1040 <deregister_tm_clones>
+    10dc:	c6 05 29 2f 00 00 01 	mov    BYTE PTR [rip+0x2f29],0x1        # 400c <completed.0>
+    10e3:	5d                   	pop    rbp
+    10e4:	c3                   	ret
+    10e5:	0f 1f 00             	nop    DWORD PTR [rax]
+    10e8:	c3                   	ret
+    10e9:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
+
+00000000000010f0 <frame_dummy>:
+    10f0:	f3 0f 1e fa          	endbr64
+    10f4:	e9 77 ff ff ff       	jmp    1070 <register_tm_clones>
+    10f9:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
 
 0000000000001100 <tracee_syscall_name_table_lookup_xdp>:
     1100:	48 8b 17             	mov    rdx,QWORD PTR [rdi]
@@ -105,150 +179,197 @@ Disassembly of section .text:
     112e:	41 55                	push   r13
     1130:	41 54                	push   r12
     1132:	53                   	push   rbx
-    1133:	49 be 09 c9 bc f3 67 	movabs r14,0x6a09e667f3bcc909
+    1133:	49 bd 09 c9 bc f3 67 	movabs r13,0x6a09e667f3bcc909
     113a:	e6 09 6a 
     113d:	48 be 63 6c 6f 73 65 	movabs rsi,0x65736f6c63
     1144:	00 00 00 
     1147:	45 31 c0             	xor    r8d,r8d
-    114a:	4c 8d 15 af 0e 00 00 	lea    r10,[rip+0xeaf]        # 2000 <_fini+0xcb0>
-    1151:	4c 8d 9e 14 06 fa 00 	lea    r11,[rsi+0xfa0614]
-    1158:	4c 8d 3d 1d 11 00 00 	lea    r15,[rip+0x111d]        # 227c <_fini+0xf2c>
-    115f:	49 bd 75 6e 6c 69 6e 	movabs r13,0x74616b6e696c6e75
-    1166:	6b 61 74 
-    1169:	48 bd 73 74 61 74 32 	movabs rbp,0x74613274617473
-    1170:	61 74 00 
-    1173:	49 b9 73 69 67 6e 65 	movabs r9,0x647466656e676973
-    117a:	66 74 64 
-    117d:	0f 1f 00             	nop    DWORD PTR [rax]
-    1180:	42 0f b6 7c 82 0c    	movzx  edi,BYTE PTR [rdx+r8*4+0xc]
-    1186:	42 0f b6 4c 82 0d    	movzx  ecx,BYTE PTR [rdx+r8*4+0xd]
-    118c:	c1 e1 08             	shl    ecx,0x8
-    118f:	09 f9                	or     ecx,edi
-    1191:	42 0f b7 44 82 0e    	movzx  eax,WORD PTR [rdx+r8*4+0xe]
-    1197:	c1 e0 10             	shl    eax,0x10
-    119a:	09 c8                	or     eax,ecx
-    119c:	3d d8 00 00 00       	cmp    eax,0xd8
-    11a1:	7f 1d                	jg     11c0 <tracee_syscall_name_table_lookup_xdp+0xc0>
-    11a3:	3d 9e 00 00 00       	cmp    eax,0x9e
-    11a8:	77 6e                	ja     1218 <tracee_syscall_name_table_lookup_xdp+0x118>
-    11aa:	89 c1                	mov    ecx,eax
-    11ac:	49 63 0c 8a          	movsxd rcx,DWORD PTR [r10+rcx*4]
-    11b0:	4c 01 d1             	add    rcx,r10
-    11b3:	ff e1                	jmp    rcx
-    11b5:	b9 64 61 65 72       	mov    ecx,0x72656164
-    11ba:	e9 41 01 00 00       	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    11bf:	90                   	nop
-    11c0:	3d 40 01 00 00       	cmp    eax,0x140
-    11c5:	7f 23                	jg     11ea <tracee_syscall_name_table_lookup_xdp+0xea>
-    11c7:	8d 88 ff fe ff ff    	lea    ecx,[rax-0x101]
-    11cd:	83 f9 22             	cmp    ecx,0x22
-    11d0:	77 30                	ja     1202 <tracee_syscall_name_table_lookup_xdp+0x102>
-    11d2:	49 63 0c 8f          	movsxd rcx,DWORD PTR [r15+rcx*4]
-    11d6:	4c 01 f9             	add    rcx,r15
-    11d9:	ff e1                	jmp    rcx
-    11db:	48 b9 6f 70 65 6e 61 	movabs rcx,0x74616e65706f
-    11e2:	74 00 00 
-    11e5:	e9 16 01 00 00       	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    11ea:	3d 41 01 00 00       	cmp    eax,0x141
-    11ef:	74 55                	je     1246 <tracee_syscall_name_table_lookup_xdp+0x146>
-    11f1:	3d 4c 01 00 00       	cmp    eax,0x14c
-    11f6:	75 58                	jne    1250 <tracee_syscall_name_table_lookup_xdp+0x150>
-    11f8:	b9 73 61 74 78       	mov    ecx,0x78746173
-    11fd:	e9 fe 00 00 00       	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    1202:	3d d9 00 00 00       	cmp    eax,0xd9
-    1207:	75 47                	jne    1250 <tracee_syscall_name_table_lookup_xdp+0x150>
-    1209:	48 b9 67 65 74 61 64 	movabs rcx,0x646461746567
-    1210:	64 00 00 
-    1213:	e9 e8 00 00 00       	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    1218:	3d ca 00 00 00       	cmp    eax,0xca
-    121d:	75 31                	jne    1250 <tracee_syscall_name_table_lookup_xdp+0x150>
-    121f:	48 b9 55 66 75 74 65 	movabs rcx,0x786574756655
-    1226:	78 00 00 
-    1229:	e9 d2 00 00 00       	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    122e:	4c 89 e9             	mov    rcx,r13
-    1231:	e9 ca 00 00 00       	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    1236:	48 89 e9             	mov    rcx,rbp
-    1239:	e9 c2 00 00 00       	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    123e:	4c 89 c9             	mov    rcx,r9
-    1241:	e9 ba 00 00 00       	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    1246:	b9 62 66 70 00       	mov    ecx,0x706662
-    124b:	e9 b0 00 00 00       	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    1250:	89 c0                	mov    eax,eax
-    1252:	48 b9 87 ca eb 85 b1 	movabs rcx,0x9e3779b185ebca87
-    1259:	79 37 9e 
-    125c:	48 0f af c1          	imul   rax,rcx
-    1260:	49 31 c6             	xor    r14,rax
-    1263:	e9 c7 00 00 00       	jmp    132f <tracee_syscall_name_table_lookup_xdp+0x22f>
-    1268:	48 b9 65 78 65 63 76 	movabs rcx,0x657663657865
-    126f:	65 00 00 
-    1272:	e9 89 00 00 00       	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    1277:	48 b9 67 74 70 69 64 	movabs rcx,0x6469707467
-    127e:	00 00 00 
-    1281:	eb 7d                	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    1283:	b9 6d 6d 61 70       	mov    ecx,0x70616d6d
-    1288:	eb 76                	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    128a:	48 b9 75 6e 6c 69 6e 	movabs rcx,0x6b6e696c6e75
-    1291:	6b 00 00 
-    1294:	eb 6a                	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    1296:	48 b9 55 63 6c 6f 6e 	movabs rcx,0x656e6f6c6355
-    129d:	65 00 00 
-    12a0:	eb 5e                	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    12a2:	48 b9 55 77 61 69 74 	movabs rcx,0x347469617755
-    12a9:	34 00 00 
-    12ac:	eb 52                	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    12ae:	b9 6f 70 65 6e       	mov    ecx,0x6e65706f
-    12b3:	eb 4b                	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    12b5:	48 89 f1             	mov    rcx,rsi
-    12b8:	eb 46                	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    12ba:	b9 66 6f 72 6b       	mov    ecx,0x6b726f66
-    12bf:	eb 3f                	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    12c1:	b9 65 78 69 74       	mov    ecx,0x74697865
-    12c6:	eb 38                	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    12c8:	4c 89 d9             	mov    rcx,r11
-    12cb:	eb 33                	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    12cd:	48 b9 55 6c 69 6e 6b 	movabs rcx,0x6b6e696c55
-    12d4:	00 00 00 
-    12d7:	eb 27                	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    12d9:	b9 6b 62 72 6b       	mov    ecx,0x6b72626b
-    12de:	eb 20                	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    12e0:	b9 63 68 64 69       	mov    ecx,0x69646863
-    12e5:	eb 19                	jmp    1300 <tracee_syscall_name_table_lookup_xdp+0x200>
-    12e7:	48 b9 61 72 63 68 5f 	movabs rcx,0x6c74635f68637261
-    12ee:	63 74 6c 
-    12f1:	66 66 66 66 66 66 2e 	data16 data16 data16 data16 data16 cs nop WORD PTR [rax+rax*1+0x0]
-    12f8:	0f 1f 84 00 00 00 00 
-    12ff:	00 
-    1300:	89 c3                	mov    ebx,eax
-    1302:	48 31 cb             	xor    rbx,rcx
-    1305:	44 89 c0             	mov    eax,r8d
-    1308:	83 e0 07             	and    eax,0x7
-    130b:	8d 48 01             	lea    ecx,[rax+0x1]
-    130e:	49 89 dc             	mov    r12,rbx
-    1311:	49 d3 e4             	shl    r12,cl
-    1314:	89 c1                	mov    ecx,eax
-    1316:	f6 d1                	not    cl
-    1318:	48 d3 eb             	shr    rbx,cl
-    131b:	c1 e0 03             	shl    eax,0x3
-    131e:	89 c1                	mov    ecx,eax
-    1320:	48 d3 e7             	shl    rdi,cl
-    1323:	4c 09 e3             	or     rbx,r12
-    1326:	4c 01 f3             	add    rbx,r14
-    1329:	48 31 df             	xor    rdi,rbx
-    132c:	49 89 fe             	mov    r14,rdi
-    132f:	49 ff c0             	inc    r8
-    1332:	49 83 f8 40          	cmp    r8,0x40
-    1336:	0f 85 44 fe ff ff    	jne    1180 <tracee_syscall_name_table_lookup_xdp+0x80>
-    133c:	4c 89 32             	mov    QWORD PTR [rdx],r14
-    133f:	b8 02 00 00 00       	mov    eax,0x2
-    1344:	5b                   	pop    rbx
-    1345:	41 5c                	pop    r12
-    1347:	41 5d                	pop    r13
-    1349:	41 5e                	pop    r14
-    134b:	41 5f                	pop    r15
-    134d:	5d                   	pop    rbp
-    134e:	c3                   	ret
+    114a:	4c 8d 8e 14 06 fa 00 	lea    r9,[rsi+0xfa0614]
+    1151:	49 bf 67 65 74 61 64 	movabs r15,0x646461746567
+    1158:	64 00 00 
+    115b:	49 bb 6f 70 65 6e 61 	movabs r11,0x74616e65706f
+    1162:	74 00 00 
+    1165:	48 bb 75 6e 6c 69 6e 	movabs rbx,0x74616b6e696c6e75
+    116c:	6b 61 74 
+    116f:	49 be 73 74 61 74 32 	movabs r14,0x74613274617473
+    1176:	61 74 00 
+    1179:	49 bc 73 69 67 6e 65 	movabs r12,0x647466656e676973
+    1180:	66 74 64 
+    1183:	66 66 66 66 2e 0f 1f 	data16 data16 data16 cs nop WORD PTR [rax+rax*1+0x0]
+    118a:	84 00 00 00 00 00 
+    1190:	42 0f b6 7c 82 0c    	movzx  edi,BYTE PTR [rdx+r8*4+0xc]
+    1196:	42 0f b6 4c 82 0d    	movzx  ecx,BYTE PTR [rdx+r8*4+0xd]
+    119c:	c1 e1 08             	shl    ecx,0x8
+    119f:	09 f9                	or     ecx,edi
+    11a1:	42 0f b7 44 82 0e    	movzx  eax,WORD PTR [rdx+r8*4+0xe]
+    11a7:	c1 e0 10             	shl    eax,0x10
+    11aa:	09 c8                	or     eax,ecx
+    11ac:	83 f8 4f             	cmp    eax,0x4f
+    11af:	7f 3f                	jg     11f0 <tracee_syscall_name_table_lookup_xdp+0xf0>
+    11b1:	83 f8 26             	cmp    eax,0x26
+    11b4:	7f 7a                	jg     1230 <tracee_syscall_name_table_lookup_xdp+0x130>
+    11b6:	83 f8 02             	cmp    eax,0x2
+    11b9:	0f 8f d5 00 00 00    	jg     1294 <tracee_syscall_name_table_lookup_xdp+0x194>
+    11bf:	85 c0                	test   eax,eax
+    11c1:	0f 84 b1 01 00 00    	je     1378 <tracee_syscall_name_table_lookup_xdp+0x278>
+    11c7:	83 f8 01             	cmp    eax,0x1
+    11ca:	0f 84 62 01 00 00    	je     1332 <tracee_syscall_name_table_lookup_xdp+0x232>
+    11d0:	83 f8 02             	cmp    eax,0x2
+    11d3:	0f 85 25 02 00 00    	jne    13fe <tracee_syscall_name_table_lookup_xdp+0x2fe>
+    11d9:	b9 6f 70 65 6e       	mov    ecx,0x6e65706f
+    11de:	e9 dd 01 00 00       	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    11e3:	66 66 66 66 2e 0f 1f 	data16 data16 data16 cs nop WORD PTR [rax+rax*1+0x0]
+    11ea:	84 00 00 00 00 00 
+    11f0:	3d 00 01 00 00       	cmp    eax,0x100
+    11f5:	7f 69                	jg     1260 <tracee_syscall_name_table_lookup_xdp+0x160>
+    11f7:	3d 9d 00 00 00       	cmp    eax,0x9d
+    11fc:	0f 8f ba 00 00 00    	jg     12bc <tracee_syscall_name_table_lookup_xdp+0x1bc>
+    1202:	83 f8 50             	cmp    eax,0x50
+    1205:	0f 84 74 01 00 00    	je     137f <tracee_syscall_name_table_lookup_xdp+0x27f>
+    120b:	83 f8 57             	cmp    eax,0x57
+    120e:	0f 84 26 01 00 00    	je     133a <tracee_syscall_name_table_lookup_xdp+0x23a>
+    1214:	83 f8 59             	cmp    eax,0x59
+    1217:	0f 85 e1 01 00 00    	jne    13fe <tracee_syscall_name_table_lookup_xdp+0x2fe>
+    121d:	48 b9 55 6c 69 6e 6b 	movabs rcx,0x6b6e696c55
+    1224:	00 00 00 
+    1227:	e9 94 01 00 00       	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    122c:	0f 1f 40 00          	nop    DWORD PTR [rax+0x0]
+    1230:	83 f8 3a             	cmp    eax,0x3a
+    1233:	0f 8f ac 00 00 00    	jg     12e5 <tracee_syscall_name_table_lookup_xdp+0x1e5>
+    1239:	83 f8 27             	cmp    eax,0x27
+    123c:	0f 84 44 01 00 00    	je     1386 <tracee_syscall_name_table_lookup_xdp+0x286>
+    1242:	83 f8 38             	cmp    eax,0x38
+    1245:	0f 84 fb 00 00 00    	je     1346 <tracee_syscall_name_table_lookup_xdp+0x246>
+    124b:	83 f8 39             	cmp    eax,0x39
+    124e:	0f 85 aa 01 00 00    	jne    13fe <tracee_syscall_name_table_lookup_xdp+0x2fe>
+    1254:	b9 66 6f 72 6b       	mov    ecx,0x6b726f66
+    1259:	e9 62 01 00 00       	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    125e:	66 90                	xchg   ax,ax
+    1260:	3d 22 01 00 00       	cmp    eax,0x122
+    1265:	0f 8f a0 00 00 00    	jg     130b <tracee_syscall_name_table_lookup_xdp+0x20b>
+    126b:	3d 01 01 00 00       	cmp    eax,0x101
+    1270:	0f 84 1c 01 00 00    	je     1392 <tracee_syscall_name_table_lookup_xdp+0x292>
+    1276:	3d 07 01 00 00       	cmp    eax,0x107
+    127b:	0f 84 d1 00 00 00    	je     1352 <tracee_syscall_name_table_lookup_xdp+0x252>
+    1281:	3d 19 01 00 00       	cmp    eax,0x119
+    1286:	0f 85 72 01 00 00    	jne    13fe <tracee_syscall_name_table_lookup_xdp+0x2fe>
+    128c:	4c 89 f1             	mov    rcx,r14
+    128f:	e9 2c 01 00 00       	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    1294:	48 89 f1             	mov    rcx,rsi
+    1297:	83 f8 03             	cmp    eax,0x3
+    129a:	0f 84 20 01 00 00    	je     13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    12a0:	83 f8 09             	cmp    eax,0x9
+    12a3:	0f 84 ae 00 00 00    	je     1357 <tracee_syscall_name_table_lookup_xdp+0x257>
+    12a9:	83 f8 0c             	cmp    eax,0xc
+    12ac:	0f 85 4c 01 00 00    	jne    13fe <tracee_syscall_name_table_lookup_xdp+0x2fe>
+    12b2:	b9 6b 62 72 6b       	mov    ecx,0x6b72626b
+    12b7:	e9 04 01 00 00       	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    12bc:	3d 9e 00 00 00       	cmp    eax,0x9e
+    12c1:	0f 84 d0 00 00 00    	je     1397 <tracee_syscall_name_table_lookup_xdp+0x297>
+    12c7:	3d ca 00 00 00       	cmp    eax,0xca
+    12cc:	0f 84 8c 00 00 00    	je     135e <tracee_syscall_name_table_lookup_xdp+0x25e>
+    12d2:	3d d9 00 00 00       	cmp    eax,0xd9
+    12d7:	0f 85 21 01 00 00    	jne    13fe <tracee_syscall_name_table_lookup_xdp+0x2fe>
+    12dd:	4c 89 f9             	mov    rcx,r15
+    12e0:	e9 db 00 00 00       	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    12e5:	83 f8 3b             	cmp    eax,0x3b
+    12e8:	0f 84 b5 00 00 00    	je     13a3 <tracee_syscall_name_table_lookup_xdp+0x2a3>
+    12ee:	83 f8 3c             	cmp    eax,0x3c
+    12f1:	74 77                	je     136a <tracee_syscall_name_table_lookup_xdp+0x26a>
+    12f3:	83 f8 3d             	cmp    eax,0x3d
+    12f6:	0f 85 02 01 00 00    	jne    13fe <tracee_syscall_name_table_lookup_xdp+0x2fe>
+    12fc:	48 b9 55 77 61 69 74 	movabs rcx,0x347469617755
+    1303:	34 00 00 
+    1306:	e9 b5 00 00 00       	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    130b:	3d 23 01 00 00       	cmp    eax,0x123
+    1310:	0f 84 99 00 00 00    	je     13af <tracee_syscall_name_table_lookup_xdp+0x2af>
+    1316:	3d 41 01 00 00       	cmp    eax,0x141
+    131b:	74 54                	je     1371 <tracee_syscall_name_table_lookup_xdp+0x271>
+    131d:	3d 4c 01 00 00       	cmp    eax,0x14c
+    1322:	0f 85 d6 00 00 00    	jne    13fe <tracee_syscall_name_table_lookup_xdp+0x2fe>
+    1328:	b9 73 61 74 78       	mov    ecx,0x78746173
+    132d:	e9 8e 00 00 00       	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    1332:	4c 89 c9             	mov    rcx,r9
+    1335:	e9 86 00 00 00       	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    133a:	48 b9 75 6e 6c 69 6e 	movabs rcx,0x6b6e696c6e75
+    1341:	6b 00 00 
+    1344:	eb 7a                	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    1346:	48 b9 55 63 6c 6f 6e 	movabs rcx,0x656e6f6c6355
+    134d:	65 00 00 
+    1350:	eb 6e                	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    1352:	48 89 d9             	mov    rcx,rbx
+    1355:	eb 69                	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    1357:	b9 6d 6d 61 70       	mov    ecx,0x70616d6d
+    135c:	eb 62                	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    135e:	48 b9 55 66 75 74 65 	movabs rcx,0x786574756655
+    1365:	78 00 00 
+    1368:	eb 56                	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    136a:	b9 65 78 69 74       	mov    ecx,0x74697865
+    136f:	eb 4f                	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    1371:	b9 62 66 70 00       	mov    ecx,0x706662
+    1376:	eb 48                	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    1378:	b9 64 61 65 72       	mov    ecx,0x72656164
+    137d:	eb 41                	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    137f:	b9 63 68 64 69       	mov    ecx,0x69646863
+    1384:	eb 3a                	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    1386:	48 b9 67 74 70 69 64 	movabs rcx,0x6469707467
+    138d:	00 00 00 
+    1390:	eb 2e                	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    1392:	4c 89 d9             	mov    rcx,r11
+    1395:	eb 29                	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    1397:	48 b9 61 72 63 68 5f 	movabs rcx,0x6c74635f68637261
+    139e:	63 74 6c 
+    13a1:	eb 1d                	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    13a3:	48 b9 65 78 65 63 76 	movabs rcx,0x657663657865
+    13aa:	65 00 00 
+    13ad:	eb 11                	jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0>
+    13af:	4c 89 e1             	mov    rcx,r12
+    13b2:	66 66 66 66 66 2e 0f 	data16 data16 data16 data16 cs nop WORD PTR [rax+rax*1+0x0]
+    13b9:	1f 84 00 00 00 00 00 
+    13c0:	89 c5                	mov    ebp,eax
+    13c2:	48 31 cd             	xor    rbp,rcx
+    13c5:	44 89 c0             	mov    eax,r8d
+    13c8:	83 e0 07             	and    eax,0x7
+    13cb:	8d 48 01             	lea    ecx,[rax+0x1]
+    13ce:	49 89 ea             	mov    r10,rbp
+    13d1:	49 d3 e2             	shl    r10,cl
+    13d4:	89 c1                	mov    ecx,eax
+    13d6:	f6 d1                	not    cl
+    13d8:	48 d3 ed             	shr    rbp,cl
+    13db:	c1 e0 03             	shl    eax,0x3
+    13de:	89 c1                	mov    ecx,eax
+    13e0:	48 d3 e7             	shl    rdi,cl
+    13e3:	4c 09 d5             	or     rbp,r10
+    13e6:	4c 01 ed             	add    rbp,r13
+    13e9:	48 31 ef             	xor    rdi,rbp
+    13ec:	49 89 fd             	mov    r13,rdi
+    13ef:	49 ff c0             	inc    r8
+    13f2:	49 83 f8 40          	cmp    r8,0x40
+    13f6:	0f 85 94 fd ff ff    	jne    1190 <tracee_syscall_name_table_lookup_xdp+0x90>
+    13fc:	eb 15                	jmp    1413 <tracee_syscall_name_table_lookup_xdp+0x313>
+    13fe:	89 c0                	mov    eax,eax
+    1400:	48 b9 87 ca eb 85 b1 	movabs rcx,0x9e3779b185ebca87
+    1407:	79 37 9e 
+    140a:	48 0f af c1          	imul   rax,rcx
+    140e:	49 31 c5             	xor    r13,rax
+    1411:	eb dc                	jmp    13ef <tracee_syscall_name_table_lookup_xdp+0x2ef>
+    1413:	4c 89 2a             	mov    QWORD PTR [rdx],r13
+    1416:	b8 02 00 00 00       	mov    eax,0x2
+    141b:	5b                   	pop    rbx
+    141c:	41 5c                	pop    r12
+    141e:	41 5d                	pop    r13
+    1420:	41 5e                	pop    r14
+    1422:	41 5f                	pop    r15
+    1424:	5d                   	pop    rbp
+    1425:	c3                   	ret
 
 Disassembly of section .fini:
+
+0000000000001428 <_fini>:
+    1428:	f3 0f 1e fa          	endbr64
+    142c:	48 83 ec 08          	sub    rsp,0x8
+    1430:	48 83 c4 08          	add    rsp,0x8
+    1434:	c3                   	ret
 ```
 
 ## Original Kernel JIT ASM
@@ -723,209 +844,352 @@ Disassembly of section .data:
      ((__u64)(SCALE) << 12) | ((__u64)(HAS_INDEX) << 14) | \
      ((__u64)(HAS_BASE) << 15) | ((__u64)(__u32)(DISP) << 16))
 
-/*
- * Semantic handcraft for tracee_syscall_name_table_lookup.
- *
- * Generated from ordinary kernel xlated BPF after stale direct-native
- * handcraft failed verifier with unreachable instructions. Restores XDP
- * ctx loads and keeps branch offsets stable by using same-PC-count leaq.
- */
-
 static const struct bpf_insn program[] = {
-    HC_RAW(0xb7, BPF_REG_0, BPF_REG_0, 0, 0),
-    /* pc 1: restore verifier-facing XDP data_end load */
-    HC_LDX(BPF_W, BPF_REG_2, BPF_REG_1, 4),
-    /* pc 2: restore verifier-facing XDP data load */
-    HC_LDX(BPF_W, BPF_REG_1, BPF_REG_1, 0),
-    HC_RAW(0x2d, BPF_REG_1, BPF_REG_2, 187, 0),
-    /* pc 4: r3 = r1; r3 += 8; leaq kinsn */
-    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_3, BPF_REG_1, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
-    HC_RAW(0x2d, BPF_REG_3, BPF_REG_2, 184, 0),
-    /* pc 7: r3 = r1; r3 += 268; leaq kinsn */
-    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_3, BPF_REG_1, 0, 0, 1, 0, 268), MICRO_HANDCRAFT_BPF_X86_LEAQ),
-    HC_RAW(0x2d, BPF_REG_3, BPF_REG_2, 181, 0),
-    HC_RAW(0x71, BPF_REG_2, BPF_REG_1, 9, 0),
-    HC_RAW(0x67, BPF_REG_2, BPF_REG_0, 0, 8),
-    HC_RAW(0x71, BPF_REG_3, BPF_REG_1, 8, 0),
-    HC_RAW(0x4f, BPF_REG_2, BPF_REG_3, 0, 0),
-    HC_RAW(0x71, BPF_REG_3, BPF_REG_1, 10, 0),
-    HC_RAW(0x67, BPF_REG_3, BPF_REG_0, 0, 16),
-    HC_RAW(0x4f, BPF_REG_2, BPF_REG_3, 0, 0),
-    HC_RAW(0x71, BPF_REG_3, BPF_REG_1, 11, 0),
-    HC_RAW(0x67, BPF_REG_3, BPF_REG_0, 0, 24),
-    HC_RAW(0x4f, BPF_REG_2, BPF_REG_3, 0, 0),
-    HC_RAW(0x67, BPF_REG_2, BPF_REG_0, 0, 32),
-    HC_RAW(0x77, BPF_REG_2, BPF_REG_0, 0, 32),
-    HC_RAW(0x55, BPF_REG_2, BPF_REG_0, 168, 64),
-    HC_RAW(0x18, BPF_REG_5, BPF_REG_0, 0, -205731575),
-    HC_RAW(0x00, BPF_REG_0, BPF_REG_0, 0, 1779033703),
-    HC_RAW(0xb7, BPF_REG_2, BPF_REG_0, 0, 0),
-    /* pc 26: r3 = r1; r3 += 15; leaq kinsn */
-    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_3, BPF_REG_1, 0, 0, 1, 0, 15), MICRO_HANDCRAFT_BPF_X86_LEAQ),
-    HC_RAW(0x18, BPF_REG_4, BPF_REG_0, 0, -2048144761),
-    HC_RAW(0x00, BPF_REG_0, BPF_REG_0, 0, -1640531535),
-    HC_RAW(0x71, BPF_REG_6, BPF_REG_3, -2, 0),
-    HC_RAW(0x67, BPF_REG_6, BPF_REG_0, 0, 8),
-    HC_RAW(0x71, BPF_REG_0, BPF_REG_3, -3, 0),
-    HC_RAW(0x4f, BPF_REG_6, BPF_REG_0, 0, 0),
-    HC_RAW(0x71, BPF_REG_7, BPF_REG_3, -1, 0),
-    HC_RAW(0x67, BPF_REG_7, BPF_REG_0, 0, 16),
-    HC_RAW(0x4f, BPF_REG_6, BPF_REG_7, 0, 0),
-    HC_RAW(0x71, BPF_REG_7, BPF_REG_3, 0, 0),
-    HC_RAW(0x67, BPF_REG_7, BPF_REG_0, 0, 24),
-    HC_RAW(0x4f, BPF_REG_6, BPF_REG_7, 0, 0),
-    HC_RAW(0xbf, BPF_REG_8, BPF_REG_6, 0, 0),
-    HC_RAW(0x67, BPF_REG_8, BPF_REG_0, 0, 32),
-    HC_RAW(0x77, BPF_REG_8, BPF_REG_0, 0, 32),
-    HC_RAW(0x65, BPF_REG_8, BPF_REG_0, 7, 79),
-    HC_RAW(0x65, BPF_REG_8, BPF_REG_0, 15, 38),
-    HC_RAW(0x65, BPF_REG_8, BPF_REG_0, 29, 2),
-    HC_RAW(0xb7, BPF_REG_7, BPF_REG_0, 0, 1919246692),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 93, 0),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 52, 1),
-    HC_RAW(0xb7, BPF_REG_7, BPF_REG_0, 0, 1852141679),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 90, 0),
-    HC_RAW(0x65, BPF_REG_8, BPF_REG_0, 15, 256),
-    HC_RAW(0x65, BPF_REG_8, BPF_REG_0, 28, 157),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 68, 80),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 49, 87),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 1, 89),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 106, 0),
-    HC_RAW(0x18, BPF_REG_7, BPF_REG_0, 0, 1852402773),
-    HC_RAW(0x00, BPF_REG_0, BPF_REG_0, 0, 107),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 81, 0),
-    HC_RAW(0x65, BPF_REG_8, BPF_REG_0, 27, 58),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 62, 39),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 44, 56),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 1, 57),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 98, 0),
-    HC_RAW(0xb7, BPF_REG_7, BPF_REG_0, 0, 1802661734),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 74, 0),
-    HC_RAW(0x65, BPF_REG_8, BPF_REG_0, 27, 290),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 58, 257),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 40, 263),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 1, 281),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 91, 0),
-    HC_RAW(0x18, BPF_REG_7, BPF_REG_0, 0, 1952543859),
-    HC_RAW(0x00, BPF_REG_0, BPF_REG_0, 0, 7627058),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 66, 0),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 54, 3),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 36, 9),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 1, 12),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 84, 0),
-    HC_RAW(0xb7, BPF_REG_7, BPF_REG_0, 0, 1802658411),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 60, 0),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 51, 158),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 32, 202),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 1, 217),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 78, 0),
-    HC_RAW(0x18, BPF_REG_7, BPF_REG_0, 0, 1635018087),
-    HC_RAW(0x00, BPF_REG_0, BPF_REG_0, 0, 25700),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 53, 0),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 47, 59),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 28, 60),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 1, 61),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 71, 0),
-    HC_RAW(0x18, BPF_REG_7, BPF_REG_0, 0, 1767995221),
-    HC_RAW(0x00, BPF_REG_0, BPF_REG_0, 0, 13428),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 46, 0),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 43, 291),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 23, 321),
-    HC_RAW(0x15, BPF_REG_8, BPF_REG_0, 1, 332),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 64, 0),
-    HC_RAW(0xb7, BPF_REG_7, BPF_REG_0, 0, 2020893043),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 40, 0),
-    HC_RAW(0x18, BPF_REG_7, BPF_REG_0, 0, 1953067639),
-    HC_RAW(0x00, BPF_REG_0, BPF_REG_0, 0, 101),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 37, 0),
-    HC_RAW(0x18, BPF_REG_7, BPF_REG_0, 0, 1768713845),
-    HC_RAW(0x00, BPF_REG_0, BPF_REG_0, 0, 27502),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 34, 0),
-    HC_RAW(0x18, BPF_REG_7, BPF_REG_0, 0, 1869374293),
-    HC_RAW(0x00, BPF_REG_0, BPF_REG_0, 0, 25966),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 31, 0),
-    HC_RAW(0x18, BPF_REG_7, BPF_REG_0, 0, 1768713845),
-    HC_RAW(0x00, BPF_REG_0, BPF_REG_0, 0, 1952541550),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 28, 0),
-    HC_RAW(0xb7, BPF_REG_7, BPF_REG_0, 0, 1885433197),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 26, 0),
-    HC_RAW(0x18, BPF_REG_7, BPF_REG_0, 0, 1953850965),
-    HC_RAW(0x00, BPF_REG_0, BPF_REG_0, 0, 30821),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 23, 0),
-    HC_RAW(0xb7, BPF_REG_7, BPF_REG_0, 0, 1953069157),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 21, 0),
-    HC_RAW(0xb7, BPF_REG_7, BPF_REG_0, 0, 7366242),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 19, 0),
-    HC_RAW(0xb7, BPF_REG_7, BPF_REG_0, 0, 1768188003),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 17, 0),
-    HC_RAW(0x18, BPF_REG_7, BPF_REG_0, 0, 1768977511),
-    HC_RAW(0x00, BPF_REG_0, BPF_REG_0, 0, 100),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 14, 0),
-    HC_RAW(0x18, BPF_REG_7, BPF_REG_0, 0, 1852141679),
-    HC_RAW(0x00, BPF_REG_0, BPF_REG_0, 0, 29793),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 11, 0),
-    HC_RAW(0x18, BPF_REG_7, BPF_REG_0, 0, 1936682083),
-    HC_RAW(0x00, BPF_REG_0, BPF_REG_0, 0, 101),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 8, 0),
-    HC_RAW(0x18, BPF_REG_7, BPF_REG_0, 0, 1751347809),
-    HC_RAW(0x00, BPF_REG_0, BPF_REG_0, 0, 1819566943),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 5, 0),
-    HC_RAW(0x18, BPF_REG_7, BPF_REG_0, 0, 1667594341),
-    HC_RAW(0x00, BPF_REG_0, BPF_REG_0, 0, 25974),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, 2, 0),
-    HC_RAW(0x18, BPF_REG_7, BPF_REG_0, 0, 1852270963),
-    HC_RAW(0x00, BPF_REG_0, BPF_REG_0, 0, 1685349989),
-    HC_RAW(0x67, BPF_REG_6, BPF_REG_0, 0, 32),
-    HC_RAW(0x77, BPF_REG_6, BPF_REG_0, 0, 32),
-    HC_RAW(0xaf, BPF_REG_7, BPF_REG_6, 0, 0),
-    HC_RAW(0xbf, BPF_REG_6, BPF_REG_2, 0, 0),
-    HC_RAW(0x57, BPF_REG_6, BPF_REG_0, 0, 7),
-    HC_RAW(0xbf, BPF_REG_8, BPF_REG_6, 0, 0),
-    HC_RAW(0xa7, BPF_REG_8, BPF_REG_0, 0, 63),
-    HC_RAW(0xbf, BPF_REG_9, BPF_REG_7, 0, 0),
-    HC_RAW(0x7f, BPF_REG_9, BPF_REG_8, 0, 0),
-    /* pc 150: r8 = r6; r8 += 1; leaq kinsn */
-    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_8, BPF_REG_6, 0, 0, 1, 0, 1), MICRO_HANDCRAFT_BPF_X86_LEAQ),
-    HC_RAW(0x6f, BPF_REG_7, BPF_REG_8, 0, 0),
-    HC_RAW(0x4f, BPF_REG_7, BPF_REG_9, 0, 0),
-    HC_RAW(0x0f, BPF_REG_7, BPF_REG_5, 0, 0),
-    HC_RAW(0x67, BPF_REG_6, BPF_REG_0, 0, 3),
-    HC_RAW(0x6f, BPF_REG_0, BPF_REG_6, 0, 0),
-    HC_RAW(0xaf, BPF_REG_7, BPF_REG_0, 0, 0),
-    HC_RAW(0x07, BPF_REG_3, BPF_REG_0, 0, 4),
-    HC_RAW(0x07, BPF_REG_2, BPF_REG_0, 0, 1),
-    HC_RAW(0xbf, BPF_REG_5, BPF_REG_7, 0, 0),
-    HC_RAW(0x15, BPF_REG_2, BPF_REG_0, 7, 64),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, -133, 0),
-    HC_RAW(0x67, BPF_REG_6, BPF_REG_0, 0, 32),
-    HC_RAW(0x77, BPF_REG_6, BPF_REG_0, 0, 32),
-    HC_RAW(0x2f, BPF_REG_6, BPF_REG_4, 0, 0),
-    HC_RAW(0xaf, BPF_REG_6, BPF_REG_5, 0, 0),
-    HC_RAW(0xbf, BPF_REG_7, BPF_REG_6, 0, 0),
-    HC_RAW(0x05, BPF_REG_0, BPF_REG_0, -11, 0),
-    HC_RAW(0xbf, BPF_REG_2, BPF_REG_7, 0, 0),
-    HC_RAW(0x77, BPF_REG_2, BPF_REG_0, 0, 56),
-    HC_RAW(0x73, BPF_REG_1, BPF_REG_2, 7, 0),
-    HC_RAW(0xbf, BPF_REG_2, BPF_REG_7, 0, 0),
-    HC_RAW(0x77, BPF_REG_2, BPF_REG_0, 0, 48),
-    HC_RAW(0x73, BPF_REG_1, BPF_REG_2, 6, 0),
-    HC_RAW(0xbf, BPF_REG_2, BPF_REG_7, 0, 0),
-    HC_RAW(0x77, BPF_REG_2, BPF_REG_0, 0, 40),
-    HC_RAW(0x73, BPF_REG_1, BPF_REG_2, 5, 0),
-    HC_RAW(0xbf, BPF_REG_2, BPF_REG_7, 0, 0),
-    HC_RAW(0x77, BPF_REG_2, BPF_REG_0, 0, 32),
-    HC_RAW(0x73, BPF_REG_1, BPF_REG_2, 4, 0),
-    HC_RAW(0xbf, BPF_REG_2, BPF_REG_7, 0, 0),
-    HC_RAW(0x77, BPF_REG_2, BPF_REG_0, 0, 24),
-    HC_RAW(0x73, BPF_REG_1, BPF_REG_2, 3, 0),
-    HC_RAW(0xbf, BPF_REG_2, BPF_REG_7, 0, 0),
-    HC_RAW(0x77, BPF_REG_2, BPF_REG_0, 0, 16),
-    HC_RAW(0x73, BPF_REG_1, BPF_REG_2, 2, 0),
-    HC_RAW(0x73, BPF_REG_1, BPF_REG_7, 0, 0),
-    HC_RAW(0x77, BPF_REG_7, BPF_REG_0, 0, 8),
-    HC_RAW(0x73, BPF_REG_1, BPF_REG_7, 1, 0),
-    HC_RAW(0xb7, BPF_REG_0, BPF_REG_0, 0, 2),
-    HC_RAW(0x95, BPF_REG_0, BPF_REG_0, 0, 0),
+    HC_INIT_X86_STACK(),
+    HC_MOV64_IMM(BPF_REG_6, 0),
+    HC_MOV64_IMM(BPF_REG_7, 0),
+    HC_MOV64_IMM(BPF_REG_8, 0),
+    HC_MOV64_IMM(BPF_REG_9, 0),
+    /* 0x1100: mov    rdx,QWORD PTR [rdi] [context-abi: native xdp_md 64-bit field at off 0 maps to BPF XDP u32 ctx field at off 0] */
+    HC_LDX(BPF_W, BPF_REG_3, BPF_REG_1, 0),
+    /* 0x1103: mov    rcx,QWORD PTR [rdi+0x8] [context-abi: native xdp_md 64-bit field at off 8 maps to BPF XDP u32 ctx field at off 4] */
+    HC_LDX(BPF_W, BPF_REG_4, BPF_REG_1, 4),
+    /* 0x1107: xor    eax,eax [exact-kinsn: xor32 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORL),
+    /* 0x1109: cmp    rdx,rcx [absorbed-control-flow: cmp folded into following ordinary BPF jbe] */
+    /* 0x110c: jbe    110f <tracee_syscall_name_table_lookup_xdp+0xf> [exact-bpf: jbe ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP | BPF_JLE | BPF_X, BPF_REG_3, BPF_REG_4, (2) - 1, 0),
+    /* 0x110e: ret [abi-boundary: native ret maps to the BPF program exit boundary] */
+    HC_EXIT(),
+    /* 0x110f: lea    rsi,[rdx+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
+    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_3, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
+    /* 0x1113: cmp    rsi,rcx [absorbed-control-flow: cmp folded into following ordinary BPF ja] */
+    /* 0x1116: ja     110e <tracee_syscall_name_table_lookup_xdp+0xe> [exact-bpf: ja ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_2, BPF_REG_4, (-3) - 1, 0),
+    /* 0x1118: lea    rdi,[rdx+0x10c] [exact-kinsn: LEA via x86 kinsn selector] */
+    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_1, BPF_REG_3, 0, 0, 1, 0, 268), MICRO_HANDCRAFT_BPF_X86_LEAQ),
+    /* 0x111f: cmp    rdi,rcx [absorbed-control-flow: cmp folded into following ordinary BPF ja] */
+    /* 0x1122: ja     110e <tracee_syscall_name_table_lookup_xdp+0xe> [exact-bpf: ja ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_1, BPF_REG_4, (-6) - 1, 0),
+    /* 0x1124: cmp    DWORD PTR [rsi],0x40 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1127: jne    110e <tracee_syscall_name_table_lookup_xdp+0xe> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LDX(BPF_W, BPF_REG_6, BPF_REG_2, 0),
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 64),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-13) - 1),
+    /* 0x1129: push   rbp [exact-kinsn: pushq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(HC_X86_RBP), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
+    /* 0x112a: push   r15 [exact-kinsn: pushq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_9), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
+    /* 0x112c: push   r14 [exact-kinsn: pushq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_8), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
+    /* 0x112e: push   r13 [exact-kinsn: pushq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
+    /* 0x1130: push   r12 [exact-kinsn: pushq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(HC_X86_R12), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
+    /* 0x1132: push   rbx [exact-kinsn: pushq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
+    /* 0x1133: movabs r13,0x6a09e667f3bcc909 [exact-bpf: movabs via verifier-visible BPF immediate load] */
+    HC_LD_IMM64_RAW(BPF_REG_7, 0, 0x6a09e667f3bcc909ULL),
+    /* 0x113d: movabs rsi,0x65736f6c63 [exact-bpf: movabs via verifier-visible BPF immediate load] */
+    HC_LD_IMM64_RAW(BPF_REG_2, 0, 0x65736f6c63ULL),
+    /* 0x1147: xor    r8d,r8d [exact-kinsn: xor32 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_5, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_XORL),
+    /* 0x114a: lea    r9,[rsi+0xfa0614] [exact-kinsn: LEA via x86 kinsn selector] */
+    HC_KINSN(HC_LEA_PAYLOAD(HC_X86_R9, BPF_REG_2, 0, 0, 1, 0, 16385556), MICRO_HANDCRAFT_BPF_X86_LEAQ),
+    /* 0x1151: movabs r15,0x646461746567 [exact-bpf: movabs via verifier-visible BPF immediate load] */
+    HC_LD_IMM64_RAW(BPF_REG_9, 0, 0x646461746567ULL),
+    /* 0x115b: movabs r11,0x74616e65706f [exact-bpf: movabs via verifier-visible BPF immediate load] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LD_IMM64_RAW(BPF_REG_6, 0, 0x74616e65706fULL),
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -424),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    /* 0x1165: movabs rbx,0x74616b6e696c6e75 [exact-bpf: movabs via verifier-visible BPF immediate load] */
+    HC_LD_IMM64_RAW(BPF_REG_6, 0, 0x74616b6e696c6e75ULL),
+    /* 0x116f: movabs r14,0x74613274617473 [exact-bpf: movabs via verifier-visible BPF immediate load] */
+    HC_LD_IMM64_RAW(BPF_REG_8, 0, 0x74613274617473ULL),
+    /* 0x1179: movabs r12,0x647466656e676973 [exact-bpf: movabs via verifier-visible BPF immediate load] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
+    HC_LD_IMM64_RAW(BPF_REG_6, 0, 0x647466656e676973ULL),
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -416),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    /* 0x1183: data16 data16 data16 cs nop WORD PTR [rax+rax*1+0x0] [padding: padding is not part of BPF semantics] */
+    /* 0x1190: movzx  edi,BYTE PTR [rdx+r8*4+0xc] [exact-kinsn: indexed memory load via x86 SIB kinsn] */
+    HC_KINSN(HC_X86_SIB_PAYLOAD(BPF_REG_1, BPF_REG_3, BPF_REG_5, 2, 12), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
+    /* 0x1196: movzx  ecx,BYTE PTR [rdx+r8*4+0xd] [exact-kinsn: indexed memory load via x86 SIB kinsn] */
+    HC_KINSN(HC_X86_SIB_PAYLOAD(BPF_REG_4, BPF_REG_3, BPF_REG_5, 2, 13), MICRO_HANDCRAFT_BPF_X86_MOVZBL),
+    /* 0x119c: shl    ecx,0x8 [exact-kinsn: shl32 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_4, 8), MICRO_HANDCRAFT_BPF_X86_SHLL),
+    /* 0x119f: or     ecx,edi [exact-kinsn: or32 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_4, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_ORL),
+    /* 0x11a1: movzx  eax,WORD PTR [rdx+r8*4+0xe] [exact-kinsn: indexed memory load via x86 SIB kinsn] */
+    HC_KINSN(HC_X86_SIB_PAYLOAD(BPF_REG_0, BPF_REG_3, BPF_REG_5, 2, 14), MICRO_HANDCRAFT_BPF_X86_MOVZWL),
+    /* 0x11a7: shl    eax,0x10 [exact-kinsn: shl32 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_0, 16), MICRO_HANDCRAFT_BPF_X86_SHLL),
+    /* 0x11aa: or     eax,ecx [exact-kinsn: or32 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_ORL),
+    /* 0x11ac: cmp    eax,0x4f [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x11af: jg     11f0 <tracee_syscall_name_table_lookup_xdp+0xf0> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_0, 0, (10) - 1, 79),
+    /* 0x11b1: cmp    eax,0x26 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x11b4: jg     1230 <tracee_syscall_name_table_lookup_xdp+0x130> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_0, 0, (17) - 1, 38),
+    /* 0x11b6: cmp    eax,0x2 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x11b9: jg     1294 <tracee_syscall_name_table_lookup_xdp+0x194> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_0, 0, (30) - 1, 2),
+    /* 0x11bf: test   eax,eax [absorbed-control-flow: test folded into following ordinary BPF je] */
+    /* 0x11c1: je     1378 <tracee_syscall_name_table_lookup_xdp+0x278> [exact-bpf: je ordinary BPF branch from preceding test] */
+    HC_RAW(BPF_JMP | BPF_JSET | BPF_K, BPF_REG_0, 0, 1, -1),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (78) - 1),
+    /* 0x11c7: cmp    eax,0x1 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x11ca: je     1332 <tracee_syscall_name_table_lookup_xdp+0x232> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_0, 0, (53) - 1, 1),
+    /* 0x11d0: cmp    eax,0x2 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x11d3: jne    13fe <tracee_syscall_name_table_lookup_xdp+0x2fe> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_0, 0, (134) - 1, 2),
+    /* 0x11d9: mov    ecx,0x6e65706f [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 1852141679), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x11de: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (93) - 1),
+    /* 0x11e3: data16 data16 data16 cs nop WORD PTR [rax+rax*1+0x0] [padding: padding is not part of BPF semantics] */
+    /* 0x11f0: cmp    eax,0x100 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x11f5: jg     1260 <tracee_syscall_name_table_lookup_xdp+0x160> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_0, 0, (15) - 1, 256),
+    /* 0x11f7: cmp    eax,0x9d [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x11fc: jg     12bc <tracee_syscall_name_table_lookup_xdp+0x1bc> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_0, 0, (29) - 1, 157),
+    /* 0x1202: cmp    eax,0x50 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x1205: je     137f <tracee_syscall_name_table_lookup_xdp+0x27f> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_0, 0, (73) - 1, 80),
+    /* 0x120b: cmp    eax,0x57 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x120e: je     133a <tracee_syscall_name_table_lookup_xdp+0x23a> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_0, 0, (48) - 1, 87),
+    /* 0x1214: cmp    eax,0x59 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1217: jne    13fe <tracee_syscall_name_table_lookup_xdp+0x2fe> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_0, 0, (126) - 1, 89),
+    /* 0x121d: movabs rcx,0x6b6e696c55 [exact-bpf: movabs via verifier-visible BPF immediate load] */
+    HC_LD_IMM64_RAW(BPF_REG_4, 0, 0x6b6e696c55ULL),
+    /* 0x1227: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (85) - 1),
+    /* 0x122c: nop    DWORD PTR [rax+0x0] [padding: padding is not part of BPF semantics] */
+    /* 0x1230: cmp    eax,0x3a [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x1233: jg     12e5 <tracee_syscall_name_table_lookup_xdp+0x1e5> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_0, 0, (28) - 1, 58),
+    /* 0x1239: cmp    eax,0x27 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x123c: je     1386 <tracee_syscall_name_table_lookup_xdp+0x286> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_0, 0, (69) - 1, 39),
+    /* 0x1242: cmp    eax,0x38 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x1245: je     1346 <tracee_syscall_name_table_lookup_xdp+0x246> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_0, 0, (44) - 1, 56),
+    /* 0x124b: cmp    eax,0x39 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x124e: jne    13fe <tracee_syscall_name_table_lookup_xdp+0x2fe> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_0, 0, (119) - 1, 57),
+    /* 0x1254: mov    ecx,0x6b726f66 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 1802661734), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1259: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (78) - 1),
+    /* 0x125e: xchg   ax,ax [padding: xchg ax,ax is nop padding] */
+    /* 0x1260: cmp    eax,0x122 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x1265: jg     130b <tracee_syscall_name_table_lookup_xdp+0x20b> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_0, 0, (27) - 1, 290),
+    /* 0x126b: cmp    eax,0x101 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x1270: je     1392 <tracee_syscall_name_table_lookup_xdp+0x292> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_0, 0, (65) - 1, 257),
+    /* 0x1276: cmp    eax,0x107 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x127b: je     1352 <tracee_syscall_name_table_lookup_xdp+0x252> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_0, 0, (40) - 1, 263),
+    /* 0x1281: cmp    eax,0x119 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1286: jne    13fe <tracee_syscall_name_table_lookup_xdp+0x2fe> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_0, 0, (112) - 1, 281),
+    /* 0x128c: mov    rcx,r14 [exact-kinsn: movq register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, BPF_REG_8), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x128f: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (71) - 1),
+    /* 0x1294: mov    rcx,rsi [exact-kinsn: movq register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, BPF_REG_2), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x1297: cmp    eax,0x3 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x129a: je     13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_0, 0, (68) - 1, 3),
+    /* 0x12a0: cmp    eax,0x9 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x12a3: je     1357 <tracee_syscall_name_table_lookup_xdp+0x257> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_0, 0, (35) - 1, 9),
+    /* 0x12a9: cmp    eax,0xc [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x12ac: jne    13fe <tracee_syscall_name_table_lookup_xdp+0x2fe> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_0, 0, (104) - 1, 12),
+    /* 0x12b2: mov    ecx,0x6b72626b [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 1802658411), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x12b7: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (63) - 1),
+    /* 0x12bc: cmp    eax,0x9e [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x12c1: je     1397 <tracee_syscall_name_table_lookup_xdp+0x297> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_0, 0, (54) - 1, 158),
+    /* 0x12c7: cmp    eax,0xca [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x12cc: je     135e <tracee_syscall_name_table_lookup_xdp+0x25e> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_0, 0, (32) - 1, 202),
+    /* 0x12d2: cmp    eax,0xd9 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x12d7: jne    13fe <tracee_syscall_name_table_lookup_xdp+0x2fe> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_0, 0, (98) - 1, 217),
+    /* 0x12dd: mov    rcx,r15 [exact-kinsn: movq register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, BPF_REG_9), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x12e0: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (57) - 1),
+    /* 0x12e5: cmp    eax,0x3b [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x12e8: je     13a3 <tracee_syscall_name_table_lookup_xdp+0x2a3> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_0, 0, (51) - 1, 59),
+    /* 0x12ee: cmp    eax,0x3c [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x12f1: je     136a <tracee_syscall_name_table_lookup_xdp+0x26a> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_0, 0, (29) - 1, 60),
+    /* 0x12f3: cmp    eax,0x3d [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x12f6: jne    13fe <tracee_syscall_name_table_lookup_xdp+0x2fe> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_0, 0, (92) - 1, 61),
+    /* 0x12fc: movabs rcx,0x347469617755 [exact-bpf: movabs via verifier-visible BPF immediate load] */
+    HC_LD_IMM64_RAW(BPF_REG_4, 0, 0x347469617755ULL),
+    /* 0x1306: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (51) - 1),
+    /* 0x130b: cmp    eax,0x123 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x1310: je     13af <tracee_syscall_name_table_lookup_xdp+0x2af> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_0, 0, (48) - 1, 291),
+    /* 0x1316: cmp    eax,0x141 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x131b: je     1371 <tracee_syscall_name_table_lookup_xdp+0x271> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_0, 0, (26) - 1, 321),
+    /* 0x131d: cmp    eax,0x14c [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1322: jne    13fe <tracee_syscall_name_table_lookup_xdp+0x2fe> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_0, 0, (86) - 1, 332),
+    /* 0x1328: mov    ecx,0x78746173 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 2020893043), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x132d: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (45) - 1),
+    /* 0x1332: mov    rcx,r9 [exact-kinsn: movq register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, HC_X86_R9), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x1335: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (42) - 1),
+    /* 0x133a: movabs rcx,0x6b6e696c6e75 [exact-bpf: movabs via verifier-visible BPF immediate load] */
+    HC_LD_IMM64_RAW(BPF_REG_4, 0, 0x6b6e696c6e75ULL),
+    /* 0x1344: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (39) - 1),
+    /* 0x1346: movabs rcx,0x656e6f6c6355 [exact-bpf: movabs via verifier-visible BPF immediate load] */
+    HC_LD_IMM64_RAW(BPF_REG_4, 0, 0x656e6f6c6355ULL),
+    /* 0x1350: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (36) - 1),
+    /* 0x1352: mov    rcx,rbx [exact-kinsn: movq register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x1355: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (33) - 1),
+    /* 0x1357: mov    ecx,0x70616d6d [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 1885433197), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x135c: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (30) - 1),
+    /* 0x135e: movabs rcx,0x786574756655 [exact-bpf: movabs via verifier-visible BPF immediate load] */
+    HC_LD_IMM64_RAW(BPF_REG_4, 0, 0x786574756655ULL),
+    /* 0x1368: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (27) - 1),
+    /* 0x136a: mov    ecx,0x74697865 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 1953069157), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x136f: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (24) - 1),
+    /* 0x1371: mov    ecx,0x706662 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 7366242), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1376: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (21) - 1),
+    /* 0x1378: mov    ecx,0x72656164 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 1919246692), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x137d: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (18) - 1),
+    /* 0x137f: mov    ecx,0x69646863 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_4, 1768188003), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1384: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (15) - 1),
+    /* 0x1386: movabs rcx,0x6469707467 [exact-bpf: movabs via verifier-visible BPF immediate load] */
+    HC_LD_IMM64_RAW(BPF_REG_4, 0, 0x6469707467ULL),
+    /* 0x1390: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (12) - 1),
+    /* 0x1392: mov    rcx,r11 [exact-kinsn: movq register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, HC_X86_R11), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x1395: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (9) - 1),
+    /* 0x1397: movabs rcx,0x6c74635f68637261 [exact-bpf: movabs via verifier-visible BPF immediate load] */
+    HC_LD_IMM64_RAW(BPF_REG_4, 0, 0x6c74635f68637261ULL),
+    /* 0x13a1: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (6) - 1),
+    /* 0x13a3: movabs rcx,0x657663657865 [exact-bpf: movabs via verifier-visible BPF immediate load] */
+    HC_LD_IMM64_RAW(BPF_REG_4, 0, 0x657663657865ULL),
+    /* 0x13ad: jmp    13c0 <tracee_syscall_name_table_lookup_xdp+0x2c0> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (3) - 1),
+    /* 0x13af: mov    rcx,r12 [exact-kinsn: movq register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, HC_X86_R12), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x13b2: data16 data16 data16 data16 cs nop WORD PTR [rax+rax*1+0x0] [padding: padding is not part of BPF semantics] */
+    /* 0x13c0: mov    ebp,eax [exact-kinsn: movl register-to-register kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RBP, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x13c2: xor    rbp,rcx [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RBP, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x13c5: mov    eax,r8d [exact-kinsn: movl register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_0, BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x13c8: and    eax,0x7 [exact-kinsn: and32 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_0, 7), MICRO_HANDCRAFT_BPF_X86_ANDL),
+    /* 0x13cb: lea    ecx,[rax+0x1] [exact-kinsn: LEA via x86 kinsn selector] */
+    HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_4, BPF_REG_0, 0, 0, 1, 0, 1), MICRO_HANDCRAFT_BPF_X86_LEAL),
+    /* 0x13ce: mov    r10,rbp [exact-kinsn: movq register-to-register kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_R10, HC_X86_RBP), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x13d1: shl    r10,cl [exact-kinsn: shl64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(HC_X86_R10, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_SHLQ),
+    /* 0x13d4: mov    ecx,eax [exact-kinsn: movl register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x13d6: not    cl [exact-kinsn: notb reg kinsn] */
+    HC_KINSN(HC_NOT_NARROW_PAYLOAD(BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_NOTB),
+    /* 0x13d8: shr    rbp,cl [exact-kinsn: shr64 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RBP, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_SHRQ),
+    /* 0x13db: shl    eax,0x3 [exact-kinsn: shl32 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_0, 3), MICRO_HANDCRAFT_BPF_X86_SHLL),
+    /* 0x13de: mov    ecx,eax [exact-kinsn: movl register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_4, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x13e0: shl    rdi,cl [exact-kinsn: shl64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_1, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_SHLQ),
+    /* 0x13e3: or     rbp,r10 [exact-kinsn: or64 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RBP, HC_X86_R10), MICRO_HANDCRAFT_BPF_X86_ORQ),
+    /* 0x13e6: add    rbp,r13 [exact-kinsn: add64 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(HC_X86_RBP, BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x13e9: xor    rdi,rbp [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ARCH_RR_PAYLOAD(BPF_REG_1, HC_X86_RBP), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x13ec: mov    r13,rdi [exact-kinsn: movq register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_7, BPF_REG_1), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x13ef: inc    r8 [exact-kinsn: incq reg kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_5), MICRO_HANDCRAFT_BPF_X86_INCQ),
+    /* 0x13f2: cmp    r8,0x40 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x13f6: jne    1190 <tracee_syscall_name_table_lookup_xdp+0x90> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_5, 0, (-152) - 1, 64),
+    /* 0x13fc: jmp    1413 <tracee_syscall_name_table_lookup_xdp+0x313> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (10) - 1),
+    /* 0x13fe: mov    eax,eax [exact-kinsn: movl register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_0, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1400: movabs rcx,0x9e3779b185ebca87 [exact-bpf: movabs via verifier-visible BPF immediate load] */
+    HC_LD_IMM64_RAW(BPF_REG_4, 0, 0x9e3779b185ebca87ULL),
+    /* 0x140a: imul   rax,rcx [exact-kinsn: imulq reg,reg kinsn] */
+    HC_KINSN(HC_REG_REG_PAYLOAD(BPF_REG_0, BPF_REG_4), MICRO_HANDCRAFT_BPF_X86_IMULQ),
+    /* 0x140e: xor    r13,rax [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_7, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1411: jmp    13ef <tracee_syscall_name_table_lookup_xdp+0x2ef> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-12) - 1),
+    /* 0x1413: mov    QWORD PTR [rdx],r13 [exact-kinsn: direct memory store via x86 kinsn selector] */
+    HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_7, BPF_REG_3, 0), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x1416: mov    eax,0x2 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_0, 2), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x141b: pop    rbx [exact-kinsn: popq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_POPQ),
+    /* 0x141c: pop    r12 [exact-kinsn: popq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(HC_X86_R12), MICRO_HANDCRAFT_BPF_X86_POPQ),
+    /* 0x141e: pop    r13 [exact-kinsn: popq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_7), MICRO_HANDCRAFT_BPF_X86_POPQ),
+    /* 0x1420: pop    r14 [exact-kinsn: popq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_8), MICRO_HANDCRAFT_BPF_X86_POPQ),
+    /* 0x1422: pop    r15 [exact-kinsn: popq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_9), MICRO_HANDCRAFT_BPF_X86_POPQ),
+    /* 0x1424: pop    rbp [exact-kinsn: popq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(HC_X86_RBP), MICRO_HANDCRAFT_BPF_X86_POPQ),
+    /* 0x1425: ret [abi-boundary: native ret maps to the BPF program exit boundary] */
+    HC_EXIT(),
 };
 
 HC_EXPORT_PROGRAM(program)
@@ -933,243 +1197,5 @@ HC_EXPORT_PROGRAM(program)
 
 ## Handcraft Kernel JIT ASM
 ```asm
-Disassembly of section .data:
-
-0000000000000000 <.data>:
-   0:	0f 1f 44 00 00       	nop    DWORD PTR [rax+rax*1+0x0]
-   5:	0f 1f 00             	nop    DWORD PTR [rax]
-   8:	55                   	push   rbp
-   9:	48 89 e5             	mov    rbp,rsp
-   c:	53                   	push   rbx
-   d:	41 55                	push   r13
-   f:	41 56                	push   r14
-  11:	41 57                	push   r15
-  13:	31 c0                	xor    eax,eax
-  15:	48 8b 77 08          	mov    rsi,QWORD PTR [rdi+0x8]
-  19:	48 8b 7f 00          	mov    rdi,QWORD PTR [rdi+0x0]
-  1d:	48 39 f7             	cmp    rdi,rsi
-  20:	0f 87 be 03 00 00    	ja     0x3e4
-  26:	48 8d 57 08          	lea    rdx,[rdi+0x8]
-  2a:	48 39 f2             	cmp    rdx,rsi
-  2d:	0f 87 b1 03 00 00    	ja     0x3e4
-  33:	48 8d 97 0c 01 00 00 	lea    rdx,[rdi+0x10c]
-  3a:	48 39 f2             	cmp    rdx,rsi
-  3d:	0f 87 a1 03 00 00    	ja     0x3e4
-  43:	48 0f b6 77 09       	movzx  rsi,BYTE PTR [rdi+0x9]
-  48:	48 c1 e6 08          	shl    rsi,0x8
-  4c:	48 0f b6 57 08       	movzx  rdx,BYTE PTR [rdi+0x8]
-  51:	48 09 d6             	or     rsi,rdx
-  54:	48 0f b6 57 0a       	movzx  rdx,BYTE PTR [rdi+0xa]
-  59:	48 c1 e2 10          	shl    rdx,0x10
-  5d:	48 09 d6             	or     rsi,rdx
-  60:	48 0f b6 57 0b       	movzx  rdx,BYTE PTR [rdi+0xb]
-  65:	48 c1 e2 18          	shl    rdx,0x18
-  69:	48 09 d6             	or     rsi,rdx
-  6c:	48 c1 e6 20          	shl    rsi,0x20
-  70:	48 c1 ee 20          	shr    rsi,0x20
-  74:	48 83 fe 40          	cmp    rsi,0x40
-  78:	0f 85 66 03 00 00    	jne    0x3e4
-  7e:	49 b8 09 c9 bc f3 67 	movabs r8,0x6a09e667f3bcc909
-  85:	e6 09 6a 
-  88:	31 f6                	xor    esi,esi
-  8a:	48 8d 57 0f          	lea    rdx,[rdi+0xf]
-  8e:	48 b9 87 ca eb 85 b1 	movabs rcx,0x9e3779b185ebca87
-  95:	79 37 9e 
-  98:	48 0f b6 5a fe       	movzx  rbx,BYTE PTR [rdx-0x2]
-  9d:	48 c1 e3 08          	shl    rbx,0x8
-  a1:	48 0f b6 42 fd       	movzx  rax,BYTE PTR [rdx-0x3]
-  a6:	48 09 c3             	or     rbx,rax
-  a9:	4c 0f b6 6a ff       	movzx  r13,BYTE PTR [rdx-0x1]
-  ae:	49 c1 e5 10          	shl    r13,0x10
-  b2:	4c 09 eb             	or     rbx,r13
-  b5:	4c 0f b6 6a 00       	movzx  r13,BYTE PTR [rdx+0x0]
-  ba:	49 c1 e5 18          	shl    r13,0x18
-  be:	4c 09 eb             	or     rbx,r13
-  c1:	49 89 de             	mov    r14,rbx
-  c4:	49 c1 e6 20          	shl    r14,0x20
-  c8:	49 c1 ee 20          	shr    r14,0x20
-  cc:	49 83 fe 4f          	cmp    r14,0x4f
-  d0:	7f 34                	jg     0x106
-  d2:	49 83 fe 26          	cmp    r14,0x26
-  d6:	7f 72                	jg     0x14a
-  d8:	49 83 fe 02          	cmp    r14,0x2
-  dc:	0f 8f e0 00 00 00    	jg     0x1c2
-  e2:	41 bd 64 61 65 72    	mov    r13d,0x72656164
-  e8:	4d 85 f6             	test   r14,r14
-  eb:	0f 84 3a 02 00 00    	je     0x32b
-  f1:	49 83 fe 01          	cmp    r14,0x1
-  f5:	0f 84 85 01 00 00    	je     0x280
-  fb:	41 bd 6f 70 65 6e    	mov    r13d,0x6e65706f
- 101:	e9 25 02 00 00       	jmp    0x32b
- 106:	49 81 fe 00 01 00 00 	cmp    r14,0x100
- 10d:	7f 6f                	jg     0x17e
- 10f:	49 81 fe 9d 00 00 00 	cmp    r14,0x9d
- 116:	0f 8f d0 00 00 00    	jg     0x1ec
- 11c:	49 83 fe 50          	cmp    r14,0x50
- 120:	0f 84 b7 01 00 00    	je     0x2dd
- 126:	49 83 fe 57          	cmp    r14,0x57
- 12a:	0f 84 5f 01 00 00    	je     0x28f
- 130:	49 83 fe 59          	cmp    r14,0x59
- 134:	74 05                	je     0x13b
- 136:	e9 42 02 00 00       	jmp    0x37d
- 13b:	49 bd 55 6c 69 6e 6b 	movabs r13,0x6b6e696c55
- 142:	00 00 00 
- 145:	e9 e1 01 00 00       	jmp    0x32b
- 14a:	49 83 fe 3a          	cmp    r14,0x3a
- 14e:	0f 8f cf 00 00 00    	jg     0x223
- 154:	49 83 fe 27          	cmp    r14,0x27
- 158:	0f 84 87 01 00 00    	je     0x2e5
- 15e:	49 83 fe 38          	cmp    r14,0x38
- 162:	0f 84 36 01 00 00    	je     0x29e
- 168:	49 83 fe 39          	cmp    r14,0x39
- 16c:	74 05                	je     0x173
- 16e:	e9 0a 02 00 00       	jmp    0x37d
- 173:	41 bd 66 6f 72 6b    	mov    r13d,0x6b726f66
- 179:	e9 ad 01 00 00       	jmp    0x32b
- 17e:	49 81 fe 22 01 00 00 	cmp    r14,0x122
- 185:	0f 8f c6 00 00 00    	jg     0x251
- 18b:	49 81 fe 01 01 00 00 	cmp    r14,0x101
- 192:	0f 84 59 01 00 00    	je     0x2f1
- 198:	49 81 fe 07 01 00 00 	cmp    r14,0x107
- 19f:	0f 84 08 01 00 00    	je     0x2ad
- 1a5:	49 81 fe 19 01 00 00 	cmp    r14,0x119
- 1ac:	74 05                	je     0x1b3
- 1ae:	e9 ca 01 00 00       	jmp    0x37d
- 1b3:	49 bd 73 74 61 74 32 	movabs r13,0x74613274617473
- 1ba:	61 74 00 
- 1bd:	e9 69 01 00 00       	jmp    0x32b
- 1c2:	49 83 fe 03          	cmp    r14,0x3
- 1c6:	0f 84 31 01 00 00    	je     0x2fd
- 1cc:	49 83 fe 09          	cmp    r14,0x9
- 1d0:	0f 84 e3 00 00 00    	je     0x2b9
- 1d6:	49 83 fe 0c          	cmp    r14,0xc
- 1da:	74 05                	je     0x1e1
- 1dc:	e9 9c 01 00 00       	jmp    0x37d
- 1e1:	41 bd 6b 62 72 6b    	mov    r13d,0x6b72626b
- 1e7:	e9 3f 01 00 00       	jmp    0x32b
- 1ec:	49 81 fe 9e 00 00 00 	cmp    r14,0x9e
- 1f3:	0f 84 10 01 00 00    	je     0x309
- 1f9:	49 81 fe ca 00 00 00 	cmp    r14,0xca
- 200:	0f 84 bb 00 00 00    	je     0x2c1
- 206:	49 81 fe d9 00 00 00 	cmp    r14,0xd9
- 20d:	74 05                	je     0x214
- 20f:	e9 69 01 00 00       	jmp    0x37d
- 214:	49 bd 67 65 74 61 64 	movabs r13,0x646461746567
- 21b:	64 00 00 
- 21e:	e9 08 01 00 00       	jmp    0x32b
- 223:	49 83 fe 3b          	cmp    r14,0x3b
- 227:	0f 84 e8 00 00 00    	je     0x315
- 22d:	49 83 fe 3c          	cmp    r14,0x3c
- 231:	0f 84 96 00 00 00    	je     0x2cd
- 237:	49 83 fe 3d          	cmp    r14,0x3d
- 23b:	74 05                	je     0x242
- 23d:	e9 3b 01 00 00       	jmp    0x37d
- 242:	49 bd 55 77 61 69 74 	movabs r13,0x347469617755
- 249:	34 00 00 
- 24c:	e9 da 00 00 00       	jmp    0x32b
- 251:	49 81 fe 23 01 00 00 	cmp    r14,0x123
- 258:	0f 84 c3 00 00 00    	je     0x321
- 25e:	49 81 fe 41 01 00 00 	cmp    r14,0x141
- 265:	74 6e                	je     0x2d5
- 267:	49 81 fe 4c 01 00 00 	cmp    r14,0x14c
- 26e:	74 05                	je     0x275
- 270:	e9 08 01 00 00       	jmp    0x37d
- 275:	41 bd 73 61 74 78    	mov    r13d,0x78746173
- 27b:	e9 ab 00 00 00       	jmp    0x32b
- 280:	49 bd 77 72 69 74 65 	movabs r13,0x6574697277
- 287:	00 00 00 
- 28a:	e9 9c 00 00 00       	jmp    0x32b
- 28f:	49 bd 75 6e 6c 69 6e 	movabs r13,0x6b6e696c6e75
- 296:	6b 00 00 
- 299:	e9 8d 00 00 00       	jmp    0x32b
- 29e:	49 bd 55 63 6c 6f 6e 	movabs r13,0x656e6f6c6355
- 2a5:	65 00 00 
- 2a8:	e9 7e 00 00 00       	jmp    0x32b
- 2ad:	49 bd 75 6e 6c 69 6e 	movabs r13,0x74616b6e696c6e75
- 2b4:	6b 61 74 
- 2b7:	eb 72                	jmp    0x32b
- 2b9:	41 bd 6d 6d 61 70    	mov    r13d,0x70616d6d
- 2bf:	eb 6a                	jmp    0x32b
- 2c1:	49 bd 55 66 75 74 65 	movabs r13,0x786574756655
- 2c8:	78 00 00 
- 2cb:	eb 5e                	jmp    0x32b
- 2cd:	41 bd 65 78 69 74    	mov    r13d,0x74697865
- 2d3:	eb 56                	jmp    0x32b
- 2d5:	41 bd 62 66 70 00    	mov    r13d,0x706662
- 2db:	eb 4e                	jmp    0x32b
- 2dd:	41 bd 63 68 64 69    	mov    r13d,0x69646863
- 2e3:	eb 46                	jmp    0x32b
- 2e5:	49 bd 67 74 70 69 64 	movabs r13,0x6469707467
- 2ec:	00 00 00 
- 2ef:	eb 3a                	jmp    0x32b
- 2f1:	49 bd 6f 70 65 6e 61 	movabs r13,0x74616e65706f
- 2f8:	74 00 00 
- 2fb:	eb 2e                	jmp    0x32b
- 2fd:	49 bd 63 6c 6f 73 65 	movabs r13,0x65736f6c63
- 304:	00 00 00 
- 307:	eb 22                	jmp    0x32b
- 309:	49 bd 61 72 63 68 5f 	movabs r13,0x6c74635f68637261
- 310:	63 74 6c 
- 313:	eb 16                	jmp    0x32b
- 315:	49 bd 65 78 65 63 76 	movabs r13,0x657663657865
- 31c:	65 00 00 
- 31f:	eb 0a                	jmp    0x32b
- 321:	49 bd 73 69 67 6e 65 	movabs r13,0x647466656e676973
- 328:	66 74 64 
- 32b:	48 c1 e3 20          	shl    rbx,0x20
- 32f:	48 c1 eb 20          	shr    rbx,0x20
- 333:	49 31 dd             	xor    r13,rbx
- 336:	48 89 f3             	mov    rbx,rsi
- 339:	48 83 e3 07          	and    rbx,0x7
- 33d:	49 89 de             	mov    r14,rbx
- 340:	49 83 f6 3f          	xor    r14,0x3f
- 344:	4d 89 ef             	mov    r15,r13
- 347:	c4 42 8b f7 ff       	shrx   r15,r15,r14
- 34c:	4c 8d 73 01          	lea    r14,[rbx+0x1]
- 350:	c4 42 89 f7 ed       	shlx   r13,r13,r14
- 355:	4d 09 fd             	or     r13,r15
- 358:	4d 01 c5             	add    r13,r8
- 35b:	48 c1 e3 03          	shl    rbx,0x3
- 35f:	c4 e2 e1 f7 c0       	shlx   rax,rax,rbx
- 364:	49 31 c5             	xor    r13,rax
- 367:	48 83 c2 04          	add    rdx,0x4
- 36b:	48 83 c6 01          	add    rsi,0x1
- 36f:	4d 89 e8             	mov    r8,r13
- 372:	48 83 fe 40          	cmp    rsi,0x40
- 376:	74 19                	je     0x391
- 378:	e9 1b fd ff ff       	jmp    0x98
- 37d:	48 c1 e3 20          	shl    rbx,0x20
- 381:	48 c1 eb 20          	shr    rbx,0x20
- 385:	48 0f af d9          	imul   rbx,rcx
- 389:	4c 31 c3             	xor    rbx,r8
- 38c:	49 89 dd             	mov    r13,rbx
- 38f:	eb d6                	jmp    0x367
- 391:	4c 89 ee             	mov    rsi,r13
- 394:	48 c1 ee 38          	shr    rsi,0x38
- 398:	40 88 77 07          	mov    BYTE PTR [rdi+0x7],sil
- 39c:	4c 89 ee             	mov    rsi,r13
- 39f:	48 c1 ee 30          	shr    rsi,0x30
- 3a3:	40 88 77 06          	mov    BYTE PTR [rdi+0x6],sil
- 3a7:	4c 89 ee             	mov    rsi,r13
- 3aa:	48 c1 ee 28          	shr    rsi,0x28
- 3ae:	40 88 77 05          	mov    BYTE PTR [rdi+0x5],sil
- 3b2:	4c 89 ee             	mov    rsi,r13
- 3b5:	48 c1 ee 20          	shr    rsi,0x20
- 3b9:	40 88 77 04          	mov    BYTE PTR [rdi+0x4],sil
- 3bd:	4c 89 ee             	mov    rsi,r13
- 3c0:	48 c1 ee 18          	shr    rsi,0x18
- 3c4:	40 88 77 03          	mov    BYTE PTR [rdi+0x3],sil
- 3c8:	4c 89 ee             	mov    rsi,r13
- 3cb:	48 c1 ee 10          	shr    rsi,0x10
- 3cf:	40 88 77 02          	mov    BYTE PTR [rdi+0x2],sil
- 3d3:	44 88 6f 00          	mov    BYTE PTR [rdi+0x0],r13b
- 3d7:	49 c1 ed 08          	shr    r13,0x8
- 3db:	44 88 6f 01          	mov    BYTE PTR [rdi+0x1],r13b
- 3df:	b8 02 00 00 00       	mov    eax,0x2
- 3e4:	41 5f                	pop    r15
- 3e6:	41 5e                	pop    r14
- 3e8:	41 5d                	pop    r13
- 3ea:	5b                   	pop    rbx
- 3eb:	c9                   	leave
- 3ec:	c3                   	ret
+not captured
 ```

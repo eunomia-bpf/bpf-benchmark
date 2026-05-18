@@ -40,6 +40,7 @@ set(MICRO_EXEC_SOURCES
     src/elf_program_loader.cpp
     src/kernel_runner.cpp
     src/main.cpp
+    src/native_lab_runner.cpp
     src/native_runner.cpp
     src/perf_counters.cpp
 )

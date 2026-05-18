@@ -50,9 +50,8 @@ x86_l_117a:
 	X86_VM_LOOP_OP(x86_exec_cmp_imm, X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_64, 0, 1043ULL);
 x86_l_1181:
 	/* 0x1181: jne    1150 <packet_checksum_fold_xdp+0x50> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE)) {
+	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
 		return 0;
-	}
 	loop->next = 0x1183;
 	return 1;
 	#undef __x86_vm_state
@@ -85,6 +84,7 @@ x86_l_1150:
 	loop->failed = 0;
 	loop->done = 0;
 	loop->next = 0;
+	loop->pc = 0x1150;
 	loop->data = __x86_vm_data;
 	loop->data_end = __x86_vm_data_end;
 	if (bpf_loop(256, x86_loop_1150_1150_cb, loop, 0) < 0) {
@@ -135,13 +135,12 @@ x86_l_119c:
 	X86_VM_LOOP_OP(x86_exec_cmp_imm, X86_OP_CMP_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 32ULL);
 x86_l_119f:
 	/* 0x119f: jne    1140 <packet_checksum_fold_xdp+0x40> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE)) {
-		if (__x86_loop_index + 1 >= 32) {
-			loop->next = 0x11a1;
-			return 1;
-		}
-		return 0;
+	if (__x86_loop_index + 1 >= 32) {
+		loop->next = 0x11a1;
+		return 1;
 	}
+	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
+		return 0;
 	loop->next = 0x11a1;
 	return 1;
 	#undef __x86_vm_state
@@ -231,6 +230,7 @@ x86_l_1140:
 	(&__x86_loop)->failed = 0;
 	(&__x86_loop)->done = 0;
 	(&__x86_loop)->next = 0;
+	(&__x86_loop)->pc = 0x1140;
 	(&__x86_loop)->data = __x86_vm_data;
 	(&__x86_loop)->data_end = __x86_vm_data_end;
 	if (bpf_loop(32, x86_loop_1140_1140_cb, (&__x86_loop), 0) < 0) {

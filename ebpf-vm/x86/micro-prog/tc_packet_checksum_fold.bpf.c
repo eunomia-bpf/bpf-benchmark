@@ -50,9 +50,8 @@ x86_l_118c:
 	X86_VM_LOOP_OP(x86_exec_cmp_imm, X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_64, 0, 512ULL);
 x86_l_1193:
 	/* 0x1193: jne    1160 <tc_packet_checksum_fold_prog+0x60> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE)) {
+	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
 		return 0;
-	}
 	loop->next = 0x1195;
 	return 1;
 	#undef __x86_vm_state
@@ -85,12 +84,19 @@ x86_l_1160:
 	loop->failed = 0;
 	loop->done = 0;
 	loop->next = 0;
+	loop->pc = 0x1160;
 	loop->data = __x86_vm_data;
 	loop->data_end = __x86_vm_data_end;
+	__u64 __x86_loop_save_1160_1160_rdi = loop->state.rdi;
+	void *__x86_loop_save_1160_1160_p_rdi = loop->state.p_rdi;
+	__u8 __x86_loop_save_1160_1160_tag_rdi = loop->state.tag_rdi;
 	if (bpf_loop(256, x86_loop_1160_1160_cb, loop, 0) < 0) {
 		loop->failed = __LINE__;
 		return 1;
 	}
+	loop->state.rdi = __x86_loop_save_1160_1160_rdi;
+	loop->state.p_rdi = __x86_loop_save_1160_1160_p_rdi;
+	loop->state.tag_rdi = __x86_loop_save_1160_1160_tag_rdi;
 	if (loop->failed)
 		return 1;
 	if (loop->done)
@@ -135,9 +141,12 @@ x86_l_11b1:
 	X86_VM_LOOP_OP(x86_exec_cmp_imm, X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 32ULL);
 x86_l_11b4:
 	/* 0x11b4: jne    1150 <tc_packet_checksum_fold_prog+0x50> */
-	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE)) {
-		return 0;
+	if (__x86_loop_index + 1 >= 32) {
+		loop->next = 0x11b6;
+		return 1;
 	}
+	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
+		return 0;
 	loop->next = 0x11b6;
 	return 1;
 	#undef __x86_vm_state
@@ -167,6 +176,9 @@ x86_l_110a:
 	if (x86_eval_cc(&__x86_vm_state, X86_CC_BE))
 		goto x86_l_1121;
 x86_l_110c:
+	/* generated-C ABI: RDI ctx capability preserved by write-set analysis */
+	__x86_vm_state.p_rdi = (void *)ctx;
+	__x86_vm_state.tag_rdi = X86_PTR_CTX;
 	/* 0x110c: mov    DWORD PTR [rdi+0x10],0xffffffff */
 	X86_VM_RUN_OP(x86_exec_mov_store_imm, X86_OP_MOV_STORE_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 73014444031ULL);
 x86_l_1113:
@@ -176,6 +188,9 @@ x86_l_1118:
 	/* 0x1118: mov    edx,0xffffffff */
 	X86_VM_RUN_OP(x86_exec_mov_imm, X86_OP_MOV_IMM, X86_RDX, X86_REG_NONE, X86_WIDTH_32, 0, 4294967295ULL);
 x86_l_111d:
+	/* generated-C ABI: RDI ctx capability preserved by write-set analysis */
+	__x86_vm_state.p_rdi = (void *)ctx;
+	__x86_vm_state.tag_rdi = X86_PTR_CTX;
 	/* 0x111d: mov    DWORD PTR [rdi+0x14],edx */
 	X86_VM_RUN_OP(x86_exec_mov_store_reg, X86_OP_MOV_STORE_REG, X86_RDI, X86_RDX, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 20ULL);
 x86_l_1120:
@@ -236,12 +251,19 @@ x86_l_1150:
 	(&__x86_loop)->failed = 0;
 	(&__x86_loop)->done = 0;
 	(&__x86_loop)->next = 0;
+	(&__x86_loop)->pc = 0x1150;
 	(&__x86_loop)->data = __x86_vm_data;
 	(&__x86_loop)->data_end = __x86_vm_data_end;
+	__u64 __x86_loop_save_1150_1150_rdi = (&__x86_loop)->state.rdi;
+	void *__x86_loop_save_1150_1150_p_rdi = (&__x86_loop)->state.p_rdi;
+	__u8 __x86_loop_save_1150_1150_tag_rdi = (&__x86_loop)->state.tag_rdi;
 	if (bpf_loop(32, x86_loop_1150_1150_cb, (&__x86_loop), 0) < 0) {
 		(&__x86_loop)->failed = __LINE__;
 		return XDP_ABORTED;
 	}
+	(&__x86_loop)->state.rdi = __x86_loop_save_1150_1150_rdi;
+	(&__x86_loop)->state.p_rdi = __x86_loop_save_1150_1150_p_rdi;
+	(&__x86_loop)->state.tag_rdi = __x86_loop_save_1150_1150_tag_rdi;
 	if ((&__x86_loop)->failed)
 		return XDP_ABORTED;
 	if ((&__x86_loop)->done)
@@ -251,6 +273,9 @@ x86_l_1150:
 	}
 	return XDP_ABORTED;
 x86_l_11b6:
+	/* generated-C ABI: RDI ctx capability preserved by write-set analysis */
+	__x86_vm_state.p_rdi = (void *)ctx;
+	__x86_vm_state.tag_rdi = X86_PTR_CTX;
 	/* 0x11b6: mov    DWORD PTR [rdi+0x10],edx */
 	X86_VM_RUN_OP(x86_exec_mov_store_reg, X86_OP_MOV_STORE_REG, X86_RDI, X86_RDX, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 16ULL);
 x86_l_11b9:
@@ -263,6 +288,9 @@ x86_l_11bf:
 	/* 0x11bf: pop    rbp */
 	X86_VM_RUN_OP(x86_exec_pop, X86_OP_POP, X86_RBP, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_11c0:
+	/* generated-C ABI: RDI ctx capability preserved by write-set analysis */
+	__x86_vm_state.p_rdi = (void *)ctx;
+	__x86_vm_state.tag_rdi = X86_PTR_CTX;
 	/* 0x11c0: mov    DWORD PTR [rdi+0x14],edx */
 	X86_VM_RUN_OP(x86_exec_mov_store_reg, X86_OP_MOV_STORE_REG, X86_RDI, X86_RDX, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 20ULL);
 x86_l_11c3:

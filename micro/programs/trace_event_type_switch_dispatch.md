@@ -113,11 +113,85 @@ DEFINE_STAGED_INPUT_XDP_BENCH(
 ```asm
 Disassembly of section .init:
 
+0000000000001000 <_init>:
+    1000:	f3 0f 1e fa          	endbr64
+    1004:	48 83 ec 08          	sub    rsp,0x8
+    1008:	48 8b 05 c1 2f 00 00 	mov    rax,QWORD PTR [rip+0x2fc1]        # 3fd0 <__gmon_start__@Base>
+    100f:	48 85 c0             	test   rax,rax
+    1012:	74 02                	je     1016 <_init+0x16>
+    1014:	ff d0                	call   rax
+    1016:	48 83 c4 08          	add    rsp,0x8
+    101a:	c3                   	ret
+
 Disassembly of section .plt:
+
+0000000000001020 <.plt>:
+    1020:	ff 35 ca 2f 00 00    	push   QWORD PTR [rip+0x2fca]        # 3ff0 <_GLOBAL_OFFSET_TABLE_+0x8>
+    1026:	ff 25 cc 2f 00 00    	jmp    QWORD PTR [rip+0x2fcc]        # 3ff8 <_GLOBAL_OFFSET_TABLE_+0x10>
+    102c:	0f 1f 40 00          	nop    DWORD PTR [rax+0x0]
 
 Disassembly of section .plt.got:
 
+0000000000001030 <__cxa_finalize@plt>:
+    1030:	ff 25 aa 2f 00 00    	jmp    QWORD PTR [rip+0x2faa]        # 3fe0 <__cxa_finalize@GLIBC_2.2.5>
+    1036:	66 90                	xchg   ax,ax
+
 Disassembly of section .text:
+
+0000000000001040 <deregister_tm_clones>:
+    1040:	48 8d 3d c9 2f 00 00 	lea    rdi,[rip+0x2fc9]        # 4010 <__TMC_END__>
+    1047:	48 8d 05 c2 2f 00 00 	lea    rax,[rip+0x2fc2]        # 4010 <__TMC_END__>
+    104e:	48 39 f8             	cmp    rax,rdi
+    1051:	74 15                	je     1068 <deregister_tm_clones+0x28>
+    1053:	48 8b 05 6e 2f 00 00 	mov    rax,QWORD PTR [rip+0x2f6e]        # 3fc8 <_ITM_deregisterTMCloneTable@Base>
+    105a:	48 85 c0             	test   rax,rax
+    105d:	74 09                	je     1068 <deregister_tm_clones+0x28>
+    105f:	ff e0                	jmp    rax
+    1061:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
+    1068:	c3                   	ret
+    1069:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
+
+0000000000001070 <register_tm_clones>:
+    1070:	48 8d 3d 99 2f 00 00 	lea    rdi,[rip+0x2f99]        # 4010 <__TMC_END__>
+    1077:	48 8d 35 92 2f 00 00 	lea    rsi,[rip+0x2f92]        # 4010 <__TMC_END__>
+    107e:	48 29 fe             	sub    rsi,rdi
+    1081:	48 89 f0             	mov    rax,rsi
+    1084:	48 c1 ee 3f          	shr    rsi,0x3f
+    1088:	48 c1 f8 03          	sar    rax,0x3
+    108c:	48 01 c6             	add    rsi,rax
+    108f:	48 d1 fe             	sar    rsi,1
+    1092:	74 14                	je     10a8 <register_tm_clones+0x38>
+    1094:	48 8b 05 3d 2f 00 00 	mov    rax,QWORD PTR [rip+0x2f3d]        # 3fd8 <_ITM_registerTMCloneTable@Base>
+    109b:	48 85 c0             	test   rax,rax
+    109e:	74 08                	je     10a8 <register_tm_clones+0x38>
+    10a0:	ff e0                	jmp    rax
+    10a2:	66 0f 1f 44 00 00    	nop    WORD PTR [rax+rax*1+0x0]
+    10a8:	c3                   	ret
+    10a9:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
+
+00000000000010b0 <__do_global_dtors_aux>:
+    10b0:	f3 0f 1e fa          	endbr64
+    10b4:	80 3d 51 2f 00 00 00 	cmp    BYTE PTR [rip+0x2f51],0x0        # 400c <completed.0>
+    10bb:	75 2b                	jne    10e8 <__do_global_dtors_aux+0x38>
+    10bd:	55                   	push   rbp
+    10be:	48 83 3d 1a 2f 00 00 	cmp    QWORD PTR [rip+0x2f1a],0x0        # 3fe0 <__cxa_finalize@GLIBC_2.2.5>
+    10c5:	00 
+    10c6:	48 89 e5             	mov    rbp,rsp
+    10c9:	74 0c                	je     10d7 <__do_global_dtors_aux+0x27>
+    10cb:	48 8b 3d 2e 2f 00 00 	mov    rdi,QWORD PTR [rip+0x2f2e]        # 4000 <__dso_handle>
+    10d2:	e8 59 ff ff ff       	call   1030 <__cxa_finalize@plt>
+    10d7:	e8 64 ff ff ff       	call   1040 <deregister_tm_clones>
+    10dc:	c6 05 29 2f 00 00 01 	mov    BYTE PTR [rip+0x2f29],0x1        # 400c <completed.0>
+    10e3:	5d                   	pop    rbp
+    10e4:	c3                   	ret
+    10e5:	0f 1f 00             	nop    DWORD PTR [rax]
+    10e8:	c3                   	ret
+    10e9:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
+
+00000000000010f0 <frame_dummy>:
+    10f0:	f3 0f 1e fa          	endbr64
+    10f4:	e9 77 ff ff ff       	jmp    1070 <register_tm_clones>
+    10f9:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
 
 0000000000001100 <trace_event_type_switch_dispatch_xdp>:
     1100:	48 8b 0f             	mov    rcx,QWORD PTR [rdi]
@@ -134,45 +208,368 @@ Disassembly of section .text:
     1122:	77 ea                	ja     110e <trace_event_type_switch_dispatch_xdp+0xe>
     1124:	81 3e 80 00 00 00    	cmp    DWORD PTR [rsi],0x80
     112a:	75 e2                	jne    110e <trace_event_type_switch_dispatch_xdp+0xe>
-    112c:	be 0f 00 00 00       	mov    esi,0xf
-    1131:	31 d2                	xor    edx,edx
-    1133:	48 8d 3d c6 0e 00 00 	lea    rdi,[rip+0xec6]        # 2000 <_fini+0xe54>
-    113a:	eb 14                	jmp    1150 <trace_event_type_switch_dispatch_xdp+0x50>
-    113c:	0f 1f 40 00          	nop    DWORD PTR [rax+0x0]
-    1140:	48 31 c2             	xor    rdx,rax
-    1143:	48 83 c6 04          	add    rsi,0x4
-    1147:	48 81 fe 0f 02 00 00 	cmp    rsi,0x20f
-    114e:	74 1c                	je     116c <trace_event_type_switch_dispatch_xdp+0x6c>
-    1150:	48 89 d0             	mov    rax,rdx
-    1153:	44 8b 44 31 fd       	mov    r8d,DWORD PTR [rcx+rsi*1-0x3]
-    1158:	ba 52 bf 01 00       	mov    edx,0x1bf52
-    115d:	41 83 f8 3f          	cmp    r8d,0x3f
-    1161:	77 dd                	ja     1140 <trace_event_type_switch_dispatch_xdp+0x40>
-    1163:	44 89 c2             	mov    edx,r8d
-    1166:	48 8b 14 d7          	mov    rdx,QWORD PTR [rdi+rdx*8]
-    116a:	eb d4                	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
-    116c:	88 11                	mov    BYTE PTR [rcx],dl
-    116e:	88 71 01             	mov    BYTE PTR [rcx+0x1],dh
-    1171:	c1 ea 10             	shr    edx,0x10
-    1174:	88 51 02             	mov    BYTE PTR [rcx+0x2],dl
-    1177:	89 c2                	mov    edx,eax
-    1179:	c1 ea 18             	shr    edx,0x18
-    117c:	88 51 03             	mov    BYTE PTR [rcx+0x3],dl
-    117f:	48 89 c2             	mov    rdx,rax
-    1182:	48 c1 ea 20          	shr    rdx,0x20
-    1186:	88 51 04             	mov    BYTE PTR [rcx+0x4],dl
-    1189:	48 89 c2             	mov    rdx,rax
-    118c:	48 c1 ea 28          	shr    rdx,0x28
-    1190:	88 51 05             	mov    BYTE PTR [rcx+0x5],dl
-    1193:	48 89 c2             	mov    rdx,rax
-    1196:	48 c1 ea 30          	shr    rdx,0x30
-    119a:	88 51 06             	mov    BYTE PTR [rcx+0x6],dl
-    119d:	48 c1 e8 38          	shr    rax,0x38
-    11a1:	88 41 07             	mov    BYTE PTR [rcx+0x7],al
-    11a4:	b8 02 00 00 00       	mov    eax,0x2
-    11a9:	c3                   	ret
+    112c:	53                   	push   rbx
+    112d:	ba 0f 00 00 00       	mov    edx,0xf
+    1132:	31 db                	xor    ebx,ebx
+    1134:	eb 1e                	jmp    1154 <trace_event_type_switch_dispatch_xdp+0x54>
+    1136:	bb 0c 00 00 00       	mov    ebx,0xc
+    113b:	0f 1f 44 00 00       	nop    DWORD PTR [rax+rax*1+0x0]
+    1140:	48 31 c3             	xor    rbx,rax
+    1143:	48 83 c2 04          	add    rdx,0x4
+    1147:	48 81 fa 0f 02 00 00 	cmp    rdx,0x20f
+    114e:	0f 84 d6 05 00 00    	je     172a <trace_event_type_switch_dispatch_xdp+0x62a>
+    1154:	48 89 d8             	mov    rax,rbx
+    1157:	8b 74 11 fd          	mov    esi,DWORD PTR [rcx+rdx*1-0x3]
+    115b:	83 fe 1f             	cmp    esi,0x1f
+    115e:	7f 40                	jg     11a0 <trace_event_type_switch_dispatch_xdp+0xa0>
+    1160:	83 fe 0f             	cmp    esi,0xf
+    1163:	7f 7b                	jg     11e0 <trace_event_type_switch_dispatch_xdp+0xe0>
+    1165:	83 fe 07             	cmp    esi,0x7
+    1168:	0f 8f e6 00 00 00    	jg     1254 <trace_event_type_switch_dispatch_xdp+0x154>
+    116e:	83 fe 03             	cmp    esi,0x3
+    1171:	0f 8f 95 01 00 00    	jg     130c <trace_event_type_switch_dispatch_xdp+0x20c>
+    1177:	83 fe 01             	cmp    esi,0x1
+    117a:	0f 8f b4 02 00 00    	jg     1434 <trace_event_type_switch_dispatch_xdp+0x334>
+    1180:	bb 38 00 00 00       	mov    ebx,0x38
+    1185:	85 f6                	test   esi,esi
+    1187:	74 b7                	je     1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1189:	83 fe 01             	cmp    esi,0x1
+    118c:	0f 85 8e 05 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    1192:	bb 2b 00 00 00       	mov    ebx,0x2b
+    1197:	eb a7                	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1199:	0f 1f 80 00 00 00 00 	nop    DWORD PTR [rax+0x0]
+    11a0:	83 fe 2f             	cmp    esi,0x2f
+    11a3:	7f 7b                	jg     1220 <trace_event_type_switch_dispatch_xdp+0x120>
+    11a5:	83 fe 27             	cmp    esi,0x27
+    11a8:	0f 8f d4 00 00 00    	jg     1282 <trace_event_type_switch_dispatch_xdp+0x182>
+    11ae:	83 fe 23             	cmp    esi,0x23
+    11b1:	0f 8f 7a 01 00 00    	jg     1331 <trace_event_type_switch_dispatch_xdp+0x231>
+    11b7:	83 fe 21             	cmp    esi,0x21
+    11ba:	0f 8f 90 02 00 00    	jg     1450 <trace_event_type_switch_dispatch_xdp+0x350>
+    11c0:	83 fe 20             	cmp    esi,0x20
+    11c3:	0f 84 2b 04 00 00    	je     15f4 <trace_event_type_switch_dispatch_xdp+0x4f4>
+    11c9:	83 fe 21             	cmp    esi,0x21
+    11cc:	0f 85 4e 05 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    11d2:	bb 27 00 00 00       	mov    ebx,0x27
+    11d7:	e9 64 ff ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    11dc:	0f 1f 40 00          	nop    DWORD PTR [rax+0x0]
+    11e0:	83 fe 17             	cmp    esi,0x17
+    11e3:	0f 8f c7 00 00 00    	jg     12b0 <trace_event_type_switch_dispatch_xdp+0x1b0>
+    11e9:	83 fe 13             	cmp    esi,0x13
+    11ec:	0f 8f 64 01 00 00    	jg     1356 <trace_event_type_switch_dispatch_xdp+0x256>
+    11f2:	83 fe 11             	cmp    esi,0x11
+    11f5:	0f 8f 71 02 00 00    	jg     146c <trace_event_type_switch_dispatch_xdp+0x36c>
+    11fb:	83 fe 10             	cmp    esi,0x10
+    11fe:	0f 84 fa 03 00 00    	je     15fe <trace_event_type_switch_dispatch_xdp+0x4fe>
+    1204:	83 fe 11             	cmp    esi,0x11
+    1207:	0f 85 13 05 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    120d:	bb 3e 00 00 00       	mov    ebx,0x3e
+    1212:	e9 29 ff ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1217:	66 0f 1f 84 00 00 00 	nop    WORD PTR [rax+rax*1+0x0]
+    121e:	00 00 
+    1220:	83 fe 37             	cmp    esi,0x37
+    1223:	0f 8f b5 00 00 00    	jg     12de <trace_event_type_switch_dispatch_xdp+0x1de>
+    1229:	83 fe 33             	cmp    esi,0x33
+    122c:	0f 8f 49 01 00 00    	jg     137b <trace_event_type_switch_dispatch_xdp+0x27b>
+    1232:	83 fe 31             	cmp    esi,0x31
+    1235:	0f 8f 4d 02 00 00    	jg     1488 <trace_event_type_switch_dispatch_xdp+0x388>
+    123b:	83 fe 30             	cmp    esi,0x30
+    123e:	0f 84 c4 03 00 00    	je     1608 <trace_event_type_switch_dispatch_xdp+0x508>
+    1244:	83 fe 31             	cmp    esi,0x31
+    1247:	0f 85 d3 04 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    124d:	31 db                	xor    ebx,ebx
+    124f:	e9 ec fe ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1254:	83 fe 0b             	cmp    esi,0xb
+    1257:	0f 8f 43 01 00 00    	jg     13a0 <trace_event_type_switch_dispatch_xdp+0x2a0>
+    125d:	83 fe 09             	cmp    esi,0x9
+    1260:	0f 8f 3e 02 00 00    	jg     14a4 <trace_event_type_switch_dispatch_xdp+0x3a4>
+    1266:	83 fe 08             	cmp    esi,0x8
+    1269:	0f 84 a3 03 00 00    	je     1612 <trace_event_type_switch_dispatch_xdp+0x512>
+    126f:	83 fe 09             	cmp    esi,0x9
+    1272:	0f 85 a8 04 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    1278:	bb 3f 00 00 00       	mov    ebx,0x3f
+    127d:	e9 be fe ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1282:	83 fe 2b             	cmp    esi,0x2b
+    1285:	0f 8f 3a 01 00 00    	jg     13c5 <trace_event_type_switch_dispatch_xdp+0x2c5>
+    128b:	83 fe 29             	cmp    esi,0x29
+    128e:	0f 8f 2c 02 00 00    	jg     14c0 <trace_event_type_switch_dispatch_xdp+0x3c0>
+    1294:	83 fe 28             	cmp    esi,0x28
+    1297:	0f 84 7f 03 00 00    	je     161c <trace_event_type_switch_dispatch_xdp+0x51c>
+    129d:	83 fe 29             	cmp    esi,0x29
+    12a0:	0f 85 7a 04 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    12a6:	bb 32 00 00 00       	mov    ebx,0x32
+    12ab:	e9 90 fe ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    12b0:	83 fe 1b             	cmp    esi,0x1b
+    12b3:	0f 8f 31 01 00 00    	jg     13ea <trace_event_type_switch_dispatch_xdp+0x2ea>
+    12b9:	83 fe 19             	cmp    esi,0x19
+    12bc:	0f 8f 1a 02 00 00    	jg     14dc <trace_event_type_switch_dispatch_xdp+0x3dc>
+    12c2:	83 fe 18             	cmp    esi,0x18
+    12c5:	0f 84 5b 03 00 00    	je     1626 <trace_event_type_switch_dispatch_xdp+0x526>
+    12cb:	83 fe 19             	cmp    esi,0x19
+    12ce:	0f 85 4c 04 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    12d4:	bb 1a 00 00 00       	mov    ebx,0x1a
+    12d9:	e9 62 fe ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    12de:	83 fe 3b             	cmp    esi,0x3b
+    12e1:	0f 8f 28 01 00 00    	jg     140f <trace_event_type_switch_dispatch_xdp+0x30f>
+    12e7:	83 fe 39             	cmp    esi,0x39
+    12ea:	0f 8f 08 02 00 00    	jg     14f8 <trace_event_type_switch_dispatch_xdp+0x3f8>
+    12f0:	83 fe 38             	cmp    esi,0x38
+    12f3:	0f 84 37 03 00 00    	je     1630 <trace_event_type_switch_dispatch_xdp+0x530>
+    12f9:	83 fe 39             	cmp    esi,0x39
+    12fc:	0f 85 1e 04 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    1302:	bb 36 00 00 00       	mov    ebx,0x36
+    1307:	e9 34 fe ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    130c:	83 fe 05             	cmp    esi,0x5
+    130f:	0f 8f ff 01 00 00    	jg     1514 <trace_event_type_switch_dispatch_xdp+0x414>
+    1315:	83 fe 04             	cmp    esi,0x4
+    1318:	0f 84 1c 03 00 00    	je     163a <trace_event_type_switch_dispatch_xdp+0x53a>
+    131e:	83 fe 05             	cmp    esi,0x5
+    1321:	0f 85 f9 03 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    1327:	bb 3d 00 00 00       	mov    ebx,0x3d
+    132c:	e9 0f fe ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1331:	83 fe 25             	cmp    esi,0x25
+    1334:	0f 8f f6 01 00 00    	jg     1530 <trace_event_type_switch_dispatch_xdp+0x430>
+    133a:	83 fe 24             	cmp    esi,0x24
+    133d:	0f 84 01 03 00 00    	je     1644 <trace_event_type_switch_dispatch_xdp+0x544>
+    1343:	83 fe 25             	cmp    esi,0x25
+    1346:	0f 85 d4 03 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    134c:	bb 04 00 00 00       	mov    ebx,0x4
+    1351:	e9 ea fd ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1356:	83 fe 15             	cmp    esi,0x15
+    1359:	0f 8f ed 01 00 00    	jg     154c <trace_event_type_switch_dispatch_xdp+0x44c>
+    135f:	83 fe 14             	cmp    esi,0x14
+    1362:	0f 84 e6 02 00 00    	je     164e <trace_event_type_switch_dispatch_xdp+0x54e>
+    1368:	83 fe 15             	cmp    esi,0x15
+    136b:	0f 85 af 03 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    1371:	bb 15 00 00 00       	mov    ebx,0x15
+    1376:	e9 c5 fd ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    137b:	83 fe 35             	cmp    esi,0x35
+    137e:	0f 8f e4 01 00 00    	jg     1568 <trace_event_type_switch_dispatch_xdp+0x468>
+    1384:	83 fe 34             	cmp    esi,0x34
+    1387:	0f 84 cb 02 00 00    	je     1658 <trace_event_type_switch_dispatch_xdp+0x558>
+    138d:	83 fe 35             	cmp    esi,0x35
+    1390:	0f 85 8a 03 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    1396:	bb 14 00 00 00       	mov    ebx,0x14
+    139b:	e9 a0 fd ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    13a0:	83 fe 0d             	cmp    esi,0xd
+    13a3:	0f 8f db 01 00 00    	jg     1584 <trace_event_type_switch_dispatch_xdp+0x484>
+    13a9:	83 fe 0c             	cmp    esi,0xc
+    13ac:	0f 84 b0 02 00 00    	je     1662 <trace_event_type_switch_dispatch_xdp+0x562>
+    13b2:	83 fe 0d             	cmp    esi,0xd
+    13b5:	0f 85 65 03 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    13bb:	bb 2a 00 00 00       	mov    ebx,0x2a
+    13c0:	e9 7b fd ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    13c5:	83 fe 2d             	cmp    esi,0x2d
+    13c8:	0f 8f d2 01 00 00    	jg     15a0 <trace_event_type_switch_dispatch_xdp+0x4a0>
+    13ce:	83 fe 2c             	cmp    esi,0x2c
+    13d1:	0f 84 95 02 00 00    	je     166c <trace_event_type_switch_dispatch_xdp+0x56c>
+    13d7:	83 fe 2d             	cmp    esi,0x2d
+    13da:	0f 85 40 03 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    13e0:	bb 2c 00 00 00       	mov    ebx,0x2c
+    13e5:	e9 56 fd ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    13ea:	83 fe 1d             	cmp    esi,0x1d
+    13ed:	0f 8f c9 01 00 00    	jg     15bc <trace_event_type_switch_dispatch_xdp+0x4bc>
+    13f3:	83 fe 1c             	cmp    esi,0x1c
+    13f6:	0f 84 7a 02 00 00    	je     1676 <trace_event_type_switch_dispatch_xdp+0x576>
+    13fc:	83 fe 1d             	cmp    esi,0x1d
+    13ff:	0f 85 1b 03 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    1405:	bb 1f 00 00 00       	mov    ebx,0x1f
+    140a:	e9 31 fd ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    140f:	83 fe 3d             	cmp    esi,0x3d
+    1412:	0f 8f c0 01 00 00    	jg     15d8 <trace_event_type_switch_dispatch_xdp+0x4d8>
+    1418:	83 fe 3c             	cmp    esi,0x3c
+    141b:	0f 84 5f 02 00 00    	je     1680 <trace_event_type_switch_dispatch_xdp+0x580>
+    1421:	83 fe 3d             	cmp    esi,0x3d
+    1424:	0f 85 f6 02 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    142a:	bb 05 00 00 00       	mov    ebx,0x5
+    142f:	e9 0c fd ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1434:	83 fe 02             	cmp    esi,0x2
+    1437:	0f 84 4d 02 00 00    	je     168a <trace_event_type_switch_dispatch_xdp+0x58a>
+    143d:	83 fe 03             	cmp    esi,0x3
+    1440:	0f 85 da 02 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    1446:	bb 1c 00 00 00       	mov    ebx,0x1c
+    144b:	e9 f0 fc ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1450:	83 fe 22             	cmp    esi,0x22
+    1453:	0f 84 3b 02 00 00    	je     1694 <trace_event_type_switch_dispatch_xdp+0x594>
+    1459:	83 fe 23             	cmp    esi,0x23
+    145c:	0f 85 be 02 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    1462:	bb 1b 00 00 00       	mov    ebx,0x1b
+    1467:	e9 d4 fc ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    146c:	83 fe 12             	cmp    esi,0x12
+    146f:	0f 84 29 02 00 00    	je     169e <trace_event_type_switch_dispatch_xdp+0x59e>
+    1475:	83 fe 13             	cmp    esi,0x13
+    1478:	0f 85 a2 02 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    147e:	bb 06 00 00 00       	mov    ebx,0x6
+    1483:	e9 b8 fc ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1488:	83 fe 32             	cmp    esi,0x32
+    148b:	0f 84 17 02 00 00    	je     16a8 <trace_event_type_switch_dispatch_xdp+0x5a8>
+    1491:	83 fe 33             	cmp    esi,0x33
+    1494:	0f 85 86 02 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    149a:	bb 03 00 00 00       	mov    ebx,0x3
+    149f:	e9 9c fc ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    14a4:	83 fe 0a             	cmp    esi,0xa
+    14a7:	0f 84 05 02 00 00    	je     16b2 <trace_event_type_switch_dispatch_xdp+0x5b2>
+    14ad:	83 fe 0b             	cmp    esi,0xb
+    14b0:	0f 85 6a 02 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    14b6:	bb 24 00 00 00       	mov    ebx,0x24
+    14bb:	e9 80 fc ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    14c0:	83 fe 2a             	cmp    esi,0x2a
+    14c3:	0f 84 f3 01 00 00    	je     16bc <trace_event_type_switch_dispatch_xdp+0x5bc>
+    14c9:	83 fe 2b             	cmp    esi,0x2b
+    14cc:	0f 85 4e 02 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    14d2:	bb 23 00 00 00       	mov    ebx,0x23
+    14d7:	e9 64 fc ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    14dc:	83 fe 1a             	cmp    esi,0x1a
+    14df:	0f 84 e1 01 00 00    	je     16c6 <trace_event_type_switch_dispatch_xdp+0x5c6>
+    14e5:	83 fe 1b             	cmp    esi,0x1b
+    14e8:	0f 85 32 02 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    14ee:	bb 29 00 00 00       	mov    ebx,0x29
+    14f3:	e9 48 fc ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    14f8:	83 fe 3a             	cmp    esi,0x3a
+    14fb:	0f 84 cf 01 00 00    	je     16d0 <trace_event_type_switch_dispatch_xdp+0x5d0>
+    1501:	83 fe 3b             	cmp    esi,0x3b
+    1504:	0f 85 16 02 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    150a:	bb 10 00 00 00       	mov    ebx,0x10
+    150f:	e9 2c fc ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1514:	83 fe 06             	cmp    esi,0x6
+    1517:	0f 84 bd 01 00 00    	je     16da <trace_event_type_switch_dispatch_xdp+0x5da>
+    151d:	83 fe 07             	cmp    esi,0x7
+    1520:	0f 85 fa 01 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    1526:	bb 3a 00 00 00       	mov    ebx,0x3a
+    152b:	e9 10 fc ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1530:	83 fe 26             	cmp    esi,0x26
+    1533:	0f 84 ab 01 00 00    	je     16e4 <trace_event_type_switch_dispatch_xdp+0x5e4>
+    1539:	83 fe 27             	cmp    esi,0x27
+    153c:	0f 85 de 01 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    1542:	bb 30 00 00 00       	mov    ebx,0x30
+    1547:	e9 f4 fb ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    154c:	83 fe 16             	cmp    esi,0x16
+    154f:	0f 84 99 01 00 00    	je     16ee <trace_event_type_switch_dispatch_xdp+0x5ee>
+    1555:	83 fe 17             	cmp    esi,0x17
+    1558:	0f 85 c2 01 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    155e:	bb 28 00 00 00       	mov    ebx,0x28
+    1563:	e9 d8 fb ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1568:	83 fe 36             	cmp    esi,0x36
+    156b:	0f 84 87 01 00 00    	je     16f8 <trace_event_type_switch_dispatch_xdp+0x5f8>
+    1571:	83 fe 37             	cmp    esi,0x37
+    1574:	0f 85 a6 01 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    157a:	bb 12 00 00 00       	mov    ebx,0x12
+    157f:	e9 bc fb ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1584:	83 fe 0e             	cmp    esi,0xe
+    1587:	0f 84 75 01 00 00    	je     1702 <trace_event_type_switch_dispatch_xdp+0x602>
+    158d:	83 fe 0f             	cmp    esi,0xf
+    1590:	0f 85 8a 01 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    1596:	bb 2e 00 00 00       	mov    ebx,0x2e
+    159b:	e9 a0 fb ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    15a0:	83 fe 2e             	cmp    esi,0x2e
+    15a3:	0f 84 63 01 00 00    	je     170c <trace_event_type_switch_dispatch_xdp+0x60c>
+    15a9:	83 fe 2f             	cmp    esi,0x2f
+    15ac:	0f 85 6e 01 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    15b2:	bb 3b 00 00 00       	mov    ebx,0x3b
+    15b7:	e9 84 fb ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    15bc:	83 fe 1e             	cmp    esi,0x1e
+    15bf:	0f 84 51 01 00 00    	je     1716 <trace_event_type_switch_dispatch_xdp+0x616>
+    15c5:	83 fe 1f             	cmp    esi,0x1f
+    15c8:	0f 85 52 01 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    15ce:	bb 34 00 00 00       	mov    ebx,0x34
+    15d3:	e9 68 fb ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    15d8:	83 fe 3e             	cmp    esi,0x3e
+    15db:	0f 84 55 fb ff ff    	je     1136 <trace_event_type_switch_dispatch_xdp+0x36>
+    15e1:	83 fe 3f             	cmp    esi,0x3f
+    15e4:	0f 85 36 01 00 00    	jne    1720 <trace_event_type_switch_dispatch_xdp+0x620>
+    15ea:	bb 37 00 00 00       	mov    ebx,0x37
+    15ef:	e9 4c fb ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    15f4:	bb 19 00 00 00       	mov    ebx,0x19
+    15f9:	e9 42 fb ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    15fe:	bb 22 00 00 00       	mov    ebx,0x22
+    1603:	e9 38 fb ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1608:	bb 2d 00 00 00       	mov    ebx,0x2d
+    160d:	e9 2e fb ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1612:	bb 02 00 00 00       	mov    ebx,0x2
+    1617:	e9 24 fb ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    161c:	bb 20 00 00 00       	mov    ebx,0x20
+    1621:	e9 1a fb ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1626:	bb 26 00 00 00       	mov    ebx,0x26
+    162b:	e9 10 fb ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1630:	bb 01 00 00 00       	mov    ebx,0x1
+    1635:	e9 06 fb ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    163a:	bb 0e 00 00 00       	mov    ebx,0xe
+    163f:	e9 fc fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1644:	bb 35 00 00 00       	mov    ebx,0x35
+    1649:	e9 f2 fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    164e:	bb 1d 00 00 00       	mov    ebx,0x1d
+    1653:	e9 e8 fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1658:	bb 0d 00 00 00       	mov    ebx,0xd
+    165d:	e9 de fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1662:	bb 13 00 00 00       	mov    ebx,0x13
+    1667:	e9 d4 fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    166c:	bb 08 00 00 00       	mov    ebx,0x8
+    1671:	e9 ca fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1676:	bb 21 00 00 00       	mov    ebx,0x21
+    167b:	e9 c0 fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1680:	bb 3c 00 00 00       	mov    ebx,0x3c
+    1685:	e9 b6 fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    168a:	bb 39 00 00 00       	mov    ebx,0x39
+    168f:	e9 ac fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1694:	bb 0b 00 00 00       	mov    ebx,0xb
+    1699:	e9 a2 fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    169e:	bb 2f 00 00 00       	mov    ebx,0x2f
+    16a3:	e9 98 fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    16a8:	bb 09 00 00 00       	mov    ebx,0x9
+    16ad:	e9 8e fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    16b2:	bb 31 00 00 00       	mov    ebx,0x31
+    16b7:	e9 84 fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    16bc:	bb 07 00 00 00       	mov    ebx,0x7
+    16c1:	e9 7a fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    16c6:	bb 11 00 00 00       	mov    ebx,0x11
+    16cb:	e9 70 fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    16d0:	bb 16 00 00 00       	mov    ebx,0x16
+    16d5:	e9 66 fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    16da:	bb 0a 00 00 00       	mov    ebx,0xa
+    16df:	e9 5c fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    16e4:	bb 18 00 00 00       	mov    ebx,0x18
+    16e9:	e9 52 fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    16ee:	bb 0f 00 00 00       	mov    ebx,0xf
+    16f3:	e9 48 fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    16f8:	bb 1e 00 00 00       	mov    ebx,0x1e
+    16fd:	e9 3e fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1702:	bb 25 00 00 00       	mov    ebx,0x25
+    1707:	e9 34 fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    170c:	bb 33 00 00 00       	mov    ebx,0x33
+    1711:	e9 2a fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1716:	bb 17 00 00 00       	mov    ebx,0x17
+    171b:	e9 20 fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    1720:	bb 52 bf 01 00       	mov    ebx,0x1bf52
+    1725:	e9 16 fa ff ff       	jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40>
+    172a:	88 19                	mov    BYTE PTR [rcx],bl
+    172c:	88 79 01             	mov    BYTE PTR [rcx+0x1],bh
+    172f:	c1 eb 10             	shr    ebx,0x10
+    1732:	88 59 02             	mov    BYTE PTR [rcx+0x2],bl
+    1735:	89 c2                	mov    edx,eax
+    1737:	c1 ea 18             	shr    edx,0x18
+    173a:	88 51 03             	mov    BYTE PTR [rcx+0x3],dl
+    173d:	48 89 c2             	mov    rdx,rax
+    1740:	48 c1 ea 20          	shr    rdx,0x20
+    1744:	88 51 04             	mov    BYTE PTR [rcx+0x4],dl
+    1747:	48 89 c2             	mov    rdx,rax
+    174a:	48 c1 ea 28          	shr    rdx,0x28
+    174e:	88 51 05             	mov    BYTE PTR [rcx+0x5],dl
+    1751:	48 89 c2             	mov    rdx,rax
+    1754:	48 c1 ea 30          	shr    rdx,0x30
+    1758:	88 51 06             	mov    BYTE PTR [rcx+0x6],dl
+    175b:	48 c1 e8 38          	shr    rax,0x38
+    175f:	88 41 07             	mov    BYTE PTR [rcx+0x7],al
+    1762:	b8 02 00 00 00       	mov    eax,0x2
+    1767:	5b                   	pop    rbx
+    1768:	c3                   	ret
 
 Disassembly of section .fini:
+
+000000000000176c <_fini>:
+    176c:	f3 0f 1e fa          	endbr64
+    1770:	48 83 ec 08          	sub    rsp,0x8
+    1774:	48 83 c4 08          	add    rsp,0x8
+    1778:	c3                   	ret
 ```
 
 ## Original Kernel JIT ASM
@@ -810,123 +1207,648 @@ Disassembly of section .data:
      ((__u64)(SCALE) << 12) | ((__u64)(HAS_INDEX) << 14) | \
      ((__u64)(HAS_BASE) << 15) | ((__u64)(__u32)(DISP) << 16))
 
-/*
- * native asm to handcraft warnings: 4
- *
- * - 0x1100: mov    rcx,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0]
- * - 0x1103: mov    rdx,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4]
- * - 0x1124: cmp    DWORD PTR [rsi],0x80 [warning-unmapped: CMP operand form has no current kinsn selector: cmp    DWORD PTR [rsi],0x80]
- * - 0x1133: lea    rdi,[rip+0xec6] [warning-unmapped: LEA base/index not in BPF register file: [rip+0xec6]]
- */
-
 static const struct bpf_insn program[] = {
-    /* 0x1100: mov    rcx,QWORD PTR [rdi] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 0; BPF XDP ctx uses u32 field at off 0] */
+    HC_INIT_X86_STACK(),
+    HC_MOV64_IMM(BPF_REG_6, 0),
+    HC_MOV64_IMM(BPF_REG_7, 0),
+    HC_MOV64_IMM(BPF_REG_8, 0),
+    HC_MOV64_IMM(BPF_REG_9, 0),
+    /* 0x1100: mov    rcx,QWORD PTR [rdi] [context-abi: native xdp_md 64-bit field at off 0 maps to BPF XDP u32 ctx field at off 0] */
     HC_LDX(BPF_W, BPF_REG_4, BPF_REG_1, 0),
-    /* 0x1103: mov    rdx,QWORD PTR [rdi+0x8] [warning-context-abi: native xdp_md uses 64-bit host pointer field at off 8; BPF XDP ctx uses u32 field at off 4] */
+    /* 0x1103: mov    rdx,QWORD PTR [rdi+0x8] [context-abi: native xdp_md 64-bit field at off 8 maps to BPF XDP u32 ctx field at off 4] */
     HC_LDX(BPF_W, BPF_REG_3, BPF_REG_1, 4),
-    HC_MOV64_REG(BPF_REG_7, BPF_REG_3),
-    /* 0x1107: xor    eax,eax [bpf-jit: zero idiom] */
-    HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_0, 0, 0, 0),
-    /* 0x1109: cmp    rcx,rdx [bpf-branch: represented by following verifier-visible BPF branch] */
-    /* 0x110c: jbe    110f <trace_event_type_switch_dispatch_xdp+0xf> [bpf-branch: lowered cmp    rcx,rdx + jbe    110f <trace_event_type_switch_dispatch_xdp+0xf> to verifier-visible BPF branch] */
-    HC_JMP_REG(BPF_JLE, BPF_REG_4, BPF_REG_3, 1),
-    /* 0x110e: ret [bpf-jit: BPF exit; kernel JIT emits the real return sequence] */
+    /* 0x1107: xor    eax,eax [exact-kinsn: xor32 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_0, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORL),
+    /* 0x1109: cmp    rcx,rdx [absorbed-control-flow: cmp folded into following ordinary BPF jbe] */
+    /* 0x110c: jbe    110f <trace_event_type_switch_dispatch_xdp+0xf> [exact-bpf: jbe ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP | BPF_JLE | BPF_X, BPF_REG_4, BPF_REG_3, (2) - 1, 0),
+    /* 0x110e: ret [abi-boundary: native ret maps to the BPF program exit boundary] */
     HC_EXIT(),
     /* 0x110f: lea    rsi,[rcx+0x8] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_2, BPF_REG_4, 0, 0, 1, 0, 8), MICRO_HANDCRAFT_BPF_X86_LEAQ),
-    /* 0x1113: cmp    rsi,rdx [bpf-branch: represented by following verifier-visible BPF branch] */
-    /* 0x1116: ja     110e <trace_event_type_switch_dispatch_xdp+0xe> [bpf-branch: lowered cmp    rsi,rdx + ja     110e <trace_event_type_switch_dispatch_xdp+0xe> to verifier-visible BPF branch] */
-    HC_JMP_REG(BPF_JGT, BPF_REG_2, BPF_REG_3, -4),
+    /* 0x1113: cmp    rsi,rdx [absorbed-control-flow: cmp folded into following ordinary BPF ja] */
+    /* 0x1116: ja     110e <trace_event_type_switch_dispatch_xdp+0xe> [exact-bpf: ja ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_2, BPF_REG_3, (-3) - 1, 0),
     /* 0x1118: lea    rdi,[rcx+0x20c] [exact-kinsn: LEA via x86 kinsn selector] */
     HC_KINSN(HC_LEA_PAYLOAD(BPF_REG_1, BPF_REG_4, 0, 0, 1, 0, 524), MICRO_HANDCRAFT_BPF_X86_LEAQ),
-    /* 0x111f: cmp    rdi,rdx [bpf-branch: represented by following verifier-visible BPF branch] */
-    /* 0x1122: ja     110e <trace_event_type_switch_dispatch_xdp+0xe> [bpf-branch: lowered cmp    rdi,rdx + ja     110e <trace_event_type_switch_dispatch_xdp+0xe> to verifier-visible BPF branch] */
-    HC_JMP_REG(BPF_JGT, BPF_REG_1, BPF_REG_3, -7),
-    /* 0x1133: lea    rdi,[rip+0xec6] [warning-repaired: static table is staged after packet payload for verifier-safe indexed load] */
-    HC_MOV64_REG(BPF_REG_6, BPF_REG_4),
-    HC_ALU64_IMM(BPF_ADD, BPF_REG_6, 1036),
-    HC_JMP_REG(BPF_JGT, BPF_REG_6, BPF_REG_3, -10),
-    /* 0x1124: cmp    DWORD PTR [rsi],0x80 [warning-unmapped: CMP operand form has no current kinsn selector: cmp    DWORD PTR [rsi],0x80] */
-    /* 0x112a: jne    110e <trace_event_type_switch_dispatch_xdp+0xe> [bpf-branch: lowered cmp    DWORD PTR [rsi],0x80 + jne    110e <trace_event_type_switch_dispatch_xdp+0xe> to verifier-visible load+branch] */
+    /* 0x111f: cmp    rdi,rdx [absorbed-control-flow: cmp folded into following ordinary BPF ja] */
+    /* 0x1122: ja     110e <trace_event_type_switch_dispatch_xdp+0xe> [exact-bpf: ja ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP | BPF_JGT | BPF_X, BPF_REG_1, BPF_REG_3, (-6) - 1, 0),
+    /* 0x1124: cmp    DWORD PTR [rsi],0x80 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x112a: jne    110e <trace_event_type_switch_dispatch_xdp+0xe> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_STX(BPF_DW, BPF_REG_10, BPF_REG_6, -376),
     HC_LDX(BPF_W, BPF_REG_6, BPF_REG_2, 0),
-    HC_RAW(BPF_JMP | BPF_JNE | BPF_K, BPF_REG_6, 0, -12, 128),
-    /* 0x112c: mov    esi,0xf [bpf-jit: 32-bit immediate move] */
-    HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_2, 0, 0, 15),
-    /* 0x1131: xor    edx,edx [bpf-jit: zero idiom] */
-    HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_3, 0, 0, 0),
-    /* 0x1133: lea    rdi,[rip+0xec6] [warning-repaired: rdi already points at staged switch table] */
-    /* 0x113a: jmp    1150 <trace_event_type_switch_dispatch_xdp+0x50> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, 3, 0),
-    /* 0x113c: nop    DWORD PTR [rax+0x0] [padding: padding is not part of BPF semantics] */
-    /* 0x1140: xor    rdx,rax [bpf-jit: ALU reg operation] */
-    HC_RAW(BPF_ALU64 | BPF_XOR | BPF_X, BPF_REG_3, BPF_REG_0, 0, 0),
-    /* 0x1143: add    rsi,0x4 [bpf-jit: ALU imm operation] */
-    HC_RAW(BPF_ALU64 | BPF_ADD | BPF_K, BPF_REG_2, 0, 0, 4),
-    /* 0x1147: cmp    rsi,0x20f [bpf-branch: represented by following verifier-visible BPF branch] */
-    /* 0x114e: je     116c <trace_event_type_switch_dispatch_xdp+0x6c> [bpf-branch: lowered cmp    rsi,0x20f + je     116c <trace_event_type_switch_dispatch_xdp+0x6c> to verifier-visible BPF branch] */
-    HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_2, 0, 15, 527),
-    /* 0x1150: mov    rax,rdx [exact-kinsn: movq register-to-register kinsn] */
-    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_0, BPF_REG_3), MICRO_HANDCRAFT_BPF_X86_MOVQ),
-    /* 0x1153: mov    r8d,DWORD PTR [rcx+rsi*1-0x3] [exact-kinsn: indexed memory load via x86 SIB kinsn] */
-    HC_KINSN(HC_X86_SIB_PAYLOAD(BPF_REG_5, BPF_REG_4, BPF_REG_2, 0, -3), MICRO_HANDCRAFT_BPF_X86_MOVL),
-    /* 0x1158: mov    edx,0x1bf52 [bpf-jit: 32-bit immediate move] */
-    HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_3, 0, 0, 114514),
-    /* 0x115d: cmp    r8d,0x3f [bpf-branch: represented by following verifier-visible BPF branch] */
-    /* 0x1161: ja     1140 <trace_event_type_switch_dispatch_xdp+0x40> [bpf-branch: lowered cmp    r8d,0x3f + ja     1140 <trace_event_type_switch_dispatch_xdp+0x40> to verifier-visible BPF branch] */
-    HC_RAW(BPF_JMP | BPF_JGT | BPF_K, BPF_REG_5, 0, -9, 63),
-    /* 0x1163: mov    edx,r8d [bpf-jit: 32-bit register move] */
-    HC_RAW(BPF_ALU | BPF_MOV | BPF_X, BPF_REG_3, BPF_REG_5, 0, 0),
-    /* 0x1166: mov    rdx,QWORD PTR [rdi+rdx*8] [warning-repaired: verifier-visible packet-table load] */
-    HC_MOV64_REG(BPF_REG_6, BPF_REG_3),
-    HC_ALU64_IMM(BPF_LSH, BPF_REG_6, 3),
-    HC_ALU64_REG(BPF_ADD, BPF_REG_6, BPF_REG_1),
-    HC_MOV64_REG(BPF_REG_8, BPF_REG_6),
-    HC_ALU64_IMM(BPF_ADD, BPF_REG_8, 8),
-    HC_JMP_REG(BPF_JGT, BPF_REG_8, BPF_REG_7, -31),
-    HC_LDX(BPF_DW, BPF_REG_3, BPF_REG_6, 0),
-    /* 0x116a: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [bpf-branch: lowered direct jmp to verifier-visible BPF jump] */
-    HC_RAW(BPF_JMP | BPF_JA, 0, 0, -18, 0),
-    /* 0x116c: mov    BYTE PTR [rcx],dl [exact-kinsn: direct memory store via x86 kinsn selector] */
-    HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_3, BPF_REG_4, 0), MICRO_HANDCRAFT_BPF_X86_MOVB),
-    /* 0x116e: mov    BYTE PTR [rcx+0x1],dh [warning-repaired: high-byte store via shift+store] */
-    HC_MOV64_REG(BPF_REG_6, BPF_REG_3),
-    HC_ALU64_IMM(BPF_RSH, BPF_REG_6, 8),
-    HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_6, BPF_REG_4, 1), MICRO_HANDCRAFT_BPF_X86_MOVB),
-    /* 0x1171: shr    edx,0x10 [bpf-jit: ALU imm operation] */
-    HC_RAW(BPF_ALU | BPF_RSH | BPF_K, BPF_REG_3, 0, 0, 16),
-    /* 0x1174: mov    BYTE PTR [rcx+0x2],dl [exact-kinsn: direct memory store via x86 kinsn selector] */
-    HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_3, BPF_REG_4, 2), MICRO_HANDCRAFT_BPF_X86_MOVB),
-    /* 0x1177: mov    edx,eax [bpf-jit: 32-bit register move] */
-    HC_RAW(BPF_ALU | BPF_MOV | BPF_X, BPF_REG_3, BPF_REG_0, 0, 0),
-    /* 0x1179: shr    edx,0x18 [bpf-jit: ALU imm operation] */
-    HC_RAW(BPF_ALU | BPF_RSH | BPF_K, BPF_REG_3, 0, 0, 24),
-    /* 0x117c: mov    BYTE PTR [rcx+0x3],dl [exact-kinsn: direct memory store via x86 kinsn selector] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_6, 0, 2, 128),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, 2),
+    HC_LDX(BPF_DW, BPF_REG_6, BPF_REG_10, -376),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-13) - 1),
+    /* 0x112c: push   rbx [exact-kinsn: pushq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_PUSHQ),
+    /* 0x112d: mov    edx,0xf [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_3, 15), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1132: xor    ebx,ebx [exact-kinsn: xor32 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_6, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_XORL),
+    /* 0x1134: jmp    1154 <trace_event_type_switch_dispatch_xdp+0x54> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (8) - 1),
+    /* 0x1136: mov    ebx,0xc [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 12), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x113b: nop    DWORD PTR [rax+rax*1+0x0] [padding: padding is not part of BPF semantics] */
+    /* 0x1140: xor    rbx,rax [exact-kinsn: xor64 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_6, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_XORQ),
+    /* 0x1143: add    rdx,0x4 [exact-kinsn: add64 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_3, 4), MICRO_HANDCRAFT_BPF_X86_ADDQ),
+    /* 0x1147: cmp    rdx,0x20f [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x114e: je     172a <trace_event_type_switch_dispatch_xdp+0x62a> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP | BPF_JEQ | BPF_K, BPF_REG_3, 0, (292) - 1, 527),
+    /* 0x1154: mov    rax,rbx [exact-kinsn: movq register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_0, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_MOVQ),
+    /* 0x1157: mov    esi,DWORD PTR [rcx+rdx*1-0x3] [exact-kinsn: indexed memory load via x86 SIB kinsn] */
+    HC_KINSN(HC_X86_SIB_PAYLOAD(BPF_REG_2, BPF_REG_4, BPF_REG_3, 0, -3), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x115b: cmp    esi,0x1f [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x115e: jg     11a0 <trace_event_type_switch_dispatch_xdp+0xa0> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (13) - 1, 31),
+    /* 0x1160: cmp    esi,0xf [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x1163: jg     11e0 <trace_event_type_switch_dispatch_xdp+0xe0> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (21) - 1, 15),
+    /* 0x1165: cmp    esi,0x7 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x1168: jg     1254 <trace_event_type_switch_dispatch_xdp+0x154> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (36) - 1, 7),
+    /* 0x116e: cmp    esi,0x3 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x1171: jg     130c <trace_event_type_switch_dispatch_xdp+0x20c> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (63) - 1, 3),
+    /* 0x1177: cmp    esi,0x1 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x117a: jg     1434 <trace_event_type_switch_dispatch_xdp+0x334> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (110) - 1, 1),
+    /* 0x1180: mov    ebx,0x38 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 56), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1185: test   esi,esi [absorbed-control-flow: test folded into following ordinary BPF je] */
+    /* 0x1187: je     1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: je ordinary BPF branch from preceding test] */
+    HC_RAW(BPF_JMP | BPF_JSET | BPF_K, BPF_REG_2, 0, 1, -1),
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-17) - 1),
+    /* 0x1189: cmp    esi,0x1 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x118c: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (275) - 1, 1),
+    /* 0x1192: mov    ebx,0x2b [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 43), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1197: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-21) - 1),
+    /* 0x1199: nop    DWORD PTR [rax+0x0] [padding: padding is not part of BPF semantics] */
+    /* 0x11a0: cmp    esi,0x2f [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x11a3: jg     1220 <trace_event_type_switch_dispatch_xdp+0x120> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (17) - 1, 47),
+    /* 0x11a5: cmp    esi,0x27 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x11a8: jg     1282 <trace_event_type_switch_dispatch_xdp+0x182> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (31) - 1, 39),
+    /* 0x11ae: cmp    esi,0x23 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x11b1: jg     1331 <trace_event_type_switch_dispatch_xdp+0x231> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (57) - 1, 35),
+    /* 0x11b7: cmp    esi,0x21 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x11ba: jg     1450 <trace_event_type_switch_dispatch_xdp+0x350> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (103) - 1, 33),
+    /* 0x11c0: cmp    esi,0x20 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x11c3: je     15f4 <trace_event_type_switch_dispatch_xdp+0x4f4> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (177) - 1, 32),
+    /* 0x11c9: cmp    esi,0x21 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x11cc: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (266) - 1, 33),
+    /* 0x11d2: mov    ebx,0x27 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 39), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x11d7: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-30) - 1),
+    /* 0x11dc: nop    DWORD PTR [rax+0x0] [padding: padding is not part of BPF semantics] */
+    /* 0x11e0: cmp    esi,0x17 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x11e3: jg     12b0 <trace_event_type_switch_dispatch_xdp+0x1b0> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (30) - 1, 23),
+    /* 0x11e9: cmp    esi,0x13 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x11ec: jg     1356 <trace_event_type_switch_dispatch_xdp+0x256> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (55) - 1, 19),
+    /* 0x11f2: cmp    esi,0x11 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x11f5: jg     146c <trace_event_type_switch_dispatch_xdp+0x36c> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (100) - 1, 17),
+    /* 0x11fb: cmp    esi,0x10 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x11fe: je     15fe <trace_event_type_switch_dispatch_xdp+0x4fe> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (172) - 1, 16),
+    /* 0x1204: cmp    esi,0x11 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1207: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (258) - 1, 17),
+    /* 0x120d: mov    ebx,0x3e [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 62), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1212: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-38) - 1),
+    /* 0x1217: nop    WORD PTR [rax+rax*1+0x0] [padding: padding is not part of BPF semantics] */
+    /* 0x1220: cmp    esi,0x37 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x1223: jg     12de <trace_event_type_switch_dispatch_xdp+0x1de> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (29) - 1, 55),
+    /* 0x1229: cmp    esi,0x33 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x122c: jg     137b <trace_event_type_switch_dispatch_xdp+0x27b> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (53) - 1, 51),
+    /* 0x1232: cmp    esi,0x31 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x1235: jg     1488 <trace_event_type_switch_dispatch_xdp+0x388> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (97) - 1, 49),
+    /* 0x123b: cmp    esi,0x30 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x123e: je     1608 <trace_event_type_switch_dispatch_xdp+0x508> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (167) - 1, 48),
+    /* 0x1244: cmp    esi,0x31 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1247: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (250) - 1, 49),
+    /* 0x124d: xor    ebx,ebx [exact-kinsn: xor32 reg kinsn] */
+    HC_KINSN(HC_X86_ALU_RR_PAYLOAD(BPF_REG_6, BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_XORL),
+    /* 0x124f: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-46) - 1),
+    /* 0x1254: cmp    esi,0xb [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x1257: jg     13a0 <trace_event_type_switch_dispatch_xdp+0x2a0> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (52) - 1, 11),
+    /* 0x125d: cmp    esi,0x9 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x1260: jg     14a4 <trace_event_type_switch_dispatch_xdp+0x3a4> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (95) - 1, 9),
+    /* 0x1266: cmp    esi,0x8 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x1269: je     1612 <trace_event_type_switch_dispatch_xdp+0x512> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (163) - 1, 8),
+    /* 0x126f: cmp    esi,0x9 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1272: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (243) - 1, 9),
+    /* 0x1278: mov    ebx,0x3f [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 63), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x127d: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-53) - 1),
+    /* 0x1282: cmp    esi,0x2b [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x1285: jg     13c5 <trace_event_type_switch_dispatch_xdp+0x2c5> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (51) - 1, 43),
+    /* 0x128b: cmp    esi,0x29 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x128e: jg     14c0 <trace_event_type_switch_dispatch_xdp+0x3c0> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (93) - 1, 41),
+    /* 0x1294: cmp    esi,0x28 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x1297: je     161c <trace_event_type_switch_dispatch_xdp+0x51c> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (159) - 1, 40),
+    /* 0x129d: cmp    esi,0x29 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x12a0: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (236) - 1, 41),
+    /* 0x12a6: mov    ebx,0x32 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 50), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x12ab: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-60) - 1),
+    /* 0x12b0: cmp    esi,0x1b [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x12b3: jg     13ea <trace_event_type_switch_dispatch_xdp+0x2ea> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (50) - 1, 27),
+    /* 0x12b9: cmp    esi,0x19 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x12bc: jg     14dc <trace_event_type_switch_dispatch_xdp+0x3dc> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (91) - 1, 25),
+    /* 0x12c2: cmp    esi,0x18 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x12c5: je     1626 <trace_event_type_switch_dispatch_xdp+0x526> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (155) - 1, 24),
+    /* 0x12cb: cmp    esi,0x19 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x12ce: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (229) - 1, 25),
+    /* 0x12d4: mov    ebx,0x1a [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 26), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x12d9: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-67) - 1),
+    /* 0x12de: cmp    esi,0x3b [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x12e1: jg     140f <trace_event_type_switch_dispatch_xdp+0x30f> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (49) - 1, 59),
+    /* 0x12e7: cmp    esi,0x39 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x12ea: jg     14f8 <trace_event_type_switch_dispatch_xdp+0x3f8> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (89) - 1, 57),
+    /* 0x12f0: cmp    esi,0x38 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x12f3: je     1630 <trace_event_type_switch_dispatch_xdp+0x530> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (151) - 1, 56),
+    /* 0x12f9: cmp    esi,0x39 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x12fc: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (222) - 1, 57),
+    /* 0x1302: mov    ebx,0x36 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 54), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1307: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-74) - 1),
+    /* 0x130c: cmp    esi,0x5 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x130f: jg     1514 <trace_event_type_switch_dispatch_xdp+0x414> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (88) - 1, 5),
+    /* 0x1315: cmp    esi,0x4 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x1318: je     163a <trace_event_type_switch_dispatch_xdp+0x53a> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (148) - 1, 4),
+    /* 0x131e: cmp    esi,0x5 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1321: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (216) - 1, 5),
+    /* 0x1327: mov    ebx,0x3d [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 61), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x132c: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-80) - 1),
+    /* 0x1331: cmp    esi,0x25 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x1334: jg     1530 <trace_event_type_switch_dispatch_xdp+0x430> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (87) - 1, 37),
+    /* 0x133a: cmp    esi,0x24 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x133d: je     1644 <trace_event_type_switch_dispatch_xdp+0x544> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (145) - 1, 36),
+    /* 0x1343: cmp    esi,0x25 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1346: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (210) - 1, 37),
+    /* 0x134c: mov    ebx,0x4 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 4), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1351: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-86) - 1),
+    /* 0x1356: cmp    esi,0x15 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x1359: jg     154c <trace_event_type_switch_dispatch_xdp+0x44c> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (86) - 1, 21),
+    /* 0x135f: cmp    esi,0x14 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x1362: je     164e <trace_event_type_switch_dispatch_xdp+0x54e> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (142) - 1, 20),
+    /* 0x1368: cmp    esi,0x15 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x136b: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (204) - 1, 21),
+    /* 0x1371: mov    ebx,0x15 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 21), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1376: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-92) - 1),
+    /* 0x137b: cmp    esi,0x35 [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x137e: jg     1568 <trace_event_type_switch_dispatch_xdp+0x468> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (85) - 1, 53),
+    /* 0x1384: cmp    esi,0x34 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x1387: je     1658 <trace_event_type_switch_dispatch_xdp+0x558> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (139) - 1, 52),
+    /* 0x138d: cmp    esi,0x35 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1390: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (198) - 1, 53),
+    /* 0x1396: mov    ebx,0x14 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 20), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x139b: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-98) - 1),
+    /* 0x13a0: cmp    esi,0xd [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x13a3: jg     1584 <trace_event_type_switch_dispatch_xdp+0x484> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (84) - 1, 13),
+    /* 0x13a9: cmp    esi,0xc [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x13ac: je     1662 <trace_event_type_switch_dispatch_xdp+0x562> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (136) - 1, 12),
+    /* 0x13b2: cmp    esi,0xd [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x13b5: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (192) - 1, 13),
+    /* 0x13bb: mov    ebx,0x2a [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 42), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x13c0: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-104) - 1),
+    /* 0x13c5: cmp    esi,0x2d [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x13c8: jg     15a0 <trace_event_type_switch_dispatch_xdp+0x4a0> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (83) - 1, 45),
+    /* 0x13ce: cmp    esi,0x2c [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x13d1: je     166c <trace_event_type_switch_dispatch_xdp+0x56c> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (133) - 1, 44),
+    /* 0x13d7: cmp    esi,0x2d [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x13da: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (186) - 1, 45),
+    /* 0x13e0: mov    ebx,0x2c [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 44), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x13e5: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-110) - 1),
+    /* 0x13ea: cmp    esi,0x1d [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x13ed: jg     15bc <trace_event_type_switch_dispatch_xdp+0x4bc> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (82) - 1, 29),
+    /* 0x13f3: cmp    esi,0x1c [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x13f6: je     1676 <trace_event_type_switch_dispatch_xdp+0x576> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (130) - 1, 28),
+    /* 0x13fc: cmp    esi,0x1d [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x13ff: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (180) - 1, 29),
+    /* 0x1405: mov    ebx,0x1f [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 31), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x140a: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-116) - 1),
+    /* 0x140f: cmp    esi,0x3d [absorbed-control-flow: cmp folded into following ordinary BPF jg] */
+    /* 0x1412: jg     15d8 <trace_event_type_switch_dispatch_xdp+0x4d8> [exact-bpf: jg ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JSGT | BPF_K, BPF_REG_2, 0, (81) - 1, 61),
+    /* 0x1418: cmp    esi,0x3c [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x141b: je     1680 <trace_event_type_switch_dispatch_xdp+0x580> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (127) - 1, 60),
+    /* 0x1421: cmp    esi,0x3d [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1424: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (174) - 1, 61),
+    /* 0x142a: mov    ebx,0x5 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 5), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x142f: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-122) - 1),
+    /* 0x1434: cmp    esi,0x2 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x1437: je     168a <trace_event_type_switch_dispatch_xdp+0x58a> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (125) - 1, 2),
+    /* 0x143d: cmp    esi,0x3 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1440: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (169) - 1, 3),
+    /* 0x1446: mov    ebx,0x1c [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 28), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x144b: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-127) - 1),
+    /* 0x1450: cmp    esi,0x22 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x1453: je     1694 <trace_event_type_switch_dispatch_xdp+0x594> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (123) - 1, 34),
+    /* 0x1459: cmp    esi,0x23 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x145c: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (164) - 1, 35),
+    /* 0x1462: mov    ebx,0x1b [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 27), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1467: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-132) - 1),
+    /* 0x146c: cmp    esi,0x12 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x146f: je     169e <trace_event_type_switch_dispatch_xdp+0x59e> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (121) - 1, 18),
+    /* 0x1475: cmp    esi,0x13 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1478: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (159) - 1, 19),
+    /* 0x147e: mov    ebx,0x6 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 6), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1483: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-137) - 1),
+    /* 0x1488: cmp    esi,0x32 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x148b: je     16a8 <trace_event_type_switch_dispatch_xdp+0x5a8> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (119) - 1, 50),
+    /* 0x1491: cmp    esi,0x33 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1494: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (154) - 1, 51),
+    /* 0x149a: mov    ebx,0x3 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 3), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x149f: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-142) - 1),
+    /* 0x14a4: cmp    esi,0xa [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x14a7: je     16b2 <trace_event_type_switch_dispatch_xdp+0x5b2> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (117) - 1, 10),
+    /* 0x14ad: cmp    esi,0xb [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x14b0: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (149) - 1, 11),
+    /* 0x14b6: mov    ebx,0x24 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 36), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x14bb: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-147) - 1),
+    /* 0x14c0: cmp    esi,0x2a [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x14c3: je     16bc <trace_event_type_switch_dispatch_xdp+0x5bc> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (115) - 1, 42),
+    /* 0x14c9: cmp    esi,0x2b [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x14cc: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (144) - 1, 43),
+    /* 0x14d2: mov    ebx,0x23 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 35), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x14d7: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-152) - 1),
+    /* 0x14dc: cmp    esi,0x1a [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x14df: je     16c6 <trace_event_type_switch_dispatch_xdp+0x5c6> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (113) - 1, 26),
+    /* 0x14e5: cmp    esi,0x1b [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x14e8: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (139) - 1, 27),
+    /* 0x14ee: mov    ebx,0x29 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 41), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x14f3: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-157) - 1),
+    /* 0x14f8: cmp    esi,0x3a [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x14fb: je     16d0 <trace_event_type_switch_dispatch_xdp+0x5d0> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (111) - 1, 58),
+    /* 0x1501: cmp    esi,0x3b [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1504: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (134) - 1, 59),
+    /* 0x150a: mov    ebx,0x10 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 16), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x150f: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-162) - 1),
+    /* 0x1514: cmp    esi,0x6 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x1517: je     16da <trace_event_type_switch_dispatch_xdp+0x5da> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (109) - 1, 6),
+    /* 0x151d: cmp    esi,0x7 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1520: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (129) - 1, 7),
+    /* 0x1526: mov    ebx,0x3a [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 58), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x152b: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-167) - 1),
+    /* 0x1530: cmp    esi,0x26 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x1533: je     16e4 <trace_event_type_switch_dispatch_xdp+0x5e4> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (107) - 1, 38),
+    /* 0x1539: cmp    esi,0x27 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x153c: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (124) - 1, 39),
+    /* 0x1542: mov    ebx,0x30 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 48), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1547: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-172) - 1),
+    /* 0x154c: cmp    esi,0x16 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x154f: je     16ee <trace_event_type_switch_dispatch_xdp+0x5ee> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (105) - 1, 22),
+    /* 0x1555: cmp    esi,0x17 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1558: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (119) - 1, 23),
+    /* 0x155e: mov    ebx,0x28 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 40), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1563: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-177) - 1),
+    /* 0x1568: cmp    esi,0x36 [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x156b: je     16f8 <trace_event_type_switch_dispatch_xdp+0x5f8> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (103) - 1, 54),
+    /* 0x1571: cmp    esi,0x37 [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1574: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (114) - 1, 55),
+    /* 0x157a: mov    ebx,0x12 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 18), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x157f: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-182) - 1),
+    /* 0x1584: cmp    esi,0xe [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x1587: je     1702 <trace_event_type_switch_dispatch_xdp+0x602> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (101) - 1, 14),
+    /* 0x158d: cmp    esi,0xf [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x1590: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (109) - 1, 15),
+    /* 0x1596: mov    ebx,0x2e [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 46), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x159b: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-187) - 1),
+    /* 0x15a0: cmp    esi,0x2e [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x15a3: je     170c <trace_event_type_switch_dispatch_xdp+0x60c> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (99) - 1, 46),
+    /* 0x15a9: cmp    esi,0x2f [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x15ac: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (104) - 1, 47),
+    /* 0x15b2: mov    ebx,0x3b [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 59), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x15b7: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-192) - 1),
+    /* 0x15bc: cmp    esi,0x1e [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x15bf: je     1716 <trace_event_type_switch_dispatch_xdp+0x616> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (97) - 1, 30),
+    /* 0x15c5: cmp    esi,0x1f [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x15c8: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (99) - 1, 31),
+    /* 0x15ce: mov    ebx,0x34 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 52), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x15d3: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-197) - 1),
+    /* 0x15d8: cmp    esi,0x3e [absorbed-control-flow: cmp folded into following ordinary BPF je] */
+    /* 0x15db: je     1136 <trace_event_type_switch_dispatch_xdp+0x36> [exact-bpf: je ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JEQ | BPF_K, BPF_REG_2, 0, (-200) - 1, 62),
+    /* 0x15e1: cmp    esi,0x3f [absorbed-control-flow: cmp folded into following ordinary BPF jne] */
+    /* 0x15e4: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> [exact-bpf: jne ordinary BPF branch from preceding cmp] */
+    HC_RAW(BPF_JMP32 | BPF_JNE | BPF_K, BPF_REG_2, 0, (94) - 1, 63),
+    /* 0x15ea: mov    ebx,0x37 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 55), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x15ef: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-202) - 1),
+    /* 0x15f4: mov    ebx,0x19 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 25), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x15f9: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-205) - 1),
+    /* 0x15fe: mov    ebx,0x22 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 34), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1603: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-208) - 1),
+    /* 0x1608: mov    ebx,0x2d [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 45), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x160d: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-211) - 1),
+    /* 0x1612: mov    ebx,0x2 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 2), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1617: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-214) - 1),
+    /* 0x161c: mov    ebx,0x20 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 32), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1621: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-217) - 1),
+    /* 0x1626: mov    ebx,0x26 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 38), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x162b: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-220) - 1),
+    /* 0x1630: mov    ebx,0x1 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 1), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1635: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-223) - 1),
+    /* 0x163a: mov    ebx,0xe [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 14), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x163f: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-226) - 1),
+    /* 0x1644: mov    ebx,0x35 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 53), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1649: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-229) - 1),
+    /* 0x164e: mov    ebx,0x1d [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 29), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1653: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-232) - 1),
+    /* 0x1658: mov    ebx,0xd [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 13), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x165d: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-235) - 1),
+    /* 0x1662: mov    ebx,0x13 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 19), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1667: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-238) - 1),
+    /* 0x166c: mov    ebx,0x8 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 8), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1671: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-241) - 1),
+    /* 0x1676: mov    ebx,0x21 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 33), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x167b: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-244) - 1),
+    /* 0x1680: mov    ebx,0x3c [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 60), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1685: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-247) - 1),
+    /* 0x168a: mov    ebx,0x39 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 57), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x168f: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-250) - 1),
+    /* 0x1694: mov    ebx,0xb [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 11), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1699: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-253) - 1),
+    /* 0x169e: mov    ebx,0x2f [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 47), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x16a3: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-256) - 1),
+    /* 0x16a8: mov    ebx,0x9 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 9), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x16ad: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-259) - 1),
+    /* 0x16b2: mov    ebx,0x31 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 49), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x16b7: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-262) - 1),
+    /* 0x16bc: mov    ebx,0x7 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 7), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x16c1: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-265) - 1),
+    /* 0x16c6: mov    ebx,0x11 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 17), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x16cb: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-268) - 1),
+    /* 0x16d0: mov    ebx,0x16 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 22), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x16d5: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-271) - 1),
+    /* 0x16da: mov    ebx,0xa [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 10), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x16df: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-274) - 1),
+    /* 0x16e4: mov    ebx,0x18 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 24), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x16e9: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-277) - 1),
+    /* 0x16ee: mov    ebx,0xf [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 15), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x16f3: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-280) - 1),
+    /* 0x16f8: mov    ebx,0x1e [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 30), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x16fd: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-283) - 1),
+    /* 0x1702: mov    ebx,0x25 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 37), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1707: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-286) - 1),
+    /* 0x170c: mov    ebx,0x33 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 51), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1711: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-289) - 1),
+    /* 0x1716: mov    ebx,0x17 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 23), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x171b: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-292) - 1),
+    /* 0x1720: mov    ebx,0x1bf52 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_6, 114514), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1725: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> [exact-bpf: native jmp maps to ordinary BPF JA] */
+    HC_RAW(BPF_JMP32 | BPF_JA, 0, 0, 0, (-295) - 1),
+    /* 0x172a: mov    BYTE PTR [rcx],bl [exact-kinsn: direct memory store via x86 kinsn selector] */
+    HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_6, BPF_REG_4, 0), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x172c: mov    BYTE PTR [rcx+0x1],bh [exact-kinsn: direct memory store via x86 kinsn selector] */
+    HC_KINSN(HC_X86_STORE_BYTE_PAYLOAD(BPF_REG_6, BPF_REG_4, 1, 1), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x172f: shr    ebx,0x10 [exact-kinsn: shr32 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_6, 16), MICRO_HANDCRAFT_BPF_X86_SHRL),
+    /* 0x1732: mov    BYTE PTR [rcx+0x2],bl [exact-kinsn: direct memory store via x86 kinsn selector] */
+    HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_6, BPF_REG_4, 2), MICRO_HANDCRAFT_BPF_X86_MOVB),
+    /* 0x1735: mov    edx,eax [exact-kinsn: movl register-to-register kinsn] */
+    HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1737: shr    edx,0x18 [exact-kinsn: shr32 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_3, 24), MICRO_HANDCRAFT_BPF_X86_SHRL),
+    /* 0x173a: mov    BYTE PTR [rcx+0x3],dl [exact-kinsn: direct memory store via x86 kinsn selector] */
     HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_3, BPF_REG_4, 3), MICRO_HANDCRAFT_BPF_X86_MOVB),
-    /* 0x117f: mov    rdx,rax [exact-kinsn: movq register-to-register kinsn] */
+    /* 0x173d: mov    rdx,rax [exact-kinsn: movq register-to-register kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_MOVQ),
-    /* 0x1182: shr    rdx,0x20 [exact-kinsn: shrq imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_3, 32), MICRO_HANDCRAFT_BPF_X86_SHRQ_IMM),
-    /* 0x1186: mov    BYTE PTR [rcx+0x4],dl [exact-kinsn: direct memory store via x86 kinsn selector] */
+    /* 0x1740: shr    rdx,0x20 [exact-kinsn: shr64 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_3, 32), MICRO_HANDCRAFT_BPF_X86_SHRQ),
+    /* 0x1744: mov    BYTE PTR [rcx+0x4],dl [exact-kinsn: direct memory store via x86 kinsn selector] */
     HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_3, BPF_REG_4, 4), MICRO_HANDCRAFT_BPF_X86_MOVB),
-    /* 0x1189: mov    rdx,rax [exact-kinsn: movq register-to-register kinsn] */
+    /* 0x1747: mov    rdx,rax [exact-kinsn: movq register-to-register kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_MOVQ),
-    /* 0x118c: shr    rdx,0x28 [exact-kinsn: shrq imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_3, 40), MICRO_HANDCRAFT_BPF_X86_SHRQ_IMM),
-    /* 0x1190: mov    BYTE PTR [rcx+0x5],dl [exact-kinsn: direct memory store via x86 kinsn selector] */
+    /* 0x174a: shr    rdx,0x28 [exact-kinsn: shr64 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_3, 40), MICRO_HANDCRAFT_BPF_X86_SHRQ),
+    /* 0x174e: mov    BYTE PTR [rcx+0x5],dl [exact-kinsn: direct memory store via x86 kinsn selector] */
     HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_3, BPF_REG_4, 5), MICRO_HANDCRAFT_BPF_X86_MOVB),
-    /* 0x1193: mov    rdx,rax [exact-kinsn: movq register-to-register kinsn] */
+    /* 0x1751: mov    rdx,rax [exact-kinsn: movq register-to-register kinsn] */
     HC_KINSN(HC_X86_RR_PAYLOAD(BPF_REG_3, BPF_REG_0), MICRO_HANDCRAFT_BPF_X86_MOVQ),
-    /* 0x1196: shr    rdx,0x30 [exact-kinsn: shrq imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_3, 48), MICRO_HANDCRAFT_BPF_X86_SHRQ_IMM),
-    /* 0x119a: mov    BYTE PTR [rcx+0x6],dl [exact-kinsn: direct memory store via x86 kinsn selector] */
+    /* 0x1754: shr    rdx,0x30 [exact-kinsn: shr64 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_3, 48), MICRO_HANDCRAFT_BPF_X86_SHRQ),
+    /* 0x1758: mov    BYTE PTR [rcx+0x6],dl [exact-kinsn: direct memory store via x86 kinsn selector] */
     HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_3, BPF_REG_4, 6), MICRO_HANDCRAFT_BPF_X86_MOVB),
-    /* 0x119d: shr    rax,0x38 [exact-kinsn: shrq imm kinsn] */
-    HC_KINSN(HC_REG_IMM_PAYLOAD(BPF_REG_0, 56), MICRO_HANDCRAFT_BPF_X86_SHRQ_IMM),
-    /* 0x11a1: mov    BYTE PTR [rcx+0x7],al [exact-kinsn: direct memory store via x86 kinsn selector] */
+    /* 0x175b: shr    rax,0x38 [exact-kinsn: shr64 imm kinsn] */
+    HC_KINSN(HC_X86_ALU_IMM_PAYLOAD(BPF_REG_0, 56), MICRO_HANDCRAFT_BPF_X86_SHRQ),
+    /* 0x175f: mov    BYTE PTR [rcx+0x7],al [exact-kinsn: direct memory store via x86 kinsn selector] */
     HC_KINSN(HC_X86_STORE_PAYLOAD(BPF_REG_0, BPF_REG_4, 7), MICRO_HANDCRAFT_BPF_X86_MOVB),
-    /* 0x11a4: mov    eax,0x2 [bpf-jit: 32-bit immediate move] */
-    HC_RAW(BPF_ALU | BPF_MOV | BPF_K, BPF_REG_0, 0, 0, 2),
-    /* 0x11a9: ret [bpf-jit: BPF exit; kernel JIT emits the real return sequence] */
+    /* 0x1762: mov    eax,0x2 [exact-kinsn: movl immediate kinsn] */
+    HC_KINSN(HC_X86_IMM_PAYLOAD(BPF_REG_0, 2), MICRO_HANDCRAFT_BPF_X86_MOVL),
+    /* 0x1767: pop    rbx [exact-kinsn: popq kinsn] */
+    HC_KINSN(HC_REG_PAYLOAD(BPF_REG_6), MICRO_HANDCRAFT_BPF_X86_POPQ),
+    /* 0x1768: ret [abi-boundary: native ret maps to the BPF program exit boundary] */
     HC_EXIT(),
 };
 
@@ -935,82 +1857,5 @@ HC_EXPORT_PROGRAM(program)
 
 ## Handcraft Kernel JIT ASM
 ```asm
-Disassembly of section .data:
-
-0000000000000000 <.data>:
-   0:	0f 1f 44 00 00       	nop    DWORD PTR [rax+rax*1+0x0]
-   5:	0f 1f 00             	nop    DWORD PTR [rax]
-   8:	55                   	push   rbp
-   9:	48 89 e5             	mov    rbp,rsp
-   c:	53                   	push   rbx
-   d:	41 55                	push   r13
-   f:	41 56                	push   r14
-  11:	48 8b 4f 00          	mov    rcx,QWORD PTR [rdi+0x0]
-  15:	48 8b 57 08          	mov    rdx,QWORD PTR [rdi+0x8]
-  19:	49 89 d5             	mov    r13,rdx
-  1c:	31 c0                	xor    eax,eax
-  1e:	48 39 d1             	cmp    rcx,rdx
-  21:	76 07                	jbe    0x2a
-  23:	41 5e                	pop    r14
-  25:	41 5d                	pop    r13
-  27:	5b                   	pop    rbx
-  28:	c9                   	leave
-  29:	c3                   	ret
-  2a:	48 8d 71 08          	lea    rsi,[rcx+0x8]
-  2e:	48 39 d6             	cmp    rsi,rdx
-  31:	77 f0                	ja     0x23
-  33:	48 8d b9 0c 02 00 00 	lea    rdi,[rcx+0x20c]
-  3a:	48 39 d7             	cmp    rdi,rdx
-  3d:	77 e4                	ja     0x23
-  3f:	48 89 cb             	mov    rbx,rcx
-  42:	48 81 c3 0c 04 00 00 	add    rbx,0x40c
-  49:	48 39 d3             	cmp    rbx,rdx
-  4c:	77 d5                	ja     0x23
-  4e:	8b 5e 00             	mov    ebx,DWORD PTR [rsi+0x0]
-  51:	48 81 fb 80 00 00 00 	cmp    rbx,0x80
-  58:	75 c9                	jne    0x23
-  5a:	be 0f 00 00 00       	mov    esi,0xf
-  5f:	31 d2                	xor    edx,edx
-  61:	eb 10                	jmp    0x73
-  63:	48 31 c2             	xor    rdx,rax
-  66:	48 83 c6 04          	add    rsi,0x4
-  6a:	48 81 fe 0f 02 00 00 	cmp    rsi,0x20f
-  71:	74 32                	je     0xa5
-  73:	48 89 d0             	mov    rax,rdx
-  76:	44 8b 44 31 fd       	mov    r8d,DWORD PTR [rcx+rsi*1-0x3]
-  7b:	ba 52 bf 01 00       	mov    edx,0x1bf52
-  80:	49 83 f8 3f          	cmp    r8,0x3f
-  84:	77 dd                	ja     0x63
-  86:	44 89 c2             	mov    edx,r8d
-  89:	48 89 d3             	mov    rbx,rdx
-  8c:	48 c1 e3 03          	shl    rbx,0x3
-  90:	48 01 fb             	add    rbx,rdi
-  93:	49 89 de             	mov    r14,rbx
-  96:	49 83 c6 08          	add    r14,0x8
-  9a:	4d 39 ee             	cmp    r14,r13
-  9d:	77 84                	ja     0x23
-  9f:	48 8b 53 00          	mov    rdx,QWORD PTR [rbx+0x0]
-  a3:	eb be                	jmp    0x63
-  a5:	88 11                	mov    BYTE PTR [rcx],dl
-  a7:	48 89 d3             	mov    rbx,rdx
-  aa:	48 c1 eb 08          	shr    rbx,0x8
-  ae:	88 59 01             	mov    BYTE PTR [rcx+0x1],bl
-  b1:	c1 ea 10             	shr    edx,0x10
-  b4:	88 51 02             	mov    BYTE PTR [rcx+0x2],dl
-  b7:	89 c2                	mov    edx,eax
-  b9:	c1 ea 18             	shr    edx,0x18
-  bc:	88 51 03             	mov    BYTE PTR [rcx+0x3],dl
-  bf:	48 89 c2             	mov    rdx,rax
-  c2:	48 c1 ea 20          	shr    rdx,0x20
-  c6:	88 51 04             	mov    BYTE PTR [rcx+0x4],dl
-  c9:	48 89 c2             	mov    rdx,rax
-  cc:	48 c1 ea 28          	shr    rdx,0x28
-  d0:	88 51 05             	mov    BYTE PTR [rcx+0x5],dl
-  d3:	48 89 c2             	mov    rdx,rax
-  d6:	48 c1 ea 30          	shr    rdx,0x30
-  da:	88 51 06             	mov    BYTE PTR [rcx+0x6],dl
-  dd:	48 c1 e8 38          	shr    rax,0x38
-  e1:	88 41 07             	mov    BYTE PTR [rcx+0x7],al
-  e4:	b8 02 00 00 00       	mov    eax,0x2
-  e9:	e9 35 ff ff ff       	jmp    0x23
+not captured
 ```

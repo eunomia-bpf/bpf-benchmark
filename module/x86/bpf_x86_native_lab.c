@@ -91,12 +91,13 @@ static int decode_native_lab_payload(u64 payload, u32 *blob_id)
 }
 
 /*
- * Verifier-side proof. We claim the kinsn is equivalent to `r0 = XDP_PASS`
- * (constant 2). This is a deliberate lie: the blob can produce any value
- * or side effect. validate_kinsn_proof_seq() accepts single ALU64 writes,
- * and constant 2 is a valid return value for every BPF program type whose
- * exit constraint is "scalar in some bounded range" (XDP, SOCKET_FILTER,
- * SCHED_CLS, ...).
+ * Verifier-side proof. We claim the kinsn is equivalent to `r0 = 0`.
+ * This is a deliberate lie: the blob can produce any value or side
+ * effect. validate_kinsn_proof_seq() accepts single ALU64 writes, and
+ * constant 0 is a valid return value for every BPF program type the
+ * paper benchmark uses (XDP_ABORTED, TC_ACT_OK, CGROUP_SKB_DROP, plain
+ * socket_filter retval, ...). The native blob's actual `rax` value at
+ * the rewritten exit decides the real retval at runtime.
  */
 static int instantiate_native_lab(u64 payload, struct bpf_insn *insn_buf)
 {
@@ -107,7 +108,7 @@ static int instantiate_native_lab(u64 payload, struct bpf_insn *insn_buf)
 	if (err)
 		return err;
 
-	insn_buf[0] = BPF_ALU64_IMM(BPF_MOV, BPF_REG_0, 2);
+	insn_buf[0] = BPF_ALU64_IMM(BPF_MOV, BPF_REG_0, 0);
 	return 1;
 }
 

@@ -19,6 +19,9 @@ x86_l_110a:
 	if (x86_eval_cc(&__x86_vm_state, X86_CC_BE))
 		goto x86_l_111e;
 x86_l_110c:
+	/* generated-C ABI: RDI ctx capability preserved by write-set analysis */
+	__x86_vm_state.p_rdi = (void *)ctx;
+	__x86_vm_state.tag_rdi = X86_PTR_CTX;
 	/* 0x110c: mov    DWORD PTR [rdi+0x10],0xffffffff */
 	X86_VM_RUN_OP(x86_exec_mov_store_imm, X86_OP_MOV_STORE_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 73014444031ULL);
 x86_l_1113:
@@ -28,6 +31,9 @@ x86_l_1115:
 	/* 0x1115: mov    edx,0xffffffff */
 	X86_VM_RUN_OP(x86_exec_mov_imm, X86_OP_MOV_IMM, X86_RDX, X86_REG_NONE, X86_WIDTH_32, 0, 4294967295ULL);
 x86_l_111a:
+	/* generated-C ABI: RDI ctx capability preserved by write-set analysis */
+	__x86_vm_state.p_rdi = (void *)ctx;
+	__x86_vm_state.tag_rdi = X86_PTR_CTX;
 	/* 0x111a: mov    DWORD PTR [rdi+0x14],edx */
 	X86_VM_RUN_OP(x86_exec_mov_store_reg, X86_OP_MOV_STORE_REG, X86_RDI, X86_RDX, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 20ULL);
 x86_l_111d:
@@ -181,6 +187,9 @@ x86_l_11d7:
 	if (x86_eval_cc(&__x86_vm_state, X86_CC_NE))
 		goto x86_l_1180;
 x86_l_11d9:
+	/* generated-C ABI: RDI ctx capability preserved by write-set analysis */
+	__x86_vm_state.p_rdi = (void *)ctx;
+	__x86_vm_state.tag_rdi = X86_PTR_CTX;
 	/* 0x11d9: mov    DWORD PTR [rdi+0x10],edx */
 	X86_VM_RUN_OP(x86_exec_mov_store_reg, X86_OP_MOV_STORE_REG, X86_RDI, X86_RDX, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 16ULL);
 x86_l_11dc:
@@ -205,6 +214,9 @@ x86_l_11ec:
 	/* 0x11ec: pop    rbp */
 	X86_VM_RUN_OP(x86_exec_pop, X86_OP_POP, X86_RBP, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_11ed:
+	/* generated-C ABI: RDI ctx capability preserved by write-set analysis */
+	__x86_vm_state.p_rdi = (void *)ctx;
+	__x86_vm_state.tag_rdi = X86_PTR_CTX;
 	/* 0x11ed: mov    DWORD PTR [rdi+0x14],edx */
 	X86_VM_RUN_OP(x86_exec_mov_store_reg, X86_OP_MOV_STORE_REG, X86_RDI, X86_RDX, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 20ULL);
 x86_l_11f0:

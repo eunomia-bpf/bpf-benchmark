@@ -2,7 +2,7 @@ CC ?= gcc
 CFLAGS ?= -O2 -g -Wall -Wextra -fPIC -D_GNU_SOURCE
 LDLIBS ?= -ldl -lpthread
 
-.PHONY: all clean smoke selftest-run docker-survey musl
+.PHONY: all clean smoke selftest-run docker-survey docker-noop-e2e musl
 
 all: libbpfrejit_shim.so selftest
 
@@ -44,6 +44,9 @@ docker-survey: libbpfrejit_shim.so libbpfrejit_shim_musl.so
 	    local log="/tmp/shim_$$name.log"; \
 	    rm -f "$$log"; touch "$$log"; \
 	    ( BPFREJIT_SHIM_LOG="$$log" BPFREJIT_SHIM_DIR=/tmp/shim_dumps \
+	        BPFREJIT_SHIM_RUN_BPFOPT="$${RUN_BPFOPT_PASSES:-}" \
+	        BPFREJIT_SHIM_TICK_MS="$${SHIM_TICK_MS:-1500}" \
+	        BPFREJIT_BPFOPT_PATH=/usr/local/bin/bpfopt \
 	        LD_PRELOAD="$$preload" "$$@" ) > /dev/null 2>&1 & \
 	    local app_pid=$$!; \
 	    sleep "$$duration"; \
@@ -58,9 +61,11 @@ docker-survey: libbpfrejit_shim.so libbpfrejit_shim_musl.so
 	    local pfopen=$$(count_pat "perf_event_open " "$$log"); \
 	    local rtopen=$$(count_pat "BPF_RAW_TRACEPOINT_OPEN " "$$log"); \
 	    local setbpf=$$(count_pat "PERF_EVENT_IOC_SET_BPF " "$$log"); \
+	    local opt_ok=$$(count_pat "bpfopt.*OK" "$$log"); \
+	    local opt_fail=$$(count_pat "bpfopt.*FAIL" "$$log"); \
 	    local lines=$$(wc -l < "$$log" 2>/dev/null); \
-	    printf "%-15s lines=%-5s LOAD=%-3s LINK_NEW=%-2s LINK_UPD=%-2s ATTACH=%-2s perf_open=%-3s RAW_TP=%-2s SET_BPF=%-3s\n" \
-	      "$$name" "$$lines" "$$prog_load" "$$link_create" "$$link_update" "$$prog_attach" "$$pfopen" "$$rtopen" "$$setbpf"; \
+	    printf "%-15s LOAD=%-3s LINK=%-2s perf=%-3s RAW_TP=%-2s SET_BPF=%-3s bpfopt[ok=%-2s fail=%-2s] lines=%s\n" \
+	      "$$name" "$$prog_load" "$$link_create" "$$pfopen" "$$rtopen" "$$setbpf" "$$opt_ok" "$$opt_fail" "$$lines"; \
 	  }; \
 	  echo "--- per-app capture summary ---"; \
 	  run_one bpftool        $$preload_glibc 1 bpftool prog list; \
@@ -82,6 +87,20 @@ docker-survey: libbpfrejit_shim.so libbpfrejit_shim_musl.so
 
 libbpfrejit_shim.so: libbpfrejit_shim.c
 	$(CC) $(CFLAGS) -shared $< -o $@ $(LDLIBS)
+
+# Phase 2 end-to-end test: shim captures BPF_PROG_LOAD on each app and worker
+# thread invokes `bpfopt --pass noop` on every captured prog. Validates:
+#   (a) shim intercepts BPF_PROG_LOAD,
+#   (b) bytecode dump file exists,
+#   (c) bpfopt subprocess succeeds (exit 0, output bytecode written),
+#   (d) noop pass output byte-equals the captured input (identity).
+#
+# Coverage: 4 LD_PRELOAD-compatible apps in the corpus. Static Go binaries
+# (tetragon / cilium-agent) are out of scope for this target — see PoC-E
+# vendor-replace design for those.
+docker-noop-e2e: RUN_BPFOPT_PASSES=noop
+docker-noop-e2e: SHIM_TICK_MS=1000
+docker-noop-e2e: docker-survey
 
 selftest: selftest.c
 	$(CC) $(CFLAGS) $< -o $@
