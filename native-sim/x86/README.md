@@ -164,40 +164,40 @@ runtime unsupported checks, abort/fallback returns, loop guards, branch range
 assertions, stack-slot rejection, and generated fallback returns.
 
 Latest correctness-first batch:
-[`results/README-20260519-005704.md`](./results/README-20260519-005704.md).
+[`results/README-20260519-014225.md`](./results/README-20260519-014225.md).
 All 29 generated micro sources compiled; 5 loaded and passed test run.
 
 | Micro program | Status | Compile s | Verify s | Current verifier result |
 | --- | --- | ---: | ---: | --- |
-| `simple` | ok | 0.249 | 0.000 | ok |
-| `simple_packet` | ok | 0.239 | 0.000 | ok |
-| `bitmap_popcount_scan` | ok | 0.654 | 0.017 | ok |
-| `sorted_rule_binary_search` | ok | 0.779 | 0.223 | ok |
-| `bcc_runqlat_log2_histogram_bucket` | run-fail | 2.570 | 0.002 | `R2 pointer arithmetic with <<= operator prohibited` |
-| `trace_event_type_switch_dispatch` | run-fail | 1.418 | 0.001 | `R3 pointer arithmetic with <<= operator prohibited` |
-| `packet_checksum_fold` | ok | 1.127 | 0.399 | ok |
-| `payload_prefix_memcmp_scan` | run-fail | 3.434 | 0.001 | `R3 pointer arithmetic on pkt_end prohibited` |
-| `packet_vlan_tcpopt_parser` | run-fail | 4.616 | 0.002 | `invalid access to packet, off=42 size=1, r=0` |
-| `bpf_local_call_fanout_dispatch` | run-fail | 9.808 | 0.001 | `invalid size of register spill` |
-| `flow_5tuple_rss_hash` | run-fail | 7.124 | 0.002 | `invalid access to packet, off=22 size=2, r=0` |
-| `katran_lb_consistent_hash_select` | run-fail | 33.176 | 0.001 | `tried to subtract pointer from scalar` |
-| `cilium_policy_guard_tree_filter` | run-fail | 2.315 | 0.034 | `R1 pointer arithmetic with <<= operator prohibited` |
-| `siphash_rotate64_mixer` | run-fail | 42.481 | 0.003 | `R1 pointer arithmetic with <<= operator prohibited` |
-| `packet_record_bounds_window` | run-fail | 2.200 | 0.043 | `R2 pointer arithmetic with <<= operator prohibited` |
-| `flow_record_field_scan` | run-fail | 2.813 | 0.025 | `R2 pointer arithmetic with <<= operator prohibited` |
-| `packed_header_bitfield_decode` | run-fail | 11.741 | 0.001 | `R1 pointer arithmetic with >>= operator prohibited` |
-| `bpftrace_string_search_prefix_scan` | run-fail | 2.302 | 0.002 | `R4 pointer arithmetic with <<= operator prohibited` |
-| `tracee_syscall_name_table_lookup` | run-fail | 1.880 | 0.001 | `R2 pointer arithmetic with <<= operator prohibited` |
-| `tracee_http_method_prefix_detect` | run-fail | 2.121 | 0.010 | `R1 pointer arithmetic with <<= operator prohibited` |
-| `cilium_socket_lb_service_select` | run-fail | 3.352 | 0.001 | `R3 bitwise operator &= on pointer prohibited` |
-| `bcc_tcpconnect_ipv4_tuple_filter` | run-fail | 3.191 | 0.021 | `R2 pointer arithmetic with <<= operator prohibited` |
-| `tetragon_process_event_arg_filter` | run-fail | 8.200 | 0.001 | `R1 pointer arithmetic with >>= operator prohibited` |
-| `otel_stack_frame_unwind_scan` | run-fail | 2.332 | 0.031 | `R3 pointer arithmetic with <<= operator prohibited` |
-| `cilium_ct_nat_tuple_rewrite` | run-fail | 3.115 | 0.016 | `R2 pointer arithmetic with <<= operator prohibited` |
-| `packet_toeplitz_rss_hash` | run-fail | 2.928 | 0.081 | `R1 pointer arithmetic with <<= operator prohibited` |
-| `bpftrace_comm_key_fnv_hash` | run-fail | 14.173 | 0.001 | `R1 pointer arithmetic with >>= operator prohibited` |
-| `tc_packet_checksum_fold` | run-fail | 1.595 | 0.000 | `invalid access to packet, off=8 size=4, r=0` |
-| `cgroup_skb_hash_chain` | run-fail | 1.982 | 0.001 | `invalid access to packet, off=8 size=4, r=0` |
+| `simple` | ok | 0.232 | 0.000 | ok |
+| `simple_packet` | ok | 0.223 | 0.000 | ok |
+| `bitmap_popcount_scan` | ok | 0.596 | 0.017 | ok |
+| `sorted_rule_binary_search` | ok | 0.739 | 0.222 | ok |
+| `bcc_runqlat_log2_histogram_bucket` | run-fail | 2.357 | 0.002 | `R2 pointer arithmetic with <<= operator prohibited` |
+| `trace_event_type_switch_dispatch` | run-fail | 1.363 | 0.001 | `R3 pointer arithmetic with <<= operator prohibited` |
+| `packet_checksum_fold` | ok | 1.126 | 0.382 | ok |
+| `payload_prefix_memcmp_scan` | run-fail | 3.353 | 0.001 | `R3 pointer arithmetic on pkt_end prohibited` |
+| `packet_vlan_tcpopt_parser` | run-fail | 4.304 | 0.002 | `invalid access to packet, off=42 size=1, r=0` |
+| `bpf_local_call_fanout_dispatch` | run-fail | 9.341 | 0.001 | `invalid size of register spill` |
+| `flow_5tuple_rss_hash` | run-fail | 6.881 | 0.002 | `invalid access to packet, off=22 size=2, r=0` |
+| `katran_lb_consistent_hash_select` | run-fail | 31.671 | 0.001 | `tried to subtract pointer from scalar` |
+| `cilium_policy_guard_tree_filter` | run-fail | 2.258 | 0.033 | `R1 pointer arithmetic with <<= operator prohibited` |
+| `siphash_rotate64_mixer` | run-fail | 41.685 | 0.003 | `R1 pointer arithmetic with <<= operator prohibited` |
+| `packet_record_bounds_window` | run-fail | 2.123 | 0.043 | `R2 pointer arithmetic with <<= operator prohibited` |
+| `flow_record_field_scan` | run-fail | 2.496 | 0.025 | `R2 pointer arithmetic with <<= operator prohibited` |
+| `packed_header_bitfield_decode` | run-fail | 10.870 | 0.001 | `R1 pointer arithmetic with >>= operator prohibited` |
+| `bpftrace_string_search_prefix_scan` | run-fail | 2.103 | 0.002 | `R4 pointer arithmetic with <<= operator prohibited` |
+| `tracee_syscall_name_table_lookup` | run-fail | 1.847 | 0.001 | `R2 pointer arithmetic with <<= operator prohibited` |
+| `tracee_http_method_prefix_detect` | run-fail | 2.070 | 0.010 | `R1 pointer arithmetic with <<= operator prohibited` |
+| `cilium_socket_lb_service_select` | run-fail | 3.114 | 0.001 | `R3 bitwise operator &= on pointer prohibited` |
+| `bcc_tcpconnect_ipv4_tuple_filter` | run-fail | 3.032 | 0.021 | `R2 pointer arithmetic with <<= operator prohibited` |
+| `tetragon_process_event_arg_filter` | run-fail | 7.422 | 0.001 | `R1 pointer arithmetic with >>= operator prohibited` |
+| `otel_stack_frame_unwind_scan` | run-fail | 2.249 | 0.031 | `R3 pointer arithmetic with <<= operator prohibited` |
+| `cilium_ct_nat_tuple_rewrite` | run-fail | 3.053 | 0.016 | `R2 pointer arithmetic with <<= operator prohibited` |
+| `packet_toeplitz_rss_hash` | run-fail | 2.907 | 0.085 | `R1 pointer arithmetic with <<= operator prohibited` |
+| `bpftrace_comm_key_fnv_hash` | run-fail | 13.462 | 0.001 | `R1 pointer arithmetic with >>= operator prohibited` |
+| `tc_packet_checksum_fold` | run-fail | 1.790 | 0.000 | `invalid access to packet, off=8 size=4, r=0` |
+| `cgroup_skb_hash_chain` | run-fail | 1.735 | 0.001 | `invalid access to packet, off=8 size=4, r=0` |
 
 For verifier diagnostics, capture the kernel verifier log through the loader:
 
@@ -375,7 +375,7 @@ Generated-C migration todo:
 | Split memory-domain helpers | done for current micro | Top-level packet loads have a raw pointer path; subfunctions and stack/ctx accesses keep typed helpers. |
 | Per-instruction const record | done | `X86_SIM_EXEC` creates a local `const struct x86_insn` for each macro-expanded native instruction so clang can specialize C-authored semantics without Python helper selection. |
 | Remove generated fallback returns | done | Generated entry and subfunction tails use `__builtin_unreachable()` after the native CFG; no fallback return value is emitted. |
-| Correctness-first compile/verify check | latest: 5/29 verifier ok | [`results/README-20260519-005704.md`](./results/README-20260519-005704.md): all 29 generated micro sources compile; five load and test successfully. Remaining failures are verifier rejection of pointer-typed x86 GPR integer operations, byte-wise pointer stack stores, scalar/pointer subtraction, and packet accesses whose native guards are not visible as direct verifier range facts. |
+| Correctness-first compile/verify check | latest: 5/29 verifier ok | [`results/README-20260519-014225.md`](./results/README-20260519-014225.md): all 29 generated micro sources compile; five load and test successfully. Remaining failures are verifier rejection of pointer-typed x86 GPR integer operations, byte-wise pointer stack stores, scalar/pointer subtraction, and packet accesses whose native guards are not visible as direct verifier range facts. |
 | Local-register macro state experiment | open | Next state-layout experiment: represent x86 GPRs/flags/metadata as function-local variables and make helper steps scoped macros/templates. This should improve constant elimination and reduce BPF stack pressure while keeping Python a one-to-one native instruction emitter. |
 | Direct-native safety TODO | open | See [`TODO.md`](./TODO.md) for remaining stack, metadata, ABI, rodata, flag, and call-return proof obligations. |
 
@@ -746,12 +746,12 @@ Current correctness-first status after removing simulator guard/retag behavior,
 deleting the direct pointer-compare branch metadata, shrinking stack state, and
 using per-instruction const records:
 
-- `results/README-20260519-005704.md` is the latest run. All 29 generated
+- `results/README-20260519-014225.md` is the latest run. All 29 generated
   micro proof C files compiled. Five loaded and passed test run: `simple`,
   `simple_packet`, `bitmap_popcount_scan`, `sorted_rule_binary_search`, and
   `packet_checksum_fold`.
 - Per-case verifier logs were captured under
-  `results/*-20260519-005704.verifier.log`.
+  `results/*-20260519-014225.verifier.log`.
 - Dominant verifier failure modes are not C compile failures:
   byte-wise stack stores of verifier pointer-typed register values (`invalid
   size of register spill`), integer operations on pointer-typed x86 GPR fields

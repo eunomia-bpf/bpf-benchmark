@@ -25,6 +25,7 @@ RESULTS_DIR = X86_DIR / "results"
 CONFIG = REPO_ROOT / "micro" / "config" / "micro_pure_jit.yaml"
 LOADER_MANIFEST = REPO_ROOT / "native-sim" / "loader" / "Cargo.toml"
 LOADER_BIN = REPO_ROOT / "native-sim" / "loader" / "target" / "debug" / "reversesim-loader"
+DEFAULT_DIRECT_BPF_DIR = REPO_ROOT / "micro" / "results" / "llvm_kinsn_programs_profit_20260519_002050"
 BPF_STACK_SIZE = os.environ.get("BPF_STACK_SIZE", "4096")
 
 sys.path.insert(0, str(REPO_ROOT))
@@ -47,6 +48,8 @@ class Result:
     compile_s: float = 0.0
     verify_s: float = 0.0
     test_s: float = 0.0
+    proof_bpf_insns: int | None = None
+    direct_bpf_insns: int | None = None
 
 
 def load_benches() -> list[Bench]:
@@ -140,6 +143,36 @@ def compile_object(bench: Bench) -> tuple[Result | None, float]:
     return None, compile_s
 
 
+def bpf_instruction_count(obj: Path) -> int:
+    result = run_cmd(["llvm-readelf", "-SW", str(obj)], timeout=30)
+    if result.returncode != 0:
+        raise RuntimeError(compact_error(result.stderr or result.stdout))
+    total = 0
+    for line in result.stdout.splitlines():
+        match = re.match(
+            r"\s*\[\s*\d+\]\s+\S+\s+PROGBITS\s+\S+\s+\S+\s+"
+            r"([0-9a-fA-F]+)\s+\S+\s+([A-Z]+)",
+            line,
+        )
+        if match is None:
+            continue
+        size = int(match.group(1), 16)
+        flags = match.group(2)
+        if "X" in flags:
+            total += size // 8
+    return total
+
+
+def existing_direct_bpf_count(bench: Bench, direct_bpf_dir: Path) -> tuple[int | None, str]:
+    obj = direct_bpf_dir / f"{bench.name}.bpf.o"
+    if not obj.exists():
+        return None, f"missing direct BPF object: {obj}"
+    try:
+        return bpf_instruction_count(obj), ""
+    except RuntimeError as exc:
+        return None, f"direct BPF count failed: {exc}"
+
+
 def run_object(bench: Bench, sudo: bool, run_id: str) -> Result:
     obj = BUILD_DIR / f"{bench.name}.bpf.o"
     input_path, _meta = materialize_input(bench.input_generator, force=False)
@@ -180,12 +213,31 @@ def run_object(bench: Bench, sudo: bool, run_id: str) -> Result:
                   verify_s=verify_s, test_s=test_s or run_s)
 
 
-def run_bench(bench: Bench, sudo: bool, run_id: str) -> Result:
+def add_note(result: Result, note: str) -> None:
+    if note:
+        result.note = f"{result.note}; {note}" if result.note else note
+
+
+def run_bench(bench: Bench, sudo: bool, run_id: str,
+              direct_bpf_dir: Path) -> Result:
+    direct_count, direct_note = existing_direct_bpf_count(bench, direct_bpf_dir)
     compile_result, compile_s = compile_object(bench)
     if compile_result is not None:
+        compile_result.direct_bpf_insns = direct_count
+        add_note(compile_result, direct_note)
         return compile_result
+    try:
+        proof_count = bpf_instruction_count(BUILD_DIR / f"{bench.name}.bpf.o")
+        proof_note = ""
+    except RuntimeError as exc:
+        proof_count = None
+        proof_note = f"proof BPF count failed: {exc}"
     result = run_object(bench, sudo=sudo, run_id=run_id)
     result.compile_s = compile_s
+    result.proof_bpf_insns = proof_count
+    result.direct_bpf_insns = direct_count
+    add_note(result, proof_note)
+    add_note(result, direct_note)
     return result
 
 
@@ -216,14 +268,17 @@ def parse_loader_timing(text: str) -> tuple[float, float]:
 
 def markdown_table(results: list[Result]) -> str:
     lines = [
-        "| Micro program | Status | Compile s | Verify s | Test s | Note |",
-        "| --- | --- | ---: | ---: | ---: | --- |",
+        "| Micro program | Status | Compile s | Proof BPF insns | Direct BPF insns | Verify s | Test s | Note |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |",
     ]
     for result in results:
         note = result.note.replace("|", "\\|")
+        proof_insns = "" if result.proof_bpf_insns is None else str(result.proof_bpf_insns)
+        direct_insns = "" if result.direct_bpf_insns is None else str(result.direct_bpf_insns)
         lines.append(
             f"| `{result.name}` | {result.status} | "
-            f"{result.compile_s:.3f} | {result.verify_s:.3f} | "
+            f"{result.compile_s:.3f} | {proof_insns} | {direct_insns} | "
+            f"{result.verify_s:.3f} | "
             f"{result.test_s:.3f} | {note} |"
         )
     return "\n".join(lines)
@@ -256,6 +311,12 @@ def main() -> int:
         type=Path,
         help="write a markdown status table; defaults to native-sim/x86/results/README-<timestamp>.md",
     )
+    parser.add_argument(
+        "--direct-bpf-dir",
+        type=Path,
+        default=Path(os.environ.get("DIRECT_BPF_DIR", DEFAULT_DIRECT_BPF_DIR)),
+        help="existing direct-compiled micro .bpf.o directory used only for instruction counts",
+    )
     args = parser.parse_args()
     if args.jobs < 1:
         raise SystemExit("--jobs must be >= 1")
@@ -278,11 +339,14 @@ def main() -> int:
     if args.jobs == 1:
         for bench in benches:
             result = run_bench(bench, sudo=not args.no_sudo,
-                               run_id=run_id)
+                               run_id=run_id,
+                               direct_bpf_dir=args.direct_bpf_dir)
             results_by_name[bench.name] = result
             print(
                 f"{bench.name}: {result.status}: "
                 f"compile={result.compile_s:.3f}s "
+                f"proof_insns={result.proof_bpf_insns or ''} "
+                f"direct_insns={result.direct_bpf_insns or ''} "
                 f"verify={result.verify_s:.3f}s "
                 f"test={result.test_s:.3f}s {result.note}",
                 flush=True,
@@ -292,7 +356,7 @@ def main() -> int:
         with ThreadPoolExecutor(max_workers=args.jobs) as executor:
             futures = {
                 executor.submit(run_bench, bench, not args.no_sudo,
-                                run_id): bench
+                                run_id, args.direct_bpf_dir): bench
                 for bench in benches
             }
             for future in as_completed(futures):
@@ -302,6 +366,8 @@ def main() -> int:
                 print(
                     f"{bench.name}: {result.status}: "
                     f"compile={result.compile_s:.3f}s "
+                    f"proof_insns={result.proof_bpf_insns or ''} "
+                    f"direct_insns={result.direct_bpf_insns or ''} "
                     f"verify={result.verify_s:.3f}s "
                     f"test={result.test_s:.3f}s {result.note}",
                     flush=True,
