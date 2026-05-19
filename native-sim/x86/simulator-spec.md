@@ -162,11 +162,20 @@ RSP = RSP + 8
 PC = tmp
 ```
 
-Current C code dispatches `PC = tmp` through generated labels. This covers the
-normal linked micro call/return pattern where return addresses are not modified
-as data. It is not yet a full hardware model for arbitrary computed return
-targets or return-address mutation; such artifacts must not be treated as
-direct-native safe until the dispatch model is extended.
+Current C code dispatches `PC = tmp` through generated labels. This is not a
+full hardware model for arbitrary computed return targets. The accepted subset
+for the current experiment is compiler-generated normal direct calls:
+
+```text
+No reachable instruction may modify the active return-address slot before the
+matching ret.
+```
+
+Examples outside this subset include stores to `[rsp]`, `[rbp+8]`, or any alias
+of the return slot followed by `ret`. Such code is legal x86, but the current
+label-dispatch simulator must not claim it is proven direct-native safe. Full
+hardware coverage requires a PC-based simulator where `ret` sets a variable PC
+from `MEM64[RSP]` and dispatches from that value.
 
 ## Memory
 

@@ -1,0 +1,24 @@
+{
+  "completed_benchmarks": 6,
+  "current_benchmark": "packet_checksum_fold",
+  "current_benchmark_index": 7,
+  "current_benchmark_record": {
+    "category": "memory-local",
+    "description": "Internet checksum style packet reduction",
+    "expected_result": 0,
+    "family": "reduction",
+    "hypothesis": "Sequential 16-bit reductions should emphasize scalar memory throughput",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_checksum_fold.mem",
+    "io_mode": "staged",
+    "level": "medium",
+    "name": "packet_checksum_fold",
+    "runs": [],
+    "tags": [
+      "alu",
+      "memory",
+      "pure-jit"
+    ]
+  },
+  "status": "running",
+  "total_benchmarks": 29
+}

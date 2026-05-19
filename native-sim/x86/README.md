@@ -79,11 +79,13 @@ exact native control/data flow plus ABI metadata, the program fails to load.
 ## Known Semantic Boundary
 
 Direct `call`/`ret` is represented by pushing a return address on modeled stack
-memory and dispatching `ret` through generated labels. This exactly covers the
-normal call/return pattern used by the current linked micro programs, where the
-return address is not modified as data. Arbitrary computed return targets or
-return-address mutation are not a complete hardware model yet and must not be
-claimed as proven direct-native safe until the dispatch model is extended.
+memory and dispatching `ret` through generated labels. This is an explicit
+accepted-subset premise for now: the native code must use compiler-generated
+normal direct calls, and the callee must not modify the active return-address
+slot as ordinary stack memory. This covers the current linked micro programs.
+It does not cover arbitrary x86 that writes `[rsp]`, `[rbp+8]`, or another alias
+of the return slot before `ret`; those programs require a PC-based dispatch
+model before they can be claimed direct-native safe.
 
 Fault-like x86 behavior is also not hidden by simulator checks. Raw invalid
 loads/stores, stack OOB, division faults, and unsupported verifier pointer
