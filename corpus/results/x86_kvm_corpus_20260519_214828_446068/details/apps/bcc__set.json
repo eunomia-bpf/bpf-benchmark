@@ -1,0 +1,10 @@
+{
+  "app": "bcc/set",
+  "baseline": null,
+  "error": "BCC tool capable exited with rc=1: Traceback (most recent call last):\n  File \"/usr/local/share/bcc/tools/capable\", line 17, in <module>\n    from bcc import BPF\nModuleNotFoundError: No module named 'bcc'\nstderr tail:\ncapable:\nTraceback (most recent call last):\n  File \"/usr/local/share/bcc/tools/capable\", line 17, in <module>\n    from bcc import BPF\nModuleNotFoundError: No module named 'bcc'\nbiosnoop:\nTraceback (most recent call last):\n  File \"/usr/local/share/bcc/tools/biosnoop\", line 19, in <module>\n    from bcc import BPF\nModuleNotFoundError: No module named 'bcc'\nvfsstat:\nTraceback (most recent call last):\n  File \"/usr/local/share/bcc/tools/vfsstat\", line 18, in <module>\n    from bcc import BPF\nModuleNotFoundError: No module named 'bcc'\nopensnoop:\nTraceback (most recent call last):\n  File \"/usr/local/share/bcc/tools/opensnoop\", line 24, in <module>\n    from bcc import ArgString, BPF\nModuleNotFoundError: No module named 'bcc'\nsyscount:\nTraceback (most recent call last):\n  File \"/usr/local/share/bcc/tools/syscount\", line 21, in <module>\n    from bcc import BPF\nModuleNotFoundError: No module named 'bcc'\ntcpconnect:\nTraceback (most recent call last):\n  File \"/usr/local/share/bcc/tools/tcpconnect\", line 25, in <module>\n    from bcc import BPF\nModuleNotFoundError: No module named 'bcc'\ntcplife:\nTraceback (most recent call last):\n  File \"/usr/local/share/bcc/tools/tcplife\", line 26, in <module>\n    from bcc import BPF\nModuleNotFoundError: No module named 'bcc'\nrunqlat:\n/usr/local/share/bcc/tools/runqlat:297: SyntaxWarning: invalid escape sequence '\\.'\n  b.attach_kprobe(event_re=\"^finish_task_switch$|^finish_task_switch\\.isra\\.\\d$\",\nTraceback (most recent call last):\n  File \"/usr/local/share/bcc/tools/runqlat\", line 28, in <module>\n    from bcc import BPF\nModuleNotFoundError: No module named 'bcc'",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "bcc_set",
+  "selected_workload": "stress_ng_os_io_network",
+  "status": "error"
+}

@@ -1,6 +1,4 @@
 # syntax=docker/dockerfile:1.6
-ARG TRACEE_IMAGE=docker.io/aquasec/tracee:0.24.1@sha256:cfbbfee972e64a644f6b1bac74ee26998e6e12442697be4c797ae563553a2a5b
-ARG CILIUM_IMAGE=quay.io/cilium/cilium:v1.19.3@sha256:2e61680593cddca8b6c055f6d4c849d87a26a1c91c7e3b8b56c7fb76ab7b7b10
 ARG RUN_TARGET_ARCH=x86_64
 
 FROM docker.io/library/ubuntu:24.04 AS runner-runtime-runtime-base
@@ -13,8 +11,6 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         auditd \
         bash \
-        bpfcc-tools \
-        bpftrace \
         bzip2 \
         ca-certificates \
         clang \
@@ -53,9 +49,10 @@ RUN apt-get update \
         libboost-thread1.83.0 \
         libboost-timer1.83.0 \
         libbpf1 \
-        libbpfcc \
         libbz2-1.0 \
         libcap2 \
+        libclang-cpp15t64 \
+        libclang1-15t64 \
         libcurl4t64 \
         libdouble-conversion3 \
         libdw1t64 \
@@ -68,6 +65,8 @@ RUN apt-get update \
         libgoogle-glog0v6t64 \
         libgrpc++1.51t64 \
         liblz4-1 \
+        libllvm15t64 \
+        libllvm17t64 \
         libmnl0 \
         libpcap0.8t64 \
         libprotobuf32t64 \
@@ -88,7 +87,6 @@ RUN apt-get update \
         php-cli \
         procps \
         python3 \
-        python3-bpfcc \
         python3-yaml \
         ruby \
         rt-tests \
@@ -103,10 +101,6 @@ RUN apt-get update \
 
 RUN mkdir -p "${IMAGE_WORKSPACE}"
 WORKDIR ${IMAGE_WORKSPACE}
-
-FROM ${TRACEE_IMAGE} AS runner-runtime-tracee-upstream
-
-FROM ${CILIUM_IMAGE} AS runner-runtime-cilium-upstream
 
 FROM runner-runtime-runtime-base AS runner-runtime-artifacts
 
@@ -141,7 +135,6 @@ RUN apt-get update \
         libaio-dev \
         libboost-all-dev \
         libbpf-dev \
-        libbpfcc-dev \
         libbz2-dev \
         libcap-dev \
         libcereal-dev \
@@ -187,54 +180,33 @@ RUN apt-get update \
         zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --link --from=runner-runtime-tracee-upstream --chmod=0755 /tracee/tracee /artifacts/tracee/bin/tracee
-COPY --link --from=runner-runtime-tracee-upstream --chmod=0755 /tracee/tracee-ebpf /artifacts/tracee/bin/tracee-ebpf
-COPY --link --from=runner-runtime-tracee-upstream --chmod=0755 /lib/ld-musl-*.so.1 /lib/
-COPY --link --from=runner-runtime-tracee-upstream /lib/libc.musl-*.so.1 /lib/
-COPY --link --from=runner-runtime-tracee-upstream /usr/lib/libelf*.so* /usr/lib/
-COPY --link --from=runner-runtime-tracee-upstream /usr/lib/libz.so* /usr/lib/
-COPY --link --from=runner-runtime-tracee-upstream /usr/lib/libzstd.so* /usr/lib/
-
+COPY --link --chmod=0755 vendor/build/${VENDOR_BUILD_ARCH}/tracee/bin/tracee /artifacts/tracee/bin/tracee
 COPY --link vendor/build/${VENDOR_BUILD_ARCH}/tetragon/ /artifacts/tetragon/
 
 COPY --link --chmod=0755 vendor/binary/katran/${RUN_TARGET_ARCH}/bin/katran_server_grpc /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bin/katran_server_grpc
-COPY --link vendor/build/katran/bpf/ /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bpf/
+COPY --link corpus/build/katran/*.bpf.o /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bpf/
 
 COPY --link --chmod=0755 vendor/build/${VENDOR_BUILD_ARCH}/cilium/bin/cilium-agent /usr/local/bin/cilium-agent
-COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-dbg /usr/local/bin/cilium-dbg
-COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-bugtool /usr/local/bin/cilium-bugtool
-COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-health /usr/local/bin/cilium-health
-COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-health-responder /usr/local/bin/cilium-health-responder
-COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-mount /usr/local/bin/cilium-mount
-COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-sysctlfix /usr/local/bin/cilium-sysctlfix
-COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/local/bin/clang /usr/local/bin/clang
-COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/local/bin/llc /usr/local/bin/llc
-COPY --link --from=runner-runtime-cilium-upstream /var/lib/cilium/ /var/lib/cilium/
+COPY --link vendor/repos/cilium/bpf/ /var/lib/cilium/bpf/
 COPY --link --chmod=0755 vendor/build/${VENDOR_BUILD_ARCH}/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler /usr/local/bin/otelcol-ebpf-profiler
+COPY --link vendor/build/${VENDOR_BUILD_ARCH}/bcc/ /usr/local/
+COPY --link --chmod=0755 vendor/build/${VENDOR_BUILD_ARCH}/bpftrace/bin/bpftrace /usr/local/bin/bpftrace
+COPY --link --chmod=0755 vendor/build/${VENDOR_BUILD_ARCH}/bpftrace/bin/bpftrace-aotrt /usr/local/bin/bpftrace-aotrt
 
 COPY --chmod=0755 runner/scripts/bpfrejit-install /usr/local/bin/bpfrejit-install
 
 RUN set -eux; \
-    musl_loader="$(find /lib /usr/lib -maxdepth 1 -name 'ld-musl-*.so.1' -print -quit)"; \
-    musl_arch="$(basename "${musl_loader}" | sed -e 's/^ld-musl-//' -e 's/\.so\.1$//')"; \
-    musl_lib_dir="/usr/lib/${musl_arch}-linux-musl"; \
-    mkdir -p "${musl_lib_dir}"; \
-    cp -a /usr/lib/libelf*.so* /usr/lib/libz.so* /usr/lib/libzstd.so* /usr/lib/libc.musl-*.so.1 "${musl_lib_dir}/"; \
     ldconfig; \
-    command -v etcd >/dev/null; \
-    etcd --version >/dev/null; \
-    command -v iptables >/dev/null; \
-    command -v iptables-save >/dev/null; \
-    command -v ip6tables-save >/dev/null; \
-    command -v ipset >/dev/null; \
-    command -v nft >/dev/null; \
-    test -x /usr/local/bin/cilium-agent; \
-    test -x /usr/local/bin/clang; \
-    test -x /usr/local/bin/llc; \
-    test -d /var/lib/cilium/bpf; \
-    test -x "/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bin/katran_server_grpc"; \
-    test -f "/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bpf/balancer.bpf.o"; \
-    test -x /usr/local/bin/otelcol-ebpf-profiler; \
+    for tool in capable biosnoop vfsstat opensnoop syscount tcpconnect tcplife runqlat; do \
+        ln -sfn "/usr/local/share/bcc/tools/${tool}" "/usr/local/bin/${tool}"; \
+        ln -sfn "/usr/local/share/bcc/tools/${tool}" "/usr/local/bin/${tool}-bpfcc"; \
+    done; \
+    # host-built bcc tools ship with `#!/usr/bin/env python` shebangs (legacy
+    # python2-era); modern Ubuntu doesn't symlink python -> python3, so the
+    # env lookup fails with `/usr/bin/env: 'python': No such file or directory`
+    # at exec time. Add the symlink so the BPF wrappers spawn correctly under
+    # the shim's LD_PRELOAD.
+    ln -sfn /usr/bin/python3 /usr/bin/python; \
     mkdir -p /opt; \
     ln -sfn /artifacts/user /opt/bpf-benchmark; \
     repo_artifact_root="/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}"; \
@@ -247,7 +219,6 @@ RUN set -eux; \
     ln -sfn /artifacts/tracee/bin/tracee /usr/local/bin/tracee; \
     ln -sfn /artifacts/tetragon/bin/tetragon /usr/local/bin/tetragon; \
     ln -sfn /usr/local/bin/cilium-agent "${repo_artifact_root}/cilium/bin/cilium-agent"; \
-    ln -sfn /usr/local/bin/cilium-dbg "${repo_artifact_root}/cilium/bin/cilium-dbg"; \
     ln -sfn /usr/local/bin/otelcol-ebpf-profiler "${repo_artifact_root}/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler"
 
 COPY --link --from=runner-runtime-host-kernel-image /${KERNEL_IMAGE_NAME} /artifacts/kernel/${KERNEL_IMAGE_NAME}
@@ -360,18 +331,24 @@ FROM runner-runtime-runtime-base AS runner-runtime
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
 
-COPY --link --from=runner-runtime-artifacts /artifacts /artifacts
+ENV PYTHONPATH=/usr/local/lib/python3/dist-packages
+
+COPY --link --from=runner-runtime-artifacts /artifacts/tracee /artifacts/tracee
+COPY --link --from=runner-runtime-artifacts /artifacts/tetragon /artifacts/tetragon
+COPY --link --from=runner-runtime-artifacts /artifacts/user/repo-artifacts /artifacts/user/repo-artifacts
 COPY --link --from=runner-runtime-artifacts /usr/local/bin/ /usr/local/bin/
 COPY --link --from=runner-runtime-artifacts /usr/local/lib/ /usr/local/lib/
-COPY --link --from=runner-runtime-artifacts /lib/ld-musl-*.so.1 /lib/
-COPY --link --from=runner-runtime-artifacts /lib/libc.musl-*.so.1 /lib/
-COPY --link --from=runner-runtime-artifacts /usr/lib/*-linux-musl/ /usr/lib/
+COPY --link --from=runner-runtime-artifacts /usr/local/share/bcc /usr/local/share/bcc
 COPY --link --from=runner-runtime-artifacts /var/lib/cilium /var/lib/cilium
+COPY --link --from=runner-runtime-artifacts /artifacts/kernel /artifacts/kernel
+COPY --link --from=runner-runtime-artifacts /artifacts/modules /artifacts/modules
+COPY --link --from=runner-runtime-artifacts /artifacts/manifest.json /artifacts/manifest.json
+COPY --link --from=runner-runtime-kinsn-artifacts /artifacts/kinsn /artifacts/kinsn
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/runner ${IMAGE_WORKSPACE}/runner
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/micro/programs ${IMAGE_WORKSPACE}/micro/programs
+COPY --link --from=runner-runtime-artifacts /artifacts/user/micro-programs /artifacts/user/micro-programs
 COPY --link --from=runner-runtime-artifacts /artifacts/user/stage2-programs /artifacts/user/stage2-programs
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/tests ${IMAGE_WORKSPACE}/tests
-COPY --link --from=runner-runtime-kinsn-artifacts /artifacts/kinsn /artifacts/kinsn
 COPY --link --from=runner-runtime-daemon-artifact /artifacts/rust/usr-local-bin/bpfrejit-daemon /usr/local/bin/bpfrejit-daemon
 COPY --link --from=runner-runtime-daemon-artifact /artifacts/rust/daemon/ ${IMAGE_WORKSPACE}/daemon/
 COPY --link --from=runner-runtime-bpfopt-artifacts /artifacts/rust/usr-local-bin/ /usr/local/bin/
@@ -379,33 +356,16 @@ COPY --link --from=runner-runtime-bpfopt-artifacts /artifacts/rust/usr-local-bin
 RUN set -eux; \
     mkdir -p /opt; \
     ln -sfn /artifacts/user /opt/bpf-benchmark; \
-    ldconfig; \
-    test -x /usr/local/bin/bpftool; \
-    test -x /usr/local/bin/bpfrejit-daemon; \
-    test -x /usr/local/bin/bpfopt; \
-    test -x /usr/local/bin/kinsnprober; \
-    test -x /usr/local/bin/cilium-agent; \
-    test -d /artifacts/kernel; \
-    test -d /artifacts/modules; \
-    test -d /artifacts/kinsn; \
-    test -x "/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bin/katran_server_grpc"; \
-    case "${RUN_TARGET_ARCH}" in \
-        x86_64) test -x "${IMAGE_WORKSPACE}/runner/build-llvmbpf/micro_exec"; test -d "${IMAGE_WORKSPACE}/tests/unittest/build/progs" ;; \
-        arm64) test -x "${IMAGE_WORKSPACE}/runner/build-arm64-llvmbpf/micro_exec"; test -d "${IMAGE_WORKSPACE}/tests/unittest/build-arm64/progs" ;; \
-        *) echo "unsupported RUN_TARGET_ARCH: ${RUN_TARGET_ARCH}" >&2; exit 1 ;; \
-    esac
+    # bcc tools shipped by the host build use `#!/usr/bin/env python`
+    # shebangs; modern Ubuntu doesn't symlink python -> python3, so the
+    # env lookup fails. The artifacts stage symlinks it, but the final
+    # runtime stage doesn't inherit /usr/bin from there, so add it again.
+    ln -sfn /usr/bin/python3 /usr/bin/python; \
+    ldconfig
 
-COPY --link corpus/bcf ./corpus/bcf
-COPY --link runner/assets ./runner/assets
-
-# LD_PRELOAD shim — installed at a fixed path so start_agent can inject it
-# without needing a workspace-relative lookup at runtime. Two variants:
-# glibc for the ubuntu base apps (bpftrace, bcc, katran, ...) and musl for
-# tracee's alpine-built binary. Build artifacts come from
-# bpfopt/shim/Makefile via the host runtime-image rule.
+# LD_PRELOAD shim installed at a fixed runtime path for glibc-linked apps.
 RUN mkdir -p /usr/local/lib/bpfrejit
-COPY --link bpfopt/shim/libbpfrejit_shim.so      /usr/local/lib/bpfrejit/libbpfrejit_shim.so
-COPY --link bpfopt/shim/libbpfrejit_shim_musl.so /usr/local/lib/bpfrejit/libbpfrejit_shim_musl.so
+COPY --link bpfopt/shim/libbpfrejit_shim.so /usr/local/lib/bpfrejit/libbpfrejit_shim.so
 COPY runner/__init__.py ./runner/
 COPY runner/config ./runner/config
 COPY runner/libs ./runner/libs
@@ -416,6 +376,8 @@ COPY micro/config ./micro/config
 COPY corpus/*.py ./corpus/
 COPY corpus/config ./corpus/config
 COPY corpus/inputs ./corpus/inputs
+COPY --link corpus/bcf ./corpus/bcf
+COPY --link runner/assets ./runner/assets
 
 RUN set -eux; \
     find ./runner ./micro ./corpus -type d -name __pycache__ -prune -exec rm -rf {} +; \
@@ -427,7 +389,7 @@ RUN printf '#!/usr/bin/env bash\nexec "$@"\n' > /usr/local/bin/bpfrejit-runtime-
 
 ENV BPFREJIT_IMAGE_WORKSPACE=${IMAGE_WORKSPACE} \
     BPFREJIT_REPO_ARTIFACT_ROOT=/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH} \
-    PYTHONPATH=${IMAGE_WORKSPACE} \
+    PYTHONPATH=${IMAGE_WORKSPACE}:/usr/local/lib/python3/dist-packages \
     RUN_TARGET_ARCH=${RUN_TARGET_ARCH} \
     PATH=${IMAGE_WORKSPACE}/runner/build-llvmbpf:${IMAGE_WORKSPACE}/runner/build-arm64-llvmbpf:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 

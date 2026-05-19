@@ -1,0 +1,31 @@
+| Micro program | Status | Compile s | Proof BPF insns | Direct BPF insns | Verify s | Test s | Note |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `simple` | ok | 0.416 | 19 | 24 | 0.000 | 0.000 |  |
+| `simple_packet` | ok | 0.368 | 16 | 21 | 0.000 | 0.000 |  |
+| `bitmap_popcount_scan` | ok | 0.798 | 56 | 79 | 0.018 | 0.000 |  |
+| `sorted_rule_binary_search` | ok | 1.025 | 66 | 159 | 0.115 | 0.000 |  |
+| `bcc_runqlat_log2_histogram_bucket` | ok | 3.372 | 130 | 145 | 1.086 | 0.000 |  |
+| `trace_event_type_switch_dispatch` | ok | 5.878 | 772 | 241 | 0.661 | 0.000 |  |
+| `packet_checksum_fold` | ok | 1.186 | 99 | 70 | 0.451 | 0.000 |  |
+| `payload_prefix_memcmp_scan` | ok | 4.675 | 344 | 140 | 0.006 | 0.000 |  |
+| `packet_vlan_tcpopt_parser` | ok | 3.540 | 188 | 197 | 0.002 | 0.000 |  |
+| `bpf_local_call_fanout_dispatch` | ok | 6.385 | 338 | 292 | 0.017 | 0.000 |  |
+| `flow_5tuple_rss_hash` | ok | 5.861 | 266 | 160 | 0.001 | 0.000 |  |
+| `katran_lb_consistent_hash_select` | ok | 12.781 | 730 | 688 | 0.004 | 0.000 |  |
+| `cilium_policy_guard_tree_filter` | ok | 3.585 | 128 | 134 | 0.048 | 0.000 |  |
+| `siphash_rotate64_mixer` | ok | 9.304 | 747 | 587 | 0.002 | 0.000 |  |
+| `packet_record_bounds_window` | ok | 2.521 | 77 | 102 | 0.011 | 0.000 |  |
+| `flow_record_field_scan` | ok | 2.535 | 92 | 91 | 0.009 | 0.000 |  |
+| `packed_header_bitfield_decode` | ok | 7.422 | 246 | 256 | 0.023 | 0.000 |  |
+| `bpftrace_string_search_prefix_scan` | ok | 3.553 | 158 | 164 | 0.550 | 0.000 |  |
+| `tracee_syscall_name_table_lookup` | ok | 4.591 | 275 | 177 | 0.122 | 0.000 |  |
+| `tracee_http_method_prefix_detect` | ok | 5.009 | 153 | 153 | 0.010 | 0.000 |  |
+| `cilium_socket_lb_service_select` | ok | 2.665 | 151 | 218 | 0.097 | 0.000 |  |
+| `bcc_tcpconnect_ipv4_tuple_filter` | ok | 3.903 | 164 | 190 | 0.063 | 0.000 |  |
+| `tetragon_process_event_arg_filter` | ok | 5.624 | 303 | 252 | 0.253 | 0.000 |  |
+| `otel_stack_frame_unwind_scan` | ok | 3.572 | 123 | 214 | 0.027 | 0.000 |  |
+| `cilium_ct_nat_tuple_rewrite` | ok | 3.351 | 120 | 195 | 0.043 | 0.000 |  |
+| `packet_toeplitz_rss_hash` | ok | 5.284 | 319 | 195 | 0.030 | 0.000 |  |
+| `bpftrace_comm_key_fnv_hash` | ok | 6.016 | 252 | 219 | 0.048 | 0.000 |  |
+| `tc_packet_checksum_fold` | ok | 2.148 | 118 | 55 | 0.449 | 0.000 |  |
+| `cgroup_skb_hash_chain` | ok | 2.306 | 236 | 102 | 0.006 | 0.000 |  |

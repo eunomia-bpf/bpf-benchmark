@@ -125,6 +125,10 @@ vendor/repos/*/deps
 vendor/repos/*/deps/**
 vendor/repos/*/bpf/objs
 vendor/repos/*/bpf/objs/**
+vendor/build/.bpftool
+vendor/build/.bpftool/**
+vendor/build/.katran-bpf
+vendor/build/.katran-bpf/**
 vendor/build/.tetragon-bpf
 vendor/build/.tetragon-bpf/**
 vendor/repos/*/target
