@@ -28,6 +28,7 @@ const XSIM_RAX: u8 = 0;
 const BPF_PROG_TYPE_XDP: u32 = 6;
 const XDP_PASS: u32 = 2;
 const SIMPLE_EXPECTED: u64 = 12_345_678;
+const ETHERNET_HEADER_SIZE: usize = 14;
 
 const X86_SIM_DONE: i32 = 1;
 const FLOW_NORMAL: u8 = 0;
@@ -66,11 +67,19 @@ struct Cli {
     expected_result: Option<u64>,
     expect_retval: u32,
     input: Option<PathBuf>,
+    result_channel: ResultChannel,
+    cgroup_skb_input: bool,
     load_only: bool,
     program: String,
     repeat: i32,
     template_object: Option<PathBuf>,
     verifier_log: Option<PathBuf>,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum ResultChannel {
+    Packet,
+    SkbCb,
 }
 
 #[derive(Deserialize)]
@@ -200,6 +209,46 @@ struct BpfTestRunOpts {
     batch_size: u32,
 }
 
+#[repr(C)]
+#[derive(Default)]
+struct SkBuffCtx {
+    len: u32,
+    pkt_type: u32,
+    mark: u32,
+    queue_mapping: u32,
+    protocol: u32,
+    vlan_present: u32,
+    vlan_tci: u32,
+    vlan_proto: u32,
+    priority: u32,
+    ingress_ifindex: u32,
+    ifindex: u32,
+    tc_index: u32,
+    cb: [u32; 5],
+    hash: u32,
+    tc_classid: u32,
+    data: u32,
+    data_end: u32,
+    napi_id: u32,
+    family: u32,
+    remote_ip4: u32,
+    local_ip4: u32,
+    remote_ip6: [u32; 4],
+    local_ip6: [u32; 4],
+    remote_port: u32,
+    local_port: u32,
+    data_meta: u32,
+    flow_keys: u64,
+    tstamp: u64,
+    wire_len: u32,
+    gso_segs: u32,
+    sk: u64,
+    gso_size: u32,
+    tstamp_type: u8,
+    pad: [u8; 3],
+    hwtstamp: u64,
+}
+
 impl Default for BpfTestRunOpts {
     fn default() -> Self {
         Self {
@@ -302,11 +351,12 @@ fn run() -> Result<()> {
     }
 
     let mut input = if let Some(path) = &cli.input {
-        build_packet_input(path)?
+        build_packet_input(path, cli.cgroup_skb_input)?
     } else {
-        build_default_case_input(&cli.case_name, json_mode)?
+        build_default_case_input(&cli.case_name, json_mode, cli.cgroup_skb_input)?
     };
     let mut output = input.clone();
+    let mut skb_ctx_out = SkBuffCtx::default();
     let mut opts = BpfTestRunOpts {
         data_in: input.as_mut_ptr().cast::<c_void>(),
         data_out: output.as_mut_ptr().cast::<c_void>(),
@@ -315,6 +365,10 @@ fn run() -> Result<()> {
         repeat: cli.repeat,
         ..Default::default()
     };
+    if cli.result_channel == ResultChannel::SkbCb {
+        opts.ctx_out = (&mut skb_ctx_out as *mut SkBuffCtx).cast::<c_void>();
+        opts.ctx_size_out = mem::size_of::<SkBuffCtx>() as u32;
+    }
 
     let start = Instant::now();
     let ret = unsafe { bpf_prog_test_run_opts(prog_fd, &mut opts) };
@@ -338,7 +392,10 @@ fn run() -> Result<()> {
         return Err(format!("short data_size_out: {}", opts.data_size_out));
     }
 
-    let result = read_le_u64(&output[XSIM_OUTPUT_OFF..XSIM_OUTPUT_OFF + 8]);
+    let result = match cli.result_channel {
+        ResultChannel::Packet => read_le_u64(&output[XSIM_OUTPUT_OFF..XSIM_OUTPUT_OFF + 8]),
+        ResultChannel::SkbCb => u64::from(skb_ctx_out.cb[0]) | (u64::from(skb_ctx_out.cb[1]) << 32),
+    };
     let expected_result = cli.expected_result.unwrap_or(SIMPLE_EXPECTED);
     if result != expected_result {
         print_timing(verify_s, test_s);
@@ -367,6 +424,8 @@ fn parse_cli() -> Result<Cli> {
     let mut expected_result = None;
     let mut expect_retval = XDP_PASS;
     let mut input = None;
+    let mut result_channel = ResultChannel::Packet;
+    let mut cgroup_skb_input = false;
     let mut load_only = false;
     let mut program = String::from("x86_sim_xdp");
     let mut repeat = 1;
@@ -416,6 +475,23 @@ fn parse_cli() -> Result<Cli> {
                         .ok_or_else(|| "--input requires a path".to_string())?,
                 ));
             }
+            "--result-channel" => {
+                let value = args
+                    .next()
+                    .ok_or_else(|| "--result-channel requires packet or skb-cb".to_string())?;
+                result_channel = match value.as_str() {
+                    "packet" => ResultChannel::Packet,
+                    "skb-cb" => ResultChannel::SkbCb,
+                    _ => {
+                        return Err(format!(
+                            "invalid --result-channel {value}: expected packet or skb-cb"
+                        ));
+                    }
+                };
+            }
+            "--cgroup-skb-input" => {
+                cgroup_skb_input = true;
+            }
             "--load-only" => {
                 load_only = true;
             }
@@ -436,10 +512,10 @@ fn parse_cli() -> Result<Cli> {
                 }
             }
             "--template-object" => {
-                template_object = Some(PathBuf::from(
-                    args.next()
-                        .ok_or_else(|| "--template-object requires a path".to_string())?,
-                ));
+                template_object =
+                    Some(PathBuf::from(args.next().ok_or_else(|| {
+                        "--template-object requires a path".to_string()
+                    })?));
             }
             "--verifier-log" => {
                 verifier_log =
@@ -466,6 +542,8 @@ fn parse_cli() -> Result<Cli> {
         expected_result,
         expect_retval,
         input,
+        result_channel,
+        cgroup_skb_input,
         load_only,
         program,
         repeat,
@@ -476,7 +554,7 @@ fn parse_cli() -> Result<Cli> {
 
 fn print_help() {
     println!(
-        "Usage: reversesim-loader (--object <sim.bpf.o>|--json proof.json) [--template-object helpers.bpf.o] [--program x86_sim_xdp] [--load-only] [--verifier-log log.txt] [--case simple|--input payload.mem --expected-result N] [--repeat N]"
+        "Usage: reversesim-loader (--object <sim.bpf.o>|--json proof.json) [--template-object helpers.bpf.o] [--program x86_sim_xdp] [--load-only] [--verifier-log log.txt] [--case simple|--input payload.mem --expected-result N] [--result-channel packet|skb-cb] [--cgroup-skb-input] [--repeat N]"
     );
 }
 
@@ -1137,10 +1215,14 @@ fn log_buf_to_string(log_buf: &[c_char]) -> String {
     String::from_utf8_lossy(&bytes).into_owned()
 }
 
-fn build_default_case_input(case_name: &str, json_mode: bool) -> Result<Vec<u8>> {
+fn build_default_case_input(
+    case_name: &str,
+    json_mode: bool,
+    cgroup_skb_input: bool,
+) -> Result<Vec<u8>> {
     if json_mode {
         let path = PathBuf::from("micro/generated-inputs").join(format!("{case_name}.mem"));
-        return build_packet_input(&path);
+        return build_packet_input(&path, cgroup_skb_input);
     }
     match case_name {
         "simple" => Ok(build_simple_case()),
@@ -1152,15 +1234,31 @@ fn build_simple_case() -> Vec<u8> {
     let mut data = vec![0u8; XSIM_CODE_OFF + 2 * XSIM_INSN_SIZE];
     write_le_u32(&mut data[XSIM_HEADER_OFF..XSIM_HEADER_OFF + 4], XSIM_MAGIC);
     write_le_u16(&mut data[XSIM_HEADER_OFF + 4..XSIM_HEADER_OFF + 6], 2);
-    encode_insn(&mut data, 0, XSIM_OP_MOV_IMM64, XSIM_RAX, 0, SIMPLE_EXPECTED);
+    encode_insn(
+        &mut data,
+        0,
+        XSIM_OP_MOV_IMM64,
+        XSIM_RAX,
+        0,
+        SIMPLE_EXPECTED,
+    );
     encode_insn(&mut data, 1, XSIM_OP_RET, 0, 0, 0);
     data
 }
 
-fn build_packet_input(path: &PathBuf) -> Result<Vec<u8>> {
+fn build_packet_input(path: &PathBuf, cgroup_skb_input: bool) -> Result<Vec<u8>> {
     let payload = fs::read(path).map_err(|err| format!("read {}: {err}", path.display()))?;
-    let mut data = vec![XSIM_OUTPUT_OFF as u8; XSIM_OUTPUT_OFF + 8 + payload.len()];
-    data[8..].copy_from_slice(&payload);
+    let prefix = if cgroup_skb_input {
+        ETHERNET_HEADER_SIZE
+    } else {
+        0
+    };
+    let mut data = vec![0u8; prefix + 8 + payload.len()];
+    if cgroup_skb_input {
+        data[12] = 0x08;
+        data[13] = 0x00;
+    }
+    data[prefix + 8..].copy_from_slice(&payload);
     Ok(data)
 }
 

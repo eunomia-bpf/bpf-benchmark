@@ -104,37 +104,49 @@ They may only:
 
 The guest ABI memory object is architectural memory for the linked native entry
 ABI. For XDP, offset 0 holds `ctx->data` and offset 8 holds `ctx->data_end`.
-For skb, the object contains the linked native ABI fields currently referenced
-by the generated x86, including `len` and `data` at the linked offsets.
-
-Current micro skb proof mode initializes:
+For skb, the guest object mirrors the kernel BPF runtime ABI used by the linked
+native micro code:
 
 ```text
-guest_abi.data = ctx->data
-guest_abi.len  = ctx->data_end - ctx->data
+guest_abi + 0x30: BPF-visible __sk_buff.cb[0..] scratch
+guest_abi + 0x50: BPF-visible __sk_buff.data_end
+guest_abi + 0xd0: sk_buff->data
 ```
 
-This is an ABI equality assumption for the current linear micro/test_run skb
-inputs: the native `sk_buff->len` value read by the linked x86 must equal the
-linear packet span represented by verifier `data_end - data`. It is not a
-general TC/cgroup skb rule. Non-linear skbs, cloned fragments, or any attach
-point where native `sk_buff->len` can differ from the verifier packet span are
-outside this proof mode until the native ABI exposes a value that is exactly
-equal to verifier `data_end`.
+The concrete offsets are generated for native code from kernel BTF:
 
-The underlying issue is an ABI registration mismatch. eBPF source-level
+```text
+K_SK_BUFF_BPF_CB_OFFSET =
+    offsetof(struct sk_buff, cb) + offsetof(struct qdisc_skb_cb, data)
+
+K_SK_BUFF_BPF_DATA_END_OFFSET =
+    offsetof(struct sk_buff, cb) + offsetof(struct bpf_skb_data_end, data_end)
+```
+
+On the current x86 kernel these are `0x30` and `0x50`; `sk_buff->data` is
+`0xd0`. The simulator constants must match the kernel used to generate the
+linked native code.
+
+The simulator must not model `skb->len` as packet end. eBPF source-level
 `ctx->data_end` is not a load from `sk_buff->len`: the verifier/JIT rewrite
 turns it into a load from `skb->cb + offsetof(struct bpf_skb_data_end,
 data_end)`, and the kernel runtime fills that slot before running skb BPF
-programs. The current linked native skb ABI reads `sk_buff->len` and computes
-`data + len`, so it is not reading the same kernel-prepared value. A
-direct-native proof for general skb programs must align the native ABI with the
-eBPF runtime/JIT ABI, or introduce a separately proven native ABI field with
-identical semantics.
+programs. Direct-native proof must align native x86 with that same runtime ABI.
 
-The entry macros must not change ctx/packet/output memory, create per-register
-tags, insert bounds checks, trap, fallback, infer `packet + len == packet_end`,
-or influence control flow.
+For skb entries, `X86_SIM_X86_RET()` copies guest ABI `cb[0..1]` to the typed
+test-run `struct __sk_buff` output context. This is the proof representation of
+the same `bpf_skb_cb(skb)` scratch storage that native x86 writes. It must not
+modify the architectural return value: `RAX` remains the program return. In
+particular, `cgroup_skb` return values are only actions
+(`CGROUP_SKB_OK`/`CGROUP_SKB_DROP`); the 64-bit benchmark result is not encoded
+in the return value.
+
+The entry and return ABI macros must not change packet data, create
+per-register tags, insert bounds checks, trap, fallback, infer
+`packet + len == packet_end`, or influence control flow. Conditional
+compilation between native and eBPF builds is limited to the minimum ABI shim
+needed to expose the same kernel fields; it must not create two benchmark
+algorithms or two result semantics.
 
 Only ABI-defined entry state may be used as a semantic fact. Other GPRs and
 flags are unspecified at native function entry. The C implementation may give
@@ -175,16 +187,14 @@ Forbidden uses:
 - proving packet bounds from `packet + len`, `data_end`, or any relation that
   the native x86 instruction stream did not itself establish.
 
-`ctx->data`, `ctx->data_end`, skb data, and skb length enter the proof through
-guest ABI memory construction and ordinary x86 loads from that memory. They do
-not create per-register pointer metadata.
+`ctx->data`, `ctx->data_end`, `bpf_skb_cb(skb)`, and `sk_buff->data` enter the
+proof through guest ABI memory construction and ordinary x86 loads/stores from
+that memory. They do not create per-register pointer metadata.
 
-The micro skb `len = data_end - data` initializer is not a packet-bound proof
-hook. If native x86 later computes `data + len`, that value remains an ordinary
-architectural result of the native instructions. The simulator must not replace
-branches against `data + len` with branches against `data_end`, or assert that
-the current register is packet-end, unless that exact value is produced by the
-native instruction sequence.
+If native x86 explicitly loads `skb->len` in a future artifact, that value is
+an ordinary architectural load and must not be treated as packet end unless the
+linked ABI has separately made it exactly equal to the verifier-visible
+`data_end` value.
 
 Known verifier-expression boundary: exact x86 partial-register writes to a
 register that currently has verifier pointer type may require integer bit
@@ -293,12 +303,11 @@ Fault-like cases are not converted into fallback behavior:
 They surface as compile, verifier, or load failures.
 
 For skb programs, the simulator must not manufacture packet `data_end` from
-`skb->data + skb->len`. If the linked native x86 computes a bound that the
-eBPF verifier cannot relate to packet memory, verifier rejection is the correct
-experimental result. The current micro `len = data_end - data` ABI initializer
-does not relax this rule: it may make the architectural `len` value match the
-linear test packet, but it must not be used to synthesize hidden packet-end
-metadata or branch assertions.
+`skb->data + skb->len`. The current native micro ABI reads the same
+runtime-prepared BPF `data_end` slot that eBPF ctx access uses. If a future
+linked native x86 sequence computes a different bound that the eBPF verifier
+cannot relate to packet memory, verifier rejection is the correct experimental
+result.
 
 ## Result Rule
 

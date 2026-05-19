@@ -74,15 +74,34 @@ The entry ABI is represented by `X86_SIM_ENTRY_XDP(ctx)` /
 `X86_SIM_ENTRY_SKB(ctx)`. These macros build a local guest ABI memory object and
 set the ABI entry register to that object's address (`RDI = &abi`, modeled
 `RSP = 0`). For XDP the object contains `data` at offset 0 and `data_end` at
-offset 8. For skb programs the object contains the linked native ABI fields
-currently used by the generated x86, including `len` and `data` at their linked
-offsets. The current micro proof ABI initializes the skb `len` slot as
-`ctx->data_end - ctx->data`; this is valid only for the current linear
-micro/test_run skb inputs where the native `sk_buff->len` value equals the
-linear packet span. It is not a general TC/cgroup skb rule for non-linear
-packets. This replaces the earlier ctx-field special cases: `[rdi]`, `[rdi+8]`,
-or `[rdi+0xd0]` are ordinary loads from guest ABI memory, not hidden register
+offset 8. For skb programs the object now mirrors the kernel/eBPF runtime ABI
+used by the linked native micro code: BPF-visible `__sk_buff.cb[]` scratch
+storage starts at `sk_buff->cb + offsetof(struct qdisc_skb_cb, data)`, the
+BPF `data_end` value is loaded from `sk_buff->cb + offsetof(struct
+bpf_skb_data_end, data_end)`, and packet `data` is loaded from
+`sk_buff->data`. On the current x86 kernel those offsets are `0x30`, `0x50`,
+and `0xd0`.
+
+The simulator does not model `skb->len` as packet end. The previous
+`len = ctx->data_end - ctx->data` experiment was removed because it was only a
+linear test-input premise and did not match the kernel BPF ctx ABI. This
+replaces the earlier ctx-field special cases: `[rdi+0x30]`, `[rdi+0x50]`, and
+`[rdi+0xd0]` are ordinary loads/stores to guest ABI memory, not hidden register
 tags or branch-dependent verifier facts.
+
+For skb proof programs, `X86_SIM_X86_RET()` projects guest ABI `cb[0..1]` back
+to the typed `struct __sk_buff` test-run output context. That projection is the
+proof-side representation of the same kernel scratch storage that native x86
+writes. It is not a fallback result path: the x86 return value remains `RAX`.
+For `cgroup_skb`, that return value is only the kernel action
+(`CGROUP_SKB_OK`/`CGROUP_SKB_DROP`); the 64-bit benchmark result must stay in
+`__sk_buff.cb[]`. Packet writes are not a valid result channel for cgroup_skb
+because the verifier rejects packet writes for that program type.
+
+Shared benchmark logic should remain shared. Conditional compilation is limited
+to the minimum ABI shim needed to expose the same kernel fields to native x86
+and eBPF. The native and kernel builds must not maintain separate benchmark
+algorithms or result semantics.
 
 Type tricks are allowed only as representation choices for the same x86 value.
 Storing GPRs as `void *` is such a trick: it does not add data, does not change
@@ -97,11 +116,7 @@ guest-visible behavior that depends on those initializer values.
 
 The active code does not add runtime data-end checks. Packet/ctx accesses are
 raw modeled memory operations. If the verifier cannot prove them safe from the
-exact native control/data flow, the program fails to load. In particular,
-mapping the micro skb `len` slot from `data_end - data` does not add a hidden
-packet-end witness. The verifier still rejects proof programs whose native
-control flow only compares against `data + len` when it cannot recognize that
-expression as packet `data_end`.
+exact native control/data flow, the program fails to load.
 
 ## Known Semantic Boundary
 
@@ -122,19 +137,18 @@ arithmetic are allowed to surface as compiler/verifier/load failures.
 
 | Issue | Attempted solution | Current status |
 | --- | --- | --- |
-| Userspace native runner used a fake skb layout with `data`/`data_end` at offsets 0/8, while linked native x86 reads real kernel offsets such as `sk_buff->len` at `0x70` and `sk_buff->data` at `0xd0`. This caused GPFs for skb native micro programs. | Keep the native x86/linker ABI unchanged and change only the userspace native runner's fake skb object to place fields at `kernel_offsets.h` offsets. | Fixed for the native runner. `make micro RUNTIMES=native SAMPLES=1 WARMUPS=0 INNER_REPEAT=10` passes 29/29. |
-| `__sk_buff.data_end` is not `skb->data + skb->len` in the kernel. Kernel BPF direct packet access uses the linear range `skb->data + skb_headlen(skb)`, saved in `struct bpf_skb_data_end`. | Document the real kernel target: direct-native proof must match verifier `data/data_end`, not assume general `skb->len == data_end - data`. | Recorded in this README and in `simulator-spec.md`. The kernel target is not a general linear-skb assumption; the linear equality is only a current micro/test_run input premise. |
-| Runtime native/JIT ABI and eBPF ctx ABI are currently not registered to the same source for skb packet end. eBPF `ctx->data_end` is load-time rewritten to `skb->cb + offsetof(struct bpf_skb_data_end, data_end)`, and kernel runtime fills that slot before the BPF program runs. The current linked native x86 instead reads `sk_buff->len` and computes `data + len`. | Treat this as an ABI mismatch, not a verifier bug. The correct direct-native target is for native x86 to read the same runtime-prepared `bpf_skb_data_end.data_end` value, or for the linker/kernel ABI to expose an equivalent field with the same semantics. | Not fixed yet. Current proof experiment documents the mismatch; the temporary micro `len = data_end - data` initializer is not a general solution and does not make the skb proof programs pass verifier. |
-| The proof ABI for skb programs initially read `ctx->len`, which does not give verifier-visible packet-end semantics and is not the same as BPF `data_end`. | Try initializing the proof guest ABI `len` slot as `ctx->data_end - ctx->data`, while leaving the native instruction stream unchanged. | Semantically acceptable only for current linear micro inputs, but it does not make the two skb proof programs pass verifier. The verifier still sees packet pointer plus scalar, not `PTR_TO_PACKET_END`. |
-| `tc_packet_checksum_fold` and `cgroup_skb_hash_chain` compare packet accesses against `data + len`. | Do not add hidden packet-end metadata, branch assertions, or bounds checks. Record verifier rejection when the exact native proof cannot be accepted. | Still fail. Verifier rejects the later packet load because it does not canonicalize `data + (data_end - data)` back to packet `data_end`. |
+| Userspace native runner used a fake skb layout with `data`/`data_end` at offsets 0/8, while linked native x86 reads real kernel offsets. This caused GPFs for skb native micro programs. | Keep benchmark logic shared and use a minimal native ABI shim that places fields at `kernel_offsets.h` offsets. | Fixed for the native runner. `make micro RUNTIMES=native SAMPLES=1 WARMUPS=0 INNER_REPEAT=10` passes 29/29. |
+| `__sk_buff.data_end` is not `skb->data + skb->len` in the kernel. Kernel BPF direct packet access uses the runtime-prepared `struct bpf_skb_data_end` slot in `skb->cb`. | Change the native micro skb helper to read `K_SK_BUFF_BPF_DATA_END_OFFSET`, so native x86 and eBPF proof both read the kernel BPF ABI value. | Fixed for the two skb micro programs. Generated native asm now loads `[rdi+0x50]`, not `skb->len`. |
+| `__sk_buff.cb[0]` is not raw `sk_buff->cb[0]`; kernel ctx access maps it through `bpf_skb_cb(skb)`, which is `skb->cb + offsetof(struct qdisc_skb_cb, data)`. | Generate `K_SK_BUFF_BPF_CB_OFFSET` from BTF and write native skb benchmark results there. The proof loader reads `ctx_out.cb[0..1]`, matching the existing kernel runner. | Fixed. Current x86 offset is `0x30`. cgroup_skb no longer tries packet writes or return-value result encoding. |
+| `cgroup_skb` return value is semantic action, not a benchmark result channel. | Keep expected retval as `CGROUP_SKB_OK`/`CGROUP_SKB_DROP`; carry the 64-bit benchmark result through BPF-visible `__sk_buff.cb[]`. | Fixed in native runner and proof loader. |
 | `payload_prefix_memcmp_scan` and `tetragon_process_event_arg_filter` contain exact x86 partial-register writes to registers that still have verifier pointer type. | Represent GPRs as `void *`/union values so pointer-shaped x86 operations keep typed shape, but keep partial-register semantics exact. | Still fail. The remaining failures are verifier expression limits: exact partial-register masking on a pointer-typed value is rejected. |
 | Earlier proof attempts used ghost pointer metadata, packet length tags, branch assertions, fuel guards, fallback/trap paths, or benchmark-specific Python renderers. | Remove those mechanisms and move semantics into C-authored instruction macros. Python remains a mechanical one-native-instruction to one-macro generator. | Removed from the active path. If verifier rejects the exact proof, that is the result. |
 | Direct BPF instruction counts were missing when the latest micro result was native-only and had no `jit_dumps/*xlated.bin`. | Make `run_micro_sim_batch.py` pick the latest micro result that actually contains xlated BPF dumps when `MICRO_RESULT_METADATA` is not set. | Fixed. Latest result table records both proof BPF insn count and direct BPF insn count. |
 
 ## Latest Results
 
-Native runner check after restoring the real linked skb offsets in the userspace
-fake skb object:
+Full native smoke after aligning skb `data_end` and result scratch slots with
+the kernel BPF ABI:
 
 ```bash
 make micro RUNTIMES=native SAMPLES=1 WARMUPS=0 INNER_REPEAT=10
@@ -142,30 +156,41 @@ make micro RUNTIMES=native SAMPLES=1 WARMUPS=0 INNER_REPEAT=10
 
 Result file:
 
-- `micro/results/x86_kvm_micro_20260519_163845_507317/metadata.json`
+- `micro/results/x86_kvm_micro_20260519_180639_651469/metadata.json`
 - 29/29 native micro programs ran successfully.
 
-Full proof run after mapping the micro skb `len` ABI slot from
-`ctx->data_end - ctx->data` and fixing direct BPF instruction counts to use the
-latest micro result that contains `jit_dumps/*xlated.bin`:
+Targeted skb native runner check after aligning native skb `data_end` and
+result scratch slots with the kernel BPF ABI, and after moving benchmark-local
+`MICRO_NATIVE` checks into the shared helper layer:
 
 ```bash
-python3 native-sim/x86/micro-prog/run_micro_sim_batch.py --jobs 8 \
-  --markdown native-sim/x86/results/README-20260519-094100-linear-skb-len.md
+make micro BENCH="tc_packet_checksum_fold cgroup_skb_hash_chain" \
+  RUNTIMES=native SAMPLES=1 WARMUPS=0 INNER_REPEAT=10
 ```
 
 Result file:
 
-- `results/README-20260519-094100-linear-skb-len.md`
-- 25/29 load and produce the expected result.
-- Direct BPF instruction counts are recorded from
-  `micro/results/x86_kvm_micro_20260519_163959_668431/details/jit_dumps`.
-- Remaining failures are direct consequences of the no-hidden-proof rule:
-  `payload_prefix_memcmp_scan` and `tetragon_process_event_arg_filter` hit
-  verifier-prohibited partial-register bit operations on values that still have
-  verifier pointer type; `tc_packet_checksum_fold` and
-  `cgroup_skb_hash_chain` compare packet accesses against `data + len`, and the
-  verifier does not treat `data + (data_end - data)` as packet `data_end`.
+- `micro/results/x86_kvm_micro_20260519_181243_060895/metadata.json`
+- `tc_packet_checksum_fold`: result `0`, retval `0`, native code `243`
+  bytes, last sample compile `43087 ns`, exec `13358 ns`.
+- `cgroup_skb_hash_chain`: result `12027228624407116210`, retval `1`,
+  native code `272` bytes, last sample compile `51849 ns`, exec `411 ns`.
 
-These are verifier/proof-expression failures after removing non-hardware
-guards, not runtime simulator fallbacks.
+Targeted skb proof run after regenerating linked native asm with the same ABI:
+
+```bash
+python3 native-sim/x86/micro-prog/run_micro_sim_batch.py --jobs 2 \
+  --only tc_packet_checksum_fold cgroup_skb_hash_chain \
+  --markdown native-sim/x86/results/README-20260519-181500-skb-kernel-abi-min-cond.md
+```
+
+Result file:
+
+- `native-sim/x86/results/README-20260519-181500-skb-kernel-abi-min-cond.md`
+- `tc_packet_checksum_fold`: ok, proof BPF 118 insns, direct BPF 55 insns,
+  verifier `0.333 s`.
+- `cgroup_skb_hash_chain`: ok, proof BPF 236 insns, direct BPF 102 insns,
+  verifier `0.006 s`.
+
+The remaining whole-suite failures, when present, are verifier/proof-expression
+failures after removing non-hardware guards, not runtime simulator fallbacks.

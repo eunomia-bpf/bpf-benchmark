@@ -7,7 +7,7 @@
 namespace { using clock_type = std::chrono::steady_clock; using native_prog_fn = int (*)(void *);
 constexpr size_t kEthernetHeaderSize = 14; struct native_xdp_md { uintptr_t data, data_end; };
 struct native_skb {
-    alignas(uintptr_t) uint8_t storage[K_SK_BUFF_DATA_OFFSET + sizeof(uintptr_t)] {};
+    alignas(uintptr_t) uint8_t storage[(K_SK_BUFF_DATA_OFFSET > K_SK_BUFF_BPF_DATA_END_OFFSET ? K_SK_BUFF_DATA_OFFSET : K_SK_BUFF_BPF_DATA_END_OFFSET) + sizeof(uintptr_t)] {};
 
     void set_len(uint32_t len) {
         std::memcpy(storage + K_SK_BUFF_LEN_OFFSET, &len, sizeof(len));
@@ -15,6 +15,18 @@ struct native_skb {
 
     void set_data(uintptr_t data) {
         std::memcpy(storage + K_SK_BUFF_DATA_OFFSET, &data, sizeof(data));
+    }
+
+    void set_data_end(uintptr_t data_end) {
+        std::memcpy(storage + K_SK_BUFF_BPF_DATA_END_OFFSET, &data_end, sizeof(data_end));
+    }
+
+    uint64_t read_result() const {
+        uint32_t lo = 0;
+        uint32_t hi = 0;
+        std::memcpy(&lo, storage + K_SK_BUFF_BPF_CB_OFFSET, sizeof(lo));
+        std::memcpy(&hi, storage + K_SK_BUFF_BPF_CB_OFFSET + sizeof(lo), sizeof(hi));
+        return static_cast<uint64_t>(lo) | (static_cast<uint64_t>(hi) << 32);
     }
 }; }
 sample_result run_native(const cli_options &options) {
@@ -44,6 +56,7 @@ sample_result run_native(const cli_options &options) {
     xdp.data = data_ptr;
     xdp.data_end = data_end_ptr;
     skb.set_data(data_ptr);
+    skb.set_data_end(data_end_ptr);
     skb.set_len(static_cast<uint32_t>(data_end_ptr - data_ptr));
     uint32_t retval = 0; const uint32_t repeat = options.repeat > 0 ? options.repeat : 1;
     const perf_counter_options perf_options {.enabled = options.perf_counters, .include_kernel = false, .scope = options.perf_scope};
@@ -54,9 +67,10 @@ sample_result run_native(const cli_options &options) {
     });
     const auto exec_end = clock_type::now();
     uint64_t packet_result = 0; std::memcpy(&packet_result, data, sizeof(packet_result));
+    const uint64_t result = is_skb ? skb.read_result() : packet_result;
     sample_result sample {.compile_ns = elapsed_ns(load_start, load_end), .exec_ns = elapsed_ns(exec_start, exec_end) / repeat};
     sample.timing_source = "clock_monotonic"; sample.timing_source_wall = "clock_monotonic"; sample.wall_exec_ns = sample.exec_ns;
-    sample.result = packet_result;
+    sample.result = result;
     sample.retval = retval; sample.code_size = {.bpf_bytecode_bytes = 0, .native_code_bytes = native_code_bytes};
     sample.phases_ns = {{"memory_prepare_ns", elapsed_ns(memory_start, memory_end)}, {"native_load_ns", sample.compile_ns}};
     sample.perf_counters = perf;

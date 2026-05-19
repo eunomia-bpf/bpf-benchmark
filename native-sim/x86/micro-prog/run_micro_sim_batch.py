@@ -38,6 +38,8 @@ class Bench:
     input_generator: str
     expected_result: int
     expected_retval: int
+    result_channel: str
+    cgroup_skb_input: bool
 
 
 @dataclass
@@ -64,8 +66,12 @@ def load_benches() -> list[Bench]:
             continue
         name = item["name"]
         expected_retval = int(item.get("expected_retval", default_retval))
+        tags = set(item.get("tags", []))
+        result_channel = "skb-cb" if {"tc", "cgroup-skb"} & tags else "packet"
+        cgroup_skb_input = "cgroup-skb" in tags
         benches.append(Bench(name, generator, int(expected),
-                             expected_retval))
+                             expected_retval, result_channel,
+                             cgroup_skb_input))
     return benches
 
 
@@ -208,7 +214,11 @@ def run_object(bench: Bench, sudo: bool, run_id: str) -> Result:
         str(bench.expected_result),
         "--expect-retval",
         str(bench.expected_retval),
+        "--result-channel",
+        bench.result_channel,
     ]
+    if bench.cgroup_skb_input:
+        cmd.append("--cgroup-skb-input")
     if sudo and os.geteuid() != 0:
         cmd = ["sudo", "-n", *cmd]
     try:

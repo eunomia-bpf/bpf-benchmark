@@ -25,12 +25,15 @@
 struct x86_sim_xdp_abi {
 	void *data;
 	void *data_end;
+	__u32 cb[5];
 };
 
 struct x86_sim_skb_abi {
-	__u8 pad0[X86_SKB_LEN_OFF];
-	__u32 len;
-	__u8 pad1[X86_SKB_DATA_OFF - X86_SKB_LEN_OFF - sizeof(__u32)];
+	__u8 pad0[X86_SKB_CB_OFF];
+	__u32 cb[5];
+	__u8 pad1[X86_SKB_DATA_END_OFF - X86_SKB_CB_OFF - sizeof(__u32) * 5];
+	void *data_end;
+	__u8 pad2[X86_SKB_DATA_OFF - X86_SKB_DATA_END_OFF - sizeof(void *)];
 	void *data;
 };
 
@@ -113,16 +116,17 @@ union x86_sim_gpr {
 		.data = (void *)(long)(CTX)->data,                       \
 		.data_end = (void *)(long)(CTX)->data_end,               \
 	};                                                               \
+	struct __sk_buff *__x86_sim_skb_ctx = (struct __sk_buff *)0;      \
 	X86_SIM_L_DECLARE_STATE();                                           \
 	X86_SIM_L_DECLARE_STACK();                                           \
 	__x86_rdi.ptr = &__x86_sim_abi
 
 #define X86_SIM_ENTRY_SKB(CTX)                                               \
 	struct x86_sim_skb_abi __x86_sim_abi = {                         \
-		.len = (__u32)((__u8 *)(long)(CTX)->data_end -           \
-			       (__u8 *)(long)(CTX)->data),               \
+		.data_end = (void *)(long)(CTX)->data_end,              \
 		.data = (void *)(long)(CTX)->data,                       \
 	};                                                               \
+	struct __sk_buff *__x86_sim_skb_ctx = (CTX);                      \
 	X86_SIM_L_DECLARE_STATE();                                           \
 	X86_SIM_L_DECLARE_STACK();                                           \
 	__x86_rdi.ptr = &__x86_sim_abi
@@ -879,7 +883,14 @@ union x86_sim_gpr {
 #define X86_SIM_RUN_OP_SUB(OP, DST, SRC, FLAGS, AUX, IMM)                   \
 	X86_SIM_RUN_OP((OP), (DST), (SRC), (FLAGS), (AUX), (IMM))
 
-#define X86_SIM_X86_RET() return (__u32)(long)__x86_rax.ptr
+#define X86_SIM_X86_RET()                                                  \
+	do {                                                               \
+		if (__x86_sim_skb_ctx) {                                   \
+			__x86_sim_skb_ctx->cb[0] = __x86_sim_abi.cb[0];    \
+			__x86_sim_skb_ctx->cb[1] = __x86_sim_abi.cb[1];    \
+		}                                                          \
+		return (__u32)(long)__x86_rax.ptr;                         \
+	} while (0)
 
 #define X86_SIM_X86_CALL(LABEL, RETURN_ADDR)                               \
 	do {                                                               \
