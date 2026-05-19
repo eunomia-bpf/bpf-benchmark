@@ -176,6 +176,27 @@ All 29 generated micro sources compile with `clang -O3`; 22 load and pass
 `BPF_PROG_TEST_RUN`. The generated-C path always uses native-link output and uses
 `x86_sim_local_bpf.h` for programs without native local-call subfunctions.
 
+Local-call legacy path status: do not delete `x86_sim_bpf.h` yet. It is still
+the only active generated-C path for native local-call/subfunction artifacts
+because `x86_sim_local_bpf.h` does not yet implement the x86 call-frame,
+subfunction-entry, and subfunction-`ret` protocol. The data says the old path is
+not worth preserving long term, but deletion should happen only after the
+local-state call-frame macro path exists and has replaced the generator
+conditional.
+
+| Result artifact | Overall verifier/test success | `bpf_local_call_fanout_dispatch` status | Compile s | Proof BPF insns | Direct BPF insns | Meaning |
+| --- | ---: | --- | ---: | ---: | ---: | --- |
+| [`README-20260519-014225.md`](./results/README-20260519-014225.md) | 5/29 | run-fail | 9.680 | 4466 | 497 | old struct/helper state for the generated simulator; local-call fails verifier. |
+| [`README-20260519-local-state.md`](./results/README-20260519-local-state.md) | 22/29 | run-fail | 8.199 | 3750 | 466 | local-state is default for non-call programs, but this one still falls back to the old struct/subfunction path and fails verifier. |
+
+The replacement target is a C-authored local-state call-frame protocol that
+models x86 `call` by writing the return address bytes to the modeled stack,
+executes the callee instruction stream in the same architectural state, and
+models callee `ret` by reading the modeled return address. Any optimization that
+omits or abstracts the return-address stack bytes needs a theorem in
+`simulator-spec.md` before implementation, because native x86 code can observe
+those bytes.
+
 | Micro program | Status | Compile s | Proof BPF insns | Direct BPF insns | Verify s | Current verifier result |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
 | `simple` | ok | 0.426 | 19 | 24 | 0.000 | ok |

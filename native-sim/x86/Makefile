@@ -13,7 +13,7 @@ BPF_STACK_SIZE ?= 4096
 build: $(BPF_OBJ)
 	$(CARGO) build --manifest-path $(LOADER_MANIFEST)
 
-$(BPF_OBJ): x86_sim_hardcoded.bpf.c x86_sim_bpf.h x86_sim.h
+$(BPF_OBJ): x86_sim_hardcoded.bpf.c x86_sim_local_bpf.h
 	mkdir -p $(BUILD_DIR)
 	$(CLANG) -g -O2 -target bpf -mllvm -bpf-stack-size=$(BPF_STACK_SIZE) \
 		-D__TARGET_ARCH_x86 \

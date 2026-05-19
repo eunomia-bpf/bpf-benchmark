@@ -1,4 +1,4 @@
-#include "x86_sim_bpf.h"
+#include "x86_sim_local_bpf.h"
 
 SEC("xdp")
 int x86_sim_hardcoded_xdp(struct xdp_md *ctx)

@@ -104,10 +104,23 @@ RUN apt-get update \
 RUN mkdir -p "${IMAGE_WORKSPACE}"
 WORKDIR ${IMAGE_WORKSPACE}
 
-FROM runner-runtime-runtime-base AS runner-runtime-build-base
+FROM ${TRACEE_IMAGE} AS runner-runtime-tracee-upstream
 
-ARG GO_VERSION=1.26.0
+FROM ${CILIUM_IMAGE} AS runner-runtime-cilium-upstream
+
+FROM runner-runtime-runtime-base AS runner-runtime-artifacts
+
+ARG IMAGE_BUILD_JOBS=4
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
+ARG RUN_TARGET_ARCH=x86_64
+ARG VENDOR_BUILD_ARCH=x86
+# Narrow build-contexts pointing at subdirs of the host kbuild O= dir to avoid
+# shipping the full kbuild output (~6 GB) as Docker context. Set by the image rule:
+#   x86_64 -> image-context = $(O)/arch/x86/boot   KERNEL_IMAGE_NAME=bzImage
+#   arm64  -> image-context = $(O)/arch/arm64/boot KERNEL_IMAGE_NAME=vmlinuz.efi
+# Manifest JSON is tiny (<200B) so we inline it as a build-arg instead of a context.
+ARG KERNEL_IMAGE_NAME
+ARG KERNEL_MANIFEST_JSON
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -174,33 +187,6 @@ RUN apt-get update \
         zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN set -eux; \
-    go_arch="$(dpkg --print-architecture)"; \
-    case "$go_arch" in \
-        amd64|x86_64) go_arch=amd64 ;; \
-        arm64|aarch64) go_arch=arm64 ;; \
-        *) echo "unsupported Go arch: $go_arch" >&2; exit 1 ;; \
-    esac; \
-    curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${go_arch}.tar.gz" -o /tmp/go.tgz; \
-    rm -rf /usr/local/go; \
-    tar -C /usr/local -xzf /tmp/go.tgz; \
-    rm -f /tmp/go.tgz; \
-    /usr/local/go/bin/go version
-
-ENV PATH="/usr/local/go/bin:${PATH}" \
-    GOTOOLCHAIN=local
-
-FROM ${TRACEE_IMAGE} AS runner-runtime-tracee-upstream
-
-FROM ${CILIUM_IMAGE} AS runner-runtime-cilium-upstream
-
-FROM runner-runtime-build-base AS runner-runtime-app-artifacts
-
-ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
-ARG RUN_TARGET_ARCH=x86_64
-ARG TARGETARCH
-ARG VENDOR_BUILD_ARCH=x86
-
 COPY --link --from=runner-runtime-tracee-upstream --chmod=0755 /tracee/tracee /artifacts/tracee/bin/tracee
 COPY --link --from=runner-runtime-tracee-upstream --chmod=0755 /tracee/tracee-ebpf /artifacts/tracee/bin/tracee-ebpf
 COPY --link --from=runner-runtime-tracee-upstream --chmod=0755 /lib/ld-musl-*.so.1 /lib/
@@ -263,19 +249,6 @@ RUN set -eux; \
     ln -sfn /usr/local/bin/cilium-agent "${repo_artifact_root}/cilium/bin/cilium-agent"; \
     ln -sfn /usr/local/bin/cilium-dbg "${repo_artifact_root}/cilium/bin/cilium-dbg"; \
     ln -sfn /usr/local/bin/otelcol-ebpf-profiler "${repo_artifact_root}/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler"
-
-FROM runner-runtime-app-artifacts AS runner-runtime-artifacts
-
-ARG IMAGE_BUILD_JOBS=4
-ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
-ARG RUN_TARGET_ARCH=x86_64
-# Narrow build-contexts pointing at subdirs of the host kbuild O= dir to avoid
-# shipping the full kbuild output (~6 GB) as Docker context. Set by the image rule:
-#   x86_64 → image-context = $(O)/arch/x86/boot   KERNEL_IMAGE_NAME=bzImage
-#   arm64  → image-context = $(O)/arch/arm64/boot KERNEL_IMAGE_NAME=vmlinuz.efi
-# Manifest JSON is tiny (<200B) so we inline it as a build-arg instead of a context.
-ARG KERNEL_IMAGE_NAME
-ARG KERNEL_MANIFEST_JSON
 
 COPY --link --from=runner-runtime-host-kernel-image /${KERNEL_IMAGE_NAME} /artifacts/kernel/${KERNEL_IMAGE_NAME}
 COPY --link --from=runner-runtime-host-kernel-offsets /kernel_offsets.h /artifacts/kernel/kernel_offsets.h

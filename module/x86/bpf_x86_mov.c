@@ -633,6 +633,30 @@ static int instantiate_mov_sib(u64 payload, struct bpf_insn *insn_buf, u8 size)
 	arch_regs = mov_payload_form(kinsn_payload_decode(payload)) ==
 		    X86_FORM_ARCH_SIB;
 
+	if (!arch_regs) {
+		if (dst_reg >= BPF_REG_10 || base_reg > BPF_REG_10 ||
+		    index_reg >= BPF_REG_10)
+			return -EINVAL;
+
+		addr_reg = kinsn_x86_scratch_avoid(dst_reg, base_reg,
+						   index_reg);
+		if (addr_reg == dst_reg || addr_reg == base_reg ||
+		    addr_reg == index_reg)
+			return -EINVAL;
+
+		scratch_mask = KINSN_X86_SCRATCH_MASK(addr_reg);
+		kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+		insn_buf[cnt++] = BPF_MOV64_REG(addr_reg, base_reg);
+		add_count = 1 << scale_log2;
+		while (add_count--)
+			insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, addr_reg,
+							index_reg);
+		insn_buf[cnt++] = BPF_LDX_MEM(size, dst_reg, addr_reg,
+					      offset);
+		kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+		return cnt;
+	}
+
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
 	if (arch_regs) {
 		kinsn_x86_read64_arch(insn_buf, &cnt, addr_reg, base_reg);

@@ -446,6 +446,33 @@ returns. The return-address value is the address of the next native instruction
 after the call site. This lets callees observe the modeled return-address bytes;
 dynamic return-target changes are still an open gap.
 
+Current implementation note: generated programs with native local-call
+subfunctions still use the older `x86_sim_bpf.h` struct/subfunction path.
+Generated programs without subfunctions use `x86_sim_local_bpf.h`. The old
+struct path may be deleted only after a local-state implementation of this
+native call-frame protocol exists. Deleting it before then would remove the only
+implementation for local-call artifacts rather than simplify an already
+covered case.
+
+The local-state replacement must satisfy the same hardware-semantics rule:
+
+```text
+call target:
+  push bytes(next_native_pc) to the modeled x86 stack
+  transfer control to target
+
+ret in callee:
+  read bytes at modeled rsp as the native return address
+  pop the modeled x86 stack slot
+  transfer control to that native address
+```
+
+An implementation may not skip the return-address bytes just because the
+current micro case does not read them. Omitting, abstracting, or replacing those
+bytes is a separate theorem obligation that must be stated here before code is
+added, since hardware x86 allows ordinary memory instructions to observe or
+modify the return address.
+
 `X86_SIM_SUB_BEGIN()` only declares the per-callee instruction record. Generated
 callee prologue/epilogue instructions such as `push rbp`, `mov rbp, rsp`, and
 `pop rbp` execute through normal x86 helper steps. Callee-saved register

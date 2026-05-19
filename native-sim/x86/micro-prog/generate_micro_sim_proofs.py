@@ -642,27 +642,25 @@ def program_kind(name: str) -> str:
     return "xdp"
 
 
-def render_x86_subfunction(symbol: str, insns: list[NativeInsn]) -> str:
+def render_x86_subroutine(symbol: str, insns: list[NativeInsn],
+                          call_functions: dict[int, str]) -> str:
     addrs = {insn.addr for insn in insns}
-    lines = [
-        f"static X86_SIM_SUBFN_ATTR int x86_fn_{c_ident(symbol)}("
-        "struct x86_state *__x86_sim_state_ptr, void *__x86_sim_data, "
-        "void *__x86_sim_data_end)",
-        "{",
-        "\t#define __x86_sim_state (*__x86_sim_state_ptr)",
-        "\tX86_SIM_SUB_BEGIN();",
-    ]
+    next_addrs = {
+        insn.addr: insns[index + 1].addr
+        for index, insn in enumerate(insns[:-1])
+    }
+    lines = [f"\t/* native subroutine {c_comment(symbol)} */"]
     for insn in insns:
         lines.append(f"x86_l_{insn.addr:x}:")
         append_branch_or_ret(lines, insn, addrs, subroutine=True,
-                             step_macro="X86_SIM_RUN_OP_SUB",
-                             ret_statement="X86_SIM_X86_SUB_RET();")
-    lines.extend([
-        "\t#undef __x86_sim_state",
-        "\t__builtin_unreachable();",
-        "}",
-        "",
-    ])
+                             next_addr=next_addrs.get(insn.addr),
+                             call_functions=call_functions,
+                             step_macro="X86_SIM_RUN_OP",
+                             ret_statement=(
+                                 "X86_SIM_X86_SUB_RET(x86_sim_ret_dispatch);"
+                             ))
+    lines.append("\t__builtin_unreachable();")
+    lines.append("")
     return "\n".join(lines)
 
 
@@ -684,18 +682,24 @@ def render_program(name: str, insns: list[NativeInsn],
         ctx_type = "struct xdp_md *"
         declare = "X86_SIM_DECLARE_XDP(ctx);"
     addrs = {insn.addr for insn in insns}
-    subfunction_by_addr = {
-        fn_insns[0].addr: f"x86_fn_{c_ident(symbol)}"
+    subroutine_label_by_addr = {
+        fn_insns[0].addr: f"x86_l_{fn_insns[0].addr:x}"
         for symbol, fn_insns in subfunctions.items()
         if fn_insns
     }
+    return_addrs = sorted({
+        fn_insns[index + 1].addr
+        for fn_insns in [insns, *subfunctions.values()]
+        for index, insn in enumerate(fn_insns[:-1])
+        if insn.mnemonic == "call"
+    })
     has_stack = any(
         insn.mnemonic in {"push", "pop"} or
         "[rsp" in insn.raw.lower() or
         "[rbp" in insn.raw.lower()
         for fn_insns in [insns, *subfunctions.values()]
         for insn in fn_insns
-    )
+    ) or bool(subfunctions)
     has_stack_memory = any(
         "[rsp" in insn.raw.lower() or "[rbp" in insn.raw.lower()
         for fn_insns in [insns, *subfunctions.values()]
@@ -705,7 +709,7 @@ def render_program(name: str, insns: list[NativeInsn],
         insn.addr: insns[index + 1].addr
         for index, insn in enumerate(insns[:-1])
     }
-    sim_header = "../x86_sim_bpf.h" if subfunctions else "../x86_sim_local_bpf.h"
+    sim_header = "../x86_sim_local_bpf.h"
     lines: list[str] = []
     if has_stack:
         lines.append('#define X86_SIM_ENABLE_STACK 1')
@@ -715,8 +719,6 @@ def render_program(name: str, insns: list[NativeInsn],
         f'#include "{sim_header}"',
         "",
     ])
-    for symbol, fn_insns in subfunctions.items():
-        lines.append(render_x86_subfunction(symbol, fn_insns))
     lines.extend([
         section,
         f"int {name}_x86_sim_xdp({ctx_type}ctx)",
@@ -728,15 +730,26 @@ def render_program(name: str, insns: list[NativeInsn],
         lines.append(f"{label}:")
         append_branch_or_ret(lines, insn, addrs,
                              next_addr=next_addrs.get(insn.addr),
-                             call_functions=subfunction_by_addr,
+                             call_functions=subroutine_label_by_addr,
                              ret_statement=ret_statement)
-    lines.extend([
-        "\t__builtin_unreachable();",
-        "}",
-        "",
-        "X86_SIM_LICENSE();",
-        "",
-    ])
+    lines.append("\t__builtin_unreachable();")
+    if subfunctions:
+        lines.extend([
+            "",
+            "x86_sim_ret_dispatch:",
+            "\tswitch (__x86_sim_ret_addr) {",
+        ])
+        for addr in return_addrs:
+            lines.append(f"\tcase 0x{addr:x}ULL: goto x86_l_{addr:x};")
+        lines.extend([
+            "\tdefault: __builtin_unreachable();",
+            "\t}",
+            "",
+        ])
+        for symbol, fn_insns in subfunctions.items():
+            lines.append(render_x86_subroutine(
+                symbol, fn_insns, subroutine_label_by_addr))
+    lines.extend(["}", "", "X86_SIM_LICENSE();", ""])
     return "\n".join(lines)
 
 

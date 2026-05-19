@@ -452,10 +452,12 @@ static struct prog_entry *capture_prog_load(const union bpf_attr *attr) {
                  getpid(), hash);
     }
     log_line("BPF_PROG_LOAD type=%u (%s) name=%s insn_cnt=%u hash=%016lx "
-             "license=%s expected_attach=%u attach_btf_id=%u",
+             "license=%s expected_attach=%u attach_btf_id=%u "
+             "prog_btf_fd=%u attach_btf_obj_fd=%u attach_prog_fd=%u",
              attr->prog_type, prog_type_short_name(attr->prog_type), name,
              insn_cnt, hash, (const char *)(uintptr_t)attr->license,
-             attr->expected_attach_type, attr->attach_btf_id);
+             attr->expected_attach_type, attr->attach_btf_id,
+             attr->prog_btf_fd, attr->attach_btf_obj_fd, attr->attach_prog_fd);
     struct prog_entry *e = (struct prog_entry *)calloc(1, sizeof(*e));
     if (!e) return NULL;
     e->prog_type = attr->prog_type;
@@ -1914,6 +1916,12 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
                           ? (uint32_t)p->attach_btf_obj_fd_dup : 0;
     a.attach_prog_fd = (p->attach_prog_fd_dup >= 0)
                        ? (uint32_t)p->attach_prog_fd_dup : 0;
+    log_line("reload prog kid=%u type=%u prog_btf_fd=%u attach_btf_obj_fd=%u "
+             "attach_prog_fd=%u attach_btf_id=%u expected_attach=%u "
+             "nr_map_fds=%u",
+             p->kernel_prog_id, p->prog_type, a.prog_btf_fd,
+             a.attach_btf_obj_fd, a.attach_prog_fd, a.attach_btf_id,
+             a.expected_attach_type, nr_fds);
     /* log_level=1 is enough for reload — we only need to diagnose verifier
      * rejection (last failure line). Detailed state dumps for downstream
      * passes are produced separately by capture_verifier_states() at
@@ -1944,7 +1952,14 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
          * shrunk window passed to the kernel, so we always have room. */
         size_t lg = strnlen(log_buf, log_size);
         snprintf(log_buf + lg, log_size - lg,
-                 "\nBPF_PROG_LOAD errno=%d (post-verifier)\n", load_errno);
+                 "\nBPF_PROG_LOAD errno=%d (post-verifier)\n"
+                 "ctx: prog_btf_fd=%u attach_btf_obj_fd=%u attach_prog_fd=%u "
+                 "attach_btf_id=%u expected_attach=%u nr_map_fds=%u "
+                 "prog_type=%u\n",
+                 load_errno,
+                 a.prog_btf_fd, a.attach_btf_obj_fd, a.attach_prog_fd,
+                 a.attach_btf_id, a.expected_attach_type, nr_fds,
+                 p->prog_type);
         clock_gettime(CLOCK_MONOTONIC, &t1);
         if (out_rejit_ms) *out_rejit_ms = (t1.tv_sec - t0.tv_sec) * 1000ULL
                                           + (t1.tv_nsec - t0.tv_nsec) / 1000000;

@@ -1,0 +1,121 @@
+{
+  "benchmarks": [
+    {
+      "category": "control-flow",
+      "description": "Repeated lookup over a sorted rule table",
+      "error": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_sibload_20260519_040801/sorted_rule_binary_search.bpf.o --program-name sorted_rule_binary_search_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/sorted_rule_binary_search.mem --io-mode staged --input-size 392 --inner-repeat 100000 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260519_111533_780823/details/jit_dumps/sorted_rule_binary_search__kernel__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260519_111533_780823/details/jit_dumps/sorted_rule_binary_search__kernel__sample00.xlated.bin\n49: (bf) r4 = r3                      ; R3=0 R4=0\n50: (bf) r3 = r2                      ; R2=0 R3=0\n51: (67) r3 <<= 3                     ; R3=0\n52: (7b) *(u64 *)(r10 -376) = r6      ; R6=0 R10=fp0 fp-376=0\n53: (7b) *(u64 *)(r10 -368) = r7      ; R7=0 R10=fp0 fp-368=0\n54: (7b) *(u64 *)(r10 -360) = r8      ; R8=0 R10=fp0 fp-360=0\n55: (79) r6 = *(u64 *)(r10 -456)      ; R6=scalar() R10=fp0\n56: (79) r7 = *(u64 *)(r10 -496)      ; R7=scalar() R10=fp0\n57: (0f) r6 += r7                     ; R6=scalar() R7=scalar()\n58: (71) r8 = *(u8 *)(r6 +0)\nR6 invalid mem access 'scalar'\nprocessed 57 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0",
+      "expected_result": 126,
+      "family": "search",
+      "hypothesis": "Captures verifier-friendly bounded rule lookup without map/helper dependencies",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/sorted_rule_binary_search.mem",
+      "io_mode": "staged",
+      "level": "medium",
+      "name": "sorted_rule_binary_search",
+      "runs": [],
+      "tags": [
+        "branch",
+        "search",
+        "pure-jit"
+      ]
+    },
+    {
+      "category": "alu-mix",
+      "description": "bcc runqlat-style log2 latency bucket selection with clamp",
+      "error": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_sibload_20260519_040801/bcc_runqlat_log2_histogram_bucket.bpf.o --program-name bcc_runqlat_log2_histogram_bucket_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bcc_runqlat_log2_histogram_bucket.mem --io-mode staged --input-size 1032 --inner-repeat 100000 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260519_111533_780823/details/jit_dumps/bcc_runqlat_log2_histogram_bucket__kernel__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260519_111533_780823/details/jit_dumps/bcc_runqlat_log2_histogram_bucket__kernel__sample00.xlated.bin\n41: (05) goto pc+97\n139: (bf) r2 = r3                     ; R2=0 R3=0\n140: (67) r2 <<= 3                    ; R2=0\n141: (7b) *(u64 *)(r10 -376) = r6     ; R6=scalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-376=scalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n142: (7b) *(u64 *)(r10 -368) = r7     ; R7=0 R10=fp0 fp-368=0\n143: (7b) *(u64 *)(r10 -360) = r8     ; R8=0 R10=fp0 fp-360=0\n144: (79) r6 = *(u64 *)(r10 -392)     ; R6=scalar() R10=fp0\n145: (79) r7 = *(u64 *)(r10 -464)     ; R7=scalar() R10=fp0\n146: (0f) r6 += r7                    ; R6=scalar() R7=scalar()\n147: (71) r8 = *(u8 *)(r6 +0)\nR6 invalid mem access 'scalar'\nprocessed 51 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0",
+      "expected_result": 17790125373615940312,
+      "family": "histogram-bucket",
+      "hypothesis": "Mirrors tracing histogram bucket selection without helper/map updates",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bcc_runqlat_log2_histogram_bucket.mem",
+      "io_mode": "staged",
+      "level": "log2-clamp",
+      "name": "bcc_runqlat_log2_histogram_bucket",
+      "runs": [],
+      "tags": [
+        "bcc",
+        "tracing",
+        "log2",
+        "histogram",
+        "pure-jit"
+      ]
+    },
+    {
+      "category": "memory-local",
+      "description": "Payload prefix comparison over fixed-size candidate records",
+      "error": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_sibload_20260519_040801/payload_prefix_memcmp_scan.bpf.o --program-name payload_prefix_memcmp_scan_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/payload_prefix_memcmp_scan.mem --io-mode staged --input-size 196 --inner-repeat 100000 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260519_111533_780823/details/jit_dumps/payload_prefix_memcmp_scan__kernel__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260519_111533_780823/details/jit_dumps/payload_prefix_memcmp_scan__kernel__sample00.xlated.bin\n24: (07) r2 += 5                      ; R2=0x6a09e667f3bcc90e\n25: (bf) r0 = r4                      ; R0=0 R4=0\n26: (07) r0 += 1                      ; R0=1\n27: (7b) *(u64 *)(r10 -376) = r6      ; R6=0 R10=fp0 fp-376=0\n28: (7b) *(u64 *)(r10 -368) = r7      ; R7=0 R10=fp0 fp-368=0\n29: (7b) *(u64 *)(r10 -360) = r8      ; R8=0 R10=fp0 fp-360=0\n30: (79) r6 = *(u64 *)(r10 -456)      ; R6=scalar() R10=fp0\n31: (79) r7 = *(u64 *)(r10 -504)      ; R7=scalar() R10=fp0\n32: (0f) r6 += r7                     ; R6=scalar() R7=scalar()\n33: (71) r8 = *(u8 *)(r6 +12)\nR6 invalid mem access 'scalar'\nprocessed 33 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0",
+      "expected_result": 9377358970524074984,
+      "family": "byte-compare",
+      "hypothesis": "Represents protocol/string prefix filters with early mismatch exits",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/payload_prefix_memcmp_scan.mem",
+      "io_mode": "staged",
+      "level": "prefix-64",
+      "name": "payload_prefix_memcmp_scan",
+      "runs": [],
+      "tags": [
+        "memory",
+        "compare",
+        "branch",
+        "pure-jit"
+      ]
+    }
+  ],
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec"
+  },
+  "defaults": {
+    "inner_repeat": 100000,
+    "perf_counters": false,
+    "perf_scope": "full_repeat_raw",
+    "runtime_order_seed": 0,
+    "samples": 1,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "details_dir": "details",
+  "error_message": "sorted_rule_binary_search: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_sibload_20260519_040801/sorted_rule_binary_search.bpf.o --program-name sorted_rule_binary_search_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/sorted_rule_binary_search.mem --io-mode staged --input-size 392 --inner-repeat 100000 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260519_111533_780823/details/jit_dumps/sorted_rule_binary_search__kernel__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260519_111533_780823/details/jit_dumps/sorted_rule_binary_search__kernel__sample00.xlated.bin\n49: (bf) r4 = r3                      ; R3=0 R4=0\n50: (bf) r3 = r2                      ; R2=0 R3=0\n51: (67) r3 <<= 3                     ; R3=0\n52: (7b) *(u64 *)(r10 -376) = r6      ; R6=0 R10=fp0 fp-376=0\n53: (7b) *(u64 *)(r10 -368) = r7      ; R7=0 R10=fp0 fp-368=0\n54: (7b) *(u64 *)(r10 -360) = r8      ; R8=0 R10=fp0 fp-360=0\n55: (79) r6 = *(u64 *)(r10 -456)      ; R6=scalar() R10=fp0\n56: (79) r7 = *(u64 *)(r10 -496)      ; R7=scalar() R10=fp0\n57: (0f) r6 += r7                     ; R6=scalar() R7=scalar()\n58: (71) r8 = *(u8 *)(r6 +0)\nR6 invalid mem access 'scalar'\nprocessed 57 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0; bcc_runqlat_log2_histogram_bucket: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_sibload_20260519_040801/bcc_runqlat_log2_histogram_bucket.bpf.o --program-name bcc_runqlat_log2_histogram_bucket_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bcc_runqlat_log2_histogram_bucket.mem --io-mode staged --input-size 1032 --inner-repeat 100000 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260519_111533_780823/details/jit_dumps/bcc_runqlat_log2_histogram_bucket__kernel__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260519_111533_780823/details/jit_dumps/bcc_runqlat_log2_histogram_bucket__kernel__sample00.xlated.bin\n41: (05) goto pc+97\n139: (bf) r2 = r3                     ; R2=0 R3=0\n140: (67) r2 <<= 3                    ; R2=0\n141: (7b) *(u64 *)(r10 -376) = r6     ; R6=scalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-376=scalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n142: (7b) *(u64 *)(r10 -368) = r7     ; R7=0 R10=fp0 fp-368=0\n143: (7b) *(u64 *)(r10 -360) = r8     ; R8=0 R10=fp0 fp-360=0\n144: (79) r6 = *(u64 *)(r10 -392)     ; R6=scalar() R10=fp0\n145: (79) r7 = *(u64 *)(r10 -464)     ; R7=scalar() R10=fp0\n146: (0f) r6 += r7                    ; R6=scalar() R7=scalar()\n147: (71) r8 = *(u8 *)(r6 +0)\nR6 invalid mem access 'scalar'\nprocessed 51 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0; payload_prefix_memcmp_scan: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --program /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_sibload_20260519_040801/payload_prefix_memcmp_scan.bpf.o --program-name payload_prefix_memcmp_scan_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/payload_prefix_memcmp_scan.mem --io-mode staged --input-size 196 --inner-repeat 100000 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260519_111533_780823/details/jit_dumps/payload_prefix_memcmp_scan__kernel__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260519_111533_780823/details/jit_dumps/payload_prefix_memcmp_scan__kernel__sample00.xlated.bin\n24: (07) r2 += 5                      ; R2=0x6a09e667f3bcc90e\n25: (bf) r0 = r4                      ; R0=0 R4=0\n26: (07) r0 += 1                      ; R0=1\n27: (7b) *(u64 *)(r10 -376) = r6      ; R6=0 R10=fp0 fp-376=0\n28: (7b) *(u64 *)(r10 -368) = r7      ; R7=0 R10=fp0 fp-368=0\n29: (7b) *(u64 *)(r10 -360) = r8      ; R8=0 R10=fp0 fp-360=0\n30: (79) r6 = *(u64 *)(r10 -456)      ; R6=scalar() R10=fp0\n31: (79) r7 = *(u64 *)(r10 -504)      ; R7=scalar() R10=fp0\n32: (0f) r6 += r7                     ; R6=scalar() R7=scalar()\n33: (71) r8 = *(u8 *)(r6 +12)\nR6 invalid mem access 'scalar'\nprocessed 33 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0",
+  "generated_at": "2026-05-19T11:15:33.780823+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "unknown",
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_root_mods=1 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 panic=-1 virtme.exec=`L3RtcC9iZW5jaG1hcmstZ3Vlc3QtMjQ4cnA4N2cuc2g=` virtme_chdir=home/yunwei37/workspace/bpf-benchmark rootfstype=9p rootflags=version=9p2000.L,trans=virtio,access=any raid=noautodetect ro debug loglevel=7 panic=30 oops=panic init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init",
+    "kernel_version": "7.0.0-rc2+",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "unknown"
+  },
+  "last_updated_at": "2026-05-19T11:15:33.971191+00:00",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_pure_jit.yaml",
+  "progress": {
+    "completed_benchmarks": 3,
+    "current_benchmark": null,
+    "current_benchmark_index": null,
+    "total_benchmarks": 3
+  },
+  "provenance": {
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 285K",
+    "environment": "vm",
+    "kernel_commit": "unknown",
+    "params": {
+      "inner_repeat": 100000,
+      "samples": 1,
+      "warmups": 0
+    },
+    "repo_dirty": false,
+    "repo_git_sha": "unknown",
+    "timestamp": "2026-05-19T11:15:33.781749+00:00"
+  },
+  "run_type": "x86_kvm_micro",
+  "started_at": "2026-05-19T11:15:33.780823+00:00",
+  "status": "error",
+  "suite": "micro_staged_codegen",
+  "toolchains": {
+    "libbpf": {
+      "root": "vendor/libbpf"
+    },
+    "llvmbpf": {
+      "root": "vendor/llvmbpf"
+    }
+  }
+}

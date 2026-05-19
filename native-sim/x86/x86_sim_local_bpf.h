@@ -22,6 +22,13 @@
 #define X86_SIM_STACK_BYTES 1U
 #endif
 
+#define X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)                                    \
+	((WIDTH) ? (WIDTH) : X86_WIDTH_64)
+
+#define X86_SIM_L_MEM_EFFECTIVE_WIDTH(AUX, FLAGS)                           \
+	(X86_MEM_AUX_MEM_WIDTH(AUX) ? X86_MEM_AUX_MEM_WIDTH(AUX) :          \
+				      X86_SIM_L_EFFECTIVE_WIDTH(FLAGS))
+
 #define X86_SIM_L_FOR_EACH_GPR(X)                                           \
 	X(X86_RAX, rax)                                                     \
 	X(X86_RCX, rcx)                                                     \
@@ -51,14 +58,21 @@
 	__u8 __x86_cf = 0;                                                  \
 	__u8 __x86_zf = 0;                                                  \
 	__u8 __x86_sf = 0;                                                  \
-	__u8 __x86_of = 0
+	__u8 __x86_of = 0;                                                  \
+	__u64 __x86_sim_ret_addr = 0
 
 #ifdef X86_SIM_ENABLE_STACK
 #define X86_SIM_L_DECLARE_STACK()                                           \
-	__u8 __x86_stack_mem[X86_SIM_STACK_BYTES] = {}
+	union {                                                            \
+		__u8 b[X86_SIM_STACK_BYTES];                              \
+		__u64 q[(X86_SIM_STACK_BYTES + 7U) / 8U];                 \
+	} __x86_stack_mem = {}
 #else
 #define X86_SIM_L_DECLARE_STACK()                                           \
-	__u8 __x86_stack_mem[1] = {}
+	union {                                                            \
+		__u8 b[1];                                                \
+		__u64 q[1];                                               \
+	} __x86_stack_mem = {}
 #endif
 
 #define X86_SIM_L_REG_VALUE(REG)                                            \
@@ -279,54 +293,68 @@
 #define X86_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)                            \
 	do {                                                               \
 		__u32 __x86_stw_index = X86_SIM_L_STACK_INDEX(OFF);       \
-		__u8 __x86_stw_width = (WIDTH) ? (WIDTH) : X86_WIDTH_64;  \
-		__u64 __x86_stw_narrowed = (VALUE) &                     \
-					x86_width_mask(__x86_stw_width); \
-		__x86_stack_mem[__x86_stw_index] = __x86_stw_narrowed;    \
-		if (__x86_stw_width >= X86_WIDTH_16)                      \
-			__x86_stack_mem[__x86_stw_index + 1] =            \
-				__x86_stw_narrowed >> 8;                  \
-		if (__x86_stw_width >= X86_WIDTH_32) {                    \
-			__x86_stack_mem[__x86_stw_index + 2] =            \
-				__x86_stw_narrowed >> 16;                 \
-			__x86_stack_mem[__x86_stw_index + 3] =            \
-				__x86_stw_narrowed >> 24;                 \
-		}                                                         \
-		if (__x86_stw_width == X86_WIDTH_64) {                    \
-			__x86_stack_mem[__x86_stw_index + 4] =            \
-				__x86_stw_narrowed >> 32;                 \
-			__x86_stack_mem[__x86_stw_index + 5] =            \
-				__x86_stw_narrowed >> 40;                 \
-			__x86_stack_mem[__x86_stw_index + 6] =            \
-				__x86_stw_narrowed >> 48;                 \
-			__x86_stack_mem[__x86_stw_index + 7] =            \
-				__x86_stw_narrowed >> 56;                 \
+		if (((WIDTH) ? (WIDTH) : X86_WIDTH_64) == X86_WIDTH_64 && \
+		    (__x86_stw_index & 7U) == 0) {                        \
+			__x86_stack_mem.q[__x86_stw_index >> 3] = (VALUE);\
+		} else {                                                  \
+			__u8 __x86_stw_width =                            \
+				(WIDTH) ? (WIDTH) : X86_WIDTH_64;         \
+			__u64 __x86_stw_narrowed = (VALUE) &              \
+				x86_width_mask(__x86_stw_width);          \
+			__x86_stack_mem.b[__x86_stw_index] =              \
+				__x86_stw_narrowed;                      \
+			if (__x86_stw_width >= X86_WIDTH_16)              \
+				__x86_stack_mem.b[__x86_stw_index + 1] =  \
+					__x86_stw_narrowed >> 8;          \
+			if (__x86_stw_width >= X86_WIDTH_32) {            \
+				__x86_stack_mem.b[__x86_stw_index + 2] =  \
+					__x86_stw_narrowed >> 16;         \
+				__x86_stack_mem.b[__x86_stw_index + 3] =  \
+					__x86_stw_narrowed >> 24;         \
+			}                                                 \
+			if (__x86_stw_width == X86_WIDTH_64) {            \
+				__x86_stack_mem.b[__x86_stw_index + 4] =  \
+					__x86_stw_narrowed >> 32;         \
+				__x86_stack_mem.b[__x86_stw_index + 5] =  \
+					__x86_stw_narrowed >> 40;         \
+				__x86_stack_mem.b[__x86_stw_index + 6] =  \
+					__x86_stw_narrowed >> 48;         \
+				__x86_stack_mem.b[__x86_stw_index + 7] =  \
+					__x86_stw_narrowed >> 56;         \
+			}                                                 \
 		}                                                         \
 	} while (0)
 
 #define X86_SIM_L_STACK_READ(OFF, WIDTH)                                    \
 	({                                                                 \
 		__u32 __x86_str_index = X86_SIM_L_STACK_INDEX(OFF);       \
-		__u8 __x86_str_width = (WIDTH) ? (WIDTH) : X86_WIDTH_64;  \
-		__u64 __x86_str_value = __x86_stack_mem[__x86_str_index]; \
-		if (__x86_str_width >= X86_WIDTH_16)                      \
-			__x86_str_value |=                                \
-				(__u64)__x86_stack_mem[__x86_str_index + 1] << 8;\
-		if (__x86_str_width >= X86_WIDTH_32) {                    \
-			__x86_str_value |=                                \
-				(__u64)__x86_stack_mem[__x86_str_index + 2] << 16;\
-			__x86_str_value |=                                \
-				(__u64)__x86_stack_mem[__x86_str_index + 3] << 24;\
-		}                                                         \
-		if (__x86_str_width == X86_WIDTH_64) {                    \
-			__x86_str_value |=                                \
-				(__u64)__x86_stack_mem[__x86_str_index + 4] << 32;\
-			__x86_str_value |=                                \
-				(__u64)__x86_stack_mem[__x86_str_index + 5] << 40;\
-			__x86_str_value |=                                \
-				(__u64)__x86_stack_mem[__x86_str_index + 6] << 48;\
-			__x86_str_value |=                                \
-				(__u64)__x86_stack_mem[__x86_str_index + 7] << 56;\
+		__u64 __x86_str_value;                                   \
+		if (((WIDTH) ? (WIDTH) : X86_WIDTH_64) == X86_WIDTH_64 && \
+		    (__x86_str_index & 7U) == 0) {                        \
+			__x86_str_value = __x86_stack_mem.q[__x86_str_index >> 3];\
+		} else {                                                  \
+			__u8 __x86_str_width =                            \
+				(WIDTH) ? (WIDTH) : X86_WIDTH_64;         \
+			__x86_str_value = __x86_stack_mem.b[__x86_str_index];\
+			if (__x86_str_width >= X86_WIDTH_16)              \
+				__x86_str_value |=                        \
+					(__u64)__x86_stack_mem.b[__x86_str_index + 1] << 8;\
+			if (__x86_str_width >= X86_WIDTH_32) {            \
+				__x86_str_value |=                        \
+					(__u64)__x86_stack_mem.b[__x86_str_index + 2] << 16;\
+				__x86_str_value |=                        \
+					(__u64)__x86_stack_mem.b[__x86_str_index + 3] << 24;\
+			}                                                 \
+			if (__x86_str_width == X86_WIDTH_64) {            \
+				__x86_str_value |=                        \
+					(__u64)__x86_stack_mem.b[__x86_str_index + 4] << 32;\
+				__x86_str_value |=                        \
+					(__u64)__x86_stack_mem.b[__x86_str_index + 5] << 40;\
+				__x86_str_value |=                        \
+					(__u64)__x86_stack_mem.b[__x86_str_index + 6] << 48;\
+				__x86_str_value |=                        \
+					(__u64)__x86_stack_mem.b[__x86_str_index + 7] << 56;\
+			}                                                 \
 		}                                                         \
 		__x86_str_value;                                          \
 	})
@@ -593,7 +621,7 @@
 		    __x86_l_tag == X86_PTR_STACK) {                       \
 			__x86_l_value = X86_SIM_L_STACK_READ(             \
 				(__s64)__x86_l_base_value + __x86_l_disp, \
-				__x86_l_mem_width);                       \
+				X86_SIM_L_MEM_EFFECTIVE_WIDTH((AUX), (FLAGS)));\
 			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,   \
 						  __x86_l_write_width);     \
 		} else if (__x86_l_tag == X86_PTR_CTX &&                  \
@@ -665,7 +693,8 @@
 		    __x86_l_tag == X86_PTR_STACK)                         \
 			X86_SIM_L_STACK_WRITE(                            \
 				(__s64)__x86_l_base_value + __x86_l_disp, \
-				__x86_l_width, __x86_l_value);             \
+				X86_SIM_L_EFFECTIVE_WIDTH(FLAGS),          \
+				__x86_l_value);                            \
 		else {                                                    \
 			if (__x86_l_tag == X86_PTR_NONE)                  \
 				__x86_l_base = (void *)(long)__x86_l_base_value;\
@@ -1074,6 +1103,22 @@
 
 #define X86_SIM_X86_RET() return (__u32)__x86_rax
 
+#define X86_SIM_X86_CALL(LABEL, RETURN_ADDR)                               \
+	do {                                                               \
+		__x86_rsp -= 8;                                           \
+		X86_SIM_L_STACK_WRITE((__s64)__x86_rsp, X86_WIDTH_64,     \
+				      (RETURN_ADDR));                     \
+		goto LABEL;                                               \
+	} while (0)
+
+#define X86_SIM_X86_SUB_RET(DISPATCH_LABEL)                                \
+	do {                                                               \
+		__x86_sim_ret_addr = X86_SIM_L_STACK_READ(                 \
+			(__s64)__x86_rsp, X86_WIDTH_64);                   \
+		__x86_rsp += 8;                                           \
+		goto DISPATCH_LABEL;                                      \
+	} while (0)
+
 #define X86_SIM_X86_JMP(CURRENT, TARGET, LABEL)                             \
 	do {                                                               \
 		(void)(CURRENT);                                           \
@@ -1102,6 +1147,12 @@ X86_SIM_CONCAT(__x86_sim_jcc_fallthrough_, ID):                              \
 
 #define X86_SIM_X86_JCC(CC, CURRENT, TARGET, LABEL)                         \
 	X86_SIM_X86_JCC_IMPL((CC), (CURRENT), (TARGET), LABEL, __LINE__)
+
+#define X86_SIM_X86_SUB_JMP(CURRENT, TARGET, LABEL)                         \
+	X86_SIM_X86_JMP((CURRENT), (TARGET), LABEL)
+
+#define X86_SIM_X86_SUB_JCC(CC, CURRENT, TARGET, LABEL)                     \
+	X86_SIM_X86_JCC((CC), (CURRENT), (TARGET), LABEL)
 
 #define X86_SIM_LICENSE() char LICENSE[] SEC("license") = "GPL"
 
