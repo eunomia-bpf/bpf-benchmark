@@ -638,6 +638,18 @@ static int instantiate_mov_sib(u64 payload, struct bpf_insn *insn_buf, u8 size)
 		    index_reg >= BPF_REG_10)
 			return -EINVAL;
 
+		if (dst_reg != base_reg && dst_reg != index_reg) {
+			insn_buf[cnt++] = BPF_MOV64_REG(dst_reg, base_reg);
+			add_count = 1 << scale_log2;
+			while (add_count--)
+				insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD,
+								dst_reg,
+								index_reg);
+			insn_buf[cnt++] = BPF_LDX_MEM(size, dst_reg, dst_reg,
+						      offset);
+			return cnt;
+		}
+
 		addr_reg = kinsn_x86_scratch_avoid(dst_reg, base_reg,
 						   index_reg);
 		if (addr_reg == dst_reg || addr_reg == base_reg ||
