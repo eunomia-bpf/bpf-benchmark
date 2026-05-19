@@ -227,14 +227,13 @@ struct x86_state {
 	void *cmp_lhs_ptr;
 	void *cmp_rhs_ptr;
 #ifdef X86_SIM_ENABLE_STACK
-	__u8 stack_mem[256];
-	void *p_stack[32];
-	__u8 tag_stack[32];
+	__u8 stack_mem[128];
 #endif
 };
 
 static __always_inline void x86_init_state(struct x86_state *state, void *ctx)
 {
+	state->rdi = (__u64)(long)ctx;
 	state->p_rdi = ctx;
 	state->tag_rdi = X86_PTR_CTX;
 #ifdef X86_SIM_ENABLE_STACK
@@ -308,6 +307,7 @@ static __always_inline void x86_clear_ptr_reg(struct x86_state *state,
 	case REG:                                                          \
 		state->PTR = 0;                                            \
 		state->TAG = X86_PTR_NONE;                                 \
+		state->OFF = 0;                                           \
 		return;
 	X86_FOR_EACH_GPR(X86_CLEAR_PTR_CASE)
 #undef X86_CLEAR_PTR_CASE
@@ -437,7 +437,7 @@ static __always_inline int x86_write_reg(struct x86_state *state,
 }
 
 #ifdef X86_SIM_ENABLE_STACK
-#define X86_SIM_STACK_BYTES 256U
+#define X86_SIM_STACK_BYTES 128U
 
 static __always_inline __u32 x86_stack_index(__s64 off)
 {
@@ -447,15 +447,9 @@ static __always_inline __u32 x86_stack_index(__s64 off)
 static __always_inline void
 x86_stack_clear_ptr_range(struct x86_state *state, __u32 index, __u8 width)
 {
-	__u32 first = index >> 3;
-	__u32 last = (index + width - 1) >> 3;
-
-	state->p_stack[first] = 0;
-	state->tag_stack[first] = X86_PTR_NONE;
-	if (last != first) {
-		state->p_stack[last] = 0;
-		state->tag_stack[last] = X86_PTR_NONE;
-	}
+	(void)state;
+	(void)index;
+	(void)width;
 }
 
 static __always_inline int x86_stack_write_raw(struct x86_state *state,
@@ -466,6 +460,8 @@ static __always_inline int x86_stack_write_raw(struct x86_state *state,
 	__u32 index = x86_stack_index(off);
 	__u64 narrowed = value & x86_width_mask(width);
 
+	(void)ptr;
+	(void)tag;
 	state->stack_mem[index] = narrowed;
 	if (width >= X86_WIDTH_16)
 		state->stack_mem[index + 1] = narrowed >> 8;
@@ -478,15 +474,6 @@ static __always_inline int x86_stack_write_raw(struct x86_state *state,
 		state->stack_mem[index + 5] = narrowed >> 40;
 		state->stack_mem[index + 6] = narrowed >> 48;
 		state->stack_mem[index + 7] = narrowed >> 56;
-		if ((index & 7) == 0) {
-			__u32 slot = index >> 3;
-
-			state->p_stack[slot] =
-				(tag == X86_PTR_NONE || tag == X86_PTR_STACK) ?
-					0 : ptr;
-			state->tag_stack[slot] = tag;
-			return X86_SIM_CONTINUE;
-		}
 	}
 	x86_stack_clear_ptr_range(state, index, width);
 	return X86_SIM_CONTINUE;
@@ -514,12 +501,6 @@ static __always_inline int x86_stack_read_raw(struct x86_state *state,
 	}
 	*ptr = 0;
 	*tag = X86_PTR_NONE;
-	if (width == X86_WIDTH_64 && (index & 7) == 0) {
-		__u32 slot = index >> 3;
-
-		*ptr = state->p_stack[slot];
-		*tag = state->tag_stack[slot];
-	}
 	return X86_SIM_CONTINUE;
 }
 
@@ -634,6 +615,118 @@ static __always_inline void x86_set_add_flags(struct x86_state *state,
 	state->of = (~(a ^ b) & (a ^ r) & sign) != 0;
 }
 
+static __always_inline __u8 x86_shift_count(__u64 rhs, __u8 width)
+{
+	if (width == X86_WIDTH_64)
+		return rhs & 0x3f;
+	return rhs & 0x1f;
+}
+
+static __always_inline void x86_set_sbb_flags(struct x86_state *state,
+					      __u64 lhs, __u64 rhs,
+					      __u8 borrow, __u64 result,
+					      __u8 width)
+{
+	__u64 mask = x86_width_mask(width);
+	__u64 a = lhs & mask;
+	__u64 b = rhs & mask;
+	__u64 sub = (b + borrow) & mask;
+	__u64 r = result & mask;
+	__u32 bits = x86_width_bits(width);
+	__u64 sign = 1ULL << (bits - 1);
+
+	state->cmp_ptr_valid = 0;
+	state->cf = (a < b) || (borrow && a == b);
+	state->zf = r == 0;
+	state->sf = (r & sign) != 0;
+	state->of = ((a ^ sub) & (a ^ r) & sign) != 0;
+}
+
+static __always_inline __u64 x86_signed_abs_width(__u64 value, __u8 width)
+{
+	__u64 narrowed = x86_apply_width(value, width);
+	__u64 sign = 1ULL << (x86_width_bits(width) - 1);
+
+	if (!(narrowed & sign))
+		return narrowed;
+	return ((~narrowed) + 1) & x86_width_mask(width);
+}
+
+static __always_inline void x86_set_imul_flags(struct x86_state *state,
+					       __u64 lhs, __u64 rhs,
+					       __u8 width)
+{
+	__u64 a_abs = x86_signed_abs_width(lhs, width);
+	__u64 b_abs = x86_signed_abs_width(rhs, width);
+	__u64 sign = 1ULL << (x86_width_bits(width) - 1);
+	__u64 limit = ((lhs ^ rhs) & sign) ? sign : sign - 1;
+	__u8 overflow = 0;
+
+	if (a_abs != 0 && b_abs > limit / a_abs)
+		overflow = 1;
+	state->cmp_ptr_valid = 0;
+	state->cf = overflow;
+	state->of = overflow;
+}
+
+static __always_inline void x86_set_shift_flags(struct x86_state *state,
+						__u64 lhs, __u64 rhs,
+						__u64 result, __u32 alu,
+						__u8 width)
+{
+	__u32 bits = x86_width_bits(width);
+	__u64 mask = x86_width_mask(width);
+	__u64 a = lhs & mask;
+	__u64 r = result & mask;
+	__u8 count = x86_shift_count(rhs, width);
+	__u64 sign = 1ULL << (bits - 1);
+
+	if (alu == X86_ALU_ROL) {
+		__u8 amount = count % bits;
+
+		if (amount == 0)
+			return;
+		state->cmp_ptr_valid = 0;
+		state->cf = r & 1;
+		if (amount == 1)
+			state->of = ((r & sign) != 0) ^ state->cf;
+		return;
+	}
+	if (count == 0)
+		return;
+	state->cmp_ptr_valid = 0;
+	state->zf = r == 0;
+	state->sf = (r & sign) != 0;
+	if (alu == X86_ALU_SHL) {
+		state->cf = count <= bits ? (a >> (bits - count)) & 1 : 0;
+		if (count == 1)
+			state->of = ((r & sign) != 0) ^ state->cf;
+		return;
+	}
+	if (alu == X86_ALU_SHR) {
+		state->cf = count <= bits ? (a >> (count - 1)) & 1 : 0;
+		if (count == 1)
+			state->of = (a & sign) != 0;
+		return;
+	}
+	if (alu == X86_ALU_SAR) {
+		state->cf = count <= bits ? (a >> (count - 1)) & 1 :
+					   (a & sign) != 0;
+		if (count == 1)
+			state->of = 0;
+	}
+}
+
+static __always_inline void x86_set_popcnt_flags(struct x86_state *state,
+						 __u64 src, __u8 width)
+{
+	state->cmp_ptr_valid = 0;
+	state->cf = 0;
+	state->of = 0;
+	state->sf = 0;
+	state->zf = x86_apply_width(src, width) == 0;
+}
+
 static __always_inline void x86_set_alu_flags(struct x86_state *state,
 					      __u64 lhs, __u64 rhs,
 					      __u64 result, __u32 alu,
@@ -650,12 +743,25 @@ static __always_inline void x86_set_alu_flags(struct x86_state *state,
 		state->cf = old_cf;
 		return;
 	}
-	if (alu == X86_ALU_SUB || alu == X86_ALU_SBB) {
+	if (alu == X86_ALU_SUB) {
 		x86_set_sub_flags(state, lhs, rhs, result, width);
+		return;
+	}
+	if (alu == X86_ALU_SBB) {
+		x86_set_sbb_flags(state, lhs, rhs, 0, result, width);
 		return;
 	}
 	if (alu == X86_ALU_NOT)
 		return;
+	if (alu == X86_ALU_SHL || alu == X86_ALU_SHR ||
+	    alu == X86_ALU_SAR || alu == X86_ALU_ROL) {
+		x86_set_shift_flags(state, lhs, rhs, result, alu, width);
+		return;
+	}
+	if (alu == X86_ALU_IMUL) {
+		x86_set_imul_flags(state, lhs, rhs, width);
+		return;
+	}
 	x86_set_logic_flags(state, result, width);
 }
 
@@ -700,7 +806,7 @@ static __always_inline __u64 x86_alu_result(__u64 lhs, __u64 rhs,
 					    __u32 alu, __u8 width)
 {
 	__u32 bits = x86_width_bits(width);
-	__u64 amount = rhs & (bits - 1);
+	__u64 amount = x86_shift_count(rhs, width);
 
 	if (alu == X86_ALU_ADD)
 		return lhs + rhs;
@@ -712,11 +818,26 @@ static __always_inline __u64 x86_alu_result(__u64 lhs, __u64 rhs,
 		return lhs | rhs;
 	if (alu == X86_ALU_AND)
 		return lhs & rhs;
-	if (alu == X86_ALU_SHL)
+	if (alu == X86_ALU_SHL) {
+		if (amount >= bits)
+			return 0;
 		return lhs << amount;
-	if (alu == X86_ALU_SHR)
+	}
+	if (alu == X86_ALU_SHR) {
+		if (amount >= bits)
+			return 0;
 		return lhs >> amount;
+	}
 	if (alu == X86_ALU_SAR) {
+		if (amount >= bits) {
+			if (width == X86_WIDTH_32)
+				return ((__u32)lhs & 0x80000000U) ?
+					       0xffffffffU :
+					       0;
+			return ((__u64)lhs & 0x8000000000000000ULL) ?
+				       0xffffffffffffffffULL :
+				       0;
+		}
 		if (width == X86_WIDTH_32)
 			return (__u32)((__s32)lhs >> amount);
 		return (__u64)((__s64)lhs >> amount);
@@ -737,12 +858,14 @@ static __always_inline __u64 x86_shld(__u64 dst, __u64 src, __u64 shift,
 {
 	__u32 bits = x86_width_bits(width);
 	__u64 mask = x86_width_mask(width);
-	__u64 amount = shift & (bits - 1);
+	__u64 amount = x86_shift_count(shift, width);
 	__u64 d = dst & mask;
 	__u64 s = src & mask;
 
 	if (amount == 0)
 		return d;
+	if (amount >= bits)
+		return (s << (amount - bits)) & mask;
 	return ((d << amount) | (s >> (bits - amount))) & mask;
 }
 
@@ -751,13 +874,57 @@ static __always_inline __u64 x86_shrd(__u64 dst, __u64 src, __u64 shift,
 {
 	__u32 bits = x86_width_bits(width);
 	__u64 mask = x86_width_mask(width);
-	__u64 amount = shift & (bits - 1);
+	__u64 amount = x86_shift_count(shift, width);
 	__u64 d = dst & mask;
 	__u64 s = src & mask;
 
 	if (amount == 0)
 		return d;
+	if (amount >= bits)
+		return (s >> (amount - bits)) & mask;
 	return ((d >> amount) | (s << (bits - amount))) & mask;
+}
+
+static __always_inline void x86_set_shld_flags(struct x86_state *state,
+					       __u64 dst, __u64 result,
+					       __u64 shift, __u8 width)
+{
+	__u32 bits = x86_width_bits(width);
+	__u64 mask = x86_width_mask(width);
+	__u64 d = dst & mask;
+	__u64 r = result & mask;
+	__u8 count = x86_shift_count(shift, width);
+	__u64 sign = 1ULL << (bits - 1);
+
+	if (count == 0)
+		return;
+	state->cmp_ptr_valid = 0;
+	state->cf = count <= bits ? (d >> (bits - count)) & 1 : 0;
+	state->zf = r == 0;
+	state->sf = (r & sign) != 0;
+	if (count == 1)
+		state->of = ((r & sign) != 0) ^ state->cf;
+}
+
+static __always_inline void x86_set_shrd_flags(struct x86_state *state,
+					       __u64 dst, __u64 result,
+					       __u64 shift, __u8 width)
+{
+	__u32 bits = x86_width_bits(width);
+	__u64 mask = x86_width_mask(width);
+	__u64 d = dst & mask;
+	__u64 r = result & mask;
+	__u8 count = x86_shift_count(shift, width);
+	__u64 sign = 1ULL << (bits - 1);
+
+	if (count == 0)
+		return;
+	state->cmp_ptr_valid = 0;
+	state->cf = count <= bits ? (d >> (count - 1)) & 1 : 0;
+	state->zf = r == 0;
+	state->sf = (r & sign) != 0;
+	if (count == 1)
+		state->of = ((d ^ r) & sign) != 0;
 }
 
 static __always_inline int x86_eval_cc(const struct x86_state *state,
@@ -907,285 +1074,6 @@ static __always_inline int x86_read_packet_value(void *data, void *data_end,
 	return 0;
 }
 
-#ifdef X86_SIM_ENABLE_RODATA
-static __always_inline int x86_rodata_trace_event_switch(__u64 index,
-							 __u64 *out)
-{
-	if (index == 0) {
-		*out = 56;
-		return 0;
-	}
-	if (index == 1) {
-		*out = 43;
-		return 0;
-	}
-	if (index == 2) {
-		*out = 57;
-		return 0;
-	}
-	if (index == 3) {
-		*out = 28;
-		return 0;
-	}
-	if (index == 4) {
-		*out = 14;
-		return 0;
-	}
-	if (index == 5) {
-		*out = 61;
-		return 0;
-	}
-	if (index == 6) {
-		*out = 10;
-		return 0;
-	}
-	if (index == 7) {
-		*out = 58;
-		return 0;
-	}
-	if (index == 8) {
-		*out = 2;
-		return 0;
-	}
-	if (index == 9) {
-		*out = 63;
-		return 0;
-	}
-	if (index == 10) {
-		*out = 49;
-		return 0;
-	}
-	if (index == 11) {
-		*out = 36;
-		return 0;
-	}
-	if (index == 12) {
-		*out = 19;
-		return 0;
-	}
-	if (index == 13) {
-		*out = 42;
-		return 0;
-	}
-	if (index == 14) {
-		*out = 37;
-		return 0;
-	}
-	if (index == 15) {
-		*out = 46;
-		return 0;
-	}
-	if (index == 16) {
-		*out = 34;
-		return 0;
-	}
-	if (index == 17) {
-		*out = 62;
-		return 0;
-	}
-	if (index == 18) {
-		*out = 47;
-		return 0;
-	}
-	if (index == 19) {
-		*out = 6;
-		return 0;
-	}
-	if (index == 20) {
-		*out = 29;
-		return 0;
-	}
-	if (index == 21) {
-		*out = 21;
-		return 0;
-	}
-	if (index == 22) {
-		*out = 15;
-		return 0;
-	}
-	if (index == 23) {
-		*out = 40;
-		return 0;
-	}
-	if (index == 24) {
-		*out = 38;
-		return 0;
-	}
-	if (index == 25) {
-		*out = 26;
-		return 0;
-	}
-	if (index == 26) {
-		*out = 17;
-		return 0;
-	}
-	if (index == 27) {
-		*out = 41;
-		return 0;
-	}
-	if (index == 28) {
-		*out = 33;
-		return 0;
-	}
-	if (index == 29) {
-		*out = 31;
-		return 0;
-	}
-	if (index == 30) {
-		*out = 23;
-		return 0;
-	}
-	if (index == 31) {
-		*out = 52;
-		return 0;
-	}
-	if (index == 32) {
-		*out = 25;
-		return 0;
-	}
-	if (index == 33) {
-		*out = 39;
-		return 0;
-	}
-	if (index == 34) {
-		*out = 11;
-		return 0;
-	}
-	if (index == 35) {
-		*out = 27;
-		return 0;
-	}
-	if (index == 36) {
-		*out = 53;
-		return 0;
-	}
-	if (index == 37) {
-		*out = 4;
-		return 0;
-	}
-	if (index == 38) {
-		*out = 24;
-		return 0;
-	}
-	if (index == 39) {
-		*out = 48;
-		return 0;
-	}
-	if (index == 40) {
-		*out = 32;
-		return 0;
-	}
-	if (index == 41) {
-		*out = 50;
-		return 0;
-	}
-	if (index == 42) {
-		*out = 7;
-		return 0;
-	}
-	if (index == 43) {
-		*out = 35;
-		return 0;
-	}
-	if (index == 44) {
-		*out = 8;
-		return 0;
-	}
-	if (index == 45) {
-		*out = 44;
-		return 0;
-	}
-	if (index == 46) {
-		*out = 51;
-		return 0;
-	}
-	if (index == 47) {
-		*out = 59;
-		return 0;
-	}
-	if (index == 48) {
-		*out = 45;
-		return 0;
-	}
-	if (index == 49) {
-		*out = 0;
-		return 0;
-	}
-	if (index == 50) {
-		*out = 9;
-		return 0;
-	}
-	if (index == 51) {
-		*out = 3;
-		return 0;
-	}
-	if (index == 52) {
-		*out = 13;
-		return 0;
-	}
-	if (index == 53) {
-		*out = 20;
-		return 0;
-	}
-	if (index == 54) {
-		*out = 30;
-		return 0;
-	}
-	if (index == 55) {
-		*out = 18;
-		return 0;
-	}
-	if (index == 56) {
-		*out = 1;
-		return 0;
-	}
-	if (index == 57) {
-		*out = 54;
-		return 0;
-	}
-	if (index == 58) {
-		*out = 22;
-		return 0;
-	}
-	if (index == 59) {
-		*out = 16;
-		return 0;
-	}
-	if (index == 60) {
-		*out = 60;
-		return 0;
-	}
-	if (index == 61) {
-		*out = 5;
-		return 0;
-	}
-	if (index == 62) {
-		*out = 12;
-		return 0;
-	}
-	if (index == 63) {
-		*out = 55;
-		return 0;
-	}
-	*out = 0;
-	return 0;
-}
-
-static __always_inline int x86_load_rodata(struct x86_state *state,
-					   __u8 dst, __u64 base,
-					   __s64 disp, __u8 load_width,
-					   __u8 write_width, __u8 sign_extend)
-{
-	__u64 value = 0;
-
-	if (base == 3782 && load_width == X86_WIDTH_64 &&
-	    disp >= 0 && disp < 512 && (disp & 7) == 0)
-		x86_rodata_trace_event_switch((__u64)disp >> 3, &value);
-	if (sign_extend)
-		value = x86_sign_extend(value, load_width);
-	return x86_write_reg_width(state, dst, value, write_width);
-}
-#endif
 
 static __always_inline int x86_store_packet_imm(void *data, void *data_end,
 						void *base, __s64 disp,
@@ -1281,13 +1169,15 @@ static __always_inline int x86_load_mem(struct x86_state *state,
 	}
 	if (tag == X86_PTR_CTX && insn->src == X86_RDI &&
 	    (disp == X86_CTX_DATA_OFF || disp == X86_SKB_DATA_OFF)) {
-		x86_write_reg_width(state, insn->dst, 0, X86_WIDTH_64);
+		x86_write_reg_width(state, insn->dst, (__u64)(long)data,
+				    X86_WIDTH_64);
 		return x86_write_ptr_reg_off(state, insn->dst, data,
 					     X86_PTR_PACKET, 0);
 	}
 	if (tag == X86_PTR_CTX && insn->src == X86_RDI &&
 	    disp == X86_CTX_DATA_END_OFF) {
-		x86_write_reg_width(state, insn->dst, 0, X86_WIDTH_64);
+		x86_write_reg_width(state, insn->dst, (__u64)(long)data_end,
+				    X86_WIDTH_64);
 		return x86_write_ptr_reg_off(state, insn->dst, data_end,
 					     X86_PTR_PACKET_END, 0);
 	}
@@ -1295,13 +1185,6 @@ static __always_inline int x86_load_mem(struct x86_state *state,
 		return x86_load_packet(state, insn->dst, data, data_end, base,
 				       disp, mem_width, insn->flags,
 				       insn->op == X86_OP_MOVSX_LOAD);
-#ifdef X86_SIM_ENABLE_RODATA
-	if (tag == X86_PTR_RODATA) {
-		return x86_load_rodata(state, insn->dst, base_value, disp,
-				       mem_width, insn->flags,
-				       insn->op == X86_OP_MOVSX_LOAD);
-	}
-#endif
 	return x86_load_packet(state, insn->dst, data, data_end,
 			       (void *)(long)base_value, disp, mem_width,
 			       insn->flags, insn->op == X86_OP_MOVSX_LOAD);
@@ -1418,20 +1301,6 @@ static __always_inline int x86_store_mem(struct x86_state *state,
 #endif
 	x86_promote_index_packet_base(state, insn->dst, insn->aux,
 				      &base, &tag, &disp);
-	if (tag == X86_PTR_CTX && insn->dst == X86_RDI &&
-	    (disp == 16 || disp == 20) && insn->flags == X86_WIDTH_32) {
-		__u64 value = x86_store_imm_value(insn->imm);
-		__s64 out_off = disp == 16 ? 0 : 4;
-		__u8 src_shift = X86_REG_AUX_GET_SRC_SHIFT(insn->aux);
-
-		if (insn->op != X86_OP_MOV_STORE_IMM) {
-			value = x86_read_reg(state, insn->src);
-			if (src_shift != 0)
-				value >>= src_shift;
-		}
-		return x86_store_packet_imm(data, data_end, data, out_off,
-					    X86_WIDTH_32, value);
-	}
 	if (insn->op == X86_OP_MOV_STORE_IMM)
 		return x86_store_packet_imm(data, data_end,
 					    tag == X86_PTR_NONE ?
@@ -1602,13 +1471,11 @@ static __always_inline int x86_exec_lea(struct x86_state *state,
 	__s32 src_off = 0;
 	__s64 off = x86_simm(insn->imm);
 
-#ifdef X86_SIM_ENABLE_RODATA
 	if (width == X86_WIDTH_64 && insn->src == X86_REG_NONE &&
 	    insn->aux == X86_PTR_RODATA) {
 		x86_write_reg_width(state, insn->dst, insn->imm, width);
-		return x86_write_ptr_reg(state, insn->dst, 0, X86_PTR_RODATA);
+		return X86_SIM_CONTINUE;
 	}
-#endif
 	x86_mem_offset(state, insn->aux, off, &off);
 	if (insn->src != X86_REG_NONE)
 		src_value = x86_read_reg(state, insn->src);
@@ -1616,7 +1483,7 @@ static __always_inline int x86_exec_lea(struct x86_state *state,
 	if (width == X86_WIDTH_64 &&
 	    (src_tag == X86_PTR_PACKET || src_tag == X86_PTR_PACKET_END)) {
 		src_off = x86_read_ptr_off_reg(state, insn->src);
-		x86_write_reg_width(state, insn->dst, 0, width);
+		x86_write_reg_width(state, insn->dst, src_value + off, width);
 		return x86_write_ptr_reg_off(state, insn->dst,
 					     (__u8 *)src_ptr + off, src_tag,
 					     src_off + off);
@@ -1644,7 +1511,9 @@ static __always_inline int x86_exec_alu_imm(struct x86_state *state,
 
 		if (insn->aux == X86_ALU_SUB)
 			off = -off;
-		result = dst_value + off;
+		result = x86_alu_result(dst_value, rhs, insn->aux, width);
+		x86_set_alu_flags(state, dst_value, rhs, result, insn->aux,
+				  width);
 		x86_write_reg_width(state, insn->dst, result, width);
 		return x86_write_ptr_reg(state, insn->dst, 0, X86_PTR_STACK);
 	}
@@ -1658,22 +1527,29 @@ static __always_inline int x86_exec_alu_imm(struct x86_state *state,
 
 		if (insn->aux == X86_ALU_SUB)
 			off = -off;
+		result = x86_alu_result(dst_value, rhs, insn->aux, width);
+		x86_set_alu_flags(state, dst_value, rhs, result, insn->aux,
+				  width);
 #ifdef X86_SIM_ENABLE_STACK
 		if (src_tag == X86_PTR_STACK) {
-			result = dst_value + off;
 			x86_write_reg_width(state, insn->dst, result, width);
 			return x86_write_ptr_reg(state, insn->dst, 0,
 						 X86_PTR_STACK);
 		}
 #endif
 		src_off = x86_read_ptr_off_reg(state, insn->dst);
-		x86_write_reg_width(state, insn->dst, 0, width);
+		x86_write_reg_width(state, insn->dst, result, width);
 		return x86_write_ptr_reg_off(state, insn->dst,
 					     (__u8 *)src_ptr + off, src_tag,
 					     src_off + off);
 	}
-	if (insn->aux == X86_ALU_SBB)
-		rhs += state->cf;
+	if (insn->aux == X86_ALU_SBB) {
+		__u8 borrow = state->cf;
+
+		result = dst_value - rhs - borrow;
+		x86_set_sbb_flags(state, dst_value, rhs, borrow, result, width);
+		return x86_write_reg_width(state, insn->dst, result, width);
+	}
 	result = x86_alu_result(dst_value, rhs, insn->aux, width);
 	x86_set_alu_flags(state, dst_value, rhs, result, insn->aux, width);
 	return x86_write_reg_width(state, insn->dst, result, width);
@@ -1699,8 +1575,14 @@ static __always_inline int x86_exec_alu_mem(struct x86_state *state,
 	dst_value = x86_read_reg(state, insn->dst);
 	x86_read_mem_value(state, insn->src, insn->aux, insn->imm, data,
 			   data_end, width, &mem_value);
-	if (alu == X86_ALU_SBB)
-		mem_value += state->cf;
+	if (alu == X86_ALU_SBB) {
+		__u8 borrow = state->cf;
+
+		result = dst_value - mem_value - borrow;
+		x86_set_sbb_flags(state, dst_value, mem_value, borrow, result,
+				  width);
+		return x86_write_reg_width(state, insn->dst, result, width);
+	}
 	result = x86_alu_result(dst_value, mem_value, alu, width);
 	x86_set_alu_flags(state, dst_value, mem_value, result, alu, width);
 	return x86_write_reg_width(state, insn->dst, result, width);
@@ -1728,7 +1610,10 @@ static __always_inline int x86_exec_alu_reg(struct x86_state *state,
 	if (width == X86_WIDTH_64 && insn->aux == X86_ALU_ADD &&
 	    dst_tag == X86_PTR_PACKET_LEN && src_tag == X86_PTR_PACKET) {
 		src_off = x86_read_ptr_off_reg(state, insn->src);
-		x86_write_reg_width(state, insn->dst, 0, width);
+		result = x86_alu_result(dst_value, src_value, insn->aux, width);
+		x86_set_alu_flags(state, dst_value, src_value, result,
+				  insn->aux, width);
+		x86_write_reg_width(state, insn->dst, result, width);
 		return x86_write_ptr_reg_off(state, insn->dst,
 					     (__u8 *)dst_ptr + src_off,
 					     X86_PTR_PACKET_END, src_off);
@@ -1736,7 +1621,10 @@ static __always_inline int x86_exec_alu_reg(struct x86_state *state,
 	if (width == X86_WIDTH_64 && insn->aux == X86_ALU_ADD &&
 	    dst_tag == X86_PTR_PACKET && src_tag == X86_PTR_PACKET_LEN) {
 		dst_off = x86_read_ptr_off_reg(state, insn->dst);
-		x86_write_reg_width(state, insn->dst, 0, width);
+		result = x86_alu_result(dst_value, src_value, insn->aux, width);
+		x86_set_alu_flags(state, dst_value, src_value, result,
+				  insn->aux, width);
+		x86_write_reg_width(state, insn->dst, result, width);
 		return x86_write_ptr_reg_off(state, insn->dst,
 					     (__u8 *)src_ptr + dst_off,
 					     X86_PTR_PACKET_END, dst_off);
@@ -1745,7 +1633,10 @@ static __always_inline int x86_exec_alu_reg(struct x86_state *state,
 	    (src_tag == X86_PTR_PACKET || src_tag == X86_PTR_PACKET_END) &&
 	    dst_tag == X86_PTR_NONE) {
 		src_off = x86_read_ptr_off_reg(state, insn->src);
-		x86_write_reg_width(state, insn->dst, 0, width);
+		result = x86_alu_result(dst_value, src_value, insn->aux, width);
+		x86_set_alu_flags(state, dst_value, src_value, result,
+				  insn->aux, width);
+		x86_write_reg_width(state, insn->dst, result, width);
 		return x86_write_ptr_reg_off(state, insn->dst,
 					     (__u8 *)src_ptr + dst_value,
 					     src_tag, src_off + dst_value);
@@ -1758,13 +1649,22 @@ static __always_inline int x86_exec_alu_reg(struct x86_state *state,
 		if (insn->aux == X86_ALU_SUB)
 			off = -off;
 		dst_off = x86_read_ptr_off_reg(state, insn->dst);
-		x86_write_reg_width(state, insn->dst, 0, width);
+		result = x86_alu_result(dst_value, src_value, insn->aux, width);
+		x86_set_alu_flags(state, dst_value, src_value, result,
+				  insn->aux, width);
+		x86_write_reg_width(state, insn->dst, result, width);
 		return x86_write_ptr_reg_off(state, insn->dst,
 					     (__u8 *)dst_ptr + off, dst_tag,
 					     dst_off + off);
 	}
-	if (insn->aux == X86_ALU_SBB)
-		src_value += state->cf;
+	if (insn->aux == X86_ALU_SBB) {
+		__u8 borrow = state->cf;
+
+		result = dst_value - src_value - borrow;
+		x86_set_sbb_flags(state, dst_value, src_value, borrow, result,
+				  width);
+		return x86_write_reg_width(state, insn->dst, result, width);
+	}
 	result = x86_alu_result(dst_value, src_value, insn->aux, width);
 	x86_set_alu_flags(state, dst_value, src_value, result, insn->aux,
 			  width);
@@ -1810,6 +1710,8 @@ static __always_inline int x86_exec_cmp_reg(struct x86_state *state,
 
 	dst_value = x86_read_reg(state, insn->dst);
 	src_value = x86_read_reg(state, insn->src);
+	x86_set_sub_flags(state, dst_value, src_value, dst_value - src_value,
+			  width);
 	x86_read_ptr_reg(state, insn->dst, &src_ptr, &src_tag);
 	if (src_tag != X86_PTR_NONE) {
 		void *rhs_ptr;
@@ -1818,19 +1720,13 @@ static __always_inline int x86_exec_cmp_reg(struct x86_state *state,
 		x86_read_ptr_reg(state, insn->src, &rhs_ptr, &rhs_tag);
 		if (rhs_tag != X86_PTR_NONE) {
 			state->cmp_ptr_valid = 1;
-			state->cmp_lhs_tag = src_tag;
-			state->cmp_rhs_tag = rhs_tag;
-			state->cmp_lhs_ptr = src_ptr;
-			state->cmp_rhs_ptr = rhs_ptr;
-			state->cf = (__u8 *)src_ptr < (__u8 *)rhs_ptr;
-			state->zf = src_ptr == rhs_ptr;
-			state->sf = 0;
-			state->of = 0;
-			return X86_SIM_CONTINUE;
-		}
+				state->cmp_lhs_tag = src_tag;
+				state->cmp_rhs_tag = rhs_tag;
+				state->cmp_lhs_ptr = src_ptr;
+				state->cmp_rhs_ptr = rhs_ptr;
+				return X86_SIM_CONTINUE;
+			}
 	}
-	x86_set_sub_flags(state, dst_value, src_value, dst_value - src_value,
-			  width);
 	return X86_SIM_CONTINUE;
 }
 
@@ -1889,14 +1785,18 @@ static __always_inline int x86_exec_cmov(struct x86_state *state,
 	__u64 src_value = 0;
 	void *src_ptr = 0;
 	__u8 src_tag = X86_PTR_NONE;
+	__s32 src_off = 0;
 
 	if (!x86_eval_cc(state, insn->aux))
 		return X86_SIM_CONTINUE;
 	src_value = x86_read_reg(state, insn->src);
 	x86_write_reg_width(state, insn->dst, src_value, width);
 	x86_read_ptr_reg(state, insn->src, &src_ptr, &src_tag);
-	if (width == X86_WIDTH_64 && src_tag != X86_PTR_NONE)
-		return x86_write_ptr_reg(state, insn->dst, src_ptr, src_tag);
+	if (width == X86_WIDTH_64 && src_tag != X86_PTR_NONE) {
+		src_off = x86_read_ptr_off_reg(state, insn->src);
+		return x86_write_ptr_reg_off(state, insn->dst, src_ptr,
+					     src_tag, src_off);
+	}
 	return X86_SIM_CONTINUE;
 }
 
@@ -1930,6 +1830,7 @@ static __always_inline int x86_exec_popcnt(struct x86_state *state,
 
 	src_value = x86_read_reg(state, insn->src);
 	result = x86_popcount64(x86_apply_width(src_value, width));
+	x86_set_popcnt_flags(state, src_value, width);
 	return x86_write_reg_width(state, insn->dst, result, width);
 }
 
@@ -1940,13 +1841,32 @@ static __always_inline int x86_exec_xchg(struct x86_state *state,
 	__u8 width = insn->flags ? insn->flags : X86_WIDTH_64;
 	__u64 dst_value = 0;
 	__u64 src_value = 0;
+	void *dst_ptr = 0;
+	void *src_ptr = 0;
+	__u8 dst_tag = X86_PTR_NONE;
+	__u8 src_tag = X86_PTR_NONE;
+	__s32 dst_off = 0;
+	__s32 src_off = 0;
 
 	if (insn->dst == insn->src)
 		return X86_SIM_CONTINUE;
 	dst_value = x86_read_reg(state, insn->dst);
 	src_value = x86_read_reg(state, insn->src);
+	if (width == X86_WIDTH_64) {
+		x86_read_ptr_reg(state, insn->dst, &dst_ptr, &dst_tag);
+		x86_read_ptr_reg(state, insn->src, &src_ptr, &src_tag);
+		dst_off = x86_read_ptr_off_reg(state, insn->dst);
+		src_off = x86_read_ptr_off_reg(state, insn->src);
+	}
 	x86_write_reg_width(state, insn->dst, src_value, width);
-	return x86_write_reg_width(state, insn->src, dst_value, width);
+	x86_write_reg_width(state, insn->src, dst_value, width);
+	if (width == X86_WIDTH_64 && src_tag != X86_PTR_NONE)
+		x86_write_ptr_reg_off(state, insn->dst, src_ptr, src_tag,
+				      src_off);
+	if (width == X86_WIDTH_64 && dst_tag != X86_PTR_NONE)
+		x86_write_ptr_reg_off(state, insn->src, dst_ptr, dst_tag,
+				      dst_off);
+	return X86_SIM_CONTINUE;
 }
 
 static __always_inline int x86_exec_control_noop(struct x86_state *state,
@@ -1960,6 +1880,7 @@ static __always_inline int x86_exec_jcc(struct x86_state *state,
 					const struct x86_insn *insn,
 					void *data, void *data_end)
 {
+	__builtin_unreachable();
 	return x86_exec_control_noop(state, insn, data, data_end);
 }
 
@@ -1967,6 +1888,7 @@ static __always_inline int x86_exec_jmp(struct x86_state *state,
 					const struct x86_insn *insn,
 					void *data, void *data_end)
 {
+	__builtin_unreachable();
 	return x86_exec_control_noop(state, insn, data, data_end);
 }
 
@@ -1974,6 +1896,7 @@ static __always_inline int x86_exec_call(struct x86_state *state,
 					 const struct x86_insn *insn,
 					 void *data, void *data_end)
 {
+	__builtin_unreachable();
 	return x86_exec_control_noop(state, insn, data, data_end);
 }
 
@@ -2018,8 +1941,10 @@ static __always_inline int x86_exec_shld_imm(struct x86_state *state,
 
 	dst_value = x86_read_reg(state, insn->dst);
 	src_value = x86_read_reg(state, insn->src);
+	if (x86_shift_count(insn->imm, width) == 0)
+		return X86_SIM_CONTINUE;
 	result = x86_shld(dst_value, src_value, insn->imm, width);
-	x86_set_logic_flags(state, result, width);
+	x86_set_shld_flags(state, dst_value, result, insn->imm, width);
 	return x86_write_reg_width(state, insn->dst, result, width);
 }
 
@@ -2034,8 +1959,10 @@ static __always_inline int x86_exec_shrd_imm(struct x86_state *state,
 
 	dst_value = x86_read_reg(state, insn->dst);
 	src_value = x86_read_reg(state, insn->src);
+	if (x86_shift_count(insn->imm, width) == 0)
+		return X86_SIM_CONTINUE;
 	result = x86_shrd(dst_value, src_value, insn->imm, width);
-	x86_set_logic_flags(state, result, width);
+	x86_set_shrd_flags(state, dst_value, result, insn->imm, width);
 	return x86_write_reg_width(state, insn->dst, result, width);
 }
 
@@ -2046,6 +1973,7 @@ static __always_inline int x86_exec_push(struct x86_state *state,
 #ifdef X86_SIM_ENABLE_STACK
 	return x86_push_reg(state, insn->src);
 #else
+	__builtin_unreachable();
 	return X86_SIM_CONTINUE;
 #endif
 }
@@ -2059,6 +1987,7 @@ static __always_inline int x86_exec_pop(struct x86_state *state,
 #ifdef X86_SIM_ENABLE_STACK
 	return x86_pop_reg(state, insn->dst, width);
 #else
+	__builtin_unreachable();
 	return X86_SIM_CONTINUE;
 #endif
 }

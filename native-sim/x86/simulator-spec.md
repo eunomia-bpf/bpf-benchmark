@@ -51,8 +51,7 @@ XState = {
                 PACKET_END,
 
   Modeled stack:
-    byte-addressed stack_mem plus aligned pointer payload metadata
-    p_stack[i], tag_stack[i],
+    byte-addressed stack_mem,
 
   Packet verifier inputs:
     data, data_end,
@@ -83,20 +82,21 @@ The code implementation is `x86_init_state()` in `x86_sim.h`.
 
 ### Stack Pointer Payload Rule
 
-The active simulator models stack bytes in `stack_mem[256]` and keeps aligned
-pointer payload metadata in `p_stack[32]` / `tag_stack[32]`. Loads and stores
-use the same effective stack address that the native instruction computes. The
-simulator no longer rejects stack-slot coverage at runtime. If a reachable
-native path needs stack memory outside the modeled layout, the artifact must be
-rejected before direct native execution or the model must be enlarged exactly.
+The active simulator models stack bytes in `stack_mem`. It intentionally does
+not store pointer payload metadata in stack memory because hardware x86 stack
+memory stores bytes, not verifier tags. Loads and stores use the same effective
+stack address that the native instruction computes. The simulator no longer
+rejects stack-slot coverage at runtime; if a reachable native path needs stack
+memory outside the modeled layout, the model must be enlarged as stack memory,
+not guarded with a runtime check.
 
 ### Hidden Packet Offset Rule
 
 For packet and packet-end capabilities, `off_<reg>` records the verifier-visible
 offset from the entry packet `data` pointer. This field is hidden proof metadata:
-the concrete x86 register value in `GPR64` is still the value produced by the
-modeled x86 instruction. For current packet pointers, pointer-producing helpers
-write a scalar register value of `0` and preserve the real packet verifier
+the concrete x86 register value in `GPR64` is still the address value produced
+by the modeled x86 instruction. Pointer-producing helpers must write that
+architectural scalar address and separately preserve the verifier pointer
 payload plus the hidden offset in `p_<reg>/tag_<reg>/off_<reg>`.
 
 Loads may use the hidden offset only to emit an equivalent verifier-visible
@@ -151,9 +151,19 @@ No runtime unsupported/trap/fallback path in an accepted artifact.
 No fuel guard or synthetic trip bound.
 No fallback return value.
 No benchmark-specific renderer or helper.
+No simulator-side fault/exception precheck for arbitrary memory, stack OOB,
+divide-by-zero/divide-overflow, or invalid addresses.
 No metadata fact may justify a memory access unless it is proved equivalent to
 the native x86 address and path condition.
 ```
+
+Fault-like behavior is deliberately not modeled as a safer interpreter branch.
+For arbitrary address load/store, stack out-of-range access, invalid address
+use, and division faults, the proof program must expose the same native
+operation. If the eBPF verifier cannot prove that operation safe, load rejection
+is the correct outcome for this experiment. The simulator must not make such a
+path acceptable by adding a guard, trap, abort return, fallback value, or
+synthetic bound.
 
 In particular, this pattern must not assert a range over current `rdx` from the
 old `cmp` flags:
@@ -495,24 +505,17 @@ mov [rdi + 16], reg
 mov [rdi + 20], reg
 ```
 
-The C-authored `X86_SIM_RUN_OP` macro calls `x86_sim_prepare_ctx_output()` before
-executing each non-loop helper. For ABI output stores, that helper reasserts:
+The simulator must not restore or retag `rdi` immediately before the store.
+Hardware x86 observes only the register value produced by earlier instructions.
+The previous `x86_sim_prepare_ctx_output()` retag helper is therefore forbidden
+and has been removed from the active path.
 
-```c
-state.p_rdi = (void *)ctx;
-state.tag_rdi = X86_PTR_CTX;
-```
-
-immediately before the store helper executes. The generator does not contain a
-benchmark-specific or store-specific renderer for this.
-
-Proof obligation:
+Implementation requirement:
 
 ```text
-For any accepted program path that reaches an ABI output store, rdi must still
-denote the entry ctx capability at that point, or the store must be covered by an
-explicit ABI-output theorem. Reasserting the ghost capability before executing
-the store helper must be observationally a no-op for the concrete x86 state.
+An ABI output store may use ctx/output metadata only when the current simulator
+state already says that the architectural rdi value denotes that ABI object.
+The store helper must not create that fact.
 ```
 
 This rule is not tied to a specific benchmark or loop exit shape.
@@ -555,16 +558,17 @@ These are not acceptable final assumptions; they are work items.
 | --- | --- |
 | Full x86 flag coverage | Audit every helper flag rule against the subset of x86 opcodes emitted by current micro programs. |
 | RODATA model | Specify each generated read-only table and prove indexed reads match the native constants. |
-| Stack model extent | Prove every modeled stack access maps to the correct native x86 stack byte and that the accepted artifact never needs stack state outside the modeled layout, or reject before native execution. Runtime slot rejection is not allowed. |
-| Unsupported native constructs | There must be no runtime unsupported/trap/fallback path in an accepted artifact. Final acceptance requires generation/load-time rejection for constructs outside the modeled subset, or a proof that the path is unreachable under the accepted native program. |
-| Packet/output helper bounds checks | Active packet/output helpers must not insert runtime `data_end` bounds checks. Verifier acceptance must come from equivalent pointer state and native guards/ABI preconditions, not an extra checked-simulator guard. |
+| Stack model extent | Implement every modeled stack access as a native x86 stack byte access. Runtime slot rejection, stack-disabled no-ops, and proof-only stack guards are not allowed. |
+| Unsupported native constructs | There must be no runtime unsupported/trap/fallback path in an accepted artifact. Correctness work should add simulator semantics rather than relying on generation-time rejection or unreachable-path assumptions. |
+| Packet/output helper bounds checks | Active packet/output helpers must not insert runtime `data_end` bounds checks. Verifier acceptance must come from equivalent pointer state and native guards/ABI state, not an extra checked-simulator guard. |
+| Fault-like native behavior | Arbitrary memory faults, stack OOB, invalid addresses, divide-by-zero, and divide overflow must not be caught by simulator checks. They either remain verifier-visible native operations or fail verification. |
 | Branch proof metadata | Removed from active code. Keep it out unless there is a formal theorem that preserves exact native x86 branch semantics and does not introduce proof-only assertions. |
 | Hidden packet-offset metadata | Prove that `off_<reg>` is observationally invisible to x86 scalar execution and that every proven packet load reads the same modeled packet byte as the native effective address. |
 | SKB packet-length metadata | Prove that `ctx+0x70` native loads exactly the SKB length and that the accepted native ABI satisfies `data + len == data_end`; `PACKET_LEN` may only express that ABI relation, not invent a branch-bound fact. |
 | No semantic verifier hacks | Prove that no verifier aid changes x86 behavior: no fuel guard, no fixed loop trip bound, no fallback return, no benchmark-specific renderer, and no assertion over facts not guaranteed by the native execution. |
 | ABI special cases | Prove the modeled `ctx`, `skb`, packet, output, and rodata layouts match the native execution ABI exactly; otherwise direct native execution may read/write addresses not covered by the proof. |
-| Native call return address | Current generated callees assume the return-address slot is not read. A callee that reads it must be rejected before native execution or modeled with the concrete native return address. |
+| Native call return address | Current generated callees assume the return-address slot is not read. The simulator must model the concrete native return-address bytes before this is complete. |
 | Multi-exit loop verifier cost | Current correctness-first code prioritizes exact branch semantics over verifier acceptance. Any future structural lowering must still be a C/template theorem and preserve native branch semantics without fuel. |
 | Paused PC-dispatch experiment | If revived, implement it as a C/template proof rule rather than Python CFG scheduling. It is not active now. |
-| ABI output-store theorem | `x86_sim_prepare_ctx_output()` is C-authored, but the final proof still must show accepted paths reach `[rdi+16/20]` stores only when `rdi` denotes entry ctx, or explicitly define that ABI store as a semantic rule. |
+| ABI output-store theorem | The retag helper is removed. Stores through `[rdi+16/20]` must be justified by the current architectural `rdi` state and the ABI memory model itself. |
 | JSON-linker equivalence | Reuse this spec after JSON bytecode linking stops going through clang. |

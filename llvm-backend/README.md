@@ -764,3 +764,92 @@ larger canonical idiom where x86 LEA actually subsumes work, such as explicit
 `copy + add`, `base + index + disp`, or `shift + add` scaled-index address
 generation. Plain scalar add remains too close to native BPF JIT output to be a
 good default LEA selector.
+
+### Step 12: final-MI LEA pair selection
+
+The bpfopt LEA pass runs on final BPF bytecode, so it sees verifier-native
+`MOV dst, base; ADD dst, imm/reg` pairs. The first LLVM LEA attempts selected
+too early in MachineSSA and sometimes rewrote scalar in-place adds that
+register allocation would already lower to a single destructive x86 `add`.
+That explains why bpfopt LEA looked stronger: it was matching the final
+bytecode opportunity, while LLVM was selecting a broader and less profitable
+pre-RA shape.
+
+The LLVM selector was moved to the pre-emit peephole after redundant move
+elimination. It now only rewrites adjacent final physical pairs:
+
+- `MOV_rr dst, base; ADD_ri dst, dst, imm` -> `bpf_x86_leaq/leal`
+- `MOV_rr dst, base; ADD_rr dst, dst, index` -> `bpf_x86_leaq/leal`
+
+Normal BPF-register LEA does not need kinsn scratch initialization, because the
+module verifier proof instantiates to ordinary BPF `MOV/ADD` over the original
+BPF registers. `BPFAsmPrinter::functionNeedsKinsnScratch()` therefore no longer
+marks LEA pseudos as scratch users. Shadow/arch-register LEA remains a module
+internal proof form and is not used by this verifier-facing LLVM path.
+
+Objects:
+
+- `micro/results/llvm_kinsn_programs_lea_reg_pair_20260518_215822`
+
+Selected kinsns:
+
+| kinsn | count |
+|---|---:|
+| `bpf_x86_leaq` | 159 |
+| `bpf_x86_rolq` | 119 |
+| `bpf_x86_rorxl` | 40 |
+| `bpf_x86_leal` | 23 |
+| `bpf_x86_movbe16` | 5 |
+| `bpf_x86_shldq` | 1 |
+| `bpf_x86_popcntq` | 1 |
+
+Single-sample full micro status:
+
+- Full `make micro` passed: 29/29 correct.
+- Run:
+  `micro/results/x86_kvm_micro_20260519_050046_753367/metadata.json`
+- Command:
+  `make micro COMMON_DEPS= TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_lea_reg_pair_20260518_215822"`
+
+Summary versus the same-environment LEA-disabled run
+`micro/results/x86_kvm_micro_20260519_045526_806779`:
+
+| Comparison | Geomean ratio | summed exec delta | JIT byte delta | wins/losses/ties |
+|---|---:|---:|---:|---:|
+| final-MI LEA vs LEA-disabled | 0.9926 | +77 ns | -466 bytes | 8/9/12 |
+
+The single-sample summed runtime was distorted by one noisy checksum sample, so
+the same two object sets were rerun with `SAMPLES=3`.
+
+Three-sample full micro status:
+
+- LEA-disabled run:
+  `micro/results/x86_kvm_micro_20260519_050426_627389/metadata.json`
+- final-MI LEA run:
+  `micro/results/x86_kvm_micro_20260519_050757_122739/metadata.json`
+- Both runs passed: 29/29 correct.
+- Command shape:
+  `make micro COMMON_DEPS= TIMEOUT=7200 MICRO_ARGS="--samples 3 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir <object-dir>"`
+
+Summary using analysis-side per-benchmark mean over three raw samples:
+
+| Comparison | Geomean ratio | summed mean exec delta | JIT byte delta | wins/losses/ties |
+|---|---:|---:|---:|---:|
+| final-MI LEA vs LEA-disabled | 0.9902 | -29.3 ns | -466 bytes | 15/7/7 |
+
+Key deltas versus LEA-disabled, three-sample mean:
+
+| Benchmark | LEA-disabled | final-MI LEA | JIT bytes |
+|---|---:|---:|---:|
+| `packet_checksum_fold` | 13329.3 ns | 13308.3 ns | 360 -> 352 |
+| `trace_event_type_switch_dispatch` | 290.7 ns | 283.7 ns | 1536 -> 1528 |
+| `tc_packet_checksum_fold` | 13336.3 ns | 13331.0 ns | 292 -> 284 |
+| `packet_toeplitz_rss_hash` | 225.0 ns | 228.3 ns | 991 -> 975 |
+| `bcc_runqlat_log2_histogram_bucket` | 1039.7 ns | 1044.3 ns | 664 -> 629 |
+
+The JIT dump for `tc_packet_checksum_fold` confirms the intended native change:
+the hot loop's `mov rax, rsi; add rax, r8` becomes a single
+`lea (%rsi,%r8), %rax`, and the bounds setup uses `lea disp(%rsi), %rcx`.
+This is the same kind of final bytecode opportunity bpfopt LEA exploits. The
+remaining mixed cases are mostly code-layout and benchmark noise rather than a
+verifier-facing LEA semantic problem.

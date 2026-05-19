@@ -579,12 +579,17 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
         else:
             raise ValueError(f"unsupported external jump target in {insn.raw}")
         return
-    if insn.mnemonic == "call":
-        lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
-        target = branch_target(insn.operands[0]) if insn.operands else 0
-        if call_functions and target in call_functions:
-            lines.append(f"{indent}X86_SIM_X86_CALL({call_functions[target]});")
-            return
+	if insn.mnemonic == "call":
+		lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+		target = branch_target(insn.operands[0]) if insn.operands else 0
+		if call_functions and target in call_functions:
+			if next_addr is None:
+				raise ValueError(f"cannot compute return address for {insn.raw}")
+			lines.append(
+				f"{indent}X86_SIM_X86_CALL({call_functions[target]}, "
+				f"0x{next_addr:x}ULL);"
+			)
+			return
         raise ValueError(f"unsupported unresolved call target in {insn.raw}")
         return
     if insn.mnemonic == "ret":

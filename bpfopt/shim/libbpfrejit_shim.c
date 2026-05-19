@@ -1847,26 +1847,25 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
         }
     }
 
-    union bpf_attr a;
-    memset(&a, 0, sizeof(a));
-    a.prog_type = p->prog_type;
+    /* Start from the captured original PROG_LOAD attr — preserves every
+     * field tracee/etc. passed (attach_btf_obj_fd, prog_btf_fd, line_info,
+     * func_info, core_relos, etc.) without us having to enumerate them.
+     * Only patch the fields the reload actually needs to swap. */
+    union bpf_attr a = p->load_attr;
     a.insns = (uintptr_t)insns;
     a.insn_cnt = (uint32_t)(bytes / sizeof(struct bpf_insn));
     a.license = (uintptr_t)p->license;
-    a.expected_attach_type = p->expected_attach_type;
-    a.attach_btf_id = p->attach_btf_id;
-    a.prog_flags = p->load_attr.prog_flags;
-    a.kern_version = p->load_attr.kern_version;
     /* log_level=1 is enough for reload — we only need to diagnose verifier
-     * rejection (last failure line). The detailed state dump for downstream
-     * passes is produced separately by capture_verifier_states() at log_level=2.
-     * Large progs (e.g. katran balancer 67939 insns) overflow even a 16 MB
-     * buffer at log_level=2, causing -ENOSPC even when the bytecode is valid. */
+     * rejection (last failure line). Detailed state dumps for downstream
+     * passes are produced separately by capture_verifier_states() at
+     * log_level=2. Large progs (e.g. katran balancer 67939 insns) overflow
+     * even a 16 MB buffer at log_level=2, causing -ENOSPC even when the
+     * bytecode is valid. */
     a.log_level = 1;
     a.log_buf = (uintptr_t)log_buf;
     /* Reserve 128B at the tail so we can always append errno post-failure. */
     a.log_size = (uint32_t)(log_size > 128 ? log_size - 128 : log_size);
-    memcpy(a.prog_name, p->load_attr.prog_name, sizeof(a.prog_name));
+    a.log_true_size = 0;
     if (fd_array) a.fd_array = (uintptr_t)fd_array;
 
     struct timespec t0, t1;

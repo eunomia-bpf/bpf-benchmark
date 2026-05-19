@@ -3,11 +3,14 @@
 This prototype asks one small question: can an eBPF program simulate a compact
 x86-like instruction stream and pass the normal eBPF verifier?
 
-Hard rule: the proof program must not use a runtime trap, runtime unsupported
-path, fallback return, synthetic bound, or verifier-only assertion to make
-native execution safe. If a native path is not modeled exactly, the artifact
-must fail before native execution, or a proof must show that the path is
-unreachable.
+Hard rule: correctness cannot be supplied by generation-time rejection, formal
+preconditions, runtime traps, unsupported paths, fallback returns, synthetic
+bounds, verifier-only assertions, or safety guards. The simulator must execute
+the same instruction semantics that the hardware would execute. Verifier
+failure is acceptable during this experiment; semantic mismatch is not.
+Fault-like cases such as arbitrary-address load/store, stack out-of-range
+access, divide-by-zero/divide-overflow, and invalid addresses are not handled by
+simulator-side checks; they remain native operations that the verifier may reject.
 
 The initial smoke case mirrors `micro/programs/simple.bpf.c`:
 
@@ -289,13 +292,13 @@ x86 does not guarantee. The active code deletes the previous `last_cmp_*`
 metadata and `x86_sim_assert_*` branch helpers. Proof-only packet/output bounds
 checks and stack-slot runtime rejection were removed from the active simulator.
 Remaining model extent questions are tracked in [`TODO.md`](./TODO.md): they
-must be resolved by a proof, an exact larger model, or rejection before native
-execution.
+must be resolved by implementing the exact simulator semantics, not by adding
+proof-only guards or generation-time exclusions.
 
 Runtime unsupported rule: native x86 will not return `XDP_ABORTED` or take an
 `X86_SIM_UNSUPPORTED` branch. The active simulator path must not contain such a
-runtime safety branch. Any native construct outside the modeled subset must
-reject before native execution or be proved unreachable.
+runtime safety branch. Any native construct outside the modeled subset is a
+simulator implementation gap.
 
 Generator complexity rule: the Python proof generator must stay below 800
 lines. Its only semantic output should be a simple native stream such as
@@ -330,11 +333,10 @@ C state-layout changes in the active path:
 
 - `X86_SIM_EXEC` performs C-owned typed opcode dispatch; Python still emits only
   `X86_SIM_RUN_OP(X86_OP_..., operands...)`.
-- The stack model is now byte-addressed (`stack_mem[256]`) with per-8-byte
-  pointer payload metadata (`p_stack[32]` / `tag_stack[32]`). It no longer
-  rejects deeper modeled slots at runtime. If a generated artifact needs stack
-  behavior outside this modeled native layout, that artifact must fail before
-  direct native execution or gain a larger exact stack model.
+- The stack model is byte-addressed stack memory. Pointer payload metadata was
+  removed from stack because hardware x86 stores bytes, not verifier tags. If a
+  generated artifact needs stack behavior outside the modeled native layout, the
+  simulator must gain a larger exact stack model.
 - Top-level packet memory loads use a verifier-proven raw-load fastpath for
   packet bases that already have verifier-visible range. Subfunction steps use
   the checked typed simulator path so local-call proof state stays stable.
@@ -740,20 +742,39 @@ This prototype has already exposed several verifier-facing design constraints:
   as the displacement. Negative immediates must not sign-extend into the
   displacement field; the generator now masks both fields before packing.
 
-Remaining places that are not yet a complete native x86 equivalence proof:
+Current correctness-first status after removing simulator guard/retag behavior:
 
-- There must be no runtime `X86_SIM_UNSUPPORTED`/trap/fallback path in an
-  accepted simulator artifact. Unsupported native constructs must reject before
-  artifact generation/loading or be covered by a proof that the path is
-  unreachable.
-- Packet/output helper `data_end` bounds checks and stack-slot runtime
-  rejection have been removed from the active simulator. Any future verifier
-  aid must preserve hardware x86 behavior exactly.
+- `results/README-20260518-222101.md` is the latest run. All 29 generated
+  micro proof C files compiled. Four loaded and passed test run:
+  `bitmap_popcount_scan`, `sorted_rule_binary_search`, `packet_checksum_fold`,
+  and `tc_packet_checksum_fold`.
+- The dominant verifier failure is now correlation loss, not C compile failure:
+  the verifier explores impossible states where a runtime tag field says
+  `STACK` while the scalar register slot contains a packet pointer. The final
+  bytecode then reaches stack-index arithmetic on a packet pointer and is
+  rejected, for example with `pointer arithmetic with <<= operator prohibited`.
+- This is an expected cost of making packet fastpaths semantic rather than
+  assumptive: if the runtime tag is not packet, the helper falls back to generic
+  memory semantics instead of pretending the tag is packet.
+- There must be no runtime `X86_SIM_UNSUPPORTED`/trap/fallback path in the
+  simulator artifact. Correctness work should add simulator semantics rather
+  than relying on generation-time rejection or unreachable-path assumptions.
+- Packet/output helper `data_end` bounds checks, retag helpers, fallback
+  returns, and stack-slot runtime rejection are removed from the active
+  simulator. Any future verifier aid must preserve hardware x86 behavior
+  exactly.
+- Arbitrary memory faults, stack OOB, invalid-address access, and division
+  faults must not be converted into simulator traps, aborts, or checked
+  fallbacks. If the resulting proof program is not verifier-provable, that is a
+  verifier result rather than a reason to add a safety guard.
 - The `ctx`, SKB, packet, output, and rodata layouts are modeled ABIs, not
   arbitrary x86 memory. They must match the native execution layout exactly.
-- The stack model is finite and uses sparse pointer payloads; it is not a full
-  x86 stack model.
-- Flag helpers cover the current micro subset, not all x86 flag behavior.
+- The stack model is finite byte-addressed memory. Pointer payload metadata was
+  removed from stack because hardware stack memory stores bytes, not verifier
+  tags.
+- Flag helpers now cover the active `SBB`, `POPCNT`, shift/rotate, `SHLD`,
+  `SHRD`, and `IMUL CF/OF` cases more closely, but undefined-flag cases and
+  non-current opcodes still need audit.
 - Native call return-address contents are only valid for callees that do not
   inspect the return address.
 
