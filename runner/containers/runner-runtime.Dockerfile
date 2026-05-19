@@ -2,8 +2,6 @@
 ARG TRACEE_IMAGE=docker.io/aquasec/tracee:0.24.1@sha256:cfbbfee972e64a644f6b1bac74ee26998e6e12442697be4c797ae563553a2a5b
 ARG TETRAGON_IMAGE=quay.io/cilium/tetragon:v1.6.1@sha256:ff96ace3e6a0166ba04ff3eecfaeee19b7e6deee2b7cdbe3245feda57df5015f
 ARG CILIUM_IMAGE=quay.io/cilium/cilium:v1.19.3@sha256:2e61680593cddca8b6c055f6d4c849d87a26a1c91c7e3b8b56c7fb76ab7b7b10
-ARG CALICO_NODE_IMAGE=quay.io/calico/node:v3.31.3@sha256:f2339c4ff3a57228cbc39a1f67ab81abded1997d843e0e0b1e86664c7c4eb6c0
-ARG CALICO_CTL_IMAGE=quay.io/calico/ctl:v3.31.3
 ARG RUN_TARGET_ARCH=x86_64
 
 FROM docker.io/library/ubuntu:24.04 AS runner-runtime-runtime-base
@@ -199,10 +197,6 @@ FROM ${TETRAGON_IMAGE} AS runner-runtime-tetragon-upstream
 
 FROM ${CILIUM_IMAGE} AS runner-runtime-cilium-upstream
 
-FROM ${CALICO_NODE_IMAGE} AS runner-runtime-calico-upstream
-
-FROM ${CALICO_CTL_IMAGE} AS runner-runtime-calicoctl-upstream
-
 FROM runner-runtime-build-base AS runner-runtime-app-artifacts
 
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
@@ -236,15 +230,6 @@ COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/local/bin/cl
 COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/local/bin/llc /usr/local/bin/llc
 COPY --link --from=runner-runtime-cilium-upstream /var/lib/cilium/ /var/lib/cilium/
 
-COPY --link --from=runner-runtime-calico-upstream --chmod=0755 /usr/bin/calico-node /usr/local/bin/calico-node
-COPY --link --from=runner-runtime-calico-upstream /etc/calico/ /etc/calico/
-COPY --link --from=runner-runtime-calico-upstream /usr/lib/calico/bpf/ /usr/lib/calico/bpf/
-COPY --link --from=runner-runtime-calico-upstream /included-source/ /included-source/
-COPY --link --from=runner-runtime-calico-upstream /usr/lib64/libpcap.so.1 /usr/local/lib/libpcap.so.1
-COPY --link --from=runner-runtime-calico-upstream /usr/lib64/libpcap.so.1.9.1 /usr/local/lib/libpcap.so.1.9.1
-
-COPY --link --from=runner-runtime-calicoctl-upstream --chmod=0755 /usr/bin/calicoctl /usr/local/bin/calicoctl
-
 COPY --chmod=0755 runner/scripts/bpfrejit-install /usr/local/bin/bpfrejit-install
 
 RUN set -eux; \
@@ -262,14 +247,9 @@ RUN set -eux; \
     command -v ipset >/dev/null; \
     command -v nft >/dev/null; \
     test -x /usr/local/bin/cilium-agent; \
-    test -x /usr/local/bin/calico-node; \
     test -x /usr/local/bin/clang; \
     test -x /usr/local/bin/llc; \
     test -d /var/lib/cilium/bpf; \
-    test -d /usr/lib/calico/bpf; \
-    test -f /usr/lib/calico/bpf/common_map_stub.o; \
-    test -f /usr/lib/calico/bpf/xdp_preamble.o; \
-    test -f /usr/local/lib/libpcap.so.1; \
     test -x "/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bin/katran_server_grpc"; \
     test -f "/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bpf/balancer.bpf.o"; \
     image_arch="${TARGETARCH}"; \
@@ -289,14 +269,12 @@ RUN set -eux; \
     repo_artifact_root="/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}"; \
     mkdir -p \
         "${repo_artifact_root}" \
-        "${repo_artifact_root}/calico/bin" \
         "${repo_artifact_root}/cilium/bin" \
         "${repo_artifact_root}/otelcol-ebpf-profiler/bin"; \
     ln -sfn /artifacts/tracee "${repo_artifact_root}/tracee"; \
     ln -sfn /artifacts/tetragon "${repo_artifact_root}/tetragon"; \
     ln -sfn /artifacts/tracee/bin/tracee /usr/local/bin/tracee; \
     ln -sfn /artifacts/tetragon/bin/tetragon /usr/local/bin/tetragon; \
-    ln -sfn /usr/local/bin/calico-node "${repo_artifact_root}/calico/bin/calico-node"; \
     ln -sfn /usr/local/bin/cilium-agent "${repo_artifact_root}/cilium/bin/cilium-agent"; \
     ln -sfn /usr/local/bin/cilium-dbg "${repo_artifact_root}/cilium/bin/cilium-dbg"; \
     ln -sfn /usr/local/bin/otelcol-ebpf-profiler "${repo_artifact_root}/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler"
@@ -398,8 +376,10 @@ RUN set -eux; \
 FROM runner-runtime-runtime-base AS runner-runtime-bpfopt-artifacts
 
 # BPFOPT_HOST_BIN_DIR is the host-relative directory containing pre-built bpfopt
-# CLI (x86_64 from bpfopt/target/release/, arm64 from
-# bpfopt/target/aarch64-unknown-linux-gnu/release/).
+# CLI + kinsnprober (x86_64 from bpfopt/target/release/, arm64 from
+# bpfopt/target/aarch64-unknown-linux-gnu/release/). kinsnprober is the
+# stock-kernel BTF prober — shim execs it once at startup to populate
+# target.json; daemon path doesn't use it.
 ARG BPFOPT_HOST_BIN_DIR=bpfopt/target/release
 # NATIVE_LINK_HOST_BIN is the host-built native-link binary. It lives under
 # ebpf-vm/x86/native_lab/native_link/target/release/ regardless of target
@@ -408,12 +388,14 @@ ARG BPFOPT_HOST_BIN_DIR=bpfopt/target/release
 ARG NATIVE_LINK_HOST_BIN=ebpf-vm/x86/native_lab/native_link/target/release/native-link
 
 COPY ${BPFOPT_HOST_BIN_DIR}/bpfopt /tmp/bpfopt
+COPY ${BPFOPT_HOST_BIN_DIR}/kinsnprober /tmp/kinsnprober
 COPY ${NATIVE_LINK_HOST_BIN} /tmp/native-link
 RUN set -eux; \
     install -d /artifacts/rust/usr-local-bin; \
     install -m 0755 /tmp/bpfopt /artifacts/rust/usr-local-bin/; \
+    install -m 0755 /tmp/kinsnprober /artifacts/rust/usr-local-bin/; \
     install -m 0755 /tmp/native-link /artifacts/rust/usr-local-bin/; \
-    rm /tmp/bpfopt /tmp/native-link
+    rm /tmp/bpfopt /tmp/kinsnprober /tmp/native-link
 
 FROM runner-runtime-runtime-base AS runner-runtime
 
@@ -427,9 +409,6 @@ COPY --link --from=runner-runtime-artifacts /lib/ld-musl-*.so.1 /lib/
 COPY --link --from=runner-runtime-artifacts /lib/libc.musl-*.so.1 /lib/
 COPY --link --from=runner-runtime-artifacts /usr/lib/*-linux-musl/ /usr/lib/
 COPY --link --from=runner-runtime-artifacts /var/lib/cilium /var/lib/cilium
-COPY --link --from=runner-runtime-artifacts /etc/calico /etc/calico
-COPY --link --from=runner-runtime-artifacts /usr/lib/calico /usr/lib/calico
-COPY --link --from=runner-runtime-artifacts /included-source /included-source
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/runner ${IMAGE_WORKSPACE}/runner
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/micro/programs ${IMAGE_WORKSPACE}/micro/programs
 COPY --link --from=runner-runtime-artifacts /artifacts/user/stage2-programs /artifacts/user/stage2-programs
@@ -446,9 +425,8 @@ RUN set -eux; \
     test -x /usr/local/bin/bpftool; \
     test -x /usr/local/bin/bpfrejit-daemon; \
     test -x /usr/local/bin/bpfopt; \
+    test -x /usr/local/bin/kinsnprober; \
     test -x /usr/local/bin/cilium-agent; \
-    test -x /usr/local/bin/calico-node; \
-    test -x /usr/local/bin/calicoctl; \
     test -d /artifacts/kernel; \
     test -d /artifacts/modules; \
     test -d /artifacts/kinsn; \

@@ -3,11 +3,8 @@
 
 #include <linux/bpf.h>
 
-#include <cstddef>
 #include <cstdint>
-#include <optional>
 #include <string>
-#include <string_view>
 #include <vector>
 
 template <typename T>
@@ -26,13 +23,5 @@ std::vector<uint8_t> load_xlated_program(
     int program_fd,
     uint32_t xlated_prog_len,
     bool require_non_empty = true);
-std::string format_byte_dump(
-    const std::vector<uint8_t> &bytes,
-    size_t width,
-    bool annotate_pc);
-std::string program_name_from_info(const bpf_prog_info &info);
-std::optional<enum bpf_prog_type> prog_type_from_string(
-    const std::string &value);
-std::string prog_type_name_from_enum(enum bpf_prog_type prog_type);
 
 #endif

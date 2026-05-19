@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import os
 import shlex
-import sys
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
@@ -167,17 +166,6 @@ class RunConfig:
                           host_python_bin=scalar("RUN_HOST_PYTHON_BIN", "python3"),
                           kernel_image=scalar("RUN_VM_KERNEL_IMAGE"), timeout_seconds=scalar("RUN_VM_TIMEOUT_SECONDS")),
         )
-
-    @classmethod
-    def from_json_text(cls, text: str) -> "RunConfig":
-        raw = json.loads(text)
-        if not isinstance(raw, dict): raise RuntimeError("run config JSON must contain an object")
-        values: dict[str, str | list[str]] = {}
-        for key, value in raw.items():
-            if not isinstance(key, str): raise RuntimeError("run config JSON keys must be strings")
-            values[key] = [str(item) for item in value] if isinstance(value, list) else ("" if value is None else str(value))
-        return cls.from_mapping(values)
-
 
 def _load_assignment_file(path: Path) -> dict[str, str]:
     if not path.is_file(): _die(f"missing required file: {path}")

@@ -187,23 +187,6 @@ def benchmark_run_provenance() -> dict[str, object]:
         "config": {"enabled_passes": benchmark_rejit_enabled_passes()},
     }
 
-def _write_failure_workdir_tar(
-    prog_id: int,
-    workdir_tar_b64: object,
-    failure_artifacts_dir: Path | None,
-) -> None:
-    if workdir_tar_b64 is None:
-        return
-    if not isinstance(workdir_tar_b64, str):
-        raise RuntimeError(f"daemon response field workdir_tar_b64 for prog {prog_id} must be a string")
-    # Caller passes failure_artifacts_dir=None to deliberately discard the tar.
-    if failure_artifacts_dir is None:
-        return
-    failure_artifacts_dir.mkdir(parents=True, exist_ok=True)
-    tar_path = failure_artifacts_dir / f"{prog_id}.tar.gz"
-    tar_path.write_bytes(base64.b64decode(workdir_tar_b64, validate=True))
-
-
 _SHIM_SOCK_DIR = Path("/var/run/bpfrejit")
 
 
@@ -385,7 +368,6 @@ class DaemonSession:
     stdout_path: Path
     stderr_path: Path
     kinsn_metadata: dict[str, object] = field(default_factory=dict)
-    _closed: bool = False
 
     # Compat: callers probe `daemon_session.proc.poll()` to detect a crashed
     # daemon. There is no daemon process now; expose a stub whose poll()
@@ -421,7 +403,11 @@ class DaemonSession:
         self.close()
 
     def close(self) -> None:
-        self._closed = True
+        # Library-mode shim: no daemon process to terminate. Kept as a
+        # method so context-manager users (`with DaemonSession(...) as s`)
+        # still work; callers may rely on the symbol existing even though
+        # there's nothing to release.
+        return
 
     def apply_rejit(
         self,
