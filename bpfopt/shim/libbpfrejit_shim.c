@@ -1983,6 +1983,13 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
     long new_pfd = real_syscall(SYS_bpf, BPF_PROG_LOAD, &a, sizeof(a));
     int load_errno = (new_pfd < 0) ? errno : 0;
 
+    /* Snapshot the fd_array (before freeing) so the failure context below
+     * can report how many slots were -1. */
+    uint32_t arr_neg1 = 0;
+    if (fd_array) {
+        for (uint32_t i = 0; i < fd_array_n; i++)
+            if (fd_array[i] < 0) arr_neg1++;
+    }
     free_full_fd_array(fd_array, fd_array_n);
     free(insns);
     /* Drop the per-reload BTF/prog fds — kernel held refs across the
@@ -2003,11 +2010,11 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
                  "\nBPF_PROG_LOAD errno=%d (post-verifier)\n"
                  "ctx: prog_btf_fd=%u attach_btf_obj_fd=%u attach_prog_fd=%u "
                  "attach_btf_id=%u expected_attach=%u nr_map_fds=%u "
-                 "prog_type=%u\n",
+                 "prog_type=%u fd_array_n=%u fd_array_neg1=%u\n",
                  load_errno,
                  a.prog_btf_fd, a.attach_btf_obj_fd, a.attach_prog_fd,
                  a.attach_btf_id, a.expected_attach_type, nr_fds,
-                 p->prog_type);
+                 p->prog_type, fd_array_n, arr_neg1);
         clock_gettime(CLOCK_MONOTONIC, &t1);
         if (out_rejit_ms) *out_rejit_ms = (t1.tv_sec - t0.tv_sec) * 1000ULL
                                           + (t1.tv_nsec - t0.tv_nsec) / 1000000;

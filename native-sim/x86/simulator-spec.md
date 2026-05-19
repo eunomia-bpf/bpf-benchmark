@@ -41,10 +41,17 @@ Memory: raw ctx/packet/stack/rodata/native-address memory as expressed by the
 Implementation representation:
 
 ```c
-__u64 __x86_rax, ..., __x86_r15;
+void *__x86_rax, ..., *__x86_r15;
 __u8 __x86_cf, __x86_zf, __x86_sf, __x86_of;
 union { __u8 b[N]; __u64 q[(N + 7) / 8]; } __x86_stack_mem;
 ```
+
+The C type `void *` is the storage representation for the architectural 64-bit
+register bits. It is not per-register metadata. A register is read as a pointer
+for pointer-shaped x86 operations such as `mov`, `lea`, stack-pointer updates,
+and memory addressing. The same register is read as `(__u64)(long)reg` for x86
+integer operations, flag computation, shifts, masks, compares, division, and
+partial-width register semantics.
 
 The stack array is a byte model of the native stack region used by the proof
 artifact. There is no runtime bounds check. If a generated proof expression
@@ -53,7 +60,8 @@ fail rather than silently executing a different behavior.
 
 ## No Ghost Pointer Metadata
 
-Registers carry only scalar x86 values. The active simulator does not maintain
+GPR variables carry only architectural x86 values. The active simulator does
+not maintain
 per-register proof metadata such as:
 
 ```c
@@ -70,14 +78,14 @@ packet + skb_len == packet_end
 ```
 
 from hidden metadata. If native code loads `skb->len`, that result is an
-ordinary scalar x86 value.
+ordinary architectural register value.
 
 ## Entry ABI
 
 For XDP and skb micro programs, ReverseSim starts with:
 
 ```text
-RDI = ctx
+RDI = &guest_abi
 RSP = 0
 ```
 
@@ -90,14 +98,18 @@ X86_SIM_ENTRY_SKB(ctx);
 
 They may only:
 
-- bind the typed verifier ctx pointer used to express legal ctx-field loads;
-- bind the scalar ctx address used by the x86 architectural state;
+- create guest ABI memory containing the linked native ABI fields;
 - declare simulator-local architectural variables and modeled stack storage;
-- set ABI-defined entry state (`RDI = ctx`, modeled `RSP = 0`).
+- set ABI-defined entry state (`RDI = &guest_abi`, modeled `RSP = 0`).
 
-They must not preload packet fields, change ctx/packet/output memory, create
-per-register tags, insert bounds checks, trap, fallback, or influence control
-flow.
+The guest ABI memory object is architectural memory for the linked native entry
+ABI. For XDP, offset 0 holds `ctx->data` and offset 8 holds `ctx->data_end`.
+For skb, the object contains the linked native ABI fields currently referenced
+by the generated x86, including `len` and `data` at the linked offsets.
+
+The entry macros must not change ctx/packet/output memory, create per-register
+tags, insert bounds checks, trap, fallback, infer `packet + len == packet_end`,
+or influence control flow.
 
 Only ABI-defined entry state may be used as a semantic fact. Other GPRs and
 flags are unspecified at native function entry. The C implementation may give
@@ -114,29 +126,40 @@ representations of the same x86 value. Removing the typed expression and
 replacing it with the corresponding raw x86 memory value must leave the same
 architectural registers, flags, memory effects, and control flow.
 
-Allowed example:
+Allowed examples:
 
 ```text
-x86 instruction:  MOV reg, [ctx + data_offset]
-proof expression: reg = scalar_value(ctx->data)
+x86 entry:        RDI = &guest_abi
+x86 instruction:  MOV reg, [RDI + data_offset]
+proof expression: reg = LOAD64(&guest_abi + data_offset)
+
+x86 instruction:  LEA reg, [packet_reg + const]
+proof expression: reg = (void *)((u8 *)packet_reg + const)
 ```
 
-This is allowed because both sides are the same ABI field load. The typed ctx
-expression is consumed immediately by the load; it is not a register tag or a
-range fact.
+These are allowed because both sides compute the same architectural x86 value.
+The `void *` C type preserves verifier-visible pointer shape when the value is
+already a pointer, but it does not attach a hidden tag to the register.
 
 Forbidden uses:
 
 - caching `ctx->data`, `ctx->data_end`, or skb `len` at entry as hidden proof
-  facts;
+  facts outside the guest ABI memory object;
 - propagating typed pointer metadata across x86 registers;
 - using typed facts to affect flags, branches, return values, or memory writes;
 - proving packet bounds from `packet + len`, `data_end`, or any relation that
   the native x86 instruction stream did not itself establish.
 
-`ctx->data`, `ctx->data_end`, skb data, and skb length are read only when the
-corresponding x86 memory load executes. The resulting register value is an
-ordinary scalar x86 value.
+`ctx->data`, `ctx->data_end`, skb data, and skb length enter the proof through
+guest ABI memory construction and ordinary x86 loads from that memory. They do
+not create per-register pointer metadata.
+
+Known verifier-expression boundary: exact x86 partial-register writes to a
+register that currently has verifier pointer type may require integer bit
+operations over pointer bits. Native x86 allows this, but the eBPF verifier may
+reject the proof expression. The simulator must not repair that rejection by
+zero-extending, dropping upper bits, or otherwise changing partial-register
+hardware semantics.
 
 ## Instruction Expansion
 
@@ -236,6 +259,11 @@ Fault-like cases are not converted into fallback behavior:
 - verifier-prohibited pointer arithmetic.
 
 They surface as compile, verifier, or load failures.
+
+For skb programs, the simulator must not manufacture packet `data_end` from
+`skb->data + skb->len`. If the linked native x86 computes a bound that the
+eBPF verifier cannot relate to packet memory, verifier rejection is the correct
+experimental result.
 
 ## Result Rule
 

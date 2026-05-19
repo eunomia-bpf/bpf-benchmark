@@ -1,0 +1,10 @@
+| Micro program | Status | Compile s | Proof BPF insns | Direct BPF insns | Verify s | Test s | Note |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `simple` | ok | 0.263 | 19 | 24 | 0.000 | 0.000 |  |
+| `simple_packet` | ok | 0.232 | 16 | 21 | 0.000 | 0.000 |  |
+| `bitmap_popcount_scan` | ok | 0.454 | 56 | 80 | 0.018 | 0.000 |  |
+| `packet_checksum_fold` | ok | 0.687 | 99 | 73 | 0.330 | 0.000 |  |
+| `payload_prefix_memcmp_scan` | run-fail | 1.885 | 228 | 139 | 0.000 | 0.015 | libbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/build/payload_prefix_memcmp_scan.bpf.o' \| error: bpf_object__load failed: Permission denied (os error 13); verifier log: /home/yunwei37/workspace/bpf-benchmark/native-sim/x86/results/payload_prefix_memcmp_scan-20260519-055531.verifier.log |
+| `tetragon_process_event_arg_filter` | run-fail | 3.087 | 301 | 255 | 0.001 | 0.014 | libbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/build/tetragon_process_event_arg_filter.bpf.o' \| error: bpf_object__load failed: Permission denied (os error 13); verifier log: /home/yunwei37/workspace/bpf-benchmark/native-sim/x86/results/tetragon_process_event_arg_filter-20260519-055531.verifier.log |
+| `tc_packet_checksum_fold` | run-fail | 1.024 | 110 | 58 | 0.000 | 0.013 | libbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/build/tc_packet_checksum_fold.bpf.o' \| error: bpf_object__load failed: Permission denied (os error 13); verifier log: /home/yunwei37/workspace/bpf-benchmark/native-sim/x86/results/tc_packet_checksum_fold-20260519-055531.verifier.log |
+| `cgroup_skb_hash_chain` | run-fail | 1.549 | 257 | 105 | 0.000 | 0.014 | libbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/build/cgroup_skb_hash_chain.bpf.o' \| error: bpf_object__load failed: Permission denied (os error 13); verifier log: /home/yunwei37/workspace/bpf-benchmark/native-sim/x86/results/cgroup_skb_hash_chain-20260519-055531.verifier.log |

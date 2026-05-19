@@ -99,8 +99,6 @@
 
 #define X86_LEA_AUX_RODATA 1U
 
-#define X86_CTX_DATA_OFF 0LL
-#define X86_CTX_DATA_END_OFF 8LL
 #define X86_SKB_LEN_OFF 0x70LL
 #define X86_SKB_DATA_OFF 0xd0LL
 

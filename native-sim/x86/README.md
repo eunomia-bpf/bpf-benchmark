@@ -56,33 +56,35 @@ flow into a verifier workaround. Complexity belongs in the C simulator/spec.
 
 Architectural state is represented by local variables:
 
-- `__x86_rax` ... `__x86_r15`;
+- `void *__x86_rax` ... `void *__x86_r15`;
 - `__x86_cf`, `__x86_zf`, `__x86_sf`, `__x86_of`;
 - byte-addressed modeled stack memory when the native program uses stack.
 
 There is no per-register ghost pointer metadata. The old `__x86_p_*`,
 `__x86_tag_*`, `__x86_off_*`, `X86_PTR_PACKET_LEN`, and packet-plus-length to
-packet-end propagation were removed. A register now carries only its scalar x86
-value.
+packet-end propagation were removed. A GPR is stored as the architectural x86
+register value itself, using `void *` as the C representation so `mov`, `lea`,
+packet pointers, ctx pointers, and stack pointers keep verifier-visible pointer
+shape as long as the actual x86 operation is pointer-shaped. Integer
+instructions still read the same register bits as `(__u64)(long)reg` when the
+x86 semantics require integer arithmetic, flags, shifts, masks, or partial
+register writes.
 
 The entry ABI is represented by `X86_SIM_ENTRY_XDP(ctx)` /
-`X86_SIM_ENTRY_SKB(ctx)`. These macros bind the typed verifier ctx pointer,
-record the scalar ctx address used by x86, declare architectural local state,
-and set the ABI entry register (`RDI = ctx`, modeled `RSP = 0`). They must not
-preload packet fields, change packet/ctx memory, create register tags, insert
-checks, or choose a control-flow path.
+`X86_SIM_ENTRY_SKB(ctx)`. These macros build a local guest ABI memory object and
+set the ABI entry register to that object's address (`RDI = &abi`, modeled
+`RSP = 0`). For XDP the object contains `data` at offset 0 and `data_end` at
+offset 8. For skb programs the object contains the linked native ABI fields
+currently used by the generated x86, including `len` and `data` at their linked
+offsets. This replaces the earlier ctx-field special cases: `[rdi]`,
+`[rdi+8]`, or `[rdi+0xd0]` are ordinary loads from guest ABI memory, not hidden
+register tags or branch-dependent verifier facts.
 
-Type tricks are allowed only as representation witnesses. For example, when an
-x86 instruction loads exactly `[ctx + data_offset]`, the simulator may express
-that same memory read as `ctx->data` so the eBPF verifier sees a legal typed ctx
-load. The result is immediately written to the architectural destination
-register as a scalar x86 value. The typed expression must not be cached as a
-hidden fact, propagated to later registers, or used to prove packet bounds.
-
-`ctx->data`, `ctx->data_end`, skb `data`, and skb `len` are therefore read only
-when the corresponding x86 memory load executes. Loading one of these fields
-does not create per-register pointer metadata; later packet loads through that
-scalar are not helped by a hidden packet tag.
+Type tricks are allowed only as representation choices for the same x86 value.
+Storing GPRs as `void *` is such a trick: it does not add data, does not change
+flags or control flow, and does not prove packet bounds. It only lets clang
+preserve pointer-shaped expressions until an actual x86 integer operation needs
+the bits as an integer.
 
 Only ABI-defined entry state is semantic. Other GPRs and flags are unspecified
 at native function entry; the C simulator may initialize local variables to keep
@@ -110,31 +112,27 @@ arithmetic are allowed to surface as compiler/verifier/load failures.
 
 ## Latest Results
 
-Smoke after deleting ghost metadata and tightening entry ABI shims:
+Full run after switching GPR storage to `void *` and replacing ctx-field
+special cases with guest ABI memory:
 
 ```bash
-python3 native-sim/x86/micro-prog/run_micro_sim_batch.py \
-  --only simple simple_packet tc_packet_checksum_fold cgroup_skb_hash_chain \
-  --jobs 4 \
-  --markdown native-sim/x86/results/README-20260519-entry-shim-smoke.md
+python3 native-sim/x86/micro-prog/run_micro_sim_batch.py --jobs 8 \
+  --markdown native-sim/x86/results/README-20260519-void-reg-move-full.md
 ```
 
-Result:
+Result file:
 
-| Micro program | Status | Proof BPF insns | Direct BPF insns | Note |
-| --- | --- | ---: | ---: | --- |
-| `simple` | ok | 19 | 24 | load and test pass |
-| `simple_packet` | ok | 16 | 21 | load and test pass |
-| `tc_packet_checksum_fold` | run-fail | 151 |  | verifier rejects scalar-address packet range without hidden metadata |
-| `cgroup_skb_hash_chain` | run-fail | 300 |  | verifier rejects scalar-address packet range without hidden metadata |
-
-Latest full entry-shim run:
-
-- `results/README-20260519-entry-shim-full.md`
-- 2/29 loaded and produced the expected result: `simple`, `simple_packet`.
-- The drop is expected: packet/ctx/stack pointer proof is no longer assisted by
-  per-register pointer metadata, packet-length facts, or entry-time
-  `ctx->data`/`ctx->data_end` caches.
+- `results/README-20260519-void-reg-move-full.md`
+- 25/29 load and produce the expected result.
+- Previously failing large-CFG cases now pass:
+  `bpf_local_call_fanout_dispatch`, `bpftrace_string_search_prefix_scan`, and
+  `packet_checksum_fold`.
+- Remaining failures are direct consequences of the no-hidden-proof rule:
+  `payload_prefix_memcmp_scan` and `tetragon_process_event_arg_filter` hit
+  verifier-prohibited integer operations on registers that still have pointer
+  type; `tc_packet_checksum_fold` and `cgroup_skb_hash_chain` need packet
+  bounds from skb data plus length, which is not expressible as packet
+  `data_end` without reintroducing a forbidden packet-length fact.
 
 These are verifier/proof-expression failures after removing non-hardware
 guards, not runtime simulator fallbacks.

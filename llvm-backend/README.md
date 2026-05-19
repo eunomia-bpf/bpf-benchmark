@@ -35,6 +35,12 @@ they do not exercise the module/native-instruction path. For example, little
 endian byte-ladder load packing must lower to `bpf_x86_movzwl`, `bpf_x86_movl`,
 or `bpf_x86_movq` when legal, not just to `LDH`, `LDW`, or `LDD`.
 
+The exception is local bpf2bpf subprogram code. Current kinsn proof sequences
+can consume verifier stack, and verifier combines caller/callee stack depth.
+Inside local subprograms, the backend may still use verifier-native wide-load
+canonicalization to reduce register pressure, but it must not force a
+stack-using kinsn proof until the local proof-stack model is fixed.
+
 ## Experiment protocol
 
 For each optimization step:
@@ -1286,3 +1292,94 @@ profitability gate is doing useful work: keep `bextrq` available for targeted
 experiments, but default-enable it only after there is a control-operand form or
 a better cost model that can prove the final x86 sequence is actually shorter or
 faster.
+
+### Step 19: little-endian byte-ladder packing uses MOV kinsns by default
+
+Rationale:
+
+- Step 13 used verifier-native `LDH/LDW/LDD` for little-endian byte-ladder
+  packing. That was a useful canonicalization, but it did not exercise the
+  kinsn/native-instruction path.
+- The backend rule is now explicit: when an existing kinsn can represent the
+  optimization, select the kinsn. Little-endian packing therefore lowers to
+  `bpf_x86_movzwl`, `bpf_x86_movl`, or `bpf_x86_movq` for non-local code.
+- Local bpf2bpf subprograms remain the exception. An all-kinsn local-call test
+  can exceed the verifier's combined caller/callee stack depth. Local callees
+  still use verifier-native `LDH/LDW/LDD` packing to reduce register pressure
+  and keep the program loadable.
+
+Implementation:
+
+- `BPFKinsnSelect` now emits MOV-family kinsn pseudos for non-local
+  little-endian byte ladders.
+- The pseudo uses the existing `bpf_x86_mov*` kfuncs and a direct
+  base+offset memory payload; no new module ABI was added.
+- `bpf_x86_mov.c` gained a verifier-proof fast path for direct BPF-register
+  memory operands: instantiate as `dst = *(width *)(base + off)` over the live
+  verifier base register. This preserves packet/frame-pointer provenance. The
+  previous generic shadow-base proof could read the base from shadow stack and
+  turn packet pointers into scalars.
+
+Objects:
+
+- `micro/results/llvm_kinsn_programs_pack_kinsn3_20260519_055006`
+
+Selected kinsns:
+
+| kinsn | count |
+|---|---:|
+| `bpf_x86_leaq` | 160 |
+| `bpf_x86_rolq` | 119 |
+| `bpf_x86_movl` | 43 |
+| `bpf_x86_rorxl` | 40 |
+| `bpf_x86_leal` | 24 |
+| `bpf_x86_movzbl` | 19 |
+| `bpf_x86_movbe16` | 13 |
+| `bpf_x86_movzwl` | 11 |
+| `bpf_x86_movq` | 8 |
+| `bpf_x86_movbe32` | 6 |
+| `bpf_x86_shldq` | 1 |
+| `bpf_x86_popcntq` | 1 |
+
+Validation:
+
+- Targeted packet/local tests passed after rebuilding the runtime image with the
+  fixed `bpf_x86_mov.ko`.
+- Full single-sample `make micro` passed: 29/29 correct.
+  Run:
+  `micro/results/x86_kvm_micro_20260519_125211_307977/metadata.json`
+- Command:
+  `make micro COMMON_DEPS= TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_pack_kinsn3_20260519_055006"`
+
+Summary using analysis-side per-benchmark values:
+
+| Comparison | Geomean ratio | summed exec delta | JIT byte delta |
+|---|---:|---:|---:|
+| MOV-packing kinsn vs no-kinsn LLVM baseline | 0.9164 | -990 ns | -5228 bytes |
+| MOV-packing kinsn vs SIB early-clobber default | 1.0043 | -1.7 ns | +160 bytes |
+
+Key deltas versus the no-kinsn LLVM baseline:
+
+| Benchmark | Baseline | MOV-packing kinsn | JIT bytes |
+|---|---:|---:|---:|
+| `bitmap_popcount_scan` | 1115 ns | 492 ns | 489 -> 337 |
+| `tc_packet_checksum_fold` | 13352 ns | 13237 ns | 292 -> 228 |
+| `packet_checksum_fold` | 13322 ns | 13254 ns | 360 -> 295 |
+| `packet_toeplitz_rss_hash` | 280 ns | 226 ns | 989 -> 916 |
+| `bcc_runqlat_log2_histogram_bucket` | 1044 ns | 1004 ns | 664 -> 542 |
+| `packet_record_bounds_window` | 108 ns | 73 ns | 644 -> 408 |
+| `bpf_local_call_fanout_dispatch` | 112 ns | 84 ns | 1985 -> 1097 |
+
+The first all-MOV-packing attempt failed only in
+`bpf_local_call_fanout_dispatch` with:
+
+```text
+combined stack size of 2 calls is 528. Too large
+```
+
+That failure happened because local subprogram byte-ladder packing was converted
+to MOV kinsns and the callee's proof stack combined with caller stack. The kept
+version restores the earlier local-subprog rule: local code may use ordinary
+wide loads, while non-local code must use the available MOV kinsns. This keeps
+the suite loadable and preserves the intended native-instruction coverage for
+normal packet/parser code.

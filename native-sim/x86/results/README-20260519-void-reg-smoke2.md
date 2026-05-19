@@ -1,0 +1,7 @@
+| Micro program | Status | Compile s | Proof BPF insns | Direct BPF insns | Verify s | Test s | Note |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `simple` | ok | 0.264 | 19 | 24 | 0.000 | 0.000 |  |
+| `simple_packet` | ok | 0.256 | 16 | 21 | 0.000 | 0.000 |  |
+| `bitmap_popcount_scan` | run-fail | 0.452 | 80 | 80 | 0.028 | 0.043 | libbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/build/bitmap_popcount_scan.bpf.o' \| error: bpf_object__load failed: Permission denied (os error 13); verifier log: /home/yunwei37/workspace/bpf-benchmark/native-sim/x86/results/bitmap_popcount_scan-20260519-054631.verifier.log |
+| `packet_checksum_fold` | run-fail | 0.707 | 88 | 73 | 0.181 | 0.196 | libbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/build/packet_checksum_fold.bpf.o' \| error: bpf_object__load failed: Bad address (os error 14); verifier log: /home/yunwei37/workspace/bpf-benchmark/native-sim/x86/results/packet_checksum_fold-20260519-054631.verifier.log |
+| `bpf_local_call_fanout_dispatch` | run-fail | 3.188 | 1477 |  | 0.001 | 0.014 | libbpf: failed to load object '/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/build/bpf_local_call_fanout_dispatch.bpf.o' \| error: bpf_object__load failed: Permission denied (os error 13); verifier log: /home/yunwei37/workspace/bpf-benchmark/native-sim/x86/results/bpf_local_call_fanout_dispatch-20260519-054631.verifier.log; missing direct xlated.bin in micro result |
