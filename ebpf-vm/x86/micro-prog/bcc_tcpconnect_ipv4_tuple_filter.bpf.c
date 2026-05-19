@@ -1,5 +1,6 @@
 #define X86_VM_ENABLE_STACK 1
 #define X86_VM_ENABLE_STACK_SLOT7 1
+#define X86_VM_ENABLE_STACK_SLOT8 1
 #define X86_VM_ENABLE_STACK_DEEP 1
 #define X86_VM_ENABLE_STACK_EXT 1
 #include "../x86_vm_bpf.h"
@@ -15,80 +16,80 @@ x86_l_1103:
 	/* 0x1103: mov    rcx,QWORD PTR [rdi+0x8] */
 	X86_VM_RUN_OP(X86_OP_MOV_LOAD, X86_RCX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);
 x86_l_1107:
-	/* 0x1107: xor    eax,eax */
+	/* 0x1107: mov    rsi,rdx */
+	X86_VM_RUN_OP(X86_OP_MOV_REG, X86_RSI, X86_RDX, X86_WIDTH_64, 0, 0);
+x86_l_110a:
+	/* 0x110a: xor    eax,eax */
 	X86_VM_RUN_OP(X86_OP_ALU_REG, X86_RAX, X86_RAX, X86_WIDTH_32, X86_ALU_XOR, 0);
-x86_l_1109:
-	/* 0x1109: cmp    rdx,rcx */
-	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RDX, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_110c:
-	/* 0x110c: jbe    110f <bcc_tcpconnect_ipv4_tuple_filter_xdp+0xf> */
-	X86_VM_X86_JCC(X86_CC_BE, 0x110c, 0x110f, x86_l_110f);
-x86_l_110e:
-	/* 0x110e: ret */
-	X86_VM_X86_RET();
+	/* 0x110c: cmp    rsi,rcx */
+	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RSI, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_110f:
-	/* 0x110f: lea    rsi,[rdx+0x8] */
-	X86_VM_RUN_OP(X86_OP_LEA, X86_RSI, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);
-x86_l_1113:
-	/* 0x1113: cmp    rsi,rcx */
-	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RSI, X86_RCX, X86_WIDTH_64, 0, 0);
+	/* 0x110f: jbe    1112 <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x12> */
+	X86_VM_X86_JCC(X86_CC_BE, 0x110f, 0x1112, x86_l_1112);
+x86_l_1111:
+	/* 0x1111: ret */
+	X86_VM_X86_RET();
+x86_l_1112:
+	/* 0x1112: lea    rdi,[rsi+0x8] */
+	X86_VM_RUN_OP(X86_OP_LEA, X86_RDI, X86_RSI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);
 x86_l_1116:
-	/* 0x1116: ja     110e <bcc_tcpconnect_ipv4_tuple_filter_xdp+0xe> */
-	X86_VM_X86_JCC(X86_CC_A, 0x1116, 0x110e, x86_l_110e);
-x86_l_1118:
-	/* 0x1118: lea    rsi,[rdx+0x310] */
-	X86_VM_RUN_OP(X86_OP_LEA, X86_RSI, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 784ULL);
-x86_l_111f:
-	/* 0x111f: cmp    rsi,rcx */
-	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RSI, X86_RCX, X86_WIDTH_64, 0, 0);
+	/* 0x1116: cmp    rdi,rcx */
+	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RDI, X86_RCX, X86_WIDTH_64, 0, 0);
+x86_l_1119:
+	/* 0x1119: ja     1111 <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x11> */
+	X86_VM_X86_JCC(X86_CC_A, 0x1119, 0x1111, x86_l_1111);
+x86_l_111b:
+	/* 0x111b: lea    rdi,[rsi+0x310] */
+	X86_VM_RUN_OP(X86_OP_LEA, X86_RDI, X86_RSI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 784ULL);
 x86_l_1122:
-	/* 0x1122: ja     110e <bcc_tcpconnect_ipv4_tuple_filter_xdp+0xe> */
-	X86_VM_X86_JCC(X86_CC_A, 0x1122, 0x110e, x86_l_110e);
-x86_l_1124:
-	/* 0x1124: cmp    DWORD PTR [rdx+0x8],0x20 */
-	X86_VM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RDX, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 34359738400ULL);
-x86_l_1128:
-	/* 0x1128: jne    110e <bcc_tcpconnect_ipv4_tuple_filter_xdp+0xe> */
-	X86_VM_X86_JCC(X86_CC_NE, 0x1128, 0x110e, x86_l_110e);
-x86_l_112a:
-	/* 0x112a: cmp    DWORD PTR [rdx+0xc],0x18 */
-	X86_VM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RDX, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 51539607576ULL);
-x86_l_112e:
-	/* 0x112e: jne    110e <bcc_tcpconnect_ipv4_tuple_filter_xdp+0xe> */
-	X86_VM_X86_JCC(X86_CC_NE, 0x112e, 0x110e, x86_l_110e);
-x86_l_1130:
-	/* 0x1130: push   rbp */
-	X86_VM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_RBP, X86_WIDTH_64, 0, 0);
+	/* 0x1122: cmp    rdi,rcx */
+	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RDI, X86_RCX, X86_WIDTH_64, 0, 0);
+x86_l_1125:
+	/* 0x1125: ja     1111 <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x11> */
+	X86_VM_X86_JCC(X86_CC_A, 0x1125, 0x1111, x86_l_1111);
+x86_l_1127:
+	/* 0x1127: cmp    DWORD PTR [rsi+0x8],0x20 */
+	X86_VM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 34359738400ULL);
+x86_l_112b:
+	/* 0x112b: jne    1111 <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x11> */
+	X86_VM_X86_JCC(X86_CC_NE, 0x112b, 0x1111, x86_l_1111);
+x86_l_112d:
+	/* 0x112d: cmp    DWORD PTR [rsi+0xc],0x18 */
+	X86_VM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 51539607576ULL);
 x86_l_1131:
-	/* 0x1131: mov    rbp,rsp */
-	X86_VM_RUN_OP(X86_OP_MOV_REG, X86_RBP, X86_RSP, X86_WIDTH_64, 0, 0);
+	/* 0x1131: jne    1111 <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x11> */
+	X86_VM_X86_JCC(X86_CC_NE, 0x1131, 0x1111, x86_l_1111);
+x86_l_1133:
+	/* 0x1133: push   rbp */
+	X86_VM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_RBP, X86_WIDTH_64, 0, 0);
 x86_l_1134:
-	/* 0x1134: push   r15 */
+	/* 0x1134: mov    rbp,rsp */
+	X86_VM_RUN_OP(X86_OP_MOV_REG, X86_RBP, X86_RSP, X86_WIDTH_64, 0, 0);
+x86_l_1137:
+	/* 0x1137: push   r15 */
 	X86_VM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_R15, X86_WIDTH_64, 0, 0);
-x86_l_1136:
-	/* 0x1136: push   r14 */
+x86_l_1139:
+	/* 0x1139: push   r14 */
 	X86_VM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_R14, X86_WIDTH_64, 0, 0);
-x86_l_1138:
-	/* 0x1138: push   r12 */
-	X86_VM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_R12, X86_WIDTH_64, 0, 0);
-x86_l_113a:
-	/* 0x113a: push   rbx */
-	X86_VM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_RBX, X86_WIDTH_64, 0, 0);
 x86_l_113b:
-	/* 0x113b: lea    rsi,[rdx+0x27] */
-	X86_VM_RUN_OP(X86_OP_LEA, X86_RSI, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 39ULL);
-x86_l_113f:
-	/* 0x113f: movabs r8,0xa0761d6478bd642f */
+	/* 0x113b: push   r12 */
+	X86_VM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_R12, X86_WIDTH_64, 0, 0);
+x86_l_113d:
+	/* 0x113d: push   rbx */
+	X86_VM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_RBX, X86_WIDTH_64, 0, 0);
+x86_l_113e:
+	/* 0x113e: add    rsi,0x27 */
+	X86_VM_RUN_OP(X86_OP_ALU_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_64, X86_ALU_ADD, 39ULL);
+x86_l_1142:
+	/* 0x1142: movabs r8,0xa0761d6478bd642f */
 	X86_VM_RUN_OP(X86_OP_MOV_IMM, X86_R8, X86_REG_NONE, X86_WIDTH_64, 0, 11562461410679940143ULL);
-x86_l_1149:
-	/* 0x1149: xor    edi,edi */
+x86_l_114c:
+	/* 0x114c: xor    edi,edi */
 	X86_VM_RUN_OP(X86_OP_ALU_REG, X86_RDI, X86_RDI, X86_WIDTH_32, X86_ALU_XOR, 0);
-x86_l_114b:
-	/* 0x114b: jmp    116d <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x6d> */
-	X86_VM_X86_JMP(0x114b, 0x116d, x86_l_116d);
-x86_l_114d:
-	/* 0x114d: nop    DWORD PTR [rax] */
-	X86_VM_RUN_OP(X86_OP_NOP, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, 0);
+x86_l_114e:
+	/* 0x114e: jmp    116d <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x6d> */
+	X86_VM_X86_JMP(0x114e, 0x116d, x86_l_116d);
 x86_l_1150:
 	/* 0x1150: shl    rcx,0x30 */
 	X86_VM_RUN_OP(X86_OP_ALU_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_64, X86_ALU_SHL, 48ULL);
@@ -386,7 +387,7 @@ x86_l_12ae:
 x86_l_12af:
 	/* 0x12af: ret */
 	X86_VM_X86_RET();
-	return XDP_ABORTED;
+	X86_VM_TRAP_RETURN();
 }
 
 X86_VM_LICENSE();

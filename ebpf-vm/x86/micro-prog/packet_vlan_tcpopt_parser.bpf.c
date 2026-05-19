@@ -1,5 +1,6 @@
 #define X86_VM_ENABLE_STACK 1
 #define X86_VM_ENABLE_STACK_SLOT7 1
+#define X86_VM_ENABLE_STACK_SLOT8 1
 #define X86_VM_ENABLE_STACK_DEEP 1
 #define X86_VM_ENABLE_STACK_EXT 1
 #include "../x86_vm_bpf.h"
@@ -524,7 +525,7 @@ x86_l_1363:
 x86_l_1368:
 	/* 0x1368: jmp    1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
 	X86_VM_X86_JMP(0x1368, 0x1241, x86_l_1241);
-	return XDP_ABORTED;
+	X86_VM_TRAP_RETURN();
 }
 
 X86_VM_LICENSE();

@@ -3,6 +3,11 @@
 This prototype asks one small question: can an eBPF program interpret a compact
 x86-like instruction stream and pass the normal eBPF verifier?
 
+Hard rule: the proof program must not use a runtime check, trap, fallback,
+synthetic bound, or verifier-only assertion to make native execution safe. If a
+native path is not modeled exactly, the artifact must fail before native
+execution, or a proof must show that the path is unreachable.
+
 The initial smoke case mirrors `micro/programs/simple.bpf.c`:
 
 ```c
@@ -128,105 +133,113 @@ compile time is part of the experiment surface for large generated verifier
 artifacts; a slow compile should be observed, not converted into a synthetic
 compile-fail timeout.
 
-Current observation: after removing Python helper selection, some large
-generated-C artifacts can keep `clang -O2 -target bpf` busy for tens of minutes
-while it tries to specialize the C-authored interpreter dispatch. That is a real
-cost of the cleaner proof boundary, not a reason for the harness to kill clang.
+Current observation: after removing Python helper selection, large generated-C
+artifacts can make `clang -O2 -target bpf` significantly slower while it
+specializes the C-authored interpreter dispatch. That is a real cost of the
+cleaner proof boundary, not a reason for the harness to kill clang.
 If this remains too expensive, the next design change must still keep helper
 selection out of Python; it should use C-authored templates/macros or a smaller
 interpreter state shape.
 
 ### Micro Compile And Verify Matrix
 
-Last full-run baseline before the generator shrink: both variants are 27/29.
-The same two programs fail verifier load with `E2BIG`; all other programs load,
-run, and match expected result/retval.
+Latest safety-first generated-C run is 29/29:
+[`results/README-20260518-201933.md`](./results/README-20260518-201933.md).
+This run keeps the previous proof-only branch assertions and `last_cmp_*`
+metadata deleted. The remaining SKB and checksum fixes are C-authored x86/ABI
+semantics: `ctx+0x70` carries a `PACKET_LEN` ghost tag that proves
+`data + skb_len == data_end`, and same-register `xchg` is treated as the real
+x86 no-op it is. They are not branch assertions, synthetic bounds checks, or
+Python renderers.
 
 `current` is the active C-dispatch path (`generate_micro_proofs.py` +
 `x86_vm_bpf.h`). `helper-selection` is historical baseline data from the
 restored backup path (`generate_micro_proofs_helper_selection.py` +
 `x86_vm_bpf_helper_selection.h`); the separate compile-cost measurement script
-has been removed so new runs use only `run_micro_interpreter_batch.py`. Current
-rows are a combined run from before this consolidation: the
-first five rows and `trace_event_type_switch_dispatch` came from the no-timeout
-sequential run; the remaining rows came from `--jobs 8 --run-label
-parallel8-rest`. Parallel wall times include CPU contention by design; they are
-recorded as the observed experiment cost. After this baseline, the active
-generator was reduced from 1423 to 774 lines by removing Python-owned
-`bpf_loop` lowering, internal call-return stack lowering, Markdown ASM input,
-and stack-depth feature selection, then adding C-owned branch fuel and native
-subfunction protocols. The full batch has not been rerun on that reduced
-generator yet.
+has been removed so new runs use only `run_micro_interpreter_batch.py`. The
+historical helper-selection numbers remain in the table only as compile-cost
+evidence.
 
 | Micro program | Status | Current clang s | Current verify s | Current verify | Helper clang s | Helper verify s | Helper verify | Note |
 | --- | --- | ---: | ---: | --- | ---: | ---: | --- | --- |
-| `simple` | ok | 12.355 | 0.013 | ok | 0.202 | 0.013 | ok |  |
-| `simple_packet` | ok | 5.159 | 0.015 | ok | 0.184 | 0.015 | ok |  |
-| `bitmap_popcount_scan` | ok | 42.873 | 0.040 | ok | 0.414 | 0.037 | ok |  |
-| `sorted_rule_binary_search` | ok | 95.229 | 0.146 | ok | 0.581 | 0.187 | ok |  |
-| `bcc_runqlat_log2_histogram_bucket` | ok | 604.283 | 0.841 | ok | 1.917 | 0.947 | ok |  |
-| `trace_event_type_switch_dispatch` | ok | 5080.961 | 1.113 | ok | 1.451 | 0.908 | ok |  |
-| `packet_checksum_fold` | ok | 26.586 | 0.684 | ok | 0.381 | 0.523 | ok | XDP retval 2. |
-| `payload_prefix_memcmp_scan` | ok | 996.500 | 0.103 | ok | 3.193 | 0.029 | ok |  |
-| `packet_vlan_tcpopt_parser` | ok | 789.335 | 0.093 | ok | 3.257 | 0.019 | ok |  |
-| `bpf_local_call_fanout_dispatch` | fail | 196.136 | 3.307 | run-fail | 1.748 | 2.542 | run-fail | Verifier E2BIG in both variants. |
-| `flow_5tuple_rss_hash` | ok | 1036.762 | 0.016 | ok | 4.854 | 0.017 | ok |  |
-| `katran_lb_consistent_hash_select` | ok | 7549.586 | 0.027 | ok | 22.169 | 0.020 | ok |  |
-| `cilium_policy_guard_tree_filter` | ok | 839.188 | 0.053 | ok | 3.178 | 0.046 | ok |  |
-| `siphash_rotate64_mixer` | ok | 5818.407 | 0.027 | ok | 24.311 | 0.016 | ok |  |
-| `packet_record_bounds_window` | ok | 366.625 | 0.054 | ok | 1.347 | 0.037 | ok |  |
-| `flow_record_field_scan` | ok | 408.265 | 0.034 | ok | 1.713 | 0.028 | ok |  |
-| `packed_header_bitfield_decode` | ok | 4407.615 | 0.122 | ok | 14.250 | 0.121 | ok |  |
-| `bpftrace_string_search_prefix_scan` | fail | 114.663 | 3.479 | run-fail | 0.677 | 2.589 | run-fail | Verifier E2BIG in both variants. |
-| `tracee_syscall_name_table_lookup` | ok | 1862.937 | 0.120 | ok | 1.347 | 0.121 | ok |  |
-| `tracee_http_method_prefix_detect` | ok | 1237.278 | 0.028 | ok | 1.911 | 0.029 | ok |  |
-| `cilium_socket_lb_service_select` | ok | 1147.972 | 0.252 | ok | 2.584 | 0.159 | ok |  |
-| `bcc_tcpconnect_ipv4_tuple_filter` | ok | 1095.224 | 0.099 | ok | 2.335 | 0.082 | ok |  |
-| `tetragon_process_event_arg_filter` | ok | 5107.060 | 0.588 | ok | 18.292 | 0.531 | ok |  |
-| `otel_stack_frame_unwind_scan` | ok | 1075.482 | 0.119 | ok | 2.424 | 0.047 | ok |  |
-| `cilium_ct_nat_tuple_rewrite` | ok | 1189.184 | 0.076 | ok | 3.420 | 0.077 | ok |  |
-| `packet_toeplitz_rss_hash` | ok | 2178.522 | 0.435 | ok | 2.290 | 0.052 | ok |  |
-| `bpftrace_comm_key_fnv_hash` | ok | 5063.579 | 0.079 | ok | 24.316 | 0.094 | ok |  |
-| `tc_packet_checksum_fold` | ok | 19.151 | 0.497 | ok | 0.404 | 0.648 | ok | TC retval 0. |
-| `cgroup_skb_hash_chain` | ok | 247.091 | 0.028 | ok | 0.923 | 0.026 | ok | cgroup skb retval 1; native SKB ctx offsets modeled in C interpreter. |
+| `simple` | ok | 0.351 | 0.000 | ok | 0.202 | 0.013 | ok |  |
+| `simple_packet` | ok | 0.433 | 0.000 | ok | 0.184 | 0.015 | ok |  |
+| `bitmap_popcount_scan` | ok | 1.360 | 0.001 | ok | 0.414 | 0.037 | ok |  |
+| `sorted_rule_binary_search` | ok | 1.324 | 0.029 | ok | 0.581 | 0.187 | ok |  |
+| `bcc_runqlat_log2_histogram_bucket` | ok | 5.440 | 0.095 | ok | 1.917 | 0.947 | ok |  |
+| `trace_event_type_switch_dispatch` | ok | 2.842 | 0.076 | ok | 1.451 | 0.908 | ok |  |
+| `packet_checksum_fold` | ok | 2.043 | 0.040 | ok | 0.381 | 0.523 | ok | Still passes after deleting branch assertions. |
+| `payload_prefix_memcmp_scan` | ok | 6.961 | 0.001 | ok | 3.193 | 0.029 | ok |  |
+| `packet_vlan_tcpopt_parser` | ok | 7.825 | 0.000 | ok | 3.257 | 0.019 | ok | Hidden packet-offset metadata stays verifier-visible. |
+| `bpf_local_call_fanout_dispatch` | ok | 29.576 | 0.021 | ok | 1.748 | 2.542 | run-fail | C-owned call/frame semantics pass; slot7/slot8 pointer payloads model real stack spills. |
+| `flow_5tuple_rss_hash` | ok | 11.715 | 0.000 | ok | 4.854 | 0.017 | ok |  |
+| `katran_lb_consistent_hash_select` | ok | 45.789 | 0.001 | ok | 22.169 | 0.020 | ok |  |
+| `cilium_policy_guard_tree_filter` | ok | 5.427 | 0.003 | ok | 3.178 | 0.046 | ok |  |
+| `siphash_rotate64_mixer` | ok | 58.022 | 0.000 | ok | 24.311 | 0.016 | ok |  |
+| `packet_record_bounds_window` | ok | 4.985 | 0.002 | ok | 1.347 | 0.037 | ok |  |
+| `flow_record_field_scan` | ok | 6.442 | 0.001 | ok | 1.713 | 0.028 | ok |  |
+| `packed_header_bitfield_decode` | ok | 23.092 | 0.002 | ok | 14.250 | 0.121 | ok |  |
+| `bpftrace_string_search_prefix_scan` | ok | 4.657 | 0.135 | ok | 0.677 | 2.589 | run-fail | Passes via C/header state-shape fixes, not branch assertions. |
+| `tracee_syscall_name_table_lookup` | ok | 4.673 | 0.016 | ok | 1.347 | 0.121 | ok |  |
+| `tracee_http_method_prefix_detect` | ok | 4.521 | 0.002 | ok | 1.911 | 0.029 | ok |  |
+| `cilium_socket_lb_service_select` | ok | 7.313 | 0.012 | ok | 2.584 | 0.159 | ok |  |
+| `bcc_tcpconnect_ipv4_tuple_filter` | ok | 8.265 | 0.007 | ok | 2.335 | 0.082 | ok |  |
+| `tetragon_process_event_arg_filter` | ok | 27.778 | 0.106 | ok | 18.292 | 0.531 | ok |  |
+| `otel_stack_frame_unwind_scan` | ok | 5.514 | 0.004 | ok | 2.424 | 0.047 | ok |  |
+| `cilium_ct_nat_tuple_rewrite` | ok | 6.592 | 0.003 | ok | 3.420 | 0.077 | ok |  |
+| `packet_toeplitz_rss_hash` | ok | 7.594 | 0.005 | ok | 2.290 | 0.052 | ok |  |
+| `bpftrace_comm_key_fnv_hash` | ok | 38.966 | 0.003 | ok | 24.316 | 0.094 | ok |  |
+| `tc_packet_checksum_fold` | ok | 3.190 | 0.039 | ok | 0.404 | 0.648 | ok | `PACKET_LEN` proves `data + skb_len == data_end`; `xchg ax,ax` is no-op. |
+| `cgroup_skb_hash_chain` | ok | 3.241 | 0.001 | ok | 0.923 | 0.026 | ok | `PACKET_LEN` proves SKB end pointer without proof-only branch assertions. |
 
-For failing objects, capture the kernel verifier log through the loader:
+For verifier diagnostics, capture the kernel verifier log through the loader:
 
 ```sh
 sudo -n ebpf-vm/loader/target/debug/ebpf-vm-loader \
-  --object ebpf-vm/x86/micro-prog/build/bpf_local_call_fanout_dispatch.bpf.o \
-  --program bpf_local_call_fanout_dispatch_x86_vm_xdp \
-  --case bpf_local_call_fanout_dispatch \
+  --object ebpf-vm/x86/micro-prog/build/packet_checksum_fold.bpf.o \
+  --program packet_checksum_fold_x86_vm_xdp \
+  --case packet_checksum_fold \
   --load-only \
-  --verifier-log /tmp/bpf_local_call_fanout_dispatch.verifier.log
+  --verifier-log ebpf-vm/x86/results/packet_checksum_fold.verifier.log
 ```
 
-### Direct BPF Control For The Two Verifier Failures
+### Direct BPF Control For Verifier-Complexity Cases
 
-The two remaining failures are verifier-complexity failures introduced by the
-x86-VM proof shape, not evidence that the original micro programs are rejected.
-As a control, the original `micro/programs/*.bpf.c` objects were compiled and
-loaded with the same loader, same generated inputs, same expected result, and
-same XDP retval on 2026-05-18. Both direct eBPF programs pass verifier and
-`BPF_PROG_TEST_RUN`.
+These controls check whether verifier failures come from the original micro
+programs or from the x86-VM proof shape. The original `micro/programs/*.bpf.c`
+objects were compiled and loaded with the same loader, same generated inputs,
+same expected result, and same program-type retval on 2026-05-18. The direct eBPF
+programs pass verifier and `BPF_PROG_TEST_RUN`.
 
-| Micro program | Direct eBPF result | Direct load/test s | Direct static BPF insns | Direct verifier processed / total / peak / max-state | x86 VM result | x86 VM load/test s | x86 VM static BPF insns | x86 VM verifier processed / total / peak / max-state | Reason |
+These rows compare direct eBPF against x86-VM proof shape. Both x86-VM rows now
+pass in the active safety-first path without restoring proof-only branch
+assertions. The x86-VM proof is still larger and more verifier-expensive than
+direct eBPF, but the failures are no longer active blockers.
+
+| Micro program | Direct eBPF result | Direct load/test s | Direct static BPF insns | Direct verifier processed / total / peak / max-state | x86 VM result | x86 VM verify s | x86 VM static BPF insns | x86 VM verifier processed / total / peak / max-state | Reason |
 | --- | --- | ---: | ---: | --- | --- | ---: | ---: | --- | --- |
-| `bpf_local_call_fanout_dispatch` | ok | 0.03 | 528 | `9572 / 120 / 70 / 10` | `E2BIG` | 3.307 | 2341 | `1000001 / 30881 / 1834 / 33` | Native 16-record loop dispatches into four local-call targets. The x86-VM lowering carries a full register/flag/pointer-tag state through generated native subfunctions and then joins at common return blocks, so verifier work grows until the global processed-insn limit is hit. |
-| `bpftrace_string_search_prefix_scan` | ok | 0.07 | 200 | `21394 / 546 / 143 / 47` | `E2BIG` | 3.479 | 1487 | `1000001 / 49269 / 1178 / 94` | The prefix scan is a bounded byte loop in direct eBPF, but the x86-VM proof repeats byte loads, x86 flag updates, pointer-tag checks, and loop callback state joins for each compare step. That increases `max_states_per_insn` and `mark_read` until the processed-insn limit is hit. |
+| `bpf_local_call_fanout_dispatch` | ok | 0.03 | 528 | `9572 / 120 / 70 / 10` | ok | 0.055 | 10985 | `22584 / 1430 / 583 / 8` | Native 16-record loop dispatches into four local-call targets. The active C-owned call/frame model greatly increases static BPF size, but the verifier can analyze the resulting shape. |
+| `bpftrace_string_search_prefix_scan` | ok | 0.07 | 200 | `21394 / 546 / 143 / 47` | ok | 0.396 | 148 | `326956 / 7055 / 108 / 5` | The current pass uses C/header state-shape fixes and exact x86 flags, not branch assertions. It remains much more expensive than direct eBPF but stays below the verifier limit. |
 
-The backup `helper-selection` path has the same verifier failure signature for
-these two programs (`Processed 1000001 insn` with the same state counts), even
-though its clang compile time is much lower. That confirms the immediate
-blocker is the verifier-visible state shape, not Python helper selection or a
-specific generated-C spelling.
+Latest safety-first generated-C run: [`results/README-20260518-201933.md`](./results/README-20260518-201933.md).
+The active path now passes 29/29 programs while keeping `last_cmp_*` and
+`x86_vm_assert_*` deleted. The remaining verifier fixes moved into C-authored
+ISA/ABI semantics: exact same-register `xchg` behavior, packet-end metadata
+derived from SKB length, and helper shape changes that do not change native x86
+semantics.
+
+The backup `helper-selection` path had lower clang cost but still failed
+`bpf_local_call_fanout_dispatch` and `bpftrace_string_search_prefix_scan` at
+the verifier. The active C-owned path trades more C/header complexity for a
+cleaner Python proof boundary and now fixes both cases.
 
 Python LOC check for this cleanup and backup:
 
 ```text
-generate_micro_proofs.py:                  1763 -> 776 lines
+generate_micro_proofs.py current:            737 lines
 generate_micro_proofs_helper_selection.py: backup at 1503 lines
-x86_vm_bpf.h:                            202 -> 642 lines
+x86_vm_bpf.h latest:                       776 lines
+x86_interp.h latest:                      2756 lines
 x86_vm_bpf_helper_selection.h:           backup at 533 lines
 ```
 
@@ -241,9 +254,9 @@ completion is a separate next experiment.
 
 The formalization target for the generated-C path is
 [`intepreter-spec.md`](./intepreter-spec.md). That spec is intentionally tied to
-the current code: instruction helper steps, exact-trip loop lowering, loop
-frame preservation, and ABI output-store capability preservation are named
-proof obligations rather than benchmark-specific fixes.
+the current code: instruction helper steps, native branch/call/return lowering,
+low-stack pointer payloads, and ABI output-store capability preservation are
+named proof obligations rather than benchmark-specific fixes.
 
 Active generator rule: Python must not rewrite native return semantics, branch
 semantics, or opcode semantics. A native `ret` is emitted as
@@ -257,9 +270,25 @@ C macro and inline-helper boundary rule: C may use macros, `__always_inline`,
 ISA semantics such as opcode, register, width, memory operand, and flag
 handling. C must not become a hidden cross-instruction renderer: no
 benchmark-name logic, no algorithm reconstruction, no semantic shortcut for a
-known output store, and no program-shape-specific rewrite that is not an x86
-instruction semantics rule. Python remains a one-to-one producer of native x86
-instruction steps and explicit native control-flow labels.
+known output store, no proof-only branch assertion, and no proof-only bounds
+check that native x86 would not execute. Python remains a one-to-one producer of
+native x86 instruction steps and explicit native control-flow labels.
+
+Native-direct safety rule: verifier acceptance must come from
+semantics-preserving optimization and state layout, not from facts that native
+x86 does not guarantee. The active code deletes the previous `last_cmp_*`
+metadata and `x86_vm_assert_*` branch helpers. Proof-only packet/output bounds
+checks were removed from the active packet helpers. Stack-slot dispatch and
+other remaining model checks are tracked in [`TODO.md`](./TODO.md): they cannot
+be used as final safety arguments unless a proof shows they are unreachable or
+exactly equivalent to the native x86 ABI/path condition.
+
+Runtime trap rule: native x86 will not return `XDP_ABORTED` when the proof
+interpreter would trap. The active top-level trap path is now fail-closed: a
+reachable trap calls an invalid helper so load/verifier fails instead of
+accepting a fallback-returning interpreter. Final acceptance still requires a
+proof that all `X86_INTERP_TRAP` paths are unreachable for the accepted native
+artifact, or rejection before native execution.
 
 Generator complexity rule: the Python proof generator must stay below 800
 lines. Its only semantic output should be a simple native stream such as
@@ -285,8 +314,34 @@ internal call-return stack lowering outright. C now consumes the simple labeled
 instruction stream through ISA-level branch/call/return macros
 (`X86_VM_X86_JCC`, `X86_VM_X86_JMP`, `X86_VM_X86_CALL`,
 `X86_VM_X86_RET`): branch macros lower native x86 control flow to C labels and
-`goto`, backward edges consume C-owned verifier fuel, and subfunction
-callee-save/restore lives in `x86_vm_bpf.h`.
+`goto`; call macros model the native return-address slot; generated callee frame
+instructions execute as x86 instructions. There is no fuel guard or synthetic
+trip bound in the active path because that is not x86 ISA semantics; verifier
+rejection for a loop is recorded as a verifier result.
+
+C state-layout changes in the active path:
+
+- `X86_VM_EXEC` performs C-owned typed opcode dispatch; Python still emits only
+  `X86_VM_RUN_OP(X86_OP_..., operands...)`.
+- Stack slots keep value/tag state, while low stack slots `0..8` also carry real
+  verifier pointer payloads (`p_stack0..p_stack8`). This models real x86 stack
+  spills used by the current micro corpus, including `bpf_local_call_fanout_dispatch`
+  spills through `[rbp-0x40]`. A reachable deeper pointer spill rejects load; it
+  is not an accepted runtime safety check.
+- Top-level packet memory loads use a verifier-proven raw-load fastpath for
+  packet bases that already have verifier-visible range. Subfunction steps use
+  the checked typed interpreter path so local-call proof state stays stable.
+- Packet pointer arithmetic preserves concrete scalar register semantics and
+  tracks packet offsets in hidden per-register metadata. Proven packet loads may
+  recompute `data + offset + disp` for the verifier without changing the modeled
+  x86 register value.
+- SKB length loads from `ctx+0x70` produce the native scalar length and a
+  `PACKET_LEN` ghost capability tied to `data_end`. Adding that length to the
+  packet `data` pointer produces `PACKET_END`, which expresses the real SKB ABI
+  relation `data + len == data_end` without adding a runtime bounds check.
+- The previous `cmp`/`test` branch-proof metadata and SKB branch range hook were
+  deleted. Branch macros now only evaluate x86 flags through `x86_eval_cc()` and
+  transfer control.
 
 Generated-C migration todo:
 
@@ -295,14 +350,29 @@ Generated-C migration todo:
 | Native return ABI lives in metadata/header, not Python rewrites | done | `ret` emits `X86_VM_X86_RET();`; runner checks `expected_retval` from YAML. |
 | Remove benchmark-name renderers from Python | done | `generate_micro_proofs.py` no longer dispatches on `packet_checksum_fold`, `bpftrace_string_search_prefix_scan`, `bpf_local_call_fanout_dispatch`, or other benchmark names. |
 | Remove stale C special templates | done | Unused checksum/string-scan C helper templates were deleted from `x86_vm_bpf.h`; the header now contains generic VM plumbing only. |
-| Move proof protocol out of Python | partial | Python pc-dispatch, ctx-store write-set insertion, `bpf_loop` lowering, internal call-return stack lowering, and stack-depth feature selection were removed; remaining Python CFG work is label/branch emission only. |
-| C-owned loop/call protocol | partial | `X86_VM_X86_JCC/JMP` own backward-edge fuel guards; `X86_VM_X86_CALL` and `X86_VM_SUB_BEGIN/X86_VM_X86_SUB_RET` own native call lowering and callee-save/restore. Verifier cost is still being measured. |
-| Shrink Python generator below 800 lines | done | `generate_micro_proofs.py` is 774 lines after moving loop/call proof details into C-authored protocol macros. |
-| Run full generated-C batch after generator shrink | pending | Last full baseline remains 27/29 before the shrink; rerun in progress after the C-owned loop/call protocol. |
+| Move proof protocol out of Python | done | Python pc-dispatch, ctx-store write-set insertion, `bpf_loop` lowering, internal call-return stack lowering, helper selection, and benchmark-name renderers were removed; remaining Python CFG work is mechanical label/branch emission. |
+| C-owned loop/call protocol | done for current micro | `X86_VM_X86_JCC/JMP` lower native branches directly to C labels; `X86_VM_X86_CALL` models call stack adjustment; generated callee frame instructions execute through normal x86 helpers. |
+| Shrink Python generator below 800 lines | done | `generate_micro_proofs.py` is 737 lines. |
+| Run full safety-first generated-C batch | done | `results/README-20260518-201933.md`: 29/29 pass after deleting proof-only branch assertions. |
+| Delete non-x86 loop fuel guard | done | Active branch macros no longer decrement `X86_VM_LOOP_FUEL`; backward edges use plain x86 branch semantics. |
+| Move opcode dispatch specialization into C | done | `X86_VM_EXEC_TYPED` selects C helpers from constant `X86_OP_*`; Python does not choose helpers. |
+| Stack pointer metadata | done for current micro | `x86_state` stores stack value/tag per slot and verifier pointer payloads for low slots `0..8`; deeper pointer spills must reject or be modeled before native execution. |
+| Verifier-proven packet load fastpath | done | Top-level packet loads can rely on verifier-visible packet range instead of adding per-load bounds helpers. |
+| Delete SKB length branch range hook | done | The proof-only `cmp [ctx+0x70], imm; ja target` range assertion was removed. |
+| Model SKB packet end through ABI metadata | done | `ctx+0x70` loads carry `PACKET_LEN`; `PACKET_LEN + PACKET` becomes `PACKET_END`, matching `data + skb_len == data_end`. |
+| Preserve same-register `xchg` semantics | done | `xchg ax, ax` is modeled as the real x86 no-op, so it does not clear packet pointer metadata. |
+| Hidden packet-offset metadata | done | Packet-capable registers carry an offset field used only to make packet bounds visible to the verifier. |
+| Delete branch-proof metadata | done | `last_cmp_*` state and `x86_vm_assert_*` helpers were removed from active C. |
+| Remove packet/output runtime bounds checks | done | Active packet/output helpers no longer guard loads/stores with proof-only `data_end` checks. |
+| Make top-level traps fail-closed | done | A reachable trap calls an invalid helper, forcing load rejection instead of returning `XDP_ABORTED`. |
+| Split memory-domain helpers | done for current micro | Top-level packet loads have a raw verifier-proven path; subfunctions and stack/ctx accesses keep checked typed helpers. |
+| Remaining generated-C verifier failures | done for current micro | Current safety-first full batch passes 29/29 without proof-only assertions/bounds checks. |
+| Direct-native safety TODO | open | See [`TODO.md`](./TODO.md) for remaining stack, trap, metadata, ABI, rodata, flag, and call-return proof obligations. |
 
-The remaining generated-C failures are already reflected in the main matrix.
-The next fix must reduce verifier-visible state joins in C-authored helper or
-loop-state abstractions without moving helper selection back into Python.
+There are no active generated-C verifier/load failures in the current
+safety-first micro corpus. Future work should keep reducing C/header size and
+specifying helper contracts, not reintroduce benchmark renderers, branch
+assertions, synthetic bounds checks, or loop-shape analysis in Python.
 
 ## JSON-Linker Todo
 
@@ -434,7 +504,7 @@ Active JSON-link rules:
    Python BPF emitters.
 3. For each micro, require all four checks: JSON generation, kernel verifier
    load, `BPF_PROG_TEST_RUN`, and expected result.
-4. Treat any local abort/fuel bound/tail-inline shortcut as a proof obligation;
+4. Treat any local abort/bound/tail-inline shortcut as a proof obligation;
    it must be justified by a loop-bound or control-flow lemma before native
    direct execution can rely on it.
 
@@ -609,7 +679,7 @@ making that C shape verifier-friendly, not part of the correctness argument. The
 restored direct-helper generator is retained only as historical compile-cost
 baseline evidence recorded above.
 
-## Current Issues
+## Current Design Constraints
 
 This prototype has already exposed several verifier-facing design constraints:
 
@@ -617,14 +687,14 @@ This prototype has already exposed several verifier-facing design constraints:
   arrays become BPF stack pressure, so generated proof sources use one immediate
   macro call per native instruction.
 - Native packet addressing needs to support both positive and negative
-  displacement. `x86_packet_bounds()` now allows negative displacement when the
-  computed address remains inside the packet window; otherwise helpers like
-  `movzx ecx, BYTE PTR [rdi-0xf]` trap incorrectly.
+  displacement. Any packet bound proof must come from native x86 guards or a
+  proved equivalent state layout. Synthetic helper checks are not enough for
+  direct native execution because native x86 will not execute them.
 - Input-dependent interpreter loops are a state-explosion risk. The generator
   should still hardcode the instruction sequence, but it must stay mechanical:
   one native instruction becomes one helper step plus explicit native
-  branch/return structure. Bounded-loop proof obligations need to live in
-  interpreter/helper templates, not in Python semantic rewrites.
+  branch/return structure. Any future bounded-loop proof obligations need to
+  live in interpreter/helper templates, not in Python semantic rewrites.
 - Native stack state must be modeled explicitly for programs with `push`, `pop`,
   or `[rsp]` accesses. A generic pointer-tag path made the verifier explore
   impossible `rsp`-as-packet states, so RSP stack accesses now need dedicated
@@ -633,24 +703,24 @@ This prototype has already exposed several verifier-facing design constraints:
   incomplete for native direct calls. The generator now rebuilds the native
   object and disassembles call-target symbols when the markdown `## Native ASM`
   block has unresolved call targets.
-- `bpf_local_call_fanout_dispatch` no longer has a benchmark-name renderer.
-  The active generator no longer uses Python pc-dispatch. Large generated native
-  subfunctions still push the verifier past `E2BIG` (`Argument list too long`
-  from libbpf), so the next fix must be a C-authored typed call summary or state
-  abstraction.
+- `bpf_local_call_fanout_dispatch` no longer has a benchmark-name renderer and
+  now passes verifier/test-run. The active fix is C-owned: typed opcode
+  dispatch, native call stack adjustment, generated callee frame execution,
+  low-stack pointer payload slots, and indexed packet-pointer promotion.
 - `bpftrace_string_search_prefix_scan` no longer uses a C-authored
-  benchmark-specific scan helper. Repeated generic memory/ALU helper expansion
-  still exceeds the verifier processed-insn limit, so the next fix must be a
-  reusable C helper/template for the repeated byte-compare/or shape rather than
-  another Python renderer.
-- `packet_checksum_fold` and `tc_packet_checksum_fold` now use the same generic
-  nested-loop lowering and both pass. The XDP variant needs the exact-trip
-  callback-index theorem so exhausting the static trip count reaches the native
-  exit path and returns XDP `2`. The TC variant additionally needs
-  loop/program frame-preservation for the entry `rdi` context capability. That
-  protocol now lives in `x86_vm_bpf.h`: loop callbacks track RDI writes in the C
-  loop context, and ABI output stores call `x86_vm_prepare_ctx_output()` from
-  `X86_VM_RUN_OP`.
+  benchmark-specific scan helper and still passes after deleting proof-only
+  branch assertions. The fix stayed in C/header state shape and flag semantics,
+  not in Python renderers or assertions.
+- `packet_checksum_fold`, `tc_packet_checksum_fold`, and
+  `cgroup_skb_hash_chain` pass after deleting proof-only branch assertions. The
+  SKB cases use C-authored ABI metadata: a `ctx+0x70` load carries
+  `PACKET_LEN`, and adding it to the packet data pointer yields `PACKET_END`.
+  The TC checksum case also required exact `xchg ax, ax` no-op semantics so a
+  native alignment NOP does not clear packet pointer metadata.
+- `packet_vlan_tcpopt_parser` now passes because packet pointer arithmetic keeps
+  concrete x86 register values separate from hidden packet-offset metadata. The
+  verifier load path can prove `data + offset + disp` while the x86 state still
+  observes the same scalar register value.
 - The strict JSON-link loader is not the current source of truth. It has passed
   smoke programs (`simple`, `simple_packet`, `bitmap_popcount_scan`), but native
   call-flow support is missing and stale loader binaries previously produced
@@ -661,6 +731,23 @@ This prototype has already exposed several verifier-facing design constraints:
 - `mov [mem], imm` packs the low 32 bits as the immediate and the high 32 bits
   as the displacement. Negative immediates must not sign-extend into the
   displacement field; the generator now masks both fields before packing.
+
+Remaining places that are not yet a complete native x86 equivalence proof:
+
+- Runtime `X86_INTERP_TRAP` paths are interpreter behavior. The top-level
+  generated path now fails closed through an invalid helper if such a path
+  remains reachable, but final direct native execution still requires
+  load/translation-time rejection or a proof that each trap is unreachable.
+- Packet/output helper `data_end` bounds checks have been removed from active
+  packet helpers. Stack slot dispatch and other model checks remain proof
+  obligations; they are not final safety guards.
+- The `ctx`, SKB, packet, output, and rodata layouts are modeled ABIs, not
+  arbitrary x86 memory. They must match the native execution layout exactly.
+- The stack model is finite and uses sparse pointer payloads; it is not a full
+  x86 stack model.
+- Flag helpers cover the current micro subset, not all x86 flag behavior.
+- Native call return-address contents are only valid for callees that do not
+  inspect the return address.
 
 For formal verification, clang optimization is not part of the trusted
 argument. This C implementation is a prototype for finding the VM semantics and

@@ -6,7 +6,11 @@
 
 static __always_inline int bench_checksum(const u8 *data, u32 len, u64 *out)
 {
+#ifdef MICRO_NATIVE
+    if (!micro_native_has_data_bytes(data, len, 0, 8)) {
+#else
     if (!micro_has_bytes(len, 0, 8)) {
+#endif
         return -1;
     }
 
@@ -17,7 +21,11 @@ static __always_inline int bench_checksum(const u8 *data, u32 len, u64 *out)
     if (rounds != TC_CHECKSUM_MAX_ROUNDS || word_count != TC_CHECKSUM_MAX_WORDS) {
         return -1;
     }
+#ifdef MICRO_NATIVE
+    if (!micro_native_has_data_bytes(data, len, 8, TC_CHECKSUM_MAX_WORDS * 2U)) {
+#else
     if (!micro_has_bytes(len, 8, TC_CHECKSUM_MAX_WORDS * 2U)) {
+#endif
         return -1;
     }
 

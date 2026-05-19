@@ -20,9 +20,10 @@
 #define X86_VM_SUBFN_ATTR __always_inline
 #endif
 
-#ifndef X86_VM_TRAP_RETVAL
-#define X86_VM_TRAP_RETVAL XDP_ABORTED
-#endif
+static __u64 (*x86_vm_unreachable_trap)(void) = (void *)999999;
+
+#define X86_VM_CONCAT2(A, B) A##B
+#define X86_VM_CONCAT(A, B) X86_VM_CONCAT2(A, B)
 
 #define X86_VM_INSN(OP, DST, SRC, FLAGS, AUX, IMM)                         \
 	((struct x86_insn){                                                 \
@@ -59,10 +60,11 @@
 
 #define X86_VM_PACKET_FASTPATH_CANDIDATE(OP, DST, SRC, AUX)               \
 	(X86_VM_MEM_BASE_REG((OP), (DST), (SRC)) != X86_REG_NONE &&        \
+	 X86_MEM_AUX_INDEX((AUX)) == X86_REG_NONE &&                       \
 	 X86_VM_MEM_BASE_REG((OP), (DST), (SRC)) != X86_RDI &&             \
+	 X86_VM_MEM_BASE_REG((OP), (DST), (SRC)) != X86_RSI &&             \
 	 X86_VM_MEM_BASE_REG((OP), (DST), (SRC)) != X86_RBP &&             \
-	 X86_VM_MEM_BASE_REG((OP), (DST), (SRC)) != X86_RSP &&             \
-	 X86_MEM_AUX_INDEX((AUX)) == X86_REG_NONE)
+	 X86_VM_MEM_BASE_REG((OP), (DST), (SRC)) != X86_RSP)
 
 #define X86_VM_EXEC_PACKET(STATE, OP)                                      \
 	({                                                                 \
@@ -310,13 +312,18 @@
 			X86_VM_EXEC_TYPED((STATE), (OP));                  \
 	})
 
+#define X86_VM_EXEC_SUB(STATE, OP, DST, SRC, FLAGS, AUX, IMM)              \
+	({                                                                 \
+		X86_VM_LOAD_INSN((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
+		X86_VM_EXEC_TYPED((STATE), (OP));                           \
+	})
+
 static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
 						   __u64 value)
 {
 	__u8 *p = data + X86_VM_OUTPUT_OFF;
 
-	if (p + 8 > (__u8 *)data_end)
-		return -1;
+	(void)data_end;
 	p[0] = value;
 	p[1] = value >> 8;
 	p[2] = value >> 16;
@@ -400,15 +407,15 @@ static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
 			FN(&__x86_vm_state, __x86_vm_data,                 \
 			   __x86_vm_data_end);                              \
 		if (__x86_vm_call_ret < 0)                                \
-			return X86_VM_TRAP_RETVAL;                        \
+			X86_VM_TRAP_RETURN();                              \
 		x86_vm_call_leave(&__x86_vm_state);                         \
 	} while (0)
 
 #define X86_VM_RUN_STEP_SUB(OP, DST, SRC, FLAGS, AUX, IMM)                  \
 	do {                                                               \
 		int __x86_vm_step_ret =                                    \
-			X86_VM_EXEC(&__x86_vm_state, (OP), (DST), (SRC),    \
-				     (FLAGS), (AUX), (IMM));                 \
+			X86_VM_EXEC_SUB(&__x86_vm_state, (OP), (DST),      \
+					 (SRC), (FLAGS), (AUX), (IMM));    \
 		if (__x86_vm_step_ret < 0)                                 \
 			return X86_INTERP_TRAP;                            \
 		if (__x86_vm_step_ret == X86_INTERP_DONE)                  \
@@ -418,14 +425,10 @@ static __always_inline int x86_vm_write_result_u64(void *data, void *data_end,
 #define X86_VM_RUN_OP_SUB(OP, DST, SRC, FLAGS, AUX, IMM)                   \
 	do {                                                               \
 		int __x86_vm_step_ret =                                    \
-			X86_VM_EXEC(&__x86_vm_state, (OP), (DST), (SRC),   \
-				     (FLAGS), (AUX), (IMM));                \
-		if (__x86_vm_step_ret < 0) {                               \
-			x86_vm_write_result_u64(__x86_vm_data,              \
-						__x86_vm_data_end,          \
-						(__u64)__LINE__);            \
+			X86_VM_EXEC_SUB(&__x86_vm_state, (OP), (DST),     \
+					 (SRC), (FLAGS), (AUX), (IMM));   \
+		if (__x86_vm_step_ret < 0)                                 \
 			return X86_INTERP_TRAP;                            \
-		}                                                          \
 		if (__x86_vm_step_ret == X86_INTERP_DONE)                  \
 			return X86_INTERP_CONTINUE;                        \
 	} while (0)
@@ -435,12 +438,7 @@ static __always_inline __u32 x86_vm_ret_rax(struct x86_state *state)
 	return (__u32)state->rax;
 }
 
-#define X86_VM_TRAP_RETURN()                                               \
-	do {                                                               \
-		x86_vm_write_result_u64(__x86_vm_data, __x86_vm_data_end,  \
-					(__u64)__LINE__);                    \
-		return X86_VM_TRAP_RETVAL;                                \
-	} while (0)
+#define X86_VM_TRAP_RETURN() return (__u32)x86_vm_unreachable_trap()
 
 #define X86_VM_X86_RET() return x86_vm_ret_rax(&__x86_vm_state)
 
@@ -451,11 +449,27 @@ static __always_inline __u32 x86_vm_ret_rax(struct x86_state *state)
 		goto LABEL;                                                   \
 	} while (0)
 
-#define X86_VM_X86_JCC(CC, CURRENT, TARGET, LABEL)                           \
+#define X86_VM_X86_JCC_BACKWARD(CC, LABEL, ID)                              \
 	do {                                                                 \
-		if (x86_eval_cc(&__x86_vm_state, (CC)))                       \
-			X86_VM_X86_JMP((CURRENT), (TARGET), LABEL);           \
+		if (!x86_eval_cc(&__x86_vm_state, (CC))) {                    \
+			goto X86_VM_CONCAT(__x86_vm_jcc_fallthrough_, ID);    \
+		}                                                            \
+		goto LABEL;                                                   \
+X86_VM_CONCAT(__x86_vm_jcc_fallthrough_, ID):                               \
+		;                                                            \
 	} while (0)
+
+#define X86_VM_X86_JCC_IMPL(CC, CURRENT, TARGET, LABEL, ID)                 \
+	do {                                                                 \
+		if ((TARGET) <= (CURRENT)) {                                  \
+			X86_VM_X86_JCC_BACKWARD((CC), LABEL, ID);             \
+		} else if (x86_eval_cc(&__x86_vm_state, (CC))) {              \
+			X86_VM_X86_JMP((CURRENT), (TARGET), LABEL);           \
+		}                                                            \
+	} while (0)
+
+#define X86_VM_X86_JCC(CC, CURRENT, TARGET, LABEL)                          \
+	X86_VM_X86_JCC_IMPL((CC), (CURRENT), (TARGET), LABEL, __LINE__)
 
 #define X86_VM_X86_SUB_JMP(CURRENT, TARGET, LABEL)                          \
 	do {                                                                 \
@@ -464,11 +478,28 @@ static __always_inline __u32 x86_vm_ret_rax(struct x86_state *state)
 		goto LABEL;                                                   \
 	} while (0)
 
-#define X86_VM_X86_SUB_JCC(CC, CURRENT, TARGET, LABEL)                       \
+#define X86_VM_X86_SUB_JCC_BACKWARD(CC, LABEL, ID)                          \
 	do {                                                                 \
-		if (x86_eval_cc(&__x86_vm_state, (CC)))                       \
-			X86_VM_X86_SUB_JMP((CURRENT), (TARGET), LABEL);       \
+		if (!x86_eval_cc(&__x86_vm_state, (CC))) {                    \
+			goto X86_VM_CONCAT(__x86_vm_sub_jcc_fallthrough_,     \
+					   ID);                                  \
+		}                                                            \
+		goto LABEL;                                                   \
+X86_VM_CONCAT(__x86_vm_sub_jcc_fallthrough_, ID):                           \
+		;                                                            \
 	} while (0)
+
+#define X86_VM_X86_SUB_JCC_IMPL(CC, CURRENT, TARGET, LABEL, ID)             \
+	do {                                                                 \
+		if ((TARGET) <= (CURRENT)) {                                  \
+			X86_VM_X86_SUB_JCC_BACKWARD((CC), LABEL, ID);         \
+		} else if (x86_eval_cc(&__x86_vm_state, (CC))) {              \
+			X86_VM_X86_SUB_JMP((CURRENT), (TARGET), LABEL);       \
+		}                                                            \
+	} while (0)
+
+#define X86_VM_X86_SUB_JCC(CC, CURRENT, TARGET, LABEL)                      \
+	X86_VM_X86_SUB_JCC_IMPL((CC), (CURRENT), (TARGET), LABEL, __LINE__)
 
 static __always_inline int x86_vm_call_enter(struct x86_state *state)
 {
@@ -522,6 +553,51 @@ x86_vm_prepare_ctx_output(struct x86_state *state, void *ctx, __u8 op,
 	state->tag_rdi = X86_PTR_CTX;
 }
 
+static __always_inline int x86_vm_read_packet_value_proven(void *data,
+							   void *data_end,
+							   void *base,
+							   __s32 base_off,
+							   __s64 disp,
+							   __u8 width,
+							   __u64 *value)
+{
+	__u8 *addr;
+
+	(void)data;
+	(void)base_off;
+	addr = (__u8 *)base + disp;
+	(void)data_end;
+	if (width == X86_WIDTH_8)
+		*value = *(__u8 *)addr;
+	else if (width == X86_WIDTH_16)
+		*value = *(__u16 *)addr;
+	else if (width == X86_WIDTH_32)
+		*value = *(__u32 *)addr;
+	else if (width == X86_WIDTH_64)
+		*value = *(__u64 *)addr;
+	else
+		return X86_INTERP_TRAP;
+	return X86_INTERP_CONTINUE;
+}
+
+static __always_inline int x86_vm_load_packet_proven(struct x86_state *state,
+						     __u8 dst, void *data,
+						     void *data_end, void *base,
+						     __s32 base_off, __s64 disp,
+						     __u8 load_width,
+						     __u8 write_width,
+						     __u8 sign_extend)
+{
+	__u64 value = 0;
+
+	if (x86_vm_read_packet_value_proven(data, data_end, base, base_off, disp,
+					    load_width, &value) < 0)
+		return X86_INTERP_TRAP;
+	if (sign_extend)
+		value = x86_sign_extend(value, load_width);
+	return x86_write_reg_width(state, dst, value, write_width);
+}
+
 static __always_inline int
 x86_vm_read_packet_mem_value(struct x86_state *state, __u8 base_reg, __u32 aux,
 			     __s64 disp, void *data, void *data_end,
@@ -529,14 +605,18 @@ x86_vm_read_packet_mem_value(struct x86_state *state, __u8 base_reg, __u32 aux,
 {
 	void *base = 0;
 	__u8 tag = X86_PTR_NONE;
+	__s32 base_off = 0;
 
 	if (x86_mem_offset(state, aux, disp, &disp) < 0)
 		return X86_INTERP_TRAP;
 	if (x86_read_ptr_reg(state, base_reg, &base, &tag) < 0)
 		return X86_INTERP_TRAP;
-	if (tag != X86_PTR_PACKET || !base)
+	if (tag != X86_PTR_PACKET)
 		return X86_INTERP_TRAP;
-	return x86_read_packet_value(data, data_end, base, disp, width, value);
+	if (x86_read_ptr_off_reg(state, base_reg, &base_off) < 0)
+		return X86_INTERP_TRAP;
+	return x86_vm_read_packet_value_proven(data, data_end, base, base_off, disp,
+					       width, value);
 }
 
 static __always_inline int
@@ -547,6 +627,7 @@ x86_exec_mov_load_packet(struct x86_state *state, const struct x86_insn *insn,
 	void *base = 0;
 	__u8 tag = X86_PTR_NONE;
 	__s64 disp = x86_simm(insn->imm);
+	__s32 base_off = 0;
 
 	if (!mem_width)
 		mem_width = insn->flags;
@@ -554,11 +635,13 @@ x86_exec_mov_load_packet(struct x86_state *state, const struct x86_insn *insn,
 		return X86_INTERP_TRAP;
 	if (x86_read_ptr_reg(state, insn->src, &base, &tag) < 0)
 		return X86_INTERP_TRAP;
-	if (tag != X86_PTR_PACKET || !base)
+	if (tag != X86_PTR_PACKET)
 		return X86_INTERP_TRAP;
-	return x86_load_packet(state, insn->dst, data, data_end, base, disp,
-			       mem_width, insn->flags,
-			       insn->op == X86_OP_MOVSX_LOAD);
+	if (x86_read_ptr_off_reg(state, insn->src, &base_off) < 0)
+		return X86_INTERP_TRAP;
+	return x86_vm_load_packet_proven(
+		state, insn->dst, data, data_end, base, base_off, disp,
+		mem_width, insn->flags, insn->op == X86_OP_MOVSX_LOAD);
 }
 
 static __always_inline int
@@ -646,7 +729,7 @@ x86_exec_mov_store_reg_packet(struct x86_state *state,
 		return X86_INTERP_TRAP;
 	if (x86_read_ptr_reg(state, insn->dst, &base, &tag) < 0)
 		return X86_INTERP_TRAP;
-	if (tag != X86_PTR_PACKET || !base)
+	if (tag != X86_PTR_PACKET)
 		return X86_INTERP_TRAP;
 	return x86_store_packet_reg(state, insn->src, data, data_end, base,
 				    disp, insn->flags, insn->aux);
@@ -665,7 +748,7 @@ x86_exec_mov_store_imm_packet(struct x86_state *state,
 		return X86_INTERP_TRAP;
 	if (x86_read_ptr_reg(state, insn->dst, &base, &tag) < 0)
 		return X86_INTERP_TRAP;
-	if (tag != X86_PTR_PACKET || !base)
+	if (tag != X86_PTR_PACKET)
 		return X86_INTERP_TRAP;
 	return x86_store_packet_imm(data, data_end, base, disp, insn->flags,
 				    x86_store_imm_value(insn->imm));
@@ -677,14 +760,14 @@ x86_exec_mov_store_imm_packet(struct x86_state *state,
 		    x86_vm_write_result_u64(__x86_vm_data,                   \
 					    __x86_vm_data_end,             \
 					    __x86_vm_state.rax) < 0)       \
-			__x86_vm_xdp_ret = XDP_ABORTED;                    \
+			X86_VM_TRAP_RETURN();                              \
 		__x86_vm_xdp_ret;                                           \
 	})
 
 #define X86_VM_END_XDP_RET_RAX()                                            \
 		int __x86_vm_xdp_ret = (__u32)__x86_vm_state.rax;          \
 		if (__x86_vm_ret < 0)                                      \
-			__x86_vm_xdp_ret = XDP_ABORTED;                    \
+			X86_VM_TRAP_RETURN();                              \
 		__x86_vm_xdp_ret;                                           \
 	})
 

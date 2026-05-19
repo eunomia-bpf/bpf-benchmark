@@ -36,6 +36,35 @@ static __inline unsigned char *micro_native_skb_data_end(void *skb) {
     uint32_t len = *(uint32_t *)((char *)skb + K_SK_BUFF_LEN_OFFSET);
     return d + len;
 }
+static __inline unsigned char *micro_native_ptr_barrier(unsigned char *ptr) {
+    __asm__ __volatile__("" : "+r"(ptr));
+    return ptr;
+}
+static __inline int micro_native_skb_result_writable(unsigned char *data,
+                                                     unsigned char *data_end) {
+    data = micro_native_ptr_barrier(data);
+    data_end = micro_native_ptr_barrier(data_end);
+    if (data > data_end) {
+        return 0;
+    }
+    return data + 8U <= data_end;
+}
+static __inline int micro_native_has_data_bytes(const unsigned char *data,
+                                                uint32_t len,
+                                                uint32_t offset,
+                                                uint32_t size) {
+    unsigned char *base = micro_native_ptr_barrier((unsigned char *)data);
+    unsigned char *end = micro_native_ptr_barrier((unsigned char *)data + len);
+    unsigned char *start = base + offset;
+
+    if (start < base) {
+        return 0;
+    }
+    if (start > end) {
+        return 0;
+    }
+    return start + size <= end;
+}
 struct xdp_md { uintptr_t data, data_end; };
 struct __sk_buff { uintptr_t data, data_end; __u32 cb[5]; };
 #else
@@ -149,6 +178,10 @@ static __always_inline int micro_prepare_packet_payload(u8 *data,
 {
     u8 *payload_ptr;
 
+#ifdef MICRO_NATIVE
+    data = micro_native_ptr_barrier(data);
+    data_end = micro_native_ptr_barrier(data_end);
+#endif
     if (data > data_end) {
         return -1;
     }
@@ -187,7 +220,12 @@ static __always_inline int micro_prepare_packet_payload(u8 *data,
 #define MICRO_SKB_PROG_ARG          void *skb
 #define MICRO_SKB_LOAD_DATA(D, E)   u8 *D = micro_native_skb_data(skb);     \
                                     u8 *E = micro_native_skb_data_end(skb);
-#define MICRO_SKB_WRITE_RESULT(V)   micro_write_u64_le(data, (V))
+#define MICRO_SKB_WRITE_RESULT(V)   do {                                    \
+                                        if (micro_native_skb_result_writable(\
+                                                data, data_end)) {           \
+                                            micro_write_u64_le(data, (V));   \
+                                        }                                    \
+                                    } while (0)
 #define MICRO_SKB_SEC_TC            /* no SEC() for userspace .so */
 #define MICRO_SKB_SEC_CGROUP        /* no SEC() */
 #define MICRO_LICENSE_ATTR()        /* no license attr */

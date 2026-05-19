@@ -557,7 +557,7 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
                          ret_statement: str = "X86_VM_X86_RET();") -> None:
     branch_macro = "X86_VM_X86_SUB_JCC" if subroutine else "X86_VM_X86_JCC"
     jump_macro = "X86_VM_X86_SUB_JMP" if subroutine else "X86_VM_X86_JMP"
-    abort_statement = "return X86_INTERP_TRAP;" if subroutine else "return XDP_ABORTED;"
+    abort_statement = "return X86_INTERP_TRAP;" if subroutine else "X86_VM_TRAP_RETURN();"
     if insn.mnemonic in CC_AUX and insn.mnemonic.startswith("j"):
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
         target = branch_target(insn.operands[0]) if insn.operands else 0
@@ -651,6 +651,8 @@ def render_program(name: str, insns: list[NativeInsn],
         lines.append('#define X86_VM_ENABLE_RODATA 1')
     if has_stack:
         lines.append('#define X86_VM_ENABLE_STACK 1')
+        lines.append('#define X86_VM_ENABLE_STACK_SLOT7 1')
+        lines.append('#define X86_VM_ENABLE_STACK_SLOT8 1')
         lines.append('#define X86_VM_ENABLE_STACK_DEEP 1')
         lines.append('#define X86_VM_ENABLE_STACK_EXT 1')
     lines.extend([
@@ -673,7 +675,7 @@ def render_program(name: str, insns: list[NativeInsn],
                              call_functions=subfunction_by_addr,
                              ret_statement=ret_statement)
     lines.extend([
-        "\treturn XDP_ABORTED;",
+        "\tX86_VM_TRAP_RETURN();",
         "}",
         "",
         "X86_VM_LICENSE();",

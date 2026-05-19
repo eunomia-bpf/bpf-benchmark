@@ -45,11 +45,14 @@ XState = {
 
   Ghost pointer capability for each GPR:
     p_<reg>   : verifier pointer value or null,
-    tag_<reg> : NONE | CTX | PACKET | PACKET_END | RODATA | STACK,
+    tag_<reg> : NONE | CTX | PACKET | PACKET_END | RODATA | STACK |
+                 PACKET_LEN,
+    off_<reg> : hidden packet/data-end offset used only when tag is PACKET or
+                PACKET_END,
 
   Modeled stack slots:
     stack0..stackN plus tag_stackN,
-    p_stack_a/p_stack_b sparse verifier pointer payloads keyed by slot number,
+    p_stack0..p_stack8 verifier pointer payloads for low stack slots,
 
   Packet verifier inputs:
     data, data_end,
@@ -59,10 +62,10 @@ XState = {
 }
 ```
 
-Concrete x86 arithmetic uses only the `GPR64` and `Flags` fields. The `p_*` and
-`tag_*` fields are ghost verifier capabilities. They must not affect the
-mathematical value of a scalar x86 register except by authorizing a memory
-access that the native program would perform.
+Concrete x86 arithmetic uses only the `GPR64` and `Flags` fields. The `p_*`,
+`tag_*`, and `off_*` fields are ghost verifier capabilities. They must not
+affect the mathematical value of a scalar x86 register except by authorizing a
+memory access that the native program would perform.
 
 ### Entry ABI
 
@@ -80,17 +83,108 @@ The code implementation is `x86_init_state()` in `x86_interp.h`.
 
 ### Stack Pointer Payload Rule
 
-Each modeled x86 stack slot stores its 64-bit value and a ghost tag. Real BPF
-verifier pointer payloads are sparse: the implementation keeps at most two live
-non-`STACK` pointer payloads in `p_stack_a` and `p_stack_b`, each keyed by the
-slot number. A stack slot tagged `STACK` reconstructs its meaning from the
-stored x86 stack offset and does not need a BPF pointer payload.
+Each modeled x86 stack slot stores its 64-bit value and a ghost tag. Low slots
+`0..8` also carry real BPF verifier pointer payloads (`p_stack0..p_stack8`) so
+native stack spills of packet/ctx/rodata capabilities can be restored without
+inventing a new pointer fact. A stack slot tagged `NONE` or `STACK` does not
+need a BPF pointer payload.
 
-If a third live non-`STACK` verifier pointer is spilled to the modeled x86 stack,
-the interpreter traps. The current micro corpus needs at most two live packet
-pointer spills. A final proof must either keep this as an explicit accepted
-subset or replace it with an unbounded/sufficiently bounded pointer-payload
-model.
+If a reachable native path spills a non-`NONE`/non-`STACK` pointer into a deeper
+slot, the generated proof artifact must reject before native execution. This is
+a support/coverage rejection, not a runtime safety check for accepted native
+code. The current micro corpus needs low slots through slot 8, including the
+`bpf_local_call_fanout_dispatch` packet-pointer spills at `[rbp-0x38]` and
+`[rbp-0x40]`.
+
+### Hidden Packet Offset Rule
+
+For packet and packet-end capabilities, `off_<reg>` records the verifier-visible
+offset from the entry packet `data` pointer. This field is hidden proof metadata:
+the concrete x86 register value in `GPR64` is still the value produced by the
+modeled x86 instruction. For current packet pointers, pointer-producing helpers
+write a scalar register value of `0` and preserve the real packet verifier
+payload plus the hidden offset in `p_<reg>/tag_<reg>/off_<reg>`.
+
+Loads may use the hidden offset only to emit an equivalent verifier-visible
+address:
+
+```text
+addr = data + off_<base> + displacement
+```
+
+The proof obligation is that this address denotes the same modeled packet byte
+that the native x86 memory operand denotes under the entry ABI. The hidden offset
+must not be read as an x86 scalar value and must be invalidated or recomputed
+whenever the pointer capability is invalidated or moved.
+
+### SKB Packet-Length Capability Rule
+
+For native SKB-shaped micro objects, `ctx+0xd0` denotes the packet data pointer
+and `ctx+0x70` denotes the packet length. A 32-bit load from `ctx+0x70` writes
+the native scalar length into the destination register and attaches a
+`PACKET_LEN` ghost capability whose verifier payload is `data_end`.
+
+The only current pointer-producing use of `PACKET_LEN` is 64-bit addition with
+a packet data pointer:
+
+```text
+PACKET_LEN(data_end, len) + PACKET(data + off)
+  = PACKET_END(data_end + off)
+PACKET(data + off) + PACKET_LEN(data_end, len)
+  = PACKET_END(data_end + off)
+```
+
+For the accepted SKB micro path, `off == 0` at the ABI construction point, so
+this expresses the kernel verifier relation `data + skb_len == data_end`.
+This is not a runtime bounds check and does not assert a branch fact; it is an
+ABI theorem that must be proved for the direct native execution environment.
+
+### No Proof-Only Assertion Or Bounds-Check Rule
+
+The final safety target is direct native x86 execution after verifier acceptance
+of the generated eBPF proof program. Therefore the proof program must not become
+a stricter checked interpreter that rejects paths the native x86 would execute.
+Verifier acceptance must come from semantics-preserving state layout, compiler
+specialization, and facts already present in the native x86 control flow.
+
+Hard rules for native-direct safety:
+
+```text
+No proof-only branch assertion.
+No runtime packet/output bounds check in the proof path.
+No proof-only stack/model bounds check that native x86 does not execute.
+No runtime trap/fallback as an accepted safety mechanism.
+No fuel guard or synthetic trip bound.
+No fallback return value.
+No benchmark-specific renderer or helper.
+No metadata fact may justify a memory access unless it is proved equivalent to
+the native x86 address and path condition.
+```
+
+In particular, this pattern must not assert a range over current `rdx` from the
+old `cmp` flags:
+
+```asm
+cmp rdx, 3
+mov rdx, r9
+ja target
+```
+
+x86 keeps the flags from `cmp`, but current `rdx` after `mov` is no longer the
+cmp operand. A verifier assertion over current `rdx` would prove a different
+program and would be unsound for direct native execution.
+
+The active code therefore deletes the previous `last_cmp_*` metadata and
+`x86_vm_assert_*` branch helpers. Branches use only `x86_eval_cc()` over the
+modeled x86 flags. This may make verifier acceptance harder, but verifier
+success must come from semantics-preserving optimization, not from a range fact
+or bounds check that native x86 does not guarantee.
+
+The active generated path is fail-closed for traps: if a trap branch remains in
+the loaded BPF artifact, it calls an invalid helper and verifier load must fail.
+This is a rejection mechanism, not runtime semantics. A final accepted native
+artifact still needs a proof that every `X86_INTERP_TRAP` path is unreachable,
+or a translation/load-time rejection before native execution.
 
 ## 3. Instruction Step Relation
 
@@ -159,6 +253,11 @@ NOT: no flag update
 Any helper whose flags do not yet match full x86 for an opcode must be listed as
 a semantic gap before that opcode can be considered verified.
 
+Same-register `xchg` is a no-op for both concrete state and ghost metadata. In
+particular, `xchg ax, ax` must not clear the packet capability of `rax`; native
+x86 treats it as an alignment NOP and direct-native safety depends on preserving
+that exact behavior.
+
 ### Memory
 
 A native memory operand is encoded by:
@@ -174,12 +273,15 @@ access width
 The verifier-facing memory domains are:
 
 ```text
-PACKET:      access is allowed only if data <= addr and addr + width <= data_end
+PACKET:      access is the native effective address represented by the packet
+             pointer capability plus displacement; no proof-only runtime
+             data_end guard may be inserted by the interpreter
 PACKET_END:  comparable pointer only; not directly dereferenceable
-CTX:         only modeled ABI reads/writes are allowed
-STACK:       access is mapped to explicit modeled stack slots
+CTX:         only modeled ABI reads/writes are accepted
+STACK:       access is mapped to explicit modeled stack slots under a stack
+             layout theorem; checked slot rejection is not a final safety guard
 RODATA:      access is mapped to a generated read-only table model
-NONE:        memory access traps
+NONE:        not an accepted dereference domain for direct native execution
 ```
 
 Packet and stack accesses in helpers must be proved equivalent to native memory
@@ -200,6 +302,11 @@ The proof obligation is:
 x86_eval_cc(state, cc) equals the x86 condition-code predicate over
 state.cf/state.zf/state.sf/state.of.
 ```
+
+The branch macro must not emit verifier-only assertions or bounds checks. If the
+verifier needs a range fact, that fact must come from the native x86 instruction
+stream itself and from semantics-preserving compiler/state shaping. The active
+code removed the previous `x86_vm_assert_branch()` path for this reason.
 
 Unconditional native branches are emitted as:
 
@@ -299,19 +406,21 @@ name, observed failure, or per-loop Python analysis. Future optimized loop
 protocols must be C-authored or bytecode-template-authored and added back to
 this spec before use.
 
-Current verifier consequence: plain native backedges are semantically clean but
-not verifier-friendly for all bounded loops. `packet_checksum_fold` and
-`tc_packet_checksum_fold` hit the kernel verifier's `8193 jumps too complex`
-limit, and `bpftrace_string_search_prefix_scan` hits the global
-processed-instruction limit. Any fix must be a C/template proof rule, not a
-Python benchmark renderer and not a fuel bound.
+Current verifier consequence: plain native backedges are semantically clean and
+the current micro corpus passes 29/29. The hard cases were fixed through
+C-authored state shape and exact ISA/ABI rules, not Python loop analysis:
+`bpftrace_string_search_prefix_scan` remains under the verifier limit, and the
+TC/SKB checksum loops use the `PACKET_LEN` ABI rule plus exact same-register
+`xchg` semantics. Future loop fixes must remain C/template proof rules that
+preserve native branch semantics, not Python benchmark renderers, branch
+assertions, or fuel bounds.
 
 ### Non-Active Loop Experiments
 
 The active implementation does not contain a loop `pc` field and does not emit
 pc-dispatch basic-block callbacks. That experiment was removed from the active
-generator because it moved CFG scheduling complexity into Python and did not
-fix the two remaining verifier `E2BIG` failures.
+generator because it moved CFG scheduling complexity into Python and did not fix
+the historical verifier-cost blockers.
 
 The previous Python-generated `bpf_loop(bound, callback, &loop_ctx, 0)` lowering
 has also been removed from the active generator for the same reason. It is not
@@ -329,8 +438,59 @@ x86 permits equivalent effective-address forms such as:
 The C interpreter treats a scale-1 index register tagged `PACKET` as the packet
 base when the nominal base register is scalar. This is implemented by
 `x86_promote_index_packet_base()` under `X86_VM_ENABLE_INDEX_PACKET_PROMOTE`.
-Packet fastpaths in `x86_vm_bpf.h` are restricted to no-index operands so they
-cannot bypass this full addressing rule.
+
+Top-level packet loads in `x86_vm_bpf.h` may use a verifier-proven raw-load
+fastpath. If the base pointer has no hidden offset, the address is:
+
+```text
+addr = packet_base + effective_disp
+value = *(width *)addr
+```
+
+If the base pointer carries a hidden packet offset, the verifier-facing address
+is:
+
+```text
+addr = data + off_<base> + effective_disp
+value = *(width *)addr
+```
+
+This is not an extra sandbox and not a semantic shortcut. It is valid only when
+the normal eBPF verifier can prove that `addr..addr+width` is inside the packet.
+If that proof is unavailable, the BPF load is rejected. Subfunction helper steps
+use the checked typed interpreter path so local-call proof state does not depend
+on raw packet range being preserved across generated callees.
+
+Packet-pointer arithmetic must preserve concrete x86 scalar semantics. For
+example, if a pointer-capable register is adjusted by an immediate, the
+implementation updates the hidden offset used by verifier proof while leaving
+the concrete register value equal to the modeled x86 result under the active ABI.
+This separation is required for formalization: `off_<reg>` is proof metadata,
+not part of the guest ISA.
+
+For TC/SKB-shaped native input, `ctx+0xd0` denotes packet `data` and `ctx+0x70`
+denotes packet length. The active implementation does not record the last
+`cmp [ctx+0x70], imm` and does not use the following branch as a verifier
+assertion. Instead, a load from `ctx+0x70` produces the concrete length scalar
+plus a `PACKET_LEN` ghost capability. The C interpreter may then derive
+`PACKET_END` only from the ABI theorem `data + len == data_end`.
+
+The previous prototype used `cmp [ctx + 0x70], imm; ja target` to emit a
+verifier-visible `data + imm + 1 <= data_end` check. That path has been removed
+from the active code because it was a proof-only branch assertion. Future SKB
+range visibility must come from native x86 guards plus the `PACKET_LEN` ABI
+relation, not from a hidden assertion attached to a branch.
+
+For XDP packet-end compares, the interpreter records:
+
+```text
+cmp packet_ptr, data_end
+```
+
+The previous prototype recorded this as `PACKET_END_IMM` and emitted an edge
+assertion. That metadata/assertion path has been removed. If packet-end compares
+are used for verifier range proof later, the proof must be part of a specified
+semantics-preserving lowering, not a hidden assertion.
 
 ## 8. Entry Context Capability Preservation
 
@@ -402,9 +562,16 @@ These are not acceptable final assumptions; they are work items.
 | --- | --- |
 | Full x86 flag coverage | Audit every helper flag rule against the subset of x86 opcodes emitted by current micro programs. |
 | RODATA model | Specify each generated read-only table and prove indexed reads match the native constants. |
-| Stack model bounds | Prove every modeled stack access maps to the correct x86 stack slot and prove the sparse two-payload pointer-spill rule is sufficient or replace it. |
-| Multi-exit loop state explosion | Add a theorem or structural lowering for priority among exits before using any non-`goto` loop proof protocol. |
+| Stack model bounds | Prove every modeled stack access maps to the correct x86 stack slot and prove the low-slot pointer-payload coverage is sufficient for the accepted artifact or reject before native execution. Runtime slot rejection is not a final safety mechanism. |
+| Runtime trap semantics | The active top-level trap path fails closed by calling an invalid helper if it remains reachable. Final acceptance still requires load-time rejection or a proof that each trap is unreachable under the accepted native program. Direct native x86 will not execute `X86_INTERP_TRAP` or return `XDP_ABORTED`. |
+| Packet/output helper bounds checks | Active packet/output helpers must not insert runtime `data_end` bounds checks. Verifier acceptance must come from equivalent pointer state and native guards/ABI preconditions, not an extra checked-interpreter guard. |
+| Branch proof metadata | Removed from active code. Keep it out unless there is a formal theorem that preserves exact native x86 branch semantics and does not introduce proof-only assertions. |
+| Hidden packet-offset metadata | Prove that `off_<reg>` is observationally invisible to x86 scalar execution and that every proven packet load reads the same modeled packet byte as the native effective address. |
+| SKB packet-length metadata | Prove that `ctx+0x70` native loads exactly the SKB length and that the accepted native ABI satisfies `data + len == data_end`; `PACKET_LEN` may only express that ABI relation, not invent a branch-bound fact. |
+| No semantic verifier hacks | Prove that no verifier aid changes x86 behavior: no fuel guard, no fixed loop trip bound, no fallback return, no benchmark-specific renderer, and no assertion over facts not guaranteed by the native execution. |
+| ABI special cases | Prove the modeled `ctx`, `skb`, packet, output, and rodata layouts match the native execution ABI exactly; otherwise direct native execution may read/write addresses not covered by the proof. |
+| Native call return address | Current generated callees assume the return-address slot is not read. A callee that reads it must be rejected or modeled with the concrete native return address. |
+| Multi-exit loop verifier cost | Current micro passes 29/29, including `bpftrace_string_search_prefix_scan`. Any future structural lowering must still be a C/template theorem and preserve native branch semantics without fuel. |
 | Paused PC-dispatch experiment | If revived, implement it as a C/template proof rule rather than Python CFG scheduling. It is not active now. |
 | ABI output-store theorem | `x86_vm_prepare_ctx_output()` is C-authored, but the final proof still must show accepted paths reach `[rdi+16/20]` stores only when `rdi` denotes entry ctx, or explicitly define that ABI store as a semantic rule. |
-| Native backedge verifier cost | Add a C/template loop proof protocol for bounded native loops that exceed verifier jump/processed-insn limits without introducing fuel semantics. |
 | JSON-linker equivalence | Reuse this spec after JSON bytecode linking stops going through clang. |

@@ -1,5 +1,6 @@
 #define X86_VM_ENABLE_STACK 1
 #define X86_VM_ENABLE_STACK_SLOT7 1
+#define X86_VM_ENABLE_STACK_SLOT8 1
 #define X86_VM_ENABLE_STACK_DEEP 1
 #define X86_VM_ENABLE_STACK_EXT 1
 #include "../x86_vm_bpf.h"
@@ -12,62 +13,65 @@ x86_l_1100:
 	/* 0x1100: mov    rcx,QWORD PTR [rdi] */
 	X86_VM_RUN_OP(X86_OP_MOV_LOAD, X86_RCX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);
 x86_l_1103:
-	/* 0x1103: mov    rdx,QWORD PTR [rdi+0x8] */
-	X86_VM_RUN_OP(X86_OP_MOV_LOAD, X86_RDX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);
+	/* 0x1103: mov    rsi,QWORD PTR [rdi+0x8] */
+	X86_VM_RUN_OP(X86_OP_MOV_LOAD, X86_RSI, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);
 x86_l_1107:
-	/* 0x1107: xor    eax,eax */
+	/* 0x1107: mov    rdx,rcx */
+	X86_VM_RUN_OP(X86_OP_MOV_REG, X86_RDX, X86_RCX, X86_WIDTH_64, 0, 0);
+x86_l_110a:
+	/* 0x110a: xor    eax,eax */
 	X86_VM_RUN_OP(X86_OP_ALU_REG, X86_RAX, X86_RAX, X86_WIDTH_32, X86_ALU_XOR, 0);
-x86_l_1109:
-	/* 0x1109: cmp    rcx,rdx */
-	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RCX, X86_RDX, X86_WIDTH_64, 0, 0);
 x86_l_110c:
-	/* 0x110c: jbe    110f <trace_event_type_switch_dispatch_xdp+0xf> */
-	X86_VM_X86_JCC(X86_CC_BE, 0x110c, 0x110f, x86_l_110f);
-x86_l_110e:
-	/* 0x110e: ret */
-	X86_VM_X86_RET();
+	/* 0x110c: cmp    rdx,rsi */
+	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RDX, X86_RSI, X86_WIDTH_64, 0, 0);
 x86_l_110f:
-	/* 0x110f: lea    rsi,[rcx+0x8] */
-	X86_VM_RUN_OP(X86_OP_LEA, X86_RSI, X86_RCX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);
-x86_l_1113:
-	/* 0x1113: cmp    rsi,rdx */
-	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RSI, X86_RDX, X86_WIDTH_64, 0, 0);
+	/* 0x110f: jbe    1112 <trace_event_type_switch_dispatch_xdp+0x12> */
+	X86_VM_X86_JCC(X86_CC_BE, 0x110f, 0x1112, x86_l_1112);
+x86_l_1111:
+	/* 0x1111: ret */
+	X86_VM_X86_RET();
+x86_l_1112:
+	/* 0x1112: lea    rdi,[rdx+0x8] */
+	X86_VM_RUN_OP(X86_OP_LEA, X86_RDI, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);
 x86_l_1116:
-	/* 0x1116: ja     110e <trace_event_type_switch_dispatch_xdp+0xe> */
-	X86_VM_X86_JCC(X86_CC_A, 0x1116, 0x110e, x86_l_110e);
-x86_l_1118:
-	/* 0x1118: lea    rdi,[rcx+0x20c] */
-	X86_VM_RUN_OP(X86_OP_LEA, X86_RDI, X86_RCX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 524ULL);
-x86_l_111f:
-	/* 0x111f: cmp    rdi,rdx */
-	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RDI, X86_RDX, X86_WIDTH_64, 0, 0);
+	/* 0x1116: cmp    rdi,rsi */
+	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_RDI, X86_RSI, X86_WIDTH_64, 0, 0);
+x86_l_1119:
+	/* 0x1119: ja     1111 <trace_event_type_switch_dispatch_xdp+0x11> */
+	X86_VM_X86_JCC(X86_CC_A, 0x1119, 0x1111, x86_l_1111);
+x86_l_111b:
+	/* 0x111b: lea    r8,[rdx+0x20c] */
+	X86_VM_RUN_OP(X86_OP_LEA, X86_R8, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 524ULL);
 x86_l_1122:
-	/* 0x1122: ja     110e <trace_event_type_switch_dispatch_xdp+0xe> */
-	X86_VM_X86_JCC(X86_CC_A, 0x1122, 0x110e, x86_l_110e);
-x86_l_1124:
-	/* 0x1124: cmp    DWORD PTR [rsi],0x80 */
-	X86_VM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 128ULL);
-x86_l_112a:
-	/* 0x112a: jne    110e <trace_event_type_switch_dispatch_xdp+0xe> */
-	X86_VM_X86_JCC(X86_CC_NE, 0x112a, 0x110e, x86_l_110e);
-x86_l_112c:
-	/* 0x112c: push   rbp */
-	X86_VM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_RBP, X86_WIDTH_64, 0, 0);
+	/* 0x1122: cmp    r8,rsi */
+	X86_VM_RUN_OP(X86_OP_CMP_REG, X86_R8, X86_RSI, X86_WIDTH_64, 0, 0);
+x86_l_1125:
+	/* 0x1125: ja     1111 <trace_event_type_switch_dispatch_xdp+0x11> */
+	X86_VM_X86_JCC(X86_CC_A, 0x1125, 0x1111, x86_l_1111);
+x86_l_1127:
+	/* 0x1127: cmp    DWORD PTR [rdi],0x80 */
+	X86_VM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 128ULL);
 x86_l_112d:
-	/* 0x112d: mov    rbp,rsp */
-	X86_VM_RUN_OP(X86_OP_MOV_REG, X86_RBP, X86_RSP, X86_WIDTH_64, 0, 0);
+	/* 0x112d: jne    1111 <trace_event_type_switch_dispatch_xdp+0x11> */
+	X86_VM_X86_JCC(X86_CC_NE, 0x112d, 0x1111, x86_l_1111);
+x86_l_112f:
+	/* 0x112f: push   rbp */
+	X86_VM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_RBP, X86_WIDTH_64, 0, 0);
 x86_l_1130:
-	/* 0x1130: push   rbx */
+	/* 0x1130: mov    rbp,rsp */
+	X86_VM_RUN_OP(X86_OP_MOV_REG, X86_RBP, X86_RSP, X86_WIDTH_64, 0, 0);
+x86_l_1133:
+	/* 0x1133: push   rbx */
 	X86_VM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_RBX, X86_WIDTH_64, 0, 0);
-x86_l_1131:
-	/* 0x1131: mov    edx,0xf */
-	X86_VM_RUN_OP(X86_OP_MOV_IMM, X86_RDX, X86_REG_NONE, X86_WIDTH_32, 0, 15ULL);
+x86_l_1134:
+	/* 0x1134: xor    esi,esi */
+	X86_VM_RUN_OP(X86_OP_ALU_REG, X86_RSI, X86_RSI, X86_WIDTH_32, X86_ALU_XOR, 0);
 x86_l_1136:
 	/* 0x1136: xor    ebx,ebx */
 	X86_VM_RUN_OP(X86_OP_ALU_REG, X86_RBX, X86_RBX, X86_WIDTH_32, X86_ALU_XOR, 0);
 x86_l_1138:
-	/* 0x1138: jmp    1154 <trace_event_type_switch_dispatch_xdp+0x54> */
-	X86_VM_X86_JMP(0x1138, 0x1154, x86_l_1154);
+	/* 0x1138: jmp    1153 <trace_event_type_switch_dispatch_xdp+0x53> */
+	X86_VM_X86_JMP(0x1138, 0x1153, x86_l_1153);
 x86_l_113a:
 	/* 0x113a: mov    ebx,0xc */
 	X86_VM_RUN_OP(X86_OP_MOV_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_32, 0, 12ULL);
@@ -78,107 +82,107 @@ x86_l_1140:
 	/* 0x1140: xor    rbx,rax */
 	X86_VM_RUN_OP(X86_OP_ALU_REG, X86_RBX, X86_RAX, X86_WIDTH_64, X86_ALU_XOR, 0);
 x86_l_1143:
-	/* 0x1143: add    rdx,0x4 */
-	X86_VM_RUN_OP(X86_OP_ALU_IMM, X86_RDX, X86_REG_NONE, X86_WIDTH_64, X86_ALU_ADD, 4ULL);
-x86_l_1147:
-	/* 0x1147: cmp    rdx,0x20f */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDX, X86_REG_NONE, X86_WIDTH_64, 0, 527ULL);
-x86_l_114e:
-	/* 0x114e: je     172a <trace_event_type_switch_dispatch_xdp+0x62a> */
-	X86_VM_X86_JCC(X86_CC_E, 0x114e, 0x172a, x86_l_172a);
-x86_l_1154:
-	/* 0x1154: mov    rax,rbx */
+	/* 0x1143: inc    rsi */
+	X86_VM_RUN_OP(X86_OP_ALU_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_64, X86_ALU_INC, 1);
+x86_l_1146:
+	/* 0x1146: cmp    rsi,0x80 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_64, 0, 128ULL);
+x86_l_114d:
+	/* 0x114d: je     172a <trace_event_type_switch_dispatch_xdp+0x62a> */
+	X86_VM_X86_JCC(X86_CC_E, 0x114d, 0x172a, x86_l_172a);
+x86_l_1153:
+	/* 0x1153: mov    rax,rbx */
 	X86_VM_RUN_OP(X86_OP_MOV_REG, X86_RAX, X86_RBX, X86_WIDTH_64, 0, 0);
-x86_l_1157:
-	/* 0x1157: mov    esi,DWORD PTR [rcx+rdx*1-0x3] */
-	X86_VM_RUN_OP(X86_OP_MOV_LOAD, X86_RSI, X86_RCX, X86_WIDTH_32, X86_MEM_AUX(X86_RDX, 0), 18446744073709551613ULL);
-x86_l_115b:
-	/* 0x115b: cmp    esi,0x1f */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 31ULL);
-x86_l_115e:
-	/* 0x115e: jg     11a0 <trace_event_type_switch_dispatch_xdp+0xa0> */
-	X86_VM_X86_JCC(X86_CC_G, 0x115e, 0x11a0, x86_l_11a0);
-x86_l_1160:
-	/* 0x1160: cmp    esi,0xf */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 15ULL);
-x86_l_1163:
-	/* 0x1163: jg     11e0 <trace_event_type_switch_dispatch_xdp+0xe0> */
-	X86_VM_X86_JCC(X86_CC_G, 0x1163, 0x11e0, x86_l_11e0);
-x86_l_1165:
-	/* 0x1165: cmp    esi,0x7 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 7ULL);
-x86_l_1168:
-	/* 0x1168: jg     1254 <trace_event_type_switch_dispatch_xdp+0x154> */
-	X86_VM_X86_JCC(X86_CC_G, 0x1168, 0x1254, x86_l_1254);
-x86_l_116e:
-	/* 0x116e: cmp    esi,0x3 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 3ULL);
-x86_l_1171:
-	/* 0x1171: jg     130c <trace_event_type_switch_dispatch_xdp+0x20c> */
-	X86_VM_X86_JCC(X86_CC_G, 0x1171, 0x130c, x86_l_130c);
-x86_l_1177:
-	/* 0x1177: cmp    esi,0x1 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 1ULL);
-x86_l_117a:
-	/* 0x117a: jg     1434 <trace_event_type_switch_dispatch_xdp+0x334> */
-	X86_VM_X86_JCC(X86_CC_G, 0x117a, 0x1434, x86_l_1434);
-x86_l_1180:
-	/* 0x1180: mov    ebx,0x38 */
+x86_l_1156:
+	/* 0x1156: mov    edi,DWORD PTR [rdx+rsi*4+0xc] */
+	X86_VM_RUN_OP(X86_OP_MOV_LOAD, X86_RDI, X86_RDX, X86_WIDTH_32, X86_MEM_AUX(X86_RSI, 2), 12ULL);
+x86_l_115a:
+	/* 0x115a: cmp    edi,0x1f */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 31ULL);
+x86_l_115d:
+	/* 0x115d: jg     11a0 <trace_event_type_switch_dispatch_xdp+0xa0> */
+	X86_VM_X86_JCC(X86_CC_G, 0x115d, 0x11a0, x86_l_11a0);
+x86_l_115f:
+	/* 0x115f: cmp    edi,0xf */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 15ULL);
+x86_l_1162:
+	/* 0x1162: jg     11e0 <trace_event_type_switch_dispatch_xdp+0xe0> */
+	X86_VM_X86_JCC(X86_CC_G, 0x1162, 0x11e0, x86_l_11e0);
+x86_l_1164:
+	/* 0x1164: cmp    edi,0x7 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 7ULL);
+x86_l_1167:
+	/* 0x1167: jg     1254 <trace_event_type_switch_dispatch_xdp+0x154> */
+	X86_VM_X86_JCC(X86_CC_G, 0x1167, 0x1254, x86_l_1254);
+x86_l_116d:
+	/* 0x116d: cmp    edi,0x3 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 3ULL);
+x86_l_1170:
+	/* 0x1170: jg     130c <trace_event_type_switch_dispatch_xdp+0x20c> */
+	X86_VM_X86_JCC(X86_CC_G, 0x1170, 0x130c, x86_l_130c);
+x86_l_1176:
+	/* 0x1176: cmp    edi,0x1 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 1ULL);
+x86_l_1179:
+	/* 0x1179: jg     1434 <trace_event_type_switch_dispatch_xdp+0x334> */
+	X86_VM_X86_JCC(X86_CC_G, 0x1179, 0x1434, x86_l_1434);
+x86_l_117f:
+	/* 0x117f: mov    ebx,0x38 */
 	X86_VM_RUN_OP(X86_OP_MOV_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_32, 0, 56ULL);
-x86_l_1185:
-	/* 0x1185: test   esi,esi */
-	X86_VM_RUN_OP(X86_OP_TEST_REG, X86_RSI, X86_RSI, X86_WIDTH_32, 0, 0);
-x86_l_1187:
-	/* 0x1187: je     1140 <trace_event_type_switch_dispatch_xdp+0x40> */
-	X86_VM_X86_JCC(X86_CC_E, 0x1187, 0x1140, x86_l_1140);
-x86_l_1189:
-	/* 0x1189: cmp    esi,0x1 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 1ULL);
-x86_l_118c:
-	/* 0x118c: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
-	X86_VM_X86_JCC(X86_CC_NE, 0x118c, 0x1720, x86_l_1720);
-x86_l_1192:
-	/* 0x1192: mov    ebx,0x2b */
+x86_l_1184:
+	/* 0x1184: test   edi,edi */
+	X86_VM_RUN_OP(X86_OP_TEST_REG, X86_RDI, X86_RDI, X86_WIDTH_32, 0, 0);
+x86_l_1186:
+	/* 0x1186: je     1140 <trace_event_type_switch_dispatch_xdp+0x40> */
+	X86_VM_X86_JCC(X86_CC_E, 0x1186, 0x1140, x86_l_1140);
+x86_l_1188:
+	/* 0x1188: cmp    edi,0x1 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 1ULL);
+x86_l_118b:
+	/* 0x118b: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
+	X86_VM_X86_JCC(X86_CC_NE, 0x118b, 0x1720, x86_l_1720);
+x86_l_1191:
+	/* 0x1191: mov    ebx,0x2b */
 	X86_VM_RUN_OP(X86_OP_MOV_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_32, 0, 43ULL);
-x86_l_1197:
-	/* 0x1197: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
-	X86_VM_X86_JMP(0x1197, 0x1140, x86_l_1140);
-x86_l_1199:
-	/* 0x1199: nop    DWORD PTR [rax+0x0] */
+x86_l_1196:
+	/* 0x1196: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
+	X86_VM_X86_JMP(0x1196, 0x1140, x86_l_1140);
+x86_l_1198:
+	/* 0x1198: nop    DWORD PTR [rax+rax*1+0x0] */
 	X86_VM_RUN_OP(X86_OP_NOP, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_11a0:
-	/* 0x11a0: cmp    esi,0x2f */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 47ULL);
+	/* 0x11a0: cmp    edi,0x2f */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 47ULL);
 x86_l_11a3:
 	/* 0x11a3: jg     1220 <trace_event_type_switch_dispatch_xdp+0x120> */
 	X86_VM_X86_JCC(X86_CC_G, 0x11a3, 0x1220, x86_l_1220);
 x86_l_11a5:
-	/* 0x11a5: cmp    esi,0x27 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 39ULL);
+	/* 0x11a5: cmp    edi,0x27 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 39ULL);
 x86_l_11a8:
 	/* 0x11a8: jg     1282 <trace_event_type_switch_dispatch_xdp+0x182> */
 	X86_VM_X86_JCC(X86_CC_G, 0x11a8, 0x1282, x86_l_1282);
 x86_l_11ae:
-	/* 0x11ae: cmp    esi,0x23 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 35ULL);
+	/* 0x11ae: cmp    edi,0x23 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 35ULL);
 x86_l_11b1:
 	/* 0x11b1: jg     1331 <trace_event_type_switch_dispatch_xdp+0x231> */
 	X86_VM_X86_JCC(X86_CC_G, 0x11b1, 0x1331, x86_l_1331);
 x86_l_11b7:
-	/* 0x11b7: cmp    esi,0x21 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 33ULL);
+	/* 0x11b7: cmp    edi,0x21 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 33ULL);
 x86_l_11ba:
 	/* 0x11ba: jg     1450 <trace_event_type_switch_dispatch_xdp+0x350> */
 	X86_VM_X86_JCC(X86_CC_G, 0x11ba, 0x1450, x86_l_1450);
 x86_l_11c0:
-	/* 0x11c0: cmp    esi,0x20 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 32ULL);
+	/* 0x11c0: cmp    edi,0x20 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 32ULL);
 x86_l_11c3:
 	/* 0x11c3: je     15f4 <trace_event_type_switch_dispatch_xdp+0x4f4> */
 	X86_VM_X86_JCC(X86_CC_E, 0x11c3, 0x15f4, x86_l_15f4);
 x86_l_11c9:
-	/* 0x11c9: cmp    esi,0x21 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 33ULL);
+	/* 0x11c9: cmp    edi,0x21 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 33ULL);
 x86_l_11cc:
 	/* 0x11cc: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x11cc, 0x1720, x86_l_1720);
@@ -192,32 +196,32 @@ x86_l_11dc:
 	/* 0x11dc: nop    DWORD PTR [rax+0x0] */
 	X86_VM_RUN_OP(X86_OP_NOP, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_11e0:
-	/* 0x11e0: cmp    esi,0x17 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 23ULL);
+	/* 0x11e0: cmp    edi,0x17 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 23ULL);
 x86_l_11e3:
 	/* 0x11e3: jg     12b0 <trace_event_type_switch_dispatch_xdp+0x1b0> */
 	X86_VM_X86_JCC(X86_CC_G, 0x11e3, 0x12b0, x86_l_12b0);
 x86_l_11e9:
-	/* 0x11e9: cmp    esi,0x13 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 19ULL);
+	/* 0x11e9: cmp    edi,0x13 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 19ULL);
 x86_l_11ec:
 	/* 0x11ec: jg     1356 <trace_event_type_switch_dispatch_xdp+0x256> */
 	X86_VM_X86_JCC(X86_CC_G, 0x11ec, 0x1356, x86_l_1356);
 x86_l_11f2:
-	/* 0x11f2: cmp    esi,0x11 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 17ULL);
+	/* 0x11f2: cmp    edi,0x11 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 17ULL);
 x86_l_11f5:
 	/* 0x11f5: jg     146c <trace_event_type_switch_dispatch_xdp+0x36c> */
 	X86_VM_X86_JCC(X86_CC_G, 0x11f5, 0x146c, x86_l_146c);
 x86_l_11fb:
-	/* 0x11fb: cmp    esi,0x10 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 16ULL);
+	/* 0x11fb: cmp    edi,0x10 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 16ULL);
 x86_l_11fe:
 	/* 0x11fe: je     15fe <trace_event_type_switch_dispatch_xdp+0x4fe> */
 	X86_VM_X86_JCC(X86_CC_E, 0x11fe, 0x15fe, x86_l_15fe);
 x86_l_1204:
-	/* 0x1204: cmp    esi,0x11 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 17ULL);
+	/* 0x1204: cmp    edi,0x11 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 17ULL);
 x86_l_1207:
 	/* 0x1207: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x1207, 0x1720, x86_l_1720);
@@ -231,32 +235,32 @@ x86_l_1217:
 	/* 0x1217: nop    WORD PTR [rax+rax*1+0x0] */
 	X86_VM_RUN_OP(X86_OP_NOP, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_1220:
-	/* 0x1220: cmp    esi,0x37 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 55ULL);
+	/* 0x1220: cmp    edi,0x37 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 55ULL);
 x86_l_1223:
 	/* 0x1223: jg     12de <trace_event_type_switch_dispatch_xdp+0x1de> */
 	X86_VM_X86_JCC(X86_CC_G, 0x1223, 0x12de, x86_l_12de);
 x86_l_1229:
-	/* 0x1229: cmp    esi,0x33 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 51ULL);
+	/* 0x1229: cmp    edi,0x33 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 51ULL);
 x86_l_122c:
 	/* 0x122c: jg     137b <trace_event_type_switch_dispatch_xdp+0x27b> */
 	X86_VM_X86_JCC(X86_CC_G, 0x122c, 0x137b, x86_l_137b);
 x86_l_1232:
-	/* 0x1232: cmp    esi,0x31 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 49ULL);
+	/* 0x1232: cmp    edi,0x31 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 49ULL);
 x86_l_1235:
 	/* 0x1235: jg     1488 <trace_event_type_switch_dispatch_xdp+0x388> */
 	X86_VM_X86_JCC(X86_CC_G, 0x1235, 0x1488, x86_l_1488);
 x86_l_123b:
-	/* 0x123b: cmp    esi,0x30 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 48ULL);
+	/* 0x123b: cmp    edi,0x30 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 48ULL);
 x86_l_123e:
 	/* 0x123e: je     1608 <trace_event_type_switch_dispatch_xdp+0x508> */
 	X86_VM_X86_JCC(X86_CC_E, 0x123e, 0x1608, x86_l_1608);
 x86_l_1244:
-	/* 0x1244: cmp    esi,0x31 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 49ULL);
+	/* 0x1244: cmp    edi,0x31 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 49ULL);
 x86_l_1247:
 	/* 0x1247: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x1247, 0x1720, x86_l_1720);
@@ -267,26 +271,26 @@ x86_l_124f:
 	/* 0x124f: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x124f, 0x1140, x86_l_1140);
 x86_l_1254:
-	/* 0x1254: cmp    esi,0xb */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 11ULL);
+	/* 0x1254: cmp    edi,0xb */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 11ULL);
 x86_l_1257:
 	/* 0x1257: jg     13a0 <trace_event_type_switch_dispatch_xdp+0x2a0> */
 	X86_VM_X86_JCC(X86_CC_G, 0x1257, 0x13a0, x86_l_13a0);
 x86_l_125d:
-	/* 0x125d: cmp    esi,0x9 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 9ULL);
+	/* 0x125d: cmp    edi,0x9 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 9ULL);
 x86_l_1260:
 	/* 0x1260: jg     14a4 <trace_event_type_switch_dispatch_xdp+0x3a4> */
 	X86_VM_X86_JCC(X86_CC_G, 0x1260, 0x14a4, x86_l_14a4);
 x86_l_1266:
-	/* 0x1266: cmp    esi,0x8 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 8ULL);
+	/* 0x1266: cmp    edi,0x8 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 8ULL);
 x86_l_1269:
 	/* 0x1269: je     1612 <trace_event_type_switch_dispatch_xdp+0x512> */
 	X86_VM_X86_JCC(X86_CC_E, 0x1269, 0x1612, x86_l_1612);
 x86_l_126f:
-	/* 0x126f: cmp    esi,0x9 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 9ULL);
+	/* 0x126f: cmp    edi,0x9 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 9ULL);
 x86_l_1272:
 	/* 0x1272: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x1272, 0x1720, x86_l_1720);
@@ -297,26 +301,26 @@ x86_l_127d:
 	/* 0x127d: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x127d, 0x1140, x86_l_1140);
 x86_l_1282:
-	/* 0x1282: cmp    esi,0x2b */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 43ULL);
+	/* 0x1282: cmp    edi,0x2b */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 43ULL);
 x86_l_1285:
 	/* 0x1285: jg     13c5 <trace_event_type_switch_dispatch_xdp+0x2c5> */
 	X86_VM_X86_JCC(X86_CC_G, 0x1285, 0x13c5, x86_l_13c5);
 x86_l_128b:
-	/* 0x128b: cmp    esi,0x29 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 41ULL);
+	/* 0x128b: cmp    edi,0x29 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 41ULL);
 x86_l_128e:
 	/* 0x128e: jg     14c0 <trace_event_type_switch_dispatch_xdp+0x3c0> */
 	X86_VM_X86_JCC(X86_CC_G, 0x128e, 0x14c0, x86_l_14c0);
 x86_l_1294:
-	/* 0x1294: cmp    esi,0x28 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 40ULL);
+	/* 0x1294: cmp    edi,0x28 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 40ULL);
 x86_l_1297:
 	/* 0x1297: je     161c <trace_event_type_switch_dispatch_xdp+0x51c> */
 	X86_VM_X86_JCC(X86_CC_E, 0x1297, 0x161c, x86_l_161c);
 x86_l_129d:
-	/* 0x129d: cmp    esi,0x29 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 41ULL);
+	/* 0x129d: cmp    edi,0x29 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 41ULL);
 x86_l_12a0:
 	/* 0x12a0: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x12a0, 0x1720, x86_l_1720);
@@ -327,26 +331,26 @@ x86_l_12ab:
 	/* 0x12ab: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x12ab, 0x1140, x86_l_1140);
 x86_l_12b0:
-	/* 0x12b0: cmp    esi,0x1b */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 27ULL);
+	/* 0x12b0: cmp    edi,0x1b */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 27ULL);
 x86_l_12b3:
 	/* 0x12b3: jg     13ea <trace_event_type_switch_dispatch_xdp+0x2ea> */
 	X86_VM_X86_JCC(X86_CC_G, 0x12b3, 0x13ea, x86_l_13ea);
 x86_l_12b9:
-	/* 0x12b9: cmp    esi,0x19 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 25ULL);
+	/* 0x12b9: cmp    edi,0x19 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 25ULL);
 x86_l_12bc:
 	/* 0x12bc: jg     14dc <trace_event_type_switch_dispatch_xdp+0x3dc> */
 	X86_VM_X86_JCC(X86_CC_G, 0x12bc, 0x14dc, x86_l_14dc);
 x86_l_12c2:
-	/* 0x12c2: cmp    esi,0x18 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 24ULL);
+	/* 0x12c2: cmp    edi,0x18 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 24ULL);
 x86_l_12c5:
 	/* 0x12c5: je     1626 <trace_event_type_switch_dispatch_xdp+0x526> */
 	X86_VM_X86_JCC(X86_CC_E, 0x12c5, 0x1626, x86_l_1626);
 x86_l_12cb:
-	/* 0x12cb: cmp    esi,0x19 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 25ULL);
+	/* 0x12cb: cmp    edi,0x19 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 25ULL);
 x86_l_12ce:
 	/* 0x12ce: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x12ce, 0x1720, x86_l_1720);
@@ -357,26 +361,26 @@ x86_l_12d9:
 	/* 0x12d9: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x12d9, 0x1140, x86_l_1140);
 x86_l_12de:
-	/* 0x12de: cmp    esi,0x3b */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 59ULL);
+	/* 0x12de: cmp    edi,0x3b */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 59ULL);
 x86_l_12e1:
 	/* 0x12e1: jg     140f <trace_event_type_switch_dispatch_xdp+0x30f> */
 	X86_VM_X86_JCC(X86_CC_G, 0x12e1, 0x140f, x86_l_140f);
 x86_l_12e7:
-	/* 0x12e7: cmp    esi,0x39 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 57ULL);
+	/* 0x12e7: cmp    edi,0x39 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 57ULL);
 x86_l_12ea:
 	/* 0x12ea: jg     14f8 <trace_event_type_switch_dispatch_xdp+0x3f8> */
 	X86_VM_X86_JCC(X86_CC_G, 0x12ea, 0x14f8, x86_l_14f8);
 x86_l_12f0:
-	/* 0x12f0: cmp    esi,0x38 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 56ULL);
+	/* 0x12f0: cmp    edi,0x38 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 56ULL);
 x86_l_12f3:
 	/* 0x12f3: je     1630 <trace_event_type_switch_dispatch_xdp+0x530> */
 	X86_VM_X86_JCC(X86_CC_E, 0x12f3, 0x1630, x86_l_1630);
 x86_l_12f9:
-	/* 0x12f9: cmp    esi,0x39 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 57ULL);
+	/* 0x12f9: cmp    edi,0x39 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 57ULL);
 x86_l_12fc:
 	/* 0x12fc: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x12fc, 0x1720, x86_l_1720);
@@ -387,20 +391,20 @@ x86_l_1307:
 	/* 0x1307: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x1307, 0x1140, x86_l_1140);
 x86_l_130c:
-	/* 0x130c: cmp    esi,0x5 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 5ULL);
+	/* 0x130c: cmp    edi,0x5 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 5ULL);
 x86_l_130f:
 	/* 0x130f: jg     1514 <trace_event_type_switch_dispatch_xdp+0x414> */
 	X86_VM_X86_JCC(X86_CC_G, 0x130f, 0x1514, x86_l_1514);
 x86_l_1315:
-	/* 0x1315: cmp    esi,0x4 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 4ULL);
+	/* 0x1315: cmp    edi,0x4 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 4ULL);
 x86_l_1318:
 	/* 0x1318: je     163a <trace_event_type_switch_dispatch_xdp+0x53a> */
 	X86_VM_X86_JCC(X86_CC_E, 0x1318, 0x163a, x86_l_163a);
 x86_l_131e:
-	/* 0x131e: cmp    esi,0x5 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 5ULL);
+	/* 0x131e: cmp    edi,0x5 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 5ULL);
 x86_l_1321:
 	/* 0x1321: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x1321, 0x1720, x86_l_1720);
@@ -411,20 +415,20 @@ x86_l_132c:
 	/* 0x132c: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x132c, 0x1140, x86_l_1140);
 x86_l_1331:
-	/* 0x1331: cmp    esi,0x25 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 37ULL);
+	/* 0x1331: cmp    edi,0x25 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 37ULL);
 x86_l_1334:
 	/* 0x1334: jg     1530 <trace_event_type_switch_dispatch_xdp+0x430> */
 	X86_VM_X86_JCC(X86_CC_G, 0x1334, 0x1530, x86_l_1530);
 x86_l_133a:
-	/* 0x133a: cmp    esi,0x24 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 36ULL);
+	/* 0x133a: cmp    edi,0x24 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 36ULL);
 x86_l_133d:
 	/* 0x133d: je     1644 <trace_event_type_switch_dispatch_xdp+0x544> */
 	X86_VM_X86_JCC(X86_CC_E, 0x133d, 0x1644, x86_l_1644);
 x86_l_1343:
-	/* 0x1343: cmp    esi,0x25 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 37ULL);
+	/* 0x1343: cmp    edi,0x25 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 37ULL);
 x86_l_1346:
 	/* 0x1346: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x1346, 0x1720, x86_l_1720);
@@ -435,20 +439,20 @@ x86_l_1351:
 	/* 0x1351: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x1351, 0x1140, x86_l_1140);
 x86_l_1356:
-	/* 0x1356: cmp    esi,0x15 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 21ULL);
+	/* 0x1356: cmp    edi,0x15 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 21ULL);
 x86_l_1359:
 	/* 0x1359: jg     154c <trace_event_type_switch_dispatch_xdp+0x44c> */
 	X86_VM_X86_JCC(X86_CC_G, 0x1359, 0x154c, x86_l_154c);
 x86_l_135f:
-	/* 0x135f: cmp    esi,0x14 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 20ULL);
+	/* 0x135f: cmp    edi,0x14 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 20ULL);
 x86_l_1362:
 	/* 0x1362: je     164e <trace_event_type_switch_dispatch_xdp+0x54e> */
 	X86_VM_X86_JCC(X86_CC_E, 0x1362, 0x164e, x86_l_164e);
 x86_l_1368:
-	/* 0x1368: cmp    esi,0x15 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 21ULL);
+	/* 0x1368: cmp    edi,0x15 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 21ULL);
 x86_l_136b:
 	/* 0x136b: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x136b, 0x1720, x86_l_1720);
@@ -459,20 +463,20 @@ x86_l_1376:
 	/* 0x1376: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x1376, 0x1140, x86_l_1140);
 x86_l_137b:
-	/* 0x137b: cmp    esi,0x35 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 53ULL);
+	/* 0x137b: cmp    edi,0x35 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 53ULL);
 x86_l_137e:
 	/* 0x137e: jg     1568 <trace_event_type_switch_dispatch_xdp+0x468> */
 	X86_VM_X86_JCC(X86_CC_G, 0x137e, 0x1568, x86_l_1568);
 x86_l_1384:
-	/* 0x1384: cmp    esi,0x34 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 52ULL);
+	/* 0x1384: cmp    edi,0x34 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 52ULL);
 x86_l_1387:
 	/* 0x1387: je     1658 <trace_event_type_switch_dispatch_xdp+0x558> */
 	X86_VM_X86_JCC(X86_CC_E, 0x1387, 0x1658, x86_l_1658);
 x86_l_138d:
-	/* 0x138d: cmp    esi,0x35 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 53ULL);
+	/* 0x138d: cmp    edi,0x35 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 53ULL);
 x86_l_1390:
 	/* 0x1390: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x1390, 0x1720, x86_l_1720);
@@ -483,20 +487,20 @@ x86_l_139b:
 	/* 0x139b: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x139b, 0x1140, x86_l_1140);
 x86_l_13a0:
-	/* 0x13a0: cmp    esi,0xd */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 13ULL);
+	/* 0x13a0: cmp    edi,0xd */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 13ULL);
 x86_l_13a3:
 	/* 0x13a3: jg     1584 <trace_event_type_switch_dispatch_xdp+0x484> */
 	X86_VM_X86_JCC(X86_CC_G, 0x13a3, 0x1584, x86_l_1584);
 x86_l_13a9:
-	/* 0x13a9: cmp    esi,0xc */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 12ULL);
+	/* 0x13a9: cmp    edi,0xc */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 12ULL);
 x86_l_13ac:
 	/* 0x13ac: je     1662 <trace_event_type_switch_dispatch_xdp+0x562> */
 	X86_VM_X86_JCC(X86_CC_E, 0x13ac, 0x1662, x86_l_1662);
 x86_l_13b2:
-	/* 0x13b2: cmp    esi,0xd */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 13ULL);
+	/* 0x13b2: cmp    edi,0xd */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 13ULL);
 x86_l_13b5:
 	/* 0x13b5: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x13b5, 0x1720, x86_l_1720);
@@ -507,20 +511,20 @@ x86_l_13c0:
 	/* 0x13c0: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x13c0, 0x1140, x86_l_1140);
 x86_l_13c5:
-	/* 0x13c5: cmp    esi,0x2d */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 45ULL);
+	/* 0x13c5: cmp    edi,0x2d */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 45ULL);
 x86_l_13c8:
 	/* 0x13c8: jg     15a0 <trace_event_type_switch_dispatch_xdp+0x4a0> */
 	X86_VM_X86_JCC(X86_CC_G, 0x13c8, 0x15a0, x86_l_15a0);
 x86_l_13ce:
-	/* 0x13ce: cmp    esi,0x2c */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 44ULL);
+	/* 0x13ce: cmp    edi,0x2c */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 44ULL);
 x86_l_13d1:
 	/* 0x13d1: je     166c <trace_event_type_switch_dispatch_xdp+0x56c> */
 	X86_VM_X86_JCC(X86_CC_E, 0x13d1, 0x166c, x86_l_166c);
 x86_l_13d7:
-	/* 0x13d7: cmp    esi,0x2d */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 45ULL);
+	/* 0x13d7: cmp    edi,0x2d */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 45ULL);
 x86_l_13da:
 	/* 0x13da: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x13da, 0x1720, x86_l_1720);
@@ -531,20 +535,20 @@ x86_l_13e5:
 	/* 0x13e5: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x13e5, 0x1140, x86_l_1140);
 x86_l_13ea:
-	/* 0x13ea: cmp    esi,0x1d */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 29ULL);
+	/* 0x13ea: cmp    edi,0x1d */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 29ULL);
 x86_l_13ed:
 	/* 0x13ed: jg     15bc <trace_event_type_switch_dispatch_xdp+0x4bc> */
 	X86_VM_X86_JCC(X86_CC_G, 0x13ed, 0x15bc, x86_l_15bc);
 x86_l_13f3:
-	/* 0x13f3: cmp    esi,0x1c */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 28ULL);
+	/* 0x13f3: cmp    edi,0x1c */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 28ULL);
 x86_l_13f6:
 	/* 0x13f6: je     1676 <trace_event_type_switch_dispatch_xdp+0x576> */
 	X86_VM_X86_JCC(X86_CC_E, 0x13f6, 0x1676, x86_l_1676);
 x86_l_13fc:
-	/* 0x13fc: cmp    esi,0x1d */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 29ULL);
+	/* 0x13fc: cmp    edi,0x1d */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 29ULL);
 x86_l_13ff:
 	/* 0x13ff: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x13ff, 0x1720, x86_l_1720);
@@ -555,20 +559,20 @@ x86_l_140a:
 	/* 0x140a: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x140a, 0x1140, x86_l_1140);
 x86_l_140f:
-	/* 0x140f: cmp    esi,0x3d */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 61ULL);
+	/* 0x140f: cmp    edi,0x3d */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 61ULL);
 x86_l_1412:
 	/* 0x1412: jg     15d8 <trace_event_type_switch_dispatch_xdp+0x4d8> */
 	X86_VM_X86_JCC(X86_CC_G, 0x1412, 0x15d8, x86_l_15d8);
 x86_l_1418:
-	/* 0x1418: cmp    esi,0x3c */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 60ULL);
+	/* 0x1418: cmp    edi,0x3c */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 60ULL);
 x86_l_141b:
 	/* 0x141b: je     1680 <trace_event_type_switch_dispatch_xdp+0x580> */
 	X86_VM_X86_JCC(X86_CC_E, 0x141b, 0x1680, x86_l_1680);
 x86_l_1421:
-	/* 0x1421: cmp    esi,0x3d */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 61ULL);
+	/* 0x1421: cmp    edi,0x3d */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 61ULL);
 x86_l_1424:
 	/* 0x1424: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x1424, 0x1720, x86_l_1720);
@@ -579,14 +583,14 @@ x86_l_142f:
 	/* 0x142f: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x142f, 0x1140, x86_l_1140);
 x86_l_1434:
-	/* 0x1434: cmp    esi,0x2 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
+	/* 0x1434: cmp    edi,0x2 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
 x86_l_1437:
 	/* 0x1437: je     168a <trace_event_type_switch_dispatch_xdp+0x58a> */
 	X86_VM_X86_JCC(X86_CC_E, 0x1437, 0x168a, x86_l_168a);
 x86_l_143d:
-	/* 0x143d: cmp    esi,0x3 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 3ULL);
+	/* 0x143d: cmp    edi,0x3 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 3ULL);
 x86_l_1440:
 	/* 0x1440: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x1440, 0x1720, x86_l_1720);
@@ -597,14 +601,14 @@ x86_l_144b:
 	/* 0x144b: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x144b, 0x1140, x86_l_1140);
 x86_l_1450:
-	/* 0x1450: cmp    esi,0x22 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 34ULL);
+	/* 0x1450: cmp    edi,0x22 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 34ULL);
 x86_l_1453:
 	/* 0x1453: je     1694 <trace_event_type_switch_dispatch_xdp+0x594> */
 	X86_VM_X86_JCC(X86_CC_E, 0x1453, 0x1694, x86_l_1694);
 x86_l_1459:
-	/* 0x1459: cmp    esi,0x23 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 35ULL);
+	/* 0x1459: cmp    edi,0x23 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 35ULL);
 x86_l_145c:
 	/* 0x145c: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x145c, 0x1720, x86_l_1720);
@@ -615,14 +619,14 @@ x86_l_1467:
 	/* 0x1467: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x1467, 0x1140, x86_l_1140);
 x86_l_146c:
-	/* 0x146c: cmp    esi,0x12 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 18ULL);
+	/* 0x146c: cmp    edi,0x12 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 18ULL);
 x86_l_146f:
 	/* 0x146f: je     169e <trace_event_type_switch_dispatch_xdp+0x59e> */
 	X86_VM_X86_JCC(X86_CC_E, 0x146f, 0x169e, x86_l_169e);
 x86_l_1475:
-	/* 0x1475: cmp    esi,0x13 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 19ULL);
+	/* 0x1475: cmp    edi,0x13 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 19ULL);
 x86_l_1478:
 	/* 0x1478: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x1478, 0x1720, x86_l_1720);
@@ -633,14 +637,14 @@ x86_l_1483:
 	/* 0x1483: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x1483, 0x1140, x86_l_1140);
 x86_l_1488:
-	/* 0x1488: cmp    esi,0x32 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 50ULL);
+	/* 0x1488: cmp    edi,0x32 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 50ULL);
 x86_l_148b:
 	/* 0x148b: je     16a8 <trace_event_type_switch_dispatch_xdp+0x5a8> */
 	X86_VM_X86_JCC(X86_CC_E, 0x148b, 0x16a8, x86_l_16a8);
 x86_l_1491:
-	/* 0x1491: cmp    esi,0x33 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 51ULL);
+	/* 0x1491: cmp    edi,0x33 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 51ULL);
 x86_l_1494:
 	/* 0x1494: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x1494, 0x1720, x86_l_1720);
@@ -651,14 +655,14 @@ x86_l_149f:
 	/* 0x149f: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x149f, 0x1140, x86_l_1140);
 x86_l_14a4:
-	/* 0x14a4: cmp    esi,0xa */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 10ULL);
+	/* 0x14a4: cmp    edi,0xa */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 10ULL);
 x86_l_14a7:
 	/* 0x14a7: je     16b2 <trace_event_type_switch_dispatch_xdp+0x5b2> */
 	X86_VM_X86_JCC(X86_CC_E, 0x14a7, 0x16b2, x86_l_16b2);
 x86_l_14ad:
-	/* 0x14ad: cmp    esi,0xb */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 11ULL);
+	/* 0x14ad: cmp    edi,0xb */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 11ULL);
 x86_l_14b0:
 	/* 0x14b0: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x14b0, 0x1720, x86_l_1720);
@@ -669,14 +673,14 @@ x86_l_14bb:
 	/* 0x14bb: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x14bb, 0x1140, x86_l_1140);
 x86_l_14c0:
-	/* 0x14c0: cmp    esi,0x2a */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 42ULL);
+	/* 0x14c0: cmp    edi,0x2a */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 42ULL);
 x86_l_14c3:
 	/* 0x14c3: je     16bc <trace_event_type_switch_dispatch_xdp+0x5bc> */
 	X86_VM_X86_JCC(X86_CC_E, 0x14c3, 0x16bc, x86_l_16bc);
 x86_l_14c9:
-	/* 0x14c9: cmp    esi,0x2b */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 43ULL);
+	/* 0x14c9: cmp    edi,0x2b */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 43ULL);
 x86_l_14cc:
 	/* 0x14cc: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x14cc, 0x1720, x86_l_1720);
@@ -687,14 +691,14 @@ x86_l_14d7:
 	/* 0x14d7: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x14d7, 0x1140, x86_l_1140);
 x86_l_14dc:
-	/* 0x14dc: cmp    esi,0x1a */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 26ULL);
+	/* 0x14dc: cmp    edi,0x1a */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 26ULL);
 x86_l_14df:
 	/* 0x14df: je     16c6 <trace_event_type_switch_dispatch_xdp+0x5c6> */
 	X86_VM_X86_JCC(X86_CC_E, 0x14df, 0x16c6, x86_l_16c6);
 x86_l_14e5:
-	/* 0x14e5: cmp    esi,0x1b */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 27ULL);
+	/* 0x14e5: cmp    edi,0x1b */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 27ULL);
 x86_l_14e8:
 	/* 0x14e8: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x14e8, 0x1720, x86_l_1720);
@@ -705,14 +709,14 @@ x86_l_14f3:
 	/* 0x14f3: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x14f3, 0x1140, x86_l_1140);
 x86_l_14f8:
-	/* 0x14f8: cmp    esi,0x3a */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 58ULL);
+	/* 0x14f8: cmp    edi,0x3a */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 58ULL);
 x86_l_14fb:
 	/* 0x14fb: je     16d0 <trace_event_type_switch_dispatch_xdp+0x5d0> */
 	X86_VM_X86_JCC(X86_CC_E, 0x14fb, 0x16d0, x86_l_16d0);
 x86_l_1501:
-	/* 0x1501: cmp    esi,0x3b */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 59ULL);
+	/* 0x1501: cmp    edi,0x3b */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 59ULL);
 x86_l_1504:
 	/* 0x1504: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x1504, 0x1720, x86_l_1720);
@@ -723,14 +727,14 @@ x86_l_150f:
 	/* 0x150f: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x150f, 0x1140, x86_l_1140);
 x86_l_1514:
-	/* 0x1514: cmp    esi,0x6 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 6ULL);
+	/* 0x1514: cmp    edi,0x6 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 6ULL);
 x86_l_1517:
 	/* 0x1517: je     16da <trace_event_type_switch_dispatch_xdp+0x5da> */
 	X86_VM_X86_JCC(X86_CC_E, 0x1517, 0x16da, x86_l_16da);
 x86_l_151d:
-	/* 0x151d: cmp    esi,0x7 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 7ULL);
+	/* 0x151d: cmp    edi,0x7 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 7ULL);
 x86_l_1520:
 	/* 0x1520: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x1520, 0x1720, x86_l_1720);
@@ -741,14 +745,14 @@ x86_l_152b:
 	/* 0x152b: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x152b, 0x1140, x86_l_1140);
 x86_l_1530:
-	/* 0x1530: cmp    esi,0x26 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 38ULL);
+	/* 0x1530: cmp    edi,0x26 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 38ULL);
 x86_l_1533:
 	/* 0x1533: je     16e4 <trace_event_type_switch_dispatch_xdp+0x5e4> */
 	X86_VM_X86_JCC(X86_CC_E, 0x1533, 0x16e4, x86_l_16e4);
 x86_l_1539:
-	/* 0x1539: cmp    esi,0x27 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 39ULL);
+	/* 0x1539: cmp    edi,0x27 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 39ULL);
 x86_l_153c:
 	/* 0x153c: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x153c, 0x1720, x86_l_1720);
@@ -759,14 +763,14 @@ x86_l_1547:
 	/* 0x1547: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x1547, 0x1140, x86_l_1140);
 x86_l_154c:
-	/* 0x154c: cmp    esi,0x16 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 22ULL);
+	/* 0x154c: cmp    edi,0x16 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 22ULL);
 x86_l_154f:
 	/* 0x154f: je     16ee <trace_event_type_switch_dispatch_xdp+0x5ee> */
 	X86_VM_X86_JCC(X86_CC_E, 0x154f, 0x16ee, x86_l_16ee);
 x86_l_1555:
-	/* 0x1555: cmp    esi,0x17 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 23ULL);
+	/* 0x1555: cmp    edi,0x17 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 23ULL);
 x86_l_1558:
 	/* 0x1558: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x1558, 0x1720, x86_l_1720);
@@ -777,14 +781,14 @@ x86_l_1563:
 	/* 0x1563: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x1563, 0x1140, x86_l_1140);
 x86_l_1568:
-	/* 0x1568: cmp    esi,0x36 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 54ULL);
+	/* 0x1568: cmp    edi,0x36 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 54ULL);
 x86_l_156b:
 	/* 0x156b: je     16f8 <trace_event_type_switch_dispatch_xdp+0x5f8> */
 	X86_VM_X86_JCC(X86_CC_E, 0x156b, 0x16f8, x86_l_16f8);
 x86_l_1571:
-	/* 0x1571: cmp    esi,0x37 */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 55ULL);
+	/* 0x1571: cmp    edi,0x37 */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 55ULL);
 x86_l_1574:
 	/* 0x1574: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x1574, 0x1720, x86_l_1720);
@@ -795,14 +799,14 @@ x86_l_157f:
 	/* 0x157f: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x157f, 0x1140, x86_l_1140);
 x86_l_1584:
-	/* 0x1584: cmp    esi,0xe */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 14ULL);
+	/* 0x1584: cmp    edi,0xe */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 14ULL);
 x86_l_1587:
 	/* 0x1587: je     1702 <trace_event_type_switch_dispatch_xdp+0x602> */
 	X86_VM_X86_JCC(X86_CC_E, 0x1587, 0x1702, x86_l_1702);
 x86_l_158d:
-	/* 0x158d: cmp    esi,0xf */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 15ULL);
+	/* 0x158d: cmp    edi,0xf */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 15ULL);
 x86_l_1590:
 	/* 0x1590: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x1590, 0x1720, x86_l_1720);
@@ -813,14 +817,14 @@ x86_l_159b:
 	/* 0x159b: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x159b, 0x1140, x86_l_1140);
 x86_l_15a0:
-	/* 0x15a0: cmp    esi,0x2e */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 46ULL);
+	/* 0x15a0: cmp    edi,0x2e */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 46ULL);
 x86_l_15a3:
 	/* 0x15a3: je     170c <trace_event_type_switch_dispatch_xdp+0x60c> */
 	X86_VM_X86_JCC(X86_CC_E, 0x15a3, 0x170c, x86_l_170c);
 x86_l_15a9:
-	/* 0x15a9: cmp    esi,0x2f */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 47ULL);
+	/* 0x15a9: cmp    edi,0x2f */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 47ULL);
 x86_l_15ac:
 	/* 0x15ac: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x15ac, 0x1720, x86_l_1720);
@@ -831,14 +835,14 @@ x86_l_15b7:
 	/* 0x15b7: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x15b7, 0x1140, x86_l_1140);
 x86_l_15bc:
-	/* 0x15bc: cmp    esi,0x1e */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 30ULL);
+	/* 0x15bc: cmp    edi,0x1e */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 30ULL);
 x86_l_15bf:
 	/* 0x15bf: je     1716 <trace_event_type_switch_dispatch_xdp+0x616> */
 	X86_VM_X86_JCC(X86_CC_E, 0x15bf, 0x1716, x86_l_1716);
 x86_l_15c5:
-	/* 0x15c5: cmp    esi,0x1f */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 31ULL);
+	/* 0x15c5: cmp    edi,0x1f */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 31ULL);
 x86_l_15c8:
 	/* 0x15c8: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x15c8, 0x1720, x86_l_1720);
@@ -849,14 +853,14 @@ x86_l_15d3:
 	/* 0x15d3: jmp    1140 <trace_event_type_switch_dispatch_xdp+0x40> */
 	X86_VM_X86_JMP(0x15d3, 0x1140, x86_l_1140);
 x86_l_15d8:
-	/* 0x15d8: cmp    esi,0x3e */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 62ULL);
+	/* 0x15d8: cmp    edi,0x3e */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 62ULL);
 x86_l_15db:
 	/* 0x15db: je     113a <trace_event_type_switch_dispatch_xdp+0x3a> */
 	X86_VM_X86_JCC(X86_CC_E, 0x15db, 0x113a, x86_l_113a);
 x86_l_15e1:
-	/* 0x15e1: cmp    esi,0x3f */
-	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, 0, 63ULL);
+	/* 0x15e1: cmp    edi,0x3f */
+	X86_VM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 63ULL);
 x86_l_15e4:
 	/* 0x15e4: jne    1720 <trace_event_type_switch_dispatch_xdp+0x620> */
 	X86_VM_X86_JCC(X86_CC_NE, 0x15e4, 0x1720, x86_l_1720);
@@ -1118,7 +1122,7 @@ x86_l_1768:
 x86_l_1769:
 	/* 0x1769: ret */
 	X86_VM_X86_RET();
-	return XDP_ABORTED;
+	X86_VM_TRAP_RETURN();
 }
 
 X86_VM_LICENSE();
