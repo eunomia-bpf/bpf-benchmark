@@ -284,13 +284,18 @@ CTX:         only modeled ABI reads/writes are accepted
 STACK:       access is mapped to explicit modeled stack slots under a stack
              layout theorem; no runtime slot rejection is an accepted safety
              mechanism
-RODATA:      access is mapped to a generated read-only table model
+RODATA:      reserved encoding for RIP-relative addresses; no active hardcoded
+             dereference table is allowed
 NONE:        not an accepted dereference domain for direct native execution
 ```
 
 Packet and stack accesses in helpers must be proved equivalent to native memory
 accesses under the ABI assumption that the native program is only allowed to
-observe the modeled packet/output/stack domains.
+observe the modeled packet/output/stack domains. RIP-relative `lea` currently
+produces the architectural scalar address only. A future rodata implementation
+must provide an exact byte image for the native read-only object; it must not map
+the address to a benchmark-specific sentinel table or return zero for unknown
+offsets.
 
 ## 4. Branches And Returns
 
@@ -350,7 +355,7 @@ static X86_SIM_SUBFN_ATTR int x86_fn_<symbol>(
 The native call site is emitted as:
 
 ```c
-X86_SIM_X86_CALL(x86_fn_<symbol>);
+X86_SIM_X86_CALL(x86_fn_<symbol>, next_native_pc);
 ```
 
 The generated subfunction body starts with:
@@ -368,8 +373,9 @@ X86_SIM_X86_SUB_RET();
 `X86_SIM_X86_CALL()` is a C-authored protocol macro. It models the native call
 stack effect by reserving one return-address slot on the modeled x86 stack
 before entering the generated callee and releasing that slot after the callee
-returns. The return-address value itself is currently modeled as scalar zero
-because none of the generated micro callees inspect it.
+returns. The return-address value is the address of the next native instruction
+after the call site. This lets callees observe the modeled return-address bytes;
+dynamic return-target changes are still an open gap.
 
 `X86_SIM_SUB_BEGIN()` only declares the per-callee instruction record. Generated
 callee prologue/epilogue instructions such as `push rbp`, `mov rbp, rsp`, and
@@ -557,7 +563,7 @@ These are not acceptable final assumptions; they are work items.
 | Gap | Required proof or implementation |
 | --- | --- |
 | Full x86 flag coverage | Audit every helper flag rule against the subset of x86 opcodes emitted by current micro programs. |
-| RODATA model | Specify each generated read-only table and prove indexed reads match the native constants. |
+| RODATA model | The hardcoded sentinel table is removed. Specify each generated read-only memory image and prove indexed reads match native constants before accepting rodata dereferences. |
 | Stack model extent | Implement every modeled stack access as a native x86 stack byte access. Runtime slot rejection, stack-disabled no-ops, and proof-only stack guards are not allowed. |
 | Unsupported native constructs | There must be no runtime unsupported/trap/fallback path in an accepted artifact. Correctness work should add simulator semantics rather than relying on generation-time rejection or unreachable-path assumptions. |
 | Packet/output helper bounds checks | Active packet/output helpers must not insert runtime `data_end` bounds checks. Verifier acceptance must come from equivalent pointer state and native guards/ABI state, not an extra checked-simulator guard. |
@@ -567,7 +573,7 @@ These are not acceptable final assumptions; they are work items.
 | SKB packet-length metadata | Prove that `ctx+0x70` native loads exactly the SKB length and that the accepted native ABI satisfies `data + len == data_end`; `PACKET_LEN` may only express that ABI relation, not invent a branch-bound fact. |
 | No semantic verifier hacks | Prove that no verifier aid changes x86 behavior: no fuel guard, no fixed loop trip bound, no fallback return, no benchmark-specific renderer, and no assertion over facts not guaranteed by the native execution. |
 | ABI special cases | Prove the modeled `ctx`, `skb`, packet, output, and rodata layouts match the native execution ABI exactly; otherwise direct native execution may read/write addresses not covered by the proof. |
-| Native call return address | Current generated callees assume the return-address slot is not read. The simulator must model the concrete native return-address bytes before this is complete. |
+| Native call return address | Calls now write the next native instruction address into the modeled stack. The remaining gap is modified-return control flow: generated callees still assume `ret` returns to the call continuation. |
 | Multi-exit loop verifier cost | Current correctness-first code prioritizes exact branch semantics over verifier acceptance. Any future structural lowering must still be a C/template theorem and preserve native branch semantics without fuel. |
 | Paused PC-dispatch experiment | If revived, implement it as a C/template proof rule rather than Python CFG scheduling. It is not active now. |
 | ABI output-store theorem | The retag helper is removed. Stores through `[rdi+16/20]` must be justified by the current architectural `rdi` state and the ABI memory model itself. |

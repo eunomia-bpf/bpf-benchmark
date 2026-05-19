@@ -360,7 +360,7 @@ Generated-C migration todo:
 | Remove benchmark-name renderers from Python | done | `generate_micro_sim_proofs.py` no longer dispatches on `packet_checksum_fold`, `bpftrace_string_search_prefix_scan`, `bpf_local_call_fanout_dispatch`, or other benchmark names. |
 | Remove stale C special templates | done | Unused checksum/string-scan C helper templates were deleted from `x86_sim_bpf.h`; the header now contains generic simulator plumbing only. |
 | Move proof protocol out of Python | done | Python pc-dispatch, ctx-store write-set insertion, `bpf_loop` lowering, internal call-return stack lowering, helper selection, and benchmark-name renderers were removed; remaining Python CFG work is mechanical label/branch emission. |
-| C-owned loop/call protocol | done for current micro | `X86_SIM_X86_JCC/JMP` lower native branches directly to C labels; `X86_SIM_X86_CALL` models call stack adjustment; generated callee frame instructions execute through normal x86 helpers. |
+| C-owned loop/call protocol | done for current micro | `X86_SIM_X86_JCC/JMP` lower native branches directly to C labels; `X86_SIM_X86_CALL` models call stack adjustment and writes the next native instruction address as the return address; generated callee frame instructions execute through normal x86 helpers. |
 | Shrink Python generator below 800 lines | done | `generate_micro_sim_proofs.py` is 737 lines. |
 | Historical safety-first generated-C batch | recorded | `results/README-20260518-210632.md`: 29/29 pass before the later no-trap/no-guard cleanup. |
 | Delete non-x86 loop fuel guard | done | Active branch macros no longer decrement `X86_SIM_LOOP_FUEL`; backward edges use plain x86 branch semantics. |
@@ -374,6 +374,7 @@ Generated-C migration todo:
 | Delete branch-proof metadata | done | `last_cmp_*` state and `x86_sim_assert_*` helpers were removed from active C. |
 | Remove packet/output runtime bounds checks | done | Active packet/output helpers no longer guard loads/stores with proof-only `data_end` checks. |
 | Remove top-level fallback returns | done | Generated paths no longer translate helper results into `XDP_ABORTED` or any other fallback return. |
+| Delete hardcoded rodata sentinel | done | The old benchmark-specific rodata switch was removed. RIP-relative `lea` now keeps only the architectural scalar address until a real read-only memory image is specified. |
 | Split memory-domain helpers | done for current micro | Top-level packet loads have a raw verifier-proven path; subfunctions and stack/ctx accesses keep checked typed helpers. |
 | Correctness-first compile check | done | [`results/README-20260518-214215.md`](./results/README-20260518-214215.md): all 29 generated micro sources compile with clang when `BPF_STACK_SIZE=4096`; verifier/load is not claimed for this state layout. |
 | Direct-native safety TODO | open | See [`TODO.md`](./TODO.md) for remaining stack, metadata, ABI, rodata, flag, and call-return proof obligations. |
@@ -744,7 +745,7 @@ This prototype has already exposed several verifier-facing design constraints:
 
 Current correctness-first status after removing simulator guard/retag behavior:
 
-- `results/README-20260518-222101.md` is the latest run. All 29 generated
+- `results/README-20260518-235117.md` is the latest run. All 29 generated
   micro proof C files compiled. Four loaded and passed test run:
   `bitmap_popcount_scan`, `sorted_rule_binary_search`, `packet_checksum_fold`,
   and `tc_packet_checksum_fold`.
@@ -769,14 +770,16 @@ Current correctness-first status after removing simulator guard/retag behavior:
   verifier result rather than a reason to add a safety guard.
 - The `ctx`, SKB, packet, output, and rodata layouts are modeled ABIs, not
   arbitrary x86 memory. They must match the native execution layout exactly.
+- The hardcoded rodata sentinel table was removed; rodata dereferences need a
+  future exact memory image instead of magic-base lookup.
 - The stack model is finite byte-addressed memory. Pointer payload metadata was
   removed from stack because hardware stack memory stores bytes, not verifier
   tags.
 - Flag helpers now cover the active `SBB`, `POPCNT`, shift/rotate, `SHLD`,
   `SHRD`, and `IMUL CF/OF` cases more closely, but undefined-flag cases and
   non-current opcodes still need audit.
-- Native call return-address contents are only valid for callees that do not
-  inspect the return address.
+- Native calls now write the next native instruction address into the modeled
+  stack slot. Modified-return control flow is still not modeled.
 
 For formal verification, clang optimization is not part of the trusted
 argument. This C implementation is a prototype for finding the simulator semantics and

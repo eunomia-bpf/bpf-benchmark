@@ -55,8 +55,11 @@ HOST_KINSN_DIR_ARM64 := $(HOST_BUILD_ROOT)/kinsn-build/arm64
 .PHONY: \
 	host-kernel-x86 host-kernel-arm64 host-kernel-offsets-x86 host-kernel-offsets-arm64 \
 	host-kinsn-x86 host-kinsn-arm64 host-rust-x86 host-rust-arm64 host-shim-artifacts \
-	aarch64-sysroot runtime-kernel-image \
+	aarch64-sysroot runtime-kernel-image katran-bpf \
 	x86-runner-runtime-image-tar arm64-runner-runtime-image-tar image-runner-runtime-image-tar
+
+katran-bpf:
+	$(MAKE) -C "$(ROOT_DIR)/vendor" katran-bpf
 
 host-kernel-x86:
 	install -d "$(HOST_KERNEL_BUILD_DIR_X86)"
