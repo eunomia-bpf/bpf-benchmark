@@ -24,6 +24,7 @@ OTEL       := $(CURDIR)/repos/opentelemetry-ebpf-profiler
 TRACEE     := $(CURDIR)/repos/tracee
 BCC        := $(CURDIR)/repos/bcc
 BPFTRACE   := $(CURDIR)/repos/bpftrace
+GO_DYNAMIC_LDFLAGS := -linkmode external
 
 ARM64_SYSROOT := $(BUILD)/sysroots/arm64-llvm15
 ARM64_DEBS    := $(BUILD)/.apt-arm64-debs
@@ -41,33 +42,40 @@ apps-x86: cilium-x86 tetragon-x86 otel-x86 tracee-x86 bcc-x86 bpftrace-x86
 apps-arm64: cilium-arm64 tetragon-arm64 otel-arm64 tracee-arm64 bcc-arm64 bpftrace-arm64
 
 cilium-x86: GOARCH := amd64
+cilium-x86: GOCC := gcc
 cilium-arm64: GOARCH := arm64
+cilium-arm64: GOCC := aarch64-linux-gnu-gcc
 cilium-x86 cilium-arm64: cilium-%:
 	install -d "$(BUILD)/$*/cilium/bin"
-	$(GO_ENV) $(MAKE) -C "$(CILIUM)/daemon" GO="$(GO)" GOARCH="$(GOARCH)" CGO_ENABLED=0 TARGET="$(BUILD)/$*/cilium/bin/cilium-agent" "$(BUILD)/$*/cilium/bin/cilium-agent"
+	CC="$(GOCC)" $(GO_ENV) $(MAKE) -C "$(CILIUM)/daemon" GO="$(GO)" GOARCH="$(GOARCH)" CGO_ENABLED=1 EXTRA_GO_BUILD_LDFLAGS="$(GO_DYNAMIC_LDFLAGS)" TARGET="$(BUILD)/$*/cilium/bin/cilium-agent" "$(BUILD)/$*/cilium/bin/cilium-agent"
 
 tetragon-x86: GOARCH := amd64
 tetragon-x86: BPFARCH := x86
+tetragon-x86: GOCC := gcc
 tetragon-arm64: GOARCH := arm64
 tetragon-arm64: BPFARCH := arm64
+tetragon-arm64: GOCC := aarch64-linux-gnu-gcc
 tetragon-x86 tetragon-arm64: tetragon-%:
 	install -d "$(BUILD)/$*/tetragon/bin" "$(BUILD)/.tetragon-bpf/$*"
-	$(GO_ENV) $(MAKE) -C "$(TETRAGON)" GO="$(GO)" TARGET_ARCH="$(GOARCH)" GOARCH="$(GOARCH)" EXTRA_GO_BUILD_FLAGS="-o $(BUILD)/$*/tetragon/bin/tetragon" tetragon
+	CC="$(GOCC)" $(GO_ENV) $(MAKE) -C "$(TETRAGON)" GO="$(GO)" TARGET_ARCH="$(GOARCH)" GOARCH="$(GOARCH)" CGO_ENABLED=1 EXTRA_GO_BUILD_LDFLAGS="$(GO_DYNAMIC_LDFLAGS)" EXTRA_GO_BUILD_FLAGS="-o $(BUILD)/$*/tetragon/bin/tetragon" tetragon
 	$(MAKE) -C "$(TETRAGON)/bpf" CLANG="$(CLANG)" LLC="$(LLC)" BPF_TARGET_ARCH="$(BPFARCH)" OBJSDIR="$(BUILD)/.tetragon-bpf/$*/objs/" DEPSDIR="$(BUILD)/.tetragon-bpf/$*/deps/" -j"$(JOBS)"
 	install -d "$(BUILD)/$*/tetragon"
 	cp -a "$(BUILD)/.tetragon-bpf/$*/objs/." "$(BUILD)/$*/tetragon/"
 
-$(CACHE)/otelcol-ebpf-profiler-%.yaml:
+$(CACHE)/otelcol-ebpf-profiler-%.yaml: Makefile
 	install -d "$(dir $@)"
 	printf '%s\n' \
-	  'dist:' '  name: otelcol-ebpf-profiler' '  output_path: $(CACHE)/otelcol-ebpf-profiler-build-$*' '  version: $(OTEL_VER)' '  otelcol_version: $(OTELCOL_VER)' \
+	  'dist:' '  name: otelcol-ebpf-profiler' '  output_path: $(CACHE)/otelcol-ebpf-profiler-build-$*' '  version: $(OTEL_VER)' '  otelcol_version: $(OTELCOL_VER)' '  cgo_enabled: true' \
 	  'receivers:' '  - gomod: go.opentelemetry.io/ebpf-profiler v0.0.0' '    import: go.opentelemetry.io/ebpf-profiler/collector' '    path: $(OTEL)' \
 	  'exporters:' '  - gomod: go.opentelemetry.io/collector/exporter/debugexporter v$(OTELCOL_VER)' \
 	  'replaces:' '  - go.opentelemetry.io/ebpf-profiler => $(OTEL)' >"$@"
 
+otel-x86: GOARCH := amd64
+otel-x86: GOCC := gcc
+otel-arm64: GOARCH := arm64
+otel-arm64: GOCC := aarch64-linux-gnu-gcc
 otel-x86 otel-arm64: otel-%: $(CACHE)/otelcol-ebpf-profiler-%.yaml
-	goarch=$$(test "$*" = x86 && echo amd64 || echo arm64); cc=$$(test "$*" = arm64 && echo aarch64-linux-gnu-gcc || true); \
-	$(GO_ENV) GOOS=linux GOARCH="$$goarch" CGO_ENABLED=0 CC="$$cc" "$(GO)" run "$(OCB)" --config "$<"; \
+	$(GO_ENV) GOOS=linux GOARCH="$(GOARCH)" CGO_ENABLED=1 CC="$(GOCC)" "$(GO)" run "$(OCB)" --config "$<" --ldflags="-s -w $(GO_DYNAMIC_LDFLAGS)"
 	install -D -m 0755 "$(CACHE)/otelcol-ebpf-profiler-build-$*/otelcol-ebpf-profiler" "$(BUILD)/$*/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler"
 
 $(ARM64_CLANG_CONFIG):

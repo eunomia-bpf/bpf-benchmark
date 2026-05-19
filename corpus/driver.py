@@ -787,6 +787,16 @@ def run_suite(
     # daemon used to do this implicitly; with the shim path it must be
     # explicit at suite start.
     kinsn_module_metadata = prepare_kinsn_modules()
+    # KEEP_WORKDIRS=1: point shim's per-prog workdirs at the run artifact dir
+    # so target.json / report.json / bytecode files persist past VM shutdown.
+    # Without this BPFREJIT_SHIM_DIR defaults to /tmp inside the VM and the
+    # entire shim work-state is lost when virtme tears the VM down. Useful for
+    # debugging katran kinsn pass failures + tracee EBADF investigations.
+    if args.keep_failure_artifacts:
+        shim_workdir_root = artifact_session.run_dir / "details" / "shim-workdirs"
+        shim_workdir_root.mkdir(parents=True, exist_ok=True)
+        os.environ["BPFREJIT_SHIM_DIR"] = str(shim_workdir_root)
+        os.environ["BPFREJIT_SHIM_LOG"] = str(shim_workdir_root / "shim.log")
     with DaemonSession.start(
         daemon_binary,
         stdout_path=daemon_log_dir / "daemon.stdout.log",
