@@ -32,18 +32,12 @@ REPO_BUILD_ROOT := $(ACTIVE_BUILD_ARTIFACT_ROOT)/repo-build/$(RUN_TARGET_ARCH)$(
 KATRAN_BUILD_ROOT := $(REPO_BUILD_ROOT)/katran
 
 ARM64_RUST_TARGET := aarch64-unknown-linux-gnu
-X86_DAEMON_BIN_DIR := $(DAEMON_DIR)/target/release
-ARM64_DAEMON_BIN_DIR := $(DAEMON_DIR)/target/$(ARM64_RUST_TARGET)/release
-X86_BPFOPT_BIN_DIR := $(ROOT_DIR)/bpfopt/target/release
-ARM64_BPFOPT_BIN_DIR := $(ROOT_DIR)/bpfopt/target/$(ARM64_RUST_TARGET)/release
 NATIVE_LINK_DIR := $(ROOT_DIR)/native-sim/x86/native_lab/native_link
 
 RUNNER_RUNTIME_CONTAINERFILE := $(RUNNER_CONTAINER_DIR)/runner-runtime.Dockerfile
 KATRAN_ARTIFACTS_CONTAINERFILE := $(RUNNER_CONTAINER_DIR)/katran-artifacts.Dockerfile
 BPFREJIT_INSTALL_SCRIPT := $(RUNNER_DIR)/scripts/bpfrejit-install
 BPFOPT_SHIM_DIR := $(ROOT_DIR)/bpfopt/shim
-BPFOPT_SHIM_GLIBC := $(BPFOPT_SHIM_DIR)/libbpfrejit_shim.so
-BPFOPT_SHIM_MUSL := $(BPFOPT_SHIM_DIR)/libbpfrejit_shim_musl.so
 
 X86_RUNNER_RUNTIME_IMAGE := bpf-benchmark/runner-runtime:x86_64
 ARM64_RUNNER_RUNTIME_IMAGE := bpf-benchmark/runner-runtime:arm64
@@ -68,8 +62,8 @@ HOST_KERNEL_BUILD_DIR_X86 := $(HOST_BUILD_ROOT)/kernel/x86_64
 HOST_KERNEL_BUILD_DIR_ARM64 := $(HOST_BUILD_ROOT)/kernel/arm64
 HOST_KERNEL_OFFSETS_DIR_X86 := $(HOST_BUILD_ROOT)/kernel-offsets/x86_64
 HOST_KERNEL_OFFSETS_DIR_ARM64 := $(HOST_BUILD_ROOT)/kernel-offsets/arm64
-HOST_KINSN_DIR_X86 := $(HOST_BUILD_ROOT)/kinsn/x86_64
-HOST_KINSN_DIR_ARM64 := $(HOST_BUILD_ROOT)/kinsn/arm64
+HOST_KINSN_DIR_X86 := $(HOST_BUILD_ROOT)/kinsn-build/x86_64
+HOST_KINSN_DIR_ARM64 := $(HOST_BUILD_ROOT)/kinsn-build/arm64
 
 .PHONY: \
 	host-kernel-x86 host-kernel-arm64 host-kernel-offsets-x86 host-kernel-offsets-arm64 \
@@ -80,47 +74,39 @@ HOST_KINSN_DIR_ARM64 := $(HOST_BUILD_ROOT)/kinsn/arm64
 	image-push-katran-artifacts
 
 host-kernel-x86:
-	mkdir -p "$(HOST_KERNEL_BUILD_DIR_X86)"
+	install -d "$(HOST_KERNEL_BUILD_DIR_X86)"
 	cp "$(DEFCONFIG_SRC)" "$(HOST_KERNEL_BUILD_DIR_X86)/.config"
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 olddefconfig
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 bzImage modules -j"$(IMAGE_BUILD_JOBS)"
-	rm -rf "$(HOST_KERNEL_BUILD_DIR_X86)/modules-install"
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_X86)/modules-install" DEPMOD=true modules_install >/dev/null
 	rel=$$(cat "$(HOST_KERNEL_BUILD_DIR_X86)/include/config/kernel.release"); \
 		printf '{"kernel_release":"%s","target_arch":"x86_64","kernel_image":"bzImage"}\n' "$$rel" >"$(HOST_KERNEL_BUILD_DIR_X86)/manifest.json"
 
 host-kernel-arm64:
 	@command -v aarch64-linux-gnu-gcc >/dev/null
-	mkdir -p "$(HOST_KERNEL_BUILD_DIR_ARM64)"
+	install -d "$(HOST_KERNEL_BUILD_DIR_ARM64)"
 	cp "$(ARM64_DEFCONFIG_SRC)" "$(HOST_KERNEL_BUILD_DIR_ARM64)/.config"
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image vmlinuz.efi modules -j"$(IMAGE_BUILD_JOBS)"
-	rm -rf "$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install"
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install" DEPMOD=true modules_install >/dev/null
 	rel=$$(cat "$(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/kernel.release"); \
 		printf '{"kernel_release":"%s","target_arch":"arm64","kernel_image":"vmlinuz.efi"}\n' "$$rel" >"$(HOST_KERNEL_BUILD_DIR_ARM64)/manifest.json"
 
 host-kernel-offsets-x86: host-kernel-x86
-	@mkdir -p "$(HOST_KERNEL_OFFSETS_DIR_X86)"
 	$(MAKE) -C "$(MICRO_PROGRAM_DIR)" OUTPUT_DIR="$(HOST_KERNEL_OFFSETS_DIR_X86)" KERNEL_VMLINUX="$(HOST_KERNEL_BUILD_DIR_X86)/vmlinux" "$(HOST_KERNEL_OFFSETS_DIR_X86)/kernel_offsets.h"
 
 host-kernel-offsets-arm64: host-kernel-arm64
-	@mkdir -p "$(HOST_KERNEL_OFFSETS_DIR_ARM64)"
 	$(MAKE) -C "$(MICRO_PROGRAM_DIR)" OUTPUT_DIR="$(HOST_KERNEL_OFFSETS_DIR_ARM64)" KERNEL_VMLINUX="$(HOST_KERNEL_BUILD_DIR_ARM64)/vmlinux" "$(HOST_KERNEL_OFFSETS_DIR_ARM64)/kernel_offsets.h"
 
 host-kinsn-x86: host-kernel-x86
-	rm -rf "$(HOST_KINSN_DIR_X86)"
-	mkdir -p "$(HOST_KINSN_DIR_X86)" "$(HOST_BUILD_ROOT)/kinsn-build/x86_64"
-	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 M="$(ROOT_DIR)/module/x86" MO="$(HOST_BUILD_ROOT)/kinsn-build/x86_64" modules -j"$(IMAGE_BUILD_JOBS)"
-	find "$(HOST_BUILD_ROOT)/kinsn-build/x86_64" -maxdepth 1 -type f -name '*.ko' -exec install -m 0644 {} "$(HOST_KINSN_DIR_X86)/" \;
+	install -d "$(HOST_KINSN_DIR_X86)"
+	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 M="$(ROOT_DIR)/module/x86" MO="$(HOST_KINSN_DIR_X86)" modules -j"$(IMAGE_BUILD_JOBS)"
 	test "$$(find "$(HOST_KINSN_DIR_X86)" -maxdepth 1 -type f -name '*.ko' | wc -l)" -gt 0
 
 host-kinsn-arm64: host-kernel-arm64
 	@command -v aarch64-linux-gnu-gcc >/dev/null
-	rm -rf "$(HOST_KINSN_DIR_ARM64)"
-	mkdir -p "$(HOST_KINSN_DIR_ARM64)" "$(HOST_BUILD_ROOT)/kinsn-build/arm64"
-	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- M="$(ROOT_DIR)/module/arm64" MO="$(HOST_BUILD_ROOT)/kinsn-build/arm64" modules -j"$(IMAGE_BUILD_JOBS)"
-	find "$(HOST_BUILD_ROOT)/kinsn-build/arm64" -maxdepth 1 -type f -name '*.ko' -exec install -m 0644 {} "$(HOST_KINSN_DIR_ARM64)/" \;
+	install -d "$(HOST_KINSN_DIR_ARM64)"
+	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- M="$(ROOT_DIR)/module/arm64" MO="$(HOST_KINSN_DIR_ARM64)" modules -j"$(IMAGE_BUILD_JOBS)"
 	test "$$(find "$(HOST_KINSN_DIR_ARM64)" -maxdepth 1 -type f -name '*.ko' | wc -l)" -gt 0
 
 host-rust-x86:
@@ -129,12 +115,8 @@ host-rust-x86:
 	cargo build --release --manifest-path "$(NATIVE_LINK_DIR)/Cargo.toml"
 
 AARCH64_SYSROOT_DIR := $(ROOT_DIR)/.cache/aarch64-sysroot
-AARCH64_SYSROOT_DEB_PACKAGES := \
-	libzstd1:arm64 libelf1t64:arm64 libelf-dev:arm64 \
-	zlib1g:arm64 zlib1g-dev:arm64 libzstd-dev:arm64
-ARM64_CARGO_RUSTFLAGS := -C link-arg=--sysroot=$(AARCH64_SYSROOT_DIR) \
-	-C link-arg=-L$(AARCH64_SYSROOT_DIR)/usr/lib/aarch64-linux-gnu \
-	-C link-arg=-Wl,-rpath-link=$(AARCH64_SYSROOT_DIR)/usr/lib/aarch64-linux-gnu
+AARCH64_SYSROOT_DEB_PACKAGES := libzstd1:arm64 libelf1t64:arm64 libelf-dev:arm64 zlib1g:arm64 zlib1g-dev:arm64 libzstd-dev:arm64
+ARM64_CARGO_RUSTFLAGS := -C link-arg=--sysroot=$(AARCH64_SYSROOT_DIR) -C link-arg=-L$(AARCH64_SYSROOT_DIR)/usr/lib/aarch64-linux-gnu -C link-arg=-Wl,-rpath-link=$(AARCH64_SYSROOT_DIR)/usr/lib/aarch64-linux-gnu
 ARM64_CARGO_ENV := \
 	CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \
 	CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS="$(ARM64_CARGO_RUSTFLAGS)"
@@ -147,7 +129,7 @@ aarch64-sysroot:
 	if ! dpkg --print-foreign-architectures | grep -q arm64; then \
 		echo "dpkg foreign architecture arm64 not configured; run: sudo dpkg --add-architecture arm64 && sudo apt-get update" >&2; exit 1; \
 	fi; \
-	mkdir -p "$(AARCH64_SYSROOT_DIR)/.debs"; \
+	install -d "$(AARCH64_SYSROOT_DIR)/.debs"; \
 	cd "$(AARCH64_SYSROOT_DIR)/.debs" && apt-get download $(AARCH64_SYSROOT_DEB_PACKAGES); \
 	for d in "$(AARCH64_SYSROOT_DIR)"/.debs/*.deb; do dpkg-deb -x "$$d" "$(AARCH64_SYSROOT_DIR)"; done
 
@@ -161,29 +143,29 @@ host-shim-artifacts:
 	$(MAKE) -C "$(BPFOPT_SHIM_DIR)" musl
 
 x86-katran-artifacts-image-tar:
-	@mkdir -p "$(dir $(X86_KATRAN_ARTIFACTS_IMAGE_TAR))"
+	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	docker build --platform linux/amd64 --target katran-artifacts \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
 		--build-arg IMAGE_BUILD_JOBS="$(IMAGE_BUILD_JOBS)" \
 		--build-arg RUN_TARGET_ARCH=x86_64 \
 		-t "$(X86_KATRAN_ARTIFACTS_IMAGE)" -f "$(KATRAN_ARTIFACTS_CONTAINERFILE)" "$(ROOT_DIR)"
-	docker tag "$(X86_KATRAN_ARTIFACTS_IMAGE)" "$(X86_KATRAN_ARTIFACTS_GHCR_IMAGE)"
-	tmp="$(X86_KATRAN_ARTIFACTS_IMAGE_TAR).$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(X86_KATRAN_ARTIFACTS_IMAGE)"; mv -f "$$tmp" "$(X86_KATRAN_ARTIFACTS_IMAGE_TAR)"
+	docker save -o "$(X86_KATRAN_ARTIFACTS_IMAGE_TAR).tmp" "$(X86_KATRAN_ARTIFACTS_IMAGE)"
+	mv -f "$(X86_KATRAN_ARTIFACTS_IMAGE_TAR).tmp" "$(X86_KATRAN_ARTIFACTS_IMAGE_TAR)"
 
 arm64-katran-artifacts-image-tar:
-	@mkdir -p "$(dir $(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR))"
+	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	docker build --platform linux/arm64 --target katran-artifacts \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
 		--build-arg IMAGE_BUILD_JOBS="$(ARM64_IMAGE_BUILD_JOBS)" \
 		--build-arg RUN_TARGET_ARCH=arm64 \
 		-t "$(ARM64_KATRAN_ARTIFACTS_IMAGE)" -f "$(KATRAN_ARTIFACTS_CONTAINERFILE)" "$(ROOT_DIR)"
-	docker tag "$(ARM64_KATRAN_ARTIFACTS_IMAGE)" "$(ARM64_KATRAN_ARTIFACTS_GHCR_IMAGE)"
-	tmp="$(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR).$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(ARM64_KATRAN_ARTIFACTS_IMAGE)"; mv -f "$$tmp" "$(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR)"
+	docker save -o "$(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR).tmp" "$(ARM64_KATRAN_ARTIFACTS_IMAGE)"
+	mv -f "$(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR).tmp" "$(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR)"
 
 image-katran-artifacts-image-tar: $(if $(filter arm64,$(RUN_TARGET_ARCH)),arm64-katran-artifacts-image-tar,x86-katran-artifacts-image-tar)
 
 x86-runner-runtime-image-tar: x86-katran-artifacts-image-tar host-kernel-x86 host-kernel-offsets-x86 host-kinsn-x86 host-rust-x86 host-shim-artifacts
-	@mkdir -p "$(dir $(X86_RUNNER_RUNTIME_IMAGE_TAR))"
+	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	docker load -i "$(X86_KATRAN_ARTIFACTS_IMAGE_TAR)"
 	docker build --platform linux/amd64 \
 		--target runner-runtime \
@@ -197,13 +179,14 @@ x86-runner-runtime-image-tar: x86-katran-artifacts-image-tar host-kernel-x86 hos
 		--build-arg RUN_TARGET_ARCH=x86_64 \
 		--build-arg KERNEL_IMAGE_NAME=bzImage \
 		--build-arg KERNEL_MANIFEST_JSON="$$(cat $(HOST_KERNEL_BUILD_DIR_X86)/manifest.json)" \
-		--build-arg DAEMON_HOST_BIN_DIR="$(patsubst $(ROOT_DIR)/%,%,$(X86_DAEMON_BIN_DIR))" \
-		--build-arg BPFOPT_HOST_BIN_DIR="$(patsubst $(ROOT_DIR)/%,%,$(X86_BPFOPT_BIN_DIR))" \
+		--build-arg DAEMON_HOST_BIN_DIR="daemon/target/release" \
+		--build-arg BPFOPT_HOST_BIN_DIR="bpfopt/target/release" \
 		-t "$(X86_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
-	tmp="$(X86_RUNNER_RUNTIME_IMAGE_TAR).$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(X86_RUNNER_RUNTIME_IMAGE)"; mv -f "$$tmp" "$(X86_RUNNER_RUNTIME_IMAGE_TAR)"
+	docker save -o "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE)"
+	mv -f "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE_TAR)"
 
 arm64-runner-runtime-image-tar: arm64-katran-artifacts-image-tar host-kernel-arm64 host-kernel-offsets-arm64 host-kinsn-arm64 host-rust-arm64 host-shim-artifacts
-	@mkdir -p "$(dir $(ARM64_RUNNER_RUNTIME_IMAGE_TAR))"
+	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	docker load -i "$(ARM64_KATRAN_ARTIFACTS_IMAGE_TAR)"
 	docker build --platform linux/arm64 \
 		--target runner-runtime \
@@ -217,15 +200,16 @@ arm64-runner-runtime-image-tar: arm64-katran-artifacts-image-tar host-kernel-arm
 		--build-arg RUN_TARGET_ARCH=arm64 \
 		--build-arg KERNEL_IMAGE_NAME=vmlinuz.efi \
 		--build-arg KERNEL_MANIFEST_JSON="$$(cat $(HOST_KERNEL_BUILD_DIR_ARM64)/manifest.json)" \
-		--build-arg DAEMON_HOST_BIN_DIR="$(patsubst $(ROOT_DIR)/%,%,$(ARM64_DAEMON_BIN_DIR))" \
-		--build-arg BPFOPT_HOST_BIN_DIR="$(patsubst $(ROOT_DIR)/%,%,$(ARM64_BPFOPT_BIN_DIR))" \
+		--build-arg DAEMON_HOST_BIN_DIR="daemon/target/$(ARM64_RUST_TARGET)/release" \
+		--build-arg BPFOPT_HOST_BIN_DIR="bpfopt/target/$(ARM64_RUST_TARGET)/release" \
 		-t "$(ARM64_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
-	tmp="$(ARM64_RUNNER_RUNTIME_IMAGE_TAR).$$$$.tmp"; rm -f "$$tmp"; docker save -o "$$tmp" "$(ARM64_RUNNER_RUNTIME_IMAGE)"; mv -f "$$tmp" "$(ARM64_RUNNER_RUNTIME_IMAGE_TAR)"
+	docker save -o "$(ARM64_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(ARM64_RUNNER_RUNTIME_IMAGE)"
+	mv -f "$(ARM64_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(ARM64_RUNNER_RUNTIME_IMAGE_TAR)"
 
 image-runner-runtime-image-tar: $(if $(filter arm64,$(RUN_TARGET_ARCH)),arm64-runner-runtime-image-tar,x86-runner-runtime-image-tar)
 
 runtime-kernel-image: x86-runner-runtime-image-tar
-	@mkdir -p "$(X86_RUNTIME_KERNEL_DIR)"
+	@install -d "$(X86_RUNTIME_KERNEL_DIR)"
 	BPFREJIT_INSTALL_KERNEL_OUT_DIR="$(X86_RUNTIME_KERNEL_DIR)" "$(BPFREJIT_INSTALL_SCRIPT)" --extract-kernel-only "$(X86_RUNNER_RUNTIME_IMAGE_TAR)"
 	test -s "$(X86_RUNTIME_KERNEL_IMAGE)"
 
@@ -242,13 +226,9 @@ image-katran-artifacts image-runner-artifacts image-micro-program-artifacts imag
 	@exit 1
 else
 image-runner-artifacts:
-	rm -rf "$(RUNNER_LIBBPF_OBJDIR)" "$(RUNNER_LIBBPF_PREFIX)"
-	mkdir -p "$(RUNNER_LIBBPF_OBJDIR)" "$(RUNNER_LIBBPF_PREFIX)/include"
 	$(MAKE) -C "$(ROOT_DIR)/vendor/libbpf/src" -j"$(JOBS)" BUILD_STATIC_ONLY=1 \
 		OBJDIR="$(RUNNER_LIBBPF_OBJDIR)" DESTDIR= PREFIX="$(RUNNER_LIBBPF_PREFIX)" \
 		"$(RUNNER_LIBBPF_ARCHIVE)" install_headers
-	mkdir -p "$(RUNNER_BUILD_DIR_ACTIVE)"
-	rm -rf "$(RUNNER_BUILD_DIR_ACTIVE)/CMakeCache.txt" "$(RUNNER_BUILD_DIR_ACTIVE)/CMakeFiles"
 	cmake -S "$(RUNNER_DIR)" -B "$(RUNNER_BUILD_DIR_ACTIVE)" \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_C_COMPILER="$(RUNNER_CONTAINER_CC)" \
@@ -261,20 +241,16 @@ image-runner-artifacts:
 	cmake --build "$(RUNNER_BUILD_DIR_ACTIVE)" --target micro_exec -j"$(JOBS)"
 
 image-micro-program-artifacts:
-	mkdir -p "$(MICRO_PROGRAM_OUTPUT_DIR)"
 	$(MAKE) -C "$(MICRO_PROGRAM_DIR)" OUTPUT_DIR="$(MICRO_PROGRAM_OUTPUT_DIR)" KERNEL_OFFSETS_INPUT="/artifacts/kernel/kernel_offsets.h" all
 
 image-stage2-program-artifacts:
-	mkdir -p "$(STAGE2_PROGRAM_OUTPUT_DIR)"
 	if [ -f /artifacts/kernel/kernel_offsets.h ]; then \
 		cp -f /artifacts/kernel/kernel_offsets.h "$(MICRO_PROGRAM_DIR)/kernel_offsets.h"; \
 	fi
 	$(MAKE) -C "$(STAGE2_PROGRAM_DIR)" OUTPUT_DIR="$(STAGE2_PROGRAM_OUTPUT_DIR)" all
 
 image-test-artifacts:
-	mkdir -p "$(ROOT_DIR)/tests/unittest/$(if $(filter arm64,$(RUN_TARGET_ARCH)),build-arm64,build)" "$(ROOT_DIR)/tests/unittest/$(if $(filter arm64,$(RUN_TARGET_ARCH)),build-arm64,build)/vendor/bpftool"
 	$(MAKE) -C "$(ROOT_DIR)/tests/unittest" BUILD_DIR="$(ROOT_DIR)/tests/unittest/$(if $(filter arm64,$(RUN_TARGET_ARCH)),build-arm64,build)" CC=gcc CLANG=clang BPF_TARGET_ARCH="$(RUN_TARGET_ARCH)"
-	mkdir -p "$(ROOT_DIR)/tests/negative/$(if $(filter arm64,$(RUN_TARGET_ARCH)),build-arm64,build)"
 	$(MAKE) -C "$(ROOT_DIR)/tests/negative" BUILD_DIR="$(ROOT_DIR)/tests/negative/$(if $(filter arm64,$(RUN_TARGET_ARCH)),build-arm64,build)" CC=gcc
 
 include $(RUNNER_DIR)/mk/katran-artifacts.mk

@@ -25,6 +25,7 @@ RESULTS_DIR = X86_DIR / "results"
 CONFIG = REPO_ROOT / "micro" / "config" / "micro_pure_jit.yaml"
 LOADER_MANIFEST = REPO_ROOT / "native-sim" / "loader" / "Cargo.toml"
 LOADER_BIN = REPO_ROOT / "native-sim" / "loader" / "target" / "debug" / "reversesim-loader"
+BPF_STACK_SIZE = os.environ.get("BPF_STACK_SIZE", "4096")
 
 sys.path.insert(0, str(REPO_ROOT))
 from runner.libs.input_generators import materialize_input  # noqa: E402
@@ -115,6 +116,8 @@ def compile_object(bench: Bench) -> tuple[Result | None, float]:
         "-O2",
         "-target",
         "bpf",
+        "-mllvm",
+        f"-bpf-stack-size={BPF_STACK_SIZE}",
         "-D__TARGET_ARCH_x86",
         "-I",
         str(REPO_ROOT / "vendor" / "libbpf" / "include" / "uapi"),

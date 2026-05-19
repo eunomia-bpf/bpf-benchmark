@@ -50,15 +50,15 @@ XState = {
     off_<reg> : hidden packet/data-end offset used only when tag is PACKET or
                 PACKET_END,
 
-  Modeled stack slots:
-    stack0..stackN plus tag_stackN,
-    p_stack0..p_stack8 verifier pointer payloads for low stack slots,
+  Modeled stack:
+    byte-addressed stack_mem plus aligned pointer payload metadata
+    p_stack[i], tag_stack[i],
 
   Packet verifier inputs:
     data, data_end,
 
   Control:
-    current native address or return/done/unsupported
+    current native address or return/done
 }
 ```
 
@@ -83,18 +83,12 @@ The code implementation is `x86_init_state()` in `x86_sim.h`.
 
 ### Stack Pointer Payload Rule
 
-Each modeled x86 stack slot stores its 64-bit value and a ghost tag. Low slots
-`0..8` also carry real BPF verifier pointer payloads (`p_stack0..p_stack8`) so
-native stack spills of packet/ctx/rodata capabilities can be restored without
-inventing a new pointer fact. A stack slot tagged `NONE` or `STACK` does not
-need a BPF pointer payload.
-
-If a reachable native path spills a non-`NONE`/non-`STACK` pointer into a deeper
-slot, the generated proof artifact must reject before native execution. This is
-a support/coverage rejection, not a runtime safety check for accepted native
-code. The current micro corpus needs low slots through slot 8, including the
-`bpf_local_call_fanout_dispatch` packet-pointer spills at `[rbp-0x38]` and
-`[rbp-0x40]`.
+The active simulator models stack bytes in `stack_mem[256]` and keeps aligned
+pointer payload metadata in `p_stack[32]` / `tag_stack[32]`. Loads and stores
+use the same effective stack address that the native instruction computes. The
+simulator no longer rejects stack-slot coverage at runtime. If a reachable
+native path needs stack memory outside the modeled layout, the artifact must be
+rejected before direct native execution or the model must be enlarged exactly.
 
 ### Hidden Packet Offset Rule
 
@@ -153,7 +147,7 @@ Hard rules for native-direct safety:
 No proof-only branch assertion.
 No runtime packet/output bounds check in the proof path.
 No proof-only stack/model bounds check that native x86 does not execute.
-No runtime unsupported/fallback as an accepted safety mechanism.
+No runtime unsupported/trap/fallback path in an accepted artifact.
 No fuel guard or synthetic trip bound.
 No fallback return value.
 No benchmark-specific renderer or helper.
@@ -180,10 +174,10 @@ modeled x86 flags. This may make verifier acceptance harder, but verifier
 success must come from semantics-preserving optimization, not from a range fact
 or bounds check that native x86 does not guarantee.
 
-`X86_SIM_UNSUPPORTED` is simulator behavior, not native x86 behavior. A final accepted
-native artifact needs a proof that every `X86_SIM_UNSUPPORTED` path is unreachable, or
-a translation/load-time rejection before native execution. It must not be used
-as a runtime safety guard for direct native execution.
+There must be no accepted runtime `X86_SIM_UNSUPPORTED`/trap path. A construct
+outside the modeled native subset must cause generation/load rejection before
+native execution, or have a proof that the path is unreachable. It must not be
+encoded as a runtime safety branch for direct native execution.
 
 ## 3. Instruction Step Relation
 
@@ -278,7 +272,8 @@ PACKET:      access is the native effective address represented by the packet
 PACKET_END:  comparable pointer only; not directly dereferenceable
 CTX:         only modeled ABI reads/writes are accepted
 STACK:       access is mapped to explicit modeled stack slots under a stack
-             layout theorem; checked slot rejection is not a final safety guard
+             layout theorem; no runtime slot rejection is an accepted safety
+             mechanism
 RODATA:      access is mapped to a generated read-only table model
 NONE:        not an accepted dereference domain for direct native execution
 ```
@@ -405,14 +400,13 @@ name, observed failure, or per-loop Python analysis. Future optimized loop
 protocols must be C-authored or bytecode-template-authored and added back to
 this spec before use.
 
-Current verifier consequence: plain native backedges are semantically clean and
-the current micro corpus passes 29/29. The hard cases were fixed through
-C-authored state shape and exact ISA/ABI rules, not Python loop analysis:
-`bpftrace_string_search_prefix_scan` remains under the verifier limit, and the
-TC/SKB checksum loops use the `PACKET_LEN` ABI rule plus exact same-register
-`xchg` semantics. Future loop fixes must remain C/template proof rules that
-preserve native branch semantics, not Python benchmark renderers, branch
-assertions, or fuel bounds.
+Current verifier consequence: plain native backedges are semantically clean but
+may be harder for the verifier. The current correctness-first implementation
+only claims clang compilation of the generated micro proof sources with
+`BPF_STACK_SIZE=4096`; verifier/load acceptance must be regained by changing the
+C-authored state layout without changing native branch semantics. Future loop
+fixes must remain C/template proof rules that preserve native branch semantics,
+not Python benchmark renderers, branch assertions, or fuel bounds.
 
 ### Non-Active Loop Experiments
 
@@ -561,16 +555,16 @@ These are not acceptable final assumptions; they are work items.
 | --- | --- |
 | Full x86 flag coverage | Audit every helper flag rule against the subset of x86 opcodes emitted by current micro programs. |
 | RODATA model | Specify each generated read-only table and prove indexed reads match the native constants. |
-| Stack model bounds | Prove every modeled stack access maps to the correct x86 stack slot and prove the low-slot pointer-payload coverage is sufficient for the accepted artifact or reject before native execution. Runtime slot rejection is not a final safety mechanism. |
-| Runtime unsupported semantics | `X86_SIM_UNSUPPORTED` is simulator behavior, not native x86 behavior. Final acceptance requires load-time rejection or a proof that each unsupported is unreachable under the accepted native program. Direct native x86 will not execute `X86_SIM_UNSUPPORTED` or return `XDP_ABORTED`. |
+| Stack model extent | Prove every modeled stack access maps to the correct native x86 stack byte and that the accepted artifact never needs stack state outside the modeled layout, or reject before native execution. Runtime slot rejection is not allowed. |
+| Unsupported native constructs | There must be no runtime unsupported/trap/fallback path in an accepted artifact. Final acceptance requires generation/load-time rejection for constructs outside the modeled subset, or a proof that the path is unreachable under the accepted native program. |
 | Packet/output helper bounds checks | Active packet/output helpers must not insert runtime `data_end` bounds checks. Verifier acceptance must come from equivalent pointer state and native guards/ABI preconditions, not an extra checked-simulator guard. |
 | Branch proof metadata | Removed from active code. Keep it out unless there is a formal theorem that preserves exact native x86 branch semantics and does not introduce proof-only assertions. |
 | Hidden packet-offset metadata | Prove that `off_<reg>` is observationally invisible to x86 scalar execution and that every proven packet load reads the same modeled packet byte as the native effective address. |
 | SKB packet-length metadata | Prove that `ctx+0x70` native loads exactly the SKB length and that the accepted native ABI satisfies `data + len == data_end`; `PACKET_LEN` may only express that ABI relation, not invent a branch-bound fact. |
 | No semantic verifier hacks | Prove that no verifier aid changes x86 behavior: no fuel guard, no fixed loop trip bound, no fallback return, no benchmark-specific renderer, and no assertion over facts not guaranteed by the native execution. |
 | ABI special cases | Prove the modeled `ctx`, `skb`, packet, output, and rodata layouts match the native execution ABI exactly; otherwise direct native execution may read/write addresses not covered by the proof. |
-| Native call return address | Current generated callees assume the return-address slot is not read. A callee that reads it must be rejected or modeled with the concrete native return address. |
-| Multi-exit loop verifier cost | Current micro passes 29/29, including `bpftrace_string_search_prefix_scan`. Any future structural lowering must still be a C/template theorem and preserve native branch semantics without fuel. |
+| Native call return address | Current generated callees assume the return-address slot is not read. A callee that reads it must be rejected before native execution or modeled with the concrete native return address. |
+| Multi-exit loop verifier cost | Current correctness-first code prioritizes exact branch semantics over verifier acceptance. Any future structural lowering must still be a C/template theorem and preserve native branch semantics without fuel. |
 | Paused PC-dispatch experiment | If revived, implement it as a C/template proof rule rather than Python CFG scheduling. It is not active now. |
 | ABI output-store theorem | `x86_sim_prepare_ctx_output()` is C-authored, but the final proof still must show accepted paths reach `[rdi+16/20]` stores only when `rdi` denotes entry ctx, or explicitly define that ABI store as a semantic rule. |
 | JSON-linker equivalence | Reuse this spec after JSON bytecode linking stops going through clang. |

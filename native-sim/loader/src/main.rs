@@ -29,9 +29,7 @@ const BPF_PROG_TYPE_XDP: u32 = 6;
 const XDP_PASS: u32 = 2;
 const SIMPLE_EXPECTED: u64 = 12_345_678;
 
-const DEFAULT_TEMPLATE_OBJECT: &str = "native-sim/x86/build/x86_sim_template_helpers.bpf.o";
 const X86_SIM_DONE: i32 = 1;
-const X86_SIM_UNSUPPORTED: i32 = -1;
 const FLOW_NORMAL: u8 = 0;
 const FLOW_JCC: u8 = 1;
 const FLOW_JMP: u8 = 2;
@@ -43,19 +41,16 @@ const BPF_REG_FP: u8 = 10;
 const BPF_CALL_INSN: u8 = 0x85;
 const BPF_EXIT_INSN: u8 = 0x95;
 const BPF_LD_IMM64_DW: u8 = 0x18;
-const BPF_MOV64_IMM: u8 = 0xb7;
 const BPF_MOV64_REG: u8 = 0xbf;
 const BPF_ADD64_IMM: u8 = 0x07;
 const BPF_LDX_MEM_W: u8 = 0x61;
 const BPF_LDX_MEM_DW: u8 = 0x79;
 const BPF_ST_MEM_DW: u8 = 0x7a;
 const BPF_JA: u8 = 0x05;
-const BPF_JGT_IMM: u8 = 0x25;
 const BPF_JNE_IMM: u8 = 0x55;
 
 const X86_STATE_STACK_OFF: i16 = -432;
 const X86_STATE_SIZE: i16 = 280;
-const X86_LOOP_COUNTER_BASE_OFF: i16 = -144;
 const X86_CTX_STACK_OFF: i16 = -448;
 const X86_STATE_RAX_OFF: i16 = 0;
 const X86_STATE_P_RDI_OFF: i16 = 184;
@@ -74,7 +69,7 @@ struct Cli {
     load_only: bool,
     program: String,
     repeat: i32,
-    template_object: PathBuf,
+    template_object: Option<PathBuf>,
     verifier_log: Option<PathBuf>,
 }
 
@@ -179,17 +174,10 @@ struct TemplateCatalog {
 struct Linker {
     insns: Vec<BpfInsn>,
     branch_fixups: Vec<(usize, LinkTarget)>,
-    loop_guards: HashMap<usize, LoopGuard>,
 }
 
 enum LinkTarget {
     Step(usize),
-}
-
-#[derive(Clone, Copy)]
-struct LoopGuard {
-    off: i16,
-    bound: i32,
 }
 
 #[repr(C)]
@@ -266,7 +254,7 @@ fn run() -> Result<()> {
     let json_mode = cli.json.is_some();
     let verify_s: f64;
     let (prog_fd, loaded_name): (c_int, String) = if let Some(json) = &cli.json {
-        let linked = build_json_linked_program(json, &cli.template_object)?;
+        let linked = build_json_linked_program(json, cli.template_object.as_ref())?;
         let start = Instant::now();
         let fd = match load_raw_xdp_program(&cli.program, &linked.insns) {
             Ok(fd) => fd,
@@ -382,7 +370,7 @@ fn parse_cli() -> Result<Cli> {
     let mut load_only = false;
     let mut program = String::from("x86_sim_xdp");
     let mut repeat = 1;
-    let mut template_object = PathBuf::from(DEFAULT_TEMPLATE_OBJECT);
+    let mut template_object = None;
     let mut verifier_log = None;
 
     while let Some(arg) = args.next() {
@@ -448,10 +436,10 @@ fn parse_cli() -> Result<Cli> {
                 }
             }
             "--template-object" => {
-                template_object = PathBuf::from(
+                template_object = Some(PathBuf::from(
                     args.next()
                         .ok_or_else(|| "--template-object requires a path".to_string())?,
-                );
+                ));
             }
             "--verifier-log" => {
                 verifier_log =
@@ -572,7 +560,10 @@ fn program_fd(object: &BpfObject, name: &str) -> Result<i32> {
     Ok(fd)
 }
 
-fn build_json_linked_program(path: &PathBuf, template_object: &PathBuf) -> Result<LinkedProgram> {
+fn build_json_linked_program(
+    path: &PathBuf,
+    template_object: Option<&PathBuf>,
+) -> Result<LinkedProgram> {
     let text = fs::read_to_string(path).map_err(|err| format!("read {}: {err}", path.display()))?;
     let proof: JsonProof =
         serde_json::from_str(&text).map_err(|err| format!("parse {}: {err}", path.display()))?;
@@ -583,6 +574,12 @@ fn build_json_linked_program(path: &PathBuf, template_object: &PathBuf) -> Resul
     }
     let steps = json_template_steps(&proof)
         .ok_or_else(|| format!("{} has no verifier_templates section", path.display()))?;
+    let template_object = template_object.ok_or_else(|| {
+        format!(
+            "{} uses verifier_templates and requires --template-object",
+            path.display()
+        )
+    })?;
     let catalog = TemplateCatalog::load(template_object)?;
     let insns = link_template_program(&steps, &catalog)?;
     if let Ok(path) = env::var("REVERSESIM_DUMP_INSNS") {
@@ -677,8 +674,6 @@ fn link_template_program(
     steps: &[JsonTemplateStep],
     catalog: &TemplateCatalog,
 ) -> Result<Vec<BpfInsn>> {
-    let steps = expand_counted_loops(steps)?;
-    let steps = steps.as_slice();
     if steps.is_empty() {
         return Err("JSON template program has no steps".to_string());
     }
@@ -692,8 +687,7 @@ fn link_template_program(
     }
 
     let reachable = reachable_template_steps(steps)?;
-    let loop_guards = loop_guards(steps, &reachable)?;
-    let mut linker = Linker::new(loop_guards);
+    let mut linker = Linker::new();
     linker.emit_prologue();
     let mut step_offsets = vec![None; steps.len()];
     for step in steps {
@@ -705,88 +699,6 @@ fn link_template_program(
     }
     linker.resolve(step_offsets)?;
     Ok(linker.insns)
-}
-
-fn expand_counted_loops(steps: &[JsonTemplateStep]) -> Result<Vec<JsonTemplateStep>> {
-    let mut current = steps.to_vec();
-    loop {
-        let Some((target, jcc_index, bound)) = find_expandable_loop(&current) else {
-            return Ok(current);
-        };
-        current = expand_one_counted_loop(&current, target, jcc_index, bound)?;
-    }
-}
-
-fn find_expandable_loop(steps: &[JsonTemplateStep]) -> Option<(usize, usize, usize)> {
-    for step in steps {
-        if step.flow != FLOW_JCC || step.target >= step.index || step.args.aux != 5 {
-            continue;
-        }
-        let cmp_index = step.index.checked_sub(1)?;
-        let cmp = steps.get(cmp_index)?;
-        if cmp.helper != "x86_exec_cmp_imm" || cmp.args.imm == 0 || cmp.args.imm > 512 {
-            continue;
-        }
-        if steps[step.target..cmp_index]
-            .iter()
-            .any(|body_step| body_step.flow != FLOW_NORMAL)
-        {
-            continue;
-        }
-        let body_len = cmp_index.saturating_sub(step.target);
-        let bound = cmp.args.imm as usize;
-        if body_len == 0 || body_len.saturating_mul(bound) > 4096 {
-            continue;
-        }
-        return Some((step.target, step.index, bound));
-    }
-    None
-}
-
-fn expand_one_counted_loop(
-    steps: &[JsonTemplateStep],
-    target: usize,
-    jcc_index: usize,
-    bound: usize,
-) -> Result<Vec<JsonTemplateStep>> {
-    let cmp_index = jcc_index
-        .checked_sub(1)
-        .ok_or_else(|| format!("bad counted loop jcc index: {jcc_index}"))?;
-    let mut out = Vec::new();
-    let mut old_to_new = HashMap::new();
-    let mut index = 0usize;
-    while index < steps.len() {
-        if index == target {
-            old_to_new.insert(target, out.len());
-            for _ in 0..bound {
-                for old in target..cmp_index {
-                    let mut clone = steps[old].clone();
-                    clone.flow = FLOW_NORMAL;
-                    clone.target = 0;
-                    out.push(clone);
-                }
-            }
-            let mut cmp = steps[cmp_index].clone();
-            cmp.flow = FLOW_NORMAL;
-            cmp.target = 0;
-            out.push(cmp);
-            index = jcc_index + 1;
-            continue;
-        }
-        old_to_new.entry(index).or_insert(out.len());
-        out.push(steps[index].clone());
-        index += 1;
-    }
-
-    for (new_index, step) in out.iter_mut().enumerate() {
-        step.index = new_index;
-        if matches!(step.flow, FLOW_JCC | FLOW_JMP | FLOW_CALL) {
-            step.target = *old_to_new
-                .get(&step.target)
-                .ok_or_else(|| format!("expanded CFG target was removed: {}", step.target))?;
-        }
-    }
-    Ok(out)
 }
 
 fn reachable_template_steps(steps: &[JsonTemplateStep]) -> Result<Vec<bool>> {
@@ -844,63 +756,6 @@ fn reachable_template_steps(steps: &[JsonTemplateStep]) -> Result<Vec<bool>> {
         }
     }
     Ok(reachable)
-}
-
-fn loop_guards(
-    steps: &[JsonTemplateStep],
-    reachable: &[bool],
-) -> Result<HashMap<usize, LoopGuard>> {
-    let mut loops = Vec::new();
-    for step in steps {
-        if !reachable[step.index]
-            || step.flow != FLOW_JCC
-            || step.target >= step.index
-            || steps
-                .get(step.target)
-                .is_some_and(|target| target.flow == FLOW_RET)
-        {
-            continue;
-        }
-        loops.push((step.index, step.target, loop_base_bound(steps, step.index)));
-    }
-    if loops.len() > 16 {
-        return Err(format!(
-            "too many verifier loop guards: {} exceeds 16 stack slots",
-            loops.len()
-        ));
-    }
-
-    let mut out = HashMap::new();
-    for (slot, (index, target, base_bound)) in loops.iter().enumerate() {
-        let mut bound = *base_bound as u64;
-        for (other_index, other_target, other_bound) in &loops {
-            if other_index == index {
-                continue;
-            }
-            if *other_target <= *target && *index <= *other_index {
-                bound = bound.saturating_mul(*other_bound as u64);
-            }
-        }
-        let bound = bound.min(8192) as i32;
-        out.insert(
-            *index,
-            LoopGuard {
-                off: X86_LOOP_COUNTER_BASE_OFF + (slot as i16 * 8),
-                bound,
-            },
-        );
-    }
-    Ok(out)
-}
-
-fn loop_base_bound(steps: &[JsonTemplateStep], jcc_index: usize) -> i32 {
-    let Some(prev) = jcc_index.checked_sub(1).and_then(|index| steps.get(index)) else {
-        return 1024;
-    };
-    if prev.helper == "x86_exec_cmp_imm" && prev.args.imm <= 8191 {
-        return (prev.args.imm as i32) + 1;
-    }
-    1024
 }
 
 fn template_symbol(helper: &str) -> String {
@@ -1032,11 +887,10 @@ fn dump_bpf_insns(path: &PathBuf, insns: &[BpfInsn]) -> Result<()> {
 }
 
 impl Linker {
-    fn new(loop_guards: HashMap<usize, LoopGuard>) -> Self {
+    fn new() -> Self {
         Self {
             insns: Vec::new(),
             branch_fixups: Vec::new(),
-            loop_guards,
         }
     }
 
@@ -1067,11 +921,6 @@ impl Linker {
         for off in (X86_STATE_STACK_OFF..X86_STATE_STACK_OFF + X86_STATE_SIZE).step_by(8) {
             self.emit_st_mem_dw(BPF_REG_FP, off, 0);
         }
-        let loop_counter_offsets: Vec<i16> =
-            self.loop_guards.values().map(|guard| guard.off).collect();
-        for off in loop_counter_offsets {
-            self.emit_st_mem_dw(BPF_REG_FP, off, 0);
-        }
         self.emit_st_mem_dw(9, X86_STATE_P_RDI_OFF, X86_PTR_CTX);
         self.emit_reload_link_regs();
     }
@@ -1080,25 +929,18 @@ impl Linker {
         match step.flow {
             FLOW_NORMAL => {
                 self.emit_helper_step(step, catalog)?;
-                self.emit_unsupported_check_local();
                 self.emit_done_check_local();
             }
             FLOW_JCC => {
                 self.emit_helper_step(step, catalog)?;
-                self.emit_unsupported_check_local();
-                if let Some(guard) = self.loop_guards.get(&step.index).copied() {
-                    self.emit_guarded_jcc(guard, LinkTarget::Step(step.target));
-                } else {
-                    self.emit_jne_imm_fixup(0, 0, LinkTarget::Step(step.target));
-                }
+                self.emit_jne_imm_fixup(0, 0, LinkTarget::Step(step.target));
             }
             FLOW_JMP => {
                 self.emit_jump(LinkTarget::Step(step.target));
             }
             FLOW_RET => {
                 self.emit_helper_step(step, catalog)?;
-                self.emit_done_check_local();
-                self.emit_abort_local();
+                self.emit_return_rax_local();
             }
             FLOW_CALL => {
                 return Err(format!(
@@ -1111,18 +953,12 @@ impl Linker {
         Ok(())
     }
 
-    fn emit_abort_local(&mut self) {
-        self.emit_mov64_imm(0, 0);
-        self.emit_exit();
-    }
-
-    fn emit_unsupported_check_local(&mut self) {
-        self.emit(BPF_JNE_IMM, 0, 0, 2, X86_SIM_UNSUPPORTED);
-        self.emit_abort_local();
-    }
-
     fn emit_done_check_local(&mut self) {
         self.emit(BPF_JNE_IMM, 0, 0, 2, X86_SIM_DONE);
+        self.emit_return_rax_local();
+    }
+
+    fn emit_return_rax_local(&mut self) {
         self.emit_ldx_mem_dw(0, 9, X86_STATE_RAX_OFF);
         self.emit_exit();
     }
@@ -1189,24 +1025,6 @@ impl Linker {
     fn emit_jne_imm_fixup(&mut self, dst: u8, imm: i32, target: LinkTarget) {
         let index = self.emit(BPF_JNE_IMM, dst, 0, 0, imm);
         self.branch_fixups.push((index, target));
-    }
-
-    fn emit_guarded_jcc(&mut self, guard: LoopGuard, target: LinkTarget) {
-        self.emit(BPF_JNE_IMM, 0, 0, 1, 0);
-        let fallthrough = self.emit(BPF_JA, 0, 0, 0, 0);
-        self.emit_ldx_mem_dw(1, BPF_REG_FP, guard.off);
-        self.emit_add64_imm(1, 1);
-        self.emit_stx_mem_dw(BPF_REG_FP, 1, guard.off);
-        self.emit(BPF_JGT_IMM, 1, 0, 1, guard.bound);
-        self.emit_jump(target);
-        self.emit_abort_local();
-        let after = self.insns.len();
-        let off = after as isize - fallthrough as isize - 1;
-        self.insns[fallthrough].off = off as i16;
-    }
-
-    fn emit_mov64_imm(&mut self, dst: u8, imm: i32) {
-        self.emit(BPF_MOV64_IMM, dst, 0, 0, imm);
     }
 
     fn emit_mov64_reg(&mut self, dst: u8, src: u8) {

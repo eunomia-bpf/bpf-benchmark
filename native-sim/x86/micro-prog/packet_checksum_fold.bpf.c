@@ -171,7 +171,7 @@ x86_l_11ae:
 x86_l_11af:
 	/* 0x11af: ret */
 	X86_SIM_X86_RET();
-	__builtin_unreachable();
+	return x86_sim_ret_rax(&__x86_sim_state);
 }
 
 X86_SIM_LICENSE();

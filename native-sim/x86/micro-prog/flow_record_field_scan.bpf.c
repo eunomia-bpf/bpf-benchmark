@@ -285,7 +285,7 @@ x86_l_121c:
 x86_l_121d:
 	/* 0x121d: ret */
 	X86_SIM_X86_RET();
-	__builtin_unreachable();
+	return x86_sim_ret_rax(&__x86_sim_state);
 }
 
 X86_SIM_LICENSE();

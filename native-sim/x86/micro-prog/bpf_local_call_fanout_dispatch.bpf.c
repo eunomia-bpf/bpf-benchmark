@@ -82,7 +82,7 @@ x86_l_12ce:
 	/* 0x12ce: ret */
 	X86_SIM_X86_SUB_RET();
 	#undef __x86_sim_state
-	__builtin_unreachable();
+	return X86_SIM_CONTINUE;
 }
 
 static X86_SIM_SUBFN_ATTR int x86_fn_local_call_linear(struct x86_state *__x86_sim_state_ptr, void *__x86_sim_data, void *__x86_sim_data_end)
@@ -165,7 +165,7 @@ x86_l_127c:
 	/* 0x127c: ret */
 	X86_SIM_X86_SUB_RET();
 	#undef __x86_sim_state
-	__builtin_unreachable();
+	return X86_SIM_CONTINUE;
 }
 
 static X86_SIM_SUBFN_ATTR int x86_fn_local_call_crossload(struct x86_state *__x86_sim_state_ptr, void *__x86_sim_data, void *__x86_sim_data_end)
@@ -305,7 +305,7 @@ x86_l_135a:
 	/* 0x135a: ret */
 	X86_SIM_X86_SUB_RET();
 	#undef __x86_sim_state
-	__builtin_unreachable();
+	return X86_SIM_CONTINUE;
 }
 
 static X86_SIM_SUBFN_ATTR int x86_fn_local_call_bytes(struct x86_state *__x86_sim_state_ptr, void *__x86_sim_data, void *__x86_sim_data_end)
@@ -481,7 +481,7 @@ x86_l_142f:
 	/* 0x142f: ret */
 	X86_SIM_X86_SUB_RET();
 	#undef __x86_sim_state
-	__builtin_unreachable();
+	return X86_SIM_CONTINUE;
 }
 
 SEC("xdp")
@@ -740,7 +740,7 @@ x86_l_122a:
 x86_l_122b:
 	/* 0x122b: ret */
 	X86_SIM_X86_RET();
-	__builtin_unreachable();
+	return x86_sim_ret_rax(&__x86_sim_state);
 }
 
 X86_SIM_LICENSE();

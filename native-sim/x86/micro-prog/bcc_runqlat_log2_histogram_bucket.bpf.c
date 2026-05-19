@@ -315,7 +315,7 @@ x86_l_1258:
 x86_l_1259:
 	/* 0x1259: ret */
 	X86_SIM_X86_RET();
-	__builtin_unreachable();
+	return x86_sim_ret_rax(&__x86_sim_state);
 }
 
 X86_SIM_LICENSE();

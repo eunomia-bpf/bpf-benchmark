@@ -32,6 +32,7 @@ from runner.libs.case_common import (
     prepare_daemon_session,
     wait_for_suite_quiescence,
 )
+from runner.libs.kinsn import prepare_kinsn_modules
 from runner.libs.app_runners.process_support import programs_after
 from runner.libs.rejit import (
     DaemonSession,
@@ -778,11 +779,22 @@ def run_suite(
     total_apps = len(suite.apps)
 
     daemon_log_dir = artifact_session.run_dir / "details"
+    # Load all kinsn .ko modules into the running kernel before any app
+    # starts. Stock-kernel BTF probing happens inside shim_init via
+    # kinsnprober; that probe needs the modules already resident, otherwise
+    # rotate/cond_select/endian_fusion/lea pass-emitted kfunc calls land on
+    # btf_ids the kernel can't resolve (EACCES / EINVAL during PROG_LOAD).
+    # daemon used to do this implicitly; with the shim path it must be
+    # explicit at suite start.
+    kinsn_module_metadata = prepare_kinsn_modules()
     with DaemonSession.start(
         daemon_binary,
         stdout_path=daemon_log_dir / "daemon.stdout.log",
         stderr_path=daemon_log_dir / "daemon.stderr.log",
     ) as daemon_session:
+        # Inject the freshly-loaded module set so suite metadata reflects
+        # actual resident kfunc providers instead of an empty stub.
+        daemon_session.kinsn_metadata.update(kinsn_module_metadata)
         prepared_daemon_session = prepare_daemon_session(
             daemon_session,
             failure_artifacts_dir=(

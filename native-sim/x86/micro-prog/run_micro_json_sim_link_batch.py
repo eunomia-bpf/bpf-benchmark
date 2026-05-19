@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run micro programs through the ReverseSim JSON static-link path.
+"""Run micro programs through the paused ReverseSim JSON static-link path.
 
 This is intentionally separate from run_micro_sim_batch.py. It does not
 compile per-micro .bpf.c files after JSON generation. The only tested path is:
@@ -24,7 +24,6 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 OUT_DIR = Path(__file__).resolve().parent
 JSON_DIR = OUT_DIR / "build" / "json-proofs"
 CONFIG = REPO_ROOT / "micro" / "config" / "micro_pure_jit.yaml"
-LOADER_MANIFEST = REPO_ROOT / "native-sim" / "loader" / "Cargo.toml"
 LOADER_BIN = REPO_ROOT / "native-sim" / "loader" / "target" / "debug" / "reversesim-loader"
 
 sys.path.insert(0, str(REPO_ROOT))
@@ -98,8 +97,10 @@ def generate_json(benches: list[Bench], only_was_set: bool, native_source: str) 
 
 
 def build_loader() -> None:
-    require_ok(["make", "-C", str(REPO_ROOT / "native-sim" / "x86"), "build-templates"], timeout=300)
-    require_ok(["cargo", "build", "--manifest-path", str(LOADER_MANIFEST)], timeout=300)
+    raise RuntimeError(
+        "JSON template-link path is paused: the old C template object was "
+        "removed because it used non-native unsupported/fallback semantics"
+    )
 
 
 def run_json(bench: Bench, sudo: bool) -> Result:

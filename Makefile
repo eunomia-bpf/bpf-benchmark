@@ -42,16 +42,16 @@ ifeq ($(PLATFORM),kvm)
   endif
   TARGET := x86-kvm
   KVM_HOST_SETUP := kvm-host-cpu
-  COMMON_DEPS := $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(X86_RUNTIME_KERNEL_IMAGE) $(DAEMON_DIR)/target/release/bpfrejit-daemon
+  COMMON_DEPS := runtime-kernel-image
   EXECUTOR_INVOKE = taskset -c 0-7 "$(PYTHON)" -m runner.libs.kvm_executor
 else ifeq ($(PLATFORM),aws)
   EXECUTOR_INVOKE = "$(PYTHON)" -m runner.libs.aws_executor run
   ifeq ($(ARCH),arm64)
     TARGET := aws-arm64
-    COMMON_DEPS := $(ARM64_RUNNER_RUNTIME_IMAGE_TAR)
+    COMMON_DEPS := arm64-runner-runtime-image-tar
   else ifeq ($(ARCH),x86)
     TARGET := aws-x86
-    COMMON_DEPS := $(X86_RUNNER_RUNTIME_IMAGE_TAR) $(DAEMON_DIR)/target/release/bpfrejit-daemon
+    COMMON_DEPS := x86-runner-runtime-image-tar
   else
     $(error PLATFORM=aws supports ARCH={x86,arm64})
   endif

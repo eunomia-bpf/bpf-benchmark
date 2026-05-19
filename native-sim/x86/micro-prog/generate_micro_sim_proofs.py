@@ -615,7 +615,7 @@ def render_x86_subfunction(symbol: str, insns: list[NativeInsn]) -> str:
                              ret_statement="X86_SIM_X86_SUB_RET();")
     lines.extend([
         "\t#undef __x86_sim_state",
-        "\t__builtin_unreachable();",
+        "\treturn X86_SIM_CONTINUE;",
         "}",
         "",
     ])
@@ -673,7 +673,7 @@ def render_program(name: str, insns: list[NativeInsn],
                              call_functions=subfunction_by_addr,
                              ret_statement=ret_statement)
     lines.extend([
-        "\t__builtin_unreachable();",
+        "\treturn x86_sim_ret_rax(&__x86_sim_state);",
         "}",
         "",
         "X86_SIM_LICENSE();",

@@ -1581,7 +1581,7 @@ x86_l_189b:
 x86_l_18a1:
 	/* 0x18a1: jmp    15f2 <katran_lb_consistent_hash_select_xdp+0x4f2> */
 	X86_SIM_X86_JMP(0x18a1, 0x15f2, x86_l_15f2);
-	__builtin_unreachable();
+	return x86_sim_ret_rax(&__x86_sim_state);
 }
 
 X86_SIM_LICENSE();

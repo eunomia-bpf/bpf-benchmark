@@ -342,7 +342,7 @@ x86_l_128c:
 x86_l_128d:
 	/* 0x128d: ret */
 	X86_SIM_X86_RET();
-	__builtin_unreachable();
+	return x86_sim_ret_rax(&__x86_sim_state);
 }
 
 X86_SIM_LICENSE();

@@ -649,10 +649,9 @@ x86_exec_alu_mem_packet(struct x86_state *state, const struct x86_insn *insn,
 	__u64 result = 0;
 
 	dst_value = x86_read_reg(state, insn->dst);
-	if (x86_sim_read_packet_mem_value(state, insn->src, insn->aux,
-					 x86_simm(insn->imm), data, data_end,
-					 width, &mem_value) < 0)
-		__builtin_unreachable();
+	x86_sim_read_packet_mem_value(state, insn->src, insn->aux,
+				      x86_simm(insn->imm), data, data_end,
+				      width, &mem_value);
 	if (alu == X86_ALU_SBB)
 		mem_value += state->cf;
 	result = x86_alu_result(dst_value, mem_value, alu, width);
@@ -670,13 +669,11 @@ x86_exec_cmp_mem_packet(struct x86_state *state, const struct x86_insn *insn,
 			     x86_simm(insn->imm) :
 			     x86_store_imm_disp(insn->imm);
 
-	if (x86_sim_read_packet_mem_value(state, insn->dst, insn->aux,
-					 disp, data, data_end, insn->flags,
-					 &lhs) < 0)
-		__builtin_unreachable();
-	if (insn->op == X86_OP_CMP_MEM_REG &&
-	    x86_read_reg(state, insn->src, &rhs) < 0)
-		__builtin_unreachable();
+	x86_sim_read_packet_mem_value(state, insn->dst, insn->aux,
+				      disp, data, data_end, insn->flags,
+				      &lhs);
+	if (insn->op == X86_OP_CMP_MEM_REG)
+		rhs = x86_read_reg(state, insn->src);
 	if (insn->op == X86_OP_TEST_MEM_IMM) {
 		x86_set_logic_flags(state, lhs & rhs, insn->flags);
 		return X86_SIM_CONTINUE;

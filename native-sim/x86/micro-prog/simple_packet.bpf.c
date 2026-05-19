@@ -63,7 +63,7 @@ x86_l_1137:
 x86_l_1138:
 	/* 0x1138: ret */
 	X86_SIM_X86_RET();
-	__builtin_unreachable();
+	return x86_sim_ret_rax(&__x86_sim_state);
 }
 
 X86_SIM_LICENSE();

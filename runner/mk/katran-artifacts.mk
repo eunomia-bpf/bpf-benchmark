@@ -8,14 +8,13 @@ image-katran-artifacts:
 	override_file="$(KATRAN_BUILD_ROOT)/cxx-override.cmake"; \
 	bpf_root="$$artifact_root/bpf"; \
 	system_libdir="$$(pkg-config --variable=libdir libelf)"; \
-	mkdir -p "$$install_root/bin" "$$install_root/lib" "$$install_root/lib64" "$$bpf_root" "$$build_root/deps"; \
+	install -d "$$install_root" "$$bpf_root" "$$build_root"; \
 	command -v grpc_cpp_plugin >/dev/null; \
-	touch "$$build_root/deps/grpc_installed"; \
 	printf '%s\n' 'set(CMAKE_CXX_COMPILE_OBJECT "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -std=gnu++20 -o <OBJECT> -c <SOURCE>")' > "$$override_file"; \
 	cd "$$repo_root" && env -u VERBOSE -u BUILD_EXAMPLE_THRIFT -u BUILD_KATRAN_TPR \
 		CC=clang CXX=clang++ AR=ar RANLIB=ranlib \
 		NCPUS="$(JOBS)" \
-		KATRAN_SKIP_SYSTEM_PACKAGES=1 BUILD_EXAMPLE_GRPC=1 BUILD_DIR="$$build_root" INSTALL_DIR="$$install_root" INSTALL_DEPS_ONLY=1 ./build_katran.sh; \
+		KATRAN_SKIP_SYSTEM_PACKAGES=1 BUILD_EXAMPLE_GRPC=0 BUILD_DIR="$$build_root" INSTALL_DIR="$$install_root" INSTALL_DEPS_ONLY=1 ./build_katran.sh; \
 	for cmake_file in "$$install_root"/lib/cmake/folly/folly-targets*.cmake "$$install_root"/lib64/cmake/folly/folly-targets*.cmake; do \
 		[ -f "$$cmake_file" ] || continue; \
 		sed -i \
@@ -23,7 +22,6 @@ image-katran-artifacts:
 			-e "s#gflags_static#$$system_libdir/libgflags.so#g" \
 			"$$cmake_file"; \
 	done; \
-	rm -rf "$$build_root/build"; \
 	env -u VERBOSE -u BUILD_EXAMPLE_THRIFT -u BUILD_KATRAN_TPR CMAKE_BUILD_EXAMPLE_GRPC=1 \
 		CC=clang CXX=clang++ AR=ar RANLIB=ranlib \
 		cmake -S "$$repo_root" -B "$$build_root/build" \
@@ -49,8 +47,8 @@ image-katran-artifacts:
 	cmake --build "$$build_root/build" --target install -j"$(JOBS)"; \
 	cd "$$repo_root" && ./build_bpf_modules_opensource.sh -s "$$repo_root" -b "$$build_root" -o "$$bpf_root"; \
 	test -x "$$install_root/bin/katran_server_grpc" || { echo "missing Katran install output: $$install_root/bin/katran_server_grpc" >&2; exit 1; }; \
-	[ -f "$$bpf_root/healthchecking_ipip.o" ] && mv -f "$$bpf_root/healthchecking_ipip.o" "$$bpf_root/healthchecking_ipip.bpf.o" || true; \
-	[ -f "$$bpf_root/xdp_root.o" ] && mv -f "$$bpf_root/xdp_root.o" "$$bpf_root/xdp_root.bpf.o" || true; \
+	if [ -f "$$bpf_root/healthchecking_ipip.o" ]; then mv -f "$$bpf_root/healthchecking_ipip.o" "$$bpf_root/healthchecking_ipip.bpf.o"; fi; \
+	if [ -f "$$bpf_root/xdp_root.o" ]; then mv -f "$$bpf_root/xdp_root.o" "$$bpf_root/xdp_root.bpf.o"; fi; \
 	test -f "$$bpf_root/balancer.bpf.o"; \
 	test -f "$$bpf_root/healthchecking_ipip.bpf.o"; \
 	test -f "$$bpf_root/xdp_root.bpf.o"

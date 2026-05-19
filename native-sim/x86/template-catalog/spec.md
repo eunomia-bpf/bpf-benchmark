@@ -1,8 +1,10 @@
 # ReverseSim x86 ReverseSim Link Spec
 
-Status: experimental specification. This file defines the model used by the
-`native-sim/x86` JSON-link prototype. It is a formalization target, not a completed
-proof.
+Status: paused historical experiment. The active source of truth is
+[`../simulator-spec.md`](../simulator-spec.md). This file records the old
+JSON-link idea and must not be read as permission to reintroduce runtime
+unsupported paths, fallback returns, packet bounds checks, or template objects
+that do not exactly implement native x86 simulator semantics.
 
 ## Goal
 
@@ -91,7 +93,7 @@ Exec(helper, args, V, P) -> (V', control)
 where `control` is one of:
 
 ```text
-continue | done | unsupported | branch_taken
+continue | done | branch_taken
 ```
 
 For ordinary helper steps:
@@ -99,7 +101,7 @@ For ordinary helper steps:
 ```text
 control = continue  => next pc = pc + 1
 control = done      => exit with V.R[rax]
-control = unsupported      => XDP_ABORTED
+unsupported native construct => reject before artifact generation/loading
 ```
 
 For conditional branch steps:
@@ -130,9 +132,10 @@ load  reads bytes P.data[off .. off+width)
 store writes bytes P.data[off .. off+width)
 ```
 
-The verifier-facing implementation must perform scalar bounds checks before
-constructing `data + off`, because the eBPF verifier rejects packet-pointer
-arithmetic with unconstrained scalars.
+The verifier-facing implementation must not insert a proof-only packet bounds
+check. Verifier acceptance has to come from native x86 guards, ABI facts, and
+semantics-preserving state layout. If those facts are insufficient, the artifact
+must fail verifier/load rather than changing native behavior.
 
 For `CTX` in the micro XDP prototype:
 
@@ -167,8 +170,9 @@ instruction subclass, but not by individual micro program.
 The loader must:
 
 1. parse JSON schedule;
-2. reject unsupported helper names or unsupported flow kinds;
-3. load C-authored template bytecode from `x86_sim_template_helpers.bpf.o`;
+2. reject unsupported helper names or flow kinds before artifact loading;
+3. load an explicitly supplied C-authored template bytecode object if this
+   experiment is revived;
 4. create a main BPF glue program with fixed CFG;
 5. load `packed_args` and `imm` constants for each step into BPF argument
    registers;
@@ -207,7 +211,8 @@ Not proven here, but required by the final design:
 The first subprogram-call linker showed why raw packet pointers cannot be stored
 inside simulator state across helper calls: the verifier reloaded them as scalars in a
 later subprogram. The linked ABI therefore uses packet offsets plus tags and
-recomputes packet pointers inside memory helpers after bounds checks.
+recomputes packet pointers inside memory helpers. The old checked helper shape
+is not part of the active direct-native safety story.
 
 Current implementation detail: tags are stored in 64-bit scalar slots in the
 linked state, not in byte-sized tag fields, because the verifier does not retain

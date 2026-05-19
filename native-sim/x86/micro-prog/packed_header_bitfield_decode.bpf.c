@@ -579,7 +579,7 @@ x86_l_138e:
 x86_l_138f:
 	/* 0x138f: ret */
 	X86_SIM_X86_RET();
-	__builtin_unreachable();
+	return x86_sim_ret_rax(&__x86_sim_state);
 }
 
 X86_SIM_LICENSE();

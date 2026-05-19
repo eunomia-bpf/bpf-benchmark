@@ -525,7 +525,7 @@ x86_l_1363:
 x86_l_1368:
 	/* 0x1368: jmp    1241 <packet_vlan_tcpopt_parser_xdp+0x141> */
 	X86_SIM_X86_JMP(0x1368, 0x1241, x86_l_1241);
-	__builtin_unreachable();
+	return x86_sim_ret_rax(&__x86_sim_state);
 }
 
 X86_SIM_LICENSE();

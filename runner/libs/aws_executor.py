@@ -140,15 +140,6 @@ def _local_build_jobs() -> int:
     return max(os.cpu_count() or 1, 1)
 
 
-def _require_kernel_release(release_file: Path, *, arch: str) -> str:
-    if not release_file.is_file():
-        _die(f"missing {arch} kernel release file: {release_file}")
-    kernel_release = release_file.read_text(encoding="utf-8").strip()
-    if not kernel_release:
-        _die(f"empty {arch} kernel release file: {release_file}")
-    return kernel_release
-
-
 def _require_modules_root(modules_root: Path, *, arch: str) -> Path:
     if not modules_root.is_dir():
         _die(f"missing canonical {arch} kernel modules root: {modules_root}")
@@ -156,17 +147,9 @@ def _require_modules_root(modules_root: Path, *, arch: str) -> Path:
 
 
 def _build_x86_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[str, Path, Path]:
-    del ctx
-    build_dir = ROOT_DIR / ".cache" / "x86-kernel-build"
-    kernel_image = build_dir / "arch" / "x86" / "boot" / "bzImage"
+    build_dir = ctx.target_root / "kernel-build"
     modules_target = ROOT_DIR / ".cache" / "repo-artifacts" / "x86_64" / "kernel-modules" / "lib" / "modules"
-    _run_local_make(str(kernel_image), str(modules_target), "RUN_TARGET_ARCH=x86_64",
-                    f"X86_BUILD_DIR={build_dir}",
-                    f"JOBS={_local_build_jobs()}")
-    if not kernel_image.is_file():
-        _die(f"missing x86 kernel image: {kernel_image}")
-    kernel_release = _require_kernel_release(build_dir / "include" / "config" / "kernel.release", arch="x86")
-    return kernel_release, kernel_image, _require_modules_root(modules_target / kernel_release, arch="x86")
+    return _extract_kernel_artifacts_from_image(ctx, build_dir, modules_target, expected_arch="x86_64")
 
 
 def _docker_run(args: list[str], *, operation: str, capture_output: bool = False) -> subprocess.CompletedProcess[str]:
@@ -195,12 +178,14 @@ def _create_runtime_image_container(image_ref: str, image_tar: Path) -> str:
     return cid
 
 
-def _extract_arm64_kernel_artifacts_from_image(ctx: aws_common.AwsExecutorContext,
-                                               build_dir: Path,
-                                               modules_target: Path) -> tuple[str, Path, Path]:
-    image_tar = runtime_container_image_tar_path(ROOT_DIR, ctx.contract.identity.target_arch)
+def _extract_kernel_artifacts_from_image(ctx: aws_common.AwsExecutorContext,
+                                         build_dir: Path,
+                                         modules_target: Path,
+                                         *,
+                                         expected_arch: str) -> tuple[str, Path, Path]:
+    image_tar = runtime_container_image_tar_path(ROOT_DIR, expected_arch)
     if not image_tar.is_file():
-        _run_local_make("image-runner-runtime-image-tar", "RUN_TARGET_ARCH=arm64",
+        _run_local_make("image-runner-runtime-image-tar", f"RUN_TARGET_ARCH={expected_arch}",
                         f"JOBS={_local_build_jobs()}")
 
     image_ref = _runtime_container_image(ctx)
@@ -209,18 +194,18 @@ def _extract_arm64_kernel_artifacts_from_image(ctx: aws_common.AwsExecutorContex
         manifest_path = build_dir / "manifest.json"
         manifest_path.parent.mkdir(parents=True, exist_ok=True)
         _docker_run(["cp", f"{cid}:/artifacts/manifest.json", str(manifest_path)],
-                    operation="copy arm64 runtime kernel manifest")
+                    operation=f"copy {expected_arch} runtime kernel manifest")
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         kernel_release = str(manifest.get("kernel_release") or "").strip()
         target_arch = str(manifest.get("target_arch") or "").strip()
         kernel_image_name = str(manifest.get("kernel_image") or "").strip()
-        if not kernel_release or target_arch != "arm64" or not kernel_image_name:
-            _die(f"invalid arm64 runtime kernel manifest: {manifest_path}")
+        if not kernel_release or target_arch != expected_arch or not kernel_image_name:
+            _die(f"invalid {expected_arch} runtime kernel manifest: {manifest_path}")
 
-        kernel_image = build_dir / "arch" / "arm64" / "boot" / kernel_image_name
+        kernel_image = build_dir / "kernel" / kernel_image_name
         kernel_image.parent.mkdir(parents=True, exist_ok=True)
         _docker_run(["cp", f"{cid}:/artifacts/kernel/{kernel_image_name}", str(kernel_image)],
-                    operation="copy arm64 runtime kernel image")
+                    operation=f"copy {expected_arch} runtime kernel image")
 
         release_file = build_dir / "include" / "config" / "kernel.release"
         release_file.parent.mkdir(parents=True, exist_ok=True)
@@ -228,22 +213,23 @@ def _extract_arm64_kernel_artifacts_from_image(ctx: aws_common.AwsExecutorContex
 
         modules_target.mkdir(parents=True, exist_ok=True)
         modules_root = modules_target / kernel_release
-        shutil.rmtree(modules_root, ignore_errors=True)
+        if modules_root.exists():
+            shutil.rmtree(modules_root)
         _docker_run(["cp", f"{cid}:/artifacts/modules/{kernel_release}", str(modules_target)],
-                    operation="copy arm64 runtime kernel modules")
+                    operation=f"copy {expected_arch} runtime kernel modules")
     finally:
         subprocess.run(["docker", "rm", "-f", cid], cwd=ROOT_DIR, text=True, check=False,
                        capture_output=True)
 
     if not kernel_image.is_file():
-        _die(f"missing ARM64 runtime kernel image after extraction: {kernel_image}")
-    return kernel_release, kernel_image, _require_modules_root(modules_target / kernel_release, arch="ARM64")
+        _die(f"missing {expected_arch} runtime kernel image after extraction: {kernel_image}")
+    return kernel_release, kernel_image, _require_modules_root(modules_target / kernel_release, arch=expected_arch)
 
 
 def _build_arm64_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[str, Path, Path]:
     build_dir = ctx.target_root / "kernel-build"
     modules_target = ROOT_DIR / ".cache" / "repo-artifacts" / "arm64" / "kernel-modules" / "lib" / "modules"
-    return _extract_arm64_kernel_artifacts_from_image(ctx, build_dir, modules_target)
+    return _extract_kernel_artifacts_from_image(ctx, build_dir, modules_target, expected_arch="arm64")
 
 
 

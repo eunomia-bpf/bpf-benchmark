@@ -3,10 +3,11 @@
 This prototype asks one small question: can an eBPF program simulate a compact
 x86-like instruction stream and pass the normal eBPF verifier?
 
-Hard rule: the proof program must not use a runtime check, unsupported, fallback,
-synthetic bound, or verifier-only assertion to make native execution safe. If a
-native path is not modeled exactly, the artifact must fail before native
-execution, or a proof must show that the path is unreachable.
+Hard rule: the proof program must not use a runtime trap, runtime unsupported
+path, fallback return, synthetic bound, or verifier-only assertion to make
+native execution safe. If a native path is not modeled exactly, the artifact
+must fail before native execution, or a proof must show that the path is
+unreachable.
 
 The initial smoke case mirrors `micro/programs/simple.bpf.c`:
 
@@ -140,16 +141,24 @@ If this remains too expensive, the next design change must still keep helper
 selection out of Python; it should use C-authored templates/macros or a smaller
 simulator state shape.
 
+Current correctness-first stack model intentionally exceeds the kernel BPF
+512-byte stack when compiled as an eBPF proof program. The active compile path
+therefore uses `-mllvm -bpf-stack-size=4096` so clang can emit objects for
+inspection. This is not a verifier strategy and does not make the object
+loadable by the kernel verifier; verifier rejection is expected until the state
+layout is made verifier-friendly without changing simulator semantics.
+
 ### Micro Compile And Verify Matrix
 
-Latest safety-first generated-C run is 29/29:
+Historical safety-first generated-C run was 29/29 before the current
+correctness-first cleanup:
 [`results/README-20260518-210632.md`](./results/README-20260518-210632.md).
-This run keeps the previous proof-only branch assertions and `last_cmp_*`
-metadata deleted. The remaining SKB and checksum fixes are C-authored x86/ABI
-semantics: `ctx+0x70` carries a `PACKET_LEN` ghost tag that proves
-`data + skb_len == data_end`, and same-register `xchg` is treated as the real
-x86 no-op it is. They are not branch assertions, synthetic bounds checks, or
-Python renderers.
+That run kept the previous proof-only branch assertions and `last_cmp_*`
+metadata deleted. The current active code goes further: runtime unsupported
+checks, abort/fallback returns, loop guards, and stack-slot rejection were
+removed from the active simulator/linker path. All 29 generated micro sources
+compile with `BPF_STACK_SIZE=4096`; no current verifier/load success is claimed
+for this correctness-first version.
 
 `current` is the active C-dispatch path (`generate_micro_sim_proofs.py` +
 `x86_sim_bpf.h`). `helper-selection` is historical baseline data from the
@@ -170,7 +179,7 @@ evidence.
 | `packet_checksum_fold` | ok | 2.043 | 0.040 | ok | 0.381 | 0.523 | ok | Still passes after deleting branch assertions. |
 | `payload_prefix_memcmp_scan` | ok | 6.961 | 0.001 | ok | 3.193 | 0.029 | ok |  |
 | `packet_vlan_tcpopt_parser` | ok | 7.825 | 0.000 | ok | 3.257 | 0.019 | ok | Hidden packet-offset metadata stays verifier-visible. |
-| `bpf_local_call_fanout_dispatch` | ok | 29.576 | 0.021 | ok | 1.748 | 2.542 | run-fail | C-owned call/frame semantics pass; slot7/slot8 pointer payloads model real stack spills. |
+| `bpf_local_call_fanout_dispatch` | ok | 29.576 | 0.021 | ok | 1.748 | 2.542 | run-fail | Historical C-owned call/frame semantics result; current stack model is byte-addressed instead of fixed slot payloads. |
 | `flow_5tuple_rss_hash` | ok | 11.715 | 0.000 | ok | 4.854 | 0.017 | ok |  |
 | `katran_lb_consistent_hash_select` | ok | 45.789 | 0.001 | ok | 22.169 | 0.020 | ok |  |
 | `cilium_policy_guard_tree_filter` | ok | 5.427 | 0.003 | ok | 3.178 | 0.046 | ok |  |
@@ -210,22 +219,21 @@ objects were compiled and loaded with the same loader, same generated inputs,
 same expected result, and same program-type retval on 2026-05-18. The direct eBPF
 programs pass verifier and `BPF_PROG_TEST_RUN`.
 
-These rows compare direct eBPF against x86-simulator proof shape. Both x86-simulator rows now
-pass in the active safety-first path without restoring proof-only branch
-assertions. The x86-simulator proof is still larger and more verifier-expensive than
-direct eBPF, but the failures are no longer active blockers.
+These rows compare direct eBPF against an earlier x86-simulator proof shape.
+They are historical verifier-complexity controls from the safety-first path, not
+current correctness-first load results. The current active path prioritizes
+exact simulator semantics and only claims clang compilation at this point.
 
 | Micro program | Direct eBPF result | Direct load/test s | Direct static BPF insns | Direct verifier processed / total / peak / max-state | x86 simulator result | x86 simulator verify s | x86 simulator static BPF insns | x86 simulator verifier processed / total / peak / max-state | Reason |
 | --- | --- | ---: | ---: | --- | --- | ---: | ---: | --- | --- |
 | `bpf_local_call_fanout_dispatch` | ok | 0.03 | 528 | `9572 / 120 / 70 / 10` | ok | 0.055 | 10985 | `22584 / 1430 / 583 / 8` | Native 16-record loop dispatches into four local-call targets. The active C-owned call/frame model greatly increases static BPF size, but the verifier can analyze the resulting shape. |
 | `bpftrace_string_search_prefix_scan` | ok | 0.07 | 200 | `21394 / 546 / 143 / 47` | ok | 0.396 | 148 | `326956 / 7055 / 108 / 5` | The current pass uses C/header state-shape fixes and exact x86 flags, not branch assertions. It remains much more expensive than direct eBPF but stays below the verifier limit. |
 
-Latest safety-first generated-C run: [`results/README-20260518-210632.md`](./results/README-20260518-210632.md).
-The active path now passes 29/29 programs while keeping `last_cmp_*` and
-`x86_sim_assert_*` deleted. The remaining verifier fixes moved into C-authored
-ISA/ABI semantics: exact same-register `xchg` behavior, packet-end metadata
-derived from SKB length, and helper shape changes that do not change native x86
-semantics.
+Latest historical safety-first generated-C run:
+[`results/README-20260518-210632.md`](./results/README-20260518-210632.md).
+The current active path is stricter about simulator semantics and no longer
+claims 29/29 verifier success. Its current checked property is compile-only:
+all 29 generated sources compile with clang when `BPF_STACK_SIZE=4096`.
 
 The backup `helper-selection` path had lower clang cost but still failed
 `bpf_local_call_fanout_dispatch` and `bpftrace_string_search_prefix_scan` at
@@ -235,11 +243,11 @@ cleaner Python proof boundary and now fixes both cases.
 Python LOC check for this cleanup and backup:
 
 ```text
-generate_micro_sim_proofs.py current:            737 lines
-generate_micro_sim_proofs_helper_selection.py: backup at 1503 lines
-x86_sim_bpf.h latest:                       776 lines
-x86_sim.h latest:                      2756 lines
-x86_sim_bpf_helper_selection.h:           backup at 533 lines
+generate_micro_sim_proofs.py current:            735 lines
+x86_sim_bpf.h latest:                       754 lines
+x86_sim.h latest:                      2154 lines
+loader/src/main.rs latest:             1192 lines
+removed x86_sim_template_helpers.bpf.c: 2010 lines
 ```
 
 The line movement is intentional: proof protocol complexity is being moved out
@@ -277,16 +285,15 @@ Native-direct safety rule: verifier acceptance must come from
 semantics-preserving optimization and state layout, not from facts that native
 x86 does not guarantee. The active code deletes the previous `last_cmp_*`
 metadata and `x86_sim_assert_*` branch helpers. Proof-only packet/output bounds
-checks were removed from the active packet helpers. Stack-slot dispatch and
-other remaining model checks are tracked in [`TODO.md`](./TODO.md): they cannot
-be used as final safety arguments unless a proof shows they are unreachable or
-exactly equivalent to the native x86 ABI/path condition.
+checks and stack-slot runtime rejection were removed from the active simulator.
+Remaining model extent questions are tracked in [`TODO.md`](./TODO.md): they
+must be resolved by a proof, an exact larger model, or rejection before native
+execution.
 
-Runtime unsupported rule: native x86 will not return `XDP_ABORTED` when the proof
-simulator would be unsupported. `X86_SIM_UNSUPPORTED` is not an accepted safety mechanism and
-cannot justify direct native execution. Any accepted artifact must either prove
-every such path unreachable under the native program and ABI contract, or reject
-before native execution.
+Runtime unsupported rule: native x86 will not return `XDP_ABORTED` or take an
+`X86_SIM_UNSUPPORTED` branch. The active simulator path must not contain such a
+runtime safety branch. Any native construct outside the modeled subset must
+reject before native execution or be proved unreachable.
 
 Generator complexity rule: the Python proof generator must stay below 800
 lines. Its only semantic output should be a simple native stream such as
@@ -321,11 +328,11 @@ C state-layout changes in the active path:
 
 - `X86_SIM_EXEC` performs C-owned typed opcode dispatch; Python still emits only
   `X86_SIM_RUN_OP(X86_OP_..., operands...)`.
-- Stack slots keep value/tag state, while low stack slots `0..8` also carry real
-  verifier pointer payloads (`p_stack0..p_stack8`). This models real x86 stack
-  spills used by the current micro corpus, including `bpf_local_call_fanout_dispatch`
-  spills through `[rbp-0x40]`. A reachable deeper pointer spill rejects load; it
-  is not an accepted runtime safety check.
+- The stack model is now byte-addressed (`stack_mem[256]`) with per-8-byte
+  pointer payload metadata (`p_stack[32]` / `tag_stack[32]`). It no longer
+  rejects deeper modeled slots at runtime. If a generated artifact needs stack
+  behavior outside this modeled native layout, that artifact must fail before
+  direct native execution or gain a larger exact stack model.
 - Top-level packet memory loads use a verifier-proven raw-load fastpath for
   packet bases that already have verifier-visible range. Subfunction steps use
   the checked typed simulator path so local-call proof state stays stable.
@@ -351,10 +358,10 @@ Generated-C migration todo:
 | Move proof protocol out of Python | done | Python pc-dispatch, ctx-store write-set insertion, `bpf_loop` lowering, internal call-return stack lowering, helper selection, and benchmark-name renderers were removed; remaining Python CFG work is mechanical label/branch emission. |
 | C-owned loop/call protocol | done for current micro | `X86_SIM_X86_JCC/JMP` lower native branches directly to C labels; `X86_SIM_X86_CALL` models call stack adjustment; generated callee frame instructions execute through normal x86 helpers. |
 | Shrink Python generator below 800 lines | done | `generate_micro_sim_proofs.py` is 737 lines. |
-| Run full safety-first generated-C batch | done | `results/README-20260518-210632.md`: 29/29 pass after deleting proof-only branch assertions. |
+| Historical safety-first generated-C batch | recorded | `results/README-20260518-210632.md`: 29/29 pass before the later no-trap/no-guard cleanup. |
 | Delete non-x86 loop fuel guard | done | Active branch macros no longer decrement `X86_SIM_LOOP_FUEL`; backward edges use plain x86 branch semantics. |
 | Move opcode dispatch specialization into C | done | `X86_SIM_EXEC_TYPED` selects C helpers from constant `X86_OP_*`; Python does not choose helpers. |
-| Stack pointer metadata | done for current micro | `x86_state` stores stack value/tag per slot and verifier pointer payloads for low slots `0..8`; deeper pointer spills must reject or be modeled before native execution. |
+| Stack pointer metadata | correctness-first rewrite | `x86_state` stores byte-addressed stack contents plus pointer metadata for 32 aligned slots; no runtime slot rejection remains in the active simulator. |
 | Verifier-proven packet load fastpath | done | Top-level packet loads can rely on verifier-visible packet range instead of adding per-load bounds helpers. |
 | Delete SKB length branch range hook | done | The proof-only `cmp [ctx+0x70], imm; ja target` range assertion was removed. |
 | Model SKB packet end through ABI metadata | done | `ctx+0x70` loads carry `PACKET_LEN`; `PACKET_LEN + PACKET` becomes `PACKET_END`, matching `data + skb_len == data_end`. |
@@ -362,15 +369,16 @@ Generated-C migration todo:
 | Hidden packet-offset metadata | done | Packet-capable registers carry an offset field used only to make packet bounds visible to the verifier. |
 | Delete branch-proof metadata | done | `last_cmp_*` state and `x86_sim_assert_*` helpers were removed from active C. |
 | Remove packet/output runtime bounds checks | done | Active packet/output helpers no longer guard loads/stores with proof-only `data_end` checks. |
-| Remove top-level fallback returns | done | Generated paths no longer translate negative helper results into `XDP_ABORTED`; `X86_SIM_UNSUPPORTED` remains a proof/rejection obligation, not a direct-native safety guard. |
+| Remove top-level fallback returns | done | Generated paths no longer translate helper results into `XDP_ABORTED` or any other fallback return. |
 | Split memory-domain helpers | done for current micro | Top-level packet loads have a raw verifier-proven path; subfunctions and stack/ctx accesses keep checked typed helpers. |
-| Remaining generated-C verifier failures | done for current micro | Current safety-first full batch passes 29/29 without proof-only assertions/bounds checks. |
-| Direct-native safety TODO | open | See [`TODO.md`](./TODO.md) for remaining stack, unsupported, metadata, ABI, rodata, flag, and call-return proof obligations. |
+| Correctness-first compile check | done | All 29 generated micro sources compile with clang when `BPF_STACK_SIZE=4096`; verifier/load is not claimed for this state layout. |
+| Direct-native safety TODO | open | See [`TODO.md`](./TODO.md) for remaining stack, metadata, ABI, rodata, flag, and call-return proof obligations. |
 
-There are no active generated-C verifier/load failures in the current
-safety-first micro corpus. Future work should keep reducing C/header size and
-specifying helper contracts, not reintroduce benchmark renderers, branch
-assertions, synthetic bounds checks, or loop-shape analysis in Python.
+The current active path is correctness-first: it removes simulator-only safety
+guards even when that makes the verifier unhappy. Future work should make the
+state layout verifier-friendly without reintroducing benchmark renderers,
+branch assertions, synthetic bounds checks, runtime traps, fallback returns, or
+loop-shape analysis in Python.
 
 ## JSON-Linker Todo
 
@@ -384,8 +392,8 @@ loader bytecode link -> BPF_PROG_LOAD -> BPF_PROG_TEST_RUN`, with no per-micro
 | JSON proof schema contains numeric instruction fields | done | Loader does not parse C macros. |
 | JSON proof schema contains C-helper template plan | done | JSON records helper names, operands, control-flow targets, and proof metadata, not raw BPF bytes. |
 | Rust loader is only a BPF linker | done | It links encoded BPF instructions and does not contain `emit_x86_*` semantics. |
-| Build reusable eBPF simulator/helper bytecode | partial | C-authored `x86_tmpl_arg_*` template object is linked by the loader. |
-| Batch runner uses JSON path as the pass/fail source | partial | It builds the C template object and runs JSON -> loader -> raw BPF load/test_run for non-call cases. |
+| Build reusable eBPF simulator/helper bytecode | paused | The old C template object used unsupported/fallback semantics and was removed from the active build. |
+| Batch runner uses JSON path as the pass/fail source | paused | The loader no longer has a default template object; a revived JSON path must provide a C-authored template object explicitly and preserve exact simulator semantics. |
 | All 29 micro programs load and return expected result | blocked | Paused. Native call-flow is not implemented in the JSON linker, so the strict JSON path is not the current source of truth. |
 
 Current strict JSON-link status:
@@ -732,12 +740,13 @@ This prototype has already exposed several verifier-facing design constraints:
 
 Remaining places that are not yet a complete native x86 equivalence proof:
 
-- Runtime `X86_SIM_UNSUPPORTED` paths are simulator behavior, not native x86 behavior.
-  Final direct native execution requires load/translation-time rejection or a
-  proof that each unsupported path is unreachable.
-- Packet/output helper `data_end` bounds checks have been removed from active
-  packet helpers. Stack slot dispatch and other model checks remain proof
-  obligations; they are not final safety guards.
+- There must be no runtime `X86_SIM_UNSUPPORTED`/trap/fallback path in an
+  accepted simulator artifact. Unsupported native constructs must reject before
+  artifact generation/loading or be covered by a proof that the path is
+  unreachable.
+- Packet/output helper `data_end` bounds checks and stack-slot runtime
+  rejection have been removed from the active simulator. Any future verifier
+  aid must preserve hardware x86 behavior exactly.
 - The `ctx`, SKB, packet, output, and rodata layouts are modeled ABIs, not
   arbitrary x86 memory. They must match the native execution layout exactly.
 - The stack model is finite and uses sparse pointer payloads; it is not a full
