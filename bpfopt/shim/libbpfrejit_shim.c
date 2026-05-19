@@ -132,6 +132,17 @@ struct prog_entry {
     uint32_t prog_btf_kid;
     uint32_t attach_btf_obj_kid;
     uint32_t attach_prog_kid;
+    /* func_info / line_info are arrays of records pointed to by attr at
+     * load time. The kernel does copy_from_user during verification; after
+     * the loader frees the buffer those user pages may hold random heap
+     * data, causing EINVAL on reload. Deep-copy the bytes so the reload
+     * sees the same content. */
+    void *func_info_buf;
+    uint32_t func_info_cnt;
+    uint32_t func_info_rec_size;
+    void *line_info_buf;
+    uint32_t line_info_cnt;
+    uint32_t line_info_rec_size;
     /* Per-prog execute_step state. */
     int canonicalized;            /* 1 once --canonicalize-map-refs has run */
     int step_seq;                 /* incremented per successful execute_step */
@@ -270,6 +281,8 @@ static void prog_free(struct prog_entry *e) {
     free(e->snap_types);
     free(e->attached_link_fds);
     free(e->attached_perf_fds);
+    free(e->func_info_buf);
+    free(e->line_info_buf);
     free(e);
 }
 
@@ -502,6 +515,34 @@ static struct prog_entry *capture_prog_load(const union bpf_attr *attr) {
         ia.info.info = (uintptr_t)&pi;
         if (real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &ia, sizeof(ia)) >= 0)
             e->attach_prog_kid = pi.id;
+    }
+    /* Copy func_info / line_info bytes — pointers in attr reference loader
+     * memory that may be freed by the time the runner triggers a reload.
+     * Without the actual record bytes the kernel reads garbage and rejects
+     * the prog (EINVAL). */
+    e->func_info_buf = NULL;
+    e->func_info_cnt = 0;
+    e->func_info_rec_size = 0;
+    e->line_info_buf = NULL;
+    e->line_info_cnt = 0;
+    e->line_info_rec_size = 0;
+    if (attr->func_info && attr->func_info_cnt && attr->func_info_rec_size) {
+        size_t n = (size_t)attr->func_info_cnt * attr->func_info_rec_size;
+        e->func_info_buf = malloc(n);
+        if (e->func_info_buf) {
+            memcpy(e->func_info_buf, (void *)(uintptr_t)attr->func_info, n);
+            e->func_info_cnt = attr->func_info_cnt;
+            e->func_info_rec_size = attr->func_info_rec_size;
+        }
+    }
+    if (attr->line_info && attr->line_info_cnt && attr->line_info_rec_size) {
+        size_t n = (size_t)attr->line_info_cnt * attr->line_info_rec_size;
+        e->line_info_buf = malloc(n);
+        if (e->line_info_buf) {
+            memcpy(e->line_info_buf, (void *)(uintptr_t)attr->line_info, n);
+            e->line_info_cnt = attr->line_info_cnt;
+            e->line_info_rec_size = attr->line_info_rec_size;
+        }
     }
     /* Deep-copy license (app-owned user string, lifetime unknown after the
      * call returns). Required for candidate BPF_PROG_LOAD verifier-state
@@ -1959,6 +2000,25 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
                           ? (uint32_t)attach_btf_obj_resolved : 0;
     a.attach_prog_fd = (attach_prog_resolved >= 0)
                        ? (uint32_t)attach_prog_resolved : 0;
+    /* Replay func_info / line_info from the byte buffers we captured at
+     * intercept time — the loader's original user pointers reference
+     * memory that's likely freed by now. */
+    a.func_info = (uintptr_t)p->func_info_buf;
+    a.func_info_cnt = p->func_info_cnt;
+    a.func_info_rec_size = p->func_info_rec_size;
+    a.line_info = (uintptr_t)p->line_info_buf;
+    a.line_info_cnt = p->line_info_cnt;
+    a.line_info_rec_size = p->line_info_rec_size;
+    /* core_relos are consumed by libbpf in userspace BEFORE PROG_LOAD; the
+     * kernel never reads them. Safe to zero. */
+    a.core_relos = 0;
+    a.core_relo_cnt = 0;
+    a.core_relo_rec_size = 0;
+    /* BPF_F_TOKEN_FD requires a live token fd; the loader's may have been
+     * closed and we don't have a kid for it. Drop the flag — kernel falls
+     * back to system-wide capability checks. Hard-coded bit (1U<<8) so this
+     * works even when libbpf-sys is too old to expose the constant. */
+    a.prog_flags &= ~((uint32_t)(1U << 8));
     log_line("reload prog kid=%u type=%u prog_btf_fd=%u attach_btf_obj_fd=%u "
              "attach_prog_fd=%u attach_btf_id=%u expected_attach=%u "
              "nr_map_fds=%u",
@@ -2010,11 +2070,13 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
                  "\nBPF_PROG_LOAD errno=%d (post-verifier)\n"
                  "ctx: prog_btf_fd=%u attach_btf_obj_fd=%u attach_prog_fd=%u "
                  "attach_btf_id=%u expected_attach=%u nr_map_fds=%u "
-                 "prog_type=%u fd_array_n=%u fd_array_neg1=%u\n",
+                 "prog_type=%u fd_array_n=%u fd_array_neg1=%u "
+                 "prog_flags=0x%x insn_cnt=%u\n",
                  load_errno,
                  a.prog_btf_fd, a.attach_btf_obj_fd, a.attach_prog_fd,
                  a.attach_btf_id, a.expected_attach_type, nr_fds,
-                 p->prog_type, fd_array_n, arr_neg1);
+                 p->prog_type, fd_array_n, arr_neg1,
+                 a.prog_flags, a.insn_cnt);
         clock_gettime(CLOCK_MONOTONIC, &t1);
         if (out_rejit_ms) *out_rejit_ms = (t1.tv_sec - t0.tv_sec) * 1000ULL
                                           + (t1.tv_nsec - t0.tv_nsec) / 1000000;
@@ -2234,59 +2296,6 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
 
     free(owned_log);
     return partial ? RELOAD_PARTIAL_ATTACH : RELOAD_OK;
-}
-
-/* Base64-encode `bytes` into a heap string (NUL-terminated). Caller frees. */
-static char *base64_encode_alloc(const uint8_t *bytes, size_t n) {
-    static const char tbl[] =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    size_t out_n = ((n + 2) / 3) * 4;
-    char *out = (char *)malloc(out_n + 1);
-    if (!out) return NULL;
-    size_t o = 0;
-    for (size_t i = 0; i < n; i += 3) {
-        uint32_t v = (uint32_t)bytes[i] << 16;
-        v |= (i + 1 < n) ? ((uint32_t)bytes[i + 1] << 8) : 0;
-        v |= (i + 2 < n) ? (uint32_t)bytes[i + 2] : 0;
-        out[o++] = tbl[(v >> 18) & 0x3f];
-        out[o++] = tbl[(v >> 12) & 0x3f];
-        out[o++] = (i + 1 < n) ? tbl[(v >> 6) & 0x3f] : '=';
-        out[o++] = (i + 2 < n) ? tbl[v & 0x3f] : '=';
-    }
-    out[o] = 0;
-    return out;
-}
-
-/* Tar a workdir into base64 and return the encoded string. Caller frees.
- * Uses /bin/tar via posix_spawnp + a temp file. */
-static char *tar_workdir_b64(const char *workdir) {
-    char tar_path[320];
-    snprintf(tar_path, sizeof(tar_path), "%s.tar.gz", workdir);
-    char *const argv[] = {"tar", "-czf", tar_path, "-C", "/", (char *)(workdir + 1), NULL};
-    posix_spawn_file_actions_t fa;
-    if (posix_spawn_file_actions_init(&fa) != 0) return NULL;
-    posix_spawn_file_actions_addopen(&fa, STDOUT_FILENO, "/dev/null", O_WRONLY, 0);
-    posix_spawn_file_actions_addopen(&fa, STDERR_FILENO, "/dev/null", O_WRONLY, 0);
-    pid_t pid;
-    int rc = posix_spawnp(&pid, "tar", &fa, NULL, argv, environ);
-    posix_spawn_file_actions_destroy(&fa);
-    if (rc != 0) return NULL;
-    int st = 0;
-    waitpid(pid, &st, 0);
-    if (!(WIFEXITED(st) && WEXITSTATUS(st) == 0)) return NULL;
-    int fd = open(tar_path, O_RDONLY);
-    if (fd < 0) return NULL;
-    struct stat sb;
-    if (fstat(fd, &sb) != 0 || sb.st_size <= 0) { real_close(fd); return NULL; }
-    uint8_t *buf = (uint8_t *)malloc((size_t)sb.st_size);
-    if (!buf) { real_close(fd); return NULL; }
-    ssize_t rd = read(fd, buf, (size_t)sb.st_size);
-    real_close(fd);
-    unlink(tar_path);
-    if (rd != sb.st_size) { free(buf); return NULL; }
-    char *b64 = base64_encode_alloc(buf, (size_t)rd);
-    free(buf);
-    return b64;
 }
 
 /* execute_step — daemon-style RPC. Runner sends a pre-resolved shell command

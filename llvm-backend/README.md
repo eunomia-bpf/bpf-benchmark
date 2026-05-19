@@ -1383,3 +1383,48 @@ version restores the earlier local-subprog rule: local code may use ordinary
 wide loads, while non-local code must use the available MOV kinsns. This keeps
 the suite loadable and preserves the intended native-instruction coverage for
 normal packet/parser code.
+
+JIT byte audit:
+
+- The initial MOV-packing run was `+160` JIT bytes versus the SIB
+  early-clobber default even though it still saved bytes versus the no-kinsn
+  baseline.
+- Root cause: `BPFAsmPrinter::functionNeedsKinsnScratch()` treated
+  `BPF_KINSN_X86_MOVZBL/MOVZWL/MOVL/MOVQ` as scratch users. For the forms LLVM
+  emits, `bpf_x86_mov.c` has verifier-native no-scratch fast paths, so this was
+  unnecessary. The extra function-entry `r6/r7/r8 = 0` made the x86 JIT save
+  callee-saved registers (`rbx/r13/r14`) and allocate stack space. In
+  `packet_checksum_fold`, the +25 bytes were entirely prologue/epilogue:
+  `sub rsp`, `push rbx/r13/r14`, three zeroing instructions, and three pops.
+- Fix: keep the MOV-load kinsns selected, but do not count these BPF-register
+  MOV-load pseudos as function-level scratch users.
+
+Validation after the scratch-init fix:
+
+- Objects:
+  `micro/results/llvm_kinsn_programs_mov_scratchfix_20260519_061416`
+- Full single-sample `make micro` passed: 29/29 correct.
+  Run:
+  `micro/results/x86_kvm_micro_20260519_131610_476641/metadata.json`
+
+Analysis-side deltas:
+
+| Comparison | Geomean ratio | summed exec delta | JIT byte delta | xlated byte delta |
+|---|---:|---:|---:|---:|
+| scratch-init fix vs MOV-packing | 0.9991 | +70 ns | -142 bytes | -360 bytes |
+| scratch-init fix vs SIB early-clobber default | 1.0013 | +69 ns | +18 bytes | +448 bytes |
+| scratch-init fix vs no-kinsn LLVM baseline | 0.9155 | -920 ns | -5370 bytes | -9072 bytes |
+
+The remaining `+18` bytes versus SIB are a separate regalloc/ABI effect, not a
+module emit bug. The MOV-load pseudo is globally early-clobber to keep SIB
+`dst` separate from address operands, which avoids scratch proof paths. For a
+direct load such as `movzwl off(%r5), %r5d`, early-clobber is too conservative
+and can make LLVM choose BPF r6/`rbx` as an address temporary, forcing one
+callee-saved push/pop. A trial that removed early-clobber did reduce that shape,
+but `sorted_rule_binary_search` then hit a SIB proof path that saved
+uninitialized r6 and failed verifier with `R6 !read_ok`. That trial is not kept.
+
+The clean follow-up is to split the internal LLVM representation or add precise
+scratch metadata: direct MOV-load pseudos may allow tied `dst == base`, while
+SIB MOV-load pseudos must either keep early-clobber or force function scratch
+initialization only when a real SIB overlap is selected.

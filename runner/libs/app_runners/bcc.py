@@ -364,6 +364,13 @@ class BCCRunner(AppRunner):
 
         tool_binary = self._resolve_tool_binary()
         tool_env = os.environ.copy()
+        # Inject LD_PRELOAD shim + BPFREJIT_SHIM_SOCK_DIR so the bcc tool's
+        # libbpf calls go through the bpfrejit shim. Without this, the
+        # runner-side _build_prog_id_to_socket_map can't locate any per-pid
+        # shim socket, and every reload request fails with ENOENT on the
+        # /var/run/bpfrejit/shim-<pid>.sock path.
+        from ..agent import _shim_env_for
+        tool_env.update(_shim_env_for(str(tool_binary)))
         kernel_source = _prepare_bcc_kernel_source(tool_env)
         if kernel_source:
             self.artifacts["bcc_kernel_source"] = kernel_source

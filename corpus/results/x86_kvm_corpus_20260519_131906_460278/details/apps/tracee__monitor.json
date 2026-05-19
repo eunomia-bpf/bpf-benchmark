@@ -1,0 +1,10 @@
+{
+  "app": "tracee/monitor",
+  "baseline": null,
+  "error": "stress_ng_os_io_network workload failed: stress-ng: metrc: [1814] rename             2592      5.18      0.00      0.04       500.79       66242.43\nstress-ng: metrc: [1814] touch              2632      5.17      0.03      0.10       509.17       21381.86\nstress-ng: metrc: [1814] utime               245      5.22      0.00      0.02        46.94       10426.42\nstress-ng: metrc: [1814] link                  4      5.21      0.03      0.41         0.77           9.04\nstress-ng: metrc: [1814] symlink               4      5.26      0.02      0.42         0.76           9.04\nstress-ng: metrc: [1814] mknod                 7      5.13      0.01      0.00         1.36        1353.44\nstress-ng: metrc: [1814] fcntl                 3      5.00      0.00      0.00         0.60        1315.21\nstress-ng: info:  [1814] skipped: 4: exec (4)\nstress-ng: info:  [1814] passed: 248: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (1) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (3)\nstress-ng: info:  [1814] failed: 1: fcntl (1)\nstress-ng: info:  [1814] metrics untrustworthy: 0\nstress-ng: info:  [1814] unsuccessful run completed in 6.74 secs",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "tracee",
+  "selected_workload": "stress_ng_os_io_network",
+  "status": "error"
+}
