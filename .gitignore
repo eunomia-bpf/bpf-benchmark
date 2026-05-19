@@ -107,8 +107,10 @@ third-party/
 corpus/bcf/
 corpus/repos/
 corpus/inventory.json
-runner/repos/*
-!runner/repos/.gitkeep
+# vendor/repos hosts git submodules for upstream apps used by corpus
+# (katran + future tracee/tetragon/cilium/bcc/bpftrace/otel forks).
+# Contents tracked via .gitmodules + the parent commit's submodule
+# gitlinks, not by globs.
 runner/inventory.json
 runner/corpus/results/
 docs/reference/papers/*.pdf

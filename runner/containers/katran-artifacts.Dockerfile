@@ -95,7 +95,7 @@ WORKDIR ${IMAGE_WORKSPACE}
 
 COPY Makefile ./Makefile
 COPY runner/mk ./runner/mk
-COPY runner/repos ./runner/repos
+COPY vendor/repos ./vendor/repos
 COPY vendor/linux-framework/Makefile ./vendor/linux-framework/Makefile
 COPY vendor/linux-framework/include ./vendor/linux-framework/include
 COPY vendor/linux-framework/arch/arm64/include/uapi/asm ./vendor/linux-framework/arch/arm64/include/uapi/asm
@@ -121,12 +121,11 @@ RUN --mount=type=cache,target=/tmp/bpf-benchmark-build,id=katran-build-${RUN_TAR
     fi; \
     katran_cache_install="/tmp/bpf-benchmark-build/katran-install-${target_arch}"; \
     # Katran source must be present in the build context at
-    # runner/repos/katran (provided by the host caller via submodule
-    # update, by an explicit clone, or via the bench Makefile that
-    # copies it into the Docker context). The clone-on-miss fallback
-    # was removed: vendored builds should be reproducible, and silent
-    # network clones during image build are a supply-chain risk.
-    test -f ./runner/repos/katran/build_katran.sh; \
+    # vendor/repos/katran (provided by the host caller via `git
+    # submodule update --init`). The clone-on-miss fallback was removed:
+    # vendored builds should be reproducible, and silent network clones
+    # during image build are a supply-chain risk.
+    test -f ./vendor/repos/katran/build_katran.sh; \
     make -C vendor/linux-framework/tools/bpf/bpftool \
         VMLINUX_BTF= \
         feature-llvm=0 \

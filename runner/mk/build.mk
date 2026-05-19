@@ -1,4 +1,4 @@
-REPOS_DIR := $(RUNNER_DIR)/repos
+REPOS_DIR := $(ROOT_DIR)/vendor/repos
 RUNNER_CONTAINER_DIR := $(RUNNER_DIR)/containers
 RUN_TARGET_ARCH ?= x86_64
 IMAGE_BUILD_JOBS ?= $(JOBS)
@@ -56,8 +56,8 @@ ACTIVE_DAEMON_TARGET_ARG := $(if $(strip $(ACTIVE_DAEMON_TARGET_TRIPLE)),TARGET_
 ACTIVE_BPFOPT_TARGET_ARG := $(if $(strip $(ACTIVE_DAEMON_TARGET_TRIPLE)),--target "$(ACTIVE_DAEMON_TARGET_TRIPLE)",)
 X86_BPFOPT_BIN_DIR := $(ROOT_DIR)/bpfopt/target/release
 ARM64_BPFOPT_BIN_DIR := $(ROOT_DIR)/bpfopt/target/$(ARM64_RUST_TARGET)/release
-X86_BPFOPT_BINARIES := $(addprefix $(X86_BPFOPT_BIN_DIR)/,bpfopt)
-ARM64_BPFOPT_BINARIES := $(addprefix $(ARM64_BPFOPT_BIN_DIR)/,bpfopt)
+X86_BPFOPT_BINARIES := $(addprefix $(X86_BPFOPT_BIN_DIR)/,bpfopt kinsnprober)
+ARM64_BPFOPT_BINARIES := $(addprefix $(ARM64_BPFOPT_BIN_DIR)/,bpfopt kinsnprober)
 
 # native-link (Rust binary, separate cargo workspace under ebpf-vm/x86/...).
 # Built on host alongside bpfopt; the runner-runtime image COPYs it to
@@ -119,7 +119,7 @@ ACTIVE_KATRAN_REQUIRED := $(REPO_KATRAN_ROOT)/bin/katran_server_grpc $(REPO_KATR
 
 REQUIRE_IMAGE_BUILD = @if [ "$(BPFREJIT_IMAGE_BUILD)" != "1" ]; then echo "$@ must be run from the runner Dockerfile with BPFREJIT_IMAGE_BUILD=1" >&2; exit 1; fi
 
-BPFOPT_SOURCE_FILES = $(shell find "$(ROOT_DIR)/bpfopt/crates" -type f \( -name '*.rs' -o -name 'Cargo.toml' \) -print 2>/dev/null) $(ROOT_DIR)/bpfopt/Cargo.toml $(ROOT_DIR)/bpfopt/Cargo.lock
+BPFOPT_SOURCE_FILES = $(shell find "$(ROOT_DIR)/bpfopt/crates" "$(ROOT_DIR)/bpfopt/kinsnprober" -type f \( -name '*.rs' -o -name 'Cargo.toml' \) -print 2>/dev/null) $(ROOT_DIR)/bpfopt/Cargo.toml $(ROOT_DIR)/bpfopt/Cargo.lock
 BPFOPT_SHIM_DIR := $(ROOT_DIR)/bpfopt/shim
 BPFOPT_SHIM_SOURCE_FILES = $(BPFOPT_SHIM_DIR)/libbpfrejit_shim.c $(BPFOPT_SHIM_DIR)/Makefile
 BPFOPT_SHIM_GLIBC := $(BPFOPT_SHIM_DIR)/libbpfrejit_shim.so
@@ -386,7 +386,7 @@ $(X86_DAEMON_BINARY): $(DAEMON_SOURCE_FILES) $(BUILD_RULE_FILES)
 
 $(X86_BPFOPT_BINARIES) &: $(BPFOPT_SOURCE_FILES) $(BUILD_RULE_FILES)
 	cargo build --release --workspace --target-dir "$(ROOT_DIR)/bpfopt/target" --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml" \
-		-p bpfopt
+		-p bpfopt -p kinsnprober
 
 $(NATIVE_LINK_BINARY): $(NATIVE_LINK_SOURCE_FILES) $(BUILD_RULE_FILES)
 	cargo build --release --manifest-path "$(NATIVE_LINK_SRC_DIR)/Cargo.toml"
@@ -431,7 +431,7 @@ $(ARM64_BPFOPT_BINARIES) &: $(BPFOPT_SOURCE_FILES) $(BUILD_RULE_FILES) $(AARCH64
 	$(ARM64_CARGO_ENV) \
 		cargo build --release --workspace --target "$(ARM64_RUST_TARGET)" \
 			--target-dir "$(ROOT_DIR)/bpfopt/target" --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml" \
-			-p bpfopt
+			-p bpfopt -p kinsnprober
 
 .PHONY: image-katran-artifacts image-runner-artifacts \
 	image-micro-program-artifacts image-test-artifacts

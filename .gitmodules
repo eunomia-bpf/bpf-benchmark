@@ -14,3 +14,25 @@
 	path = llvm-backend/llvm
 	url = https://github.com/eunomia-bpf/bpf-kinsn-llvm.git
 	branch = main
+[submodule "vendor/repos/katran"]
+	path = vendor/repos/katran
+	url = https://github.com/eunomia-bpf/katran.git
+	branch = bpf-benchmark
+[submodule "vendor/repos/tracee"]
+	path = vendor/repos/tracee
+	url = https://github.com/eunomia-bpf/tracee.git
+[submodule "vendor/repos/tetragon"]
+	path = vendor/repos/tetragon
+	url = https://github.com/eunomia-bpf/tetragon.git
+[submodule "vendor/repos/cilium"]
+	path = vendor/repos/cilium
+	url = https://github.com/eunomia-bpf/cilium.git
+[submodule "vendor/repos/bpftrace"]
+	path = vendor/repos/bpftrace
+	url = https://github.com/eunomia-bpf/bpftrace.git
+[submodule "vendor/repos/bcc"]
+	path = vendor/repos/bcc
+	url = https://github.com/eunomia-bpf/bcc.git
+[submodule "vendor/repos/opentelemetry-ebpf-profiler"]
+	path = vendor/repos/opentelemetry-ebpf-profiler
+	url = https://github.com/eunomia-bpf/opentelemetry-ebpf-profiler.git
