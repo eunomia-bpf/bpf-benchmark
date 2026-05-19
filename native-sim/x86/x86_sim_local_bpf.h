@@ -90,25 +90,26 @@
 	 (REG) == X86_R14 ? __x86_r14 :                                      \
 	 (REG) == X86_R15 ? __x86_r15 : 0)
 
-#define X86_SIM_DECLARE_XDP(CTX)                                            \
-	void *__x86_sim_ctx = (void *)(CTX);                                \
-	void *__x86_sim_data = (void *)(long)(CTX)->data;                   \
-	void *__x86_sim_data_end = (void *)(long)(CTX)->data_end;           \
-	__u8 __x86_sim_is_skb = 0;                                         \
-	__u32 __x86_sim_len = 0;                                           \
-	X86_SIM_L_DECLARE_STATE();                                          \
-	X86_SIM_L_DECLARE_STACK();                                          \
-	__x86_rdi = (__u64)(long)(CTX)
+#define X86_SIM_KIND_XDP 0U
+#define X86_SIM_KIND_SKB 1U
 
-#define X86_SIM_DECLARE_SKB(CTX)                                            \
-	void *__x86_sim_ctx = (void *)(CTX);                                \
-	void *__x86_sim_data = (void *)(long)(CTX)->data;                   \
-	void *__x86_sim_data_end = (void *)(long)(CTX)->data_end;           \
-	__u8 __x86_sim_is_skb = 1;                                         \
-	__u32 __x86_sim_len = (CTX)->len;                                  \
-	X86_SIM_L_DECLARE_STATE();                                          \
-	X86_SIM_L_DECLARE_STACK();                                          \
-	__x86_rdi = (__u64)(long)(CTX)
+#define X86_SIM_ENTRY_XDP(CTX)                                               \
+	struct xdp_md *__x86_sim_xdp_ctx = (CTX);                            \
+	struct __sk_buff *__x86_sim_skb_ctx = (void *)0;                     \
+	const __u8 __x86_sim_kind = X86_SIM_KIND_XDP;                        \
+	const __u64 __x86_sim_ctx_addr = (__u64)(long)(CTX);                 \
+	X86_SIM_L_DECLARE_STATE();                                           \
+	X86_SIM_L_DECLARE_STACK();                                           \
+	__x86_rdi = __x86_sim_ctx_addr
+
+#define X86_SIM_ENTRY_SKB(CTX)                                               \
+	struct xdp_md *__x86_sim_xdp_ctx = (void *)0;                         \
+	struct __sk_buff *__x86_sim_skb_ctx = (CTX);                          \
+	const __u8 __x86_sim_kind = X86_SIM_KIND_SKB;                         \
+	const __u64 __x86_sim_ctx_addr = (__u64)(long)(CTX);                  \
+	X86_SIM_L_DECLARE_STATE();                                           \
+	X86_SIM_L_DECLARE_STACK();                                           \
+	__x86_rdi = __x86_sim_ctx_addr
 
 #define X86_SIM_L_READ_REG_CASE(REG, NAME)                                  \
 	case REG:                                                          \
@@ -243,6 +244,33 @@
 			__x86_lda_value = *(__u64 *)__x86_lda_addr;       \
 		__x86_lda_value;                                          \
 	})
+
+#define X86_SIM_L_TRY_LOAD_CTX_FIELD(ADDR, WIDTH, VALUE, MATCHED)           \
+	do {                                                               \
+		(MATCHED) = 1;                                             \
+		if (__x86_sim_kind == X86_SIM_KIND_XDP &&                  \
+		    (ADDR) == __x86_sim_ctx_addr + X86_CTX_DATA_OFF) {     \
+			(VALUE) = (__u64)(long)(void *)(long)              \
+				__x86_sim_xdp_ctx->data;                  \
+		} else if (__x86_sim_kind == X86_SIM_KIND_XDP &&           \
+			   (ADDR) == __x86_sim_ctx_addr +                  \
+				     X86_CTX_DATA_END_OFF) {               \
+			(VALUE) = (__u64)(long)(void *)(long)              \
+				__x86_sim_xdp_ctx->data_end;              \
+		} else if (__x86_sim_kind == X86_SIM_KIND_SKB &&           \
+			   (ADDR) == __x86_sim_ctx_addr +                  \
+				     X86_SKB_DATA_OFF) {                   \
+			(VALUE) = (__u64)(long)(void *)(long)              \
+				__x86_sim_skb_ctx->data;                  \
+		} else if (__x86_sim_kind == X86_SIM_KIND_SKB &&           \
+			   (ADDR) == __x86_sim_ctx_addr +                  \
+				     X86_SKB_LEN_OFF &&                    \
+			   (WIDTH) == X86_WIDTH_32) {                       \
+			(VALUE) = __x86_sim_skb_ctx->len;                   \
+		} else {                                                  \
+			(MATCHED) = 0;                                    \
+		}                                                         \
+	} while (0)
 
 #define X86_SIM_L_STORE_ADDR(ADDR, WIDTH, VALUE)                            \
 	do {                                                               \
@@ -449,25 +477,14 @@
 			__x86_l_value = X86_SIM_L_STACK_READ(             \
 				(__s64)__x86_l_base_value + __x86_l_disp, \
 				(WIDTH));                                  \
-		} else if (__x86_l_addr == (__u64)(long)__x86_sim_ctx +   \
-					  X86_CTX_DATA_OFF) {             \
-			__x86_l_value = (__u64)(long)__x86_sim_data;       \
-		} else if (__x86_l_addr == (__u64)(long)__x86_sim_ctx +   \
-					  X86_CTX_DATA_END_OFF) {         \
-			__x86_l_value = (__u64)(long)__x86_sim_data_end;   \
-		} else if (__x86_sim_is_skb &&                           \
-			   __x86_l_addr == (__u64)(long)__x86_sim_ctx +   \
-					  X86_SKB_DATA_OFF) {             \
-			__x86_l_value = (__u64)(long)__x86_sim_data;       \
-		} else if (__x86_sim_is_skb &&                           \
-			   __x86_l_addr == (__u64)(long)__x86_sim_ctx +   \
-					  X86_SKB_LEN_OFF &&              \
-			   (WIDTH) == X86_WIDTH_32) {                     \
-			__x86_l_value = __x86_sim_len;                    \
 		} else {                                                  \
-			__x86_l_value = X86_SIM_L_LOAD_ADDR(              \
-				(void *)(long)__x86_l_addr,               \
-				(WIDTH));                                  \
+			__u8 __x86_l_ctx_field;                         \
+			X86_SIM_L_TRY_LOAD_CTX_FIELD(__x86_l_addr,       \
+				(WIDTH), __x86_l_value, __x86_l_ctx_field);\
+			if (!__x86_l_ctx_field)                          \
+				__x86_l_value = X86_SIM_L_LOAD_ADDR(      \
+					(void *)(long)__x86_l_addr,       \
+					(WIDTH));                          \
 		}                                                         \
 		__x86_l_value;                                            \
 	})
@@ -491,30 +508,15 @@
 				X86_SIM_L_MEM_EFFECTIVE_WIDTH((AUX), (FLAGS)));\
 			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,   \
 						  __x86_l_write_width);     \
-		} else if (__x86_l_addr == (__u64)(long)__x86_sim_ctx +   \
-					  X86_CTX_DATA_OFF ||            \
-				   (__x86_sim_is_skb &&                          \
-				    __x86_l_addr == (__u64)(long)__x86_sim_ctx +  \
-						  X86_SKB_DATA_OFF)) {           \
-			X86_SIM_L_WRITE_REG_WIDTH((DST),                  \
-						  (__u64)(long)__x86_sim_data,\
-						  X86_WIDTH_64);            \
-		} else if (__x86_l_addr == (__u64)(long)__x86_sim_ctx +   \
-					  X86_CTX_DATA_END_OFF) {        \
-			X86_SIM_L_WRITE_REG_WIDTH((DST),                  \
-						  (__u64)(long)__x86_sim_data_end,\
-						  X86_WIDTH_64);            \
-		} else if (__x86_sim_is_skb &&                           \
-			   __x86_l_addr == (__u64)(long)__x86_sim_ctx +   \
-					  X86_SKB_LEN_OFF &&             \
-			   __x86_l_mem_width == X86_WIDTH_32) {           \
-			__x86_l_value = __x86_sim_len;                    \
-			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,   \
-						  __x86_l_write_width);     \
 		} else {                                                  \
-			__x86_l_value = X86_SIM_L_LOAD_ADDR(              \
-				(void *)(long)__x86_l_addr,               \
-				__x86_l_mem_width);                       \
+			__u8 __x86_l_ctx_field;                         \
+			X86_SIM_L_TRY_LOAD_CTX_FIELD(__x86_l_addr,       \
+				__x86_l_mem_width, __x86_l_value,        \
+				__x86_l_ctx_field);                      \
+			if (!__x86_l_ctx_field)                          \
+				__x86_l_value = X86_SIM_L_LOAD_ADDR(      \
+					(void *)(long)__x86_l_addr,       \
+					__x86_l_mem_width);               \
 			if ((OP) == X86_OP_MOVSX_LOAD)                    \
 				__x86_l_value = x86_sign_extend(           \
 					__x86_l_value, __x86_l_mem_width);  \

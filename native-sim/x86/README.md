@@ -65,10 +65,29 @@ There is no per-register ghost pointer metadata. The old `__x86_p_*`,
 packet-end propagation were removed. A register now carries only its scalar x86
 value.
 
-The entry ABI still defines the modeled ctx fields that native code may load:
-`ctx->data`, `ctx->data_end`, and skb `len`. These are memory-model values, not
-register tags. Loading `ctx->data` produces the scalar packet address; later
-packet loads through that scalar are not helped by a hidden packet tag.
+The entry ABI is represented by `X86_SIM_ENTRY_XDP(ctx)` /
+`X86_SIM_ENTRY_SKB(ctx)`. These macros bind the typed verifier ctx pointer,
+record the scalar ctx address used by x86, declare architectural local state,
+and set the ABI entry register (`RDI = ctx`, modeled `RSP = 0`). They must not
+preload packet fields, change packet/ctx memory, create register tags, insert
+checks, or choose a control-flow path.
+
+Type tricks are allowed only as representation witnesses. For example, when an
+x86 instruction loads exactly `[ctx + data_offset]`, the simulator may express
+that same memory read as `ctx->data` so the eBPF verifier sees a legal typed ctx
+load. The result is immediately written to the architectural destination
+register as a scalar x86 value. The typed expression must not be cached as a
+hidden fact, propagated to later registers, or used to prove packet bounds.
+
+`ctx->data`, `ctx->data_end`, skb `data`, and skb `len` are therefore read only
+when the corresponding x86 memory load executes. Loading one of these fields
+does not create per-register pointer metadata; later packet loads through that
+scalar are not helped by a hidden packet tag.
+
+Only ABI-defined entry state is semantic. Other GPRs and flags are unspecified
+at native function entry; the C simulator may initialize local variables to keep
+the eBPF program well-formed, but accepted direct-native artifacts must not have
+guest-visible behavior that depends on those initializer values.
 
 The active code does not add runtime data-end checks. Packet/ctx accesses are
 raw modeled memory operations. If the verifier cannot prove them safe from the
@@ -91,13 +110,13 @@ arithmetic are allowed to surface as compiler/verifier/load failures.
 
 ## Latest Results
 
-Smoke after deleting ghost metadata:
+Smoke after deleting ghost metadata and tightening entry ABI shims:
 
 ```bash
 python3 native-sim/x86/micro-prog/run_micro_sim_batch.py \
-  --only simple simple_packet packet_checksum_fold bpf_local_call_fanout_dispatch \
+  --only simple simple_packet tc_packet_checksum_fold cgroup_skb_hash_chain \
   --jobs 4 \
-  --markdown native-sim/x86/results/README-20260519-no-ghost-smoke.md
+  --markdown native-sim/x86/results/README-20260519-entry-shim-smoke.md
 ```
 
 Result:
@@ -106,15 +125,16 @@ Result:
 | --- | --- | ---: | ---: | --- |
 | `simple` | ok | 19 | 24 | load and test pass |
 | `simple_packet` | ok | 16 | 21 | load and test pass |
-| `packet_checksum_fold` | run-fail | 170 | 67 | verifier complexity / exact scalar-address proof fallout |
-| `bpf_local_call_fanout_dispatch` | run-fail | 550 | 295 | proof BPF stack growth after metadata removal |
+| `tc_packet_checksum_fold` | run-fail | 151 |  | verifier rejects scalar-address packet range without hidden metadata |
+| `cgroup_skb_hash_chain` | run-fail | 300 |  | verifier rejects scalar-address packet range without hidden metadata |
 
-Latest full no-ghost run:
+Latest full entry-shim run:
 
-- `results/README-20260519-no-ghost-full.md`
+- `results/README-20260519-entry-shim-full.md`
 - 2/29 loaded and produced the expected result: `simple`, `simple_packet`.
 - The drop is expected: packet/ctx/stack pointer proof is no longer assisted by
-  per-register pointer metadata or packet-length facts.
+  per-register pointer metadata, packet-length facts, or entry-time
+  `ctx->data`/`ctx->data_end` caches.
 
 These are verifier/proof-expression failures after removing non-hardware
 guards, not runtime simulator fallbacks.

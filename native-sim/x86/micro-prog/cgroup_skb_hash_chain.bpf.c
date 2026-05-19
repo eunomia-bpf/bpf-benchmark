@@ -4,7 +4,7 @@
 SEC("cgroup_skb/egress")
 int cgroup_skb_hash_chain_x86_sim_xdp(struct __sk_buff *ctx)
 {
-	X86_SIM_DECLARE_SKB(ctx);
+	X86_SIM_ENTRY_SKB(ctx);
 x86_l_0:
 	/* 0x0: push   r15 */
 	X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_R15, X86_WIDTH_64, 0, 0);

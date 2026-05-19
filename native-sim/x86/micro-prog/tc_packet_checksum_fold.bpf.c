@@ -3,7 +3,7 @@
 SEC("tc")
 int tc_packet_checksum_fold_x86_sim_xdp(struct __sk_buff *ctx)
 {
-	X86_SIM_DECLARE_SKB(ctx);
+	X86_SIM_ENTRY_SKB(ctx);
 x86_l_0:
 	/* 0x0: mov    rdx,QWORD PTR [rdi+0xd0] */
 	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_RDX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 208ULL);

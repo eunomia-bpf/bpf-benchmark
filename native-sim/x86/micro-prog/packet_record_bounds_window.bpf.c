@@ -4,7 +4,7 @@
 SEC("xdp")
 int packet_record_bounds_window_x86_sim_xdp(struct xdp_md *ctx)
 {
-	X86_SIM_DECLARE_XDP(ctx);
+	X86_SIM_ENTRY_XDP(ctx);
 x86_l_0:
 	/* 0x0: mov    rdx,QWORD PTR [rdi] */
 	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_RDX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);

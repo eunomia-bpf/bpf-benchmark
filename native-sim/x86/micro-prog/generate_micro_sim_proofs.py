@@ -671,15 +671,15 @@ def render_program(name: str, insns: list[NativeInsn],
     if kind == "tc":
         section = 'SEC("tc")'
         ctx_type = "struct __sk_buff *"
-        declare = "X86_SIM_DECLARE_SKB(ctx);"
+        declare = "X86_SIM_ENTRY_SKB(ctx);"
     elif kind == "cgroup_skb":
         section = 'SEC("cgroup_skb/egress")'
         ctx_type = "struct __sk_buff *"
-        declare = "X86_SIM_DECLARE_SKB(ctx);"
+        declare = "X86_SIM_ENTRY_SKB(ctx);"
     else:
         section = 'SEC("xdp")'
         ctx_type = "struct xdp_md *"
-        declare = "X86_SIM_DECLARE_XDP(ctx);"
+        declare = "X86_SIM_ENTRY_XDP(ctx);"
     addrs = {insn.addr for insn in insns}
     subroutine_label_by_addr = {
         fn_insns[0].addr: f"x86_l_{fn_insns[0].addr:x}"

@@ -81,11 +81,62 @@ RDI = ctx
 RSP = 0
 ```
 
-`ctx->data`, `ctx->data_end`, and skb data/length fields are modeled as ABI
-loads. The resulting scalar value must equal the value a native ABI-compliant
-program would observe. These ABI fields do not create per-register pointer
-tags; subsequent memory operations use the scalar address produced by x86
-execution.
+The implementation entry macros are:
+
+```c
+X86_SIM_ENTRY_XDP(ctx);
+X86_SIM_ENTRY_SKB(ctx);
+```
+
+They may only:
+
+- bind the typed verifier ctx pointer used to express legal ctx-field loads;
+- bind the scalar ctx address used by the x86 architectural state;
+- declare simulator-local architectural variables and modeled stack storage;
+- set ABI-defined entry state (`RDI = ctx`, modeled `RSP = 0`).
+
+They must not preload packet fields, change ctx/packet/output memory, create
+per-register tags, insert bounds checks, trap, fallback, or influence control
+flow.
+
+Only ABI-defined entry state may be used as a semantic fact. Other GPRs and
+flags are unspecified at native function entry. The C implementation may give
+local variables initializer values so the eBPF program is well-formed, but an
+accepted artifact must separately establish that no guest-visible data flow,
+control flow, memory access, or return value depends on those initializer values.
+Self-zeroing idioms such as `xor eax, eax` are acceptable only because the x86
+instruction result is independent of the old register value.
+
+## Representation Tricks
+
+Verifier-facing typed expressions are allowed only as semantics-erased
+representations of the same x86 value. Removing the typed expression and
+replacing it with the corresponding raw x86 memory value must leave the same
+architectural registers, flags, memory effects, and control flow.
+
+Allowed example:
+
+```text
+x86 instruction:  MOV reg, [ctx + data_offset]
+proof expression: reg = scalar_value(ctx->data)
+```
+
+This is allowed because both sides are the same ABI field load. The typed ctx
+expression is consumed immediately by the load; it is not a register tag or a
+range fact.
+
+Forbidden uses:
+
+- caching `ctx->data`, `ctx->data_end`, or skb `len` at entry as hidden proof
+  facts;
+- propagating typed pointer metadata across x86 registers;
+- using typed facts to affect flags, branches, return values, or memory writes;
+- proving packet bounds from `packet + len`, `data_end`, or any relation that
+  the native x86 instruction stream did not itself establish.
+
+`ctx->data`, `ctx->data_end`, skb data, and skb length are read only when the
+corresponding x86 memory load executes. The resulting register value is an
+ordinary scalar x86 value.
 
 ## Instruction Expansion
 

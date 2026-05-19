@@ -28,6 +28,13 @@ check whether the matched MI range is too broad or too narrow. The replacement
 should cover the whole canonical idiom that the x86 instruction subsumes; leaving
 redundant cleanup instructions behind can make a good instruction look bad.
 
+If an optimization can be represented by an existing kinsn, the backend should
+select that kinsn rather than only replacing the sequence with verifier-native
+BPF. Plain BPF rewrites are useful for correctness and verifier proof shape, but
+they do not exercise the module/native-instruction path. For example, little
+endian byte-ladder load packing must lower to `bpf_x86_movzwl`, `bpf_x86_movl`,
+or `bpf_x86_movq` when legal, not just to `LDH`, `LDW`, or `LDD`.
+
 ## Experiment protocol
 
 For each optimization step:
