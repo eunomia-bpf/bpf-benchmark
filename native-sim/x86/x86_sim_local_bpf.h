@@ -34,6 +34,12 @@ struct x86_sim_skb_abi {
 	void *data;
 };
 
+union x86_sim_gpr {
+	void *ptr;
+	__u16 w;
+	__u8 b[8];
+};
+
 #define X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)                                    \
 	((WIDTH) ? (WIDTH) : X86_WIDTH_64)
 
@@ -60,7 +66,7 @@ struct x86_sim_skb_abi {
 	X(X86_R15, r15)
 
 #define X86_SIM_L_DECLARE_REG(REG, NAME)                                    \
-	void *__x86_##NAME = (void *)0;
+	union x86_sim_gpr __x86_##NAME = { .ptr = (void *)0 };
 
 #define X86_SIM_L_DECLARE_STATE()                                           \
 	X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_DECLARE_REG)                       \
@@ -85,22 +91,22 @@ struct x86_sim_skb_abi {
 #endif
 
 #define X86_SIM_L_REG_VALUE(REG)                                            \
-	((REG) == X86_RAX ? __x86_rax :                                      \
-	 (REG) == X86_RCX ? __x86_rcx :                                      \
-	 (REG) == X86_RDX ? __x86_rdx :                                      \
-	 (REG) == X86_RBX ? __x86_rbx :                                      \
-	 (REG) == X86_RSP ? __x86_rsp :                                      \
-	 (REG) == X86_RBP ? __x86_rbp :                                      \
-	 (REG) == X86_RSI ? __x86_rsi :                                      \
-	 (REG) == X86_RDI ? __x86_rdi :                                      \
-	 (REG) == X86_R8 ? __x86_r8 :                                        \
-	 (REG) == X86_R9 ? __x86_r9 :                                        \
-	 (REG) == X86_R10 ? __x86_r10 :                                      \
-	 (REG) == X86_R11 ? __x86_r11 :                                      \
-	 (REG) == X86_R12 ? __x86_r12 :                                      \
-	 (REG) == X86_R13 ? __x86_r13 :                                      \
-	 (REG) == X86_R14 ? __x86_r14 :                                      \
-	 (REG) == X86_R15 ? __x86_r15 : (void *)0)
+	((REG) == X86_RAX ? __x86_rax.ptr :                                  \
+	 (REG) == X86_RCX ? __x86_rcx.ptr :                                  \
+	 (REG) == X86_RDX ? __x86_rdx.ptr :                                  \
+	 (REG) == X86_RBX ? __x86_rbx.ptr :                                  \
+	 (REG) == X86_RSP ? __x86_rsp.ptr :                                  \
+	 (REG) == X86_RBP ? __x86_rbp.ptr :                                  \
+	 (REG) == X86_RSI ? __x86_rsi.ptr :                                  \
+	 (REG) == X86_RDI ? __x86_rdi.ptr :                                  \
+	 (REG) == X86_R8 ? __x86_r8.ptr :                                    \
+	 (REG) == X86_R9 ? __x86_r9.ptr :                                    \
+	 (REG) == X86_R10 ? __x86_r10.ptr :                                  \
+	 (REG) == X86_R11 ? __x86_r11.ptr :                                  \
+	 (REG) == X86_R12 ? __x86_r12.ptr :                                  \
+	 (REG) == X86_R13 ? __x86_r13.ptr :                                  \
+	 (REG) == X86_R14 ? __x86_r14.ptr :                                  \
+	 (REG) == X86_R15 ? __x86_r15.ptr : (void *)0)
 
 #define X86_SIM_ENTRY_XDP(CTX)                                               \
 	struct x86_sim_xdp_abi __x86_sim_abi = {                         \
@@ -109,7 +115,7 @@ struct x86_sim_skb_abi {
 	};                                                               \
 	X86_SIM_L_DECLARE_STATE();                                           \
 	X86_SIM_L_DECLARE_STACK();                                           \
-	__x86_rdi = &__x86_sim_abi
+	__x86_rdi.ptr = &__x86_sim_abi
 
 #define X86_SIM_ENTRY_SKB(CTX)                                               \
 	struct x86_sim_skb_abi __x86_sim_abi = {                         \
@@ -118,11 +124,11 @@ struct x86_sim_skb_abi {
 	};                                                               \
 	X86_SIM_L_DECLARE_STATE();                                           \
 	X86_SIM_L_DECLARE_STACK();                                           \
-	__x86_rdi = &__x86_sim_abi
+	__x86_rdi.ptr = &__x86_sim_abi
 
 #define X86_SIM_L_READ_REG_CASE(REG, NAME)                                  \
 	case REG:                                                          \
-		__x86_l_value = __x86_##NAME;                             \
+		__x86_l_value = __x86_##NAME.ptr;                         \
 		break;
 
 #define X86_SIM_L_READ_REG_PTR(REG)                                         \
@@ -133,12 +139,22 @@ struct x86_sim_skb_abi {
 
 #define X86_SIM_L_WRITE_REG_VALUE_CASE(REG, NAME)                           \
 	case REG:                                                          \
-		__x86_##NAME = (void *)(long)__x86_wr_next;              \
+		__x86_##NAME.ptr = (void *)(long)__x86_wr_next;          \
+		break;
+
+#define X86_SIM_L_WRITE_REG8_VALUE_CASE(REG, NAME)                          \
+	case REG:                                                          \
+		__x86_##NAME.b[0] = (__u8)__x86_wr_next;                  \
+		break;
+
+#define X86_SIM_L_WRITE_REG16_VALUE_CASE(REG, NAME)                         \
+	case REG:                                                          \
+		__x86_##NAME.w = (__u16)__x86_wr_next;                    \
 		break;
 
 #define X86_SIM_L_WRITE_REG_PTR_VALUE_CASE(REG, NAME)                       \
 	case REG:                                                          \
-		__x86_##NAME = __x86_wr_next_ptr;                        \
+		__x86_##NAME.ptr = __x86_wr_next_ptr;                    \
 		break;
 
 #define X86_SIM_L_WRITE_REG_PTR(REG, VALUE)                                 \
@@ -155,19 +171,31 @@ struct x86_sim_skb_abi {
 	do {                                                               \
 		__u8 __x86_wr_width = (WIDTH) ? (WIDTH) : X86_WIDTH_64;   \
 		__u64 __x86_wr_next = (VALUE);                            \
-		if (__x86_wr_width == X86_WIDTH_8 ||                      \
-		    __x86_wr_width == X86_WIDTH_16) {                     \
-			__u64 __x86_wr_old = X86_SIM_L_READ_REG(REG);     \
-			__u64 __x86_wr_mask = x86_width_mask(__x86_wr_width);\
-			__x86_wr_next = (__x86_wr_old & ~__x86_wr_mask) | \
-				       (__x86_wr_next & __x86_wr_mask);  \
+		if (__x86_wr_width == X86_WIDTH_8) {                      \
+			switch (REG) {                                    \
+			X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_WRITE_REG8_VALUE_CASE)\
+			default:                                          \
+				break;                                    \
+			}                                                 \
+		} else if (__x86_wr_width == X86_WIDTH_16) {              \
+			switch (REG) {                                    \
+			X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_WRITE_REG16_VALUE_CASE)\
+			default:                                          \
+				break;                                    \
+			}                                                 \
 		} else if (__x86_wr_width == X86_WIDTH_32) {              \
 			__x86_wr_next = (__u32)__x86_wr_next;             \
-		}                                                         \
-		switch (REG) {                                            \
-		X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_WRITE_REG_VALUE_CASE)    \
-		default:                                                  \
-			break;                                            \
+			switch (REG) {                                    \
+			X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_WRITE_REG_VALUE_CASE)\
+			default:                                          \
+				break;                                    \
+			}                                                 \
+		} else {                                                  \
+			switch (REG) {                                    \
+			X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_WRITE_REG_VALUE_CASE)\
+			default:                                          \
+				break;                                    \
+			}                                                 \
 		}                                                         \
 	} while (0)
 
@@ -830,15 +858,15 @@ struct x86_sim_skb_abi {
 			}                                                   \
 		} else if ((OP) == X86_OP_PUSH) {                         \
 			__u64 __x86_l_value = X86_SIM_L_READ_REG(SRC);    \
-			__x86_rsp = (__u8 *)__x86_rsp - 8;                \
-			X86_SIM_L_STACK_WRITE((__s64)(long)__x86_rsp, X86_WIDTH_64,\
+			__x86_rsp.ptr = (__u8 *)__x86_rsp.ptr - 8;        \
+			X86_SIM_L_STACK_WRITE((__s64)(long)__x86_rsp.ptr, X86_WIDTH_64,\
 					      __x86_l_value);              \
 		} else if ((OP) == X86_OP_POP) {                          \
 			__u64 __x86_l_value = X86_SIM_L_STACK_READ(        \
-				(__s64)(long)__x86_rsp, __x86_l_width);    \
+				(__s64)(long)__x86_rsp.ptr, __x86_l_width);\
 			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,   \
 						  __x86_l_width);        \
-			__x86_rsp = (__u8 *)__x86_rsp + 8;                \
+			__x86_rsp.ptr = (__u8 *)__x86_rsp.ptr + 8;        \
 		}                                                         \
 	} while (0)
 
@@ -850,12 +878,12 @@ struct x86_sim_skb_abi {
 #define X86_SIM_RUN_OP_SUB(OP, DST, SRC, FLAGS, AUX, IMM)                   \
 	X86_SIM_RUN_OP((OP), (DST), (SRC), (FLAGS), (AUX), (IMM))
 
-#define X86_SIM_X86_RET() return (__u32)(long)__x86_rax
+#define X86_SIM_X86_RET() return (__u32)(long)__x86_rax.ptr
 
 #define X86_SIM_X86_CALL(LABEL, RETURN_ADDR)                               \
 	do {                                                               \
-		__x86_rsp = (__u8 *)__x86_rsp - 8;                        \
-		X86_SIM_L_STACK_WRITE((__s64)(long)__x86_rsp, X86_WIDTH_64,\
+		__x86_rsp.ptr = (__u8 *)__x86_rsp.ptr - 8;                \
+		X86_SIM_L_STACK_WRITE((__s64)(long)__x86_rsp.ptr, X86_WIDTH_64,\
 				      (RETURN_ADDR));                     \
 		goto LABEL;                                               \
 	} while (0)
@@ -863,8 +891,8 @@ struct x86_sim_skb_abi {
 #define X86_SIM_X86_SUB_RET(DISPATCH_LABEL)                                \
 	do {                                                               \
 		__x86_sim_ret_addr = X86_SIM_L_STACK_READ(                 \
-			(__s64)(long)__x86_rsp, X86_WIDTH_64);             \
-		__x86_rsp = (__u8 *)__x86_rsp + 8;                        \
+			(__s64)(long)__x86_rsp.ptr, X86_WIDTH_64);         \
+		__x86_rsp.ptr = (__u8 *)__x86_rsp.ptr + 8;                \
 		goto DISPATCH_LABEL;                                      \
 	} while (0)
 
