@@ -90,6 +90,12 @@ rejects stack-slot coverage at runtime; if a reachable native path needs stack
 memory outside the modeled layout, the model must be enlarged as stack memory,
 not guarded with a runtime check.
 
+Stack helper interfaces must not carry verifier pointer payloads. A stack write
+is a byte write of the low operand-width bits; a stack read reconstructs the
+little-endian scalar byte value. If that scalar later denotes an address, the
+proof must recover that fact from the architectural value and ABI relation, not
+from hidden pointer tags stored in stack memory.
+
 The current generated source may select a shallow or deep stack-state layout:
 64 bytes for push/pop-only frames and 128 bytes for programs with real
 `[rsp/rbp + disp]` local stack memory. This is a compile-time state-size choice,
@@ -258,6 +264,16 @@ helper factoring, inline/noinline boundaries, macro shape, state layout, and
 ISA-semantics factoring are valid places to change. Python-side helper
 selection, loop recognition, control-flow reconstruction, state specialization,
 or benchmark-specific workarounds are outside this spec.
+
+A planned state-layout experiment is to replace the pointer-to-`struct
+x86_state` register file with C local variables in the generated entry function
+and to express helper semantics as scoped C macros or fixed C-authored
+templates. This is allowed only as a representation change: the macro-expanded
+step must still implement the same x86 small-step relation, and Python must
+still emit only the one-to-one native instruction schedule. This may help clang
+and the verifier eliminate unused registers, avoid address-taken struct aliasing,
+and reduce BPF stack spills, but it is not allowed to introduce branch
+assertions, bounds checks, safety guards, or benchmark-specific behavior.
 
 ### Arithmetic And Flags
 
@@ -601,7 +617,7 @@ These are not acceptable final assumptions; they are work items.
 | Unsupported native constructs | There must be no runtime unsupported/trap/fallback path in an accepted artifact. Correctness work should add simulator semantics rather than relying on generation-time rejection or unreachable-path assumptions. |
 | Control-flow step dispatch | `JCC/JMP/CALL/RET` must not be accepted by `X86_SIM_RUN_OP()`; they are represented only by the corresponding x86 control-flow macros. |
 | Packet/output helper bounds checks | Active packet/output helpers must not insert runtime `data_end` bounds checks. Verifier acceptance must come from equivalent pointer state and native guards/ABI state, not an extra checked-simulator guard. |
-| Fault-like native behavior | Arbitrary memory faults, stack OOB, invalid addresses, divide-by-zero, and divide overflow must not be caught by simulator checks. They either remain verifier-visible native operations or fail verification. |
+| Fault-like native behavior | Arbitrary memory faults, stack OOB, invalid addresses, divide-by-zero, and divide overflow must not be caught by simulator checks. They either remain verifier-visible native operations or fail verification. Non-faulting `DIV` paths now use the correct x86 dividend and destination registers for 8/16/32/64-bit operands. |
 | Generated CFG tail | Generated code tails use `__builtin_unreachable()` instead of fallback returns. Prove the native CFG coverage theorem for each artifact: no reachable generated path falls through past the emitted native instructions. |
 | Branch proof metadata | Removed from active code. Keep it out unless there is a formal theorem that preserves exact native x86 branch semantics and does not introduce proof-only assertions. |
 | x86 pointer-as-integer representation | Current GPR fields can still carry verifier pointer-typed values. This is verifier-hostile for x86 integer operations on addresses. A final design must specify an address representation that preserves x86-observable behavior under the ABI without adding guards or assertions. |
@@ -613,4 +629,5 @@ These are not acceptable final assumptions; they are work items.
 | Multi-exit loop verifier cost | Current correctness-first code prioritizes exact branch semantics over verifier acceptance. Any future structural lowering must still be a C/template theorem and preserve native branch semantics without fuel. |
 | Paused PC-dispatch experiment | If revived, implement it as a C/template proof rule rather than Python CFG scheduling. It is not active now. |
 | ABI output-store theorem | The retag helper is removed. Stores through `[rdi+16/20]` must be justified by the current architectural `rdi` state and the ABI memory model itself. |
+| Local-register macro state | Open experiment. Prove macro-expanded local-variable state is observationally equivalent to the abstract `XState` register/flag/metadata fields, then reuse the same instruction helper theorems. |
 | JSON-linker equivalence | Reuse this spec after JSON bytecode linking stops going through clang. |

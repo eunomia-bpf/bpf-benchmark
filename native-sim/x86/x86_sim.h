@@ -430,24 +430,13 @@ static __always_inline __u32 x86_stack_index(__s64 off)
 	return (__u32)(off + X86_SIM_STACK_BYTES);
 }
 
-static __always_inline void
-x86_stack_clear_ptr_range(struct x86_state *state, __u32 index, __u8 width)
-{
-	(void)state;
-	(void)index;
-	(void)width;
-}
-
 static __always_inline int x86_stack_write_raw(struct x86_state *state,
 					       __s64 off, __u8 width,
-					       __u64 value, void *ptr,
-					       __u8 tag)
+					       __u64 value)
 {
 	__u32 index = x86_stack_index(off);
 	__u64 narrowed = value & x86_width_mask(width);
 
-	(void)ptr;
-	(void)tag;
 	state->stack_mem[index] = narrowed;
 	if (width >= X86_WIDTH_16)
 		state->stack_mem[index + 1] = narrowed >> 8;
@@ -461,14 +450,12 @@ static __always_inline int x86_stack_write_raw(struct x86_state *state,
 		state->stack_mem[index + 6] = narrowed >> 48;
 		state->stack_mem[index + 7] = narrowed >> 56;
 	}
-	x86_stack_clear_ptr_range(state, index, width);
 	return X86_SIM_CONTINUE;
 }
 
 static __always_inline int x86_stack_read_raw(struct x86_state *state,
 					      __s64 off, __u8 width,
-					      __u64 *value,
-					      void **ptr, __u8 *tag)
+					      __u64 *value)
 {
 	__u32 index = x86_stack_index(off);
 
@@ -485,36 +472,26 @@ static __always_inline int x86_stack_read_raw(struct x86_state *state,
 		*value |= (__u64)state->stack_mem[index + 6] << 48;
 		*value |= (__u64)state->stack_mem[index + 7] << 56;
 	}
-	*ptr = 0;
-	*tag = X86_PTR_NONE;
 	return X86_SIM_CONTINUE;
 }
 
 static __always_inline int x86_push_reg(struct x86_state *state, __u8 reg)
 {
 	__u64 value = 0;
-	void *ptr = 0;
-	__u8 tag = X86_PTR_NONE;
 
 	value = x86_read_reg(state, reg);
-	x86_read_ptr_reg(state, reg, &ptr, &tag);
 	state->rsp -= 8;
 	return x86_stack_write_raw(state, (__s64)state->rsp, X86_WIDTH_64,
-				   value, ptr, tag);
+				   value);
 }
 
 static __always_inline int x86_pop_reg(struct x86_state *state, __u8 reg,
 				       __u8 width)
 {
 	__u64 value = 0;
-	void *ptr = 0;
-	__u8 tag = X86_PTR_NONE;
 
-	x86_stack_read_raw(state, (__s64)state->rsp, width, &value, &ptr,
-			   &tag);
+	x86_stack_read_raw(state, (__s64)state->rsp, width, &value);
 	x86_write_reg_width(state, reg, value, width);
-	if (width == X86_WIDTH_64 && tag != X86_PTR_NONE)
-		x86_write_ptr_reg(state, reg, ptr, tag);
 	state->rsp += 8;
 	return X86_SIM_CONTINUE;
 }
@@ -523,13 +500,9 @@ static __always_inline int x86_load_stack(struct x86_state *state, __u8 dst,
 					  __s64 off, __u8 width)
 {
 	__u64 value = 0;
-	void *ptr = 0;
-	__u8 tag = X86_PTR_NONE;
 
-	x86_stack_read_raw(state, off, width, &value, &ptr, &tag);
+	x86_stack_read_raw(state, off, width, &value);
 	x86_write_reg_width(state, dst, value, width);
-	if (tag != X86_PTR_NONE)
-		return x86_write_ptr_reg(state, dst, ptr, tag);
 	return X86_SIM_CONTINUE;
 }
 
@@ -538,17 +511,12 @@ static __always_inline int x86_store_stack_reg(struct x86_state *state,
 					       __u8 width, __u32 aux)
 {
 	__u64 value = 0;
-	void *ptr = 0;
-	__u8 tag = X86_PTR_NONE;
 	__u8 src_shift = X86_REG_AUX_GET_SRC_SHIFT(aux);
 
 	value = x86_read_reg(state, src);
 	if (src_shift != 0)
 		value >>= src_shift;
-	x86_read_ptr_reg(state, src, &ptr, &tag);
-	if (width != X86_WIDTH_64)
-		tag = X86_PTR_NONE;
-	return x86_stack_write_raw(state, off, width, value, ptr, tag);
+	return x86_stack_write_raw(state, off, width, value);
 }
 #endif
 
@@ -1188,13 +1156,9 @@ static __always_inline int x86_read_mem_value(struct x86_state *state,
 	}
 #ifdef X86_SIM_ENABLE_STACK
 	if (base_reg == X86_RSP || base_reg == X86_RBP ||
-	    tag == X86_PTR_STACK) {
-		void *ptr = 0;
-		__u8 ptr_tag = X86_PTR_NONE;
-
+	    tag == X86_PTR_STACK)
 		return x86_stack_read_raw(state, (__s64)base_value + disp,
-					  width, value, &ptr, &ptr_tag);
-	}
+					  width, value);
 #endif
 #ifdef X86_SIM_ENABLE_PACKET_REG_FASTPATH
 	if (base_reg == X86_RCX && state->tag_rcx == X86_PTR_PACKET) {
@@ -1251,8 +1215,7 @@ static __always_inline int x86_store_mem(struct x86_state *state,
 						   (__s64)base_value + disp,
 						   insn->flags,
 						   x86_store_imm_value(insn->imm,
-								       insn->flags),
-						   0, X86_PTR_NONE);
+								       insn->flags));
 		return x86_store_stack_reg(state, insn->src,
 					   (__s64)base_value + disp,
 					   insn->flags, insn->aux);

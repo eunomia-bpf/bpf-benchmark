@@ -331,7 +331,8 @@ C state-layout changes in the active path:
 - The stack model is byte-addressed stack memory. Pointer payload metadata was
   removed from stack because hardware x86 stores bytes, not verifier tags. The
   generated source selects 64-byte or 128-byte state layout, but no runtime
-  stack bounds guard is inserted.
+  stack bounds guard is inserted. Stack helper signatures now carry only bytes,
+  offsets, and widths; they no longer accept or return hidden pointer payloads.
 - Top-level packet memory loads use a raw-load fastpath for
   packet bases that already have verifier-visible range. Subfunction steps use
   the generic typed simulator path so local-call proof state stays stable.
@@ -365,6 +366,7 @@ Generated-C migration todo:
 | Delete SKB length branch range hook | done | The proof-only `cmp [ctx+0x70], imm; ja target` range assertion was removed. |
 | Model SKB packet end through ABI metadata | done | `ctx+0x70` loads carry `PACKET_LEN`; `PACKET_LEN + PACKET` becomes `PACKET_END`, matching `data + skb_len == data_end`. |
 | Preserve same-register `xchg` semantics | done | `xchg ax, ax` is modeled as the real x86 no-op, so it does not clear packet pointer metadata. |
+| Non-faulting `DIV` semantics | done | `div` now uses `AX`, `DX:AX`, `EDX:EAX`, or `RDX:RAX` according to operand width and writes quotient/remainder to the architectural destinations. Divide faults remain unguarded fault-like behavior. |
 | Hidden packet-offset metadata | done | Packet-capable registers carry an offset field used only to make packet bounds visible to the verifier. |
 | Delete branch-proof metadata | done | `last_cmp_*` state and `x86_sim_assert_*` helpers were removed from active C. |
 | Remove packet/output runtime bounds checks | done | Active packet/output helpers no longer guard loads/stores with proof-only `data_end` checks. |
@@ -374,6 +376,7 @@ Generated-C migration todo:
 | Per-instruction const record | done | `X86_SIM_EXEC` creates a local `const struct x86_insn` for each macro-expanded native instruction so clang can specialize C-authored semantics without Python helper selection. |
 | Remove generated fallback returns | done | Generated entry and subfunction tails use `__builtin_unreachable()` after the native CFG; no fallback return value is emitted. |
 | Correctness-first compile/verify check | latest: 5/29 verifier ok | [`results/README-20260519-005704.md`](./results/README-20260519-005704.md): all 29 generated micro sources compile; five load and test successfully. Remaining failures are verifier rejection of pointer-typed x86 GPR integer operations, byte-wise pointer stack stores, scalar/pointer subtraction, and packet accesses whose native guards are not visible as direct verifier range facts. |
+| Local-register macro state experiment | open | Next state-layout experiment: represent x86 GPRs/flags/metadata as function-local variables and make helper steps scoped macros/templates. This should improve constant elimination and reduce BPF stack pressure while keeping Python a one-to-one native instruction emitter. |
 | Direct-native safety TODO | open | See [`TODO.md`](./TODO.md) for remaining stack, metadata, ABI, rodata, flag, and call-return proof obligations. |
 
 The current active path is correctness-first: it removes simulator-only safety
@@ -796,6 +799,9 @@ using per-instruction const records:
   removed from stack because hardware stack memory stores bytes, not verifier
   tags. It currently uses a 64-byte shallow layout or a 128-byte deep layout;
   any future increase must remain an exact byte-memory model, not a guard.
+- `DIV` now models the non-faulting architectural dividend and writeback rules
+  for 8/16/32/64-bit operands. Divide-by-zero and quotient-overflow remain
+  fault-like cases; the simulator does not add guards or trap returns for them.
 - Flag helpers now cover the active `SBB`, `POPCNT`, shift/rotate, `SHLD`,
   `SHRD`, and `IMUL CF/OF` cases more closely, but undefined-flag cases and
   non-current opcodes still need audit.

@@ -425,7 +425,7 @@ static __always_inline int x86_sim_call_enter(struct x86_state *state,
 #ifdef X86_SIM_ENABLE_STACK
 	state->rsp -= 8;
 	return x86_stack_write_raw(state, (__s64)state->rsp, X86_WIDTH_64,
-				   return_addr, 0, X86_PTR_NONE);
+				   return_addr);
 #else
 	(void)state;
 	(void)return_addr;
@@ -437,11 +437,9 @@ static __always_inline void x86_sim_ret_pop(struct x86_state *state)
 {
 #ifdef X86_SIM_ENABLE_STACK
 	__u64 return_addr = 0;
-	void *return_ptr = 0;
-	__u8 return_tag = X86_PTR_NONE;
 
 	x86_stack_read_raw(state, (__s64)state->rsp, X86_WIDTH_64,
-			   &return_addr, &return_ptr, &return_tag);
+			   &return_addr);
 	state->rsp += 8;
 #else
 	(void)state;
