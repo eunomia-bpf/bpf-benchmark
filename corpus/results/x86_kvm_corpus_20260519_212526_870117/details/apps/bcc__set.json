@@ -1,0 +1,10 @@
+{
+  "app": "bcc/set",
+  "baseline": null,
+  "error": "BCC tool capable exited with rc=127: /usr/bin/env: 'python': No such file or directory\nstderr tail:\ncapable:\n/usr/bin/env: 'python': No such file or directory\nbiosnoop:\n/usr/bin/env: 'python': No such file or directory\nvfsstat:\n/usr/bin/env: 'python': No such file or directory\nopensnoop:\n/usr/bin/env: 'python': No such file or directory\nsyscount:\n/usr/bin/env: 'python': No such file or directory\ntcpconnect:\n/usr/bin/env: 'python': No such file or directory\ntcplife:\n/usr/bin/env: 'python': No such file or directory\nrunqlat:\n/usr/bin/env: 'python': No such file or directory",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "bcc_set",
+  "selected_workload": "stress_ng_os_io_network",
+  "status": "error"
+}
