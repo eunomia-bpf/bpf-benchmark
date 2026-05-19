@@ -77,7 +77,7 @@ Keep the codebase fail-fast so missing v3 capabilities become visible defects in
 Do not produce `git revert` commits or "Restore X" commits to undo previous changes. If a change is wrong, fix it forward in a new commit that does the right thing — do not bounce the tree between two states. Repeated revert/restore pairs (e.g. `Revert "X"` followed by `Restore X`) are forbidden; they pollute history and obscure intent. Decide what the code should be, write that, commit once.
 
 ### No Unauthorized Git Mutations
-Assistants (Claude or codex) must NOT run git commands that modify state: `commit`, `commit --amend`, `checkout -- <files>`, `checkout HEAD -- <files>`, `reset`, `reset --hard`, `restore`, `stash`, `stash pop`, `branch -D`, `push`, `push -f`, `rebase`, `cherry-pick`, `revert`. The only allowed git commands are read-only: `status`, `diff`, `log`, `blame`, `show`, `fsck`, `stash list`, `reflog`.
+Assistants (Claude or codex) must NOT run git commands that modify state: `commit`, `commit --amend`, `checkout -- <files>`, `checkout HEAD -- <files>`, `reset`, `reset --hard`, `restore`, `stash`, `stash pop`, `branch -D`, `push`, `push -f`, `rebase`, `cherry-pick`, `revert`. The only allowed git state mutation is `git add`, and only when the user explicitly asks to stage files. Other allowed git commands are read-only: `status`, `diff`, `log`, `blame`, `show`, `fsck`, `stash list`, `reflog`.
 
 Uncommitted working-tree modifications may be the user's or a concurrent agent's WIP. Even when the build is broken (e.g., 82 compile errors from a half-done refactor), do NOT `git checkout` to "fix" it — report the situation to the user and wait for direction. Lost WIP is not recoverable through `git reflog` because reflog only tracks committed states.
 
