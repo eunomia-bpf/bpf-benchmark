@@ -600,32 +600,10 @@ def c_ident(text: str) -> str:
     return re.sub(r"[^A-Za-z0-9_]", "_", text)
 
 
-CALLEE_SAVED_REGS = ("rbx", "rbp", "r12", "r13", "r14", "r15")
-
-
-def is_subfunction_frame_insn(insn: NativeInsn) -> bool:
-    if insn.mnemonic in {"push", "pop"} and len(insn.operands) == 1:
-        return insn.operands[0].lower() in CALLEE_SAVED_REGS
-    if insn.mnemonic == "mov" and len(insn.operands) == 2:
-        return (
-            insn.operands[0].lower() == "rbp"
-            and insn.operands[1].lower() == "rsp"
-        )
-    return False
-
-
-def is_entry_synthetic_frame_insn(insn: NativeInsn) -> bool:
-    if is_subfunction_frame_insn(insn):
-        return True
-    if insn.mnemonic in {"add", "sub"} and len(insn.operands) == 2:
-        return insn.operands[0].lower() == "rsp" and is_int(insn.operands[1])
-    return False
-
-
 def render_x86_subfunction(symbol: str, insns: list[NativeInsn]) -> str:
     addrs = {insn.addr for insn in insns}
     lines = [
-        f"static __noinline int x86_fn_{c_ident(symbol)}("
+        f"static X86_VM_SUBFN_ATTR int x86_fn_{c_ident(symbol)}("
         "struct x86_state *__x86_vm_state_ptr, void *__x86_vm_data, "
         "void *__x86_vm_data_end)",
         "{",
@@ -633,10 +611,6 @@ def render_x86_subfunction(symbol: str, insns: list[NativeInsn]) -> str:
         "\tX86_VM_SUB_BEGIN();",
     ]
     for insn in insns:
-        if is_subfunction_frame_insn(insn):
-            lines.append(f"\t/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
-            lines.append("\t/* generated-C ABI: callee-save frame traffic handled by wrapper */")
-            continue
         lines.append(f"x86_l_{insn.addr:x}:")
         append_branch_or_ret(lines, insn, addrs, subroutine=True,
                              step_macro="X86_VM_RUN_OP_SUB",
@@ -654,7 +628,6 @@ def render_program(name: str, insns: list[NativeInsn],
                    subfunctions: dict[str, list[NativeInsn]] | None = None) -> str:
     ret_statement = "X86_VM_X86_RET();"
     subfunctions = subfunctions or {}
-    synthetic_entry_frame = bool(subfunctions)
     addrs = {insn.addr for insn in insns}
     subfunction_by_addr = {
         fn_insns[0].addr: f"x86_fn_{c_ident(symbol)}"
@@ -678,7 +651,6 @@ def render_program(name: str, insns: list[NativeInsn],
         lines.append('#define X86_VM_ENABLE_RODATA 1')
     if has_stack:
         lines.append('#define X86_VM_ENABLE_STACK 1')
-        lines.append('#define X86_VM_ENABLE_STACK_SLOT7 1')
         lines.append('#define X86_VM_ENABLE_STACK_DEEP 1')
         lines.append('#define X86_VM_ENABLE_STACK_EXT 1')
     lines.extend([
@@ -693,22 +665,9 @@ def render_program(name: str, insns: list[NativeInsn],
         "{",
         "\tX86_VM_DECLARE_XDP(ctx);",
     ])
-    if synthetic_entry_frame:
-        lines.extend([
-            "\t__x86_vm_state.rbp = 0;",
-            "\t__x86_vm_state.p_rbp = 0;",
-            "\t__x86_vm_state.tag_rbp = X86_PTR_STACK;",
-            "\t__x86_vm_state.rsp = 0;",
-            "\t__x86_vm_state.p_rsp = 0;",
-            "\t__x86_vm_state.tag_rsp = X86_PTR_STACK;",
-        ])
     for insn in insns:
         label = f"x86_l_{insn.addr:x}"
         lines.append(f"{label}:")
-        if synthetic_entry_frame and is_entry_synthetic_frame_insn(insn):
-            lines.append(f"\t/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
-            lines.append("\t/* generated-C ABI: entry frame traffic handled by wrapper */")
-            continue
         append_branch_or_ret(lines, insn, addrs,
                              next_addr=next_addrs.get(insn.addr),
                              call_functions=subfunction_by_addr,

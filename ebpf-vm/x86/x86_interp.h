@@ -107,6 +107,7 @@
 #define X86_PTR_PACKET_END 3U
 #define X86_PTR_RODATA 4U
 #define X86_PTR_STACK 5U
+#define X86_STACK_PTR_SLOT_NONE 0xffU
 
 #define X86_CTX_DATA_OFF 0LL
 #define X86_CTX_DATA_END_OFF 8LL
@@ -229,24 +230,8 @@ struct x86_state {
 	__u64 stack14;
 	__u64 stack15;
 #endif
-	void *p_stack0;
-	void *p_stack1;
-#ifndef X86_VM_ENABLE_STACK_SHALLOW
-	void *p_stack2;
-	void *p_stack3;
-	void *p_stack4;
-	void *p_stack5;
-	void *p_stack6;
-#endif
-#ifdef X86_VM_ENABLE_STACK_SLOT7
-	void *p_stack7;
-#endif
-#ifdef X86_VM_ENABLE_STACK_DEEP
-	void *p_stack8;
-	void *p_stack9;
-	void *p_stack10;
-	void *p_stack11;
-#endif
+	void *p_stack_a;
+	void *p_stack_b;
 	__u8 tag_stack0;
 	__u8 tag_stack1;
 #ifndef X86_VM_ENABLE_STACK_SHALLOW
@@ -265,6 +250,14 @@ struct x86_state {
 	__u8 tag_stack10;
 	__u8 tag_stack11;
 #endif
+#ifdef X86_VM_ENABLE_STACK_EXT
+	__u8 tag_stack12;
+	__u8 tag_stack13;
+	__u8 tag_stack14;
+	__u8 tag_stack15;
+#endif
+	__u8 p_stack_a_slot;
+	__u8 p_stack_b_slot;
 #endif
 };
 
@@ -274,6 +267,8 @@ static __always_inline void x86_init_state(struct x86_state *state, void *ctx)
 	state->tag_rdi = X86_PTR_CTX;
 #ifdef X86_VM_ENABLE_STACK
 	state->tag_rsp = X86_PTR_STACK;
+	state->p_stack_a_slot = X86_STACK_PTR_SLOT_NONE;
+	state->p_stack_b_slot = X86_STACK_PTR_SLOT_NONE;
 #endif
 }
 
@@ -671,6 +666,62 @@ static __always_inline int x86_write_reg(struct x86_state *state,
 }
 
 #ifdef X86_VM_ENABLE_STACK
+static __always_inline void
+x86_stack_clear_ptr_slot(struct x86_state *state, __u8 slot)
+{
+	if (state->p_stack_a_slot == slot) {
+		state->p_stack_a = 0;
+		state->p_stack_a_slot = X86_STACK_PTR_SLOT_NONE;
+	}
+	if (state->p_stack_b_slot == slot) {
+		state->p_stack_b = 0;
+		state->p_stack_b_slot = X86_STACK_PTR_SLOT_NONE;
+	}
+}
+
+static __always_inline int
+x86_stack_store_ptr_slot(struct x86_state *state, __u8 slot, void *ptr,
+			 __u8 tag)
+{
+	if (tag == X86_PTR_NONE || tag == X86_PTR_STACK) {
+		x86_stack_clear_ptr_slot(state, slot);
+		return 0;
+	}
+	if (!ptr)
+		return X86_INTERP_TRAP;
+	if (state->p_stack_a_slot == slot ||
+	    state->p_stack_a_slot == X86_STACK_PTR_SLOT_NONE) {
+		state->p_stack_a = ptr;
+		state->p_stack_a_slot = slot;
+		return 0;
+	}
+	if (state->p_stack_b_slot == slot ||
+	    state->p_stack_b_slot == X86_STACK_PTR_SLOT_NONE) {
+		state->p_stack_b = ptr;
+		state->p_stack_b_slot = slot;
+		return 0;
+	}
+	return X86_INTERP_TRAP;
+}
+
+static __always_inline int
+x86_stack_read_ptr_slot(struct x86_state *state, __u8 slot, __u8 tag,
+			void **ptr)
+{
+	*ptr = 0;
+	if (tag == X86_PTR_NONE || tag == X86_PTR_STACK)
+		return 0;
+	if (state->p_stack_a_slot == slot) {
+		*ptr = state->p_stack_a;
+		return *ptr ? 0 : X86_INTERP_TRAP;
+	}
+	if (state->p_stack_b_slot == slot) {
+		*ptr = state->p_stack_b;
+		return *ptr ? 0 : X86_INTERP_TRAP;
+	}
+	return X86_INTERP_TRAP;
+}
+
 static __always_inline int x86_stack_write_raw(struct x86_state *state,
 					       __s64 off, __u8 width,
 					       __u64 value, void *ptr,
@@ -682,60 +733,50 @@ static __always_inline int x86_stack_write_raw(struct x86_state *state,
 	if (width != X86_WIDTH_8 && width != X86_WIDTH_16 &&
 	    width != X86_WIDTH_32 && width != X86_WIDTH_64)
 		return X86_INTERP_TRAP;
-#define X86_STACK_WRITE_SLOT(BASE, VALUE_FIELD, PTR_FIELD, TAG_FIELD)       \
+#define X86_STACK_WRITE_SLOT(BASE, SLOT, VALUE_FIELD, TAG_FIELD)            \
 	if (off >= (BASE) && off + width <= (BASE) + 8) {                   \
 		shift = (__u8)((off - (BASE)) << 3);                       \
 		if (width == X86_WIDTH_64 && shift == 0) {                 \
+			if (x86_stack_store_ptr_slot(state, (SLOT), ptr,   \
+						     tag) < 0)             \
+				return X86_INTERP_TRAP;                     \
 			state->VALUE_FIELD = value;                        \
-			state->PTR_FIELD = ptr;                            \
 			state->TAG_FIELD = tag;                            \
 		} else {                                                   \
+			x86_stack_clear_ptr_slot(state, (SLOT));           \
 			state->VALUE_FIELD =                                \
 				(state->VALUE_FIELD & ~(mask << shift)) |   \
 				((value & mask) << shift);                  \
-			state->PTR_FIELD = 0;                             \
 			state->TAG_FIELD = X86_PTR_NONE;                  \
 		}                                                          \
 		return 0;                                                  \
 	}
 
-	X86_STACK_WRITE_SLOT(-8, stack0, p_stack0, tag_stack0);
-	X86_STACK_WRITE_SLOT(-16, stack1, p_stack1, tag_stack1);
+	X86_STACK_WRITE_SLOT(-8, 0, stack0, tag_stack0);
+	X86_STACK_WRITE_SLOT(-16, 1, stack1, tag_stack1);
 #ifndef X86_VM_ENABLE_STACK_SHALLOW
-	X86_STACK_WRITE_SLOT(-24, stack2, p_stack2, tag_stack2);
-	X86_STACK_WRITE_SLOT(-32, stack3, p_stack3, tag_stack3);
-	X86_STACK_WRITE_SLOT(-40, stack4, p_stack4, tag_stack4);
-	X86_STACK_WRITE_SLOT(-48, stack5, p_stack5, tag_stack5);
-	X86_STACK_WRITE_SLOT(-56, stack6, p_stack6, tag_stack6);
+	X86_STACK_WRITE_SLOT(-24, 2, stack2, tag_stack2);
+	X86_STACK_WRITE_SLOT(-32, 3, stack3, tag_stack3);
+	X86_STACK_WRITE_SLOT(-40, 4, stack4, tag_stack4);
+	X86_STACK_WRITE_SLOT(-48, 5, stack5, tag_stack5);
+	X86_STACK_WRITE_SLOT(-56, 6, stack6, tag_stack6);
 #endif
 #ifdef X86_VM_ENABLE_STACK_SLOT7
-	X86_STACK_WRITE_SLOT(-64, stack7, p_stack7, tag_stack7);
+	X86_STACK_WRITE_SLOT(-64, 7, stack7, tag_stack7);
 #endif
 #ifdef X86_VM_ENABLE_STACK_DEEP
-	X86_STACK_WRITE_SLOT(-72, stack8, p_stack8, tag_stack8);
-	X86_STACK_WRITE_SLOT(-80, stack9, p_stack9, tag_stack9);
-	X86_STACK_WRITE_SLOT(-88, stack10, p_stack10, tag_stack10);
-	X86_STACK_WRITE_SLOT(-96, stack11, p_stack11, tag_stack11);
+	X86_STACK_WRITE_SLOT(-72, 8, stack8, tag_stack8);
+	X86_STACK_WRITE_SLOT(-80, 9, stack9, tag_stack9);
+	X86_STACK_WRITE_SLOT(-88, 10, stack10, tag_stack10);
+	X86_STACK_WRITE_SLOT(-96, 11, stack11, tag_stack11);
+#endif
+#ifdef X86_VM_ENABLE_STACK_EXT
+	X86_STACK_WRITE_SLOT(-104, 12, stack12, tag_stack12);
+	X86_STACK_WRITE_SLOT(-112, 13, stack13, tag_stack13);
+	X86_STACK_WRITE_SLOT(-120, 14, stack14, tag_stack14);
+	X86_STACK_WRITE_SLOT(-128, 15, stack15, tag_stack15);
 #endif
 #undef X86_STACK_WRITE_SLOT
-#ifdef X86_VM_ENABLE_STACK_EXT
-#define X86_STACK_WRITE_EXT(BASE, VALUE_FIELD)                              \
-	if (off >= (BASE) && off + width <= (BASE) + 8) {                   \
-		if (tag != X86_PTR_NONE)                                    \
-			return X86_INTERP_TRAP;                             \
-		shift = (__u8)((off - (BASE)) << 3);                       \
-		state->VALUE_FIELD =                                        \
-			(state->VALUE_FIELD & ~(mask << shift)) |           \
-			((value & mask) << shift);                          \
-		return 0;                                                   \
-	}
-
-	X86_STACK_WRITE_EXT(-104, stack12);
-	X86_STACK_WRITE_EXT(-112, stack13);
-	X86_STACK_WRITE_EXT(-120, stack14);
-	X86_STACK_WRITE_EXT(-128, stack15);
-#undef X86_STACK_WRITE_EXT
-#endif
 	return X86_INTERP_TRAP;
 }
 
@@ -750,7 +791,7 @@ static __always_inline int x86_stack_read_raw(struct x86_state *state,
 	if (width != X86_WIDTH_8 && width != X86_WIDTH_16 &&
 	    width != X86_WIDTH_32 && width != X86_WIDTH_64)
 		return X86_INTERP_TRAP;
-#define X86_STACK_READ_SLOT(BASE, VALUE_FIELD, PTR_FIELD, TAG_FIELD)        \
+#define X86_STACK_READ_SLOT(BASE, SLOT, VALUE_FIELD, TAG_FIELD)             \
 	if (off >= (BASE) && off + width <= (BASE) + 8) {                   \
 		shift = (__u8)((off - (BASE)) << 3);                       \
 		*value = (state->VALUE_FIELD >> shift) & mask;             \
@@ -758,47 +799,39 @@ static __always_inline int x86_stack_read_raw(struct x86_state *state,
 		*tag = X86_PTR_NONE;                                       \
 		if (width == X86_WIDTH_64 && shift == 0 &&                 \
 		    state->TAG_FIELD != X86_PTR_NONE) {                    \
-			*ptr = state->PTR_FIELD;                           \
 			*tag = state->TAG_FIELD;                           \
+			if (x86_stack_read_ptr_slot(state, (SLOT), *tag,   \
+						    ptr) < 0)              \
+				return X86_INTERP_TRAP;                     \
 		}                                                          \
 		return 0;                                                   \
 	}
 
-	X86_STACK_READ_SLOT(-8, stack0, p_stack0, tag_stack0);
-	X86_STACK_READ_SLOT(-16, stack1, p_stack1, tag_stack1);
+	X86_STACK_READ_SLOT(-8, 0, stack0, tag_stack0);
+	X86_STACK_READ_SLOT(-16, 1, stack1, tag_stack1);
 #ifndef X86_VM_ENABLE_STACK_SHALLOW
-	X86_STACK_READ_SLOT(-24, stack2, p_stack2, tag_stack2);
-	X86_STACK_READ_SLOT(-32, stack3, p_stack3, tag_stack3);
-	X86_STACK_READ_SLOT(-40, stack4, p_stack4, tag_stack4);
-	X86_STACK_READ_SLOT(-48, stack5, p_stack5, tag_stack5);
-	X86_STACK_READ_SLOT(-56, stack6, p_stack6, tag_stack6);
+	X86_STACK_READ_SLOT(-24, 2, stack2, tag_stack2);
+	X86_STACK_READ_SLOT(-32, 3, stack3, tag_stack3);
+	X86_STACK_READ_SLOT(-40, 4, stack4, tag_stack4);
+	X86_STACK_READ_SLOT(-48, 5, stack5, tag_stack5);
+	X86_STACK_READ_SLOT(-56, 6, stack6, tag_stack6);
 #endif
 #ifdef X86_VM_ENABLE_STACK_SLOT7
-	X86_STACK_READ_SLOT(-64, stack7, p_stack7, tag_stack7);
+	X86_STACK_READ_SLOT(-64, 7, stack7, tag_stack7);
 #endif
 #ifdef X86_VM_ENABLE_STACK_DEEP
-	X86_STACK_READ_SLOT(-72, stack8, p_stack8, tag_stack8);
-	X86_STACK_READ_SLOT(-80, stack9, p_stack9, tag_stack9);
-	X86_STACK_READ_SLOT(-88, stack10, p_stack10, tag_stack10);
-	X86_STACK_READ_SLOT(-96, stack11, p_stack11, tag_stack11);
+	X86_STACK_READ_SLOT(-72, 8, stack8, tag_stack8);
+	X86_STACK_READ_SLOT(-80, 9, stack9, tag_stack9);
+	X86_STACK_READ_SLOT(-88, 10, stack10, tag_stack10);
+	X86_STACK_READ_SLOT(-96, 11, stack11, tag_stack11);
+#endif
+#ifdef X86_VM_ENABLE_STACK_EXT
+	X86_STACK_READ_SLOT(-104, 12, stack12, tag_stack12);
+	X86_STACK_READ_SLOT(-112, 13, stack13, tag_stack13);
+	X86_STACK_READ_SLOT(-120, 14, stack14, tag_stack14);
+	X86_STACK_READ_SLOT(-128, 15, stack15, tag_stack15);
 #endif
 #undef X86_STACK_READ_SLOT
-#ifdef X86_VM_ENABLE_STACK_EXT
-#define X86_STACK_READ_EXT(BASE, VALUE_FIELD)                               \
-	if (off >= (BASE) && off + width <= (BASE) + 8) {                   \
-		shift = (__u8)((off - (BASE)) << 3);                       \
-		*value = (state->VALUE_FIELD >> shift) & mask;             \
-		*ptr = 0;                                                  \
-		*tag = X86_PTR_NONE;                                       \
-		return 0;                                                   \
-	}
-
-	X86_STACK_READ_EXT(-104, stack12);
-	X86_STACK_READ_EXT(-112, stack13);
-	X86_STACK_READ_EXT(-120, stack14);
-	X86_STACK_READ_EXT(-128, stack15);
-#undef X86_STACK_READ_EXT
-#endif
 	return X86_INTERP_TRAP;
 }
 

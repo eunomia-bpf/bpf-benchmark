@@ -48,7 +48,8 @@ XState = {
     tag_<reg> : NONE | CTX | PACKET | PACKET_END | RODATA | STACK,
 
   Modeled stack slots:
-    stack0..stackN plus p_stackN/tag_stackN,
+    stack0..stackN plus tag_stackN,
+    p_stack_a/p_stack_b sparse verifier pointer payloads keyed by slot number,
 
   Packet verifier inputs:
     data, data_end,
@@ -77,6 +78,20 @@ all other ghost capabilities start as NONE
 
 The code implementation is `x86_init_state()` in `x86_interp.h`.
 
+### Stack Pointer Payload Rule
+
+Each modeled x86 stack slot stores its 64-bit value and a ghost tag. Real BPF
+verifier pointer payloads are sparse: the implementation keeps at most two live
+non-`STACK` pointer payloads in `p_stack_a` and `p_stack_b`, each keyed by the
+slot number. A stack slot tagged `STACK` reconstructs its meaning from the
+stored x86 stack offset and does not need a BPF pointer payload.
+
+If a third live non-`STACK` verifier pointer is spilled to the modeled x86 stack,
+the interpreter traps. The current micro corpus needs at most two live packet
+pointer spills. A final proof must either keep this as an explicit accepted
+subset or replace it with an unbounded/sufficiently bounded pointer-payload
+model.
+
 ## 3. Instruction Step Relation
 
 For every generated native instruction `I` at address `pc`, the generator emits
@@ -87,12 +102,6 @@ The interpreter step has the form:
 
 ```c
 X86_VM_RUN_OP(op, dst, src, width, aux, imm);
-```
-
-or inside a loop callback:
-
-```c
-X86_VM_LOOP_OP(op, dst, src, width, aux, imm);
 ```
 
 The generated tuple `(op, dst, src, width, aux, imm)` is the encoded form of the
@@ -200,26 +209,12 @@ X86_VM_X86_JMP(current_pc, target_pc, target_label);
 
 These are x86 instruction-lowering macros, not a separate VM instruction set.
 The generated operation is still native `jcc`/`jmp`; the C-authored macro owns
-the verifier lowering to `goto target_label` and the loop proof protocol. If
-`target_pc <= current_pc`, the edge is treated as a verifier-visible backedge
-and consumes one unit from `__x86_vm_loop_fuel`. If fuel reaches zero, the proof
-program traps. Python does not infer loop bounds, induction variables, exits, or
-callback state. It only supplies the native current/target addresses and target
-label.
-
-The semantic theorem for this fuel guard is:
-
-```text
-For a generated proof program with fuel F, if native execution from the same
-entry state reaches every taken backward edge fewer than F times before the
-program returns or traps, then the fuel-guarded C proof program follows the same
-native control-flow path. Fuel exhaustion is outside the proved equivalence
-domain and is reported as Trap.
-```
-
-The fuel value is a C/spec parameter (`X86_VM_LOOP_FUEL`, default `4096`), not a
-Python-derived bound. Raising or lowering it is a proof-surface change and must
-be recorded with verifier cost.
+the verifier lowering to `goto target_label`. Python does not infer loop bounds,
+induction variables, exits, or callback state. It only supplies the native
+current/target addresses and target label. A taken backward edge has the same
+control-flow meaning as native x86: jump to the target label. Any verifier
+rejection for an unprovable or too-expensive loop is a verifier result, not a VM
+semantic fallback.
 
 Native `ret` is emitted as:
 
@@ -237,7 +232,7 @@ Known direct native call targets are disassembled and emitted as generated
 subfunctions:
 
 ```c
-static __noinline int x86_fn_<symbol>(
+static X86_VM_SUBFN_ATTR int x86_fn_<symbol>(
     struct x86_state *state, void *data, void *data_end);
 ```
 
@@ -259,13 +254,17 @@ and every native callee `ret` is emitted as:
 X86_VM_X86_SUB_RET();
 ```
 
-`X86_VM_SUB_BEGIN()` / `X86_VM_X86_SUB_RET()` are C-authored protocol macros.
-They save and restore the SysV callee-saved register set and associated ghost
-pointer capabilities:
+`X86_VM_X86_CALL()` is a C-authored protocol macro. It models the native call
+stack effect by reserving one return-address slot on the modeled x86 stack
+before entering the generated callee and releasing that slot after the callee
+returns. The return-address value itself is currently modeled as scalar zero
+because none of the generated micro callees inspect it.
 
-```text
-rbx r12 r13 r14 r15
-```
+`X86_VM_SUB_BEGIN()` only declares the per-callee instruction record. Generated
+callee prologue/epilogue instructions such as `push rbp`, `mov rbp, rsp`, and
+`pop rbp` execute through normal x86 helper steps. Callee-saved register
+preservation is therefore provided by those generated x86 instructions, not by a
+separate hidden wrapper restore.
 
 Subfunction branches use the subfunction branch macros:
 
@@ -274,8 +273,8 @@ X86_VM_X86_SUB_JCC(cc, current_pc, target_pc, target_label);
 X86_VM_X86_SUB_JMP(current_pc, target_pc, target_label);
 ```
 
-which apply the same C-owned fuel guard as entry-function branches and return
-`X86_INTERP_TRAP` on fuel exhaustion.
+which apply the same native branch lowering as entry-function branches inside
+the generated callee body.
 
 The subfunction proof obligation is:
 
@@ -284,20 +283,28 @@ Executing x86_fn_symbol from state S is equivalent to executing the native
 callee instruction stream from its entry until its native ret.
 ```
 
-If a callee relies on stack-frame traffic that the wrapper suppresses, the
-wrapper rule must prove that the suppressed native push/pop/mov frame sequence
-is observationally equivalent under the modeled stack ABI.
+If a future callee reads the native return address, the call macro must model
+the concrete return-address value or reject that program.
 
 ## 6. Loop Lowering
 
 The active generator does not lower loops to `bpf_loop` and does not perform
 loop-shape analysis. Native loops remain native labels plus branch macros. The
-C-authored fuel guard in `X86_VM_X86_JCC/JMP` is the active loop proof protocol.
+C-authored branch macros lower native x86 edges directly to C labels and `goto`.
+There is no fuel guard or synthetic trip bound because those are not x86 ISA
+semantics.
 
 The generator must not choose loop treatment based on return value, benchmark
 name, observed failure, or per-loop Python analysis. Future optimized loop
 protocols must be C-authored or bytecode-template-authored and added back to
 this spec before use.
+
+Current verifier consequence: plain native backedges are semantically clean but
+not verifier-friendly for all bounded loops. `packet_checksum_fold` and
+`tc_packet_checksum_fold` hit the kernel verifier's `8193 jumps too complex`
+limit, and `bpftrace_string_search_prefix_scan` hits the global
+processed-instruction limit. Any fix must be a C/template proof rule, not a
+Python benchmark renderer and not a fuel bound.
 
 ### Non-Active Loop Experiments
 
@@ -310,30 +317,20 @@ The previous Python-generated `bpf_loop(bound, callback, &loop_ctx, 0)` lowering
 has also been removed from the active generator for the same reason. It is not
 part of the current proof contract.
 
-## 7. Loop Frame Preservation
+## 7. Indexed Packet Addressing
 
-The loop callback may widen verifier knowledge of stack-carried ghost fields.
-The active implementation handles the `rdi` case in the C loop protocol instead
-of Python write-set insertion.
-
-Current implemented frame rule:
+x86 permits equivalent effective-address forms such as:
 
 ```text
-During a loop callback:
-  X86_VM_LOOP_OP marks loop.rdi_written when an opcode writes X86_RDI.
-  X86_VM_LOOP_CALL marks loop.rdi_written for native direct calls.
-
-After bpf_loop returns:
-  if loop.rdi_written == 0:
-    state.rdi     = saved_rdi
-    state.p_rdi   = saved_p_rdi
-    state.tag_rdi = saved_tag_rdi
+[packet_ptr + scalar + disp]
+[scalar + packet_ptr + disp]
 ```
 
-This is valid for paths where the C loop protocol records no RDI write. For
-concrete x86 correctness, the restore is observationally a no-op on those paths.
-For verifier correctness, it preserves the ghost capability needed by later
-memory helpers.
+The C interpreter treats a scale-1 index register tagged `PACKET` as the packet
+base when the nominal base register is scalar. This is implemented by
+`x86_promote_index_packet_base()` under `X86_VM_ENABLE_INDEX_PACKET_PROMOTE`.
+Packet fastpaths in `x86_vm_bpf.h` are restricted to no-index operands so they
+cannot bypass this full addressing rule.
 
 ## 8. Entry Context Capability Preservation
 
@@ -385,8 +382,7 @@ the generator must satisfy:
 
 2. Address labels in G preserve native control-flow targets.
 
-3. Any omitted native instruction must be covered by an explicit theorem
-   (for example synthetic frame traffic in generated call wrappers).
+3. Any omitted native instruction must be covered by an explicit theorem.
 
 4. Any ghost restore must be justified by a C helper/frame theorem.
 
@@ -406,9 +402,9 @@ These are not acceptable final assumptions; they are work items.
 | --- | --- |
 | Full x86 flag coverage | Audit every helper flag rule against the subset of x86 opcodes emitted by current micro programs. |
 | RODATA model | Specify each generated read-only table and prove indexed reads match the native constants. |
-| Stack model bounds | Prove every modeled stack access maps to the correct x86 stack slot after synthetic frame rewrites. |
-| Multi-exit loop state explosion | Add a theorem or structural lowering for priority among exits before using exact-trip fallback on multi-exit loops. |
+| Stack model bounds | Prove every modeled stack access maps to the correct x86 stack slot and prove the sparse two-payload pointer-spill rule is sufficient or replace it. |
+| Multi-exit loop state explosion | Add a theorem or structural lowering for priority among exits before using any non-`goto` loop proof protocol. |
 | Paused PC-dispatch experiment | If revived, implement it as a C/template proof rule rather than Python CFG scheduling. It is not active now. |
 | ABI output-store theorem | `x86_vm_prepare_ctx_output()` is C-authored, but the final proof still must show accepted paths reach `[rdi+16/20]` stores only when `rdi` denotes entry ctx, or explicitly define that ABI store as a semantic rule. |
-| Native call loops | Prove or refactor loop callbacks that call large generated subfunctions without exceeding verifier complexity. |
+| Native backedge verifier cost | Add a C/template loop proof protocol for bounded native loops that exceed verifier jump/processed-insn limits without introducing fuel semantics. |
 | JSON-linker equivalence | Reuse this spec after JSON bytecode linking stops going through clang. |
