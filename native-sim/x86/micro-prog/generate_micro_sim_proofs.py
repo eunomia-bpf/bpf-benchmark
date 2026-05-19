@@ -456,7 +456,7 @@ def encode(insn: NativeInsn) -> EncodedInsn:
                        aux=mem_aux(ops[0]),
                        imm=c_u64(parse_int(ops[1]) + (mem_disp(ops[0]) << 32)))
         if is_mem(ops[0]) or is_mem(ops[1]):
-            return enc("X86_OP_NOP", flags=WIDTH_CONST[width])
+            raise ValueError(f"unsupported memory compare/test form: {insn.raw}")
         raise ValueError(f"cannot encode {insn.raw}")
 
     if op in ALU_AUX:
@@ -465,7 +465,7 @@ def encode(insn: NativeInsn) -> EncodedInsn:
                 raise ValueError(f"cannot encode {insn.raw}")
             dst_reg = reg_info(ops[0])
             if dst_reg is None:
-                return enc("X86_OP_NOP", flags=WIDTH_CONST[operand_width(ops[0])])
+                raise ValueError(f"unsupported memory unary ALU form: {insn.raw}")
             return enc("X86_OP_ALU_IMM", dst=dst_reg[0],
                        flags=WIDTH_CONST[dst_reg[1]], aux=ALU_AUX[op],
                        imm="1" if op == "inc" else "0")
@@ -487,8 +487,7 @@ def encode(insn: NativeInsn) -> EncodedInsn:
                        aux=f"({mem_aux(ops[1], operand_width(ops[1], dst_reg[1]))} | X86_MEM_AUX_ALU_OP({ALU_AUX[op]}))",
                        imm=c_u64(mem_disp(ops[1])))
         if is_mem(ops[0]) or is_mem(ops[1]):
-            return enc("X86_OP_NOP", flags=WIDTH_CONST[operand_width(ops[0])],
-                       aux=ALU_AUX[op])
+            raise ValueError(f"unsupported memory ALU form: {insn.raw}")
         raise ValueError(f"cannot encode {insn.raw}")
 
     if op == "bswap":
@@ -620,7 +619,7 @@ def render_x86_subfunction(symbol: str, insns: list[NativeInsn]) -> str:
                              ret_statement="X86_SIM_X86_SUB_RET();")
     lines.extend([
         "\t#undef __x86_sim_state",
-        "\treturn X86_SIM_CONTINUE;",
+        "\t__builtin_unreachable();",
         "}",
         "",
     ])
@@ -644,6 +643,11 @@ def render_program(name: str, insns: list[NativeInsn],
         for fn_insns in [insns, *subfunctions.values()]
         for insn in fn_insns
     )
+    has_stack_memory = any(
+        "[rsp" in insn.raw.lower() or "[rbp" in insn.raw.lower()
+        for fn_insns in [insns, *subfunctions.values()]
+        for insn in fn_insns
+    )
     next_addrs = {
         insn.addr: insns[index + 1].addr
         for index, insn in enumerate(insns[:-1])
@@ -651,10 +655,8 @@ def render_program(name: str, insns: list[NativeInsn],
     lines: list[str] = []
     if has_stack:
         lines.append('#define X86_SIM_ENABLE_STACK 1')
-        lines.append('#define X86_SIM_ENABLE_STACK_SLOT7 1')
-        lines.append('#define X86_SIM_ENABLE_STACK_SLOT8 1')
-        lines.append('#define X86_SIM_ENABLE_STACK_DEEP 1')
-        lines.append('#define X86_SIM_ENABLE_STACK_EXT 1')
+        if has_stack_memory:
+            lines.append('#define X86_SIM_ENABLE_STACK_DEEP 1')
     lines.extend([
         '#include "../x86_sim_bpf.h"',
         "",
@@ -675,7 +677,7 @@ def render_program(name: str, insns: list[NativeInsn],
                              call_functions=subfunction_by_addr,
                              ret_statement=ret_statement)
     lines.extend([
-        "\treturn x86_sim_ret_rax(&__x86_sim_state);",
+        "\t__builtin_unreachable();",
         "}",
         "",
         "X86_SIM_LICENSE();",

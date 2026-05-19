@@ -23,7 +23,7 @@ $(BPF_OBJ): x86_sim_hardcoded.bpf.c x86_sim_bpf.h x86_sim.h
 		-c x86_sim_hardcoded.bpf.c -o $(BPF_OBJ)
 
 run: build
-	$(LOADER_BIN) --object $(BPF_OBJ) --program x86_sim_hardcoded_xdp --case simple
+	$(LOADER_BIN) --object $(BPF_OBJ) --program x86_sim_hardcoded_xdp --case simple --load-only
 
 clean:
 	rm -rf $(BUILD_DIR) ../loader/target

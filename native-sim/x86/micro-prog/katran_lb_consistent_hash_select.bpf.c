@@ -1,8 +1,5 @@
 #define X86_SIM_ENABLE_STACK 1
-#define X86_SIM_ENABLE_STACK_SLOT7 1
-#define X86_SIM_ENABLE_STACK_SLOT8 1
 #define X86_SIM_ENABLE_STACK_DEEP 1
-#define X86_SIM_ENABLE_STACK_EXT 1
 #include "../x86_sim_bpf.h"
 
 SEC("xdp")
@@ -1581,7 +1578,7 @@ x86_l_189b:
 x86_l_18a1:
 	/* 0x18a1: jmp    15f2 <katran_lb_consistent_hash_select_xdp+0x4f2> */
 	X86_SIM_X86_JMP(0x18a1, 0x15f2, x86_l_15f2);
-	return x86_sim_ret_rax(&__x86_sim_state);
+	__builtin_unreachable();
 }
 
 X86_SIM_LICENSE();

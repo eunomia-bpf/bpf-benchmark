@@ -90,6 +90,12 @@ rejects stack-slot coverage at runtime; if a reachable native path needs stack
 memory outside the modeled layout, the model must be enlarged as stack memory,
 not guarded with a runtime check.
 
+The current generated source may select a shallow or deep stack-state layout:
+64 bytes for push/pop-only frames and 128 bytes for programs with real
+`[rsp/rbp + disp]` local stack memory. This is a compile-time state-size choice,
+not an x86 semantic branch. It is valid only when the modeled native stack
+accesses for the generated artifact fit inside that exact byte-memory model.
+
 ### Hidden Packet Offset Rule
 
 For packet and packet-end capabilities, `off_<reg>` records the verifier-visible
@@ -150,6 +156,7 @@ No proof-only stack/model bounds check that native x86 does not execute.
 No runtime unsupported/trap/fallback path in an accepted artifact.
 No fuel guard or synthetic trip bound.
 No fallback return value.
+No generated code-end return value after the native CFG.
 No benchmark-specific renderer or helper.
 No simulator-side fault/exception precheck for arbitrary memory, stack OOB,
 divide-by-zero/divide-overflow, or invalid addresses.
@@ -178,16 +185,18 @@ x86 keeps the flags from `cmp`, but current `rdx` after `mov` is no longer the
 cmp operand. A verifier assertion over current `rdx` would prove a different
 program and would be unsound for direct native execution.
 
-The active code therefore deletes the previous `last_cmp_*` metadata and
+The active code therefore deletes the previous `last_cmp_*`, `cmp_ptr_*`, and
 `x86_sim_assert_*` branch helpers. Branches use only `x86_eval_cc()` over the
 modeled x86 flags. This may make verifier acceptance harder, but verifier
 success must come from semantics-preserving optimization, not from a range fact
 or bounds check that native x86 does not guarantee.
 
-There must be no accepted runtime `X86_SIM_UNSUPPORTED`/trap path. A construct
-outside the modeled native subset must cause generation/load rejection before
-native execution, or have a proof that the path is unreachable. It must not be
-encoded as a runtime safety branch for direct native execution.
+There must be no accepted runtime `X86_SIM_UNSUPPORTED`/trap path. During
+prototyping, generation failure for an unimplemented native form is only an
+incompleteness signal that prevents silently accepting a wrong proof artifact;
+it is not a final correctness argument. The final simulator must add exact x86
+semantics for any accepted native form rather than encoding a runtime safety
+branch or relying on a formal precondition.
 
 ## 3. Instruction Step Relation
 
@@ -208,7 +217,7 @@ does not select those helpers. The C simulator step must implement the
 following relation:
 
 ```text
-step(I, XState_in, Mem_in) = XState_out, Mem_out, Continue | Done | Unsupported
+step(I, XState_in, Mem_in) = XState_out, Mem_out, Continue
 ```
 
 The proof obligation for each C simulator step/helper is:
@@ -218,6 +227,23 @@ For every supported native instruction I encoded as args,
 helper(args, XState_in, Mem_in) implements the same state transition as
 the x86 ISA rule for I, restricted to the modeled memory/capability domain.
 ```
+
+`X86_SIM_RUN_OP()` is only for non-control-flow x86 instructions. `JCC`, `JMP`,
+`CALL`, and `RET` are not valid step opcodes; accepting them through the typed
+step dispatcher would risk silently modeling control flow as a no-op. They must
+be emitted through the branch/call/return macros below.
+
+Generated entry and subfunction bodies must not contain a fallback return after
+the emitted native CFG. The active generator emits `__builtin_unreachable()` at
+the C tail instead. The proof obligation is that every reachable generated
+control-flow path reaches a modeled native branch/call/return edge; otherwise
+the generated proof artifact is incomplete.
+
+Each `X86_SIM_RUN_OP()` expansion constructs a local `const struct x86_insn`
+record from the opcode and operand constants before calling C-authored helpers.
+This is a compiler-specialization mechanism only. The semantic object remains
+the helper relation for the encoded x86 instruction, not a Python-selected
+helper policy.
 
 Compiler optimization is not part of the semantic proof. Clang inlining and
 constant propagation may specialize fixed `(op, dst, src, aux, imm)` records so
@@ -255,6 +281,11 @@ NOT: no flag update
 
 Any helper whose flags do not yet match full x86 for an opcode must be listed as
 a semantic gap before that opcode can be considered verified.
+
+Immediate operands must follow the x86 encoding, not the host C literal width.
+For active 64-bit `ALU/CMP/TEST r/m64, imm32` forms and `mov r/m64, imm32`, the
+low 32-bit immediate is sign-extended to 64 bits before execution. Narrower
+forms use the low operand-width bits.
 
 Same-register `xchg` is a no-op for both concrete state and ghost metadata. In
 particular, `xchg ax, ax` must not clear the packet capability of `rax`; native
@@ -418,11 +449,12 @@ this spec before use.
 
 Current verifier consequence: plain native backedges are semantically clean but
 may be harder for the verifier. The current correctness-first implementation
-only claims clang compilation of the generated micro proof sources with
-`BPF_STACK_SIZE=4096`; verifier/load acceptance must be regained by changing the
-C-authored state layout without changing native branch semantics. Future loop
-fixes must remain C/template proof rules that preserve native branch semantics,
-not Python benchmark renderers, branch assertions, or fuel bounds.
+currently loads 5/29 generated micro proof programs; the remaining failures are
+recorded as verifier results. Verifier/load acceptance must be regained by
+changing the C-authored state layout or memory representation without changing
+native branch semantics. Future loop fixes must remain C/template proof rules
+that preserve native branch semantics, not Python benchmark renderers, branch
+assertions, or fuel bounds.
 
 ### Non-Active Loop Experiments
 
@@ -448,8 +480,9 @@ The C simulator treats a scale-1 index register tagged `PACKET` as the packet
 base when the nominal base register is scalar. This is implemented by
 `x86_promote_index_packet_base()` under `X86_SIM_ENABLE_INDEX_PACKET_PROMOTE`.
 
-Top-level packet loads in `x86_sim_bpf.h` may use a verifier-proven raw-load
-fastpath. If the base pointer has no hidden offset, the address is:
+Top-level packet loads in `x86_sim_bpf.h` may use a raw-load fastpath over
+verifier-visible packet pointers. If the base pointer has no hidden offset, the
+address is:
 
 ```text
 addr = packet_base + effective_disp
@@ -467,7 +500,7 @@ value = *(width *)addr
 This is not an extra sandbox and not a semantic shortcut. It is valid only when
 the normal eBPF verifier can prove that `addr..addr+width` is inside the packet.
 If that proof is unavailable, the BPF load is rejected. Subfunction helper steps
-use the checked typed simulator path so local-call proof state does not depend
+use the generic typed simulator path so local-call proof state does not depend
 on raw packet range being preserved across generated callees.
 
 Packet-pointer arithmetic must preserve concrete x86 scalar semantics. For
@@ -566,10 +599,13 @@ These are not acceptable final assumptions; they are work items.
 | RODATA model | The hardcoded sentinel table is removed. Specify each generated read-only memory image and prove indexed reads match native constants before accepting rodata dereferences. |
 | Stack model extent | Implement every modeled stack access as a native x86 stack byte access. Runtime slot rejection, stack-disabled no-ops, and proof-only stack guards are not allowed. |
 | Unsupported native constructs | There must be no runtime unsupported/trap/fallback path in an accepted artifact. Correctness work should add simulator semantics rather than relying on generation-time rejection or unreachable-path assumptions. |
+| Control-flow step dispatch | `JCC/JMP/CALL/RET` must not be accepted by `X86_SIM_RUN_OP()`; they are represented only by the corresponding x86 control-flow macros. |
 | Packet/output helper bounds checks | Active packet/output helpers must not insert runtime `data_end` bounds checks. Verifier acceptance must come from equivalent pointer state and native guards/ABI state, not an extra checked-simulator guard. |
 | Fault-like native behavior | Arbitrary memory faults, stack OOB, invalid addresses, divide-by-zero, and divide overflow must not be caught by simulator checks. They either remain verifier-visible native operations or fail verification. |
+| Generated CFG tail | Generated code tails use `__builtin_unreachable()` instead of fallback returns. Prove the native CFG coverage theorem for each artifact: no reachable generated path falls through past the emitted native instructions. |
 | Branch proof metadata | Removed from active code. Keep it out unless there is a formal theorem that preserves exact native x86 branch semantics and does not introduce proof-only assertions. |
-| Hidden packet-offset metadata | Prove that `off_<reg>` is observationally invisible to x86 scalar execution and that every proven packet load reads the same modeled packet byte as the native effective address. |
+| x86 pointer-as-integer representation | Current GPR fields can still carry verifier pointer-typed values. This is verifier-hostile for x86 integer operations on addresses. A final design must specify an address representation that preserves x86-observable behavior under the ABI without adding guards or assertions. |
+| Hidden packet-offset metadata | Prove that `off_<reg>` is observationally invisible to x86 scalar execution and that every raw packet load reads the same modeled packet byte as the native effective address. |
 | SKB packet-length metadata | Prove that `ctx+0x70` native loads exactly the SKB length and that the accepted native ABI satisfies `data + len == data_end`; `PACKET_LEN` may only express that ABI relation, not invent a branch-bound fact. |
 | No semantic verifier hacks | Prove that no verifier aid changes x86 behavior: no fuel guard, no fixed loop trip bound, no fallback return, no benchmark-specific renderer, and no assertion over facts not guaranteed by the native execution. |
 | ABI special cases | Prove the modeled `ctx`, `skb`, packet, output, and rodata layouts match the native execution ABI exactly; otherwise direct native execution may read/write addresses not covered by the proof. |

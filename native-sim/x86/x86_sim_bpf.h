@@ -33,16 +33,6 @@
 		.imm = (IMM),                                               \
 	})
 
-#define X86_SIM_LOAD_INSN(OP, DST, SRC, FLAGS, AUX, IMM)                    \
-	do {                                                               \
-		__x86_sim_insn.op = (OP);                                   \
-		__x86_sim_insn.dst = (DST);                                 \
-		__x86_sim_insn.src = (SRC);                                 \
-		__x86_sim_insn.flags = (FLAGS);                             \
-		__x86_sim_insn.aux = (AUX);                                 \
-		__x86_sim_insn.imm = (IMM);                                 \
-	} while (0)
-
 #define X86_SIM_MEM_OP_SRC_BASE(OP)                                         \
 	((OP) == X86_OP_MOV_LOAD || (OP) == X86_OP_MOVSX_LOAD ||           \
 	 (OP) == X86_OP_ALU_MEM)
@@ -79,11 +69,9 @@
 	 (OP) == X86_OP_TEST_REG || (OP) == X86_OP_CMOV ||                \
 	 (OP) == X86_OP_SETCC || (OP) == X86_OP_BSWAP ||                  \
 	 (OP) == X86_OP_POPCNT || (OP) == X86_OP_XCHG ||                  \
-	 (OP) == X86_OP_JCC || (OP) == X86_OP_JMP ||                      \
-	 (OP) == X86_OP_CALL || (OP) == X86_OP_DIV ||                     \
+	 (OP) == X86_OP_DIV ||                                            \
 	 (OP) == X86_OP_SHLD_IMM || (OP) == X86_OP_SHRD_IMM ||            \
-	 (OP) == X86_OP_PUSH || (OP) == X86_OP_POP ||                     \
-	 (OP) == X86_OP_RET)
+	 (OP) == X86_OP_PUSH || (OP) == X86_OP_POP)
 
 #define X86_SIM_REQUIRE_KNOWN_OP(OP)                                        \
 	_Static_assert(X86_SIM_OP_IS_KNOWN(OP), "unknown x86 simulator op")
@@ -288,21 +276,6 @@
 				x86_exec_xchg((STATE), &__x86_sim_insn,    \
 					      __x86_sim_data,                 \
 					      __x86_sim_data_end);             \
-		else if ((OP) == X86_OP_JCC)                              \
-			__x86_sim_typed_ret =                              \
-				x86_exec_jcc((STATE), &__x86_sim_insn,     \
-					     __x86_sim_data,                  \
-					     __x86_sim_data_end);              \
-		else if ((OP) == X86_OP_JMP)                              \
-			__x86_sim_typed_ret =                              \
-				x86_exec_jmp((STATE), &__x86_sim_insn,     \
-					     __x86_sim_data,                  \
-					     __x86_sim_data_end);              \
-		else if ((OP) == X86_OP_CALL)                             \
-			__x86_sim_typed_ret =                              \
-				x86_exec_call((STATE), &__x86_sim_insn,    \
-					      __x86_sim_data,                 \
-					      __x86_sim_data_end);             \
 		else if ((OP) == X86_OP_DIV)                              \
 			__x86_sim_typed_ret =                              \
 				x86_exec_div((STATE), &__x86_sim_insn,     \
@@ -328,19 +301,16 @@
 				x86_exec_pop((STATE), &__x86_sim_insn,     \
 					     __x86_sim_data,                  \
 					     __x86_sim_data_end);              \
-		else if ((OP) == X86_OP_RET)                              \
-			__x86_sim_typed_ret =                              \
-				x86_exec_ret((STATE), &__x86_sim_insn,     \
-					     __x86_sim_data,                  \
-					     __x86_sim_data_end);              \
 		__x86_sim_typed_ret;                                      \
 	})
 
 #define X86_SIM_EXEC(STATE, OP, DST, SRC, FLAGS, AUX, IMM)                  \
 	({                                                                 \
+		const struct x86_insn __x86_sim_insn =                    \
+			X86_SIM_INSN((OP), (DST), (SRC), (FLAGS), (AUX),   \
+				     (IMM));                                \
 		X86_SIM_REQUIRE_KNOWN_OP(OP);                              \
 		X86_SIM_REQUIRE_STACK_OP(OP);                              \
-		X86_SIM_LOAD_INSN((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
 		X86_SIM_PACKET_FASTPATH_CANDIDATE((OP), (DST), (SRC),      \
 						  (AUX)) ?                  \
 			X86_SIM_EXEC_PACKET((STATE), (OP)) :                 \
@@ -349,108 +319,38 @@
 
 #define X86_SIM_EXEC_SUB(STATE, OP, DST, SRC, FLAGS, AUX, IMM)              \
 	({                                                                 \
+		const struct x86_insn __x86_sim_insn =                    \
+			X86_SIM_INSN((OP), (DST), (SRC), (FLAGS), (AUX),   \
+				     (IMM));                                \
 		X86_SIM_REQUIRE_KNOWN_OP(OP);                              \
 		X86_SIM_REQUIRE_STACK_OP(OP);                              \
-		X86_SIM_LOAD_INSN((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
 		X86_SIM_EXEC_TYPED((STATE), (OP));                           \
 	})
-
-static __always_inline void x86_sim_write_result_u64(void *data, void *data_end,
-					    __u64 value)
-{
-	__u8 *p = data + X86_SIM_OUTPUT_OFF;
-
-	(void)data_end;
-	p[0] = value;
-	p[1] = value >> 8;
-	p[2] = value >> 16;
-	p[3] = value >> 24;
-	p[4] = value >> 32;
-	p[5] = value >> 40;
-	p[6] = value >> 48;
-	p[7] = value >> 56;
-}
-
-#define X86_SIM_BEGIN_XDP(CTX)                                               \
-	({                                                                 \
-		void *__x86_sim_ctx = (void *)(CTX);                         \
-		void *__x86_sim_data = (void *)(long)(CTX)->data;            \
-		void *__x86_sim_data_end = (void *)(long)(CTX)->data_end;    \
-		struct x86_state __x86_sim_state = {};                       \
-		struct x86_insn __x86_sim_insn = {};                         \
-		x86_init_state(&__x86_sim_state, (void *)(CTX));             \
-		int __x86_sim_ret = 0;
 
 #define X86_SIM_DECLARE_XDP(CTX)                                             \
 	void *__x86_sim_ctx = (void *)(CTX);                                     \
 	void *__x86_sim_data = (void *)(long)(CTX)->data;                    \
 	void *__x86_sim_data_end = (void *)(long)(CTX)->data_end;            \
 	struct x86_state __x86_sim_state = {};                               \
-	struct x86_insn __x86_sim_insn = {};                                 \
 	x86_init_state(&__x86_sim_state, (void *)(CTX))
-
-#define X86_SIM_STEP(OP, DST, SRC, FLAGS, AUX, IMM)                          \
-		if (__x86_sim_ret == 0) {                                      \
-			int __x86_sim_step_ret =                               \
-				X86_SIM_EXEC(&__x86_sim_state, (OP), (DST),      \
-					     (SRC), (FLAGS), (AUX), (IMM));    \
-			if (__x86_sim_step_ret == X86_SIM_DONE)              \
-				__x86_sim_ret = X86_SIM_DONE;                \
-		}
-
-#define X86_SIM_STEP_OP(OP, DST, SRC, FLAGS, AUX, IMM)                      \
-		if (__x86_sim_ret == 0) {                                      \
-			int __x86_sim_step_ret =                               \
-				X86_SIM_EXEC(&__x86_sim_state, (OP), (DST),      \
-					     (SRC), (FLAGS), (AUX), (IMM));    \
-			if (__x86_sim_step_ret == X86_SIM_DONE)              \
-				__x86_sim_ret = X86_SIM_DONE;                \
-		}
-
-#define X86_SIM_RUN_STEP(OP, DST, SRC, FLAGS, AUX, IMM)                      \
-	do {                                                               \
-		int __x86_sim_step_ret =                                    \
-			X86_SIM_EXEC(&__x86_sim_state, (OP), (DST), (SRC),    \
-				     (FLAGS), (AUX), (IMM));                 \
-		if (__x86_sim_step_ret == X86_SIM_DONE)                  \
-			return (__u32)__x86_sim_state.rax;                  \
-	} while (0)
 
 #define X86_SIM_RUN_OP(OP, DST, SRC, FLAGS, AUX, IMM)                       \
 	do {                                                               \
-		int __x86_sim_step_ret =                                    \
-			X86_SIM_EXEC(&__x86_sim_state, (OP), (DST), (SRC),   \
-				     (FLAGS), (AUX), (IMM));                \
-		if (__x86_sim_step_ret == X86_SIM_DONE)                  \
-			return (__u32)__x86_sim_state.rax;                  \
+		X86_SIM_EXEC(&__x86_sim_state, (OP), (DST), (SRC),        \
+			     (FLAGS), (AUX), (IMM));                         \
 	} while (0)
 
 #define X86_SIM_X86_CALL(FN, RETURN_ADDR)                                    \
 	do {                                                                 \
 		X86_SIM_REQUIRE_STACK_CALL();                                \
-		x86_sim_call_enter(&__x86_sim_state, (RETURN_ADDR));           \
-		int __x86_sim_call_ret =                                    \
-			FN(&__x86_sim_state, __x86_sim_data,                 \
-			   __x86_sim_data_end);                              \
-		x86_sim_call_leave(&__x86_sim_state);                         \
-	} while (0)
-
-#define X86_SIM_RUN_STEP_SUB(OP, DST, SRC, FLAGS, AUX, IMM)                  \
-	do {                                                               \
-		int __x86_sim_step_ret =                                    \
-			X86_SIM_EXEC_SUB(&__x86_sim_state, (OP), (DST),      \
-					 (SRC), (FLAGS), (AUX), (IMM));    \
-		if (__x86_sim_step_ret == X86_SIM_DONE)                  \
-			return X86_SIM_CONTINUE;                        \
+		x86_sim_call_enter(&__x86_sim_state, (RETURN_ADDR));         \
+		FN(&__x86_sim_state, __x86_sim_data, __x86_sim_data_end);    \
 	} while (0)
 
 #define X86_SIM_RUN_OP_SUB(OP, DST, SRC, FLAGS, AUX, IMM)                   \
 	do {                                                               \
-		int __x86_sim_step_ret =                                    \
-			X86_SIM_EXEC_SUB(&__x86_sim_state, (OP), (DST),     \
-					 (SRC), (FLAGS), (AUX), (IMM));   \
-		if (__x86_sim_step_ret == X86_SIM_DONE)                  \
-			return X86_SIM_CONTINUE;                        \
+		X86_SIM_EXEC_SUB(&__x86_sim_state, (OP), (DST), (SRC),    \
+				 (FLAGS), (AUX), (IMM));                     \
 	} while (0)
 
 static __always_inline __u32 x86_sim_ret_rax(struct x86_state *state)
@@ -477,40 +377,13 @@ X86_SIM_CONCAT(__x86_sim_jcc_fallthrough_, ID):                               \
 		;                                                            \
 	} while (0)
 
-#define X86_SIM_X86_JCC_PTR_CMP(CC, CURRENT, TARGET, LABEL, ID)              \
+#define X86_SIM_X86_JCC_IMPL(CC, CURRENT, TARGET, LABEL, ID)                 \
 	do {                                                                 \
-		if (!__x86_sim_state.cmp_ptr_valid)                            \
-			goto X86_SIM_CONCAT(__x86_sim_ptr_cmp_unhandled_, ID);   \
-		if (!((__x86_sim_state.cmp_lhs_tag == X86_PTR_PACKET ||       \
-		       __x86_sim_state.cmp_lhs_tag == X86_PTR_PACKET_END) &&  \
-		      __x86_sim_state.cmp_rhs_tag == X86_PTR_PACKET_END))      \
-			goto X86_SIM_CONCAT(__x86_sim_ptr_cmp_unhandled_, ID);   \
-		if ((CC) == X86_CC_A) {                                      \
-			if ((__u8 *)__x86_sim_state.cmp_lhs_ptr >             \
-			    (__u8 *)__x86_sim_state.cmp_rhs_ptr)              \
-				goto LABEL;                                  \
-			goto X86_SIM_CONCAT(__x86_sim_ptr_cmp_done_, ID);      \
-		}                                                            \
-		if ((CC) == X86_CC_BE) {                                     \
-			if ((__u8 *)__x86_sim_state.cmp_lhs_ptr <=            \
-			    (__u8 *)__x86_sim_state.cmp_rhs_ptr)              \
-				goto LABEL;                                  \
-			goto X86_SIM_CONCAT(__x86_sim_ptr_cmp_done_, ID);      \
-		}                                                            \
-X86_SIM_CONCAT(__x86_sim_ptr_cmp_unhandled_, ID):                              \
 		if ((TARGET) <= (CURRENT)) {                                  \
 			X86_SIM_X86_JCC_BACKWARD((CC), LABEL, ID);             \
 		} else if (x86_eval_cc(&__x86_sim_state, (CC))) {              \
 			X86_SIM_X86_JMP((CURRENT), (TARGET), LABEL);           \
 		}                                                            \
-X86_SIM_CONCAT(__x86_sim_ptr_cmp_done_, ID):                                   \
-		;                                                            \
-	} while (0)
-
-#define X86_SIM_X86_JCC_IMPL(CC, CURRENT, TARGET, LABEL, ID)                 \
-	do {                                                                 \
-		X86_SIM_X86_JCC_PTR_CMP((CC), (CURRENT), (TARGET), LABEL,    \
-				       ID);                                  \
 	} while (0)
 
 #define X86_SIM_X86_JCC(CC, CURRENT, TARGET, LABEL)                          \
@@ -557,34 +430,39 @@ static __always_inline int x86_sim_call_enter(struct x86_state *state,
 	(void)state;
 	(void)return_addr;
 	__builtin_unreachable();
-	return X86_SIM_CONTINUE;
 #endif
 }
 
-static __always_inline void x86_sim_call_leave(struct x86_state *state)
+static __always_inline void x86_sim_ret_pop(struct x86_state *state)
 {
 #ifdef X86_SIM_ENABLE_STACK
+	__u64 return_addr = 0;
+	void *return_ptr = 0;
+	__u8 return_tag = X86_PTR_NONE;
+
+	x86_stack_read_raw(state, (__s64)state->rsp, X86_WIDTH_64,
+			   &return_addr, &return_ptr, &return_tag);
 	state->rsp += 8;
 #else
 	(void)state;
 #endif
 }
 
-#define X86_SIM_SUB_BEGIN()                                                  \
-	struct x86_insn __x86_sim_insn = {}
+#define X86_SIM_SUB_BEGIN() ((void)0)
 
 #define X86_SIM_X86_SUB_RET()                                                \
 	do {                                                                 \
+		x86_sim_ret_pop(&__x86_sim_state);                        \
 		return X86_SIM_CONTINUE;                                  \
 	} while (0)
 
-static __always_inline void x86_sim_read_packet_value_proven(void *data,
-							    void *data_end,
-							    void *base,
-							    __s32 base_off,
-							    __s64 disp,
-							    __u8 width,
-							    __u64 *value)
+static __always_inline void x86_sim_read_packet_value_raw(void *data,
+							 void *data_end,
+							 void *base,
+							 __s32 base_off,
+							 __s64 disp,
+							 __u8 width,
+							 __u64 *value)
 {
 	__u8 *addr;
 
@@ -602,18 +480,18 @@ static __always_inline void x86_sim_read_packet_value_proven(void *data,
 		*value = *(__u64 *)addr;
 }
 
-static __always_inline int x86_sim_load_packet_proven(struct x86_state *state,
-						     __u8 dst, void *data,
-						     void *data_end, void *base,
-						     __s32 base_off, __s64 disp,
-						     __u8 load_width,
-						     __u8 write_width,
-						     __u8 sign_extend)
+static __always_inline int x86_sim_load_packet_raw(struct x86_state *state,
+						   __u8 dst, void *data,
+						   void *data_end, void *base,
+						   __s32 base_off, __s64 disp,
+						   __u8 load_width,
+						   __u8 write_width,
+						   __u8 sign_extend)
 {
 	__u64 value = 0;
 
-	x86_sim_read_packet_value_proven(data, data_end, base, base_off, disp,
-					load_width, &value);
+	x86_sim_read_packet_value_raw(data, data_end, base, base_off, disp,
+				      load_width, &value);
 	if (sign_extend)
 		value = x86_sign_extend(value, load_width);
 	return x86_write_reg_width(state, dst, value, write_width);
@@ -638,8 +516,8 @@ x86_sim_read_packet_mem_value(struct x86_state *state, __u8 base_reg, __u32 aux,
 					     (void *)(long)base_value, disp,
 					     width, value);
 	base_off = x86_read_ptr_off_reg(state, base_reg);
-	x86_sim_read_packet_value_proven(data, data_end, base, base_off, disp,
-					width, value);
+	x86_sim_read_packet_value_raw(data, data_end, base, base_off, disp,
+				      width, value);
 	return X86_SIM_CONTINUE;
 }
 
@@ -660,7 +538,7 @@ x86_exec_mov_load_packet(struct x86_state *state, const struct x86_insn *insn,
 	if (tag != X86_PTR_PACKET)
 		return x86_load_mem(state, insn, data, data_end);
 	base_off = x86_read_ptr_off_reg(state, insn->src);
-	return x86_sim_load_packet_proven(
+	return x86_sim_load_packet_raw(
 		state, insn->dst, data, data_end, base, base_off, disp,
 		mem_width, insn->flags, insn->op == X86_OP_MOVSX_LOAD);
 }
@@ -697,7 +575,7 @@ x86_exec_cmp_mem_packet(struct x86_state *state, const struct x86_insn *insn,
 			void *data, void *data_end)
 {
 	__u64 lhs = 0;
-	__u64 rhs = x86_store_imm_value(insn->imm);
+	__u64 rhs = x86_store_imm_value(insn->imm, insn->flags);
 	__s64 disp = insn->op == X86_OP_CMP_MEM_REG ?
 			     x86_simm(insn->imm) :
 			     x86_store_imm_disp(insn->imm);
@@ -770,21 +648,8 @@ x86_exec_mov_store_imm_packet(struct x86_state *state,
 	if (tag != X86_PTR_PACKET)
 		return x86_store_mem(state, insn, data, data_end);
 	return x86_store_packet_imm(data, data_end, base, disp, insn->flags,
-				    x86_store_imm_value(insn->imm));
+				    x86_store_imm_value(insn->imm, insn->flags));
 }
-
-#define X86_SIM_END_XDP()                                                    \
-		int __x86_sim_xdp_ret = XDP_PASS;                         \
-		x86_sim_write_result_u64(__x86_sim_data,                   \
-					__x86_sim_data_end,             \
-					__x86_sim_state.rax);           \
-		__x86_sim_xdp_ret;                                           \
-	})
-
-#define X86_SIM_END_XDP_RET_RAX()                                            \
-		int __x86_sim_xdp_ret = (__u32)__x86_sim_state.rax;          \
-		__x86_sim_xdp_ret;                                           \
-	})
 
 #define X86_SIM_LICENSE() char LICENSE[] SEC("license") = "GPL"
 

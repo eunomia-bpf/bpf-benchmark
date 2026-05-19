@@ -709,26 +709,42 @@ long syscall(long number, ...) {
             pending_prog->fd = (int)ret;
             resolved_id = resolve_kernel_id((int)ret);
             pending_prog->kernel_prog_id = resolved_id;
-            /* Enumerate /proc/self/fd to find every BPF map fd currently open
-             * in the loader. Catches fds from BPF_MAP_CREATE, MAP_GET_FD_BY_ID,
-             * BPF_OBJ_GET (pinned paths), dup3, fcntl(F_DUPFD), etc. — we
-             * don't have to intercept each fd-producing path. The bytecode's
-             * BPF_PSEUDO_MAP_FD imm values point at fds open at this moment. */
-            uint32_t cap = 32, n = 0;
+            /* Capture only the maps THIS prog actually references. Earlier we
+             * enumerated all of /proc/self/fd, but for a long-lived loader
+             * (e.g. tracee with 158 progs) that snapshot accumulates every
+             * map fd ever opened (hundreds), and the kernel rejects PROG_LOAD
+             * with -E2BIG once nr_maps > MAX_USED_MAPS=64. Use the prog's own
+             * used_maps list (kernel-authoritative) and only map those ids
+             * back to loader fds via a single /proc/self/fd scan. */
+            uint32_t pmap_ids[64] = {0};
+            uint32_t pmap_n = 0;
+            {
+                struct bpf_prog_info pi;
+                memset(&pi, 0, sizeof(pi));
+                pi.nr_map_ids = 64;
+                pi.map_ids = (uintptr_t)pmap_ids;
+                union bpf_attr pa = {0};
+                pa.info.bpf_fd = (uint32_t)ret;
+                pa.info.info_len = sizeof(pi);
+                pa.info.info = (uintptr_t)&pi;
+                long pr = real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD,
+                                       &pa, sizeof(pa));
+                if (pr >= 0) {
+                    pmap_n = pi.nr_map_ids;
+                    if (pmap_n > 64) pmap_n = 64;
+                }
+            }
+            uint32_t cap = pmap_n ? pmap_n : 1, n = 0;
             uint32_t *fds = (uint32_t *)calloc(cap, sizeof(uint32_t));
             uint32_t *kids = (uint32_t *)calloc(cap, sizeof(uint32_t));
             uint32_t *types = (uint32_t *)calloc(cap, sizeof(uint32_t));
-            DIR *fd_dir = opendir("/proc/self/fd");
+            DIR *fd_dir = pmap_n > 0 ? opendir("/proc/self/fd") : NULL;
             if (fd_dir && fds && kids && types) {
                 struct dirent *de;
-                while ((de = readdir(fd_dir)) != NULL) {
+                while ((de = readdir(fd_dir)) != NULL && n < pmap_n) {
                     if (de->d_name[0] < '0' || de->d_name[0] > '9') continue;
                     int probe_fd = atoi(de->d_name);
                     if (probe_fd < 0) continue;
-                    /* /proc/self/fd/<N> symlinks to anon_inode:bpf-map for
-                     * map fds and anon_inode:bpf-prog/bpf-link/etc. for
-                     * other BPF kinds. Cheap discriminator that avoids
-                     * issuing OBJ_GET_INFO_BY_FD on every fd. */
                     char fdpath[64], link_target[64];
                     snprintf(fdpath, sizeof(fdpath), "/proc/self/fd/%d", probe_fd);
                     ssize_t lr = readlink(fdpath, link_target, sizeof(link_target) - 1);
@@ -744,13 +760,18 @@ long syscall(long number, ...) {
                     long r = real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD,
                                           &ia, sizeof(ia));
                     if (r < 0 || mi.id == 0) continue;
-                    if (n == cap) {
-                        cap *= 2;
-                        fds = (uint32_t *)realloc(fds, cap * sizeof(uint32_t));
-                        kids = (uint32_t *)realloc(kids, cap * sizeof(uint32_t));
-                        types = (uint32_t *)realloc(types, cap * sizeof(uint32_t));
-                        if (!fds || !kids || !types) { n = 0; break; }
-                    }
+                    /* Only keep fds whose kernel map id is in this prog's
+                     * used_maps list. */
+                    int wanted = 0;
+                    for (uint32_t i = 0; i < pmap_n; i++)
+                        if (pmap_ids[i] == mi.id) { wanted = 1; break; }
+                    if (!wanted) continue;
+                    /* Skip duplicates — multiple loader fds may alias the
+                     * same kernel id; one representative is enough. */
+                    int dup = 0;
+                    for (uint32_t i = 0; i < n; i++)
+                        if (kids[i] == mi.id) { dup = 1; break; }
+                    if (dup) continue;
                     fds[n] = (uint32_t)probe_fd;
                     kids[n] = mi.id;
                     types[n] = mi.type;

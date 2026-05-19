@@ -140,15 +140,19 @@ def compile_object(bench: Bench) -> tuple[Result | None, float]:
     return None, compile_s
 
 
-def run_object(bench: Bench, sudo: bool) -> Result:
+def run_object(bench: Bench, sudo: bool, run_id: str) -> Result:
     obj = BUILD_DIR / f"{bench.name}.bpf.o"
     input_path, _meta = materialize_input(bench.input_generator, force=False)
+    verifier_log = RESULTS_DIR / f"{bench.name}-{run_id}.verifier.log"
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     cmd = [
         str(LOADER_BIN),
         "--object",
         str(obj),
         "--program",
         f"{bench.name}_x86_sim_xdp",
+        "--verifier-log",
+        str(verifier_log),
         "--case",
         bench.name,
         "--input",
@@ -176,11 +180,11 @@ def run_object(bench: Bench, sudo: bool) -> Result:
                   verify_s=verify_s, test_s=test_s or run_s)
 
 
-def run_bench(bench: Bench, sudo: bool) -> Result:
+def run_bench(bench: Bench, sudo: bool, run_id: str) -> Result:
     compile_result, compile_s = compile_object(bench)
     if compile_result is not None:
         return compile_result
-    result = run_object(bench, sudo=sudo)
+    result = run_object(bench, sudo=sudo, run_id=run_id)
     result.compile_s = compile_s
     return result
 
@@ -200,7 +204,7 @@ def compact_error(text: str) -> str:
         or "processed" in line
     ]
     chosen = interesting[-2:] if interesting else lines[-2:]
-    return " | ".join(chosen)[:240]
+    return " | ".join(chosen)[:500]
 
 
 def parse_loader_timing(text: str) -> tuple[float, float]:
@@ -225,9 +229,8 @@ def markdown_table(results: list[Result]) -> str:
     return "\n".join(lines)
 
 
-def default_markdown_path() -> Path:
-    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    return RESULTS_DIR / f"README-{timestamp}.md"
+def default_markdown_path(run_id: str) -> Path:
+    return RESULTS_DIR / f"README-{run_id}.md"
 
 
 def main() -> int:
@@ -270,10 +273,12 @@ def main() -> int:
     if not args.no_build_loader:
         build_loader()
 
+    run_id = datetime.now().strftime("%Y%m%d-%H%M%S")
     results_by_name: dict[str, Result] = {}
     if args.jobs == 1:
         for bench in benches:
-            result = run_bench(bench, sudo=not args.no_sudo)
+            result = run_bench(bench, sudo=not args.no_sudo,
+                               run_id=run_id)
             results_by_name[bench.name] = result
             print(
                 f"{bench.name}: {result.status}: "
@@ -286,7 +291,8 @@ def main() -> int:
         print(f"running {len(benches)} benchmarks with {args.jobs} jobs", flush=True)
         with ThreadPoolExecutor(max_workers=args.jobs) as executor:
             futures = {
-                executor.submit(run_bench, bench, not args.no_sudo): bench
+                executor.submit(run_bench, bench, not args.no_sudo,
+                                run_id): bench
                 for bench in benches
             }
             for future in as_completed(futures):
@@ -303,7 +309,7 @@ def main() -> int:
 
     results = [results_by_name[bench.name] for bench in benches]
     table = markdown_table(results)
-    markdown_path = args.markdown or default_markdown_path()
+    markdown_path = args.markdown or default_markdown_path(run_id)
     markdown_path.parent.mkdir(parents=True, exist_ok=True)
     markdown_path.write_text(table + "\n")
     print(f"wrote {markdown_path}")

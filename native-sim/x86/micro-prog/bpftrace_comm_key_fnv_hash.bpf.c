@@ -1,8 +1,5 @@
 #define X86_SIM_ENABLE_STACK 1
-#define X86_SIM_ENABLE_STACK_SLOT7 1
-#define X86_SIM_ENABLE_STACK_SLOT8 1
 #define X86_SIM_ENABLE_STACK_DEEP 1
-#define X86_SIM_ENABLE_STACK_EXT 1
 #include "../x86_sim_bpf.h"
 
 SEC("xdp")
@@ -630,7 +627,7 @@ x86_l_13e9:
 x86_l_13ea:
 	/* 0x13ea: ret */
 	X86_SIM_X86_RET();
-	return x86_sim_ret_rax(&__x86_sim_state);
+	__builtin_unreachable();
 }
 
 X86_SIM_LICENSE();

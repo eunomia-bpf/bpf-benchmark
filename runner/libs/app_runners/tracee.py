@@ -202,10 +202,18 @@ def _tracee_collector_has_activity(collector: TraceeOutputCollector) -> bool:
 
 
 def build_tracee_commands(binary: str, extra_args: Sequence[str] = ()) -> list[list[str]]:
+    # --capabilities bypass=true keeps CAP_BPF + CAP_PERFMON effective for the
+    # whole tracee process lifetime. Default tracee parks them in a separate
+    # "EBPF ring" and only enters that ring around its own BPF syscalls; the
+    # bpfrejit shim performs BPF_PROG_LOAD inline from a runner-driven socket
+    # request, which lands outside the ring and would otherwise EPERM at
+    # kernel/bpf/syscall.c:2913 (bpf_token_capable check).
     return [[binary, "--events", "*",
              "--output", TRACEE_OUTPUT_MODE,
              "--server", "healthz", "--server", f"http-address=:{TRACEE_HEALTH_PORT}",
-             "--signatures-dir", str(_tracee_signatures_dir()), *extra_args]]
+             "--signatures-dir", str(_tracee_signatures_dir()),
+             "--capabilities", "bypass=true",
+             *extra_args]]
 
 
 def _format_launch_failure(command: Sequence[str], proc: subprocess.Popen[str] | None, snapshot: Mapping[str, object]) -> str:

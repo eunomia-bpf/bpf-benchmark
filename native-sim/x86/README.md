@@ -25,9 +25,9 @@ mov rax, 12345678
 ret
 ```
 
-The BPF program simulates the hardcoded instruction stream, writes `rax` to the
-first eight packet bytes, and returns `XDP_PASS`. The loader runs it with
-`BPF_PROG_TEST_RUN` and checks that the output value is `12345678`.
+The BPF program simulates the hardcoded instruction stream and returns the
+architectural `rax` value. The smoke target uses load-only verification because
+the `mov; ret` stream has no native packet bounds guard or output store.
 
 The instruction sequence is hardcoded in the `.bpf.c` file, while all simulator machinery lives in headers.
 
@@ -41,12 +41,11 @@ native instruction:
 SEC("xdp")
 int x86_sim_hardcoded_xdp(struct xdp_md *ctx)
 {
-	return X86_SIM_BEGIN_XDP(ctx)
+	X86_SIM_DECLARE_XDP(ctx);
 	/* 0x0: mov rax, 12345678 */
-	X86_SIM_STEP_OP(X86_OP_MOV_IMM64, X86_RAX, 0, 0, 0, 12345678ULL)
+	X86_SIM_RUN_OP(X86_OP_MOV_IMM64, X86_RAX, 0, 0, 0, 12345678ULL);
 	/* 0x5: ret */
-	X86_SIM_STEP_OP(X86_OP_RET, 0, 0, 0, 0, 0)
-	X86_SIM_END_XDP();
+	X86_SIM_X86_RET();
 }
 ```
 
@@ -81,13 +80,14 @@ make -C native-sim/x86 build
 sudo native-sim/loader/target/debug/reversesim-loader \
   --object native-sim/x86/build/x86_sim_hardcoded.bpf.o \
   --program x86_sim_hardcoded_xdp \
-  --case simple
+  --case simple \
+  --load-only
 ```
 
-Observed smoke result:
+Observed load-only smoke result:
 
 ```text
-case=simple retval=2 result=12345678 repeat=1 data_size_out=48
+timing verify_s=... test_s=0.000000
 ```
 
 Object inspection for the hardcoded artifact:
@@ -95,7 +95,7 @@ Object inspection for the hardcoded artifact:
 ```text
 no .maps section
 no .rodata section
-xdp section size: 0xa0 bytes
+xdp section size: 0x10 bytes
 ```
 
 The current simulator has prototype coverage for integer register moves,
@@ -144,66 +144,60 @@ If this remains too expensive, the next design change must still keep helper
 selection out of Python; it should use C-authored templates/macros or a smaller
 simulator state shape.
 
-Current correctness-first stack model intentionally exceeds the kernel BPF
-512-byte stack when compiled as an eBPF proof program. The active compile path
-therefore uses `-mllvm -bpf-stack-size=4096` so clang can emit objects for
-inspection. This is not a verifier strategy and does not make the object
-loadable by the kernel verifier; verifier rejection is expected until the state
-layout is made verifier-friendly without changing simulator semantics.
+Earlier full-state layouts exceeded the kernel BPF 512-byte stack. The active
+state now uses a C-owned shallow/deep byte-stack layout: push/pop-only programs
+get 64 bytes, and programs with real `[rsp/rbp + disp]` local memory get 128
+bytes. This is a state-layout choice, not a runtime guard. The batch still
+passes `-mllvm -bpf-stack-size=4096` so clang does not abort before we can
+inspect verifier behavior, but latest verifier failures are now dominated by
+pointer representation and packet-range visibility rather than stack-frame
+overflow.
 
 ### Micro Compile And Verify Matrix
 
 Historical safety-first generated-C run was 29/29 before the current
 correctness-first cleanup:
 [`results/README-20260518-210632.md`](./results/README-20260518-210632.md).
-That run kept the previous proof-only branch assertions and `last_cmp_*`
-metadata deleted. The current active code goes further: runtime unsupported
-checks, abort/fallback returns, loop guards, and stack-slot rejection were
-removed from the active simulator/linker path. All 29 generated micro sources
-compile with `BPF_STACK_SIZE=4096`;
-[`results/README-20260518-214215.md`](./results/README-20260518-214215.md)
-records that compile-only check. No current verifier/load success is claimed
-for this correctness-first version.
+That run is no longer a direct-native-safety result: it used verifier-friendly
+facts and paths that have since been deleted. The current active code removes
+runtime unsupported checks, abort/fallback returns, loop guards, branch range
+assertions, stack-slot rejection, and generated fallback returns.
 
-`current` is the active C-dispatch path (`generate_micro_sim_proofs.py` +
-`x86_sim_bpf.h`). `helper-selection` is historical baseline data from the
-restored backup path (`generate_micro_sim_proofs_helper_selection.py` +
-`x86_sim_bpf_helper_selection.h`); the separate compile-cost measurement script
-has been removed so new runs use only `run_micro_sim_batch.py`. The
-historical helper-selection numbers remain in the table only as compile-cost
-evidence.
+Latest correctness-first batch:
+[`results/README-20260519-005704.md`](./results/README-20260519-005704.md).
+All 29 generated micro sources compiled; 5 loaded and passed test run.
 
-| Micro program | Status | Current clang s | Current verify s | Current verify | Helper clang s | Helper verify s | Helper verify | Note |
-| --- | --- | ---: | ---: | --- | ---: | ---: | --- | --- |
-| `simple` | ok | 0.351 | 0.000 | ok | 0.202 | 0.013 | ok |  |
-| `simple_packet` | ok | 0.433 | 0.000 | ok | 0.184 | 0.015 | ok |  |
-| `bitmap_popcount_scan` | ok | 1.360 | 0.001 | ok | 0.414 | 0.037 | ok |  |
-| `sorted_rule_binary_search` | ok | 1.324 | 0.029 | ok | 0.581 | 0.187 | ok |  |
-| `bcc_runqlat_log2_histogram_bucket` | ok | 5.440 | 0.095 | ok | 1.917 | 0.947 | ok |  |
-| `trace_event_type_switch_dispatch` | ok | 2.842 | 0.076 | ok | 1.451 | 0.908 | ok |  |
-| `packet_checksum_fold` | ok | 2.043 | 0.040 | ok | 0.381 | 0.523 | ok | Still passes after deleting branch assertions. |
-| `payload_prefix_memcmp_scan` | ok | 6.961 | 0.001 | ok | 3.193 | 0.029 | ok |  |
-| `packet_vlan_tcpopt_parser` | ok | 7.825 | 0.000 | ok | 3.257 | 0.019 | ok | Hidden packet-offset metadata stays verifier-visible. |
-| `bpf_local_call_fanout_dispatch` | ok | 29.576 | 0.021 | ok | 1.748 | 2.542 | run-fail | Historical C-owned call/frame semantics result; current stack model is byte-addressed instead of fixed slot payloads. |
-| `flow_5tuple_rss_hash` | ok | 11.715 | 0.000 | ok | 4.854 | 0.017 | ok |  |
-| `katran_lb_consistent_hash_select` | ok | 45.789 | 0.001 | ok | 22.169 | 0.020 | ok |  |
-| `cilium_policy_guard_tree_filter` | ok | 5.427 | 0.003 | ok | 3.178 | 0.046 | ok |  |
-| `siphash_rotate64_mixer` | ok | 58.022 | 0.000 | ok | 24.311 | 0.016 | ok |  |
-| `packet_record_bounds_window` | ok | 4.985 | 0.002 | ok | 1.347 | 0.037 | ok |  |
-| `flow_record_field_scan` | ok | 6.442 | 0.001 | ok | 1.713 | 0.028 | ok |  |
-| `packed_header_bitfield_decode` | ok | 23.092 | 0.002 | ok | 14.250 | 0.121 | ok |  |
-| `bpftrace_string_search_prefix_scan` | ok | 4.657 | 0.135 | ok | 0.677 | 2.589 | run-fail | Passes via C/header state-shape fixes, not branch assertions. |
-| `tracee_syscall_name_table_lookup` | ok | 4.673 | 0.016 | ok | 1.347 | 0.121 | ok |  |
-| `tracee_http_method_prefix_detect` | ok | 4.521 | 0.002 | ok | 1.911 | 0.029 | ok |  |
-| `cilium_socket_lb_service_select` | ok | 7.313 | 0.012 | ok | 2.584 | 0.159 | ok |  |
-| `bcc_tcpconnect_ipv4_tuple_filter` | ok | 8.265 | 0.007 | ok | 2.335 | 0.082 | ok |  |
-| `tetragon_process_event_arg_filter` | ok | 27.778 | 0.106 | ok | 18.292 | 0.531 | ok |  |
-| `otel_stack_frame_unwind_scan` | ok | 5.514 | 0.004 | ok | 2.424 | 0.047 | ok |  |
-| `cilium_ct_nat_tuple_rewrite` | ok | 6.592 | 0.003 | ok | 3.420 | 0.077 | ok |  |
-| `packet_toeplitz_rss_hash` | ok | 7.594 | 0.005 | ok | 2.290 | 0.052 | ok |  |
-| `bpftrace_comm_key_fnv_hash` | ok | 38.966 | 0.003 | ok | 24.316 | 0.094 | ok |  |
-| `tc_packet_checksum_fold` | ok | 3.190 | 0.039 | ok | 0.404 | 0.648 | ok | `PACKET_LEN` proves `data + skb_len == data_end`; `xchg ax,ax` is no-op. |
-| `cgroup_skb_hash_chain` | ok | 3.241 | 0.001 | ok | 0.923 | 0.026 | ok | `PACKET_LEN` proves SKB end pointer without proof-only branch assertions. |
+| Micro program | Status | Compile s | Verify s | Current verifier result |
+| --- | --- | ---: | ---: | --- |
+| `simple` | ok | 0.249 | 0.000 | ok |
+| `simple_packet` | ok | 0.239 | 0.000 | ok |
+| `bitmap_popcount_scan` | ok | 0.654 | 0.017 | ok |
+| `sorted_rule_binary_search` | ok | 0.779 | 0.223 | ok |
+| `bcc_runqlat_log2_histogram_bucket` | run-fail | 2.570 | 0.002 | `R2 pointer arithmetic with <<= operator prohibited` |
+| `trace_event_type_switch_dispatch` | run-fail | 1.418 | 0.001 | `R3 pointer arithmetic with <<= operator prohibited` |
+| `packet_checksum_fold` | ok | 1.127 | 0.399 | ok |
+| `payload_prefix_memcmp_scan` | run-fail | 3.434 | 0.001 | `R3 pointer arithmetic on pkt_end prohibited` |
+| `packet_vlan_tcpopt_parser` | run-fail | 4.616 | 0.002 | `invalid access to packet, off=42 size=1, r=0` |
+| `bpf_local_call_fanout_dispatch` | run-fail | 9.808 | 0.001 | `invalid size of register spill` |
+| `flow_5tuple_rss_hash` | run-fail | 7.124 | 0.002 | `invalid access to packet, off=22 size=2, r=0` |
+| `katran_lb_consistent_hash_select` | run-fail | 33.176 | 0.001 | `tried to subtract pointer from scalar` |
+| `cilium_policy_guard_tree_filter` | run-fail | 2.315 | 0.034 | `R1 pointer arithmetic with <<= operator prohibited` |
+| `siphash_rotate64_mixer` | run-fail | 42.481 | 0.003 | `R1 pointer arithmetic with <<= operator prohibited` |
+| `packet_record_bounds_window` | run-fail | 2.200 | 0.043 | `R2 pointer arithmetic with <<= operator prohibited` |
+| `flow_record_field_scan` | run-fail | 2.813 | 0.025 | `R2 pointer arithmetic with <<= operator prohibited` |
+| `packed_header_bitfield_decode` | run-fail | 11.741 | 0.001 | `R1 pointer arithmetic with >>= operator prohibited` |
+| `bpftrace_string_search_prefix_scan` | run-fail | 2.302 | 0.002 | `R4 pointer arithmetic with <<= operator prohibited` |
+| `tracee_syscall_name_table_lookup` | run-fail | 1.880 | 0.001 | `R2 pointer arithmetic with <<= operator prohibited` |
+| `tracee_http_method_prefix_detect` | run-fail | 2.121 | 0.010 | `R1 pointer arithmetic with <<= operator prohibited` |
+| `cilium_socket_lb_service_select` | run-fail | 3.352 | 0.001 | `R3 bitwise operator &= on pointer prohibited` |
+| `bcc_tcpconnect_ipv4_tuple_filter` | run-fail | 3.191 | 0.021 | `R2 pointer arithmetic with <<= operator prohibited` |
+| `tetragon_process_event_arg_filter` | run-fail | 8.200 | 0.001 | `R1 pointer arithmetic with >>= operator prohibited` |
+| `otel_stack_frame_unwind_scan` | run-fail | 2.332 | 0.031 | `R3 pointer arithmetic with <<= operator prohibited` |
+| `cilium_ct_nat_tuple_rewrite` | run-fail | 3.115 | 0.016 | `R2 pointer arithmetic with <<= operator prohibited` |
+| `packet_toeplitz_rss_hash` | run-fail | 2.928 | 0.081 | `R1 pointer arithmetic with <<= operator prohibited` |
+| `bpftrace_comm_key_fnv_hash` | run-fail | 14.173 | 0.001 | `R1 pointer arithmetic with >>= operator prohibited` |
+| `tc_packet_checksum_fold` | run-fail | 1.595 | 0.000 | `invalid access to packet, off=8 size=4, r=0` |
+| `cgroup_skb_hash_chain` | run-fail | 1.982 | 0.001 | `invalid access to packet, off=8 size=4, r=0` |
 
 For verifier diagnostics, capture the kernel verifier log through the loader:
 
@@ -227,7 +221,7 @@ programs pass verifier and `BPF_PROG_TEST_RUN`.
 These rows compare direct eBPF against an earlier x86-simulator proof shape.
 They are historical verifier-complexity controls from the safety-first path, not
 current correctness-first load results. The current active path prioritizes
-exact simulator semantics and only claims clang compilation at this point.
+exact simulator semantics and currently claims 5/29 verifier/load success.
 
 | Micro program | Direct eBPF result | Direct load/test s | Direct static BPF insns | Direct verifier processed / total / peak / max-state | x86 simulator result | x86 simulator verify s | x86 simulator static BPF insns | x86 simulator verifier processed / total / peak / max-state | Reason |
 | --- | --- | ---: | ---: | --- | --- | ---: | ---: | --- | --- |
@@ -237,20 +231,20 @@ exact simulator semantics and only claims clang compilation at this point.
 Latest historical safety-first generated-C run:
 [`results/README-20260518-210632.md`](./results/README-20260518-210632.md).
 The current active path is stricter about simulator semantics and no longer
-claims 29/29 verifier success. Its current checked property is compile-only:
-all 29 generated sources compile with clang when `BPF_STACK_SIZE=4096`.
+claims 29/29 verifier success.
 
 The backup `helper-selection` path had lower clang cost but still failed
 `bpf_local_call_fanout_dispatch` and `bpftrace_string_search_prefix_scan` at
-the verifier. The active C-owned path trades more C/header complexity for a
-cleaner Python proof boundary and now fixes both cases.
+the verifier. The active C-owned path keeps the cleaner Python proof boundary,
+but after the direct-native cleanup those two programs currently fail for the
+same pointer-representation reasons as the other large cases.
 
 Python LOC check for this cleanup and backup:
 
 ```text
-generate_micro_sim_proofs.py current:            735 lines
-x86_sim_bpf.h latest:                       780 lines
-x86_sim.h latest:                      2073 lines
+generate_micro_sim_proofs.py current:       739 lines
+x86_sim_bpf.h latest:                      657 lines
+x86_sim.h latest:                         1932 lines
 loader/src/main.rs latest:             1192 lines
 removed x86_sim_template_helpers.bpf.c: 2010 lines
 ```
@@ -267,8 +261,9 @@ completion is a separate next experiment.
 The formalization target for the generated-C path is
 [`simulator-spec.md`](./simulator-spec.md). That spec is intentionally tied to
 the current code: instruction helper steps, native branch/call/return lowering,
-low-stack pointer payloads, and ABI output-store capability preservation are
-named proof obligations rather than benchmark-specific fixes.
+byte-addressed stack layout, hidden packet metadata, and ABI output-store
+capability preservation are named proof obligations rather than
+benchmark-specific fixes.
 
 Active generator rule: Python must not rewrite native return semantics, branch
 semantics, or opcode semantics. A native `ret` is emitted as
@@ -334,16 +329,16 @@ C state-layout changes in the active path:
 - `X86_SIM_EXEC` performs C-owned typed opcode dispatch; Python still emits only
   `X86_SIM_RUN_OP(X86_OP_..., operands...)`.
 - The stack model is byte-addressed stack memory. Pointer payload metadata was
-  removed from stack because hardware x86 stores bytes, not verifier tags. If a
-  generated artifact needs stack behavior outside the modeled native layout, the
-  simulator must gain a larger exact stack model.
-- Top-level packet memory loads use a verifier-proven raw-load fastpath for
+  removed from stack because hardware x86 stores bytes, not verifier tags. The
+  generated source selects 64-byte or 128-byte state layout, but no runtime
+  stack bounds guard is inserted.
+- Top-level packet memory loads use a raw-load fastpath for
   packet bases that already have verifier-visible range. Subfunction steps use
-  the checked typed simulator path so local-call proof state stays stable.
+  the generic typed simulator path so local-call proof state stays stable.
 - Packet pointer arithmetic preserves concrete scalar register semantics and
-  tracks packet offsets in hidden per-register metadata. Proven packet loads may
-  recompute `data + offset + disp` for the verifier without changing the modeled
-  x86 register value.
+  tracks packet offsets in hidden per-register metadata. Raw packet loads may
+  recompute `data + offset + disp` for the verifier without changing the
+  modeled x86 register value.
 - SKB length loads from `ctx+0x70` produce the native scalar length and a
   `PACKET_LEN` ghost capability tied to `data_end`. Adding that length to the
   packet `data` pointer produces `PACKET_END`, which expresses the real SKB ABI
@@ -365,8 +360,8 @@ Generated-C migration todo:
 | Historical safety-first generated-C batch | recorded | `results/README-20260518-210632.md`: 29/29 pass before the later no-trap/no-guard cleanup. |
 | Delete non-x86 loop fuel guard | done | Active branch macros no longer decrement `X86_SIM_LOOP_FUEL`; backward edges use plain x86 branch semantics. |
 | Move opcode dispatch specialization into C | done | `X86_SIM_EXEC_TYPED` selects C helpers from constant `X86_OP_*`; Python does not choose helpers. |
-| Stack pointer metadata | correctness-first rewrite | `x86_state` stores byte-addressed stack contents plus pointer metadata for 32 aligned slots; no runtime slot rejection remains in the active simulator. |
-| Verifier-proven packet load fastpath | done | Top-level packet loads can rely on verifier-visible packet range instead of adding per-load bounds helpers. |
+| Stack pointer metadata | correctness-first rewrite | `x86_state` stores only byte-addressed stack contents, with a 64-byte shallow or 128-byte deep layout selected at generation time; no runtime slot rejection remains in the active simulator. |
+| Raw packet load fastpath | done | Top-level packet loads use verifier-visible packet pointers directly instead of adding per-load bounds helpers. |
 | Delete SKB length branch range hook | done | The proof-only `cmp [ctx+0x70], imm; ja target` range assertion was removed. |
 | Model SKB packet end through ABI metadata | done | `ctx+0x70` loads carry `PACKET_LEN`; `PACKET_LEN + PACKET` becomes `PACKET_END`, matching `data + skb_len == data_end`. |
 | Preserve same-register `xchg` semantics | done | `xchg ax, ax` is modeled as the real x86 no-op, so it does not clear packet pointer metadata. |
@@ -375,8 +370,10 @@ Generated-C migration todo:
 | Remove packet/output runtime bounds checks | done | Active packet/output helpers no longer guard loads/stores with proof-only `data_end` checks. |
 | Remove top-level fallback returns | done | Generated paths no longer translate helper results into `XDP_ABORTED` or any other fallback return. |
 | Delete hardcoded rodata sentinel | done | The old benchmark-specific rodata switch was removed. RIP-relative `lea` now keeps only the architectural scalar address until a real read-only memory image is specified. |
-| Split memory-domain helpers | done for current micro | Top-level packet loads have a raw verifier-proven path; subfunctions and stack/ctx accesses keep checked typed helpers. |
-| Correctness-first compile check | done | [`results/README-20260518-214215.md`](./results/README-20260518-214215.md): all 29 generated micro sources compile with clang when `BPF_STACK_SIZE=4096`; verifier/load is not claimed for this state layout. |
+| Split memory-domain helpers | done for current micro | Top-level packet loads have a raw pointer path; subfunctions and stack/ctx accesses keep typed helpers. |
+| Per-instruction const record | done | `X86_SIM_EXEC` creates a local `const struct x86_insn` for each macro-expanded native instruction so clang can specialize C-authored semantics without Python helper selection. |
+| Remove generated fallback returns | done | Generated entry and subfunction tails use `__builtin_unreachable()` after the native CFG; no fallback return value is emitted. |
+| Correctness-first compile/verify check | latest: 5/29 verifier ok | [`results/README-20260519-005704.md`](./results/README-20260519-005704.md): all 29 generated micro sources compile; five load and test successfully. Remaining failures are verifier rejection of pointer-typed x86 GPR integer operations, byte-wise pointer stack stores, scalar/pointer subtraction, and packet accesses whose native guards are not visible as direct verifier range facts. |
 | Direct-native safety TODO | open | See [`TODO.md`](./TODO.md) for remaining stack, metadata, ABI, rodata, flag, and call-return proof obligations. |
 
 The current active path is correctness-first: it removes simulator-only safety
@@ -714,24 +711,23 @@ This prototype has already exposed several verifier-facing design constraints:
   incomplete for native direct calls. The generator now rebuilds the native
   object and disassembles call-target symbols when the markdown `## Native ASM`
   block has unresolved call targets.
-- `bpf_local_call_fanout_dispatch` no longer has a benchmark-name renderer and
-  now passes verifier/test-run. The active fix is C-owned: typed opcode
-  dispatch, native call stack adjustment, generated callee frame execution,
-  low-stack pointer payload slots, and indexed packet-pointer promotion.
+- `bpf_local_call_fanout_dispatch` no longer has a benchmark-name renderer. It
+  passed in an earlier safety-first shape after C-owned call/frame work, but the
+  current correctness-first shape fails verifier because byte-wise x86 stack
+  stores of pointer-typed GPR values become invalid BPF pointer spills.
 - `bpftrace_string_search_prefix_scan` no longer uses a C-authored
-  benchmark-specific scan helper and still passes after deleting proof-only
-  branch assertions. The fix stayed in C/header state shape and flag semantics,
-  not in Python renderers or assertions.
-- `packet_checksum_fold`, `tc_packet_checksum_fold`, and
-  `cgroup_skb_hash_chain` pass after deleting proof-only branch assertions. The
-  SKB cases use C-authored ABI metadata: a `ctx+0x70` load carries
-  `PACKET_LEN`, and adding it to the packet data pointer yields `PACKET_END`.
-  The TC checksum case also required exact `xchg ax, ax` no-op semantics so a
-  native alignment NOP does not clear packet pointer metadata.
-- `packet_vlan_tcpopt_parser` now passes because packet pointer arithmetic keeps
-  concrete x86 register values separate from hidden packet-offset metadata. The
-  verifier load path can prove `data + offset + disp` while the x86 state still
-  observes the same scalar register value.
+  benchmark-specific scan helper. It now fails verifier on pointer-typed GPR
+  shift operations, which is the expected result after deleting branch
+  assertions and keeping hardware-like register semantics.
+- `packet_checksum_fold` still passes after deleting proof-only branch
+  assertions. `tc_packet_checksum_fold` and `cgroup_skb_hash_chain` now fail
+  verifier because the native SKB guard is represented through x86 flags and
+  `PACKET_LEN` metadata rather than a direct verifier-visible packet range fact.
+- `packet_vlan_tcpopt_parser` previously passed when hidden packet-offset
+  metadata gave the verifier enough range information. The current
+  correctness-first shape fails on a packet access with `r=0`; restoring
+  verifier acceptance needs an equivalent state representation, not a bound
+  check or branch assertion.
 - The strict JSON-link loader is not the current source of truth. It has passed
   smoke programs (`simple`, `simple_packet`, `bitmap_popcount_scan`), but native
   call-flow support is missing and stale loader binaries previously produced
@@ -743,20 +739,38 @@ This prototype has already exposed several verifier-facing design constraints:
   as the displacement. Negative immediates must not sign-extend into the
   displacement field; the generator now masks both fields before packing.
 
-Current correctness-first status after removing simulator guard/retag behavior:
+Current correctness-first status after removing simulator guard/retag behavior,
+deleting the direct pointer-compare branch metadata, shrinking stack state, and
+using per-instruction const records:
 
-- `results/README-20260518-235117.md` is the latest run. All 29 generated
-  micro proof C files compiled. Four loaded and passed test run:
-  `bitmap_popcount_scan`, `sorted_rule_binary_search`, `packet_checksum_fold`,
-  and `tc_packet_checksum_fold`.
-- The dominant verifier failure is now correlation loss, not C compile failure:
-  the verifier explores impossible states where a runtime tag field says
-  `STACK` while the scalar register slot contains a packet pointer. The final
-  bytecode then reaches stack-index arithmetic on a packet pointer and is
-  rejected, for example with `pointer arithmetic with <<= operator prohibited`.
-- This is an expected cost of making packet fastpaths semantic rather than
-  assumptive: if the runtime tag is not packet, the helper falls back to generic
-  memory semantics instead of pretending the tag is packet.
+- `results/README-20260519-005704.md` is the latest run. All 29 generated
+  micro proof C files compiled. Five loaded and passed test run: `simple`,
+  `simple_packet`, `bitmap_popcount_scan`, `sorted_rule_binary_search`, and
+  `packet_checksum_fold`.
+- Per-case verifier logs were captured under
+  `results/*-20260519-005704.verifier.log`.
+- Dominant verifier failure modes are not C compile failures:
+  byte-wise stack stores of verifier pointer-typed register values (`invalid
+  size of register spill`), integer operations on pointer-typed x86 GPR fields
+  (`pointer arithmetic with <<=`, `>>=`, `&=`, or scalar-pointer subtraction
+  prohibited), direct pointer arithmetic on `pkt_end`, and packet accesses
+  whose native guard now lives only in modeled flags (`invalid access to packet
+  ... r=0`).
+- Stack-frame overflow is no longer the dominant rejection after the shallow/deep
+  byte-stack layout. That change is semantics-preserving because it changes only
+  modeled stack extent, not runtime stack guards or x86 control flow.
+- The result is expected after deleting `cmp_ptr_*`: branches now use only
+  architectural x86 flags, so the verifier no longer receives a direct packet
+  pointer comparison fact. Restoring verifier acceptance must come from a
+  semantics-preserving state representation, not a branch assertion or bounds
+  check.
+- The most important design issue exposed by the logs is representation:
+  current GPR scalar fields can hold verifier pointer-typed values, while x86
+  hardware registers are integers. That is close to native address execution
+  for simple loads, but it makes later integer operations on those registers
+  unverifiable. A final design needs a formally specified address abstraction
+  or another exact representation that preserves the x86-observable behavior
+  required by the ABI.
 - There must be no runtime `X86_SIM_UNSUPPORTED`/trap/fallback path in the
   simulator artifact. Correctness work should add simulator semantics rather
   than relying on generation-time rejection or unreachable-path assumptions.
@@ -764,6 +778,12 @@ Current correctness-first status after removing simulator guard/retag behavior:
   returns, and stack-slot runtime rejection are removed from the active
   simulator. Any future verifier aid must preserve hardware x86 behavior
   exactly.
+- Control-flow opcodes are no longer accepted by the ordinary
+  `X86_SIM_RUN_OP()` step dispatch; generated `jcc`, `jmp`, `call`, and `ret`
+  must use the C-authored x86 control-flow macros.
+- Immediate handling now sign-extends imm32 for 64-bit ALU/CMP/TEST and
+  `mov r/m64, imm32`, matching the x86 encoding instead of treating those
+  immediates as unsigned 64-bit constants.
 - Arbitrary memory faults, stack OOB, invalid-address access, and division
   faults must not be converted into simulator traps, aborts, or checked
   fallbacks. If the resulting proof program is not verifier-provable, that is a
@@ -774,12 +794,14 @@ Current correctness-first status after removing simulator guard/retag behavior:
   future exact memory image instead of magic-base lookup.
 - The stack model is finite byte-addressed memory. Pointer payload metadata was
   removed from stack because hardware stack memory stores bytes, not verifier
-  tags.
+  tags. It currently uses a 64-byte shallow layout or a 128-byte deep layout;
+  any future increase must remain an exact byte-memory model, not a guard.
 - Flag helpers now cover the active `SBB`, `POPCNT`, shift/rotate, `SHLD`,
   `SHRD`, and `IMUL CF/OF` cases more closely, but undefined-flag cases and
   non-current opcodes still need audit.
 - Native calls now write the next native instruction address into the modeled
-  stack slot. Modified-return control flow is still not modeled.
+  stack slot, and subfunction `ret` pops that modeled slot. Dynamic or modified
+  return-address control flow is still not modeled.
 
 For formal verification, clang optimization is not part of the trusted
 argument. This C implementation is a prototype for finding the simulator semantics and
