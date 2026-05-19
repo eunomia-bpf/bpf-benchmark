@@ -48,6 +48,59 @@ static __always_inline void emit_ldimm64(struct bpf_insn *insn_buf, int *cnt,
 	insn_buf[(*cnt)++] = insns[1];
 }
 
+static int instantiate_popcntq_bpf(u8 dst_reg, u8 src_reg,
+				   struct bpf_insn *insn_buf)
+{
+	u32 scratch_mask = KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH0) |
+			   KINSN_X86_SCRATCH_MASK(KINSN_X86_SCRATCH1);
+	int cnt = 0;
+
+	if (kinsn_x86_is_scratch(dst_reg) || kinsn_x86_is_scratch(src_reg))
+		return -EINVAL;
+
+	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+	if (dst_reg != src_reg)
+		insn_buf[cnt++] = BPF_MOV64_REG(dst_reg, src_reg);
+
+	insn_buf[cnt++] = BPF_MOV64_REG(KINSN_X86_SCRATCH0, dst_reg);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_RSH, KINSN_X86_SCRATCH0, 1);
+	emit_ldimm64(insn_buf, &cnt, KINSN_X86_SCRATCH1,
+		     0x5555555555555555ULL);
+	insn_buf[cnt++] = BPF_ALU64_REG(BPF_AND, KINSN_X86_SCRATCH0,
+					KINSN_X86_SCRATCH1);
+	insn_buf[cnt++] = BPF_ALU64_REG(BPF_SUB, dst_reg,
+					KINSN_X86_SCRATCH0);
+
+	insn_buf[cnt++] = BPF_MOV64_REG(KINSN_X86_SCRATCH0, dst_reg);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_RSH, KINSN_X86_SCRATCH0, 2);
+	emit_ldimm64(insn_buf, &cnt, KINSN_X86_SCRATCH1,
+		     0x3333333333333333ULL);
+	insn_buf[cnt++] = BPF_ALU64_REG(BPF_AND, KINSN_X86_SCRATCH0,
+					KINSN_X86_SCRATCH1);
+	insn_buf[cnt++] = BPF_ALU64_REG(BPF_AND, dst_reg,
+					KINSN_X86_SCRATCH1);
+	insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, dst_reg,
+					KINSN_X86_SCRATCH0);
+
+	insn_buf[cnt++] = BPF_MOV64_REG(KINSN_X86_SCRATCH0, dst_reg);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_RSH, KINSN_X86_SCRATCH0, 4);
+	insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, dst_reg,
+					KINSN_X86_SCRATCH0);
+	emit_ldimm64(insn_buf, &cnt, KINSN_X86_SCRATCH1,
+		     0x0f0f0f0f0f0f0f0fULL);
+	insn_buf[cnt++] = BPF_ALU64_REG(BPF_AND, dst_reg,
+					KINSN_X86_SCRATCH1);
+
+	emit_ldimm64(insn_buf, &cnt, KINSN_X86_SCRATCH1,
+		     0x0101010101010101ULL);
+	insn_buf[cnt++] = BPF_ALU64_REG(BPF_MUL, dst_reg,
+					KINSN_X86_SCRATCH1);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_RSH, dst_reg, 56);
+	kinsn_x86_write64(insn_buf, &cnt, dst_reg, dst_reg, scratch_mask);
+	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+	return cnt;
+}
+
 static int instantiate_popcntq(u64 payload, struct bpf_insn *insn_buf)
 {
 	u8 dst_reg, src_reg;
@@ -61,6 +114,11 @@ static int instantiate_popcntq(u64 payload, struct bpf_insn *insn_buf)
 	err = decode_popcnt_payload(payload, &dst_reg, &src_reg, &arch_reg);
 	if (err)
 		return err;
+	if (!arch_reg) {
+		err = instantiate_popcntq_bpf(dst_reg, src_reg, insn_buf);
+		if (err != -EINVAL)
+			return err;
+	}
 
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
 	if (arch_reg)

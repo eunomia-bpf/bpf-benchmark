@@ -1,0 +1,309 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 6398462,
+        "run_time_ns_delta": 773655624,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "config": {
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 10.039464451,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 9  udp_src_max: 9  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags:\nCurrent:\n     pkts-sofar: 6398462  errors: 0\n     started: 126630123us  stopped: 136543607us idle: 0us\n     seq_num: 6398463  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 9\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 9913483(c9913483+d0) usec, 6398462 (64byte,-1frags)\n  645430pps 330Mb/sec (330460160bps) errors: 0",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 6117912,
+        "run_time_ns_delta": 763709766,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "config": {
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 10.037666965000085,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 9  udp_src_max: 9  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags:\nCurrent:\n     pkts-sofar: 6117912  errors: 0\n     started: 608990018us  stopped: 618905726us idle: 0us\n     seq_num: 6117913  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 9\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 9915707(c9915707+d0) usec, 6117912 (64byte,-1frags)\n  616991pps 315Mb/sec (315899392bps) errors: 0",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "9": {
+        "passes": [
+          {
+            "bpfopt_ms": 258,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 135,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1425,
+            "bpfopt_summary": {},
+            "error": "func_info BTF section doesn't match subprog layout in BPF program\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=52 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=37 nr_map_fds=14 prog_type=6 fd_array_n=21 fd_array_neg1=0 prog_flags=0x0 insn_cnt=2456\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_ms": 1072,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 136,
+            "status": "ok",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 300,
+            "bpfopt_summary": {},
+            "error": "func_info BTF section doesn't match subprog layout in BPF program\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=52 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=37 nr_map_fds=14 prog_type=6 fd_array_n=21 fd_array_neg1=0 prog_flags=0x0 insn_cnt=2533\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_ms": 276,
+            "bpfopt_summary": {},
+            "error": "func_info BTF section doesn't match subprog layout in BPF program\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=52 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=37 nr_map_fds=14 prog_type=6 fd_array_n=21 fd_array_neg1=0 prog_flags=0x0 insn_cnt=2462\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_ms": 307,
+            "bpfopt_summary": {},
+            "error": "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=52 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=37 nr_map_fds=14 prog_type=6 fd_array_n=21 fd_array_neg1=0 prog_flags=0x0 insn_cnt=2570\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_ms": 269,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 146,
+            "status": "ok",
+            "step": {
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_ms": 260,
+            "bpfopt_summary": {},
+            "error": "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=52 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=37 nr_map_fds=14 prog_type=6 fd_array_n=21 fd_array_neg1=0 prog_flags=0x0 insn_cnt=2554\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_ms": 350,
+            "bpfopt_summary": {},
+            "error": "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=52 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=37 nr_map_fds=14 prog_type=6 fd_array_n=21 fd_array_neg1=0 prog_flags=0x0 insn_cnt=2542\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "lea"
+            }
+          },
+          {
+            "bpfopt_ms": 275,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 157,
+            "status": "ok",
+            "step": {
+              "name": "ccmp"
+            }
+          },
+          {
+            "bpfopt_ms": 287,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 148,
+            "status": "ok",
+            "step": {
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_ms": 10690,
+            "bpfopt_summary": {},
+            "error": "func_info BTF section doesn't match subprog layout in BPF program\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=52 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=37 nr_map_fds=14 prog_type=6 fd_array_n=21 fd_array_neg1=0 prog_flags=0x0 insn_cnt=2630\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "prefetch"
+            }
+          },
+          {
+            "bpfopt_ms": 275,
+            "bpfopt_summary": {},
+            "error": "func_info BTF section doesn't match subprog layout in BPF program\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=52 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=37 nr_map_fds=14 prog_type=6 fd_array_n=21 fd_array_neg1=0 prog_flags=0x0 insn_cnt=2530\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 281,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 136,
+            "status": "ok",
+            "step": {
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_ms": 273,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 136,
+            "status": "ok",
+            "step": {
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_ms": 254,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 136,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1276,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 147,
+            "status": "ok",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 332,
+            "bpfopt_summary": {},
+            "error": "func_info BTF section doesn't match subprog layout in BPF program\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=52 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=37 nr_map_fds=14 prog_type=6 fd_array_n=21 fd_array_neg1=0 prog_flags=0x0 insn_cnt=2533\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "dce"
+            }
+          }
+        ],
+        "prog_id": 9,
+        "program": {
+          "final_insn_count": 2542,
+          "orig_insn_count": 2542,
+          "prog_id": 9,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_pktgen",
+  "status": "ok"
+}

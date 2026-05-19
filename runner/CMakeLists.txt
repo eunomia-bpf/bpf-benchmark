@@ -108,6 +108,8 @@ target_include_directories(micro_exec
         "${MICRO_LIBBPF_PREFIX}/include"
         "${MICRO_REPO_ROOT}/vendor/libbpf/include"
         "${MICRO_REPO_ROOT}/vendor/libbpf/include/uapi"
+        "/artifacts/kernel"
+        "${MICRO_REPO_ROOT}/.cache/repo-build/host/kernel-offsets/x86_64"
 )
 
 if(MICRO_EXEC_ENABLE_LLVMBPF)

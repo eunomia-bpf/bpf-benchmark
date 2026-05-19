@@ -56,6 +56,50 @@ static __always_inline int decode_movbe_payload(u64 payload,
 	return 0;
 }
 
+static bool movbe16_direct_scratch(u8 dst_reg, u8 base_reg, u8 *high_reg,
+				   u8 *value_reg)
+{
+	u8 reg;
+
+	*high_reg = 0;
+	*value_reg = 0;
+	for (reg = KINSN_X86_SCRATCH0; reg <= KINSN_X86_SCRATCH2; reg++) {
+		if (reg == dst_reg || reg == base_reg)
+			continue;
+		if (!*high_reg) {
+			*high_reg = reg;
+			continue;
+		}
+		*value_reg = reg;
+		return true;
+	}
+	return false;
+}
+
+static int instantiate_movbe16_direct(u8 dst_reg, u8 base_reg, s16 offset,
+				      struct bpf_insn *insn_buf)
+{
+	u8 high_reg, value_reg;
+	u32 scratch_mask;
+	int cnt = 0;
+
+	if (!movbe16_direct_scratch(dst_reg, base_reg, &high_reg, &value_reg))
+		return -EINVAL;
+
+	scratch_mask = KINSN_X86_SCRATCH_MASK(high_reg) |
+		       KINSN_X86_SCRATCH_MASK(value_reg);
+	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+	insn_buf[cnt++] = BPF_MOV64_REG(high_reg, dst_reg);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_RSH, high_reg, 16);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, high_reg, 16);
+	insn_buf[cnt++] = BPF_LDX_MEM(BPF_H, value_reg, base_reg, offset);
+	insn_buf[cnt++] = BPF_BSWAP(value_reg, 16);
+	insn_buf[cnt++] = BPF_MOV64_REG(dst_reg, high_reg);
+	insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, dst_reg, value_reg);
+	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+	return cnt;
+}
+
 static int instantiate_movbe_indexed(u64 payload, struct bpf_insn *insn_buf,
 				 u8 size)
 {
@@ -75,6 +119,18 @@ static int instantiate_movbe_indexed(u64 payload, struct bpf_insn *insn_buf,
 				       &indexed);
 	if (err)
 		return err;
+
+	if (!indexed && (size == BPF_W || size == BPF_DW)) {
+		insn_buf[cnt++] = BPF_LDX_MEM(size, dst_reg, base_reg, offset);
+		insn_buf[cnt++] = BPF_BSWAP(dst_reg, size == BPF_W ? 32 : 64);
+		return cnt;
+	}
+	if (!indexed && size == BPF_H) {
+		err = instantiate_movbe16_direct(dst_reg, base_reg, offset,
+						 insn_buf);
+		if (err != -EINVAL)
+			return err;
+	}
 
 	addr_reg = kinsn_x86_scratch_avoid(dst_reg, base_reg, index_reg);
 	value_reg = kinsn_x86_scratch_avoid4(dst_reg, base_reg, index_reg,

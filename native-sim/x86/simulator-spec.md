@@ -107,6 +107,21 @@ ABI. For XDP, offset 0 holds `ctx->data` and offset 8 holds `ctx->data_end`.
 For skb, the object contains the linked native ABI fields currently referenced
 by the generated x86, including `len` and `data` at the linked offsets.
 
+Current micro skb proof mode initializes:
+
+```text
+guest_abi.data = ctx->data
+guest_abi.len  = ctx->data_end - ctx->data
+```
+
+This is an ABI equality assumption for the current linear micro/test_run skb
+inputs: the native `sk_buff->len` value read by the linked x86 must equal the
+linear packet span represented by verifier `data_end - data`. It is not a
+general TC/cgroup skb rule. Non-linear skbs, cloned fragments, or any attach
+point where native `sk_buff->len` can differ from the verifier packet span are
+outside this proof mode until the native ABI exposes a value that is exactly
+equal to verifier `data_end`.
+
 The entry macros must not change ctx/packet/output memory, create per-register
 tags, insert bounds checks, trap, fallback, infer `packet + len == packet_end`,
 or influence control flow.
@@ -153,6 +168,13 @@ Forbidden uses:
 `ctx->data`, `ctx->data_end`, skb data, and skb length enter the proof through
 guest ABI memory construction and ordinary x86 loads from that memory. They do
 not create per-register pointer metadata.
+
+The micro skb `len = data_end - data` initializer is not a packet-bound proof
+hook. If native x86 later computes `data + len`, that value remains an ordinary
+architectural result of the native instructions. The simulator must not replace
+branches against `data + len` with branches against `data_end`, or assert that
+the current register is packet-end, unless that exact value is produced by the
+native instruction sequence.
 
 Known verifier-expression boundary: exact x86 partial-register writes to a
 register that currently has verifier pointer type may require integer bit
@@ -263,7 +285,10 @@ They surface as compile, verifier, or load failures.
 For skb programs, the simulator must not manufacture packet `data_end` from
 `skb->data + skb->len`. If the linked native x86 computes a bound that the
 eBPF verifier cannot relate to packet memory, verifier rejection is the correct
-experimental result.
+experimental result. The current micro `len = data_end - data` ABI initializer
+does not relax this rule: it may make the architectural `len` value match the
+linear test packet, but it must not be used to synthesize hidden packet-end
+metadata or branch assertions.
 
 ## Result Rule
 

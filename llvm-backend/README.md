@@ -1428,3 +1428,187 @@ The clean follow-up is to split the internal LLVM representation or add precise
 scratch metadata: direct MOV-load pseudos may allow tied `dst == base`, while
 SIB MOV-load pseudos must either keep early-clobber or force function scratch
 initialization only when a real SIB overlap is selected.
+
+Follow-up implementation:
+
+- Split the LLVM-only MOV-load pseudos into direct base+offset forms
+  (`BPF_KINSN_X86_MOVZBL_MEM/MOVZWL_MEM/MOVL_MEM/MOVQ_MEM`) and SIB forms
+  (`BPF_KINSN_X86_MOVZBL/MOVZWL/MOVL/MOVQ`).
+- Direct forms carry only `dst, base, off` and do not use early-clobber. This
+  lets LLVM keep shapes such as `dst == base` when they are valid and avoids
+  introducing a callee-saved temporary only because SIB needs stricter operand
+  separation.
+- SIB forms keep the conservative early-clobber rule because their proof path
+  must keep `dst` separate from `base/index`.
+
+Validation:
+
+- Objects:
+  `micro/results/llvm_kinsn_programs_mov_split_20260519_090434`
+- Full single-sample `make micro` passed: 29/29 correct.
+  Run:
+  `micro/results/x86_kvm_micro_20260519_160716_947398/metadata.json`
+
+Analysis-side deltas:
+
+| Comparison | Geomean ratio | summed exec delta | JIT byte delta | xlated byte delta |
+|---|---:|---:|---:|---:|
+| direct/SIB split vs scratch-init fix | 0.9982 | -24 ns | -7 bytes | 0 bytes |
+| direct/SIB split vs no-kinsn LLVM baseline | 0.9140 | -944 ns | -5377 bytes | -9072 bytes |
+
+The concrete byte win was `packet_checksum_fold`: the direct MEM pseudo no
+longer forced the extra `push rbx` shape that the unified early-clobber MOV
+pseudo could trigger.
+
+### Step 17: MOVBE32/64 verifier proof fast path
+
+`bpf_x86_movbe32/64` final emit was already one `movbe` instruction, but the
+verifier proof still went through the generic indexed-address scratch path for
+direct base+offset loads. The direct form can be proved as ordinary BPF:
+
+```text
+dst = *(u32/u64 *)(base + off)
+dst = bswap(dst)
+```
+
+Implementation:
+
+- `bpf_x86_movbe.c` now uses the two-instruction verifier proof above for
+  direct 32-bit and 64-bit MOVBE loads.
+- LLVM no longer counts direct `MOVBE32/64` pseudos as function-level scratch
+  users. `MOVBE16` stays scratch-using because `movbe r16, m16` is a partial
+  register write and still needs the tied-zero proof shape.
+
+Validation:
+
+- Objects:
+  `micro/results/llvm_kinsn_programs_movbe_fast_20260519_091202`
+- Full single-sample `make micro` passed: 29/29 correct.
+  Run:
+  `micro/results/x86_kvm_micro_20260519_161612_466178/metadata.json`
+
+Analysis-side deltas:
+
+| Comparison | Geomean ratio | summed exec delta | JIT byte delta | xlated byte delta |
+|---|---:|---:|---:|---:|
+| MOVBE fast proof vs direct/SIB split | 0.9923 | -24 ns | 0 bytes | 0 bytes |
+| MOVBE fast proof vs scratch-init fix | 0.9905 | -48 ns | -7 bytes | 0 bytes |
+| MOVBE fast proof vs no-kinsn LLVM baseline | 0.9068 | -968 ns | -5377 bytes | -9072 bytes |
+
+The main value is not a new final x86 instruction; it is removing unnecessary
+proof scratch pressure so future selectors do not pay accidental prologue cost.
+
+### Step 18: precise scratch mask and POPCNT fast proof
+
+The earlier scratch initialization was still boolean: any scratch-using kinsn
+initialized all of `r6/r7/r8`, which made the x86 JIT save `rbx/r13/r14` even
+when only one or two verifier scratch registers were actually needed.
+
+Implementation:
+
+- `BPFAsmPrinter` now computes a per-function scratch mask instead of a boolean.
+  Examples: standalone `bswap` needs only `r6`; rotate/BMI/SHD use `r6/r7`;
+  direct MOV-load and direct `MOVBE32/64` need no scratch.
+- `bpf_x86_popcntq` gained a BPF-register verifier fast path using `dst` as the
+  accumulator plus `r6/r7` as scratch. The generic shadow/arch path remains for
+  operands that actually need it.
+
+Validation:
+
+- Objects:
+  `micro/results/llvm_kinsn_programs_scratch_mask_20260519_092354`
+- Full single-sample `make micro` passed: 29/29 correct.
+  Run:
+  `micro/results/x86_kvm_micro_20260519_162833_596819/metadata.json`
+
+Analysis-side deltas:
+
+| Comparison | Geomean ratio | summed exec delta | JIT byte delta | xlated byte delta |
+|---|---:|---:|---:|---:|
+| precise scratch mask vs MOVBE fast proof | 1.0011 | +37 ns | -33 bytes | -56 bytes |
+| precise scratch mask vs direct/SIB split | 0.9934 | +13 ns | -33 bytes | -56 bytes |
+| precise scratch mask vs no-kinsn LLVM baseline | 0.9078 | -931 ns | -5410 bytes | -9128 bytes |
+
+The runtime difference against the immediately previous run is single-sample
+noise, but the code-shape fix is real. In `bitmap_popcount_scan`, the JIT
+prologue changed from:
+
+```asm
+push rbx
+push r13
+push r14
+xor ebx, ebx
+xor r13d, r13d
+xor r14d, r14d
+```
+
+to:
+
+```asm
+push rbx
+push r13
+xor ebx, ebx
+xor r13d, r13d
+```
+
+The suite still keeps the large baseline win from `popcnt`, rotate, MOVBE, LEA,
+and MOV-load packing, while avoiding accidental callee-saved register pressure.
+
+### Step 19: direct MOVBE16 proof fast path
+
+`MOVBE16` was still the main small scratch outlier. LLVM emits it only as a
+direct base+offset memory operand, but the module verifier proof used the
+generic indexed path:
+
+```text
+addr = base + index * scale
+dst = byte0 << 8 | byte1
+dst |= old_dst_high_bits
+```
+
+That needed address, byte-value, and high-bits scratch registers. For the
+direct form, the proof can avoid address construction and byte-by-byte
+reassembly:
+
+```text
+high = old_dst & ~0xffff
+value = *(u16 *)(base + off)
+value = bswap16(value)
+dst = high | value
+```
+
+Implementation:
+
+- `bpf_x86_movbe.c` now has a direct 16-bit fast path using two scratch
+  registers when possible; it falls back to the existing generic path only when
+  `dst/base` consume too many scratch registers.
+- `BPFAsmPrinter` computes the actual two-scratch mask for `MOVBE16` from
+  `dst/base` instead of always initializing all three scratch registers.
+
+Validation:
+
+- Objects:
+  `micro/results/llvm_kinsn_programs_movbe16_fast_20260519_093430`
+- Full single-sample `make micro` passed: 29/29 correct.
+  Run:
+  `micro/results/x86_kvm_micro_20260519_163959_668431/metadata.json`
+
+Analysis-side deltas:
+
+| Comparison | Geomean ratio | summed exec delta | JIT byte delta | xlated byte delta |
+|---|---:|---:|---:|---:|
+| direct MOVBE16 proof vs precise scratch mask | 0.9992 | -88 ns | -9 bytes | -24 bytes |
+| direct MOVBE16 proof vs no-kinsn LLVM baseline | 0.9072 | -1019 ns | -5419 bytes | -9152 bytes |
+
+The code-shape win is visible but small. In `packet_toeplitz_rss_hash`, the
+new proof removes the scratch zero-init for `r14`:
+
+```asm
+- xor r14d, r14d
+```
+
+The function still contains `push r14` because LLVM uses that register for the
+program itself, not because the kinsn scratch init requires it. This is the
+current clean boundary: the selector should remove artificial prologue cost, but
+not fight normal register allocation unless a later cost model can prove that is
+profitable.

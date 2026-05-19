@@ -119,7 +119,8 @@ union x86_sim_gpr {
 
 #define X86_SIM_ENTRY_SKB(CTX)                                               \
 	struct x86_sim_skb_abi __x86_sim_abi = {                         \
-		.len = (CTX)->len,                                        \
+		.len = (__u32)((__u8 *)(long)(CTX)->data_end -           \
+			       (__u8 *)(long)(CTX)->data),               \
 		.data = (void *)(long)(CTX)->data,                       \
 	};                                                               \
 	X86_SIM_L_DECLARE_STATE();                                           \

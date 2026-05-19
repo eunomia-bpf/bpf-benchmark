@@ -170,6 +170,10 @@ def latest_micro_result_dir() -> Path:
                    reverse=True)
     if not paths:
         raise RuntimeError("missing micro result metadata")
+    for path in paths:
+        dump_dir = path.parent / "details" / "jit_dumps"
+        if any(dump_dir.glob("*__kernel__sample00.xlated.bin")):
+            return path.parent
     return paths[0].parent
 
 

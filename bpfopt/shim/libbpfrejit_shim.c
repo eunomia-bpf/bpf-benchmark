@@ -2000,24 +2000,31 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
                           ? (uint32_t)attach_btf_obj_resolved : 0;
     a.attach_prog_fd = (attach_prog_resolved >= 0)
                        ? (uint32_t)attach_prog_resolved : 0;
-    /* Replay func_info / line_info from the byte buffers we captured at
-     * intercept time — the loader's original user pointers reference
-     * memory that's likely freed by now. */
-    a.func_info = (uintptr_t)p->func_info_buf;
-    a.func_info_cnt = p->func_info_cnt;
-    a.func_info_rec_size = p->func_info_rec_size;
-    a.line_info = (uintptr_t)p->line_info_buf;
-    a.line_info_cnt = p->line_info_cnt;
-    a.line_info_rec_size = p->line_info_rec_size;
-    /* core_relos are consumed by libbpf in userspace BEFORE PROG_LOAD; the
-     * kernel never reads them. Safe to zero. */
+    /* Drop func_info / line_info / core_relos for fresh re-load.
+     *
+     * Per audit (docs/tmp/20260519-shim-audit/REPORT.md §2,§4): replaying
+     * the original loader's func_info/line_info after a transformed
+     * bytecode produces 'func_info BTF section doesn't match subprog
+     * layout' (kernel check_btf_func) because the new bytecode has
+     * different insn_off boundaries. The kernel hasn't yet finished
+     * validating fresh-load metadata for transformed bytes — drop these
+     * pointer/count pairs and let the kernel synthesise minimal info.
+     * Original buffers (p->func_info_buf etc.) are kept for the in-place
+     * verifier-state probe path; reload deliberately omits them. */
+    a.func_info = 0;
+    a.func_info_cnt = 0;
+    a.func_info_rec_size = 0;
+    a.line_info = 0;
+    a.line_info_cnt = 0;
+    a.line_info_rec_size = 0;
     a.core_relos = 0;
     a.core_relo_cnt = 0;
     a.core_relo_rec_size = 0;
-    /* BPF_F_TOKEN_FD requires a live token fd; the loader's may have been
-     * closed and we don't have a kid for it. Drop the flag — kernel falls
-     * back to system-wide capability checks. Hard-coded bit (1U<<8) so this
-     * works even when libbpf-sys is too old to expose the constant. */
+    /* BPF_F_TOKEN_FD requires a live token fd; clear it because the
+     * loader's token fd may have been closed and we don't have a kid for
+     * it. Kernel falls back to system-wide capability checks. Hard-coded
+     * bit (1U<<8) so this works even when libbpf-sys is too old to expose
+     * the constant. */
     a.prog_flags &= ~((uint32_t)(1U << 8));
     log_line("reload prog kid=%u type=%u prog_btf_fd=%u attach_btf_obj_fd=%u "
              "attach_prog_fd=%u attach_btf_id=%u expected_attach=%u "
@@ -2037,10 +2044,30 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
     a.log_size = (uint32_t)(log_size > 128 ? log_size - 128 : log_size);
     a.log_true_size = 0;
     if (fd_array) a.fd_array = (uintptr_t)fd_array;
+    /* Clear fd_array_cnt from the captured load_attr. The original loader
+     * may have set fd_array_cnt to its own array size; when kernel sees
+     * a non-zero count it eagerly walks fd_array[0..fd_array_cnt) and
+     * binds every entry as a map. Because our fd_array has BTF module
+     * fds at higher slots (post-map-prefix shift), that eager bind fails
+     * with EBADF/EINVAL ("fd N not pointing to valid bpf_map or btf").
+     * fd_array_cnt == 0 keeps the kernel on the on-demand fdget path,
+     * matching the daemon ReJIT behaviour.
+     *
+     * libbpf-sys's union bpf_attr may lack the fd_array_cnt field name,
+     * so we patch at the UAPI offset (148: 4 bytes after prog_token_fd
+     * at 144) on a 256B buffer that's also generously sized for any
+     * post-attr_buf tail-zero check. */
+    char attr_buf[256] = {0};
+    memcpy(attr_buf, &a, sizeof(a));
+    /* offset 148 = fd_array_cnt; offset 144 = prog_token_fd. Zero both
+     * so the kernel doesn't try eager map binding via the loader's
+     * stale count and doesn't try to validate a closed token fd. */
+    memset(attr_buf + 144, 0, 8);
 
     struct timespec t0, t1;
     clock_gettime(CLOCK_MONOTONIC, &t0);
-    long new_pfd = real_syscall(SYS_bpf, BPF_PROG_LOAD, &a, sizeof(a));
+    long new_pfd = real_syscall(SYS_bpf, BPF_PROG_LOAD, attr_buf,
+                                sizeof(attr_buf));
     int load_errno = (new_pfd < 0) ? errno : 0;
 
     /* Snapshot the fd_array (before freeing) so the failure context below
