@@ -76,6 +76,9 @@ Keep the codebase fail-fast so missing v3 capabilities become visible defects in
 ### No Revert / Restore Commits
 Do not produce `git revert` commits or "Restore X" commits to undo previous changes. If a change is wrong, fix it forward in a new commit that does the right thing — do not bounce the tree between two states. Repeated revert/restore pairs (e.g. `Revert "X"` followed by `Restore X`) are forbidden; they pollute history and obscure intent. Decide what the code should be, write that, commit once.
 
+### Preserve Documentation History
+Do not rewrite long-lived design notes, experiment logs, benchmark reports, or status documents wholesale unless the user explicitly asks for a full rewrite. Prefer minimal, additive edits that preserve existing data, failed experiments, artifact paths, and rationale. When simplifying stale documentation, first compare against the current diff and keep every still-relevant measurement, caveat, and lesson learned; summarize only duplicated or obsolete narrative.
+
 ### No Unauthorized Git Mutations
 Assistants (Claude or codex) must NOT run git commands that modify state: `commit`, `commit --amend`, `checkout -- <files>`, `checkout HEAD -- <files>`, `reset`, `reset --hard`, `restore`, `stash`, `stash pop`, `branch -D`, `push`, `push -f`, `rebase`, `cherry-pick`, `revert`. The only allowed git state mutation is `git add`, and only when the user explicitly asks to stage files. Other allowed git commands are read-only: `status`, `diff`, `log`, `blame`, `show`, `fsck`, `stash list`, `reflog`.
 
