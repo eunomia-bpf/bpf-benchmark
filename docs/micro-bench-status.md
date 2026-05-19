@@ -534,7 +534,7 @@ the current micro handcraft implementation.
 
 ## Native Lab: in-kernel native x86 vs BPF JIT (2026-05-17)
 
-A new probe column has been added alongside `kernel`, `kernel_rejit`, and `native`: **native_lab**. Each micro program's `.native.so` (clang `-target x86_64` of the same `.bpf.c` source) is linked through a 250-line mini ELF linker (`ebpf-vm/x86/native_lab/native_link`, Rust + `object` + `iced-x86`) into a position-independent byte blob, uploaded into kernel memory via the `bpf_x86_native_lab` kinsn debugfs interface, and splatted directly into a BPF JIT image. The BPF program is a 3-instruction stub (`sidecar; call kinsn; exit`) whose body the JIT replaces verbatim with the native bytes; the kernel verifier sees only a benign `r0 = 0` proof.
+A new probe column has been added alongside `kernel`, `kernel_rejit`, and `native`: **native_lab**. Each micro program's `.native.so` (clang `-target x86_64` of the same `.bpf.c` source) is linked through a 250-line mini ELF linker (`native-sim/x86/native_lab/native_link`, Rust + `object` + `iced-x86`) into a position-independent byte blob, uploaded into kernel memory via the `bpf_x86_native_lab` kinsn debugfs interface, and splatted directly into a BPF JIT image. The BPF program is a 3-instruction stub (`sidecar; call kinsn; exit`) whose body the JIT replaces verbatim with the native bytes; the kernel verifier sees only a benign `r0 = 0` proof.
 
 This gives us a paper-grade A baseline: what the function would cost with **no verifier inserts, no BPF→x86 translation, no BPF JIT code-shape constraints**. It's the upper bound any future kinsn pass family can approach, and it's measured through the same `micro_exec test-run / run-native-lab` harness that already runs the production `kernel` / `kernel_rejit` / `llvmbpf` paths, so timing semantics line up: `exec_ns` is the kernel-reported per-iteration `duration` and `result` comes out of the same packet/staged path the kernel runner uses.
 
@@ -552,7 +552,7 @@ Anything that would reference outside the union of discovered symbols (rodata co
 ### Run and analysis layout
 
 ```
-ebpf-vm/x86/native_lab/
+native-sim/x86/native_lab/
 ├── README.md                              -- architecture + how to run
 ├── native_link/                           -- Rust mini linker (object + iced-x86)
 ├── tests/run_all_micro.sh                 -- driver: link each program + dual-run via micro_exec
@@ -567,7 +567,7 @@ The kinsn module is **test-only**: it lets userspace splat arbitrary bytes into 
 
 ### Results
 
-Source: `ebpf-vm/x86/native_lab/results/all_micro.jsonl`, generated from one VM sweep with `INNER_REPEAT=1000`. Each row is one `micro_exec` sample. `exec_ns` is the kernel-reported per-iteration `duration_ns`. `result` is the 8-byte LE value the function writes back to `packet[0..8]`, which must match between runtimes (output identity check).
+Source: `native-sim/x86/native_lab/results/all_micro.jsonl`, generated from one VM sweep with `INNER_REPEAT=1000`. Each row is one `micro_exec` sample. `exec_ns` is the kernel-reported per-iteration `duration_ns`. `result` is the 8-byte LE value the function writes back to `packet[0..8]`, which must match between runtimes (output identity check).
 
 | program | native_lab ns/iter | kernel_jit ns/iter | ratio | status |
 |---|---:|---:|---:|---|
@@ -627,7 +627,7 @@ Build (one-time per source change):
 
 ```sh
 make host-kinsn-x86                                                       # produces bpf_x86_native_lab.ko
-cargo build --release --manifest-path ebpf-vm/x86/native_lab/native_link/Cargo.toml
+cargo build --release --manifest-path native-sim/x86/native_lab/native_link/Cargo.toml
 cmake --build runner/build-llvmbpf --target micro_exec -j8                # picks up native_lab_runner.cpp
 make -C micro/programs                                                    # *.bpf.o + *.native.so
 ```
@@ -638,9 +638,9 @@ Sweep + analyze:
 vng --run .cache/runtime-kernel/x86_64/bzImage --cwd "$(pwd)" --rwdir "$(pwd)" \
     --overlay-rwdir /tmp --cpus 2 --memory 2G --disable-monitor \
     --append "loglevel=4 panic=30 oops=panic" \
-    --exec ebpf-vm/x86/native_lab/tests/run_all_micro.sh \
-    > ebpf-vm/x86/native_lab/results/all_micro.jsonl
-python3 ebpf-vm/x86/native_lab/tests/analyze.py
+    --exec native-sim/x86/native_lab/tests/run_all_micro.sh \
+    > native-sim/x86/native_lab/results/all_micro.jsonl
+python3 native-sim/x86/native_lab/tests/analyze.py
 ```
 
 ### What this column unlocks for the paper

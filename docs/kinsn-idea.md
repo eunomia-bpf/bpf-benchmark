@@ -16,7 +16,7 @@ infrastructure) but address different problems with different designs.
 |---|---|---|
 | 1 | Speculative eBPF optimization (pure userspace) | `docs/rejit-speculative-optimization-ebpf.md` |
 | 2 | **Kinsn** (this doc) — new OS abstraction, bring eBPF close to hardware | `docs/kinsn-idea.md` |
-| 3 | ReverseJIT / ReverseInterpreter (x86/arm interpreter in eBPF) | `docs/reverse-jit.md` |
+| 3 | ReverseSim (x86/arm native simulator in eBPF) | `docs/reverse-sim.md` |
 
 The three ideas are not incremental versions of one design. Each picks a
 different problem, a different point in the trust / kernel-surface / coverage
@@ -134,7 +134,7 @@ Formal semantics: `docs/kinsn-formal-semantics.md`.
 The kinsn subset of the `vendor/linux-framework/rejit-v2` branch — i.e. the
 kinsn-only kernel surface — touches the following files. (REJIT-specific
 files belong to the orthogonal speculative-optimization line and are
-intentionally excluded from this paper; see `docs/reverse-jit.md` discussion
+intentionally excluded from this paper; see `docs/reverse-sim.md` discussion
 of the kernel-ABI variant and `docs/kinsn-only` branch in the kernel
 worktree.)
 
@@ -257,7 +257,7 @@ A kernel that ships idea #2 strictly contains a kernel that ships only idea
 their passes. But the papers separate them because the contributions are
 distinct (userspace mechanism vs. kernel abstraction).
 
-### Idea #3 — ReverseJIT / ReverseInterpreter
+### Idea #3 — ReverseSim
 
 Idea #2 and idea #3 attack the same underlying question — how to make
 non-trivial native operations available inside the eBPF safety model — from
@@ -266,14 +266,14 @@ opposite ends:
 - Kinsn extends the kernel-side instruction set with kernel-defined
   dual-semantics primitives. Each new primitive grows the kernel TCB by a
   small amount.
-- ReverseInterpreter extends the userspace-side lowering with a verified
-  interpreter or JIT. The kernel stays unchanged. The added TCB is a userspace
+- ReverseSim extends the userspace-side lowering with a verified
+  simulator or JIT. The kernel stays unchanged. The added TCB is a userspace
   artifact: one C file per target ISA.
 
 Kinsn covers a handful of patterns ordinary eBPF cannot express well.
-ReverseInterpreter covers anything the target ISA can express, subject to
+ReverseSim covers anything the target ISA can express, subject to
 verifier-tractable lowering. The two are not exclusive: a kinsn-aware kernel
-combined with a ReverseInterpreter that emits kinsns where helpful is a
+combined with a ReverseSim that emits kinsns where helpful is a
 natural ablation point, but neither requires the other.
 
 ## 7. Paper Framing
@@ -354,4 +354,4 @@ A strong evaluation needs to show:
   extract, endian, prefetch, ccmp, lea, bls, andn, setcc_cset, simd_fpu,
   bulk_memory, ldp_stp, register_realloc, region_kinsn, ...)
 - Speculative-optimization sibling paper: `docs/rejit-speculative-optimization-ebpf.md`
-- ReverseJIT sibling paper: `docs/reverse-jit.md`
+- ReverseSim sibling paper: `docs/reverse-sim.md`

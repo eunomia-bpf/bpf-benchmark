@@ -1,7 +1,7 @@
 // Native-lab kernel runner.
 //
 // Mirrors run_kernel's measurement contract but loads a userspace-linked
-// x86 byte blob (produced by ebpf-vm/x86/native_lab/native_link) into a
+// x86 byte blob (produced by native-sim/x86/native_lab/native_link) into a
 // minimal BPF stub via the `bpf_x86_native_lab` kinsn. The kinsn splats
 // the blob bytes into the JIT image so the native function runs in place
 // of the BPF body. Input prep, packet construction, and result extraction
@@ -345,7 +345,7 @@ std::filesystem::path native_link_binary(const cli_options &options)
     if (std::filesystem::exists(image_path, ec)) {
         return image_path;
     }
-    return "ebpf-vm/x86/native_lab/native_link/target/release/native-link";
+    return "native-sim/x86/native_lab/native_link/target/release/native-link";
 }
 
 /* Stage 2: given an ELF .native.o input, resolve helper kernel addresses

@@ -31,7 +31,7 @@
 |------|------|---------|
 | **Jitterbug** | OSDI'20 | 形式化验证 Linux BPF JIT，发现并修复 bug，引入优化并 upstream |
 | **Synthesizing JIT Compilers for In-Kernel DSLs** | CAV'20 | 综合形式化正确的 eBPF/cBPF JIT |
-| **End-to-End Mechanized Proof of eBPF VM for IoT** | CAV'24 | RIOT 内核 eBPF JIT 的机械化正确性证明 |
+| **End-to-End Mechanized Proof of ReverseSim for IoT** | CAV'24 | RIOT 内核 eBPF JIT 的机械化正确性证明 |
 | **hXDP: Efficient Software Packet Processing on FPGA NICs** | OSDI'20 | FPGA 上运行 XDP 程序 |
 | **eBPF Program Warping on FPGA** | ATC'22 | hXDP peephole 优化 |
 | **eHDL: Turning eBPF/XDP Programs into Hardware Designs** | ASPLOS'23 | 从 XDP 程序自动生成 FPGA 流水线 |

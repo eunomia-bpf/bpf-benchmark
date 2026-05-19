@@ -59,13 +59,12 @@ ARM64_BPFOPT_BIN_DIR := $(ROOT_DIR)/bpfopt/target/$(ARM64_RUST_TARGET)/release
 X86_BPFOPT_BINARIES := $(addprefix $(X86_BPFOPT_BIN_DIR)/,bpfopt kinsnprober)
 ARM64_BPFOPT_BINARIES := $(addprefix $(ARM64_BPFOPT_BIN_DIR)/,bpfopt kinsnprober)
 
-# native-link (Rust binary, separate cargo workspace under ebpf-vm/x86/...).
+# native-link (Rust binary, separate cargo workspace under native-sim/).
 # Built on host alongside bpfopt; the runner-runtime image COPYs it to
 # /usr/local/bin/native-link. native_lab_runner finds it via that fixed
 # path when running inside the container.
-NATIVE_LINK_SRC_DIR := $(ROOT_DIR)/ebpf-vm/x86/native_lab/native_link
+NATIVE_LINK_SRC_DIR := $(ROOT_DIR)/native-sim/x86/native_lab/native_link
 NATIVE_LINK_BINARY := $(NATIVE_LINK_SRC_DIR)/target/release/native-link
-NATIVE_LINK_SOURCE_FILES = $(shell find "$(NATIVE_LINK_SRC_DIR)/src" -type f -name '*.rs' -print 2>/dev/null) $(NATIVE_LINK_SRC_DIR)/Cargo.toml
 ACTIVE_BPFOPT_BINARY_DIR := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_BPFOPT_BIN_DIR),$(X86_BPFOPT_BIN_DIR))
 ACTIVE_BPFOPT_BINARIES := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(ARM64_BPFOPT_BINARIES),$(X86_BPFOPT_BINARIES))
 ACTIVE_RUNNER_BINARY := $(RUNNER_BUILD_DIR_ACTIVE)/micro_exec
@@ -388,7 +387,12 @@ $(X86_BPFOPT_BINARIES) &: $(BPFOPT_SOURCE_FILES) $(BUILD_RULE_FILES)
 	cargo build --release --workspace --target-dir "$(ROOT_DIR)/bpfopt/target" --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml" \
 		-p bpfopt -p kinsnprober
 
-$(NATIVE_LINK_BINARY): $(NATIVE_LINK_SOURCE_FILES) $(BUILD_RULE_FILES)
+# cargo already tracks its own source dependencies; pre-globbing them into a
+# Make var is duplicate machinery. Treat the binary as phony so cargo always
+# evaluates incrementally — when nothing changed it does not touch the output
+# mtime, so the downstream image layer remains cached via Docker's COPY hash.
+.PHONY: $(NATIVE_LINK_BINARY)
+$(NATIVE_LINK_BINARY):
 	cargo build --release --manifest-path "$(NATIVE_LINK_SRC_DIR)/Cargo.toml"
 
 # LD_PRELOAD shim — glibc + musl variants. Built on host (glibc via gcc;

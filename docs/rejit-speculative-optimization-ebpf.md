@@ -12,7 +12,7 @@ infrastructure) but address different problems with different designs.
 |---|---|---|
 | 1 | **Speculative eBPF optimization** (this doc) — runtime userspace-guided rewriting of live eBPF programs | `docs/rejit-speculative-optimization-ebpf.md` |
 | 2 | Kinsn — new OS abstraction, brings eBPF close to hardware | `docs/kinsn-idea.md` |
-| 3 | ReverseJIT / ReverseInterpreter — x86/arm interpreter or JIT written in eBPF | `docs/reverse-jit.md` |
+| 3 | ReverseSim — x86/arm native simulator written in eBPF | `docs/reverse-sim.md` |
 
 The three ideas are not incremental versions of one design. Each picks a
 different problem and a different point in the trust / kernel-surface /
@@ -66,7 +66,7 @@ eBPF is widely adopted in production for observability, networking, and customiz
 | Topic | File | Purpose |
 | --- | --- | --- |
 | **Plan + design hub (this doc)** | `docs/rejit-speculative-optimization-ebpf.md` | paper plan, architecture, methodology, task tracking |
-| Sister idea hubs (separate paper lines) | `docs/kinsn-idea.md`, `docs/reverse-jit.md` | idea #2 / #3 framing |
+| Sister idea hubs (separate paper lines) | `docs/kinsn-idea.md`, `docs/reverse-sim.md` | idea #2 / #3 framing |
 | Task history | `git log` | retired task tables and superseded plan snapshots are recovered from git history |
 | Shim implementation | `bpfopt/shim/README.md` | LD_PRELOAD shim + per-pid socket + execute_step RPC |
 | Userspace-only design notes | `docs/tmp/userspace_speculative_opt_design.md`, `docs/tmp/poc_a_katran_pidfd_swap.md`, `docs/tmp/poc_b_bcc_perf_event_swap.md`, `docs/tmp/poc_c_v2_shim_only_design.md`, `docs/tmp/poc_e_vendor_replace_x_sys_design.md` | per-attach-type swap recipes, static-Go fallback |

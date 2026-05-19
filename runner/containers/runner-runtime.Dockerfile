@@ -448,7 +448,7 @@ COPY --link runner/assets ./runner/assets
 RUN mkdir -p /usr/local/lib/bpfrejit
 COPY --link bpfopt/shim/libbpfrejit_shim.so      /usr/local/lib/bpfrejit/libbpfrejit_shim.so
 COPY --link bpfopt/shim/libbpfrejit_shim_musl.so /usr/local/lib/bpfrejit/libbpfrejit_shim_musl.so
-COPY runner/__init__.py runner/repos.yaml ./runner/
+COPY runner/__init__.py ./runner/
 COPY runner/config ./runner/config
 COPY runner/libs ./runner/libs
 COPY runner/suites ./runner/suites

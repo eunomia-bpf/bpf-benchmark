@@ -302,59 +302,59 @@ def apply_daemon_rejit(
         app_name=app_name,
         prog_names_by_id=prog_names_by_id,
     )
-    # Locate the shim that owns each prog_id. For single-process apps the
-    # app_pid-derived socket already has every prog; for multi-process apps
-    # (bpftrace/set, bcc/set) each child shim only sees the progs its own
-    # libbpf instance loaded, and prog_ids span all of them — we must scan.
+    # Group prog_ids by which shim socket owns them. Then send ONE execute_plan
+    # RPC per socket, matching daemon's monolithic batch semantics. Multi-process
+    # apps (bpftrace/set spawns 5 children) end up sending N execute_plans (one
+    # per child shim); each plan contains only that shim's progs.
     prog_id_to_socket = _build_prog_id_to_socket_map(_discover_shim_sockets())
     fallback_sock = _shim_socket_for_pid(int(app_pid))
-    per_program: dict[str, Any] = {}
+    sock_to_progs: dict[str, list[dict[str, Any]]] = {}
     for program in payload["programs"]:
-        pid = int(program["prog_id"])
-        sock = prog_id_to_socket.get(pid, fallback_sock)
-        passes_detail: list[dict[str, Any]] = []
-        all_ok = True
-        for step in program["steps"]:
-            req = {"cmd": "execute_step", "prog_id": pid, "command": step["command"]}
-            try:
-                resp = _shim_request(sock, req)
-            except RuntimeError as exc:
-                passes_detail.append({
-                    "step": dict(step),
+        sock = prog_id_to_socket.get(int(program["prog_id"]), fallback_sock)
+        sock_to_progs.setdefault(str(sock), []).append(program)
+
+    per_program: dict[str, Any] = {}
+    for sock_str, prog_list in sock_to_progs.items():
+        sock = Path(sock_str)
+        plan = {"cmd": "execute_plan", "programs": prog_list}
+        try:
+            resp = _shim_request(sock, plan)
+        except RuntimeError as exc:
+            # Whole batch failed — surface the same error for every prog so
+            # the caller's per-program loop sees a meaningful error.
+            for program in prog_list:
+                pid = int(program["prog_id"])
+                per_program[str(pid)] = {
                     "status": "error",
-                    "error": str(exc),
-                    "bpfopt_summary": {},
-                })
-                all_ok = False
-                break
-            step_ok = bool(resp.get("ok"))
-            report_data = _read_bpfopt_report(resp.get("report"))
-            passes_detail.append({
-                "step": dict(step),
-                "status": "ok" if step_ok else "error",
-                "error": None if step_ok else f"exit_code={resp.get('exit_code', -1)} error={resp.get('error', '')}",
-                "bpfopt_summary": report_data,
-            })
-            if not step_ok:
-                # Don't break: daemon's per-step loop keeps going so later
-                # passes still get a chance against the last successful
-                # bytecode/state. The shim mirrors this — its `cur` and
-                # `verifier_states_in` only advance on success.
-                all_ok = False
-                continue
-        per_program[str(pid)] = {
-            "status": "ok" if all_ok else "error",
-            "prog_id": pid,
-            "program": {
-                "prog_id": pid,
-                "prog_name": (prog_names_by_id or {}).get(pid, "") if prog_names_by_id else "",
-                "prog_type": 0,
-                "orig_insn_count": 0,
-                "final_insn_count": 0,
-            },
-            "passes": passes_detail,
-            "error_message": None,
-        }
+                    "prog_id": pid,
+                    "error_message": str(exc),
+                    "program": {
+                        "prog_id": pid,
+                        "prog_name": (prog_names_by_id or {}).get(pid, "") if prog_names_by_id else "",
+                        "prog_type": 0,
+                        "orig_insn_count": 0,
+                        "final_insn_count": 0,
+                    },
+                    "passes": [
+                        {"step": dict(step), "status": "error", "error": str(exc),
+                         "bpfopt_summary": {}}
+                        for step in program["steps"]
+                    ],
+                }
+            continue
+        for pid_str, prog_result in (resp.get("per_program") or {}).items():
+            # Each `prog_result` already matches the daemon shape (status,
+            # prog_id, program, passes). Read bpfopt_summary from report.json
+            # for each pass since shim doesn't inline it.
+            passes_in = prog_result.get("passes") or []
+            for p in passes_in:
+                # Shim writes report at WORKDIR/report.json overwritten per step;
+                # by the time we get the response only the last step's report
+                # remains. Best-effort: leave bpfopt_summary empty for now —
+                # consumers only use it for diagnostic dumps, not pass logic.
+                p.setdefault("bpfopt_summary", {})
+                p.setdefault("error", None)
+            per_program[str(pid_str)] = prog_result
     return {"status": "ok", "per_program": per_program}
 
 

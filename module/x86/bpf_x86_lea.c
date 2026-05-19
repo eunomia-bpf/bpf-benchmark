@@ -190,10 +190,7 @@ static int instantiate_lea64(u64 payload, struct bpf_insn *insn_buf)
 				 &arch_reg, &disp);
 	if (err)
 		return err;
-	if (arch_reg ||
-	    kinsn_x86_reg_is_shadowed(dst_reg) ||
-	    (has_base && kinsn_x86_reg_is_shadowed(base_reg)) ||
-	    (has_index && kinsn_x86_reg_is_shadowed(index_reg)))
+	if (arch_reg)
 		return instantiate_lea_shadow(insn_buf, 64, dst_reg, base_reg,
 					      index_reg, scale_log2, has_base,
 					      has_index, arch_reg, disp);
@@ -247,10 +244,7 @@ static int instantiate_lea32(u64 payload, struct bpf_insn *insn_buf)
 				 &arch_reg, &disp);
 	if (err)
 		return err;
-	if (arch_reg ||
-	    kinsn_x86_reg_is_shadowed(dst_reg) ||
-	    (has_base && kinsn_x86_reg_is_shadowed(base_reg)) ||
-	    (has_index && kinsn_x86_reg_is_shadowed(index_reg)))
+	if (arch_reg)
 		return instantiate_lea_shadow(insn_buf, 32, dst_reg, base_reg,
 					      index_reg, scale_log2, has_base,
 					      has_index, arch_reg, disp);

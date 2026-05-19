@@ -581,3 +581,186 @@ with a strong hit in a representative packet/endian workload. The important
 lesson is methodological: do not reject a kinsn class based on a loose selector
 that leaves cleanup instructions behind; tighten the matched idiom first, then
 measure the hit programs and the full suite separately.
+
+### Step 10: bpfopt kinsn pass coverage audit
+
+I checked the current bpfopt kinsn-class passes against the LLVM backend
+selector. The useful x86 coverage now looks like this:
+
+| bpfopt pass | x86 kinsn targets | LLVM backend status |
+|---|---|---|
+| `rotate` | `bpf_x86_rolq`, `bpf_x86_rorxl` | implemented and selected by default |
+| `endian_fusion` | `bpf_x86_rolw`, `bpf_x86_bswapl`, `bpf_x86_bswapq` | `bswapq` already implemented; `rolw` and `bswapl` pseudos/AsmPrinter lowering added in this step; current micro has no `rolw/bswapl` hits |
+| `cond_select` | `bpf_x86_testq`, `bpf_x86_cmoveq`, `bpf_x86_cmovneq` | backend lowering exists for LLVM `SELECT_CC`, but current micro has no safe RR select hits |
+| `extract` | `bpf_x86_shrq`, `bpf_x86_andl` | exact bpfopt split is not selected; LLVM has stronger `bpf_x86_bextrq` recognition, default-disabled until a profitable control-operand form exists |
+| `lea` | `bpf_x86_leaq`, `bpf_x86_leal` | pseudo/AsmPrinter lowering exists and automatic `ADD_rr/ADD_rr_32` selection now passes micro after fixing the module proof path |
+| `bulk_memory` | `bpf_x86_movzbl`, `bpf_x86_movb` | not ported as an LLVM selector; ordinary BPF byte load/store already lowers to these machine instructions, so duplicating them as kinsns is not useful without a larger bulk-copy semantic source |
+| `prefetch` | `bpf_x86_prefetcht0` | not ported; bpfopt's pass is program/dataflow placement over map/packet dereferences, while the LLVM backend only sees local MI patterns unless source emits `llvm.prefetch` |
+
+LEA experiment:
+
+- Added `BPF_KINSN_X86_LEAQ/LEAL` pseudos and a first `ADD_rr/ADD_rr_32`
+  selector.
+- Objects:
+  `micro/results/llvm_kinsn_programs_bpfopt_gap_20260518_201638`
+- Selected kinsns included 238 `bpf_x86_leaq` and 38 `bpf_x86_leal`.
+- Full micro failed verification in pointer-heavy programs. Example failure:
+  verifier saw `r6 += r7` over values loaded from kinsn shadow-stack slots, then
+  rejected a later packet load with `invalid mem access 'scalar'`.
+
+The failure was not a fundamental LLVM legality problem. It exposed a module
+boundary bug: `bpf_x86_lea.c` sent the normal BPF-register payload form through
+the x86 shadow-register proof path because `kinsn_x86_reg_is_shadowed()` returns
+true for BPF regs. That is correct for arch-register/native-lab payloads, but it
+is wrong for verifier-facing BPF-register LEA. The normal form must instantiate
+as verifier-visible `MOV/ADD/LSH` over the original BPF registers so packet and
+frame-pointer provenance stay intact. The module now only uses the shadow path
+for `KINSN_X86_LEA_FORM_ARCH_REG`.
+
+LEA retry after the module fix:
+
+- Objects:
+  `micro/results/llvm_kinsn_programs_lea_retry_20260518_210000`
+- Selected LEA kinsns: 238 `bpf_x86_leaq`, 38 `bpf_x86_leal` (276 total).
+- Top LEA hit programs:
+
+| Benchmark | LEA count |
+|---|---:|
+| `siphash_rotate64_mixer` | 78 |
+| `katran_lb_consistent_hash_select` | 68 |
+| `packed_header_bitfield_decode` | 19 |
+| `flow_5tuple_rss_hash` | 12 |
+| `bpftrace_string_search_prefix_scan` | 11 |
+| `bcc_runqlat_log2_histogram_bucket` | 10 |
+
+Micro status:
+
+- Full `make micro` passed: 29/29 correct.
+- Run:
+  `micro/results/x86_kvm_micro_20260519_034347_448372/metadata.json`
+- Command:
+  `make micro TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_lea_retry_20260518_210000"`
+
+Summary:
+
+| Comparison | Geomean ratio | JIT byte delta |
+|---|---:|---:|
+| LEA retry vs no-kinsn baseline | 0.9512 | -1357 bytes |
+| LEA retry vs LEA-disabled bpfopt-gap2 | 1.0166 | +179 bytes |
+
+The correctness result is the important part: broad LEA selection no longer
+breaks packet-pointer verification. The first performance result is mixed. LEA
+adds many kinsn bundles and is not automatically a suite-wide win in this micro
+set; it improves or holds several cases, but regresses `bcc_runqlat_log2_histogram_bucket`
+and increases total JIT bytes versus the LEA-disabled selector. The next LEA
+step should therefore be profitability refinement rather than another verifier
+workaround: keep pointer-preserving module proof, then prefer LEA sites where the
+final x86 actually removes a move/add pair or materially shrinks a hot block.
+
+ROLW/BSWAPL + LEA-disabled validation:
+
+- Objects:
+  `micro/results/llvm_kinsn_programs_bpfopt_gap2_20260518_204000`
+- Selected kinsns:
+
+| kinsn | count |
+|---|---:|
+| `bpf_x86_movbe16` | 5 |
+| `bpf_x86_popcntq` | 1 |
+| `bpf_x86_rolq` | 119 |
+| `bpf_x86_rorxl` | 40 |
+| `bpf_x86_shldq` | 1 |
+
+Micro status:
+
+- Full `make micro` passed: 29/29 correct.
+- Run:
+  `micro/results/x86_kvm_micro_20260519_032814_683943/metadata.json`
+- Command:
+  `make micro TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_bpfopt_gap2_20260518_204000"`
+
+Summary:
+
+| Comparison | Geomean ratio | JIT byte delta |
+|---|---:|---:|
+| bpfopt-gap2 vs no-kinsn baseline | 0.9357 | -1536 bytes |
+| bpfopt-gap2 vs strict `movbe16` | 0.9814 | 0 bytes |
+
+Key deltas versus the no-kinsn baseline:
+
+| Benchmark | Baseline | bpfopt-gap2 | Ratio | JIT bytes |
+|---|---:|---:|---:|---:|
+| `bitmap_popcount_scan` | 1115 ns | 491 ns | 0.440 | 489 -> 416 |
+| `siphash_rotate64_mixer` | 54 ns | 38 ns | 0.704 | 3529 -> 2399 |
+| `packet_toeplitz_rss_hash` | 280 ns | 219 ns | 0.782 | 989 -> 991 |
+| `flow_5tuple_rss_hash` | 13 ns | 11 ns | 0.846 | 819 -> 689 |
+| `packet_vlan_tcpopt_parser` | 12 ns | 11 ns | 0.917 | 1065 -> 1018 |
+| `katran_lb_consistent_hash_select` | 17 ns | 16 ns | 0.941 | 2975 -> 2817 |
+
+### Step 11: live-aware LEA profitability refinement
+
+The broad LEA retry proved correctness but not profitability. Inspecting the JIT
+dump showed why: many selected sites were not `copy + add -> lea`; they were
+plain one-instruction `add reg, reg` sites rewritten to one-instruction
+`lea reg, [reg + reg]`. That is not a guaranteed win on x86. It can increase
+encoding size and front-end pressure while saving no instruction.
+
+The selector now only picks `ADD_rr/ADD_rr_32` when both add operands have more
+than one non-debug use. If either operand dies at the add, ordinary BPF register
+coalescing can usually make the final code a single destructive `add`, so LEA is
+not selected. This is still a simple static rule, but it removes the obvious
+non-profitable broad matches without adding verifier-facing guards or fallback
+logic.
+
+Objects:
+
+- `micro/results/llvm_kinsn_programs_lea_live2_20260519_041000`
+
+Selected kinsns:
+
+| kinsn | count |
+|---|---:|
+| `bpf_x86_rolq` | 119 |
+| `bpf_x86_leaq` | 51 |
+| `bpf_x86_rorxl` | 40 |
+| `bpf_x86_leal` | 17 |
+| `bpf_x86_movbe16` | 5 |
+| `bpf_x86_shldq` | 1 |
+| `bpf_x86_popcntq` | 1 |
+
+LEA hit count dropped from 276 to 68. The largest previous regression,
+`bcc_runqlat_log2_histogram_bucket`, dropped from 10 LEA sites to 0. Katran
+dropped from 68 to 6, and SipHash dropped from 78 to 30.
+
+Micro status:
+
+- Full `make micro` passed: 29/29 correct.
+- Run:
+  `micro/results/x86_kvm_micro_20260519_040112_031843/metadata.json`
+- Command:
+  `make micro TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_lea_live2_20260519_041000"`
+
+Summary:
+
+| Comparison | Geomean ratio | summed exec delta | JIT byte delta |
+|---|---:|---:|---:|
+| live-aware LEA vs no-kinsn baseline | 0.9442 | -772 ns | -1399 bytes |
+| live-aware LEA vs LEA-disabled bpfopt-gap2 | 1.0091 | +37 ns | +137 bytes |
+| live-aware LEA vs broad LEA retry | 0.9926 | -104 ns | -42 bytes |
+
+Key deltas versus LEA-disabled:
+
+| Benchmark | LEA-disabled | live-aware LEA | JIT bytes |
+|---|---:|---:|---:|
+| `bcc_runqlat_log2_histogram_bucket` | 1025 ns | 1024 ns | 664 -> 664 |
+| `siphash_rotate64_mixer` | 38 ns | 42 ns | 2399 -> 2387 |
+| `packed_header_bitfield_decode` | 263 ns | 259 ns | 1085 -> 1101 |
+| `katran_lb_consistent_hash_select` | 16 ns | 16 ns | 2817 -> 2812 |
+| `cilium_socket_lb_service_select` | 326 ns | 332 ns | 931 -> 967 |
+
+This is better than broad LEA, but still not better than LEA-disabled. The next
+profitable LEA step should not be another wider `ADD_rr` rule. It should match a
+larger canonical idiom where x86 LEA actually subsumes work, such as explicit
+`copy + add`, `base + index + disp`, or `shift + add` scaled-index address
+generation. Plain scalar add remains too close to native BPF JIT output to be a
+good default LEA selector.

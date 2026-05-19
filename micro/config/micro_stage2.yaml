@@ -1,7 +1,7 @@
 # Stage 2 micro suite: BPF programs that exercise helpers and maps.
 # Companion to micro/config/micro_pure_jit.yaml (which is pure-compute).
 #
-# Built by `make -C ebpf-vm/test`; products land in `ebpf-vm/test/build/`.
+# Built by `make -C native-sim/test`; products land in `native-sim/test/build/`.
 # Each .bpf.c yields a .bpf.o (canonical micro program object) plus a
 # .native.o (clang-x86-64 object the native-lab linker consumes).
 #
