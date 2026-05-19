@@ -2,9 +2,9 @@ CC ?= gcc
 CFLAGS ?= -O2 -g -Wall -Wextra -fPIC -D_GNU_SOURCE
 LDLIBS ?= -ldl -lpthread
 
-.PHONY: all clean smoke selftest-run musl
+.PHONY: all clean smoke selftest-run musl host-selftest
 
-all: libbpfrejit_shim.so selftest
+all: libbpfrejit_shim.so selftest selftest_full
 
 libbpfrejit_shim.so: libbpfrejit_shim.c
 	$(CC) $(CFLAGS) -shared $< -o $@ $(LDLIBS)
@@ -21,6 +21,24 @@ libbpfrejit_shim_musl.so: libbpfrejit_shim.c
 
 selftest: selftest.c
 	$(CC) $(CFLAGS) $< -o $@
+
+selftest_full: selftest_full.c
+	$(CC) $(CFLAGS) $< -o $@
+
+# Comprehensive host-side shim regression harness — exercises socket
+# plumbing, prog_load capture, list_progs JSON, and the inner_map_ids
+# iteration cap. Requires sudo because the host kernel has
+# kernel.unprivileged_bpf_disabled=2. Completes in ≤ 5 s when shim is
+# healthy; ≥ 30 s indicates a hang and the harness should bail.
+host-selftest: all
+	rm -rf /tmp/shim_full_st && mkdir -p /tmp/shim_full_st
+	rm -f /tmp/shim_full_st.log
+	sudo -n env \
+	  BPFREJIT_SHIM_DIR=/tmp/shim_full_st \
+	  BPFREJIT_SHIM_LOG=/tmp/shim_full_st.log \
+	  BPFREJIT_SHIM_SOCK_DIR=/tmp/shim_full_st/sock \
+	  LD_PRELOAD=$$PWD/libbpfrejit_shim.so \
+	  timeout 30 ./selftest_full
 
 # Exercise the shim with a synthetic BPF_PROG_LOAD call. Validates: (a) shim
 # loads via LD_PRELOAD, (b) BPF_PROG_LOAD is intercepted, (c) bytecode is

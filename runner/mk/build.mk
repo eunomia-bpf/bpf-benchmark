@@ -138,7 +138,6 @@ host-rust-arm64: aarch64-sysroot
 
 host-shim-artifacts:
 	$(MAKE) -C "$(BPFOPT_SHIM_DIR)" libbpfrejit_shim.so
-	$(MAKE) -C "$(BPFOPT_SHIM_DIR)" musl
 
 x86-runner-runtime-image-tar: host-kernel-x86 host-kernel-offsets-x86 host-kinsn-x86 host-rust-x86 host-shim-artifacts host-source-apps-x86
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"

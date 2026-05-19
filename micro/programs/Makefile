@@ -43,7 +43,7 @@ else
 endif
 
 ifeq ($(KERNEL_OFFSETS_INPUT),)
-$(KERNEL_OFFSETS): $(KERNEL_VMLINUX) | $(OUTPUT_DIR)
+$(KERNEL_OFFSETS): $(KERNEL_VMLINUX) Makefile | $(OUTPUT_DIR)
 	@if [ ! -x "$$(command -v pahole)" ]; then \
 	    echo "pahole not found; install dwarves to extract kernel field offsets" >&2; \
 	    exit 1; \
@@ -53,7 +53,14 @@ $(KERNEL_OFFSETS): $(KERNEL_VMLINUX) | $(OUTPUT_DIR)
 	    echo '#pragma once'; \
 	    pahole -C sk_buff '$(KERNEL_VMLINUX)' 2>/dev/null | \
 	        awk '/unsigned char \*\s*data;/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_SK_BUFF_DATA_OFFSET %du\n", a[1] } \
-	             /unsigned int\s*len;/      { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_SK_BUFF_LEN_OFFSET %du\n", a[1] }'; \
+	             /unsigned int\s*len;/      { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_SK_BUFF_LEN_OFFSET %du\n", a[1] } \
+	             /char\s+cb\[/              { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_SK_BUFF_CB_OFFSET %du\n", a[1] }'; \
+	    pahole -C bpf_skb_data_end '$(KERNEL_VMLINUX)' 2>/dev/null | \
+	        awk '/void \*\s*data_end;/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_BPF_SKB_DATA_END_FIELD_OFFSET %du\n", a[1] }'; \
+	    pahole -C qdisc_skb_cb '$(KERNEL_VMLINUX)' 2>/dev/null | \
+	        awk '/unsigned char\s+data\[/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_QDISC_SKB_CB_DATA_OFFSET %du\n", a[1] }'; \
+	    echo '#define K_SK_BUFF_BPF_DATA_END_OFFSET (K_SK_BUFF_CB_OFFSET + K_BPF_SKB_DATA_END_FIELD_OFFSET)'; \
+	    echo '#define K_SK_BUFF_BPF_CB_OFFSET (K_SK_BUFF_CB_OFFSET + K_QDISC_SKB_CB_DATA_OFFSET)'; \
 	    pahole -C xdp_buff '$(KERNEL_VMLINUX)' 2>/dev/null | \
 	        awk '/void \*\s*data;/     { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_XDP_BUFF_DATA_OFFSET %du\n", a[1] } \
 	             /void \*\s*data_end;/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_XDP_BUFF_DATA_END_OFFSET %du\n", a[1] }'; \

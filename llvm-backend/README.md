@@ -1221,7 +1221,8 @@ selects every currently recognized kinsn candidate?
 
 Implementation:
 
-- Added hidden llc flag `-bpf-kinsn-force-all`.
+- Added hidden llc flag `-bpf-kinsn-force-all` for this experiment. This was
+  later replaced by the unified `-bpf-kinsn-mode=...` policy knob in Step 22.
 - Added `BPF_KINSN_LLC_FLAGS` to `micro/programs/Makefile` so experiments can
   pass extra llc flags without changing the default build path.
 - The flag ignores candidate score only. It does not override legality. In
@@ -1612,3 +1613,249 @@ program itself, not because the kinsn scratch init requires it. This is the
 current clean boundary: the selector should remove artificial prologue cost, but
 not fight normal register allocation unless a later cost model can prove that is
 profitable.
+
+### Step 20: rotate proof scratch chosen from operands
+
+The next implementation issue was in the high-hit rotate family. The latest
+object set contains 119 `bpf_x86_rolq` and 40 `bpf_x86_rorxl` calls, and some
+of those pseudos use BPF `r6/r7/r8` as normal program operands after register
+allocation. The old verifier proof always used fixed `r6/r7` scratch for
+immediate rotates. That worked for the measured final native code, but it made
+the proof path unnecessarily heavy and mixed two roles for the same registers:
+program operands and verifier scratch.
+
+Implementation:
+
+- `bpf_x86_rotate.c` now has a BPF-register fast path for immediate
+  `ROLQ`/`RORXL`. It chooses one scratch register not equal to the instruction's
+  dst/src operands, saves/restores only that scratch, computes directly in the
+  live BPF dst register, and then updates the shadow slot.
+- `BPFAsmPrinter` uses the same operand-aware scratch rule for rotate scratch
+  initialization. `ROLW` from LLVM is non-arch and lowers to a verifier-native
+  `BPF_BSWAP16`, so it no longer requests scratch initialization.
+
+Validation:
+
+- Objects:
+  `micro/results/llvm_kinsn_programs_rotate_scratch_20260519_104343`
+- Full single-sample `make micro` passed: 29/29 correct.
+  Run:
+  `micro/results/x86_kvm_micro_20260519_174650_398599/metadata.json`
+
+Analysis-side deltas:
+
+| Comparison | Geomean ratio | summed exec delta | JIT byte delta | xlated byte delta |
+|---|---:|---:|---:|---:|
+| operand-aware rotate proof vs direct MOVBE16 proof | 0.9929 | +37 ns | -9 bytes | -24 bytes |
+| operand-aware rotate proof vs no-kinsn LLVM baseline | 0.9007 | -982 ns | -5428 bytes | -9176 bytes |
+
+The runtime delta against the previous run is noise-level; the useful change is
+that rotate proof now has a cleaner register contract. It no longer needs to
+treat the fixed scratch pair as globally safe when one of those physical BPF
+registers is itself a kinsn operand.
+
+### Step 21: post-RA scaled-index folds must respect live-out registers
+
+Rationale:
+
+- The LLVM-side LEA/SIB work happens after register allocation, so operands are
+  physical BPF registers. Deleting a `MOV; SHL` scaled-index producer is only
+  legal if that physical register is not live past the local rewrite.
+- One unsafe SIB-memory fold reproduced a verifier failure in
+  `bcc_runqlat_log2_histogram_bucket`:
+
+```text
+R7 pointer += pointer prohibited
+```
+
+  The deleted scaled-index definition left `r2` holding the old packet
+  `data_end` pointer along one loop path, and a later `r7 += r2` became pointer
+  plus pointer. The bug was in the LLVM peephole's post-RA liveness handling,
+  not in bpfopt or the final x86 emitter.
+
+Implementation:
+
+- `foldScaledIndexMemPseudos()` now computes `LivePhysRegs` for each
+  `MachineBasicBlock` and refuses to erase the scaled-index temp when that
+  physical register is live-out.
+- The same live-out check was added to the scaled-index LEA pair fold
+  (`MOV index; SHL index; MOV dst, base; ADD dst, index -> LEA`) because it has
+  the same post-RA deletion hazard.
+- This is not a profitability gate. It is the normal LLVM legality condition for
+  deleting physical-register definitions after register allocation.
+
+Validation:
+
+- `ninja -C llvm-backend/build-bpf-kinsn LLVMBPFCodeGen llc -j4`: pass.
+- Objects:
+  `micro/results/llvm_kinsn_programs_liveoutfix_20260519_114208`
+- Full single-sample `make micro` passed: 29/29 correct.
+  Run:
+  `micro/results/x86_kvm_micro_20260519_185045_458143/metadata.json`
+- A follow-up build with the LEA-pair live-out check produced byte-identical
+  BPF objects:
+  `micro/results/llvm_kinsn_programs_lea_liveout2_20260519_115307`
+
+Selected kinsns in the validated object set:
+
+| kinsn | count |
+|---|---:|
+| `bpf_x86_leaq` | 160 |
+| `bpf_x86_rolq` | 119 |
+| `bpf_x86_movl` | 43 |
+| `bpf_x86_rorxl` | 40 |
+| `bpf_x86_leal` | 24 |
+| `bpf_x86_movzbl` | 19 |
+| `bpf_x86_movbe16` | 13 |
+| `bpf_x86_movzwl` | 11 |
+| `bpf_x86_movq` | 8 |
+| `bpf_x86_movbe32` | 6 |
+| `bpf_x86_shldq` | 1 |
+| `bpf_x86_popcntq` | 1 |
+
+Single-sample summary versus the no-kinsn LLVM baseline
+`micro/results/x86_kvm_micro_20260518_210242_364278`:
+
+| Comparison | Geomean ratio | summed exec delta | JIT byte delta | xlated byte delta |
+|---|---:|---:|---:|---:|
+| live-out-safe LLVM kinsn vs baseline | 0.9070 | -992 ns | -5448 bytes | -9232 bytes |
+
+Key deltas:
+
+| Benchmark | Baseline | live-out-safe | JIT bytes |
+|---|---:|---:|---:|
+| `bitmap_popcount_scan` | 1115 ns | 490 ns | 489 -> 330 |
+| `tc_packet_checksum_fold` | 13352 ns | 13248 ns | 292 -> 211 |
+| `packet_checksum_fold` | 13322 ns | 13258 ns | 360 -> 277 |
+| `packet_toeplitz_rss_hash` | 280 ns | 232 ns | 989 -> 913 |
+| `bpf_local_call_fanout_dispatch` | 112 ns | 73 ns | 1985 -> 1071 |
+| `packet_record_bounds_window` | 108 ns | 73 ns | 644 -> 400 |
+| `siphash_rotate64_mixer` | 54 ns | 31 ns | 3529 -> 1562 |
+
+Incremental comparison against the previous stable rotate-scratch run
+`micro/results/x86_kvm_micro_20260519_174650_398599`:
+
+| Comparison | Geomean ratio | summed exec delta | JIT byte delta | xlated byte delta |
+|---|---:|---:|---:|---:|
+| live-out-safe vs rotate-scratch | 1.0070 | -10 ns | -20 bytes | -56 bytes |
+
+The incremental geomean is slightly worse because the unsafe fold had removed a
+few instructions on paths where the scaled-index temp was actually live. That
+speed was invalid. The safe version keeps the suite-wide baseline win while
+preserving verifier-visible pointer/scalar state.
+
+Current LLVM optimization boundary:
+
+- Profitable and enabled: rotate, `ctpop`/`popcnt`, final-MI LEA pairs,
+  direct/SIB MOV-load packing, BE byte-ladder `movbe`, local verifier-native
+  wide-load packing, and selected SHD.
+- Implemented but not default-profitable in this micro set: `bextr`, BMI1
+  `blsi/blsr`, standalone narrow endian/unary forms, and broad scalar LEA.
+- Still worth improving in LLVM, not bpfopt: earlier semantic hooks for
+  `select`/`cmov`, a better BEXTR form that reuses or cheaply materializes the
+  control operand, and a more precise cost model for indexed loads in tight
+  induction loops.
+
+### Step 22: selector policy knobs for A/B experiments
+
+The rotate amortization experiment showed why selector profitability policy
+must be controllable rather than deleted after one noisy run. The rule reduced
+three cold `rolq` selections and the full micro run remained correct:
+
+- Objects:
+  `micro/results/llvm_kinsn_programs_rotate_cost_20260519_134610`
+- Full single-sample `make micro` passed: 29/29 correct.
+  Run:
+  `micro/results/x86_kvm_micro_20260519_211121_812654/metadata.json`
+- Versus no-kinsn baseline:
+  geomean `0.9040`, summed exec delta `-1043 ns`, JIT byte delta `-5422`,
+  xlated byte delta `-9200`, result mismatches `0`.
+- Versus live-out-safe:
+  geomean `0.9967`, summed exec delta `-51 ns`, JIT byte delta `+26`, xlated
+  byte delta `+32`, result mismatches `0`.
+
+The result is not strong enough to hard-code a policy conclusion. The right
+boundary is:
+
+- legality/correctness checks stay unconditional, for example post-RA live-out
+  checks before deleting a physical register def;
+- profitability and experimental selector choices get `llc` flags and are
+  exercised through `BPF_KINSN_LLC_FLAGS`.
+
+The flag surface is intentionally compact. Do not add one boolean flag per
+selector. Selector policy is one three-state option:
+
+```text
+-bpf-kinsn-mode=family=disable|cost|force
+```
+
+Entries are comma-separated or repeated. `all=...` applies to every family and
+later entries override earlier entries. The default is `cost` for every family.
+`disable` blocks candidate collection or early DAG legalization for that family,
+`cost` runs legality plus profitability, and `force` selects every legal
+candidate while keeping correctness checks unconditional. Families that do not
+yet have a distinct profitability rule treat `cost` and `force` the same.
+
+Current families:
+
+| Family | Scope |
+|---|---|
+| `unary` | standalone byte-order/unary candidates |
+| `wide-load` | byte-ladder wide-load packing |
+| `movbe-be` | big-endian byte-ladder `movbe` |
+| `movbe-load` | load + byte-swap `movbe` |
+| `indexed-load` | indexed/SIB load kinsns |
+| `bextr` | BEXTR candidate collection |
+| `bmi1` | BLSI/BLSR candidates |
+| `rotate` | rotate candidates and rotate amortization policy |
+| `shd` | SHLD/SHRD candidates |
+| `cmov` | LLVM `select` lowering to cmp/cmov kinsns |
+| `popcnt` | `ctpop` SelectionDAG legalization to `popcntq` |
+| `preemit-lea` | post-RA MOV+ADD to LEA |
+| `scaled-index-mem` | post-RA scaled-index fold for SIB memory kinsns |
+
+The only remaining numeric tuning flag is
+`-bpf-kinsn-rotate-amortization-threshold=<N>`, default `4`; it is used only
+when `rotate=cost`.
+
+Validation:
+
+- `ninja -C llvm-backend/build-bpf-kinsn LLVMBPFCodeGen llc -j4`: pass.
+- `llc --help-hidden` now lists only:
+  `-bpf-enable-kinsn-select`, `-bpf-kinsn-mode=<family=mode>`, and
+  `-bpf-kinsn-rotate-amortization-threshold=<N>`.
+- Default policy objects:
+  `micro/results/llvm_kinsn_programs_mode_default_20260519_143046`
+- Rotate forced objects:
+  `micro/results/llvm_kinsn_programs_mode_rotate_force_20260519_143046`
+- All disabled objects:
+  `micro/results/llvm_kinsn_programs_mode_all_disable_20260519_143046`
+- The default object set is byte-identical to the previous
+  `llvm_kinsn_programs_flags_default_20260519_141800` set.
+- The `rotate=force` object set is byte-identical to the previous
+  `llvm_kinsn_programs_flags_rotate_nocost_20260519_141800` set.
+
+The rotate flag changes only the intended sparse rotate sites:
+
+| Object set | total kinsns | `bpf_x86_rolq` |
+|---|---:|---:|
+| default policy | 442 | 116 |
+| `-bpf-kinsn-mode=rotate=force` | 445 | 119 |
+| `-bpf-kinsn-mode=all=disable` | 0 | 0 |
+
+Changed programs:
+
+| Program | Default | `rotate=force` |
+|---|---|---|
+| `bpftrace_string_search_prefix_scan` | no `rolq` | +1 `rolq` |
+| `payload_prefix_memcmp_scan` | no cold `rolq` | +2 `rolq` |
+
+This keeps the default policy measurable while preserving the ability to run
+the previous behavior without code changes:
+
+```sh
+BPF_KINSN_LLC_FLAGS="-bpf-kinsn-mode=rotate=force" \
+make -C micro/programs OUTPUT_DIR=... \
+  BPFREJIT_MICRO_BPF_COMPILER=kinsn-llvm \
+  BPF_KINSN_LLC="$PWD/llvm-backend/build-bpf-kinsn/bin/llc" all
+```

@@ -6,11 +6,7 @@
 
 static __always_inline int bench_hash_chain(const u8 *data, u32 len, u64 *out)
 {
-#ifdef MICRO_NATIVE
-    if (!micro_native_has_data_bytes(data, len, 0, 8)) {
-#else
-    if (!micro_has_bytes(len, 0, 8)) {
-#endif
+    if (!micro_payload_has_bytes(data, len, 0, 8)) {
         return -1;
     }
 
@@ -20,11 +16,7 @@ static __always_inline int bench_hash_chain(const u8 *data, u32 len, u64 *out)
     if (rounds != HASH_CHAIN_ROUNDS || word_count != HASH_CHAIN_WORDS) {
         return -1;
     }
-#ifdef MICRO_NATIVE
-    if (!micro_native_has_data_bytes(data, len, 8, HASH_CHAIN_WORDS * 8U)) {
-#else
-    if (!micro_has_bytes(len, 8, HASH_CHAIN_WORDS * 8U)) {
-#endif
+    if (!micro_payload_has_bytes(data, len, 8, HASH_CHAIN_WORDS * 8U)) {
         return -1;
     }
 
