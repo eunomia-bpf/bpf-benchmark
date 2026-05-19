@@ -16,7 +16,7 @@ build:
 defaults:
   samples: 10
   warmups: 2
-  inner_repeat: 1000
+  inner_repeat: 100000
   runtimes: [native, llvmbpf, kernel]
   output: micro/results/dev/pure_jit.json
 

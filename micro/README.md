@@ -64,7 +64,7 @@ Run those objects in the framework-kernel VM:
 
 ```bash
 make micro TIMEOUT=7200 \
-  MICRO_ARGS="--samples 3 --warmups 0 --inner-repeat 1000 --runtime kernel --program-dir $out"
+  MICRO_ARGS="--samples 3 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir $out"
 ```
 
 Current smoke result from this path:

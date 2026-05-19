@@ -218,7 +218,7 @@ image-stage2-program-artifacts:
 	$(MAKE) -C "$(STAGE2_PROGRAM_DIR)" OUTPUT_DIR="$(STAGE2_PROGRAM_OUTPUT_DIR)" all
 
 image-test-artifacts:
-	$(MAKE) -C "$(ROOT_DIR)/tests/unittest" BUILD_DIR="$(ROOT_DIR)/tests/unittest/$(if $(filter arm64,$(RUN_TARGET_ARCH)),build-arm64,build)" CC=gcc CLANG=clang BPF_TARGET_ARCH="$(RUN_TARGET_ARCH)"
+	$(MAKE) -C "$(ROOT_DIR)/tests/unittest" BUILD_DIR="$(ROOT_DIR)/tests/unittest/$(if $(filter arm64,$(RUN_TARGET_ARCH)),build-arm64,build)" CC=gcc CLANG=clang BPF_TARGET_ARCH="$(RUN_TARGET_ARCH)" BPFTOOL_BOOTSTRAP=/usr/local/bin/bpftool
 	$(MAKE) -C "$(ROOT_DIR)/tests/negative" BUILD_DIR="$(ROOT_DIR)/tests/negative/$(if $(filter arm64,$(RUN_TARGET_ARCH)),build-arm64,build)" CC=gcc
 
 endif

@@ -184,14 +184,17 @@ COPY --link --chmod=0755 vendor/build/${VENDOR_BUILD_ARCH}/tracee/bin/tracee /ar
 COPY --link vendor/build/${VENDOR_BUILD_ARCH}/tetragon/ /artifacts/tetragon/
 
 COPY --link --chmod=0755 vendor/binary/katran/${RUN_TARGET_ARCH}/bin/katran_server_grpc /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bin/katran_server_grpc
-COPY --link corpus/build/katran/*.bpf.o /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bpf/
+COPY --link vendor/build/${VENDOR_BUILD_ARCH}/katran/bpf/*.bpf.o /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bpf/
 
-COPY --link --chmod=0755 vendor/build/${VENDOR_BUILD_ARCH}/cilium/bin/cilium-agent /usr/local/bin/cilium-agent
 COPY --link vendor/repos/cilium/bpf/ /var/lib/cilium/bpf/
-COPY --link --chmod=0755 vendor/build/${VENDOR_BUILD_ARCH}/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler /usr/local/bin/otelcol-ebpf-profiler
 COPY --link vendor/build/${VENDOR_BUILD_ARCH}/bcc/ /usr/local/
-COPY --link --chmod=0755 vendor/build/${VENDOR_BUILD_ARCH}/bpftrace/bin/bpftrace /usr/local/bin/bpftrace
-COPY --link --chmod=0755 vendor/build/${VENDOR_BUILD_ARCH}/bpftrace/bin/bpftrace-aotrt /usr/local/bin/bpftrace-aotrt
+COPY --link --chmod=0755 \
+    vendor/build/${VENDOR_BUILD_ARCH}/cilium/bin/cilium-agent \
+    vendor/build/${VENDOR_BUILD_ARCH}/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler \
+    vendor/build/${VENDOR_BUILD_ARCH}/bpftool/bin/bpftool \
+    vendor/build/${VENDOR_BUILD_ARCH}/bpftrace/bin/bpftrace \
+    vendor/build/${VENDOR_BUILD_ARCH}/bpftrace/bin/bpftrace-aotrt \
+    /usr/local/bin/
 
 COPY --chmod=0755 runner/scripts/bpfrejit-install /usr/local/bin/bpfrejit-install
 
@@ -230,17 +233,7 @@ COPY Makefile ./Makefile
 COPY runner/mk ./runner/mk
 COPY vendor/libbpf ./vendor/libbpf
 COPY vendor/llvmbpf ./vendor/llvmbpf
-COPY vendor/linux-framework/Makefile ./vendor/linux-framework/Makefile
 COPY vendor/linux-framework/include ./vendor/linux-framework/include
-COPY vendor/linux-framework/arch/arm64/include/uapi/asm ./vendor/linux-framework/arch/arm64/include/uapi/asm
-COPY vendor/linux-framework/scripts ./vendor/linux-framework/scripts
-COPY vendor/linux-framework/kernel/bpf ./vendor/linux-framework/kernel/bpf
-COPY vendor/linux-framework/tools/arch ./vendor/linux-framework/tools/arch
-COPY vendor/linux-framework/tools/bpf/bpftool ./vendor/linux-framework/tools/bpf/bpftool
-COPY vendor/linux-framework/tools/build ./vendor/linux-framework/tools/build
-COPY vendor/linux-framework/tools/include ./vendor/linux-framework/tools/include
-COPY vendor/linux-framework/tools/lib ./vendor/linux-framework/tools/lib
-COPY vendor/linux-framework/tools/scripts ./vendor/linux-framework/tools/scripts
 COPY runner/CMakeLists.txt ./runner/CMakeLists.txt
 COPY runner/include ./runner/include
 COPY runner/src ./runner/src
@@ -250,15 +243,6 @@ COPY tests/unittest ./tests/unittest
 COPY tests/negative ./tests/negative
 
 RUN set -eux; \
-    make -C vendor/linux-framework/tools/bpf/bpftool \
-        VMLINUX_BTF= \
-        feature-llvm=1 \
-        feature-libbfd=0 \
-        feature-libbfd-liberty=0 \
-        feature-libbfd-liberty-z=0 \
-        -j"${IMAGE_BUILD_JOBS}"; \
-    install -m 0755 vendor/linux-framework/tools/bpf/bpftool/bpftool /usr/local/bin/bpftool; \
-    bpftool version; \
     make image-runner-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
     CLANG=/usr/bin/clang make image-micro-program-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
     CLANG=/usr/bin/clang make image-stage2-program-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
@@ -316,9 +300,11 @@ ARG BPFOPT_HOST_BIN_DIR=bpfopt/target/release
 # container, not on the target architecture).
 ARG NATIVE_LINK_HOST_BIN=native-sim/x86/native_lab/native_link/target/release/native-link
 
-COPY ${BPFOPT_HOST_BIN_DIR}/bpfopt /tmp/bpfopt
-COPY ${BPFOPT_HOST_BIN_DIR}/kinsnprober /tmp/kinsnprober
-COPY ${NATIVE_LINK_HOST_BIN} /tmp/native-link
+COPY \
+    ${BPFOPT_HOST_BIN_DIR}/bpfopt \
+    ${BPFOPT_HOST_BIN_DIR}/kinsnprober \
+    ${NATIVE_LINK_HOST_BIN} \
+    /tmp/
 RUN set -eux; \
     install -d /artifacts/rust/usr-local-bin; \
     install -m 0755 /tmp/bpfopt /artifacts/rust/usr-local-bin/; \

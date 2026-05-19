@@ -3,7 +3,7 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 
-.PHONY: apps apps-x86 apps-arm64 cilium-x86 cilium-arm64 tetragon-x86 tetragon-arm64 otel-x86 otel-arm64 tracee-x86 tracee-arm64 bcc-x86 bcc-arm64 bpftrace-x86 bpftrace-arm64
+.PHONY: apps apps-x86 apps-arm64 cilium-x86 cilium-arm64 tetragon-x86 tetragon-arm64 otel-x86 otel-arm64 tracee-x86 tracee-arm64 bcc-x86 bcc-arm64 bpftrace-x86 bpftrace-arm64 katran-x86 katran-arm64 bpftool-x86 bpftool-arm64
 
 ROOT       := $(abspath $(CURDIR)/..)
 BUILD      := $(CURDIR)/build
@@ -24,7 +24,13 @@ OTEL       := $(CURDIR)/repos/opentelemetry-ebpf-profiler
 TRACEE     := $(CURDIR)/repos/tracee
 BCC        := $(CURDIR)/repos/bcc
 BPFTRACE   := $(CURDIR)/repos/bpftrace
+KATRAN     := $(CURDIR)/repos/katran
+BPFTOOL    := $(CURDIR)/linux-framework/tools/bpf/bpftool
 GO_DYNAMIC_LDFLAGS := -linkmode external
+KATRAN_BPF_OBJS := balancer.bpf.o healthchecking_ipip.bpf.o healthchecking.bpf.o xdp_root.bpf.o
+KATRAN_BPF_DEPS := $(wildcard $(KATRAN)/katran/lib/bpf/*.h $(KATRAN)/katran/lib/linux_includes/*.h)
+KATRAN_BPF_CC = "$(CLANG)" -I"$(KATRAN)" -I"$(KATRAN)/katran/lib/linux_includes" -DDEBUG -D__KERNEL__ -Wno-unused-value -Wno-pointer-sign -Wno-compare-distinct-pointer-types -O2 -emit-llvm -c -g "$<" -o - | "$(LLC)" -march=bpf -filetype=obj -o "$@"
+BPFTOOL_FLAGS := VMLINUX_BTF= feature-libbfd=0 feature-libbfd-liberty=0 feature-libbfd-liberty-z=0
 
 ARM64_SYSROOT := $(BUILD)/sysroots/arm64-llvm15
 ARM64_DEBS    := $(BUILD)/.apt-arm64-debs
@@ -38,8 +44,8 @@ ARM64_PKGS    := llvm-15-dev:arm64 llvm-15:arm64 llvm-15-runtime:arm64 llvm-15-t
 	binutils-dev:arm64 libbinutils:arm64 libctf-nobfd0:arm64 libctf0:arm64 libsframe1:arm64 libcereal-dev
 
 apps: apps-x86 apps-arm64
-apps-x86: cilium-x86 tetragon-x86 otel-x86 tracee-x86 bcc-x86 bpftrace-x86
-apps-arm64: cilium-arm64 tetragon-arm64 otel-arm64 tracee-arm64 bcc-arm64 bpftrace-arm64
+apps-x86: cilium-x86 tetragon-x86 otel-x86 tracee-x86 bcc-x86 bpftrace-x86 katran-x86 bpftool-x86
+apps-arm64: cilium-arm64 tetragon-arm64 otel-arm64 tracee-arm64 bcc-arm64 bpftrace-arm64 katran-arm64 bpftool-arm64
 
 cilium-x86: GOARCH := amd64
 cilium-x86: GOCC := gcc
@@ -125,3 +131,21 @@ bpftrace-arm64: bcc-arm64
 	CPATH="$(BUILD)/arm64/bcc/include:$(ARM64_SYSROOT)/usr/include:$(ARM64_SYSROOT)/usr/include/aarch64-linux-gnu:$(ARM64_SYSROOT)/usr/include/elfutils" LIBRARY_PATH="$(BUILD)/arm64/bcc/lib:$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu:$(ARM64_SYSROOT)/usr/lib/llvm-15/lib" LD_LIBRARY_PATH="$(BUILD)/arm64/bcc/lib:$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu:$(ARM64_SYSROOT)/usr/lib/llvm-15/lib" cmake -S "$(BPFTRACE)" -B "$(BUILD)/.bpftrace-build/arm64" -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$(BUILD)/arm64/bpftrace" -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=aarch64 -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ -DCMAKE_FIND_ROOT_PATH="$(ARM64_SYSROOT);$(BUILD)/arm64/bcc" -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY -DCMAKE_PREFIX_PATH="$(ARM64_SYSROOT)/usr/lib/llvm-15;$(BUILD)/arm64/bcc" -DUSE_SYSTEM_BPF_BCC=ON -DBUILD_TESTING=OFF -DENABLE_MAN=OFF -DENABLE_TEST_VALIDATE_CODEGEN=OFF -DENABLE_SKB_OUTPUT=OFF -DLLVM_REQUESTED_VERSION=15 -DLLVM_DIR="$(ARM64_SYSROOT)/usr/lib/llvm-15/lib/cmake/llvm" -DClang_DIR="$(ARM64_SYSROOT)/usr/lib/llvm-15/lib/cmake/clang" -DLIBBCC_INCLUDE_DIRS="$(BUILD)/arm64/bcc/include" -DLIBBCC_LIBRARIES="$(BUILD)/arm64/bcc/lib/libbcc.so" -DLIBBCC_BPF_LIBRARIES="$(BUILD)/arm64/bcc/lib/libbcc_bpf.so" -DLIBBCC_LOADER_LIBRARY_STATIC="$(BUILD)/arm64/bcc/lib/libbcc-loader-static.a" -DLIBBPF_INCLUDE_DIRS="$(ARM64_SYSROOT)/usr/include" -DLIBBPF_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libbpf.so" -DLIBCEREAL_INCLUDE_DIRS="$(ARM64_SYSROOT)/usr/include" -DLIBELF_INCLUDE_DIRS="$(ARM64_SYSROOT)/usr/include" -DLIBELF_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libelf.so" -DLIBDW_INCLUDE_DIRS="$(ARM64_SYSROOT)/usr/include/elfutils" -DLIBDW_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libdw.so" -DLIBBFD_INCLUDE_DIRS="$(ARM64_SYSROOT)/usr/include" -DLIBBFD_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libbfd.so" -DLIBOPCODES_INCLUDE_DIRS="$(ARM64_SYSROOT)/usr/include" -DLIBOPCODES_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libopcodes.so" -DZLIB_LIBRARY="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libz.so" -DZLIB_INCLUDE_DIR="$(ARM64_SYSROOT)/usr/include" -DFFI_INCLUDE_DIR="$(ARM64_SYSROOT)/usr/include/aarch64-linux-gnu" -DFFI_LIBRARY_DIR="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu" -DFFI_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libffi.so" -DTerminfo_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libtinfo.so" -DCMAKE_CXX_FLAGS='-I$(ARM64_SYSROOT)/usr/lib/llvm-15/include'
 	cmake --build "$(BUILD)/.bpftrace-build/arm64" -j"$(JOBS)"
 	cmake --install "$(BUILD)/.bpftrace-build/arm64"
+
+katran-x86: $(addprefix $(BUILD)/x86/katran/bpf/,$(KATRAN_BPF_OBJS))
+katran-arm64: $(addprefix $(BUILD)/arm64/katran/bpf/,$(KATRAN_BPF_OBJS))
+$(BUILD)/x86/katran/bpf/%.bpf.o: $(KATRAN)/katran/lib/bpf/%.c $(KATRAN_BPF_DEPS)
+	install -d "$(dir $@)"
+	$(KATRAN_BPF_CC)
+
+$(BUILD)/arm64/katran/bpf/%.bpf.o: $(KATRAN)/katran/lib/bpf/%.c $(KATRAN_BPF_DEPS)
+	install -d "$(dir $@)"
+	$(KATRAN_BPF_CC)
+
+bpftool-x86: BPFTOOL_LLVM := 1
+bpftool-arm64: BPFTOOL_LLVM := 0
+bpftool-arm64: BPFTOOL_CROSS := ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- EXTRA_LDFLAGS="-L/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,/usr/lib/aarch64-linux-gnu"
+bpftool-x86 bpftool-arm64: bpftool-%:
+	install -d "$(BUILD)/.bpftool/$*" "$(BUILD)/$*/bpftool/bin"
+	$(MAKE) -C "$(BPFTOOL)" OUTPUT="$(BUILD)/.bpftool/$*/" $(BPFTOOL_FLAGS) feature-llvm="$(BPFTOOL_LLVM)" $(BPFTOOL_CROSS) -j"$(JOBS)"
+	install -m 0755 "$(BUILD)/.bpftool/$*/bpftool" "$(BUILD)/$*/bpftool/bin/bpftool"
