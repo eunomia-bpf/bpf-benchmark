@@ -1,0 +1,292 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 6355314,
+        "run_time_ns_delta": 748574700,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "config": {
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 10.038604370000002,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 9  udp_src_max: 9  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags:\nCurrent:\n     pkts-sofar: 6355314  errors: 0\n     started: 153350146us  stopped: 163264690us idle: 0us\n     seq_num: 6355315  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 9\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 9914544(c9914544+d0) usec, 6355314 (64byte,-1frags)\n  641009pps 328Mb/sec (328196608bps) errors: 0",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 6136583,
+        "run_time_ns_delta": 729879507,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "config": {
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 10.040200187999972,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 9  udp_src_max: 9  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags:\nCurrent:\n     pkts-sofar: 6136583  errors: 0\n     started: 856450389us  stopped: 866364893us idle: 0us\n     seq_num: 6136584  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 9\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 9914504(c9914504+d0) usec, 6136583 (64byte,-1frags)\n  618950pps 316Mb/sec (316902400bps) errors: 0",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "9": {
+        "error_message": "shim socket /var/run/bpfrejit/shim-2058.sock returned invalid JSON: Unterminated string starting at: line 1 column 2070758483 (char 2070758482): {\"status\":\"ok\",\"per_program\":{\"9\":{\"prog_id\":9,\"passes\":[{\"step\":{\"name\":\"noop\"},\"status\":\"error\",\"bpfopt_ms\":39,\"rejit_syscall_ms\":300,\"failure_kind\":\"rejit\",\"error\":\"64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\\n\\nfrom 178 to 1531: safe\\nframe 0: propagating r8\\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \\nmark_preci",
+        "passes": [
+          {
+            "bpfopt_summary": {},
+            "error": "shim socket /var/run/bpfrejit/shim-2058.sock returned invalid JSON: Unterminated string starting at: line 1 column 2070758483 (char 2070758482): {\"status\":\"ok\",\"per_program\":{\"9\":{\"prog_id\":9,\"passes\":[{\"step\":{\"name\":\"noop\"},\"status\":\"error\",\"bpfopt_ms\":39,\"rejit_syscall_ms\":300,\"failure_kind\":\"rejit\",\"error\":\"64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\\n\\nfrom 178 to 1531: safe\\nframe 0: propagating r8\\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \\nmark_preci",
+            "status": "error",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {},
+            "error": "shim socket /var/run/bpfrejit/shim-2058.sock returned invalid JSON: Unterminated string starting at: line 1 column 2070758483 (char 2070758482): {\"status\":\"ok\",\"per_program\":{\"9\":{\"prog_id\":9,\"passes\":[{\"step\":{\"name\":\"noop\"},\"status\":\"error\",\"bpfopt_ms\":39,\"rejit_syscall_ms\":300,\"failure_kind\":\"rejit\",\"error\":\"64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\\n\\nfrom 178 to 1531: safe\\nframe 0: propagating r8\\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \\nmark_preci",
+            "status": "error",
+            "step": {
+              "command": "OVERLAY_DIR=/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/map_inline/overlays/katran; CH=; RE=; SI=; VIP=; for f in ${MAP_VALUES}/map-*.show.json; do n=$(jq -r .name \"$f\"); i=$(jq -r .id \"$f\"); case \"$n\" in ch_rings) CH=$i ;; reals) RE=$i ;; server_id_map) SI=$i ;; vip_map) VIP=$i ;; esac; done; VIP_TCP=0a6401010000000000000000000000001f900600; VIP_UDP=0a6401010000000000000000000000001f901100; VIP_DUMP=${MAP_VALUES}/map-$VIP.dump.json; if jq -e --arg key \"$VIP_TCP\" 'any(.[]?; ((.key // []) | map(sub(\"^0x\"; \"\") | ascii_downcase) | join(\"\")) == $key)' \"$VIP_DUMP\" >/dev/null; then VIP_KEY=$VIP_TCP; elif jq -e --arg key \"$VIP_UDP\" 'any(.[]?; ((.key // []) | map(sub(\"^0x\"; \"\") | ascii_downcase) | join(\"\")) == $key)' \"$VIP_DUMP\" >/dev/null; then VIP_KEY=$VIP_UDP; else echo \"katran map_inline: neither TCP nor UDP benchmark VIP key is present in $VIP_DUMP\" >&2; exit 1; fi; jq -n --arg c \"$CH\" --arg r \"$RE\" --arg s \"$SI\" --slurpfile co \"$OVERLAY_DIR/ch_rings.json\" --slurpfile ro \"$OVERLAY_DIR/reals.json\" --slurpfile so \"$OVERLAY_DIR/server_id_map.json\" '($c | if . == \"\" then {} else {(.): $co[0]} end) + ($r | if . == \"\" then {} else {(.): $ro[0]} end) + ($s | if . == \"\" then {} else {(.): $so[0]} end)' > ${MAP_VALUES}/overlays.json && timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --inline-hint=ctl_array:!00000000 --inline-hint=vip_map:!$VIP_KEY --inline-hint=ch_rings:!00000000 --inline-hint=reals:!01000000 --inline-hint=server_id_map:!00000000 # lpm_src_v4/v6 hints commented: katran is built without # -DLPM_SRC_LOOKUP, so these maps are guarded out of the program # by `#ifdef LPM_SRC_LOOKUP` in balancer_maps.h. bpfopt fail-fasts # on hint anchor not in metadata (correct: catches typos and # mis-applied hints early). Uncomment if a future build turns on # source-IP routing. # --inline-hint=lpm_src_v4:!00000000 # --inline-hint=lpm_src_v6:!00000000 # lru_mapping/global_lru_maps outer-only hints commented: katran # benchmark uses F_LRU_BYPASS + no `-forwarding_cores`, so the outer # ARRAY_OF_MAPS stays empty (every slot ENOENT). #265 root-caused this: # `attachLrus()` iterates empty forwardingCores_ \u2192 zero update_elem. # bpfopt fail-fasts when hinted outer key has no live inner map # (correct: hint claims something kernel snapshot disproves). # Uncomment only if benchmark configures forwarding cores OR an # alternative test deploys populated map-in-map. # --inline-hint=lru_mapping:!00000000 # --inline-hint=global_lru_maps:!00000000",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_summary": {},
+            "error": "shim socket /var/run/bpfrejit/shim-2058.sock returned invalid JSON: Unterminated string starting at: line 1 column 2070758483 (char 2070758482): {\"status\":\"ok\",\"per_program\":{\"9\":{\"prog_id\":9,\"passes\":[{\"step\":{\"name\":\"noop\"},\"status\":\"error\",\"bpfopt_ms\":39,\"rejit_syscall_ms\":300,\"failure_kind\":\"rejit\",\"error\":\"64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\\n\\nfrom 178 to 1531: safe\\nframe 0: propagating r8\\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \\nmark_preci",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET}",
+              "log_level": 1,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_summary": {},
+            "error": "shim socket /var/run/bpfrejit/shim-2058.sock returned invalid JSON: Unterminated string starting at: line 1 column 2070758483 (char 2070758482): {\"status\":\"ok\",\"per_program\":{\"9\":{\"prog_id\":9,\"passes\":[{\"step\":{\"name\":\"noop\"},\"status\":\"error\",\"bpfopt_ms\":39,\"rejit_syscall_ms\":300,\"failure_kind\":\"rejit\",\"error\":\"64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\\n\\nfrom 178 to 1531: safe\\nframe 0: propagating r8\\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \\nmark_preci",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_summary": {},
+            "error": "shim socket /var/run/bpfrejit/shim-2058.sock returned invalid JSON: Unterminated string starting at: line 1 column 2070758483 (char 2070758482): {\"status\":\"ok\",\"per_program\":{\"9\":{\"prog_id\":9,\"passes\":[{\"step\":{\"name\":\"noop\"},\"status\":\"error\",\"bpfopt_ms\":39,\"rejit_syscall_ms\":300,\"failure_kind\":\"rejit\",\"error\":\"64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\\n\\nfrom 178 to 1531: safe\\nframe 0: propagating r8\\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \\nmark_preci",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_summary": {},
+            "error": "shim socket /var/run/bpfrejit/shim-2058.sock returned invalid JSON: Unterminated string starting at: line 1 column 2070758483 (char 2070758482): {\"status\":\"ok\",\"per_program\":{\"9\":{\"prog_id\":9,\"passes\":[{\"step\":{\"name\":\"noop\"},\"status\":\"error\",\"bpfopt_ms\":39,\"rejit_syscall_ms\":300,\"failure_kind\":\"rejit\",\"error\":\"64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\\n\\nfrom 178 to 1531: safe\\nframe 0: propagating r8\\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \\nmark_preci",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_summary": {},
+            "error": "shim socket /var/run/bpfrejit/shim-2058.sock returned invalid JSON: Unterminated string starting at: line 1 column 2070758483 (char 2070758482): {\"status\":\"ok\",\"per_program\":{\"9\":{\"prog_id\":9,\"passes\":[{\"step\":{\"name\":\"noop\"},\"status\":\"error\",\"bpfopt_ms\":39,\"rejit_syscall_ms\":300,\"failure_kind\":\"rejit\",\"error\":\"64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\\n\\nfrom 178 to 1531: safe\\nframe 0: propagating r8\\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \\nmark_preci",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_summary": {},
+            "error": "shim socket /var/run/bpfrejit/shim-2058.sock returned invalid JSON: Unterminated string starting at: line 1 column 2070758483 (char 2070758482): {\"status\":\"ok\",\"per_program\":{\"9\":{\"prog_id\":9,\"passes\":[{\"step\":{\"name\":\"noop\"},\"status\":\"error\",\"bpfopt_ms\":39,\"rejit_syscall_ms\":300,\"failure_kind\":\"rejit\",\"error\":\"64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\\n\\nfrom 178 to 1531: safe\\nframe 0: propagating r8\\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \\nmark_preci",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_summary": {},
+            "error": "shim socket /var/run/bpfrejit/shim-2058.sock returned invalid JSON: Unterminated string starting at: line 1 column 2070758483 (char 2070758482): {\"status\":\"ok\",\"per_program\":{\"9\":{\"prog_id\":9,\"passes\":[{\"step\":{\"name\":\"noop\"},\"status\":\"error\",\"bpfopt_ms\":39,\"rejit_syscall_ms\":300,\"failure_kind\":\"rejit\",\"error\":\"64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\\n\\nfrom 178 to 1531: safe\\nframe 0: propagating r8\\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \\nmark_preci",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "lea"
+            }
+          },
+          {
+            "bpfopt_summary": {},
+            "error": "shim socket /var/run/bpfrejit/shim-2058.sock returned invalid JSON: Unterminated string starting at: line 1 column 2070758483 (char 2070758482): {\"status\":\"ok\",\"per_program\":{\"9\":{\"prog_id\":9,\"passes\":[{\"step\":{\"name\":\"noop\"},\"status\":\"error\",\"bpfopt_ms\":39,\"rejit_syscall_ms\":300,\"failure_kind\":\"rejit\",\"error\":\"64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\\n\\nfrom 178 to 1531: safe\\nframe 0: propagating r8\\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \\nmark_preci",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass ccmp --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "ccmp"
+            }
+          },
+          {
+            "bpfopt_summary": {},
+            "error": "shim socket /var/run/bpfrejit/shim-2058.sock returned invalid JSON: Unterminated string starting at: line 1 column 2070758483 (char 2070758482): {\"status\":\"ok\",\"per_program\":{\"9\":{\"prog_id\":9,\"passes\":[{\"step\":{\"name\":\"noop\"},\"status\":\"error\",\"bpfopt_ms\":39,\"rejit_syscall_ms\":300,\"failure_kind\":\"rejit\",\"error\":\"64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\\n\\nfrom 178 to 1531: safe\\nframe 0: propagating r8\\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \\nmark_preci",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_summary": {},
+            "error": "shim socket /var/run/bpfrejit/shim-2058.sock returned invalid JSON: Unterminated string starting at: line 1 column 2070758483 (char 2070758482): {\"status\":\"ok\",\"per_program\":{\"9\":{\"prog_id\":9,\"passes\":[{\"step\":{\"name\":\"noop\"},\"status\":\"error\",\"bpfopt_ms\":39,\"rejit_syscall_ms\":300,\"failure_kind\":\"rejit\",\"error\":\"64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\\n\\nfrom 178 to 1531: safe\\nframe 0: propagating r8\\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \\nmark_preci",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          },
+          {
+            "bpfopt_summary": {},
+            "error": "shim socket /var/run/bpfrejit/shim-2058.sock returned invalid JSON: Unterminated string starting at: line 1 column 2070758483 (char 2070758482): {\"status\":\"ok\",\"per_program\":{\"9\":{\"prog_id\":9,\"passes\":[{\"step\":{\"name\":\"noop\"},\"status\":\"error\",\"bpfopt_ms\":39,\"rejit_syscall_ms\":300,\"failure_kind\":\"rejit\",\"error\":\"64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\\n\\nfrom 178 to 1531: safe\\nframe 0: propagating r8\\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \\nmark_preci",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_summary": {},
+            "error": "shim socket /var/run/bpfrejit/shim-2058.sock returned invalid JSON: Unterminated string starting at: line 1 column 2070758483 (char 2070758482): {\"status\":\"ok\",\"per_program\":{\"9\":{\"prog_id\":9,\"passes\":[{\"step\":{\"name\":\"noop\"},\"status\":\"error\",\"bpfopt_ms\":39,\"rejit_syscall_ms\":300,\"failure_kind\":\"rejit\",\"error\":\"64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\\n\\nfrom 178 to 1531: safe\\nframe 0: propagating r8\\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \\nmark_preci",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass bounds_check_merge --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_summary": {},
+            "error": "shim socket /var/run/bpfrejit/shim-2058.sock returned invalid JSON: Unterminated string starting at: line 1 column 2070758483 (char 2070758482): {\"status\":\"ok\",\"per_program\":{\"9\":{\"prog_id\":9,\"passes\":[{\"step\":{\"name\":\"noop\"},\"status\":\"error\",\"bpfopt_ms\":39,\"rejit_syscall_ms\":300,\"failure_kind\":\"rejit\",\"error\":\"64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\\n\\nfrom 178 to 1531: safe\\nframe 0: propagating r8\\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \\nmark_preci",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass skb_load_bytes_spec --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_summary": {},
+            "error": "shim socket /var/run/bpfrejit/shim-2058.sock returned invalid JSON: Unterminated string starting at: line 1 column 2070758483 (char 2070758482): {\"status\":\"ok\",\"per_program\":{\"9\":{\"prog_id\":9,\"passes\":[{\"step\":{\"name\":\"noop\"},\"status\":\"error\",\"bpfopt_ms\":39,\"rejit_syscall_ms\":300,\"failure_kind\":\"rejit\",\"error\":\"64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\\n\\nfrom 178 to 1531: safe\\nframe 0: propagating r8\\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \\nmark_preci",
+            "status": "error",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_summary": {},
+            "error": "shim socket /var/run/bpfrejit/shim-2058.sock returned invalid JSON: Unterminated string starting at: line 1 column 2070758483 (char 2070758482): {\"status\":\"ok\",\"per_program\":{\"9\":{\"prog_id\":9,\"passes\":[{\"step\":{\"name\":\"noop\"},\"status\":\"error\",\"bpfopt_ms\":39,\"rejit_syscall_ms\":300,\"failure_kind\":\"rejit\",\"error\":\"64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\\n\\nfrom 178 to 1531: safe\\nframe 0: propagating r8\\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \\nmark_preci",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET}",
+              "log_level": 1,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_summary": {},
+            "error": "shim socket /var/run/bpfrejit/shim-2058.sock returned invalid JSON: Unterminated string starting at: line 1 column 2070758483 (char 2070758482): {\"status\":\"ok\",\"per_program\":{\"9\":{\"prog_id\":9,\"passes\":[{\"step\":{\"name\":\"noop\"},\"status\":\"error\",\"bpfopt_ms\":39,\"rejit_syscall_ms\":300,\"failure_kind\":\"rejit\",\"error\":\"64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\\n\\nfrom 178 to 1531: safe\\nframe 0: propagating r8\\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \\nmark_preci",
+            "status": "error",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          }
+        ],
+        "prog_id": 9,
+        "program": {
+          "final_insn_count": 0,
+          "orig_insn_count": 0,
+          "prog_id": 9,
+          "prog_name": "balancer_ingress",
+          "prog_type": 0
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_pktgen",
+  "status": "ok"
+}

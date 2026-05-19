@@ -1,0 +1,327 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 6114932,
+        "run_time_ns_delta": 743550417,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "config": {
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 10.036236032000005,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 9  udp_src_max: 9  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags:\nCurrent:\n     pkts-sofar: 6114932  errors: 0\n     started: 141180043us  stopped: 151097307us idle: 0us\n     seq_num: 6114933  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 9\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 9917263(c9917263+d0) usec, 6114932 (64byte,-1frags)\n  616594pps 315Mb/sec (315696128bps) errors: 0",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 6396349,
+        "run_time_ns_delta": 770475900,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "config": {
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 10.03725020500002,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 9  udp_src_max: 9  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags:\nCurrent:\n     pkts-sofar: 6396349  errors: 0\n     started: 356380110us  stopped: 366296255us idle: 0us\n     seq_num: 6396350  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 9\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 9916145(c9916145+d0) usec, 6396349 (64byte,-1frags)\n  645043pps 330Mb/sec (330262016bps) errors: 0",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "9": {
+        "passes": [
+          {
+            "bpfopt_ms": 40,
+            "bpfopt_summary": {},
+            "error": "64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\n\nfrom 178 to 1531: safe\nframe 0: propagating r8\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \nmark_precise: frame0: regs=r8 stack= before 168: (2d) if r3 > r2 goto pc+1362\nmark_precise: frame0: regs=r8 stack= before 167: (7b) *(u64 *)(r10 -144) = r2\nmark_precise: frame0: regs=r8 stack= before 166: (07) r3 += 54\nmark_precise: frame0: regs=r8 stack= before 165: (bf) r3 = r7\nmark_precise: frame0: regs=r8 stack= before 164: (63) *(u32 *)(r10 -120) = r1\nmark_precise: frame0: regs=r8 stack= before 163: (7b) *(u64 *)(r10 -112) = r1\nmark_precise: frame0: regs=r8 stack= before 162: (7b) *(u64 *)(r10 -104) = r1\nmark_precise: frame0: regs=r8 stack= before 161: (63) *(u32 *)(r10 -96) = r1\nmark_precise: frame0: regs=r8 stack= before 160: (7b) *(u64 *)(r10 -88) = r1\nmark_precise: frame0: regs=r8 stack= before 159: (7b) *(u64 *)(r10 -80) = r1\nmark_precise: frame0: regs=r8 stack= before 158: (7b) *(u64 *)(r10 -72) = r1\nmark_precise: frame0: regs=r8 stack= before 157: (7b) *(u64 *)(r10 -64) = r1\nmark_precise: frame0: regs=r8 stack= before 156: (7b) *(u64 *)(r10 -56) = r1\nmark_precise: frame0: regs=r8 stack= before 155: (7b) *(u64 *)(r10 -48) = r1\nmark_precise: frame0: regs=r8 stack= before 154: (b7) r1 = 0\nmark_precise: frame0: regs=r8 stack= before 153: (61) r7 = *(u32 *)(r6 +0)\nmark_precise: frame0: regs=r8 stack= before 152: (61) r2 = *(u32 *)(r6 +4)\nmark_precise: frame0: regs=r8 stack= before 27: (15) if r1 == 0xdd86 goto pc+124\nmark_precise: frame0: regs=r8 stack= before 26: (b7) r8 = 1\n\nfrom 168 to 1531: safe\n\nfrom 14 to 1560: safe\n\nfrom 6 to 1560: safe\nprocessed 67939 insns (limit 1000000) max_states_per_insn 20 total_states 3993 peak_states 1206 mark_read 0\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 294,
+            "status": "error",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 63,
+            "bpfopt_summary": {},
+            "error": "error: failed to read verifier states from /tmp/work_9/verifier_log_initial.log: No such file or directory (os error 2)\n",
+            "exit_code": 1,
+            "failure_kind": "bpfopt",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {},
+            "error": "error: failed to read verifier states from /tmp/work_9/verifier_log_initial.log: No such file or directory (os error 2)\n",
+            "exit_code": 1,
+            "failure_kind": "bpfopt",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 101,
+            "bpfopt_summary": {},
+            "error": "64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\n\nfrom 178 to 1526: safe\nframe 0: propagating r8\nmark_precise: frame0: last_idx 1526 first_idx 14 subseq_idx -1 \nmark_precise: frame0: regs=r8 stack= before 168: (2d) if r3 > r2 goto pc+1357\nmark_precise: frame0: regs=r8 stack= before 167: (7b) *(u64 *)(r10 -144) = r2\nmark_precise: frame0: regs=r8 stack= before 166: (07) r3 += 54\nmark_precise: frame0: regs=r8 stack= before 165: (bf) r3 = r7\nmark_precise: frame0: regs=r8 stack= before 164: (63) *(u32 *)(r10 -120) = r1\nmark_precise: frame0: regs=r8 stack= before 163: (7b) *(u64 *)(r10 -112) = r1\nmark_precise: frame0: regs=r8 stack= before 162: (7b) *(u64 *)(r10 -104) = r1\nmark_precise: frame0: regs=r8 stack= before 161: (63) *(u32 *)(r10 -96) = r1\nmark_precise: frame0: regs=r8 stack= before 160: (7b) *(u64 *)(r10 -88) = r1\nmark_precise: frame0: regs=r8 stack= before 159: (7b) *(u64 *)(r10 -80) = r1\nmark_precise: frame0: regs=r8 stack= before 158: (7b) *(u64 *)(r10 -72) = r1\nmark_precise: frame0: regs=r8 stack= before 157: (7b) *(u64 *)(r10 -64) = r1\nmark_precise: frame0: regs=r8 stack= before 156: (7b) *(u64 *)(r10 -56) = r1\nmark_precise: frame0: regs=r8 stack= before 155: (7b) *(u64 *)(r10 -48) = r1\nmark_precise: frame0: regs=r8 stack= before 154: (b7) r1 = 0\nmark_precise: frame0: regs=r8 stack= before 153: (61) r7 = *(u32 *)(r6 +0)\nmark_precise: frame0: regs=r8 stack= before 152: (61) r2 = *(u32 *)(r6 +4)\nmark_precise: frame0: regs=r8 stack= before 27: (15) if r1 == 0xdd86 goto pc+124\nmark_precise: frame0: regs=r8 stack= before 26: (b7) r8 = 1\n\nfrom 168 to 1526: safe\n\nfrom 14 to 1555: safe\n\nfrom 6 to 1555: safe\nprocessed 67912 insns (limit 1000000) max_states_per_insn 20 total_states 3993 peak_states 1206 mark_read 0\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 295,
+            "status": "error",
+            "step": {
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_ms": 67,
+            "bpfopt_summary": {},
+            "error": "; 0xffffffff))\n1972: (57) r1 &= 8                    ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=8,var_off=(0x0; 0x8))\n1973: (55) if r1 != 0x0 goto pc+2     ; R1=0\n1974: (61) r1 = *(u32 *)(r10 -88)     ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-88=scalar()\n1975: (05) goto pc+5\n1981: (61) r2 = *(u32 *)(r10 -56)     ; R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-56=mmmm000\n1982: (85) call pc+546\ncaller:\n R6=ctx() R7=map_value(map=stats,ks=4,vs=16) R8=scalar(id=37) R9=scalar() R10=fp0 fp-8=????514 fp-24=0 fp-32=0 fp-48=mmmmscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-56=mmmm000 fp-64=mmmmmmmm fp-72=mmmmmmmm fp-80=scalar() fp-88=scalar() fp-96=????mm0 fp-104=0 fp-112=mmmmscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-120=mmmmmmmm fp-128=mmmmscalar(smin=smin32=0,smax=umax=smax32=umax32=7,var_off=(0x0; 0x7)) fp-136=mmmm???? fp-144=pkt_end() fp-152=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) fp-160=map_value(map=vip_map,ks=20,vs=8) fp-168=map_ptr(map=fallback_cache,ks=40,vs=16) fp-176=map_value(map=stats,ks=4,vs=16) fp-184=0 fp-192=0\ncallee:\n frame1: R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0\n2529: frame1: R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0\n2529: (07) r2 += -525483785           ; frame1: R2=scalar(smin=0xffffffffe0adc0f7,smax=0xe0adc0f6)\n2530: (18) r3 = 0xfffc0000            ; frame1: R3=0xfffc0000\n2532: (7b) *(u64 *)(r10 -376) = r6\nR6 !read_ok\nprocessed 514 insns (limit 1000000) max_states_per_insn 0 total_states 38 peak_states 38 mark_read 0\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 3,
+            "status": "error",
+            "step": {
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_ms": 102,
+            "bpfopt_summary": {},
+            "error": "func#0 @0\nfunc#1 @2346\nfunc#2 @2494\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_ms": 35,
+            "bpfopt_summary": {},
+            "error": "64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\n\nfrom 178 to 1531: safe\nframe 0: propagating r8\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \nmark_precise: frame0: regs=r8 stack= before 168: (2d) if r3 > r2 goto pc+1362\nmark_precise: frame0: regs=r8 stack= before 167: (7b) *(u64 *)(r10 -144) = r2\nmark_precise: frame0: regs=r8 stack= before 166: (07) r3 += 54\nmark_precise: frame0: regs=r8 stack= before 165: (bf) r3 = r7\nmark_precise: frame0: regs=r8 stack= before 164: (63) *(u32 *)(r10 -120) = r1\nmark_precise: frame0: regs=r8 stack= before 163: (7b) *(u64 *)(r10 -112) = r1\nmark_precise: frame0: regs=r8 stack= before 162: (7b) *(u64 *)(r10 -104) = r1\nmark_precise: frame0: regs=r8 stack= before 161: (63) *(u32 *)(r10 -96) = r1\nmark_precise: frame0: regs=r8 stack= before 160: (7b) *(u64 *)(r10 -88) = r1\nmark_precise: frame0: regs=r8 stack= before 159: (7b) *(u64 *)(r10 -80) = r1\nmark_precise: frame0: regs=r8 stack= before 158: (7b) *(u64 *)(r10 -72) = r1\nmark_precise: frame0: regs=r8 stack= before 157: (7b) *(u64 *)(r10 -64) = r1\nmark_precise: frame0: regs=r8 stack= before 156: (7b) *(u64 *)(r10 -56) = r1\nmark_precise: frame0: regs=r8 stack= before 155: (7b) *(u64 *)(r10 -48) = r1\nmark_precise: frame0: regs=r8 stack= before 154: (b7) r1 = 0\nmark_precise: frame0: regs=r8 stack= before 153: (61) r7 = *(u32 *)(r6 +0)\nmark_precise: frame0: regs=r8 stack= before 152: (61) r2 = *(u32 *)(r6 +4)\nmark_precise: frame0: regs=r8 stack= before 27: (15) if r1 == 0xdd86 goto pc+124\nmark_precise: frame0: regs=r8 stack= before 26: (b7) r8 = 1\n\nfrom 168 to 1531: safe\n\nfrom 14 to 1560: safe\n\nfrom 6 to 1560: safe\nprocessed 67939 insns (limit 1000000) max_states_per_insn 20 total_states 3993 peak_states 1206 mark_read 0\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 294,
+            "status": "error",
+            "step": {
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_ms": 40,
+            "bpfopt_summary": {},
+            "error": "func#0 @0\nfunc#1 @2330\nfunc#2 @2478\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_ms": 118,
+            "bpfopt_summary": {},
+            "error": "func#0 @0\nfunc#1 @2318\nfunc#2 @2466\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "lea"
+            }
+          },
+          {
+            "bpfopt_ms": 35,
+            "bpfopt_summary": {},
+            "error": "64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\n\nfrom 178 to 1531: safe\nframe 0: propagating r8\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \nmark_precise: frame0: regs=r8 stack= before 168: (2d) if r3 > r2 goto pc+1362\nmark_precise: frame0: regs=r8 stack= before 167: (7b) *(u64 *)(r10 -144) = r2\nmark_precise: frame0: regs=r8 stack= before 166: (07) r3 += 54\nmark_precise: frame0: regs=r8 stack= before 165: (bf) r3 = r7\nmark_precise: frame0: regs=r8 stack= before 164: (63) *(u32 *)(r10 -120) = r1\nmark_precise: frame0: regs=r8 stack= before 163: (7b) *(u64 *)(r10 -112) = r1\nmark_precise: frame0: regs=r8 stack= before 162: (7b) *(u64 *)(r10 -104) = r1\nmark_precise: frame0: regs=r8 stack= before 161: (63) *(u32 *)(r10 -96) = r1\nmark_precise: frame0: regs=r8 stack= before 160: (7b) *(u64 *)(r10 -88) = r1\nmark_precise: frame0: regs=r8 stack= before 159: (7b) *(u64 *)(r10 -80) = r1\nmark_precise: frame0: regs=r8 stack= before 158: (7b) *(u64 *)(r10 -72) = r1\nmark_precise: frame0: regs=r8 stack= before 157: (7b) *(u64 *)(r10 -64) = r1\nmark_precise: frame0: regs=r8 stack= before 156: (7b) *(u64 *)(r10 -56) = r1\nmark_precise: frame0: regs=r8 stack= before 155: (7b) *(u64 *)(r10 -48) = r1\nmark_precise: frame0: regs=r8 stack= before 154: (b7) r1 = 0\nmark_precise: frame0: regs=r8 stack= before 153: (61) r7 = *(u32 *)(r6 +0)\nmark_precise: frame0: regs=r8 stack= before 152: (61) r2 = *(u32 *)(r6 +4)\nmark_precise: frame0: regs=r8 stack= before 27: (15) if r1 == 0xdd86 goto pc+124\nmark_precise: frame0: regs=r8 stack= before 26: (b7) r8 = 1\n\nfrom 168 to 1531: safe\n\nfrom 14 to 1560: safe\n\nfrom 6 to 1560: safe\nprocessed 67939 insns (limit 1000000) max_states_per_insn 20 total_states 3993 peak_states 1206 mark_read 0\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 296,
+            "status": "error",
+            "step": {
+              "name": "ccmp"
+            }
+          },
+          {
+            "bpfopt_ms": 67,
+            "bpfopt_summary": {},
+            "error": "64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\n\nfrom 178 to 1531: safe\nframe 0: propagating r8\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \nmark_precise: frame0: regs=r8 stack= before 168: (2d) if r3 > r2 goto pc+1362\nmark_precise: frame0: regs=r8 stack= before 167: (7b) *(u64 *)(r10 -144) = r2\nmark_precise: frame0: regs=r8 stack= before 166: (07) r3 += 54\nmark_precise: frame0: regs=r8 stack= before 165: (bf) r3 = r7\nmark_precise: frame0: regs=r8 stack= before 164: (63) *(u32 *)(r10 -120) = r1\nmark_precise: frame0: regs=r8 stack= before 163: (7b) *(u64 *)(r10 -112) = r1\nmark_precise: frame0: regs=r8 stack= before 162: (7b) *(u64 *)(r10 -104) = r1\nmark_precise: frame0: regs=r8 stack= before 161: (63) *(u32 *)(r10 -96) = r1\nmark_precise: frame0: regs=r8 stack= before 160: (7b) *(u64 *)(r10 -88) = r1\nmark_precise: frame0: regs=r8 stack= before 159: (7b) *(u64 *)(r10 -80) = r1\nmark_precise: frame0: regs=r8 stack= before 158: (7b) *(u64 *)(r10 -72) = r1\nmark_precise: frame0: regs=r8 stack= before 157: (7b) *(u64 *)(r10 -64) = r1\nmark_precise: frame0: regs=r8 stack= before 156: (7b) *(u64 *)(r10 -56) = r1\nmark_precise: frame0: regs=r8 stack= before 155: (7b) *(u64 *)(r10 -48) = r1\nmark_precise: frame0: regs=r8 stack= before 154: (b7) r1 = 0\nmark_precise: frame0: regs=r8 stack= before 153: (61) r7 = *(u32 *)(r6 +0)\nmark_precise: frame0: regs=r8 stack= before 152: (61) r2 = *(u32 *)(r6 +4)\nmark_precise: frame0: regs=r8 stack= before 27: (15) if r1 == 0xdd86 goto pc+124\nmark_precise: frame0: regs=r8 stack= before 26: (b7) r8 = 1\n\nfrom 168 to 1531: safe\n\nfrom 14 to 1560: safe\n\nfrom 6 to 1560: safe\nprocessed 67939 insns (limit 1000000) max_states_per_insn 20 total_states 3993 peak_states 1206 mark_read 0\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 294,
+            "status": "error",
+            "step": {
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_ms": 10093,
+            "bpfopt_summary": {},
+            "error": "rame0: regs=r8 stack= before 175: (2d) if r3 > r2 goto pc+1382\nmark_precise: frame0: regs=r8 stack= before 174: (7b) *(u64 *)(r10 -144) = r2\nmark_precise: frame0: regs=r8 stack= before 173: (07) r3 += 54\nmark_precise: frame0: regs=r8 stack= before 172: (bf) r3 = r7\nmark_precise: frame0: regs=r8 stack= before 171: (63) *(u32 *)(r10 -120) = r1\nmark_precise: frame0: regs=r8 stack= before 170: (7b) *(u64 *)(r10 -112) = r1\nmark_precise: frame0: regs=r8 stack= before 169: (7b) *(u64 *)(r10 -104) = r1\nmark_precise: frame0: regs=r8 stack= before 168: (63) *(u32 *)(r10 -96) = r1\nmark_precise: frame0: regs=r8 stack= before 167: (7b) *(u64 *)(r10 -88) = r1\nmark_precise: frame0: regs=r8 stack= before 166: (7b) *(u64 *)(r10 -80) = r1\nmark_precise: frame0: regs=r8 stack= before 165: (7b) *(u64 *)(r10 -72) = r1\nmark_precise: frame0: regs=r8 stack= before 164: (7b) *(u64 *)(r10 -64) = r1\nmark_precise: frame0: regs=r8 stack= before 163: (7b) *(u64 *)(r10 -56) = r1\nmark_precise: frame0: regs=r8 stack= before 162: (7b) *(u64 *)(r10 -48) = r1\nmark_precise: frame0: regs=r8 stack= before 161: (b7) r1 = 0\nmark_precise: frame0: regs=r8 stack= before 160: (61) r7 = *(u32 *)(r6 +0)\nmark_precise: frame0: regs=r8 stack= before 159: (61) r2 = *(u32 *)(r6 +4)\nmark_precise: frame0: regs=r8 stack= before 29: (15) if r1 == 0xdd86 goto pc+129\nmark_precise: frame0: parent state regs= stack=:  R0=map_value(map=stats,ks=4,vs=16) R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=ctx() R7=1 R8=P1 R9=scalar() R10=fp0 fp-136=mmmm????\n\nfrom 175 to 1558: safe\n\nfrom 14 to 1588: safe\n\nfrom 6 to 1588: safe\nprocessed 68894 insns (limit 1000000) max_states_per_insn 20 total_states 4138 peak_states 1276 mark_read 0\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 299,
+            "status": "error",
+            "step": {
+              "name": "prefetch"
+            }
+          },
+          {
+            "bpfopt_ms": 70,
+            "bpfopt_summary": {},
+            "error": "64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\n\nfrom 172 to 1519: safe\nframe 0: propagating r8\nmark_precise: frame0: last_idx 1519 first_idx 14 subseq_idx -1 \nmark_precise: frame0: regs=r8 stack= before 162: (2d) if r3 > r2 goto pc+1356\nmark_precise: frame0: regs=r8 stack= before 161: (7b) *(u64 *)(r10 -144) = r2\nmark_precise: frame0: regs=r8 stack= before 160: (07) r3 += 54\nmark_precise: frame0: regs=r8 stack= before 159: (bf) r3 = r7\nmark_precise: frame0: regs=r8 stack= before 158: (63) *(u32 *)(r10 -120) = r1\nmark_precise: frame0: regs=r8 stack= before 157: (7b) *(u64 *)(r10 -112) = r1\nmark_precise: frame0: regs=r8 stack= before 156: (7b) *(u64 *)(r10 -104) = r1\nmark_precise: frame0: regs=r8 stack= before 155: (63) *(u32 *)(r10 -96) = r1\nmark_precise: frame0: regs=r8 stack= before 154: (7b) *(u64 *)(r10 -88) = r1\nmark_precise: frame0: regs=r8 stack= before 153: (7b) *(u64 *)(r10 -80) = r1\nmark_precise: frame0: regs=r8 stack= before 152: (7b) *(u64 *)(r10 -72) = r1\nmark_precise: frame0: regs=r8 stack= before 151: (7b) *(u64 *)(r10 -64) = r1\nmark_precise: frame0: regs=r8 stack= before 150: (7b) *(u64 *)(r10 -56) = r1\nmark_precise: frame0: regs=r8 stack= before 149: (7b) *(u64 *)(r10 -48) = r1\nmark_precise: frame0: regs=r8 stack= before 148: (b7) r1 = 0\nmark_precise: frame0: regs=r8 stack= before 147: (61) r7 = *(u32 *)(r6 +0)\nmark_precise: frame0: regs=r8 stack= before 146: (61) r2 = *(u32 *)(r6 +4)\nmark_precise: frame0: regs=r8 stack= before 27: (15) if r1 == 0xdd86 goto pc+118\nmark_precise: frame0: regs=r8 stack= before 26: (b7) r8 = 1\n\nfrom 162 to 1519: safe\n\nfrom 14 to 1548: safe\n\nfrom 6 to 1548: safe\nprocessed 67915 insns (limit 1000000) max_states_per_insn 20 total_states 3993 peak_states 1206 mark_read 0\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 295,
+            "status": "error",
+            "step": {
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 66,
+            "bpfopt_summary": {},
+            "error": "64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\n\nfrom 178 to 1531: safe\nframe 0: propagating r8\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \nmark_precise: frame0: regs=r8 stack= before 168: (2d) if r3 > r2 goto pc+1362\nmark_precise: frame0: regs=r8 stack= before 167: (7b) *(u64 *)(r10 -144) = r2\nmark_precise: frame0: regs=r8 stack= before 166: (07) r3 += 54\nmark_precise: frame0: regs=r8 stack= before 165: (bf) r3 = r7\nmark_precise: frame0: regs=r8 stack= before 164: (63) *(u32 *)(r10 -120) = r1\nmark_precise: frame0: regs=r8 stack= before 163: (7b) *(u64 *)(r10 -112) = r1\nmark_precise: frame0: regs=r8 stack= before 162: (7b) *(u64 *)(r10 -104) = r1\nmark_precise: frame0: regs=r8 stack= before 161: (63) *(u32 *)(r10 -96) = r1\nmark_precise: frame0: regs=r8 stack= before 160: (7b) *(u64 *)(r10 -88) = r1\nmark_precise: frame0: regs=r8 stack= before 159: (7b) *(u64 *)(r10 -80) = r1\nmark_precise: frame0: regs=r8 stack= before 158: (7b) *(u64 *)(r10 -72) = r1\nmark_precise: frame0: regs=r8 stack= before 157: (7b) *(u64 *)(r10 -64) = r1\nmark_precise: frame0: regs=r8 stack= before 156: (7b) *(u64 *)(r10 -56) = r1\nmark_precise: frame0: regs=r8 stack= before 155: (7b) *(u64 *)(r10 -48) = r1\nmark_precise: frame0: regs=r8 stack= before 154: (b7) r1 = 0\nmark_precise: frame0: regs=r8 stack= before 153: (61) r7 = *(u32 *)(r6 +0)\nmark_precise: frame0: regs=r8 stack= before 152: (61) r2 = *(u32 *)(r6 +4)\nmark_precise: frame0: regs=r8 stack= before 27: (15) if r1 == 0xdd86 goto pc+124\nmark_precise: frame0: regs=r8 stack= before 26: (b7) r8 = 1\n\nfrom 168 to 1531: safe\n\nfrom 14 to 1560: safe\n\nfrom 6 to 1560: safe\nprocessed 67939 insns (limit 1000000) max_states_per_insn 20 total_states 3993 peak_states 1206 mark_read 0\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 294,
+            "status": "error",
+            "step": {
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_ms": 36,
+            "bpfopt_summary": {},
+            "error": "64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\n\nfrom 178 to 1531: safe\nframe 0: propagating r8\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \nmark_precise: frame0: regs=r8 stack= before 168: (2d) if r3 > r2 goto pc+1362\nmark_precise: frame0: regs=r8 stack= before 167: (7b) *(u64 *)(r10 -144) = r2\nmark_precise: frame0: regs=r8 stack= before 166: (07) r3 += 54\nmark_precise: frame0: regs=r8 stack= before 165: (bf) r3 = r7\nmark_precise: frame0: regs=r8 stack= before 164: (63) *(u32 *)(r10 -120) = r1\nmark_precise: frame0: regs=r8 stack= before 163: (7b) *(u64 *)(r10 -112) = r1\nmark_precise: frame0: regs=r8 stack= before 162: (7b) *(u64 *)(r10 -104) = r1\nmark_precise: frame0: regs=r8 stack= before 161: (63) *(u32 *)(r10 -96) = r1\nmark_precise: frame0: regs=r8 stack= before 160: (7b) *(u64 *)(r10 -88) = r1\nmark_precise: frame0: regs=r8 stack= before 159: (7b) *(u64 *)(r10 -80) = r1\nmark_precise: frame0: regs=r8 stack= before 158: (7b) *(u64 *)(r10 -72) = r1\nmark_precise: frame0: regs=r8 stack= before 157: (7b) *(u64 *)(r10 -64) = r1\nmark_precise: frame0: regs=r8 stack= before 156: (7b) *(u64 *)(r10 -56) = r1\nmark_precise: frame0: regs=r8 stack= before 155: (7b) *(u64 *)(r10 -48) = r1\nmark_precise: frame0: regs=r8 stack= before 154: (b7) r1 = 0\nmark_precise: frame0: regs=r8 stack= before 153: (61) r7 = *(u32 *)(r6 +0)\nmark_precise: frame0: regs=r8 stack= before 152: (61) r2 = *(u32 *)(r6 +4)\nmark_precise: frame0: regs=r8 stack= before 27: (15) if r1 == 0xdd86 goto pc+124\nmark_precise: frame0: regs=r8 stack= before 26: (b7) r8 = 1\n\nfrom 168 to 1531: safe\n\nfrom 14 to 1560: safe\n\nfrom 6 to 1560: safe\nprocessed 67939 insns (limit 1000000) max_states_per_insn 20 total_states 3993 peak_states 1206 mark_read 0\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 294,
+            "status": "error",
+            "step": {
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_ms": 35,
+            "bpfopt_summary": {},
+            "error": "64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\n\nfrom 178 to 1531: safe\nframe 0: propagating r8\nmark_precise: frame0: last_idx 1531 first_idx 14 subseq_idx -1 \nmark_precise: frame0: regs=r8 stack= before 168: (2d) if r3 > r2 goto pc+1362\nmark_precise: frame0: regs=r8 stack= before 167: (7b) *(u64 *)(r10 -144) = r2\nmark_precise: frame0: regs=r8 stack= before 166: (07) r3 += 54\nmark_precise: frame0: regs=r8 stack= before 165: (bf) r3 = r7\nmark_precise: frame0: regs=r8 stack= before 164: (63) *(u32 *)(r10 -120) = r1\nmark_precise: frame0: regs=r8 stack= before 163: (7b) *(u64 *)(r10 -112) = r1\nmark_precise: frame0: regs=r8 stack= before 162: (7b) *(u64 *)(r10 -104) = r1\nmark_precise: frame0: regs=r8 stack= before 161: (63) *(u32 *)(r10 -96) = r1\nmark_precise: frame0: regs=r8 stack= before 160: (7b) *(u64 *)(r10 -88) = r1\nmark_precise: frame0: regs=r8 stack= before 159: (7b) *(u64 *)(r10 -80) = r1\nmark_precise: frame0: regs=r8 stack= before 158: (7b) *(u64 *)(r10 -72) = r1\nmark_precise: frame0: regs=r8 stack= before 157: (7b) *(u64 *)(r10 -64) = r1\nmark_precise: frame0: regs=r8 stack= before 156: (7b) *(u64 *)(r10 -56) = r1\nmark_precise: frame0: regs=r8 stack= before 155: (7b) *(u64 *)(r10 -48) = r1\nmark_precise: frame0: regs=r8 stack= before 154: (b7) r1 = 0\nmark_precise: frame0: regs=r8 stack= before 153: (61) r7 = *(u32 *)(r6 +0)\nmark_precise: frame0: regs=r8 stack= before 152: (61) r2 = *(u32 *)(r6 +4)\nmark_precise: frame0: regs=r8 stack= before 27: (15) if r1 == 0xdd86 goto pc+124\nmark_precise: frame0: regs=r8 stack= before 26: (b7) r8 = 1\n\nfrom 168 to 1531: safe\n\nfrom 14 to 1560: safe\n\nfrom 6 to 1560: safe\nprocessed 67939 insns (limit 1000000) max_states_per_insn 20 total_states 3993 peak_states 1206 mark_read 0\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 295,
+            "status": "error",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {},
+            "error": "error: failed to read verifier states from /tmp/work_9/verifier_log_initial.log: No such file or directory (os error 2)\n",
+            "exit_code": 1,
+            "failure_kind": "bpfopt",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 104,
+            "bpfopt_summary": {},
+            "error": "64=0 fp-72=0 fp-80=0 fp-88=0 fp-96=????0 fp-104=0 fp-112=0 fp-120=????0 fp-136=mmmm???? fp-144=pkt_end()\n\nfrom 178 to 1526: safe\nframe 0: propagating r8\nmark_precise: frame0: last_idx 1526 first_idx 14 subseq_idx -1 \nmark_precise: frame0: regs=r8 stack= before 168: (2d) if r3 > r2 goto pc+1357\nmark_precise: frame0: regs=r8 stack= before 167: (7b) *(u64 *)(r10 -144) = r2\nmark_precise: frame0: regs=r8 stack= before 166: (07) r3 += 54\nmark_precise: frame0: regs=r8 stack= before 165: (bf) r3 = r7\nmark_precise: frame0: regs=r8 stack= before 164: (63) *(u32 *)(r10 -120) = r1\nmark_precise: frame0: regs=r8 stack= before 163: (7b) *(u64 *)(r10 -112) = r1\nmark_precise: frame0: regs=r8 stack= before 162: (7b) *(u64 *)(r10 -104) = r1\nmark_precise: frame0: regs=r8 stack= before 161: (63) *(u32 *)(r10 -96) = r1\nmark_precise: frame0: regs=r8 stack= before 160: (7b) *(u64 *)(r10 -88) = r1\nmark_precise: frame0: regs=r8 stack= before 159: (7b) *(u64 *)(r10 -80) = r1\nmark_precise: frame0: regs=r8 stack= before 158: (7b) *(u64 *)(r10 -72) = r1\nmark_precise: frame0: regs=r8 stack= before 157: (7b) *(u64 *)(r10 -64) = r1\nmark_precise: frame0: regs=r8 stack= before 156: (7b) *(u64 *)(r10 -56) = r1\nmark_precise: frame0: regs=r8 stack= before 155: (7b) *(u64 *)(r10 -48) = r1\nmark_precise: frame0: regs=r8 stack= before 154: (b7) r1 = 0\nmark_precise: frame0: regs=r8 stack= before 153: (61) r7 = *(u32 *)(r6 +0)\nmark_precise: frame0: regs=r8 stack= before 152: (61) r2 = *(u32 *)(r6 +4)\nmark_precise: frame0: regs=r8 stack= before 27: (15) if r1 == 0xdd86 goto pc+124\nmark_precise: frame0: regs=r8 stack= before 26: (b7) r8 = 1\n\nfrom 168 to 1526: safe\n\nfrom 14 to 1555: safe\n\nfrom 6 to 1555: safe\nprocessed 67912 insns (limit 1000000) max_states_per_insn 20 total_states 3993 peak_states 1206 mark_read 0\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 296,
+            "status": "error",
+            "step": {
+              "name": "dce"
+            }
+          }
+        ],
+        "prog_id": 9,
+        "program": {
+          "final_insn_count": 2542,
+          "orig_insn_count": 2542,
+          "prog_id": 9,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_pktgen",
+  "status": "ok"
+}
