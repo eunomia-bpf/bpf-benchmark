@@ -54,7 +54,7 @@ def micro_program_root(workspace: Path, target_arch: str) -> Path:
 
 
 def stage2_program_root(workspace: Path, target_arch: str) -> Path:
-    """ebpf-vm/test/-built Stage 2 (maps + helpers) program artifacts.
+    """native-sim/test/-built Stage 2 (maps + helpers) program artifacts.
     Mirrors `micro_program_root` but under a separate sub-tree so the
     Stage 1 pure-compute build doesn't have to care about helper extern
     relocations."""

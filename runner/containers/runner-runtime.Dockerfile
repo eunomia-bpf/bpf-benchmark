@@ -316,7 +316,7 @@ COPY runner/CMakeLists.txt ./runner/CMakeLists.txt
 COPY runner/include ./runner/include
 COPY runner/src ./runner/src
 COPY micro/programs ./micro/programs
-COPY ebpf-vm/test ./ebpf-vm/test
+COPY native-sim/test ./native-sim/test
 COPY tests/unittest ./tests/unittest
 COPY tests/negative ./tests/negative
 
@@ -382,10 +382,10 @@ FROM runner-runtime-runtime-base AS runner-runtime-bpfopt-artifacts
 # target.json; daemon path doesn't use it.
 ARG BPFOPT_HOST_BIN_DIR=bpfopt/target/release
 # NATIVE_LINK_HOST_BIN is the host-built native-link binary. It lives under
-# ebpf-vm/x86/native_lab/native_link/target/release/ regardless of target
+# native-sim/x86/native_lab/native_link/target/release/ regardless of target
 # arch (native-link runs as an x86 host-side build tool inside the runtime
 # container, not on the target architecture).
-ARG NATIVE_LINK_HOST_BIN=ebpf-vm/x86/native_lab/native_link/target/release/native-link
+ARG NATIVE_LINK_HOST_BIN=native-sim/x86/native_lab/native_link/target/release/native-link
 
 COPY ${BPFOPT_HOST_BIN_DIR}/bpfopt /tmp/bpfopt
 COPY ${BPFOPT_HOST_BIN_DIR}/kinsnprober /tmp/kinsnprober

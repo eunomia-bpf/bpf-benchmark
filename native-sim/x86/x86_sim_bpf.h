@@ -316,8 +316,8 @@
 		X86_SIM_EXEC_TYPED((STATE), (OP));                           \
 	})
 
-static __always_inline int x86_sim_write_result_u64(void *data, void *data_end,
-						   __u64 value)
+static __always_inline void x86_sim_write_result_u64(void *data, void *data_end,
+					    __u64 value)
 {
 	__u8 *p = data + X86_SIM_OUTPUT_OFF;
 
@@ -330,7 +330,6 @@ static __always_inline int x86_sim_write_result_u64(void *data, void *data_end,
 	p[5] = value >> 40;
 	p[6] = value >> 48;
 	p[7] = value >> 56;
-	return 0;
 }
 
 #define X86_SIM_BEGIN_XDP(CTX)                                               \
@@ -358,8 +357,6 @@ static __always_inline int x86_sim_write_result_u64(void *data, void *data_end,
 					     (SRC), (FLAGS), (AUX), (IMM));    \
 			if (__x86_sim_step_ret == X86_SIM_DONE)              \
 				__x86_sim_ret = X86_SIM_DONE;                \
-			else if (__x86_sim_step_ret < 0)                        \
-				__x86_sim_ret = __x86_sim_step_ret;              \
 		}
 
 #define X86_SIM_STEP_OP(OP, DST, SRC, FLAGS, AUX, IMM)                      \
@@ -369,8 +366,6 @@ static __always_inline int x86_sim_write_result_u64(void *data, void *data_end,
 					     (SRC), (FLAGS), (AUX), (IMM));    \
 			if (__x86_sim_step_ret == X86_SIM_DONE)              \
 				__x86_sim_ret = X86_SIM_DONE;                \
-			else if (__x86_sim_step_ret < 0)                        \
-				__x86_sim_ret = __x86_sim_step_ret;              \
 		}
 
 #define X86_SIM_RUN_STEP(OP, DST, SRC, FLAGS, AUX, IMM)                      \
@@ -378,8 +373,6 @@ static __always_inline int x86_sim_write_result_u64(void *data, void *data_end,
 		int __x86_sim_step_ret =                                    \
 			X86_SIM_EXEC(&__x86_sim_state, (OP), (DST), (SRC),    \
 				     (FLAGS), (AUX), (IMM));                 \
-		if (__x86_sim_step_ret < 0)                                 \
-			__builtin_unreachable();                         \
 		if (__x86_sim_step_ret == X86_SIM_DONE)                  \
 			return (__u32)__x86_sim_state.rax;                  \
 	} while (0)
@@ -391,21 +384,16 @@ static __always_inline int x86_sim_write_result_u64(void *data, void *data_end,
 		int __x86_sim_step_ret =                                    \
 			X86_SIM_EXEC(&__x86_sim_state, (OP), (DST), (SRC),   \
 				     (FLAGS), (AUX), (IMM));                \
-		if (__x86_sim_step_ret < 0)                                 \
-			__builtin_unreachable();                         \
 		if (__x86_sim_step_ret == X86_SIM_DONE)                  \
 			return (__u32)__x86_sim_state.rax;                  \
 	} while (0)
 
 #define X86_SIM_X86_CALL(FN)                                                 \
 	do {                                                                 \
-		if (x86_sim_call_enter(&__x86_sim_state) < 0)                  \
-			__builtin_unreachable();                            \
+		x86_sim_call_enter(&__x86_sim_state);                         \
 		int __x86_sim_call_ret =                                    \
 			FN(&__x86_sim_state, __x86_sim_data,                 \
 			   __x86_sim_data_end);                              \
-		if (__x86_sim_call_ret < 0)                                \
-			__builtin_unreachable();                          \
 		x86_sim_call_leave(&__x86_sim_state);                         \
 	} while (0)
 
@@ -414,8 +402,6 @@ static __always_inline int x86_sim_write_result_u64(void *data, void *data_end,
 		int __x86_sim_step_ret =                                    \
 			X86_SIM_EXEC_SUB(&__x86_sim_state, (OP), (DST),      \
 					 (SRC), (FLAGS), (AUX), (IMM));    \
-		if (__x86_sim_step_ret < 0)                                 \
-			__builtin_unreachable();                         \
 		if (__x86_sim_step_ret == X86_SIM_DONE)                  \
 			return X86_SIM_CONTINUE;                        \
 	} while (0)
@@ -425,8 +411,6 @@ static __always_inline int x86_sim_write_result_u64(void *data, void *data_end,
 		int __x86_sim_step_ret =                                    \
 			X86_SIM_EXEC_SUB(&__x86_sim_state, (OP), (DST),     \
 					 (SRC), (FLAGS), (AUX), (IMM));   \
-		if (__x86_sim_step_ret < 0)                                 \
-			__builtin_unreachable();                         \
 		if (__x86_sim_step_ret == X86_SIM_DONE)                  \
 			return X86_SIM_CONTINUE;                        \
 	} while (0)
@@ -626,14 +610,9 @@ x86_sim_read_packet_mem_value(struct x86_state *state, __u8 base_reg, __u32 aux,
 	__u8 tag = X86_PTR_NONE;
 	__s32 base_off = 0;
 
-	if (x86_mem_offset(state, aux, disp, &disp) < 0)
-		return X86_SIM_UNSUPPORTED;
-	if (x86_read_ptr_reg(state, base_reg, &base, &tag) < 0)
-		return X86_SIM_UNSUPPORTED;
-	if (tag != X86_PTR_PACKET)
-		return X86_SIM_UNSUPPORTED;
-	if (x86_read_ptr_off_reg(state, base_reg, &base_off) < 0)
-		return X86_SIM_UNSUPPORTED;
+	x86_mem_offset(state, aux, disp, &disp);
+	x86_read_ptr_reg(state, base_reg, &base, &tag);
+	x86_read_ptr_off_reg(state, base_reg, &base_off);
 	x86_sim_read_packet_value_proven(data, data_end, base, base_off, disp,
 					width, value);
 	return X86_SIM_CONTINUE;
@@ -651,14 +630,9 @@ x86_exec_mov_load_packet(struct x86_state *state, const struct x86_insn *insn,
 
 	if (!mem_width)
 		mem_width = insn->flags;
-	if (x86_mem_offset(state, insn->aux, disp, &disp) < 0)
-		return X86_SIM_UNSUPPORTED;
-	if (x86_read_ptr_reg(state, insn->src, &base, &tag) < 0)
-		return X86_SIM_UNSUPPORTED;
-	if (tag != X86_PTR_PACKET)
-		return X86_SIM_UNSUPPORTED;
-	if (x86_read_ptr_off_reg(state, insn->src, &base_off) < 0)
-		return X86_SIM_UNSUPPORTED;
+	x86_mem_offset(state, insn->aux, disp, &disp);
+	x86_read_ptr_reg(state, insn->src, &base, &tag);
+	x86_read_ptr_off_reg(state, insn->src, &base_off);
 	return x86_sim_load_packet_proven(
 		state, insn->dst, data, data_end, base, base_off, disp,
 		mem_width, insn->flags, insn->op == X86_OP_MOVSX_LOAD);
@@ -674,12 +648,11 @@ x86_exec_alu_mem_packet(struct x86_state *state, const struct x86_insn *insn,
 	__u64 mem_value = 0;
 	__u64 result = 0;
 
-	if (x86_read_reg(state, insn->dst, &dst_value) < 0)
-		return X86_SIM_UNSUPPORTED;
+	x86_read_reg(state, insn->dst, &dst_value);
 	if (x86_sim_read_packet_mem_value(state, insn->src, insn->aux,
 					 x86_simm(insn->imm), data, data_end,
 					 width, &mem_value) < 0)
-		return X86_SIM_UNSUPPORTED;
+		__builtin_unreachable();
 	if (alu == X86_ALU_SBB)
 		mem_value += state->cf;
 	result = x86_alu_result(dst_value, mem_value, alu, width);
@@ -700,10 +673,10 @@ x86_exec_cmp_mem_packet(struct x86_state *state, const struct x86_insn *insn,
 	if (x86_sim_read_packet_mem_value(state, insn->dst, insn->aux,
 					 disp, data, data_end, insn->flags,
 					 &lhs) < 0)
-		return X86_SIM_UNSUPPORTED;
+		__builtin_unreachable();
 	if (insn->op == X86_OP_CMP_MEM_REG &&
 	    x86_read_reg(state, insn->src, &rhs) < 0)
-		return X86_SIM_UNSUPPORTED;
+		__builtin_unreachable();
 	if (insn->op == X86_OP_TEST_MEM_IMM) {
 		x86_set_logic_flags(state, lhs & rhs, insn->flags);
 		return X86_SIM_CONTINUE;
@@ -745,12 +718,8 @@ x86_exec_mov_store_reg_packet(struct x86_state *state,
 	__u8 tag = X86_PTR_NONE;
 	__s64 disp = x86_simm(insn->imm);
 
-	if (x86_mem_offset(state, insn->aux, disp, &disp) < 0)
-		return X86_SIM_UNSUPPORTED;
-	if (x86_read_ptr_reg(state, insn->dst, &base, &tag) < 0)
-		return X86_SIM_UNSUPPORTED;
-	if (tag != X86_PTR_PACKET)
-		return X86_SIM_UNSUPPORTED;
+	x86_mem_offset(state, insn->aux, disp, &disp);
+	x86_read_ptr_reg(state, insn->dst, &base, &tag);
 	return x86_store_packet_reg(state, insn->src, data, data_end, base,
 				    disp, insn->flags, insn->aux);
 }
@@ -764,30 +733,22 @@ x86_exec_mov_store_imm_packet(struct x86_state *state,
 	__u8 tag = X86_PTR_NONE;
 	__s64 disp = x86_store_imm_disp(insn->imm);
 
-	if (x86_mem_offset(state, insn->aux, disp, &disp) < 0)
-		return X86_SIM_UNSUPPORTED;
-	if (x86_read_ptr_reg(state, insn->dst, &base, &tag) < 0)
-		return X86_SIM_UNSUPPORTED;
-	if (tag != X86_PTR_PACKET)
-		return X86_SIM_UNSUPPORTED;
+	x86_mem_offset(state, insn->aux, disp, &disp);
+	x86_read_ptr_reg(state, insn->dst, &base, &tag);
 	return x86_store_packet_imm(data, data_end, base, disp, insn->flags,
 				    x86_store_imm_value(insn->imm));
 }
 
 #define X86_SIM_END_XDP()                                                    \
 		int __x86_sim_xdp_ret = XDP_PASS;                         \
-		if (__x86_sim_ret < 0 ||                                      \
-		    x86_sim_write_result_u64(__x86_sim_data,                   \
-					    __x86_sim_data_end,             \
-					    __x86_sim_state.rax) < 0)       \
-			__builtin_unreachable();                          \
+		x86_sim_write_result_u64(__x86_sim_data,                   \
+					__x86_sim_data_end,             \
+					__x86_sim_state.rax);           \
 		__x86_sim_xdp_ret;                                           \
 	})
 
 #define X86_SIM_END_XDP_RET_RAX()                                            \
 		int __x86_sim_xdp_ret = (__u32)__x86_sim_state.rax;          \
-		if (__x86_sim_ret < 0)                                      \
-			__builtin_unreachable();                          \
 		__x86_sim_xdp_ret;                                           \
 	})
 

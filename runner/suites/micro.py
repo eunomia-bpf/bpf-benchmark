@@ -133,7 +133,7 @@ def _run_micro_suite(workspace: Path, args: argparse.Namespace) -> None:
         program_dir = resolve_workspace_path(workspace, args.program_dir)
     elif args.suite and "stage2" in Path(args.suite).name:
         # The Stage 2 maps/helpers suite (micro/config/micro_stage2.yaml)
-        # consumes programs built from ebpf-vm/test/ that live under a
+        # consumes programs built from native-sim/test/ that live under a
         # parallel artifact tree. Detected here by the suite filename so
         # users don't have to pass --program-dir explicitly.
         program_dir = stage2_program_root(workspace, args.target_arch)

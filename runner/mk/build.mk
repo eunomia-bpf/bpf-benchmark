@@ -21,14 +21,14 @@ MICRO_PROGRAM_SRCS = $(shell find "$(MICRO_PROGRAM_SOURCE_ROOT)" -maxdepth 1 -ty
 MICRO_PROGRAM_OBJECTS = $(patsubst $(MICRO_PROGRAM_SOURCE_ROOT)/%.bpf.c,$(MICRO_PROGRAM_OUTPUT_ROOT)/%.bpf.o,$(MICRO_PROGRAM_SRCS))
 MICRO_PROGRAM_NATIVE_OBJECTS = $(patsubst $(MICRO_PROGRAM_SOURCE_ROOT)/%.bpf.c,$(MICRO_PROGRAM_OUTPUT_ROOT)/%.native.so,$(MICRO_PROGRAM_SRCS))
 
-# Stage 2 (maps + helpers) test programs. Source is in ebpf-vm/test/;
+# Stage 2 (maps + helpers) test programs. Source is in native-sim/test/;
 # build output lands under <artifact-root>/stage2-programs/<arch>/. Each
 # .bpf.c produces a .bpf.o (canonical micro program object the kernel JIT
 # consumes via libbpf) plus a .native.o (clang-x86-64 object the
 # native-link tool consumes; external helper/map symbol relocations stay
 # in .rela.text for runtime patching against kallsyms-resolved kernel
 # addresses).
-STAGE2_PROGRAM_SOURCE_ROOT := $(ROOT_DIR)/ebpf-vm/test
+STAGE2_PROGRAM_SOURCE_ROOT := $(ROOT_DIR)/native-sim/test
 STAGE2_PROGRAM_OUTPUT_ROOT := $(ACTIVE_ARTIFACT_ROOT)/stage2-programs/$(RUN_TARGET_ARCH)
 STAGE2_PROGRAM_SRCS = $(shell find "$(STAGE2_PROGRAM_SOURCE_ROOT)" -maxdepth 1 -type f -name '*.bpf.c' -print 2>/dev/null)
 STAGE2_PROGRAM_OBJECTS = $(patsubst $(STAGE2_PROGRAM_SOURCE_ROOT)/%.bpf.c,$(STAGE2_PROGRAM_OUTPUT_ROOT)/%.bpf.o,$(STAGE2_PROGRAM_SRCS))
@@ -488,7 +488,7 @@ $(MICRO_PROGRAM_OBJECTS) $(MICRO_PROGRAM_NATIVE_OBJECTS) &: $(MICRO_PROGRAM_SOUR
 	make -C "$(MICRO_PROGRAM_SOURCE_ROOT)" OUTPUT_DIR="$(MICRO_PROGRAM_OUTPUT_ROOT)" KERNEL_OFFSETS_INPUT="/artifacts/kernel/kernel_offsets.h" all
 	for path in $(MICRO_PROGRAM_OBJECTS) $(MICRO_PROGRAM_NATIVE_OBJECTS); do test -f "$$path"; done
 
-# Stage 2 build rule. The ebpf-vm/test/Makefile resolves
+# Stage 2 build rule. The native-sim/test/Makefile resolves
 # KERNEL_OFFSETS by recursing into micro/programs (its
 # `$(MAKE) -C $(MICRO_PROGRAMS_DIR) $@` step). Inside the runner-runtime
 # artifacts container we already have a pre-built kernel_offsets.h at
