@@ -51,9 +51,10 @@ artifact. There is no runtime bounds check. If a generated proof expression
 accesses outside the modeled extent, the compiler/verifier/load path should
 fail rather than silently executing a different behavior.
 
-## Ghost Pointer Metadata
+## No Ghost Pointer Metadata
 
-Each register also has proof metadata:
+Registers carry only scalar x86 values. The active simulator does not maintain
+per-register proof metadata such as:
 
 ```c
 void *__x86_p_<reg>;
@@ -61,30 +62,15 @@ __u8  __x86_tag_<reg>;
 __s32 __x86_off_<reg>;
 ```
 
-This metadata is not architectural x86 state. It exists only to express the
-same address value in a form the eBPF verifier can type-check. The invariant is:
+The old `PACKET`, `PACKET_END`, `PACKET_LEN`, and `STACK` tags are removed.
+In particular, the simulator must not prove:
 
 ```text
-tag(reg) != NONE  =>  scalar(reg) == address_value(ptr(reg), off(reg), tag(reg))
+packet + skb_len == packet_end
 ```
 
-Allowed uses:
-
-- select a verifier-typed pointer expression for a load/store whose scalar x86
-  address is the same value;
-- propagate tags through 64-bit `mov`, `lea`, `add`, `sub`, and `xchg` when the
-  scalar value is transformed identically.
-
-Forbidden uses:
-
-- change a scalar GPR value;
-- change flags or branch conditions;
-- prove a branch from metadata rather than x86 flags;
-- insert a runtime check;
-- manufacture a pointer relation not guaranteed by the ABI or previous exact
-  instruction semantics.
-
-This invariant is a proof obligation for direct-native safety.
+from hidden metadata. If native code loads `skb->len`, that result is an
+ordinary scalar x86 value.
 
 ## Entry ABI
 
@@ -92,14 +78,14 @@ For XDP and skb micro programs, ReverseSim starts with:
 
 ```text
 RDI = ctx
-tag(RDI) = CTX
 RSP = 0
-tag(RSP) = STACK
 ```
 
 `ctx->data`, `ctx->data_end`, and skb data/length fields are modeled as ABI
 loads. The resulting scalar value must equal the value a native ABI-compliant
-program would observe.
+program would observe. These ABI fields do not create per-register pointer
+tags; subsequent memory operations use the scalar address produced by x86
+execution.
 
 ## Instruction Expansion
 
@@ -206,10 +192,9 @@ An accepted artifact may be used for direct-native safety only if:
 
 1. The generated instruction sequence is the linked native x86 sequence.
 2. Every emitted macro implements the corresponding x86 state transition.
-3. Ghost metadata satisfies the invariant above and never affects architectural
-   values except by selecting an equivalent typed address expression.
-4. No forbidden mechanism appears in the accepted artifact.
-5. The verifier accepts the generated eBPF proof program.
+3. No hidden pointer metadata, packet-length proof, branch assertion, runtime
+   guard, trap, or fallback appears in the accepted artifact.
+4. The verifier accepts the generated eBPF proof program.
 
 If any item is missing, the result is an experiment result, not a direct-native
 safety proof.

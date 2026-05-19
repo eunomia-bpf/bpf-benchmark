@@ -454,7 +454,7 @@ def encode(insn: NativeInsn) -> EncodedInsn:
             raise ValueError(f"cannot encode {insn.raw}")
         if "[rip" in ops[1].lower():
             return enc("X86_OP_LEA", dst=dst_reg[0], src="X86_REG_NONE",
-                       flags=WIDTH_CONST[dst_reg[1]], aux="X86_PTR_RODATA",
+                       flags=WIDTH_CONST[dst_reg[1]], aux="X86_LEA_AUX_RODATA",
                        imm=c_u64(mem_disp(ops[1])))
         return enc("X86_OP_LEA", dst=dst_reg[0], src=mem_base_reg(ops[1]),
                    flags=WIDTH_CONST[dst_reg[1]], aux=mem_aux(ops[1]),

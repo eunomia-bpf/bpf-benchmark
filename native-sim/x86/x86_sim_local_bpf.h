@@ -48,10 +48,7 @@
 	X(X86_R15, r15)
 
 #define X86_SIM_L_DECLARE_REG(REG, NAME)                                    \
-	__u64 __x86_##NAME = 0;                                             \
-	void *__x86_p_##NAME = 0;                                           \
-	__u8 __x86_tag_##NAME = X86_PTR_NONE;                              \
-	__s32 __x86_off_##NAME = 0;
+	__u64 __x86_##NAME = 0;
 
 #define X86_SIM_L_DECLARE_STATE()                                           \
 	X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_DECLARE_REG)                       \
@@ -93,79 +90,25 @@
 	 (REG) == X86_R14 ? __x86_r14 :                                      \
 	 (REG) == X86_R15 ? __x86_r15 : 0)
 
-#define X86_SIM_L_PTR_VALUE(REG)                                            \
-	((REG) == X86_RAX ? __x86_p_rax :                                    \
-	 (REG) == X86_RCX ? __x86_p_rcx :                                    \
-	 (REG) == X86_RDX ? __x86_p_rdx :                                    \
-	 (REG) == X86_RBX ? __x86_p_rbx :                                    \
-	 (REG) == X86_RSP ? __x86_p_rsp :                                    \
-	 (REG) == X86_RBP ? __x86_p_rbp :                                    \
-	 (REG) == X86_RSI ? __x86_p_rsi :                                    \
-	 (REG) == X86_RDI ? __x86_p_rdi :                                    \
-	 (REG) == X86_R8 ? __x86_p_r8 :                                      \
-	 (REG) == X86_R9 ? __x86_p_r9 :                                      \
-	 (REG) == X86_R10 ? __x86_p_r10 :                                    \
-	 (REG) == X86_R11 ? __x86_p_r11 :                                    \
-	 (REG) == X86_R12 ? __x86_p_r12 :                                    \
-	 (REG) == X86_R13 ? __x86_p_r13 :                                    \
-	 (REG) == X86_R14 ? __x86_p_r14 :                                    \
-	 (REG) == X86_R15 ? __x86_p_r15 : 0)
-
-#define X86_SIM_L_TAG_VALUE(REG)                                            \
-	((REG) == X86_RAX ? __x86_tag_rax :                                  \
-	 (REG) == X86_RCX ? __x86_tag_rcx :                                  \
-	 (REG) == X86_RDX ? __x86_tag_rdx :                                  \
-	 (REG) == X86_RBX ? __x86_tag_rbx :                                  \
-	 (REG) == X86_RSP ? __x86_tag_rsp :                                  \
-	 (REG) == X86_RBP ? __x86_tag_rbp :                                  \
-	 (REG) == X86_RSI ? __x86_tag_rsi :                                  \
-	 (REG) == X86_RDI ? __x86_tag_rdi :                                  \
-	 (REG) == X86_R8 ? __x86_tag_r8 :                                    \
-	 (REG) == X86_R9 ? __x86_tag_r9 :                                    \
-	 (REG) == X86_R10 ? __x86_tag_r10 :                                  \
-	 (REG) == X86_R11 ? __x86_tag_r11 :                                  \
-	 (REG) == X86_R12 ? __x86_tag_r12 :                                  \
-	 (REG) == X86_R13 ? __x86_tag_r13 :                                  \
-	 (REG) == X86_R14 ? __x86_tag_r14 :                                  \
-	 (REG) == X86_R15 ? __x86_tag_r15 : X86_PTR_NONE)
-
-#define X86_SIM_L_OFF_VALUE(REG)                                            \
-	((REG) == X86_RAX ? __x86_off_rax :                                  \
-	 (REG) == X86_RCX ? __x86_off_rcx :                                  \
-	 (REG) == X86_RDX ? __x86_off_rdx :                                  \
-	 (REG) == X86_RBX ? __x86_off_rbx :                                  \
-	 (REG) == X86_RSP ? __x86_off_rsp :                                  \
-	 (REG) == X86_RBP ? __x86_off_rbp :                                  \
-	 (REG) == X86_RSI ? __x86_off_rsi :                                  \
-	 (REG) == X86_RDI ? __x86_off_rdi :                                  \
-	 (REG) == X86_R8 ? __x86_off_r8 :                                    \
-	 (REG) == X86_R9 ? __x86_off_r9 :                                    \
-	 (REG) == X86_R10 ? __x86_off_r10 :                                  \
-	 (REG) == X86_R11 ? __x86_off_r11 :                                  \
-	 (REG) == X86_R12 ? __x86_off_r12 :                                  \
-	 (REG) == X86_R13 ? __x86_off_r13 :                                  \
-	 (REG) == X86_R14 ? __x86_off_r14 :                                  \
-	 (REG) == X86_R15 ? __x86_off_r15 : 0)
-
 #define X86_SIM_DECLARE_XDP(CTX)                                            \
+	void *__x86_sim_ctx = (void *)(CTX);                                \
 	void *__x86_sim_data = (void *)(long)(CTX)->data;                   \
 	void *__x86_sim_data_end = (void *)(long)(CTX)->data_end;           \
+	__u8 __x86_sim_is_skb = 0;                                         \
+	__u32 __x86_sim_len = 0;                                           \
 	X86_SIM_L_DECLARE_STATE();                                          \
 	X86_SIM_L_DECLARE_STACK();                                          \
-	__x86_rdi = (__u64)(long)(CTX);                                     \
-	__x86_p_rdi = (void *)(CTX);                                        \
-	__x86_tag_rdi = X86_PTR_CTX;                                       \
-	__x86_tag_rsp = X86_PTR_STACK
+	__x86_rdi = (__u64)(long)(CTX)
 
 #define X86_SIM_DECLARE_SKB(CTX)                                            \
+	void *__x86_sim_ctx = (void *)(CTX);                                \
 	void *__x86_sim_data = (void *)(long)(CTX)->data;                   \
 	void *__x86_sim_data_end = (void *)(long)(CTX)->data_end;           \
+	__u8 __x86_sim_is_skb = 1;                                         \
+	__u32 __x86_sim_len = (CTX)->len;                                  \
 	X86_SIM_L_DECLARE_STATE();                                          \
 	X86_SIM_L_DECLARE_STACK();                                          \
-	__x86_rdi = (__u64)(long)(CTX);                                     \
-	__x86_p_rdi = (void *)(CTX);                                        \
-	__x86_tag_rdi = X86_PTR_CTX;                                       \
-	__x86_tag_rsp = X86_PTR_STACK
+	__x86_rdi = (__u64)(long)(CTX)
 
 #define X86_SIM_L_READ_REG_CASE(REG, NAME)                                  \
 	case REG:                                                          \
@@ -174,22 +117,6 @@
 
 #define X86_SIM_L_READ_REG(REG)                                             \
 	X86_SIM_L_REG_VALUE(REG)
-
-#define X86_SIM_L_CLEAR_PTR_CASE(REG, NAME)                                 \
-	case REG:                                                          \
-		__x86_p_##NAME = 0;                                      \
-		__x86_tag_##NAME = X86_PTR_NONE;                         \
-		__x86_off_##NAME = 0;                                    \
-		break;
-
-#define X86_SIM_L_CLEAR_PTR(REG)                                            \
-	do {                                                               \
-		switch (REG) {                                            \
-		X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_CLEAR_PTR_CASE)          \
-		default:                                                  \
-			break;                                            \
-		}                                                         \
-	} while (0)
 
 #define X86_SIM_L_WRITE_REG_VALUE_CASE(REG, NAME)                           \
 	case REG:                                                          \
@@ -200,7 +127,6 @@
 	do {                                                               \
 		__u8 __x86_wr_width = (WIDTH) ? (WIDTH) : X86_WIDTH_64;   \
 		__u64 __x86_wr_next = (VALUE);                            \
-		X86_SIM_L_CLEAR_PTR(REG);                                 \
 		if (__x86_wr_width == X86_WIDTH_8 ||                      \
 		    __x86_wr_width == X86_WIDTH_16) {                     \
 			__u64 __x86_wr_old = X86_SIM_L_READ_REG(REG);     \
@@ -216,63 +142,6 @@
 			break;                                            \
 		}                                                         \
 	} while (0)
-
-#define X86_SIM_L_READ_PTR_CASE(REG, NAME)                                  \
-	case REG:                                                          \
-		__x86_l_ptr = __x86_p_##NAME;                            \
-		__x86_l_tag = __x86_tag_##NAME;                          \
-		break;
-
-#define X86_SIM_L_READ_PTR(REG, PTR_OUT, TAG_OUT)                           \
-	do {                                                               \
-		*(PTR_OUT) = X86_SIM_L_PTR_VALUE(REG);                   \
-		*(TAG_OUT) = X86_SIM_L_TAG_VALUE(REG);                   \
-	} while (0)
-
-#define X86_SIM_L_READ_OFF_CASE(REG, NAME)                                  \
-	case REG:                                                          \
-		__x86_l_off = __x86_off_##NAME;                          \
-		break;
-
-#define X86_SIM_L_READ_OFF(REG)                                             \
-	X86_SIM_L_OFF_VALUE(REG)
-
-#define X86_SIM_L_WRITE_OFF_CASE(REG, NAME)                                 \
-	case REG:                                                          \
-		__x86_off_##NAME = __x86_wo_off;                         \
-		break;
-
-#define X86_SIM_L_WRITE_OFF(REG, OFF)                                       \
-	do {                                                               \
-		__s32 __x86_wo_off = (OFF);                              \
-		switch (REG) {                                            \
-		X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_WRITE_OFF_CASE)          \
-		default:                                                  \
-			break;                                            \
-		}                                                         \
-	} while (0)
-
-#define X86_SIM_L_WRITE_PTR_CASE(REG, NAME)                                 \
-	case REG:                                                          \
-		__x86_p_##NAME = __x86_wp_ptr;                           \
-		__x86_tag_##NAME = __x86_wp_tag;                         \
-		__x86_off_##NAME = __x86_wp_off;                         \
-		break;
-
-#define X86_SIM_L_WRITE_PTR(REG, PTR, TAG, OFF)                             \
-	do {                                                               \
-		void *__x86_wp_ptr = (PTR);                               \
-		__u8 __x86_wp_tag = (TAG);                                \
-		__s32 __x86_wp_off = (OFF);                               \
-		switch (REG) {                                            \
-		X86_SIM_L_FOR_EACH_GPR(X86_SIM_L_WRITE_PTR_CASE)          \
-		default:                                                  \
-			break;                                            \
-		}                                                         \
-	} while (0)
-
-#define X86_SIM_L_WRITE_PTR_AFTER_REG(REG, PTR, TAG, OFF)                   \
-	X86_SIM_L_WRITE_PTR((REG), (PTR), (TAG), (OFF))
 
 #define X86_SIM_L_MEM_OFFSET(AUX, DISP)                                     \
 	({                                                                 \
@@ -567,35 +436,37 @@
 
 #define X86_SIM_L_READ_MEM_VALUE(BASE_REG, AUX, IMM, WIDTH, STORE_DISP)      \
 	({                                                                 \
-		void *__x86_l_base = 0;                                   \
-		__u8 __x86_l_tag = X86_PTR_NONE;                         \
 		__u64 __x86_l_base_value = 0;                            \
 		__s64 __x86_l_disp = (STORE_DISP) ?                      \
 			x86_store_imm_disp(IMM) : x86_simm(IMM);          \
 		__x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX), __x86_l_disp);\
-		if ((BASE_REG) != X86_REG_NONE) {                        \
+		if ((BASE_REG) != X86_REG_NONE)                          \
 			__x86_l_base_value = X86_SIM_L_READ_REG(BASE_REG);\
-			X86_SIM_L_READ_PTR((BASE_REG), &__x86_l_base,     \
-					   &__x86_l_tag);                   \
-		}                                                         \
 		__u64 __x86_l_value;                                     \
-		if (((BASE_REG) == X86_RSP || (BASE_REG) == X86_RBP ||    \
-		     __x86_l_tag == X86_PTR_STACK)) {                     \
+		__u64 __x86_l_addr = __x86_l_base_value +                 \
+				     (__u64)__x86_l_disp;                \
+		if ((BASE_REG) == X86_RSP || (BASE_REG) == X86_RBP) {     \
 			__x86_l_value = X86_SIM_L_STACK_READ(             \
 				(__s64)__x86_l_base_value + __x86_l_disp, \
 				(WIDTH));                                  \
-		} else if (__x86_l_tag == X86_PTR_CTX &&                  \
-			   (BASE_REG) == X86_RDI &&                       \
-			   __x86_l_disp == X86_SKB_LEN_OFF &&             \
+		} else if (__x86_l_addr == (__u64)(long)__x86_sim_ctx +   \
+					  X86_CTX_DATA_OFF) {             \
+			__x86_l_value = (__u64)(long)__x86_sim_data;       \
+		} else if (__x86_l_addr == (__u64)(long)__x86_sim_ctx +   \
+					  X86_CTX_DATA_END_OFF) {         \
+			__x86_l_value = (__u64)(long)__x86_sim_data_end;   \
+		} else if (__x86_sim_is_skb &&                           \
+			   __x86_l_addr == (__u64)(long)__x86_sim_ctx +   \
+					  X86_SKB_DATA_OFF) {             \
+			__x86_l_value = (__u64)(long)__x86_sim_data;       \
+		} else if (__x86_sim_is_skb &&                           \
+			   __x86_l_addr == (__u64)(long)__x86_sim_ctx +   \
+					  X86_SKB_LEN_OFF &&              \
 			   (WIDTH) == X86_WIDTH_32) {                     \
-			__x86_l_value =                                   \
-				(__u32)((__u64)__x86_sim_data_end -       \
-					(__u64)__x86_sim_data);            \
+			__x86_l_value = __x86_sim_len;                    \
 		} else {                                                  \
-			if (__x86_l_tag == X86_PTR_NONE)                  \
-				__x86_l_base = (void *)(long)__x86_l_base_value;\
 			__x86_l_value = X86_SIM_L_LOAD_ADDR(              \
-				(__u8 *)__x86_l_base + __x86_l_disp,      \
+				(void *)(long)__x86_l_addr,               \
 				(WIDTH));                                  \
 		}                                                         \
 		__x86_l_value;                                            \
@@ -603,8 +474,6 @@
 
 #define X86_SIM_L_EXEC_MOV_LOAD(OP, DST, SRC, FLAGS, AUX, IMM)              \
 	do {                                                               \
-		void *__x86_l_base = 0;                                   \
-		__u8 __x86_l_tag = X86_PTR_NONE;                         \
 		__u8 __x86_l_mem_width = X86_MEM_AUX_MEM_WIDTH(AUX);      \
 		__u8 __x86_l_write_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;\
 		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX), x86_simm(IMM));\
@@ -612,54 +481,39 @@
 		__u64 __x86_l_value = 0;                                 \
 		if (!__x86_l_mem_width)                                  \
 			__x86_l_mem_width = __x86_l_write_width;          \
-		if ((SRC) != X86_REG_NONE) {                             \
+		if ((SRC) != X86_REG_NONE)                               \
 			__x86_l_base_value = X86_SIM_L_READ_REG(SRC);     \
-			X86_SIM_L_READ_PTR((SRC), &__x86_l_base,          \
-					   &__x86_l_tag);                   \
-		}                                                         \
-		if ((SRC) == X86_RSP || (SRC) == X86_RBP ||               \
-		    __x86_l_tag == X86_PTR_STACK) {                       \
+		__u64 __x86_l_addr = __x86_l_base_value +                 \
+				     (__u64)__x86_l_disp;                \
+		if ((SRC) == X86_RSP || (SRC) == X86_RBP) {               \
 			__x86_l_value = X86_SIM_L_STACK_READ(             \
 				(__s64)__x86_l_base_value + __x86_l_disp, \
 				X86_SIM_L_MEM_EFFECTIVE_WIDTH((AUX), (FLAGS)));\
 			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,   \
 						  __x86_l_write_width);     \
-		} else if (__x86_l_tag == X86_PTR_CTX &&                  \
-			   (SRC) == X86_RDI &&                           \
-			   (__x86_l_disp == X86_CTX_DATA_OFF ||          \
-			    __x86_l_disp == X86_SKB_DATA_OFF)) {         \
+		} else if (__x86_l_addr == (__u64)(long)__x86_sim_ctx +   \
+					  X86_CTX_DATA_OFF ||            \
+				   (__x86_sim_is_skb &&                          \
+				    __x86_l_addr == (__u64)(long)__x86_sim_ctx +  \
+						  X86_SKB_DATA_OFF)) {           \
 			X86_SIM_L_WRITE_REG_WIDTH((DST),                  \
 						  (__u64)(long)__x86_sim_data,\
 						  X86_WIDTH_64);            \
-			X86_SIM_L_WRITE_PTR_AFTER_REG((DST),              \
-						      __x86_sim_data,     \
-						      X86_PTR_PACKET, 0); \
-		} else if (__x86_l_tag == X86_PTR_CTX &&                  \
-			   (SRC) == X86_RDI &&                           \
-			   __x86_l_disp == X86_CTX_DATA_END_OFF) {       \
+		} else if (__x86_l_addr == (__u64)(long)__x86_sim_ctx +   \
+					  X86_CTX_DATA_END_OFF) {        \
 			X86_SIM_L_WRITE_REG_WIDTH((DST),                  \
 						  (__u64)(long)__x86_sim_data_end,\
 						  X86_WIDTH_64);            \
-			X86_SIM_L_WRITE_PTR_AFTER_REG((DST),              \
-						      __x86_sim_data_end, \
-						      X86_PTR_PACKET_END, 0);\
-		} else if (__x86_l_tag == X86_PTR_CTX &&                  \
-			   (SRC) == X86_RDI &&                           \
-			   __x86_l_disp == X86_SKB_LEN_OFF &&             \
+		} else if (__x86_sim_is_skb &&                           \
+			   __x86_l_addr == (__u64)(long)__x86_sim_ctx +   \
+					  X86_SKB_LEN_OFF &&             \
 			   __x86_l_mem_width == X86_WIDTH_32) {           \
-			__x86_l_value =                                   \
-				(__u32)((__u64)__x86_sim_data_end -       \
-					(__u64)__x86_sim_data);            \
+			__x86_l_value = __x86_sim_len;                    \
 			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,   \
 						  __x86_l_write_width);     \
-			X86_SIM_L_WRITE_PTR_AFTER_REG((DST),              \
-						      __x86_sim_data_end, \
-						      X86_PTR_PACKET_LEN, 0);\
 		} else {                                                  \
-			if (__x86_l_tag == X86_PTR_NONE)                  \
-				__x86_l_base = (void *)(long)__x86_l_base_value;\
 			__x86_l_value = X86_SIM_L_LOAD_ADDR(              \
-				(__u8 *)__x86_l_base + __x86_l_disp,      \
+				(void *)(long)__x86_l_addr,               \
 				__x86_l_mem_width);                       \
 			if ((OP) == X86_OP_MOVSX_LOAD)                    \
 				__x86_l_value = x86_sign_extend(           \
@@ -671,8 +525,6 @@
 
 #define X86_SIM_L_EXEC_STORE(OP, DST, SRC, FLAGS, AUX, IMM)                 \
 	do {                                                               \
-		void *__x86_l_base = 0;                                   \
-		__u8 __x86_l_tag = X86_PTR_NONE;                         \
 		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
 		__s64 __x86_l_disp = (OP) == X86_OP_MOV_STORE_IMM ?       \
 			x86_store_imm_disp(IMM) : x86_simm(IMM);          \
@@ -684,23 +536,18 @@
 		    X86_REG_AUX_GET_SRC_SHIFT(AUX) != 0)                  \
 			__x86_l_value >>= X86_REG_AUX_GET_SRC_SHIFT(AUX); \
 		__x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX), __x86_l_disp); \
-		if ((DST) != X86_REG_NONE) {                             \
+		if ((DST) != X86_REG_NONE)                               \
 			__x86_l_base_value = X86_SIM_L_READ_REG(DST);     \
-			X86_SIM_L_READ_PTR((DST), &__x86_l_base,          \
-					   &__x86_l_tag);                   \
-		}                                                         \
-		if ((DST) == X86_RSP || (DST) == X86_RBP ||               \
-		    __x86_l_tag == X86_PTR_STACK)                         \
+		if ((DST) == X86_RSP || (DST) == X86_RBP)                 \
 			X86_SIM_L_STACK_WRITE(                            \
 				(__s64)__x86_l_base_value + __x86_l_disp, \
 				X86_SIM_L_EFFECTIVE_WIDTH(FLAGS),          \
 				__x86_l_value);                            \
 		else {                                                    \
-			if (__x86_l_tag == X86_PTR_NONE)                  \
-				__x86_l_base = (void *)(long)__x86_l_base_value;\
-			X86_SIM_L_STORE_ADDR((__u8 *)__x86_l_base +       \
-					     __x86_l_disp, __x86_l_width, \
-					     __x86_l_value);              \
+			__u64 __x86_l_addr = __x86_l_base_value +         \
+					     (__u64)__x86_l_disp;        \
+			X86_SIM_L_STORE_ADDR((void *)(long)__x86_l_addr,  \
+					     __x86_l_width, __x86_l_value);\
 		}                                                         \
 	} while (0)
 
@@ -710,27 +557,13 @@
 		__s64 __x86_l_off = X86_SIM_L_MEM_OFFSET((AUX), x86_simm(IMM));\
 		__u64 __x86_l_src_value = (SRC) == X86_REG_NONE ? 0 :     \
 					   X86_SIM_L_READ_REG(SRC);        \
-		void *__x86_l_src_ptr = 0;                                \
-		__u8 __x86_l_src_tag = X86_PTR_NONE;                     \
 		if (__x86_l_width == X86_WIDTH_64 && (SRC) == X86_REG_NONE &&\
-		    (AUX) == X86_PTR_RODATA) {                            \
+		    (AUX) == X86_LEA_AUX_RODATA) {                        \
 			X86_SIM_L_WRITE_REG_WIDTH((DST), (IMM), __x86_l_width);\
 		} else {                                                  \
-			X86_SIM_L_READ_PTR((SRC), &__x86_l_src_ptr,       \
-					   &__x86_l_src_tag);                \
 			X86_SIM_L_WRITE_REG_WIDTH((DST),                 \
 				__x86_l_src_value + __x86_l_off,         \
 				__x86_l_width);                          \
-			if (__x86_l_width == X86_WIDTH_64 &&             \
-			    (__x86_l_src_tag == X86_PTR_PACKET ||        \
-			     __x86_l_src_tag == X86_PTR_PACKET_END)) {   \
-				__s32 __x86_l_src_off =                  \
-					X86_SIM_L_READ_OFF(SRC);          \
-				X86_SIM_L_WRITE_PTR_AFTER_REG((DST),      \
-					(__u8 *)__x86_l_src_ptr + __x86_l_off,\
-					__x86_l_src_tag,                  \
-					__x86_l_src_off + __x86_l_off);   \
-			}                                               \
 		}                                                         \
 	} while (0)
 
@@ -740,9 +573,6 @@
 		__u64 __x86_l_lhs = X86_SIM_L_READ_REG(DST);             \
 		__u64 __x86_l_rhs = x86_store_imm_value((IMM), __x86_l_width);\
 		__u64 __x86_l_result;                                    \
-		void *__x86_l_ptr = 0;                                    \
-		__u8 __x86_l_tag = X86_PTR_NONE;                         \
-		X86_SIM_L_READ_PTR((DST), &__x86_l_ptr, &__x86_l_tag);    \
 		if ((ALU) == X86_ALU_SBB) {                               \
 			__u8 __x86_l_borrow = __x86_cf;                   \
 			__x86_l_result = __x86_l_lhs - __x86_l_rhs -      \
@@ -763,24 +593,6 @@
 						__x86_l_width);        \
 			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
 						  __x86_l_width);        \
-			if (__x86_l_width == X86_WIDTH_64 &&               \
-			    ((ALU) == X86_ALU_ADD || (ALU) == X86_ALU_SUB) &&\
-			    (__x86_l_tag == X86_PTR_PACKET ||              \
-			     __x86_l_tag == X86_PTR_PACKET_END)) {         \
-				__s64 __x86_l_delta = (__s64)__x86_l_rhs;  \
-				if ((ALU) == X86_ALU_SUB)                   \
-					__x86_l_delta = -__x86_l_delta;     \
-				X86_SIM_L_WRITE_PTR_AFTER_REG((DST),        \
-					(__u8 *)__x86_l_ptr + __x86_l_delta,\
-					__x86_l_tag,                        \
-					X86_SIM_L_READ_OFF(DST) + __x86_l_delta);\
-			} else if (__x86_l_width == X86_WIDTH_64 &&        \
-				   ((ALU) == X86_ALU_ADD ||               \
-				    (ALU) == X86_ALU_SUB) &&               \
-				   __x86_l_tag == X86_PTR_STACK) {         \
-				X86_SIM_L_WRITE_PTR_AFTER_REG((DST), 0,    \
-							      X86_PTR_STACK, 0);\
-			}                                               \
 		}                                                         \
 	} while (0)
 
@@ -790,12 +602,6 @@
 		__u64 __x86_l_lhs = X86_SIM_L_READ_REG(DST);             \
 		__u64 __x86_l_rhs = X86_SIM_L_READ_REG(SRC);             \
 		__u64 __x86_l_result;                                    \
-		void *__x86_l_dst_ptr = 0;                                \
-		void *__x86_l_src_ptr = 0;                                \
-		__u8 __x86_l_dst_tag = X86_PTR_NONE;                     \
-		__u8 __x86_l_src_tag = X86_PTR_NONE;                     \
-		X86_SIM_L_READ_PTR((DST), &__x86_l_dst_ptr, &__x86_l_dst_tag);\
-		X86_SIM_L_READ_PTR((SRC), &__x86_l_src_ptr, &__x86_l_src_tag);\
 		if ((ALU) == X86_ALU_SBB) {                               \
 			__u8 __x86_l_borrow = __x86_cf;                   \
 			__x86_l_result = __x86_l_lhs - __x86_l_rhs -      \
@@ -816,56 +622,6 @@
 						__x86_l_width);        \
 			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
 						  __x86_l_width);        \
-			if (__x86_l_width == X86_WIDTH_64 &&               \
-			    (ALU) == X86_ALU_ADD &&                         \
-			    __x86_l_dst_tag == X86_PTR_PACKET_LEN &&        \
-			    __x86_l_src_tag == X86_PTR_PACKET) {            \
-				void *__x86_l_end_ptr =                     \
-					(__u8 *)__x86_l_dst_ptr +           \
-					X86_SIM_L_READ_OFF(SRC);             \
-				X86_SIM_L_WRITE_REG_WIDTH((DST),          \
-					(__u64)(long)__x86_l_end_ptr,     \
-					X86_WIDTH_64);                      \
-				X86_SIM_L_WRITE_PTR_AFTER_REG((DST),      \
-					__x86_l_end_ptr, X86_PTR_PACKET_END,\
-					X86_SIM_L_READ_OFF(SRC));           \
-			}                                                   \
-			else if (__x86_l_width == X86_WIDTH_64 &&          \
-				 (ALU) == X86_ALU_ADD &&                   \
-				 __x86_l_dst_tag == X86_PTR_PACKET &&      \
-				 __x86_l_src_tag == X86_PTR_PACKET_LEN) {  \
-				void *__x86_l_end_ptr =                     \
-					(__u8 *)__x86_l_src_ptr +           \
-					X86_SIM_L_READ_OFF(DST);             \
-				X86_SIM_L_WRITE_REG_WIDTH((DST),          \
-					(__u64)(long)__x86_l_end_ptr,     \
-					X86_WIDTH_64);                      \
-				X86_SIM_L_WRITE_PTR_AFTER_REG((DST),      \
-					__x86_l_end_ptr, X86_PTR_PACKET_END,\
-					X86_SIM_L_READ_OFF(DST));           \
-			}                                                   \
-			else if (__x86_l_width == X86_WIDTH_64 &&          \
-				 (ALU) == X86_ALU_ADD &&                   \
-				 (__x86_l_src_tag == X86_PTR_PACKET ||     \
-				  __x86_l_src_tag == X86_PTR_PACKET_END) && \
-				 __x86_l_dst_tag == X86_PTR_NONE)          \
-				X86_SIM_L_WRITE_PTR_AFTER_REG((DST),        \
-					(__u8 *)__x86_l_src_ptr + __x86_l_lhs,\
-					__x86_l_src_tag,                    \
-					X86_SIM_L_READ_OFF(SRC) + __x86_l_lhs);\
-			else if (__x86_l_width == X86_WIDTH_64 &&          \
-				 ((ALU) == X86_ALU_ADD ||                  \
-				  (ALU) == X86_ALU_SUB) &&                  \
-				 (__x86_l_dst_tag == X86_PTR_PACKET ||     \
-				  __x86_l_dst_tag == X86_PTR_PACKET_END)) { \
-				__s64 __x86_l_delta = (__s64)__x86_l_rhs;  \
-				if ((ALU) == X86_ALU_SUB)                  \
-					__x86_l_delta = -__x86_l_delta;    \
-				X86_SIM_L_WRITE_PTR_AFTER_REG((DST),        \
-					(__u8 *)__x86_l_dst_ptr + __x86_l_delta,\
-					__x86_l_dst_tag,                    \
-					X86_SIM_L_READ_OFF(DST) + __x86_l_delta);\
-			}                                               \
 		}                                                         \
 	} while (0)
 
@@ -918,16 +674,8 @@
 			X86_SIM_L_WRITE_REG_WIDTH((DST), (IMM), __x86_l_width);\
 		} else if ((OP) == X86_OP_MOV_REG) {                       \
 			__u64 __x86_l_value = X86_SIM_L_READ_REG(SRC);     \
-			void *__x86_l_ptr = 0;                            \
-			__u8 __x86_l_tag = X86_PTR_NONE;                  \
 			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,   \
 						  __x86_l_width);        \
-			X86_SIM_L_READ_PTR((SRC), &__x86_l_ptr, &__x86_l_tag);\
-			if (__x86_l_width == X86_WIDTH_64 &&               \
-			    __x86_l_tag != X86_PTR_NONE)                   \
-				X86_SIM_L_WRITE_PTR_AFTER_REG((DST),        \
-					__x86_l_ptr, __x86_l_tag,            \
-					X86_SIM_L_READ_OFF(SRC));             \
 		} else if ((OP) == X86_OP_MOVZX_REG ||                    \
 			   (OP) == X86_OP_MOVSX_REG) {                    \
 			__u8 __x86_l_src_width = (AUX) ? (AUX) : __x86_l_width;\
@@ -984,17 +732,8 @@
 		} else if ((OP) == X86_OP_CMOV) {                         \
 			if (X86_SIM_L_EVAL_CC(AUX)) {                      \
 				__u64 __x86_l_value = X86_SIM_L_READ_REG(SRC);\
-				void *__x86_l_ptr = 0;                    \
-				__u8 __x86_l_tag = X86_PTR_NONE;          \
 				X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,\
 							  __x86_l_width);    \
-				X86_SIM_L_READ_PTR((SRC), &__x86_l_ptr,   \
-						   &__x86_l_tag);           \
-				if (__x86_l_width == X86_WIDTH_64 &&       \
-				    __x86_l_tag != X86_PTR_NONE)           \
-					X86_SIM_L_WRITE_PTR_AFTER_REG((DST),\
-						__x86_l_ptr, __x86_l_tag,    \
-						X86_SIM_L_READ_OFF(SRC));     \
 			}                                                   \
 		} else if ((OP) == X86_OP_SETCC) {                        \
 			X86_SIM_L_WRITE_REG_WIDTH((DST), X86_SIM_L_EVAL_CC(AUX),\
@@ -1015,30 +754,10 @@
 		} else if ((OP) == X86_OP_XCHG) {                         \
 			__u64 __x86_l_dst_value = X86_SIM_L_READ_REG(DST);\
 			__u64 __x86_l_src_value = X86_SIM_L_READ_REG(SRC);\
-			void *__x86_l_dst_ptr = 0;                        \
-			void *__x86_l_src_ptr = 0;                        \
-			__u8 __x86_l_dst_tag = X86_PTR_NONE;              \
-			__u8 __x86_l_src_tag = X86_PTR_NONE;              \
-			__s32 __x86_l_dst_off = X86_SIM_L_READ_OFF(DST);  \
-			__s32 __x86_l_src_off = X86_SIM_L_READ_OFF(SRC);  \
-			X86_SIM_L_READ_PTR((DST), &__x86_l_dst_ptr,       \
-					   &__x86_l_dst_tag);              \
-			X86_SIM_L_READ_PTR((SRC), &__x86_l_src_ptr,       \
-					   &__x86_l_src_tag);              \
 			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_src_value,\
 						  __x86_l_width);        \
 			X86_SIM_L_WRITE_REG_WIDTH((SRC), __x86_l_dst_value,\
 						  __x86_l_width);        \
-			if (__x86_l_width == X86_WIDTH_64 &&               \
-			    __x86_l_src_tag != X86_PTR_NONE)               \
-				X86_SIM_L_WRITE_PTR_AFTER_REG((DST),        \
-					__x86_l_src_ptr, __x86_l_src_tag,    \
-					__x86_l_src_off);                   \
-			if (__x86_l_width == X86_WIDTH_64 &&               \
-			    __x86_l_dst_tag != X86_PTR_NONE)               \
-				X86_SIM_L_WRITE_PTR_AFTER_REG((SRC),        \
-					__x86_l_dst_ptr, __x86_l_dst_tag,    \
-					__x86_l_dst_off);                   \
 		} else if ((OP) == X86_OP_DIV) {                          \
 			__u64 __x86_l_divisor = X86_SIM_L_READ_REG(SRC);  \
 			__u64 __x86_l_rax = X86_SIM_L_READ_REG(X86_RAX);  \

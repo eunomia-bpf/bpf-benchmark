@@ -1068,3 +1068,135 @@ suite code size drops by another 1494 bytes versus movbe BE. This change is
 kept, with the explicit rule that local subprograms may receive verifier-native
 wide-load canonicalization but not stack-using kinsn proof sequences until the
 local proof-stack model is fixed.
+
+### Step 16: 64-bit OR trees may carry 16/32-bit little-endian byte ladders
+
+Rationale:
+
+- Some 16-bit and 32-bit little-endian byte ladders are widened into a 64-bit
+  OR tree before the final mask/truncation. The previous recognizer only
+  selected the native-width root and missed these strict sub-width loads.
+- The kept change lets `collectWideLoadLE()` use `LDH/LDW` when a 16/32-bit
+  byte ladder is carried by a 64-bit OR tree. This is still verifier-native BPF,
+  not a kinsn proof, so it is allowed in local subprograms as well.
+
+Objects:
+
+- `micro/results/llvm_kinsn_programs_wideload64_20260519_035538`
+
+Selected kinsns:
+
+| kinsn | count |
+|---|---:|
+| `bpf_x86_leaq` | 160 |
+| `bpf_x86_rolq` | 119 |
+| `bpf_x86_rorxl` | 40 |
+| `bpf_x86_leal` | 24 |
+| `bpf_x86_movbe16` | 13 |
+| `bpf_x86_movbe32` | 6 |
+| `bpf_x86_shldq` | 1 |
+| `bpf_x86_popcntq` | 1 |
+
+Three-sample status:
+
+- Full `make micro` passed: 29/29 correct.
+- Run:
+  `micro/results/x86_kvm_micro_20260519_110037_284774/metadata.json`
+
+Summary using analysis-side per-benchmark mean over three raw samples:
+
+| Comparison | Geomean ratio | summed mean exec delta | JIT byte delta | wins/losses/ties |
+|---|---:|---:|---:|---:|
+| 64-bit carried wide-load vs local `LDD` | 0.9973 | +9.7 ns | -329 bytes | 15/6/8 |
+
+Key three-sample deltas versus local `LDD`:
+
+| Benchmark | local `LDD` | 64-bit carried wide-load | JIT bytes |
+|---|---:|---:|---:|
+| `packet_record_bounds_window` | 83.0 ns | 72.7 ns | 500 -> 401 |
+| `bitmap_popcount_scan` | 496.3 ns | 491.3 ns | 375 -> 337 |
+| `bcc_runqlat_log2_histogram_bucket` | 1043.3 ns | 1104.3 ns | 597 -> 559 |
+| `packet_toeplitz_rss_hash` | 225.0 ns | 234.7 ns | 916 -> 916 |
+
+This change is kept because it is verifier-native, reduces code size, and adds
+coverage without introducing kinsn proof stack. Runtime is mixed and the main
+runqlat loss in this run is not supported by a larger JIT body; the next step
+therefore targeted the actual indexed byte-load shape instead of widening this
+rule further.
+
+### Step 17: indexed byte loads -> `bpf_x86_movzbl` SIB form
+
+Rationale:
+
+- The native x86 gaps in `bcc_runqlat_log2_histogram_bucket`,
+  `sorted_rule_binary_search`, and `payload_prefix_memcmp_scan` include
+  repeated byte loads from `base + index + offset`. Ordinary BPF represents this
+  as address arithmetic plus `LDX_MEM`; x86 can issue one SIB memory operand.
+- The LLVM selector now recognizes a same-block one-use `ADD_rr` feeding an
+  `LDB/LDB32` and emits `BPF_KINSN_X86_MOVZBL dst, base, index, scale, off`.
+- The first attempt exposed two verifier-facing module bugs:
+  - non-arch SIB proof read BPF registers through the shadow-register path,
+    losing packet-pointer provenance and failing with `invalid mem access
+    'scalar'`;
+  - scratch fallback forced a deep proof stack when the register allocator chose
+    `dst == index`, increasing final JIT stack frames from `0x40/0x48` to
+    `0x178`.
+- The kept module proof has a verifier-native fast path:
+  `dst = base; dst += index; dst = *(width *)(dst + off)` when
+  `dst != base && dst != index`. The LLVM pseudo is marked early-clobber so the
+  register allocator keeps that fast path legal. The final x86 emit remains one
+  `movzbl disp(base,index,scale), dst` instruction.
+
+Objects:
+
+- `micro/results/llvm_kinsn_programs_sib_ec_20260519_043546`
+
+Selected kinsns:
+
+| kinsn | count |
+|---|---:|
+| `bpf_x86_leaq` | 160 |
+| `bpf_x86_rolq` | 119 |
+| `bpf_x86_rorxl` | 40 |
+| `bpf_x86_leal` | 24 |
+| `bpf_x86_movzbl` | 19 |
+| `bpf_x86_movbe16` | 13 |
+| `bpf_x86_movbe32` | 6 |
+| `bpf_x86_shldq` | 1 |
+| `bpf_x86_popcntq` | 1 |
+
+Validation:
+
+- Targeted SIB run passed for `sorted_rule_binary_search`,
+  `bcc_runqlat_log2_histogram_bucket`, and `payload_prefix_memcmp_scan`.
+- Full single-sample `make micro` passed: 29/29 correct.
+  Run:
+  `micro/results/x86_kvm_micro_20260519_113952_304271/metadata.json`
+- Full three-sample `make micro` passed: 29/29 correct.
+  Run:
+  `micro/results/x86_kvm_micro_20260519_114214_364050/metadata.json`
+
+Summary using analysis-side per-benchmark mean over three raw samples:
+
+| Comparison | Geomean ratio | summed mean exec delta | JIT byte delta | wins/losses/ties |
+|---|---:|---:|---:|---:|
+| SIB early-clobber vs 64-bit carried wide-load | 0.9977 | -107.7 ns | -31 bytes | 12/6/11 |
+| SIB early-clobber vs local `LDD` | 0.9951 | -104.0 ns | -360 bytes | 16/6/7 |
+
+Key three-sample deltas versus 64-bit carried wide-load:
+
+| Benchmark | wide-load | SIB early-clobber | JIT bytes |
+|---|---:|---:|---:|
+| `bcc_runqlat_log2_histogram_bucket` | 1104.3 ns | 1003.7 ns | 559 -> 542 |
+| `sorted_rule_binary_search` | 524.7 ns | 533.0 ns | 660 -> 643 |
+| `payload_prefix_memcmp_scan` | 100.0 ns | 113.7 ns | 528 -> 531 |
+| `packet_toeplitz_rss_hash` | 234.7 ns | 221.7 ns | 916 -> 916 |
+
+The indexed-load selector is now correctness-clean and has a measurable suite
+win, but it is not universally profitable. It is excellent for runqlat's
+precomputed-pointer byte loads; it is slightly negative for the memcmp-prefix
+loop because register allocation and induction-update scheduling become less
+favorable even though the load itself is a better x86 instruction. Keep the
+selector, but do not broaden it to more memory widths or scaled forms until the
+profitability model can distinguish address-ladder loads from tight induction
+loops where BPF's existing `lea/add + load` schedule is already strong.

@@ -60,21 +60,19 @@ Architectural state is represented by local variables:
 - `__x86_cf`, `__x86_zf`, `__x86_sf`, `__x86_of`;
 - byte-addressed modeled stack memory when the native program uses stack.
 
-The simulator still carries ghost pointer metadata (`__x86_p_*`,
-`__x86_tag_*`, `__x86_off_*`) so verifier pointer types can track the same
-address value held in a native register. This metadata is not x86 architectural
-state and must satisfy this invariant:
+There is no per-register ghost pointer metadata. The old `__x86_p_*`,
+`__x86_tag_*`, `__x86_off_*`, `X86_PTR_PACKET_LEN`, and packet-plus-length to
+packet-end propagation were removed. A register now carries only its scalar x86
+value.
 
-> If a register has a non-`NONE` tag, the corresponding scalar register value
-> must equal the same address represented by the metadata.
-
-The metadata may guide the eBPF load/store expression used for proof, but it
-must not change the scalar x86 value, branch condition, flags, or memory value.
-Any violation of this invariant would make direct native execution unsafe.
+The entry ABI still defines the modeled ctx fields that native code may load:
+`ctx->data`, `ctx->data_end`, and skb `len`. These are memory-model values, not
+register tags. Loading `ctx->data` produces the scalar packet address; later
+packet loads through that scalar are not helped by a hidden packet tag.
 
 The active code does not add runtime data-end checks. Packet/ctx accesses are
 raw modeled memory operations. If the verifier cannot prove them safe from the
-exact native control/data flow plus ABI metadata, the program fails to load.
+exact native control/data flow, the program fails to load.
 
 ## Known Semantic Boundary
 
@@ -93,13 +91,13 @@ arithmetic are allowed to surface as compiler/verifier/load failures.
 
 ## Latest Results
 
-Smoke after pruning the old path:
+Smoke after deleting ghost metadata:
 
 ```bash
 python3 native-sim/x86/micro-prog/run_micro_sim_batch.py \
-  --only simple bpf_local_call_fanout_dispatch packed_header_bitfield_decode \
-  --jobs 3 \
-  --markdown native-sim/x86/results/README-20260519-pruned-smoke.md
+  --only simple simple_packet packet_checksum_fold bpf_local_call_fanout_dispatch \
+  --jobs 4 \
+  --markdown native-sim/x86/results/README-20260519-no-ghost-smoke.md
 ```
 
 Result:
@@ -107,18 +105,16 @@ Result:
 | Micro program | Status | Proof BPF insns | Direct BPF insns | Note |
 | --- | --- | ---: | ---: | --- |
 | `simple` | ok | 19 | 24 | load and test pass |
-| `bpf_local_call_fanout_dispatch` | ok | 277 | 295 | local-call path now uses the same local-state simulator |
-| `packed_header_bitfield_decode` | run-fail | 331 | 254 | verifier rejects pointer-as-integer shift; no guard was added |
+| `simple_packet` | ok | 16 | 21 | load and test pass |
+| `packet_checksum_fold` | run-fail | 170 | 67 | verifier complexity / exact scalar-address proof fallout |
+| `bpf_local_call_fanout_dispatch` | run-fail | 550 | 295 | proof BPF stack growth after metadata removal |
 
-Latest full pruned run:
+Latest full no-ghost run:
 
-- `results/README-20260519-pruned-full.md`
-- 25/29 loaded and produced the expected result.
-- Remaining verifier failures were:
-  - `packet_vlan_tcpopt_parser`: verifier loses packet range through native aliasing;
-  - `flow_5tuple_rss_hash`: same packet alias/range visibility issue;
-  - `packed_header_bitfield_decode`: pointer value is later used as an integer for shifts/masks;
-  - `cgroup_skb_hash_chain`: cgroup skb verifier rejects packet writes.
+- `results/README-20260519-no-ghost-full.md`
+- 2/29 loaded and produced the expected result: `simple`, `simple_packet`.
+- The drop is expected: packet/ctx/stack pointer proof is no longer assisted by
+  per-register pointer metadata or packet-length facts.
 
 These are verifier/proof-expression failures after removing non-hardware
 guards, not runtime simulator fallbacks.

@@ -97,13 +97,7 @@
 #define X86_R15 15U
 #define X86_REG_NONE 0xffU
 
-#define X86_PTR_NONE 0U
-#define X86_PTR_CTX 1U
-#define X86_PTR_PACKET 2U
-#define X86_PTR_PACKET_END 3U
-#define X86_PTR_RODATA 4U
-#define X86_PTR_STACK 5U
-#define X86_PTR_PACKET_LEN 6U
+#define X86_LEA_AUX_RODATA 1U
 
 #define X86_CTX_DATA_OFF 0LL
 #define X86_CTX_DATA_END_OFF 8LL
