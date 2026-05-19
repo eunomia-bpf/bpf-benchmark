@@ -104,10 +104,11 @@ WORKDIR ${IMAGE_WORKSPACE}
 
 FROM runner-runtime-runtime-base AS runner-runtime-artifacts
 
-ARG IMAGE_BUILD_JOBS=4
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
 ARG VENDOR_BUILD_ARCH=x86
+ARG RUNNER_BUILD_DIR_NAME=build-llvmbpf
+ARG TEST_BUILD_DIR=build
 # Narrow build-contexts pointing at subdirs of the host kbuild O= dir to avoid
 # shipping the full kbuild output (~6 GB) as Docker context. Set by the image rule:
 #   x86_64 -> image-context = $(O)/arch/x86/boot   KERNEL_IMAGE_NAME=bzImage
@@ -115,70 +116,6 @@ ARG VENDOR_BUILD_ARCH=x86
 # Manifest JSON is tiny (<200B) so we inline it as a build-arg instead of a context.
 ARG KERNEL_IMAGE_NAME
 ARG KERNEL_MANIFEST_JSON
-
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        autoconf \
-        automake \
-        bc \
-        binutils-dev \
-        bison \
-        build-essential \
-        cmake \
-        cpio \
-        dwarves \
-        flex \
-        g++ \
-        gcc \
-        gcc-aarch64-linux-gnu \
-        git \
-        libaio-dev \
-        libboost-all-dev \
-        libbpf-dev \
-        libbz2-dev \
-        libcap-dev \
-        libcereal-dev \
-        libclang-dev \
-        libcurl4-openssl-dev \
-        libdouble-conversion-dev \
-        libdw-dev \
-        libdwarf-dev \
-        libedit-dev \
-        libelf-dev \
-        libevent-dev \
-        libffi-dev \
-        libfl-dev \
-        libfmt-dev \
-        libgflags-dev \
-        libgoogle-glog-dev \
-        libgrpc++-dev \
-        libiberty-dev \
-        liblz4-dev \
-        libmnl-dev \
-        libpcap-dev \
-        libprotobuf-dev \
-        libre2-dev \
-        libsodium-dev \
-        libsnappy-dev \
-        libspdlog-dev \
-        libssl-dev \
-        libtool \
-        libtool-bin \
-        libltdl-dev \
-        libunwind-dev \
-        libyaml-cpp-dev \
-        libzstd-dev \
-        llvm-dev \
-        make \
-        pkg-config \
-        protobuf-compiler \
-        protobuf-compiler-grpc \
-        rsync \
-        scons \
-        unzip \
-        xxd \
-        zlib1g-dev \
-    && rm -rf /var/lib/apt/lists/*
 
 COPY --link --chmod=0755 vendor/build/${VENDOR_BUILD_ARCH}/tracee/bin/tracee /artifacts/tracee/bin/tracee
 COPY --link vendor/build/${VENDOR_BUILD_ARCH}/tetragon/ /artifacts/tetragon/
@@ -229,41 +166,12 @@ COPY --link --from=runner-runtime-host-kernel-offsets /kernel_offsets.h /artifac
 COPY --link --from=runner-runtime-host-kernel-modules / /artifacts/modules
 RUN mkdir -p /artifacts && printf '%s\n' "${KERNEL_MANIFEST_JSON}" > /artifacts/manifest.json
 
-COPY Makefile ./Makefile
-COPY runner/mk ./runner/mk
-COPY vendor/libbpf ./vendor/libbpf
-COPY vendor/llvmbpf ./vendor/llvmbpf
-COPY vendor/linux-framework/include ./vendor/linux-framework/include
-COPY runner/CMakeLists.txt ./runner/CMakeLists.txt
-COPY runner/include ./runner/include
-COPY runner/src ./runner/src
 COPY micro/programs ./micro/programs
-COPY native-sim/test ./native-sim/test
-COPY tests/unittest ./tests/unittest
-COPY tests/negative ./tests/negative
-
-RUN set -eux; \
-    make image-runner-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
-    CLANG=/usr/bin/clang make image-micro-program-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
-    CLANG=/usr/bin/clang make image-stage2-program-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
-    PATH="/usr/bin:${PATH}" make image-test-artifacts RUN_TARGET_ARCH="${RUN_TARGET_ARCH}" BPFREJIT_IMAGE_BUILD=1 JOBS="${IMAGE_BUILD_JOBS}"; \
-    rm -rf \
-        /tmp/bpf-benchmark-build \
-        ./vendor \
-        ./runner/src \
-        ./runner/include \
-        ./runner/CMakeLists.txt \
-        ./tests/unittest/Makefile \
-        ./tests/unittest/module \
-        ./tests/unittest/progs \
-        ./tests/unittest/*.c \
-        ./tests/unittest/*.h \
-        ./tests/negative/Makefile \
-        ./tests/negative/*.c \
-        ./tests/negative/*.h; \
-    find ./runner -maxdepth 3 -type d \( -name CMakeFiles -o -name vendor \) -prune -exec rm -rf {} +; \
-    find ./runner -maxdepth 3 -type f \( -name CMakeCache.txt -o -name cmake_install.cmake -o -name Makefile \) -delete; \
-    find ./tests -type f \( \( -name '*.o' ! -name '*.bpf.o' \) -o -name '*.d' -o -name '*.cmd' \) -delete
+COPY --link --from=runner-runtime-host-runner-build /micro_exec ${IMAGE_WORKSPACE}/runner/${RUNNER_BUILD_DIR_NAME}/micro_exec
+COPY --link --from=runner-runtime-host-micro-programs / /artifacts/user/micro-programs/${RUN_TARGET_ARCH}/
+COPY --link --from=runner-runtime-host-stage2-programs / /artifacts/user/stage2-programs/${RUN_TARGET_ARCH}/
+COPY --link --from=runner-runtime-host-unittest / ${IMAGE_WORKSPACE}/tests/unittest/${TEST_BUILD_DIR}/
+COPY --link --from=runner-runtime-host-negative / ${IMAGE_WORKSPACE}/tests/negative/${TEST_BUILD_DIR}/
 
 FROM scratch AS runner-runtime-kinsn-artifacts
 

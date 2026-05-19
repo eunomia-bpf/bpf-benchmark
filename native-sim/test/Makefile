@@ -3,15 +3,15 @@
 #   - .native.o : userspace x86-64 .o with `.rela.text` against extern
 #                 helper / map symbols, what native-link consumes
 #
-# Driven by runner/mk/build.mk's image-stage2-program-artifacts target so
-# the in-image program_dir lines up with what micro/config/micro_stage2.yaml
-# points at. Default OUTPUT_DIR is the in-source `build/` for host-only
-# `make -C native-sim/test` rebuilds during local debugging.
+# Driven by runner/mk/build.mk's host-stage2-programs-* targets. Docker copies
+# the resulting component-local build directory directly into the runtime image.
 DEB_HOST_MULTIARCH := $(shell gcc -print-multiarch 2>/dev/null || dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
-SYS_INCLUDE_FLAGS := $(if $(DEB_HOST_MULTIARCH),-I/usr/include/$(DEB_HOST_MULTIARCH))
+SYS_INCLUDE_FLAGS ?= $(if $(DEB_HOST_MULTIARCH),-I/usr/include/$(DEB_HOST_MULTIARCH))
 REPO_ROOT := $(abspath $(CURDIR)/../..)
 OUTPUT_DIR ?= $(CURDIR)/build
 CLANG ?= clang
+NATIVE_TARGET ?=
+NATIVE_ARCH ?= $(shell uname -m)
 
 BPF_CFLAGS := -Wall -Wextra -O2 -g -target bpf $(SYS_INCLUDE_FLAGS) -MMD -MP
 
@@ -26,8 +26,10 @@ BPF_CFLAGS := -Wall -Wextra -O2 -g -target bpf $(SYS_INCLUDE_FLAGS) -MMD -MP
 # external function calls instead of `call rel32` (5 bytes, PLT32).
 # native-link patches the disp32 to point at a literal-pool entry holding
 # the helper's kernel address; no trampoline needed.
-NATIVE_CFLAGS := -Wall -Wextra -O2 -g -fPIC -c -fno-plt -DMICRO_NATIVE \
-    -fomit-frame-pointer -mno-red-zone -fno-stack-protector \
+NATIVE_TARGET_FLAGS := $(if $(NATIVE_TARGET),--target=$(NATIVE_TARGET))
+NATIVE_ARCH_CFLAGS := $(if $(filter x86_64 amd64,$(NATIVE_ARCH)),-mno-red-zone)
+NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -Wall -Wextra -O2 -g -fPIC -c -fno-plt -DMICRO_NATIVE \
+    -fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
     -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
     -mllvm -switch-to-lookup=false \
     $(SYS_INCLUDE_FLAGS) -MMD -MP
@@ -37,6 +39,7 @@ NATIVE_CFLAGS := -Wall -Wextra -O2 -g -fPIC -c -fno-plt -DMICRO_NATIVE \
 # kernel layout. Not all Stage 2 programs reference SKB/XDP context offsets
 # directly, but common.h includes the header unconditionally.
 KERNEL_OFFSETS := $(REPO_ROOT)/micro/programs/kernel_offsets.h
+KERNEL_OFFSETS_INCLUDE := $(dir $(abspath $(KERNEL_OFFSETS)))
 MICRO_PROGRAMS_DIR := $(REPO_ROOT)/micro/programs
 
 BPF_SRCS := $(wildcard *.bpf.c)
@@ -57,7 +60,7 @@ $(OUTPUT_DIR)/%.bpf.o: %.bpf.c | $(OUTPUT_DIR)
 	$(CLANG) $(BPF_CFLAGS) -MF "$(OUTPUT_DIR)/$*.bpf.d" -MT "$@" -c -o "$@" "$<"
 
 $(OUTPUT_DIR)/%.native.o: %.bpf.c $(KERNEL_OFFSETS) | $(OUTPUT_DIR)
-	$(CLANG) $(NATIVE_CFLAGS) -I"$(MICRO_PROGRAMS_DIR)" \
+	$(CLANG) $(NATIVE_CFLAGS) -I"$(MICRO_PROGRAMS_DIR)" -I"$(KERNEL_OFFSETS_INCLUDE)" \
 	    -MF "$(OUTPUT_DIR)/$*.native.d" -MT "$@" -o "$@" "$<"
 
 clean:

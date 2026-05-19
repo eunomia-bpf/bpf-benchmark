@@ -1,5 +1,5 @@
 DEB_HOST_MULTIARCH := $(shell gcc -print-multiarch 2>/dev/null || dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
-SYS_INCLUDE_FLAGS := $(if $(DEB_HOST_MULTIARCH),-I/usr/include/$(DEB_HOST_MULTIARCH))
+SYS_INCLUDE_FLAGS ?= $(if $(DEB_HOST_MULTIARCH),-I/usr/include/$(DEB_HOST_MULTIARCH))
 OUTPUT_DIR ?= $(CURDIR)
 CLANG ?= clang
 BPFREJIT_MICRO_BPF_COMPILER ?= clang
@@ -7,11 +7,15 @@ BPF_KINSN_LLC ?=
 BPF_KINSN_LLC_FLAGS ?=
 BPF_KINSN_TRIPLE ?= bpfel
 BPF_KINSN_CPU ?= v3
+NATIVE_TARGET ?=
+NATIVE_ARCH ?= $(shell uname -m)
 REPO_ROOT := $(abspath $(CURDIR)/../..)
 
 CFLAGS := -Wall -Wextra -O2 -g -target bpf $(SYS_INCLUDE_FLAGS) -MMD -MP
-NATIVE_CFLAGS := -Wall -Wextra -O2 -g -fPIC -shared -fno-plt -DMICRO_NATIVE \
-	-fomit-frame-pointer -mno-red-zone -fno-stack-protector \
+NATIVE_TARGET_FLAGS := $(if $(NATIVE_TARGET),--target=$(NATIVE_TARGET))
+NATIVE_ARCH_CFLAGS := $(if $(filter x86_64 amd64,$(NATIVE_ARCH)),-mno-red-zone)
+NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -Wall -Wextra -O2 -g -fPIC -shared -fno-plt -DMICRO_NATIVE \
+	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
 	-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
 	-mllvm -switch-to-lookup=false \
 	$(SYS_INCLUDE_FLAGS) -MMD -MP
