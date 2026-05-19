@@ -617,7 +617,6 @@ x86_l_2cf:
 x86_l_2d0:
 	/* 0x2d0: jmp    0x2d5 ; native-link entry RET */
 	X86_SIM_X86_RET();
-	__builtin_unreachable();
 }
 
 X86_SIM_LICENSE();

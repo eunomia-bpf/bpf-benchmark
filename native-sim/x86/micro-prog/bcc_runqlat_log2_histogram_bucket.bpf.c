@@ -296,7 +296,6 @@ x86_l_144:
 x86_l_146:
 	/* 0x146: jmp    0x14b ; native-link entry RET */
 	X86_SIM_X86_RET();
-	__builtin_unreachable();
 }
 
 X86_SIM_LICENSE();

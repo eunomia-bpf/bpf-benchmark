@@ -151,7 +151,6 @@ x86_l_9c:
 x86_l_a1:
 	/* 0xa1: jmp    0xa6 ; native-link entry RET */
 	X86_SIM_X86_RET();
-	__builtin_unreachable();
 }
 
 X86_SIM_LICENSE();

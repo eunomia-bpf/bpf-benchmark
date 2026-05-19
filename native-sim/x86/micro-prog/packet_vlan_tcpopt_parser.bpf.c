@@ -518,7 +518,6 @@ x86_l_266:
 x86_l_26b:
 	/* 0x26b: jmp    0x142 */
 	X86_SIM_X86_JMP(0x26b, 0x142, x86_l_142);
-	__builtin_unreachable();
 }
 
 X86_SIM_LICENSE();

@@ -365,7 +365,6 @@ x86_l_18d:
 x86_l_18e:
 	/* 0x18e: jmp    0x193 ; native-link entry RET */
 	X86_SIM_X86_RET();
-	__builtin_unreachable();
 }
 
 X86_SIM_LICENSE();

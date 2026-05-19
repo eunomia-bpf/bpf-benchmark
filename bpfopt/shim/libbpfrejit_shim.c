@@ -124,13 +124,14 @@ struct prog_entry {
      * bytecode_path. */
     union bpf_attr load_attr;
     char license[64];             /* deep-copied license string */
-    /* fd-typed attr fields are duped here so reload can re-pass them even
-     * after the loader closes the originals. Each is -1 when unused; we
-     * dup() at PROG_LOAD-intercept time and close on prog_entry teardown. */
-    int prog_btf_fd_dup;
-    int attach_btf_obj_fd_dup;
-    int attach_prog_fd_dup;
-    int prog_token_fd_dup;
+    /* fd-typed attr fields cannot survive the loader closing the originals
+     * (and tracee in particular runs close_range after init, wiping any
+     * dup'd fds the shim cached). Persist the kernel IDs of the referenced
+     * BTF / prog objects and re-resolve to fresh fds at reload time via
+     * BPF_BTF_GET_FD_BY_ID / BPF_PROG_GET_FD_BY_ID. 0 means unused. */
+    uint32_t prog_btf_kid;
+    uint32_t attach_btf_obj_kid;
+    uint32_t attach_prog_kid;
     /* Per-prog execute_step state. */
     int canonicalized;            /* 1 once --canonicalize-map-refs has run */
     int step_seq;                 /* incremented per successful execute_step */
@@ -468,22 +469,40 @@ static struct prog_entry *capture_prog_load(const union bpf_attr *attr) {
     e->expected_attach_type = attr->expected_attach_type;
     e->attach_btf_id = attr->attach_btf_id;
     e->load_attr = *attr;
-    /* Dup fd-typed attr fields so reload can re-pass them after the loader
-     * closes the originals. The kernel re-validates these fds at every
-     * PROG_LOAD; relying on cached integer values leads to -EBADF when the
-     * host app (e.g. tracee, bcc/Python) drops its loader-side references.
-     * prog_token_fd is post-6.10 and may not be in libbpf-sys's union
-     * bpf_attr — skip dup'ing it. */
-    e->prog_btf_fd_dup = -1;
-    e->attach_btf_obj_fd_dup = -1;
-    e->attach_prog_fd_dup = -1;
-    e->prog_token_fd_dup = -1;
-    if (attr->prog_btf_fd)
-        e->prog_btf_fd_dup = dup((int)attr->prog_btf_fd);
-    if (attr->attach_btf_obj_fd)
-        e->attach_btf_obj_fd_dup = dup((int)attr->attach_btf_obj_fd);
-    if (attr->attach_prog_fd)
-        e->attach_prog_fd_dup = dup((int)attr->attach_prog_fd);
+    /* Resolve fd-typed attr fields to kernel IDs while the originals are
+     * still valid (just before the syscall fires). dup() doesn't survive
+     * because long-lived loaders (tracee) call close_range() after init.
+     * Reload re-resolves these IDs back to fresh fds via *_GET_FD_BY_ID. */
+    e->prog_btf_kid = 0;
+    e->attach_btf_obj_kid = 0;
+    e->attach_prog_kid = 0;
+    if (attr->prog_btf_fd) {
+        struct bpf_btf_info bi = {0};
+        union bpf_attr ia = {0};
+        ia.info.bpf_fd = attr->prog_btf_fd;
+        ia.info.info_len = sizeof(bi);
+        ia.info.info = (uintptr_t)&bi;
+        if (real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &ia, sizeof(ia)) >= 0)
+            e->prog_btf_kid = bi.id;
+    }
+    if (attr->attach_btf_obj_fd) {
+        struct bpf_btf_info bi = {0};
+        union bpf_attr ia = {0};
+        ia.info.bpf_fd = attr->attach_btf_obj_fd;
+        ia.info.info_len = sizeof(bi);
+        ia.info.info = (uintptr_t)&bi;
+        if (real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &ia, sizeof(ia)) >= 0)
+            e->attach_btf_obj_kid = bi.id;
+    }
+    if (attr->attach_prog_fd) {
+        struct bpf_prog_info pi = {0};
+        union bpf_attr ia = {0};
+        ia.info.bpf_fd = attr->attach_prog_fd;
+        ia.info.info_len = sizeof(pi);
+        ia.info.info = (uintptr_t)&pi;
+        if (real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &ia, sizeof(ia)) >= 0)
+            e->attach_prog_kid = pi.id;
+    }
     /* Deep-copy license (app-owned user string, lifetime unknown after the
      * call returns). Required for candidate BPF_PROG_LOAD verifier-state
      * probes. */
@@ -1911,11 +1930,35 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
     a.insns = (uintptr_t)insns;
     a.insn_cnt = (uint32_t)(bytes / sizeof(struct bpf_insn));
     a.license = (uintptr_t)p->license;
-    a.prog_btf_fd = (p->prog_btf_fd_dup >= 0) ? (uint32_t)p->prog_btf_fd_dup : 0;
-    a.attach_btf_obj_fd = (p->attach_btf_obj_fd_dup >= 0)
-                          ? (uint32_t)p->attach_btf_obj_fd_dup : 0;
-    a.attach_prog_fd = (p->attach_prog_fd_dup >= 0)
-                       ? (uint32_t)p->attach_prog_fd_dup : 0;
+    /* Open fresh fds for the BTF / attach-prog objects we captured by id.
+     * These get closed below after PROG_LOAD returns (kernel takes refs
+     * during the syscall; we only need the fd alive across the call). */
+    int prog_btf_resolved = -1;
+    int attach_btf_obj_resolved = -1;
+    int attach_prog_resolved = -1;
+    if (p->prog_btf_kid) {
+        union bpf_attr ia = {0};
+        ia.btf_id = p->prog_btf_kid;
+        long r = real_syscall(SYS_bpf, BPF_BTF_GET_FD_BY_ID, &ia, sizeof(ia));
+        if (r >= 0) prog_btf_resolved = (int)r;
+    }
+    if (p->attach_btf_obj_kid) {
+        union bpf_attr ia = {0};
+        ia.btf_id = p->attach_btf_obj_kid;
+        long r = real_syscall(SYS_bpf, BPF_BTF_GET_FD_BY_ID, &ia, sizeof(ia));
+        if (r >= 0) attach_btf_obj_resolved = (int)r;
+    }
+    if (p->attach_prog_kid) {
+        union bpf_attr ia = {0};
+        ia.prog_id = p->attach_prog_kid;
+        long r = real_syscall(SYS_bpf, BPF_PROG_GET_FD_BY_ID, &ia, sizeof(ia));
+        if (r >= 0) attach_prog_resolved = (int)r;
+    }
+    a.prog_btf_fd = (prog_btf_resolved >= 0) ? (uint32_t)prog_btf_resolved : 0;
+    a.attach_btf_obj_fd = (attach_btf_obj_resolved >= 0)
+                          ? (uint32_t)attach_btf_obj_resolved : 0;
+    a.attach_prog_fd = (attach_prog_resolved >= 0)
+                       ? (uint32_t)attach_prog_resolved : 0;
     log_line("reload prog kid=%u type=%u prog_btf_fd=%u attach_btf_obj_fd=%u "
              "attach_prog_fd=%u attach_btf_id=%u expected_attach=%u "
              "nr_map_fds=%u",
@@ -1942,6 +1985,11 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
 
     free_full_fd_array(fd_array, fd_array_n);
     free(insns);
+    /* Drop the per-reload BTF/prog fds — kernel held refs across the
+     * syscall; our fds are not needed afterwards. */
+    if (prog_btf_resolved >= 0) real_close(prog_btf_resolved);
+    if (attach_btf_obj_resolved >= 0) real_close(attach_btf_obj_resolved);
+    if (attach_prog_resolved >= 0) real_close(attach_prog_resolved);
 
     if (new_pfd < 0) {
         /* Always append the actual errno — verifier may have accepted (so the

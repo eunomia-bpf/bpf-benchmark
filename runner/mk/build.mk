@@ -57,11 +57,8 @@ HOST_KINSN_DIR_ARM64 := $(HOST_BUILD_ROOT)/kinsn-build/arm64
 	host-kernel-x86 host-kernel-arm64 host-kernel-offsets-x86 host-kernel-offsets-arm64 \
 	host-kinsn-x86 host-kinsn-arm64 host-rust-x86 host-rust-arm64 host-shim-artifacts \
 	apps host-source-apps host-source-apps-x86 host-source-apps-arm64 \
-	aarch64-sysroot runtime-kernel-image katran-bpf \
+	aarch64-sysroot runtime-kernel-image \
 	x86-runner-runtime-image-tar arm64-runner-runtime-image-tar image-runner-runtime-image-tar
-
-katran-bpf:
-	$(MAKE) -C "$(ROOT_DIR)/vendor" katran-bpf
 
 apps: host-source-apps
 host-source-apps: host-source-apps-x86 host-source-apps-arm64
@@ -143,7 +140,7 @@ host-shim-artifacts:
 	$(MAKE) -C "$(BPFOPT_SHIM_DIR)" libbpfrejit_shim.so
 	$(MAKE) -C "$(BPFOPT_SHIM_DIR)" musl
 
-x86-runner-runtime-image-tar: host-kernel-x86 host-kernel-offsets-x86 host-kinsn-x86 host-rust-x86 host-shim-artifacts host-source-apps-x86 katran-bpf
+x86-runner-runtime-image-tar: host-kernel-x86 host-kernel-offsets-x86 host-kinsn-x86 host-rust-x86 host-shim-artifacts host-source-apps-x86
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	docker build --platform linux/amd64 \
 		--target runner-runtime \
@@ -163,7 +160,7 @@ x86-runner-runtime-image-tar: host-kernel-x86 host-kernel-offsets-x86 host-kinsn
 	docker save -o "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE)"
 	mv -f "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE_TAR)"
 
-arm64-runner-runtime-image-tar: host-kernel-arm64 host-kernel-offsets-arm64 host-kinsn-arm64 host-rust-arm64 host-shim-artifacts host-source-apps-arm64 katran-bpf
+arm64-runner-runtime-image-tar: host-kernel-arm64 host-kernel-offsets-arm64 host-kinsn-arm64 host-rust-arm64 host-shim-artifacts host-source-apps-arm64
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	docker build --platform linux/arm64 \
 		--target runner-runtime \

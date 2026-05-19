@@ -1200,3 +1200,82 @@ favorable even though the load itself is a better x86 instruction. Keep the
 selector, but do not broaden it to more memory widths or scaled forms until the
 profitability model can distinguish address-ladder loads from tight induction
 loops where BPF's existing `lea/add + load` schedule is already strong.
+
+### Step 18: force-select every legal kinsn candidate
+
+Question tested: what happens if the LLVM selector ignores profitability and
+selects every currently recognized kinsn candidate?
+
+Implementation:
+
+- Added hidden llc flag `-bpf-kinsn-force-all`.
+- Added `BPF_KINSN_LLC_FLAGS` to `micro/programs/Makefile` so experiments can
+  pass extra llc flags without changing the default build path.
+- The flag ignores candidate score only. It does not override legality. In
+  particular, local bpf2bpf subprogram kinsn selection stays disabled because
+  kinsn proof sequences consume verifier stack that is combined with the caller.
+
+The first experiment also forced local subprograms. That is not legal today:
+`bpf_local_call_fanout_dispatch` failed verifier with:
+
+```text
+combined stack size of 2 calls is 544. Too large
+```
+
+That failed run is useful because it confirms the local-subprog restriction is
+a verifier legality rule, not just conservative profitability.
+
+Legal force-all objects:
+
+- `micro/results/llvm_kinsn_programs_force_all_legal_20260519_050157`
+
+Selected kinsns:
+
+| kinsn | count |
+|---|---:|
+| `bpf_x86_leaq` | 160 |
+| `bpf_x86_rolq` | 119 |
+| `bpf_x86_rorxl` | 40 |
+| `bpf_x86_leal` | 24 |
+| `bpf_x86_movzbl` | 19 |
+| `bpf_x86_movbe16` | 13 |
+| `bpf_x86_bextrq` | 10 |
+| `bpf_x86_movbe32` | 6 |
+| `bpf_x86_rolw` | 2 |
+| `bpf_x86_bswapl` | 2 |
+| `bpf_x86_shldq` | 1 |
+| `bpf_x86_popcntq` | 1 |
+
+Validation:
+
+- Full single-sample `make micro` passed: 29/29 correct.
+  Run:
+  `micro/results/x86_kvm_micro_20260519_120403_748777/metadata.json`
+- Full three-sample `make micro` passed: 29/29 correct.
+  Run:
+  `micro/results/x86_kvm_micro_20260519_120633_074134/metadata.json`
+
+Summary using analysis-side per-benchmark mean over three raw samples:
+
+| Comparison | Geomean ratio | summed mean exec delta | JIT byte delta | xlated byte delta | wins/losses/ties |
+|---|---:|---:|---:|---:|---:|
+| legal force-all vs SIB early-clobber default | 1.0011 | +299.0 ns | +38 bytes | +168 bytes | 9/15/5 |
+
+Key three-sample deltas versus SIB early-clobber default:
+
+| Benchmark | SIB default | legal force-all | JIT bytes | xlated bytes |
+|---|---:|---:|---:|---:|
+| `bcc_runqlat_log2_histogram_bucket` | 1003.7 ns | 1086.7 ns | 542 -> 583 | 1168 -> 1216 |
+| `packet_checksum_fold` | 13250.0 ns | 13462.3 ns | 270 -> 270 | 536 -> 536 |
+| `packet_toeplitz_rss_hash` | 221.7 ns | 230.0 ns | 916 -> 916 | 1568 -> 1568 |
+| `sorted_rule_binary_search` | 533.0 ns | 527.3 ns | 643 -> 643 | 1280 -> 1280 |
+| `trace_event_type_switch_dispatch` | 283.3 ns | 277.3 ns | 1457 -> 1457 | 1912 -> 1912 |
+| `packed_header_bitfield_decode` | 266.0 ns | 269.0 ns | 1006 -> 1009 | 2032 -> 2120 |
+
+Conclusion: enabling all legal kinsn candidates is not the right default. It
+mostly adds `bpf_x86_bextrq` and cold `rolw/bswapl` unary forms. Those are
+correct, but not consistently profitable on this suite. The current
+profitability gate is doing useful work: keep `bextrq` available for targeted
+experiments, but default-enable it only after there is a control-operand form or
+a better cost model that can prove the final x86 sequence is actually shorter or
+faster.

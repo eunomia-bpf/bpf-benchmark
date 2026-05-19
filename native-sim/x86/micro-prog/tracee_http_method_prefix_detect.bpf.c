@@ -503,7 +503,6 @@ x86_l_265:
 x86_l_267:
 	/* 0x267: jmp    0x26c ; native-link entry RET */
 	X86_SIM_X86_RET();
-	__builtin_unreachable();
 }
 
 X86_SIM_LICENSE();

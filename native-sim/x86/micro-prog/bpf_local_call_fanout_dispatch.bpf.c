@@ -243,17 +243,6 @@ x86_l_ff:
 x86_l_104:
 	/* 0x104: jmp    0x1f */
 	X86_SIM_X86_JMP(0x104, 0x1f, x86_l_1f);
-	__builtin_unreachable();
-
-x86_sim_ret_dispatch:
-	switch (__x86_sim_ret_addr) {
-	case 0x83ULL: goto x86_l_83;
-	case 0xd9ULL: goto x86_l_d9;
-	case 0xe7ULL: goto x86_l_e7;
-	case 0xf5ULL: goto x86_l_f5;
-	default: __builtin_unreachable();
-	}
-
 	/* native subroutine native_link_sub_109 */
 x86_l_109:
 	/* 0x109: mov    eax,edx */
@@ -318,7 +307,6 @@ x86_l_14f:
 x86_l_152:
 	/* 0x152: ret */
 	X86_SIM_X86_SUB_RET(x86_sim_ret_dispatch);
-	__builtin_unreachable();
 
 	/* native subroutine native_link_sub_153 */
 x86_l_153:
@@ -387,7 +375,6 @@ x86_l_197:
 x86_l_19a:
 	/* 0x19a: ret */
 	X86_SIM_X86_SUB_RET(x86_sim_ret_dispatch);
-	__builtin_unreachable();
 
 	/* native subroutine native_link_sub_19b */
 x86_l_19b:
@@ -513,7 +500,6 @@ x86_l_21e:
 x86_l_220:
 	/* 0x220: ret */
 	X86_SIM_X86_SUB_RET(x86_sim_ret_dispatch);
-	__builtin_unreachable();
 
 	/* native subroutine native_link_sub_221 */
 x86_l_221:
@@ -675,7 +661,14 @@ x86_l_2e6:
 x86_l_2eb:
 	/* 0x2eb: ret */
 	X86_SIM_X86_SUB_RET(x86_sim_ret_dispatch);
-	__builtin_unreachable();
+
+x86_sim_ret_dispatch:
+	switch (__x86_sim_ret_addr) {
+	case 0x83ULL: goto x86_l_83;
+	case 0xd9ULL: goto x86_l_d9;
+	case 0xe7ULL: goto x86_l_e7;
+	case 0xf5ULL: goto x86_l_f5;
+	}
 
 }
 

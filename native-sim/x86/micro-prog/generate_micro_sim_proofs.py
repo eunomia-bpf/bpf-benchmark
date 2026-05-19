@@ -659,7 +659,6 @@ def render_x86_subroutine(symbol: str, insns: list[NativeInsn],
                              ret_statement=(
                                  "X86_SIM_X86_SUB_RET(x86_sim_ret_dispatch);"
                              ))
-    lines.append("\t__builtin_unreachable();")
     lines.append("")
     return "\n".join(lines)
 
@@ -732,23 +731,20 @@ def render_program(name: str, insns: list[NativeInsn],
                              next_addr=next_addrs.get(insn.addr),
                              call_functions=subroutine_label_by_addr,
                              ret_statement=ret_statement)
-    lines.append("\t__builtin_unreachable();")
     if subfunctions:
+        for symbol, fn_insns in subfunctions.items():
+            lines.append(render_x86_subroutine(
+                symbol, fn_insns, subroutine_label_by_addr))
         lines.extend([
-            "",
             "x86_sim_ret_dispatch:",
             "\tswitch (__x86_sim_ret_addr) {",
         ])
         for addr in return_addrs:
             lines.append(f"\tcase 0x{addr:x}ULL: goto x86_l_{addr:x};")
         lines.extend([
-            "\tdefault: __builtin_unreachable();",
             "\t}",
             "",
         ])
-        for symbol, fn_insns in subfunctions.items():
-            lines.append(render_x86_subroutine(
-                symbol, fn_insns, subroutine_label_by_addr))
     lines.extend(["}", "", "X86_SIM_LICENSE();", ""])
     return "\n".join(lines)
 

@@ -964,7 +964,6 @@ x86_l_467:
 x86_l_46c:
 	/* 0x46c: jmp    0x471 ; native-link entry RET */
 	X86_SIM_X86_RET();
-	__builtin_unreachable();
 }
 
 X86_SIM_LICENSE();

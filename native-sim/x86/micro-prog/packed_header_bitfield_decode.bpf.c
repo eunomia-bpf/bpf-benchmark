@@ -582,7 +582,6 @@ x86_l_295:
 x86_l_296:
 	/* 0x296: jmp    0x29b ; native-link entry RET */
 	X86_SIM_X86_RET();
-	__builtin_unreachable();
 }
 
 X86_SIM_LICENSE();

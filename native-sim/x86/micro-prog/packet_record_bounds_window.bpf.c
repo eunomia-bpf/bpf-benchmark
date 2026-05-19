@@ -230,7 +230,6 @@ x86_l_f7:
 x86_l_f9:
 	/* 0xf9: jmp    0xfe ; native-link entry RET */
 	X86_SIM_X86_RET();
-	__builtin_unreachable();
 }
 
 X86_SIM_LICENSE();

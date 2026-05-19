@@ -403,7 +403,6 @@ x86_l_1e3:
 x86_l_1e8:
 	/* 0x1e8: jmp    0x1ed ; native-link entry RET */
 	X86_SIM_X86_RET();
-	__builtin_unreachable();
 }
 
 X86_SIM_LICENSE();

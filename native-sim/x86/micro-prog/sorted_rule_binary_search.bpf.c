@@ -146,7 +146,6 @@ x86_l_97:
 x86_l_98:
 	/* 0x98: jmp    0x9d ; native-link entry RET */
 	X86_SIM_X86_RET();
-	__builtin_unreachable();
 }
 
 X86_SIM_LICENSE();

@@ -58,7 +58,6 @@ x86_l_37:
 x86_l_3c:
 	/* 0x3c: jmp    0x41 ; native-link entry RET */
 	X86_SIM_X86_RET();
-	__builtin_unreachable();
 }
 
 X86_SIM_LICENSE();

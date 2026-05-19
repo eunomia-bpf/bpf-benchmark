@@ -1575,7 +1575,6 @@ x86_l_794:
 x86_l_79a:
 	/* 0x79a: jmp    0x4ee */
 	X86_SIM_X86_JMP(0x79a, 0x4ee, x86_l_4ee);
-	__builtin_unreachable();
 }
 
 X86_SIM_LICENSE();
