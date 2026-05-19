@@ -612,7 +612,7 @@ x86_sim_read_packet_mem_value(struct x86_state *state, __u8 base_reg, __u32 aux,
 
 	x86_mem_offset(state, aux, disp, &disp);
 	x86_read_ptr_reg(state, base_reg, &base, &tag);
-	x86_read_ptr_off_reg(state, base_reg, &base_off);
+	base_off = x86_read_ptr_off_reg(state, base_reg);
 	x86_sim_read_packet_value_proven(data, data_end, base, base_off, disp,
 					width, value);
 	return X86_SIM_CONTINUE;
@@ -632,7 +632,7 @@ x86_exec_mov_load_packet(struct x86_state *state, const struct x86_insn *insn,
 		mem_width = insn->flags;
 	x86_mem_offset(state, insn->aux, disp, &disp);
 	x86_read_ptr_reg(state, insn->src, &base, &tag);
-	x86_read_ptr_off_reg(state, insn->src, &base_off);
+	base_off = x86_read_ptr_off_reg(state, insn->src);
 	return x86_sim_load_packet_proven(
 		state, insn->dst, data, data_end, base, base_off, disp,
 		mem_width, insn->flags, insn->op == X86_OP_MOVSX_LOAD);
@@ -648,7 +648,7 @@ x86_exec_alu_mem_packet(struct x86_state *state, const struct x86_insn *insn,
 	__u64 mem_value = 0;
 	__u64 result = 0;
 
-	x86_read_reg(state, insn->dst, &dst_value);
+	dst_value = x86_read_reg(state, insn->dst);
 	if (x86_sim_read_packet_mem_value(state, insn->src, insn->aux,
 					 x86_simm(insn->imm), data, data_end,
 					 width, &mem_value) < 0)

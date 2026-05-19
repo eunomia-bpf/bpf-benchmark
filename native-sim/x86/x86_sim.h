@@ -227,69 +227,9 @@ struct x86_state {
 	void *cmp_lhs_ptr;
 	void *cmp_rhs_ptr;
 #ifdef X86_SIM_ENABLE_STACK
-	__u64 stack0;
-	__u64 stack1;
-#ifndef X86_SIM_ENABLE_STACK_SHALLOW
-	__u64 stack2;
-	__u64 stack3;
-	__u64 stack4;
-	__u64 stack5;
-	__u64 stack6;
-#endif
-#ifdef X86_SIM_ENABLE_STACK_SLOT7
-	__u64 stack7;
-#endif
-#ifdef X86_SIM_ENABLE_STACK_DEEP
-	__u64 stack8;
-	__u64 stack9;
-	__u64 stack10;
-	__u64 stack11;
-#endif
-#ifdef X86_SIM_ENABLE_STACK_EXT
-	__u64 stack12;
-	__u64 stack13;
-	__u64 stack14;
-	__u64 stack15;
-#endif
-	void *p_stack0;
-	void *p_stack1;
-#ifndef X86_SIM_ENABLE_STACK_SHALLOW
-	void *p_stack2;
-	void *p_stack3;
-	void *p_stack4;
-	void *p_stack5;
-	void *p_stack6;
-#endif
-#ifdef X86_SIM_ENABLE_STACK_SLOT7
-	void *p_stack7;
-#endif
-#ifdef X86_SIM_ENABLE_STACK_SLOT8
-	void *p_stack8;
-#endif
-	__u8 tag_stack0;
-	__u8 tag_stack1;
-#ifndef X86_SIM_ENABLE_STACK_SHALLOW
-	__u8 tag_stack2;
-	__u8 tag_stack3;
-	__u8 tag_stack4;
-	__u8 tag_stack5;
-	__u8 tag_stack6;
-#endif
-#ifdef X86_SIM_ENABLE_STACK_SLOT7
-	__u8 tag_stack7;
-#endif
-#ifdef X86_SIM_ENABLE_STACK_DEEP
-	__u8 tag_stack8;
-	__u8 tag_stack9;
-	__u8 tag_stack10;
-	__u8 tag_stack11;
-#endif
-#ifdef X86_SIM_ENABLE_STACK_EXT
-	__u8 tag_stack12;
-	__u8 tag_stack13;
-	__u8 tag_stack14;
-	__u8 tag_stack15;
-#endif
+	__u8 stack_mem[256];
+	void *p_stack[32];
+	__u8 tag_stack[32];
 #endif
 };
 
@@ -342,206 +282,69 @@ static __always_inline __u64 x86_sign_extend(__u64 value, __u8 width)
 	return narrowed;
 }
 
+#define X86_FOR_EACH_GPR(X)                                                \
+	X(X86_RAX, rax, p_rax, tag_rax, off_rax)                           \
+	X(X86_RCX, rcx, p_rcx, tag_rcx, off_rcx)                           \
+	X(X86_RDX, rdx, p_rdx, tag_rdx, off_rdx)                           \
+	X(X86_RBX, rbx, p_rbx, tag_rbx, off_rbx)                           \
+	X(X86_RSP, rsp, p_rsp, tag_rsp, off_rsp)                           \
+	X(X86_RBP, rbp, p_rbp, tag_rbp, off_rbp)                           \
+	X(X86_RSI, rsi, p_rsi, tag_rsi, off_rsi)                           \
+	X(X86_RDI, rdi, p_rdi, tag_rdi, off_rdi)                           \
+	X(X86_R8, r8, p_r8, tag_r8, off_r8)                                \
+	X(X86_R9, r9, p_r9, tag_r9, off_r9)                                \
+	X(X86_R10, r10, p_r10, tag_r10, off_r10)                           \
+	X(X86_R11, r11, p_r11, tag_r11, off_r11)                           \
+	X(X86_R12, r12, p_r12, tag_r12, off_r12)                           \
+	X(X86_R13, r13, p_r13, tag_r13, off_r13)                           \
+	X(X86_R14, r14, p_r14, tag_r14, off_r14)                           \
+	X(X86_R15, r15, p_r15, tag_r15, off_r15)
+
 static __always_inline void x86_clear_ptr_reg(struct x86_state *state,
 					      __u8 reg)
 {
 	switch (reg) {
-	case X86_RAX:
-		state->p_rax = 0;
-		state->tag_rax = X86_PTR_NONE;
+#define X86_CLEAR_PTR_CASE(REG, VALUE, PTR, TAG, OFF)                      \
+	case REG:                                                          \
+		state->PTR = 0;                                            \
+		state->TAG = X86_PTR_NONE;                                 \
 		return;
-	case X86_RCX:
-		state->p_rcx = 0;
-		state->tag_rcx = X86_PTR_NONE;
-		return;
-	case X86_RDX:
-		state->p_rdx = 0;
-		state->tag_rdx = X86_PTR_NONE;
-		return;
-	case X86_RBX:
-		state->p_rbx = 0;
-		state->tag_rbx = X86_PTR_NONE;
-		return;
-	case X86_RSP:
-		state->p_rsp = 0;
-		state->tag_rsp = X86_PTR_NONE;
-		return;
-	case X86_RBP:
-		state->p_rbp = 0;
-		state->tag_rbp = X86_PTR_NONE;
-		return;
-	case X86_RSI:
-		state->p_rsi = 0;
-		state->tag_rsi = X86_PTR_NONE;
-		return;
-	case X86_RDI:
-		state->p_rdi = 0;
-		state->tag_rdi = X86_PTR_NONE;
-		return;
-	case X86_R8:
-		state->p_r8 = 0;
-		state->tag_r8 = X86_PTR_NONE;
-		return;
-	case X86_R9:
-		state->p_r9 = 0;
-		state->tag_r9 = X86_PTR_NONE;
-		return;
-	case X86_R10:
-		state->p_r10 = 0;
-		state->tag_r10 = X86_PTR_NONE;
-		return;
-	case X86_R11:
-		state->p_r11 = 0;
-		state->tag_r11 = X86_PTR_NONE;
-		return;
-	case X86_R12:
-		state->p_r12 = 0;
-		state->tag_r12 = X86_PTR_NONE;
-		return;
-	case X86_R13:
-		state->p_r13 = 0;
-		state->tag_r13 = X86_PTR_NONE;
-		return;
-	case X86_R14:
-		state->p_r14 = 0;
-		state->tag_r14 = X86_PTR_NONE;
-		return;
-	case X86_R15:
-		state->p_r15 = 0;
-		state->tag_r15 = X86_PTR_NONE;
-		return;
+	X86_FOR_EACH_GPR(X86_CLEAR_PTR_CASE)
+#undef X86_CLEAR_PTR_CASE
 	default:
 		return;
 	}
 }
 
-static __always_inline int x86_read_ptr_reg(const struct x86_state *state,
-					    __u8 reg, void **ptr, __u8 *tag)
+static __always_inline void x86_read_ptr_reg(const struct x86_state *state,
+					     __u8 reg, void **ptr, __u8 *tag)
 {
+	*ptr = 0;
+	*tag = X86_PTR_NONE;
 	switch (reg) {
-	case X86_RAX:
-		*ptr = state->p_rax;
-		*tag = state->tag_rax;
-		return 0;
-	case X86_RCX:
-		*ptr = state->p_rcx;
-		*tag = state->tag_rcx;
-		return 0;
-	case X86_RDX:
-		*ptr = state->p_rdx;
-		*tag = state->tag_rdx;
-		return 0;
-	case X86_RBX:
-		*ptr = state->p_rbx;
-		*tag = state->tag_rbx;
-		return 0;
-	case X86_RSP:
-		*ptr = state->p_rsp;
-		*tag = state->tag_rsp;
-		return 0;
-	case X86_RBP:
-		*ptr = state->p_rbp;
-		*tag = state->tag_rbp;
-		return 0;
-	case X86_RSI:
-		*ptr = state->p_rsi;
-		*tag = state->tag_rsi;
-		return 0;
-	case X86_RDI:
-		*ptr = state->p_rdi;
-		*tag = state->tag_rdi;
-		return 0;
-	case X86_R8:
-		*ptr = state->p_r8;
-		*tag = state->tag_r8;
-		return 0;
-	case X86_R9:
-		*ptr = state->p_r9;
-		*tag = state->tag_r9;
-		return 0;
-	case X86_R10:
-		*ptr = state->p_r10;
-		*tag = state->tag_r10;
-		return 0;
-	case X86_R11:
-		*ptr = state->p_r11;
-		*tag = state->tag_r11;
-		return 0;
-	case X86_R12:
-		*ptr = state->p_r12;
-		*tag = state->tag_r12;
-		return 0;
-	case X86_R13:
-		*ptr = state->p_r13;
-		*tag = state->tag_r13;
-		return 0;
-	case X86_R14:
-		*ptr = state->p_r14;
-		*tag = state->tag_r14;
-		return 0;
-	case X86_R15:
-		*ptr = state->p_r15;
-		*tag = state->tag_r15;
-		return 0;
+#define X86_READ_PTR_CASE(REG, VALUE, PTR, TAG, OFF)                       \
+	case REG:                                                          \
+		*ptr = state->PTR;                                        \
+		*tag = state->TAG;                                        \
+		return;
+	X86_FOR_EACH_GPR(X86_READ_PTR_CASE)
+#undef X86_READ_PTR_CASE
 	default:
-		__builtin_unreachable();
+		return;
 	}
 }
 
-static __always_inline int x86_read_ptr_off_reg(const struct x86_state *state,
-						__u8 reg, __s32 *off)
+static __always_inline __s32 x86_read_ptr_off_reg(const struct x86_state *state,
+						  __u8 reg)
 {
 	switch (reg) {
-	case X86_RAX:
-		*off = state->off_rax;
-		return 0;
-	case X86_RCX:
-		*off = state->off_rcx;
-		return 0;
-	case X86_RDX:
-		*off = state->off_rdx;
-		return 0;
-	case X86_RBX:
-		*off = state->off_rbx;
-		return 0;
-	case X86_RSP:
-		*off = state->off_rsp;
-		return 0;
-	case X86_RBP:
-		*off = state->off_rbp;
-		return 0;
-	case X86_RSI:
-		*off = state->off_rsi;
-		return 0;
-	case X86_RDI:
-		*off = state->off_rdi;
-		return 0;
-	case X86_R8:
-		*off = state->off_r8;
-		return 0;
-	case X86_R9:
-		*off = state->off_r9;
-		return 0;
-	case X86_R10:
-		*off = state->off_r10;
-		return 0;
-	case X86_R11:
-		*off = state->off_r11;
-		return 0;
-	case X86_R12:
-		*off = state->off_r12;
-		return 0;
-	case X86_R13:
-		*off = state->off_r13;
-		return 0;
-	case X86_R14:
-		*off = state->off_r14;
-		return 0;
-	case X86_R15:
-		*off = state->off_r15;
-		return 0;
+#define X86_READ_PTR_OFF_CASE(REG, VALUE, PTR, TAG, OFF)                   \
+	case REG:                                                          \
+		return state->OFF;
+	X86_FOR_EACH_GPR(X86_READ_PTR_OFF_CASE)
+#undef X86_READ_PTR_OFF_CASE
 	default:
-		__builtin_unreachable();
+		return 0;
 	}
 }
 
@@ -549,56 +352,14 @@ static __always_inline int x86_write_ptr_off_reg(struct x86_state *state,
 						 __u8 reg, __s32 off)
 {
 	switch (reg) {
-	case X86_RAX:
-		state->off_rax = off;
-		return 0;
-	case X86_RCX:
-		state->off_rcx = off;
-		return 0;
-	case X86_RDX:
-		state->off_rdx = off;
-		return 0;
-	case X86_RBX:
-		state->off_rbx = off;
-		return 0;
-	case X86_RSP:
-		state->off_rsp = off;
-		return 0;
-	case X86_RBP:
-		state->off_rbp = off;
-		return 0;
-	case X86_RSI:
-		state->off_rsi = off;
-		return 0;
-	case X86_RDI:
-		state->off_rdi = off;
-		return 0;
-	case X86_R8:
-		state->off_r8 = off;
-		return 0;
-	case X86_R9:
-		state->off_r9 = off;
-		return 0;
-	case X86_R10:
-		state->off_r10 = off;
-		return 0;
-	case X86_R11:
-		state->off_r11 = off;
-		return 0;
-	case X86_R12:
-		state->off_r12 = off;
-		return 0;
-	case X86_R13:
-		state->off_r13 = off;
-		return 0;
-	case X86_R14:
-		state->off_r14 = off;
-		return 0;
-	case X86_R15:
-		state->off_r15 = off;
-		return 0;
+#define X86_WRITE_PTR_OFF_CASE(REG, VALUE, PTR, TAG, OFF)                  \
+	case REG:                                                          \
+		state->OFF = off;                                          \
+		return X86_SIM_CONTINUE;
+	X86_FOR_EACH_GPR(X86_WRITE_PTR_OFF_CASE)
+#undef X86_WRITE_PTR_OFF_CASE
 	default:
-		__builtin_unreachable();
+		return X86_SIM_CONTINUE;
 	}
 }
 
@@ -607,72 +368,15 @@ static __always_inline int x86_write_ptr_reg(struct x86_state *state,
 {
 	x86_write_ptr_off_reg(state, reg, 0);
 	switch (reg) {
-	case X86_RAX:
-		state->p_rax = ptr;
-		state->tag_rax = tag;
-		return 0;
-	case X86_RCX:
-		state->p_rcx = ptr;
-		state->tag_rcx = tag;
-		return 0;
-	case X86_RDX:
-		state->p_rdx = ptr;
-		state->tag_rdx = tag;
-		return 0;
-	case X86_RBX:
-		state->p_rbx = ptr;
-		state->tag_rbx = tag;
-		return 0;
-	case X86_RSP:
-		state->p_rsp = ptr;
-		state->tag_rsp = tag;
-		return 0;
-	case X86_RBP:
-		state->p_rbp = ptr;
-		state->tag_rbp = tag;
-		return 0;
-	case X86_RSI:
-		state->p_rsi = ptr;
-		state->tag_rsi = tag;
-		return 0;
-	case X86_RDI:
-		state->p_rdi = ptr;
-		state->tag_rdi = tag;
-		return 0;
-	case X86_R8:
-		state->p_r8 = ptr;
-		state->tag_r8 = tag;
-		return 0;
-	case X86_R9:
-		state->p_r9 = ptr;
-		state->tag_r9 = tag;
-		return 0;
-	case X86_R10:
-		state->p_r10 = ptr;
-		state->tag_r10 = tag;
-		return 0;
-	case X86_R11:
-		state->p_r11 = ptr;
-		state->tag_r11 = tag;
-		return 0;
-	case X86_R12:
-		state->p_r12 = ptr;
-		state->tag_r12 = tag;
-		return 0;
-	case X86_R13:
-		state->p_r13 = ptr;
-		state->tag_r13 = tag;
-		return 0;
-	case X86_R14:
-		state->p_r14 = ptr;
-		state->tag_r14 = tag;
-		return 0;
-	case X86_R15:
-		state->p_r15 = ptr;
-		state->tag_r15 = tag;
-		return 0;
+#define X86_WRITE_PTR_CASE(REG, VALUE, PTR, TAG, OFF)                      \
+	case REG:                                                          \
+		state->PTR = ptr;                                         \
+		state->TAG = tag;                                         \
+		return X86_SIM_CONTINUE;
+	X86_FOR_EACH_GPR(X86_WRITE_PTR_CASE)
+#undef X86_WRITE_PTR_CASE
 	default:
-		__builtin_unreachable();
+		return X86_SIM_CONTINUE;
 	}
 }
 
@@ -684,60 +388,17 @@ static __always_inline int x86_write_ptr_reg_off(struct x86_state *state,
 	return x86_write_ptr_off_reg(state, reg, off);
 }
 
-static __always_inline int x86_read_reg(const struct x86_state *state,
-					__u8 reg, __u64 *out)
+static __always_inline __u64 x86_read_reg(const struct x86_state *state,
+					  __u8 reg)
 {
 	switch (reg) {
-	case X86_RAX:
-		*out = state->rax;
-		return 0;
-	case X86_RCX:
-		*out = state->rcx;
-		return 0;
-	case X86_RDX:
-		*out = state->rdx;
-		return 0;
-	case X86_RBX:
-		*out = state->rbx;
-		return 0;
-	case X86_RSP:
-		*out = state->rsp;
-		return 0;
-	case X86_RBP:
-		*out = state->rbp;
-		return 0;
-	case X86_RSI:
-		*out = state->rsi;
-		return 0;
-	case X86_RDI:
-		*out = state->rdi;
-		return 0;
-	case X86_R8:
-		*out = state->r8;
-		return 0;
-	case X86_R9:
-		*out = state->r9;
-		return 0;
-	case X86_R10:
-		*out = state->r10;
-		return 0;
-	case X86_R11:
-		*out = state->r11;
-		return 0;
-	case X86_R12:
-		*out = state->r12;
-		return 0;
-	case X86_R13:
-		*out = state->r13;
-		return 0;
-	case X86_R14:
-		*out = state->r14;
-		return 0;
-	case X86_R15:
-		*out = state->r15;
-		return 0;
+#define X86_READ_REG_CASE(REG, VALUE, PTR, TAG, OFF)                       \
+	case REG:                                                          \
+		return state->VALUE;
+	X86_FOR_EACH_GPR(X86_READ_REG_CASE)
+#undef X86_READ_REG_CASE
 	default:
-		__builtin_unreachable();
+		return 0;
 	}
 }
 
@@ -745,13 +406,12 @@ static __always_inline int x86_write_reg_width(struct x86_state *state,
 					       __u8 reg, __u64 value,
 					       __u8 width)
 {
-	__u64 old_value = 0;
 	__u64 next_value = value;
 
 	x86_clear_ptr_reg(state, reg);
 	if (width == X86_WIDTH_8 || width == X86_WIDTH_16) {
-		if (x86_read_reg(state, reg, &old_value) < 0)
-			__builtin_unreachable();
+		__u64 old_value = x86_read_reg(state, reg);
+
 		next_value = (old_value & ~x86_width_mask(width)) |
 			     (value & x86_width_mask(width));
 	} else if (width == X86_WIDTH_32) {
@@ -759,56 +419,14 @@ static __always_inline int x86_write_reg_width(struct x86_state *state,
 	}
 
 	switch (reg) {
-	case X86_RAX:
-		state->rax = next_value;
-		return 0;
-	case X86_RCX:
-		state->rcx = next_value;
-		return 0;
-	case X86_RDX:
-		state->rdx = next_value;
-		return 0;
-	case X86_RBX:
-		state->rbx = next_value;
-		return 0;
-	case X86_RSP:
-		state->rsp = next_value;
-		return 0;
-	case X86_RBP:
-		state->rbp = next_value;
-		return 0;
-	case X86_RSI:
-		state->rsi = next_value;
-		return 0;
-	case X86_RDI:
-		state->rdi = next_value;
-		return 0;
-	case X86_R8:
-		state->r8 = next_value;
-		return 0;
-	case X86_R9:
-		state->r9 = next_value;
-		return 0;
-	case X86_R10:
-		state->r10 = next_value;
-		return 0;
-	case X86_R11:
-		state->r11 = next_value;
-		return 0;
-	case X86_R12:
-		state->r12 = next_value;
-		return 0;
-	case X86_R13:
-		state->r13 = next_value;
-		return 0;
-	case X86_R14:
-		state->r14 = next_value;
-		return 0;
-	case X86_R15:
-		state->r15 = next_value;
-		return 0;
+#define X86_WRITE_REG_CASE(REG, VALUE, PTR, TAG, OFF)                      \
+	case REG:                                                          \
+		state->VALUE = next_value;                                \
+		return X86_SIM_CONTINUE;
+	X86_FOR_EACH_GPR(X86_WRITE_REG_CASE)
+#undef X86_WRITE_REG_CASE
 	default:
-		__builtin_unreachable();
+		return X86_SIM_CONTINUE;
 	}
 }
 
@@ -819,93 +437,25 @@ static __always_inline int x86_write_reg(struct x86_state *state,
 }
 
 #ifdef X86_SIM_ENABLE_STACK
+#define X86_SIM_STACK_BYTES 256U
+
+static __always_inline __u32 x86_stack_index(__s64 off)
+{
+	return (__u32)(off + X86_SIM_STACK_BYTES);
+}
+
 static __always_inline void
-x86_stack_clear_ptr_slot(struct x86_state *state, __u8 slot)
+x86_stack_clear_ptr_range(struct x86_state *state, __u32 index, __u8 width)
 {
-#define X86_STACK_CLEAR_PTR(SLOT, PTR_FIELD)                               \
-	if (slot == (SLOT)) {                                               \
-		state->PTR_FIELD = 0;                                       \
-		return;                                                     \
-	}
-	X86_STACK_CLEAR_PTR(0, p_stack0);
-	X86_STACK_CLEAR_PTR(1, p_stack1);
-#ifndef X86_SIM_ENABLE_STACK_SHALLOW
-	X86_STACK_CLEAR_PTR(2, p_stack2);
-	X86_STACK_CLEAR_PTR(3, p_stack3);
-	X86_STACK_CLEAR_PTR(4, p_stack4);
-	X86_STACK_CLEAR_PTR(5, p_stack5);
-	X86_STACK_CLEAR_PTR(6, p_stack6);
-#endif
-#ifdef X86_SIM_ENABLE_STACK_SLOT7
-	X86_STACK_CLEAR_PTR(7, p_stack7);
-#endif
-#ifdef X86_SIM_ENABLE_STACK_SLOT8
-	X86_STACK_CLEAR_PTR(8, p_stack8);
-#endif
-#undef X86_STACK_CLEAR_PTR
-}
+	__u32 first = index >> 3;
+	__u32 last = (index + width - 1) >> 3;
 
-static __always_inline int
-x86_stack_store_ptr_slot(struct x86_state *state, __u8 slot, void *ptr,
-			 __u8 tag)
-{
-	if (tag == X86_PTR_NONE || tag == X86_PTR_STACK) {
-		x86_stack_clear_ptr_slot(state, slot);
-		return 0;
+	state->p_stack[first] = 0;
+	state->tag_stack[first] = X86_PTR_NONE;
+	if (last != first) {
+		state->p_stack[last] = 0;
+		state->tag_stack[last] = X86_PTR_NONE;
 	}
-#define X86_STACK_STORE_PTR(SLOT, PTR_FIELD)                               \
-	if (slot == (SLOT)) {                                               \
-		state->PTR_FIELD = ptr;                                    \
-		return 0;                                                  \
-	}
-	X86_STACK_STORE_PTR(0, p_stack0);
-	X86_STACK_STORE_PTR(1, p_stack1);
-#ifndef X86_SIM_ENABLE_STACK_SHALLOW
-	X86_STACK_STORE_PTR(2, p_stack2);
-	X86_STACK_STORE_PTR(3, p_stack3);
-	X86_STACK_STORE_PTR(4, p_stack4);
-	X86_STACK_STORE_PTR(5, p_stack5);
-	X86_STACK_STORE_PTR(6, p_stack6);
-#endif
-#ifdef X86_SIM_ENABLE_STACK_SLOT7
-	X86_STACK_STORE_PTR(7, p_stack7);
-#endif
-#ifdef X86_SIM_ENABLE_STACK_SLOT8
-	X86_STACK_STORE_PTR(8, p_stack8);
-#endif
-#undef X86_STACK_STORE_PTR
-	__builtin_unreachable();
-}
-
-static __always_inline int
-x86_stack_read_ptr_slot(struct x86_state *state, __u8 slot, __u8 tag,
-			void **ptr)
-{
-	*ptr = 0;
-	if (tag == X86_PTR_NONE || tag == X86_PTR_STACK)
-		return 0;
-#define X86_STACK_READ_PTR(SLOT, PTR_FIELD)                                \
-	if (slot == (SLOT)) {                                               \
-		*ptr = state->PTR_FIELD;                                    \
-		return 0;                                                  \
-	}
-	X86_STACK_READ_PTR(0, p_stack0);
-	X86_STACK_READ_PTR(1, p_stack1);
-#ifndef X86_SIM_ENABLE_STACK_SHALLOW
-	X86_STACK_READ_PTR(2, p_stack2);
-	X86_STACK_READ_PTR(3, p_stack3);
-	X86_STACK_READ_PTR(4, p_stack4);
-	X86_STACK_READ_PTR(5, p_stack5);
-	X86_STACK_READ_PTR(6, p_stack6);
-#endif
-#ifdef X86_SIM_ENABLE_STACK_SLOT7
-	X86_STACK_READ_PTR(7, p_stack7);
-#endif
-#ifdef X86_SIM_ENABLE_STACK_SLOT8
-	X86_STACK_READ_PTR(8, p_stack8);
-#endif
-#undef X86_STACK_READ_PTR
-	__builtin_unreachable();
 }
 
 static __always_inline int x86_stack_write_raw(struct x86_state *state,
@@ -913,57 +463,33 @@ static __always_inline int x86_stack_write_raw(struct x86_state *state,
 					       __u64 value, void *ptr,
 					       __u8 tag)
 {
-	__u64 mask = x86_width_mask(width);
-	__u8 shift = 0;
+	__u32 index = x86_stack_index(off);
+	__u64 narrowed = value & x86_width_mask(width);
 
-	if (width != X86_WIDTH_8 && width != X86_WIDTH_16 &&
-	    width != X86_WIDTH_32 && width != X86_WIDTH_64)
-		__builtin_unreachable();
-#define X86_STACK_WRITE_SLOT(BASE, SLOT, VALUE_FIELD, TAG_FIELD)            \
-	if (off >= (BASE) && off + width <= (BASE) + 8) {                   \
-		shift = (__u8)((off - (BASE)) << 3);                       \
-		if (width == X86_WIDTH_64 && shift == 0) {                 \
-			if (x86_stack_store_ptr_slot(state, (SLOT), ptr,   \
-						     tag) < 0)             \
-				__builtin_unreachable();                     \
-			state->VALUE_FIELD = value;                        \
-			state->TAG_FIELD = tag;                            \
-		} else {                                                   \
-			x86_stack_clear_ptr_slot(state, (SLOT));           \
-			state->VALUE_FIELD =                                \
-				(state->VALUE_FIELD & ~(mask << shift)) |   \
-				((value & mask) << shift);                  \
-			state->TAG_FIELD = X86_PTR_NONE;                  \
-		}                                                          \
-		return 0;                                                  \
+	state->stack_mem[index] = narrowed;
+	if (width >= X86_WIDTH_16)
+		state->stack_mem[index + 1] = narrowed >> 8;
+	if (width >= X86_WIDTH_32) {
+		state->stack_mem[index + 2] = narrowed >> 16;
+		state->stack_mem[index + 3] = narrowed >> 24;
 	}
+	if (width == X86_WIDTH_64) {
+		state->stack_mem[index + 4] = narrowed >> 32;
+		state->stack_mem[index + 5] = narrowed >> 40;
+		state->stack_mem[index + 6] = narrowed >> 48;
+		state->stack_mem[index + 7] = narrowed >> 56;
+		if ((index & 7) == 0) {
+			__u32 slot = index >> 3;
 
-	X86_STACK_WRITE_SLOT(-8, 0, stack0, tag_stack0);
-	X86_STACK_WRITE_SLOT(-16, 1, stack1, tag_stack1);
-#ifndef X86_SIM_ENABLE_STACK_SHALLOW
-	X86_STACK_WRITE_SLOT(-24, 2, stack2, tag_stack2);
-	X86_STACK_WRITE_SLOT(-32, 3, stack3, tag_stack3);
-	X86_STACK_WRITE_SLOT(-40, 4, stack4, tag_stack4);
-	X86_STACK_WRITE_SLOT(-48, 5, stack5, tag_stack5);
-	X86_STACK_WRITE_SLOT(-56, 6, stack6, tag_stack6);
-#endif
-#ifdef X86_SIM_ENABLE_STACK_SLOT7
-	X86_STACK_WRITE_SLOT(-64, 7, stack7, tag_stack7);
-#endif
-#ifdef X86_SIM_ENABLE_STACK_DEEP
-	X86_STACK_WRITE_SLOT(-72, 8, stack8, tag_stack8);
-	X86_STACK_WRITE_SLOT(-80, 9, stack9, tag_stack9);
-	X86_STACK_WRITE_SLOT(-88, 10, stack10, tag_stack10);
-	X86_STACK_WRITE_SLOT(-96, 11, stack11, tag_stack11);
-#endif
-#ifdef X86_SIM_ENABLE_STACK_EXT
-	X86_STACK_WRITE_SLOT(-104, 12, stack12, tag_stack12);
-	X86_STACK_WRITE_SLOT(-112, 13, stack13, tag_stack13);
-	X86_STACK_WRITE_SLOT(-120, 14, stack14, tag_stack14);
-	X86_STACK_WRITE_SLOT(-128, 15, stack15, tag_stack15);
-#endif
-#undef X86_STACK_WRITE_SLOT
-	__builtin_unreachable();
+			state->p_stack[slot] =
+				(tag == X86_PTR_NONE || tag == X86_PTR_STACK) ?
+					0 : ptr;
+			state->tag_stack[slot] = tag;
+			return X86_SIM_CONTINUE;
+		}
+	}
+	x86_stack_clear_ptr_range(state, index, width);
+	return X86_SIM_CONTINUE;
 }
 
 static __always_inline int x86_stack_read_raw(struct x86_state *state,
@@ -971,54 +497,30 @@ static __always_inline int x86_stack_read_raw(struct x86_state *state,
 					      __u64 *value,
 					      void **ptr, __u8 *tag)
 {
-	__u64 mask = x86_width_mask(width);
-	__u8 shift = 0;
+	__u32 index = x86_stack_index(off);
 
-	if (width != X86_WIDTH_8 && width != X86_WIDTH_16 &&
-	    width != X86_WIDTH_32 && width != X86_WIDTH_64)
-		__builtin_unreachable();
-#define X86_STACK_READ_SLOT(BASE, SLOT, VALUE_FIELD, TAG_FIELD)             \
-	if (off >= (BASE) && off + width <= (BASE) + 8) {                   \
-		shift = (__u8)((off - (BASE)) << 3);                       \
-		*value = (state->VALUE_FIELD >> shift) & mask;             \
-		*ptr = 0;                                                  \
-		*tag = X86_PTR_NONE;                                       \
-		if (width == X86_WIDTH_64 && shift == 0 &&                 \
-		    state->TAG_FIELD != X86_PTR_NONE) {                    \
-			*tag = state->TAG_FIELD;                           \
-			if (x86_stack_read_ptr_slot(state, (SLOT), *tag,   \
-						    ptr) < 0)              \
-				__builtin_unreachable();                     \
-		}                                                          \
-		return 0;                                                   \
+	*value = state->stack_mem[index];
+	if (width >= X86_WIDTH_16)
+		*value |= (__u64)state->stack_mem[index + 1] << 8;
+	if (width >= X86_WIDTH_32) {
+		*value |= (__u64)state->stack_mem[index + 2] << 16;
+		*value |= (__u64)state->stack_mem[index + 3] << 24;
 	}
+	if (width == X86_WIDTH_64) {
+		*value |= (__u64)state->stack_mem[index + 4] << 32;
+		*value |= (__u64)state->stack_mem[index + 5] << 40;
+		*value |= (__u64)state->stack_mem[index + 6] << 48;
+		*value |= (__u64)state->stack_mem[index + 7] << 56;
+	}
+	*ptr = 0;
+	*tag = X86_PTR_NONE;
+	if (width == X86_WIDTH_64 && (index & 7) == 0) {
+		__u32 slot = index >> 3;
 
-	X86_STACK_READ_SLOT(-8, 0, stack0, tag_stack0);
-	X86_STACK_READ_SLOT(-16, 1, stack1, tag_stack1);
-#ifndef X86_SIM_ENABLE_STACK_SHALLOW
-	X86_STACK_READ_SLOT(-24, 2, stack2, tag_stack2);
-	X86_STACK_READ_SLOT(-32, 3, stack3, tag_stack3);
-	X86_STACK_READ_SLOT(-40, 4, stack4, tag_stack4);
-	X86_STACK_READ_SLOT(-48, 5, stack5, tag_stack5);
-	X86_STACK_READ_SLOT(-56, 6, stack6, tag_stack6);
-#endif
-#ifdef X86_SIM_ENABLE_STACK_SLOT7
-	X86_STACK_READ_SLOT(-64, 7, stack7, tag_stack7);
-#endif
-#ifdef X86_SIM_ENABLE_STACK_DEEP
-	X86_STACK_READ_SLOT(-72, 8, stack8, tag_stack8);
-	X86_STACK_READ_SLOT(-80, 9, stack9, tag_stack9);
-	X86_STACK_READ_SLOT(-88, 10, stack10, tag_stack10);
-	X86_STACK_READ_SLOT(-96, 11, stack11, tag_stack11);
-#endif
-#ifdef X86_SIM_ENABLE_STACK_EXT
-	X86_STACK_READ_SLOT(-104, 12, stack12, tag_stack12);
-	X86_STACK_READ_SLOT(-112, 13, stack13, tag_stack13);
-	X86_STACK_READ_SLOT(-120, 14, stack14, tag_stack14);
-	X86_STACK_READ_SLOT(-128, 15, stack15, tag_stack15);
-#endif
-#undef X86_STACK_READ_SLOT
-	__builtin_unreachable();
+		*ptr = state->p_stack[slot];
+		*tag = state->tag_stack[slot];
+	}
+	return X86_SIM_CONTINUE;
 }
 
 static __always_inline int x86_push_reg(struct x86_state *state, __u8 reg)
@@ -1027,7 +529,7 @@ static __always_inline int x86_push_reg(struct x86_state *state, __u8 reg)
 	void *ptr = 0;
 	__u8 tag = X86_PTR_NONE;
 
-	x86_read_reg(state, reg, &value);
+	value = x86_read_reg(state, reg);
 	x86_read_ptr_reg(state, reg, &ptr, &tag);
 	state->rsp -= 8;
 	return x86_stack_write_raw(state, (__s64)state->rsp, X86_WIDTH_64,
@@ -1041,13 +543,11 @@ static __always_inline int x86_pop_reg(struct x86_state *state, __u8 reg,
 	void *ptr = 0;
 	__u8 tag = X86_PTR_NONE;
 
-	if (x86_stack_read_raw(state, (__s64)state->rsp, width, &value, &ptr,
-			       &tag) < 0)
-		__builtin_unreachable();
+	x86_stack_read_raw(state, (__s64)state->rsp, width, &value, &ptr,
+			   &tag);
 	x86_write_reg_width(state, reg, value, width);
-	if (width == X86_WIDTH_64 && tag != X86_PTR_NONE &&
-	    x86_write_ptr_reg(state, reg, ptr, tag) < 0)
-		__builtin_unreachable();
+	if (width == X86_WIDTH_64 && tag != X86_PTR_NONE)
+		x86_write_ptr_reg(state, reg, ptr, tag);
 	state->rsp += 8;
 	return X86_SIM_CONTINUE;
 }
@@ -1075,7 +575,7 @@ static __always_inline int x86_store_stack_reg(struct x86_state *state,
 	__u8 tag = X86_PTR_NONE;
 	__u8 src_shift = X86_REG_AUX_GET_SRC_SHIFT(aux);
 
-	x86_read_reg(state, src, &value);
+	value = x86_read_reg(state, src);
 	if (src_shift != 0)
 		value >>= src_shift;
 	x86_read_ptr_reg(state, src, &ptr, &tag);
@@ -1320,9 +820,7 @@ static __always_inline int x86_mem_offset(struct x86_state *state,
 	*out = disp;
 	if (index == X86_REG_NONE)
 		return 0;
-	if (scale_log2 > 3)
-		__builtin_unreachable();
-	x86_read_reg(state, index, &index_value);
+	index_value = x86_read_reg(state, index);
 	*out += (__s64)(index_value << scale_log2);
 	return 0;
 }
@@ -1345,13 +843,11 @@ static __always_inline int x86_promote_index_packet_base(struct x86_state *state
 
 	if (*tag != X86_PTR_NONE || index == X86_REG_NONE || scale_log2 != 0)
 		return 0;
-	if (x86_read_ptr_reg(state, index, &index_ptr, &index_tag) < 0)
-		return 0;
+	x86_read_ptr_reg(state, index, &index_ptr, &index_tag);
 	if (index_tag != X86_PTR_PACKET)
 		return 0;
-	if (base_reg != X86_REG_NONE &&
-	    x86_read_reg(state, base_reg, &base_value) < 0)
-		__builtin_unreachable();
+	if (base_reg != X86_REG_NONE)
+		base_value = x86_read_reg(state, base_reg);
 	*base = index_ptr;
 	*tag = X86_PTR_PACKET;
 	*disp += (__s64)base_value;
@@ -1671,7 +1167,8 @@ static __always_inline int x86_rodata_trace_event_switch(__u64 index,
 		*out = 55;
 		return 0;
 	}
-	__builtin_unreachable();
+	*out = 0;
+	return 0;
 }
 
 static __always_inline int x86_load_rodata(struct x86_state *state,
@@ -1682,15 +1179,11 @@ static __always_inline int x86_load_rodata(struct x86_state *state,
 	__u64 value = 0;
 
 	if (base == 3782 && load_width == X86_WIDTH_64 &&
-	    disp >= 0 && disp < 512 && (disp & 7) == 0) {
-		if (x86_rodata_trace_event_switch((__u64)disp >> 3,
-						  &value) < 0)
-			__builtin_unreachable();
-		if (sign_extend)
-			value = x86_sign_extend(value, load_width);
-		return x86_write_reg_width(state, dst, value, write_width);
-	}
-	__builtin_unreachable();
+	    disp >= 0 && disp < 512 && (disp & 7) == 0)
+		x86_rodata_trace_event_switch((__u64)disp >> 3, &value);
+	if (sign_extend)
+		value = x86_sign_extend(value, load_width);
+	return x86_write_reg_width(state, dst, value, write_width);
 }
 #endif
 
@@ -1723,7 +1216,7 @@ static __always_inline int x86_store_packet_reg(struct x86_state *state,
 	__u64 value;
 	__u8 src_shift = X86_REG_AUX_GET_SRC_SHIFT(aux);
 
-	x86_read_reg(state, src, &value);
+	value = x86_read_reg(state, src);
 	if (src_shift != 0)
 		value >>= src_shift;
 	return x86_store_packet_imm(data, data_end, base, disp, width, value);
@@ -2066,7 +1559,7 @@ static __always_inline int x86_exec_mov_reg(struct x86_state *state,
 	__u8 src_tag = X86_PTR_NONE;
 	__s32 src_off = 0;
 
-	x86_read_reg(state, insn->src, &src_value);
+	src_value = x86_read_reg(state, insn->src);
 	x86_write_reg_width(state, insn->dst, src_value, width);
 	if (width == X86_WIDTH_64 &&
 	    x86_read_ptr_reg(state, insn->src, &src_ptr, &src_tag) == 0 &&
@@ -2087,7 +1580,7 @@ static __always_inline int x86_exec_movzx_reg(struct x86_state *state,
 	__u8 src_width = insn->aux ? insn->aux : width;
 	__u64 src_value = 0;
 
-	x86_read_reg(state, insn->src, &src_value);
+	src_value = x86_read_reg(state, insn->src);
 	src_value = x86_apply_width(src_value, src_width);
 	return x86_write_reg_width(state, insn->dst, src_value, width);
 }
@@ -2100,7 +1593,7 @@ static __always_inline int x86_exec_movsx_reg(struct x86_state *state,
 	__u8 src_width = insn->aux ? insn->aux : width;
 	__u64 src_value = 0;
 
-	x86_read_reg(state, insn->src, &src_value);
+	src_value = x86_read_reg(state, insn->src);
 	src_value = x86_sign_extend(src_value, src_width);
 	return x86_write_reg_width(state, insn->dst, src_value, width);
 }
@@ -2182,7 +1675,7 @@ static __always_inline int x86_exec_alu_imm(struct x86_state *state,
 	__u8 src_tag = X86_PTR_NONE;
 	__s32 src_off = 0;
 
-	x86_read_reg(state, insn->dst, &dst_value);
+	dst_value = x86_read_reg(state, insn->dst);
 #ifdef X86_SIM_ENABLE_STACK
 	if (width == X86_WIDTH_64 && insn->dst == X86_RSP &&
 	    (insn->aux == X86_ALU_ADD || insn->aux == X86_ALU_SUB)) {
@@ -2247,7 +1740,7 @@ static __always_inline int x86_exec_alu_mem(struct x86_state *state,
 	__u64 mem_value = 0;
 	__u64 result = 0;
 
-	x86_read_reg(state, insn->dst, &dst_value);
+	dst_value = x86_read_reg(state, insn->dst);
 	if (x86_read_mem_value(state, insn->src, insn->aux, insn->imm, data,
 			       data_end, width, &mem_value) < 0)
 		__builtin_unreachable();
@@ -2273,8 +1766,8 @@ static __always_inline int x86_exec_alu_reg(struct x86_state *state,
 	__s32 dst_off = 0;
 	__s32 src_off = 0;
 
-	x86_read_reg(state, insn->dst, &dst_value);
-	x86_read_reg(state, insn->src, &src_value);
+	dst_value = x86_read_reg(state, insn->dst);
+	src_value = x86_read_reg(state, insn->src);
 	x86_read_ptr_reg(state, insn->dst, &dst_ptr, &dst_tag);
 	x86_read_ptr_reg(state, insn->src, &src_ptr, &src_tag);
 	if (width == X86_WIDTH_64 && insn->aux == X86_ALU_ADD &&
@@ -2352,7 +1845,7 @@ static __always_inline int x86_exec_cmp_imm(struct x86_state *state,
 	__u8 width = insn->flags ? insn->flags : X86_WIDTH_64;
 	__u64 dst_value = 0;
 
-	x86_read_reg(state, insn->dst, &dst_value);
+	dst_value = x86_read_reg(state, insn->dst);
 	x86_set_sub_flags(state, dst_value, insn->imm, dst_value - insn->imm,
 			  width);
 	return X86_SIM_CONTINUE;
@@ -2368,8 +1861,8 @@ static __always_inline int x86_exec_cmp_reg(struct x86_state *state,
 	void *src_ptr = 0;
 	__u8 src_tag = X86_PTR_NONE;
 
-	x86_read_reg(state, insn->dst, &dst_value);
-	x86_read_reg(state, insn->src, &src_value);
+	dst_value = x86_read_reg(state, insn->dst);
+	src_value = x86_read_reg(state, insn->src);
 	if (x86_read_ptr_reg(state, insn->dst, &src_ptr, &src_tag) == 0 &&
 	    src_tag != X86_PTR_NONE) {
 		void *rhs_ptr;
@@ -2422,7 +1915,7 @@ static __always_inline int x86_exec_test_imm(struct x86_state *state,
 	__u8 width = insn->flags ? insn->flags : X86_WIDTH_64;
 	__u64 dst_value = 0;
 
-	x86_read_reg(state, insn->dst, &dst_value);
+	dst_value = x86_read_reg(state, insn->dst);
 	x86_set_logic_flags(state, dst_value & insn->imm, width);
 	return X86_SIM_CONTINUE;
 }
@@ -2435,8 +1928,8 @@ static __always_inline int x86_exec_test_reg(struct x86_state *state,
 	__u64 dst_value = 0;
 	__u64 src_value = 0;
 
-	x86_read_reg(state, insn->dst, &dst_value);
-	x86_read_reg(state, insn->src, &src_value);
+	dst_value = x86_read_reg(state, insn->dst);
+	src_value = x86_read_reg(state, insn->src);
 	x86_set_logic_flags(state, dst_value & src_value, width);
 	return X86_SIM_CONTINUE;
 }
@@ -2452,7 +1945,7 @@ static __always_inline int x86_exec_cmov(struct x86_state *state,
 
 	if (!x86_eval_cc(state, insn->aux))
 		return X86_SIM_CONTINUE;
-	x86_read_reg(state, insn->src, &src_value);
+	src_value = x86_read_reg(state, insn->src);
 	x86_write_reg_width(state, insn->dst, src_value, width);
 	if (width == X86_WIDTH_64 &&
 	    x86_read_ptr_reg(state, insn->src, &src_ptr, &src_tag) == 0 &&
@@ -2476,7 +1969,7 @@ static __always_inline int x86_exec_bswap(struct x86_state *state,
 	__u8 width = insn->flags ? insn->flags : X86_WIDTH_64;
 	__u64 dst_value = 0;
 
-	x86_read_reg(state, insn->dst, &dst_value);
+	dst_value = x86_read_reg(state, insn->dst);
 	return x86_write_reg_width(state, insn->dst,
 				   x86_bswap(dst_value, width), width);
 }
@@ -2489,7 +1982,7 @@ static __always_inline int x86_exec_popcnt(struct x86_state *state,
 	__u64 src_value = 0;
 	__u64 result = 0;
 
-	x86_read_reg(state, insn->src, &src_value);
+	src_value = x86_read_reg(state, insn->src);
 	result = x86_popcount64(x86_apply_width(src_value, width));
 	return x86_write_reg_width(state, insn->dst, result, width);
 }
@@ -2504,8 +1997,8 @@ static __always_inline int x86_exec_xchg(struct x86_state *state,
 
 	if (insn->dst == insn->src)
 		return X86_SIM_CONTINUE;
-	x86_read_reg(state, insn->dst, &dst_value);
-	x86_read_reg(state, insn->src, &src_value);
+	dst_value = x86_read_reg(state, insn->dst);
+	src_value = x86_read_reg(state, insn->src);
 	x86_write_reg_width(state, insn->dst, src_value, width);
 	return x86_write_reg_width(state, insn->src, dst_value, width);
 }

@@ -1,25 +1,8 @@
 {
-  "completed_benchmarks": 27,
-  "current_benchmark": "tc_packet_checksum_fold",
-  "current_benchmark_index": 28,
-  "current_benchmark_record": {
-    "category": "memory-local",
-    "description": "TC version of the packet checksum fold benchmark",
-    "expected_result": 0,
-    "family": "reduction",
-    "hypothesis": "Reuses the checksum reduction under a sched_cls hook with packet-fed staged input and skb-context result extraction",
-    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_checksum_fold.mem",
-    "io_mode": "staged",
-    "level": "medium",
-    "name": "tc_packet_checksum_fold",
-    "runs": [],
-    "tags": [
-      "tc",
-      "pure-jit",
-      "non-xdp",
-      "kernel-only"
-    ]
-  },
-  "status": "running",
+  "completed_benchmarks": 29,
+  "current_benchmark": null,
+  "current_benchmark_index": null,
+  "current_benchmark_record": null,
+  "status": "completed",
   "total_benchmarks": 29
 }

@@ -1,6 +1,6 @@
 # GCC 13 can ICE while compiling grpc's tcp_client_posix.cc on Ubuntu 24.04.
 # Build Katran's C/C++ userspace stack with clang instead.
-$(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES) $(KATRAN_ARTIFACTS_BUILD_RULE_FILE)
+image-katran-artifacts:
 	repo_root="$(REPOS_DIR)/katran"; \
 	build_root="$(KATRAN_BUILD_ROOT)"; \
 	install_root="$(REPO_KATRAN_ROOT)"; \
@@ -51,5 +51,6 @@ $(ACTIVE_KATRAN_REQUIRED) &: $(KATRAN_SOURCE_FILES) $(KATRAN_ARTIFACTS_BUILD_RUL
 	test -x "$$install_root/bin/katran_server_grpc" || { echo "missing Katran install output: $$install_root/bin/katran_server_grpc" >&2; exit 1; }; \
 	[ -f "$$bpf_root/healthchecking_ipip.o" ] && mv -f "$$bpf_root/healthchecking_ipip.o" "$$bpf_root/healthchecking_ipip.bpf.o" || true; \
 	[ -f "$$bpf_root/xdp_root.o" ] && mv -f "$$bpf_root/xdp_root.o" "$$bpf_root/xdp_root.bpf.o" || true; \
-	for path in $(ACTIVE_KATRAN_REQUIRED); do test -e "$$path"; done; \
-	touch $(ACTIVE_KATRAN_REQUIRED)
+	test -f "$$bpf_root/balancer.bpf.o"; \
+	test -f "$$bpf_root/healthchecking_ipip.bpf.o"; \
+	test -f "$$bpf_root/xdp_root.bpf.o"

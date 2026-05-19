@@ -1625,11 +1625,132 @@
         "string",
         "pure-jit"
       ]
+    },
+    {
+      "category": "memory-local",
+      "description": "TC version of the packet checksum fold benchmark",
+      "expected_result": 0,
+      "family": "reduction",
+      "hypothesis": "Reuses the checksum reduction under a sched_cls hook with packet-fed staged input and skb-context result extraction",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/packet_checksum_fold.mem",
+      "io_mode": "staged",
+      "level": "medium",
+      "name": "tc_packet_checksum_fold",
+      "runs": [
+        {
+          "inner_repeat": 100000,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 624,
+                "native_code_bytes": 298
+              },
+              "compile_ns": 45071322,
+              "exec_cycles": 49365,
+              "exec_ns": 13390,
+              "jited_prog_len": 298,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 2383,
+                "memory_prepare_ns": 24605,
+                "object_load_ns": 42087853,
+                "object_open_ns": 2983469,
+                "prog_run_wall_ns": 1339101281,
+                "result_extract_ns": 293
+              },
+              "result": 0,
+              "retval": 0,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686220719,
+              "wall_exec_ns": 13392,
+              "xlated_prog_len": 624
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "tc",
+        "pure-jit",
+        "non-xdp",
+        "kernel-only"
+      ]
+    },
+    {
+      "category": "alu-mix",
+      "description": "cgroup_skb egress hash-chain reduction over generated u64 words",
+      "expected_result": 12027228624407116210,
+      "family": "hash-chain",
+      "hypothesis": "Exercises a non-XDP cgroup_skb hook with packet-fed staged input and skb-context result extraction",
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/cgroup_skb_hash_chain.mem",
+      "io_mode": "staged",
+      "level": "short",
+      "name": "cgroup_skb_hash_chain",
+      "runs": [
+        {
+          "inner_repeat": 100000,
+          "mode": "kernel",
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 992,
+                "native_code_bytes": 505
+              },
+              "compile_ns": 11982383,
+              "exec_cycles": 1083,
+              "exec_ns": 293,
+              "jited_prog_len": 505,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 304,
+                "memory_prepare_ns": 27942,
+                "object_load_ns": 9316400,
+                "object_open_ns": 2665983,
+                "prog_run_wall_ns": 29366582,
+                "result_extract_ns": 273
+              },
+              "result": 12027228624407116210,
+              "retval": 1,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686267854,
+              "wall_exec_ns": 294,
+              "xlated_prog_len": 992
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "cgroup-skb",
+        "pure-jit",
+        "non-xdp",
+        "kernel-only"
+      ]
     }
   ],
   "build": {
     "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec"
   },
+  "completed_at": "2026-05-19T04:20:05.489021+00:00",
   "defaults": {
     "inner_repeat": 100000,
     "perf_counters": false,
@@ -1653,12 +1774,12 @@
     "python": "3.12.3",
     "turbo_state": "unknown"
   },
-  "last_updated_at": "2026-05-19T04:19:56.518857+00:00",
+  "last_updated_at": "2026-05-19T04:20:05.489021+00:00",
   "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_pure_jit.yaml",
   "progress": {
-    "completed_benchmarks": 27,
-    "current_benchmark": "tc_packet_checksum_fold",
-    "current_benchmark_index": 28,
+    "completed_benchmarks": 29,
+    "current_benchmark": null,
+    "current_benchmark_index": null,
     "total_benchmarks": 29
   },
   "provenance": {
@@ -1676,7 +1797,7 @@
   },
   "run_type": "x86_kvm_micro",
   "started_at": "2026-05-19T04:19:35.824020+00:00",
-  "status": "running",
+  "status": "completed",
   "suite": "micro_staged_codegen",
   "toolchains": {
     "libbpf": {
