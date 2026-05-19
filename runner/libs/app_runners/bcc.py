@@ -14,10 +14,8 @@ from typing import Mapping, Sequence
 
 from .. import ROOT_DIR, tail_text, which
 from ..benchmark_catalog import MACRO_APP_DEFINITIONS
-from ..agent import bpftool_prog_show_records, stop_agent
-from ..workload import WorkloadResult, run_named_workload
+from ..agent import stop_agent
 from .base import AppRunner
-from .process_support import wait_until_program_set_stable
 
 DEFAULT_ATTACH_TIMEOUT_SECONDS = 150
 KHEADERS_READY_MARKER = ".bpfrejit-kheaders-ready"
@@ -357,103 +355,6 @@ class BCCRunner(AppRunner):
         if not os.access(self.tool_binary, os.X_OK):
             raise RuntimeError(f"BCC tool binary is not executable: {self.tool_binary}")
         return self.tool_binary
-
-    def start(self) -> list[int]:
-        if self.session is not None:
-            raise RuntimeError(f"BCC tool {self.tool_name} is already running")
-
-        tool_binary = self._resolve_tool_binary()
-        tool_env = os.environ.copy()
-        # Inject LD_PRELOAD shim + BPFREJIT_SHIM_SOCK_DIR so the bcc tool's
-        # libbpf calls go through the bpfrejit shim. Without this, the
-        # runner-side _build_prog_id_to_socket_map can't locate any per-pid
-        # shim socket, and every reload request fails with ENOENT on the
-        # /var/run/bpfrejit/shim-<pid>.sock path.
-        from ..agent import _shim_env_for
-        tool_env.update(_shim_env_for(str(tool_binary)))
-        kernel_source = _prepare_bcc_kernel_source(tool_env)
-        if kernel_source:
-            self.artifacts["bcc_kernel_source"] = kernel_source
-        self._compat_dir = _prepare_bcc_python_compat(tool_env)
-        self.artifacts["bcc_python_compat_dir"] = str(self._compat_dir)
-        command = [str(tool_binary), *self.tool_args]
-        before_ids = {
-            int(record.get("id", 0) or 0)
-            for record in bpftool_prog_show_records()
-            if int(record.get("id", 0) or 0) > 0
-        }
-        process = subprocess.Popen(
-            command,
-            cwd=ROOT_DIR,
-            env=tool_env,
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            bufsize=1,
-        )
-        if process.stdout is None or process.stderr is None:
-            process.kill()
-            raise RuntimeError(f"BCC tool {self.tool_name} did not expose stdout/stderr pipes")
-        stdout_capture = _TailCapture(max_lines=40, max_chars=8000)
-        stderr_capture = _TailCapture(max_lines=40, max_chars=8000)
-        stdout_thread = threading.Thread(
-            target=_drain_stream,
-            args=(process.stdout, stdout_capture),
-            daemon=True,
-        )
-        stderr_thread = threading.Thread(
-            target=_drain_stream,
-            args=(process.stderr, stderr_capture),
-            daemon=True,
-        )
-        stdout_thread.start()
-        stderr_thread.start()
-        self.session = ToolProcessSession(
-            process=process,
-            stdout_capture=stdout_capture,
-            stderr_capture=stderr_capture,
-            stdout_thread=stdout_thread,
-            stderr_thread=stderr_thread,
-        )
-        programs = wait_until_program_set_stable(
-            before_ids=before_ids,
-            timeout_s=self.attach_timeout_s,
-            process=process,
-            collector_snapshot=lambda: {
-                "stdout_tail": [stdout_capture.render()],
-                "stderr_tail": [stderr_capture.render()],
-            },
-            process_name=f"BCC tool {self.tool_name}",
-        )
-        if not programs:
-            return self._fail_start(
-                f"BCC tool {self.tool_name} did not attach any BPF programs within {self.attach_timeout_s}s"
-            )
-        self.programs = [dict(program) for program in programs]
-        return [int(program["id"]) for program in self.programs if int(program.get("id", 0) or 0) > 0]
-
-    def run_workload(self, seconds: float) -> WorkloadResult:
-        if self.session is None:
-            raise RuntimeError(f"BCC tool {self.tool_name} is not running")
-        return run_named_workload(
-            str(self.workload_spec.get("kind") or self.workload_spec.get("name") or ""),
-            seconds,
-        )
-
-    def run_workload_spec(
-        self,
-        workload_spec: Mapping[str, object],
-        seconds: float,
-    ) -> WorkloadResult:
-        if self.session is None:
-            raise RuntimeError(f"BCC tool {self.tool_name} is not running")
-        requested_kind = str(workload_spec.get("kind") or workload_spec.get("name") or "").strip()
-        if not requested_kind:
-            raise RuntimeError(f"BCC tool {self.tool_name} workload spec is missing a workload kind")
-        return run_named_workload(requested_kind, seconds)
 
     def stop(self) -> None:
         if self.session is None:

@@ -122,6 +122,16 @@ point where native `sk_buff->len` can differ from the verifier packet span are
 outside this proof mode until the native ABI exposes a value that is exactly
 equal to verifier `data_end`.
 
+The underlying issue is an ABI registration mismatch. eBPF source-level
+`ctx->data_end` is not a load from `sk_buff->len`: the verifier/JIT rewrite
+turns it into a load from `skb->cb + offsetof(struct bpf_skb_data_end,
+data_end)`, and the kernel runtime fills that slot before running skb BPF
+programs. The current linked native skb ABI reads `sk_buff->len` and computes
+`data + len`, so it is not reading the same kernel-prepared value. A
+direct-native proof for general skb programs must align the native ABI with the
+eBPF runtime/JIT ABI, or introduce a separately proven native ABI field with
+identical semantics.
+
 The entry macros must not change ctx/packet/output memory, create per-register
 tags, insert bounds checks, trap, fallback, infer `packet + len == packet_end`,
 or influence control flow.

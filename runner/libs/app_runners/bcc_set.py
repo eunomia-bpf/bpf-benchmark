@@ -146,6 +146,14 @@ class BccSetRunner(AppRunner):
             raise RuntimeError(f"BCC tool {child.tool_name} is already running")
         tool_binary = child._resolve_tool_binary()
         tool_env = os.environ.copy()
+        # bcc/set spawns multiple BCC python wrappers per workload. Each child
+        # process needs the bpfrejit shim attached so it registers its own
+        # per-pid socket and the runner can route execute_plan to the right
+        # child. The single-tool BCCRunner.start() injects shim env via
+        # _shim_env_for; we have to do the same here because this set-runner
+        # bypasses start() and constructs its own Popen.
+        from ..agent import _shim_env_for
+        tool_env.update(_shim_env_for(str(tool_binary)))
         kernel_source = _prepare_bcc_kernel_source(tool_env)
         if kernel_source:
             child.artifacts["bcc_kernel_source"] = kernel_source
