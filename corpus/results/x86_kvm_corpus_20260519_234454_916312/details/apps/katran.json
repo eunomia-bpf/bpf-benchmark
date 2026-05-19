@@ -1,0 +1,303 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 6503352,
+        "run_time_ns_delta": 817865316,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "config": {
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 10.037162935999987,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 9  udp_src_max: 9  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags:\nCurrent:\n     pkts-sofar: 6503352  errors: 0\n     started: 130430120us  stopped: 140345794us idle: 0us\n     seq_num: 6503353  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 9\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 9915674(c9915674+d0) usec, 6503352 (64byte,-1frags)\n  655865pps 335Mb/sec (335802880bps) errors: 0",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "9": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 6488796,
+        "run_time_ns_delta": 810328443,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "config": {
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 10.039924310000004,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 9  udp_src_max: 9  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags:\nCurrent:\n     pkts-sofar: 6488796  errors: 0\n     started: 184800156us  stopped: 194712880us idle: 0us\n     seq_num: 6488797  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 9\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 9912724(c9912724+d0) usec, 6488796 (64byte,-1frags)\n  654592pps 335Mb/sec (335151104bps) errors: 0",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "9": {
+        "passes": [
+          {
+            "bpfopt_ms": 418,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 125,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 741,
+            "bpfopt_summary": {},
+            "error": " log: invalid id attribute value \"3136-525483785\"\nwarning: verifier log: invalid id attribute value \"3256-525483785\"\nwarning: verifier log: invalid id attribute value \"3256-525483785\"\nwarning: verifier log: invalid id attribute value \"3385-525483785\"\nwarning: verifier log: invalid id attribute value \"3385-525483785\"\nwarning: verifier log: invalid id attribute value \"3503-525483785\"\nwarning: verifier log: invalid id attribute value \"3503-525483785\"\nwarning: verifier log: invalid id attribute value \"3638-525483785\"\nwarning: verifier log: invalid id attribute value \"3638-525483785\"\nwarning: verifier log: invalid id attribute value \"3762-525483785\"\nwarning: verifier log: invalid id attribute value \"3762-525483785\"\nerror: failed to parse bpftool map dump skip marker from /home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_corpus_20260519_234454_916312/details/shim-workdirs/work_9/map-values/map-8.dump.json: unknown field `estimated_bytes`, expected one of `skipped`, `reason`, `size_bytes`, `limit_bytes`\n",
+            "exit_code": 1,
+            "failure_kind": "bpfopt",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_ms": 1357,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 126,
+            "status": "ok",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 370,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 125,
+            "status": "ok",
+            "step": {
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_ms": 297,
+            "bpfopt_summary": {},
+            "error": "ar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-88=scalar()\n1967: (05) goto pc+5\n1973: (61) r2 = *(u32 *)(r10 -56)     ; R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-56=mmmm000\n1974: (85) call pc+508\ncaller:\n R6=ctx() R7=map_value(map=stats,ks=4,vs=16) R8=scalar(id=37) R9=scalar() R10=fp0 fp-8=????514 fp-24=0 fp-32=0 fp-48=mmmmscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-56=mmmm000 fp-64=mmmmmmmm fp-72=mmmmmmmm fp-80=scalar() fp-88=scalar() fp-96=????mm0 fp-104=0 fp-112=mmmmscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-120=mmmmmmmm fp-128=mmmmscalar(smin=smin32=0,smax=umax=smax32=umax32=7,var_off=(0x0; 0x7)) fp-136=mmmm???? fp-144=pkt_end() fp-152=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) fp-160=map_value(map=vip_map,ks=20,vs=8) fp-168=map_ptr(map=fallback_cache,ks=40,vs=16) fp-176=map_value(map=stats,ks=4,vs=16) fp-184=0 fp-192=0\ncallee:\n frame1: R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0\n2483: frame1: R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0\n2483: (07) r2 += -525483785           ; frame1: R2=scalar(smin=0xffffffffe0adc0f7,smax=0xe0adc0f6)\n2484: (18) r3 = 0xfffc0000            ; frame1: R3=0xfffc0000\n2486: (7b) *(u64 *)(r10 -376) = r6\nR6 !read_ok\nprocessed 514 insns (limit 1000000) max_states_per_insn 0 total_states 38 peak_states 38 mark_read 0\n\nBPF_PROG_LOAD errno=13 (post-verifier)\nctx: prog_btf_fd=52 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=37 nr_map_fds=14 prog_type=6 fd_array_n=21 fd_array_neg1=0 prog_flags=0x0 insn_cnt=2453\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 1,
+            "status": "error",
+            "step": {
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_ms": 297,
+            "bpfopt_summary": {},
+            "error": "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=52 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=37 nr_map_fds=14 prog_type=6 fd_array_n=21 fd_array_neg1=0 prog_flags=0x0 insn_cnt=2561\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_ms": 224,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 125,
+            "status": "ok",
+            "step": {
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_ms": 331,
+            "bpfopt_summary": {},
+            "error": "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=52 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=37 nr_map_fds=14 prog_type=6 fd_array_n=21 fd_array_neg1=0 prog_flags=0x0 insn_cnt=2545\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_ms": 373,
+            "bpfopt_summary": {},
+            "error": "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=52 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=37 nr_map_fds=14 prog_type=6 fd_array_n=21 fd_array_neg1=0 prog_flags=0x0 insn_cnt=2533\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "lea"
+            }
+          },
+          {
+            "bpfopt_ms": 285,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 128,
+            "status": "ok",
+            "step": {
+              "name": "ccmp"
+            }
+          },
+          {
+            "bpfopt_ms": 358,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 128,
+            "status": "ok",
+            "step": {
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_ms": 10362,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 128,
+            "status": "ok",
+            "step": {
+              "name": "prefetch"
+            }
+          },
+          {
+            "bpfopt_ms": 352,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 131,
+            "status": "ok",
+            "step": {
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 382,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 130,
+            "status": "ok",
+            "step": {
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_ms": 257,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 128,
+            "status": "ok",
+            "step": {
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_ms": 313,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 128,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 1165,
+            "bpfopt_summary": {},
+            "error": " 1000000001            ; R1=0x3b9aca01\n2293: (2d) if r1 > r2 goto pc+34      ; R1=0x3b9aca01 R2=scalar(umin=0x3b9aca01)\n2294: (7b) *(u64 *)(r7 +8) = r0       ; R0=scalar(id=92) R7=map_value(map=stats,ks=4,vs=16)\n2295: (b7) r1 = 1                     ; R1=1\n2296: (7b) *(u64 *)(r7 +0) = r1       ; R1=1 R7=map_value(map=stats,ks=4,vs=16)\n2297: (b7) r1 = 0                     ; R1=0\n2298: (7b) *(u64 *)(r10 -32) = r1     ; R1=0 R10=fp0 fp-32=0\n2299: (61) r2 = *(u32 *)(r10 -48)     ; R2=scalar(id=93,smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-48=mmmmscalar(id=93,smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n2300: (63) *(u32 *)(r10 -32) = r2     ; R2=scalar(id=93,smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-32=mmmmscalar(id=93,smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n2301: (7b) *(u64 *)(r10 -24) = r1     ; R1=0 R10=fp0 fp-24=0\n2302: (bf) r2 = r10                   ; R2=fp0 R10=fp0\n2303: (07) r2 += -88                  ; R2=fp-88\n2304: (bf) r3 = r10                   ; R3=fp0 R10=fp0\n2305: (18) r3 = 0xf0000000            ; R3=0xf0000000\n2307: (79) r1 = *(u64 *)(r10 -168)    ; R1=map_ptr(map=fallback_cache,ks=40,vs=16) R10=fp0 fp-168=map_ptr(map=fallback_cache,ks=40,vs=16)\n2308: (b7) r4 = 0                     ; R4=0\n2309: (85) call bpf_map_update_elem#2\nR3 type=scalar expected=fp, pkt, pkt_meta, map_key, map_value, mem, ringbuf_mem, buf, trusted_ptr_\nprocessed 1508 insns (limit 1000000) max_states_per_insn 1 total_states 105 peak_states 105 mark_read 0\n\nBPF_PROG_LOAD errno=13 (post-verifier)\nctx: prog_btf_fd=52 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=37 nr_map_fds=14 prog_type=6 fd_array_n=21 fd_array_neg1=0 prog_flags=0x0 insn_cnt=2613\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 3,
+            "status": "error",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 339,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 130,
+            "status": "ok",
+            "step": {
+              "name": "dce"
+            }
+          }
+        ],
+        "prog_id": 9,
+        "program": {
+          "final_insn_count": 2609,
+          "orig_insn_count": 2542,
+          "prog_id": 9,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_pktgen",
+  "status": "ok"
+}

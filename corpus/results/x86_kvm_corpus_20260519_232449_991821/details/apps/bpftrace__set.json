@@ -1,0 +1,2221 @@
+{
+  "app": "bpftrace/set",
+  "baseline": {
+    "bpf": {
+      "10": {
+        "bytes_jited": 2020,
+        "bytes_xlated": 3392,
+        "id": 10,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 342476,
+        "run_time_ns_delta": 128758911,
+        "type": "kprobe"
+      },
+      "17": {
+        "bytes_jited": 362,
+        "bytes_xlated": 680,
+        "id": 17,
+        "name": "1",
+        "run_cnt_delta": 10,
+        "run_time_ns_delta": 14090,
+        "type": "perf_event"
+      },
+      "18": {
+        "bytes_jited": 131,
+        "bytes_xlated": 208,
+        "id": 18,
+        "name": "vfs_create",
+        "run_cnt_delta": 9408073,
+        "run_time_ns_delta": 698424237,
+        "type": "kprobe"
+      },
+      "23": {
+        "bytes_jited": 769,
+        "bytes_xlated": 1360,
+        "id": 23,
+        "name": "cap_capable",
+        "run_cnt_delta": 5948872,
+        "run_time_ns_delta": 917575608,
+        "type": "kprobe"
+      },
+      "30": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 30,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 1845100,
+        "run_time_ns_delta": 190366834,
+        "type": "tracepoint"
+      },
+      "31": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 31,
+        "name": "sched_wakeup_ne",
+        "run_cnt_delta": 89369,
+        "run_time_ns_delta": 18324416,
+        "type": "tracepoint"
+      },
+      "32": {
+        "bytes_jited": 471,
+        "bytes_xlated": 816,
+        "id": 32,
+        "name": "sched_switch",
+        "run_cnt_delta": 2283498,
+        "run_time_ns_delta": 427071614,
+        "type": "tracepoint"
+      },
+      "39": {
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 39,
+        "name": "block_io_start",
+        "run_cnt_delta": 113950,
+        "run_time_ns_delta": 49975851,
+        "type": "tracepoint"
+      },
+      "40": {
+        "bytes_jited": 931,
+        "bytes_xlated": 1576,
+        "id": 40,
+        "name": "block_io_done",
+        "run_cnt_delta": 116283,
+        "run_time_ns_delta": 56031823,
+        "type": "tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "4",
+          "--eventfd",
+          "4",
+          "--get",
+          "4",
+          "--prctl",
+          "4",
+          "--set",
+          "4",
+          "--dup",
+          "4",
+          "--kill",
+          "4",
+          "--sigfd",
+          "4",
+          "--signal",
+          "4",
+          "--pty",
+          "4",
+          "--itimer",
+          "4",
+          "--timerfd",
+          "4",
+          "--exec",
+          "4",
+          "--fork",
+          "4",
+          "--vfork",
+          "4",
+          "--clone",
+          "4",
+          "--ptrace",
+          "4",
+          "--futex",
+          "4",
+          "--sem",
+          "4",
+          "--aio",
+          "4",
+          "--aiol",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--io",
+          "4",
+          "--iomix",
+          "4",
+          "--iomix-bytes",
+          "128M",
+          "--io-uring",
+          "4",
+          "--sync-file",
+          "4",
+          "--epoll",
+          "4",
+          "--netdev",
+          "4",
+          "--sctp",
+          "1",
+          "--sock",
+          "4",
+          "--sockdiag",
+          "4",
+          "--sockfd",
+          "4",
+          "--sockpair",
+          "4",
+          "--sockmany",
+          "4",
+          "--udp",
+          "4",
+          "--udp-flood",
+          "4",
+          "--mmap",
+          "4",
+          "--mmap-bytes",
+          "16M",
+          "--mprotect",
+          "4",
+          "--mremap",
+          "4",
+          "--mremap-bytes",
+          "16M",
+          "--madvise",
+          "4",
+          "--access",
+          "4",
+          "--chdir",
+          "4",
+          "--chmod",
+          "4",
+          "--chown",
+          "4",
+          "--dentry",
+          "4",
+          "--dir",
+          "4",
+          "--dirmany",
+          "4",
+          "--fallocate",
+          "4",
+          "--fallocate-bytes",
+          "128M",
+          "--file-ioctl",
+          "4",
+          "--filename",
+          "4",
+          "--flock",
+          "4",
+          "--fpunch",
+          "4",
+          "--fpunch-bytes",
+          "32M",
+          "--fstat",
+          "4",
+          "--getdent",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--inotify",
+          "4",
+          "--open",
+          "4",
+          "--open-max",
+          "1024",
+          "--rename",
+          "4",
+          "--touch",
+          "4",
+          "--utime",
+          "4",
+          "--link",
+          "4",
+          "--symlink",
+          "4",
+          "--mknod",
+          "4",
+          "--fcntl",
+          "4",
+          "--epoll-port",
+          "14310",
+          "--sctp-port",
+          "14410",
+          "--sock-port",
+          "14510",
+          "--sockfd-port",
+          "14610",
+          "--timeout",
+          "10s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/jo"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "eventfd",
+            "get",
+            "prctl",
+            "set",
+            "dup",
+            "kill",
+            "sigfd",
+            "signal",
+            "pty",
+            "itimer",
+            "timerfd",
+            "exec",
+            "fork",
+            "vfork",
+            "clone",
+            "ptrace",
+            "futex",
+            "sem",
+            "aio",
+            "aiol",
+            "hdd",
+            "io",
+            "iomix",
+            "io-uring",
+            "sync-file",
+            "epoll",
+            "netdev",
+            "sctp",
+            "sock",
+            "sockdiag",
+            "sockfd",
+            "sockpair",
+            "sockmany",
+            "udp",
+            "udp-flood",
+            "mmap",
+            "mprotect",
+            "mremap",
+            "madvise",
+            "access",
+            "chdir",
+            "chmod",
+            "chown",
+            "dentry",
+            "dir",
+            "dirmany",
+            "fallocate",
+            "file-ioctl",
+            "filename",
+            "flock",
+            "fpunch",
+            "fstat",
+            "getdent",
+            "hdd",
+            "inotify",
+            "open",
+            "rename",
+            "touch",
+            "utime",
+            "link",
+            "symlink",
+            "mknod",
+            "fcntl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 11.332254785000003,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [21167] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [21167] setting to a 10 secs run per stressor\nstress-ng: info:  [21167] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd, 4 fork, 4 vfork, 4 clone, 4 ptrace, 4 futex, 4 sem, 4 aio, 4 aiol, 4 hdd, 4 io, 4 iomix, 4 io-uring, 4 sync-file, 4 epoll, 4 netdev, 1 sctp, 4 sock, 4 sockdiag, 4 sockfd, 4 sockpair, 4 sockmany, 4 udp, 4 udp-flood, 4 mmap, 4 mprotect, 4 mremap, 4 madvise, 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [21167] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [21785] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: info:  [23264] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [23193] dentry: 317280 dentries allocated\nstress-ng: info:  [23181] chdir: removing 8192 directories\nstress-ng: metrc: [21167] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [21167]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [21167] cap             1207211     10.17      0.31      1.58    118676.37      637429.75\nstress-ng: metrc: [21167] eventfd          311259     10.02      0.26      1.69     31068.95      160013.55\nstress-ng: metrc: [21167] get                2063     10.03      0.02      0.78       205.67        2565.97\nstress-ng: metrc: [21167] prctl              3581     10.07      0.67      0.55       355.48        2921.51\nstress-ng: metrc: [21167] set              121014     10.11      0.23      1.77     11968.52       60426.00\nstress-ng: metrc: [21167] dup                 526     10.01      0.12      0.14        52.54        1981.15\nstress-ng: metrc: [21167] kill              30130     10.06      0.07      2.36      2994.46       12397.45\nstress-ng: metrc: [21167] sigfd           3518973     10.16      0.56      3.05    346491.86      972836.40\nstress-ng: metrc: [21167] signal                0     10.04      0.00      0.00         0.00           0.00\nstress-ng: metrc: [21167] pty                  70     10.09      0.11      1.14         6.94          56.05\nstress-ng: metrc: [21167] itimer              238     10.04      0.45      1.69        23.72         111.09\nstress-ng: metrc: [21167] timerfd          325632     10.59      0.01      2.32     30757.29      139546.01\nstress-ng: metrc: [21167] fork               3722     10.03      0.49      0.71       371.03        3107.50\nstress-ng: metrc: [21167] vfork             46668     10.02      0.46      0.57      4657.27       45216.20\nstress-ng: metrc: [21167] clone              1083     10.23      0.41      1.76       105.90         498.69\nstress-ng: metrc: [21167] ptrace           228793     10.01      0.09      0.85     22866.86      243420.11\nstress-ng: metrc: [21167] futex            191112     20.12      0.38      2.35      9499.20       70072.13\nstress-ng: metrc: [21167] sem                1248     10.06      0.01      0.01       124.08      102286.70\nstress-ng: metrc: [21167] aio               21139     10.43      0.02      0.04      2026.11      352681.10\nstress-ng: metrc: [21167] aiol               4833     10.63      0.06      0.29       454.84       13597.12\nstress-ng: metrc: [21167] hdd               30209     10.35      0.41      0.31      2918.94       42130.97\nstress-ng: metrc: [21167] io                   97     10.32      0.04      0.02         9.39        1669.62\nstress-ng: metrc: [21167] iomix              4403     10.77      0.18      2.87       408.75        1441.45\nstress-ng: metrc: [21167] io-uring          12248     10.44      0.00      0.59      1173.23       20703.60\nstress-ng: metrc: [21167] sync-file           110     10.33      0.02      0.12        10.65         771.42\nstress-ng: metrc: [21167] epoll               455     10.23      0.03      0.23        44.46        1745.44\nstress-ng: metrc: [21167] netdev          1851726     10.07      0.23      1.28    183911.55     1225875.90\nstress-ng: metrc: [21167] sctp              79534     10.02      0.00      0.29      7934.03      274995.76\nstress-ng: metrc: [21167] sock               2114     10.05      0.01      1.04       210.26        2015.90\nstress-ng: metrc: [21167] sockdiag       39631178     10.08      0.15      2.25   3930288.68    16530554.55\nstress-ng: metrc: [21167] sockfd           350715     10.13      0.01      1.06     34627.84      327844.87\nstress-ng: metrc: [21167] sockpair           3288     10.11      0.02      0.08       325.21       32007.16\nstress-ng: metrc: [21167] sockmany          38230     10.07      0.05      1.08      3796.00       33883.79\nstress-ng: metrc: [21167] udp              170454     10.06      0.04      1.91     16941.70       87301.50\nstress-ng: metrc: [21167] udp-flood       1287647     10.05      0.17      1.62    128099.71      721412.90\nstress-ng: metrc: [21167] mmap               1480     10.03      0.08      1.55       147.54         908.61\nstress-ng: metrc: [21167] mprotect        8615956     10.18      2.10     10.38    846640.14      689898.93\nstress-ng: metrc: [21167] mremap             2778     10.08      0.02      2.16       275.68        1276.12\nstress-ng: metrc: [21167] madvise             108     10.34      0.13      2.05        10.44          49.51\nstress-ng: metrc: [21167] access             9669     10.33      0.09      0.78       936.11       11093.70\nstress-ng: metrc: [21167] chdir                 6     10.62      0.04      1.07         0.57           5.40\nstress-ng: metrc: [21167] chmod                75     10.30      0.00      0.12         7.28         614.07\nstress-ng: metrc: [21167] chown               264     10.31      0.01      0.00        25.61       24237.97\nstress-ng: metrc: [21167] dentry            10240     10.46      0.01      0.25       978.69       38736.67\nstress-ng: metrc: [21167] dir               24738     10.76      0.10      2.37      2298.34       10045.49\nstress-ng: metrc: [21167] dirmany           17397     10.38      0.02      0.38      1675.85       42926.51\nstress-ng: metrc: [21167] fallocate             4     10.36      0.02      0.00         0.39         243.72\nstress-ng: metrc: [21167] file-ioctl        67199     10.33      0.09      0.76      6507.60       78648.77\nstress-ng: metrc: [21167] filename           2604     10.28      0.04      0.54       253.21        4457.34\nstress-ng: metrc: [21167] flock           1405989     10.26      0.32      0.40    136985.98     1941249.81\nstress-ng: metrc: [21167] fpunch              453     10.35      0.01      0.73        43.75         615.61\nstress-ng: metrc: [21167] fstat              7918     10.00      0.13      0.74       791.68        9133.42\nstress-ng: metrc: [21167] getdent          338188     10.01      0.21      1.48     33769.49      199704.63\nstress-ng: metrc: [21167] hdd               24399     10.34      0.24      0.35      2360.34       41546.55\nstress-ng: metrc: [21167] inotify              12     10.34      0.03      0.00         1.16         475.25\nstress-ng: metrc: [21167] open               6519     10.25      0.00      0.11       635.72       60192.79\nstress-ng: metrc: [21167] rename            59700     10.26      0.00      0.42      5818.56      140278.82\nstress-ng: metrc: [21167] touch             75485     10.25      0.05      1.86      7362.11       39553.48\nstress-ng: metrc: [21167] utime             34284     10.18      0.04      0.60      3368.90       53812.84\nstress-ng: metrc: [21167] link                  4     10.28      0.04      0.56         0.39           6.64\nstress-ng: metrc: [21167] symlink               4     10.41      0.02      1.06         0.38           3.69\nstress-ng: metrc: [21167] mknod                20     10.13      0.00      0.00         1.97        5039.05\nstress-ng: metrc: [21167] fcntl             20895     10.20      0.04      0.26      2048.88       70261.98\nstress-ng: info:  [21167] skipped: 4: exec (4)\nstress-ng: info:  [21167] passed: 249: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (1) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [21167] failed: 0\nstress-ng: info:  [21167] metrics untrustworthy: 0\nstress-ng: info:  [21167] successful run completed in 11.32 secs",
+        "workload_name": "stress_ng_os_io_network"
+      }
+    ]
+  },
+  "error": "BPF stats missing requested program IDs: 10, 17, 18, 23, 30, 31, 32, 39, 40",
+  "post_rejit": null,
+  "rejit_result": {
+    "per_program": {
+      "10": {
+        "passes": [
+          {
+            "bpfopt_ms": 69,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 398,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 125,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 985,
+            "status": "ok",
+            "step": {
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_ms": 237,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 342,
+            "status": "ok",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 49,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 303,
+            "status": "ok",
+            "step": {
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_ms": 59,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 988,
+            "status": "ok",
+            "step": {
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_ms": 63,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 277,
+            "status": "ok",
+            "step": {
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_ms": 68,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 219,
+            "status": "ok",
+            "step": {
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_ms": 64,
+            "bpfopt_summary": {},
+            "error": "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=0 nr_map_fds=5 prog_type=2 fd_array_n=12 fd_array_neg1=0 prog_flags=0x0 insn_cnt=404\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_ms": 56,
+            "bpfopt_summary": {},
+            "error": "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=0 nr_map_fds=5 prog_type=2 fd_array_n=12 fd_array_neg1=0 prog_flags=0x0 insn_cnt=402\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "lea"
+            }
+          },
+          {
+            "bpfopt_ms": 67,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 258,
+            "status": "ok",
+            "step": {
+              "name": "ccmp"
+            }
+          },
+          {
+            "bpfopt_ms": 61,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 234,
+            "status": "ok",
+            "step": {
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_ms": 71,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 247,
+            "status": "ok",
+            "step": {
+              "name": "prefetch"
+            }
+          },
+          {
+            "bpfopt_ms": 101,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 200,
+            "status": "ok",
+            "step": {
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 56,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 246,
+            "status": "ok",
+            "step": {
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_ms": 63,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 299,
+            "status": "ok",
+            "step": {
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_ms": 257,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 262,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 168,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 283,
+            "status": "ok",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 61,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 250,
+            "status": "ok",
+            "step": {
+              "name": "dce"
+            }
+          }
+        ],
+        "prog_id": 10,
+        "program": {
+          "final_insn_count": 406,
+          "orig_insn_count": 402,
+          "prog_id": 10,
+          "prog_name": "tcp_set_state",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "17": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 48,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_ms": 69,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 18,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_ms": 22,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_ms": 22,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_ms": 22,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_ms": 22,
+            "bpfopt_summary": {},
+            "error": "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=0 nr_map_fds=2 prog_type=7 fd_array_n=9 fd_array_neg1=0 prog_flags=0x0 insn_cnt=67\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "lea"
+            }
+          },
+          {
+            "bpfopt_ms": 24,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "name": "ccmp"
+            }
+          },
+          {
+            "bpfopt_ms": 19,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "name": "prefetch"
+            }
+          },
+          {
+            "bpfopt_ms": 21,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 20,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_ms": 20,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 73,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 21,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "name": "dce"
+            }
+          }
+        ],
+        "prog_id": 17,
+        "program": {
+          "final_insn_count": 67,
+          "orig_insn_count": 67,
+          "prog_id": 17,
+          "prog_name": "1",
+          "prog_type": 7
+        },
+        "status": "error"
+      },
+      "18": {
+        "passes": [
+          {
+            "bpfopt_ms": 15,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 2100,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {},
+            "error": "processed 21 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=11: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 1697,
+            "status": "error",
+            "step": {
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_ms": 37,
+            "bpfopt_summary": {},
+            "error": "processed 21 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=11: SET_BPF errno=17, no saved attrs; perf_fd=13: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 14158,
+            "status": "error",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": "processed 21 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=11: SET_BPF errno=17, no saved attrs; perf_fd=13: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 1395,
+            "status": "error",
+            "step": {
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_ms": 17,
+            "bpfopt_summary": {},
+            "error": "processed 21 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=11: SET_BPF errno=17, no saved attrs; perf_fd=13: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 1913,
+            "status": "error",
+            "step": {
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_ms": 15,
+            "bpfopt_summary": {},
+            "error": "processed 21 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=11: SET_BPF errno=17, no saved attrs; perf_fd=13: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 1269,
+            "status": "error",
+            "step": {
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_ms": 16,
+            "bpfopt_summary": {},
+            "error": "processed 21 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=11: SET_BPF errno=17, no saved attrs; perf_fd=13: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 1257,
+            "status": "error",
+            "step": {
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_ms": 17,
+            "bpfopt_summary": {},
+            "error": "processed 21 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=11: SET_BPF errno=17, no saved attrs; perf_fd=13: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 2005,
+            "status": "error",
+            "step": {
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_ms": 16,
+            "bpfopt_summary": {},
+            "error": "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=0 nr_map_fds=1 prog_type=2 fd_array_n=8 fd_array_neg1=0 prog_flags=0x0 insn_cnt=22\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "lea"
+            }
+          },
+          {
+            "bpfopt_ms": 18,
+            "bpfopt_summary": {},
+            "error": "processed 21 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=11: SET_BPF errno=17, no saved attrs; perf_fd=13: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 1413,
+            "status": "error",
+            "step": {
+              "name": "ccmp"
+            }
+          },
+          {
+            "bpfopt_ms": 17,
+            "bpfopt_summary": {},
+            "error": "processed 21 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=11: SET_BPF errno=17, no saved attrs; perf_fd=13: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 1437,
+            "status": "error",
+            "step": {
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_ms": 15,
+            "bpfopt_summary": {},
+            "error": "processed 31 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0\nperf_fd=11: SET_BPF errno=17, no saved attrs; perf_fd=13: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 1159,
+            "status": "error",
+            "step": {
+              "name": "prefetch"
+            }
+          },
+          {
+            "bpfopt_ms": 18,
+            "bpfopt_summary": {},
+            "error": "processed 21 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=11: SET_BPF errno=17, no saved attrs; perf_fd=13: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 1321,
+            "status": "error",
+            "step": {
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 16,
+            "bpfopt_summary": {},
+            "error": "processed 21 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=11: SET_BPF errno=17, no saved attrs; perf_fd=13: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 1297,
+            "status": "error",
+            "step": {
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_ms": 1822,
+            "bpfopt_summary": {},
+            "error": "processed 21 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=11: SET_BPF errno=17, no saved attrs; perf_fd=13: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 1281,
+            "status": "error",
+            "step": {
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_ms": 17,
+            "bpfopt_summary": {},
+            "error": "processed 21 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=11: SET_BPF errno=17, no saved attrs; perf_fd=13: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 1949,
+            "status": "error",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 38,
+            "bpfopt_summary": {},
+            "error": "processed 21 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=11: SET_BPF errno=17, no saved attrs; perf_fd=13: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 1297,
+            "status": "error",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 16,
+            "bpfopt_summary": {},
+            "error": "processed 21 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=11: SET_BPF errno=17, no saved attrs; perf_fd=13: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 2029,
+            "status": "error",
+            "step": {
+              "name": "dce"
+            }
+          }
+        ],
+        "prog_id": 18,
+        "program": {
+          "final_insn_count": 22,
+          "orig_insn_count": 22,
+          "prog_id": 18,
+          "prog_name": "vfs_create",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "23": {
+        "passes": [
+          {
+            "bpfopt_ms": 31,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 235,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 68,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 219,
+            "status": "ok",
+            "step": {
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_ms": 79,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 230,
+            "status": "ok",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 28,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 250,
+            "status": "ok",
+            "step": {
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_ms": 31,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 233,
+            "status": "ok",
+            "step": {
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_ms": 33,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 235,
+            "status": "ok",
+            "step": {
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_ms": 35,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 241,
+            "status": "ok",
+            "step": {
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_ms": 29,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 239,
+            "status": "ok",
+            "step": {
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_ms": 35,
+            "bpfopt_summary": {},
+            "error": "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=0 nr_map_fds=3 prog_type=2 fd_array_n=10 fd_array_neg1=0 prog_flags=0x0 insn_cnt=156\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "lea"
+            }
+          },
+          {
+            "bpfopt_ms": 32,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 215,
+            "status": "ok",
+            "step": {
+              "name": "ccmp"
+            }
+          },
+          {
+            "bpfopt_ms": 27,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 212,
+            "status": "ok",
+            "step": {
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_ms": 36,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 261,
+            "status": "ok",
+            "step": {
+              "name": "prefetch"
+            }
+          },
+          {
+            "bpfopt_ms": 31,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 296,
+            "status": "ok",
+            "step": {
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 30,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 214,
+            "status": "ok",
+            "step": {
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_ms": 28,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 212,
+            "status": "ok",
+            "step": {
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_ms": 28,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 199,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 65,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 238,
+            "status": "ok",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 25,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 249,
+            "status": "ok",
+            "step": {
+              "name": "dce"
+            }
+          }
+        ],
+        "prog_id": 23,
+        "program": {
+          "final_insn_count": 140,
+          "orig_insn_count": 156,
+          "prog_id": 23,
+          "prog_name": "cap_capable",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "30": {
+        "passes": [
+          {
+            "bpfopt_ms": 13,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 408,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 19,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 431,
+            "status": "ok",
+            "step": {
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_ms": 27,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 394,
+            "status": "ok",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 396,
+            "status": "ok",
+            "step": {
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 410,
+            "status": "ok",
+            "step": {
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 1369,
+            "status": "ok",
+            "step": {
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_ms": 15,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 452,
+            "status": "ok",
+            "step": {
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 402,
+            "status": "ok",
+            "step": {
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=0 nr_map_fds=1 prog_type=5 fd_array_n=8 fd_array_neg1=0 prog_flags=0x0 insn_cnt=17\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "lea"
+            }
+          },
+          {
+            "bpfopt_ms": 18,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 393,
+            "status": "ok",
+            "step": {
+              "name": "ccmp"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 436,
+            "status": "ok",
+            "step": {
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 327,
+            "status": "ok",
+            "step": {
+              "name": "prefetch"
+            }
+          },
+          {
+            "bpfopt_ms": 18,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 411,
+            "status": "ok",
+            "step": {
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 417,
+            "status": "ok",
+            "step": {
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 456,
+            "status": "ok",
+            "step": {
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 356,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 28,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 533,
+            "status": "ok",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 486,
+            "status": "ok",
+            "step": {
+              "name": "dce"
+            }
+          }
+        ],
+        "prog_id": 30,
+        "program": {
+          "final_insn_count": 17,
+          "orig_insn_count": 17,
+          "prog_id": 30,
+          "prog_name": "sched_wakeup",
+          "prog_type": 5
+        },
+        "status": "error"
+      },
+      "31": {
+        "passes": [
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 514,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 19,
+            "bpfopt_summary": {},
+            "error": "processed 16 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=12: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_ms": 28,
+            "bpfopt_summary": {},
+            "error": "processed 16 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=12: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": "processed 16 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=12: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": "processed 16 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=12: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_ms": 15,
+            "bpfopt_summary": {},
+            "error": "processed 16 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=12: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_ms": 17,
+            "bpfopt_summary": {},
+            "error": "processed 16 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=12: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": "processed 16 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=12: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=0 nr_map_fds=1 prog_type=5 fd_array_n=8 fd_array_neg1=0 prog_flags=0x0 insn_cnt=17\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "lea"
+            }
+          },
+          {
+            "bpfopt_ms": 22,
+            "bpfopt_summary": {},
+            "error": "processed 16 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=12: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "ccmp"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": "processed 16 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=12: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": "processed 16 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=12: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "prefetch"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": "processed 16 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=12: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": "processed 16 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=12: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": "processed 16 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=12: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": "processed 16 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=12: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 28,
+            "bpfopt_summary": {},
+            "error": "processed 16 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=12: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 15,
+            "bpfopt_summary": {},
+            "error": "processed 16 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0\nperf_fd=12: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "dce"
+            }
+          }
+        ],
+        "prog_id": 31,
+        "program": {
+          "final_insn_count": 17,
+          "orig_insn_count": 17,
+          "prog_id": 31,
+          "prog_name": "sched_wakeup_ne",
+          "prog_type": 5
+        },
+        "status": "error"
+      },
+      "32": {
+        "passes": [
+          {
+            "bpfopt_ms": 21,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 506,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 37,
+            "bpfopt_summary": {},
+            "error": "processed 139 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=13: SET_BPF on new event errno=13; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 463,
+            "status": "error",
+            "step": {
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_ms": 64,
+            "bpfopt_summary": {},
+            "error": "processed 139 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=13: SET_BPF on new event errno=13; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 22,
+            "bpfopt_summary": {},
+            "error": "processed 139 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=13: SET_BPF on new event errno=13; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_ms": 22,
+            "bpfopt_summary": {},
+            "error": "processed 139 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=13: SET_BPF on new event errno=13; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_ms": 29,
+            "bpfopt_summary": {},
+            "error": "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=0 nr_map_fds=2 prog_type=5 fd_array_n=9 fd_array_neg1=0 prog_flags=0x0 insn_cnt=118\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_ms": 22,
+            "bpfopt_summary": {},
+            "error": "processed 139 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=13: SET_BPF on new event errno=13; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_ms": 22,
+            "bpfopt_summary": {},
+            "error": "processed 139 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=13: SET_BPF on new event errno=13; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_ms": 21,
+            "bpfopt_summary": {},
+            "error": "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=0 nr_map_fds=2 prog_type=5 fd_array_n=9 fd_array_neg1=0 prog_flags=0x0 insn_cnt=96\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "lea"
+            }
+          },
+          {
+            "bpfopt_ms": 26,
+            "bpfopt_summary": {},
+            "error": "processed 139 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=13: SET_BPF on new event errno=13; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "ccmp"
+            }
+          },
+          {
+            "bpfopt_ms": 24,
+            "bpfopt_summary": {},
+            "error": "processed 139 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=13: SET_BPF on new event errno=13; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_ms": 22,
+            "bpfopt_summary": {},
+            "error": "processed 140 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=13: SET_BPF on new event errno=13; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "prefetch"
+            }
+          },
+          {
+            "bpfopt_ms": 22,
+            "bpfopt_summary": {},
+            "error": "processed 139 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=13: SET_BPF on new event errno=13; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 30,
+            "bpfopt_summary": {},
+            "error": "processed 139 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=13: SET_BPF on new event errno=13; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_ms": 21,
+            "bpfopt_summary": {},
+            "error": "processed 139 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=13: SET_BPF on new event errno=13; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_ms": 25,
+            "bpfopt_summary": {},
+            "error": "processed 139 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=13: SET_BPF on new event errno=13; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 62,
+            "bpfopt_summary": {},
+            "error": "processed 139 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=13: SET_BPF on new event errno=13; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {},
+            "error": "processed 139 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=13: SET_BPF on new event errno=13; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "dce"
+            }
+          }
+        ],
+        "prog_id": 32,
+        "program": {
+          "final_insn_count": 96,
+          "orig_insn_count": 96,
+          "prog_id": 32,
+          "prog_name": "sched_switch",
+          "prog_type": 5
+        },
+        "status": "error"
+      },
+      "39": {
+        "passes": [
+          {
+            "bpfopt_ms": 22,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 483,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 33,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 436,
+            "status": "ok",
+            "step": {
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_ms": 61,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 409,
+            "status": "ok",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 18,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 439,
+            "status": "ok",
+            "step": {
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_ms": 19,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 631,
+            "status": "ok",
+            "step": {
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_ms": 19,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 451,
+            "status": "ok",
+            "step": {
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_ms": 18,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 391,
+            "status": "ok",
+            "step": {
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_ms": 19,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 371,
+            "status": "ok",
+            "step": {
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_ms": 18,
+            "bpfopt_summary": {},
+            "error": "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=0 nr_map_fds=3 prog_type=5 fd_array_n=10 fd_array_neg1=0 prog_flags=0x0 insn_cnt=51\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "lea"
+            }
+          },
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 483,
+            "status": "ok",
+            "step": {
+              "name": "ccmp"
+            }
+          },
+          {
+            "bpfopt_ms": 19,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 440,
+            "status": "ok",
+            "step": {
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_ms": 18,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 382,
+            "status": "ok",
+            "step": {
+              "name": "prefetch"
+            }
+          },
+          {
+            "bpfopt_ms": 19,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 420,
+            "status": "ok",
+            "step": {
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 18,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 472,
+            "status": "ok",
+            "step": {
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_ms": 19,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 551,
+            "status": "ok",
+            "step": {
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_ms": 18,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 422,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 58,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 391,
+            "status": "ok",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 18,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 482,
+            "status": "ok",
+            "step": {
+              "name": "dce"
+            }
+          }
+        ],
+        "prog_id": 39,
+        "program": {
+          "final_insn_count": 51,
+          "orig_insn_count": 51,
+          "prog_id": 39,
+          "prog_name": "block_io_start",
+          "prog_type": 5
+        },
+        "status": "error"
+      },
+      "40": {
+        "passes": [
+          {
+            "bpfopt_ms": 30,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 596,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 78,
+            "bpfopt_summary": {},
+            "error": "processed 200 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=14: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_ms": 90,
+            "bpfopt_summary": {},
+            "error": "processed 200 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=14: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 32,
+            "bpfopt_summary": {},
+            "error": "processed 200 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=14: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_ms": 34,
+            "bpfopt_summary": {},
+            "error": "processed 200 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=14: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_ms": 30,
+            "bpfopt_summary": {},
+            "error": "processed 200 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=14: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_ms": 31,
+            "bpfopt_summary": {},
+            "error": "processed 200 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=14: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_ms": 32,
+            "bpfopt_summary": {},
+            "error": "processed 200 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=14: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_ms": 32,
+            "bpfopt_summary": {},
+            "error": "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=0 nr_map_fds=6 prog_type=5 fd_array_n=13 fd_array_neg1=0 prog_flags=0x0 insn_cnt=181\n",
+            "exit_code": 0,
+            "failure_kind": "rejit",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "lea"
+            }
+          },
+          {
+            "bpfopt_ms": 35,
+            "bpfopt_summary": {},
+            "error": "processed 200 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=14: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "ccmp"
+            }
+          },
+          {
+            "bpfopt_ms": 30,
+            "bpfopt_summary": {},
+            "error": "processed 200 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=14: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_ms": 34,
+            "bpfopt_summary": {},
+            "error": "processed 241 insns (limit 1000000) max_states_per_insn 0 total_states 13 peak_states 13 mark_read 0\nperf_fd=14: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "prefetch"
+            }
+          },
+          {
+            "bpfopt_ms": 32,
+            "bpfopt_summary": {},
+            "error": "processed 188 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=14: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 33,
+            "bpfopt_summary": {},
+            "error": "processed 200 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=14: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_ms": 31,
+            "bpfopt_summary": {},
+            "error": "processed 200 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=14: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_ms": 33,
+            "bpfopt_summary": {},
+            "error": "processed 200 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=14: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 90,
+            "bpfopt_summary": {},
+            "error": "processed 200 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=14: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 32,
+            "bpfopt_summary": {},
+            "error": "processed 200 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0\nperf_fd=14: SET_BPF errno=17, no saved attrs; ",
+            "exit_code": 0,
+            "failure_kind": "rejit_partial",
+            "rejit_syscall_ms": 0,
+            "status": "error",
+            "step": {
+              "name": "dce"
+            }
+          }
+        ],
+        "prog_id": 40,
+        "program": {
+          "final_insn_count": 181,
+          "orig_insn_count": 181,
+          "prog_id": 40,
+          "prog_name": "block_io_done",
+          "prog_type": 5
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bpftrace_set",
+  "selected_workload": "stress_ng_os_io_network",
+  "status": "error"
+}

@@ -2,32 +2,22 @@ REPOS_DIR := $(ROOT_DIR)/vendor/repos
 RUNNER_CONTAINER_DIR := $(RUNNER_DIR)/containers
 RUN_TARGET_ARCH ?= x86_64
 IMAGE_BUILD_JOBS ?= $(JOBS)
-ARM64_IMAGE_BUILD_JOBS ?= 4
-X86_BUILD_DISTRO_VARIANT := ubuntu24.04
-BUILD_ARCH_VARIANT := $(if $(filter x86_64,$(RUN_TARGET_ARCH)),-$(X86_BUILD_DISTRO_VARIANT),)
-IMAGE_ARTIFACT_ROOT ?= /artifacts/user
-IMAGE_BUILD_ROOT ?= /tmp/bpf-benchmark-build/$(RUN_TARGET_ARCH)$(BUILD_ARCH_VARIANT)
-ACTIVE_ARTIFACT_ROOT := $(if $(filter 1,$(BPFREJIT_IMAGE_BUILD)),$(IMAGE_ARTIFACT_ROOT),$(ARTIFACT_ROOT))
-ACTIVE_BUILD_ARTIFACT_ROOT := $(if $(filter 1,$(BPFREJIT_IMAGE_BUILD)),$(IMAGE_BUILD_ROOT),$(ARTIFACT_ROOT))
 
 MICRO_PROGRAM_DIR := $(ROOT_DIR)/micro/programs
-MICRO_PROGRAM_OUTPUT_DIR := $(ACTIVE_ARTIFACT_ROOT)/micro-programs/$(RUN_TARGET_ARCH)
 STAGE2_PROGRAM_DIR := $(ROOT_DIR)/native-sim/test
-STAGE2_PROGRAM_OUTPUT_DIR := $(ACTIVE_ARTIFACT_ROOT)/stage2-programs/$(RUN_TARGET_ARCH)
+MICRO_PROGRAM_BUILD_X86 := $(MICRO_PROGRAM_DIR)/build-x86
+MICRO_PROGRAM_BUILD_ARM64 := $(MICRO_PROGRAM_DIR)/build-arm64
+STAGE2_PROGRAM_BUILD_X86 := $(STAGE2_PROGRAM_DIR)/build-x86
+STAGE2_PROGRAM_BUILD_ARM64 := $(STAGE2_PROGRAM_DIR)/build-arm64
 
-RUNNER_BUILD_DIR_ACTIVE := $(if $(filter arm64,$(RUN_TARGET_ARCH)),$(RUNNER_DIR)/build-arm64-llvmbpf,$(RUNNER_DIR)/build-llvmbpf)
-RUNNER_LIBBPF_BUILD_DIR := $(RUNNER_BUILD_DIR_ACTIVE)/vendor/libbpf
-RUNNER_LIBBPF_OBJDIR := $(RUNNER_LIBBPF_BUILD_DIR)/obj
-RUNNER_LIBBPF_PREFIX := $(RUNNER_LIBBPF_BUILD_DIR)/prefix
-RUNNER_LIBBPF_ARCHIVE := $(RUNNER_LIBBPF_OBJDIR)/libbpf.a
 DEFAULT_RUNNER_LLVM_DIR := /usr/lib/llvm-18/lib/cmake/llvm
 RUNNER_LLVM_DIR := $(if $(strip $(LLVM_DIR)),$(LLVM_DIR),$(if $(strip $(RUN_LLVM_DIR)),$(RUN_LLVM_DIR),$(DEFAULT_RUNNER_LLVM_DIR)))
-RUNNER_CONTAINER_CC := /usr/bin/gcc
-RUNNER_CONTAINER_CXX := /usr/bin/g++
+ARM64_RUNNER_LLVM_SYSROOT := $(ROOT_DIR)/vendor/build/sysroots/arm64-llvm15
+ARM64_RUNNER_LLVM_DIR := $(ARM64_RUNNER_LLVM_SYSROOT)/usr/lib/llvm-15/lib/cmake/llvm
+ARM64_PKG_CONFIG_LIBDIR = $(AARCH64_SYSROOT_DIR)/usr/lib/aarch64-linux-gnu/pkgconfig
+ARM64_SYS_INCLUDE_FLAGS = -I/usr/aarch64-linux-gnu/include -I$(AARCH64_SYSROOT_DIR)/usr/include -I$(AARCH64_SYSROOT_DIR)/usr/include/aarch64-linux-gnu
 
 CONTAINER_IMAGE_ARTIFACT_ROOT := $(ARTIFACT_ROOT)/container-images
-REPO_ARTIFACT_ROOT := $(ACTIVE_ARTIFACT_ROOT)/repo-artifacts/$(RUN_TARGET_ARCH)
-REPO_BUILD_ROOT := $(ACTIVE_BUILD_ARTIFACT_ROOT)/repo-build/$(RUN_TARGET_ARCH)$(BUILD_ARCH_VARIANT)
 
 ARM64_RUST_TARGET := aarch64-unknown-linux-gnu
 NATIVE_LINK_DIR := $(ROOT_DIR)/native-sim/x86/native_lab/native_link
@@ -44,7 +34,7 @@ ARM64_RUNNER_RUNTIME_IMAGE_TAR := $(CONTAINER_IMAGE_ARTIFACT_ROOT)/arm64-runner-
 
 X86_RUNTIME_KERNEL_DIR := $(ARTIFACT_ROOT)/runtime-kernel/x86_64
 X86_RUNTIME_KERNEL_IMAGE := $(X86_RUNTIME_KERNEL_DIR)/bzImage
-HOST_BUILD_ROOT := $(ACTIVE_BUILD_ARTIFACT_ROOT)/repo-build/host
+HOST_BUILD_ROOT := $(ARTIFACT_ROOT)/repo-build/host
 HOST_GO ?= $(or $(GO),$(shell command -v go))
 HOST_KERNEL_BUILD_DIR_X86 := $(HOST_BUILD_ROOT)/kernel/x86_64
 HOST_KERNEL_BUILD_DIR_ARM64 := $(HOST_BUILD_ROOT)/kernel/arm64
@@ -56,6 +46,8 @@ HOST_KINSN_DIR_ARM64 := $(HOST_BUILD_ROOT)/kinsn-build/arm64
 .PHONY: \
 	host-kernel-x86 host-kernel-arm64 host-kernel-offsets-x86 host-kernel-offsets-arm64 \
 	host-kinsn-x86 host-kinsn-arm64 host-rust-x86 host-rust-arm64 host-shim-artifacts \
+	host-runner-x86 host-runner-arm64 host-micro-programs-x86 host-micro-programs-arm64 \
+	host-stage2-programs-x86 host-stage2-programs-arm64 \
 	apps host-source-apps host-source-apps-x86 host-source-apps-arm64 \
 	aarch64-sysroot runtime-kernel-image \
 	x86-runner-runtime-image-tar arm64-runner-runtime-image-tar image-runner-runtime-image-tar
@@ -113,14 +105,15 @@ host-rust-x86:
 	cargo build --release --manifest-path "$(NATIVE_LINK_DIR)/Cargo.toml"
 
 AARCH64_SYSROOT_DIR := $(ROOT_DIR)/.cache/aarch64-sysroot
-AARCH64_SYSROOT_DEB_PACKAGES := libzstd1:arm64 libelf1t64:arm64 libelf-dev:arm64 zlib1g:arm64 zlib1g-dev:arm64 libzstd-dev:arm64
+AARCH64_SYSROOT_DEB_PACKAGES := libzstd1:arm64 libelf1t64:arm64 libelf-dev:arm64 zlib1g:arm64 zlib1g-dev:arm64 libzstd-dev:arm64 \
+	libyaml-cpp0.8:arm64 libyaml-cpp-dev:arm64 libspdlog1.12:arm64 libspdlog-dev:arm64 libfmt9:arm64 libfmt-dev:arm64
 ARM64_CARGO_RUSTFLAGS := -C link-arg=--sysroot=$(AARCH64_SYSROOT_DIR) -C link-arg=-L$(AARCH64_SYSROOT_DIR)/usr/lib/aarch64-linux-gnu -C link-arg=-Wl,-rpath-link=$(AARCH64_SYSROOT_DIR)/usr/lib/aarch64-linux-gnu
 ARM64_CARGO_ENV := \
 	CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \
 	CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS="$(ARM64_CARGO_RUSTFLAGS)"
 
 aarch64-sysroot:
-	@if [ -f "$(AARCH64_SYSROOT_DIR)/usr/include/libelf.h" ]; then exit 0; fi; \
+	@if [ -f "$(AARCH64_SYSROOT_DIR)/usr/include/libelf.h" ] && [ -f "$(AARCH64_SYSROOT_DIR)/usr/include/yaml-cpp/yaml.h" ] && [ -f "$(AARCH64_SYSROOT_DIR)/usr/include/spdlog/spdlog.h" ]; then exit 0; fi; \
 	command -v aarch64-linux-gnu-gcc >/dev/null || { echo "aarch64-linux-gnu-gcc missing; install gcc-aarch64-linux-gnu" >&2; exit 1; }; \
 	command -v dpkg-deb >/dev/null; \
 	command -v apt-get >/dev/null; \
@@ -139,18 +132,54 @@ host-rust-arm64: aarch64-sysroot
 host-shim-artifacts:
 	$(MAKE) -C "$(BPFOPT_SHIM_DIR)" libbpfrejit_shim.so
 
-x86-runner-runtime-image-tar: host-kernel-x86 host-kernel-offsets-x86 host-kinsn-x86 host-rust-x86 host-shim-artifacts host-source-apps-x86
+host-runner-x86: RUNNER_BUILD_DIR_ARCH := $(RUNNER_DIR)/build-llvmbpf
+host-runner-x86: RUNNER_CC := gcc
+host-runner-x86: RUNNER_CXX := g++
+host-runner-x86: RUNNER_LIBBPF_ENV := CC=gcc
+host-runner-x86: RUNNER_LLVM_DIR_ARCH := $(RUNNER_LLVM_DIR)
+host-runner-arm64: RUNNER_BUILD_DIR_ARCH := $(RUNNER_DIR)/build-arm64-llvmbpf
+host-runner-arm64: RUNNER_CC := aarch64-linux-gnu-gcc
+host-runner-arm64: RUNNER_CXX := aarch64-linux-gnu-g++
+host-runner-arm64: RUNNER_LIBBPF_ENV := CC=aarch64-linux-gnu-gcc LD=aarch64-linux-gnu-ld AR=aarch64-linux-gnu-ar
+host-runner-arm64: RUNNER_LLVM_DIR_ARCH := $(ARM64_RUNNER_LLVM_DIR)
+host-runner-arm64: RUNNER_CMAKE_CROSS := -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=aarch64 -DCMAKE_FIND_ROOT_PATH="$(AARCH64_SYSROOT_DIR);$(ARM64_RUNNER_LLVM_SYSROOT);/usr/aarch64-linux-gnu" -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH -DCMAKE_EXE_LINKER_FLAGS="-L$(AARCH64_SYSROOT_DIR)/usr/lib/aarch64-linux-gnu -L$(ARM64_RUNNER_LLVM_SYSROOT)/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,$(AARCH64_SYSROOT_DIR)/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,$(ARM64_RUNNER_LLVM_SYSROOT)/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,$(ARM64_RUNNER_LLVM_SYSROOT)/usr/lib/llvm-15/lib"
+host-runner-arm64: RUNNER_PKG_CONFIG := PKG_CONFIG_LIBDIR="$(ARM64_PKG_CONFIG_LIBDIR)" PKG_CONFIG_SYSROOT_DIR="$(AARCH64_SYSROOT_DIR)"
+host-runner-arm64: aarch64-sysroot host-source-apps-arm64
+host-runner-x86 host-runner-arm64:
+	$(MAKE) -C "$(ROOT_DIR)/vendor/libbpf/src" -j"$(JOBS)" BUILD_STATIC_ONLY=1 $(RUNNER_LIBBPF_ENV) OBJDIR="$(RUNNER_BUILD_DIR_ARCH)/vendor/libbpf/obj" DESTDIR= PREFIX="$(RUNNER_BUILD_DIR_ARCH)/vendor/libbpf/prefix" "$(RUNNER_BUILD_DIR_ARCH)/vendor/libbpf/obj/libbpf.a" install_headers
+	$(RUNNER_PKG_CONFIG) cmake -S "$(RUNNER_DIR)" -B "$(RUNNER_BUILD_DIR_ARCH)" -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER="$(RUNNER_CC)" -DCMAKE_CXX_COMPILER="$(RUNNER_CXX)" -DMICRO_REPO_ROOT="$(ROOT_DIR)" -DMICRO_LIBBPF_PREFIX="$(RUNNER_BUILD_DIR_ARCH)/vendor/libbpf/prefix" -DMICRO_LIBBPF_LIBRARY="$(RUNNER_BUILD_DIR_ARCH)/vendor/libbpf/obj/libbpf.a" -DMICRO_EXEC_ENABLE_LLVMBPF=1 -DLLVM_DIR="$(RUNNER_LLVM_DIR_ARCH)" $(RUNNER_CMAKE_CROSS)
+	cmake --build "$(RUNNER_BUILD_DIR_ARCH)" --target micro_exec -j"$(JOBS)"
+
+host-micro-programs-x86: host-kernel-x86
+	$(MAKE) -C "$(MICRO_PROGRAM_DIR)" OUTPUT_DIR="$(MICRO_PROGRAM_BUILD_X86)" KERNEL_VMLINUX="$(HOST_KERNEL_BUILD_DIR_X86)/vmlinux" all
+
+host-micro-programs-arm64: host-kernel-arm64
+	$(MAKE) -C "$(MICRO_PROGRAM_DIR)" OUTPUT_DIR="$(MICRO_PROGRAM_BUILD_ARM64)" KERNEL_VMLINUX="$(HOST_KERNEL_BUILD_DIR_ARM64)/vmlinux" NATIVE_TARGET=aarch64-linux-gnu NATIVE_ARCH=arm64 SYS_INCLUDE_FLAGS="$(ARM64_SYS_INCLUDE_FLAGS)" all
+
+host-stage2-programs-x86: host-micro-programs-x86
+	$(MAKE) -C "$(STAGE2_PROGRAM_DIR)" OUTPUT_DIR="$(STAGE2_PROGRAM_BUILD_X86)" KERNEL_OFFSETS="$(MICRO_PROGRAM_BUILD_X86)/kernel_offsets.h" all
+
+host-stage2-programs-arm64: host-micro-programs-arm64
+	$(MAKE) -C "$(STAGE2_PROGRAM_DIR)" OUTPUT_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)" KERNEL_OFFSETS="$(MICRO_PROGRAM_BUILD_ARM64)/kernel_offsets.h" NATIVE_TARGET=aarch64-linux-gnu NATIVE_ARCH=arm64 SYS_INCLUDE_FLAGS="$(ARM64_SYS_INCLUDE_FLAGS)" all
+
+x86-runner-runtime-image-tar: host-kernel-x86 host-kernel-offsets-x86 host-kinsn-x86 host-rust-x86 host-shim-artifacts host-source-apps-x86 host-runner-x86 host-micro-programs-x86 host-stage2-programs-x86
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	docker build --platform linux/amd64 \
 		--target runner-runtime \
+		--build-context runner-runtime-host-runner-build="$(RUNNER_DIR)/build-llvmbpf" \
+		--build-context runner-runtime-host-micro-programs="$(MICRO_PROGRAM_BUILD_X86)" \
+		--build-context runner-runtime-host-stage2-programs="$(STAGE2_PROGRAM_BUILD_X86)" \
+		--build-context runner-runtime-host-unittest="$(ROOT_DIR)/tests/unittest/build" \
+		--build-context runner-runtime-host-negative="$(ROOT_DIR)/tests/negative/build" \
 		--build-context runner-runtime-host-kernel-image="$(HOST_KERNEL_BUILD_DIR_X86)/arch/x86/boot" \
 		--build-context runner-runtime-host-kernel-offsets="$(HOST_KERNEL_OFFSETS_DIR_X86)" \
 		--build-context runner-runtime-host-kernel-modules="$(HOST_KERNEL_BUILD_DIR_X86)/modules-install/lib/modules" \
 		--build-context runner-runtime-host-kinsn-artifacts="$(HOST_KINSN_DIR_X86)" \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
-		--build-arg IMAGE_BUILD_JOBS="$(IMAGE_BUILD_JOBS)" \
 		--build-arg RUN_TARGET_ARCH=x86_64 \
 		--build-arg VENDOR_BUILD_ARCH=x86 \
+		--build-arg RUNNER_BUILD_DIR_NAME=build-llvmbpf \
+		--build-arg TEST_BUILD_DIR=build \
 		--build-arg KERNEL_IMAGE_NAME=bzImage \
 		--build-arg KERNEL_MANIFEST_JSON="$$(cat $(HOST_KERNEL_BUILD_DIR_X86)/manifest.json)" \
 		--build-arg DAEMON_HOST_BIN_DIR="daemon/target/release" \
@@ -159,18 +188,24 @@ x86-runner-runtime-image-tar: host-kernel-x86 host-kernel-offsets-x86 host-kinsn
 	docker save -o "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE)"
 	mv -f "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE_TAR)"
 
-arm64-runner-runtime-image-tar: host-kernel-arm64 host-kernel-offsets-arm64 host-kinsn-arm64 host-rust-arm64 host-shim-artifacts host-source-apps-arm64
+arm64-runner-runtime-image-tar: host-kernel-arm64 host-kernel-offsets-arm64 host-kinsn-arm64 host-rust-arm64 host-shim-artifacts host-source-apps-arm64 host-runner-arm64 host-micro-programs-arm64 host-stage2-programs-arm64
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	docker build --platform linux/arm64 \
 		--target runner-runtime \
+		--build-context runner-runtime-host-runner-build="$(RUNNER_DIR)/build-arm64-llvmbpf" \
+		--build-context runner-runtime-host-micro-programs="$(MICRO_PROGRAM_BUILD_ARM64)" \
+		--build-context runner-runtime-host-stage2-programs="$(STAGE2_PROGRAM_BUILD_ARM64)" \
+		--build-context runner-runtime-host-unittest="$(ROOT_DIR)/tests/unittest/build-arm64" \
+		--build-context runner-runtime-host-negative="$(ROOT_DIR)/tests/negative/build-arm64" \
 		--build-context runner-runtime-host-kernel-image="$(HOST_KERNEL_BUILD_DIR_ARM64)/arch/arm64/boot" \
 		--build-context runner-runtime-host-kernel-offsets="$(HOST_KERNEL_OFFSETS_DIR_ARM64)" \
 		--build-context runner-runtime-host-kernel-modules="$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install/lib/modules" \
 		--build-context runner-runtime-host-kinsn-artifacts="$(HOST_KINSN_DIR_ARM64)" \
 		--build-arg IMAGE_WORKSPACE="$(ROOT_DIR)" \
-		--build-arg IMAGE_BUILD_JOBS="$(ARM64_IMAGE_BUILD_JOBS)" \
 		--build-arg RUN_TARGET_ARCH=arm64 \
 		--build-arg VENDOR_BUILD_ARCH=arm64 \
+		--build-arg RUNNER_BUILD_DIR_NAME=build-arm64-llvmbpf \
+		--build-arg TEST_BUILD_DIR=build-arm64 \
 		--build-arg KERNEL_IMAGE_NAME=vmlinuz.efi \
 		--build-arg KERNEL_MANIFEST_JSON="$$(cat $(HOST_KERNEL_BUILD_DIR_ARM64)/manifest.json)" \
 		--build-arg DAEMON_HOST_BIN_DIR="daemon/target/$(ARM64_RUST_TARGET)/release" \
@@ -185,40 +220,3 @@ runtime-kernel-image: x86-runner-runtime-image-tar
 	@install -d "$(X86_RUNTIME_KERNEL_DIR)"
 	BPFREJIT_INSTALL_KERNEL_OUT_DIR="$(X86_RUNTIME_KERNEL_DIR)" "$(BPFREJIT_INSTALL_SCRIPT)" --extract-kernel-only "$(X86_RUNNER_RUNTIME_IMAGE_TAR)"
 	test -s "$(X86_RUNTIME_KERNEL_IMAGE)"
-
-.PHONY: image-runner-artifacts \
-	image-micro-program-artifacts image-stage2-program-artifacts image-test-artifacts
-ifneq ($(BPFREJIT_IMAGE_BUILD),1)
-image-runner-artifacts image-micro-program-artifacts image-stage2-program-artifacts image-test-artifacts:
-	@echo "$@ must be run from the runner Dockerfile with BPFREJIT_IMAGE_BUILD=1" >&2
-	@exit 1
-else
-image-runner-artifacts:
-	$(MAKE) -C "$(ROOT_DIR)/vendor/libbpf/src" -j"$(JOBS)" BUILD_STATIC_ONLY=1 \
-		OBJDIR="$(RUNNER_LIBBPF_OBJDIR)" DESTDIR= PREFIX="$(RUNNER_LIBBPF_PREFIX)" \
-		"$(RUNNER_LIBBPF_ARCHIVE)" install_headers
-	cmake -S "$(RUNNER_DIR)" -B "$(RUNNER_BUILD_DIR_ACTIVE)" \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_COMPILER="$(RUNNER_CONTAINER_CC)" \
-		-DCMAKE_CXX_COMPILER="$(RUNNER_CONTAINER_CXX)" \
-		-DMICRO_REPO_ROOT="$(ROOT_DIR)" \
-		-DMICRO_LIBBPF_PREFIX="$(RUNNER_LIBBPF_PREFIX)" \
-		-DMICRO_LIBBPF_LIBRARY="$(RUNNER_LIBBPF_ARCHIVE)" \
-		-DMICRO_EXEC_ENABLE_LLVMBPF="1" \
-		-DLLVM_DIR="$(RUNNER_LLVM_DIR)"
-	cmake --build "$(RUNNER_BUILD_DIR_ACTIVE)" --target micro_exec -j"$(JOBS)"
-
-image-micro-program-artifacts:
-	$(MAKE) -C "$(MICRO_PROGRAM_DIR)" OUTPUT_DIR="$(MICRO_PROGRAM_OUTPUT_DIR)" KERNEL_OFFSETS_INPUT="/artifacts/kernel/kernel_offsets.h" all
-
-image-stage2-program-artifacts:
-	if [ -f /artifacts/kernel/kernel_offsets.h ]; then \
-		cp -f /artifacts/kernel/kernel_offsets.h "$(MICRO_PROGRAM_DIR)/kernel_offsets.h"; \
-	fi
-	$(MAKE) -C "$(STAGE2_PROGRAM_DIR)" OUTPUT_DIR="$(STAGE2_PROGRAM_OUTPUT_DIR)" all
-
-image-test-artifacts:
-	$(MAKE) -C "$(ROOT_DIR)/tests/unittest" BUILD_DIR="$(ROOT_DIR)/tests/unittest/$(if $(filter arm64,$(RUN_TARGET_ARCH)),build-arm64,build)" CC=gcc CLANG=clang BPF_TARGET_ARCH="$(RUN_TARGET_ARCH)" BPFTOOL_BOOTSTRAP=/usr/local/bin/bpftool
-	$(MAKE) -C "$(ROOT_DIR)/tests/negative" BUILD_DIR="$(ROOT_DIR)/tests/negative/$(if $(filter arm64,$(RUN_TARGET_ARCH)),build-arm64,build)" CC=gcc
-
-endif

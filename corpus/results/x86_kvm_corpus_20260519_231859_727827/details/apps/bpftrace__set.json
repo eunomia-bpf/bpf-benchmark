@@ -1,0 +1,543 @@
+{
+  "app": "bpftrace/set",
+  "baseline": {
+    "bpf": {
+      "10": {
+        "bytes_jited": 2020,
+        "bytes_xlated": 3392,
+        "id": 10,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 358982,
+        "run_time_ns_delta": 134871113,
+        "type": "kprobe"
+      },
+      "17": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 17,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 1794725,
+        "run_time_ns_delta": 203103127,
+        "type": "tracepoint"
+      },
+      "18": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 18,
+        "name": "sched_wakeup_ne",
+        "run_cnt_delta": 71246,
+        "run_time_ns_delta": 17579750,
+        "type": "tracepoint"
+      },
+      "19": {
+        "bytes_jited": 471,
+        "bytes_xlated": 816,
+        "id": 19,
+        "name": "sched_switch",
+        "run_cnt_delta": 2273908,
+        "run_time_ns_delta": 485858571,
+        "type": "tracepoint"
+      },
+      "26": {
+        "bytes_jited": 362,
+        "bytes_xlated": 680,
+        "id": 26,
+        "name": "1",
+        "run_cnt_delta": 11,
+        "run_time_ns_delta": 14552,
+        "type": "perf_event"
+      },
+      "27": {
+        "bytes_jited": 131,
+        "bytes_xlated": 208,
+        "id": 27,
+        "name": "vfs_create",
+        "run_cnt_delta": 8070891,
+        "run_time_ns_delta": 640733767,
+        "type": "kprobe"
+      },
+      "34": {
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 34,
+        "name": "block_io_start",
+        "run_cnt_delta": 99725,
+        "run_time_ns_delta": 55545330,
+        "type": "tracepoint"
+      },
+      "35": {
+        "bytes_jited": 931,
+        "bytes_xlated": 1576,
+        "id": 35,
+        "name": "block_io_done",
+        "run_cnt_delta": 103573,
+        "run_time_ns_delta": 66630752,
+        "type": "tracepoint"
+      },
+      "40": {
+        "bytes_jited": 769,
+        "bytes_xlated": 1360,
+        "id": 40,
+        "name": "cap_capable",
+        "run_cnt_delta": 5825434,
+        "run_time_ns_delta": 890181483,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "4",
+          "--eventfd",
+          "4",
+          "--get",
+          "4",
+          "--prctl",
+          "4",
+          "--set",
+          "4",
+          "--dup",
+          "4",
+          "--kill",
+          "4",
+          "--sigfd",
+          "4",
+          "--signal",
+          "4",
+          "--pty",
+          "4",
+          "--itimer",
+          "4",
+          "--timerfd",
+          "4",
+          "--exec",
+          "4",
+          "--fork",
+          "4",
+          "--vfork",
+          "4",
+          "--clone",
+          "4",
+          "--ptrace",
+          "4",
+          "--futex",
+          "4",
+          "--sem",
+          "4",
+          "--aio",
+          "4",
+          "--aiol",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--io",
+          "4",
+          "--iomix",
+          "4",
+          "--iomix-bytes",
+          "128M",
+          "--io-uring",
+          "4",
+          "--sync-file",
+          "4",
+          "--epoll",
+          "4",
+          "--netdev",
+          "4",
+          "--sctp",
+          "1",
+          "--sock",
+          "4",
+          "--sockdiag",
+          "4",
+          "--sockfd",
+          "4",
+          "--sockpair",
+          "4",
+          "--sockmany",
+          "4",
+          "--udp",
+          "4",
+          "--udp-flood",
+          "4",
+          "--mmap",
+          "4",
+          "--mmap-bytes",
+          "16M",
+          "--mprotect",
+          "4",
+          "--mremap",
+          "4",
+          "--mremap-bytes",
+          "16M",
+          "--madvise",
+          "4",
+          "--access",
+          "4",
+          "--chdir",
+          "4",
+          "--chmod",
+          "4",
+          "--chown",
+          "4",
+          "--dentry",
+          "4",
+          "--dir",
+          "4",
+          "--dirmany",
+          "4",
+          "--fallocate",
+          "4",
+          "--fallocate-bytes",
+          "128M",
+          "--file-ioctl",
+          "4",
+          "--filename",
+          "4",
+          "--flock",
+          "4",
+          "--fpunch",
+          "4",
+          "--fpunch-bytes",
+          "32M",
+          "--fstat",
+          "4",
+          "--getdent",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--inotify",
+          "4",
+          "--open",
+          "4",
+          "--open-max",
+          "1024",
+          "--rename",
+          "4",
+          "--touch",
+          "4",
+          "--utime",
+          "4",
+          "--link",
+          "4",
+          "--symlink",
+          "4",
+          "--mknod",
+          "4",
+          "--fcntl",
+          "4",
+          "--epoll-port",
+          "14314",
+          "--sctp-port",
+          "14414",
+          "--sock-port",
+          "14514",
+          "--sockfd-port",
+          "14614",
+          "--timeout",
+          "10s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/xe2x77hx"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "eventfd",
+            "get",
+            "prctl",
+            "set",
+            "dup",
+            "kill",
+            "sigfd",
+            "signal",
+            "pty",
+            "itimer",
+            "timerfd",
+            "exec",
+            "fork",
+            "vfork",
+            "clone",
+            "ptrace",
+            "futex",
+            "sem",
+            "aio",
+            "aiol",
+            "hdd",
+            "io",
+            "iomix",
+            "io-uring",
+            "sync-file",
+            "epoll",
+            "netdev",
+            "sctp",
+            "sock",
+            "sockdiag",
+            "sockfd",
+            "sockpair",
+            "sockmany",
+            "udp",
+            "udp-flood",
+            "mmap",
+            "mprotect",
+            "mremap",
+            "madvise",
+            "access",
+            "chdir",
+            "chmod",
+            "chown",
+            "dentry",
+            "dir",
+            "dirmany",
+            "fallocate",
+            "file-ioctl",
+            "filename",
+            "flock",
+            "fpunch",
+            "fstat",
+            "getdent",
+            "hdd",
+            "inotify",
+            "open",
+            "rename",
+            "touch",
+            "utime",
+            "link",
+            "symlink",
+            "mknod",
+            "fcntl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 11.855335543999985,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [15654] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [15654] setting to a 10 secs run per stressor\nstress-ng: info:  [15654] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd, 4 fork, 4 vfork, 4 clone, 4 ptrace, 4 futex, 4 sem, 4 aio, 4 aiol, 4 hdd, 4 io, 4 iomix, 4 io-uring, 4 sync-file, 4 epoll, 4 netdev, 1 sctp, 4 sock, 4 sockdiag, 4 sockfd, 4 sockpair, 4 sockmany, 4 udp, 4 udp-flood, 4 mmap, 4 mprotect, 4 mremap, 4 madvise, 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [15654] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [15819] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: info:  [16847] open: using a maximum of 1024 file descriptors\nstress-ng: info:  [16531] chdir: removing 8192 directories\nstress-ng: info:  [16606] dentry: 150362 dentries allocated\nstress-ng: metrc: [15654] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [15654]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [15654] cap             1145067     10.10      0.34      1.50    113368.04      624964.59\nstress-ng: metrc: [15654] eventfd          254777     10.01      0.21      1.48     25450.80      150449.65\nstress-ng: metrc: [15654] get                2551     10.01      0.04      0.93       254.95        2628.89\nstress-ng: metrc: [15654] prctl              2983     10.01      0.57      0.57       297.86        2608.76\nstress-ng: metrc: [15654] set               83327     10.12      0.14      1.27      8233.86       58753.56\nstress-ng: metrc: [15654] dup                 434     10.25      0.15      0.11        42.34        1705.06\nstress-ng: metrc: [15654] kill              28516     10.16      0.02      2.29      2806.46       12378.69\nstress-ng: metrc: [15654] sigfd           3511398     10.10      0.45      2.53    347772.89     1179462.15\nstress-ng: metrc: [15654] signal                0     10.04      0.00      0.00         0.00           0.00\nstress-ng: metrc: [15654] pty                  72     10.12      0.03      1.25         7.11          56.14\nstress-ng: metrc: [15654] itimer              236     10.19      0.44      1.41        23.16         127.78\nstress-ng: metrc: [15654] timerfd          239616     10.55      0.01      1.74     22702.84      136736.53\nstress-ng: metrc: [15654] fork               2874     10.01      0.41      0.58       287.10        2891.34\nstress-ng: metrc: [15654] vfork             37711     10.01      0.37      0.47      3767.85       44828.14\nstress-ng: metrc: [15654] clone              1060     10.26      0.41      1.84       103.27         470.97\nstress-ng: metrc: [15654] ptrace           225852     10.01      0.05      0.91     22566.44      235088.39\nstress-ng: metrc: [15654] futex            352566     20.33      0.45      3.32     17339.78       93685.85\nstress-ng: metrc: [15654] sem                7183     10.07      0.01      0.00       713.12      708802.05\nstress-ng: metrc: [15654] aio               25267     10.52      0.05      0.03      2401.92      326392.21\nstress-ng: metrc: [15654] aiol               3193     10.58      0.09      0.16       301.90       12620.80\nstress-ng: metrc: [15654] hdd               39424     10.56      0.47      0.48      3733.92       41263.31\nstress-ng: metrc: [15654] io                  580     10.91      0.02      0.03        53.14       10349.93\nstress-ng: metrc: [15654] iomix              5175     10.93      0.26      2.73       473.41        1734.66\nstress-ng: metrc: [15654] io-uring          20508     10.66      0.00      0.90      1923.27       22626.72\nstress-ng: metrc: [15654] sync-file           139     10.50      0.05      0.14        13.24         754.58\nstress-ng: metrc: [15654] epoll               462     10.54      0.02      0.23        43.82        1805.29\nstress-ng: metrc: [15654] netdev          1559782     10.09      0.19      1.01    154644.49     1303775.29\nstress-ng: metrc: [15654] sctp              59627     10.00      0.00      0.34      5960.09      175786.11\nstress-ng: metrc: [15654] sock               2325     10.15      0.06      1.09       229.13        2022.86\nstress-ng: metrc: [15654] sockdiag       17664420     10.04      0.03      1.29   1760104.57    13334465.65\nstress-ng: metrc: [15654] sockfd           448607     10.37      0.08      1.29     43266.59      328593.01\nstress-ng: metrc: [15654] sockpair            543     10.15      0.06      0.02        53.52        7202.16\nstress-ng: metrc: [15654] sockmany          40016     10.18      0.05      1.14      3932.25       33519.91\nstress-ng: metrc: [15654] udp              129436     10.06      0.04      1.89     12870.98       66772.97\nstress-ng: metrc: [15654] udp-flood       1587311     10.11      0.17      2.08    156974.70      703991.92\nstress-ng: metrc: [15654] mmap               2698     10.06      0.14      2.87       268.08         897.14\nstress-ng: metrc: [15654] mprotect        8000377     10.16      1.81      9.96    787425.18      679598.62\nstress-ng: metrc: [15654] mremap             2759     10.22      0.02      2.32       269.90        1177.09\nstress-ng: metrc: [15654] madvise              86     10.39      0.22      1.65         8.28          46.11\nstress-ng: metrc: [15654] access             8162     10.50      0.10      0.66       777.30       10793.50\nstress-ng: metrc: [15654] chdir                 4     10.71      0.02      0.78         0.37           4.98\nstress-ng: metrc: [15654] chmod               158     10.38      0.00      0.22        15.23         715.84\nstress-ng: metrc: [15654] chown               406     10.32      0.00      0.28        39.35        1456.36\nstress-ng: metrc: [15654] dentry            12492     10.52      0.02      0.40      1187.46       29662.63\nstress-ng: metrc: [15654] dir               10836     10.69      0.05      0.96      1013.42       10670.66\nstress-ng: metrc: [15654] dirmany           13644     10.34      0.00      0.36      1319.30       38343.08\nstress-ng: metrc: [15654] fallocate             0     10.28      0.01      0.00         0.00           0.00\nstress-ng: metrc: [15654] file-ioctl        22935     10.28      0.02      0.29      2232.01       74277.15\nstress-ng: metrc: [15654] filename           1159     10.24      0.04      0.26       113.14        3878.17\nstress-ng: metrc: [15654] flock           1545652     10.02      0.46      0.56    154251.08     1509412.51\nstress-ng: metrc: [15654] fpunch               23     10.20      0.00      0.24         2.25          95.65\nstress-ng: metrc: [15654] fstat              6064     10.00      0.09      0.72       606.13        7508.89\nstress-ng: metrc: [15654] getdent          272004     10.00      0.15      1.70     27197.97      146788.38\nstress-ng: metrc: [15654] hdd                7501     10.18      0.08      0.12       737.14       37898.19\nstress-ng: metrc: [15654] inotify               6     10.28      0.01      0.00         0.58         528.03\nstress-ng: metrc: [15654] open               7168     10.34      0.02      0.13       693.12       47567.22\nstress-ng: metrc: [15654] rename            43948     10.39      0.01      0.31      4231.17      137202.44\nstress-ng: metrc: [15654] touch             19195     10.33      0.05      0.71      1858.21       25219.41\nstress-ng: metrc: [15654] utime             16284     10.10      0.01      0.29      1612.22       53812.90\nstress-ng: metrc: [15654] link                  4     10.26      0.01      0.44         0.39           9.00\nstress-ng: metrc: [15654] symlink               4     10.22      0.02      0.63         0.39           6.14\nstress-ng: metrc: [15654] mknod               161     10.69      0.00      0.03        15.06        5150.35\nstress-ng: metrc: [15654] fcntl             18784     10.32      0.06      0.34      1819.40       46648.62\nstress-ng: info:  [15654] skipped: 4: exec (4)\nstress-ng: info:  [15654] passed: 249: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (1) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [15654] failed: 0\nstress-ng: info:  [15654] metrics untrustworthy: 0\nstress-ng: info:  [15654] successful run completed in 11.84 secs",
+        "workload_name": "stress_ng_os_io_network"
+      }
+    ]
+  },
+  "error": "BPF stats missing requested program IDs: 10, 17, 18, 19, 26, 27, 34, 35, 40",
+  "post_rejit": null,
+  "rejit_result": {
+    "per_program": {
+      "10": {
+        "passes": [
+          {
+            "bpfopt_ms": 54,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 333,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 10,
+        "program": {
+          "final_insn_count": 402,
+          "orig_insn_count": 402,
+          "prog_id": 10,
+          "prog_name": "tcp_set_state",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "17": {
+        "passes": [
+          {
+            "bpfopt_ms": 14,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 539,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 17,
+        "program": {
+          "final_insn_count": 17,
+          "orig_insn_count": 17,
+          "prog_id": 17,
+          "prog_name": "sched_wakeup",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "18": {
+        "passes": [
+          {
+            "bpfopt_ms": 15,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 457,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 18,
+        "program": {
+          "final_insn_count": 17,
+          "orig_insn_count": 17,
+          "prog_id": 18,
+          "prog_name": "sched_wakeup_ne",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "19": {
+        "passes": [
+          {
+            "bpfopt_ms": 23,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 487,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 19,
+        "program": {
+          "final_insn_count": 96,
+          "orig_insn_count": 96,
+          "prog_id": 19,
+          "prog_name": "sched_switch",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "26": {
+        "passes": [
+          {
+            "bpfopt_ms": 24,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 26,
+        "program": {
+          "final_insn_count": 67,
+          "orig_insn_count": 67,
+          "prog_id": 26,
+          "prog_name": "1",
+          "prog_type": 7
+        },
+        "status": "ok"
+      },
+      "27": {
+        "passes": [
+          {
+            "bpfopt_ms": 16,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 2224,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 27,
+        "program": {
+          "final_insn_count": 22,
+          "orig_insn_count": 22,
+          "prog_id": 27,
+          "prog_name": "vfs_create",
+          "prog_type": 2
+        },
+        "status": "ok"
+      },
+      "34": {
+        "passes": [
+          {
+            "bpfopt_ms": 19,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 531,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 34,
+        "program": {
+          "final_insn_count": 51,
+          "orig_insn_count": 51,
+          "prog_id": 34,
+          "prog_name": "block_io_start",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "35": {
+        "passes": [
+          {
+            "bpfopt_ms": 31,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 419,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 35,
+        "program": {
+          "final_insn_count": 181,
+          "orig_insn_count": 181,
+          "prog_id": 35,
+          "prog_name": "block_io_done",
+          "prog_type": 5
+        },
+        "status": "ok"
+      },
+      "40": {
+        "passes": [
+          {
+            "bpfopt_ms": 29,
+            "bpfopt_summary": {},
+            "error": null,
+            "rejit_syscall_ms": 296,
+            "status": "ok",
+            "step": {
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 40,
+        "program": {
+          "final_insn_count": 156,
+          "orig_insn_count": 156,
+          "prog_id": 40,
+          "prog_name": "cap_capable",
+          "prog_type": 2
+        },
+        "status": "ok"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "bpftrace_set",
+  "selected_workload": "stress_ng_os_io_network",
+  "status": "error"
+}
