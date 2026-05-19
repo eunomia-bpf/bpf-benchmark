@@ -156,6 +156,8 @@ specialization, and facts already present in the native x86 control flow.
 Hard rules for native-direct safety:
 
 ```text
+No verifier aid may be implemented before its equivalence theorem is written
+and accepted in this spec.
 No proof-only branch assertion.
 No runtime packet/output bounds check in the proof path.
 No proof-only stack/model bounds check that native x86 does not execute.
@@ -169,6 +171,12 @@ divide-by-zero/divide-overflow, or invalid addresses.
 No metadata fact may justify a memory access unless it is proved equivalent to
 the native x86 address and path condition.
 ```
+
+This is a proof-before-implementation rule, not a documentation cleanup rule.
+If a verifier-friendly representation needs ghost metadata, a typed fast path,
+or a different pointer expression, the required theorem must exist before the
+code is added. An unproved fast path must be deleted or left disabled even if it
+would make a benchmark pass the verifier.
 
 Fault-like behavior is deliberately not modeled as a safer interpreter branch.
 For arbitrary address load/store, stack out-of-range access, invalid address

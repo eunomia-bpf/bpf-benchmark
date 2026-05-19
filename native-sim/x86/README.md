@@ -781,6 +781,11 @@ using per-instruction const records:
   returns, and stack-slot runtime rejection are removed from the active
   simulator. Any future verifier aid must preserve hardware x86 behavior
   exactly.
+- Proof-before-implementation rule: do not add a verifier-friendly fast path,
+  ghost-metadata shortcut, rewritten pointer expression, or other non-hardware
+  representation until the exact equivalence theorem is written in
+  `simulator-spec.md`. If the theorem is missing, the code must stay disabled
+  or be deleted even when it would make a verifier failure pass.
 - Control-flow opcodes are no longer accepted by the ordinary
   `X86_SIM_RUN_OP()` step dispatch; generated `jcc`, `jmp`, `call`, and `ret`
   must use the C-authored x86 control-flow macros.

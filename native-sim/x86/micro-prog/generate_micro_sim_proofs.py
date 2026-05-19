@@ -192,15 +192,15 @@ def unresolved_call_symbols(insns: list[NativeInsn]) -> list[str]:
 
 
 def native_object_path(name: str) -> Path:
-    out_dir = Path("/tmp/bpf-benchmark-micro-native-nojt")
+    out_dir = Path("/tmp/bpf-benchmark-micro-native-link")
     so_path = out_dir / f"{name}.native.so"
-    cmd = ["make", "-C", str(MICRO_PROGRAMS), f"OUTPUT_DIR={out_dir}"]
-    cmd.append(
-        "NATIVE_CFLAGS=-Wall -Wextra -O2 -g -fPIC -shared "
-        "-DMICRO_NATIVE -fno-omit-frame-pointer -fno-jump-tables "
-        "-MMD -MP"
-    )
-    cmd.append(str(so_path))
+    cmd = [
+        "make",
+        "-C",
+        str(MICRO_PROGRAMS),
+        f"OUTPUT_DIR={out_dir}",
+        str(so_path),
+    ]
     subprocess.run(cmd, cwd=REPO_ROOT, check=True, stdout=subprocess.DEVNULL)
     return so_path
 
@@ -733,6 +733,16 @@ def c_ident(text: str) -> str:
     return re.sub(r"[^A-Za-z0-9_]", "_", text)
 
 
+def program_kind(name: str) -> str:
+    source = MICRO_PROGRAMS / f"{name}.bpf.c"
+    text = source.read_text()
+    if "CGROUP_SKB_BENCH" in text or "cgroup_skb" in text:
+        return "cgroup_skb"
+    if "TC_BENCH" in text or 'SEC("tc")' in text:
+        return "tc"
+    return "xdp"
+
+
 def render_x86_subfunction(symbol: str, insns: list[NativeInsn]) -> str:
     addrs = {insn.addr for insn in insns}
     lines = [
@@ -758,9 +768,22 @@ def render_x86_subfunction(symbol: str, insns: list[NativeInsn]) -> str:
 
 
 def render_program(name: str, insns: list[NativeInsn],
-                   subfunctions: dict[str, list[NativeInsn]] | None = None) -> str:
+                   subfunctions: dict[str, list[NativeInsn]] | None = None,
+                   kind: str = "xdp") -> str:
     ret_statement = "X86_SIM_X86_RET();"
     subfunctions = subfunctions or {}
+    if kind == "tc":
+        section = 'SEC("tc")'
+        ctx_type = "struct __sk_buff *"
+        declare = "X86_SIM_DECLARE_SKB(ctx);"
+    elif kind == "cgroup_skb":
+        section = 'SEC("cgroup_skb/egress")'
+        ctx_type = "struct __sk_buff *"
+        declare = "X86_SIM_DECLARE_SKB(ctx);"
+    else:
+        section = 'SEC("xdp")'
+        ctx_type = "struct xdp_md *"
+        declare = "X86_SIM_DECLARE_XDP(ctx);"
     addrs = {insn.addr for insn in insns}
     subfunction_by_addr = {
         fn_insns[0].addr: f"x86_fn_{c_ident(symbol)}"
@@ -795,10 +818,10 @@ def render_program(name: str, insns: list[NativeInsn],
     for symbol, fn_insns in subfunctions.items():
         lines.append(render_x86_subfunction(symbol, fn_insns))
     lines.extend([
-        "SEC(\"xdp\")",
-        f"int {name}_x86_sim_xdp(struct xdp_md *ctx)",
+        section,
+        f"int {name}_x86_sim_xdp({ctx_type}ctx)",
         "{",
-        "\tX86_SIM_DECLARE_XDP(ctx);",
+        f"\t{declare}",
     ])
     for insn in insns:
         label = f"x86_l_{insn.addr:x}"
@@ -835,7 +858,8 @@ def write_one(md_path: Path, out_dir: Path, *,
     if not insns:
         raise ValueError(f"{md_path}: no native instructions parsed")
     output = out_dir / f"{name}.bpf.c"
-    output.write_text(render_program(name, insns, subfunctions))
+    output.write_text(render_program(name, insns, subfunctions,
+                                     kind=program_kind(name)))
     return output
 
 

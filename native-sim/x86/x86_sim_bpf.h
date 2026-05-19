@@ -334,6 +334,13 @@
 	struct x86_state __x86_sim_state = {};                               \
 	x86_init_state(&__x86_sim_state, (void *)(CTX))
 
+#define X86_SIM_DECLARE_SKB(CTX)                                             \
+	void *__x86_sim_ctx = (void *)(CTX);                                  \
+	void *__x86_sim_data = (void *)(long)(CTX)->data;                     \
+	void *__x86_sim_data_end = (void *)(long)(CTX)->data_end;             \
+	struct x86_state __x86_sim_state = {};                                \
+	x86_init_state(&__x86_sim_state, (void *)(CTX))
+
 #define X86_SIM_RUN_OP(OP, DST, SRC, FLAGS, AUX, IMM)                       \
 	do {                                                               \
 		X86_SIM_EXEC(&__x86_sim_state, (OP), (DST), (SRC),        \
