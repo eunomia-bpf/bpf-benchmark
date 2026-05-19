@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
 import subprocess
@@ -25,7 +26,7 @@ RESULTS_DIR = X86_DIR / "results"
 CONFIG = REPO_ROOT / "micro" / "config" / "micro_pure_jit.yaml"
 LOADER_MANIFEST = REPO_ROOT / "native-sim" / "loader" / "Cargo.toml"
 LOADER_BIN = REPO_ROOT / "native-sim" / "loader" / "target" / "debug" / "reversesim-loader"
-DEFAULT_DIRECT_BPF_DIR = REPO_ROOT / "micro" / "results" / "llvm_kinsn_programs_profit_20260519_002050"
+MICRO_RESULTS_DIR = REPO_ROOT / "micro" / "results"
 BPF_STACK_SIZE = os.environ.get("BPF_STACK_SIZE", "4096")
 
 sys.path.insert(0, str(REPO_ROOT))
@@ -163,14 +164,33 @@ def bpf_instruction_count(obj: Path) -> int:
     return total
 
 
-def existing_direct_bpf_count(bench: Bench, direct_bpf_dir: Path) -> tuple[int | None, str]:
-    obj = direct_bpf_dir / f"{bench.name}.bpf.o"
-    if not obj.exists():
-        return None, f"missing direct BPF object: {obj}"
-    try:
-        return bpf_instruction_count(obj), ""
-    except RuntimeError as exc:
-        return None, f"direct BPF count failed: {exc}"
+def latest_micro_metadata_path() -> Path:
+    override = os.environ.get("MICRO_RESULT_METADATA")
+    if override:
+        return Path(override)
+    paths = sorted(MICRO_RESULTS_DIR.glob("x86_kvm_micro_*/metadata.json"),
+                   reverse=True)
+    if not paths:
+        raise RuntimeError("missing micro result metadata")
+    return paths[0]
+
+
+def load_direct_bpf_counts() -> dict[str, int]:
+    path = latest_micro_metadata_path()
+    data = json.loads(path.read_text())
+    counts: dict[str, int] = {}
+    for bench in data.get("benchmarks", []):
+        for run in bench.get("runs", []):
+            if run.get("mode") != "kernel":
+                continue
+            for sample in run.get("samples", []):
+                size = (sample.get("code_size") or {}).get("bpf_bytecode_bytes")
+                if size is not None:
+                    counts[bench["name"]] = int(size) // 8
+                    break
+            if bench["name"] in counts:
+                break
+    return counts
 
 
 def run_object(bench: Bench, sudo: bool, run_id: str) -> Result:
@@ -219,8 +239,9 @@ def add_note(result: Result, note: str) -> None:
 
 
 def run_bench(bench: Bench, sudo: bool, run_id: str,
-              direct_bpf_dir: Path) -> Result:
-    direct_count, direct_note = existing_direct_bpf_count(bench, direct_bpf_dir)
+              direct_counts: dict[str, int]) -> Result:
+    direct_count = direct_counts.get(bench.name)
+    direct_note = "" if direct_count is not None else "missing direct BPF count in micro result metadata"
     compile_result, compile_s = compile_object(bench)
     if compile_result is not None:
         compile_result.direct_bpf_insns = direct_count
@@ -302,8 +323,8 @@ def main() -> int:
     )
     parser.add_argument(
         "--native-source",
-        choices=("markdown", "object-no-jump-tables"),
-        default="object-no-jump-tables",
+        choices=("native-link", "object-no-jump-tables"),
+        default="native-link",
         help="native x86 disassembly source for generated proof C",
     )
     parser.add_argument(
@@ -311,17 +332,12 @@ def main() -> int:
         type=Path,
         help="write a markdown status table; defaults to native-sim/x86/results/README-<timestamp>.md",
     )
-    parser.add_argument(
-        "--direct-bpf-dir",
-        type=Path,
-        default=Path(os.environ.get("DIRECT_BPF_DIR", DEFAULT_DIRECT_BPF_DIR)),
-        help="existing direct-compiled micro .bpf.o directory used only for instruction counts",
-    )
     args = parser.parse_args()
     if args.jobs < 1:
         raise SystemExit("--jobs must be >= 1")
 
     benches = load_benches()
+    direct_counts = load_direct_bpf_counts()
     only = set(args.only or [])
     if only:
         benches = [bench for bench in benches if bench.name in only]
@@ -340,7 +356,7 @@ def main() -> int:
         for bench in benches:
             result = run_bench(bench, sudo=not args.no_sudo,
                                run_id=run_id,
-                               direct_bpf_dir=args.direct_bpf_dir)
+                               direct_counts=direct_counts)
             results_by_name[bench.name] = result
             print(
                 f"{bench.name}: {result.status}: "
@@ -356,7 +372,7 @@ def main() -> int:
         with ThreadPoolExecutor(max_workers=args.jobs) as executor:
             futures = {
                 executor.submit(run_bench, bench, not args.no_sudo,
-                                run_id, args.direct_bpf_dir): bench
+                                run_id, direct_counts): bench
                 for bench in benches
             }
             for future in as_completed(futures):

@@ -13,6 +13,15 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[3]
 MICRO_PROGRAMS = REPO_ROOT / "micro" / "programs"
 OUT_DIR = Path(__file__).resolve().parent
+NATIVE_LINK_MANIFEST = (
+    REPO_ROOT / "native-sim" / "x86" / "native_lab" /
+    "native_link" / "Cargo.toml"
+)
+NATIVE_LINK_BIN = (
+    REPO_ROOT / "native-sim" / "x86" / "native_lab" /
+    "native_link" / "target" / "release" / "native-link"
+)
+NATIVE_LINK_BUILD_DIR = OUT_DIR / "build" / "native-link"
 
 PTR_WIDTH = {
     "BYTE": 8,
@@ -196,6 +205,36 @@ def native_object_path(name: str) -> Path:
     return so_path
 
 
+def ensure_native_link() -> Path:
+    if not NATIVE_LINK_BIN.exists():
+        subprocess.run(
+            ["cargo", "build", "--release", "--manifest-path",
+             str(NATIVE_LINK_MANIFEST)],
+            cwd=REPO_ROOT,
+            check=True,
+        )
+    return NATIVE_LINK_BIN
+
+
+def native_entry_symbol(so_path: Path, symbols: list[str]) -> str:
+    result = subprocess.run(
+        ["objdump", "-t", str(so_path)],
+        cwd=REPO_ROOT,
+        check=True,
+        text=True,
+        stdout=subprocess.PIPE,
+    )
+    present = {
+        line.rsplit(None, 1)[-1]
+        for line in result.stdout.splitlines()
+        if line.strip()
+    }
+    for symbol in symbols:
+        if symbol in present:
+            return symbol
+    raise ValueError(f"{so_path}: none of the native symbols exist: {symbols}")
+
+
 def parse_native_symbol(so_path: Path, symbol: str) -> list[NativeInsn]:
     result = subprocess.run(
         ["objdump", "-dr", "-Mintel", f"--disassemble={symbol}", str(so_path)],
@@ -234,6 +273,98 @@ def parse_entry_native_function(name: str) -> list[NativeInsn]:
         so_path, [f"{name}_xdp", f"{name}_prog"]
     )
     return insns
+
+
+def parse_native_link_blob(name: str) -> tuple[list[NativeInsn], int]:
+    so_path = native_object_path(name)
+    symbol = native_entry_symbol(so_path, [f"{name}_xdp", f"{name}_prog"])
+    linker = ensure_native_link()
+    NATIVE_LINK_BUILD_DIR.mkdir(parents=True, exist_ok=True)
+    blob_path = NATIVE_LINK_BUILD_DIR / f"{name}.blob.bin"
+    reloc_path = NATIVE_LINK_BUILD_DIR / f"{name}.relocs.bin"
+    result = subprocess.run(
+        [
+            str(linker),
+            "--input", str(so_path),
+            "--symbol", symbol,
+            "--output", str(blob_path),
+            "--output-relocs", str(reloc_path),
+        ],
+        cwd=REPO_ROOT,
+        check=False,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    if result.returncode != 0:
+        detail = "\n".join(
+            part.strip()
+            for part in (result.stdout, result.stderr)
+            if part and part.strip()
+        )
+        raise RuntimeError(f"native-link failed for {name}\n{detail}")
+    disasm = subprocess.run(
+        ["objdump", "-D", "-b", "binary", "-m", "i386:x86-64",
+         "-Mintel", str(blob_path)],
+        cwd=REPO_ROOT,
+        check=True,
+        text=True,
+        stdout=subprocess.PIPE,
+    )
+    return parse_asm_text(disasm.stdout), blob_path.stat().st_size
+
+
+def normalize_native_link_entry_returns(
+    insns: list[NativeInsn], blob_len: int
+) -> list[NativeInsn]:
+    out: list[NativeInsn] = []
+    for insn in insns:
+        if (
+            insn.mnemonic == "jmp"
+            and insn.operands
+            and branch_target(insn.operands[0]) == blob_len
+        ):
+            out.append(
+                NativeInsn(
+                    addr=insn.addr,
+                    raw=f"{insn.raw} ; native-link entry RET",
+                    mnemonic="ret",
+                    operands=(),
+                )
+            )
+        else:
+            out.append(insn)
+    return out
+
+
+def parse_native_linked_program(
+    name: str,
+) -> tuple[list[NativeInsn], dict[str, list[NativeInsn]]]:
+    insns, blob_len = parse_native_link_blob(name)
+    insns = normalize_native_link_entry_returns(insns, blob_len)
+    if not insns:
+        return [], {}
+
+    insn_addrs = {insn.addr for insn in insns}
+    sub_starts = sorted({
+        branch_target(insn.operands[0])
+        for insn in insns
+        if insn.mnemonic == "call"
+        and insn.operands
+        and branch_target(insn.operands[0]) in insn_addrs
+    })
+    if not sub_starts:
+        return insns, {}
+
+    entry_end = sub_starts[0]
+    entry = [insn for insn in insns if insn.addr < entry_end]
+    subfunctions: dict[str, list[NativeInsn]] = {}
+    for index, start in enumerate(sub_starts):
+        end = sub_starts[index + 1] if index + 1 < len(sub_starts) else blob_len
+        fn_insns = [insn for insn in insns if start <= insn.addr < end]
+        if fn_insns:
+            subfunctions[f"native_link_sub_{start:x}"] = fn_insns
+    return entry, subfunctions
 
 
 def parse_int(text: str) -> int:
@@ -687,17 +818,20 @@ def render_program(name: str, insns: list[NativeInsn],
 
 
 def write_one(md_path: Path, out_dir: Path, *,
-              native_source: str = "object-no-jump-tables") -> Path:
+              native_source: str = "native-link") -> Path:
     name = md_path.stem
-    if native_source != "object-no-jump-tables":
+    if native_source == "native-link":
+        insns, subfunctions = parse_native_linked_program(name)
+    elif native_source == "object-no-jump-tables":
+        insns = parse_entry_native_function(name)
+        missing_symbols = unresolved_call_symbols(insns)
+        subfunctions: dict[str, list[NativeInsn]] = {}
+        if missing_symbols:
+            native_functions = parse_full_native_functions(name, missing_symbols)
+            insns = native_functions.pop(f"{name}_xdp")
+            subfunctions = native_functions
+    else:
         raise ValueError(f"unknown native source: {native_source}")
-    insns = parse_entry_native_function(name)
-    missing_symbols = unresolved_call_symbols(insns)
-    subfunctions: dict[str, list[NativeInsn]] = {}
-    if missing_symbols:
-        native_functions = parse_full_native_functions(name, missing_symbols)
-        insns = native_functions.pop(f"{name}_xdp")
-        subfunctions = native_functions
     if not insns:
         raise ValueError(f"{md_path}: no native instructions parsed")
     output = out_dir / f"{name}.bpf.c"
@@ -712,9 +846,9 @@ def main() -> int:
     parser.add_argument("--only", nargs="*", help="optional micro benchmark stem list")
     parser.add_argument(
         "--native-source",
-        choices=("object-no-jump-tables",),
-        default="object-no-jump-tables",
-        help="read native x86 disassembly from object-no-jump-tables build",
+        choices=("native-link", "object-no-jump-tables"),
+        default="native-link",
+        help="read native x86 disassembly from native-link blob or raw object",
     )
     args = parser.parse_args()
 
