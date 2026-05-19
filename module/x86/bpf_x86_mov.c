@@ -574,6 +574,15 @@ static int instantiate_mov_mem(u64 payload, struct bpf_insn *insn_buf, u8 size,
 	if (err)
 		return err;
 
+	if (!arch_base && dst_reg < BPF_REG_10 && base_reg <= BPF_REG_10) {
+		insn_buf[cnt++] = BPF_LDX_MEM(size, dst_reg, base_reg, offset);
+		if (kinsn_x86_reg_is_shadowed(dst_reg))
+			insn_buf[cnt++] = BPF_STX_MEM(BPF_DW, BPF_REG_10,
+						      dst_reg,
+						      kinsn_x86_shadow_reg_off(dst_reg));
+		return cnt;
+	}
+
 	addr_reg = base_reg;
 	value_reg = dst_reg;
 	dst_shadowed = arch_base ? kinsn_x86_arch_reg_is_shadowed(dst_reg) :

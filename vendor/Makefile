@@ -40,19 +40,22 @@ apps: apps-x86 apps-arm64
 apps-x86: cilium-x86 tetragon-x86 otel-x86 tracee-x86 bcc-x86 bpftrace-x86
 apps-arm64: cilium-arm64 tetragon-arm64 otel-arm64 tracee-arm64 bcc-arm64 bpftrace-arm64
 
-cilium-x86 cilium-arm64:
-	arch="$(patsubst cilium-%,%,$@)"; goarch=$$(test "$$arch" = x86 && echo amd64 || echo arm64); \
-	$(GO_ENV) $(MAKE) -C "$(CILIUM)/daemon" GO="$(GO)" GOARCH="$$goarch" CGO_ENABLED=0 cilium-agent; \
-	install -D -m 0755 "$(CILIUM)/daemon/cilium-agent" "$(BUILD)/$$arch/cilium/bin/cilium-agent"
+cilium-x86: GOARCH := amd64
+cilium-arm64: GOARCH := arm64
+cilium-x86 cilium-arm64: cilium-%:
+	install -d "$(BUILD)/$*/cilium/bin"
+	$(GO_ENV) $(MAKE) -C "$(CILIUM)/daemon" GO="$(GO)" GOARCH="$(GOARCH)" CGO_ENABLED=0 TARGET="$(BUILD)/$*/cilium/bin/cilium-agent" "$(BUILD)/$*/cilium/bin/cilium-agent"
 
-tetragon-x86 tetragon-arm64:
-	arch="$(patsubst tetragon-%,%,$@)"; goarch=$$(test "$$arch" = x86 && echo amd64 || echo arm64); bpfarch=$$(test "$$arch" = x86 && echo x86 || echo arm64); \
-	bpfroot="$(BUILD)/.tetragon-bpf/$$arch"; objdir="$$bpfroot/objs/"; depsdir="$$bpfroot/deps/"; install -d "$$bpfroot"; \
-	$(GO_ENV) $(MAKE) -C "$(TETRAGON)" GO="$(GO)" TARGET_ARCH="$$goarch" GOARCH="$$goarch" tetragon; \
-	install -D -m 0755 "$(TETRAGON)/tetragon" "$(BUILD)/$$arch/tetragon/bin/tetragon"; \
-	$(MAKE) -C "$(TETRAGON)/bpf" CLANG="$(CLANG)" LLC="$(LLC)" BPF_TARGET_ARCH="$$bpfarch" OBJSDIR="$$objdir" DEPSDIR="$$depsdir" -j"$(JOBS)"; \
-	install -d "$(BUILD)/$$arch/tetragon"; \
-	cp -a "$$objdir/." "$(BUILD)/$$arch/tetragon/"
+tetragon-x86: GOARCH := amd64
+tetragon-x86: BPFARCH := x86
+tetragon-arm64: GOARCH := arm64
+tetragon-arm64: BPFARCH := arm64
+tetragon-x86 tetragon-arm64: tetragon-%:
+	install -d "$(BUILD)/$*/tetragon/bin" "$(BUILD)/.tetragon-bpf/$*"
+	$(GO_ENV) $(MAKE) -C "$(TETRAGON)" GO="$(GO)" TARGET_ARCH="$(GOARCH)" GOARCH="$(GOARCH)" EXTRA_GO_BUILD_FLAGS="-o $(BUILD)/$*/tetragon/bin/tetragon" tetragon
+	$(MAKE) -C "$(TETRAGON)/bpf" CLANG="$(CLANG)" LLC="$(LLC)" BPF_TARGET_ARCH="$(BPFARCH)" OBJSDIR="$(BUILD)/.tetragon-bpf/$*/objs/" DEPSDIR="$(BUILD)/.tetragon-bpf/$*/deps/" -j"$(JOBS)"
+	install -d "$(BUILD)/$*/tetragon"
+	cp -a "$(BUILD)/.tetragon-bpf/$*/objs/." "$(BUILD)/$*/tetragon/"
 
 $(CACHE)/otelcol-ebpf-profiler-%.yaml:
 	install -d "$(dir $@)"
