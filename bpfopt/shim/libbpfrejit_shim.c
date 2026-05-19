@@ -2703,17 +2703,46 @@ static void emit_dump_state(int cli) {
 }
 
 static void handle_client(int cli) {
-    char buf[8192];
-    ssize_t n = read(cli, buf, sizeof(buf) - 1);
-    if (n <= 0)
+    /* The runner can send arbitrarily large execute_plan payloads (e.g. tracee
+     * with 158 progs × 18 steps × per-step bash command can exceed 100 KB).
+     * Read until newline so we never truncate a request mid-JSON. */
+    size_t cap = 16 * 1024;
+    size_t len = 0;
+    char *buf = (char *)malloc(cap);
+    if (!buf) {
+        dprintf(cli, "{\"ok\":false,\"error\":\"shim oom on request buf\"}\n");
         return;
-    buf[n] = 0;
+    }
+    while (1) {
+        if (len + 1 >= cap) {
+            size_t ncap = cap * 2;
+            char *nb = (char *)realloc(buf, ncap);
+            if (!nb) {
+                free(buf);
+                dprintf(cli, "{\"ok\":false,\"error\":\"shim oom on request grow\"}\n");
+                return;
+            }
+            buf = nb; cap = ncap;
+        }
+        ssize_t n = read(cli, buf + len, cap - len - 1);
+        if (n < 0) {
+            if (errno == EINTR) continue;
+            free(buf);
+            return;
+        }
+        if (n == 0) break;
+        len += (size_t)n;
+        buf[len] = 0;
+        if (memchr(buf, '\n', len) != NULL) break;
+    }
+    if (len == 0) { free(buf); return; }
     char cmd[64] = {0};
     if (!json_get_str(buf, "cmd", cmd, sizeof(cmd))) {
         dprintf(cli, "{\"ok\":false,\"error\":\"missing cmd\"}\n");
+        free(buf);
         return;
     }
-    log_line("socket: cmd=%s", cmd);
+    log_line("socket: cmd=%s len=%zu", cmd, len);
     if (strcmp(cmd, "list_progs") == 0)
         emit_list_progs(cli);
     else if (strcmp(cmd, "execute_plan") == 0)
@@ -2722,6 +2751,7 @@ static void handle_client(int cli) {
         emit_dump_state(cli);
     else
         dprintf(cli, "{\"ok\":false,\"error\":\"unknown cmd: %s\"}\n", cmd);
+    free(buf);
 }
 
 static void *socket_thread(void *arg) {

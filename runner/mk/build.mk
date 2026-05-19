@@ -99,12 +99,14 @@ host-kernel-offsets-arm64: host-kernel-arm64
 	$(MAKE) -C "$(MICRO_PROGRAM_DIR)" OUTPUT_DIR="$(HOST_KERNEL_OFFSETS_DIR_ARM64)" KERNEL_VMLINUX="$(HOST_KERNEL_BUILD_DIR_ARM64)/vmlinux" "$(HOST_KERNEL_OFFSETS_DIR_ARM64)/kernel_offsets.h"
 
 host-kinsn-x86: host-kernel-x86
+	rm -rf "$(HOST_KINSN_DIR_X86)"
 	install -d "$(HOST_KINSN_DIR_X86)"
 	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 M="$(ROOT_DIR)/module/x86" MO="$(HOST_KINSN_DIR_X86)" modules -j"$(IMAGE_BUILD_JOBS)"
 	test "$$(find "$(HOST_KINSN_DIR_X86)" -maxdepth 1 -type f -name '*.ko' | wc -l)" -gt 0
 
 host-kinsn-arm64: host-kernel-arm64
 	@command -v aarch64-linux-gnu-gcc >/dev/null
+	rm -rf "$(HOST_KINSN_DIR_ARM64)"
 	install -d "$(HOST_KINSN_DIR_ARM64)"
 	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- M="$(ROOT_DIR)/module/arm64" MO="$(HOST_KINSN_DIR_ARM64)" modules -j"$(IMAGE_BUILD_JOBS)"
 	test "$$(find "$(HOST_KINSN_DIR_ARM64)" -maxdepth 1 -type f -name '*.ko' | wc -l)" -gt 0

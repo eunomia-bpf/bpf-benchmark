@@ -64,6 +64,30 @@
 	 X86_SIM_MEM_BASE_REG((OP), (DST), (SRC)) != X86_RBP &&             \
 	 X86_SIM_MEM_BASE_REG((OP), (DST), (SRC)) != X86_RSP)
 
+#define X86_SIM_OP_IS_KNOWN(OP)                                            \
+	((OP) == X86_OP_NOP || (OP) == X86_OP_MOV_IMM ||                  \
+	 (OP) == X86_OP_MOV_REG || (OP) == X86_OP_MOVZX_REG ||            \
+	 (OP) == X86_OP_MOVSX_REG || (OP) == X86_OP_MOV_LOAD ||           \
+	 (OP) == X86_OP_MOVSX_LOAD || (OP) == X86_OP_MOV_STORE_IMM ||     \
+	 (OP) == X86_OP_MOV_STORE_REG || (OP) == X86_OP_LEA ||            \
+	 (OP) == X86_OP_ADD_IMM || (OP) == X86_OP_ALU_IMM ||              \
+	 (OP) == X86_OP_ALU_MEM || (OP) == X86_OP_ADD_REG ||              \
+	 (OP) == X86_OP_XOR_REG || (OP) == X86_OP_ALU_REG ||              \
+	 (OP) == X86_OP_CMP_IMM || (OP) == X86_OP_CMP_REG ||              \
+	 (OP) == X86_OP_CMP_MEM_IMM || (OP) == X86_OP_CMP_MEM_REG ||      \
+	 (OP) == X86_OP_TEST_MEM_IMM || (OP) == X86_OP_TEST_IMM ||         \
+	 (OP) == X86_OP_TEST_REG || (OP) == X86_OP_CMOV ||                \
+	 (OP) == X86_OP_SETCC || (OP) == X86_OP_BSWAP ||                  \
+	 (OP) == X86_OP_POPCNT || (OP) == X86_OP_XCHG ||                  \
+	 (OP) == X86_OP_JCC || (OP) == X86_OP_JMP ||                      \
+	 (OP) == X86_OP_CALL || (OP) == X86_OP_DIV ||                     \
+	 (OP) == X86_OP_SHLD_IMM || (OP) == X86_OP_SHRD_IMM ||            \
+	 (OP) == X86_OP_PUSH || (OP) == X86_OP_POP ||                     \
+	 (OP) == X86_OP_RET)
+
+#define X86_SIM_REQUIRE_KNOWN_OP(OP)                                        \
+	_Static_assert(X86_SIM_OP_IS_KNOWN(OP), "unknown x86 simulator op")
+
 #define X86_SIM_EXEC_PACKET(STATE, OP)                                      \
 	({                                                                 \
 		int __x86_sim_packet_ret = X86_SIM_CONTINUE;             \
@@ -303,6 +327,7 @@
 
 #define X86_SIM_EXEC(STATE, OP, DST, SRC, FLAGS, AUX, IMM)                  \
 	({                                                                 \
+		X86_SIM_REQUIRE_KNOWN_OP(OP);                              \
 		X86_SIM_LOAD_INSN((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
 		X86_SIM_PACKET_FASTPATH_CANDIDATE((OP), (DST), (SRC),      \
 						  (AUX)) ?                  \
@@ -312,6 +337,7 @@
 
 #define X86_SIM_EXEC_SUB(STATE, OP, DST, SRC, FLAGS, AUX, IMM)              \
 	({                                                                 \
+		X86_SIM_REQUIRE_KNOWN_OP(OP);                              \
 		X86_SIM_LOAD_INSN((OP), (DST), (SRC), (FLAGS), (AUX), (IMM)); \
 		X86_SIM_EXEC_TYPED((STATE), (OP));                           \
 	})

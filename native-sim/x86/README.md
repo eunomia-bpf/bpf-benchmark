@@ -157,7 +157,9 @@ That run kept the previous proof-only branch assertions and `last_cmp_*`
 metadata deleted. The current active code goes further: runtime unsupported
 checks, abort/fallback returns, loop guards, and stack-slot rejection were
 removed from the active simulator/linker path. All 29 generated micro sources
-compile with `BPF_STACK_SIZE=4096`; no current verifier/load success is claimed
+compile with `BPF_STACK_SIZE=4096`;
+[`results/README-20260518-214215.md`](./results/README-20260518-214215.md)
+records that compile-only check. No current verifier/load success is claimed
 for this correctness-first version.
 
 `current` is the active C-dispatch path (`generate_micro_sim_proofs.py` +
@@ -244,8 +246,8 @@ Python LOC check for this cleanup and backup:
 
 ```text
 generate_micro_sim_proofs.py current:            735 lines
-x86_sim_bpf.h latest:                       754 lines
-x86_sim.h latest:                      2154 lines
+x86_sim_bpf.h latest:                       780 lines
+x86_sim.h latest:                      2073 lines
 loader/src/main.rs latest:             1192 lines
 removed x86_sim_template_helpers.bpf.c: 2010 lines
 ```
@@ -371,7 +373,7 @@ Generated-C migration todo:
 | Remove packet/output runtime bounds checks | done | Active packet/output helpers no longer guard loads/stores with proof-only `data_end` checks. |
 | Remove top-level fallback returns | done | Generated paths no longer translate helper results into `XDP_ABORTED` or any other fallback return. |
 | Split memory-domain helpers | done for current micro | Top-level packet loads have a raw verifier-proven path; subfunctions and stack/ctx accesses keep checked typed helpers. |
-| Correctness-first compile check | done | All 29 generated micro sources compile with clang when `BPF_STACK_SIZE=4096`; verifier/load is not claimed for this state layout. |
+| Correctness-first compile check | done | [`results/README-20260518-214215.md`](./results/README-20260518-214215.md): all 29 generated micro sources compile with clang when `BPF_STACK_SIZE=4096`; verifier/load is not claimed for this state layout. |
 | Direct-native safety TODO | open | See [`TODO.md`](./TODO.md) for remaining stack, metadata, ABI, rodata, flag, and call-return proof obligations. |
 
 The current active path is correctness-first: it removes simulator-only safety
