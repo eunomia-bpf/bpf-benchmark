@@ -119,7 +119,7 @@ renderers and moving loop/ABI capability protocol into C-authored helpers:
 
 ```sh
 python3 native-sim/x86/micro-prog/run_micro_sim_batch.py \
-  --native-source object-no-jump-tables --no-build-loader
+  --no-build-loader
 ```
 
 `run_micro_sim_batch.py` is the single active generated-C batch entry.
@@ -127,6 +127,9 @@ It records `compile_s` in the Python harness and parses loader-reported
 `verify_s`/`test_s`, where `verify_s` is measured inside the Rust loader around
 `bpf_object__load()` or raw `bpf_prog_load()`. It runs in parallel by default
 with `--jobs min(8, ncpu)`; use `--jobs 1` only when a serial run is needed.
+Direct BPF instruction counts are read from the latest micro result's existing
+`details/jit_dumps/*__kernel__sample00.xlated.bin` files; the batch does not
+recompile direct eBPF or derive those counts from markdown/native asm.
 Unless `--markdown` is specified, each run writes a timestamped result file
 under `native-sim/x86/results/README-<timestamp>.md`; do not write status output to
 `/tmp`.
@@ -137,7 +140,7 @@ artifacts; a slow compile should be observed, not converted into a synthetic
 compile-fail timeout.
 
 Current observation: after removing Python helper selection, large generated-C
-artifacts can make `clang -O2 -target bpf` significantly slower while it
+artifacts can make `clang -O3 -target bpf` significantly slower while it
 specializes the C-authored simulator dispatch. That is a real cost of the
 cleaner proof boundary, not a reason for the harness to kill clang.
 If this remains too expensive, the next design change must still keep helper
@@ -145,13 +148,17 @@ selection out of Python; it should use C-authored templates/macros or a smaller
 simulator state shape.
 
 Earlier full-state layouts exceeded the kernel BPF 512-byte stack. The active
-state now uses a C-owned shallow/deep byte-stack layout: push/pop-only programs
-get 64 bytes, and programs with real `[rsp/rbp + disp]` local memory get 128
-bytes. This is a state-layout choice, not a runtime guard. The batch still
-passes `-mllvm -bpf-stack-size=4096` so clang does not abort before we can
-inspect verifier behavior, but latest verifier failures are now dominated by
-pointer representation and packet-range visibility rather than stack-frame
-overflow.
+default path uses `x86_sim_local_bpf.h`, which represents x86 GPRs, flags, and
+metadata as function-local variables and expands instruction helpers as macros
+so clang can eliminate unused state. Programs with native local-call
+subfunctions still use the older struct/subfunction path until call-frame
+macro semantics are specified. Stack-enabled local-state programs use a
+C-owned shallow/deep byte-stack layout: push/pop-only programs get 64 bytes,
+and programs with real `[rsp/rbp + disp]` local memory get 128 bytes. This is a
+state-layout choice, not a runtime guard. The batch still passes
+`-mllvm -bpf-stack-size=4096` so clang does not abort before we can inspect
+verifier behavior, but latest verifier failures are now dominated by pointer
+representation and packet-range visibility rather than stack-frame overflow.
 
 ### Micro Compile And Verify Matrix
 
@@ -163,41 +170,43 @@ facts and paths that have since been deleted. The current active code removes
 runtime unsupported checks, abort/fallback returns, loop guards, branch range
 assertions, stack-slot rejection, and generated fallback returns.
 
-Latest correctness-first batch:
-[`results/README-20260519-014225.md`](./results/README-20260519-014225.md).
-All 29 generated micro sources compiled; 5 loaded and passed test run.
+Latest correctness-first local-state batch:
+[`results/README-20260519-local-state.md`](./results/README-20260519-local-state.md).
+All 29 generated micro sources compile with `clang -O3`; 22 load and pass
+`BPF_PROG_TEST_RUN`. The generated-C path always uses native-link output and uses
+`x86_sim_local_bpf.h` for programs without native local-call subfunctions.
 
-| Micro program | Status | Compile s | Verify s | Current verifier result |
-| --- | --- | ---: | ---: | --- |
-| `simple` | ok | 0.232 | 0.000 | ok |
-| `simple_packet` | ok | 0.223 | 0.000 | ok |
-| `bitmap_popcount_scan` | ok | 0.596 | 0.017 | ok |
-| `sorted_rule_binary_search` | ok | 0.739 | 0.222 | ok |
-| `bcc_runqlat_log2_histogram_bucket` | run-fail | 2.357 | 0.002 | `R2 pointer arithmetic with <<= operator prohibited` |
-| `trace_event_type_switch_dispatch` | run-fail | 1.363 | 0.001 | `R3 pointer arithmetic with <<= operator prohibited` |
-| `packet_checksum_fold` | ok | 1.126 | 0.382 | ok |
-| `payload_prefix_memcmp_scan` | run-fail | 3.353 | 0.001 | `R3 pointer arithmetic on pkt_end prohibited` |
-| `packet_vlan_tcpopt_parser` | run-fail | 4.304 | 0.002 | `invalid access to packet, off=42 size=1, r=0` |
-| `bpf_local_call_fanout_dispatch` | run-fail | 9.341 | 0.001 | `invalid size of register spill` |
-| `flow_5tuple_rss_hash` | run-fail | 6.881 | 0.002 | `invalid access to packet, off=22 size=2, r=0` |
-| `katran_lb_consistent_hash_select` | run-fail | 31.671 | 0.001 | `tried to subtract pointer from scalar` |
-| `cilium_policy_guard_tree_filter` | run-fail | 2.258 | 0.033 | `R1 pointer arithmetic with <<= operator prohibited` |
-| `siphash_rotate64_mixer` | run-fail | 41.685 | 0.003 | `R1 pointer arithmetic with <<= operator prohibited` |
-| `packet_record_bounds_window` | run-fail | 2.123 | 0.043 | `R2 pointer arithmetic with <<= operator prohibited` |
-| `flow_record_field_scan` | run-fail | 2.496 | 0.025 | `R2 pointer arithmetic with <<= operator prohibited` |
-| `packed_header_bitfield_decode` | run-fail | 10.870 | 0.001 | `R1 pointer arithmetic with >>= operator prohibited` |
-| `bpftrace_string_search_prefix_scan` | run-fail | 2.103 | 0.002 | `R4 pointer arithmetic with <<= operator prohibited` |
-| `tracee_syscall_name_table_lookup` | run-fail | 1.847 | 0.001 | `R2 pointer arithmetic with <<= operator prohibited` |
-| `tracee_http_method_prefix_detect` | run-fail | 2.070 | 0.010 | `R1 pointer arithmetic with <<= operator prohibited` |
-| `cilium_socket_lb_service_select` | run-fail | 3.114 | 0.001 | `R3 bitwise operator &= on pointer prohibited` |
-| `bcc_tcpconnect_ipv4_tuple_filter` | run-fail | 3.032 | 0.021 | `R2 pointer arithmetic with <<= operator prohibited` |
-| `tetragon_process_event_arg_filter` | run-fail | 7.422 | 0.001 | `R1 pointer arithmetic with >>= operator prohibited` |
-| `otel_stack_frame_unwind_scan` | run-fail | 2.249 | 0.031 | `R3 pointer arithmetic with <<= operator prohibited` |
-| `cilium_ct_nat_tuple_rewrite` | run-fail | 3.053 | 0.016 | `R2 pointer arithmetic with <<= operator prohibited` |
-| `packet_toeplitz_rss_hash` | run-fail | 2.907 | 0.085 | `R1 pointer arithmetic with <<= operator prohibited` |
-| `bpftrace_comm_key_fnv_hash` | run-fail | 13.462 | 0.001 | `R1 pointer arithmetic with >>= operator prohibited` |
-| `tc_packet_checksum_fold` | run-fail | 1.790 | 0.000 | `invalid access to packet, off=8 size=4, r=0` |
-| `cgroup_skb_hash_chain` | run-fail | 1.735 | 0.001 | `invalid access to packet, off=8 size=4, r=0` |
+| Micro program | Status | Compile s | Proof BPF insns | Direct BPF insns | Verify s | Current verifier result |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| `simple` | ok | 0.426 | 19 | 24 | 0.000 | ok |
+| `simple_packet` | ok | 0.371 | 16 | 21 | 0.000 | ok |
+| `bitmap_popcount_scan` | ok | 0.886 | 56 | 87 | 0.018 | ok |
+| `sorted_rule_binary_search` | ok | 1.104 | 65 | 158 | 0.115 | ok |
+| `bcc_runqlat_log2_histogram_bucket` | ok | 2.577 | 115 | 153 | 0.989 | ok |
+| `trace_event_type_switch_dispatch` | ok | 6.035 | 775 | 239 | 0.570 | ok |
+| `packet_checksum_fold` | ok | 1.273 | 163 | 67 | 0.450 | ok |
+| `payload_prefix_memcmp_scan` | ok | 4.107 | 184 | 135 | 0.007 | ok |
+| `packet_vlan_tcpopt_parser` | run-fail | 4.784 | 218 | 222 | 0.001 | `invalid access to packet, off=42 size=1, r=0`; native guard is through an alias after variable IP header offset, and verifier does not propagate that range to the load base. |
+| `bpf_local_call_fanout_dispatch` | run-fail | 8.199 | 3750 | 466 | 0.001 | still on old struct/subfunction path; verifier rejects pointer-typed stack helper arithmetic. |
+| `flow_5tuple_rss_hash` | run-fail | 5.381 | 269 | 179 | 0.001 | `invalid access to packet, off=22 size=2, r=0`; same alias/range visibility issue after variable header length. |
+| `katran_lb_consistent_hash_select` | ok | 24.382 | 723 | 682 | 0.003 | ok |
+| `cilium_policy_guard_tree_filter` | ok | 3.229 | 164 | 134 | 0.030 | ok |
+| `siphash_rotate64_mixer` | ok | 18.738 | 747 | 772 | 0.002 | ok |
+| `packet_record_bounds_window` | ok | 2.452 | 97 | 118 | 0.010 | ok |
+| `flow_record_field_scan` | ok | 2.543 | 97 | 91 | 0.010 | ok |
+| `packed_header_bitfield_decode` | run-fail | 8.818 | 410 | 254 | 0.001 | `pointer arithmetic with <<= operator prohibited`; byte stack stores a packet pointer as x86 bytes, and verifier will not shift pointer-typed values. |
+| `bpftrace_string_search_prefix_scan` | ok | 2.769 | 161 | 164 | 0.606 | ok |
+| `tracee_syscall_name_table_lookup` | ok | 3.394 | 275 | 176 | 0.122 | ok |
+| `tracee_http_method_prefix_detect` | ok | 4.271 | 209 | 151 | 0.009 | ok |
+| `cilium_socket_lb_service_select` | ok | 3.551 | 210 | 216 | 0.124 | ok |
+| `bcc_tcpconnect_ipv4_tuple_filter` | ok | 3.176 | 180 | 190 | 0.051 | ok |
+| `tetragon_process_event_arg_filter` | run-fail | 5.970 | 568 | 250 | 0.001 | `pointer arithmetic with >>= operator prohibited`; byte stack stores a packet pointer as x86 bytes. |
+| `otel_stack_frame_unwind_scan` | ok | 3.069 | 156 | 212 | 0.044 | ok |
+| `cilium_ct_nat_tuple_rewrite` | ok | 3.189 | 197 | 195 | 0.047 | ok |
+| `packet_toeplitz_rss_hash` | ok | 4.368 | 334 | 211 | 0.032 | ok |
+| `bpftrace_comm_key_fnv_hash` | run-fail | 6.682 | 631 | 217 | 0.001 | `pointer arithmetic with >>= operator prohibited`; byte stack stores a packet pointer as x86 bytes. |
+| `tc_packet_checksum_fold` | ok | 2.233 | 167 | 52 | 0.341 | ok |
+| `cgroup_skb_hash_chain` | run-fail | 2.814 | 829 | 100 | 0.007 | `cannot write into packet`; native SKB result ABI writes packet head, but cgroup_skb verifier policy rejects packet writes. |
 
 For verifier diagnostics, capture the kernel verifier log through the loader:
 
@@ -221,7 +230,7 @@ programs pass verifier and `BPF_PROG_TEST_RUN`.
 These rows compare direct eBPF against an earlier x86-simulator proof shape.
 They are historical verifier-complexity controls from the safety-first path, not
 current correctness-first load results. The current active path prioritizes
-exact simulator semantics and currently claims 5/29 verifier/load success.
+exact simulator semantics and currently has 22/29 verifier/load/test success.
 
 | Micro program | Direct eBPF result | Direct load/test s | Direct static BPF insns | Direct verifier processed / total / peak / max-state | x86 simulator result | x86 simulator verify s | x86 simulator static BPF insns | x86 simulator verifier processed / total / peak / max-state | Reason |
 | --- | --- | ---: | ---: | --- | --- | ---: | ---: | --- | --- |
@@ -242,9 +251,10 @@ same pointer-representation reasons as the other large cases.
 Python LOC check for this cleanup and backup:
 
 ```text
-generate_micro_sim_proofs.py current:       739 lines
-x86_sim_bpf.h latest:                      657 lines
-x86_sim.h latest:                         1932 lines
+generate_micro_sim_proofs.py current:       778 lines
+x86_sim_local_bpf.h latest:               1108 lines
+x86_sim_bpf.h latest:                      661 lines
+x86_sim.h latest:                         1918 lines
 loader/src/main.rs latest:             1192 lines
 removed x86_sim_template_helpers.bpf.c: 2010 lines
 ```
@@ -357,7 +367,7 @@ Generated-C migration todo:
 | Remove stale C special templates | done | Unused checksum/string-scan C helper templates were deleted from `x86_sim_bpf.h`; the header now contains generic simulator plumbing only. |
 | Move proof protocol out of Python | done | Python pc-dispatch, ctx-store write-set insertion, `bpf_loop` lowering, internal call-return stack lowering, helper selection, and benchmark-name renderers were removed; remaining Python CFG work is mechanical label/branch emission. |
 | C-owned loop/call protocol | done for current micro | `X86_SIM_X86_JCC/JMP` lower native branches directly to C labels; `X86_SIM_X86_CALL` models call stack adjustment and writes the next native instruction address as the return address; generated callee frame instructions execute through normal x86 helpers. |
-| Shrink Python generator below 800 lines | done | `generate_micro_sim_proofs.py` is 737 lines. |
+| Shrink Python generator below 800 lines | done | `generate_micro_sim_proofs.py` is 778 lines. |
 | Historical safety-first generated-C batch | recorded | `results/README-20260518-210632.md`: 29/29 pass before the later no-trap/no-guard cleanup. |
 | Delete non-x86 loop fuel guard | done | Active branch macros no longer decrement `X86_SIM_LOOP_FUEL`; backward edges use plain x86 branch semantics. |
 | Move opcode dispatch specialization into C | done | `X86_SIM_EXEC_TYPED` selects C helpers from constant `X86_OP_*`; Python does not choose helpers. |
@@ -375,8 +385,8 @@ Generated-C migration todo:
 | Split memory-domain helpers | done for current micro | Top-level packet loads have a raw pointer path; subfunctions and stack/ctx accesses keep typed helpers. |
 | Per-instruction const record | done | `X86_SIM_EXEC` creates a local `const struct x86_insn` for each macro-expanded native instruction so clang can specialize C-authored semantics without Python helper selection. |
 | Remove generated fallback returns | done | Generated entry and subfunction tails use `__builtin_unreachable()` after the native CFG; no fallback return value is emitted. |
-| Correctness-first compile/verify check | latest: 5/29 verifier ok | [`results/README-20260519-014225.md`](./results/README-20260519-014225.md): all 29 generated micro sources compile; five load and test successfully. Remaining failures are verifier rejection of pointer-typed x86 GPR integer operations, byte-wise pointer stack stores, scalar/pointer subtraction, and packet accesses whose native guards are not visible as direct verifier range facts. |
-| Local-register macro state experiment | open | Next state-layout experiment: represent x86 GPRs/flags/metadata as function-local variables and make helper steps scoped macros/templates. This should improve constant elimination and reduce BPF stack pressure while keeping Python a one-to-one native instruction emitter. |
+| Correctness-first compile/verify check | latest: 22/29 verifier ok | [`results/README-20260519-local-state.md`](./results/README-20260519-local-state.md): all 29 generated micro sources compile with `clang -O3`; 22 load and test successfully. Remaining failures are verifier rejection of byte-stack pointer stores, native-call struct path state, packet alias range visibility, and cgroup_skb packet-write policy. |
+| Local-register macro state experiment | default for non-call micro | `x86_sim_local_bpf.h` represents x86 GPRs/flags/metadata as function-local variables and makes helper steps scoped macros/templates. This keeps Python a one-to-one native instruction emitter while reducing proof BPF size for most micro programs. Native local-call subfunctions still need a separately specified macro-frame path. |
 | Direct-native safety TODO | open | See [`TODO.md`](./TODO.md) for remaining stack, metadata, ABI, rodata, flag, and call-return proof obligations. |
 
 The current active path is correctness-first: it removes simulator-only safety
@@ -519,19 +529,11 @@ Active JSON-link rules:
    it must be justified by a loop-bound or control-flow lemma before native
    direct execution can rely on it.
 
-The JSON smoke status should be reproduced with:
-
-```sh
-python3 native-sim/x86/micro-prog/run_micro_json_sim_link_batch.py \
-  --only simple simple_packet bitmap_popcount_scan \
-  --native-source object-no-jump-tables
-```
-
-Do not use `--no-build-loader` when quoting JSON-link status; stale loader
-binaries can otherwise make the table misleading. `ok` means JSON generation,
-loader link, verifier load, test run, and expected-result check all passed.
-The active completion target for now is the generated-C simulator path below,
-not the JSON linker.
+Do not quote new JSON-link status without first reviving and rebuilding that
+paused path. Stale loader binaries previously made the JSON smoke table
+misleading. `ok` means JSON generation, loader link, verifier load, test run,
+and expected-result check all passed. The active completion target for now is
+the generated-C simulator path below, not the JSON linker.
 
 ## Simulator Dispatch Boundary
 
@@ -680,15 +682,17 @@ levels:
 | `-O0` | compile-fail: BPF stack limit exceeded, then clang exits with code 70 |
 | `-O1` | ok: verifier load and `BPF_PROG_TEST_RUN` return `12345678` |
 | `-O2` | ok: verifier load and `BPF_PROG_TEST_RUN` return `12345678` |
+| `-O3` | active batch mode; full local-state run compiles all 29 generated sources |
 
 So “turn optimization off to make proof simpler” is not viable for this C
 simulator shape. Without optimization, clang keeps too much generic simulator state on
-the BPF stack. The practical C prototype still needs `-O1`/`-O2` for sane BPF
-code shape. The active generator now passes fixed opcode operands into
+the BPF stack. The practical C prototype now uses `-O3` so clang applies all
+available optimization before verifier load. The active generator passes fixed
+opcode operands into
 C-authored dispatch; clang constant propagation is an engineering mechanism for
 making that C shape verifier-friendly, not part of the correctness argument. The
-restored direct-helper generator is retained only as historical compile-cost
-baseline evidence recorded above.
+older direct-helper generator is retained only as historical compile-cost
+baseline evidence in previous result files.
 
 ## Current Design Constraints
 
@@ -719,13 +723,13 @@ This prototype has already exposed several verifier-facing design constraints:
   current correctness-first shape fails verifier because byte-wise x86 stack
   stores of pointer-typed GPR values become invalid BPF pointer spills.
 - `bpftrace_string_search_prefix_scan` no longer uses a C-authored
-  benchmark-specific scan helper. It now fails verifier on pointer-typed GPR
-  shift operations, which is the expected result after deleting branch
-  assertions and keeping hardware-like register semantics.
+  benchmark-specific scan helper. The local-state path now gets it through the
+  verifier without adding branch assertions or safety guards.
 - `packet_checksum_fold` still passes after deleting proof-only branch
-  assertions. `tc_packet_checksum_fold` and `cgroup_skb_hash_chain` now fail
-  verifier because the native SKB guard is represented through x86 flags and
-  `PACKET_LEN` metadata rather than a direct verifier-visible packet range fact.
+  assertions. `tc_packet_checksum_fold` also passes through the `PACKET_LEN`
+  ABI relation; `cgroup_skb_hash_chain` still fails because its native SKB
+  result ABI writes packet memory and cgroup skb verifier policy rejects that
+  write.
 - `packet_vlan_tcpopt_parser` previously passed when hidden packet-offset
   metadata gave the verifier enough range information. The current
   correctness-first shape fails on a packet access with `r=0`; restoring
@@ -737,28 +741,25 @@ This prototype has already exposed several verifier-facing design constraints:
   misleading status if `--no-build-loader` was used.
 - The object-native SKB path must model the ABI translation in C, not Python:
   `ctx+0xd0` maps to packet `data`, and `ctx+0x70` maps to packet length for
-  the generated native `sk_buff` stand-in. This is now in `x86_sim.h`.
+  the generated native `sk_buff` stand-in. This is now in the C simulator
+  headers, including the active local-state path.
 - `mov [mem], imm` packs the low 32 bits as the immediate and the high 32 bits
   as the displacement. Negative immediates must not sign-extend into the
   displacement field; the generator now masks both fields before packing.
 
 Current correctness-first status after removing simulator guard/retag behavior,
 deleting the direct pointer-compare branch metadata, shrinking stack state, and
-using per-instruction const records:
+using local-register macro state:
 
-- `results/README-20260519-014225.md` is the latest run. All 29 generated
-  micro proof C files compiled. Five loaded and passed test run: `simple`,
-  `simple_packet`, `bitmap_popcount_scan`, `sorted_rule_binary_search`, and
-  `packet_checksum_fold`.
+- `results/README-20260519-local-state.md` is the latest run. All 29 generated
+  micro proof C files compiled with `clang -O3`. 22 loaded and passed test run.
 - Per-case verifier logs were captured under
-  `results/*-20260519-014225.verifier.log`.
+  `results/*-20260519-025825.verifier.log`.
 - Dominant verifier failure modes are not C compile failures:
-  byte-wise stack stores of verifier pointer-typed register values (`invalid
-  size of register spill`), integer operations on pointer-typed x86 GPR fields
-  (`pointer arithmetic with <<=`, `>>=`, `&=`, or scalar-pointer subtraction
-  prohibited), direct pointer arithmetic on `pkt_end`, and packet accesses
-  whose native guard now lives only in modeled flags (`invalid access to packet
-  ... r=0`).
+  byte-wise stack stores of verifier pointer-typed register values, the old
+  struct/subfunction path for native calls, packet accesses whose native guard
+  is not visible to the verifier through the final load base (`invalid access
+  to packet ... r=0`), and cgroup skb packet-write policy.
 - Stack-frame overflow is no longer the dominant rejection after the shallow/deep
   byte-stack layout. That change is semantics-preserving because it changes only
   modeled stack extent, not runtime stack guards or x86 control flow.

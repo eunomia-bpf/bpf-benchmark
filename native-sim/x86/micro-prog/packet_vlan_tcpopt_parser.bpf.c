@@ -1,5 +1,5 @@
 #define X86_SIM_ENABLE_STACK 1
-#include "../x86_sim_bpf.h"
+#include "../x86_sim_local_bpf.h"
 
 SEC("xdp")
 int packet_vlan_tcpopt_parser_x86_sim_xdp(struct xdp_md *ctx)
@@ -18,8 +18,8 @@ x86_l_9:
 	/* 0x9: cmp    rdx,r10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RDX, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_c:
-	/* 0xc: ja     0x14b */
-	X86_SIM_X86_JCC(X86_CC_A, 0xc, 0x14b, x86_l_14b);
+	/* 0xc: ja     0x148 */
+	X86_SIM_X86_JCC(X86_CC_A, 0xc, 0x148, x86_l_148);
 x86_l_12:
 	/* 0x12: lea    rcx,[rdx+0x8] */
 	X86_SIM_RUN_OP(X86_OP_LEA, X86_RCX, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 8ULL);
@@ -27,8 +27,8 @@ x86_l_16:
 	/* 0x16: cmp    rcx,r10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RCX, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_19:
-	/* 0x19: ja     0x14b */
-	X86_SIM_X86_JCC(X86_CC_A, 0x19, 0x14b, x86_l_14b);
+	/* 0x19: ja     0x148 */
+	X86_SIM_X86_JCC(X86_CC_A, 0x19, 0x148, x86_l_148);
 x86_l_1f:
 	/* 0x1f: lea    r9,[rdx+0x16] */
 	X86_SIM_RUN_OP(X86_OP_LEA, X86_R9, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 22ULL);
@@ -36,491 +36,488 @@ x86_l_23:
 	/* 0x23: cmp    r9,r10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_R9, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_26:
-	/* 0x26: ja     0x14b */
-	X86_SIM_X86_JCC(X86_CC_A, 0x26, 0x14b, x86_l_14b);
+	/* 0x26: ja     0x148 */
+	X86_SIM_X86_JCC(X86_CC_A, 0x26, 0x148, x86_l_148);
 x86_l_2c:
 	/* 0x2c: push   rbp */
 	X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_RBP, X86_WIDTH_64, 0, 0);
 x86_l_2d:
-	/* 0x2d: mov    rbp,rsp */
-	X86_SIM_RUN_OP(X86_OP_MOV_REG, X86_RBP, X86_RSP, X86_WIDTH_64, 0, 0);
-x86_l_30:
-	/* 0x30: push   r15 */
+	/* 0x2d: push   r15 */
 	X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_R15, X86_WIDTH_64, 0, 0);
-x86_l_32:
-	/* 0x32: push   r14 */
+x86_l_2f:
+	/* 0x2f: push   r14 */
 	X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_R14, X86_WIDTH_64, 0, 0);
-x86_l_34:
-	/* 0x34: push   rbx */
+x86_l_31:
+	/* 0x31: push   rbx */
 	X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_RBX, X86_WIDTH_64, 0, 0);
-x86_l_35:
-	/* 0x35: movzx  eax,WORD PTR [rdx+0x14] */
+x86_l_32:
+	/* 0x32: movzx  eax,WORD PTR [rdx+0x14] */
 	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_RAX, X86_RDX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_16), 20ULL);
-x86_l_39:
-	/* 0x39: rol    ax,0x8 */
+x86_l_36:
+	/* 0x36: rol    ax,0x8 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_16, X86_ALU_ROL, 8ULL);
-x86_l_3d:
-	/* 0x3d: movzx  ecx,ax */
+x86_l_3a:
+	/* 0x3a: movzx  ecx,ax */
 	X86_SIM_RUN_OP(X86_OP_MOVZX_REG, X86_RCX, X86_RAX, X86_WIDTH_32, X86_WIDTH_16, 0);
-x86_l_40:
-	/* 0x40: xor    eax,eax */
+x86_l_3d:
+	/* 0x3d: xor    eax,eax */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_RAX, X86_RAX, X86_WIDTH_32, X86_ALU_XOR, 0);
-x86_l_42:
-	/* 0x42: cmp    ecx,0x800 */
+x86_l_3f:
+	/* 0x3f: cmp    ecx,0x800 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 2048ULL);
-x86_l_48:
-	/* 0x48: je     0xe6 */
-	X86_SIM_X86_JCC(X86_CC_E, 0x48, 0xe6, x86_l_e6);
-x86_l_4e:
-	/* 0x4e: cmp    ecx,0x88a8 */
+x86_l_45:
+	/* 0x45: je     0xe3 */
+	X86_SIM_X86_JCC(X86_CC_E, 0x45, 0xe3, x86_l_e3);
+x86_l_4b:
+	/* 0x4b: cmp    ecx,0x88a8 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 34984ULL);
-x86_l_54:
-	/* 0x54: je     0x62 */
-	X86_SIM_X86_JCC(X86_CC_E, 0x54, 0x62, x86_l_62);
-x86_l_56:
-	/* 0x56: cmp    ecx,0x8100 */
+x86_l_51:
+	/* 0x51: je     0x5f */
+	X86_SIM_X86_JCC(X86_CC_E, 0x51, 0x5f, x86_l_5f);
+x86_l_53:
+	/* 0x53: cmp    ecx,0x8100 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 33024ULL);
-x86_l_5c:
-	/* 0x5c: jne    0x145 */
-	X86_SIM_X86_JCC(X86_CC_NE, 0x5c, 0x145, x86_l_145);
-x86_l_62:
-	/* 0x62: lea    r9,[rdx+0x1a] */
+x86_l_59:
+	/* 0x59: jne    0x142 */
+	X86_SIM_X86_JCC(X86_CC_NE, 0x59, 0x142, x86_l_142);
+x86_l_5f:
+	/* 0x5f: lea    r9,[rdx+0x1a] */
 	X86_SIM_RUN_OP(X86_OP_LEA, X86_R9, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 26ULL);
-x86_l_66:
-	/* 0x66: cmp    r9,r10 */
+x86_l_63:
+	/* 0x63: cmp    r9,r10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_R9, X86_R10, X86_WIDTH_64, 0, 0);
-x86_l_69:
-	/* 0x69: ja     0x145 */
-	X86_SIM_X86_JCC(X86_CC_A, 0x69, 0x145, x86_l_145);
-x86_l_6f:
-	/* 0x6f: movzx  esi,WORD PTR [rdx+0x16] */
+x86_l_66:
+	/* 0x66: ja     0x142 */
+	X86_SIM_X86_JCC(X86_CC_A, 0x66, 0x142, x86_l_142);
+x86_l_6c:
+	/* 0x6c: movzx  esi,WORD PTR [rdx+0x16] */
 	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_RSI, X86_RDX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_16), 22ULL);
-x86_l_73:
-	/* 0x73: movzx  ecx,WORD PTR [rdx+0x18] */
+x86_l_70:
+	/* 0x70: movzx  ecx,WORD PTR [rdx+0x18] */
 	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_RCX, X86_RDX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_16), 24ULL);
-x86_l_77:
-	/* 0x77: rol    si,0x8 */
+x86_l_74:
+	/* 0x74: rol    si,0x8 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_16, X86_ALU_ROL, 8ULL);
-x86_l_7b:
-	/* 0x7b: rol    cx,0x8 */
+x86_l_78:
+	/* 0x78: rol    cx,0x8 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_16, X86_ALU_ROL, 8ULL);
+x86_l_7c:
+	/* 0x7c: movzx  ecx,cx */
+	X86_SIM_RUN_OP(X86_OP_MOVZX_REG, X86_RCX, X86_RCX, X86_WIDTH_32, X86_WIDTH_16, 0);
 x86_l_7f:
-	/* 0x7f: movzx  ecx,cx */
-	X86_SIM_RUN_OP(X86_OP_MOVZX_REG, X86_RCX, X86_RCX, X86_WIDTH_32, X86_WIDTH_16, 0);
-x86_l_82:
-	/* 0x82: cmp    ecx,0x800 */
+	/* 0x7f: cmp    ecx,0x800 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 2048ULL);
-x86_l_88:
-	/* 0x88: je     0x150 */
-	X86_SIM_X86_JCC(X86_CC_E, 0x88, 0x150, x86_l_150);
-x86_l_8e:
-	/* 0x8e: cmp    ecx,0x88a8 */
+x86_l_85:
+	/* 0x85: je     0x14d */
+	X86_SIM_X86_JCC(X86_CC_E, 0x85, 0x14d, x86_l_14d);
+x86_l_8b:
+	/* 0x8b: cmp    ecx,0x88a8 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 34984ULL);
-x86_l_94:
-	/* 0x94: je     0xa2 */
-	X86_SIM_X86_JCC(X86_CC_E, 0x94, 0xa2, x86_l_a2);
-x86_l_96:
-	/* 0x96: cmp    ecx,0x8100 */
+x86_l_91:
+	/* 0x91: je     0x9f */
+	X86_SIM_X86_JCC(X86_CC_E, 0x91, 0x9f, x86_l_9f);
+x86_l_93:
+	/* 0x93: cmp    ecx,0x8100 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 33024ULL);
-x86_l_9c:
-	/* 0x9c: jne    0x145 */
-	X86_SIM_X86_JCC(X86_CC_NE, 0x9c, 0x145, x86_l_145);
-x86_l_a2:
-	/* 0xa2: lea    rcx,[rdx+0x1e] */
+x86_l_99:
+	/* 0x99: jne    0x142 */
+	X86_SIM_X86_JCC(X86_CC_NE, 0x99, 0x142, x86_l_142);
+x86_l_9f:
+	/* 0x9f: lea    rcx,[rdx+0x1e] */
 	X86_SIM_RUN_OP(X86_OP_LEA, X86_RCX, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 30ULL);
+x86_l_a3:
+	/* 0xa3: cmp    rcx,r10 */
+	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RCX, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_a6:
-	/* 0xa6: cmp    rcx,r10 */
-	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RCX, X86_R10, X86_WIDTH_64, 0, 0);
-x86_l_a9:
-	/* 0xa9: ja     0x145 */
-	X86_SIM_X86_JCC(X86_CC_A, 0xa9, 0x145, x86_l_145);
-x86_l_af:
-	/* 0xaf: movzx  ecx,WORD PTR [rdx+0x1c] */
+	/* 0xa6: ja     0x142 */
+	X86_SIM_X86_JCC(X86_CC_A, 0xa6, 0x142, x86_l_142);
+x86_l_ac:
+	/* 0xac: movzx  ecx,WORD PTR [rdx+0x1c] */
 	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_RCX, X86_RDX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_16), 28ULL);
-x86_l_b3:
-	/* 0xb3: rol    cx,0x8 */
+x86_l_b0:
+	/* 0xb0: rol    cx,0x8 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_16, X86_ALU_ROL, 8ULL);
-x86_l_b7:
-	/* 0xb7: movzx  ecx,cx */
+x86_l_b4:
+	/* 0xb4: movzx  ecx,cx */
 	X86_SIM_RUN_OP(X86_OP_MOVZX_REG, X86_RCX, X86_RCX, X86_WIDTH_32, X86_WIDTH_16, 0);
-x86_l_ba:
-	/* 0xba: cmp    ecx,0x800 */
+x86_l_b7:
+	/* 0xb7: cmp    ecx,0x800 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 2048ULL);
-x86_l_c0:
-	/* 0xc0: jne    0x145 */
-	X86_SIM_X86_JCC(X86_CC_NE, 0xc0, 0x145, x86_l_145);
-x86_l_c6:
-	/* 0xc6: lea    rcx,[rdx+0x32] */
+x86_l_bd:
+	/* 0xbd: jne    0x142 */
+	X86_SIM_X86_JCC(X86_CC_NE, 0xbd, 0x142, x86_l_142);
+x86_l_c3:
+	/* 0xc3: lea    rcx,[rdx+0x32] */
 	X86_SIM_RUN_OP(X86_OP_LEA, X86_RCX, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 50ULL);
-x86_l_ca:
-	/* 0xca: cmp    rcx,r10 */
+x86_l_c7:
+	/* 0xc7: cmp    rcx,r10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RCX, X86_R10, X86_WIDTH_64, 0, 0);
-x86_l_cd:
-	/* 0xcd: ja     0x145 */
-	X86_SIM_X86_JCC(X86_CC_A, 0xcd, 0x145, x86_l_145);
-x86_l_cf:
-	/* 0xcf: lea    r9,[rdx+0x1e] */
+x86_l_ca:
+	/* 0xca: ja     0x142 */
+	X86_SIM_X86_JCC(X86_CC_A, 0xca, 0x142, x86_l_142);
+x86_l_cc:
+	/* 0xcc: lea    r9,[rdx+0x1e] */
 	X86_SIM_RUN_OP(X86_OP_LEA, X86_R9, X86_RDX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 30ULL);
-x86_l_d3:
-	/* 0xd3: movzx  ecx,WORD PTR [rdx+0x1a] */
+x86_l_d0:
+	/* 0xd0: movzx  ecx,WORD PTR [rdx+0x1a] */
 	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_RCX, X86_RDX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_16), 26ULL);
-x86_l_d7:
-	/* 0xd7: rol    cx,0x8 */
+x86_l_d4:
+	/* 0xd4: rol    cx,0x8 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_16, X86_ALU_ROL, 8ULL);
-x86_l_db:
-	/* 0xdb: movzx  r8d,cx */
+x86_l_d8:
+	/* 0xd8: movzx  r8d,cx */
 	X86_SIM_RUN_OP(X86_OP_MOVZX_REG, X86_R8, X86_RCX, X86_WIDTH_32, X86_WIDTH_16, 0);
-x86_l_df:
-	/* 0xdf: mov    ecx,0x2 */
+x86_l_dc:
+	/* 0xdc: mov    ecx,0x2 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
-x86_l_e4:
-	/* 0xe4: jmp    0xf6 */
-	X86_SIM_X86_JMP(0xe4, 0xf6, x86_l_f6);
-x86_l_e6:
-	/* 0xe6: xor    esi,esi */
+x86_l_e1:
+	/* 0xe1: jmp    0xf3 */
+	X86_SIM_X86_JMP(0xe1, 0xf3, x86_l_f3);
+x86_l_e3:
+	/* 0xe3: xor    esi,esi */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_RSI, X86_RSI, X86_WIDTH_32, X86_ALU_XOR, 0);
-x86_l_e8:
-	/* 0xe8: xor    ecx,ecx */
+x86_l_e5:
+	/* 0xe5: xor    ecx,ecx */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_RCX, X86_RCX, X86_WIDTH_32, X86_ALU_XOR, 0);
-x86_l_ea:
-	/* 0xea: lea    rdi,[r9+0x14] */
+x86_l_e7:
+	/* 0xe7: lea    rdi,[r9+0x14] */
 	X86_SIM_RUN_OP(X86_OP_LEA, X86_RDI, X86_R9, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 20ULL);
-x86_l_ee:
-	/* 0xee: cmp    rdi,r10 */
+x86_l_eb:
+	/* 0xeb: cmp    rdi,r10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RDI, X86_R10, X86_WIDTH_64, 0, 0);
-x86_l_f1:
-	/* 0xf1: ja     0x145 */
-	X86_SIM_X86_JCC(X86_CC_A, 0xf1, 0x145, x86_l_145);
-x86_l_f3:
-	/* 0xf3: xor    r8d,r8d */
+x86_l_ee:
+	/* 0xee: ja     0x142 */
+	X86_SIM_X86_JCC(X86_CC_A, 0xee, 0x142, x86_l_142);
+x86_l_f0:
+	/* 0xf0: xor    r8d,r8d */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_R8, X86_R8, X86_WIDTH_32, X86_ALU_XOR, 0);
-x86_l_f6:
-	/* 0xf6: movzx  edi,BYTE PTR [r9] */
+x86_l_f3:
+	/* 0xf3: movzx  edi,BYTE PTR [r9] */
 	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_RDI, X86_R9, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 0ULL);
-x86_l_fa:
-	/* 0xfa: mov    r11d,edi */
+x86_l_f7:
+	/* 0xf7: mov    r11d,edi */
 	X86_SIM_RUN_OP(X86_OP_MOV_REG, X86_R11, X86_RDI, X86_WIDTH_32, 0, 0);
-x86_l_fd:
-	/* 0xfd: and    r11b,0xf0 */
+x86_l_fa:
+	/* 0xfa: and    r11b,0xf0 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_R11, X86_REG_NONE, X86_WIDTH_8, X86_ALU_AND, 240ULL);
-x86_l_101:
-	/* 0x101: cmp    r11b,0x40 */
+x86_l_fe:
+	/* 0xfe: cmp    r11b,0x40 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R11, X86_REG_NONE, X86_WIDTH_8, 0, 64ULL);
-x86_l_105:
-	/* 0x105: jne    0x145 */
-	X86_SIM_X86_JCC(X86_CC_NE, 0x105, 0x145, x86_l_145);
-x86_l_107:
-	/* 0x107: and    edi,0xf */
+x86_l_102:
+	/* 0x102: jne    0x142 */
+	X86_SIM_X86_JCC(X86_CC_NE, 0x102, 0x142, x86_l_142);
+x86_l_104:
+	/* 0x104: and    edi,0xf */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, X86_ALU_AND, 15ULL);
-x86_l_10a:
-	/* 0x10a: cmp    dil,0x5 */
+x86_l_107:
+	/* 0x107: cmp    dil,0x5 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_8, 0, 5ULL);
-x86_l_10e:
-	/* 0x10e: jb     0x145 */
-	X86_SIM_X86_JCC(X86_CC_B, 0x10e, 0x145, x86_l_145);
-x86_l_110:
-	/* 0x110: lea    rbx,[r9+rdi*4] */
+x86_l_10b:
+	/* 0x10b: jb     0x142 */
+	X86_SIM_X86_JCC(X86_CC_B, 0x10b, 0x142, x86_l_142);
+x86_l_10d:
+	/* 0x10d: lea    rbx,[r9+rdi*4] */
 	X86_SIM_RUN_OP(X86_OP_LEA, X86_RBX, X86_R9, X86_WIDTH_64, X86_MEM_AUX(X86_RDI, 2), 0ULL);
-x86_l_114:
-	/* 0x114: cmp    rbx,r10 */
+x86_l_111:
+	/* 0x111: cmp    rbx,r10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RBX, X86_R10, X86_WIDTH_64, 0, 0);
-x86_l_117:
-	/* 0x117: ja     0x145 */
-	X86_SIM_X86_JCC(X86_CC_A, 0x117, 0x145, x86_l_145);
-x86_l_119:
-	/* 0x119: cmp    BYTE PTR [r9+0x9],0x6 */
+x86_l_114:
+	/* 0x114: ja     0x142 */
+	X86_SIM_X86_JCC(X86_CC_A, 0x114, 0x142, x86_l_142);
+x86_l_116:
+	/* 0x116: cmp    BYTE PTR [r9+0x9],0x6 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_R9, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 38654705670ULL);
-x86_l_11e:
-	/* 0x11e: jne    0x145 */
-	X86_SIM_X86_JCC(X86_CC_NE, 0x11e, 0x145, x86_l_145);
-x86_l_120:
-	/* 0x120: lea    r14,[rbx+0x14] */
+x86_l_11b:
+	/* 0x11b: jne    0x142 */
+	X86_SIM_X86_JCC(X86_CC_NE, 0x11b, 0x142, x86_l_142);
+x86_l_11d:
+	/* 0x11d: lea    r14,[rbx+0x14] */
 	X86_SIM_RUN_OP(X86_OP_LEA, X86_R14, X86_RBX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 20ULL);
-x86_l_124:
-	/* 0x124: cmp    r14,r10 */
+x86_l_121:
+	/* 0x121: cmp    r14,r10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_R14, X86_R10, X86_WIDTH_64, 0, 0);
-x86_l_127:
-	/* 0x127: ja     0x145 */
-	X86_SIM_X86_JCC(X86_CC_A, 0x127, 0x145, x86_l_145);
-x86_l_129:
-	/* 0x129: movzx  r11d,BYTE PTR [rbx+0xc] */
+x86_l_124:
+	/* 0x124: ja     0x142 */
+	X86_SIM_X86_JCC(X86_CC_A, 0x124, 0x142, x86_l_142);
+x86_l_126:
+	/* 0x126: movzx  r11d,BYTE PTR [rbx+0xc] */
 	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_R11, X86_RBX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 12ULL);
-x86_l_12e:
-	/* 0x12e: cmp    r11,0x50 */
+x86_l_12b:
+	/* 0x12b: cmp    r11,0x50 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R11, X86_REG_NONE, X86_WIDTH_64, 0, 80ULL);
-x86_l_132:
-	/* 0x132: jb     0x145 */
-	X86_SIM_X86_JCC(X86_CC_B, 0x132, 0x145, x86_l_145);
-x86_l_134:
-	/* 0x134: shr    r11d,0x2 */
+x86_l_12f:
+	/* 0x12f: jb     0x142 */
+	X86_SIM_X86_JCC(X86_CC_B, 0x12f, 0x142, x86_l_142);
+x86_l_131:
+	/* 0x131: shr    r11d,0x2 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_R11, X86_REG_NONE, X86_WIDTH_32, X86_ALU_SHR, 2ULL);
-x86_l_138:
-	/* 0x138: and    r11d,0xfffffffc */
+x86_l_135:
+	/* 0x135: and    r11d,0xfffffffc */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_R11, X86_REG_NONE, X86_WIDTH_32, X86_ALU_AND, 4294967292ULL);
-x86_l_13c:
-	/* 0x13c: lea    r15,[rbx+r11*1] */
+x86_l_139:
+	/* 0x139: lea    r15,[rbx+r11*1] */
 	X86_SIM_RUN_OP(X86_OP_LEA, X86_R15, X86_RBX, X86_WIDTH_64, X86_MEM_AUX(X86_R11, 0), 0ULL);
+x86_l_13d:
+	/* 0x13d: cmp    r15,r10 */
+	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_R15, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_140:
-	/* 0x140: cmp    r15,r10 */
-	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_R15, X86_R10, X86_WIDTH_64, 0, 0);
-x86_l_143:
-	/* 0x143: jbe    0x157 */
-	X86_SIM_X86_JCC(X86_CC_BE, 0x143, 0x157, x86_l_157);
-x86_l_145:
-	/* 0x145: pop    rbx */
+	/* 0x140: jbe    0x154 */
+	X86_SIM_X86_JCC(X86_CC_BE, 0x140, 0x154, x86_l_154);
+x86_l_142:
+	/* 0x142: pop    rbx */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_RBX, X86_REG_NONE, X86_WIDTH_64, 0, 0);
-x86_l_146:
-	/* 0x146: pop    r14 */
+x86_l_143:
+	/* 0x143: pop    r14 */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_R14, X86_REG_NONE, X86_WIDTH_64, 0, 0);
-x86_l_148:
-	/* 0x148: pop    r15 */
+x86_l_145:
+	/* 0x145: pop    r15 */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_R15, X86_REG_NONE, X86_WIDTH_64, 0, 0);
-x86_l_14a:
-	/* 0x14a: pop    rbp */
+x86_l_147:
+	/* 0x147: pop    rbp */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_RBP, X86_REG_NONE, X86_WIDTH_64, 0, 0);
-x86_l_14b:
-	/* 0x14b: jmp    0x275 ; native-link entry RET */
+x86_l_148:
+	/* 0x148: jmp    0x270 ; native-link entry RET */
 	X86_SIM_X86_RET();
-x86_l_150:
-	/* 0x150: mov    ecx,0x1 */
+x86_l_14d:
+	/* 0x14d: mov    ecx,0x1 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 1ULL);
-x86_l_155:
-	/* 0x155: jmp    0xea */
-	X86_SIM_X86_JMP(0x155, 0xea, x86_l_ea);
-x86_l_157:
-	/* 0x157: lea    r15,[rbx+0x20] */
+x86_l_152:
+	/* 0x152: jmp    0xe7 */
+	X86_SIM_X86_JMP(0x152, 0xe7, x86_l_e7);
+x86_l_154:
+	/* 0x154: lea    r15,[rbx+0x20] */
 	X86_SIM_RUN_OP(X86_OP_LEA, X86_R15, X86_RBX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 32ULL);
-x86_l_15b:
-	/* 0x15b: cmp    r15,r10 */
+x86_l_158:
+	/* 0x158: cmp    r15,r10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_R15, X86_R10, X86_WIDTH_64, 0, 0);
-x86_l_15e:
-	/* 0x15e: ja     0x145 */
-	X86_SIM_X86_JCC(X86_CC_A, 0x15e, 0x145, x86_l_145);
-x86_l_160:
-	/* 0x160: cmp    r11b,0x20 */
+x86_l_15b:
+	/* 0x15b: ja     0x142 */
+	X86_SIM_X86_JCC(X86_CC_A, 0x15b, 0x142, x86_l_142);
+x86_l_15d:
+	/* 0x15d: cmp    r11b,0x20 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R11, X86_REG_NONE, X86_WIDTH_8, 0, 32ULL);
-x86_l_164:
-	/* 0x164: jb     0x145 */
-	X86_SIM_X86_JCC(X86_CC_B, 0x164, 0x145, x86_l_145);
-x86_l_166:
-	/* 0x166: cmp    BYTE PTR [r14],0x2 */
+x86_l_161:
+	/* 0x161: jb     0x142 */
+	X86_SIM_X86_JCC(X86_CC_B, 0x161, 0x142, x86_l_142);
+x86_l_163:
+	/* 0x163: cmp    BYTE PTR [r14],0x2 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_R14, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 2ULL);
-x86_l_16a:
-	/* 0x16a: jne    0x145 */
-	X86_SIM_X86_JCC(X86_CC_NE, 0x16a, 0x145, x86_l_145);
-x86_l_16c:
-	/* 0x16c: cmp    BYTE PTR [rbx+0x15],0x4 */
+x86_l_167:
+	/* 0x167: jne    0x142 */
+	X86_SIM_X86_JCC(X86_CC_NE, 0x167, 0x142, x86_l_142);
+x86_l_169:
+	/* 0x169: cmp    BYTE PTR [rbx+0x15],0x4 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 90194313220ULL);
-x86_l_170:
-	/* 0x170: jb     0x145 */
-	X86_SIM_X86_JCC(X86_CC_B, 0x170, 0x145, x86_l_145);
-x86_l_172:
-	/* 0x172: cmp    BYTE PTR [rbx+0x18],0x1 */
+x86_l_16d:
+	/* 0x16d: jb     0x142 */
+	X86_SIM_X86_JCC(X86_CC_B, 0x16d, 0x142, x86_l_142);
+x86_l_16f:
+	/* 0x16f: cmp    BYTE PTR [rbx+0x18],0x1 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 103079215105ULL);
-x86_l_176:
-	/* 0x176: jne    0x145 */
-	X86_SIM_X86_JCC(X86_CC_NE, 0x176, 0x145, x86_l_145);
-x86_l_178:
-	/* 0x178: cmp    BYTE PTR [rbx+0x19],0x3 */
+x86_l_173:
+	/* 0x173: jne    0x142 */
+	X86_SIM_X86_JCC(X86_CC_NE, 0x173, 0x142, x86_l_142);
+x86_l_175:
+	/* 0x175: cmp    BYTE PTR [rbx+0x19],0x3 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 107374182403ULL);
-x86_l_17c:
-	/* 0x17c: jne    0x145 */
-	X86_SIM_X86_JCC(X86_CC_NE, 0x17c, 0x145, x86_l_145);
-x86_l_17e:
-	/* 0x17e: cmp    BYTE PTR [rbx+0x1a],0x3 */
+x86_l_179:
+	/* 0x179: jne    0x142 */
+	X86_SIM_X86_JCC(X86_CC_NE, 0x179, 0x142, x86_l_142);
+x86_l_17b:
+	/* 0x17b: cmp    BYTE PTR [rbx+0x1a],0x3 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 111669149699ULL);
-x86_l_182:
-	/* 0x182: jb     0x145 */
-	X86_SIM_X86_JCC(X86_CC_B, 0x182, 0x145, x86_l_145);
-x86_l_184:
-	/* 0x184: cmp    BYTE PTR [rbx+0x1c],0x4 */
+x86_l_17f:
+	/* 0x17f: jb     0x142 */
+	X86_SIM_X86_JCC(X86_CC_B, 0x17f, 0x142, x86_l_142);
+x86_l_181:
+	/* 0x181: cmp    BYTE PTR [rbx+0x1c],0x4 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 120259084292ULL);
-x86_l_188:
-	/* 0x188: jne    0x145 */
-	X86_SIM_X86_JCC(X86_CC_NE, 0x188, 0x145, x86_l_145);
-x86_l_18a:
-	/* 0x18a: cmp    BYTE PTR [rbx+0x1d],0x2 */
+x86_l_185:
+	/* 0x185: jne    0x142 */
+	X86_SIM_X86_JCC(X86_CC_NE, 0x185, 0x142, x86_l_142);
+x86_l_187:
+	/* 0x187: cmp    BYTE PTR [rbx+0x1d],0x2 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 124554051586ULL);
-x86_l_18e:
-	/* 0x18e: jb     0x145 */
-	X86_SIM_X86_JCC(X86_CC_B, 0x18e, 0x145, x86_l_145);
-x86_l_190:
-	/* 0x190: cmp    BYTE PTR [rbx+0x1e],0x1 */
+x86_l_18b:
+	/* 0x18b: jb     0x142 */
+	X86_SIM_X86_JCC(X86_CC_B, 0x18b, 0x142, x86_l_142);
+x86_l_18d:
+	/* 0x18d: cmp    BYTE PTR [rbx+0x1e],0x1 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 128849018881ULL);
-x86_l_194:
-	/* 0x194: jne    0x145 */
-	X86_SIM_X86_JCC(X86_CC_NE, 0x194, 0x145, x86_l_145);
-x86_l_196:
-	/* 0x196: shl    rdi,0x2 */
+x86_l_191:
+	/* 0x191: jne    0x142 */
+	X86_SIM_X86_JCC(X86_CC_NE, 0x191, 0x142, x86_l_142);
+x86_l_193:
+	/* 0x193: shl    rdi,0x2 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_64, X86_ALU_SHL, 2ULL);
-x86_l_19a:
-	/* 0x19a: movzx  eax,WORD PTR [r9+0x2] */
+x86_l_197:
+	/* 0x197: movzx  eax,WORD PTR [r9+0x2] */
 	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_RAX, X86_R9, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_16), 2ULL);
-x86_l_19f:
-	/* 0x19f: rol    ax,0x8 */
+x86_l_19c:
+	/* 0x19c: rol    ax,0x8 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_16, X86_ALU_ROL, 8ULL);
-x86_l_1a3:
-	/* 0x1a3: movzx  eax,ax */
+x86_l_1a0:
+	/* 0x1a0: movzx  eax,ax */
 	X86_SIM_RUN_OP(X86_OP_MOVZX_REG, X86_RAX, X86_RAX, X86_WIDTH_32, X86_WIDTH_16, 0);
-x86_l_1a6:
-	/* 0x1a6: mov    r10d,DWORD PTR [r9+0xc] */
+x86_l_1a3:
+	/* 0x1a3: mov    r10d,DWORD PTR [r9+0xc] */
 	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_R10, X86_R9, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 12ULL);
-x86_l_1aa:
-	/* 0x1aa: bswap  r10d */
+x86_l_1a7:
+	/* 0x1a7: bswap  r10d */
 	X86_SIM_RUN_OP(X86_OP_BSWAP, X86_R10, X86_REG_NONE, X86_WIDTH_32, 0, 0);
-x86_l_1ad:
-	/* 0x1ad: mov    r9d,DWORD PTR [r9+0x10] */
+x86_l_1aa:
+	/* 0x1aa: mov    r9d,DWORD PTR [r9+0x10] */
 	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_R9, X86_R9, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 16ULL);
-x86_l_1b1:
-	/* 0x1b1: bswap  r9d */
+x86_l_1ae:
+	/* 0x1ae: bswap  r9d */
 	X86_SIM_RUN_OP(X86_OP_BSWAP, X86_R9, X86_REG_NONE, X86_WIDTH_32, 0, 0);
+x86_l_1b1:
+	/* 0x1b1: movzx  ebp,WORD PTR [rbx] */
+	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_RBP, X86_RBX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_16), 0ULL);
 x86_l_1b4:
-	/* 0x1b4: movzx  r14d,WORD PTR [rbx] */
-	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_R14, X86_RBX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_16), 0ULL);
-x86_l_1b8:
-	/* 0x1b8: movzx  r15d,WORD PTR [rbx+0x2] */
-	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_R15, X86_RBX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_16), 2ULL);
+	/* 0x1b4: movzx  r14d,WORD PTR [rbx+0x2] */
+	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_R14, X86_RBX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_16), 2ULL);
+x86_l_1b9:
+	/* 0x1b9: rol    bp,0x8 */
+	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_RBP, X86_REG_NONE, X86_WIDTH_16, X86_ALU_ROL, 8ULL);
 x86_l_1bd:
-	/* 0x1bd: rol    r14w,0x8 */
+	/* 0x1bd: movzx  r15d,bp */
+	X86_SIM_RUN_OP(X86_OP_MOVZX_REG, X86_R15, X86_RBP, X86_WIDTH_32, X86_WIDTH_16, 0);
+x86_l_1c1:
+	/* 0x1c1: add    r15,rax */
+	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_R15, X86_RAX, X86_WIDTH_64, X86_ALU_ADD, 0);
+x86_l_1c4:
+	/* 0x1c4: rol    r14w,0x8 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_R14, X86_REG_NONE, X86_WIDTH_16, X86_ALU_ROL, 8ULL);
-x86_l_1c2:
-	/* 0x1c2: movzx  r14d,r14w */
-	X86_SIM_RUN_OP(X86_OP_MOVZX_REG, X86_R14, X86_R14, X86_WIDTH_32, X86_WIDTH_16, 0);
-x86_l_1c6:
-	/* 0x1c6: add    r14,rax */
-	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_R14, X86_RAX, X86_WIDTH_64, X86_ALU_ADD, 0);
 x86_l_1c9:
-	/* 0x1c9: rol    r15w,0x8 */
-	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_R15, X86_REG_NONE, X86_WIDTH_16, X86_ALU_ROL, 8ULL);
-x86_l_1ce:
-	/* 0x1ce: movzx  eax,r15w */
-	X86_SIM_RUN_OP(X86_OP_MOVZX_REG, X86_RAX, X86_R15, X86_WIDTH_32, X86_WIDTH_16, 0);
-x86_l_1d2:
-	/* 0x1d2: add    rax,r14 */
-	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_RAX, X86_R14, X86_WIDTH_64, X86_ALU_ADD, 0);
-x86_l_1d5:
-	/* 0x1d5: xor    rax,r10 */
+	/* 0x1c9: movzx  eax,r14w */
+	X86_SIM_RUN_OP(X86_OP_MOVZX_REG, X86_RAX, X86_R14, X86_WIDTH_32, X86_WIDTH_16, 0);
+x86_l_1cd:
+	/* 0x1cd: add    rax,r15 */
+	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_RAX, X86_R15, X86_WIDTH_64, X86_ALU_ADD, 0);
+x86_l_1d0:
+	/* 0x1d0: xor    rax,r10 */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_RAX, X86_R10, X86_WIDTH_64, X86_ALU_XOR, 0);
-x86_l_1d8:
-	/* 0x1d8: add    rax,r9 */
+x86_l_1d3:
+	/* 0x1d3: add    rax,r9 */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_RAX, X86_R9, X86_WIDTH_64, X86_ALU_ADD, 0);
-x86_l_1db:
-	/* 0x1db: movzx  r9d,BYTE PTR [rbx+0x16] */
+x86_l_1d6:
+	/* 0x1d6: movzx  r9d,BYTE PTR [rbx+0x16] */
 	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_R9, X86_RBX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 22ULL);
-x86_l_1e0:
-	/* 0x1e0: mov    r10d,r9d */
+x86_l_1db:
+	/* 0x1db: mov    r10d,r9d */
 	X86_SIM_RUN_OP(X86_OP_MOV_REG, X86_R10, X86_R9, X86_WIDTH_32, 0, 0);
-x86_l_1e3:
-	/* 0x1e3: shl    r10d,0x8 */
+x86_l_1de:
+	/* 0x1de: shl    r10d,0x8 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_R10, X86_REG_NONE, X86_WIDTH_32, X86_ALU_SHL, 8ULL);
-x86_l_1e7:
-	/* 0x1e7: movzx  r14d,BYTE PTR [rbx+0x17] */
+x86_l_1e2:
+	/* 0x1e2: movzx  r14d,BYTE PTR [rbx+0x17] */
 	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_R14, X86_RBX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 23ULL);
-x86_l_1ec:
-	/* 0x1ec: or     r10d,r14d */
+x86_l_1e7:
+	/* 0x1e7: or     r10d,r14d */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_R10, X86_R14, X86_WIDTH_32, X86_ALU_OR, 0);
-x86_l_1ef:
-	/* 0x1ef: add    r10,0x2 */
+x86_l_1ea:
+	/* 0x1ea: add    r10,0x2 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_R10, X86_REG_NONE, X86_WIDTH_64, X86_ALU_ADD, 2ULL);
-x86_l_1f3:
-	/* 0x1f3: shl    r9d,0x10 */
+x86_l_1ee:
+	/* 0x1ee: shl    r9d,0x10 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_R9, X86_REG_NONE, X86_WIDTH_32, X86_ALU_SHL, 16ULL);
-x86_l_1f7:
-	/* 0x1f7: xor    r9,r10 */
+x86_l_1f2:
+	/* 0x1f2: xor    r9,r10 */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_R9, X86_R10, X86_WIDTH_64, X86_ALU_XOR, 0);
-x86_l_1fa:
-	/* 0x1fa: shl    r14d,0x18 */
+x86_l_1f5:
+	/* 0x1f5: shl    r14d,0x18 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_R14, X86_REG_NONE, X86_WIDTH_32, X86_ALU_SHL, 24ULL);
-x86_l_1fe:
-	/* 0x1fe: add    r9,r14 */
+x86_l_1f9:
+	/* 0x1f9: add    r9,r14 */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_R9, X86_R14, X86_WIDTH_64, X86_ALU_ADD, 0);
-x86_l_201:
-	/* 0x201: add    r9,0x30100 */
+x86_l_1fc:
+	/* 0x1fc: add    r9,0x30100 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_R9, X86_REG_NONE, X86_WIDTH_64, X86_ALU_ADD, 196864ULL);
-x86_l_208:
-	/* 0x208: movzx  r10d,BYTE PTR [rbx+0x1b] */
+x86_l_203:
+	/* 0x203: movzx  r10d,BYTE PTR [rbx+0x1b] */
 	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_R10, X86_RBX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 27ULL);
-x86_l_20d:
-	/* 0x20d: mov    r14,r10 */
+x86_l_208:
+	/* 0x208: mov    r14,r10 */
 	X86_SIM_RUN_OP(X86_OP_MOV_REG, X86_R14, X86_R10, X86_WIDTH_64, 0, 0);
-x86_l_210:
-	/* 0x210: shl    r14,0x20 */
+x86_l_20b:
+	/* 0x20b: shl    r14,0x20 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_R14, X86_REG_NONE, X86_WIDTH_64, X86_ALU_SHL, 32ULL);
-x86_l_214:
-	/* 0x214: shl    r10d,0x10 */
+x86_l_20f:
+	/* 0x20f: shl    r10d,0x10 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_R10, X86_REG_NONE, X86_WIDTH_32, X86_ALU_SHL, 16ULL);
-x86_l_218:
-	/* 0x218: xor    r10,r14 */
+x86_l_213:
+	/* 0x213: xor    r10,r14 */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_R10, X86_R14, X86_WIDTH_64, X86_ALU_XOR, 0);
-x86_l_21b:
-	/* 0x21b: xor    r10,r9 */
+x86_l_216:
+	/* 0x216: xor    r10,r9 */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_R10, X86_R9, X86_WIDTH_64, X86_ALU_XOR, 0);
-x86_l_21e:
-	/* 0x21e: movzx  ebx,BYTE PTR [rbx+0x1f] */
+x86_l_219:
+	/* 0x219: movzx  ebx,BYTE PTR [rbx+0x1f] */
 	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_RBX, X86_RBX, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_8), 31ULL);
-x86_l_222:
-	/* 0x222: shl    rbx,0x28 */
+x86_l_21d:
+	/* 0x21d: shl    rbx,0x28 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_64, X86_ALU_SHL, 40ULL);
-x86_l_226:
-	/* 0x226: or     rbx,r10 */
+x86_l_221:
+	/* 0x221: or     rbx,r10 */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_RBX, X86_R10, X86_WIDTH_64, X86_ALU_OR, 0);
-x86_l_229:
-	/* 0x229: movabs r9,0x144000000 */
+x86_l_224:
+	/* 0x224: movabs r9,0x144000000 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_R9, X86_REG_NONE, X86_WIDTH_64, 0, 5435817984ULL);
-x86_l_233:
-	/* 0x233: add    r9,rbx */
+x86_l_22e:
+	/* 0x22e: add    r9,rbx */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_R9, X86_RBX, X86_WIDTH_64, X86_ALU_ADD, 0);
-x86_l_236:
-	/* 0x236: shl    esi,0x10 */
+x86_l_231:
+	/* 0x231: shl    esi,0x10 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, X86_ALU_SHL, 16ULL);
-x86_l_239:
-	/* 0x239: or     rsi,r8 */
+x86_l_234:
+	/* 0x234: or     rsi,r8 */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_RSI, X86_R8, X86_WIDTH_64, X86_ALU_OR, 0);
-x86_l_23c:
-	/* 0x23c: xor    rsi,rax */
+x86_l_237:
+	/* 0x237: xor    rsi,rax */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_RSI, X86_RAX, X86_WIDTH_64, X86_ALU_XOR, 0);
-x86_l_23f:
-	/* 0x23f: mov    rax,rcx */
+x86_l_23a:
+	/* 0x23a: mov    rax,rcx */
 	X86_SIM_RUN_OP(X86_OP_MOV_REG, X86_RAX, X86_RCX, X86_WIDTH_64, 0, 0);
-x86_l_242:
-	/* 0x242: shl    rax,0x28 */
+x86_l_23d:
+	/* 0x23d: shl    rax,0x28 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_64, X86_ALU_SHL, 40ULL);
-x86_l_246:
-	/* 0x246: shl    edi,0x8 */
+x86_l_241:
+	/* 0x241: shl    edi,0x8 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, X86_ALU_SHL, 8ULL);
-x86_l_249:
-	/* 0x249: or     rdi,rax */
+x86_l_244:
+	/* 0x244: or     rdi,rax */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_RDI, X86_RAX, X86_WIDTH_64, X86_ALU_OR, 0);
-x86_l_24c:
-	/* 0x24c: or     rdi,r11 */
+x86_l_247:
+	/* 0x247: or     rdi,r11 */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_RDI, X86_R11, X86_WIDTH_64, X86_ALU_OR, 0);
-x86_l_24f:
-	/* 0x24f: movabs rax,0x600000000 */
+x86_l_24a:
+	/* 0x24a: movabs rax,0x600000000 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_64, 0, 25769803776ULL);
-x86_l_259:
-	/* 0x259: add    rax,rdi */
+x86_l_254:
+	/* 0x254: add    rax,rdi */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_RAX, X86_RDI, X86_WIDTH_64, X86_ALU_ADD, 0);
-x86_l_25c:
-	/* 0x25c: add    ecx,0x5 */
+x86_l_257:
+	/* 0x257: add    ecx,0x5 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, X86_ALU_ADD, 5ULL);
-x86_l_25f:
-	/* 0x25f: rol    r9,cl */
+x86_l_25a:
+	/* 0x25a: rol    r9,cl */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_R9, X86_RCX, X86_WIDTH_64, X86_ALU_ROL, 0);
-x86_l_262:
-	/* 0x262: add    rax,rsi */
+x86_l_25d:
+	/* 0x25d: add    rax,rsi */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_RAX, X86_RSI, X86_WIDTH_64, X86_ALU_ADD, 0);
-x86_l_265:
-	/* 0x265: xor    r9,rax */
+x86_l_260:
+	/* 0x260: xor    r9,rax */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_R9, X86_RAX, X86_WIDTH_64, X86_ALU_XOR, 0);
-x86_l_268:
-	/* 0x268: mov    QWORD PTR [rdx],r9 */
+x86_l_263:
+	/* 0x263: mov    QWORD PTR [rdx],r9 */
 	X86_SIM_RUN_OP(X86_OP_MOV_STORE_REG, X86_RDX, X86_R9, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);
-x86_l_26b:
-	/* 0x26b: mov    eax,0x2 */
+x86_l_266:
+	/* 0x266: mov    eax,0x2 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
-x86_l_270:
-	/* 0x270: jmp    0x145 */
-	X86_SIM_X86_JMP(0x270, 0x145, x86_l_145);
+x86_l_26b:
+	/* 0x26b: jmp    0x142 */
+	X86_SIM_X86_JMP(0x26b, 0x142, x86_l_142);
 	__builtin_unreachable();
 }
 

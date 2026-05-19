@@ -1,0 +1,26 @@
+{
+  "completed_benchmarks": 26,
+  "current_benchmark": "bpftrace_comm_key_fnv_hash",
+  "current_benchmark_index": 27,
+  "current_benchmark_record": {
+    "category": "alu-mix",
+    "description": "bpftrace-style comm plus pid/tgid/probe aggregation key hashed with FNV-1a",
+    "expected_result": 8524536671075880526,
+    "family": "tracing-key-hash",
+    "hypothesis": "Adds lightweight string/tuple aggregation key hashing distinct from packet-oriented hash paths",
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/bpftrace_comm_key_fnv_hash.mem",
+    "io_mode": "staged",
+    "level": "fnv1a-comm-key",
+    "name": "bpftrace_comm_key_fnv_hash",
+    "runs": [],
+    "tags": [
+      "bpftrace",
+      "tracing",
+      "hash",
+      "string",
+      "pure-jit"
+    ]
+  },
+  "status": "running",
+  "total_benchmarks": 29
+}

@@ -1,5 +1,5 @@
 #define X86_SIM_ENABLE_STACK 1
-#include "../x86_sim_bpf.h"
+#include "../x86_sim_local_bpf.h"
 
 SEC("xdp")
 int bcc_runqlat_log2_histogram_bucket_x86_sim_xdp(struct xdp_md *ctx)

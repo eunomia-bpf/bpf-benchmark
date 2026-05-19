@@ -1,5 +1,4 @@
-#define X86_SIM_ENABLE_STACK 1
-#include "../x86_sim_bpf.h"
+#include "../x86_sim_local_bpf.h"
 
 SEC("xdp")
 int simple_packet_x86_sim_xdp(struct xdp_md *ctx)
@@ -21,8 +20,8 @@ x86_l_c:
 	/* 0xc: cmp    rsi,rdx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RSI, X86_RDX, X86_WIDTH_64, 0, 0);
 x86_l_f:
-	/* 0xf: ja     0x38 */
-	X86_SIM_X86_JCC(X86_CC_A, 0xf, 0x38, x86_l_38);
+	/* 0xf: ja     0x33 */
+	X86_SIM_X86_JCC(X86_CC_A, 0xf, 0x33, x86_l_33);
 x86_l_11:
 	/* 0x11: add    rsi,0x8 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_64, X86_ALU_ADD, 8ULL);
@@ -30,34 +29,25 @@ x86_l_15:
 	/* 0x15: cmp    rsi,rdx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RSI, X86_RDX, X86_WIDTH_64, 0, 0);
 x86_l_18:
-	/* 0x18: ja     0x38 */
-	X86_SIM_X86_JCC(X86_CC_A, 0x18, 0x38, x86_l_38);
+	/* 0x18: ja     0x33 */
+	X86_SIM_X86_JCC(X86_CC_A, 0x18, 0x33, x86_l_33);
 x86_l_1a:
-	/* 0x1a: push   rbp */
-	X86_SIM_RUN_OP(X86_OP_PUSH, X86_REG_NONE, X86_RBP, X86_WIDTH_64, 0, 0);
-x86_l_1b:
-	/* 0x1b: mov    rbp,rsp */
-	X86_SIM_RUN_OP(X86_OP_MOV_REG, X86_RBP, X86_RSP, X86_WIDTH_64, 0, 0);
-x86_l_1e:
-	/* 0x1e: mov    WORD PTR [rcx],0x614e */
+	/* 0x1a: mov    WORD PTR [rcx],0x614e */
 	X86_SIM_RUN_OP(X86_OP_MOV_STORE_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_16, X86_MEM_AUX(X86_REG_NONE, 0), 24910ULL);
-x86_l_23:
-	/* 0x23: mov    BYTE PTR [rcx+0x2],0xbc */
+x86_l_1f:
+	/* 0x1f: mov    BYTE PTR [rcx+0x2],0xbc */
 	X86_SIM_RUN_OP(X86_OP_MOV_STORE_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 8589934780ULL);
-x86_l_27:
-	/* 0x27: mov    DWORD PTR [rcx+0x3],0x0 */
+x86_l_23:
+	/* 0x23: mov    DWORD PTR [rcx+0x3],0x0 */
 	X86_SIM_RUN_OP(X86_OP_MOV_STORE_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 12884901888ULL);
-x86_l_2e:
-	/* 0x2e: mov    BYTE PTR [rcx+0x7],0x0 */
+x86_l_2a:
+	/* 0x2a: mov    BYTE PTR [rcx+0x7],0x0 */
 	X86_SIM_RUN_OP(X86_OP_MOV_STORE_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 30064771072ULL);
-x86_l_32:
-	/* 0x32: mov    eax,0x2 */
+x86_l_2e:
+	/* 0x2e: mov    eax,0x2 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
-x86_l_37:
-	/* 0x37: pop    rbp */
-	X86_SIM_RUN_OP(X86_OP_POP, X86_RBP, X86_REG_NONE, X86_WIDTH_64, 0, 0);
-x86_l_38:
-	/* 0x38: jmp    0x3d ; native-link entry RET */
+x86_l_33:
+	/* 0x33: jmp    0x38 ; native-link entry RET */
 	X86_SIM_X86_RET();
 	__builtin_unreachable();
 }

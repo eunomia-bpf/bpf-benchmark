@@ -125,6 +125,8 @@ vendor/repos/*/deps
 vendor/repos/*/deps/**
 vendor/repos/*/bpf/objs
 vendor/repos/*/bpf/objs/**
+vendor/build/.tetragon-bpf
+vendor/build/.tetragon-bpf/**
 vendor/repos/*/target
 vendor/repos/*/target/**
 vendor/repos/*/autom4te.cache

@@ -25,11 +25,17 @@ This spec covers the generated-C path:
 - `native-sim/x86/micro-prog/generate_micro_sim_proofs.py`
 - `native-sim/x86/x86_sim.h`
 - `native-sim/x86/x86_sim_bpf.h`
+- `native-sim/x86/x86_sim_local_bpf.h`
 - generated programs under `native-sim/x86/micro-prog/*.bpf.c`
 
 The strict JSON-linker path is a separate experiment. Its final proof should use
 the same instruction and lowering rules, but its bytecode-linking details are
 not specified here.
+
+The generated-C path always consumes the `native-link` output for the selected
+micro program. Raw object/no-jump-table disassembly is not an active generated-C
+mode; the proof source should reflect the native code shape that would be run
+under the ReverseSim ABI.
 
 ## 2. Machine State
 
@@ -273,15 +279,23 @@ ISA-semantics factoring are valid places to change. Python-side helper
 selection, loop recognition, control-flow reconstruction, state specialization,
 or benchmark-specific workarounds are outside this spec.
 
-A planned state-layout experiment is to replace the pointer-to-`struct
+The active default path for generated programs without native local-call
+subfunctions uses `x86_sim_local_bpf.h`. It replaces the pointer-to-`struct
 x86_state` register file with C local variables in the generated entry function
-and to express helper semantics as scoped C macros or fixed C-authored
-templates. This is allowed only as a representation change: the macro-expanded
-step must still implement the same x86 small-step relation, and Python must
-still emit only the one-to-one native instruction schedule. This may help clang
-and the verifier eliminate unused registers, avoid address-taken struct aliasing,
-and reduce BPF stack spills, but it is not allowed to introduce branch
-assertions, bounds checks, safety guards, or benchmark-specific behavior.
+and expresses helper semantics as scoped C macros. This is a representation
+change only: the macro-expanded step must implement the same x86 small-step
+relation, and Python still emits only the one-to-one native instruction
+schedule. This helps clang and the verifier eliminate unused registers, avoid
+address-taken struct aliasing, and reduce BPF stack spills. It is not allowed to
+introduce branch assertions, bounds checks, safety guards, benchmark-specific
+behavior, or any other non-hardware semantics.
+
+The generated-C batch compiles verifier artifacts with `clang -O3 -target bpf`.
+All clang optimization is an engineering specialization mechanism. It may make
+constant opcode/operand records and local state easier for the verifier to
+analyze, but the correctness statement does not depend on an optimization
+firing. If `-O3` fails to specialize a hard case enough for verifier acceptance,
+that is a verifier/compiler result, not permission to add a semantic shortcut.
 
 ### Arithmetic And Flags
 
@@ -472,13 +486,13 @@ protocols must be C-authored or bytecode-template-authored and added back to
 this spec before use.
 
 Current verifier consequence: plain native backedges are semantically clean but
-may be harder for the verifier. The current correctness-first implementation
-currently loads 5/29 generated micro proof programs; the remaining failures are
-recorded as verifier results. Verifier/load acceptance must be regained by
-changing the C-authored state layout or memory representation without changing
-native branch semantics. Future loop fixes must remain C/template proof rules
-that preserve native branch semantics, not Python benchmark renderers, branch
-assertions, or fuel bounds.
+may be harder for the verifier. The current correctness-first local-state
+implementation loads and tests 22/29 generated micro proof programs; the
+remaining failures are recorded as verifier results. Verifier/load acceptance
+must be regained by changing the C-authored state layout or memory
+representation without changing native branch semantics. Future loop fixes must
+remain C/template proof rules that preserve native branch semantics, not Python
+benchmark renderers, branch assertions, or fuel bounds.
 
 ### Non-Active Loop Experiments
 
@@ -637,5 +651,5 @@ These are not acceptable final assumptions; they are work items.
 | Multi-exit loop verifier cost | Current correctness-first code prioritizes exact branch semantics over verifier acceptance. Any future structural lowering must still be a C/template theorem and preserve native branch semantics without fuel. |
 | Paused PC-dispatch experiment | If revived, implement it as a C/template proof rule rather than Python CFG scheduling. It is not active now. |
 | ABI output-store theorem | The retag helper is removed. Stores through `[rdi+16/20]` must be justified by the current architectural `rdi` state and the ABI memory model itself. |
-| Local-register macro state | Open experiment. Prove macro-expanded local-variable state is observationally equivalent to the abstract `XState` register/flag/metadata fields, then reuse the same instruction helper theorems. |
+| Local-register macro state | Active default for generated programs without native local-call subfunctions. Prove macro-expanded local-variable state is observationally equivalent to the abstract `XState` register/flag/metadata fields, then reuse the same instruction helper theorems. |
 | JSON-linker equivalence | Reuse this spec after JSON bytecode linking stops going through clang. |

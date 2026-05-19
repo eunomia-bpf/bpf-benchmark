@@ -124,6 +124,13 @@ struct prog_entry {
      * bytecode_path. */
     union bpf_attr load_attr;
     char license[64];             /* deep-copied license string */
+    /* fd-typed attr fields are duped here so reload can re-pass them even
+     * after the loader closes the originals. Each is -1 when unused; we
+     * dup() at PROG_LOAD-intercept time and close on prog_entry teardown. */
+    int prog_btf_fd_dup;
+    int attach_btf_obj_fd_dup;
+    int attach_prog_fd_dup;
+    int prog_token_fd_dup;
     /* Per-prog execute_step state. */
     int canonicalized;            /* 1 once --canonicalize-map-refs has run */
     int step_seq;                 /* incremented per successful execute_step */
@@ -459,6 +466,22 @@ static struct prog_entry *capture_prog_load(const union bpf_attr *attr) {
     e->expected_attach_type = attr->expected_attach_type;
     e->attach_btf_id = attr->attach_btf_id;
     e->load_attr = *attr;
+    /* Dup fd-typed attr fields so reload can re-pass them after the loader
+     * closes the originals. The kernel re-validates these fds at every
+     * PROG_LOAD; relying on cached integer values leads to -EBADF when the
+     * host app (e.g. tracee, bcc/Python) drops its loader-side references.
+     * prog_token_fd is post-6.10 and may not be in libbpf-sys's union
+     * bpf_attr — skip dup'ing it. */
+    e->prog_btf_fd_dup = -1;
+    e->attach_btf_obj_fd_dup = -1;
+    e->attach_prog_fd_dup = -1;
+    e->prog_token_fd_dup = -1;
+    if (attr->prog_btf_fd)
+        e->prog_btf_fd_dup = dup((int)attr->prog_btf_fd);
+    if (attr->attach_btf_obj_fd)
+        e->attach_btf_obj_fd_dup = dup((int)attr->attach_btf_obj_fd);
+    if (attr->attach_prog_fd)
+        e->attach_prog_fd_dup = dup((int)attr->attach_prog_fd);
     /* Deep-copy license (app-owned user string, lifetime unknown after the
      * call returns). Required for candidate BPF_PROG_LOAD verifier-state
      * probes. */
@@ -1645,8 +1668,13 @@ static int parse_target_btf_modules(const char *target_json_path,
  * `*out_fd_array` is heap-allocated; *out_count = total slot count. Caller
  * frees the array and `real_close()`s each non-negative fd. Returns 0 on
  * success, -1 on OOM/IO. */
+/* `map_kernel_ids[i]` is the kernel-side BPF map id (stable). We open a fresh
+ * fd via BPF_MAP_GET_FD_BY_ID for every reload — loader-side fds captured at
+ * PROG_LOAD time may have been closed by the host app after init (tracee
+ * drops its loader map fds once libbpf is done with them; reusing the
+ * cached fd would return -EBADF). */
 static int build_full_fd_array(const char *target_json_path,
-                               const uint32_t *map_loader_fds,
+                               const uint32_t *map_kernel_ids,
                                uint32_t nr_maps,
                                int **out_fd_array,
                                uint32_t *out_count) {
@@ -1670,11 +1698,15 @@ static int build_full_fd_array(const char *target_json_path,
     int *arr = (int *)malloc(total * sizeof(int));
     if (!arr) { free(btf_ids); free(call_offsets); return -1; }
     for (uint32_t i = 0; i < total; i++) arr[i] = -1;
-    /* Map fds in [0, nr_maps). dup() so kernel keeps a reference even if the
-     * loader later closes its fd; caller closes our dups. */
+    /* Map fds in [0, nr_maps). Resolve fresh from kernel id; the snapshot's
+     * loader-side fds may have been closed since PROG_LOAD. */
     for (uint32_t i = 0; i < nr_maps; i++) {
-        int lfd = (int)map_loader_fds[i];
-        arr[i] = (lfd >= 0) ? dup(lfd) : -1;
+        uint32_t kid = map_kernel_ids[i];
+        if (kid == 0) { arr[i] = -1; continue; }
+        union bpf_attr ga = {0};
+        ga.map_id = kid;
+        long mfd = real_syscall(SYS_bpf, BPF_MAP_GET_FD_BY_ID, &ga, sizeof(ga));
+        arr[i] = (mfd >= 0) ? (int)mfd : -1;
     }
     /* BTF module fds at call_offset slots. */
     for (uint32_t i = 0; i < n_mods; i++) {
@@ -1869,13 +1901,19 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
     }
 
     /* Start from the captured original PROG_LOAD attr — preserves every
-     * field tracee/etc. passed (attach_btf_obj_fd, prog_btf_fd, line_info,
-     * func_info, core_relos, etc.) without us having to enumerate them.
-     * Only patch the fields the reload actually needs to swap. */
+     * field tracee/etc. passed (line_info, func_info, core_relos, etc.)
+     * without us having to enumerate them. Only patch the fields the reload
+     * actually needs to swap, plus the fd-typed fields which we dup at
+     * intercept time (the originals may already be closed). */
     union bpf_attr a = p->load_attr;
     a.insns = (uintptr_t)insns;
     a.insn_cnt = (uint32_t)(bytes / sizeof(struct bpf_insn));
     a.license = (uintptr_t)p->license;
+    a.prog_btf_fd = (p->prog_btf_fd_dup >= 0) ? (uint32_t)p->prog_btf_fd_dup : 0;
+    a.attach_btf_obj_fd = (p->attach_btf_obj_fd_dup >= 0)
+                          ? (uint32_t)p->attach_btf_obj_fd_dup : 0;
+    a.attach_prog_fd = (p->attach_prog_fd_dup >= 0)
+                       ? (uint32_t)p->attach_prog_fd_dup : 0;
     /* log_level=1 is enough for reload — we only need to diagnose verifier
      * rejection (last failure line). Detailed state dumps for downstream
      * passes are produced separately by capture_verifier_states() at
@@ -2252,7 +2290,7 @@ static void run_step(struct prog_entry *pd,
                      const char *workdir, const char *prog_type_name,
                      const char *prog_id_str, const char *target_json,
                      const char *map_ids_csv, const char *map_values_dir,
-                     uint32_t *local_loader_fds, uint32_t nr_maps,
+                     uint32_t *local_kernel_ids, uint32_t nr_maps,
                      char *cur, const char *nxt, const char *report,
                      int *step_seq, const char *step_name,
                      const char *command, struct step_result *out) {
@@ -2348,7 +2386,7 @@ static void run_step(struct prog_entry *pd,
         return;
     }
     enum reload_status rs = reload_and_reattach(pd, nxt, target_json,
-                                                local_loader_fds, nr_maps,
+                                                local_kernel_ids, nr_maps,
                                                 verifier_buf,
                                                 verifier_buf_sz,
                                                 &out->rejit_ms);
@@ -2389,7 +2427,7 @@ static void run_step(struct prog_entry *pd,
     free(verifier_buf);
 
     /* Write the new prog's verifier log for the next step. */
-    capture_verifier_states(pd, nxt, target_json, local_loader_fds, nr_maps,
+    capture_verifier_states(pd, nxt, target_json, local_kernel_ids, nr_maps,
                             verifier_log);
     rename(nxt, cur);
     pthread_mutex_lock(&state_mutex);
@@ -2651,7 +2689,7 @@ static void emit_execute_plan(int cli, const char *json) {
 
             struct step_result sr;
             run_step(pd, w.workdir, prog_type_name, prog_id_str, w.target_json,
-                     map_ids_csv, w.map_values_dir, local_loader_fds, nr_maps,
+                     map_ids_csv, w.map_values_dir, local_ids, nr_maps,
                      w.cur, w.nxt, w.report, &step_seq, name, cmdbuf, &sr);
 
             /* On success-with-new-bytecode, compute final_insn_count from cur. */

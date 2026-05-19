@@ -1,5 +1,5 @@
 #define X86_SIM_ENABLE_STACK 1
-#include "../x86_sim_bpf.h"
+#include "../x86_sim_local_bpf.h"
 
 SEC("cgroup_skb/egress")
 int cgroup_skb_hash_chain_x86_sim_xdp(struct __sk_buff *ctx)

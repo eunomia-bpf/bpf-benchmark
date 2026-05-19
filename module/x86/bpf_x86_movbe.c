@@ -59,12 +59,14 @@ static __always_inline int decode_movbe_payload(u64 payload,
 static int instantiate_movbe_indexed(u64 payload, struct bpf_insn *insn_buf,
 				 u8 size)
 {
-	u8 dst_reg, base_reg, index_reg, scale_log2, addr_reg, high_reg;
+	u8 dst_reg, base_reg, index_reg, scale_log2, addr_reg, value_reg, high_reg;
 	bool need_tmp = size == BPF_H;
 	bool indexed;
 	u32 scratch_mask;
+	u8 bytes = kinsn_bpf_size_bits(size) / 8;
 	s16 offset;
 	int add_count;
+	int i;
 	int cnt = 0;
 	int err;
 
@@ -75,10 +77,13 @@ static int instantiate_movbe_indexed(u64 payload, struct bpf_insn *insn_buf,
 		return err;
 
 	addr_reg = kinsn_x86_scratch_avoid(dst_reg, base_reg, index_reg);
-	scratch_mask = KINSN_X86_SCRATCH_MASK(addr_reg);
+	value_reg = kinsn_x86_scratch_avoid4(dst_reg, base_reg, index_reg,
+					     addr_reg);
+	scratch_mask = KINSN_X86_SCRATCH_MASK(addr_reg) |
+		       KINSN_X86_SCRATCH_MASK(value_reg);
 	if (need_tmp) {
-		high_reg = kinsn_x86_scratch_avoid(dst_reg, base_reg,
-						    addr_reg);
+		high_reg = kinsn_x86_scratch_avoid4(dst_reg, base_reg,
+						     addr_reg, value_reg);
 		scratch_mask |= KINSN_X86_SCRATCH_MASK(high_reg);
 	}
 	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
@@ -95,8 +100,15 @@ static int instantiate_movbe_indexed(u64 payload, struct bpf_insn *insn_buf,
 			insn_buf[cnt++] = BPF_ALU64_REG(BPF_ADD, addr_reg,
 							index_reg);
 	}
-	insn_buf[cnt++] = BPF_LDX_MEM(size, dst_reg, addr_reg, offset);
-	insn_buf[cnt++] = BPF_BSWAP(dst_reg, kinsn_bpf_size_bits(size));
+	insn_buf[cnt++] = BPF_MOV64_IMM(dst_reg, 0);
+	for (i = 0; i < bytes; i++) {
+		insn_buf[cnt++] = BPF_LDX_MEM(BPF_B, value_reg, addr_reg,
+					      offset + i);
+		if (i != bytes - 1)
+			insn_buf[cnt++] = BPF_ALU64_IMM(BPF_LSH, value_reg,
+							(bytes - 1 - i) * 8);
+		insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, dst_reg, value_reg);
+	}
 	if (need_tmp)
 		insn_buf[cnt++] = BPF_ALU64_REG(BPF_OR, dst_reg, high_reg);
 	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
@@ -189,7 +201,7 @@ const struct bpf_kinsn bpf_x86_movbe16_desc = {
 
 const struct bpf_kinsn bpf_x86_movbe32_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 13 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 18 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_movbe32_indexed,
 	.emit_x86 = emit_movbe32_indexed_x86,
@@ -197,7 +209,7 @@ const struct bpf_kinsn bpf_x86_movbe32_desc = {
 
 const struct bpf_kinsn bpf_x86_movbe64_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 13 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
+	.max_insn_cnt = 30 + KINSN_X86_SAVE_RESTORE_INSN_CNT,
 	.max_emit_bytes = 16,
 	.instantiate_insn = instantiate_movbe64_indexed,
 	.emit_x86 = emit_movbe64_indexed_x86,

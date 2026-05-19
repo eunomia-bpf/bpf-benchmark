@@ -1,4 +1,4 @@
-#include "../x86_sim_bpf.h"
+#include "../x86_sim_local_bpf.h"
 
 SEC("tc")
 int tc_packet_checksum_fold_x86_sim_xdp(struct __sk_buff *ctx)

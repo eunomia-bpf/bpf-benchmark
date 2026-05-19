@@ -1,6 +1,5 @@
 # syntax=docker/dockerfile:1.6
 ARG TRACEE_IMAGE=docker.io/aquasec/tracee:0.24.1@sha256:cfbbfee972e64a644f6b1bac74ee26998e6e12442697be4c797ae563553a2a5b
-ARG TETRAGON_IMAGE=quay.io/cilium/tetragon:v1.6.1@sha256:ff96ace3e6a0166ba04ff3eecfaeee19b7e6deee2b7cdbe3245feda57df5015f
 ARG CILIUM_IMAGE=quay.io/cilium/cilium:v1.19.3@sha256:2e61680593cddca8b6c055f6d4c849d87a26a1c91c7e3b8b56c7fb76ab7b7b10
 ARG RUN_TARGET_ARCH=x86_64
 
@@ -193,8 +192,6 @@ ENV PATH="/usr/local/go/bin:${PATH}" \
 
 FROM ${TRACEE_IMAGE} AS runner-runtime-tracee-upstream
 
-FROM ${TETRAGON_IMAGE} AS runner-runtime-tetragon-upstream
-
 FROM ${CILIUM_IMAGE} AS runner-runtime-cilium-upstream
 
 FROM runner-runtime-build-base AS runner-runtime-app-artifacts
@@ -202,9 +199,7 @@ FROM runner-runtime-build-base AS runner-runtime-app-artifacts
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
 ARG TARGETARCH
-# The requested v0.120.0 asset is not published upstream; use the earliest
-# verified official otelcol-ebpf-profiler release instead.
-ARG OTELCOL_EBPF_PROFILER_VERSION=0.140.0
+ARG VENDOR_BUILD_ARCH=x86
 
 COPY --link --from=runner-runtime-tracee-upstream --chmod=0755 /tracee/tracee /artifacts/tracee/bin/tracee
 COPY --link --from=runner-runtime-tracee-upstream --chmod=0755 /tracee/tracee-ebpf /artifacts/tracee/bin/tracee-ebpf
@@ -214,13 +209,12 @@ COPY --link --from=runner-runtime-tracee-upstream /usr/lib/libelf*.so* /usr/lib/
 COPY --link --from=runner-runtime-tracee-upstream /usr/lib/libz.so* /usr/lib/
 COPY --link --from=runner-runtime-tracee-upstream /usr/lib/libzstd.so* /usr/lib/
 
-COPY --link --from=runner-runtime-tetragon-upstream --chmod=0755 /usr/bin/tetragon /artifacts/tetragon/bin/tetragon
-COPY --link --from=runner-runtime-tetragon-upstream /var/lib/tetragon/ /artifacts/tetragon/
+COPY --link vendor/build/${VENDOR_BUILD_ARCH}/tetragon/ /artifacts/tetragon/
 
 COPY --link --chmod=0755 vendor/binary/katran/${RUN_TARGET_ARCH}/bin/katran_server_grpc /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bin/katran_server_grpc
 COPY --link vendor/build/katran/bpf/ /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bpf/
 
-COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-agent /usr/local/bin/cilium-agent
+COPY --link --chmod=0755 vendor/build/${VENDOR_BUILD_ARCH}/cilium/bin/cilium-agent /usr/local/bin/cilium-agent
 COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-dbg /usr/local/bin/cilium-dbg
 COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-bugtool /usr/local/bin/cilium-bugtool
 COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-health /usr/local/bin/cilium-health
@@ -230,6 +224,7 @@ COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-s
 COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/local/bin/clang /usr/local/bin/clang
 COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/local/bin/llc /usr/local/bin/llc
 COPY --link --from=runner-runtime-cilium-upstream /var/lib/cilium/ /var/lib/cilium/
+COPY --link --chmod=0755 vendor/build/${VENDOR_BUILD_ARCH}/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler /usr/local/bin/otelcol-ebpf-profiler
 
 COPY --chmod=0755 runner/scripts/bpfrejit-install /usr/local/bin/bpfrejit-install
 
@@ -253,17 +248,6 @@ RUN set -eux; \
     test -d /var/lib/cilium/bpf; \
     test -x "/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bin/katran_server_grpc"; \
     test -f "/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bpf/balancer.bpf.o"; \
-    image_arch="${TARGETARCH}"; \
-    if [ -z "${image_arch}" ]; then image_arch="$(dpkg --print-architecture)"; fi; \
-    case "${image_arch}" in \
-        amd64|x86_64) otel_arch=amd64 ;; \
-        arm64|aarch64) otel_arch=arm64 ;; \
-        *) echo "unsupported runtime arch for otelcol-ebpf-profiler: ${image_arch}" >&2; exit 1 ;; \
-    esac; \
-    otel_tar="/tmp/otelcol-ebpf-profiler_${OTELCOL_EBPF_PROFILER_VERSION}_linux_${otel_arch}.tar.gz"; \
-    curl -fsSL "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v${OTELCOL_EBPF_PROFILER_VERSION}/otelcol-ebpf-profiler_${OTELCOL_EBPF_PROFILER_VERSION}_linux_${otel_arch}.tar.gz" -o "${otel_tar}"; \
-    tar -C /usr/local/bin -xzf "${otel_tar}" otelcol-ebpf-profiler; \
-    rm -f "${otel_tar}"; \
     test -x /usr/local/bin/otelcol-ebpf-profiler; \
     mkdir -p /opt; \
     ln -sfn /artifacts/user /opt/bpf-benchmark; \

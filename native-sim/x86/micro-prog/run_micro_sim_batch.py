@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import os
 import re
 import subprocess
@@ -91,12 +90,10 @@ def require_ok(cmd: list[str], *, timeout: int) -> None:
         raise RuntimeError(f"{' '.join(cmd)} failed\n{detail}")
 
 
-def generate_sources(only: list[str], native_source: str) -> None:
+def generate_sources(only: list[str]) -> None:
     cmd = [
         "python3",
         str(OUT_DIR / "generate_micro_sim_proofs.py"),
-        "--native-source",
-        native_source,
     ]
     if only:
         cmd.extend(["--only", *only])
@@ -117,7 +114,7 @@ def compile_object(bench: Bench) -> tuple[Result | None, float]:
     cmd = [
         "clang",
         "-g",
-        "-O2",
+        "-O3",
         "-target",
         "bpf",
         "-mllvm",
@@ -164,32 +161,25 @@ def bpf_instruction_count(obj: Path) -> int:
     return total
 
 
-def latest_micro_metadata_path() -> Path:
+def latest_micro_result_dir() -> Path:
     override = os.environ.get("MICRO_RESULT_METADATA")
     if override:
-        return Path(override)
+        path = Path(override)
+        return path.parent if path.name == "metadata.json" else path
     paths = sorted(MICRO_RESULTS_DIR.glob("x86_kvm_micro_*/metadata.json"),
                    reverse=True)
     if not paths:
         raise RuntimeError("missing micro result metadata")
-    return paths[0]
+    return paths[0].parent
 
 
 def load_direct_bpf_counts() -> dict[str, int]:
-    path = latest_micro_metadata_path()
-    data = json.loads(path.read_text())
+    result_dir = latest_micro_result_dir()
+    dump_dir = result_dir / "details" / "jit_dumps"
     counts: dict[str, int] = {}
-    for bench in data.get("benchmarks", []):
-        for run in bench.get("runs", []):
-            if run.get("mode") != "kernel":
-                continue
-            for sample in run.get("samples", []):
-                size = (sample.get("code_size") or {}).get("bpf_bytecode_bytes")
-                if size is not None:
-                    counts[bench["name"]] = int(size) // 8
-                    break
-            if bench["name"] in counts:
-                break
+    for path in dump_dir.glob("*__kernel__sample00.xlated.bin"):
+        name = path.name.split("__kernel__sample00.xlated.bin", 1)[0]
+        counts[name] = path.stat().st_size // 8
     return counts
 
 
@@ -241,7 +231,7 @@ def add_note(result: Result, note: str) -> None:
 def run_bench(bench: Bench, sudo: bool, run_id: str,
               direct_counts: dict[str, int]) -> Result:
     direct_count = direct_counts.get(bench.name)
-    direct_note = "" if direct_count is not None else "missing direct BPF count in micro result metadata"
+    direct_note = "" if direct_count is not None else "missing direct xlated.bin in micro result"
     compile_result, compile_s = compile_object(bench)
     if compile_result is not None:
         compile_result.direct_bpf_insns = direct_count
@@ -322,12 +312,6 @@ def main() -> int:
         help="parallel compile/load jobs; use --jobs 1 for serial",
     )
     parser.add_argument(
-        "--native-source",
-        choices=("native-link", "object-no-jump-tables"),
-        default="native-link",
-        help="native x86 disassembly source for generated proof C",
-    )
-    parser.add_argument(
         "--markdown",
         type=Path,
         help="write a markdown status table; defaults to native-sim/x86/results/README-<timestamp>.md",
@@ -345,8 +329,7 @@ def main() -> int:
         raise SystemExit("no selected benchmarks")
 
     if not args.no_generate:
-        generate_sources([bench.name for bench in benches] if only else [],
-                         args.native_source)
+        generate_sources([bench.name for bench in benches] if only else [])
     if not args.no_build_loader:
         build_loader()
 

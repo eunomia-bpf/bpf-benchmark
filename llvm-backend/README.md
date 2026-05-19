@@ -853,3 +853,218 @@ the hot loop's `mov rax, rsi; add rax, r8` becomes a single
 This is the same kind of final bytecode opportunity bpfopt LEA exploits. The
 remaining mixed cases are mostly code-layout and benchmark noise rather than a
 verifier-facing LEA semantic problem.
+
+### Step 13: little-endian byte ladder -> native wide load
+
+Rationale:
+
+- Several packet/parser micros still lowered simple little-endian
+  `u16/u32` field reads as byte ladders: `ldb; shl; ldb; or`.
+- This is not a kinsn-only opportunity. For naturally aligned little-endian
+  byte ladders, ordinary verifier-facing BPF `LDH32/LDW32` is the right
+  canonical form because the normal kernel JIT already emits the target native
+  memory load.
+- The selector therefore rewrites only local same-block one-use byte ladders
+  with a single base register, contiguous offsets, and natural alignment. It
+  keeps packet/verifier safety by avoiding unaligned wide loads.
+
+Objects:
+
+- `micro/results/llvm_kinsn_programs_wideload_20260519_024858`
+
+Object-level effect versus final-MI LEA objects:
+
+| BPF shape | final-MI LEA | wideload |
+|---|---:|---:|
+| `*(u8 *)` | 950 | 776 |
+| `*(u16 *)` | 2 | 11 |
+| `*(u32 *)` | 174 | 215 |
+| `*(u64 *)` | 331 | 328 |
+| kfunc calls | 441 | 443 |
+
+Micro status:
+
+- Full `make micro` passed: 29/29 correct.
+- Run:
+  `micro/results/x86_kvm_micro_20260519_095437_720881/metadata.json`
+- Command:
+  `make micro MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_wideload_20260519_024858"`
+
+Summary versus final-MI LEA single-sample run
+`micro/results/x86_kvm_micro_20260519_050046_753367`:
+
+| Comparison | Geomean ratio | summed exec delta | JIT byte delta | wins/losses/ties |
+|---|---:|---:|---:|---:|
+| wideload vs final-MI LEA | 0.9945 | -189 ns | -1408 bytes | 15/8/6 |
+
+Key deltas:
+
+| Benchmark | final-MI LEA | wideload | JIT bytes |
+|---|---:|---:|---:|
+| `tc_packet_checksum_fold` | 13378 ns | 13241 ns | 284 -> 205 |
+| `packet_record_bounds_window` | 107 ns | 84 ns | 638 -> 500 |
+| `packet_checksum_fold` | 13310 ns | 13294 ns | 352 -> 270 |
+| `bpf_local_call_fanout_dispatch` | 113 ns | 102 ns | 1924 -> 1803 |
+| `trace_event_type_switch_dispatch` | 287 ns | 280 ns | 1528 -> 1457 |
+
+This is the strongest post-LEA result in this series because it removes whole
+byte-ladder idioms rather than replacing one scalar ALU instruction with another
+machine instruction. It also shows the intended LLVM-backend boundary: use
+ordinary BPF when normal BPF is already a verifier-safe native instruction, and
+reserve kinsn for instructions the kernel JIT cannot otherwise emit.
+
+### Step 14: big-endian byte ladder -> `bpf_x86_movbe16/32`
+
+Rationale:
+
+- Network-order packet fields often appear as unaligned big-endian byte ladders.
+  Ordinary BPF `LDH/LDW` is not a safe blanket replacement for these because
+  alignment and verifier packet-access rules matter.
+- `bpf_x86_movbe16/32` gives the final x86 JIT a real `movbe` memory operand,
+  while the module's verifier proof now expands to verifier-visible byte loads,
+  shifts, and ORs. That keeps unaligned packet fields safe without relying on a
+  wide packet load proof.
+- The first full run exposed a module scratch bug in the 16-bit proof: the
+  high-bit-preserve register could alias the computed address register, causing
+  verifier rejection with a pointer `OR`. The module now chooses the high
+  scratch register while avoiding destination, base, computed address, and byte
+  value scratch registers.
+
+Objects:
+
+- `micro/results/llvm_kinsn_programs_movbe_be_20260519_030015`
+
+Selected kinsns:
+
+| kinsn | count |
+|---|---:|
+| `bpf_x86_leaq` | 160 |
+| `bpf_x86_rolq` | 119 |
+| `bpf_x86_rorxl` | 40 |
+| `bpf_x86_leal` | 24 |
+| `bpf_x86_movbe16` | 9 |
+| `bpf_x86_movbe32` | 4 |
+| `bpf_x86_shldq` | 1 |
+| `bpf_x86_popcntq` | 1 |
+
+Single-sample status:
+
+- Full `make micro` passed: 29/29 correct.
+- Run:
+  `micro/results/x86_kvm_micro_20260519_101047_239434/metadata.json`
+
+Incremental single-sample summary versus wideload:
+
+| Comparison | Geomean ratio | summed exec delta | JIT byte delta | wins/losses/ties |
+|---|---:|---:|---:|---:|
+| movbe BE vs wideload | 0.9956 | -48 ns | -124 bytes | 11/5/13 |
+
+Three-sample status:
+
+- Full `make micro` passed: 29/29 correct.
+- Run:
+  `micro/results/x86_kvm_micro_20260519_101946_349411/metadata.json`
+- Command:
+  `make micro COMMON_DEPS= TIMEOUT=7200 MICRO_ARGS="--samples 3 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_movbe_be_20260519_030015"`
+
+Summary using analysis-side per-benchmark mean over three raw samples:
+
+| Comparison | Geomean ratio | summed mean exec delta | JIT byte delta | wins/losses/ties |
+|---|---:|---:|---:|---:|
+| movbe BE vs final-MI LEA | 0.9852 | -190.7 ns | -1532 bytes | 16/8/5 |
+| movbe BE vs LEA-disabled | 0.9756 | -220.0 ns | -1998 bytes | 23/4/2 |
+| movbe BE vs no-kinsn LLVM baseline | 0.9289 | -926.7 ns | -3534 bytes | 22/5/2 |
+
+Key three-sample deltas versus final-MI LEA:
+
+| Benchmark | final-MI LEA | movbe BE | JIT bytes |
+|---|---:|---:|---:|
+| `tc_packet_checksum_fold` | 13331.0 ns | 13246.3 ns | 284 -> 205 |
+| `packet_checksum_fold` | 13308.3 ns | 13256.7 ns | 352 -> 270 |
+| `packet_record_bounds_window` | 107.3 ns | 83.3 ns | 638 -> 500 |
+| `bcc_runqlat_log2_histogram_bucket` | 1044.3 ns | 1023.7 ns | 629 -> 597 |
+| `bpf_local_call_fanout_dispatch` | 113.7 ns | 102.0 ns | 1924 -> 1803 |
+| `packet_toeplitz_rss_hash` | 228.3 ns | 232.3 ns | 975 -> 916 |
+
+The `packet_toeplitz_rss_hash` runtime remains noisy and slightly slower than
+the final-MI LEA three-sample mean despite having smaller JIT code. The code
+shape is still the intended one: the latest JIT dump contains real `movbe`
+loads for Ethernet/IP/TCP fields, including `movbe si, WORD PTR [rdi+0x14]` and
+`movbe edx, DWORD PTR [rdi+0x22]`. The current conclusion is to keep the
+selector because full-suite correctness holds, total JIT bytes drop materially,
+and the three-sample geomean is positive.
+
+I also tested extending the final-MI LEA peephole from adjacent `MOV+ADD` pairs
+to `MOV+ADD+ADD/disp` chains. The generated object set had exactly the same
+kinsn distribution as the movbe BE objects, so there were zero new hits in the
+current micro suite. That change was not kept; the pair-only LEA selector is
+the cleaner default until a real scaled-index or displacement-chain opportunity
+shows up in final MI.
+
+### Step 15: local-subprog little-endian 64-bit byte ladders -> ordinary `LDD`
+
+Rationale:
+
+- The remaining native/JIT gap after movbe BE was dominated by byte-ladder
+  recomposition in local subprograms, especially `bpf_local_call_fanout_dispatch`.
+- Enabling every kinsn selector inside local subprograms is not verifier-safe
+  today. A test version that allowed local `rolq` kinsns failed with:
+  `combined stack size of 2 calls is 544. Too large`. The cause is kinsn proof
+  stack usage inside a bpf2bpf callee, combined with the caller stack.
+- Ordinary BPF wide loads do not have that proof-stack problem. The kept change
+  allows local subprograms to use only verifier-native little-endian wide-load
+  canonicalization, while kinsn selectors that instantiate proof stack remain
+  disabled in local subprograms.
+
+Objects:
+
+- `micro/results/llvm_kinsn_programs_local_ldd_20260519_034100`
+
+Object-level effect:
+
+- kinsn count is unchanged from movbe BE: 358 total kinsn calls.
+- `bpf_local_call_fanout_dispatch` direct `*(u64 *)` loads increased from 6 to
+  14, replacing the main 8-byte byte ladders in local callees.
+- The local all-kinsn attempt is not kept; only verifier-native `LDD` in local
+  subprograms is kept.
+
+Single-sample status:
+
+- Full `make micro` passed: 29/29 correct.
+- Run:
+  `micro/results/x86_kvm_micro_20260519_103705_813710/metadata.json`
+
+Three-sample status:
+
+- Full `make micro` passed: 29/29 correct.
+- Run:
+  `micro/results/x86_kvm_micro_20260519_104019_462499/metadata.json`
+- Command:
+  `make micro COMMON_DEPS= TIMEOUT=7200 MICRO_ARGS="--samples 3 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir /home/yunwei37/workspace/bpf-benchmark/micro/results/llvm_kinsn_programs_local_ldd_20260519_034100"`
+
+Summary using analysis-side per-benchmark mean over three raw samples:
+
+| Comparison | Geomean ratio | summed mean exec delta | JIT byte delta | wins/losses/ties |
+|---|---:|---:|---:|---:|
+| local `LDD` vs movbe BE | 0.9872 | +42.3 ns | -1494 bytes | 10/13/6 |
+| local `LDD` vs final-MI LEA | 0.9726 | -148.3 ns | -3026 bytes | 16/8/5 |
+| local `LDD` vs LEA-disabled | 0.9631 | -177.7 ns | -3492 bytes | 21/6/2 |
+
+Key three-sample deltas versus movbe BE:
+
+| Benchmark | movbe BE | local `LDD` | JIT bytes |
+|---|---:|---:|---:|
+| `bpf_local_call_fanout_dispatch` | 102.0 ns | 84.3 ns | 1803 -> 1089 |
+| `siphash_rotate64_mixer` | 38.3 ns | 30.7 ns | 2345 -> 1565 |
+| `packet_toeplitz_rss_hash` | 232.3 ns | 225.0 ns | 916 -> 916 |
+| `trace_event_type_switch_dispatch` | 288.7 ns | 280.0 ns | 1457 -> 1457 |
+| `tc_packet_checksum_fold` | 13246.3 ns | 13303.0 ns | 205 -> 205 |
+| `bcc_runqlat_log2_histogram_bucket` | 1023.7 ns | 1043.3 ns | 597 -> 597 |
+
+The checksum and runqlat losses have unchanged JIT bytes, so they are likely
+run-to-run noise or layout/cache effects outside the local `LDD` hit set. The
+directly affected local-call and SipHash cases improve substantially and the
+suite code size drops by another 1494 bytes versus movbe BE. This change is
+kept, with the explicit rule that local subprograms may receive verifier-native
+wide-load canonicalization but not stack-using kinsn proof sequences until the
+local proof-stack model is fixed.
