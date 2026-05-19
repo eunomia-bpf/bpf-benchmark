@@ -1912,6 +1912,7 @@ static __always_inline int x86_exec_div(struct x86_state *state,
 	divisor = x86_read_reg(state, insn->src);
 	rax = x86_read_reg(state, X86_RAX);
 	rdx = x86_read_reg(state, X86_RDX);
+	state->cmp_ptr_valid = 0;
 	if (width == X86_WIDTH_32) {
 		__u64 dividend;
 		__u64 quotient;

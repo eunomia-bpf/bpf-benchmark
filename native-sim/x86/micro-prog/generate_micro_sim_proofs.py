@@ -579,17 +579,17 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
         else:
             raise ValueError(f"unsupported external jump target in {insn.raw}")
         return
-	if insn.mnemonic == "call":
-		lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
-		target = branch_target(insn.operands[0]) if insn.operands else 0
-		if call_functions and target in call_functions:
-			if next_addr is None:
-				raise ValueError(f"cannot compute return address for {insn.raw}")
-			lines.append(
-				f"{indent}X86_SIM_X86_CALL({call_functions[target]}, "
-				f"0x{next_addr:x}ULL);"
-			)
-			return
+    if insn.mnemonic == "call":
+        lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+        target = branch_target(insn.operands[0]) if insn.operands else 0
+        if call_functions and target in call_functions:
+            if next_addr is None:
+                raise ValueError(f"cannot compute return address for {insn.raw}")
+            lines.append(
+                f"{indent}X86_SIM_X86_CALL({call_functions[target]}, "
+                f"0x{next_addr:x}ULL);"
+            )
+            return
         raise ValueError(f"unsupported unresolved call target in {insn.raw}")
         return
     if insn.mnemonic == "ret":
@@ -637,7 +637,6 @@ def render_program(name: str, insns: list[NativeInsn],
         for symbol, fn_insns in subfunctions.items()
         if fn_insns
     }
-    has_rodata = any("[rip" in insn.raw.lower() for insn in insns)
     has_stack = any(
         insn.mnemonic in {"push", "pop"} or
         "[rsp" in insn.raw.lower() or
@@ -650,8 +649,6 @@ def render_program(name: str, insns: list[NativeInsn],
         for index, insn in enumerate(insns[:-1])
     }
     lines: list[str] = []
-    if has_rodata:
-        lines.append('#define X86_SIM_ENABLE_RODATA 1')
     if has_stack:
         lines.append('#define X86_SIM_ENABLE_STACK 1')
         lines.append('#define X86_SIM_ENABLE_STACK_SLOT7 1')

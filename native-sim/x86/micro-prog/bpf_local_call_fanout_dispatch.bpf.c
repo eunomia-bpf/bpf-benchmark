@@ -595,7 +595,7 @@ x86_l_1184:
 	X86_SIM_RUN_OP(X86_OP_MOV_REG, X86_RCX, X86_R14, X86_WIDTH_32, 0, 0);
 x86_l_1187:
 	/* 0x1187: call   1280 <local_call_pressure> */
-	X86_SIM_X86_CALL(x86_fn_local_call_pressure);
+	X86_SIM_X86_CALL(x86_fn_local_call_pressure, 0x118cULL);
 x86_l_118c:
 	/* 0x118c: mov    ecx,ebx */
 	X86_SIM_RUN_OP(X86_OP_MOV_REG, X86_RCX, X86_RBX, X86_WIDTH_32, 0, 0);
@@ -673,7 +673,7 @@ x86_l_11e1:
 	X86_SIM_RUN_OP(X86_OP_MOV_REG, X86_RCX, X86_R14, X86_WIDTH_32, 0, 0);
 x86_l_11e4:
 	/* 0x11e4: call   1230 <local_call_linear> */
-	X86_SIM_X86_CALL(x86_fn_local_call_linear);
+	X86_SIM_X86_CALL(x86_fn_local_call_linear, 0x11e9ULL);
 x86_l_11e9:
 	/* 0x11e9: jmp    118c <bpf_local_call_fanout_dispatch_xdp+0x8c> */
 	X86_SIM_X86_JMP(0x11e9, 0x118c, x86_l_118c);
@@ -688,7 +688,7 @@ x86_l_11f4:
 	X86_SIM_RUN_OP(X86_OP_MOV_REG, X86_RCX, X86_R14, X86_WIDTH_32, 0, 0);
 x86_l_11f7:
 	/* 0x11f7: call   12d0 <local_call_crossload> */
-	X86_SIM_X86_CALL(x86_fn_local_call_crossload);
+	X86_SIM_X86_CALL(x86_fn_local_call_crossload, 0x11fcULL);
 x86_l_11fc:
 	/* 0x11fc: jmp    118c <bpf_local_call_fanout_dispatch_xdp+0x8c> */
 	X86_SIM_X86_JMP(0x11fc, 0x118c, x86_l_118c);
@@ -703,7 +703,7 @@ x86_l_1204:
 	X86_SIM_RUN_OP(X86_OP_MOV_REG, X86_RCX, X86_R14, X86_WIDTH_32, 0, 0);
 x86_l_1207:
 	/* 0x1207: call   1360 <local_call_bytes> */
-	X86_SIM_X86_CALL(x86_fn_local_call_bytes);
+	X86_SIM_X86_CALL(x86_fn_local_call_bytes, 0x120cULL);
 x86_l_120c:
 	/* 0x120c: jmp    118c <bpf_local_call_fanout_dispatch_xdp+0x8c> */
 	X86_SIM_X86_JMP(0x120c, 0x118c, x86_l_118c);

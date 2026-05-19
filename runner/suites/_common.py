@@ -144,9 +144,6 @@ def ensure_katran_artifacts(workspace: Path, target_arch: str, native_repos: Seq
             continue
         if not target.is_file():
             die(f"Katran artifact is missing: {target}")  # type: ignore[operator]
-    katran_lib_root = katran_root / "lib"
-    if not katran_lib_root.is_dir():
-        die(f"Katran runtime library artifact directory is missing: {katran_lib_root}")  # type: ignore[operator]
 
 
 # ---------------------------------------------------------------------------

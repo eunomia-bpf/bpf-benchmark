@@ -217,7 +217,8 @@ COPY --link --from=runner-runtime-tracee-upstream /usr/lib/libzstd.so* /usr/lib/
 COPY --link --from=runner-runtime-tetragon-upstream --chmod=0755 /usr/bin/tetragon /artifacts/tetragon/bin/tetragon
 COPY --link --from=runner-runtime-tetragon-upstream /var/lib/tetragon/ /artifacts/tetragon/
 
-COPY --link --from=runner-runtime-katran-upstream /artifacts/katran /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran
+COPY --link --chmod=0755 vendor/binary/katran/${RUN_TARGET_ARCH}/bin/katran_server_grpc /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bin/katran_server_grpc
+COPY --link vendor/build/katran/bpf/ /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bpf/
 
 COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-agent /usr/local/bin/cilium-agent
 COPY --link --from=runner-runtime-cilium-upstream --chmod=0755 /usr/bin/cilium-dbg /usr/local/bin/cilium-dbg
