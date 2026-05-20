@@ -38,7 +38,8 @@ NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -Wall -Wextra -O2 -g -fPIC -c -fno-plt -
 # context-struct offsets in common.h's MICRO_NATIVE branch match the host
 # kernel layout. Not all Stage 2 programs reference SKB/XDP context offsets
 # directly, but common.h includes the header unconditionally.
-KERNEL_OFFSETS := $(REPO_ROOT)/micro/programs/kernel_offsets.h
+KERNEL_OFFSETS_DIR ?= $(REPO_ROOT)/micro/programs/build-x86
+KERNEL_OFFSETS := $(KERNEL_OFFSETS_DIR)/kernel_offsets.h
 KERNEL_OFFSETS_INCLUDE := $(dir $(abspath $(KERNEL_OFFSETS)))
 MICRO_PROGRAMS_DIR := $(REPO_ROOT)/micro/programs
 
@@ -54,7 +55,7 @@ $(OUTPUT_DIR):
 	mkdir -p "$@"
 
 $(KERNEL_OFFSETS):
-	$(MAKE) -C $(MICRO_PROGRAMS_DIR) $@
+	$(MAKE) -C $(MICRO_PROGRAMS_DIR) OUTPUT_DIR="$(KERNEL_OFFSETS_DIR)" "$@"
 
 $(OUTPUT_DIR)/%.bpf.o: %.bpf.c | $(OUTPUT_DIR)
 	$(CLANG) $(BPF_CFLAGS) -MF "$(OUTPUT_DIR)/$*.bpf.d" -MT "$@" -c -o "$@" "$<"

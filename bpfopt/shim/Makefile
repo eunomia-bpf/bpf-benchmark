@@ -1,12 +1,13 @@
 CC ?= gcc
 CFLAGS ?= -O2 -g -Wall -Wextra -fPIC -D_GNU_SOURCE
 LDLIBS ?= -ldl -lpthread
+SHIM_SO ?= libbpfrejit_shim.so
 
 .PHONY: all clean smoke selftest-run host-selftest
 
-all: libbpfrejit_shim.so selftest selftest_full
+all: $(SHIM_SO) selftest selftest_full
 
-libbpfrejit_shim.so: libbpfrejit_shim.c
+$(SHIM_SO): libbpfrejit_shim.c
 	$(CC) $(CFLAGS) -shared $< -o $@ $(LDLIBS)
 
 selftest: selftest.c
@@ -27,7 +28,7 @@ host-selftest: all
 	  BPFREJIT_SHIM_DIR=/tmp/shim_full_st \
 	  BPFREJIT_SHIM_LOG=/tmp/shim_full_st.log \
 	  BPFREJIT_SHIM_SOCK_DIR=/tmp/shim_full_st/sock \
-	  LD_PRELOAD=$$PWD/libbpfrejit_shim.so \
+	  LD_PRELOAD="$(abspath $(SHIM_SO))" \
 	  timeout 30 ./selftest_full
 
 # Exercise the shim with a synthetic BPF_PROG_LOAD call. Validates: (a) shim
@@ -37,7 +38,7 @@ selftest-run: all
 	rm -rf /tmp/shim_st && mkdir -p /tmp/shim_st
 	rm -f /tmp/shim_st.log
 	BPFREJIT_SHIM_DIR=/tmp/shim_st BPFREJIT_SHIM_LOG=/tmp/shim_st.log \
-	  LD_PRELOAD=$$PWD/libbpfrejit_shim.so ./selftest
+	  LD_PRELOAD="$(abspath $(SHIM_SO))" ./selftest
 	@echo "--- log ---" && cat /tmp/shim_st.log
 	@echo "--- dumps ---" && ls -la /tmp/shim_st/
 	@dump=$$(ls /tmp/shim_st/bpfrejit_*.bpf 2>/dev/null | head -1); \
@@ -48,10 +49,10 @@ selftest-run: all
 
 # Smoke test: run `bpftool prog list` under the shim and check the log was
 # populated. Requires bpftool available on PATH.
-smoke: libbpfrejit_shim.so
+smoke: $(SHIM_SO)
 	rm -f /tmp/bpfrejit_shim_smoke.log
 	BPFREJIT_SHIM_LOG=/tmp/bpfrejit_shim_smoke.log \
-	  LD_PRELOAD=$$PWD/libbpfrejit_shim.so bpftool prog list >/dev/null 2>&1 || true
+	  LD_PRELOAD="$(abspath $(SHIM_SO))" bpftool prog list >/dev/null 2>&1 || true
 	@if [ -s /tmp/bpfrejit_shim_smoke.log ]; then \
 		echo "smoke: PASS ($$(wc -l < /tmp/bpfrejit_shim_smoke.log) log lines)"; \
 		head -10 /tmp/bpfrejit_shim_smoke.log; \
@@ -61,5 +62,5 @@ smoke: libbpfrejit_shim.so
 	fi
 
 clean:
-	rm -f libbpfrejit_shim.so selftest selftest_full \
+	rm -f "$(SHIM_SO)" selftest selftest_full \
 	      /tmp/bpfrejit_shim_smoke.log
