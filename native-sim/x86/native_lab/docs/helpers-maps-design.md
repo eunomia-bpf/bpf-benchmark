@@ -1,4 +1,4 @@
-# Native Lab Stage 2 — Helpers & Maps via the BPF JIT as Address Oracle
+# Native Kernel Stage 2 — Helpers & Maps via the BPF JIT as Address Oracle
 
 ## Goal
 
@@ -128,7 +128,7 @@ naturally expects the same pointer.
        - emit final position-independent native blob
 
    5. blob -> debugfs chunks -> kinsn -> JIT image splat
-       Existing native_lab path takes over here.
+       Existing native kernel path takes over here.
 ```
 
 ## Build flow
@@ -305,8 +305,8 @@ Test programs live at `native-sim/test/`:
 |------|----------|
 | `helper_only_ktime.bpf.c` | One call to `bpf_ktime_get_ns()`. Pure smoke test — no maps, single helper. Lowest possible bar to validate the helper resolution path. |
 | `helper_get_pid_tgid.bpf.c` | `bpf_get_current_pid_tgid()`. Tests a helper that reads kernel context, returning split tgid/pid. |
-| `map_array_lookup.bpf.c` | `BPF_MAP_TYPE_ARRAY`, `bpf_map_lookup_elem` then read u64. The most-inlined map type in BPF JIT; native_lab will lose some perf vs BPF JIT here, which is interesting data. |
-| `map_hash_lookup.bpf.c` | `BPF_MAP_TYPE_HASH`, `bpf_map_lookup_elem`. Helper call is not inlined for HASH; native_lab and BPF JIT should be equally fast. |
+| `map_array_lookup.bpf.c` | `BPF_MAP_TYPE_ARRAY`, `bpf_map_lookup_elem` then read u64. The most-inlined map type in BPF JIT; native kernel will lose some perf vs BPF JIT here, which is interesting data. |
+| `map_hash_lookup.bpf.c` | `BPF_MAP_TYPE_HASH`, `bpf_map_lookup_elem`. Helper call is not inlined for HASH; native kernel and BPF JIT should be equally fast. |
 | `map_percpu_array.bpf.c` | `BPF_MAP_TYPE_PERCPU_ARRAY`. Tests per-CPU semantics — each CPU sees its own value. |
 | `combined_helper_map.bpf.c` | Use `bpf_get_smp_processor_id()` to index a `BPF_MAP_TYPE_ARRAY`, then `bpf_ktime_get_ns()` to write a timestamp. Realistic mini program. |
 
@@ -330,7 +330,7 @@ JIT runs must produce the same value.
    JIT image, build helper/map address table, invoke `native-link` with
    it, upload reloc side-band).
 5. **Phase E — VM verification** (run each test program through both
-   `kernel_jit` and `native_lab` paths, assert result identity and
+   `kernel_jit` and `native_lab` raw runtime paths, assert result identity and
    sensible timing).
 
 Phases B, C, D have no inter-dependency once the side-band protocol is
@@ -352,7 +352,7 @@ fixed; can be done in parallel.
   `ARRAY` / `PERCPU_ARRAY`) are inlined by the BPF JIT into direct
   pointer math; the JIT image contains NO call instruction for them.
   Native code will still emit a real `call`. Both paths will compute the
-  same value, but native_lab will be slower than BPF JIT for those
+  same value, but native kernel will be slower than BPF JIT for those
   specific helpers. That's the interesting finding, not a bug.
 - **Tail calls / bpf_tail_call**. Reserve r9 + emit the BPF JIT's
   tail-call counter slot if a program uses tail calls. Defer until a

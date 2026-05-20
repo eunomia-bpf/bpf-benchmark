@@ -1,4 +1,4 @@
-# ReverseSim Full Micro Runtime With Native Lab: 2026-05-20 04:44 UTC
+# ReverseSim Full Micro Runtime With Native Kernel: 2026-05-20 04:44 UTC
 
 Command:
 
@@ -12,13 +12,14 @@ Raw result:
 
 Purpose:
 
-- Verify the `native_lab` result channel fix for TC and cgroup skb programs.
-- Compare direct native, kernel eBPF, and kernel-loaded native_lab execution on
-  the same full 29-program micro dataset.
+- Verify the native kernel (`native_lab`) result channel fix for TC and cgroup
+  skb programs.
+- Compare native userspace, kernel eBPF, and native kernel execution on the
+  same full 29-program micro dataset.
 
 Fix validated by this run:
 
-- `native_lab_runner` now reads TC/cgroup benchmark results from
+- The native kernel runner (`native_lab_runner`) now reads TC/cgroup benchmark results from
   `ctx_out.cb[0..1]`, matching kernel BPF `__sk_buff.cb[]` semantics and the
   proof loader.
 - The earlier failed full run
@@ -30,16 +31,16 @@ Summary:
 
 | Population | Programs | Ratio | Geomean | Speedup | Wins | Losses | Ties |
 | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: |
-| All micro programs | 29 | native/kernel | 0.588 | 1.70x | 27 | 2 | 0 |
-| All micro programs | 29 | native_lab/kernel | 0.707 | 1.41x | 24 | 4 | 1 |
-| All micro programs | 29 | native_lab/native | 1.203 | 0.83x | 3 | 23 | 3 |
-| Excluding `simple` and `simple_packet` | 27 | native/kernel | 0.649 | 1.54x | 25 | 2 | 0 |
-| Excluding `simple` and `simple_packet` | 27 | native_lab/kernel | 0.689 | 1.45x | 23 | 3 | 1 |
-| Excluding `simple` and `simple_packet` | 27 | native_lab/native | 1.062 | 0.94x | 3 | 21 | 3 |
+| All micro programs | 29 | native userspace/kernel | 0.588 | 1.70x | 27 | 2 | 0 |
+| All micro programs | 29 | native kernel/kernel | 0.707 | 1.41x | 24 | 4 | 1 |
+| All micro programs | 29 | native kernel/native userspace | 1.203 | 0.83x | 3 | 23 | 3 |
+| Excluding `simple` and `simple_packet` | 27 | native userspace/kernel | 0.649 | 1.54x | 25 | 2 | 0 |
+| Excluding `simple` and `simple_packet` | 27 | native kernel/kernel | 0.689 | 1.45x | 23 | 3 | 1 |
+| Excluding `simple` and `simple_packet` | 27 | native kernel/native userspace | 1.062 | 0.94x | 3 | 21 | 3 |
 
 Per-program median runtime table:
 
-| Micro program | Native ns | Kernel ns | Native_lab ns | Native/kernel | Native_lab/kernel | Native_lab/native |
+| Micro program | Native userspace ns | Kernel eBPF ns | Native kernel ns | Native userspace/kernel | Native kernel/kernel | Native kernel/native userspace |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | `simple` | 1.0 | 7.0 | 6.0 | 7.00x | 1.17x | 6.00x |
 | `simple_packet` | 1.0 | 6.0 | 7.0 | 6.00x | 0.86x | 7.00x |

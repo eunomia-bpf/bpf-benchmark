@@ -40,7 +40,7 @@ Reproduce via `make micro SUITE=micro/config/micro_stage2.yaml RUNTIMES="native_
 | `packet_5tuple_classify` | HASH keyed by a 5-tuple struct parsed from packet |
 | `stats_mixed_helpers` | HASH + PERCPU_HASH + 3 helpers (tetragon-style aggregator) |
 
-All 13 produce bit-identical `result` words between native_lab and
+All 13 produce bit-identical `result` words between native kernel and
 kernel runtimes. The yaml suite deliberately excludes
 `helper_only_ktime.bpf.c` and `helper_get_pid_tgid.bpf.c` (the .bpf.c
 files still build) because `bpf_ktime_get_ns` and
@@ -52,7 +52,7 @@ suite double as a correctness check, not just a perf sweep.
 ## Baseline numbers — `make micro` 2026-05-18, SAMPLES=3 INNER_REPEAT=10000 WARMUPS=2
 
 ```
-program                    native_lab    kernel    ratio (NL/K, <1 = NL faster)
+program                    native kernel    kernel    ratio (NK/K, <1 = native kernel faster)
                             min / med    min / med    min   med
 ─────────────────────────────────────────────────────────────────
 helper_only_uid_gid           7 /  8 ns   9 /  9 ns   0.78  0.89
@@ -72,12 +72,12 @@ stats_mixed_helpers          64 / 67 ns  60 / 62 ns   1.07  1.08
 geomean over 13 programs                              0.940 0.966
 ```
 
-native_lab is comparable to (slightly faster than) kernel JIT on this
+native kernel is comparable to (slightly faster than) kernel eBPF on this
 suite. The earlier 5x gap on `map_hash_lookup` is gone — per-call-site
 inline routing (see commit `c43a7e43`) now lets HASH lookups use the
 same in-kernel `__htab_map_lookup_elem` fast path the kernel JIT does
 via its `map_gen_lookup` callback. Compile cost is 110–115 ms for
-native_lab (clang -O2 + `native-link` relocation pipeline) vs 0.3–0.4
+native kernel (clang -O2 + `native-link` relocation pipeline) vs 0.3–0.4
 ms for the kernel JIT.
 
 Environment caveats (visible as `[WARN]` lines in the run): KVM with
@@ -104,7 +104,7 @@ vs BPF JIT's direct `call rel32 → helper`. The extra indirection costs
 
 For `helper_only_ktime` / `helper_get_pid_tgid` the per-iteration time
 is dominated by the helper itself (~50–60 ns), not the trampoline, so
-native_lab and kernel_jit tie.
+native kernel and kernel eBPF tie.
 
 ### Map literal-pool overhead (~1-4 cycles per access)
 
@@ -141,7 +141,7 @@ jne +1                         ; handle NULL
 add r0, sizeof(htab_elem)+key  ; direct offset to value
 ```
 
-native_lab loses this — calling `bpf_map_lookup_elem` from native goes
+native kernel loses this — calling `bpf_map_lookup_elem` from native kernel goes
 through the public symbol, which:
 - Acquires/checks RCU read-lock state
 - Dispatches via `map->ops->map_lookup_elem`
@@ -200,7 +200,7 @@ trampoline overhead.
 per unique helper), one less indirect jump per call, and shaves ~5 ns
 off helper-heavy programs.
 
-The HASH map 5x gap shrinks only modestly (391→367 ns native_lab vs
+The HASH map 5x gap shrinks only modestly (391→367 ns native kernel vs
 ~74 ns kernel_jit) because the dominant cost is still the missing
 `map_gen_lookup` inlining (see below) — not the trampoline.
 
@@ -211,7 +211,7 @@ no observable effect since those programs are pure-compute and have no
 external calls to relocate) and `native-sim/test/Makefile` (Stage 2,
 ~24 ns win on `map_hash_lookup`). Single full sweep:
 
-| stage | program | native_lab ns | kernel_jit ns | ratio |
+| stage | program | native kernel ns | kernel eBPF ns | ratio |
 |-------|---------|--------------:|--------------:|------:|
 | S1 | bcc_runqlat_log2_histogram_bucket | 1246 | 1731 | 0.720 |
 | S1 | bcc_tcpconnect_ipv4_tuple_filter | 70 | 124 | 0.565 |
@@ -253,10 +253,10 @@ external calls to relocate) and `native-sim/test/Makefile` (Stage 2,
 
 | metric | value |
 |--------|------:|
-| geomean ratio | **0.7123x** (native_lab 1.40x faster on average) |
+| geomean ratio | **0.7123x** (native kernel 1.40x faster on average) |
 | range | 0.326 .. 4.128 |
 | wins (native faster) | 27 |
-| losses (kernel_jit faster) | 2 |
+| losses (kernel eBPF faster) | 2 |
 | ties | 6 |
 
 Stage 1 geomean unchanged from the previous Stage 1-only run
@@ -336,7 +336,7 @@ vng --run vendor/build/x86/linux/arch/x86/boot/bzImage --cwd "$(pwd)" \
 ## Next research steps
 
 1. ~~Implement `map_gen_lookup`-style inlining in native-link (issue 1
-   above). Re-measure HASH map case; expect native_lab to drop from
+   above). Re-measure HASH map case; expect native kernel to drop from
    ~390 ns to ~50 ns.~~ **DONE — see follow-up below.**
 2. Migrate one real micro program from `micro/programs/` to use helpers
    + maps (e.g. tracee/tetragon-style filter with map lookup) to
@@ -397,7 +397,7 @@ The previous status update (above) reported `map_hash_lookup` at
 was **noisy**: at INNER_REPEAT=1000, the per-iter `exec_ns` from the
 kernel's BPF test_run varies wildly run-to-run (e.g. the kernel_jit
 baseline jumped between 37 ns and 83 ns across consecutive sweeps).
-At INNER_REPEAT=100000 the kernel_jit baseline stabilizes and the
+At INNER_REPEAT=100000 the kernel eBPF baseline stabilizes and the
 true picture appears. The prior `nl_ns=355 kj_ns=86 = 4.128x` figure
 came from `run_stage2.sh`'s INNER_REPEAT=1 mode and was almost
 entirely PROG_TEST_RUN syscall dispatch overhead, not program time.
@@ -445,7 +445,7 @@ ARRAY/PERCPU/LRU calls — exactly what kernel JIT does.
 `native-sim/x86/native_lab/results/stage2_per_call_routing_sweep.txt`
 (INNER_REPEAT=100000, SAMPLES=15 medians):
 
-| # | program | maps | helpers | native_lab ns | kernel_jit ns | ratio | inline? | Δ vs guard |
+| # | program | maps | helpers | native kernel ns | kernel eBPF ns | ratio | inline? | Δ vs guard |
 |---|---|---|---|---:|---:|---:|---|---:|
 | 1 | `helper_only_ktime` | 0 | 1 | 28 | 28 | 1.000 | n/a | — |
 | 2 | `helper_get_pid_tgid` | 0 | 1 | 5 | 6 | 0.833 | n/a | — |
@@ -463,7 +463,7 @@ ARRAY/PERCPU/LRU calls — exactly what kernel JIT does.
 | 14 | **`stats_mixed_helpers`** | 2 (HASH+PERCPU_HASH) | 3 | 95 | 83 | **1.145** | per-call (HASH only) | **-0.115** |
 
 **Stage 2 geomean: 0.979x** (was 1.046x under the single-HASH-only
-guard). native_lab is now slightly *faster* than kernel JIT on this
+guard). native kernel is now slightly *faster* than kernel eBPF on this
 14-program set.
 
 ### Reading
@@ -505,9 +505,9 @@ Result files:
 - `native-sim/x86/native_lab/results/stage1_sweep_100k_s5_v2.jsonl`
 - `native-sim/x86/native_lab/results/stage2_per_call_routing_sweep.txt`
 
-Sorted by ratio ascending (best native_lab wins first):
+Sorted by ratio ascending (best native kernel wins first):
 
-|   # | stage | program | native_lab ns | kernel_jit ns | ratio |
+|   # | stage | program | native kernel ns | kernel eBPF ns | ratio |
 |---:|:---:|---|---:|---:|---:|
 | 1 | S1 | `otel_stack_frame_unwind_scan` | 43 | 155 | 0.277 |
 | 2 | S1 | `cilium_socket_lb_service_select` | 174 | 427 | 0.407 |
@@ -555,7 +555,7 @@ Sorted by ratio ascending (best native_lab wins first):
 
 | metric | value |
 |---|---:|
-| **Combined geomean (N=43)** | **0.755x** (native_lab ~1.32x faster avg) |
+| **Combined geomean (N=43)** | **0.755x** (native kernel ~1.32x faster avg) |
 | Stage 1 geomean (N=29) | 0.666x |
 | Stage 2 geomean (N=14) | 0.980x |
 | Wins (ratio < 0.98) | 30 |
@@ -563,7 +563,7 @@ Sorted by ratio ascending (best native_lab wins first):
 | Ties (±2%) | 8 |
 | Range | 0.277 .. 1.167 |
 
-The biggest native_lab wins are pure-compute Stage 1 programs whose
+The biggest native kernel wins are pure-compute Stage 1 programs whose
 BPF JIT has nothing to inline away (`otel_stack_frame_unwind_scan`,
 `bitmap_popcount_scan`, `cilium_*`). The five losses cluster around
 1.0-1.17x — programs where the kernel BPF JIT's per-call-site

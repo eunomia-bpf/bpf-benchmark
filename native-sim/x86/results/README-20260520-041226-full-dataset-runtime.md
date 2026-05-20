@@ -16,45 +16,50 @@ Proof result for the same generated dataset/direct BPF dumps:
 
 Summary:
 
-| Population | Programs | Native/kernel geomean | Native speedup | Wins | Losses |
+| Population | Programs | Native userspace/kernel geomean | Native userspace speedup | Wins | Losses |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | All micro programs | 29 | 0.594 | 1.68x | 27 | 2 |
 | Excluding `simple` and `simple_packet` | 27 | 0.656 | 1.53x | 25 | 2 |
 | Excluding baselines, per-program sample medians | 27 | 0.649 | 1.54x | 25 | 2 |
 
-Comparison to the previous full native/kernel/llvmbpf run:
+Comparison to the previous full native userspace / kernel eBPF / LLVM-BPF run:
 
 - Previous raw result: `micro/results/x86_kvm_micro_20260520_023753_401581/metadata.json`
-- Previous all-program native speedup: `1.71x`; current: `1.68x`.
-- Previous non-baseline native speedup: `1.55x`; current: `1.53x`.
+- Previous all-program native userspace speedup: `1.71x`; current: `1.68x`.
+- Previous non-baseline native userspace speedup: `1.55x`; current: `1.53x`.
 - The main regression is `payload_prefix_memcmp_scan`: source shaping made
-  the kernel eBPF version faster, so native speedup dropped from `2.03x` to
+  the kernel eBPF version faster, so native userspace speedup dropped from `2.03x` to
   `1.29x` in this full run. A targeted SAMPLES=5 run measured the same shaped
-  source at native `48 ns`, kernel `82.2 ns`, native_lab `51 ns`.
+  source at native userspace `48 ns`, kernel eBPF `82.2 ns`, native kernel
+  `51 ns`.
 
 Comparison to the older pre-local-simulator full run:
 
 - Older raw result: `micro/results/x86_kvm_micro_20260520_012923_324142/metadata.json`
-- Older all-program native speedup was `0.19x` because native was slower than
-  kernel on 27/29 programs. Current all-program native speedup is `1.68x`.
-- Older non-baseline native speedup was `0.21x`; current non-baseline native
-  speedup is `1.53x`.
+- Older all-program native userspace speedup was `0.19x` because native
+  userspace was slower than kernel eBPF on 27/29 programs. Current all-program
+  native userspace speedup is `1.68x`.
+- Older non-baseline native userspace speedup was `0.21x`; current
+  non-baseline native userspace speedup is `1.53x`.
 
-The earlier failed full native/kernel/native_lab attempt is also recorded:
+The earlier failed full native userspace / kernel eBPF / native kernel attempt
+is also recorded:
 
 - `micro/results/x86_kvm_micro_20260520_040517_640313/metadata.json`
-- It completed native/kernel/native_lab for 28 programs, but failed
-  `cgroup_skb_hash_chain/native_lab` warmup with result `0` instead of
+- It completed native userspace / kernel eBPF / native kernel for 28 programs,
+  but failed raw runtime case `cgroup_skb_hash_chain/native_lab` warmup with
+  result `0` instead of
   `12027228624407116210`.
-- Root cause: `native_lab_runner` read TC/cgroup benchmark results from packet
-  bytes, while the kernel and proof paths use BPF-visible `__sk_buff.cb[]`.
-- Fixed full native/kernel/native_lab run:
+- Root cause: the native kernel runner (`native_lab_runner`) read TC/cgroup
+  benchmark results from packet bytes, while the kernel and proof paths use
+  BPF-visible `__sk_buff.cb[]`.
+- Fixed full native userspace / kernel eBPF / native kernel run:
   `micro/results/x86_kvm_micro_20260520_044439_120822/metadata.json`.
   See `native-sim/x86/results/README-20260520-044439-full-native-lab.md`.
 
 Per-program runtime table:
 
-| Micro program | Native ns | Kernel ns | Current speedup | Previous speedup | Delta |
+| Micro program | Native userspace ns | Kernel eBPF ns | Current speedup | Previous speedup | Delta |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | `simple` | 1.0 | 6.0 | 6.00x | 6.33x | -0.33x |
 | `simple_packet` | 1.0 | 6.7 | 6.67x | 6.33x | +0.33x |
