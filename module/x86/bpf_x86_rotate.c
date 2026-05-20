@@ -181,13 +181,64 @@ static int instantiate_rotate(u64 payload, struct bpf_insn *insn_buf, u8 width)
 	return cnt;
 }
 
+static int instantiate_rotate_bpf(u64 payload, struct bpf_insn *insn_buf,
+				  u8 width)
+{
+	struct rotate_payload rot;
+	u8 scratch;
+	u32 scratch_mask;
+	int cnt = 0;
+	int err;
+
+	if (rotate_payload_form(payload) != X86_ROTATE_FORM_IMM)
+		return -EINVAL;
+
+	err = decode_rotate_payload(payload, width - 1, &rot);
+	if (err)
+		return err;
+	if (rot.shift == 0)
+		return -EINVAL;
+	if (!kinsn_x86_reg_is_bpf_writable(rot.dst_reg) ||
+	    !kinsn_x86_reg_is_bpf_writable(rot.src_reg))
+		return -EINVAL;
+
+	scratch = kinsn_x86_scratch_avoid(rot.dst_reg, rot.src_reg, 0);
+	scratch_mask = KINSN_X86_SCRATCH_MASK(scratch);
+	kinsn_x86_save_scratch(insn_buf, &cnt, scratch_mask);
+	if (rot.dst_reg != rot.src_reg)
+		insn_buf[cnt++] = rotate_mov(width, rot.dst_reg, rot.src_reg);
+	insn_buf[cnt++] = rotate_mov(width, scratch, rot.dst_reg);
+	insn_buf[cnt++] = rotate_alu_imm(width, BPF_LSH, rot.dst_reg,
+					 rot.shift);
+	insn_buf[cnt++] = rotate_alu_imm(width, BPF_RSH, scratch,
+					 width - rot.shift);
+	insn_buf[cnt++] = rotate_alu_reg(width, BPF_OR, rot.dst_reg,
+					 scratch);
+	if (width == 32)
+		kinsn_x86_write32(insn_buf, &cnt, rot.dst_reg, rot.dst_reg,
+				  scratch_mask);
+	else
+		kinsn_x86_write64(insn_buf, &cnt, rot.dst_reg, rot.dst_reg,
+				  scratch_mask);
+	kinsn_x86_restore_scratch(insn_buf, &cnt, scratch_mask);
+	return cnt;
+}
+
 static int instantiate_rotate64(u64 payload, struct bpf_insn *insn_buf)
 {
+	int err = instantiate_rotate_bpf(payload, insn_buf, 64);
+
+	if (err != -EINVAL)
+		return err;
 	return instantiate_rotate(payload, insn_buf, 64);
 }
 
 static int instantiate_rotate32(u64 payload, struct bpf_insn *insn_buf)
 {
+	int err = instantiate_rotate_bpf(payload, insn_buf, 32);
+
+	if (err != -EINVAL)
+		return err;
 	return instantiate_rotate(payload, insn_buf, 32);
 }
 

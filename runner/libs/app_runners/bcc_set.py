@@ -146,6 +146,15 @@ class BccSetRunner(AppRunner):
             raise RuntimeError(f"BCC tool {child.tool_name} is already running")
         tool_binary = child._resolve_tool_binary()
         tool_env = os.environ.copy()
+        # Ensure the bcc python module is on PYTHONPATH — the Dockerfile sets
+        # ENV PYTHONPATH but virtme doesn't always propagate it into the VM
+        # workload exec. Prepend bcc's install path explicitly.
+        bcc_site = "/usr/local/lib/python3/dist-packages"
+        existing = tool_env.get("PYTHONPATH", "")
+        if bcc_site not in existing.split(os.pathsep):
+            tool_env["PYTHONPATH"] = (
+                bcc_site + os.pathsep + existing if existing else bcc_site
+            )
         # bcc/set spawns multiple BCC python wrappers per workload. Each child
         # process needs the bpfrejit shim attached so it registers its own
         # per-pid socket and the runner can route execute_plan to the right

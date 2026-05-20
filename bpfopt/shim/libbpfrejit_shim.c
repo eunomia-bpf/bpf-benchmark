@@ -48,6 +48,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "shim_netlink.h"
+
 extern char **environ;
 
 #ifndef SYS_perf_event_open
@@ -69,6 +71,13 @@ extern char **environ;
 static long (*real_syscall)(long, ...);
 static int (*real_ioctl)(int, unsigned long, ...);
 static int (*real_close)(int);
+/* sendto/sendmsg are intercepted to catch katran-style rtnetlink XDP
+ * attach (RTM_SETLINK + IFLA_XDP_FD). libbpf < v0.8, iproute2-style ip-link
+ * xdp, and Cilium's pre-link path all attach via these. Without intercept,
+ * the netdev keeps dispatching to the original prog after ReJIT reload. */
+static ssize_t (*real_sendto)(int, const void *, size_t, int,
+                              const struct sockaddr *, socklen_t);
+static ssize_t (*real_sendmsg)(int, const struct msghdr *, int);
 
 /* Resolve any not-yet-resolved real symbols. Called at the top of every
  * interceptor so that apps which call syscall(3)/ioctl(2)/close(2) from a
@@ -78,6 +87,13 @@ static void ensure_syms_resolved(void) {
         real_syscall = (long (*)(long, ...))dlsym(RTLD_NEXT, "syscall");
     if (!real_ioctl)
         real_ioctl = (int (*)(int, unsigned long, ...))dlsym(RTLD_NEXT, "ioctl");
+    if (!real_sendto)
+        real_sendto = (ssize_t (*)(int, const void *, size_t, int,
+                                   const struct sockaddr *, socklen_t))
+                      dlsym(RTLD_NEXT, "sendto");
+    if (!real_sendmsg)
+        real_sendmsg = (ssize_t (*)(int, const struct msghdr *, int))
+                       dlsym(RTLD_NEXT, "sendmsg");
     if (!real_close)
         real_close = (int (*)(int))dlsym(RTLD_NEXT, "close");
 }
@@ -162,6 +178,14 @@ struct prog_entry {
     uint32_t n_links;
     int *attached_perf_fds;
     uint32_t n_perfs;
+    /* XDP netlink attachments captured by intercepting sendmsg/sendto on
+     * AF_NETLINK / NETLINK_ROUTE sockets when the message carries an
+     * RTM_SETLINK IFLA_XDP attribute. reload_and_reattach() iterates
+     * this list and re-issues RTM_SETLINK with the new prog_fd; without
+     * this path the netdev keeps dispatching to the original prog and
+     * any ReJIT bytecode change is invisible to the workload. */
+    struct xdp_nl_attach *xdp_attaches;
+    uint32_t n_xdp;
 };
 static struct prog_entry *prog_table[BPF_STATE_BUCKETS];
 
@@ -283,6 +307,7 @@ static void prog_free(struct prog_entry *e) {
     free(e->attached_perf_fds);
     free(e->func_info_buf);
     free(e->line_info_buf);
+    free(e->xdp_attaches);
     free(e);
 }
 
@@ -1484,10 +1509,20 @@ static void write_inner_map_ids_supplement(const char *map_values_dir,
     uint8_t *prev_key = NULL;
     if (!key) { fprintf(f, "}\n}\n"); fclose(f); real_close((int)ofd); return; }
 
+    /* Hard cap iterations at MAP_SUPPLEMENT_MAX_ENTRIES. Katran-class outer
+     * maps (lru_mapping, lpm_src_v4/v6, global_lru_maps) can have millions
+     * of entries; without a cap the LOOKUP_ELEM / GET_NEXT_KEY loop hangs
+     * the shim for ages and stalls every reload pass. Daemon's equivalent
+     * guard is a 64 KB dump-size pre-check; we mirror that as an absolute
+     * iteration budget so even unbounded HASH_OF_MAPS walks terminate. */
+    const uint32_t MAP_SUPPLEMENT_MAX_ENTRIES = 4096;
+    uint32_t emitted = 0;
     /* ARRAY_OF_MAPS: 4-byte u32 indices 0..max_entries-1. HASH_OF_MAPS: walk
      * with BPF_MAP_GET_NEXT_KEY. */
     if (outer_type == BPF_MAP_TYPE_ARRAY_OF_MAPS && info.key_size == 4) {
-        for (uint32_t k = 0; k < info.max_entries; k++) {
+        uint32_t limit = info.max_entries < MAP_SUPPLEMENT_MAX_ENTRIES
+                         ? info.max_entries : MAP_SUPPLEMENT_MAX_ENTRIES;
+        for (uint32_t k = 0; k < limit; k++) {
             uint32_t inner_kid = 0;
             *(uint32_t *)key = k;
             union bpf_attr la = {0};
@@ -1501,11 +1536,13 @@ static void write_inner_map_ids_supplement(const char *map_values_dir,
                     first ? "" : ",",
                     key[0], key[1], key[2], key[3], inner_kid);
             first = 0;
+            if (++emitted >= MAP_SUPPLEMENT_MAX_ENTRIES) break;
         }
     } else if (outer_type == BPF_MAP_TYPE_HASH_OF_MAPS) {
         uint8_t *cur = (uint8_t *)calloc(1, info.key_size);
+        uint32_t iters = 0;
         if (cur) {
-            for (;;) {
+            for (; iters < MAP_SUPPLEMENT_MAX_ENTRIES; iters++) {
                 union bpf_attr na = {0};
                 na.map_fd = (uint32_t)ofd;
                 na.key = prev_key ? (uintptr_t)prev_key : 0;
@@ -1560,15 +1597,58 @@ static void write_map_snapshots(const char *map_values_dir,
         if (!map_type_needs_dump(types[i])) continue;
         snprintf(dump_path, sizeof(dump_path), "%s/map-%u.dump.json",
                  map_values_dir, kernel_ids[i]);
+        /* Pre-filter by max_entries × (key+value) so we don't ask bpftool to
+         * walk multi-million-entry maps (katran lru_mapping etc.) — bpftool
+         * has no timeout/limit and would block the runner for hours. We
+         * query the kernel for map_info via BPF_OBJ_GET_INFO_BY_FD and
+         * estimate the dump size before spawning bpftool. */
+        const uint64_t MAP_SNAPSHOT_MAX_BYTES = 64ULL * 1024ULL;
+        int skip_dump = 0;
+        uint64_t estimated = 0;
+        {
+            union bpf_attr ga = {0};
+            ga.map_id = kernel_ids[i];
+            long mfd = real_syscall(SYS_bpf, BPF_MAP_GET_FD_BY_ID, &ga, sizeof(ga));
+            if (mfd >= 0) {
+                struct bpf_map_info mi;
+                memset(&mi, 0, sizeof(mi));
+                union bpf_attr ia = {0};
+                ia.info.bpf_fd = (uint32_t)mfd;
+                ia.info.info_len = sizeof(mi);
+                ia.info.info = (uintptr_t)&mi;
+                if (real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &ia, sizeof(ia)) >= 0) {
+                    estimated = (uint64_t)mi.max_entries *
+                                ((uint64_t)mi.key_size + (uint64_t)mi.value_size);
+                }
+                real_close((int)mfd);
+            }
+            /* JSON encoding inflates raw bytes by ≈ 4× (hex + commas + keys);
+             * compare against 4× threshold to be conservative. */
+            if (estimated > MAP_SNAPSHOT_MAX_BYTES * 4) skip_dump = 1;
+        }
+        if (skip_dump) {
+            int wfd = open(dump_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+            if (wfd >= 0) {
+                /* Schema must match daemon (write_map_snapshot_skip_marker):
+                 * bpfopt's map_inline parses `skipped`, `reason`,
+                 * `size_bytes`, `limit_bytes` and rejects unknown keys
+                 * like `estimated_bytes`. */
+                dprintf(wfd,
+                        "{\"skipped\":true,\"reason\":\"size_limit\","
+                        "\"size_bytes\":%llu,\"limit_bytes\":%llu}\n",
+                        (unsigned long long)estimated,
+                        (unsigned long long)MAP_SNAPSHOT_MAX_BYTES);
+                real_close(wfd);
+            }
+            continue;
+        }
         char *const dump_argv[] = {"bpftool", "-j", "map", "dump", "id",
                                    id_str, NULL};
         (void)run_bpftool_to_file(dump_argv, dump_path);
-        /* Match daemon's 64 KB skip threshold: large dumps (e.g. katran's
-         * reals/ch_rings 1M-entry arrays) would otherwise live as raw entries
-         * AND collide with the overlays.json that map_inline expects to be
-         * the sole source of truth for those map_ids. */
+        /* Secondary post-dump size check: pre-filter above bails for huge
+         * maps before spawning bpftool, but bpftool may still emit JSON
+         * larger than the threshold for medium-sized maps. */
         struct stat dst;
-        const uint64_t MAP_SNAPSHOT_MAX_BYTES = 64ULL * 1024ULL;
         if (stat(dump_path, &dst) == 0 &&
             (uint64_t)dst.st_size > MAP_SNAPSHOT_MAX_BYTES) {
             int wfd = open(dump_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
@@ -2280,6 +2360,26 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
             continue;
         }
         if (perf_replaced) perf_replaced[i] = (int)new_perf_fd;
+        /* The reopen path bypassed the perf_event_open intercept (in_shim=1),
+         * so the new fd isn't in perf_table. Re-insert it with the saved
+         * attrs so the next reload's SET_BPF fallback finds the entry
+         * instead of bailing with "no saved attrs". */
+        struct perf_entry *ne = (struct perf_entry *)calloc(1, sizeof(*ne));
+        if (ne) {
+            ne->fd = (int)new_perf_fd;
+            ne->type = ((const struct perf_event_attr *)saved_attr)->type;
+            ne->config = ((const struct perf_event_attr *)saved_attr)->config;
+            ne->pid = saved_pid;
+            ne->cpu = saved_cpu;
+            ne->group_fd = saved_group;
+            ne->open_flags = saved_flags;
+            ne->attached_prog_fd = (int)new_pfd;
+            memcpy(ne->attr_blob, saved_attr, saved_attr_size);
+            ne->attr_size = saved_attr_size;
+            pthread_mutex_lock(&state_mutex);
+            perf_insert(ne);
+            pthread_mutex_unlock(&state_mutex);
+        }
         log_line("reload_and_reattach: perf SET_BPF→reopen fallback OK "
                  "old_fd=%d → new_fd=%ld (errno=%d on initial SET_BPF)",
                  perfs[i], new_perf_fd, set_err);
