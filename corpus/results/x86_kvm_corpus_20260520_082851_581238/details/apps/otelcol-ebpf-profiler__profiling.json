@@ -1,0 +1,10 @@
+{
+  "app": "otelcol-ebpf-profiler/profiling",
+  "baseline": null,
+  "error": "native app did not load any shim-tracked BPF programs within 200.0s",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "otelcol-ebpf-profiler",
+  "selected_workload": "otel_mixed_workload",
+  "status": "error"
+}

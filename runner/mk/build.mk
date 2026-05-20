@@ -23,6 +23,8 @@ CONTAINER_IMAGE_ARTIFACT_ROOT := $(ARTIFACT_ROOT)/container-images
 
 ARM64_RUST_TARGET := aarch64-unknown-linux-gnu
 NATIVE_LINK_DIR := $(ROOT_DIR)/native-sim/x86/native_lab/native_link
+ARM64_NATIVE_LAB_SMOKE_DIR := $(ROOT_DIR)/native-sim/arm64/native_lab_smoke
+ARM64_SIM_PROOF_DIR := $(ROOT_DIR)/native-sim/arm64
 
 RUNNER_RUNTIME_CONTAINERFILE := $(RUNNER_CONTAINER_DIR)/runner-runtime.Dockerfile
 BPFOPT_SHIM_DIR := $(ROOT_DIR)/bpfopt/shim
@@ -47,7 +49,7 @@ HOST_KINSN_DIR_ARM64 := $(ROOT_DIR)/module/arm64/build
 	host-kinsn-x86 host-kinsn-arm64 host-rust-x86 host-rust-arm64 \
 	host-shim-x86 host-shim-arm64 host-shim-artifacts \
 	host-runner-x86 host-runner-arm64 host-micro-programs-x86 host-micro-programs-arm64 \
-	host-stage2-programs-x86 host-stage2-programs-arm64 \
+	host-stage2-programs-x86 host-stage2-programs-arm64 host-arm64-native-lab-smoke host-arm64-sim-proofs \
 	apps host-source-apps host-source-apps-x86 host-source-apps-arm64 \
 	aarch64-sysroot runtime-kernel-image \
 	x86-runner-runtime-image-tar arm64-runner-runtime-image-tar image-runner-runtime-image-tar
@@ -111,7 +113,7 @@ $(AARCH64_SYSROOT_DIR)/usr/include/libelf.h $(AARCH64_SYSROOT_DIR)/usr/include/y
 
 host-rust-arm64: aarch64-sysroot
 	$(ARM64_CARGO_ENV) cargo build --release --workspace --target "$(ARM64_RUST_TARGET)" --target-dir "$(ROOT_DIR)/bpfopt/target" --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml" -p bpfopt -p kinsnprober
-	cargo build --release --manifest-path "$(NATIVE_LINK_DIR)/Cargo.toml"
+	$(ARM64_CARGO_ENV) cargo build --release --target "$(ARM64_RUST_TARGET)" --manifest-path "$(NATIVE_LINK_DIR)/Cargo.toml"
 
 host-shim-x86:
 	install -d "$(BPFOPT_SHIM_BUILD_X86)"
@@ -160,6 +162,12 @@ host-stage2-programs-x86: host-micro-programs-x86
 host-stage2-programs-arm64: host-micro-programs-arm64
 	$(MAKE) -C "$(STAGE2_PROGRAM_DIR)" OUTPUT_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)" KERNEL_OFFSETS="$(MICRO_PROGRAM_BUILD_ARM64)/kernel_offsets.h" NATIVE_TARGET=aarch64-linux-gnu NATIVE_ARCH=arm64 SYS_INCLUDE_FLAGS="$(ARM64_SYS_INCLUDE_FLAGS)" all
 
+host-arm64-native-lab-smoke:
+	$(MAKE) -C "$(ARM64_NATIVE_LAB_SMOKE_DIR)" OUTPUT_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)/native_lab_smoke" all
+
+host-arm64-sim-proofs: host-micro-programs-arm64
+	$(MAKE) -C "$(ARM64_SIM_PROOF_DIR)" OUTPUT_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)/arm64_sim_proofs" MICRO_BUILD_DIR="$(MICRO_PROGRAM_BUILD_ARM64)" simple-proof-build
+
 x86-runner-runtime-image-tar: host-kernel-x86 host-kinsn-x86 host-rust-x86 host-shim-x86 host-source-apps-x86 host-runner-x86 host-micro-programs-x86 host-stage2-programs-x86
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	docker build --platform linux/amd64 \
@@ -186,7 +194,7 @@ x86-runner-runtime-image-tar: host-kernel-x86 host-kinsn-x86 host-rust-x86 host-
 	docker save -o "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE)"
 	mv -f "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE_TAR)"
 
-arm64-runner-runtime-image-tar: host-kernel-arm64 host-kinsn-arm64 host-rust-arm64 host-shim-arm64 host-source-apps-arm64 host-runner-arm64 host-micro-programs-arm64 host-stage2-programs-arm64
+arm64-runner-runtime-image-tar: host-kernel-arm64 host-kinsn-arm64 host-rust-arm64 host-shim-arm64 host-source-apps-arm64 host-runner-arm64 host-micro-programs-arm64 host-stage2-programs-arm64 host-arm64-native-lab-smoke host-arm64-sim-proofs
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	docker build --platform linux/arm64 \
 		--target runner-runtime \
@@ -208,6 +216,7 @@ arm64-runner-runtime-image-tar: host-kernel-arm64 host-kinsn-arm64 host-rust-arm
 		--build-arg KERNEL_IMAGE_NAME=vmlinuz.efi \
 		--build-arg KERNEL_MANIFEST_JSON="$$(cat $(HOST_KERNEL_BUILD_DIR_ARM64)/manifest.json)" \
 		--build-arg BPFOPT_HOST_BIN_DIR="bpfopt/target/$(ARM64_RUST_TARGET)/release" \
+		--build-arg NATIVE_LINK_HOST_BIN="native-sim/x86/native_lab/native_link/target/$(ARM64_RUST_TARGET)/release/native-link" \
 		-t "$(ARM64_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	docker save -o "$(ARM64_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(ARM64_RUNNER_RUNTIME_IMAGE)"
 	mv -f "$(ARM64_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(ARM64_RUNNER_RUNTIME_IMAGE_TAR)"

@@ -15,6 +15,7 @@ obj-m += bpf_arm64_mov.o
 obj-m += bpf_arm64_rev.o
 obj-m += bpf_arm64_ldp.o
 obj-m += bpf_arm64_prfm.o
+obj-m += bpf_arm64_native_lab.o
 
 all:
 	$(MAKE) -C $(KDIR) M=$(CURDIR) modules

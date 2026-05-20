@@ -1,4 +1,4 @@
-//! native-link: minimal x86-64 ELF -> native-lab blob linker.
+//! native-link: minimal native ELF -> native-lab blob linker.
 //!
 //! Reads a userspace-compiled `.so` (typically produced by
 //! `micro/programs/Makefile`'s `MICRO_NATIVE` build), discovers an entry
@@ -161,14 +161,6 @@ fn parse_lookup_sites(args: &[String]) -> Result<Vec<LookupSiteSpec>> {
     Ok(by_index.into_iter().map(|(_, s)| s).collect())
 }
 
-#[derive(Clone, Copy, Debug)]
-enum RelocKind {
-    /// `call rel32` — patch disp32 at splat time using the target's
-    /// kernel address (the kernel module computes the exact disp32 once
-    /// it knows where the blob will sit in the JIT image).
-    CallRel32 = 1,
-}
-
 /// A side-band relocation record. The on-disk layout must stay in sync
 /// with `struct native_lab_reloc_record` in
 /// module/x86/bpf_x86_native_lab.c (offset:u32, kind:u32, target:u64 —
@@ -176,7 +168,7 @@ enum RelocKind {
 /// transmuting from a `#[repr(C, packed)]` struct, so plain alignment is
 /// fine.
 #[derive(Clone, Copy, Debug)]
-struct RelocRecord {
+pub struct RelocRecord {
     offset: u32,
     kind: u32,
     target: u64,
@@ -196,36 +188,44 @@ fn main() -> Result<()> {
         .with_context(|| format!("read {}", args.input.display()))?;
     let elf = object::File::parse(&*bytes)
         .with_context(|| format!("parse ELF {}", args.input.display()))?;
-    if elf.architecture() != object::Architecture::X86_64 {
-        bail!("input ELF arch must be x86_64, got {:?}", elf.architecture());
-    }
-
-    let entry = find_symbol_by_name(&elf, &args.symbol)?;
-    let included = discover_reachable(&elf, &entry)?;
-
-    eprintln!(
-        "native-link: entry={} ({} bytes), {} reachable symbol(s) total",
-        entry.name,
-        entry.size,
-        included.len()
-    );
-    for sym in &included {
-        eprintln!(
-            "  - {} (vaddr {:#x}, {} bytes){}",
-            sym.name,
-            sym.address,
-            sym.size,
-            if sym.address == entry.address { " [entry]" } else { "" }
-        );
-    }
-
     let helper_addrs = parse_name_addr_args(&args.helpers, "helper")?;
     let map_addrs = parse_name_addr_args(&args.maps, "map")?;
     let lookup_sites = parse_lookup_sites(&args.lookup_sites)?;
+    let RewriteResult { blob, relocs } = match elf.architecture() {
+        object::Architecture::X86_64 => {
+            let entry = find_symbol_by_name(&elf, &args.symbol)?;
+            let included = discover_reachable(&elf, &entry)?;
 
-    let RewriteResult { blob, relocs } = rewrite(
-        &elf, &entry, &included, &helper_addrs, &map_addrs, &lookup_sites, args.show,
-    )?;
+            eprintln!(
+                "native-link: entry={} ({} bytes), {} reachable symbol(s) total",
+                entry.name,
+                entry.size,
+                included.len()
+            );
+            for sym in &included {
+                eprintln!(
+                    "  - {} (vaddr {:#x}, {} bytes){}",
+                    sym.name,
+                    sym.address,
+                    sym.size,
+                    if sym.address == entry.address { " [entry]" } else { "" }
+                );
+            }
+
+            rewrite_x86(
+                &elf, &entry, &included, &helper_addrs, &map_addrs, &lookup_sites, args.show,
+            )?
+        }
+        object::Architecture::Aarch64 => {
+            let entry = find_symbol_by_name(&elf, &args.symbol)?;
+            eprintln!(
+                "native-link: arm64 entry={} ({} bytes)",
+                entry.name, entry.size
+            );
+            rewrite_arm64_single_symbol(&elf, &entry, args.show)?
+        }
+        arch => bail!("unsupported input ELF arch: {:?}", arch),
+    };
     fs::write(&args.output, &blob)
         .with_context(|| format!("write {}", args.output.display()))?;
     eprintln!(
@@ -379,9 +379,9 @@ struct PatchInfo {
     kind: PatchKind,
 }
 
-pub struct RewriteResult {
-    pub blob: Vec<u8>,
-    pub relocs: Vec<RelocRecord>,
+struct RewriteResult {
+    blob: Vec<u8>,
+    relocs: Vec<RelocRecord>,
 }
 
 /// Per-symbol record kept across the decode/encode phases so that ELF
@@ -470,7 +470,7 @@ fn scan_helper_calls(
     Ok(out)
 }
 
-fn rewrite(
+fn rewrite_x86(
     elf: &object::File,
     entry: &SymInfo,
     included: &[SymInfo],
@@ -747,6 +747,120 @@ fn rewrite(
         disasm(&blob);
     }
     Ok(RewriteResult { blob, relocs: Vec::new() })
+}
+
+fn a64_sign_extend(value: u32, bits: u8) -> i64 {
+    let shift = 64 - bits;
+    ((value as i64) << shift) >> shift
+}
+
+fn a64_patch_b_to_end(word_index: usize, end_index: usize) -> Result<u32> {
+    let disp = end_index as i64 - word_index as i64;
+    if disp < -(1 << 25) || disp >= (1 << 25) {
+        bail!("arm64 branch-to-end displacement out of range: {disp}");
+    }
+    Ok(0x1400_0000 | ((disp as u32) & 0x03ff_ffff))
+}
+
+fn a64_is_uncond_b(insn: u32) -> bool {
+    (insn & 0x7c00_0000) == 0x1400_0000
+}
+
+fn a64_is_bl(insn: u32) -> bool {
+    (insn & 0xfc00_0000) == 0x9400_0000
+}
+
+fn a64_is_b_cond(insn: u32) -> bool {
+    (insn & 0xff00_0010) == 0x5400_0000
+}
+
+fn a64_branch_target(entry_addr: u64, word_index: usize, insn: u32) -> Option<u64> {
+    if a64_is_uncond_b(insn) {
+        let imm26 = insn & 0x03ff_ffff;
+        let disp = a64_sign_extend(imm26, 26) << 2;
+        return Some(((entry_addr as i64) + (word_index as i64 * 4) + disp) as u64);
+    }
+    if a64_is_b_cond(insn) {
+        let imm19 = (insn >> 5) & 0x7ffff;
+        let disp = a64_sign_extend(imm19, 19) << 2;
+        return Some(((entry_addr as i64) + (word_index as i64 * 4) + disp) as u64);
+    }
+    None
+}
+
+fn a64_is_mov_wide(insn: u32) -> bool {
+    matches!(insn & 0x7f80_0000, 0x1280_0000 | 0x5280_0000 | 0x7280_0000)
+}
+
+fn a64_is_mov_reg_alias(insn: u32) -> bool {
+    (insn & 0x7fe0_ffe0) == 0x2a00_03e0
+}
+
+fn a64_rewrite_return_reg(insn: u32) -> u32 {
+    if (insn & 0x1f) != 0 {
+        return insn;
+    }
+    if a64_is_mov_wide(insn) || a64_is_mov_reg_alias(insn) {
+        return (insn & !0x1f) | 7;
+    }
+    insn
+}
+
+fn rewrite_arm64_single_symbol(
+    elf: &object::File,
+    entry: &SymInfo,
+    show: bool,
+) -> Result<RewriteResult> {
+    let bytes = read_symbol_bytes(elf, entry)?;
+    if bytes.is_empty() || bytes.len() % 4 != 0 {
+        bail!("arm64 symbol {} size must be a non-zero multiple of 4", entry.name);
+    }
+
+    let mut blob = bytes.clone();
+    let end = entry.address + entry.size;
+    let end_index = blob.len() / 4;
+    for word_index in 0..end_index {
+        let off = word_index * 4;
+        let mut insn = u32::from_le_bytes(blob[off..off + 4].try_into().unwrap());
+
+        if a64_is_bl(insn) {
+            bail!("arm64 native-link does not support BL/calls yet at byte offset {off:#x}");
+        }
+        if (insn & 0x9f00_0000) == 0x1000_0000 || (insn & 0x9f00_0000) == 0x9000_0000 {
+            bail!("arm64 native-link does not support ADR/ADRP yet at byte offset {off:#x}");
+        }
+        if (insn & 0x3b00_0000) == 0x1800_0000 {
+            bail!("arm64 native-link does not support LDR literal yet at byte offset {off:#x}");
+        }
+        if let Some(target) = a64_branch_target(entry.address, word_index, insn) {
+            if target < entry.address || target > end {
+                bail!(
+                    "arm64 branch at byte offset {off:#x} targets {target:#x}, outside {}",
+                    entry.name
+                );
+            }
+        }
+
+        if insn == 0xd65f_03c0 {
+            insn = a64_patch_b_to_end(word_index, end_index)?;
+        } else {
+            insn = a64_rewrite_return_reg(insn);
+        }
+        blob[off..off + 4].copy_from_slice(&insn.to_le_bytes());
+    }
+
+    if show {
+        disasm_arm64_words(&blob);
+    }
+    Ok(RewriteResult { blob, relocs: Vec::new() })
+}
+
+fn disasm_arm64_words(blob: &[u8]) {
+    eprintln!("rewritten arm64 blob ({} bytes):", blob.len());
+    for (i, word) in blob.chunks_exact(4).enumerate() {
+        let insn = u32::from_le_bytes(word.try_into().unwrap());
+        eprintln!("  {:#06x}: {:#010x}", i * 4, insn);
+    }
 }
 
 /// Walk the ELF .text relocations attached to the bytes we just encoded.

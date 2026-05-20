@@ -1,8 +1,8 @@
 // Native-lab kernel runner.
 //
 // Mirrors run_kernel's measurement contract but loads a userspace-linked
-// x86 byte blob (produced by native-sim/x86/native_lab/native_link) into a
-// minimal BPF stub via the `bpf_x86_native_lab` kinsn. The kinsn splats
+// native byte blob into a minimal BPF stub via the native_lab kinsn. The
+// kinsn splats
 // the blob bytes into the JIT image so the native function runs in place
 // of the BPF body. Input prep, packet construction, and result extraction
 // reuse the shared kernel_test_run helpers; the only logic that lives in
@@ -41,14 +41,40 @@
 
 namespace {
 
-constexpr const char *kModuleName = "bpf_x86_native_lab";
-constexpr const char *kKfuncName = "bpf_x86_native_lab_emit";
-constexpr const char *kModuleBtfPath = "/sys/kernel/btf/bpf_x86_native_lab";
+struct NativeLabTarget {
+    const char *module_name;
+    const char *kfunc_name;
+    const char *module_btf_path;
+    const char *debugfs_dir;
+    const char *blob_path_fmt;
+    const char *relocs_path_fmt;
+    uint32_t chunk_bytes;
+};
+
+#if defined(__aarch64__)
+constexpr NativeLabTarget kNativeLabTarget = {
+    .module_name = "bpf_arm64_native_lab",
+    .kfunc_name = "bpf_arm64_native_lab_emit",
+    .module_btf_path = "/sys/kernel/btf/bpf_arm64_native_lab",
+    .debugfs_dir = "/sys/kernel/debug/bpf_arm64_native_lab",
+    .blob_path_fmt = "/sys/kernel/debug/bpf_arm64_native_lab/blob%u",
+    .relocs_path_fmt = nullptr,
+    .chunk_bytes = 256,
+};
+#else
+constexpr NativeLabTarget kNativeLabTarget = {
+    .module_name = "bpf_x86_native_lab",
+    .kfunc_name = "bpf_x86_native_lab_emit",
+    .module_btf_path = "/sys/kernel/btf/bpf_x86_native_lab",
+    .debugfs_dir = "/sys/kernel/debug/bpf_x86_native_lab",
+    .blob_path_fmt = "/sys/kernel/debug/bpf_x86_native_lab/blob%u",
+    .relocs_path_fmt = "/sys/kernel/debug/bpf_x86_native_lab/blob%u.relocs",
+    .chunk_bytes = 128,
+};
+#endif
+
 constexpr const char *kVmlinuxBtfPath = "/sys/kernel/btf/vmlinux";
 constexpr const char *kDebugfsDir = "/sys/kernel/debug";
-constexpr const char *kBlobPathFmt = "/sys/kernel/debug/bpf_x86_native_lab/blob%u";
-constexpr const char *kRelocsPathFmt = "/sys/kernel/debug/bpf_x86_native_lab/blob%u.relocs";
-constexpr uint32_t kChunkBytes = 128;
 constexpr uint32_t kMaxBlobs = 64;
 
 /* Stage 2: BPF helpers whose addresses we resolve from /proc/kallsyms
@@ -77,7 +103,7 @@ constexpr const char *kSupportedHelpers[] = {
 void ensure_debugfs_mounted()
 {
     struct stat st = {};
-    if (stat("/sys/kernel/debug/bpf_x86_native_lab", &st) == 0 && S_ISDIR(st.st_mode)) {
+    if (stat(kNativeLabTarget.debugfs_dir, &st) == 0 && S_ISDIR(st.st_mode)) {
         return;
     }
     (void)mount("none", kDebugfsDir, "debugfs", 0, nullptr);
@@ -92,8 +118,12 @@ void upload_relocs(const std::vector<uint8_t> &relocs, uint32_t chunk_id_for_rel
     if (relocs.empty()) {
         return;
     }
+#if defined(__aarch64__)
+    fail(std::string("native_lab relocs are not supported by module ")
+         + kNativeLabTarget.module_name);
+#else
     char path[160];
-    snprintf(path, sizeof(path), kRelocsPathFmt, chunk_id_for_relocs);
+    snprintf(path, sizeof(path), kNativeLabTarget.relocs_path_fmt, chunk_id_for_relocs);
     int fd = open(path, O_WRONLY | O_TRUNC);
     if (fd < 0) {
         fail(std::string("open ") + path + ": " + std::strerror(errno));
@@ -104,6 +134,7 @@ void upload_relocs(const std::vector<uint8_t> &relocs, uint32_t chunk_id_for_rel
     if (n != static_cast<ssize_t>(relocs.size())) {
         fail(std::string("write ") + path + ": " + std::strerror(saved));
     }
+#endif
 }
 
 uint32_t upload_blob(const std::vector<uint8_t> &blob)
@@ -111,20 +142,21 @@ uint32_t upload_blob(const std::vector<uint8_t> &blob)
     if (blob.empty()) {
         fail("native blob is empty");
     }
-    uint32_t chunks = static_cast<uint32_t>((blob.size() + kChunkBytes - 1) / kChunkBytes);
+    uint32_t chunks = static_cast<uint32_t>(
+        (blob.size() + kNativeLabTarget.chunk_bytes - 1) / kNativeLabTarget.chunk_bytes);
     if (chunks > kMaxBlobs) {
         fail("native blob requires " + std::to_string(chunks) +
              " chunks but module only supports " + std::to_string(kMaxBlobs));
     }
     for (uint32_t i = 0; i < chunks; i++) {
         char path[128];
-        snprintf(path, sizeof(path), kBlobPathFmt, i);
+        snprintf(path, sizeof(path), kNativeLabTarget.blob_path_fmt, i);
         int fd = open(path, O_WRONLY | O_TRUNC);
         if (fd < 0) {
             fail(std::string("open ") + path + ": " + std::strerror(errno));
         }
-        size_t off = static_cast<size_t>(i) * kChunkBytes;
-        size_t l = std::min<size_t>(kChunkBytes, blob.size() - off);
+        size_t off = static_cast<size_t>(i) * kNativeLabTarget.chunk_bytes;
+        size_t l = std::min<size_t>(kNativeLabTarget.chunk_bytes, blob.size() - off);
         ssize_t n = write(fd, blob.data() + off, l);
         int saved = errno;
         close(fd);
@@ -135,8 +167,8 @@ uint32_t upload_blob(const std::vector<uint8_t> &blob)
     return chunks;
 }
 
-// Walk every loaded kernel BTF and return an fd pointing at the one named
-// `bpf_x86_native_lab`. The caller owns the fd. libbpf doesn't expose a
+// Walk every loaded kernel BTF and return an fd pointing at the native_lab
+// module BTF. The caller owns the fd. libbpf doesn't expose a
 // direct "find module btf by name" helper, so we iterate BPF_BTF_GET_NEXT_ID.
 int find_module_btf_fd()
 {
@@ -160,13 +192,13 @@ int find_module_btf_fd()
         info.name_len = sizeof(name);
         uint32_t info_len = sizeof(info);
         if (bpf_obj_get_info_by_fd(fd, &info, &info_len) == 0
-            && std::strcmp(name, kModuleName) == 0) {
+            && std::strcmp(name, kNativeLabTarget.module_name) == 0) {
             return fd;
         }
         close(fd);
     }
-    fail(std::string("BTF for module ") + kModuleName +
-         " is not loaded (insmod " + kModuleName + ".ko)");
+    fail(std::string("BTF for module ") + kNativeLabTarget.module_name +
+         " is not loaded (insmod " + kNativeLabTarget.module_name + ".ko)");
     return -1;
 }
 
@@ -177,17 +209,17 @@ int find_kfunc_btf_id()
         fail(std::string("btf__parse vmlinux: ")
              + std::strerror(static_cast<int>(-libbpf_get_error(vmlinux))));
     }
-    struct btf *mod = btf__parse_split(kModuleBtfPath, vmlinux);
+    struct btf *mod = btf__parse_split(kNativeLabTarget.module_btf_path, vmlinux);
     if (libbpf_get_error(mod)) {
         btf__free(vmlinux);
         fail(std::string("btf__parse_split module: ")
              + std::strerror(static_cast<int>(-libbpf_get_error(mod))));
     }
-    int id = btf__find_by_name_kind(mod, kKfuncName, BTF_KIND_FUNC);
+    int id = btf__find_by_name_kind(mod, kNativeLabTarget.kfunc_name, BTF_KIND_FUNC);
     btf__free(mod);
     btf__free(vmlinux);
     if (id < 0) {
-        fail(std::string("kfunc ") + kKfuncName + " not found in module BTF");
+        fail(std::string("kfunc ") + kNativeLabTarget.kfunc_name + " not found in module BTF");
     }
     return id;
 }

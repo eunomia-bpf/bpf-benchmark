@@ -30,6 +30,7 @@
 #include <signal.h>
 #include <spawn.h>
 #include <stdarg.h>
+#include <stddef.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <sys/wait.h>
@@ -257,7 +258,7 @@ long syscall(long number, ...) {
         in_shim = 1;
         switch (cmd) {
         case BPF_PROG_LOAD:
-            pending_prog = capture_prog_load(attr);
+            pending_prog = capture_prog_load(attr, size);
             break;
         case BPF_MAP_CREATE:
             pending_map = capture_map_create(attr);
@@ -815,6 +816,7 @@ static int unix_socket_listen(const char *path) {
 #include "shim_json.h"
 
 static void emit_list_progs(int cli) {
+    discover_bpf_programs();
     pthread_mutex_lock(&state_mutex);
     /* Estimate buffer size: ~256 bytes per prog. */
     size_t cap = 4096;
