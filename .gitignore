@@ -1,5 +1,5 @@
 output*
-runner/build-llvmbpf
+runner/build*-llvmbpf/
 dump*
 runner/build-arm64
 runner/build-x86
@@ -41,6 +41,7 @@ build/
 /build-arm64/
 micro/build/
 micro/build-arm64/
+micro/programs/build*/
 scanner/build/
 scanner/build-arm64/
 corpus/build/

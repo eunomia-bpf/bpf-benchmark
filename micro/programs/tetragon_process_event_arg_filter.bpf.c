@@ -5,16 +5,13 @@
 #define TETRAGON_ARG_FILTER_INPUT_SIZE \
     (8U + TETRAGON_ARG_FILTER_RECORDS * TETRAGON_ARG_FILTER_RECORD_SIZE)
 
-static __always_inline u32 tetragon_event_weight(u16 event_id)
+static __always_inline u32 tetragon_event_weight(u32 event_id)
 {
-    switch (event_id) {
-    case 1U: return 0x11U;
-    case 2U: return 0x23U;
-    case 5U: return 0x37U;
-    case 9U: return 0x41U;
-    case 13U: return 0x59U;
-    default: return 0U;
-    }
+    return event_id == 1U ? 0x11U :
+           event_id == 2U ? 0x23U :
+           event_id == 5U ? 0x37U :
+           event_id == 9U ? 0x41U :
+           event_id == 13U ? 0x59U : 0U;
 }
 
 static __always_inline u32 tetragon_arg_prefix_class(u64 arg_sig)
@@ -54,8 +51,8 @@ bench_tetragon_process_event_arg_filter(const u8 *data, u32 len, u64 *out)
         u32 pid = micro_read_u32_le(data, base);
         u32 tid = micro_read_u32_le(data, base + 4U);
         u32 namespace_id = micro_read_u32_le(data, base + 8U);
-        u16 event_id = micro_read_u16_le(data, base + 12U);
-        u16 action = micro_read_u16_le(data, base + 14U);
+        u32 event_id = micro_read_u16_le(data, base + 12U);
+        u32 action = micro_read_u16_le(data, base + 14U);
         u64 caps = micro_read_u64_le(data, base + 16U);
         u64 arg_sig = micro_read_u64_le(data, base + 24U);
         u32 weight = tetragon_event_weight(event_id);

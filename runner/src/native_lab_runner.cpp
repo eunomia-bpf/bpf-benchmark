@@ -935,6 +935,11 @@ std::vector<sample_result> run_kernel_native_lab(const cli_options &options)
     const auto prog_load_end = std::chrono::steady_clock::now();
     close(mod_btf_fd);
 
+    const bool result_from_skb_context =
+        prog_type_value == BPF_PROG_TYPE_SCHED_CLS ||
+        prog_type_value == BPF_PROG_TYPE_CGROUP_SKB;
+    __sk_buff context_out = {};
+
     // Warmup (1 iteration to populate caches + verify mechanism).
     bpf_test_run_opts warm = {};
     warm.sz = sizeof(warm);
@@ -943,12 +948,18 @@ std::vector<sample_result> run_kernel_native_lab(const cli_options &options)
     warm.data_size_in = packet.size();
     warm.data_out = packet_out.data();
     warm.data_size_out = packet_out.size();
+    if (result_from_skb_context) {
+        warm.ctx_out = &context_out;
+        warm.ctx_size_out = sizeof(context_out);
+    }
     if (bpf_prog_test_run_opts(prog_fd, &warm) < 0) {
         close(prog_fd);
         fail(std::string("warmup test_run failed: ") + std::strerror(errno));
     }
 
     // Measured run.
+    std::fill(packet_out.begin(), packet_out.end(), 0);
+    std::memset(&context_out, 0, sizeof(context_out));
     bpf_test_run_opts test_opts = {};
     test_opts.sz = sizeof(test_opts);
     test_opts.repeat = options.repeat;
@@ -956,6 +967,10 @@ std::vector<sample_result> run_kernel_native_lab(const cli_options &options)
     test_opts.data_size_in = packet.size();
     test_opts.data_out = packet_out.data();
     test_opts.data_size_out = packet_out.size();
+    if (result_from_skb_context) {
+        test_opts.ctx_out = &context_out;
+        test_opts.ctx_size_out = sizeof(context_out);
+    }
     const auto run_start = std::chrono::steady_clock::now();
     const int run_err = bpf_prog_test_run_opts(prog_fd, &test_opts);
     const auto run_end = std::chrono::steady_clock::now();
@@ -964,24 +979,17 @@ std::vector<sample_result> run_kernel_native_lab(const cli_options &options)
         fail(std::string("bpf_prog_test_run_opts failed: ") + std::strerror(errno));
     }
 
-    // Extract the u64 result from packet_out. For XDP/sched_cls the BPF
-    // program sees skb->data at offset 0 of the user packet, so native_lab
-    // writes (and we read) at offset 0. For cgroup_skb the kernel
-    // bpf_prog_test_run_skb path strips the L2 header during prog setup
-    // (`is_l2 = false`) and pushes it back afterwards -- both runtimes write
-    // their u64 at byte 14 of the returned packet buffer, which is the
-    // start of the L3 payload `build_packet_input` reserves for the result.
-    size_t result_off = 0;
-    if (prog_type_value == BPF_PROG_TYPE_CGROUP_SKB) {
-        result_off = 14; /* kEthernetHeaderSize */
-    }
-    if (packet_out.size() < result_off + sizeof(uint64_t)) {
-        close(prog_fd);
-        fail("native_lab: packet_out too small to hold u64 result at offset "
-             + std::to_string(result_off));
-    }
     uint64_t result_word = 0;
-    std::memcpy(&result_word, packet_out.data() + result_off, sizeof(result_word));
+    if (result_from_skb_context) {
+        result_word = static_cast<uint64_t>(context_out.cb[0]) |
+                      (static_cast<uint64_t>(context_out.cb[1]) << 32);
+    } else {
+        if (packet_out.size() < sizeof(uint64_t)) {
+            close(prog_fd);
+            fail("native_lab: packet_out too small to hold u64 result");
+        }
+        std::memcpy(&result_word, packet_out.data(), sizeof(result_word));
+    }
 
     close(prog_fd);
     /* Companion bpf_object stays open until here so the maps it owns

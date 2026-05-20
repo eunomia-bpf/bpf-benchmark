@@ -4,9 +4,9 @@
 #define MEMCMP_PREFIX_LEN 64U
 #define MEMCMP_PREFIX_INPUT_SIZE (4U + MEMCMP_PREFIX_SCENARIOS * MEMCMP_PREFIX_LEN)
 
-static __always_inline u8 memcmp_prefix_pattern_byte(u32 index)
+static __always_inline u32 memcmp_prefix_pattern_byte(u32 index)
 {
-    return (u8)((((index * 29U) ^ (index << 2U) ^ 0xA5U) + 0x11U) & 0xFFU);
+    return (((index * 29U) ^ (index << 2U) ^ 0xA5U) + 0x11U) & 0xFFU;
 }
 
 static __always_inline int bench_payload_prefix_memcmp_scan(const u8 *data, u32 len, u64 *out)
