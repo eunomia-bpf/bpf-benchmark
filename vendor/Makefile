@@ -53,7 +53,7 @@ cilium-arm64: GOARCH := arm64
 cilium-arm64: GOCC := aarch64-linux-gnu-gcc
 cilium-x86 cilium-arm64: cilium-%:
 	install -d "$(BUILD)/$*/cilium/bin"
-	CC="$(GOCC)" $(GO_ENV) $(MAKE) -C "$(CILIUM)/daemon" GO="$(GO)" GOARCH="$(GOARCH)" CGO_ENABLED=1 EXTRA_GO_BUILD_LDFLAGS="$(GO_DYNAMIC_LDFLAGS)" TARGET="$(BUILD)/$*/cilium/bin/cilium-agent" "$(BUILD)/$*/cilium/bin/cilium-agent"
+	CC="$(GOCC)" $(GO_ENV) $(MAKE) -C "$(CILIUM)/daemon" GO="$(GO)" GOARCH="$(GOARCH)" CGO_ENABLED=1 NOSTRIP=1 EXTRA_GO_BUILD_LDFLAGS="$(GO_DYNAMIC_LDFLAGS)" TARGET="$(BUILD)/$*/cilium/bin/cilium-agent" "$(BUILD)/$*/cilium/bin/cilium-agent"
 
 tetragon-x86: GOARCH := amd64
 tetragon-x86: BPFARCH := x86
@@ -63,7 +63,7 @@ tetragon-arm64: BPFARCH := arm64
 tetragon-arm64: GOCC := aarch64-linux-gnu-gcc
 tetragon-x86 tetragon-arm64: tetragon-%:
 	install -d "$(BUILD)/$*/tetragon/bin" "$(BUILD)/.tetragon-bpf/$*"
-	CC="$(GOCC)" $(GO_ENV) $(MAKE) -C "$(TETRAGON)" GO="$(GO)" TARGET_ARCH="$(GOARCH)" GOARCH="$(GOARCH)" CGO_ENABLED=1 EXTRA_GO_BUILD_LDFLAGS="$(GO_DYNAMIC_LDFLAGS)" EXTRA_GO_BUILD_FLAGS="-o $(BUILD)/$*/tetragon/bin/tetragon" tetragon
+	CC="$(GOCC)" $(GO_ENV) $(MAKE) -C "$(TETRAGON)" GO="$(GO)" TARGET_ARCH="$(GOARCH)" GOARCH="$(GOARCH)" CGO_ENABLED=1 NOSTRIP=1 EXTRA_GO_BUILD_LDFLAGS="$(GO_DYNAMIC_LDFLAGS)" EXTRA_GO_BUILD_FLAGS="-o $(BUILD)/$*/tetragon/bin/tetragon" tetragon
 	$(MAKE) -C "$(TETRAGON)/bpf" CLANG="$(CLANG)" LLC="$(LLC)" BPF_TARGET_ARCH="$(BPFARCH)" OBJSDIR="$(BUILD)/.tetragon-bpf/$*/objs/" DEPSDIR="$(BUILD)/.tetragon-bpf/$*/deps/" -j"$(JOBS)"
 	install -d "$(BUILD)/$*/tetragon"
 	cp -a "$(BUILD)/.tetragon-bpf/$*/objs/." "$(BUILD)/$*/tetragon/"
@@ -81,7 +81,7 @@ otel-x86: GOCC := gcc
 otel-arm64: GOARCH := arm64
 otel-arm64: GOCC := aarch64-linux-gnu-gcc
 otel-x86 otel-arm64: otel-%: $(BUILD)/otelcol-ebpf-profiler-%.yaml
-	$(GO_ENV) GOOS=linux GOARCH="$(GOARCH)" CGO_ENABLED=1 CC="$(GOCC)" "$(GO)" run "$(OCB)" --config "$<" --ldflags="-s -w $(GO_DYNAMIC_LDFLAGS)"
+	$(GO_ENV) GOOS=linux GOARCH="$(GOARCH)" CGO_ENABLED=1 CC="$(GOCC)" "$(GO)" run "$(OCB)" --config "$<" --ldflags="$(GO_DYNAMIC_LDFLAGS)"
 	install -D -m 0755 "$(BUILD)/otelcol-ebpf-profiler-build-$*/otelcol-ebpf-profiler" "$(BUILD)/$*/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler"
 
 $(ARM64_CLANG_CONFIG):

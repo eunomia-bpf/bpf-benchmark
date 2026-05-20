@@ -615,14 +615,16 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
                                 xa = RTA_NEXT(xa, nl);
                             }
                             if (attached_pid == p->kernel_prog_id) {
-                                /* Reconstruct an xdp_flags value from
-                                 * IFLA_XDP_ATTACHED: 1=SKB(generic), 2=DRV,
-                                 * 3=HW. Bit positions in XDP_FLAGS_* are:
-                                 * SKB=2, DRV=4, HW=8. */
+                                /* Reconstruct xdp_flags from
+                                 * enum xdp_attached_mode:
+                                 * 1=DRV(native), 2=SKB(generic), 3=HW. */
                                 uint32_t mode_flag = 0;
-                                if (mode == 1) mode_flag = 1U << 1; /* SKB */
-                                else if (mode == 2) mode_flag = 1U << 2; /* DRV */
-                                else if (mode == 3) mode_flag = 1U << 3; /* HW */
+                                if (mode == XDP_ATTACHED_DRV)
+                                    mode_flag = XDP_FLAGS_DRV_MODE;
+                                else if (mode == XDP_ATTACHED_SKB)
+                                    mode_flag = XDP_FLAGS_SKB_MODE;
+                                else if (mode == XDP_ATTACHED_HW)
+                                    mode_flag = XDP_FLAGS_HW_MODE;
                                 struct xdp_nl_attach *grown =
                                     (struct xdp_nl_attach *)realloc(
                                         discovered,

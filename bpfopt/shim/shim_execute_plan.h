@@ -459,6 +459,11 @@ static void emit_execute_plan(int cli, const char *json) {
             run_step(pd, w.workdir, prog_type_name, prog_id_str, w.target_json,
                      map_ids_csv, w.map_values_dir, local_ids, nr_maps,
                      w.cur, w.nxt, w.report, &step_seq, name, cmdbuf, &sr);
+            pthread_mutex_lock(&state_mutex);
+            if (pd && pd->kernel_prog_id)
+                snprintf(prog_id_str, sizeof(prog_id_str), "%u",
+                         pd->kernel_prog_id);
+            pthread_mutex_unlock(&state_mutex);
 
             /* On success-with-new-bytecode, compute final_insn_count from cur. */
             struct stat cst;
@@ -498,13 +503,18 @@ static void emit_execute_plan(int cli, const char *json) {
             buf_appendf(&resp, &cap, &len, "}");
             first_step = 0;
         }
+        uint32_t final_prog_id = want_id;
+        pthread_mutex_lock(&state_mutex);
+        if (pd && pd->kernel_prog_id)
+            final_prog_id = pd->kernel_prog_id;
+        pthread_mutex_unlock(&state_mutex);
         buf_appendf(&resp, &cap, &len,
                     "],\"status\":\"%s\","
                     "\"program\":{\"prog_id\":%u,\"prog_name\":\"%s\","
                     "\"prog_type\":%u,\"orig_insn_count\":%u,"
                     "\"final_insn_count\":%u}}",
                     prog_any_failed ? "error" : "ok",
-                    want_id, prog_name, prog_type_num,
+                    final_prog_id, prog_name, prog_type_num,
                     orig_insn_count, final_insn_count);
 
         free(local_ids); free(local_types); free(local_loader_fds);

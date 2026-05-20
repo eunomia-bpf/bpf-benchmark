@@ -62,7 +62,6 @@ RUN apt-get update \
         libunwind8 \
         libyaml-cpp0.8 \
         libzstd1 \
-        llvm \
         lz4 \
         nftables \
         openssl \
@@ -73,7 +72,6 @@ RUN apt-get update \
         python3 \
         python3-yaml \
         ruby \
-        rt-tests \
         stress-ng \
         tar \
         util-linux \
@@ -143,8 +141,9 @@ COPY micro/programs ./micro/programs
 COPY --link --from=runner-runtime-host-runner-build /micro_exec ${IMAGE_WORKSPACE}/runner/${RUNNER_BUILD_DIR_NAME}/micro_exec
 COPY --link --from=runner-runtime-host-micro-programs / /artifacts/user/micro-programs/${RUN_TARGET_ARCH}/
 COPY --link --from=runner-runtime-host-stage2-programs / /artifacts/user/stage2-programs/${RUN_TARGET_ARCH}/
-COPY --link --from=runner-runtime-host-unittest / ${IMAGE_WORKSPACE}/tests/unittest/${TEST_BUILD_DIR}/
-COPY --link --from=runner-runtime-host-negative / ${IMAGE_WORKSPACE}/tests/negative/${TEST_BUILD_DIR}/
+COPY --link --from=runner-runtime-host-unittest /rejit_*[^d] ${IMAGE_WORKSPACE}/tests/unittest/${TEST_BUILD_DIR}/
+COPY --link --from=runner-runtime-host-unittest /progs/*.bpf.o ${IMAGE_WORKSPACE}/tests/unittest/${TEST_BUILD_DIR}/progs/
+COPY --link --from=runner-runtime-host-negative /adversarial_rejit /fuzz_rejit ${IMAGE_WORKSPACE}/tests/negative/${TEST_BUILD_DIR}/
 
 FROM runner-runtime-runtime-base AS runner-runtime
 
