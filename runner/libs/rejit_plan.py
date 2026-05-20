@@ -1,6 +1,6 @@
-"""Build the daemon `execute_plan` socket payload from per-pass YAML config.
+"""Build the shim `execute_plan` socket payload from per-pass YAML config.
 
-Each pass declares its daemon step in `runner/config/passes/<pass>/default.yaml`;
+Each pass declares its shim step in `runner/config/passes/<pass>/default.yaml`;
 optional per-app overrides live at `runner/config/passes/<pass>/<app>.yaml`
 with a `programs` map keyed by prog_name (and `default` fallback). YAML is the
 single source of truth; runner never queries bpfopt for pass metadata.
@@ -16,21 +16,12 @@ step's outgoing daemon `log_level` to the next step's input requirement.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 import yaml
 
 CONFIG_ROOT = Path(__file__).resolve().parents[1] / "config" / "passes"
-
-
-@dataclass(frozen=True)
-class StepConfig:
-    command: str        # multi-line yaml block collapsed to single shell line
-    log_level: int      # 1 or 2 — predecessor must rejit at this level
-    kinsns: tuple[str, ...]
-    """Daemon target.json kinsn probes, by exact kfunc name."""
 
 
 def _load(path: Path) -> Mapping[str, Any]:
@@ -42,53 +33,11 @@ def _collapse(s: object) -> str:
     return " ".join(str(s).split())
 
 
-def _kinsns(payload: Mapping[str, Any]) -> tuple[str, ...]:
-    return tuple(sorted(
-        str(k["name"])
-        for k in (payload.get("kinsns") or [])
-    ))
-
-
 def _command_key_for_prog(prog_name: str) -> str:
     sanitized = "".join(
         c if c.isalnum() or c == "_" else "_" for c in str(prog_name).strip()
     )
     return f"command_{sanitized}"
-
-
-def find_step_config(
-    pass_name: str, app_name: str | None, prog_name: str | None,
-) -> StepConfig:
-    pass_dir = CONFIG_ROOT / pass_name
-    default = _load(pass_dir / "default.yaml")
-    kinsns = _kinsns(default)
-
-    if app_name is not None:
-        app_path = pass_dir / f"{app_name}.yaml"
-        if app_path.is_file():
-            override = _load(app_path)
-            programs = override["programs"]
-            entry = programs.get(prog_name) if prog_name else None
-            if entry is None:
-                if "default" not in programs:
-                    raise RuntimeError(
-                        f"{app_path}: programs.{prog_name!r} not found and "
-                        f"programs.default fallback is missing — every app "
-                        f"override yaml must list every prog explicitly or "
-                        f"provide a default"
-                    )
-                entry = programs["default"]
-            return StepConfig(
-                command=_collapse(entry["command"]),
-                log_level=int(override["log_level"]),
-                kinsns=kinsns,
-            )
-
-    return StepConfig(
-        command=_collapse(default["command"]),
-        log_level=int(default["log_level"]),
-        kinsns=kinsns,
-    )
 
 
 def find_step_payload(pass_name: str, app_name: str | None) -> dict[str, Any]:
@@ -120,14 +69,6 @@ def find_step_payload(pass_name: str, app_name: str | None) -> dict[str, Any]:
     return payload
 
 
-def build_kinsn_probes(enabled_passes: Sequence[str]) -> list[dict[str, Any]]:
-    """Union of kinsn probes across the chosen passes (read from default.yaml)."""
-    names: set[str] = set()
-    for pass_name in enabled_passes:
-        names.update(find_step_config(pass_name, None, None).kinsns)
-    return [{"name": n} for n in sorted(names)]
-
-
 def build_execute_all_payload(
     enabled_passes: Sequence[str],
     *,
@@ -149,5 +90,4 @@ def build_execute_all_payload(
     return {
         "cmd": "execute_plan",
         "steps": steps,
-        "kinsn_probes": build_kinsn_probes(passes),
     }

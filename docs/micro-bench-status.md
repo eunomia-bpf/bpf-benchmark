@@ -1,12 +1,12 @@
 # Micro Benchmark Evaluation Status
 
-Last updated: 2026-05-18
+Last updated: 2026-05-20
 
 This document is the current evaluation note for the micro benchmark suite. It is written as an evaluation-section draft: what was measured, how it was measured, what the result says, and where the remaining native-code gap comes from.
 
-All figures were generated with Python/matplotlib from the raw result file `micro/results/x86_kvm_micro_20260514_205607_714679/metadata.json`. The benchmark framework does not write ratios, geomeans, win/loss counts, or summaries into result payloads; those numbers here are post-hoc analysis.
+Figures 1-4 are x86 KVM figures generated with Python/matplotlib from the raw result file `micro/results/x86_kvm_micro_20260514_205607_714679/metadata.json`. Figure 5 is an AWS arm64 smoke figure generated from `micro/results/aws_arm64_micro_20260520_052452_727433/metadata.json`. The benchmark framework does not write ratios, geomeans, win/loss counts, or summaries into result payloads; those numbers here are post-hoc analysis.
 
-## Headline
+## Headline: x86 KVM ReJIT
 
 On the current x86 KVM micro suite, full-pass ReJIT is correct across all cases and gives a modest but real local-codegen improvement:
 
@@ -25,7 +25,7 @@ On the current x86 KVM micro suite, full-pass ReJIT is correct across all cases 
 
 The main conclusion is not "LEA fixed everything." LEA is now verifier-facing safe on this micro suite and applies broadly, but the remaining gap to native/LLVM code is mostly in non-local codegen: dense switch lowering, loop-level transformations, local-call ABI/inlining, scheduling/register allocation, and broader packet hot-path cleanup.
 
-## Experimental Setup
+## Experimental Setup: x86 KVM
 
 Command:
 
@@ -53,6 +53,62 @@ This is a correctness and performance-direction run, not the final publication e
 
 The win/loss/tie counts in this document use a +/-2% tie band. Exact ratios and geomeans are still computed from the raw medians without rounding the inputs.
 
+## AWS Arm64 Smoke Performance
+
+This is a separate arm64 smoke run, not the x86 KVM ReJIT run above. It uses
+`native`, `llvmbpf`, and `kernel`; it does not include `kernel_rejit`.
+
+Command:
+
+```sh
+PLATFORM=aws ARCH=arm64 SAMPLES=1 WARMUPS=0 INNER_REPEAT=10000 make micro
+```
+
+Result:
+
+- Result path: `micro/results/aws_arm64_micro_20260520_052452_727433/metadata.json`
+- `SAMPLES=1`
+- `INNER_REPEAT=10000`
+- `WARMUPS=0`
+- Runtimes: `native`, `llvmbpf`, `kernel`
+- Machine mode: AWS arm64, one `t4g.small`
+- Benchmarks completed: 29 / 29
+- Expected-result mismatches: 0
+
+![AWS arm64 native and LLVM-BPF runtime speedup](figures/micro-arm64-runtime-speedup.png)
+
+Figure 5 sorts all 29 arm64 benchmarks by native speedup over kernel eBPF.
+Both native and LLVM-BPF beat kernel eBPF on every case in this smoke run.
+Native is only slightly ahead of LLVM-BPF overall; several cases still favor
+LLVM-BPF.
+
+| Population | Runtime ratio | Programs | Geomean ratio | Speedup | Wins / losses / ties |
+|---|---|---:|---:|---:|---:|
+| All micro programs | `native / kernel` | 29 | 0.488 | 2.05x | 29 / 0 / 0 |
+| All micro programs | `llvmbpf / kernel` | 29 | 0.521 | 1.92x | 29 / 0 / 0 |
+| All micro programs | `native / llvmbpf` | 29 | 0.935 | 1.07x | 20 / 9 / 0 |
+| Excluding `simple` and `simple_packet` | `native / kernel` | 27 | 0.506 | 1.98x | 27 / 0 / 0 |
+| Excluding `simple` and `simple_packet` | `llvmbpf / kernel` | 27 | 0.520 | 1.92x | 27 / 0 / 0 |
+| Excluding `simple` and `simple_packet` | `native / llvmbpf` | 27 | 0.971 | 1.03x | 18 / 9 / 0 |
+
+Representative arm64 cases:
+
+| Case | Native ns | LLVM-BPF ns | Kernel ns | Native speedup vs kernel | LLVM-BPF speedup vs kernel |
+|---|---:|---:|---:|---:|---:|
+| `bitmap_popcount_scan` | 1614 | 1633 | 2226 | 1.38x | 1.36x |
+| `sorted_rule_binary_search` | 722 | 664 | 1947 | 2.70x | 2.93x |
+| `packet_checksum_fold` | 26085 | 26162 | 39543 | 1.52x | 1.51x |
+| `bpf_local_call_fanout_dispatch` | 164 | 121 | 358 | 2.18x | 2.96x |
+| `cilium_socket_lb_service_select` | 340 | 419 | 1127 | 3.31x | 2.69x |
+| `otel_stack_frame_unwind_scan` | 107 | 187 | 409 | 3.82x | 2.19x |
+| `tc_packet_checksum_fold` | 32792 | 26144 | 39531 | 1.21x | 1.51x |
+| `cgroup_skb_hash_chain` | 368 | 372 | 964 | 2.62x | 2.59x |
+
+This arm64 result is a smoke measurement, not a paper-grade arm64 run: it uses
+one sample, no warmups, and AWS instance noise. Its main purpose is to confirm
+that the arm64 suite and runtime plumbing work and to establish the current
+directional native/LLVM-BPF/kernel relationship.
+
 ## Benchmark Scope
 
 Config: `micro/config/micro_pure_jit.yaml`
@@ -71,7 +127,7 @@ The suite currently has 29 workload-pattern micro cases:
 
 The suite is closer to workload patterns than unit tests: cases are named after app families where possible and avoid helper/map dependencies so the same input can run through native, llvmbpf, kernel, and ReJIT. This does not replace corpus. It deliberately omits helper-heavy map paths, full tail-call chains, app startup, and realistic service workload behavior.
 
-## ReJIT Runtime Effect
+## x86 KVM ReJIT Runtime Effect
 
 ![Full-pass ReJIT runtime ratio](figures/micro-rejit-runtime-ratio.png)
 
@@ -93,7 +149,7 @@ The regressions are mostly control-flow or string/field-filter cases where code 
 
 The important shape is mixed but positive: 14 wins, 8 losses, 7 ties. This says the pass stack is already useful as a local optimizer, but it is not a general native-code optimizer.
 
-## Pass Coverage
+## x86 KVM Pass Coverage
 
 ![Full-pass ReJIT pass coverage](figures/micro-pass-coverage.png)
 
@@ -115,7 +171,7 @@ Per full-suite sample, divide by 3: `lea=184`, `rotate=164`, `wide_mem=62`, `dce
 
 This validates the verifier-facing LEA fix on micro: LEA has `552/552` applied sites and no skipped sites in the full-pass run. The earlier verifier-facing concern was that pointer-derived address arithmetic could be lowered into a shape the verifier cannot prove. That failure mode does not reproduce here: all ReJIT syscalls succeeded and all post-ReJIT executions matched expected results.
 
-## Native Gap
+## x86 KVM Native Gap
 
 ![Native-code performance gap](figures/micro-native-gap-ratio.png)
 
@@ -130,7 +186,7 @@ Native is a reference point, not an absolute optimum. `packet_toeplitz_rss_hash`
 
 The main gap pattern is therefore not just "kernel JIT emits too many bytes." It is that current bytecode-level rewrites do not reconstruct higher-level control/loop structure once Clang has already lowered C into verifier-friendly BPF.
 
-## Code Size vs Runtime
+## x86 KVM Code Size vs Runtime
 
 ![Code size vs runtime scatter](figures/micro-size-runtime-scatter.png)
 
@@ -145,7 +201,7 @@ That means code shrink is a necessary but insufficient signal. Examples:
 
 This is the key evaluation point for future pass work: a pass can improve instruction count while leaving the critical path unchanged, or even make branch layout/register pressure worse. The next evaluation should therefore keep reporting both runtime and code size, and case-study the native/rejit machine code when they disagree.
 
-## Native-Code Inspection
+## x86 Native-Code Inspection
 
 To avoid treating `native` as an opaque baseline, I rebuilt the micro artifacts under `/tmp/bpf-benchmark-micro-codegen-analysis` and inspected the selected `.native.so` and `.bpf.o` files with `llvm-objdump`, `llvm-nm`, and `llvm-readelf`.
 

@@ -33,6 +33,7 @@ RUN apt-get update \
         libboost-program-options1.83.0 \
         libboost-regex1.83.0 \
         libbpf1 \
+        libbpfcc \
         libbz2-1.0 \
         libcap2 \
         libclang-cpp15t64 \
@@ -106,8 +107,15 @@ COPY --link --chmod=0755 vendor/binary/katran/${RUN_TARGET_ARCH}/bin/katran_serv
 COPY --link vendor/build/${VENDOR_BUILD_ARCH}/katran/bpf/*.bpf.o /artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}/katran/bpf/
 
 COPY --link vendor/repos/cilium/bpf/ /var/lib/cilium/bpf/
-COPY --link vendor/build/${VENDOR_BUILD_ARCH}/bcc/ /usr/local/
 COPY --link --chmod=0755 \
+    vendor/build/${VENDOR_BUILD_ARCH}/bcc/bin/capable \
+    vendor/build/${VENDOR_BUILD_ARCH}/bcc/bin/biosnoop \
+    vendor/build/${VENDOR_BUILD_ARCH}/bcc/bin/vfsstat \
+    vendor/build/${VENDOR_BUILD_ARCH}/bcc/bin/opensnoop \
+    vendor/build/${VENDOR_BUILD_ARCH}/bcc/bin/syscount \
+    vendor/build/${VENDOR_BUILD_ARCH}/bcc/bin/tcpconnect \
+    vendor/build/${VENDOR_BUILD_ARCH}/bcc/bin/tcplife \
+    vendor/build/${VENDOR_BUILD_ARCH}/bcc/bin/runqlat \
     vendor/build/${VENDOR_BUILD_ARCH}/cilium/bin/cilium-agent \
     vendor/build/${VENDOR_BUILD_ARCH}/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler \
     vendor/build/${VENDOR_BUILD_ARCH}/bpftool/bin/bpftool \
@@ -116,10 +124,6 @@ COPY --link --chmod=0755 \
     /usr/local/bin/
 
 RUN set -eux; \
-    for tool in capable biosnoop vfsstat opensnoop syscount tcpconnect tcplife runqlat; do \
-        ln -sfn "/usr/local/share/bcc/tools/${tool}" "/usr/local/bin/${tool}"; \
-        ln -sfn "/usr/local/share/bcc/tools/${tool}" "/usr/local/bin/${tool}-bpfcc"; \
-    done; \
     repo_artifact_root="/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}"; \
     mkdir -p \
         "${repo_artifact_root}" \
@@ -137,7 +141,6 @@ COPY --link --from=runner-runtime-host-kernel-offsets /kernel_offsets.h /artifac
 COPY --link --from=runner-runtime-host-kernel-modules / /artifacts/modules
 RUN mkdir -p /artifacts && printf '%s\n' "${KERNEL_MANIFEST_JSON}" > /artifacts/manifest.json
 
-COPY micro/programs ./micro/programs
 COPY --link --from=runner-runtime-host-runner-build /micro_exec ${IMAGE_WORKSPACE}/runner/${RUNNER_BUILD_DIR_NAME}/micro_exec
 COPY --link --from=runner-runtime-host-micro-programs / /artifacts/user/micro-programs/${RUN_TARGET_ARCH}/
 COPY --link --from=runner-runtime-host-stage2-programs / /artifacts/user/stage2-programs/${RUN_TARGET_ARCH}/
@@ -153,20 +156,15 @@ ARG DAEMON_HOST_BIN_DIR=daemon/target/release
 ARG BPFOPT_HOST_BIN_DIR=bpfopt/target/release
 ARG NATIVE_LINK_HOST_BIN=native-sim/x86/native_lab/native_link/target/release/native-link
 
-ENV PYTHONPATH=/usr/local/lib/python3/dist-packages
-
 COPY --link --from=runner-runtime-artifacts /artifacts/tracee /artifacts/tracee
 COPY --link --from=runner-runtime-artifacts /artifacts/tetragon /artifacts/tetragon
 COPY --link --from=runner-runtime-artifacts /artifacts/user/repo-artifacts /artifacts/user/repo-artifacts
 COPY --link --from=runner-runtime-artifacts /usr/local/bin/ /usr/local/bin/
-COPY --link --from=runner-runtime-artifacts /usr/local/lib/ /usr/local/lib/
-COPY --link --from=runner-runtime-artifacts /usr/local/share/bcc /usr/local/share/bcc
 COPY --link --from=runner-runtime-artifacts /var/lib/cilium /var/lib/cilium
 COPY --link --from=runner-runtime-artifacts /artifacts/kernel /artifacts/kernel
 COPY --link --from=runner-runtime-artifacts /artifacts/modules /artifacts/modules
 COPY --link --from=runner-runtime-artifacts /artifacts/manifest.json /artifacts/manifest.json
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/runner ${IMAGE_WORKSPACE}/runner
-COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/micro/programs ${IMAGE_WORKSPACE}/micro/programs
 COPY --link --from=runner-runtime-artifacts /artifacts/user/micro-programs /artifacts/user/micro-programs
 COPY --link --from=runner-runtime-artifacts /artifacts/user/stage2-programs /artifacts/user/stage2-programs
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/tests ${IMAGE_WORKSPACE}/tests
@@ -181,10 +179,6 @@ RUN set -eux; \
     mkdir -p /opt; \
     ln -sfn /artifacts/user /opt/bpf-benchmark; \
     ln -sfn "${IMAGE_WORKSPACE}/${DAEMON_HOST_BIN_DIR}/bpfrejit-daemon" /usr/local/bin/bpfrejit-daemon; \
-    # bcc tools shipped by the host build use `#!/usr/bin/env python`
-    # shebangs; modern Ubuntu doesn't symlink python -> python3, so the
-    # env lookup fails.
-    ln -sfn /usr/bin/python3 /usr/bin/python; \
     ldconfig
 
 COPY --link --from=runner-runtime-host-kinsn-artifacts / /artifacts/kinsn
@@ -204,12 +198,10 @@ COPY corpus/config ./corpus/config
 COPY corpus/inputs ./corpus/inputs
 COPY --link runner/assets ./runner/assets
 
-RUN set -eux; \
-    find ./runner ./micro ./corpus -type d -name __pycache__ -prune -exec rm -rf {} +; \
-    mkdir -p micro/results corpus/results tests/results /var/tmp/bpfrejit-runtime
+RUN mkdir -p micro/results corpus/results tests/results /var/tmp/bpfrejit-runtime
 
 ENV BPFREJIT_IMAGE_WORKSPACE=${IMAGE_WORKSPACE} \
     BPFREJIT_REPO_ARTIFACT_ROOT=/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH} \
-    PYTHONPATH=${IMAGE_WORKSPACE}:/usr/local/lib/python3/dist-packages \
+    PYTHONPATH=${IMAGE_WORKSPACE} \
     RUN_TARGET_ARCH=${RUN_TARGET_ARCH} \
     PATH=${IMAGE_WORKSPACE}/runner/build-llvmbpf:${IMAGE_WORKSPACE}/runner/build-arm64-llvmbpf:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin

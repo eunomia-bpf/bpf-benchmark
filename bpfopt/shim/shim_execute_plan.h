@@ -85,6 +85,130 @@ static void command_key_for_prog(const char *prog_name, char *out,
     out[o] = 0;
 }
 
+static char **env_without_ld_preload(void) {
+    size_t n_env = 0;
+    while (environ[n_env]) n_env++;
+    char **clean_env = (char **)calloc(n_env + 1, sizeof(char *));
+    if (!clean_env) return NULL;
+    size_t j = 0;
+    for (size_t i = 0; i < n_env; i++)
+        if (strncmp(environ[i], "LD_PRELOAD=", 11) != 0)
+            clean_env[j++] = environ[i];
+    clean_env[j] = NULL;
+    return clean_env;
+}
+
+static char *base64_encode_bytes(const unsigned char *bytes, size_t len) {
+    static const char table[] =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    size_t out_len = ((len + 2) / 3) * 4;
+    char *out = (char *)malloc(out_len + 1);
+    if (!out) return NULL;
+    size_t o = 0;
+    for (size_t i = 0; i < len; i += 3) {
+        size_t rem = len - i;
+        unsigned int n = ((unsigned int)bytes[i] << 16) |
+                         ((rem > 1 ? (unsigned int)bytes[i + 1] : 0) << 8) |
+                         (rem > 2 ? (unsigned int)bytes[i + 2] : 0);
+        out[o++] = table[(n >> 18) & 0x3f];
+        out[o++] = table[(n >> 12) & 0x3f];
+        out[o++] = rem > 1 ? table[(n >> 6) & 0x3f] : '=';
+        out[o++] = rem > 2 ? table[n & 0x3f] : '=';
+    }
+    out[o] = 0;
+    return out;
+}
+
+static char *tar_workdir_b64(const char *workdir) {
+    int pipefd[2];
+    if (pipe(pipefd) != 0) {
+        log_line("tar workdir pipe failed: errno=%d", errno);
+        return NULL;
+    }
+
+    posix_spawn_file_actions_t fa;
+    int fa_inited = (posix_spawn_file_actions_init(&fa) == 0);
+    if (!fa_inited) {
+        real_close(pipefd[0]);
+        real_close(pipefd[1]);
+        return NULL;
+    }
+    posix_spawn_file_actions_adddup2(&fa, pipefd[1], STDOUT_FILENO);
+    posix_spawn_file_actions_addclose(&fa, pipefd[0]);
+    posix_spawn_file_actions_addopen(&fa, STDERR_FILENO, "/dev/null",
+                                     O_WRONLY, 0);
+
+    char *const argv[] = {"tar", "-czf", "-", "-C", (char *)workdir, ".", NULL};
+    char **clean_env = env_without_ld_preload();
+    pid_t pid;
+    int rc = posix_spawnp(&pid, "tar", &fa, NULL, argv,
+                          clean_env ? clean_env : environ);
+    free(clean_env);
+    posix_spawn_file_actions_destroy(&fa);
+    real_close(pipefd[1]);
+    if (rc != 0) {
+        real_close(pipefd[0]);
+        log_line("tar workdir spawn failed: rc=%d workdir=%s", rc, workdir);
+        return NULL;
+    }
+
+    unsigned char *data = NULL;
+    size_t len = 0, cap = 0;
+    int read_failed = 0;
+    for (;;) {
+        unsigned char chunk[8192];
+        ssize_t n = read(pipefd[0], chunk, sizeof(chunk));
+        if (n > 0) {
+            if (len + (size_t)n > cap) {
+                size_t want = cap ? cap * 2 : 65536;
+                while (want < len + (size_t)n) {
+                    size_t next = want * 2;
+                    if (next <= want) { read_failed = 1; break; }
+                    want = next;
+                }
+                if (read_failed) break;
+                unsigned char *nr = (unsigned char *)realloc(data, want);
+                if (!nr) { read_failed = 1; break; }
+                data = nr;
+                cap = want;
+            }
+            memcpy(data + len, chunk, (size_t)n);
+            len += (size_t)n;
+            continue;
+        }
+        if (n == 0) break;
+        if (errno == EINTR) continue;
+        read_failed = 1;
+        break;
+    }
+    real_close(pipefd[0]);
+    int st = 0;
+    waitpid(pid, &st, 0);
+    if (read_failed || !WIFEXITED(st) || WEXITSTATUS(st) != 0) {
+        log_line("tar workdir failed: read_failed=%d exit=%d workdir=%s",
+                 read_failed, WIFEXITED(st) ? WEXITSTATUS(st) : -1, workdir);
+        free(data);
+        return NULL;
+    }
+    char *encoded = base64_encode_bytes(data ? data : (const unsigned char *)"", len);
+    free(data);
+    return encoded;
+}
+
+static int append_workdir_tar_b64(char **resp, size_t *cap, size_t *len,
+                                  const char *workdir, int *artifact_count) {
+    if (*artifact_count >= 32)
+        return 0;
+    (*artifact_count)++;
+    char *encoded = tar_workdir_b64(workdir);
+    if (!encoded)
+        return 0;
+    int rc = buf_appendf(resp, cap, len, ",\"workdir_tar_b64\":\"%s\"",
+                         encoded);
+    free(encoded);
+    return rc;
+}
+
 /* Run one bpfopt pass on a prog. Updates `cur` (input bytecode path) and
  * `step_seq` on success and after successful reload_and_reattach. */
 static void run_step(struct prog_entry *pd,
@@ -122,13 +246,7 @@ static void run_step(struct prog_entry *pd,
     substitute_vars(resolved, sizeof(resolved), command, vars, 10);
 
     /* /bin/sh -c <resolved> with LD_PRELOAD stripped, stdout+stderr to log */
-    size_t n_env = 0; while (environ[n_env]) n_env++;
-    char **clean_env = (char **)calloc(n_env + 1, sizeof(char *));
-    size_t j = 0;
-    for (size_t i = 0; clean_env && i < n_env; i++)
-        if (strncmp(environ[i], "LD_PRELOAD=", 11) != 0)
-            clean_env[j++] = environ[i];
-    if (clean_env) clean_env[j] = NULL;
+    char **clean_env = env_without_ld_preload();
     char subproc_log[320];
     snprintf(subproc_log, sizeof(subproc_log), "%s/step%d.log", workdir, *step_seq);
     char *const argv[] = {"/bin/sh", "-c", resolved, NULL};

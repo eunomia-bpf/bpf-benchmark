@@ -1,12 +1,69 @@
 # arm64 ReverseSim Prototype
 
-This directory is reserved for the arm64 version of the ReverseSim prototype.
+This directory is the arm64 counterpart of `../x86`.
 
-The intended shape mirrors `../x86`:
+Current scope is intentionally small:
 
-- a verifier-facing BPF simulator for a compact arm64-like instruction stream;
-- a Rust loader that supplies benchmark input through `BPF_PROG_TEST_RUN`;
-- smoke cases derived from the simplest `micro/programs` benchmarks.
+- C-authored simulator macros for a small AArch64 register-only subset.
+- A hardcoded BPF object that verifies the build/load path.
+- No memory safety guards, no fallback/trap path, no synthetic proof facts.
 
-The x86 prototype is implemented first because the current ReverseSim/k-insn
-discussion and micro handcraft path are x86-centered.
+The simulator state is architectural state only: general-purpose registers plus
+NZCV flags when a covered instruction updates them. Unsupported instructions
+must fail at generation/build time rather than falling back at runtime.
+
+The first artifact is not a full micro proof generator yet. It exists to prove
+that the arm64 simulator object can be compiled as eBPF and loaded by the shared
+ReverseSim loader. The next step is to add a mechanical parser for linked arm64
+native disassembly and grow the C-authored instruction subset according to real
+micro output.
+
+## Smoke
+
+```bash
+make -C native-sim/arm64 run
+```
+
+This compiles `arm64_sim_hardcoded.bpf.c` and load-tests
+`arm64_sim_hardcoded_xdp`.
+
+Current local result:
+
+```bash
+make -C native-sim/arm64 build
+sudo native-sim/loader/target/debug/reversesim-loader \
+  --object native-sim/arm64/build/arm64_sim_hardcoded.bpf.o \
+  --program arm64_sim_hardcoded_xdp \
+  --case simple \
+  --load-only
+```
+
+Result:
+
+- load ok
+- verifier/load time: `0.000248 s`
+
+## AWS Arm64 Note
+
+Use the repository Makefile for AWS runs:
+
+```bash
+PLATFORM=aws ARCH=arm64 SAMPLES=1 WARMUPS=0 INNER_REPEAT=10000 make micro
+```
+
+`runner/targets/aws-arm64.env` currently defaults benchmark instances to
+`t4g.small` and test instances to `t4g.micro`.
+
+Current AWS smoke:
+
+```bash
+PLATFORM=aws ARCH=arm64 SAMPLES=1 WARMUPS=0 INNER_REPEAT=10000 make micro
+```
+
+Result:
+
+- raw result: `micro/results/aws_arm64_micro_20260520_052452_727433/metadata.json`
+- status: completed
+- benchmarks: 29/29
+- runtimes: `native`, `llvmbpf`, `kernel`
+- AWS instance: one `t4g.small`, terminated by the executor after result sync
