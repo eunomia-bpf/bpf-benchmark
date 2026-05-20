@@ -31,7 +31,7 @@ def expected_kinsn_modules() -> list[str]:
     modules = sorted(
         path.stem
         for path in module_dir.glob("bpf_*.ko")
-        if path.is_file() and path.stem != "bpf_barrier"
+        if path.is_file()
     )
     if not modules:
         raise RuntimeError(f"no kinsn modules found under {module_dir}")
@@ -109,12 +109,10 @@ def load_kinsn_modules(
     resolved_module_dir = resolve_kinsn_module_dir(module_dir)
     loaded = 0
     total = 0
-    for ko_path in sorted(resolved_module_dir.glob("*.ko")):
+    for ko_path in sorted(resolved_module_dir.glob("bpf_*.ko")):
         if not ko_path.is_file():
             continue
         module_name = ko_path.stem
-        if module_name == "bpf_barrier":
-            continue
         total += 1
         if not _module_is_resident(module_name):
             completed = run_command(["insmod", str(ko_path)], timeout=120, check=False)

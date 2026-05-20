@@ -2564,25 +2564,172 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
             n_xdp = 0;
     }
     pthread_mutex_unlock(&state_mutex);
+    /* Discovery fallback: if no in-process netlink attach was observed but
+     * the prog is an XDP type, the attach was performed by an out-of-process
+     * runner (katran's `bpftool net attach xdp ... dev <iface>`). Walk all
+     * netdevs and ask the kernel which prog_id is bound; any match against
+     * our kid means we own that attach and must replay. */
+    if (n_xdp == 0 && p->prog_type == BPF_PROG_TYPE_XDP &&
+        p->kernel_prog_id != 0) {
+        DIR *nd = opendir("/sys/class/net");
+        if (nd) {
+            struct xdp_nl_attach *discovered = NULL;
+            uint32_t n_discovered = 0;
+            struct dirent *de;
+            while ((de = readdir(nd)) != NULL) {
+                if (de->d_name[0] == '.') continue;
+                char ifindex_path[256];
+                snprintf(ifindex_path, sizeof(ifindex_path),
+                         "/sys/class/net/%s/ifindex", de->d_name);
+                FILE *fi = fopen(ifindex_path, "r");
+                if (!fi) continue;
+                unsigned ifindex = 0;
+                if (fscanf(fi, "%u", &ifindex) != 1) {
+                    fclose(fi);
+                    continue;
+                }
+                fclose(fi);
+                /* Query the kernel for the XDP-bound prog id on this iface
+                 * via RTM_GETLINK + IFLA_XDP. We could parse /proc but the
+                 * netlink path is cleaner and the response includes the
+                 * exact flags (skb/native/hw) the original attach used. */
+                int s = socket(AF_NETLINK, SOCK_RAW | SOCK_CLOEXEC, NETLINK_ROUTE);
+                if (s < 0) continue;
+                struct {
+                    struct nlmsghdr nh;
+                    struct ifinfomsg ifi;
+                } q;
+                memset(&q, 0, sizeof(q));
+                q.nh.nlmsg_type = RTM_GETLINK;
+                q.nh.nlmsg_flags = NLM_F_REQUEST;
+                q.nh.nlmsg_seq = 1 + ifindex;
+                q.nh.nlmsg_len = sizeof(q);
+                q.ifi.ifi_family = AF_UNSPEC;
+                q.ifi.ifi_index = (int)ifindex;
+                struct sockaddr_nl sa;
+                memset(&sa, 0, sizeof(sa));
+                sa.nl_family = AF_NETLINK;
+                if (sendto(s, &q, q.nh.nlmsg_len, 0,
+                           (struct sockaddr *)&sa, sizeof(sa)) < 0) {
+                    real_close(s);
+                    continue;
+                }
+                char resp[16384];
+                ssize_t rn = recv(s, resp, sizeof(resp), 0);
+                real_close(s);
+                if (rn < (ssize_t)NLMSG_HDRLEN) continue;
+                /* Walk response: find IFLA_XDP -> IFLA_XDP_PROG_ID and
+                 * IFLA_XDP_ATTACHED. */
+                const struct nlmsghdr *nh = (const struct nlmsghdr *)resp;
+                size_t left = (size_t)rn;
+                while (NLMSG_OK(nh, left)) {
+                    if (nh->nlmsg_type != RTM_NEWLINK) {
+                        nh = NLMSG_NEXT(nh, left);
+                        continue;
+                    }
+                    const struct ifinfomsg *ifi =
+                        (const struct ifinfomsg *)NLMSG_DATA(nh);
+                    size_t alen = nh->nlmsg_len - NLMSG_LENGTH(sizeof(*ifi));
+                    const struct rtattr *rta =
+                        (const struct rtattr *)IFLA_RTA(ifi);
+                    while (RTA_OK(rta, alen)) {
+                        if (rta->rta_type == IFLA_XDP) {
+                            size_t nl = RTA_PAYLOAD(rta);
+                            const struct rtattr *xa =
+                                (const struct rtattr *)RTA_DATA(rta);
+                            uint32_t attached_pid = 0;
+                            uint8_t mode = 0;
+                            while (RTA_OK(xa, nl)) {
+                                if (xa->rta_type == IFLA_XDP_PROG_ID &&
+                                    RTA_PAYLOAD(xa) >= 4) {
+                                    memcpy(&attached_pid, RTA_DATA(xa), 4);
+                                } else if (xa->rta_type == IFLA_XDP_ATTACHED &&
+                                           RTA_PAYLOAD(xa) >= 1) {
+                                    memcpy(&mode, RTA_DATA(xa), 1);
+                                }
+                                xa = RTA_NEXT(xa, nl);
+                            }
+                            if (attached_pid == p->kernel_prog_id) {
+                                /* Reconstruct an xdp_flags value from
+                                 * IFLA_XDP_ATTACHED: 1=SKB(generic), 2=DRV,
+                                 * 3=HW. Bit positions in XDP_FLAGS_* are:
+                                 * SKB=2, DRV=4, HW=8. */
+                                uint32_t mode_flag = 0;
+                                if (mode == 1) mode_flag = 1U << 1; /* SKB */
+                                else if (mode == 2) mode_flag = 1U << 2; /* DRV */
+                                else if (mode == 3) mode_flag = 1U << 3; /* HW */
+                                struct xdp_nl_attach *grown =
+                                    (struct xdp_nl_attach *)realloc(
+                                        discovered,
+                                        (n_discovered + 1) *
+                                            sizeof(*discovered));
+                                if (grown) {
+                                    discovered = grown;
+                                    discovered[n_discovered].ifindex = ifindex;
+                                    discovered[n_discovered].xdp_flags =
+                                        mode_flag;
+                                    n_discovered++;
+                                    log_line("XDP discovery: kid=%u found on "
+                                             "ifindex=%u ifname=%s mode=%u "
+                                             "(flags=0x%x)",
+                                             attached_pid, ifindex,
+                                             de->d_name, mode, mode_flag);
+                                }
+                            }
+                            break;
+                        }
+                        rta = RTA_NEXT(rta, alen);
+                    }
+                    nh = NLMSG_NEXT(nh, left);
+                }
+            }
+            closedir(nd);
+            if (n_discovered > 0) {
+                n_xdp = n_discovered;
+                xdp_snap = discovered;
+            }
+        }
+    }
+    /* Guard so the shim's own sendto/recv inside the replay don't get
+     * intercepted by the shim's own sendto/sendmsg wrappers — that would
+     * either log spurious "no known prog_entry" entries or deadlock. */
+    in_shim = 1;
+    /* The kernel rejects a plain re-attach over an existing XDP prog with
+     * EEXIST unless we either set XDP_FLAGS_UPDATE_IF_NOEXIST (a first-time
+     * attach, wrong here) or perform an atomic REPLACE with
+     * IFLA_XDP_EXPECTED_FD pointing at the currently-attached prog. The
+     * loader's original fd is gone, but at this point p->kernel_prog_id is
+     * still the OLD prog id (it is bumped to the new id only after this
+     * block), so open a fresh fd to it for the EXPECTED_FD check. */
+    int old_xdp_fd = -1;
+    if (n_xdp > 0 && p->kernel_prog_id != 0) {
+        union bpf_attr ga = {0};
+        ga.prog_id = p->kernel_prog_id;
+        long ofd = real_syscall(SYS_bpf, BPF_PROG_GET_FD_BY_ID, &ga,
+                                sizeof(ga));
+        if (ofd >= 0) old_xdp_fd = (int)ofd;
+    }
     for (uint32_t i = 0; i < n_xdp; i++) {
-        /* old_prog_fd = previously-attached prog fd (p->fd before swap) so
-         * the kernel can verify with IFLA_XDP_EXPECTED_FD that we are
-         * replacing the exact prog we observed at attach time, not some
-         * other prog that subsequently won the netdev. */
         int r = nl_send_setlink_xdp_replace(xdp_snap[i].ifindex,
-                                            (int)new_pfd, old_prog_fd,
+                                            (int)new_pfd, old_xdp_fd,
                                             xdp_snap[i].xdp_flags);
         if (r < 0) {
             APPEND_DETAIL("xdp ifindex=%u: nl_send_setlink_xdp_replace "
                           "failed (errno=%d); ",
                           xdp_snap[i].ifindex, errno);
             partial = 1;
+            log_line("reload_and_reattach: XDP netlink reattach ifindex=%u "
+                     "FAILED errno=%d (new_pfd=%ld flags=0x%x)",
+                     xdp_snap[i].ifindex, errno, new_pfd,
+                     xdp_snap[i].xdp_flags);
         } else {
             log_line("reload_and_reattach: XDP netlink reattach ifindex=%u "
                      "flags=0x%x → new_prog_fd=%ld OK",
                      xdp_snap[i].ifindex, xdp_snap[i].xdp_flags, new_pfd);
         }
     }
+    if (old_xdp_fd >= 0) real_close(old_xdp_fd);
+    in_shim = 0;
     free(xdp_snap);
 #undef APPEND_DETAIL
     free(links);

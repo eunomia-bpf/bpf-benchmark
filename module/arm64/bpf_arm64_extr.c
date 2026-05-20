@@ -129,11 +129,6 @@ static int emit_rotate_arm64(u32 *image, int *idx, bool emit,
 
 	(void)prog;
 
-	if (!idx)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	if (is64)
 		err = decode_rotate64_payload(payload, &dst_reg, &src_reg, &tmp_reg, &shift);
 	else
@@ -150,10 +145,7 @@ static int emit_rotate_arm64(u32 *image, int *idx, bool emit,
 		insn = a64_extr_x(dst_reg, src_reg, src_reg, (-shift) & 63);
 	else
 		insn = a64_extr_w(dst_reg, src_reg, src_reg, (-shift) & 31);
-	if (emit)
-		image[*idx] = cpu_to_le32(insn);
-	*idx += 1;
-	return 1;
+	return kinsn_arm64_emit_one(image, idx, emit, insn);
 }
 
 static int emit_rotate64_arm64(u32 *image, int *idx, bool emit,

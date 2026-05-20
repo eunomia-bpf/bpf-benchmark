@@ -95,7 +95,7 @@ def _expected_kinsn_modules(workspace: Path, target_arch: str) -> list[str]:
     modules = sorted(
         path.stem
         for path in module_dir.glob("bpf_*.ko")
-        if path.is_file() and path.stem != "bpf_barrier"
+        if path.is_file()
     )
     if not modules:
         _die(f"no kinsn modules found under {module_dir}")

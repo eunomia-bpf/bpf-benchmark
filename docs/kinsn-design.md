@@ -319,7 +319,6 @@ Current in-tree targets include:
 - select
 - extract
 - endian load16/load32/load64
-- speculation barrier
 
 Representative files:
 
@@ -327,12 +326,10 @@ Representative files:
 - [`module/x86/bpf_select.c`](../module/x86/bpf_select.c)
 - [`module/x86/bpf_extract.c`](../module/x86/bpf_extract.c)
 - [`module/x86/bpf_endian.c`](../module/x86/bpf_endian.c)
-- [`module/x86/bpf_barrier.c`](../module/x86/bpf_barrier.c)
 - [`module/arm64/bpf_rotate.c`](../module/arm64/bpf_rotate.c)
 - [`module/arm64/bpf_select.c`](../module/arm64/bpf_select.c)
 - [`module/arm64/bpf_extract.c`](../module/arm64/bpf_extract.c)
 - [`module/arm64/bpf_endian.c`](../module/arm64/bpf_endian.c)
-- [`module/arm64/bpf_barrier.c`](../module/arm64/bpf_barrier.c)
 
 ### 5.2 Daemon
 
@@ -363,7 +360,7 @@ That test suite covers current end-to-end behavior such as:
 
 - kinsn discovery through module BTF and BTF FDs
 - packed sidecar transport semantics
-- REJIT correctness for rotate/select/extract/endian/barrier
+- REJIT correctness for rotate/select/extract/endian
 - x86 native emit byte-pattern checks for rotate
 - rollback behavior when REJIT fails
 

@@ -201,11 +201,6 @@ static int emit_cmp_arm64(u32 *image, int *idx, bool emit, u64 payload,
 
 	(void)prog;
 
-	if (!idx)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_reg_payload(payload, &reg);
 	if (err)
 		return err;
@@ -215,10 +210,7 @@ static int emit_cmp_arm64(u32 *image, int *idx, bool emit, u64 payload,
 		return -EINVAL;
 
 	insn = a64_cmp_imm(width32 ? 0 : 1, reg);
-	if (emit)
-		image[*idx] = cpu_to_le32(insn);
-	*idx += 1;
-	return 1;
+	return kinsn_arm64_emit_one(image, idx, emit, insn);
 }
 
 static int emit_ccmp_arm64(u32 *image, int *idx, bool emit, u64 payload,
@@ -230,11 +222,6 @@ static int emit_ccmp_arm64(u32 *image, int *idx, bool emit, u64 payload,
 
 	(void)prog;
 
-	if (!idx)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_ccmp_reg_payload(payload, &reg, &mode);
 	if (err)
 		return err;
@@ -245,10 +232,7 @@ static int emit_ccmp_arm64(u32 *image, int *idx, bool emit, u64 payload,
 
 	ccmp_mode_fields(mode, &continue_cond, &poison_nzcv);
 	insn = a64_ccmp_imm(width32 ? 0 : 1, reg, poison_nzcv, continue_cond);
-	if (emit)
-		image[*idx] = cpu_to_le32(insn);
-	*idx += 1;
-	return 1;
+	return kinsn_arm64_emit_one(image, idx, emit, insn);
 }
 
 static int emit_cset_arm64(u32 *image, int *idx, bool emit, u64 payload,
@@ -261,11 +245,6 @@ static int emit_cset_arm64(u32 *image, int *idx, bool emit, u64 payload,
 
 	(void)prog;
 
-	if (!idx)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_cset_payload(payload, &decoded);
 	if (err)
 		return err;
@@ -277,10 +256,7 @@ static int emit_cset_arm64(u32 *image, int *idx, bool emit, u64 payload,
 	ccmp_mode_fields(decoded.mode, &continue_cond, &poison_nzcv);
 	(void)poison_nzcv;
 	insn = a64_cset_x(dst_reg, continue_cond);
-	if (emit)
-		image[*idx] = cpu_to_le32(insn);
-	*idx += 1;
-	return 1;
+	return kinsn_arm64_emit_one(image, idx, emit, insn);
 }
 
 static int emit_cmp_x_arm64(u32 *image, int *idx, bool emit,

@@ -45,8 +45,7 @@ R[x <- v]
 and functional composition on states as usual.
 
 This model is intentionally architectural. It does not attempt to encode
-microarchitectural speculation state. That matters for `speculation_barrier`
-and is modeled separately below.
+microarchitectural speculation state.
 
 **Register encoding convention.** Payload fields that name registers use 4 bits,
 encoding values 0–15. Only values 0–10 (corresponding to BPF `r0`–`r10`) are
@@ -243,7 +242,6 @@ The current in-tree descriptor set is:
 - `bpf_endian_load16`
 - `bpf_endian_load32`
 - `bpf_endian_load64`
-- `bpf_speculation_barrier`
 
 These come from:
 
@@ -559,46 +557,6 @@ So the proof semantics domain is wider than the arm64 native-emit direct
 encoding domain, but the rewrite pipeline reshapes sites to stay inside the
 native domain.
 
-### 3.5 `speculation_barrier`
-
-Source files:
-
-- [`module/x86/bpf_barrier.c`](../module/x86/bpf_barrier.c)
-- [`module/arm64/bpf_barrier.c`](../module/arm64/bpf_barrier.c)
-
-Decoded payload:
-
-```text
-payload = 0
-```
-
-Validity:
-
-```text
-payload = 0
-```
-
-Architectural proof semantics:
-
-```text
-Proof_barrier(R, M) = (R, M)
-```
-
-because the instantiated proof sequence is `BPF_JMP_A(0)`.
-
-Additional architecture-specific fence contract:
-
-- x86 native emit inserts `LFENCE`
-- arm64 native emit inserts `DSB SY; ISB`
-
-So `speculation_barrier` has:
-
-- identity semantics at the architectural BPF-state level
-- an additional microarchitectural ordering contract not expressible in plain
-  BPF proof instructions
-
-That is why the proof object is a no-op while the native emit is still useful.
-
 ## 4. What This Formalization Says About the Current System
 
 ### 4.1 Three layers of correctness
@@ -652,31 +610,7 @@ Concrete admissibility conditions:
   encoding domain, or the daemon must first materialize an adjusted base with
   offset zero
 
-### 4.3 Barrier: native emit is strictly stronger than proof
-
-`speculation_barrier` demonstrates why the refinement relation is directional.
-The proof sequence is a BPF no-op (`BPF_JMP_A(0)`), so:
-
-```text
-Proof_barrier(R, M) = (R, M)       ; identity on architectural state
-```
-
-The native emitters add a real fence (`LFENCE` on x86, `DSB SY; ISB` on
-arm64). This is strictly stronger than the proof: it preserves the same
-architectural state *and* provides an additional microarchitectural ordering
-guarantee not expressible in BPF proof instructions.
-
-Local refinement still holds because identity is trivially refined by any
-state-preserving transformation. The extra fence guarantee is a bonus that the
-formal model acknowledges but does not attempt to encode in the BPF state
-model.
-
-**Scope limitation.** The formal model only claims architectural state
-preservation for `speculation_barrier`. Any Spectre-style security argument
-requires a microarchitectural execution model that this formalization does
-not provide.
-
-### 4.4 What this formalization is and is not
+### 4.3 What this formalization is and is not
 
 This is a **semi-formal specification with a proof sketch** — not a
 mechanically verified proof. It is closer to the style of Jitk (OSDI '14)

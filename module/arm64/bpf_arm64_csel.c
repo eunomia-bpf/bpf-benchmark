@@ -102,11 +102,6 @@ static int emit_tst_arm64(u32 *image, int *idx, bool emit,
 
 	(void)prog;
 
-	if (!idx)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_tst_payload(payload, &reg);
 	if (err)
 		return err;
@@ -116,10 +111,7 @@ static int emit_tst_arm64(u32 *image, int *idx, bool emit,
 		return -EINVAL;
 
 	insn = a64_tst(reg, reg);
-	if (emit)
-		image[*idx] = cpu_to_le32(insn);
-	*idx += 1;
-	return 1;
+	return kinsn_arm64_emit_one(image, idx, emit, insn);
 }
 
 static int emit_csel_ne_arm64(u32 *image, int *idx, bool emit,
@@ -130,11 +122,6 @@ static int emit_csel_ne_arm64(u32 *image, int *idx, bool emit,
 	int err;
 
 	(void)prog;
-
-	if (!idx)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
 
 	err = decode_csel_payload(payload, &dst_reg, &true_reg, &false_reg,
 				  &cond_reg);
@@ -150,10 +137,7 @@ static int emit_csel_ne_arm64(u32 *image, int *idx, bool emit,
 		return -EINVAL;
 
 	insn = a64_csel(dst_reg, true_reg, false_reg, COND_NE);
-	if (emit)
-		image[*idx] = cpu_to_le32(insn);
-	*idx += 1;
-	return 1;
+	return kinsn_arm64_emit_one(image, idx, emit, insn);
 }
 
 const struct bpf_kinsn bpf_arm64_tst_desc = {

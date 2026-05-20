@@ -193,7 +193,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 
 | 变换 | 状态 | 说明 |
 |------|:---:|------|
-| **Spectre 缓解注入** | ✅ | SpeculationBarrierPass + bpf_barrier kinsn |
+| **Spectre 缓解注入** | ⏸ | 当前没有 in-tree barrier kinsn module |
 | **危险 helper 防火墙** | ✅ | 分级策略：P0 fail-closed，P1 coarseify，audit-only |
 | **BPF 程序漏洞热修复** | ✅ | null-guard / helper 参数净化 / packet pointer refresh / tail-call isolation |
 | **权限收紧** | ✅ 调研完成 | D⊇S⊇N⊇O 模型 |

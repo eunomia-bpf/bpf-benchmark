@@ -161,7 +161,7 @@ Override knobs (env vars passed to `make`):
 | `AWS_<ARM64\|X86>_{REGION,PROFILE,SUBNET_ID,SECURITY_GROUP_ID,KEY_NAME,KEY_PATH}` | PLATFORM=aws | AWS deploy params | `AWS_ARM64_REGION=us-east-1 PLATFORM=aws ARCH=arm64 make test` |
 
 Pass list reference (current `corpus/config/benchmark_config.yaml`):
-- **kinsn-class** (replace bytecode with a kfunc call lowered by an in-kernel kinsn module): `rotate`, `cond_select`, `ccmp` (arm64-only), `extract`, `endian_fusion`, `bulk_memory`, `prefetch`. Kinsn modules `bpf_barrier` and `bpf_ldp` exist as kernel modules but have no bpfopt pass consuming them yet.
+- **kinsn-class** (replace bytecode with a kfunc call lowered by an in-kernel kinsn module): `rotate`, `cond_select`, `ccmp` (arm64-only), `extract`, `endian_fusion`, `bulk_memory`, `prefetch`. Kinsn module `bpf_ldp` exists but has no bpfopt pass consuming it yet.
 - **bytecode rewriting** (pure BPF→BPF, no kfunc): `noop` (verifier-state producer), `wide_mem` (collapse byte-ladder into wide `LDX_MEM`), `map_inline`, `const_prop`, `dce`, `bounds_check_merge`, `skb_load_bytes_spec`
 - **profile-guided** (not in default policy): `branch_flip`
 

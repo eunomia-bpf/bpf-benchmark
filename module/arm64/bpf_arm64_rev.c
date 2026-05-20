@@ -81,11 +81,6 @@ static int emit_rev_arm64(u32 *image, int *idx, bool emit, u64 payload,
 
 	(void)prog;
 
-	if (!idx)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_reg_payload(payload, &dst_reg);
 	if (err)
 		return err;
@@ -108,10 +103,7 @@ static int emit_rev_arm64(u32 *image, int *idx, bool emit, u64 payload,
 		return -EINVAL;
 	}
 
-	if (emit)
-		image[*idx] = cpu_to_le32(insn);
-	*idx += 1;
-	return 1;
+	return kinsn_arm64_emit_one(image, idx, emit, insn);
 }
 
 static int emit_rev16_w_arm64(u32 *image, int *idx, bool emit, u64 payload,

@@ -68,20 +68,9 @@ static int instantiate_ldr_x_mem(u64 payload, struct bpf_insn *insn_buf)
 	return instantiate_ldr(payload, insn_buf, BPF_DW);
 }
 
-static inline bool a64_scaled_uoff_ok(s16 offset, u8 shift)
-{
-	return offset >= 0 && offset <= (0x0fff << shift) &&
-	       !(offset & ((1 << shift) - 1));
-}
-
-static inline bool a64_unscaled_soff_ok(s16 offset)
-{
-	return offset >= -256 && offset <= 255;
-}
-
 static inline u32 a64_ldrh(u8 rt, u8 rn, s16 offset)
 {
-	if (a64_scaled_uoff_ok(offset, 1))
+	if (kinsn_arm64_scaled_uoff_ok(offset, 1))
 		return 0x79400000U | ((((u32)offset) >> 1) << 10) |
 		       ((u32)rn << 5) | (u32)rt;
 
@@ -91,7 +80,7 @@ static inline u32 a64_ldrh(u8 rt, u8 rn, s16 offset)
 
 static inline u32 a64_ldrb(u8 rt, u8 rn, s16 offset)
 {
-	if (a64_scaled_uoff_ok(offset, 0))
+	if (kinsn_arm64_scaled_uoff_ok(offset, 0))
 		return 0x39400000U | ((u32)((u16)offset) << 10) |
 		       ((u32)rn << 5) | (u32)rt;
 
@@ -101,7 +90,7 @@ static inline u32 a64_ldrb(u8 rt, u8 rn, s16 offset)
 
 static inline u32 a64_ldr_w(u8 rt, u8 rn, s16 offset)
 {
-	if (a64_scaled_uoff_ok(offset, 2))
+	if (kinsn_arm64_scaled_uoff_ok(offset, 2))
 		return 0xB9400000U | ((((u32)offset) >> 2) << 10) |
 		       ((u32)rn << 5) | (u32)rt;
 
@@ -111,7 +100,7 @@ static inline u32 a64_ldr_w(u8 rt, u8 rn, s16 offset)
 
 static inline u32 a64_ldr_x(u8 rt, u8 rn, s16 offset)
 {
-	if (a64_scaled_uoff_ok(offset, 3))
+	if (kinsn_arm64_scaled_uoff_ok(offset, 3))
 		return 0xF9400000U | ((((u32)offset) >> 3) << 10) |
 		       ((u32)rn << 5) | (u32)rt;
 
@@ -129,11 +118,6 @@ static int emit_ldr_arm64(u32 *image, int *idx, bool emit, u64 payload,
 
 	(void)prog;
 
-	if (!idx)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_ldr_payload(payload, &dst_reg, &base_reg, &offset);
 	if (err)
 		return err;
@@ -145,22 +129,26 @@ static int emit_ldr_arm64(u32 *image, int *idx, bool emit, u64 payload,
 
 	switch (size) {
 	case BPF_B:
-		if (!a64_scaled_uoff_ok(offset, 0) && !a64_unscaled_soff_ok(offset))
+		if (!kinsn_arm64_scaled_uoff_ok(offset, 0) &&
+		    !kinsn_arm64_unscaled_soff_ok(offset))
 			return -EINVAL;
 		insn = a64_ldrb(dst_reg, base_reg, offset);
 		break;
 	case BPF_H:
-		if (!a64_scaled_uoff_ok(offset, 1) && !a64_unscaled_soff_ok(offset))
+		if (!kinsn_arm64_scaled_uoff_ok(offset, 1) &&
+		    !kinsn_arm64_unscaled_soff_ok(offset))
 			return -EINVAL;
 		insn = a64_ldrh(dst_reg, base_reg, offset);
 		break;
 	case BPF_W:
-		if (!a64_scaled_uoff_ok(offset, 2) && !a64_unscaled_soff_ok(offset))
+		if (!kinsn_arm64_scaled_uoff_ok(offset, 2) &&
+		    !kinsn_arm64_unscaled_soff_ok(offset))
 			return -EINVAL;
 		insn = a64_ldr_w(dst_reg, base_reg, offset);
 		break;
 	case BPF_DW:
-		if (!a64_scaled_uoff_ok(offset, 3) && !a64_unscaled_soff_ok(offset))
+		if (!kinsn_arm64_scaled_uoff_ok(offset, 3) &&
+		    !kinsn_arm64_unscaled_soff_ok(offset))
 			return -EINVAL;
 		insn = a64_ldr_x(dst_reg, base_reg, offset);
 		break;
@@ -168,10 +156,7 @@ static int emit_ldr_arm64(u32 *image, int *idx, bool emit, u64 payload,
 		return -EINVAL;
 	}
 
-	if (emit)
-		image[*idx] = cpu_to_le32(insn);
-	*idx += 1;
-	return 1;
+	return kinsn_arm64_emit_one(image, idx, emit, insn);
 }
 
 static int emit_ldrh_mem_arm64(u32 *image, int *idx, bool emit, u64 payload,

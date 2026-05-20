@@ -156,6 +156,30 @@ static __always_inline u8 kinsn_arm64_reg(u8 bpf_reg)
 		return 0xff;
 	}
 }
+
+static __always_inline int kinsn_arm64_emit_one(u32 *image, int *idx,
+						bool emit, u32 insn)
+{
+	if (!idx)
+		return -EINVAL;
+	if (emit && !image)
+		return -EINVAL;
+	if (emit)
+		image[*idx] = cpu_to_le32(insn);
+	*idx += 1;
+	return 1;
+}
+
+static __always_inline bool kinsn_arm64_scaled_uoff_ok(s16 offset, u8 shift)
+{
+	return offset >= 0 && offset <= (0x0fff << shift) &&
+	       !(offset & ((1 << shift) - 1));
+}
+
+static __always_inline bool kinsn_arm64_unscaled_soff_ok(s16 offset)
+{
+	return offset >= -256 && offset <= 255;
+}
 #endif
 
 #define DEFINE_KINSN_V2_MODULE(prefix, desc, kfunc_ids, kinsn_desc_array)	\

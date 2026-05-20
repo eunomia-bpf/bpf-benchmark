@@ -96,14 +96,12 @@ ARM64_CARGO_ENV := \
 	CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \
 	CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS="$(ARM64_CARGO_RUSTFLAGS)"
 
-aarch64-sysroot:
-	@if [ -f "$(AARCH64_SYSROOT_DIR)/usr/include/libelf.h" ] && [ -f "$(AARCH64_SYSROOT_DIR)/usr/include/yaml-cpp/yaml.h" ] && [ -f "$(AARCH64_SYSROOT_DIR)/usr/include/spdlog/spdlog.h" ]; then exit 0; fi; \
+aarch64-sysroot: $(AARCH64_SYSROOT_DIR)/usr/include/libelf.h $(AARCH64_SYSROOT_DIR)/usr/include/yaml-cpp/yaml.h $(AARCH64_SYSROOT_DIR)/usr/include/spdlog/spdlog.h
+
+$(AARCH64_SYSROOT_DIR)/usr/include/libelf.h $(AARCH64_SYSROOT_DIR)/usr/include/yaml-cpp/yaml.h $(AARCH64_SYSROOT_DIR)/usr/include/spdlog/spdlog.h &:
 	command -v aarch64-linux-gnu-gcc >/dev/null || { echo "aarch64-linux-gnu-gcc missing; install gcc-aarch64-linux-gnu" >&2; exit 1; }; \
 	command -v dpkg-deb >/dev/null; \
 	command -v apt-get >/dev/null; \
-	if ! dpkg --print-foreign-architectures | grep -q arm64; then \
-		echo "dpkg foreign architecture arm64 not configured; run: sudo dpkg --add-architecture arm64 && sudo apt-get update" >&2; exit 1; \
-	fi; \
 	install -d "$(AARCH64_SYSROOT_DIR)/.debs"; \
 	cd "$(AARCH64_SYSROOT_DIR)/.debs" && apt-get download $(AARCH64_SYSROOT_DEB_PACKAGES); \
 	for d in "$(AARCH64_SYSROOT_DIR)"/.debs/*.deb; do dpkg-deb -x "$$d" "$(AARCH64_SYSROOT_DIR)"; done

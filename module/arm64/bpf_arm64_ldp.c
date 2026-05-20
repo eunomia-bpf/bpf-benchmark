@@ -132,11 +132,6 @@ static int emit_ldp_arm64(u32 *image, int *idx, bool emit,
 
 	(void)prog;
 
-	if (!idx)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_ldp_payload(payload, &dst_lo_reg, &dst_hi_reg,
 				 &base_reg, &offset);
 	if (err)
@@ -149,10 +144,7 @@ static int emit_ldp_arm64(u32 *image, int *idx, bool emit,
 		return -EINVAL;
 
 	insn = a64_ldp_x(dst_lo_reg, dst_hi_reg, base_reg, offset);
-	if (emit)
-		image[*idx] = cpu_to_le32(insn);
-	*idx += 1;
-	return 1;
+	return kinsn_arm64_emit_one(image, idx, emit, insn);
 }
 
 static int emit_stp_arm64(u32 *image, int *idx, bool emit,
@@ -164,11 +156,6 @@ static int emit_stp_arm64(u32 *image, int *idx, bool emit,
 	int err;
 
 	(void)prog;
-
-	if (!idx)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
 
 	err = decode_stp_payload(payload, &src_lo_reg, &src_hi_reg,
 				 &base_reg, &offset);
@@ -182,10 +169,7 @@ static int emit_stp_arm64(u32 *image, int *idx, bool emit,
 		return -EINVAL;
 
 	insn = a64_stp_x(src_lo_reg, src_hi_reg, base_reg, offset);
-	if (emit)
-		image[*idx] = cpu_to_le32(insn);
-	*idx += 1;
-	return 1;
+	return kinsn_arm64_emit_one(image, idx, emit, insn);
 }
 
 const struct bpf_kinsn bpf_arm64_ldp_x_desc = {

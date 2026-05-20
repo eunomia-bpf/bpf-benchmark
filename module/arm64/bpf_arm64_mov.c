@@ -54,11 +54,6 @@ static int emit_mov_x_arm64(u32 *image, int *idx, bool emit,
 
 	(void)prog;
 
-	if (!idx)
-		return -EINVAL;
-	if (emit && !image)
-		return -EINVAL;
-
 	err = decode_mov_payload(payload, &dst_reg, &src_reg);
 	if (err)
 		return err;
@@ -69,10 +64,7 @@ static int emit_mov_x_arm64(u32 *image, int *idx, bool emit,
 		return -EINVAL;
 
 	insn = a64_mov_x(dst_reg, src_reg);
-	if (emit)
-		image[*idx] = cpu_to_le32(insn);
-	*idx += 1;
-	return 1;
+	return kinsn_arm64_emit_one(image, idx, emit, insn);
 }
 
 const struct bpf_kinsn bpf_arm64_mov_x_desc = {

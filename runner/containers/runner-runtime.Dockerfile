@@ -275,7 +275,6 @@ COPY --link runner/assets ./runner/assets
 
 RUN set -eux; \
     find ./runner ./micro ./corpus -type d -name __pycache__ -prune -exec rm -rf {} +; \
-    find ./runner/assets/tetragon_policies -type f \( -name '*.yaml' -o -name '*.yml' \) | grep -q .; \
     mkdir -p micro/results corpus/results tests/results /var/tmp/bpfrejit-runtime
 
 RUN printf '#!/usr/bin/env bash\nexec "$@"\n' > /usr/local/bin/bpfrejit-runtime-entrypoint && \

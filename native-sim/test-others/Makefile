@@ -113,7 +113,6 @@ $(VM_SCRIPT): | $(OUTPUT_DIR)
 	    'set -eu' \
 	    'cd "$(CURDIR)"' \
 	    'for ko in $(KINSN_KO_DIR)/bpf_*.ko; do' \
-	    '    [ "$$(basename "$$ko" .ko)" = "bpf_barrier" ] && continue' \
 	    '    insmod "$$ko" 2>/dev/null || true' \
 	    'done' \
 	    'export BPFREJIT_NATIVE_LINK_BINARY="$(NATIVE_LINK_HOST)"' \

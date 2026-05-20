@@ -163,7 +163,7 @@ def _run_micro_suite(workspace: Path, args: argparse.Namespace) -> None:
         expected = sorted(
             path.stem
             for path in module_dir.glob("bpf_*.ko")
-            if path.is_file() and path.stem != "bpf_barrier"
+            if path.is_file()
         )
         if expected:
             load_kinsn_modules(expected, module_dir=module_dir)
