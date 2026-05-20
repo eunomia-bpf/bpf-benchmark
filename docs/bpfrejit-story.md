@@ -316,7 +316,7 @@ Correctness（daemon 负责）：
 - corpus **0.983x**
 - Tracee **+8.1%**；Tetragon **+20.3%/+32.2%**；Katran BPF **1.108-1.168x**
 - gap **0.581x**
-- vm-selftest **35/35**
+- `make selftest` **35/35**
 
 ### v2 数据（BpfReJIT 架构，~550 LOC kernel + daemon）
 

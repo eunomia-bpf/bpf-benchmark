@@ -139,8 +139,8 @@ arithmetic are allowed to surface as compiler/verifier/load failures.
 | --- | --- | --- |
 | Userspace native runner used a fake skb layout with `data`/`data_end` at offsets 0/8, while linked native x86 reads real kernel offsets. This caused GPFs for skb native micro programs. | Keep benchmark logic shared and use a minimal native ABI shim that places fields at `kernel_offsets.h` offsets. | Fixed for the native runner. `make micro RUNTIMES=native SAMPLES=1 WARMUPS=0 INNER_REPEAT=10` passes 29/29. |
 | `__sk_buff.data_end` is not `skb->data + skb->len` in the kernel. Kernel BPF direct packet access uses the runtime-prepared `struct bpf_skb_data_end` slot in `skb->cb`. | Change the native micro skb helper to read `K_SK_BUFF_BPF_DATA_END_OFFSET`, so native x86 and eBPF proof both read the kernel BPF ABI value. | Fixed for the two skb micro programs. Generated native asm now loads `[rdi+0x50]`, not `skb->len`. |
-| `__sk_buff.cb[0]` is not raw `sk_buff->cb[0]`; kernel ctx access maps it through `bpf_skb_cb(skb)`, which is `skb->cb + offsetof(struct qdisc_skb_cb, data)`. | Generate `K_SK_BUFF_BPF_CB_OFFSET` from BTF and write native skb benchmark results there. Kernel runner, proof loader, and native_lab runner read `ctx_out.cb[0..1]`. | Fixed. Current x86 offset is `0x30`. cgroup_skb no longer tries packet writes or return-value result encoding. |
-| `cgroup_skb` return value is semantic action, not a benchmark result channel. | Keep expected retval as `CGROUP_SKB_OK`/`CGROUP_SKB_DROP`; carry the 64-bit benchmark result through BPF-visible `__sk_buff.cb[]`. | Fixed in native runner, native_lab runner, and proof loader. |
+| `__sk_buff.cb[0]` is not raw `sk_buff->cb[0]`; kernel ctx access maps it through `bpf_skb_cb(skb)`, which is `skb->cb + offsetof(struct qdisc_skb_cb, data)`. | Generate `K_SK_BUFF_BPF_CB_OFFSET` from BTF and write native skb benchmark results there. Kernel runner, proof loader, and native kernel runner read `ctx_out.cb[0..1]`. | Fixed. Current x86 offset is `0x30`. cgroup_skb no longer tries packet writes or return-value result encoding. |
+| `cgroup_skb` return value is semantic action, not a benchmark result channel. | Keep expected retval as `CGROUP_SKB_OK`/`CGROUP_SKB_DROP`; carry the 64-bit benchmark result through BPF-visible `__sk_buff.cb[]`. | Fixed in native userspace runner, native kernel runner, and proof loader. |
 | `payload_prefix_memcmp_scan` and `tetragon_process_event_arg_filter` contain exact x86 partial-register writes to registers that still have verifier pointer type (`mov sil/r8b` in payload, `mov dl` in tetragon). | Use minimal source shaping while keeping the simulator hardware-exact: widen only the payload pattern/temporary byte values to `u32`, and rewrite the tetragon event-weight table as the same integer expression so clang emits full 32-bit writes instead of low-byte writes. | Adopted as a source-code shaping experiment. The generated proof artifacts now load; runtime still shows a clear native-vs-kernel gap. Current full proof: `native-sim/x86/results/README-20260520-041226-full-proof.md`. Runtime: `native-sim/x86/results/README-20260520-041226-full-dataset-runtime.md`. |
 | Same partial-register failure, simulator-only direction. | Tested a C-only lazy partial-register representation with per-register low 8/16-bit lane variables plus bool flags, materializing only on wider reads. | Rejected. It moved `payload_prefix_memcmp_scan` from failing at `mov sil,0x1d` to failing at the later exact `lea r10d,[rsi-0x1d]` materialization, and it made `tetragon_process_event_arg_filter` exceed the verifier stack limit. Results: `native-sim/x86/results/README-20260519-195148-partial-lazy-known-failures.md`. |
 | Earlier proof attempts used ghost pointer metadata, packet length tags, branch assertions, fuel guards, fallback/trap paths, or benchmark-specific Python renderers. | Remove those mechanisms and move semantics into C-authored instruction macros. Python remains a mechanical one-native-instruction to one-macro generator. | Removed from the active path. If verifier rejects the exact proof, that is the result. |
@@ -232,9 +232,10 @@ Result files:
 - `micro/results/x86_kvm_micro_20260520_032422_672690/metadata.json`
 - `native-sim/x86/results/README-20260519-202449-source-minimal-proof.md`
 - `payload_prefix_memcmp_scan`: proof ok, proof BPF 344 insns, direct BPF 142
-  insns; runtime native `48 ns`, kernel `82.2 ns`, native_lab `51 ns`.
+  insns; runtime native userspace `48 ns`, kernel eBPF `82.2 ns`, native kernel
+  `51 ns`.
 - `tetragon_process_event_arg_filter`: proof ok, proof BPF 290 insns, direct
-  BPF 282 insns; runtime native `104.2 ns`, kernel `154 ns`, native_lab
+  BPF 282 insns; runtime native userspace `104.2 ns`, kernel eBPF `154 ns`, native kernel
   `107.2 ns`.
 - A smaller tetragon attempt that kept the `switch` and only widened
   `event_id` to `u32` still generated `mov dl,0x1` and failed verifier load,
@@ -254,26 +255,26 @@ Result files:
 - `micro/results/x86_kvm_micro_20260520_041226_759303/metadata.json`
 - `native-sim/x86/results/README-20260520-041226-full-proof.md`
 - `native-sim/x86/results/README-20260520-041226-full-dataset-runtime.md`
-- Runtime, all 29 programs: native/kernel geomean `0.594`, native speedup
-  `1.68x`, `27` wins and `2` losses.
-- Runtime, excluding `simple` and `simple_packet`: native/kernel geomean
-  `0.656`, native speedup `1.53x`, `25` wins and `2` losses.
+- Runtime, all 29 programs: native userspace / kernel geomean `0.594`, native
+  userspace speedup `1.68x`, `27` wins and `2` losses.
+- Runtime, excluding `simple` and `simple_packet`: native userspace / kernel
+  geomean `0.656`, native userspace speedup `1.53x`, `25` wins and `2` losses.
 - Proof: 29/29 generated ReverseSim proof programs compile, load, pass
   verifier, and pass `BPF_PROG_TEST_RUN`. Direct BPF instruction counts are
   recorded from the same micro result's `xlated.bin` dumps.
-- Compared with the previous full native/kernel/llvmbpf run
+- Compared with the previous full native userspace / kernel eBPF / LLVM-BPF run
   `micro/results/x86_kvm_micro_20260520_023753_401581/metadata.json`, the
-  full-dataset native speedup is essentially flat to slightly lower:
+  full-dataset native userspace speedup is essentially flat to slightly lower:
   `1.71x -> 1.68x` overall and `1.55x -> 1.53x` excluding baselines. The main
   regression is `payload_prefix_memcmp_scan`, where source shaping also made
   the kernel eBPF code faster.
 - Compared with the older pre-local-simulator full run
   `micro/results/x86_kvm_micro_20260520_012923_324142/metadata.json`, the
-  current result is the first useful full-dataset native win: all-program
-  native speedup moved from `0.19x` to `1.68x`, and non-baseline speedup moved
-  from `0.21x` to `1.53x`.
+  current result is the first useful full-dataset native userspace win:
+  all-program native userspace speedup moved from `0.19x` to `1.68x`, and
+  non-baseline speedup moved from `0.21x` to `1.53x`.
 
-Native-lab result-channel fix for this full dataset:
+Native kernel result-channel fix for this full dataset:
 
 ```bash
 make micro RUNTIMES="native kernel native_lab" \
@@ -283,24 +284,26 @@ make micro RUNTIMES="native kernel native_lab" \
 Earlier failed result file:
 
 - `micro/results/x86_kvm_micro_20260520_040517_640313/metadata.json`
-- This run completed native/kernel/native_lab for 28 programs but failed at
-  `cgroup_skb_hash_chain/native_lab` warmup: result `0` instead of
+- This run completed native userspace / kernel eBPF / native kernel for 28
+  programs but failed at raw runtime case `cgroup_skb_hash_chain/native_lab`
+  warmup: result `0` instead of
   `12027228624407116210`.
-- Root cause: native_lab was still reading TC/cgroup benchmark result bytes
+- Root cause: native kernel was still reading TC/cgroup benchmark result bytes
   from the packet buffer. The kernel path and proof loader read BPF-visible
   `__sk_buff.cb[]`.
 - Fix: `runner/src/native_lab_runner.cpp` now requests `ctx_out` for
   TC/cgroup and extracts the 64-bit benchmark result from `cb[0..1]`.
 
-Fixed full native/kernel/native_lab result:
+Fixed full native userspace / kernel eBPF / native kernel result:
 
 - `micro/results/x86_kvm_micro_20260520_044439_120822/metadata.json`
 - `native-sim/x86/results/README-20260520-044439-full-native-lab.md`
-- 29/29 programs completed for `native`, `kernel`, and `native_lab`.
-- All-program median geomean: native/kernel `0.588` (`1.70x` speedup),
-  native_lab/kernel `0.707` (`1.41x` speedup).
-- Excluding `simple` and `simple_packet`: native/kernel `0.649` (`1.54x`),
-  native_lab/kernel `0.689` (`1.45x`).
+- 29/29 programs completed for native userspace (`native`), kernel eBPF
+  (`kernel`), and native kernel (`native_lab`).
+- All-program median geomean: native userspace / kernel `0.588` (`1.70x`
+  speedup), native kernel / kernel `0.707` (`1.41x` speedup).
+- Excluding `simple` and `simple_packet`: native userspace / kernel `0.649`
+  (`1.54x`), native kernel / kernel `0.689` (`1.45x`).
 
 Known old-source proof failures after regenerating the two exact proof
 artifacts:

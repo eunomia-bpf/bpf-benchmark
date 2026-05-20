@@ -60,8 +60,6 @@ class BccSetRunner(AppRunner):
             self._children[spec.name] = BCCRunner(
                 tool_binary=Path(binary),
                 tool_args=spec.tool_args,
-                workload_spec={"kind": BCC_SET_WORKLOAD},
-                attach_timeout_s=int(self.attach_timeout_s),
             )
 
     @property

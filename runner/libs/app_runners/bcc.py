@@ -13,8 +13,6 @@ from .. import tail_text
 from ..agent import stop_agent
 from .base import AppRunner
 
-DEFAULT_ATTACH_TIMEOUT_SECONDS = 150
-
 
 @dataclass
 class ToolProcessSession:
@@ -99,15 +97,11 @@ class BCCRunner(AppRunner):
         *,
         tool_binary: Path | str,
         tool_args: Sequence[str],
-        workload_spec: Mapping[str, object],
-        attach_timeout_s: int = DEFAULT_ATTACH_TIMEOUT_SECONDS,
     ) -> None:
         super().__init__()
         self.tool_binary = Path(tool_binary).resolve()
         self.tool_name = self.tool_binary.name
         self.tool_args = tuple(str(arg) for arg in tool_args if str(arg).strip())
-        self.workload_spec = dict(workload_spec)
-        self.attach_timeout_s = int(attach_timeout_s)
         self.session: ToolProcessSession | None = None
 
     @property

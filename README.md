@@ -45,11 +45,8 @@ source /home/yunwei37/workspace/.venv/bin/activate   # workspace venv (optional)
 # Local static validation
 make check
 
-# Full micro benchmark suite in VM
-make vm-micro
-
-# Show all targets and parameters
-make help
+# Local x86 KVM micro benchmark suite
+make micro
 ```
 
 ## Running Benchmarks
@@ -59,24 +56,19 @@ make help
 must go through `make <target>`.**
 
 ```bash
-make vm-micro                        # full micro suite in VM
-make vm-micro BENCH="simple bitcount"
-make vm-micro SAMPLES=1 WARMUPS=0 INNER_REPEAT=10
-make vm-corpus                       # corpus benchmark, all 7 supported apps
-make vm-corpus SAMPLES=5
-make vm-selftest                     # kernel selftests
-make vm-negative-test                # negative tests
-make vm-test                         # full test suite (selftest + negative + repo units)
-make vm-all                          # vm-test + vm-micro + vm-corpus
-make aws-arm64-selftest              # AWS ARM64 selftest only
-make aws-arm64-test                  # AWS ARM64 full test
-make aws-arm64-micro                 # AWS ARM64 micro benchmark
-make aws-arm64-corpus                # AWS ARM64 corpus benchmark
-make aws-x86-selftest                # AWS x86 variants
-make aws-x86-test
-make aws-x86-micro
-make aws-x86-corpus
-make aws-corpus                      # auto-pick arm64/x86 by RUN_TARGET_ARCH
+make micro                           # local x86 KVM micro suite
+make micro BENCH="simple bitcount"
+make micro SAMPLES=1 WARMUPS=0 INNER_REPEAT=10
+make corpus                          # local x86 KVM corpus, all 7 supported apps
+make corpus SAMPLES=3
+make selftest                        # kernel selftests
+make negative-test                   # negative tests
+make test                            # full test suite
+make all                             # test + micro + corpus
+PLATFORM=aws ARCH=arm64 make test
+PLATFORM=aws ARCH=arm64 make micro
+PLATFORM=aws ARCH=arm64 make corpus
+PLATFORM=aws ARCH=x86 make test
 ```
 
 ### Per-app filtering (corpus)
@@ -86,10 +78,10 @@ cilium/agent, tetragon/observer, katran, tracee/monitor, bpftrace/set):
 
 ```bash
 # Single app
-BPFREJIT_CORPUS_APPS="tetragon/observer" make vm-corpus
+BPFREJIT_CORPUS_APPS="tetragon/observer" make corpus
 
 # Multiple apps (comma- or space-separated)
-BPFREJIT_CORPUS_APPS="cilium/agent,tracee/monitor" make vm-corpus
+BPFREJIT_CORPUS_APPS="cilium/agent,tracee/monitor" make corpus
 ```
 
 ### Per-pass override (corpus / micro)
@@ -100,17 +92,17 @@ explicitly.
 
 ```bash
 # Only noop + map_inline
-BPFREJIT_BENCH_PASSES="noop,map_inline" make vm-corpus
+BPFREJIT_BENCH_PASSES="noop,map_inline" make corpus
 
 # Only kinsn-class passes
 BPFREJIT_BENCH_PASSES="wide_mem,rotate,cond_select,extract,endian_fusion,bulk_memory,prefetch" \
-    make vm-corpus
+    make corpus
 
 # Combine with per-app + sample count
 BPFREJIT_CORPUS_APPS="tetragon/observer" \
 BPFREJIT_BENCH_PASSES="noop,map_inline" \
 SAMPLES=3 \
-    make vm-corpus
+    make corpus
 ```
 
 Pass list reference (current `corpus/config/benchmark_config.yaml`):
@@ -127,12 +119,10 @@ retention to inspect raw verifier logs and per-pass bytecode:
 
 ```bash
 # Retain tarballs for programs that hit a real ReJIT failure
-KEEP_WORKDIRS=1 make vm-corpus
+KEEP_WORKDIRS=1 make corpus
 
-# Force-capture every prog's workdir (useful for debugging successful progs;
-# uses BPFREJIT_KEEP_ALL_WORKDIRS=1 internally to deliberately fail steps so
-# the daemon emits tars for all)
-KEEP_WORKDIRS=all make vm-corpus
+# To capture a successful pass, append `&& false` to that pass command in
+# runner/config/passes/<pass>/<app>.yaml so it becomes a controlled failure.
 
 # Tarballs land in: corpus/results/<run_dir>/details/failure-artifacts/<prog_id>.tar.gz
 ```
@@ -163,10 +153,11 @@ directories are not benchmark result roots.
 The root `Makefile` surface is reserved for canonical run/validation entrypoints,
 plus a small developer helper surface for direct kernel/module lifecycle work.
 Active local prep/build flows through real Make targets resolved by the Python
-runner libraries. User-space artifacts are built inside `runner-runtime` during
-Dockerfile build. Host-coupled kernel/module artifacts are exported through
-`docker build --target runner-host-artifacts --output`. Benchmark execution
-loads and runs the same `runner-runtime` image with privileged suite containers.
+runner libraries. Kernel, module, app, runner, and BPF artifacts are host-built
+into the repository build roots; the runner Dockerfile copies those artifacts
+into the runtime image without compiling benchmark apps inside Docker.
+Benchmark execution loads and runs the same `runner-runtime` image with
+privileged suite containers.
 
 ## Layer Notes
 

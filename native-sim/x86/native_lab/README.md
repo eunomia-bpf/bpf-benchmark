@@ -1,4 +1,4 @@
-# Native Lab — running userspace-compiled x86 in kernel as eBPF replacement
+# Native Kernel — running userspace-compiled x86 in kernel as eBPF replacement
 
 A research escape hatch that lets userspace upload arbitrary x86-64 byte
 sequences and execute them in kernel context as if they were the body of
@@ -13,7 +13,7 @@ For each micro benchmark in `micro/programs/*.bpf.c`:
 
 | column | what runs | what it tells us |
 |--------|-----------|------------------|
-| **A. native_lab** | clang -target x86_64 -O2 of the same `.bpf.c` source → linked through `native-link` → splatted into a BPF JIT image via the `bpf_x86_native_lab` kinsn | what the function would cost with no verifier inserts, no BPF→x86 translation |
+| **A. native kernel** (`native_lab`) | clang -target x86_64 -O2 of the same `.bpf.c` source → linked through `native-link` → splatted into a BPF JIT image via the `bpf_x86_native_lab` kinsn | what the function would cost with no verifier inserts, no BPF→x86 translation |
 | **B. kinsn** | the production bpfopt+kinsn pipeline (run via `make micro` etc.) | how close the production pipeline gets to A |
 | **C. kernel BPF JIT** | stock `.bpf.o` → libbpf → BPF JIT | the BPF performance baseline B is trying to beat |
 
@@ -84,7 +84,7 @@ absolute minimum work needed to bridge two ABIs:
 
 1. **SysV AMD64** (what clang emits): `rdi` = first arg, `rax` = return,
    `rbx`/`rbp`/`r12`-`r15` callee-saved, control returns via `ret`.
-2. **The native_lab kinsn contract** (what kernel will run): splatted in
+2. **The native kernel kinsn contract** (what kernel will run): splatted in
    the middle of a BPF JIT image where the BPF JIT prologue already
    pushed the callee-saved registers and the BPF JIT epilogue expects to
    pop them. The blob must fall through to the epilogue, never `ret`.
@@ -131,7 +131,7 @@ make -C micro/programs
 
 ## Running
 
-End-to-end: link one program, run native_lab and kernel BPF JIT under
+End-to-end: link one program, run native kernel and kernel BPF JIT under
 the same input, print both samples:
 
 ```sh
@@ -180,8 +180,8 @@ python3 native-sim/x86/native_lab/tests/analyze.py
 See `tests/analyze.py` output. Headline numbers:
 
 - 26 programs measured, 1 linker-rejected, 2 skipped (non-xdp).
-- Per-program geomean of `native_lab / kernel_jit` = **0.6438x**
-  (native_lab is 1.55x faster on average).
+- Per-program geomean of native kernel / kernel eBPF = **0.6438x**
+  (native kernel is 1.55x faster on average).
 - 23 wins, 2 losses, 1 tie.
 - All 26 measured programs match the kernel JIT output bit-for-bit
   (`result` field identity check).

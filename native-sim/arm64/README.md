@@ -65,5 +65,5 @@ Result:
 - raw result: `micro/results/aws_arm64_micro_20260520_052452_727433/metadata.json`
 - status: completed
 - benchmarks: 29/29
-- runtimes: `native`, `llvmbpf`, `kernel`
+- runtimes: native userspace (`native`), LLVM-BPF (`llvmbpf`), kernel eBPF (`kernel`)
 - AWS instance: one `t4g.small`, terminated by the executor after result sync
