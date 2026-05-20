@@ -1,43 +1,17 @@
 from __future__ import annotations
 
-import math
 import os
 import subprocess
 import threading
-import time
 from collections import deque
 from pathlib import Path
-from typing import Any, Callable, Mapping, Sequence
+from typing import Any, Mapping, Sequence
 
 from .. import ROOT_DIR, tail_text
-from ..agent import bpftool_prog_show_records, stop_agent, wait_healthy
+from ..agent import stop_agent
+from ..rejit import wait_for_app_shim_programs
 from ..workload import WorkloadResult, run_named_workload
 from .base import AppRunner
-
-
-def programs_after(
-    before_ids: Sequence[int] = (),
-    *,
-    records: Sequence[Mapping[str, object]] | None = None,
-) -> list[dict[str, object]]:
-    baseline_ids = {int(prog_id) for prog_id in before_ids if int(prog_id) > 0}
-    programs = [dict(record) for record in (bpftool_prog_show_records() if records is None else records)
-                if int(record.get("id", -1) or -1) not in baseline_ids]
-    programs.sort(key=lambda item: int(item.get("id", 0) or 0))
-    return programs
-
-
-def _program_id_preview(programs: Sequence[Mapping[str, object]], *, limit: int = 12) -> str:
-    preview = ",".join(str(int(program.get("id", 0) or 0)) for program in programs[:limit])
-    return preview or "<none>"
-
-
-def _program_id_set(programs: Sequence[Mapping[str, object]]) -> frozenset[int]:
-    return frozenset(
-        int(program.get("id", 0) or 0)
-        for program in programs
-        if int(program.get("id", 0) or 0) > 0
-    )
 
 
 def describe_process_exit(process_name: str, process: Any | None, snapshot: Mapping[str, object]) -> str | None:
@@ -49,61 +23,6 @@ def describe_process_exit(process_name: str, process: Any | None, snapshot: Mapp
     combined = "\n".join((snapshot.get("stderr_tail") or []) + (snapshot.get("stdout_tail") or []))
     details = tail_text(combined, max_lines=40, max_chars=8000)
     return f"{process_name} exited with code {returncode}" + (f": {details}" if details else "")
-
-
-def wait_until_program_set_stable(
-    *,
-    before_ids: Sequence[int] = (),
-    timeout_s: float,
-    stable_window_s: float = 2.0,
-    poll_interval_s: float = 0.2,
-    discover_programs: Callable[[], Sequence[Mapping[str, object]]] | None = None,
-    process: Any | None = None,
-    collector_snapshot: Callable[[], Mapping[str, object]] | None = None,
-    process_name: str = "process",
-) -> list[dict[str, object]]:
-    deadline = time.monotonic() + max(0.0, float(timeout_s))
-    stable_window = max(0.0, float(stable_window_s))
-    poll_interval = max(0.05, float(poll_interval_s))
-    required_stable_observations = max(1, int(math.ceil(stable_window / poll_interval)) + 1)
-    last_program_ids: frozenset[int] = frozenset()
-    stable_observations = 0
-    last_programs: list[dict[str, object]] = []
-    peak_programs: list[dict[str, object]] = []
-    while True:
-        now = time.monotonic()
-        raw_programs = programs_after(before_ids) if discover_programs is None else discover_programs()
-        programs = [dict(program) for program in raw_programs]
-        current_program_ids = _program_id_set(programs)
-        last_programs = [dict(program) for program in programs]
-        if len(programs) > len(peak_programs):
-            peak_programs = [dict(program) for program in programs]
-        if current_program_ids == last_program_ids:
-            stable_observations += 1
-        else:
-            last_program_ids = current_program_ids
-            stable_observations = 1
-        if process is not None:
-            snapshot = {} if collector_snapshot is None else dict(collector_snapshot())
-            if exit_reason := describe_process_exit(process_name, process, snapshot):
-                raise RuntimeError(
-                    f"{exit_reason} before BPF program set stabilized "
-                    f"(timeout_s={timeout_s}, last_program_count={len(last_programs)}, "
-                    f"last_program_ids={_program_id_preview(last_programs)}, "
-                    f"peak_program_count={len(peak_programs)}, "
-                    f"peak_program_ids={_program_id_preview(peak_programs)})"
-                )
-        if programs and stable_observations >= required_stable_observations:
-            return last_programs
-        if now >= deadline:
-            raise RuntimeError(
-                "BPF program set did not stabilize before timeout "
-                f"(timeout_s={timeout_s}, last_program_count={len(last_programs)}, "
-                f"last_program_ids={_program_id_preview(last_programs)}, "
-                f"peak_program_count={len(peak_programs)}, "
-                f"peak_program_ids={_program_id_preview(peak_programs)})"
-            )
-        time.sleep(min(poll_interval, max(0.0, deadline - now)))
 
 
 class ProcessOutputCollector:
@@ -197,7 +116,6 @@ class ManagedProcessSession:
         self.stdout_thread: threading.Thread | None = None
         self.stderr_thread: threading.Thread | None = None
         self.programs: list[dict[str, object]] = []
-        self.before_ids: set[int] = set()
 
     def __enter__(self) -> "ManagedProcessSession":
         from ..agent import _shim_env_for, _SHIM_SOCK_DIR
@@ -210,11 +128,6 @@ class ManagedProcessSession:
         if self.env is not None:
             merged_env.update(self.env)
         os.makedirs(_SHIM_SOCK_DIR, exist_ok=True)
-        self.before_ids = {
-            int(record.get("id", 0) or 0)
-            for record in bpftool_prog_show_records()
-            if int(record.get("id", 0) or 0) > 0
-        }
         self.process = subprocess.Popen(
             self.command,
             cwd=self.cwd or ROOT_DIR,
@@ -231,47 +144,21 @@ class ManagedProcessSession:
         self.stdout_thread.start()
         self.stderr_thread.start()
         try:
-            healthy = wait_healthy(
-                self.process,
-                self.load_timeout_s,
-                lambda: bool(self._discover_programs()),
-            )
-        except Exception:
-            self.close()
-            raise
-        if not healthy:
-            details = tail_text(
-                "\n".join(
-                    list(self.collector.snapshot().get("stderr_tail") or [])
-                    + list(self.collector.snapshot().get("stdout_tail") or [])
-                ),
-                max_lines=40,
-                max_chars=8000,
-            )
-            self.close()
-            raise RuntimeError(f"native app did not attach BPF programs within {self.load_timeout_s}s: {details}")
-        try:
-            self.programs = wait_until_program_set_stable(
-                before_ids=self.before_ids,
+            wait_for_app_shim_programs(
+                app_pid=int(self.process.pid),
                 timeout_s=self.load_timeout_s,
                 process=self.process,
-                collector_snapshot=self.collector_snapshot,
+                snapshot=self.collector_snapshot,
                 process_name="native app",
             )
         except Exception:
             self.close()
             raise
-        if not self.programs:
-            self.close()
-            raise RuntimeError("native app became healthy but no BPF programs were discovered")
         return self
 
     @property
     def pid(self) -> int | None:
         return None if self.process is None else int(self.process.pid or 0)
-
-    def _discover_programs(self) -> list[dict[str, object]]:
-        return programs_after(self.before_ids)
 
     def collector_snapshot(self) -> dict[str, object]:
         return self.collector.snapshot()
@@ -354,12 +241,9 @@ class NativeProcessRunner(AppRunner):
         session.__enter__()
         self.session = session
         self.command_used = list(command)
-        programs = [dict(program) for program in session.programs]
-        if not programs:
-            self._fail_start("native app did not attach any BPF programs")
         self.loader_binary = binary
-        self.programs = programs
-        return [int(program["id"]) for program in programs if int(program.get("id", 0) or 0) > 0]
+        self.programs = []
+        return []
 
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None:

@@ -6,11 +6,10 @@ import json
 import os
 import signal
 import sys
-from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Callable, Mapping, Sequence
+from typing import Mapping, Sequence
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -24,16 +23,14 @@ from runner.libs.benchmark_catalog import (
 from runner.libs.app_runners import get_app_runner
 from runner.libs.app_runners.base import AppRunner
 from runner.libs.app_suite_schema import AppSpec, AppSuite, load_app_suite_from_yaml
-from runner.libs.bpf_stats import compute_delta, enable_bpf_stats, sample_bpf_stats
+from runner.libs.bpf_stats import enable_bpf_stats
 from runner.libs.case_common import (
     CaseLifecycleState,
     LifecycleRunResult,
-    live_rejit_prog_ids,
     prepare_daemon_session,
     wait_for_suite_quiescence,
 )
 from runner.libs.kinsn import prepare_kinsn_modules
-from runner.libs.app_runners.process_support import programs_after
 from runner.libs.rejit import (
     DaemonSession,
     benchmark_rejit_enabled_passes,
@@ -173,221 +170,19 @@ def _sample_count(args: argparse.Namespace) -> int:
     return int(DEFAULT_CORPUS_SAMPLES)
 
 
-def _measure_runner_phase(
-    runner: AppRunner,
-    prog_ids: Sequence[int],
-    *,
-    workload_seconds: float,
-    samples: int,
-    warmups: int = 0,
-) -> dict[str, object]:
-    logical_prog_ids = [int(prog_id) for prog_id in prog_ids if int(prog_id) > 0]
-    if not logical_prog_ids:
-        raise RuntimeError("workload measurement requires at least one live BPF program id")
-    workloads: list[dict[str, object]] = []
-    for _ in range(max(0, int(warmups))):
-        runner.run_workload(workload_seconds)
-    initial_stats = sample_bpf_stats(logical_prog_ids)
-    for _ in range(samples):
-        workloads.append(runner.run_workload(workload_seconds).to_dict())
-    final_stats = sample_bpf_stats(logical_prog_ids)
-    return {
-        "workloads": workloads,
-        "bpf": compute_delta(initial_stats, final_stats),
-    }
-
-
 def _build_runner_state(
     app: AppSpec,
     runner: AppRunner,
-    started_prog_ids: Sequence[int],
 ) -> CaseLifecycleState:
-    prog_ids = [int(value) for value in started_prog_ids if int(value) > 0]
-    if not prog_ids: raise RuntimeError(f"{app.name}: runner did not return any live prog_ids")
-    programs = [dict(program) for program in runner.programs]
-    if not programs: raise RuntimeError(f"{app.name}: runner did not expose any live programs")
-    artifacts: dict[str, object] = {"programs": programs, "rejit_policy_context": {
+    artifacts: dict[str, object] = {"rejit_policy_context": {
         "repo": str(app.name).strip(), "category": str(app.runner).strip(), "level": "corpus"}}
     result_details = runner.artifacts.get("result_details")
     if isinstance(result_details, Mapping):
         artifacts["result_details"] = dict(result_details)
     return CaseLifecycleState(
-        runtime=runner, prog_ids=list(prog_ids),
+        runtime=runner,
         artifacts=artifacts,
     )
-
-
-def _tracked_prog_id_set(prog_ids: Sequence[int]) -> frozenset[int]:
-    return frozenset(int(prog_id) for prog_id in prog_ids if int(prog_id) > 0)
-
-
-@dataclass(frozen=True)
-class RediscoveredPrograms:
-    programs: list[dict[str, object]]
-    source: str
-
-
-def _rediscover_session_programs(
-    session: "CorpusAppSession",
-    *,
-    phase: str,
-    missing_ids: Sequence[int],
-    tracked_prog_ids: Sequence[int],
-    claimed_ids: Sequence[int],
-    candidate_sources: Sequence[tuple[str, Callable[[], object]]],
-) -> RediscoveredPrograms:
-    def normalize_programs(programs: object) -> list[dict[str, object]]:
-        if not isinstance(programs, Sequence) or isinstance(programs, (str, bytes, bytearray)):
-            return []
-        deduped: dict[int, dict[str, object]] = {}
-        for program in programs:
-            if not isinstance(program, Mapping):
-                continue
-            prog_id = int(program.get("id", 0) or 0)
-            if prog_id <= 0:
-                continue
-            deduped[prog_id] = dict(program)
-        return [deduped[prog_id] for prog_id in sorted(deduped)]
-
-    def program_identity(program: Mapping[str, object]) -> tuple[str, str, str, str, int]:
-        return (
-            str(program.get("name") or ""),
-            str(program.get("type") or ""),
-            str(program.get("attach_type") or program.get("expected_attach_type") or ""),
-            str(program.get("attach_to") or program.get("attach_target") or program.get("attach_btf_name") or ""),
-            int(program.get("attach_btf_id", 0) or 0),
-        )
-
-    expected_programs = normalize_programs(session.runner.live_rejit_programs())
-    if not expected_programs:
-        expected_programs = normalize_programs(session.state.artifacts.get("programs"))
-    tracked_ids = [int(prog_id) for prog_id in tracked_prog_ids if int(prog_id) > 0]
-    if not expected_programs:
-        raise RuntimeError(
-            f"{session.app.name}: tracked BPF program ids disappeared before {phase}; "
-            f"rediscovery found no live replacement programs: "
-            f"missing_ids={list(missing_ids)}, tracked_ids={tracked_ids}"
-        )
-
-    claimed = {int(prog_id) for prog_id in claimed_ids if int(prog_id) > 0}
-    overlapping_claimed: set[int] = set()
-    for source, load_programs in candidate_sources:
-        remaining = Counter(program_identity(program) for program in expected_programs)
-        matched_programs: list[dict[str, object]] = []
-        for program in normalize_programs(load_programs()):
-            identity = program_identity(program)
-            if remaining[identity] <= 0:
-                continue
-            prog_id = int(program["id"])
-            if prog_id in claimed:
-                overlapping_claimed.add(prog_id)
-                continue
-            matched_programs.append(dict(program))
-            remaining[identity] -= 1
-        if matched_programs:
-            return RediscoveredPrograms(programs=matched_programs, source=source)
-
-    if claimed_overlap := sorted(overlapping_claimed):
-        raise RuntimeError(
-            f"{session.app.name}: tracked BPF program ids disappeared before {phase}; "
-            f"rediscovered replacements overlap another session's claimed ids: "
-            f"missing_ids={list(missing_ids)}, tracked_ids={tracked_ids}, "
-            f"claimed_overlap={claimed_overlap}"
-        )
-    raise RuntimeError(
-        f"{session.app.name}: tracked BPF program ids disappeared before {phase}; "
-        f"rediscovery found no live replacement programs: "
-        f"missing_ids={list(missing_ids)}, tracked_ids={tracked_ids}"
-    )
-
-
-def _refresh_active_session_programs(
-    sessions: Sequence["CorpusAppSession"],
-    phase: str,
-) -> None:
-    current_programs_by_id: dict[int, dict[str, object]] = {}
-    current_programs_raw = programs_after(())
-    if isinstance(current_programs_raw, Sequence) and not isinstance(
-        current_programs_raw,
-        (str, bytes, bytearray),
-    ):
-        for program in current_programs_raw:
-            if not isinstance(program, Mapping):
-                continue
-            prog_id = int(program.get("id", 0) or 0)
-            if prog_id <= 0:
-                continue
-            current_programs_by_id[prog_id] = dict(program)
-    current_programs = [current_programs_by_id[prog_id] for prog_id in sorted(current_programs_by_id)]
-    current_prog_ids = frozenset(current_programs_by_id)
-    claimed_ids: set[int] = set()
-    for session in sessions:
-        tracked_prog_ids = _tracked_prog_id_set(session.state.prog_ids)
-        if not tracked_prog_ids:
-            raise RuntimeError(f"{session.app.name}: no tracked BPF program ids remain before {phase}")
-        live_programs: list[dict[str, object]]
-        if missing_ids := sorted(tracked_prog_ids - current_prog_ids):
-            discover_source = ""
-            candidate_sources: list[tuple[str, Callable[[], object]]] = []
-            refresh = getattr(session.runner, "refresh_programs", None)
-            if callable(refresh):
-                discover_source = "runner.refresh_programs"
-                candidate_sources.append((discover_source, refresh))
-            else:
-                runtime_session = getattr(session.runner, "session", None)
-                refresh = getattr(runtime_session, "refresh_programs", None)
-                if callable(refresh):
-                    discover_source = "runner.session.refresh_programs"
-                    candidate_sources.append((discover_source, refresh))
-                else:
-                    discover = getattr(runtime_session, "_discover_programs", None)
-                    if callable(discover):
-                        discover_source = "runner.session._discover_programs"
-                        candidate_sources.append((discover_source, discover))
-            candidate_sources.append(("bpftool prog show", lambda: current_programs))
-            rediscovered = _rediscover_session_programs(
-                session,
-                phase=phase,
-                missing_ids=missing_ids,
-                tracked_prog_ids=sorted(tracked_prog_ids),
-                claimed_ids=sorted(claimed_ids),
-                candidate_sources=candidate_sources,
-            )
-            live_programs = rediscovered.programs
-            discover_source = discover_source or rediscovered.source
-            expected_count = len(tracked_prog_ids)
-            refreshed_count = len(live_programs)
-            refreshed_ids = [int(program["id"]) for program in live_programs]
-            refreshed_id_set = set(refreshed_ids)
-            if refreshed_id_set != tracked_prog_ids:
-                raise RuntimeError(
-                    f"{session.app.name}: rediscovery changed tracked BPF program ids "
-                    f"before {phase}: refreshed_count={refreshed_count}, "
-                    f"expected_count={expected_count}, expected_ids={sorted(tracked_prog_ids)}, "
-                    f"refreshed_ids={refreshed_ids}, "
-                    f"missing_ids={sorted(tracked_prog_ids - refreshed_id_set)}, "
-                    f"unexpected_ids={sorted(refreshed_id_set - tracked_prog_ids)}, "
-                    f"original_missing_ids={missing_ids}, "
-                    f"discover_source={discover_source}"
-                )
-        else:
-            if overlapping_ids := sorted(tracked_prog_ids & claimed_ids):
-                raise RuntimeError(
-                    f"{session.app.name}: BPF program ids are already claimed by another session before {phase}: "
-                    f"{overlapping_ids}"
-                )
-            live_programs = [dict(current_programs_by_id[prog_id]) for prog_id in sorted(tracked_prog_ids)]
-        if overlapping_ids := sorted(
-            int(program["id"]) for program in live_programs if int(program["id"]) in claimed_ids
-        ):
-            raise RuntimeError(
-                f"{session.app.name}: BPF program ids are already claimed by another session before {phase}: "
-                f"{overlapping_ids}"
-            )
-        session.state.prog_ids = [int(program["id"]) for program in live_programs]
-        session.state.artifacts["programs"] = live_programs
-        session.runner.programs = [dict(program) for program in live_programs]
-        claimed_ids.update(session.state.prog_ids)
 
 
 def _build_app_error_result(
@@ -552,68 +347,53 @@ def _run_suite_lifecycle_sessions(
             return str(workload_for("corpus"))
         return str(getattr(session.app, "workload", ""))
 
+    def session_pids(session: CorpusAppSession) -> list[int]:
+        raw = getattr(session.runner, "pids", None)
+        pids = raw if isinstance(raw, Sequence) and not isinstance(raw, (str, bytes, bytearray)) else [session.runner.pid]
+        result = [int(pid) for pid in pids if pid is not None and int(pid) > 0]
+        if not result:
+            raise RuntimeError(f"{session.app.name}: runner did not expose any shim pids")
+        return result
+
     try:
         active_pairs = list(session_results)
-        if active_pairs:
-            _print_progress("lifecycle_phase_start", phase="baseline_refresh", apps=len(active_pairs))
-            _refresh_active_session_programs([session for session, _ in active_pairs], "baseline")
-            _print_progress("lifecycle_phase_done", phase="baseline_refresh", apps=len(active_pairs))
-
         surviving_pairs: list[tuple[CorpusAppSession, LifecycleRunResult]] = []
         for session, result in active_pairs:
-            prog_ids = [int(value) for value in result.state.prog_ids if int(value) > 0]
-            if not prog_ids:
-                record_baseline_failure(session, result, "lifecycle did not provide any program ids")
-            else:
-                try:
-                    _print_progress(
-                        "measurement_start",
-                        app=session.app.name,
-                        runner=session.app.runner,
-                        phase="baseline",
-                        workload=session_workload(session),
-                        samples=samples,
-                    )
-                    result.baseline = _measure_runner_phase(
-                        session.runner,
-                        result.state.prog_ids,
-                        workload_seconds=session.workload_seconds,
-                        samples=samples,
-                        warmups=warmups,
-                    )
-                    _print_progress(
-                        "measurement_done",
-                        app=session.app.name,
-                        runner=session.app.runner,
-                        phase="baseline",
-                        status="ok",
-                    )
-                    surviving_pairs.append((session, result))
-                except Exception as exc:
-                    _print_progress(
-                        "measurement_done",
-                        app=session.app.name,
-                        runner=session.app.runner,
-                        phase="baseline",
-                        status="error",
-                        error=str(exc),
-                    )
-                    record_baseline_failure(session, result, str(exc))
+            try:
+                _print_progress(
+                    "measurement_start",
+                    app=session.app.name,
+                    runner=session.app.runner,
+                    phase="baseline",
+                    workload=session_workload(session),
+                    samples=samples,
+                )
+                result.baseline = active_daemon_session.measure_phase(
+                    app_pids=session_pids(session),
+                    runner=session.runner,
+                    workload_seconds=session.workload_seconds,
+                    samples=samples,
+                    warmups=warmups,
+                )
+                _print_progress(
+                    "measurement_done",
+                    app=session.app.name,
+                    runner=session.app.runner,
+                    phase="baseline",
+                    status="ok",
+                )
+                surviving_pairs.append((session, result))
+            except Exception as exc:
+                _print_progress(
+                    "measurement_done",
+                    app=session.app.name,
+                    runner=session.app.runner,
+                    phase="baseline",
+                    status="error",
+                    error=str(exc),
+                )
+                record_baseline_failure(session, result, str(exc))
             check_daemon()
-
-        active_pairs = surviving_pairs
-        if active_pairs:
-            _print_progress("lifecycle_phase_start", phase="rejit_refresh", apps=len(active_pairs))
-            _refresh_active_session_programs([session for session, _ in active_pairs], "rejit")
-            _print_progress("lifecycle_phase_done", phase="rejit_refresh", apps=len(active_pairs))
-
-        surviving_pairs = []
-        for session, result in active_pairs:
-            prog_ids = live_rejit_prog_ids(result.state)
-            if not prog_ids:
-                raise RuntimeError("lifecycle did not provide any program ids after baseline")
-            result.rejit_prog_ids = prog_ids
-            surviving_pairs.append((session, result))
 
         active_pairs = surviving_pairs
         for session, result in active_pairs:
@@ -622,50 +402,30 @@ def _run_suite_lifecycle_sessions(
                     "rejit_skipped",
                     app=session.app.name,
                     runner=session.app.runner,
-                    program_count=len(result.rejit_prog_ids),
                 )
-                result.rejit_result = {
-                    "status": "skipped",
-                    "per_program": {str(int(pid)): {"status": "skipped", "passes": []} for pid in result.rejit_prog_ids},
-                }
+                result.rejit_result = {"status": "skipped"}
                 continue
             _print_progress(
                 "rejit_start",
                 app=session.app.name,
                 runner=session.app.runner,
-                program_count=len(result.rejit_prog_ids),
             )
             # Per-app pass yaml lookup uses the lib short name (first slash
             # segment) so config dirs live as runner/config/passes/<pass>/
             # <katran|cilium|bcc|...>.yaml regardless of which sub-target
             # (`/agent`, `/set`, `/profiling`) the corpus selects.
             yaml_app_name = str(session.app.name).split("/")[0]
-            prog_names_by_id: dict[int, str] = {}
-            for prog in (result.state.artifacts.get("programs") or []):
-                pid = int(prog.get("id", 0) or 0)
-                pname = str(prog.get("name") or "").strip()
-                if pid > 0 and pname:
-                    prog_names_by_id[pid] = pname
-            result.rejit_result = active_daemon_session.apply_rejit(
-                result.rejit_prog_ids,
-                app_pid=int(session.runner.pid or 0),
+            result.rejit_result = active_daemon_session.apply_rejit_for_app(
+                app_pids=session_pids(session),
                 enabled_passes=apply_enabled_passes,
                 failure_artifacts_dir=prepared_daemon_session.failure_artifacts_dir,
                 app_name=yaml_app_name,
-                prog_names_by_id=prog_names_by_id,
             )
             _print_progress(
                 "rejit_done",
                 app=session.app.name,
                 runner=session.app.runner,
-                status=(
-                    "ok"
-                    if all(
-                        str((rec or {}).get("status") or "error") == "ok"
-                        for rec in (result.rejit_result.get("per_program") or {}).values()
-                    )
-                    else "error"
-                ),
+                status=str(result.rejit_result.get("status") or "error"),
             )
             check_daemon()
 
@@ -679,9 +439,9 @@ def _run_suite_lifecycle_sessions(
                     workload=session_workload(session),
                     samples=samples,
                 )
-                result.post_rejit = _measure_runner_phase(
-                    session.runner,
-                    result.state.prog_ids,
+                result.post_rejit = active_daemon_session.measure_phase(
+                    app_pids=session_pids(session),
+                    runner=session.runner,
                     workload_seconds=session.workload_seconds,
                     samples=samples,
                     warmups=warmups,
@@ -820,8 +580,8 @@ def run_suite(
                 result: dict[str, object] | None = None
                 try:
                     runner = get_app_runner(app.runner, workload=app.workload_for("corpus"), **app.args)
-                    started_prog_ids = [int(value) for value in runner.start() if int(value) > 0]
-                    state = _build_runner_state(app, runner, started_prog_ids)
+                    runner.start()
+                    state = _build_runner_state(app, runner)
                     session = CorpusAppSession(
                         app=app,
                         runner=runner,

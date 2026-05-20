@@ -4,6 +4,7 @@ import json
 import os
 import platform
 import socket
+import time
 from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
@@ -194,37 +195,24 @@ def _shim_socket_for_pid(app_pid: int) -> Path:
     return _SHIM_SOCK_DIR / f"shim-{int(app_pid)}.sock"
 
 
-def _discover_shim_sockets() -> list[Path]:
-    """Return every shim socket the runner can see. Multi-process apps (e.g.
-    bpftrace/set spawns 5 children, each one's libbpf calls PROG_LOAD inside
-    its own intercept layer) keep each sub-shim's state isolated by pid."""
-    if not _SHIM_SOCK_DIR.is_dir():
-        return []
-    return sorted(_SHIM_SOCK_DIR.glob("shim-*.sock"))
-
-
-def _build_prog_id_to_socket_map(
-    sockets: Sequence[Path],
-) -> dict[int, Path]:
-    """Ask each shim for its tracked progs and build a prog_id → socket map.
-    Later sockets win on duplicate prog_ids (kernel ids are globally unique
-    so this should not actually happen, but defensive deduping costs nothing)."""
-    mapping: dict[int, Path] = {}
-    for sock in sockets:
-        try:
-            resp = _shim_request(sock, {"cmd": "list_progs"})
-        except RuntimeError:
+def _normalize_app_pids(
+    *,
+    app_pid: int | None = None,
+    app_pids: Sequence[int] | None = None,
+) -> list[int]:
+    raw = list(app_pids or ([] if app_pid is None else [app_pid]))
+    result: list[int] = []
+    seen: set[int] = set()
+    for value in raw:
+        pid = int(value)
+        if pid <= 0:
             continue
-        if not resp.get("ok"):
-            continue
-        for entry in resp.get("progs", []) or []:
-            try:
-                pid = int(entry.get("id", 0) or 0)
-            except (TypeError, ValueError):
-                continue
-            if pid > 0:
-                mapping[pid] = sock
-    return mapping
+        if pid not in seen:
+            seen.add(pid)
+            result.append(pid)
+    if not result:
+        raise ValueError("app shim operation requires at least one app pid")
+    return result
 
 
 def _shim_request(socket_path: Path, payload: Mapping[str, object]) -> dict[str, Any]:
@@ -255,107 +243,103 @@ def _shim_request(socket_path: Path, payload: Mapping[str, object]) -> dict[str,
     return dict(response)  # type: ignore[arg-type]
 
 
-def _read_bpfopt_report(report_path: object) -> dict[str, Any]:
-    if not isinstance(report_path, str) or not report_path:
-        return {}
-    try:
-        with open(report_path, encoding="utf-8") as fh:
-            data = json.load(fh)
-    except (OSError, ValueError):
-        return {}
-    return dict(data) if isinstance(data, Mapping) else {}
-
-
-def apply_daemon_rejit(
-    prog_ids: list[int] | None = None,
-    *,
-    enabled_passes: Sequence[str] | None = None,
-    app_pid: int,
-    failure_artifacts_dir: Path | None = None,
-    app_name: str | None = None,
-    prog_names_by_id: Mapping[int, str] | None = None,
-) -> dict[str, object]:
-    """Drive optimization via per-pid shim socket (replaces the daemon path).
-
-    For each prog and each pass step in `enabled_passes`, send `execute_step`
-    to the shim hosting that prog. Build a `per_program` response in the
-    shape the daemon used to return so existing consumers stay unchanged.
-    """
-    del failure_artifacts_dir  # accepted for API stability; shim path has no workdir tar payload
-    prog_ids = [int(v) for v in (prog_ids or []) if int(v) > 0]
-    if not prog_ids:
-        raise ValueError("apply_daemon_rejit requires at least one prog_id")
-    if len(set(prog_ids)) != len(prog_ids):
-        raise ValueError("apply_daemon_rejit requires unique prog_ids")
+def app_shim_has_programs(app_pid: int) -> bool:
     if int(app_pid) <= 0:
-        raise ValueError("apply_daemon_rejit requires app_pid > 0")
+        return False
+    try:
+        resp = _shim_request(_shim_socket_for_pid(int(app_pid)), {"cmd": "has_programs"})
+    except RuntimeError:
+        return False
+    return str(resp.get("status") or "error") == "ok"
+
+
+def wait_for_app_shim_programs(
+    *,
+    app_pid: int,
+    timeout_s: int | float,
+    process: object | None = None,
+    snapshot: object | None = None,
+    process_name: str = "process",
+) -> None:
+    deadline = time.monotonic() + max(0.0, float(timeout_s))
+    while time.monotonic() < deadline:
+        poll = getattr(process, "poll", None)
+        if callable(poll) and poll() is not None:
+            detail = ""
+            if callable(snapshot):
+                snap = snapshot()
+                if isinstance(snap, Mapping):
+                    lines = list(snap.get("stderr_tail") or []) + list(snap.get("stdout_tail") or [])
+                    detail = "\n" + "\n".join(str(line) for line in lines[-40:]) if lines else ""
+            raise RuntimeError(f"{process_name} exited before BPF programs were tracked by shim{detail}")
+        if app_shim_has_programs(int(app_pid)):
+            return
+        time.sleep(0.2)
+    raise RuntimeError(
+        f"{process_name} did not load any shim-tracked BPF programs within {float(timeout_s):.1f}s"
+    )
+
+
+def apply_app_rejit(
+    *,
+    app_pid: int | None = None,
+    app_pids: Sequence[int] | None = None,
+    enabled_passes: Sequence[str] | None = None,
+    app_name: str | None = None,
+    failure_artifacts_dir: Path | None = None,
+) -> dict[str, object]:
+    del failure_artifacts_dir
+    pids = _normalize_app_pids(app_pid=app_pid, app_pids=app_pids)
     normalized_enabled_passes = (
         _normalize_pass_list(list(enabled_passes))
         if enabled_passes is not None
         else None
     )
     if not normalized_enabled_passes:
-        raise ValueError("apply_daemon_rejit requires non-empty enabled_passes")
-    payload = rejit_plan.build_execute_plan_payload(
-        prog_ids,
+        raise ValueError("apply_app_rejit requires non-empty enabled_passes")
+    payload = rejit_plan.build_execute_all_payload(
         [str(n).strip() for n in normalized_enabled_passes if str(n).strip()],
         app_name=app_name,
-        prog_names_by_id=prog_names_by_id,
     )
-    # Group prog_ids by which shim socket owns them. Then send ONE execute_plan
-    # RPC per socket, matching daemon's monolithic batch semantics. Multi-process
-    # apps (bpftrace/set spawns 5 children) end up sending N execute_plans (one
-    # per child shim); each plan contains only that shim's progs.
-    prog_id_to_socket = _build_prog_id_to_socket_map(_discover_shim_sockets())
-    fallback_sock = _shim_socket_for_pid(int(app_pid))
-    sock_to_progs: dict[str, list[dict[str, Any]]] = {}
-    for program in payload["programs"]:
-        sock = prog_id_to_socket.get(int(program["prog_id"]), fallback_sock)
-        sock_to_progs.setdefault(str(sock), []).append(program)
+    responses: list[dict[str, object]] = []
+    for pid in pids:
+        resp = _shim_request(_shim_socket_for_pid(pid), payload)
+        if str(resp.get("status") or "error") != "ok":
+            raise RuntimeError(str(resp.get("error_message") or resp.get("error") or "ReJIT failed"))
+        responses.append({"pid": pid, "response": dict(resp)})
+    return dict(responses[0]["response"]) if len(responses) == 1 else {"status": "ok", "shim_responses": responses}
 
-    per_program: dict[str, Any] = {}
-    for sock_str, prog_list in sock_to_progs.items():
-        sock = Path(sock_str)
-        plan = {"cmd": "execute_plan", "programs": prog_list}
-        try:
-            resp = _shim_request(sock, plan)
-        except RuntimeError as exc:
-            # Whole batch failed — surface the same error for every prog so
-            # the caller's per-program loop sees a meaningful error.
-            for program in prog_list:
-                pid = int(program["prog_id"])
-                per_program[str(pid)] = {
-                    "status": "error",
-                    "prog_id": pid,
-                    "error_message": str(exc),
-                    "program": {
-                        "prog_id": pid,
-                        "prog_name": (prog_names_by_id or {}).get(pid, "") if prog_names_by_id else "",
-                        "prog_type": 0,
-                        "orig_insn_count": 0,
-                        "final_insn_count": 0,
-                    },
-                    "passes": [
-                        {"step": dict(step), "status": "failed_rejit", "error": str(exc),
-                         "bpfopt_summary": None}
-                        for step in program["steps"]
-                    ],
-                }
-            continue
-        for pid_str, prog_result in (resp.get("per_program") or {}).items():
-            # Each `prog_result` already matches the daemon shape (status,
-            # prog_id, program, passes). Read bpfopt_summary from report.json
-            # for each pass since shim doesn't inline it.
-            passes_in = prog_result.get("passes") or []
-            for p in passes_in:
-                # Shim writes report at WORKDIR/report.json overwritten per step;
-                # by the time we get the response only the last step's report
-                # remains. Best-effort: leave bpfopt_summary empty for now —
-                # consumers only use it for diagnostic dumps, not pass logic.
-                p.setdefault("bpfopt_summary", {})
-                p.setdefault("error", None)
-            per_program[str(pid_str)] = prog_result
-    return {"status": "ok", "per_program": per_program}
+
+def measure_app_phase(
+    *,
+    app_pid: int | None = None,
+    app_pids: Sequence[int] | None = None,
+    runner: object,
+    workload_seconds: float,
+    samples: int,
+    warmups: int = 0,
+) -> dict[str, object]:
+    pids = _normalize_app_pids(app_pid=app_pid, app_pids=app_pids)
+    for _ in range(max(0, int(warmups))):
+        runner.run_workload(workload_seconds)
+    for pid in pids:
+        start = _shim_request(_shim_socket_for_pid(pid), {"cmd": "measure_start"})
+        if str(start.get("status") or "error") != "ok":
+            raise RuntimeError(str(start.get("error") or "measure_start failed"))
+    workloads: list[dict[str, object]] = []
+    for _ in range(samples):
+        workloads.append(runner.run_workload(workload_seconds).to_dict())
+    bpf: dict[str, object] = {}
+    for pid in pids:
+        finish = _shim_request(_shim_socket_for_pid(pid), {"cmd": "measure_finish"})
+        if str(finish.get("status") or "error") != "ok":
+            raise RuntimeError(str(finish.get("error") or "measure_finish failed"))
+        if isinstance(finish.get("bpf"), Mapping):
+            bpf.update(dict(finish["bpf"]))  # type: ignore[index]
+    return {
+        "workloads": workloads,
+        "bpf": bpf,
+    }
 
 
 @dataclass
@@ -409,21 +393,38 @@ class DaemonSession:
         # there's nothing to release.
         return
 
-    def apply_rejit(
+    def apply_rejit_for_app(
         self,
-        prog_ids: Sequence[int],
         *,
-        app_pid: int,
+        app_pid: int | None = None,
+        app_pids: Sequence[int] | None = None,
         enabled_passes: Sequence[str] | None = None,
         failure_artifacts_dir: Path | None = None,
         app_name: str | None = None,
-        prog_names_by_id: Mapping[int, str] | None = None,
     ) -> dict[str, object]:
-        return apply_daemon_rejit(
-            [int(p) for p in prog_ids if int(p) > 0],
+        return apply_app_rejit(
+            app_pid=app_pid,
+            app_pids=app_pids,
             enabled_passes=enabled_passes,
-            app_pid=int(app_pid),
             failure_artifacts_dir=failure_artifacts_dir,
             app_name=app_name,
-            prog_names_by_id=prog_names_by_id,
+        )
+
+    def measure_phase(
+        self,
+        *,
+        app_pid: int | None = None,
+        app_pids: Sequence[int] | None = None,
+        runner: object,
+        workload_seconds: float,
+        samples: int,
+        warmups: int = 0,
+    ) -> dict[str, object]:
+        return measure_app_phase(
+            app_pid=app_pid,
+            app_pids=app_pids,
+            runner=runner,
+            workload_seconds=workload_seconds,
+            samples=samples,
+            warmups=warmups,
         )

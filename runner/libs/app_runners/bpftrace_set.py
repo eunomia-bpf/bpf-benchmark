@@ -6,8 +6,9 @@ from dataclasses import dataclass
 from typing import Mapping
 
 from .. import tail_text, which
-from ..agent import bpftool_prog_show_records, start_agent
+from ..agent import start_agent
 from ..benchmark_net import BENCHMARK_IFACE
+from ..rejit import wait_for_app_shim_programs
 from ..workload import WorkloadResult, run_named_workload
 from .base import AppRunner
 from .bpftrace import BpftraceRunner
@@ -28,15 +29,6 @@ BPFTRACE_SET_SCRIPT_SPECS: tuple[BpftraceSetScriptSpec, ...] = (
     BpftraceSetScriptSpec("runqlat"),
     BpftraceSetScriptSpec("tcplife"),
 )
-
-
-def _program_records_by_id() -> dict[int, dict[str, object]]:
-    records: dict[int, dict[str, object]] = {}
-    for record in bpftool_prog_show_records():
-        prog_id = int(record.get("id", 0) or 0)
-        if prog_id > 0:
-            records[prog_id] = dict(record)
-    return records
 
 
 class BpftraceSetRunner(AppRunner):
@@ -65,11 +57,14 @@ class BpftraceSetRunner(AppRunner):
                 return child.pid
         return None
 
+    @property
+    def pids(self) -> list[int]:
+        return [int(child.pid) for child in self._children.values() if child.pid is not None]
+
     def start(self) -> list[int]:
         if any(child.process is not None for child in self._children.values()):
             raise RuntimeError("bpftrace/set is already running")
         self.programs = []
-        before_records = _program_records_by_id()
 
         for spec in BPFTRACE_SET_SCRIPT_SPECS:
             try:
@@ -81,15 +76,16 @@ class BpftraceSetRunner(AppRunner):
 
         for spec in BPFTRACE_SET_SCRIPT_SPECS:
             self._raise_if_child_exited(spec.name, self._children[spec.name])
-
-        after_records = _program_records_by_id()
-        prog_ids = sorted(set(after_records).difference(before_records))
-        if not prog_ids:
-            self._fail_start(
-                f"bpftrace/set added no BPF programs in {self.attach_timeout_s:g}s attach wait window"
+            child = self._children[spec.name]
+            assert child.process is not None
+            wait_for_app_shim_programs(
+                app_pid=int(child.process.pid),
+                timeout_s=self.attach_timeout_s,
+                process=child.process,
+                snapshot=lambda child=child: self._child_output_snapshot(child),
+                process_name=f"bpftrace script {spec.name}",
             )
-        self.programs = [after_records[prog_id] for prog_id in prog_ids]
-        return prog_ids
+        return []
 
     def run_workload(self, seconds: float) -> WorkloadResult:
         if not any(child.process is not None for child in self._children.values()):

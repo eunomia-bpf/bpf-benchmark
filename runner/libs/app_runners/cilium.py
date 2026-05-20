@@ -23,7 +23,7 @@ from ..benchmark_net import (
 )
 from ..workload import WorkloadResult, run_named_workload
 from .etcd_support import LocalEtcdSession
-from .process_support import NativeProcessRunner, wait_until_program_set_stable
+from .process_support import NativeProcessRunner
 from .setup_support import optional_repo_artifact_path
 
 
@@ -515,19 +515,7 @@ class CiliumRunner(NativeProcessRunner):
         )
 
     def refresh_programs(self) -> list[dict[str, object]]:
-        if self.session is None:
-            return [dict(program) for program in self.programs]
-        programs = wait_until_program_set_stable(
-            before_ids=self.session.before_ids,
-            timeout_s=self.load_timeout_s,
-            discover_programs=self.session._discover_programs,
-            process=self.session.process,
-            collector_snapshot=self.session.collector_snapshot,
-            process_name="cilium-agent",
-        )
-        self.session.programs = [dict(program) for program in programs]
-        self.programs = [dict(program) for program in programs]
-        return [dict(program) for program in self.programs]
+        return []
 
     def _delete_managed_endpoints(self) -> None:
         if self._state_dir is None:
@@ -548,13 +536,10 @@ class CiliumRunner(NativeProcessRunner):
 
     def _pause_agent(self) -> None:
         # Freeze cilium-agent userspace after endpoint setup so no controller
-        # (orchestrator reinitialize, regen-recovery, devices-controller-driven
-        # local-node-config update, etc.) can call ReloadDatapath() during
-        # baseline / post_rejit measurement and invalidate the prog IDs the
-        # corpus driver captured at start.  TC/XDP datapath programs and pinned
-        # maps stay resident in the kernel; packets keep hitting them.  SIGSTOP
-        # is uncatchable by Go so this is deterministic.  Cleanup must SIGCONT
-        # before API-level endpoint deletion to avoid hangs.
+        # can call ReloadDatapath() during baseline / post_rejit measurement.
+        # TC/XDP datapath programs and pinned maps stay resident in the kernel;
+        # packets keep hitting them. SIGSTOP is uncatchable by Go, so this is
+        # deterministic. Cleanup must SIGCONT before endpoint deletion.
         process = None if self.session is None else self.session.process
         if process is None or process.poll() is not None or self._agent_paused:
             return
@@ -589,9 +574,8 @@ class CiliumRunner(NativeProcessRunner):
             ).start()
             super().start()
             self._setup_managed_endpoints()
-            program_ids = [int(program["id"]) for program in self.refresh_programs() if int(program.get("id", 0) or 0) > 0]
             self._pause_agent()
-            return program_ids
+            return []
         except Exception:
             self.stop()
             raise

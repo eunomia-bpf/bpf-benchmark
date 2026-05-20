@@ -69,6 +69,22 @@ static const char *daemon_step_status(const struct step_result *sr) {
     return sr->failure_kind == 1 ? "failed_bpfopt" : "failed_rejit";
 }
 
+static void command_key_for_prog(const char *prog_name, char *out,
+                                 size_t out_sz) {
+    size_t o = 0;
+    const char prefix[] = "command_";
+    for (size_t i = 0; prefix[i] && o + 1 < out_sz; i++)
+        out[o++] = prefix[i];
+    for (size_t i = 0; prog_name[i] && o + 1 < out_sz; i++) {
+        char c = prog_name[i];
+        out[o++] = ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+                    (c >= '0' && c <= '9') || c == '_')
+                       ? c
+                       : '_';
+    }
+    out[o] = 0;
+}
+
 /* Run one bpfopt pass on a prog. Updates `cur` (input bytecode path) and
  * `step_seq` on success and after successful reload_and_reattach. */
 static void run_step(struct prog_entry *pd,
@@ -335,14 +351,44 @@ static int prog_workdir_init(struct prog_entry *pd, uint32_t want_id,
 static void emit_execute_plan(int cli, const char *json) {
     const char *progs_end = NULL;
     const char *progs = json_array_at(json, "programs", &progs_end);
-    if (!progs) {
-        dprintf(cli, "{\"status\":\"error\",\"error_message\":\"missing programs\"}\n");
+    const char *all_steps_end = NULL;
+    const char *all_steps = json_array_at(json, "steps", &all_steps_end);
+    if (!progs && !all_steps) {
+        dprintf(cli, "{\"status\":\"error\",\"error_message\":\"missing programs or steps\"}\n");
         return;
+    }
+    uint32_t *all_prog_ids = NULL;
+    uint32_t all_prog_n = 0;
+    uint32_t all_prog_i = 0;
+    if (!progs) {
+        pthread_mutex_lock(&state_mutex);
+        for (int b = 0; b < BPF_STATE_BUCKETS; b++)
+            for (struct prog_entry *e = prog_table[b]; e; e = e->next)
+                if (e->kernel_prog_id) all_prog_n++;
+        if (all_prog_n == 0) {
+            pthread_mutex_unlock(&state_mutex);
+            dprintf(cli, "{\"status\":\"error\",\"error_message\":\"no tracked BPF programs\"}\n");
+            return;
+        }
+        all_prog_ids = (uint32_t *)calloc(all_prog_n ? all_prog_n : 1,
+                                          sizeof(*all_prog_ids));
+        if (!all_prog_ids) {
+            pthread_mutex_unlock(&state_mutex);
+            dprintf(cli, "{\"status\":\"error\",\"error_message\":\"oom\"}\n");
+            return;
+        }
+        uint32_t idx = 0;
+        for (int b = 0; b < BPF_STATE_BUCKETS; b++)
+            for (struct prog_entry *e = prog_table[b]; e; e = e->next)
+                if (e->kernel_prog_id && idx < all_prog_n)
+                    all_prog_ids[idx++] = e->kernel_prog_id;
+        pthread_mutex_unlock(&state_mutex);
     }
 
     size_t cap = 65536, len = 0;
     char *resp = (char *)malloc(cap);
     if (!resp) {
+        free(all_prog_ids);
         dprintf(cli, "{\"status\":\"error\",\"error_message\":\"oom\"}\n");
         return;
     }
@@ -352,11 +398,28 @@ static void emit_execute_plan(int cli, const char *json) {
     const char *cursor = progs;
     const char *po_s, *po_e;
     int first_prog = 1;
-    while (json_array_next_obj(&cursor, progs_end, &po_s, &po_e)) {
-        size_t plen = (size_t)(po_e - po_s);
-        char *po = (char *)malloc(plen + 1);
-        if (!po) continue;
-        memcpy(po, po_s, plen); po[plen] = 0;
+    while (1) {
+        char *po = NULL;
+        if (progs) {
+            if (!json_array_next_obj(&cursor, progs_end, &po_s, &po_e))
+                break;
+            size_t plen = (size_t)(po_e - po_s);
+            po = (char *)malloc(plen + 1);
+            if (!po) continue;
+            memcpy(po, po_s, plen); po[plen] = 0;
+        } else {
+            if (all_prog_i >= all_prog_n)
+                break;
+            size_t steps_len = (size_t)(all_steps_end - all_steps);
+            size_t plen = steps_len + 80;
+            po = (char *)malloc(plen);
+            if (!po) {
+                all_prog_i++;
+                continue;
+            }
+            snprintf(po, plen, "{\"prog_id\":%u,\"steps\":[%.*s]}",
+                     all_prog_ids[all_prog_i++], (int)steps_len, all_steps);
+        }
 
         long pid_l = json_get_int(po, "prog_id");
         if (pid_l <= 0) { free(po); continue; }
@@ -451,6 +514,12 @@ static void emit_execute_plan(int cli, const char *json) {
             char cmdbuf[4096] = {0};
             json_get_str(so, "name", name, sizeof(name));
             json_get_str(so, "command", cmdbuf, sizeof(cmdbuf));
+            char command_key[96];
+            char override_cmd[4096] = {0};
+            command_key_for_prog(prog_name, command_key, sizeof(command_key));
+            if (json_get_str(so, command_key, override_cmd,
+                             sizeof(override_cmd)))
+                snprintf(cmdbuf, sizeof(cmdbuf), "%s", override_cmd);
             long log_level = json_get_int(so, "log_level");
             if (log_level <= 0) log_level = 1;
             free(so);
@@ -522,12 +591,14 @@ static void emit_execute_plan(int cli, const char *json) {
         log_line("execute_plan prog_id=%u step_seq=%d status=%s",
                  want_id, step_seq, prog_any_failed ? "error" : "ok");
     }
+    free(all_prog_ids);
     buf_appendf(&resp, &cap, &len, "}}\n");
     if (resp) (void)!write(cli, resp, len);
     free(resp);
     return;
 
 resp_oom:
+    free(all_prog_ids);
     dprintf(cli, "{\"status\":\"error\",\"error_message\":\"response oom\"}\n");
     free(resp);
 }

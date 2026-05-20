@@ -32,6 +32,12 @@ struct prog_entry {
     uint32_t expected_attach_type;
     uint32_t attach_btf_id;
     uint32_t kernel_prog_id;      /* 0 until resolved via OBJ_GET_INFO_BY_FD */
+    uint64_t measure_run_cnt;
+    uint64_t measure_run_time_ns;
+    uint32_t measure_bytes_jited;
+    uint32_t measure_bytes_xlated;
+    uint32_t measure_prog_id;
+    int measure_active;
     /* Captured BPF_PROG_LOAD attr for candidate re-load (verifier-state
      * probe). The insns pointer is left dangling; consumers re-read from
      * bytecode_path. */

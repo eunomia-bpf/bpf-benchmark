@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Mapping
 
 from .. import ROOT_DIR, tail_text
-from ..agent import bpftool_prog_show_records
+from ..rejit import wait_for_app_shim_programs
 from ..workload import WorkloadResult, run_named_workload
 from .base import AppRunner
 from .bcc import (
@@ -17,8 +17,6 @@ from .bcc import (
     ToolProcessSession,
     _TailCapture,
     _drain_stream,
-    _prepare_bcc_kernel_source,
-    _prepare_bcc_python_compat,
 )
 
 BCC_SET_WORKLOAD = "stress_ng_os_io_network"
@@ -41,15 +39,6 @@ BCC_SET_TOOL_SPECS: tuple[BccSetToolSpec, ...] = (
     BccSetToolSpec("tcplife"),
     BccSetToolSpec("runqlat"),
 )
-
-
-def _program_records_by_id() -> dict[int, dict[str, object]]:
-    records: dict[int, dict[str, object]] = {}
-    for record in bpftool_prog_show_records():
-        prog_id = int(record.get("id", 0) or 0)
-        if prog_id > 0:
-            records[prog_id] = dict(record)
-    return records
 
 
 class BccSetRunner(AppRunner):
@@ -82,11 +71,14 @@ class BccSetRunner(AppRunner):
                 return child.pid
         return None
 
+    @property
+    def pids(self) -> list[int]:
+        return [int(child.pid) for child in self._children.values() if child.pid is not None]
+
     def start(self) -> list[int]:
         if any(child.session is not None for child in self._children.values()):
             raise RuntimeError("bcc/set is already running")
         self.programs = []
-        before_records = _program_records_by_id()
 
         for spec in BCC_SET_TOOL_SPECS:
             try:
@@ -98,15 +90,16 @@ class BccSetRunner(AppRunner):
 
         for spec in BCC_SET_TOOL_SPECS:
             self._raise_if_child_exited(spec.name, self._children[spec.name])
-
-        after_records = _program_records_by_id()
-        prog_ids = sorted(set(after_records).difference(before_records))
-        if not prog_ids:
-            self._fail_start(
-                f"bcc/set added no BPF programs in {self.attach_timeout_s:g}s attach wait window"
+            child = self._children[spec.name]
+            assert child.session is not None
+            wait_for_app_shim_programs(
+                app_pid=int(child.session.process.pid),
+                timeout_s=self.attach_timeout_s,
+                process=child.session.process,
+                snapshot=lambda child=child: self._child_output_snapshot(child),
+                process_name=f"BCC tool {spec.name}",
             )
-        self.programs = [after_records[prog_id] for prog_id in prog_ids]
-        return prog_ids
+        return []
 
     def run_workload(self, seconds: float) -> WorkloadResult:
         if not any(child.session is not None for child in self._children.values()):
@@ -146,28 +139,12 @@ class BccSetRunner(AppRunner):
             raise RuntimeError(f"BCC tool {child.tool_name} is already running")
         tool_binary = child._resolve_tool_binary()
         tool_env = os.environ.copy()
-        # Ensure the bcc python module is on PYTHONPATH — the Dockerfile sets
-        # ENV PYTHONPATH but virtme doesn't always propagate it into the VM
-        # workload exec. Prepend bcc's install path explicitly.
-        bcc_site = "/usr/local/lib/python3/dist-packages"
-        existing = tool_env.get("PYTHONPATH", "")
-        if bcc_site not in existing.split(os.pathsep):
-            tool_env["PYTHONPATH"] = (
-                bcc_site + os.pathsep + existing if existing else bcc_site
-            )
-        # bcc/set spawns multiple BCC python wrappers per workload. Each child
+        # bcc/set spawns multiple libbpf-tools per workload. Each child
         # process needs the bpfrejit shim attached so it registers its own
         # per-pid socket and the runner can route execute_plan to the right
-        # child. The single-tool BCCRunner.start() injects shim env via
-        # _shim_env_for; we have to do the same here because this set-runner
-        # bypasses start() and constructs its own Popen.
+        # child.
         from ..agent import _shim_env_for
         tool_env.update(_shim_env_for(str(tool_binary)))
-        kernel_source = _prepare_bcc_kernel_source(tool_env)
-        if kernel_source:
-            child.artifacts["bcc_kernel_source"] = kernel_source
-        child._compat_dir = _prepare_bcc_python_compat(tool_env)
-        child.artifacts["bcc_python_compat_dir"] = str(child._compat_dir)
         command = [str(tool_binary), *child.tool_args]
         child.command_used = list(command)
         process = subprocess.Popen(

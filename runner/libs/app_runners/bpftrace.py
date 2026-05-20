@@ -2,14 +2,15 @@ from __future__ import annotations
 
 import threading
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any, Mapping
 
 from .. import ROOT_DIR, tail_text, which
-from ..agent import bpftool_prog_show_records, start_agent, stop_agent
+from ..agent import start_agent, stop_agent
 from ..benchmark_net import BENCHMARK_IFACE
+from ..rejit import wait_for_app_shim_programs
 from ..workload import WorkloadResult, run_named_workload
 from .base import AppRunner
-from .process_support import ProcessOutputCollector, programs_after, wait_until_program_set_stable
+from .process_support import ProcessOutputCollector
 
 DEFAULT_SCRIPT_DIR = ROOT_DIR / "runner" / "assets" / "bpftrace_scripts"
 
@@ -46,11 +47,6 @@ class BpftraceRunner(AppRunner):
             raise RuntimeError(f"unknown bpftrace script: {self.script_name}")
         return script_path
 
-    def _discover_script_programs(self, before_ids: Sequence[int]) -> list[dict[str, object]]:
-        programs = [dict(program) for program in programs_after(before_ids)]
-        programs.sort(key=lambda item: int(item.get("id", 0) or 0))
-        return programs
-
     def start(self) -> list[int]:
         if self.process is not None:
             raise RuntimeError("BpftraceRunner is already running")
@@ -59,11 +55,6 @@ class BpftraceRunner(AppRunner):
         if bpftrace_binary is None:
             raise RuntimeError("bpftrace is required but not present in PATH")
         script_path = self._resolve_script_path()
-        before_ids = {
-            int(record.get("id", 0) or 0)
-            for record in bpftool_prog_show_records()
-            if int(record.get("id", 0) or 0) > 0
-        }
         self.command_used = [bpftrace_binary, "-q", str(script_path)]
         self.process = start_agent(bpftrace_binary, ["-q", str(script_path)])
         if self.process.stdout is None or self.process.stderr is None:
@@ -81,18 +72,15 @@ class BpftraceRunner(AppRunner):
         )
         self.stdout_thread.start()
         self.stderr_thread.start()
-        programs = wait_until_program_set_stable(
-            before_ids=before_ids,
+        wait_for_app_shim_programs(
+            app_pid=int(self.process.pid),
             timeout_s=self.attach_timeout_s,
-            discover_programs=lambda: self._discover_script_programs(before_ids),
             process=self.process,
-            collector_snapshot=self.collector.snapshot,
+            snapshot=self.collector.snapshot,
             process_name=f"bpftrace ({self.script_name})",
         )
-        if not programs:
-            self._fail_start(f"bpftrace did not attach any BPF programs for {script_path.name}")
-        self.programs = [dict(program) for program in programs]
-        return [int(program["id"]) for program in self.programs if int(program.get("id", 0) or 0) > 0]
+        self.programs = []
+        return []
 
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.process is None:

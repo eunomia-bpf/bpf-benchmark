@@ -49,6 +49,13 @@ def _kinsns(payload: Mapping[str, Any]) -> tuple[str, ...]:
     ))
 
 
+def _command_key_for_prog(prog_name: str) -> str:
+    sanitized = "".join(
+        c if c.isalnum() or c == "_" else "_" for c in str(prog_name).strip()
+    )
+    return f"command_{sanitized}"
+
+
 def find_step_config(
     pass_name: str, app_name: str | None, prog_name: str | None,
 ) -> StepConfig:
@@ -84,6 +91,35 @@ def find_step_config(
     )
 
 
+def find_step_payload(pass_name: str, app_name: str | None) -> dict[str, Any]:
+    pass_dir = CONFIG_ROOT / pass_name
+    default = _load(pass_dir / "default.yaml")
+    command = _collapse(default["command"])
+    log_level = int(default["log_level"])
+    payload: dict[str, Any] = {"command": command, "log_level": log_level}
+
+    if app_name is None:
+        return payload
+    app_path = pass_dir / f"{app_name}.yaml"
+    if not app_path.is_file():
+        return payload
+
+    override = _load(app_path)
+    log_level = int(override["log_level"])
+    programs = override["programs"]
+    if "default" in programs:
+        payload["command"] = _collapse(programs["default"]["command"])
+    payload["log_level"] = log_level
+    for prog_name, entry in programs.items():
+        if str(prog_name) == "default":
+            continue
+        collapsed = _collapse(entry["command"])
+        names = {str(prog_name), str(prog_name)[:15]}
+        for name in names:
+            payload[_command_key_for_prog(name)] = collapsed
+    return payload
+
+
 def build_kinsn_probes(enabled_passes: Sequence[str]) -> list[dict[str, Any]]:
     """Union of kinsn probes across the chosen passes (read from default.yaml)."""
     names: set[str] = set()
@@ -92,40 +128,26 @@ def build_kinsn_probes(enabled_passes: Sequence[str]) -> list[dict[str, Any]]:
     return [{"name": n} for n in sorted(names)]
 
 
-def build_execute_plan_payload(
-    prog_ids: Sequence[int],
+def build_execute_all_payload(
     enabled_passes: Sequence[str],
     *,
     app_name: str | None = None,
-    prog_names_by_id: Mapping[int, str] | None = None,
 ) -> dict[str, Any]:
-    """Per-prog steps with command/log_level resolved from yaml.
-
-    `step.log_level` (daemon-side rejit verbosity *after* this step's bytecode
-    lands) = next step's declared input requirement, or 1 for the last step.
-    """
-    if not prog_ids:
-        raise ValueError("execute_plan requires at least one prog_id")
     passes = [str(p).strip() for p in enabled_passes if str(p).strip()]
     if not passes:
         raise ValueError("execute_plan requires at least one pass")
 
-    programs: list[dict[str, Any]] = []
-    for pid in prog_ids:
-        prog_name = prog_names_by_id.get(int(pid)) if prog_names_by_id else None
-        configs = [find_step_config(p, app_name, prog_name) for p in passes]
-        steps = [
-            {
-                "name": p,
-                "command": cfg.command,
-                "log_level": int(configs[i + 1].log_level if i + 1 < len(configs) else 1),
-            }
-            for i, (p, cfg) in enumerate(zip(passes, configs))
-        ]
-        programs.append({"prog_id": int(pid), "steps": steps})
-
+    configs = [find_step_payload(p, app_name) for p in passes]
+    steps: list[dict[str, Any]] = []
+    for i, (pass_name, cfg) in enumerate(zip(passes, configs)):
+        step = dict(cfg)
+        step["name"] = pass_name
+        step["log_level"] = int(
+            configs[i + 1]["log_level"] if i + 1 < len(configs) else 1
+        )
+        steps.append(step)
     return {
         "cmd": "execute_plan",
-        "programs": programs,
+        "steps": steps,
         "kinsn_probes": build_kinsn_probes(passes),
     }

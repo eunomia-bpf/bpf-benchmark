@@ -6,71 +6,42 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from .. import ROOT_DIR, run_command, tail_text, which
-from ..agent import bpftool_prog_show_records, start_agent, stop_agent, wait_healthy
+from ..agent import start_agent, stop_agent
+from ..rejit import wait_for_app_shim_programs
 from ..workload import (
     WorkloadResult,
     run_file_io,
     run_named_workload,
 )
 from .base import AppRunner
-from .process_support import AgentSession, wait_until_program_set_stable
+from .process_support import AgentSession
 from .setup_support import missing_required_commands, pick_host_executable, repo_artifact_root
-
-
-def current_programs() -> list[dict[str, object]]:
-    return [dict(record) for record in bpftool_prog_show_records() if "id" in record]
 
 
 class TetragonAgentSession(AgentSession):
     def __init__(self, command: Sequence[str], load_timeout: int) -> None:
-        super().__init__(load_timeout); self.command = list(command); self.before_ids: set[int] = set()
+        super().__init__(load_timeout); self.command = list(command)
 
     def _cleanup_err(self) -> Exception | None:
         try: self.close(); return None
         except Exception as exc: return exc
 
     def __enter__(self) -> "TetragonAgentSession":
-        before_ids = {int(program["id"]) for program in current_programs()}
-        self.before_ids = before_ids
         self.process = start_agent(self.command[0], self.command[1:], env={"HOME": os.environ.get("HOME", str(ROOT_DIR))})
         self._start_io_threads()
         try:
-            healthy = wait_healthy(self.process, self.load_timeout,
-                lambda: bool(self.refresh_programs()))
+            wait_for_app_shim_programs(
+                app_pid=int(self.process.pid),
+                timeout_s=self.load_timeout,
+                process=self.process,
+                snapshot=self.collector_snapshot,
+                process_name="Tetragon",
+            )
         except Exception:
             if (ce := self._cleanup_err()) is not None:
                 raise RuntimeError(f"Tetragon health check failed and cleanup also failed: {ce}") from ce
             raise
-        if not healthy:
-            snapshot = self.collector.snapshot()
-            details = tail_text("\n".join((snapshot.get("stderr_tail") or []) + (snapshot.get("stdout_tail") or [])), max_lines=40, max_chars=8000)
-            ce = self._cleanup_err()
-            msg = f"Tetragon failed to become healthy within {self.load_timeout}s: {details}"
-            raise RuntimeError(msg if ce is None else f"{msg}\nCleanup error while stopping Tetragon: {ce}")
-        try:
-            self.programs = wait_until_program_set_stable(
-                before_ids=self.before_ids,
-                timeout_s=self.load_timeout,
-                process=self.process,
-                collector_snapshot=self.collector_snapshot,
-                process_name="Tetragon",
-            )
-        except Exception as exc:
-            ce = self._cleanup_err()
-            if ce is None:
-                raise
-            raise RuntimeError(f"{exc}\nCleanup error while stopping Tetragon: {ce}") from exc
-        if not self.programs:
-            ce = self._cleanup_err()
-            msg = "Tetragon became healthy but no new BPF programs were found"
-            raise RuntimeError(msg if ce is None else f"{msg}\nCleanup error while stopping Tetragon: {ce}")
         return self
-
-    def refresh_programs(self) -> list[dict[str, object]]:
-        programs = [dict(item) for item in current_programs() if int(item.get("id", -1)) not in self.before_ids]
-        programs.sort(key=lambda item: int(item.get("id", 0) or 0))
-        self.programs = programs
-        return [dict(item) for item in self.programs]
 
     def close(self) -> None:
         stop_error: Exception | None = None
@@ -180,10 +151,8 @@ class TetragonRunner(AppRunner):
         session = TetragonAgentSession(self.command, self.load_timeout_s)
         session.__enter__()
         self.session = session; self.tetragon_binary = Path(tetragon_binary).resolve()
-        programs = [dict(program) for program in session.programs]
-        if not programs: self._fail_start("Tetragon did not attach any BPF programs")
-        self.programs = programs
-        return [int(p["id"]) for p in programs if int(p.get("id", 0) or 0) > 0]
+        self.programs = []
+        return []
 
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None: raise RuntimeError("TetragonRunner is not running")
@@ -194,11 +163,6 @@ class TetragonRunner(AppRunner):
     def run_workload_spec(self, workload_spec: Mapping[str, object], seconds: float) -> WorkloadResult:
         if self.session is None: raise RuntimeError("TetragonRunner is not running")
         return run_tetragon_workload(workload_spec, max(1, int(round(seconds))))
-
-    def refresh_programs(self) -> list[dict[str, object]]:
-        if self.session is None: raise RuntimeError("TetragonRunner is not running")
-        self.programs = [dict(program) for program in self.session.refresh_programs()]
-        return [dict(program) for program in self.programs]
 
     def stop(self) -> None:
         if self.session is None: return

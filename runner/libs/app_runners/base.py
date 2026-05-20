@@ -32,8 +32,10 @@ class AppRunner:
     def pid(self) -> int | None:
         raise NotImplementedError
 
-    def live_rejit_programs(self) -> list[dict[str, object]]:
-        return [dict(program) for program in self.programs]
+    @property
+    def pids(self) -> list[int]:
+        pid = self.pid
+        return [] if pid is None else [int(pid)]
 
     def _fail_start(self, message: str) -> NoReturn:
         try:

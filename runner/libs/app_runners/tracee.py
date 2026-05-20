@@ -13,17 +13,17 @@ from urllib.request import urlopen
 
 from .. import ROOT_DIR, run_command, tail_text
 from ..agent import (
-    bpftool_prog_show_records,
     start_agent,
     stop_agent,
     wait_healthy,
 )
+from ..rejit import app_shim_has_programs
 from ..workload import (
     WorkloadResult,
     run_named_workload,
 )
 from .base import AppRunner
-from .process_support import AgentSession, wait_until_program_set_stable
+from .process_support import AgentSession
 from .setup_support import pick_host_executable, repo_artifact_root
 
 
@@ -80,11 +80,6 @@ class TraceeAgentSession(AgentSession):
         self.command_used: list[str] | None = None
 
     def __enter__(self) -> "TraceeAgentSession":
-        preexisting_ids = {
-            int(record["id"])
-            for record in bpftool_prog_show_records()
-            if "id" in record
-        }
         failures: list[str] = []
         tracee_tmpdir = _tracee_runtime_dir()
         tracee_tmpdir.mkdir(parents=True, exist_ok=True)
@@ -108,13 +103,7 @@ class TraceeAgentSession(AgentSession):
                 return (
                     _tracee_healthz_ready(TRACEE_HEALTH_HOST, TRACEE_HEALTH_PORT)
                     or _tracee_collector_has_activity(self.collector)
-                ) and bool(
-                    [
-                        record
-                        for record in bpftool_prog_show_records()
-                        if int(record.get("id", -1) or -1) not in preexisting_ids
-                    ]
-                )
+                ) and app_shim_has_programs(int(proc.pid))
 
             try:
                 healthy = wait_healthy(proc, self.load_timeout, _health_check)
@@ -122,10 +111,8 @@ class TraceeAgentSession(AgentSession):
                 self.close()
                 raise
             if healthy:
-                programs = wait_until_program_set_stable(before_ids=preexisting_ids, timeout_s=self.load_timeout)
-                if programs:
-                    self.programs = [dict(program) for program in programs]
-                    return self
+                self.programs = []
+                return self
             snapshot = self.collector.snapshot()
             failures.append(_format_launch_failure(command, proc, snapshot))
             self.close()
@@ -294,14 +281,11 @@ class TraceeRunner(AppRunner):
         session.__enter__()
         self.session = session
         self.command_used = list(session.command_used or [])
-        programs = [dict(program) for program in session.programs]
-        if not programs:
-            self._fail_start("Tracee did not attach any BPF programs")
         self.tracee_binary = Path(tracee_binary).resolve()
-        self.programs = programs
+        self.programs = []
         if DEFAULT_STARTUP_SETTLE_S > 0.0:
             time.sleep(DEFAULT_STARTUP_SETTLE_S)
-        return [int(program["id"]) for program in programs if int(program.get("id", 0) or 0) > 0]
+        return []
 
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None:

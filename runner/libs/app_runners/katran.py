@@ -16,7 +16,7 @@ from .. import ROOT_DIR, resolve_bpftool_binary, run_command, run_json_command, 
 from ..kernel_modules import kernel_module_is_builtin, load_kernel_module
 from ..workload import WorkloadResult, resolve_workload_tool
 from .base import AppRunner
-from .process_support import ManagedProcessSession, wait_until_program_set_stable
+from .process_support import ManagedProcessSession
 from .setup_support import repo_artifact_root
 
 DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S = 300
@@ -96,48 +96,6 @@ def _attached_xdp_mode(attach_info: Mapping[str, object] | None) -> str | None:
     return mode or None
 
 
-def _attached_xdp_prog_id(attach_info: Mapping[str, object] | None) -> int | None:
-    if not isinstance(attach_info, Mapping): return None
-    if isinstance(xdp_records := attach_info.get("xdp"), list):
-        for entry in xdp_records:
-            if not isinstance(entry, Mapping):
-                continue
-            prog_id = int(entry.get("id", entry.get("prog_id", 0)) or 0)
-            if prog_id > 0:
-                return prog_id
-    for key in ("id", "prog_id"):
-        prog_id = int(attach_info.get(key, 0) or 0)
-        if prog_id > 0:
-            return prog_id
-    return None
-
-
-def _bpftool_attach_token(mode: str) -> str:
-    normalized = str(mode or "").strip().lower()
-    token = {"driver": "xdp", "native": "xdp", "generic": "xdpgeneric", "skb": "xdpgeneric", "offload": "xdpoffload"}.get(normalized)
-    if token is None: raise RuntimeError(f"unsupported XDP attach mode for bpftool transition: {mode!r}")
-    return token
-
-
-def reattach_xdp_program(iface: str, prog_id: int, *, target_mode: str) -> dict[str, object]:
-    prog_id = int(prog_id)
-    if prog_id <= 0: raise RuntimeError(f"invalid prog_id for XDP reattach: {prog_id}")
-    normalized_target_mode = str(target_mode).strip().lower()
-    current_attach = _attached_xdp_info(iface); current_mode = _attached_xdp_mode(current_attach)
-    current_prog_id = _attached_xdp_prog_id(current_attach)
-    target_token = _bpftool_attach_token(normalized_target_mode)
-    if current_mode == normalized_target_mode and current_prog_id == prog_id: return current_attach
-    if current_mode is not None:
-        run_command([resolve_bpftool_binary(), "net", "detach", _bpftool_attach_token(current_mode), "dev", str(iface)], check=False, timeout=150)
-    run_command([resolve_bpftool_binary(), "net", "attach", target_token, "id", str(prog_id), "dev", str(iface), "overwrite"], timeout=300)
-    attach_info = _attached_xdp_info(iface)
-    if (attached_mode := _attached_xdp_mode(attach_info)) != normalized_target_mode:
-        raise RuntimeError(f"expected XDP attach mode {target_mode!r} on {iface}, got {attached_mode!r}: {attach_info}")
-    if (attached_prog_id := _attached_xdp_prog_id(attach_info)) != prog_id:
-        raise RuntimeError(f"expected XDP prog id {prog_id} on {iface}, got {attached_prog_id!r}: {attach_info}")
-    return attach_info
-
-
 def _detach_all_xdp_modes(iface: str) -> None:
     for attach_type in ("xdpgeneric", "xdpdrv", "xdp", "xdpoffload"):
         run_command(
@@ -147,45 +105,25 @@ def _detach_all_xdp_modes(iface: str) -> None:
         )
 
 
-def _current_prog_ids() -> set[int]:
-    payload = run_json_command([resolve_bpftool_binary(), "-j", "prog", "show"], timeout=300)
-    if not isinstance(payload, list): raise RuntimeError("bpftool prog show returned unexpected payload")
-    return {int(r["id"]) for r in payload if isinstance(r, dict) and "id" in r}
-
-
 def _namespace_exists(namespace: str) -> bool:
     return any(Path(root).joinpath(namespace).exists() for root in ("/run/netns", "/var/run/netns"))
 
 
 def wait_for_katran_teardown(
-    prog_id: int | Sequence[int] | None,
     *,
     timeout_s: float = DEFAULT_KATRAN_STOP_TIMEOUT_S,
     settle_s: float = DEFAULT_KATRAN_STOP_SETTLE_S,
 ) -> None:
-    if prog_id is None:
-        tracked_prog_ids: set[int] = set()
-    elif isinstance(prog_id, Sequence) and not isinstance(prog_id, (str, bytes, bytearray)):
-        tracked_prog_ids = {
-            int(value)
-            for value in prog_id
-            if isinstance(value, (int, float, str)) and int(value) > 0
-        }
-    else:
-        tracked_prog_ids = {int(prog_id)} if int(prog_id) > 0 else set()
     deadline = time.monotonic() + max(0.1, float(timeout_s))
     settle = max(0.0, float(settle_s))
     _ns_triple = (ROUTER_NS, CLIENT_NS, REAL_NS)
     while time.monotonic() < deadline:
-        current_prog_ids = _current_prog_ids()
-        if not (tracked_prog_ids & current_prog_ids) and all(not _namespace_exists(ns) for ns in _ns_triple):
+        if all(not _namespace_exists(ns) for ns in _ns_triple):
             if settle > 0.0:
                 time.sleep(settle)
             return
         time.sleep(0.1)
-    current_prog_ids = _current_prog_ids()
-    remaining = [f"prog_id={prog}" for prog in sorted(tracked_prog_ids & current_prog_ids)]
-    remaining.extend(ns for ns in _ns_triple if _namespace_exists(ns))
+    remaining = [ns for ns in _ns_triple if _namespace_exists(ns)]
     raise RuntimeError("Katran teardown did not quiesce before the next app start: "
                        + (", ".join(remaining) if remaining else "transient kernel/procfs state remained"))
 
@@ -519,7 +457,6 @@ class KatranServerSession:
         self.attach_mode_before_rebind: str | None = None
         self.attach_info_before_rebind: dict[str, object] = {}
         self.ifindex = 0
-        self.before_prog_ids: set[int] = set()
 
     def __enter__(self) -> "KatranServerSession":
         if not link_exists(self.iface):
@@ -531,7 +468,6 @@ class KatranServerSession:
             if not artifact_path.exists():
                 raise RuntimeError(f"Katran {label} program image not found: {artifact_path}")
         self.ifindex = int(Path("/sys/class/net").joinpath(self.iface, "ifindex").read_text().strip())
-        self.before_prog_ids = _current_prog_ids()
         before_map_ids = {int(r.get("id", -1)) for r in _map_show_records() if "id" in r}
         command = [
             str(self.server_binary),
@@ -550,7 +486,7 @@ class KatranServerSession:
             session.__enter__()
             self.session = session
             self.command_used = list(command)
-            self.programs = wait_until_program_set_stable(before_ids=self.before_prog_ids, timeout_s=self.load_timeout_s)
+            self.programs = []
             self.maps_by_name = self._discover_maps(before_map_ids)
             self.attach_info = _attached_xdp_info(self.iface)
         except Exception:
@@ -571,22 +507,6 @@ class KatranServerSession:
             self.close()
             raise RuntimeError(f"Katran server did not expose an attached XDP program on {self.iface}")
         return self
-
-    @property
-    def attached_prog_id(self) -> int:
-        prog_id = _attached_xdp_prog_id(self.attach_info)
-        if prog_id is not None:
-            return prog_id
-        raise RuntimeError(f"Katran attached XDP program id is unavailable on {self.iface}: {self.attach_info}")
-
-    @property
-    def prog_id(self) -> int:
-        for program in self.programs:
-            if str(program.get("name") or "") == "balancer_ingress":
-                prog_id = int(program.get("id", 0) or 0)
-                if prog_id > 0:
-                    return prog_id
-        return self.attached_prog_id
 
     @property
     def pid(self) -> int | None: return None if self.session is None else self.session.pid
@@ -616,21 +536,14 @@ class KatranServerSession:
         return {
             "server_binary": str(self.server_binary), "balancer_prog_path": str(self.balancer_prog_path),
             "healthchecking_prog_path": str(self.healthchecking_prog_path),
-            "programs": [dict(p) for p in self.programs],
             "maps": {n: dict(r) for n, r in self.maps_by_name.items()},
             "iface": self.iface, "ifindex": self.ifindex,
             "attached": bool(self.attach_info), "attach_info": self.attach_info,
-            "attached_prog_id": self.attached_prog_id,
-            "balancer_prog_id": self.prog_id,
             "attach_mode": _attached_xdp_mode(self.attach_info),
             "attach_mode_before_rebind": self.attach_mode_before_rebind,
             "attach_info_before_rebind": dict(self.attach_info_before_rebind),
             "pid": self.pid, "command_used": list(self.command_used),
         }
-
-    def reattach_xdpgeneric(self) -> None:
-        self.attach_info_before_rebind = dict(self.attach_info); self.attach_mode_before_rebind = _attached_xdp_mode(self.attach_info)
-        self.attach_info = reattach_xdp_program(self.iface, self.prog_id, target_mode="generic")
 
     def close(self) -> None:
         errors: list[str] = []
@@ -723,9 +636,6 @@ class KatranRunner(AppRunner):
         self.artifacts: dict[str, object] = {}
 
     @property
-    def prog_id(self) -> int | None: return None if self.session is None else int(self.session.prog_id)
-
-    @property
     def pid(self) -> int | None: return None if self.session is None else self.session.pid
 
     def start(self) -> list[int]:
@@ -745,7 +655,6 @@ class KatranRunner(AppRunner):
             topology.__enter__()
             http_server.__enter__()
             session.__enter__()
-            session.reattach_xdpgeneric()
             self.artifacts = {
                 "topology": topology.metadata(),
                 "http_server": http_server.metadata(),
@@ -773,8 +682,8 @@ class KatranRunner(AppRunner):
         self.topology = topology; self.http_server = http_server; self.session = session
         self.loader_binary = server_binary
         self.command_used = list(session.command_used)
-        self.programs = [dict(program) for program in session.programs]
-        return [int(program["id"]) for program in self.programs if int(program.get("id", 0) or 0) > 0]
+        self.programs = []
+        return []
 
     def _run_network_workload(self, seconds: float) -> WorkloadResult:
         duration_s = max(1, int(float(seconds)))
@@ -884,7 +793,6 @@ class KatranRunner(AppRunner):
 
     def stop(self) -> None:
         errors: list[str] = []
-        prog_ids = [int(program.get("id", 0) or 0) for program in self.programs if int(program.get("id", 0) or 0) > 0]
         if self.session is not None:
             session, self.session = self.session, None
             process = None if session.session is None else session.session.process
@@ -901,6 +809,6 @@ class KatranRunner(AppRunner):
                 except Exception as exc: errors.append(str(exc))
                 setattr(self, attr, None)
         if not errors:
-            try: wait_for_katran_teardown(prog_ids, settle_s=DEFAULT_KATRAN_STOP_SETTLE_S)
+            try: wait_for_katran_teardown(settle_s=DEFAULT_KATRAN_STOP_SETTLE_S)
             except Exception as exc: errors.append(str(exc))
         if errors: raise RuntimeError("; ".join(errors))

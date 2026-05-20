@@ -855,6 +855,8 @@ static void emit_list_progs(int cli) {
 
 #include "shim_reload.h"
 
+#include "shim_measure.h"
+
 #include "shim_execute_plan.h"
 
 static void emit_dump_state(int cli) {
@@ -911,6 +913,12 @@ static void handle_client(int cli) {
         emit_list_progs(cli);
     else if (strcmp(cmd, "execute_plan") == 0)
         emit_execute_plan(cli, buf);
+    else if (strcmp(cmd, "has_programs") == 0)
+        emit_has_programs(cli);
+    else if (strcmp(cmd, "measure_start") == 0)
+        emit_measure_start(cli);
+    else if (strcmp(cmd, "measure_finish") == 0)
+        emit_measure_finish(cli);
     else if (strcmp(cmd, "dump_state") == 0)
         emit_dump_state(cli);
     else
