@@ -518,12 +518,10 @@ def _pull_remote_dir(ctx: aws_common.AwsExecutorContext, ip: str, remote_path: s
 def _remote_runtime_container_command(
     ctx: aws_common.AwsExecutorContext,
     remote_workspace: str,
-    suite_args: list[str],
 ) -> list[str]:
     return build_runtime_container_command(
         Path(remote_workspace),
         ctx.contract,
-        list(suite_args),
         die=_die,
     )
 
@@ -533,7 +531,7 @@ def _remote_result_dir_command(remote_workspace: str, suite_name: str) -> str:
     return shlex.join(["mkdir", "-p", *dirs])
 
 
-def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str, suite_args: list[str]) -> None:
+def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     aws_common._wait_for_ssh(ctx, ip)
     _ensure_remote_docker(ctx, ip)
     stamp = f"{ctx.suite_name}_{ctx.run_token}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
@@ -550,7 +548,7 @@ def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str, suite_args: l
         f"mkdir -p {shlex.quote(remote_run_dir)} && "
         f"chown $(id -u):$(id -g) {shlex.quote(remote_run_dir)} 2>/dev/null || true"
     )
-    suite_cmd = shlex.join(_remote_runtime_container_command(ctx, remote_workspace, suite_args))
+    suite_cmd = shlex.join(_remote_runtime_container_command(ctx, remote_workspace))
     log_dir_cmd = f"mkdir -p {shlex.quote(str(Path(remote_log).parent))}"
     run_cmd = (
         f"{log_dir_cmd} && "
@@ -589,12 +587,12 @@ def _cleanup_failed_run(ctx: aws_common.AwsExecutorContext, state: dict[str, str
     return cleanup_error or None
 
 
-def _run_aws(ctx: aws_common.AwsExecutorContext, suite_args: list[str]) -> None:
+def _run_aws(ctx: aws_common.AwsExecutorContext) -> None:
     state = {}
     try:
         instance_ip = _ensure_instance_for_suite(ctx)
         state = aws_common._load_instance_state(ctx)
-        _run_remote_suite(ctx, instance_ip, suite_args)
+        _run_remote_suite(ctx, instance_ip)
     except BaseException as exc:
         cleanup_error = _cleanup_failed_run(ctx, state or None)
         if cleanup_error and hasattr(exc, "add_note"):
@@ -607,14 +605,14 @@ def _run_aws(ctx: aws_common.AwsExecutorContext, suite_args: list[str]) -> None:
 def main(argv: list[str] | None = None) -> None:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args:
-        _die("usage: aws_executor.py <run <target> <suite> [suite_args...] | terminate <target>>")
+        _die("usage: aws_executor.py <run <target> <suite> | terminate <target>>")
     action = args[0]
     if action == "run":
-        if len(args) < 3:
-            _die("usage: aws_executor.py run <target> <suite> [suite_args...]")
+        if len(args) != 3:
+            _die("usage: aws_executor.py run <target> <suite>")
         contract = build_run_config(args[1], args[2])
         ctx = aws_common._build_context(action, contract)
-        _run_aws(ctx, args[3:])
+        _run_aws(ctx)
         return
     if action == "terminate":
         if len(args) != 2:

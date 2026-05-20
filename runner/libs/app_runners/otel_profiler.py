@@ -16,7 +16,7 @@ from .setup_support import optional_repo_artifact_path
 # concurrently for the measurement window. The catalog wires that workload
 # (`workload="otel_mixed_workload"`) so `.baseline.workloads[]` /
 # `.post_rejit.workloads[]` carry per-language raw stderr ("<lang> sha256
-# ops=N elapsed_s=T") in components, and offline analysis derives ops/sec.
+# ops=N elapsed_s=T") in components; interpretation stays outside the framework.
 #
 # IMPORTANT: BPF tail-called programs (perf_unwind_python, perf_unwind_php,
 # ...) are entered through `bpf_func + X86_TAIL_CALL_OFFSET` which skips
@@ -25,7 +25,7 @@ from .setup_support import optional_repo_artifact_path
 # stay 0 for every tail-called program, even though the program executes
 # every time `native_tracer_entry` dispatches into it. Coverage of these
 # programs must be confirmed via the OTEL debug exporter sample dump
-# (interpreter frame names) or via offline analysis of the per-language
+# (interpreter frame names) or via external inspection of the per-language
 # ops/s in the workload result, not via run_cnt. See CLAUDE.md "Tail-call
 # accounting caveat" for the full list of affected programs.
 

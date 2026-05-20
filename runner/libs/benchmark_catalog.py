@@ -7,8 +7,8 @@ DEFAULT_CORPUS_SAMPLES = 3
 # Single global workload duration. Override at run time with the
 # WORKLOAD_DURATION env var (passed through `make corpus
 # WORKLOAD_DURATION=30`). Per-app overrides intentionally not supported --
-# every app shares this duration so cross-app comparison is consistent and
-# noise-floor analysis (CV vs duration) only needs one knob.
+# every app shares this duration; benchmark interpretation stays outside the
+# framework and only has one duration knob to account for.
 DEFAULT_CORPUS_WORKLOAD_DURATION_S = 30.0
 
 

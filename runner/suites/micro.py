@@ -19,11 +19,13 @@ from runner.libs.workspace_layout import (
     stage2_program_root,
 )
 from runner.suites._common import (
-    add_common_args,
     base_runtime_env,
+    common_env_args,
     cross_runtime_ld_library_path,
-    nonnegative_int,
-    positive_int,
+    env_bool,
+    env_int,
+    env_str,
+    env_tokens,
     resolve_executable,
     resolve_workspace_path,
     run_checked,
@@ -35,39 +37,26 @@ _die = partial(fail, "micro-suite")
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Run the micro benchmark suite as a standalone entrypoint.",
-    )
-    add_common_args(parser)
-    parser.set_defaults(workspace=str(ROOT_DIR), target_name="local")
-    parser.add_argument("--runner-binary", default="", help="Override the micro_exec runner binary path.")
-    parser.add_argument("--program-dir", default="", help="Override the compiled micro BPF program directory.")
-    parser.add_argument("--suite", default="", help="Path to the micro suite YAML manifest.")
-    parser.add_argument("--bench", action="append", dest="benches", help="Benchmark name to run; repeatable.")
-    parser.add_argument(
-        "--runtime",
-        action="append",
-        dest="runtimes",
-        default=None,
-        help="Runtime name to run; repeatable. Defaults to native, llvmbpf, and kernel.",
-    )
-    parser.add_argument("--samples", type=positive_int, required=True, help="Measured samples per runtime pair.")
-    parser.add_argument("--warmups", type=nonnegative_int, required=True, help="Warmup runs per benchmark/runtime.")
-    parser.add_argument("--inner-repeat", type=positive_int, required=True, help="Repeat count inside each helper sample.")
-    parser.add_argument("--output", default="", help="JSON output path.")
-    parser.add_argument("--cpu", default="", help="Pin child processes to a specific CPU via taskset.")
-    parser.add_argument("--strict-env", action="store_true", help="Fail if environment is not publication-grade.")
-    parser.add_argument("--shuffle-seed", type=int, help="Shuffle benchmark order with a reproducible seed.")
-    parser.add_argument("--perf-counters", action="store_true", help="Collect perf_event counters when available.")
-    parser.add_argument(
-        "--perf-scope",
-        default="full_repeat_raw",
-        choices=["full_repeat_raw", "full_repeat_avg"],
-        help="PMU scope passed through to micro/driver.py.",
-    )
-    parser.add_argument("--regenerate-inputs", action="store_true", help="Force regeneration of generated inputs.")
-    parser.add_argument("--list", action="store_true", help="List benchmarks and runtimes.")
-    return parser.parse_args(sys.argv[1:] if argv is None else argv)
+    if argv or (argv is None and sys.argv[1:]):
+        _die("micro suite takes env only; run through Make")
+    args = common_env_args(str(ROOT_DIR), _die)
+    args.runner_binary = env_str("MICRO_RUNNER_BINARY")
+    args.program_dir = env_str("MICRO_PROGRAM_DIR")
+    args.suite = env_str("SUITE")
+    args.benches = env_tokens("BENCH")
+    args.runtimes = env_tokens("RUNTIMES") or None
+    args.samples = env_int("SAMPLES", 3, _die, positive=True)
+    args.warmups = env_int("WARMUPS", 0, _die)
+    args.inner_repeat = env_int("INNER_REPEAT", 100000, _die, positive=True)
+    args.output = env_str("MICRO_OUTPUT")
+    args.cpu = env_str("CPU")
+    args.strict_env = env_bool("STRICT_ENV")
+    args.shuffle_seed = int(env_str("SHUFFLE_SEED")) if env_str("SHUFFLE_SEED") else None
+    args.perf_counters = env_bool("PERF_COUNTERS")
+    args.perf_scope = env_str("PERF_SCOPE", "full_repeat_raw")
+    args.regenerate_inputs = env_bool("REGENERATE_INPUTS")
+    args.list = env_bool("LIST")
+    return args
 
 
 def _runtime_env(workspace: Path, args: argparse.Namespace) -> dict[str, str]:
@@ -151,7 +140,7 @@ def _run_micro_suite(workspace: Path, args: argparse.Namespace) -> None:
     env["BPFREJIT_MICRO_PROGRAM_DIR"] = str(program_dir)
     env["BPFREJIT_MICRO_RUNNER_BINARY"] = str(runner_binary)
 
-    # When `native_lab` is among the requested runtimes, every kinsn `.ko`
+    # When `native_kernel` is among the requested runtimes, every kinsn `.ko`
     # under the kernel-modules dir must be resident (the runner's
     # run-native-lab subcommand splats into `bpf_x86_native_lab.ko`). Load
     # them up-front, mirroring `runner/suites/test.py`. We always load (no

@@ -52,6 +52,7 @@ struct step_result {
     char err_msg[2048];
     char report_path[320];
     char output_path[320];
+    char *report_json;              /* raw validated JSON from ${REPORT}, or NULL */
 };
 
 static const char *daemon_step_status(const struct step_result *sr) {
@@ -186,8 +187,9 @@ static char *tar_workdir_b64(const char *workdir) {
 }
 
 static int append_workdir_tar_b64(char **resp, size_t *cap, size_t *len,
-                                  const char *workdir, int *artifact_count) {
-    if (*artifact_count >= 32)
+                                  const char *workdir, int *artifact_count,
+                                  int artifact_limit) {
+    if (artifact_limit >= 0 && *artifact_count >= artifact_limit)
         return 0;
     (*artifact_count)++;
     char *encoded = tar_workdir_b64(workdir);
@@ -197,6 +199,117 @@ static int append_workdir_tar_b64(char **resp, size_t *cap, size_t *len,
                          encoded);
     free(encoded);
     return rc;
+}
+
+static int keep_all_workdirs_enabled(void) {
+    const char *mode = getenv("KEEP_WORKDIRS");
+    if (mode && strcmp(mode, "all") == 0)
+        return 1;
+    mode = getenv("BPFREJIT_KEEP_ALL_WORKDIRS");
+    return mode && mode[0] && strcmp(mode, "0") != 0;
+}
+
+static int json_trailing_ws_only(const char *s) {
+    for (; *s; s++) {
+        if (*s != ' ' && *s != '\n' && *s != '\r' && *s != '\t')
+            return 0;
+    }
+    return 1;
+}
+
+static int json_token_is_null(const char *json, const jsmntok_t *tok) {
+    return tok->type == JSMN_PRIMITIVE &&
+           tok->end - tok->start == 4 &&
+           strncmp(json + tok->start, "null", 4) == 0;
+}
+
+static void json_minify_in_place(char *s) {
+    char *w = s;
+    int in_str = 0;
+    int escaped = 0;
+    for (char *p = s; *p; p++) {
+        char c = *p;
+        if (in_str) {
+            *w++ = c;
+            if (escaped) {
+                escaped = 0;
+            } else if (c == '\\') {
+                escaped = 1;
+            } else if (c == '"') {
+                in_str = 0;
+            }
+            continue;
+        }
+        if (c == '"') {
+            in_str = 1;
+            *w++ = c;
+        } else if (c != ' ' && c != '\n' && c != '\r' && c != '\t') {
+            *w++ = c;
+        }
+    }
+    *w = 0;
+}
+
+static char *read_report_json_or_null(const char *path, char *err,
+                                      size_t err_sz) {
+    if (err_sz) err[0] = 0;
+    int fd = open(path, O_RDONLY);
+    if (fd < 0) {
+        if (errno == ENOENT)
+            return NULL;
+        snprintf(err, err_sz, "open %s failed errno=%d", path, errno);
+        return NULL;
+    }
+    struct stat st;
+    if (fstat(fd, &st) != 0) {
+        snprintf(err, err_sz, "stat %s failed errno=%d", path, errno);
+        real_close(fd);
+        return NULL;
+    }
+    if (st.st_size <= 0 || st.st_size > 1024 * 1024) {
+        snprintf(err, err_sz, "invalid report size at %s: %lld", path,
+                 (long long)st.st_size);
+        real_close(fd);
+        return NULL;
+    }
+    char *buf = (char *)malloc((size_t)st.st_size + 1);
+    if (!buf) {
+        snprintf(err, err_sz, "oom reading report %s", path);
+        real_close(fd);
+        return NULL;
+    }
+    size_t off = 0;
+    while (off < (size_t)st.st_size) {
+        ssize_t n = read(fd, buf + off, (size_t)st.st_size - off);
+        if (n > 0) {
+            off += (size_t)n;
+            continue;
+        }
+        if (n < 0 && errno == EINTR)
+            continue;
+        snprintf(err, err_sz, "read %s failed errno=%d", path, errno);
+        free(buf);
+        real_close(fd);
+        return NULL;
+    }
+    real_close(fd);
+    buf[off] = 0;
+
+    jsmntok_t *tokens = NULL;
+    int count = 0;
+    if (json_parse_alloc(buf, &tokens, &count) != 0 || count <= 0 ||
+        tokens[0].start < 0 || tokens[0].end < tokens[0].start ||
+        (tokens[0].type != JSMN_OBJECT &&
+         !json_token_is_null(buf, &tokens[0])) ||
+        !json_trailing_ws_only(buf + tokens[0].end)) {
+        snprintf(err, err_sz, "invalid JSON report at %s", path);
+        free(tokens);
+        free(buf);
+        return NULL;
+    }
+    free(tokens);
+    json_minify_in_place(buf);
+    return buf;
 }
 
 /* Run one bpfopt pass on a prog. Updates `cur` (input bytecode path) and
@@ -224,6 +337,7 @@ static void run_step(struct prog_entry *pd,
     snprintf(verifier_log, sizeof(verifier_log),
              "%s/verifier_log_step%d.log", workdir, *step_seq);
     unlink(nxt);
+    unlink(report);
 
     const char *vars[10][2] = {
         {"PROG_ID", prog_id_str}, {"PROG_TYPE", prog_type_name},
@@ -267,6 +381,19 @@ static void run_step(struct prog_entry *pd,
                      + (uint64_t)((t1.tv_nsec - t0.tv_nsec) / 1000000);
     int bpfopt_ok = WIFEXITED(status) && WEXITSTATUS(status) == 0;
     out->code = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+
+    char report_err[512];
+    out->report_json = read_report_json_or_null(report, report_err,
+                                                sizeof(report_err));
+    if (report_err[0]) {
+        out->failure_kind = 1;
+        char escaped[1024];
+        json_escape_into(report_err, strlen(report_err), escaped,
+                         sizeof(escaped));
+        snprintf(out->err_msg, sizeof(out->err_msg),
+                 "read step report at %s: %s", report, escaped);
+        return;
+    }
 
     if (!bpfopt_ok) {
         out->failure_kind = 1;
@@ -501,6 +628,8 @@ static void emit_execute_plan(int cli, const char *json) {
         goto resp_oom;
 
     int failure_artifacts = 0;
+    int keep_all_workdirs = keep_all_workdirs_enabled();
+    int artifact_limit = keep_all_workdirs ? -1 : 32;
     int first_prog = 1;
     while (all_prog_i < all_prog_n) {
         uint32_t want_id = all_prog_ids[all_prog_i++];
@@ -567,7 +696,8 @@ static void emit_execute_plan(int cli, const char *json) {
                         orig_insn_count, orig_insn_count);
             if (w.workdir[0] &&
                 append_workdir_tar_b64(&resp, &cap, &len, w.workdir,
-                                       &failure_artifacts) != 0) {
+                                       &failure_artifacts,
+                                       artifact_limit) != 0) {
                 free(local_ids); free(local_types); free(local_loader_fds);
                 goto resp_oom;
             }
@@ -644,9 +774,16 @@ static void emit_execute_plan(int cli, const char *json) {
             } else {
                 buf_appendf(&resp, &cap, &len, "\"error\":null");
             }
+            if (sr.report_json) {
+                buf_appendf(&resp, &cap, &len,
+                            ",\"bpfopt_summary\":%s", sr.report_json);
+                free(sr.report_json);
+            } else {
+                buf_appendf(&resp, &cap, &len,
+                            ",\"bpfopt_summary\":null");
+            }
             buf_appendf(&resp, &cap, &len,
-                        ",\"bpfopt_summary\":null,"
-                        "\"bpfopt_ms\":%lu,\"rejit_syscall_ms\":%lu",
+                        ",\"bpfopt_ms\":%lu,\"rejit_syscall_ms\":%lu",
                         (unsigned long)sr.bpfopt_ms,
                         (unsigned long)sr.rejit_ms);
             buf_appendf(&resp, &cap, &len, "}");
@@ -665,9 +802,10 @@ static void emit_execute_plan(int cli, const char *json) {
                     prog_any_failed ? "error" : "ok",
                     final_prog_id, prog_name, prog_type_num,
                     orig_insn_count, final_insn_count);
-        if (prog_any_failed &&
+        if ((prog_any_failed || keep_all_workdirs) &&
             append_workdir_tar_b64(&resp, &cap, &len, w.workdir,
-                                   &failure_artifacts) != 0) {
+                                   &failure_artifacts,
+                                   artifact_limit) != 0) {
             free(local_ids); free(local_types); free(local_loader_fds);
             goto resp_oom;
         }

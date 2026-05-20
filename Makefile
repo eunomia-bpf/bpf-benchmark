@@ -1,8 +1,6 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 
-$(if $(wildcard vendor/linux-framework/Makefile),,$(error vendor/linux-framework not found. Run: git submodule update --init --recursive))
-
 ROOT_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 MICRO_DIR := $(ROOT_DIR)/micro
 RUNNER_DIR := $(ROOT_DIR)/runner
@@ -42,6 +40,7 @@ RUN_TARGET.aws-arm64 := aws-arm64
 RUN_TARGET.docker-x86 := x86-docker
 RUN_TARGET.qemu-arm64 := arm64-qemu
 TARGET := $(RUN_TARGET.$(RUN_KEY))
+RUN_TARGET_NAME := $(TARGET)
 
 RUN_TARGET_ARCH.kvm-x86 := x86_64
 RUN_TARGET_ARCH.aws-x86 := x86_64
@@ -81,12 +80,71 @@ VM_CPUS := $(or $(VM_CPUS),$(VM_CPUS.$(RUN_KEY)))
 VM_MEM.kvm-x86 := 64G
 VM_MEM.qemu-arm64 := 64G
 VM_MEM := $(or $(VM_MEM),$(VM_MEM.$(RUN_KEY)))
+VNG = $(VM_EXECUTABLE) --run "$(VM_KERNEL_IMAGE)" --cwd "$(ROOT_DIR)" --disable-monitor --verbose \
+	--cpus "$(VM_CPUS)" --mem "$(VM_MEM)" --rwdir "$(ROOT_DIR)" --overlay-rwdir /tmp \
+	--append "loglevel=7 panic=30 oops=panic"
+
+RUN_REMOTE_PYTHON_BIN ?= python3
+RUN_RUNTIME_PYTHON_BIN ?= python3
+RUN_BPFTOOL_BIN ?= bpftool
+RUN_NATIVE_REPOS_CSV ?= bcc,bpftrace,katran,tracee,tetragon
+
+AWS_X86_NAME_TAG ?= bpf-benchmark-x86
+AWS_X86_TEST_INSTANCE_TYPE ?= t3.micro
+AWS_X86_BENCH_INSTANCE_TYPE ?= t3.small
+AWS_X86_REMOTE_USER ?= ec2-user
+AWS_X86_REMOTE_STAGE_DIR ?= /var/tmp/bpf-benchmark-aws-x86
+AWS_X86_AMI_PARAM ?= /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+AWS_X86_REGION ?= us-east-1
+AWS_X86_PROFILE ?= codex-ec2
+AWS_X86_ROOT_VOLUME_GB ?= 32
+AWS_X86_KEY_PATH ?= /home/yunwei37/.ssh/codex-arm64-test-20260319121631.pem
+AWS_X86_KEY_NAME ?= $(basename $(notdir $(AWS_X86_KEY_PATH)))
+AWS_X86_SECURITY_GROUP_ID ?= sg-02dc8d8b61d78608c
+AWS_X86_SUBNET_ID ?= subnet-009460065a1cd946c
+
+AWS_ARM64_NAME_TAG ?= bpf-benchmark-arm64
+AWS_ARM64_TEST_INSTANCE_TYPE ?= t4g.micro
+AWS_ARM64_BENCH_INSTANCE_TYPE ?= t4g.small
+AWS_ARM64_REMOTE_USER ?= ec2-user
+AWS_ARM64_REMOTE_STAGE_DIR ?= /var/tmp/bpf-benchmark-aws-arm64
+AWS_ARM64_AMI_PARAM ?= /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64
+AWS_ARM64_REGION ?= us-east-1
+AWS_ARM64_PROFILE ?= codex-ec2
+AWS_ARM64_ROOT_VOLUME_GB ?= 32
+AWS_ARM64_KEY_PATH ?= /home/yunwei37/.ssh/codex-arm64-test-20260319121631.pem
+AWS_ARM64_KEY_NAME ?= $(basename $(notdir $(AWS_ARM64_KEY_PATH)))
+AWS_ARM64_SECURITY_GROUP_ID ?= sg-0ebe13c1e4c0defc9
+AWS_ARM64_SUBNET_ID ?= subnet-009460065a1cd946c
+
+AWS_PREFIX.x86 := AWS_X86
+AWS_PREFIX.arm64 := AWS_ARM64
+AWS_TARGET_NAME.x86 := aws-x86
+AWS_TARGET_NAME.arm64 := aws-arm64
+AWS_BASE_ENV = TARGET=$(AWS_TARGET_NAME.$(AWS_ARCH_KEY)) RUN_TARGET_NAME=$(AWS_TARGET_NAME.$(AWS_ARCH_KEY)) \
+	RUN_TARGET_ARCH=$(RUN_TARGET_ARCH.aws-$(AWS_ARCH_KEY)) \
+	RUN_EXECUTOR=aws-ssh RUN_NAME_TAG="$($(AWS_PREFIX.$(AWS_ARCH_KEY))_NAME_TAG)" \
+	RUN_REMOTE_USER="$($(AWS_PREFIX.$(AWS_ARCH_KEY))_REMOTE_USER)" \
+	RUN_AMI_PARAM="$($(AWS_PREFIX.$(AWS_ARCH_KEY))_AMI_PARAM)" \
+	RUN_ROOT_VOLUME_GB="$($(AWS_PREFIX.$(AWS_ARCH_KEY))_ROOT_VOLUME_GB)" \
+	RUN_AWS_KEY_NAME="$($(AWS_PREFIX.$(AWS_ARCH_KEY))_KEY_NAME)" \
+	RUN_AWS_KEY_PATH="$($(AWS_PREFIX.$(AWS_ARCH_KEY))_KEY_PATH)" \
+	RUN_AWS_SECURITY_GROUP_ID="$($(AWS_PREFIX.$(AWS_ARCH_KEY))_SECURITY_GROUP_ID)" \
+	RUN_AWS_SUBNET_ID="$($(AWS_PREFIX.$(AWS_ARCH_KEY))_SUBNET_ID)" \
+	RUN_AWS_REGION="$($(AWS_PREFIX.$(AWS_ARCH_KEY))_REGION)" RUN_AWS_PROFILE="$($(AWS_PREFIX.$(AWS_ARCH_KEY))_PROFILE)" \
+	RUN_REMOTE_PYTHON_BIN="$(RUN_REMOTE_PYTHON_BIN)" RUN_RUNTIME_PYTHON_BIN="$(RUN_RUNTIME_PYTHON_BIN)" \
+	RUN_RUNTIME_CONTAINER_IMAGE="$(RUNTIME_CONTAINER_IMAGE.aws-$(AWS_ARCH_KEY))" RUN_BPFTOOL_BIN="$(RUN_BPFTOOL_BIN)" \
+	RUN_NATIVE_REPOS_CSV="$(RUN_NATIVE_REPOS_CSV)" RUN_TOKEN="$(RUN_TOKEN)"
+AWS_RUN_ENV = $(AWS_BASE_ENV) RUN_INSTANCE_TYPE="$(AWS_INSTANCE_TYPE)" RUN_SUITE_NEEDS_RUNTIME_BTF=$(AWS_BTF) \
+	RUN_REMOTE_STAGE_DIR="$($(AWS_PREFIX.$(AWS_ARCH_KEY))_REMOTE_STAGE_DIR)/$(AWS_SUITE)/$(RUN_TOKEN)" \
+	$(foreach v,$(SUITE_ENV_NAMES),$(v)="$($(v))")
 
 # Python / venv
 _VENV_CANDIDATES := $(HOME)/workspace/.venv $(HOME)/.venv .venv venv
-_VENV_FOUND := $(firstword $(foreach v,$(_VENV_CANDIDATES),$(if $(wildcard $(v)/bin/activate),$(v),)))
+_VENV_ACTIVATE := $(firstword $(wildcard $(addsuffix /bin/activate,$(_VENV_CANDIDATES))))
+_VENV_FOUND := $(patsubst %/bin/activate,%,$(_VENV_ACTIVATE))
 VENV ?= $(_VENV_FOUND)
-PYTHON := $(if $(VENV),$(VENV)/bin/python3,python3)
+PYTHON := $(or $(VENV:%=%/bin/python3),python3)
 export BZIMAGE PYTHON LLVM_DIR RUN_LLVM_DIR TIMEOUT FUZZ_ROUNDS WORKLOAD_DURATION
 
 # KEEP_WORKDIRS: empty/0 = no tars (default), 1 = tar on real failures only.
@@ -96,9 +154,11 @@ export BZIMAGE PYTHON LLVM_DIR RUN_LLVM_DIR TIMEOUT FUZZ_ROUNDS WORKLOAD_DURATIO
 # failure-tar pipeline writes the workdir to details/failure-artifacts/.
 KEEP_WORKDIRS ?=
 
-# All user knobs flow through to the in-container driver via the all-env
-# passthrough in suite_commands.build_runtime_container_command — no enumeration here.
-export SAMPLES WARMUPS SKIP_REJIT INNER_REPEAT KEEP_WORKDIRS
+# Suite knobs are env-only for local, VM, Docker, and AWS runs.
+SUITE_ENV_NAMES = SAMPLES WARMUPS INNER_REPEAT BENCH SUITE RUNTIMES FUZZ_ROUNDS TEST_MODE WORKLOAD_DURATION \
+	KEEP_WORKDIRS BPFREJIT_BENCH_PASSES BPFREJIT_CORPUS_APPS SKIP_REJIT CPU STRICT_ENV SHUFFLE_SEED \
+	PERF_COUNTERS PERF_SCOPE REGENERATE_INPUTS LIST MICRO_RUNNER_BINARY MICRO_PROGRAM_DIR
+export $(SUITE_ENV_NAMES)
 
 # Per-run identity. RUN_TOKEN must be unique per invocation so AWS remote stage
 # dirs and local run-state directories don't collide across concurrent or
@@ -106,34 +166,18 @@ export SAMPLES WARMUPS SKIP_REJIT INNER_REPEAT KEEP_WORKDIRS
 RUN_TOKEN ?= $(shell head -c 32 /dev/urandom 2>/dev/null | tr -dc 'a-z0-9' | head -c 8)
 export RUN_TOKEN TARGET
 
-# micro and test suites still consume legacy CLI args until their drivers migrate.
-MICRO_ARGS = --samples "$(SAMPLES)" --warmups "$(or $(WARMUPS),0)" --inner-repeat "$(or $(INNER_REPEAT),100000)" $(foreach b,$(BENCH),--bench "$(b)") $(if $(SUITE),--suite "$(SUITE)") $(foreach r,$(RUNTIMES),--runtime "$(r)")
-TEST_ARGS_COMMON = --fuzz-rounds "$(FUZZ_ROUNDS)"
+RUN_MAKE_VAR_NAMES = TARGET RUN_TARGET_NAME RUN_TARGET_ARCH RUN_EXECUTOR RUNTIME_CONTAINER_IMAGE RUNTIME_IMAGE_TAR \
+	RUN_REMOTE_PYTHON_BIN RUN_RUNTIME_PYTHON_BIN RUN_BPFTOOL_BIN RUN_NATIVE_REPOS_CSV RUN_TOKEN $(SUITE_ENV_NAMES)
+RUN_MAKE_VARS = $(foreach v,$(RUN_MAKE_VAR_NAMES),$(v)='$($(v))')
 
-RUN_MAKE_VARS = TARGET='$(TARGET)' RUN_TARGET_ARCH='$(RUN_TARGET_ARCH)' RUN_EXECUTOR='$(RUN_EXECUTOR)' \
-	RUNTIME_CONTAINER_IMAGE='$(RUNTIME_CONTAINER_IMAGE)' RUNTIME_IMAGE_TAR='$(RUNTIME_IMAGE_TAR)' \
-	RUN_TOKEN='$(RUN_TOKEN)' SAMPLES='$(SAMPLES)' WARMUPS='$(WARMUPS)' INNER_REPEAT='$(INNER_REPEAT)' \
-	BENCH='$(BENCH)' SUITE='$(SUITE)' RUNTIMES='$(RUNTIMES)' FUZZ_ROUNDS='$(FUZZ_ROUNDS)' \
-	WORKLOAD_DURATION='$(WORKLOAD_DURATION)' KEEP_WORKDIRS='$(KEEP_WORKDIRS)' \
-	BPFREJIT_BENCH_PASSES='$(BPFREJIT_BENCH_PASSES)' BPFREJIT_CORPUS_APPS='$(BPFREJIT_CORPUS_APPS)' \
-	SKIP_REJIT='$(SKIP_REJIT)'
-
-RUNTIME_ENV = -e TARGET="$(TARGET)" -e RUN_TOKEN="$(RUN_TOKEN)" -e SAMPLES="$(SAMPLES)" \
-	-e RUN_TARGET_ARCH="$(RUN_TARGET_ARCH)" -e RUN_EXECUTOR="$(RUN_EXECUTOR)" \
-	-e WARMUPS="$(WARMUPS)" -e INNER_REPEAT="$(INNER_REPEAT)" -e KEEP_WORKDIRS="$(KEEP_WORKDIRS)" \
-	-e BPFREJIT_BENCH_PASSES="$(BPFREJIT_BENCH_PASSES)" -e BPFREJIT_CORPUS_APPS="$(BPFREJIT_CORPUS_APPS)" \
-	-e WORKLOAD_DURATION="$(WORKLOAD_DURATION)" -e SKIP_REJIT="$(SKIP_REJIT)"
+RUNTIME_ENV_NAMES = TARGET RUN_TARGET_NAME RUN_TOKEN RUN_TARGET_ARCH RUN_EXECUTOR RUN_REMOTE_PYTHON_BIN \
+	RUN_RUNTIME_PYTHON_BIN RUN_BPFTOOL_BIN RUN_NATIVE_REPOS_CSV $(SUITE_ENV_NAMES)
+RUNTIME_ENV = $(foreach v,$(RUNTIME_ENV_NAMES),-e $(v)="$($(v))")
 RUNTIME_MOUNTS = -v /sys:/sys -v /sys/fs/bpf:/sys/fs/bpf -v /sys/kernel/debug:/sys/kernel/debug \
 	-v /lib/modules:/lib/modules:ro -v /boot:/boot:ro
 RUNTIME_DOCKER = docker run --rm --privileged --pid=host --network=host --ipc=host --cgroupns=host \
 	-e BPFREJIT_INSIDE_RUNTIME_CONTAINER=1 -e HOME=/root $(RUNTIME_ENV) \
 	-w "$(ROOT_DIR)" $(RUNTIME_MOUNTS)
-MICRO_CONTAINER_ARGS = --workspace "$(ROOT_DIR)" --target-arch "$(RUN_TARGET_ARCH)" --target-name "$(TARGET)" \
-	--executor "$(RUN_EXECUTOR)" --run-token "$(RUN_TOKEN)" --python-bin python3 --bpftool-bin bpftool \
-	--output "$(ROOT_DIR)/micro/results/$(TARGET)_micro.json" $(MICRO_ARGS)
-TEST_CONTAINER_ARGS = --workspace "$(ROOT_DIR)" --target-arch "$(RUN_TARGET_ARCH)" --target-name "$(TARGET)" \
-	--executor "$(RUN_EXECUTOR)" --run-token "$(RUN_TOKEN)" --python-bin python3 --bpftool-bin bpftool \
-	--artifact-dir "$(ROOT_DIR)/tests/results/$(RUN_TOKEN)" $(TEST_MODE_ARGS)
 
 .PHONY: check validate daemon-tests lint clean \
 	selftest negative-test test micro corpus all terminate kvm-host-cpu \
@@ -157,35 +201,29 @@ selftest: selftest-$(RUN_KEY)
 negative-test: negative-test-$(RUN_KEY)
 test: test-$(RUN_KEY)
 
-selftest-kvm-x86: TEST_MODE_ARGS := --test-mode selftest $(TEST_ARGS_COMMON)
-negative-test-kvm-x86: TEST_MODE_ARGS := --test-mode negative $(TEST_ARGS_COMMON)
-test-kvm-x86: TEST_MODE_ARGS := --test-mode test $(TEST_ARGS_COMMON)
+selftest-kvm-x86 selftest-qemu-arm64 selftest-aws-x86 selftest-aws-arm64: TEST_MODE := selftest
+negative-test-kvm-x86 negative-test-qemu-arm64 negative-test-aws-x86 negative-test-aws-arm64: TEST_MODE := negative
+test-kvm-x86 test-qemu-arm64 test-aws-x86 test-aws-arm64: TEST_MODE := test
 selftest-kvm-x86 negative-test-kvm-x86 test-kvm-x86: runtime-kernel-image kvm-host-cpu
-	$(VM_EXECUTABLE) --run "$(VM_KERNEL_IMAGE)" --cwd "$(ROOT_DIR)" --disable-monitor --verbose --cpus "$(VM_CPUS)" --mem "$(VM_MEM)" --rwdir "$(ROOT_DIR)" --overlay-rwdir /tmp --append "loglevel=7 panic=30 oops=panic" --exec "$(MAKE) -C $(ROOT_DIR) __runtime-vm-test $(RUN_MAKE_VARS)"
+	$(VNG) --exec "$(MAKE) -C $(ROOT_DIR) __runtime-vm-test $(RUN_MAKE_VARS)"
 
-selftest-qemu-arm64: TEST_MODE_ARGS := --test-mode selftest $(TEST_ARGS_COMMON)
-negative-test-qemu-arm64: TEST_MODE_ARGS := --test-mode negative $(TEST_ARGS_COMMON)
-test-qemu-arm64: TEST_MODE_ARGS := --test-mode test $(TEST_ARGS_COMMON)
 selftest-qemu-arm64 negative-test-qemu-arm64 test-qemu-arm64: arm64-runner-runtime-image-tar
-	$(VM_EXECUTABLE) --run "$(VM_KERNEL_IMAGE)" --cwd "$(ROOT_DIR)" --disable-monitor --verbose --cpus "$(VM_CPUS)" --mem "$(VM_MEM)" --rwdir "$(ROOT_DIR)" --overlay-rwdir /tmp --append "loglevel=7 panic=30 oops=panic" --exec "$(MAKE) -C $(ROOT_DIR) __runtime-vm-test $(RUN_MAKE_VARS)"
+	$(VNG) --exec "$(MAKE) -C $(ROOT_DIR) __runtime-vm-test $(RUN_MAKE_VARS)"
 
-selftest-aws-x86:
-	"$(PYTHON)" -m runner.libs.aws_executor run aws-x86 test --test-mode selftest $(TEST_ARGS_COMMON)
+AWS_TEST_TARGETS = selftest-aws-x86 negative-test-aws-x86 test-aws-x86 selftest-aws-arm64 negative-test-aws-arm64 test-aws-arm64
+AWS_BENCH_TARGETS = micro-aws-x86 corpus-aws-x86 micro-aws-arm64 corpus-aws-arm64
+$(AWS_TEST_TARGETS) $(AWS_BENCH_TARGETS):
+	$(AWS_RUN_ENV) "$(PYTHON)" -m runner.libs.aws_executor run $(AWS_TARGET_NAME.$(AWS_ARCH_KEY)) $(AWS_SUITE)
 
-negative-test-aws-x86:
-	"$(PYTHON)" -m runner.libs.aws_executor run aws-x86 test --test-mode negative $(TEST_ARGS_COMMON)
-
-test-aws-x86:
-	"$(PYTHON)" -m runner.libs.aws_executor run aws-x86 test --test-mode test $(TEST_ARGS_COMMON)
-
-selftest-aws-arm64:
-	"$(PYTHON)" -m runner.libs.aws_executor run aws-arm64 test --test-mode selftest $(TEST_ARGS_COMMON)
-
-negative-test-aws-arm64:
-	"$(PYTHON)" -m runner.libs.aws_executor run aws-arm64 test --test-mode negative $(TEST_ARGS_COMMON)
-
-test-aws-arm64:
-	"$(PYTHON)" -m runner.libs.aws_executor run aws-arm64 test --test-mode test $(TEST_ARGS_COMMON)
+selftest-aws-x86 negative-test-aws-x86 test-aws-x86 micro-aws-x86 corpus-aws-x86: AWS_ARCH_KEY := x86
+selftest-aws-arm64 negative-test-aws-arm64 test-aws-arm64 micro-aws-arm64 corpus-aws-arm64: AWS_ARCH_KEY := arm64
+$(AWS_TEST_TARGETS): AWS_INSTANCE_TYPE = $($(AWS_PREFIX.$(AWS_ARCH_KEY))_TEST_INSTANCE_TYPE)
+$(AWS_TEST_TARGETS): AWS_BTF := 1
+$(AWS_BENCH_TARGETS): AWS_INSTANCE_TYPE = $($(AWS_PREFIX.$(AWS_ARCH_KEY))_BENCH_INSTANCE_TYPE)
+$(AWS_BENCH_TARGETS): AWS_BTF := 0
+$(AWS_TEST_TARGETS): AWS_SUITE := test
+selftest-aws-x86 negative-test-aws-x86 test-aws-x86: x86-runner-runtime-image-tar
+selftest-aws-arm64 negative-test-aws-arm64 test-aws-arm64: arm64-runner-runtime-image-tar
 
 selftest-docker-x86 negative-test-docker-x86 test-docker-x86:
 	$(error PLATFORM=docker supports micro/corpus only)
@@ -198,48 +236,36 @@ kvm-host-cpu:
 micro: micro-$(RUN_KEY)
 corpus: corpus-$(RUN_KEY)
 
-micro-kvm-x86: runtime-kernel-image kvm-host-cpu
-	$(VM_EXECUTABLE) --run "$(VM_KERNEL_IMAGE)" --cwd "$(ROOT_DIR)" --disable-monitor --verbose --cpus "$(VM_CPUS)" --mem "$(VM_MEM)" --rwdir "$(ROOT_DIR)" --overlay-rwdir /tmp --append "loglevel=7 panic=30 oops=panic" --exec "$(MAKE) -C $(ROOT_DIR) __runtime-vm-micro $(RUN_MAKE_VARS)"
+micro-kvm-x86 micro-qemu-arm64 micro-docker-x86: RUNTIME_SUITE := micro
+corpus-kvm-x86 corpus-qemu-arm64 corpus-docker-x86: RUNTIME_SUITE := corpus
+micro-kvm-x86 corpus-kvm-x86: runtime-kernel-image kvm-host-cpu
+	$(VNG) --exec "$(MAKE) -C $(ROOT_DIR) __runtime-vm-$(RUNTIME_SUITE) $(RUN_MAKE_VARS)"
 
-corpus-kvm-x86: runtime-kernel-image kvm-host-cpu
-	$(VM_EXECUTABLE) --run "$(VM_KERNEL_IMAGE)" --cwd "$(ROOT_DIR)" --disable-monitor --verbose --cpus "$(VM_CPUS)" --mem "$(VM_MEM)" --rwdir "$(ROOT_DIR)" --overlay-rwdir /tmp --append "loglevel=7 panic=30 oops=panic" --exec "$(MAKE) -C $(ROOT_DIR) __runtime-vm-corpus $(RUN_MAKE_VARS)"
+micro-qemu-arm64 corpus-qemu-arm64: arm64-runner-runtime-image-tar
+	$(VNG) --exec "$(MAKE) -C $(ROOT_DIR) __runtime-vm-$(RUNTIME_SUITE) $(RUN_MAKE_VARS)"
 
-micro-qemu-arm64: arm64-runner-runtime-image-tar
-	$(VM_EXECUTABLE) --run "$(VM_KERNEL_IMAGE)" --cwd "$(ROOT_DIR)" --disable-monitor --verbose --cpus "$(VM_CPUS)" --mem "$(VM_MEM)" --rwdir "$(ROOT_DIR)" --overlay-rwdir /tmp --append "loglevel=7 panic=30 oops=panic" --exec "$(MAKE) -C $(ROOT_DIR) __runtime-vm-micro $(RUN_MAKE_VARS)"
+micro-docker-x86 corpus-docker-x86: x86-runner-runtime-image-tar
+	$(MAKE) __runtime-host-$(RUNTIME_SUITE) $(RUN_MAKE_VARS)
 
-corpus-qemu-arm64: arm64-runner-runtime-image-tar
-	$(VM_EXECUTABLE) --run "$(VM_KERNEL_IMAGE)" --cwd "$(ROOT_DIR)" --disable-monitor --verbose --cpus "$(VM_CPUS)" --mem "$(VM_MEM)" --rwdir "$(ROOT_DIR)" --overlay-rwdir /tmp --append "loglevel=7 panic=30 oops=panic" --exec "$(MAKE) -C $(ROOT_DIR) __runtime-vm-corpus $(RUN_MAKE_VARS)"
-
-micro-docker-x86: x86-runner-runtime-image-tar
-	$(MAKE) __runtime-host-micro $(RUN_MAKE_VARS)
-
-corpus-docker-x86: x86-runner-runtime-image-tar
-	$(MAKE) __runtime-host-corpus $(RUN_MAKE_VARS)
-
-micro-aws-x86:
-	"$(PYTHON)" -m runner.libs.aws_executor run aws-x86 micro $(MICRO_ARGS)
-
-corpus-aws-x86:
-	"$(PYTHON)" -m runner.libs.aws_executor run aws-x86 corpus
-
-micro-aws-arm64:
-	"$(PYTHON)" -m runner.libs.aws_executor run aws-arm64 micro $(MICRO_ARGS)
-
-corpus-aws-arm64:
-	"$(PYTHON)" -m runner.libs.aws_executor run aws-arm64 corpus
+micro-aws-x86 micro-aws-arm64: AWS_SUITE := micro
+corpus-aws-x86 corpus-aws-arm64: AWS_SUITE := corpus
+micro-aws-x86 corpus-aws-x86: x86-runner-runtime-image-tar
+micro-aws-arm64 corpus-aws-arm64: arm64-runner-runtime-image-tar
 
 micro-% corpus-% selftest-% negative-test-% test-%:
 	$(error unsupported PLATFORM/ARCH: PLATFORM=$(PLATFORM) ARCH=$(ARCH))
 
-__runtime-host-micro:
-	install -d "$(ROOT_DIR)/micro/results"
-	sudo "$(RUNNER_DIR)/scripts/bpfrejit-install" --image "$(RUNTIME_CONTAINER_IMAGE)" "$(RUNTIME_IMAGE_TAR)"
-	$(RUNTIME_DOCKER) -v "$(ROOT_DIR)/micro/results:$(ROOT_DIR)/micro/results" "$(RUNTIME_CONTAINER_IMAGE)" python3 -m runner.suites.micro $(MICRO_CONTAINER_ARGS)
+__runtime-host-micro __runtime-vm-micro: RUNTIME_RESULT_DIR := micro/results
+__runtime-host-corpus __runtime-vm-corpus: RUNTIME_RESULT_DIR := corpus/results
+__runtime-vm-test: RUNTIME_RESULT_DIR := tests/results
+__runtime-host-micro __runtime-vm-micro: RUNTIME_SUITE_MODULE := runner.suites.micro
+__runtime-host-corpus __runtime-vm-corpus: RUNTIME_SUITE_MODULE := corpus.driver
+__runtime-vm-test: RUNTIME_SUITE_MODULE := runner.suites.test
 
-__runtime-host-corpus:
-	install -d "$(ROOT_DIR)/corpus/results"
+__runtime-host-micro __runtime-host-corpus:
+	install -d "$(ROOT_DIR)/$(RUNTIME_RESULT_DIR)"
 	sudo "$(RUNNER_DIR)/scripts/bpfrejit-install" --image "$(RUNTIME_CONTAINER_IMAGE)" "$(RUNTIME_IMAGE_TAR)"
-	$(RUNTIME_DOCKER) -v "$(ROOT_DIR)/corpus/results:$(ROOT_DIR)/corpus/results" "$(RUNTIME_CONTAINER_IMAGE)" python3 -m corpus.driver
+	$(RUNTIME_DOCKER) -v "$(ROOT_DIR)/$(RUNTIME_RESULT_DIR):$(ROOT_DIR)/$(RUNTIME_RESULT_DIR)" "$(RUNTIME_CONTAINER_IMAGE)" python3 -m $(RUNTIME_SUITE_MODULE)
 
 __runtime-vm-docker:
 	rm -rf /run/bpf-benchmark-docker /tmp/bpf-benchmark-docker.img
@@ -251,27 +277,18 @@ __runtime-vm-docker:
 	sleep 10
 	docker info >/dev/null
 
-__runtime-vm-micro: __runtime-vm-docker
-	install -d "$(ROOT_DIR)/micro/results"
+__runtime-vm-micro __runtime-vm-corpus __runtime-vm-test: __runtime-vm-docker
+	install -d "$(ROOT_DIR)/$(RUNTIME_RESULT_DIR)"
 	"$(RUNNER_DIR)/scripts/bpfrejit-install" --image "$(RUNTIME_CONTAINER_IMAGE)" "$(RUNTIME_IMAGE_TAR)"
-	$(RUNTIME_DOCKER) -v "$(ROOT_DIR)/micro/results:$(ROOT_DIR)/micro/results" "$(RUNTIME_CONTAINER_IMAGE)" python3 -m runner.suites.micro $(MICRO_CONTAINER_ARGS)
-
-__runtime-vm-corpus: __runtime-vm-docker
-	install -d "$(ROOT_DIR)/corpus/results"
-	"$(RUNNER_DIR)/scripts/bpfrejit-install" --image "$(RUNTIME_CONTAINER_IMAGE)" "$(RUNTIME_IMAGE_TAR)"
-	$(RUNTIME_DOCKER) -v "$(ROOT_DIR)/corpus/results:$(ROOT_DIR)/corpus/results" "$(RUNTIME_CONTAINER_IMAGE)" python3 -m corpus.driver
-
-__runtime-vm-test: __runtime-vm-docker
-	install -d "$(ROOT_DIR)/tests/results"
-	"$(RUNNER_DIR)/scripts/bpfrejit-install" --image "$(RUNTIME_CONTAINER_IMAGE)" "$(RUNTIME_IMAGE_TAR)"
-	$(RUNTIME_DOCKER) -v "$(ROOT_DIR)/tests/results:$(ROOT_DIR)/tests/results" "$(RUNTIME_CONTAINER_IMAGE)" python3 -m runner.suites.test $(TEST_CONTAINER_ARGS)
+	$(RUNTIME_DOCKER) -v "$(ROOT_DIR)/$(RUNTIME_RESULT_DIR):$(ROOT_DIR)/$(RUNTIME_RESULT_DIR)" "$(RUNTIME_CONTAINER_IMAGE)" python3 -m $(RUNTIME_SUITE_MODULE)
 
 all: test micro corpus
 
 terminate: terminate-$(PLATFORM)
 
+terminate-aws: AWS_ARCH_KEY := $(ARCH)
 terminate-aws:
-	"$(PYTHON)" -m runner.libs.aws_executor terminate $(TARGET)
+	$(AWS_BASE_ENV) "$(PYTHON)" -m runner.libs.aws_executor terminate $(TARGET)
 
 terminate-%:
 	$(error terminate requires PLATFORM=aws)

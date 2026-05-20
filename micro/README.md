@@ -13,7 +13,6 @@
 - `driver.py`: consolidated micro suite driver; `make micro` is the canonical benchmark entrypoint
 - `catalog.py`: micro-only suite YAML parser
 - `../runner/libs/input_generators.py`: deterministic input generation for active benchmarks
-- `summarize_rq.py`, `generate_figures.py`: active reporting utilities
 - `../runner/`: shared C++ runner plus reusable Python libs for `micro/` and `corpus/`
 - `programs/*.bpf.c`: active pure-JIT benchmark sources
 

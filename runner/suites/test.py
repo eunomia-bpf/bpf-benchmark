@@ -20,11 +20,12 @@ from runner.libs.workspace_layout import (
     test_unittest_build_dir,
 )
 from runner.suites._common import (
-    add_common_args,
     base_suite_runtime_env,
+    common_env_args,
     ensure_bpf_stats_enabled,
+    env_int,
+    env_str,
     env_with_suite_runtime_ld,
-    positive_int,
     resolve_executable,
     resolve_workspace_path,
     run_checked,
@@ -35,23 +36,17 @@ _die = partial(fail, "test-suite")
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Run the test suite as a standalone entrypoint.",
-    )
-    add_common_args(parser)
-    parser.set_defaults(workspace=str(ROOT_DIR), target_name="local")
-    parser.add_argument("--daemon-binary", default="", help="Override the bpfrejit-daemon binary path.")
-    parser.add_argument("--artifact-dir", default="", help="Override the test suite artifact directory.")
-    parser.add_argument("--run-contract-json", default="", help="Run contract JSON to persist beside test logs.")
-    parser.add_argument("--run-contract-path", default="", help="Run contract JSON path to copy beside test logs.")
-    parser.add_argument(
-        "--test-mode",
-        choices=["selftest", "negative", "test", "fuzz"],
-        default="test",
-        help="Test mode to run.",
-    )
-    parser.add_argument("--fuzz-rounds", type=positive_int, default=1000, help="Number of fuzz_rejit rounds.")
-    args = parser.parse_args(sys.argv[1:] if argv is None else argv)
+    if argv or (argv is None and sys.argv[1:]):
+        _die("test suite takes env only; run through Make")
+    args = common_env_args(str(ROOT_DIR), _die)
+    args.daemon_binary = env_str("DAEMON_BINARY")
+    args.artifact_dir = env_str("TEST_ARTIFACT_DIR")
+    args.run_contract_json = env_str("RUN_CONTRACT_JSON")
+    args.run_contract_path = env_str("RUN_CONTRACT_PATH")
+    args.test_mode = env_str("TEST_MODE", "test")
+    args.fuzz_rounds = env_int("FUZZ_ROUNDS", 1000, _die, positive=True)
+    if args.test_mode not in {"selftest", "negative", "test", "fuzz"}:
+        _die(f"unsupported test mode: {args.test_mode}")
     return args
 
 
@@ -122,23 +117,22 @@ def _log_test_section(title: str) -> None:
     print(f"\n========================================\n  {title}\n========================================", file=sys.stderr)
 
 
-def _run_unittest_suite(workspace: Path, args: argparse.Namespace, env: dict[str, str], *, log_path: Path | None = None) -> tuple[int, int]:
+def _run_unittest_suite(workspace: Path, args: argparse.Namespace, env: dict[str, str], *, log_path: Path | None = None) -> None:
     _log_test_section("Running tests/unittest/ suite (pre-built)")
     build_dir = test_unittest_build_dir(workspace, args.target_arch)
     tests = _discover_unittest_binaries(workspace, args.target_arch)
     if not tests:
-        print(f"ERROR: no rejit_* test binaries found in {build_dir}", file=sys.stderr)
-        return 0, 1
+        _die(f"no rejit_* test binaries found in {build_dir}")
     runtime_env, _ = env_with_suite_runtime_ld(workspace, args.target_arch, env)
-    passed = failed = 0
     for test_binary in tests:
         print(f"--- {test_binary.name} ---", file=sys.stderr)
-        if _run_with_status([str(test_binary), str(build_dir / "progs")], cwd=workspace, env=runtime_env, log_path=log_path):
-            passed += 1
-        else:
-            failed += 1
-            print(f"FAIL: {test_binary.name}", file=sys.stderr)
-    return passed, failed
+        if not _run_with_status(
+            [str(test_binary), str(build_dir / "progs")],
+            cwd=workspace,
+            env=runtime_env,
+            log_path=log_path,
+        ):
+            _die(f"{test_binary.name} failed")
 
 
 def _fuzz_rounds_text(args: argparse.Namespace) -> str:
@@ -153,12 +147,10 @@ def _run_negative_suite(
     include_adversarial: bool = True,
     include_fuzz: bool = True,
     log_path: Path | None = None,
-) -> tuple[int, int]:
+) -> None:
     _log_test_section("Running tests/negative/ adversarial suite")
     negative_build = test_negative_build_dir(workspace, args.target_arch)
     runtime_env, _ = env_with_suite_runtime_ld(workspace, args.target_arch, env)
-    passed = 0
-    failed = 0
     tests: list[tuple[str, list[str], dict[str, str]]] = []
     if include_adversarial:
         tests.append(("adversarial_rejit", [str(negative_build / "adversarial_rejit")], runtime_env.copy()))
@@ -172,28 +164,18 @@ def _run_negative_suite(
         )
     for label, command, command_env in tests:
         print(f"--- {label} ---", file=sys.stderr)
-        if _run_with_status(command, cwd=workspace, env=command_env, log_path=log_path):
-            passed += 1
-        else:
-            failed += 1
-            print(f"FAIL: {label.split(' (')[0]}", file=sys.stderr)
-    return passed, failed
+        if not _run_with_status(command, cwd=workspace, env=command_env, log_path=log_path):
+            _die(f"{label.split(' (')[0]} failed")
 
 
-def _run_kernel_selftest(workspace: Path, env: dict[str, str]) -> tuple[int, int]:
+def _run_kernel_selftest(workspace: Path, env: dict[str, str]) -> None:
     kernel_selftest = workspace / "tests" / "kernel" / "build" / "test_recompile"
     if not kernel_selftest.is_file():
         print(f"SKIP: test_recompile not found at {kernel_selftest}", file=sys.stderr)
-        return 0, 0
+        return
     _log_test_section("Kernel selftest (test_recompile)")
-    if _run_with_status([str(kernel_selftest)], cwd=workspace, env=env):
-        return 1, 0
-    print("FAIL: test_recompile", file=sys.stderr)
-    return 0, 1
-
-
-def _print_test_summary(passed: int, failed: int, *, prefix: str = "RESULTS") -> None:
-    print(f"\n========================================\n  {prefix}: {passed} passed, {failed} failed\n========================================", file=sys.stderr)
+    if not _run_with_status([str(kernel_selftest)], cwd=workspace, env=env):
+        _die("test_recompile failed")
 
 
 def _artifact_dir(workspace: Path, args: argparse.Namespace) -> Path:
@@ -223,50 +205,30 @@ def _run_selftest_mode(workspace: Path, args: argparse.Namespace, env: dict[str,
     log_path = artifact_dir / "selftest.log"
     _log_test_section("Loading kinsn modules")
     _load_kinsn_modules(workspace, args.target_arch)
-    pa, fa = _run_unittest_suite(workspace, args, env, log_path=log_path)
-    pb, fb = _run_negative_suite(workspace, args, env, log_path=log_path)
-    _print_test_summary(pa + pb, fa + fb, prefix="vm-selftest")
-    if fa + fb:
-        _die("vm-selftest failed")
+    _run_unittest_suite(workspace, args, env, log_path=log_path)
+    _run_negative_suite(workspace, args, env, log_path=log_path)
 
 
 def _run_negative_mode(workspace: Path, args: argparse.Namespace, env: dict[str, str], artifact_dir: Path) -> None:
     log_path = artifact_dir / "negative.log"
-    passed, failed = _run_negative_suite(workspace, args, env, log_path=log_path)
-    _print_test_summary(passed, failed, prefix="vm-negative-test")
-    if failed:
-        _die("vm-negative-test failed")
+    _run_negative_suite(workspace, args, env, log_path=log_path)
 
 
 def _run_fuzz_mode(workspace: Path, args: argparse.Namespace, env: dict[str, str], artifact_dir: Path) -> None:
     log_path = artifact_dir / "fuzz.log"
-    passed, failed = _run_negative_suite(
+    _run_negative_suite(
         workspace, args, env,
         include_adversarial=False, include_fuzz=True,
         log_path=log_path,
     )
-    _print_test_summary(passed, failed, prefix="vm-fuzz-test")
-    if failed:
-        _die("vm-fuzz-test failed")
 
 
 def _run_test_mode(workspace: Path, args: argparse.Namespace, env: dict[str, str]) -> None:
-    total_pass = total_fail = 0
-    p, f = _run_kernel_selftest(workspace, env)
-    total_pass += p
-    total_fail += f
+    _run_kernel_selftest(workspace, env)
     _log_test_section("Loading kinsn modules")
     _load_kinsn_modules(workspace, args.target_arch)
-    p, f = _run_unittest_suite(workspace, args, env)
-    total_pass += p
-    total_fail += f
-    p, f = _run_negative_suite(workspace, args, env)
-    total_pass += p
-    total_fail += f
-    _print_test_summary(total_pass, total_fail)
-    if total_fail:
-        _die("vm-test failed")
-    print("vm-test: ALL PASSED", file=sys.stderr)
+    _run_unittest_suite(workspace, args, env)
+    _run_negative_suite(workspace, args, env)
 
 
 def _mode_needs_bpf_stats(mode: str) -> bool:

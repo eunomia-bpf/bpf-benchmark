@@ -41,8 +41,8 @@ def resolve_workload_tool(name: str) -> str:
 class WorkloadResult:
     """Raw workload run record. Framework never parses tool output.
 
-    All metric extraction (ops_per_sec, latency percentiles, error rates,
-    bytes_total, etc.) happens offline in `analysis/` from `stdout`.
+    Tool output is stored verbatim. Any metric extraction from stdout happens
+    outside the benchmark framework.
 
     Fields are observed externally (return code, wallclock duration, exact
     command) or stored verbatim (stdout, stderr). `config` records non-output
@@ -1276,9 +1276,8 @@ def run_otel_mixed_workload(duration_s: int | float) -> WorkloadResult:
         perf_unwind_native and the Go-binary path.
 
     The composite WorkloadResult holds one component per concurrent process
-    (5 languages + 1 stress-ng), each with raw stdout/stderr; offline
-    analysis derives per-language ops/sec from the final stderr line and
-    stress-ng bogo-ops from its --metrics-brief output.
+    (5 languages + 1 stress-ng), each with raw stdout/stderr. Interpreting
+    language ops/sec or stress-ng bogo-ops is external to the framework.
 
     Note: BPF tail-called programs (perf_unwind_<lang>) skip the prologue
     and stay at run_cnt=0; coverage of these programs is established via

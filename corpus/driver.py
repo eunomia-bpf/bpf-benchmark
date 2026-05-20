@@ -94,6 +94,15 @@ def _env_bool(name: str) -> bool:
     return _env_str(name).lower() in ("1", "true", "yes", "on")
 
 
+def _keep_workdirs_enabled() -> bool:
+    raw = _env_str("KEEP_WORKDIRS").lower()
+    if raw in ("", "0"):
+        return False
+    if raw in ("1", "all"):
+        return True
+    raise SystemExit("KEEP_WORKDIRS must be empty, 0, 1, or all")
+
+
 def _env_int(name: str, default: int) -> int:
     raw = _env_str(name)
     return default if not raw else int(raw)
@@ -105,34 +114,45 @@ def _env_float(name: str, default: float) -> float:
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    """Build the driver Namespace entirely from env vars (no CLI args).
-
-    Infrastructure (workspace/target_arch/executor/native_repos) is rebuilt
-    in-process via runner.libs.run_contract.build_run_config(TARGET, "corpus").
-    User knobs (SAMPLES/WARMUPS/...) come straight from env. argv is accepted
-    for legacy callers but ignored.
-    """
+    """Build the driver Namespace entirely from Make-provided env vars."""
     del argv
-    from runner.libs.run_contract import build_run_config
-    target_name = _env_str("TARGET", "x86-kvm")
-    contract = build_run_config(target_name, "corpus")
+    target_name = _env_str("RUN_TARGET_NAME", _env_str("TARGET", "x86-kvm"))
+    target_arch = _env_str("RUN_TARGET_ARCH")
+    executor = _env_str("RUN_EXECUTOR")
+    run_token = _env_str("RUN_TOKEN")
+    python_bin = _env_str("RUN_REMOTE_PYTHON_BIN")
+    bpftool_bin = _env_str("RUN_BPFTOOL_BIN")
+    native_repos = [
+        token.strip()
+        for token in _env_str("RUN_NATIVE_REPOS_CSV").split(",")
+        if token.strip()
+    ]
+    for name, value in (
+        ("RUN_TARGET_ARCH", target_arch),
+        ("RUN_EXECUTOR", executor),
+        ("RUN_TOKEN", run_token),
+        ("RUN_REMOTE_PYTHON_BIN", python_bin),
+        ("RUN_BPFTOOL_BIN", bpftool_bin),
+    ):
+        if not value:
+            raise SystemExit(f"{name} is required; run corpus through Make")
     ns = argparse.Namespace(
         workspace=str(ROOT_DIR),
-        target_arch=contract.identity.target_arch,
-        target_name=contract.identity.target_name,
-        executor=contract.identity.executor,
-        run_token=contract.identity.token,
-        python_bin=contract.remote.python_bin,
-        bpftool_bin=contract.remote.bpftool_bin or "bpftool",
+        target_arch=target_arch,
+        target_name=target_name,
+        executor=executor,
+        run_token=run_token,
+        python_bin=python_bin,
+        bpftool_bin=bpftool_bin,
         daemon_binary="",  # resolved later via resolve_daemon_binary()
         suite=str(DEFAULT_MACRO_APPS_YAML),
-        native_repos=list(contract.artifacts.native_repos),
+        native_repos=native_repos,
         output_json="",  # filled in by _setup_runtime_env
         samples=_env_int("SAMPLES", 0),
         duration_s=_env_float("WORKLOAD_DURATION", 0.0),
         warmups=_env_int("WARMUPS", 1),
         skip_rejit=_env_bool("SKIP_REJIT"),
-        keep_failure_artifacts=_env_str("KEEP_WORKDIRS").strip() == "1",
+        keep_failure_artifacts=_keep_workdirs_enabled(),
     )
     if ns.samples < 0:
         raise SystemExit("SAMPLES must be >= 0")
@@ -547,16 +567,6 @@ def run_suite(
     # daemon used to do this implicitly; with the shim path it must be
     # explicit at suite start.
     kinsn_module_metadata = prepare_kinsn_modules()
-    # KEEP_WORKDIRS=1: point shim's per-prog workdirs at the run artifact dir
-    # so target.json / report.json / bytecode files persist past VM shutdown.
-    # Without this BPFREJIT_SHIM_DIR defaults to /tmp inside the VM and the
-    # entire shim work-state is lost when virtme tears the VM down. Useful for
-    # debugging katran kinsn pass failures + tracee EBADF investigations.
-    if args.keep_failure_artifacts:
-        shim_workdir_root = artifact_session.run_dir / "details" / "shim-workdirs"
-        shim_workdir_root.mkdir(parents=True, exist_ok=True)
-        os.environ["BPFREJIT_SHIM_DIR"] = str(shim_workdir_root)
-        os.environ["BPFREJIT_SHIM_LOG"] = str(shim_workdir_root / "shim.log")
     with DaemonSession.start(
         daemon_binary,
         stdout_path=daemon_log_dir / "daemon.stdout.log",
@@ -653,8 +663,7 @@ def run_suite(
         kinsn_metadata = dict(prepared_daemon_session.metadata)
 
     # No top-level results array. Per-app data is in details/apps/<safe>.json
-    # (incrementally written). Suite-wide status derived in-memory from
-    # results_by_name; no per-app summary copied into result.json.
+    # (incrementally written). Only suite status is copied into result.json.
     any_app_failed = any(
         str((results_by_name.get(app.name) or {}).get("status") or "error") != "ok"
         for app in suite.apps
@@ -860,9 +869,8 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
         # Per-app failures (verifier reject after rewrite, EBUSY tail-calls,
-        # transient stats-sample errors) are recorded in result.json for
-        # analysis; they should not fail the make target. Only fail when the
-        # suite never started (payload.fatal_error) or every app failed.
+        # transient stats-sample errors) are recorded as raw errors. Only fail
+        # when the suite never started (payload.fatal_error) or every app failed.
         suite_fatal = bool(str(payload.get("fatal_error") or "").strip())
         results = payload.get("results") or []
         all_apps_failed = bool(results) and all(

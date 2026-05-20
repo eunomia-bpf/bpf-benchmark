@@ -62,36 +62,19 @@ def _container_suite_config(config: Any, python_bin: str) -> Any:
 
 
 def _build_base_suite_argv(
-    workspace: Path,
     suite_module: str,
     config: Any,
     *,
     die: Any,
 ) -> list[str]:
-    """Build python -m invocation. corpus.driver rebuilds RunConfig in-container
-    via build_run_config(TARGET, "corpus"); micro and test still consume legacy
-    CLI infra args via argparse pending their own env migration.
-    """
+    """Build python -m invocation for the runtime container."""
     remote_python = _required(config.remote.python_bin, "RUN_REMOTE_PYTHON_BIN", die)
-    suite_name = config.identity.suite_name
-    if suite_name == "corpus":
-        return [remote_python, "-m", suite_module]
-    return [
-        remote_python, "-m", suite_module,
-        "--workspace", str(workspace),
-        "--target-arch", _required(config.identity.target_arch, "RUN_TARGET_ARCH", die),
-        "--target-name", _required(config.identity.target_name, "RUN_TARGET_NAME", die),
-        "--executor", _required(config.identity.executor, "RUN_EXECUTOR", die),
-        "--run-token", _required(config.identity.token, "RUN_TOKEN", die),
-        "--python-bin", remote_python,
-        "--bpftool-bin", _required(config.remote.bpftool_bin, "RUN_BPFTOOL_BIN", die),
-    ]
+    return [remote_python, "-m", suite_module]
 
 
 def build_runtime_container_command(
     host_workspace: Path,
     config: Any,
-    suite_args: list[str],
     *,
     die: Any,
 ) -> list[str]:
@@ -100,7 +83,7 @@ def build_runtime_container_command(
     image_workspace = RUNTIME_IMAGE_WORKSPACE
     suite_name = _required(config.identity.suite_name, "RUN_SUITE_NAME", die)
     container_config = _container_suite_config(config, runtime_python)
-    suite_argv = build_suite_argv(image_workspace, container_config, suite_args, die=die)
+    suite_argv = build_suite_argv(container_config, die=die)
     if len(suite_argv) < 3 or suite_argv[1] != "-m":
         die(f"unexpected suite argv shape: {suite_argv}")
     command = [
@@ -110,13 +93,14 @@ def build_runtime_container_command(
         "-e", "HOME=/root",
         "-w", str(image_workspace),
     ]
-    # Forward every host env var (minus container-managed ones) so the in-container
-    # driver sees TARGET, RUN_TOKEN, SAMPLES, WARMUPS, BPFREJIT_BENCH_PASSES, ...
-    # without any allowlist or rename. The driver rebuilds RunConfig itself.
+    # Forward every host env var (minus container-managed ones) so in-container
+    # drivers see Make-provided RUN_* plus suite knobs without a second config file.
     for name, value in os.environ.items():
         if name in _HOST_ENV_BLOCKLIST or not value.strip():
             continue
         command.extend(["-e", f"{name}={value}"])
+    if suite_name == "test":
+        command.extend(["-e", f"RUN_CONTRACT_JSON={config.to_json_text()}"])
     for result_dir in runtime_container_result_dirs(host_workspace, suite_name, die=die):
         command.extend(["-v", f"{result_dir}:{image_workspace / result_dir.relative_to(host_workspace)}"])
     for source, target, readonly in (
@@ -140,34 +124,14 @@ _SUITE_MODULE = {
 
 
 def build_suite_argv(
-    workspace: Path,
     config: Any,
-    suite_args: list[str],
     *,
     die: Any,
-    config_path: Path | None = None,
 ) -> list[str]:
-    """Compose `python -m <suite_module>` plus any legacy CLI tail args.
-
-    Suite-specific knobs flow through BPFREJIT_* env vars (see _config_env_pairs).
-    The micro and test suites still consume some legacy CLI args via suite_args
-    while their respective drivers are migrated to env-only.
-    """
-    del config_path
+    """Compose `python -m <suite_module>`; suite knobs are env-only."""
     suite_name = config.identity.suite_name
     module = _SUITE_MODULE.get(suite_name)
     if module is None:
         die(f"unsupported suite: {suite_name}")
         raise AssertionError("unreachable")
-    command = _build_base_suite_argv(workspace, module, config, die=die)
-    # Legacy CLI for micro and test until those drivers migrate to env-only too.
-    # corpus is fully env-driven, so it appends nothing here.
-    if suite_name == "micro":
-        target_name = _required(config.identity.target_name, "RUN_TARGET_NAME", die)
-        command.extend(["--output", str(workspace / "micro" / "results" / f"{target_name}_micro.json")])
-    elif suite_name == "test":
-        run_token = _required(config.identity.token, "RUN_TOKEN", die)
-        command.extend(["--artifact-dir", str(workspace / "tests" / "results" / run_token)])
-        command.extend(["--run-contract-json", config.to_json_text()])
-    command.extend(suite_args)
-    return command
+    return _build_base_suite_argv(module, config, die=die)

@@ -42,6 +42,12 @@ from runner.libs.run_artifacts import (
 
 DEFAULT_RUNTIME_ORDER_SEED = 0
 RUNNER_TIMEOUT_SECONDS = 180
+RUNTIME_COMMANDS = {
+    "native": "run-native",
+    "llvmbpf": "run-llvmbpf",
+    "kernel": "test-run",
+    "native_kernel": "run-native-lab",
+}
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -172,32 +178,23 @@ def list_suite(suite: SuiteSpec) -> None:
     print("----------")
     for benchmark in suite.benchmarks.values():
         tags = ",".join(benchmark.tags)
-        family = benchmark.family or "-"
-        level = benchmark.level or "-"
-        print(f"{benchmark.name:20} {benchmark.category:18} {benchmark.io_mode:8} {family:16} {level:8} {tags}")
+        print(f"{benchmark.name:36} {benchmark.io_mode:8} {tags}")
 
     print()
     print("Runtimes")
     print("--------")
     for runtime in suite.runtimes:
-        aliases = f" (aliases: {', '.join(runtime.aliases)})" if runtime.aliases else ""
-        print(f"{runtime.name:12} {runtime.label}{aliases}")
+        print(runtime.name)
 
 
 def select_runtimes(names: list[str] | None, suite: SuiteSpec) -> list[RuntimeSpec]:
     requested = names or list(suite.defaults.runtimes)
     runtimes_by_name = {runtime.name: runtime for runtime in suite.runtimes}
     selected: list[RuntimeSpec] = []
-    for raw_name in requested:
-        name = suite.runtime_aliases.get(raw_name, raw_name)
-        if name not in runtimes_by_name:
-            raise SystemExit(f"unknown runtime: {raw_name}")
-        runtime = runtimes_by_name[name]
-        if runtime.policy_mode != "stock":
-            raise SystemExit(
-                f"micro benchmark only supports stock runtimes under §5.6; got {runtime.name} ({runtime.mode})"
-            )
-        selected.append(runtime)
+    for name in requested:
+        if name not in runtimes_by_name or name not in RUNTIME_COMMANDS:
+            raise SystemExit(f"unknown runtime: {name}")
+        selected.append(runtimes_by_name[name])
     return selected
 
 
@@ -248,13 +245,12 @@ def build_runner_command(
     dump_jit_path: Path | None = None,
     dump_xlated_path: Path | None = None,
 ) -> list[str]:
-    if runtime.mode == "llvmbpf":
-        command = [str(runner_binary), "run-llvmbpf"]
-    elif runtime.mode == "native":
-        command = [str(runner_binary), "run-native"]
-    elif runtime.mode == "native_lab":
-        command = [str(runner_binary), "run-native-lab"]
-        # Pick the native_lab program type from benchmark tags so the
+    runner_command = RUNTIME_COMMANDS.get(runtime.name)
+    if runner_command is None:
+        raise RuntimeError(f"unsupported micro runtime: {runtime.name}")
+    command = [str(runner_binary), runner_command]
+    if runtime.name == "native_kernel":
+        # Pick the native kernel program type from benchmark tags so the
         # runner builds the right BPF stub (XDP vs sched_cls vs cgroup_skb).
         tags = set(benchmark.tags)
         if "tc" in tags:
@@ -262,10 +258,6 @@ def build_runner_command(
         elif "cgroup_skb" in tags or "cgroup-skb" in tags:
             command.extend(["--native-lab-prog-type", "cgroup_skb"])
         # else: default xdp
-    elif runtime.mode == "kernel":
-        command = [str(runner_binary), "test-run"]
-    else:
-        raise RuntimeError(f"unsupported micro runtime mode: {runtime.mode}")
 
     command.extend(["--program", str(benchmark.object_path)])
     if benchmark.program_names:
@@ -405,7 +397,7 @@ def main(argv: list[str] | None = None) -> int:
 
     require_suite_artifacts(suite)
     runner_binary = Path(suite.build.runner_binary).resolve()
-    if any(runtime.mode == "llvmbpf" for runtime in runtimes):
+    if any(runtime.name == "llvmbpf" for runtime in runtimes):
         runner_help = runner_help_text(runner_binary)
         if "run-llvmbpf" not in runner_help:
             detail = tail_text(runner_help, max_lines=20, max_chars=4000)
@@ -431,11 +423,6 @@ def main(argv: list[str] | None = None) -> int:
             "cpu_governor": read_optional_text("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"),
             "turbo_state": read_optional_text("/sys/devices/system/cpu/intel_pstate/no_turbo"),
             "perf_event_paranoid": read_optional_text("/proc/sys/kernel/perf_event_paranoid"),
-        },
-        "toolchains": {
-            name: {"root": str(spec.get("root"))}
-            for name, spec in ((suite.metadata.get("toolchains") or {}).items())
-            if isinstance(spec, dict)
         },
         "build": {
             "runner_binary": str(runner_binary),
@@ -526,11 +513,6 @@ def main(argv: list[str] | None = None) -> int:
                 )
             benchmark_record = {
                 "name": benchmark.name,
-                "description": benchmark.description,
-                "category": benchmark.category,
-                "family": benchmark.family,
-                "level": benchmark.level,
-                "hypothesis": benchmark.hypothesis,
                 "io_mode": benchmark.io_mode,
                 "tags": list(benchmark.tags),
                 "expected_result": benchmark.expected_result,
@@ -562,13 +544,12 @@ def main(argv: list[str] | None = None) -> int:
                     result_values = [sample["result"] for sample in run_samples]
                     benchmark_record["runs"].append({
                         "runtime": runtime.name,
-                        "mode": runtime.mode,
                         "inner_repeat": inner_repeat,
                         "samples": run_samples,
                     })
                     last_sample = run_samples[-1]
                     print(
-                        f"  {runtime.name:10} "
+                        f"  {runtime.name:16} "
                         f"compile last {int(last_sample.get('compile_ns') or 0)} ns | "
                         f"exec last {int(last_sample.get('exec_ns') or 0)} ns | "
                         f"result {result_values[-1] if result_values else '?'}"
@@ -611,11 +592,11 @@ def main(argv: list[str] | None = None) -> int:
                         inner_repeat = int(runtime_samples[runtime.name]["inner_repeat"])
                         dump_jit_path = None
                         dump_xlated_path = None
-                        if runtime.mode in {"kernel", "llvmbpf"}:
+                        if runtime.name in {"kernel", "llvmbpf"}:
                             dump_jit_path, dump_xlated_path = _jit_dump_paths(
                                 artifact_dir,
                                 _dump_stem(benchmark.name, runtime.name, sample_idx),
-                                xlated=runtime.mode == "kernel",
+                                xlated=runtime.name == "kernel",
                             )
                         command = build_runner_command(
                             runner_binary=runner_binary,

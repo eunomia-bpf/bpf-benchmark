@@ -39,10 +39,10 @@ def tail_text(text: str, *, max_lines: int = 12, max_chars: int = 4000) -> str:
     lines = [line.rstrip() for line in text.splitlines() if line.strip()]
     if len(lines) > max_lines:
         lines = lines[-max_lines:]
-    summary = "\n".join(lines)
-    if len(summary) > max_chars:
-        summary = summary[-max_chars:]
-    return summary
+    tail = "\n".join(lines)
+    if len(tail) > max_chars:
+        tail = tail[-max_chars:]
+    return tail
 
 
 def which(tool: str) -> str | None:

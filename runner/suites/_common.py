@@ -36,6 +36,50 @@ def csv_tokens(value: str) -> list[str]:
     return [token.strip() for token in str(value or "").split(",") if token.strip()]
 
 
+def env_str(name: str, default: str = "") -> str:
+    return os.environ.get(name, "").strip() or default
+
+
+def env_required(name: str, die: object) -> str:
+    value = env_str(name)
+    if not value:
+        die(f"{name} is required; run suites through Make")  # type: ignore[operator]
+        raise AssertionError("unreachable")
+    return value
+
+
+def env_int(name: str, default: int, die: object, *, positive: bool = False) -> int:
+    raw = env_str(name)
+    value = default if not raw else int(raw)
+    if value < 0 or (positive and value <= 0):
+        op = "> 0" if positive else ">= 0"
+        die(f"{name} must be {op}")  # type: ignore[operator]
+    return value
+
+
+def env_bool(name: str) -> bool:
+    return env_str(name).lower() in {"1", "true", "yes", "on"}
+
+
+def env_tokens(name: str) -> list[str]:
+    return [token for token in env_str(name).replace(",", " ").split() if token]
+
+
+def common_env_args(default_workspace: str, die: object) -> argparse.Namespace:
+    target_name = env_str("RUN_TARGET_NAME", env_str("TARGET"))
+    if not target_name:
+        die("RUN_TARGET_NAME is required; run suites through Make")  # type: ignore[operator]
+    return argparse.Namespace(
+        workspace=env_str("WORKSPACE", default_workspace),
+        target_arch=env_required("RUN_TARGET_ARCH", die),
+        target_name=target_name,
+        executor=env_required("RUN_EXECUTOR", die),
+        run_token=env_required("RUN_TOKEN", die),
+        python_bin=env_required("RUN_REMOTE_PYTHON_BIN", die),
+        bpftool_bin=env_str("RUN_BPFTOOL_BIN", "bpftool"),
+    )
+
+
 # ---------------------------------------------------------------------------
 # runtime env / PATH helpers
 # ---------------------------------------------------------------------------
@@ -216,41 +260,6 @@ def setup_tmpdir(env: dict[str, str], scratch_token: str) -> None:
         Path(env["TMPDIR"]).chmod(0o1777)
     env.setdefault("TMP", env["TMPDIR"])
     env.setdefault("TEMP", env["TMPDIR"])
-
-
-# ---------------------------------------------------------------------------
-# Shared argparse helpers
-# ---------------------------------------------------------------------------
-
-def add_common_args(parser: argparse.ArgumentParser) -> None:
-    """Add the standard arguments shared by all suite entrypoints."""
-    parser.add_argument("--workspace", help="Benchmark workspace root.")
-    parser.add_argument(
-        "--target-arch",
-        "--arch",
-        dest="target_arch",
-        default="x86_64",
-        help="Target artifact architecture, for example x86, x86_64, aarch64, or arm64.",
-    )
-    parser.add_argument("--target-name", default="local", help="Target name used for run identity.")
-    parser.add_argument("--executor", default="local", help="Executor name used for artifact path resolution.")
-    parser.add_argument("--run-token", default="", help="Run token used for runtime scratch directories.")
-    parser.add_argument("--python-bin", default="", help="Python binary used to run the suite driver.")
-    parser.add_argument("--bpftool-bin", default="bpftool", help="bpftool binary name or path.")
-
-
-def positive_int(value: str) -> int:
-    parsed = int(value)
-    if parsed <= 0:
-        raise argparse.ArgumentTypeError("must be > 0")
-    return parsed
-
-
-def nonnegative_int(value: str) -> int:
-    parsed = int(value)
-    if parsed < 0:
-        raise argparse.ArgumentTypeError("must be >= 0")
-    return parsed
 
 
 # ---------------------------------------------------------------------------

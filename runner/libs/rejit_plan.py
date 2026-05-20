@@ -5,7 +5,7 @@ optional per-app overrides live at `runner/config/passes/<pass>/<app>.yaml`
 with a `programs` map keyed by prog_name (and `default` fallback). YAML is the
 single source of truth; runner never queries bpfopt for pass metadata.
 
-Lookup (no merge — first match wins):
+Lookup (no merge; first match is selected):
   1. <pass>/<app>.yaml -> programs[<prog_name>]
   2. <pass>/<app>.yaml -> programs.default
   3. <pass>/default.yaml -> top-level command

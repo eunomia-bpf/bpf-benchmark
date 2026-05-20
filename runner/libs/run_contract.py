@@ -11,7 +11,6 @@ from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail
 
 
-TARGETS_DIR = ROOT_DIR / "runner" / "targets"
 SUITES_DIR = ROOT_DIR / "runner" / "suites"
 
 _die = partial(fail, "run-contract")
@@ -185,68 +184,11 @@ def _env_or_default(env: dict[str, str], name: str, default: str = "") -> str:
     return env.get(name, "").strip() or default
 
 
-def _prefixed_env_or_default(env: dict[str, str], prefix: str, suffix: str, default: str = "") -> str:
-    return _env_or_default(env, f"{prefix}_{suffix}", default)
-
-
-def _target_default(target: dict[str, str], name: str) -> str:
-    return target.get(f"TARGET_{name}_DEFAULT", "")
-
-
-def _resolve_repo_path(path: str) -> str:
-    if not path: return ""
-    candidate = Path(path)
-    return str(candidate) if candidate.is_absolute() else str((ROOT_DIR / candidate).resolve())
-
-
-def _host_cpu_count() -> int: return max(os.cpu_count() or 1, 1)
-
-
-def _resolve_cpu_spec(spec: str) -> str:
-    if not spec or spec == "auto": return str(_host_cpu_count())
-    if spec.startswith("auto:"):
-        return str(max(int(_host_cpu_count() * float(spec.split(":", 1)[1] or "1")), 1))
-    return spec
-_COMMON_MANIFEST_INPUTS = {
-    "PYTHON",
-    "RUN_TOKEN",
-    "RUNTIME_PYTHON",
-}
-
-_KVM_MANIFEST_INPUTS = {
-    "BZIMAGE",
-    "VM_CPUS",
-    "VM_MEM",
-    "TIMEOUT",
-}
-
-_AWS_MANIFEST_SUFFIXES = {
-    "NAME_TAG",
-    "INSTANCE_TYPE",
-    "REMOTE_USER",
-    "REMOTE_STAGE_DIR",
-    "AMI_PARAM",
-    "AMI_ID",
-    "ROOT_VOLUME_GB",
-    "KEY_NAME",
-    "KEY_PATH",
-    "SECURITY_GROUP_ID",
-    "SUBNET_ID",
-    "REGION",
-    "PROFILE",
-}
-
-
-def _filtered_run_inputs(target_name: str, env: dict[str, str] | None) -> dict[str, str]:
-    source_env = os.environ if env is None else env
-    allowed = set(_COMMON_MANIFEST_INPUTS)
-    if target_name == "x86-kvm":
-        allowed.update(_KVM_MANIFEST_INPUTS)
-    else:
-        target = _load_assignment_file(TARGETS_DIR / f"{target_name}.env")
-        if aws_env_prefix := target.get("TARGET_AWS_ENV_PREFIX", ""):
-            allowed.update(f"{aws_env_prefix}_{suffix}" for suffix in _AWS_MANIFEST_SUFFIXES)
-    return {key: source_env[key] for key in allowed if key in source_env}
+def _required_env(env: dict[str, str], name: str) -> str:
+    value = _env_or_default(env, name)
+    if not value:
+        _die(f"{name} is required; run benchmark targets through Make")
+    return value
 
 
 def _validate_test_mode(mode: str) -> None:
@@ -258,75 +200,65 @@ def _build_run_config_mapping(
     env: dict[str, str] | None = None,
 ) -> dict[str, str | list[str]]:
     source_env = os.environ if env is None else env
-    values = _filtered_run_inputs(target_name, env)
-    target = _load_assignment_file(TARGETS_DIR / f"{target_name}.env")
     suite = _load_assignment_file(SUITES_DIR / f"{suite_name}.env")
     run_test_mode = (source_env.get("TEST_MODE", "").strip().lower() or "test") if suite_name == "test" else "test"
 
-    run_token = values.get("RUN_TOKEN", "").strip() or f"{target_name}_{suite_name}"
-    (run_name_tag, run_instance_type, run_remote_user, run_remote_stage_dir,
-     run_ami_param, run_ami_id, run_root_volume_gb,
-     run_aws_key_name, run_aws_key_path, run_aws_security_group_id,
-     run_aws_subnet_id, run_aws_region, run_aws_profile,
-     run_vm_backend, run_vm_executable, run_vm_cpus, run_vm_mem, run_vm_kernel_image,
-    ) = ("",) * 18
-    run_bpftool_bin = "bpftool"
-    run_native_repos = suite.get("SUITE_DEFAULT_NATIVE_REPOS", "")
-    run_vm_timeout_seconds = suite.get("SUITE_DEFAULT_VM_TIMEOUT_SECONDS", "")
-    run_host_python_bin = _env_or_default(values, "PYTHON", "python3")
-    run_runtime_python_bin = _env_or_default(values, "RUNTIME_PYTHON", "python3")
-    run_remote_python_bin = target.get("TARGET_REMOTE_PYTHON_DEFAULT", suite.get("SUITE_DEFAULT_REMOTE_PYTHON_BIN", ""))
-    if target.get("TARGET_EXECUTOR", "") == "aws-ssh":
-        aws_env_prefix = target.get("TARGET_AWS_ENV_PREFIX", "")
-        if not aws_env_prefix:
-            _die(f"AWS target {target_name} is missing TARGET_AWS_ENV_PREFIX")
-        _penv = lambda suf, dflt="": _prefixed_env_or_default(values, aws_env_prefix, suf, dflt)
-        _treq = lambda suf: _die(f"{aws_env_prefix}_{suf} is required for AWS targets")
-        run_name_tag = _penv("NAME_TAG", _target_default(target, "NAME_TAG"))
-        default_instance_type = _target_default(target, "INSTANCE_TYPE")
-        if suite.get("SUITE_VM_CLASS", "") == "benchmark":
-            default_instance_type = _target_default(target, "BENCH_INSTANCE_TYPE") or default_instance_type
-        else:
-            default_instance_type = _target_default(target, "TEST_INSTANCE_TYPE") or default_instance_type
-        run_instance_type = _penv("INSTANCE_TYPE", default_instance_type)
-        run_remote_user = _penv("REMOTE_USER", _target_default(target, "REMOTE_USER"))
-        remote_stage_root = _penv("REMOTE_STAGE_DIR", _target_default(target, "REMOTE_STAGE_DIR")).rstrip("/")
-        if not remote_stage_root:
-            _die(f"AWS target {target_name} is missing TARGET_REMOTE_STAGE_DIR_DEFAULT")
-        run_remote_stage_dir = f"{remote_stage_root}/{suite_name}/{run_token}" if suite_name else f"{remote_stage_root}/{run_token}"
-        run_ami_param = _penv("AMI_PARAM", _target_default(target, "AMI_PARAM"))
-        run_ami_id = _penv("AMI_ID")
-        run_root_volume_gb = _penv("ROOT_VOLUME_GB", _target_default(target, "ROOT_VOLUME_GB"))
-        run_aws_key_path = _penv("KEY_PATH", _target_default(target, "KEY_PATH"))
-        if not run_aws_key_path: _treq("KEY_PATH")
-        run_aws_key_name = _penv("KEY_NAME", _target_default(target, "KEY_NAME")) or Path(run_aws_key_path).stem
-        if not run_aws_key_name: _die(f"{aws_env_prefix}_KEY_NAME could not be derived from {aws_env_prefix}_KEY_PATH")
-        run_aws_security_group_id = _penv("SECURITY_GROUP_ID", _target_default(target, "SECURITY_GROUP_ID"))
-        if not run_aws_security_group_id: _treq("SECURITY_GROUP_ID")
-        run_aws_subnet_id = _penv("SUBNET_ID", _target_default(target, "SUBNET_ID"))
-        if not run_aws_subnet_id: _treq("SUBNET_ID")
-        run_aws_region = _penv("REGION", _target_default(target, "AWS_REGION"))
-        if not run_aws_region: _treq("REGION")
-        run_aws_profile = _penv("PROFILE", _target_default(target, "AWS_PROFILE"))
-        if not run_aws_profile: _treq("PROFILE")
-    elif target_name == "x86-kvm":
-        run_vm_backend = target.get("TARGET_KVM_BACKEND", "")
-        run_vm_executable = target.get("TARGET_KVM_EXECUTABLE", "")
-        run_host_python_bin = _env_or_default(values, "PYTHON", target.get("TARGET_KVM_HOST_PYTHON_DEFAULT", "python3"))
-        run_vm_kernel_image = _resolve_repo_path(_env_or_default(values, "BZIMAGE", target.get("TARGET_KVM_KERNEL_IMAGE_DEFAULT", "vendor/linux-framework/arch/x86/boot/bzImage")))
-        if not run_vm_backend: _die("x86-kvm target is missing TARGET_KVM_BACKEND")
-        if not run_vm_executable: _die("x86-kvm target is missing TARGET_KVM_EXECUTABLE")
-        if not Path(run_vm_executable).is_absolute() and "/" in run_vm_executable:
-            run_vm_executable = str((ROOT_DIR / run_vm_executable).resolve())
-        _kenv = lambda k, dflt="": _env_or_default(values, k, dflt)
-        run_vm_cpus = _kenv("VM_CPUS", _resolve_cpu_spec(target.get("TARGET_KVM_CPUS_SPEC", "8")))
-        run_vm_mem = _kenv("VM_MEM", target.get("TARGET_KVM_MEM", "64G"))
-    else:
-        _die(f"unsupported target: {target_name}")
-
-    run_vm_timeout_seconds = _env_or_default(values, "TIMEOUT", run_vm_timeout_seconds)
-
     _validate_test_mode(run_test_mode)
+    run_target_name = _env_or_default(source_env, "RUN_TARGET_NAME", target_name)
+    if run_target_name != target_name:
+        _die(f"RUN_TARGET_NAME={run_target_name!r} does not match requested target {target_name!r}")
+    run_executor = _required_env(source_env, "RUN_EXECUTOR")
+    run_remote_python_bin = _required_env(source_env, "RUN_REMOTE_PYTHON_BIN")
+    run_runtime_python_bin = _required_env(source_env, "RUN_RUNTIME_PYTHON_BIN")
+    run_bpftool_bin = _required_env(source_env, "RUN_BPFTOOL_BIN")
+    run_token = _required_env(source_env, "RUN_TOKEN")
+    run_native_repos = _env_or_default(source_env, "RUN_NATIVE_REPOS_CSV")
+    run_vm_timeout_seconds = _env_or_default(source_env, "TIMEOUT", suite.get("SUITE_DEFAULT_VM_TIMEOUT_SECONDS", ""))
+    run_host_python_bin = _env_or_default(source_env, "PYTHON", "python3")
+    run_name_tag = run_instance_type = run_remote_user = run_remote_stage_dir = ""
+    run_ami_param = run_ami_id = run_root_volume_gb = ""
+    run_aws_key_name = run_aws_key_path = run_aws_security_group_id = ""
+    run_aws_subnet_id = run_aws_region = run_aws_profile = ""
+    run_vm_backend = run_vm_executable = run_vm_cpus = run_vm_mem = run_vm_kernel_image = ""
+    if run_executor == "aws-ssh":
+        for name in (
+            "RUN_NAME_TAG",
+            "RUN_INSTANCE_TYPE",
+            "RUN_REMOTE_USER",
+            "RUN_REMOTE_STAGE_DIR",
+            "RUN_AMI_PARAM",
+            "RUN_ROOT_VOLUME_GB",
+            "RUN_AWS_KEY_NAME",
+            "RUN_AWS_KEY_PATH",
+            "RUN_AWS_SECURITY_GROUP_ID",
+            "RUN_AWS_SUBNET_ID",
+            "RUN_AWS_REGION",
+            "RUN_AWS_PROFILE",
+            "RUN_RUNTIME_CONTAINER_IMAGE",
+        ):
+            _required_env(source_env, name)
+        run_name_tag = _env_or_default(source_env, "RUN_NAME_TAG")
+        run_instance_type = _env_or_default(source_env, "RUN_INSTANCE_TYPE")
+        run_remote_user = _env_or_default(source_env, "RUN_REMOTE_USER")
+        run_remote_stage_dir = _env_or_default(source_env, "RUN_REMOTE_STAGE_DIR")
+        run_ami_param = _env_or_default(source_env, "RUN_AMI_PARAM")
+        run_ami_id = _env_or_default(source_env, "RUN_AMI_ID")
+        run_root_volume_gb = _env_or_default(source_env, "RUN_ROOT_VOLUME_GB")
+        run_aws_key_name = _env_or_default(source_env, "RUN_AWS_KEY_NAME")
+        run_aws_key_path = _env_or_default(source_env, "RUN_AWS_KEY_PATH")
+        run_aws_security_group_id = _env_or_default(source_env, "RUN_AWS_SECURITY_GROUP_ID")
+        run_aws_subnet_id = _env_or_default(source_env, "RUN_AWS_SUBNET_ID")
+        run_aws_region = _env_or_default(source_env, "RUN_AWS_REGION")
+        run_aws_profile = _env_or_default(source_env, "RUN_AWS_PROFILE")
+    elif run_executor == "kvm":
+        run_vm_backend = _env_or_default(source_env, "RUN_VM_BACKEND")
+        run_vm_executable = _env_or_default(source_env, "RUN_VM_EXECUTABLE")
+        run_vm_cpus = _env_or_default(source_env, "RUN_VM_CPUS")
+        run_vm_mem = _env_or_default(source_env, "RUN_VM_MEM")
+        run_vm_kernel_image = _env_or_default(source_env, "RUN_VM_KERNEL_IMAGE")
+    elif run_executor != "local-docker":
+        _die(f"unsupported executor: {run_executor}")
+
     if not run_remote_python_bin:
         _die(f"suite {suite_name} is missing remote python contract")
     if not run_bpftool_bin:
@@ -345,12 +277,12 @@ def _build_run_config_mapping(
     elif suite_name != "corpus":
         _die(f"unsupported suite: {suite_name}")
 
-    arch = target.get("TARGET_ARCH", "").strip()
+    arch = _required_env(source_env, "RUN_TARGET_ARCH")
     return {
         "RUN_TARGET_NAME": target_name, "RUN_TARGET_ARCH": arch,
-        "RUN_EXECUTOR": target.get("TARGET_EXECUTOR", ""), "RUN_SUITE_NAME": suite_name,
-        "RUN_SUITE_NEEDS_RUNTIME_BTF": suite.get("SUITE_NEEDS_RUNTIME_BTF", "0"),
-        "RUN_RUNTIME_CONTAINER_IMAGE": f"bpf-benchmark/runner-runtime:{arch}",
+        "RUN_EXECUTOR": run_executor, "RUN_SUITE_NAME": suite_name,
+        "RUN_SUITE_NEEDS_RUNTIME_BTF": _env_or_default(source_env, "RUN_SUITE_NEEDS_RUNTIME_BTF", suite.get("SUITE_NEEDS_RUNTIME_BTF", "0")),
+        "RUN_RUNTIME_CONTAINER_IMAGE": _env_or_default(source_env, "RUN_RUNTIME_CONTAINER_IMAGE"),
         "RUN_TOKEN": run_token,
         "RUN_NAME_TAG": run_name_tag, "RUN_INSTANCE_TYPE": run_instance_type,
         "RUN_REMOTE_USER": run_remote_user, "RUN_REMOTE_STAGE_DIR": run_remote_stage_dir,
@@ -379,21 +311,19 @@ def build_run_config(
 
 
 def build_target_config(target_name: str, *, env: dict[str, str] | None = None) -> RunConfig:
-    values = _filtered_run_inputs(target_name, env)
-    target = _load_assignment_file(TARGETS_DIR / f"{target_name}.env")
-    run_token = values.get("RUN_TOKEN", "").strip() or f"target_{target_name}"
-    run_name_tag = run_aws_region = run_aws_profile = ""
-    if target.get("TARGET_EXECUTOR", "") == "aws-ssh":
-        aws_env_prefix = target.get("TARGET_AWS_ENV_PREFIX", "")
-        if not aws_env_prefix: _die(f"AWS target {target_name} is missing TARGET_AWS_ENV_PREFIX")
-        _penv = lambda suf, dflt="": _prefixed_env_or_default(values, aws_env_prefix, suf, dflt)
-        run_name_tag = _penv("NAME_TAG", _target_default(target, "NAME_TAG"))
-        run_aws_region = _penv("REGION", _target_default(target, "AWS_REGION"))
-        if not run_aws_region: _die(f"{aws_env_prefix}_REGION is required for AWS targets")
-        run_aws_profile = _penv("PROFILE", _target_default(target, "AWS_PROFILE"))
-        if not run_aws_profile: _die(f"{aws_env_prefix}_PROFILE is required for AWS targets")
-    return RunConfig.from_mapping({"RUN_TARGET_NAME": target_name, "RUN_TARGET_ARCH": target.get("TARGET_ARCH", ""),
-                                   "RUN_EXECUTOR": target.get("TARGET_EXECUTOR", ""), "RUN_SUITE_NAME": "",
-                                   "RUN_TOKEN": run_token, "RUN_NAME_TAG": run_name_tag,
-                                   "RUN_AWS_REGION": run_aws_region, "RUN_AWS_PROFILE": run_aws_profile})
-
+    source_env = os.environ if env is None else env
+    run_target_name = _env_or_default(source_env, "RUN_TARGET_NAME", target_name)
+    if run_target_name != target_name:
+        _die(f"RUN_TARGET_NAME={run_target_name!r} does not match requested target {target_name!r}")
+    return RunConfig.from_mapping({
+        "RUN_TARGET_NAME": target_name,
+        "RUN_TARGET_ARCH": _required_env(source_env, "RUN_TARGET_ARCH"),
+        "RUN_EXECUTOR": _required_env(source_env, "RUN_EXECUTOR"),
+        "RUN_SUITE_NAME": "",
+        "RUN_TOKEN": _required_env(source_env, "RUN_TOKEN"),
+        "RUN_NAME_TAG": _required_env(source_env, "RUN_NAME_TAG"),
+        "RUN_REMOTE_USER": _env_or_default(source_env, "RUN_REMOTE_USER"),
+        "RUN_AWS_KEY_PATH": _env_or_default(source_env, "RUN_AWS_KEY_PATH"),
+        "RUN_AWS_REGION": _required_env(source_env, "RUN_AWS_REGION"),
+        "RUN_AWS_PROFILE": _required_env(source_env, "RUN_AWS_PROFILE"),
+    })

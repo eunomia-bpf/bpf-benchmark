@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import base64
+import binascii
 import json
 import os
 import platform
@@ -243,6 +245,41 @@ def _shim_request(socket_path: Path, payload: Mapping[str, object]) -> dict[str,
     return dict(response)  # type: ignore[arg-type]
 
 
+def _failure_artifact_name(raw_key: object) -> str:
+    name = str(raw_key).strip()
+    if not name:
+        raise RuntimeError("empty failure artifact key")
+    safe = "".join(c if c.isalnum() or c in "._-" else "_" for c in name)
+    if safe in {".", ".."}:
+        raise RuntimeError(f"invalid failure artifact key: {name!r}")
+    return safe
+
+
+def _persist_failure_artifacts(
+    response: dict[str, Any],
+    failure_artifacts_dir: Path | None,
+) -> None:
+    per_program = response.get("per_program")
+    if not isinstance(per_program, Mapping):
+        return
+    for key, raw_result in per_program.items():
+        if not isinstance(raw_result, dict):
+            continue
+        encoded = raw_result.pop("workdir_tar_b64", None)
+        if encoded is None:
+            continue
+        if failure_artifacts_dir is None:
+            continue
+        if not isinstance(encoded, str):
+            raise RuntimeError(f"invalid workdir_tar_b64 for artifact {key!r}")
+        try:
+            data = base64.b64decode(encoded, validate=True)
+        except binascii.Error as exc:
+            raise RuntimeError(f"invalid workdir_tar_b64 for artifact {key!r}: {exc}") from exc
+        failure_artifacts_dir.mkdir(parents=True, exist_ok=True)
+        (failure_artifacts_dir / f"{_failure_artifact_name(key)}.tar.gz").write_bytes(data)
+
+
 def app_shim_has_programs(app_pid: int) -> bool:
     if int(app_pid) <= 0:
         return False
@@ -288,7 +325,6 @@ def apply_app_rejit(
     app_name: str | None = None,
     failure_artifacts_dir: Path | None = None,
 ) -> dict[str, object]:
-    del failure_artifacts_dir
     pids = _normalize_app_pids(app_pid=app_pid, app_pids=app_pids)
     normalized_enabled_passes = (
         _normalize_pass_list(list(enabled_passes))
@@ -306,6 +342,7 @@ def apply_app_rejit(
         resp = _shim_request(_shim_socket_for_pid(pid), payload)
         if str(resp.get("status") or "error") != "ok":
             raise RuntimeError(str(resp.get("error_message") or resp.get("error") or "ReJIT failed"))
+        _persist_failure_artifacts(resp, failure_artifacts_dir)
         responses.append({"pid": pid, "response": dict(resp)})
     return dict(responses[0]["response"]) if len(responses) == 1 else {"status": "ok", "shim_responses": responses}
 
