@@ -5,7 +5,7 @@ CROSS_COMPILE ?= aarch64-linux-gnu-
 AARCH64_AS ?= $(CROSS_COMPILE)as
 AARCH64_OBJCOPY ?= $(CROSS_COMPILE)objcopy
 
-BLOB := $(OUTPUT_DIR)/arm64_native_lab_xdp_result.blob
+BLOB := $(OUTPUT_DIR)/arm64_native_kernel_xdp_result.blob
 
 .PHONY: all clean
 

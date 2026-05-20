@@ -376,7 +376,7 @@ struct arm64_sim_skb_abi {
 		__u64 __a64_sub_rhs = (RHS) & __a64_sub_mask;             \
 		__u64 __a64_sub_res = (__a64_sub_lhs - __a64_sub_rhs) & __a64_sub_mask;\
 		__u64 __a64_sub_sign = arm64_sign_bit(__a64_sub_width);   \
-		__a64_z = __a64_sub_res == 0;                             \
+		__a64_z = __a64_sub_lhs == __a64_sub_rhs;                 \
 		__a64_n = (__a64_sub_res & __a64_sub_sign) != 0;          \
 		__a64_c = __a64_sub_lhs >= __a64_sub_rhs;                 \
 		__a64_v = ((__a64_sub_lhs ^ __a64_sub_rhs) & (__a64_sub_lhs ^ __a64_sub_res) & __a64_sub_sign) != 0;\
@@ -407,7 +407,8 @@ struct arm64_sim_skb_abi {
 	 (COND) == ARM64_COND_GE ? (__a64_n == __a64_v) :                     \
 	 (COND) == ARM64_COND_LT ? (__a64_n != __a64_v) :                     \
 	 (COND) == ARM64_COND_GT ? (!__a64_z && (__a64_n == __a64_v)) :       \
-	 (COND) == ARM64_COND_LE ? (__a64_z || (__a64_n != __a64_v)) : 1)
+	 (COND) == ARM64_COND_LE ? (__a64_z || (__a64_n != __a64_v)) :        \
+	 (COND) == ARM64_COND_AL ? 1 : ({ ARM64_SIM_L_UNSUPPORTED_OPCODE(); 0; }))
 
 #define ARM64_SIM_L_UNSUPPORTED_OPCODE()                                    \
 	do {                                                               \
@@ -435,6 +436,8 @@ struct arm64_sim_skb_abi {
 			__a64_alu_result = __a64_alu_lhs ^ __a64_alu_rhs; \
 		else if (__a64_alu_op == ARM64_ALU_ORR)                   \
 			__a64_alu_result = __a64_alu_lhs | __a64_alu_rhs; \
+		else                                                      \
+			ARM64_SIM_L_UNSUPPORTED_OPCODE();                 \
 		if (__a64_alu_width == ARM64_WIDTH_64 &&                  \
 		    __a64_alu_op == ARM64_ALU_ADD)                        \
 			ARM64_SIM_L_WRITE_REG_PTR((DST),                  \
@@ -465,10 +468,17 @@ struct arm64_sim_skb_abi {
 		} else if ((OP) == ARM64_OP_SHIFT_IMM || (OP) == ARM64_OP_SHIFT_REG) {\
 			__u8 __a64_l_shift = (OP) == ARM64_OP_SHIFT_IMM ? (__u8)(IMM) : (__u8)ARM64_SIM_L_READ_REG(SRC2);\
 			__u64 __a64_l_value = ARM64_SIM_L_READ_REG(SRC);  \
-			__u64 __a64_l_result = (AUX) == ARM64_SHIFT_LSL ? arm64_lsl(__a64_l_value, __a64_l_shift, __a64_l_width) :\
-				(AUX) == ARM64_SHIFT_LSR ? arm64_lsr(__a64_l_value, __a64_l_shift, __a64_l_width) :\
-				(AUX) == ARM64_SHIFT_ASR ? arm64_asr(__a64_l_value, __a64_l_shift, __a64_l_width) :\
-				arm64_ror(__a64_l_value, __a64_l_shift, __a64_l_width);\
+			__u64 __a64_l_result = 0;                       \
+			if ((AUX) == ARM64_SHIFT_LSL)                    \
+				__a64_l_result = arm64_lsl(__a64_l_value, __a64_l_shift, __a64_l_width);\
+			else if ((AUX) == ARM64_SHIFT_LSR)               \
+				__a64_l_result = arm64_lsr(__a64_l_value, __a64_l_shift, __a64_l_width);\
+			else if ((AUX) == ARM64_SHIFT_ASR)               \
+				__a64_l_result = arm64_asr(__a64_l_value, __a64_l_shift, __a64_l_width);\
+			else if ((AUX) == ARM64_SHIFT_ROR)               \
+				__a64_l_result = arm64_ror(__a64_l_value, __a64_l_shift, __a64_l_width);\
+			else                                             \
+				ARM64_SIM_L_UNSUPPORTED_OPCODE();        \
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width);\
 		} else if ((OP) == ARM64_OP_MADD || (OP) == ARM64_OP_MSUB) { \
 			__u64 __a64_l_product = ARM64_SIM_L_READ_REG(SRC) * ARM64_SIM_L_READ_REG(SRC2);\
@@ -509,9 +519,12 @@ struct arm64_sim_skb_abi {
 				__a64_bf_result = __a64_bf_src_l & (__a64_bf_lsb >= 64 ? 0 : __a64_bf_mask << __a64_bf_lsb);\
 			else if (__a64_bf_kind == ARM64_BITFIELD_BFXIL)       \
 				__a64_bf_result = (ARM64_SIM_L_READ_REG(DST) & ~__a64_bf_mask) | (__a64_bf_src_r & __a64_bf_mask);\
-			else {                                                \
+			else if (__a64_bf_kind == ARM64_BITFIELD_BFI) {       \
 				__u64 __a64_bf_field_mask = __a64_bf_lsb >= 64 ? 0 : __a64_bf_mask << __a64_bf_lsb;\
 				__a64_bf_result = (ARM64_SIM_L_READ_REG(DST) & ~__a64_bf_field_mask) | (__a64_bf_src_l & __a64_bf_field_mask);\
+			} else {                                              \
+				ARM64_SIM_L_UNSUPPORTED_OPCODE();             \
+				__a64_bf_result = 0;                           \
 			}                                                     \
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_bf_result, __a64_l_width);\
 		} else if ((OP) == ARM64_OP_REV || (OP) == ARM64_OP_REV16 || (OP) == ARM64_OP_SXTH) {\
@@ -580,8 +593,10 @@ struct arm64_sim_skb_abi {
 		} else if ((OP) == ARM64_OP_FMOV) {                            \
 			if ((AUX) == ARM64_FMOV_D_FROM_X || (AUX) == ARM64_FMOV_S_FROM_W)\
 				__a64_v0 = ARM64_SIM_L_READ_REG(SRC);          \
-			else                                                   \
+			else if ((AUX) == ARM64_FMOV_X_FROM_D || (AUX) == ARM64_FMOV_W_FROM_S)\
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_v0, __a64_l_width);\
+			else                                                   \
+				ARM64_SIM_L_UNSUPPORTED_OPCODE();              \
 		} else if ((OP) == ARM64_OP_CNT) {                             \
 			__a64_v0 = arm64_replicate_byte_popcounts(__a64_v0);   \
 		} else if ((OP) == ARM64_OP_UADDLV) {                          \
@@ -637,9 +652,10 @@ ARM64_SIM_CONCAT(__a64_sim_jcc_fallthrough_, ID):                            \
 	do {                                                               \
 		__u64 __a64_l_value = ARM64_SIM_L_READ_REG(REG);          \
 		if ((TARGET) <= (CURRENT)) {                              \
-			if (((__a64_l_value == 0) != (ZERO)))             \
+			if (((__a64_l_value == 0) != (ZERO))) {           \
 				goto ARM64_SIM_CONCAT(__a64_sim_cb_fallthrough_, ID);\
-				goto LABEL;                                      \
+			}                                                 \
+			goto LABEL;                                      \
 ARM64_SIM_CONCAT(__a64_sim_cb_fallthrough_, ID):                             \
 			;                                                \
 		} else if ((__a64_l_value == 0) == (ZERO)) {             \
@@ -657,9 +673,10 @@ ARM64_SIM_CONCAT(__a64_sim_cb_fallthrough_, ID):                             \
 	do {                                                               \
 		__u64 __a64_l_value = (ARM64_SIM_L_READ_REG(REG) >> (BIT)) & 1ULL;\
 		if ((TARGET) <= (CURRENT)) {                              \
-			if (((__a64_l_value == 0) != (ZERO)))             \
+			if (((__a64_l_value == 0) != (ZERO))) {           \
 				goto ARM64_SIM_CONCAT(__a64_sim_tb_fallthrough_, ID);\
-				goto LABEL;                                      \
+			}                                                 \
+			goto LABEL;                                      \
 ARM64_SIM_CONCAT(__a64_sim_tb_fallthrough_, ID):                             \
 			;                                                \
 		} else if ((__a64_l_value == 0) == (ZERO)) {             \
@@ -685,7 +702,7 @@ ARM64_SIM_CONCAT(__a64_sim_tb_fallthrough_, ID):                             \
 		if (__a64_lr) {                                           \
 			switch (__a64_lr) {                               \
 			ARM64_SIM_RETURN_CASES                           \
-			default: break;                                  \
+			default: ARM64_SIM_L_UNSUPPORTED_OPCODE(); break;\
 			}                                                 \
 		}                                                          \
 		ARM64_SIM_RET();                                          \
