@@ -187,7 +187,6 @@ COPY runner/__init__.py ./runner/
 COPY runner/config ./runner/config
 COPY runner/libs ./runner/libs
 COPY runner/suites ./runner/suites
-COPY runner/targets ./runner/targets
 COPY micro/*.py ./micro/
 COPY micro/config ./micro/config
 COPY corpus/*.py ./corpus/

@@ -61,20 +61,27 @@ host-source-apps-x86:
 host-source-apps-arm64:
 	$(MAKE) -C "$(ROOT_DIR)/vendor" apps-arm64 GO="$(HOST_GO)" JOBS="$(JOBS)"
 
-host-kernel-x86:
+$(HOST_KERNEL_BUILD_DIR_X86)/.config: $(DEFCONFIG_SRC)
 	install -d "$(HOST_KERNEL_BUILD_DIR_X86)"
 	cp "$(DEFCONFIG_SRC)" "$(HOST_KERNEL_BUILD_DIR_X86)/.config"
+
+$(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf: $(HOST_KERNEL_BUILD_DIR_X86)/.config
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 olddefconfig
+
+host-kernel-x86: $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 bzImage modules -j"$(IMAGE_BUILD_JOBS)"
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_X86)/modules-install" INSTALL_MOD_STRIP=1 DEPMOD=true modules_install >/dev/null
 	rel=$$(cat "$(HOST_KERNEL_BUILD_DIR_X86)/include/config/kernel.release"); \
 		printf '{"kernel_release":"%s","target_arch":"x86_64","kernel_image":"bzImage"}\n' "$$rel" >"$(HOST_KERNEL_BUILD_DIR_X86)/manifest.json"
 
-host-kernel-arm64:
-	@command -v aarch64-linux-gnu-gcc >/dev/null
+$(HOST_KERNEL_BUILD_DIR_ARM64)/.config: $(ARM64_DEFCONFIG_SRC)
 	install -d "$(HOST_KERNEL_BUILD_DIR_ARM64)"
 	cp "$(ARM64_DEFCONFIG_SRC)" "$(HOST_KERNEL_BUILD_DIR_ARM64)/.config"
+
+$(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/auto.conf: $(HOST_KERNEL_BUILD_DIR_ARM64)/.config
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
+
+host-kernel-arm64: $(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/auto.conf
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image vmlinuz.efi modules -j"$(IMAGE_BUILD_JOBS)"
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install" INSTALL_MOD_STRIP=1 DEPMOD=true modules_install >/dev/null
 	rel=$$(cat "$(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/kernel.release"); \
@@ -85,7 +92,6 @@ host-kinsn-x86: host-kernel-x86
 	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 M="$(ROOT_DIR)/module/x86" MO="$(HOST_KINSN_DIR_X86)" modules -j"$(IMAGE_BUILD_JOBS)"
 
 host-kinsn-arm64: host-kernel-arm64
-	@command -v aarch64-linux-gnu-gcc >/dev/null
 	install -d "$(HOST_KINSN_DIR_ARM64)"
 	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- M="$(ROOT_DIR)/module/arm64" MO="$(HOST_KINSN_DIR_ARM64)" modules -j"$(IMAGE_BUILD_JOBS)"
 
@@ -120,7 +126,6 @@ host-shim-x86:
 	$(MAKE) -C "$(BPFOPT_SHIM_DIR)" CC=gcc SHIM_SO="$(BPFOPT_SHIM_BUILD_X86)/libbpfrejit_shim.so" "$(BPFOPT_SHIM_BUILD_X86)/libbpfrejit_shim.so"
 
 host-shim-arm64:
-	command -v aarch64-linux-gnu-gcc >/dev/null
 	install -d "$(BPFOPT_SHIM_BUILD_ARM64)"
 	$(MAKE) -C "$(BPFOPT_SHIM_DIR)" CC=aarch64-linux-gnu-gcc SHIM_SO="$(BPFOPT_SHIM_BUILD_ARM64)/libbpfrejit_shim.so" "$(BPFOPT_SHIM_BUILD_ARM64)/libbpfrejit_shim.so"
 
@@ -166,7 +171,7 @@ host-arm64-native-lab-smoke:
 	$(MAKE) -C "$(ARM64_NATIVE_LAB_SMOKE_DIR)" OUTPUT_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)/native_lab_smoke" all
 
 host-arm64-sim-proofs: host-micro-programs-arm64
-	$(MAKE) -C "$(ARM64_SIM_PROOF_DIR)" OUTPUT_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)/arm64_sim_proofs" MICRO_BUILD_DIR="$(MICRO_PROGRAM_BUILD_ARM64)" simple-proof-build
+	$(MAKE) -C "$(ARM64_SIM_PROOF_DIR)" PROOF_BUILD_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)/arm64_sim_proofs" MICRO_BUILD_DIR="$(MICRO_PROGRAM_BUILD_ARM64)" micro-proofs-build
 
 x86-runner-runtime-image-tar: host-kernel-x86 host-kinsn-x86 host-rust-x86 host-shim-x86 host-source-apps-x86 host-runner-x86 host-micro-programs-x86 host-stage2-programs-x86
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"

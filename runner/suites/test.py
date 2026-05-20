@@ -10,8 +10,11 @@ from functools import partial
 from pathlib import Path
 from typing import Sequence
 
+import yaml
+
 from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail
+from runner.libs.input_generators import materialize_input
 from runner.libs.kinsn import load_kinsn_modules
 from runner.libs.results import parse_last_json_line
 from runner.libs.workspace_layout import (
@@ -257,45 +260,58 @@ def _run_arm64_simulator_proof_smoke(
         return
 
     runner_binary = runner_binary_path(workspace, args.target_arch)
-    proof_obj = stage2_program_root(workspace, args.target_arch) / "arm64_sim_proofs" / \
-        "simple_arm64_sim.bpf.o"
+    proof_dir = stage2_program_root(workspace, args.target_arch) / "arm64_sim_proofs"
     if not runner_binary.is_file() or not os.access(runner_binary, os.X_OK):
         _die(f"runner artifact is missing or not executable: {runner_binary}")
-    if not proof_obj.is_file():
-        _die(f"arm64 simulator proof object is missing: {proof_obj}")
 
     _log_test_section("arm64 simulator proof smoke")
-    command = [
-        str(runner_binary),
-        "test-run",
-        "--program", str(proof_obj),
-        "--io-mode", "staged",
-        "--input-size", "64",
-        "--inner-repeat", "1",
-    ]
-    completed = subprocess.run(
-        command,
-        cwd=workspace,
-        env=env,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if log_path is not None:
-        with log_path.open("a", encoding="utf-8") as log_file:
-            log_file.write(completed.stdout)
-            log_file.write(completed.stderr)
-    sys.stderr.write(completed.stdout)
-    sys.stderr.write(completed.stderr)
-    if completed.returncode != 0:
-        _die(f"arm64 simulator proof smoke failed with exit {completed.returncode}")
-
-    sample = _parse_single_runner_sample(completed.stdout, "arm64 simulator proof smoke")
-    if sample.get("result") != 12345678 or sample.get("retval") != 2:
-        _die(
-            "arm64 simulator proof smoke returned unexpected result: "
-            f"result={sample.get('result')} retval={sample.get('retval')}"
+    config = yaml.safe_load((workspace / "micro" / "config" / "micro_pure_jit.yaml").read_text(encoding="utf-8"))
+    defaults = config.get("benchmark_defaults", {})
+    default_io_mode = str(defaults.get("io_mode", "staged"))
+    default_retval = int(defaults.get("expected_retval", 2))
+    for item in config["benchmarks"]:
+        name = item["name"]
+        proof_obj = proof_dir / f"{name}.bpf.o"
+        if not proof_obj.is_file():
+            _die(f"arm64 simulator proof object is missing: {proof_obj}")
+        input_path, _meta = materialize_input(str(item["input_generator"]), force=False)
+        label = f"arm64 simulator proof smoke/{name}"
+        command = [
+            str(runner_binary),
+            "test-run",
+            "--program", str(proof_obj),
+            "--program-name", f"{name}_arm64_sim_xdp",
+            "--memory", str(input_path),
+            "--io-mode", str(item.get("io_mode", default_io_mode)),
+            "--input-size", str(int(item.get("kernel_input_size", 0))),
+            "--inner-repeat", "1",
+        ]
+        completed = subprocess.run(
+            command,
+            cwd=workspace,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
         )
+        if log_path is not None:
+            with log_path.open("a", encoding="utf-8") as log_file:
+                log_file.write(completed.stdout)
+                log_file.write(completed.stderr)
+        sys.stderr.write(completed.stdout)
+        sys.stderr.write(completed.stderr)
+        if completed.returncode != 0:
+            _die(f"{label} failed with exit {completed.returncode}")
+
+        sample = _parse_single_runner_sample(completed.stdout, label)
+        expected_result = int(item["expected_result"])
+        expected_retval = int(item.get("expected_retval", default_retval))
+        if sample.get("result") != expected_result or sample.get("retval") != expected_retval:
+            _die(
+                f"{label} returned unexpected result: "
+                f"result={sample.get('result')} retval={sample.get('retval')} "
+                f"expected_result={expected_result} expected_retval={expected_retval}"
+            )
 
 
 def _artifact_dir(workspace: Path, args: argparse.Namespace) -> Path:
