@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build and run every generated x86 ReverseSim micro proof artifact."""
+"""Build and run generated ReverseSim micro proof artifacts."""
 
 from __future__ import annotations
 
@@ -17,19 +17,58 @@ from pathlib import Path
 import yaml
 
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-OUT_DIR = Path(__file__).resolve().parent
-X86_DIR = OUT_DIR.parent
-BUILD_DIR = OUT_DIR / "build"
-RESULTS_DIR = X86_DIR / "results"
+NATIVE_SIM_DIR = Path(__file__).resolve().parent
+REPO_ROOT = NATIVE_SIM_DIR.parent
 CONFIG = REPO_ROOT / "micro" / "config" / "micro_pure_jit.yaml"
-LOADER_MANIFEST = REPO_ROOT / "native-sim" / "loader" / "Cargo.toml"
-LOADER_BIN = REPO_ROOT / "native-sim" / "loader" / "target" / "debug" / "reversesim-loader"
+LOADER_MANIFEST = NATIVE_SIM_DIR / "loader" / "Cargo.toml"
+LOADER_BIN = NATIVE_SIM_DIR / "loader" / "target" / "debug" / "reversesim-loader"
 MICRO_RESULTS_DIR = REPO_ROOT / "micro" / "results"
 BPF_STACK_SIZE = os.environ.get("BPF_STACK_SIZE", "4096")
 
 sys.path.insert(0, str(REPO_ROOT))
 from runner.libs.input_generators import materialize_input  # noqa: E402
+
+
+@dataclass(frozen=True)
+class ArchConfig:
+    name: str
+    clang_opt: str
+    target_define: str
+    program_suffix: str
+    result_glob: str
+    require_micro_result: bool
+
+    @property
+    def source_dir(self) -> Path:
+        return NATIVE_SIM_DIR / self.name / "micro-prog"
+
+    @property
+    def build_dir(self) -> Path:
+        return self.source_dir / "build"
+
+    @property
+    def results_dir(self) -> Path:
+        return NATIVE_SIM_DIR / self.name / "results"
+
+
+ARCHES = {
+    "x86": ArchConfig(
+        name="x86",
+        clang_opt="-O3",
+        target_define="-D__TARGET_ARCH_x86",
+        program_suffix="_x86_sim_xdp",
+        result_glob="x86_kvm_micro_*/metadata.json",
+        require_micro_result=True,
+    ),
+    "arm64": ArchConfig(
+        name="arm64",
+        clang_opt="-O2",
+        target_define="-D__TARGET_ARCH_arm64",
+        program_suffix="_arm64_sim_xdp",
+        result_glob="arm64_qemu_micro_*/metadata.json",
+        require_micro_result=False,
+    ),
+}
 
 
 @dataclass(frozen=True)
@@ -55,7 +94,7 @@ class Result:
 
 
 def load_benches() -> list[Bench]:
-    data = yaml.safe_load(CONFIG.read_text())
+    data = yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
     defaults = data.get("benchmark_defaults", {})
     default_retval = int(defaults.get("expected_retval", 2))
     benches: list[Bench] = []
@@ -64,31 +103,34 @@ def load_benches() -> list[Bench]:
         generator = item.get("input_generator")
         if expected is None or generator is None:
             continue
-        name = item["name"]
-        expected_retval = int(item.get("expected_retval", default_retval))
         tags = set(item.get("tags", []))
         result_channel = "skb-cb" if {"tc", "cgroup-skb"} & tags else "packet"
-        cgroup_skb_input = "cgroup-skb" in tags
-        benches.append(Bench(name, generator, int(expected),
-                             expected_retval, result_channel,
-                             cgroup_skb_input))
+        benches.append(
+            Bench(
+                name=item["name"],
+                input_generator=generator,
+                expected_result=int(expected),
+                expected_retval=int(item.get("expected_retval", default_retval)),
+                result_channel=result_channel,
+                cgroup_skb_input="cgroup-skb" in tags,
+            )
+        )
     return benches
 
 
-def run_cmd(cmd: list[str], *, timeout: int | None, capture: bool = True) -> subprocess.CompletedProcess[str]:
+def run_cmd(cmd: list[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         cmd,
         cwd=REPO_ROOT,
         check=False,
         text=True,
-        stdout=subprocess.PIPE if capture else None,
-        stderr=subprocess.PIPE if capture else None,
-        timeout=timeout,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
 
 
-def require_ok(cmd: list[str], *, timeout: int) -> None:
-    result = run_cmd(cmd, timeout=timeout)
+def require_ok(cmd: list[str]) -> None:
+    result = run_cmd(cmd)
     if result.returncode != 0:
         out = (result.stdout or "").strip()
         err = (result.stderr or "").strip()
@@ -96,36 +138,32 @@ def require_ok(cmd: list[str], *, timeout: int) -> None:
         raise RuntimeError(f"{' '.join(cmd)} failed\n{detail}")
 
 
-def generate_sources(only: list[str]) -> None:
-    cmd = [
-        "python3",
-        str(OUT_DIR / "generate_micro_sim_proofs.py"),
-    ]
+def generate_sources(config: ArchConfig, only: list[str]) -> None:
+    cmd = ["python3", str(config.source_dir / "generate_micro_sim_proofs.py")]
     if only:
         cmd.extend(["--only", *only])
-    require_ok(cmd, timeout=300)
+    require_ok(cmd)
 
 
 def build_loader() -> None:
-    require_ok(["cargo", "build", "--manifest-path", str(LOADER_MANIFEST)], timeout=300)
+    require_ok(["cargo", "build", "--manifest-path", str(LOADER_MANIFEST)])
 
 
-def compile_object(bench: Bench) -> tuple[Result | None, float]:
-    src = OUT_DIR / f"{bench.name}.bpf.c"
-    obj = BUILD_DIR / f"{bench.name}.bpf.o"
+def compile_object(config: ArchConfig, bench: Bench) -> tuple[Result | None, float]:
+    src = config.source_dir / f"{bench.name}.bpf.c"
+    obj = config.build_dir / f"{bench.name}.bpf.o"
     if not src.exists():
-        return Result(bench.name, "compile-fail",
-                      f"missing generated source: {src}"), 0.0
-    BUILD_DIR.mkdir(parents=True, exist_ok=True)
+        return Result(bench.name, "compile-fail", f"missing generated source: {src}"), 0.0
+    config.build_dir.mkdir(parents=True, exist_ok=True)
     cmd = [
         "clang",
         "-g",
-        "-O3",
+        config.clang_opt,
         "-target",
         "bpf",
         "-mllvm",
         f"-bpf-stack-size={BPF_STACK_SIZE}",
-        "-D__TARGET_ARCH_x86",
+        config.target_define,
         "-I",
         str(REPO_ROOT / "vendor" / "libbpf" / "include" / "uapi"),
         "-I",
@@ -138,17 +176,20 @@ def compile_object(bench: Bench) -> tuple[Result | None, float]:
         str(obj),
     ]
     start = time.monotonic()
-    result = run_cmd(cmd, timeout=None)
+    result = run_cmd(cmd)
     compile_s = time.monotonic() - start
     if result.returncode != 0:
-        err = compact_error(result.stderr or result.stdout or "clang failed")
-        return Result(bench.name, "compile-fail", err,
-                      compile_s=compile_s), compile_s
+        return Result(
+            bench.name,
+            "compile-fail",
+            compact_error(result.stderr or result.stdout or "clang failed"),
+            compile_s=compile_s,
+        ), compile_s
     return None, compile_s
 
 
 def bpf_instruction_count(obj: Path) -> int:
-    result = run_cmd(["llvm-readelf", "-SW", str(obj)], timeout=30)
+    result = run_cmd(["llvm-readelf", "-SW", str(obj)])
     if result.returncode != 0:
         raise RuntimeError(compact_error(result.stderr or result.stdout))
     total = 0
@@ -167,24 +208,27 @@ def bpf_instruction_count(obj: Path) -> int:
     return total
 
 
-def latest_micro_result_dir() -> Path:
+def latest_micro_result_dir(config: ArchConfig) -> Path | None:
     override = os.environ.get("MICRO_RESULT_METADATA")
     if override:
         path = Path(override)
         return path.parent if path.name == "metadata.json" else path
-    paths = sorted(MICRO_RESULTS_DIR.glob("x86_kvm_micro_*/metadata.json"),
-                   reverse=True)
+    paths = sorted(MICRO_RESULTS_DIR.glob(config.result_glob), reverse=True)
     if not paths:
-        raise RuntimeError("missing micro result metadata")
+        if config.require_micro_result:
+            raise RuntimeError("missing micro result metadata")
+        return None
     for path in paths:
         dump_dir = path.parent / "details" / "jit_dumps"
         if any(dump_dir.glob("*__kernel__sample00.xlated.bin")):
             return path.parent
-    return paths[0].parent
+    return paths[0].parent if config.require_micro_result else None
 
 
-def load_direct_bpf_counts() -> dict[str, int]:
-    result_dir = latest_micro_result_dir()
+def load_direct_bpf_counts(config: ArchConfig) -> dict[str, int]:
+    result_dir = latest_micro_result_dir(config)
+    if result_dir is None:
+        return {}
     dump_dir = result_dir / "details" / "jit_dumps"
     counts: dict[str, int] = {}
     for path in dump_dir.glob("*__kernel__sample00.xlated.bin"):
@@ -193,17 +237,17 @@ def load_direct_bpf_counts() -> dict[str, int]:
     return counts
 
 
-def run_object(bench: Bench, sudo: bool, run_id: str) -> Result:
-    obj = BUILD_DIR / f"{bench.name}.bpf.o"
+def run_object(config: ArchConfig, bench: Bench, sudo: bool, run_id: str) -> Result:
+    obj = config.build_dir / f"{bench.name}.bpf.o"
     input_path, _meta = materialize_input(bench.input_generator, force=False)
-    verifier_log = RESULTS_DIR / f"{bench.name}-{run_id}.verifier.log"
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    verifier_log = config.results_dir / f"{bench.name}-{run_id}.verifier.log"
+    config.results_dir.mkdir(parents=True, exist_ok=True)
     cmd = [
         str(LOADER_BIN),
         "--object",
         str(obj),
         "--program",
-        f"{bench.name}_x86_sim_xdp",
+        f"{bench.name}{config.program_suffix}",
         "--verifier-log",
         str(verifier_log),
         "--case",
@@ -221,20 +265,19 @@ def run_object(bench: Bench, sudo: bool, run_id: str) -> Result:
         cmd.append("--cgroup-skb-input")
     if sudo and os.geteuid() != 0:
         cmd = ["sudo", "-n", *cmd]
-    try:
-        start = time.monotonic()
-        result = run_cmd(cmd, timeout=120)
-        run_s = time.monotonic() - start
-    except subprocess.TimeoutExpired:
-        return Result(bench.name, "run-fail", "loader timeout", test_s=120.0)
-    verify_s, test_s = parse_loader_timing(
-        f"{result.stdout or ''}\n{result.stderr or ''}"
-    )
+    start = time.monotonic()
+    result = run_cmd(cmd)
+    run_s = time.monotonic() - start
+    verify_s, test_s = parse_loader_timing(f"{result.stdout or ''}\n{result.stderr or ''}")
     if result.returncode == 0:
         return Result(bench.name, "ok", "", verify_s=verify_s, test_s=test_s)
-    return Result(bench.name, "run-fail",
-                  compact_error(result.stderr or result.stdout or "loader failed"),
-                  verify_s=verify_s, test_s=test_s or run_s)
+    return Result(
+        bench.name,
+        "run-fail",
+        compact_error(result.stderr or result.stdout or "loader failed"),
+        verify_s=verify_s,
+        test_s=test_s or run_s,
+    )
 
 
 def add_note(result: Result, note: str) -> None:
@@ -242,22 +285,21 @@ def add_note(result: Result, note: str) -> None:
         result.note = f"{result.note}; {note}" if result.note else note
 
 
-def run_bench(bench: Bench, sudo: bool, run_id: str,
-              direct_counts: dict[str, int]) -> Result:
+def run_bench(config: ArchConfig, bench: Bench, sudo: bool, run_id: str, direct_counts: dict[str, int]) -> Result:
     direct_count = direct_counts.get(bench.name)
-    direct_note = "" if direct_count is not None else "missing direct xlated.bin in micro result"
-    compile_result, compile_s = compile_object(bench)
+    direct_note = "" if direct_count is not None else f"missing direct xlated.bin in {config.name} micro result"
+    compile_result, compile_s = compile_object(config, bench)
     if compile_result is not None:
         compile_result.direct_bpf_insns = direct_count
         add_note(compile_result, direct_note)
         return compile_result
     try:
-        proof_count = bpf_instruction_count(BUILD_DIR / f"{bench.name}.bpf.o")
+        proof_count = bpf_instruction_count(config.build_dir / f"{bench.name}.bpf.o")
         proof_note = ""
     except RuntimeError as exc:
         proof_count = None
         proof_note = f"proof BPF count failed: {exc}"
-    result = run_object(bench, sudo=sudo, run_id=run_id)
+    result = run_object(config, bench, sudo=sudo, run_id=run_id)
     result.compile_s = compile_s
     result.proof_bpf_insns = proof_count
     result.direct_bpf_insns = direct_count
@@ -271,7 +313,8 @@ def compact_error(text: str) -> str:
     if not lines:
         return "unknown error"
     interesting = [
-        line for line in lines
+        line
+        for line in lines
         if "error:" in line
         or "failed" in line
         or "mismatch" in line
@@ -303,39 +346,38 @@ def markdown_table(results: list[Result]) -> str:
         lines.append(
             f"| `{result.name}` | {result.status} | "
             f"{result.compile_s:.3f} | {proof_insns} | {direct_insns} | "
-            f"{result.verify_s:.3f} | "
-            f"{result.test_s:.3f} | {note} |"
+            f"{result.verify_s:.3f} | {result.test_s:.3f} | {note} |"
         )
     return "\n".join(lines)
 
 
-def default_markdown_path(run_id: str) -> Path:
-    return RESULTS_DIR / f"README-{run_id}.md"
+def print_result(result: Result) -> None:
+    print(
+        f"{result.name}: {result.status}: "
+        f"compile={result.compile_s:.3f}s "
+        f"proof_insns={result.proof_bpf_insns or ''} "
+        f"direct_insns={result.direct_bpf_insns or ''} "
+        f"verify={result.verify_s:.3f}s "
+        f"test={result.test_s:.3f}s {result.note}",
+        flush=True,
+    )
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--arch", choices=sorted(ARCHES), required=True)
     parser.add_argument("--only", nargs="*", help="optional micro benchmark names")
     parser.add_argument("--no-generate", action="store_true")
     parser.add_argument("--no-build-loader", action="store_true")
     parser.add_argument("--no-sudo", action="store_true")
-    parser.add_argument(
-        "--jobs",
-        type=int,
-        default=min(8, os.cpu_count() or 1),
-        help="parallel compile/load jobs; use --jobs 1 for serial",
-    )
-    parser.add_argument(
-        "--markdown",
-        type=Path,
-        help="write a markdown status table; defaults to native-sim/x86/results/README-<timestamp>.md",
-    )
-    args = parser.parse_args()
+    parser.add_argument("--jobs", type=int, default=min(8, os.cpu_count() or 1))
+    parser.add_argument("--markdown", type=Path)
+    args = parser.parse_args(argv)
     if args.jobs < 1:
         raise SystemExit("--jobs must be >= 1")
 
+    config = ARCHES[args.arch]
     benches = load_benches()
-    direct_counts = load_direct_bpf_counts()
     only = set(args.only or [])
     if only:
         benches = [bench for bench in benches if bench.name in only]
@@ -343,54 +385,36 @@ def main() -> int:
         raise SystemExit("no selected benchmarks")
 
     if not args.no_generate:
-        generate_sources([bench.name for bench in benches] if only else [])
+        generate_sources(config, [bench.name for bench in benches] if only else [])
     if not args.no_build_loader:
         build_loader()
 
+    direct_counts = load_direct_bpf_counts(config)
     run_id = datetime.now().strftime("%Y%m%d-%H%M%S")
     results_by_name: dict[str, Result] = {}
     if args.jobs == 1:
         for bench in benches:
-            result = run_bench(bench, sudo=not args.no_sudo,
-                               run_id=run_id,
-                               direct_counts=direct_counts)
+            result = run_bench(config, bench, sudo=not args.no_sudo, run_id=run_id, direct_counts=direct_counts)
             results_by_name[bench.name] = result
-            print(
-                f"{bench.name}: {result.status}: "
-                f"compile={result.compile_s:.3f}s "
-                f"proof_insns={result.proof_bpf_insns or ''} "
-                f"direct_insns={result.direct_bpf_insns or ''} "
-                f"verify={result.verify_s:.3f}s "
-                f"test={result.test_s:.3f}s {result.note}",
-                flush=True,
-            )
+            print_result(result)
     else:
         print(f"running {len(benches)} benchmarks with {args.jobs} jobs", flush=True)
         with ThreadPoolExecutor(max_workers=args.jobs) as executor:
             futures = {
-                executor.submit(run_bench, bench, not args.no_sudo,
-                                run_id, direct_counts): bench
+                executor.submit(run_bench, config, bench, not args.no_sudo, run_id, direct_counts): bench
                 for bench in benches
             }
             for future in as_completed(futures):
                 bench = futures[future]
                 result = future.result()
                 results_by_name[bench.name] = result
-                print(
-                    f"{bench.name}: {result.status}: "
-                    f"compile={result.compile_s:.3f}s "
-                    f"proof_insns={result.proof_bpf_insns or ''} "
-                    f"direct_insns={result.direct_bpf_insns or ''} "
-                    f"verify={result.verify_s:.3f}s "
-                    f"test={result.test_s:.3f}s {result.note}",
-                    flush=True,
-                )
+                print_result(result)
 
     results = [results_by_name[bench.name] for bench in benches]
     table = markdown_table(results)
-    markdown_path = args.markdown or default_markdown_path(run_id)
+    markdown_path = args.markdown or (config.results_dir / f"README-{run_id}.md")
     markdown_path.parent.mkdir(parents=True, exist_ok=True)
-    markdown_path.write_text(table + "\n")
+    markdown_path.write_text(table + "\n", encoding="utf-8")
     print(f"wrote {markdown_path}")
     print(table)
     return 0 if all(result.status == "ok" for result in results) else 1

@@ -6,9 +6,10 @@ LOADER_BIN := ../loader/target/debug/reversesim-loader
 
 CLANG ?= clang
 CARGO ?= cargo
+PYTHON ?= python3
 BPF_STACK_SIZE ?= 4096
 
-.PHONY: build run clean
+.PHONY: build run micro-proofs-run clean
 
 build: $(BPF_OBJ)
 	$(CARGO) build --manifest-path $(LOADER_MANIFEST)
@@ -24,6 +25,9 @@ $(BPF_OBJ): x86_sim_hardcoded.bpf.c x86_sim_local_bpf.h
 
 run: build
 	$(LOADER_BIN) --object $(BPF_OBJ) --program x86_sim_hardcoded_xdp --case simple --load-only
+
+micro-proofs-run:
+	$(PYTHON) ../run_micro_sim_batch.py --arch x86
 
 clean:
 	rm -rf $(BUILD_DIR) ../loader/target

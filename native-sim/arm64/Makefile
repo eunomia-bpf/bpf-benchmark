@@ -17,7 +17,7 @@ CARGO ?= cargo
 PYTHON ?= python3
 BPF_STACK_SIZE ?= 4096
 
-.PHONY: build run micro-proofs-generate micro-proofs-build simple-proof-build simple-proof clean
+.PHONY: build run micro-proofs-generate micro-proofs-build micro-proofs-run simple-proof-build simple-proof clean
 
 build: $(BPF_OBJ)
 	$(CARGO) build --manifest-path $(LOADER_MANIFEST)
@@ -55,6 +55,9 @@ $(SIMPLE_INPUT): | $(PROOF_BUILD_DIR)
 	dd if=/dev/zero of="$@" bs=64 count=1 status=none
 
 micro-proofs-build: micro-proofs-generate $(PROOF_OBJS)
+
+micro-proofs-run:
+	$(PYTHON) ../run_micro_sim_batch.py --arch arm64
 
 simple-proof-build: $(SIMPLE_OBJ) $(SIMPLE_INPUT)
 

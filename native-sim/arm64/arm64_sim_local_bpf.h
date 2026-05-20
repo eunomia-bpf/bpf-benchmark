@@ -93,8 +93,7 @@ struct arm64_sim_skb_abi {
 	__u8 __a64_c = 0;                                                  \
 	__u8 __a64_v = 0;                                                  \
 	__u64 __a64_lr = 0;                                                \
-	__u64 __a64_v0 = 0;                                                \
-	volatile __u32 __a64_loop_budget = 4096
+	__u64 __a64_v0 = 0
 
 #define ARM64_SIM_ENTRY_XDP(CTX)                                            \
 	struct arm64_sim_xdp_abi __a64_sim_abi = {                         \
@@ -609,17 +608,6 @@ struct arm64_sim_skb_abi {
 
 #define ARM64_SIM_A64_JMP(CURRENT, TARGET, LABEL)                           \
 	do {                                                               \
-		if ((TARGET) <= (CURRENT))                                 \
-			ARM64_SIM_A64_BACKWARD_GOTO(LABEL);                \
-		else                                                       \
-			goto LABEL;                                        \
-	} while (0)
-
-#define ARM64_SIM_A64_BACKWARD_GOTO(LABEL)                                  \
-	do {                                                               \
-		if (!__a64_loop_budget)                                   \
-			ARM64_SIM_RET();                                  \
-		__a64_loop_budget--;                                      \
 		goto LABEL;                                                \
 	} while (0)
 
@@ -628,7 +616,7 @@ struct arm64_sim_skb_abi {
 		if (!ARM64_SIM_L_EVAL_COND(COND)) {                       \
 			goto ARM64_SIM_CONCAT(__a64_sim_jcc_fallthrough_, ID);\
 		}                                                          \
-		ARM64_SIM_A64_BACKWARD_GOTO(LABEL);                       \
+		goto LABEL;                                                \
 ARM64_SIM_CONCAT(__a64_sim_jcc_fallthrough_, ID):                            \
 		;                                                          \
 	} while (0)
@@ -651,7 +639,7 @@ ARM64_SIM_CONCAT(__a64_sim_jcc_fallthrough_, ID):                            \
 		if ((TARGET) <= (CURRENT)) {                              \
 			if (((__a64_l_value == 0) != (ZERO)))             \
 				goto ARM64_SIM_CONCAT(__a64_sim_cb_fallthrough_, ID);\
-			ARM64_SIM_A64_BACKWARD_GOTO(LABEL);              \
+				goto LABEL;                                      \
 ARM64_SIM_CONCAT(__a64_sim_cb_fallthrough_, ID):                             \
 			;                                                \
 		} else if ((__a64_l_value == 0) == (ZERO)) {             \
@@ -671,7 +659,7 @@ ARM64_SIM_CONCAT(__a64_sim_cb_fallthrough_, ID):                             \
 		if ((TARGET) <= (CURRENT)) {                              \
 			if (((__a64_l_value == 0) != (ZERO)))             \
 				goto ARM64_SIM_CONCAT(__a64_sim_tb_fallthrough_, ID);\
-			ARM64_SIM_A64_BACKWARD_GOTO(LABEL);              \
+				goto LABEL;                                      \
 ARM64_SIM_CONCAT(__a64_sim_tb_fallthrough_, ID):                             \
 			;                                                \
 		} else if ((__a64_l_value == 0) == (ZERO)) {             \
