@@ -59,6 +59,10 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return args
 
 
+def _selected_runtimes(args: argparse.Namespace) -> list[str]:
+    return args.runtimes or ["native", "llvmbpf", "kernel"]
+
+
 def _runtime_env(workspace: Path, args: argparse.Namespace) -> dict[str, str]:
     env = base_runtime_env()
     setup_tmpdir(env, args.run_token or f"{args.target_name}_micro")
@@ -81,9 +85,8 @@ def _micro_driver_argv(workspace: Path, args: argparse.Namespace) -> list[str]:
         workspace,
         args.output or str(workspace / "micro" / "results" / f"{args.target_name}_micro.json"),
     )
-    runtimes = args.runtimes or ["native", "llvmbpf", "kernel"]
     argv: list[str] = []
-    for runtime in runtimes:
+    for runtime in _selected_runtimes(args):
         argv.extend(["--runtime", str(runtime)])
     argv.extend([
         "--samples", str(args.samples),
@@ -140,22 +143,14 @@ def _run_micro_suite(workspace: Path, args: argparse.Namespace) -> None:
     env["BPFREJIT_MICRO_PROGRAM_DIR"] = str(program_dir)
     env["BPFREJIT_MICRO_RUNNER_BINARY"] = str(runner_binary)
 
-    # When `native_kernel` is among the requested runtimes, every kinsn `.ko`
-    # under the kernel-modules dir must be resident (the runner's
-    # run-native-lab subcommand splats into `bpf_x86_native_lab.ko`). Load
-    # them up-front, mirroring `runner/suites/test.py`. We always load (no
-    # filtering by selected runtimes) because the modules are tiny and
-    # idempotent; this also makes downstream `BPFREJIT_BENCH_PASSES` use
-    # work without extra wiring.
-    module_dir = kinsn_module_dir(workspace, args.target_arch)
-    if module_dir.is_dir():
-        expected = sorted(
-            path.stem
-            for path in module_dir.glob("bpf_*.ko")
-            if path.is_file()
-        )
-        if expected:
-            load_kinsn_modules(expected, module_dir=module_dir)
+    if "native_kernel" in _selected_runtimes(args):
+        module_dir = kinsn_module_dir(workspace, args.target_arch)
+        if not module_dir.is_dir():
+            _die(f"kinsn module artifact root is missing: {module_dir}")
+        expected = sorted(path.stem for path in module_dir.glob("bpf_*.ko") if path.is_file())
+        if not expected:
+            _die(f"no kinsn modules found under {module_dir}")
+        load_kinsn_modules(expected, module_dir=module_dir)
 
     command = [python_bin, str(workspace / "micro" / "driver.py"), *_micro_driver_argv(workspace, args)]
     run_checked(command, cwd=workspace, env=env, die=_die)

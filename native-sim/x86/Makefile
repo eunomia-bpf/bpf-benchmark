@@ -27,7 +27,7 @@ run: build
 	$(LOADER_BIN) --object $(BPF_OBJ) --program x86_sim_hardcoded_xdp --case simple --load-only
 
 micro-proofs-run:
-	$(PYTHON) ../run_micro_sim_batch.py --arch x86
+	$(PYTHON) ../run_micro_sim_batch.py --arch x86 $(MICRO_SIM_PROOF_ARGS)
 
 clean:
 	rm -rf $(BUILD_DIR) ../loader/target

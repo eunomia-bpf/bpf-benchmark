@@ -57,7 +57,7 @@ $(SIMPLE_INPUT): | $(PROOF_BUILD_DIR)
 micro-proofs-build: micro-proofs-generate $(PROOF_OBJS)
 
 micro-proofs-run:
-	$(PYTHON) ../run_micro_sim_batch.py --arch arm64
+	$(PYTHON) ../run_micro_sim_batch.py --arch arm64 $(MICRO_SIM_PROOF_ARGS)
 
 simple-proof-build: $(SIMPLE_OBJ) $(SIMPLE_INPUT)
 

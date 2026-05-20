@@ -2,8 +2,6 @@
 #include "bpf_helpers.hpp"
 #include "kernel_test_run.hpp"
 
-#include <arpa/inet.h>
-
 #include <bpf/bpf.h>
 #include <bpf/btf.h>
 #include <bpf/libbpf.h>
@@ -11,7 +9,6 @@
 #include <yaml-cpp/yaml.h>
 
 #include <algorithm>
-#include <array>
 #include <cerrno>
 #include <cctype>
 #include <chrono>
@@ -21,11 +18,9 @@
 #include <fcntl.h>
 #include <fstream>
 #include <iostream>
-#include <netinet/in.h>
 #include <signal.h>
 #include <string>
 #include <string_view>
-#include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
 #include <thread>
@@ -39,12 +34,6 @@ namespace {
 using clock_type = std::chrono::steady_clock;
 volatile sig_atomic_t g_measure_signal_seen = 0;
 constexpr size_t kEthernetHeaderSize = 14;
-constexpr std::string_view kKatranBalancerProgramName = "balancer_ingress";
-constexpr uint32_t kKatranVipNum = 0;
-constexpr uint32_t kKatranRealNum = 1;
-constexpr uint32_t kKatranVipFlags = 1U << 1;
-constexpr uint32_t kKatranChRingSize = 65537;
-constexpr size_t kKatranEncapHeadroom = 64;
 constexpr const char *kVmlinuxBtfPath = "/sys/kernel/btf/vmlinux";
 
 #ifndef BPF_PSEUDO_KINSN_CALL
@@ -177,12 +166,6 @@ struct live_fixture_map {
     int fd = -1;
 };
 
-bool katran_balancer_fixture_requested(const cli_options &options)
-{
-    return options.program_name.has_value() &&
-           *options.program_name == kKatranBalancerProgramName;
-}
-
 std::optional<uint64_t> read_nominal_tsc_freq_hz()
 {
     std::ifstream cpuinfo("/proc/cpuinfo");
@@ -277,130 +260,10 @@ uint64_t detect_tsc_freq_hz()
     return calibrate_tsc_freq_hz();
 }
 
-std::array<uint8_t, 4> parse_ipv4_address(std::string_view text)
-{
-    std::array<uint8_t, 4> address {};
-    const std::string rendered(text);
-    if (inet_pton(AF_INET, rendered.c_str(), address.data()) != 1) {
-        fail("unable to parse IPv4 address: " + rendered);
-    }
-    return address;
-}
-
-std::array<uint8_t, 6> parse_mac_address(std::string_view text)
-{
-    std::array<uint8_t, 6> mac {};
-    unsigned int octets[6] = {};
-    const std::string rendered(text);
-    if (std::sscanf(
-            rendered.c_str(),
-            "%2x:%2x:%2x:%2x:%2x:%2x",
-            &octets[0],
-            &octets[1],
-            &octets[2],
-            &octets[3],
-            &octets[4],
-            &octets[5]) != 6) {
-        fail("unable to parse MAC address: " + rendered);
-    }
-    for (size_t index = 0; index < mac.size(); ++index) {
-        mac[index] = static_cast<uint8_t>(octets[index] & 0xFFU);
-    }
-    return mac;
-}
-
-void update_map_elem_or_fail(
-    int fd,
-    const void *key,
-    const void *value,
-    std::string_view map_name)
-{
-    if (bpf_map_update_elem(fd, key, value, BPF_ANY) != 0) {
-        fail(
-            "bpf_map_update_elem(" + std::string(map_name) + ") failed: " +
-            std::string(strerror(errno)));
-    }
-}
-
-std::array<uint8_t, 8> build_katran_ctl_value()
-{
-    std::array<uint8_t, 8> value {};
-    const auto mac = parse_mac_address("02:00:00:00:00:0b");
-    std::copy(mac.begin(), mac.end(), value.begin());
-    return value;
-}
-
-std::array<uint8_t, 20> build_katran_vip_key()
-{
-    std::array<uint8_t, 20> key {};
-    const auto vip = parse_ipv4_address("10.100.1.1");
-    std::copy(vip.begin(), vip.end(), key.begin());
-    key[16] = static_cast<uint8_t>((8080U >> 8) & 0xFFU);
-    key[17] = static_cast<uint8_t>(8080U & 0xFFU);
-    key[18] = IPPROTO_TCP;
-    return key;
-}
-
-std::array<uint8_t, 8> build_katran_vip_value()
-{
-    std::array<uint8_t, 8> value {};
-    const uint32_t flags = kKatranVipFlags;
-    const uint32_t vip_num = kKatranVipNum;
-    std::memcpy(value.data(), &flags, sizeof(flags));
-    std::memcpy(value.data() + sizeof(flags), &vip_num, sizeof(vip_num));
-    return value;
-}
-
-std::array<uint8_t, 20> build_katran_real_value()
-{
-    std::array<uint8_t, 20> value {};
-    const auto real = parse_ipv4_address("10.200.0.2");
-    std::copy(real.begin(), real.end(), value.begin());
-    return value;
-}
-
-void initialize_katran_test_fixture(bpf_object *object)
-{
-    bpf_map *vip_map = bpf_object__find_map_by_name(object, "vip_map");
-    bpf_map *reals_map = bpf_object__find_map_by_name(object, "reals");
-    bpf_map *rings_map = bpf_object__find_map_by_name(object, "ch_rings");
-    bpf_map *ctl_array_map = bpf_object__find_map_by_name(object, "ctl_array");
-    if (vip_map == nullptr || reals_map == nullptr || rings_map == nullptr ||
-        ctl_array_map == nullptr) {
-        fail("katran fixture missing required maps");
-    }
-
-    const int vip_fd = bpf_map__fd(vip_map);
-    const int reals_fd = bpf_map__fd(reals_map);
-    const int rings_fd = bpf_map__fd(rings_map);
-    const int ctl_fd = bpf_map__fd(ctl_array_map);
-    if (vip_fd < 0 || reals_fd < 0 || rings_fd < 0 || ctl_fd < 0) {
-        fail("unable to obtain Katran fixture map fd");
-    }
-
-    const uint32_t zero = 0;
-    const uint32_t real_num = kKatranRealNum;
-    const auto ctl_value = build_katran_ctl_value();
-    const auto vip_key = build_katran_vip_key();
-    const auto vip_value = build_katran_vip_value();
-    const auto real_value = build_katran_real_value();
-
-    update_map_elem_or_fail(ctl_fd, &zero, ctl_value.data(), "ctl_array");
-    update_map_elem_or_fail(vip_fd, vip_key.data(), vip_value.data(), "vip_map");
-    update_map_elem_or_fail(reals_fd, &real_num, real_value.data(), "reals");
-    for (uint32_t ring_pos = 0; ring_pos < kKatranChRingSize; ++ring_pos) {
-        const uint32_t key = (kKatranVipNum * kKatranChRingSize) + ring_pos;
-        update_map_elem_or_fail(rings_fd, &key, &real_num, "ch_rings");
-    }
-}
-
 } // namespace
 
-size_t packet_output_capacity(const cli_options &options, size_t packet_size)
+size_t packet_output_capacity(const cli_options &, size_t packet_size)
 {
-    if (katran_balancer_fixture_requested(options)) {
-        return std::max(packet_size + kKatranEncapHeadroom, static_cast<size_t>(128));
-    }
     return packet_size;
 }
 
@@ -1133,9 +996,6 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         if (options.btf_custom_path.has_value()) {
             fail("raw kinsn micro loader does not support custom BTF paths");
         }
-        if (katran_balancer_fixture_requested(options)) {
-            fail("raw kinsn micro loader does not support Katran map fixtures");
-        }
         if (options.fixture_path.has_value()) {
             fail("raw kinsn micro loader does not support map fixtures");
         }
@@ -1169,9 +1029,6 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         object_load_end = std::chrono::steady_clock::now();
         effective_io_mode = resolve_effective_io_mode(options.io_mode, object.get());
 
-        if (katran_balancer_fixture_requested(options)) {
-            initialize_katran_test_fixture(object.get());
-        }
         maybe_load_map_fixtures(options, object.get());
 
         bpf_program *prog = find_program(object.get(), options.program_name);
