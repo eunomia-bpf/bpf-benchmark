@@ -42,16 +42,6 @@ static void substitute_vars(char *out, size_t out_sz, const char *in,
     out[o] = 0;
 }
 
-/* execute_step — daemon-style RPC. Runner sends a pre-resolved shell command
- * (read from runner/config/passes/<pass>/default.yaml), shim substitutes
- * shim-owned vars and runs /bin/sh -c verbatim. Mirrors daemon's contract at
- * daemon/src/commands.rs:execute_one + daemon/src/server.rs:execute_plan.
- *
- *   request:  {"cmd":"execute_step","prog_id":<u32>,"command":"<sh>",
- *              "step_seq":<int optional>}
- *   response: {"ok":<bool>,"exit_code":<int>,"output":"<path>","report":"<path>",
- *              "bpfopt_ms":<u64>,"program":{...},"workdir_tar_b64":"..."}
- */
 /* Per-step outcome from the inner execute_plan loop. */
 struct step_result {
     int ok;
@@ -461,47 +451,44 @@ static int prog_workdir_init(struct prog_entry *pd, uint32_t want_id,
     return 0;
 }
 
-/* execute_plan — replaces daemon's execute_plan RPC. Input plan JSON:
- *   {"cmd":"execute_plan",
- *    "programs":[{"prog_id":N,
- *                 "steps":[{"name":"...","command":"...","log_level":N}]}]}
- * Response (same shape as daemon's): {"status":"ok","per_program":{...}}. */
+/* execute_plan — app-level shim RPC. The runner sends only pass steps; shim
+ * applies them to every BPF program tracked by this process. */
 static void emit_execute_plan(int cli, const char *json) {
-    const char *progs_end = NULL;
-    const char *progs = json_array_at(json, "programs", &progs_end);
+    const char *unsupported_end = NULL;
+    if (json_array_at(json, "programs", &unsupported_end)) {
+        dprintf(cli, "{\"status\":\"error\",\"error_message\":\"programs/prog_id execute_plan is unsupported by shim; send top-level steps\"}\n");
+        return;
+    }
     const char *all_steps_end = NULL;
     const char *all_steps = json_array_at(json, "steps", &all_steps_end);
-    if (!progs && !all_steps) {
-        dprintf(cli, "{\"status\":\"error\",\"error_message\":\"missing programs or steps\"}\n");
+    if (!all_steps) {
+        dprintf(cli, "{\"status\":\"error\",\"error_message\":\"missing steps\"}\n");
         return;
     }
     uint32_t *all_prog_ids = NULL;
     uint32_t all_prog_n = 0;
     uint32_t all_prog_i = 0;
-    if (!progs) {
-        pthread_mutex_lock(&state_mutex);
-        for (int b = 0; b < BPF_STATE_BUCKETS; b++)
-            for (struct prog_entry *e = prog_table[b]; e; e = e->next)
-                if (e->kernel_prog_id) all_prog_n++;
-        if (all_prog_n == 0) {
-            pthread_mutex_unlock(&state_mutex);
-            dprintf(cli, "{\"status\":\"error\",\"error_message\":\"no tracked BPF programs\"}\n");
-            return;
-        }
-        all_prog_ids = (uint32_t *)calloc(all_prog_n ? all_prog_n : 1,
-                                          sizeof(*all_prog_ids));
-        if (!all_prog_ids) {
-            pthread_mutex_unlock(&state_mutex);
-            dprintf(cli, "{\"status\":\"error\",\"error_message\":\"oom\"}\n");
-            return;
-        }
-        uint32_t idx = 0;
-        for (int b = 0; b < BPF_STATE_BUCKETS; b++)
-            for (struct prog_entry *e = prog_table[b]; e; e = e->next)
-                if (e->kernel_prog_id && idx < all_prog_n)
-                    all_prog_ids[idx++] = e->kernel_prog_id;
+    pthread_mutex_lock(&state_mutex);
+    for (int b = 0; b < BPF_STATE_BUCKETS; b++)
+        for (struct prog_entry *e = prog_table[b]; e; e = e->next)
+            if (e->kernel_prog_id) all_prog_n++;
+    if (all_prog_n == 0) {
         pthread_mutex_unlock(&state_mutex);
+        dprintf(cli, "{\"status\":\"error\",\"error_message\":\"no tracked BPF programs\"}\n");
+        return;
     }
+    all_prog_ids = (uint32_t *)calloc(all_prog_n, sizeof(*all_prog_ids));
+    if (!all_prog_ids) {
+        pthread_mutex_unlock(&state_mutex);
+        dprintf(cli, "{\"status\":\"error\",\"error_message\":\"oom\"}\n");
+        return;
+    }
+    uint32_t idx = 0;
+    for (int b = 0; b < BPF_STATE_BUCKETS; b++)
+        for (struct prog_entry *e = prog_table[b]; e; e = e->next)
+            if (e->kernel_prog_id && idx < all_prog_n)
+                all_prog_ids[idx++] = e->kernel_prog_id;
+    pthread_mutex_unlock(&state_mutex);
 
     size_t cap = 65536, len = 0;
     char *resp = (char *)malloc(cap);
@@ -513,35 +500,10 @@ static void emit_execute_plan(int cli, const char *json) {
     if (buf_appendf(&resp, &cap, &len, "{\"status\":\"ok\",\"per_program\":{") != 0)
         goto resp_oom;
 
-    const char *cursor = progs;
-    const char *po_s, *po_e;
+    int failure_artifacts = 0;
     int first_prog = 1;
-    while (1) {
-        char *po = NULL;
-        if (progs) {
-            if (!json_array_next_obj(&cursor, progs_end, &po_s, &po_e))
-                break;
-            size_t plen = (size_t)(po_e - po_s);
-            po = (char *)malloc(plen + 1);
-            if (!po) continue;
-            memcpy(po, po_s, plen); po[plen] = 0;
-        } else {
-            if (all_prog_i >= all_prog_n)
-                break;
-            size_t steps_len = (size_t)(all_steps_end - all_steps);
-            size_t plen = steps_len + 80;
-            po = (char *)malloc(plen);
-            if (!po) {
-                all_prog_i++;
-                continue;
-            }
-            snprintf(po, plen, "{\"prog_id\":%u,\"steps\":[%.*s]}",
-                     all_prog_ids[all_prog_i++], (int)steps_len, all_steps);
-        }
-
-        long pid_l = json_get_int(po, "prog_id");
-        if (pid_l <= 0) { free(po); continue; }
-        uint32_t want_id = (uint32_t)pid_l;
+    while (all_prog_i < all_prog_n) {
+        uint32_t want_id = all_prog_ids[all_prog_i++];
         char prog_id_str[32];
         snprintf(prog_id_str, sizeof(prog_id_str), "%u", want_id);
 
@@ -561,7 +523,6 @@ static void emit_execute_plan(int cli, const char *json) {
 
         if (buf_appendf(&resp, &cap, &len, "%s\"%u\":{",
                         first_prog ? "" : ",", want_id) != 0) {
-            free(po);
             goto resp_oom;
         }
         first_prog = 0;
@@ -576,12 +537,12 @@ static void emit_execute_plan(int cli, const char *json) {
                         "\"final_insn_count\":0},"
                         "\"passes\":[]}",
                         want_id, getpid(), want_id, want_id);
-            free(po);
             continue;
         }
 
         /* Per-prog setup (canonicalize + map snapshots) — once per prog. */
         struct prog_workdir w;
+        memset(&w, 0, sizeof(w));
         uint32_t nr_maps = 0;
         uint32_t *local_ids = NULL, *local_types = NULL, *local_loader_fds = NULL;
         char map_ids_csv[1024];
@@ -601,11 +562,17 @@ static void emit_execute_plan(int cli, const char *json) {
                         "\"program\":{\"prog_id\":%u,\"prog_name\":\"%s\","
                         "\"prog_type\":%u,\"orig_insn_count\":%u,"
                         "\"final_insn_count\":%u},"
-                        "\"passes\":[]}",
+                        "\"passes\":[]",
                         escaped, want_id, want_id, prog_name, prog_type_num,
                         orig_insn_count, orig_insn_count);
+            if (w.workdir[0] &&
+                append_workdir_tar_b64(&resp, &cap, &len, w.workdir,
+                                       &failure_artifacts) != 0) {
+                free(local_ids); free(local_types); free(local_loader_fds);
+                goto resp_oom;
+            }
+            buf_appendf(&resp, &cap, &len, "}");
             free(local_ids); free(local_types); free(local_loader_fds);
-            free(po);
             continue;
         }
 
@@ -617,13 +584,11 @@ static void emit_execute_plan(int cli, const char *json) {
         if (pd) step_seq = pd->step_seq;
         pthread_mutex_unlock(&state_mutex);
 
-        const char *steps_end = NULL;
-        const char *steps = json_array_at(po, "steps", &steps_end);
-        const char *scur = steps;
+        const char *scur = all_steps;
         const char *so_s, *so_e;
         int first_step = 1;
         buf_appendf(&resp, &cap, &len, "\"prog_id\":%u,\"passes\":[", want_id);
-        while (steps && json_array_next_obj(&scur, steps_end, &so_s, &so_e)) {
+        while (json_array_next_obj(&scur, all_steps_end, &so_s, &so_e)) {
             size_t slen = (size_t)(so_e - so_s);
             char *so = (char *)malloc(slen + 1);
             if (!so) continue;
@@ -669,12 +634,9 @@ static void emit_execute_plan(int cli, const char *json) {
                         name_json, cmd_json, log_level,
                         daemon_step_status(&sr));
             if (!sr.ok) {
-                /* err_msg already json-escaped + bounded to 2 KB. We do NOT
-                 * include workdir_tar_b64 — base64-encoded tarballs of large
-                 * prog workdirs (verifier logs, map dumps, bytecode) explode
-                 * to hundreds of MB per step and overflow the socket
-                 * response buffer. Failure tar is left on-disk under
-                 * /tmp/work_<prog_id>/ for KEEP_WORKDIRS=1 collection. */
+                /* err_msg already json-escaped + bounded to 2 KB. Full logs
+                 * and side inputs are attached once at the per-program level
+                 * through workdir_tar_b64, matching daemon failure payloads. */
                 buf_appendf(&resp, &cap, &len,
                             "\"error\":\"%s\","
                             "\"exit_code\":%d",
@@ -699,13 +661,19 @@ static void emit_execute_plan(int cli, const char *json) {
                     "],\"status\":\"%s\","
                     "\"program\":{\"prog_id\":%u,\"prog_name\":\"%s\","
                     "\"prog_type\":%u,\"orig_insn_count\":%u,"
-                    "\"final_insn_count\":%u}}",
+                    "\"final_insn_count\":%u}",
                     prog_any_failed ? "error" : "ok",
                     final_prog_id, prog_name, prog_type_num,
                     orig_insn_count, final_insn_count);
+        if (prog_any_failed &&
+            append_workdir_tar_b64(&resp, &cap, &len, w.workdir,
+                                   &failure_artifacts) != 0) {
+            free(local_ids); free(local_types); free(local_loader_fds);
+            goto resp_oom;
+        }
+        buf_appendf(&resp, &cap, &len, "}");
 
         free(local_ids); free(local_types); free(local_loader_fds);
-        free(po);
         log_line("execute_plan prog_id=%u step_seq=%d status=%s",
                  want_id, step_seq, prog_any_failed ? "error" : "ok");
     }

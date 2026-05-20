@@ -10,10 +10,10 @@
  * original load attr (for prog), and the attach relationship (for link /
  * perf_event). close() maintains table consistency.
  *
- * Per-pid socket implements daemon-protocol RPCs (list_progs / execute_step /
- * dump_state). Optimization is runner-driven: the runner reads its yaml,
- * resolves a shell command, sends it via execute_step; the shim substitutes
- * ${VAR}s and runs /bin/sh -c.
+ * Per-pid socket implements app-level shim RPCs. Optimization is runner-driven:
+ * the runner reads its yaml and sends pass steps; the shim applies them to
+ * every BPF program tracked in this process, substitutes ${VAR}s, and runs
+ * /bin/sh -c.
  *
  * Usage:
  *   gcc -shared -fPIC -O2 libbpfrejit_shim.c -o libbpfrejit_shim.so -ldl -lpthread
@@ -132,7 +132,7 @@ __attribute__((constructor)) static void shim_init(void) {
     }
 
     /* Probe the kernel BTF for all available kinsn kfunc targets and write
-     * target.json once. Subsequent execute_step RPCs reuse this file for the
+     * target.json once. Subsequent execute_plan RPCs reuse this file for the
      * `--target` arg to every bpfopt pass. Daemon-equivalent of the
      * `probe_target_json` step. */
     char target_json_path[320];
@@ -170,7 +170,7 @@ __attribute__((constructor)) static void shim_init(void) {
     pthread_create(&tid, NULL, worker_thread, NULL);
     pthread_detach(tid);
 
-    /* Socket server thread — per-pid daemon-compatible socket.
+    /* Socket server thread — per-pid app-level shim socket.
      * Disable by setting BPFREJIT_SHIM_SOCK_DISABLE=1. */
     if (!getenv("BPFREJIT_SHIM_SOCK_DISABLE")) {
         pthread_t stid;
@@ -965,7 +965,7 @@ static void *socket_thread(void *arg) {
 
 /* Worker thread: optional periodic state JSON dump
  * (env: BPFREJIT_SHIM_PERIODIC_DUMP_MS, ms). Optimization itself is driven
- * by the runner over the socket via execute_step, not by this thread. */
+ * by the runner over the socket via execute_plan, not by this thread. */
 static void *worker_thread(void *arg) {
     (void)arg;
     const char *dump_env = getenv("BPFREJIT_SHIM_PERIODIC_DUMP_MS");

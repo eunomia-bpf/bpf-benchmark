@@ -62,9 +62,9 @@ struct prog_entry {
     void *line_info_buf;
     uint32_t line_info_cnt;
     uint32_t line_info_rec_size;
-    /* Per-prog execute_step state. */
+    /* Per-prog execute_plan state. */
     int canonicalized;            /* 1 once --canonicalize-map-refs has run */
-    int step_seq;                 /* incremented per successful execute_step */
+    int step_seq;                 /* incremented per successful execute_plan step */
     /* Snapshot of map_table at PROG_LOAD time — libbpf may close the map fds
      * shortly after load (especially when handling map-in-map relocations or
      * temporary metadata fds), but the bytecode still references those fd

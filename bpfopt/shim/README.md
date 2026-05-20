@@ -69,13 +69,13 @@ binaries need the vendor-replace path documented in
 - **Skip `<sys/ioctl.h>`** — glibc and musl have conflicting signatures.
   Include only `<linux/ioctl.h>` for IOC macros and self-declare the function.
 
-## Phase 2 (active — daemon-protocol socket, runner-driven)
+## Phase 2 (active — app-level shim socket, runner-driven)
 
-The shim is a **dumb shell executor** matching the existing daemon contract
-(`runner/libs/rejit_plan.py` + `daemon/src/server.rs`):
+The shim is a **dumb shell executor** for BPF apps launched under
+`LD_PRELOAD`:
 
 - the **runner** parses `runner/config/passes/<pass>/default.yaml` and ships
-  the resolved shell command to the shim over the socket
+  pass steps to the shim over the socket
 - the **shim** substitutes shim-owned vars (`${INPUT}`, `${OUTPUT}`,
   `${REPORT}`, `${PROG_ID}`, `${PROG_TYPE}`, `${WORKDIR}`, `${TARGET}`) and
   runs `/bin/sh -c <command>` with `LD_PRELOAD` stripped from the subprocess
@@ -85,7 +85,7 @@ The shim ships **no** auto-tick / hardcoded pass logic. Optimization is
 runner-driven over the socket; the shim is responsible only for interception
 + state tracking + executing whatever shell command the runner sends.
 
-### Socket — Plan A, daemon protocol compatible
+### Socket — app-level plan
 
 Each shim instance binds a per-pid unix socket:
 
@@ -102,10 +102,12 @@ Line-delimited JSON. Commands:
 //                            "type": <prog_type>, "insn_cnt": ...,
 //                            "hash": "...", "bytecode_path": "..."}]}
 
-// execute_step — run a runner-supplied shell command against one prog
-{"cmd": "execute_step", "prog_id": 4669,
- "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}"}
-// → {"ok": true, "exit_code": 0, "output": "...", "report": "..."}
+// execute_plan — run runner-supplied pass steps against every tracked prog
+{"cmd": "execute_plan",
+ "steps": [{"name": "noop",
+            "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+            "log_level": 1}]}
+// → {"status": "ok", "per_program": {"4669": {"status": "ok", "passes": [...]}}}
 
 // dump_state — write state JSON to disk and return path
 {"cmd": "dump_state"}
@@ -165,6 +167,6 @@ Design references:
 
 | file | purpose |
 |---|---|
-| `libbpfrejit_shim.c` | LD_PRELOAD library (intercept + state + execute_step socket) |
+| `libbpfrejit_shim.c` | LD_PRELOAD library (intercept + state + execute_plan socket) |
 | `selftest.c` | synthetic-load PoC, exercises capture path without root |
 | `Makefile` | `all` / `musl` / `smoke` / `selftest-run` |
