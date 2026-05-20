@@ -8,7 +8,7 @@
 //!   2. shell out to `bpftool map show -j` + `bpftool map dump -j` for each map
 //!      referenced by the loaded programs → `<workdir>/map-values/`
 //!   3. for each program: `bpfopt --canonicalize-map-refs`
-//!   4. for each program (if `--pass` given): execute the daemon's per-pass yaml
+//!   4. for each program (if `--pass` given): execute the per-pass yaml
 //!      at `runner/config/passes/<pass>/default.yaml`, then re-verify the
 //!      produced bytecode with `BPF_PROG_LOAD`
 //!
@@ -74,7 +74,7 @@ struct Cli {
     /// loaded and processed; each ends up in `<workdir>/<prog_name>/`.
     #[arg(long, value_name = "FILE")]
     obj: PathBuf,
-    /// Pass to run via the daemon's per-pass yaml.
+    /// Pass to run via the per-pass yaml.
     #[arg(long, value_name = "NAME")]
     pass: Option<String>,
     /// bpfopt executable to invoke.
@@ -1389,7 +1389,7 @@ mod tests {
     use super::*;
 
     // EXPERIMENT: force `reals:!01000000` to see if loader can now match
-    // corpus daemon's 16 map_inline applied (was 10).
+    // corpus run's 16 map_inline applied (was 10).
     const KATRAN_INLINE_HINTS: [&str; 5] = [
         "--inline-hint=ctl_array:!00000000",
         "--inline-hint=vip_map:!0a6401010000000000000000000000001f901100",

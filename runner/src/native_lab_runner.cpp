@@ -224,8 +224,8 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
         .code = BPF_JMP | BPF_EXIT, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0,
     });
 
-    // fd_array[0] is the verifier's pre-scan slot; daemon convention is to
-    // duplicate the module BTF fd there. fd_array[1] is what `off=1` in the
+    // fd_array[0] is the verifier's pre-scan slot; the ReJIT path duplicates
+    // the module BTF fd there. fd_array[1] is what `off=1` in the
     // kinsn call insn resolves to.
     int fd_array[2] = {mod_btf_fd, mod_btf_fd};
     std::vector<char> log_buf(32 * 1024, '\0');

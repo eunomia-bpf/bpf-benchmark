@@ -290,7 +290,7 @@ class CiliumRunner(NativeProcessRunner):
             "--enable-l7-proxy=false",
             "--enable-health-checking=false",
             "--enable-endpoint-health-checking=false",
-            # Disable userspace continuous reload features so the daemon stops
+            # Disable userspace continuous reload features so Cilium stops
             # rebuilding endpoint BPF every few seconds (otherwise paper-perf
             # measurements include drift-checker / dynamic-config regenerations).
             "--enable-drift-checker=false",

@@ -4,7 +4,6 @@ SHELL := /bin/bash
 ROOT_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 MICRO_DIR := $(ROOT_DIR)/micro
 RUNNER_DIR := $(ROOT_DIR)/runner
-DAEMON_DIR := $(ROOT_DIR)/daemon
 KERNEL_DIR := $(ROOT_DIR)/vendor/linux-framework
 ARTIFACT_ROOT := $(ROOT_DIR)/.cache
 RUNNER_BUILD_DIR ?= $(RUNNER_DIR)/build
@@ -179,7 +178,7 @@ RUNTIME_DOCKER = docker run --rm --privileged --pid=host --network=host --ipc=ho
 	-e BPFREJIT_INSIDE_RUNTIME_CONTAINER=1 -e HOME=/root $(RUNTIME_ENV) \
 	-w "$(ROOT_DIR)" $(RUNTIME_MOUNTS)
 
-.PHONY: check validate daemon-tests lint clean \
+.PHONY: check validate lint clean \
 	selftest negative-test test micro corpus all terminate kvm-host-cpu \
 	clean-build clean-results clean-vm-tmp clean-docker-cache
 
@@ -193,9 +192,6 @@ lint:
 	find "$(ROOT_DIR)" \
 		\( -path "$(ROOT_DIR)/vendor" -o -path "$(ROOT_DIR)/docs/tmp" -o -path "$(ROOT_DIR)/runner/repos" -o -path "$(ROOT_DIR)/.cache" -o -path "$(ROOT_DIR)/tests/results" -o -path "$(ROOT_DIR)/tests/unittest/build" -o -path "$(ROOT_DIR)/tests/unittest/build-arm64" -o -path "*/__pycache__" \) -prune -o \
 		-type f -name '*.py' -exec "$(PYTHON)" -m py_compile {} +
-
-daemon-tests:
-	cargo test --workspace --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 
 selftest: selftest-$(RUN_KEY)
 negative-test: negative-test-$(RUN_KEY)
@@ -305,7 +301,6 @@ clean-build:
 	rm -f "$(MICRO_DIR)"/generated-inputs/*.mem
 	rm -rf "$(MICRO_DIR)/__pycache__" "$(MICRO_DIR)/build" "$(MICRO_DIR)"/programs/build-x86 "$(MICRO_DIR)"/programs/build-arm64
 	cargo clean --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml"
-	cargo clean --manifest-path "$(DAEMON_DIR)/Cargo.toml"
 	rm -rf \
 		"$(ARTIFACT_ROOT)/container-images" \
 		"$(ARTIFACT_ROOT)/aws-arm64/run-state" \

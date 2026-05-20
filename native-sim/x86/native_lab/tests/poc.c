@@ -274,9 +274,7 @@ static int build_and_load_prog(int kfunc_btf_id, int mod_btf_fd,
 	 * fd_array[0] must be a valid fd: the verifier pre-scans the array
 	 * even when no maps reference it. fd_array[1] is the module BTF fd
 	 * that off=1 in the kinsn call insn addresses. Duplicating the BTF
-	 * fd into slot 0 is the same trick the bpfrejit daemon uses (see
-	 * daemon/src/commands.rs: "duplicate valid BTF fd only to satisfy
-	 * the verifier's fd_array pre-scan").
+	 * fd into slot 0 satisfies the verifier's fd_array pre-scan.
 	 */
 	int fd_array[2] = { mod_btf_fd, mod_btf_fd };
 	char log_buf[16 * 1024] = {};

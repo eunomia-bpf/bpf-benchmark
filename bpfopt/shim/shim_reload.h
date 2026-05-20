@@ -32,7 +32,7 @@ static void capture_verifier_states(const struct prog_entry *p,
     (void)build_full_fd_array(target_json_path, map_fds, nr_fds,
                               &fd_array, &fd_array_n);
 
-    /* 16 MB log buffer matches daemon's REJIT_VERBOSE_LOG_BUF_SIZE. */
+    /* 16 MB log buffer keeps large-program verifier logs intact. */
     size_t log_buf_size = 16 * 1024 * 1024;
     char *log_buf = (char *)malloc(log_buf_size);
     if (!log_buf) {
@@ -243,8 +243,8 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
      * binds every entry as a map. Because our fd_array has BTF module
      * fds at higher slots (post-map-prefix shift), that eager bind fails
      * with EBADF/EINVAL ("fd N not pointing to valid bpf_map or btf").
-     * fd_array_cnt == 0 keeps the kernel on the on-demand fdget path,
-     * matching the daemon ReJIT behaviour.
+     * fd_array_cnt == 0 keeps the kernel on the on-demand fdget path used by
+     * the ReJIT path.
      *
      * libbpf-sys's union bpf_attr may lack the fd_array_cnt field name,
      * so we patch at the UAPI offset (148: 4 bytes after prog_token_fd

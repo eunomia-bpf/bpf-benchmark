@@ -17,10 +17,10 @@
 #   phase 2: vip_map[VIP+port+TCP]  benchmark single VIP (soft guarded)
 #   phase 3: ch_rings  uniform overlay all entries → real_id 1
 #            reals[1]  sparse overlay, REAL_IP 10.200.0.2 → real_definition
-#   phase 4: lpm_src_v4/v6 empty daemon dumps → lookup miss/NULL
+#   phase 4: lpm_src_v4/v6 empty snapshots → lookup miss/NULL
 #            lru_mapping/global_lru_maps outer lookup → const inner map_ptr
 #
-# Phase 3 needs runtime overlay injection because daemon size-skipped
+# Phase 3 needs runtime overlay injection because snapshot capture size-skipped
 # ch_rings/reals (33M-entry array). _inject_katran.sh resolves map_id by name
 # from MAP_VALUES/map-*.show.json and writes overlays.json keyed by current
 # run's map_ids (overlay templates are static; map_ids change per run).

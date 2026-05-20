@@ -39,7 +39,6 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     if argv or (argv is None and sys.argv[1:]):
         _die("test suite takes env only; run through Make")
     args = common_env_args(str(ROOT_DIR), _die)
-    args.daemon_binary = env_str("DAEMON_BINARY")
     args.artifact_dir = env_str("TEST_ARTIFACT_DIR")
     args.run_contract_json = env_str("RUN_CONTRACT_JSON")
     args.run_contract_path = env_str("RUN_CONTRACT_PATH")

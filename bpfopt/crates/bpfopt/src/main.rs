@@ -24,7 +24,7 @@ struct Cli {
     #[command(flatten)]
     common: CommonArgs,
     /// Pass to run. bpfopt runs exactly one pass per invocation; pass
-    /// sequencing is owned by the daemon, not by bpfopt.
+    /// sequencing is owned by the caller, not by bpfopt.
     #[arg(long, value_name = "NAME")]
     pass: Option<String>,
     /// Canonicalize map references from loader FD form to stable map-index form.
@@ -41,7 +41,7 @@ struct Cli {
     /// captured bytecode came from a stock-kernel intercept (LD_PRELOAD shim)
     /// where the loader uses several distinct fds for the same underlying
     /// kernel map. Format: `{"5": 265, "7": 265, "9": 100}` (string keys, u32
-    /// values). When omitted, bpfopt keeps daemon semantics (imm = kid).
+    /// values). When omitted, bpfopt treats the immediate as the kernel map id.
     #[arg(long, value_name = "FILE")]
     fd_to_id: Option<PathBuf>,
     /// Pass-local args. Must follow `--` and are parsed by the selected pass.

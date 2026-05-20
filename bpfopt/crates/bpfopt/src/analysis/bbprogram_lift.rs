@@ -186,8 +186,8 @@ pub fn lift_with_pass_context(insns: &[BpfInsn], ctx: &PassContext) -> anyhow::R
     Ok(prog)
 }
 
-// Snapshot initialization canonicalizes loader-owned map references before the
-// daemon lifts bytecode into ProgramCFG. This is intentionally a raw Vec mutation
+// Snapshot initialization canonicalizes loader-owned map references before
+// bytecode is lifted into ProgramCFG. This is intentionally a raw Vec mutation
 // path for lift-time normalization; optimization passes operate through ProgramCFG.
 pub fn canonicalize_map_refs_to_idx(
     insns: &mut [BpfInsn],
@@ -208,9 +208,9 @@ pub fn canonicalize_map_refs_to_idx(
 /// pointing to the same kernel map collapse to a single fd_array slot, and
 /// the resulting bytecode imm = position-of-kid-in-map_ids.
 ///
-/// When `fd_to_id` is None the function preserves the original daemon
-/// semantics: bytecode imm IS already the kernel id (verifier-rewritten
-/// via `BPF_PROG_GET_ORIGINAL`), unique imm values get sequential indices.
+/// When `fd_to_id` is None the bytecode imm is already the kernel id
+/// (verifier-rewritten via `BPF_PROG_GET_ORIGINAL`), and unique imm values get
+/// sequential indices.
 pub fn canonicalize_map_refs_to_idx_with_mapping(
     insns: &mut [BpfInsn],
     original_loader_fd_array: Option<&[i32]>,

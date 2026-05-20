@@ -1,9 +1,9 @@
 #ifndef BPFREJIT_SHIM_SNAPSHOT_H
 #define BPFREJIT_SHIM_SNAPSHOT_H
 
-/* --- daemon-parity helpers (MAP_IDS / MAP_VALUES / canonicalize / VERIFIER_STATES) --- */
+/* --- snapshot helpers (MAP_IDS / MAP_VALUES / canonicalize / VERIFIER_STATES) --- */
 
-/* Mirror of daemon's needs_bpftool_map_dump. */
+/* Map types that can produce useful bpftool JSON snapshots for map_inline. */
 static int map_type_needs_dump(uint32_t t) {
     return t == BPF_MAP_TYPE_HASH || t == BPF_MAP_TYPE_ARRAY ||
            t == BPF_MAP_TYPE_PERCPU_ARRAY || t == BPF_MAP_TYPE_LRU_HASH ||
@@ -71,7 +71,7 @@ static int run_bpftool_to_file(char *const argv[], const char *out_path) {
 /* For map-in-map outers (ARRAY_OF_MAPS / HASH_OF_MAPS): walk the outer map
  * via BPF_MAP_GET_NEXT_KEY + BPF_MAP_LOOKUP_ELEM and write each slot's inner
  * map id to map-<outer_kid>.inner_map_ids.json. map_inline reads this file to
- * resolve inner refs during inlining; daemon-equivalent supplement. */
+ * resolve inner refs during inlining. */
 static void write_inner_map_ids_supplement(const char *map_values_dir,
                                            uint32_t outer_kid,
                                            uint32_t outer_type) {
@@ -224,8 +224,8 @@ static void write_map_snapshots(const char *map_values_dir,
         if (skip_dump) {
             int wfd = open(dump_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
             if (wfd >= 0) {
-                /* Schema must match daemon (write_map_snapshot_skip_marker):
-                 * bpfopt's map_inline parses `skipped`, `reason`,
+                /* Keep the skip-marker schema narrow: bpfopt's map_inline
+                 * parses `skipped`, `reason`,
                  * `size_bytes`, `limit_bytes` and rejects unknown keys
                  * like `estimated_bytes`. */
                 dprintf(wfd,
@@ -255,8 +255,7 @@ static void write_map_snapshots(const char *map_values_dir,
                         (unsigned long long)MAP_SNAPSHOT_MAX_BYTES);
                 real_close(wfd);
             }
-            /* Skip inner_map_ids supplement when we've dropped the raw dump,
-             * matching daemon's `dump_size <= MAP_SNAPSHOT_MAX_BYTES` guard. */
+            /* Skip inner_map_ids supplement when we've dropped the raw dump. */
             continue;
         }
         if (types[i] == BPF_MAP_TYPE_ARRAY_OF_MAPS ||
@@ -396,7 +395,7 @@ static int parse_target_btf_modules(const char *target_json_path,
 }
 
 /* Build the fd_array passed to BPF_PROG_LOAD for an optimized bytecode.
- * Layout (matches daemon's build_rejit_fd_array):
+ * Layout:
  *   - slots [0..nr_map_fds): map fds (dup'd from loader fds)
  *   - slots at each module's `call_offset`: BTF module fds (from
  *     BPF_BTF_GET_FD_BY_ID(btf_id))

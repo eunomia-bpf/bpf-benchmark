@@ -2,12 +2,9 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Mapping
 
 from runner.libs.bpf_stats import program_table_count
-from runner.libs.kinsn import relpath
-from runner.libs.rejit import DaemonSession
 
 DEFAULT_SUITE_QUIESCE_TIMEOUT_S = 200.0
 DEFAULT_SUITE_QUIESCE_STABLE_S = 2.0
@@ -45,40 +42,10 @@ def wait_for_suite_quiescence(
 
 
 @dataclass
-class CaseLifecycleState:
-    runtime: object
-    artifacts: dict[str, object] = field(default_factory=dict)
-
-
-@dataclass
-class PreparedDaemonSession:
-    session: DaemonSession
-    metadata: dict[str, object]
-    failure_artifacts_dir: Path | None = None
-
-
-@dataclass
 class LifecycleRunResult:
-    state: CaseLifecycleState | None
     baseline: Mapping[str, object] | None
     rejit_result: dict[str, object] | None
     post_rejit: Mapping[str, object] | None
     artifacts: dict[str, object] = field(default_factory=dict)
     error: str = ""
     stop_error: str = ""
-    stopped: bool = False
-
-
-def prepare_daemon_session(
-    daemon_session: DaemonSession,
-    *,
-    failure_artifacts_dir: Path | None = None,
-) -> PreparedDaemonSession:
-    metadata = dict(getattr(daemon_session, "kinsn_metadata", {}) or {})
-    # Stock-kernel shim path has no kinsn modules; an empty dict is valid.
-    metadata["daemon_binary"] = relpath(daemon_session.daemon_binary.resolve())
-    return PreparedDaemonSession(
-        session=daemon_session,
-        metadata=metadata,
-        failure_artifacts_dir=failure_artifacts_dir,
-    )

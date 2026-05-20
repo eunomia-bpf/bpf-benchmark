@@ -9,7 +9,7 @@
 //   BPFOPT_TESTBIN_UPDATE=1 cargo test -p bpfopt --test testbin_pass_counts
 //
 // Verifier-state-consuming passes (`map_inline`, `const_prop`) run with empty
-// verifier states here, so their apply counts are 0 even if real daemon-side
+// verifier states here, so their apply counts are 0 even if real ReJIT
 // verifier logs would let them fire. `branch_flip` is skipped (per-site PMU
 // profile required). `prog_type` is unknown for testbin entries, so passes
 // gated on packet ctx layout (`skb_load_bytes_spec`, `bounds_check_merge`)
@@ -234,8 +234,8 @@ fn run_pass_on_program(
 }
 
 /// Builds a KinsnRegistry with synthetic but unique (btf_id, call_off) per
-/// registered target so kinsn-class passes can emit calls without a daemon-
-/// supplied target.json. Same registry can be cloned per program/pass.
+/// registered target so kinsn-class passes can emit calls without a captured
+/// target.json. Same registry can be cloned per program/pass.
 fn build_registry() -> Result<KinsnRegistry> {
     let mut registry = KinsnRegistry::new()?;
     // Iterate every kinsn name the registry is aware of via PASS_REGISTRY +

@@ -12,7 +12,6 @@ RUNTIME_KINSN_MODULE_DIR = Path("/artifacts/kinsn")
 
 # (arm64_parts, x86_parts)
 _ARCH_PATHS: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
-    "daemon_binary_path":      (("daemon", "target", "aarch64-unknown-linux-gnu", "release", "bpfrejit-daemon"), ("daemon", "target", "release", "bpfrejit-daemon")),
     "runner_binary_path":      (("runner", "build-arm64-llvmbpf", "micro_exec"), ("runner", "build-llvmbpf", "micro_exec")),
     "test_unittest_build_dir": (("tests", "unittest", "build-arm64"), ("tests", "unittest", "build")),
     "test_negative_build_dir": (("tests", "negative", "build-arm64"), ("tests", "negative", "build")),
@@ -60,9 +59,6 @@ def stage2_program_root(workspace: Path, target_arch: str) -> Path:
     if inside_runtime_image():
         return image_artifact_root(target_arch, "stage2-programs")
     return runtime_workspace(workspace) / "native-sim" / "test" / f"build-{_vendor_arch(target_arch)}"
-
-def daemon_binary_path(workspace: Path, target_arch: str) -> Path:
-    return _p(runtime_workspace(workspace), target_arch, "daemon_binary_path")
 
 def runner_binary_path(workspace: Path, target_arch: str) -> Path:
     return _p(runtime_workspace(workspace), target_arch, "runner_binary_path")

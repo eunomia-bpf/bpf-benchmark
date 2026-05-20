@@ -120,11 +120,11 @@ pub(super) fn arm64_mov_reg_payload(dst_reg: u8, src_reg: u8) -> u64 {
 /// Entry in the pass registry. `kinsn_targets` declares which kinsn descriptors
 /// the pass might emit (used by `KinsnRegistry` to know which targets exist and
 /// to compute register liveness for in-bytecode kinsn calls). `needs_verifier_states`
-/// flags passes that consume the daemon's verifier log at lift time.
+/// flags passes that consume the previous ReJIT verifier log at lift time.
 ///
 /// There is intentionally no kinsn pre-flight or arch gate here — bpfopt emits
-/// candidate bytecode and lets the kernel verifier (via the daemon's REJIT)
-/// reject what the running kernel cannot accept.
+/// candidate bytecode and lets the kernel verifier reject what the running
+/// kernel cannot accept.
 pub struct PassRegistryEntry {
     pub name: &'static str,
     pub make: fn(&[String]) -> Result<Box<dyn BpfPass>>,
@@ -157,8 +157,7 @@ fn reject_pass_args(pass_name: &str, args: &[String]) -> Result<()> {
 }
 
 /// Canonical pass ordering and requirements. The CLI looks up entries by name to
-/// build a single-pass invocation; the daemon iterates this array in order when
-/// orchestrating multiple per-pass `bpfopt` invocations.
+/// build a single-pass invocation; callers use this order for multi-pass plans.
 #[rustfmt::skip] pub const PASS_REGISTRY: &[PassRegistryEntry] = &[
     pass_entry!("noop", noop::NoopPass, &[], false),
     PassRegistryEntry { name: "map_inline", make: map_inline::MapInlinePass::from_cli_args, kinsn_targets: &[], needs_verifier_states: true },

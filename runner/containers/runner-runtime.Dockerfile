@@ -152,7 +152,6 @@ FROM runner-runtime-runtime-base AS runner-runtime
 
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
-ARG DAEMON_HOST_BIN_DIR=daemon/target/release
 ARG BPFOPT_HOST_BIN_DIR=bpfopt/target/release
 ARG NATIVE_LINK_HOST_BIN=native-sim/x86/native_lab/native_link/target/release/native-link
 
@@ -168,7 +167,6 @@ COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/runner ${IMAGE_WO
 COPY --link --from=runner-runtime-artifacts /artifacts/user/micro-programs /artifacts/user/micro-programs
 COPY --link --from=runner-runtime-artifacts /artifacts/user/stage2-programs /artifacts/user/stage2-programs
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/tests ${IMAGE_WORKSPACE}/tests
-COPY --link --chmod=0755 ${DAEMON_HOST_BIN_DIR}/bpfrejit-daemon ${IMAGE_WORKSPACE}/${DAEMON_HOST_BIN_DIR}/bpfrejit-daemon
 COPY --link --chmod=0755 \
     ${BPFOPT_HOST_BIN_DIR}/bpfopt \
     ${BPFOPT_HOST_BIN_DIR}/kinsnprober \
@@ -178,7 +176,6 @@ COPY --link --chmod=0755 \
 RUN set -eux; \
     mkdir -p /opt; \
     ln -sfn /artifacts/user /opt/bpf-benchmark; \
-    ln -sfn "${IMAGE_WORKSPACE}/${DAEMON_HOST_BIN_DIR}/bpfrejit-daemon" /usr/local/bin/bpfrejit-daemon; \
     ldconfig
 
 COPY --link --from=runner-runtime-host-kinsn-artifacts / /artifacts/kinsn

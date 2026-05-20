@@ -55,7 +55,7 @@ struct step_result {
     char *report_json;              /* raw validated JSON from ${REPORT}, or NULL */
 };
 
-static const char *daemon_step_status(const struct step_result *sr) {
+static const char *step_status(const struct step_result *sr) {
     if (sr->ok) return "ok";
     return sr->failure_kind == 1 ? "failed_bpfopt" : "failed_rejit";
 }
@@ -410,7 +410,7 @@ static void run_step(struct prog_entry *pd,
     }
 
     /* New bytecode in nxt → reload + reattach + capture verifier states.
-     * 16 MB matches daemon's REJIT_VERBOSE_LOG_BUF_SIZE — large progs (e.g.
+     * 16 MB keeps large-prog verifier logs intact — large progs (e.g.
      * katran balancer.bpf.o, 67939 insns) overflow a 1 MB buffer at
      * log_level=2 and the kernel returns -ENOSPC, masking the real cause. */
     const size_t verifier_buf_sz = 16 * 1024 * 1024;
@@ -762,11 +762,11 @@ static void emit_execute_plan(int cli, const char *json) {
                         "\"status\":\"%s\",",
                         first_step ? "" : ",",
                         name_json, cmd_json, log_level,
-                        daemon_step_status(&sr));
+                        step_status(&sr));
             if (!sr.ok) {
                 /* err_msg already json-escaped + bounded to 2 KB. Full logs
                  * and side inputs are attached once at the per-program level
-                 * through workdir_tar_b64, matching daemon failure payloads. */
+                 * through workdir_tar_b64. */
                 buf_appendf(&resp, &cap, &len,
                             "\"error\":\"%s\","
                             "\"exit_code\":%d",

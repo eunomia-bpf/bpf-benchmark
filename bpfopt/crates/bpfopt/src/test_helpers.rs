@@ -66,7 +66,7 @@ pub fn ctx_with_kinsn(target: &str, btf_id: i32) -> PassContext {
 
 pub fn ctx_with_verifier_states(states: Vec<VerifierInsn>) -> PassContext {
     let mut ctx = pass_ctx();
-    // Raw daemon verifier states stay on PassContext and are consumed once at lift.
+    // Raw verifier states stay on PassContext and are consumed once at lift.
     ctx.set_verifier_states_test(states);
     ctx
 }

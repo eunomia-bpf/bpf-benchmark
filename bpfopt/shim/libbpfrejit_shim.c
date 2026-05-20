@@ -769,12 +769,11 @@ static void dump_state_json(void) {
 }
 
 /* =========================================================================
- * Socket server thread — Plan A: per-pid socket reusing daemon JSON protocol.
+ * Socket server thread: per-pid JSON control socket.
  *
  * Path: $BPFREJIT_SHIM_SOCK_DIR/shim-<pid>.sock (default /var/run/bpfrejit/)
  *
- * Protocol (line-delimited JSON, one request per line, one response per line,
- * same shape as the existing bpfrejit-daemon at daemon/src/server.rs):
+ * Protocol: line-delimited JSON, one request per line, one response per line.
  *
  *   request:  {"cmd": "list_progs"}
  *   response: {"ok": true, "progs": [{"id": <kernel_prog_id>, "name": "...",

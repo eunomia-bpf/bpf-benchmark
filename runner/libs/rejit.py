@@ -7,7 +7,6 @@ import os
 import platform
 import socket
 import time
-from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -377,91 +376,3 @@ def measure_app_phase(
         "workloads": workloads,
         "bpf": bpf,
     }
-
-
-@dataclass
-class DaemonSession:
-    """Compat shim — keeps callers stable across the daemon → LD_PRELOAD shim
-    migration. There is no daemon process now; the per-app shim lifecycle is
-    managed by app startup (LD_PRELOAD). `start()` / `close()` are no-ops.
-    Name kept to avoid churn in callers."""
-    daemon_binary: Path
-    stdout_path: Path
-    stderr_path: Path
-    kinsn_metadata: dict[str, object] = field(default_factory=dict)
-
-    # Compat: callers probe `daemon_session.proc.poll()` to detect a crashed
-    # daemon. There is no daemon process now; expose a stub whose poll()
-    # always returns None ("still alive"). A real shim crash surfaces as a
-    # socket-connection error during apply_rejit, not here.
-    class _AlwaysAliveProc:
-        def poll(self) -> None:
-            return None
-    proc: object = field(default_factory=_AlwaysAliveProc)
-
-    @classmethod
-    def start(
-        cls,
-        daemon_binary: Path | str,
-        *,
-        stdout_path: Path,
-        stderr_path: Path,
-    ) -> "DaemonSession":
-        stdout_path.parent.mkdir(parents=True, exist_ok=True)
-        stderr_path.parent.mkdir(parents=True, exist_ok=True)
-        return cls(
-            daemon_binary=Path(daemon_binary).resolve(),
-            stdout_path=stdout_path,
-            stderr_path=stderr_path,
-            kinsn_metadata={},
-        )
-
-    def __enter__(self) -> "DaemonSession":
-        return self
-
-    def __exit__(self, exc_type: object, exc: object, tb: object) -> None:
-        del exc_type, exc, tb
-        self.close()
-
-    def close(self) -> None:
-        # Library-mode shim: no daemon process to terminate. Kept as a
-        # method so context-manager users (`with DaemonSession(...) as s`)
-        # still work; callers may rely on the symbol existing even though
-        # there's nothing to release.
-        return
-
-    def apply_rejit_for_app(
-        self,
-        *,
-        app_pid: int | None = None,
-        app_pids: Sequence[int] | None = None,
-        enabled_passes: Sequence[str] | None = None,
-        failure_artifacts_dir: Path | None = None,
-        app_name: str | None = None,
-    ) -> dict[str, object]:
-        return apply_app_rejit(
-            app_pid=app_pid,
-            app_pids=app_pids,
-            enabled_passes=enabled_passes,
-            failure_artifacts_dir=failure_artifacts_dir,
-            app_name=app_name,
-        )
-
-    def measure_phase(
-        self,
-        *,
-        app_pid: int | None = None,
-        app_pids: Sequence[int] | None = None,
-        runner: object,
-        workload_seconds: float,
-        samples: int,
-        warmups: int = 0,
-    ) -> dict[str, object]:
-        return measure_app_phase(
-            app_pid=app_pid,
-            app_pids=app_pids,
-            runner=runner,
-            workload_seconds=workload_seconds,
-            samples=samples,
-            warmups=warmups,
-        )

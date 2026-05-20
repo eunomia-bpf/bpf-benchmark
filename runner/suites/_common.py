@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import Sequence
 
 from runner.libs.workspace_layout import (
-    daemon_binary_path,
     kernel_modules_root,
     runtime_path_value,
     runtime_repo_artifact_root,
@@ -151,14 +150,6 @@ def require_executable(path: Path, description: str, die: object) -> Path:
 def resolve_workspace_path(workspace: Path, value: str) -> Path:
     path = Path(value)
     return path if path.is_absolute() else (workspace / path).resolve()
-
-
-def resolve_daemon_binary(workspace: Path, target_arch: str, override: str, die: object) -> Path:
-    if override:
-        candidate = resolve_workspace_path(workspace, override)
-    else:
-        candidate = daemon_binary_path(workspace, target_arch)
-    return require_executable(candidate, "daemon artifact", die)
 
 
 # ---------------------------------------------------------------------------

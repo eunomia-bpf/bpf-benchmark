@@ -172,6 +172,6 @@ def prepare_kinsn_modules() -> dict[str, object]:
     return {
         "captured_at": datetime.now(timezone.utc).isoformat(),
         "expected_modules": expected_modules,
-        "module_snapshot_before_daemon": before_snapshot,
+        "module_snapshot_before_rejit": before_snapshot,
         "module_load": module_load,
     }

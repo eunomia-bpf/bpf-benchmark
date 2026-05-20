@@ -12,7 +12,7 @@ Lookup (no merge; first match is selected):
 
 Per-pass yaml's `log_level` is the *input* level the pass needs (predecessor's
 rejit must produce at least this verifier-log verbosity). The runner sets each
-step's outgoing daemon `log_level` to the next step's input requirement.
+step's outgoing `log_level` to the next step's input requirement.
 """
 from __future__ import annotations
 

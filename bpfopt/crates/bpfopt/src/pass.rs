@@ -656,7 +656,7 @@ pub fn first_report_site(program: &ProgramCFG) -> anyhow::Result<InsnSite> {
 
 impl PassContext {
     pub fn set_verifier_states_from_log(&mut self, log: &str) -> anyhow::Result<()> {
-        // An empty state set is legitimate when the previous daemon step ran at
+        // An empty state set is legitimate when the previous ReJIT step ran at
         // log_level=1 — the kernel only emits the final pass/fail line, no
         // per-PC deltas. Passes that consume verifier states fall back to
         // unknown reg classification (which their is_some_and gates handle).

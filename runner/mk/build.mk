@@ -88,7 +88,6 @@ host-kinsn-arm64: host-kernel-arm64
 	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- M="$(ROOT_DIR)/module/arm64" MO="$(HOST_KINSN_DIR_ARM64)" modules -j"$(IMAGE_BUILD_JOBS)"
 
 host-rust-x86:
-	$(MAKE) -C "$(ROOT_DIR)/daemon" release TARGET_DIR="$(DAEMON_DIR)/target"
 	cargo build --release --workspace --target-dir "$(ROOT_DIR)/bpfopt/target" --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml" -p bpfopt -p kinsnprober
 	cargo build --release --manifest-path "$(NATIVE_LINK_DIR)/Cargo.toml"
 
@@ -111,7 +110,6 @@ $(AARCH64_SYSROOT_DIR)/usr/include/libelf.h $(AARCH64_SYSROOT_DIR)/usr/include/y
 	for d in "$(AARCH64_SYSROOT_DIR)"/.debs/*.deb; do dpkg-deb -x "$$d" "$(AARCH64_SYSROOT_DIR)"; done
 
 host-rust-arm64: aarch64-sysroot
-	$(ARM64_CARGO_ENV) $(MAKE) -C "$(ROOT_DIR)/daemon" release TARGET_DIR="$(DAEMON_DIR)/target" TARGET_TRIPLE="$(ARM64_RUST_TARGET)"
 	$(ARM64_CARGO_ENV) cargo build --release --workspace --target "$(ARM64_RUST_TARGET)" --target-dir "$(ROOT_DIR)/bpfopt/target" --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml" -p bpfopt -p kinsnprober
 	cargo build --release --manifest-path "$(NATIVE_LINK_DIR)/Cargo.toml"
 
@@ -183,7 +181,6 @@ x86-runner-runtime-image-tar: host-kernel-x86 host-kinsn-x86 host-rust-x86 host-
 		--build-arg TEST_BUILD_DIR=build \
 		--build-arg KERNEL_IMAGE_NAME=bzImage \
 		--build-arg KERNEL_MANIFEST_JSON="$$(cat $(HOST_KERNEL_BUILD_DIR_X86)/manifest.json)" \
-		--build-arg DAEMON_HOST_BIN_DIR="daemon/target/release" \
 		--build-arg BPFOPT_HOST_BIN_DIR="bpfopt/target/release" \
 		-t "$(X86_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	docker save -o "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE)"
@@ -210,7 +207,6 @@ arm64-runner-runtime-image-tar: host-kernel-arm64 host-kinsn-arm64 host-rust-arm
 		--build-arg TEST_BUILD_DIR=build-arm64 \
 		--build-arg KERNEL_IMAGE_NAME=vmlinuz.efi \
 		--build-arg KERNEL_MANIFEST_JSON="$$(cat $(HOST_KERNEL_BUILD_DIR_ARM64)/manifest.json)" \
-		--build-arg DAEMON_HOST_BIN_DIR="daemon/target/$(ARM64_RUST_TARGET)/release" \
 		--build-arg BPFOPT_HOST_BIN_DIR="bpfopt/target/$(ARM64_RUST_TARGET)/release" \
 		-t "$(ARM64_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	docker save -o "$(ARM64_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(ARM64_RUNNER_RUNTIME_IMAGE)"
