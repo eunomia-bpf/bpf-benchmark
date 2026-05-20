@@ -1,0 +1,335 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "12": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 12,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 6605366,
+        "run_time_ns_delta": 742952894,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "config": {
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 10.040749594999994,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 9  udp_src_max: 9  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags:\nCurrent:\n     pkts-sofar: 6605366  errors: 0\n     started: 85010132us  stopped: 94922483us idle: 0us\n     seq_num: 6605367  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 9\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 9912350(c9912350+d0) usec, 6605366 (64byte,-1frags)\n  666377pps 341Mb/sec (341185024bps) errors: 0",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "12": {
+        "bytes_jited": 13629,
+        "bytes_xlated": 23840,
+        "id": 12,
+        "name": "balancer_ingress",
+        "run_cnt_delta": 6447409,
+        "run_time_ns_delta": 735065606,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "config": {
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": false,
+          "src_ip": "10.0.0.2",
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 10.031770172999998,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 9  udp_src_max: 9  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags:\nCurrent:\n     pkts-sofar: 6447408  errors: 0\n     started: 121850033us  stopped: 131761317us idle: 0us\n     seq_num: 6447409  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 9\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 9911284(c9911284+d0) usec, 6447408 (64byte,-1frags)\n  650511pps 333Mb/sec (333061632bps) errors: 0",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "12": {
+        "passes": [
+          {
+            "bpfopt_ms": 35,
+            "bpfopt_summary": null,
+            "error": "processed 67939 insns (limit 1000000) max_states_per_insn 20 total_states 3993 peak_states 1206 mark_read 0\nxdp ifindex=5: nl_send_setlink_xdp_replace failed (errno=17); ",
+            "exit_code": 0,
+            "rejit_syscall_ms": 123,
+            "status": "failed_rejit",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 49,
+            "bpfopt_summary": null,
+            "error": "error: failed to read verifier states from /tmp/work_12/verifier_log_initial.log: No such file or directory (os error 2)\n",
+            "exit_code": 1,
+            "rejit_syscall_ms": 0,
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "OVERLAY_DIR=/home/yunwei37/workspace/bpf-benchmark/runner/config/passes/map_inline/overlays/katran; CH=; RE=; SI=; VIP=; for f in ${MAP_VALUES}/map-*.show.json; do n=$(jq -r .name \"$f\"); i=$(jq -r .id \"$f\"); case \"$n\" in ch_rings) CH=$i ;; reals) RE=$i ;; server_id_map) SI=$i ;; vip_map) VIP=$i ;; esac; done; VIP_TCP=0a6401010000000000000000000000001f900600; VIP_UDP=0a6401010000000000000000000000001f901100; VIP_DUMP=${MAP_VALUES}/map-$VIP.dump.json; if jq -e --arg key \"$VIP_TCP\" 'any(.[]?; ((.key // []) | map(sub(\"^0x\"; \"\") | ascii_downcase) | join(\"\")) == $key)' \"$VIP_DUMP\" >/dev/null; then VIP_KEY=$VIP_TCP; elif jq -e --arg key \"$VIP_UDP\" 'any(.[]?; ((.key // []) | map(sub(\"^0x\"; \"\") | ascii_downcase) | join(\"\")) == $key)' \"$VIP_DUMP\" >/dev/null; then VIP_KEY=$VIP_UDP; else echo \"katran map_inline: neither TCP nor UDP benchmark VIP key is present in $VIP_DUMP\" >&2; exit 1; fi; jq -n --arg c \"$CH\" --arg r \"$RE\" --arg s \"$SI\" --slurpfile co \"$OVERLAY_DIR/ch_rings.json\" --slurpfile ro \"$OVERLAY_DIR/reals.json\" --slurpfile so \"$OVERLAY_DIR/server_id_map.json\" '($c | if . == \"\" then {} else {(.): $co[0]} end) + ($r | if . == \"\" then {} else {(.): $ro[0]} end) + ($s | if . == \"\" then {} else {(.): $so[0]} end)' > ${MAP_VALUES}/overlays.json && timeout 6000 bpfopt --pass map_inline --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} -- --map-values ${MAP_VALUES} --map-ids ${MAP_IDS} --inline-hint=ctl_array:!00000000 --inline-hint=vip_map:!$VIP_KEY --inline-hint=ch_rings:!00000000 --inline-hint=reals:!01000000 --inline-hint=server_id_map:!00000000 # lpm_src_v4/v6 hints commented: katran is built without # -DLPM_SRC_LOOKUP, so these maps are guarded out of the program # by `#ifdef LPM_SRC_LOOKUP` in balancer_maps.h. bpfopt fail-fasts # on hint anchor not in metadata (correct: catches typos and # mis-applied hints early). Uncomment if a future build turns on # source-IP routing. # --inline-hint=lpm_src_v4:!00000000 # --inline-hint=lpm_src_v6:!00000000 # lru_mapping/global_lru_maps outer-only hints commented: katran # benchmark uses F_LRU_BYPASS + no `-forwarding_cores`, so the outer # ARRAY_OF_MAPS stays empty (every slot ENOENT). #265 root-caused this: # `attachLrus()` iterates empty forwardingCores_ \u0092 zero update_elem. # bpfopt fail-fasts when hinted outer key has no live inner map # (correct: hint claims something kernel snapshot disproves). # Uncomment only if benchmark configures forwarding cores OR an # alternative test deploys populated map-in-map. # --inline-hint=lru_mapping:!00000000 # --inline-hint=global_lru_maps:!00000000",
+              "log_level": 2,
+              "name": "map_inline"
+            }
+          },
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": null,
+            "error": "error: failed to read verifier states from /tmp/work_12/verifier_log_initial.log: No such file or directory (os error 2)\n",
+            "exit_code": 1,
+            "rejit_syscall_ms": 0,
+            "status": "failed_bpfopt",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET}",
+              "log_level": 1,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 98,
+            "bpfopt_summary": null,
+            "error": null,
+            "rejit_syscall_ms": 123,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          },
+          {
+            "bpfopt_ms": 65,
+            "bpfopt_summary": null,
+            "error": "ar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-88=scalar()\n1970: (05) goto pc+5\n1976: (61) r2 = *(u32 *)(r10 -56)     ; R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-56=mmmm000\n1977: (85) call pc+509\ncaller:\n R6=ctx() R7=map_value(map=stats,ks=4,vs=16) R8=scalar(id=37) R9=scalar() R10=fp0 fp-8=????514 fp-24=0 fp-32=0 fp-48=mmmmscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-56=mmmm000 fp-64=mmmmmmmm fp-72=mmmmmmmm fp-80=scalar() fp-88=scalar() fp-96=????mm0 fp-104=0 fp-112=mmmmscalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) fp-120=mmmmmmmm fp-128=mmmmscalar(smin=smin32=0,smax=umax=smax32=umax32=7,var_off=(0x0; 0x7)) fp-136=mmmm???? fp-144=pkt_end() fp-152=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) fp-160=map_value(map=vip_map,ks=20,vs=8) fp-168=map_ptr(map=fallback_cache,ks=40,vs=16) fp-176=map_value(map=stats,ks=4,vs=16) fp-184=0 fp-192=0\ncallee:\n frame1: R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0\n2487: frame1: R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0\n2487: (07) r2 += -525483785           ; frame1: R2=scalar(smin=0xffffffffe0adc0f7,smax=0xe0adc0f6)\n2488: (18) r3 = 0xfffc0000            ; frame1: R3=0xfffc0000\n2490: (7b) *(u64 *)(r10 -376) = r6\nR6 !read_ok\nprocessed 514 insns (limit 1000000) max_states_per_insn 0 total_states 38 peak_states 38 mark_read 0\n\nBPF_PROG_LOAD errno=13 (post-verifier)\nctx: prog_btf_fd=52 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=37 nr_map_fds=14 prog_type=6 fd_array_n=21 fd_array_neg1=0 prog_flags=0x0 insn_cnt=2457\n",
+            "exit_code": 0,
+            "rejit_syscall_ms": 1,
+            "status": "failed_rejit",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass rotate --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "rotate"
+            }
+          },
+          {
+            "bpfopt_ms": 94,
+            "bpfopt_summary": null,
+            "error": "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=52 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=37 nr_map_fds=14 prog_type=6 fd_array_n=21 fd_array_neg1=0 prog_flags=0x0 insn_cnt=2565\n",
+            "exit_code": 0,
+            "rejit_syscall_ms": 0,
+            "status": "failed_rejit",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass cond_select --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "cond_select"
+            }
+          },
+          {
+            "bpfopt_ms": 35,
+            "bpfopt_summary": null,
+            "error": null,
+            "rejit_syscall_ms": 123,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass extract --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "extract"
+            }
+          },
+          {
+            "bpfopt_ms": 40,
+            "bpfopt_summary": null,
+            "error": "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=52 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=37 nr_map_fds=14 prog_type=6 fd_array_n=21 fd_array_neg1=0 prog_flags=0x0 insn_cnt=2549\n",
+            "exit_code": 0,
+            "rejit_syscall_ms": 0,
+            "status": "failed_rejit",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass endian_fusion --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "endian_fusion"
+            }
+          },
+          {
+            "bpfopt_ms": 117,
+            "bpfopt_summary": null,
+            "error": "processed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_LOAD errno=22 (post-verifier)\nctx: prog_btf_fd=52 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=37 nr_map_fds=14 prog_type=6 fd_array_n=21 fd_array_neg1=0 prog_flags=0x0 insn_cnt=2537\n",
+            "exit_code": 0,
+            "rejit_syscall_ms": 0,
+            "status": "failed_rejit",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass lea --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "lea"
+            }
+          },
+          {
+            "bpfopt_ms": 35,
+            "bpfopt_summary": null,
+            "error": null,
+            "rejit_syscall_ms": 125,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass ccmp --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "ccmp"
+            }
+          },
+          {
+            "bpfopt_ms": 65,
+            "bpfopt_summary": null,
+            "error": null,
+            "rejit_syscall_ms": 124,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass bulk_memory --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bulk_memory"
+            }
+          },
+          {
+            "bpfopt_ms": 10096,
+            "bpfopt_summary": null,
+            "error": null,
+            "rejit_syscall_ms": 127,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass prefetch --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "prefetch"
+            }
+          },
+          {
+            "bpfopt_ms": 69,
+            "bpfopt_summary": null,
+            "error": null,
+            "rejit_syscall_ms": 126,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass wide_mem --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "wide_mem"
+            }
+          },
+          {
+            "bpfopt_ms": 66,
+            "bpfopt_summary": null,
+            "error": null,
+            "rejit_syscall_ms": 127,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass bounds_check_merge --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "bounds_check_merge"
+            }
+          },
+          {
+            "bpfopt_ms": 35,
+            "bpfopt_summary": null,
+            "error": null,
+            "rejit_syscall_ms": 126,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass skb_load_bytes_spec --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "skb_load_bytes_spec"
+            }
+          },
+          {
+            "bpfopt_ms": 35,
+            "bpfopt_summary": null,
+            "error": null,
+            "rejit_syscall_ms": 127,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 2,
+              "name": "noop"
+            }
+          },
+          {
+            "bpfopt_ms": 195,
+            "bpfopt_summary": null,
+            "error": " 1000000001            ; R1=0x3b9aca01\n2297: (2d) if r1 > r2 goto pc+34      ; R1=0x3b9aca01 R2=scalar(umin=0x3b9aca01)\n2298: (7b) *(u64 *)(r7 +8) = r0       ; R0=scalar(id=94) R7=map_value(map=stats,ks=4,vs=16)\n2299: (b7) r1 = 1                     ; R1=1\n2300: (7b) *(u64 *)(r7 +0) = r1       ; R1=1 R7=map_value(map=stats,ks=4,vs=16)\n2301: (b7) r1 = 0                     ; R1=0\n2302: (7b) *(u64 *)(r10 -32) = r1     ; R1=0 R10=fp0 fp-32=0\n2303: (61) r2 = *(u32 *)(r10 -48)     ; R2=scalar(id=95,smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-48=mmmmscalar(id=95,smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n2304: (63) *(u32 *)(r10 -32) = r2     ; R2=scalar(id=95,smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-32=mmmmscalar(id=95,smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n2305: (7b) *(u64 *)(r10 -24) = r1     ; R1=0 R10=fp0 fp-24=0\n2306: (bf) r2 = r10                   ; R2=fp0 R10=fp0\n2307: (07) r2 += -88                  ; R2=fp-88\n2308: (bf) r3 = r10                   ; R3=fp0 R10=fp0\n2309: (18) r3 = 0xf0000000            ; R3=0xf0000000\n2311: (79) r1 = *(u64 *)(r10 -168)    ; R1=map_ptr(map=fallback_cache,ks=40,vs=16) R10=fp0 fp-168=map_ptr(map=fallback_cache,ks=40,vs=16)\n2312: (b7) r4 = 0                     ; R4=0\n2313: (85) call bpf_map_update_elem#2\nR3 type=scalar expected=fp, pkt, pkt_meta, map_key, map_value, mem, ringbuf_mem, buf, trusted_ptr_\nprocessed 1510 insns (limit 1000000) max_states_per_insn 1 total_states 105 peak_states 105 mark_read 0\n\nBPF_PROG_LOAD errno=13 (post-verifier)\nctx: prog_btf_fd=52 attach_btf_obj_fd=0 attach_prog_fd=0 attach_btf_id=0 expected_attach=37 nr_map_fds=14 prog_type=6 fd_array_n=21 fd_array_neg1=0 prog_flags=0x0 insn_cnt=2617\n",
+            "exit_code": 0,
+            "rejit_syscall_ms": 3,
+            "status": "failed_rejit",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --verifier-states ${VERIFIER_STATES} --target ${TARGET}",
+              "log_level": 1,
+              "name": "const_prop"
+            }
+          },
+          {
+            "bpfopt_ms": 66,
+            "bpfopt_summary": null,
+            "error": null,
+            "rejit_syscall_ms": 126,
+            "status": "ok",
+            "step": {
+              "command": "timeout 6000 bpfopt --pass dce --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+              "log_level": 1,
+              "name": "dce"
+            }
+          }
+        ],
+        "prog_id": 12,
+        "program": {
+          "final_insn_count": 2613,
+          "orig_insn_count": 2542,
+          "prog_id": 12,
+          "prog_name": "balancer_ingres",
+          "prog_type": 6
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_pktgen",
+  "status": "ok"
+}
