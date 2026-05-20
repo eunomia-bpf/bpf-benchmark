@@ -336,8 +336,8 @@ def apply_daemon_rejit(
                         "final_insn_count": 0,
                     },
                     "passes": [
-                        {"step": dict(step), "status": "error", "error": str(exc),
-                         "bpfopt_summary": {}}
+                        {"step": dict(step), "status": "failed_rejit", "error": str(exc),
+                         "bpfopt_summary": None}
                         for step in program["steps"]
                     ],
                 }

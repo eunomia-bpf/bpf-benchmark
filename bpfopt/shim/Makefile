@@ -7,7 +7,7 @@ SHIM_SO ?= libbpfrejit_shim.so
 
 all: $(SHIM_SO) selftest selftest_full
 
-$(SHIM_SO): libbpfrejit_shim.c
+$(SHIM_SO): libbpfrejit_shim.c jsmn.h shim_state.h shim_json.h shim_snapshot.h shim_reload.h shim_execute_plan.h shim_netlink.h
 	$(CC) $(CFLAGS) -shared $< -o $@ $(LDLIBS)
 
 selftest: selftest.c

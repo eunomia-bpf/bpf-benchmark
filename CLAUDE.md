@@ -135,6 +135,9 @@ Use `libbpf-rs`/`libbpf-sys` instead of custom wrappers whenever upstream libbpf
 ### Make Is the Only Benchmark Entrypoint
 **Every benchmark run must be invoked via `make <target>`. Never call `python -m runner.libs.run_target_suite`, `cargo run`, `docker run`, or any component binary directly.** Targets handle build dependencies, runtime image assembly, KVM/AWS dispatch, and artifact paths consistently; bypassing them silently changes the contract.
 
+### Makefile Edit Discipline
+Makefile changes must be minimal and local. Do not refactor target structure, add alias targets, or add conditional logic (`if`, `ifeq`, `ifneq`) for convenience. Do not add `mkdir` to Makefiles; use the repo's existing `install -d` pattern in the owning rule when an output directory must be created. Arch-specific build outputs belong under the owning component's build directories (for example `bpfopt/shim/build-x86` and `bpfopt/shim/build-arm64`), not under `.cache`, unless an existing rule already defines that location.
+
 Targets (suite name only — platform/arch are env vars, NOT in the target name):
 - Suites: `selftest`, `negative-test`, `test`, `micro`, `corpus`, `all`, `terminate`
 - Platform: `PLATFORM=kvm` (default, x86 only) or `PLATFORM=aws`
