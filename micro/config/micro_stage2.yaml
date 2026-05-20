@@ -3,10 +3,10 @@
 #
 # Built by `make -C native-sim/test`; products land in `native-sim/test/build-x86/`.
 # Each .bpf.c yields a .bpf.o (canonical micro program object) plus a
-# .native.o (clang-x86-64 object the native-lab linker consumes).
+# .native.o (clang-x86-64 object the native kernel linker consumes).
 #
 # Reproduce: `make micro SUITE=micro/config/micro_stage2.yaml \
-#                       RUNTIMES="native_lab kernel" SAMPLES=15 INNER_REPEAT=100000`
+#                       RUNTIMES="native_kernel kernel" SAMPLES=15 INNER_REPEAT=100000`
 suite_name: micro_stage2_maps_helpers
 
 paths:
@@ -15,12 +15,6 @@ paths:
   # build path used when running `python -m micro.driver` directly.
   program_dir: native-sim/test/build-x86
 
-toolchains:
-  llvmbpf:
-    root: vendor/llvmbpf
-  libbpf:
-    root: vendor/libbpf
-
 build:
   runner_binary: runner/build/micro_exec
 
@@ -28,7 +22,7 @@ defaults:
   samples: 15
   warmups: 2
   inner_repeat: 100000
-  runtimes: [native_lab, kernel]
+  runtimes: [native_kernel, kernel]
   output: micro/results/dev/stage2.json
 
 benchmark_defaults:
@@ -37,14 +31,8 @@ benchmark_defaults:
 
 runtimes:
   - name: kernel
-    label: kernel eBPF
-    mode: kernel
-    sudo: true
 
-  - name: native_lab
-    label: native code via bpf_x86_native_lab kinsn
-    mode: native_lab
-    sudo: true
+  - name: native_kernel
 
 benchmarks:
   # Pure helpers + one trivial single-slot HASH map. Deterministic.
@@ -56,11 +44,6 @@ benchmarks:
   # `helper_only_uid_gid` (uid_gid is identical across runtimes when
   # both run as root, which the micro suite always does via sudo).
   - name: helper_only_uid_gid
-    description: One bpf_get_current_uid_gid call
-    category: helpers
-    family: identity
-    level: tiny
-    hypothesis: Captures helper-call overhead floor for a single deterministic identity read; uid_gid is bit-identical between native_lab and kernel TEST_RUN (both run as root)
     base_name: helper_only_uid_gid
     program_name: helper_only_uid_gid
     kernel_input_size: 64
@@ -68,11 +51,6 @@ benchmarks:
     tags: [stage2, helpers, identity]
 
   - name: helper_chain_simple
-    description: uid_gid + 3 HASH map ops chained (update/lookup/delete)
-    category: helpers
-    family: chain
-    level: small
-    hypothesis: 4 distinct deterministic helpers exercise the dispatch path; lookup returns what update wrote so result is bit-identical across runtimes
     base_name: helper_chain_simple
     program_name: helper_chain_simple
     kernel_input_size: 64
@@ -81,11 +59,6 @@ benchmarks:
 
   # Single map, simple update+lookup pattern.
   - name: map_array_lookup
-    description: BPF_MAP_TYPE_ARRAY write then lookup at fixed key
-    category: maps
-    family: array
-    level: small
-    hypothesis: Baseline ARRAY map case; kernel JIT fully inlines the lookup, native_lab still calls bpf_map_lookup_elem
     base_name: map_array_lookup
     program_name: map_array_lookup
     kernel_input_size: 64
@@ -93,11 +66,6 @@ benchmarks:
     tags: [stage2, maps, array]
 
   - name: map_array_index_packet
-    description: ARRAY map indexed by a packet byte
-    category: maps
-    family: array
-    level: small
-    hypothesis: Per-port / per-bucket counter shape with packet-driven index
     base_name: map_array_index_packet
     program_name: map_array_index_packet
     kernel_input_size: 64
@@ -105,11 +73,6 @@ benchmarks:
     tags: [stage2, maps, array, packet-derived-key]
 
   - name: map_hash_lookup
-    description: BPF_MAP_TYPE_HASH write then lookup at fixed u32 key
-    category: maps
-    family: hash
-    level: small
-    hypothesis: Baseline HASH case; both runtimes go through __htab_map_lookup_elem (kernel via JIT inline, native_lab via per-call-site routing)
     base_name: map_hash_lookup
     program_name: map_hash_lookup
     kernel_input_size: 64
@@ -117,11 +80,6 @@ benchmarks:
     tags: [stage2, maps, hash, inline-eligible]
 
   - name: map_hash_str_key
-    description: HASH map with a 16-byte string-shaped key
-    category: maps
-    family: hash
-    level: small
-    hypothesis: Exercises HASH inline with a larger KEY_OFFSET (16-byte key vs 4-byte)
     base_name: map_hash_str_key
     program_name: map_hash_str_key
     kernel_input_size: 64
@@ -129,11 +87,6 @@ benchmarks:
     tags: [stage2, maps, hash, inline-eligible, large-key]
 
   - name: map_percpu_array
-    description: PERCPU_ARRAY write then lookup
-    category: maps
-    family: percpu_array
-    level: small
-    hypothesis: Per-cpu counter shape; kernel JIT fully inlines (LEA + per-cpu offset), native_lab calls helper
     base_name: map_percpu_array
     program_name: map_percpu_array
     kernel_input_size: 64
@@ -141,11 +94,6 @@ benchmarks:
     tags: [stage2, maps, percpu]
 
   - name: map_lru_hash_counter
-    description: LRU_HASH per-key counter (delete + update + lookup write-back)
-    category: maps
-    family: lru_hash
-    level: medium
-    hypothesis: Bounded per-key counter pattern (cilium-CT / tetragon-throttle shape)
     base_name: map_lru_hash_counter
     program_name: map_lru_hash_counter
     kernel_input_size: 64
@@ -153,11 +101,6 @@ benchmarks:
     tags: [stage2, maps, lru_hash]
 
   - name: map_percpu_hash_counter
-    description: PERCPU_HASH per-key counter (update + lookup write-back)
-    category: maps
-    family: percpu_hash
-    level: medium
-    hypothesis: Lock-free per-cpu counter table (cilium nodeport / tetragon rate)
     base_name: map_percpu_hash_counter
     program_name: map_percpu_hash_counter
     kernel_input_size: 64
@@ -165,11 +108,6 @@ benchmarks:
     tags: [stage2, maps, percpu_hash]
 
   - name: combined_helper_map
-    description: bpf_get_smp_processor_id + uid_gid feeding PERCPU_ARRAY
-    category: maps
-    family: percpu_array
-    level: medium
-    hypothesis: Per-cpu tagging workload; stored value is uid_gid (deterministic across runtimes) so result is bit-identical between native_lab and kernel
     base_name: combined_helper_map
     program_name: combined_helper_map
     kernel_input_size: 64
@@ -177,11 +115,6 @@ benchmarks:
     tags: [stage2, maps, percpu, helpers]
 
   - name: multi_map_policy
-    description: ARRAY + HASH + PERCPU_ARRAY chain (cilium-style policy lookup)
-    category: maps
-    family: multi_map
-    level: large
-    hypothesis: Exercises per-call-site routing -- HASH inlines, ARRAY/PERCPU stay on plain helper
     base_name: multi_map_policy
     program_name: multi_map_policy
     kernel_input_size: 64
@@ -189,11 +122,6 @@ benchmarks:
     tags: [stage2, maps, multi-map]
 
   - name: packet_5tuple_classify
-    description: HASH map keyed by a 16-byte 5-tuple struct parsed from packet
-    category: maps
-    family: hash
-    level: large
-    hypothesis: Cilium / katran connection-classifier shape
     base_name: packet_5tuple_classify
     program_name: packet_5tuple_classify
     kernel_input_size: 64
@@ -201,11 +129,6 @@ benchmarks:
     tags: [stage2, maps, hash, inline-eligible, packet-derived-key]
 
   - name: stats_mixed_helpers
-    description: HASH + PERCPU_HASH + 3 helpers (tetragon-style stats aggregator)
-    category: maps
-    family: multi_map
-    level: large
-    hypothesis: Real-shape program with mixed map types; stored tag is uid_gid (deterministic across runtimes) so result is bit-identical even though pid/smp route to different bucket slots
     base_name: stats_mixed_helpers
     program_name: stats_mixed_helpers
     kernel_input_size: 64

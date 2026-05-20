@@ -1,0 +1,6 @@
+{
+  "error_message": "shim socket /var/run/bpfrejit/shim-2243.sock returned invalid JSON: Unterminated string starting at: line 14 column 3 (char 4083): {\"status\":\"ok\",\"per_program\":{\"12\":{\"prog_id\":12,\"passes\":[{\"step\":{\"name\":\"noop\",\"command\":\"if [ \\\"x$BPFREJIT_DUMP_LIVE_JIT\\\" = \\\"x1\\\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKD",
+  "failed_at": "2026-05-20T07:07:16.633563+00:00",
+  "status": "error",
+  "suite": "corpus"
+}

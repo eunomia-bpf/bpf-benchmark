@@ -1,0 +1,24 @@
+{
+  "config": {
+    "enabled_passes": [
+      "noop",
+      "map_inline",
+      "const_prop",
+      "dce"
+    ]
+  },
+  "details_dir": "details",
+  "error_message": "shim socket /var/run/bpfrejit/shim-2243.sock returned invalid JSON: Unterminated string starting at: line 14 column 3 (char 4083): {\"status\":\"ok\",\"per_program\":{\"12\":{\"prog_id\":12,\"passes\":[{\"step\":{\"name\":\"noop\",\"command\":\"if [ \\\"x$BPFREJIT_DUMP_LIVE_JIT\\\" = \\\"x1\\\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKD",
+  "generated_at": "2026-05-20T07:07:16.633570+00:00",
+  "last_updated_at": "2026-05-20T07:07:16.633566+00:00",
+  "launcher_boot_id": "e8267612-0dbe-40f9-bf7f-c3280a6a32c9",
+  "launcher_pid": 1856,
+  "launcher_start_ticks": 6511,
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
+  "run_type": "x86_kvm_corpus",
+  "samples": 1,
+  "started_at": "2026-05-20T07:06:46.468249+00:00",
+  "status": "error",
+  "suite": "corpus",
+  "workload_seconds": 10.0
+}

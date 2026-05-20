@@ -4,12 +4,6 @@ suite_name: micro_staged_codegen
 paths:
   program_dir: micro/programs/build-x86
 
-toolchains:
-  llvmbpf:
-    root: vendor/llvmbpf
-  libbpf:
-    root: vendor/libbpf
-
 build:
   runner_binary: runner/build/micro_exec
 
@@ -24,35 +18,17 @@ benchmark_defaults:
   io_mode: staged
   expected_retval: 2
 
-analysis:
-  baseline_benchmark: simple
-
 runtimes:
   - name: native
-    mode: native
 
   - name: llvmbpf
-    label: llvmbpf LLVM JIT
-    mode: llvmbpf
-    aliases: [llvm]
 
   - name: kernel
-    label: kernel eBPF
-    mode: kernel
-    sudo: true
 
-  - name: native_lab
-    label: native code via bpf_x86_native_lab kinsn
-    mode: native_lab
-    sudo: true
+  - name: native_kernel
 
 benchmarks:
   - name: simple
-    description: Return-only baseline
-    category: baseline
-    family: baseline
-    level: tiny
-    hypothesis: Captures the staged harness floor for baseline subtraction
     base_name: simple
     kernel_input_size: 64
     input_generator: simple
@@ -60,11 +36,6 @@ benchmarks:
     tags: [baseline, pure-jit]
 
   - name: simple_packet
-    description: Packet-backed return-only baseline
-    category: baseline
-    family: baseline
-    level: tiny
-    hypothesis: Removes staged input helper overhead to expose the packet-backed harness floor
     base_name: simple_packet
     io_mode: packet
     kernel_input_size: 64
@@ -73,11 +44,6 @@ benchmarks:
     tags: [baseline, packet-backed, helper-free]
 
   - name: bitmap_popcount_scan
-    description: Bitmap popcount scan over generated u64 words
-    category: alu-mix
-    family: popcount
-    level: medium
-    hypothesis: Represents bitmap/set summarization loops common in BPF policy and tracing code
     base_name: bitmap_popcount_scan
     kernel_input_size: 2056
     input_generator: bitmap_popcount_scan
@@ -85,11 +51,6 @@ benchmarks:
     tags: [bitops, pure-jit]
 
   - name: sorted_rule_binary_search
-    description: Repeated lookup over a sorted rule table
-    category: control-flow
-    family: search
-    level: medium
-    hypothesis: Captures verifier-friendly bounded rule lookup without map/helper dependencies
     base_name: sorted_rule_binary_search
     kernel_input_size: 392
     input_generator: sorted_rule_binary_search
@@ -97,11 +58,6 @@ benchmarks:
     tags: [branch, search, pure-jit]
 
   - name: bcc_runqlat_log2_histogram_bucket
-    description: bcc runqlat-style log2 latency bucket selection with clamp
-    category: alu-mix
-    family: histogram-bucket
-    level: log2-clamp
-    hypothesis: Mirrors tracing histogram bucket selection without helper/map updates
     base_name: bcc_runqlat_log2_histogram_bucket
     kernel_input_size: 1032
     input_generator: bcc_runqlat_log2_histogram_bucket
@@ -109,11 +65,6 @@ benchmarks:
     tags: [bcc, tracing, log2, histogram, pure-jit]
 
   - name: trace_event_type_switch_dispatch
-    description: Trace event type dispatch over generated 6-bit event IDs
-    category: control-flow
-    family: switch-dispatch
-    level: dense-64
-    hypothesis: Represents event/type dispatch tables seen in tracing filters
     base_name: trace_event_type_switch_dispatch
     kernel_input_size: 1028
     input_generator: trace_event_type_switch_dispatch
@@ -121,11 +72,6 @@ benchmarks:
     tags: [branch, dispatch, pure-jit]
 
   - name: packet_checksum_fold
-    description: Internet checksum style packet reduction
-    category: memory-local
-    family: reduction
-    level: medium
-    hypothesis: Sequential 16-bit reductions should emphasize scalar memory throughput
     base_name: packet_checksum_fold
     kernel_input_size: 1032
     input_generator: packet_checksum_fold
@@ -135,11 +81,6 @@ benchmarks:
     tags: [alu, memory, pure-jit]
 
   - name: payload_prefix_memcmp_scan
-    description: Payload prefix comparison over fixed-size candidate records
-    category: memory-local
-    family: byte-compare
-    level: prefix-64
-    hypothesis: Represents protocol/string prefix filters with early mismatch exits
     base_name: payload_prefix_memcmp_scan
     kernel_input_size: 196
     input_generator: payload_prefix_memcmp_scan
@@ -147,11 +88,6 @@ benchmarks:
     tags: [memory, compare, branch, pure-jit]
 
   - name: packet_vlan_tcpopt_parser
-    description: Packet-backed Ethernet plus VLAN plus IPv4 plus TCP parser with options walk
-    category: memory-local
-    family: parser
-    level: variable-vlan-tcpopts
-    hypothesis: Variable cursor advancement and repeated bounds checks should magnify packet-parse codegen differences
     base_name: packet_vlan_tcpopt_parser
     io_mode: packet
     kernel_input_size: 74
@@ -160,11 +96,6 @@ benchmarks:
     tags: [packet, parse, bounds, variable-offsets, pure-jit]
 
   - name: bpf_local_call_fanout_dispatch
-    description: Dispatch among four __noinline local subprograms with different pressure profiles
-    category: call-overhead
-    family: bpf-local-call
-    level: fanout-4
-    hypothesis: Fan-out local calls should stress call-site layout, prologue diversity, and join-point register allocation
     base_name: bpf_local_call_fanout_dispatch
     kernel_input_size: 392
     input_generator: bpf_local_call_fanout_dispatch
@@ -172,11 +103,6 @@ benchmarks:
     tags: [call, bpf-to-bpf, local-call, reg-pressure, pure-jit]
 
   - name: flow_5tuple_rss_hash
-    description: Parse an IPv4 TCP 5-tuple and compute a Jenkins-style flow hash
-    category: alu-mix
-    family: packet-hash
-    level: flow-5tuple
-    hypothesis: Endian conversion plus field extraction and rotates should be more workload-realistic than standalone checksum math
     base_name: flow_5tuple_rss_hash
     io_mode: packet
     kernel_input_size: 54
@@ -185,11 +111,6 @@ benchmarks:
     tags: [packet, hash, endian, pure-jit]
 
   - name: katran_lb_consistent_hash_select
-    description: Katran IPv4 TCP VIP path with local fixture lookups and consistent-hash backend selection
-    category: alu-mix
-    family: packet-load-balancer
-    level: katran-hotpath
-    hypothesis: A helper-free Katran-shaped path should expose realistic parse, hash, selection, and encap ALU patterns
     base_name: katran_lb_consistent_hash_select
     io_mode: packet
     kernel_input_size: 54
@@ -198,11 +119,6 @@ benchmarks:
     tags: [packet, katran, hash, endian, pure-jit]
 
   - name: cilium_policy_guard_tree_filter
-    description: Cilium-policy-shaped nested guard tree over staged record fields
-    category: control-flow
-    family: deep-guards
-    level: depth-8
-    hypothesis: Represents policy/filter decision trees without map/helper dependencies
     base_name: cilium_policy_guard_tree_filter
     kernel_input_size: 516
     input_generator: cilium_policy_guard_tree_filter
@@ -210,11 +126,6 @@ benchmarks:
     tags: [cilium, branch, nested, guards, pure-jit]
 
   - name: siphash_rotate64_mixer
-    description: SipHash-like hash mixer using 64-bit rotations
-    category: alu-mix
-    family: rotate-hash
-    level: siphash-64
-    hypothesis: Captures a realistic rotate-heavy hash mixer used by packet and map-key paths
     base_name: siphash_rotate64_mixer
     kernel_input_size: 64
     input_generator: siphash_rotate64_mixer
@@ -222,11 +133,6 @@ benchmarks:
     tags: [compute, rotate, hash, pure-jit]
 
   - name: packet_record_bounds_window
-    description: Packet-backed record parser with one wide dominating window plus many redundant sub-checks
-    category: memory-local
-    family: bounds-density
-    level: redundant-window
-    hypothesis: Dominating range checks should create a clean target for redundant bounds-check elimination
     base_name: packet_record_bounds_window
     io_mode: packet
     kernel_input_size: 776
@@ -235,11 +141,6 @@ benchmarks:
     tags: [packet, bounds, redundant-checks, pure-jit]
 
   - name: flow_record_field_scan
-    description: Dense fixed-offset field extraction from flow-like records
-    category: memory-local
-    family: field-access
-    level: clustered-records
-    hypothesis: Many same-base fixed-offset loads should reward base-plus-offset fusion and grouped field lowering
     base_name: flow_record_field_scan
     kernel_input_size: 1032
     input_generator: flow_record_field_scan
@@ -247,11 +148,6 @@ benchmarks:
     tags: [memory, fields, fixed-offsets, pure-jit]
 
   - name: packed_header_bitfield_decode
-    description: Packed header bitfield extraction over staged two-word records
-    category: memory-local
-    family: bitfield-extract
-    level: packed-records
-    hypothesis: Repeated constant shift-and-mask extracts should reward compact canonical extract lowering over packed inputs
     base_name: packed_header_bitfield_decode
     kernel_input_size: 520
     input_generator: packed_header_bitfield_decode
@@ -259,11 +155,6 @@ benchmarks:
     tags: [memory, fields, bitfield, pure-jit]
 
   - name: bpftrace_string_search_prefix_scan
-    description: bpftrace-style bounded string length and substring prefix scan
-    category: memory-local
-    family: string-scan
-    level: bounded-strings
-    hypothesis: Represents helper-free string fallback paths with bounded byte loops
     base_name: bpftrace_string_search_prefix_scan
     kernel_input_size: 112
     input_generator: bpftrace_string_search_prefix_scan
@@ -271,11 +162,6 @@ benchmarks:
     tags: [bpftrace, string, compare, loop, pure-jit]
 
   - name: tracee_syscall_name_table_lookup
-    description: Tracee-style sparse syscall number to name-table dispatch
-    category: control-flow
-    family: syscall-dispatch
-    level: sparse-table
-    hypothesis: Represents sparse syscall lookup and name classification without map/helper dependencies
     base_name: tracee_syscall_name_table_lookup
     kernel_input_size: 260
     input_generator: tracee_syscall_name_table_lookup
@@ -283,11 +169,6 @@ benchmarks:
     tags: [tracee, syscall, dispatch, pure-jit]
 
   - name: tracee_http_method_prefix_detect
-    description: Tracee net_l7_is_http-style HTTP method prefix detection
-    category: memory-local
-    family: protocol-prefix
-    level: http-methods
-    hypothesis: Represents protocol prefix chains over packet/string bytes
     base_name: tracee_http_method_prefix_detect
     kernel_input_size: 136
     input_generator: tracee_http_method_prefix_detect
@@ -295,11 +176,6 @@ benchmarks:
     tags: [tracee, http, string, branch, pure-jit]
 
   - name: cilium_socket_lb_service_select
-    description: Cilium socket LB service selection over protocol, port range, wildcard, and backend count
-    category: alu-mix
-    family: socket-lb
-    level: service-select
-    hypothesis: Captures protocol/port/range/wildcard decision trees plus backend selection math
     base_name: cilium_socket_lb_service_select
     kernel_input_size: 1544
     input_generator: cilium_socket_lb_service_select
@@ -307,11 +183,6 @@ benchmarks:
     tags: [cilium, socket-lb, branch, hash, pure-jit]
 
   - name: bcc_tcpconnect_ipv4_tuple_filter
-    description: bcc tcpconnect-style IPv4 tuple event filter over pid, uid, netns, and port class
-    category: control-flow
-    family: tracing-tuple-filter
-    level: ipv4-connect
-    hypothesis: Captures tracing event tuple filtering without packet parsing, maps, or helpers
     base_name: bcc_tcpconnect_ipv4_tuple_filter
     kernel_input_size: 776
     input_generator: bcc_tcpconnect_ipv4_tuple_filter
@@ -319,11 +190,6 @@ benchmarks:
     tags: [bcc, tracing, tuple, branch, pure-jit]
 
   - name: tetragon_process_event_arg_filter
-    description: Tetragon process-event argument, namespace, capability, and action filter
-    category: control-flow
-    family: security-event-filter
-    level: process-args
-    hypothesis: Represents security policy event filtering over process metadata and argument signatures
     base_name: tetragon_process_event_arg_filter
     kernel_input_size: 1032
     input_generator: tetragon_process_event_arg_filter
@@ -331,11 +197,6 @@ benchmarks:
     tags: [tetragon, security, branch, string, pure-jit]
 
   - name: otel_stack_frame_unwind_scan
-    description: OpenTelemetry profiler-style stack frame unwind scan over frame deltas and symbol hashes
-    category: memory-local
-    family: profiler-unwind
-    level: frame-scan
-    hypothesis: Captures profiler unwind cursor updates and frame classification without helper dependencies
     base_name: otel_stack_frame_unwind_scan
     kernel_input_size: 584
     input_generator: otel_stack_frame_unwind_scan
@@ -343,11 +204,6 @@ benchmarks:
     tags: [otel, profiler, stack, fields, pure-jit]
 
   - name: cilium_ct_nat_tuple_rewrite
-    description: Cilium conntrack/NAT tuple rewrite with direction swap, rev NAT id, identity, and lifetime fields
-    category: alu-mix
-    family: ct-nat-rewrite
-    level: tuple-rewrite
-    hypothesis: Represents datapath tuple rewrite and CT/NAT metadata mixing distinct from service selection
     base_name: cilium_ct_nat_tuple_rewrite
     kernel_input_size: 1032
     input_generator: cilium_ct_nat_tuple_rewrite
@@ -355,11 +211,6 @@ benchmarks:
     tags: [cilium, conntrack, nat, tuple, pure-jit]
 
   - name: packet_toeplitz_rss_hash
-    description: Packet-backed IPv4 TCP Toeplitz RSS hash over a 5-tuple
-    category: alu-mix
-    family: rss-hash
-    level: toeplitz-ipv4-tcp
-    hypothesis: Adds NIC/RSS-style Toeplitz hashing, a different packet hash family from Jenkins and SipHash-like mixers
     base_name: packet_toeplitz_rss_hash
     io_mode: packet
     kernel_input_size: 54
@@ -368,11 +219,6 @@ benchmarks:
     tags: [packet, hash, toeplitz, rss, pure-jit]
 
   - name: bpftrace_comm_key_fnv_hash
-    description: bpftrace-style comm plus pid/tgid/probe aggregation key hashed with FNV-1a
-    category: alu-mix
-    family: tracing-key-hash
-    level: fnv1a-comm-key
-    hypothesis: Adds lightweight string/tuple aggregation key hashing distinct from packet-oriented hash paths
     base_name: bpftrace_comm_key_fnv_hash
     kernel_input_size: 1032
     input_generator: bpftrace_comm_key_fnv_hash
@@ -380,11 +226,6 @@ benchmarks:
     tags: [bpftrace, tracing, hash, string, pure-jit]
 
   - name: tc_packet_checksum_fold
-    description: TC version of the packet checksum fold benchmark
-    category: memory-local
-    family: reduction
-    level: medium
-    hypothesis: Reuses the checksum reduction under a sched_cls hook with packet-fed staged input and skb-context result extraction
     base_name: tc_packet_checksum_fold
     program_name: tc_packet_checksum_fold_prog
     io_mode: staged
@@ -397,11 +238,6 @@ benchmarks:
     tags: [tc, pure-jit, non-xdp, kernel-only]
 
   - name: cgroup_skb_hash_chain
-    description: cgroup_skb egress hash-chain reduction over generated u64 words
-    category: alu-mix
-    family: hash-chain
-    level: short
-    hypothesis: Exercises a non-XDP cgroup_skb hook with packet-fed staged input and skb-context result extraction
     base_name: cgroup_skb_hash_chain
     program_name: cgroup_skb_hash_chain_prog
     io_mode: staged
