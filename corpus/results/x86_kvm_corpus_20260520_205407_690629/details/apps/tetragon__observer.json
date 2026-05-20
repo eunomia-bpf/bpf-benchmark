@@ -1,0 +1,1727 @@
+{
+  "app": "tetragon/observer",
+  "baseline": {
+    "bpf": {
+      "2": {
+        "bytes_jited": 167,
+        "bytes_xlated": 280,
+        "id": 2,
+        "name": "dump_bpf_map",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "26": {
+        "bytes_jited": 1038,
+        "bytes_xlated": 1840,
+        "id": 26,
+        "name": "event_exit_acct",
+        "run_cnt_delta": 17310,
+        "run_time_ns_delta": 6549795,
+        "type": "kprobe"
+      },
+      "27": {
+        "bytes_jited": 7335,
+        "bytes_xlated": 11312,
+        "id": 27,
+        "name": "event_wake_up_n",
+        "run_cnt_delta": 28490,
+        "run_time_ns_delta": 16716408,
+        "type": "kprobe"
+      },
+      "28": {
+        "bytes_jited": 1381,
+        "bytes_xlated": 2352,
+        "id": 28,
+        "name": "execve_rate",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "29": {
+        "bytes_jited": 5127,
+        "bytes_xlated": 8136,
+        "id": 29,
+        "name": "execve_send",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "3": {
+        "bytes_jited": 740,
+        "bytes_xlated": 520,
+        "id": 3,
+        "name": "dump_bpf_prog",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "30": {
+        "bytes_jited": 11790,
+        "bytes_xlated": 20472,
+        "id": 30,
+        "name": "event_execve",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 6246,
+        "type": "tracepoint"
+      },
+      "31": {
+        "bytes_jited": 1533,
+        "bytes_xlated": 2560,
+        "id": 31,
+        "name": "tg_kp_bprm_comm",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 1206,
+        "type": "kprobe"
+      },
+      "32": {
+        "bytes_jited": 325,
+        "bytes_xlated": 544,
+        "id": 32,
+        "name": "execve_map_upda",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "6": {
+        "bytes_jited": 41,
+        "bytes_xlated": 64,
+        "id": 6,
+        "name": "",
+        "run_cnt_delta": 138552,
+        "run_time_ns_delta": 3510385,
+        "type": "socket_filter"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "4",
+          "--eventfd",
+          "4",
+          "--get",
+          "4",
+          "--prctl",
+          "4",
+          "--set",
+          "4",
+          "--dup",
+          "4",
+          "--kill",
+          "4",
+          "--sigfd",
+          "4",
+          "--signal",
+          "4",
+          "--pty",
+          "4",
+          "--itimer",
+          "4",
+          "--timerfd",
+          "4",
+          "--exec",
+          "4",
+          "--fork",
+          "4",
+          "--vfork",
+          "4",
+          "--clone",
+          "4",
+          "--ptrace",
+          "4",
+          "--futex",
+          "4",
+          "--sem",
+          "4",
+          "--aio",
+          "4",
+          "--aiol",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--io",
+          "4",
+          "--iomix",
+          "4",
+          "--iomix-bytes",
+          "128M",
+          "--io-uring",
+          "4",
+          "--sync-file",
+          "4",
+          "--epoll",
+          "4",
+          "--netdev",
+          "4",
+          "--sctp",
+          "1",
+          "--sock",
+          "4",
+          "--sockdiag",
+          "4",
+          "--sockfd",
+          "4",
+          "--sockpair",
+          "4",
+          "--sockmany",
+          "4",
+          "--udp",
+          "4",
+          "--udp-flood",
+          "4",
+          "--mmap",
+          "4",
+          "--mmap-bytes",
+          "16M",
+          "--mprotect",
+          "4",
+          "--mremap",
+          "4",
+          "--mremap-bytes",
+          "16M",
+          "--madvise",
+          "4",
+          "--access",
+          "4",
+          "--chdir",
+          "4",
+          "--chmod",
+          "4",
+          "--chown",
+          "4",
+          "--dentry",
+          "4",
+          "--dir",
+          "4",
+          "--dirmany",
+          "4",
+          "--fallocate",
+          "4",
+          "--fallocate-bytes",
+          "128M",
+          "--file-ioctl",
+          "4",
+          "--filename",
+          "4",
+          "--flock",
+          "4",
+          "--fpunch",
+          "4",
+          "--fpunch-bytes",
+          "32M",
+          "--fstat",
+          "4",
+          "--getdent",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--inotify",
+          "4",
+          "--open",
+          "4",
+          "--open-max",
+          "1024",
+          "--rename",
+          "4",
+          "--touch",
+          "4",
+          "--utime",
+          "4",
+          "--link",
+          "4",
+          "--symlink",
+          "4",
+          "--mknod",
+          "4",
+          "--fcntl",
+          "4",
+          "--epoll-port",
+          "14404",
+          "--sctp-port",
+          "14504",
+          "--sock-port",
+          "14604",
+          "--sockfd-port",
+          "14704",
+          "--timeout",
+          "3s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/pqi2v6u1"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "eventfd",
+            "get",
+            "prctl",
+            "set",
+            "dup",
+            "kill",
+            "sigfd",
+            "signal",
+            "pty",
+            "itimer",
+            "timerfd",
+            "exec",
+            "fork",
+            "vfork",
+            "clone",
+            "ptrace",
+            "futex",
+            "sem",
+            "aio",
+            "aiol",
+            "hdd",
+            "io",
+            "iomix",
+            "io-uring",
+            "sync-file",
+            "epoll",
+            "netdev",
+            "sctp",
+            "sock",
+            "sockdiag",
+            "sockfd",
+            "sockpair",
+            "sockmany",
+            "udp",
+            "udp-flood",
+            "mmap",
+            "mprotect",
+            "mremap",
+            "madvise",
+            "access",
+            "chdir",
+            "chmod",
+            "chown",
+            "dentry",
+            "dir",
+            "dirmany",
+            "fallocate",
+            "file-ioctl",
+            "filename",
+            "flock",
+            "fpunch",
+            "fstat",
+            "getdent",
+            "hdd",
+            "inotify",
+            "open",
+            "rename",
+            "touch",
+            "utime",
+            "link",
+            "symlink",
+            "mknod",
+            "fcntl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 4.60071911499999,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [30679] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [30679] setting to a 3 secs run per stressor\nstress-ng: info:  [30679] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd, 4 fork, 4 vfork, 4 clone, 4 ptrace, 4 futex, 4 sem, 4 aio, 4 aiol, 4 hdd, 4 io, 4 iomix, 4 io-uring, 4 sync-file, 4 epoll, 4 netdev, 1 sctp, 4 sock, 4 sockdiag, 4 sockfd, 4 sockpair, 4 sockmany, 4 udp, 4 udp-flood, 4 mmap, 4 mprotect, 4 mremap, 4 madvise, 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [30679] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [31611] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: info:  [997] open: using a maximum of 1024 file descriptors\nstress-ng: metrc: [30679] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [30679]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [30679] cap             1031503      3.18      0.26      1.05    324032.54      788621.71\nstress-ng: metrc: [30679] eventfd          102987      3.02      0.09      0.34     34137.36      234684.34\nstress-ng: metrc: [30679] get                1448      3.07      0.04      0.24       472.35        5223.31\nstress-ng: metrc: [30679] prctl              1539      3.05      0.24      0.18       504.90        3599.42\nstress-ng: metrc: [30679] set               46496      3.08      0.07      0.57     15113.90       72982.87\nstress-ng: metrc: [30679] dup                 262      3.55      0.08      0.03        73.83        2529.06\nstress-ng: metrc: [30679] kill              22000      3.13      0.03      1.02      7035.86       20935.49\nstress-ng: metrc: [30679] sigfd           1341277      3.15      0.16      0.60    425313.30     1768342.27\nstress-ng: metrc: [30679] signal                0      3.04      0.00      0.00         0.00           0.00\nstress-ng: metrc: [30679] pty                  27      3.13      0.01      0.48         8.64          55.48\nstress-ng: metrc: [30679] itimer               64      3.04      0.19      0.37        21.09         115.23\nstress-ng: metrc: [30679] timerfd           91136      3.44      0.01      0.63     26498.62      142230.88\nstress-ng: metrc: [30679] fork               1482      3.03      0.15      0.21       489.29        4067.76\nstress-ng: metrc: [30679] vfork             12647      3.01      0.13      0.15      4207.60       44891.61\nstress-ng: metrc: [30679] clone               598      3.08      0.26      0.76       193.98         585.97\nstress-ng: metrc: [30679] ptrace           100800      3.00      0.02      0.28     33586.85      336709.33\nstress-ng: metrc: [30679] futex             73186      6.06      0.35      0.92     12079.96       57615.88\nstress-ng: metrc: [30679] sem                 563      3.06      0.00      0.00       183.73      175992.50\nstress-ng: metrc: [30679] aio               25763      3.25      0.04      0.00      7917.58      697484.91\nstress-ng: metrc: [30679] aiol               1838      3.48      0.06      0.07       528.77       14736.07\nstress-ng: metrc: [30679] hdd               15370      3.36      0.20      0.14      4581.16       45186.61\nstress-ng: metrc: [30679] io                   94      3.44      0.01      0.03        27.32        2843.92\nstress-ng: metrc: [30679] iomix              1146      3.51      0.06      1.20       326.64         912.96\nstress-ng: metrc: [30679] io-uring           7928      3.41      0.00      0.50      2324.28       15705.01\nstress-ng: metrc: [30679] sync-file            32      3.41      0.00      0.04         9.37         768.36\nstress-ng: metrc: [30679] epoll               213      3.26      0.01      0.00        65.43       15172.02\nstress-ng: metrc: [30679] netdev           496084      3.10      0.08      0.28    160244.63     1377712.61\nstress-ng: metrc: [30679] sctp                787      3.00      0.01      0.00       262.28      125438.32\nstress-ng: metrc: [30679] sock               1135      3.02      0.06      0.43       376.13        2304.57\nstress-ng: metrc: [30679] sockdiag        4977986      3.07      0.00      0.31   1623242.01    15881022.79\nstress-ng: metrc: [30679] sockfd           104278      3.15      0.05      0.22     33124.18      384997.08\nstress-ng: metrc: [30679] sockpair            171      3.09      0.02      0.04        55.32        2460.15\nstress-ng: metrc: [30679] sockmany          18645      3.13      0.04      0.34      5954.46       48748.03\nstress-ng: metrc: [30679] udp               93908      3.05      0.05      0.62     30802.14      141345.76\nstress-ng: metrc: [30679] udp-flood        316122      3.06      0.03      0.40    103171.58      735097.35\nstress-ng: metrc: [30679] mmap                497      3.07      0.01      0.49       161.81         988.59\nstress-ng: metrc: [30679] mprotect        3861501      3.08      0.94      4.70   1253033.93      684541.32\nstress-ng: metrc: [30679] mremap              785      3.04      0.01      0.58       258.03        1339.36\nstress-ng: metrc: [30679] madvise              29      3.32      0.01      0.50         8.73          56.39\nstress-ng: metrc: [30679] access             3939      3.40      0.05      0.30      1159.04       11548.07\nstress-ng: metrc: [30679] chdir                 4      3.38      0.01      0.18         1.18          21.31\nstress-ng: metrc: [30679] chmod                19      3.40      0.00      0.10         5.59         198.41\nstress-ng: metrc: [30679] chown                74      3.38      0.00      0.07        21.90         973.39\nstress-ng: metrc: [30679] dentry             9042      3.37      0.01      0.21      2683.41       40741.29\nstress-ng: metrc: [30679] dir                5732      3.42      0.05      0.40      1677.67       12624.52\nstress-ng: metrc: [30679] dirmany            5119      3.31      0.06      0.05      1545.65       48878.53\nstress-ng: metrc: [30679] fallocate             0      3.19      0.01      0.00         0.00           0.00\nstress-ng: metrc: [30679] file-ioctl         4035      3.19      0.03      0.02      1266.45       88196.72\nstress-ng: metrc: [30679] filename            129      3.22      0.04      0.02        40.03        2318.64\nstress-ng: metrc: [30679] flock            357423      3.19      0.10      0.09    112107.81     1804146.14\nstress-ng: metrc: [30679] fpunch                0      3.11      0.00      0.04         0.00           0.00\nstress-ng: metrc: [30679] fstat              2666      3.01      0.04      0.20       884.54       10800.91\nstress-ng: metrc: [30679] getdent           84654      3.00      0.04      0.60     28188.60      132143.45\nstress-ng: metrc: [30679] hdd                6139      3.12      0.07      0.06      1966.49       45395.39\nstress-ng: metrc: [30679] inotify               5      3.80      0.00      0.00         1.32        1012.15\nstress-ng: metrc: [30679] open                  4      3.15      0.02      0.00         1.27         239.39\nstress-ng: metrc: [30679] rename             4435      3.11      0.00      0.03      1424.48      143138.39\nstress-ng: metrc: [30679] touch                20      3.21      0.01      0.02         6.23         818.67\nstress-ng: metrc: [30679] utime                 4      3.07      0.00      0.00         1.30        4550.63\nstress-ng: metrc: [30679] link                  4      3.22      0.00      0.15         1.24          26.76\nstress-ng: metrc: [30679] symlink               4      3.18      0.01      0.14         1.26          27.09\nstress-ng: metrc: [30679] mknod                 0      3.07      0.00      0.00         0.00           0.00\nstress-ng: metrc: [30679] fcntl               278      3.09      0.00      0.01        89.86       46271.64\nstress-ng: info:  [30679] skipped: 4: exec (4)\nstress-ng: info:  [30679] passed: 249: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (1) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [30679] failed: 0\nstress-ng: info:  [30679] metrics untrustworthy: 0\nstress-ng: info:  [30679] successful run completed in 4.59 secs",
+        "workload_name": "stress_ng_os_io_network"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "2": {
+        "bytes_jited": 167,
+        "bytes_xlated": 280,
+        "id": 2,
+        "name": "dump_bpf_map",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "26": {
+        "bytes_jited": 1038,
+        "bytes_xlated": 1840,
+        "id": 26,
+        "name": "event_exit_acct",
+        "run_cnt_delta": 18163,
+        "run_time_ns_delta": 6092824,
+        "type": "kprobe"
+      },
+      "27": {
+        "bytes_jited": 7335,
+        "bytes_xlated": 11312,
+        "id": 27,
+        "name": "event_wake_up_n",
+        "run_cnt_delta": 31934,
+        "run_time_ns_delta": 16802486,
+        "type": "kprobe"
+      },
+      "28": {
+        "bytes_jited": 1381,
+        "bytes_xlated": 2352,
+        "id": 28,
+        "name": "execve_rate",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "29": {
+        "bytes_jited": 5127,
+        "bytes_xlated": 8136,
+        "id": 29,
+        "name": "execve_send",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "3": {
+        "bytes_jited": 740,
+        "bytes_xlated": 520,
+        "id": 3,
+        "name": "dump_bpf_prog",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "30": {
+        "bytes_jited": 11790,
+        "bytes_xlated": 20472,
+        "id": 30,
+        "name": "event_execve",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 6874,
+        "type": "tracepoint"
+      },
+      "31": {
+        "bytes_jited": 1533,
+        "bytes_xlated": 2560,
+        "id": 31,
+        "name": "tg_kp_bprm_comm",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 1156,
+        "type": "kprobe"
+      },
+      "32": {
+        "bytes_jited": 325,
+        "bytes_xlated": 544,
+        "id": 32,
+        "name": "execve_map_upda",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "socket_filter"
+      },
+      "35": {
+        "bytes_jited": 5664,
+        "bytes_xlated": 10136,
+        "id": 35,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "36": {
+        "bytes_jited": 1877,
+        "bytes_xlated": 3160,
+        "id": 36,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "37": {
+        "bytes_jited": 12207,
+        "bytes_xlated": 19944,
+        "id": 37,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "38": {
+        "bytes_jited": 1313,
+        "bytes_xlated": 2240,
+        "id": 38,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "39": {
+        "bytes_jited": 18195,
+        "bytes_xlated": 29864,
+        "id": 39,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "40": {
+        "bytes_jited": 18573,
+        "bytes_xlated": 31440,
+        "id": 40,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "41": {
+        "bytes_jited": 1875,
+        "bytes_xlated": 3304,
+        "id": 41,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 43,
+        "run_time_ns_delta": 212678,
+        "type": "kprobe"
+      },
+      "42": {
+        "bytes_jited": 1877,
+        "bytes_xlated": 3160,
+        "id": 42,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "43": {
+        "bytes_jited": 18195,
+        "bytes_xlated": 29864,
+        "id": 43,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "44": {
+        "bytes_jited": 5664,
+        "bytes_xlated": 10136,
+        "id": 44,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "45": {
+        "bytes_jited": 18573,
+        "bytes_xlated": 31440,
+        "id": 45,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "46": {
+        "bytes_jited": 1313,
+        "bytes_xlated": 2240,
+        "id": 46,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "47": {
+        "bytes_jited": 12207,
+        "bytes_xlated": 19944,
+        "id": 47,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "48": {
+        "bytes_jited": 1875,
+        "bytes_xlated": 3304,
+        "id": 48,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 6,
+        "run_time_ns_delta": 32891,
+        "type": "kprobe"
+      },
+      "49": {
+        "bytes_jited": 1875,
+        "bytes_xlated": 3304,
+        "id": 49,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 523,
+        "run_time_ns_delta": 309279,
+        "type": "kprobe"
+      },
+      "50": {
+        "bytes_jited": 18195,
+        "bytes_xlated": 29864,
+        "id": 50,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "51": {
+        "bytes_jited": 1877,
+        "bytes_xlated": 3160,
+        "id": 51,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "52": {
+        "bytes_jited": 5664,
+        "bytes_xlated": 10136,
+        "id": 52,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "53": {
+        "bytes_jited": 18573,
+        "bytes_xlated": 31440,
+        "id": 53,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "54": {
+        "bytes_jited": 12207,
+        "bytes_xlated": 19944,
+        "id": 54,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "55": {
+        "bytes_jited": 1313,
+        "bytes_xlated": 2240,
+        "id": 55,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "56": {
+        "bytes_jited": 1313,
+        "bytes_xlated": 2240,
+        "id": 56,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "57": {
+        "bytes_jited": 18195,
+        "bytes_xlated": 29864,
+        "id": 57,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "58": {
+        "bytes_jited": 1877,
+        "bytes_xlated": 3160,
+        "id": 58,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "59": {
+        "bytes_jited": 18573,
+        "bytes_xlated": 31440,
+        "id": 59,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6": {
+        "bytes_jited": 41,
+        "bytes_xlated": 64,
+        "id": 6,
+        "name": "",
+        "run_cnt_delta": 178541,
+        "run_time_ns_delta": 4530262,
+        "type": "socket_filter"
+      },
+      "60": {
+        "bytes_jited": 12207,
+        "bytes_xlated": 19944,
+        "id": 60,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "61": {
+        "bytes_jited": 5664,
+        "bytes_xlated": 10136,
+        "id": 61,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "62": {
+        "bytes_jited": 1875,
+        "bytes_xlated": 3304,
+        "id": 62,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 27642,
+        "run_time_ns_delta": 15613466,
+        "type": "kprobe"
+      },
+      "63": {
+        "bytes_jited": 15271,
+        "bytes_xlated": 26384,
+        "id": 63,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 27642,
+        "run_time_ns_delta": 8584846,
+        "type": "kprobe"
+      },
+      "64": {
+        "bytes_jited": 4391,
+        "bytes_xlated": 7784,
+        "id": 64,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "65": {
+        "bytes_jited": 799,
+        "bytes_xlated": 1360,
+        "id": 65,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "66": {
+        "bytes_jited": 17466,
+        "bytes_xlated": 28616,
+        "id": 66,
+        "name": "generic_retkpro",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "67": {
+        "bytes_jited": 1875,
+        "bytes_xlated": 3304,
+        "id": 67,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 35997,
+        "run_time_ns_delta": 28327043,
+        "type": "kprobe"
+      },
+      "68": {
+        "bytes_jited": 12207,
+        "bytes_xlated": 19944,
+        "id": 68,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "69": {
+        "bytes_jited": 5664,
+        "bytes_xlated": 10136,
+        "id": 69,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "70": {
+        "bytes_jited": 18573,
+        "bytes_xlated": 31440,
+        "id": 70,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "71": {
+        "bytes_jited": 18195,
+        "bytes_xlated": 29864,
+        "id": 71,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "72": {
+        "bytes_jited": 1313,
+        "bytes_xlated": 2240,
+        "id": 72,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "73": {
+        "bytes_jited": 1877,
+        "bytes_xlated": 3160,
+        "id": 73,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "74": {
+        "bytes_jited": 18195,
+        "bytes_xlated": 29864,
+        "id": 74,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "75": {
+        "bytes_jited": 18573,
+        "bytes_xlated": 31440,
+        "id": 75,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "76": {
+        "bytes_jited": 5664,
+        "bytes_xlated": 10136,
+        "id": 76,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "77": {
+        "bytes_jited": 1875,
+        "bytes_xlated": 3304,
+        "id": 77,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "78": {
+        "bytes_jited": 1313,
+        "bytes_xlated": 2240,
+        "id": 78,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "79": {
+        "bytes_jited": 1877,
+        "bytes_xlated": 3160,
+        "id": 79,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "80": {
+        "bytes_jited": 12207,
+        "bytes_xlated": 19944,
+        "id": 80,
+        "name": "generic_kprobe_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "4",
+          "--eventfd",
+          "4",
+          "--get",
+          "4",
+          "--prctl",
+          "4",
+          "--set",
+          "4",
+          "--dup",
+          "4",
+          "--kill",
+          "4",
+          "--sigfd",
+          "4",
+          "--signal",
+          "4",
+          "--pty",
+          "4",
+          "--itimer",
+          "4",
+          "--timerfd",
+          "4",
+          "--exec",
+          "4",
+          "--fork",
+          "4",
+          "--vfork",
+          "4",
+          "--clone",
+          "4",
+          "--ptrace",
+          "4",
+          "--futex",
+          "4",
+          "--sem",
+          "4",
+          "--aio",
+          "4",
+          "--aiol",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--io",
+          "4",
+          "--iomix",
+          "4",
+          "--iomix-bytes",
+          "128M",
+          "--io-uring",
+          "4",
+          "--sync-file",
+          "4",
+          "--epoll",
+          "4",
+          "--netdev",
+          "4",
+          "--sctp",
+          "1",
+          "--sock",
+          "4",
+          "--sockdiag",
+          "4",
+          "--sockfd",
+          "4",
+          "--sockpair",
+          "4",
+          "--sockmany",
+          "4",
+          "--udp",
+          "4",
+          "--udp-flood",
+          "4",
+          "--mmap",
+          "4",
+          "--mmap-bytes",
+          "16M",
+          "--mprotect",
+          "4",
+          "--mremap",
+          "4",
+          "--mremap-bytes",
+          "16M",
+          "--madvise",
+          "4",
+          "--access",
+          "4",
+          "--chdir",
+          "4",
+          "--chmod",
+          "4",
+          "--chown",
+          "4",
+          "--dentry",
+          "4",
+          "--dir",
+          "4",
+          "--dirmany",
+          "4",
+          "--fallocate",
+          "4",
+          "--fallocate-bytes",
+          "128M",
+          "--file-ioctl",
+          "4",
+          "--filename",
+          "4",
+          "--flock",
+          "4",
+          "--fpunch",
+          "4",
+          "--fpunch-bytes",
+          "32M",
+          "--fstat",
+          "4",
+          "--getdent",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--inotify",
+          "4",
+          "--open",
+          "4",
+          "--open-max",
+          "1024",
+          "--rename",
+          "4",
+          "--touch",
+          "4",
+          "--utime",
+          "4",
+          "--link",
+          "4",
+          "--symlink",
+          "4",
+          "--mknod",
+          "4",
+          "--fcntl",
+          "4",
+          "--epoll-port",
+          "15428",
+          "--sctp-port",
+          "15528",
+          "--sock-port",
+          "15628",
+          "--sockfd-port",
+          "15728",
+          "--timeout",
+          "3s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/pqi2v6u1"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "eventfd",
+            "get",
+            "prctl",
+            "set",
+            "dup",
+            "kill",
+            "sigfd",
+            "signal",
+            "pty",
+            "itimer",
+            "timerfd",
+            "exec",
+            "fork",
+            "vfork",
+            "clone",
+            "ptrace",
+            "futex",
+            "sem",
+            "aio",
+            "aiol",
+            "hdd",
+            "io",
+            "iomix",
+            "io-uring",
+            "sync-file",
+            "epoll",
+            "netdev",
+            "sctp",
+            "sock",
+            "sockdiag",
+            "sockfd",
+            "sockpair",
+            "sockmany",
+            "udp",
+            "udp-flood",
+            "mmap",
+            "mprotect",
+            "mremap",
+            "madvise",
+            "access",
+            "chdir",
+            "chmod",
+            "chown",
+            "dentry",
+            "dir",
+            "dirmany",
+            "fallocate",
+            "file-ioctl",
+            "filename",
+            "flock",
+            "fpunch",
+            "fstat",
+            "getdent",
+            "hdd",
+            "inotify",
+            "open",
+            "rename",
+            "touch",
+            "utime",
+            "link",
+            "symlink",
+            "mknod",
+            "fcntl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 5.121426968999998,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [18426] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [18426] setting to a 3 secs run per stressor\nstress-ng: info:  [18426] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd, 4 fork, 4 vfork, 4 clone, 4 ptrace, 4 futex, 4 sem, 4 aio, 4 aiol, 4 hdd, 4 io, 4 iomix, 4 io-uring, 4 sync-file, 4 epoll, 4 netdev, 1 sctp, 4 sock, 4 sockdiag, 4 sockfd, 4 sockpair, 4 sockmany, 4 udp, 4 udp-flood, 4 mmap, 4 mprotect, 4 mremap, 4 madvise, 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [18426] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [18526] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: info:  [19085] open: using a maximum of 1024 file descriptors\nstress-ng: warn:  [18977] dirmany: no files were created in /var/tmp/bpfrejit-runtime/pqi2v6u1/tmp-stress-ng-dirmany-18977-0\nstress-ng: warn:  [18978] dirmany: no files were created in /var/tmp/bpfrejit-runtime/pqi2v6u1/tmp-stress-ng-dirmany-18978-1\nstress-ng: info:  [18958] dentry: 191915 dentries allocated\nstress-ng: metrc: [18426] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [18426]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [18426] cap              803558      3.08      0.23      0.81    260850.10      772920.96\nstress-ng: metrc: [18426] eventfd           92810      3.02      0.16      0.25     30750.32      229092.05\nstress-ng: metrc: [18426] get                2143      3.01      0.06      0.34       711.11        5429.29\nstress-ng: metrc: [18426] prctl              1161      3.02      0.26      0.07       384.86        3489.23\nstress-ng: metrc: [18426] set               57578      3.08      0.11      0.65     18681.66       75970.65\nstress-ng: metrc: [18426] dup                 140      3.08      0.07      0.00        45.43        1989.85\nstress-ng: metrc: [18426] kill               8083      3.09      0.00      0.45      2619.26       17753.40\nstress-ng: metrc: [18426] sigfd           1836442      3.08      0.15      0.90    596916.46     1747145.40\nstress-ng: metrc: [18426] signal                0      3.02      0.00      0.00         0.00           0.00\nstress-ng: metrc: [18426] pty                  23      3.05      0.01      0.53         7.54          42.27\nstress-ng: metrc: [18426] itimer               86      3.05      0.18      0.61        28.23         109.31\nstress-ng: metrc: [18426] timerfd           80896      3.38      0.00      0.58     23917.14      140424.70\nstress-ng: metrc: [18426] fork               1464      3.04      0.14      0.22       481.45        4047.82\nstress-ng: metrc: [18426] vfork             14507      3.00      0.12      0.15      4834.63       55086.18\nstress-ng: metrc: [18426] clone               246      3.20      0.12      0.43        76.90         441.09\nstress-ng: metrc: [18426] ptrace           149970      3.01      0.03      0.38     49794.28      370400.56\nstress-ng: metrc: [18426] futex             19816      6.13      0.19      0.43      3230.95       32289.34\nstress-ng: metrc: [18426] sem                 424      3.04      0.00      0.00       139.68      155539.25\nstress-ng: metrc: [18426] aio                5147      3.36      0.01      0.00      1532.41      400887.92\nstress-ng: metrc: [18426] aiol               2242      3.67      0.03      0.12       611.68       14803.08\nstress-ng: metrc: [18426] hdd                9928      3.60      0.12      0.11      2758.59       41814.43\nstress-ng: metrc: [18426] io                   74      3.58      0.01      0.01        20.68        6308.07\nstress-ng: metrc: [18426] iomix              2167      4.26      0.08      2.10       508.41         998.24\nstress-ng: metrc: [18426] io-uring           4388      3.67      0.00      0.32      1196.35       13707.87\nstress-ng: metrc: [18426] sync-file            61      3.30      0.05      0.02        18.50         824.39\nstress-ng: metrc: [18426] epoll               170      3.46      0.01      0.00        49.07       10975.53\nstress-ng: metrc: [18426] netdev           535194      3.03      0.05      0.33    176439.79     1384293.06\nstress-ng: metrc: [18426] sctp                762      3.02      0.00      0.00       252.70      134962.81\nstress-ng: metrc: [18426] sock               1064      3.03      0.05      0.42       351.07        2284.24\nstress-ng: metrc: [18426] sockdiag        7084694      3.02      0.03      0.46   2344239.10    14422767.17\nstress-ng: metrc: [18426] sockfd           138451      3.38      0.00      0.37     40958.33      377359.67\nstress-ng: metrc: [18426] sockpair            173      3.17      0.05      0.04        54.53        2065.72\nstress-ng: metrc: [18426] sockmany           8353      3.17      0.06      0.15      2638.15       40003.45\nstress-ng: metrc: [18426] udp               56473      3.04      0.05      0.89     18556.18       60149.58\nstress-ng: metrc: [18426] udp-flood        635751      3.04      0.04      0.82    208838.93      742474.25\nstress-ng: metrc: [18426] mmap                432      3.09      0.02      0.48       139.78         855.57\nstress-ng: metrc: [18426] mprotect        3649739      3.13      0.81      4.51   1164693.63      687226.24\nstress-ng: metrc: [18426] mremap             1569      3.08      0.00      1.13       508.62        1392.62\nstress-ng: metrc: [18426] madvise               8      3.13      0.00      0.15         2.55          52.76\nstress-ng: metrc: [18426] access             1864      3.39      0.02      0.14       549.72       11414.29\nstress-ng: metrc: [18426] chdir                 4      3.36      0.01      0.22         1.19          17.51\nstress-ng: metrc: [18426] chmod                 2      3.47      0.00      0.00         0.58         755.57\nstress-ng: metrc: [18426] chown                38      3.53      0.00      0.06        10.78         588.84\nstress-ng: metrc: [18426] dentry             8147      3.66      0.02      0.18      2228.43       40698.37\nstress-ng: metrc: [18426] dir                 605      3.45      0.05      0.55       175.44        1010.32\nstress-ng: metrc: [18426] dirmany            1816      3.14      0.00      0.08       578.96       24024.34\nstress-ng: metrc: [18426] fallocate             0      3.24      0.00      0.04         0.00           0.00\nstress-ng: metrc: [18426] file-ioctl         5262      3.27      0.00      0.06      1608.11       80527.67\nstress-ng: metrc: [18426] filename            162      3.17      0.01      0.06        51.03        2051.28\nstress-ng: metrc: [18426] flock            746190      3.29      0.17      0.23    227100.27     1894070.73\nstress-ng: metrc: [18426] fpunch               72      3.52      0.05      0.29        20.45         213.79\nstress-ng: metrc: [18426] fstat              3406      3.07      0.03      0.24      1110.44       12202.77\nstress-ng: metrc: [18426] getdent           76020      3.06      0.04      0.62     24840.73      114196.61\nstress-ng: metrc: [18426] hdd                9396      3.50      0.13      0.12      2680.77       38473.51\nstress-ng: metrc: [18426] inotify               5      3.37      0.00      0.04         1.48         109.38\nstress-ng: metrc: [18426] open               3696      3.44      0.04      0.10      1074.36       27771.31\nstress-ng: metrc: [18426] rename            13706      3.23      0.01      0.08      4243.39      147882.01\nstress-ng: metrc: [18426] touch             24063      3.57      0.01      0.60      6740.21       39572.88\nstress-ng: metrc: [18426] utime             11652      3.30      0.01      0.20      3527.65       56476.75\nstress-ng: metrc: [18426] link                  4      3.58      0.01      0.30         1.12          12.92\nstress-ng: metrc: [18426] symlink               4      3.58      0.05      0.50         1.12           7.29\nstress-ng: metrc: [18426] mknod                30      3.22      0.00      0.00         9.30       16339.87\nstress-ng: metrc: [18426] fcntl              5439      3.40      0.01      0.06      1597.42       76881.76\nstress-ng: info:  [18426] skipped: 4: exec (4)\nstress-ng: info:  [18426] passed: 249: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (1) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [18426] failed: 0\nstress-ng: info:  [18426] metrics untrustworthy: 0\nstress-ng: info:  [18426] successful run completed in 5.11 secs",
+        "workload_name": "stress_ng_os_io_network"
+      }
+    ]
+  },
+  "rejit_result": {
+    "per_program": {
+      "11": {
+        "passes": [
+          {
+            "bpfopt_ms": 1,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 2,
+              "insn_count_before": 2,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "reload_and_reattach internal error",
+            "exit_code": 0,
+            "rejit_syscall_ms": 0,
+            "status": "failed_rejit",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 11,
+        "program": {
+          "final_insn_count": 2,
+          "orig_insn_count": 2,
+          "prog_id": 11,
+          "prog_name": "probe_upm_link",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "2": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 35,
+              "insn_count_before": 35,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "fd 277 is not pointing to valid bpf_map\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_REJIT errno=22\nctx: prog_id=2 prog_type=26 fd_array_n=8 insn_cnt=35\n",
+            "exit_code": 0,
+            "rejit_syscall_ms": 0,
+            "status": "failed_rejit",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 2,
+        "program": {
+          "final_insn_count": 35,
+          "orig_insn_count": 35,
+          "prog_id": 2,
+          "prog_name": "dump_bpf_map",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "26": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 42 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 26,
+        "program": {
+          "final_insn_count": 183,
+          "orig_insn_count": 183,
+          "prog_id": 26,
+          "prog_name": "event_exit_acct",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "27": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 58 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 27,
+        "program": {
+          "final_insn_count": 1362,
+          "orig_insn_count": 1362,
+          "prog_id": 27,
+          "prog_name": "event_wake_up_n",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "28": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 65 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 28,
+        "program": {
+          "final_insn_count": 241,
+          "orig_insn_count": 241,
+          "prog_id": 28,
+          "prog_name": "execve_rate",
+          "prog_type": 5
+        },
+        "status": "error"
+      },
+      "29": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 65 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 29,
+        "program": {
+          "final_insn_count": 1412,
+          "orig_insn_count": 1412,
+          "prog_id": 29,
+          "prog_name": "execve_send",
+          "prog_type": 5
+        },
+        "status": "error"
+      },
+      "3": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 65,
+              "insn_count_before": 65,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": "fd 245 is not pointing to valid bpf_map\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_REJIT errno=22\nctx: prog_id=3 prog_type=26 fd_array_n=8 insn_cnt=65\n",
+            "exit_code": 0,
+            "rejit_syscall_ms": 0,
+            "status": "failed_rejit",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 3,
+        "program": {
+          "final_insn_count": 65,
+          "orig_insn_count": 65,
+          "prog_id": 3,
+          "prog_name": "dump_bpf_prog",
+          "prog_type": 26
+        },
+        "status": "error"
+      },
+      "30": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 65 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 30,
+        "program": {
+          "final_insn_count": 2806,
+          "orig_insn_count": 2806,
+          "prog_id": 30,
+          "prog_name": "event_execve",
+          "prog_type": 5
+        },
+        "status": "error"
+      },
+      "31": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 43 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 31,
+        "program": {
+          "final_insn_count": 292,
+          "orig_insn_count": 292,
+          "prog_id": 31,
+          "prog_name": "tg_kp_bprm_comm",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "32": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 25 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 32,
+        "program": {
+          "final_insn_count": 97,
+          "orig_insn_count": 97,
+          "prog_id": 32,
+          "prog_name": "execve_map_upda",
+          "prog_type": 1
+        },
+        "status": "error"
+      },
+      "35": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 90 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 35,
+        "program": {
+          "final_insn_count": 1166,
+          "orig_insn_count": 1166,
+          "prog_id": 35,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "36": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 90 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 36,
+        "program": {
+          "final_insn_count": 377,
+          "orig_insn_count": 377,
+          "prog_id": 36,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "37": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 90 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 37,
+        "program": {
+          "final_insn_count": 2919,
+          "orig_insn_count": 2919,
+          "prog_id": 37,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "38": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 90 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 38,
+        "program": {
+          "final_insn_count": 255,
+          "orig_insn_count": 255,
+          "prog_id": 38,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "39": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 90 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 39,
+        "program": {
+          "final_insn_count": 3634,
+          "orig_insn_count": 3634,
+          "prog_id": 39,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "40": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 90 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 40,
+        "program": {
+          "final_insn_count": 4051,
+          "orig_insn_count": 4051,
+          "prog_id": 40,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "41": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 90 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 41,
+        "program": {
+          "final_insn_count": 421,
+          "orig_insn_count": 421,
+          "prog_id": 41,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "42": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 76 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 42,
+        "program": {
+          "final_insn_count": 377,
+          "orig_insn_count": 377,
+          "prog_id": 42,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "43": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 76 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 43,
+        "program": {
+          "final_insn_count": 3634,
+          "orig_insn_count": 3634,
+          "prog_id": 43,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "44": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 76 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 44,
+        "program": {
+          "final_insn_count": 1166,
+          "orig_insn_count": 1166,
+          "prog_id": 44,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "45": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 76 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 45,
+        "program": {
+          "final_insn_count": 4051,
+          "orig_insn_count": 4051,
+          "prog_id": 45,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "46": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 76 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 46,
+        "program": {
+          "final_insn_count": 255,
+          "orig_insn_count": 255,
+          "prog_id": 46,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "47": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 76 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 47,
+        "program": {
+          "final_insn_count": 2919,
+          "orig_insn_count": 2919,
+          "prog_id": 47,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "48": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 76 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 48,
+        "program": {
+          "final_insn_count": 421,
+          "orig_insn_count": 421,
+          "prog_id": 48,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "49": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 107 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 49,
+        "program": {
+          "final_insn_count": 421,
+          "orig_insn_count": 421,
+          "prog_id": 49,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "50": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 107 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 50,
+        "program": {
+          "final_insn_count": 3634,
+          "orig_insn_count": 3634,
+          "prog_id": 50,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "51": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 107 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 51,
+        "program": {
+          "final_insn_count": 377,
+          "orig_insn_count": 377,
+          "prog_id": 51,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "52": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 107 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 52,
+        "program": {
+          "final_insn_count": 1166,
+          "orig_insn_count": 1166,
+          "prog_id": 52,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "53": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 107 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 53,
+        "program": {
+          "final_insn_count": 4051,
+          "orig_insn_count": 4051,
+          "prog_id": 53,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "54": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 107 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 54,
+        "program": {
+          "final_insn_count": 2919,
+          "orig_insn_count": 2919,
+          "prog_id": 54,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "55": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 107 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 55,
+        "program": {
+          "final_insn_count": 255,
+          "orig_insn_count": 255,
+          "prog_id": 55,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "56": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 239 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 56,
+        "program": {
+          "final_insn_count": 255,
+          "orig_insn_count": 255,
+          "prog_id": 56,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "57": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 239 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 57,
+        "program": {
+          "final_insn_count": 3634,
+          "orig_insn_count": 3634,
+          "prog_id": 57,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "58": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 239 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 58,
+        "program": {
+          "final_insn_count": 377,
+          "orig_insn_count": 377,
+          "prog_id": 58,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "59": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 239 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 59,
+        "program": {
+          "final_insn_count": 4051,
+          "orig_insn_count": 4051,
+          "prog_id": 59,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "6": {
+        "passes": [
+          {
+            "bpfopt_ms": 2,
+            "bpfopt_summary": {
+              "diagnostics": [],
+              "insn_count_after": 8,
+              "insn_count_before": 8,
+              "insn_delta": 0,
+              "pass": "noop",
+              "sites_applied": 0,
+              "sites_matched": 0,
+              "sites_skipped": 0,
+              "skip_reasons": {}
+            },
+            "error": null,
+            "rejit_syscall_ms": 0,
+            "status": "ok",
+            "step": {
+              "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+              "log_level": 1,
+              "name": "noop"
+            }
+          }
+        ],
+        "prog_id": 6,
+        "program": {
+          "final_insn_count": 8,
+          "orig_insn_count": 8,
+          "prog_id": 6,
+          "prog_name": "",
+          "prog_type": 15
+        },
+        "status": "ok"
+      },
+      "60": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 239 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 60,
+        "program": {
+          "final_insn_count": 2919,
+          "orig_insn_count": 2919,
+          "prog_id": 60,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "61": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 239 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 61,
+        "program": {
+          "final_insn_count": 1166,
+          "orig_insn_count": 1166,
+          "prog_id": 61,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "62": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 239 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 62,
+        "program": {
+          "final_insn_count": 421,
+          "orig_insn_count": 421,
+          "prog_id": 62,
+          "prog_name": "generic_kprobe_",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "63": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 247 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 63,
+        "program": {
+          "final_insn_count": 3356,
+          "orig_insn_count": 3356,
+          "prog_id": 63,
+          "prog_name": "generic_retkpro",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "64": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 247 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 64,
+        "program": {
+          "final_insn_count": 880,
+          "orig_insn_count": 880,
+          "prog_id": 64,
+          "prog_name": "generic_retkpro",
+          "prog_type": 2
+        },
+        "status": "error"
+      },
+      "65": {
+        "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 247 not in fd-to-id mapping\\n",
+        "passes": [],
+        "prog_id": 65,
+        "program": {
+          "final_insn_count": 128,
+          "orig_insn_count": 128,
+          "prog_id": 65,
+          "prog_name": "generic_retkpro",
+          "prog_type": 2
+        },
+        "status": "error"
+      }
+    },
+    "status": "ok"
+  },
+  "runner": "tetragon",
+  "selected_workload": "stress_ng_os_io_network",
+  "status": "ok"
+}

@@ -32,6 +32,8 @@ benchmark_defaults:
 runtimes:
   - name: kernel
 
+  - name: kernel_rejit
+
   - name: native_kernel
 
 benchmarks:

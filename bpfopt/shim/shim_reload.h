@@ -81,6 +81,149 @@ enum reload_status {
     RELOAD_INTERNAL,       /* OOM / I/O before any kernel call */
 };
 
+#ifndef BPF_PROG_REJIT
+#define BPF_PROG_REJIT 39
+#endif
+
+struct bpf_prog_rejit_attr {
+    uint32_t prog_fd;
+    uint32_t insn_cnt;
+    uint64_t insns;
+    uint32_t log_level;
+    uint32_t log_size;
+    uint64_t log_buf;
+    uint64_t fd_array;
+    uint32_t fd_array_cnt;
+    uint32_t flags;
+};
+
+static enum reload_status rejit_in_place(struct prog_entry *p,
+                                         const char *new_bytecode_path,
+                                         const char *target_json_path,
+                                         const uint32_t *map_fds,
+                                         uint32_t nr_fds,
+                                         uint32_t log_level,
+                                         char *verifier_log,
+                                         size_t log_buf_sz,
+                                         uint64_t *out_rejit_ms) {
+    if (out_rejit_ms) *out_rejit_ms = 0;
+    if (verifier_log && log_buf_sz > 0) verifier_log[0] = 0;
+
+    int bfd = open(new_bytecode_path, O_RDONLY);
+    if (bfd < 0) return RELOAD_INTERNAL;
+    struct stat st;
+    if (fstat(bfd, &st) != 0 || st.st_size <= 0 ||
+        (st.st_size % (off_t)sizeof(struct bpf_insn)) != 0) {
+        real_close(bfd);
+        return RELOAD_INTERNAL;
+    }
+    size_t bytes = (size_t)st.st_size;
+    struct bpf_insn *insns = (struct bpf_insn *)malloc(bytes);
+    if (!insns) { real_close(bfd); return RELOAD_INTERNAL; }
+    ssize_t rd = read(bfd, insns, bytes);
+    real_close(bfd);
+    if (rd != (ssize_t)bytes) { free(insns); return RELOAD_INTERNAL; }
+
+    int *fd_array = NULL;
+    uint32_t fd_array_n = 0;
+    (void)build_full_fd_array(target_json_path, map_fds, nr_fds,
+                              &fd_array, &fd_array_n);
+
+    int prog_fd = -1;
+    if (p->kernel_prog_id) {
+        union bpf_attr ga = {0};
+        ga.prog_id = p->kernel_prog_id;
+        long r = real_syscall(SYS_bpf, BPF_PROG_GET_FD_BY_ID, &ga,
+                              sizeof(ga));
+        if (r >= 0) prog_fd = (int)r;
+    }
+    if (prog_fd < 0 && p->fd >= 0)
+        prog_fd = p->fd;
+    if (prog_fd < 0) {
+        free_full_fd_array(fd_array, fd_array_n);
+        free(insns);
+        return RELOAD_INTERNAL;
+    }
+
+    char *log_buf = verifier_log;
+    size_t log_size = log_buf_sz;
+    char *owned_log = NULL;
+    if (!log_buf) {
+        log_size = 1 * 1024 * 1024;
+        owned_log = (char *)malloc(log_size);
+        log_buf = owned_log;
+        if (!log_buf) {
+            if (prog_fd != p->fd) real_close(prog_fd);
+            free_full_fd_array(fd_array, fd_array_n);
+            free(insns);
+            return RELOAD_INTERNAL;
+        }
+    }
+    memset(log_buf, 0, log_size);
+
+    struct bpf_prog_rejit_attr a;
+    memset(&a, 0, sizeof(a));
+    a.prog_fd = (uint32_t)prog_fd;
+    a.insn_cnt = (uint32_t)(bytes / sizeof(struct bpf_insn));
+    a.insns = (uintptr_t)insns;
+    a.log_level = log_level;
+    a.log_buf = (uintptr_t)log_buf;
+    a.log_size = (uint32_t)(log_size > 128 ? log_size - 128 : log_size);
+    if (fd_array) {
+        a.fd_array = (uintptr_t)fd_array;
+        a.fd_array_cnt = fd_array_n;
+    }
+
+    struct timespec t0, t1;
+    clock_gettime(CLOCK_MONOTONIC, &t0);
+    long r = real_syscall(SYS_bpf, BPF_PROG_REJIT, &a, sizeof(a));
+    int rejit_errno = (r < 0) ? errno : 0;
+    clock_gettime(CLOCK_MONOTONIC, &t1);
+    if (out_rejit_ms) *out_rejit_ms = (t1.tv_sec - t0.tv_sec) * 1000ULL
+                                      + (t1.tv_nsec - t0.tv_nsec) / 1000000;
+
+    if (prog_fd != p->fd)
+        real_close(prog_fd);
+    free_full_fd_array(fd_array, fd_array_n);
+    free(insns);
+
+    if (r < 0) {
+        size_t lg = strnlen(log_buf, log_size);
+        snprintf(log_buf + lg, log_size - lg,
+                 "\nBPF_PROG_REJIT errno=%d\n"
+                 "ctx: prog_id=%u prog_type=%u fd_array_n=%u insn_cnt=%u\n",
+                 rejit_errno, p->kernel_prog_id, p->prog_type, fd_array_n,
+                 a.insn_cnt);
+        free(owned_log);
+        return RELOAD_FAILED_REJIT;
+    }
+
+    free(owned_log);
+    return RELOAD_OK;
+}
+
+static void capture_rejit_verifier_states(const struct prog_entry *p,
+                                          const char *bytecode_path,
+                                          const char *target_json_path,
+                                          const uint32_t *map_fds,
+                                          uint32_t nr_fds,
+                                          const char *log_path) {
+    const size_t log_buf_size = 16 * 1024 * 1024;
+    char *log_buf = (char *)malloc(log_buf_size);
+    if (!log_buf)
+        return;
+    uint64_t ignored_ms = 0;
+    (void)rejit_in_place((struct prog_entry *)p, bytecode_path,
+                         target_json_path, map_fds, nr_fds, 2, log_buf,
+                         log_buf_size, &ignored_ms);
+    int wfd = open(log_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (wfd >= 0) {
+        (void)!write(wfd, log_buf, strnlen(log_buf, log_buf_size));
+        real_close(wfd);
+    }
+    free(log_buf);
+}
+
 /* Replace the live kernel BPF program identified by `p` with the bytecode at
  * `new_bytecode_path`. After successful return, every link/perf_event that
  * was attached to the old prog points at the new one, and `p` is updated in
@@ -110,6 +253,13 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
                                               char *verifier_log,
                                               size_t log_buf_sz,
                                               uint64_t *out_rejit_ms) {
+    const char *force_in_place = getenv("BPFREJIT_SHIM_FORCE_IN_PLACE");
+    if (p->discovered_from_fd ||
+        (force_in_place && force_in_place[0] && strcmp(force_in_place, "0") != 0)) {
+        return rejit_in_place(p, new_bytecode_path, target_json_path,
+                              map_fds, nr_fds, 1, verifier_log, log_buf_sz,
+                              out_rejit_ms);
+    }
     if (out_rejit_ms) *out_rejit_ms = 0;
     if (verifier_log && log_buf_sz > 0) verifier_log[0] = 0;
 

@@ -1,0 +1,2034 @@
+{
+  "app": "bpftrace/set",
+  "baseline": {
+    "bpf": {
+      "13": {
+        "bytes_jited": 2020,
+        "bytes_xlated": 3392,
+        "id": 13,
+        "name": "tcp_set_state",
+        "run_cnt_delta": 132828,
+        "run_time_ns_delta": 40639285,
+        "type": "kprobe"
+      },
+      "2": {
+        "bytes_jited": 167,
+        "bytes_xlated": 280,
+        "id": 2,
+        "name": "dump_bpf_map",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "20": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 20,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 658353,
+        "run_time_ns_delta": 67257226,
+        "type": "tracepoint"
+      },
+      "21": {
+        "bytes_jited": 86,
+        "bytes_xlated": 136,
+        "id": 21,
+        "name": "sched_wakeup_ne",
+        "run_cnt_delta": 22013,
+        "run_time_ns_delta": 4226437,
+        "type": "tracepoint"
+      },
+      "22": {
+        "bytes_jited": 471,
+        "bytes_xlated": 816,
+        "id": 22,
+        "name": "sched_switch",
+        "run_cnt_delta": 798475,
+        "run_time_ns_delta": 146430785,
+        "type": "tracepoint"
+      },
+      "29": {
+        "bytes_jited": 362,
+        "bytes_xlated": 680,
+        "id": 29,
+        "name": "1",
+        "run_cnt_delta": 4,
+        "run_time_ns_delta": 4380,
+        "type": "perf_event"
+      },
+      "3": {
+        "bytes_jited": 740,
+        "bytes_xlated": 520,
+        "id": 3,
+        "name": "dump_bpf_prog",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing"
+      },
+      "30": {
+        "bytes_jited": 131,
+        "bytes_xlated": 208,
+        "id": 30,
+        "name": "vfs_create",
+        "run_cnt_delta": 3122190,
+        "run_time_ns_delta": 225981223,
+        "type": "kprobe"
+      },
+      "37": {
+        "bytes_jited": 222,
+        "bytes_xlated": 408,
+        "id": 37,
+        "name": "block_io_start",
+        "run_cnt_delta": 55749,
+        "run_time_ns_delta": 22322941,
+        "type": "tracepoint"
+      },
+      "38": {
+        "bytes_jited": 931,
+        "bytes_xlated": 1576,
+        "id": 38,
+        "name": "block_io_done",
+        "run_cnt_delta": 57176,
+        "run_time_ns_delta": 41622271,
+        "type": "tracepoint"
+      },
+      "43": {
+        "bytes_jited": 769,
+        "bytes_xlated": 1360,
+        "id": 43,
+        "name": "cap_capable",
+        "run_cnt_delta": 1851580,
+        "run_time_ns_delta": 239843401,
+        "type": "kprobe"
+      },
+      "6": {
+        "bytes_jited": 41,
+        "bytes_xlated": 64,
+        "id": 6,
+        "name": "",
+        "run_cnt_delta": 202791,
+        "run_time_ns_delta": 5019935,
+        "type": "socket_filter"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "4",
+          "--eventfd",
+          "4",
+          "--get",
+          "4",
+          "--prctl",
+          "4",
+          "--set",
+          "4",
+          "--dup",
+          "4",
+          "--kill",
+          "4",
+          "--sigfd",
+          "4",
+          "--signal",
+          "4",
+          "--pty",
+          "4",
+          "--itimer",
+          "4",
+          "--timerfd",
+          "4",
+          "--exec",
+          "4",
+          "--fork",
+          "4",
+          "--vfork",
+          "4",
+          "--clone",
+          "4",
+          "--ptrace",
+          "4",
+          "--futex",
+          "4",
+          "--sem",
+          "4",
+          "--aio",
+          "4",
+          "--aiol",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--io",
+          "4",
+          "--iomix",
+          "4",
+          "--iomix-bytes",
+          "128M",
+          "--io-uring",
+          "4",
+          "--sync-file",
+          "4",
+          "--epoll",
+          "4",
+          "--netdev",
+          "4",
+          "--sctp",
+          "1",
+          "--sock",
+          "4",
+          "--sockdiag",
+          "4",
+          "--sockfd",
+          "4",
+          "--sockpair",
+          "4",
+          "--sockmany",
+          "4",
+          "--udp",
+          "4",
+          "--udp-flood",
+          "4",
+          "--mmap",
+          "4",
+          "--mmap-bytes",
+          "16M",
+          "--mprotect",
+          "4",
+          "--mremap",
+          "4",
+          "--mremap-bytes",
+          "16M",
+          "--madvise",
+          "4",
+          "--access",
+          "4",
+          "--chdir",
+          "4",
+          "--chmod",
+          "4",
+          "--chown",
+          "4",
+          "--dentry",
+          "4",
+          "--dir",
+          "4",
+          "--dirmany",
+          "4",
+          "--fallocate",
+          "4",
+          "--fallocate-bytes",
+          "128M",
+          "--file-ioctl",
+          "4",
+          "--filename",
+          "4",
+          "--flock",
+          "4",
+          "--fpunch",
+          "4",
+          "--fpunch-bytes",
+          "32M",
+          "--fstat",
+          "4",
+          "--getdent",
+          "4",
+          "--hdd",
+          "4",
+          "--hdd-bytes",
+          "128M",
+          "--inotify",
+          "4",
+          "--open",
+          "4",
+          "--open-max",
+          "1024",
+          "--rename",
+          "4",
+          "--touch",
+          "4",
+          "--utime",
+          "4",
+          "--link",
+          "4",
+          "--symlink",
+          "4",
+          "--mknod",
+          "4",
+          "--fcntl",
+          "4",
+          "--epoll-port",
+          "14406",
+          "--sctp-port",
+          "14506",
+          "--sock-port",
+          "14606",
+          "--sockfd-port",
+          "14706",
+          "--timeout",
+          "3s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/tes6ur"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "eventfd",
+            "get",
+            "prctl",
+            "set",
+            "dup",
+            "kill",
+            "sigfd",
+            "signal",
+            "pty",
+            "itimer",
+            "timerfd",
+            "exec",
+            "fork",
+            "vfork",
+            "clone",
+            "ptrace",
+            "futex",
+            "sem",
+            "aio",
+            "aiol",
+            "hdd",
+            "io",
+            "iomix",
+            "io-uring",
+            "sync-file",
+            "epoll",
+            "netdev",
+            "sctp",
+            "sock",
+            "sockdiag",
+            "sockfd",
+            "sockpair",
+            "sockmany",
+            "udp",
+            "udp-flood",
+            "mmap",
+            "mprotect",
+            "mremap",
+            "madvise",
+            "access",
+            "chdir",
+            "chmod",
+            "chown",
+            "dentry",
+            "dir",
+            "dirmany",
+            "fallocate",
+            "file-ioctl",
+            "filename",
+            "flock",
+            "fpunch",
+            "fstat",
+            "getdent",
+            "hdd",
+            "inotify",
+            "open",
+            "rename",
+            "touch",
+            "utime",
+            "link",
+            "symlink",
+            "mknod",
+            "fcntl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 4.649645203999995,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [31953] exec stressor must not run as root, skipping the stressor\nstress-ng: info:  [31953] setting to a 3 secs run per stressor\nstress-ng: info:  [31953] dispatching hogs: 4 cap, 4 eventfd, 4 get, 4 prctl, 4 set, 4 dup, 4 kill, 4 sigfd, 4 signal, 4 pty, 4 itimer, 4 timerfd, 4 fork, 4 vfork, 4 clone, 4 ptrace, 4 futex, 4 sem, 4 aio, 4 aiol, 4 hdd, 4 io, 4 iomix, 4 io-uring, 4 sync-file, 4 epoll, 4 netdev, 1 sctp, 4 sock, 4 sockdiag, 4 sockfd, 4 sockpair, 4 sockmany, 4 udp, 4 udp-flood, 4 mmap, 4 mprotect, 4 mremap, 4 madvise, 4 access, 4 chdir, 4 chmod, 4 chown, 4 dentry, 4 dir, 4 dirmany, 4 fallocate, 4 file-ioctl, 4 filename, 4 flock, 4 fpunch, 4 fstat, 4 getdent, 4 hdd, 4 inotify, 4 open, 4 rename, 4 touch, 4 utime, 4 link, 4 symlink, 4 mknod, 4 fcntl\nstress-ng: info:  [31953] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [471] io: this is a legacy I/O sync stressor, consider using iomix instead\nstress-ng: info:  [2047] dentry: 58079 dentries allocated\nstress-ng: info:  [2307] open: using a maximum of 1024 file descriptors\nstress-ng: metrc: [31953] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [31953]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [31953] cap              628739      3.08      0.19      0.61    203939.72      781348.95\nstress-ng: metrc: [31953] eventfd           75749      3.01      0.02      0.49     25163.18      150808.80\nstress-ng: metrc: [31953] get                1208      3.01      0.05      0.21       401.64        4773.76\nstress-ng: metrc: [31953] prctl              1207      3.05      0.20      0.17       395.66        3308.55\nstress-ng: metrc: [31953] set               49738      3.13      0.11      0.61     15865.69       69096.10\nstress-ng: metrc: [31953] dup                 172      3.77      0.05      0.02        45.58        2315.72\nstress-ng: metrc: [31953] kill              15371      3.09      0.03      0.62      4966.67       23855.34\nstress-ng: metrc: [31953] sigfd           1270075      3.40      0.14      0.99    373895.19     1123636.01\nstress-ng: metrc: [31953] signal                0      3.09      0.00      0.00         0.00           0.00\nstress-ng: metrc: [31953] pty                  94      3.18      0.01      0.62        29.55         148.06\nstress-ng: metrc: [31953] itimer               98      3.10      0.18      0.70        31.63         110.16\nstress-ng: metrc: [31953] timerfd           82944      3.68      0.00      0.61     22553.20      135742.56\nstress-ng: metrc: [31953] fork               1242      3.13      0.12      0.22       396.30        3694.76\nstress-ng: metrc: [31953] vfork             11315      3.02      0.08      0.16      3742.45       46490.70\nstress-ng: metrc: [31953] clone               346      3.12      0.14      0.55       110.93         495.69\nstress-ng: metrc: [31953] ptrace            94008      3.01      0.08      0.31     31281.91      238769.88\nstress-ng: metrc: [31953] futex             64536      6.43      0.27      0.65     10033.21       70074.25\nstress-ng: metrc: [31953] sem                 502      3.06      0.00      0.00       163.86      129648.76\nstress-ng: metrc: [31953] aio               13090      3.70      0.02      0.01      3540.30      477127.76\nstress-ng: metrc: [31953] aiol                804      3.69      0.05      0.02       217.72       12017.76\nstress-ng: metrc: [31953] hdd               14332      3.69      0.09      0.25      3883.21       42895.67\nstress-ng: metrc: [31953] io                  177      3.10      0.02      0.00        57.07        9492.14\nstress-ng: metrc: [31953] iomix              1375      3.79      0.09      1.23       363.11        1042.84\nstress-ng: metrc: [31953] io-uring           6508      3.64      0.00      0.44      1789.06       14578.76\nstress-ng: metrc: [31953] sync-file            30      3.61      0.01      0.03         8.32         706.28\nstress-ng: metrc: [31953] epoll               178      3.31      0.00      0.06        53.79        2642.79\nstress-ng: metrc: [31953] netdev          1409719      3.14      0.15      0.87    449494.34     1380435.82\nstress-ng: metrc: [31953] sctp              32290      3.15      0.01      0.12     10249.96      256852.86\nstress-ng: metrc: [31953] sock               1130      3.07      0.03      0.48       368.07        2223.12\nstress-ng: metrc: [31953] sockdiag        9058918      3.09      0.04      0.53   2930689.84    15859061.58\nstress-ng: metrc: [31953] sockfd           162063      3.20      0.05      0.38     50570.62      373719.30\nstress-ng: metrc: [31953] sockpair            154      3.18      0.02      0.04        48.45        2463.84\nstress-ng: metrc: [31953] sockmany          14787      3.20      0.04      0.32      4627.29       40056.89\nstress-ng: metrc: [31953] udp               13776      3.08      0.01      0.44      4476.74       30857.93\nstress-ng: metrc: [31953] udp-flood        389161      3.12      0.09      0.49    124818.91      670748.67\nstress-ng: metrc: [31953] mmap                484      3.19      0.02      0.59       151.89         785.85\nstress-ng: metrc: [31953] mprotect        3616523      3.16      0.90      4.58   1145583.42      659369.74\nstress-ng: metrc: [31953] mremap              742      3.14      0.00      0.55       236.39        1354.18\nstress-ng: metrc: [31953] madvise              40      3.40      0.04      0.74        11.78          51.80\nstress-ng: metrc: [31953] access             2604      3.40      0.03      0.25       766.39        9261.99\nstress-ng: metrc: [31953] chdir                 4      3.43      0.03      0.12         1.17          25.61\nstress-ng: metrc: [31953] chmod                65      3.33      0.00      0.06        19.53        1079.18\nstress-ng: metrc: [31953] chown                69      3.44      0.00      0.03        20.05        2427.01\nstress-ng: metrc: [31953] dentry             4660      3.45      0.00      0.12      1351.94       40057.08\nstress-ng: metrc: [31953] dir                2684      3.42      0.01      0.43       783.85        6070.96\nstress-ng: metrc: [31953] dirmany            4328      3.27      0.02      0.06      1323.01       50339.04\nstress-ng: metrc: [31953] fallocate             0      3.38      0.00      0.00         0.00           0.00\nstress-ng: metrc: [31953] file-ioctl        10460      3.27      0.01      0.12      3195.68       81111.05\nstress-ng: metrc: [31953] filename            628      3.33      0.02      0.14       188.85        3920.98\nstress-ng: metrc: [31953] flock            307723      3.29      0.09      0.09     93436.04     1730988.40\nstress-ng: metrc: [31953] fpunch              480      3.16      0.03      0.35       151.71        1267.64\nstress-ng: metrc: [31953] fstat              1623      3.07      0.06      0.29       529.09        4611.66\nstress-ng: metrc: [31953] getdent           91143      3.08      0.06      0.56     29607.93      147461.73\nstress-ng: metrc: [31953] hdd                2745      3.27      0.04      0.04       839.08       35804.19\nstress-ng: metrc: [31953] inotify               4      3.42      0.00      0.00         1.17        1045.75\nstress-ng: metrc: [31953] open               3088      3.19      0.00      0.05       969.19       57196.84\nstress-ng: metrc: [31953] rename                0      3.06      0.00      0.00         0.00           0.00\nstress-ng: metrc: [31953] touch              5410      3.30      0.01      0.12      1641.80       39805.17\nstress-ng: metrc: [31953] utime              4738      3.18      0.02      0.08      1488.26       50935.83\nstress-ng: metrc: [31953] link                  4      3.24      0.02      0.13         1.23          26.42\nstress-ng: metrc: [31953] symlink               4      3.37      0.00      0.21         1.19          18.71\nstress-ng: metrc: [31953] mknod                 4      3.08      0.00      0.00         1.30         855.98\nstress-ng: metrc: [31953] fcntl              3671      3.02      0.00      0.05      1215.36       74224.59\nstress-ng: info:  [31953] skipped: 4: exec (4)\nstress-ng: info:  [31953] passed: 249: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (1) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (4)\nstress-ng: info:  [31953] failed: 0\nstress-ng: info:  [31953] metrics untrustworthy: 0\nstress-ng: info:  [31953] successful run completed in 4.63 secs",
+        "workload_name": "stress_ng_os_io_network"
+      }
+    ]
+  },
+  "error": "stress_ng_os_io_network workload failed: stress-ng: metrc: [22166] rename                0      3.14      0.00      0.00         0.00           0.00\nstress-ng: metrc: [22166] touch                20      3.28      0.01      0.00         6.10        2794.08\nstress-ng: metrc: [22166] utime                 4      3.22      0.00      0.00         1.24        5082.59\nstress-ng: metrc: [22166] link                  4      3.30      0.02      0.15         1.21          24.35\nstress-ng: metrc: [22166] symlink               4      3.33      0.04      0.14         1.20          22.65\nstress-ng: metrc: [22166] mknod                 0      3.24      0.00      0.00         0.00           0.00\nstress-ng: metrc: [22166] fcntl                 3      3.28      0.00      0.00         0.91         993.05\nstress-ng: info:  [22166] skipped: 4: exec (4)\nstress-ng: info:  [22166] passed: 248: cap (4) eventfd (4) get (4) prctl (4) set (4) dup (4) kill (4) sigfd (4) signal (4) pty (4) itimer (4) timerfd (4) fork (4) vfork (4) clone (4) ptrace (4) futex (4) sem (4) aio (4) aiol (4) hdd (4) io (4) iomix (4) io-uring (4) sync-file (4) epoll (4) netdev (4) sctp (1) sock (4) sockdiag (4) sockfd (4) sockpair (4) sockmany (4) udp (4) udp-flood (4) mmap (4) mprotect (4) mremap (4) madvise (4) access (4) chdir (4) chmod (4) chown (4) dentry (4) dir (4) dirmany (4) fallocate (4) file-ioctl (4) filename (4) flock (4) fpunch (4) fstat (4) getdent (4) hdd (4) inotify (4) open (4) rename (4) touch (4) utime (4) link (4) symlink (4) mknod (4) fcntl (3)\nstress-ng: info:  [22166] failed: 1: fcntl (1)\nstress-ng: info:  [22166] metrics untrustworthy: 0\nstress-ng: info:  [22166] unsuccessful run completed in 3.60 secs",
+  "post_rejit": null,
+  "rejit_result": {
+    "shim_responses": [
+      {
+        "pid": 1841,
+        "response": {
+          "per_program": {
+            "13": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 4 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 13,
+              "program": {
+                "final_insn_count": 402,
+                "orig_insn_count": 402,
+                "prog_id": 13,
+                "prog_name": "tcp_set_state",
+                "prog_type": 2
+              },
+              "status": "error"
+            },
+            "2": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 35,
+                    "insn_count_before": 35,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": "fd 12 is not pointing to valid bpf_map\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_REJIT errno=22\nctx: prog_id=2 prog_type=26 fd_array_n=8 insn_cnt=35\n",
+                  "exit_code": 0,
+                  "rejit_syscall_ms": 0,
+                  "status": "failed_rejit",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 2,
+              "program": {
+                "final_insn_count": 35,
+                "orig_insn_count": 35,
+                "prog_id": 2,
+                "prog_name": "dump_bpf_map",
+                "prog_type": 26
+              },
+              "status": "error"
+            },
+            "20": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 6 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 20,
+              "program": {
+                "final_insn_count": 17,
+                "orig_insn_count": 17,
+                "prog_id": 20,
+                "prog_name": "sched_wakeup",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "21": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 6 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 21,
+              "program": {
+                "final_insn_count": 17,
+                "orig_insn_count": 17,
+                "prog_id": 21,
+                "prog_name": "sched_wakeup_ne",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "22": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 6 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 22,
+              "program": {
+                "final_insn_count": 96,
+                "orig_insn_count": 96,
+                "prog_id": 22,
+                "prog_name": "sched_switch",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "29": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 7 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 29,
+              "program": {
+                "final_insn_count": 67,
+                "orig_insn_count": 67,
+                "prog_id": 29,
+                "prog_name": "1",
+                "prog_type": 7
+              },
+              "status": "error"
+            },
+            "3": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 65,
+                    "insn_count_before": 65,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": "fd 11 is not pointing to valid bpf_map\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_REJIT errno=22\nctx: prog_id=3 prog_type=26 fd_array_n=8 insn_cnt=65\n",
+                  "exit_code": 0,
+                  "rejit_syscall_ms": 0,
+                  "status": "failed_rejit",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 3,
+              "program": {
+                "final_insn_count": 65,
+                "orig_insn_count": 65,
+                "prog_id": 3,
+                "prog_name": "dump_bpf_prog",
+                "prog_type": 26
+              },
+              "status": "error"
+            },
+            "30": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 6 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 30,
+              "program": {
+                "final_insn_count": 22,
+                "orig_insn_count": 22,
+                "prog_id": 30,
+                "prog_name": "vfs_create",
+                "prog_type": 2
+              },
+              "status": "error"
+            },
+            "37": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 8 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 37,
+              "program": {
+                "final_insn_count": 51,
+                "orig_insn_count": 51,
+                "prog_id": 37,
+                "prog_name": "block_io_start",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "38": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 8 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 38,
+              "program": {
+                "final_insn_count": 181,
+                "orig_insn_count": 181,
+                "prog_id": 38,
+                "prog_name": "block_io_done",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "43": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 156,
+                    "insn_count_before": 156,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 333,
+                  "status": "ok",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 43,
+              "program": {
+                "final_insn_count": 156,
+                "orig_insn_count": 156,
+                "prog_id": 44,
+                "prog_name": "cap_capable",
+                "prog_type": 2
+              },
+              "status": "ok"
+            },
+            "6": {
+              "passes": [
+                {
+                  "bpfopt_ms": 1,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 8,
+                    "insn_count_before": 8,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 6,
+              "program": {
+                "final_insn_count": 8,
+                "orig_insn_count": 8,
+                "prog_id": 6,
+                "prog_name": "",
+                "prog_type": 15
+              },
+              "status": "ok"
+            }
+          },
+          "status": "ok"
+        }
+      },
+      {
+        "pid": 1844,
+        "response": {
+          "per_program": {
+            "13": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 4 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 13,
+              "program": {
+                "final_insn_count": 402,
+                "orig_insn_count": 402,
+                "prog_id": 13,
+                "prog_name": "tcp_set_state",
+                "prog_type": 2
+              },
+              "status": "error"
+            },
+            "2": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 35,
+                    "insn_count_before": 35,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": "fd 17 is not pointing to valid bpf_map\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_REJIT errno=22\nctx: prog_id=2 prog_type=26 fd_array_n=8 insn_cnt=35\n",
+                  "exit_code": 0,
+                  "rejit_syscall_ms": 0,
+                  "status": "failed_rejit",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 2,
+              "program": {
+                "final_insn_count": 35,
+                "orig_insn_count": 35,
+                "prog_id": 2,
+                "prog_name": "dump_bpf_map",
+                "prog_type": 26
+              },
+              "status": "error"
+            },
+            "20": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 6 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 20,
+              "program": {
+                "final_insn_count": 17,
+                "orig_insn_count": 17,
+                "prog_id": 20,
+                "prog_name": "sched_wakeup",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "21": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 6 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 21,
+              "program": {
+                "final_insn_count": 17,
+                "orig_insn_count": 17,
+                "prog_id": 21,
+                "prog_name": "sched_wakeup_ne",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "22": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 6 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 22,
+              "program": {
+                "final_insn_count": 96,
+                "orig_insn_count": 96,
+                "prog_id": 22,
+                "prog_name": "sched_switch",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "29": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 7 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 29,
+              "program": {
+                "final_insn_count": 67,
+                "orig_insn_count": 67,
+                "prog_id": 29,
+                "prog_name": "1",
+                "prog_type": 7
+              },
+              "status": "error"
+            },
+            "3": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 65,
+                    "insn_count_before": 65,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": "fd 17 is not pointing to valid bpf_map\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_REJIT errno=22\nctx: prog_id=3 prog_type=26 fd_array_n=8 insn_cnt=65\n",
+                  "exit_code": 0,
+                  "rejit_syscall_ms": 0,
+                  "status": "failed_rejit",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 3,
+              "program": {
+                "final_insn_count": 65,
+                "orig_insn_count": 65,
+                "prog_id": 3,
+                "prog_name": "dump_bpf_prog",
+                "prog_type": 26
+              },
+              "status": "error"
+            },
+            "30": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 6 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 30,
+              "program": {
+                "final_insn_count": 22,
+                "orig_insn_count": 22,
+                "prog_id": 30,
+                "prog_name": "vfs_create",
+                "prog_type": 2
+              },
+              "status": "error"
+            },
+            "37": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 51,
+                    "insn_count_before": 51,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 362,
+                  "status": "ok",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 37,
+              "program": {
+                "final_insn_count": 51,
+                "orig_insn_count": 51,
+                "prog_id": 48,
+                "prog_name": "block_io_start",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "38": {
+              "passes": [
+                {
+                  "bpfopt_ms": 3,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 181,
+                    "insn_count_before": 181,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 378,
+                  "status": "ok",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 38,
+              "program": {
+                "final_insn_count": 181,
+                "orig_insn_count": 181,
+                "prog_id": 46,
+                "prog_name": "block_io_done",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "43": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 7 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 43,
+              "program": {
+                "final_insn_count": 156,
+                "orig_insn_count": 156,
+                "prog_id": 43,
+                "prog_name": "cap_capable",
+                "prog_type": 2
+              },
+              "status": "error"
+            },
+            "44": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: map index 1 out of range for 1 map ids\\n",
+              "passes": [],
+              "prog_id": 44,
+              "program": {
+                "final_insn_count": 156,
+                "orig_insn_count": 156,
+                "prog_id": 44,
+                "prog_name": "cap_capable",
+                "prog_type": 2
+              },
+              "status": "error"
+            },
+            "6": {
+              "passes": [
+                {
+                  "bpfopt_ms": 1,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 8,
+                    "insn_count_before": 8,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 6,
+              "program": {
+                "final_insn_count": 8,
+                "orig_insn_count": 8,
+                "prog_id": 6,
+                "prog_name": "",
+                "prog_type": 15
+              },
+              "status": "ok"
+            }
+          },
+          "status": "ok"
+        }
+      },
+      {
+        "pid": 1847,
+        "response": {
+          "per_program": {
+            "13": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 4 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 13,
+              "program": {
+                "final_insn_count": 402,
+                "orig_insn_count": 402,
+                "prog_id": 13,
+                "prog_name": "tcp_set_state",
+                "prog_type": 2
+              },
+              "status": "error"
+            },
+            "2": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 35,
+                    "insn_count_before": 35,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": "fd 21 is not pointing to valid bpf_map\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_REJIT errno=22\nctx: prog_id=2 prog_type=26 fd_array_n=8 insn_cnt=35\n",
+                  "exit_code": 0,
+                  "rejit_syscall_ms": 0,
+                  "status": "failed_rejit",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 2,
+              "program": {
+                "final_insn_count": 35,
+                "orig_insn_count": 35,
+                "prog_id": 2,
+                "prog_name": "dump_bpf_map",
+                "prog_type": 26
+              },
+              "status": "error"
+            },
+            "20": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 6 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 20,
+              "program": {
+                "final_insn_count": 17,
+                "orig_insn_count": 17,
+                "prog_id": 20,
+                "prog_name": "sched_wakeup",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "21": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 6 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 21,
+              "program": {
+                "final_insn_count": 17,
+                "orig_insn_count": 17,
+                "prog_id": 21,
+                "prog_name": "sched_wakeup_ne",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "22": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 6 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 22,
+              "program": {
+                "final_insn_count": 96,
+                "orig_insn_count": 96,
+                "prog_id": 22,
+                "prog_name": "sched_switch",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "29": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 67,
+                    "insn_count_before": 67,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 29,
+              "program": {
+                "final_insn_count": 67,
+                "orig_insn_count": 67,
+                "prog_id": 52,
+                "prog_name": "1",
+                "prog_type": 7
+              },
+              "status": "ok"
+            },
+            "3": {
+              "passes": [
+                {
+                  "bpfopt_ms": 1,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 65,
+                    "insn_count_before": 65,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": "fd 11 is not pointing to valid bpf_map\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_REJIT errno=22\nctx: prog_id=3 prog_type=26 fd_array_n=8 insn_cnt=65\n",
+                  "exit_code": 0,
+                  "rejit_syscall_ms": 0,
+                  "status": "failed_rejit",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 3,
+              "program": {
+                "final_insn_count": 65,
+                "orig_insn_count": 65,
+                "prog_id": 3,
+                "prog_name": "dump_bpf_prog",
+                "prog_type": 26
+              },
+              "status": "error"
+            },
+            "30": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 22,
+                    "insn_count_before": 22,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 1375,
+                  "status": "ok",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 30,
+              "program": {
+                "final_insn_count": 22,
+                "orig_insn_count": 22,
+                "prog_id": 50,
+                "prog_name": "vfs_create",
+                "prog_type": 2
+              },
+              "status": "ok"
+            },
+            "37": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 8 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 37,
+              "program": {
+                "final_insn_count": 51,
+                "orig_insn_count": 51,
+                "prog_id": 37,
+                "prog_name": "block_io_start",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "38": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 8 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 38,
+              "program": {
+                "final_insn_count": 181,
+                "orig_insn_count": 181,
+                "prog_id": 38,
+                "prog_name": "block_io_done",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "43": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 7 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 43,
+              "program": {
+                "final_insn_count": 156,
+                "orig_insn_count": 156,
+                "prog_id": 43,
+                "prog_name": "cap_capable",
+                "prog_type": 2
+              },
+              "status": "error"
+            },
+            "44": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: map index 1 out of range for 1 map ids\\n",
+              "passes": [],
+              "prog_id": 44,
+              "program": {
+                "final_insn_count": 156,
+                "orig_insn_count": 156,
+                "prog_id": 44,
+                "prog_name": "cap_capable",
+                "prog_type": 2
+              },
+              "status": "error"
+            },
+            "46": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: map index 2 out of range for 1 map ids\\n",
+              "passes": [],
+              "prog_id": 46,
+              "program": {
+                "final_insn_count": 181,
+                "orig_insn_count": 181,
+                "prog_id": 46,
+                "prog_name": "block_io_done",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "48": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: map index 2 out of range for 1 map ids\\n",
+              "passes": [],
+              "prog_id": 48,
+              "program": {
+                "final_insn_count": 51,
+                "orig_insn_count": 51,
+                "prog_id": 48,
+                "prog_name": "block_io_start",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "6": {
+              "passes": [
+                {
+                  "bpfopt_ms": 1,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 8,
+                    "insn_count_before": 8,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 6,
+              "program": {
+                "final_insn_count": 8,
+                "orig_insn_count": 8,
+                "prog_id": 6,
+                "prog_name": "",
+                "prog_type": 15
+              },
+              "status": "ok"
+            }
+          },
+          "status": "ok"
+        }
+      },
+      {
+        "pid": 1850,
+        "response": {
+          "per_program": {
+            "13": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 4 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 13,
+              "program": {
+                "final_insn_count": 402,
+                "orig_insn_count": 402,
+                "prog_id": 13,
+                "prog_name": "tcp_set_state",
+                "prog_type": 2
+              },
+              "status": "error"
+            },
+            "2": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 35,
+                    "insn_count_before": 35,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": "fd 12 is not pointing to valid bpf_map\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_REJIT errno=22\nctx: prog_id=2 prog_type=26 fd_array_n=8 insn_cnt=35\n",
+                  "exit_code": 0,
+                  "rejit_syscall_ms": 0,
+                  "status": "failed_rejit",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 2,
+              "program": {
+                "final_insn_count": 35,
+                "orig_insn_count": 35,
+                "prog_id": 2,
+                "prog_name": "dump_bpf_map",
+                "prog_type": 26
+              },
+              "status": "error"
+            },
+            "20": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 17,
+                    "insn_count_before": 17,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 375,
+                  "status": "ok",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 20,
+              "program": {
+                "final_insn_count": 17,
+                "orig_insn_count": 17,
+                "prog_id": 54,
+                "prog_name": "sched_wakeup",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "21": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 17,
+                    "insn_count_before": 17,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 447,
+                  "status": "ok",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 21,
+              "program": {
+                "final_insn_count": 17,
+                "orig_insn_count": 17,
+                "prog_id": 58,
+                "prog_name": "sched_wakeup_ne",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "22": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 96,
+                    "insn_count_before": 96,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 366,
+                  "status": "ok",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 22,
+              "program": {
+                "final_insn_count": 96,
+                "orig_insn_count": 96,
+                "prog_id": 56,
+                "prog_name": "sched_switch",
+                "prog_type": 5
+              },
+              "status": "ok"
+            },
+            "29": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 7 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 29,
+              "program": {
+                "final_insn_count": 67,
+                "orig_insn_count": 67,
+                "prog_id": 29,
+                "prog_name": "1",
+                "prog_type": 7
+              },
+              "status": "error"
+            },
+            "3": {
+              "passes": [
+                {
+                  "bpfopt_ms": 1,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 65,
+                    "insn_count_before": 65,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": "fd 12 is not pointing to valid bpf_map\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_REJIT errno=22\nctx: prog_id=3 prog_type=26 fd_array_n=8 insn_cnt=65\n",
+                  "exit_code": 0,
+                  "rejit_syscall_ms": 0,
+                  "status": "failed_rejit",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 3,
+              "program": {
+                "final_insn_count": 65,
+                "orig_insn_count": 65,
+                "prog_id": 3,
+                "prog_name": "dump_bpf_prog",
+                "prog_type": 26
+              },
+              "status": "error"
+            },
+            "30": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 6 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 30,
+              "program": {
+                "final_insn_count": 22,
+                "orig_insn_count": 22,
+                "prog_id": 30,
+                "prog_name": "vfs_create",
+                "prog_type": 2
+              },
+              "status": "error"
+            },
+            "37": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 8 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 37,
+              "program": {
+                "final_insn_count": 51,
+                "orig_insn_count": 51,
+                "prog_id": 37,
+                "prog_name": "block_io_start",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "38": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 8 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 38,
+              "program": {
+                "final_insn_count": 181,
+                "orig_insn_count": 181,
+                "prog_id": 38,
+                "prog_name": "block_io_done",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "43": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 7 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 43,
+              "program": {
+                "final_insn_count": 156,
+                "orig_insn_count": 156,
+                "prog_id": 43,
+                "prog_name": "cap_capable",
+                "prog_type": 2
+              },
+              "status": "error"
+            },
+            "44": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: map index 1 out of range for 1 map ids\\n",
+              "passes": [],
+              "prog_id": 44,
+              "program": {
+                "final_insn_count": 156,
+                "orig_insn_count": 156,
+                "prog_id": 44,
+                "prog_name": "cap_capable",
+                "prog_type": 2
+              },
+              "status": "error"
+            },
+            "46": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: map index 2 out of range for 1 map ids\\n",
+              "passes": [],
+              "prog_id": 46,
+              "program": {
+                "final_insn_count": 181,
+                "orig_insn_count": 181,
+                "prog_id": 46,
+                "prog_name": "block_io_done",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "48": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: map index 2 out of range for 1 map ids\\n",
+              "passes": [],
+              "prog_id": 48,
+              "program": {
+                "final_insn_count": 51,
+                "orig_insn_count": 51,
+                "prog_id": 48,
+                "prog_name": "block_io_start",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "50": {
+              "passes": [
+                {
+                  "bpfopt_ms": 1,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 22,
+                    "insn_count_before": 22,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": "fd 15 is not pointing to valid bpf_map\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_REJIT errno=22\nctx: prog_id=50 prog_type=2 fd_array_n=8 insn_cnt=22\n",
+                  "exit_code": 0,
+                  "rejit_syscall_ms": 0,
+                  "status": "failed_rejit",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 50,
+              "program": {
+                "final_insn_count": 22,
+                "orig_insn_count": 22,
+                "prog_id": 50,
+                "prog_name": "vfs_create",
+                "prog_type": 2
+              },
+              "status": "error"
+            },
+            "52": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: map index 1 out of range for 1 map ids\\n",
+              "passes": [],
+              "prog_id": 52,
+              "program": {
+                "final_insn_count": 67,
+                "orig_insn_count": 67,
+                "prog_id": 52,
+                "prog_name": "1",
+                "prog_type": 7
+              },
+              "status": "error"
+            },
+            "6": {
+              "passes": [
+                {
+                  "bpfopt_ms": 1,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 8,
+                    "insn_count_before": 8,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 6,
+              "program": {
+                "final_insn_count": 8,
+                "orig_insn_count": 8,
+                "prog_id": 6,
+                "prog_name": "",
+                "prog_type": 15
+              },
+              "status": "ok"
+            }
+          },
+          "status": "ok"
+        }
+      },
+      {
+        "pid": 1853,
+        "response": {
+          "per_program": {
+            "13": {
+              "passes": [
+                {
+                  "bpfopt_ms": 4,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 402,
+                    "insn_count_before": 402,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 238,
+                  "status": "ok",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 13,
+              "program": {
+                "final_insn_count": 402,
+                "orig_insn_count": 402,
+                "prog_id": 60,
+                "prog_name": "tcp_set_state",
+                "prog_type": 2
+              },
+              "status": "ok"
+            },
+            "2": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 35,
+                    "insn_count_before": 35,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": "fd 14 is not pointing to valid bpf_map\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_REJIT errno=22\nctx: prog_id=2 prog_type=26 fd_array_n=8 insn_cnt=35\n",
+                  "exit_code": 0,
+                  "rejit_syscall_ms": 0,
+                  "status": "failed_rejit",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 2,
+              "program": {
+                "final_insn_count": 35,
+                "orig_insn_count": 35,
+                "prog_id": 2,
+                "prog_name": "dump_bpf_map",
+                "prog_type": 26
+              },
+              "status": "error"
+            },
+            "20": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 6 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 20,
+              "program": {
+                "final_insn_count": 17,
+                "orig_insn_count": 17,
+                "prog_id": 20,
+                "prog_name": "sched_wakeup",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "21": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 6 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 21,
+              "program": {
+                "final_insn_count": 17,
+                "orig_insn_count": 17,
+                "prog_id": 21,
+                "prog_name": "sched_wakeup_ne",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "22": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 6 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 22,
+              "program": {
+                "final_insn_count": 96,
+                "orig_insn_count": 96,
+                "prog_id": 22,
+                "prog_name": "sched_switch",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "29": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 7 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 29,
+              "program": {
+                "final_insn_count": 67,
+                "orig_insn_count": 67,
+                "prog_id": 29,
+                "prog_name": "1",
+                "prog_type": 7
+              },
+              "status": "error"
+            },
+            "3": {
+              "passes": [
+                {
+                  "bpfopt_ms": 2,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 65,
+                    "insn_count_before": 65,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": "fd 13 is not pointing to valid bpf_map\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_REJIT errno=22\nctx: prog_id=3 prog_type=26 fd_array_n=8 insn_cnt=65\n",
+                  "exit_code": 0,
+                  "rejit_syscall_ms": 0,
+                  "status": "failed_rejit",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 3,
+              "program": {
+                "final_insn_count": 65,
+                "orig_insn_count": 65,
+                "prog_id": 3,
+                "prog_name": "dump_bpf_prog",
+                "prog_type": 26
+              },
+              "status": "error"
+            },
+            "30": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 6 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 30,
+              "program": {
+                "final_insn_count": 22,
+                "orig_insn_count": 22,
+                "prog_id": 30,
+                "prog_name": "vfs_create",
+                "prog_type": 2
+              },
+              "status": "error"
+            },
+            "37": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 8 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 37,
+              "program": {
+                "final_insn_count": 51,
+                "orig_insn_count": 51,
+                "prog_id": 37,
+                "prog_name": "block_io_start",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "38": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 8 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 38,
+              "program": {
+                "final_insn_count": 181,
+                "orig_insn_count": 181,
+                "prog_id": 38,
+                "prog_name": "block_io_done",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "43": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: loader fd 7 not in fd-to-id mapping\\n",
+              "passes": [],
+              "prog_id": 43,
+              "program": {
+                "final_insn_count": 156,
+                "orig_insn_count": 156,
+                "prog_id": 43,
+                "prog_name": "cap_capable",
+                "prog_type": 2
+              },
+              "status": "error"
+            },
+            "44": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: map index 1 out of range for 1 map ids\\n",
+              "passes": [],
+              "prog_id": 44,
+              "program": {
+                "final_insn_count": 156,
+                "orig_insn_count": 156,
+                "prog_id": 44,
+                "prog_name": "cap_capable",
+                "prog_type": 2
+              },
+              "status": "error"
+            },
+            "46": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: map index 2 out of range for 1 map ids\\n",
+              "passes": [],
+              "prog_id": 46,
+              "program": {
+                "final_insn_count": 181,
+                "orig_insn_count": 181,
+                "prog_id": 46,
+                "prog_name": "block_io_done",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "48": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: map index 2 out of range for 1 map ids\\n",
+              "passes": [],
+              "prog_id": 48,
+              "program": {
+                "final_insn_count": 51,
+                "orig_insn_count": 51,
+                "prog_id": 48,
+                "prog_name": "block_io_start",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "50": {
+              "passes": [
+                {
+                  "bpfopt_ms": 1,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 22,
+                    "insn_count_before": 22,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": "fd 13 is not pointing to valid bpf_map\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_REJIT errno=22\nctx: prog_id=50 prog_type=2 fd_array_n=8 insn_cnt=22\n",
+                  "exit_code": 0,
+                  "rejit_syscall_ms": 0,
+                  "status": "failed_rejit",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 50,
+              "program": {
+                "final_insn_count": 22,
+                "orig_insn_count": 22,
+                "prog_id": 50,
+                "prog_name": "vfs_create",
+                "prog_type": 2
+              },
+              "status": "error"
+            },
+            "52": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: map index 1 out of range for 1 map ids\\n",
+              "passes": [],
+              "prog_id": 52,
+              "program": {
+                "final_insn_count": 67,
+                "orig_insn_count": 67,
+                "prog_id": 52,
+                "prog_name": "1",
+                "prog_type": 7
+              },
+              "status": "error"
+            },
+            "54": {
+              "passes": [
+                {
+                  "bpfopt_ms": 1,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 17,
+                    "insn_count_before": 17,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": "fd 14 is not pointing to valid bpf_map\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_REJIT errno=22\nctx: prog_id=54 prog_type=5 fd_array_n=8 insn_cnt=17\n",
+                  "exit_code": 0,
+                  "rejit_syscall_ms": 0,
+                  "status": "failed_rejit",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 54,
+              "program": {
+                "final_insn_count": 17,
+                "orig_insn_count": 17,
+                "prog_id": 54,
+                "prog_name": "sched_wakeup",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "56": {
+              "error_message": "bpfopt --canonicalize-map-refs failed: error: canonicalize_map_refs_to_idx: map index 1 out of range for 1 map ids\\n",
+              "passes": [],
+              "prog_id": 56,
+              "program": {
+                "final_insn_count": 96,
+                "orig_insn_count": 96,
+                "prog_id": 56,
+                "prog_name": "sched_switch",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "58": {
+              "passes": [
+                {
+                  "bpfopt_ms": 1,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 17,
+                    "insn_count_before": 17,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": "fd 14 is not pointing to valid bpf_map\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\nBPF_PROG_REJIT errno=22\nctx: prog_id=58 prog_type=5 fd_array_n=8 insn_cnt=17\n",
+                  "exit_code": 0,
+                  "rejit_syscall_ms": 0,
+                  "status": "failed_rejit",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 58,
+              "program": {
+                "final_insn_count": 17,
+                "orig_insn_count": 17,
+                "prog_id": 58,
+                "prog_name": "sched_wakeup_ne",
+                "prog_type": 5
+              },
+              "status": "error"
+            },
+            "6": {
+              "passes": [
+                {
+                  "bpfopt_ms": 1,
+                  "bpfopt_summary": {
+                    "diagnostics": [],
+                    "insn_count_after": 8,
+                    "insn_count_before": 8,
+                    "insn_delta": 0,
+                    "pass": "noop",
+                    "sites_applied": 0,
+                    "sites_matched": 0,
+                    "sites_skipped": 0,
+                    "skip_reasons": {}
+                  },
+                  "error": null,
+                  "rejit_syscall_ms": 0,
+                  "status": "ok",
+                  "step": {
+                    "command": "if [ \"x$BPFREJIT_DUMP_LIVE_JIT\" = \"x1\" ]; then bpftool prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.txt; bpftool -j prog show id ${PROG_ID} > ${WORKDIR}/live_prog_show.json; bpftool prog dump xlated id ${PROG_ID} > ${WORKDIR}/live_xlated.disasm; bpftool prog dump jited id ${PROG_ID} file ${WORKDIR}/live_jited.bin; chmod 0644 ${WORKDIR}/live_jited.bin; arch=$(uname -m); case \"$arch\" in x86_64|amd64) objdump_machine=i386:x86-64 ;; aarch64|arm64) objdump_machine=aarch64 ;; *) echo \"unsupported JIT dump objdump arch: $arch\" >&2; exit 1 ;; esac; objdump -D -b binary -m \"$objdump_machine\" ${WORKDIR}/live_jited.bin > ${WORKDIR}/live_jited.objdump; fi; timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}; if [ \"x$BPFREJIT_DUMP_LIVE_JIT_FAIL\" = \"x1\" ]; then false; fi",
+                    "log_level": 1,
+                    "name": "noop"
+                  }
+                }
+              ],
+              "prog_id": 6,
+              "program": {
+                "final_insn_count": 8,
+                "orig_insn_count": 8,
+                "prog_id": 6,
+                "prog_name": "",
+                "prog_type": 15
+              },
+              "status": "ok"
+            }
+          },
+          "status": "ok"
+        }
+      }
+    ],
+    "status": "ok"
+  },
+  "runner": "bpftrace_set",
+  "selected_workload": "stress_ng_os_io_network",
+  "status": "error"
+}

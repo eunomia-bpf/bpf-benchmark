@@ -63,6 +63,7 @@ struct cli_options {
     bool dump_jit = false;
     std::optional<std::filesystem::path> dump_jit_path;
     std::optional<std::filesystem::path> dump_xlated;
+    bool wait_signal = false;
     /* native_lab-only: xdp | sched_cls | cgroup_skb. Defaults to xdp. */
     std::string native_lab_prog_type = "xdp";
     /* native_lab Stage 2: native_lab function symbol to extract when the

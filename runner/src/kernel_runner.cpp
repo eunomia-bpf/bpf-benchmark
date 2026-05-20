@@ -22,6 +22,7 @@
 #include <fstream>
 #include <iostream>
 #include <netinet/in.h>
+#include <signal.h>
 #include <string>
 #include <string_view>
 #include <sys/socket.h>
@@ -36,6 +37,7 @@
 namespace {
 
 using clock_type = std::chrono::steady_clock;
+volatile sig_atomic_t g_measure_signal_seen = 0;
 constexpr size_t kEthernetHeaderSize = 14;
 constexpr std::string_view kKatranBalancerProgramName = "balancer_ingress";
 constexpr uint32_t kKatranVipNum = 0;
@@ -107,6 +109,29 @@ struct kernel_run_pass_result {
     kernel_run_measurement measurement {};
     perf_counter_capture perf_counters {};
 };
+
+void handle_measure_signal(int)
+{
+    g_measure_signal_seen = 1;
+}
+
+void install_measure_signal_handler()
+{
+    g_measure_signal_seen = 0;
+    struct sigaction action {};
+    action.sa_handler = handle_measure_signal;
+    sigemptyset(&action.sa_mask);
+    if (sigaction(SIGUSR1, &action, nullptr) != 0) {
+        fail("sigaction(SIGUSR1) failed: " + std::string(strerror(errno)));
+    }
+}
+
+void wait_for_measure_signal()
+{
+    while (!g_measure_signal_seen) {
+        pause();
+    }
+}
 
 struct object_deleter {
     void operator()(bpf_object *obj) const
@@ -1082,6 +1107,10 @@ int load_raw_kinsn_program(program_image &image)
 
 std::vector<sample_result> run_kernel(const cli_options &options)
 {
+    if (options.wait_signal) {
+        install_measure_signal_handler();
+    }
+
     const auto memory_prepare_start = std::chrono::steady_clock::now();
     auto input_bytes = materialize_memory(options.memory, options.input_size);
     const auto memory_prepare_end = std::chrono::steady_clock::now();
@@ -1270,6 +1299,10 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         .result_key = key,
         .reset_result_map = effective_io_mode == "map",
     };
+
+    if (options.wait_signal) {
+        wait_for_measure_signal();
+    }
 
     auto run_pass = execute_kernel_measurement_pass(run_context, options);
     const auto &run_measurement = run_pass.measurement;

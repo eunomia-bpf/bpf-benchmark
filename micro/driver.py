@@ -6,6 +6,7 @@ import os
 import platform
 import random
 import re
+import signal
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -25,6 +26,7 @@ from micro.catalog import (
     load_manifest as load_suite,
 )
 from runner.libs import run_command, tail_text
+from runner.libs.agent import start_agent
 from runner.libs.benchmarks import resolve_memory_file, select_benchmarks
 from runner.libs.environment import (
     require_existing_paths,
@@ -33,6 +35,7 @@ from runner.libs.environment import (
     validate_publication_environment,
 )
 from runner.libs.results import parse_last_json_line
+from runner.libs.rejit import apply_app_rejit, benchmark_rejit_enabled_passes, wait_for_app_shim_programs
 from runner.libs.run_artifacts import (
     ArtifactSession,
     derive_run_type,
@@ -46,6 +49,7 @@ RUNTIME_COMMANDS = {
     "native": "run-native",
     "llvmbpf": "run-llvmbpf",
     "kernel": "test-run",
+    "kernel_rejit": "test-run",
     "native_kernel": "run-native-lab",
 }
 
@@ -258,6 +262,8 @@ def build_runner_command(
         elif "cgroup_skb" in tags or "cgroup-skb" in tags:
             command.extend(["--native-lab-prog-type", "cgroup_skb"])
         # else: default xdp
+    if runtime.name == "kernel_rejit":
+        command.append("--wait-signal")
 
     command.extend(["--program", str(benchmark.object_path)])
     if benchmark.program_names:
@@ -292,16 +298,50 @@ def run_single_sample(
         cwd=cwd,
         timeout=RUNNER_TIMEOUT_SECONDS,
     )
+    return parse_micro_exec_sample(command, completed.stdout, completed.stderr)
+
+
+def parse_micro_exec_sample(command: list[str], stdout: str, stderr: str) -> dict[str, Any]:
     try:
-        payload = parse_last_json_line(completed.stdout, label="micro_exec")
+        payload = parse_last_json_line(stdout, label="micro_exec")
     except Exception as exc:
-        detail = tail_text(completed.stderr or completed.stdout or "")
+        detail = tail_text(stderr or stdout or "")
         raise RuntimeError(
             f"micro_exec returned invalid JSON for {' '.join(command)}\n{detail}"
         ) from exc
     if not isinstance(payload, dict):
         raise RuntimeError(f"micro_exec returned non-object JSON for {' '.join(command)}")
     return dict(payload)
+
+
+def run_rejit_sample(command: list[str], *, cwd: Path) -> dict[str, Any]:
+    del cwd
+    proc = start_agent(command[0], command[1:], env={"BPFREJIT_SHIM_FORCE_IN_PLACE": "1"})
+    try:
+        wait_for_app_shim_programs(app_pid=proc.pid, timeout_s=30, process=proc, process_name="micro_exec")
+        rejit_result = apply_app_rejit(app_pid=proc.pid, enabled_passes=benchmark_rejit_enabled_passes())
+        os.kill(proc.pid, signal.SIGUSR1)
+        stdout, stderr = proc.communicate(timeout=RUNNER_TIMEOUT_SECONDS)
+    except subprocess.TimeoutExpired as exc:
+        proc.kill()
+        stdout, stderr = proc.communicate()
+        raise RuntimeError(f"micro_exec timed out after ReJIT\n{tail_text(stderr or stdout or '')}") from exc
+    except Exception:
+        if proc.poll() is None:
+            proc.kill()
+            proc.wait()
+        raise
+    if proc.returncode != 0:
+        raise RuntimeError(f"command failed ({proc.returncode}): {' '.join(command)}\n{tail_text(stderr or stdout or '')}")
+    sample = parse_micro_exec_sample(command, stdout, stderr)
+    sample["rejit_result"] = rejit_result
+    return sample
+
+
+def run_runtime_sample(command: list[str], runtime_name: str, *, cwd: Path) -> dict[str, Any]:
+    if runtime_name == "kernel_rejit":
+        return run_rejit_sample(command, cwd=cwd)
+    return run_single_sample(command, cwd=cwd)
 
 
 def _dump_stem(benchmark_name: str, runtime_name: str, sample_idx: int | None = None) -> str:
@@ -573,7 +613,7 @@ def main(argv: list[str] | None = None) -> int:
                         cpu=args.cpu,
                     )
                     for _ in range(max(0, warmups)):
-                        sample = run_single_sample(warmup_command, cwd=ROOT_DIR)
+                        sample = run_runtime_sample(warmup_command, runtime.name, cwd=ROOT_DIR)
                         if benchmark.expected_result is not None and sample.get("result") != benchmark.expected_result:
                             raise RuntimeError(
                                 f"{benchmark.name}/{runtime.name} warmup result mismatch: "
@@ -592,11 +632,11 @@ def main(argv: list[str] | None = None) -> int:
                         inner_repeat = int(runtime_samples[runtime.name]["inner_repeat"])
                         dump_jit_path = None
                         dump_xlated_path = None
-                        if runtime.name in {"kernel", "llvmbpf"}:
+                        if runtime.name in {"kernel", "kernel_rejit", "llvmbpf"}:
                             dump_jit_path, dump_xlated_path = _jit_dump_paths(
                                 artifact_dir,
                                 _dump_stem(benchmark.name, runtime.name, sample_idx),
-                                xlated=runtime.name == "kernel",
+                                xlated=runtime.name in {"kernel", "kernel_rejit"},
                             )
                         command = build_runner_command(
                             runner_binary=runner_binary,
@@ -610,7 +650,7 @@ def main(argv: list[str] | None = None) -> int:
                             dump_jit_path=dump_jit_path,
                             dump_xlated_path=dump_xlated_path,
                         )
-                        sample = run_single_sample(command, cwd=ROOT_DIR)
+                        sample = run_runtime_sample(command, runtime.name, cwd=ROOT_DIR)
                         sample["sample_index"] = sample_idx
 
                         if benchmark.expected_result is not None and sample.get("result") != benchmark.expected_result:

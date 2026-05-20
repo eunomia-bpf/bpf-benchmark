@@ -1,0 +1,9 @@
+{
+  "completed_benchmarks": 29,
+  "current_benchmark": null,
+  "current_benchmark_index": null,
+  "current_benchmark_record": null,
+  "error_message": "bitmap_popcount_scan: bitmap_popcount_scan/kernel_rejit result mismatch: 12830754992348228997 != 12830754992348206170; sorted_rule_binary_search: sorted_rule_binary_search/kernel_rejit result mismatch: 1 != 126; payload_prefix_memcmp_scan: payload_prefix_memcmp_scan/kernel_rejit result mismatch: 11069793955954099111 != 9377358970524074984; bpf_local_call_fanout_dispatch: bpf_local_call_fanout_dispatch/kernel_rejit result mismatch: 1171593469689660158 != 1171593469689687806; flow_5tuple_rss_hash: flow_5tuple_rss_hash/kernel_rejit result mismatch: 6635026475712826774 != 11016707074064960918; bpftrace_string_search_prefix_scan: bpftrace_string_search_prefix_scan/kernel_rejit result mismatch: 5729198350995591603 != 15111065535037762995; cilium_socket_lb_service_select: cilium_socket_lb_service_select/kernel_rejit result mismatch: 2799485930091884716 != 2868565165525030065; bcc_tcpconnect_ipv4_tuple_filter: bcc_tcpconnect_ipv4_tuple_filter/kernel_rejit result mismatch: 11563802583433303736 != 18109187572642697766; otel_stack_frame_unwind_scan: otel_stack_frame_unwind_scan/kernel_rejit result mismatch: 0 != 12043289854646947360; cilium_ct_nat_tuple_rewrite: cilium_ct_nat_tuple_rewrite/kernel_rejit result mismatch: 8867328098157064532 != 14199193300769829204; packet_toeplitz_rss_hash: packet_toeplitz_rss_hash/kernel_rejit result mismatch: 14038663394547151834 != 13526464303109995596",
+  "status": "error",
+  "total_benchmarks": 29
+}

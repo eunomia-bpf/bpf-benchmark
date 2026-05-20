@@ -1,0 +1,9 @@
+{
+  "completed_benchmarks": 1,
+  "current_benchmark": null,
+  "current_benchmark_index": null,
+  "current_benchmark_record": null,
+  "error_message": "simple: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec test-run --wait-signal --program /artifacts/user/micro-programs/x86_64/simple.bpf.o --program-name simple_xdp --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/simple.mem --io-mode staged --input-size 64 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260520_205835_474976/details/jit_dumps/simple__kernel_rejit__sample00.jited.bin --dump-xlated /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260520_205835_474976/details/jit_dumps/simple__kernel_rejit__sample00.xlated.bin\nbpf_prog_test_run_opts failed: Bad file descriptor",
+  "status": "error",
+  "total_benchmarks": 1
+}

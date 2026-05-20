@@ -16,7 +16,7 @@ std::string usage_text()
         "[--io-mode map|staged|packet|context] [--raw-packet] [--inner-repeat N] "
         "[--warmup N] [--input-size N] [--perf-counters] "
         "[--perf-scope full_repeat_raw|full_repeat_avg] [--dump-jit] [--dump-jit-path <path>] "
-        "[--dump-xlated <path>]\n"
+        "[--dump-xlated <path>] [--wait-signal]\n"
         "  micro_exec run-native [--program <path>|<path>] [--program-name <name>] "
         "[--memory <path>] [--io-mode staged|packet] [--inner-repeat N] [--input-size N]\n"
 #ifdef MICRO_EXEC_ENABLE_LLVMBPF
@@ -48,6 +48,9 @@ void validate_cli_options(const cli_options &options)
     if (options.perf_scope != "full_repeat_raw" &&
         options.perf_scope != "full_repeat_avg") {
         fail("--perf-scope must be one of full_repeat_raw or full_repeat_avg");
+    }
+    if (options.wait_signal && options.command != "test-run") {
+        fail("--wait-signal is only supported by test-run");
     }
     if ((options.command == "test-run"
          || options.command == "run-native"
@@ -328,6 +331,10 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--dump-xlated" && index + 1 < argc) {
             options.dump_xlated = std::filesystem::path(argv[++index]);
+            continue;
+        }
+        if (current == "--wait-signal") {
+            options.wait_signal = true;
             continue;
         }
         fail("unknown or incomplete argument: " + std::string(current));
