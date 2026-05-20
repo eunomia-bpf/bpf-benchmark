@@ -15,6 +15,8 @@ Notes:
 - `old-restored` is the original partial-register source shape restored after
   the new run. The worktree was restored so these two micro source files have no
   remaining diff.
+- Decision after this comparison: do not adopt `new-shaped`. Keep the old
+  source shape and accept the two ReverseSim proof failures for now.
 - The runner warned that CPU governor/turbo settings may add noise.
 
 Result directories:

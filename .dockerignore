@@ -27,8 +27,12 @@ micro/results/**
 
 runner/build
 runner/build/**
+runner/build-llvmbpf
+runner/build-llvmbpf/**
 runner/build-arm64
 runner/build-arm64/**
+runner/build-arm64-llvmbpf
+runner/build-arm64-llvmbpf/**
 runner/build-x86
 runner/build-x86/**
 runner/.cache
@@ -37,6 +41,10 @@ micro/build
 micro/build/**
 micro/build-*
 micro/build-*/**
+micro/programs/build-x86
+micro/programs/build-x86/**
+micro/programs/build-arm64
+micro/programs/build-arm64/**
 micro/jit-dumps
 micro/jit-dumps/**
 micro/programs/*.md
@@ -70,6 +78,10 @@ tests/kernel/build-arm64
 tests/kernel/build-arm64/**
 tests/results
 tests/results/**
+native-sim/test/build-x86
+native-sim/test/build-x86/**
+native-sim/test/build-arm64
+native-sim/test/build-arm64/**
 bpfopt-suite/target
 bpfopt-suite/target/**
 bpfopt/target

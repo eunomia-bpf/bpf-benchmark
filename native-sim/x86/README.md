@@ -141,7 +141,7 @@ arithmetic are allowed to surface as compiler/verifier/load failures.
 | `__sk_buff.data_end` is not `skb->data + skb->len` in the kernel. Kernel BPF direct packet access uses the runtime-prepared `struct bpf_skb_data_end` slot in `skb->cb`. | Change the native micro skb helper to read `K_SK_BUFF_BPF_DATA_END_OFFSET`, so native x86 and eBPF proof both read the kernel BPF ABI value. | Fixed for the two skb micro programs. Generated native asm now loads `[rdi+0x50]`, not `skb->len`. |
 | `__sk_buff.cb[0]` is not raw `sk_buff->cb[0]`; kernel ctx access maps it through `bpf_skb_cb(skb)`, which is `skb->cb + offsetof(struct qdisc_skb_cb, data)`. | Generate `K_SK_BUFF_BPF_CB_OFFSET` from BTF and write native skb benchmark results there. The proof loader reads `ctx_out.cb[0..1]`, matching the existing kernel runner. | Fixed. Current x86 offset is `0x30`. cgroup_skb no longer tries packet writes or return-value result encoding. |
 | `cgroup_skb` return value is semantic action, not a benchmark result channel. | Keep expected retval as `CGROUP_SKB_OK`/`CGROUP_SKB_DROP`; carry the 64-bit benchmark result through BPF-visible `__sk_buff.cb[]`. | Fixed in native runner and proof loader. |
-| `payload_prefix_memcmp_scan` and `tetragon_process_event_arg_filter` contain exact x86 partial-register writes to registers that still have verifier pointer type. | Represent GPRs as `void *`/union values so pointer-shaped x86 operations keep typed shape, but keep partial-register semantics exact. | Still fail. The remaining failures are verifier expression limits: exact partial-register masking on a pointer-typed value is rejected. |
+| `payload_prefix_memcmp_scan` and `tetragon_process_event_arg_filter` contain exact x86 partial-register writes to registers that still have verifier pointer type (`mov sil/r8b` in payload, `mov dl` in tetragon). | A temporary source-shaping fix was tested: widen payload byte temporaries to `u32`, and inline the tetragon event-weight switch so clang emits `mov r32, imm` instead of low-byte writes. That made the proof artifacts load, but it changes the micro source/native code shape and changes the runtime comparison. | Not adopted. Keep the old micro source shape. These two ReverseSim proof programs are accepted known verifier failures for now; the simulator remains hardware-exact and we do not change benchmark source just to satisfy the verifier. |
 | Earlier proof attempts used ghost pointer metadata, packet length tags, branch assertions, fuel guards, fallback/trap paths, or benchmark-specific Python renderers. | Remove those mechanisms and move semantics into C-authored instruction macros. Python remains a mechanical one-native-instruction to one-macro generator. | Removed from the active path. If verifier rejects the exact proof, that is the result. |
 | Direct BPF instruction counts were missing when the latest micro result was native-only and had no `jit_dumps/*xlated.bin`. | Make `run_micro_sim_batch.py` pick the latest micro result that actually contains xlated BPF dumps when `MICRO_RESULT_METADATA` is not set. | Fixed. Latest result table records both proof BPF insn count and direct BPF insn count. |
 
@@ -192,5 +192,64 @@ Result file:
 - `cgroup_skb_hash_chain`: ok, proof BPF 236 insns, direct BPF 102 insns,
   verifier `0.006 s`.
 
-The remaining whole-suite failures, when present, are verifier/proof-expression
-failures after removing non-hardware guards, not runtime simulator fallbacks.
+Rejected source-shaping experiment:
+
+```bash
+make micro BENCH="payload_prefix_memcmp_scan tetragon_process_event_arg_filter" \
+  RUNTIMES="native kernel native_lab" \
+  SAMPLES=5 WARMUPS=1 INNER_REPEAT=100000
+```
+
+Result file:
+
+- `native-sim/x86/results/README-20260519-runtime-retry-source-shape.md`
+- How it was fixed temporarily:
+  - `payload_prefix_memcmp_scan`: changed `memcmp_prefix_pattern_byte`,
+    `observed`, and `expected` from `u8` to `u32`, so native x86 used
+    32-bit writes like `mov esi,0x1d` instead of low-byte writes like
+    `mov sil,0x1d`.
+  - `tetragon_process_event_arg_filter`: inlined `tetragon_event_weight()` into
+    the main loop, avoiding the small helper/code shape that produced
+    `mov dl,0x1`.
+- Decision: do not keep this fix. It is useful evidence for why verifier
+  rejects the exact low-byte form, but it changes benchmark source/native code
+  and changes native-vs-kernel performance.
+
+Known old-source proof failures after regenerating the two exact proof
+artifacts:
+
+```bash
+python3 native-sim/x86/micro-prog/generate_micro_sim_proofs.py \
+  --only payload_prefix_memcmp_scan tetragon_process_event_arg_filter
+python3 native-sim/x86/micro-prog/run_micro_sim_batch.py --jobs 2 \
+  --only payload_prefix_memcmp_scan tetragon_process_event_arg_filter \
+  --markdown native-sim/x86/results/README-20260519-old-source-known-failures.md
+```
+
+Result file:
+
+- `native-sim/x86/results/README-20260519-old-source-known-failures.md`
+- `payload_prefix_memcmp_scan`: run-fail, proof BPF 228 insns, direct BPF 139
+  insns.
+- `tetragon_process_event_arg_filter`: run-fail, proof BPF 301 insns, direct
+  BPF 287 insns.
+- Both failures are verifier/load failures on exact old-source native code, not
+  simulator traps or fallback behavior.
+
+Targeted runtime comparison across every runtime mode available in
+`micro/config/micro_pure_jit.yaml`:
+
+```bash
+make micro BENCH="payload_prefix_memcmp_scan tetragon_process_event_arg_filter" \
+  RUNTIMES="native llvmbpf kernel native_lab" \
+  SAMPLES=1 WARMUPS=0 INNER_REPEAT=100000
+```
+
+Result file:
+
+- `micro/results/x86_kvm_micro_20260519_213344_357618/metadata.json`
+- Detailed table: `native-sim/x86/results/README-20260519-runtime-compare-proof-passing.md`
+
+The remaining whole-suite failures, when present in future experiments, should
+be verifier/proof-expression failures after removing non-hardware guards, not
+runtime simulator fallbacks.

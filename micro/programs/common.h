@@ -23,31 +23,26 @@ typedef uint8_t __u8; typedef uint16_t __u16; typedef uint32_t __u32; typedef ui
  * incompatible with the real kernel `struct sk_buff` -- data is at offset
  * 0xd0 in the real struct, not 0; data_end is synthesized by the verifier
  * from `bpf_skb_data_end` stored in cb[]. The MICRO_NATIVE build uses the
- * two helpers below to read at the real kernel offsets (extracted from BTF
- * at build time and emitted into kernel_offsets.h). For non-fragmented
- * TEST_RUN packets, `data + len` matches the verifier's synthesized
- * data_end exactly.
+ * helpers below to read/write at the real kernel offsets (extracted from BTF
+ * at build time and emitted into kernel_offsets.h), including the same
+ * runtime-prepared `bpf_skb_data_end.data_end` slot that eBPF ctx access
+ * rewriting uses and the same `bpf_skb_cb(skb)` scratch slots that the
+ * BPF-side micro harness exposes as `__sk_buff.cb[]`.
  */
 static __inline unsigned char *micro_native_skb_data(void *skb) {
     return *(unsigned char **)((char *)skb + K_SK_BUFF_DATA_OFFSET);
 }
 static __inline unsigned char *micro_native_skb_data_end(void *skb) {
-    unsigned char *d = micro_native_skb_data(skb);
-    uint32_t len = *(uint32_t *)((char *)skb + K_SK_BUFF_LEN_OFFSET);
-    return d + len;
+    return *(unsigned char **)((char *)skb + K_SK_BUFF_BPF_DATA_END_OFFSET);
+}
+static __inline void micro_native_skb_write_result(void *skb, uint64_t value) {
+    *(uint32_t *)((char *)skb + K_SK_BUFF_BPF_CB_OFFSET) = (uint32_t)value;
+    *(uint32_t *)((char *)skb + K_SK_BUFF_BPF_CB_OFFSET + sizeof(uint32_t)) =
+        (uint32_t)(value >> 32);
 }
 static __inline unsigned char *micro_native_ptr_barrier(unsigned char *ptr) {
     __asm__ __volatile__("" : "+r"(ptr));
     return ptr;
-}
-static __inline int micro_native_skb_result_writable(unsigned char *data,
-                                                     unsigned char *data_end) {
-    data = micro_native_ptr_barrier(data);
-    data_end = micro_native_ptr_barrier(data_end);
-    if (data > data_end) {
-        return 0;
-    }
-    return data + 8U <= data_end;
 }
 static __inline int micro_native_has_data_bytes(const unsigned char *data,
                                                 uint32_t len,
@@ -94,6 +89,16 @@ struct __sk_buff { uintptr_t data, data_end; __u32 cb[5]; };
 #define CGROUP_SKB_OK 1
 #endif
 
+#ifdef MICRO_NATIVE
+#define MICRO_NATIVE_TARGET_POPCNT_PUSH                                      \
+    _Pragma("clang attribute push (__attribute__((target(\"popcnt\"))), apply_to = function)")
+#define MICRO_NATIVE_TARGET_POPCNT_POP                                       \
+    _Pragma("clang attribute pop")
+#else
+#define MICRO_NATIVE_TARGET_POPCNT_PUSH
+#define MICRO_NATIVE_TARGET_POPCNT_POP
+#endif
+
 #define MICRO_RESULT_PREFIX_SIZE 8U
 #define MICRO_UNBOUNDED_LEN 0xFFFFFFFFU
 
@@ -106,6 +111,19 @@ static __always_inline int micro_has_bytes(u32 len, u32 offset, u32 size)
         return 0;
     }
     return len - offset >= size;
+}
+
+static __always_inline int micro_payload_has_bytes(const u8 *data,
+                                                   u32 len,
+                                                   u32 offset,
+                                                   u32 size)
+{
+#ifdef MICRO_NATIVE
+    return micro_native_has_data_bytes(data, len, offset, size);
+#else
+    (void)data;
+    return micro_has_bytes(len, offset, size);
+#endif
 }
 
 static __always_inline u16 micro_read_u16_le(const u8 *data, u32 offset)
@@ -206,26 +224,18 @@ static __always_inline int micro_prepare_packet_payload(u8 *data,
     return 0;
 }
 
-/* Only the SKB path (tc / cgroup_skb) needs to diverge between MICRO_NATIVE
- * and BPF: in NATIVE the function gets a `void *` pointing at a real kernel
- * sk_buff (incompatible layout with the userspace `struct __sk_buff`
- * stand-in), so data/data_end load via the helpers above and the result
- * goes to the packet head (where the native_lab runner reads it). In BPF
- * mode the verifier ctx-translates `skb->data`/`skb->data_end` for free
- * and the result goes to `skb->cb[]` as before. XDP path stays unchanged
- * -- the userspace `xdp_md` stand-in happens to match the real `xdp_buff`
- * layout, so `ctx->data`/`ctx->data_end` reads work as-is.
+/* Only the SKB ABI shim (tc / cgroup_skb) needs to diverge between
+ * MICRO_NATIVE and BPF: in native mode the function receives a real kernel
+ * `struct sk_buff`, while BPF sees verifier-translated `struct __sk_buff`.
+ * Both paths expose the same `data`, `data_end`, and `cb[]` semantics to the
+ * benchmark body. XDP stays unchanged because the native stand-in layout
+ * matches the real `xdp_buff` fields used here.
  */
 #ifdef MICRO_NATIVE
 #define MICRO_SKB_PROG_ARG          void *skb
 #define MICRO_SKB_LOAD_DATA(D, E)   u8 *D = micro_native_skb_data(skb);     \
                                     u8 *E = micro_native_skb_data_end(skb);
-#define MICRO_SKB_WRITE_RESULT(V)   do {                                    \
-                                        if (micro_native_skb_result_writable(\
-                                                data, data_end)) {           \
-                                            micro_write_u64_le(data, (V));   \
-                                        }                                    \
-                                    } while (0)
+#define MICRO_SKB_WRITE_RESULT(V)   micro_native_skb_write_result(skb, (V))
 #define MICRO_SKB_SEC_TC            /* no SEC() for userspace .so */
 #define MICRO_SKB_SEC_CGROUP        /* no SEC() */
 #define MICRO_LICENSE_ATTR()        /* no license attr */
