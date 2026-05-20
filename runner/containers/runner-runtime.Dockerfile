@@ -133,22 +133,11 @@ COPY --link --chmod=0755 \
     vendor/build/${VENDOR_BUILD_ARCH}/bpftrace/bin/bpftrace-aotrt \
     /usr/local/bin/
 
-COPY --chmod=0755 runner/scripts/bpfrejit-install /usr/local/bin/bpfrejit-install
-
 RUN set -eux; \
-    ldconfig; \
     for tool in capable biosnoop vfsstat opensnoop syscount tcpconnect tcplife runqlat; do \
         ln -sfn "/usr/local/share/bcc/tools/${tool}" "/usr/local/bin/${tool}"; \
         ln -sfn "/usr/local/share/bcc/tools/${tool}" "/usr/local/bin/${tool}-bpfcc"; \
     done; \
-    # host-built bcc tools ship with `#!/usr/bin/env python` shebangs (legacy
-    # python2-era); modern Ubuntu doesn't symlink python -> python3, so the
-    # env lookup fails with `/usr/bin/env: 'python': No such file or directory`
-    # at exec time. Add the symlink so the BPF wrappers spawn correctly under
-    # the shim's LD_PRELOAD.
-    ln -sfn /usr/bin/python3 /usr/bin/python; \
-    mkdir -p /opt; \
-    ln -sfn /artifacts/user /opt/bpf-benchmark; \
     repo_artifact_root="/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH}"; \
     mkdir -p \
         "${repo_artifact_root}" \
@@ -173,57 +162,13 @@ COPY --link --from=runner-runtime-host-stage2-programs / /artifacts/user/stage2-
 COPY --link --from=runner-runtime-host-unittest / ${IMAGE_WORKSPACE}/tests/unittest/${TEST_BUILD_DIR}/
 COPY --link --from=runner-runtime-host-negative / ${IMAGE_WORKSPACE}/tests/negative/${TEST_BUILD_DIR}/
 
-FROM scratch AS runner-runtime-kinsn-artifacts
-
-COPY --link --from=runner-runtime-host-kinsn-artifacts / /artifacts/kinsn
-
-FROM runner-runtime-runtime-base AS runner-runtime-daemon-artifact
-
-# DAEMON_HOST_BIN_DIR is the host-relative directory containing the pre-built
-# bpfrejit-daemon binary (x86_64 from daemon/target/release/, arm64 from
-# daemon/target/aarch64-unknown-linux-gnu/release/). Both arches build on host.
-# The runner Python (workspace_layout.py) reads the daemon from this same path
-# inside the image workspace, so the binary is staged at both /usr/local/bin and
-# /artifacts/rust/${DAEMON_HOST_BIN_DIR}.
-ARG DAEMON_HOST_BIN_DIR=daemon/target/release
-
-COPY ${DAEMON_HOST_BIN_DIR}/bpfrejit-daemon /tmp/bpfrejit-daemon
-RUN set -eux; \
-    install -d /artifacts/rust/usr-local-bin "/artifacts/rust/${DAEMON_HOST_BIN_DIR}"; \
-    install -m 0755 /tmp/bpfrejit-daemon /artifacts/rust/usr-local-bin/bpfrejit-daemon; \
-    install -m 0755 /tmp/bpfrejit-daemon "/artifacts/rust/${DAEMON_HOST_BIN_DIR}/bpfrejit-daemon"; \
-    rm /tmp/bpfrejit-daemon
-
-FROM runner-runtime-runtime-base AS runner-runtime-bpfopt-artifacts
-
-# BPFOPT_HOST_BIN_DIR is the host-relative directory containing pre-built bpfopt
-# CLI + kinsnprober (x86_64 from bpfopt/target/release/, arm64 from
-# bpfopt/target/aarch64-unknown-linux-gnu/release/). kinsnprober is the
-# stock-kernel BTF prober — shim execs it once at startup to populate
-# target.json; daemon path doesn't use it.
-ARG BPFOPT_HOST_BIN_DIR=bpfopt/target/release
-# NATIVE_LINK_HOST_BIN is the host-built native-link binary. It lives under
-# native-sim/x86/native_lab/native_link/target/release/ regardless of target
-# arch (native-link runs as an x86 host-side build tool inside the runtime
-# container, not on the target architecture).
-ARG NATIVE_LINK_HOST_BIN=native-sim/x86/native_lab/native_link/target/release/native-link
-
-COPY \
-    ${BPFOPT_HOST_BIN_DIR}/bpfopt \
-    ${BPFOPT_HOST_BIN_DIR}/kinsnprober \
-    ${NATIVE_LINK_HOST_BIN} \
-    /tmp/
-RUN set -eux; \
-    install -d /artifacts/rust/usr-local-bin; \
-    install -m 0755 /tmp/bpfopt /artifacts/rust/usr-local-bin/; \
-    install -m 0755 /tmp/kinsnprober /artifacts/rust/usr-local-bin/; \
-    install -m 0755 /tmp/native-link /artifacts/rust/usr-local-bin/; \
-    rm /tmp/bpfopt /tmp/kinsnprober /tmp/native-link
-
 FROM runner-runtime-runtime-base AS runner-runtime
 
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
+ARG DAEMON_HOST_BIN_DIR=daemon/target/release
+ARG BPFOPT_HOST_BIN_DIR=bpfopt/target/release
+ARG NATIVE_LINK_HOST_BIN=native-sim/x86/native_lab/native_link/target/release/native-link
 
 ENV PYTHONPATH=/usr/local/lib/python3/dist-packages
 
@@ -237,29 +182,33 @@ COPY --link --from=runner-runtime-artifacts /var/lib/cilium /var/lib/cilium
 COPY --link --from=runner-runtime-artifacts /artifacts/kernel /artifacts/kernel
 COPY --link --from=runner-runtime-artifacts /artifacts/modules /artifacts/modules
 COPY --link --from=runner-runtime-artifacts /artifacts/manifest.json /artifacts/manifest.json
-COPY --link --from=runner-runtime-kinsn-artifacts /artifacts/kinsn /artifacts/kinsn
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/runner ${IMAGE_WORKSPACE}/runner
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/micro/programs ${IMAGE_WORKSPACE}/micro/programs
 COPY --link --from=runner-runtime-artifacts /artifacts/user/micro-programs /artifacts/user/micro-programs
 COPY --link --from=runner-runtime-artifacts /artifacts/user/stage2-programs /artifacts/user/stage2-programs
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/tests ${IMAGE_WORKSPACE}/tests
-COPY --link --from=runner-runtime-daemon-artifact /artifacts/rust/usr-local-bin/bpfrejit-daemon /usr/local/bin/bpfrejit-daemon
-COPY --link --from=runner-runtime-daemon-artifact /artifacts/rust/daemon/ ${IMAGE_WORKSPACE}/daemon/
-COPY --link --from=runner-runtime-bpfopt-artifacts /artifacts/rust/usr-local-bin/ /usr/local/bin/
+COPY --link --chmod=0755 ${DAEMON_HOST_BIN_DIR}/bpfrejit-daemon ${IMAGE_WORKSPACE}/${DAEMON_HOST_BIN_DIR}/bpfrejit-daemon
+COPY --link --chmod=0755 \
+    ${BPFOPT_HOST_BIN_DIR}/bpfopt \
+    ${BPFOPT_HOST_BIN_DIR}/kinsnprober \
+    ${NATIVE_LINK_HOST_BIN} \
+    /usr/local/bin/
 
 RUN set -eux; \
     mkdir -p /opt; \
     ln -sfn /artifacts/user /opt/bpf-benchmark; \
+    ln -sfn "${IMAGE_WORKSPACE}/${DAEMON_HOST_BIN_DIR}/bpfrejit-daemon" /usr/local/bin/bpfrejit-daemon; \
     # bcc tools shipped by the host build use `#!/usr/bin/env python`
     # shebangs; modern Ubuntu doesn't symlink python -> python3, so the
-    # env lookup fails. The artifacts stage symlinks it, but the final
-    # runtime stage doesn't inherit /usr/bin from there, so add it again.
+    # env lookup fails.
     ln -sfn /usr/bin/python3 /usr/bin/python; \
     ldconfig
 
+COPY --link --from=runner-runtime-host-kinsn-artifacts / /artifacts/kinsn
+
 # LD_PRELOAD shim installed at a fixed runtime path for glibc-linked apps.
-RUN mkdir -p /usr/local/lib/bpfrejit
 COPY --link bpfopt/shim/libbpfrejit_shim.so /usr/local/lib/bpfrejit/libbpfrejit_shim.so
+COPY --chmod=0755 runner/scripts/bpfrejit-install /usr/local/bin/bpfrejit-install
 COPY runner/__init__.py ./runner/
 COPY runner/config ./runner/config
 COPY runner/libs ./runner/libs
@@ -270,22 +219,14 @@ COPY micro/config ./micro/config
 COPY corpus/*.py ./corpus/
 COPY corpus/config ./corpus/config
 COPY corpus/inputs ./corpus/inputs
-COPY --link corpus/bcf ./corpus/bcf
 COPY --link runner/assets ./runner/assets
 
 RUN set -eux; \
     find ./runner ./micro ./corpus -type d -name __pycache__ -prune -exec rm -rf {} +; \
     mkdir -p micro/results corpus/results tests/results /var/tmp/bpfrejit-runtime
 
-RUN printf '#!/usr/bin/env bash\nexec "$@"\n' > /usr/local/bin/bpfrejit-runtime-entrypoint && \
-    chmod +x /usr/local/bin/bpfrejit-runtime-entrypoint
-
 ENV BPFREJIT_IMAGE_WORKSPACE=${IMAGE_WORKSPACE} \
     BPFREJIT_REPO_ARTIFACT_ROOT=/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH} \
     PYTHONPATH=${IMAGE_WORKSPACE}:/usr/local/lib/python3/dist-packages \
     RUN_TARGET_ARCH=${RUN_TARGET_ARCH} \
     PATH=${IMAGE_WORKSPACE}/runner/build-llvmbpf:${IMAGE_WORKSPACE}/runner/build-arm64-llvmbpf:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-
-ENTRYPOINT ["/usr/local/bin/bpfrejit-runtime-entrypoint"]
-
-FROM runner-runtime AS runner-default

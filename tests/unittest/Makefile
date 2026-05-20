@@ -87,7 +87,7 @@ $(BUILD_DIR)/%: $(UNITTEST_DIR)/%.c $(LIBBPF_A) $(LIBBPF_HDR) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -MMD -MP -MF $@.d -MT $@ $(INCLUDES) $(LIBBPF_INCLUDES) -o $@ $< $(LIBBPF_A) $(HOST_EXT_LIBS) -lpthread
 
 $(BUILD_DIR)/module/%: $(UNITTEST_DIR)/module/%.c $(LIBBPF_A) $(LIBBPF_HDR) | $(BUILD_DIR)/module
-	$(CC) $(CFLAGS) -MMD -MP -MF $@.d -MT $@ $(INCLUDES) $(LIBBPF_INCLUDES) -o $@ $< $(LIBBPF_A) $(HOST_EXT_LIBS) -lpthread
+	$(CC) $(CFLAGS) -MMD -MP -MF $@.d -MT $@ $(INCLUDES) $(LIBBPF_INCLUDES) -I$(ROOT_DIR)/module/include -o $@ $< $(LIBBPF_A) $(HOST_EXT_LIBS) -lpthread
 
 $(LIBBPF_A) $(LIBBPF_HDR) &:
 	mkdir -p $(LIBBPF_OBJDIR)
