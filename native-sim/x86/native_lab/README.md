@@ -135,7 +135,7 @@ End-to-end: link one program, run native_lab and kernel BPF JIT under
 the same input, print both samples:
 
 ```sh
-vng --run .cache/runtime-kernel/x86_64/bzImage \
+vng --run vendor/build/x86/linux/arch/x86/boot/bzImage \
     --cwd "$(pwd)" --rwdir "$(pwd)" --overlay-rwdir /tmp \
     --cpus 2 --memory 2G \
     --append "loglevel=4 panic=30 oops=panic" \

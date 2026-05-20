@@ -48,7 +48,7 @@ For each optimization step:
 1. Build the BPF backend:
    `ninja -C llvm-backend/build-bpf-kinsn LLVMBPFCodeGen llc -j4`
 2. Generate micro objects with kinsn selection:
-   `make -C micro/programs OUTPUT_DIR=$PWD/micro/results/llvm_kinsn_programs_<tag> KERNEL_OFFSETS_INPUT=$PWD/.cache/repo-build/host/kernel-offsets/x86_64/kernel_offsets.h BPFREJIT_MICRO_BPF_COMPILER=kinsn-llvm BPF_KINSN_LLC=$PWD/llvm-backend/build-bpf-kinsn/bin/llc all`
+   `make -C micro/programs OUTPUT_DIR=$PWD/micro/results/llvm_kinsn_programs_<tag> KERNEL_OFFSETS_INPUT=$PWD/micro/programs/build-x86/kernel_offsets.h BPFREJIT_MICRO_BPF_COMPILER=kinsn-llvm BPF_KINSN_LLC=$PWD/llvm-backend/build-bpf-kinsn/bin/llc all`
 3. Run full micro through the normal entrypoint:
    `make micro TIMEOUT=7200 MICRO_ARGS="--samples 1 --warmups 0 --inner-repeat 100000 --runtime kernel --program-dir micro/results/llvm_kinsn_programs_<tag>"`
 4. Compare against the no-kinsn LLVM baseline:

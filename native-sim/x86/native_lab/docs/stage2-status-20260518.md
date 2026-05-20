@@ -327,7 +327,7 @@ make host-kinsn-x86
 cmake --build runner/build-llvmbpf --target micro_exec -j8
 
 # Run
-vng --run .cache/runtime-kernel/x86_64/bzImage --cwd "$(pwd)" \
+vng --run vendor/build/x86/linux/arch/x86/boot/bzImage --cwd "$(pwd)" \
     --rwdir "$(pwd)" --overlay-rwdir /tmp --cpus 2 --memory 2G \
     --disable-monitor --append "loglevel=4 panic=30 oops=panic" \
     --exec native-sim/test/run_stage2.sh

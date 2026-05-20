@@ -54,7 +54,7 @@ Generate kinsn-enabled micro objects:
 out="micro/results/llvm_kinsn_programs_$(date +%Y%m%d_%H%M%S)"
 make -C micro/programs \
   OUTPUT_DIR="$PWD/$out" \
-  KERNEL_OFFSETS_INPUT="$PWD/.cache/repo-build/host/kernel-offsets/x86_64/kernel_offsets.h" \
+  KERNEL_OFFSETS_INPUT="$PWD/micro/programs/build-x86/kernel_offsets.h" \
   BPFREJIT_MICRO_BPF_COMPILER=kinsn-llvm \
   BPF_KINSN_LLC="$PWD/llvm-backend/build-bpf-kinsn/bin/llc" \
   all

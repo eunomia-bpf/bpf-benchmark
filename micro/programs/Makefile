@@ -26,7 +26,7 @@ BPF_OBJS := $(patsubst %.bpf.c,$(OUTPUT_DIR)/%.bpf.o,$(BPF_SRCS))
 # directly via hard-coded offsets. Offsets are extracted from the running
 # kernel's BTF at build time so the native code lines up with whatever
 # `struct xdp_buff` / `struct sk_buff` the fork kernel is built with.
-KERNEL_VMLINUX ?= $(REPO_ROOT)/.cache/repo-build/host/kernel/x86_64/vmlinux
+KERNEL_VMLINUX ?= $(REPO_ROOT)/vendor/build/x86/linux/vmlinux
 KERNEL_OFFSETS_INPUT ?=
 KERNEL_OFFSETS := $(OUTPUT_DIR)/kernel_offsets.h
 BPF_DEPS := $(patsubst %.bpf.c,$(OUTPUT_DIR)/%.bpf.d,$(BPF_SRCS))

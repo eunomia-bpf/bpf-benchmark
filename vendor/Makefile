@@ -32,8 +32,8 @@ KATRAN_BPF_DEPS := $(wildcard $(KATRAN)/katran/lib/bpf/*.h $(KATRAN)/katran/lib/
 KATRAN_BPF_CC = "$(CLANG)" -I"$(KATRAN)" -I"$(KATRAN)/katran/lib/linux_includes" -DDEBUG -D__KERNEL__ -Wno-unused-value -Wno-pointer-sign -Wno-compare-distinct-pointer-types -O2 -emit-llvm -c -g "$<" -o - | "$(LLC)" -march=bpf -filetype=obj -o "$@"
 BPFTOOL_FLAGS := VMLINUX_BTF= feature-libbfd=0 feature-libbfd-liberty=0 feature-libbfd-liberty-z=0
 
-ARM64_SYSROOT := $(BUILD)/sysroots/arm64-llvm15
-ARM64_DEBS    := $(BUILD)/.apt-arm64-debs
+ARM64_SYSROOT := $(CACHE)/sysroots/arm64-llvm15
+ARM64_DEBS    := $(CACHE)/apt-arm64-debs
 ARM64_CLANG_CONFIG := $(ARM64_SYSROOT)/usr/lib/llvm-15/lib/cmake/clang/ClangConfig.cmake
 ARM64_PKGS    := llvm-15-dev:arm64 llvm-15:arm64 llvm-15-runtime:arm64 llvm-15-tools:arm64 llvm-15-linker-tools:arm64 \
 	libllvm15t64:arm64 libclang-15-dev:arm64 libclang-common-15-dev:arm64 libclang-cpp15t64:arm64 libclang1-15t64:arm64 libclang-rt-15-dev:arm64 \
@@ -68,10 +68,10 @@ tetragon-x86 tetragon-arm64: tetragon-%:
 	install -d "$(BUILD)/$*/tetragon"
 	cp -a "$(BUILD)/.tetragon-bpf/$*/objs/." "$(BUILD)/$*/tetragon/"
 
-$(CACHE)/otelcol-ebpf-profiler-%.yaml: Makefile
+$(BUILD)/otelcol-ebpf-profiler-%.yaml: Makefile
 	install -d "$(dir $@)"
 	printf '%s\n' \
-	  'dist:' '  name: otelcol-ebpf-profiler' '  output_path: $(CACHE)/otelcol-ebpf-profiler-build-$*' '  version: $(OTEL_VER)' '  otelcol_version: $(OTELCOL_VER)' '  cgo_enabled: true' \
+	  'dist:' '  name: otelcol-ebpf-profiler' '  output_path: $(BUILD)/otelcol-ebpf-profiler-build-$*' '  version: $(OTEL_VER)' '  otelcol_version: $(OTELCOL_VER)' '  cgo_enabled: true' \
 	  'receivers:' '  - gomod: go.opentelemetry.io/ebpf-profiler v0.0.0' '    import: go.opentelemetry.io/ebpf-profiler/collector' '    path: $(OTEL)' \
 	  'exporters:' '  - gomod: go.opentelemetry.io/collector/exporter/debugexporter v$(OTELCOL_VER)' \
 	  'replaces:' '  - go.opentelemetry.io/ebpf-profiler => $(OTEL)' >"$@"
@@ -80,9 +80,9 @@ otel-x86: GOARCH := amd64
 otel-x86: GOCC := gcc
 otel-arm64: GOARCH := arm64
 otel-arm64: GOCC := aarch64-linux-gnu-gcc
-otel-x86 otel-arm64: otel-%: $(CACHE)/otelcol-ebpf-profiler-%.yaml
+otel-x86 otel-arm64: otel-%: $(BUILD)/otelcol-ebpf-profiler-%.yaml
 	$(GO_ENV) GOOS=linux GOARCH="$(GOARCH)" CGO_ENABLED=1 CC="$(GOCC)" "$(GO)" run "$(OCB)" --config "$<" --ldflags="-s -w $(GO_DYNAMIC_LDFLAGS)"
-	install -D -m 0755 "$(CACHE)/otelcol-ebpf-profiler-build-$*/otelcol-ebpf-profiler" "$(BUILD)/$*/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler"
+	install -D -m 0755 "$(BUILD)/otelcol-ebpf-profiler-build-$*/otelcol-ebpf-profiler" "$(BUILD)/$*/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler"
 
 $(ARM64_CLANG_CONFIG):
 	install -d "$(ARM64_DEBS)" "$(ARM64_SYSROOT)"

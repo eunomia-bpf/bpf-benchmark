@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import os
-import json
 import shlex
 import shutil
 import subprocess
@@ -125,112 +123,25 @@ def _instance_state_is_reusable(state: str) -> bool:
     return state in {"pending", "running"}
 
 
-def _run_local_make(*args: str, env: dict[str, str] | None = None) -> None:
-    completed = subprocess.run(["make", "-C", str(ROOT_DIR), *args],
-                               cwd=ROOT_DIR, env=env, text=True, check=False)
-    if completed.returncode != 0:
-        raise SystemExit(completed.returncode)
-
-
-def _local_build_jobs() -> int:
-    for name in ("IMAGE_BUILD_JOBS", "JOBS"):
-        value = os.environ.get(name, "").strip()
-        if value.isdigit() and int(value) > 0:
-            return int(value)
-    return max(os.cpu_count() or 1, 1)
-
-
 def _require_modules_root(modules_root: Path, *, arch: str) -> Path:
     if not modules_root.is_dir():
         _die(f"missing canonical {arch} kernel modules root: {modules_root}")
     return modules_root
 
 
-def _build_x86_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[str, Path, Path]:
-    build_dir = ctx.target_root / "kernel-build"
-    modules_target = ROOT_DIR / ".cache" / "repo-artifacts" / "x86_64" / "kernel-modules" / "lib" / "modules"
-    return _extract_kernel_artifacts_from_image(ctx, build_dir, modules_target, expected_arch="x86_64")
-
-
-def _docker_run(args: list[str], *, operation: str, capture_output: bool = False) -> subprocess.CompletedProcess[str]:
-    completed = subprocess.run(["docker", *args], cwd=ROOT_DIR, text=True, check=False, capture_output=capture_output)
-    if completed.returncode != 0:
-        detail = completed.stderr.strip() or completed.stdout.strip()
-        _die(f"{operation} failed" + (f": {detail}" if detail else ""))
-    return completed
-
-
-def _create_runtime_image_container(image_ref: str, image_tar: Path) -> str:
-    create = subprocess.run(["docker", "create", image_ref, "/bin/true"],
-                            cwd=ROOT_DIR, text=True, check=False, capture_output=True)
-    if create.returncode != 0:
-        if not image_tar.is_file():
-            _die(f"runtime image tar does not exist: {image_tar}")
-        _docker_run(["load", "-i", str(image_tar)], operation=f"load runtime image {image_tar}")
-        create = subprocess.run(["docker", "create", image_ref, "/bin/true"],
-                                cwd=ROOT_DIR, text=True, check=False, capture_output=True)
-    if create.returncode != 0:
-        detail = create.stderr.strip() or create.stdout.strip()
-        _die("create runtime image container failed" + (f": {detail}" if detail else ""))
-    cid = create.stdout.strip()
-    if not cid:
-        _die("docker create returned an empty container id")
-    return cid
-
-
-def _extract_kernel_artifacts_from_image(ctx: aws_common.AwsExecutorContext,
-                                         build_dir: Path,
-                                         modules_target: Path,
-                                         *,
-                                         expected_arch: str) -> tuple[str, Path, Path]:
-    image_tar = runtime_container_image_tar_path(ROOT_DIR, expected_arch)
-    if not image_tar.is_file():
-        _run_local_make("image-runner-runtime-image-tar", f"RUN_TARGET_ARCH={expected_arch}",
-                        f"JOBS={_local_build_jobs()}")
-
-    image_ref = _runtime_container_image(ctx)
-    cid = _create_runtime_image_container(image_ref, image_tar)
-    try:
-        manifest_path = build_dir / "manifest.json"
-        manifest_path.parent.mkdir(parents=True, exist_ok=True)
-        _docker_run(["cp", f"{cid}:/artifacts/manifest.json", str(manifest_path)],
-                    operation=f"copy {expected_arch} runtime kernel manifest")
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-        kernel_release = str(manifest.get("kernel_release") or "").strip()
-        target_arch = str(manifest.get("target_arch") or "").strip()
-        kernel_image_name = str(manifest.get("kernel_image") or "").strip()
-        if not kernel_release or target_arch != expected_arch or not kernel_image_name:
-            _die(f"invalid {expected_arch} runtime kernel manifest: {manifest_path}")
-
-        kernel_image = build_dir / "kernel" / kernel_image_name
-        kernel_image.parent.mkdir(parents=True, exist_ok=True)
-        _docker_run(["cp", f"{cid}:/artifacts/kernel/{kernel_image_name}", str(kernel_image)],
-                    operation=f"copy {expected_arch} runtime kernel image")
-
-        release_file = build_dir / "include" / "config" / "kernel.release"
-        release_file.parent.mkdir(parents=True, exist_ok=True)
-        release_file.write_text(f"{kernel_release}\n", encoding="utf-8")
-
-        modules_target.mkdir(parents=True, exist_ok=True)
-        modules_root = modules_target / kernel_release
-        if modules_root.exists():
-            shutil.rmtree(modules_root)
-        _docker_run(["cp", f"{cid}:/artifacts/modules/{kernel_release}", str(modules_target)],
-                    operation=f"copy {expected_arch} runtime kernel modules")
-    finally:
-        subprocess.run(["docker", "rm", "-f", cid], cwd=ROOT_DIR, text=True, check=False,
-                       capture_output=True)
-
+def _host_kernel_artifacts(target_arch: str) -> tuple[str, Path, Path]:
+    vendor_arch = "arm64" if target_arch == "arm64" else "x86"
+    image_rel = Path("arch/arm64/boot/vmlinuz.efi") if target_arch == "arm64" else Path("arch/x86/boot/bzImage")
+    build_dir = ROOT_DIR / "vendor" / "build" / vendor_arch / "linux"
+    release_file = build_dir / "include" / "config" / "kernel.release"
+    if not release_file.is_file():
+        _die(f"missing {target_arch} kernel release file: {release_file}")
+    kernel_release = release_file.read_text(encoding="utf-8").strip()
+    kernel_image = build_dir / image_rel
     if not kernel_image.is_file():
-        _die(f"missing {expected_arch} runtime kernel image after extraction: {kernel_image}")
-    return kernel_release, kernel_image, _require_modules_root(modules_target / kernel_release, arch=expected_arch)
-
-
-def _build_arm64_kernel_artifacts(ctx: aws_common.AwsExecutorContext) -> tuple[str, Path, Path]:
-    build_dir = ctx.target_root / "kernel-build"
-    modules_target = ROOT_DIR / ".cache" / "repo-artifacts" / "arm64" / "kernel-modules" / "lib" / "modules"
-    return _extract_kernel_artifacts_from_image(ctx, build_dir, modules_target, expected_arch="arm64")
-
+        _die(f"missing {target_arch} kernel image: {kernel_image}")
+    modules_root = build_dir / "modules-install" / "lib" / "modules" / kernel_release
+    return kernel_release, kernel_image, _require_modules_root(modules_root, arch=target_arch)
 
 
 def _remote_kernel_release(ctx: aws_common.AwsExecutorContext, ip: str) -> str:
@@ -343,14 +254,6 @@ sudo docker info >/dev/null
 """.strip()
     aws_common._ssh_exec(ctx, ip, "bash", "-c", script)
 
-
-def _runtime_container_image(ctx: aws_common.AwsExecutorContext) -> str:
-    image = ctx.contract.remote.runtime_container_image.strip()
-    if not image:
-        _die("run config RUN_RUNTIME_CONTAINER_IMAGE is empty")
-    return image
-
-
 def _remote_runtime_image_tar(ctx: aws_common.AwsExecutorContext) -> Path:
     return runtime_container_image_tar_path(Path(ctx.remote_stage_dir), ctx.contract.identity.target_arch)
 
@@ -427,12 +330,10 @@ def _setup_instance(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
 
     target_arch = ctx.contract.identity.target_arch.strip() or ctx.target_name
     with runner_lock(f"artifact-build.{target_arch}"):
-        if ctx.target_name == "aws-arm64":
-            kernel_release, kernel_image, modules_root = _build_arm64_kernel_artifacts(ctx)
-        elif ctx.target_name == "aws-x86":
-            kernel_release, kernel_image, modules_root = _build_x86_kernel_artifacts(ctx)
-        else:
+        if ctx.target_name not in {"aws-arm64", "aws-x86"}:
             _die(f"unsupported AWS target for setup: {ctx.target_name}")
+        artifact_arch = "arm64" if ctx.target_name == "aws-arm64" else "x86_64"
+        kernel_release, kernel_image, modules_root = _host_kernel_artifacts(artifact_arch)
 
         setup_result_dir = ctx.results_dir / f"setup_{kernel_release}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
         setup_result_dir.mkdir(parents=True, exist_ok=True)

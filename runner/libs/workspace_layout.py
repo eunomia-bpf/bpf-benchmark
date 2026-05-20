@@ -26,12 +26,11 @@ def _p(workspace: Path, target_arch: str, key: str) -> Path:
     arm64, x86 = _ARCH_PATHS[key]
     return workspace.joinpath(*(arm64 if _is_arm64(target_arch) else x86))
 
-def _cache(workspace: Path, target_arch: str, subdir: str) -> Path:
-    return workspace / ".cache" / subdir / str(target_arch).strip()
+def _vendor_arch(target_arch: str) -> str:
+    return "arm64" if _is_arm64(target_arch) else "x86"
 
-
-def repo_artifact_root(workspace: Path, target_arch: str) -> Path:       return _cache(workspace, target_arch, "repo-artifacts")
-def workload_tools_root(workspace: Path, target_arch: str) -> Path:      return _cache(workspace, target_arch, "workload-tools")
+def repo_artifact_root(workspace: Path, target_arch: str) -> Path:       return workspace / "vendor" / "build" / _vendor_arch(target_arch)
+def workload_tools_root(workspace: Path, target_arch: str) -> Path:      return workspace / "vendor" / "build" / _vendor_arch(target_arch) / "workload-tools"
 def test_unittest_build_dir(workspace: Path, target_arch: str) -> Path:  return _p(workspace, target_arch, "test_unittest_build_dir")
 def test_negative_build_dir(workspace: Path, target_arch: str) -> Path:  return _p(workspace, target_arch, "test_negative_build_dir")
 
@@ -50,7 +49,7 @@ def runtime_workspace(workspace: Path) -> Path:
 def micro_program_root(workspace: Path, target_arch: str) -> Path:
     if inside_runtime_image():
         return image_artifact_root(target_arch, "micro-programs")
-    return _cache(runtime_workspace(workspace), target_arch, "micro-programs")
+    return runtime_workspace(workspace) / "micro" / "programs" / f"build-{_vendor_arch(target_arch)}"
 
 
 def stage2_program_root(workspace: Path, target_arch: str) -> Path:
@@ -60,7 +59,7 @@ def stage2_program_root(workspace: Path, target_arch: str) -> Path:
     relocations."""
     if inside_runtime_image():
         return image_artifact_root(target_arch, "stage2-programs")
-    return _cache(runtime_workspace(workspace), target_arch, "stage2-programs")
+    return runtime_workspace(workspace) / "native-sim" / "test" / f"build-{_vendor_arch(target_arch)}"
 
 def daemon_binary_path(workspace: Path, target_arch: str) -> Path:
     return _p(runtime_workspace(workspace), target_arch, "daemon_binary_path")
@@ -93,11 +92,11 @@ def kernel_modules_root(workspace: Path, target_arch: str, executor: str) -> Pat
     if str(executor).strip() == "kvm":
         if arch != "x86_64":
             raise AssertionError(f"kvm executor only supports x86_64 kernel modules, got {arch!r}")
-        return repo_artifact_root(workspace, arch) / "kernel-modules"
+        return workspace / "vendor" / "build" / "x86" / "linux" / "modules-install"
     return Path("/")
 
 def kvm_kernel_image_path(workspace: Path) -> Path:
-    return workspace / ".cache" / "runtime-kernel" / "x86_64" / "bzImage"
+    return workspace / "vendor" / "build" / "x86" / "linux" / "arch" / "x86" / "boot" / "bzImage"
 
 
 def runtime_path_value(workspace: Path, target_arch: str) -> str:

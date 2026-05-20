@@ -2,22 +2,12 @@ CC ?= gcc
 CFLAGS ?= -O2 -g -Wall -Wextra -fPIC -D_GNU_SOURCE
 LDLIBS ?= -ldl -lpthread
 
-.PHONY: all clean smoke selftest-run musl host-selftest
+.PHONY: all clean smoke selftest-run host-selftest
 
 all: libbpfrejit_shim.so selftest selftest_full
 
 libbpfrejit_shim.so: libbpfrejit_shim.c
 	$(CC) $(CFLAGS) -shared $< -o $@ $(LDLIBS)
-
-# Build a musl-compatible variant inside an alpine container for tracee (whose
-# binary uses /lib/ld-musl-x86_64.so.1 and rejects glibc-built .so files).
-musl: libbpfrejit_shim_musl.so
-
-libbpfrejit_shim_musl.so: libbpfrejit_shim.c
-	docker run --rm -v $$PWD:/work:rw alpine:latest sh -c \
-	  "apk add --no-cache gcc musl-dev linux-headers > /dev/null && \
-	   gcc -O2 -fPIC -D_GNU_SOURCE -shared /work/libbpfrejit_shim.c \
-	     -o /work/libbpfrejit_shim_musl.so -ldl -lpthread"
 
 selftest: selftest.c
 	$(CC) $(CFLAGS) $< -o $@
@@ -71,5 +61,5 @@ smoke: libbpfrejit_shim.so
 	fi
 
 clean:
-	rm -f libbpfrejit_shim.so libbpfrejit_shim_musl.so selftest \
+	rm -f libbpfrejit_shim.so selftest selftest_full \
 	      /tmp/bpfrejit_shim_smoke.log

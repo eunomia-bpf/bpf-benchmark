@@ -22,6 +22,7 @@ endif()
 set(MICRO_REPO_ROOT "${MICRO_REPO_ROOT}" CACHE PATH "Repository root")
 set(MICRO_LIBBPF_PREFIX "${MICRO_LIBBPF_PREFIX}" CACHE PATH "libbpf prefix")
 set(MICRO_LIBBPF_LIBRARY "${MICRO_LIBBPF_LIBRARY}" CACHE FILEPATH "libbpf static library")
+set(MICRO_KERNEL_OFFSETS_INCLUDE "${MICRO_REPO_ROOT}/micro/programs/build-x86" CACHE PATH "kernel_offsets.h include directory")
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBELF REQUIRED IMPORTED_TARGET libelf)
@@ -109,7 +110,7 @@ target_include_directories(micro_exec
         "${MICRO_REPO_ROOT}/vendor/libbpf/include"
         "${MICRO_REPO_ROOT}/vendor/libbpf/include/uapi"
         "/artifacts/kernel"
-        "${MICRO_REPO_ROOT}/.cache/repo-build/host/kernel-offsets/x86_64"
+        "${MICRO_KERNEL_OFFSETS_INCLUDE}"
 )
 
 if(MICRO_EXEC_ENABLE_LLVMBPF)

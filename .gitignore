@@ -233,6 +233,17 @@ micro/results/*/details/jit_dumps/
 micro/results/*/details/jit_dumps/**
 micro/results/*/details/code_compare/
 micro/results/*/details/code_compare/**
+micro/results/**/*.bpf.d
+micro/results/**/*.bpf.ll
+micro/results/**/*.bpf.o
+micro/results/**/*.native.d
+micro/results/**/*.native.so
+micro/results/**/*.jited.bin
+micro/results/**/*.xlated.bin
+micro/results/**/*.h
+micro/results/**/*.o
+micro/results/**/*.so
+!micro/results/**/*.json
 micro/results/llvm_kinsn_programs_*/*.bpf.d
 micro/results/llvm_kinsn_programs_*/*.bpf.ll
 micro/results/llvm_kinsn_programs_*/*.bpf.o

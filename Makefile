@@ -9,10 +9,7 @@ RUNNER_DIR := $(ROOT_DIR)/runner
 DAEMON_DIR := $(ROOT_DIR)/daemon
 KERNEL_DIR := $(ROOT_DIR)/vendor/linux-framework
 ARTIFACT_ROOT := $(ROOT_DIR)/.cache
-X86_BUILD_DIR ?= $(ARTIFACT_ROOT)/x86-kernel-build
 RUNNER_BUILD_DIR ?= $(RUNNER_DIR)/build
-
-ARM64_BUILD_DIR     ?= $(ARTIFACT_ROOT)/arm64-kernel-build
 
 
 NPROC        ?= $(shell nproc 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)
@@ -21,8 +18,6 @@ DEFCONFIG_SRC := $(ROOT_DIR)/vendor/bpfrejit_x86_defconfig
 ARM64_DEFCONFIG_SRC := $(ROOT_DIR)/vendor/bpfrejit_arm64_defconfig
 
 include $(RUNNER_DIR)/mk/build.mk
-
-export ARM64_BUILD_DIR
 
 # Tunables
 PLATFORM ?= kvm
@@ -146,25 +141,20 @@ clean-build:
 	rm -rf "$(RUNNER_DIR)/build-arm64-llvmbpf"
 	$(MAKE) -C "$(MICRO_DIR)/programs" OUTPUT_DIR="$(MICRO_DIR)/programs" clean
 	rm -f "$(MICRO_DIR)"/generated-inputs/*.mem
-	rm -rf "$(MICRO_DIR)/__pycache__" "$(MICRO_DIR)/build"
+	rm -rf "$(MICRO_DIR)/__pycache__" "$(MICRO_DIR)/build" "$(MICRO_DIR)"/programs/build-x86 "$(MICRO_DIR)"/programs/build-arm64
 	cargo clean --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml"
 	cargo clean --manifest-path "$(DAEMON_DIR)/Cargo.toml"
-	rm -rf "$(X86_BUILD_DIR)" "$(ARM64_BUILD_DIR)" "$(ARTIFACT_ROOT)/runtime-kernel"
 	rm -rf \
 		"$(ARTIFACT_ROOT)/container-images" \
-		"$(ARTIFACT_ROOT)/libbpf-build" \
-		"$(ARTIFACT_ROOT)/micro-programs" \
-		"$(ARTIFACT_ROOT)/repo-artifacts" \
-		"$(ARTIFACT_ROOT)/repo-build" \
-		"$(ARTIFACT_ROOT)/workload-tools" \
-		"$(ARTIFACT_ROOT)/workload-tools-build" \
-		"$(ARTIFACT_ROOT)/aws-arm64/kernel-build" \
 		"$(ARTIFACT_ROOT)/aws-arm64/run-state" \
 		"$(ARTIFACT_ROOT)/aws-arm64/runs" \
 		"$(ARTIFACT_ROOT)/aws-arm64/state" \
 		"$(ARTIFACT_ROOT)/aws-x86/run-state" \
 		"$(ARTIFACT_ROOT)/aws-x86/runs" \
 		"$(ARTIFACT_ROOT)/aws-x86/state"
+	rm -rf "$(ROOT_DIR)"/vendor/build
+	rm -rf "$(ROOT_DIR)"/module/x86/build "$(ROOT_DIR)"/module/arm64/build
+	rm -rf "$(ROOT_DIR)"/native-sim/test/build-x86 "$(ROOT_DIR)"/native-sim/test/build-arm64
 
 clean-results:
 	@# results retention is manual; see docs/tmp/p89_disk_audit.md

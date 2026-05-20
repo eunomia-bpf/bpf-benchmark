@@ -635,7 +635,7 @@ make -C micro/programs                                                    # *.bp
 Sweep + analyze:
 
 ```sh
-vng --run .cache/runtime-kernel/x86_64/bzImage --cwd "$(pwd)" --rwdir "$(pwd)" \
+vng --run vendor/build/x86/linux/arch/x86/boot/bzImage --cwd "$(pwd)" --rwdir "$(pwd)" \
     --overlay-rwdir /tmp --cpus 2 --memory 2G --disable-monitor \
     --append "loglevel=4 panic=30 oops=panic" \
     --exec native-sim/x86/native_lab/tests/run_all_micro.sh \

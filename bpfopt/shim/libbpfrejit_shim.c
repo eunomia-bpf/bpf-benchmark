@@ -1048,6 +1048,154 @@ int ioctl(int fd, unsigned long request, ...) {
     return ret;
 }
 
+/* Drop or insert an XDP attach record for `prog_fd`. Holds state_mutex
+ * for the duration; safe to call without external locking. `prog_fd<0`
+ * variant (detach) is dispatched via prog_xdp_detach_by_ifindex below. */
+static void prog_xdp_attach_set(int prog_fd, uint32_t ifindex,
+                                uint32_t xdp_flags, int old_prog_fd) {
+    pthread_mutex_lock(&state_mutex);
+    struct prog_entry *p = prog_find(prog_fd);
+    if (!p) {
+        pthread_mutex_unlock(&state_mutex);
+        log_line("netlink RTM_SETLINK IFLA_XDP_FD=%d ifindex=%u: no known "
+                 "prog_entry — attach won't survive reload",
+                 prog_fd, ifindex);
+        return;
+    }
+    /* Dedup by ifindex; newest flags + old_prog_fd win. */
+    for (uint32_t i = 0; i < p->n_xdp; i++) {
+        if (p->xdp_attaches[i].ifindex == ifindex) {
+            p->xdp_attaches[i].xdp_flags = xdp_flags;
+            uint32_t kid = p->kernel_prog_id;
+            pthread_mutex_unlock(&state_mutex);
+            log_line("netlink RTM_SETLINK update: prog_fd=%d kid=%u "
+                     "ifindex=%u flags=0x%x", prog_fd, kid, ifindex, xdp_flags);
+            return;
+        }
+    }
+    struct xdp_nl_attach *grown =
+        (struct xdp_nl_attach *)realloc(p->xdp_attaches,
+                                        (p->n_xdp + 1) * sizeof(*grown));
+    if (!grown) { pthread_mutex_unlock(&state_mutex); return; }
+    grown[p->n_xdp].ifindex = ifindex;
+    grown[p->n_xdp].xdp_flags = xdp_flags;
+    p->xdp_attaches = grown;
+    p->n_xdp++;
+    uint32_t kid = p->kernel_prog_id;
+    pthread_mutex_unlock(&state_mutex);
+    log_line("netlink RTM_SETLINK captured: prog_fd=%d kid=%u ifindex=%u "
+             "flags=0x%x (old_prog_fd=%d)", prog_fd, kid, ifindex,
+             xdp_flags, old_prog_fd);
+}
+
+/* Drop the (ifindex) attach from any prog_entry that holds it. Called on
+ * observed detach (IFLA_XDP_FD == -1). */
+static void prog_xdp_detach_by_ifindex(uint32_t ifindex) {
+    pthread_mutex_lock(&state_mutex);
+    for (unsigned b = 0; b < BPF_STATE_BUCKETS; b++) {
+        for (struct prog_entry *p = prog_table[b]; p; p = p->next) {
+            for (uint32_t i = 0; i < p->n_xdp; ) {
+                if (p->xdp_attaches[i].ifindex == ifindex) {
+                    p->xdp_attaches[i] = p->xdp_attaches[p->n_xdp - 1];
+                    p->n_xdp--;
+                } else {
+                    i++;
+                }
+            }
+        }
+    }
+    pthread_mutex_unlock(&state_mutex);
+    log_line("netlink RTM_SETLINK detach observed: ifindex=%u dropped from "
+             "all prog_entry xdp_attaches", ifindex);
+}
+
+/* Decide whether `sock_fd` is the kind of socket we want to inspect.
+ * Cached lookup via getsockopt; the cost is one syscall per send call
+ * which is dwarfed by netlink RTT. */
+static int sock_is_rtnetlink(int sock_fd) {
+    int domain = -1, protocol = -1;
+    socklen_t slen = sizeof(domain);
+    if (getsockopt(sock_fd, SOL_SOCKET, SO_DOMAIN, &domain, &slen) != 0)
+        return 0;
+    if (domain != AF_NETLINK) return 0;
+    slen = sizeof(protocol);
+    if (getsockopt(sock_fd, SOL_SOCKET, SO_PROTOCOL, &protocol, &slen) != 0)
+        return 0;
+    return protocol == NETLINK_ROUTE;
+}
+
+/* Inspect an outgoing rtnetlink message AFTER it succeeded. Records or
+ * removes XDP attach state per IFLA_XDP_FD value. */
+static void netlink_observe_xdp_post(int sock_fd, const void *buf, size_t len) {
+    if (!buf || len < sizeof(struct nlmsghdr)) return;
+    if (!sock_is_rtnetlink(sock_fd)) return;
+    uint32_t ifindex = 0, flags = 0;
+    int prog_fd = -1;
+    if (!nl_parse_setlink_xdp_attach(buf, len, &ifindex, &prog_fd, &flags))
+        return;
+    if (prog_fd < 0) {
+        /* Detach: drop attach record from whichever prog held this ifindex. */
+        prog_xdp_detach_by_ifindex(ifindex);
+        return;
+    }
+    /* Attach succeeded — record. old_prog_fd not known here; replay falls
+     * back to non-EXPECTED replace mode. */
+    prog_xdp_attach_set(prog_fd, ifindex, flags, -1);
+}
+
+ssize_t sendto(int sockfd, const void *buf, size_t len, int flags,
+               const struct sockaddr *dest_addr, socklen_t addrlen) {
+    ensure_syms_resolved();
+    ssize_t ret = real_sendto(sockfd, buf, len, flags, dest_addr, addrlen);
+    int saved_errno = errno;
+    /* Only observe AFTER kernel accepted the message — pre-syscall observe
+     * would record attaches that the kernel later rejects, leading to
+     * phantom replay attempts during reload. */
+    if (!in_shim && ret >= 0 && buf && (size_t)ret >= sizeof(struct nlmsghdr)) {
+        in_shim = 1;
+        netlink_observe_xdp_post(sockfd, buf, (size_t)ret);
+        in_shim = 0;
+    }
+    errno = saved_errno;
+    return ret;
+}
+
+ssize_t sendmsg(int sockfd, const struct msghdr *msg, int flags) {
+    ensure_syms_resolved();
+    ssize_t ret = real_sendmsg(sockfd, msg, flags);
+    int saved_errno = errno;
+    if (!in_shim && ret >= 0 && msg && msg->msg_iovlen > 0) {
+        in_shim = 1;
+        /* Linearise iovecs if the netlink message spans multiple iovs.
+         * sendmsg lets the app scatter the request across iovecs and the
+         * kernel reassembles; our parser needs a flat view. */
+        size_t total = 0;
+        const struct iovec *iov = msg->msg_iov;
+        for (size_t i = 0; i < (size_t)msg->msg_iovlen; i++)
+            total += iov[i].iov_len;
+        if (total >= sizeof(struct nlmsghdr) && total <= (size_t)ret) {
+            char stack_buf[4096];
+            char *flat = (total <= sizeof(stack_buf))
+                         ? stack_buf
+                         : (char *)malloc(total);
+            if (flat) {
+                size_t off = 0;
+                for (size_t i = 0; i < (size_t)msg->msg_iovlen && off < total; i++) {
+                    size_t take = iov[i].iov_len;
+                    if (off + take > total) take = total - off;
+                    if (iov[i].iov_base) memcpy(flat + off, iov[i].iov_base, take);
+                    off += take;
+                }
+                netlink_observe_xdp_post(sockfd, flat, total);
+                if (flat != stack_buf) free(flat);
+            }
+        }
+        in_shim = 0;
+    }
+    errno = saved_errno;
+    return ret;
+}
+
 /* Intercept close(2): release table entries if any (cheap; fd is unique
  * across kinds so at most one removes a real entry). */
 int close(int fd) {
@@ -2399,6 +2547,43 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
         pthread_mutex_unlock(&state_mutex);
         free(perf_replaced);
     }
+    /* XDP netlink reattach. The app (katran, iproute2, libbpf<0.8) bound
+     * the original prog via RTM_SETLINK + IFLA_XDP_FD; that path is
+     * invisible to LINK_UPDATE / SET_BPF, so without explicit replay the
+     * netdev keeps dispatching to the original prog and the workload
+     * sees no bytecode change. We send a fresh RTM_SETLINK against every
+     * captured (ifindex, flags) pair using the new_pfd. */
+    pthread_mutex_lock(&state_mutex);
+    uint32_t n_xdp = p->n_xdp;
+    struct xdp_nl_attach *xdp_snap = NULL;
+    if (n_xdp) {
+        xdp_snap = (struct xdp_nl_attach *)malloc(n_xdp * sizeof(*xdp_snap));
+        if (xdp_snap)
+            memcpy(xdp_snap, p->xdp_attaches, n_xdp * sizeof(*xdp_snap));
+        else
+            n_xdp = 0;
+    }
+    pthread_mutex_unlock(&state_mutex);
+    for (uint32_t i = 0; i < n_xdp; i++) {
+        /* old_prog_fd = previously-attached prog fd (p->fd before swap) so
+         * the kernel can verify with IFLA_XDP_EXPECTED_FD that we are
+         * replacing the exact prog we observed at attach time, not some
+         * other prog that subsequently won the netdev. */
+        int r = nl_send_setlink_xdp_replace(xdp_snap[i].ifindex,
+                                            (int)new_pfd, old_prog_fd,
+                                            xdp_snap[i].xdp_flags);
+        if (r < 0) {
+            APPEND_DETAIL("xdp ifindex=%u: nl_send_setlink_xdp_replace "
+                          "failed (errno=%d); ",
+                          xdp_snap[i].ifindex, errno);
+            partial = 1;
+        } else {
+            log_line("reload_and_reattach: XDP netlink reattach ifindex=%u "
+                     "flags=0x%x → new_prog_fd=%ld OK",
+                     xdp_snap[i].ifindex, xdp_snap[i].xdp_flags, new_pfd);
+        }
+    }
+    free(xdp_snap);
 #undef APPEND_DETAIL
     free(links);
     free(perfs);
