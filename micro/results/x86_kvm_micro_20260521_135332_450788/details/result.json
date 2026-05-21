@@ -1,0 +1,780 @@
+{
+  "benchmarks": [
+    {
+      "expected_result": null,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "name": "multi_map_policy",
+      "runs": [
+        {
+          "inner_repeat": 100000,
+          "runtime": "native_kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 335
+              },
+              "compile_ns": 82274041,
+              "exec_ns": 44,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 73548604,
+                "blob_upload_ns": 17188,
+                "companion_load_ns": 71179666,
+                "companion_lookup_spec_ns": 70704907,
+                "companion_map_ptr_extract_ns": 27898,
+                "companion_object_load_ns": 348677,
+                "companion_open_ns": 94022,
+                "memory_prepare_ns": 34248,
+                "native_link_cache_lookup_ns": 101833,
+                "native_link_exec_ns": 2200008,
+                "native_link_map_patch_ns": 382,
+                "native_link_read_ns": 21594,
+                "packet_prepare_ns": 528,
+                "prog_load_ns": 8708249,
+                "prog_run_wall_ns": 49774622
+              },
+              "result": 1311768465173141112,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 49774622
+            },
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 335
+              },
+              "compile_ns": 548775,
+              "exec_ns": 44,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 476904,
+                "blob_upload_ns": 10038,
+                "companion_load_ns": 385795,
+                "companion_lookup_spec_ns": 37360,
+                "companion_map_ptr_extract_ns": 21984,
+                "companion_object_load_ns": 259775,
+                "companion_open_ns": 63796,
+                "memory_prepare_ns": 21791,
+                "native_link_cache_lookup_ns": 63129,
+                "native_link_exec_ns": 0,
+                "native_link_map_patch_ns": 324,
+                "native_link_read_ns": 14019,
+                "packet_prepare_ns": 1487,
+                "prog_load_ns": 61833,
+                "prog_run_wall_ns": 76881518
+              },
+              "result": 1311768465173141112,
+              "retval": 2,
+              "sample_index": 1,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 76881518
+            },
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 335
+              },
+              "compile_ns": 648542,
+              "exec_ns": 125,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 557801,
+                "blob_upload_ns": 12540,
+                "companion_load_ns": 445463,
+                "companion_lookup_spec_ns": 31307,
+                "companion_map_ptr_extract_ns": 28584,
+                "companion_object_load_ns": 299446,
+                "companion_open_ns": 83004,
+                "memory_prepare_ns": 28226,
+                "native_link_cache_lookup_ns": 82358,
+                "native_link_exec_ns": 0,
+                "native_link_map_patch_ns": 401,
+                "native_link_read_ns": 15707,
+                "packet_prepare_ns": 1955,
+                "prog_load_ns": 78201,
+                "prog_run_wall_ns": 83450401
+              },
+              "result": 1311768465173141112,
+              "retval": 2,
+              "sample_index": 2,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 83450401
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100000,
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 832,
+                "native_code_bytes": 447
+              },
+              "compile_ns": 470978,
+              "exec_cycles": 1847,
+              "exec_ns": 103,
+              "jited_prog_len": 447,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 27136,
+                "object_load_ns": 353159,
+                "object_open_ns": 117819,
+                "packet_prepare_ns": 515,
+                "prog_run_wall_ns": 50091641,
+                "result_extract_ns": 351
+              },
+              "result": 1311768465173141112,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686261733,
+              "wall_exec_ns": 501,
+              "xlated_prog_len": 832
+            },
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 832,
+                "native_code_bytes": 447
+              },
+              "compile_ns": 351032,
+              "exec_cycles": 1475,
+              "exec_ns": 44,
+              "jited_prog_len": 447,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 21244,
+                "object_load_ns": 261108,
+                "object_open_ns": 89924,
+                "packet_prepare_ns": 312,
+                "prog_run_wall_ns": 40025507,
+                "result_extract_ns": 431
+              },
+              "result": 1311768465173141112,
+              "retval": 2,
+              "sample_index": 1,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686183858,
+              "wall_exec_ns": 400,
+              "xlated_prog_len": 832
+            },
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 832,
+                "native_code_bytes": 447
+              },
+              "compile_ns": 333388,
+              "exec_cycles": 1475,
+              "exec_ns": 44,
+              "jited_prog_len": 447,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 23585,
+                "object_load_ns": 244874,
+                "object_open_ns": 88514,
+                "packet_prepare_ns": 480,
+                "prog_run_wall_ns": 40002937,
+                "result_extract_ns": 434
+              },
+              "result": 1311768465173141112,
+              "retval": 2,
+              "sample_index": 2,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686285214,
+              "wall_exec_ns": 400,
+              "xlated_prog_len": 832
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "multi-map"
+      ]
+    },
+    {
+      "expected_result": null,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "name": "map_percpu_hash_counter",
+      "runs": [
+        {
+          "inner_repeat": 100000,
+          "runtime": "native_kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 123
+              },
+              "compile_ns": 2899652,
+              "exec_ns": 28,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 2805814,
+                "blob_upload_ns": 11696,
+                "companion_load_ns": 369800,
+                "companion_lookup_spec_ns": 29762,
+                "companion_map_ptr_extract_ns": 15985,
+                "companion_object_load_ns": 254672,
+                "companion_open_ns": 65320,
+                "memory_prepare_ns": 22214,
+                "native_link_cache_lookup_ns": 57237,
+                "native_link_exec_ns": 2291802,
+                "native_link_map_patch_ns": 178,
+                "native_link_read_ns": 28736,
+                "packet_prepare_ns": 508,
+                "prog_load_ns": 82142,
+                "prog_run_wall_ns": 53747581
+              },
+              "result": 1,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 53747581
+            },
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 123
+              },
+              "compile_ns": 711066,
+              "exec_ns": 74,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 633098,
+                "blob_upload_ns": 8741,
+                "companion_load_ns": 502733,
+                "companion_lookup_spec_ns": 35513,
+                "companion_map_ptr_extract_ns": 21889,
+                "companion_object_load_ns": 359287,
+                "companion_open_ns": 82561,
+                "memory_prepare_ns": 26304,
+                "native_link_cache_lookup_ns": 86733,
+                "native_link_exec_ns": 0,
+                "native_link_map_patch_ns": 160,
+                "native_link_read_ns": 27506,
+                "packet_prepare_ns": 420,
+                "prog_load_ns": 69227,
+                "prog_run_wall_ns": 116180764
+              },
+              "result": 1,
+              "retval": 2,
+              "sample_index": 1,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 116180764
+            },
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 123
+              },
+              "compile_ns": 686770,
+              "exec_ns": 74,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 611562,
+                "blob_upload_ns": 9219,
+                "companion_load_ns": 500803,
+                "companion_lookup_spec_ns": 38076,
+                "companion_map_ptr_extract_ns": 20772,
+                "companion_object_load_ns": 350037,
+                "companion_open_ns": 81559,
+                "memory_prepare_ns": 28897,
+                "native_link_cache_lookup_ns": 78875,
+                "native_link_exec_ns": 0,
+                "native_link_map_patch_ns": 394,
+                "native_link_read_ns": 15841,
+                "packet_prepare_ns": 2077,
+                "prog_load_ns": 65989,
+                "prog_run_wall_ns": 72560558
+              },
+              "result": 1,
+              "retval": 2,
+              "sample_index": 2,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 72560558
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100000,
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 432,
+                "native_code_bytes": 246
+              },
+              "compile_ns": 447426,
+              "exec_cycles": 1473,
+              "exec_ns": 75,
+              "jited_prog_len": 246,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 28055,
+                "object_load_ns": 348160,
+                "object_open_ns": 99266,
+                "packet_prepare_ns": 593,
+                "prog_run_wall_ns": 39951210,
+                "result_extract_ns": 355
+              },
+              "result": 1,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686288997,
+              "wall_exec_ns": 400,
+              "xlated_prog_len": 432
+            },
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 432,
+                "native_code_bytes": 246
+              },
+              "compile_ns": 351754,
+              "exec_cycles": 2211,
+              "exec_ns": 27,
+              "jited_prog_len": 246,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 21014,
+                "object_load_ns": 266135,
+                "object_open_ns": 85619,
+                "packet_prepare_ns": 558,
+                "prog_run_wall_ns": 59972042,
+                "result_extract_ns": 853
+              },
+              "result": 1,
+              "retval": 2,
+              "sample_index": 1,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686283915,
+              "wall_exec_ns": 600,
+              "xlated_prog_len": 432
+            },
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 432,
+                "native_code_bytes": 246
+              },
+              "compile_ns": 338454,
+              "exec_cycles": 1470,
+              "exec_ns": 28,
+              "jited_prog_len": 246,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 22871,
+                "object_load_ns": 245888,
+                "object_open_ns": 92566,
+                "packet_prepare_ns": 462,
+                "prog_run_wall_ns": 39870774,
+                "result_extract_ns": 508
+              },
+              "result": 1,
+              "retval": 2,
+              "sample_index": 2,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686273351,
+              "wall_exec_ns": 399,
+              "xlated_prog_len": 432
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "percpu_hash"
+      ]
+    },
+    {
+      "expected_result": null,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "name": "stats_mixed_helpers",
+      "runs": [
+        {
+          "inner_repeat": 100000,
+          "runtime": "native_kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 237
+              },
+              "compile_ns": 2867184,
+              "exec_ns": 63,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 2781375,
+                "blob_upload_ns": 9832,
+                "companion_load_ns": 374765,
+                "companion_lookup_spec_ns": 35240,
+                "companion_map_ptr_extract_ns": 21540,
+                "companion_object_load_ns": 247677,
+                "companion_open_ns": 67294,
+                "memory_prepare_ns": 23449,
+                "native_link_cache_lookup_ns": 74946,
+                "native_link_exec_ns": 2235243,
+                "native_link_map_patch_ns": 171,
+                "native_link_read_ns": 31260,
+                "packet_prepare_ns": 657,
+                "prog_load_ns": 75977,
+                "prog_run_wall_ns": 76613499
+              },
+              "result": 1,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 76613499
+            },
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 237
+              },
+              "compile_ns": 503036,
+              "exec_ns": 61,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 437497,
+                "blob_upload_ns": 8306,
+                "companion_load_ns": 342443,
+                "companion_lookup_spec_ns": 30846,
+                "companion_map_ptr_extract_ns": 19168,
+                "companion_object_load_ns": 230000,
+                "companion_open_ns": 59842,
+                "memory_prepare_ns": 20531,
+                "native_link_cache_lookup_ns": 62235,
+                "native_link_exec_ns": 0,
+                "native_link_map_patch_ns": 208,
+                "native_link_read_ns": 19285,
+                "packet_prepare_ns": 442,
+                "prog_load_ns": 57233,
+                "prog_run_wall_ns": 88434921
+              },
+              "result": 1,
+              "retval": 2,
+              "sample_index": 1,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 88434921
+            },
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 0,
+                "native_code_bytes": 237
+              },
+              "compile_ns": 693176,
+              "exec_ns": 202,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "blob_read_ns": 604639,
+                "blob_upload_ns": 12546,
+                "companion_load_ns": 483834,
+                "companion_lookup_spec_ns": 37448,
+                "companion_map_ptr_extract_ns": 26594,
+                "companion_object_load_ns": 329113,
+                "companion_open_ns": 87047,
+                "memory_prepare_ns": 41555,
+                "native_link_cache_lookup_ns": 84477,
+                "native_link_exec_ns": 0,
+                "native_link_map_patch_ns": 229,
+                "native_link_read_ns": 17224,
+                "packet_prepare_ns": 504,
+                "prog_load_ns": 75991,
+                "prog_run_wall_ns": 91932671
+              },
+              "result": 1,
+              "retval": 2,
+              "sample_index": 2,
+              "timing_source": "ktime",
+              "timing_source_wall": "wall_steady",
+              "wall_exec_ns": 91932671
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100000,
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 648,
+                "native_code_bytes": 364
+              },
+              "compile_ns": 451532,
+              "exec_cycles": 1852,
+              "exec_ns": 155,
+              "jited_prog_len": 364,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 32108,
+                "object_load_ns": 335533,
+                "object_open_ns": 115999,
+                "packet_prepare_ns": 772,
+                "prog_run_wall_ns": 50238064,
+                "result_extract_ns": 284
+              },
+              "result": 1,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686117944,
+              "wall_exec_ns": 502,
+              "xlated_prog_len": 648
+            },
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 648,
+                "native_code_bytes": 364
+              },
+              "compile_ns": 323338,
+              "exec_cycles": 1476,
+              "exec_ns": 60,
+              "jited_prog_len": 364,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 24866,
+                "object_load_ns": 231175,
+                "object_open_ns": 92163,
+                "packet_prepare_ns": 402,
+                "prog_run_wall_ns": 40051607,
+                "result_extract_ns": 357
+              },
+              "result": 1,
+              "retval": 2,
+              "sample_index": 1,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686285007,
+              "wall_exec_ns": 401,
+              "xlated_prog_len": 648
+            },
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 648,
+                "native_code_bytes": 364
+              },
+              "compile_ns": 330928,
+              "exec_cycles": 1477,
+              "exec_ns": 60,
+              "jited_prog_len": 364,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": false,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 27283,
+                "object_load_ns": 246059,
+                "object_open_ns": 84869,
+                "packet_prepare_ns": 259,
+                "prog_run_wall_ns": 40065695,
+                "result_extract_ns": 361
+              },
+              "result": 1,
+              "retval": 2,
+              "sample_index": 2,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686262682,
+              "wall_exec_ns": 401,
+              "xlated_prog_len": 648
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "multi-map",
+        "helpers"
+      ]
+    }
+  ],
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec"
+  },
+  "defaults": {
+    "inner_repeat": 100000,
+    "perf_counters": false,
+    "perf_scope": "full_repeat_raw",
+    "runtime_order_seed": 0,
+    "samples": 3,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "generated_at": "2026-05-21T13:53:32.450788+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "unknown",
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_link_mods=/home/yunwei37/workspace/bpf-benchmark/vendor/build/x86/linux/.virtme_mods/lib/modules/0.0.0 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 panic=-1 virtme.exec=`bWFrZSAtQyAvaG9tZS95dW53ZWkzNy93b3Jrc3BhY2UvYnBmLWJlbmNobWFyayBfX3J1bnRpbWUtdm0tbWljcm8gVEFSR0VUPSd4ODYta3ZtJyBSVU5fVEFSR0VUX05BTUU9J3g4Ni1rdm0nIFJVTl9UQVJHRVRfQVJDSD0neDg2XzY0JyBSVU5fRVhFQ1VUT1I9J2t2bScgUlVOVElNRV9DT05UQUlORVJfSU1BR0U9J2JwZi1iZW5jaG1hcmsvcnVubmVyLXJ1bnRpbWU6eDg2XzY0JyBSVU5USU1FX0lNQUdFX1RBUj0nL2hvbWUveXVud2VpMzcvd29ya3NwYWNlL2JwZi1iZW5jaG1hcmsvLmNhY2hlL2NvbnRhaW5lci1pbWFnZXMveDg2XzY0LXJ1bm5lci1ydW50aW1lLmltYWdlLnRhcicgUlVOX1JFTU9URV9QWVRIT05fQklOPSdweXRob24zJyBSVU5fUlVOVElNRV9QWVRIT05fQklOPSdweXRob24zJyBSVU5fQlBGVE9PTF9CSU49J2JwZnRvb2wnIFJVTl9OQVRJVkVfUkVQT1NfQ1NWPSdiY2Msa2F0cmFuLHRyYWNlZSx0ZXRyYWdvbicgUlVOX1RPS0VOPSczNGNlNzIwYScgU0FNUExFUz0nMycgV0FSTVVQUz0nMCcgSU5ORVJfUkVQRUFUPScxMDAwMDAnIEJFTkNIPSdtdWx0aV9tYXBfcG9saWN5IG1hcF9wZXJjcHVfaGFzaF9jb3VudGVyIHN0YXRzX21peGVkX2hlbHBlcnMnIFNVSVRFPSdtaWNyby9jb25maWcvbWljcm9fc3RhZ2UyLnlhbWwnIFJVTlRJTUVTPSduYXRpdmVfa2VybmVsIGtlcm5lbCcgRlVaWl9ST1VORFM9JzEwMDAnIFRFU1RfTU9ERT0nJyBXT1JLTE9BRF9EVVJBVElPTj0nJyBLRUVQX1dPUktESVJTPScnIEJQRlJFSklUX0JFTkNIX1BBU1NFUz0nJyBCUEZSRUpJVF9DT1JQVVNfQVBQUz0nJyBTS0lQX1JFSklUPScnIENQVT0nJyBTVFJJQ1RfRU5WPScnIFNIVUZGTEVfU0VFRD0nJyBQRVJGX0NPVU5URVJTPScnIFBFUkZfU0NPUEU9JycgUkVHRU5FUkFURV9JTlBVVFM9JycgTElTVD0nJyBNSUNST19SVU5ORVJfQklOQVJZPScnIEJQRlJFSklUX0NPUlBVU19BUFBfVElNRU9VVD0nJyBCUEZSRUpJVF9DT1JQVVNfUkVKSVRfVElNRU9VVD0nJw==` virtme_chdir=home/yunwei37/workspace/bpf-benchmark debug loglevel=7 panic=30 oops=panic init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init",
+    "kernel_version": "7.0.0-rc2+",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "unknown"
+  },
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_stage2.yaml",
+  "provenance": {
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 285K",
+    "environment": "vm",
+    "kernel_commit": "unknown",
+    "params": {
+      "inner_repeat": 100000,
+      "samples": 3,
+      "warmups": 0
+    },
+    "repo_dirty": false,
+    "repo_git_sha": "unknown",
+    "timestamp": "2026-05-21T13:53:32.451668+00:00"
+  },
+  "suite": "micro_stage2_maps_helpers"
+}

@@ -1,0 +1,22 @@
+{
+  "completed_benchmarks": 11,
+  "current_benchmark": "packet_5tuple_classify",
+  "current_benchmark_index": 12,
+  "current_benchmark_record": {
+    "expected_result": null,
+    "expected_retval": 2,
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+    "io_mode": "packet",
+    "name": "packet_5tuple_classify",
+    "runs": [],
+    "tags": [
+      "stage2",
+      "maps",
+      "hash",
+      "inline-eligible",
+      "packet-derived-key"
+    ]
+  },
+  "status": "running",
+  "total_benchmarks": 13
+}

@@ -1,0 +1,22 @@
+{
+  "completed_benchmarks": 5,
+  "current_benchmark": "map_hash_str_key",
+  "current_benchmark_index": 6,
+  "current_benchmark_record": {
+    "expected_result": null,
+    "expected_retval": 2,
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+    "io_mode": "packet",
+    "name": "map_hash_str_key",
+    "runs": [],
+    "tags": [
+      "stage2",
+      "maps",
+      "hash",
+      "inline-eligible",
+      "large-key"
+    ]
+  },
+  "status": "running",
+  "total_benchmarks": 13
+}

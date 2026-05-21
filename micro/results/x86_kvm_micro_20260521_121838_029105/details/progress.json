@@ -1,0 +1,9 @@
+{
+  "completed_benchmarks": 1,
+  "current_benchmark": null,
+  "current_benchmark_index": null,
+  "current_benchmark_record": null,
+  "error_message": "helper_chain_simple: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec run-native-kernel --program /artifacts/user/stage2-programs/x86_64/helper_chain_simple.bpf.o --native-program /artifacts/user/stage2-programs/x86_64/helper_chain_simple.native.o --program-name helper_chain_simple --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem --io-mode packet --input-size 64 --inner-repeat 100000\nnative-link: entry=helper_chain_simple (137 bytes), 1 reachable symbol(s) total\n  - helper_chain_simple (vaddr 0x0, 137 bytes) [entry]\nnative-link: wrote 144 bytes -> /tmp/native_kernel_link_cache/131a351f7dbd0a15.tmp.1892.blob.bin (4 relocs)\nnative-link: wrote 4 relocs -> /tmp/native_kernel_link_cache/131a351f7dbd0a15.tmp.1892.relocs.bin\nnative-link: wrote 1 map patch site(s) -> /tmp/native_kernel_link_cache/131a351f7dbd0a15.tmp.1892.map-patches.tsv\nnative-link: wrote ABI metadata -> /tmp/native_kernel_link_cache/131a351f7dbd0a15.tmp.1892.abi.tsv\nbpf_prog_load (native_lab stub): Unknown error 524\nverifier log:\nprocessed 9 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+  "status": "error",
+  "total_benchmarks": 1
+}

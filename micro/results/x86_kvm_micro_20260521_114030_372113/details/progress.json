@@ -1,0 +1,20 @@
+{
+  "completed_benchmarks": 10,
+  "current_benchmark": "multi_map_policy",
+  "current_benchmark_index": 11,
+  "current_benchmark_record": {
+    "expected_result": null,
+    "expected_retval": 2,
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+    "io_mode": "packet",
+    "name": "multi_map_policy",
+    "runs": [],
+    "tags": [
+      "stage2",
+      "maps",
+      "multi-map"
+    ]
+  },
+  "status": "running",
+  "total_benchmarks": 13
+}
