@@ -36,3 +36,6 @@
 [submodule "vendor/repos/opentelemetry-ebpf-profiler"]
 	path = vendor/repos/opentelemetry-ebpf-profiler
 	url = https://github.com/eunomia-bpf/opentelemetry-ebpf-profiler.git
+[submodule "vendor/repos/cilium-ebpf"]
+	path = vendor/repos/cilium-ebpf
+	url = https://github.com/cilium/ebpf.git

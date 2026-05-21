@@ -2,7 +2,7 @@
 
 日期: 2026-05-20
 范围: `docs/rejit-speculative-optimization-ebpf_idea.md` (idea #1) /
-`docs/kinsn_idea.md` (idea #2) / `docs/reverse-sim_idea.md` (idea #3)
+`docs/kinsn_idea.md` (idea #2) / `docs/nativebpf_idea.md` (idea #3)
 方法: web 检索 eBPF 优化/验证/JIT/native-code 文献 + 对比三篇现有引用
 
 ---
@@ -145,7 +145,7 @@ speculation),但**每篇都缺 2–4 个直接相关、审稿人一定会问的�
   随 kinsn 数量增长"。这三篇是"给 eBPF 加硬件/SFI 隔离"的对照组,可用于
   论证 kinsn 的 TCB 增量 vs. 这些路线。优先级低于上面两条。
 
-### Idea #3 — ReverseSim (`reverse-sim_idea.md`)
+### Idea #3 — NativeBPF (`nativebpf_idea.md`)
 
 现有引用(§Related Work Positioning):
 - ✅ PCC [Necula&Lee OSDI'96]

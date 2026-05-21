@@ -15,7 +15,7 @@ corpus、micro 套件和测量基础设施),但用不同的设计解决不同的
 |---|---|---|
 | 1 | Speculative eBPF optimization(纯用户态) | `docs/rejit-speculative-optimization-ebpf_idea.md` |
 | 2 | **Kinsn**(本文档)—— 新 OS 抽象,让 eBPF 贴近硬件 | `docs/kinsn_idea.md` |
-| 3 | ReverseSim(eBPF 里的 x86/arm native simulator) | `docs/reverse-sim_idea.md` |
+| 3 | NativeBPF(eBPF 里的 x86/arm native simulator) | `docs/nativebpf_idea.md` |
 
 这三个 idea 不是同一个设计的递进版本。每个各自挑了一个不同的问题、一个在 trust /
 内核暴露面 / 覆盖面空间里不同的位置,以及一个不同的设计核心。
@@ -108,7 +108,7 @@ eBPF 指令扩展面**。
 
 `vendor/linux-framework/rejit-v2` 分支的 kinsn 子集——即仅 kinsn 的内核暴露面——触及
 以下文件。(REJIT 专属文件属于正交的 speculative-optimization 论文线,本篇刻意排除;
-见 `docs/reverse-sim_idea.md` 中关于 kernel-ABI 变体的讨论,以及内核 worktree 里的
+见 `docs/nativebpf_idea.md` 中关于 kernel-ABI 变体的讨论,以及内核 worktree 里的
 `docs/kinsn-only` 分支。)
 
 | 文件 | 职责 |
@@ -215,18 +215,18 @@ daemon 跑哪些 pass、以及这些 pass 需要哪些内核设施。
 两者的部署就跑它们 pass 的并集。但论文把它们分开,因为贡献点不同(用户态机制 vs. 内核
 抽象)。
 
-### Idea #3 —— ReverseSim
+### Idea #3 —— NativeBPF
 
 idea #2 和 idea #3 从相反的两端攻击同一个底层问题——如何让非平凡的 native 操作在
 eBPF 安全模型内变得可用:
 
 - Kinsn 用内核定义的双语义原语扩展内核侧的指令集。每个新原语都让内核 TCB 小幅增长。
-- ReverseSim 用一个经过验证的 simulator 或 JIT 扩展用户态侧的 lowering。内核保持不变。
+- NativeBPF 用一个经过验证的 simulator 或 JIT 扩展用户态侧的 lowering。内核保持不变。
   新增的 TCB 是一个用户态产物:每个目标 ISA 一个 C 文件。
 
-Kinsn 覆盖普通 eBPF 表达不好的少数几种模式。ReverseSim 覆盖目标 ISA 能表达的任何东西,
+Kinsn 覆盖普通 eBPF 表达不好的少数几种模式。NativeBPF 覆盖目标 ISA 能表达的任何东西,
 只要其 lowering 对 verifier 可处理。两者并不互斥:一个支持 kinsn 的内核,配上一个在有
-益处时 emit kinsn 的 ReverseSim,是一个自然的 ablation 点,但二者互不依赖。
+益处时 emit kinsn 的 NativeBPF,是一个自然的 ablation 点,但二者互不依赖。
 
 ## 7. 论文 framing
 
@@ -310,4 +310,4 @@ profile data.
   prefetch、ccmp、lea、bls、andn、setcc_cset、simd_fpu、bulk_memory、ldp_stp、
   register_realloc、region_kinsn 等)
 - Speculative-optimization 姐妹论文:`docs/rejit-speculative-optimization-ebpf_idea.md`
-- ReverseSim 姐妹论文:`docs/reverse-sim_idea.md`
+- NativeBPF 姐妹论文:`docs/nativebpf_idea.md`

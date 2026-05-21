@@ -1,9 +1,9 @@
-# ReverseSim:用 eBPF simulator 让内核扩展又安全又高效
+# NativeBPF:用 eBPF simulator 让内核扩展又安全又高效
 
 状态:研究方向 · idea #3 的论文线 hub
 
 > **一句话**:内核扩展今天被"安全 × 高效"的三难逼着二选一 —— 内核模块快但不安全、
-> eBPF 安全但有 codegen 惩罚、Rust-for-Linux 快但安全靠信任编译器而非独立验证。ReverseSim
+> eBPF 安全但有 codegen 惩罚、Rust-for-Linux 快但安全靠信任编译器而非独立验证。NativeBPF
 > 占住缺失的那一角:**native 性能 + eBPF-verifier 级、对不可信作者也成立的独立安全**,
 > 办法是裸跑原生扩展、而由 eBPF verifier 经一个忠实 simulator 来认证它。
 
@@ -16,7 +16,7 @@ corpus、micro 套件和测量基础设施),但用不同的设计和实现解决
 |---|---|---|---|---|
 | 1 | **Speculative eBPF optimization**(投机式 eBPF 优化) | 已加载的 eBPF 程序错失了那些只有在程序上线后才可见的优化机会(map 内容稳定下来、分支 profile 浮现、helper 调用模式显现)。 | 纯用户态工具:观察运行中的程序,施加 BPF-to-BPF 重写 pass(`map_inline`、`const_prop`、`dce`、`bounds_check_merge`、`branch_flip` 等),再用 stock 内核的原子或近原子 attach 更新机制换入优化后的候选程序。 | 接近零。 |
 | 2 | **Kinsn** | eBPF 指令集离硬件太远,无法表达若干 native 等价的优化(rotate、conditional select、BMI 位域提取、BLS 指令、prefetch)。 | 一个新的 OS 抽象:内核定义的双语义指令,以 kfunc 机制的 `KF_KINSN` 特化形式实现。verifier 把一个声明式 effect(`model_call` → `bpf_kinsn_effect`)施加到它的抽象状态上,JIT 则分派到内核模块提供的、按架构区分的 `emit_x86()` / `emit_arm64()` 回调。用户态优化器(`bpfopt`)负责识别候选模式。 | kinsn 框架 patch + 各架构模块,TCB 增长但有界。 |
-| 3 | **ReverseSim**(本文档) | 内核扩展被"安全 × 高效"三难逼着二选一:模块快但不安全、eBPF 安全但有 codegen 惩罚、Rust 快但安全靠信任编译器而非独立验证。如何同时拿到 native 性能 + 对不可信作者也成立的独立安全? | 用 eBPF C 写一个目标 ISA 的忠实解释器。针对某个具体目标程序特化,把解释器坍缩成 straight-line eBPF,**交给 stock eBPF verifier 做它平常那套安全分析**。**verifier 接受后直接裸跑 native P;那段 eBPF 只是被分析的对象,从不执行,无 lowering。** | 接近零(执行 native P 的路径除外)。 |
+| 3 | **NativeBPF**(本文档) | 内核扩展被"安全 × 高效"三难逼着二选一:模块快但不安全、eBPF 安全但有 codegen 惩罚、Rust 快但安全靠信任编译器而非独立验证。如何同时拿到 native 性能 + 对不可信作者也成立的独立安全? | 用 eBPF C 写一个目标 ISA 的忠实解释器。针对某个具体目标程序特化,把解释器坍缩成 straight-line eBPF,**交给 stock eBPF verifier 做它平常那套安全分析**。**verifier 接受后直接裸跑 native P;那段 eBPF 只是被分析的对象,从不执行,无 lowering。** | 接近零(执行 native P 的路径除外)。 |
 
 这三者不是同一个设计的递进版本。每个各自挑了一个不同的问题、一个在 trust /
 内核暴露面 / 覆盖面空间里不同的位置。本文档讲的是 idea #3。idea #1 在
@@ -24,7 +24,7 @@ corpus、micro 套件和测量基础设施),但用不同的设计和实现解决
 `docs/kinsn_idea.md`(机制设计见 `docs/tmp/kinsn-design.md`,形式语义见
 `docs/tmp/kinsn-formal-semantics.md`)。
 
-"ReverseSim" 还有一个 kernel-ABI 变体(由内核拥有的双语义 ISA),那是 idea #3
+"NativeBPF" 还有一个 kernel-ABI 变体(由内核拥有的双语义 ISA),那是 idea #3
 更早的一种 framing。它和 idea #2 重叠很大,现在只作为一条备选路径记录在
 [备选路径:kernel-ABI 双语义 ISA](#alternative-path-kernel-abi-dual-semantics-isa)
 一节。
@@ -38,7 +38,7 @@ corpus、micro 套件和测量基础设施),但用不同的设计和实现解决
 | **kernel module (C)** | native ✅ | 无 ❌ | 完全信任作者 | 无限 ✅ |
 | **eBPF** | eBPF-JIT,有 codegen 惩罚 ❌ | verifier 独立检查 ✅ | **不信任作者** ✅ | verifier 受限 ❌ |
 | **Rust-for-Linux** | native ✅ | 编译期类型 / borrow checker | 信任 Rust 编译器 + `unsafe` 块 ⚠️ | 无限 ✅ |
-| **ReverseSim(本文)** | **native ✅** | **verifier 独立检查 ✅** | **不信任作者 ✅** | verifier 受限 |
+| **NativeBPF(本文)** | **native ✅** | **verifier 独立检查 ✅** | **不信任作者 ✅** | verifier 受限 |
 
 - **内核模块**:native 速度,但**没有任何验证**,一个 bug 就是内核崩溃 / 提权 —— 完全信任作者。
 - **eBPF**:verifier 对不可信作者也独立保证内存安全 / 有界终止,但执行的是 eBPF-JIT 产物,
@@ -48,21 +48,21 @@ corpus、micro 套件和测量基础设施),但用不同的设计和实现解决
   的、**信任 Rust 工具链 + `unsafe` 块**的安全,**不是对一个不可信二进制做独立的 load-time
   检查**;它没有 eBPF 那种"untrusted producer, trusted checker"性质。
 
-**ReverseSim 占的是没人占的那一格:native 性能 + eBPF-verifier 级、对不可信作者也成立的
+**NativeBPF 占的是没人占的那一格:native 性能 + eBPF-verifier 级、对不可信作者也成立的
 独立 load-time 安全。** module 没验证、eBPF 不 native、Rust 信任编译器而非独立验证 —— 三者
-各缺一角,ReverseSim 把缺的那角补上。
+各缺一角,NativeBPF 把缺的那角补上。
 
-**诚实的边界(必须主动承认)**:ReverseSim 的表达力仍被 verifier 锁死(无界循环、任意数据
+**诚实的边界(必须主动承认)**:NativeBPF 的表达力仍被 verifier 锁死(无界循环、任意数据
 结构跑不了)。所以它**不是**"在内核跑任意 native",而是 **"为本来就能在 verifier 下表达的
 扩展,加上 native 速度,且仍不信任作者"** —— 一句话:**native-speed eBPF for untrusted
 extensions**。它的天然战场和 eBPF 相同(多租户、跑不可信扩展),只是把性能拉到 native。
 - **vs eBPF**:相同安全、相同表达力上限,**纯赚性能**(裸跑 native vs 跑 eBPF-JIT 产物)。
-- **vs 模块 / Rust**:它们表达力无限而 ReverseSim 受限;ReverseSim 换来的是**对不可信作者
+- **vs 模块 / Rust**:它们表达力无限而 NativeBPF 受限;NativeBPF 换来的是**对不可信作者
   也成立的独立验证**(模块完全没有;Rust 是编译器信任,不是独立检查)。
 
 ## 核心思想
 
-ReverseSim 把 **stock eBPF verifier 复用成 native 代码的现成安全检查器(safety oracle)**:
+NativeBPF 把 **stock eBPF verifier 复用成 native 代码的现成安全检查器(safety oracle)**:
 用一个目标 ISA 的**忠实解释器 `I`**(不插任何检查的纯翻译器),让 verifier 对"`I` 跑目标
 程序 P 的过程"跑它平常那套 abstract-interpretation 安全分析。**verifier 接受 = 它确证了
 "P 在 eBPF 内存安全策略下没问题"。然后内核直接裸跑原生 P 本身。**
@@ -95,7 +95,7 @@ target P ───────┤     → 把 "I 跑 P" 表示成 verifier 可�
 一句话概括:
 
 ```text
-ReverseSim reuses the stock eBPF verifier as an off-the-shelf safety checker for
+NativeBPF reuses the stock eBPF verifier as an off-the-shelf safety checker for
 native code: a once-verified, faithful ISA interpreter — specialized to the target
 program — turns "is P safe?" into an eBPF program that the verifier accepts or
 rejects via its ordinary abstract-interpretation analysis. The native program P
@@ -109,11 +109,11 @@ is not proof-carrying code; see Related Work.)
 
 这个 idea 内部有两种生成"供 verifier 分析的 eBPF"的策略:
 
-- **ReverseSim(simulator 变体,主线)**:用 C 写目标 ISA 的忠实解释器,靠 clang 常量
+- **NativeBPF(simulator 变体,主线)**:用 C 写目标 ISA 的忠实解释器,靠 clang 常量
   传播针对单个 P 做特化(这是 Futamura 第一投影:把解释器特化到程序 = 得到对该程序的
   专用直线 eBPF)。编译快(每个程序一次特化,而非每次 load 跑一遍 LLVM)。详见
   [机制](#mechanism)。
-- **ReverseSim-in-eBPF(JIT 变体)**:用 C 写一个 native→eBPF 的显式翻译器,编译成
+- **NativeBPF-in-eBPF(JIT 变体)**:用 C 写一个 native→eBPF 的显式翻译器,编译成
   eBPF,离线对 P emit 出供 verifier 分析的 eBPF。翻译器只需验证一次。两个变体的 trust
   模型与 safety transfer 论证完全相同,区别只在于"特化"由 clang 隐式做(simulator 变体)
   还是由显式 emitter 做(JIT 变体)。**两个变体的执行侧都一样 —— 跑 native P,不跑 eBPF。**
@@ -121,7 +121,7 @@ is not proof-carrying code; see Related Work.)
 ## 它是什么、不是什么
 
 **它不是 proof-carrying code(PCC)。** PCC(Necula-Lee)的定义性特征是:代码**附带**一份
-显式 proof 证书,一个轻量 checker **校验**这份证书。ReverseSim 两条都不满足:
+显式 proof 证书,一个轻量 checker **校验**这份证书。NativeBPF 两条都不满足:
 - **没有任何东西携带 proof** —— 没有被生成、被传输、被校验的证书;
 - **verifier 不校验 proof** —— 它跑自己的 abstract interpretation,**推断**出安全性
   (基础 eBPF verifier 是 inference engine,不是 proof checker;真正 PCC 风格的是 VEP 的
@@ -137,7 +137,7 @@ is not proof-carrying code; see Related Work.)
     -> 轻量 checker 校验证书
     -> 裸跑 native P
 
-ReverseSim(不是 PCC):
+NativeBPF(不是 PCC):
   native P + 已验证的忠实解释器 I(特化到 P → 一段直线 eBPF,作为被分析对象)
     -> stock eBPF verifier 跑它平常的 abstract interpretation(推断,非校验证书)
     -> verifier 接受 = 确证 P 内存安全
@@ -159,23 +159,23 @@ eBPF-JIT 的产物"——那是错的:那样会白白背上 eBPF codegen 的性�
 
 ## 与 kinsn 的关系
 
-Kinsn(idea #2)和 ReverseSim(idea #3)从相反的两端攻击同一个底层问题——如何让
+Kinsn(idea #2)和 NativeBPF(idea #3)从相反的两端攻击同一个底层问题——如何让
 非平凡的 native 操作在 eBPF 安全模型内变得可用:
 
 - Kinsn 用内核定义的双语义原语扩展内核侧的指令集。每个新原语都让内核 TCB 小幅增长。
-- ReverseSim 用一个经过验证的 simulator 或 JIT 扩展用户态侧的 lowering。内核保持不变。
+- NativeBPF 用一个经过验证的 simulator 或 JIT 扩展用户态侧的 lowering。内核保持不变。
   新增的 TCB 是一个用户态产物:每个目标 ISA 一个 C 文件,可独立验证。
 
-Kinsn 覆盖的是"普通 eBPF 表达不好的少数几种模式"。ReverseSim 覆盖的是"目标 ISA 能
+Kinsn 覆盖的是"普通 eBPF 表达不好的少数几种模式"。NativeBPF 覆盖的是"目标 ISA 能
 表达的任何东西,只要其 lowering 对 verifier 可处理"。两者并不互斥:一个支持 kinsn 的
-内核,配上一个在有益处时 emit kinsn 的 ReverseSim,是一个自然的 ablation 点,但二者
+内核,配上一个在有益处时 emit kinsn 的 NativeBPF,是一个自然的 ablation 点,但二者
 互不依赖。
 
 ## 机制
 
-本节给出 ReverseSim 变体的规格。ReverseSim-in-eBPF 变体使用相同的 lowering 规则,
+本节给出 NativeBPF 变体的规格。NativeBPF-in-eBPF 变体使用相同的 lowering 规则,
 但由一个显式 emitter 来执行,而非依赖 clang 特化;见
-[ReverseSim-In-eBPF 变体](#reversesim-in-ebpf-variant)。
+[NativeBPF-In-eBPF 变体](#reversesim-in-ebpf-variant)。
 
 ### 按程序特化
 
@@ -366,7 +366,7 @@ SCALAR 类型,只在真正执行指针类型操作的 handler 内部才把指针
 **拒绝**(验证忠实性:不安全的 P 必须无法通过分析)。注意 PoC 不需要执行那段 eBPF ——
 它只是被分析对象;真正要跑的是 native P。
 
-### ReverseSim-In-eBPF 变体
+### NativeBPF-In-eBPF 变体
 
 idea #3 内部的另一条路是:用 C 写一个 native-to-eBPF JIT,把这个 JIT 本身编译成 eBPF,
 离线针对目标二进制运行它,再把 emit 出来的 eBPF 提交给内核。trust profile 与 simulator
@@ -420,7 +420,7 @@ idea #3 内部的另一条路是:用 C 写一个 native-to-eBPF JIT,把这个 JI
   转移到裸跑的 P"这唯一的问题,**完全归结于上面那条 `I` 的忠实等价**。
 - **eBPF JIT**:不在 TCB 里(eBPF 从不执行)。
 
-对比经典 PCC(信任一份 per-program proof + 一个专用 checker),ReverseSim 把新增信任压缩成
+对比经典 PCC(信任一份 per-program proof + 一个专用 checker),NativeBPF 把新增信任压缩成
 **一个 per-ISA、可一次性验证**的解释器 —— 这是它 TCB 论述上的核心优势。
 
 ## Safety Transfer 论证
@@ -443,7 +443,7 @@ native program P
 safe(B) and B ≡ P faithfully  =>  safe(execute_native(P))
 ```
 
-`P` 不是因为某个独立的 ReverseSim 被验证过才安全 —— 它安全,是因为 verifier 证明了"忠实
+`P` 不是因为某个独立的 NativeBPF 被验证过才安全 —— 它安全,是因为 verifier 证明了"忠实
 解释器跑 P"安全,而 `I` 的忠实等价把这份证明搬到了真正裸跑的 `P` 上。**整个论证的承重墙
 就是这条忠实等价**:`I` 对 ISA 的建模必须和 CPU 真实执行 `P` 时的访存/控制流/异常行为
 分毫不差。
@@ -491,7 +491,7 @@ load guest_mem[guest_addr]
 ```
 
 这证明的是 sandbox 化 x86 simulator 语义的安全性,而不是把 `rax` 当作真实内核地址来用的
-安全性。ReverseSim 的 lowering 忠实,当且仅当目标程序在 packet、ctx、map_value 和 stack
+安全性。NativeBPF 的 lowering 忠实,当且仅当目标程序在 packet、ctx、map_value 和 stack
 指针上的语义,一对一地映射到 verifier 已经在检查的 eBPF 指针类型操作上。不忠实的 lowering
 会破坏 safety transfer。
 
@@ -545,7 +545,7 @@ helper 调用、且让 verifier 检查该指针的类型/边界 —— 而不是
 
 ## 备选路径:kernel-ABI 双语义 ISA
 
-idea #3 更早的一种 framing 把双语义放进内核里:每条 ReverseSim 指令同时拥有一个 verifier
+idea #3 更早的一种 framing 把双语义放进内核里:每条 NativeBPF 指令同时拥有一个 verifier
 可见的 `instantiate_insn()` lowering 和一个按架构区分的 native emitter,二者都归内核 ABI
 所有。这个 framing 已被降级为备选路径,因为它与 idea #2(Kinsn,整程序泛化)有显著重叠。
 
@@ -560,7 +560,7 @@ struct reversesim_insn {
 ```
 
 `instantiate_insn()` 是 verifier 的 source of truth。native emitter 是执行层面的精化。
-verifier 路径把 ReverseSim 指令 lower 成普通 BPF 语义并检查结果程序。JIT 路径则改为 emit
+verifier 路径把 NativeBPF 指令 lower 成普通 BPF 语义并检查结果程序。JIT 路径则改为 emit
 native 语义。
 
 要让它成为一个整程序 substrate 而不是 peephole 机制,内核接口还需要:
@@ -579,25 +579,25 @@ native 语义。
 
 ### 主对比:扩展内核的三条路(安全 × 高效)
 
-ReverseSim 的主战场是"如何安全高效地扩展内核",所以最直接的对比是现有三条路:
+NativeBPF 的主战场是"如何安全高效地扩展内核",所以最直接的对比是现有三条路:
 
 - **eBPF(系统本身)** [Linux kernel; bpftime / llvmbpf 等用户态运行时]:同样靠 verifier
   对不可信作者独立保证安全,但执行 eBPF-JIT 产物、背 codegen 惩罚,且表达力受 verifier 限。
-  ReverseSim 与它**同安全、同表达力上限,但裸跑 native** —— 把 idea #1 / llvmbpf 追的
+  NativeBPF 与它**同安全、同表达力上限,但裸跑 native** —— 把 idea #1 / llvmbpf 追的
   30–40% 差距直接抹掉(不是优化 eBPF codegen,而是根本不执行 eBPF)。
 - **Rust-for-Linux**:编译到 native、安全靠语言类型 / borrow checker。关键区别:Rust 是
   **编译期、信任工具链 + `unsafe`** 的安全,**不对一个不可信二进制做独立 load-time 验证**;
-  ReverseSim 保留 eBPF 的"untrusted producer, trusted checker"性质。代价是 ReverseSim
+  NativeBPF 保留 eBPF 的"untrusted producer, trusted checker"性质。代价是 NativeBPF
   表达力受 verifier 限,而 Rust 无限。
-- **裸内核模块 (C)**:native、表达力无限,但**零验证、完全信任作者**。ReverseSim 在
+- **裸内核模块 (C)**:native、表达力无限,但**零验证、完全信任作者**。NativeBPF 在
   verifier 可表达的范围内提供同样的 native 速度,但不要求信任作者。
 
-一句话:**eBPF 不 native、Rust 信任编译器而非独立验证、模块没验证 —— ReverseSim 补上三者
+一句话:**eBPF 不 native、Rust 信任编译器而非独立验证、模块没验证 —— NativeBPF 补上三者
 缺的那一角(native + 对不可信作者独立验证)。**
 
 ### 机制谱系(次要对比:本工作的技术血缘)
 
-下面这些不是"扩展内核"的同类竞品,而是 ReverseSim 机制(把 native 经一个可信 lowering 交给
+下面这些不是"扩展内核"的同类竞品,而是 NativeBPF 机制(把 native 经一个可信 lowering 交给
 一个独立 checker、再裸跑 native)的技术血缘与对照。
 
 一个常被联想、但必须明确区分的对照是 proof-carrying code:
@@ -606,7 +606,7 @@ ReverseSim 的主战场是"如何安全高效地扩展内核",所以最直接的
   Checking",OSDI 1996。
 
 PCC 让 native 代码**附带**一份显式 proof 证书,一个轻量 checker 去**校验**证书。
-**ReverseSim 不是 PCC**:它不携带任何 proof,被喂给 verifier 的是一个特化到 P 的忠实
+**NativeBPF 不是 PCC**:它不携带任何 proof,被喂给 verifier 的是一个特化到 P 的忠实
 解释器,而 stock eBPF verifier 用自己的 abstract interpretation **推断**安全性 —— 不是
 在校验一份证书。所以 PCC 是对照,不是本工作的归属。
 
@@ -614,25 +614,25 @@ Translation validation(翻译验证)与之相关:它可以验证按程序的特�
 验证一个手写 JIT 忠实地实现了目标 ISA。
 
 Native Client、RockSalt 以及 native 机器码 validator 通过**直接**验证或约束 native 机器码
-来安全执行 native 代码 —— 它们也裸跑 native,但 checker 是为该 ISA 专门构造的。ReverseSim
+来安全执行 native 代码 —— 它们也裸跑 native,但 checker 是为该 ISA 专门构造的。NativeBPF
 同样裸跑 native P,但**不专门造 checker**:它把"P 安全吗"经一个忠实解释器特化成 eBPF,复用
 stock eBPF verifier 当现成的安全分析器。SFI(software fault isolation)的源头是 Wahbe 等人
-(SOSP 1993),它靠二进制改写 + inline check 约束 native;ReverseSim 不改写、不插 check,
+(SOSP 1993),它靠二进制改写 + inline check 约束 native;NativeBPF 不改写、不插 check,
 而是用 verifier 的抽象解释证明原样的 P 已经安全。
 
-**WebAssembly 沙箱一条线是 ReverseSim 最近邻的 prior work,结构完全同构**:把不可信代码
+**WebAssembly 沙箱一条线是 NativeBPF 最近邻的 prior work,结构完全同构**:把不可信代码
 编译到一个可被安全检查的 IR,再 lower 成 native。Provably-Safe Multilingual Software
 Sandboxing using WebAssembly(USENIX Security 2022)把多语言代码编译到 Wasm 当可安全检查
 的 IR;VeriWasm(USENIX Security 2021)验证 Wasm→native 编译保持 SFI;RLBox(USENIX
 Security 2020 / Firefox 95)把不可信库编译成 Wasm 再编 native,在同地址空间安全共享。
 两者结构同构:Wasm 沙箱是"untrusted → 可信编译成 safe IR → checker 通过 → 跑(JIT 后的)
-native";ReverseSim 是"native P → 经忠实解释器特化成 eBPF → stock verifier 安全分析通过 →
-**裸跑原生 P**"。关键区别两点:① ReverseSim 不引入新 IR、不引入新 checker,直接复用内核
+native";NativeBPF 是"native P → 经忠实解释器特化成 eBPF → stock verifier 安全分析通过 →
+**裸跑原生 P**"。关键区别两点:① NativeBPF 不引入新 IR、不引入新 checker,直接复用内核
 已有的 eBPF verifier,处理的是 native ISA(x86/arm64)而非 Wasm 这类天生为沙箱设计的 IR;
 ② **被执行的是原生 P 本身,eBPF 不被执行**(Wasm 路线执行的是 Wasm→native 的产物)。
 
 经验证的 eBPF JIT 工作(Jitterbug、Serval、K2)证明的是一个 eBPF JIT 保持 eBPF 语义。
-ReverseSim 是其对偶:它要保证的是一个 native↔eBPF 的忠实等价(让 verifier 对 eBPF 的
+NativeBPF 是其对偶:它要保证的是一个 native↔eBPF 的忠实等价(让 verifier 对 eBPF 的
 安全结论能转移到裸跑的 native);注意它**不执行 eBPF、不依赖 eBPF JIT**。Jitk(OSDI 2014)
 对"把可信 lowering 写成可验证
 组件"这点更贴:它形式化验证地把高层规则编译到 cBPF 加 machine code。RIOT 微控制器内核上
@@ -651,7 +651,7 @@ reference simulator。这些都是可信 simulator `I` 的候选来源。
 Kernel extension forces a safety/efficiency trade-off: modules are fast but
 unverified, eBPF is verified (against an untrusted producer) but pays a codegen
 penalty, and Rust-for-Linux is fast but its safety is compile-time and trusts the
-toolchain rather than independently checking an untrusted binary. ReverseSim hits
+toolchain rather than independently checking an untrusted binary. NativeBPF hits
 the missing corner — native-code efficiency with eBPF-verifier safety that holds
 against an untrusted producer — by running the native extension directly while the
 stock eBPF verifier certifies it via a faithful, once-verified ISA simulator. The
@@ -667,13 +667,13 @@ Making Kernel Extensions Safe and Efficient with an eBPF Simulator
 
 要成为一篇有分量的系统论文,评测需要:
 
-- **主对比矩阵**:在同一组扩展上对比 eBPF / Rust-for-Linux / 裸内核模块 / ReverseSim,
+- **主对比矩阵**:在同一组扩展上对比 eBPF / Rust-for-Linux / 裸内核模块 / NativeBPF,
   沿"性能(吞吐 / 延迟 / 指令数 / cache)× 安全(对不可信作者是否独立验证)× 表达力"摆位;
 - 性能就是 native x86/arm64(P 裸跑,无 eBPF 执行)——相同语义下**严格优于** eBPF-JIT 产物
   (那 30–40% 差距是 idea #1 / llvmbpf 在追的),并接近裸模块 / Rust;
 - 安全:对不可信作者的独立 load-time 验证(模块没有、Rust 是编译器信任),并给出
   verifier 自然拒绝不忠实 / 不安全程序的失败案例;
-- TCB 核算:相对模块(全信任)、Rust(信任编译器 + unsafe)、eBPF,ReverseSim 净增的信任
+- TCB 核算:相对模块(全信任)、Rust(信任编译器 + unsafe)、eBPF,NativeBPF 净增的信任
   只有"一个 per-ISA 可一次性验证的忠实 simulator";
 - 覆盖面:广泛的目标 ISA 与真实扩展(把现有 eBPF app 用该路径重表达,量化 verifier 受限
   排除掉多少真实程序);
@@ -701,7 +701,7 @@ Making Kernel Extensions Safe and Efficient with an eBPF Simulator
 因此最强的版本是保守的:
 
 ```text
-ReverseSim executes the user's native program P directly. The eBPF artifact is
+NativeBPF executes the user's native program P directly. The eBPF artifact is
 never executed — it is only what the verifier analyzes. A once-verified, faithful
 (no-sanitization) ISA interpreter, specialized to P, turns "is P memory-safe?"
 into an eBPF program that the stock eBPF verifier accepts or rejects via its
@@ -945,7 +945,7 @@ carried or certificate-checked); P runs with no lowering.
    形式化对象: 每条 kinsn 的 verifier 语义和 native emit 的等价性
    解决的问题: 让 eBPF 能表达更接近硬件的操作而不放弃 verifier 保证
 
-3. ReverseSim (本 doc)
+3. NativeBPF (本 doc)
    定位: making kernel extensions safe AND efficient via an eBPF simulator;
         native 性能 + eBPF-verifier 级、对不可信作者也成立的独立验证
    关键技术: 特化的忠实 eBPF simulator(主线) 或 native-to-eBPF translator;
@@ -953,7 +953,7 @@ carried or certificate-checked); P runs with no lowering.
    内核改动: 接近零(执行 native P 的路径除外)
    形式化对象: 单个 C simulator 与目标 ISA 的忠实等价(净增唯一 TCB)
    解决的问题: 内核扩展的安全 × 高效三难 —— 模块快但不安全、eBPF 安全但有 codegen 惩罚、
-              Rust 快但安全靠信任编译器而非独立验证;ReverseSim 补缺的那一角
+              Rust 快但安全靠信任编译器而非独立验证;NativeBPF 补缺的那一角
    主对比: eBPF 系统本身 / Rust-for-Linux / 裸内核模块
    诚实边界: 表达力仍受 verifier 限 → 是 "native-speed eBPF for untrusted extensions",
             不是 "在内核跑任意 native"
