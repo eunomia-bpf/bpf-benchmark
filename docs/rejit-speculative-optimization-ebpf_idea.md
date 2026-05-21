@@ -194,6 +194,13 @@ bpfopt 的 Insight 3(吃 verifier 已算出来的 tnum/range 当 ground truth、
 
 另有一条**"改 / 换 verifier 以提升可表达性"**的正交路线 —— **Fast/Flexible Kernel Extensions** [SOSP'24]、**Rex** [ATC'25]、**VEP** [NSDI'25]、**Approximation Enforced Execution** [Sec'25]。它们都改动或替换 verifier;bpfopt 的卖点恰恰相反:**stock verifier、零内核改动**,因此与这条路线正交。
 
+#### speculation / deopt 与在线换码相关工作(补充)
+
+- **Deoptless** [Flückiger et al, PLDI'22]:用 dispatched OSR + specialized continuations 做投机,**不走传统 deopt**。bpfopt 的 two-tier deopt(inline guard + 同版本 slow path、不需要 OSR)应正面对标这条"避免传统 deopt"的路线(§4)。
+- **Correctness of Speculative Optimizations with Dynamic Deoptimization** [Flückiger et al, POPL'18]:CoreJIT [POPL'21] 的奠基前作,形式化 guard/deopt 正确性 —— bpfopt 把"证 deopt path safe"outsource 给 verifier,与之对照。
+- **KShot** [DSN'20] 等 live kernel patching:运行中内核代码原子替换的可行性先例;bpfopt 的程序版本原子换属同类"在线换码",但有 verifier 强制 safety(livepatch / KShot 信任 patch 作者)。
+- **bpftime** [OSDI'25]:用户态 eBPF 运行时(含 llvmbpf LLVM JIT,本文用作性能上界参考);与 bpfopt 部署透明性目标相关,应正式引 OSDI'25 版。
+
 ### 1.9 四种用途
 
 同一框架支持四种用途：

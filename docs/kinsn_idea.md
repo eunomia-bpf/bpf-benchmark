@@ -282,6 +282,19 @@ profile data.
   Compilers for In-Kernel DSLs CAV 2020)**:kinsn 的 soundness 论证(§9:声明式 effect
   必须忠实建模 native emit)本质上是"JIT emit 正确性"问题。verified JIT 与 translation
   validation 是这一缓解手段的既有方法论范式。
+- **peephole / 超优化的正确性谱系(kinsn soundness 的直接方法论来源)**:kinsn 的
+  "声明式 effect ≡ native emit" 等价,正是 peephole 正确性 / superoptimization 的核心
+  问题,应正面对标这条线:
+  - **Alive(PLDI 2015)** + **Alive2(PLDI 2021)**:用 DSL + SMT **证明 peephole 等价**
+    / 对 LLVM 做有界 translation validation —— 几乎就是验证 "kinsn effect ↔ emit" 该用
+    的方法。
+  - **STOKE(ASPLOS 2013)** / **Souper(LLVM superoptimizer)** / **Minotaur(OOPSLA
+    2024,SIMD)** / **Hydra(OOPSLA 2024,泛化 peephole)**:随机 / 合成式超优化发现并
+    **形式化验证** native(含 SIMD)指令序列 —— 自定义指令生成 + 等价验证的谱系。
+  - kinsn 与它们的区别:它们离线发现 / 验证一条 host 指令序列;kinsn 把这种"更接近硬件
+    的单条原语"放到**内核模块 + verifier 声明式 effect**之后,在线由 bytecode pass 插入。
+- **ePASS(in-kernel eBPF 编译框架,2025)**:把 SSA IR 与 verifier 协同放进内核做分析 /
+  变换,与 kinsn 的"内核模块 + verifier 协同"架构可直接对比(也与 idea #1 相关)。
 - **BeeBox / MOAT / Hive(USENIX Security 2024)**:给 eBPF 加硬件或 SFI 隔离的对照组
   (分别针对瞬态执行、Intel MPK、AArch64 硬件隔离)。可用于论证 kinsn 的 TCB 增量相对
   这些"改运行时隔离"路线的取舍。

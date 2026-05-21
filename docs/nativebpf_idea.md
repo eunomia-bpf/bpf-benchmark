@@ -595,6 +595,29 @@ NativeBPF 的主战场是"如何安全高效地扩展内核",所以最直接的�
 一句话:**eBPF 不 native、Rust 信任编译器而非独立验证、模块没验证 —— NativeBPF 补上三者
 缺的那一角(native + 对不可信作者独立验证)。**
 
+**更广的安全内核扩展谱系(摆位用,非同类竞品)**:让内核扩展更安全有一整片设计空间,
+按**两条轴**摆最清楚——**①安全何时强制**(静态验证完就裸跑 vs 运行时持续强制)×
+**②是否信任作者**(信编译器/工具链 vs 不信任、直接管住二进制):
+
+| 阵营 | 代表 | 何时强制 | 信任作者? | 代价 |
+|---|---|---|:---:|---|
+| **静态验证(不信任作者)** | eBPF verifier、**NativeBPF**、PCC/TAL | 静态,过后裸跑 | **否** | 表达力受 verifier 限 |
+| **语言级(信任编译器)** | Rust-for-Linux、SafeDrive(OSDI'06)、Singularity(OSR'07) | 编译期 | 是(信工具链+`unsafe`) | — |
+| **SFI(软件运行时检查,不信任作者)** | Wahbe(SOSP'93)、NaCl、RockSalt、XFI(OSDI'06)、BGI(SOSP'09) | **运行时**(改写+插 check/mask) | **否** | **每访问运行时开销 + 代码被改写** |
+| **硬件/页表/MPK 隔离** | Nooks(SOSP'03)、Mondrix(SOSP'05)、MOAT/Hive(MPK,Sec'24) | 运行时 | 否 | 运行时开销 |
+| **硬件 capability** | CHERI(S&P 多年) | 运行时 | 否 | 需特殊硬件 |
+
+(外加裸内核模块 = 完全信任、零安全。)
+
+**NativeBPF 与 SFI 是最尖锐的对照**:两者**都不信任作者**(同属"管住二进制"而非"信编译器"),
+但强制方式正相反 —— **SFI 靠二进制改写 + 运行时插 check/mask(代码被改、每访问付开销);
+NativeBPF 靠静态验证一次,然后裸跑未改动的 native(运行时零插桩、零隔离开销)。** 这比
+"native vs eBPF-JIT"更能凸显 NativeBPF 的独特性。
+
+NativeBPF 独占的格子:**静态 + 独立(不信任作者)验证 + native 速度裸跑、运行时无开销** ——
+语言级路线信任编译器、SFI 与硬件路线都付运行时代价,都没占这一格。(SFI 各系统作为机制的
+具体对照见下方[机制谱系](#机制谱系次要对比本工作的技术血缘)。)
+
 ### 机制谱系(次要对比:本工作的技术血缘)
 
 下面这些不是"扩展内核"的同类竞品,而是 NativeBPF 机制(把 native 经一个可信 lowering 交给
@@ -639,6 +662,15 @@ NativeBPF 是其对偶:它要保证的是一个 native↔eBPF 的忠实等价(�
 的 eBPF interpreter+verifier(CAV 2022)与 JIT(CAV 2024)端到端机器证明,则是"对一个
 具体 eBPF interpreter/JIT 做整体机器证明"的现成范例,支撑本文 Trust Model 里"simulator
 `I` 可被形式化验证一次"的可行性主张。
+
+**直击核心难题的 prior work**:NativeBPF 的承重墙是"忠实解释器 `I` 的建模语义 == 真实 CPU
+执行 P 的语义"。
+- **Islaris: Verification of Machine Code Against Authoritative ISA Semantics(PLDI 2022)**
+  —— 把 native 机器码**对照权威完整 ISA 规格(ARMv8-A / RISC-V)**做验证。这正是 `I` 忠实
+  等价该用的现成方法论,是这条 idea 最该正面引用、对标的工作(⚠️ must-cite)。
+- **Formally Verified Native Code Generation in an Effectful JIT(POPL 2023)**:把 CompCert
+  后端扩到 JIT 场景、在 Coq 里证明**动态生成 native 代码**的正确性 —— 对应"如何在没有
+  compile-time 全验证时保证动态 lowering 正确"。
 
 可复用的可信 ISA 规格包括 Sail 对 arm64 和 RISC-V 的机器可检查语义,以及 ARM 官方的 C
 reference simulator。这些都是可信 simulator `I` 的候选来源。

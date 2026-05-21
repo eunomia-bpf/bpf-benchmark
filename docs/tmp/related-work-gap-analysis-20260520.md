@@ -214,3 +214,61 @@ speculation),但**每篇都缺 2–4 个直接相关、审稿人一定会问的�
 - VeriWasm (Sec'21): https://cseweb.ucsd.edu/~dstefan/pubs/johnson:2021:veriwasm.pdf
 - Demystifying Performance of eBPF Network Applications (CoNEXT/ACM Netw. '25):
   https://dl.acm.org/doi/10.1145/3749216
+
+---
+
+## 二次审计补充(2026-05-20,3 个 haiku subagent 并行)
+
+在第一轮(K2/Merlin/EPSO/Morpheus/hXDP/Wasm 等)之外,三个并行 subagent 又找出以下
+净新增、且已下载 PDF 入 `docs/reference/papers/` 的引用。已分别补进三篇 idea doc 的
+related work。
+
+### Idea #1 — BpfReJIT(rejit doc §1.8 "speculation/deopt 与在线换码"补充)
+| 论文 | venue | 作用 | PDF |
+|---|---|---|---|
+| Deoptless: Speculation w/ Dispatched OSR & Specialized Continuations | PLDI'22 | 对标 two-tier deopt(不走传统 deopt) | `90-deoptless-...pdf` |
+| Correctness of Speculative Optimizations w/ Dynamic Deoptimization (Flückiger) | POPL'18 | CoreJIT 奠基前作,形式化 guard/deopt | `91-correctness-speculative-...pdf` |
+| KShot: Live Kernel Patching (SMM+SGX) | DSN'20 | 运行中内核原子换码先例 | `92-kshot-...pdf` |
+| bpftime (EIM) | OSDI'25 | 用户态 eBPF 运行时,正式引 | 已在 `47-cache-ext`/bpftime 库内 |
+
+### Idea #2 — Kinsn(§8 新增 "peephole/超优化正确性谱系")
+kinsn soundness("声明式 effect ≡ native emit")= peephole 正确性问题,这条线原先一篇没引:
+| 论文 | venue | 作用 | PDF |
+|---|---|---|---|
+| Alive: Provably Correct Peephole Optimizations | PLDI'15 | DSL+SMT 证 peephole 等价(⚠️ 方法论直系) | `85b-alive-...pdf` |
+| STOKE: Stochastic Superoptimization | ASPLOS'13 | x86 序列超优化 + 符号验证 | `85-stoke-...pdf` |
+| Minotaur: SIMD-Oriented Synthesizing Superoptimizer | OOPSLA'24 | 合成+验证 SIMD peephole | `86-minotaur-...pdf` |
+| Souper (LLVM superoptimizer) | — | IR 级 SMT 超优化 | `87-souper-...pdf` |
+| Alive2: Bounded Translation Validation for LLVM | PLDI'21 | LLVM 变换有界验证 | `88-alive2-...pdf` |
+| Hydra: Generalizing Peephole Optimizations | OOPSLA'24 | 泛化 peephole + 验证 | `89-hydra-...pdf` |
+| ePASS(in-kernel eBPF 编译框架) | 2025 | SSA IR + verifier 协同,架构对比(也涉 idea #1) | 无(GitHub) |
+
+### Idea #3 — NativeBPF(机制谱系 + 主对比)
+| 论文 | venue | 作用 | PDF |
+|---|---|---|---|
+| **Islaris: Verification of Machine Code Against Authoritative ISA Semantics** | PLDI'22 | **⚠️ 直击核心难题**:native↔权威 ISA 语义忠实等价的现成方法 | `80-islaris-...pdf` |
+| Formally Verified Native Code Generation in an Effectful JIT | POPL'23 | 形式化验证动态 native 代码生成 | `81-formally-verified-native-codegen-...pdf` |
+| SafeDrive | OSDI'06 | 语言级驱动隔离(对比:信任编译器一路) | `82-safedrive-...pdf` |
+| Nooks | SOSP'03 | 页表沙箱隔离驱动(对比:运行时隔离一路) | `83-nooks-...pdf` |
+| Singularity | SOSP/OSR'07 | SIP / Sing# 语言安全 | `84-singularity-...pdf` |
+| CHERI | S&P 多年 | 硬件 capability 内存安全(对照路) | 无 |
+
+### 最该立刻用的 4 个
+1. **Islaris [PLDI'22]**(idea#3)—— 锚定核心难题,最高价值。
+2. **Alive [PLDI'15] + STOKE [ASPLOS'13]**(idea#2)—— 补 kinsn 缺失的 peephole-correctness 谱系。
+3. **Deoptless [PLDI'22]**(idea#1)—— 对标 two-tier deopt。
+
+(注:`docs/reference/papers/manifest.csv` 已删除;元数据脏的问题随之消失。`manifest.json` 保留。)
+
+### 补充:安全内核扩展的完整谱系(idea#3 主对比,2026-05-20)
+
+把"扩展内核安全"理成 5 支(两轴:静态 vs 运行时强制 × 信任作者 vs 管二进制),NativeBPF
+主对比的"更广谱系"已据此重写。新增 SFI 单列(原先被并进硬件隔离)+ 与 NativeBPF 的尖锐对照
+("都不信任作者,但 SFI 运行时改写+插 check,NativeBPF 静态验证+裸跑未改动 native")。新下 PDF:
+| 论文 | venue | 阵营 | PDF |
+|---|---|---|---|
+| XFI: Software Guards for System Address Spaces | OSDI'06 | SFI | `93-xfi-...pdf` |
+| BGI: Fast Byte-Granularity Software Fault Isolation | SOSP'09 | SFI | `94-bgi-...pdf` |
+| Mondrix: Memory Isolation for Linux (Mondriaan) | SOSP'05 | 硬件/页表隔离 | `95-mondrix-...pdf` |
+
+(Wahbe SOSP'93 / NaCl / RockSalt 已在库 / 已引;CHERI 无 PDF;MPK 路线 MOAT/Hive 在库 #13/#14。)
