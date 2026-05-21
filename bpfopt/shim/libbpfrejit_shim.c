@@ -106,6 +106,9 @@ static pthread_mutex_t log_mutex = PTHREAD_MUTEX_INITIALIZER;
 static __thread int in_shim;
 
 #include "shim_state.h"
+#include "shim_json.h"
+#include "shim_snapshot.h"
+#include "shim_loadtime.h"
 
 static void *worker_thread(void *arg);  /* forward decl */
 static void *socket_thread(void *arg);  /* forward decl */
@@ -255,6 +258,8 @@ long syscall(long number, ...) {
     struct map_entry *pending_map = NULL;
     struct link_entry *pending_link = NULL;
     struct raw_tp_entry *pending_raw_tp = NULL;
+    struct loadtime_result loadtime = {0};
+    int loadtime_active = 0;
     if (!in_shim && attr) {
         in_shim = 1;
         switch (cmd) {
@@ -284,11 +289,27 @@ long syscall(long number, ...) {
             log_line("bpf cmd=%d size=%u", cmd, size);
             break;
         }
+        if (cmd == BPF_PROG_LOAD && pending_prog) {
+            char opt_err[512];
+            int opt_rc = loadtime_optimize_prog_load(attr, size, &loadtime,
+                                                     opt_err, sizeof(opt_err));
+            if (opt_rc < 0) {
+                in_shim = 0;
+                log_line("loadtime optimization failed: %s", opt_err);
+                prog_free(pending_prog);
+                errno = EINVAL;
+                return -1;
+            }
+            loadtime_active = opt_rc > 0;
+        }
         in_shim = 0;
     }
 
     in_shim = 1;
-    long ret = real_syscall(number, a0, a1, a2, a3, a4, a5);
+    long ret = real_syscall(number, a0,
+                            loadtime_active ? (long)(uintptr_t)loadtime.attr_buf : a1,
+                            loadtime_active ? (long)loadtime.attr_size : a2,
+                            a3, a4, a5);
     int saved_errno = errno;
 
     uint32_t resolved_id = 0;
@@ -439,6 +460,8 @@ long syscall(long number, ...) {
         }
     }
     in_shim = 0;
+    if (loadtime_active)
+        loadtime_result_free(&loadtime);
 
     if (cmd == BPF_PROG_LOAD)
         log_line("  PROG_LOAD -> fd=%ld errno=%d kernel_prog_id=%u", ret,
@@ -849,8 +872,6 @@ static int unix_socket_listen(const char *path) {
     return fd;
 }
 
-#include "shim_json.h"
-
 static void emit_list_progs(int cli) {
     discover_bpf_programs();
     pthread_mutex_lock(&state_mutex);
@@ -887,8 +908,6 @@ static void emit_list_progs(int cli) {
     if (write(cli, buf, len) < 0) { /* best effort */ }
     free(buf);
 }
-
-#include "shim_snapshot.h"
 
 #include "shim_reload.h"
 

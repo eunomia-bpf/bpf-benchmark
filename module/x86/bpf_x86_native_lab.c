@@ -170,25 +170,37 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 			for (i = 0; i < blobs[blob_id].reloc_count; i++) {
 				const struct native_lab_reloc_record *r =
 					&blobs[blob_id].relocs[i];
-				if (r->kind != NATIVE_LAB_RELOC_CALL_REL32)
-					continue;
-				if ((size_t)r->offset + 5 > snapshot_len)
-					continue; /* invalid; skip defensively */
+				if (r->kind != NATIVE_LAB_RELOC_CALL_REL32) {
+					err = -EINVAL;
+					break;
+				}
+				if ((size_t)r->offset + 5 > snapshot_len) {
+					err = -ERANGE;
+					break;
+				}
 				/*
 				 * blob byte at r->offset is the 0xE8 opcode;
 				 * the disp32 field occupies offset+1 .. +5.
 				 */
-				if (emit_at[r->offset] != 0xE8)
-					continue; /* not a call rel32 */
+				if (emit_at[r->offset] != 0xE8) {
+					err = -EINVAL;
+					break;
+				}
 				{
 					u64 patch_va = (u64)emit_at + r->offset + 1;
 					u64 rip_after = patch_va + 4;
 					s64 disp64 = (s64)r->target - (s64)rip_after;
 					s32 disp = (s32)disp64;
-					if ((s64)disp != disp64)
-						continue; /* out of i32 range; skip */
+					if ((s64)disp != disp64) {
+						err = -ERANGE;
+						break;
+					}
 					memcpy((void *)patch_va, &disp, 4);
 				}
+			}
+			if (err) {
+				mutex_unlock(&blobs_lock);
+				return err;
 			}
 		}
 	}

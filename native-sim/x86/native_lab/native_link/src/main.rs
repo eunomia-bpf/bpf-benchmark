@@ -45,16 +45,18 @@
 use anyhow::{anyhow, bail, Context, Result};
 use clap::Parser;
 use iced_x86::{
-    BlockEncoder, BlockEncoderOptions, Code, Decoder, DecoderOptions, FlowControl,
-    Instruction, InstructionBlock, OpKind, Register,
+    BlockEncoder, BlockEncoderOptions, Code, Decoder, DecoderOptions, FlowControl, Instruction,
+    InstructionBlock, OpKind, Register,
 };
 use object::{Object, ObjectSection, ObjectSymbol, RelocationFlags, RelocationTarget};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
-#[command(about = "Extract one function (plus reachable subprograms) from a userspace x86-64 ELF and rewrite it for native_lab.")]
+#[command(
+    about = "Extract one function (plus reachable subprograms) from a userspace x86-64 ELF and rewrite it for native_lab."
+)]
 struct Args {
     /// Input ELF object/shared library (e.g. *.native.so from micro/programs).
     #[arg(long)]
@@ -132,22 +134,28 @@ struct LookupSiteSpec {
 fn parse_lookup_sites(args: &[String]) -> Result<Vec<LookupSiteSpec>> {
     let mut by_index: Vec<(usize, LookupSiteSpec)> = Vec::new();
     for a in args {
-        let (idx_s, payload) = a.split_once('=').ok_or_else(|| {
-            anyhow!("--lookup-site expects INDEX=HEXADDR,OFFSET; got {a:?}")
-        })?;
+        let (idx_s, payload) = a
+            .split_once('=')
+            .ok_or_else(|| anyhow!("--lookup-site expects INDEX=HEXADDR,OFFSET; got {a:?}"))?;
         let idx: usize = idx_s
             .parse()
             .map_err(|e| anyhow!("--lookup-site INDEX parse: {e}"))?;
-        let (addr_s, off_s) = payload.split_once(',').ok_or_else(|| {
-            anyhow!("--lookup-site payload missing offset; got {payload:?}")
-        })?;
+        let (addr_s, off_s) = payload
+            .split_once(',')
+            .ok_or_else(|| anyhow!("--lookup-site payload missing offset; got {payload:?}"))?;
         let addr_s = addr_s.strip_prefix("0x").unwrap_or(addr_s);
         let target_addr = u64::from_str_radix(addr_s, 16)
             .map_err(|e| anyhow!("--lookup-site ADDR parse: {e}"))?;
         let key_offset: u32 = off_s
             .parse()
             .map_err(|e| anyhow!("--lookup-site OFFSET parse: {e}"))?;
-        by_index.push((idx, LookupSiteSpec { target_addr, key_offset }));
+        by_index.push((
+            idx,
+            LookupSiteSpec {
+                target_addr,
+                key_offset,
+            },
+        ));
     }
     by_index.sort_by_key(|(i, _)| *i);
     for (expected, (i, _)) in by_index.iter().enumerate() {
@@ -174,6 +182,18 @@ pub struct RelocRecord {
     target: u64,
 }
 
+fn build_x86_absolute_helper_call(target_addr: u64, local_ip: u64) -> Result<[Instruction; 2]> {
+    let mut mov = Instruction::with2(Code::Mov_r64_imm64, Register::RAX, target_addr)
+        .map_err(|e| anyhow!("encode movabs helper target: {e:?}"))?;
+    mov.set_ip(local_ip);
+
+    let mut call = Instruction::with1(Code::Call_rm64, Register::RAX)
+        .map_err(|e| anyhow!("encode indirect helper call: {e:?}"))?;
+    call.set_ip(local_ip + 10);
+
+    Ok([mov, call])
+}
+
 #[derive(Debug, Clone)]
 struct SymInfo {
     name: String,
@@ -184,8 +204,7 @@ struct SymInfo {
 
 fn main() -> Result<()> {
     let args = Args::parse();
-    let bytes = fs::read(&args.input)
-        .with_context(|| format!("read {}", args.input.display()))?;
+    let bytes = fs::read(&args.input).with_context(|| format!("read {}", args.input.display()))?;
     let elf = object::File::parse(&*bytes)
         .with_context(|| format!("parse ELF {}", args.input.display()))?;
     let helper_addrs = parse_name_addr_args(&args.helpers, "helper")?;
@@ -208,12 +227,22 @@ fn main() -> Result<()> {
                     sym.name,
                     sym.address,
                     sym.size,
-                    if sym.address == entry.address { " [entry]" } else { "" }
+                    if sym.address == entry.address {
+                        " [entry]"
+                    } else {
+                        ""
+                    }
                 );
             }
 
             rewrite_x86(
-                &elf, &entry, &included, &helper_addrs, &map_addrs, &lookup_sites, args.show,
+                &elf,
+                &entry,
+                &included,
+                &helper_addrs,
+                &map_addrs,
+                &lookup_sites,
+                args.show,
             )?
         }
         object::Architecture::Aarch64 => {
@@ -231,15 +260,25 @@ fn main() -> Result<()> {
                     sym.name,
                     sym.address,
                     sym.size,
-                    if sym.address == entry.address { " [entry]" } else { "" }
+                    if sym.address == entry.address {
+                        " [entry]"
+                    } else {
+                        ""
+                    }
                 );
             }
-            rewrite_arm64(&elf, &entry, &included, &helper_addrs, &map_addrs, args.show)?
+            rewrite_arm64(
+                &elf,
+                &entry,
+                &included,
+                &helper_addrs,
+                &map_addrs,
+                args.show,
+            )?
         }
         arch => bail!("unsupported input ELF arch: {:?}", arch),
     };
-    fs::write(&args.output, &blob)
-        .with_context(|| format!("write {}", args.output.display()))?;
+    fs::write(&args.output, &blob).with_context(|| format!("write {}", args.output.display()))?;
     eprintln!(
         "native-link: wrote {} bytes -> {} ({} relocs)",
         blob.len(),
@@ -255,8 +294,7 @@ fn main() -> Result<()> {
             buf.extend_from_slice(&r.kind.to_le_bytes());
             buf.extend_from_slice(&r.target.to_le_bytes());
         }
-        fs::write(path, &buf)
-            .with_context(|| format!("write {}", path.display()))?;
+        fs::write(path, &buf).with_context(|| format!("write {}", path.display()))?;
         eprintln!(
             "native-link: wrote {} relocs -> {}",
             relocs.len(),
@@ -278,8 +316,8 @@ fn parse_name_addr_args(args: &[String], kind: &str) -> Result<HashMap<String, u
             .split_once('=')
             .ok_or_else(|| anyhow!("invalid --{kind} {a:?}; expected NAME=HEXADDR"))?;
         let addr = addr.strip_prefix("0x").unwrap_or(addr);
-        let addr = u64::from_str_radix(addr, 16)
-            .map_err(|e| anyhow!("invalid --{kind} {a:?}: {e}"))?;
+        let addr =
+            u64::from_str_radix(addr, 16).map_err(|e| anyhow!("invalid --{kind} {a:?}: {e}"))?;
         out.insert(name.to_string(), addr);
     }
     Ok(out)
@@ -364,7 +402,11 @@ fn discover_reachable(elf: &object::File, entry: &SymInfo) -> Result<Vec<SymInfo
                     continue;
                 }
                 let called = find_symbol_at_address(elf, target).ok_or_else(|| {
-                    anyhow!("{} calls {:#x} but no symbol covers that address", sym.name, target)
+                    anyhow!(
+                        "{} calls {:#x} but no symbol covers that address",
+                        sym.name,
+                        target
+                    )
                 })?;
                 if !seen.contains(&called.address) {
                     seen.insert(called.address);
@@ -459,7 +501,9 @@ fn scan_helper_calls(
                 9 | 41 | 42 => reloc_offset.checked_sub(2),
                 _ => None,
             };
-            let Some(loc) = local_opcode_off else { continue };
+            let Some(loc) = local_opcode_off else {
+                continue;
+            };
             // Only call-class relocs map to "call to helper"; mov-class
             // GOTPCREL refs against maps also use 9/41/42 but the byte
             // at reloc_offset-2 is the mov's REX (0x48/0x49), not
@@ -509,6 +553,7 @@ fn rewrite_x86(
     // literal-pool entry holding the per-site target address.
     let mut lookup_call_ordinal: HashMap<(u64, u64), usize> = HashMap::new();
     let mut lookup_call_counter: usize = 0;
+    let mut resolved_helper_call_sites: HashSet<(u64, u64)> = HashSet::new();
 
     for sym in included {
         let is_entry = sym.address == entry.address;
@@ -590,8 +635,7 @@ fn rewrite_x86(
             // We must NOT treat those as cross-symbol calls; the ELF reloc
             // pass below picks them up instead.
             if matches!(insn.flow_control(), FlowControl::Call) && original_target != 0 {
-                let target_is_symbol_entry =
-                    included.iter().any(|s| s.address == original_target);
+                let target_is_symbol_entry = included.iter().any(|s| s.address == original_target);
                 if target_is_symbol_entry {
                     let next = local_ip.wrapping_add(5);
                     insn.set_near_branch64(next);
@@ -606,6 +650,43 @@ fn rewrite_x86(
                 // other intra-symbol "call" with non-entry target would be
                 // a self-referential placeholder, which the assembler does
                 // not normally emit.
+            }
+
+            if matches!(
+                insn.flow_control(),
+                FlowControl::Call | FlowControl::IndirectCall
+            ) {
+                if let Some(name) = helper_call_sites.get(&(sym.address, local_ip)) {
+                    let mut target_addr = helper_addrs.get(name).copied();
+                    let mut inline_hash_key_offset = 0;
+                    if name == "bpf_map_lookup_elem" && is_entry {
+                        let ordinal = lookup_call_counter;
+                        lookup_call_counter += 1;
+                        lookup_call_ordinal.insert((sym.address, local_ip), ordinal);
+                        if let Some(spec) = lookup_sites.get(ordinal) {
+                            target_addr = Some(spec.target_addr);
+                            inline_hash_key_offset = spec.key_offset;
+                        }
+                    }
+                    if let Some(target_addr) = target_addr {
+                        let [mov, call] = build_x86_absolute_helper_call(target_addr, local_ip)?;
+                        local.push(mov);
+                        kinds.push(None);
+                        insn_local_ip.push(local_ip);
+                        local.push(call);
+                        kinds.push(None);
+                        insn_local_ip.push(u64::MAX);
+                        resolved_helper_call_sites.insert((sym.address, local_ip));
+                        if inline_hash_key_offset > 0 {
+                            for ib in build_inline_hash_lookup(inline_hash_key_offset)? {
+                                local.push(ib);
+                                kinds.push(None);
+                                insn_local_ip.push(u64::MAX);
+                            }
+                        }
+                        continue;
+                    }
+                }
             }
 
             // Helper PLT32 placeholder: clang emits `call rel32` with the
@@ -704,7 +785,10 @@ fn rewrite_x86(
     // Apply intra-blob Call patches first (cross-symbol direct calls);
     // those need only `sym_global_offset` which is already known.
     for p in &patches {
-        if let PatchKind::Call { target_symbol_address } = p.kind {
+        if let PatchKind::Call {
+            target_symbol_address,
+        } = p.kind
+        {
             let off = p.global_offset;
             if off + 5 > blob.len() || blob[off] != 0xE8 {
                 bail!("CALL at off {off:#x} did not encode as Call_rel32_64");
@@ -713,24 +797,22 @@ fn rewrite_x86(
                 .get(&target_symbol_address)
                 .ok_or_else(|| anyhow!("call target sym addr not in index map"))?;
             let disp = target_global as i64 - (off + 5) as i64;
-            let d = i32::try_from(disp)
-                .map_err(|_| anyhow!("call disp {disp} exceeds i32"))?;
+            let d = i32::try_from(disp).map_err(|_| anyhow!("call disp {disp} exceeds i32"))?;
             blob[off + 1..off + 5].copy_from_slice(&d.to_le_bytes());
         }
     }
 
-    // Stage 2: append helper trampolines to the tail of the blob and
-    // patch each in-body `call rel32` disp to point at the trampoline
-    // it should reach. Trampolines are position-independent (they hold
-    // the helper's absolute address inline and use `jmp [rip+0]`), so
-    // the kernel module's emit_x86 can splat the blob verbatim.
-    apply_elf_relocations(
+    // Stage 2: resolve ELF relocations. x86 helper calls become
+    // side-band CALL_REL32 records because the final JIT address is only
+    // known when the kernel module splats a blob chunk.
+    let relocs = apply_elf_relocations(
         elf,
         &layouts,
         helper_addrs,
         map_addrs,
         lookup_sites,
         &lookup_call_ordinal,
+        &resolved_helper_call_sites,
         &mut blob,
     )?;
 
@@ -744,13 +826,10 @@ fn rewrite_x86(
         if let PatchKind::JmpEnd = p.kind {
             let off = p.global_offset;
             if off + 5 > blob.len() || blob[off] != 0xE9 {
-                bail!(
-                    "JmpEnd placeholder at off {off:#x} did not encode as Jmp_rel32_64"
-                );
+                bail!("JmpEnd placeholder at off {off:#x} did not encode as Jmp_rel32_64");
             }
             let disp = end_offset - (off + 5) as i64;
-            let d = i32::try_from(disp)
-                .map_err(|_| anyhow!("jmp_end disp {disp} exceeds i32"))?;
+            let d = i32::try_from(disp).map_err(|_| anyhow!("jmp_end disp {disp} exceeds i32"))?;
             blob[off + 1..off + 5].copy_from_slice(&d.to_le_bytes());
         }
     }
@@ -758,7 +837,7 @@ fn rewrite_x86(
     if show {
         disasm(&blob);
     }
-    Ok(RewriteResult { blob, relocs: Vec::new() })
+    Ok(RewriteResult { blob, relocs })
 }
 
 fn a64_sign_extend(value: u32, bits: u8) -> i64 {
@@ -782,6 +861,39 @@ fn a64_patch_bl(word_index: usize, target_index: usize) -> Result<u32> {
     Ok(0x9400_0000 | ((disp as u32) & 0x03ff_ffff))
 }
 
+fn a64_patch_b_cond(insn: u32, word_index: usize, target_index: usize) -> Result<u32> {
+    let disp = target_index as i64 - word_index as i64;
+    if disp < -(1 << 18) || disp >= (1 << 18) {
+        bail!("arm64 B.cond displacement out of range: {disp}");
+    }
+    Ok((insn & !(0x7ffff << 5)) | (((disp as u32) & 0x7ffff) << 5))
+}
+
+fn a64_patch_cbz_cbnz(insn: u32, word_index: usize, target_index: usize) -> Result<u32> {
+    let disp = target_index as i64 - word_index as i64;
+    if disp < -(1 << 18) || disp >= (1 << 18) {
+        bail!("arm64 CBZ/CBNZ displacement out of range: {disp}");
+    }
+    Ok((insn & !(0x7ffff << 5)) | (((disp as u32) & 0x7ffff) << 5))
+}
+
+fn a64_adr(rd: u32, word_index: usize, target_byte_offset: usize) -> Result<u32> {
+    if rd >= 32 {
+        bail!("arm64 ADR target register out of range: x{rd}");
+    }
+    let source_byte_offset = word_index
+        .checked_mul(4)
+        .ok_or_else(|| anyhow!("arm64 source byte offset overflow"))?;
+    let disp = target_byte_offset as i64 - source_byte_offset as i64;
+    if disp < -(1 << 20) || disp >= (1 << 20) {
+        bail!("arm64 ADR displacement out of range: {disp}");
+    }
+    let imm = (disp as u32) & 0x1f_ffff;
+    let immlo = (imm & 0x3) << 29;
+    let immhi = ((imm >> 2) & 0x7ffff) << 5;
+    Ok(0x1000_0000 | immlo | immhi | rd)
+}
+
 fn a64_is_uncond_b(insn: u32) -> bool {
     (insn & 0x7c00_0000) == 0x1400_0000
 }
@@ -802,6 +914,10 @@ fn a64_is_b_cond(insn: u32) -> bool {
     (insn & 0xff00_0010) == 0x5400_0000
 }
 
+fn a64_is_cbz_cbnz(insn: u32) -> bool {
+    (insn & 0x7e00_0000) == 0x3400_0000
+}
+
 fn a64_branch_target(entry_addr: u64, word_index: usize, insn: u32) -> Option<u64> {
     if a64_is_uncond_b(insn) {
         let imm26 = insn & 0x03ff_ffff;
@@ -809,6 +925,11 @@ fn a64_branch_target(entry_addr: u64, word_index: usize, insn: u32) -> Option<u6
         return Some(((entry_addr as i64) + (word_index as i64 * 4) + disp) as u64);
     }
     if a64_is_b_cond(insn) {
+        let imm19 = (insn >> 5) & 0x7ffff;
+        let disp = a64_sign_extend(imm19, 19) << 2;
+        return Some(((entry_addr as i64) + (word_index as i64 * 4) + disp) as u64);
+    }
+    if a64_is_cbz_cbnz(insn) {
         let imm19 = (insn >> 5) & 0x7ffff;
         let disp = a64_sign_extend(imm19, 19) << 2;
         return Some(((entry_addr as i64) + (word_index as i64 * 4) + disp) as u64);
@@ -847,11 +968,89 @@ fn a64_ldr_lit64(rt: u32, word_index: usize, target_byte_offset: usize) -> Resul
     Ok(0x5800_0000 | (((imm19 as u32) & 0x7ffff) << 5) | rt)
 }
 
-fn a64_br(reg: u32) -> Result<u32> {
+fn a64_blr(reg: u32) -> Result<u32> {
     if reg >= 32 {
-        bail!("arm64 BR register out of range: x{reg}");
+        bail!("arm64 BLR register out of range: x{reg}");
     }
-    Ok(0xd61f_0000 | (reg << 5))
+    Ok(0xd63f_0000 | (reg << 5))
+}
+
+fn a64_movz(reg: u32, imm16: u16, shift: u32) -> Result<u32> {
+    if reg >= 32 {
+        bail!("arm64 MOVZ register out of range: x{reg}");
+    }
+    if shift % 16 != 0 || shift > 48 {
+        bail!("arm64 MOVZ shift out of range: {shift}");
+    }
+    Ok(0xd280_0000 | ((shift / 16) << 21) | ((imm16 as u32) << 5) | reg)
+}
+
+fn a64_movn(reg: u32, imm16: u16, shift: u32) -> Result<u32> {
+    if reg >= 32 {
+        bail!("arm64 MOVN register out of range: x{reg}");
+    }
+    if shift % 16 != 0 || shift > 48 {
+        bail!("arm64 MOVN shift out of range: {shift}");
+    }
+    Ok(0x9280_0000 | ((shift / 16) << 21) | ((imm16 as u32) << 5) | reg)
+}
+
+fn a64_movk(reg: u32, imm16: u16, shift: u32) -> Result<u32> {
+    if reg >= 32 {
+        bail!("arm64 MOVK register out of range: x{reg}");
+    }
+    if shift % 16 != 0 || shift > 48 {
+        bail!("arm64 MOVK shift out of range: {shift}");
+    }
+    Ok(0xf280_0000 | ((shift / 16) << 21) | ((imm16 as u32) << 5) | reg)
+}
+
+fn arm64_helper_call_sequence(helper_addr: u64) -> Result<Vec<u32>> {
+    const A64_X16: u32 = 16;
+
+    let mut chunks = [0u16; 4];
+    for (i, chunk) in chunks.iter_mut().enumerate() {
+        *chunk = ((helper_addr >> (i * 16)) & 0xffff) as u16;
+    }
+
+    let mut best: Option<(bool, usize, usize)> = None;
+    for use_movn in [false, true] {
+        for lane in 0..4 {
+            let mut cost = 1usize;
+            for i in 0..4 {
+                if i == lane {
+                    continue;
+                }
+                let base_chunk = if use_movn { 0xffff } else { 0 };
+                if chunks[i] != base_chunk {
+                    cost += 1;
+                }
+            }
+            if best.is_none_or(|(_, _, best_cost)| cost < best_cost) {
+                best = Some((use_movn, lane, cost));
+            }
+        }
+    }
+
+    let (use_movn, lane, _) = best.ok_or_else(|| anyhow!("arm64 helper call sequence empty"))?;
+    let mut words = Vec::with_capacity(5);
+    let first = if use_movn {
+        a64_movn(A64_X16, !chunks[lane], (lane as u32) * 16)?
+    } else {
+        a64_movz(A64_X16, chunks[lane], (lane as u32) * 16)?
+    };
+    words.push(first);
+    for (i, chunk) in chunks.iter().copied().enumerate() {
+        if i == lane {
+            continue;
+        }
+        let base_chunk = if use_movn { 0xffff } else { 0 };
+        if chunk != base_chunk {
+            words.push(a64_movk(A64_X16, chunk, (i as u32) * 16)?);
+        }
+    }
+    words.push(a64_blr(A64_X16)?);
+    Ok(words)
 }
 
 fn append_u32(blob: &mut Vec<u8>, word: u32) {
@@ -876,18 +1075,33 @@ fn arm64_append_literal(blob: &mut Vec<u8>, value: u64) -> usize {
     offset
 }
 
-fn arm64_append_helper_thunk(blob: &mut Vec<u8>, helper_addr: u64) -> Result<usize> {
-    const A64_X16: u32 = 16;
-
+fn arm64_append_section_data(
+    elf: &object::File,
+    section_index: object::SectionIndex,
+    blob: &mut Vec<u8>,
+    local_data: &mut HashMap<object::SectionIndex, usize>,
+) -> Result<usize> {
+    if let Some(&offset) = local_data.get(&section_index) {
+        return Ok(offset);
+    }
     align_arm64_blob_to_8(blob);
-    let thunk_word = blob.len() / 4;
-    let literal_offset = (thunk_word + 2) * 4;
-    append_u32(blob, a64_ldr_lit64(A64_X16, thunk_word, literal_offset)?);
-    append_u32(blob, a64_br(A64_X16)?);
-    append_u64(blob, helper_addr);
-    Ok(thunk_word)
+    let offset = blob.len();
+    let section = elf
+        .section_by_index(section_index)
+        .with_context(|| format!("arm64 local data section {section_index:?}"))?;
+    let data = section
+        .data()
+        .with_context(|| format!("read arm64 local data section {section_index:?}"))?;
+    if data.is_empty() {
+        bail!("arm64 local data section {section_index:?} is empty");
+    }
+    blob.extend_from_slice(data);
+    local_data.insert(section_index, offset);
+    Ok(offset)
 }
 
+const R_AARCH64_ADR_PREL_PG_HI21: u32 = 275;
+const R_AARCH64_ADD_ABS_LO12_NC: u32 = 277;
 const R_AARCH64_CALL26: u32 = 283;
 const R_AARCH64_ADR_GOT_PAGE: u32 = 311;
 const R_AARCH64_LD64_GOT_LO12_NC: u32 = 312;
@@ -896,6 +1110,8 @@ const R_AARCH64_LD64_GOT_LO12_NC: u32 = 312;
 struct Arm64RelocInfo {
     r_type: u32,
     target_name: String,
+    target_section_index: Option<object::SectionIndex>,
+    addend: i64,
 }
 
 fn arm64_text_relocations(
@@ -924,17 +1140,27 @@ fn arm64_text_relocations(
                 RelocationFlags::Elf { r_type } => r_type,
                 _ => continue,
             };
-            let target_name: String = match reloc.target() {
-                RelocationTarget::Symbol(idx) => elf
-                    .symbol_by_index(idx)?
-                    .name()
-                    .map_err(|e| anyhow!("reloc target symbol name: {e}"))?
-                    .to_string(),
+            let (target_name, target_section_index) = match reloc.target() {
+                RelocationTarget::Symbol(idx) => {
+                    let target_sym = elf.symbol_by_index(idx)?;
+                    (
+                        target_sym
+                            .name()
+                            .map_err(|e| anyhow!("reloc target symbol name: {e}"))?
+                            .to_string(),
+                        target_sym.section_index(),
+                    )
+                }
                 _ => continue,
             };
             out.insert(
                 (sym.address, reloc_addr - sym.address),
-                Arm64RelocInfo { r_type, target_name },
+                Arm64RelocInfo {
+                    r_type,
+                    target_name,
+                    target_section_index,
+                    addend: reloc.addend(),
+                },
             );
         }
     }
@@ -967,7 +1193,10 @@ fn discover_reachable_arm64(elf: &object::File, entry: &SymInfo) -> Result<Vec<S
                 continue;
             }
             let called = find_symbol_at_address(elf, target).ok_or_else(|| {
-                anyhow!("{} calls {target:#x} but no symbol covers that address", sym.name)
+                anyhow!(
+                    "{} calls {target:#x} but no symbol covers that address",
+                    sym.name
+                )
             })?;
             if called.address != target {
                 bail!(
@@ -986,12 +1215,31 @@ fn discover_reachable_arm64(elf: &object::File, entry: &SymInfo) -> Result<Vec<S
     Ok(included)
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 enum Arm64PatchKind {
     ReturnToTrampoline,
-    Bl { target_symbol_address: u64 },
-    HelperCall { target_name: String },
-    MapLiteralLoad { target_name: String },
+    Bl {
+        target_symbol_address: u64,
+    },
+    B {
+        target_address: u64,
+    },
+    BCond {
+        insn: u32,
+        target_address: u64,
+    },
+    CbzCbnz {
+        insn: u32,
+        target_address: u64,
+    },
+    MapLiteralLoad {
+        target_name: String,
+    },
+    LocalDataAdr {
+        target_name: String,
+        section_index: object::SectionIndex,
+        addend: i64,
+    },
     Nop,
 }
 
@@ -1009,7 +1257,7 @@ fn rewrite_arm64(
     show: bool,
 ) -> Result<RewriteResult> {
     let mut blob = Vec::new();
-    let mut sym_word_offset: HashMap<u64, usize> = HashMap::new();
+    let mut addr_word_offset: HashMap<u64, usize> = HashMap::new();
     let mut patches: Vec<Arm64Patch> = Vec::new();
     let relocs = arm64_text_relocations(elf, included)?;
 
@@ -1017,20 +1265,49 @@ fn rewrite_arm64(
         let is_entry = sym.address == entry.address;
         let bytes = read_symbol_bytes(elf, sym)?;
         if bytes.is_empty() || bytes.len() % 4 != 0 {
-            bail!("arm64 symbol {} size must be a non-zero multiple of 4", sym.name);
+            bail!(
+                "arm64 symbol {} size must be a non-zero multiple of 4",
+                sym.name
+            );
         }
 
-        let sym_base_word = blob.len() / 4;
-        sym_word_offset.insert(sym.address, sym_base_word);
         let end = sym.address + sym.size;
         for (local_word_index, word) in bytes.chunks_exact(4).enumerate() {
             let off = local_word_index * 4;
             let insn = u32::from_le_bytes(word.try_into().unwrap());
-            let global_word_index = sym_base_word + local_word_index;
+            let emit_word_index = blob.len() / 4;
+            addr_word_offset.insert(sym.address + off as u64, emit_word_index);
             let reloc = relocs.get(&(sym.address, off as u64));
 
             if let Some(reloc) = reloc {
                 match reloc.r_type {
+                    R_AARCH64_ADR_PREL_PG_HI21 => {
+                        let section_index = reloc.target_section_index.ok_or_else(|| {
+                            anyhow!(
+                                "arm64 ADR_PREL in {} at byte offset {off:#x} targets {} without a section",
+                                sym.name,
+                                reloc.target_name
+                            )
+                        })?;
+                        patches.push(Arm64Patch {
+                            word_index: emit_word_index,
+                            kind: Arm64PatchKind::LocalDataAdr {
+                                target_name: reloc.target_name.clone(),
+                                section_index,
+                                addend: reloc.addend,
+                            },
+                        });
+                        blob.extend_from_slice(&insn.to_le_bytes());
+                        continue;
+                    }
+                    R_AARCH64_ADD_ABS_LO12_NC => {
+                        patches.push(Arm64Patch {
+                            word_index: emit_word_index,
+                            kind: Arm64PatchKind::Nop,
+                        });
+                        blob.extend_from_slice(&insn.to_le_bytes());
+                        continue;
+                    }
                     R_AARCH64_CALL26 => {
                         if !helper_addrs.contains_key(&reloc.target_name) {
                             bail!(
@@ -1039,13 +1316,12 @@ fn rewrite_arm64(
                                 reloc.target_name
                             );
                         }
-                        patches.push(Arm64Patch {
-                            word_index: global_word_index,
-                            kind: Arm64PatchKind::HelperCall {
-                                target_name: reloc.target_name.clone(),
-                            },
-                        });
-                        blob.extend_from_slice(&insn.to_le_bytes());
+                        let helper_addr = *helper_addrs.get(&reloc.target_name).ok_or_else(|| {
+                            anyhow!("missing arm64 helper address: {}", reloc.target_name)
+                        })?;
+                        for word in arm64_helper_call_sequence(helper_addr)? {
+                            append_u32(&mut blob, word);
+                        }
                         continue;
                     }
                     R_AARCH64_ADR_GOT_PAGE => {
@@ -1057,7 +1333,7 @@ fn rewrite_arm64(
                             );
                         }
                         patches.push(Arm64Patch {
-                            word_index: global_word_index,
+                            word_index: emit_word_index,
                             kind: Arm64PatchKind::MapLiteralLoad {
                                 target_name: reloc.target_name.clone(),
                             },
@@ -1074,7 +1350,7 @@ fn rewrite_arm64(
                             );
                         }
                         patches.push(Arm64Patch {
-                            word_index: global_word_index,
+                            word_index: emit_word_index,
                             kind: Arm64PatchKind::Nop,
                         });
                         blob.extend_from_slice(&insn.to_le_bytes());
@@ -1105,7 +1381,7 @@ fn rewrite_arm64(
                     );
                 }
                 patches.push(Arm64Patch {
-                    word_index: global_word_index,
+                    word_index: emit_word_index,
                     kind: Arm64PatchKind::Bl {
                         target_symbol_address: target,
                     },
@@ -1121,11 +1397,35 @@ fn rewrite_arm64(
                         sym.name
                     );
                 }
+                let kind = if a64_is_uncond_b(insn) {
+                    Arm64PatchKind::B {
+                        target_address: target,
+                    }
+                } else if a64_is_b_cond(insn) {
+                    Arm64PatchKind::BCond {
+                        insn,
+                        target_address: target,
+                    }
+                } else if a64_is_cbz_cbnz(insn) {
+                    Arm64PatchKind::CbzCbnz {
+                        insn,
+                        target_address: target,
+                    }
+                } else {
+                    bail!(
+                        "arm64 unsupported branch rewrite in {} at byte offset {off:#x}: {insn:#010x}",
+                        sym.name
+                    );
+                };
+                patches.push(Arm64Patch {
+                    word_index: emit_word_index,
+                    kind,
+                });
             }
 
             if is_entry && a64_is_ret(insn) {
                 patches.push(Arm64Patch {
-                    word_index: global_word_index,
+                    word_index: emit_word_index,
                     kind: Arm64PatchKind::ReturnToTrampoline,
                 });
                 blob.extend_from_slice(&0u32.to_le_bytes());
@@ -1133,34 +1433,22 @@ fn rewrite_arm64(
                 blob.extend_from_slice(&insn.to_le_bytes());
             }
         }
+        addr_word_offset.insert(sym.address + sym.size, blob.len() / 4);
     }
 
-    let mut helper_thunks: HashMap<String, usize> = HashMap::new();
     let mut map_literals: HashMap<String, usize> = HashMap::new();
+    let mut local_data: HashMap<object::SectionIndex, usize> = HashMap::new();
 
     for patch in patches.iter().filter(|p| {
         matches!(
             p.kind,
-            Arm64PatchKind::HelperCall { .. }
-                | Arm64PatchKind::MapLiteralLoad { .. }
+            Arm64PatchKind::MapLiteralLoad { .. }
+                | Arm64PatchKind::LocalDataAdr { .. }
                 | Arm64PatchKind::Nop
         )
     }) {
         let off = patch.word_index * 4;
         let patched = match &patch.kind {
-            Arm64PatchKind::HelperCall { target_name } => {
-                let thunk_word = if let Some(&word) = helper_thunks.get(target_name) {
-                    word
-                } else {
-                    let addr = *helper_addrs
-                        .get(target_name)
-                        .ok_or_else(|| anyhow!("missing arm64 helper address: {target_name}"))?;
-                    let word = arm64_append_helper_thunk(&mut blob, addr)?;
-                    helper_thunks.insert(target_name.clone(), word);
-                    word
-                };
-                a64_patch_bl(patch.word_index, thunk_word)?
-            }
             Arm64PatchKind::MapLiteralLoad { target_name } => {
                 let literal_offset = if let Some(&offset) = map_literals.get(target_name) {
                     offset
@@ -1175,6 +1463,36 @@ fn rewrite_arm64(
                 let rd = u32::from(blob[off] & 0x1f);
                 a64_ldr_lit64(rd, patch.word_index, literal_offset)?
             }
+            Arm64PatchKind::LocalDataAdr {
+                target_name,
+                section_index,
+                addend,
+            } => {
+                if *addend < 0 {
+                    bail!("arm64 local data relocation {target_name} has negative addend {addend}");
+                }
+                let section_offset =
+                    arm64_append_section_data(elf, *section_index, &mut blob, &mut local_data)?;
+                let target_offset = section_offset
+                    .checked_add(*addend as usize)
+                    .ok_or_else(|| anyhow!("arm64 local data offset overflow for {target_name}"))?;
+                let section = elf
+                    .section_by_index(*section_index)
+                    .with_context(|| format!("arm64 local data section {section_index:?}"))?;
+                let section_len = section
+                    .data()
+                    .with_context(|| format!("read arm64 local data section {section_index:?}"))?
+                    .len();
+                if *addend as usize > section_len {
+                    bail!(
+                        "arm64 local data relocation {target_name} addend {} exceeds section size {}",
+                        addend,
+                        section_len
+                    );
+                }
+                let rd = u32::from(blob[off] & 0x1f);
+                a64_adr(rd, patch.word_index, target_offset)?
+            }
             Arm64PatchKind::Nop => 0xd503_201f,
             _ => continue,
         };
@@ -1187,17 +1505,50 @@ fn rewrite_arm64(
     append_u32(&mut blob, A64_MOV_X7_X0);
 
     for patch in patches.iter().filter(|p| {
-        matches!(p.kind, Arm64PatchKind::ReturnToTrampoline | Arm64PatchKind::Bl { .. })
+        matches!(
+            p.kind,
+            Arm64PatchKind::ReturnToTrampoline
+                | Arm64PatchKind::Bl { .. }
+                | Arm64PatchKind::B { .. }
+                | Arm64PatchKind::BCond { .. }
+                | Arm64PatchKind::CbzCbnz { .. }
+        )
     }) {
         let patched = match patch.kind {
             Arm64PatchKind::ReturnToTrampoline => {
                 a64_patch_b(patch.word_index, ret_trampoline_word)?
             }
-            Arm64PatchKind::Bl { target_symbol_address } => {
-                let target_word = *sym_word_offset
+            Arm64PatchKind::Bl {
+                target_symbol_address,
+            } => {
+                let target_word = *addr_word_offset
                     .get(&target_symbol_address)
                     .ok_or_else(|| anyhow!("arm64 BL target sym addr not in index map"))?;
                 a64_patch_bl(patch.word_index, target_word)?
+            }
+            Arm64PatchKind::B { target_address } => {
+                let target_word = *addr_word_offset
+                    .get(&target_address)
+                    .ok_or_else(|| anyhow!("arm64 B target addr not in index map"))?;
+                a64_patch_b(patch.word_index, target_word)?
+            }
+            Arm64PatchKind::BCond {
+                insn,
+                target_address,
+            } => {
+                let target_word = *addr_word_offset
+                    .get(&target_address)
+                    .ok_or_else(|| anyhow!("arm64 B.cond target addr not in index map"))?;
+                a64_patch_b_cond(insn, patch.word_index, target_word)?
+            }
+            Arm64PatchKind::CbzCbnz {
+                insn,
+                target_address,
+            } => {
+                let target_word = *addr_word_offset
+                    .get(&target_address)
+                    .ok_or_else(|| anyhow!("arm64 CBZ/CBNZ target addr not in index map"))?;
+                a64_patch_cbz_cbnz(insn, patch.word_index, target_word)?
             }
             _ => continue,
         };
@@ -1208,7 +1559,10 @@ fn rewrite_arm64(
     if show {
         disasm_arm64_words(&blob);
     }
-    Ok(RewriteResult { blob, relocs: Vec::new() })
+    Ok(RewriteResult {
+        blob,
+        relocs: Vec::new(),
+    })
 }
 
 fn disasm_arm64_words(blob: &[u8]) {
@@ -1219,20 +1573,11 @@ fn disasm_arm64_words(blob: &[u8]) {
     }
 }
 
-/// Walk the ELF .text relocations attached to the bytes we just encoded.
+/// Resolve ELF .text relocations attached to the bytes we just encoded.
 ///
-/// Helper trampoline layout emitted inline at each unique helper reloc:
-///
-///     ff 25 00 00 00 00          jmp QWORD PTR [rip+0]   ; 6 bytes
-///     <u64 absolute helper addr>                          ; 8 bytes
-///
-/// The `[rip+0]` operand resolves to the byte right after the jmp itself,
-/// which holds the absolute kernel address of the helper. Total: 14 bytes
-/// per unique helper. Multiple PLT32 call sites targeting the same
-/// helper share a single trampoline.
-///
-/// For each PLT32 helper reloc, emit (or reuse) a tail trampoline and
-/// rewrite the call disp32 in the body to point at it.
+/// Helper calls are emitted as side-band CALL_REL32 relocations. The
+/// native blob keeps a `call rel32` placeholder and the kernel module
+/// patches its disp32 once the final JIT address is known.
 fn apply_elf_relocations(
     elf: &object::File,
     layouts: &[SymbolLayout],
@@ -1240,10 +1585,11 @@ fn apply_elf_relocations(
     map_addrs: &HashMap<String, u64>,
     lookup_sites: &[LookupSiteSpec],
     lookup_call_ordinal: &HashMap<(u64, u64), usize>,
+    resolved_helper_call_sites: &HashSet<(u64, u64)>,
     blob: &mut Vec<u8>,
-) -> Result<()> {
+) -> Result<Vec<RelocRecord>> {
     if layouts.is_empty() {
-        return Ok(());
+        return Ok(Vec::new());
     }
 
     // Group symbols by ELF section so we walk each section's relocations
@@ -1256,16 +1602,17 @@ fn apply_elf_relocations(
             .push(layout);
     }
 
-    // Cache: helper symbol name -> trampoline byte offset in blob.
-    let mut helper_trampoline: HashMap<String, usize> = HashMap::new();
     // Cache: map symbol name -> literal-pool entry byte offset in blob.
     let mut map_pool_entry: HashMap<String, usize> = HashMap::new();
+    // Cache: helper symbol name -> tail trampoline byte offset in blob.
+    let mut helper_trampoline: HashMap<String, usize> = HashMap::new();
     // Cache: local rodata/data symbol name -> embedded copy offset.
     // R_X86_64_PC32 against a `.L__const.<fn>.<arr>` symbol (clang puts
     // small const initializers there for 16+ byte loads via SSE) is
     // satisfied by copying the symbol's bytes to the blob tail and
     // patching the rip-relative disp32 in the loading insn.
     let mut local_data_embed: HashMap<String, usize> = HashMap::new();
+    let out_relocs = Vec::new();
 
     for (section_index, layouts_in_sec) in &sections {
         let section = elf
@@ -1275,7 +1622,9 @@ fn apply_elf_relocations(
             let owning_layout = layouts_in_sec.iter().find(|l| {
                 reloc_offset >= l.sym.address && reloc_offset < l.sym.address + l.sym.size
             });
-            let Some(layout) = owning_layout else { continue };
+            let Some(layout) = owning_layout else {
+                continue;
+            };
 
             let target_sym_idx = match reloc.target() {
                 RelocationTarget::Symbol(idx) => idx,
@@ -1302,49 +1651,57 @@ fn apply_elf_relocations(
                 // points at the 4-byte disp32 field; the 0xE8 opcode is
                 // at offset-1.
                 4 => {
-                    let helper_addr = *helper_addrs
-                        .get(&target_name)
-                        .ok_or_else(|| anyhow!(
+                    let helper_addr = *helper_addrs.get(&target_name).ok_or_else(|| {
+                        anyhow!(
                             "PLT32 reloc against unknown helper {}: \
                              pass --helper {}=0x... on the command line",
-                            target_name, target_name
-                        ))?;
+                            target_name,
+                            target_name
+                        )
+                    })?;
                     let opcode_local_off = local_patch_off
                         .checked_sub(1)
                         .ok_or_else(|| anyhow!("PLT32 reloc at offset 0?"))?;
+                    if resolved_helper_call_sites.contains(&(layout.sym.address, opcode_local_off))
+                    {
+                        continue;
+                    }
                     let insn_idx = layout
                         .insn_local_ip
                         .iter()
                         .position(|&ip| ip == opcode_local_off)
-                        .ok_or_else(|| anyhow!(
-                            "PLT32 reloc at {:#x} (opcode at {:#x}) does not align \
+                        .ok_or_else(|| {
+                            anyhow!(
+                                "PLT32 reloc at {:#x} (opcode at {:#x}) does not align \
                              with any decoded instruction in symbol {}",
-                            local_patch_off, opcode_local_off, layout.sym.name
-                        ))?;
+                                local_patch_off,
+                                opcode_local_off,
+                                layout.sym.name
+                            )
+                        })?;
                     let new_opcode_off =
                         layout.base_in_blob + layout.new_offset_in_sym[insn_idx] as usize;
-
-                    // Reserve / reuse a trampoline.
+                    if new_opcode_off + 5 > blob.len() || blob[new_opcode_off] != 0xE8 {
+                        bail!(
+                            "PLT32 reloc at {:#x} in {} did not encode as call rel32",
+                            local_patch_off,
+                            layout.sym.name
+                        );
+                    }
                     let tramp_off = if let Some(&off) = helper_trampoline.get(&target_name) {
                         off
                     } else {
                         let off = blob.len();
-                        // jmp [rip+0] ; ff 25 00 00 00 00
                         blob.extend_from_slice(&[0xFF, 0x25, 0x00, 0x00, 0x00, 0x00]);
-                        // .quad helper_addr (LE)
                         blob.extend_from_slice(&helper_addr.to_le_bytes());
                         helper_trampoline.insert(target_name.clone(), off);
                         off
                     };
-
-                    // Patch the call's disp32 = tramp_off - (call_op + 5).
                     let rip_after_call = (new_opcode_off + 5) as i64;
                     let disp = tramp_off as i64 - rip_after_call;
-                    let d = i32::try_from(disp)
-                        .map_err(|_| anyhow!("call disp {disp} exceeds i32"))?;
-                    let disp32_off = new_opcode_off + 1;
-                    blob[disp32_off..disp32_off + 4]
-                        .copy_from_slice(&d.to_le_bytes());
+                    let d =
+                        i32::try_from(disp).map_err(|_| anyhow!("call disp {disp} exceeds i32"))?;
+                    blob[new_opcode_off + 1..new_opcode_off + 5].copy_from_slice(&d.to_le_bytes());
                 }
                 // GOT-relative references (R_X86_64_GOTPCREL=9,
                 // _GOTPCRELX=41, _REX_GOTPCRELX=42). clang emits these
@@ -1359,6 +1716,13 @@ fn apply_elf_relocations(
                 // common; map_addrs is consulted only if not found in
                 // helpers.
                 9 | 41 | 42 => {
+                    let got_call_local_off = local_patch_off.wrapping_sub(2);
+                    if resolved_helper_call_sites
+                        .contains(&(layout.sym.address, got_call_local_off))
+                    {
+                        continue;
+                    }
+
                     // Per-call-site routing for `bpf_map_lookup_elem`.
                     // If the runner supplied a `--lookup-site` for
                     // this call's BPF-source ordinal, route this site
@@ -1376,9 +1740,8 @@ fn apply_elf_relocations(
                         // The reloc offset points at the disp32 of the
                         // 6-byte indirect call (`ff 15 dd dd dd dd`);
                         // the call's opcode is 2 bytes earlier.
-                        let call_local_off = local_patch_off.wrapping_sub(2);
-                        if let Some(&ord) = lookup_call_ordinal
-                            .get(&(layout.sym.address, call_local_off))
+                        if let Some(&ord) =
+                            lookup_call_ordinal.get(&(layout.sym.address, got_call_local_off))
                         {
                             if let Some(spec) = lookup_sites.get(ord) {
                                 dedicated_pool_addr = Some(spec.target_addr);
@@ -1394,10 +1757,12 @@ fn apply_elf_relocations(
                             .or_else(|| map_addrs.get(&target_name).copied())
                             .ok_or_else(|| {
                                 anyhow!(
-                                "GOT-relative reloc against unknown symbol {}: \
+                                    "GOT-relative reloc against unknown symbol {}: \
                                  pass --helper {}=0x... or --map {}=0x... on the command line",
-                                target_name, target_name, target_name
-                            )
+                                    target_name,
+                                    target_name,
+                                    target_name
+                                )
                             })?
                     };
                     let map_addr = kernel_addr; /* used by code below */
@@ -1416,13 +1781,17 @@ fn apply_elf_relocations(
                         .filter(|(_, &ip)| ip != u64::MAX && ip <= local_patch_off)
                         .max_by_key(|(_, &ip)| ip)
                         .map(|(idx, _)| idx)
-                        .ok_or_else(|| anyhow!(
-                            "GOTPCREL reloc at {:#x} does not align with any instruction in {}",
-                            local_patch_off, layout.sym.name
-                        ))?;
+                        .ok_or_else(|| {
+                            anyhow!(
+                                "GOTPCREL reloc at {:#x} does not align with any instruction in {}",
+                                local_patch_off,
+                                layout.sym.name
+                            )
+                        })?;
                     let new_insn_off =
                         layout.base_in_blob + layout.new_offset_in_sym[insn_idx] as usize;
-                    let off_within_insn = (local_patch_off - layout.insn_local_ip[insn_idx]) as usize;
+                    let off_within_insn =
+                        (local_patch_off - layout.insn_local_ip[insn_idx]) as usize;
                     let disp32_off = new_insn_off + off_within_insn;
 
                     // Reserve / reuse a pool entry. For
@@ -1448,10 +1817,9 @@ fn apply_elf_relocations(
                     // mov reg, [rip+disp32]: disp32 = pool_off - (disp32_off + 4)
                     let rip_after = (disp32_off + 4) as i64;
                     let disp = pool_off as i64 - rip_after;
-                    let d = i32::try_from(disp)
-                        .map_err(|_| anyhow!("map disp {disp} exceeds i32"))?;
-                    blob[disp32_off..disp32_off + 4]
-                        .copy_from_slice(&d.to_le_bytes());
+                    let d =
+                        i32::try_from(disp).map_err(|_| anyhow!("map disp {disp} exceeds i32"))?;
+                    blob[disp32_off..disp32_off + 4].copy_from_slice(&d.to_le_bytes());
                 }
                 // R_X86_64_PC32 = 2: PC-relative reference to a local
                 // symbol. clang emits this for `movups xmm0, [rip+disp]`
@@ -1467,12 +1835,9 @@ fn apply_elf_relocations(
                 // mechanism (PC-relative form here -- clang shouldn't
                 // be emitting 32S in -fPIC code, but handle defensively).
                 2 => {
-                    let target_section_idx = target_sym
-                        .section_index()
-                        .ok_or_else(|| anyhow!(
-                            "PC32 reloc target {} has no section",
-                            target_name
-                        ))?;
+                    let target_section_idx = target_sym.section_index().ok_or_else(|| {
+                        anyhow!("PC32 reloc target {} has no section", target_name)
+                    })?;
                     let target_section = elf
                         .section_by_index(target_section_idx)
                         .with_context(|| format!("PC32 target section {target_section_idx:?}"))?;
@@ -1483,26 +1848,19 @@ fn apply_elf_relocations(
                     let sym_off_in_sec = target_sym
                         .address()
                         .checked_sub(sec_base)
-                        .ok_or_else(|| anyhow!(
-                            "PC32 target {} below section base",
-                            target_name
-                        ))?;
+                        .ok_or_else(|| anyhow!("PC32 target {} below section base", target_name))?;
                     let sym_size = target_sym.size();
                     if sym_size == 0 {
-                        bail!(
-                            "PC32 target {} has zero size; cannot embed",
-                            target_name
-                        );
+                        bail!("PC32 target {} has zero size; cannot embed", target_name);
                     }
                     let end = sym_off_in_sec
                         .checked_add(sym_size)
                         .ok_or_else(|| anyhow!("PC32 target size overflow"))?;
                     let sym_bytes = target_data
                         .get(sym_off_in_sec as usize..end as usize)
-                        .ok_or_else(|| anyhow!(
-                            "PC32 target {} bytes out of section bounds",
-                            target_name
-                        ))?
+                        .ok_or_else(|| {
+                            anyhow!("PC32 target {} bytes out of section bounds", target_name)
+                        })?
                         .to_vec();
 
                     let embed_off = if let Some(&off) = local_data_embed.get(&target_name) {
@@ -1524,10 +1882,13 @@ fn apply_elf_relocations(
                         .filter(|(_, &ip)| ip != u64::MAX && ip <= local_patch_off)
                         .max_by_key(|(_, &ip)| ip)
                         .map(|(idx, _)| idx)
-                        .ok_or_else(|| anyhow!(
-                            "PC32 reloc at {:#x} does not align with any instruction in {}",
-                            local_patch_off, layout.sym.name
-                        ))?;
+                        .ok_or_else(|| {
+                            anyhow!(
+                                "PC32 reloc at {:#x} does not align with any instruction in {}",
+                                local_patch_off,
+                                layout.sym.name
+                            )
+                        })?;
                     let new_insn_off =
                         layout.base_in_blob + layout.new_offset_in_sym[insn_idx] as usize;
                     let off_within_insn =
@@ -1540,20 +1901,21 @@ fn apply_elf_relocations(
                     // disp32 field), P = disp32_off.
                     let addend = reloc.addend();
                     let disp = embed_off as i64 + addend - disp32_off as i64;
-                    let d = i32::try_from(disp)
-                        .map_err(|_| anyhow!("PC32 disp {disp} exceeds i32"))?;
-                    blob[disp32_off..disp32_off + 4]
-                        .copy_from_slice(&d.to_le_bytes());
+                    let d =
+                        i32::try_from(disp).map_err(|_| anyhow!("PC32 disp {disp} exceeds i32"))?;
+                    blob[disp32_off..disp32_off + 4].copy_from_slice(&d.to_le_bytes());
                 }
                 _ => bail!(
                     "unsupported relocation r_type={} against symbol {} (offset {:#x})",
-                    r_type, target_name, reloc_offset
+                    r_type,
+                    target_name,
+                    reloc_offset
                 ),
             }
         }
     }
 
-    Ok(())
+    Ok(out_relocs)
 }
 
 fn is_return(insn: &Instruction) -> bool {
@@ -1570,18 +1932,13 @@ fn is_alignment_nop(insn: &Instruction) -> bool {
 
 /// Reject any PC-relative reference whose target sits outside the union
 /// of `included` symbols' byte ranges.
-fn validate_no_external_refs(
-    insn: &Instruction,
-    included_ranges: &[(u64, u64)],
-) -> Result<()> {
+fn validate_no_external_refs(insn: &Instruction, included_ranges: &[(u64, u64)]) -> Result<()> {
     let in_any = |a: u64| included_ranges.iter().any(|&(lo, hi)| a >= lo && a < hi);
 
     let fc = insn.flow_control();
     if matches!(
         fc,
-        FlowControl::UnconditionalBranch
-            | FlowControl::ConditionalBranch
-            | FlowControl::Call
+        FlowControl::UnconditionalBranch | FlowControl::ConditionalBranch | FlowControl::Call
     ) {
         let target = insn.near_branch_target();
         if target != 0 && !in_any(target) {
@@ -1654,23 +2011,31 @@ fn validate_no_external_refs(
 fn build_inline_hash_lookup(key_offset: u32) -> Result<Vec<Instruction>> {
     if key_offset <= 0x7f {
         let bytes = [
-            0x48, 0x85, 0xC0,           // test rax, rax
-            0x74, 0x04,                 // je +4
-            0x48, 0x83, 0xC0, key_offset as u8, // add rax, imm8
+            0x48,
+            0x85,
+            0xC0, // test rax, rax
+            0x74,
+            0x04, // je +4
+            0x48,
+            0x83,
+            0xC0,
+            key_offset as u8, // add rax, imm8
         ];
-        Ok(vec![Instruction::with_declare_byte(&bytes)
-            .map_err(|e| anyhow!("declare_byte: {e:?}"))?])
+        Ok(vec![
+            Instruction::with_declare_byte(&bytes).map_err(|e| anyhow!("declare_byte: {e:?}"))?
+        ])
     } else {
         let imm = key_offset.to_le_bytes();
         // add rax, imm32 (rax-special opcode): 48 05 imm32  -> 6 bytes
         // total: 3 + 2 + 6 = 11
         let bytes = [
-            0x48, 0x85, 0xC0,                       // test rax, rax
-            0x74, 0x06,                             // je +6
+            0x48, 0x85, 0xC0, // test rax, rax
+            0x74, 0x06, // je +6
             0x48, 0x05, imm[0], imm[1], imm[2], imm[3], // add rax, imm32
         ];
-        Ok(vec![Instruction::with_declare_byte(&bytes)
-            .map_err(|e| anyhow!("declare_byte: {e:?}"))?])
+        Ok(vec![
+            Instruction::with_declare_byte(&bytes).map_err(|e| anyhow!("declare_byte: {e:?}"))?
+        ])
     }
 }
 

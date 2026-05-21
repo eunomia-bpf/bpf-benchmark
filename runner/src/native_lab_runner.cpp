@@ -109,21 +109,50 @@ void ensure_debugfs_mounted()
     (void)mount("none", kDebugfsDir, "debugfs", 0, nullptr);
 }
 
-void upload_relocs(const std::vector<uint8_t> &relocs, uint32_t chunk_id_for_relocs)
+constexpr size_t kRelocRecordBytes = 16;
+
+uint32_t read_u32_le(const uint8_t *p)
 {
-    /* The .relocs side-band is bound to blob<id>; we always attach it
-     * to blob 0 (chunk 0) since for Stage 2 single-chunk blobs the
-     * relocations target only the first chunk. Larger blobs would need
-     * per-chunk reloc tables -- defer until needed. */
-    if (relocs.empty()) {
-        return;
+    return static_cast<uint32_t>(p[0]) |
+           (static_cast<uint32_t>(p[1]) << 8) |
+           (static_cast<uint32_t>(p[2]) << 16) |
+           (static_cast<uint32_t>(p[3]) << 24);
+}
+
+uint64_t read_u64_le(const uint8_t *p)
+{
+    uint64_t v = 0;
+    for (unsigned i = 0; i < 8; i++) {
+        v |= static_cast<uint64_t>(p[i]) << (i * 8);
     }
+    return v;
+}
+
+void append_u32_le(std::vector<uint8_t> &out, uint32_t v)
+{
+    out.push_back(static_cast<uint8_t>(v & 0xff));
+    out.push_back(static_cast<uint8_t>((v >> 8) & 0xff));
+    out.push_back(static_cast<uint8_t>((v >> 16) & 0xff));
+    out.push_back(static_cast<uint8_t>((v >> 24) & 0xff));
+}
+
+void append_u64_le(std::vector<uint8_t> &out, uint64_t v)
+{
+    for (unsigned i = 0; i < 8; i++) {
+        out.push_back(static_cast<uint8_t>((v >> (i * 8)) & 0xff));
+    }
+}
+
+void upload_reloc_chunk(const std::vector<uint8_t> &relocs, uint32_t chunk_id)
+{
 #if defined(__aarch64__)
+    (void)relocs;
+    (void)chunk_id;
     fail(std::string("native_lab relocs are not supported by module ")
          + kNativeLabTarget.module_name);
 #else
     char path[160];
-    snprintf(path, sizeof(path), kNativeLabTarget.relocs_path_fmt, chunk_id_for_relocs);
+    snprintf(path, sizeof(path), kNativeLabTarget.relocs_path_fmt, chunk_id);
     int fd = open(path, O_WRONLY | O_TRUNC);
     if (fd < 0) {
         fail(std::string("open ") + path + ": " + std::strerror(errno));
@@ -135,6 +164,47 @@ void upload_relocs(const std::vector<uint8_t> &relocs, uint32_t chunk_id_for_rel
         fail(std::string("write ") + path + ": " + std::strerror(saved));
     }
 #endif
+}
+
+void upload_relocs(const std::vector<uint8_t> &relocs, size_t blob_size, uint32_t chunks)
+{
+    if (relocs.empty()) {
+        return;
+    }
+    if (!kNativeLabTarget.relocs_path_fmt) {
+        fail(std::string("native_lab relocs are not supported by module ")
+             + kNativeLabTarget.module_name);
+    }
+    if (relocs.size() % kRelocRecordBytes != 0) {
+        fail("native_lab reloc file size is not a multiple of 16 bytes");
+    }
+
+    std::vector<std::vector<uint8_t>> by_chunk(chunks);
+    for (size_t off = 0; off < relocs.size(); off += kRelocRecordBytes) {
+        uint32_t global_offset = read_u32_le(relocs.data() + off);
+        uint32_t kind = read_u32_le(relocs.data() + off + 4);
+        uint64_t target = read_u64_le(relocs.data() + off + 8);
+        if (static_cast<size_t>(global_offset) + 5 > blob_size) {
+            fail("native_lab reloc call offset exceeds blob bounds");
+        }
+        uint32_t chunk_id = global_offset / kNativeLabTarget.chunk_bytes;
+        uint32_t local_offset = global_offset % kNativeLabTarget.chunk_bytes;
+        if (chunk_id >= chunks) {
+            fail("native_lab reloc chunk exceeds uploaded blob count");
+        }
+        if (local_offset + 5 > kNativeLabTarget.chunk_bytes) {
+            fail("native_lab call relocation crosses a blob chunk boundary");
+        }
+        append_u32_le(by_chunk[chunk_id], local_offset);
+        append_u32_le(by_chunk[chunk_id], kind);
+        append_u64_le(by_chunk[chunk_id], target);
+    }
+
+    for (uint32_t i = 0; i < chunks; i++) {
+        if (!by_chunk[i].empty()) {
+            upload_reloc_chunk(by_chunk[i], i);
+        }
+    }
 }
 
 uint32_t upload_blob(const std::vector<uint8_t> &blob)
@@ -406,11 +476,11 @@ struct CompanionLoad {
      * walking the program's BPF source bytecode (track r1's binding
      * through the most recent BPF_LD_IMM64 pseudo_map_fd) and the
      * per-kernel `offsetof(struct htab_elem, key)` extracted from any
-     * one HASH map's JIT-emitted `add rax, imm` immediate. Maps whose
-     * type is ARRAY / PERCPU_ARRAY / LRU_HASH / PERCPU_HASH / dynamic
-     * stay on the plain helper (target=bpf_map_lookup_elem, offset=0)
-     * since (a) kernel either fully inlines them away into LEA (ARRAY)
-     * or (b) doesn't have a map_gen_lookup callback for them. */
+     * one HASH map's JIT-emitted `add rax, imm` immediate. ARRAY and
+     * PERCPU_ARRAY sites call the concrete kernel map op directly;
+     * HASH sites call `__htab_map_lookup_elem` plus the post-call value
+     * adjustment. Other map types stay on the plain helper until they
+     * get their own concrete lowering. */
     struct LookupSite {
         uint64_t target_addr;
         uint32_t key_offset;
@@ -790,6 +860,8 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
         }
 
         uint64_t htab_addr = kallsyms_lookup("__htab_map_lookup_elem");
+        uint64_t array_addr = kallsyms_lookup("array_map_lookup_elem");
+        uint64_t percpu_array_addr = kallsyms_lookup("percpu_array_map_lookup_elem");
         uint64_t plain_addr = kallsyms_lookup("bpf_map_lookup_elem");
         if (plain_addr == 0) {
             fail("bpf_map_lookup_elem not in /proc/kallsyms");
@@ -836,20 +908,21 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
                 auto it = (fd >= 0) ? meta_by_fd.find(fd) : meta_by_fd.end();
                 if (it != meta_by_fd.end()) {
                     int t = it->second.type;
-                    if (t == BPF_MAP_TYPE_HASH && have_base && htab_addr != 0) {
+                    if (t == BPF_MAP_TYPE_ARRAY) {
+                        if (array_addr == 0) {
+                            fail("array_map_lookup_elem not in /proc/kallsyms");
+                        }
+                        site.target_addr = array_addr;
+                    } else if (t == BPF_MAP_TYPE_PERCPU_ARRAY) {
+                        if (percpu_array_addr == 0) {
+                            fail("percpu_array_map_lookup_elem not in /proc/kallsyms");
+                        }
+                        site.target_addr = percpu_array_addr;
+                    } else if (t == BPF_MAP_TYPE_HASH && have_base && htab_addr != 0) {
                         uint32_t rounded = (it->second.key_size + 7) & ~7u;
                         site.target_addr = htab_addr;
                         site.key_offset = htab_key_base + rounded;
                     }
-                    /* Other map types: kernel may have inline expansions
-                     * (LRU_HASH on >=5.7, PERCPU_HASH on some kernels,
-                     * ARRAY fully inlined to LEA). For POC we keep
-                     * the plain bpf_map_lookup_elem call site (no
-                     * inline) for everything except plain HASH; the
-                     * cost is correctness-preserving and bounded
-                     * (~20-30 ns per non-HASH lookup vs the
-                     * kernel JIT). Extending to LRU_HASH/PERCPU_HASH
-                     * is a follow-up. */
                 }
                 out.lookup_sites.push_back(site);
             }
@@ -983,7 +1056,7 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
     const auto upload_start = std::chrono::steady_clock::now();
     ensure_debugfs_mounted();
     uint32_t chunks = upload_blob(blob);
-    upload_relocs(relocs, /*chunk_id_for_relocs=*/0);
+    upload_relocs(relocs, blob.size(), chunks);
     const auto upload_end = std::chrono::steady_clock::now();
 
     const auto prog_load_start = std::chrono::steady_clock::now();

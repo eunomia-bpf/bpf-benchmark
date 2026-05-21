@@ -6,6 +6,7 @@ import json
 import os
 import signal
 import sys
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Mapping, Sequence
@@ -28,8 +29,8 @@ from runner.libs.case_common import (
     wait_for_suite_quiescence,
 )
 from runner.libs.kinsn import prepare_kinsn_modules
+from runner.libs import rejit_plan
 from runner.libs.rejit import (
-    apply_app_rejit,
     benchmark_rejit_enabled_passes,
     benchmark_run_provenance,
     measure_app_phase,
@@ -311,6 +312,39 @@ def _sanitize_app_filename(app_name: str) -> str:
     return app_name.replace("/", "__")
 
 
+@contextmanager
+def _temporary_env(updates: Mapping[str, str]):
+    previous: dict[str, str | None] = {key: os.environ.get(key) for key in updates}
+    try:
+        for key, value in updates.items():
+            os.environ[key] = str(value)
+        yield
+    finally:
+        for key, value in previous.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+
+
+def _write_loadtime_plan(
+    app: AppSpec,
+    enabled_passes: Sequence[str],
+    *,
+    artifact_session: ArtifactSession | None,
+) -> tuple[Path, dict[str, object]]:
+    yaml_app_name = str(app.name).split("/")[0]
+    payload = rejit_plan.build_execute_all_payload(enabled_passes, app_name=yaml_app_name)
+    if artifact_session is not None:
+        plan_dir = artifact_session.run_dir / "details" / "loadtime-plans"
+    else:
+        plan_dir = Path(os.environ.get("TMPDIR", "/tmp")) / "bpfrejit-loadtime-plans"
+    plan_dir.mkdir(parents=True, exist_ok=True)
+    plan_path = plan_dir / f"{_sanitize_app_filename(app.name)}.json"
+    plan_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    return plan_path, payload
+
+
 def _write_incremental_app_result(
     run_dir: Path,
     app_name: str,
@@ -364,10 +398,6 @@ def run_suite(
     results_by_name: dict[str, dict[str, object]] = {}
     completed_apps: set[str] = set()
     total_apps = len(suite.apps)
-    failure_artifacts_dir = (
-        artifact_session.run_dir / "details" / "failure-artifacts"
-        if artifact_session is not None and args.keep_failure_artifacts else None
-    )
     apply_enabled_passes = benchmark_rejit_enabled_passes()
 
     # Load all kinsn .ko modules into the running kernel before any app
@@ -385,7 +415,8 @@ def run_suite(
             phase = ""
             try:
                 runner = get_app_runner(app.runner, workload=app.workload_for("corpus"), **app.args)
-                runner.start()
+                with _temporary_env({"BPFREJIT_SHIM_LOADTIME_PLAN": ""}):
+                    runner.start()
                 lifecycle = LifecycleRunResult(
                     baseline=None,
                     rejit_result=None,
@@ -419,25 +450,45 @@ def run_suite(
                     status="ok",
                 )
 
-                phase = "rejit"
+                phase = "baseline_stop"
+                try:
+                    runner.stop()
+                    runner = None
+                    wait_for_suite_quiescence()
+                except Exception as stop_exc:
+                    raise RuntimeError(f"baseline app stop failed: {stop_exc}") from stop_exc
+
+                phase = "loadtime_plan"
+                loadtime_env: dict[str, str] = {"BPFREJIT_SHIM_LOADTIME_PLAN": ""}
                 if skip_rejit:
                     _print_progress("rejit_skipped", app=app.name, runner=app.runner)
-                    lifecycle.rejit_result = {"status": "skipped"}
+                    lifecycle.rejit_result = {"status": "skipped", "mode": "loadtime"}
                 else:
-                    _print_progress("rejit_start", app=app.name, runner=app.runner)
-                    yaml_app_name = str(app.name).split("/")[0]
-                    lifecycle.rejit_result = apply_app_rejit(
-                        app_pids=app_pids,
-                        enabled_passes=apply_enabled_passes,
-                        failure_artifacts_dir=failure_artifacts_dir,
-                        app_name=yaml_app_name,
+                    _print_progress("loadtime_plan_start", app=app.name, runner=app.runner)
+                    plan_path, _plan_payload = _write_loadtime_plan(
+                        app,
+                        apply_enabled_passes,
+                        artifact_session=artifact_session,
                     )
+                    loadtime_env["BPFREJIT_SHIM_LOADTIME_PLAN"] = str(plan_path)
+                    lifecycle.rejit_result = {
+                        "status": "ok",
+                        "mode": "loadtime",
+                        "plan_path": str(plan_path),
+                        "enabled_passes": list(apply_enabled_passes),
+                    }
                     _print_progress(
-                        "rejit_done",
+                        "loadtime_plan_done",
                         app=app.name,
                         runner=app.runner,
                         status=str(lifecycle.rejit_result.get("status") or "error"),
                     )
+
+                phase = "post_rejit_start"
+                runner = get_app_runner(app.runner, workload=app.workload_for("corpus"), **app.args)
+                with _temporary_env(loadtime_env):
+                    runner.start()
+                app_pids = _runner_pids(app, runner)
 
                 phase = "post_rejit"
                 _print_progress(
@@ -468,12 +519,12 @@ def run_suite(
                     startup_error = error_message
                 else:
                     lifecycle.error = error_message
-                    if phase == "rejit":
+                    if phase in {"loadtime_plan", "post_rejit_start", "baseline_stop"}:
                         _print_progress(
-                            "rejit_done",
+                            "phase_error",
                             app=app.name,
                             runner=app.runner,
-                            status="error",
+                            phase=phase,
                             error=error_message,
                         )
                     elif phase:

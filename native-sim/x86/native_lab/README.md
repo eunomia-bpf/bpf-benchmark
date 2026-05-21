@@ -156,6 +156,20 @@ python3 native-sim/x86/native_lab/tests/analyze.py
 - **No verifier protection at all.** Any blob with bad reg/state usage
   panics the kernel. This module is research-only; do not load it on
   production kernels.
+- **Helper calls cannot be blindly lowered to `call rel32`.** On x86-64,
+  `call rel32` can only reach +/-2GB from the JIT image. A 2026-05-21
+  KVM validation run that rewrote helper calls to side-band direct
+  `call rel32` relocs failed `BPF_PROG_LOAD` with `-ENOTSUPP` because
+  the BPF JIT text and helper symbols were out of range. The native
+  linker must either keep an indirect absolute call sequence or use a
+  near thunk placed in the same JIT allocation; silently assuming direct
+  helper reachability is not hardware-equivalent.
+- **The runtime image needs GNU `objdump`.** The micro driver writes
+  post-run code-compare markdown by disassembling native objects and JIT
+  dumps. A 2026-05-21 KVM validation run completed both helper workloads
+  but failed during artifact finalization with `FileNotFoundError:
+  objdump`. This is a runtime-image dependency issue, not a native blob
+  correctness failure.
 - **Single-function symbols only.** `bpf_local_call_fanout_dispatch` is
   the one current micro benchmark that uses `__noinline` subprograms;
   the linker correctly rejects it because the entry function calls into
