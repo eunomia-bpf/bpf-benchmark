@@ -110,6 +110,20 @@ static char *base64_encode_bytes(const unsigned char *bytes, size_t len) {
     return out;
 }
 
+static int write_all(int fd, const char *buf, size_t len) {
+    size_t off = 0;
+    while (off < len) {
+        ssize_t n = write(fd, buf + off, len - off);
+        if (n < 0) {
+            if (errno == EINTR) continue;
+            return -1;
+        }
+        if (n == 0) return -1;
+        off += (size_t)n;
+    }
+    return 0;
+}
+
 static char *tar_workdir_b64(const char *workdir) {
     int pipefd[2];
     if (pipe(pipefd) != 0) {
@@ -463,12 +477,8 @@ static void run_step(struct prog_entry *pd,
     free(verifier_buf);
 
     /* Write the new prog's verifier log for the next step. */
-    if (pd->discovered_from_fd)
-        capture_rejit_verifier_states(pd, nxt, target_json, local_kernel_ids,
-                                      nr_maps, verifier_log);
-    else
-        capture_verifier_states(pd, nxt, target_json, local_kernel_ids,
-                                nr_maps, verifier_log);
+    capture_verifier_states(pd, nxt, target_json, local_kernel_ids,
+                            nr_maps, verifier_log);
     rename(nxt, cur);
     pthread_mutex_lock(&state_mutex);
     pd->step_seq = *step_seq + 1;
@@ -825,7 +835,7 @@ static void emit_execute_plan(int cli, const char *json) {
     }
     free(all_prog_ids);
     buf_appendf(&resp, &cap, &len, "}}\n");
-    if (resp) (void)!write(cli, resp, len);
+    if (resp) (void)write_all(cli, resp, len);
     free(resp);
     return;
 

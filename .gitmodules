@@ -39,3 +39,6 @@
 [submodule "vendor/repos/cilium-ebpf"]
 	path = vendor/repos/cilium-ebpf
 	url = https://github.com/cilium/ebpf.git
+[submodule "vendor/repos/deepflow"]
+	path = vendor/repos/deepflow
+	url = https://github.com/deepflowio/deepflow.git

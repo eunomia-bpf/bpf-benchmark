@@ -83,10 +83,28 @@ func main() {
 	var passList string
 	var bpfopt string
 	var timeoutSeconds int
+	var shimClientSocket string
+	var shimClientRequest string
 	flag.StringVar(&passList, "pass", "noop", "comma-separated bpfopt passes to run through shim")
 	flag.StringVar(&bpfopt, "bpfopt", getenvDefault("BPFOPT_BIN", "bpfopt"), "bpfopt binary path")
 	flag.IntVar(&timeoutSeconds, "timeout", 60, "bpfopt step timeout in seconds")
+	flag.StringVar(&shimClientSocket, "shim-client-socket", "", "internal: shim socket path")
+	flag.StringVar(&shimClientRequest, "shim-client-request", "", "internal: execute_plan request JSON")
 	flag.Parse()
+
+	if shimClientSocket != "" {
+		if shimClientRequest == "" {
+			exitf("-shim-client-request must be set with -shim-client-socket")
+		}
+		raw, err := shimRequestRaw(shimClientSocket, []byte(shimClientRequest))
+		if err != nil {
+			exitf("shim client request: %v", err)
+		}
+		if _, err := os.Stdout.Write(raw); err != nil {
+			exitf("write shim response: %v", err)
+		}
+		return
+	}
 
 	passes := parsePassList(passList)
 	if len(passes) == 0 {
@@ -120,7 +138,7 @@ func main() {
 		"steps": steps,
 	}
 
-	raw, err := shimRequest(socketPath, request)
+	raw, err := runShimClient(socketPath, request)
 	if err != nil {
 		exitf("shim execute_plan request: %v", err)
 	}
@@ -138,6 +156,12 @@ func main() {
 	}
 	if err := resources.verifyRawTracepointUpdated(resp); err != nil {
 		exitf("execute_plan did not update raw tracepoint: %v", err)
+	}
+	if err := resources.verifyPerfEventUpdated(resp); err != nil {
+		exitf("execute_plan did not update perf_event ioctl attach: %v", err)
+	}
+	if err := resources.verifyTCXUpdated(resp); err != nil {
+		exitf("execute_plan did not update TCX attach: %v", err)
 	}
 	if err := resources.verifyXDPAttachUpdated(resp); err != nil {
 		exitf("execute_plan did not update XDP attach: %v", err)
@@ -168,6 +192,8 @@ type pocResources struct {
 	xdpIface             string
 	xdpPeer              string
 	xdpAttachedByBPFTOOL bool
+	tcxProgram           *ebpf.Program
+	tcxLink              link.Link
 }
 
 func loadPOCResources() (*pocResources, error) {
@@ -189,11 +215,11 @@ func loadPOCResources() (*pocResources, error) {
 	resources.cgroupFile = cgroupFile
 	resources.cgroupPath = cgroupPath
 
-	progAttachProgram, progAttachFile, progAttachPath, err := loadProgAttachCgroupProgram()
+	progAttachFile, progAttachPath, err := loadProgAttachCgroup(cgroupProgram)
 	if err != nil {
 		return nil, errors.Join(err, resources.cleanup())
 	}
-	resources.progAttachProgram = progAttachProgram
+	resources.progAttachProgram = cgroupProgram
 	resources.progAttachFile = progAttachFile
 	resources.progAttachPath = progAttachPath
 
@@ -219,6 +245,13 @@ func loadPOCResources() (*pocResources, error) {
 	resources.xdpIface = xdpIface
 	resources.xdpPeer = xdpPeer
 	resources.xdpAttachedByBPFTOOL = true
+
+	tcxProgram, tcxLink, err := loadTCXProgram(xdpIface)
+	if err != nil {
+		return nil, errors.Join(err, resources.cleanup())
+	}
+	resources.tcxProgram = tcxProgram
+	resources.tcxLink = tcxLink
 
 	return resources, nil
 }
@@ -343,45 +376,34 @@ func loadCgroupLinkProgram() (*ebpf.Program, *link.RawLink, *os.File, string, er
 	return prog, rawLink, cgroupFile, cgroupPath, nil
 }
 
-func loadProgAttachCgroupProgram() (*ebpf.Program, *os.File, string, error) {
+func loadProgAttachCgroup(prog *ebpf.Program) (*os.File, string, error) {
 	cgroupPath, err := createTempCgroup()
 	if err != nil {
-		return nil, nil, "", err
+		return nil, "", err
 	}
 	cgroupFile, err := os.Open(cgroupPath)
 	if err != nil {
 		removeErr := os.Remove(cgroupPath)
 		if removeErr != nil {
-			return nil, nil, "", fmt.Errorf("open temp prog_attach cgroup: %w; remove temp cgroup: %w", err, removeErr)
+			return nil, "", fmt.Errorf("open temp prog_attach cgroup: %w; remove temp cgroup: %w", err, removeErr)
 		}
-		return nil, nil, "", fmt.Errorf("open temp prog_attach cgroup: %w", err)
-	}
-	prog, err := ebpf.NewProgram(&ebpf.ProgramSpec{
-		Name:         "cilium_prog_attach_poc",
-		Type:         ebpf.CGroupSKB,
-		AttachType:   ebpf.AttachCGroupInetIngress,
-		License:      "MIT",
-		Instructions: simpleReturnProgram(1),
-	})
-	if err != nil {
-		cleanupErr := cleanupCgroup(cgroupFile, cgroupPath)
-		return nil, nil, "", errors.Join(fmt.Errorf("load BPF_PROG_ATTACH cgroup program: %w", err), cleanupErr)
+		return nil, "", fmt.Errorf("open temp prog_attach cgroup: %w", err)
 	}
 	if err := link.RawAttachProgram(link.RawAttachProgramOptions{
 		Target:  int(cgroupFile.Fd()),
 		Program: prog,
-		Attach:  ebpf.AttachCGroupInetIngress,
+		Attach:  ebpf.AttachCGroupInetEgress,
 	}); err != nil {
 		cleanupErr := cleanupCgroup(cgroupFile, cgroupPath)
-		return nil, nil, "", errors.Join(fmt.Errorf("BPF_PROG_ATTACH cgroup program: %w", err), cleanupErr)
+		return nil, "", errors.Join(fmt.Errorf("BPF_PROG_ATTACH cgroup program: %w", err), cleanupErr)
 	}
 	fmt.Printf("attached cgroup BPF_PROG_ATTACH prog_fd=%d cgroup=%s\n", prog.FD(), cgroupPath)
-	return prog, cgroupFile, cgroupPath, nil
+	return cgroupFile, cgroupPath, nil
 }
 
 func loadRawTracepointProgram() (*ebpf.Program, link.Link, error) {
 	prog, err := ebpf.NewProgram(&ebpf.ProgramSpec{
-		Name:         "cilium_rawtp_poc",
+		Name:         "cilium_rawtp",
 		Type:         ebpf.RawTracepoint,
 		License:      "MIT",
 		Instructions: simpleReturnProgram(0),
@@ -474,6 +496,37 @@ func loadExternalXDPProgram() (*ebpf.Program, string, string, error) {
 	return prog, iface, peer, nil
 }
 
+func loadTCXProgram(iface string) (*ebpf.Program, link.Link, error) {
+	netIface, err := net.InterfaceByName(iface)
+	if err != nil {
+		return nil, nil, fmt.Errorf("lookup TCX interface %s: %w", iface, err)
+	}
+	prog, err := ebpf.NewProgram(&ebpf.ProgramSpec{
+		Name:         "cilium_tcx_poc",
+		Type:         ebpf.SchedCLS,
+		AttachType:   ebpf.AttachTCXIngress,
+		License:      "MIT",
+		Instructions: simpleReturnProgram(0),
+	})
+	if err != nil {
+		return nil, nil, fmt.Errorf("load TCX sched_cls program: %w", err)
+	}
+	tcxLink, err := link.AttachTCX(link.TCXOptions{
+		Program:   prog,
+		Interface: netIface.Index,
+		Attach:    ebpf.AttachTCXIngress,
+	})
+	if err != nil {
+		return nil, nil, errors.Join(fmt.Errorf("attach TCX ingress: %w", err), prog.Close())
+	}
+	info, err := tcxLink.Info()
+	if err != nil {
+		return nil, nil, errors.Join(fmt.Errorf("query TCX link info: %w", err), tcxLink.Close(), prog.Close())
+	}
+	fmt.Printf("attached TCX sched_cls link prog_fd=%d link_id=%d prog_id=%d if=%s\n", prog.FD(), info.ID, info.Program, iface)
+	return prog, tcxLink, nil
+}
+
 func simpleReturnProgram(ret int32) asm.Instructions {
 	return asm.Instructions{
 		asm.Mov.Imm(asm.R0, ret),
@@ -527,6 +580,7 @@ func (r *pocResources) cleanup() error {
 	return errors.Join(
 		closeLink(r.cgroupLink),
 		closeLink(r.rawTraceLink),
+		closeLink(r.tcxLink),
 		cleanupCgroup(r.cgroupFile, r.cgroupPath),
 		cleanupCgroup(r.progAttachFile, r.progAttachPath),
 		r.counter.Close(),
@@ -553,13 +607,13 @@ func (r *pocResources) verifyCgroupLinkUpdated(resp *executeResponse) error {
 }
 
 func (r *pocResources) verifyProgAttachUpdated(resp *executeResponse) error {
-	want, err := programIDByName(resp, "cilium_prog_attach_poc")
+	want, err := programIDByName(resp, "cilium_link_poc")
 	if err != nil {
 		return err
 	}
 	result, err := link.QueryPrograms(link.QueryOptions{
 		Target: int(r.progAttachFile.Fd()),
-		Attach: ebpf.AttachCGroupInetIngress,
+		Attach: ebpf.AttachCGroupInetEgress,
 	})
 	if err != nil {
 		return fmt.Errorf("query BPF_PROG_ATTACH cgroup: %w", err)
@@ -574,7 +628,7 @@ func (r *pocResources) verifyProgAttachUpdated(resp *executeResponse) error {
 }
 
 func (r *pocResources) verifyRawTracepointUpdated(resp *executeResponse) error {
-	want, err := programIDByName(resp, "cilium_rawtp_poc")
+	want, err := programIDByName(resp, "cilium_rawtp")
 	if err != nil {
 		return err
 	}
@@ -586,6 +640,38 @@ func (r *pocResources) verifyRawTracepointUpdated(resp *executeResponse) error {
 		return fmt.Errorf("bpftool link show missing raw tracepoint prog_id=%d", want)
 	}
 	fmt.Printf("verified raw tracepoint link now points at prog_id=%d\n", want)
+	return nil
+}
+
+func (r *pocResources) verifyPerfEventUpdated(resp *executeResponse) error {
+	want, err := programIDByName(resp, "cilium_perf_ioc")
+	if err != nil {
+		return err
+	}
+	raw, err := runCleanOutput("bpftool", "-j", "perf", "show")
+	if err != nil {
+		return err
+	}
+	if !jsonContainsProgramID(raw, want) {
+		return fmt.Errorf("bpftool perf show missing prog_id=%d", want)
+	}
+	fmt.Printf("verified perf_event ioctl attach now points at prog_id=%d\n", want)
+	return nil
+}
+
+func (r *pocResources) verifyTCXUpdated(resp *executeResponse) error {
+	want, err := programIDByName(resp, "cilium_tcx_poc")
+	if err != nil {
+		return err
+	}
+	info, err := r.tcxLink.Info()
+	if err != nil {
+		return fmt.Errorf("query TCX link after execute_plan: %w", err)
+	}
+	if uint32(info.Program) != want {
+		return fmt.Errorf("TCX link program id %d, want %d", info.Program, want)
+	}
+	fmt.Printf("verified TCX sched_cls link now points at prog_id=%d\n", want)
 	return nil
 }
 
@@ -813,7 +899,21 @@ func shimSocketCandidates(pid int) []string {
 	return candidates
 }
 
-func shimRequest(socketPath string, payload any) ([]byte, error) {
+func runShimClient(socketPath string, payload any) ([]byte, error) {
+	req, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+	cmd := exec.Command(os.Args[0], "-shim-client-socket", socketPath, "-shim-client-request", string(req))
+	cmd.Env = envWithoutLDPreload(os.Environ())
+	raw, err := cmd.CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w: %s", strings.Join(cmd.Args, " "), err, strings.TrimSpace(string(raw)))
+	}
+	return raw, nil
+}
+
+func shimRequestRaw(socketPath string, req []byte) ([]byte, error) {
 	conn, err := net.DialTimeout("unix", socketPath, 5*time.Second)
 	if err != nil {
 		return nil, err
@@ -826,14 +926,6 @@ func shimRequest(socketPath string, payload any) ([]byte, error) {
 		return nil, err
 	}
 
-	req, err := json.Marshal(payload)
-	if err != nil {
-		closeErr := conn.Close()
-		if closeErr != nil {
-			return nil, fmt.Errorf("marshal request: %w; close: %w", err, closeErr)
-		}
-		return nil, err
-	}
 	req = append(req, '\n')
 	if _, err := conn.Write(req); err != nil {
 		closeErr := conn.Close()

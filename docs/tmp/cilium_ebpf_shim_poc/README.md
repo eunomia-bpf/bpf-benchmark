@@ -11,8 +11,14 @@ Covered paths:
   cilium/ebpf map APIs.
 - `BPF_PROG_LOAD` for a socket-filter program that references a map.
 - `BPF_LINK_CREATE` for a cgroup skb program attached to a temporary cgroup.
+- `BPF_PROG_ATTACH` for a legacy cgroup skb attach.
+- `BPF_RAW_TRACEPOINT_OPEN` for raw tracepoints.
+- `perf_event_open` + `PERF_EVENT_IOC_SET_BPF` for perf-event based attach.
+- external XDP attach via `bpftool net attach`, matching out-of-process XDP
+  attach/discovery.
+- TCX `BPF_LINK_CREATE` for `sched_cls` programs.
 - `execute_plan` with one or more passes, including a post-ReJIT check that the
-  cgroup `bpf_link` now points at the new program id returned by the shim.
+  live attach points now point at the new program ids returned by the shim.
 
 Build:
 
@@ -37,7 +43,7 @@ sudo env \
 Expected success ends with:
 
 ```text
-cilium/ebpf map load, cgroup bpf_link attach, and execute_plan completed
+cilium/ebpf map load, corpus attach families, and execute_plan completed
 ```
 
 On a stock kernel without the fork-only ReJIT command, the program may load but
