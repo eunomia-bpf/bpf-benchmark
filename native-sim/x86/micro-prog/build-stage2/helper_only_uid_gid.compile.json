@@ -1,0 +1,28 @@
+{
+  "arch": "x86",
+  "command": [
+    "clang",
+    "-g",
+    "-O3",
+    "-target",
+    "bpf",
+    "-mllvm",
+    "-bpf-stack-size=4096",
+    "-D__TARGET_ARCH_x86",
+    "-I",
+    "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/include/uapi",
+    "-I",
+    "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/src",
+    "-I",
+    "/usr/include/x86_64-linux-gnu",
+    "-c",
+    "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/helper_only_uid_gid.bpf.c",
+    "-o",
+    "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/build-stage2/helper_only_uid_gid.bpf.o"
+  ],
+  "compile_ns": 292354631,
+  "compile_s": 0.29235463100485504,
+  "name": "helper_only_uid_gid",
+  "object": "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/build-stage2/helper_only_uid_gid.bpf.o",
+  "source": "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/helper_only_uid_gid.bpf.c"
+}

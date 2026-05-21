@@ -1,0 +1,28 @@
+{
+  "arch": "x86",
+  "command": [
+    "clang",
+    "-g",
+    "-O3",
+    "-target",
+    "bpf",
+    "-mllvm",
+    "-bpf-stack-size=4096",
+    "-D__TARGET_ARCH_x86",
+    "-I",
+    "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/include/uapi",
+    "-I",
+    "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/src",
+    "-I",
+    "/usr/include/x86_64-linux-gnu",
+    "-c",
+    "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/map_array_index_packet.bpf.c",
+    "-o",
+    "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/build-stage2/map_array_index_packet.bpf.o"
+  ],
+  "compile_ns": 978366933,
+  "compile_s": 0.9783669330063276,
+  "name": "map_array_index_packet",
+  "object": "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/build-stage2/map_array_index_packet.bpf.o",
+  "source": "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/map_array_index_packet.bpf.c"
+}

@@ -1,0 +1,28 @@
+{
+  "arch": "arm64",
+  "command": [
+    "clang",
+    "-g",
+    "-O2",
+    "-target",
+    "bpf",
+    "-mllvm",
+    "-bpf-stack-size=4096",
+    "-D__TARGET_ARCH_arm64",
+    "-I",
+    "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/include/uapi",
+    "-I",
+    "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/src",
+    "-I",
+    "/usr/include/x86_64-linux-gnu",
+    "-c",
+    "/home/yunwei37/workspace/bpf-benchmark/native-sim/arm64/micro-prog/map_percpu_hash_counter.bpf.c",
+    "-o",
+    "/home/yunwei37/workspace/bpf-benchmark/native-sim/arm64/micro-prog/build-stage2/map_percpu_hash_counter.bpf.o"
+  ],
+  "compile_ns": 1169618856,
+  "compile_s": 1.1696188560163137,
+  "name": "map_percpu_hash_counter",
+  "object": "/home/yunwei37/workspace/bpf-benchmark/native-sim/arm64/micro-prog/build-stage2/map_percpu_hash_counter.bpf.o",
+  "source": "/home/yunwei37/workspace/bpf-benchmark/native-sim/arm64/micro-prog/map_percpu_hash_counter.bpf.c"
+}

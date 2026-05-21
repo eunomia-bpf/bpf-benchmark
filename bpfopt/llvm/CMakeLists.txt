@@ -8,23 +8,33 @@ find_package(LLVM REQUIRED CONFIG)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(SPDLOG REQUIRED IMPORTED_TARGET spdlog)
 
-find_program(LLVM_CONFIG_EXECUTABLE
-  NAMES llvm-config llvm-config-${LLVM_VERSION_MAJOR}
-  HINTS ${LLVM_TOOLS_BINARY_DIR}
+# Resolve LLVM component libraries via the CMake config package rather than
+# shelling out to llvm-config: the in-repo kinsn LLVM build does not ship a
+# working llvm-config, and the component targets carry their own transitive
+# system-lib dependencies (zlib, zstd, etc.).
+# bpfopt-llvm only emits BPF object code, so the BPF backend is mandatory. The
+# host backend (native/x86/aarch64) is only present when LLVM was built with it
+# (the in-repo kinsn LLVM is BPF-only), so add it conditionally.
+set(BPFOPT_LLVM_COMPONENTS
+  core support target analysis ipo transformutils passes bitreader
+  asmparser linker mc mcparser mcdisassembler object executionengine
+  runtimedyld orcjit mcjit
+  bpfcodegen bpfasmparser bpfdisassembler bpfdesc bpfinfo
 )
-if(NOT LLVM_CONFIG_EXECUTABLE)
-  message(FATAL_ERROR "llvm-config not found")
+if("X86" IN_LIST LLVM_TARGETS_TO_BUILD)
+  list(APPEND BPFOPT_LLVM_COMPONENTS native x86)
 endif()
+if("AArch64" IN_LIST LLVM_TARGETS_TO_BUILD)
+  list(APPEND BPFOPT_LLVM_COMPONENTS aarch64)
+endif()
+llvm_map_components_to_libnames(LLVM_LINK_FLAGS ${BPFOPT_LLVM_COMPONENTS})
 
-execute_process(
-  COMMAND ${LLVM_CONFIG_EXECUTABLE} --ldflags --libs --system-libs
-          core support target analysis ipo transformutils passes bitreader
-          asmparser linker mc mcparser mcdisassembler object executionengine
-          runtimedyld orcjit mcjit native bpf x86 aarch64
-  OUTPUT_VARIABLE LLVM_LINK_FLAGS_RAW
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-separate_arguments(LLVM_LINK_FLAGS UNIX_COMMAND "${LLVM_LINK_FLAGS_RAW}")
+# Match the LLVM build's RTTI setting; the in-repo kinsn LLVM is built without
+# RTTI, so compiling our translation units with RTTI on leaves typeinfo symbols
+# (ErrorInfoBase, format_adapter) unresolved at link time.
+if(NOT LLVM_ENABLE_RTTI)
+  add_compile_options(-fno-rtti)
+endif()
 
 set(LLVMBPF_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../vendor/llvmbpf")
 
