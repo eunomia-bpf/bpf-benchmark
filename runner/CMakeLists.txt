@@ -54,11 +54,11 @@ if(MICRO_EXEC_ENABLE_LLVMBPF)
     find_package(LLVM REQUIRED CONFIG PATHS "${LLVM_DIR}" NO_DEFAULT_PATH)
     pkg_check_modules(SPDLOG REQUIRED IMPORTED_TARGET spdlog)
 
-    # Keep this list aligned with vendor/llvmbpf/CMakeLists.txt so host-cross
+    # Keep this list aligned with bpfopt/llvm/CMakeLists.txt so host-cross
     # builds can link against target LLVM libraries without executing a target
-    # llvm-config binary on the host.
+    # llvm-config binary on the host. The in-repo kinsn LLVM build is BPF-only,
+    # so only request host target libraries when the selected LLVM provides them.
     set(MICRO_EXEC_LLVM_COMPONENTS
-        ${LLVM_TARGETS_TO_BUILD}
         Core
         Support
         Target
@@ -76,19 +76,32 @@ if(MICRO_EXEC_ENABLE_LLVMBPF)
         RuntimeDyld
         OrcJIT
         MCJIT
-        X86CodeGen
-        X86Desc
-        X86Info
-        X86AsmParser
-        NVPTXCodeGen
-        NVPTXDesc
-        NVPTXInfo
-        AArch64CodeGen
-        AArch64Desc
-        AArch64Info
-        AArch64AsmParser
     )
+    if("BPF" IN_LIST LLVM_TARGETS_TO_BUILD)
+        list(APPEND MICRO_EXEC_LLVM_COMPONENTS
+            BPFCodeGen BPFAsmParser BPFDisassembler BPFDesc BPFInfo
+        )
+    endif()
+    if("X86" IN_LIST LLVM_TARGETS_TO_BUILD)
+        list(APPEND MICRO_EXEC_LLVM_COMPONENTS
+            X86CodeGen X86Desc X86Info X86AsmParser
+        )
+    endif()
+    if("NVPTX" IN_LIST LLVM_TARGETS_TO_BUILD)
+        list(APPEND MICRO_EXEC_LLVM_COMPONENTS
+            NVPTXCodeGen NVPTXDesc NVPTXInfo
+        )
+    endif()
+    if("AArch64" IN_LIST LLVM_TARGETS_TO_BUILD)
+        list(APPEND MICRO_EXEC_LLVM_COMPONENTS
+            AArch64CodeGen AArch64Desc AArch64Info AArch64AsmParser
+        )
+    endif()
     llvm_map_components_to_libnames(MICRO_EXEC_LLVM_LIBS ${MICRO_EXEC_LLVM_COMPONENTS})
+
+    if(NOT LLVM_ENABLE_RTTI)
+        add_compile_options(-fno-rtti)
+    endif()
 
     list(APPEND MICRO_EXEC_SOURCES
         src/llvmbpf_runner.cpp
