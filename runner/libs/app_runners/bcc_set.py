@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 import subprocess
 import threading
-import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Mapping
@@ -20,7 +19,6 @@ from .bcc import (
 )
 
 BCC_SET_WORKLOAD = "stress_ng_os_io_network"
-DEFAULT_BCC_SET_ATTACH_WAIT_SECONDS = 10
 
 
 @dataclass(frozen=True)
@@ -47,11 +45,9 @@ class BccSetRunner(AppRunner):
         *,
         tool_binaries: Mapping[str, Path | str],
         workload_spec: Mapping[str, object],
-        attach_timeout_s: int = DEFAULT_BCC_SET_ATTACH_WAIT_SECONDS,
     ) -> None:
         super().__init__()
         self.workload_spec = dict(workload_spec)
-        self.attach_timeout_s = float(attach_timeout_s)
         self._children: dict[str, BCCRunner] = {}
         for spec in BCC_SET_TOOL_SPECS:
             binary = tool_binaries.get(spec.name)
@@ -84,15 +80,12 @@ class BccSetRunner(AppRunner):
             except Exception as exc:
                 self._fail_start(f"bcc/set failed to start {spec.name}: {exc}")
 
-        time.sleep(max(0.0, self.attach_timeout_s))
-
         for spec in BCC_SET_TOOL_SPECS:
             self._raise_if_child_exited(spec.name, self._children[spec.name])
             child = self._children[spec.name]
             assert child.session is not None
             wait_for_app_shim_programs(
                 app_pid=int(child.session.process.pid),
-                timeout_s=self.attach_timeout_s,
                 process=child.session.process,
                 snapshot=lambda child=child: self._child_output_snapshot(child),
                 process_name=f"BCC tool {spec.name}",

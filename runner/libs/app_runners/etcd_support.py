@@ -44,11 +44,9 @@ class LocalEtcdSession:
         *,
         work_dir: Path,
         name: str,
-        startup_timeout_s: int = 200,
     ) -> None:
         self.work_dir = Path(work_dir).resolve()
         self.name = str(name).strip() or "runner"
-        self.startup_timeout_s = int(startup_timeout_s)
         self.data_dir = self.work_dir / "data"
         self.process: subprocess.Popen[str] | None = None
         self.collector = ProcessOutputCollector()
@@ -102,8 +100,7 @@ class LocalEtcdSession:
         )
         self.stdout_thread.start()
         self.stderr_thread.start()
-        deadline = time.monotonic() + max(1, self.startup_timeout_s)
-        while time.monotonic() < deadline:
+        while True:
             if self.process.poll() is not None:
                 returncode = self.process.returncode
                 details = self._tail_details()
@@ -115,18 +112,12 @@ class LocalEtcdSession:
             if self._healthy():
                 return self
             time.sleep(0.2)
-        details = self._tail_details()
-        self.close()
-        raise RuntimeError(
-            f"local etcd did not become healthy within {self.startup_timeout_s}s"
-            + (f": {details}" if details else "")
-        )
 
     def _healthy(self) -> bool:
         if not self.client_url:
             return False
         try:
-            with urllib.request.urlopen(f"{self.client_url}/health", timeout=10.0) as response:
+            with urllib.request.urlopen(f"{self.client_url}/health") as response:
                 payload = response.read().decode("utf-8", errors="replace").lower()
         except (OSError, urllib.error.URLError):
             return False

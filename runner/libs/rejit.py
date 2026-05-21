@@ -210,6 +210,8 @@ def benchmark_run_provenance() -> dict[str, object]:
     }
 
 _SHIM_SOCK_DIR = Path("/var/run/bpfrejit")
+_SHIM_PROGRAM_STABLE_SECONDS = 2.0
+_LOADTIME_SHIM_PROGRAM_STABLE_SECONDS = 15.0
 
 
 def _shim_socket_for_pid(app_pid: int) -> Path:
@@ -309,18 +311,45 @@ def app_shim_has_programs(app_pid: int) -> bool:
     return str(resp.get("status") or "error") == "ok"
 
 
+def _list_app_shim_program_ids(app_pid: int) -> tuple[int, ...]:
+    resp = _shim_request(_shim_socket_for_pid(int(app_pid)), {"cmd": "list_progs"})
+    if not bool(resp.get("ok")):
+        raise RuntimeError(str(resp.get("error") or "list_progs failed"))
+    programs = resp.get("progs")
+    if not isinstance(programs, Sequence) or isinstance(programs, (str, bytes, bytearray)):
+        raise RuntimeError("list_progs returned invalid progs payload")
+    ids: list[int] = []
+    for item in programs:
+        if not isinstance(item, Mapping):
+            continue
+        prog_id = int(item.get("id", 0) or 0)
+        if prog_id > 0:
+            ids.append(prog_id)
+    return tuple(sorted(set(ids)))
+
+
 def wait_for_app_shim_programs(
     *,
     app_pid: int,
-    timeout_s: int | float | None,
     process: object | None = None,
     snapshot: object | None = None,
     process_name: str = "process",
+    stable_seconds_override: float | None = None,
+    min_programs: int = 1,
 ) -> None:
     if skip_rejit_disables_shim():
         return
-    deadline = None if timeout_s is None else time.monotonic() + max(0.0, float(timeout_s))
-    while deadline is None or time.monotonic() < deadline:
+    if stable_seconds_override is None:
+        stable_seconds = (
+            _LOADTIME_SHIM_PROGRAM_STABLE_SECONDS
+            if os.environ.get("BPFREJIT_SHIM_LOADTIME_PLAN", "").strip()
+            else _SHIM_PROGRAM_STABLE_SECONDS
+        )
+    else:
+        stable_seconds = max(0.0, float(stable_seconds_override))
+    stable_ids: tuple[int, ...] = ()
+    stable_since: float | None = None
+    while True:
         poll = getattr(process, "poll", None)
         if callable(poll) and poll() is not None:
             detail = ""
@@ -330,12 +359,22 @@ def wait_for_app_shim_programs(
                     lines = list(snap.get("stderr_tail") or []) + list(snap.get("stdout_tail") or [])
                     detail = "\n" + "\n".join(str(line) for line in lines[-40:]) if lines else ""
             raise RuntimeError(f"{process_name} exited before BPF programs were tracked by shim{detail}")
-        if app_shim_has_programs(int(app_pid)):
+        try:
+            ids = _list_app_shim_program_ids(int(app_pid))
+        except RuntimeError:
+            ids = ()
+        if ids and len(ids) >= max(1, int(min_programs)) and stable_seconds <= 0.0:
             return
+        if ids and len(ids) >= max(1, int(min_programs)) and ids == stable_ids:
+            if stable_since is not None and time.monotonic() - stable_since >= stable_seconds:
+                return
+        elif ids and len(ids) >= max(1, int(min_programs)):
+            stable_ids = ids
+            stable_since = time.monotonic()
+        else:
+            stable_ids = ()
+            stable_since = None
         time.sleep(0.2)
-    raise RuntimeError(
-        f"{process_name} did not load any shim-tracked BPF programs within {float(timeout_s):.1f}s"
-    )
 
 
 def apply_app_rejit(

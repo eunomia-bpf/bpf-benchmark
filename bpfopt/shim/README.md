@@ -105,7 +105,7 @@ Line-delimited JSON. Commands:
 // execute_plan — run runner-supplied pass steps against every tracked prog
 {"cmd": "execute_plan",
  "steps": [{"name": "noop",
-            "command": "timeout 6000 bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
+            "command": "bpfopt --pass noop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}",
             "log_level": 1}]}
 // → {"status": "ok", "per_program": {"4669": {"status": "ok", "passes": [...]}}}
 

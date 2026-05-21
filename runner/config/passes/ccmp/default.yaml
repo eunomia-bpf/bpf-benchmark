@@ -9,4 +9,4 @@ kinsns:
   - name: bpf_arm64_ccmp_w
   - name: bpf_arm64_cset_x_cond
 command: |
-  timeout 6000 bpfopt --pass ccmp --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}
+  bpfopt --pass ccmp --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}

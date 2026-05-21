@@ -52,8 +52,7 @@ class ProcessOutputCollector:
 
 
 class AgentSession:
-    def __init__(self, load_timeout: int) -> None:
-        self.load_timeout = int(load_timeout)
+    def __init__(self) -> None:
         self.process: Any | None = None
         self.collector = ProcessOutputCollector()
         self.stdout_thread: threading.Thread | None = None
@@ -103,12 +102,10 @@ class ManagedProcessSession:
         self,
         command: Sequence[str],
         *,
-        load_timeout_s: int,
         cwd: Path | None = None,
         env: Mapping[str, str] | None = None,
     ) -> None:
         self.command = [str(item) for item in command]
-        self.load_timeout_s = int(load_timeout_s)
         self.cwd = None if cwd is None else Path(cwd).resolve()
         self.env = None if env is None else {str(key): str(value) for key, value in env.items()}
         self.process: Any | None = None
@@ -146,7 +143,6 @@ class ManagedProcessSession:
         try:
             wait_for_app_shim_programs(
                 app_pid=int(self.process.pid),
-                timeout_s=self.load_timeout_s,
                 process=self.process,
                 snapshot=self.collector_snapshot,
                 process_name="native app",
@@ -185,13 +181,11 @@ class NativeProcessRunner(AppRunner):
         *,
         loader_binary: Path | str | None = None,
         loader_args: Sequence[str] = (),
-        load_timeout_s: int = 200,
         workload_kind: str | None = None,
     ) -> None:
         super().__init__()
         self.loader_binary = None if loader_binary is None else Path(loader_binary).resolve()
         self.loader_args = tuple(str(arg) for arg in loader_args if str(arg).strip())
-        self.load_timeout_s = int(load_timeout_s)
         self.workload_kind = str(workload_kind or "").strip()
         self.session: ManagedProcessSession | None = None
 
@@ -234,7 +228,6 @@ class NativeProcessRunner(AppRunner):
         command = self._command(binary)
         session = ManagedProcessSession(
             command,
-            load_timeout_s=self.load_timeout_s,
             cwd=self._command_cwd(),
             env=self._command_env(),
         )

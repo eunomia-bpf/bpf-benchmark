@@ -37,6 +37,7 @@ struct prog_entry {
     uint32_t measure_bytes_jited;
     uint32_t measure_bytes_xlated;
     uint32_t measure_prog_id;
+    uint32_t measure_generation;
     int measure_active;
     /* Captured BPF_PROG_LOAD attr for candidate re-load (verifier-state
      * probe). The insns pointer is left dangling; consumers re-read from

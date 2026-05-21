@@ -45,6 +45,20 @@ static int loadtime_write_file(const char *path, const void *data, size_t len) {
     return 0;
 }
 
+static int loadtime_write_all_fd(int fd, const char *data, size_t len) {
+    size_t off = 0;
+    while (off < len) {
+        ssize_t n = write(fd, data + off, len - off);
+        if (n < 0) {
+            if (errno == EINTR) continue;
+            return -1;
+        }
+        if (n == 0) return -1;
+        off += (size_t)n;
+    }
+    return 0;
+}
+
 static struct bpf_insn *loadtime_read_bytecode(const char *path,
                                                uint32_t *insn_cnt_out) {
     *insn_cnt_out = 0;
@@ -111,6 +125,113 @@ static int loadtime_read_text_file(const char *path, char **out) {
     real_close(fd);
     buf[off] = 0;
     *out = buf;
+    return 0;
+}
+
+static int loadtime_json_is_object(const char *payload) {
+    jsmntok_t *tokens = NULL;
+    int count = 0;
+    int ok = json_parse_alloc(payload, &tokens, &count) == 0 && count > 0 &&
+             tokens[0].type == JSMN_OBJECT;
+    free(tokens);
+    return ok;
+}
+
+static void loadtime_json_make_single_line(char *payload) {
+    if (!payload)
+        return;
+    for (char *p = payload; *p; p++)
+        if (*p == '\n' || *p == '\r')
+            *p = ' ';
+}
+
+static int loadtime_append_step_report(const char *prog_name,
+                                       const char *prog_type,
+                                       const char *step_name,
+                                       int step_index,
+                                       uint64_t elapsed_ms,
+                                       const char *workdir,
+                                       const char *report_path) {
+    const char *reports_path = getenv("BPFREJIT_SHIM_LOADTIME_REPORTS");
+    if (!reports_path || !reports_path[0])
+        return 0;
+
+    char *report_json = NULL;
+    char report_error[256] = {0};
+    int report_ok = 0;
+    if (loadtime_read_text_file(report_path, &report_json) == 0) {
+        report_ok = loadtime_json_is_object(report_json);
+        if (report_ok)
+            loadtime_json_make_single_line(report_json);
+        else
+            snprintf(report_error, sizeof(report_error), "invalid JSON report");
+    } else {
+        snprintf(report_error, sizeof(report_error),
+                 "missing report errno=%d", errno);
+    }
+
+    char e_prog[96], e_type[64], e_step[128], e_workdir[512], e_report[512],
+         e_error[512];
+    json_escape_into(prog_name ? prog_name : "", strlen(prog_name ? prog_name : ""),
+                     e_prog, sizeof(e_prog));
+    json_escape_into(prog_type ? prog_type : "", strlen(prog_type ? prog_type : ""),
+                     e_type, sizeof(e_type));
+    json_escape_into(step_name ? step_name : "", strlen(step_name ? step_name : ""),
+                     e_step, sizeof(e_step));
+    json_escape_into(workdir ? workdir : "", strlen(workdir ? workdir : ""),
+                     e_workdir, sizeof(e_workdir));
+    json_escape_into(report_path ? report_path : "",
+                     strlen(report_path ? report_path : ""),
+                     e_report, sizeof(e_report));
+    json_escape_into(report_error, strlen(report_error), e_error,
+                     sizeof(e_error));
+
+    int fd = open(reports_path, O_WRONLY | O_CREAT | O_APPEND, 0644);
+    if (fd < 0) {
+        free(report_json);
+        return -1;
+    }
+    while (flock(fd, LOCK_EX) != 0) {
+        if (errno == EINTR)
+            continue;
+        real_close(fd);
+        free(report_json);
+        return -1;
+    }
+
+    char prefix[1536];
+    int n = snprintf(prefix, sizeof(prefix),
+                     "{\"prog_name\":\"%s\",\"prog_type\":\"%s\","
+                     "\"step\":\"%s\",\"step_index\":%d,"
+                     "\"elapsed_ms\":%llu,\"workdir\":\"%s\","
+                     "\"report_path\":\"%s\",\"report\":",
+                     e_prog, e_type, e_step, step_index,
+                     (unsigned long long)elapsed_ms, e_workdir, e_report);
+    if (n < 0 || (size_t)n >= sizeof(prefix) ||
+        loadtime_write_all_fd(fd, prefix, (size_t)n) != 0 ||
+        loadtime_write_all_fd(fd, report_ok ? report_json : "null",
+                              report_ok ? strlen(report_json) : 4) != 0) {
+        real_close(fd);
+        free(report_json);
+        return -1;
+    }
+    if (report_error[0]) {
+        char suffix[640];
+        n = snprintf(suffix, sizeof(suffix),
+                     ",\"report_error\":\"%s\"}\n", e_error);
+        if (n < 0 || (size_t)n >= sizeof(suffix) ||
+            loadtime_write_all_fd(fd, suffix, (size_t)n) != 0) {
+            real_close(fd);
+            free(report_json);
+            return -1;
+        }
+    } else if (loadtime_write_all_fd(fd, "}\n", 2) != 0) {
+        real_close(fd);
+        free(report_json);
+        return -1;
+    }
+    real_close(fd);
+    free(report_json);
     return 0;
 }
 
@@ -512,6 +633,19 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
         if (loadtime_run_shell(resolved, step_log, &elapsed_ms) != 0) {
             snprintf(err, err_sz, "loadtime bpfopt step %s failed; log=%s",
                      name[0] ? name : "<unnamed>", step_log);
+            free(map_ids);
+            free(map_types);
+            free(plan_json);
+            return -1;
+        }
+        if (loadtime_append_step_report(prog_name, prog_type_name,
+                                        name[0] ? name : "<unnamed>",
+                                        step_seq, elapsed_ms, workdir,
+                                        report) != 0) {
+            snprintf(err, err_sz, "failed to append loadtime report %s errno=%d",
+                     getenv("BPFREJIT_SHIM_LOADTIME_REPORTS") ?
+                         getenv("BPFREJIT_SHIM_LOADTIME_REPORTS") : "",
+                     errno);
             free(map_ids);
             free(map_types);
             free(plan_json);

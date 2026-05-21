@@ -17,7 +17,7 @@ from ..agent import (
     stop_agent,
     wait_healthy,
 )
-from ..rejit import app_shim_has_programs, skip_rejit_disables_shim
+from ..rejit import app_shim_has_programs, skip_rejit_disables_shim, wait_for_app_shim_programs
 from ..workload import (
     WorkloadResult,
     run_named_workload,
@@ -73,8 +73,8 @@ class TraceeOutputCollector:
 
 
 class TraceeAgentSession(AgentSession):
-    def __init__(self, commands: Sequence[Sequence[str]], load_timeout: int) -> None:
-        super().__init__(load_timeout)
+    def __init__(self, commands: Sequence[Sequence[str]]) -> None:
+        super().__init__()
         self.commands = [list(command) for command in commands]
         self.collector = TraceeOutputCollector()
         self.command_used: list[str] | None = None
@@ -106,11 +106,21 @@ class TraceeAgentSession(AgentSession):
                 ) and (skip_rejit_disables_shim() or app_shim_has_programs(int(proc.pid)))
 
             try:
-                healthy = wait_healthy(proc, self.load_timeout, _health_check)
+                healthy = wait_healthy(proc, None, _health_check)
             except Exception:
                 self.close()
                 raise
             if healthy:
+                try:
+                    wait_for_app_shim_programs(
+                        app_pid=int(proc.pid),
+                        process=proc,
+                        snapshot=self.collector_snapshot,
+                        process_name="Tracee",
+                    )
+                except Exception:
+                    self.close()
+                    raise
                 self.programs = []
                 return self
             snapshot = self.collector.snapshot()
@@ -139,9 +149,9 @@ def inspect_tracee_setup() -> dict[str, object]:
     if tracee_binary is None:
         return {"returncode": 1, "tracee_binary": None, "stdout_tail": "",
                 "stderr_tail": f"missing upstream Tracee container artifact under {artifact_binary}"}
-    vp = run_command([str(tracee_binary), "--version"], check=False, timeout=300)
+    vp = run_command([str(tracee_binary), "--version"], check=False)
     if vp.returncode != 0:
-        vp = run_command([str(tracee_binary), "version"], check=False, timeout=300)
+        vp = run_command([str(tracee_binary), "version"], check=False)
     if vp.returncode != 0:
         return {"returncode": vp.returncode, "tracee_binary": str(tracee_binary),
                 "stdout_tail": tail_text(vp.stdout or "", max_lines=40, max_chars=8000),
@@ -177,7 +187,7 @@ def _tracee_signatures_dir() -> Path:
 
 def _tracee_healthz_ready(host: str, port: int) -> bool:
     try:
-        with urlopen(f"http://{host}:{int(port)}/healthz", timeout=10.0) as response:
+        with urlopen(f"http://{host}:{int(port)}/healthz") as response:
             return int(getattr(response, "status", 0) or 0) == 200
     except (OSError, URLError):
         return False
@@ -225,10 +235,8 @@ def run_tracee_workload(spec: Mapping[str, object], duration_s: int) -> Workload
         return run_named_workload(kind, duration_s)
     raise RuntimeError(f"unsupported workload kind: {kind}")
 
-DEFAULT_LOAD_TIMEOUT_S = 1200
 DEFAULT_STARTUP_SETTLE_S = 5.0
 DEFAULT_STOP_TIMEOUT_S = 300.0
-DEFAULT_EVENT_JOIN_TIMEOUT_S = 100.0
 
 
 class TraceeRunner(AppRunner):
@@ -237,13 +245,11 @@ class TraceeRunner(AppRunner):
         *,
         tracee_binary: Path | str | None = None,
         extra_args: Sequence[str] = (),
-        load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
         workload_spec: Mapping[str, object] | None = None,
     ) -> None:
         super().__init__()
         self.tracee_binary = None if tracee_binary is None else Path(tracee_binary).resolve()
         self.extra_args = tuple(str(arg) for arg in extra_args)
-        self.load_timeout_s = int(load_timeout_s)
         self.session: Any | None = None
         self.setup_result: dict[str, object] = {"returncode": 0, "tracee_binary": None, "stdout_tail": "", "stderr_tail": ""}
         self.workload_spec: Mapping[str, object] = {} if workload_spec is None else dict(workload_spec)
@@ -277,7 +283,7 @@ class TraceeRunner(AppRunner):
 
         tracee_binary = self._resolve_binary()
         commands = build_tracee_commands(tracee_binary, self.extra_args)
-        session = TraceeAgentSession(commands, self.load_timeout_s)
+        session = TraceeAgentSession(commands)
         session.__enter__()
         self.session = session
         self.command_used = list(session.command_used or [])

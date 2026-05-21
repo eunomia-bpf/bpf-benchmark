@@ -52,11 +52,11 @@ def start_agent(
 
 def wait_healthy(
     proc: subprocess.Popen[str],
-    timeout: int | float,
+    timeout: int | float | None,
     health_check_fn: Callable[[], bool],
 ) -> bool:
-    deadline = time.monotonic() + float(timeout)
-    while time.monotonic() < deadline:
+    deadline = None if timeout is None else time.monotonic() + float(timeout)
+    while deadline is None or time.monotonic() < deadline:
         if proc.poll() is not None:
             return False
         if health_check_fn():

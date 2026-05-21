@@ -39,7 +39,7 @@ def kernel_module_is_builtin(module_name: str) -> bool:
     return False
 
 
-def load_kernel_module(module_name: str, *module_args: str, timeout: int | float = 10) -> None:
+def load_kernel_module(module_name: str, *module_args: str) -> None:
     modprobe_binary = which("modprobe")
     if modprobe_binary is None:
         raise RuntimeError(f"modprobe is required to load kernel module {module_name!r}")
@@ -52,7 +52,6 @@ def load_kernel_module(module_name: str, *module_args: str, timeout: int | float
             *module_args,
         ],
         check=False,
-        timeout=timeout,
     )
     if completed.returncode != 0:
         details = tail_text(completed.stderr or completed.stdout)

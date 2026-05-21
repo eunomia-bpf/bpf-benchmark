@@ -68,7 +68,7 @@ programs:
         --slurpfile so "$OVERLAY_DIR/server_id_map.json"
         '($c | if . == "" then {} else {(.): $co[0]} end) + ($r | if . == "" then {} else {(.): $ro[0]} end) + ($s | if . == "" then {} else {(.): $so[0]} end)'
         > ${MAP_VALUES}/overlays.json &&
-      timeout 6000 bpfopt --pass map_inline
+      bpfopt --pass map_inline
         --input ${INPUT} --output ${OUTPUT} --report ${REPORT}
         --prog-type ${PROG_TYPE}
         --verifier-states ${VERIFIER_STATES}
@@ -99,7 +99,7 @@ programs:
         # --inline-hint=global_lru_maps:!00000000
   default:
     command: |
-      timeout 6000 bpfopt --pass map_inline
+      bpfopt --pass map_inline
         --input ${INPUT} --output ${OUTPUT} --report ${REPORT}
         --prog-type ${PROG_TYPE}
         --verifier-states ${VERIFIER_STATES}

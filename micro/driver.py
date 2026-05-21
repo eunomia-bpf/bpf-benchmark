@@ -347,7 +347,7 @@ def run_rejit_sample(command: list[str], *, cwd: Path) -> dict[str, Any]:
     del cwd
     proc = start_agent(command[0], command[1:])
     try:
-        wait_for_app_shim_programs(app_pid=proc.pid, timeout_s=None, process=proc, process_name="micro_exec")
+        wait_for_app_shim_programs(app_pid=proc.pid, process=proc, process_name="micro_exec")
         rejit_result = apply_app_rejit(app_pid=proc.pid, enabled_passes=benchmark_rejit_enabled_passes())
         os.kill(proc.pid, signal.SIGUSR1)
         stdout, stderr = proc.communicate()
@@ -686,7 +686,7 @@ def main(argv: list[str] | None = None) -> int:
                         inner_repeat = int(runtime_samples[runtime.name]["inner_repeat"])
                         dump_jit_path = None
                         dump_xlated_path = None
-                        if runtime.name in {"kernel", "kernel_rejit", "llvmbpf"}:
+                        if runtime.name in {"kernel", "kernel_rejit", "llvmbpf", "native_kernel"}:
                             dump_jit_path, dump_xlated_path = _jit_dump_paths(
                                 artifact_dir,
                                 _dump_stem(benchmark.name, runtime.name, sample_idx),

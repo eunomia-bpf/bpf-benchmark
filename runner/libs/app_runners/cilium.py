@@ -27,7 +27,6 @@ from .process_support import NativeProcessRunner
 from .setup_support import optional_repo_artifact_path
 
 
-_CILIUM_API_TIMEOUT_S = 30.0
 _CILIUM_API_BASE = "/v1"
 _CILIUM_ENDPOINT_PEER_IFACE = "eth0"
 
@@ -47,13 +46,12 @@ _CILIUM_ENDPOINT_SPECS: tuple[_CiliumEndpointSpec, ...] = (
 
 
 class _UnixHTTPConnection(http.client.HTTPConnection):
-    def __init__(self, socket_path: Path, *, timeout: float) -> None:
-        super().__init__("localhost", timeout=timeout)
+    def __init__(self, socket_path: Path) -> None:
+        super().__init__("localhost")
         self.socket_path = Path(socket_path)
 
     def connect(self) -> None:
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        sock.settimeout(self.timeout)
         try:
             sock.connect(str(self.socket_path))
         except Exception:
@@ -69,14 +67,13 @@ def _api_json(
     *,
     body: Mapping[str, object] | None = None,
     expected_status: Sequence[int] = (200,),
-    timeout: float = _CILIUM_API_TIMEOUT_S,
 ) -> Any:
     payload = None if body is None else json.dumps(body, sort_keys=True).encode()
     headers = {"Accept": "application/json", "Host": "localhost"}
     if payload is not None:
         headers["Content-Type"] = "application/json"
         headers["Content-Length"] = str(len(payload))
-    connection = _UnixHTTPConnection(socket_path, timeout=timeout)
+    connection = _UnixHTTPConnection(socket_path)
     try:
         connection.request(method, path, body=payload, headers=headers)
         response = connection.getresponse()
@@ -103,7 +100,7 @@ def _endpoint_api_path(endpoint_id: int | str) -> str:
 
 def _link_exists(name: str) -> bool:
     try:
-        run_command(["ip", "-o", "link", "show", "dev", name], timeout=100)
+        run_command(["ip", "-o", "link", "show", "dev", name])
     except Exception:
         return False
     return True
@@ -113,14 +110,14 @@ def _delete_link_if_exists(name: str) -> None:
     if not _link_exists(name):
         return
     try:
-        run_command(["ip", "link", "delete", "dev", name], timeout=100)
+        run_command(["ip", "link", "delete", "dev", name])
     except Exception:
         pass
 
 
 def _netns_exists(name: str) -> bool:
     try:
-        completed = run_command(["ip", "netns", "list"], timeout=100)
+        completed = run_command(["ip", "netns", "list"])
     except Exception:
         return False
     return any(line.split(maxsplit=1)[0].strip() == name for line in completed.stdout.splitlines())
@@ -130,7 +127,7 @@ def _link_exists_in_netns(namespace: str, name: str) -> bool:
     if not _netns_exists(namespace):
         return False
     try:
-        run_command(["ip", "-n", namespace, "-o", "link", "show", "dev", name], timeout=100)
+        run_command(["ip", "-n", namespace, "-o", "link", "show", "dev", name])
     except Exception:
         return False
     return True
@@ -144,7 +141,6 @@ def _ensure_benchmark_interface() -> str:
         run_command(
             ["ip", "-n", BENCHMARK_NETNS, "link", "delete", "dev", BENCHMARK_PEER_IFACE],
             check=False,
-            timeout=100,
         )
         peer_exists_in_netns = False
     if iface_exists and not peer_exists_in_netns:
@@ -153,7 +149,7 @@ def _ensure_benchmark_interface() -> str:
         peer_exists_in_root = False
         peer_exists_in_netns = False
     if not _netns_exists(BENCHMARK_NETNS):
-        run_command(["ip", "netns", "add", BENCHMARK_NETNS], timeout=100)
+        run_command(["ip", "netns", "add", BENCHMARK_NETNS])
     if not iface_exists:
         run_command(
             [
@@ -168,29 +164,27 @@ def _ensure_benchmark_interface() -> str:
                 "name",
                 BENCHMARK_PEER_IFACE,
             ],
-            timeout=100,
         )
         peer_exists_in_root = True
     if peer_exists_in_root:
-        run_command(["ip", "link", "set", "dev", BENCHMARK_PEER_IFACE, "netns", BENCHMARK_NETNS], timeout=100)
+        run_command(["ip", "link", "set", "dev", BENCHMARK_PEER_IFACE, "netns", BENCHMARK_NETNS])
     if not _link_exists_in_netns(BENCHMARK_NETNS, BENCHMARK_PEER_IFACE):
         raise RuntimeError(
             f"benchmark peer interface {BENCHMARK_PEER_IFACE} is unavailable in namespace {BENCHMARK_NETNS}"
         )
-    run_command(["ip", "addr", "replace", BENCHMARK_IFACE_CIDR, "dev", BENCHMARK_IFACE], timeout=100)
-    run_command(["ip", "link", "set", "dev", BENCHMARK_IFACE, "up"], timeout=100)
+    run_command(["ip", "addr", "replace", BENCHMARK_IFACE_CIDR, "dev", BENCHMARK_IFACE])
+    run_command(["ip", "link", "set", "dev", BENCHMARK_IFACE, "up"])
     run_command(
         ["ip", "-n", BENCHMARK_NETNS, "addr", "replace", BENCHMARK_PEER_IFACE_CIDR, "dev", BENCHMARK_PEER_IFACE],
-        timeout=100,
     )
-    run_command(["ip", "-n", BENCHMARK_NETNS, "link", "set", "dev", "lo", "up"], timeout=100)
-    run_command(["ip", "-n", BENCHMARK_NETNS, "link", "set", "dev", BENCHMARK_PEER_IFACE, "up"], timeout=100)
+    run_command(["ip", "-n", BENCHMARK_NETNS, "link", "set", "dev", "lo", "up"])
+    run_command(["ip", "-n", BENCHMARK_NETNS, "link", "set", "dev", BENCHMARK_PEER_IFACE, "up"])
     return BENCHMARK_IFACE
 
 
 def _delete_netns_if_exists(name: str) -> None:
     if _netns_exists(name):
-        run_command(["ip", "netns", "delete", name], check=False, timeout=100)
+        run_command(["ip", "netns", "delete", name], check=False)
 
 
 def _link_json(name: str, *, namespace: str | None = None) -> dict[str, object]:
@@ -198,7 +192,7 @@ def _link_json(name: str, *, namespace: str | None = None) -> dict[str, object]:
     if namespace is not None:
         command += ["-n", namespace]
     command += ["link", "show", "dev", name]
-    payload = json.loads(run_command(command, timeout=100).stdout)
+    payload = json.loads(run_command(command).stdout)
     if not isinstance(payload, list) or not payload or not isinstance(payload[0], dict):
         raise RuntimeError(f"could not read link metadata for {name}")
     return dict(payload[0])
@@ -226,16 +220,13 @@ class CiliumRunner(NativeProcessRunner):
         cluster_name: str = "default",
         cluster_id: int = 0,
         ipv4_range: str = "10.244.0.0/24",
-        etcd_startup_timeout_s: int = 200,
         **kwargs: object,
     ) -> None:
-        kwargs.setdefault("load_timeout_s", 1200)
         super().__init__(**kwargs)
         self.device = str(device or "").strip() or None
         self.cluster_name = str(cluster_name or "").strip() or "default"
         self.cluster_id = int(cluster_id)
         self.ipv4_range = str(ipv4_range or "").strip() or "10.244.0.0/24"
-        self.etcd_startup_timeout_s = int(etcd_startup_timeout_s)
         self.etcd_session: LocalEtcdSession | None = None
         self.runtime_dir: Path | None = None
         self._bpf_root: Path | None = None
@@ -351,9 +342,7 @@ class CiliumRunner(NativeProcessRunner):
 
     def _wait_for_api(self) -> Mapping[str, object]:
         socket_path = self._api_socket_path()
-        deadline = time.monotonic() + float(self.load_timeout_s)
-        last_error = ""
-        while time.monotonic() < deadline:
+        while True:
             if self.session is not None and self.session.process is not None:
                 returncode = self.session.process.poll()
                 if returncode is not None:
@@ -370,10 +359,9 @@ class CiliumRunner(NativeProcessRunner):
                     if isinstance(config, Mapping):
                         return config
                     raise RuntimeError("Cilium API /config returned a non-object payload")
-                except Exception as exc:
-                    last_error = str(exc)
+                except Exception:
+                    pass
             time.sleep(0.2)
-        raise TimeoutError(f"Cilium API socket did not become ready at {socket_path}: {last_error}")
 
     def _allocate_endpoint_ip(self, spec: _CiliumEndpointSpec) -> Mapping[str, object]:
         owner = urllib.parse.quote(spec.container_id, safe="")
@@ -397,7 +385,7 @@ class CiliumRunner(NativeProcessRunner):
     def _prepare_endpoint_link(self, spec: _CiliumEndpointSpec, ipv4: str, gateway: str) -> None:
         _delete_link_if_exists(spec.host_if)
         _delete_netns_if_exists(spec.namespace)
-        run_command(["ip", "netns", "add", spec.namespace], timeout=100)
+        run_command(["ip", "netns", "add", spec.namespace])
         run_command(
             [
                 "ip",
@@ -411,24 +399,21 @@ class CiliumRunner(NativeProcessRunner):
                 "name",
                 f"{spec.host_if}p",
             ],
-            timeout=100,
         )
-        run_command(["ip", "link", "set", "dev", f"{spec.host_if}p", "netns", spec.namespace], timeout=100)
-        run_command(["ip", "link", "set", "dev", spec.host_if, "up"], timeout=100)
-        run_command(["sysctl", "-qw", f"net.ipv4.conf.{spec.host_if}.rp_filter=0"], timeout=100)
-        run_command(["ip", "-n", spec.namespace, "link", "set", "dev", f"{spec.host_if}p", "name", _CILIUM_ENDPOINT_PEER_IFACE], timeout=100)
-        run_command(["ip", "netns", "exec", spec.namespace, "sysctl", "-qw", "net.ipv4.conf.all.rp_filter=0"], timeout=100)
-        run_command(["ip", "netns", "exec", spec.namespace, "sysctl", "-qw", f"net.ipv4.conf.{_CILIUM_ENDPOINT_PEER_IFACE}.rp_filter=0"], timeout=100)
-        run_command(["ip", "-n", spec.namespace, "link", "set", "dev", "lo", "up"], timeout=100)
-        run_command(["ip", "-n", spec.namespace, "link", "set", "dev", _CILIUM_ENDPOINT_PEER_IFACE, "up"], timeout=100)
-        run_command(["ip", "-n", spec.namespace, "addr", "replace", f"{ipv4}/32", "dev", _CILIUM_ENDPOINT_PEER_IFACE], timeout=100)
+        run_command(["ip", "link", "set", "dev", f"{spec.host_if}p", "netns", spec.namespace])
+        run_command(["ip", "link", "set", "dev", spec.host_if, "up"])
+        run_command(["sysctl", "-qw", f"net.ipv4.conf.{spec.host_if}.rp_filter=0"])
+        run_command(["ip", "-n", spec.namespace, "link", "set", "dev", f"{spec.host_if}p", "name", _CILIUM_ENDPOINT_PEER_IFACE])
+        run_command(["ip", "netns", "exec", spec.namespace, "sysctl", "-qw", "net.ipv4.conf.all.rp_filter=0"])
+        run_command(["ip", "netns", "exec", spec.namespace, "sysctl", "-qw", f"net.ipv4.conf.{_CILIUM_ENDPOINT_PEER_IFACE}.rp_filter=0"])
+        run_command(["ip", "-n", spec.namespace, "link", "set", "dev", "lo", "up"])
+        run_command(["ip", "-n", spec.namespace, "link", "set", "dev", _CILIUM_ENDPOINT_PEER_IFACE, "up"])
+        run_command(["ip", "-n", spec.namespace, "addr", "replace", f"{ipv4}/32", "dev", _CILIUM_ENDPOINT_PEER_IFACE])
         run_command(
             ["ip", "-n", spec.namespace, "route", "replace", f"{gateway}/32", "dev", _CILIUM_ENDPOINT_PEER_IFACE, "scope", "link"],
-            timeout=100,
         )
         run_command(
             ["ip", "-n", spec.namespace, "route", "replace", "default", "via", gateway, "dev", _CILIUM_ENDPOINT_PEER_IFACE],
-            timeout=100,
         )
 
     def _create_endpoint(self, spec: _CiliumEndpointSpec) -> int:
@@ -476,7 +461,6 @@ class CiliumRunner(NativeProcessRunner):
             _endpoint_api_path("0"),
             body=endpoint_request,
             expected_status=(201,),
-            timeout=max(_CILIUM_API_TIMEOUT_S, float(self.load_timeout_s)),
         )
         if not isinstance(response, Mapping):
             raise RuntimeError(f"Cilium endpoint create returned a non-object payload for {spec.container_id}")
@@ -491,24 +475,29 @@ class CiliumRunner(NativeProcessRunner):
             if realized_mac and realized_mac.lower() != peer_mac.lower():
                 run_command(
                     ["ip", "-n", spec.namespace, "link", "set", "dev", _CILIUM_ENDPOINT_PEER_IFACE, "address", realized_mac],
-                    timeout=100,
                 )
         return endpoint_id
 
     def _wait_endpoint_ready(self, endpoint_id: int) -> None:
-        deadline = time.monotonic() + float(self.load_timeout_s)
-        last_state = ""
-        while time.monotonic() < deadline:
+        while True:
+            if self.session is not None and self.session.process is not None:
+                returncode = self.session.process.poll()
+                if returncode is not None:
+                    snapshot = self.session.collector_snapshot()
+                    details = tail_text(
+                        "\n".join((snapshot.get("stderr_tail") or []) + (snapshot.get("stdout_tail") or [])),
+                        max_lines=40,
+                        max_chars=8000,
+                    )
+                    raise RuntimeError(f"cilium-agent exited before endpoint {endpoint_id} became ready (rc={returncode}): {details}")
             payload = _api_json(self._api_socket_path(), "GET", _endpoint_api_path(endpoint_id), expected_status=(200,))
             if isinstance(payload, Mapping):
                 status = payload.get("status")
                 if isinstance(status, Mapping):
                     state = status.get("state")
-                    last_state = str(state or "")
-                    if last_state == "ready":
+                    if str(state or "") == "ready":
                         return
             time.sleep(0.2)
-        raise TimeoutError(f"Cilium endpoint {endpoint_id} did not become ready; last_state={last_state!r}")
 
     def _setup_managed_endpoints(self) -> None:
         self._wait_for_api()
@@ -519,7 +508,6 @@ class CiliumRunner(NativeProcessRunner):
             self._wait_endpoint_ready(endpoint_id)
         run_command(
             ["ip", "-n", BENCHMARK_NETNS, "route", "replace", self.ipv4_range, "via", BENCHMARK_IFACE_CIDR.split("/", 1)[0]],
-            timeout=100,
         )
 
     def refresh_programs(self) -> list[dict[str, object]]:
@@ -578,7 +566,6 @@ class CiliumRunner(NativeProcessRunner):
             self.etcd_session = LocalEtcdSession(
                 work_dir=self.runtime_dir / "etcd",
                 name=type(self).__name__.replace("Runner", "").lower() or "runner",
-                startup_timeout_s=self.etcd_startup_timeout_s,
             ).start()
             super().start()
             self._setup_managed_endpoints()
@@ -597,7 +584,7 @@ class CiliumRunner(NativeProcessRunner):
             self.etcd_session = None
         if self.runtime_dir is not None:
             if self._bpf_root is not None and self._bpf_root.is_mount():
-                run_command(["umount", str(self._bpf_root)], check=False, timeout=100)
+                run_command(["umount", str(self._bpf_root)], check=False)
             shutil.rmtree(self.runtime_dir, ignore_errors=True)
             self.runtime_dir = None
         self._bpf_root = None

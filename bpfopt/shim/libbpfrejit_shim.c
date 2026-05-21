@@ -31,6 +31,7 @@
 #include <spawn.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <sys/file.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <sys/wait.h>

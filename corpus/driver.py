@@ -399,6 +399,19 @@ def _write_loadtime_plan(
     return plan_path, payload
 
 
+def _loadtime_reports_path(
+    app: AppSpec,
+    *,
+    artifact_session: ArtifactSession | None,
+) -> Path:
+    if artifact_session is not None:
+        reports_dir = artifact_session.run_dir / "details" / "loadtime-reports"
+    else:
+        reports_dir = Path(os.environ.get("TMPDIR", "/tmp")) / "bpfrejit-loadtime-reports"
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    return reports_dir / f"{_sanitize_app_filename(app.name)}.jsonl"
+
+
 def _write_incremental_app_result(
     run_dir: Path,
     app_name: str,
@@ -527,10 +540,16 @@ def run_suite(
                             artifact_session=artifact_session,
                         )
                         loadtime_env["BPFREJIT_SHIM_LOADTIME_PLAN"] = str(plan_path)
+                        reports_path = _loadtime_reports_path(
+                            app,
+                            artifact_session=artifact_session,
+                        )
+                        loadtime_env["BPFREJIT_SHIM_LOADTIME_REPORTS"] = str(reports_path)
                         lifecycle.rejit_result = {
                             "status": "ok",
                             "mode": "loadtime",
                             "plan_path": str(plan_path),
+                            "report_path": str(reports_path),
                             "enabled_passes": list(apply_enabled_passes),
                         }
                         _print_progress(
@@ -571,13 +590,21 @@ def run_suite(
                         phase=phase,
                         status="ok",
                     )
+
+                    phase = "post_rejit_stop"
+                    try:
+                        runner.stop()
+                        runner = None
+                        wait_for_suite_quiescence()
+                    except Exception as stop_exc:
+                        raise RuntimeError(f"post app stop failed: {stop_exc}") from stop_exc
             except Exception as exc:
                 error_message = str(exc)
                 if lifecycle is None:
                     startup_error = error_message
                 else:
                     lifecycle.error = error_message
-                    if phase in {"loadtime_plan", "post_rejit_start", "baseline_stop"}:
+                    if phase in {"loadtime_plan", "post_rejit_start", "baseline_stop", "post_rejit_stop"}:
                         _print_progress(
                             "phase_error",
                             app=app.name,

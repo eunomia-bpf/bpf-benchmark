@@ -19,7 +19,6 @@ from .base import AppRunner
 from .process_support import ManagedProcessSession
 from .setup_support import repo_artifact_root
 
-DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S = 300
 DEFAULT_KATRAN_STOP_TIMEOUT_S = 200.0
 DEFAULT_KATRAN_STOP_SETTLE_S = 2.0
 KATRAN_REQUIRED_MAP_NAMES = ("vip_map", "reals", "ch_rings", "ctl_array")
@@ -64,7 +63,6 @@ CLIENT_MAC = "02:00:00:00:00:1c"
 ROUTER_REAL_MAC = "02:00:00:00:00:2b"
 REAL_MAC = "02:00:00:00:00:2c"
 
-SERVER_START_TIMEOUT_S = 150.0
 TOPOLOGY_SETTLE_S = 2.0
 
 DEFAULT_HC_V4_TUN_IFACE = "ipip0"
@@ -72,13 +70,13 @@ DEFAULT_HC_V6_TUN_IFACE = "ipip60"
 
 
 def _map_show_records() -> list[dict[str, object]]:
-    payload = run_json_command([resolve_bpftool_binary(), "-j", "map", "show"], timeout=300)
+    payload = run_json_command([resolve_bpftool_binary(), "-j", "map", "show"])
     if not isinstance(payload, list): raise RuntimeError("bpftool map show returned unexpected payload")
     return [dict(record) for record in payload if isinstance(record, dict)]
 
 
 def _net_show_records(iface: str) -> list[dict[str, object]]:
-    payload = run_json_command([resolve_bpftool_binary(), "-j", "net", "show", "dev", str(iface)], timeout=300)
+    payload = run_json_command([resolve_bpftool_binary(), "-j", "net", "show", "dev", str(iface)])
     if not isinstance(payload, list): raise RuntimeError(f"bpftool net show returned unexpected payload for {iface}")
     return [dict(record) for record in payload if isinstance(record, dict)]
 
@@ -101,7 +99,6 @@ def _detach_all_xdp_modes(iface: str) -> None:
         run_command(
             [resolve_bpftool_binary(), "net", "detach", attach_type, "dev", str(iface)],
             check=False,
-            timeout=150,
         )
 
 
@@ -154,16 +151,16 @@ def _normalize_ip_command(command: list[str] | tuple[str, ...]) -> list[str]:
     return args[1:] if args and args[0] == "ip" else args
 
 
-def ip_command(command: list[str] | tuple[str, ...], *, check: bool = True, timeout: int | float | None = 300) -> subprocess.CompletedProcess[str]:
-    return run_command([ip_binary(), *_normalize_ip_command(command)], check=check, timeout=timeout)
+def ip_command(command: list[str] | tuple[str, ...], *, check: bool = True) -> subprocess.CompletedProcess[str]:
+    return run_command([ip_binary(), *_normalize_ip_command(command)], check=check)
 
 
-def ns_exec_command(namespace: str, command: list[str] | tuple[str, ...], *, check: bool = True, timeout: int | float | None = 300) -> subprocess.CompletedProcess[str]:
-    return run_command([ip_binary(), "netns", "exec", namespace, *[str(part) for part in command]], check=check, timeout=timeout)
+def ns_exec_command(namespace: str, command: list[str] | tuple[str, ...], *, check: bool = True) -> subprocess.CompletedProcess[str]:
+    return run_command([ip_binary(), "netns", "exec", namespace, *[str(part) for part in command]], check=check)
 
 
-def ns_ip_command(namespace: str, command: list[str] | tuple[str, ...], *, check: bool = True, timeout: int | float | None = 300) -> subprocess.CompletedProcess[str]:
-    return ns_exec_command(namespace, [ip_binary(), *_normalize_ip_command(command)], check=check, timeout=timeout)
+def ns_ip_command(namespace: str, command: list[str] | tuple[str, ...], *, check: bool = True) -> subprocess.CompletedProcess[str]:
+    return ns_exec_command(namespace, [ip_binary(), *_normalize_ip_command(command)], check=check)
 
 
 def link_exists(name: str) -> bool:
@@ -177,19 +174,19 @@ def module_loaded(name: str) -> bool:
 def ensure_kernel_module_loaded(name: str) -> None:
     if module_loaded(name): return
     if kernel_module_is_builtin(name): return
-    load_kernel_module(name, timeout=150)
+    load_kernel_module(name)
     if module_loaded(name): return
     if kernel_module_is_builtin(name): return
     raise RuntimeError(f"kernel module {name} still is not resident after modprobe")
 
 
 def set_ns_sysctl(namespace: str, key: str, value: int) -> None:
-    ns_exec_command(namespace, ["sh", "-c", f"printf '%s' '{int(value)}' > /proc/sys/{key.replace('.', '/')}"], timeout=150)
+    ns_exec_command(namespace, ["sh", "-c", f"printf '%s' '{int(value)}' > /proc/sys/{key.replace('.', '/')}"])
 
 
 def set_link_mac(namespace: str | None, iface: str, mac: str) -> None:
     cmd = ["link", "set", "dev", iface, "address", mac]
-    (ip_command if namespace is None else lambda c, **kw: ns_ip_command(namespace, c, **kw))(cmd, timeout=150)
+    (ip_command if namespace is None else lambda c, **kw: ns_ip_command(namespace, c, **kw))(cmd)
 
 
 def pack_u32(value: int) -> bytes: return struct.pack("=I", int(value))
@@ -264,18 +261,18 @@ class KatranDsrTopology:
     def __enter__(self) -> "KatranDsrTopology":
         self.cleanup()
         for mod in ("veth", "tunnel4", "ip_tunnel", "ipip", "ip6_tunnel"): ensure_kernel_module_loaded(mod)
-        for ns in (ROUTER_NS, CLIENT_NS, REAL_NS): ip_command(["netns", "add", ns], timeout=150)
+        for ns in (ROUTER_NS, CLIENT_NS, REAL_NS): ip_command(["netns", "add", ns])
         if self.router_peer_iface is None:
-            ip_command(["link", "add", self.iface, "type", "veth", "peer", "name", ROUTER_LB_IFACE], timeout=150)
-            ip_command(["link", "set", ROUTER_LB_IFACE, "netns", ROUTER_NS], timeout=150)
+            ip_command(["link", "add", self.iface, "type", "veth", "peer", "name", ROUTER_LB_IFACE])
+            ip_command(["link", "set", ROUTER_LB_IFACE, "netns", ROUTER_NS])
         else:
             if self.router_peer_iface == self.iface: raise RuntimeError("router peer iface must differ from Katran ingress iface")
             if not link_exists(self.iface): raise RuntimeError(f"network interface does not exist: {self.iface}")
             if not link_exists(self.router_peer_iface): raise RuntimeError(f"router peer interface does not exist: {self.router_peer_iface}")
-            ip_command(["link", "set", self.router_peer_iface, "netns", ROUTER_NS], timeout=150)
-            ns_ip_command(ROUTER_NS, ["link", "set", "dev", self.router_peer_iface, "name", ROUTER_LB_IFACE], timeout=150)
-        _ipc = lambda *a: ip_command(list(a), timeout=150)
-        _nsc = lambda ns, *a: ns_ip_command(ns, list(a), timeout=150)
+            ip_command(["link", "set", self.router_peer_iface, "netns", ROUTER_NS])
+            ns_ip_command(ROUTER_NS, ["link", "set", "dev", self.router_peer_iface, "name", ROUTER_LB_IFACE])
+        _ipc = lambda *a: ip_command(list(a))
+        _nsc = lambda ns, *a: ns_ip_command(ns, list(a))
         _ipc("link", "add", ROUTER_CLIENT_IFACE, "type", "veth", "peer", "name", CLIENT_IFACE)
         _ipc("link", "set", ROUTER_CLIENT_IFACE, "netns", ROUTER_NS)
         _ipc("link", "set", CLIENT_IFACE, "netns", CLIENT_NS)
@@ -327,16 +324,16 @@ class KatranDsrTopology:
 
     def cleanup(self) -> None:
         if self.router_peer_iface is None and link_exists(self.iface):
-            ip_command(["link", "del", self.iface], check=False, timeout=150)
+            ip_command(["link", "del", self.iface], check=False)
         if self.router_peer_iface is not None:
-            ns_ip_command(ROUTER_NS, ["link", "set", "dev", ROUTER_LB_IFACE, "netns", "1"], check=False, timeout=150)
+            ns_ip_command(ROUTER_NS, ["link", "set", "dev", ROUTER_LB_IFACE, "netns", "1"], check=False)
         for hc_iface in self.created_hc_ifaces:
             if link_exists(hc_iface):
-                ip_command(["link", "del", hc_iface], check=False, timeout=150)
+                ip_command(["link", "del", hc_iface], check=False)
         self.created_hc_ifaces = []
-        for ns in (REAL_NS, CLIENT_NS, ROUTER_NS): ip_command(["netns", "del", ns], check=False, timeout=150)
+        for ns in (REAL_NS, CLIENT_NS, ROUTER_NS): ip_command(["netns", "del", ns], check=False)
         if self.router_peer_iface is not None and link_exists(ROUTER_LB_IFACE) and not link_exists(self.router_peer_iface):
-            ip_command(["link", "set", "dev", ROUTER_LB_IFACE, "name", self.router_peer_iface], check=False, timeout=150)
+            ip_command(["link", "set", "dev", ROUTER_LB_IFACE, "name", self.router_peer_iface], check=False)
 
     def metadata(self) -> dict[str, object]:
         return {"namespaces": {"router": ROUTER_NS, "client": CLIENT_NS, "real": REAL_NS},
@@ -400,17 +397,15 @@ class NamespaceHttpServer:
 
     def _wait_until_ready(self) -> None:
         assert self.process is not None
-        deadline = time.monotonic() + SERVER_START_TIMEOUT_S
         probe = "import socket, sys; s = socket.socket(); s.settimeout(0.2); rc = s.connect_ex((sys.argv[1], int(sys.argv[2]))); s.close(); raise SystemExit(0 if rc == 0 else 1)"
-        while time.monotonic() < deadline:
+        while True:
             if self.process.poll() is not None:
-                stdout, stderr = self.process.communicate(timeout=50)
+                stdout, stderr = self.process.communicate()
                 self.stdout_tail = tail_text(stdout or "", max_lines=20, max_chars=4000)
                 self.stderr_tail = tail_text(stderr or "", max_lines=20, max_chars=4000)
                 raise RuntimeError(f"http server exited early: {self.stderr_tail or self.stdout_tail}")
-            if ns_exec_command(self.namespace, [remote_python_binary(), "-c", probe, self.bind_ip, str(self.port)], check=False, timeout=50).returncode == 0: return
+            if ns_exec_command(self.namespace, [remote_python_binary(), "-c", probe, self.bind_ip, str(self.port)], check=False).returncode == 0: return
             time.sleep(0.1)
-        raise RuntimeError("timed out waiting for namespace http server to start")
 
     def metadata(self) -> dict[str, object]:
         return {"namespace": self.namespace, "bind_ip": self.bind_ip, "port": self.port,
@@ -441,14 +436,12 @@ class KatranServerSession:
         healthchecking_prog_path: Path,
         iface: str,
         default_router_mac: str,
-        load_timeout_s: int = DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S,
     ) -> None:
         self.server_binary = server_binary.resolve()
         self.balancer_prog_path = balancer_prog_path.resolve()
         self.healthchecking_prog_path = healthchecking_prog_path.resolve()
         self.iface = iface
         self.default_router_mac = default_router_mac
-        self.load_timeout_s = int(load_timeout_s)
         self.session: ManagedProcessSession | None = None
         self.command_used: list[str] = []
         self.programs: list[dict[str, object]] = []
@@ -481,14 +474,14 @@ class KatranServerSession:
             "-logtostderr",
             "-alsologtostderr",
         ]
-        session = ManagedProcessSession(command, load_timeout_s=self.load_timeout_s, cwd=ROOT_DIR, env=os.environ.copy())
+        session = ManagedProcessSession(command, cwd=ROOT_DIR, env=os.environ.copy())
         try:
             session.__enter__()
             self.session = session
             self.command_used = list(command)
             self.programs = []
             self.maps_by_name = self._discover_maps(before_map_ids)
-            self.attach_info = _attached_xdp_info(self.iface)
+            self.attach_info = self._wait_for_xdp_attach()
         except Exception:
             close_errors: list[str] = []
             try:
@@ -503,9 +496,6 @@ class KatranServerSession:
             if close_errors:
                 raise RuntimeError("; ".join(close_errors))
             raise
-        if not self.attach_info:
-            self.close()
-            raise RuntimeError(f"Katran server did not expose an attached XDP program on {self.iface}")
         return self
 
     @property
@@ -520,8 +510,8 @@ class KatranServerSession:
         return {} if self.session is None else self.session.collector_snapshot()
 
     def _discover_maps(self, before_map_ids: set[int]) -> dict[str, dict[str, object]]:
-        deadline = time.monotonic() + float(self.load_timeout_s); last_names: list[str] = []
-        while time.monotonic() < deadline:
+        last_names: list[str] = []
+        while True:
             new_records = [r for r in _map_show_records() if int(r.get("id", -1)) not in before_map_ids]
             maps_by_name = {str(r.get("name") or ""): dict(r) for r in new_records if str(r.get("name") or "").strip()}
             if not (missing := [n for n in KATRAN_REQUIRED_MAP_NAMES if n not in maps_by_name]):
@@ -531,6 +521,16 @@ class KatranServerSession:
             time.sleep(0.2)
         missing = [n for n in KATRAN_REQUIRED_MAP_NAMES if n not in last_names]
         raise RuntimeError(f"Katran server did not expose expected maps {missing}; discovered {last_names}")
+
+    def _wait_for_xdp_attach(self) -> dict[str, object]:
+        while True:
+            attach_info = _attached_xdp_info(self.iface)
+            if attach_info:
+                return attach_info
+            if self.session is not None and self.session.process is not None and self.session.process.poll() is not None:
+                break
+            time.sleep(0.2)
+        raise RuntimeError(f"Katran server did not expose an attached XDP program on {self.iface}")
 
     def metadata(self) -> dict[str, object]:
         return {
@@ -592,7 +592,6 @@ DEFAULT_PKTGEN_PKT_SIZE = 64
 PKTGEN_THREAD = "/proc/net/pktgen/kpktgend_0"
 PKTGEN_CTRL = "/proc/net/pktgen/pgctrl"
 PKTGEN_ROUTER_DEV = f"/proc/net/pktgen/{ROUTER_LB_IFACE}"
-DEFAULT_LOAD_TIMEOUT_S = DEFAULT_KATRAN_SERVER_LOAD_TIMEOUT_S
 KATRAN_WORKLOADS = {"xdp_traffic", "xdp_pktgen"}
 
 
@@ -610,7 +609,7 @@ def _resolve_katran_bpf_artifact(*relative_candidates: str) -> Path:
 
 class KatranRunner(AppRunner):
     def __init__(self, *, loader_binary: Path | str | None = None, iface: str = DEFAULT_INTERFACE,
-                 router_peer_iface: str | None = None, load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S,
+                 router_peer_iface: str | None = None,
                  wrk_threads: int = DEFAULT_WRK_THREADS, wrk_connections: int = DEFAULT_WRK_CONNECTIONS,
                  workload_spec: Mapping[str, object],
                  default_router_mac: str = ROUTER_LB_MAC) -> None:
@@ -624,7 +623,6 @@ class KatranRunner(AppRunner):
             "healthchecking_ipip.o",
         )
         self.iface = str(iface); self.router_peer_iface = None if router_peer_iface is None else str(router_peer_iface)
-        self.load_timeout_s = int(load_timeout_s)
         self.wrk_threads = max(1, int(wrk_threads))
         self.wrk_connections = max(1, int(wrk_connections))
         self.workload_spec = dict(workload_spec)
@@ -649,7 +647,6 @@ class KatranRunner(AppRunner):
             healthchecking_prog_path=self.healthchecking_prog_path,
             iface=self.iface,
             default_router_mac=self.default_router_mac,
-            load_timeout_s=self.load_timeout_s,
         )
         try:
             topology.__enter__()
@@ -699,7 +696,7 @@ class KatranRunner(AppRunner):
             url,
         ]
         start = time.monotonic()
-        completed = run_command(command, check=False, timeout=max(300, duration_s * 4 + 10))
+        completed = run_command(command, check=False)
         elapsed = time.monotonic() - start
         if completed.returncode != 0:
             raise RuntimeError(
@@ -746,8 +743,8 @@ class KatranRunner(AppRunner):
         try:
             time.sleep(duration_s)
             self._pktgen_write(PKTGEN_CTRL, "stop")
-            stdout, stderr = process.communicate(timeout=60)
-        except Exception:
+            stdout, stderr = process.communicate()
+        except BaseException:
             if process.poll() is None:
                 try: self._pktgen_write(PKTGEN_CTRL, "stop")
                 finally: process.kill()
@@ -774,10 +771,10 @@ class KatranRunner(AppRunner):
         return f"printf '%s\\n' {shlex.quote(command)} > {shlex.quote(path)}"
 
     def _pktgen_write(self, path: str, command: str) -> None:
-        ns_exec_command(ROUTER_NS, ["sh", "-c", self._pktgen_write_script(path, command)], timeout=150)
+        ns_exec_command(ROUTER_NS, ["sh", "-c", self._pktgen_write_script(path, command)])
 
     def _pktgen_read(self, path: str) -> str:
-        return ns_exec_command(ROUTER_NS, ["cat", path], timeout=150).stdout or ""
+        return ns_exec_command(ROUTER_NS, ["cat", path]).stdout or ""
 
     def run_workload(self, seconds: float) -> WorkloadResult:
         if self.session is None: raise RuntimeError("KatranRunner is not running")

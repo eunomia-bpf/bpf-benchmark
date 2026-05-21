@@ -1,6 +1,8 @@
 #ifndef BPFREJIT_SHIM_MEASURE_H
 #define BPFREJIT_SHIM_MEASURE_H
 
+static uint32_t current_measure_generation;
+
 static int query_prog_info(struct prog_entry *p, struct bpf_prog_info *info) {
     memset(info, 0, sizeof(*info));
     int fd = p->fd;
@@ -45,10 +47,15 @@ static void emit_has_programs(int cli) {
 
 static void emit_measure_start(int cli) {
     uint32_t count = 0;
+    discover_bpf_programs();
     pthread_mutex_lock(&state_mutex);
+    current_measure_generation++;
+    if (current_measure_generation == 0)
+        current_measure_generation++;
     for (int b = 0; b < BPF_STATE_BUCKETS; b++) {
         for (struct prog_entry *p = prog_table[b]; p; p = p->next) {
             struct bpf_prog_info info;
+            p->measure_generation = current_measure_generation;
             if (query_prog_info(p, &info) != 0 || info.id == 0) {
                 p->measure_active = 0;
                 continue;
@@ -83,20 +90,26 @@ static void emit_measure_finish(int cli) {
     int first = 1;
     uint32_t emitted = 0;
     pthread_mutex_lock(&state_mutex);
+    uint32_t generation = current_measure_generation;
     for (int b = 0; b < BPF_STATE_BUCKETS; b++) {
         for (struct prog_entry *p = prog_table[b]; p; p = p->next) {
-            if (!p->measure_active)
+            int existed_at_start = p->measure_generation == generation;
+            if (existed_at_start && !p->measure_active)
                 continue;
             struct bpf_prog_info info;
             if (query_prog_info(p, &info) != 0 || info.id == 0)
                 continue;
+            uint64_t start_run_cnt =
+                existed_at_start ? p->measure_run_cnt : 0;
+            uint64_t start_run_time_ns =
+                existed_at_start ? p->measure_run_time_ns : 0;
             uint64_t run_cnt_delta =
-                info.run_cnt >= p->measure_run_cnt
-                    ? info.run_cnt - p->measure_run_cnt
+                info.run_cnt >= start_run_cnt
+                    ? info.run_cnt - start_run_cnt
                     : 0;
             uint64_t run_time_delta =
-                info.run_time_ns >= p->measure_run_time_ns
-                    ? info.run_time_ns - p->measure_run_time_ns
+                info.run_time_ns >= start_run_time_ns
+                    ? info.run_time_ns - start_run_time_ns
                     : 0;
             char name[sizeof(info.name) + 1];
             memcpy(name, info.name, sizeof(info.name));

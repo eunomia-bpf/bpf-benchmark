@@ -164,13 +164,14 @@ KEEP_WORKDIRS ?=
 # Suite knobs are env-only for local, VM, Docker, and AWS runs.
 SUITE_ENV_NAMES = SAMPLES WARMUPS INNER_REPEAT BENCH SUITE RUNTIMES FUZZ_ROUNDS TEST_MODE WORKLOAD_DURATION \
 	KEEP_WORKDIRS BPFREJIT_BENCH_PASSES BPFREJIT_CORPUS_APPS SKIP_REJIT CPU STRICT_ENV SHUFFLE_SEED \
-	PERF_COUNTERS PERF_SCOPE REGENERATE_INPUTS LIST MICRO_RUNNER_BINARY
+	PERF_COUNTERS PERF_SCOPE REGENERATE_INPUTS LIST MICRO_RUNNER_BINARY \
+	BPFREJIT_CORPUS_APP_TIMEOUT BPFREJIT_CORPUS_REJIT_TIMEOUT
 export $(SUITE_ENV_NAMES)
 
 # Per-run identity. RUN_TOKEN must be unique per invocation so AWS remote stage
 # dirs and local run-state directories don't collide across concurrent or
 # sequential failed runs. Random hex when not user-supplied.
-RUN_TOKEN ?= $(shell head -c 32 /dev/urandom 2>/dev/null | tr -dc 'a-z0-9' | head -c 8)
+RUN_TOKEN ?= $(shell od -An -N4 -tx4 /dev/urandom 2>/dev/null | tr -d ' \n')
 export RUN_TOKEN TARGET
 
 RUN_MAKE_VAR_NAMES = TARGET RUN_TARGET_NAME RUN_TARGET_ARCH RUN_EXECUTOR RUNTIME_CONTAINER_IMAGE RUNTIME_IMAGE_TAR \

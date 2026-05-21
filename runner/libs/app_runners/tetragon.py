@@ -19,8 +19,8 @@ from .setup_support import missing_required_commands, pick_host_executable, repo
 
 
 class TetragonAgentSession(AgentSession):
-    def __init__(self, command: Sequence[str], load_timeout: int) -> None:
-        super().__init__(load_timeout); self.command = list(command)
+    def __init__(self, command: Sequence[str]) -> None:
+        super().__init__(); self.command = list(command)
 
     def _cleanup_err(self) -> Exception | None:
         try: self.close(); return None
@@ -32,10 +32,11 @@ class TetragonAgentSession(AgentSession):
         try:
             wait_for_app_shim_programs(
                 app_pid=int(self.process.pid),
-                timeout_s=self.load_timeout,
                 process=self.process,
                 snapshot=self.collector_snapshot,
                 process_name="Tetragon",
+                stable_seconds_override=0.0,
+                min_programs=100,
             )
         except Exception:
             if (ce := self._cleanup_err()) is not None:
@@ -63,7 +64,7 @@ def inspect_tetragon_setup() -> dict[str, object]:
     if bpf_lib_dir is None or not any(bpf_lib_dir.glob("*.o")) and not any(bpf_lib_dir.glob("*.bpf.o")):
         return {"returncode": 1, "tetragon_binary": str(tetragon_binary), "tetragon_bpf_lib_dir": None,
                 "stdout_tail": "", "stderr_tail": f"missing Tetragon .bpf.o artifacts under {artifact_root}"}
-    help_probe = run_command(["timeout", "50s", str(tetragon_binary), "--help"], check=False, timeout=150)
+    help_probe = run_command([str(tetragon_binary), "--help"], check=False)
     if help_probe.returncode != 0:
         return {"returncode": help_probe.returncode, "tetragon_binary": str(tetragon_binary), "tetragon_bpf_lib_dir": str(bpf_lib_dir),
                 "stdout_tail": tail_text(help_probe.stdout or "", max_lines=60, max_chars=12000),
@@ -90,7 +91,6 @@ def run_tetragon_workload(spec: Mapping[str, object], duration_s: int) -> Worklo
     raise RuntimeError(f"unsupported workload kind: {kind}")
 
 
-DEFAULT_LOAD_TIMEOUT_S = 450
 DEFAULT_POLICY_DIR = ROOT_DIR / "runner" / "assets" / "tetragon_policies"
 
 
@@ -111,11 +111,10 @@ def resolve_tetragon_policy_dir() -> str:
 
 class TetragonRunner(AppRunner):
     def __init__(self, *, tetragon_binary: Path | str | None = None,
-                 load_timeout_s: int = DEFAULT_LOAD_TIMEOUT_S, workload_spec: Mapping[str, object] | None = None,
+                 workload_spec: Mapping[str, object] | None = None,
                  setup_result: Mapping[str, object] | None = None) -> None:
         super().__init__()
         self.tetragon_binary = None if tetragon_binary is None else Path(tetragon_binary).resolve()
-        self.load_timeout_s = int(load_timeout_s)
         self.setup_result = None if setup_result is None else dict(setup_result)
         self.command: list[str] = []; self.session: Any | None = None
         self.workload_spec: Mapping[str, object] = {} if workload_spec is None else dict(workload_spec)
@@ -148,7 +147,7 @@ class TetragonRunner(AppRunner):
         if tetragon_bpf_lib_dir := str((self.setup_result or {}).get("tetragon_bpf_lib_dir") or "").strip():
             self.command.extend(["--bpf-lib", tetragon_bpf_lib_dir])
         self.command_used = list(self.command)
-        session = TetragonAgentSession(self.command, self.load_timeout_s)
+        session = TetragonAgentSession(self.command)
         session.__enter__()
         self.session = session; self.tetragon_binary = Path(tetragon_binary).resolve()
         self.programs = []
