@@ -75,14 +75,19 @@ struct prog_entry {
     uint32_t *snap_kids;
     uint32_t *snap_types;
     uint32_t snap_n;
-    /* Live attach points for this prog. Populated by BPF_LINK_CREATE post-call
-     * and PERF_EVENT_IOC_SET_BPF post-ioctl; pruned by close() intercept. Used
-     * by reload_and_reattach to know what to BPF_LINK_UPDATE / SET_BPF when
-     * we swap in a new prog fd. */
+    /* Live attach points for this prog. Populated by BPF_LINK_CREATE post-call,
+     * BPF_PROG_ATTACH post-call, BPF_RAW_TRACEPOINT_OPEN post-call, and
+     * PERF_EVENT_IOC_SET_BPF post-ioctl; fd-backed entries are pruned by
+     * close() intercept. Used by reload_and_reattach to know what kernel attach
+     * object must be pointed at the new prog fd. */
     int *attached_link_fds;
     uint32_t n_links;
     int *attached_perf_fds;
     uint32_t n_perfs;
+    struct prog_attach_point *prog_attaches;
+    uint32_t n_prog_attaches;
+    int *attached_raw_tp_fds;
+    uint32_t n_raw_tps;
     /* XDP netlink attachments captured by intercepting sendmsg/sendto on
      * AF_NETLINK / NETLINK_ROUTE sockets when the message carries an
      * RTM_SETLINK IFLA_XDP attribute. reload_and_reattach() iterates
@@ -124,6 +129,22 @@ struct link_entry {
     char create_attr_blob[80];
 };
 static struct link_entry *link_table[BPF_STATE_BUCKETS];
+
+/* ---- legacy BPF_PROG_ATTACH points (cgroup, flow dissector, etc.) ---- */
+struct prog_attach_point {
+    int target_fd;
+    uint32_t attach_type;
+    uint32_t attach_flags;
+};
+
+/* ---- BPF_RAW_TRACEPOINT_OPEN fd table ---- */
+struct raw_tp_entry {
+    int fd;
+    struct raw_tp_entry *next;
+    uint32_t prog_fd;
+    char name[128];
+};
+static struct raw_tp_entry *raw_tp_table[BPF_STATE_BUCKETS];
 
 /* ---- perf_event table (records perf_event_open + SET_BPF) ---- */
 struct perf_entry {
@@ -188,6 +209,7 @@ static struct perf_entry *perf_table[BPF_STATE_BUCKETS];
 
 DECLARE_FD_TABLE_OPS(map, struct map_entry, map_table)
 DECLARE_FD_TABLE_OPS(link, struct link_entry, link_table)
+DECLARE_FD_TABLE_OPS(raw_tp, struct raw_tp_entry, raw_tp_table)
 DECLARE_FD_TABLE_OPS(perf, struct perf_entry, perf_table)
 
 /* prog table needs custom insert (free insns on overwrite). */
@@ -210,10 +232,31 @@ static void prog_free(struct prog_entry *e) {
     free(e->snap_types);
     free(e->attached_link_fds);
     free(e->attached_perf_fds);
+    free(e->prog_attaches);
+    free(e->attached_raw_tp_fds);
     free(e->func_info_buf);
     free(e->line_info_buf);
     free(e->xdp_attaches);
     free(e);
+}
+
+/* Append a legacy BPF_PROG_ATTACH point to a prog. Caller holds state_mutex. */
+static int prog_attach_point_append(struct prog_attach_point **items,
+                                    uint32_t *n,
+                                    struct prog_attach_point point) {
+    for (uint32_t i = 0; i < *n; i++)
+        if ((*items)[i].target_fd == point.target_fd &&
+            (*items)[i].attach_type == point.attach_type)
+            return 0;
+    if (*n == 0 || ((*n) & ((*n) - 1)) == 0) {
+        uint32_t cap = (*n == 0) ? 4 : (*n) * 2;
+        struct prog_attach_point *ni =
+            (struct prog_attach_point *)realloc(*items, cap * sizeof(*ni));
+        if (!ni) return -1;
+        *items = ni;
+    }
+    (*items)[(*n)++] = point;
+    return 0;
 }
 
 /* Append a fd to a prog's attached_link_fds / attached_perf_fds, growing the
@@ -243,13 +286,14 @@ static void prog_attach_drop(int *fds, uint32_t *n, int fd) {
     }
 }
 
-/* Walk every prog_entry and drop `fd` from its link/perf attach lists. Cheap
+/* Walk every prog_entry and drop `fd` from its fd-backed attach lists. Cheap
  * since we usually have few progs. Caller holds mutex. */
 static void prog_table_drop_attach_fd(int fd) {
     for (int b = 0; b < BPF_STATE_BUCKETS; b++)
         for (struct prog_entry *e = prog_table[b]; e; e = e->next) {
             prog_attach_drop(e->attached_link_fds, &e->n_links, fd);
             prog_attach_drop(e->attached_perf_fds, &e->n_perfs, fd);
+            prog_attach_drop(e->attached_raw_tp_fds, &e->n_raw_tps, fd);
         }
 }
 static void prog_insert(struct prog_entry *e) {
@@ -548,10 +592,16 @@ static void on_prog_attach(const union bpf_attr *attr) {
              attr->target_fd, attr->attach_bpf_fd, attr->attach_type);
 }
 
-static void on_raw_tp_open(const union bpf_attr *attr) {
-    log_line("BPF_RAW_TRACEPOINT_OPEN name=%s prog_fd=%u",
-             (const char *)(uintptr_t)attr->raw_tracepoint.name,
-             attr->raw_tracepoint.prog_fd);
+static struct raw_tp_entry *capture_raw_tp_open(const union bpf_attr *attr) {
+    struct raw_tp_entry *e = (struct raw_tp_entry *)calloc(1, sizeof(*e));
+    if (!e) return NULL;
+    e->fd = -1;
+    e->prog_fd = attr->raw_tracepoint.prog_fd;
+    const char *name = (const char *)(uintptr_t)attr->raw_tracepoint.name;
+    if (name)
+        snprintf(e->name, sizeof(e->name), "%s", name);
+    log_line("BPF_RAW_TRACEPOINT_OPEN name=%s prog_fd=%u", e->name, e->prog_fd);
+    return e;
 }
 
 /* Host linux/bpf.h may not have the fork-only bpf_prog_info tail. The fork

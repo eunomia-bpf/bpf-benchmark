@@ -43,6 +43,13 @@ HOST_KERNEL_BUILD_DIR_X86 := $(VENDOR_BUILD_DIR)/x86/linux
 HOST_KERNEL_BUILD_DIR_ARM64 := $(VENDOR_BUILD_DIR)/arm64/linux
 HOST_KINSN_DIR_X86 := $(ROOT_DIR)/module/x86/build
 HOST_KINSN_DIR_ARM64 := $(ROOT_DIR)/module/arm64/build
+HOST_KERNEL_IMAGE_X86 := $(X86_RUNTIME_KERNEL_IMAGE)
+HOST_KERNEL_VMLINUX_X86 := $(HOST_KERNEL_BUILD_DIR_X86)/vmlinux
+HOST_KERNEL_MODULES_ORDER_X86 := $(HOST_KERNEL_BUILD_DIR_X86)/modules.order
+HOST_KERNEL_IMAGE_ARM64 := $(HOST_KERNEL_BUILD_DIR_ARM64)/arch/arm64/boot/Image
+HOST_KERNEL_EFI_ARM64 := $(HOST_KERNEL_BUILD_DIR_ARM64)/arch/arm64/boot/vmlinuz.efi
+HOST_KERNEL_VMLINUX_ARM64 := $(HOST_KERNEL_BUILD_DIR_ARM64)/vmlinux
+HOST_KERNEL_MODULES_ORDER_ARM64 := $(HOST_KERNEL_BUILD_DIR_ARM64)/modules.order
 
 .PHONY: \
 	host-kernel-x86 host-kernel-arm64 \
@@ -68,11 +75,11 @@ $(HOST_KERNEL_BUILD_DIR_X86)/.config: $(DEFCONFIG_SRC)
 $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf: $(HOST_KERNEL_BUILD_DIR_X86)/.config
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 olddefconfig
 
-host-kernel-x86: $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf
+host-kernel-x86: $(HOST_KERNEL_IMAGE_X86) $(HOST_KERNEL_VMLINUX_X86) $(HOST_KERNEL_MODULES_ORDER_X86)
+
+$(HOST_KERNEL_IMAGE_X86) $(HOST_KERNEL_VMLINUX_X86) $(HOST_KERNEL_MODULES_ORDER_X86) &: $(HOST_KERNEL_BUILD_DIR_X86)/include/config/auto.conf
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 bzImage modules -j"$(IMAGE_BUILD_JOBS)"
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_X86)/modules-install" INSTALL_MOD_STRIP=1 DEPMOD=true modules_install >/dev/null
-	rel=$$(cat "$(HOST_KERNEL_BUILD_DIR_X86)/include/config/kernel.release"); \
-		printf '{"kernel_release":"%s","target_arch":"x86_64","kernel_image":"bzImage"}\n' "$$rel" >"$(HOST_KERNEL_BUILD_DIR_X86)/manifest.json"
 
 $(HOST_KERNEL_BUILD_DIR_ARM64)/.config: $(ARM64_DEFCONFIG_SRC)
 	install -d "$(HOST_KERNEL_BUILD_DIR_ARM64)"
@@ -81,17 +88,17 @@ $(HOST_KERNEL_BUILD_DIR_ARM64)/.config: $(ARM64_DEFCONFIG_SRC)
 $(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/auto.conf: $(HOST_KERNEL_BUILD_DIR_ARM64)/.config
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
 
-host-kernel-arm64: $(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/auto.conf
+host-kernel-arm64: $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM64) $(HOST_KERNEL_VMLINUX_ARM64) $(HOST_KERNEL_MODULES_ORDER_ARM64)
+
+$(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM64) $(HOST_KERNEL_VMLINUX_ARM64) $(HOST_KERNEL_MODULES_ORDER_ARM64) &: $(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/auto.conf
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image vmlinuz.efi modules -j"$(IMAGE_BUILD_JOBS)"
 	$(MAKE) -C "$(KERNEL_DIR)" O="$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- INSTALL_MOD_PATH="$(HOST_KERNEL_BUILD_DIR_ARM64)/modules-install" INSTALL_MOD_STRIP=1 DEPMOD=true modules_install >/dev/null
-	rel=$$(cat "$(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/kernel.release"); \
-		printf '{"kernel_release":"%s","target_arch":"arm64","kernel_image":"vmlinuz.efi"}\n' "$$rel" >"$(HOST_KERNEL_BUILD_DIR_ARM64)/manifest.json"
 
-host-kinsn-x86: host-kernel-x86
+host-kinsn-x86: $(HOST_KERNEL_MODULES_ORDER_X86)
 	install -d "$(HOST_KINSN_DIR_X86)"
 	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_X86)" ARCH=x86_64 M="$(ROOT_DIR)/module/x86" MO="$(HOST_KINSN_DIR_X86)" modules -j"$(IMAGE_BUILD_JOBS)"
 
-host-kinsn-arm64: host-kernel-arm64
+host-kinsn-arm64: $(HOST_KERNEL_MODULES_ORDER_ARM64)
 	install -d "$(HOST_KINSN_DIR_ARM64)"
 	$(MAKE) -C "$(HOST_KERNEL_BUILD_DIR_ARM64)" ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- M="$(ROOT_DIR)/module/arm64" MO="$(HOST_KINSN_DIR_ARM64)" modules -j"$(IMAGE_BUILD_JOBS)"
 
@@ -155,10 +162,10 @@ host-runner-x86 host-runner-arm64:
 	cmake --build "$(RUNNER_BUILD_DIR_ARCH)" --target micro_exec -j"$(JOBS)"
 	$(RUNNER_STRIP) --strip-unneeded "$(RUNNER_BUILD_DIR_ARCH)/micro_exec"
 
-host-micro-programs-x86: host-kernel-x86
+host-micro-programs-x86: $(HOST_KERNEL_VMLINUX_X86)
 	$(MAKE) -C "$(MICRO_PROGRAM_DIR)" OUTPUT_DIR="$(MICRO_PROGRAM_BUILD_X86)" KERNEL_VMLINUX="$(HOST_KERNEL_BUILD_DIR_X86)/vmlinux" all
 
-host-micro-programs-arm64: host-kernel-arm64
+host-micro-programs-arm64: $(HOST_KERNEL_VMLINUX_ARM64)
 	$(MAKE) -C "$(MICRO_PROGRAM_DIR)" OUTPUT_DIR="$(MICRO_PROGRAM_BUILD_ARM64)" KERNEL_VMLINUX="$(HOST_KERNEL_BUILD_DIR_ARM64)/vmlinux" NATIVE_TARGET=aarch64-linux-gnu NATIVE_ARCH=arm64 SYS_INCLUDE_FLAGS="$(ARM64_SYS_INCLUDE_FLAGS)" all
 
 host-stage2-programs-x86: host-micro-programs-x86
@@ -176,7 +183,7 @@ host-x86-sim-proofs: host-micro-programs-x86
 host-arm64-sim-proofs: host-micro-programs-arm64
 	$(MAKE) -C "$(ARM64_SIM_PROOF_DIR)" PROOF_BUILD_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)/arm64_sim_proofs" MICRO_BUILD_DIR="$(MICRO_PROGRAM_BUILD_ARM64)" micro-proofs-build
 
-x86-runner-runtime-image-tar: host-kernel-x86 host-kinsn-x86 host-rust-x86 host-shim-x86 host-source-apps-x86 host-runner-x86 host-micro-programs-x86 host-stage2-programs-x86 host-x86-sim-proofs
+x86-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_X86) host-kinsn-x86 host-rust-x86 host-shim-x86 host-source-apps-x86 host-runner-x86 host-micro-programs-x86 host-stage2-programs-x86 host-x86-sim-proofs
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	docker build --platform linux/amd64 \
 		--target runner-runtime \
@@ -195,13 +202,13 @@ x86-runner-runtime-image-tar: host-kernel-x86 host-kinsn-x86 host-rust-x86 host-
 		--build-arg RUNNER_BUILD_DIR_NAME=build-llvmbpf \
 		--build-arg TEST_BUILD_DIR=build \
 		--build-arg KERNEL_IMAGE_NAME=bzImage \
-		--build-arg KERNEL_MANIFEST_JSON="$$(cat $(HOST_KERNEL_BUILD_DIR_X86)/manifest.json)" \
+		--build-arg KERNEL_MANIFEST_JSON="$$(printf '{"kernel_release":"%s","target_arch":"x86_64","kernel_image":"bzImage"}' "$$(cat "$(HOST_KERNEL_BUILD_DIR_X86)/include/config/kernel.release")")" \
 		--build-arg BPFOPT_HOST_BIN_DIR="bpfopt/target/release" \
 		-t "$(X86_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	docker save -o "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE)"
 	mv -f "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE_TAR)"
 
-arm64-runner-runtime-image-tar: host-kernel-arm64 host-kinsn-arm64 host-rust-arm64 host-shim-arm64 host-source-apps-arm64 host-runner-arm64 host-micro-programs-arm64 host-stage2-programs-arm64 host-arm64-native-kernel-smoke host-arm64-sim-proofs
+arm64-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM64) host-kinsn-arm64 host-rust-arm64 host-shim-arm64 host-source-apps-arm64 host-runner-arm64 host-micro-programs-arm64 host-stage2-programs-arm64 host-arm64-native-kernel-smoke host-arm64-sim-proofs
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	docker build --platform linux/arm64 \
 		--target runner-runtime \
@@ -220,7 +227,7 @@ arm64-runner-runtime-image-tar: host-kernel-arm64 host-kinsn-arm64 host-rust-arm
 		--build-arg RUNNER_BUILD_DIR_NAME=build-arm64-llvmbpf \
 		--build-arg TEST_BUILD_DIR=build-arm64 \
 		--build-arg KERNEL_IMAGE_NAME=vmlinuz.efi \
-		--build-arg KERNEL_MANIFEST_JSON="$$(cat $(HOST_KERNEL_BUILD_DIR_ARM64)/manifest.json)" \
+		--build-arg KERNEL_MANIFEST_JSON="$$(printf '{"kernel_release":"%s","target_arch":"arm64","kernel_image":"vmlinuz.efi"}' "$$(cat "$(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/kernel.release")")" \
 		--build-arg BPFOPT_HOST_BIN_DIR="bpfopt/target/$(ARM64_RUST_TARGET)/release" \
 		--build-arg NATIVE_LINK_HOST_BIN="native-sim/x86/native_lab/native_link/target/$(ARM64_RUST_TARGET)/release/native-link" \
 		-t "$(ARM64_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"

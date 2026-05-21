@@ -467,6 +467,11 @@ uint32_t extract_htab_inline_offset(const std::vector<uint8_t> &jit)
 }
 
 #if defined(__aarch64__)
+bool is_arm64_linear_map_ptr(uint64_t value)
+{
+    return (value >> 48) == 0xffffULL && ((value >> 47) & 1ULL) == 0;
+}
+
 bool a64_is_movz64(uint32_t insn)
 {
     return (insn & 0xff800000u) == 0xd2800000u;
@@ -535,7 +540,7 @@ std::vector<uint64_t> extract_arm64_kernel_mov_immediates(const std::vector<uint
             value = (value & ~next_mask) | (a64_mov_imm16(next) << next_shift);
         }
 
-        if ((value >> 47) == 0x1ffffULL) {
+        if (is_arm64_linear_map_ptr(value)) {
             values.push_back(value);
         }
         i = j == i + 1 ? i : j - 1;
@@ -543,6 +548,24 @@ std::vector<uint64_t> extract_arm64_kernel_mov_immediates(const std::vector<uint
     return values;
 }
 #endif
+
+std::vector<uint64_t> extract_xlated_ldimm64_kernel_ptrs(const std::vector<bpf_insn> &insns)
+{
+    std::vector<uint64_t> values;
+    for (size_t i = 0; i + 1 < insns.size(); i++) {
+        if (insns[i].code != (BPF_LD | BPF_DW | BPF_IMM)) {
+            continue;
+        }
+        uint64_t lo = static_cast<uint32_t>(insns[i].imm);
+        uint64_t hi = static_cast<uint32_t>(insns[i + 1].imm);
+        uint64_t imm64 = lo | (hi << 32);
+        if ((imm64 >> 48) == 0xffffULL) {
+            values.push_back(imm64);
+        }
+        i++;
+    }
+    return values;
+}
 
 /* Walk a BPF program's original (pre-verifier) bytecode and identify,
  * for each `BPF_CALL bpf_map_lookup_elem`, which map fd is currently
@@ -651,15 +674,12 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
         info_len = sizeof(info2);
         if (bpf_obj_get_info_by_fd(prog_fd, &info2, &info_len) < 0) continue;
 
-        (void)xlated_cnt; (void)xlated; /* xlated path retained for future use */
-        /* Kernel sanitizes xlated bytecode for ld_imm64 map refs (the
-         * imm is overwritten with map->id, not the kernel ptr). Read
-         * the JITted x86 bytes instead -- they aren't sanitized -- and
-         * find every `movabs reg, imm64` whose imm64 lies in the
-         * canonical kernel upper half. JIT emits exactly one such
-         * movabs per PSEUDO_MAP_FD ld_imm64 (helpers go through
-         * `call rel32`, not movabs). Pair them with the corresponding
-         * map fd in ORIG by ordinal position. */
+        (void)xlated_cnt;
+        /* Prefer the JIT image because upstream kernels may sanitize
+         * xlated map immediates returned through BPF_OBJ_GET_INFO_BY_FD.
+         * If this fork returns real map pointers in xlated bytecode, use
+         * it as a fallback; xlated LD_IMM64 sites are map-only here, while
+         * arm64 JIT immediates can also contain helper/text addresses. */
         bpf_prog_info info_j = {};
         __u32 info_j_len = sizeof(info_j);
         if (bpf_obj_get_info_by_fd(prog_fd, &info_j, &info_j_len) < 0
@@ -698,11 +718,16 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
             i += 9; /* advance past this 10-byte movabs */
         }
 #endif
+        std::vector<uint64_t> xlated_map_ptrs = extract_xlated_ldimm64_kernel_ptrs(xlated);
+        if (jit_map_ptrs.size() != orig_fds.size()
+            && xlated_map_ptrs.size() == orig_fds.size()) {
+            jit_map_ptrs = std::move(xlated_map_ptrs);
+        }
 
         if (orig_fds.size() != jit_map_ptrs.size()) {
             std::fprintf(stderr,
                 "[native_kernel] warning: orig has %zu PSEUDO_MAP_FD ld_imm64 but "
-                "jited has %zu kernel-half movabs imm64; map mapping may be wrong\n",
+                "resolved %zu kernel map pointers; map mapping may be wrong\n",
                 orig_fds.size(), jit_map_ptrs.size());
         }
         for (size_t k = 0; k < std::min(orig_fds.size(), jit_map_ptrs.size()); k++) {

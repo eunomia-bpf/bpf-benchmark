@@ -1,6 +1,10 @@
 #ifndef BPFREJIT_SHIM_RELOAD_H
 #define BPFREJIT_SHIM_RELOAD_H
 
+#ifndef BPF_F_REPLACE
+#define BPF_F_REPLACE (1U << 2)
+#endif
+
 /* Issue a stock BPF_PROG_LOAD with the pass-output bytecode + log_level=2 to
  * capture verifier states. Writes the verifier log to log_path. The probe fd
  * is closed; we never run the probe program. Failures fall through silently
@@ -460,7 +464,9 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
     /* Snapshot lists locally — reattach syscalls release state_mutex
      * via real_syscall (kernel side, not shim re-entry, but be safe). */
     uint32_t nlinks = p->n_links, nperfs = p->n_perfs;
-    int *links = NULL, *perfs = NULL;
+    uint32_t n_prog_attaches = p->n_prog_attaches, n_raw_tps = p->n_raw_tps;
+    int *links = NULL, *perfs = NULL, *raw_tps = NULL;
+    struct prog_attach_point *prog_attaches = NULL;
     if (nlinks) {
         links = (int *)malloc(nlinks * sizeof(int));
         if (links) memcpy(links, p->attached_link_fds, nlinks * sizeof(int));
@@ -470,6 +476,21 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
         perfs = (int *)malloc(nperfs * sizeof(int));
         if (perfs) memcpy(perfs, p->attached_perf_fds, nperfs * sizeof(int));
         else nperfs = 0;
+    }
+    if (n_prog_attaches) {
+        prog_attaches = (struct prog_attach_point *)
+            malloc(n_prog_attaches * sizeof(*prog_attaches));
+        if (prog_attaches)
+            memcpy(prog_attaches, p->prog_attaches,
+                   n_prog_attaches * sizeof(*prog_attaches));
+        else
+            n_prog_attaches = 0;
+    }
+    if (n_raw_tps) {
+        raw_tps = (int *)malloc(n_raw_tps * sizeof(int));
+        if (raw_tps) memcpy(raw_tps, p->attached_raw_tp_fds,
+                            n_raw_tps * sizeof(int));
+        else n_raw_tps = 0;
     }
     int old_prog_fd = p->fd;
     pthread_mutex_unlock(&state_mutex);
@@ -564,6 +585,53 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
         }
         pthread_mutex_unlock(&state_mutex);
         free(replaced_with);
+    }
+    for (uint32_t i = 0; i < n_prog_attaches; i++) {
+        union bpf_attr a;
+        memset(&a, 0, sizeof(a));
+        a.target_fd = (uint32_t)prog_attaches[i].target_fd;
+        a.attach_bpf_fd = (uint32_t)new_pfd;
+        a.attach_type = prog_attaches[i].attach_type;
+        a.attach_flags = prog_attaches[i].attach_flags | BPF_F_REPLACE;
+        a.replace_bpf_fd = (uint32_t)old_prog_fd;
+        long r = real_syscall(SYS_bpf, BPF_PROG_ATTACH, &a, sizeof(a));
+        if (r >= 0) {
+            log_line("reload_and_reattach: PROG_ATTACH replace target_fd=%d "
+                     "attach=%u → new_prog_fd=%ld OK",
+                     prog_attaches[i].target_fd,
+                     prog_attaches[i].attach_type, new_pfd);
+            continue;
+        }
+        int replace_err = errno;
+        union bpf_attr d;
+        memset(&d, 0, sizeof(d));
+        d.target_fd = (uint32_t)prog_attaches[i].target_fd;
+        d.attach_bpf_fd = (uint32_t)old_prog_fd;
+        d.attach_type = prog_attaches[i].attach_type;
+        long dr = real_syscall(SYS_bpf, BPF_PROG_DETACH, &d, sizeof(d));
+        int detach_err = errno;
+        memset(&a, 0, sizeof(a));
+        a.target_fd = (uint32_t)prog_attaches[i].target_fd;
+        a.attach_bpf_fd = (uint32_t)new_pfd;
+        a.attach_type = prog_attaches[i].attach_type;
+        a.attach_flags = prog_attaches[i].attach_flags;
+        long ar = dr >= 0 ? real_syscall(SYS_bpf, BPF_PROG_ATTACH, &a,
+                                         sizeof(a)) : -1;
+        int attach_err = errno;
+        if (dr >= 0 && ar >= 0) {
+            log_line("reload_and_reattach: PROG_ATTACH detach→attach fallback "
+                     "target_fd=%d attach=%u → new_prog_fd=%ld OK "
+                     "(replace errno=%d)",
+                     prog_attaches[i].target_fd,
+                     prog_attaches[i].attach_type, new_pfd, replace_err);
+            continue;
+        }
+        APPEND_DETAIL("prog_attach target_fd=%d attach=%u: replace errno=%d, "
+                      "detach errno=%d, attach errno=%d; ",
+                      prog_attaches[i].target_fd,
+                      prog_attaches[i].attach_type, replace_err,
+                      dr < 0 ? detach_err : 0, ar < 0 ? attach_err : 0);
+        partial = 1;
     }
     int *perf_replaced = (int *)malloc(nperfs * sizeof(int));
     if (perf_replaced) for (uint32_t i = 0; i < nperfs; i++) perf_replaced[i] = -1;
@@ -661,6 +729,60 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
         }
         pthread_mutex_unlock(&state_mutex);
         free(perf_replaced);
+    }
+    int *raw_replaced = (int *)malloc(n_raw_tps * sizeof(int));
+    if (raw_replaced) for (uint32_t i = 0; i < n_raw_tps; i++) raw_replaced[i] = -1;
+    for (uint32_t i = 0; i < n_raw_tps; i++) {
+        char raw_name[128] = {0};
+        pthread_mutex_lock(&state_mutex);
+        struct raw_tp_entry *rt = raw_tp_find(raw_tps[i]);
+        if (rt) snprintf(raw_name, sizeof(raw_name), "%s", rt->name);
+        pthread_mutex_unlock(&state_mutex);
+        if (!raw_name[0]) {
+            APPEND_DETAIL("raw_tp_fd=%d: no saved name; ", raw_tps[i]);
+            partial = 1;
+            continue;
+        }
+        union bpf_attr rta;
+        memset(&rta, 0, sizeof(rta));
+        rta.raw_tracepoint.name = (uintptr_t)raw_name;
+        rta.raw_tracepoint.prog_fd = (uint32_t)new_pfd;
+        real_close(raw_tps[i]);
+        long new_raw = real_syscall(SYS_bpf, BPF_RAW_TRACEPOINT_OPEN,
+                                    &rta, sizeof(rta));
+        if (new_raw < 0) {
+            APPEND_DETAIL("raw_tp_fd=%d name=%s: reopen errno=%d; ",
+                          raw_tps[i], raw_name, errno);
+            partial = 1;
+            continue;
+        }
+        if (raw_replaced) raw_replaced[i] = (int)new_raw;
+        struct raw_tp_entry *ne = (struct raw_tp_entry *)calloc(1, sizeof(*ne));
+        if (ne) {
+            ne->fd = (int)new_raw;
+            ne->prog_fd = (uint32_t)new_pfd;
+            snprintf(ne->name, sizeof(ne->name), "%s", raw_name);
+            pthread_mutex_lock(&state_mutex);
+            raw_tp_remove(raw_tps[i]);
+            raw_tp_insert(ne);
+            pthread_mutex_unlock(&state_mutex);
+        }
+        log_line("reload_and_reattach: RAW_TRACEPOINT_OPEN name=%s "
+                 "old_fd=%d → new_fd=%ld OK", raw_name, raw_tps[i], new_raw);
+    }
+    if (raw_replaced) {
+        pthread_mutex_lock(&state_mutex);
+        for (uint32_t i = 0; i < n_raw_tps; i++) {
+            if (raw_replaced[i] < 0) continue;
+            for (uint32_t k = 0; k < p->n_raw_tps; k++) {
+                if (p->attached_raw_tp_fds[k] == raw_tps[i]) {
+                    p->attached_raw_tp_fds[k] = raw_replaced[i];
+                    break;
+                }
+            }
+        }
+        pthread_mutex_unlock(&state_mutex);
+        free(raw_replaced);
     }
     /* XDP netlink reattach. The app (katran, iproute2, libbpf<0.8) bound
      * the original prog via RTM_SETLINK + IFLA_XDP_FD; that path is
@@ -851,6 +973,8 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
 #undef APPEND_DETAIL
     free(links);
     free(perfs);
+    free(prog_attaches);
+    free(raw_tps);
 
     clock_gettime(CLOCK_MONOTONIC, &t1);
     if (out_rejit_ms) *out_rejit_ms = (t1.tv_sec - t0.tv_sec) * 1000ULL

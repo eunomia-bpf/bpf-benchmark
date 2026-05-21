@@ -254,6 +254,7 @@ long syscall(long number, ...) {
     struct prog_entry *pending_prog = NULL;
     struct map_entry *pending_map = NULL;
     struct link_entry *pending_link = NULL;
+    struct raw_tp_entry *pending_raw_tp = NULL;
     if (!in_shim && attr) {
         in_shim = 1;
         switch (cmd) {
@@ -277,7 +278,7 @@ long syscall(long number, ...) {
             on_prog_attach(attr);
             break;
         case BPF_RAW_TRACEPOINT_OPEN:
-            on_raw_tp_open(attr);
+            pending_raw_tp = capture_raw_tp_open(attr);
             break;
         default:
             log_line("bpf cmd=%d size=%u", cmd, size);
@@ -409,6 +410,34 @@ long syscall(long number, ...) {
             free(pending_link);
         }
     }
+    if (cmd == BPF_PROG_ATTACH && ret >= 0 && attr) {
+        pthread_mutex_lock(&state_mutex);
+        struct prog_entry *pe = prog_find((int)attr->attach_bpf_fd);
+        if (pe) {
+            struct prog_attach_point point = {
+                .target_fd = (int)attr->target_fd,
+                .attach_type = attr->attach_type,
+                .attach_flags = attr->attach_flags,
+            };
+            (void)prog_attach_point_append(&pe->prog_attaches,
+                                           &pe->n_prog_attaches, point);
+        }
+        pthread_mutex_unlock(&state_mutex);
+    }
+    if (pending_raw_tp) {
+        if (ret >= 0) {
+            pending_raw_tp->fd = (int)ret;
+            pthread_mutex_lock(&state_mutex);
+            raw_tp_insert(pending_raw_tp);
+            struct prog_entry *pe = prog_find((int)pending_raw_tp->prog_fd);
+            if (pe)
+                (void)prog_attach_append(&pe->attached_raw_tp_fds,
+                                         &pe->n_raw_tps, (int)ret);
+            pthread_mutex_unlock(&state_mutex);
+        } else {
+            free(pending_raw_tp);
+        }
+    }
     in_shim = 0;
 
     if (cmd == BPF_PROG_LOAD)
@@ -423,6 +452,12 @@ long syscall(long number, ...) {
     else if (cmd == BPF_MAP_CREATE)
         log_line("  MAP_CREATE -> fd=%ld errno=%d kernel_map_id=%u", ret,
                  ret < 0 ? saved_errno : 0, resolved_id);
+    else if (cmd == BPF_PROG_ATTACH)
+        log_line("  PROG_ATTACH -> ret=%ld errno=%d", ret,
+                 ret < 0 ? saved_errno : 0);
+    else if (cmd == BPF_RAW_TRACEPOINT_OPEN)
+        log_line("  RAW_TRACEPOINT_OPEN -> fd=%ld errno=%d", ret,
+                 ret < 0 ? saved_errno : 0);
 
     errno = saved_errno;
     return ret;
@@ -682,6 +717,7 @@ int close(int fd) {
         prog_remove(fd);
         map_remove(fd);
         link_remove(fd);
+        raw_tp_remove(fd);
         perf_remove(fd);
         /* If this fd was a link/perf_event attached to some prog, drop it
          * from that prog's attach lists too (no-op if fd was not a known

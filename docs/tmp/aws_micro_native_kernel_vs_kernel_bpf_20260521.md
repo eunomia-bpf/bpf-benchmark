@@ -1,110 +1,143 @@
 # AWS micro native_kernel vs kernel_bpf, 2026-05-21
 
-`kernel_bpf` is the micro runner `kernel` runtime. Times are per-run `exec_ns` from
-`SAMPLES=1 WARMUPS=0 INNER_REPEAT=10`; `native/kernel` is
-`native_kernel exec_ns / kernel_bpf exec_ns`, so values below 1.0 mean
+`kernel_bpf` is the micro runner `kernel` runtime. Times are per-run `exec_ns`.
+For x86, the table uses the median of `SAMPLES=3 INNER_REPEAT=100000`; for arm64,
+the table preserves the earlier smoke data with `SAMPLES=1 WARMUPS=0 INNER_REPEAT=10`.
+`speedup` is `kernel_bpf exec_ns / native_kernel exec_ns`, so values above 1.0 mean
 `native_kernel` was faster for that row.
 
 Validated result paths:
 
-- x86 pure 29: `micro/results/aws_x86_micro_20260521_021842_488173`
-- x86 stage2 13: `micro/results/aws_x86_micro_20260521_022752_872114`
-- arm64 pure 29: `micro/results/aws_arm64_micro_20260521_023726_510990`
-- arm64 stage2 13: `micro/results/aws_arm64_micro_20260521_024750_386500`
+- x86 pure: `micro/results/aws_x86_micro_20260521_032223_857289`; status=completed, programs=29, samples=[3], inner=[100000], mismatches=0
+- x86 stage2: `micro/results/aws_x86_micro_20260521_033443_371646`; status=completed, programs=13, samples=[3], inner=[100000], mismatches=0
+- x86 KVM pure cross-check: `micro/results/x86_kvm_micro_20260521_035600_826130`; status=completed, programs=29, samples=[3], inner=[100000], mismatches=0
+- x86 KVM stage2 cross-check: `micro/results/x86_kvm_micro_20260521_040152_335017`; status=completed, programs=13, samples=[3], inner=[100000], mismatches=0
+- x86 KVM previous native-kernel baseline: `micro/results/x86_kvm_micro_20260520_044439_120822`; status=completed, programs=29, samples=[3], inner=[100000], mismatches=0
+- arm64 pure: `micro/results/aws_arm64_micro_20260521_023726_510990`; status=completed, programs=29, samples=[1], inner=[10], mismatches=0
+- arm64 stage2: `micro/results/aws_arm64_micro_20260521_024750_386500`; status=completed, programs=13, samples=[1], inner=[10], mismatches=0
 
-All four runs completed, covered the expected benchmark count, and had zero
-`result`/`retval` mismatches between `native_kernel` and `kernel_bpf`.
+![AWS micro native_kernel speedup over kernel_bpf](../figures/aws-micro-native-kernel-vs-kernel-bpf-20260521.png)
+
+![Micro native runtime KVM/AWS trend](../figures/micro-native-kernel-kvm-aws-trend-20260521.png)
+
+## Trend read
+
+The x86 pure trend does not show a native-kernel regression against the previous
+KVM baseline: old KVM `native_lab` pure was 1.414x and current KVM
+`native_kernel` pure is 1.425x. The earlier 1.6x-1.7x number came from the
+separate native userspace runtime, not from the in-kernel native runtime.
+
+The outlier is x86 AWS stage2 helper/map performance. It remains slow even with
+`SAMPLES=3 INNER_REPEAT=100000`, but the same stage2 suite on KVM is faster than
+kernel eBPF. That points to an AWS x86 environment / CPU / helper-call-path
+interaction rather than a broad x86 native-kernel regression.
+
+| result | suite | runtime | samples | inner | speedup | native/kernel/tie |
+| --- | --- | --- | ---: | ---: | ---: | ---: |
+| old x86 KVM | pure | `native_lab` | 3 | 100000 | 1.414x | 24 / 4 / 1 |
+| current x86 KVM | pure | `native_kernel` | 3 | 100000 | 1.425x | 24 / 4 / 1 |
+| x86 AWS smoke | pure | `native_kernel` | 1 | 10 | 1.249x | 22 / 7 / 0 |
+| x86 AWS current | pure | `native_kernel` | 3 | 100000 | 1.503x | 26 / 3 / 0 |
+| x86 AWS smoke | stage2 helpers/maps | `native_kernel` | 1 | 10 | 0.676x | 4 / 9 / 0 |
+| x86 AWS current | stage2 helpers/maps | `native_kernel` | 3 | 100000 | 0.690x | 0 / 12 / 1 |
+| x86 KVM current | stage2 helpers/maps | `native_kernel` | 3 | 100000 | 1.300x | 9 / 2 / 2 |
+| arm64 AWS smoke | pure | `native_kernel` | 1 | 10 | 2.318x | 28 / 1 / 0 |
+| arm64 AWS smoke | stage2 helpers/maps | `native_kernel` | 1 | 10 | 2.460x | 13 / 0 / 0 |
 
 ## x86
 
-| suite | bench | native_kernel ns | kernel_bpf ns | native/kernel | faster |
+Summary: native_kernel wins 26/42; geomean speedup `kernel_bpf/native_kernel` = 1.181x.
+
+| suite | bench | native_kernel ns | kernel_bpf ns | speedup | faster |
 | --- | --- | ---: | ---: | ---: | --- |
-| pure | `simple` | 115 | 134 | 0.858 | native_kernel |
-| pure | `simple_packet` | 142 | 102 | 1.392 | kernel_bpf |
-| pure | `bitmap_popcount_scan` | 718 | 1,462 | 0.491 | native_kernel |
-| pure | `sorted_rule_binary_search` | 672 | 1,922 | 0.350 | native_kernel |
-| pure | `bcc_runqlat_log2_histogram_bucket` | 3,984 | 3,289 | 1.211 | kernel_bpf |
-| pure | `trace_event_type_switch_dispatch` | 1,512 | 1,420 | 1.065 | kernel_bpf |
-| pure | `packet_checksum_fold` | 17,859 | 22,100 | 0.808 | native_kernel |
-| pure | `payload_prefix_memcmp_scan` | 300 | 360 | 0.833 | native_kernel |
-| pure | `packet_vlan_tcpopt_parser` | 132 | 150 | 0.880 | native_kernel |
-| pure | `bpf_local_call_fanout_dispatch` | 333 | 421 | 0.791 | native_kernel |
-| pure | `flow_5tuple_rss_hash` | 128 | 152 | 0.842 | native_kernel |
-| pure | `katran_lb_consistent_hash_select` | 171 | 240 | 0.713 | native_kernel |
-| pure | `cilium_policy_guard_tree_filter` | 331 | 314 | 1.054 | kernel_bpf |
-| pure | `siphash_rotate64_mixer` | 216 | 240 | 0.900 | native_kernel |
-| pure | `packet_record_bounds_window` | 294 | 398 | 0.739 | native_kernel |
-| pure | `flow_record_field_scan` | 296 | 302 | 0.980 | native_kernel |
-| pure | `packed_header_bitfield_decode` | 612 | 619 | 0.989 | native_kernel |
-| pure | `bpftrace_string_search_prefix_scan` | 614 | 745 | 0.824 | native_kernel |
-| pure | `tracee_syscall_name_table_lookup` | 516 | 536 | 0.963 | native_kernel |
-| pure | `tracee_http_method_prefix_detect` | 293 | 275 | 1.065 | kernel_bpf |
-| pure | `cilium_socket_lb_service_select` | 534 | 1,283 | 0.416 | native_kernel |
-| pure | `bcc_tcpconnect_ipv4_tuple_filter` | 382 | 626 | 0.610 | native_kernel |
-| pure | `tetragon_process_event_arg_filter` | 686 | 656 | 1.046 | kernel_bpf |
-| pure | `otel_stack_frame_unwind_scan` | 289 | 494 | 0.585 | native_kernel |
-| pure | `cilium_ct_nat_tuple_rewrite` | 389 | 556 | 0.700 | native_kernel |
-| pure | `packet_toeplitz_rss_hash` | 932 | 973 | 0.958 | native_kernel |
-| pure | `bpftrace_comm_key_fnv_hash` | 963 | 920 | 1.047 | kernel_bpf |
-| pure | `tc_packet_checksum_fold` | 17,381 | 26,872 | 0.647 | native_kernel |
-| pure | `cgroup_skb_hash_chain` | 336 | 638 | 0.527 | native_kernel |
-| stage2 | `helper_only_uid_gid` | 185 | 175 | 1.057 | kernel_bpf |
-| stage2 | `helper_chain_simple` | 654 | 564 | 1.160 | kernel_bpf |
-| stage2 | `map_array_lookup` | 257 | 229 | 1.122 | kernel_bpf |
-| stage2 | `map_array_index_packet` | 239 | 281 | 0.851 | native_kernel |
-| stage2 | `map_hash_lookup` | 838 | 372 | 2.253 | kernel_bpf |
-| stage2 | `map_hash_str_key` | 364 | 403 | 0.903 | native_kernel |
-| stage2 | `map_percpu_array` | 348 | 159 | 2.189 | kernel_bpf |
-| stage2 | `map_lru_hash_counter` | 756 | 386 | 1.959 | kernel_bpf |
-| stage2 | `map_percpu_hash_counter` | 382 | 395 | 0.967 | native_kernel |
-| stage2 | `combined_helper_map` | 843 | 255 | 3.306 | kernel_bpf |
-| stage2 | `multi_map_policy` | 1,052 | 483 | 2.178 | kernel_bpf |
-| stage2 | `packet_5tuple_classify` | 6,368 | 351 | 18.142 | kernel_bpf |
-| stage2 | `stats_mixed_helpers` | 5,869 | 46,947 | 0.125 | native_kernel |
+| pure | `simple` | 10 | 12 | 1.200 | native_kernel |
+| pure | `simple_packet` | 10 | 11 | 1.100 | native_kernel |
+| pure | `bitmap_popcount_scan` | 505 | 1,366 | 2.705 | native_kernel |
+| pure | `sorted_rule_binary_search` | 544 | 1,233 | 2.267 | native_kernel |
+| pure | `bcc_runqlat_log2_histogram_bucket` | 2,827 | 3,195 | 1.130 | native_kernel |
+| pure | `trace_event_type_switch_dispatch` | 405 | 552 | 1.363 | native_kernel |
+| pure | `packet_checksum_fold` | 16,979 | 21,670 | 1.276 | native_kernel |
+| pure | `payload_prefix_memcmp_scan` | 131 | 213 | 1.626 | native_kernel |
+| pure | `packet_vlan_tcpopt_parser` | 28 | 32 | 1.143 | native_kernel |
+| pure | `bpf_local_call_fanout_dispatch` | 110 | 237 | 2.155 | native_kernel |
+| pure | `flow_5tuple_rss_hash` | 24 | 33 | 1.375 | native_kernel |
+| pure | `katran_lb_consistent_hash_select` | 33 | 47 | 1.424 | native_kernel |
+| pure | `cilium_policy_guard_tree_filter` | 129 | 186 | 1.442 | native_kernel |
+| pure | `siphash_rotate64_mixer` | 48 | 96 | 2.000 | native_kernel |
+| pure | `packet_record_bounds_window` | 135 | 251 | 1.859 | native_kernel |
+| pure | `flow_record_field_scan` | 137 | 129 | 0.942 | kernel_bpf |
+| pure | `packed_header_bitfield_decode` | 461 | 499 | 1.082 | native_kernel |
+| pure | `bpftrace_string_search_prefix_scan` | 314 | 560 | 1.783 | native_kernel |
+| pure | `tracee_syscall_name_table_lookup` | 278 | 328 | 1.180 | native_kernel |
+| pure | `tracee_http_method_prefix_detect` | 47 | 44 | 0.936 | kernel_bpf |
+| pure | `cilium_socket_lb_service_select` | 455 | 1,117 | 2.455 | native_kernel |
+| pure | `bcc_tcpconnect_ipv4_tuple_filter` | 162 | 257 | 1.586 | native_kernel |
+| pure | `tetragon_process_event_arg_filter` | 267 | 398 | 1.491 | native_kernel |
+| pure | `otel_stack_frame_unwind_scan` | 118 | 286 | 2.424 | native_kernel |
+| pure | `cilium_ct_nat_tuple_rewrite` | 176 | 346 | 1.966 | native_kernel |
+| pure | `packet_toeplitz_rss_hash` | 368 | 462 | 1.255 | native_kernel |
+| pure | `bpftrace_comm_key_fnv_hash` | 783 | 771 | 0.985 | kernel_bpf |
+| pure | `tc_packet_checksum_fold` | 16,896 | 26,935 | 1.594 | native_kernel |
+| pure | `cgroup_skb_hash_chain` | 315 | 578 | 1.835 | native_kernel |
+| stage2 | `helper_only_uid_gid` | 23 | 23 | 1.000 | tie |
+| stage2 | `helper_chain_simple` | 159 | 133 | 0.836 | kernel_bpf |
+| stage2 | `map_array_lookup` | 51 | 25 | 0.490 | kernel_bpf |
+| stage2 | `map_array_index_packet` | 50 | 24 | 0.480 | kernel_bpf |
+| stage2 | `map_hash_lookup` | 85 | 73 | 0.859 | kernel_bpf |
+| stage2 | `map_hash_str_key` | 86 | 75 | 0.872 | kernel_bpf |
+| stage2 | `map_percpu_array` | 58 | 25 | 0.431 | kernel_bpf |
+| stage2 | `map_lru_hash_counter` | 174 | 143 | 0.822 | kernel_bpf |
+| stage2 | `map_percpu_hash_counter` | 97 | 68 | 0.701 | kernel_bpf |
+| stage2 | `combined_helper_map` | 69 | 42 | 0.609 | kernel_bpf |
+| stage2 | `multi_map_policy` | 162 | 96 | 0.593 | kernel_bpf |
+| stage2 | `packet_5tuple_classify` | 92 | 78 | 0.848 | kernel_bpf |
+| stage2 | `stats_mixed_helpers` | 197 | 142 | 0.721 | kernel_bpf |
 
 ## arm64
 
-| suite | bench | native_kernel ns | kernel_bpf ns | native/kernel | faster |
+Summary: native_kernel wins 41/42; geomean speedup `kernel_bpf/native_kernel` = 2.361x.
+
+| suite | bench | native_kernel ns | kernel_bpf ns | speedup | faster |
 | --- | --- | ---: | ---: | ---: | --- |
-| pure | `simple` | 22 | 54 | 0.407 | native_kernel |
-| pure | `simple_packet` | 19 | 75 | 0.253 | native_kernel |
-| pure | `bitmap_popcount_scan` | 1,649 | 2,235 | 0.738 | native_kernel |
-| pure | `sorted_rule_binary_search` | 761 | 2,032 | 0.375 | native_kernel |
-| pure | `bcc_runqlat_log2_histogram_bucket` | 2,471 | 7,046 | 0.351 | native_kernel |
-| pure | `trace_event_type_switch_dispatch` | 972 | 903 | 1.076 | kernel_bpf |
-| pure | `packet_checksum_fold` | 26,126 | 40,006 | 0.653 | native_kernel |
-| pure | `payload_prefix_memcmp_scan` | 184 | 352 | 0.523 | native_kernel |
-| pure | `packet_vlan_tcpopt_parser` | 35 | 120 | 0.292 | native_kernel |
-| pure | `bpf_local_call_fanout_dispatch` | 167 | 541 | 0.309 | native_kernel |
-| pure | `flow_5tuple_rss_hash` | 33 | 128 | 0.258 | native_kernel |
-| pure | `katran_lb_consistent_hash_select` | 45 | 174 | 0.259 | native_kernel |
-| pure | `cilium_policy_guard_tree_filter` | 153 | 339 | 0.451 | native_kernel |
-| pure | `siphash_rotate64_mixer` | 60 | 329 | 0.182 | native_kernel |
-| pure | `packet_record_bounds_window` | 171 | 441 | 0.388 | native_kernel |
-| pure | `flow_record_field_scan` | 150 | 260 | 0.577 | native_kernel |
-| pure | `packed_header_bitfield_decode` | 513 | 928 | 0.553 | native_kernel |
-| pure | `bpftrace_string_search_prefix_scan` | 379 | 724 | 0.523 | native_kernel |
-| pure | `tracee_syscall_name_table_lookup` | 392 | 588 | 0.667 | native_kernel |
-| pure | `tracee_http_method_prefix_detect` | 73 | 141 | 0.518 | native_kernel |
-| pure | `cilium_socket_lb_service_select` | 354 | 1,197 | 0.296 | native_kernel |
-| pure | `bcc_tcpconnect_ipv4_tuple_filter` | 187 | 420 | 0.445 | native_kernel |
-| pure | `tetragon_process_event_arg_filter` | 304 | 776 | 0.392 | native_kernel |
-| pure | `otel_stack_frame_unwind_scan` | 142 | 582 | 0.244 | native_kernel |
-| pure | `cilium_ct_nat_tuple_rewrite` | 242 | 618 | 0.392 | native_kernel |
-| pure | `packet_toeplitz_rss_hash` | 565 | 916 | 0.617 | native_kernel |
-| pure | `bpftrace_comm_key_fnv_hash` | 1,307 | 1,632 | 0.801 | native_kernel |
-| pure | `tc_packet_checksum_fold` | 26,043 | 40,804 | 0.638 | native_kernel |
-| pure | `cgroup_skb_hash_chain` | 389 | 955 | 0.407 | native_kernel |
-| stage2 | `helper_only_uid_gid` | 37 | 95 | 0.389 | native_kernel |
-| stage2 | `helper_chain_simple` | 264 | 577 | 0.458 | native_kernel |
-| stage2 | `map_array_lookup` | 39 | 100 | 0.390 | native_kernel |
-| stage2 | `map_array_index_packet` | 37 | 109 | 0.339 | native_kernel |
-| stage2 | `map_hash_lookup` | 164 | 221 | 0.742 | native_kernel |
-| stage2 | `map_hash_str_key` | 145 | 259 | 0.560 | native_kernel |
-| stage2 | `map_percpu_array` | 37 | 128 | 0.289 | native_kernel |
-| stage2 | `map_lru_hash_counter` | 258 | 540 | 0.478 | native_kernel |
-| stage2 | `map_percpu_hash_counter` | 132 | 305 | 0.433 | native_kernel |
-| stage2 | `combined_helper_map` | 61 | 243 | 0.251 | native_kernel |
-| stage2 | `multi_map_policy` | 166 | 722 | 0.230 | native_kernel |
-| stage2 | `packet_5tuple_classify` | 140 | 311 | 0.450 | native_kernel |
-| stage2 | `stats_mixed_helpers` | 247 | 454 | 0.544 | native_kernel |
+| pure | `simple` | 22 | 54 | 2.455 | native_kernel |
+| pure | `simple_packet` | 19 | 75 | 3.947 | native_kernel |
+| pure | `bitmap_popcount_scan` | 1,649 | 2,235 | 1.355 | native_kernel |
+| pure | `sorted_rule_binary_search` | 761 | 2,032 | 2.670 | native_kernel |
+| pure | `bcc_runqlat_log2_histogram_bucket` | 2,471 | 7,046 | 2.851 | native_kernel |
+| pure | `trace_event_type_switch_dispatch` | 972 | 903 | 0.929 | kernel_bpf |
+| pure | `packet_checksum_fold` | 26,126 | 40,006 | 1.531 | native_kernel |
+| pure | `payload_prefix_memcmp_scan` | 184 | 352 | 1.913 | native_kernel |
+| pure | `packet_vlan_tcpopt_parser` | 35 | 120 | 3.429 | native_kernel |
+| pure | `bpf_local_call_fanout_dispatch` | 167 | 541 | 3.240 | native_kernel |
+| pure | `flow_5tuple_rss_hash` | 33 | 128 | 3.879 | native_kernel |
+| pure | `katran_lb_consistent_hash_select` | 45 | 174 | 3.867 | native_kernel |
+| pure | `cilium_policy_guard_tree_filter` | 153 | 339 | 2.216 | native_kernel |
+| pure | `siphash_rotate64_mixer` | 60 | 329 | 5.483 | native_kernel |
+| pure | `packet_record_bounds_window` | 171 | 441 | 2.579 | native_kernel |
+| pure | `flow_record_field_scan` | 150 | 260 | 1.733 | native_kernel |
+| pure | `packed_header_bitfield_decode` | 513 | 928 | 1.809 | native_kernel |
+| pure | `bpftrace_string_search_prefix_scan` | 379 | 724 | 1.910 | native_kernel |
+| pure | `tracee_syscall_name_table_lookup` | 392 | 588 | 1.500 | native_kernel |
+| pure | `tracee_http_method_prefix_detect` | 73 | 141 | 1.932 | native_kernel |
+| pure | `cilium_socket_lb_service_select` | 354 | 1,197 | 3.381 | native_kernel |
+| pure | `bcc_tcpconnect_ipv4_tuple_filter` | 187 | 420 | 2.246 | native_kernel |
+| pure | `tetragon_process_event_arg_filter` | 304 | 776 | 2.553 | native_kernel |
+| pure | `otel_stack_frame_unwind_scan` | 142 | 582 | 4.099 | native_kernel |
+| pure | `cilium_ct_nat_tuple_rewrite` | 242 | 618 | 2.554 | native_kernel |
+| pure | `packet_toeplitz_rss_hash` | 565 | 916 | 1.621 | native_kernel |
+| pure | `bpftrace_comm_key_fnv_hash` | 1,307 | 1,632 | 1.249 | native_kernel |
+| pure | `tc_packet_checksum_fold` | 26,043 | 40,804 | 1.567 | native_kernel |
+| pure | `cgroup_skb_hash_chain` | 389 | 955 | 2.455 | native_kernel |
+| stage2 | `helper_only_uid_gid` | 37 | 95 | 2.568 | native_kernel |
+| stage2 | `helper_chain_simple` | 264 | 577 | 2.186 | native_kernel |
+| stage2 | `map_array_lookup` | 39 | 100 | 2.564 | native_kernel |
+| stage2 | `map_array_index_packet` | 37 | 109 | 2.946 | native_kernel |
+| stage2 | `map_hash_lookup` | 164 | 221 | 1.348 | native_kernel |
+| stage2 | `map_hash_str_key` | 145 | 259 | 1.786 | native_kernel |
+| stage2 | `map_percpu_array` | 37 | 128 | 3.459 | native_kernel |
+| stage2 | `map_lru_hash_counter` | 258 | 540 | 2.093 | native_kernel |
+| stage2 | `map_percpu_hash_counter` | 132 | 305 | 2.311 | native_kernel |
+| stage2 | `combined_helper_map` | 61 | 243 | 3.984 | native_kernel |
+| stage2 | `multi_map_policy` | 166 | 722 | 4.349 | native_kernel |
+| stage2 | `packet_5tuple_classify` | 140 | 311 | 2.221 | native_kernel |
+| stage2 | `stats_mixed_helpers` | 247 | 454 | 1.838 | native_kernel |

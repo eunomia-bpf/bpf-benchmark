@@ -1,6 +1,6 @@
 # Micro Benchmark Status
 
-Last updated: 2026-05-20
+Last updated: 2026-05-21
 
 This is the current short status page for micro benchmark data. The previous
 long evaluation note is archived at
@@ -76,6 +76,29 @@ data. It is not a paper-grade arm64 run.
 ## Kernel vs Native Performance
 
 ![Micro runtime speedup over kernel eBPF](figures/micro-current-runtime-speedup.png)
+
+2026-05-21 AWS native-kernel snapshot:
+`docs/tmp/aws_micro_native_kernel_vs_kernel_bpf_20260521.md` covers x86 and
+arm64 `native_kernel` vs kernel eBPF across the 29 pure micro programs plus the
+13 stage2 helper/map programs.
+
+![AWS micro native_kernel speedup over kernel eBPF](figures/aws-micro-native-kernel-vs-kernel-bpf-20260521.png)
+
+2026-05-21 KVM/AWS trend cross-check:
+the current x86 KVM pure run is consistent with the previous x86 KVM native
+kernel baseline, while x86 AWS stage2 helper/map results are the outlier.
+
+![Micro native runtime KVM/AWS trend](figures/micro-native-kernel-kvm-aws-trend-20260521.png)
+
+| Result | Suite | Runtime | Speedup vs kernel eBPF |
+|---|---|---|---:|
+| x86 KVM previous | pure | native kernel (`native_lab`) | 1.414x |
+| x86 KVM current | pure | `native_kernel` | 1.425x |
+| x86 AWS current | pure | `native_kernel` | 1.503x |
+| x86 AWS current | stage2 helpers/maps | `native_kernel` | 0.690x |
+| x86 KVM current | stage2 helpers/maps | `native_kernel` | 1.300x |
+| arm64 AWS smoke | pure | `native_kernel` | 2.318x |
+| arm64 AWS smoke | stage2 helpers/maps | `native_kernel` | 2.460x |
 
 ### x86 KVM
 

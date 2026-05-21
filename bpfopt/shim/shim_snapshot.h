@@ -48,6 +48,19 @@ static void format_map_ids_csv(uint32_t *ids, uint32_t n, char *out, size_t out_
         o += snprintf(out + o, out_sz - o, "%s%u", i ? "," : "", ids[i]);
 }
 
+static char **snapshot_env_without_ld_preload(void) {
+    size_t n_env = 0;
+    while (environ[n_env]) n_env++;
+    char **clean_env = (char **)calloc(n_env + 1, sizeof(char *));
+    if (!clean_env) return NULL;
+    size_t j = 0;
+    for (size_t i = 0; i < n_env; i++)
+        if (strncmp(environ[i], "LD_PRELOAD=", 11) != 0)
+            clean_env[j++] = environ[i];
+    clean_env[j] = NULL;
+    return clean_env;
+}
+
 /* Run `bpftool <args...>` redirecting stdout to `out_path`. Returns 0 on
  * exit 0, else -1. Args must be NULL-terminated. */
 static int run_bpftool_to_file(char *const argv[], const char *out_path) {
@@ -60,8 +73,11 @@ static int run_bpftool_to_file(char *const argv[], const char *out_path) {
     posix_spawn_file_actions_addopen(&fa, STDERR_FILENO, "/dev/null",
                                      O_WRONLY, 0);
     pid_t pid;
-    int rc = posix_spawnp(&pid, argv[0], &fa, NULL, argv, environ);
+    char **clean_env = snapshot_env_without_ld_preload();
+    int rc = posix_spawnp(&pid, argv[0], &fa, NULL, argv,
+                          clean_env ? clean_env : environ);
     posix_spawn_file_actions_destroy(&fa);
+    free(clean_env);
     if (rc != 0) return -1;
     int st = 0;
     waitpid(pid, &st, 0);
