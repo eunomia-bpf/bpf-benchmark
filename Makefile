@@ -378,4 +378,4 @@ clean-docker-cache:
 	@echo "Docker build cache is not pruned automatically."
 	@echo "After confirming no image build is active, run:"
 	@echo "  docker buildx prune --keep-storage $(DOCKER_BUILD_CACHE_KEEP_STORAGE)"
-	@echo "See docs/docker-build-cache-gc.md"
+	@echo "See docs/tmp/docker-build-cache-gc.md"

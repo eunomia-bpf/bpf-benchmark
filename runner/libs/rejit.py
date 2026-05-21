@@ -28,11 +28,11 @@ def skip_rejit_mode(raw: str | None = None) -> str:
     value = (os.environ.get(_SKIP_REJIT_ENV, "") if raw is None else str(raw)).strip().lower()
     if value in ("", "0", "false", "no", "off"):
         return "off"
-    if value in ("1", "true", "yes", "on", "rejit"):
-        return "rejit"
-    if value in ("nopreload", "no-preload", "all"):
-        return "nopreload"
-    raise ValueError("SKIP_REJIT must be empty, 0, 1, rejit, nopreload, or all")
+    if value == "norejit":
+        return "norejit"
+    if value == "all":
+        return "all"
+    raise ValueError("SKIP_REJIT must be empty, 0, norejit, or all")
 
 
 def skip_rejit_enabled(raw: str | None = None) -> bool:
@@ -40,7 +40,7 @@ def skip_rejit_enabled(raw: str | None = None) -> bool:
 
 
 def skip_rejit_disables_shim(raw: str | None = None) -> bool:
-    return skip_rejit_mode(raw) == "nopreload"
+    return skip_rejit_mode(raw) == "all"
 
 
 def _mapping_dict(value: Any, *, field_name: str) -> dict[str, Any]:

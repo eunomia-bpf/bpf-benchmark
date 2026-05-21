@@ -466,6 +466,84 @@ uint32_t extract_htab_inline_offset(const std::vector<uint8_t> &jit)
     return 0;
 }
 
+#if defined(__aarch64__)
+bool a64_is_movz64(uint32_t insn)
+{
+    return (insn & 0xff800000u) == 0xd2800000u;
+}
+
+bool a64_is_movn64(uint32_t insn)
+{
+    return (insn & 0xff800000u) == 0x92800000u;
+}
+
+bool a64_is_movk64(uint32_t insn)
+{
+    return (insn & 0xff800000u) == 0xf2800000u;
+}
+
+uint32_t a64_mov_rd(uint32_t insn)
+{
+    return insn & 0x1fu;
+}
+
+uint32_t a64_mov_shift(uint32_t insn)
+{
+    return ((insn >> 21) & 0x3u) * 16u;
+}
+
+uint64_t a64_mov_imm16(uint32_t insn)
+{
+    return (insn >> 5) & 0xffffu;
+}
+
+std::vector<uint64_t> extract_arm64_kernel_mov_immediates(const std::vector<uint8_t> &jit)
+{
+    std::vector<uint64_t> values;
+    if (jit.size() < sizeof(uint32_t)) {
+        return values;
+    }
+
+    const size_t words = jit.size() / sizeof(uint32_t);
+    for (size_t i = 0; i < words; i++) {
+        uint32_t word = 0;
+        std::memcpy(&word, jit.data() + i * sizeof(uint32_t), sizeof(word));
+        if (!a64_is_movz64(word) && !a64_is_movn64(word)) {
+            continue;
+        }
+
+        const uint32_t rd = a64_mov_rd(word);
+        uint64_t value = a64_is_movn64(word) ? ~0ULL : 0ULL;
+        const uint32_t shift = a64_mov_shift(word);
+        const uint64_t field_mask = 0xffffULL << shift;
+        const uint64_t imm = a64_mov_imm16(word) << shift;
+        if (a64_is_movn64(word)) {
+            value = (value & ~field_mask) | (((~a64_mov_imm16(word)) & 0xffffULL) << shift);
+        } else {
+            value = (value & ~field_mask) | imm;
+        }
+
+        size_t j = i + 1;
+        for (; j < words; j++) {
+            uint32_t next = 0;
+            std::memcpy(&next, jit.data() + j * sizeof(uint32_t), sizeof(next));
+            if (!a64_is_movk64(next) || a64_mov_rd(next) != rd) {
+                break;
+            }
+            const uint32_t next_shift = a64_mov_shift(next);
+            const uint64_t next_mask = 0xffffULL << next_shift;
+            value = (value & ~next_mask) | (a64_mov_imm16(next) << next_shift);
+        }
+
+        if ((value >> 47) == 0x1ffffULL) {
+            values.push_back(value);
+        }
+        i = j == i + 1 ? i : j - 1;
+    }
+    return values;
+}
+#endif
+
 /* Walk a BPF program's original (pre-verifier) bytecode and identify,
  * for each `BPF_CALL bpf_map_lookup_elem`, which map fd is currently
  * bound to r1 (the map argument). Returns -1 in the slot when the
@@ -601,6 +679,9 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
             }
         }
 
+#if defined(__aarch64__)
+        std::vector<uint64_t> jit_map_ptrs = extract_arm64_kernel_mov_immediates(jit);
+#else
         std::vector<uint64_t> jit_map_ptrs;
         /* x86_64 movabs reg, imm64 encoding:
          *   REX.W=1 (0x48), B=0 -> registers rax..rdi:  48 b8+r <imm64>
@@ -616,6 +697,7 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
             jit_map_ptrs.push_back(imm);
             i += 9; /* advance past this 10-byte movabs */
         }
+#endif
 
         if (orig_fds.size() != jit_map_ptrs.size()) {
             std::fprintf(stderr,

@@ -1,182 +1,154 @@
-# Kinsn: A New OS Abstraction for Bringing eBPF Closer to Hardware
+# Kinsn:让 eBPF 更贴近硬件的一个新 OS 抽象
 
-Status: research direction · paper-line hub for idea #2
+状态:研究方向 · idea #2 的论文线 hub
 
 > 本文档是 Kinsn 论文线索的单一 hub。详细机制设计见 `docs/tmp/kinsn-design.md`,
 > 形式化语义见 `docs/tmp/kinsn-formal-semantics.md`,工程实现细节见各 pass 的
 > `docs/tmp/*kinsn*` 调研报告。
 
-## Project Context: Three Sister Ideas
+## 项目背景:三个姐妹 idea
 
-This research project produces three distinct papers that share a single
-evaluation setup (the `bpf-benchmark` corpus, micro suite, and measurement
-infrastructure) but address different problems with different designs.
+本研究项目产出三篇彼此独立的论文,它们共用同一套评测设施(`bpf-benchmark`
+corpus、micro 套件和测量基础设施),但用不同的设计解决不同的问题。
 
-| # | Idea | Hub doc |
+| # | Idea | Hub 文档 |
 |---|---|---|
-| 1 | Speculative eBPF optimization (pure userspace) | `docs/rejit-speculative-optimization-ebpf_idea.md` |
-| 2 | **Kinsn** (this doc) — new OS abstraction, bring eBPF close to hardware | `docs/kinsn_idea.md` |
-| 3 | ReverseSim (x86/arm native simulator in eBPF) | `docs/reverse-sim_idea.md` |
+| 1 | Speculative eBPF optimization(纯用户态) | `docs/rejit-speculative-optimization-ebpf_idea.md` |
+| 2 | **Kinsn**(本文档)—— 新 OS 抽象,让 eBPF 贴近硬件 | `docs/kinsn_idea.md` |
+| 3 | ReverseSim(eBPF 里的 x86/arm native simulator) | `docs/reverse-sim_idea.md` |
 
-The three ideas are not incremental versions of one design. Each picks a
-different problem, a different point in the trust / kernel-surface / coverage
-space, and a different design center.
+这三个 idea 不是同一个设计的递进版本。每个各自挑了一个不同的问题、一个在 trust /
+内核暴露面 / 覆盖面空间里不同的位置,以及一个不同的设计核心。
 
-## 1. Problem
+## 1. 问题
 
-The eBPF instruction set is intentionally minimal: load/store, ALU, compare,
-branch, call, exit, plus a few packet-specific instructions. This minimalism
-keeps the kernel verifier tractable and the JIT small, but it leaves several
-classes of native-hardware-level optimization unreachable from inside eBPF
-programs:
+eBPF 指令集刻意保持最小:load/store、ALU、比较、分支、call、exit,外加少数几条
+packet 专用指令。这种极简让内核 verifier 可处理、JIT 也小,但它也使得几类 native
+硬件级的优化从 eBPF 程序内部无法触及:
 
-- **Rotate** (`RORX`/`ROR`): hash and crypto-style loops emit `(x << n) | (x >> (64-n))`
-  which the kernel JIT cannot fuse into a single hardware rotate.
-- **Conditional select** (`CMOV`/`CSEL`): branchless selection is unavailable;
-  BPF emits a branch+mov sequence that costs more on predictable inputs and
-  loses to a branch on unpredictable inputs.
-- **Bitfield extract** (`BEXTR`/`UBFX`): bit-packed protocol parsing emits
-  `shift+and` sequences instead of a single hardware extract.
-- **Endian fusion** (`MOVBE`): load+byte-swap is two instructions instead of
-  one.
-- **Wide load/store pair** (`LDP`/`STP` on arm64): adjacent 64-bit loads or
-  stores cannot be paired into a single 128-bit memory op.
-- **Bulk memory** (`rep movsb` on x86, `LDP/STP` chain on arm64): inline
-  memcpy/memset cannot use ISA-specific bulk paths.
-- **Prefetch** (`PREFETCHT0`/`PRFM`): no way to hint the cache for a coming
-  memory access.
-- **Conditional compare chain** (`CCMP` on arm64): chained comparison cannot be
-  collapsed into the arm64-specific compare-then-conditional-compare form.
+- **Rotate**(`RORX`/`ROR`):hash 和 crypto 风格的循环 emit 出
+  `(x << n) | (x >> (64-n))`,内核 JIT 无法把它融合成单条硬件 rotate。
+- **Conditional select**(`CMOV`/`CSEL`):无分支选择不可用;BPF emit 出一段
+  branch+mov 序列,在可预测输入上更费,在不可预测输入上又输给一个分支。
+- **Bitfield extract**(`BEXTR`/`UBFX`):位打包的协议解析 emit 出 `shift+and`
+  序列,而不是单条硬件 extract。
+- **Endian fusion**(`MOVBE`):load+byte-swap 是两条指令而不是一条。
+- **Wide load/store pair**(arm64 上的 `LDP`/`STP`):相邻的 64 位 load 或 store
+  无法配对成单条 128 位内存操作。
+- **Bulk memory**(x86 上的 `rep movsb`,arm64 上的 `LDP/STP` 链):内联的
+  memcpy/memset 无法使用 ISA 专用的批量路径。
+- **Prefetch**(`PREFETCHT0`/`PRFM`):没有办法为即将到来的内存访问给缓存提示。
+- **Conditional compare chain**(arm64 上的 `CCMP`):链式比较无法坍缩成 arm64
+  专用的 compare-then-conditional-compare 形式。
 
-Implementing each of these as a kernel-JIT peephole would require many small
-patches, each going through upstream review, each adding kernel surface that
-must be maintained for every supported architecture. The cumulative kernel
-churn is high and the upstream cycle is slow.
+把这些每一个都做成内核 JIT peephole,需要许多小 patch,每个都要走上游 review,每个都
+增加内核暴露面、且必须为每个支持的架构维护。累积的内核 churn 很高,上游周期又慢。
 
 ## 2. Idea
 
-**Kinsn** (kernel instruction) is a new OS abstraction that lets the kernel
-expose hardware-specific instruction primitives to eBPF programs without
-extending the core eBPF instruction set and without per-feature verifier or
-JIT patches.
+**Kinsn**(kernel instruction)是一个新的 OS 抽象,它让内核能向 eBPF 程序暴露硬件
+专用的指令原语,而无需扩展核心 eBPF 指令集、也无需为每个特性打 verifier 或 JIT patch。
 
-Each kinsn is a **dual-semantics primitive**:
+每条 kinsn 都是一个**双语义原语**:
 
-- **Verifier semantics**: a declarative effect (`bpf_kinsn_effect`) describing
-  the operation's clobber mask, result range, tnum, sub-register definition,
-  and memory accesses. The kernel verifier applies this effect to the abstract
-  state and checks the result with its existing rules.
-- **Execution semantics**: a per-architecture `emit_x86()` / `emit_arm64()`
-  callback that emits the native instruction sequence during JIT.
+- **Verifier 语义**:一个声明式 effect(`bpf_kinsn_effect`),描述该操作的 clobber
+  mask、结果 range、tnum、sub-register 定义和内存访问。内核 verifier 把这个 effect
+  施加到抽象状态上,再用它现有的规则检查结果。
+- **执行语义**:一个按架构区分的 `emit_x86()` / `emit_arm64()` 回调,在 JIT 期间
+  emit 出 native 指令序列。
 
-Kinsns are implemented as a specialization of the existing kfunc mechanism
-with a new `KF_KINSN` flag and an attached `bpf_kinsn_ops` table. The verifier
-reuses `check_kfunc_call()` with zero changes for the per-kinsn case; the JIT
-checks `KF_KINSN` at CALL-emit time and dispatches to the module-provided emit
-callback instead of generating a function call.
+kinsn 以现有 kfunc 机制的特化形式实现:新增一个 `KF_KINSN` flag 和一张挂接的
+`bpf_kinsn_ops` 表。verifier 对每条 kinsn 的情形零改动地复用 `check_kfunc_call()`;
+JIT 在 CALL-emit 时检查 `KF_KINSN`,分派到模块提供的 emit 回调,而不是生成一个函数调用。
 
-New optimization = new kinsn definition in a small kernel module + a userspace
-pattern recognizer (in `bpfopt`) that rewrites matching BPF bytecode to call
-the kinsn. **Zero changes to the core kernel verifier, JIT, or BPF ISA per new
-optimization.**
+新优化 = 在一个小内核模块里定义一条新 kinsn + 一个用户态模式识别器(在 `bpfopt` 里),
+把匹配的 BPF 字节码重写成调用该 kinsn。**每个新优化对核心内核 verifier、JIT 或 BPF ISA
+的改动为零。**
 
-## 3. Why This Is A New Abstraction, Not Another Peephole
+## 3. 为什么这是一个新抽象,而不是又一个 peephole
 
-Three properties separate kinsn from in-kernel peephole optimizations:
+三条性质把 kinsn 与内核内 peephole 优化区分开:
 
-1. **Policy vs. mechanism separation**. The kernel module supplies the
-   mechanism (what the instruction does, how the verifier should model it, how
-   the JIT should emit it). Userspace `bpfopt` supplies the policy (which
-   patterns to rewrite, what cost model to use, when a kinsn is worth
-   inserting). Mechanism is small and fixed; policy is rich and iterable.
+1. **策略与机制分离**。内核模块提供机制(指令做什么、verifier 该如何建模它、JIT 该如何
+   emit 它)。用户态 `bpfopt` 提供策略(重写哪些模式、用什么 cost model、何时值得插入
+   一条 kinsn)。机制小而固定;策略丰富而可迭代。
 
-2. **No core kernel patch per optimization**. The core kernel JIT and verifier
-   are untouched. Adding a new kinsn is a module change plus an external
-   bytecode-rewrite pass. The upstream cycle is one-time (for the kinsn
-   framework itself), not per-feature.
+2. **每个优化不打核心内核 patch**。核心内核 JIT 和 verifier 不动。加一条新 kinsn 是一次
+   模块改动加一个外部字节码重写 pass。上游周期是一次性的(针对 kinsn 框架本身),不是
+   每个特性一次。
 
-3. **Workload-adaptive insertion**. Whether a kinsn helps depends on workload
-   characteristics (branch predictability for CMOV, hot/missy memory access
-   for prefetch, register pressure for LDP/STP). A userspace optimizer with
-   runtime profile data picks insertion sites better than any static kernel
-   heuristic.
+3. **随 workload 自适应的插入**。一条 kinsn 是否有益取决于 workload 特征(CMOV 看分支
+   可预测性、prefetch 看热/易 miss 的内存访问、LDP/STP 看寄存器压力)。一个带运行时
+   profile 数据的用户态优化器,挑插入点比任何静态内核启发式都更好。
 
-The combination produces a new OS abstraction: **a kernel-defined, verifier-
-modeled, JIT-emitted, module-implemented instruction extension surface for
-eBPF**.
+这套组合产出一个新的 OS 抽象:**一个由内核定义、verifier 建模、JIT emit、模块实现的
+eBPF 指令扩展面**。
 
-## 4. Mechanism Sketch
+## 4. 机制速写
 
-Detailed mechanism design lives in `docs/tmp/kinsn-design.md`. Brief sketch:
+详细机制设计见 `docs/tmp/kinsn-design.md`。这里是简短速写:
 
-- `struct bpf_kinsn_ops` holds the module callbacks:
-  - `model_call(call, effect)`: produce a declarative `bpf_kinsn_effect` the
-    verifier applies to abstract state.
-  - `decode_call(call)` / `validate_call(call)`: decode encoded operands and
-    check well-formedness.
-  - `emit_x86(call, ctx)` / `emit_arm64(call, ctx)`: emit native code at JIT
-    time.
-- `KF_KINSN` is a new kfunc flag (mutually exclusive with KF_ACQUIRE /
-  KF_RELEASE / KF_SLEEPABLE).
-- Packed encoding: a sidecar pseudo-instruction (`BPF_PSEUDO_KINSN_SIDECAR`)
-  immediately preceding the kinsn `BPF_CALL` carries operand bits. The verifier
-  decodes the sidecar before applying the modeled effect. Zero-argument-setup,
-  N→1 instruction replacement.
-- Module lifetime: standard Linux module load/unload. When a kinsn module is
-  not loaded, the verifier rejects programs that reference its kfuncs, and the
-  JIT never sees them. When unloaded after programs are loaded, in-flight
-  programs continue executing the already-emitted native code.
+- `struct bpf_kinsn_ops` 持有模块回调:
+  - `model_call(call, effect)`:产出一个声明式 `bpf_kinsn_effect`,供 verifier
+    施加到抽象状态上。
+  - `decode_call(call)` / `validate_call(call)`:解码编码后的操作数并检查良构性。
+  - `emit_x86(call, ctx)` / `emit_arm64(call, ctx)`:在 JIT 期 emit native 代码。
+- `KF_KINSN` 是一个新的 kfunc flag(与 KF_ACQUIRE / KF_RELEASE / KF_SLEEPABLE
+  互斥)。
+- 打包编码:一条紧邻在 kinsn `BPF_CALL` 之前的 sidecar 伪指令
+  (`BPF_PSEUDO_KINSN_SIDECAR`)携带操作数位。verifier 在施加建模 effect 之前先解码
+  sidecar。零参数 setup,N→1 指令替换。
+- 模块生命周期:标准 Linux 模块 load/unload。当一个 kinsn 模块未加载时,verifier 拒绝
+  引用它 kfunc 的程序,JIT 也永远看不到它们。在程序已加载之后再卸载,在飞的程序继续
+  执行已经 emit 出的 native 代码。
 
-Formal semantics: `docs/tmp/kinsn-formal-semantics.md`.
+形式化语义:`docs/tmp/kinsn-formal-semantics.md`。
 
-### 4.1 Kernel source touchpoints (rejit-v2 branch / kinsn subset)
+### 4.1 内核源码触点(rejit-v2 分支 / kinsn 子集)
 
-The kinsn subset of the `vendor/linux-framework/rejit-v2` branch — i.e. the
-kinsn-only kernel surface — touches the following files. (REJIT-specific
-files belong to the orthogonal speculative-optimization line and are
-intentionally excluded from this paper; see `docs/reverse-sim_idea.md` discussion
-of the kernel-ABI variant and `docs/kinsn-only` branch in the kernel
-worktree.)
+`vendor/linux-framework/rejit-v2` 分支的 kinsn 子集——即仅 kinsn 的内核暴露面——触及
+以下文件。(REJIT 专属文件属于正交的 speculative-optimization 论文线,本篇刻意排除;
+见 `docs/reverse-sim_idea.md` 中关于 kernel-ABI 变体的讨论,以及内核 worktree 里的
+`docs/kinsn-only` 分支。)
 
 | 文件 | 职责 |
 |------|------|
-| `include/linux/bpf.h` | `bpf_kinsn_ops` / `bpf_kinsn_effect` / `bpf_kinsn_call` structs, registration API |
-| `include/linux/bpf_verifier.h` | kinsn verifier helper structs |
+| `include/linux/bpf.h` | `bpf_kinsn_ops` / `bpf_kinsn_effect` / `bpf_kinsn_call`结构体、注册 API |
+| `include/linux/bpf_verifier.h` | kinsn verifier 辅助结构体 |
 | `include/linux/btf.h` | `KF_KINSN` flag |
-| `include/uapi/linux/bpf.h` + `tools/include/uapi/linux/bpf.h` | `BPF_PSEUDO_KINSN_SIDECAR` + `BPF_PSEUDO_KINSN_CALL` enum extensions |
-| `kernel/bpf/btf.c` | kinsn BTF id resolution |
-| `kernel/bpf/verifier.c` | kinsn registration / lookup, `model_call` verifier flow, sidecar decode |
-| `kernel/bpf/disasm.c` | kinsn disasm support |
-| `arch/x86/net/bpf_jit_comp.c` | x86 JIT CALL-case kinsn inline dispatch |
-| `arch/arm64/net/bpf_jit_comp.c` | arm64 JIT kinsn inline dispatch |
+| `include/uapi/linux/bpf.h` + `tools/include/uapi/linux/bpf.h` | `BPF_PSEUDO_KINSN_SIDECAR` + `BPF_PSEUDO_KINSN_CALL` enum 扩展 |
+| `kernel/bpf/btf.c` | kinsn BTF id 解析 |
+| `kernel/bpf/verifier.c` | kinsn 注册 / 查找、`model_call` verifier 流程、sidecar 解码 |
+| `kernel/bpf/disasm.c` | kinsn 反汇编支持 |
+| `arch/x86/net/bpf_jit_comp.c` | x86 JIT CALL-case kinsn 内联 dispatch |
+| `arch/arm64/net/bpf_jit_comp.c` | arm64 JIT kinsn 内联 dispatch |
 
-Net diff size (kinsn-only branch on top of stock 7.0-rc baseline):
-**+869 / -101 LOC across 10 files**(零 REJIT 引用,纯 kinsn surface)。
+净 diff 体量(仅 kinsn 分支,叠加在 stock 7.0-rc baseline 之上):
+**10 个文件共 +869 / -101 LOC**(零 REJIT 引用,纯 kinsn surface)。
 
-## 5. Coverage And Decisions
+## 5. 覆盖面与取舍
 
-The kinsn surface is intentionally bounded. Coverage decisions are driven by
-corpus evidence: a candidate kinsn is added only when the supported runtime
-corpus has enough sites to justify the kernel module surface and a measurable
-performance win at the inserted sites.
+kinsn 暴露面是刻意有界的。覆盖决策由 corpus 证据驱动:只有当支持的运行时 corpus 里有
+足够多的 site 来证明内核模块暴露面的合理性、且在插入点处有可测量的性能收益时,才加入
+一个候选 kinsn。
 
-**Implemented kinsns** (default policy on the corresponding architecture):
+**已实现的 kinsn**(在对应架构上为默认策略):
 
-| Kinsn | Arch | Status | Site evidence | Design / research refs |
+| Kinsn | 架构 | 状态 | Site 证据 | 设计 / 调研引用 |
 |---|---|---|---|---|
-| `bpf_rotate64` | x86 / arm64 | shipped | 701 sites, 15 applied (shift+or → RORX) | — |
-| `bpf_select64` (CMOV/CSEL) | x86 / arm64 | shipped, **policy-sensitive** | 12 corpus applied (branch+mov → CMOV) | policy: predictable input → CMOV slower; unpredictable → faster |
-| `bpf_extract64` (BEXTR/UBFX) | x86 / arm64 | shipped | 524 sites, 4 applied (shift+and → BEXTR) | — |
-| `bpf_endian` (MOVBE / rev16/32/64) | x86 / arm64 | shipped | 256 sites, 17 corpus applied (load+bswap → MOVBE) | — |
-| `bpf_ldp128` / `bpf_stp128` | **arm64 only** | shipped | ARM64 corpus store-pair density high; current JIT 0 LDP/STP | `arm64_ldp_stp_kinsn_design_20260326.md`, `arm64_bpf_ldp_module_report_20260326.md`; x86 dispatched to `rep movsb` (see `x86_128bit_wide_loadstore_design_20260326.md`) |
-| `bpf_bulk_memory` | x86 / arm64 | shipped | corpus 40 / 74 / 360 / 464 B 连续 copy/zero runs | `simd_kinsn_design_20260324.md`; x86 用 `rep movsb/stosb`,ARM64 用 LDP/STP,均 no-FPU |
-| `bpf_ccmp` | arm64 | designed (first wave) | **4957 sites, 6228 saved branches** | `arm64_kinsn_research_20260329.md`;restricted first wave,避免通用变长 compare-chain |
-| `bpf_prefetch` (PrefetchV2) | x86 / arm64 | shipped, default pass | 17391 `map_lookup_elem` + 21 `map_lookup_percpu_elem` 潜在 site;hot+missy site 预期 2.5-25ns/exec | `docs/tmp/p89_prefetchv2_impl.md`, `memory_hints_kinsn_research_20260329.md`, `prefetch_kinsn_design_20260329.md` |
-| `bpf_lea{32,64}` | **x86 only** | experimental | Katran `lea` 122 applied, bytes 13629→13277, BPF counter ratio 1.0487 | `docs/tmp/lea_kinsn_design_census_20260513.md`(详 §5.1 scoped-down decision) |
+| `bpf_rotate64` | x86 / arm64 | 已实现 | 701 sites,15 applied(shift+or → RORX) | — |
+| `bpf_select64` (CMOV/CSEL) | x86 / arm64 | 已实现,**策略敏感** | 12 corpus applied(branch+mov → CMOV) | 策略:可预测输入 → CMOV 更慢;不可预测 → 更快 |
+| `bpf_extract64` (BEXTR/UBFX) | x86 / arm64 | 已实现 | 524 sites,4 applied(shift+and → BEXTR) | — |
+| `bpf_endian` (MOVBE / rev16/32/64) | x86 / arm64 | 已实现 | 256 sites,17 corpus applied(load+bswap → MOVBE) | — |
+| `bpf_ldp128` / `bpf_stp128` | **仅 arm64** | 已实现 | ARM64 corpus store-pair 密度高;当前 JIT 0 个 LDP/STP | `arm64_ldp_stp_kinsn_design_20260326.md`、`arm64_bpf_ldp_module_report_20260326.md`;x86 dispatch 到 `rep movsb`(见 `x86_128bit_wide_loadstore_design_20260326.md`) |
+| `bpf_bulk_memory` | x86 / arm64 | 已实现 | corpus 40 / 74 / 360 / 464 B 连续 copy/zero runs | `simd_kinsn_design_20260324.md`;x86 用 `rep movsb/stosb`,ARM64 用 LDP/STP,均 no-FPU |
+| `bpf_ccmp` | arm64 | 已设计(第一波) | **4957 sites,6228 条省下的分支** | `arm64_kinsn_research_20260329.md`;受限的第一波,避免通用变长 compare-chain |
+| `bpf_prefetch` (PrefetchV2) | x86 / arm64 | 已实现,默认 pass | 17391 个 `map_lookup_elem` + 21 个 `map_lookup_percpu_elem` 潜在 site;hot+missy site 预期 2.5-25ns/exec | `docs/tmp/p89_prefetchv2_impl.md`、`memory_hints_kinsn_research_20260329.md`、`prefetch_kinsn_design_20260329.md` |
+| `bpf_lea{32,64}` | **仅 x86** | 实验性 | Katran `lea` 122 applied,bytes 13629→13277,BPF counter ratio 1.0487 | `docs/tmp/lea_kinsn_design_census_20260513.md`(详 §5.1 收窄决定) |
 
-**Explicitly not pursued / deferred** (with rationale + research refs):
+**明确不做 / 推迟**(附理由 + 调研引用):
 
-| Candidate | Site evidence | Reason / research ref |
+| 候选 | Site 证据 | 理由 / 调研引用 |
 |---|---|---|
 | POPCNT / CLZ / CTZ | 0 site | clang 已展开 `__builtin_popcount` 为高效位操作序列。`bit_ops_kinsn_research_20260329.md` |
 | CRC32 | loxilb SCTP CRC32C: 2 个 byte-update site | broad corpus 覆盖低;若做,第一版 CRC32C-only no-FPU scalar backend + loxilb-targeted `step8/step64` idiom pass。`crc32_kinsn_research_20260329.md` |
@@ -196,95 +168,75 @@ performance win at the inserted sites.
 | Region kinsn(寄存器扩展) | Cilium/Calico Jenkins/hash 信号,Tetragon byte-pack/decoder;上界 census 24/1/175 clusters | 高寄存器压力代码段包装为 region kinsn。首版限定 pure scalar N→1 无内存/stack/packet/map 写、无 helper/call,等 kinsn v3 / region ABI 收敛。`docs/tmp/region_kinsn_research_20260430.md` |
 | 除法强度削减(常量除数 → shift+mul) | 957 .bpf.o:DIV/MOD 共 1269 sites,K 812 / X 457;Cilium `/1e9` 占 553 | 纯 bytecode 需 64×64→128 mulhi emulation,先等 per-site profile 或 native mulhi/kinsn。`docs/tmp/division_reduction_research_20260430.md` |
 
-Decision rule: a new kinsn must have non-trivial supported-corpus site count
-(rough floor: hundreds), an isolable performance win at the inserted sites
-larger than the I-cache and verifier-rerun cost of insertion, and a
-verifier-friendly declarative effect. Without all three, the proposal stays
-in the "not pursued" bucket.
+决策规则:一条新 kinsn 必须具备非平凡的受支持 corpus site 数量(粗略下限:数百个)、
+在插入点处有可隔离出来的、大于插入带来的 I-cache 与 verifier 重跑成本的性能收益,以及
+一个对 verifier 友好的声明式 effect。三者缺一,该提案就留在"不做"的桶里。
 
-### 5.1 LEA / address-generation scoped-down decision (2026-05-13)
+### 5.1 LEA / 地址生成的收窄决定(2026-05-13)
 
-详细 design doc: `docs/tmp/lea_kinsn_design_census_20260513.md`.
+详细 design doc:`docs/tmp/lea_kinsn_design_census_20260513.md`。
 
-**Status**: implemented as an x86-only kinsn experiment. **Do not pursue
-the core kernel-JIT peephole path** under the project no-core-JIT-change
-policy. ARM64 does not implement LEA and should not advertise
-`bpf_lea{32,64}`.
+**状态**:作为一个仅 x86 的 kinsn 实验实现。在项目"不改核心 JIT"政策下,**不走核心
+内核 JIT peephole 路线**。ARM64 不实现 LEA,也不应对外暴露 `bpf_lea{32,64}`。
 
-Combined census:
+合并普查:
 
-- Runtime `testbin`: strict non-overlap sites are **13,321 total** (Tracee
-  6,405, Tetragon 6,363, OTEL 470, Cilium 79, Katran 4). Static-scalar
-  first wave would be 10,922 sites across 4 apps. All strict runtime sites
-  are plain pattern `a` (`MOV+ADD`); scaled-index, scaled+disp, and
-  add-imm-chain are 0.
-- Generated `testobject`: strict BPF sites are 6,999 total across all
-  7 apps (6,995 pattern `a`, 4 pattern `b`, 0 pattern `c`, 0 pattern `d`).
-- Native `testccode/*.x86.s`: 42,153 `lea` instructions, but 36,991 are
-  simple base+disp address materialization. **BPF-object strict/native
-  ratio is 16.6%**.
-- Katran contradiction resolved: actual native Katran count is 225, while
-  Katran BPF strict count is 4. The native richness is x86 address-mode
-  materialization, not bytecode-level arithmetic LEA.
+- 运行时 `testbin`:严格不重叠的 site **共 13,321 个**(Tracee 6,405、Tetragon
+  6,363、OTEL 470、Cilium 79、Katran 4)。静态 scalar 的第一波将是跨 4 个 app 的
+  10,922 个 site。所有严格运行时 site 都是朴素的 pattern `a`(`MOV+ADD`);scaled-index、
+  scaled+disp 和 add-imm-chain 均为 0。
+- 生成的 `testobject`:严格 BPF site 跨全部 7 个 app 共 6,999 个(6,995 个 pattern
+  `a`,4 个 pattern `b`,0 个 pattern `c`,0 个 pattern `d`)。
+- Native `testccode/*.x86.s`:42,153 条 `lea` 指令,但其中 36,991 条是简单的
+  base+disp 地址 materialization。**BPF-object 严格 / native 之比为 16.6%**。
+- Katran 矛盾已解决:实际 native Katran 计数是 225,而 Katran BPF 严格计数是 4。native
+  那边的丰富性来自 x86 地址模式 materialization,而非字节码层面的算术 LEA。
 
-Implication: the remaining BPF-level opportunity is adjacent `MOV+ADD`.
-A core JIT peephole would lower it most directly, but that path is ruled
-out by the no-core-JIT-change policy. The implemented kinsn-only route
-preserves that boundary and lets userspace own replacement policy. It
-reduces final x86 instruction count/code size for matched sites, but the
-dominant pattern remains 2 BPF slots after packed-sidecar replacement and
-does not recover the native address-mode LEAs that motivated the
-investigation. Treat LEA as **experimental** until post-hoc performance
-evidence shows a runtime win.
+含义:剩下的 BPF 层面机会是相邻的 `MOV+ADD`。一个核心 JIT peephole 会最直接地 lower
+它,但该路线被"不改核心 JIT"政策排除。已实现的纯 kinsn 路线保住了那条边界,并让用户态
+拥有替换策略。它对匹配 site 减少了最终的 x86 指令数 / 代码大小,但在 packed-sidecar
+替换之后主导模式仍是 2 个 BPF slot,并未把当初引发这项调查的 native 地址模式 LEA 收回来。
+在事后性能证据显示出运行时收益之前,把 LEA 当作**实验性**对待。
 
-## 6. Relation To The Other Two Ideas
+## 6. 与另外两个 idea 的关系
 
-### Idea #1 — Speculative eBPF optimization
+### Idea #1 —— Speculative eBPF optimization
 
-Both ideas share `bpfopt` as the userspace rewrite tool and the
-`bpfrejit-daemon` as the orchestrator. They differ in what passes the daemon
-runs and what kernel facilities those passes require.
+两个 idea 共用 `bpfopt` 作为用户态重写工具、`bpfrejit-daemon` 作为编排器。区别在于
+daemon 跑哪些 pass、以及这些 pass 需要哪些内核设施。
 
-- Idea #1's default pipeline is BPF-to-BPF rewrites only (`map_inline`,
-  `const_prop`, `dce`, `bounds_check_merge`, `branch_flip`, ...). It requires
-  near-zero kernel changes.
-- Idea #2's pipeline can include kinsn-introducing passes (`rotate`,
-  `cond_select`, `extract`, `endian_fusion`, `prefetch`, ...). These require
-  the kinsn framework patch in the kernel plus per-arch kinsn modules.
+- idea #1 的默认 pipeline 只有 BPF-to-BPF 重写(`map_inline`、`const_prop`、`dce`、
+  `bounds_check_merge`、`branch_flip` 等)。它要求接近零的内核改动。
+- idea #2 的 pipeline 可以包含引入 kinsn 的 pass(`rotate`、`cond_select`、`extract`、
+  `endian_fusion`、`prefetch` 等)。这些需要内核里的 kinsn 框架 patch 加上各架构 kinsn
+  模块。
 
-A kernel that ships idea #2 strictly contains a kernel that ships only idea
-#1. The two pipelines compose: a deployment that wants both runs the union of
-their passes. But the papers separate them because the contributions are
-distinct (userspace mechanism vs. kernel abstraction).
+一个搭载 idea #2 的内核严格包含一个只搭载 idea #1 的内核。两条 pipeline 可组合:想要
+两者的部署就跑它们 pass 的并集。但论文把它们分开,因为贡献点不同(用户态机制 vs. 内核
+抽象)。
 
-### Idea #3 — ReverseSim
+### Idea #3 —— ReverseSim
 
-Idea #2 and idea #3 attack the same underlying question — how to make
-non-trivial native operations available inside the eBPF safety model — from
-opposite ends:
+idea #2 和 idea #3 从相反的两端攻击同一个底层问题——如何让非平凡的 native 操作在
+eBPF 安全模型内变得可用:
 
-- Kinsn extends the kernel-side instruction set with kernel-defined
-  dual-semantics primitives. Each new primitive grows the kernel TCB by a
-  small amount.
-- ReverseSim extends the userspace-side lowering with a verified
-  simulator or JIT. The kernel stays unchanged. The added TCB is a userspace
-  artifact: one C file per target ISA.
+- Kinsn 用内核定义的双语义原语扩展内核侧的指令集。每个新原语都让内核 TCB 小幅增长。
+- ReverseSim 用一个经过验证的 simulator 或 JIT 扩展用户态侧的 lowering。内核保持不变。
+  新增的 TCB 是一个用户态产物:每个目标 ISA 一个 C 文件。
 
-Kinsn covers a handful of patterns ordinary eBPF cannot express well.
-ReverseSim covers anything the target ISA can express, subject to
-verifier-tractable lowering. The two are not exclusive: a kinsn-aware kernel
-combined with a ReverseSim that emits kinsns where helpful is a
-natural ablation point, but neither requires the other.
+Kinsn 覆盖普通 eBPF 表达不好的少数几种模式。ReverseSim 覆盖目标 ISA 能表达的任何东西,
+只要其 lowering 对 verifier 可处理。两者并不互斥:一个支持 kinsn 的内核,配上一个在有
+益处时 emit kinsn 的 ReverseSim,是一个自然的 ablation 点,但二者互不依赖。
 
-## 7. Paper Framing
+## 7. 论文 framing
 
-Possible title:
+可能的标题:
 
 ```text
 Kinsn: A Hardware-Aware Instruction Extension Surface for eBPF
 ```
 
-Central systems claim:
+核心的系统主张:
 
 ```text
 Kinsn introduces a new kernel abstraction that lets eBPF programs use
@@ -296,62 +248,66 @@ ISA, and a userspace optimizer chooses insertion sites based on workload
 profile data.
 ```
 
-A strong evaluation needs to show:
+一份有分量的评测需要展示:
 
-- broad kinsn coverage (rotate / cond_select / extract / endian / prefetch /
-  pair load-store / bulk memory at minimum), not a single primitive;
-- real eBPF programs (Cilium / Katran / Tetragon / Tracee / BCC / bpftrace /
-  loxilb), not only microbenchmarks;
-- workload-adaptive insertion outperforming fixed kernel heuristics on at
-  least one policy-sensitive kinsn (CMOV is the canonical example);
-- small and understandable kernel surface (the framework patch);
-- module-level isolation (loading or unloading a kinsn module does not
-  affect unrelated programs);
-- arm64 results, not only x86, to validate the per-arch abstraction.
+- 广泛的 kinsn 覆盖(至少 rotate / cond_select / extract / endian / prefetch /
+  pair load-store / bulk memory),而非单个原语;
+- 真实 eBPF 程序(Cilium / Katran / Tetragon / Tracee / BCC / bpftrace /
+  loxilb),而非只有 microbenchmark;
+- 在至少一条策略敏感的 kinsn 上(CMOV 是典型例子),随 workload 自适应的插入胜过固定的
+  内核启发式;
+- 小而可理解的内核暴露面(框架 patch);
+- 模块级隔离(加载或卸载一个 kinsn 模块不影响无关程序);
+- arm64 结果,而非只有 x86,以验证按架构区分的抽象。
 
-## 8. Related Work Positioning
+## 8. 相关工作定位
 
-- **kfuncs (existing upstream)**: kinsn is implemented as a specialization
-  of kfuncs (KF_KINSN). The contribution is the dual-semantics emit path,
-  not the BTF or registration machinery.
-- **JIT peepholes**: per-architecture peepholes in core JIT (e.g., upstream
-  arm64 LDP fusion). Kinsn pushes the same capability behind a module
-  boundary so additions do not touch the core JIT.
-- **JVM intrinsics**: HotSpot intrinsics replace standard library calls with
-  hand-coded native sequences chosen by the JIT. Kinsn is the same idea
-  applied to eBPF, with the verifier modeling the intrinsic's effect
-  declaratively.
-- **K2 / Merlin / EPSO**: BPF bytecode optimizers operating pre-load on
-  source `.bpf.o`. They do not extend the BPF ISA and cannot emit native
-  instructions outside the standard JIT vocabulary. Kinsn complements them
-  by widening the emit vocabulary.
+- **kfuncs(现有上游)**:kinsn 以 kfunc 的特化形式实现(KF_KINSN)。贡献点是双语义
+  emit 路径,而非 BTF 或注册机制。
+- **JIT peephole**:核心 JIT 里按架构区分的 peephole(例如上游 arm64 LDP fusion)。
+  kinsn 把同样的能力推到一个模块边界之后,使得新增不触碰核心 JIT。
+- **JVM intrinsics**:HotSpot intrinsic 把标准库调用替换成由 JIT 挑选的手写 native
+  序列。kinsn 是把同一思路用到 eBPF 上,并让 verifier 以声明式方式建模该 intrinsic 的
+  effect。
+- **K2 / Merlin / EPSO**:在 load 前对源 `.bpf.o` 操作的 BPF 字节码优化器。它们不扩展
+  BPF ISA,也无法 emit 标准 JIT 词汇表之外的 native 指令。kinsn 通过拓宽 emit 词汇表来
+  与它们互补。
+- **hXDP(OSDI 2020)/ eBPF Program Warping(ATC 2022)**:与 kinsn 思路同构的最近邻
+  prior work。Program Warping 用 peephole 把一串 eBPF 指令替换成**优化过的硬件实现**,
+  hXDP 给 eBPF 扩 ISA 以在 FPGA NIC 上执行。这正是 kinsn 的核心("识别一段 BPF 模式,
+  emit 成更接近硬件的单条原语,拓宽 emit vocabulary"),区别在于它们的 target 是 FPGA
+  overlay,而 kinsn 在 stock host x86/arm64 JIT 上做、走模块边界、verifier 见声明式
+  effect。
+- **经验证的 JIT / translation validation(Jitterbug OSDI 2020、Synthesizing JIT
+  Compilers for In-Kernel DSLs CAV 2020)**:kinsn 的 soundness 论证(§9:声明式 effect
+  必须忠实建模 native emit)本质上是"JIT emit 正确性"问题。verified JIT 与 translation
+  validation 是这一缓解手段的既有方法论范式。
+- **BeeBox / MOAT / Hive(USENIX Security 2024)**:给 eBPF 加硬件或 SFI 隔离的对照组
+  (分别针对瞬态执行、Intel MPK、AArch64 硬件隔离)。可用于论证 kinsn 的 TCB 增量相对
+  这些"改运行时隔离"路线的取舍。
 
-## 9. Main Risks
+## 9. 主要风险
 
-- Each new kinsn adds a small piece of kernel surface (module callbacks,
-  declarative effect, JIT emit). The total surface scales with the number of
-  kinsns, and the audit cost compounds.
-- A declarative effect that does not faithfully model the native emit
-  silently violates verifier soundness for any program using that kinsn. The
-  per-kinsn formal-semantics doc and translation-validation work
-  (`docs/tmp/kinsn-formal-semantics.md`) is the mitigation.
-- Workload-adaptive insertion requires reliable per-site profile data. Idea
-  #1's `bpfprof --per-site` pipeline is the source; if PMU data is
-  unreliable on a deployment, policy-sensitive kinsns must fall back to a
-  conservative default rather than guess.
-- Some natural-looking kinsns (FPU SIMD, RDTSC) cannot be added without
-  either changing semantics (RDTSC not monotonic) or paying setup costs that
-  exceed the gain (FPU context save). The decision rule in §5 keeps these
-  out of the surface.
+- 每条新 kinsn 都增加一小块内核暴露面(模块回调、声明式 effect、JIT emit)。总暴露面随
+  kinsn 数量增长,审计成本随之累积。
+- 一个不忠实建模 native emit 的声明式 effect,会对任何使用该 kinsn 的程序静默违反 verifier
+  soundness。每条 kinsn 的形式化语义文档与 translation-validation 工作
+  (`docs/tmp/kinsn-formal-semantics.md`)是缓解办法。
+- 随 workload 自适应的插入需要可靠的 per-site profile 数据。idea #1 的 `bpfprof
+  --per-site` pipeline 是其来源;如果某个部署上 PMU 数据不可靠,策略敏感的 kinsn 必须
+  回退到一个保守默认值,而不是去猜。
+- 一些看起来很自然的 kinsn(FPU SIMD、RDTSC)无法加入,因为要么会改变语义(RDTSC 非
+  单调),要么要付出超过收益的 setup 成本(FPU 上下文保存)。§5 的决策规则把它们挡在
+  暴露面之外。
 
-## 10. Cross-References
+## 10. 交叉引用
 
-- Mechanism design: `docs/tmp/kinsn-design.md`
-- Formal semantics and translation validation: `docs/tmp/kinsn-formal-semantics.md`
-- `bpf_kinsn_ops` detailed design: `docs/tmp/20260323/kinsn_ops_design_20260323.md`
-- Implementation audit: `docs/tmp/20260323/kinsn_implementation_review_20260323.md`
-- Per-kinsn research and decisions: `docs/tmp/*kinsn*` (rotate, cond_select,
-  extract, endian, prefetch, ccmp, lea, bls, andn, setcc_cset, simd_fpu,
-  bulk_memory, ldp_stp, register_realloc, region_kinsn, ...)
-- Speculative-optimization sibling paper: `docs/rejit-speculative-optimization-ebpf_idea.md`
-- ReverseSim sibling paper: `docs/reverse-sim_idea.md`
+- 机制设计:`docs/tmp/kinsn-design.md`
+- 形式化语义与 translation validation:`docs/tmp/kinsn-formal-semantics.md`
+- `bpf_kinsn_ops` 详细设计:`docs/tmp/20260323/kinsn_ops_design_20260323.md`
+- 实现审计:`docs/tmp/20260323/kinsn_implementation_review_20260323.md`
+- 每条 kinsn 的调研与决策:`docs/tmp/*kinsn*`(rotate、cond_select、extract、endian、
+  prefetch、ccmp、lea、bls、andn、setcc_cset、simd_fpu、bulk_memory、ldp_stp、
+  register_realloc、region_kinsn 等)
+- Speculative-optimization 姐妹论文:`docs/rejit-speculative-optimization-ebpf_idea.md`
+- ReverseSim 姐妹论文:`docs/reverse-sim_idea.md`

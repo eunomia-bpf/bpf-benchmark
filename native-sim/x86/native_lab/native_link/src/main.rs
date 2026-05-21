@@ -234,7 +234,7 @@ fn main() -> Result<()> {
                     if sym.address == entry.address { " [entry]" } else { "" }
                 );
             }
-            rewrite_arm64(&elf, &entry, &included, args.show)?
+            rewrite_arm64(&elf, &entry, &included, &helper_addrs, &map_addrs, args.show)?
         }
         arch => bail!("unsupported input ELF arch: {:?}", arch),
     };
@@ -790,6 +790,14 @@ fn a64_is_bl(insn: u32) -> bool {
     (insn & 0xfc00_0000) == 0x9400_0000
 }
 
+fn a64_is_adr_or_adrp(insn: u32) -> bool {
+    (insn & 0x9f00_0000) == 0x1000_0000 || (insn & 0x9f00_0000) == 0x9000_0000
+}
+
+fn a64_is_ldr_literal(insn: u32) -> bool {
+    (insn & 0x3b00_0000) == 0x1800_0000
+}
+
 fn a64_is_b_cond(insn: u32) -> bool {
     (insn & 0xff00_0010) == 0x5400_0000
 }
@@ -821,6 +829,118 @@ fn a64_is_ret(insn: u32) -> bool {
     (insn & 0xffff_fc1f) == 0xd65f_0000
 }
 
+fn a64_ldr_lit64(rt: u32, word_index: usize, target_byte_offset: usize) -> Result<u32> {
+    if rt >= 32 {
+        bail!("arm64 literal load target register out of range: x{rt}");
+    }
+    let source_byte_offset = word_index
+        .checked_mul(4)
+        .ok_or_else(|| anyhow!("arm64 source byte offset overflow"))?;
+    let disp = target_byte_offset as i64 - source_byte_offset as i64;
+    if disp % 4 != 0 {
+        bail!("arm64 literal load displacement is not 4-byte aligned: {disp}");
+    }
+    let imm19 = disp / 4;
+    if imm19 < -(1 << 18) || imm19 >= (1 << 18) {
+        bail!("arm64 literal load displacement out of range: {disp}");
+    }
+    Ok(0x5800_0000 | (((imm19 as u32) & 0x7ffff) << 5) | rt)
+}
+
+fn a64_br(reg: u32) -> Result<u32> {
+    if reg >= 32 {
+        bail!("arm64 BR register out of range: x{reg}");
+    }
+    Ok(0xd61f_0000 | (reg << 5))
+}
+
+fn append_u32(blob: &mut Vec<u8>, word: u32) {
+    blob.extend_from_slice(&word.to_le_bytes());
+}
+
+fn append_u64(blob: &mut Vec<u8>, value: u64) {
+    blob.extend_from_slice(&value.to_le_bytes());
+}
+
+fn align_arm64_blob_to_8(blob: &mut Vec<u8>) {
+    const A64_NOP: u32 = 0xd503_201f;
+    if blob.len() % 8 != 0 {
+        append_u32(blob, A64_NOP);
+    }
+}
+
+fn arm64_append_literal(blob: &mut Vec<u8>, value: u64) -> usize {
+    align_arm64_blob_to_8(blob);
+    let offset = blob.len();
+    append_u64(blob, value);
+    offset
+}
+
+fn arm64_append_helper_thunk(blob: &mut Vec<u8>, helper_addr: u64) -> Result<usize> {
+    const A64_X16: u32 = 16;
+
+    align_arm64_blob_to_8(blob);
+    let thunk_word = blob.len() / 4;
+    let literal_offset = (thunk_word + 2) * 4;
+    append_u32(blob, a64_ldr_lit64(A64_X16, thunk_word, literal_offset)?);
+    append_u32(blob, a64_br(A64_X16)?);
+    append_u64(blob, helper_addr);
+    Ok(thunk_word)
+}
+
+const R_AARCH64_CALL26: u32 = 283;
+const R_AARCH64_ADR_GOT_PAGE: u32 = 311;
+const R_AARCH64_LD64_GOT_LO12_NC: u32 = 312;
+
+#[derive(Clone, Debug)]
+struct Arm64RelocInfo {
+    r_type: u32,
+    target_name: String,
+}
+
+fn arm64_text_relocations(
+    elf: &object::File,
+    included: &[SymInfo],
+) -> Result<HashMap<(u64, u64), Arm64RelocInfo>> {
+    let mut out = HashMap::new();
+    let mut sections: HashMap<object::SectionIndex, Vec<&SymInfo>> = HashMap::new();
+    for sym in included {
+        sections.entry(sym.section_index).or_default().push(sym);
+    }
+    for (section_index, syms) in sections {
+        let section = elf
+            .section_by_index(section_index)
+            .with_context(|| format!("section {section_index:?}"))?;
+        let section_addr = section.address();
+        for (reloc_offset, reloc) in section.relocations() {
+            let reloc_addr = section_addr + reloc_offset;
+            let Some(sym) = syms
+                .iter()
+                .find(|s| reloc_addr >= s.address && reloc_addr < s.address + s.size)
+            else {
+                continue;
+            };
+            let r_type = match reloc.flags() {
+                RelocationFlags::Elf { r_type } => r_type,
+                _ => continue,
+            };
+            let target_name: String = match reloc.target() {
+                RelocationTarget::Symbol(idx) => elf
+                    .symbol_by_index(idx)?
+                    .name()
+                    .map_err(|e| anyhow!("reloc target symbol name: {e}"))?
+                    .to_string(),
+                _ => continue,
+            };
+            out.insert(
+                (sym.address, reloc_addr - sym.address),
+                Arm64RelocInfo { r_type, target_name },
+            );
+        }
+    }
+    Ok(out)
+}
+
 fn discover_reachable_arm64(elf: &object::File, entry: &SymInfo) -> Result<Vec<SymInfo>> {
     let mut included: Vec<SymInfo> = vec![entry.clone()];
     let mut seen: std::collections::HashSet<u64> = [entry.address].into_iter().collect();
@@ -831,8 +951,15 @@ fn discover_reachable_arm64(elf: &object::File, entry: &SymInfo) -> Result<Vec<S
         if bytes.len() % 4 != 0 {
             bail!("arm64 symbol {} size must be a multiple of 4", sym.name);
         }
+        let relocs = arm64_text_relocations(elf, std::slice::from_ref(&sym))?;
         for (word_index, word) in bytes.chunks_exact(4).enumerate() {
             let insn = u32::from_le_bytes(word.try_into().unwrap());
+            if relocs
+                .get(&(sym.address, (word_index * 4) as u64))
+                .is_some_and(|reloc| reloc.r_type == R_AARCH64_CALL26)
+            {
+                continue;
+            }
             let Some(target) = a64_bl_target(sym.address, word_index, insn) else {
                 continue;
             };
@@ -863,6 +990,9 @@ fn discover_reachable_arm64(elf: &object::File, entry: &SymInfo) -> Result<Vec<S
 enum Arm64PatchKind {
     ReturnToTrampoline,
     Bl { target_symbol_address: u64 },
+    HelperCall { target_name: String },
+    MapLiteralLoad { target_name: String },
+    Nop,
 }
 
 struct Arm64Patch {
@@ -874,11 +1004,14 @@ fn rewrite_arm64(
     elf: &object::File,
     entry: &SymInfo,
     included: &[SymInfo],
+    helper_addrs: &HashMap<String, u64>,
+    map_addrs: &HashMap<String, u64>,
     show: bool,
 ) -> Result<RewriteResult> {
     let mut blob = Vec::new();
     let mut sym_word_offset: HashMap<u64, usize> = HashMap::new();
     let mut patches: Vec<Arm64Patch> = Vec::new();
+    let relocs = arm64_text_relocations(elf, included)?;
 
     for sym in included {
         let is_entry = sym.address == entry.address;
@@ -894,14 +1027,70 @@ fn rewrite_arm64(
             let off = local_word_index * 4;
             let insn = u32::from_le_bytes(word.try_into().unwrap());
             let global_word_index = sym_base_word + local_word_index;
+            let reloc = relocs.get(&(sym.address, off as u64));
 
-            if (insn & 0x9f00_0000) == 0x1000_0000 || (insn & 0x9f00_0000) == 0x9000_0000 {
+            if let Some(reloc) = reloc {
+                match reloc.r_type {
+                    R_AARCH64_CALL26 => {
+                        if !helper_addrs.contains_key(&reloc.target_name) {
+                            bail!(
+                                "arm64 CALL26 in {} at byte offset {off:#x} targets unknown helper {}",
+                                sym.name,
+                                reloc.target_name
+                            );
+                        }
+                        patches.push(Arm64Patch {
+                            word_index: global_word_index,
+                            kind: Arm64PatchKind::HelperCall {
+                                target_name: reloc.target_name.clone(),
+                            },
+                        });
+                        blob.extend_from_slice(&insn.to_le_bytes());
+                        continue;
+                    }
+                    R_AARCH64_ADR_GOT_PAGE => {
+                        if !map_addrs.contains_key(&reloc.target_name) {
+                            bail!(
+                                "arm64 ADR_GOT in {} at byte offset {off:#x} targets unknown map {}",
+                                sym.name,
+                                reloc.target_name
+                            );
+                        }
+                        patches.push(Arm64Patch {
+                            word_index: global_word_index,
+                            kind: Arm64PatchKind::MapLiteralLoad {
+                                target_name: reloc.target_name.clone(),
+                            },
+                        });
+                        blob.extend_from_slice(&insn.to_le_bytes());
+                        continue;
+                    }
+                    R_AARCH64_LD64_GOT_LO12_NC => {
+                        if !map_addrs.contains_key(&reloc.target_name) {
+                            bail!(
+                                "arm64 LD64_GOT in {} at byte offset {off:#x} targets unknown map {}",
+                                sym.name,
+                                reloc.target_name
+                            );
+                        }
+                        patches.push(Arm64Patch {
+                            word_index: global_word_index,
+                            kind: Arm64PatchKind::Nop,
+                        });
+                        blob.extend_from_slice(&insn.to_le_bytes());
+                        continue;
+                    }
+                    _ => {}
+                }
+            }
+
+            if a64_is_adr_or_adrp(insn) {
                 bail!(
                     "arm64 native-link does not support ADR/ADRP yet in {} at byte offset {off:#x}",
                     sym.name
                 );
             }
-            if (insn & 0x3b00_0000) == 0x1800_0000 {
+            if a64_is_ldr_literal(insn) {
                 bail!(
                     "arm64 native-link does not support LDR literal yet in {} at byte offset {off:#x}",
                     sym.name
@@ -946,11 +1135,60 @@ fn rewrite_arm64(
         }
     }
 
+    let mut helper_thunks: HashMap<String, usize> = HashMap::new();
+    let mut map_literals: HashMap<String, usize> = HashMap::new();
+
+    for patch in patches.iter().filter(|p| {
+        matches!(
+            p.kind,
+            Arm64PatchKind::HelperCall { .. }
+                | Arm64PatchKind::MapLiteralLoad { .. }
+                | Arm64PatchKind::Nop
+        )
+    }) {
+        let off = patch.word_index * 4;
+        let patched = match &patch.kind {
+            Arm64PatchKind::HelperCall { target_name } => {
+                let thunk_word = if let Some(&word) = helper_thunks.get(target_name) {
+                    word
+                } else {
+                    let addr = *helper_addrs
+                        .get(target_name)
+                        .ok_or_else(|| anyhow!("missing arm64 helper address: {target_name}"))?;
+                    let word = arm64_append_helper_thunk(&mut blob, addr)?;
+                    helper_thunks.insert(target_name.clone(), word);
+                    word
+                };
+                a64_patch_bl(patch.word_index, thunk_word)?
+            }
+            Arm64PatchKind::MapLiteralLoad { target_name } => {
+                let literal_offset = if let Some(&offset) = map_literals.get(target_name) {
+                    offset
+                } else {
+                    let addr = *map_addrs
+                        .get(target_name)
+                        .ok_or_else(|| anyhow!("missing arm64 map address: {target_name}"))?;
+                    let offset = arm64_append_literal(&mut blob, addr);
+                    map_literals.insert(target_name.clone(), offset);
+                    offset
+                };
+                let rd = u32::from(blob[off] & 0x1f);
+                a64_ldr_lit64(rd, patch.word_index, literal_offset)?
+            }
+            Arm64PatchKind::Nop => 0xd503_201f,
+            _ => continue,
+        };
+        blob[off..off + 4].copy_from_slice(&patched.to_le_bytes());
+    }
+
+    align_arm64_blob_to_8(&mut blob);
     let ret_trampoline_word = blob.len() / 4;
     const A64_MOV_X7_X0: u32 = 0xaa00_03e7;
-    blob.extend_from_slice(&A64_MOV_X7_X0.to_le_bytes());
+    append_u32(&mut blob, A64_MOV_X7_X0);
 
-    for patch in patches {
+    for patch in patches.iter().filter(|p| {
+        matches!(p.kind, Arm64PatchKind::ReturnToTrampoline | Arm64PatchKind::Bl { .. })
+    }) {
         let patched = match patch.kind {
             Arm64PatchKind::ReturnToTrampoline => {
                 a64_patch_b(patch.word_index, ret_trampoline_word)?
@@ -961,6 +1199,7 @@ fn rewrite_arm64(
                     .ok_or_else(|| anyhow!("arm64 BL target sym addr not in index map"))?;
                 a64_patch_bl(patch.word_index, target_word)?
             }
+            _ => continue,
         };
         let off = patch.word_index * 4;
         blob[off..off + 4].copy_from_slice(&patched.to_le_bytes());

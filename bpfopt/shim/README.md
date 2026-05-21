@@ -147,7 +147,7 @@ Design references:
 - `docs/tmp/poc_c_bpf_syscall_shim_design.md` (v1: daemon + shim).
 - `docs/tmp/poc_c_v2_shim_only_design.md` (v2: shim-only, daemon eliminated).
 - `docs/tmp/poc_e_vendor_replace_x_sys_design.md` (Tier 4: static Go).
-- `docs/rejit-speculative-optimization-ebpf.md` (idea #1 paper-line hub).
+- `docs/rejit-speculative-optimization-ebpf_idea.md` (idea #1 paper-line hub).
 
 ## Non-goals (Phase 1 + Phase 2)
 
