@@ -1,0 +1,21 @@
+{
+  "completed_benchmarks": 1,
+  "current_benchmark": "stats_mixed_helpers",
+  "current_benchmark_index": 2,
+  "current_benchmark_record": {
+    "expected_result": null,
+    "expected_retval": 2,
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+    "io_mode": "packet",
+    "name": "stats_mixed_helpers",
+    "runs": [],
+    "tags": [
+      "stage2",
+      "maps",
+      "multi-map",
+      "helpers"
+    ]
+  },
+  "status": "running",
+  "total_benchmarks": 2
+}
