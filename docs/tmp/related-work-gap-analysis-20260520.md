@@ -1,8 +1,8 @@
 # 三篇论文相关工作 / 参考文献缺口分析
 
 日期: 2026-05-20
-范围: `docs/rejit-speculative-optimization-ebpf.md` (idea #1) /
-`docs/kinsn-idea.md` (idea #2) / `docs/reverse-sim.md` (idea #3)
+范围: `docs/rejit-speculative-optimization-ebpf_idea.md` (idea #1) /
+`docs/kinsn_idea.md` (idea #2) / `docs/reverse-sim_idea.md` (idea #3)
 方法: web 检索 eBPF 优化/验证/JIT/native-code 文献 + 对比三篇现有引用
 
 ---
@@ -94,7 +94,7 @@ speculation),但**每篇都缺 2–4 个直接相关、审稿人一定会问的�
 
 ## 逐篇缺口
 
-### Idea #1 — Speculative eBPF Optimization (`rejit-speculative-optimization-ebpf.md`)
+### Idea #1 — Speculative eBPF Optimization (`rejit-speculative-optimization-ebpf_idea.md`)
 
 现有引用(§1.5 / §1.8 / §3):
 - ✅ Self/PIC [Chambers&Ungar OOPSLA'91, Hölzle PLDI'91]
@@ -122,7 +122,7 @@ speculation),但**每篇都缺 2–4 个直接相关、审稿人一定会问的�
   [Sec'25]。这些都改 verifier/换 verifier;idea #1 的卖点恰恰是 **stock
   verifier、零内核改动**,放一句"与这些改内核的路线正交"能强化定位。
 
-### Idea #2 — Kinsn (`kinsn-idea.md`)
+### Idea #2 — Kinsn (`kinsn_idea.md`)
 
 现有引用(§8):
 - ✅ kfuncs (upstream),JIT peepholes (arm64 LDP fusion),JVM intrinsics,
@@ -145,7 +145,7 @@ speculation),但**每篇都缺 2–4 个直接相关、审稿人一定会问的�
   随 kinsn 数量增长"。这三篇是"给 eBPF 加硬件/SFI 隔离"的对照组,可用于
   论证 kinsn 的 TCB 增量 vs. 这些路线。优先级低于上面两条。
 
-### Idea #3 — ReverseSim (`reverse-sim.md`)
+### Idea #3 — ReverseSim (`reverse-sim_idea.md`)
 
 现有引用(§Related Work Positioning):
 - ✅ PCC [Necula&Lee OSDI'96]

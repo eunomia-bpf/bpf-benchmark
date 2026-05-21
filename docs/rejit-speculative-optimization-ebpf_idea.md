@@ -10,9 +10,9 @@ infrastructure) but address different problems with different designs.
 
 | # | Idea | Hub doc |
 |---|---|---|
-| 1 | **Speculative eBPF optimization** (this doc) — runtime userspace-guided rewriting of live eBPF programs | `docs/rejit-speculative-optimization-ebpf.md` |
-| 2 | Kinsn — new OS abstraction, brings eBPF close to hardware | `docs/kinsn-idea.md` |
-| 3 | ReverseSim — x86/arm native simulator written in eBPF | `docs/reverse-sim.md` |
+| 1 | **Speculative eBPF optimization** (this doc) — runtime userspace-guided rewriting of live eBPF programs | `docs/rejit-speculative-optimization-ebpf_idea.md` |
+| 2 | Kinsn — new OS abstraction, brings eBPF close to hardware | `docs/kinsn_idea.md` |
+| 3 | ReverseSim — x86/arm native simulator written in eBPF | `docs/reverse-sim_idea.md` |
 
 The three ideas are not incremental versions of one design. Each picks a
 different problem and a different point in the trust / kernel-surface /
@@ -27,7 +27,7 @@ is **stock-kernel**: zero kernel patches, no `BPF_PROG_REJIT` syscall, no
 out-of-tree daemon. The shim is the only persistent userspace component.
 Kinsn-introducing passes (rotate, cond_select, extract, endian fusion,
 prefetch, pair load/store, bulk memory, ccmp, lea) belong to the kinsn
-paper line (idea #2) and are **not in scope here**; see `docs/kinsn-idea.md`.
+paper line (idea #2) and are **not in scope here**; see `docs/kinsn_idea.md`.
 
 > **论文核心方向：构建一个最小化、动态、可扩展的 eBPF 优化框架，让 deployed eBPF 从一次性静态编译，变成可在线、透明、runtime-guided specialization 的执行环境。Paper 必须展示真实程序上的可测量加速能力。**
 > **编辑规则**：
@@ -65,8 +65,8 @@ eBPF is widely adopted in production for observability, networking, and customiz
 
 | Topic | File | Purpose |
 | --- | --- | --- |
-| **Plan + design hub (this doc)** | `docs/rejit-speculative-optimization-ebpf.md` | paper plan, architecture, methodology, task tracking |
-| Sister idea hubs (separate paper lines) | `docs/kinsn-idea.md`, `docs/reverse-sim.md` | idea #2 / #3 framing |
+| **Plan + design hub (this doc)** | `docs/rejit-speculative-optimization-ebpf_idea.md` | paper plan, architecture, methodology, task tracking |
+| Sister idea hubs (separate paper lines) | `docs/kinsn_idea.md`, `docs/reverse-sim_idea.md` | idea #2 / #3 framing |
 | Task history | `git log` | retired task tables and superseded plan snapshots are recovered from git history |
 | Shim implementation | `bpfopt/shim/README.md` | LD_PRELOAD shim + per-pid socket + execute_step RPC |
 | Userspace-only design notes | `docs/tmp/userspace_speculative_opt_design.md`, `docs/tmp/poc_a_katran_pidfd_swap.md`, `docs/tmp/poc_b_bcc_perf_event_swap.md`, `docs/tmp/poc_c_v2_shim_only_design.md`, `docs/tmp/poc_e_vendor_replace_x_sys_design.md` | per-attach-type swap recipes, static-Go fallback |
@@ -250,7 +250,7 @@ stdin/stdout 传 raw `struct bpf_insn[]`,一次跑一个 `--pass <name>`,零 sys
 
 ### 3.1 性能优化变换
 
-> **范围说明**:本表只列**纯 BPF-to-BPF rewrite pass**(即不依赖任何内核 patch / kinsn 框架的 pass)。所有依赖 kinsn 的变换(`rotate`、`cond_select`、`extract`、`endian_fusion`、`prefetch`、`ldp_stp`、`bulk_memory`、`ccmp`、`lea` 等)属于 idea #2,见 `docs/kinsn-idea.md`,**不在本论文范围**。
+> **范围说明**:本表只列**纯 BPF-to-BPF rewrite pass**(即不依赖任何内核 patch / kinsn 框架的 pass)。所有依赖 kinsn 的变换(`rotate`、`cond_select`、`extract`、`endian_fusion`、`prefetch`、`ldp_stp`、`bulk_memory`、`ccmp`、`lea` 等)属于 idea #2,见 `docs/kinsn_idea.md`,**不在本论文范围**。
 
 #### Speculative 分类(本论文 framing)
 

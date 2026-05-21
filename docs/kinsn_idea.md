@@ -14,9 +14,9 @@ infrastructure) but address different problems with different designs.
 
 | # | Idea | Hub doc |
 |---|---|---|
-| 1 | Speculative eBPF optimization (pure userspace) | `docs/rejit-speculative-optimization-ebpf.md` |
-| 2 | **Kinsn** (this doc) — new OS abstraction, bring eBPF close to hardware | `docs/kinsn-idea.md` |
-| 3 | ReverseSim (x86/arm native simulator in eBPF) | `docs/reverse-sim.md` |
+| 1 | Speculative eBPF optimization (pure userspace) | `docs/rejit-speculative-optimization-ebpf_idea.md` |
+| 2 | **Kinsn** (this doc) — new OS abstraction, bring eBPF close to hardware | `docs/kinsn_idea.md` |
+| 3 | ReverseSim (x86/arm native simulator in eBPF) | `docs/reverse-sim_idea.md` |
 
 The three ideas are not incremental versions of one design. Each picks a
 different problem, a different point in the trust / kernel-surface / coverage
@@ -134,7 +134,7 @@ Formal semantics: `docs/tmp/kinsn-formal-semantics.md`.
 The kinsn subset of the `vendor/linux-framework/rejit-v2` branch — i.e. the
 kinsn-only kernel surface — touches the following files. (REJIT-specific
 files belong to the orthogonal speculative-optimization line and are
-intentionally excluded from this paper; see `docs/reverse-sim.md` discussion
+intentionally excluded from this paper; see `docs/reverse-sim_idea.md` discussion
 of the kernel-ABI variant and `docs/kinsn-only` branch in the kernel
 worktree.)
 
@@ -353,5 +353,5 @@ A strong evaluation needs to show:
 - Per-kinsn research and decisions: `docs/tmp/*kinsn*` (rotate, cond_select,
   extract, endian, prefetch, ccmp, lea, bls, andn, setcc_cset, simd_fpu,
   bulk_memory, ldp_stp, register_realloc, region_kinsn, ...)
-- Speculative-optimization sibling paper: `docs/rejit-speculative-optimization-ebpf.md`
-- ReverseSim sibling paper: `docs/reverse-sim.md`
+- Speculative-optimization sibling paper: `docs/rejit-speculative-optimization-ebpf_idea.md`
+- ReverseSim sibling paper: `docs/reverse-sim_idea.md`

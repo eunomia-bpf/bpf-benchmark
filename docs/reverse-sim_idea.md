@@ -18,8 +18,8 @@ implementations.
 The three are not incremental versions of one design. Each picks a different
 problem and a different point in the trust / kernel-surface / coverage space.
 This doc is about idea #3. Idea #1 lives in
-`docs/rejit-speculative-optimization-ebpf.md`. Idea #2 lives in
-`docs/kinsn-idea.md` (机制设计见 `docs/tmp/kinsn-design.md`,形式语义见
+`docs/rejit-speculative-optimization-ebpf_idea.md`. Idea #2 lives in
+`docs/kinsn_idea.md` (机制设计见 `docs/tmp/kinsn-design.md`,形式语义见
 `docs/tmp/kinsn-formal-semantics.md`).
 
 A kernel-ABI variant of "ReverseSim" (dual-semantics ISA owned by the kernel)
