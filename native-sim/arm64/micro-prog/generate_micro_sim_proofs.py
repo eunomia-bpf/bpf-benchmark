@@ -16,8 +16,9 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[3]
 OUT_DIR = Path(__file__).resolve().parent
 MICRO_PROGRAMS = REPO_ROOT / "micro" / "programs"
+STAGE2_PROGRAMS = REPO_ROOT / "native-sim" / "test"
 CONFIG = REPO_ROOT / "micro" / "config" / "micro_pure_jit.yaml"
-ARM64_BUILD_DIR = MICRO_PROGRAMS / "build-arm64"
+PROOF_OBJECT_DIR = OUT_DIR / "build" / "native-link"
 
 WIDTH_CONST = {1: "ARM64_WIDTH_8", 2: "ARM64_WIDTH_16", 4: "ARM64_WIDTH_32", 8: "ARM64_WIDTH_64"}
 ALU = {"add": "ARM64_ALU_ADD", "sub": "ARM64_ALU_SUB", "and": "ARM64_ALU_AND",
@@ -51,6 +52,7 @@ class NativeInsn:
     mnemonic: str
     operands: tuple[str, ...]
     raw: str
+    reloc_symbol: str | None = None
 
 
 @dataclass(frozen=True)
@@ -75,12 +77,50 @@ class Encoded:
     imm: str = "0"
 
 
-def run_objdump(native_so: Path) -> str:
-    result = subprocess.run(["aarch64-linux-gnu-objdump", "-d", str(native_so)],
-                            check=False, capture_output=True, text=True)
+def rodata_bytes(obj: Path) -> bytes:
+    result = subprocess.run(
+        ["aarch64-linux-gnu-objdump", "-s", "-j", ".native_link_rodata", str(obj)],
+        cwd=REPO_ROOT, check=False, text=True, stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
     if result.returncode != 0:
-        raise RuntimeError(result.stderr.strip() or result.stdout.strip())
-    return result.stdout
+        return b""
+    out = bytearray()
+    for line in result.stdout.splitlines():
+        fields = line.split()
+        if len(fields) < 2 or not re.fullmatch(r"[0-9a-fA-F]+", fields[0]):
+            continue
+        for field in fields[1:]:
+            if not re.fullmatch(r"[0-9a-fA-F]+", field) or len(field) % 2:
+                break
+            out.extend(int(field[i:i + 2], 16) for i in range(0, len(field), 2))
+    return bytes(out)
+
+
+def load_rodata16(obj: Path) -> dict[str, tuple[int, int]]:
+    data = rodata_bytes(obj)
+    if not data:
+        return {}
+    result = subprocess.run(["aarch64-linux-gnu-objdump", "-t", str(obj)],
+                            cwd=REPO_ROOT, check=True, text=True,
+                            stdout=subprocess.PIPE)
+    out: dict[str, tuple[int, int]] = {}
+    for line in result.stdout.splitlines():
+        fields = line.split()
+        if ".native_link_rodata" not in fields:
+            continue
+        idx = fields.index(".native_link_rodata")
+        if idx + 2 >= len(fields):
+            continue
+        offset = int(fields[0], 16)
+        size = int(fields[idx + 1], 16)
+        name = fields[idx + 2]
+        if size >= 16 and offset + 16 <= len(data):
+            out[name] = (
+                int.from_bytes(data[offset:offset + 8], "little"),
+                int.from_bytes(data[offset + 8:offset + 16], "little"),
+            )
+    return out
 
 
 def split_operands(text: str) -> tuple[str, ...]:
@@ -102,59 +142,52 @@ def split_operands(text: str) -> tuple[str, ...]:
     return tuple(parts)
 
 
-def parse_functions(text: str) -> tuple[dict[str, list[NativeInsn]], dict[int, str]]:
-    functions: dict[str, list[NativeInsn]] = OrderedDict()
-    by_addr: dict[int, str] = {}
-    current: str | None = None
-    func_re = re.compile(r"^([0-9a-f]+) <([^>]+)>:$")
+def parse_flat_instructions(text: str) -> list[NativeInsn]:
+    insns: list[NativeInsn] = []
     insn_re = re.compile(r"^\s*([0-9a-f]+):\s+[0-9a-f]{8}\s+\t([a-z0-9.]+)\s*(.*)$")
     for line in text.splitlines():
-        m_func = func_re.match(line)
-        if m_func:
-            current = m_func.group(2)
-            functions[current] = []
-            by_addr[int(m_func.group(1), 16)] = current
-            continue
-        if current is None:
+        reloc = re.search(r"\bR_AARCH64_[A-Z0-9_]+\s+(\S+)", line)
+        if reloc is not None and insns:
+            symbol = re.sub(r"([+-]0x[0-9a-fA-F]+)$", "", reloc.group(1))
+            insns[-1] = NativeInsn(
+                insns[-1].addr,
+                insns[-1].mnemonic,
+                insns[-1].operands,
+                insns[-1].raw,
+                symbol,
+            )
             continue
         m_insn = insn_re.match(line)
         if not m_insn:
             continue
         operands = m_insn.group(3).split("//", 1)[0].strip()
         asm = f"{m_insn.group(2)} {operands}".strip()
-        functions[current].append(NativeInsn(int(m_insn.group(1), 16),
-                                             m_insn.group(2),
-                                             split_operands(operands),
-                                             asm))
-    return functions, by_addr
+        addr = int(m_insn.group(1), 16)
+        insns.append(NativeInsn(addr, m_insn.group(2), split_operands(operands), asm))
+    return insns
+
+
+def parse_native_linked_program(
+    bench: Bench,
+    proof_object_dir: Path,
+) -> tuple[OrderedDict[str, list[NativeInsn]], dict[str, tuple[int, int]]]:
+    symbol = bench.symbol
+    proof_obj = proof_object_dir / f"{bench.name}.proof.o"
+    if not proof_obj.is_file():
+        raise RuntimeError(f"missing proof object for {bench.name}: {proof_obj}")
+    rodata16 = load_rodata16(proof_obj)
+    disasm = subprocess.run(
+        ["aarch64-linux-gnu-objdump", "-dr", str(proof_obj)],
+        cwd=REPO_ROOT, check=True, text=True, stdout=subprocess.PIPE,
+    )
+    insns = parse_flat_instructions(disasm.stdout)
+    if not insns:
+        raise RuntimeError(f"{bench.name}: no arm64 native-link instructions parsed")
+    return OrderedDict([(symbol, insns)]), rodata16
 
 
 def branch_target(operand: str) -> int:
     return int(operand.split()[0], 16)
-
-
-def collect_functions(functions: dict[str, list[NativeInsn]],
-                      by_addr: dict[int, str],
-                      entry: str) -> OrderedDict[str, list[NativeInsn]]:
-    selected: OrderedDict[str, list[NativeInsn]] = OrderedDict()
-
-    def add(symbol: str) -> None:
-        if symbol in selected:
-            return
-        insns = functions.get(symbol)
-        if not insns:
-            raise RuntimeError(f"missing arm64 native symbol: {symbol}")
-        selected[symbol] = insns
-        for insn in insns:
-            if insn.mnemonic == "bl":
-                target = branch_target(insn.operands[0])
-                target_symbol = by_addr.get(target)
-                if target_symbol is None:
-                    raise RuntimeError(f"unresolved arm64 call target in {insn.raw}")
-                add(target_symbol)
-
-    add(entry)
-    return selected
 
 
 def program_kind(item: dict) -> str:
@@ -166,16 +199,32 @@ def program_kind(item: dict) -> str:
     return "xdp"
 
 
-def load_benches() -> list[Bench]:
-    data = yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
+def load_benches(config_path: Path) -> list[Bench]:
+    data = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     return [
         Bench(item["name"], item.get("program_name", f"{item['name']}_xdp"), program_kind(item))
         for item in data["benchmarks"]
     ]
 
 
+def is_helper_symbol(symbol: str | None) -> bool:
+    return bool(symbol and symbol.startswith("bpf_"))
+
+
 def c_comment(text: str) -> str:
     return text.replace("*/", "* /")
+
+
+def source_prelude(source: Path) -> str:
+    text = source.read_text(encoding="utf-8")
+    match = re.search(r'\nSEC\("[^"]+"\)\s+int\s+', text)
+    if match is None:
+        return ""
+    prelude = text[:match.start()].strip()
+    return prelude.replace(
+        '#include "include/native_helpers.h"',
+        '#include "../../test/include/native_helpers.h"',
+    )
 
 
 def c_u64(value: int) -> str:
@@ -394,9 +443,78 @@ def label(addr: int) -> str:
     return f"arm64_l_{addr:x}"
 
 
+def is_rodata_symbol(symbol: str | None, rodata16: dict[str, tuple[int, int]]) -> bool:
+    return bool(symbol and symbol in rodata16)
+
+
+def append_special_insn(
+    lines: list[str],
+    insn: NativeInsn,
+    rodata16: dict[str, tuple[int, int]],
+    rodata_regs: dict[str, str],
+) -> bool:
+    op = insn.mnemonic
+    ops = insn.operands
+    if insn.reloc_symbol and is_rodata_symbol(insn.reloc_symbol, rodata16):
+        if op == "adrp" and ops:
+            rodata_regs[reg_const(ops[0])] = insn.reloc_symbol
+            lines.append("\t(void)0;")
+            return True
+        if op == "add" and len(ops) >= 2:
+            dst = reg_const(ops[0])
+            src = reg_const(ops[1])
+            if src in rodata_regs:
+                rodata_regs[dst] = rodata_regs[src]
+                lines.append("\t(void)0;")
+                return True
+    if insn.reloc_symbol and not is_helper_symbol(insn.reloc_symbol):
+        if op == "adrp" and ops:
+            lines.append("\t(void)0;")
+            return True
+        if op == "ldr" and len(ops) == 2 and ops[0].lower().startswith("x"):
+            lines.append(
+                f"\tARM64_SIM_L_WRITE_REG_MAP_PTR({reg_const(ops[0])}, "
+                f"&{insn.reloc_symbol});"
+            )
+            return True
+    if op == "ldr" and len(ops) == 2 and ops[0].lower() == "q0":
+        mem = parse_mem(ops, 1)
+        symbol = rodata_regs.get(mem.base)
+        if symbol is not None and symbol in rodata16:
+            lo, hi = rodata16[symbol]
+            lines.append(f"\tARM64_SIM_L_LOAD_CONST16_Q0({c_u64(lo)}, {c_u64(hi)});")
+            return True
+    if op == "str" and len(ops) == 2 and ops[0].lower() == "q0":
+        mem = parse_mem(ops, 1)
+        lines.append(
+            f"\tARM64_SIM_L_STORE_Q0_MEM({mem.base}, {mem.index}, "
+            f"{mem_aux(mem)}, {c_u64(mem.offset)});"
+        )
+        return True
+    if op == "ldr" and len(ops) == 2 and ops[0].lower() == "d0":
+        mem = parse_mem(ops, 1)
+        lines.append(
+            f"\tARM64_SIM_L_LOAD_D0_MEM({mem.base}, {mem.index}, "
+            f"{mem_aux(mem)}, {c_u64(mem.offset)});"
+        )
+        return True
+    if op == "str" and len(ops) == 2 and ops[0].lower() == "d0":
+        mem = parse_mem(ops, 1)
+        lines.append(
+            f"\tARM64_SIM_L_STORE_D0_MEM({mem.base}, {mem.index}, "
+            f"{mem_aux(mem)}, {c_u64(mem.offset)});"
+        )
+        return True
+    return False
+
+
 def append_insn(lines: list[str], insn: NativeInsn, all_addrs: set[int],
-                next_addr: int | None) -> None:
+                next_addr: int | None,
+                rodata16: dict[str, tuple[int, int]],
+                rodata_regs: dict[str, str]) -> None:
     lines.append(f"\t/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+    if append_special_insn(lines, insn, rodata16, rodata_regs):
+        return
     op = insn.mnemonic
     if op.startswith("b."):
         target = branch_target(insn.operands[0])
@@ -417,6 +535,9 @@ def append_insn(lines: list[str], insn: NativeInsn, all_addrs: set[int],
         lines.append(f"\t{macro}({reg_const(insn.operands[0])}, {parse_imm(insn.operands[1])}, 0x{insn.addr:x}, 0x{target:x}, {label(target)});")
         return
     if op == "bl":
+        if is_helper_symbol(insn.reloc_symbol):
+            lines.append(f"\tARM64_SIM_BPF_CALL_{insn.reloc_symbol}();")
+            return
         target = branch_target(insn.operands[0])
         if target not in all_addrs or next_addr is None:
             raise ValueError(f"unsupported call target in {insn.raw}")
@@ -432,7 +553,11 @@ def append_insn(lines: list[str], insn: NativeInsn, all_addrs: set[int],
     )
 
 
-def render_program(name: str, symbol: str, functions: OrderedDict[str, list[NativeInsn]], kind: str) -> str:
+def render_program(name: str, symbol: str, functions: OrderedDict[str, list[NativeInsn]],
+                   kind: str, prelude: str = "",
+                   rodata16: dict[str, tuple[int, int]] | None = None,
+                   linked_exit: bool = False) -> str:
+    rodata16 = rodata16 or {}
     all_insns = [insn for fn in functions.values() for insn in fn]
     all_addrs = {insn.addr for insn in all_insns}
     next_by_addr = {
@@ -458,29 +583,45 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
     lines.extend([
         '#include "../arm64_sim_local_bpf.h"',
         "",
+    ])
+    if prelude:
+        lines.append(prelude.rstrip())
+        lines.append("")
+    lines.extend([
         section,
         f"int {name}_arm64_sim_xdp({ctx}ctx)",
         "{",
         f"\t{entry}",
     ])
+    rodata_regs: dict[str, str] = {}
     for fn_symbol, insns in functions.items():
         if fn_symbol != symbol:
             lines.append(f"\t/* native subroutine {c_comment(fn_symbol)} */")
         for insn in insns:
             lines.append(f"{label(insn.addr)}:")
-            append_insn(lines, insn, all_addrs, next_by_addr.get(insn.addr))
-    lines.extend(["\treturn 0;", "}", "", "ARM64_SIM_LICENSE();", ""])
+            append_insn(lines, insn, all_addrs, next_by_addr.get(insn.addr),
+                        rodata16, rodata_regs)
+    if linked_exit:
+        lines.extend([
+            "\tARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, ARM64_SIM_L_READ_REG(ARM64_X7), ARM64_WIDTH_64);",
+            "\tARM64_SIM_RET();",
+        ])
+    else:
+        lines.append("\treturn 0;")
+    lines.extend(["}", "", "ARM64_SIM_LICENSE();", ""])
     return "\n".join(lines)
 
 
-def generate_one(bench: Bench, output_dir: Path, build_dir: Path) -> Path:
-    native_so = build_dir / f"{bench.name}.native.so"
-    if not native_so.is_file():
-        raise RuntimeError(f"missing arm64 native object: {native_so}")
-    functions, by_addr = parse_functions(run_objdump(native_so))
-    selected = collect_functions(functions, by_addr, bench.symbol)
+def generate_one(bench: Bench, source_dir: Path, output_dir: Path, proof_object_dir: Path) -> Path:
+    selected, rodata16 = parse_native_linked_program(bench, proof_object_dir)
     output = output_dir / f"{bench.name}.bpf.c"
-    output.write_text(render_program(bench.name, bench.symbol, selected, bench.kind), encoding="utf-8")
+    source = source_dir / f"{bench.name}.bpf.c"
+    prelude = source_prelude(source) if source_dir == STAGE2_PROGRAMS else ""
+    output.write_text(
+        render_program(bench.name, bench.symbol, selected, bench.kind,
+                       prelude=prelude, rodata16=rodata16, linked_exit=True),
+        encoding="utf-8",
+    )
     return output
 
 
@@ -488,14 +629,19 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--micro-programs", type=Path, default=MICRO_PROGRAMS)
     parser.add_argument("--output-dir", type=Path, default=OUT_DIR)
-    parser.add_argument("--native-build-dir", type=Path, default=ARM64_BUILD_DIR)
+    parser.add_argument("--proof-object-dir", type=Path, default=PROOF_OBJECT_DIR)
+    parser.add_argument("--native-build-dir", type=Path, help=argparse.SUPPRESS)
+    parser.add_argument("--config", type=Path, default=CONFIG)
     parser.add_argument("--only", nargs="*", help="optional micro benchmark stem list")
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
+    source_dir = args.micro_programs
+    if source_dir == MICRO_PROGRAMS and "stage2" in args.config.stem:
+        source_dir = STAGE2_PROGRAMS
     only = set(args.only or [])
     written = [
-        generate_one(bench, args.output_dir, args.native_build_dir)
-        for bench in load_benches()
+        generate_one(bench, source_dir, args.output_dir, args.proof_object_dir)
+        for bench in load_benches(args.config)
         if not only or bench.name in only
     ]
     for path in written:

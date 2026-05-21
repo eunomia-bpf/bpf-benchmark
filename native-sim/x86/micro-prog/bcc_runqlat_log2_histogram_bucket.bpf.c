@@ -24,7 +24,7 @@ x86_l_f:
 	/* 0xf: jbe    0x16 */
 	X86_SIM_X86_JCC(X86_CC_BE, 0xf, 0x16, x86_l_16);
 x86_l_11:
-	/* 0x11: jmp    0x14b ; native-link entry RET */
+	/* 0x11: jmp    0x146 ; native-link entry RET */
 	X86_SIM_X86_RET();
 x86_l_16:
 	/* 0x16: lea    rdx,[rdi+0x8] */
@@ -294,7 +294,7 @@ x86_l_144:
 	/* 0x144: pop    r15 */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_R15, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_146:
-	/* 0x146: jmp    0x14b ; native-link entry RET */
+	/* native-link entry fallthrough exit */
 	X86_SIM_X86_RET();
 }
 

@@ -24,7 +24,10 @@
  *    the BPF program, set rax in the blob and follow with BPF `exit`.
  *  - Callee-saved registers (rbx, rbp, r12-r15) map to BPF r6-r10 and to the
  *    BPF JIT frame pointer; clobber them only if the surrounding BPF program
- *    doesn't use those registers.
+ *    doesn't use those registers. native-link may strip RBX/R13-R15 saves from
+ *    the blob only when the sidecar ABI mask below asks the JIT proof to mark
+ *    the corresponding BPF callee-saved regs as used, forcing the BPF JIT
+ *    prologue/epilogue to preserve the host registers.
  *  - Caller-saved (rdi, rsi, rdx, rcx, r8, r9, r10, r11) and rax are free.
  *  - The kfunc takes a single u64 argument so the BPF program can stage one
  *    value (e.g. a context pointer cast to u64) into rdi before the call.
@@ -65,6 +68,14 @@
  */
 #define NATIVE_LAB_RELOC_CALL_REL32	1
 #define NATIVE_LAB_MAX_RELOCS		32
+#define NATIVE_LAB_ABI_RBX		(1U << 0)
+#define NATIVE_LAB_ABI_R13		(1U << 1)
+#define NATIVE_LAB_ABI_R14		(1U << 2)
+#define NATIVE_LAB_ABI_R15		(1U << 3)
+#define NATIVE_LAB_ABI_MASK		(NATIVE_LAB_ABI_RBX | \
+					 NATIVE_LAB_ABI_R13 | \
+					 NATIVE_LAB_ABI_R14 | \
+					 NATIVE_LAB_ABI_R15)
 
 struct native_lab_reloc_record {
 	__u32 offset;   /* byte offset of the call instruction (E8) in blob */
@@ -100,18 +111,22 @@ BTF_KFUNCS_START(bpf_x86_native_lab_kfunc_ids)
 BTF_ID_FLAGS(func, bpf_x86_native_lab_emit)
 BTF_KFUNCS_END(bpf_x86_native_lab_kfunc_ids)
 
-static int decode_native_lab_payload(u64 payload, u32 *blob_id)
+static int decode_native_lab_payload(u64 payload, u32 *blob_id, u32 *abi_mask)
 {
 	payload = kinsn_payload_decode(payload);
 
 	if (payload & 0xf)
 		return -EINVAL;
-	if ((payload >> 4) & 0xffff)
+	if (((payload >> 4) & 0xf) & ~NATIVE_LAB_ABI_MASK)
+		return -EINVAL;
+	if ((payload >> 8) & 0xfff)
 		return -EINVAL;
 
 	*blob_id = (u32)(payload >> 20);
 	if (*blob_id >= NATIVE_LAB_MAX_BLOBS)
 		return -EINVAL;
+	if (abi_mask)
+		*abi_mask = (u32)((payload >> 4) & 0xf);
 
 	return 0;
 }
@@ -127,15 +142,25 @@ static int decode_native_lab_payload(u64 payload, u32 *blob_id)
  */
 static int instantiate_native_lab(u64 payload, struct bpf_insn *insn_buf)
 {
+	u32 abi_mask = 0;
 	u32 blob_id;
 	int err;
+	int cnt = 0;
 
-	err = decode_native_lab_payload(payload, &blob_id);
+	err = decode_native_lab_payload(payload, &blob_id, &abi_mask);
 	if (err)
 		return err;
 
-	insn_buf[0] = BPF_ALU64_IMM(BPF_MOV, BPF_REG_0, 0);
-	return 1;
+	if (abi_mask & NATIVE_LAB_ABI_RBX)
+		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_6, BPF_REG_1);
+	if (abi_mask & NATIVE_LAB_ABI_R13)
+		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_7, BPF_REG_1);
+	if (abi_mask & NATIVE_LAB_ABI_R14)
+		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_8, BPF_REG_1);
+	if (abi_mask & NATIVE_LAB_ABI_R15)
+		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_9, BPF_REG_1);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_MOV, BPF_REG_0, 0);
+	return cnt;
 }
 
 static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
@@ -147,7 +172,7 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 
 	(void)prog;
 
-	err = decode_native_lab_payload(payload, &blob_id);
+	err = decode_native_lab_payload(payload, &blob_id, NULL);
 	if (err)
 		return err;
 
@@ -164,41 +189,44 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 
 			memcpy(emit_at, blobs[blob_id].bytes, snapshot_len);
 
-			/*
-			 * Apply each side-band relocation. The call-rel32
-			 * disp is target - rip_after_call = target -
-			 * (emit_at + call_offset + 5).
+			/* Apply each side-band relocation after the blob lands in
+			 * final JIT memory.
 			 */
 			for (i = 0; i < blobs[blob_id].reloc_count; i++) {
 				const struct native_lab_reloc_record *r =
 					&blobs[blob_id].relocs[i];
-				if (r->kind != NATIVE_LAB_RELOC_CALL_REL32) {
-					err = -EINVAL;
-					break;
-				}
-				if ((size_t)r->offset + 5 > snapshot_len) {
-					err = -ERANGE;
-					break;
-				}
-				/*
-				 * blob byte at r->offset is the 0xE8 opcode;
-				 * the disp32 field occupies offset+1 .. +5.
-				 */
-				if (emit_at[r->offset] != 0xE8) {
-					err = -EINVAL;
-					break;
-				}
-				{
-					u64 patch_va = (u64)emit_at + r->offset + 1;
-					u64 rip_after = patch_va + 4;
-					s64 disp64 = (s64)r->target - (s64)rip_after;
-					s32 disp = (s32)disp64;
+				switch (r->kind) {
+				case NATIVE_LAB_RELOC_CALL_REL32: {
+					u64 patch_va;
+					u64 rip_after;
+					s64 disp64;
+					s32 disp;
+
+					if ((size_t)r->offset + 5 > snapshot_len) {
+						err = -ERANGE;
+						break;
+					}
+					if (emit_at[r->offset] != 0xE8) {
+						err = -EINVAL;
+						break;
+					}
+					patch_va = (u64)emit_at + r->offset + 1;
+					rip_after = patch_va + 4;
+					disp64 = (s64)r->target - (s64)rip_after;
+					disp = (s32)disp64;
 					if ((s64)disp != disp64) {
 						err = -ERANGE;
 						break;
 					}
 					memcpy((void *)patch_va, &disp, 4);
+					break;
 				}
+				default:
+					err = -EINVAL;
+					break;
+				}
+				if (err)
+					break;
 			}
 			if (err) {
 				mutex_unlock(&blobs_lock);
@@ -217,7 +245,7 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 
 const struct bpf_kinsn bpf_x86_native_lab_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 1,
+	.max_insn_cnt = 5,
 	.max_emit_bytes = NATIVE_LAB_MAX_BLOB_BYTES,
 	.instantiate_insn = instantiate_native_lab,
 	.emit_x86 = emit_native_lab_x86,

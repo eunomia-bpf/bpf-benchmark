@@ -47,12 +47,19 @@
 //! in-place using the byte offsets iced reports.
 
 use anyhow::{anyhow, bail, Context, Result};
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 use iced_x86::{
     BlockEncoder, BlockEncoderOptions, Code, Decoder, DecoderOptions, FlowControl, Instruction,
     InstructionBlock, Mnemonic, OpKind, Register,
 };
-use object::{Object, ObjectSection, ObjectSymbol, RelocationFlags, RelocationTarget};
+use object::write::{
+    Object as WriteObject, Relocation as WriteRelocation, StandardSection,
+    Symbol as WriteSymbol, SymbolId as WriteSymbolId, SymbolSection as WriteSymbolSection,
+};
+use object::{
+    BinaryFormat, Endianness, Object, ObjectSection, ObjectSymbol, RelocationFlags,
+    RelocationTarget, SectionKind, SymbolFlags, SymbolKind, SymbolScope,
+};
 use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::PathBuf;
@@ -145,6 +152,18 @@ struct Args {
     /// Print a human-readable disassembly of the rewritten blob to stderr.
     #[arg(long)]
     show: bool,
+
+    /// Link mode. `proof` applies canonical ABI/link edits but leaves
+    /// verifier-after helper/map lowering symbolic and emits a relocatable
+    /// proof object for the eBPF simulator generator.
+    #[arg(long, value_enum, default_value_t = LinkMode::Kernel)]
+    mode: LinkMode,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, ValueEnum)]
+enum LinkMode {
+    Kernel,
+    Proof,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -371,6 +390,7 @@ struct SymInfo {
 
 fn main() -> Result<()> {
     let args = Args::parse();
+    let proof_mode = args.mode == LinkMode::Proof;
     let bytes = fs::read(&args.input).with_context(|| format!("read {}", args.input.display()))?;
     let elf = object::File::parse(&*bytes)
         .with_context(|| format!("parse ELF {}", args.input.display()))?;
@@ -383,6 +403,8 @@ fn main() -> Result<()> {
         relocs,
         map_patches,
         x86_callee_saved_mask,
+        proof_relocs,
+        proof_symbols,
     } = match elf.architecture() {
         object::Architecture::X86_64 => {
             let entry = find_symbol_by_name(&elf, &args.symbol)?;
@@ -416,6 +438,7 @@ fn main() -> Result<()> {
                 &map_addrs,
                 &lookup_sites,
                 &update_sites,
+                proof_mode,
                 args.show,
             )?
         }
@@ -449,11 +472,33 @@ fn main() -> Result<()> {
                 &map_addrs,
                 &lookup_sites,
                 &update_sites,
+                proof_mode,
                 args.show,
             )?
         }
         arch => bail!("unsupported input ELF arch: {:?}", arch),
     };
+    if proof_mode {
+        if args.output_relocs.is_some() || args.output_map_patches.is_some() || args.output_abi.is_some() {
+            bail!("proof mode writes a single .proof.o; do not pass kernel sideband outputs");
+        }
+        write_proof_object(
+            &args.output,
+            elf.architecture(),
+            &args.symbol,
+            &blob,
+            &proof_symbols,
+            &proof_relocs,
+            x86_callee_saved_mask,
+        )?;
+        eprintln!(
+            "native-link: wrote proof object {} bytes, {} reloc(s) -> {}",
+            blob.len(),
+            proof_relocs.len(),
+            args.output.display()
+        );
+        return Ok(());
+    }
     fs::write(&args.output, &blob).with_context(|| format!("write {}", args.output.display()))?;
     eprintln!(
         "native-link: wrote {} bytes -> {} ({} relocs)",
@@ -509,6 +554,157 @@ fn main() -> Result<()> {
         eprintln!("native-link: wrote ABI metadata -> {}", path.display());
     }
     Ok(())
+}
+
+fn write_proof_object(
+    path: &PathBuf,
+    arch: object::Architecture,
+    entry_symbol: &str,
+    text: &[u8],
+    proof_symbols: &[ProofSymbol],
+    proof_relocs: &[ProofReloc],
+    x86_callee_saved_mask: u8,
+) -> Result<()> {
+    let mut object = WriteObject::new(BinaryFormat::Elf, arch, Endianness::Little);
+    let text_section = object.section_id(StandardSection::Text);
+    let text_align = match arch {
+        object::Architecture::Aarch64 => 4,
+        object::Architecture::X86_64 => 16,
+        _ => 1,
+    };
+    object.append_section_data(text_section, text, text_align);
+
+    let mut symbol_ids: HashMap<String, WriteSymbolId> = HashMap::new();
+    let add_text_symbol = |object: &mut WriteObject<'_>,
+                           symbol_ids: &mut HashMap<String, WriteSymbolId>,
+                           name: &str,
+                           offset: u64,
+                           size: u64|
+     -> Result<()> {
+        if offset.checked_add(size).is_none_or(|end| end > text.len() as u64) {
+            bail!("proof symbol {name} range {offset:#x}+{size:#x} exceeds .text");
+        }
+        let id = object.add_symbol(WriteSymbol {
+            name: name.as_bytes().to_vec(),
+            value: offset,
+            size,
+            kind: SymbolKind::Text,
+            scope: SymbolScope::Linkage,
+            weak: false,
+            section: WriteSymbolSection::Section(text_section),
+            flags: SymbolFlags::None,
+        });
+        symbol_ids.insert(name.to_string(), id);
+        Ok(())
+    };
+
+    let mut saw_entry = false;
+    for sym in proof_symbols {
+        if sym.name == entry_symbol {
+            saw_entry = true;
+        }
+        add_text_symbol(
+            &mut object,
+            &mut symbol_ids,
+            &sym.name,
+            sym.offset,
+            sym.size,
+        )?;
+    }
+    if !saw_entry {
+        add_text_symbol(
+            &mut object,
+            &mut symbol_ids,
+            entry_symbol,
+            0,
+            text.len() as u64,
+        )?;
+    }
+
+    let data_section = object.add_section(
+        Vec::new(),
+        b".native_link_rodata".to_vec(),
+        SectionKind::ReadOnlyData,
+    );
+    let mut rodata_ids: HashMap<String, WriteSymbolId> = HashMap::new();
+    for reloc in proof_relocs.iter().filter(|reloc| reloc.data.is_some()) {
+        if rodata_ids.contains_key(&reloc.symbol) {
+            continue;
+        }
+        let data = reloc.data.as_ref().expect("filtered proof rodata");
+        let offset = object.append_section_data(data_section, data, 16);
+        let id = object.add_symbol(WriteSymbol {
+            name: reloc.symbol.as_bytes().to_vec(),
+            value: offset,
+            size: data.len() as u64,
+            kind: SymbolKind::Data,
+            scope: SymbolScope::Linkage,
+            weak: false,
+            section: WriteSymbolSection::Section(data_section),
+            flags: SymbolFlags::None,
+        });
+        symbol_ids.insert(reloc.symbol.clone(), id);
+        rodata_ids.insert(reloc.symbol.clone(), id);
+    }
+
+    for reloc in proof_relocs {
+        if reloc.offset >= text.len() as u64 {
+            bail!(
+                "proof relocation against {} at {:#x} exceeds .text size {}",
+                reloc.symbol,
+                reloc.offset,
+                text.len()
+            );
+        }
+        let symbol = if let Some(id) = symbol_ids.get(&reloc.symbol) {
+            *id
+        } else {
+            let id = object.add_symbol(WriteSymbol {
+                name: reloc.symbol.as_bytes().to_vec(),
+                value: 0,
+                size: 0,
+                kind: SymbolKind::Unknown,
+                scope: SymbolScope::Linkage,
+                weak: false,
+                section: WriteSymbolSection::Undefined,
+                flags: SymbolFlags::None,
+            });
+            symbol_ids.insert(reloc.symbol.clone(), id);
+            id
+        };
+        object
+            .add_relocation(
+                text_section,
+                WriteRelocation {
+                    offset: reloc.offset,
+                    symbol,
+                    addend: reloc.addend,
+                    flags: RelocationFlags::Elf {
+                        r_type: reloc.r_type,
+                    },
+                },
+            )
+            .with_context(|| {
+                format!(
+                    "add proof relocation {:#x} r_type={} {}",
+                    reloc.offset, reloc.r_type, reloc.symbol
+                )
+            })?;
+    }
+
+    let abi_section = object.add_section(
+        Vec::new(),
+        b".native_link_abi".to_vec(),
+        SectionKind::ReadOnlyData,
+    );
+    let abi = format!(
+        "version\tnative-link-abi-v1\nx86_callee_saved_mask\t{}\n",
+        x86_callee_saved_mask
+    );
+    object.append_section_data(abi_section, abi.as_bytes(), 1);
+
+    let bytes = object.write().context("write proof ELF object")?;
+    fs::write(path, bytes).with_context(|| format!("write {}", path.display()))
 }
 
 fn parse_name_addr_args(args: &[String], kind: &str) -> Result<HashMap<String, u64>> {
@@ -643,6 +839,24 @@ struct RewriteResult {
     relocs: Vec<RelocRecord>,
     map_patches: Vec<MapPatch>,
     x86_callee_saved_mask: u8,
+    proof_relocs: Vec<ProofReloc>,
+    proof_symbols: Vec<ProofSymbol>,
+}
+
+#[derive(Clone, Debug)]
+struct ProofReloc {
+    offset: u64,
+    r_type: u32,
+    symbol: String,
+    addend: i64,
+    data: Option<Vec<u8>>,
+}
+
+#[derive(Clone, Debug)]
+struct ProofSymbol {
+    name: String,
+    offset: u64,
+    size: u64,
 }
 
 /// Per-symbol record kept across the decode/encode phases so that ELF
@@ -814,6 +1028,7 @@ fn rewrite_x86(
     map_addrs: &HashMap<String, u64>,
     lookup_sites: &[LookupSiteSpec],
     update_sites: &[UpdateSiteSpec],
+    proof_mode: bool,
     show: bool,
 ) -> Result<RewriteResult> {
     let included_ranges: Vec<(u64, u64)> = included
@@ -887,7 +1102,8 @@ fn rewrite_x86(
                 remap_x86_entry_registers(&mut insn, &entry_abi_strip.register_renames)?;
             }
 
-            if insn.mnemonic() == Mnemonic::Mov
+            if !proof_mode
+                && insn.mnemonic() == Mnemonic::Mov
                 && insn.op_count() >= 2
                 && insn.op0_kind() == OpKind::Register
                 && insn.op1_kind() == OpKind::Memory
@@ -933,7 +1149,9 @@ fn rewrite_x86(
                 }
             }
 
-            validate_no_external_refs(&insn, &included_ranges)?;
+            if !proof_mode {
+                validate_no_external_refs(&insn, &included_ranges)?;
+            }
 
             // Re-anchor to symbol-local IP=0 space.
             insn.set_ip(local_ip);
@@ -1008,6 +1226,12 @@ fn rewrite_x86(
                 FlowControl::Call | FlowControl::IndirectCall
             ) {
                 if let Some(name) = helper_call_sites.get(&(sym.address, local_ip)) {
+                    if proof_mode {
+                        local.push(insn);
+                        kinds.push(None);
+                        insn_local_ip.push(local_ip);
+                        continue;
+                    }
                     if name == "bpf_get_smp_processor_id" {
                         if let Some(inline) = build_x86_get_smp_processor_id_inline(helper_addrs)? {
                             for ib in inline {
@@ -1242,18 +1466,23 @@ fn rewrite_x86(
     // Stage 2: resolve ELF relocations. GOT helper calls keep their original
     // RIP-relative indirect-call form and point at in-blob literal-pool entries;
     // PLT32 helper calls use in-blob absolute trampolines.
-    relocs.extend(apply_elf_relocations(
-        elf,
-        &layouts,
-        helper_addrs,
-        map_addrs,
-        lookup_sites,
-        &lookup_call_ordinal,
-        &resolved_helper_call_sites,
-        &resolved_got_relocations,
-        &mut blob,
-        &mut map_patches,
-    )?);
+    let proof_relocs = if proof_mode {
+        collect_x86_proof_relocs(elf, &layouts)?
+    } else {
+        relocs.extend(apply_elf_relocations(
+            elf,
+            &layouts,
+            helper_addrs,
+            map_addrs,
+            lookup_sites,
+            &lookup_call_ordinal,
+            &resolved_helper_call_sites,
+            &resolved_got_relocations,
+            &mut blob,
+            &mut map_patches,
+        )?);
+        Vec::new()
+    };
 
     // Patch JmpEnd disps LAST so they target the byte AFTER any
     // trampolines we just appended -- i.e., where the BPF JIT will emit
@@ -1296,11 +1525,18 @@ fn rewrite_x86(
     if show {
         disasm(&blob);
     }
+    let proof_symbols = if proof_mode {
+        proof_symbols_from_x86_layouts(&layouts, blob.len())?
+    } else {
+        Vec::new()
+    };
     Ok(RewriteResult {
         blob,
         relocs,
         map_patches,
         x86_callee_saved_mask,
+        proof_relocs,
+        proof_symbols,
     })
 }
 
@@ -1995,13 +2231,20 @@ fn arm64_text_relocations(
             let (target_name, target_section_index) = match reloc.target() {
                 RelocationTarget::Symbol(idx) => {
                     let target_sym = elf.symbol_by_index(idx)?;
-                    (
-                        target_sym
-                            .name()
-                            .map_err(|e| anyhow!("reloc target symbol name: {e}"))?
-                            .to_string(),
-                        target_sym.section_index(),
-                    )
+                    let target_section_index = target_sym.section_index();
+                    let raw_name = target_sym
+                        .name()
+                        .map_err(|e| anyhow!("reloc target symbol name: {e}"))?;
+                    let target_name = if raw_name.is_empty() {
+                        format!(
+                            "__arm64_section_{:?}_addend_{}",
+                            target_section_index,
+                            reloc.addend()
+                        )
+                    } else {
+                        raw_name.to_string()
+                    };
+                    (target_name, target_section_index)
                 }
                 _ => continue,
             };
@@ -2017,6 +2260,43 @@ fn arm64_text_relocations(
         }
     }
     Ok(out)
+}
+
+fn arm64_reloc_data(
+    elf: &object::File,
+    reloc: &Arm64RelocInfo,
+    max_len: usize,
+) -> Result<Vec<u8>> {
+    let section_index = reloc.target_section_index.ok_or_else(|| {
+        anyhow!(
+            "arm64 proof data relocation {} has no target section",
+            reloc.target_name
+        )
+    })?;
+    if reloc.addend < 0 {
+        bail!(
+            "arm64 proof data relocation {} has negative addend {}",
+            reloc.target_name,
+            reloc.addend
+        );
+    }
+    let section = elf
+        .section_by_index(section_index)
+        .with_context(|| format!("arm64 proof data section {section_index:?}"))?;
+    let data = section
+        .data()
+        .with_context(|| format!("read arm64 proof data section {section_index:?}"))?;
+    let start = reloc.addend as usize;
+    if start >= data.len() {
+        bail!(
+            "arm64 proof data relocation {} addend {} exceeds section size {}",
+            reloc.target_name,
+            reloc.addend,
+            data.len()
+        );
+    }
+    let end = data.len().min(start + max_len);
+    Ok(data[start..end].to_vec())
 }
 
 fn discover_reachable_arm64(elf: &object::File, entry: &SymInfo) -> Result<Vec<SymInfo>> {
@@ -2133,6 +2413,7 @@ fn rewrite_arm64(
     map_addrs: &HashMap<String, u64>,
     lookup_sites: &[LookupSiteSpec],
     update_sites: &[UpdateSiteSpec],
+    proof_mode: bool,
     show: bool,
 ) -> Result<RewriteResult> {
     let mut blob = Vec::new();
@@ -2143,6 +2424,7 @@ fn rewrite_arm64(
     let relocs = arm64_text_relocations(elf, included)?;
     let mut lookup_call_counter: usize = 0;
     let mut update_call_counter: usize = 0;
+    let mut proof_relocs: Vec<ProofReloc> = Vec::new();
 
     for sym in included {
         let is_entry = sym.address == entry.address;
@@ -2166,6 +2448,17 @@ fn rewrite_arm64(
             if let Some(reloc) = reloc {
                 match reloc.r_type {
                     R_AARCH64_ADR_PREL_PG_HI21 => {
+                        if proof_mode {
+                            proof_relocs.push(ProofReloc {
+                                offset: (emit_word_index * 4) as u64,
+                                r_type: reloc.r_type,
+                                symbol: reloc.target_name.clone(),
+                                addend: reloc.addend,
+                                data: Some(arm64_reloc_data(elf, reloc, 16)?),
+                            });
+                            blob.extend_from_slice(&insn.to_le_bytes());
+                            continue;
+                        }
                         let section_index = reloc.target_section_index.ok_or_else(|| {
                             anyhow!(
                                 "arm64 ADR_PREL in {} at byte offset {off:#x} targets {} without a section",
@@ -2185,6 +2478,17 @@ fn rewrite_arm64(
                         continue;
                     }
                     R_AARCH64_ADD_ABS_LO12_NC => {
+                        if proof_mode {
+                            proof_relocs.push(ProofReloc {
+                                offset: (emit_word_index * 4) as u64,
+                                r_type: reloc.r_type,
+                                symbol: reloc.target_name.clone(),
+                                addend: reloc.addend,
+                                data: None,
+                            });
+                            blob.extend_from_slice(&insn.to_le_bytes());
+                            continue;
+                        }
                         patches.push(Arm64Patch {
                             word_index: emit_word_index,
                             kind: Arm64PatchKind::Nop,
@@ -2193,6 +2497,17 @@ fn rewrite_arm64(
                         continue;
                     }
                     R_AARCH64_CALL26 => {
+                        if proof_mode {
+                            proof_relocs.push(ProofReloc {
+                                offset: (emit_word_index * 4) as u64,
+                                r_type: reloc.r_type,
+                                symbol: reloc.target_name.clone(),
+                                addend: reloc.addend,
+                                data: None,
+                            });
+                            blob.extend_from_slice(&insn.to_le_bytes());
+                            continue;
+                        }
                         if !helper_addrs.contains_key(&reloc.target_name) {
                             bail!(
                                 "arm64 CALL26 in {} at byte offset {off:#x} targets unknown helper {}",
@@ -2262,6 +2577,17 @@ fn rewrite_arm64(
                         continue;
                     }
                     R_AARCH64_ADR_GOT_PAGE => {
+                        if proof_mode {
+                            proof_relocs.push(ProofReloc {
+                                offset: (emit_word_index * 4) as u64,
+                                r_type: reloc.r_type,
+                                symbol: reloc.target_name.clone(),
+                                addend: reloc.addend,
+                                data: None,
+                            });
+                            blob.extend_from_slice(&insn.to_le_bytes());
+                            continue;
+                        }
                         if !map_addrs.contains_key(&reloc.target_name) {
                             bail!(
                                 "arm64 ADR_GOT in {} at byte offset {off:#x} targets unknown map {}",
@@ -2279,6 +2605,17 @@ fn rewrite_arm64(
                         continue;
                     }
                     R_AARCH64_LD64_GOT_LO12_NC => {
+                        if proof_mode {
+                            proof_relocs.push(ProofReloc {
+                                offset: (emit_word_index * 4) as u64,
+                                r_type: reloc.r_type,
+                                symbol: reloc.target_name.clone(),
+                                addend: reloc.addend,
+                                data: None,
+                            });
+                            blob.extend_from_slice(&insn.to_le_bytes());
+                            continue;
+                        }
                         if !map_addrs.contains_key(&reloc.target_name) {
                             bail!(
                                 "arm64 LD64_GOT in {} at byte offset {off:#x} targets unknown map {}",
@@ -2592,12 +2929,54 @@ fn rewrite_arm64(
     if show {
         disasm_arm64_words(&blob);
     }
+    let proof_symbols = if proof_mode {
+        arm64_proof_symbols(included, &sym_start_word_offset, &sym_end_word_offset, blob.len())?
+    } else {
+        Vec::new()
+    };
+    proof_relocs.sort_by_key(|reloc| reloc.offset);
     Ok(RewriteResult {
         blob,
         relocs: Vec::new(),
         map_patches,
         x86_callee_saved_mask: 0,
+        proof_relocs,
+        proof_symbols,
     })
+}
+
+fn arm64_proof_symbols(
+    included: &[SymInfo],
+    start_words: &HashMap<u64, usize>,
+    end_words: &HashMap<u64, usize>,
+    blob_len: usize,
+) -> Result<Vec<ProofSymbol>> {
+    let mut out = Vec::new();
+    for sym in included {
+        let start = *start_words
+            .get(&sym.address)
+            .ok_or_else(|| anyhow!("arm64 proof symbol {} has no start", sym.name))?
+            * 4;
+        let mut end = *end_words
+            .get(&sym.address)
+            .ok_or_else(|| anyhow!("arm64 proof symbol {} has no end", sym.name))?
+            * 4;
+        if sym.address == included[0].address && end < blob_len {
+            end = blob_len;
+        }
+        if end < start || end > blob_len {
+            bail!(
+                "arm64 proof symbol {} range {start:#x}..{end:#x} outside blob size {blob_len}",
+                sym.name
+            );
+        }
+        out.push(ProofSymbol {
+            name: sym.name.clone(),
+            offset: start as u64,
+            size: (end - start) as u64,
+        });
+    }
+    Ok(out)
 }
 
 fn disasm_arm64_words(blob: &[u8]) {
@@ -2606,6 +2985,195 @@ fn disasm_arm64_words(blob: &[u8]) {
         let insn = u32::from_le_bytes(word.try_into().unwrap());
         eprintln!("  {:#06x}: {:#010x}", i * 4, insn);
     }
+}
+
+fn x86_layout_insn_global_offset(layout: &SymbolLayout, local_patch_off: u64) -> Result<usize> {
+    let insn_idx = layout
+        .insn_local_ip
+        .iter()
+        .enumerate()
+        .filter(|(_, &ip)| ip != u64::MAX && ip <= local_patch_off)
+        .max_by_key(|(_, &ip)| ip)
+        .map(|(idx, _)| idx)
+        .ok_or_else(|| {
+            anyhow!(
+                "reloc at local offset {:#x} does not align with any decoded instruction in {}",
+                local_patch_off,
+                layout.sym.name
+            )
+        })?;
+    Ok(layout.base_in_blob + layout.new_offset_in_sym[insn_idx] as usize)
+}
+
+fn proof_symbols_from_x86_layouts(
+    layouts: &[SymbolLayout],
+    blob_len: usize,
+) -> Result<Vec<ProofSymbol>> {
+    let mut out = Vec::new();
+    for (idx, layout) in layouts.iter().enumerate() {
+        let start = layout.base_in_blob;
+        let next_start = layouts
+            .get(idx + 1)
+            .map(|next| next.base_in_blob)
+            .unwrap_or(blob_len);
+        if next_start < start {
+            bail!("x86 proof symbol layout is not sorted");
+        }
+        if start >= blob_len {
+            continue;
+        }
+        let end = next_start.min(blob_len);
+        out.push(ProofSymbol {
+            name: layout.sym.name.clone(),
+            offset: start as u64,
+            size: (end - start) as u64,
+        });
+    }
+    Ok(out)
+}
+
+fn collect_x86_proof_relocs(
+    elf: &object::File,
+    layouts: &[SymbolLayout],
+) -> Result<Vec<ProofReloc>> {
+    let mut relocs = Vec::new();
+    let mut sections: HashMap<object::SectionIndex, Vec<&SymbolLayout>> = HashMap::new();
+    for layout in layouts {
+        sections
+            .entry(layout.sym.section_index)
+            .or_default()
+            .push(layout);
+    }
+
+    for (section_index, layouts_in_sec) in sections {
+        let section = elf
+            .section_by_index(section_index)
+            .with_context(|| format!("section {:?}", section_index))?;
+        for (reloc_offset, reloc) in section.relocations() {
+            let Some(layout) = layouts_in_sec.iter().find(|l| {
+                reloc_offset >= l.sym.address && reloc_offset < l.sym.address + l.sym.size
+            }) else {
+                continue;
+            };
+            let target_sym_idx = match reloc.target() {
+                RelocationTarget::Symbol(idx) => idx,
+                _ => continue,
+            };
+            let target_sym = elf
+                .symbol_by_index(target_sym_idx)
+                .with_context(|| format!("proof reloc target symbol {target_sym_idx:?}"))?;
+            let target_name = target_sym
+                .name()
+                .map_err(|e| anyhow!("proof reloc target symbol name: {e}"))?
+                .to_string();
+            let r_type = match reloc.flags() {
+                RelocationFlags::Elf { r_type } => r_type,
+                _ => continue,
+            };
+            let local_patch_off = reloc_offset - layout.sym.address;
+            match r_type {
+                4 => {
+                    let opcode_local_off = local_patch_off
+                        .checked_sub(1)
+                        .ok_or_else(|| anyhow!("PLT32 proof reloc at offset 0?"))?;
+                    let opcode_off = x86_layout_insn_global_offset(layout, opcode_local_off)?;
+                    relocs.push(ProofReloc {
+                        offset: (opcode_off + 1) as u64,
+                        r_type,
+                        symbol: target_name,
+                        addend: reloc.addend(),
+                        data: None,
+                    });
+                }
+                9 | 41 | 42 => {
+                    let insn_idx = layout
+                        .insn_local_ip
+                        .iter()
+                        .enumerate()
+                        .filter(|(_, &ip)| ip != u64::MAX && ip <= local_patch_off)
+                        .max_by_key(|(_, &ip)| ip)
+                        .map(|(idx, _)| idx)
+                        .ok_or_else(|| {
+                            anyhow!(
+                                "GOT proof reloc at {:#x} does not align with any instruction in {}",
+                                local_patch_off,
+                                layout.sym.name
+                            )
+                        })?;
+                    let insn_off =
+                        layout.base_in_blob + layout.new_offset_in_sym[insn_idx] as usize;
+                    let off_within_insn =
+                        (local_patch_off - layout.insn_local_ip[insn_idx]) as usize;
+                    let disp32_off = insn_off + off_within_insn;
+                    relocs.push(ProofReloc {
+                        offset: disp32_off as u64,
+                        r_type,
+                        symbol: target_name,
+                        addend: reloc.addend(),
+                        data: None,
+                    });
+                }
+                2 => {
+                    let target_section_idx = target_sym.section_index().ok_or_else(|| {
+                        anyhow!("PC32 proof reloc target {} has no section", target_name)
+                    })?;
+                    let target_section = elf
+                        .section_by_index(target_section_idx)
+                        .with_context(|| format!("PC32 proof target section {target_section_idx:?}"))?;
+                    let target_data = target_section
+                        .data()
+                        .with_context(|| format!("read proof target section {target_section_idx:?} data"))?;
+                    let sec_base = target_section.address();
+                    let sym_off_in_sec = target_sym.address().checked_sub(sec_base).ok_or_else(|| {
+                        anyhow!("PC32 proof target {} below section base", target_name)
+                    })?;
+                    let sym_size = target_sym.size();
+                    if sym_size == 0 {
+                        bail!("PC32 proof target {} has zero size", target_name);
+                    }
+                    let end = sym_off_in_sec
+                        .checked_add(sym_size)
+                        .ok_or_else(|| anyhow!("PC32 proof target size overflow"))?;
+                    let sym_bytes = target_data
+                        .get(sym_off_in_sec as usize..end as usize)
+                        .ok_or_else(|| anyhow!("PC32 proof target {} out of section bounds", target_name))?;
+                    let insn_idx = layout
+                        .insn_local_ip
+                        .iter()
+                        .enumerate()
+                        .filter(|(_, &ip)| ip != u64::MAX && ip <= local_patch_off)
+                        .max_by_key(|(_, &ip)| ip)
+                        .map(|(idx, _)| idx)
+                        .ok_or_else(|| {
+                            anyhow!(
+                                "PC32 proof reloc at {:#x} does not align with any instruction in {}",
+                                local_patch_off,
+                                layout.sym.name
+                            )
+                        })?;
+                    let new_insn_off =
+                        layout.base_in_blob + layout.new_offset_in_sym[insn_idx] as usize;
+                    let off_within_insn =
+                        (local_patch_off - layout.insn_local_ip[insn_idx]) as usize;
+                    relocs.push(ProofReloc {
+                        offset: (new_insn_off + off_within_insn) as u64,
+                        r_type,
+                        symbol: target_name,
+                        addend: reloc.addend(),
+                        data: Some(sym_bytes.to_vec()),
+                    });
+                }
+                _ => bail!(
+                    "unsupported proof relocation r_type={} against symbol {} (offset {:#x})",
+                    r_type,
+                    target_name,
+                    reloc_offset
+                ),
+            }
+        }
+    }
+    relocs.sort_by_key(|reloc| reloc.offset);
+    Ok(relocs)
 }
 
 /// Resolve ELF .text relocations attached to the bytes we just encoded.

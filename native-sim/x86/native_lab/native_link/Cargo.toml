@@ -12,7 +12,7 @@ path = "src/main.rs"
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
 iced-x86 = { version = "1.21", features = ["decoder", "encoder", "block_encoder", "instr_info"] }
-object = { version = "0.36", default-features = false, features = ["read", "elf", "std"] }
+object = { version = "0.36", default-features = false, features = ["read", "write", "elf", "std"] }
 
 [profile.release]
 lto = "thin"

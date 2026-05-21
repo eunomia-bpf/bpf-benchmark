@@ -6,23 +6,19 @@ from __future__ import annotations
 import argparse
 import re
 import subprocess
+from dataclasses import replace
 from dataclasses import dataclass
 from pathlib import Path
+
+import yaml
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 MICRO_PROGRAMS = REPO_ROOT / "micro" / "programs"
+STAGE2_PROGRAMS = REPO_ROOT / "native-sim" / "test"
 OUT_DIR = Path(__file__).resolve().parent
-X86_BUILD_DIR = MICRO_PROGRAMS / "build-x86"
-NATIVE_LINK_MANIFEST = (
-    REPO_ROOT / "native-sim" / "x86" / "native_lab" /
-    "native_link" / "Cargo.toml"
-)
-NATIVE_LINK_BIN = (
-    REPO_ROOT / "native-sim" / "x86" / "native_lab" /
-    "native_link" / "target" / "release" / "native-link"
-)
-NATIVE_LINK_BUILD_DIR = OUT_DIR / "build" / "native-link"
+CONFIG = REPO_ROOT / "micro" / "config" / "micro_pure_jit.yaml"
+PROOF_OBJECT_DIR = OUT_DIR / "build" / "native-link"
 
 PTR_WIDTH = {
     "BYTE": 8,
@@ -106,11 +102,18 @@ WIDTH_CONST = {
 }
 
 @dataclass(frozen=True)
+class Bench:
+    name: str
+    kind: str
+
+
+@dataclass(frozen=True)
 class NativeInsn:
     addr: int
     raw: str
     mnemonic: str
     operands: tuple[str, ...]
+    reloc_symbol: str | None = None
 
 
 @dataclass(frozen=True)
@@ -144,6 +147,11 @@ def split_operands(text: str) -> tuple[str, ...]:
 def parse_asm_text(text: str) -> list[NativeInsn]:
     insns: list[NativeInsn] = []
     for line in text.splitlines():
+        reloc = re.search(r"\bR_X86_64_[A-Z0-9_]+\s+(\S+)", line)
+        if reloc is not None and insns:
+            symbol = re.sub(r"([+-]0x[0-9a-fA-F]+)$", "", reloc.group(1))
+            insns[-1] = replace(insns[-1], reloc_symbol=symbol)
+            continue
         if ":" not in line:
             continue
         prefix, rest = line.split(":", 1)
@@ -164,52 +172,78 @@ def parse_asm_text(text: str) -> list[NativeInsn]:
     return insns
 
 
-def native_object_path(name: str, build_dir: Path) -> Path:
-    so_path = build_dir / f"{name}.native.so"
-    if not so_path.is_file():
-        raise RuntimeError(f"missing x86 native object: {so_path}")
-    return so_path
-
-
-def ensure_native_link() -> Path:
-    if not NATIVE_LINK_BIN.exists():
-        subprocess.run(["cargo", "build", "--release", "--manifest-path",
-                        str(NATIVE_LINK_MANIFEST)], cwd=REPO_ROOT, check=True)
-    return NATIVE_LINK_BIN
-
-
-def native_entry_symbol(so_path: Path, symbols: list[str]) -> str:
-    result = subprocess.run(["objdump", "-t", str(so_path)], cwd=REPO_ROOT,
+def section_size(obj: Path, section: str) -> int:
+    result = subprocess.run(["objdump", "-h", str(obj)], cwd=REPO_ROOT,
                             check=True, text=True, stdout=subprocess.PIPE)
-    present = {line.rsplit(None, 1)[-1] for line in result.stdout.splitlines()
-               if line.strip()}
-    for symbol in symbols:
-        if symbol in present:
-            return symbol
-    raise ValueError(f"{so_path}: none of the native symbols exist: {symbols}")
+    for line in result.stdout.splitlines():
+        fields = line.split()
+        if len(fields) >= 3 and fields[1] == section:
+            return int(fields[2], 16)
+    raise RuntimeError(f"{obj}: missing section {section}")
 
 
-def parse_native_link_blob(name: str, build_dir: Path) -> tuple[list[NativeInsn], int]:
-    so_path = native_object_path(name, build_dir)
-    symbol = native_entry_symbol(so_path, [f"{name}_xdp", f"{name}_prog"])
-    linker = ensure_native_link()
-    NATIVE_LINK_BUILD_DIR.mkdir(parents=True, exist_ok=True)
-    blob_path = NATIVE_LINK_BUILD_DIR / f"{name}.blob.bin"
-    reloc_path = NATIVE_LINK_BUILD_DIR / f"{name}.relocs.bin"
-    result = subprocess.run(
-        [str(linker), "--input", str(so_path), "--symbol", symbol,
-         "--output", str(blob_path), "--output-relocs", str(reloc_path)],
-        cwd=REPO_ROOT, check=False, text=True, stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
+def rodata_bytes(obj: Path) -> bytes:
+    result = subprocess.run(["objdump", "-s", "-j", ".native_link_rodata", str(obj)],
+                            cwd=REPO_ROOT, check=False, text=True,
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if result.returncode != 0:
-        detail = "\n".join(part.strip() for part in (result.stdout, result.stderr)
-                           if part and part.strip())
-        raise RuntimeError(f"native-link failed for {name}\n{detail}")
+        return b""
+    out = bytearray()
+    for line in result.stdout.splitlines():
+        fields = line.split()
+        if len(fields) < 2 or not re.fullmatch(r"[0-9a-fA-F]+", fields[0]):
+            continue
+        for field in fields[1:]:
+            if not re.fullmatch(r"[0-9a-fA-F]+", field) or len(field) % 2:
+                break
+            out.extend(int(field[i:i + 2], 16) for i in range(0, len(field), 2))
+    return bytes(out)
+
+
+def load_rodata16(obj: Path) -> dict[str, tuple[int, int]]:
+    data = rodata_bytes(obj)
+    if not data:
+        return {}
+    result = subprocess.run(["objdump", "-t", str(obj)], cwd=REPO_ROOT,
+                            check=True, text=True, stdout=subprocess.PIPE)
+    out: dict[str, tuple[int, int]] = {}
+    for line in result.stdout.splitlines():
+        fields = line.split()
+        if ".native_link_rodata" not in fields:
+            continue
+        idx = fields.index(".native_link_rodata")
+        if idx + 2 >= len(fields):
+            continue
+        offset = int(fields[0], 16)
+        size = int(fields[idx + 1], 16)
+        name = fields[idx + 2]
+        if size >= 16 and offset + 16 <= len(data):
+            out[name] = (
+                int.from_bytes(data[offset:offset + 8], "little"),
+                int.from_bytes(data[offset + 8:offset + 16], "little"),
+            )
+    return out
+
+
+def parse_native_link_blob(
+    name: str,
+    proof_object_dir: Path,
+) -> tuple[list[NativeInsn], int, dict[str, tuple[int, int]]]:
+    proof_obj = proof_object_dir / f"{name}.proof.o"
+    if not proof_obj.is_file():
+        raise RuntimeError(f"missing proof object for {name}: {proof_obj}")
+    rodata16 = load_rodata16(proof_obj)
     disasm = subprocess.run(
-        ["objdump", "-D", "-b", "binary", "-m", "i386:x86-64", "-Mintel",
-         str(blob_path)], cwd=REPO_ROOT, check=True, text=True,
+        ["objdump", "-dr", "-Mintel", str(proof_obj)], cwd=REPO_ROOT, check=True, text=True,
         stdout=subprocess.PIPE)
-    return parse_asm_text(disasm.stdout), blob_path.stat().st_size
+    return parse_asm_text(disasm.stdout), section_size(proof_obj, ".text"), rodata16
+
+
+def parse_proof_object_program(
+    name: str,
+    proof_object_dir: Path,
+) -> tuple[list[NativeInsn], dict[str, list[NativeInsn]], int | None, dict[str, tuple[int, int]]]:
+    return parse_native_linked_program(name, proof_object_dir)
 
 
 def normalize_native_link_entry_returns(
@@ -237,33 +271,43 @@ def normalize_native_link_entry_returns(
 
 def parse_native_linked_program(
     name: str,
-    build_dir: Path,
-) -> tuple[list[NativeInsn], dict[str, list[NativeInsn]]]:
-    insns, blob_len = parse_native_link_blob(name, build_dir)
+    proof_object_dir: Path,
+) -> tuple[list[NativeInsn], dict[str, list[NativeInsn]], int, dict[str, tuple[int, int]]]:
+    insns, blob_len, rodata16 = parse_native_link_blob(name, proof_object_dir)
     insns = normalize_native_link_entry_returns(insns, blob_len)
     if not insns:
-        return [], {}
+        return [], {}, blob_len, rodata16
 
     insn_addrs = {insn.addr for insn in insns}
+    exit_addr = max(
+        [blob_len, *[
+            branch_target(insn.operands[0])
+            for insn in insns
+            if insn.mnemonic in CC_AUX or insn.mnemonic == "jmp"
+            if insn.operands
+            if branch_target(insn.operands[0]) not in insn_addrs
+        ]]
+    )
     sub_starts = sorted({
         branch_target(insn.operands[0])
         for insn in insns
         if insn.mnemonic == "call"
         and insn.operands
+        and branch_target(insn.operands[0]) != 0
         and branch_target(insn.operands[0]) in insn_addrs
     })
     if not sub_starts:
-        return insns, {}
+        return insns, {}, exit_addr, rodata16
 
     entry_end = sub_starts[0]
     entry = [insn for insn in insns if insn.addr < entry_end]
     subfunctions: dict[str, list[NativeInsn]] = {}
     for index, start in enumerate(sub_starts):
-        end = sub_starts[index + 1] if index + 1 < len(sub_starts) else blob_len
+        end = sub_starts[index + 1] if index + 1 < len(sub_starts) else exit_addr
         fn_insns = [insn for insn in insns if start <= insn.addr < end]
         if fn_insns:
             subfunctions[f"native_link_sub_{start:x}"] = fn_insns
-    return entry, subfunctions
+    return entry, subfunctions, exit_addr, rodata16
 
 
 def parse_int(text: str) -> int:
@@ -358,6 +402,59 @@ def branch_target(operand: str) -> int:
 def enc(op: str, dst: str = "X86_REG_NONE", src: str = "X86_REG_NONE",
         flags: str = "X86_WIDTH_64", aux: str = "0", imm: str = "0") -> EncodedInsn:
     return EncodedInsn(op, dst, src, flags, aux, imm)
+
+
+def is_helper_symbol(symbol: str | None) -> bool:
+    return bool(symbol and symbol.startswith("bpf_"))
+
+
+def is_rodata_symbol(symbol: str | None, rodata16: dict[str, tuple[int, int]]) -> bool:
+    return bool(symbol and symbol in rodata16)
+
+
+def append_special_step(
+    lines: list[str],
+    insn: NativeInsn,
+    rodata16: dict[str, tuple[int, int]],
+    indent: str,
+) -> bool:
+    if is_helper_symbol(insn.reloc_symbol):
+        if insn.mnemonic in {"mov", "movabs"} and len(insn.operands) == 2:
+            dst_reg = reg_info(insn.operands[0])
+            if dst_reg and is_mem(insn.operands[1]):
+                lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+                lines.append(
+                    f"{indent}X86_SIM_L_WRITE_REG_HELPER_ID({dst_reg[0]}, "
+                    f"X86_SIM_HELPER_{insn.reloc_symbol});"
+                )
+                return True
+    if insn.reloc_symbol and not is_helper_symbol(insn.reloc_symbol):
+        if insn.mnemonic in {"mov", "movabs"} and len(insn.operands) == 2:
+            dst_reg = reg_info(insn.operands[0])
+            if dst_reg and is_mem(insn.operands[1]) and not is_rodata_symbol(insn.reloc_symbol, rodata16):
+                lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+                lines.append(
+                    f"{indent}X86_SIM_L_WRITE_REG_MAP_PTR({dst_reg[0]}, &{insn.reloc_symbol});"
+                )
+                return True
+        if insn.mnemonic == "movups" and len(insn.operands) == 2:
+            if insn.operands[0].lower() == "xmm0" and is_rodata_symbol(insn.reloc_symbol, rodata16):
+                lo, hi = rodata16[insn.reloc_symbol]
+                lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+                lines.append(
+                    f"{indent}X86_SIM_L_LOAD_CONST16_XMM0({c_u64(lo)}, {c_u64(hi)});"
+                )
+                return True
+    if insn.mnemonic in {"movaps", "movups"} and len(insn.operands) == 2:
+        dst, src = insn.operands
+        if is_mem(dst) and src.lower() == "xmm0" and mem_base_reg(dst) == "X86_RSP":
+            lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+            lines.append(
+                f"{indent}X86_SIM_L_STORE_XMM0_STACK((__s64)(long)"
+                f"X86_SIM_L_READ_REG_PTR(X86_RSP) + {mem_disp(dst)});"
+            )
+            return True
+    return False
 
 
 def encode(insn: NativeInsn) -> EncodedInsn:
@@ -473,6 +570,12 @@ def encode(insn: NativeInsn) -> EncodedInsn:
         if dst_reg and src_reg:
             return enc("X86_OP_CMP_REG" if op == "cmp" else "X86_OP_TEST_REG",
                        dst=dst_reg[0], src=src_reg[0], flags=WIDTH_CONST[dst_reg[1]])
+        if op == "cmp" and dst_reg and is_mem(ops[1]):
+            return enc("X86_OP_CMP_REG_MEM",
+                       dst=dst_reg[0], src=mem_base_reg(ops[1]),
+                       flags=WIDTH_CONST[dst_reg[1]],
+                       aux=mem_aux(ops[1], operand_width(ops[1], dst_reg[1])),
+                       imm=c_u64(mem_disp(ops[1])))
         if op == "cmp" and is_mem(ops[0]) and src_reg:
             return enc("X86_OP_CMP_MEM_REG",
                        dst=mem_base_reg(ops[0]), src=src_reg[0],
@@ -568,7 +671,10 @@ def c_comment(text: str) -> str:
 
 
 def append_step(lines: list[str], insn: NativeInsn, indent: str = "\t",
-                step_macro: str = "X86_SIM_RUN_OP") -> None:
+                step_macro: str = "X86_SIM_RUN_OP",
+                rodata16: dict[str, tuple[int, int]] | None = None) -> None:
+    if append_special_step(lines, insn, rodata16 or {}, indent):
+        return
     encoded = encode(insn)
     lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
     lines.append(
@@ -583,7 +689,9 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
                          call_functions: dict[int, str] | None = None,
                          subroutine: bool = False,
                          step_macro: str = "X86_SIM_RUN_OP",
-                         ret_statement: str = "X86_SIM_X86_RET();") -> None:
+                         ret_statement: str = "X86_SIM_X86_RET();",
+                         rodata16: dict[str, tuple[int, int]] | None = None,
+                         helper_call_regs: set[str] | None = None) -> None:
     branch_macro = "X86_SIM_X86_SUB_JCC" if subroutine else "X86_SIM_X86_JCC"
     jump_macro = "X86_SIM_X86_SUB_JMP" if subroutine else "X86_SIM_X86_JMP"
     if insn.mnemonic in CC_AUX and insn.mnemonic.startswith("j"):
@@ -610,6 +718,14 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
         return
     if insn.mnemonic == "call":
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
+        if is_helper_symbol(insn.reloc_symbol):
+            lines.append(f"{indent}X86_SIM_BPF_CALL_{insn.reloc_symbol}();")
+            return
+        if insn.operands:
+            call_reg = reg_info(insn.operands[0])
+            if call_reg is not None and helper_call_regs and call_reg[0] in helper_call_regs:
+                lines.append(f"{indent}X86_SIM_BPF_CALL_REG({call_reg[0]});")
+                return
         target = branch_target(insn.operands[0]) if insn.operands else 0
         if call_functions and target in call_functions:
             if next_addr is None:
@@ -625,25 +741,49 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
         lines.append(f"{indent}{ret_statement}")
         return
-    append_step(lines, insn, indent, step_macro)
+    append_step(lines, insn, indent, step_macro, rodata16)
 
 
 def c_ident(text: str) -> str:
     return re.sub(r"[^A-Za-z0-9_]", "_", text)
 
 
-def program_kind(name: str) -> str:
-    source = MICRO_PROGRAMS / f"{name}.bpf.c"
-    text = source.read_text()
-    if "CGROUP_SKB_BENCH" in text or "cgroup_skb" in text:
+def program_kind(item: dict) -> str:
+    tags = set(item.get("tags", []))
+    if "cgroup-skb" in tags or "cgroup_skb" in tags:
         return "cgroup_skb"
-    if "TC_BENCH" in text or 'SEC("tc")' in text:
+    if "tc" in tags:
         return "tc"
     return "xdp"
 
 
+def load_benches(config_path: Path) -> list[Bench]:
+    data = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    return [Bench(item["name"], program_kind(item)) for item in data["benchmarks"]]
+
+
+def source_prelude(source: Path) -> str:
+    text = source.read_text(encoding="utf-8")
+    match = re.search(r'\nSEC\("[^"]+"\)\s+int\s+', text)
+    if match is None:
+        return ""
+    prelude = text[:match.start()].strip()
+    prelude = prelude.replace(
+        '#include "include/native_helpers.h"',
+        '#include "../../test/include/native_helpers.h"',
+    )
+    return prelude
+
+
+def proof_kind_for_source(bench: Bench, source: Path) -> str:
+    _ = source
+    return bench.kind
+
+
 def render_x86_subroutine(symbol: str, insns: list[NativeInsn],
-                          call_functions: dict[int, str]) -> str:
+                          call_functions: dict[int, str],
+                          rodata16: dict[str, tuple[int, int]] | None = None,
+                          helper_call_regs: set[str] | None = None) -> str:
     addrs = {insn.addr for insn in insns}
     next_addrs = {
         insn.addr: insns[index + 1].addr
@@ -658,14 +798,19 @@ def render_x86_subroutine(symbol: str, insns: list[NativeInsn],
                              step_macro="X86_SIM_RUN_OP",
                              ret_statement=(
                                  "X86_SIM_X86_SUB_RET(x86_sim_ret_dispatch);"
-                             ))
+                             ),
+                             rodata16=rodata16,
+                             helper_call_regs=helper_call_regs)
     lines.append("")
     return "\n".join(lines)
 
 
 def render_program(name: str, insns: list[NativeInsn],
                    subfunctions: dict[str, list[NativeInsn]] | None = None,
-                   kind: str = "xdp") -> str:
+                   kind: str = "xdp",
+                   exit_addr: int | None = None,
+                   source_prelude: str = "",
+                   rodata16: dict[str, tuple[int, int]] | None = None) -> str:
     ret_statement = "X86_SIM_X86_RET();"
     subfunctions = subfunctions or {}
     if kind == "tc":
@@ -681,6 +826,8 @@ def render_program(name: str, insns: list[NativeInsn],
         ctx_type = "struct xdp_md *"
         declare = "X86_SIM_ENTRY_XDP(ctx);"
     addrs = {insn.addr for insn in insns}
+    if exit_addr is not None:
+        addrs.add(exit_addr)
     subroutine_label_by_addr = {
         fn_insns[0].addr: f"x86_l_{fn_insns[0].addr:x}"
         for symbol, fn_insns in subfunctions.items()
@@ -708,6 +855,15 @@ def render_program(name: str, insns: list[NativeInsn],
         insn.addr: insns[index + 1].addr
         for index, insn in enumerate(insns[:-1])
     }
+    helper_call_regs = {
+        reg_info(insn.operands[0])[0]
+        for fn_insns in [insns, *subfunctions.values()]
+        for insn in fn_insns
+        if is_helper_symbol(insn.reloc_symbol)
+        and insn.mnemonic in {"mov", "movabs"}
+        and len(insn.operands) == 2
+        and reg_info(insn.operands[0]) is not None
+    }
     sim_header = "../x86_sim_local_bpf.h"
     lines: list[str] = []
     if has_stack:
@@ -718,6 +874,9 @@ def render_program(name: str, insns: list[NativeInsn],
         f'#include "{sim_header}"',
         "",
     ])
+    if source_prelude:
+        lines.append(source_prelude.rstrip())
+        lines.append("")
     lines.extend([
         section,
         f"int {name}_x86_sim_xdp({ctx_type}ctx)",
@@ -730,11 +889,18 @@ def render_program(name: str, insns: list[NativeInsn],
         append_branch_or_ret(lines, insn, addrs,
                              next_addr=next_addrs.get(insn.addr),
                              call_functions=subroutine_label_by_addr,
-                             ret_statement=ret_statement)
+                             ret_statement=ret_statement,
+                             rodata16=rodata16,
+                             helper_call_regs=helper_call_regs)
+    if exit_addr is not None:
+        lines.append(f"x86_l_{exit_addr:x}:")
+        lines.append("\t/* native-link entry fallthrough exit */")
+        lines.append(f"\t{ret_statement}")
     if subfunctions:
         for symbol, fn_insns in subfunctions.items():
             lines.append(render_x86_subroutine(
-                symbol, fn_insns, subroutine_label_by_addr))
+                symbol, fn_insns, subroutine_label_by_addr, rodata16,
+                helper_call_regs))
         lines.extend([
             "x86_sim_ret_dispatch:",
             "\tswitch (__x86_sim_ret_addr) {",
@@ -749,34 +915,41 @@ def render_program(name: str, insns: list[NativeInsn],
     return "\n".join(lines)
 
 
-def write_one(md_path: Path, out_dir: Path, build_dir: Path) -> Path:
-    name = md_path.stem
-    insns, subfunctions = parse_native_linked_program(name, build_dir)
+def write_one(bench: Bench, source_dir: Path, out_dir: Path, proof_object_dir: Path) -> Path:
+    name = bench.name
+    insns, subfunctions, exit_addr, rodata16 = parse_proof_object_program(name, proof_object_dir)
     if not insns:
-        raise ValueError(f"{md_path}: no native instructions parsed")
+        raise ValueError(f"{name}: no native instructions parsed")
     output = out_dir / f"{name}.bpf.c"
+    source = source_dir / f"{name}.bpf.c"
+    prelude = source_prelude(source) if source_dir == STAGE2_PROGRAMS else ""
+    kind = proof_kind_for_source(bench, source) if source_dir == STAGE2_PROGRAMS else bench.kind
     output.write_text(render_program(name, insns, subfunctions,
-                                     kind=program_kind(name)))
+                                     kind=kind,
+                                     exit_addr=exit_addr,
+                                     source_prelude=prelude,
+                                     rodata16=rodata16))
     return output
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--micro-programs", type=Path, default=MICRO_PROGRAMS)
+    parser.add_argument("--micro-programs", type=Path)
     parser.add_argument("--output-dir", type=Path, default=OUT_DIR)
-    parser.add_argument("--native-build-dir", type=Path, default=X86_BUILD_DIR)
+    parser.add_argument("--proof-object-dir", type=Path, default=PROOF_OBJECT_DIR)
+    parser.add_argument("--native-build-dir", type=Path, help=argparse.SUPPRESS)
+    parser.add_argument("--config", type=Path, default=CONFIG)
     parser.add_argument("--only", nargs="*", help="optional micro benchmark stem list")
     args = parser.parse_args()
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
+    source_dir = args.micro_programs or (STAGE2_PROGRAMS if "stage2" in args.config.stem else MICRO_PROGRAMS)
     only = set(args.only or [])
     written: list[Path] = []
-    for bpf_path in sorted(args.micro_programs.glob("*.bpf.c")):
-        name = bpf_path.name[:-len(".bpf.c")]
-        if only and name not in only:
+    for bench in load_benches(args.config):
+        if only and bench.name not in only:
             continue
-        md_path = args.micro_programs / f"{name}.md"
-        written.append(write_one(md_path, args.output_dir, args.native_build_dir))
+        written.append(write_one(bench, source_dir, args.output_dir, args.proof_object_dir))
 
     for path in written:
         print(path)

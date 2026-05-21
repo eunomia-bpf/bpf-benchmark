@@ -164,13 +164,17 @@ python3 native-sim/x86/native_lab/tests/analyze.py
   linker must either keep an indirect absolute call sequence or use a
   near thunk placed in the same JIT allocation; silently assuming direct
   helper reachability is not hardware-equivalent.
-- **Entry save/restore cannot be stripped after codegen.** A 2026-05-21
+- **Entry save/restore cannot be stripped blindly after codegen.** A 2026-05-21
   KVM validation run removed x86 entry `push r15/r14/r12/rbx` and the
   matching pops in `native-link`; `helper_chain_simple` then panicked
   with an NX instruction fetch inside the native blob. The BPF JIT
   wrapper is not a normal SysV call frame, so post-link ABI surgery is
-  unsafe. The safer optimization is to bias LLVM register allocation
-  away from callee-saved registers before codegen.
+  unsafe unless it is proven against the concrete BPF JIT epilogue.
+  A later 2026-05-21 run stripped `rbp` too and `multi_map_policy`
+  panicked at the BPF epilogue `leave; ret`: the entry blob had used
+  `rbp` as a normal temporary, corrupting the JIT frame pointer. The
+  retained rule is therefore narrower: keep `rbp` save/restore, and only
+  strip `rbx`/`r12`-`r15` when the prologue/epilogue shape matches.
 - **Helper/map lowering should follow the BPF JIT's concrete ABI.** A
   2026-05-21 x86 KVM run added native lowering for the verifier/JIT's
   `bpf_get_smp_processor_id()` inline sequence (`cpu_number` plus
@@ -210,11 +214,107 @@ python3 native-sim/x86/native_lab/tests/analyze.py
   matching return values and packet result words. Keep the absolute
   helper-call path until the module/kernel JIT relocation failure is
   understood.
+- **Direct helper calls must be opportunistic, not assumed.** A later
+  2026-05-21 x86 KVM experiment kept a 13-byte
+  `movabs r11, helper; call *r11` slot and let the kernel module patch it
+  to `call rel32; nop8` only if the final helper address is in range.
+  Correctness passed in
+  `micro/results/x86_kvm_micro_20260521_131020_098407`, but the JIT dump
+  still showed the absolute-indirect form, so the extra relocation kind
+  was removed. The retained helper-call lowering is the range-independent
+  absolute-register call sequence.
+- **Instruction replacements must keep the replaced instruction's
+  original IP.** A 2026-05-21 KVM JIT dump from
+  `micro/results/x86_kvm_micro_20260521_132250_159715` showed
+  `multi_map_policy` emitting a `je -1` after an inline ARRAY lookup.
+  The branch target was the original GOT load, but native-link had
+  replaced that one instruction with a synthetic `movabs` that no longer
+  carried the original local IP. The fix records one-instruction
+  replacements at the replaced local IP; the focused validation
+  `micro/results/x86_kvm_micro_20260521_134806_999032` kept
+  map/helper return values matching `kernel` and the dump now branches
+  to real instruction boundaries.
+- **RIP literal-pool helper calls were tested and not kept.** A
+  2026-05-21 x86 KVM experiment used `call *disp32(%rip)` through a
+  blob-local literal pool so the call instruction stayed shorter than
+  `movabs r11; call *r11`. Correctness passed in
+  `micro/results/x86_kvm_micro_20260521_134403_234702`, but the focused
+  helper/map cases showed no speedup and larger blobs, so the linker was
+  restored to the absolute-register helper-call sequence.
+- **Use `rax` for absolute helper-call targets on x86.** A 2026-05-21
+  focused KVM run changed the helper-call sequence from
+  `movabs r11, helper; call *r11` to `movabs rax, helper; call *rax`.
+  `rax` is caller-saved and not a SysV helper argument register, so this
+  remains ABI-equivalent while saving one byte per helper call. The run
+  `micro/results/x86_kvm_micro_20260521_135332_450788` kept all three
+  focused map/helper cases correct and reduced native blob size from
+  336/125/239 bytes to 335/123/237 bytes. A repeat single-case run
+  `micro/results/x86_kvm_micro_20260521_135631_031982` confirmed
+  `map_percpu_hash_counter` remained at 27 ns samples with matching
+  result values.
+- **Use the short x86 ARRAY bounds compare when possible.** A
+  2026-05-21 focused KVM run changed inlined ARRAY/PERCPU_ARRAY lookup
+  bounds checks from `cmp eax, imm32` to `cmp eax, imm8` when
+  `max_entries <= 127`. The focused run
+  `micro/results/x86_kvm_micro_20260521_140414_825532` kept all five
+  affected benchmarks correct. Native blob sizes dropped by 2 bytes per
+  affected array lookup site: `map_array_lookup` 132 -> 130,
+  `map_array_index_packet` 140 -> 138, `map_percpu_array` 144 -> 142,
+  `combined_helper_map` 165 -> 163, and `multi_map_policy` 335 -> 331.
+- **Use sign-extended imm32 helper target loads when exact.** A
+  2026-05-21 focused KVM run changed x86 helper target materialization
+  from unconditional `movabs imm64` to `mov r64, sign_extend(imm32)`
+  when the full helper address is exactly representable that way, falling
+  back to `movabs` otherwise. Map pointers still use `movabs` because
+  live map addresses such as `0xffff8...` are not generally sign-extended
+  low-32-bit values. The focused run
+  `micro/results/x86_kvm_micro_20260521_141224_348437` kept helper
+  return values correct and reduced `helper_only_uid_gid`/`helper_chain`
+  / `map_hash_lookup` native blob sizes to 32/153/126 bytes.
+- **Inline simple ARRAY/PERCPU_ARRAY update helpers only at proven call
+  sites.** A 2026-05-21 x86 KVM run added `--update-site` metadata from
+  the companion BPF bytecode and lowered direct `bpf_map_update_elem`
+  call sites for ARRAY/PERCPU_ARRAY maps with 1/2/4/8-byte values into
+  the kernel arraymap bounds/flags/store sequence. Focused validation in
+  `micro/results/x86_kvm_micro_20260521_142752_403207` kept return
+  values and packet output equal to `kernel` while moving
+  `map_array_lookup`, `map_array_index_packet`, and `map_percpu_array`
+  down to 6-7 ns samples and `combined_helper_map` down to 13 ns. The
+  full x86 stage2 run
+  `micro/results/x86_kvm_micro_20260521_143430_287023` passed all 13
+  native/kernel cases and the proof build. Do not apply this to
+  compiler-CSE'd helper pointers (`call rbp`/`call r14`) without a
+  separate ABI proof; `multi_map_policy` deliberately keeps those update
+  calls on the real helper path.
+- **The same ARRAY/PERCPU_ARRAY update inline is now wired for arm64.**
+  The arm64 linker consumes the same `--update-site` metadata and lowers
+  direct `bpf_map_update_elem` calls into the arraymap bounds/flags/store
+  sequence, using `TPIDR_EL1` for PERCPU_ARRAY value selection like the
+  arm64 lookup inline. A focused AWS run
+  `micro/results/aws_arm64_micro_20260521_145305_707860` kept all five
+  affected native/kernel cases correct and improved the old focused run:
+  `map_array_lookup` 26-27 ns -> 17 ns, `map_percpu_array` 27-28 ns ->
+  20-21 ns, and `multi_map_policy` 123-124 ns -> 110 ns. The full arm64
+  stage2 run `micro/results/aws_arm64_micro_20260521_150209_297924`
+  passed all 13 native/kernel cases with matching return values and
+  packet/result words; the arm64 proof build was 29/29 ok.
 - **x86 callee-saved pressure needs a real codegen strategy.** Raising
   LLVM's CSR first-use cost for x86 increased helper/map object sizes in
   the focused compile check, so that knob was not kept. Avoiding
   redundant save/restore should be solved before or during codegen, not
   by post-link deletion.
+- **Terminal return deletion is safe only when all exits still run the
+  BPF return bridge.** On x86, native-link now deletes a final
+  `jmp +0` when the rewritten entry return is already at blob end; early
+  returns still jump to the same end offset. The full 2026-05-21 KVM run
+  `micro/results/x86_kvm_micro_20260521_132250_159715` passed all 13
+  helper/map cases against `kernel`, with matching return values and
+  packet result words. On arm64, the analogous optimization replaces the
+  terminal return with `mov x7, x0` and redirects early returns to that
+  word only when the entry tail contains padding NOPs and no literal pool
+  or subprogram follows it; a local native-link sanity check reduced
+  `simple_xdp` from 92 to 84 bytes. Helper/map arm64 blobs with a tail
+  literal pool deliberately keep the shared return trampoline.
 - **PERCPU_HASH inline was tested and not kept.** A 2026-05-21 x86 KVM
   focused run changed PERCPU_HASH lookup routing from
   `htab_percpu_map_lookup_elem` to `__htab_map_lookup_elem` plus the
@@ -243,6 +343,24 @@ python3 native-sim/x86/native_lab/tests/analyze.py
   ARRAY/PERCPU_ARRAY, helper+map, multi-map, and mixed-helper cases with
   `native_kernel` and `kernel`; all return values and packet result
   words matched.
+- **Proof generation now goes through native-link stage 1.** On
+  2026-05-21, x86 and arm64 proof generators were changed to consume
+  `native-link --mode proof` output for both the pure 29 and the
+  helper/map stage2 13 programs. Python no longer parses ELF relocation
+  records; native-link owns ELF relocation discovery and emits proof
+  site metadata for helper/map/rodata sites. Local proof runs passed:
+  x86 stage2 `native-sim/x86/results/README-20260521-133039.md`, x86
+  pure `native-sim/x86/results/README-20260521-133047.md`, arm64 stage2
+  `native-sim/arm64/results/README-20260521-133152.md`, and arm64 pure
+  `native-sim/arm64/results/README-20260521-133201.md`.
+- **Make/runtime incrementality still has non-kernel repeat work.** The
+  arm64 QEMU rootfs assembly was changed from a phony rebuild to the real
+  file target `$(ARM64_QEMU_ROOT)/qemu-init`, so QEMU rootfs export is no
+  longer forced by the target name. Separate from that, `make micro`
+  still re-enters several vendor app recipes and rebuilds upper Docker
+  runtime layers when runner/stage2 contexts change, and each AWS run
+  starts a fresh instance that installs Docker again. These are build/run
+  orchestration costs, not native blob correctness failures.
 - **Non-xdp prog types** (`tc_packet_checksum_fold`,
   `cgroup_skb_hash_chain`) are skipped — the stub BPF program is
   currently hard-coded to `BPF_PROG_TYPE_XDP`. Extending to sched_cls /

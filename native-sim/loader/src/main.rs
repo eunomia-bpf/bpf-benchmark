@@ -65,7 +65,6 @@ struct Cli {
     json: Option<PathBuf>,
     case_name: String,
     expected_result: Option<u64>,
-    accept_any_result: bool,
     expect_retval: u32,
     input: Option<PathBuf>,
     result_channel: ResultChannel,
@@ -397,14 +396,12 @@ fn run() -> Result<()> {
         ResultChannel::Packet => read_le_u64(&output[XSIM_OUTPUT_OFF..XSIM_OUTPUT_OFF + 8]),
         ResultChannel::SkbCb => u64::from(skb_ctx_out.cb[0]) | (u64::from(skb_ctx_out.cb[1]) << 32),
     };
-    if !cli.accept_any_result {
-        let expected_result = cli.expected_result.unwrap_or(SIMPLE_EXPECTED);
-        if result != expected_result {
-            print_timing(verify_s, test_s);
-            return Err(format!(
-                "result mismatch: got {result}, expected {expected_result}"
-            ));
-        }
+    let expected_result = cli.expected_result.unwrap_or(SIMPLE_EXPECTED);
+    if result != expected_result {
+        print_timing(verify_s, test_s);
+        return Err(format!(
+            "result mismatch: got {result}, expected {expected_result}"
+        ));
     }
 
     println!(
@@ -425,7 +422,6 @@ fn parse_cli() -> Result<Cli> {
     let mut json = None;
     let mut case_name = String::from("simple");
     let mut expected_result = None;
-    let mut accept_any_result = false;
     let mut expect_retval = XDP_PASS;
     let mut input = None;
     let mut result_channel = ResultChannel::Packet;
@@ -464,9 +460,6 @@ fn parse_cli() -> Result<Cli> {
                         .parse::<u64>()
                         .map_err(|err| format!("invalid --expected-result {value}: {err}"))?,
                 );
-            }
-            "--accept-any-result" => {
-                accept_any_result = true;
             }
             "--expect-retval" => {
                 let value = args
@@ -547,7 +540,6 @@ fn parse_cli() -> Result<Cli> {
         json,
         case_name,
         expected_result,
-        accept_any_result,
         expect_retval,
         input,
         result_channel,
@@ -562,7 +554,7 @@ fn parse_cli() -> Result<Cli> {
 
 fn print_help() {
     println!(
-        "Usage: reversesim-loader (--object <sim.bpf.o>|--json proof.json) [--template-object helpers.bpf.o] [--program x86_sim_xdp] [--load-only] [--verifier-log log.txt] [--case simple|--input payload.mem --expected-result N|--accept-any-result] [--result-channel packet|skb-cb] [--cgroup-skb-input] [--repeat N]"
+        "Usage: reversesim-loader (--object <sim.bpf.o>|--json proof.json) [--template-object helpers.bpf.o] [--program x86_sim_xdp] [--load-only] [--verifier-log log.txt] [--case simple|--input payload.mem --expected-result N] [--result-channel packet|skb-cb] [--cgroup-skb-input] [--repeat N]"
     );
 }
 

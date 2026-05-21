@@ -47,7 +47,7 @@ x86_l_2e:
 	/* 0x2e: mov    eax,0x2 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
 x86_l_33:
-	/* 0x33: jmp    0x38 ; native-link entry RET */
+	/* native-link entry fallthrough exit */
 	X86_SIM_X86_RET();
 }
 

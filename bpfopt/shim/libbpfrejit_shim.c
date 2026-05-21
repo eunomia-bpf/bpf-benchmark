@@ -925,6 +925,181 @@ static void emit_dump_state(int cli) {
             getpid());
 }
 
+struct snapshot_prog_copy {
+    char name[17];
+    char bytecode_path[256];
+    uint32_t prog_type;
+    uint32_t kernel_prog_id;
+    uint32_t snap_n;
+    uint32_t *snap_fds;
+    uint32_t *snap_kids;
+};
+
+static void free_snapshot_prog_copies(struct snapshot_prog_copy *items,
+                                      uint32_t n) {
+    if (!items) return;
+    for (uint32_t i = 0; i < n; i++) {
+        free(items[i].snap_fds);
+        free(items[i].snap_kids);
+    }
+    free(items);
+}
+
+static int write_snapshot_ref_meta(const char *path,
+                                   const struct snapshot_prog_copy *prog,
+                                   uint64_t prog_hash,
+                                   const struct shim_map_ref *ref) {
+    int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd < 0) return -1;
+    char prog_name_json[80], map_name_json[80];
+    json_escape_into(prog->name, strlen(prog->name), prog_name_json,
+                     sizeof(prog_name_json));
+    json_escape_into(ref->name, strlen(ref->name), map_name_json,
+                     sizeof(map_name_json));
+    dprintf(fd,
+            "{\"version\":1,\"prog_name\":\"%s\",\"prog_type\":%u,"
+            "\"prog_fingerprint\":\"%016llx\",\"map_ref_pc\":%u,"
+            "\"map_id\":%u,\"map_name\":\"%s\",\"map_type\":%u,"
+            "\"key_size\":%u,\"value_size\":%u,\"max_entries\":%u}\n",
+            prog_name_json, prog->prog_type, (unsigned long long)prog_hash,
+            ref->pc, ref->kernel_id, map_name_json, ref->map_type,
+            ref->key_size, ref->value_size, ref->max_entries);
+    real_close(fd);
+    return 0;
+}
+
+static int snapshot_prog_id_is_live(uint32_t prog_id) {
+    if (prog_id == 0)
+        return 0;
+    union bpf_attr get = {0};
+    get.prog_id = prog_id;
+    long fd = real_syscall(SYS_bpf, BPF_PROG_GET_FD_BY_ID, &get, sizeof(get));
+    if (fd < 0)
+        return 0;
+    real_close((int)fd);
+    return 1;
+}
+
+static void emit_snapshot_maps(int cli, const char *json) {
+    char root[512] = {0};
+    if (!json_get_str(json, "output_dir", root, sizeof(root)) || !root[0]) {
+        dprintf(cli, "{\"ok\":false,\"error\":\"missing output_dir\"}\n");
+        return;
+    }
+    if (mkdir_one(root) != 0) {
+        dprintf(cli,
+                "{\"ok\":false,\"error\":\"failed to create output_dir errno=%d\"}\n",
+                errno);
+        return;
+    }
+
+    discover_bpf_programs();
+
+    struct snapshot_prog_copy *items = NULL;
+    uint32_t prog_n = 0, prog_i = 0;
+    pthread_mutex_lock(&state_mutex);
+    for (int b = 0; b < BPF_STATE_BUCKETS; b++)
+        for (struct prog_entry *e = prog_table[b]; e; e = e->next)
+            if (e->bytecode_path[0] && e->snap_n > 0 &&
+                snapshot_prog_id_is_live(e->kernel_prog_id))
+                prog_n++;
+    items = (struct snapshot_prog_copy *)calloc(prog_n ? prog_n : 1,
+                                                sizeof(*items));
+    if (!items) {
+        pthread_mutex_unlock(&state_mutex);
+        dprintf(cli, "{\"ok\":false,\"error\":\"oom\"}\n");
+        return;
+    }
+    for (int b = 0; b < BPF_STATE_BUCKETS; b++) {
+        for (struct prog_entry *e = prog_table[b]; e; e = e->next) {
+            if (!e->bytecode_path[0] || e->snap_n == 0 ||
+                !snapshot_prog_id_is_live(e->kernel_prog_id))
+                continue;
+            struct snapshot_prog_copy *dst = &items[prog_i++];
+            memcpy(dst->name, e->name, sizeof(dst->name));
+            snprintf(dst->bytecode_path, sizeof(dst->bytecode_path), "%s",
+                     e->bytecode_path);
+            dst->prog_type = e->prog_type;
+            dst->kernel_prog_id = e->kernel_prog_id;
+            dst->snap_n = e->snap_n;
+            dst->snap_fds =
+                (uint32_t *)malloc((size_t)e->snap_n * sizeof(uint32_t));
+            dst->snap_kids =
+                (uint32_t *)malloc((size_t)e->snap_n * sizeof(uint32_t));
+            if (!dst->snap_fds || !dst->snap_kids) {
+                pthread_mutex_unlock(&state_mutex);
+                free_snapshot_prog_copies(items, prog_n);
+                dprintf(cli, "{\"ok\":false,\"error\":\"oom\"}\n");
+                return;
+            }
+            memcpy(dst->snap_fds, e->snap_fds,
+                   (size_t)e->snap_n * sizeof(uint32_t));
+            memcpy(dst->snap_kids, e->snap_kids,
+                   (size_t)e->snap_n * sizeof(uint32_t));
+        }
+    }
+    pthread_mutex_unlock(&state_mutex);
+
+    uint32_t map_refs_written = 0;
+    for (uint32_t i = 0; i < prog_n; i++) {
+        struct bpf_insn *insns = NULL;
+        uint32_t insn_cnt = 0;
+        if (read_bytecode_file(items[i].bytecode_path, &insns, &insn_cnt) != 0)
+            continue;
+        uint64_t prog_hash = normalized_prog_hash(insns, insn_cnt);
+        struct shim_map_ref *refs = NULL;
+        uint32_t ref_n = 0;
+        char ref_err[256] = {0};
+        if (collect_saved_map_refs(insns, insn_cnt, items[i].snap_fds,
+                                   items[i].snap_kids, items[i].snap_n,
+                                   &refs, &ref_n, ref_err,
+                                   sizeof(ref_err)) != 0) {
+            free(insns);
+            free_snapshot_prog_copies(items, prog_n);
+            dprintf(cli,
+                    "{\"ok\":false,\"error\":\"failed to collect map refs: %s\"}\n",
+                    ref_err[0] ? ref_err : "unknown error");
+            return;
+        }
+        for (uint32_t r = 0; r < ref_n; r++) {
+            char ref_dir[768], values_dir[820], meta_path[840];
+            snapshot_ref_dir(ref_dir, sizeof(ref_dir), root, prog_hash,
+                             items[i].prog_type, &refs[r]);
+            snprintf(values_dir, sizeof(values_dir), "%s/map-values", ref_dir);
+            snprintf(meta_path, sizeof(meta_path), "%s/ref.json", ref_dir);
+            if (mkdir_one(ref_dir) != 0 || mkdir_one(values_dir) != 0) {
+                free(refs);
+                free(insns);
+                free_snapshot_prog_copies(items, prog_n);
+                dprintf(cli,
+                        "{\"ok\":false,\"error\":\"failed to create snapshot ref dir errno=%d\"}\n",
+                        errno);
+                return;
+            }
+            uint32_t kid = refs[r].kernel_id;
+            uint32_t type = refs[r].map_type;
+            write_map_snapshots(values_dir, &kid, &type, 1);
+            if (write_snapshot_ref_meta(meta_path, &items[i], prog_hash,
+                                        &refs[r]) != 0) {
+                free(refs);
+                free(insns);
+                free_snapshot_prog_copies(items, prog_n);
+                dprintf(cli,
+                        "{\"ok\":false,\"error\":\"failed to write snapshot metadata errno=%d\"}\n",
+                        errno);
+                return;
+            }
+            map_refs_written++;
+        }
+        free(refs);
+        free(insns);
+    }
+    free_snapshot_prog_copies(items, prog_n);
+    dprintf(cli,
+            "{\"ok\":true,\"output_dir\":\"%s\",\"programs\":%u,\"map_refs\":%u}\n",
+            root, prog_n, map_refs_written);
+}
+
 static void handle_client(int cli) {
     /* The runner can send arbitrarily large execute_plan payloads (e.g. tracee
      * with 158 progs × 18 steps × per-step bash command can exceed 100 KB).
@@ -976,6 +1151,8 @@ static void handle_client(int cli) {
         emit_measure_start(cli);
     else if (strcmp(cmd, "measure_finish") == 0)
         emit_measure_finish(cli);
+    else if (strcmp(cmd, "snapshot_maps") == 0)
+        emit_snapshot_maps(cli, buf);
     else if (strcmp(cmd, "dump_state") == 0)
         emit_dump_state(cli);
     else

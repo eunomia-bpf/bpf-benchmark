@@ -30,7 +30,7 @@ x86_l_1e:
 	/* 0x1e: mov    DWORD PTR [rdi+0x34],edx */
 	X86_SIM_RUN_OP(X86_OP_MOV_STORE_REG, X86_RDI, X86_RDX, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 52ULL);
 x86_l_21:
-	/* 0x21: jmp    0x108 ; native-link entry RET */
+	/* 0x21: jmp    0x103 ; native-link entry RET */
 	X86_SIM_X86_RET();
 x86_l_26:
 	/* 0x26: lea    rcx,[rax+0x8] */
@@ -225,7 +225,7 @@ x86_l_100:
 	/* 0x100: mov    DWORD PTR [rdi+0x34],edx */
 	X86_SIM_RUN_OP(X86_OP_MOV_STORE_REG, X86_RDI, X86_RDX, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 52ULL);
 x86_l_103:
-	/* 0x103: jmp    0x108 ; native-link entry RET */
+	/* native-link entry fallthrough exit */
 	X86_SIM_X86_RET();
 }
 

@@ -962,7 +962,7 @@ x86_l_467:
 	/* 0x467: mov    eax,0x2 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
 x86_l_46c:
-	/* 0x46c: jmp    0x471 ; native-link entry RET */
+	/* native-link entry fallthrough exit */
 	X86_SIM_X86_RET();
 }
 

@@ -99,6 +99,7 @@ native-sim/test/build-arm64/
 !bpfopt/testobject/
 !bpfopt/testobject/*.o
 !bpfopt/testobject/*.bpf.o
+bpfopt/llvm/build-kinsn/bpfopt
 bpfopt/testccode/*.s
 # Makefile incremental rebuild stamp files
 .build.stamp

@@ -3,6 +3,7 @@ OUTPUT_DIR ?= build
 BUILD_DIR := $(OUTPUT_DIR)
 BPF_OBJ := $(BUILD_DIR)/arm64_sim_hardcoded.bpf.o
 MICRO_BUILD_DIR ?= $(ROOT_DIR)/micro/programs/build-arm64
+MICRO_CONFIG ?= $(ROOT_DIR)/micro/config/micro_pure_jit.yaml
 MICRO_PROG_DIR := micro-prog
 PROOF_BUILD_DIR ?= $(MICRO_PROG_DIR)/build
 SIMPLE_INPUT := $(PROOF_BUILD_DIR)/simple.mem
@@ -33,9 +34,11 @@ run: build
 	$(LOADER_BIN) --object $(BPF_OBJ) --program arm64_sim_hardcoded_xdp --case simple --load-only
 
 micro-proofs-generate:
-	$(PYTHON) $(MICRO_PROG_DIR)/generate_micro_sim_proofs.py \
-		--output-dir "$(MICRO_PROG_DIR)" \
-		--native-build-dir "$(MICRO_BUILD_DIR)"
+	$(PYTHON) ../run_micro_sim_batch.py --arch arm64 --generate-only \
+		--build-dir "$(PROOF_BUILD_DIR)" \
+		--native-build-dir "$(MICRO_BUILD_DIR)" \
+		--config "$(MICRO_CONFIG)" \
+		$(MICRO_SIM_PROOF_ARGS)
 
 $(PROOF_BUILD_DIR):
 	install -d "$@"
@@ -56,10 +59,14 @@ micro-proofs-build:
 	$(PYTHON) ../run_micro_sim_batch.py --arch arm64 --build-only \
 		--build-dir "$(PROOF_BUILD_DIR)" \
 		--native-build-dir "$(MICRO_BUILD_DIR)" \
+		--config "$(MICRO_CONFIG)" \
 		$(MICRO_SIM_PROOF_ARGS)
 
 micro-proofs-run:
-	$(PYTHON) ../run_micro_sim_batch.py --arch arm64 $(MICRO_SIM_PROOF_ARGS)
+	$(PYTHON) ../run_micro_sim_batch.py --arch arm64 \
+		--native-build-dir "$(MICRO_BUILD_DIR)" \
+		--config "$(MICRO_CONFIG)" \
+		$(MICRO_SIM_PROOF_ARGS)
 
 simple-proof-build: $(SIMPLE_OBJ) $(SIMPLE_INPUT)
 

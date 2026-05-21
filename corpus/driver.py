@@ -35,6 +35,7 @@ from runner.libs.rejit import (
     benchmark_rejit_enabled_passes,
     benchmark_run_provenance,
     measure_app_phase,
+    snapshot_app_maps,
     skip_rejit_enabled,
 )
 from runner.libs.run_artifacts import (
@@ -412,6 +413,20 @@ def _loadtime_reports_path(
     return reports_dir / f"{_sanitize_app_filename(app.name)}.jsonl"
 
 
+def _map_snapshot_path(
+    app: AppSpec,
+    *,
+    artifact_session: ArtifactSession | None,
+) -> Path:
+    if artifact_session is not None:
+        snapshot_dir = artifact_session.run_dir / "details" / "map-snapshots"
+    else:
+        snapshot_dir = Path(os.environ.get("TMPDIR", "/tmp")) / "bpfrejit-map-snapshots"
+    path = snapshot_dir / _sanitize_app_filename(app.name)
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
 def _write_incremental_app_result(
     run_dir: Path,
     app_name: str,
@@ -519,6 +534,29 @@ def run_suite(
                         status="ok",
                     )
 
+                    baseline_map_snapshot_path: Path | None = None
+                    if not skip_rejit and "map_inline" in apply_enabled_passes:
+                        phase = "map_snapshot"
+                        baseline_map_snapshot_path = _map_snapshot_path(
+                            app,
+                            artifact_session=artifact_session,
+                        )
+                        _print_progress(
+                            "map_snapshot_start",
+                            app=app.name,
+                            runner=app.runner,
+                        )
+                        snapshot_result = snapshot_app_maps(
+                            app_pids=app_pids,
+                            output_dir=baseline_map_snapshot_path,
+                        )
+                        _print_progress(
+                            "map_snapshot_done",
+                            app=app.name,
+                            runner=app.runner,
+                            status="ok",
+                        )
+
                     phase = "baseline_stop"
                     try:
                         runner.stop()
@@ -545,6 +583,10 @@ def run_suite(
                             artifact_session=artifact_session,
                         )
                         loadtime_env["BPFREJIT_SHIM_LOADTIME_REPORTS"] = str(reports_path)
+                        if baseline_map_snapshot_path is not None:
+                            loadtime_env["BPFREJIT_SHIM_MAP_SNAPSHOT_ROOT"] = str(
+                                baseline_map_snapshot_path
+                            )
                         lifecycle.rejit_result = {
                             "status": "ok",
                             "mode": "loadtime",
@@ -552,6 +594,11 @@ def run_suite(
                             "report_path": str(reports_path),
                             "enabled_passes": list(apply_enabled_passes),
                         }
+                        if baseline_map_snapshot_path is not None:
+                            lifecycle.rejit_result["map_snapshot_path"] = str(
+                                baseline_map_snapshot_path
+                            )
+                            lifecycle.rejit_result["map_snapshot"] = snapshot_result
                         _print_progress(
                             "loadtime_plan_done",
                             app=app.name,
@@ -604,7 +651,7 @@ def run_suite(
                     startup_error = error_message
                 else:
                     lifecycle.error = error_message
-                    if phase in {"loadtime_plan", "post_rejit_start", "baseline_stop", "post_rejit_stop"}:
+                    if phase in {"map_snapshot", "loadtime_plan", "post_rejit_start", "baseline_stop", "post_rejit_stop"}:
                         _print_progress(
                             "phase_error",
                             app=app.name,

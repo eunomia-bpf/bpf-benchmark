@@ -369,7 +369,7 @@ x86_l_1c1:
 	/* 0x1c1: pop    rbp */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_RBP, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_1c2:
-	/* 0x1c2: jmp    0x1c7 ; native-link entry RET */
+	/* native-link entry fallthrough exit */
 	X86_SIM_X86_RET();
 }
 

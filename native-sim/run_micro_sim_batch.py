@@ -23,6 +23,10 @@ REPO_ROOT = NATIVE_SIM_DIR.parent
 CONFIG = REPO_ROOT / "micro" / "config" / "micro_pure_jit.yaml"
 LOADER_MANIFEST = NATIVE_SIM_DIR / "loader" / "Cargo.toml"
 LOADER_BIN = NATIVE_SIM_DIR / "loader" / "target" / "debug" / "reversesim-loader"
+NATIVE_LINK_MANIFEST = NATIVE_SIM_DIR / "x86" / "native_lab" / "native_link" / "Cargo.toml"
+NATIVE_LINK_BIN = (
+    NATIVE_SIM_DIR / "x86" / "native_lab" / "native_link" / "target" / "release" / "native-link"
+)
 MICRO_RESULTS_DIR = REPO_ROOT / "micro" / "results"
 BPF_STACK_SIZE = os.environ.get("BPF_STACK_SIZE", "4096")
 
@@ -38,6 +42,8 @@ class ArchConfig:
     program_suffix: str
     result_glob: str
     require_micro_result: bool
+    native_build_dir: Path
+    objdump: str
 
     @property
     def source_dir(self) -> Path:
@@ -60,6 +66,8 @@ ARCHES = {
         program_suffix="_x86_sim_xdp",
         result_glob="x86_kvm_micro_*/metadata.json",
         require_micro_result=True,
+        native_build_dir=REPO_ROOT / "micro" / "programs" / "build-x86",
+        objdump="objdump",
     ),
     "arm64": ArchConfig(
         name="arm64",
@@ -68,6 +76,8 @@ ARCHES = {
         program_suffix="_arm64_sim_xdp",
         result_glob="arm64_qemu_micro_*/metadata.json",
         require_micro_result=False,
+        native_build_dir=REPO_ROOT / "micro" / "programs" / "build-arm64",
+        objdump="aarch64-linux-gnu-objdump",
     ),
 }
 
@@ -75,6 +85,7 @@ ARCHES = {
 @dataclass(frozen=True)
 class Bench:
     name: str
+    program_name: str
     input_generator: str
     expected_result: int
     expected_retval: int
@@ -94,8 +105,8 @@ class Result:
     direct_bpf_insns: int | None = None
 
 
-def load_benches() -> list[Bench]:
-    data = yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
+def load_benches(config_path: Path) -> list[Bench]:
+    data = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     defaults = data.get("benchmark_defaults", {})
     default_retval = int(defaults.get("expected_retval", 2))
     benches: list[Bench] = []
@@ -109,6 +120,7 @@ def load_benches() -> list[Bench]:
         benches.append(
             Bench(
                 name=item["name"],
+                program_name=item.get("program_name", item["name"]),
                 input_generator=generator,
                 expected_result=int(expected),
                 expected_retval=int(item.get("expected_retval", default_retval)),
@@ -139,15 +151,63 @@ def require_ok(cmd: list[str]) -> None:
         raise RuntimeError(f"{' '.join(cmd)} failed\n{detail}")
 
 
+def native_object_path(name: str, native_build_dir: Path) -> Path:
+    for suffix in (".native.o", ".native.so"):
+        path = native_build_dir / f"{name}{suffix}"
+        if path.is_file():
+            return path
+    raise RuntimeError(f"missing native object for {name} in {native_build_dir}")
+
+
+def native_entry_symbol(objdump: str, native_obj: Path, symbols: list[str]) -> str:
+    result = run_cmd([objdump, "-t", str(native_obj)])
+    if result.returncode != 0:
+        detail = "\n".join(part.strip() for part in (result.stdout, result.stderr) if part.strip())
+        raise RuntimeError(f"{objdump} -t {native_obj} failed\n{detail}")
+    present = {line.rsplit(None, 1)[-1] for line in result.stdout.splitlines() if line.strip()}
+    for symbol in symbols:
+        if symbol in present:
+            return symbol
+    raise RuntimeError(f"{native_obj}: none of the native symbols exist: {symbols}")
+
+
+def build_proof_objects(
+    config: ArchConfig,
+    benches: list[Bench],
+    *,
+    native_build_dir: Path,
+) -> Path:
+    require_ok(["cargo", "build", "--release", "--manifest-path", str(NATIVE_LINK_MANIFEST)])
+    proof_object_dir = config.source_dir / "build" / "native-link"
+    proof_object_dir.mkdir(parents=True, exist_ok=True)
+    for bench in benches:
+        native_obj = native_object_path(bench.name, native_build_dir)
+        symbol = native_entry_symbol(
+            config.objdump,
+            native_obj,
+            [bench.program_name, bench.name, f"{bench.name}_xdp", f"{bench.name}_prog"],
+        )
+        proof_obj = proof_object_dir / f"{bench.name}.proof.o"
+        require_ok([
+            str(NATIVE_LINK_BIN),
+            "--input", str(native_obj),
+            "--symbol", symbol,
+            "--output", str(proof_obj),
+            "--mode", "proof",
+        ])
+    return proof_object_dir
+
+
 def generate_sources(
     config: ArchConfig,
     only: list[str],
     *,
-    native_build_dir: Path | None = None,
+    proof_config_path: Path,
+    proof_object_dir: Path,
 ) -> None:
     cmd = ["python3", str(config.source_dir / "generate_micro_sim_proofs.py")]
-    if native_build_dir is not None:
-        cmd.extend(["--native-build-dir", str(native_build_dir)])
+    cmd.extend(["--config", str(proof_config_path)])
+    cmd.extend(["--proof-object-dir", str(proof_object_dir)])
     if only:
         cmd.extend(["--only", *only])
     require_ok(cmd)
@@ -281,7 +341,13 @@ def load_direct_bpf_counts(config: ArchConfig) -> dict[str, int]:
     return counts
 
 
-def run_object(config: ArchConfig, bench: Bench, build_dir: Path, sudo: bool, run_id: str) -> Result:
+def run_object(
+    config: ArchConfig,
+    bench: Bench,
+    build_dir: Path,
+    sudo: bool,
+    run_id: str,
+) -> Result:
     obj = build_dir / f"{bench.name}.bpf.o"
     input_path, _meta = materialize_input(bench.input_generator, force=False)
     verifier_log = config.results_dir / f"{bench.name}-{run_id}.verifier.log"
@@ -358,7 +424,13 @@ def run_bench(
         result.direct_bpf_insns = direct_count
         add_note(result, proof_note)
         return result
-    result = run_object(config, bench, build_dir, sudo=sudo, run_id=run_id)
+    result = run_object(
+        config,
+        bench,
+        build_dir,
+        sudo=sudo,
+        run_id=run_id,
+    )
     result.compile_s = compile_s
     result.proof_bpf_insns = proof_count
     result.direct_bpf_insns = direct_count
@@ -427,10 +499,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--arch", choices=sorted(ARCHES), required=True)
     parser.add_argument("--only", nargs="*", help="optional micro benchmark names")
     parser.add_argument("--no-generate", action="store_true")
+    parser.add_argument("--generate-only", action="store_true")
     parser.add_argument("--no-build-loader", action="store_true")
     parser.add_argument("--build-only", action="store_true")
     parser.add_argument("--build-dir", type=Path)
     parser.add_argument("--native-build-dir", type=Path)
+    parser.add_argument("--config", type=Path, default=CONFIG)
     parser.add_argument("--no-sudo", action="store_true")
     parser.add_argument("--jobs", type=int, default=min(8, os.cpu_count() or 1))
     parser.add_argument("--markdown", type=Path)
@@ -440,8 +514,13 @@ def main(argv: list[str] | None = None) -> int:
 
     config = ARCHES[args.arch]
     build_dir = (args.build_dir or config.build_dir).resolve()
-    native_build_dir = args.native_build_dir.resolve() if args.native_build_dir is not None else None
-    benches = load_benches()
+    native_build_dir = (
+        args.native_build_dir.resolve()
+        if args.native_build_dir is not None
+        else config.native_build_dir.resolve()
+    )
+    proof_config_path = args.config.resolve()
+    benches = load_benches(proof_config_path)
     only = set(args.only or [])
     if only:
         benches = [bench for bench in benches if bench.name in only]
@@ -449,15 +528,27 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit("no selected benchmarks")
 
     if not args.no_generate:
+        proof_object_dir = build_proof_objects(
+            config,
+            benches,
+            native_build_dir=native_build_dir,
+        )
         generate_sources(
             config,
             [bench.name for bench in benches] if only else [],
-            native_build_dir=native_build_dir,
+            proof_config_path=proof_config_path,
+            proof_object_dir=proof_object_dir,
         )
+    if args.generate_only:
+        return 0
     if not args.no_build_loader and not args.build_only:
         build_loader()
 
-    direct_counts = {} if args.build_only else load_direct_bpf_counts(config)
+    direct_counts = (
+        load_direct_bpf_counts(config)
+        if not args.build_only and proof_config_path.name == "micro_pure_jit.yaml"
+        else {}
+    )
     run_id = datetime.now().strftime("%Y%m%d-%H%M%S")
     results_by_name: dict[str, Result] = {}
     if args.jobs == 1:

@@ -52,6 +52,14 @@ union arm64_sim_gpr {
 	__u32 w;
 };
 
+#define ARM64_SIM_TAG_SCALAR 0U
+#define ARM64_SIM_TAG_ABI 1U
+#define ARM64_SIM_TAG_PACKET 2U
+#define ARM64_SIM_TAG_PACKET_END 3U
+#define ARM64_SIM_TAG_STACK 4U
+#define ARM64_SIM_TAG_MAP_PTR 5U
+#define ARM64_SIM_TAG_MAP_VALUE 6U
+
 struct arm64_sim_xdp_abi {
 	void *data;
 	void *data_end;
@@ -68,7 +76,8 @@ struct arm64_sim_skb_abi {
 };
 
 #define ARM64_SIM_L_DECLARE_REG(REG, NAME)                                  \
-	union arm64_sim_gpr __a64_##NAME = { .x = 0 };
+	union arm64_sim_gpr __a64_##NAME = { .x = 0 };                    \
+	__u8 __a64_##NAME##_tag = ARM64_SIM_TAG_SCALAR;
 
 #ifdef ARM64_SIM_ENABLE_STACK
 #define ARM64_SIM_L_DECLARE_STACK()                                         \
@@ -76,6 +85,7 @@ struct arm64_sim_skb_abi {
 		__u8 b[160];                                              \
 		__u64 q[20];                                              \
 	} __a64_stack = {};                                            \
+	__u8 __a64_stack_tag[20] = {};                                  \
 	__s64 __a64_sp = 0
 #else
 #define ARM64_SIM_L_DECLARE_STACK()                                         \
@@ -83,6 +93,7 @@ struct arm64_sim_skb_abi {
 		__u8 b[1];                                                \
 		__u64 q[1];                                               \
 	} __a64_stack = {};                                             \
+	__u8 __a64_stack_tag[1] = {};                                   \
 	__s64 __a64_sp = 0
 #endif
 
@@ -93,7 +104,8 @@ struct arm64_sim_skb_abi {
 	__u8 __a64_c = 0;                                                  \
 	__u8 __a64_v = 0;                                                  \
 	__u64 __a64_lr = 0;                                                \
-	__u64 __a64_v0 = 0
+	__u64 __a64_v0 = 0;                                                \
+	__u64 __a64_v0_hi = 0
 
 #define ARM64_SIM_ENTRY_XDP(CTX)                                            \
 	struct arm64_sim_xdp_abi __a64_sim_abi = {                         \
@@ -103,7 +115,8 @@ struct arm64_sim_skb_abi {
 	struct __sk_buff *__a64_sim_skb_ctx = (struct __sk_buff *)0;      \
 	ARM64_SIM_L_DECLARE_STATE();                                      \
 	ARM64_SIM_L_DECLARE_STACK();                                      \
-	__a64_x0.ptr = &__a64_sim_abi
+	__a64_x0.ptr = &__a64_sim_abi;                                    \
+	__a64_x0_tag = ARM64_SIM_TAG_ABI
 
 #define ARM64_SIM_ENTRY_SKB(CTX)                                            \
 	struct arm64_sim_skb_abi __a64_sim_abi = {                         \
@@ -113,7 +126,8 @@ struct arm64_sim_skb_abi {
 	struct __sk_buff *__a64_sim_skb_ctx = (CTX);                      \
 	ARM64_SIM_L_DECLARE_STATE();                                      \
 	ARM64_SIM_L_DECLARE_STACK();                                      \
-	__a64_x0.ptr = &__a64_sim_abi
+	__a64_x0.ptr = &__a64_sim_abi;                                    \
+	__a64_x0_tag = ARM64_SIM_TAG_ABI
 
 #define ARM64_SIM_L_READ_REG_CASE(REG, NAME)                                \
 	case REG:                                                          \
@@ -145,28 +159,55 @@ struct arm64_sim_skb_abi {
 #define ARM64_SIM_L_READ_REG_PTR(REG)                                       \
 	({                                                                 \
 		void *__a64_l_ptr = (void *)0;                            \
-		switch (REG) {                                            \
-		ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_REG_PTR_CASE)        \
-		default:                                                  \
-			__a64_l_ptr = (void *)0;                          \
-			break;                                            \
+		if ((REG) == ARM64_SP) {                                  \
+			__a64_l_ptr = (void *)(long)__a64_sp;             \
+		} else {                                                   \
+			switch (REG) {                                    \
+			ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_REG_PTR_CASE)\
+			default:                                          \
+				__a64_l_ptr = (void *)0;                  \
+				break;                                    \
+			}                                                 \
 		}                                                         \
 		__a64_l_ptr;                                              \
+	})
+
+#define ARM64_SIM_L_REG_TAG_CASE(REG, NAME)                                 \
+	case REG:                                                          \
+		__a64_l_tag = __a64_##NAME##_tag;                       \
+		break;
+
+#define ARM64_SIM_L_REG_TAG(REG)                                            \
+	({                                                                 \
+		__u8 __a64_l_tag = ARM64_SIM_TAG_SCALAR;                 \
+		if ((REG) == ARM64_SP) {                                  \
+			__a64_l_tag = ARM64_SIM_TAG_STACK;                \
+		} else {                                                   \
+			switch (REG) {                                    \
+			ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_REG_TAG_CASE)\
+			default:                                          \
+				break;                                    \
+			}                                                 \
+		}                                                         \
+		__a64_l_tag;                                              \
 	})
 
 #define ARM64_SIM_L_WRITE_REG64_CASE(REG, NAME)                             \
 	case REG:                                                          \
 		__a64_##NAME.x = __a64_l_next;                          \
+		__a64_##NAME##_tag = ARM64_SIM_TAG_SCALAR;              \
 		break;
 
 #define ARM64_SIM_L_WRITE_REG32_CASE(REG, NAME)                             \
 	case REG:                                                          \
 		__a64_##NAME.x = (__u32)__a64_l_next;                   \
+		__a64_##NAME##_tag = ARM64_SIM_TAG_SCALAR;              \
 		break;
 
 #define ARM64_SIM_L_WRITE_REG_PTR_CASE(REG, NAME)                           \
 	case REG:                                                          \
 		__a64_##NAME.ptr = __a64_l_next_ptr;                    \
+		__a64_##NAME##_tag = __a64_l_next_tag;                 \
 		break;
 
 #define ARM64_SIM_L_WRITE_REG_WIDTH(REG, VALUE, WIDTH)                      \
@@ -192,6 +233,7 @@ struct arm64_sim_skb_abi {
 #define ARM64_SIM_L_WRITE_REG_PTR(REG, VALUE)                               \
 	do {                                                               \
 		void *__a64_l_next_ptr = (void *)(VALUE);                \
+		__u8 __a64_l_next_tag = ARM64_SIM_TAG_SCALAR;            \
 		if ((REG) != ARM64_XZR && (REG) != ARM64_REG_NONE) {      \
 			switch (REG) {                                    \
 			ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_WRITE_REG_PTR_CASE)\
@@ -199,6 +241,21 @@ struct arm64_sim_skb_abi {
 			}                                                 \
 		}                                                          \
 	} while (0)
+
+#define ARM64_SIM_L_WRITE_REG_PTR_TAG(REG, VALUE, TAG)                       \
+	do {                                                               \
+		void *__a64_l_next_ptr = (void *)(VALUE);                \
+		__u8 __a64_l_next_tag = (TAG);                           \
+		if ((REG) != ARM64_XZR && (REG) != ARM64_REG_NONE) {      \
+			switch (REG) {                                    \
+			ARM64_SIM_L_FOR_EACH_GPR(ARM64_SIM_L_WRITE_REG_PTR_CASE)\
+			default: break;                                   \
+			}                                                 \
+		}                                                          \
+	} while (0)
+
+#define ARM64_SIM_L_WRITE_REG_MAP_PTR(REG, VALUE)                            \
+	ARM64_SIM_L_WRITE_REG_PTR_TAG((REG), (VALUE), ARM64_SIM_TAG_MAP_PTR)
 
 #define ARM64_SIM_L_MOD(AUX) (((AUX) >> 8) & 0xffU)
 #define ARM64_SIM_L_SHIFT(AUX) (((AUX) >> 16) & 0xffU)
@@ -242,57 +299,112 @@ struct arm64_sim_skb_abi {
 	({                                                                 \
 		__u32 __a64_str_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
 		__u8 __a64_str_width = (WIDTH);                           \
-		__u64 __a64_str_value = __a64_stack.b[__a64_str_index];   \
-		if (__a64_str_width >= ARM64_WIDTH_16)                    \
-			__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 1] << 8;\
-		if (__a64_str_width >= ARM64_WIDTH_32) {                  \
-			__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 2] << 16;\
-			__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 3] << 24;\
-		}                                                         \
-		if (__a64_str_width == ARM64_WIDTH_64) {                  \
-			__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 4] << 32;\
-			__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 5] << 40;\
-			__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 6] << 48;\
-			__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 7] << 56;\
+		__u64 __a64_str_value;                                    \
+		if (__a64_str_width == ARM64_WIDTH_64 &&                  \
+		    (__a64_str_index & 7U) == 0) {                        \
+			__a64_str_value = __a64_stack.q[__a64_str_index >> 3];\
+		} else {                                                   \
+			__a64_str_value = __a64_stack.b[__a64_str_index];  \
+			if (__a64_str_width >= ARM64_WIDTH_16)            \
+				__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 1] << 8;\
+			if (__a64_str_width >= ARM64_WIDTH_32) {          \
+				__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 2] << 16;\
+				__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 3] << 24;\
+			}                                                 \
+			if (__a64_str_width == ARM64_WIDTH_64) {          \
+				__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 4] << 32;\
+				__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 5] << 40;\
+				__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 6] << 48;\
+				__a64_str_value |= (__u64)__a64_stack.b[__a64_str_index + 7] << 56;\
+			}                                                 \
 		}                                                         \
 		__a64_str_value;                                          \
 	})
 
-#define ARM64_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)                          \
+#define ARM64_SIM_L_STACK_READ_TAG(OFF, WIDTH)                              \
+	({                                                                 \
+		__u32 __a64_srt_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
+		__u8 __a64_srt_width = (WIDTH);                           \
+		(__a64_srt_width == ARM64_WIDTH_64 &&                     \
+		 (__a64_srt_index & 7U) == 0) ?                           \
+			__a64_stack_tag[__a64_srt_index >> 3] :            \
+			ARM64_SIM_TAG_SCALAR;                             \
+	})
+
+#define ARM64_SIM_L_STACK_WRITE_TAG(OFF, WIDTH, VALUE, TAG)                  \
 	do {                                                               \
 		__u32 __a64_stw_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
 		__u8 __a64_stw_width = (WIDTH);                           \
 		__u64 __a64_stw_value = arm64_apply_width((VALUE), __a64_stw_width);\
-		__a64_stack.b[__a64_stw_index] = (__u8)__a64_stw_value;   \
-		if (__a64_stw_width >= ARM64_WIDTH_16)                    \
-			__a64_stack.b[__a64_stw_index + 1] = (__u8)(__a64_stw_value >> 8);\
-		if (__a64_stw_width >= ARM64_WIDTH_32) {                  \
-			__a64_stack.b[__a64_stw_index + 2] = (__u8)(__a64_stw_value >> 16);\
-			__a64_stack.b[__a64_stw_index + 3] = (__u8)(__a64_stw_value >> 24);\
+		if (__a64_stw_width == ARM64_WIDTH_64 &&                  \
+		    (__a64_stw_index & 7U) == 0) {                        \
+			__a64_stack.q[__a64_stw_index >> 3] = __a64_stw_value;\
+			__a64_stack_tag[__a64_stw_index >> 3] = (TAG);    \
+		} else {                                                   \
+			if ((__a64_stw_index & 7U) == 0)                   \
+				__a64_stack_tag[__a64_stw_index >> 3] = ARM64_SIM_TAG_SCALAR;\
+			__a64_stack.b[__a64_stw_index] = (__u8)__a64_stw_value;\
+			if (__a64_stw_width >= ARM64_WIDTH_16)            \
+				__a64_stack.b[__a64_stw_index + 1] = (__u8)(__a64_stw_value >> 8);\
+			if (__a64_stw_width >= ARM64_WIDTH_32) {          \
+				__a64_stack.b[__a64_stw_index + 2] = (__u8)(__a64_stw_value >> 16);\
+				__a64_stack.b[__a64_stw_index + 3] = (__u8)(__a64_stw_value >> 24);\
+			}                                                 \
+			if (__a64_stw_width == ARM64_WIDTH_64) {          \
+				__a64_stack.b[__a64_stw_index + 4] = (__u8)(__a64_stw_value >> 32);\
+				__a64_stack.b[__a64_stw_index + 5] = (__u8)(__a64_stw_value >> 40);\
+				__a64_stack.b[__a64_stw_index + 6] = (__u8)(__a64_stw_value >> 48);\
+				__a64_stack.b[__a64_stw_index + 7] = (__u8)(__a64_stw_value >> 56);\
+			}                                                 \
 		}                                                         \
-		if (__a64_stw_width == ARM64_WIDTH_64) {                  \
-			__a64_stack.b[__a64_stw_index + 4] = (__u8)(__a64_stw_value >> 32);\
-			__a64_stack.b[__a64_stw_index + 5] = (__u8)(__a64_stw_value >> 40);\
-			__a64_stack.b[__a64_stw_index + 6] = (__u8)(__a64_stw_value >> 48);\
-			__a64_stack.b[__a64_stw_index + 7] = (__u8)(__a64_stw_value >> 56);\
-		}                                                         \
+	} while (0)
+
+#define ARM64_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)                          \
+	ARM64_SIM_L_STACK_WRITE_TAG((OFF), (WIDTH), (VALUE), ARM64_SIM_TAG_SCALAR)
+
+#define ARM64_SIM_L_STACK_PTR(OFF)                                         \
+	((void *)&__a64_stack.b[ARM64_SIM_STACK_BIAS + (__s64)(long)(OFF)])
+
+#define ARM64_SIM_L_HELPER_ARG_PTR(REG)                                    \
+	(ARM64_SIM_L_REG_TAG(REG) == ARM64_SIM_TAG_STACK ?                 \
+	 ARM64_SIM_L_STACK_PTR((__s64)(long)ARM64_SIM_L_READ_REG_PTR(REG)) :\
+	 ARM64_SIM_L_READ_REG_PTR(REG))
+
+#define ARM64_SIM_L_LOAD_CONST16_Q0(LO, HI)                                \
+	do {                                                               \
+		__a64_v0 = (LO);                                         \
+		__a64_v0_hi = (HI);                                      \
+	} while (0)
+
+#define ARM64_SIM_L_STORE_Q0_STACK(OFF)                                    \
+	do {                                                               \
+		ARM64_SIM_L_STACK_WRITE((OFF), ARM64_WIDTH_64, __a64_v0);\
+		ARM64_SIM_L_STACK_WRITE((__s64)(OFF) + 8, ARM64_WIDTH_64,\
+					__a64_v0_hi);                    \
 	} while (0)
 
 #define ARM64_SIM_L_LOAD_ADDR(ADDR, WIDTH)                                  \
 	({                                                                 \
-		__u8 *__a64_lda_addr = (__u8 *)(ADDR);                   \
+		volatile const __u8 *__a64_lda_addr =                    \
+			(volatile const __u8 *)(ADDR);                   \
 		__u8 __a64_lda_width = (WIDTH);                           \
-		__u64 __a64_lda_value;                                    \
-		if (__a64_lda_width == ARM64_WIDTH_8)                     \
-			__a64_lda_value = *(__u8 *)__a64_lda_addr;        \
-		else if (__a64_lda_width == ARM64_WIDTH_16)               \
-			__a64_lda_value = *(__u16 *)__a64_lda_addr;       \
-		else if (__a64_lda_width == ARM64_WIDTH_32)               \
-			__a64_lda_value = *(__u32 *)__a64_lda_addr;       \
-		else                                                      \
-			__a64_lda_value = *(__u64 *)__a64_lda_addr;       \
+		__u64 __a64_lda_value = __a64_lda_addr[0];               \
+		if (__a64_lda_width >= ARM64_WIDTH_16)                    \
+			__a64_lda_value |= (__u64)__a64_lda_addr[1] << 8;\
+		if (__a64_lda_width >= ARM64_WIDTH_32) {                  \
+			__a64_lda_value |= (__u64)__a64_lda_addr[2] << 16;\
+			__a64_lda_value |= (__u64)__a64_lda_addr[3] << 24;\
+		}                                                         \
+		if (__a64_lda_width == ARM64_WIDTH_64) {                  \
+			__a64_lda_value |= (__u64)__a64_lda_addr[4] << 32;\
+			__a64_lda_value |= (__u64)__a64_lda_addr[5] << 40;\
+			__a64_lda_value |= (__u64)__a64_lda_addr[6] << 48;\
+			__a64_lda_value |= (__u64)__a64_lda_addr[7] << 56;\
+		}                                                         \
 		__a64_lda_value;                                          \
 	})
+
+#define ARM64_SIM_L_LOAD_PTR_ADDR(ADDR) (*(void **)(ADDR))
 
 #define ARM64_SIM_L_STORE_ADDR(ADDR, WIDTH, VALUE)                          \
 	do {                                                               \
@@ -327,8 +439,9 @@ struct arm64_sim_skb_abi {
 			if ((BASE) == ARM64_SP)                            \
 				__a64_sp += __a64_l_pre;                  \
 			else                                               \
-				ARM64_SIM_L_WRITE_REG_PTR((BASE),         \
-					(__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) + __a64_l_pre);\
+				ARM64_SIM_L_WRITE_REG_PTR_TAG((BASE),     \
+					(__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) + __a64_l_pre,\
+					ARM64_SIM_L_REG_TAG(BASE));        \
 		}                                                          \
 	} while (0)
 
@@ -339,17 +452,25 @@ struct arm64_sim_skb_abi {
 			if ((BASE) == ARM64_SP)                            \
 				__a64_sp += __a64_l_post;                 \
 			else                                               \
-				ARM64_SIM_L_WRITE_REG_PTR((BASE),         \
-					(__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) + __a64_l_post);\
+				ARM64_SIM_L_WRITE_REG_PTR_TAG((BASE),     \
+					(__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) + __a64_l_post,\
+					ARM64_SIM_L_REG_TAG(BASE));        \
 		}                                                          \
 	} while (0)
 
 #define ARM64_SIM_L_MEM_READ(BASE, INDEX, AUX, IMM, EXTRA, WIDTH)            \
 	({                                                                 \
 		__s64 __a64_mrd_off = ARM64_SIM_L_MEM_BASE_OFF((AUX), (INDEX), (IMM)) + (EXTRA);\
+		__u8 __a64_mrd_tag = ARM64_SIM_L_REG_TAG(BASE);          \
 		__u64 __a64_mrd_value;                                    \
-		if ((BASE) == ARM64_SP) {                                 \
-			__a64_mrd_value = ARM64_SIM_L_STACK_READ(__a64_sp + __a64_mrd_off, (WIDTH));\
+		if ((BASE) == ARM64_SP || __a64_mrd_tag == ARM64_SIM_TAG_STACK) {\
+			__s64 __a64_mrd_base = (BASE) == ARM64_SP ? __a64_sp :\
+				(__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);\
+			__a64_mrd_value = ARM64_SIM_L_STACK_READ(__a64_mrd_base + __a64_mrd_off, (WIDTH));\
+		} else if (__a64_mrd_tag == ARM64_SIM_TAG_ABI &&          \
+			   (WIDTH) == ARM64_WIDTH_64) {                  \
+			void *__a64_mrd_addr = (__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) + __a64_mrd_off;\
+			__a64_mrd_value = (__u64)(long)ARM64_SIM_L_LOAD_PTR_ADDR(__a64_mrd_addr);\
 		} else {                                                   \
 			void *__a64_mrd_addr = (__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) + __a64_mrd_off;\
 			__a64_mrd_value = ARM64_SIM_L_LOAD_ADDR(__a64_mrd_addr, (WIDTH));\
@@ -357,15 +478,66 @@ struct arm64_sim_skb_abi {
 		__a64_mrd_value;                                          \
 	})
 
-#define ARM64_SIM_L_MEM_WRITE(BASE, INDEX, AUX, IMM, EXTRA, WIDTH, VALUE)    \
+#define ARM64_SIM_L_MEM_READ_TAG(BASE, INDEX, AUX, IMM, EXTRA, WIDTH)        \
+	({                                                                 \
+		__s64 __a64_mrt_off = ARM64_SIM_L_MEM_BASE_OFF((AUX), (INDEX), (IMM)) + (EXTRA);\
+		__u8 __a64_mrt_tag = ARM64_SIM_L_REG_TAG(BASE);          \
+		__u8 __a64_mrt_value_tag = ARM64_SIM_TAG_SCALAR;         \
+		if ((BASE) == ARM64_SP || __a64_mrt_tag == ARM64_SIM_TAG_STACK) {\
+			__s64 __a64_mrt_base = (BASE) == ARM64_SP ? __a64_sp :\
+				(__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);\
+			__a64_mrt_value_tag = ARM64_SIM_L_STACK_READ_TAG( \
+				__a64_mrt_base + __a64_mrt_off, (WIDTH));\
+		} else if (__a64_mrt_tag == ARM64_SIM_TAG_ABI &&          \
+			   (WIDTH) == ARM64_WIDTH_64) {                  \
+			__a64_mrt_value_tag = __a64_mrt_off == 8 ?        \
+				ARM64_SIM_TAG_PACKET_END : ARM64_SIM_TAG_PACKET;\
+		}                                                         \
+		__a64_mrt_value_tag;                                      \
+	})
+
+#define ARM64_SIM_L_MEM_WRITE(BASE, INDEX, AUX, IMM, EXTRA, WIDTH, VALUE, TAG)\
 	do {                                                               \
 		__s64 __a64_mwr_off = ARM64_SIM_L_MEM_BASE_OFF((AUX), (INDEX), (IMM)) + (EXTRA);\
-		if ((BASE) == ARM64_SP) {                                 \
-			ARM64_SIM_L_STACK_WRITE(__a64_sp + __a64_mwr_off, (WIDTH), (VALUE));\
+		__u8 __a64_mwr_tag = ARM64_SIM_L_REG_TAG(BASE);          \
+		if ((BASE) == ARM64_SP || __a64_mwr_tag == ARM64_SIM_TAG_STACK) {\
+			__s64 __a64_mwr_base = (BASE) == ARM64_SP ? __a64_sp :\
+				(__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE);\
+			ARM64_SIM_L_STACK_WRITE_TAG(__a64_mwr_base + __a64_mwr_off,\
+						    (WIDTH), (VALUE), (TAG));\
 		} else {                                                   \
 			void *__a64_mwr_addr = (__u8 *)ARM64_SIM_L_READ_REG_PTR(BASE) + __a64_mwr_off;\
 			ARM64_SIM_L_STORE_ADDR(__a64_mwr_addr, (WIDTH), (VALUE));\
 		}                                                         \
+	} while (0)
+
+#define ARM64_SIM_L_LOAD_D0_MEM(BASE, INDEX, AUX, IMM)                      \
+	do {                                                               \
+		ARM64_SIM_L_MEM_PRE((BASE), (AUX), (IMM));               \
+		__a64_v0 = ARM64_SIM_L_MEM_READ((BASE), (INDEX), (AUX), \
+						(IMM), 0, ARM64_WIDTH_64);\
+		ARM64_SIM_L_MEM_POST((BASE), (AUX), (IMM));              \
+	} while (0)
+
+#define ARM64_SIM_L_STORE_D0_MEM(BASE, INDEX, AUX, IMM)                     \
+	do {                                                               \
+		ARM64_SIM_L_MEM_PRE((BASE), (AUX), (IMM));               \
+		ARM64_SIM_L_MEM_WRITE((BASE), (INDEX), (AUX), (IMM), 0, \
+				      ARM64_WIDTH_64, __a64_v0,         \
+				      ARM64_SIM_TAG_SCALAR);            \
+		ARM64_SIM_L_MEM_POST((BASE), (AUX), (IMM));              \
+	} while (0)
+
+#define ARM64_SIM_L_STORE_Q0_MEM(BASE, INDEX, AUX, IMM)                     \
+	do {                                                               \
+		ARM64_SIM_L_MEM_PRE((BASE), (AUX), (IMM));               \
+		ARM64_SIM_L_MEM_WRITE((BASE), (INDEX), (AUX), (IMM), 0, \
+				      ARM64_WIDTH_64, __a64_v0,         \
+				      ARM64_SIM_TAG_SCALAR);            \
+		ARM64_SIM_L_MEM_WRITE((BASE), (INDEX), (AUX), (IMM),    \
+				      ARM64_WIDTH_64, ARM64_WIDTH_64,   \
+				      __a64_v0_hi, ARM64_SIM_TAG_SCALAR);\
+		ARM64_SIM_L_MEM_POST((BASE), (AUX), (IMM));              \
 	} while (0)
 
 #define ARM64_SIM_L_SET_SUB_FLAGS(LHS, RHS, WIDTH)                          \
@@ -423,6 +595,7 @@ struct arm64_sim_skb_abi {
 		__u64 __a64_alu_rhs = (OP) == ARM64_OP_ALU_IMM ? (__u64)(IMM) :\
 			ARM64_SIM_L_MOD_VALUE((SRC2), ARM64_SIM_L_MOD(AUX), ARM64_SIM_L_SHIFT(AUX), __a64_alu_width);\
 		__u8 __a64_alu_op = (AUX) & 0xffU;                        \
+		__u8 __a64_alu_src_tag = ARM64_SIM_L_REG_TAG(SRC);        \
 		__u64 __a64_alu_result = 0;                               \
 		if (__a64_alu_op == ARM64_ALU_ADD)                        \
 			__a64_alu_result = __a64_alu_lhs + __a64_alu_rhs; \
@@ -439,9 +612,11 @@ struct arm64_sim_skb_abi {
 		else                                                      \
 			ARM64_SIM_L_UNSUPPORTED_OPCODE();                 \
 		if (__a64_alu_width == ARM64_WIDTH_64 &&                  \
-		    __a64_alu_op == ARM64_ALU_ADD)                        \
-			ARM64_SIM_L_WRITE_REG_PTR((DST),                  \
-				(__u8 *)ARM64_SIM_L_READ_REG_PTR(SRC) + __a64_alu_rhs);\
+		    __a64_alu_op == ARM64_ALU_ADD && (DST) != ARM64_SP && \
+		    __a64_alu_src_tag != ARM64_SIM_TAG_SCALAR)            \
+			ARM64_SIM_L_WRITE_REG_PTR_TAG((DST),              \
+				(__u8 *)ARM64_SIM_L_READ_REG_PTR(SRC) + __a64_alu_rhs,\
+				__a64_alu_src_tag);                       \
 		else                                                       \
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_alu_result, __a64_alu_width);\
 	} while (0)
@@ -455,7 +630,9 @@ struct arm64_sim_skb_abi {
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), (IMM), __a64_l_width);\
 		} else if ((OP) == ARM64_OP_MOV_REG) {                     \
 			if (__a64_l_width == ARM64_WIDTH_64)               \
-				ARM64_SIM_L_WRITE_REG_PTR((DST), ARM64_SIM_L_READ_REG_PTR(SRC));\
+				ARM64_SIM_L_WRITE_REG_PTR_TAG((DST),       \
+					ARM64_SIM_L_READ_REG_PTR(SRC),     \
+					ARM64_SIM_L_REG_TAG(SRC));         \
 			else                                               \
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_READ_REG(SRC), __a64_l_width);\
 		} else if ((OP) == ARM64_OP_MOVK) {                        \
@@ -556,30 +733,49 @@ struct arm64_sim_skb_abi {
 			else if ((OP) == ARM64_OP_CINC)                       \
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_EVAL_COND(AUX) ? ARM64_SIM_L_READ_REG(SRC) + 1 : ARM64_SIM_L_READ_REG(SRC), __a64_l_width);\
 			else if (__a64_l_width == ARM64_WIDTH_64 && ARM64_SIM_L_EVAL_COND(AUX))\
-				ARM64_SIM_L_WRITE_REG_PTR((DST), ARM64_SIM_L_READ_REG_PTR(SRC));\
+				ARM64_SIM_L_WRITE_REG_PTR_TAG((DST),       \
+					ARM64_SIM_L_READ_REG_PTR(SRC),     \
+					ARM64_SIM_L_REG_TAG(SRC));         \
 			else if (__a64_l_width == ARM64_WIDTH_64)              \
-				ARM64_SIM_L_WRITE_REG_PTR((DST), ARM64_SIM_L_READ_REG_PTR(SRC2));\
+				ARM64_SIM_L_WRITE_REG_PTR_TAG((DST),       \
+					ARM64_SIM_L_READ_REG_PTR(SRC2),    \
+					ARM64_SIM_L_REG_TAG(SRC2));        \
 			else                                                   \
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), ARM64_SIM_L_EVAL_COND(AUX) ? ARM64_SIM_L_READ_REG(SRC) : ARM64_SIM_L_READ_REG(SRC2), __a64_l_width);\
 		} else if ((OP) == ARM64_OP_LOAD) {                            \
 			ARM64_SIM_L_MEM_PRE((SRC), (AUX), (IMM));              \
 			__u64 __a64_l_value = ARM64_SIM_L_MEM_READ((SRC), (SRC2), (AUX), (IMM), 0, __a64_l_width);\
-			if (__a64_l_width == ARM64_WIDTH_64 && (SRC) != ARM64_SP)\
-				ARM64_SIM_L_WRITE_REG_PTR((DST), (void *)(long)__a64_l_value);\
+			__u8 __a64_l_value_tag = ARM64_SIM_L_MEM_READ_TAG( \
+				(SRC), (SRC2), (AUX), (IMM), 0, __a64_l_width);\
+			if (__a64_l_width == ARM64_WIDTH_64 &&              \
+			    __a64_l_value_tag != ARM64_SIM_TAG_SCALAR)      \
+				ARM64_SIM_L_WRITE_REG_PTR_TAG((DST),       \
+					(void *)(long)__a64_l_value,        \
+					__a64_l_value_tag);                 \
 			else                                                   \
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width);\
 			ARM64_SIM_L_MEM_POST((SRC), (AUX), (IMM));             \
 		} else if ((OP) == ARM64_OP_STORE) {                           \
 			ARM64_SIM_L_MEM_PRE((DST), (AUX), (IMM));              \
-			ARM64_SIM_L_MEM_WRITE((DST), (SRC2), (AUX), (IMM), 0, __a64_l_width, ARM64_SIM_L_READ_REG(SRC));\
+			ARM64_SIM_L_MEM_WRITE((DST), (SRC2), (AUX), (IMM), 0,\
+				__a64_l_width, ARM64_SIM_L_READ_REG(SRC),   \
+				ARM64_SIM_L_REG_TAG(SRC));                  \
 			ARM64_SIM_L_MEM_POST((DST), (AUX), (IMM));             \
 		} else if ((OP) == ARM64_OP_LDP) {                             \
 			ARM64_SIM_L_MEM_PRE((SRC2), (AUX), (IMM));             \
 			__u64 __a64_l_v0 = ARM64_SIM_L_MEM_READ((SRC2), (SRC3), (AUX), (IMM), 0, __a64_l_width);\
 			__u64 __a64_l_v1 = ARM64_SIM_L_MEM_READ((SRC2), (SRC3), (AUX), (IMM), __a64_l_width, __a64_l_width);\
-			if (__a64_l_width == ARM64_WIDTH_64 && (SRC2) != ARM64_SP) {\
-				ARM64_SIM_L_WRITE_REG_PTR((DST), (void *)(long)__a64_l_v0);\
-				ARM64_SIM_L_WRITE_REG_PTR((SRC), (void *)(long)__a64_l_v1);\
+			__u8 __a64_l_t0 = ARM64_SIM_L_MEM_READ_TAG((SRC2), (SRC3), (AUX), (IMM), 0, __a64_l_width);\
+			__u8 __a64_l_t1 = ARM64_SIM_L_MEM_READ_TAG((SRC2), (SRC3), (AUX), (IMM), __a64_l_width, __a64_l_width);\
+			if (__a64_l_width == ARM64_WIDTH_64 && (__a64_l_t0 != ARM64_SIM_TAG_SCALAR || __a64_l_t1 != ARM64_SIM_TAG_SCALAR)) {\
+				if (__a64_l_t0 != ARM64_SIM_TAG_SCALAR)     \
+					ARM64_SIM_L_WRITE_REG_PTR_TAG((DST), (void *)(long)__a64_l_v0, __a64_l_t0);\
+				else                                       \
+					ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_v0, __a64_l_width);\
+				if (__a64_l_t1 != ARM64_SIM_TAG_SCALAR)     \
+					ARM64_SIM_L_WRITE_REG_PTR_TAG((SRC), (void *)(long)__a64_l_v1, __a64_l_t1);\
+				else                                       \
+					ARM64_SIM_L_WRITE_REG_WIDTH((SRC), __a64_l_v1, __a64_l_width);\
 			} else {                                                \
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_v0, __a64_l_width);\
 				ARM64_SIM_L_WRITE_REG_WIDTH((SRC), __a64_l_v1, __a64_l_width);\
@@ -587,8 +783,13 @@ struct arm64_sim_skb_abi {
 			ARM64_SIM_L_MEM_POST((SRC2), (AUX), (IMM));            \
 		} else if ((OP) == ARM64_OP_STP) {                             \
 			ARM64_SIM_L_MEM_PRE((DST), (AUX), (IMM));              \
-			ARM64_SIM_L_MEM_WRITE((DST), (SRC3), (AUX), (IMM), 0, __a64_l_width, ARM64_SIM_L_READ_REG(SRC));\
-			ARM64_SIM_L_MEM_WRITE((DST), (SRC3), (AUX), (IMM), __a64_l_width, __a64_l_width, ARM64_SIM_L_READ_REG(SRC2));\
+			ARM64_SIM_L_MEM_WRITE((DST), (SRC3), (AUX), (IMM), 0,\
+				__a64_l_width, ARM64_SIM_L_READ_REG(SRC),   \
+				ARM64_SIM_L_REG_TAG(SRC));                  \
+			ARM64_SIM_L_MEM_WRITE((DST), (SRC3), (AUX), (IMM),   \
+				__a64_l_width, __a64_l_width,               \
+				ARM64_SIM_L_READ_REG(SRC2),                 \
+				ARM64_SIM_L_REG_TAG(SRC2));                 \
 			ARM64_SIM_L_MEM_POST((DST), (AUX), (IMM));             \
 		} else if ((OP) == ARM64_OP_FMOV) {                            \
 			if ((AUX) == ARM64_FMOV_D_FROM_X || (AUX) == ARM64_FMOV_S_FROM_W)\
@@ -611,6 +812,56 @@ struct arm64_sim_skb_abi {
 
 #define ARM64_SIM_RUN_OP(OP, DST, SRC, FLAGS, AUX, IMM)                     \
 	ARM64_SIM_RUN_OP3((OP), (DST), (SRC), ARM64_REG_NONE, ARM64_REG_NONE, (FLAGS), (AUX), (IMM))
+
+#define ARM64_SIM_BPF_CALL_bpf_map_lookup_elem()                            \
+	do {                                                               \
+		void *__a64_bpf_ret = bpf_map_lookup_elem(                \
+			ARM64_SIM_L_READ_REG_PTR(ARM64_X0),               \
+			ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1));            \
+		ARM64_SIM_L_WRITE_REG_PTR_TAG(ARM64_X0, __a64_bpf_ret,   \
+					      ARM64_SIM_TAG_MAP_VALUE);   \
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_map_update_elem()                            \
+	do {                                                               \
+		long __a64_bpf_ret = bpf_map_update_elem(                 \
+			ARM64_SIM_L_READ_REG_PTR(ARM64_X0),               \
+			ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1),             \
+			ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X2),             \
+			ARM64_SIM_L_READ_REG(ARM64_X3));                  \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, (__u64)__a64_bpf_ret,\
+					    ARM64_WIDTH_64);              \
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_map_delete_elem()                            \
+	do {                                                               \
+		long __a64_bpf_ret = bpf_map_delete_elem(                 \
+			ARM64_SIM_L_READ_REG_PTR(ARM64_X0),               \
+			ARM64_SIM_L_HELPER_ARG_PTR(ARM64_X1));            \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, (__u64)__a64_bpf_ret,\
+					    ARM64_WIDTH_64);              \
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_get_current_uid_gid()                        \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_get_current_pid_tgid()                       \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_64);\
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_get_smp_processor_id()                       \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, 0, ARM64_WIDTH_32);\
+	} while (0)
+
+#define ARM64_SIM_BPF_CALL_bpf_ktime_get_ns()                               \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, bpf_ktime_get_ns(), \
+					    ARM64_WIDTH_64);              \
+	} while (0)
 
 #define ARM64_SIM_RET()                                                     \
 	do {                                                               \

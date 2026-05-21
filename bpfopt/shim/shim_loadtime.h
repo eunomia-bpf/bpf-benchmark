@@ -321,56 +321,40 @@ static int loadtime_run_shell(const char *command, const char *log_path,
 
 static int loadtime_collect_maps(const struct bpf_insn *insns,
                                  uint32_t insn_cnt,
+                                 struct shim_map_ref **refs_out,
+                                 uint32_t *ref_n_out,
                                  uint32_t **ids_out,
                                  uint32_t **types_out,
                                  uint32_t *n_out,
                                  char *map_ids_csv,
                                  size_t map_ids_csv_sz) {
+    *refs_out = NULL;
+    *ref_n_out = 0;
     *ids_out = NULL;
     *types_out = NULL;
     *n_out = 0;
     if (map_ids_csv_sz) map_ids_csv[0] = 0;
 
+    if (collect_current_map_refs(insns, insn_cnt, refs_out, ref_n_out) != 0)
+        return -1;
+
     uint32_t cap = 8, n = 0;
     uint32_t *ids = (uint32_t *)calloc(cap, sizeof(uint32_t));
     uint32_t *types = (uint32_t *)calloc(cap, sizeof(uint32_t));
     if (!ids || !types) {
+        free(*refs_out);
+        *refs_out = NULL;
+        *ref_n_out = 0;
         free(ids);
         free(types);
         return -1;
     }
 
-    for (uint32_t pc = 0; pc < insn_cnt; pc++) {
-        const struct bpf_insn *insn = &insns[pc];
-        if (insn->code != (BPF_LD | BPF_DW | BPF_IMM))
-            continue;
-        if (insn->src_reg != BPF_PSEUDO_MAP_FD &&
-            insn->src_reg != BPF_PSEUDO_MAP_VALUE)
-            continue;
-        if (pc + 1 >= insn_cnt)
-            break;
-        int fd = insn->imm;
-        if (fd < 0) {
-            pc++;
-            continue;
-        }
-        struct bpf_map_info mi;
-        memset(&mi, 0, sizeof(mi));
-        union bpf_attr ia = {0};
-        ia.info.bpf_fd = (uint32_t)fd;
-        ia.info.info_len = sizeof(mi);
-        ia.info.info = (uintptr_t)&mi;
-        if (real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD,
-                         &ia, sizeof(ia)) < 0 || mi.id == 0) {
-            log_line("loadtime map fd resolution failed: fd=%d errno=%d",
-                     fd, errno);
-            free(ids);
-            free(types);
-            return -1;
-        }
+    for (uint32_t r = 0; r < *ref_n_out; r++) {
+        const struct shim_map_ref *ref = &(*refs_out)[r];
         int dup = 0;
         for (uint32_t i = 0; i < n; i++) {
-            if (ids[i] == mi.id) {
+            if (ids[i] == ref->kernel_id) {
                 dup = 1;
                 break;
             }
@@ -383,16 +367,18 @@ static int loadtime_collect_maps(const struct bpf_insn *insns,
                 if (!ni || !nt) {
                     free(ni ? ni : ids);
                     free(nt ? nt : types);
+                    free(*refs_out);
+                    *refs_out = NULL;
+                    *ref_n_out = 0;
                     return -1;
                 }
                 ids = ni;
                 types = nt;
             }
-            ids[n] = mi.id;
-            types[n] = mi.type;
+            ids[n] = ref->kernel_id;
+            types[n] = ref->map_type;
             n++;
         }
-        pc++;
     }
     format_map_ids_csv(ids, n, map_ids_csv, map_ids_csv_sz);
     *ids_out = ids;
@@ -549,16 +535,33 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
         return -1;
     }
 
+    struct shim_map_ref *map_refs = NULL;
+    uint32_t map_ref_n = 0;
     uint32_t *map_ids = NULL, *map_types = NULL, map_n = 0;
     char map_ids_csv[1024];
-    if (loadtime_collect_maps(input_insns, attr->insn_cnt, &map_ids,
-                              &map_types, &map_n, map_ids_csv,
-                              sizeof(map_ids_csv)) != 0) {
+    if (loadtime_collect_maps(input_insns, attr->insn_cnt, &map_refs,
+                              &map_ref_n, &map_ids, &map_types, &map_n,
+                              map_ids_csv, sizeof(map_ids_csv)) != 0) {
         snprintf(err, err_sz, "failed to collect loadtime map ids");
         free(plan_json);
         return -1;
     }
-    write_map_snapshots(map_values_dir, map_ids, map_types, map_n);
+    const char *snapshot_root = getenv("BPFREJIT_SHIM_MAP_SNAPSHOT_ROOT");
+    if (snapshot_root && snapshot_root[0]) {
+        if (remap_saved_map_snapshots(map_values_dir, snapshot_root,
+                                      input_insns, attr->insn_cnt,
+                                      attr->prog_type, map_refs, map_ref_n,
+                                      map_ids, map_types, map_n,
+                                      err, err_sz) != 0) {
+            free(map_refs);
+            free(map_ids);
+            free(map_types);
+            free(plan_json);
+            return -1;
+        }
+    } else {
+        write_map_snapshots(map_values_dir, map_ids, map_types, map_n);
+    }
 
     char prog_type_name[32];
     snprintf(prog_type_name, sizeof(prog_type_name), "%s",
@@ -573,6 +576,7 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
     if (loadtime_probe_verifier_log(attr, attr_size, cur, target_json,
                                     verifier_log) != 0) {
         snprintf(err, err_sz, "loadtime initial verifier probe failed");
+        free(map_refs);
         free(map_ids);
         free(map_types);
         free(plan_json);
@@ -587,6 +591,7 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
         char *so = (char *)malloc(slen + 1);
         if (!so) {
             snprintf(err, err_sz, "oom copying loadtime step");
+            free(map_refs);
             free(map_ids);
             free(map_types);
             free(plan_json);
@@ -633,6 +638,7 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
         if (loadtime_run_shell(resolved, step_log, &elapsed_ms) != 0) {
             snprintf(err, err_sz, "loadtime bpfopt step %s failed; log=%s",
                      name[0] ? name : "<unnamed>", step_log);
+            free(map_refs);
             free(map_ids);
             free(map_types);
             free(plan_json);
@@ -646,6 +652,7 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
                      getenv("BPFREJIT_SHIM_LOADTIME_REPORTS") ?
                          getenv("BPFREJIT_SHIM_LOADTIME_REPORTS") : "",
                      errno);
+            free(map_refs);
             free(map_ids);
             free(map_types);
             free(plan_json);
@@ -660,6 +667,7 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
                                         verifier_log) != 0) {
             snprintf(err, err_sz, "loadtime verifier probe failed after step %s",
                      name[0] ? name : "<unnamed>");
+            free(map_refs);
             free(map_ids);
             free(map_types);
             free(plan_json);
@@ -676,6 +684,7 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
     if (!optimized || out_insn_cnt == 0) {
         snprintf(err, err_sz, "loadtime optimized bytecode missing at %s", cur);
         free(optimized);
+        free(map_refs);
         free(map_ids);
         free(map_types);
         free(plan_json);
@@ -687,6 +696,7 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
     if (build_full_fd_array(target_json, NULL, 0, &fd_array, &fd_array_n) != 0) {
         snprintf(err, err_sz, "failed to build loadtime fd_array");
         free(optimized);
+        free(map_refs);
         free(map_ids);
         free(map_types);
         free(plan_json);
@@ -718,6 +728,7 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
     out->attr_size = sizeof(out->attr_buf);
     log_line("loadtime optimized prog=%s insns=%u->%u maps=%u workdir=%s",
              prog_name, attr->insn_cnt, out_insn_cnt, map_n, workdir);
+    free(map_refs);
     free(map_ids);
     free(map_types);
     free(plan_json);

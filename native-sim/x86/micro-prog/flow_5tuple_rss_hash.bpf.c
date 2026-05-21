@@ -459,7 +459,7 @@ x86_l_206:
 	/* 0x206: pop    rbp */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_RBP, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_207:
-	/* 0x207: jmp    0x20c ; native-link entry RET */
+	/* native-link entry fallthrough exit */
 	X86_SIM_X86_RET();
 }
 
