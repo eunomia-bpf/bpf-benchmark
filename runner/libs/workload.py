@@ -448,7 +448,6 @@ _STRESS_NG_FILESYSTEM_STRESSORS = (
     "link",
     "symlink",
     "mknod",
-    "fcntl",
 )
 _STRESS_NG_IO_STRESSORS = (
     "aio",
@@ -472,16 +471,18 @@ _STRESS_NG_NETWORK_STRESSORS = (
     "udp-flood",
 )
 
+# `fcntl` is intentionally not in the filesystem set: current kernels can
+# reject stress-ng's mandatory-lock subtests, tripping exit 2 even though the
+# surrounding file-system workload is otherwise healthy.
+#
 # Stressors that must be dropped on AL2023 ARM64 (t4g.small) because their
 # workers fail intermittently, tripping stress-ng exit 2 and zeroing the
-# whole workload. x86 keeps both: kernel has them compiled in and they
-# exercise relevant BPF paths.
+# whole workload. x86 keeps SCTP: kernel has it compiled in and it exercises
+# relevant BPF paths.
 #   sctp: kernel SCTP=m, autoload flaky.
-#   fcntl: some fcntl variants on aarch64 AL2023 fail 3/4 workers (cause TBD,
-#          observed 2026-05-13).
 # Keys are `platform.machine()` values.
 _STRESS_NG_DROP_STRESSORS_BY_ARCH: Mapping[str, frozenset[str]] = {
-    "aarch64": frozenset({"sctp", "fcntl"}),
+    "aarch64": frozenset({"sctp"}),
 }
 
 

@@ -325,6 +325,17 @@ static void prog_remove(int fd) {
     }
 }
 
+static void prog_forget_loader_fd(int fd) {
+    if (fd < 0) return;
+    struct prog_entry *e = prog_find(fd);
+    if (!e) return;
+    if (e->kernel_prog_id) {
+        e->fd = -(int)e->kernel_prog_id;
+    } else {
+        prog_remove(fd);
+    }
+}
+
 /* Resolve any fd's kernel id via BPF_OBJ_GET_INFO_BY_FD. Works for prog,
  * map, link — all info structs start with {type, id} so we just read id. */
 static uint32_t resolve_kernel_id(int fd) {

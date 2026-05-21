@@ -345,7 +345,7 @@ def parse_micro_exec_sample(command: list[str], stdout: str, stderr: str) -> dic
 
 def run_rejit_sample(command: list[str], *, cwd: Path) -> dict[str, Any]:
     del cwd
-    proc = start_agent(command[0], command[1:], env={"BPFREJIT_SHIM_FORCE_IN_PLACE": "1"})
+    proc = start_agent(command[0], command[1:])
     try:
         wait_for_app_shim_programs(app_pid=proc.pid, timeout_s=None, process=proc, process_name="micro_exec")
         rejit_result = apply_app_rejit(app_pid=proc.pid, enabled_passes=benchmark_rejit_enabled_passes())

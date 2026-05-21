@@ -467,6 +467,11 @@ struct BpfArrayOffsets {
     uint32_t pptrs;
 };
 
+struct BpfHtabOffsets {
+    uint32_t key;
+    uint32_t lru_ref;
+};
+
 BpfArrayOffsets read_bpf_array_offsets()
 {
     btf *vmlinux = btf__parse(kVmlinuxBtfPath, nullptr);
@@ -477,6 +482,22 @@ BpfArrayOffsets read_bpf_array_offsets()
     BpfArrayOffsets out{
         kernel_btf_member_offset_bytes(vmlinux, "bpf_array", "value"),
         kernel_btf_member_offset_bytes(vmlinux, "bpf_array", "pptrs"),
+    };
+    btf__free(vmlinux);
+    return out;
+}
+
+BpfHtabOffsets read_bpf_htab_offsets()
+{
+    btf *vmlinux = btf__parse(kVmlinuxBtfPath, nullptr);
+    if (libbpf_get_error(vmlinux)) {
+        fail(std::string("btf__parse vmlinux: ")
+             + std::strerror(static_cast<int>(-libbpf_get_error(vmlinux))));
+    }
+    uint32_t lru_node = kernel_btf_member_offset_bytes(vmlinux, "htab_elem", "lru_node");
+    BpfHtabOffsets out{
+        kernel_btf_member_offset_bytes(vmlinux, "htab_elem", "key"),
+        lru_node + kernel_btf_member_offset_bytes(vmlinux, "bpf_lru_node", "ref"),
     };
     btf__free(vmlinux);
     return out;
@@ -573,14 +594,13 @@ struct CompanionLoad {
      * The pair is decided per-call from the map type discovered by
      * walking the program's BPF source bytecode (track r1's binding
      * through the most recent BPF_LD_IMM64 pseudo_map_fd) and the
-     * per-kernel `offsetof(struct htab_elem, key)` extracted from any
-     * one HASH map's JIT-emitted `add rax, imm` immediate. ARRAY and
+     * per-kernel `struct htab_elem` offsets read from BTF. ARRAY and
      * PERCPU_ARRAY sites carry enough metadata for native-link to emit
      * the same bounds-check + pointer arithmetic shape that the kernel
      * JIT emits. Other map types stay on the plain helper until they get
      * their own concrete lowering. */
     struct LookupSite {
-        enum class Kind { Call, Hash, Array, PerCpuArray } kind;
+        enum class Kind { Call, Hash, LruHash, PerCpuHash, Array, PerCpuArray } kind;
         uint64_t target_addr;
         uint32_t key_offset;
         uint64_t map_addr;
@@ -589,57 +609,10 @@ struct CompanionLoad {
         uint32_t index_mask;
         uint32_t value_offset;
         uint64_t percpu_base_addr;
+        uint32_t lru_ref_offset;
     };
     std::vector<LookupSite> lookup_sites;
 };
-
-/* Walk the JITted x86 bytes of a BPF program. Find any `call rel32`
- * whose post-call bytes match the kernel BPF JIT's inlined HASH lookup
- * sequence:
- *     test rax,rax  ;  je <2f>  ;  add rax, KEY_OFFSET  ;  2:
- * Return the first KEY_OFFSET we observe. We don't need to verify the
- * call target equals __htab_map_lookup_elem (which would require
- * jited_ksyms VA computation); the post-call test/je/add shape is
- * specific enough to kernel `htab_map_gen_lookup`. Returns 0 if the
- * pattern isn't found.
- *
- * KEY_OFFSET = `offsetof(struct htab_elem, key) + roundup(map.key_size,
- * 8)` for the map whose lookup got inlined here. Subtract the rounded
- * key_size of that map to derive the kernel-constant base. */
-uint32_t extract_htab_inline_offset(const std::vector<uint8_t> &jit)
-{
-    for (size_t i = 0; i + 5 <= jit.size(); i++) {
-        if (jit[i] != 0xE8) continue;
-        size_t p = i + 5;
-        if (p + 9 > jit.size()) continue;
-        if (jit[p] != 0x48 || jit[p+1] != 0x85 || jit[p+2] != 0xC0) continue;
-        size_t je_len;
-        if (jit[p+3] == 0x74) {
-            je_len = 2;
-        } else if (jit[p+3] == 0x0F && jit[p+4] == 0x84) {
-            je_len = 6;
-        } else {
-            continue;
-        }
-        size_t q = p + 3 + je_len;
-        if (q + 4 > jit.size()) continue;
-        if (jit[q] == 0x48 && jit[q+1] == 0x83 && jit[q+2] == 0xC0) {
-            return jit[q+3];
-        }
-        if (jit[q] == 0x48 && jit[q+1] == 0x81 && jit[q+2] == 0xC0
-            && q + 7 <= jit.size()) {
-            uint32_t v;
-            std::memcpy(&v, &jit[q+3], 4);
-            return v;
-        }
-        if (jit[q] == 0x48 && jit[q+1] == 0x05 && q + 6 <= jit.size()) {
-            uint32_t v;
-            std::memcpy(&v, &jit[q+2], 4);
-            return v;
-        }
-    }
-    return 0;
-}
 
 #if defined(__aarch64__)
 bool is_arm64_linear_map_ptr(uint64_t value)
@@ -946,61 +919,17 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
             }
         }
 
-        /* Extract htab_elem.key offset (kernel constant) from JIT once.
-         * Search across all programs for the inlined HASH lookup
-         * pattern; the first match gives us
-         *   add_imm = offsetof(htab_elem, key) + roundup(map.key_size, 8)
-         * We then derive `htab_elem_key_offset_base` by subtracting the
-         * rounded key_size of the first HASH map. All other HASH maps
-         * compute their own key_offset = base + roundup(key_size, 8). */
-        uint32_t observed_inline_offset = 0;
-        bpf_program *pj = nullptr;
-        bpf_object__for_each_program(pj, obj) {
-            int pfd = bpf_program__fd(pj);
-            if (pfd < 0) continue;
-            bpf_prog_info pi = {};
-            __u32 pi_len = sizeof(pi);
-            if (bpf_obj_get_info_by_fd(pfd, &pi, &pi_len) < 0
-                || pi.jited_prog_len == 0) continue;
-            std::vector<uint8_t> jit(pi.jited_prog_len);
-            bpf_prog_info pi2 = {};
-            pi2.jited_prog_len = pi.jited_prog_len;
-            pi2.jited_prog_insns = reinterpret_cast<uintptr_t>(jit.data());
-            pi_len = sizeof(pi2);
-            if (bpf_obj_get_info_by_fd(pfd, &pi2, &pi_len) < 0) continue;
-            observed_inline_offset = extract_htab_inline_offset(jit);
-            if (observed_inline_offset != 0) break;
-        }
-
         uint64_t htab_addr = kallsyms_lookup("__htab_map_lookup_elem");
         BpfArrayOffsets array_offsets = read_bpf_array_offsets();
+        BpfHtabOffsets htab_offsets = read_bpf_htab_offsets();
+#if defined(__x86_64__)
         uint64_t this_cpu_off_addr = kallsyms_lookup("this_cpu_off");
+#else
+        uint64_t this_cpu_off_addr = 0;
+#endif
         uint64_t plain_addr = kallsyms_lookup("bpf_map_lookup_elem");
         if (plain_addr == 0) {
             fail("bpf_map_lookup_elem not in /proc/kallsyms");
-        }
-
-        /* Derive htab_elem.key base from the first HASH map's
-         * observed inline offset. If the program has no HASH map (or
-         * kernel didn't inline any lookup), `observed_inline_offset`
-         * is 0 and we skip all inlining. */
-        uint32_t htab_key_base = 0;
-        bool have_base = false;
-        if (observed_inline_offset != 0) {
-            uint32_t first_hash_key_rounded = 0;
-            map = nullptr;
-            bpf_object__for_each_map(map, obj) {
-                if (bpf_map__type(map) == BPF_MAP_TYPE_HASH) {
-                    uint32_t ks = bpf_map__key_size(map);
-                    first_hash_key_rounded = (ks + 7) & ~7u;
-                    break;
-                }
-            }
-            if (first_hash_key_rounded > 0
-                && observed_inline_offset >= first_hash_key_rounded) {
-                htab_key_base = observed_inline_offset - first_hash_key_rounded;
-                have_base = true;
-            }
         }
 
         /* Walk the entry program's BPF source bytecode and build the
@@ -1020,6 +949,7 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
                 CompanionLoad::LookupSite site{
                     CompanionLoad::LookupSite::Kind::Call,
                     plain_addr,
+                    0,
                     0,
                     0,
                     0,
@@ -1047,9 +977,11 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
                         if (map_it == out.map_addrs.end()) {
                             fail("native_kernel: missing kernel map pointer for PERCPU_ARRAY map " + it->second.name);
                         }
+#if defined(__x86_64__)
                         if (this_cpu_off_addr == 0) {
                             fail("this_cpu_off not in /proc/kallsyms");
                         }
+#endif
                         site.kind = CompanionLoad::LookupSite::Kind::PerCpuArray;
                         site.map_addr = map_it->second;
                         site.max_entries = it->second.max_entries;
@@ -1057,11 +989,28 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
                         site.index_mask = roundup_pow2_mask(it->second.max_entries);
                         site.value_offset = array_offsets.pptrs;
                         site.percpu_base_addr = this_cpu_off_addr;
-                    } else if (t == BPF_MAP_TYPE_HASH && have_base && htab_addr != 0) {
+                    } else if (t == BPF_MAP_TYPE_HASH || t == BPF_MAP_TYPE_LRU_HASH
+                               || t == BPF_MAP_TYPE_PERCPU_HASH) {
+                        if (htab_addr == 0) {
+                            fail("__htab_map_lookup_elem not in /proc/kallsyms");
+                        }
                         uint32_t rounded = (it->second.key_size + 7) & ~7u;
-                        site.kind = CompanionLoad::LookupSite::Kind::Hash;
                         site.target_addr = htab_addr;
-                        site.key_offset = htab_key_base + rounded;
+                        site.key_offset = htab_offsets.key + rounded;
+                        if (t == BPF_MAP_TYPE_HASH) {
+                            site.kind = CompanionLoad::LookupSite::Kind::Hash;
+                        } else if (t == BPF_MAP_TYPE_LRU_HASH) {
+                            site.kind = CompanionLoad::LookupSite::Kind::LruHash;
+                            site.lru_ref_offset = htab_offsets.lru_ref;
+                        } else {
+#if defined(__x86_64__)
+                            if (this_cpu_off_addr == 0) {
+                                fail("this_cpu_off not in /proc/kallsyms");
+                            }
+#endif
+                            site.kind = CompanionLoad::LookupSite::Kind::PerCpuHash;
+                            site.percpu_base_addr = this_cpu_off_addr;
+                        }
                     }
                 }
                 out.lookup_sites.push_back(site);
@@ -1121,6 +1070,12 @@ LinkerOutput invoke_native_link(const cli_options &options,
         case CompanionLoad::LookupSite::Kind::Hash:
             kind = "hash";
             break;
+        case CompanionLoad::LookupSite::Kind::LruHash:
+            kind = "lru_hash";
+            break;
+        case CompanionLoad::LookupSite::Kind::PerCpuHash:
+            kind = "percpu_hash";
+            break;
         case CompanionLoad::LookupSite::Kind::Array:
             kind = "array";
             break;
@@ -1128,8 +1083,8 @@ LinkerOutput invoke_native_link(const cli_options &options,
             kind = "percpu_array";
             break;
         }
-        char buf[256];
-        std::snprintf(buf, sizeof(buf), "%zu=%s,0x%lx,%u,0x%lx,%u,%u,%u,%u,0x%lx",
+        char buf[320];
+        std::snprintf(buf, sizeof(buf), "%zu=%s,0x%lx,%u,0x%lx,%u,%u,%u,%u,0x%lx,%u",
                       i,
                       kind,
                       (unsigned long)s.target_addr,
@@ -1139,7 +1094,8 @@ LinkerOutput invoke_native_link(const cli_options &options,
                       (unsigned)s.elem_size,
                       (unsigned)s.index_mask,
                       (unsigned)s.value_offset,
-                      (unsigned long)s.percpu_base_addr);
+                      (unsigned long)s.percpu_base_addr,
+                      (unsigned)s.lru_ref_offset);
         argv.push_back("--lookup-site");
         argv.push_back(buf);
     }

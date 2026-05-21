@@ -5,7 +5,7 @@ static int query_prog_info(struct prog_entry *p, struct bpf_prog_info *info) {
     memset(info, 0, sizeof(*info));
     int fd = p->fd;
     int close_fd = 0;
-    if ((fd < 0 || p->discovered_from_fd) && p->kernel_prog_id) {
+    if (p->kernel_prog_id) {
         union bpf_attr ga = {0};
         ga.prog_id = p->kernel_prog_id;
         fd = (int)real_syscall(SYS_bpf, BPF_PROG_GET_FD_BY_ID, &ga,

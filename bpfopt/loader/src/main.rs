@@ -269,44 +269,74 @@ fn prepare_workdir(
     fs::create_dir_all(&map_values_dir)?;
 
     let compat = prepare_compatible_object(workdir, obj_path)?;
-    let obj = open_bpf_object(&compat.path)?;
-    normalize_open_maps(&obj)?;
-    let progs = programs(&obj)?;
-    normalize_open_programs(&progs)?;
-    let progs = apply_autoload_filter(progs, compat.autoload.as_ref())?;
-    let mut log_bufs: Vec<Vec<c_char>> = (0..progs.len()).map(|_| vec![0; LOG_BYTES]).collect();
-    for (prog, buf) in progs.iter().zip(log_bufs.iter_mut()) {
-        libbpf_ok(
-            unsafe { libbpf_sys::bpf_program__set_log_level(prog.ptr, initial_log_level) },
-            "bpf_program__set_log_level",
-        )?;
-        libbpf_ok(
-            unsafe {
-                libbpf_sys::bpf_program__set_log_buf(
-                    prog.ptr,
-                    buf.as_mut_ptr(),
-                    LOG_BYTES as libbpf_sys::size_t,
-                )
-            },
-            "bpf_program__set_log_buf",
-        )?;
-        unsafe { libbpf_sys::bpf_program__set_autoattach(prog.ptr, false) };
-    }
 
-    let ret = unsafe { libbpf_sys::bpf_object__load(obj.ptr) };
-    if ret < 0 {
-        // Dump whatever verifier output libbpf produced so the user can diagnose.
-        for (prog, buf) in progs.iter().zip(&log_bufs) {
-            let dir = workdir.join(&prog.name);
-            let _ = fs::create_dir_all(&dir);
-            let _ = fs::write(dir.join(VERIFIER_LOG), log_buf_to_string(buf));
+    // The verifier log captured here is only consumed by the Rust bpfopt's
+    // verifier-state passes; the LLVM bpfopt ignores it. Large programs can
+    // overflow the 64 MiB verifier log at log_level>=2, making BPF_PROG_LOAD
+    // return -ENOSPC and failing the whole object. Filling the log must not be
+    // fatal: if a log_level>=2 load fails, reopen and reload at log_level=0
+    // (verifier states unavailable for that object, which is fine for the LLVM
+    // path) instead of aborting.
+    let log_levels: &[u32] = if initial_log_level >= 2 {
+        &[initial_log_level, 0]
+    } else {
+        &[initial_log_level]
+    };
+    let mut loaded: Option<(BpfObject, Vec<ProgramRef>, Vec<Vec<c_char>>)> = None;
+    for (attempt, &log_level) in log_levels.iter().enumerate() {
+        let last_attempt = attempt + 1 == log_levels.len();
+        let obj = open_bpf_object(&compat.path)?;
+        normalize_open_maps(&obj)?;
+        let progs = programs(&obj)?;
+        normalize_open_programs(&progs)?;
+        let progs = apply_autoload_filter(progs, compat.autoload.as_ref())?;
+        let mut log_bufs: Vec<Vec<c_char>> =
+            (0..progs.len()).map(|_| vec![0; LOG_BYTES]).collect();
+        for (prog, buf) in progs.iter().zip(log_bufs.iter_mut()) {
+            libbpf_ok(
+                unsafe { libbpf_sys::bpf_program__set_log_level(prog.ptr, log_level) },
+                "bpf_program__set_log_level",
+            )?;
+            libbpf_ok(
+                unsafe {
+                    libbpf_sys::bpf_program__set_log_buf(
+                        prog.ptr,
+                        buf.as_mut_ptr(),
+                        LOG_BYTES as libbpf_sys::size_t,
+                    )
+                },
+                "bpf_program__set_log_buf",
+            )?;
+            unsafe { libbpf_sys::bpf_program__set_autoattach(prog.ptr, false) };
         }
-        bail!(
-            "libbpf failed to load {}: {}",
-            compat.path.display(),
-            neg_errno(ret)
-        );
+
+        let ret = unsafe { libbpf_sys::bpf_object__load(obj.ptr) };
+        if ret < 0 {
+            if !last_attempt {
+                eprintln!(
+                    "warning: load of {} at log_level={} failed ({}); retrying at log_level=0 (verifier states unavailable for this object; harmless for the LLVM bpfopt)",
+                    compat.path.display(),
+                    log_level,
+                    neg_errno(ret)
+                );
+                continue;
+            }
+            // Final attempt failed: dump whatever verifier output exists.
+            for (prog, buf) in progs.iter().zip(&log_bufs) {
+                let dir = workdir.join(&prog.name);
+                let _ = fs::create_dir_all(&dir);
+                let _ = fs::write(dir.join(VERIFIER_LOG), log_buf_to_string(buf));
+            }
+            bail!(
+                "libbpf failed to load {}: {}",
+                compat.path.display(),
+                neg_errno(ret)
+            );
+        }
+        loaded = Some((obj, progs, log_bufs));
+        break;
     }
+    let (obj, progs, log_bufs) = loaded.expect("log_levels is non-empty");
 
     let loaded_maps = maps(&obj)?;
     let btf_fd = unsafe { libbpf_sys::bpf_object__btf_fd(obj.ptr) };
@@ -534,7 +564,6 @@ fn run_pass_via_yaml(
     } else {
         join_u32_csv(map_ids)
     };
-    let target_arg = target.map(|t| t.display().to_string()).unwrap_or_default();
     let command = template
         .replacen("bpfopt ", &format!("{} ", shell_quote_path(bpfopt)), 1)
         .replace("${INPUT}", &p(INPUT_BIN))
@@ -543,8 +572,17 @@ fn run_pass_via_yaml(
         .replace("${VERIFIER_STATES}", &p(VERIFIER_LOG))
         .replace("${MAP_VALUES}", &map_values_dir.display().to_string())
         .replace("${MAP_IDS}", &map_ids_arg)
-        .replace("${PROG_TYPE}", &metadata.prog_type.to_string())
-        .replace("${TARGET}", &target_arg);
+        .replace("${PROG_TYPE}", &metadata.prog_type.to_string());
+    // When no target is set, drop the whole `--target ${TARGET}` flag instead of
+    // emitting an empty value: an empty `--target` consumes the `--` pass-arg
+    // separator as its value, leaking post-`--` args into the main parser
+    // ("unknown argument: --map-values").
+    let command = match target {
+        Some(t) => command.replace("${TARGET}", &t.display().to_string()),
+        None => command
+            .replace("--target ${TARGET} ", "")
+            .replace("--target ${TARGET}", ""),
+    };
 
     let status = Command::new("sh").arg("-c").arg(&command).status()?;
     if !status.success() {

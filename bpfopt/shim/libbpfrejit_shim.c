@@ -737,7 +737,7 @@ int close(int fd) {
     ensure_syms_resolved();
     if (!in_shim && fd >= 0) {
         pthread_mutex_lock(&state_mutex);
-        prog_remove(fd);
+        prog_forget_loader_fd(fd);
         map_remove(fd);
         link_remove(fd);
         raw_tp_remove(fd);

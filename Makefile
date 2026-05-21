@@ -303,13 +303,12 @@ __runtime-host-corpus:
 	$(RUNTIME_DOCKER_RUN)
 
 __runtime-vm-docker:
-	rm -rf /run/bpf-benchmark-docker /tmp/bpf-benchmark-docker.img
 	install -d /run/bpf-benchmark-docker /run/bpf-benchmark-docker/data /run/bpf-benchmark-docker/exec
-	truncate -s "$${BPFREJIT_VM_DOCKER_DISK_SIZE:-64G}" /tmp/bpf-benchmark-docker.img
-	mkfs.ext4 -F -q /tmp/bpf-benchmark-docker.img
-	mount -o loop,discard /tmp/bpf-benchmark-docker.img /run/bpf-benchmark-docker
+	truncate -s "$${BPFREJIT_VM_DOCKER_DISK_SIZE:-64G}" /var/tmp/bpf-benchmark-docker.img
+	mkfs.ext4 -F -q /var/tmp/bpf-benchmark-docker.img
+	mount -o loop,discard /var/tmp/bpf-benchmark-docker.img /run/bpf-benchmark-docker
 	dockerd --data-root /run/bpf-benchmark-docker/data --exec-root /run/bpf-benchmark-docker/exec --pidfile /run/bpf-benchmark-docker/docker.pid --host unix:///run/docker.sock --bridge=none --iptables=false --ip-masq=false --ip-forward=false >/run/bpf-benchmark-docker/dockerd.log 2>&1 &
-	sleep 10
+	for _ in 1 2 3 4 5 6 7 8 9 10; do docker info >/dev/null 2>&1 && break; sleep 1; done
 	docker info >/dev/null
 
 __runtime-vm-micro __runtime-vm-corpus __runtime-vm-test: __runtime-vm-docker
