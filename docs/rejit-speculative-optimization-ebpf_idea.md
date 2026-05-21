@@ -57,7 +57,7 @@ paper line (idea #2) and are **not in scope here**; see `docs/kinsn_idea.md`.
 
 ## 0. Abstract
 
-eBPF is widely adopted in production for observability, networking, and customizable kernel extensions in modern production systems, yet its current just-in-time (JIT) compilers remain rigid, platform-agnostic, and severely under-optimized compared to mature runtimes such as JVM, WASM, or LLVM. Many optimizations and security hardenings are restricted due to stringent kernel safety constraints and prohibitive implementation complexity. This paper presents BpfReJIT, a dynamic, minimally invasive, and extensible kernel compilation framework that transparently optimizes kernel-resident eBPF programs. Our key insight is a novel, microkernel-inspired separation of concerns that delegates kernel safety guarantees to minimal kernel extensions, allowing lightweight verification and in-place recompilation while offloading correctness and complex optimizations to an extensible userspace CLI toolchain informed by runtime profiling data. We implement BpfReJIT within the Linux kernel with fewer than 600 lines of code modifications, transparently supporting existing eBPF tools, loaders, and subsystems. Evaluation across diverse hardware platforms and representative workloads (network monitoring, security enforcement, and observability tracing) demonstrates that BpfReJIT achieves up to 40% performance improvement, 50% reduction in binary size, and negligible overhead. BpfReJIT provides a practical, upstream-compatible path toward dynamic, extensible compilation frameworks in operating system kernels.
+eBPF is widely adopted in production for observability, networking, and customizable kernel extensions, yet its just-in-time (JIT) compilers remain rigid, platform-agnostic, and under-optimized compared to mature runtimes such as JVM, WASM, or LLVM. More fundamentally, each program is compiled once at load time and never revisited, even as its runtime context — map contents, branch profile, helper-call patterns — only becomes known after the program is live. This paper presents BpfReJIT, a dynamic, transparent, and **fully userspace** framework that speculatively re-optimizes already-loaded eBPF programs on a **stock Linux kernel with zero kernel patches** (no new syscall, no verifier or JIT changes, no out-of-tree daemon). An `LD_PRELOAD` shim intercepts the BPF syscalls of unmodified upstream applications, captures each program's original bytecode, and exposes a per-process control socket; a userspace CLI toolchain (`bpfopt`) applies profile-guided BPF-to-BPF rewrite passes and reloads the optimized candidate through the stock `BPF_PROG_LOAD` path, so the existing kernel verifier re-certifies safety exactly as it did for the original program. Optimized versions are installed through the kernel's existing atomic-or-near-atomic attachment-update mechanisms and protected by inline guards with an in-program slow path, avoiding on-stack replacement entirely thanks to eBPF's run-to-completion execution model. Because the verifier remains the sole safety oracle and nothing in the kernel is modified, BpfReJIT runs on any 6.x kernel and preserves BTF/CO-RE and all existing eBPF tooling, loaders, and subsystems. We evaluate BpfReJIT across diverse hardware platforms and representative workloads (network monitoring, security enforcement, and observability tracing) and report guard-protected, profile-driven speedups on real programs while preserving the kernel's safety guarantees. [评测数值待 authoritative rerun 填入;旧 abstract 的 40%/50% 来自含 kinsn / llvmbpf 上界的旧设计,不属于本篇纯 BPF-to-BPF stock-kernel 范围。]
 
 ---
 
@@ -162,7 +162,7 @@ BpfReJIT 的设计基于三个层次的 insight：
 
 注入到 app 进程的 dumb executor。三件事:
 - **拦截** libc 的 `syscall(SYS_bpf, ...)`、`perf_event_open(2)`、`ioctl(2)`、`close(2)`,捕获每次 `BPF_PROG_LOAD` 的原始 bytecode + attr,落盘成 `<dir>/bpfrejit_<pid>_<hash>.bpf`,在 in-process state table 里跟 `kernel_prog_id`(via `OBJ_GET_INFO_BY_FD`)关联。
-- **bind** per-pid 套接字 `/var/run/bpfrejit/shim-<pid>.sock`,实现 `list_progs` / `execute_step` / `dump_state` 三个 RPC(协议照搬现有 daemon 的 JSON 形态)。
+- **bind** per-pid 套接字 `/var/run/bpfrejit/shim-<pid>.sock`,实现 `list_progs` / `execute_step` / `dump_state` 三个 RPC(协议沿用原 daemon 时期定义的 JSON 形态;daemon 已移除,shim 是唯一持久用户态组件)。
 - **执行**:`execute_step` 收到 runner 发的 shell command 模板,替换 `${VAR}` 后 `posix_spawn("/bin/sh", "-c", ...)`,subprocess env 里删 `LD_PRELOAD` 避免自递归。
 
 shim 不知道 yaml,不知道有哪些 pass,不知道 `bpfopt` 是什么 — 就是一个**通用 syscall hook + state table + shell executor**。语言 C,~1000 行 + musl 变体。
@@ -173,7 +173,7 @@ stdin/stdout 传 raw `struct bpf_insn[]`,一次跑一个 `--pass <name>`,零 sys
 
 **组件 3:Runner Python orchestration**
 
-读 `runner/config/passes/<pass>/default.yaml` 中的命令模板,通过 per-pid shim socket 发 `execute_step`。负责 yaml 解析、profile lifecycle、measurement、pass 序列。**不写新代码** — 沿用现有 `runner/libs/rejit_plan.py:build_execute_plan_payload()` 的 yaml→JSON 协议,只是把 daemon 的 socket 换成 shim 的 per-pid socket(router 转发或 runner 直接枚举,见 PoC-C v2 §6)。
+读 `runner/config/passes/<pass>/default.yaml` 中的命令模板,通过 per-pid shim socket 发 `execute_step`。负责 yaml 解析、profile lifecycle、measurement、pass 序列。**不写新代码** — 沿用现有 `runner/libs/rejit_plan.py:build_execute_plan_payload()` 的 yaml→JSON 协议,只是把原 daemon 的 socket 换成 shim 的 per-pid socket(daemon 已移除;router 转发或 runner 直接枚举,见 PoC-C v2 §6)。
 
 > **谁知道什么**:
 > - shim:对单个 app 进程的拦截 + state 完整知识;不知 yaml、不知 pass 名字
@@ -193,6 +193,7 @@ stdin/stdout 传 raw `struct bpf_insn[]`,一次跑一个 `--pass <name>`,零 sys
 | **LLVM Pass** | 编译时 IR 变换,可扩展 | 我们是 **运行时 post-load + speculative**,verifier 当 safety oracle |
 | **Linux livepatch** | 运行时内核代码替换 | 我们有 **verifier 强制 safety**;livepatch 完全信任 patch 作者 |
 | **K2/Merlin/EPSO** | BPF bytecode 优化 | 他们 **offline / static / single-version**,bpfopt **online / profile-driven / multi-version + guard** |
+| **Morpheus** [Miano et al, ASPLOS'22] | runtime traffic-guided 特化软件数据面(eBPF/XDP + DPDK)+ guard-protected 多版本 + 重 load 经 verifier | **最近邻 prior work,机制高度重叠**:online + 多版本 + profile-driven + guard + tail-call 原子换 + 重 load 经 **in-kernel verifier 兜底**(§6.3 明确),passes 也重叠(const_prop / dce / table-inline≈map_inline / branch-injection≈branch_flip / data-structure-spec≈map representation switching)。**"用 verifier 当 oracle" 不是区别 —— Morpheus 也靠 verifier。** 真正的区别:① Morpheus 只做**网络数据面**(match-action table + 流量信号),bpfopt 覆盖**通用 eBPF**(tracing/安全/观测,无 match-action table);② Morpheus 在 **LLVM IR 层 + 集成进 Polycube/FastClick 工具链**(必须用其工具链构建程序),bpfopt 在 **raw BPF 字节码层 + LD_PRELOAD shim 透明拦截未改动上游 app**(不需源码/IR/框架,作用于已部署程序);③ profiling 信号不同(Morpheus 插 per-packet map-access heatmap,bpfopt 用 run-stats / PMU per-site)。**投稿必须正面区分,否则审稿人直接问"这不是 Morpheus 吗"** |
 | **BCF** [SOSP'25] | certificate-backed verification | 他们 offload verification,我们 offload optimization;两者正交可叠加 |
 
 #### 与 eBPF 现有工作的关键差异(扩展轴)
@@ -204,9 +205,19 @@ stdin/stdout 传 raw `struct bpf_insn[]`,一次跑一个 `--pass <name>`,零 sys
 | EPSO (ASE'25) | offline / pre-load | 单版本 | 否 | 否 | 是 | 否 | 否 | 编译器正确性 |
 | ePass (LPC'25 原型) | load/verify | 单版本 | 否 | 否 | 是 | 否 | 否 | in-kernel pass |
 | BCF (SOSP'25) | load-time | 单版本 | 否 | 否 | 是 | 否 | 否 | certificate |
+| Morpheus (ASPLOS'22) | online / runtime | 多版本 | ✅ | ✅ guard + re-specialize | 需 LLVM IR | 否(集成 Polycube/FastClick) | ✅ | **kernel verifier(重 load 重过)** |
 | **bpfopt(本论文)** | **online / post-load** | **多版本** | **✅** | **✅ inline guard + async respec** | **否** | **✅** | **✅** | **kernel verifier** |
 
-加粗的三轴(**online / multi-version / profile-driven + deopt**)是 bpfopt 跟所有现有 eBPF 优化工作的本质差异 — 不只是时机不同,更是设计哲学不同。
+加粗的三轴(**online / multi-version / profile-driven + deopt**)是 bpfopt 跟绝大多数现有 eBPF 优化工作的本质差异 — 不只是时机不同,更是设计哲学不同。**Morpheus 是唯一一个也落在 online / multi-version / profile-driven 这格的 prior work**;bpfopt 与它的真正分水岭是「优化后的候选重过 stock eBPF verifier 取得 safety」这一点(Morpheus 不把 eBPF 安全保证 outsource 给 verifier),以及 deopt 用程序版本原子换而非 binary 重生成。
+
+#### verifier 精度 / 可表达性相关工作
+
+bpfopt 的 Insight 3(吃 verifier 已算出来的 tnum/range 当 ground truth、砍掉自己的 analyzer)依赖"verifier 的 value-level abstract interpretation 是 sound 的、可被信任当 oracle":
+
+- **PREVAIL** [Gershuni et al, PLDI'19]:基于 abstract interpretation 的 eBPF verifier(Windows 在用)。讨论"verifier 当 abstract interpreter"绕不开的引用。
+- **Tristate Numbers** [Vishwanathan et al, CGO'22] + **Range Analysis Verification** [CAV'23]:形式化证明并改进 verifier 的 tnum / range analysis。直接支撑"verifier 的 tnum/range 可信"。
+
+另有一条**"改 / 换 verifier 以提升可表达性"**的正交路线 —— **Fast/Flexible Kernel Extensions** [SOSP'24]、**Rex** [ATC'25]、**VEP** [NSDI'25]、**Approximation Enforced Execution** [Sec'25]。它们都改动或替换 verifier;bpfopt 的卖点恰恰相反:**stock verifier、零内核改动**,因此与这条路线正交。
 
 ### 1.9 四种用途
 
@@ -243,7 +254,7 @@ stdin/stdout 传 raw `struct bpf_insn[]`,一次跑一个 `--pass <name>`,零 sys
 6. **`bpfopt` 零 syscall 依赖**:`bpfopt` 只读写 raw `struct bpf_insn[]`,所有 BPF syscall 由 shim 在 app 进程内调,跟 bpfopt 隔离。
 7. **Pipeline 协议**:`bpfopt --pass <name>` stdin/stdout 传 raw binary bytecode,side-input/output(profile / verifier-states / map values / report)走文件。Runner 把 yaml 命令模板通过 shim 套接字发到 app 进程,shim 替换 `${VAR}` 后 `/bin/sh -c`。
 8. **Shim 是 dumb executor**:不知道 yaml,不知道 pass 名字。所有 pass 知识在 `bpfopt` + `runner/config/passes/*.yaml`,跟 shim 解耦。
-9. **Runner 稳定边界**:沿用现有 `runner/libs/rejit_plan.py:build_execute_plan_payload()` 的 yaml→JSON 协议,把"发给 daemon"换成"发给每个 app 的 shim socket"。Benchmark runner Python 改动最小。
+9. **Runner 稳定边界**:沿用现有 `runner/libs/rejit_plan.py:build_execute_plan_payload()` 的 yaml→JSON 协议,把原本"发给 daemon"改成"发给每个 app 的 shim socket"(daemon 已移除)。Benchmark runner Python 改动最小。
 
 
 ## 3. 变换分类
@@ -321,7 +332,7 @@ C 类是本论文跟所有 prior eBPF 优化(K2/Merlin/EPSO)的关键差异:**�
 │  - rejit_plan.build_execute_plan_payload() 把 yaml.command      │
 │    塞进 JSON                                                    │
 │  - 通过 per-pid socket 发 execute_step 给目标 app 的 shim       │
-│  - 现有 daemon socket 协议复用,只是 socket path 变成 per-pid    │
+│  - 原 daemon 时期的 socket 协议复用,socket path 变成 per-pid    │
 └──────────────────┬──────────────────────────────────────────────┘
                    │  unix socket: /var/run/bpfrejit/shim-<pid>.sock
                    │  {"cmd":"execute_step","prog_id":N,
@@ -659,7 +670,7 @@ runner/                     # 共享基础设施
     results.py              #     JSON result 解析/聚合
     statistics.py           #     median/geomean/CI/Wilcoxon
     vm.py                   #     vng boot/exec helpers
-    rejit.py                #     per-pid shim socket 通信(沿用现有 daemon JSON 协议)
+    rejit.py                #     per-pid shim socket 通信(沿用原 daemon 时期的 JSON 协议)
     bpf_stats.py            #     bpf_enable_stats + read per-program stats
   src/                      #   C++ micro_exec(仅 TEST_RUN + llvmbpf)
   scripts/                  #   AWS/ARM64 远端脚本
