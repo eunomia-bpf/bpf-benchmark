@@ -152,14 +152,14 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 	mutex_lock(&blobs_lock);
 	if (blobs[blob_id].bytes && blobs[blob_id].len) {
 		snapshot_len = blobs[blob_id].len;
+		if (snapshot_len > NATIVE_LAB_MAX_BLOB_BYTES) {
+			mutex_unlock(&blobs_lock);
+			return -E2BIG;
+		}
 		if (emit) {
 			u8 *emit_at = image + *off;
 			size_t i;
 
-			if (snapshot_len > NATIVE_LAB_MAX_BLOB_BYTES) {
-				mutex_unlock(&blobs_lock);
-				return -E2BIG;
-			}
 			memcpy(emit_at, blobs[blob_id].bytes, snapshot_len);
 
 			/*
