@@ -1,34 +1,5 @@
 # Speculative eBPF Optimization (BpfReJIT)
 
-Status: paper-line hub for idea #1.
-
-## Project Context: Three Sister Ideas
-
-This research project produces three distinct papers that share a single
-evaluation setup (the `bpf-benchmark` corpus, micro suite, and measurement
-infrastructure) but address different problems with different designs.
-
-| # | Idea | Hub doc |
-|---|---|---|
-| 1 | **Speculative eBPF optimization** (this doc) — runtime userspace-guided rewriting of live eBPF programs | `docs/rejit-speculative-optimization-ebpf_idea.md` |
-| 2 | Kinsn — new OS abstraction, brings eBPF close to hardware | `docs/kinsn_idea.md` |
-| 3 | ReverseSim — x86/arm native simulator written in eBPF | `docs/reverse-sim_idea.md` |
-
-The three ideas are not incremental versions of one design. Each picks a
-different problem and a different point in the trust / kernel-surface /
-coverage space.
-
-**Scope of this doc (idea #1)**: speculative BPF-to-BPF rewrite passes
-applied to live eBPF programs, driven by a userspace **LD_PRELOAD shim**
-(`bpfopt/shim/`) that intercepts BPF syscalls in real upstream apps,
-captures original bytecode, and exposes a per-pid socket on which the
-runner sends shell-encoded `bpfopt --pass <name>` commands. Optimization
-is **stock-kernel**: zero kernel patches, no `BPF_PROG_REJIT` syscall, no
-out-of-tree daemon. The shim is the only persistent userspace component.
-Kinsn-introducing passes (rotate, cond_select, extract, endian fusion,
-prefetch, pair load/store, bulk memory, ccmp, lea) belong to the kinsn
-paper line (idea #2) and are **not in scope here**; see `docs/kinsn_idea.md`.
-
 > **论文核心方向：构建一个最小化、动态、可扩展的 eBPF 优化框架，让 deployed eBPF 从一次性静态编译，变成可在线、透明、runtime-guided specialization 的执行环境。Paper 必须展示真实程序上的可测量加速能力。**
 > **编辑规则**：
 > - **⚠️ 未经用户明确同意，禁止修改内核代码（vendor/linux-framework）。** 所有内核改动必须先调研→用户确认→再实施。codex/agent prompt 必须包含此约束。
@@ -208,7 +179,11 @@ stdin/stdout 传 raw `struct bpf_insn[]`,一次跑一个 `--pass <name>`,零 sys
 | Morpheus (ASPLOS'22) | online / runtime | 多版本 | ✅ | ✅ guard + re-specialize | 需 LLVM IR | 否(集成 Polycube/FastClick) | ✅ | **kernel verifier(重 load 重过)** |
 | **bpfopt(本论文)** | **online / post-load** | **多版本** | **✅** | **✅ inline guard + async respec** | **否** | **✅** | **✅** | **kernel verifier** |
 
-加粗的三轴(**online / multi-version / profile-driven + deopt**)是 bpfopt 跟绝大多数现有 eBPF 优化工作的本质差异 — 不只是时机不同,更是设计哲学不同。**Morpheus 是唯一一个也落在 online / multi-version / profile-driven 这格的 prior work**;bpfopt 与它的真正分水岭是「优化后的候选重过 stock eBPF verifier 取得 safety」这一点(Morpheus 不把 eBPF 安全保证 outsource 给 verifier),以及 deopt 用程序版本原子换而非 binary 重生成。
+加粗的三轴(**online / multi-version / profile-driven + deopt**)是 bpfopt 跟**绝大多数**现有 eBPF 优化工作的本质差异 — 不只是时机不同,更是设计哲学不同。**唯一的例外是 Morpheus(ASPLOS'22),它也落在 online / multi-version / profile-driven 这格,且重 load 同样过 in-kernel verifier**——因此「用 verifier 当 oracle」不是与 Morpheus 的区别。bpfopt 与 Morpheus 的真正分水岭见下面的 related-work 段落(域的一般性 / 透明字节码部署 / map 之外的信号)。
+
+**Related work — Morpheus(用于 paper 的 related-work 段落):**
+
+> Morpheus [ASPLOS'22] is the closest prior work: it performs guard-protected, profile-driven runtime specialization of eBPF data planes with deoptimization fallback, reloading through the in-kernel verifier — mechanically a form of speculative optimization, though it is framed as unsupervised dynamic compilation for networking and does not connect to the speculative-JIT lineage. We share this paradigm but differ in three respects: (i) **generality** — we optimize arbitrary deployed eBPF (tracing, security, networking), not only match-action data planes; (ii) **transparency/deployment** — we operate on raw loaded bytecode via an `LD_PRELOAD` shim on unmodified binaries, whereas Morpheus works at the LLVM IR level and must be integrated into the data-plane framework (Polycube/FastClick); (iii) **signal** — we exploit PMU per-site branch profiles and run-statistics, signals Morpheus explicitly forgoes in favor of map-access heatmaps.
 
 #### verifier 精度 / 可表达性相关工作
 
