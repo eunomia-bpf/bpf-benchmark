@@ -23,7 +23,7 @@ CONTAINER_IMAGE_ARTIFACT_ROOT := $(ARTIFACT_ROOT)/container-images
 
 ARM64_RUST_TARGET := aarch64-unknown-linux-gnu
 NATIVE_LINK_DIR := $(ROOT_DIR)/native-sim/x86/native_lab/native_link
-ARM64_NATIVE_LAB_SMOKE_DIR := $(ROOT_DIR)/native-sim/arm64/native_lab_smoke
+ARM64_NATIVE_KERNEL_SMOKE_DIR := $(ROOT_DIR)/native-sim/arm64/native_lab_smoke
 ARM64_SIM_PROOF_DIR := $(ROOT_DIR)/native-sim/arm64
 
 RUNNER_RUNTIME_CONTAINERFILE := $(RUNNER_CONTAINER_DIR)/runner-runtime.Dockerfile
@@ -49,7 +49,7 @@ HOST_KINSN_DIR_ARM64 := $(ROOT_DIR)/module/arm64/build
 	host-kinsn-x86 host-kinsn-arm64 host-rust-x86 host-rust-arm64 \
 	host-shim-x86 host-shim-arm64 host-shim-artifacts \
 	host-runner-x86 host-runner-arm64 host-micro-programs-x86 host-micro-programs-arm64 \
-	host-stage2-programs-x86 host-stage2-programs-arm64 host-arm64-native-lab-smoke host-arm64-sim-proofs \
+	host-stage2-programs-x86 host-stage2-programs-arm64 host-x86-sim-proofs host-arm64-native-kernel-smoke host-arm64-sim-proofs \
 	apps host-source-apps host-source-apps-x86 host-source-apps-arm64 \
 	aarch64-sysroot runtime-kernel-image \
 	x86-runner-runtime-image-tar arm64-runner-runtime-image-tar image-runner-runtime-image-tar
@@ -167,20 +167,22 @@ host-stage2-programs-x86: host-micro-programs-x86
 host-stage2-programs-arm64: host-micro-programs-arm64
 	$(MAKE) -C "$(STAGE2_PROGRAM_DIR)" OUTPUT_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)" KERNEL_OFFSETS="$(MICRO_PROGRAM_BUILD_ARM64)/kernel_offsets.h" NATIVE_TARGET=aarch64-linux-gnu NATIVE_ARCH=arm64 SYS_INCLUDE_FLAGS="$(ARM64_SYS_INCLUDE_FLAGS)" all
 
-host-arm64-native-lab-smoke:
-	$(MAKE) -C "$(ARM64_NATIVE_LAB_SMOKE_DIR)" OUTPUT_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)/native_lab_smoke" all
+host-arm64-native-kernel-smoke:
+	$(MAKE) -C "$(ARM64_NATIVE_KERNEL_SMOKE_DIR)" OUTPUT_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)/native_kernel_smoke" all
+
+host-x86-sim-proofs: host-micro-programs-x86
+	$(MAKE) -C "$(ROOT_DIR)/native-sim/x86" PROOF_BUILD_DIR="$(STAGE2_PROGRAM_BUILD_X86)/x86_sim_proofs" MICRO_BUILD_DIR="$(MICRO_PROGRAM_BUILD_X86)" micro-proofs-build
 
 host-arm64-sim-proofs: host-micro-programs-arm64
 	$(MAKE) -C "$(ARM64_SIM_PROOF_DIR)" PROOF_BUILD_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)/arm64_sim_proofs" MICRO_BUILD_DIR="$(MICRO_PROGRAM_BUILD_ARM64)" micro-proofs-build
 
-x86-runner-runtime-image-tar: host-kernel-x86 host-kinsn-x86 host-rust-x86 host-shim-x86 host-source-apps-x86 host-runner-x86 host-micro-programs-x86 host-stage2-programs-x86
+x86-runner-runtime-image-tar: host-kernel-x86 host-kinsn-x86 host-rust-x86 host-shim-x86 host-source-apps-x86 host-runner-x86 host-micro-programs-x86 host-stage2-programs-x86 host-x86-sim-proofs
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	docker build --platform linux/amd64 \
 		--target runner-runtime \
 		--build-context runner-runtime-host-runner-build="$(RUNNER_DIR)/build-llvmbpf" \
 		--build-context runner-runtime-host-micro-programs="$(MICRO_PROGRAM_BUILD_X86)" \
 		--build-context runner-runtime-host-stage2-programs="$(STAGE2_PROGRAM_BUILD_X86)" \
-		--build-context runner-runtime-host-unittest="$(ROOT_DIR)/tests/unittest/build" \
 		--build-context runner-runtime-host-negative="$(ROOT_DIR)/tests/negative/build" \
 		--build-context runner-runtime-host-kernel-image="$(HOST_KERNEL_BUILD_DIR_X86)/arch/x86/boot" \
 		--build-context runner-runtime-host-kernel-offsets="$(MICRO_PROGRAM_BUILD_X86)" \
@@ -199,14 +201,13 @@ x86-runner-runtime-image-tar: host-kernel-x86 host-kinsn-x86 host-rust-x86 host-
 	docker save -o "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE)"
 	mv -f "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE_TAR)"
 
-arm64-runner-runtime-image-tar: host-kernel-arm64 host-kinsn-arm64 host-rust-arm64 host-shim-arm64 host-source-apps-arm64 host-runner-arm64 host-micro-programs-arm64 host-stage2-programs-arm64 host-arm64-native-lab-smoke host-arm64-sim-proofs
+arm64-runner-runtime-image-tar: host-kernel-arm64 host-kinsn-arm64 host-rust-arm64 host-shim-arm64 host-source-apps-arm64 host-runner-arm64 host-micro-programs-arm64 host-stage2-programs-arm64 host-arm64-native-kernel-smoke host-arm64-sim-proofs
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	docker build --platform linux/arm64 \
 		--target runner-runtime \
 		--build-context runner-runtime-host-runner-build="$(RUNNER_DIR)/build-arm64-llvmbpf" \
 		--build-context runner-runtime-host-micro-programs="$(MICRO_PROGRAM_BUILD_ARM64)" \
 		--build-context runner-runtime-host-stage2-programs="$(STAGE2_PROGRAM_BUILD_ARM64)" \
-		--build-context runner-runtime-host-unittest="$(ROOT_DIR)/tests/unittest/build-arm64" \
 		--build-context runner-runtime-host-negative="$(ROOT_DIR)/tests/negative/build-arm64" \
 		--build-context runner-runtime-host-kernel-image="$(HOST_KERNEL_BUILD_DIR_ARM64)/arch/arm64/boot" \
 		--build-context runner-runtime-host-kernel-offsets="$(MICRO_PROGRAM_BUILD_ARM64)" \

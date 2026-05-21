@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
 import subprocess
@@ -138,8 +139,15 @@ def require_ok(cmd: list[str]) -> None:
         raise RuntimeError(f"{' '.join(cmd)} failed\n{detail}")
 
 
-def generate_sources(config: ArchConfig, only: list[str]) -> None:
+def generate_sources(
+    config: ArchConfig,
+    only: list[str],
+    *,
+    native_build_dir: Path | None = None,
+) -> None:
     cmd = ["python3", str(config.source_dir / "generate_micro_sim_proofs.py")]
+    if native_build_dir is not None:
+        cmd.extend(["--native-build-dir", str(native_build_dir)])
     if only:
         cmd.extend(["--only", *only])
     require_ok(cmd)
@@ -149,12 +157,40 @@ def build_loader() -> None:
     require_ok(["cargo", "build", "--manifest-path", str(LOADER_MANIFEST)])
 
 
-def compile_object(config: ArchConfig, bench: Bench) -> tuple[Result | None, float]:
+def write_compile_metadata(
+    *,
+    config: ArchConfig,
+    bench: Bench,
+    src: Path,
+    obj: Path,
+    cmd: list[str],
+    compile_s: float,
+) -> None:
+    metadata = {
+        "arch": config.name,
+        "name": bench.name,
+        "source": str(src),
+        "object": str(obj),
+        "compile_ns": int(compile_s * 1_000_000_000),
+        "compile_s": compile_s,
+        "command": cmd,
+    }
+    (obj.parent / f"{bench.name}.compile.json").write_text(
+        json.dumps(metadata, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def compile_object(
+    config: ArchConfig,
+    bench: Bench,
+    build_dir: Path,
+) -> tuple[Result | None, float]:
     src = config.source_dir / f"{bench.name}.bpf.c"
-    obj = config.build_dir / f"{bench.name}.bpf.o"
+    obj = build_dir / f"{bench.name}.bpf.o"
     if not src.exists():
         return Result(bench.name, "compile-fail", f"missing generated source: {src}"), 0.0
-    config.build_dir.mkdir(parents=True, exist_ok=True)
+    build_dir.mkdir(parents=True, exist_ok=True)
     cmd = [
         "clang",
         "-g",
@@ -185,6 +221,14 @@ def compile_object(config: ArchConfig, bench: Bench) -> tuple[Result | None, flo
             compact_error(result.stderr or result.stdout or "clang failed"),
             compile_s=compile_s,
         ), compile_s
+    write_compile_metadata(
+        config=config,
+        bench=bench,
+        src=src,
+        obj=obj,
+        cmd=cmd,
+        compile_s=compile_s,
+    )
     return None, compile_s
 
 
@@ -237,8 +281,8 @@ def load_direct_bpf_counts(config: ArchConfig) -> dict[str, int]:
     return counts
 
 
-def run_object(config: ArchConfig, bench: Bench, sudo: bool, run_id: str) -> Result:
-    obj = config.build_dir / f"{bench.name}.bpf.o"
+def run_object(config: ArchConfig, bench: Bench, build_dir: Path, sudo: bool, run_id: str) -> Result:
+    obj = build_dir / f"{bench.name}.bpf.o"
     input_path, _meta = materialize_input(bench.input_generator, force=False)
     verifier_log = config.results_dir / f"{bench.name}-{run_id}.verifier.log"
     config.results_dir.mkdir(parents=True, exist_ok=True)
@@ -285,21 +329,36 @@ def add_note(result: Result, note: str) -> None:
         result.note = f"{result.note}; {note}" if result.note else note
 
 
-def run_bench(config: ArchConfig, bench: Bench, sudo: bool, run_id: str, direct_counts: dict[str, int]) -> Result:
+def run_bench(
+    config: ArchConfig,
+    bench: Bench,
+    build_dir: Path,
+    sudo: bool,
+    run_id: str,
+    direct_counts: dict[str, int],
+    *,
+    build_only: bool = False,
+) -> Result:
     direct_count = direct_counts.get(bench.name)
-    direct_note = "" if direct_count is not None else f"missing direct xlated.bin in {config.name} micro result"
-    compile_result, compile_s = compile_object(config, bench)
+    direct_note = "" if build_only or direct_count is not None else f"missing direct xlated.bin in {config.name} micro result"
+    compile_result, compile_s = compile_object(config, bench, build_dir)
     if compile_result is not None:
         compile_result.direct_bpf_insns = direct_count
         add_note(compile_result, direct_note)
         return compile_result
     try:
-        proof_count = bpf_instruction_count(config.build_dir / f"{bench.name}.bpf.o")
+        proof_count = bpf_instruction_count(build_dir / f"{bench.name}.bpf.o")
         proof_note = ""
     except RuntimeError as exc:
         proof_count = None
         proof_note = f"proof BPF count failed: {exc}"
-    result = run_object(config, bench, sudo=sudo, run_id=run_id)
+    if build_only:
+        result = Result(bench.name, "ok", "", compile_s=compile_s)
+        result.proof_bpf_insns = proof_count
+        result.direct_bpf_insns = direct_count
+        add_note(result, proof_note)
+        return result
+    result = run_object(config, bench, build_dir, sudo=sudo, run_id=run_id)
     result.compile_s = compile_s
     result.proof_bpf_insns = proof_count
     result.direct_bpf_insns = direct_count
@@ -369,6 +428,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--only", nargs="*", help="optional micro benchmark names")
     parser.add_argument("--no-generate", action="store_true")
     parser.add_argument("--no-build-loader", action="store_true")
+    parser.add_argument("--build-only", action="store_true")
+    parser.add_argument("--build-dir", type=Path)
+    parser.add_argument("--native-build-dir", type=Path)
     parser.add_argument("--no-sudo", action="store_true")
     parser.add_argument("--jobs", type=int, default=min(8, os.cpu_count() or 1))
     parser.add_argument("--markdown", type=Path)
@@ -377,6 +439,8 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit("--jobs must be >= 1")
 
     config = ARCHES[args.arch]
+    build_dir = (args.build_dir or config.build_dir).resolve()
+    native_build_dir = args.native_build_dir.resolve() if args.native_build_dir is not None else None
     benches = load_benches()
     only = set(args.only or [])
     if only:
@@ -385,23 +449,42 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit("no selected benchmarks")
 
     if not args.no_generate:
-        generate_sources(config, [bench.name for bench in benches] if only else [])
-    if not args.no_build_loader:
+        generate_sources(
+            config,
+            [bench.name for bench in benches] if only else [],
+            native_build_dir=native_build_dir,
+        )
+    if not args.no_build_loader and not args.build_only:
         build_loader()
 
-    direct_counts = load_direct_bpf_counts(config)
+    direct_counts = {} if args.build_only else load_direct_bpf_counts(config)
     run_id = datetime.now().strftime("%Y%m%d-%H%M%S")
     results_by_name: dict[str, Result] = {}
     if args.jobs == 1:
         for bench in benches:
-            result = run_bench(config, bench, sudo=not args.no_sudo, run_id=run_id, direct_counts=direct_counts)
+            result = run_bench(
+                config, bench, build_dir,
+                sudo=not args.no_sudo,
+                run_id=run_id,
+                direct_counts=direct_counts,
+                build_only=args.build_only,
+            )
             results_by_name[bench.name] = result
             print_result(result)
     else:
         print(f"running {len(benches)} benchmarks with {args.jobs} jobs", flush=True)
         with ThreadPoolExecutor(max_workers=args.jobs) as executor:
             futures = {
-                executor.submit(run_bench, config, bench, not args.no_sudo, run_id, direct_counts): bench
+                executor.submit(
+                    run_bench,
+                    config,
+                    bench,
+                    build_dir,
+                    not args.no_sudo,
+                    run_id,
+                    direct_counts,
+                    build_only=args.build_only,
+                ): bench
                 for bench in benches
             }
             for future in as_completed(futures):
@@ -412,10 +495,11 @@ def main(argv: list[str] | None = None) -> int:
 
     results = [results_by_name[bench.name] for bench in benches]
     table = markdown_table(results)
-    markdown_path = args.markdown or (config.results_dir / f"README-{run_id}.md")
-    markdown_path.parent.mkdir(parents=True, exist_ok=True)
-    markdown_path.write_text(table + "\n", encoding="utf-8")
-    print(f"wrote {markdown_path}")
+    if args.markdown is not None or not args.build_only:
+        markdown_path = args.markdown or (config.results_dir / f"README-{run_id}.md")
+        markdown_path.parent.mkdir(parents=True, exist_ok=True)
+        markdown_path.write_text(table + "\n", encoding="utf-8")
+        print(f"wrote {markdown_path}")
     print(table)
     return 0 if all(result.status == "ok" for result in results) else 1
 

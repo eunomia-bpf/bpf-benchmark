@@ -49,6 +49,7 @@ struct program_descriptor {
 struct cli_options {
     std::string command;
     std::filesystem::path program;
+    std::optional<std::filesystem::path> native_program;
     std::optional<std::filesystem::path> memory;
     std::optional<std::filesystem::path> fixture_path;
     std::optional<std::filesystem::path> btf_custom_path;
@@ -64,15 +65,10 @@ struct cli_options {
     std::optional<std::filesystem::path> dump_jit_path;
     std::optional<std::filesystem::path> dump_xlated;
     bool wait_signal = false;
-    /* native_lab-only: xdp | sched_cls | cgroup_skb. Defaults to xdp. */
-    std::string native_lab_prog_type = "xdp";
-    /* native_lab Stage 2: native_lab function symbol to extract when the
-     * input is a .native.o ELF rather than a pre-linked blob.bin.
-     * Defaults to the ELF basename. */
-    std::string native_lab_symbol;
-    /* Override the path of the native-link binary. Empty -> use repo
-     * default. */
-    std::string native_lab_linker_path;
+    /* native_kernel-only: xdp | sched_cls | cgroup_skb. Defaults to xdp. */
+    std::string native_kernel_prog_type = "xdp";
+    /* Override the path of the native-link binary. */
+    std::string native_kernel_linker_path;
 };
 
 struct timing_phase {
@@ -135,7 +131,7 @@ program_image load_program_image(
 std::vector<sample_result> run_kernel(const cli_options &options);
 sample_result run_llvmbpf(const cli_options &options);
 sample_result run_native(const cli_options &options);
-std::vector<sample_result> run_kernel_native_lab(const cli_options &options);
+std::vector<sample_result> run_native_kernel(const cli_options &options);
 void print_json(std::ostream &out, const sample_result &sample);
 void print_json(std::ostream &out, const std::vector<sample_result> &samples);
 void print_json(const sample_result &sample);

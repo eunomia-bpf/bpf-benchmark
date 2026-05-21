@@ -218,11 +218,23 @@ fn main() -> Result<()> {
         }
         object::Architecture::Aarch64 => {
             let entry = find_symbol_by_name(&elf, &args.symbol)?;
+            let included = discover_reachable_arm64(&elf, &entry)?;
             eprintln!(
-                "native-link: arm64 entry={} ({} bytes)",
-                entry.name, entry.size
+                "native-link: arm64 entry={} ({} bytes), {} reachable symbol(s) total",
+                entry.name,
+                entry.size,
+                included.len()
             );
-            rewrite_arm64_single_symbol(&elf, &entry, args.show)?
+            for sym in &included {
+                eprintln!(
+                    "  - {} (vaddr {:#x}, {} bytes){}",
+                    sym.name,
+                    sym.address,
+                    sym.size,
+                    if sym.address == entry.address { " [entry]" } else { "" }
+                );
+            }
+            rewrite_arm64(&elf, &entry, &included, args.show)?
         }
         arch => bail!("unsupported input ELF arch: {:?}", arch),
     };
@@ -754,12 +766,20 @@ fn a64_sign_extend(value: u32, bits: u8) -> i64 {
     ((value as i64) << shift) >> shift
 }
 
-fn a64_patch_b_to_end(word_index: usize, end_index: usize) -> Result<u32> {
-    let disp = end_index as i64 - word_index as i64;
+fn a64_patch_b(word_index: usize, target_index: usize) -> Result<u32> {
+    let disp = target_index as i64 - word_index as i64;
     if disp < -(1 << 25) || disp >= (1 << 25) {
-        bail!("arm64 branch-to-end displacement out of range: {disp}");
+        bail!("arm64 branch displacement out of range: {disp}");
     }
     Ok(0x1400_0000 | ((disp as u32) & 0x03ff_ffff))
+}
+
+fn a64_patch_bl(word_index: usize, target_index: usize) -> Result<u32> {
+    let disp = target_index as i64 - word_index as i64;
+    if disp < -(1 << 25) || disp >= (1 << 25) {
+        bail!("arm64 BL displacement out of range: {disp}");
+    }
+    Ok(0x9400_0000 | ((disp as u32) & 0x03ff_ffff))
 }
 
 fn a64_is_uncond_b(insn: u32) -> bool {
@@ -788,65 +808,162 @@ fn a64_branch_target(entry_addr: u64, word_index: usize, insn: u32) -> Option<u6
     None
 }
 
-fn a64_is_mov_wide(insn: u32) -> bool {
-    matches!(insn & 0x7f80_0000, 0x1280_0000 | 0x5280_0000 | 0x7280_0000)
+fn a64_bl_target(entry_addr: u64, word_index: usize, insn: u32) -> Option<u64> {
+    if !a64_is_bl(insn) {
+        return None;
+    }
+    let imm26 = insn & 0x03ff_ffff;
+    let disp = a64_sign_extend(imm26, 26) << 2;
+    Some(((entry_addr as i64) + (word_index as i64 * 4) + disp) as u64)
 }
 
-fn a64_is_mov_reg_alias(insn: u32) -> bool {
-    (insn & 0x7fe0_ffe0) == 0x2a00_03e0
+fn a64_is_ret(insn: u32) -> bool {
+    (insn & 0xffff_fc1f) == 0xd65f_0000
 }
 
-fn a64_rewrite_return_reg(insn: u32) -> u32 {
-    if (insn & 0x1f) != 0 {
-        return insn;
-    }
-    if a64_is_mov_wide(insn) || a64_is_mov_reg_alias(insn) {
-        return (insn & !0x1f) | 7;
-    }
-    insn
-}
+fn discover_reachable_arm64(elf: &object::File, entry: &SymInfo) -> Result<Vec<SymInfo>> {
+    let mut included: Vec<SymInfo> = vec![entry.clone()];
+    let mut seen: std::collections::HashSet<u64> = [entry.address].into_iter().collect();
+    let mut queue: Vec<SymInfo> = vec![entry.clone()];
 
-fn rewrite_arm64_single_symbol(
-    elf: &object::File,
-    entry: &SymInfo,
-    show: bool,
-) -> Result<RewriteResult> {
-    let bytes = read_symbol_bytes(elf, entry)?;
-    if bytes.is_empty() || bytes.len() % 4 != 0 {
-        bail!("arm64 symbol {} size must be a non-zero multiple of 4", entry.name);
-    }
-
-    let mut blob = bytes.clone();
-    let end = entry.address + entry.size;
-    let end_index = blob.len() / 4;
-    for word_index in 0..end_index {
-        let off = word_index * 4;
-        let mut insn = u32::from_le_bytes(blob[off..off + 4].try_into().unwrap());
-
-        if a64_is_bl(insn) {
-            bail!("arm64 native-link does not support BL/calls yet at byte offset {off:#x}");
+    while let Some(sym) = queue.pop() {
+        let bytes = read_symbol_bytes(elf, &sym)?;
+        if bytes.len() % 4 != 0 {
+            bail!("arm64 symbol {} size must be a multiple of 4", sym.name);
         }
-        if (insn & 0x9f00_0000) == 0x1000_0000 || (insn & 0x9f00_0000) == 0x9000_0000 {
-            bail!("arm64 native-link does not support ADR/ADRP yet at byte offset {off:#x}");
-        }
-        if (insn & 0x3b00_0000) == 0x1800_0000 {
-            bail!("arm64 native-link does not support LDR literal yet at byte offset {off:#x}");
-        }
-        if let Some(target) = a64_branch_target(entry.address, word_index, insn) {
-            if target < entry.address || target > end {
+        for (word_index, word) in bytes.chunks_exact(4).enumerate() {
+            let insn = u32::from_le_bytes(word.try_into().unwrap());
+            let Some(target) = a64_bl_target(sym.address, word_index, insn) else {
+                continue;
+            };
+            if seen.contains(&target) {
+                continue;
+            }
+            let called = find_symbol_at_address(elf, target).ok_or_else(|| {
+                anyhow!("{} calls {target:#x} but no symbol covers that address", sym.name)
+            })?;
+            if called.address != target {
                 bail!(
-                    "arm64 branch at byte offset {off:#x} targets {target:#x}, outside {}",
-                    entry.name
+                    "{} calls {target:#x}, which lands inside {} at {:#x}",
+                    sym.name,
+                    called.name,
+                    called.address
                 );
             }
+            if seen.insert(called.address) {
+                included.push(called.clone());
+                queue.push(called);
+            }
+        }
+    }
+    Ok(included)
+}
+
+#[derive(Clone, Copy)]
+enum Arm64PatchKind {
+    ReturnToTrampoline,
+    Bl { target_symbol_address: u64 },
+}
+
+struct Arm64Patch {
+    word_index: usize,
+    kind: Arm64PatchKind,
+}
+
+fn rewrite_arm64(
+    elf: &object::File,
+    entry: &SymInfo,
+    included: &[SymInfo],
+    show: bool,
+) -> Result<RewriteResult> {
+    let mut blob = Vec::new();
+    let mut sym_word_offset: HashMap<u64, usize> = HashMap::new();
+    let mut patches: Vec<Arm64Patch> = Vec::new();
+
+    for sym in included {
+        let is_entry = sym.address == entry.address;
+        let bytes = read_symbol_bytes(elf, sym)?;
+        if bytes.is_empty() || bytes.len() % 4 != 0 {
+            bail!("arm64 symbol {} size must be a non-zero multiple of 4", sym.name);
         }
 
-        if insn == 0xd65f_03c0 {
-            insn = a64_patch_b_to_end(word_index, end_index)?;
-        } else {
-            insn = a64_rewrite_return_reg(insn);
+        let sym_base_word = blob.len() / 4;
+        sym_word_offset.insert(sym.address, sym_base_word);
+        let end = sym.address + sym.size;
+        for (local_word_index, word) in bytes.chunks_exact(4).enumerate() {
+            let off = local_word_index * 4;
+            let insn = u32::from_le_bytes(word.try_into().unwrap());
+            let global_word_index = sym_base_word + local_word_index;
+
+            if (insn & 0x9f00_0000) == 0x1000_0000 || (insn & 0x9f00_0000) == 0x9000_0000 {
+                bail!(
+                    "arm64 native-link does not support ADR/ADRP yet in {} at byte offset {off:#x}",
+                    sym.name
+                );
+            }
+            if (insn & 0x3b00_0000) == 0x1800_0000 {
+                bail!(
+                    "arm64 native-link does not support LDR literal yet in {} at byte offset {off:#x}",
+                    sym.name
+                );
+            }
+
+            if let Some(target) = a64_bl_target(sym.address, local_word_index, insn) {
+                if !included.iter().any(|s| s.address == target) {
+                    bail!(
+                        "arm64 BL in {} at byte offset {off:#x} targets {target:#x}, outside included symbols",
+                        sym.name
+                    );
+                }
+                patches.push(Arm64Patch {
+                    word_index: global_word_index,
+                    kind: Arm64PatchKind::Bl {
+                        target_symbol_address: target,
+                    },
+                });
+                blob.extend_from_slice(&insn.to_le_bytes());
+                continue;
+            }
+
+            if let Some(target) = a64_branch_target(sym.address, local_word_index, insn) {
+                if target < sym.address || target > end {
+                    bail!(
+                        "arm64 branch in {} at byte offset {off:#x} targets {target:#x}, outside symbol",
+                        sym.name
+                    );
+                }
+            }
+
+            if is_entry && a64_is_ret(insn) {
+                patches.push(Arm64Patch {
+                    word_index: global_word_index,
+                    kind: Arm64PatchKind::ReturnToTrampoline,
+                });
+                blob.extend_from_slice(&0u32.to_le_bytes());
+            } else {
+                blob.extend_from_slice(&insn.to_le_bytes());
+            }
         }
-        blob[off..off + 4].copy_from_slice(&insn.to_le_bytes());
+    }
+
+    let ret_trampoline_word = blob.len() / 4;
+    const A64_MOV_X7_X0: u32 = 0xaa00_03e7;
+    blob.extend_from_slice(&A64_MOV_X7_X0.to_le_bytes());
+
+    for patch in patches {
+        let patched = match patch.kind {
+            Arm64PatchKind::ReturnToTrampoline => {
+                a64_patch_b(patch.word_index, ret_trampoline_word)?
+            }
+            Arm64PatchKind::Bl { target_symbol_address } => {
+                let target_word = *sym_word_offset
+                    .get(&target_symbol_address)
+                    .ok_or_else(|| anyhow!("arm64 BL target sym addr not in index map"))?;
+                a64_patch_bl(patch.word_index, target_word)?
+            }
+        };
+        let off = patch.word_index * 4;
+        blob[off..off + 4].copy_from_slice(&patched.to_le_bytes());
     }
 
     if show {

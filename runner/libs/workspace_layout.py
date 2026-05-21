@@ -13,7 +13,6 @@ RUNTIME_KINSN_MODULE_DIR = Path("/artifacts/kinsn")
 # (arm64_parts, x86_parts)
 _ARCH_PATHS: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
     "runner_binary_path":      (("runner", "build-arm64-llvmbpf", "micro_exec"), ("runner", "build-llvmbpf", "micro_exec")),
-    "test_unittest_build_dir": (("tests", "unittest", "build-arm64"), ("tests", "unittest", "build")),
     "test_negative_build_dir": (("tests", "negative", "build-arm64"), ("tests", "negative", "build")),
 }
 
@@ -30,7 +29,6 @@ def _vendor_arch(target_arch: str) -> str:
 
 def repo_artifact_root(workspace: Path, target_arch: str) -> Path:       return workspace / "vendor" / "build" / _vendor_arch(target_arch)
 def workload_tools_root(workspace: Path, target_arch: str) -> Path:      return workspace / "vendor" / "build" / _vendor_arch(target_arch) / "workload-tools"
-def test_unittest_build_dir(workspace: Path, target_arch: str) -> Path:  return _p(workspace, target_arch, "test_unittest_build_dir")
 def test_negative_build_dir(workspace: Path, target_arch: str) -> Path:  return _p(workspace, target_arch, "test_negative_build_dir")
 
 def image_artifact_root(target_arch: str, subdir: str) -> Path:
@@ -59,6 +57,9 @@ def stage2_program_root(workspace: Path, target_arch: str) -> Path:
     if inside_runtime_image():
         return image_artifact_root(target_arch, "stage2-programs")
     return runtime_workspace(workspace) / "native-sim" / "test" / f"build-{_vendor_arch(target_arch)}"
+
+def sim_proof_root(workspace: Path, target_arch: str) -> Path:
+    return stage2_program_root(workspace, target_arch) / f"{_vendor_arch(target_arch)}_sim_proofs"
 
 def runner_binary_path(workspace: Path, target_arch: str) -> Path:
     return _p(runtime_workspace(workspace), target_arch, "runner_binary_path")

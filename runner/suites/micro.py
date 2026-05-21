@@ -16,6 +16,7 @@ from runner.libs.workspace_layout import (
     runner_binary_path,
     runtime_path_value,
     runtime_repo_artifact_root,
+    sim_proof_root,
     stage2_program_root,
 )
 from runner.suites._common import (
@@ -142,6 +143,8 @@ def _run_micro_suite(workspace: Path, args: argparse.Namespace) -> None:
 
     env["BPFREJIT_MICRO_PROGRAM_DIR"] = str(program_dir)
     env["BPFREJIT_MICRO_RUNNER_BINARY"] = str(runner_binary)
+    env["BPFREJIT_MICRO_PROOF_DIR"] = str(sim_proof_root(workspace, args.target_arch))
+    env["BPFREJIT_MICRO_PROOF_ARCH"] = "arm64" if args.target_arch == "arm64" else "x86"
 
     if "native_kernel" in _selected_runtimes(args):
         module_dir = kinsn_module_dir(workspace, args.target_arch)
@@ -151,6 +154,11 @@ def _run_micro_suite(workspace: Path, args: argparse.Namespace) -> None:
         if not expected:
             _die(f"no kinsn modules found under {module_dir}")
         load_kinsn_modules(expected, module_dir=module_dir)
+
+    if "native_proof" in _selected_runtimes(args):
+        proof_dir = sim_proof_root(workspace, args.target_arch)
+        if not proof_dir.is_dir():
+            _die(f"native proof artifact root is missing: {proof_dir}")
 
     command = [python_bin, str(workspace / "micro" / "driver.py"), *_micro_driver_argv(workspace, args)]
     run_checked(command, cwd=workspace, env=env, die=_die)

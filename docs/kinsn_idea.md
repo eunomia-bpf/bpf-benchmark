@@ -2,8 +2,8 @@
 
 Status: research direction · paper-line hub for idea #2
 
-> 本文档是 Kinsn 论文线索的单一 hub。详细机制设计见 `docs/kinsn-design.md`,
-> 形式化语义见 `docs/kinsn-formal-semantics.md`,工程实现细节见各 pass 的
+> 本文档是 Kinsn 论文线索的单一 hub。详细机制设计见 `docs/tmp/kinsn-design.md`,
+> 形式化语义见 `docs/tmp/kinsn-formal-semantics.md`,工程实现细节见各 pass 的
 > `docs/tmp/*kinsn*` 调研报告。
 
 ## Project Context: Three Sister Ideas
@@ -107,7 +107,7 @@ eBPF**.
 
 ## 4. Mechanism Sketch
 
-Detailed mechanism design lives in `docs/kinsn-design.md`. Brief sketch:
+Detailed mechanism design lives in `docs/tmp/kinsn-design.md`. Brief sketch:
 
 - `struct bpf_kinsn_ops` holds the module callbacks:
   - `model_call(call, effect)`: produce a declarative `bpf_kinsn_effect` the
@@ -127,7 +127,7 @@ Detailed mechanism design lives in `docs/kinsn-design.md`. Brief sketch:
   JIT never sees them. When unloaded after programs are loaded, in-flight
   programs continue executing the already-emitted native code.
 
-Formal semantics: `docs/kinsn-formal-semantics.md`.
+Formal semantics: `docs/tmp/kinsn-formal-semantics.md`.
 
 ### 4.1 Kernel source touchpoints (rejit-v2 branch / kinsn subset)
 
@@ -334,7 +334,7 @@ A strong evaluation needs to show:
 - A declarative effect that does not faithfully model the native emit
   silently violates verifier soundness for any program using that kinsn. The
   per-kinsn formal-semantics doc and translation-validation work
-  (`docs/kinsn-formal-semantics.md`) is the mitigation.
+  (`docs/tmp/kinsn-formal-semantics.md`) is the mitigation.
 - Workload-adaptive insertion requires reliable per-site profile data. Idea
   #1's `bpfprof --per-site` pipeline is the source; if PMU data is
   unreliable on a deployment, policy-sensitive kinsns must fall back to a
@@ -346,8 +346,8 @@ A strong evaluation needs to show:
 
 ## 10. Cross-References
 
-- Mechanism design: `docs/kinsn-design.md`
-- Formal semantics and translation validation: `docs/kinsn-formal-semantics.md`
+- Mechanism design: `docs/tmp/kinsn-design.md`
+- Formal semantics and translation validation: `docs/tmp/kinsn-formal-semantics.md`
 - `bpf_kinsn_ops` detailed design: `docs/tmp/20260323/kinsn_ops_design_20260323.md`
 - Implementation audit: `docs/tmp/20260323/kinsn_implementation_review_20260323.md`
 - Per-kinsn research and decisions: `docs/tmp/*kinsn*` (rotate, cond_select,

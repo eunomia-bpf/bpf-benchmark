@@ -13,6 +13,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[3]
 MICRO_PROGRAMS = REPO_ROOT / "micro" / "programs"
 OUT_DIR = Path(__file__).resolve().parent
+X86_BUILD_DIR = MICRO_PROGRAMS / "build-x86"
 NATIVE_LINK_MANIFEST = (
     REPO_ROOT / "native-sim" / "x86" / "native_lab" /
     "native_link" / "Cargo.toml"
@@ -163,12 +164,10 @@ def parse_asm_text(text: str) -> list[NativeInsn]:
     return insns
 
 
-def native_object_path(name: str) -> Path:
-    out_dir = Path("/tmp/bpf-benchmark-micro-native-link")
-    so_path = out_dir / f"{name}.native.so"
-    cmd = ["make", "-C", str(MICRO_PROGRAMS), f"OUTPUT_DIR={out_dir}",
-           str(so_path)]
-    subprocess.run(cmd, cwd=REPO_ROOT, check=True, stdout=subprocess.DEVNULL)
+def native_object_path(name: str, build_dir: Path) -> Path:
+    so_path = build_dir / f"{name}.native.so"
+    if not so_path.is_file():
+        raise RuntimeError(f"missing x86 native object: {so_path}")
     return so_path
 
 
@@ -190,8 +189,8 @@ def native_entry_symbol(so_path: Path, symbols: list[str]) -> str:
     raise ValueError(f"{so_path}: none of the native symbols exist: {symbols}")
 
 
-def parse_native_link_blob(name: str) -> tuple[list[NativeInsn], int]:
-    so_path = native_object_path(name)
+def parse_native_link_blob(name: str, build_dir: Path) -> tuple[list[NativeInsn], int]:
+    so_path = native_object_path(name, build_dir)
     symbol = native_entry_symbol(so_path, [f"{name}_xdp", f"{name}_prog"])
     linker = ensure_native_link()
     NATIVE_LINK_BUILD_DIR.mkdir(parents=True, exist_ok=True)
@@ -238,8 +237,9 @@ def normalize_native_link_entry_returns(
 
 def parse_native_linked_program(
     name: str,
+    build_dir: Path,
 ) -> tuple[list[NativeInsn], dict[str, list[NativeInsn]]]:
-    insns, blob_len = parse_native_link_blob(name)
+    insns, blob_len = parse_native_link_blob(name, build_dir)
     insns = normalize_native_link_entry_returns(insns, blob_len)
     if not insns:
         return [], {}
@@ -749,9 +749,9 @@ def render_program(name: str, insns: list[NativeInsn],
     return "\n".join(lines)
 
 
-def write_one(md_path: Path, out_dir: Path) -> Path:
+def write_one(md_path: Path, out_dir: Path, build_dir: Path) -> Path:
     name = md_path.stem
-    insns, subfunctions = parse_native_linked_program(name)
+    insns, subfunctions = parse_native_linked_program(name, build_dir)
     if not insns:
         raise ValueError(f"{md_path}: no native instructions parsed")
     output = out_dir / f"{name}.bpf.c"
@@ -764,6 +764,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--micro-programs", type=Path, default=MICRO_PROGRAMS)
     parser.add_argument("--output-dir", type=Path, default=OUT_DIR)
+    parser.add_argument("--native-build-dir", type=Path, default=X86_BUILD_DIR)
     parser.add_argument("--only", nargs="*", help="optional micro benchmark stem list")
     args = parser.parse_args()
 
@@ -775,7 +776,7 @@ def main() -> int:
         if only and name not in only:
             continue
         md_path = args.micro_programs / f"{name}.md"
-        written.append(write_one(md_path, args.output_dir))
+        written.append(write_one(md_path, args.output_dir, args.native_build_dir))
 
     for path in written:
         print(path)

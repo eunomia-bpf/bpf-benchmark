@@ -12,7 +12,7 @@ suite_name: micro_stage2_maps_helpers
 paths:
   # In-container path comes from BPFREJIT_MICRO_PROGRAM_DIR (set by
   # runner/suites/micro.py); this fallback is the conventional host
-  # build path used when running `python -m micro.driver` directly.
+  # build path used when running `python micro/driver.py` directly.
   program_dir: native-sim/test/build-x86
 
 build:

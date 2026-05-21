@@ -354,18 +354,15 @@ int run_subprocess(const std::vector<std::string> &argv)
     return WEXITSTATUS(status);
 }
 
-/* Path to the native-link binary. The runner invokes it via fork+exec
- * (per project rule "native_lab_runner can only call linker from the
- * command line"). Resolution order:
- *   1. `--native-lab-linker` CLI override.
+/* Path to the native-link binary. The runner invokes it via fork+exec.
+ * Resolution order:
+ *   1. `--native-kernel-linker` CLI override.
  *   2. `BPFREJIT_NATIVE_LINK_BINARY` env var.
- *   3. `/usr/local/bin/native-link` if it exists (runtime container
- *      installs the host-built binary here).
- *   4. host repo build path (local non-container debugging). */
+ *   3. `/usr/local/bin/native-link` from the runtime image. */
 std::filesystem::path native_link_binary(const cli_options &options)
 {
-    if (!options.native_lab_linker_path.empty()) {
-        return options.native_lab_linker_path;
+    if (!options.native_kernel_linker_path.empty()) {
+        return options.native_kernel_linker_path;
     }
     if (const char *e = std::getenv("BPFREJIT_NATIVE_LINK_BINARY")) {
         if (e[0] != '\0') {
@@ -377,7 +374,7 @@ std::filesystem::path native_link_binary(const cli_options &options)
     if (std::filesystem::exists(image_path, ec)) {
         return image_path;
     }
-    return "native-sim/x86/native_lab/native_link/target/release/native-link";
+    fail("native_kernel: native-link not found; set BPFREJIT_NATIVE_LINK_BINARY or install /usr/local/bin/native-link");
 }
 
 /* Stage 2: given an ELF .native.o input, resolve helper kernel addresses
@@ -388,13 +385,12 @@ struct LinkerOutput {
     std::filesystem::path relocs;
 };
 
-/* If a sibling `.bpf.o` lives next to the `.native.o`, libbpf-load it
- * so the kernel allocates the maps and verifier rewrites pseudo_ld_imm64
- * with kernel pointers. Read those pointers back from xlated bytecode +
- * cross-reference against the original bytecode's fd to produce a
- * (map_name -> kernel ptr) table. The caller MUST keep the returned
- * bpf_object alive while the native_lab runs -- closing it frees the
- * maps. */
+/* Libbpf-load the canonical `.bpf.o` companion so the kernel allocates
+ * maps and verifier rewrites pseudo_ld_imm64 with kernel pointers. Read
+ * those pointers back from xlated bytecode + cross-reference against the
+ * original bytecode's fd to produce a (map_name -> kernel ptr) table. The
+ * caller MUST keep the returned bpf_object alive while the native_kernel
+ * run executes -- closing it frees the maps. */
 struct CompanionLoad {
     bpf_object *obj = nullptr;
     std::unordered_map<std::string, uint64_t> map_addrs;
@@ -529,70 +525,13 @@ std::vector<int> walk_lookup_call_maps(const struct bpf_insn *insns, size_t cnt)
     return sites;
 }
 
-/* Normalize the `--program` argument to (companion_bpf_o, native_input).
- *
- * The `make micro` pipeline passes the canonical `.bpf.o` path; the
- * legacy direct-invocation pattern (deprecated, no scripts use it any
- * more) passed `.native.o` or `.native.so` directly. Both work:
- *   - `.bpf.o`        → companion = arg;   native_input = sibling `.native.o` if present, else `.native.so`.
- *   - `.native.{o,so}` → native_input = arg; companion = sibling `.bpf.o` if present, else empty.
- *
- * `companion_bpf_o` may be empty when no `.bpf.o` exists alongside; that
- * is fine for pure-compute programs (Stage 1 of the micro suite) which
- * have no maps or helpers and thus need no kernel-address resolution. */
-struct NativeLabPaths {
-    std::filesystem::path companion_bpf_o;
-    std::filesystem::path native_input;
-};
-
-NativeLabPaths resolve_native_lab_paths(const std::filesystem::path &program)
-{
-    NativeLabPaths out;
-    std::string s = program.string();
-
-    auto strip_suffix = [](std::string &str, const char *sfx) -> bool {
-        size_t n = std::strlen(sfx);
-        if (str.size() >= n && std::memcmp(str.data() + str.size() - n, sfx, n) == 0) {
-            str.resize(str.size() - n);
-            return true;
-        }
-        return false;
-    };
-
-    std::string base = s;
-    if (strip_suffix(base, ".bpf.o")) {
-        out.companion_bpf_o = program;
-        std::filesystem::path no = base + ".native.o";
-        std::filesystem::path nso = base + ".native.so";
-        if (std::filesystem::exists(no)) {
-            out.native_input = no;
-        } else if (std::filesystem::exists(nso)) {
-            out.native_input = nso;
-        } else {
-            fail("native_lab: no .native.o or .native.so sibling for " + s);
-        }
-    } else if (strip_suffix(base, ".native.o") || strip_suffix(base, ".native.so")) {
-        out.native_input = program;
-        std::filesystem::path bpfo = base + ".bpf.o";
-        if (std::filesystem::exists(bpfo)) {
-            out.companion_bpf_o = bpfo;
-        }
-    } else {
-        fail("native_lab: --program must end in .bpf.o, .native.o, or .native.so: " + s);
-    }
-    return out;
-}
-
 CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
 {
-    /* `bpf_o_path` is the `.bpf.o` companion directly. Returns an empty
-     * CompanionLoad if the file doesn't exist (pure-compute programs
-     * without maps/helpers don't need a companion). */
     CompanionLoad out{};
     struct stat st {};
     std::string bpf_path = bpf_o_path.string();
     if (stat(bpf_path.c_str(), &st) != 0) {
-        return out; /* no companion; native blob must be helper-free */
+        fail("native_kernel companion .bpf.o is missing: " + bpf_path);
     }
 
     bpf_object *obj = bpf_object__open_file(bpf_path.c_str(), nullptr);
@@ -680,7 +619,7 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
 
         if (orig_fds.size() != jit_map_ptrs.size()) {
             std::fprintf(stderr,
-                "[native_lab] warning: orig has %zu PSEUDO_MAP_FD ld_imm64 but "
+                "[native_kernel] warning: orig has %zu PSEUDO_MAP_FD ld_imm64 but "
                 "jited has %zu kernel-half movabs imm64; map mapping may be wrong\n",
                 orig_fds.size(), jit_map_ptrs.size());
         }
@@ -827,7 +766,7 @@ LinkerOutput invoke_native_link(const cli_options &options,
     argv.push_back("--symbol");
     argv.push_back(symbol_name);
 
-    std::string base = "/tmp/native_lab_" + std::to_string(getpid()) + "_"
+    std::string base = "/tmp/native_kernel_" + std::to_string(getpid()) + "_"
                        + elf_path.stem().string();
     LinkerOutput out{};
     out.blob = base + ".blob.bin";
@@ -878,13 +817,13 @@ uint32_t prog_type_from_option(const std::string &name)
     if (name == "xdp") return BPF_PROG_TYPE_XDP;
     if (name == "sched_cls") return BPF_PROG_TYPE_SCHED_CLS;
     if (name == "cgroup_skb") return BPF_PROG_TYPE_CGROUP_SKB;
-    fail("unsupported --native-lab-prog-type: " + name);
+    fail("unsupported --native-kernel-prog-type: " + name);
     return 0; // unreachable
 }
 
 } // namespace
 
-std::vector<sample_result> run_kernel_native_lab(const cli_options &options)
+std::vector<sample_result> run_native_kernel(const cli_options &options)
 {
     const auto memory_prepare_start = std::chrono::steady_clock::now();
     auto input_bytes = materialize_memory(options.memory, options.input_size);
@@ -893,7 +832,7 @@ std::vector<sample_result> run_kernel_native_lab(const cli_options &options)
     }
     const auto memory_prepare_end = std::chrono::steady_clock::now();
 
-    const uint32_t prog_type_value = prog_type_from_option(options.native_lab_prog_type);
+    const uint32_t prog_type_value = prog_type_from_option(options.native_kernel_prog_type);
 
     // Packet layout matches what kernel_runner builds for the same prog
     // type (8-byte result prefix for staged/packet xdp, ethernet prefix
@@ -912,37 +851,17 @@ std::vector<sample_result> run_kernel_native_lab(const cli_options &options)
     std::vector<uint8_t> relocs;
     CompanionLoad companion{};
     if (file_is_elf(options.program)) {
-        /* Resolve `.bpf.o` (companion, for map-ptr + per-call lookup
-         * spec) and `.native.{o,so}` (native-link input) from whichever
-         * suffix the caller passed. The micro pipeline passes `.bpf.o`;
-         * direct invocations may pass `.native.{o,so}`. */
-        auto paths = resolve_native_lab_paths(options.program);
-
-        /* Symbol selection precedence:
-         *   1. `--program-name <X>` (micro pipeline canonical)
-         *   2. `--native-lab-symbol <X>` (legacy flag, still accepted)
-         *   3. derive from native_input filename stem, stripping a
-         *      trailing `.native` segment if present. */
-        std::string symbol;
-        if (options.program_name && !options.program_name->empty()) {
-            symbol = *options.program_name;
-        } else if (!options.native_lab_symbol.empty()) {
-            symbol = options.native_lab_symbol;
-        } else {
-            std::string stem = paths.native_input.stem().string();
-            const std::string nat = ".native";
-            if (stem.size() >= nat.size()
-                && stem.compare(stem.size() - nat.size(), nat.size(), nat) == 0) {
-                stem.resize(stem.size() - nat.size());
-            }
-            symbol = stem;
+        if (!options.native_program.has_value()) {
+            fail("native_kernel: ELF --program requires --native-program");
         }
-
-        if (!paths.companion_bpf_o.empty()) {
-            companion = load_bpf_companion(paths.companion_bpf_o);
+        if (!options.program_name || options.program_name->empty()) {
+            fail("native_kernel requires --program-name");
         }
+        const std::string &symbol = *options.program_name;
+
+        companion = load_bpf_companion(options.program);
         LinkerOutput lo = invoke_native_link(
-            options, paths.native_input, symbol, companion.map_addrs, companion);
+            options, *options.native_program, symbol, companion.map_addrs, companion);
         blob = read_blob_file(lo.blob);
         std::ifstream rf(lo.relocs, std::ios::binary);
         if (rf) {
@@ -1018,7 +937,7 @@ std::vector<sample_result> run_kernel_native_lab(const cli_options &options)
     } else {
         if (packet_out.size() < sizeof(uint64_t)) {
             close(prog_fd);
-            fail("native_lab: packet_out too small to hold u64 result");
+            fail("native_kernel: packet_out too small to hold u64 result");
         }
         std::memcpy(&result_word, packet_out.data(), sizeof(result_word));
     }

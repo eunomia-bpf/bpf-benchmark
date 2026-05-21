@@ -31,9 +31,9 @@ struct native_skb {
 }; }
 sample_result run_native(const cli_options &options) {
     const auto memory_start = clock_type::now(); auto input = materialize_memory(options.memory, options.input_size);
-    const auto memory_end = clock_type::now(); auto so = options.program; const auto file = so.filename().string();
-    if (file.ends_with(".bpf.o")) so.replace_filename(file.substr(0, file.size() - 6) + ".native.so");
-    else so.replace_extension(".native.so");
+    const auto memory_end = clock_type::now();
+    if (!options.native_program.has_value()) fail("run-native requires --native-program");
+    const auto so = *options.native_program;
     const auto load_start = clock_type::now();
     void *handle = dlopen(so.c_str(), RTLD_NOW | RTLD_LOCAL); if (handle == nullptr) fail("dlopen failed for " + so.string() + ": " + dlerror());
     const std::string symbol = options.program_name.value_or(benchmark_name_for_program(options.program) + "_xdp");

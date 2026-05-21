@@ -17,8 +17,11 @@ std::string usage_text()
         "[--warmup N] [--input-size N] [--perf-counters] "
         "[--perf-scope full_repeat_raw|full_repeat_avg] [--dump-jit] [--dump-jit-path <path>] "
         "[--dump-xlated <path>] [--wait-signal]\n"
-        "  micro_exec run-native [--program <path>|<path>] [--program-name <name>] "
+        "  micro_exec run-native [--program <path>|<path>] --native-program <path> [--program-name <name>] "
         "[--memory <path>] [--io-mode staged|packet] [--inner-repeat N] [--input-size N]\n"
+        "  micro_exec run-native-kernel [--program <path>|<path>] [--native-program <path>] [--program-name <name>] "
+        "[--memory <path>] [--io-mode staged|packet] [--native-kernel-prog-type xdp|sched_cls|cgroup_skb] "
+        "[--inner-repeat N] [--input-size N]\n"
 #ifdef MICRO_EXEC_ENABLE_LLVMBPF
         "  micro_exec run-llvmbpf [--program <path>|<path>] [--program-name <name>] "
         "[--memory <path>] [--io-mode map|staged|packet] [--raw-packet] "
@@ -33,7 +36,7 @@ void validate_cli_options(const cli_options &options)
     const bool supported_command =
         options.command == "test-run" ||
         options.command == "run-native" ||
-        options.command == "run-native-lab" ||
+        options.command == "run-native-kernel" ||
         options.command == "list-programs"
 #ifdef MICRO_EXEC_ENABLE_LLVMBPF
         || options.command == "run-llvmbpf"
@@ -52,9 +55,17 @@ void validate_cli_options(const cli_options &options)
     if (options.wait_signal && options.command != "test-run") {
         fail("--wait-signal is only supported by test-run");
     }
+    if (options.native_program.has_value() &&
+        options.command != "run-native" &&
+        options.command != "run-native-kernel") {
+        fail("--native-program is only supported by run-native and run-native-kernel");
+    }
+    if (options.command == "run-native" && !options.native_program.has_value()) {
+        fail("run-native requires --native-program");
+    }
     if ((options.command == "test-run"
          || options.command == "run-native"
-         || options.command == "run-native-lab"
+         || options.command == "run-native-kernel"
 #ifdef MICRO_EXEC_ENABLE_LLVMBPF
          || options.command == "run-llvmbpf"
 #endif
@@ -261,6 +272,10 @@ cli_options parse_args(int argc, char **argv)
             options.program = argv[++index];
             continue;
         }
+        if (current == "--native-program" && index + 1 < argc) {
+            options.native_program = std::filesystem::path(argv[++index]);
+            continue;
+        }
         if (!current.empty() && current.front() != '-' && options.program.empty()) {
             options.program = std::filesystem::path(current);
             continue;
@@ -289,16 +304,12 @@ cli_options parse_args(int argc, char **argv)
             options.raw_packet = true;
             continue;
         }
-        if (current == "--native-lab-prog-type" && index + 1 < argc) {
-            options.native_lab_prog_type = argv[++index];
+        if (current == "--native-kernel-prog-type" && index + 1 < argc) {
+            options.native_kernel_prog_type = argv[++index];
             continue;
         }
-        if (current == "--native-lab-symbol" && index + 1 < argc) {
-            options.native_lab_symbol = argv[++index];
-            continue;
-        }
-        if (current == "--native-lab-linker" && index + 1 < argc) {
-            options.native_lab_linker_path = argv[++index];
+        if (current == "--native-kernel-linker" && index + 1 < argc) {
+            options.native_kernel_linker_path = argv[++index];
             continue;
         }
         if (current == "--inner-repeat" && index + 1 < argc) {

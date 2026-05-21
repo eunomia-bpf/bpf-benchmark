@@ -90,6 +90,8 @@ tests/kernel/build/
 tests/kernel/build-arm64/
 tests/negative/build-arm64/
 tests/integration/
+native-sim/test/build-x86/
+native-sim/test/build-arm64/
 
 # BPF build artifacts
 *.bpf.o

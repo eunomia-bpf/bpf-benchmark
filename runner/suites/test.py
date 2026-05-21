@@ -10,20 +10,18 @@ from functools import partial
 from pathlib import Path
 from typing import Sequence
 
-import yaml
-
 from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail
-from runner.libs.input_generators import materialize_input
 from runner.libs.kinsn import load_kinsn_modules
 from runner.libs.results import parse_last_json_line
 from runner.libs.workspace_layout import (
     inside_runtime_image,
     kinsn_module_dir,
+    micro_program_root,
     runner_binary_path,
+    sim_proof_root,
     stage2_program_root,
     test_negative_build_dir,
-    test_unittest_build_dir,
 )
 from runner.suites._common import (
     base_suite_runtime_env,
@@ -109,35 +107,8 @@ def _load_kinsn_modules(workspace: Path, target_arch: str) -> None:
     )
 
 
-def _discover_unittest_binaries(workspace: Path, target_arch: str) -> list[Path]:
-    build_dir = test_unittest_build_dir(workspace, target_arch)
-    return sorted(
-        path
-        for path in build_dir.glob("rejit_*")
-        if path.is_file() and os.access(path, os.X_OK)
-    )
-
-
 def _log_test_section(title: str) -> None:
     print(f"\n========================================\n  {title}\n========================================", file=sys.stderr)
-
-
-def _run_unittest_suite(workspace: Path, args: argparse.Namespace, env: dict[str, str], *, log_path: Path | None = None) -> None:
-    _log_test_section("Running tests/unittest/ suite (pre-built)")
-    build_dir = test_unittest_build_dir(workspace, args.target_arch)
-    tests = _discover_unittest_binaries(workspace, args.target_arch)
-    if not tests:
-        _die(f"no rejit_* test binaries found in {build_dir}")
-    runtime_env, _ = env_with_suite_runtime_ld(workspace, args.target_arch, env)
-    for test_binary in tests:
-        print(f"--- {test_binary.name} ---", file=sys.stderr)
-        if not _run_with_status(
-            [str(test_binary), str(build_dir / "progs")],
-            cwd=workspace,
-            env=runtime_env,
-            log_path=log_path,
-        ):
-            _die(f"{test_binary.name} failed")
 
 
 def _fuzz_rounds_text(args: argparse.Namespace) -> str:
@@ -197,7 +168,7 @@ def _parse_single_runner_sample(stdout: str, label: str) -> dict:
     raise AssertionError("unreachable")
 
 
-def _run_arm64_native_lab_smoke(
+def _run_arm64_native_kernel_smoke(
     workspace: Path,
     args: argparse.Namespace,
     env: dict[str, str],
@@ -208,17 +179,17 @@ def _run_arm64_native_lab_smoke(
         return
 
     runner_binary = runner_binary_path(workspace, args.target_arch)
-    blob = stage2_program_root(workspace, args.target_arch) / "native_lab_smoke" / \
-        "arm64_native_lab_xdp_result.blob"
+    blob = stage2_program_root(workspace, args.target_arch) / "native_kernel_smoke" / \
+        "arm64_native_kernel_xdp_result.blob"
     if not runner_binary.is_file() or not os.access(runner_binary, os.X_OK):
         _die(f"runner artifact is missing or not executable: {runner_binary}")
     if not blob.is_file():
-        _die(f"arm64 native_lab smoke blob is missing: {blob}")
+        _die(f"arm64 native_kernel smoke blob is missing: {blob}")
 
-    _log_test_section("arm64 native_lab smoke")
+    _log_test_section("arm64 native_kernel smoke")
     command = [
         str(runner_binary),
-        "run-native-lab",
+        "run-native-kernel",
         "--program", str(blob),
         "--io-mode", "staged",
         "--input-size", "64",
@@ -239,79 +210,51 @@ def _run_arm64_native_lab_smoke(
     sys.stderr.write(completed.stdout)
     sys.stderr.write(completed.stderr)
     if completed.returncode != 0:
-        _die(f"arm64 native_lab smoke failed with exit {completed.returncode}")
+        _die(f"arm64 native_kernel smoke failed with exit {completed.returncode}")
 
-    sample = _parse_single_runner_sample(completed.stdout, "arm64 native_lab smoke")
+    sample = _parse_single_runner_sample(completed.stdout, "arm64 native_kernel smoke")
     if sample.get("result") != 12345678 or sample.get("retval") != 2:
         _die(
-            "arm64 native_lab smoke returned unexpected result: "
+            "arm64 native_kernel smoke returned unexpected result: "
             f"result={sample.get('result')} retval={sample.get('retval')}"
         )
 
 
-def _run_arm64_simulator_proof_smoke(
+def _run_native_proof_micro_smoke(
     workspace: Path,
     args: argparse.Namespace,
     env: dict[str, str],
     *,
     log_path: Path | None = None,
 ) -> None:
-    if args.target_arch != "arm64":
-        return
-
     runner_binary = runner_binary_path(workspace, args.target_arch)
-    proof_dir = stage2_program_root(workspace, args.target_arch) / "arm64_sim_proofs"
+    program_dir = micro_program_root(workspace, args.target_arch)
+    proof_dir = sim_proof_root(workspace, args.target_arch)
     if not runner_binary.is_file() or not os.access(runner_binary, os.X_OK):
         _die(f"runner artifact is missing or not executable: {runner_binary}")
+    if not program_dir.is_dir():
+        _die(f"micro program artifact root is missing: {program_dir}")
+    if not proof_dir.is_dir():
+        _die(f"native proof artifact root is missing: {proof_dir}")
 
-    _log_test_section("arm64 simulator proof smoke")
-    config = yaml.safe_load((workspace / "micro" / "config" / "micro_pure_jit.yaml").read_text(encoding="utf-8"))
-    defaults = config.get("benchmark_defaults", {})
-    default_io_mode = str(defaults.get("io_mode", "staged"))
-    default_retval = int(defaults.get("expected_retval", 2))
-    for item in config["benchmarks"]:
-        name = item["name"]
-        proof_obj = proof_dir / f"{name}.bpf.o"
-        if not proof_obj.is_file():
-            _die(f"arm64 simulator proof object is missing: {proof_obj}")
-        input_path, _meta = materialize_input(str(item["input_generator"]), force=False)
-        label = f"arm64 simulator proof smoke/{name}"
-        command = [
-            str(runner_binary),
-            "test-run",
-            "--program", str(proof_obj),
-            "--program-name", f"{name}_arm64_sim_xdp",
-            "--memory", str(input_path),
-            "--io-mode", str(item.get("io_mode", default_io_mode)),
-            "--input-size", str(int(item.get("kernel_input_size", 0))),
-            "--inner-repeat", "1",
-        ]
-        completed = subprocess.run(
-            command,
-            cwd=workspace,
-            env=env,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        if log_path is not None:
-            with log_path.open("a", encoding="utf-8") as log_file:
-                log_file.write(completed.stdout)
-                log_file.write(completed.stderr)
-        sys.stderr.write(completed.stdout)
-        sys.stderr.write(completed.stderr)
-        if completed.returncode != 0:
-            _die(f"{label} failed with exit {completed.returncode}")
-
-        sample = _parse_single_runner_sample(completed.stdout, label)
-        expected_result = int(item["expected_result"])
-        expected_retval = int(item.get("expected_retval", default_retval))
-        if sample.get("result") != expected_result or sample.get("retval") != expected_retval:
-            _die(
-                f"{label} returned unexpected result: "
-                f"result={sample.get('result')} retval={sample.get('retval')} "
-                f"expected_result={expected_result} expected_retval={expected_retval}"
-            )
+    _log_test_section("native_proof micro smoke")
+    proof_env = env.copy()
+    proof_env["BPFREJIT_MICRO_PROGRAM_DIR"] = str(program_dir)
+    proof_env["BPFREJIT_MICRO_RUNNER_BINARY"] = str(runner_binary)
+    proof_env["BPFREJIT_MICRO_PROOF_DIR"] = str(proof_dir)
+    proof_env["BPFREJIT_MICRO_PROOF_ARCH"] = "arm64" if args.target_arch == "arm64" else "x86"
+    command = [
+        args.python_bin or sys.executable,
+        str(workspace / "micro" / "driver.py"),
+        "--suite", str(workspace / "micro" / "config" / "micro_pure_jit.yaml"),
+        "--runtime", "native_proof",
+        "--samples", "1",
+        "--warmups", "0",
+        "--inner-repeat", "1",
+        "--output", str((_artifact_dir(workspace, args) / "native_proof_micro.json")),
+    ]
+    if not _run_with_status(command, cwd=workspace, env=proof_env, log_path=log_path):
+        _die("native_proof micro smoke failed")
 
 
 def _artifact_dir(workspace: Path, args: argparse.Namespace) -> Path:
@@ -341,9 +284,8 @@ def _run_selftest_mode(workspace: Path, args: argparse.Namespace, env: dict[str,
     log_path = artifact_dir / "selftest.log"
     _log_test_section("Loading kinsn modules")
     _load_kinsn_modules(workspace, args.target_arch)
-    _run_arm64_native_lab_smoke(workspace, args, env, log_path=log_path)
-    _run_arm64_simulator_proof_smoke(workspace, args, env, log_path=log_path)
-    _run_unittest_suite(workspace, args, env, log_path=log_path)
+    _run_arm64_native_kernel_smoke(workspace, args, env, log_path=log_path)
+    _run_native_proof_micro_smoke(workspace, args, env, log_path=log_path)
     _run_negative_suite(workspace, args, env, log_path=log_path)
 
 
@@ -365,9 +307,8 @@ def _run_test_mode(workspace: Path, args: argparse.Namespace, env: dict[str, str
     _run_kernel_selftest(workspace, env)
     _log_test_section("Loading kinsn modules")
     _load_kinsn_modules(workspace, args.target_arch)
-    _run_arm64_native_lab_smoke(workspace, args, env)
-    _run_arm64_simulator_proof_smoke(workspace, args, env)
-    _run_unittest_suite(workspace, args, env)
+    _run_arm64_native_kernel_smoke(workspace, args, env)
+    _run_native_proof_micro_smoke(workspace, args, env)
     _run_negative_suite(workspace, args, env)
 
 

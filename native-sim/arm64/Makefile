@@ -5,8 +5,6 @@ BPF_OBJ := $(BUILD_DIR)/arm64_sim_hardcoded.bpf.o
 MICRO_BUILD_DIR ?= $(ROOT_DIR)/micro/programs/build-arm64
 MICRO_PROG_DIR := micro-prog
 PROOF_BUILD_DIR ?= $(MICRO_PROG_DIR)/build
-PROOF_SRCS := $(wildcard $(MICRO_PROG_DIR)/*.bpf.c)
-PROOF_OBJS := $(patsubst $(MICRO_PROG_DIR)/%.bpf.c,$(PROOF_BUILD_DIR)/%.bpf.o,$(PROOF_SRCS))
 SIMPLE_INPUT := $(PROOF_BUILD_DIR)/simple.mem
 SIMPLE_OBJ := $(PROOF_BUILD_DIR)/simple.bpf.o
 LOADER_MANIFEST := ../loader/Cargo.toml
@@ -54,7 +52,11 @@ $(PROOF_BUILD_DIR)/%.bpf.o: $(MICRO_PROG_DIR)/%.bpf.c arm64_sim_local_bpf.h arm6
 $(SIMPLE_INPUT): | $(PROOF_BUILD_DIR)
 	dd if=/dev/zero of="$@" bs=64 count=1 status=none
 
-micro-proofs-build: micro-proofs-generate $(PROOF_OBJS)
+micro-proofs-build:
+	$(PYTHON) ../run_micro_sim_batch.py --arch arm64 --build-only \
+		--build-dir "$(PROOF_BUILD_DIR)" \
+		--native-build-dir "$(MICRO_BUILD_DIR)" \
+		$(MICRO_SIM_PROOF_ARGS)
 
 micro-proofs-run:
 	$(PYTHON) ../run_micro_sim_batch.py --arch arm64 $(MICRO_SIM_PROOF_ARGS)

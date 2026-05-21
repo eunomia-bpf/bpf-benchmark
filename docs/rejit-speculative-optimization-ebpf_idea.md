@@ -70,12 +70,11 @@ eBPF is widely adopted in production for observability, networking, and customiz
 | Task history | `git log` | retired task tables and superseded plan snapshots are recovered from git history |
 | Shim implementation | `bpfopt/shim/README.md` | LD_PRELOAD shim + per-pid socket + execute_step RPC |
 | Userspace-only design notes | `docs/tmp/userspace_speculative_opt_design.md`, `docs/tmp/poc_a_katran_pidfd_swap.md`, `docs/tmp/poc_b_bcc_perf_event_swap.md`, `docs/tmp/poc_c_v2_shim_only_design.md`, `docs/tmp/poc_e_vendor_replace_x_sys_design.md` | per-attach-type swap recipes, static-Go fallback |
-| Benchmark framework | `docs/benchmark-framework-design.md` | corpus / micro suite layout |
-| Benchmark runtime | `docs/benchmark-runtime-architecture.md` | container/VM runtime model |
+| Benchmark runtime | `docs/benchmark-runtime-architecture.md` | corpus / micro 执行架构 + container/VM runtime model |
 | Story / pitch | `docs/bpfrejit-story.md` | high-level narrative |
 | eBPF research plan | `docs/ebpf-bench-research-plan.md` | research methodology + 项目目标 |
-| GHCR image cache | `docs/ghcr-image-cache.md` | base image strategy |
-| Docker build cache | `docs/docker-build-cache-gc.md` | local docker cache 生命周期 |
+| GHCR image cache | `docs/tmp/ghcr-image-cache.md` | base image strategy |
+| Docker build cache | `docs/tmp/docker-build-cache-gc.md` | local docker cache 生命周期 |
 | Paper writeup | `docs/paper/` (submodule) | paper LaTeX source |
 | Ad-hoc reports | `docs/tmp/` | 临时调研/调试报告(按日期组织) |
 

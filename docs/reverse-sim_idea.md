@@ -12,14 +12,15 @@ implementations.
 | # | Idea | Problem | Design center | Kernel change |
 |---|---|---|---|---|
 | 1 | **Speculative eBPF optimization** | Already-loaded eBPF programs miss optimization opportunities that only become visible after the program is live (map contents stabilize, branch profile emerges, helper-call patterns). | Pure-userspace tool that observes live programs, applies BPF-to-BPF rewrite passes (`map_inline`, `const_prop`, `dce`, `bounds_check_merge`, `branch_flip`, ...) and swaps in an optimized candidate using the stock kernel's atomic-or-near-atomic attachment update mechanisms. | Near zero. |
-| 2 | **Kinsn** | The eBPF instruction set is too far from hardware to express several native-equivalent optimizations (rotate, conditional select, BMI bit-field extract, BLS instructions, prefetch). | A new OS abstraction: kernel-defined dual-semantics instructions, where the verifier sees `instantiate_insn()` lowering to ordinary eBPF and the JIT executes a per-architecture `emit_*()`. Likely also LLVM backend support and a userspace optimizer to recognize candidate patterns. | Verifier + JIT additions, one structure per kinsn, growing TCB but bounded. |
+| 2 | **Kinsn** | The eBPF instruction set is too far from hardware to express several native-equivalent optimizations (rotate, conditional select, BMI bit-field extract, BLS instructions, prefetch). | A new OS abstraction: kernel-defined dual-semantics instructions implemented as a `KF_KINSN` specialization of the kfunc mechanism. The verifier applies a declarative effect (`model_call` → `bpf_kinsn_effect`) to its abstract state, and the JIT dispatches to a per-architecture `emit_x86()` / `emit_arm64()` callback supplied by a kernel module. A userspace optimizer (`bpfopt`) recognizes candidate patterns. | Kinsn framework patch + per-arch modules, growing TCB but bounded. |
 | 3 | **ReverseSim** (this doc) | Run arbitrary x86/arm64 native code safely inside the kernel without requiring the developer to write eBPF or to submit a separate proof. | An x86 or arm64 simulator (or a JIT that emits eBPF) written in eBPF C. Specialization to a specific target program collapses the simulator to straight-line eBPF, which the stock verifier checks. The kernel JIT then lowers it to native. | Near zero. |
 
 The three are not incremental versions of one design. Each picks a different
 problem and a different point in the trust / kernel-surface / coverage space.
 This doc is about idea #3. Idea #1 lives in
-`docs/optimization-architecture-vision.md`. Idea #2 lives in
-`docs/kinsn-design.md` and `docs/kinsn-formal-semantics.md`.
+`docs/rejit-speculative-optimization-ebpf.md`. Idea #2 lives in
+`docs/kinsn-idea.md` (机制设计见 `docs/tmp/kinsn-design.md`,形式语义见
+`docs/tmp/kinsn-formal-semantics.md`).
 
 A kernel-ABI variant of "ReverseSim" (dual-semantics ISA owned by the kernel)
 was an earlier framing of idea #3. It overlaps heavily with idea #2 and is now
