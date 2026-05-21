@@ -19,8 +19,28 @@ from . import ROOT_DIR
 
 
 _BENCH_PASSES_ENV = "BPFREJIT_BENCH_PASSES"
+_SKIP_REJIT_ENV = "SKIP_REJIT"
 _BENCHMARK_CONFIG_PATH = ROOT_DIR / "corpus" / "config" / "benchmark_config.yaml"
 _DEFAULT_BENCHMARK_REPEAT = 200
+
+
+def skip_rejit_mode(raw: str | None = None) -> str:
+    value = (os.environ.get(_SKIP_REJIT_ENV, "") if raw is None else str(raw)).strip().lower()
+    if value in ("", "0", "false", "no", "off"):
+        return "off"
+    if value in ("1", "true", "yes", "on", "rejit"):
+        return "rejit"
+    if value in ("nopreload", "no-preload", "all"):
+        return "nopreload"
+    raise ValueError("SKIP_REJIT must be empty, 0, 1, rejit, nopreload, or all")
+
+
+def skip_rejit_enabled(raw: str | None = None) -> bool:
+    return skip_rejit_mode(raw) != "off"
+
+
+def skip_rejit_disables_shim(raw: str | None = None) -> bool:
+    return skip_rejit_mode(raw) == "nopreload"
 
 
 def _mapping_dict(value: Any, *, field_name: str) -> dict[str, Any]:
@@ -292,13 +312,15 @@ def app_shim_has_programs(app_pid: int) -> bool:
 def wait_for_app_shim_programs(
     *,
     app_pid: int,
-    timeout_s: int | float,
+    timeout_s: int | float | None,
     process: object | None = None,
     snapshot: object | None = None,
     process_name: str = "process",
 ) -> None:
-    deadline = time.monotonic() + max(0.0, float(timeout_s))
-    while time.monotonic() < deadline:
+    if skip_rejit_disables_shim():
+        return
+    deadline = None if timeout_s is None else time.monotonic() + max(0.0, float(timeout_s))
+    while deadline is None or time.monotonic() < deadline:
         poll = getattr(process, "poll", None)
         if callable(poll) and poll() is not None:
             detail = ""
@@ -355,6 +377,15 @@ def measure_app_phase(
     samples: int,
     warmups: int = 0,
 ) -> dict[str, object]:
+    if skip_rejit_disables_shim():
+        for _ in range(max(0, int(warmups))):
+            runner.run_workload(workload_seconds)
+        workloads = [
+            runner.run_workload(workload_seconds).to_dict()
+            for _ in range(samples)
+        ]
+        return {"workloads": workloads, "bpf": {}}
+
     pids = _normalize_app_pids(app_pid=app_pid, app_pids=app_pids)
     for _ in range(max(0, int(warmups))):
         runner.run_workload(workload_seconds)

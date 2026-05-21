@@ -33,6 +33,7 @@ from runner.libs.rejit import (
     benchmark_rejit_enabled_passes,
     benchmark_run_provenance,
     measure_app_phase,
+    skip_rejit_enabled,
 )
 from runner.libs.run_artifacts import (
     ArtifactSession,
@@ -87,8 +88,11 @@ def _env_str(name: str, default: str = "") -> str:
     return os.environ.get(name, "").strip() or default
 
 
-def _env_bool(name: str) -> bool:
-    return _env_str(name).lower() in ("1", "true", "yes", "on")
+def _skip_rejit_enabled() -> bool:
+    try:
+        return skip_rejit_enabled(_env_str("SKIP_REJIT"))
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
 
 
 def _keep_workdirs_enabled() -> bool:
@@ -147,7 +151,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         samples=_env_int("SAMPLES", 0),
         duration_s=_env_float("WORKLOAD_DURATION", 0.0),
         warmups=_env_int("WARMUPS", 1),
-        skip_rejit=_env_bool("SKIP_REJIT"),
+        skip_rejit=_skip_rejit_enabled(),
         keep_failure_artifacts=_keep_workdirs_enabled(),
     )
     if ns.samples < 0:

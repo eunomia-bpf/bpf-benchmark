@@ -294,7 +294,7 @@ static int run_canonicalize(const char *input_path, const char *out_path,
                             const char *target_json, const char *map_ids_csv,
                             const char *fd_to_id_json,
                             const char *log_path) {
-    char *const argv[] = {
+    char *const argv_with_fd_to_id[] = {
         "bpfopt", "--canonicalize-map-refs",
         "--input", (char *)input_path,
         "--output", (char *)out_path,
@@ -303,6 +303,15 @@ static int run_canonicalize(const char *input_path, const char *out_path,
         "--target-output", (char *)target_json,
         "--fd-to-id", (char *)fd_to_id_json,
         NULL};
+    char *const argv_kernel_ids[] = {
+        "bpfopt", "--canonicalize-map-refs",
+        "--input", (char *)input_path,
+        "--output", (char *)out_path,
+        "--map-ids", (char *)map_ids_csv,
+        "--target", (char *)target_json,
+        "--target-output", (char *)target_json,
+        NULL};
+    char *const *argv = fd_to_id_json ? argv_with_fd_to_id : argv_kernel_ids;
     /* Strip LD_PRELOAD so the bpfopt child doesn't re-attach the shim. */
     size_t n_env = 0;
     while (environ[n_env]) n_env++;
@@ -322,8 +331,8 @@ static int run_canonicalize(const char *input_path, const char *out_path,
                                          O_WRONLY | O_APPEND, 0);
     }
     pid_t pid;
-    int rc = posix_spawnp(&pid, "bpfopt", fa_inited ? &fa : NULL, NULL, argv,
-                          clean_env ? clean_env : environ);
+    int rc = posix_spawnp(&pid, "bpfopt", fa_inited ? &fa : NULL, NULL,
+                          (char *const *)argv, clean_env ? clean_env : environ);
     if (fa_inited) posix_spawn_file_actions_destroy(&fa);
     free(clean_env);
     if (rc != 0) return -1;

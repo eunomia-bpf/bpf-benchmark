@@ -65,6 +65,8 @@ struct prog_entry {
     /* Per-prog execute_plan state. */
     int canonicalized;            /* 1 once --canonicalize-map-refs has run */
     int step_seq;                 /* incremented per successful execute_plan step */
+    int discovered_from_fd;       /* raw-syscall loader: discovered via /proc/self/fd */
+    int map_refs_are_kernel_ids;  /* bytecode map refs carry kernel map ids */
     /* Snapshot of map_table at PROG_LOAD time — libbpf may close the map fds
      * shortly after load (especially when handling map-in-map relocations or
      * temporary metadata fds), but the bytecode still references those fd
@@ -377,7 +379,11 @@ static void dump_bytecode(uint64_t hash, const struct bpf_insn *insns,
  * capture_prog_load: dumps the original bytecode to disk (the kernel does
  * not preserve it). NEVER touches/modifies the bytecode buffer otherwise —
  * the bytecode_path is the only piece of state downstream pipeline needs. */
-static struct prog_entry *capture_prog_load(const union bpf_attr *attr) {
+#define ATTR_HAS_FIELD(ATTR_SIZE, FIELD) \
+    ((ATTR_SIZE) >= (offsetof(union bpf_attr, FIELD) + sizeof(((union bpf_attr *)0)->FIELD)))
+
+static struct prog_entry *capture_prog_load(const union bpf_attr *attr,
+                                            unsigned int attr_size) {
     char name[17] = {0};
     memcpy(name, attr->prog_name, 16);
     uint32_t insn_cnt = attr->insn_cnt;
@@ -407,9 +413,15 @@ static struct prog_entry *capture_prog_load(const union bpf_attr *attr) {
     e->name[16] = 0;
     e->insn_cnt = insn_cnt;
     e->hash = hash;
-    e->expected_attach_type = attr->expected_attach_type;
-    e->attach_btf_id = attr->attach_btf_id;
-    e->load_attr = *attr;
+    e->expected_attach_type = ATTR_HAS_FIELD(attr_size, expected_attach_type)
+                                  ? attr->expected_attach_type
+                                  : 0;
+    e->attach_btf_id = ATTR_HAS_FIELD(attr_size, attach_btf_id)
+                           ? attr->attach_btf_id
+                           : 0;
+    memset(&e->load_attr, 0, sizeof(e->load_attr));
+    memcpy(&e->load_attr, attr,
+           attr_size < sizeof(e->load_attr) ? attr_size : sizeof(e->load_attr));
     /* Resolve fd-typed attr fields to kernel IDs while the originals are
      * still valid (just before the syscall fires). dup() doesn't survive
      * because long-lived loaders (tracee) call close_range() after init.
@@ -417,7 +429,7 @@ static struct prog_entry *capture_prog_load(const union bpf_attr *attr) {
     e->prog_btf_kid = 0;
     e->attach_btf_obj_kid = 0;
     e->attach_prog_kid = 0;
-    if (attr->prog_btf_fd) {
+    if (ATTR_HAS_FIELD(attr_size, prog_btf_fd) && attr->prog_btf_fd) {
         struct bpf_btf_info bi = {0};
         union bpf_attr ia = {0};
         ia.info.bpf_fd = attr->prog_btf_fd;
@@ -426,7 +438,8 @@ static struct prog_entry *capture_prog_load(const union bpf_attr *attr) {
         if (real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &ia, sizeof(ia)) >= 0)
             e->prog_btf_kid = bi.id;
     }
-    if (attr->attach_btf_obj_fd) {
+    if (ATTR_HAS_FIELD(attr_size, attach_btf_obj_fd) &&
+        attr->attach_btf_obj_fd) {
         struct bpf_btf_info bi = {0};
         union bpf_attr ia = {0};
         ia.info.bpf_fd = attr->attach_btf_obj_fd;
@@ -435,7 +448,7 @@ static struct prog_entry *capture_prog_load(const union bpf_attr *attr) {
         if (real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &ia, sizeof(ia)) >= 0)
             e->attach_btf_obj_kid = bi.id;
     }
-    if (attr->attach_prog_fd) {
+    if (ATTR_HAS_FIELD(attr_size, attach_prog_fd) && attr->attach_prog_fd) {
         struct bpf_prog_info pi = {0};
         union bpf_attr ia = {0};
         ia.info.bpf_fd = attr->attach_prog_fd;
@@ -454,7 +467,10 @@ static struct prog_entry *capture_prog_load(const union bpf_attr *attr) {
     e->line_info_buf = NULL;
     e->line_info_cnt = 0;
     e->line_info_rec_size = 0;
-    if (attr->func_info && attr->func_info_cnt && attr->func_info_rec_size) {
+    if (ATTR_HAS_FIELD(attr_size, func_info) &&
+        ATTR_HAS_FIELD(attr_size, func_info_cnt) &&
+        ATTR_HAS_FIELD(attr_size, func_info_rec_size) &&
+        attr->func_info && attr->func_info_cnt && attr->func_info_rec_size) {
         size_t n = (size_t)attr->func_info_cnt * attr->func_info_rec_size;
         e->func_info_buf = malloc(n);
         if (e->func_info_buf) {
@@ -463,7 +479,10 @@ static struct prog_entry *capture_prog_load(const union bpf_attr *attr) {
             e->func_info_rec_size = attr->func_info_rec_size;
         }
     }
-    if (attr->line_info && attr->line_info_cnt && attr->line_info_rec_size) {
+    if (ATTR_HAS_FIELD(attr_size, line_info) &&
+        ATTR_HAS_FIELD(attr_size, line_info_cnt) &&
+        ATTR_HAS_FIELD(attr_size, line_info_rec_size) &&
+        attr->line_info && attr->line_info_cnt && attr->line_info_rec_size) {
         size_t n = (size_t)attr->line_info_cnt * attr->line_info_rec_size;
         e->line_info_buf = malloc(n);
         if (e->line_info_buf) {
@@ -484,6 +503,8 @@ static struct prog_entry *capture_prog_load(const union bpf_attr *attr) {
     if (path[0]) memcpy(e->bytecode_path, path, sizeof(path));
     return e;
 }
+
+#undef ATTR_HAS_FIELD
 
 static struct map_entry *capture_map_create(const union bpf_attr *attr) {
     struct map_entry *e = (struct map_entry *)calloc(1, sizeof(*e));
@@ -531,6 +552,329 @@ static void on_raw_tp_open(const union bpf_attr *attr) {
     log_line("BPF_RAW_TRACEPOINT_OPEN name=%s prog_fd=%u",
              (const char *)(uintptr_t)attr->raw_tracepoint.name,
              attr->raw_tracepoint.prog_fd);
+}
+
+/* Host linux/bpf.h may not have the fork-only bpf_prog_info tail. The fork
+ * UAPI places orig_prog_len in host struct tail padding, so do not append to
+ * struct bpf_prog_info directly. */
+#define BPF_PROG_INFO_FORK_SIZE 240U
+#define BPF_PROG_INFO_ORIG_PROG_LEN_OFF 228U
+#define BPF_PROG_INFO_ORIG_PROG_INSNS_OFF 232U
+
+struct bpf_prog_info_fork {
+    uint8_t raw[BPF_PROG_INFO_FORK_SIZE];
+};
+
+static struct bpf_prog_info *prog_info_fork_base(struct bpf_prog_info_fork *info) {
+    return (struct bpf_prog_info *)(void *)info->raw;
+}
+
+static uint32_t prog_info_fork_orig_len(const struct bpf_prog_info_fork *info) {
+    uint32_t value = 0;
+    memcpy(&value, info->raw + BPF_PROG_INFO_ORIG_PROG_LEN_OFF, sizeof(value));
+    return value;
+}
+
+static void prog_info_fork_set_orig_len(struct bpf_prog_info_fork *info,
+                                        uint32_t value) {
+    memcpy(info->raw + BPF_PROG_INFO_ORIG_PROG_LEN_OFF, &value, sizeof(value));
+}
+
+static void prog_info_fork_set_orig_insns(struct bpf_prog_info_fork *info,
+                                          uint64_t value) {
+    memcpy(info->raw + BPF_PROG_INFO_ORIG_PROG_INSNS_OFF, &value,
+           sizeof(value));
+}
+
+static int query_prog_info_fork(int fd, struct bpf_prog_info_fork *info) {
+    memset(info, 0, sizeof(*info));
+    union bpf_attr ia = {0};
+    ia.info.bpf_fd = (uint32_t)fd;
+    ia.info.info_len = sizeof(info->raw);
+    ia.info.info = (uintptr_t)info->raw;
+    return real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &ia, sizeof(ia)) < 0
+               ? -1
+               : 0;
+}
+
+static int scan_open_map_fds_for_prog(const uint32_t *want_ids,
+                                      uint32_t want_n,
+                                      uint32_t **fds_out,
+                                      uint32_t **kids_out,
+                                      uint32_t **types_out,
+                                      uint32_t *n_out) {
+    *fds_out = NULL;
+    *kids_out = NULL;
+    *types_out = NULL;
+    *n_out = 0;
+    if (want_n == 0)
+        return 0;
+
+    uint32_t *fds = (uint32_t *)calloc(want_n, sizeof(uint32_t));
+    uint32_t *kids = (uint32_t *)calloc(want_n, sizeof(uint32_t));
+    uint32_t *types = (uint32_t *)calloc(want_n, sizeof(uint32_t));
+    if (!fds || !kids || !types) {
+        free(fds);
+        free(kids);
+        free(types);
+        return -1;
+    }
+
+    DIR *fd_dir = opendir("/proc/self/fd");
+    if (!fd_dir) {
+        free(fds);
+        free(kids);
+        free(types);
+        return -1;
+    }
+
+    uint32_t n = 0;
+    struct dirent *de;
+    while ((de = readdir(fd_dir)) != NULL && n < want_n) {
+        if (de->d_name[0] < '0' || de->d_name[0] > '9')
+            continue;
+        int probe_fd = atoi(de->d_name);
+        if (probe_fd < 0)
+            continue;
+        char fdpath[64], link_target[64];
+        snprintf(fdpath, sizeof(fdpath), "/proc/self/fd/%d", probe_fd);
+        ssize_t lr = readlink(fdpath, link_target, sizeof(link_target) - 1);
+        if (lr <= 0)
+            continue;
+        link_target[lr] = 0;
+        if (strcmp(link_target, "anon_inode:bpf-map") != 0)
+            continue;
+
+        struct bpf_map_info mi;
+        memset(&mi, 0, sizeof(mi));
+        union bpf_attr ia = {0};
+        ia.info.bpf_fd = (uint32_t)probe_fd;
+        ia.info.info_len = sizeof(mi);
+        ia.info.info = (uintptr_t)&mi;
+        if (real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD,
+                         &ia, sizeof(ia)) < 0 || mi.id == 0)
+            continue;
+
+        int wanted = 0;
+        for (uint32_t i = 0; i < want_n; i++) {
+            if (want_ids[i] == mi.id) {
+                wanted = 1;
+                break;
+            }
+        }
+        if (!wanted)
+            continue;
+
+        int dup = 0;
+        for (uint32_t i = 0; i < n; i++) {
+            if (kids[i] == mi.id) {
+                dup = 1;
+                break;
+            }
+        }
+        if (dup)
+            continue;
+
+        fds[n] = (uint32_t)probe_fd;
+        kids[n] = mi.id;
+        types[n] = mi.type;
+        n++;
+    }
+    closedir(fd_dir);
+
+    *fds_out = fds;
+    *kids_out = kids;
+    *types_out = types;
+    *n_out = n;
+    return 0;
+}
+
+static int prog_id_is_tracked(uint32_t prog_id) {
+    int tracked = 0;
+    pthread_mutex_lock(&state_mutex);
+    tracked = prog_find_by_kernel_id(prog_id) != NULL;
+    pthread_mutex_unlock(&state_mutex);
+    return tracked;
+}
+
+static struct prog_entry *discover_prog_from_fd(int fd) {
+    struct bpf_prog_info_fork info;
+    struct bpf_prog_info *ibase = prog_info_fork_base(&info);
+    if (query_prog_info_fork(fd, &info) != 0 || ibase->id == 0)
+        return NULL;
+    if (prog_id_is_tracked(ibase->id))
+        return NULL;
+    uint32_t orig_prog_len = prog_info_fork_orig_len(&info);
+    if (orig_prog_len == 0 ||
+        (orig_prog_len % sizeof(struct bpf_insn)) != 0)
+        return NULL;
+    if (orig_prog_len > 16U * 1024U * 1024U) {
+        log_line("discover prog fd=%d id=%u skipped: orig_prog_len=%u",
+                 fd, ibase->id, orig_prog_len);
+        return NULL;
+    }
+
+    uint32_t map_n = ibase->nr_map_ids;
+    uint32_t *map_ids = NULL;
+    if (map_n) {
+        map_ids = (uint32_t *)calloc(map_n, sizeof(uint32_t));
+        if (!map_ids) {
+            free(map_ids);
+            return NULL;
+        }
+    }
+    size_t insn_bytes = orig_prog_len;
+    struct bpf_insn *insns = (struct bpf_insn *)malloc(insn_bytes);
+    if (!insns) {
+        free(map_ids);
+        return NULL;
+    }
+
+    struct bpf_prog_info_fork full;
+    memset(&full, 0, sizeof(full));
+    struct bpf_prog_info *fbase = prog_info_fork_base(&full);
+    fbase->nr_map_ids = map_n;
+    fbase->map_ids = (uintptr_t)map_ids;
+    prog_info_fork_set_orig_len(&full, orig_prog_len);
+    prog_info_fork_set_orig_insns(&full, (uintptr_t)insns);
+    union bpf_attr ia = {0};
+    ia.info.bpf_fd = (uint32_t)fd;
+    ia.info.info_len = sizeof(full);
+    ia.info.info = (uintptr_t)full.raw;
+    if (real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &ia, sizeof(ia)) < 0 ||
+        prog_info_fork_orig_len(&full) != orig_prog_len) {
+        free(insns);
+        free(map_ids);
+        return NULL;
+    }
+    if (fbase->nr_map_ids < map_n)
+        map_n = fbase->nr_map_ids;
+
+    uint64_t hash = fnv1a64(insns, insn_bytes);
+    dump_bytecode(hash, insns, (uint32_t)(insn_bytes / sizeof(*insns)));
+    free(insns);
+
+    uint32_t *snap_fds = NULL;
+    uint32_t *snap_kids = NULL;
+    uint32_t *snap_types = NULL;
+    uint32_t snap_n = 0;
+    if (scan_open_map_fds_for_prog(map_ids, map_n, &snap_fds, &snap_kids,
+                                   &snap_types, &snap_n) != 0) {
+        free(map_ids);
+        return NULL;
+    }
+    free(map_ids);
+
+    struct prog_entry *e = (struct prog_entry *)calloc(1, sizeof(*e));
+    if (!e) {
+        free(snap_fds);
+        free(snap_kids);
+        free(snap_types);
+        return NULL;
+    }
+    e->fd = fd;
+    e->prog_type = fbase->type;
+    memcpy(e->name, fbase->name, sizeof(e->name) - 1);
+    e->name[sizeof(e->name) - 1] = 0;
+    e->insn_cnt = (uint32_t)(insn_bytes / sizeof(struct bpf_insn));
+    e->hash = hash;
+    e->attach_btf_id = fbase->attach_btf_id;
+    e->kernel_prog_id = fbase->id;
+    e->prog_btf_kid = fbase->btf_id;
+    e->attach_btf_obj_kid = fbase->attach_btf_obj_id;
+    e->load_attr.prog_type = fbase->type;
+    e->load_attr.attach_btf_id = fbase->attach_btf_id;
+    snprintf(e->license, sizeof(e->license), "GPL");
+    const char *dir = getenv("BPFREJIT_SHIM_DIR");
+    if (!dir) dir = "/tmp";
+    snprintf(e->bytecode_path, sizeof(e->bytecode_path),
+             "%s/bpfrejit_%d_%016lx.bpf", dir, getpid(), hash);
+    e->snap_n = snap_n;
+    e->snap_fds = snap_fds;
+    e->snap_kids = snap_kids;
+    e->snap_types = snap_types;
+    e->discovered_from_fd = 1;
+    e->map_refs_are_kernel_ids = 0;
+    log_line("discovered BPF prog fd=%d id=%u type=%u name=%s insn_cnt=%u maps=%u",
+             fd, e->kernel_prog_id, e->prog_type, e->name, e->insn_cnt,
+             e->snap_n);
+    return e;
+}
+
+static void discover_proc_bpf_fds(void) {
+    int saved_in_shim = in_shim;
+    in_shim = 1;
+    DIR *fd_dir = opendir("/proc/self/fd");
+    if (!fd_dir) {
+        in_shim = saved_in_shim;
+        return;
+    }
+    struct dirent *de;
+    while ((de = readdir(fd_dir)) != NULL) {
+        if (de->d_name[0] < '0' || de->d_name[0] > '9')
+            continue;
+        int fd = atoi(de->d_name);
+        if (fd < 0)
+            continue;
+        char fdpath[64], link_target[64];
+        snprintf(fdpath, sizeof(fdpath), "/proc/self/fd/%d", fd);
+        ssize_t lr = readlink(fdpath, link_target, sizeof(link_target) - 1);
+        if (lr <= 0)
+            continue;
+        link_target[lr] = 0;
+        if (strcmp(link_target, "anon_inode:bpf-prog") != 0)
+            continue;
+        struct prog_entry *e = discover_prog_from_fd(fd);
+        if (!e)
+            continue;
+        pthread_mutex_lock(&state_mutex);
+        if (prog_find_by_kernel_id(e->kernel_prog_id))
+            prog_free(e);
+        else
+            prog_insert(e);
+        pthread_mutex_unlock(&state_mutex);
+    }
+    closedir(fd_dir);
+    in_shim = saved_in_shim;
+}
+
+static void discover_kernel_bpf_progs(void) {
+    int saved_in_shim = in_shim;
+    in_shim = 1;
+    uint32_t id = 0;
+    for (uint32_t iter = 0; iter < 1000000; iter++) {
+        union bpf_attr next = {0};
+        next.start_id = id;
+        if (real_syscall(SYS_bpf, BPF_PROG_GET_NEXT_ID, &next,
+                         sizeof(next)) < 0)
+            break;
+        id = next.next_id;
+        if (id == 0 || prog_id_is_tracked(id))
+            continue;
+        union bpf_attr get = {0};
+        get.prog_id = id;
+        long fd = real_syscall(SYS_bpf, BPF_PROG_GET_FD_BY_ID, &get,
+                               sizeof(get));
+        if (fd < 0)
+            continue;
+        struct prog_entry *e = discover_prog_from_fd((int)fd);
+        real_close((int)fd);
+        if (!e)
+            continue;
+        e->fd = -(int)e->kernel_prog_id;
+        pthread_mutex_lock(&state_mutex);
+        if (prog_find_by_kernel_id(e->kernel_prog_id))
+            prog_free(e);
+        else
+            prog_insert(e);
+        pthread_mutex_unlock(&state_mutex);
+    }
+    in_shim = saved_in_shim;
+}
+
+static void discover_bpf_programs(void) {
+    discover_proc_bpf_fds();
+    discover_kernel_bpf_progs();
 }
 
 #endif /* BPFREJIT_SHIM_STATE_H */

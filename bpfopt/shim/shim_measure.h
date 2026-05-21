@@ -5,7 +5,7 @@ static int query_prog_info(struct prog_entry *p, struct bpf_prog_info *info) {
     memset(info, 0, sizeof(*info));
     int fd = p->fd;
     int close_fd = 0;
-    if (fd < 0 && p->kernel_prog_id) {
+    if ((fd < 0 || p->discovered_from_fd) && p->kernel_prog_id) {
         union bpf_attr ga = {0};
         ga.prog_id = p->kernel_prog_id;
         fd = (int)real_syscall(SYS_bpf, BPF_PROG_GET_FD_BY_ID, &ga,
@@ -26,6 +26,7 @@ static int query_prog_info(struct prog_entry *p, struct bpf_prog_info *info) {
 
 static void emit_has_programs(int cli) {
     int found = 0;
+    discover_bpf_programs();
     pthread_mutex_lock(&state_mutex);
     for (int b = 0; b < BPF_STATE_BUCKETS && !found; b++) {
         for (struct prog_entry *p = prog_table[b]; p; p = p->next) {
@@ -45,6 +46,7 @@ static void emit_has_programs(int cli) {
 
 static void emit_measure_start(int cli) {
     uint32_t count = 0;
+    discover_bpf_programs();
     pthread_mutex_lock(&state_mutex);
     for (int b = 0; b < BPF_STATE_BUCKETS; b++) {
         for (struct prog_entry *p = prog_table[b]; p; p = p->next) {

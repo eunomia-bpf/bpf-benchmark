@@ -7,6 +7,7 @@ import time
 from typing import Callable, Sequence
 
 from . import ROOT_DIR, resolve_bpftool_binary, run_json_command
+from .rejit import skip_rejit_disables_shim
 
 
 _SHIM_PATH = "/usr/local/lib/bpfrejit/libbpfrejit_shim.so"
@@ -18,6 +19,8 @@ def _shim_env_for(binary: str) -> dict[str, str]:
     `binary`. The shim looks for BPFREJIT_SHIM_SOCK_DIR to know where to place
     its per-pid socket (matching the runner's apply_rejit lookup)."""
     del binary
+    if skip_rejit_disables_shim():
+        return {}
     if not os.path.exists(_SHIM_PATH):
         # Outside the runtime image (unit tests, host scripts), the shim
         # may not be installed. Run without it and let downstream rejit fail

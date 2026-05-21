@@ -463,8 +463,12 @@ static void run_step(struct prog_entry *pd,
     free(verifier_buf);
 
     /* Write the new prog's verifier log for the next step. */
-    capture_verifier_states(pd, nxt, target_json, local_kernel_ids, nr_maps,
-                            verifier_log);
+    if (pd->discovered_from_fd)
+        capture_rejit_verifier_states(pd, nxt, target_json, local_kernel_ids,
+                                      nr_maps, verifier_log);
+    else
+        capture_verifier_states(pd, nxt, target_json, local_kernel_ids,
+                                nr_maps, verifier_log);
     rename(nxt, cur);
     pthread_mutex_lock(&state_mutex);
     pd->step_seq = *step_seq + 1;
@@ -506,6 +510,7 @@ static int prog_workdir_init(struct prog_entry *pd, uint32_t want_id,
         }
     }
     int canonicalized = pd->canonicalized;
+    int map_refs_are_kernel_ids = pd->map_refs_are_kernel_ids;
     char bytecode_path[256];
     snprintf(bytecode_path, sizeof(bytecode_path), "%s", pd->bytecode_path);
     pthread_mutex_unlock(&state_mutex);
@@ -558,9 +563,11 @@ static int prog_workdir_init(struct prog_entry *pd, uint32_t want_id,
         char canon_log[320], fd_to_id_path[320];
         snprintf(canon_log, sizeof(canon_log), "%s/canonicalize.log", w->workdir);
         snprintf(fd_to_id_path, sizeof(fd_to_id_path), "%s/fd-to-id.json", w->workdir);
-        (void)write_fd_to_id_json(fd_to_id_path, fd2id_fds, fd2id_kids, fd2id_n);
+        if (!map_refs_are_kernel_ids)
+            (void)write_fd_to_id_json(fd_to_id_path, fd2id_fds, fd2id_kids, fd2id_n);
         if (run_canonicalize(bytecode_path, w->cur, w->target_json, map_ids_csv,
-                             fd_to_id_path, canon_log) != 0) {
+                             map_refs_are_kernel_ids ? NULL : fd_to_id_path,
+                             canon_log) != 0) {
             char err_tail[1024] = {0};
             read_tail_escaped(canon_log, err_tail, sizeof(err_tail));
             snprintf(err_out, err_sz,
@@ -592,6 +599,7 @@ static void emit_execute_plan(int cli, const char *json) {
         dprintf(cli, "{\"status\":\"error\",\"error_message\":\"missing steps\"}\n");
         return;
     }
+    discover_bpf_programs();
     uint32_t *all_prog_ids = NULL;
     uint32_t all_prog_n = 0;
     uint32_t all_prog_i = 0;

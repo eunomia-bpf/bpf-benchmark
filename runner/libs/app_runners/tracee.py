@@ -17,7 +17,7 @@ from ..agent import (
     stop_agent,
     wait_healthy,
 )
-from ..rejit import app_shim_has_programs
+from ..rejit import app_shim_has_programs, skip_rejit_disables_shim
 from ..workload import (
     WorkloadResult,
     run_named_workload,
@@ -103,7 +103,7 @@ class TraceeAgentSession(AgentSession):
                 return (
                     _tracee_healthz_ready(TRACEE_HEALTH_HOST, TRACEE_HEALTH_PORT)
                     or _tracee_collector_has_activity(self.collector)
-                ) and app_shim_has_programs(int(proc.pid))
+                ) and (skip_rejit_disables_shim() or app_shim_has_programs(int(proc.pid)))
 
             try:
                 healthy = wait_healthy(proc, self.load_timeout, _health_check)
