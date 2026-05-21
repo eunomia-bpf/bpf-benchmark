@@ -20,6 +20,7 @@
  */
 
 #include <linux/capability.h>
+#include <linux/bpf.h>
 #include <linux/debugfs.h>
 #include <linux/err.h>
 #include <linux/fs.h>
@@ -151,6 +152,11 @@ struct blob_file_priv {
 	u32 id;
 };
 
+struct map_ptr_file_priv {
+	char response[32];
+	size_t len;
+};
+
 static ssize_t blob_write(struct file *file, const char __user *ubuf,
 			  size_t len, loff_t *ppos)
 {
@@ -237,6 +243,75 @@ static const struct file_operations blob_fops = {
 	.llseek = default_llseek,
 };
 
+static int map_ptr_open(struct inode *inode, struct file *file)
+{
+	struct map_ptr_file_priv *priv;
+
+	priv = kzalloc(sizeof(*priv), GFP_KERNEL);
+	if (!priv)
+		return -ENOMEM;
+	file->private_data = priv;
+	return 0;
+}
+
+static int map_ptr_release(struct inode *inode, struct file *file)
+{
+	kfree(file->private_data);
+	return 0;
+}
+
+static ssize_t map_ptr_write(struct file *file, const char __user *ubuf,
+			     size_t len, loff_t *ppos)
+{
+	struct map_ptr_file_priv *priv = file->private_data;
+	struct bpf_map *map;
+	unsigned int fd;
+	char buf[32];
+	int err;
+
+	if (!capable(CAP_SYS_ADMIN))
+		return -EPERM;
+	if (*ppos)
+		return -EINVAL;
+	if (!len || len >= sizeof(buf))
+		return -EINVAL;
+	if (copy_from_user(buf, ubuf, len))
+		return -EFAULT;
+	buf[len] = '\0';
+
+	err = kstrtouint(buf, 0, &fd);
+	if (err)
+		return err;
+
+	map = bpf_map_get(fd);
+	if (IS_ERR(map))
+		return PTR_ERR(map);
+
+	priv->len = scnprintf(priv->response, sizeof(priv->response),
+			      "0x%llx\n", (unsigned long long)(unsigned long)map);
+	bpf_map_put(map);
+	*ppos = len;
+	return len;
+}
+
+static ssize_t map_ptr_read(struct file *file, char __user *ubuf, size_t len,
+			    loff_t *ppos)
+{
+	struct map_ptr_file_priv *priv = file->private_data;
+
+	return simple_read_from_buffer(ubuf, len, ppos, priv->response,
+				       priv->len);
+}
+
+static const struct file_operations map_ptr_fops = {
+	.owner = THIS_MODULE,
+	.open = map_ptr_open,
+	.release = map_ptr_release,
+	.read = map_ptr_read,
+	.write = map_ptr_write,
+	.llseek = default_llseek,
+};
+
 static int __init bpf_arm64_native_lab_debugfs_init(void)
 {
 	long i;
@@ -244,6 +319,9 @@ static int __init bpf_arm64_native_lab_debugfs_init(void)
 	debugfs_root = debugfs_create_dir("bpf_arm64_native_lab", NULL);
 	if (IS_ERR(debugfs_root))
 		return PTR_ERR(debugfs_root);
+
+	debugfs_create_file("map_ptr", 0600, debugfs_root, NULL,
+			    &map_ptr_fops);
 
 	for (i = 0; i < NATIVE_LAB_MAX_BLOBS; i++) {
 		char name[24];
@@ -306,3 +384,4 @@ module_exit(bpf_arm64_native_lab_exit);
 MODULE_DESCRIPTION("BpfReJIT arm64 native-code lab kinsn (test only; bypasses verifier guarantees)");
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("BpfReJIT");
+MODULE_IMPORT_NS("BPF_INTERNAL");

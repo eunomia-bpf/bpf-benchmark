@@ -1458,7 +1458,11 @@ mod tests {
             .context("resolve project root")?;
         std::env::set_current_dir(&root).context("chdir to project root")?;
         let obj = root.join("bpfopt/testobject/katran_balancer.bpf.o");
-        let bpfopt = root.join(BPFOPT_BIN);
+        // Allow pointing the katran perf path at an alternate bpfopt (e.g. the
+        // LLVM O3 drop-in) via env, defaulting to the Rust bpfopt.
+        let bpfopt = std::env::var("BPFOPT_LOADER_BPFOPT")
+            .map(PathBuf::from)
+            .unwrap_or_else(|_| root.join(BPFOPT_BIN));
         let overlay_dir = root.join("runner/config/passes/map_inline/overlays/katran");
         let diag_dir = std::env::var("BPFOPT_LOADER_DIAG_WORKDIR")
             .ok()
@@ -1511,15 +1515,21 @@ mod tests {
                 prog.dir.join(VERIFIER_LOG),
                 prog.dir.join("verifier_after_map_inline.log"),
             )?;
-            promote_output_to_input(prog)?;
-            run_katran_bytecode_pass(prog, &bpfopt, "const_prop", true)?;
-            fs::copy(
-                prog.dir.join(REPORT_JSON),
-                prog.dir.join("report_const_prop.json"),
-            )?;
-            promote_output_to_input(prog)?;
-            run_katran_bytecode_pass(prog, &bpfopt, "dce", false)?;
-            fs::copy(prog.dir.join(REPORT_JSON), prog.dir.join("report_dce.json"))?;
+            // The LLVM bpfopt does a full O3 roundtrip per pass, so a single
+            // map_inline already subsumes const-prop/dce; re-running them is
+            // redundant O3 that can blow the 512B BPF stack. Allow skipping the
+            // bytecode passes to measure map_inline-only on the LLVM path.
+            if std::env::var("BPFOPT_LOADER_SKIP_BYTECODE_PASSES").is_err() {
+                promote_output_to_input(prog)?;
+                run_katran_bytecode_pass(prog, &bpfopt, "const_prop", true)?;
+                fs::copy(
+                    prog.dir.join(REPORT_JSON),
+                    prog.dir.join("report_const_prop.json"),
+                )?;
+                promote_output_to_input(prog)?;
+                run_katran_bytecode_pass(prog, &bpfopt, "dce", false)?;
+                fs::copy(prog.dir.join(REPORT_JSON), prog.dir.join("report_dce.json"))?;
+            }
             let fd = verify_workdir(
                 &prog.dir,
                 &prog.map_fds,

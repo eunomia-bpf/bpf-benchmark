@@ -55,14 +55,15 @@ create_bpf_target_machine(llvm::CodeGenOptLevel opt_level)
 	llvm::InitializeAllAsmPrinters();
 
 	std::string error;
+	llvm::Triple triple("bpfel");
 	const llvm::Target *target =
-		llvm::TargetRegistry::lookupTarget("bpfel", error);
+		llvm::TargetRegistry::lookupTarget(triple, error);
 	if (!target) {
 		throw std::runtime_error("lookupTarget(bpfel) failed: " + error);
 	}
 	llvm::TargetOptions options;
 	auto machine = std::unique_ptr<llvm::TargetMachine>(
-		target->createTargetMachine("bpfel", "v3", "", options,
+		target->createTargetMachine(triple, "v3", "", options,
 					    std::nullopt, std::nullopt,
 					    opt_level));
 	if (!machine) {
@@ -116,7 +117,7 @@ std::vector<uint8_t> emit_bpf_object(llvm::Module &module, bool optimize_ir)
 	auto machine = create_bpf_target_machine(
 		optimize_ir ? llvm::CodeGenOptLevel::Aggressive :
 			      llvm::CodeGenOptLevel::Less);
-	module.setTargetTriple("bpfel");
+	module.setTargetTriple(llvm::Triple("bpfel"));
 	module.setDataLayout(machine->createDataLayout());
 	if (optimize_ir) {
 		optimize_module(module, *machine);

@@ -21,11 +21,9 @@
 //!      multi-byte NOPs to shorter forms, which would break pre-computed
 //!      offset arithmetic).
 //!
-//! We don't strip prologue push-callee-saved or epilogue pop-callee-saved.
-//! Compilers emit balanced push/pop along every control-flow path, so each
-//! rewritten `RET` site already sees a balanced stack. By the time the
-//! rewritten `jmp end_label` fires, the function has popped whatever it
-//! pushed, and the BPF JIT prologue's saved values are intact.
+//! We keep the compiler-emitted prologue/epilogue intact. The blob runs
+//! inside a BPF JIT frame, not as a normal userspace call target, so
+//! post-link ABI surgery is only safe when proven for a concrete pattern.
 //!
 //! Any PC-relative reference whose target lies outside the **union of**
 //! discovered symbols (rodata constants, GOT entries, external functions)
@@ -53,6 +51,10 @@ use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::PathBuf;
 
+const X86_CPU_NUMBER_HELPER_KEY: &str = "__native_x86_cpu_number";
+const X86_THIS_CPU_OFF_HELPER_KEY: &str = "__native_x86_this_cpu_off";
+const ARM64_THREAD_INFO_CPU_OFFSET_HELPER_KEY: &str = "__native_arm64_thread_info_cpu_offset";
+
 #[derive(Parser, Debug)]
 #[command(
     about = "Extract one function (plus reachable subprograms) from a userspace x86-64 ELF and rewrite it for native_lab."
@@ -76,6 +78,12 @@ struct Args {
     #[arg(long)]
     output_relocs: Option<PathBuf>,
 
+    /// Output path for map literal patch sites. Each line is
+    /// NAME<TAB>OFFSET, where OFFSET points at an 8-byte literal-pool
+    /// slot that the runner must fill with the current kernel map pointer.
+    #[arg(long)]
+    output_map_patches: Option<PathBuf>,
+
     /// BPF helper to kernel-address mapping. Repeatable.
     /// Format: NAME=HEXADDR (e.g. bpf_ktime_get_ns=0xffffffff81234567).
     /// Each PLT32 relocation in the input ELF against a listed name is
@@ -95,8 +103,8 @@ struct Args {
     /// companion `.bpf.o`'s bytecode to identify which map each call uses.
     ///
     /// Preferred format:
-    /// INDEX=KIND,HEXADDR,KEY_OFFSET,MAP_ADDR,MAX_ENTRIES,ELEM_SIZE,INDEX_MASK,VALUE_OFFSET,PERCPU_BASE,LRU_REF_OFFSET
-    /// where KIND is call/hash/lru_hash/percpu_hash/array/percpu_array. The legacy
+    /// INDEX=KIND,HEXADDR,KEY_OFFSET,MAP_ADDR,MAX_ENTRIES,ELEM_SIZE,INDEX_MASK,VALUE_OFFSET,PERCPU_BASE
+    /// where KIND is call/hash/array/percpu_array. The legacy
     /// INDEX=HEXADDR,OFFSET form is still accepted for standalone tests.
     ///
     /// When zero `--lookup-site` flags are supplied, every
@@ -104,7 +112,10 @@ struct Args {
     /// `--helper bpf_map_lookup_elem=ADDR` pool with no inline (legacy
     /// behavior, used by the standalone `tests/run_micro_one.sh`
     /// driver that doesn't know about the bytecode oracle).
-    #[arg(long = "lookup-site", value_name = "INDEX=KIND,ADDR,KEY_OFF,MAP,MAX,ELEM,MASK,VALUE_OFF,PERCPU,LRU_REF")]
+    #[arg(
+        long = "lookup-site",
+        value_name = "INDEX=KIND,ADDR,KEY_OFF,MAP,MAX,ELEM,MASK,VALUE_OFF,PERCPU"
+    )]
     lookup_sites: Vec<String>,
 
     /// Print a human-readable disassembly of the rewritten blob to stderr.
@@ -116,8 +127,6 @@ struct Args {
 enum LookupKind {
     Call,
     Hash,
-    LruHash,
-    PerCpuHash,
     Array,
     PerCpuArray,
 }
@@ -129,13 +138,11 @@ struct LookupSiteSpec {
     target_addr: u64,
     /// HASH post-call `add rax, OFFSET` immediate. Zero means no hash inline.
     key_offset: u32,
-    map_addr: u64,
     max_entries: u32,
     elem_size: u32,
     index_mask: u32,
     value_offset: u32,
     percpu_base_addr: u64,
-    lru_ref_offset: u32,
 }
 
 fn parse_lookup_sites(args: &[String]) -> Result<Vec<LookupSiteSpec>> {
@@ -159,34 +166,35 @@ fn parse_lookup_sites(args: &[String]) -> Result<Vec<LookupSiteSpec>> {
                 },
                 target_addr,
                 key_offset,
-                map_addr: 0,
                 max_entries: 0,
                 elem_size: 0,
                 index_mask: 0,
                 value_offset: 0,
                 percpu_base_addr: 0,
-                lru_ref_offset: 0,
             }
-        } else if parts.len() == 9 || parts.len() == 10 {
+        } else if parts.len() == 9 {
+            let kind = parse_lookup_kind(parts[0])?;
+            let target_addr = parse_u64_auto(parts[1], "--lookup-site ADDR")?;
+            let key_offset = parse_u32_auto(parts[2], "--lookup-site KEY_OFFSET")?;
+            parse_u64_auto(parts[3], "--lookup-site MAP_ADDR")?;
+            let max_entries = parse_u32_auto(parts[4], "--lookup-site MAX_ENTRIES")?;
+            let elem_size = parse_u32_auto(parts[5], "--lookup-site ELEM_SIZE")?;
+            let index_mask = parse_u32_auto(parts[6], "--lookup-site INDEX_MASK")?;
+            let value_offset = parse_u32_auto(parts[7], "--lookup-site VALUE_OFFSET")?;
+            let percpu_base_addr = parse_u64_auto(parts[8], "--lookup-site PERCPU_BASE")?;
             LookupSiteSpec {
-                kind: parse_lookup_kind(parts[0])?,
-                target_addr: parse_u64_auto(parts[1], "--lookup-site ADDR")?,
-                key_offset: parse_u32_auto(parts[2], "--lookup-site KEY_OFFSET")?,
-                map_addr: parse_u64_auto(parts[3], "--lookup-site MAP_ADDR")?,
-                max_entries: parse_u32_auto(parts[4], "--lookup-site MAX_ENTRIES")?,
-                elem_size: parse_u32_auto(parts[5], "--lookup-site ELEM_SIZE")?,
-                index_mask: parse_u32_auto(parts[6], "--lookup-site INDEX_MASK")?,
-                value_offset: parse_u32_auto(parts[7], "--lookup-site VALUE_OFFSET")?,
-                percpu_base_addr: parse_u64_auto(parts[8], "--lookup-site PERCPU_BASE")?,
-                lru_ref_offset: if parts.len() == 10 {
-                    parse_u32_auto(parts[9], "--lookup-site LRU_REF_OFFSET")?
-                } else {
-                    0
-                },
+                kind,
+                target_addr,
+                key_offset,
+                max_entries,
+                elem_size,
+                index_mask,
+                value_offset,
+                percpu_base_addr,
             }
         } else {
             bail!(
-                "--lookup-site payload has {} comma-separated fields; expected 2, 9, or 10: {payload:?}",
+                "--lookup-site payload has {} comma-separated fields; expected 2 or 9: {payload:?}",
                 parts.len()
             );
         };
@@ -208,8 +216,6 @@ fn parse_lookup_kind(s: &str) -> Result<LookupKind> {
     match s {
         "call" => Ok(LookupKind::Call),
         "hash" => Ok(LookupKind::Hash),
-        "lru_hash" => Ok(LookupKind::LruHash),
-        "percpu_hash" => Ok(LookupKind::PerCpuHash),
         "array" => Ok(LookupKind::Array),
         "percpu_array" => Ok(LookupKind::PerCpuArray),
         _ => bail!("unknown --lookup-site KIND {s:?}"),
@@ -243,6 +249,12 @@ pub struct RelocRecord {
     target: u64,
 }
 
+#[derive(Clone, Debug)]
+struct MapPatch {
+    name: String,
+    offset: usize,
+}
+
 fn build_x86_absolute_helper_call(target_addr: u64, local_ip: u64) -> Result<[Instruction; 2]> {
     let mut mov = Instruction::with2(Code::Mov_r64_imm64, Register::RAX, target_addr)
         .map_err(|e| anyhow!("encode movabs helper target: {e:?}"))?;
@@ -253,6 +265,24 @@ fn build_x86_absolute_helper_call(target_addr: u64, local_ip: u64) -> Result<[In
     call.set_ip(local_ip + 10);
 
     Ok([mov, call])
+}
+
+fn build_x86_get_smp_processor_id_inline(
+    helper_addrs: &HashMap<String, u64>,
+) -> Result<Option<Vec<Instruction>>> {
+    let (Some(&cpu_number), Some(&this_cpu_off)) = (
+        helper_addrs.get(X86_CPU_NUMBER_HELPER_KEY),
+        helper_addrs.get(X86_THIS_CPU_OFF_HELPER_KEY),
+    ) else {
+        return Ok(None);
+    };
+    let mut bytes = Vec::new();
+    bytes.extend_from_slice(&[0x48, 0xC7, 0xC0]); // mov rax, sign_extend32(&cpu_number)
+    bytes.extend_from_slice(&(cpu_number as u32).to_le_bytes());
+    bytes.extend_from_slice(&[0x65, 0x48, 0x03, 0x04, 0x25]); // add rax, gs:[this_cpu_off]
+    bytes.extend_from_slice(&(this_cpu_off as u32).to_le_bytes());
+    bytes.extend_from_slice(&[0x8B, 0x40, 0x00]); // mov eax, [rax]
+    Ok(Some(declared_byte_chunks(&bytes)?))
 }
 
 #[derive(Debug, Clone)]
@@ -271,7 +301,11 @@ fn main() -> Result<()> {
     let helper_addrs = parse_name_addr_args(&args.helpers, "helper")?;
     let map_addrs = parse_name_addr_args(&args.maps, "map")?;
     let lookup_sites = parse_lookup_sites(&args.lookup_sites)?;
-    let RewriteResult { blob, relocs } = match elf.architecture() {
+    let RewriteResult {
+        blob,
+        relocs,
+        map_patches,
+    } = match elf.architecture() {
         object::Architecture::X86_64 => {
             let entry = find_symbol_by_name(&elf, &args.symbol)?;
             let included = discover_reachable(&elf, &entry)?;
@@ -366,6 +400,24 @@ fn main() -> Result<()> {
         bail!(
             "{} relocations recorded but --output-relocs was not given",
             relocs.len()
+        );
+    }
+    if let Some(path) = &args.output_map_patches {
+        let mut text = String::new();
+        for patch in &map_patches {
+            if patch.name.contains('\t') || patch.name.contains('\n') {
+                bail!("map patch name contains a tab/newline: {:?}", patch.name);
+            }
+            text.push_str(&patch.name);
+            text.push('\t');
+            text.push_str(&patch.offset.to_string());
+            text.push('\n');
+        }
+        fs::write(path, text).with_context(|| format!("write {}", path.display()))?;
+        eprintln!(
+            "native-link: wrote {} map patch site(s) -> {}",
+            map_patches.len(),
+            path.display()
         );
     }
     Ok(())
@@ -498,6 +550,7 @@ struct PatchInfo {
 struct RewriteResult {
     blob: Vec<u8>,
     relocs: Vec<RelocRecord>,
+    map_patches: Vec<MapPatch>,
 }
 
 /// Per-symbol record kept across the decode/encode phases so that ELF
@@ -741,6 +794,22 @@ fn rewrite_x86(
                 FlowControl::Call | FlowControl::IndirectCall
             ) {
                 if let Some(name) = helper_call_sites.get(&(sym.address, local_ip)) {
+                    if name == "bpf_get_smp_processor_id" {
+                        if let Some(inline) = build_x86_get_smp_processor_id_inline(helper_addrs)? {
+                            for ib in inline {
+                                push_x86_synthetic(
+                                    &mut local,
+                                    &mut kinds,
+                                    &mut insn_local_ip,
+                                    &mut next_synthetic_ip,
+                                    ib,
+                                )?;
+                            }
+                            resolved_helper_call_sites.insert((sym.address, local_ip));
+                            continue;
+                        }
+                    }
+
                     let mut target_addr = helper_addrs.get(name).copied();
                     let mut inline_lookup_spec: Option<LookupSiteSpec> = None;
                     if name == "bpf_map_lookup_elem" && is_entry {
@@ -765,7 +834,7 @@ fn rewrite_x86(
                                 LookupKind::Call => {
                                     target_addr = Some(spec.target_addr);
                                 }
-                                LookupKind::Hash | LookupKind::LruHash | LookupKind::PerCpuHash => {
+                                LookupKind::Hash => {
                                     target_addr = Some(spec.target_addr);
                                     inline_lookup_spec = Some(*spec);
                                 }
@@ -832,10 +901,7 @@ fn rewrite_x86(
                         lookup_call_counter += 1;
                         lookup_call_ordinal.insert((sym.address, local_ip), ordinal);
                         if let Some(spec) = lookup_sites.get(ordinal) {
-                            if matches!(
-                                spec.kind,
-                                LookupKind::Hash | LookupKind::LruHash | LookupKind::PerCpuHash
-                            ) {
+                            if matches!(spec.kind, LookupKind::Hash) {
                                 for ib in build_x86_hash_lookup_postcall(spec)? {
                                     push_x86_synthetic(
                                         &mut local,
@@ -923,6 +989,7 @@ fn rewrite_x86(
     // Stage 2: resolve ELF relocations. x86 helper calls become
     // side-band CALL_REL32 records because the final JIT address is only
     // known when the kernel module splats a blob chunk.
+    let mut map_patches = Vec::new();
     let relocs = apply_elf_relocations(
         elf,
         &layouts,
@@ -932,6 +999,7 @@ fn rewrite_x86(
         &lookup_call_ordinal,
         &resolved_helper_call_sites,
         &mut blob,
+        &mut map_patches,
     )?;
 
     // Patch JmpEnd disps LAST so they target the byte AFTER any
@@ -955,7 +1023,11 @@ fn rewrite_x86(
     if show {
         disasm(&blob);
     }
-    Ok(RewriteResult { blob, relocs })
+    Ok(RewriteResult {
+        blob,
+        relocs,
+        map_patches,
+    })
 }
 
 fn a64_sign_extend(value: u32, bits: u8) -> i64 {
@@ -1127,6 +1199,13 @@ fn a64_ldr_u32(rt: u32, rn: u32, byte_off: u32) -> Result<u32> {
     Ok(0xb940_0000 | ((byte_off / 4) << 10) | (rn << 5) | rt)
 }
 
+fn a64_mrs_sp_el0(rt: u32) -> Result<u32> {
+    if rt >= 32 {
+        bail!("arm64 MRS SP_EL0 target register out of range: x{rt}");
+    }
+    Ok(0xd538_4100 | rt)
+}
+
 fn a64_ldr_u64(rt: u32, rn: u32, byte_off: u32) -> Result<u32> {
     if rt >= 32 || rn >= 32 {
         bail!("arm64 LDR x register out of range: x{rt}, x{rn}");
@@ -1248,6 +1327,23 @@ fn arm64_helper_call_sequence(helper_addr: u64) -> Result<Vec<u32>> {
     Ok(words)
 }
 
+fn build_arm64_get_smp_processor_id_inline(
+    helper_addrs: &HashMap<String, u64>,
+) -> Result<Option<Vec<u32>>> {
+    const X0: u32 = 0;
+    const X16: u32 = 16;
+
+    let Some(&cpu_offset) = helper_addrs.get(ARM64_THREAD_INFO_CPU_OFFSET_HELPER_KEY) else {
+        return Ok(None);
+    };
+    let cpu_offset = u32::try_from(cpu_offset)
+        .map_err(|_| anyhow!("arm64 thread_info.cpu offset does not fit u32: {cpu_offset}"))?;
+    Ok(Some(vec![
+        a64_mrs_sp_el0(X16)?,
+        a64_ldr_u32(X0, X16, cpu_offset)?,
+    ]))
+}
+
 fn build_arm64_array_lookup(spec: &LookupSiteSpec) -> Result<Vec<u32>> {
     const X0: u32 = 0;
     const X1: u32 = 1;
@@ -1298,6 +1394,29 @@ fn build_arm64_array_lookup(spec: &LookupSiteSpec) -> Result<Vec<u32>> {
 
     words[null_branch] = a64_patch_b_cond(0x5400_0002, null_branch, null_target)?;
     words[done_branch] = a64_patch_b(done_branch, done_target)?;
+    Ok(words)
+}
+
+fn build_arm64_hash_lookup_postcall(spec: &LookupSiteSpec) -> Result<Vec<u32>> {
+    const X0: u32 = 0;
+    const A64_CBZ_X0: u32 = 0xb400_0000;
+
+    if !matches!(spec.kind, LookupKind::Hash) {
+        bail!(
+            "lookup kind {:?} is not an arm64 hash post-call inline",
+            spec.kind
+        );
+    }
+    if spec.key_offset == 0 {
+        bail!("arm64 hash lookup inline missing htab value offset");
+    }
+
+    let mut words = Vec::new();
+    let null_branch = words.len();
+    words.push(0);
+    words.push(a64_add_imm64(X0, X0, spec.key_offset)?);
+    let done_target = words.len();
+    words[null_branch] = a64_patch_cbz_cbnz(A64_CBZ_X0, null_branch, done_target)?;
     Ok(words)
 }
 
@@ -1470,14 +1589,20 @@ enum Arm64PatchKind {
         target_symbol_address: u64,
     },
     B {
+        source_symbol_address: u64,
+        target_is_symbol_end: bool,
         target_address: u64,
     },
     BCond {
         insn: u32,
+        source_symbol_address: u64,
+        target_is_symbol_end: bool,
         target_address: u64,
     },
     CbzCbnz {
         insn: u32,
+        source_symbol_address: u64,
+        target_is_symbol_end: bool,
         target_address: u64,
     },
     MapLiteralLoad {
@@ -1496,6 +1621,25 @@ struct Arm64Patch {
     kind: Arm64PatchKind,
 }
 
+fn arm64_branch_target_word(
+    addr_word_offset: &HashMap<u64, usize>,
+    sym_end_word_offset: &HashMap<u64, usize>,
+    source_symbol_address: u64,
+    target_is_symbol_end: bool,
+    target_address: u64,
+) -> Result<usize> {
+    if target_is_symbol_end {
+        return sym_end_word_offset
+            .get(&source_symbol_address)
+            .copied()
+            .ok_or_else(|| anyhow!("arm64 branch target symbol end not in index map"));
+    }
+    addr_word_offset
+        .get(&target_address)
+        .copied()
+        .ok_or_else(|| anyhow!("arm64 branch target addr not in index map"))
+}
+
 fn rewrite_arm64(
     elf: &object::File,
     entry: &SymInfo,
@@ -1506,6 +1650,8 @@ fn rewrite_arm64(
     show: bool,
 ) -> Result<RewriteResult> {
     let mut blob = Vec::new();
+    let mut sym_start_word_offset: HashMap<u64, usize> = HashMap::new();
+    let mut sym_end_word_offset: HashMap<u64, usize> = HashMap::new();
     let mut addr_word_offset: HashMap<u64, usize> = HashMap::new();
     let mut patches: Vec<Arm64Patch> = Vec::new();
     let relocs = arm64_text_relocations(elf, included)?;
@@ -1522,6 +1668,7 @@ fn rewrite_arm64(
         }
 
         let end = sym.address + sym.size;
+        sym_start_word_offset.insert(sym.address, blob.len() / 4);
         for (local_word_index, word) in bytes.chunks_exact(4).enumerate() {
             let off = local_word_index * 4;
             let insn = u32::from_le_bytes(word.try_into().unwrap());
@@ -1566,9 +1713,20 @@ fn rewrite_arm64(
                                 reloc.target_name
                             );
                         }
-                        let mut helper_addr = *helper_addrs.get(&reloc.target_name).ok_or_else(|| {
-                            anyhow!("missing arm64 helper address: {}", reloc.target_name)
-                        })?;
+                        let mut helper_addr =
+                            *helper_addrs.get(&reloc.target_name).ok_or_else(|| {
+                                anyhow!("missing arm64 helper address: {}", reloc.target_name)
+                            })?;
+                        if reloc.target_name == "bpf_get_smp_processor_id" {
+                            if let Some(inline) =
+                                build_arm64_get_smp_processor_id_inline(helper_addrs)?
+                            {
+                                for word in inline {
+                                    append_u32(&mut blob, word);
+                                }
+                                continue;
+                            }
+                        }
                         if reloc.target_name == "bpf_map_lookup_elem" && is_entry {
                             let ordinal = lookup_call_counter;
                             lookup_call_counter += 1;
@@ -1583,12 +1741,15 @@ fn rewrite_arm64(
                                     LookupKind::Call => {
                                         helper_addr = spec.target_addr;
                                     }
-                                    LookupKind::Hash
-                                    | LookupKind::LruHash
-                                    | LookupKind::PerCpuHash => {
-                                        bail!(
-                                            "arm64 hash-style map lookup inline is not implemented yet"
-                                        );
+                                    LookupKind::Hash => {
+                                        helper_addr = spec.target_addr;
+                                        for word in arm64_helper_call_sequence(helper_addr)? {
+                                            append_u32(&mut blob, word);
+                                        }
+                                        for word in build_arm64_hash_lookup_postcall(spec)? {
+                                            append_u32(&mut blob, word);
+                                        }
+                                        continue;
                                     }
                                 }
                             }
@@ -1671,18 +1832,25 @@ fn rewrite_arm64(
                         sym.name
                     );
                 }
+                let target_is_symbol_end = target == end;
                 let kind = if a64_is_uncond_b(insn) {
                     Arm64PatchKind::B {
+                        source_symbol_address: sym.address,
+                        target_is_symbol_end,
                         target_address: target,
                     }
                 } else if a64_is_b_cond(insn) {
                     Arm64PatchKind::BCond {
                         insn,
+                        source_symbol_address: sym.address,
+                        target_is_symbol_end,
                         target_address: target,
                     }
                 } else if a64_is_cbz_cbnz(insn) {
                     Arm64PatchKind::CbzCbnz {
                         insn,
+                        source_symbol_address: sym.address,
+                        target_is_symbol_end,
                         target_address: target,
                     }
                 } else {
@@ -1707,10 +1875,11 @@ fn rewrite_arm64(
                 blob.extend_from_slice(&insn.to_le_bytes());
             }
         }
-        addr_word_offset.insert(sym.address + sym.size, blob.len() / 4);
+        sym_end_word_offset.insert(sym.address, blob.len() / 4);
     }
 
     let mut map_literals: HashMap<String, usize> = HashMap::new();
+    let mut map_patches = Vec::new();
     let mut local_data: HashMap<object::SectionIndex, usize> = HashMap::new();
 
     for patch in patches.iter().filter(|p| {
@@ -1732,6 +1901,10 @@ fn rewrite_arm64(
                         .ok_or_else(|| anyhow!("missing arm64 map address: {target_name}"))?;
                     let offset = arm64_append_literal(&mut blob, addr);
                     map_literals.insert(target_name.clone(), offset);
+                    map_patches.push(MapPatch {
+                        name: target_name.clone(),
+                        offset,
+                    });
                     offset
                 };
                 let rd = u32::from(blob[off] & 0x1f);
@@ -1795,33 +1968,53 @@ fn rewrite_arm64(
             Arm64PatchKind::Bl {
                 target_symbol_address,
             } => {
-                let target_word = *addr_word_offset
+                let target_word = *sym_start_word_offset
                     .get(&target_symbol_address)
                     .ok_or_else(|| anyhow!("arm64 BL target sym addr not in index map"))?;
                 a64_patch_bl(patch.word_index, target_word)?
             }
-            Arm64PatchKind::B { target_address } => {
-                let target_word = *addr_word_offset
-                    .get(&target_address)
-                    .ok_or_else(|| anyhow!("arm64 B target addr not in index map"))?;
+            Arm64PatchKind::B {
+                source_symbol_address,
+                target_is_symbol_end,
+                target_address,
+            } => {
+                let target_word = arm64_branch_target_word(
+                    &addr_word_offset,
+                    &sym_end_word_offset,
+                    source_symbol_address,
+                    target_is_symbol_end,
+                    target_address,
+                )?;
                 a64_patch_b(patch.word_index, target_word)?
             }
             Arm64PatchKind::BCond {
                 insn,
+                source_symbol_address,
+                target_is_symbol_end,
                 target_address,
             } => {
-                let target_word = *addr_word_offset
-                    .get(&target_address)
-                    .ok_or_else(|| anyhow!("arm64 B.cond target addr not in index map"))?;
+                let target_word = arm64_branch_target_word(
+                    &addr_word_offset,
+                    &sym_end_word_offset,
+                    source_symbol_address,
+                    target_is_symbol_end,
+                    target_address,
+                )?;
                 a64_patch_b_cond(insn, patch.word_index, target_word)?
             }
             Arm64PatchKind::CbzCbnz {
                 insn,
+                source_symbol_address,
+                target_is_symbol_end,
                 target_address,
             } => {
-                let target_word = *addr_word_offset
-                    .get(&target_address)
-                    .ok_or_else(|| anyhow!("arm64 CBZ/CBNZ target addr not in index map"))?;
+                let target_word = arm64_branch_target_word(
+                    &addr_word_offset,
+                    &sym_end_word_offset,
+                    source_symbol_address,
+                    target_is_symbol_end,
+                    target_address,
+                )?;
                 a64_patch_cbz_cbnz(insn, patch.word_index, target_word)?
             }
             _ => continue,
@@ -1836,6 +2029,7 @@ fn rewrite_arm64(
     Ok(RewriteResult {
         blob,
         relocs: Vec::new(),
+        map_patches,
     })
 }
 
@@ -1861,6 +2055,7 @@ fn apply_elf_relocations(
     lookup_call_ordinal: &HashMap<(u64, u64), usize>,
     resolved_helper_call_sites: &HashSet<(u64, u64)>,
     blob: &mut Vec<u8>,
+    map_patches: &mut Vec<MapPatch>,
 ) -> Result<Vec<RelocRecord>> {
     if layouts.is_empty() {
         return Ok(Vec::new());
@@ -2039,6 +2234,9 @@ fn apply_elf_relocations(
                                 )
                             })?
                     };
+                    let is_map_literal = dedicated_pool_addr.is_none()
+                        && !helper_addrs.contains_key(&target_name)
+                        && map_addrs.contains_key(&target_name);
                     let map_addr = kernel_addr; /* used by code below */
 
                     // Find the decoded instruction that contains this
@@ -2085,6 +2283,12 @@ fn apply_elf_relocations(
                         let off = blob.len();
                         blob.extend_from_slice(&map_addr.to_le_bytes());
                         map_pool_entry.insert(target_name.clone(), off);
+                        if is_map_literal {
+                            map_patches.push(MapPatch {
+                                name: target_name.clone(),
+                                offset: off,
+                            });
+                        }
                         off
                     };
 
@@ -2294,6 +2498,35 @@ fn append_x86_scale_rax(bytes: &mut Vec<u8>, elem_size: u32) -> Result<()> {
     Ok(())
 }
 
+fn x86_sib_scale(elem_size: u32) -> Option<u8> {
+    match elem_size {
+        1 => Some(0),
+        2 => Some(1),
+        4 => Some(2),
+        8 => Some(3),
+        _ => None,
+    }
+}
+
+fn append_x86_array_value_ptr(
+    bytes: &mut Vec<u8>,
+    elem_size: u32,
+    value_offset: u32,
+) -> Result<()> {
+    if let Some(scale) = x86_sib_scale(elem_size) {
+        bytes.extend_from_slice(&[0x48, 0x8D, 0x84, (scale << 6) | 0x07]);
+        bytes.extend_from_slice(&value_offset.to_le_bytes());
+        return Ok(());
+    }
+
+    append_x86_scale_rax(bytes, elem_size)?;
+    bytes.extend_from_slice(&[0x48, 0x01, 0xF8]); // add rax, rdi
+    if value_offset != 0 {
+        append_x86_add_rax_imm(bytes, value_offset);
+    }
+    Ok(())
+}
+
 fn build_x86_array_lookup(spec: &LookupSiteSpec) -> Result<Vec<Instruction>> {
     if spec.max_entries == 0 {
         bail!("array lookup max_entries must be non-zero");
@@ -2305,14 +2538,9 @@ fn build_x86_array_lookup(spec: &LookupSiteSpec) -> Result<Vec<Instruction>> {
             spec.max_entries
         );
     }
-    let value_base = spec
-        .map_addr
-        .checked_add(u64::from(spec.value_offset))
-        .ok_or_else(|| anyhow!("array lookup value base address overflow"))?;
 
     let mut body = Vec::new();
-    append_x86_scale_rax(&mut body, spec.elem_size)?;
-    body.extend_from_slice(&[0x4C, 0x01, 0xD8]); // add rax, r11
+    append_x86_array_value_ptr(&mut body, spec.elem_size, spec.value_offset)?;
 
     if matches!(spec.kind, LookupKind::PerCpuArray) {
         if spec.percpu_base_addr == 0 {
@@ -2328,8 +2556,6 @@ fn build_x86_array_lookup(spec: &LookupSiteSpec) -> Result<Vec<Instruction>> {
         .map_err(|_| anyhow!("array lookup inline body too large: {} bytes", body.len()))?;
 
     let mut bytes = Vec::new();
-    bytes.extend_from_slice(&[0x49, 0xBB]); // movabs r11, value/pptrs base
-    bytes.extend_from_slice(&value_base.to_le_bytes());
     bytes.extend_from_slice(&[0x8B, 0x06]); // mov eax, [rsi]
     bytes.push(0x3D); // cmp eax, imm32
     bytes.extend_from_slice(&spec.max_entries.to_le_bytes());
@@ -2349,62 +2575,22 @@ fn append_x86_add_rax_imm(bytes: &mut Vec<u8>, key_offset: u32) {
     }
 }
 
-fn append_x86_lru_ref_load(bytes: &mut Vec<u8>, lru_ref_offset: u32) {
-    if lru_ref_offset <= 0x7f {
-        bytes.extend_from_slice(&[0x48, 0x0F, 0xB6, 0x78, lru_ref_offset as u8]);
-    } else {
-        bytes.extend_from_slice(&[0x48, 0x0F, 0xB6, 0xB8]);
-        bytes.extend_from_slice(&lru_ref_offset.to_le_bytes());
-    }
-}
-
-fn append_x86_lru_ref_store(bytes: &mut Vec<u8>, lru_ref_offset: u32) {
-    if lru_ref_offset <= 0x7f {
-        bytes.extend_from_slice(&[0xC6, 0x40, lru_ref_offset as u8, 0x01]);
-    } else {
-        bytes.extend_from_slice(&[0xC6, 0x80]);
-        bytes.extend_from_slice(&lru_ref_offset.to_le_bytes());
-        bytes.push(0x01);
-    }
-}
-
 /// Build the inline byte sequence that the x86 BPF JIT emits after an
 /// inlined `__htab_map_lookup_elem` call. Regular HASH adjusts the
-/// returned `struct htab_elem *` to the value. LRU_HASH also marks the
-/// LRU ref byte. PERCPU_HASH loads the per-cpu value pointer and applies
-/// the current CPU offset.
+/// returned `struct htab_elem *` to the value.
 fn build_x86_hash_lookup_postcall(spec: &LookupSiteSpec) -> Result<Vec<Instruction>> {
+    if !matches!(spec.kind, LookupKind::Hash) {
+        bail!(
+            "lookup kind {:?} is not a hash-style post-call inline",
+            spec.kind
+        );
+    }
     if spec.key_offset == 0 {
         bail!("hash lookup inline missing htab value offset");
     }
 
     let mut body = Vec::new();
-    match spec.kind {
-        LookupKind::Hash => {
-            append_x86_add_rax_imm(&mut body, spec.key_offset);
-        }
-        LookupKind::LruHash => {
-            if spec.lru_ref_offset == 0 {
-                bail!("lru hash lookup inline missing lru ref offset");
-            }
-            append_x86_lru_ref_load(&mut body, spec.lru_ref_offset); // movzx rdi, byte [rax+ref]
-            body.extend_from_slice(&[0x48, 0x85, 0xFF]); // test rdi, rdi
-            let store_len: u8 = if spec.lru_ref_offset <= 0x7f { 4 } else { 7 };
-            body.extend_from_slice(&[0x75, store_len]); // jne over ref store
-            append_x86_lru_ref_store(&mut body, spec.lru_ref_offset);
-            append_x86_add_rax_imm(&mut body, spec.key_offset);
-        }
-        LookupKind::PerCpuHash => {
-            if spec.percpu_base_addr == 0 {
-                bail!("percpu hash lookup missing this_cpu_off address");
-            }
-            append_x86_add_rax_imm(&mut body, spec.key_offset);
-            body.extend_from_slice(&[0x48, 0x8B, 0x00]); // mov rax, [rax]
-            body.extend_from_slice(&[0x65, 0x48, 0x03, 0x04, 0x25]); // add rax, gs:[disp32]
-            body.extend_from_slice(&(spec.percpu_base_addr as u32).to_le_bytes());
-        }
-        _ => bail!("lookup kind {:?} is not a hash-style post-call inline", spec.kind),
-    }
+    append_x86_add_rax_imm(&mut body, spec.key_offset);
 
     let body_len = u8::try_from(body.len())
         .map_err(|_| anyhow!("hash lookup inline body too large: {} bytes", body.len()))?;

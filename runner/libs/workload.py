@@ -95,7 +95,18 @@ class _SilentHandler(BaseHTTPRequestHandler):
         del format, args
 
 
-class _ThreadingHTTPServerV6(ThreadingHTTPServer):
+class _BenchmarkThreadingHTTPServer(ThreadingHTTPServer):
+    daemon_threads = True
+    block_on_close = False
+
+    def handle_error(self, request: object, client_address: object) -> None:
+        exc = sys.exc_info()[1]
+        if isinstance(exc, (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, socket.timeout)):
+            return
+        super().handle_error(request, client_address)
+
+
+class _ThreadingHTTPServerV6(_BenchmarkThreadingHTTPServer):
     address_family = socket.AF_INET6
 
 
@@ -103,7 +114,7 @@ class LocalHttpServer:
     def __init__(self, host: str = "127.0.0.1") -> None:
         self.host = str(host)
         self.family = socket.AF_INET6 if ":" in self.host else socket.AF_INET
-        server_class = _ThreadingHTTPServerV6 if self.family == socket.AF_INET6 else ThreadingHTTPServer
+        server_class = _ThreadingHTTPServerV6 if self.family == socket.AF_INET6 else _BenchmarkThreadingHTTPServer
         bind_address: tuple[object, ...] = (self.host, 0, 0, 0) if self.family == socket.AF_INET6 else (self.host, 0)
         self.server = server_class(bind_address, _SilentHandler)
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
@@ -131,6 +142,17 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import socket
 import sys
 
+class BenchmarkThreadingHTTPServer(ThreadingHTTPServer):
+    daemon_threads = True
+    block_on_close = False
+
+    def handle_error(self, request, client_address):
+        exc = sys.exc_info()[1]
+        if isinstance(exc, (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, socket.timeout)):
+            return
+        super().handle_error(request, client_address)
+
+
 class SilentHandler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
 
@@ -151,11 +173,11 @@ class SilentHandler(BaseHTTPRequestHandler):
 host = sys.argv[1]
 port = int(sys.argv[2])
 if ":" in host:
-    class Server(ThreadingHTTPServer):
+    class Server(BenchmarkThreadingHTTPServer):
         address_family = socket.AF_INET6
     bind_address = (host, port, 0, 0)
 else:
-    Server = ThreadingHTTPServer
+    Server = BenchmarkThreadingHTTPServer
     bind_address = (host, port)
 server = Server(bind_address, SilentHandler)
 print("READY", flush=True)
@@ -207,11 +229,10 @@ def _wait_for_stdout_marker(
     process: subprocess.Popen[str],
     *,
     marker: str,
-    deadline: float,
     description: str,
 ) -> None:
     stdout_lines: list[str] = []
-    while time.monotonic() < deadline:
+    while True:
         if process.stdout is not None:
             readable, _, _ = select.select([process.stdout], [], [], 0)
             if readable:
@@ -230,7 +251,6 @@ def _wait_for_stdout_marker(
                 f"{tail_text(stderr or stdout, max_lines=20, max_chars=4000)}"
             )
         time.sleep(0.05)
-    raise TimeoutError(f"{description} did not print {marker!r}")
 
 
 class NamespacedHttpServer:
@@ -271,17 +291,10 @@ class NamespacedHttpServer:
             text=True,
             bufsize=1,
         )
-        # 30s (was 5s): AL2023 ARM64 t4g.small `ip netns exec python3 -u -c ...`
-        # startup occasionally takes 6-15s, tripping the 5s wait and zeroing
-        # cilium's namespaced-HTTP workload. x86 KVM (16 CPU / 64G) starts in
-        # <1s so the longer ceiling is harmless there. Failures still surface
-        # quickly via process.poll() in _wait_for_stdout_marker.
-        deadline = time.monotonic() + 30.0
         try:
             _wait_for_stdout_marker(
                 self.process,
                 marker=_NAMESPACED_HTTP_READY_MARKER,
-                deadline=deadline,
                 description="interface-bound HTTP server",
             )
         except TimeoutError as exc:
@@ -345,12 +358,10 @@ class NamespacedUdpServer:
             text=True,
             bufsize=1,
         )
-        deadline = time.monotonic() + 5.0
         try:
             _wait_for_stdout_marker(
                 self.process,
                 marker=_NAMESPACED_HTTP_READY_MARKER,
-                deadline=deadline,
                 description="namespace UDP server",
             )
         except TimeoutError as exc:
@@ -620,15 +631,7 @@ def run_stress_ng_class_load(duration_s: int | float, stressors: Sequence[str], 
     command += _stress_ng_dynamic_stressor_args(normalized_stressors)
     command += ["--timeout", f"{seconds}s", "--metrics-brief", "--temp-path", str(temp_root)]
     start = time.monotonic()
-    try:
-        completed = run_command(
-            command,
-            check=False,
-            cwd=temp_root,
-            timeout=max(float(seconds) + 30, float(seconds) * 4),
-        )
-    except subprocess.TimeoutExpired as exc:
-        raise RuntimeError(f"{workload_name} workload timed out") from exc
+    completed = run_command(command, check=False, cwd=temp_root)
     elapsed = time.monotonic() - start
     if completed.returncode != 0:
         raise RuntimeError(
@@ -665,7 +668,7 @@ def run_file_io(duration_s: int | float) -> WorkloadResult:
             "--output-format=json",
         ]
         start = time.monotonic()
-        c = run_command(cmd, check=False, cwd=Path(tempdir), timeout=float(seconds) + 60)
+        c = run_command(cmd, check=False, cwd=Path(tempdir))
         elapsed = time.monotonic() - start
         if c.returncode != 0:
             raise RuntimeError(f"fio file_io workload failed: {tail_text(c.stderr or c.stdout)}")
@@ -735,14 +738,14 @@ def _namespaced_client_command(namespace: str, command: Sequence[str]) -> list[s
 
 
 def _netns_exists(namespace: str) -> bool:
-    completed = run_command(["ip", "netns", "list"], check=False, timeout=10)
+    completed = run_command(["ip", "netns", "list"], check=False)
     if completed.returncode != 0:
         return False
     return any(line.split(maxsplit=1)[0].strip() == namespace for line in completed.stdout.splitlines())
 
 
 def _namespace_ipv4(namespace: str, iface: str) -> str | None:
-    completed = run_command(["ip", "-n", namespace, "-4", "-o", "addr", "show", "dev", iface], check=False, timeout=10)
+    completed = run_command(["ip", "-n", namespace, "-4", "-o", "addr", "show", "dev", iface], check=False)
     if completed.returncode != 0:
         return None
     match = re.search(r"\binet\s+([0-9.]+)/", completed.stdout)
@@ -750,7 +753,7 @@ def _namespace_ipv4(namespace: str, iface: str) -> str | None:
 
 
 def _namespace_default_gateway(namespace: str) -> str | None:
-    completed = run_command(["ip", "-n", namespace, "-4", "route", "show", "default"], check=False, timeout=10)
+    completed = run_command(["ip", "-n", namespace, "-4", "route", "show", "default"], check=False)
     if completed.returncode != 0:
         return None
     match = re.search(r"\bvia\s+([0-9.]+)\b", completed.stdout)
@@ -770,27 +773,6 @@ def _cilium_endpoint_topology() -> tuple[_CiliumEndpoint, _CiliumEndpoint] | Non
     return endpoints[0], endpoints[1]
 
 
-def _wait_for_http_endpoint(url: str, namespace: str | None, max_wait_s: float = 60.0) -> None:
-    # Post-ReJIT cilium reattaches xdp+tc programs; that reattach window can leave
-    # the dataplane briefly unreachable. Probe with curl until 2xx or deadline.
-    curl = which("curl") or "/usr/bin/curl"
-    probe = [curl, "-s", "-o", "/dev/null", "-w", "%{http_code}", "--connect-timeout", "1", "--max-time", "2", url]
-    if namespace:
-        probe = _namespaced_client_command(namespace, probe)
-    deadline = time.monotonic() + max_wait_s
-    last = ""
-    while time.monotonic() < deadline:
-        try:
-            result = run_command(probe, check=False, timeout=3.0)
-            last = (result.stdout or "").strip()
-            if last.startswith("2"):
-                return
-        except Exception as exc:
-            last = str(exc)
-        time.sleep(0.2)
-    raise RuntimeError(f"endpoint {url} not ready after {max_wait_s}s (last={last!r})")
-
-
 def _run_wrk_http_load(
     wrk_binary: str,
     url: str,
@@ -801,23 +783,17 @@ def _run_wrk_http_load(
     connections: int = 8,
     workload_name: str,
 ) -> WorkloadResult:
-
-    _wait_for_http_endpoint(url, namespace)
-    # `--timeout 5s` bounds wrk's per-socket wait. 1s was too aggressive: a slow
-    # first connect after a post-ReJIT BPF attach window could hang every socket
-    # and exhaust the subprocess deadline.
     command = [
         wrk_binary,
         f"-t{int(threads)}",
         f"-c{int(connections)}",
         f"-d{int(seconds)}s",
-        "--timeout", "5s",
         url,
     ]
     if namespace:
         command = _namespaced_client_command(namespace, command)
     start = time.monotonic()
-    completed = run_command(command, check=False, timeout=float(seconds) + 60)
+    completed = run_command(command, check=False)
     elapsed = time.monotonic() - start
     if completed.returncode != 0:
         raise RuntimeError(
@@ -866,7 +842,7 @@ def _run_udp_burst(host: str, port: int, seconds: int, *, namespace: str | None 
     if namespace:
         command = _namespaced_client_command(namespace, command)
     start = time.monotonic()
-    completed = run_command(command, check=False, timeout=float(seconds) + 10)
+    completed = run_command(command, check=False)
     elapsed = time.monotonic() - start
     if completed.returncode != 0:
         raise RuntimeError(f"UDP workload failed via {_render_command(command)}: {tail_text(completed.stderr or completed.stdout)}")
@@ -1002,14 +978,14 @@ def _netem_qdisc(device: str, *, loss_pct: float, delay_ms: int) -> Iterator[Non
     add = [tc, "qdisc", "add", "dev", device, "root", "netem",
            "loss", f"{loss_pct}%", "delay", f"{delay_ms}ms"]
     delete = [tc, "qdisc", "del", "dev", device, "root"]
-    if run_command(add, check=False, timeout=10).returncode != 0:
-        run_command(delete, check=False, timeout=10)
-        if run_command(add, check=False, timeout=10).returncode != 0:
+    if run_command(add, check=False).returncode != 0:
+        run_command(delete, check=False)
+        if run_command(add, check=False).returncode != 0:
             raise RuntimeError(f"failed to install netem qdisc on {device}")
     try:
         yield
     finally:
-        run_command(delete, check=False, timeout=10)
+        run_command(delete, check=False)
 
 
 def run_network_lossy_multi_load(
@@ -1052,7 +1028,7 @@ def run_network_lossy_multi_load(
                     [wrk_binary, "-t4", "-c50", f"-d{seconds}s", server.url],
                     network_device,
                 )
-                c = run_command(command, check=False, timeout=float(duration_s) + 30)
+                c = run_command(command, check=False)
                 elapsed = time.monotonic() - start
                 if c.returncode != 0:
                     raise RuntimeError(
@@ -1098,7 +1074,7 @@ def run_xdp_traffic_load(duration_s: int | float, *, network_device: str | None 
             [wrk_binary, "-t2", "-c10", f"-d{max(1, int(duration_s))}s", server.url],
             network_device,
         )
-        c = run_command(command, check=False, timeout=float(duration_s) + 30)
+        c = run_command(command, check=False)
         elapsed = time.monotonic() - start
         if c.returncode != 0:
             raise RuntimeError(
@@ -1130,7 +1106,7 @@ def run_tcp_connect_load(duration_s: int | float, *, network_device: str | None 
         with _network_http_server(normalized_device) as server:
             command = _network_client_command([*wrk_args, server.url], normalized_device)
             start = time.monotonic()
-            c = run_command(command, check=False, timeout=float(duration_s) + 30)
+            c = run_command(command, check=False)
             elapsed = time.monotonic() - start
             if c.returncode != 0:
                 raise RuntimeError(
@@ -1149,7 +1125,7 @@ def run_tcp_connect_load(duration_s: int | float, *, network_device: str | None 
     with LocalHttpServer("127.0.0.1") as server:
         command = [*wrk_args, server.url]
         start = time.monotonic()
-        c = run_command(command, check=False, timeout=float(duration_s) + 30)
+        c = run_command(command, check=False)
         elapsed = time.monotonic() - start
         if c.returncode != 0:
             raise RuntimeError(f"tcp connect load failed: {tail_text(c.stderr or c.stdout)}")
@@ -1316,10 +1292,12 @@ def run_otel_mixed_workload(duration_s: int | float) -> WorkloadResult:
     components: list[WorkloadResult] = []
     for tool, cmd, proc in procs:
         try:
-            out, err = proc.communicate(timeout=seconds + 30)
-        except subprocess.TimeoutExpired as exc:
-            proc.kill()
-            raise RuntimeError(f"otel_mixed_workload {tool} timed out") from exc
+            out, err = proc.communicate()
+        except BaseException:
+            for _, _, pending in procs:
+                if pending.poll() is None:
+                    pending.kill()
+            raise
         elapsed = time.monotonic() - start
         if proc.returncode != 0:
             raise RuntimeError(
@@ -1359,7 +1337,7 @@ def run_noop(duration_s: int | float) -> WorkloadResult:
     seconds = max(1, int(round(float(duration_s))))
     cmd = ["sleep", str(seconds)]
     start = time.monotonic()
-    completed = run_command(cmd, check=False, timeout=float(seconds) + 30)
+    completed = run_command(cmd, check=False)
     elapsed = time.monotonic() - start
     return _record_run(
         workload_name="noop",

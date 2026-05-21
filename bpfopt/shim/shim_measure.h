@@ -26,7 +26,6 @@ static int query_prog_info(struct prog_entry *p, struct bpf_prog_info *info) {
 
 static void emit_has_programs(int cli) {
     int found = 0;
-    discover_bpf_programs();
     pthread_mutex_lock(&state_mutex);
     for (int b = 0; b < BPF_STATE_BUCKETS && !found; b++) {
         for (struct prog_entry *p = prog_table[b]; p; p = p->next) {
@@ -46,7 +45,6 @@ static void emit_has_programs(int cli) {
 
 static void emit_measure_start(int cli) {
     uint32_t count = 0;
-    discover_bpf_programs();
     pthread_mutex_lock(&state_mutex);
     for (int b = 0; b < BPF_STATE_BUCKETS; b++) {
         for (struct prog_entry *p = prog_table[b]; p; p = p->next) {

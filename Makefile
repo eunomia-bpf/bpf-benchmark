@@ -35,6 +35,7 @@ ARM64_RUNTIME_KERNEL_IMAGE := $(VENDOR_BUILD_DIR)/arm64/linux/arch/arm64/boot/vm
 ARM64_QEMU_KERNEL_IMAGE := $(VENDOR_BUILD_DIR)/arm64/linux/arch/arm64/boot/Image
 ARM64_QEMU_BIN ?= $(shell command -v qemu-system-aarch64 2>/dev/null || true)
 ARM64_QEMU_ROOT ?= $(ARTIFACT_ROOT)/qemu-arm64-root
+ARM64_QEMU_ROOT_TMP := $(ARM64_QEMU_ROOT).tmp
 ARM64_QEMU_WORKSPACE := $(ARM64_QEMU_ROOT)$(ROOT_DIR)
 ARM64_QEMU_RUN_SCRIPT := $(ARM64_QEMU_ROOT)/qemu-run.sh
 ARM64_QEMU_STATUS := $(ARM64_QEMU_ROOT)/qemu-status
@@ -316,21 +317,23 @@ __runtime-vm-micro __runtime-vm-corpus __runtime-vm-test: __runtime-vm-docker
 	"$(RUNNER_DIR)/scripts/bpfrejit-install" --image "$(RUNTIME_CONTAINER_IMAGE)" "$(RUNTIME_IMAGE_TAR)"
 	$(RUNTIME_DOCKER_RUN)
 
-arm64-qemu-root: $(ARM64_QEMU_ROOT_READY)
+arm64-qemu-root: $(ARM64_QEMU_ROOT)
+
+$(ARM64_QEMU_ROOT): $(ARM64_QEMU_ROOT_READY)
 
 $(ARM64_QEMU_ROOT_READY): $(ARM64_RUNNER_RUNTIME_IMAGE_TAR) $(RUNNER_DIR)/scripts/qemu-arm64-init
 	test -n "$(ARM64_QEMU_BIN)"
 	install -d "$(ARTIFACT_ROOT)"
-	rm -rf "$(ARM64_QEMU_ROOT).tmp"
-	install -d "$(ARM64_QEMU_ROOT).tmp"
+	rm -rf "$(ARM64_QEMU_ROOT_TMP)"
+	install -d "$(ARM64_QEMU_ROOT_TMP)"
 	docker load -i "$(ARM64_RUNNER_RUNTIME_IMAGE_TAR)" >/dev/null
 	cid=$$(docker create --platform linux/arm64 "$(ARM64_RUNNER_RUNTIME_IMAGE)" /bin/true); \
-		trap 'docker rm -f '"$$cid"' >/dev/null 2>&1 || true; rm -rf "$(ARM64_QEMU_ROOT).tmp"' EXIT; \
-		docker export "$$cid" | tar -C "$(ARM64_QEMU_ROOT).tmp" -xf -; \
+		trap 'docker rm -f '"$$cid"' >/dev/null 2>&1 || true; rm -rf "$(ARM64_QEMU_ROOT_TMP)"' EXIT; \
+		docker export "$$cid" | tar -C "$(ARM64_QEMU_ROOT_TMP)" -xf -; \
 		docker rm "$$cid" >/dev/null; \
 		trap - EXIT; \
 			rm -rf "$(ARM64_QEMU_ROOT)"; \
-			mv "$(ARM64_QEMU_ROOT).tmp" "$(ARM64_QEMU_ROOT)"
+			mv "$(ARM64_QEMU_ROOT_TMP)" "$(ARM64_QEMU_ROOT)"
 	install -m 0755 "$(RUNNER_DIR)/scripts/qemu-arm64-init" "$(ARM64_QEMU_ROOT)/qemu-init"
 
 all: test micro corpus

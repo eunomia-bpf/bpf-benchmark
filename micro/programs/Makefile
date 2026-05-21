@@ -13,7 +13,8 @@ REPO_ROOT := $(abspath $(CURDIR)/../..)
 
 CFLAGS := -Wall -Wextra -O2 -g -target bpf $(SYS_INCLUDE_FLAGS) -MMD -MP
 NATIVE_TARGET_FLAGS := $(if $(NATIVE_TARGET),--target=$(NATIVE_TARGET))
-NATIVE_ARCH_CFLAGS := $(if $(filter x86_64 amd64,$(NATIVE_ARCH)),-mno-red-zone)
+NATIVE_ARCH_CFLAGS := $(if $(filter x86_64 amd64,$(NATIVE_ARCH)),-mno-red-zone) \
+	$(if $(filter arm64 aarch64,$(NATIVE_ARCH)),-mllvm -regalloc-csr-first-time-cost=100000)
 NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -Wall -Wextra -O2 -g -fPIC -shared -fno-plt -DMICRO_NATIVE \
 	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
 	-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
@@ -68,6 +69,13 @@ $(KERNEL_OFFSETS): $(KERNEL_VMLINUX) Makefile | $(OUTPUT_DIR)
 	    pahole -C xdp_buff '$(KERNEL_VMLINUX)' 2>/dev/null | \
 	        awk '/void \*\s*data;/     { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_XDP_BUFF_DATA_OFFSET %du\n", a[1] } \
 	             /void \*\s*data_end;/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_XDP_BUFF_DATA_END_OFFSET %du\n", a[1] }'; \
+	    pahole -C bpf_array '$(KERNEL_VMLINUX)' 2>/dev/null | \
+	        awk '/char\s+value\[/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_BPF_ARRAY_VALUE_OFFSET %du\n", a[1] } \
+	             /void \*\s*pptrs\[/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_BPF_ARRAY_PPTRS_OFFSET %du\n", a[1] }'; \
+	    pahole -C htab_elem '$(KERNEL_VMLINUX)' 2>/dev/null | \
+	        awk '/char\s+key\[\]/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_HTAB_ELEM_KEY_OFFSET %du\n", a[1] }'; \
+	    pahole -C thread_info '$(KERNEL_VMLINUX)' 2>/dev/null | \
+	        awk '/u32\s+cpu;/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_THREAD_INFO_CPU_OFFSET %du\n", a[1] }'; \
 	} > "$@"
 else
 $(KERNEL_OFFSETS): $(KERNEL_OFFSETS_INPUT) | $(OUTPUT_DIR)
@@ -76,7 +84,7 @@ endif
 
 $(NATIVE_SOS): $(KERNEL_OFFSETS)
 
-$(OUTPUT_DIR)/%.native.so: %.bpf.c $(KERNEL_OFFSETS) | $(OUTPUT_DIR)
+$(OUTPUT_DIR)/%.native.so: %.bpf.c $(KERNEL_OFFSETS) Makefile | $(OUTPUT_DIR)
 	$(CLANG) $(NATIVE_CFLAGS) -I"$(OUTPUT_DIR)" -MF "$(OUTPUT_DIR)/$*.native.d" -MT "$@" -o "$@" "$<"
 
 $(OUTPUT_DIR):

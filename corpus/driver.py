@@ -6,6 +6,7 @@ import json
 import os
 import signal
 import sys
+import time
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -57,6 +58,11 @@ from runner.suites._common import (
 
 DEFAULT_MACRO_APPS_YAML = ROOT_DIR / "corpus" / "config" / "macro_apps.yaml"
 _CORPUS_APPS_ENV = "BPFREJIT_CORPUS_APPS"
+_CORPUS_APP_TIMEOUT_ENV = "BPFREJIT_CORPUS_APP_TIMEOUT"
+_CORPUS_REJIT_TIMEOUT_ENV = "BPFREJIT_CORPUS_REJIT_TIMEOUT"
+_DEFAULT_CORPUS_APP_TIMEOUT_S = 1800.0
+_DEFAULT_CORPUS_REJIT_TIMEOUT_S = 900.0
+_TIMEOUT_STACK: list[tuple[float, str, float]] = []
 
 
 def _filter_suite_apps(suite: AppSuite) -> AppSuite:
@@ -152,6 +158,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         samples=_env_int("SAMPLES", 0),
         duration_s=_env_float("WORKLOAD_DURATION", 0.0),
         warmups=_env_int("WARMUPS", 1),
+        app_timeout_s=_env_float(_CORPUS_APP_TIMEOUT_ENV, _DEFAULT_CORPUS_APP_TIMEOUT_S),
+        rejit_timeout_s=_env_float(_CORPUS_REJIT_TIMEOUT_ENV, _DEFAULT_CORPUS_REJIT_TIMEOUT_S),
         skip_rejit=_skip_rejit_enabled(),
         keep_failure_artifacts=_keep_workdirs_enabled(),
     )
@@ -161,6 +169,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         raise SystemExit("WARMUPS must be >= 0")
     if ns.duration_s < 0:
         raise SystemExit("WORKLOAD_DURATION must be >= 0")
+    if ns.app_timeout_s < 0:
+        raise SystemExit(f"{_CORPUS_APP_TIMEOUT_ENV} must be >= 0")
+    if ns.rejit_timeout_s < 0:
+        raise SystemExit(f"{_CORPUS_REJIT_TIMEOUT_ENV} must be >= 0")
     return ns
 
 def _print_progress(event: str, **fields: object) -> None:
@@ -327,6 +339,48 @@ def _temporary_env(updates: Mapping[str, str]):
                 os.environ[key] = value
 
 
+def _arm_timeout_timer() -> None:
+    if not _TIMEOUT_STACK:
+        signal.setitimer(signal.ITIMER_REAL, 0.0)
+        return
+    next_deadline = min(entry[0] for entry in _TIMEOUT_STACK)
+    signal.setitimer(signal.ITIMER_REAL, max(0.001, next_deadline - time.monotonic()))
+
+
+def _timeout_signal_handler(signum: int, frame: object) -> None:
+    del signum, frame
+    if not _TIMEOUT_STACK:
+        return
+    entry = min(_TIMEOUT_STACK, key=lambda item: item[0])
+    try:
+        _TIMEOUT_STACK.remove(entry)
+    except ValueError:
+        pass
+    _arm_timeout_timer()
+    _deadline, label, seconds = entry
+    raise TimeoutError(f"{label} timed out after {seconds:.1f}s")
+
+
+@contextmanager
+def _timeout_scope(seconds: float, label: str):
+    budget = float(seconds or 0.0)
+    if budget <= 0.0:
+        yield
+        return
+    signal.signal(signal.SIGALRM, _timeout_signal_handler)
+    entry = (time.monotonic() + budget, str(label), budget)
+    _TIMEOUT_STACK.append(entry)
+    _arm_timeout_timer()
+    try:
+        yield
+    finally:
+        try:
+            _TIMEOUT_STACK.remove(entry)
+        except ValueError:
+            pass
+        _arm_timeout_timer()
+
+
 def _write_loadtime_plan(
     app: AppSpec,
     enabled_passes: Sequence[str],
@@ -414,105 +468,109 @@ def run_suite(
             startup_error = ""
             phase = ""
             try:
-                runner = get_app_runner(app.runner, workload=app.workload_for("corpus"), **app.args)
-                with _temporary_env({"BPFREJIT_SHIM_LOADTIME_PLAN": ""}):
-                    runner.start()
-                lifecycle = LifecycleRunResult(
-                    baseline=None,
-                    rejit_result=None,
-                    post_rejit=None,
-                    artifacts=_build_runner_artifacts(app, runner),
-                )
-                app_pids = _runner_pids(app, runner)
-                workload_name = _app_workload_name(app)
-
-                phase = "baseline"
-                _print_progress(
-                    "measurement_start",
-                    app=app.name,
-                    runner=app.runner,
-                    phase=phase,
-                    workload=workload_name,
-                    samples=samples,
-                )
-                lifecycle.baseline = measure_app_phase(
-                    app_pids=app_pids,
-                    runner=runner,
-                    workload_seconds=workload_seconds,
-                    samples=samples,
-                    warmups=warmups,
-                )
-                _print_progress(
-                    "measurement_done",
-                    app=app.name,
-                    runner=app.runner,
-                    phase=phase,
-                    status="ok",
-                )
-
-                phase = "baseline_stop"
-                try:
-                    runner.stop()
-                    runner = None
-                    wait_for_suite_quiescence()
-                except Exception as stop_exc:
-                    raise RuntimeError(f"baseline app stop failed: {stop_exc}") from stop_exc
-
-                phase = "loadtime_plan"
-                loadtime_env: dict[str, str] = {"BPFREJIT_SHIM_LOADTIME_PLAN": ""}
-                if skip_rejit:
-                    _print_progress("rejit_skipped", app=app.name, runner=app.runner)
-                    lifecycle.rejit_result = {"status": "skipped", "mode": "loadtime"}
-                else:
-                    _print_progress("loadtime_plan_start", app=app.name, runner=app.runner)
-                    plan_path, _plan_payload = _write_loadtime_plan(
-                        app,
-                        apply_enabled_passes,
-                        artifact_session=artifact_session,
+                with _timeout_scope(float(getattr(args, "app_timeout_s", 0.0) or 0.0),
+                                    f"{app.name} app lifecycle"):
+                    runner = get_app_runner(app.runner, workload=app.workload_for("corpus"), **app.args)
+                    with _temporary_env({"BPFREJIT_SHIM_LOADTIME_PLAN": ""}):
+                        runner.start()
+                    lifecycle = LifecycleRunResult(
+                        baseline=None,
+                        rejit_result=None,
+                        post_rejit=None,
+                        artifacts=_build_runner_artifacts(app, runner),
                     )
-                    loadtime_env["BPFREJIT_SHIM_LOADTIME_PLAN"] = str(plan_path)
-                    lifecycle.rejit_result = {
-                        "status": "ok",
-                        "mode": "loadtime",
-                        "plan_path": str(plan_path),
-                        "enabled_passes": list(apply_enabled_passes),
-                    }
+                    app_pids = _runner_pids(app, runner)
+                    workload_name = _app_workload_name(app)
+
+                    phase = "baseline"
                     _print_progress(
-                        "loadtime_plan_done",
+                        "measurement_start",
                         app=app.name,
                         runner=app.runner,
-                        status=str(lifecycle.rejit_result.get("status") or "error"),
+                        phase=phase,
+                        workload=workload_name,
+                        samples=samples,
+                    )
+                    lifecycle.baseline = measure_app_phase(
+                        app_pids=app_pids,
+                        runner=runner,
+                        workload_seconds=workload_seconds,
+                        samples=samples,
+                        warmups=warmups,
+                    )
+                    _print_progress(
+                        "measurement_done",
+                        app=app.name,
+                        runner=app.runner,
+                        phase=phase,
+                        status="ok",
                     )
 
-                phase = "post_rejit_start"
-                runner = get_app_runner(app.runner, workload=app.workload_for("corpus"), **app.args)
-                with _temporary_env(loadtime_env):
-                    runner.start()
-                app_pids = _runner_pids(app, runner)
+                    phase = "baseline_stop"
+                    try:
+                        runner.stop()
+                        runner = None
+                        wait_for_suite_quiescence()
+                    except Exception as stop_exc:
+                        raise RuntimeError(f"baseline app stop failed: {stop_exc}") from stop_exc
 
-                phase = "post_rejit"
-                _print_progress(
-                    "measurement_start",
-                    app=app.name,
-                    runner=app.runner,
-                    phase=phase,
-                    workload=workload_name,
-                    samples=samples,
-                )
-                lifecycle.post_rejit = measure_app_phase(
-                    app_pids=app_pids,
-                    runner=runner,
-                    workload_seconds=workload_seconds,
-                    samples=samples,
-                    warmups=warmups,
-                )
-                _print_progress(
-                    "measurement_done",
-                    app=app.name,
-                    runner=app.runner,
-                    phase=phase,
-                    status="ok",
-                )
+                    phase = "loadtime_plan"
+                    loadtime_env: dict[str, str] = {"BPFREJIT_SHIM_LOADTIME_PLAN": ""}
+                    if skip_rejit:
+                        _print_progress("rejit_skipped", app=app.name, runner=app.runner)
+                        lifecycle.rejit_result = {"status": "skipped", "mode": "loadtime"}
+                    else:
+                        _print_progress("loadtime_plan_start", app=app.name, runner=app.runner)
+                        plan_path, _plan_payload = _write_loadtime_plan(
+                            app,
+                            apply_enabled_passes,
+                            artifact_session=artifact_session,
+                        )
+                        loadtime_env["BPFREJIT_SHIM_LOADTIME_PLAN"] = str(plan_path)
+                        lifecycle.rejit_result = {
+                            "status": "ok",
+                            "mode": "loadtime",
+                            "plan_path": str(plan_path),
+                            "enabled_passes": list(apply_enabled_passes),
+                        }
+                        _print_progress(
+                            "loadtime_plan_done",
+                            app=app.name,
+                            runner=app.runner,
+                            status=str(lifecycle.rejit_result.get("status") or "error"),
+                        )
+
+                    phase = "post_rejit_start"
+                    runner = get_app_runner(app.runner, workload=app.workload_for("corpus"), **app.args)
+                    with _timeout_scope(float(getattr(args, "rejit_timeout_s", 0.0) or 0.0),
+                                        f"{app.name} loadtime rejit"):
+                        with _temporary_env(loadtime_env):
+                            runner.start()
+                    app_pids = _runner_pids(app, runner)
+
+                    phase = "post_rejit"
+                    _print_progress(
+                        "measurement_start",
+                        app=app.name,
+                        runner=app.runner,
+                        phase=phase,
+                        workload=workload_name,
+                        samples=samples,
+                    )
+                    lifecycle.post_rejit = measure_app_phase(
+                        app_pids=app_pids,
+                        runner=runner,
+                        workload_seconds=workload_seconds,
+                        samples=samples,
+                        warmups=warmups,
+                    )
+                    _print_progress(
+                        "measurement_done",
+                        app=app.name,
+                        runner=app.runner,
+                        phase=phase,
+                        status="ok",
+                    )
             except Exception as exc:
                 error_message = str(exc)
                 if lifecycle is None:
