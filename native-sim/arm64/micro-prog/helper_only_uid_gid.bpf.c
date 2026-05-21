@@ -29,13 +29,13 @@ arm64_l_8:
 	/* 0x8: cmp x10, x9 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X10, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_c:
-	/* 0xc: b.ls 0x18 */
+	/* 0xc: b.ls 18 <helper_only_uid_gid+0x18> */
 	ARM64_SIM_A64_JCC(ARM64_COND_LS, 0xc, 0x18, arm64_l_18);
 arm64_l_10:
 	/* 0x10: mov w0, wzr */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_REG, ARM64_X0, ARM64_XZR, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, 0, 0);
 arm64_l_14:
-	/* 0x14: b 0x34 */
+	/* 0x14: b 34 <helper_only_uid_gid+0x34> */
 	ARM64_SIM_A64_JMP(0x14, 0x34, arm64_l_34);
 arm64_l_18:
 	/* 0x18: stp x30, x19, [sp, #-16]! */
@@ -44,7 +44,7 @@ arm64_l_1c:
 	/* 0x1c: mov x19, x8 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_REG, ARM64_X19, ARM64_X8, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, 0, 0);
 arm64_l_20:
-	/* 0x20: bl 0x20 */
+	/* 0x20: bl 0 <bpf_get_current_uid_gid> */
 	ARM64_SIM_BPF_CALL_bpf_get_current_uid_gid();
 arm64_l_24:
 	/* 0x24: mov x8, x0 */

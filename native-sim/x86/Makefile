@@ -1,7 +1,6 @@
 ROOT_DIR := ../..
 BUILD_DIR := build
 BPF_OBJ := $(BUILD_DIR)/x86_sim_hardcoded.bpf.o
-MICRO_BUILD_DIR ?= $(ROOT_DIR)/micro/programs/build-x86
 MICRO_CONFIG ?= $(ROOT_DIR)/micro/config/micro_pure_jit.yaml
 PROOF_BUILD_DIR ?= micro-prog/build
 LOADER_MANIFEST := ../loader/Cargo.toml
@@ -32,13 +31,11 @@ run: build
 micro-proofs-build:
 	$(PYTHON) ../run_micro_sim_batch.py --arch x86 --build-only \
 		--build-dir "$(PROOF_BUILD_DIR)" \
-		--native-build-dir "$(MICRO_BUILD_DIR)" \
 		--config "$(MICRO_CONFIG)" \
 		$(MICRO_SIM_PROOF_ARGS)
 
 micro-proofs-run:
 	$(PYTHON) ../run_micro_sim_batch.py --arch x86 \
-		--native-build-dir "$(MICRO_BUILD_DIR)" \
 		--config "$(MICRO_CONFIG)" \
 		$(MICRO_SIM_PROOF_ARGS)
 

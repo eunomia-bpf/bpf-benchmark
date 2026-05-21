@@ -46,7 +46,7 @@ x86_l_d:
 	/* 0xd: cmp    rcx,QWORD PTR [rdi+0x8] */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG_MEM, X86_RCX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_64), 8ULL);
 x86_l_11:
-	/* 0x11: ja     0x66 */
+	/* 0x11: ja     66 <combined_helper_map+0x66> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x11, 0x66, x86_l_66);
 x86_l_13:
 	/* 0x13: call   QWORD PTR [rip+0x0] */
@@ -97,7 +97,7 @@ x86_l_56:
 	/* 0x56: test   rax,rax */
 	X86_SIM_RUN_OP(X86_OP_TEST_REG, X86_RAX, X86_RAX, X86_WIDTH_64, 0, 0);
 x86_l_59:
-	/* 0x59: je     0x5e */
+	/* 0x59: je     5e <combined_helper_map+0x5e> */
 	X86_SIM_X86_JCC(X86_CC_E, 0x59, 0x5e, x86_l_5e);
 x86_l_5b:
 	/* 0x5b: mov    r13,QWORD PTR [rax] */
@@ -112,6 +112,9 @@ x86_l_66:
 	/* 0x66: add    rsp,0x18 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_RSP, X86_REG_NONE, X86_WIDTH_64, X86_ALU_ADD, 24ULL);
 x86_l_6a:
+	/* 0x6a: jmp    6f <combined_helper_map+0x6f> ; native-link entry RET */
+	X86_SIM_X86_RET();
+x86_l_6f:
 	/* native-link entry fallthrough exit */
 	X86_SIM_X86_RET();
 }

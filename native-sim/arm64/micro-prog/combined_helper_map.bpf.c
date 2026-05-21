@@ -44,13 +44,13 @@ arm64_l_8:
 	/* 0x8: cmp x10, x9 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X10, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_c:
-	/* 0xc: b.ls 0x18 */
+	/* 0xc: b.ls 18 <combined_helper_map+0x18> */
 	ARM64_SIM_A64_JCC(ARM64_COND_LS, 0xc, 0x18, arm64_l_18);
 arm64_l_10:
 	/* 0x10: mov w0, wzr */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_REG, ARM64_X0, ARM64_XZR, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, 0, 0);
 arm64_l_14:
-	/* 0x14: b 0x80 */
+	/* 0x14: b 80 <combined_helper_map+0x80> */
 	ARM64_SIM_A64_JMP(0x14, 0x80, arm64_l_80);
 arm64_l_18:
 	/* 0x18: sub sp, sp, #0x30 */
@@ -62,19 +62,19 @@ arm64_l_20:
 	/* 0x20: str x8, [sp, #8] */
 	ARM64_SIM_RUN_OP3(ARM64_OP_STORE, ARM64_SP, ARM64_X8, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 8ULL);
 arm64_l_24:
-	/* 0x24: bl 0x24 */
+	/* 0x24: bl 0 <bpf_get_smp_processor_id> */
 	ARM64_SIM_BPF_CALL_bpf_get_smp_processor_id();
 arm64_l_28:
 	/* 0x28: str w0, [sp, #28] */
 	ARM64_SIM_RUN_OP3(ARM64_OP_STORE, ARM64_SP, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 28ULL);
 arm64_l_2c:
-	/* 0x2c: bl 0x2c */
+	/* 0x2c: bl 0 <bpf_get_current_uid_gid> */
 	ARM64_SIM_BPF_CALL_bpf_get_current_uid_gid();
 arm64_l_30:
 	/* 0x30: str x0, [sp, #16] */
 	ARM64_SIM_RUN_OP3(ARM64_OP_STORE, ARM64_SP, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 16ULL);
 arm64_l_34:
-	/* 0x34: adrp x19, 0x0 */
+	/* 0x34: adrp x19, 0 <cpu_ts> */
 	(void)0;
 arm64_l_38:
 	/* 0x38: add x1, sp, #0x1c */
@@ -92,7 +92,7 @@ arm64_l_48:
 	/* 0x48: mov x0, x19 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_REG, ARM64_X0, ARM64_X19, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, 0, 0);
 arm64_l_4c:
-	/* 0x4c: bl 0x4c */
+	/* 0x4c: bl 0 <bpf_map_update_elem> */
 	ARM64_SIM_BPF_CALL_bpf_map_update_elem();
 arm64_l_50:
 	/* 0x50: add x1, sp, #0x1c */
@@ -101,16 +101,16 @@ arm64_l_54:
 	/* 0x54: mov x0, x19 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_REG, ARM64_X0, ARM64_X19, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, 0, 0);
 arm64_l_58:
-	/* 0x58: bl 0x58 */
+	/* 0x58: bl 0 <bpf_map_lookup_elem> */
 	ARM64_SIM_BPF_CALL_bpf_map_lookup_elem();
 arm64_l_5c:
-	/* 0x5c: cbz x0, 0x68 */
+	/* 0x5c: cbz x0, 68 <combined_helper_map+0x68> */
 	ARM64_SIM_A64_CBZ(ARM64_X0, 0x5c, 0x68, arm64_l_68);
 arm64_l_60:
 	/* 0x60: ldr x8, [x0] */
 	ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X8, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL);
 arm64_l_64:
-	/* 0x64: b 0x6c */
+	/* 0x64: b 6c <combined_helper_map+0x6c> */
 	ARM64_SIM_A64_JMP(0x64, 0x6c, arm64_l_6c);
 arm64_l_68:
 	/* 0x68: mov x8, xzr */

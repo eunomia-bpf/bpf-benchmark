@@ -21,10 +21,10 @@ x86_l_c:
 	/* 0xc: cmp    rdi,rcx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RDI, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_f:
-	/* 0xf: jbe    0x16 */
+	/* 0xf: jbe    16 <bcc_runqlat_log2_histogram_bucket_xdp+0x16> */
 	X86_SIM_X86_JCC(X86_CC_BE, 0xf, 0x16, x86_l_16);
 x86_l_11:
-	/* 0x11: jmp    0x146 ; native-link entry RET */
+	/* 0x11: jmp    14b <bcc_runqlat_log2_histogram_bucket_xdp+0x14b> ; native-link entry RET */
 	X86_SIM_X86_RET();
 x86_l_16:
 	/* 0x16: lea    rdx,[rdi+0x8] */
@@ -33,7 +33,7 @@ x86_l_1a:
 	/* 0x1a: cmp    rdx,rcx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RDX, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_1d:
-	/* 0x1d: ja     0x11 */
+	/* 0x1d: ja     11 <bcc_runqlat_log2_histogram_bucket_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x1d, 0x11, x86_l_11);
 x86_l_1f:
 	/* 0x1f: lea    r8,[rdi+0x410] */
@@ -42,13 +42,13 @@ x86_l_26:
 	/* 0x26: cmp    r8,rcx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_R8, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_29:
-	/* 0x29: ja     0x11 */
+	/* 0x29: ja     11 <bcc_runqlat_log2_histogram_bucket_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x29, 0x11, x86_l_11);
 x86_l_2b:
 	/* 0x2b: cmp    DWORD PTR [rdx],0x80 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RDX, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 128ULL);
 x86_l_31:
-	/* 0x31: jne    0x11 */
+	/* 0x31: jne    11 <bcc_runqlat_log2_histogram_bucket_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x31, 0x11, x86_l_11);
 x86_l_33:
 	/* 0x33: push   r15 */
@@ -69,7 +69,7 @@ x86_l_3e:
 	/* 0x3e: xor    eax,eax */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_RAX, X86_RAX, X86_WIDTH_32, X86_ALU_XOR, 0);
 x86_l_40:
-	/* 0x40: jmp    0x65 */
+	/* 0x40: jmp    65 <bcc_runqlat_log2_histogram_bucket_xdp+0x65> */
 	X86_SIM_X86_JMP(0x40, 0x65, x86_l_65);
 x86_l_42:
 	/* 0x42: shl    rax,0x3 */
@@ -99,7 +99,7 @@ x86_l_58:
 	/* 0x58: cmp    r11,0x80 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R11, X86_REG_NONE, X86_WIDTH_64, 0, 128ULL);
 x86_l_5f:
-	/* 0x5f: je     0x137 */
+	/* 0x5f: je     137 <bcc_runqlat_log2_histogram_bucket_xdp+0x137> */
 	X86_SIM_X86_JCC(X86_CC_E, 0x5f, 0x137, x86_l_137);
 x86_l_65:
 	/* 0x65: movzx  edx,WORD PTR [rdi+rax*8+0x10] */
@@ -126,7 +126,7 @@ x86_l_80:
 	/* 0x80: and    edx,0xfffff */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_RDX, X86_REG_NONE, X86_WIDTH_32, X86_ALU_AND, 1048575ULL);
 x86_l_86:
-	/* 0x86: je     0xaa */
+	/* 0x86: je     aa <bcc_runqlat_log2_histogram_bucket_xdp+0xaa> */
 	X86_SIM_X86_JCC(X86_CC_E, 0x86, 0xaa, x86_l_aa);
 x86_l_88:
 	/* 0x88: inc    rdx */
@@ -144,7 +144,7 @@ x86_l_95:
 	/* 0x95: cmp    r10d,0x3d */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R10, X86_REG_NONE, X86_WIDTH_32, 0, 61ULL);
 x86_l_99:
-	/* 0x99: ja     0xaa */
+	/* 0x99: ja     aa <bcc_runqlat_log2_histogram_bucket_xdp+0xaa> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x99, 0xaa, x86_l_aa);
 x86_l_9b:
 	/* 0x9b: mov    r10,rdx */
@@ -159,7 +159,7 @@ x86_l_a5:
 	/* 0xa5: mov    rdx,r10 */
 	X86_SIM_RUN_OP(X86_OP_MOV_REG, X86_RDX, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_a8:
-	/* 0xa8: ja     0x8e */
+	/* 0xa8: ja     8e <bcc_runqlat_log2_histogram_bucket_xdp+0x8e> */
 	X86_SIM_X86_JCC(X86_CC_A, 0xa8, 0x8e, x86_l_8e);
 x86_l_aa:
 	/* 0xaa: movzx  edx,BYTE PTR [rdi+rax*8+0x13] */
@@ -264,7 +264,7 @@ x86_l_121:
 	/* 0x121: cmp    r9d,0x19 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R9, X86_REG_NONE, X86_WIDTH_32, 0, 25ULL);
 x86_l_125:
-	/* 0x125: jb     0x42 */
+	/* 0x125: jb     42 <bcc_runqlat_log2_histogram_bucket_xdp+0x42> */
 	X86_SIM_X86_JCC(X86_CC_B, 0x125, 0x42, x86_l_42);
 x86_l_12b:
 	/* 0x12b: shr    r10,0x20 */
@@ -273,7 +273,7 @@ x86_l_12f:
 	/* 0x12f: add    r14,r10 */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_R14, X86_R10, X86_WIDTH_64, X86_ALU_ADD, 0);
 x86_l_132:
-	/* 0x132: jmp    0x52 */
+	/* 0x132: jmp    52 <bcc_runqlat_log2_histogram_bucket_xdp+0x52> */
 	X86_SIM_X86_JMP(0x132, 0x52, x86_l_52);
 x86_l_137:
 	/* 0x137: mov    QWORD PTR [rsi],r8 */
@@ -294,6 +294,9 @@ x86_l_144:
 	/* 0x144: pop    r15 */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_R15, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_146:
+	/* 0x146: jmp    14b <bcc_runqlat_log2_histogram_bucket_xdp+0x14b> ; native-link entry RET */
+	X86_SIM_X86_RET();
+x86_l_14b:
 	/* native-link entry fallthrough exit */
 	X86_SIM_X86_RET();
 }

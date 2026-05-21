@@ -42,13 +42,13 @@ arm64_l_8:
 	/* 0x8: cmp x10, x9 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X10, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_c:
-	/* 0xc: b.ls 0x18 */
+	/* 0xc: b.ls 18 <map_array_index_packet+0x18> */
 	ARM64_SIM_A64_JCC(ARM64_COND_LS, 0xc, 0x18, arm64_l_18);
 arm64_l_10:
 	/* 0x10: mov w0, wzr */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_REG, ARM64_X0, ARM64_XZR, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, 0, 0);
 arm64_l_14:
-	/* 0x14: b 0x9c */
+	/* 0x14: b 9c <map_array_index_packet+0x9c> */
 	ARM64_SIM_A64_JMP(0x14, 0x9c, arm64_l_9c);
 arm64_l_18:
 	/* 0x18: sub sp, sp, #0x40 */
@@ -66,7 +66,7 @@ arm64_l_28:
 	/* 0x28: str wzr, [sp, #28] */
 	ARM64_SIM_RUN_OP3(ARM64_OP_STORE, ARM64_SP, ARM64_XZR, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 28ULL);
 arm64_l_2c:
-	/* 0x2c: adrp x20, 0x0 */
+	/* 0x2c: adrp x20, 0 <idx_array> */
 	(void)0;
 arm64_l_30:
 	/* 0x30: movk x9, #0xcafe, lsl #16 */
@@ -99,7 +99,7 @@ arm64_l_54:
 	/* 0x54: mov x0, x20 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_REG, ARM64_X0, ARM64_X20, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, 0, 0);
 arm64_l_58:
-	/* 0x58: bl 0x58 */
+	/* 0x58: bl 0 <bpf_map_update_elem> */
 	ARM64_SIM_BPF_CALL_bpf_map_update_elem();
 arm64_l_5c:
 	/* 0x5c: ldrb w8, [x21, #16] */
@@ -120,16 +120,16 @@ arm64_l_70:
 	/* 0x70: str w8, [sp, #12] */
 	ARM64_SIM_RUN_OP3(ARM64_OP_STORE, ARM64_SP, ARM64_X8, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 12ULL);
 arm64_l_74:
-	/* 0x74: bl 0x74 */
+	/* 0x74: bl 0 <bpf_map_lookup_elem> */
 	ARM64_SIM_BPF_CALL_bpf_map_lookup_elem();
 arm64_l_78:
-	/* 0x78: cbz x0, 0x84 */
+	/* 0x78: cbz x0, 84 <map_array_index_packet+0x84> */
 	ARM64_SIM_A64_CBZ(ARM64_X0, 0x78, 0x84, arm64_l_84);
 arm64_l_7c:
 	/* 0x7c: ldr x8, [x0] */
 	ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X8, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL);
 arm64_l_80:
-	/* 0x80: b 0x88 */
+	/* 0x80: b 88 <map_array_index_packet+0x88> */
 	ARM64_SIM_A64_JMP(0x80, 0x88, arm64_l_88);
 arm64_l_84:
 	/* 0x84: mov x8, xzr */

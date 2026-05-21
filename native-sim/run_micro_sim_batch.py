@@ -43,6 +43,7 @@ class ArchConfig:
     result_glob: str
     require_micro_result: bool
     native_build_dir: Path
+    stage2_native_build_dir: Path
     objdump: str
 
     @property
@@ -67,6 +68,7 @@ ARCHES = {
         result_glob="x86_kvm_micro_*/metadata.json",
         require_micro_result=True,
         native_build_dir=REPO_ROOT / "micro" / "programs" / "build-x86",
+        stage2_native_build_dir=REPO_ROOT / "native-sim" / "test" / "build-x86",
         objdump="objdump",
     ),
     "arm64": ArchConfig(
@@ -77,6 +79,7 @@ ARCHES = {
         result_glob="arm64_qemu_micro_*/metadata.json",
         require_micro_result=False,
         native_build_dir=REPO_ROOT / "micro" / "programs" / "build-arm64",
+        stage2_native_build_dir=REPO_ROOT / "native-sim" / "test" / "build-arm64",
         objdump="aarch64-linux-gnu-objdump",
     ),
 }
@@ -91,6 +94,7 @@ class Bench:
     expected_retval: int
     result_channel: str
     cgroup_skb_input: bool
+    stage2: bool
 
 
 @dataclass
@@ -126,9 +130,18 @@ def load_benches(config_path: Path) -> list[Bench]:
                 expected_retval=int(item.get("expected_retval", default_retval)),
                 result_channel=result_channel,
                 cgroup_skb_input="cgroup-skb" in tags,
+                stage2="stage2" in tags,
             )
         )
     return benches
+
+
+def default_native_build_dir(config: ArchConfig, benches: list[Bench]) -> Path:
+    has_stage2 = any(bench.stage2 for bench in benches)
+    has_non_stage2 = any(not bench.stage2 for bench in benches)
+    if has_stage2 and has_non_stage2:
+        raise RuntimeError("mixed stage2 and non-stage2 proof suites are not supported")
+    return config.stage2_native_build_dir if has_stage2 else config.native_build_dir
 
 
 def run_cmd(cmd: list[str]) -> subprocess.CompletedProcess[str]:
@@ -514,11 +527,6 @@ def main(argv: list[str] | None = None) -> int:
 
     config = ARCHES[args.arch]
     build_dir = (args.build_dir or config.build_dir).resolve()
-    native_build_dir = (
-        args.native_build_dir.resolve()
-        if args.native_build_dir is not None
-        else config.native_build_dir.resolve()
-    )
     proof_config_path = args.config.resolve()
     benches = load_benches(proof_config_path)
     only = set(args.only or [])
@@ -526,6 +534,11 @@ def main(argv: list[str] | None = None) -> int:
         benches = [bench for bench in benches if bench.name in only]
     if not benches:
         raise SystemExit("no selected benchmarks")
+    native_build_dir = (
+        args.native_build_dir.resolve()
+        if args.native_build_dir is not None
+        else default_native_build_dir(config, benches).resolve()
+    )
 
     if not args.no_generate:
         proof_object_dir = build_proof_objects(
@@ -549,7 +562,7 @@ def main(argv: list[str] | None = None) -> int:
         if not args.build_only and proof_config_path.name == "micro_pure_jit.yaml"
         else {}
     )
-    run_id = datetime.now().strftime("%Y%m%d-%H%M%S")
+    run_id = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
     results_by_name: dict[str, Result] = {}
     if args.jobs == 1:
         for bench in benches:

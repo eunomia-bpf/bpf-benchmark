@@ -20,13 +20,13 @@ arm64_l_10:
 	/* 0x10: ccmp x11, x9, #0x2, ls */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CCMP_REG, ARM64_X11, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_CCMP(ARM64_COND_LS, 2), 0);
 arm64_l_14:
-	/* 0x14: b.ls 0x20 */
+	/* 0x14: b.ls 20 <simple_packet_xdp+0x20> */
 	ARM64_SIM_A64_JCC(ARM64_COND_LS, 0x14, 0x20, arm64_l_20);
 arm64_l_18:
 	/* 0x18: mov w0, wzr */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_REG, ARM64_X0, ARM64_XZR, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, 0, 0);
 arm64_l_1c:
-	/* 0x1c: b 0x3c */
+	/* 0x1c: b 3c <simple_packet_xdp+0x3c> */
 	ARM64_SIM_A64_JMP(0x1c, 0x3c, arm64_l_3c);
 arm64_l_20:
 	/* 0x20: mov w9, #0x614e */

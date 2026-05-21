@@ -14,13 +14,13 @@ arm64_l_8:
 	/* 0x8: cmp x10, x9 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X10, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_c:
-	/* 0xc: b.ls 0x18 */
+	/* 0xc: b.ls 18 <bitmap_popcount_scan_xdp+0x18> */
 	ARM64_SIM_A64_JCC(ARM64_COND_LS, 0xc, 0x18, arm64_l_18);
 arm64_l_10:
 	/* 0x10: mov w0, wzr */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_REG, ARM64_X0, ARM64_XZR, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, 0, 0);
 arm64_l_14:
-	/* 0x14: b 0x8c */
+	/* 0x14: b 8c <bitmap_popcount_scan_xdp+0x8c> */
 	ARM64_SIM_A64_JMP(0x14, 0x8c, arm64_l_8c);
 arm64_l_18:
 	/* 0x18: add x11, x10, #0x8 */
@@ -32,7 +32,7 @@ arm64_l_20:
 	/* 0x20: cmp x11, x9 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X11, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_24:
-	/* 0x24: b.hi 0x8c */
+	/* 0x24: b.hi 8c <bitmap_popcount_scan_xdp+0x8c> */
 	ARM64_SIM_A64_JCC(ARM64_COND_HI, 0x24, 0x8c, arm64_l_8c);
 arm64_l_28:
 	/* 0x28: add x12, x10, #0x810 */
@@ -41,7 +41,7 @@ arm64_l_2c:
 	/* 0x2c: cmp x12, x9 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X12, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_30:
-	/* 0x30: b.hi 0x8c */
+	/* 0x30: b.hi 8c <bitmap_popcount_scan_xdp+0x8c> */
 	ARM64_SIM_A64_JCC(ARM64_COND_HI, 0x30, 0x8c, arm64_l_8c);
 arm64_l_34:
 	/* 0x34: ldr w9, [x11] */
@@ -50,7 +50,7 @@ arm64_l_38:
 	/* 0x38: cmp w9, #0x100 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 256ULL);
 arm64_l_3c:
-	/* 0x3c: b.ne 0x10 */
+	/* 0x3c: b.ne 10 <bitmap_popcount_scan_xdp+0x10> */
 	ARM64_SIM_A64_JCC(ARM64_COND_NE, 0x3c, 0x10, arm64_l_10);
 arm64_l_40:
 	/* 0x40: ldr w11, [x10, #12] */
@@ -101,7 +101,7 @@ arm64_l_7c:
 	/* 0x7c: eor x11, x11, x12 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_ALU_REG, ARM64_X11, ARM64_X11, ARM64_X12, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(ARM64_ALU_EOR, ARM64_MOD_NONE, 0), 0);
 arm64_l_80:
-	/* 0x80: b.ne 0x4c */
+	/* 0x80: b.ne 4c <bitmap_popcount_scan_xdp+0x4c> */
 	ARM64_SIM_A64_JCC(ARM64_COND_NE, 0x80, 0x4c, arm64_l_4c);
 arm64_l_84:
 	/* 0x84: mov w0, #0x2 */

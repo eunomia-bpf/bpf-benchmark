@@ -21,10 +21,10 @@ x86_l_c:
 	/* 0xc: cmp    rsi,rcx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RSI, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_f:
-	/* 0xf: jbe    0x16 */
+	/* 0xf: jbe    16 <tracee_http_method_prefix_detect_xdp+0x16> */
 	X86_SIM_X86_JCC(X86_CC_BE, 0xf, 0x16, x86_l_16);
 x86_l_11:
-	/* 0x11: jmp    0x267 ; native-link entry RET */
+	/* 0x11: jmp    26c <tracee_http_method_prefix_detect_xdp+0x26c> ; native-link entry RET */
 	X86_SIM_X86_RET();
 x86_l_16:
 	/* 0x16: lea    rdi,[rsi+0x8] */
@@ -33,7 +33,7 @@ x86_l_1a:
 	/* 0x1a: cmp    rdi,rcx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RDI, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_1d:
-	/* 0x1d: ja     0x11 */
+	/* 0x1d: ja     11 <tracee_http_method_prefix_detect_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x1d, 0x11, x86_l_11);
 x86_l_1f:
 	/* 0x1f: lea    rdi,[rsi+0x90] */
@@ -42,19 +42,19 @@ x86_l_26:
 	/* 0x26: cmp    rdi,rcx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RDI, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_29:
-	/* 0x29: ja     0x11 */
+	/* 0x29: ja     11 <tracee_http_method_prefix_detect_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x29, 0x11, x86_l_11);
 x86_l_2b:
 	/* 0x2b: cmp    DWORD PTR [rsi+0x8],0x8 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 34359738376ULL);
 x86_l_2f:
-	/* 0x2f: jne    0x11 */
+	/* 0x2f: jne    11 <tracee_http_method_prefix_detect_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x2f, 0x11, x86_l_11);
 x86_l_31:
 	/* 0x31: cmp    DWORD PTR [rsi+0xc],0x10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 51539607568ULL);
 x86_l_35:
-	/* 0x35: jne    0x11 */
+	/* 0x35: jne    11 <tracee_http_method_prefix_detect_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x35, 0x11, x86_l_11);
 x86_l_37:
 	/* 0x37: push   r14 */
@@ -84,25 +84,25 @@ x86_l_59:
 	/* 0x59: cmp    edi,0x47 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 71ULL);
 x86_l_5c:
-	/* 0x5c: jg     0x9f */
+	/* 0x5c: jg     9f <tracee_http_method_prefix_detect_xdp+0x9f> */
 	X86_SIM_X86_JCC(X86_CC_G, 0x5c, 0x9f, x86_l_9f);
 x86_l_5e:
 	/* 0x5e: cmp    edi,0x44 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 68ULL);
 x86_l_61:
-	/* 0x61: je     0xfe */
+	/* 0x61: je     fe <tracee_http_method_prefix_detect_xdp+0xfe> */
 	X86_SIM_X86_JCC(X86_CC_E, 0x61, 0xfe, x86_l_fe);
 x86_l_67:
 	/* 0x67: cmp    edi,0x47 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 71ULL);
 x86_l_6a:
-	/* 0x6a: jne    0x1c5 */
+	/* 0x6a: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x6a, 0x1c5, x86_l_1c5);
 x86_l_70:
 	/* 0x70: cmp    r8b,0x45 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R8, X86_REG_NONE, X86_WIDTH_8, 0, 69ULL);
 x86_l_74:
-	/* 0x74: jne    0x1c5 */
+	/* 0x74: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x74, 0x1c5, x86_l_1c5);
 x86_l_7a:
 	/* 0x7a: mov    r8b,0x45 */
@@ -111,7 +111,7 @@ x86_l_7d:
 	/* 0x7d: cmp    BYTE PTR [rsi-0x4],0x54 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 18446744056529682516ULL);
 x86_l_81:
-	/* 0x81: jne    0x1c5 */
+	/* 0x81: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x81, 0x1c5, x86_l_1c5);
 x86_l_87:
 	/* 0x87: mov    r10b,0x45 */
@@ -120,13 +120,13 @@ x86_l_8a:
 	/* 0x8a: cmp    BYTE PTR [rsi-0x3],0x20 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 18446744060824649760ULL);
 x86_l_8e:
-	/* 0x8e: jne    0x1c5 */
+	/* 0x8e: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x8e, 0x1c5, x86_l_1c5);
 x86_l_94:
 	/* 0x94: mov    r9d,0x1 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_R9, X86_REG_NONE, X86_WIDTH_32, 0, 1ULL);
 x86_l_9a:
-	/* 0x9a: jmp    0x19a */
+	/* 0x9a: jmp    19a <tracee_http_method_prefix_detect_xdp+0x19a> */
 	X86_SIM_X86_JMP(0x9a, 0x19a, x86_l_19a);
 x86_l_9f:
 	/* 0x9f: movzx  r9d,r8b */
@@ -135,25 +135,25 @@ x86_l_a3:
 	/* 0xa3: cmp    edi,0x48 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 72ULL);
 x86_l_a6:
-	/* 0xa6: je     0x150 */
+	/* 0xa6: je     150 <tracee_http_method_prefix_detect_xdp+0x150> */
 	X86_SIM_X86_JCC(X86_CC_E, 0xa6, 0x150, x86_l_150);
 x86_l_ac:
 	/* 0xac: cmp    edi,0x50 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 80ULL);
 x86_l_af:
-	/* 0xaf: jne    0x1c5 */
+	/* 0xaf: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0xaf, 0x1c5, x86_l_1c5);
 x86_l_b5:
 	/* 0xb5: cmp    r9d,0x55 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R9, X86_REG_NONE, X86_WIDTH_32, 0, 85ULL);
 x86_l_b9:
-	/* 0xb9: je     0x182 */
+	/* 0xb9: je     182 <tracee_http_method_prefix_detect_xdp+0x182> */
 	X86_SIM_X86_JCC(X86_CC_E, 0xb9, 0x182, x86_l_182);
 x86_l_bf:
 	/* 0xbf: cmp    r9d,0x4f */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R9, X86_REG_NONE, X86_WIDTH_32, 0, 79ULL);
 x86_l_c3:
-	/* 0xc3: jne    0x1c5 */
+	/* 0xc3: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0xc3, 0x1c5, x86_l_1c5);
 x86_l_c9:
 	/* 0xc9: mov    r8b,0x4f */
@@ -162,13 +162,13 @@ x86_l_cc:
 	/* 0xcc: cmp    BYTE PTR [rsi-0x4],0x53 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 18446744056529682515ULL);
 x86_l_d0:
-	/* 0xd0: jne    0x1c5 */
+	/* 0xd0: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0xd0, 0x1c5, x86_l_1c5);
 x86_l_d6:
 	/* 0xd6: cmp    BYTE PTR [rsi-0x3],0x54 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 18446744060824649812ULL);
 x86_l_da:
-	/* 0xda: jne    0x1c5 */
+	/* 0xda: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0xda, 0x1c5, x86_l_1c5);
 x86_l_e0:
 	/* 0xe0: mov    r10b,0x4f */
@@ -177,7 +177,7 @@ x86_l_e3:
 	/* 0xe3: cmp    BYTE PTR [rsi-0x2],0x20 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 18446744065119617056ULL);
 x86_l_e7:
-	/* 0xe7: jne    0x1c5 */
+	/* 0xe7: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0xe7, 0x1c5, x86_l_1c5);
 x86_l_ed:
 	/* 0xed: mov    r9d,0x2 */
@@ -189,13 +189,13 @@ x86_l_f6:
 	/* 0xf6: mov    r11b,0x54 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_R11, X86_REG_NONE, X86_WIDTH_8, 0, 84ULL);
 x86_l_f9:
-	/* 0xf9: jmp    0x1d5 */
+	/* 0xf9: jmp    1d5 <tracee_http_method_prefix_detect_xdp+0x1d5> */
 	X86_SIM_X86_JMP(0xf9, 0x1d5, x86_l_1d5);
 x86_l_fe:
 	/* 0xfe: cmp    r8b,0x45 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R8, X86_REG_NONE, X86_WIDTH_8, 0, 69ULL);
 x86_l_102:
-	/* 0x102: jne    0x1c5 */
+	/* 0x102: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x102, 0x1c5, x86_l_1c5);
 x86_l_108:
 	/* 0x108: mov    r8b,0x45 */
@@ -204,25 +204,25 @@ x86_l_10b:
 	/* 0x10b: cmp    BYTE PTR [rsi-0x4],0x4c */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 18446744056529682508ULL);
 x86_l_10f:
-	/* 0x10f: jne    0x1c5 */
+	/* 0x10f: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x10f, 0x1c5, x86_l_1c5);
 x86_l_115:
 	/* 0x115: cmp    BYTE PTR [rsi-0x3],0x45 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 18446744060824649797ULL);
 x86_l_119:
-	/* 0x119: jne    0x1c5 */
+	/* 0x119: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x119, 0x1c5, x86_l_1c5);
 x86_l_11f:
 	/* 0x11f: cmp    BYTE PTR [rsi-0x2],0x54 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 18446744065119617108ULL);
 x86_l_123:
-	/* 0x123: jne    0x1c5 */
+	/* 0x123: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x123, 0x1c5, x86_l_1c5);
 x86_l_129:
 	/* 0x129: cmp    BYTE PTR [rsi-0x1],0x45 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 18446744069414584389ULL);
 x86_l_12d:
-	/* 0x12d: jne    0x1c5 */
+	/* 0x12d: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x12d, 0x1c5, x86_l_1c5);
 x86_l_133:
 	/* 0x133: mov    r11b,0x45 */
@@ -231,7 +231,7 @@ x86_l_136:
 	/* 0x136: cmp    BYTE PTR [rsi],0x20 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 32ULL);
 x86_l_139:
-	/* 0x139: jne    0x1c5 */
+	/* 0x139: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x139, 0x1c5, x86_l_1c5);
 x86_l_13f:
 	/* 0x13f: mov    r9d,0x4 */
@@ -243,19 +243,19 @@ x86_l_148:
 	/* 0x148: mov    r10b,0x45 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_R10, X86_REG_NONE, X86_WIDTH_8, 0, 69ULL);
 x86_l_14b:
-	/* 0x14b: jmp    0x1d5 */
+	/* 0x14b: jmp    1d5 <tracee_http_method_prefix_detect_xdp+0x1d5> */
 	X86_SIM_X86_JMP(0x14b, 0x1d5, x86_l_1d5);
 x86_l_150:
 	/* 0x150: cmp    r9d,0x54 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R9, X86_REG_NONE, X86_WIDTH_32, 0, 84ULL);
 x86_l_154:
-	/* 0x154: je     0x1a2 */
+	/* 0x154: je     1a2 <tracee_http_method_prefix_detect_xdp+0x1a2> */
 	X86_SIM_X86_JCC(X86_CC_E, 0x154, 0x1a2, x86_l_1a2);
 x86_l_156:
 	/* 0x156: cmp    r9d,0x45 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R9, X86_REG_NONE, X86_WIDTH_32, 0, 69ULL);
 x86_l_15a:
-	/* 0x15a: jne    0x1c5 */
+	/* 0x15a: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x15a, 0x1c5, x86_l_1c5);
 x86_l_15c:
 	/* 0x15c: mov    r8b,0x45 */
@@ -264,13 +264,13 @@ x86_l_15f:
 	/* 0x15f: cmp    BYTE PTR [rsi-0x4],0x41 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 18446744056529682497ULL);
 x86_l_163:
-	/* 0x163: jne    0x1c5 */
+	/* 0x163: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x163, 0x1c5, x86_l_1c5);
 x86_l_165:
 	/* 0x165: cmp    BYTE PTR [rsi-0x3],0x44 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 18446744060824649796ULL);
 x86_l_169:
-	/* 0x169: jne    0x1c5 */
+	/* 0x169: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x169, 0x1c5, x86_l_1c5);
 x86_l_16b:
 	/* 0x16b: mov    r10b,0x45 */
@@ -279,7 +279,7 @@ x86_l_16e:
 	/* 0x16e: cmp    BYTE PTR [rsi-0x2],0x20 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 18446744065119617056ULL);
 x86_l_172:
-	/* 0x172: jne    0x1c5 */
+	/* 0x172: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x172, 0x1c5, x86_l_1c5);
 x86_l_174:
 	/* 0x174: mov    r9d,0x5 */
@@ -291,7 +291,7 @@ x86_l_17d:
 	/* 0x17d: mov    r11b,0x44 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_R11, X86_REG_NONE, X86_WIDTH_8, 0, 68ULL);
 x86_l_180:
-	/* 0x180: jmp    0x1d5 */
+	/* 0x180: jmp    1d5 <tracee_http_method_prefix_detect_xdp+0x1d5> */
 	X86_SIM_X86_JMP(0x180, 0x1d5, x86_l_1d5);
 x86_l_182:
 	/* 0x182: mov    r8b,0x55 */
@@ -300,7 +300,7 @@ x86_l_185:
 	/* 0x185: cmp    BYTE PTR [rsi-0x4],0x54 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 18446744056529682516ULL);
 x86_l_189:
-	/* 0x189: jne    0x1c5 */
+	/* 0x189: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x189, 0x1c5, x86_l_1c5);
 x86_l_18b:
 	/* 0x18b: mov    r10b,0x55 */
@@ -309,7 +309,7 @@ x86_l_18e:
 	/* 0x18e: cmp    BYTE PTR [rsi-0x3],0x20 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 18446744060824649760ULL);
 x86_l_192:
-	/* 0x192: jne    0x1c5 */
+	/* 0x192: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x192, 0x1c5, x86_l_1c5);
 x86_l_194:
 	/* 0x194: mov    r9d,0x3 */
@@ -321,7 +321,7 @@ x86_l_19d:
 	/* 0x19d: mov    r11b,0x20 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_R11, X86_REG_NONE, X86_WIDTH_8, 0, 32ULL);
 x86_l_1a0:
-	/* 0x1a0: jmp    0x1d5 */
+	/* 0x1a0: jmp    1d5 <tracee_http_method_prefix_detect_xdp+0x1d5> */
 	X86_SIM_X86_JMP(0x1a0, 0x1d5, x86_l_1d5);
 x86_l_1a2:
 	/* 0x1a2: mov    r8b,0x54 */
@@ -330,19 +330,19 @@ x86_l_1a5:
 	/* 0x1a5: cmp    BYTE PTR [rsi-0x4],0x54 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 18446744056529682516ULL);
 x86_l_1a9:
-	/* 0x1a9: jne    0x1c5 */
+	/* 0x1a9: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x1a9, 0x1c5, x86_l_1c5);
 x86_l_1ab:
 	/* 0x1ab: cmp    BYTE PTR [rsi-0x3],0x50 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 18446744060824649808ULL);
 x86_l_1af:
-	/* 0x1af: jne    0x1c5 */
+	/* 0x1af: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x1af, 0x1c5, x86_l_1c5);
 x86_l_1b1:
 	/* 0x1b1: cmp    BYTE PTR [rsi-0x2],0x2f */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 18446744065119617071ULL);
 x86_l_1b5:
-	/* 0x1b5: jne    0x1c5 */
+	/* 0x1b5: jne    1c5 <tracee_http_method_prefix_detect_xdp+0x1c5> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x1b5, 0x1c5, x86_l_1c5);
 x86_l_1b7:
 	/* 0x1b7: mov    r9d,0x6 */
@@ -354,7 +354,7 @@ x86_l_1c0:
 	/* 0x1c0: mov    r10b,0x54 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_R10, X86_REG_NONE, X86_WIDTH_8, 0, 84ULL);
 x86_l_1c3:
-	/* 0x1c3: jmp    0x1d5 */
+	/* 0x1c3: jmp    1d5 <tracee_http_method_prefix_detect_xdp+0x1d5> */
 	X86_SIM_X86_JMP(0x1c3, 0x1d5, x86_l_1d5);
 x86_l_1c5:
 	/* 0x1c5: mov    r10d,r8d */
@@ -432,7 +432,7 @@ x86_l_21b:
 	/* 0x21b: cmp    rcx,0x9 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_64, 0, 9ULL);
 x86_l_21f:
-	/* 0x21f: jne    0x4d */
+	/* 0x21f: jne    4d <tracee_http_method_prefix_detect_xdp+0x4d> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x21f, 0x4d, x86_l_4d);
 x86_l_225:
 	/* 0x225: mov    BYTE PTR [rdx],al */
@@ -501,6 +501,9 @@ x86_l_265:
 	/* 0x265: pop    r14 */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_R14, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_267:
+	/* 0x267: jmp    26c <tracee_http_method_prefix_detect_xdp+0x26c> ; native-link entry RET */
+	X86_SIM_X86_RET();
+x86_l_26c:
 	/* native-link entry fallthrough exit */
 	X86_SIM_X86_RET();
 }

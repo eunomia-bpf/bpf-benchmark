@@ -178,10 +178,10 @@ host-arm64-native-kernel-smoke:
 	$(MAKE) -C "$(ARM64_NATIVE_KERNEL_SMOKE_DIR)" OUTPUT_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)/native_kernel_smoke" all
 
 host-x86-sim-proofs: host-micro-programs-x86
-	$(MAKE) -C "$(ROOT_DIR)/native-sim/x86" PROOF_BUILD_DIR="$(STAGE2_PROGRAM_BUILD_X86)/x86_sim_proofs" MICRO_BUILD_DIR="$(MICRO_PROGRAM_BUILD_X86)" micro-proofs-build
+	$(MAKE) -C "$(ROOT_DIR)/native-sim/x86" PROOF_BUILD_DIR="$(STAGE2_PROGRAM_BUILD_X86)/x86_sim_proofs" micro-proofs-build
 
 host-arm64-sim-proofs: host-micro-programs-arm64
-	$(MAKE) -C "$(ARM64_SIM_PROOF_DIR)" PROOF_BUILD_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)/arm64_sim_proofs" MICRO_BUILD_DIR="$(MICRO_PROGRAM_BUILD_ARM64)" micro-proofs-build
+	$(MAKE) -C "$(ARM64_SIM_PROOF_DIR)" PROOF_BUILD_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)/arm64_sim_proofs" micro-proofs-build
 
 x86-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_X86) host-kinsn-x86 host-rust-x86 host-shim-x86 host-source-apps-x86 host-runner-x86 host-micro-programs-x86 host-stage2-programs-x86 host-x86-sim-proofs
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"

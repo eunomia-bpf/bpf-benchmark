@@ -15,13 +15,13 @@ arm64_l_8:
 	/* 0x8: cmp x10, x9 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X10, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_c:
-	/* 0xc: b.ls 0x18 */
+	/* 0xc: b.ls 18 <tetragon_process_event_arg_filter_xdp+0x18> */
 	ARM64_SIM_A64_JCC(ARM64_COND_LS, 0xc, 0x18, arm64_l_18);
 arm64_l_10:
 	/* 0x10: mov w0, wzr */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_REG, ARM64_X0, ARM64_XZR, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, 0, 0);
 arm64_l_14:
-	/* 0x14: b 0x2c8 */
+	/* 0x14: b 2c8 <tetragon_process_event_arg_filter_xdp+0x2c8> */
 	ARM64_SIM_A64_JMP(0x14, 0x2c8, arm64_l_2c8);
 arm64_l_18:
 	/* 0x18: add x11, x10, #0x8 */
@@ -33,7 +33,7 @@ arm64_l_20:
 	/* 0x20: cmp x11, x9 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X11, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_24:
-	/* 0x24: b.hi 0x2c8 */
+	/* 0x24: b.hi 2c8 <tetragon_process_event_arg_filter_xdp+0x2c8> */
 	ARM64_SIM_A64_JCC(ARM64_COND_HI, 0x24, 0x2c8, arm64_l_2c8);
 arm64_l_28:
 	/* 0x28: add x11, x10, #0x410 */
@@ -42,7 +42,7 @@ arm64_l_2c:
 	/* 0x2c: cmp x11, x9 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X11, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_30:
-	/* 0x30: b.hi 0x2c8 */
+	/* 0x30: b.hi 2c8 <tetragon_process_event_arg_filter_xdp+0x2c8> */
 	ARM64_SIM_A64_JCC(ARM64_COND_HI, 0x30, 0x2c8, arm64_l_2c8);
 arm64_l_34:
 	/* 0x34: ldr w9, [x10, #8] */
@@ -54,7 +54,7 @@ arm64_l_3c:
 	/* 0x3c: cmp w9, #0x20 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 32ULL);
 arm64_l_40:
-	/* 0x40: b.ne 0x2c8 */
+	/* 0x40: b.ne 2c8 <tetragon_process_event_arg_filter_xdp+0x2c8> */
 	ARM64_SIM_A64_JCC(ARM64_COND_NE, 0x40, 0x2c8, arm64_l_2c8);
 arm64_l_44:
 	/* 0x44: ldr w9, [x10, #12] */
@@ -63,7 +63,7 @@ arm64_l_48:
 	/* 0x48: cmp w9, #0x20 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 32ULL);
 arm64_l_4c:
-	/* 0x4c: b.ne 0x2c8 */
+	/* 0x4c: b.ne 2c8 <tetragon_process_event_arg_filter_xdp+0x2c8> */
 	ARM64_SIM_A64_JCC(ARM64_COND_NE, 0x4c, 0x2c8, arm64_l_2c8);
 arm64_l_50:
 	/* 0x50: stp x26, x25, [sp, #-64]! */
@@ -126,7 +126,7 @@ arm64_l_9c:
 	/* 0x9c: mov w17, #0x59 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_IMM, ARM64_X17, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, 0, 89ULL);
 arm64_l_a0:
-	/* 0xa0: b 0xbc */
+	/* 0xa0: b bc <tetragon_process_event_arg_filter_xdp+0xbc> */
 	ARM64_SIM_A64_JMP(0xa0, 0xbc, arm64_l_bc);
 arm64_l_a4:
 	/* 0xa4: orr x13, x24, x0, lsl #32 */
@@ -144,7 +144,7 @@ arm64_l_b4:
 	/* 0xb4: cmp x9, #0x20 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 32ULL);
 arm64_l_b8:
-	/* 0xb8: b.eq 0x2b0 */
+	/* 0xb8: b.eq 2b0 <tetragon_process_event_arg_filter_xdp+0x2b0> */
 	ARM64_SIM_A64_JCC(ARM64_COND_EQ, 0xb8, 0x2b0, arm64_l_2b0);
 arm64_l_bc:
 	/* 0xbc: ldrb w18, [x11, #5] */
@@ -159,43 +159,43 @@ arm64_l_c8:
 	/* 0xc8: cmp w0, #0x4 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 4ULL);
 arm64_l_cc:
-	/* 0xcc: b.gt 0xe8 */
+	/* 0xcc: b.gt e8 <tetragon_process_event_arg_filter_xdp+0xe8> */
 	ARM64_SIM_A64_JCC(ARM64_COND_GT, 0xcc, 0xe8, arm64_l_e8);
 arm64_l_d0:
 	/* 0xd0: cmp w0, #0x1 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 1ULL);
 arm64_l_d4:
-	/* 0xd4: b.eq 0x10c */
+	/* 0xd4: b.eq 10c <tetragon_process_event_arg_filter_xdp+0x10c> */
 	ARM64_SIM_A64_JCC(ARM64_COND_EQ, 0xd4, 0x10c, arm64_l_10c);
 arm64_l_d8:
 	/* 0xd8: cmp w0, #0x2 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 2ULL);
 arm64_l_dc:
-	/* 0xdc: b.ne 0x100 */
+	/* 0xdc: b.ne 100 <tetragon_process_event_arg_filter_xdp+0x100> */
 	ARM64_SIM_A64_JCC(ARM64_COND_NE, 0xdc, 0x100, arm64_l_100);
 arm64_l_e0:
 	/* 0xe0: mov w1, #0x23 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_IMM, ARM64_X1, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, 0, 35ULL);
 arm64_l_e4:
-	/* 0xe4: b 0x118 */
+	/* 0xe4: b 118 <tetragon_process_event_arg_filter_xdp+0x118> */
 	ARM64_SIM_A64_JMP(0xe4, 0x118, arm64_l_118);
 arm64_l_e8:
 	/* 0xe8: cmp w0, #0x5 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 5ULL);
 arm64_l_ec:
-	/* 0xec: b.eq 0x114 */
+	/* 0xec: b.eq 114 <tetragon_process_event_arg_filter_xdp+0x114> */
 	ARM64_SIM_A64_JCC(ARM64_COND_EQ, 0xec, 0x114, arm64_l_114);
 arm64_l_f0:
 	/* 0xf0: cmp w0, #0x9 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 9ULL);
 arm64_l_f4:
-	/* 0xf4: b.ne 0x100 */
+	/* 0xf4: b.ne 100 <tetragon_process_event_arg_filter_xdp+0x100> */
 	ARM64_SIM_A64_JCC(ARM64_COND_NE, 0xf4, 0x100, arm64_l_100);
 arm64_l_f8:
 	/* 0xf8: mov w1, #0x41 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_IMM, ARM64_X1, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, 0, 65ULL);
 arm64_l_fc:
-	/* 0xfc: b 0x118 */
+	/* 0xfc: b 118 <tetragon_process_event_arg_filter_xdp+0x118> */
 	ARM64_SIM_A64_JMP(0xfc, 0x118, arm64_l_118);
 arm64_l_100:
 	/* 0x100: cmp w0, #0xd */
@@ -204,13 +204,13 @@ arm64_l_104:
 	/* 0x104: csel w1, w17, wzr, eq */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CSEL, ARM64_X1, ARM64_X17, ARM64_XZR, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_COND_EQ, 0);
 arm64_l_108:
-	/* 0x108: b 0x118 */
+	/* 0x108: b 118 <tetragon_process_event_arg_filter_xdp+0x118> */
 	ARM64_SIM_A64_JMP(0x108, 0x118, arm64_l_118);
 arm64_l_10c:
 	/* 0x10c: mov w1, #0x11 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_IMM, ARM64_X1, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, 0, 17ULL);
 arm64_l_110:
-	/* 0x110: b 0x118 */
+	/* 0x110: b 118 <tetragon_process_event_arg_filter_xdp+0x118> */
 	ARM64_SIM_A64_JMP(0x110, 0x118, arm64_l_118);
 arm64_l_114:
 	/* 0x114: mov w1, #0x37 */
@@ -249,13 +249,13 @@ arm64_l_140:
 	/* 0x140: orr x2, x2, x16 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_ALU_REG, ARM64_X2, ARM64_X2, ARM64_X16, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(ARM64_ALU_ORR, ARM64_MOD_NONE, 0), 0);
 arm64_l_144:
-	/* 0x144: b.eq 0x160 */
+	/* 0x144: b.eq 160 <tetragon_process_event_arg_filter_xdp+0x160> */
 	ARM64_SIM_A64_JCC(ARM64_COND_EQ, 0x144, 0x160, arm64_l_160);
 arm64_l_148:
 	/* 0x148: cmp w16, w14 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X16, ARM64_X14, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_14c:
-	/* 0x14c: b.ne 0x170 */
+	/* 0x14c: b.ne 170 <tetragon_process_event_arg_filter_xdp+0x170> */
 	ARM64_SIM_A64_JCC(ARM64_COND_NE, 0x14c, 0x170, arm64_l_170);
 arm64_l_150:
 	/* 0x150: mov w16, #0x2 */
@@ -264,10 +264,10 @@ arm64_l_154:
 	/* 0x154: ldur w24, [x11, #-7] */
 	ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X24, ARM64_X11, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 18446744073709551609ULL);
 arm64_l_158:
-	/* 0x158: cbnz w1, 0x19c */
+	/* 0x158: cbnz w1, 19c <tetragon_process_event_arg_filter_xdp+0x19c> */
 	ARM64_SIM_A64_CBNZ(ARM64_X1, 0x158, 0x19c, arm64_l_19c);
 arm64_l_15c:
-	/* 0x15c: b 0xa4 */
+	/* 0x15c: b a4 <tetragon_process_event_arg_filter_xdp+0xa4> */
 	ARM64_SIM_A64_JMP(0x15c, 0xa4, arm64_l_a4);
 arm64_l_160:
 	/* 0x160: mov w16, #0x1 */
@@ -276,16 +276,16 @@ arm64_l_164:
 	/* 0x164: ldur w24, [x11, #-7] */
 	ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X24, ARM64_X11, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 18446744073709551609ULL);
 arm64_l_168:
-	/* 0x168: cbnz w1, 0x19c */
+	/* 0x168: cbnz w1, 19c <tetragon_process_event_arg_filter_xdp+0x19c> */
 	ARM64_SIM_A64_CBNZ(ARM64_X1, 0x168, 0x19c, arm64_l_19c);
 arm64_l_16c:
-	/* 0x16c: b 0xa4 */
+	/* 0x16c: b a4 <tetragon_process_event_arg_filter_xdp+0xa4> */
 	ARM64_SIM_A64_JMP(0x16c, 0xa4, arm64_l_a4);
 arm64_l_170:
 	/* 0x170: cmp x2, x15 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X2, ARM64_X15, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_174:
-	/* 0x174: b.ne 0x188 */
+	/* 0x174: b.ne 188 <tetragon_process_event_arg_filter_xdp+0x188> */
 	ARM64_SIM_A64_JCC(ARM64_COND_NE, 0x174, 0x188, arm64_l_188);
 arm64_l_178:
 	/* 0x178: mov w16, #0x3 */
@@ -294,10 +294,10 @@ arm64_l_17c:
 	/* 0x17c: ldur w24, [x11, #-7] */
 	ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X24, ARM64_X11, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 18446744073709551609ULL);
 arm64_l_180:
-	/* 0x180: cbnz w1, 0x19c */
+	/* 0x180: cbnz w1, 19c <tetragon_process_event_arg_filter_xdp+0x19c> */
 	ARM64_SIM_A64_CBNZ(ARM64_X1, 0x180, 0x19c, arm64_l_19c);
 arm64_l_184:
-	/* 0x184: b 0xa4 */
+	/* 0x184: b a4 <tetragon_process_event_arg_filter_xdp+0xa4> */
 	ARM64_SIM_A64_JMP(0x184, 0xa4, arm64_l_a4);
 arm64_l_188:
 	/* 0x188: cmp x13, x3 */
@@ -312,7 +312,7 @@ arm64_l_194:
 	/* 0x194: ldur w24, [x11, #-7] */
 	ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X24, ARM64_X11, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 18446744073709551609ULL);
 arm64_l_198:
-	/* 0x198: cbz w1, 0xa4 */
+	/* 0x198: cbz w1, a4 <tetragon_process_event_arg_filter_xdp+0xa4> */
 	ARM64_SIM_A64_CBZ(ARM64_X1, 0x198, 0xa4, arm64_l_a4);
 arm64_l_19c:
 	/* 0x19c: ldrb w21, [x11, #1] */
@@ -360,13 +360,13 @@ arm64_l_1d4:
 	/* 0x1d4: ldur w3, [x11, #-3] */
 	ARM64_SIM_RUN_OP3(ARM64_OP_LOAD, ARM64_X3, ARM64_X11, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 18446744073709551613ULL);
 arm64_l_1d8:
-	/* 0x1d8: b.eq 0x208 */
+	/* 0x1d8: b.eq 208 <tetragon_process_event_arg_filter_xdp+0x208> */
 	ARM64_SIM_A64_JCC(ARM64_COND_EQ, 0x1d8, 0x208, arm64_l_208);
 arm64_l_1dc:
 	/* 0x1dc: and x26, x5, x25 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_ALU_REG, ARM64_X26, ARM64_X5, ARM64_X25, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(ARM64_ALU_AND, ARM64_MOD_NONE, 0), 0);
 arm64_l_1e0:
-	/* 0x1e0: cbnz x26, 0x208 */
+	/* 0x1e0: cbnz x26, 208 <tetragon_process_event_arg_filter_xdp+0x208> */
 	ARM64_SIM_A64_CBNZ(ARM64_X26, 0x1e0, 0x208, arm64_l_208);
 arm64_l_1e4:
 	/* 0x1e4: ldrb w15, [x11, #2] */
@@ -393,7 +393,7 @@ arm64_l_200:
 	/* 0x200: add x10, x15, x10 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_ALU_REG, ARM64_X10, ARM64_X15, ARM64_X10, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(ARM64_ALU_ADD, ARM64_MOD_NONE, 0), 0);
 arm64_l_204:
-	/* 0x204: b 0x2a0 */
+	/* 0x204: b 2a0 <tetragon_process_event_arg_filter_xdp+0x2a0> */
 	ARM64_SIM_A64_JMP(0x204, 0x2a0, arm64_l_2a0);
 arm64_l_208:
 	/* 0x208: lsl x1, x1, #48 */
@@ -411,10 +411,10 @@ arm64_l_218:
 	/* 0x218: orr x1, x16, x24 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_ALU_REG, ARM64_X1, ARM64_X16, ARM64_X24, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(ARM64_ALU_ORR, ARM64_MOD_NONE, 0), 0);
 arm64_l_21c:
-	/* 0x21c: tbz w0, #1, 0x24c */
+	/* 0x21c: tbz w0, #1, 24c <tetragon_process_event_arg_filter_xdp+0x24c> */
 	ARM64_SIM_A64_TBZ(ARM64_X0, 1, 0x21c, 0x24c, arm64_l_24c);
 arm64_l_220:
-	/* 0x220: cbz w21, 0x24c */
+	/* 0x220: cbz w21, 24c <tetragon_process_event_arg_filter_xdp+0x24c> */
 	ARM64_SIM_A64_CBZ(ARM64_X21, 0x220, 0x24c, arm64_l_24c);
 arm64_l_224:
 	/* 0x224: lsl x21, x23, #56 */
@@ -519,7 +519,7 @@ arm64_l_2a8:
 	/* 0x2a8: mov x15, x13 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_REG, ARM64_X15, ARM64_X13, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, 0, 0);
 arm64_l_2ac:
-	/* 0x2ac: b 0xac */
+	/* 0x2ac: b ac <tetragon_process_event_arg_filter_xdp+0xac> */
 	ARM64_SIM_A64_JMP(0x2ac, 0xac, arm64_l_ac);
 arm64_l_2b0:
 	/* 0x2b0: ldp x20, x19, [sp, #48] */

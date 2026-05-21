@@ -56,6 +56,9 @@ x86_l_37:
 	/* 0x37: mov    eax,0x2 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
 x86_l_3c:
+	/* 0x3c: jmp    41 <simple_xdp+0x41> ; native-link entry RET */
+	X86_SIM_X86_RET();
+x86_l_41:
 	/* native-link entry fallthrough exit */
 	X86_SIM_X86_RET();
 }

@@ -70,7 +70,7 @@ x86_l_10:
 	/* 0x10: cmp    rcx,QWORD PTR [rdi+0x8] */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG_MEM, X86_RCX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_64), 8ULL);
 x86_l_14:
-	/* 0x14: ja     0xfd */
+	/* 0x14: ja     fd <multi_map_policy+0xfd> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x14, 0xfd, x86_l_fd);
 x86_l_1a:
 	/* 0x1a: mov    DWORD PTR [rsp+0xc],0x3 */
@@ -166,7 +166,7 @@ x86_l_ac:
 	/* 0xac: test   rax,rax */
 	X86_SIM_RUN_OP(X86_OP_TEST_REG, X86_RAX, X86_RAX, X86_WIDTH_64, 0, 0);
 x86_l_af:
-	/* 0xaf: je     0xc4 */
+	/* 0xaf: je     c4 <multi_map_policy+0xc4> */
 	X86_SIM_X86_JCC(X86_CC_E, 0xaf, 0xc4, x86_l_c4);
 x86_l_b1:
 	/* 0xb1: mov    rdi,QWORD PTR [rip+0x0] */
@@ -193,13 +193,13 @@ x86_l_d6:
 	/* 0xd6: test   rax,rax */
 	X86_SIM_RUN_OP(X86_OP_TEST_REG, X86_RAX, X86_RAX, X86_WIDTH_64, 0, 0);
 x86_l_d9:
-	/* 0xd9: je     0xe8 */
+	/* 0xd9: je     e8 <multi_map_policy+0xe8> */
 	X86_SIM_X86_JCC(X86_CC_E, 0xd9, 0xe8, x86_l_e8);
 x86_l_db:
 	/* 0xdb: test   rbx,rbx */
 	X86_SIM_RUN_OP(X86_OP_TEST_REG, X86_RBX, X86_RBX, X86_WIDTH_64, 0, 0);
 x86_l_de:
-	/* 0xde: je     0xe8 */
+	/* 0xde: je     e8 <multi_map_policy+0xe8> */
 	X86_SIM_X86_JCC(X86_CC_E, 0xde, 0xe8, x86_l_e8);
 x86_l_e0:
 	/* 0xe0: mov    rcx,QWORD PTR [rbx] */
@@ -208,19 +208,19 @@ x86_l_e3:
 	/* 0xe3: mov    QWORD PTR [rax],rcx */
 	X86_SIM_RUN_OP(X86_OP_MOV_STORE_REG, X86_RAX, X86_RCX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);
 x86_l_e6:
-	/* 0xe6: jmp    0xf4 */
+	/* 0xe6: jmp    f4 <multi_map_policy+0xf4> */
 	X86_SIM_X86_JMP(0xe6, 0xf4, x86_l_f4);
 x86_l_e8:
 	/* 0xe8: test   rax,rax */
 	X86_SIM_RUN_OP(X86_OP_TEST_REG, X86_RAX, X86_RAX, X86_WIDTH_64, 0, 0);
 x86_l_eb:
-	/* 0xeb: je     0xf2 */
+	/* 0xeb: je     f2 <multi_map_policy+0xf2> */
 	X86_SIM_X86_JCC(X86_CC_E, 0xeb, 0xf2, x86_l_f2);
 x86_l_ed:
 	/* 0xed: mov    rcx,QWORD PTR [rax] */
 	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_RCX, X86_RAX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);
 x86_l_f0:
-	/* 0xf0: jmp    0xf4 */
+	/* 0xf0: jmp    f4 <multi_map_policy+0xf4> */
 	X86_SIM_X86_JMP(0xf0, 0xf4, x86_l_f4);
 x86_l_f2:
 	/* 0xf2: xor    ecx,ecx */
@@ -241,6 +241,9 @@ x86_l_103:
 	/* 0x103: pop    rbp */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_RBP, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_104:
+	/* 0x104: jmp    109 <multi_map_policy+0x109> ; native-link entry RET */
+	X86_SIM_X86_RET();
+x86_l_109:
 	/* native-link entry fallthrough exit */
 	X86_SIM_X86_RET();
 }

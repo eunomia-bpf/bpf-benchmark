@@ -26,7 +26,7 @@ make the proof easier by changing x86 behavior.
 | --- | --- |
 | `x86_sim_local_bpf.h` | The active C-authored x86 simulator. Architectural GPRs/flags are function-local variables; each x86 instruction macro expands to C semantics. |
 | `x86_sim.h` | Shared ISA constants and pure arithmetic helpers only. It no longer contains `struct x86_state` or `x86_exec_*`. |
-| `micro-prog/generate_micro_sim_proofs.py` | Mechanical generator: build native code through `native_lab/native_link`, disassemble the linked x86 blob, and emit one `X86_SIM_RUN_OP(...)` or native branch/call/ret macro per x86 instruction. |
+| `micro-prog/generate_micro_sim_proofs.py` | Mechanical generator: disassemble a prebuilt `.proof.o` and emit one `X86_SIM_RUN_OP(...)` or native branch/call/ret macro per x86 instruction. |
 | `micro-prog/run_micro_sim_batch.py` | Builds generated proof programs with `clang -O3`, loads them with `bpf_prog_test_run`, records compile time, verifier time, test time, proof BPF instruction count, and direct BPF instruction count from the latest micro result. |
 | `simulator-spec.md` | The semantic contract for the active simulator path. |
 
@@ -41,9 +41,10 @@ Deleted old paths:
 ## Current Algorithm
 
 1. Build the micro program native object.
-2. Run the `native_lab/native_link` linker so the x86 bytes use the
-   ReverseSim/kernel ABI shape.
-3. Disassemble that linked x86 blob.
+2. Run `native_lab/native_link --mode proof` so the x86 bytes use the
+   ReverseSim/kernel ABI shape and helper/map/rodata sites remain ELF
+   relocations in a `.proof.o`.
+3. Disassemble that proof object.
 4. Emit a BPF C source where each native instruction remains a native
    instruction macro with the original assembly in a comment.
 5. Compile with `clang -O3 -target bpf`.

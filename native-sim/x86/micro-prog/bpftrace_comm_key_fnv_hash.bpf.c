@@ -22,10 +22,10 @@ x86_l_c:
 	/* 0xc: cmp    rsi,rcx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RSI, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_f:
-	/* 0xf: jbe    0x16 */
+	/* 0xf: jbe    16 <bpftrace_comm_key_fnv_hash_xdp+0x16> */
 	X86_SIM_X86_JCC(X86_CC_BE, 0xf, 0x16, x86_l_16);
 x86_l_11:
-	/* 0x11: jmp    0x2f7 ; native-link entry RET */
+	/* 0x11: jmp    2fc <bpftrace_comm_key_fnv_hash_xdp+0x2fc> ; native-link entry RET */
 	X86_SIM_X86_RET();
 x86_l_16:
 	/* 0x16: lea    rdx,[rsi+0x8] */
@@ -34,7 +34,7 @@ x86_l_1a:
 	/* 0x1a: cmp    rdx,rcx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RDX, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_1d:
-	/* 0x1d: ja     0x11 */
+	/* 0x1d: ja     11 <bpftrace_comm_key_fnv_hash_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x1d, 0x11, x86_l_11);
 x86_l_1f:
 	/* 0x1f: lea    rdx,[rsi+0x410] */
@@ -43,19 +43,19 @@ x86_l_26:
 	/* 0x26: cmp    rdx,rcx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RDX, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_29:
-	/* 0x29: ja     0x11 */
+	/* 0x29: ja     11 <bpftrace_comm_key_fnv_hash_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x29, 0x11, x86_l_11);
 x86_l_2b:
 	/* 0x2b: cmp    DWORD PTR [rsi+0x8],0x20 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 34359738400ULL);
 x86_l_2f:
-	/* 0x2f: jne    0x11 */
+	/* 0x2f: jne    11 <bpftrace_comm_key_fnv_hash_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x2f, 0x11, x86_l_11);
 x86_l_31:
 	/* 0x31: cmp    DWORD PTR [rsi+0xc],0x20 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 51539607584ULL);
 x86_l_35:
-	/* 0x35: jne    0x11 */
+	/* 0x35: jne    11 <bpftrace_comm_key_fnv_hash_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x35, 0x11, x86_l_11);
 x86_l_37:
 	/* 0x37: push   rbp */
@@ -94,7 +94,7 @@ x86_l_5b:
 	/* 0x5b: movabs r10,0x100000001b3 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_R10, X86_REG_NONE, X86_WIDTH_64, 0, 1099511628211ULL);
 x86_l_65:
-	/* 0x65: jmp    0xb6 */
+	/* 0x65: jmp    b6 <bpftrace_comm_key_fnv_hash_xdp+0xb6> */
 	X86_SIM_X86_JMP(0x65, 0xb6, x86_l_b6);
 x86_l_67:
 	/* 0x67: shl    r12d,0x8 */
@@ -169,7 +169,7 @@ x86_l_ac:
 	/* 0xac: cmp    r8,0x20 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R8, X86_REG_NONE, X86_WIDTH_64, 0, 32ULL);
 x86_l_b0:
-	/* 0xb0: je     0x2dc */
+	/* 0xb0: je     2dc <bpftrace_comm_key_fnv_hash_xdp+0x2dc> */
 	X86_SIM_X86_JCC(X86_CC_E, 0xb0, 0x2dc, x86_l_2dc);
 x86_l_b6:
 	/* 0xb6: mov    QWORD PTR [rsp+0x40],r8 */
@@ -472,13 +472,13 @@ x86_l_247:
 	/* 0x247: test   r14b,0x1 */
 	X86_SIM_RUN_OP(X86_OP_TEST_IMM, X86_R14, X86_REG_NONE, X86_WIDTH_8, 0, 1ULL);
 x86_l_24b:
-	/* 0x24b: jne    0x253 */
+	/* 0x24b: jne    253 <bpftrace_comm_key_fnv_hash_xdp+0x253> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x24b, 0x253, x86_l_253);
 x86_l_24d:
 	/* 0x24d: mov    r9,QWORD PTR [rsp] */
 	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_R9, X86_RSP, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);
 x86_l_251:
-	/* 0x251: jmp    0x2b3 */
+	/* 0x251: jmp    2b3 <bpftrace_comm_key_fnv_hash_xdp+0x2b3> */
 	X86_SIM_X86_JMP(0x251, 0x2b3, x86_l_2b3);
 x86_l_253:
 	/* 0x253: shl    r9d,0x18 */
@@ -571,7 +571,7 @@ x86_l_2b7:
 	/* 0x2b7: mov    r8,QWORD PTR [rsp+0x40] */
 	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_R8, X86_RSP, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 64ULL);
 x86_l_2bc:
-	/* 0x2bc: je     0x67 */
+	/* 0x2bc: je     67 <bpftrace_comm_key_fnv_hash_xdp+0x67> */
 	X86_SIM_X86_JCC(X86_CC_E, 0x2bc, 0x67, x86_l_67);
 x86_l_2c2:
 	/* 0x2c2: movabs rax,0x9e3779b185ebca87 */
@@ -586,7 +586,7 @@ x86_l_2d3:
 	/* 0x2d3: cmove  r11,rax */
 	X86_SIM_RUN_OP(X86_OP_CMOV, X86_R11, X86_RAX, X86_WIDTH_64, X86_CC_E, 0);
 x86_l_2d7:
-	/* 0x2d7: jmp    0x67 */
+	/* 0x2d7: jmp    67 <bpftrace_comm_key_fnv_hash_xdp+0x67> */
 	X86_SIM_X86_JMP(0x2d7, 0x67, x86_l_67);
 x86_l_2dc:
 	/* 0x2dc: mov    rax,QWORD PTR [rsp+0x8] */
@@ -619,6 +619,9 @@ x86_l_2f6:
 	/* 0x2f6: pop    rbp */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_RBP, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_2f7:
+	/* 0x2f7: jmp    2fc <bpftrace_comm_key_fnv_hash_xdp+0x2fc> ; native-link entry RET */
+	X86_SIM_X86_RET();
+x86_l_2fc:
 	/* native-link entry fallthrough exit */
 	X86_SIM_X86_RET();
 }

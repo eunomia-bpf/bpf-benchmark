@@ -1,0 +1,31 @@
+| Micro program | Status | Compile s | Proof BPF insns | Direct BPF insns | Verify s | Test s | Note |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `simple` | ok | 0.756 | 19 |  | 0.000 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `simple_packet` | ok | 0.652 | 16 |  | 0.000 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `bitmap_popcount_scan` | ok | 1.387 | 95 |  | 0.034 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `sorted_rule_binary_search` | ok | 1.249 | 126 |  | 0.312 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `bcc_runqlat_log2_histogram_bucket` | ok | 4.477 | 155 |  | 0.589 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `trace_event_type_switch_dispatch` | ok | 6.822 | 786 |  | 0.672 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `packet_checksum_fold` | ok | 1.317 | 129 |  | 0.602 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `payload_prefix_memcmp_scan` | ok | 3.789 | 209 |  | 0.006 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `packet_vlan_tcpopt_parser` | ok | 4.769 | 228 |  | 0.002 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `bpf_local_call_fanout_dispatch` | ok | 10.062 | 543 |  | 0.036 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `flow_5tuple_rss_hash` | ok | 4.882 | 287 |  | 0.002 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `katran_lb_consistent_hash_select` | ok | 16.436 | 864 |  | 0.005 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `cilium_policy_guard_tree_filter` | ok | 4.715 | 164 |  | 0.034 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `siphash_rotate64_mixer` | ok | 10.996 | 972 |  | 0.003 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `packet_record_bounds_window` | ok | 3.345 | 148 |  | 0.018 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `flow_record_field_scan` | ok | 3.009 | 193 |  | 0.024 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `packed_header_bitfield_decode` | ok | 6.702 | 258 |  | 0.022 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `bpftrace_string_search_prefix_scan` | ok | 4.775 | 185 |  | 0.663 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `tracee_syscall_name_table_lookup` | ok | 4.235 | 287 |  | 0.123 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `tracee_http_method_prefix_detect` | ok | 6.804 | 171 |  | 0.008 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `cilium_socket_lb_service_select` | ok | 3.289 | 238 |  | 0.135 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `bcc_tcpconnect_ipv4_tuple_filter` | ok | 5.216 | 225 |  | 0.083 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `tetragon_process_event_arg_filter` | ok | 7.195 | 348 |  | 0.417 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `otel_stack_frame_unwind_scan` | ok | 3.424 | 212 |  | 0.042 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `cilium_ct_nat_tuple_rewrite` | ok | 3.270 | 184 |  | 0.065 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `packet_toeplitz_rss_hash` | ok | 5.766 | 341 |  | 0.034 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `bpftrace_comm_key_fnv_hash` | ok | 6.608 | 269 |  | 0.048 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `tc_packet_checksum_fold` | ok | 2.859 | 153 |  | 0.618 | 0.000 | missing direct xlated.bin in x86 micro result |
+| `cgroup_skb_hash_chain` | ok | 3.295 | 419 |  | 0.014 | 0.000 | missing direct xlated.bin in x86 micro result |

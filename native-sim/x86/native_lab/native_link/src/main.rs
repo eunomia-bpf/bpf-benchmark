@@ -53,8 +53,8 @@ use iced_x86::{
     InstructionBlock, Mnemonic, OpKind, Register,
 };
 use object::write::{
-    Object as WriteObject, Relocation as WriteRelocation, StandardSection,
-    Symbol as WriteSymbol, SymbolId as WriteSymbolId, SymbolSection as WriteSymbolSection,
+    Object as WriteObject, Relocation as WriteRelocation, StandardSection, Symbol as WriteSymbol,
+    SymbolId as WriteSymbolId, SymbolSection as WriteSymbolSection,
 };
 use object::{
     BinaryFormat, Endianness, Object, ObjectSection, ObjectSymbol, RelocationFlags,
@@ -394,6 +394,10 @@ fn main() -> Result<()> {
     let bytes = fs::read(&args.input).with_context(|| format!("read {}", args.input.display()))?;
     let elf = object::File::parse(&*bytes)
         .with_context(|| format!("parse ELF {}", args.input.display()))?;
+    let proof_input = elf.section_by_name(".native_link_abi").is_some();
+    if !proof_mode && !proof_input {
+        bail!("--mode kernel requires a .proof.o produced by --mode proof");
+    }
     let helper_addrs = parse_name_addr_args(&args.helpers, "helper")?;
     let map_addrs = parse_name_addr_args(&args.maps, "map")?;
     let lookup_sites = parse_lookup_sites(&args.lookup_sites)?;
@@ -479,7 +483,10 @@ fn main() -> Result<()> {
         arch => bail!("unsupported input ELF arch: {:?}", arch),
     };
     if proof_mode {
-        if args.output_relocs.is_some() || args.output_map_patches.is_some() || args.output_abi.is_some() {
+        if args.output_relocs.is_some()
+            || args.output_map_patches.is_some()
+            || args.output_abi.is_some()
+        {
             bail!("proof mode writes a single .proof.o; do not pass kernel sideband outputs");
         }
         write_proof_object(
@@ -499,6 +506,8 @@ fn main() -> Result<()> {
         );
         return Ok(());
     }
+    let output_x86_callee_saved_mask = read_proof_abi(&elf)?.unwrap_or(x86_callee_saved_mask);
+
     fs::write(&args.output, &blob).with_context(|| format!("write {}", args.output.display()))?;
     eprintln!(
         "native-link: wrote {} bytes -> {} ({} relocs)",
@@ -548,7 +557,7 @@ fn main() -> Result<()> {
     if let Some(path) = &args.output_abi {
         let text = format!(
             "version\tnative-link-abi-v1\nx86_callee_saved_mask\t{}\n",
-            x86_callee_saved_mask
+            output_x86_callee_saved_mask
         );
         fs::write(path, text).with_context(|| format!("write {}", path.display()))?;
         eprintln!("native-link: wrote ABI metadata -> {}", path.display());
@@ -581,7 +590,10 @@ fn write_proof_object(
                            offset: u64,
                            size: u64|
      -> Result<()> {
-        if offset.checked_add(size).is_none_or(|end| end > text.len() as u64) {
+        if offset
+            .checked_add(size)
+            .is_none_or(|end| end > text.len() as u64)
+        {
             bail!("proof symbol {name} range {offset:#x}+{size:#x} exceeds .text");
         }
         let id = object.add_symbol(WriteSymbol {
@@ -705,6 +717,49 @@ fn write_proof_object(
 
     let bytes = object.write().context("write proof ELF object")?;
     fs::write(path, bytes).with_context(|| format!("write {}", path.display()))
+}
+
+fn read_proof_abi(elf: &object::File) -> Result<Option<u8>> {
+    let Some(section) = elf.section_by_name(".native_link_abi") else {
+        return Ok(None);
+    };
+    let text = std::str::from_utf8(section.data().context("read .native_link_abi section")?)
+        .context(".native_link_abi is not UTF-8")?;
+    let mut seen_version = false;
+    let mut mask: Option<u8> = None;
+    for (line_no, line) in text.lines().enumerate() {
+        if line.is_empty() {
+            continue;
+        }
+        let (key, value) = line
+            .split_once('\t')
+            .ok_or_else(|| anyhow!("invalid .native_link_abi line {}", line_no + 1))?;
+        if value.contains('\t') {
+            bail!("invalid .native_link_abi line {}", line_no + 1);
+        }
+        match key {
+            "version" => {
+                if value != "native-link-abi-v1" {
+                    bail!("unsupported .native_link_abi version {value:?}");
+                }
+                seen_version = true;
+            }
+            "x86_callee_saved_mask" => {
+                let parsed: u8 = value
+                    .parse()
+                    .with_context(|| format!("parse x86_callee_saved_mask {value:?}"))?;
+                if parsed > 0xf {
+                    bail!("x86_callee_saved_mask exceeds 4 bits: {parsed}");
+                }
+                mask = Some(parsed);
+            }
+            _ => bail!("unknown .native_link_abi key {key:?}"),
+        }
+    }
+    if !seen_version || mask.is_none() {
+        bail!(".native_link_abi missing required keys");
+    }
+    Ok(mask)
 }
 
 fn parse_name_addr_args(args: &[String], kind: &str) -> Result<HashMap<String, u64>> {
@@ -1038,6 +1093,7 @@ fn rewrite_x86(
 
     let helper_call_sites = scan_helper_calls(elf, included)?;
     let got_relocations = scan_x86_got_relocations(elf, included)?;
+    let proof_input = elf.section_by_name(".native_link_abi").is_some();
 
     let mut sym_global_offset: HashMap<u64, usize> = HashMap::new();
     let mut blob: Vec<u8> = Vec::new();
@@ -1161,16 +1217,46 @@ fn rewrite_x86(
             // because we'll patch the disp32 manually after concat; what
             // matters is that we identify "this is a call to symbol X" by
             // looking up the original vaddr target.
-            let original_target = insn.near_branch_target();
-            let intra_symbol_branch = original_target != 0
+            let mut original_target = insn.near_branch_target();
+            if is_entry
                 && original_target >= sym.address
                 && original_target < sym.address + sym.size
+            {
+                let target_local = original_target - sym.address;
+                if let Some(remapped_local) =
+                    entry_abi_strip.branch_target_remaps.get(&target_local)
+                {
+                    original_target = sym.address + remapped_local;
+                    insn.set_near_branch64(original_target);
+                }
+            }
+            let intra_symbol_branch = original_target != 0
+                && original_target >= sym.address
+                && original_target <= sym.address + sym.size
                 && matches!(
                     insn.flow_control(),
                     FlowControl::UnconditionalBranch | FlowControl::ConditionalBranch
                 );
             if intra_symbol_branch {
                 insn.set_near_branch64(original_target - sym.address);
+            }
+
+            const JMP_END_PLACEHOLDER_TARGET: u64 = 0x4000_0000;
+            if !proof_mode
+                && proof_input
+                && is_entry
+                && insn.mnemonic() == Mnemonic::Jmp
+                && original_target == sym.address + sym.size
+            {
+                let mut jmp = Instruction::default();
+                jmp.set_code(Code::Jmp_rel32_64);
+                jmp.set_op0_kind(OpKind::NearBranch64);
+                jmp.set_near_branch64(JMP_END_PLACEHOLDER_TARGET);
+                jmp.set_ip(local_ip);
+                local.push(jmp);
+                kinds.push(Some(PatchKind::JmpEnd));
+                insn_local_ip.push(local_ip);
+                continue;
             }
 
             // RET in the entry function -> placeholder Jmp_rel32_64. The
@@ -1181,7 +1267,6 @@ fn rewrite_x86(
             // The post-encode patcher relies on every JmpEnd site being
             // `e9 dd dd dd dd` so it can rewrite the 4-byte disp; a
             // shrunken `eb rel8` would break that assumption.
-            const JMP_END_PLACEHOLDER_TARGET: u64 = 0x4000_0000;
             if is_return(&insn) && is_entry {
                 let mut jmp = Instruction::default();
                 jmp.set_code(Code::Jmp_rel32_64);
@@ -1491,13 +1576,17 @@ fn rewrite_x86(
     // epilogue and skips the trampolines along the way. If the final
     // entry return already sits at the true blob end, delete that
     // redundant `jmp +0` and let it fall through into the BPF epilogue.
-    let trailing_jmp_end = patches.iter().find_map(|p| {
-        if matches!(&p.kind, PatchKind::JmpEnd) && p.global_offset + 5 == blob.len() {
-            Some(p.global_offset)
-        } else {
-            None
-        }
-    });
+    let trailing_jmp_end = if proof_mode {
+        None
+    } else {
+        patches.iter().find_map(|p| {
+            if matches!(&p.kind, PatchKind::JmpEnd) && p.global_offset + 5 == blob.len() {
+                Some(p.global_offset)
+            } else {
+                None
+            }
+        })
+    };
     if let Some(off) = trailing_jmp_end {
         if off + 5 > blob.len() || blob[off] != 0xE9 {
             bail!("trailing JmpEnd placeholder at off {off:#x} did not encode as Jmp_rel32_64");
@@ -2262,11 +2351,7 @@ fn arm64_text_relocations(
     Ok(out)
 }
 
-fn arm64_reloc_data(
-    elf: &object::File,
-    reloc: &Arm64RelocInfo,
-    max_len: usize,
-) -> Result<Vec<u8>> {
+fn arm64_reloc_data(elf: &object::File, reloc: &Arm64RelocInfo, max_len: usize) -> Result<Vec<u8>> {
     let section_index = reloc.target_section_index.ok_or_else(|| {
         anyhow!(
             "arm64 proof data relocation {} has no target section",
@@ -2930,7 +3015,12 @@ fn rewrite_arm64(
         disasm_arm64_words(&blob);
     }
     let proof_symbols = if proof_mode {
-        arm64_proof_symbols(included, &sym_start_word_offset, &sym_end_word_offset, blob.len())?
+        arm64_proof_symbols(
+            included,
+            &sym_start_word_offset,
+            &sym_end_word_offset,
+            blob.len(),
+        )?
     } else {
         Vec::new()
     };
@@ -3117,16 +3207,18 @@ fn collect_x86_proof_relocs(
                     let target_section_idx = target_sym.section_index().ok_or_else(|| {
                         anyhow!("PC32 proof reloc target {} has no section", target_name)
                     })?;
-                    let target_section = elf
-                        .section_by_index(target_section_idx)
-                        .with_context(|| format!("PC32 proof target section {target_section_idx:?}"))?;
-                    let target_data = target_section
-                        .data()
-                        .with_context(|| format!("read proof target section {target_section_idx:?} data"))?;
-                    let sec_base = target_section.address();
-                    let sym_off_in_sec = target_sym.address().checked_sub(sec_base).ok_or_else(|| {
-                        anyhow!("PC32 proof target {} below section base", target_name)
+                    let target_section =
+                        elf.section_by_index(target_section_idx).with_context(|| {
+                            format!("PC32 proof target section {target_section_idx:?}")
+                        })?;
+                    let target_data = target_section.data().with_context(|| {
+                        format!("read proof target section {target_section_idx:?} data")
                     })?;
+                    let sec_base = target_section.address();
+                    let sym_off_in_sec =
+                        target_sym.address().checked_sub(sec_base).ok_or_else(|| {
+                            anyhow!("PC32 proof target {} below section base", target_name)
+                        })?;
                     let sym_size = target_sym.size();
                     if sym_size == 0 {
                         bail!("PC32 proof target {} has zero size", target_name);
@@ -3136,7 +3228,9 @@ fn collect_x86_proof_relocs(
                         .ok_or_else(|| anyhow!("PC32 proof target size overflow"))?;
                     let sym_bytes = target_data
                         .get(sym_off_in_sec as usize..end as usize)
-                        .ok_or_else(|| anyhow!("PC32 proof target {} out of section bounds", target_name))?;
+                        .ok_or_else(|| {
+                            anyhow!("PC32 proof target {} out of section bounds", target_name)
+                        })?;
                     let insn_idx = layout
                         .insn_local_ip
                         .iter()
@@ -3540,6 +3634,7 @@ struct X86EntryAbiStrip {
     drop_local_ips: HashSet<u64>,
     callee_saved_mask: u8,
     register_renames: HashMap<Register, Register>,
+    branch_target_remaps: HashMap<u64, u64>,
 }
 
 fn plan_x86_entry_abi_strip(bytes: &[u8], base_ip: u64) -> Result<X86EntryAbiStrip> {
@@ -3607,6 +3702,7 @@ fn plan_x86_entry_abi_strip(bytes: &[u8], base_ip: u64) -> Result<X86EntryAbiStr
     }
 
     let mut drop_local_ips: HashSet<u64> = HashSet::new();
+    let mut branch_target_remaps: HashMap<u64, u64> = HashMap::new();
     for (reg, local_ip) in prologue_regs.iter().zip(prologue_local_ips.iter()) {
         if strip_set.contains(reg) {
             drop_local_ips.insert(*local_ip);
@@ -3640,6 +3736,27 @@ fn plan_x86_entry_abi_strip(bytes: &[u8], base_ip: u64) -> Result<X86EntryAbiStr
                 }
             }
         }
+        let ret_local_ip = insn.ip() - base_ip;
+        for ep_idx in cursor..idx {
+            let epilogue = &insns[ep_idx];
+            let Some(reg) = x86_saved_pop_reg(epilogue) else {
+                continue;
+            };
+            if !strip_set.contains(&reg) {
+                continue;
+            }
+            let dropped_local_ip = epilogue.ip() - base_ip;
+            let mut target_local_ip = ret_local_ip;
+            for next in &insns[ep_idx + 1..=idx] {
+                let next_is_dropped_pop =
+                    x86_saved_pop_reg(next).is_some_and(|next_reg| strip_set.contains(&next_reg));
+                if !next_is_dropped_pop {
+                    target_local_ip = next.ip() - base_ip;
+                    break;
+                }
+            }
+            branch_target_remaps.insert(dropped_local_ip, target_local_ip);
+        }
     }
 
     // The runner encodes `callee_saved_mask` in the kinsn sidecar, and the
@@ -3668,6 +3785,7 @@ fn plan_x86_entry_abi_strip(bytes: &[u8], base_ip: u64) -> Result<X86EntryAbiStr
         drop_local_ips,
         callee_saved_mask,
         register_renames,
+        branch_target_remaps,
     })
 }
 
@@ -3925,6 +4043,7 @@ fn is_alignment_nop(insn: &Instruction) -> bool {
 /// of `included` symbols' byte ranges.
 fn validate_no_external_refs(insn: &Instruction, included_ranges: &[(u64, u64)]) -> Result<()> {
     let in_any = |a: u64| included_ranges.iter().any(|&(lo, hi)| a >= lo && a < hi);
+    let in_any_or_end = |a: u64| included_ranges.iter().any(|&(lo, hi)| a >= lo && a <= hi);
 
     let fc = insn.flow_control();
     if matches!(
@@ -3932,7 +4051,7 @@ fn validate_no_external_refs(insn: &Instruction, included_ranges: &[(u64, u64)])
         FlowControl::UnconditionalBranch | FlowControl::ConditionalBranch | FlowControl::Call
     ) {
         let target = insn.near_branch_target();
-        if target != 0 && !in_any(target) {
+        if target != 0 && !in_any_or_end(target) {
             bail!(
                 "instruction at IP {:#x} branches to {:#x} outside the included symbols",
                 insn.ip(),

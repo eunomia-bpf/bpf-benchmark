@@ -347,12 +347,29 @@ python3 native-sim/x86/native_lab/tests/analyze.py
   2026-05-21, x86 and arm64 proof generators were changed to consume
   `native-link --mode proof` output for both the pure 29 and the
   helper/map stage2 13 programs. Python no longer parses ELF relocation
-  records; native-link owns ELF relocation discovery and emits proof
-  site metadata for helper/map/rodata sites. Local proof runs passed:
-  x86 stage2 `native-sim/x86/results/README-20260521-133039.md`, x86
-  pure `native-sim/x86/results/README-20260521-133047.md`, arm64 stage2
-  `native-sim/arm64/results/README-20260521-133152.md`, and arm64 pure
-  `native-sim/arm64/results/README-20260521-133201.md`.
+  records from the original native objects; native-link owns ELF
+  relocation discovery and emits relocatable `.proof.o` files with
+  helper/map/rodata relocations. The generator only disassembles those
+  proof objects and emits labels plus simulator instruction macros.
+  Local proof runs passed again after this split:
+  x86 stage2 `native-sim/x86/results/README-20260521-proof-object-stage2.md`,
+  x86 pure `native-sim/x86/results/README-20260521-proof-object-pure.md`,
+  arm64 stage2 `native-sim/arm64/results/README-20260521-proof-object-stage2.md`,
+  and arm64 pure `native-sim/arm64/results/README-20260521-proof-object-pure.md`.
+- **Proof-object exits must survive kernel lowering.** A 2026-05-21 x86
+  KVM stage2 run `micro/results/x86_kvm_micro_20260521_230627_333619`
+  found two proof->kernel bugs before workload completion:
+  `helper_only_uid_gid` had a branch target landing on a stripped
+  epilogue pop, and `map_hash_str_key` fell through from the entry
+  epilogue into appended rodata/literal bytes. The fix keeps the proof
+  object's final `jmp end` marker, remaps branches that target stripped
+  epilogue pops to the retained entry-exit marker, and makes kernel mode
+  treat a proof-object entry `jmp` to symbol end as a `JmpEnd` site so
+  late helper/map lowering can redirect it past appended pools. After
+  that, x86 proof runs passed again for stage2 13/13 and pure 29/29, and
+  KVM smoke runs passed with matching `native_kernel`/`kernel` results:
+  stage2 `micro/results/x86_kvm_micro_20260521_231330_690264` and pure
+  `micro/results/x86_kvm_micro_20260521_231746_727344`.
 - **Make/runtime incrementality still has non-kernel repeat work.** The
   arm64 QEMU rootfs assembly was changed from a phony rebuild to the real
   file target `$(ARM64_QEMU_ROOT)/qemu-init`, so QEMU rootfs export is no

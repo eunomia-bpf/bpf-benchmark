@@ -427,6 +427,20 @@ def _map_snapshot_path(
     return path
 
 
+def _shim_log_path(
+    app: AppSpec,
+    phase: str,
+    *,
+    artifact_session: ArtifactSession | None,
+) -> Path:
+    if artifact_session is not None:
+        log_dir = artifact_session.run_dir / "details" / "shim-logs"
+    else:
+        log_dir = Path(os.environ.get("TMPDIR", "/tmp")) / "bpfrejit-shim-logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    return log_dir / f"{_sanitize_app_filename(app.name)}.{phase}.log"
+
+
 def _write_incremental_app_result(
     run_dir: Path,
     app_name: str,
@@ -499,7 +513,14 @@ def run_suite(
                 with _timeout_scope(float(getattr(args, "app_timeout_s", 0.0) or 0.0),
                                     f"{app.name} app lifecycle"):
                     runner = get_app_runner(app.runner, workload=app.workload_for("corpus"), **app.args)
-                    with _temporary_env({"BPFREJIT_SHIM_LOADTIME_PLAN": ""}):
+                    with _temporary_env({
+                        "BPFREJIT_SHIM_LOADTIME_PLAN": "",
+                        "BPFREJIT_SHIM_LOG": str(_shim_log_path(
+                            app,
+                            "baseline",
+                            artifact_session=artifact_session,
+                        )),
+                    }):
                         runner.start()
                     lifecycle = LifecycleRunResult(
                         baseline=None,
@@ -583,6 +604,11 @@ def run_suite(
                             artifact_session=artifact_session,
                         )
                         loadtime_env["BPFREJIT_SHIM_LOADTIME_REPORTS"] = str(reports_path)
+                        loadtime_env["BPFREJIT_SHIM_LOG"] = str(_shim_log_path(
+                            app,
+                            "post_rejit",
+                            artifact_session=artifact_session,
+                        ))
                         if baseline_map_snapshot_path is not None:
                             loadtime_env["BPFREJIT_SHIM_MAP_SNAPSHOT_ROOT"] = str(
                                 baseline_map_snapshot_path

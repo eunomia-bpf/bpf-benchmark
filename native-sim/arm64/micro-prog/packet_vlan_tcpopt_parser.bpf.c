@@ -14,7 +14,7 @@ arm64_l_8:
 	/* 0x8: cmp x8, x12 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X8, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_c:
-	/* 0xc: b.hi 0x2c */
+	/* 0xc: b.hi 2c <packet_vlan_tcpopt_parser_xdp+0x2c> */
 	ARM64_SIM_A64_JCC(ARM64_COND_HI, 0xc, 0x2c, arm64_l_2c);
 arm64_l_10:
 	/* 0x10: add x9, x8, #0x8 */
@@ -23,7 +23,7 @@ arm64_l_14:
 	/* 0x14: cmp x9, x12 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X9, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_18:
-	/* 0x18: b.hi 0x2c */
+	/* 0x18: b.hi 2c <packet_vlan_tcpopt_parser_xdp+0x2c> */
 	ARM64_SIM_A64_JCC(ARM64_COND_HI, 0x18, 0x2c, arm64_l_2c);
 arm64_l_1c:
 	/* 0x1c: add x11, x8, #0x16 */
@@ -32,13 +32,13 @@ arm64_l_20:
 	/* 0x20: cmp x11, x12 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X11, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_24:
-	/* 0x24: b.ls 0x30 */
+	/* 0x24: b.ls 30 <packet_vlan_tcpopt_parser_xdp+0x30> */
 	ARM64_SIM_A64_JCC(ARM64_COND_LS, 0x24, 0x30, arm64_l_30);
 arm64_l_28:
 	/* 0x28: mov w0, wzr */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_REG, ARM64_X0, ARM64_XZR, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, 0, 0);
 arm64_l_2c:
-	/* 0x2c: b 0x290 */
+	/* 0x2c: b 290 <packet_vlan_tcpopt_parser_xdp+0x290> */
 	ARM64_SIM_A64_JMP(0x2c, 0x290, arm64_l_290);
 arm64_l_30:
 	/* 0x30: ldrh w9, [x8, #20] */
@@ -50,7 +50,7 @@ arm64_l_38:
 	/* 0x38: cmp w9, #0x800 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 2048ULL);
 arm64_l_3c:
-	/* 0x3c: b.eq 0xdc */
+	/* 0x3c: b.eq dc <packet_vlan_tcpopt_parser_xdp+0xdc> */
 	ARM64_SIM_A64_JCC(ARM64_COND_EQ, 0x3c, 0xdc, arm64_l_dc);
 arm64_l_40:
 	/* 0x40: mov w10, #0x88a8 */
@@ -59,7 +59,7 @@ arm64_l_44:
 	/* 0x44: cmp w9, w10 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X9, ARM64_X10, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_48:
-	/* 0x48: b.eq 0x5c */
+	/* 0x48: b.eq 5c <packet_vlan_tcpopt_parser_xdp+0x5c> */
 	ARM64_SIM_A64_JCC(ARM64_COND_EQ, 0x48, 0x5c, arm64_l_5c);
 arm64_l_4c:
 	/* 0x4c: mov w10, #0x8100 */
@@ -71,7 +71,7 @@ arm64_l_54:
 	/* 0x54: cmp w9, w10 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X9, ARM64_X10, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_58:
-	/* 0x58: b.ne 0x2c */
+	/* 0x58: b.ne 2c <packet_vlan_tcpopt_parser_xdp+0x2c> */
 	ARM64_SIM_A64_JCC(ARM64_COND_NE, 0x58, 0x2c, arm64_l_2c);
 arm64_l_5c:
 	/* 0x5c: add x11, x8, #0x1a */
@@ -80,7 +80,7 @@ arm64_l_60:
 	/* 0x60: cmp x11, x12 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X11, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_64:
-	/* 0x64: b.hi 0x28 */
+	/* 0x64: b.hi 28 <packet_vlan_tcpopt_parser_xdp+0x28> */
 	ARM64_SIM_A64_JCC(ARM64_COND_HI, 0x64, 0x28, arm64_l_28);
 arm64_l_68:
 	/* 0x68: ldrh w9, [x8, #22] */
@@ -101,7 +101,7 @@ arm64_l_7c:
 	/* 0x7c: cmp w10, #0x800 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X10, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 2048ULL);
 arm64_l_80:
-	/* 0x80: b.eq 0x288 */
+	/* 0x80: b.eq 288 <packet_vlan_tcpopt_parser_xdp+0x288> */
 	ARM64_SIM_A64_JCC(ARM64_COND_EQ, 0x80, 0x288, arm64_l_288);
 arm64_l_84:
 	/* 0x84: mov w11, #0x88a8 */
@@ -110,7 +110,7 @@ arm64_l_88:
 	/* 0x88: cmp w10, w11 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X10, ARM64_X11, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_8c:
-	/* 0x8c: b.eq 0x9c */
+	/* 0x8c: b.eq 9c <packet_vlan_tcpopt_parser_xdp+0x9c> */
 	ARM64_SIM_A64_JCC(ARM64_COND_EQ, 0x8c, 0x9c, arm64_l_9c);
 arm64_l_90:
 	/* 0x90: mov w11, #0x8100 */
@@ -119,7 +119,7 @@ arm64_l_94:
 	/* 0x94: cmp w10, w11 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X10, ARM64_X11, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_98:
-	/* 0x98: b.ne 0x28 */
+	/* 0x98: b.ne 28 <packet_vlan_tcpopt_parser_xdp+0x28> */
 	ARM64_SIM_A64_JCC(ARM64_COND_NE, 0x98, 0x28, arm64_l_28);
 arm64_l_9c:
 	/* 0x9c: add x10, x8, #0x1e */
@@ -128,7 +128,7 @@ arm64_l_a0:
 	/* 0xa0: cmp x10, x12 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X10, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_a4:
-	/* 0xa4: b.hi 0x28 */
+	/* 0xa4: b.hi 28 <packet_vlan_tcpopt_parser_xdp+0x28> */
 	ARM64_SIM_A64_JCC(ARM64_COND_HI, 0xa4, 0x28, arm64_l_28);
 arm64_l_a8:
 	/* 0xa8: ldrh w10, [x8, #28] */
@@ -143,7 +143,7 @@ arm64_l_b4:
 	/* 0xb4: cmp w10, #0x800 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X10, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 2048ULL);
 arm64_l_b8:
-	/* 0xb8: b.ne 0x2c */
+	/* 0xb8: b.ne 2c <packet_vlan_tcpopt_parser_xdp+0x2c> */
 	ARM64_SIM_A64_JCC(ARM64_COND_NE, 0xb8, 0x2c, arm64_l_2c);
 arm64_l_bc:
 	/* 0xbc: add x10, x8, #0x32 */
@@ -152,7 +152,7 @@ arm64_l_c0:
 	/* 0xc0: cmp x10, x12 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X10, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_c4:
-	/* 0xc4: b.hi 0x2c */
+	/* 0xc4: b.hi 2c <packet_vlan_tcpopt_parser_xdp+0x2c> */
 	ARM64_SIM_A64_JCC(ARM64_COND_HI, 0xc4, 0x2c, arm64_l_2c);
 arm64_l_c8:
 	/* 0xc8: ldrh w10, [x8, #26] */
@@ -167,7 +167,7 @@ arm64_l_d4:
 	/* 0xd4: mov w10, #0x2 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_IMM, ARM64_X10, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, 0, 2ULL);
 arm64_l_d8:
-	/* 0xd8: b 0xf4 */
+	/* 0xd8: b f4 <packet_vlan_tcpopt_parser_xdp+0xf4> */
 	ARM64_SIM_A64_JMP(0xd8, 0xf4, arm64_l_f4);
 arm64_l_dc:
 	/* 0xdc: mov w9, wzr */
@@ -182,7 +182,7 @@ arm64_l_e8:
 	/* 0xe8: cmp x13, x12 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X13, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_ec:
-	/* 0xec: b.hi 0x28 */
+	/* 0xec: b.hi 28 <packet_vlan_tcpopt_parser_xdp+0x28> */
 	ARM64_SIM_A64_JCC(ARM64_COND_HI, 0xec, 0x28, arm64_l_28);
 arm64_l_f0:
 	/* 0xf0: mov x13, xzr */
@@ -200,7 +200,7 @@ arm64_l_100:
 	/* 0x100: cmp w15, #0x40 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X15, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 64ULL);
 arm64_l_104:
-	/* 0x104: b.ne 0x2c */
+	/* 0x104: b.ne 2c <packet_vlan_tcpopt_parser_xdp+0x2c> */
 	ARM64_SIM_A64_JCC(ARM64_COND_NE, 0x104, 0x2c, arm64_l_2c);
 arm64_l_108:
 	/* 0x108: and x14, x14, #0xf */
@@ -209,7 +209,7 @@ arm64_l_10c:
 	/* 0x10c: cmp w14, #0x5 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X14, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 5ULL);
 arm64_l_110:
-	/* 0x110: b.cc 0x2c */
+	/* 0x110: b.cc 2c <packet_vlan_tcpopt_parser_xdp+0x2c> */
 	ARM64_SIM_A64_JCC(ARM64_COND_CC, 0x110, 0x2c, arm64_l_2c);
 arm64_l_114:
 	/* 0x114: lsl x14, x14, #2 */
@@ -221,7 +221,7 @@ arm64_l_11c:
 	/* 0x11c: cmp x16, x12 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X16, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_120:
-	/* 0x120: b.hi 0x28 */
+	/* 0x120: b.hi 28 <packet_vlan_tcpopt_parser_xdp+0x28> */
 	ARM64_SIM_A64_JCC(ARM64_COND_HI, 0x120, 0x28, arm64_l_28);
 arm64_l_124:
 	/* 0x124: ldrb w15, [x11, #9] */
@@ -230,7 +230,7 @@ arm64_l_128:
 	/* 0x128: cmp w15, #0x6 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X15, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 6ULL);
 arm64_l_12c:
-	/* 0x12c: b.ne 0x28 */
+	/* 0x12c: b.ne 28 <packet_vlan_tcpopt_parser_xdp+0x28> */
 	ARM64_SIM_A64_JCC(ARM64_COND_NE, 0x12c, 0x28, arm64_l_28);
 arm64_l_130:
 	/* 0x130: add x17, x16, #0x14 */
@@ -239,7 +239,7 @@ arm64_l_134:
 	/* 0x134: cmp x17, x12 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X17, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_138:
-	/* 0x138: b.hi 0x28 */
+	/* 0x138: b.hi 28 <packet_vlan_tcpopt_parser_xdp+0x28> */
 	ARM64_SIM_A64_JCC(ARM64_COND_HI, 0x138, 0x28, arm64_l_28);
 arm64_l_13c:
 	/* 0x13c: ldrb w15, [x16, #12] */
@@ -248,7 +248,7 @@ arm64_l_140:
 	/* 0x140: cmp w15, #0x50 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X15, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 80ULL);
 arm64_l_144:
-	/* 0x144: b.cc 0x28 */
+	/* 0x144: b.cc 28 <packet_vlan_tcpopt_parser_xdp+0x28> */
 	ARM64_SIM_A64_JCC(ARM64_COND_CC, 0x144, 0x28, arm64_l_28);
 arm64_l_148:
 	/* 0x148: lsr x15, x15, #2 */
@@ -263,7 +263,7 @@ arm64_l_154:
 	/* 0x154: cmp x18, x12 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X18, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_158:
-	/* 0x158: b.hi 0x28 */
+	/* 0x158: b.hi 28 <packet_vlan_tcpopt_parser_xdp+0x28> */
 	ARM64_SIM_A64_JCC(ARM64_COND_HI, 0x158, 0x28, arm64_l_28);
 arm64_l_15c:
 	/* 0x15c: add x18, x16, #0x20 */
@@ -275,13 +275,13 @@ arm64_l_164:
 	/* 0x164: cmp x18, x12 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X18, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_168:
-	/* 0x168: b.hi 0x2c */
+	/* 0x168: b.hi 2c <packet_vlan_tcpopt_parser_xdp+0x2c> */
 	ARM64_SIM_A64_JCC(ARM64_COND_HI, 0x168, 0x2c, arm64_l_2c);
 arm64_l_16c:
 	/* 0x16c: cmp w15, #0x20 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X15, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 32ULL);
 arm64_l_170:
-	/* 0x170: b.cc 0x2c */
+	/* 0x170: b.cc 2c <packet_vlan_tcpopt_parser_xdp+0x2c> */
 	ARM64_SIM_A64_JCC(ARM64_COND_CC, 0x170, 0x2c, arm64_l_2c);
 arm64_l_174:
 	/* 0x174: ldrb w12, [x17] */
@@ -290,7 +290,7 @@ arm64_l_178:
 	/* 0x178: cmp w12, #0x2 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 2ULL);
 arm64_l_17c:
-	/* 0x17c: b.ne 0x28 */
+	/* 0x17c: b.ne 28 <packet_vlan_tcpopt_parser_xdp+0x28> */
 	ARM64_SIM_A64_JCC(ARM64_COND_NE, 0x17c, 0x28, arm64_l_28);
 arm64_l_180:
 	/* 0x180: ldrb w12, [x16, #21] */
@@ -299,7 +299,7 @@ arm64_l_184:
 	/* 0x184: cmp w12, #0x4 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 4ULL);
 arm64_l_188:
-	/* 0x188: b.cc 0x28 */
+	/* 0x188: b.cc 28 <packet_vlan_tcpopt_parser_xdp+0x28> */
 	ARM64_SIM_A64_JCC(ARM64_COND_CC, 0x188, 0x28, arm64_l_28);
 arm64_l_18c:
 	/* 0x18c: ldrb w12, [x16, #24] */
@@ -308,7 +308,7 @@ arm64_l_190:
 	/* 0x190: cmp w12, #0x1 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 1ULL);
 arm64_l_194:
-	/* 0x194: b.ne 0x28 */
+	/* 0x194: b.ne 28 <packet_vlan_tcpopt_parser_xdp+0x28> */
 	ARM64_SIM_A64_JCC(ARM64_COND_NE, 0x194, 0x28, arm64_l_28);
 arm64_l_198:
 	/* 0x198: ldrb w12, [x16, #25] */
@@ -317,7 +317,7 @@ arm64_l_19c:
 	/* 0x19c: cmp w12, #0x3 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 3ULL);
 arm64_l_1a0:
-	/* 0x1a0: b.ne 0x28 */
+	/* 0x1a0: b.ne 28 <packet_vlan_tcpopt_parser_xdp+0x28> */
 	ARM64_SIM_A64_JCC(ARM64_COND_NE, 0x1a0, 0x28, arm64_l_28);
 arm64_l_1a4:
 	/* 0x1a4: ldrb w12, [x16, #26] */
@@ -326,7 +326,7 @@ arm64_l_1a8:
 	/* 0x1a8: cmp w12, #0x3 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 3ULL);
 arm64_l_1ac:
-	/* 0x1ac: b.cc 0x28 */
+	/* 0x1ac: b.cc 28 <packet_vlan_tcpopt_parser_xdp+0x28> */
 	ARM64_SIM_A64_JCC(ARM64_COND_CC, 0x1ac, 0x28, arm64_l_28);
 arm64_l_1b0:
 	/* 0x1b0: ldrb w12, [x16, #28] */
@@ -335,7 +335,7 @@ arm64_l_1b4:
 	/* 0x1b4: cmp w12, #0x4 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 4ULL);
 arm64_l_1b8:
-	/* 0x1b8: b.ne 0x28 */
+	/* 0x1b8: b.ne 28 <packet_vlan_tcpopt_parser_xdp+0x28> */
 	ARM64_SIM_A64_JCC(ARM64_COND_NE, 0x1b8, 0x28, arm64_l_28);
 arm64_l_1bc:
 	/* 0x1bc: ldrb w12, [x16, #29] */
@@ -344,7 +344,7 @@ arm64_l_1c0:
 	/* 0x1c0: cmp w12, #0x2 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 2ULL);
 arm64_l_1c4:
-	/* 0x1c4: b.cc 0x28 */
+	/* 0x1c4: b.cc 28 <packet_vlan_tcpopt_parser_xdp+0x28> */
 	ARM64_SIM_A64_JCC(ARM64_COND_CC, 0x1c4, 0x28, arm64_l_28);
 arm64_l_1c8:
 	/* 0x1c8: ldrb w12, [x16, #30] */
@@ -353,7 +353,7 @@ arm64_l_1cc:
 	/* 0x1cc: cmp w12, #0x1 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 1ULL);
 arm64_l_1d0:
-	/* 0x1d0: b.ne 0x28 */
+	/* 0x1d0: b.ne 28 <packet_vlan_tcpopt_parser_xdp+0x28> */
 	ARM64_SIM_A64_JCC(ARM64_COND_NE, 0x1d0, 0x28, arm64_l_28);
 arm64_l_1d4:
 	/* 0x1d4: ldrb w12, [x16, #22] */
@@ -488,13 +488,13 @@ arm64_l_280:
 	/* 0x280: str x9, [x8] */
 	ARM64_SIM_RUN_OP3(ARM64_OP_STORE, ARM64_X8, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL);
 arm64_l_284:
-	/* 0x284: b 0x290 */
+	/* 0x284: b 290 <packet_vlan_tcpopt_parser_xdp+0x290> */
 	ARM64_SIM_A64_JMP(0x284, 0x290, arm64_l_290);
 arm64_l_288:
 	/* 0x288: mov w10, #0x1 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_IMM, ARM64_X10, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, 0, 1ULL);
 arm64_l_28c:
-	/* 0x28c: b 0xe4 */
+	/* 0x28c: b e4 <packet_vlan_tcpopt_parser_xdp+0xe4> */
 	ARM64_SIM_A64_JMP(0x28c, 0xe4, arm64_l_e4);
 arm64_l_290:
 	/* 0x290: mov x7, x0 */

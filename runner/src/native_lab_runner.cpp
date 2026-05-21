@@ -106,7 +106,7 @@ constexpr const char *kX86ThisCpuOffHelperKey = "__native_x86_this_cpu_off";
 constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v18";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v19";
 constexpr const char *kKallsymsCachePath = "/tmp/native_kernel_kallsyms.tsv";
 constexpr const char *kKallsymsCacheVersion = "native-kallsyms-cache-v1";
 constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
@@ -1062,9 +1062,10 @@ std::filesystem::path native_link_binary(const cli_options &options)
 }
 
 /* Stage 2: given an ELF .native.o input, resolve helper kernel addresses
- * via /proc/kallsyms, invoke native-link as a subprocess to produce
- * blob + relocs files. Returns paths to those files. */
+ * via /proc/kallsyms, invoke native-link first in proof mode and then
+ * kernel-lower that proof object into blob + relocs files. */
 struct LinkerOutput {
+    std::filesystem::path proof;
     std::filesystem::path blob;
     std::filesystem::path relocs;
     std::filesystem::path map_patches;
@@ -1587,7 +1588,8 @@ std::string native_link_cache_key(const std::filesystem::path &native_elf,
 bool linker_output_exists(const LinkerOutput &out)
 {
     std::error_code ec;
-    return std::filesystem::exists(out.blob, ec)
+    return std::filesystem::exists(out.proof, ec)
+           && std::filesystem::exists(out.blob, ec)
            && std::filesystem::exists(out.relocs, ec)
            && std::filesystem::exists(out.map_patches, ec)
            && std::filesystem::exists(out.abi, ec);
@@ -1615,18 +1617,40 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
                                 const NativeLinkArgs &link_args,
                                 const std::filesystem::path &base)
 {
-    std::vector<std::string> argv;
-    argv.push_back(link_args.linker.string());
-    argv.push_back("--input");
-    argv.push_back(elf_path.string());
-    argv.push_back("--symbol");
-    argv.push_back(symbol_name);
-
     LinkerOutput out{};
+    out.proof = base.string() + ".proof.o";
     out.blob = base.string() + ".blob.bin";
     out.relocs = base.string() + ".relocs.bin";
     out.map_patches = base.string() + ".map-patches.tsv";
     out.abi = base.string() + ".abi.tsv";
+
+    std::vector<std::string> proof_argv;
+    proof_argv.push_back(link_args.linker.string());
+    proof_argv.push_back("--input");
+    proof_argv.push_back(elf_path.string());
+    proof_argv.push_back("--symbol");
+    proof_argv.push_back(symbol_name);
+    proof_argv.push_back("--output");
+    proof_argv.push_back(out.proof.string());
+    proof_argv.push_back("--mode");
+    proof_argv.push_back("proof");
+
+    int proof_rc = run_subprocess(proof_argv);
+    if (proof_rc != 0) {
+        std::ostringstream msg;
+        msg << "native-link proof failed (rc=" << proof_rc << "): ";
+        for (auto &a : proof_argv) msg << a << " ";
+        fail(msg.str());
+    }
+
+    std::vector<std::string> argv;
+    argv.push_back(link_args.linker.string());
+    argv.push_back("--input");
+    argv.push_back(out.proof.string());
+    argv.push_back("--symbol");
+    argv.push_back(symbol_name);
+    argv.push_back("--mode");
+    argv.push_back("kernel");
     argv.push_back("--output");
     argv.push_back(out.blob.string());
     argv.push_back("--output-relocs");
@@ -1656,7 +1680,7 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     int rc = run_subprocess(argv);
     if (rc != 0) {
         std::ostringstream msg;
-        msg << "native-link failed (rc=" << rc << "): ";
+        msg << "native-link kernel failed (rc=" << rc << "): ";
         for (auto &a : argv) msg << a << " ";
         fail(msg.str());
     }
@@ -1681,6 +1705,7 @@ LinkedBlob load_or_link_native_blob(const cli_options &options,
     const std::string key =
         native_link_cache_key(elf_path, options.program, symbol_name, link_args);
     LinkerOutput cache{};
+    cache.proof = cache_dir / (key + ".proof.o");
     cache.blob = cache_dir / (key + ".blob.bin");
     cache.relocs = cache_dir / (key + ".relocs.bin");
     cache.map_patches = cache_dir / (key + ".map-patches.tsv");
@@ -1710,6 +1735,7 @@ LinkedBlob load_or_link_native_blob(const cli_options &options,
         auto map_patches = read_map_patch_file(source.map_patches);
         linked.x86_callee_saved_mask = read_link_abi_file(source.abi);
         const auto read_end = std::chrono::steady_clock::now();
+        publish_cache_file(tmp.proof, cache.proof);
         publish_cache_file(tmp.blob, cache.blob);
         publish_cache_file(tmp.relocs, cache.relocs);
         publish_cache_file(tmp.map_patches, cache.map_patches);

@@ -20,10 +20,10 @@ x86_l_c:
 	/* 0xc: cmp    rsi,rcx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RSI, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_f:
-	/* 0xf: jbe    0x16 */
+	/* 0xf: jbe    16 <packet_checksum_fold_xdp+0x16> */
 	X86_SIM_X86_JCC(X86_CC_BE, 0xf, 0x16, x86_l_16);
 x86_l_11:
-	/* 0x11: jmp    0xa1 ; native-link entry RET */
+	/* 0x11: jmp    a6 <packet_checksum_fold_xdp+0xa6> ; native-link entry RET */
 	X86_SIM_X86_RET();
 x86_l_16:
 	/* 0x16: lea    rdi,[rsi+0x8] */
@@ -32,7 +32,7 @@ x86_l_1a:
 	/* 0x1a: cmp    rdi,rcx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RDI, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_1d:
-	/* 0x1d: ja     0x11 */
+	/* 0x1d: ja     11 <packet_checksum_fold_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x1d, 0x11, x86_l_11);
 x86_l_1f:
 	/* 0x1f: lea    rdi,[rsi+0x410] */
@@ -41,19 +41,19 @@ x86_l_26:
 	/* 0x26: cmp    rdi,rcx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RDI, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_29:
-	/* 0x29: ja     0x11 */
+	/* 0x29: ja     11 <packet_checksum_fold_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x29, 0x11, x86_l_11);
 x86_l_2b:
 	/* 0x2b: cmp    DWORD PTR [rsi+0x8],0x20 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 34359738400ULL);
 x86_l_2f:
-	/* 0x2f: jne    0x11 */
+	/* 0x2f: jne    11 <packet_checksum_fold_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x2f, 0x11, x86_l_11);
 x86_l_31:
 	/* 0x31: cmp    DWORD PTR [rsi+0xc],0x200 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 51539608064ULL);
 x86_l_38:
-	/* 0x38: jne    0x11 */
+	/* 0x38: jne    11 <packet_checksum_fold_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x38, 0x11, x86_l_11);
 x86_l_3a:
 	/* 0x3a: xor    eax,eax */
@@ -104,7 +104,7 @@ x86_l_6f:
 	/* 0x6f: cmp    rcx,0x200 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_64, 0, 512ULL);
 x86_l_76:
-	/* 0x76: jne    0x43 */
+	/* 0x76: jne    43 <packet_checksum_fold_xdp+0x43> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x76, 0x43, x86_l_43);
 x86_l_78:
 	/* 0x78: mov    ecx,r8d */
@@ -140,7 +140,7 @@ x86_l_94:
 	/* 0x94: cmp    eax,0x20 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 32ULL);
 x86_l_97:
-	/* 0x97: jne    0x3e */
+	/* 0x97: jne    3e <packet_checksum_fold_xdp+0x3e> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x97, 0x3e, x86_l_3e);
 x86_l_99:
 	/* 0x99: mov    QWORD PTR [rdx],rdi */
@@ -149,6 +149,9 @@ x86_l_9c:
 	/* 0x9c: mov    eax,0x2 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
 x86_l_a1:
+	/* 0xa1: jmp    a6 <packet_checksum_fold_xdp+0xa6> ; native-link entry RET */
+	X86_SIM_X86_RET();
+x86_l_a6:
 	/* native-link entry fallthrough exit */
 	X86_SIM_X86_RET();
 }

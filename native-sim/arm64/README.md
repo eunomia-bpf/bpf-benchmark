@@ -2,21 +2,23 @@
 
 This directory is the arm64 counterpart of `../x86`.
 
-Current scope is intentionally small:
+Current scope:
 
-- C-authored simulator macros for a small AArch64 register-only subset.
-- A hardcoded BPF object that verifies the build/load path.
+- C-authored simulator macros for the AArch64 subset emitted by current micro
+  native builds.
+- Generated micro proof objects for the pure and helper/map suites.
+- A hardcoded BPF object that still verifies the basic build/load path.
 - No memory safety guards, no fallback/trap path, no synthetic proof facts.
 
 The simulator state is architectural state only: general-purpose registers plus
 NZCV flags when a covered instruction updates them. Unsupported instructions
 must fail at generation/build time rather than falling back at runtime.
 
-The first artifact is not a full micro proof generator yet. It exists to prove
-that the arm64 simulator object can be compiled as eBPF and loaded by the shared
-ReverseSim loader. The next step is to add a mechanical parser for linked arm64
-native disassembly and grow the C-authored instruction subset according to real
-micro output.
+The generator consumes prebuilt `.proof.o` files emitted by
+`native-link --mode proof`, disassembles them, and emits labels plus simulator
+instruction macros. Helper/map/rodata sites stay represented by ELF
+relocations in the proof object; the generator does not parse the original
+native object relocation frontend.
 
 ## Smoke
 

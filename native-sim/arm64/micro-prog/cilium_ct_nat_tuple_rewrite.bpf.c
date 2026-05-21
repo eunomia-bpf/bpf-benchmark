@@ -14,13 +14,13 @@ arm64_l_8:
 	/* 0x8: cmp x10, x9 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X10, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_c:
-	/* 0xc: b.ls 0x18 */
+	/* 0xc: b.ls 18 <cilium_ct_nat_tuple_rewrite_xdp+0x18> */
 	ARM64_SIM_A64_JCC(ARM64_COND_LS, 0xc, 0x18, arm64_l_18);
 arm64_l_10:
 	/* 0x10: mov w0, wzr */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_REG, ARM64_X0, ARM64_XZR, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, 0, 0);
 arm64_l_14:
-	/* 0x14: b 0x168 */
+	/* 0x14: b 168 <cilium_ct_nat_tuple_rewrite_xdp+0x168> */
 	ARM64_SIM_A64_JMP(0x14, 0x168, arm64_l_168);
 arm64_l_18:
 	/* 0x18: add x11, x10, #0x8 */
@@ -32,7 +32,7 @@ arm64_l_20:
 	/* 0x20: cmp x11, x9 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X11, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_24:
-	/* 0x24: b.hi 0x168 */
+	/* 0x24: b.hi 168 <cilium_ct_nat_tuple_rewrite_xdp+0x168> */
 	ARM64_SIM_A64_JCC(ARM64_COND_HI, 0x24, 0x168, arm64_l_168);
 arm64_l_28:
 	/* 0x28: add x11, x10, #0x410 */
@@ -41,7 +41,7 @@ arm64_l_2c:
 	/* 0x2c: cmp x11, x9 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_REG, ARM64_X11, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 0);
 arm64_l_30:
-	/* 0x30: b.hi 0x168 */
+	/* 0x30: b.hi 168 <cilium_ct_nat_tuple_rewrite_xdp+0x168> */
 	ARM64_SIM_A64_JCC(ARM64_COND_HI, 0x30, 0x168, arm64_l_168);
 arm64_l_34:
 	/* 0x34: ldr w9, [x10, #8] */
@@ -53,7 +53,7 @@ arm64_l_3c:
 	/* 0x3c: cmp w9, #0x20 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 32ULL);
 arm64_l_40:
-	/* 0x40: b.ne 0x168 */
+	/* 0x40: b.ne 168 <cilium_ct_nat_tuple_rewrite_xdp+0x168> */
 	ARM64_SIM_A64_JCC(ARM64_COND_NE, 0x40, 0x168, arm64_l_168);
 arm64_l_44:
 	/* 0x44: ldr w9, [x10, #12] */
@@ -62,7 +62,7 @@ arm64_l_48:
 	/* 0x48: cmp w9, #0x20 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 32ULL);
 arm64_l_4c:
-	/* 0x4c: b.ne 0x168 */
+	/* 0x4c: b.ne 168 <cilium_ct_nat_tuple_rewrite_xdp+0x168> */
 	ARM64_SIM_A64_JCC(ARM64_COND_NE, 0x4c, 0x168, arm64_l_168);
 arm64_l_50:
 	/* 0x50: mov x11, #0xc6e3 */
@@ -83,7 +83,7 @@ arm64_l_64:
 	/* 0x64: movk x11, #0x8ebc, lsl #48 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOVK, ARM64_X11, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MOVK(48), 36540ULL);
 arm64_l_68:
-	/* 0x68: b 0x134 */
+	/* 0x68: b 134 <cilium_ct_nat_tuple_rewrite_xdp+0x134> */
 	ARM64_SIM_A64_JMP(0x68, 0x134, arm64_l_134);
 arm64_l_6c:
 	/* 0x6c: ldrb w17, [x10, #7] */
@@ -233,7 +233,7 @@ arm64_l_12c:
 	/* 0x12c: cmp x9, #0x20 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 32ULL);
 arm64_l_130:
-	/* 0x130: b.eq 0x160 */
+	/* 0x130: b.eq 160 <cilium_ct_nat_tuple_rewrite_xdp+0x160> */
 	ARM64_SIM_A64_JCC(ARM64_COND_EQ, 0x130, 0x160, arm64_l_160);
 arm64_l_134:
 	/* 0x134: ldrb w14, [x10, #5] */
@@ -251,13 +251,13 @@ arm64_l_144:
 	/* 0x144: cmp w14, #0x6 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X14, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 6ULL);
 arm64_l_148:
-	/* 0x148: b.eq 0x6c */
+	/* 0x148: b.eq 6c <cilium_ct_nat_tuple_rewrite_xdp+0x6c> */
 	ARM64_SIM_A64_JCC(ARM64_COND_EQ, 0x148, 0x6c, arm64_l_6c);
 arm64_l_14c:
 	/* 0x14c: cmp w14, #0x11 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_CMP_IMM, ARM64_X14, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_ALU(0, ARM64_MOD_NONE, 0), 17ULL);
 arm64_l_150:
-	/* 0x150: b.eq 0x6c */
+	/* 0x150: b.eq 6c <cilium_ct_nat_tuple_rewrite_xdp+0x6c> */
 	ARM64_SIM_A64_JCC(ARM64_COND_EQ, 0x150, 0x6c, arm64_l_6c);
 arm64_l_154:
 	/* 0x154: orr x12, x12, x14, lsl #56 */
@@ -266,7 +266,7 @@ arm64_l_158:
 	/* 0x158: eor x11, x12, x11 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_ALU_REG, ARM64_X11, ARM64_X12, ARM64_X11, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_ALU(ARM64_ALU_EOR, ARM64_MOD_NONE, 0), 0);
 arm64_l_15c:
-	/* 0x15c: b 0x124 */
+	/* 0x15c: b 124 <cilium_ct_nat_tuple_rewrite_xdp+0x124> */
 	ARM64_SIM_A64_JMP(0x15c, 0x124, arm64_l_124);
 arm64_l_160:
 	/* 0x160: mov w0, #0x2 */

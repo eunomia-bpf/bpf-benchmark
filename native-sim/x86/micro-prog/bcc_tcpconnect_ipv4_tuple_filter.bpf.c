@@ -21,10 +21,10 @@ x86_l_c:
 	/* 0xc: cmp    rsi,rcx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RSI, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_f:
-	/* 0xf: jbe    0x16 */
+	/* 0xf: jbe    16 <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x16> */
 	X86_SIM_X86_JCC(X86_CC_BE, 0xf, 0x16, x86_l_16);
 x86_l_11:
-	/* 0x11: jmp    0x18e ; native-link entry RET */
+	/* 0x11: jmp    193 <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x193> ; native-link entry RET */
 	X86_SIM_X86_RET();
 x86_l_16:
 	/* 0x16: lea    rdi,[rsi+0x8] */
@@ -33,7 +33,7 @@ x86_l_1a:
 	/* 0x1a: cmp    rdi,rcx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RDI, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_1d:
-	/* 0x1d: ja     0x11 */
+	/* 0x1d: ja     11 <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x1d, 0x11, x86_l_11);
 x86_l_1f:
 	/* 0x1f: lea    rdi,[rsi+0x310] */
@@ -42,19 +42,19 @@ x86_l_26:
 	/* 0x26: cmp    rdi,rcx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RDI, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_29:
-	/* 0x29: ja     0x11 */
+	/* 0x29: ja     11 <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x29, 0x11, x86_l_11);
 x86_l_2b:
 	/* 0x2b: cmp    DWORD PTR [rsi+0x8],0x20 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 34359738400ULL);
 x86_l_2f:
-	/* 0x2f: jne    0x11 */
+	/* 0x2f: jne    11 <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x2f, 0x11, x86_l_11);
 x86_l_31:
 	/* 0x31: cmp    DWORD PTR [rsi+0xc],0x18 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 51539607576ULL);
 x86_l_35:
-	/* 0x35: jne    0x11 */
+	/* 0x35: jne    11 <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x35, 0x11, x86_l_11);
 x86_l_37:
 	/* 0x37: push   rbp */
@@ -78,7 +78,7 @@ x86_l_4b:
 	/* 0x4b: xor    edi,edi */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_RDI, X86_RDI, X86_WIDTH_32, X86_ALU_XOR, 0);
 x86_l_4d:
-	/* 0x4d: jmp    0x6c */
+	/* 0x4d: jmp    6c <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x6c> */
 	X86_SIM_X86_JMP(0x4d, 0x6c, x86_l_6c);
 x86_l_4f:
 	/* 0x4f: shl    rcx,0x30 */
@@ -102,7 +102,7 @@ x86_l_62:
 	/* 0x62: cmp    rdi,0x20 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_64, 0, 32ULL);
 x86_l_66:
-	/* 0x66: je     0x180 */
+	/* 0x66: je     180 <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x180> */
 	X86_SIM_X86_JCC(X86_CC_E, 0x66, 0x180, x86_l_180);
 x86_l_6c:
 	/* 0x6c: movzx  eax,WORD PTR [rsi-0x5] */
@@ -111,43 +111,43 @@ x86_l_70:
 	/* 0x70: cmp    eax,0x1f8f */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 8079ULL);
 x86_l_75:
-	/* 0x75: jg     0x8b */
+	/* 0x75: jg     8b <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x8b> */
 	X86_SIM_X86_JCC(X86_CC_G, 0x75, 0x8b, x86_l_8b);
 x86_l_77:
 	/* 0x77: cmp    eax,0x50 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 80ULL);
 x86_l_7a:
-	/* 0x7a: je     0xb7 */
+	/* 0x7a: je     b7 <bcc_tcpconnect_ipv4_tuple_filter_xdp+0xb7> */
 	X86_SIM_X86_JCC(X86_CC_E, 0x7a, 0xb7, x86_l_b7);
 x86_l_7c:
 	/* 0x7c: cmp    eax,0x1bb */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 443ULL);
 x86_l_81:
-	/* 0x81: jne    0xa1 */
+	/* 0x81: jne    a1 <bcc_tcpconnect_ipv4_tuple_filter_xdp+0xa1> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x81, 0xa1, x86_l_a1);
 x86_l_83:
 	/* 0x83: mov    r9d,0x2 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_R9, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
 x86_l_89:
-	/* 0x89: jmp    0xbd */
+	/* 0x89: jmp    bd <bcc_tcpconnect_ipv4_tuple_filter_xdp+0xbd> */
 	X86_SIM_X86_JMP(0x89, 0xbd, x86_l_bd);
 x86_l_8b:
 	/* 0x8b: cmp    eax,0x1f90 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 8080ULL);
 x86_l_90:
-	/* 0x90: je     0x99 */
+	/* 0x90: je     99 <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x99> */
 	X86_SIM_X86_JCC(X86_CC_E, 0x90, 0x99, x86_l_99);
 x86_l_92:
 	/* 0x92: cmp    eax,0x20fb */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 8443ULL);
 x86_l_97:
-	/* 0x97: jne    0xa1 */
+	/* 0x97: jne    a1 <bcc_tcpconnect_ipv4_tuple_filter_xdp+0xa1> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x97, 0xa1, x86_l_a1);
 x86_l_99:
 	/* 0x99: mov    r9d,0x3 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_R9, X86_REG_NONE, X86_WIDTH_32, 0, 3ULL);
 x86_l_9f:
-	/* 0x9f: jmp    0xbd */
+	/* 0x9f: jmp    bd <bcc_tcpconnect_ipv4_tuple_filter_xdp+0xbd> */
 	X86_SIM_X86_JMP(0x9f, 0xbd, x86_l_bd);
 x86_l_a1:
 	/* 0xa1: movsx  ecx,ax */
@@ -165,7 +165,7 @@ x86_l_b1:
 	/* 0xb1: shl    r9d,0x2 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_R9, X86_REG_NONE, X86_WIDTH_32, X86_ALU_SHL, 2ULL);
 x86_l_b5:
-	/* 0xb5: jmp    0xbd */
+	/* 0xb5: jmp    bd <bcc_tcpconnect_ipv4_tuple_filter_xdp+0xbd> */
 	X86_SIM_X86_JMP(0xb5, 0xbd, x86_l_bd);
 x86_l_b7:
 	/* 0xb7: mov    r9d,0x1 */
@@ -180,7 +180,7 @@ x86_l_c4:
 	/* 0xc4: cmp    ecx,0x2 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
 x86_l_c7:
-	/* 0xc7: jne    0x4f */
+	/* 0xc7: jne    4f <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x4f> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0xc7, 0x4f, x86_l_4f);
 x86_l_c9:
 	/* 0xc9: mov    r10d,DWORD PTR [rsi-0x13] */
@@ -192,13 +192,13 @@ x86_l_d1:
 	/* 0xd1: test   bpl,0x1 */
 	X86_SIM_RUN_OP(X86_OP_TEST_IMM, X86_RBP, X86_REG_NONE, X86_WIDTH_8, 0, 1ULL);
 x86_l_d5:
-	/* 0xd5: je     0x171 */
+	/* 0xd5: je     171 <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x171> */
 	X86_SIM_X86_JCC(X86_CC_E, 0xd5, 0x171, x86_l_171);
 x86_l_db:
 	/* 0xdb: test   r9d,r9d */
 	X86_SIM_RUN_OP(X86_OP_TEST_REG, X86_R9, X86_R9, X86_WIDTH_32, 0, 0);
 x86_l_de:
-	/* 0xde: je     0x171 */
+	/* 0xde: je     171 <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x171> */
 	X86_SIM_X86_JCC(X86_CC_E, 0xde, 0x171, x86_l_171);
 x86_l_e4:
 	/* 0xe4: mov    ecx,DWORD PTR [rsi-0xb] */
@@ -330,7 +330,7 @@ x86_l_169:
 	/* 0x169: add    r8,rbx */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_R8, X86_RBX, X86_WIDTH_64, X86_ALU_ADD, 0);
 x86_l_16c:
-	/* 0x16c: jmp    0x5b */
+	/* 0x16c: jmp    5b <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x5b> */
 	X86_SIM_X86_JMP(0x16c, 0x5b, x86_l_5b);
 x86_l_171:
 	/* 0x171: shl    r10,0x20 */
@@ -342,7 +342,7 @@ x86_l_178:
 	/* 0x178: add    r8,r10 */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_R8, X86_R10, X86_WIDTH_64, X86_ALU_ADD, 0);
 x86_l_17b:
-	/* 0x17b: jmp    0x5b */
+	/* 0x17b: jmp    5b <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x5b> */
 	X86_SIM_X86_JMP(0x17b, 0x5b, x86_l_5b);
 x86_l_180:
 	/* 0x180: mov    QWORD PTR [rdx],r8 */
@@ -363,6 +363,9 @@ x86_l_18d:
 	/* 0x18d: pop    rbp */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_RBP, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_18e:
+	/* 0x18e: jmp    193 <bcc_tcpconnect_ipv4_tuple_filter_xdp+0x193> ; native-link entry RET */
+	X86_SIM_X86_RET();
+x86_l_193:
 	/* native-link entry fallthrough exit */
 	X86_SIM_X86_RET();
 }

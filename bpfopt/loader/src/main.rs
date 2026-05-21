@@ -683,6 +683,15 @@ fn verify_workdir_with_log_level(
     let log = log_buf_to_string(&log_buf);
     fs::write(prog_dir.join(VERIFY_LOG), &log)?;
     if fd < 0 {
+        // A complex program at log_level>=1 can fill the verifier log buffer and
+        // make BPF_PROG_LOAD return -ENOSPC even though the program verifies.
+        // Retry once with the log disabled so the load is not log-bound.
+        const ENOSPC: i32 = 28;
+        if io::Error::last_os_error().raw_os_error() == Some(ENOSPC) && log_level != 0 {
+            return verify_workdir_with_log_level(
+                prog_dir, map_fds, btf_fd, func_info, line_info, 0,
+            );
+        }
         bail!(
             "BPF_PROG_LOAD rejected {}: {}; verifier log: {}",
             input.display(),
@@ -1426,15 +1435,6 @@ fn neg_errno(ret: i32) -> io::Error {
 mod tests {
     use super::*;
 
-    // EXPERIMENT: force `reals:!01000000` to see if loader can now match
-    // corpus run's 16 map_inline applied (was 10).
-    const KATRAN_INLINE_HINTS: [&str; 5] = [
-        "--inline-hint=ctl_array:!00000000",
-        "--inline-hint=vip_map:!0a6401010000000000000000000000001f901100",
-        "--inline-hint=ch_rings:!00000000",
-        "--inline-hint=server_id_map:!00000000",
-        "--inline-hint=reals:!01000000",
-    ];
     const KATRAN_OVERLAY_MAPS: [(&str, &str); 2] = [
         ("ch_rings", "ch_rings.json"),
         ("server_id_map", "server_id_map.json"),
@@ -1725,7 +1725,6 @@ mod tests {
             .arg(map_values_dir)
             .arg("--map-ids")
             .arg(join_u32_csv(&prog.map_ids))
-            .args(KATRAN_INLINE_HINTS)
             .status()?;
         if !status.success() {
             bail!("hardcoded katran map_inline exited with {status}");

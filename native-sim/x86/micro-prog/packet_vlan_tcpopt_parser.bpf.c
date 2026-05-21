@@ -18,7 +18,7 @@ x86_l_9:
 	/* 0x9: cmp    rdx,r10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RDX, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_c:
-	/* 0xc: ja     0x148 */
+	/* 0xc: ja     148 <packet_vlan_tcpopt_parser_xdp+0x148> */
 	X86_SIM_X86_JCC(X86_CC_A, 0xc, 0x148, x86_l_148);
 x86_l_12:
 	/* 0x12: lea    rcx,[rdx+0x8] */
@@ -27,7 +27,7 @@ x86_l_16:
 	/* 0x16: cmp    rcx,r10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RCX, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_19:
-	/* 0x19: ja     0x148 */
+	/* 0x19: ja     148 <packet_vlan_tcpopt_parser_xdp+0x148> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x19, 0x148, x86_l_148);
 x86_l_1f:
 	/* 0x1f: lea    r9,[rdx+0x16] */
@@ -36,7 +36,7 @@ x86_l_23:
 	/* 0x23: cmp    r9,r10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_R9, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_26:
-	/* 0x26: ja     0x148 */
+	/* 0x26: ja     148 <packet_vlan_tcpopt_parser_xdp+0x148> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x26, 0x148, x86_l_148);
 x86_l_2c:
 	/* 0x2c: push   rbp */
@@ -66,19 +66,19 @@ x86_l_3f:
 	/* 0x3f: cmp    ecx,0x800 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 2048ULL);
 x86_l_45:
-	/* 0x45: je     0xe3 */
+	/* 0x45: je     e3 <packet_vlan_tcpopt_parser_xdp+0xe3> */
 	X86_SIM_X86_JCC(X86_CC_E, 0x45, 0xe3, x86_l_e3);
 x86_l_4b:
 	/* 0x4b: cmp    ecx,0x88a8 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 34984ULL);
 x86_l_51:
-	/* 0x51: je     0x5f */
+	/* 0x51: je     5f <packet_vlan_tcpopt_parser_xdp+0x5f> */
 	X86_SIM_X86_JCC(X86_CC_E, 0x51, 0x5f, x86_l_5f);
 x86_l_53:
 	/* 0x53: cmp    ecx,0x8100 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 33024ULL);
 x86_l_59:
-	/* 0x59: jne    0x142 */
+	/* 0x59: jne    142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x59, 0x142, x86_l_142);
 x86_l_5f:
 	/* 0x5f: lea    r9,[rdx+0x1a] */
@@ -87,7 +87,7 @@ x86_l_63:
 	/* 0x63: cmp    r9,r10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_R9, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_66:
-	/* 0x66: ja     0x142 */
+	/* 0x66: ja     142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x66, 0x142, x86_l_142);
 x86_l_6c:
 	/* 0x6c: movzx  esi,WORD PTR [rdx+0x16] */
@@ -108,19 +108,19 @@ x86_l_7f:
 	/* 0x7f: cmp    ecx,0x800 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 2048ULL);
 x86_l_85:
-	/* 0x85: je     0x14d */
+	/* 0x85: je     14d <packet_vlan_tcpopt_parser_xdp+0x14d> */
 	X86_SIM_X86_JCC(X86_CC_E, 0x85, 0x14d, x86_l_14d);
 x86_l_8b:
 	/* 0x8b: cmp    ecx,0x88a8 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 34984ULL);
 x86_l_91:
-	/* 0x91: je     0x9f */
+	/* 0x91: je     9f <packet_vlan_tcpopt_parser_xdp+0x9f> */
 	X86_SIM_X86_JCC(X86_CC_E, 0x91, 0x9f, x86_l_9f);
 x86_l_93:
 	/* 0x93: cmp    ecx,0x8100 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 33024ULL);
 x86_l_99:
-	/* 0x99: jne    0x142 */
+	/* 0x99: jne    142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x99, 0x142, x86_l_142);
 x86_l_9f:
 	/* 0x9f: lea    rcx,[rdx+0x1e] */
@@ -129,7 +129,7 @@ x86_l_a3:
 	/* 0xa3: cmp    rcx,r10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RCX, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_a6:
-	/* 0xa6: ja     0x142 */
+	/* 0xa6: ja     142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_A, 0xa6, 0x142, x86_l_142);
 x86_l_ac:
 	/* 0xac: movzx  ecx,WORD PTR [rdx+0x1c] */
@@ -144,7 +144,7 @@ x86_l_b7:
 	/* 0xb7: cmp    ecx,0x800 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 2048ULL);
 x86_l_bd:
-	/* 0xbd: jne    0x142 */
+	/* 0xbd: jne    142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0xbd, 0x142, x86_l_142);
 x86_l_c3:
 	/* 0xc3: lea    rcx,[rdx+0x32] */
@@ -153,7 +153,7 @@ x86_l_c7:
 	/* 0xc7: cmp    rcx,r10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RCX, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_ca:
-	/* 0xca: ja     0x142 */
+	/* 0xca: ja     142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_A, 0xca, 0x142, x86_l_142);
 x86_l_cc:
 	/* 0xcc: lea    r9,[rdx+0x1e] */
@@ -171,7 +171,7 @@ x86_l_dc:
 	/* 0xdc: mov    ecx,0x2 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
 x86_l_e1:
-	/* 0xe1: jmp    0xf3 */
+	/* 0xe1: jmp    f3 <packet_vlan_tcpopt_parser_xdp+0xf3> */
 	X86_SIM_X86_JMP(0xe1, 0xf3, x86_l_f3);
 x86_l_e3:
 	/* 0xe3: xor    esi,esi */
@@ -186,7 +186,7 @@ x86_l_eb:
 	/* 0xeb: cmp    rdi,r10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RDI, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_ee:
-	/* 0xee: ja     0x142 */
+	/* 0xee: ja     142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_A, 0xee, 0x142, x86_l_142);
 x86_l_f0:
 	/* 0xf0: xor    r8d,r8d */
@@ -204,7 +204,7 @@ x86_l_fe:
 	/* 0xfe: cmp    r11b,0x40 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R11, X86_REG_NONE, X86_WIDTH_8, 0, 64ULL);
 x86_l_102:
-	/* 0x102: jne    0x142 */
+	/* 0x102: jne    142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x102, 0x142, x86_l_142);
 x86_l_104:
 	/* 0x104: and    edi,0xf */
@@ -213,7 +213,7 @@ x86_l_107:
 	/* 0x107: cmp    dil,0x5 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_8, 0, 5ULL);
 x86_l_10b:
-	/* 0x10b: jb     0x142 */
+	/* 0x10b: jb     142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_B, 0x10b, 0x142, x86_l_142);
 x86_l_10d:
 	/* 0x10d: lea    rbx,[r9+rdi*4] */
@@ -222,13 +222,13 @@ x86_l_111:
 	/* 0x111: cmp    rbx,r10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RBX, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_114:
-	/* 0x114: ja     0x142 */
+	/* 0x114: ja     142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x114, 0x142, x86_l_142);
 x86_l_116:
 	/* 0x116: cmp    BYTE PTR [r9+0x9],0x6 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_R9, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 38654705670ULL);
 x86_l_11b:
-	/* 0x11b: jne    0x142 */
+	/* 0x11b: jne    142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x11b, 0x142, x86_l_142);
 x86_l_11d:
 	/* 0x11d: lea    r14,[rbx+0x14] */
@@ -237,7 +237,7 @@ x86_l_121:
 	/* 0x121: cmp    r14,r10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_R14, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_124:
-	/* 0x124: ja     0x142 */
+	/* 0x124: ja     142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x124, 0x142, x86_l_142);
 x86_l_126:
 	/* 0x126: movzx  r11d,BYTE PTR [rbx+0xc] */
@@ -246,7 +246,7 @@ x86_l_12b:
 	/* 0x12b: cmp    r11,0x50 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R11, X86_REG_NONE, X86_WIDTH_64, 0, 80ULL);
 x86_l_12f:
-	/* 0x12f: jb     0x142 */
+	/* 0x12f: jb     142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_B, 0x12f, 0x142, x86_l_142);
 x86_l_131:
 	/* 0x131: shr    r11d,0x2 */
@@ -261,7 +261,7 @@ x86_l_13d:
 	/* 0x13d: cmp    r15,r10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_R15, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_140:
-	/* 0x140: jbe    0x154 */
+	/* 0x140: jbe    154 <packet_vlan_tcpopt_parser_xdp+0x154> */
 	X86_SIM_X86_JCC(X86_CC_BE, 0x140, 0x154, x86_l_154);
 x86_l_142:
 	/* 0x142: pop    rbx */
@@ -276,13 +276,13 @@ x86_l_147:
 	/* 0x147: pop    rbp */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_RBP, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_148:
-	/* 0x148: jmp    0x270 ; native-link entry RET */
+	/* 0x148: jmp    270 <packet_vlan_tcpopt_parser_xdp+0x270> ; native-link entry RET */
 	X86_SIM_X86_RET();
 x86_l_14d:
 	/* 0x14d: mov    ecx,0x1 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 1ULL);
 x86_l_152:
-	/* 0x152: jmp    0xe7 */
+	/* 0x152: jmp    e7 <packet_vlan_tcpopt_parser_xdp+0xe7> */
 	X86_SIM_X86_JMP(0x152, 0xe7, x86_l_e7);
 x86_l_154:
 	/* 0x154: lea    r15,[rbx+0x20] */
@@ -291,61 +291,61 @@ x86_l_158:
 	/* 0x158: cmp    r15,r10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_R15, X86_R10, X86_WIDTH_64, 0, 0);
 x86_l_15b:
-	/* 0x15b: ja     0x142 */
+	/* 0x15b: ja     142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x15b, 0x142, x86_l_142);
 x86_l_15d:
 	/* 0x15d: cmp    r11b,0x20 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R11, X86_REG_NONE, X86_WIDTH_8, 0, 32ULL);
 x86_l_161:
-	/* 0x161: jb     0x142 */
+	/* 0x161: jb     142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_B, 0x161, 0x142, x86_l_142);
 x86_l_163:
 	/* 0x163: cmp    BYTE PTR [r14],0x2 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_R14, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 2ULL);
 x86_l_167:
-	/* 0x167: jne    0x142 */
+	/* 0x167: jne    142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x167, 0x142, x86_l_142);
 x86_l_169:
 	/* 0x169: cmp    BYTE PTR [rbx+0x15],0x4 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 90194313220ULL);
 x86_l_16d:
-	/* 0x16d: jb     0x142 */
+	/* 0x16d: jb     142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_B, 0x16d, 0x142, x86_l_142);
 x86_l_16f:
 	/* 0x16f: cmp    BYTE PTR [rbx+0x18],0x1 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 103079215105ULL);
 x86_l_173:
-	/* 0x173: jne    0x142 */
+	/* 0x173: jne    142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x173, 0x142, x86_l_142);
 x86_l_175:
 	/* 0x175: cmp    BYTE PTR [rbx+0x19],0x3 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 107374182403ULL);
 x86_l_179:
-	/* 0x179: jne    0x142 */
+	/* 0x179: jne    142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x179, 0x142, x86_l_142);
 x86_l_17b:
 	/* 0x17b: cmp    BYTE PTR [rbx+0x1a],0x3 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 111669149699ULL);
 x86_l_17f:
-	/* 0x17f: jb     0x142 */
+	/* 0x17f: jb     142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_B, 0x17f, 0x142, x86_l_142);
 x86_l_181:
 	/* 0x181: cmp    BYTE PTR [rbx+0x1c],0x4 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 120259084292ULL);
 x86_l_185:
-	/* 0x185: jne    0x142 */
+	/* 0x185: jne    142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x185, 0x142, x86_l_142);
 x86_l_187:
 	/* 0x187: cmp    BYTE PTR [rbx+0x1d],0x2 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 124554051586ULL);
 x86_l_18b:
-	/* 0x18b: jb     0x142 */
+	/* 0x18b: jb     142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_B, 0x18b, 0x142, x86_l_142);
 x86_l_18d:
 	/* 0x18d: cmp    BYTE PTR [rbx+0x1e],0x1 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 128849018881ULL);
 x86_l_191:
-	/* 0x191: jne    0x142 */
+	/* 0x191: jne    142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x191, 0x142, x86_l_142);
 x86_l_193:
 	/* 0x193: shl    rdi,0x2 */
@@ -516,7 +516,7 @@ x86_l_266:
 	/* 0x266: mov    eax,0x2 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
 x86_l_26b:
-	/* 0x26b: jmp    0x142 */
+	/* 0x26b: jmp    142 <packet_vlan_tcpopt_parser_xdp+0x142> */
 	X86_SIM_X86_JMP(0x26b, 0x142, x86_l_142);
 x86_l_270:
 	/* native-link entry fallthrough exit */

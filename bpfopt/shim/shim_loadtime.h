@@ -408,10 +408,70 @@ static int loadtime_prepare_target(const char *workdir, char *target_json,
     return loadtime_write_file(target_json, fallback, sizeof(fallback) - 1);
 }
 
+static int loadtime_bytecode_needs_fd_array(const struct bpf_insn *insns,
+                                            uint32_t insn_cnt) {
+    for (uint32_t pc = 0; pc < insn_cnt; pc++) {
+        const struct bpf_insn *insn = &insns[pc];
+        if (insn->code == (BPF_LD | BPF_DW | BPF_IMM)) {
+            if (insn->src_reg == BPF_PSEUDO_MAP_IDX ||
+                insn->src_reg == BPF_PSEUDO_MAP_IDX_VALUE)
+                return 1;
+            if (pc + 1 < insn_cnt)
+                pc++;
+            continue;
+        }
+        if ((insn->code == (BPF_JMP | BPF_CALL) ||
+             insn->code == (BPF_JMP32 | BPF_CALL)) &&
+            insn->src_reg == BPF_PSEUDO_KINSN_CALL &&
+            insn->off != 0)
+            return 1;
+    }
+    return 0;
+}
+
+static int loadtime_write_fd_to_id_json(const char *path,
+                                        const struct shim_map_ref *refs,
+                                        uint32_t ref_n) {
+    uint32_t *fds = NULL;
+    uint32_t *kids = NULL;
+    uint32_t n = 0;
+    if (ref_n) {
+        fds = (uint32_t *)calloc(ref_n, sizeof(uint32_t));
+        kids = (uint32_t *)calloc(ref_n, sizeof(uint32_t));
+        if (!fds || !kids) {
+            free(fds);
+            free(kids);
+            return -1;
+        }
+    }
+    for (uint32_t i = 0; i < ref_n; i++) {
+        if (refs[i].loader_fd < 0 || refs[i].kernel_id == 0)
+            continue;
+        int dup = 0;
+        for (uint32_t j = 0; j < n; j++) {
+            if (fds[j] == (uint32_t)refs[i].loader_fd) {
+                dup = 1;
+                break;
+            }
+        }
+        if (dup)
+            continue;
+        fds[n] = (uint32_t)refs[i].loader_fd;
+        kids[n] = refs[i].kernel_id;
+        n++;
+    }
+    int rc = write_fd_to_id_json(path, fds, kids, n);
+    free(fds);
+    free(kids);
+    return rc;
+}
+
 static int loadtime_probe_verifier_log(const union bpf_attr *orig_attr,
                                        unsigned int attr_size,
                                        const char *bytecode_path,
                                        const char *target_json_path,
+                                       const uint32_t *map_ids,
+                                       uint32_t map_n,
                                        const char *log_path) {
     uint32_t insn_cnt = 0;
     struct bpf_insn *insns = loadtime_read_bytecode(bytecode_path, &insn_cnt);
@@ -419,10 +479,19 @@ static int loadtime_probe_verifier_log(const union bpf_attr *orig_attr,
         return -1;
     int *fd_array = NULL;
     uint32_t fd_array_n = 0;
-    if (build_full_fd_array(target_json_path, NULL, 0,
-                            &fd_array, &fd_array_n) != 0) {
-        free(insns);
-        return -1;
+    int needs_fd_array = loadtime_bytecode_needs_fd_array(insns, insn_cnt);
+    if (needs_fd_array) {
+        if (build_full_fd_array(target_json_path, map_ids, map_n,
+                                &fd_array, &fd_array_n) != 0) {
+            free(insns);
+            return -1;
+        }
+        if (!fd_array || fd_array_n == 0) {
+            free_full_fd_array(fd_array, fd_array_n);
+            free(insns);
+            errno = EINVAL;
+            return -1;
+        }
     }
 
     const size_t log_buf_size = 16 * 1024 * 1024;
@@ -443,6 +512,7 @@ static int loadtime_probe_verifier_log(const union bpf_attr *orig_attr,
     a->log_level = 2;
     a->log_buf = (uintptr_t)log_buf;
     a->log_size = (uint32_t)log_buf_size;
+    a->fd_array = 0;
     if (fd_array) a->fd_array = (uintptr_t)fd_array;
     if (sizeof(attr_buf) >= 152)
         memset(attr_buf + 148, 0, 4);
@@ -470,7 +540,7 @@ static int loadtime_probe_verifier_log(const union bpf_attr *orig_attr,
     free(log_buf);
     free(insns);
     errno = saved_errno;
-    return 0;
+    return pfd >= 0 ? 0 : -1;
 }
 
 static int loadtime_optimize_prog_load(const union bpf_attr *attr,
@@ -563,6 +633,40 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
         write_map_snapshots(map_values_dir, map_ids, map_types, map_n);
     }
 
+    char fd_to_id_path[360], canon[360], canon_log[360];
+    snprintf(fd_to_id_path, sizeof(fd_to_id_path), "%s/fd-to-id.json", workdir);
+    snprintf(canon, sizeof(canon), "%s/input.canon.bin", workdir);
+    snprintf(canon_log, sizeof(canon_log), "%s/canonicalize.log", workdir);
+    if (loadtime_write_fd_to_id_json(fd_to_id_path, map_refs, map_ref_n) != 0) {
+        snprintf(err, err_sz, "failed to write loadtime fd-to-id map %s errno=%d",
+                 fd_to_id_path, errno);
+        free(map_refs);
+        free(map_ids);
+        free(map_types);
+        free(plan_json);
+        return -1;
+    }
+    if (run_canonicalize(cur, canon, target_json, map_ids_csv,
+                         fd_to_id_path, canon_log) != 0) {
+        char err_tail[1024] = {0};
+        read_tail_escaped(canon_log, err_tail, sizeof(err_tail));
+        snprintf(err, err_sz, "loadtime canonicalize failed: %s", err_tail);
+        free(map_refs);
+        free(map_ids);
+        free(map_types);
+        free(plan_json);
+        return -1;
+    }
+    if (rename(canon, cur) != 0) {
+        snprintf(err, err_sz, "failed to install canonicalized bytecode errno=%d",
+                 errno);
+        free(map_refs);
+        free(map_ids);
+        free(map_types);
+        free(plan_json);
+        return -1;
+    }
+
     char prog_type_name[32];
     snprintf(prog_type_name, sizeof(prog_type_name), "%s",
              prog_type_short_name(attr->prog_type));
@@ -574,8 +678,10 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
     snprintf(verifier_log, sizeof(verifier_log), "%s/verifier_log_initial.log",
              workdir);
     if (loadtime_probe_verifier_log(attr, attr_size, cur, target_json,
-                                    verifier_log) != 0) {
-        snprintf(err, err_sz, "loadtime initial verifier probe failed");
+                                    map_ids, map_n, verifier_log) != 0) {
+        snprintf(err, err_sz,
+                 "loadtime initial verifier probe failed errno=%d log=%s",
+                 errno, verifier_log);
         free(map_refs);
         free(map_ids);
         free(map_types);
@@ -664,9 +770,10 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
             continue;
         }
         if (loadtime_probe_verifier_log(attr, attr_size, nxt, target_json,
-                                        verifier_log) != 0) {
-            snprintf(err, err_sz, "loadtime verifier probe failed after step %s",
-                     name[0] ? name : "<unnamed>");
+                                        map_ids, map_n, verifier_log) != 0) {
+            snprintf(err, err_sz,
+                     "loadtime verifier probe failed after step %s errno=%d log=%s",
+                     name[0] ? name : "<unnamed>", errno, verifier_log);
             free(map_refs);
             free(map_ids);
             free(map_types);
@@ -693,14 +800,28 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
 
     int *fd_array = NULL;
     uint32_t fd_array_n = 0;
-    if (build_full_fd_array(target_json, NULL, 0, &fd_array, &fd_array_n) != 0) {
-        snprintf(err, err_sz, "failed to build loadtime fd_array");
-        free(optimized);
-        free(map_refs);
-        free(map_ids);
-        free(map_types);
-        free(plan_json);
-        return -1;
+    int needs_fd_array = loadtime_bytecode_needs_fd_array(optimized, out_insn_cnt);
+    if (needs_fd_array) {
+        if (build_full_fd_array(target_json, map_ids, map_n,
+                                &fd_array, &fd_array_n) != 0) {
+            snprintf(err, err_sz, "failed to build loadtime fd_array");
+            free(optimized);
+            free(map_refs);
+            free(map_ids);
+            free(map_types);
+            free(plan_json);
+            return -1;
+        }
+        if (!fd_array || fd_array_n == 0) {
+            snprintf(err, err_sz, "loadtime bytecode needs fd_array but none was built");
+            free_full_fd_array(fd_array, fd_array_n);
+            free(optimized);
+            free(map_refs);
+            free(map_ids);
+            free(map_types);
+            free(plan_json);
+            return -1;
+        }
     }
 
     memset(out->attr_buf, 0, sizeof(out->attr_buf));
@@ -709,6 +830,7 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
     union bpf_attr *a = (union bpf_attr *)(void *)out->attr_buf;
     a->insns = (uintptr_t)optimized;
     a->insn_cnt = out_insn_cnt;
+    a->fd_array = 0;
     if (fd_array) a->fd_array = (uintptr_t)fd_array;
     if (sizeof(out->attr_buf) >= 152)
         memset(out->attr_buf + 148, 0, 4);

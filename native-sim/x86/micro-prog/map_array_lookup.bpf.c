@@ -106,6 +106,9 @@ x86_l_68:
 	/* 0x68: add    rsp,0x18 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_RSP, X86_REG_NONE, X86_WIDTH_64, X86_ALU_ADD, 24ULL);
 x86_l_6c:
+	/* 0x6c: jmp    71 <map_array_lookup+0x71> ; native-link entry RET */
+	X86_SIM_X86_RET();
+x86_l_71:
 	/* native-link entry fallthrough exit */
 	X86_SIM_X86_RET();
 }

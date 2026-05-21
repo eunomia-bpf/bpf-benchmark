@@ -10,6 +10,7 @@
 #include <limits>
 #include <map>
 #include <optional>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -78,6 +79,15 @@ constexpr uint8_t BPF_PSEUDO_MAP_IDX_VALUE = 6;
 constexpr uint8_t BPF_PSEUDO_CALL = 1;
 constexpr uint8_t BPF_PSEUDO_FUNC = 4;
 constexpr size_t INSN_SIZE = 8;
+
+// BPF helper function ids (uapi/linux/bpf.h __BPF_FUNC_MAPPER order). This pure
+// LLVM tool does not link libbpf, so the relevant ids are spelled out here like
+// the opcode constants above.
+constexpr int32_t BPF_FUNC_map_lookup_elem = 1;
+constexpr int32_t BPF_FUNC_map_update_elem = 2;
+constexpr int32_t BPF_FUNC_map_delete_elem = 3;
+constexpr int32_t BPF_FUNC_map_push_elem = 87;
+constexpr int32_t BPF_FUNC_map_pop_elem = 88;
 
 struct Cli {
 	bool canonicalize_map_refs = false;
@@ -388,7 +398,7 @@ void run_pass(Cli &cli)
 		output = run_llvm_roundtrip(input, false);
 	} else if (*cli.pass == "map_inline") {
 		auto map_inlined = input;
-		inlined = apply_map_inline_hints(map_inlined, cli);
+		inlined = apply_map_inline_auto(map_inlined, cli);
 		output = run_llvm_roundtrip(map_inlined, true);
 	} else {
 		output = run_llvm_roundtrip(input, true);

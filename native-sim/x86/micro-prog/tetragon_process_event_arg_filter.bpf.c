@@ -22,10 +22,10 @@ x86_l_c:
 	/* 0xc: cmp    rsi,rcx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RSI, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_f:
-	/* 0xf: jbe    0x16 */
+	/* 0xf: jbe    16 <tetragon_process_event_arg_filter_xdp+0x16> */
 	X86_SIM_X86_JCC(X86_CC_BE, 0xf, 0x16, x86_l_16);
 x86_l_11:
-	/* 0x11: jmp    0x2d0 ; native-link entry RET */
+	/* 0x11: jmp    2d5 <tetragon_process_event_arg_filter_xdp+0x2d5> ; native-link entry RET */
 	X86_SIM_X86_RET();
 x86_l_16:
 	/* 0x16: lea    rdx,[rsi+0x8] */
@@ -34,7 +34,7 @@ x86_l_1a:
 	/* 0x1a: cmp    rdx,rcx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RDX, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_1d:
-	/* 0x1d: ja     0x11 */
+	/* 0x1d: ja     11 <tetragon_process_event_arg_filter_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x1d, 0x11, x86_l_11);
 x86_l_1f:
 	/* 0x1f: lea    rdx,[rsi+0x410] */
@@ -43,19 +43,19 @@ x86_l_26:
 	/* 0x26: cmp    rdx,rcx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RDX, X86_RCX, X86_WIDTH_64, 0, 0);
 x86_l_29:
-	/* 0x29: ja     0x11 */
+	/* 0x29: ja     11 <tetragon_process_event_arg_filter_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x29, 0x11, x86_l_11);
 x86_l_2b:
 	/* 0x2b: cmp    DWORD PTR [rsi+0x8],0x20 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 34359738400ULL);
 x86_l_2f:
-	/* 0x2f: jne    0x11 */
+	/* 0x2f: jne    11 <tetragon_process_event_arg_filter_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x2f, 0x11, x86_l_11);
 x86_l_31:
 	/* 0x31: cmp    DWORD PTR [rsi+0xc],0x20 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RSI, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 51539607584ULL);
 x86_l_35:
-	/* 0x35: jne    0x11 */
+	/* 0x35: jne    11 <tetragon_process_event_arg_filter_xdp+0x11> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x35, 0x11, x86_l_11);
 x86_l_37:
 	/* 0x37: push   rbp */
@@ -91,7 +91,7 @@ x86_l_58:
 	/* 0x58: xor    r8d,r8d */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_R8, X86_R8, X86_WIDTH_32, X86_ALU_XOR, 0);
 x86_l_5b:
-	/* 0x5b: jmp    0x7a */
+	/* 0x5b: jmp    7a <tetragon_process_event_arg_filter_xdp+0x7a> */
 	X86_SIM_X86_JMP(0x5b, 0x7a, x86_l_7a);
 x86_l_5d:
 	/* 0x5d: shl    rcx,0x20 */
@@ -115,7 +115,7 @@ x86_l_70:
 	/* 0x70: cmp    r8,0x20 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R8, X86_REG_NONE, X86_WIDTH_64, 0, 32ULL);
 x86_l_74:
-	/* 0x74: je     0x2b5 */
+	/* 0x74: je     2b5 <tetragon_process_event_arg_filter_xdp+0x2b5> */
 	X86_SIM_X86_JCC(X86_CC_E, 0x74, 0x2b5, x86_l_2b5);
 x86_l_7a:
 	/* 0x7a: movzx  r14d,BYTE PTR [rsi-0x13] */
@@ -133,43 +133,43 @@ x86_l_89:
 	/* 0x89: cmp    ecx,0x4 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 4ULL);
 x86_l_8c:
-	/* 0x8c: jg     0xa0 */
+	/* 0x8c: jg     a0 <tetragon_process_event_arg_filter_xdp+0xa0> */
 	X86_SIM_X86_JCC(X86_CC_G, 0x8c, 0xa0, x86_l_a0);
 x86_l_8e:
 	/* 0x8e: cmp    ecx,0x1 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 1ULL);
 x86_l_91:
-	/* 0x91: je     0xc7 */
+	/* 0x91: je     c7 <tetragon_process_event_arg_filter_xdp+0xc7> */
 	X86_SIM_X86_JCC(X86_CC_E, 0x91, 0xc7, x86_l_c7);
 x86_l_93:
 	/* 0x93: cmp    ecx,0x2 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
 x86_l_96:
-	/* 0x96: jne    0xb2 */
+	/* 0x96: jne    b2 <tetragon_process_event_arg_filter_xdp+0xb2> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x96, 0xb2, x86_l_b2);
 x86_l_98:
 	/* 0x98: mov    r12d,0x23 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_R12, X86_REG_NONE, X86_WIDTH_32, 0, 35ULL);
 x86_l_9e:
-	/* 0x9e: jmp    0xd5 */
+	/* 0x9e: jmp    d5 <tetragon_process_event_arg_filter_xdp+0xd5> */
 	X86_SIM_X86_JMP(0x9e, 0xd5, x86_l_d5);
 x86_l_a0:
 	/* 0xa0: cmp    ecx,0x5 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 5ULL);
 x86_l_a3:
-	/* 0xa3: je     0xcf */
+	/* 0xa3: je     cf <tetragon_process_event_arg_filter_xdp+0xcf> */
 	X86_SIM_X86_JCC(X86_CC_E, 0xa3, 0xcf, x86_l_cf);
 x86_l_a5:
 	/* 0xa5: cmp    ecx,0x9 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 9ULL);
 x86_l_a8:
-	/* 0xa8: jne    0xb2 */
+	/* 0xa8: jne    b2 <tetragon_process_event_arg_filter_xdp+0xb2> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0xa8, 0xb2, x86_l_b2);
 x86_l_aa:
 	/* 0xaa: mov    r12d,0x41 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_R12, X86_REG_NONE, X86_WIDTH_32, 0, 65ULL);
 x86_l_b0:
-	/* 0xb0: jmp    0xd5 */
+	/* 0xb0: jmp    d5 <tetragon_process_event_arg_filter_xdp+0xd5> */
 	X86_SIM_X86_JMP(0xb0, 0xd5, x86_l_d5);
 x86_l_b2:
 	/* 0xb2: cmp    cx,0xd */
@@ -184,13 +184,13 @@ x86_l_c1:
 	/* 0xc1: cmove  r12d,eax */
 	X86_SIM_RUN_OP(X86_OP_CMOV, X86_R12, X86_RAX, X86_WIDTH_32, X86_CC_E, 0);
 x86_l_c5:
-	/* 0xc5: jmp    0xd5 */
+	/* 0xc5: jmp    d5 <tetragon_process_event_arg_filter_xdp+0xd5> */
 	X86_SIM_X86_JMP(0xc5, 0xd5, x86_l_d5);
 x86_l_c7:
 	/* 0xc7: mov    r12d,0x11 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_R12, X86_REG_NONE, X86_WIDTH_32, 0, 17ULL);
 x86_l_cd:
-	/* 0xcd: jmp    0xd5 */
+	/* 0xcd: jmp    d5 <tetragon_process_event_arg_filter_xdp+0xd5> */
 	X86_SIM_X86_JMP(0xcd, 0xd5, x86_l_d5);
 x86_l_cf:
 	/* 0xcf: mov    r12d,0x37 */
@@ -238,25 +238,25 @@ x86_l_105:
 	/* 0x105: cmp    rdi,0x68736162 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_64, 0, 1752392034ULL);
 x86_l_10c:
-	/* 0x10c: je     0x11d */
+	/* 0x10c: je     11d <tetragon_process_event_arg_filter_xdp+0x11d> */
 	X86_SIM_X86_JCC(X86_CC_E, 0x10c, 0x11d, x86_l_11d);
 x86_l_10e:
 	/* 0x10e: cmp    edi,0x6c727563 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_32, 0, 1819440483ULL);
 x86_l_114:
-	/* 0x114: jne    0x124 */
+	/* 0x114: jne    124 <tetragon_process_event_arg_filter_xdp+0x124> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x114, 0x124, x86_l_124);
 x86_l_116:
 	/* 0x116: mov    ebx,0x2 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
 x86_l_11b:
-	/* 0x11b: jmp    0x146 */
+	/* 0x11b: jmp    146 <tetragon_process_event_arg_filter_xdp+0x146> */
 	X86_SIM_X86_JMP(0x11b, 0x146, x86_l_146);
 x86_l_11d:
 	/* 0x11d: mov    ebx,0x1 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_RBX, X86_REG_NONE, X86_WIDTH_32, 0, 1ULL);
 x86_l_122:
-	/* 0x122: jmp    0x146 */
+	/* 0x122: jmp    146 <tetragon_process_event_arg_filter_xdp+0x146> */
 	X86_SIM_X86_JMP(0x122, 0x146, x86_l_146);
 x86_l_124:
 	/* 0x124: mov    ebx,0x3 */
@@ -268,7 +268,7 @@ x86_l_133:
 	/* 0x133: cmp    r9,rax */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_R9, X86_RAX, X86_WIDTH_64, 0, 0);
 x86_l_136:
-	/* 0x136: je     0x146 */
+	/* 0x136: je     146 <tetragon_process_event_arg_filter_xdp+0x146> */
 	X86_SIM_X86_JCC(X86_CC_E, 0x136, 0x146, x86_l_146);
 x86_l_138:
 	/* 0x138: xor    ebx,ebx */
@@ -289,7 +289,7 @@ x86_l_149:
 	/* 0x149: test   r12d,r12d */
 	X86_SIM_RUN_OP(X86_OP_TEST_REG, X86_R12, X86_R12, X86_WIDTH_32, 0, 0);
 x86_l_14c:
-	/* 0x14c: je     0x5d */
+	/* 0x14c: je     5d <tetragon_process_event_arg_filter_xdp+0x5d> */
 	X86_SIM_X86_JCC(X86_CC_E, 0x14c, 0x5d, x86_l_5d);
 x86_l_152:
 	/* 0x152: mov    QWORD PTR [rsp+0x18],r14 */
@@ -355,7 +355,7 @@ x86_l_1a9:
 	/* 0x1a9: cmp    dil,0x42 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_RDI, X86_REG_NONE, X86_WIDTH_8, 0, 66ULL);
 x86_l_1ad:
-	/* 0x1ad: je     0x1e2 */
+	/* 0x1ad: je     1e2 <tetragon_process_event_arg_filter_xdp+0x1e2> */
 	X86_SIM_X86_JCC(X86_CC_E, 0x1ad, 0x1e2, x86_l_1e2);
 x86_l_1af:
 	/* 0x1af: mov    eax,r15d */
@@ -364,7 +364,7 @@ x86_l_1b2:
 	/* 0x1b2: and    eax,0x24 */
 	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, X86_ALU_AND, 36ULL);
 x86_l_1b5:
-	/* 0x1b5: jne    0x1e2 */
+	/* 0x1b5: jne    1e2 <tetragon_process_event_arg_filter_xdp+0x1e2> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x1b5, 0x1e2, x86_l_1e2);
 x86_l_1b7:
 	/* 0x1b7: movzx  eax,BYTE PTR [rsi-0x16] */
@@ -400,7 +400,7 @@ x86_l_1da:
 	/* 0x1da: mov    r11,rax */
 	X86_SIM_RUN_OP(X86_OP_MOV_REG, X86_R11, X86_RAX, X86_WIDTH_64, 0, 0);
 x86_l_1dd:
-	/* 0x1dd: jmp    0x69 */
+	/* 0x1dd: jmp    69 <tetragon_process_event_arg_filter_xdp+0x69> */
 	X86_SIM_X86_JMP(0x1dd, 0x69, x86_l_69);
 x86_l_1e2:
 	/* 0x1e2: shl    r12,0x30 */
@@ -439,13 +439,13 @@ x86_l_207:
 	/* 0x207: test   r12b,0x2 */
 	X86_SIM_RUN_OP(X86_OP_TEST_IMM, X86_R12, X86_REG_NONE, X86_WIDTH_8, 0, 2ULL);
 x86_l_20b:
-	/* 0x20b: je     0x23d */
+	/* 0x20b: je     23d <tetragon_process_event_arg_filter_xdp+0x23d> */
 	X86_SIM_X86_JCC(X86_CC_E, 0x20b, 0x23d, x86_l_23d);
 x86_l_20d:
 	/* 0x20d: test   ebx,ebx */
 	X86_SIM_RUN_OP(X86_OP_TEST_REG, X86_RBX, X86_RBX, X86_WIDTH_32, 0, 0);
 x86_l_20f:
-	/* 0x20f: je     0x23d */
+	/* 0x20f: je     23d <tetragon_process_event_arg_filter_xdp+0x23d> */
 	X86_SIM_X86_JCC(X86_CC_E, 0x20f, 0x23d, x86_l_23d);
 x86_l_211:
 	/* 0x211: shl    rcx,0x30 */
@@ -589,7 +589,7 @@ x86_l_2ad:
 	/* 0x2ad: xor    r11,rdx */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_R11, X86_RDX, X86_WIDTH_64, X86_ALU_XOR, 0);
 x86_l_2b0:
-	/* 0x2b0: jmp    0x69 */
+	/* 0x2b0: jmp    69 <tetragon_process_event_arg_filter_xdp+0x69> */
 	X86_SIM_X86_JMP(0x2b0, 0x69, x86_l_69);
 x86_l_2b5:
 	/* 0x2b5: mov    rax,QWORD PTR [rsp+0x10] */
@@ -622,6 +622,9 @@ x86_l_2cf:
 	/* 0x2cf: pop    rbp */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_RBP, X86_REG_NONE, X86_WIDTH_64, 0, 0);
 x86_l_2d0:
+	/* 0x2d0: jmp    2d5 <tetragon_process_event_arg_filter_xdp+0x2d5> ; native-link entry RET */
+	X86_SIM_X86_RET();
+x86_l_2d5:
 	/* native-link entry fallthrough exit */
 	X86_SIM_X86_RET();
 }

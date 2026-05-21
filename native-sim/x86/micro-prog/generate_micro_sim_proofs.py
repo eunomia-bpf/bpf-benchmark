@@ -216,7 +216,7 @@ def load_rodata16(obj: Path) -> dict[str, tuple[int, int]]:
             continue
         offset = int(fields[0], 16)
         size = int(fields[idx + 1], 16)
-        name = fields[idx + 2]
+        name = fields[-1]
         if size >= 16 and offset + 16 <= len(data):
             out[name] = (
                 int.from_bytes(data[offset:offset + 8], "little"),
@@ -744,10 +744,6 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
     append_step(lines, insn, indent, step_macro, rodata16)
 
 
-def c_ident(text: str) -> str:
-    return re.sub(r"[^A-Za-z0-9_]", "_", text)
-
-
 def program_kind(item: dict) -> str:
     tags = set(item.get("tags", []))
     if "cgroup-skb" in tags or "cgroup_skb" in tags:
@@ -937,7 +933,6 @@ def main() -> int:
     parser.add_argument("--micro-programs", type=Path)
     parser.add_argument("--output-dir", type=Path, default=OUT_DIR)
     parser.add_argument("--proof-object-dir", type=Path, default=PROOF_OBJECT_DIR)
-    parser.add_argument("--native-build-dir", type=Path, help=argparse.SUPPRESS)
     parser.add_argument("--config", type=Path, default=CONFIG)
     parser.add_argument("--only", nargs="*", help="optional micro benchmark stem list")
     args = parser.parse_args()

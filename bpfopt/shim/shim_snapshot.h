@@ -1,6 +1,10 @@
 #ifndef BPFREJIT_SHIM_SNAPSHOT_H
 #define BPFREJIT_SHIM_SNAPSHOT_H
 
+#ifndef BPF_PSEUDO_KINSN_CALL
+#define BPF_PSEUDO_KINSN_CALL 4
+#endif
+
 /* --- snapshot helpers (MAP_IDS / MAP_VALUES / canonicalize / VERIFIER_STATES) --- */
 
 /* Map types that can produce useful bpftool JSON snapshots for map_inline. */
@@ -50,6 +54,7 @@ static void format_map_ids_csv(uint32_t *ids, uint32_t n, char *out, size_t out_
 
 struct shim_map_ref {
     uint32_t pc;
+    int loader_fd;
     uint32_t kernel_id;
     uint32_t map_type;
     uint32_t key_size;
@@ -151,9 +156,11 @@ static int query_map_info_by_id(uint32_t map_id, struct bpf_map_info *info) {
 
 static void fill_map_ref_from_info(struct shim_map_ref *ref,
                                    uint32_t pc,
+                                   int loader_fd,
                                    const struct bpf_map_info *info) {
     memset(ref, 0, sizeof(*ref));
     ref->pc = pc;
+    ref->loader_fd = loader_fd;
     ref->kernel_id = info->id;
     ref->map_type = info->type;
     ref->key_size = info->key_size;
@@ -207,7 +214,7 @@ static int collect_current_map_refs(const struct bpf_insn *insns,
             return -1;
         }
         struct shim_map_ref ref;
-        fill_map_ref_from_info(&ref, pc, &mi);
+        fill_map_ref_from_info(&ref, pc, fd, &mi);
         if (append_map_ref(&refs, n_out, &cap, &ref) != 0) {
             free(refs);
             return -1;
@@ -266,7 +273,7 @@ static int collect_saved_map_refs(const struct bpf_insn *insns,
             return -1;
         }
         struct shim_map_ref ref;
-        fill_map_ref_from_info(&ref, pc, &mi);
+        fill_map_ref_from_info(&ref, pc, -1, &mi);
         if (append_map_ref(&refs, n_out, &cap, &ref) != 0) {
             free(refs);
             return -1;

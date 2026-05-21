@@ -15,7 +15,7 @@ x86_l_b:
 	/* 0xb: cmp    rax,rsi */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RAX, X86_RSI, X86_WIDTH_64, 0, 0);
 x86_l_e:
-	/* 0xe: jbe    0x26 */
+	/* 0xe: jbe    26 <cgroup_skb_hash_chain_prog+0x26> */
 	X86_SIM_X86_JCC(X86_CC_BE, 0xe, 0x26, x86_l_26);
 x86_l_10:
 	/* 0x10: mov    DWORD PTR [rdi+0x30],0xffffffff */
@@ -30,7 +30,7 @@ x86_l_1e:
 	/* 0x1e: mov    DWORD PTR [rdi+0x34],edx */
 	X86_SIM_RUN_OP(X86_OP_MOV_STORE_REG, X86_RDI, X86_RDX, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 52ULL);
 x86_l_21:
-	/* 0x21: jmp    0x103 ; native-link entry RET */
+	/* 0x21: jmp    108 <cgroup_skb_hash_chain_prog+0x108> ; native-link entry RET */
 	X86_SIM_X86_RET();
 x86_l_26:
 	/* 0x26: lea    rcx,[rax+0x8] */
@@ -39,7 +39,7 @@ x86_l_2a:
 	/* 0x2a: cmp    rcx,rsi */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RCX, X86_RSI, X86_WIDTH_64, 0, 0);
 x86_l_2d:
-	/* 0x2d: ja     0x10 */
+	/* 0x2d: ja     10 <cgroup_skb_hash_chain_prog+0x10> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x2d, 0x10, x86_l_10);
 x86_l_2f:
 	/* 0x2f: lea    rdx,[rax+0x50] */
@@ -48,7 +48,7 @@ x86_l_33:
 	/* 0x33: cmp    rdx,rsi */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RDX, X86_RSI, X86_WIDTH_64, 0, 0);
 x86_l_36:
-	/* 0x36: ja     0x10 */
+	/* 0x36: ja     10 <cgroup_skb_hash_chain_prog+0x10> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x36, 0x10, x86_l_10);
 x86_l_38:
 	/* 0x38: mov    rsi,rcx */
@@ -60,7 +60,7 @@ x86_l_3e:
 	/* 0x3e: cmp    rsi,r8 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RSI, X86_R8, X86_WIDTH_64, 0, 0);
 x86_l_41:
-	/* 0x41: ja     0x10 */
+	/* 0x41: ja     10 <cgroup_skb_hash_chain_prog+0x10> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x41, 0x10, x86_l_10);
 x86_l_43:
 	/* 0x43: add    rsi,0x8 */
@@ -69,19 +69,19 @@ x86_l_47:
 	/* 0x47: cmp    rsi,r8 */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RSI, X86_R8, X86_WIDTH_64, 0, 0);
 x86_l_4a:
-	/* 0x4a: ja     0x10 */
+	/* 0x4a: ja     10 <cgroup_skb_hash_chain_prog+0x10> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x4a, 0x10, x86_l_10);
 x86_l_4c:
 	/* 0x4c: cmp    DWORD PTR [rax+0x8],0x10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 34359738384ULL);
 x86_l_50:
-	/* 0x50: jne    0x10 */
+	/* 0x50: jne    10 <cgroup_skb_hash_chain_prog+0x10> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x50, 0x10, x86_l_10);
 x86_l_52:
 	/* 0x52: cmp    DWORD PTR [rax+0xc],0x8 */
 	X86_SIM_RUN_OP(X86_OP_CMP_MEM_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 51539607560ULL);
 x86_l_56:
-	/* 0x56: jne    0x10 */
+	/* 0x56: jne    10 <cgroup_skb_hash_chain_prog+0x10> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x56, 0x10, x86_l_10);
 x86_l_58:
 	/* 0x58: lea    rsi,[rcx+0x8] */
@@ -90,7 +90,7 @@ x86_l_5c:
 	/* 0x5c: cmp    rsi,rdx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RSI, X86_RDX, X86_WIDTH_64, 0, 0);
 x86_l_5f:
-	/* 0x5f: ja     0x10 */
+	/* 0x5f: ja     10 <cgroup_skb_hash_chain_prog+0x10> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x5f, 0x10, x86_l_10);
 x86_l_61:
 	/* 0x61: add    rcx,0x48 */
@@ -99,7 +99,7 @@ x86_l_65:
 	/* 0x65: cmp    rcx,rdx */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG, X86_RCX, X86_RDX, X86_WIDTH_64, 0, 0);
 x86_l_68:
-	/* 0x68: ja     0x10 */
+	/* 0x68: ja     10 <cgroup_skb_hash_chain_prog+0x10> */
 	X86_SIM_X86_JCC(X86_CC_A, 0x68, 0x10, x86_l_10);
 x86_l_6a:
 	/* 0x6a: push   r15 */
@@ -189,7 +189,7 @@ x86_l_dd:
 	/* 0xdd: cmp    r15,0x8 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R15, X86_REG_NONE, X86_WIDTH_64, 0, 8ULL);
 x86_l_e1:
-	/* 0xe1: jne    0xb4 */
+	/* 0xe1: jne    b4 <cgroup_skb_hash_chain_prog+0xb4> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0xe1, 0xb4, x86_l_b4);
 x86_l_e3:
 	/* 0xe3: add    rsi,0x5 */
@@ -198,7 +198,7 @@ x86_l_e7:
 	/* 0xe7: cmp    r9,0x10 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R9, X86_REG_NONE, X86_WIDTH_64, 0, 16ULL);
 x86_l_eb:
-	/* 0xeb: jne    0xa1 */
+	/* 0xeb: jne    a1 <cgroup_skb_hash_chain_prog+0xa1> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0xeb, 0xa1, x86_l_a1);
 x86_l_ed:
 	/* 0xed: mov    DWORD PTR [rdi+0x30],edx */
@@ -225,6 +225,9 @@ x86_l_100:
 	/* 0x100: mov    DWORD PTR [rdi+0x34],edx */
 	X86_SIM_RUN_OP(X86_OP_MOV_STORE_REG, X86_RDI, X86_RDX, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 52ULL);
 x86_l_103:
+	/* 0x103: jmp    108 <cgroup_skb_hash_chain_prog+0x108> ; native-link entry RET */
+	X86_SIM_X86_RET();
+x86_l_108:
 	/* native-link entry fallthrough exit */
 	X86_SIM_X86_RET();
 }

@@ -29,8 +29,8 @@ x86_l_9:
 	/* 0x9: cmp    rcx,QWORD PTR [rdi+0x8] */
 	X86_SIM_RUN_OP(X86_OP_CMP_REG_MEM, X86_RCX, X86_RDI, X86_WIDTH_64, X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_64), 8ULL);
 x86_l_d:
-	/* 0xd: ja     0x1e */
-	X86_SIM_X86_JCC(X86_CC_A, 0xd, 0x1e, x86_l_1e);
+	/* 0xd: ja     1d <helper_only_uid_gid+0x1d> */
+	X86_SIM_X86_JCC(X86_CC_A, 0xd, 0x1d, x86_l_1d);
 x86_l_f:
 	/* 0xf: call   QWORD PTR [rip+0x0] */
 	X86_SIM_BPF_CALL_bpf_get_current_uid_gid();
@@ -40,7 +40,10 @@ x86_l_15:
 x86_l_18:
 	/* 0x18: mov    eax,0x2 */
 	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
-x86_l_1e:
+x86_l_1d:
+	/* 0x1d: jmp    22 <helper_only_uid_gid+0x22> ; native-link entry RET */
+	X86_SIM_X86_RET();
+x86_l_22:
 	/* native-link entry fallthrough exit */
 	X86_SIM_X86_RET();
 }
