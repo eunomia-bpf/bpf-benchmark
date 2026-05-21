@@ -38,6 +38,7 @@ ARM64_QEMU_ROOT ?= $(ARTIFACT_ROOT)/qemu-arm64-root
 ARM64_QEMU_WORKSPACE := $(ARM64_QEMU_ROOT)$(ROOT_DIR)
 ARM64_QEMU_RUN_SCRIPT := $(ARM64_QEMU_ROOT)/qemu-run.sh
 ARM64_QEMU_STATUS := $(ARM64_QEMU_ROOT)/qemu-status
+ARM64_QEMU_ROOT_READY := $(ARM64_QEMU_ROOT)/qemu-init
 
 RUN_TARGET.kvm-x86 := x86-kvm
 RUN_TARGET.aws-x86 := aws-x86
@@ -187,7 +188,7 @@ RUNTIME_DOCKER_RUN = $(RUNTIME_DOCKER) -v "$(ROOT_DIR)/$(RUNTIME_RESULT_DIR):$(R
 
 .PHONY: check validate lint clean \
 	selftest negative-test test micro corpus all terminate kvm-host-cpu \
-	arm64-qemu-root clean-build clean-results clean-vm-tmp clean-docker-cache
+	clean-build clean-results clean-vm-tmp clean-docker-cache
 
 validate:
 	$(MAKE) test
@@ -212,7 +213,7 @@ selftest-kvm-x86 negative-test-kvm-x86 test-kvm-x86: runtime-kernel-image kvm-ho
 
 selftest-qemu-arm64 negative-test-qemu-arm64 test-qemu-arm64: RUNTIME_RESULT_DIR := tests/results
 selftest-qemu-arm64 negative-test-qemu-arm64 test-qemu-arm64: RUNTIME_SUITE_MODULE := runner.suites.test
-selftest-qemu-arm64 negative-test-qemu-arm64 test-qemu-arm64: arm64-qemu-root
+selftest-qemu-arm64 negative-test-qemu-arm64 test-qemu-arm64: $(ARM64_QEMU_ROOT_READY)
 	printf '%s\n' "#!/bin/sh" "set -eu" "export BPFREJIT_INSIDE_RUNTIME_CONTAINER=1 HOME=/root $(RUN_MAKE_VARS)" "exec python3 -m $(RUNTIME_SUITE_MODULE)" >"$(ARM64_QEMU_RUN_SCRIPT)"
 	chmod +x "$(ARM64_QEMU_RUN_SCRIPT)"
 	rm -f "$(ARM64_QEMU_STATUS)"
@@ -260,7 +261,7 @@ micro-qemu-arm64: RUNTIME_RESULT_DIR := micro/results
 corpus-qemu-arm64: RUNTIME_RESULT_DIR := corpus/results
 micro-qemu-arm64: RUNTIME_SUITE_MODULE := runner.suites.micro
 corpus-qemu-arm64: RUNTIME_SUITE_MODULE := corpus.driver
-micro-qemu-arm64 corpus-qemu-arm64: arm64-qemu-root
+micro-qemu-arm64 corpus-qemu-arm64: $(ARM64_QEMU_ROOT_READY)
 	printf '%s\n' "#!/bin/sh" "set -eu" "export BPFREJIT_INSIDE_RUNTIME_CONTAINER=1 HOME=/root $(RUN_MAKE_VARS)" "exec python3 -m $(RUNTIME_SUITE_MODULE)" >"$(ARM64_QEMU_RUN_SCRIPT)"
 	chmod +x "$(ARM64_QEMU_RUN_SCRIPT)"
 	rm -f "$(ARM64_QEMU_STATUS)"
@@ -316,7 +317,9 @@ __runtime-vm-micro __runtime-vm-corpus __runtime-vm-test: __runtime-vm-docker
 	"$(RUNNER_DIR)/scripts/bpfrejit-install" --image "$(RUNTIME_CONTAINER_IMAGE)" "$(RUNTIME_IMAGE_TAR)"
 	$(RUNTIME_DOCKER_RUN)
 
-arm64-qemu-root: arm64-runner-runtime-image-tar
+arm64-qemu-root: $(ARM64_QEMU_ROOT_READY)
+
+$(ARM64_QEMU_ROOT_READY): $(ARM64_RUNNER_RUNTIME_IMAGE_TAR) $(RUNNER_DIR)/scripts/qemu-arm64-init
 	test -n "$(ARM64_QEMU_BIN)"
 	install -d "$(ARTIFACT_ROOT)"
 	rm -rf "$(ARM64_QEMU_ROOT).tmp"
@@ -327,8 +330,8 @@ arm64-qemu-root: arm64-runner-runtime-image-tar
 		docker export "$$cid" | tar -C "$(ARM64_QEMU_ROOT).tmp" -xf -; \
 		docker rm "$$cid" >/dev/null; \
 		trap - EXIT; \
-		rm -rf "$(ARM64_QEMU_ROOT)"; \
-		mv "$(ARM64_QEMU_ROOT).tmp" "$(ARM64_QEMU_ROOT)"
+			rm -rf "$(ARM64_QEMU_ROOT)"; \
+			mv "$(ARM64_QEMU_ROOT).tmp" "$(ARM64_QEMU_ROOT)"
 	install -m 0755 "$(RUNNER_DIR)/scripts/qemu-arm64-init" "$(ARM64_QEMU_ROOT)/qemu-init"
 
 all: test micro corpus

@@ -13,6 +13,7 @@ RUN apt-get update \
         binutils \
         bzip2 \
         ca-certificates \
+        clang \
         curl \
         debianutils \
         diffutils \

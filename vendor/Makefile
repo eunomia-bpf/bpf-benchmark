@@ -19,6 +19,7 @@ OTEL_VER   := 0.140.0
 OTELCOL_VER:= 0.139.0
 
 CILIUM     := $(CURDIR)/repos/cilium
+CILIUM_EBPF:= $(CURDIR)/repos/cilium-ebpf
 TETRAGON   := $(CURDIR)/repos/tetragon
 OTEL       := $(CURDIR)/repos/opentelemetry-ebpf-profiler
 TRACEE     := $(CURDIR)/repos/tracee
@@ -64,7 +65,7 @@ $(BUILD)/otelcol-ebpf-profiler-%.yaml: Makefile
 	  'dist:' '  name: otelcol-ebpf-profiler' '  output_path: $(BUILD)/otelcol-ebpf-profiler-build-$*' '  version: $(OTEL_VER)' '  otelcol_version: $(OTELCOL_VER)' '  cgo_enabled: true' \
 	  'receivers:' '  - gomod: go.opentelemetry.io/ebpf-profiler v0.0.0' '    import: go.opentelemetry.io/ebpf-profiler/collector' '    path: $(OTEL)' \
 	  'exporters:' '  - gomod: go.opentelemetry.io/collector/exporter/debugexporter v$(OTELCOL_VER)' \
-	  'replaces:' '  - go.opentelemetry.io/ebpf-profiler => $(OTEL)' >"$@"
+	  'replaces:' '  - go.opentelemetry.io/ebpf-profiler => $(OTEL)' '  - github.com/cilium/ebpf => $(CILIUM_EBPF)' >"$@"
 
 otel-x86: GOARCH := amd64
 otel-x86: GOCC := gcc
@@ -109,6 +110,5 @@ bpftool-arm64: BPFTOOL_LLVM := 0
 bpftool-arm64: BPFTOOL_CROSS := ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- EXTRA_LDFLAGS="-L/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,/usr/lib/aarch64-linux-gnu"
 bpftool-x86 bpftool-arm64: bpftool-%:
 	install -d "$(BUILD)/.bpftool/$*" "$(BUILD)/$*/bpftool/bin"
-	$(MAKE) -C "$(BPFTOOL)" OUTPUT="$(BUILD)/.bpftool/$*/" clean
 	$(MAKE) -C "$(BPFTOOL)" OUTPUT="$(BUILD)/.bpftool/$*/" $(BPFTOOL_FLAGS) feature-llvm="$(BPFTOOL_LLVM)" $(BPFTOOL_CROSS) -j"$(JOBS)"
 	install -m 0755 "$(BUILD)/.bpftool/$*/bpftool" "$(BUILD)/$*/bpftool/bin/bpftool"

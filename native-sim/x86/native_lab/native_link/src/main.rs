@@ -92,28 +92,19 @@ struct Args {
 
     /// Per-call-site spec for every `bpf_map_lookup_elem` site in the
     /// entry program, given in BPF-source order. The runner walks the
-    /// companion `.bpf.o`'s bytecode to identify which map each call
-    /// uses, looks up that map's type, and produces one of these for
-    /// each site:
+    /// companion `.bpf.o`'s bytecode to identify which map each call uses.
     ///
-    ///   - HASH map call: ADDR = `__htab_map_lookup_elem`'s kernel
-    ///     address, OFFSET = `offsetof(struct htab_elem, key) +
-    ///     roundup(map.key_size, 8)`. native-link allocates a
-    ///     dedicated literal-pool entry, routes the `call *[rip+disp]`
-    ///     to that entry, and inserts a 9- or 11-byte
-    ///     `test rax,rax; je; add rax, OFFSET` chunk after the call.
-    ///   - Non-HASH map call: ADDR = `bpf_map_lookup_elem`'s kernel
-    ///     address, OFFSET = 0. Same routing, no inline.
-    ///
-    /// Format: INDEX=HEXADDR,OFFSET. INDEX is the zero-based BPF-source
-    /// ordinal of this `bpf_map_lookup_elem` call. Repeatable.
+    /// Preferred format:
+    /// INDEX=KIND,HEXADDR,KEY_OFFSET,MAP_ADDR,MAX_ENTRIES,ELEM_SIZE,INDEX_MASK,VALUE_OFFSET,PERCPU_BASE
+    /// where KIND is call/hash/array/percpu_array. The legacy
+    /// INDEX=HEXADDR,OFFSET form is still accepted for standalone tests.
     ///
     /// When zero `--lookup-site` flags are supplied, every
     /// `bpf_map_lookup_elem` call falls back to the shared
     /// `--helper bpf_map_lookup_elem=ADDR` pool with no inline (legacy
     /// behavior, used by the standalone `tests/run_micro_one.sh`
     /// driver that doesn't know about the bytecode oracle).
-    #[arg(long = "lookup-site", value_name = "INDEX=HEXADDR,OFFSET")]
+    #[arg(long = "lookup-site", value_name = "INDEX=KIND,ADDR,KEY_OFF,MAP,MAX,ELEM,MASK,VALUE_OFF,PERCPU")]
     lookup_sites: Vec<String>,
 
     /// Print a human-readable disassembly of the rewritten blob to stderr.
@@ -122,13 +113,26 @@ struct Args {
 }
 
 #[derive(Clone, Copy, Debug)]
+enum LookupKind {
+    Call,
+    Hash,
+    Array,
+    PerCpuArray,
+}
+
+#[derive(Clone, Copy, Debug)]
 struct LookupSiteSpec {
-    /// Kernel address the call should route to. For HASH this is
-    /// `__htab_map_lookup_elem`; for non-HASH it's the public
-    /// `bpf_map_lookup_elem`.
+    kind: LookupKind,
+    /// Kernel address the call should route to when this site remains a call.
     target_addr: u64,
-    /// Post-call `add rax, OFFSET` immediate. Zero means no inline.
+    /// HASH post-call `add rax, OFFSET` immediate. Zero means no hash inline.
     key_offset: u32,
+    map_addr: u64,
+    max_entries: u32,
+    elem_size: u32,
+    index_mask: u32,
+    value_offset: u32,
+    percpu_base_addr: u64,
 }
 
 fn parse_lookup_sites(args: &[String]) -> Result<Vec<LookupSiteSpec>> {
@@ -140,22 +144,44 @@ fn parse_lookup_sites(args: &[String]) -> Result<Vec<LookupSiteSpec>> {
         let idx: usize = idx_s
             .parse()
             .map_err(|e| anyhow!("--lookup-site INDEX parse: {e}"))?;
-        let (addr_s, off_s) = payload
-            .split_once(',')
-            .ok_or_else(|| anyhow!("--lookup-site payload missing offset; got {payload:?}"))?;
-        let addr_s = addr_s.strip_prefix("0x").unwrap_or(addr_s);
-        let target_addr = u64::from_str_radix(addr_s, 16)
-            .map_err(|e| anyhow!("--lookup-site ADDR parse: {e}"))?;
-        let key_offset: u32 = off_s
-            .parse()
-            .map_err(|e| anyhow!("--lookup-site OFFSET parse: {e}"))?;
-        by_index.push((
-            idx,
+        let parts: Vec<&str> = payload.split(',').collect();
+        let spec = if parts.len() == 2 {
+            let target_addr = parse_u64_auto(parts[0], "--lookup-site ADDR")?;
+            let key_offset = parse_u32_auto(parts[1], "--lookup-site OFFSET")?;
             LookupSiteSpec {
+                kind: if key_offset == 0 {
+                    LookupKind::Call
+                } else {
+                    LookupKind::Hash
+                },
                 target_addr,
                 key_offset,
-            },
-        ));
+                map_addr: 0,
+                max_entries: 0,
+                elem_size: 0,
+                index_mask: 0,
+                value_offset: 0,
+                percpu_base_addr: 0,
+            }
+        } else if parts.len() == 9 {
+            LookupSiteSpec {
+                kind: parse_lookup_kind(parts[0])?,
+                target_addr: parse_u64_auto(parts[1], "--lookup-site ADDR")?,
+                key_offset: parse_u32_auto(parts[2], "--lookup-site KEY_OFFSET")?,
+                map_addr: parse_u64_auto(parts[3], "--lookup-site MAP_ADDR")?,
+                max_entries: parse_u32_auto(parts[4], "--lookup-site MAX_ENTRIES")?,
+                elem_size: parse_u32_auto(parts[5], "--lookup-site ELEM_SIZE")?,
+                index_mask: parse_u32_auto(parts[6], "--lookup-site INDEX_MASK")?,
+                value_offset: parse_u32_auto(parts[7], "--lookup-site VALUE_OFFSET")?,
+                percpu_base_addr: parse_u64_auto(parts[8], "--lookup-site PERCPU_BASE")?,
+            }
+        } else {
+            bail!(
+                "--lookup-site payload has {} comma-separated fields; expected 2 or 9: {payload:?}",
+                parts.len()
+            );
+        };
+        by_index.push((idx, spec));
     }
     by_index.sort_by_key(|(i, _)| *i);
     for (expected, (i, _)) in by_index.iter().enumerate() {
@@ -167,6 +193,30 @@ fn parse_lookup_sites(args: &[String]) -> Result<Vec<LookupSiteSpec>> {
         }
     }
     Ok(by_index.into_iter().map(|(_, s)| s).collect())
+}
+
+fn parse_lookup_kind(s: &str) -> Result<LookupKind> {
+    match s {
+        "call" => Ok(LookupKind::Call),
+        "hash" => Ok(LookupKind::Hash),
+        "array" => Ok(LookupKind::Array),
+        "percpu_array" => Ok(LookupKind::PerCpuArray),
+        _ => bail!("unknown --lookup-site KIND {s:?}"),
+    }
+}
+
+fn parse_u64_auto(s: &str, label: &str) -> Result<u64> {
+    let s = s.trim();
+    if let Some(hex) = s.strip_prefix("0x") {
+        u64::from_str_radix(hex, 16).map_err(|e| anyhow!("{label} parse: {e}"))
+    } else {
+        s.parse::<u64>().map_err(|e| anyhow!("{label} parse: {e}"))
+    }
+}
+
+fn parse_u32_auto(s: &str, label: &str) -> Result<u32> {
+    let value = parse_u64_auto(s, label)?;
+    u32::try_from(value).map_err(|_| anyhow!("{label} does not fit u32: {value}"))
 }
 
 /// A side-band relocation record. The on-disk layout must stay in sync
@@ -659,15 +709,28 @@ fn rewrite_x86(
                 if let Some(name) = helper_call_sites.get(&(sym.address, local_ip)) {
                     let mut target_addr = helper_addrs.get(name).copied();
                     let mut inline_hash_key_offset = 0;
-                    if name == "bpf_map_lookup_elem" && is_entry {
-                        let ordinal = lookup_call_counter;
-                        lookup_call_counter += 1;
-                        lookup_call_ordinal.insert((sym.address, local_ip), ordinal);
-                        if let Some(spec) = lookup_sites.get(ordinal) {
-                            target_addr = Some(spec.target_addr);
-                            inline_hash_key_offset = spec.key_offset;
-                        }
-                    }
+	                    if name == "bpf_map_lookup_elem" && is_entry {
+	                        let ordinal = lookup_call_counter;
+	                        lookup_call_counter += 1;
+	                        lookup_call_ordinal.insert((sym.address, local_ip), ordinal);
+	                        if let Some(spec) = lookup_sites.get(ordinal) {
+	                            match spec.kind {
+	                                LookupKind::Array | LookupKind::PerCpuArray => {
+	                                    for ib in build_x86_array_lookup(spec)? {
+	                                        local.push(ib);
+	                                        kinds.push(None);
+	                                        insn_local_ip.push(u64::MAX);
+	                                    }
+	                                    resolved_helper_call_sites.insert((sym.address, local_ip));
+	                                    continue;
+	                                }
+	                                LookupKind::Call | LookupKind::Hash => {
+	                                    target_addr = Some(spec.target_addr);
+	                                    inline_hash_key_offset = spec.key_offset;
+	                                }
+	                            }
+	                        }
+	                    }
                     if let Some(target_addr) = target_addr {
                         let [mov, call] = build_x86_absolute_helper_call(target_addr, local_ip)?;
                         local.push(mov);
@@ -1994,6 +2057,74 @@ fn validate_no_external_refs(insn: &Instruction, included_ranges: &[(u64, u64)])
     Ok(())
 }
 
+fn declared_bytes(bytes: &[u8]) -> Result<Instruction> {
+    Instruction::with_declare_byte(bytes).map_err(|e| anyhow!("declare_byte: {e:?}"))
+}
+
+fn append_x86_scale_rax(bytes: &mut Vec<u8>, elem_size: u32) -> Result<()> {
+    if elem_size == 0 {
+        bail!("array lookup elem_size must be non-zero");
+    }
+    if elem_size.is_power_of_two() {
+        let shift = elem_size.trailing_zeros();
+        if shift != 0 {
+            bytes.extend_from_slice(&[0x48, 0xC1, 0xE0, shift as u8]); // shl rax, shift
+        }
+    } else {
+        let imm = i32::try_from(elem_size)
+            .map_err(|_| anyhow!("array elem_size too large for x86 imul imm32: {elem_size}"))?;
+        bytes.extend_from_slice(&[0x48, 0x69, 0xC0]); // imul rax, rax, imm32
+        bytes.extend_from_slice(&imm.to_le_bytes());
+    }
+    Ok(())
+}
+
+fn build_x86_array_lookup(spec: &LookupSiteSpec) -> Result<Vec<Instruction>> {
+    if spec.max_entries == 0 {
+        bail!("array lookup max_entries must be non-zero");
+    }
+    if u64::from(spec.index_mask) + 1 < u64::from(spec.max_entries) {
+        bail!(
+            "array lookup index_mask {} is smaller than max_entries {}",
+            spec.index_mask,
+            spec.max_entries
+        );
+    }
+    let value_base = spec
+        .map_addr
+        .checked_add(u64::from(spec.value_offset))
+        .ok_or_else(|| anyhow!("array lookup value base address overflow"))?;
+
+    let mut body = Vec::new();
+    append_x86_scale_rax(&mut body, spec.elem_size)?;
+    body.extend_from_slice(&[0x4C, 0x01, 0xD8]); // add rax, r11
+
+    if matches!(spec.kind, LookupKind::PerCpuArray) {
+        if spec.percpu_base_addr == 0 {
+            bail!("percpu array lookup missing this_cpu_off address");
+        }
+        body.extend_from_slice(&[0x48, 0x8B, 0x00]); // mov rax, [rax]
+        body.extend_from_slice(&[0x65, 0x48, 0x03, 0x04, 0x25]); // add rax, gs:[disp32]
+        body.extend_from_slice(&(spec.percpu_base_addr as u32).to_le_bytes());
+    }
+
+    body.extend_from_slice(&[0xEB, 0x02]); // jmp over null return
+    let body_len = u8::try_from(body.len())
+        .map_err(|_| anyhow!("array lookup inline body too large: {} bytes", body.len()))?;
+
+    let mut bytes = Vec::new();
+    bytes.extend_from_slice(&[0x49, 0xBB]); // movabs r11, value/pptrs base
+    bytes.extend_from_slice(&value_base.to_le_bytes());
+    bytes.extend_from_slice(&[0x8B, 0x06]); // mov eax, [rsi]
+    bytes.push(0x3D); // cmp eax, imm32
+    bytes.extend_from_slice(&spec.max_entries.to_le_bytes());
+    bytes.extend_from_slice(&[0x73, body_len]); // jae null
+    bytes.extend_from_slice(&body);
+    bytes.extend_from_slice(&[0x31, 0xC0]); // xor eax, eax
+
+    Ok(vec![declared_bytes(&bytes)?])
+}
+
 /// Build the inline byte sequence that the BPF JIT emits after an
 /// inlined `__htab_map_lookup_elem` call:
 ///
@@ -2021,9 +2152,7 @@ fn build_inline_hash_lookup(key_offset: u32) -> Result<Vec<Instruction>> {
             0xC0,
             key_offset as u8, // add rax, imm8
         ];
-        Ok(vec![
-            Instruction::with_declare_byte(&bytes).map_err(|e| anyhow!("declare_byte: {e:?}"))?
-        ])
+        Ok(vec![declared_bytes(&bytes)?])
     } else {
         let imm = key_offset.to_le_bytes();
         // add rax, imm32 (rax-special opcode): 48 05 imm32  -> 6 bytes
@@ -2033,9 +2162,7 @@ fn build_inline_hash_lookup(key_offset: u32) -> Result<Vec<Instruction>> {
             0x74, 0x06, // je +6
             0x48, 0x05, imm[0], imm[1], imm[2], imm[3], // add rax, imm32
         ];
-        Ok(vec![
-            Instruction::with_declare_byte(&bytes).map_err(|e| anyhow!("declare_byte: {e:?}"))?
-        ])
+        Ok(vec![declared_bytes(&bytes)?])
     }
 }
 

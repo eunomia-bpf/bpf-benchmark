@@ -398,6 +398,104 @@ uint64_t kallsyms_lookup(const std::string &name)
     return 0;
 }
 
+const struct btf_type *btf_type_by_id_checked(const btf *btf_obj, uint32_t type_id)
+{
+    const struct btf_type *t = btf__type_by_id(btf_obj, type_id);
+    if (!t) {
+        fail("btf__type_by_id failed for type id " + std::to_string(type_id));
+    }
+    return t;
+}
+
+uint32_t btf_member_offset_bits_recursive(const btf *btf_obj,
+                                          uint32_t type_id,
+                                          const std::string &member_name,
+                                          uint32_t base_bits,
+                                          uint32_t depth)
+{
+    if (depth > 8) {
+        fail("BTF member recursion too deep while looking for " + member_name);
+    }
+    const struct btf_type *t = btf_type_by_id_checked(btf_obj, type_id);
+    while (btf_kind(t) == BTF_KIND_TYPEDEF || btf_kind(t) == BTF_KIND_CONST
+           || btf_kind(t) == BTF_KIND_VOLATILE || btf_kind(t) == BTF_KIND_RESTRICT
+           || btf_kind(t) == BTF_KIND_TYPE_TAG) {
+        t = btf_type_by_id_checked(btf_obj, t->type);
+    }
+    uint16_t kind = btf_kind(t);
+    if (kind != BTF_KIND_STRUCT && kind != BTF_KIND_UNION) {
+        return UINT32_MAX;
+    }
+
+    const struct btf_member *members = btf_members(t);
+    for (uint16_t i = 0; i < btf_vlen(t); i++) {
+        const char *name = btf__name_by_offset(btf_obj, members[i].name_off);
+        uint32_t off_bits = base_bits + btf_member_bit_offset(t, i);
+        if (name && member_name == name) {
+            return off_bits;
+        }
+        uint32_t nested = btf_member_offset_bits_recursive(
+            btf_obj, members[i].type, member_name, off_bits, depth + 1);
+        if (nested != UINT32_MAX) {
+            return nested;
+        }
+    }
+    return UINT32_MAX;
+}
+
+uint32_t kernel_btf_member_offset_bytes(const btf *btf_obj,
+                                        const std::string &struct_name,
+                                        const std::string &member_name)
+{
+    int type_id = btf__find_by_name_kind(btf_obj, struct_name.c_str(), BTF_KIND_STRUCT);
+    if (type_id < 0) {
+        fail("kernel BTF struct not found: " + struct_name);
+    }
+    uint32_t off_bits = btf_member_offset_bits_recursive(
+        btf_obj, static_cast<uint32_t>(type_id), member_name, 0, 0);
+    if (off_bits == UINT32_MAX) {
+        fail("kernel BTF member not found: " + struct_name + "." + member_name);
+    }
+    if (off_bits % 8 != 0) {
+        fail("kernel BTF member is not byte-aligned: " + struct_name + "." + member_name);
+    }
+    return off_bits / 8;
+}
+
+struct BpfArrayOffsets {
+    uint32_t value;
+    uint32_t pptrs;
+};
+
+BpfArrayOffsets read_bpf_array_offsets()
+{
+    btf *vmlinux = btf__parse(kVmlinuxBtfPath, nullptr);
+    if (libbpf_get_error(vmlinux)) {
+        fail(std::string("btf__parse vmlinux: ")
+             + std::strerror(static_cast<int>(-libbpf_get_error(vmlinux))));
+    }
+    BpfArrayOffsets out{
+        kernel_btf_member_offset_bytes(vmlinux, "bpf_array", "value"),
+        kernel_btf_member_offset_bytes(vmlinux, "bpf_array", "pptrs"),
+    };
+    btf__free(vmlinux);
+    return out;
+}
+
+uint32_t roundup_pow2_mask(uint32_t max_entries)
+{
+    if (max_entries == 0) {
+        fail("array map max_entries is zero");
+    }
+    uint64_t v = static_cast<uint64_t>(max_entries) - 1;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    return static_cast<uint32_t>(v);
+}
+
 /* Spawn the native-link binary with the supplied argv. Returns
  * subprocess exit code. */
 int run_subprocess(const std::vector<std::string> &argv)
@@ -477,13 +575,20 @@ struct CompanionLoad {
      * through the most recent BPF_LD_IMM64 pseudo_map_fd) and the
      * per-kernel `offsetof(struct htab_elem, key)` extracted from any
      * one HASH map's JIT-emitted `add rax, imm` immediate. ARRAY and
-     * PERCPU_ARRAY sites call the concrete kernel map op directly;
-     * HASH sites call `__htab_map_lookup_elem` plus the post-call value
-     * adjustment. Other map types stay on the plain helper until they
-     * get their own concrete lowering. */
+     * PERCPU_ARRAY sites carry enough metadata for native-link to emit
+     * the same bounds-check + pointer arithmetic shape that the kernel
+     * JIT emits. Other map types stay on the plain helper until they get
+     * their own concrete lowering. */
     struct LookupSite {
+        enum class Kind { Call, Hash, Array, PerCpuArray } kind;
         uint64_t target_addr;
         uint32_t key_offset;
+        uint64_t map_addr;
+        uint32_t max_entries;
+        uint32_t elem_size;
+        uint32_t index_mask;
+        uint32_t value_offset;
+        uint64_t percpu_base_addr;
     };
     std::vector<LookupSite> lookup_sites;
 };
@@ -819,7 +924,13 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
      * `bpf_map_lookup_elem` site to share one target). */
     {
         /* Collect map metadata by fd for quick lookup. */
-        struct MapMeta { std::string name; int type; uint32_t key_size; };
+        struct MapMeta {
+            std::string name;
+            int type;
+            uint32_t key_size;
+            uint32_t value_size;
+            uint32_t max_entries;
+        };
         std::unordered_map<int, MapMeta> meta_by_fd;
         map = nullptr;
         bpf_object__for_each_map(map, obj) {
@@ -829,6 +940,8 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
                     std::string(bpf_map__name(map)),
                     (int)bpf_map__type(map),
                     bpf_map__key_size(map),
+                    bpf_map__value_size(map),
+                    bpf_map__max_entries(map),
                 };
             }
         }
@@ -860,8 +973,8 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
         }
 
         uint64_t htab_addr = kallsyms_lookup("__htab_map_lookup_elem");
-        uint64_t array_addr = kallsyms_lookup("array_map_lookup_elem");
-        uint64_t percpu_array_addr = kallsyms_lookup("percpu_array_map_lookup_elem");
+        BpfArrayOffsets array_offsets = read_bpf_array_offsets();
+        uint64_t this_cpu_off_addr = kallsyms_lookup("this_cpu_off");
         uint64_t plain_addr = kallsyms_lookup("bpf_map_lookup_elem");
         if (plain_addr == 0) {
             fail("bpf_map_lookup_elem not in /proc/kallsyms");
@@ -904,22 +1017,49 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
             size_t insn_cnt = bpf_program__insn_cnt(entry_prog);
             std::vector<int> call_maps = walk_lookup_call_maps(insns, insn_cnt);
             for (int fd : call_maps) {
-                CompanionLoad::LookupSite site{plain_addr, 0};
+                CompanionLoad::LookupSite site{
+                    CompanionLoad::LookupSite::Kind::Call,
+                    plain_addr,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                };
                 auto it = (fd >= 0) ? meta_by_fd.find(fd) : meta_by_fd.end();
                 if (it != meta_by_fd.end()) {
                     int t = it->second.type;
                     if (t == BPF_MAP_TYPE_ARRAY) {
-                        if (array_addr == 0) {
-                            fail("array_map_lookup_elem not in /proc/kallsyms");
+                        auto map_it = out.map_addrs.find(it->second.name);
+                        if (map_it == out.map_addrs.end()) {
+                            fail("native_kernel: missing kernel map pointer for ARRAY map " + it->second.name);
                         }
-                        site.target_addr = array_addr;
+                        site.kind = CompanionLoad::LookupSite::Kind::Array;
+                        site.map_addr = map_it->second;
+                        site.max_entries = it->second.max_entries;
+                        site.elem_size = (it->second.value_size + 7u) & ~7u;
+                        site.index_mask = roundup_pow2_mask(it->second.max_entries);
+                        site.value_offset = array_offsets.value;
                     } else if (t == BPF_MAP_TYPE_PERCPU_ARRAY) {
-                        if (percpu_array_addr == 0) {
-                            fail("percpu_array_map_lookup_elem not in /proc/kallsyms");
+                        auto map_it = out.map_addrs.find(it->second.name);
+                        if (map_it == out.map_addrs.end()) {
+                            fail("native_kernel: missing kernel map pointer for PERCPU_ARRAY map " + it->second.name);
                         }
-                        site.target_addr = percpu_array_addr;
+                        if (this_cpu_off_addr == 0) {
+                            fail("this_cpu_off not in /proc/kallsyms");
+                        }
+                        site.kind = CompanionLoad::LookupSite::Kind::PerCpuArray;
+                        site.map_addr = map_it->second;
+                        site.max_entries = it->second.max_entries;
+                        site.elem_size = sizeof(void *);
+                        site.index_mask = roundup_pow2_mask(it->second.max_entries);
+                        site.value_offset = array_offsets.pptrs;
+                        site.percpu_base_addr = this_cpu_off_addr;
                     } else if (t == BPF_MAP_TYPE_HASH && have_base && htab_addr != 0) {
                         uint32_t rounded = (it->second.key_size + 7) & ~7u;
+                        site.kind = CompanionLoad::LookupSite::Kind::Hash;
                         site.target_addr = htab_addr;
                         site.key_offset = htab_key_base + rounded;
                     }
@@ -973,11 +1113,33 @@ LinkerOutput invoke_native_link(const cli_options &options,
     }
     for (size_t i = 0; i < companion.lookup_sites.size(); i++) {
         const auto &s = companion.lookup_sites[i];
-        char buf[96];
-        std::snprintf(buf, sizeof(buf), "%zu=0x%lx,%u",
+        const char *kind = "call";
+        switch (s.kind) {
+        case CompanionLoad::LookupSite::Kind::Call:
+            kind = "call";
+            break;
+        case CompanionLoad::LookupSite::Kind::Hash:
+            kind = "hash";
+            break;
+        case CompanionLoad::LookupSite::Kind::Array:
+            kind = "array";
+            break;
+        case CompanionLoad::LookupSite::Kind::PerCpuArray:
+            kind = "percpu_array";
+            break;
+        }
+        char buf[256];
+        std::snprintf(buf, sizeof(buf), "%zu=%s,0x%lx,%u,0x%lx,%u,%u,%u,%u,0x%lx",
                       i,
+                      kind,
                       (unsigned long)s.target_addr,
-                      (unsigned)s.key_offset);
+                      (unsigned)s.key_offset,
+                      (unsigned long)s.map_addr,
+                      (unsigned)s.max_entries,
+                      (unsigned)s.elem_size,
+                      (unsigned)s.index_mask,
+                      (unsigned)s.value_offset,
+                      (unsigned long)s.percpu_base_addr);
         argv.push_back("--lookup-site");
         argv.push_back(buf);
     }
