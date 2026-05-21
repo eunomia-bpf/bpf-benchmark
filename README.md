@@ -59,7 +59,7 @@ must go through `make <target>`.**
 make micro                           # local x86 KVM micro suite
 make micro BENCH="simple bitcount"
 make micro SAMPLES=1 WARMUPS=0 INNER_REPEAT=10
-make corpus                          # local x86 KVM corpus, all 7 supported apps
+make corpus                          # local x86 KVM corpus, all 6 supported apps
 make corpus SAMPLES=3
 make selftest                        # kernel selftests
 make negative-test                   # negative tests
@@ -73,8 +73,8 @@ PLATFORM=aws ARCH=x86 make test
 
 ### Per-app filtering (corpus)
 
-Restrict to a subset of the 7 supported apps (bcc/set, otelcol-ebpf-profiler,
-cilium/agent, tetragon/observer, katran, tracee/monitor, bpftrace/set):
+Restrict to a subset of the 6 supported apps (bcc/set, otelcol-ebpf-profiler,
+cilium/agent, tetragon/observer, katran, tracee/monitor):
 
 ```bash
 # Single app

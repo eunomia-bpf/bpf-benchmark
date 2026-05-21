@@ -121,7 +121,7 @@ class ManagedProcessSession:
         from ..agent import _shim_env_for, _SHIM_SOCK_DIR
         merged_env = dict(os.environ)
         # Inject LD_PRELOAD + shim socket dir based on the target binary's libc
-        # variant, same contract as agent.start_agent for bpftrace/bcc/tracee.
+        # variant, same contract as agent.start_agent for bcc/tracee.
         # Without this, katran's ManagedProcessSession spawns without the shim
         # and apply_rejit can't find a per-pid socket.
         merged_env.update(_shim_env_for(self.command[0]))

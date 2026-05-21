@@ -8,7 +8,7 @@ post-fix conditions), computes:
   fig 1 — per-program geomean (Method B, §6.2.1)
   fig 2 — app-side workload throughput ratio (§6.2.2)
 
-Both use the same layout: 7 app groups × N condition bars per group, with a
+Both use the same layout: 6 app groups × N condition bars per group, with a
 horizontal reference line at 1.0.
 
 Re-run anytime to pick up new run dirs; missing cells render as gaps.
@@ -32,7 +32,6 @@ import numpy as np
 RESULTS = Path("/home/yunwei37/workspace/bpf-benchmark/corpus/results")
 APPS = [
     "bcc/set",
-    "bpftrace/set",
     "cilium/agent",
     "katran",
     "otelcol-ebpf-profiler/profiling",
@@ -68,7 +67,7 @@ def stress_ng_bogo(stdout: str) -> int:
 
 
 def parse_workload(w: dict, app: str) -> float:
-    if app in ("bcc/set", "bpftrace/set", "tetragon/observer", "tracee/monitor"):
+    if app in ("bcc/set", "tetragon/observer", "tracee/monitor"):
         return stress_ng_bogo(w.get("stdout") or "")
     if app == "katran":
         out = w.get("stdout") or ""
@@ -148,7 +147,7 @@ def app_workload_ratio(payload: dict, app: str) -> float | None:
 def find_dirs_for(condition_idx: int) -> dict[str, Path]:
     """Return {app: latest payload dir} for this condition.
 
-    For multi-pass conditions where 7-app runs exist, prefer those. Otherwise
+    For multi-pass conditions where full-suite runs exist, prefer those. Otherwise
     use single-app reruns. Returns latest match per app.
 
     skip_rejit / warmups are stored in details/result.json (not metadata.json),

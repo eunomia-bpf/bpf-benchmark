@@ -10,9 +10,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         bash \
+        binutils \
         bzip2 \
         ca-certificates \
-        clang \
         curl \
         debianutils \
         diffutils \
@@ -33,16 +33,12 @@ RUN apt-get update \
         libboost-program-options1.83.0 \
         libboost-regex1.83.0 \
         libbpf1 \
-        libbpfcc \
         libbz2-1.0 \
         libcap2 \
-        libclang-cpp15t64 \
-        libclang1-15t64 \
         libcurl4t64 \
         libdouble-conversion3 \
         libdw1t64 \
         libdwarf1 \
-        libedit2 \
         libelf1t64 \
         libevent-2.1-7t64 \
         libfmt9 \
@@ -50,8 +46,6 @@ RUN apt-get update \
         libgoogle-glog0v6t64 \
         libgrpc++1.51t64 \
         liblz4-1 \
-        libllvm15t64 \
-        libllvm17t64 \
         libmnl0 \
         libpcap0.8t64 \
         libprotobuf32t64 \
@@ -119,8 +113,6 @@ COPY --link --chmod=0755 \
     vendor/build/${VENDOR_BUILD_ARCH}/cilium/bin/cilium-agent \
     vendor/build/${VENDOR_BUILD_ARCH}/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler \
     vendor/build/${VENDOR_BUILD_ARCH}/bpftool/bin/bpftool \
-    vendor/build/${VENDOR_BUILD_ARCH}/bpftrace/bin/bpftrace \
-    vendor/build/${VENDOR_BUILD_ARCH}/bpftrace/bin/bpftrace-aotrt \
     /usr/local/bin/
 
 RUN set -eux; \

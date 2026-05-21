@@ -92,7 +92,7 @@ VNG = $(VM_EXECUTABLE) --run "$(VM_KERNEL_IMAGE)" --cwd "$(ROOT_DIR)" --disable-
 RUN_REMOTE_PYTHON_BIN ?= python3
 RUN_RUNTIME_PYTHON_BIN ?= python3
 RUN_BPFTOOL_BIN ?= bpftool
-RUN_NATIVE_REPOS_CSV ?= bcc,bpftrace,katran,tracee,tetragon
+RUN_NATIVE_REPOS_CSV ?= bcc,katran,tracee,tetragon
 
 AWS_X86_NAME_TAG ?= bpf-benchmark-x86
 AWS_X86_TEST_INSTANCE_TYPE ?= t3.micro

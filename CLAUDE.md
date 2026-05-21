@@ -155,7 +155,7 @@ Override knobs (env vars passed to `make`):
 | `SAMPLES` | corpus / micro | per-program sample count (default 3 for both) | `SAMPLES=3 make corpus` |
 | `WORKLOAD_DURATION` | corpus | seconds per workload sample, single global knob (default 30, applies to every app — no per-app override) | `WORKLOAD_DURATION=10 make corpus` |
 | `TIMEOUT` | all VM | suite timeout in seconds (default 7200) | `TIMEOUT=3600 make test` |
-| `BPFREJIT_CORPUS_APPS` | corpus | comma-separated subset of the 7 supported apps. Names match `corpus/config/macro_apps.yaml` (e.g. `bcc/set`, `tetragon/observer`, `katran`) | `BPFREJIT_CORPUS_APPS="cilium/agent,tracee/monitor" make corpus` |
+| `BPFREJIT_CORPUS_APPS` | corpus | comma-separated subset of the 6 supported apps. Names match `corpus/config/macro_apps.yaml` (e.g. `bcc/set`, `tetragon/observer`, `katran`) | `BPFREJIT_CORPUS_APPS="cilium/agent,tracee/monitor" make corpus` |
 | `BPFREJIT_BENCH_PASSES` | corpus / micro | comma-separated bpfopt pass list overriding `corpus/config/benchmark_config.yaml`. Set to `default` to use yaml policy explicitly | `BPFREJIT_BENCH_PASSES="noop,map_inline" make corpus` |
 | `KEEP_WORKDIRS` | corpus | `1` = retain failure workdir tarballs at `details/failure-artifacts/<prog_id>.tar.gz`. To capture artifacts from a successful pass, edit the relevant `runner/config/passes/<pass>/<app>.yaml` and append `&& false` to that step's `command:` — that converts it into a controlled failure and the failure-tar pipeline writes the workdir | `KEEP_WORKDIRS=1 make corpus` |
 | `BENCH` | micro | subset of micro benchmarks | `make micro BENCH="simple bitcount"` |
@@ -187,8 +187,8 @@ Docker image layers must be ordered by change frequency (bottom = stable, top = 
 
 Changing Python must NOT trigger recompilation of apps, kernel, or daemon. `RUNNER_RUNTIME_IMAGE_SOURCE_FILES` in build.mk must only include files that participate in compilation, not runtime Python/YAML/config files.
 
-## Supported Apps (7)
-tracee, tetragon, bpftrace, bcc, katran, cilium, otelcol-ebpf-profiler
+## Supported Apps (6)
+tracee, tetragon, bcc, katran, cilium, otelcol-ebpf-profiler
 
 ## Removed Apps
 - **scx**: struct_ops ReJIT crashes the scheduler

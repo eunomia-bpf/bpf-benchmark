@@ -33,19 +33,6 @@ def _adapt_bcc_set(workload: str, kwargs: dict[str, object]) -> dict[str, object
     return mapped
 
 
-def _adapt_bpftrace_set(workload: str, kwargs: dict[str, object]) -> dict[str, object]:
-    from .bpftrace_set import BPFTRACE_SET_WORKLOAD
-
-    normalized_workload = str(workload).strip()
-    if normalized_workload != BPFTRACE_SET_WORKLOAD:
-        raise RuntimeError(
-            f"bpftrace_set runner requires workload {BPFTRACE_SET_WORKLOAD!r}; got {normalized_workload!r}"
-        )
-    mapped = dict(kwargs)
-    mapped.setdefault("workload_spec", {"kind": normalized_workload})
-    return mapped
-
-
 def _adapt_tracee(workload: str, kwargs: dict[str, object]) -> dict[str, object]:
     mapped = dict(kwargs)
     kind = str(workload).strip()
@@ -77,7 +64,6 @@ def _adapt_native_process(workload: str, kwargs: dict[str, object]) -> dict[str,
 
 _RUNNERS = {
     "bcc_set": ("runner.libs.app_runners.bcc_set", "BccSetRunner", _adapt_bcc_set),
-    "bpftrace_set": ("runner.libs.app_runners.bpftrace_set", "BpftraceSetRunner", _adapt_bpftrace_set),
     "cilium": ("runner.libs.app_runners.cilium", "CiliumRunner", _adapt_native_process),
     "katran": ("runner.libs.app_runners.katran", "KatranRunner", _adapt_katran),
     "otelcol-ebpf-profiler": ("runner.libs.app_runners.otel_profiler", "OtelProfilerRunner", _adapt_native_process),

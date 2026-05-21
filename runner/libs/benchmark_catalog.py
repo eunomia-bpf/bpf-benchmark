@@ -31,7 +31,6 @@ MACRO_APP_DEFINITIONS: tuple[MacroAppDefinition, ...] = (
     MacroAppDefinition(name="tetragon/observer", runner="tetragon", workload="stress_ng_os_io_network"),
     MacroAppDefinition(name="katran", runner="katran", workload="xdp_pktgen"),
     MacroAppDefinition(name="tracee/monitor", runner="tracee", workload="stress_ng_os_io_network"),
-    MacroAppDefinition(name="bpftrace/set", runner="bpftrace_set", workload="stress_ng_os_io_network"),
 )
 
 MACRO_APP_DEFINITION_BY_NAME = {spec.name: spec for spec in MACRO_APP_DEFINITIONS}

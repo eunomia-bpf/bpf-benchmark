@@ -32,5 +32,5 @@ Current policy:
    source trees or require a directory-sync tool for result collection.
 
 The old split between a standalone build image and a runtime image is removed.
-There is no separate `runner-build.Dockerfile`, and bpftrace no longer has a
-separate first-class static build image in this pipeline.
+There is no separate `runner-build.Dockerfile`. bpftrace is not built or copied
+into the runtime image.
