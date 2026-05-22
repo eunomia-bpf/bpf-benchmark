@@ -1,0 +1,211 @@
+{
+  "benchmarks": [
+    {
+      "expected_result": 12345678,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/simple.mem",
+      "io_mode": "staged",
+      "name": "simple",
+      "runs": [
+        {
+          "inner_repeat": 100000,
+          "runtime": "native",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 192,
+                "native_code_bytes": 61
+              },
+              "compile_ns": 60135,
+              "exec_ns": 1,
+              "perf_counters": {
+                "branch_misses": 32,
+                "branches": 801031,
+                "cache_misses": 144,
+                "cache_references": 159,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "cycles": 611499,
+                "instructions": 3204809,
+                "page_faults": 0,
+                "task_clock_ns": 198993
+              },
+              "perf_counters_meta": {
+                "collected": true,
+                "error": "",
+                "include_kernel": false,
+                "requested": true,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 46035,
+                "native_load_ns": 60135
+              },
+              "result": 12345678,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "clock_monotonic",
+              "timing_source_wall": "clock_monotonic",
+              "wall_exec_ns": 1
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100000,
+          "runtime": "llvmbpf",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 192,
+                "native_code_bytes": 75
+              },
+              "compile_ns": 7993368,
+              "exec_cycles": 19,
+              "exec_ns": 5,
+              "perf_counters": {
+                "branch_misses": 45,
+                "branches": 1101087,
+                "cache_misses": 212,
+                "cache_references": 213,
+                "context_switches": 0,
+                "cpu_migrations": 0,
+                "cycles": 1617300,
+                "instructions": 6905047,
+                "page_faults": 1,
+                "task_clock_ns": 561714
+              },
+              "perf_counters_meta": {
+                "collected": true,
+                "error": "",
+                "include_kernel": false,
+                "requested": true,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 289,
+                "jit_compile_ns": 7993368,
+                "memory_prepare_ns": 29562,
+                "program_image_ns": 133566,
+                "vm_load_code_ns": 260
+              },
+              "result": 12345678,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "rdtsc",
+              "timing_source_wall": "unavailable",
+              "tsc_freq_hz": 3685794359,
+              "wall_exec_ns": 5
+            }
+          ]
+        },
+        {
+          "inner_repeat": 100000,
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 192,
+                "native_code_bytes": 108
+              },
+              "compile_ns": 504146,
+              "exec_cycles": 831,
+              "exec_ns": 9,
+              "jited_prog_len": 108,
+              "perf_counters": {
+                "branch_misses": 710,
+                "branches": 2521411,
+                "cache_misses": 3491,
+                "cache_references": 6640,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "cycles": 3205553,
+                "instructions": 13416987,
+                "page_faults": 0,
+                "task_clock_ns": 1040280
+              },
+              "perf_counters_meta": {
+                "collected": true,
+                "error": "",
+                "include_kernel": true,
+                "requested": true,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 842,
+                "memory_prepare_ns": 51752,
+                "object_load_ns": 364493,
+                "object_open_ns": 139653,
+                "prog_run_wall_ns": 22550960,
+                "result_extract_ns": 292
+              },
+              "result": 12345678,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3685869451,
+              "wall_exec_ns": 226,
+              "xlated_prog_len": 192
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "baseline",
+        "pure-jit"
+      ]
+    }
+  ],
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec"
+  },
+  "completed_at": "2026-05-22T08:01:09.184121+00:00",
+  "defaults": {
+    "inner_repeat": 100000,
+    "perf_counters": true,
+    "runtime_order_seed": 0,
+    "samples": 1,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "details_dir": "details",
+  "generated_at": "2026-05-22T08:01:08.964058+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "performance",
+    "git_sha": "unknown",
+    "hostname": "lab",
+    "kernel_cmdline": "BOOT_IMAGE=/boot/vmlinuz-6.15.11-061511-generic root=UUID=85355174-a2ad-4e84-bf78-53fac30b89fb ro panic=10 splash quiet iommu=pt vt.handoff=7",
+    "kernel_version": "6.15.11-061511-generic",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-6.15.11-061511-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "1"
+  },
+  "last_updated_at": "2026-05-22T08:01:09.184121+00:00",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_pure_jit.yaml",
+  "progress": {
+    "completed_benchmarks": 1,
+    "current_benchmark": null,
+    "current_benchmark_index": null,
+    "total_benchmarks": 1
+  },
+  "provenance": {
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 285K",
+    "environment": "bare-metal",
+    "kernel_commit": "unknown",
+    "params": {
+      "inner_repeat": 100000,
+      "perf_counters": true,
+      "samples": 1,
+      "warmups": 0
+    },
+    "repo_dirty": false,
+    "repo_git_sha": "unknown",
+    "timestamp": "2026-05-22T08:01:08.965924+00:00"
+  },
+  "run_type": "x86_docker_micro",
+  "started_at": "2026-05-22T08:01:08.964058+00:00",
+  "status": "completed",
+  "suite": "micro_staged_codegen"
+}

@@ -1,0 +1,120 @@
+{
+  "benchmarks": [
+    {
+      "expected_result": 12345678,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/simple.mem",
+      "io_mode": "staged",
+      "name": "simple",
+      "runs": [
+        {
+          "inner_repeat": 100000,
+          "runtime": "kernel",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 192,
+                "native_code_bytes": 108
+              },
+              "compile_ns": 442973,
+              "exec_cycles": 789,
+              "exec_ns": 9,
+              "jited_prog_len": 108,
+              "perf_counters": {
+                "branch_misses": 0,
+                "branches": 0,
+                "cache_misses": 0,
+                "cache_references": 0,
+                "context_switches": 2,
+                "cpu_migrations": 0,
+                "cycles": 0,
+                "instructions": 0,
+                "page_faults": 0,
+                "task_clock_ns": 1698255
+              },
+              "perf_counters_meta": {
+                "collected": true,
+                "error": "",
+                "include_kernel": true,
+                "requested": true,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "input_stage_ns": 657,
+                "memory_prepare_ns": 44871,
+                "object_load_ns": 313936,
+                "object_open_ns": 129037,
+                "prog_run_wall_ns": 21409559,
+                "result_extract_ns": 413
+              },
+              "result": 12345678,
+              "retval": 2,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3685949402,
+              "wall_exec_ns": 214,
+              "xlated_prog_len": 192
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "baseline",
+        "pure-jit"
+      ]
+    }
+  ],
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec"
+  },
+  "completed_at": "2026-05-22T07:04:52.638634+00:00",
+  "defaults": {
+    "inner_repeat": 100000,
+    "perf_counters": true,
+    "runtime_order_seed": 0,
+    "samples": 1,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "details_dir": "details",
+  "generated_at": "2026-05-22T07:04:52.451013+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "performance",
+    "git_sha": "unknown",
+    "hostname": "lab",
+    "kernel_cmdline": "BOOT_IMAGE=/boot/vmlinuz-6.15.11-061511-generic root=UUID=85355174-a2ad-4e84-bf78-53fac30b89fb ro panic=10 splash quiet iommu=pt vt.handoff=7",
+    "kernel_version": "6.15.11-061511-generic",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-6.15.11-061511-generic-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "1"
+  },
+  "last_updated_at": "2026-05-22T07:04:52.638634+00:00",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_pure_jit.yaml",
+  "progress": {
+    "completed_benchmarks": 1,
+    "current_benchmark": null,
+    "current_benchmark_index": null,
+    "total_benchmarks": 1
+  },
+  "provenance": {
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 285K",
+    "environment": "bare-metal",
+    "kernel_commit": "unknown",
+    "params": {
+      "inner_repeat": 100000,
+      "perf_counters": true,
+      "samples": 1,
+      "warmups": 0
+    },
+    "repo_dirty": false,
+    "repo_git_sha": "unknown",
+    "timestamp": "2026-05-22T07:04:52.452787+00:00"
+  },
+  "run_type": "x86_docker_micro",
+  "started_at": "2026-05-22T07:04:52.451013+00:00",
+  "status": "completed",
+  "suite": "micro_staged_codegen"
+}
