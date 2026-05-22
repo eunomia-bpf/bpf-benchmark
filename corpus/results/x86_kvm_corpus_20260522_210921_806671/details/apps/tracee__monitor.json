@@ -1,0 +1,86 @@
+{
+  "app": "tracee/monitor",
+  "baseline": {
+    "bpf": {},
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--syscall",
+          "1",
+          "--syscall-method",
+          "fast75",
+          "--get",
+          "1",
+          "--eventfd",
+          "1",
+          "--timerfd",
+          "1",
+          "--dup",
+          "1",
+          "--futex",
+          "1",
+          "--cap",
+          "1",
+          "--prctl",
+          "1",
+          "--set",
+          "1",
+          "--chmod",
+          "1",
+          "--chown",
+          "1",
+          "--open",
+          "1",
+          "--open-max",
+          "1024",
+          "--fstat",
+          "1",
+          "--kill",
+          "1",
+          "--sigfd",
+          "1",
+          "--timeout",
+          "10s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/1a3ad65b"
+        ],
+        "config": {
+          "stressors": [
+            "syscall",
+            "get",
+            "eventfd",
+            "timerfd",
+            "dup",
+            "futex",
+            "cap",
+            "prctl",
+            "set",
+            "chmod",
+            "chown",
+            "open",
+            "fstat",
+            "kill",
+            "sigfd"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 10.043527901000004,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [1849] setting to a 10 secs run per stressor\nstress-ng: info:  [1849] dispatching hogs: 1 syscall, 1 get, 1 eventfd, 1 timerfd, 1 dup, 1 futex, 1 cap, 1 prctl, 1 set, 1 chmod, 1 chown, 1 open, 1 fstat, 1 kill, 1 sigfd\nstress-ng: info:  [1849] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [1850] syscall: using method 'fast75'\nstress-ng: info:  [1861] open: using a maximum of 1024 file descriptors\nstress-ng: fail:  [1861] open: rmdir '/var/tmp/bpfrejit-runtime/1a3ad65b/tmp-stress-ng-open-1861-0' failed, errno=39 (Directory not empty)\nstress-ng: info:  [1850] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [1850] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [1850] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [1850] syscall:                  pkey_set       60.5         55\nstress-ng: info:  [1850] syscall:              gettimeofday       90.5         67\nstress-ng: info:  [1850] syscall:                  pkey_get      118.0         50\nstress-ng: info:  [1850] syscall:           set_robust_list      120.5        109\nstress-ng: info:  [1850] syscall:                 pkey_free      122.0        112\nstress-ng: info:  [1850] syscall:                      time      128.0         58\nstress-ng: info:  [1850] syscall:    sched_get_priority_min      133.5        131\nstress-ng: info:  [1850] syscall:                 setresuid      182.5        177\nstress-ng: info:  [1850] syscall:                    getcpu      186.0        121\nstress-ng: info:  [1850] syscall:                  mlockall      186.0        170\nstress-ng: metrc: [1849] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1849]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1849] syscall             514     10.01      0.01      0.01        51.33       27699.94\nstress-ng: metrc: [1849] get                6912     10.00      0.12      0.69       691.16        8566.04\nstress-ng: metrc: [1849] eventfd         1835781     10.00      0.86      6.08    183568.34      264259.97\nstress-ng: metrc: [1849] timerfd         1235968     10.00      0.11      8.14    123562.84      149924.52\nstress-ng: metrc: [1849] dup                3576     10.00      0.56      0.52       357.59        3321.35\nstress-ng: metrc: [1849] futex           3291668     20.00      1.92     12.77    164576.58      223949.85\nstress-ng: metrc: [1849] cap             7091235     10.00      1.98      6.25    709123.28      862029.21\nstress-ng: metrc: [1849] prctl             12290     10.00      1.83      1.19      1228.99        4062.60\nstress-ng: metrc: [1849] set              636482     10.00      1.40      7.09     63648.06       74951.97\nstress-ng: metrc: [1849] chmod              8140     10.00      0.05      1.38       813.79        5694.03\nstress-ng: metrc: [1849] chown             42361     10.01      0.03      0.63      4232.26       64032.18\nstress-ng: metrc: [1849] open              64289     10.00      0.08      1.44      6428.86       42313.02\nstress-ng: metrc: [1849] fstat              3373     10.01      0.13      0.45       337.12        5791.77\nstress-ng: metrc: [1849] kill             988454     10.00      0.76      8.49     98844.26      106861.74\nstress-ng: metrc: [1849] sigfd          16032530     10.00      1.48     13.00   1603137.76     1107286.06\nstress-ng: info:  [1849] skipped: 0\nstress-ng: info:  [1849] passed: 15: syscall (1) get (1) eventfd (1) timerfd (1) dup (1) futex (1) cap (1) prctl (1) set (1) chmod (1) chown (1) open (1) fstat (1) kill (1) sigfd (1)\nstress-ng: info:  [1849] failed: 0\nstress-ng: info:  [1849] metrics untrustworthy: 0\nstress-ng: info:  [1849] successful run completed in 10.03 secs",
+        "workload_name": "stress_ng_tracee_syscall_hot"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": null,
+  "rejit_result": {
+    "mode": "workload_only",
+    "status": "skipped"
+  },
+  "runner": "tracee",
+  "selected_workload": "stress_ng_tracee_syscall_hot",
+  "status": "ok"
+}

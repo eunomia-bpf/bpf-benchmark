@@ -105,6 +105,12 @@ void promote_register_allocas(llvm::Module &module, llvm::TargetMachine &machine
 	llvm::FunctionPassManager function_pipeline;
 	function_pipeline.addPass(llvm::SROAPass(llvm::SROAOptions::PreserveCFG));
 	function_pipeline.addPass(llvm::PromotePass());
+	// InstCombine canonicalizes llvmbpf's frame pointers: the lifted code
+	// addresses the stack via `inttoptr(ptrtoint(stackEnd) + off)`, which keeps
+	// frame stores off the alloca's def-use chain. InstCombine folds
+	// `inttoptr(ptrtoint(gep(alloca)))` back to `gep(alloca)`, reconnecting the
+	// stores so resolve_const_key can recover a constant key written there.
+	function_pipeline.addPass(llvm::InstCombinePass());
 	function_pipeline.addPass(llvm::DCEPass());
 	llvm::ModulePassManager module_pipeline;
 	module_pipeline.addPass(llvm::createModuleToFunctionPassAdaptor(
@@ -123,10 +129,6 @@ std::vector<uint8_t> emit_bpf_object(llvm::Module &module, bool optimize_ir)
 		optimize_module(module, *machine);
 	} else {
 		promote_register_allocas(module, *machine);
-	}
-
-	if (std::getenv("BPFOPT_DUMP_IR")) {
-		module.print(llvm::errs(), nullptr);
 	}
 
 	llvm::SmallVector<char, 0> object_stream;
@@ -653,51 +655,72 @@ llvm::Value *build_key_match(llvm::IRBuilder<> &b, llvm::Value *key_arg,
 	return match;
 }
 
-// Materialize `value` into a fresh entry-block stack slot (so no constant
-// global / .rodata map is introduced) and return its address as an i64 — the
-// same representation a map_lookup_elem result carries. Stores are emitted at
-// `b`'s point as i32 words + i8 tail (the proven roundtrip granularity); O3's
-// SROA forwards them into the downstream value loads.
-llvm::Value *materialize_value_ptr(llvm::IRBuilder<> &b,
-				   const std::vector<uint8_t> &value,
-				   llvm::Type *i64ty)
+// Allocate a fresh entry-block stack buffer of `size` bytes (so no constant
+// global / .rodata map is introduced for the value).
+llvm::AllocaInst *alloc_value_buf(llvm::Function *fn, size_t size)
 {
-	llvm::Function *fn = b.GetInsertBlock()->getParent();
 	llvm::IRBuilder<> eb(&*fn->getEntryBlock().getFirstInsertionPt());
-	auto *arr = llvm::ArrayType::get(eb.getInt8Ty(), value.size());
-	auto *slot = eb.CreateAlloca(arr, nullptr, "mapinline.val");
+	auto *arr = llvm::ArrayType::get(eb.getInt8Ty(), size);
+	return eb.CreateAlloca(arr, nullptr, "mapinline.buf");
+}
+
+// Store the snapshot constant `value` into `buf` at `b`'s point, as i32 words +
+// i8 tail (the proven roundtrip granularity).
+void store_const_to_buf(llvm::IRBuilder<> &b, llvm::Value *buf,
+			const std::vector<uint8_t> &value)
+{
 	size_t off = 0;
 	for (; off + 4 <= value.size(); off += 4) {
 		uint32_t w = 0;
 		std::memcpy(&w, value.data() + off, sizeof(w));
-		auto *p = b.CreateGEP(b.getInt8Ty(), slot, b.getInt64(off));
-		b.CreateStore(b.getInt32(w), p);
+		b.CreateStore(b.getInt32(w),
+			      b.CreateGEP(b.getInt8Ty(), buf, b.getInt64(off)));
 	}
 	for (; off < value.size(); off++) {
-		auto *p = b.CreateGEP(b.getInt8Ty(), slot, b.getInt64(off));
-		b.CreateStore(b.getInt8(value[off]), p);
+		b.CreateStore(b.getInt8(value[off]),
+			      b.CreateGEP(b.getInt8Ty(), buf, b.getInt64(off)));
 	}
-	return b.CreatePtrToInt(slot, i64ty);
+}
+
+// Materialize `value` into a fresh entry-block stack slot and return its address
+// as an i64 — the representation a map_lookup_elem result carries. Used by the
+// unconditional folds (uniform / const-key); O3's SROA forwards the stored bytes
+// into the downstream value loads.
+llvm::Value *materialize_value_ptr(llvm::IRBuilder<> &b,
+				   const std::vector<uint8_t> &value,
+				   llvm::Type *i64ty)
+{
+	auto *buf = alloc_value_buf(b.GetInsertBlock()->getParent(), value.size());
+	store_const_to_buf(b, buf, value);
+	return b.CreatePtrToInt(buf, i64ty);
 }
 
 // Soft speculation as a real control-flow guard, NOT a select:
 //
-//   orig:  ...                          ; key bytes already on stack
-//          %m = (key == K)
+//   orig:  %m = (key == K)
 //          br %m, fast, slow
-//   fast:  <materialize V on stack>     ; skips the lookup entirely
+//   fast:  <materialize snapshot V on stack>       ; skips the lookup entirely
 //          br merge
-//   slow:  %r = call map_lookup_elem(...)
+//   slow:  %r = call map_lookup_elem(...)           ; live value, writes preserved
 //          br merge
-//   merge: %r0 = phi [fastptr, fast], [%r, slow]
+//   merge: %r0 = phi [&buf, fast], [%r, slow]
 //
-// A select would still execute the (expensive, e.g. HASH) lookup on every
-// dispatch; this branch skips it on the fast path, which is the whole point of
-// the hint. Replacing the result at the call boundary handles every downstream
-// use pattern uniformly (loads, null checks, and PHIs — vip_map's result flows
-// through a PHI, which the per-load select path could not reach). When K is a
-// provable constant, O3 folds the branch away and DCEs the call; for a runtime
-// key the guard stays and the slow lookup runs only on a miss (sound).
+// A select would still run the (expensive, e.g. HASH) lookup every dispatch;
+// this branch skips it on the fast path. Replacing the result at the call
+// boundary handles every downstream use uniformly (loads, null checks, PHIs).
+// Soundness: the snapshot constant is used ONLY when the runtime key equals K;
+// every other key and a miss take the slow path with the real lookup result
+// (so its live value and any write-through pointer are preserved). When K is a
+// provable constant O3 folds the branch away and DCEs the call.
+//
+// NOTE: the fast path gives the verifier a known-constant value where the slow
+// path has an unknown live value; these are distinct value-abstractions, so the
+// verifier explores the lookup's downstream for both. That cost is inherent to
+// speculation and scales with the downstream size — cheap for a value consumed
+// as a small scalar (e.g. vip_map -> real index), but ~50k processed insns for a
+// value that feeds a large cone (e.g. an ARRAY reals entry driving IPIP encap).
+// Only worth guarding lookups that are themselves expensive (HASH), not cheap
+// O(1) ARRAY indices.
 void fold_guarded_branch(llvm::Module &module, llvm::CallInst *call,
 			 const std::vector<uint8_t> &key,
 			 const std::vector<uint8_t> &value)
@@ -730,15 +753,143 @@ void fold_guarded_branch(llvm::Module &module, llvm::CallInst *call,
 	phi->addIncoming(call, slow);
 }
 
+// Walk every constant-offset store reachable from alloca pointer `p` at
+// cumulative byte offset `off`, recording (byte offset, store). Used to recover
+// a frame slot's contents. Loads / ptrtoint / calls are ignored (they read the
+// slot; only stores define it).
+void collect_alloca_stores(
+	llvm::Value *p, int64_t off, const llvm::DataLayout &dl,
+	std::vector<std::pair<int64_t, llvm::StoreInst *>> &out)
+{
+	for (llvm::User *u : p->users()) {
+		if (auto *st = llvm::dyn_cast<llvm::StoreInst>(u)) {
+			if (st->getPointerOperand() == p) {
+				out.push_back({ off, st });
+			}
+		} else if (auto *gep =
+				   llvm::dyn_cast<llvm::GetElementPtrInst>(u)) {
+			llvm::APInt o(64, 0);
+			if (gep->accumulateConstantOffset(dl, o)) {
+				collect_alloca_stores(
+					gep, off + o.getSExtValue(), dl, out);
+			}
+		}
+	}
+}
+
+// Recover a compile-time-constant lookup key from arg1 when it points to a frame
+// slot written only by constant stores that dominate the call. llvmbpf lifts the
+// BPF frame as an alloca plus `ptrtoint(stackEnd)` integer arithmetic, so the key
+// pointer looks like `ptrtoint(gep(stackBegin, FS)) + C`; LLVM cannot
+// alias-analyze that integer form back to the `gep(stackBegin, off)` stores, so
+// O3 never folds such a constant key itself. Recovering it here lets a
+// constant-key lookup fold unconditionally (no guard) — sound, and the value
+// then const-propagates like a uniform fold. Each covered byte must be written
+// by exactly one constant store that dominates the call (any second or runtime
+// store to those bytes aborts, since ordering can't be proven).
+std::optional<std::vector<uint8_t>>
+resolve_const_key(llvm::CallInst *call, size_t key_size, llvm::DominatorTree &dt,
+		  const llvm::DataLayout &dl)
+{
+	llvm::Value *kp = call->getArgOperand(1);
+	int64_t add_c = 0;
+	if (auto *bo = llvm::dyn_cast<llvm::BinaryOperator>(kp)) {
+		if (bo->getOpcode() == llvm::Instruction::Add) {
+			if (auto *c = llvm::dyn_cast<llvm::ConstantInt>(
+				    bo->getOperand(1))) {
+				add_c = c->getSExtValue();
+				kp = bo->getOperand(0);
+			}
+		}
+	}
+	auto *p2i = llvm::dyn_cast<llvm::PtrToIntInst>(kp);
+	if (!p2i) {
+		return std::nullopt;
+	}
+	llvm::Value *base = p2i->getPointerOperand();
+	int64_t base_off = 0;
+	while (auto *gep = llvm::dyn_cast<llvm::GetElementPtrInst>(base)) {
+		llvm::APInt o(64, 0);
+		if (!gep->accumulateConstantOffset(dl, o)) {
+			return std::nullopt;
+		}
+		base_off += o.getSExtValue();
+		base = gep->getPointerOperand();
+	}
+	auto *slot = llvm::dyn_cast<llvm::AllocaInst>(base);
+	if (!slot) {
+		return std::nullopt;
+	}
+	const int64_t key_off = base_off + add_c;
+	if (key_off < 0) {
+		return std::nullopt;
+	}
+	std::vector<std::pair<int64_t, llvm::StoreInst *>> stores;
+	collect_alloca_stores(slot, 0, dl, stores);
+	std::vector<uint8_t> key(key_size, 0);
+	std::vector<bool> have(key_size, false);    // some store sets this byte
+	std::vector<bool> covered(key_size, false); // a dominating store sets it
+	// Every store touching the key bytes must be a constant; all stores must
+	// agree per byte; and each byte must have at least one store that
+	// dominates the call. Then — regardless of path or ordering — that byte
+	// holds the agreed constant at the call (the dominating store guarantees
+	// it is written; all writers store the same value). Any runtime or
+	// disagreeing write to the key bytes aborts.
+	for (const auto &[soff, st] : stores) {
+		const auto width = dl.getTypeStoreSize(
+			st->getValueOperand()->getType());
+		const int64_t lo = std::max<int64_t>(soff, key_off);
+		const int64_t hi = std::min<int64_t>(soff + (int64_t)width,
+						     key_off + (int64_t)key_size);
+		if (lo >= hi) {
+			continue; // store does not touch the key bytes
+		}
+		auto *cv = llvm::dyn_cast<llvm::ConstantInt>(st->getValueOperand());
+		if (!cv) {
+			return std::nullopt; // runtime write to the key bytes
+		}
+		const bool dom = dt.dominates(st, call);
+		const auto value = cv->getValue();
+		for (int64_t b = lo; b < hi; b++) {
+			const auto byte = static_cast<uint8_t>(
+				value.extractBitsAsZExtValue(8, (b - soff) * 8));
+			const size_t i = b - key_off;
+			if (have[i] && key[i] != byte) {
+				return std::nullopt; // conflicting writers
+			}
+			key[i] = byte;
+			have[i] = true;
+			covered[i] = covered[i] || dom;
+		}
+	}
+	for (size_t i = 0; i < key_size; i++) {
+		if (!covered[i]) {
+			return std::nullopt; // byte not guaranteed-written by a const
+		}
+	}
+	return key;
+}
+
 // All-IR map_inline. For each map_lookup_elem call: resolve its map (IR symbol),
-// skip data-path-mutable maps, and fold per the snapshot:
-//   - uniform map  -> unconditional: replace the value-deref loads with
-//     constants, make the null check see non-null, erase the lookup (O3 then
-//     propagates + DCEs);
-//   - CLI speculation hint (map:key) -> soft guard: each loaded value becomes
-//     select(key==K, const, real-load); the real lookup is retained as the
-//     fallback. A constant/proven key lets O3 collapse the select and DCE the
-//     lookup; a runtime key keeps the guarded fallback (sound for other keys).
+// skip data-path-mutable maps, and fold per the snapshot. Three cases, in
+// priority order:
+//   1. constant key (recovered via resolve_const_key) -> UNCONDITIONAL fold:
+//      replace the result with a stack copy of the value and delete the lookup.
+//      A proven-constant key is sound with no guard, and (no result phi) the
+//      value const-propagates like a uniform fold. This is "if the key is
+//      constant, skip the call" — done by us, since O3 can't see the constant
+//      through llvmbpf's ptrtoint frame arithmetic.
+//   2. uniform map -> UNCONDITIONAL fold (value is key-independent).
+//   3. CLI speculation hint on a runtime key -> guarded branch: fast path skips
+//      the lookup, slow path keeps the real lookup as a sound fallback.
+struct FoldDecision {
+	llvm::CallInst *call;
+	std::vector<uint8_t> key;
+	std::vector<uint8_t> value;
+	bool guarded;
+	uint32_t map_id;
+};
+
 std::vector<InlineRecord> fold_map_lookups_ir(llvm::Module &module,
 					      const MapInlineArgs &args)
 {
@@ -754,65 +905,83 @@ std::vector<InlineRecord> fold_map_lookups_ir(llvm::Module &module,
 	for (const auto &h : args.hints) {
 		hint_key[h.map_name] = h.key;
 	}
-	std::vector<llvm::CallInst *> calls;
+	const auto &dl = module.getDataLayout();
+	llvm::DominatorTree dt(*main_fn);
+
+	// Phase 1 — analysis only (no IR mutation), so the dominator tree stays
+	// valid for resolve_const_key across every site.
+	std::vector<FoldDecision> decisions;
 	for (auto &bb : *main_fn) {
 		for (auto &inst : bb) {
-			if (auto *ci = llvm::dyn_cast<llvm::CallInst>(&inst)) {
-				if (ci->getCalledFunction() == lookup) {
-					calls.push_back(ci);
+			auto *call = llvm::dyn_cast<llvm::CallInst>(&inst);
+			if (!call || call->getCalledFunction() != lookup) {
+				continue;
+			}
+			const auto map_id = lookup_call_map_id(call, args.map_ids);
+			if (!map_id || mutable_maps.count(*map_id)) {
+				continue;
+			}
+			const auto mi = snapshot.maps.find(*map_id);
+			if (mi == snapshot.maps.end() ||
+			    !map_type_supports_value_inline(mi->second.map_type)) {
+				continue;
+			}
+			std::optional<std::vector<uint8_t>> value;
+			bool guarded = false;
+			std::vector<uint8_t> key;
+			if (auto ck = resolve_const_key(call, mi->second.key_size,
+							dt, dl)) {
+				const auto exact = snapshot.values.find(
+					{ *map_id, bytes_hex(*ck) });
+				if (exact != snapshot.values.end()) {
+					key = *ck;
+					value = exact->second;
 				}
 			}
+			if (!value) {
+				const auto hit = hint_key.find(mi->second.name);
+				if (hit != hint_key.end()) {
+					key = hit->second;
+					const auto exact = snapshot.values.find(
+						{ *map_id, bytes_hex(key) });
+					if (exact != snapshot.values.end()) {
+						value = exact->second;
+					} else if (snapshot.truly_uniform.count(
+							   *map_id)) {
+						value = snapshot.uniform_values.at(
+							*map_id);
+					}
+					guarded = true;
+				} else if (snapshot.truly_uniform.count(*map_id)) {
+					value = snapshot.uniform_values.at(*map_id);
+				}
+			}
+			if (!value || value->size() != mi->second.value_size ||
+			    (guarded && key.size() != mi->second.key_size)) {
+				continue;
+			}
+			decisions.push_back(
+				{ call, key, *value, guarded, *map_id });
 		}
 	}
-	for (auto *call : calls) {
-		const auto map_id = lookup_call_map_id(call, args.map_ids);
-		if (!map_id || mutable_maps.count(*map_id)) {
-			continue;
-		}
-		const auto mi = snapshot.maps.find(*map_id);
-		if (mi == snapshot.maps.end() ||
-		    !map_type_supports_value_inline(mi->second.map_type)) {
-			continue;
-		}
-		std::optional<std::vector<uint8_t>> value;
-		bool guarded = false;
-		std::vector<uint8_t> key;
-		const auto hit = hint_key.find(mi->second.name);
-		if (hit != hint_key.end()) { // CLI speculation
-			key = hit->second;
-			const auto exact = snapshot.values.find(
-				{ *map_id, bytes_hex(key) });
-			if (exact != snapshot.values.end()) {
-				value = exact->second;
-			} else if (snapshot.truly_uniform.count(*map_id)) {
-				value = snapshot.uniform_values.at(*map_id);
-			}
-			guarded = true;
-		} else if (snapshot.truly_uniform.count(*map_id)) {
-			value = snapshot.uniform_values.at(*map_id);
+
+	// Phase 2 — apply. Guarded folds split blocks (invalidating the dominator
+	// tree), but phase 1 made all dominance queries already.
+	for (auto &d : decisions) {
+		if (d.guarded) {
+			fold_guarded_branch(module, d.call, d.key, d.value);
 		} else {
-			continue;
+			// Unconditional: replace the result with a stack copy of
+			// the value and delete the lookup. O3's SROA forwards the
+			// stored bytes into the value loads and a non-null stack
+			// address satisfies any null check.
+			llvm::IRBuilder<> b(d.call);
+			auto *ptr = materialize_value_ptr(b, d.value,
+							  d.call->getType());
+			d.call->replaceAllUsesWith(ptr);
+			d.call->eraseFromParent();
 		}
-		if (!value || value->size() != mi->second.value_size ||
-		    (guarded && key.size() != mi->second.key_size)) {
-			continue;
-		}
-		if (guarded) {
-			// Real control-flow guard: skip the lookup on a key match.
-			fold_guarded_branch(module, call, key, *value);
-		} else {
-			// Uniform map: the lookup always yields this value, so
-			// replace its result with a stack copy and delete it.
-			// O3's SROA forwards the stored bytes into the value
-			// loads and a non-null stack address satisfies any null
-			// check (sound for in-range bounded-index ARRAY maps).
-			llvm::IRBuilder<> b(call);
-			auto *ptr = materialize_value_ptr(b, *value,
-							  call->getType());
-			call->replaceAllUsesWith(ptr);
-			call->eraseFromParent();
-		}
-		records.push_back({ *map_id, key, *value });
+		records.push_back({ d.map_id, d.key, d.value });
 	}
 	return records;
 }
@@ -831,6 +1000,9 @@ std::vector<uint8_t> run_map_inline_roundtrip(const std::vector<uint8_t> &input,
 		// Promote per-register allocas to SSA first so a lookup result
 		// flows directly to its uses (else it is stored to its alloca).
 		promote_register_allocas(module, *machine);
+		if (std::getenv("BPFOPT_DUMP_IR")) {
+			module.print(llvm::errs(), nullptr);
+		}
 		records = fold_map_lookups_ir(module, args);
 		return extract_relocated_text(emit_bpf_object(module, true),
 					      input);

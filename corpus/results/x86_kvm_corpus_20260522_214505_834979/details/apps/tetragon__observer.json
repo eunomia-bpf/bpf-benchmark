@@ -1,0 +1,92 @@
+{
+  "app": "tetragon/observer",
+  "baseline": {
+    "bpf": {},
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--syscall",
+          "1",
+          "--syscall-method",
+          "fast75",
+          "--get",
+          "1",
+          "--eventfd",
+          "1",
+          "--timerfd",
+          "1",
+          "--open",
+          "1",
+          "--open-max",
+          "1024",
+          "--fstat",
+          "1",
+          "--mmap",
+          "1",
+          "--mmap-bytes",
+          "16M",
+          "--mprotect",
+          "1",
+          "--udp",
+          "1",
+          "--sock",
+          "1",
+          "--sockfd",
+          "1",
+          "--sockpair",
+          "1",
+          "--fork",
+          "1",
+          "--clone",
+          "1",
+          "--futex",
+          "1",
+          "--sock-port",
+          "14135",
+          "--sockfd-port",
+          "14235",
+          "--timeout",
+          "60s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/cfb38708"
+        ],
+        "config": {
+          "stressors": [
+            "syscall",
+            "get",
+            "eventfd",
+            "timerfd",
+            "open",
+            "fstat",
+            "mmap",
+            "mprotect",
+            "udp",
+            "sock",
+            "sockfd",
+            "sockpair",
+            "fork",
+            "clone",
+            "futex"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 60.733142006,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [1851] setting to a 1 min, 0 secs run per stressor\nstress-ng: info:  [1851] dispatching hogs: 1 syscall, 1 get, 1 eventfd, 1 timerfd, 1 open, 1 fstat, 1 mmap, 1 mprotect, 1 udp, 1 sock, 1 sockfd, 1 sockpair, 1 fork, 1 clone, 1 futex\nstress-ng: info:  [1851] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: info:  [1852] syscall: using method 'fast75'\nstress-ng: info:  [1856] open: using a maximum of 1024 file descriptors\nstress-ng: fail:  [1856] open: rmdir '/var/tmp/bpfrejit-runtime/cfb38708/tmp-stress-ng-open-1856-0' failed, errno=39 (Directory not empty)\nstress-ng: info:  [1852] syscall: 294 system call tests, 220 (74.8%) fastest non-failing tests fully exercised\nstress-ng: info:  [1852] syscall: Top 10 fastest system calls (timings in nanosecs):\nstress-ng: info:  [1852] syscall:               System Call   Avg (ns)   Min (ns)\nstress-ng: info:  [1852] syscall:                  pkey_get       55.5         52\nstress-ng: info:  [1852] syscall:                  pkey_set       57.0         55\nstress-ng: info:  [1852] syscall:              gettimeofday      103.5         81\nstress-ng: info:  [1852] syscall:           set_robust_list      117.5        117\nstress-ng: info:  [1852] syscall:                 pkey_free      124.5        124\nstress-ng: info:  [1852] syscall:    sched_get_priority_min      126.0        119\nstress-ng: info:  [1852] syscall:                      time      130.0         62\nstress-ng: info:  [1852] syscall:                    getgid      158.0        148\nstress-ng: info:  [1852] syscall:                   geteuid      159.0        134\nstress-ng: info:  [1852] syscall:          timer_getoverrun      163.5        156\nstress-ng: metrc: [1851] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1851]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1851] syscall             514     60.63      0.02      0.07         8.48        5361.93\nstress-ng: metrc: [1851] get               12592     60.00      0.28     13.60       209.87         907.21\nstress-ng: metrc: [1851] eventfd         8205797     60.00      4.12     25.70    136759.86      275165.01\nstress-ng: metrc: [1851] timerfd         4946944     60.01      0.35     32.79     82429.91      149295.16\nstress-ng: metrc: [1851] open              63076     60.01      0.42     13.20      1051.15        4631.64\nstress-ng: metrc: [1851] fstat             22181     60.01      0.46      3.00       369.65        6408.77\nstress-ng: metrc: [1851] mmap              10477     60.01      1.77     35.73       174.59         279.39\nstress-ng: metrc: [1851] mprotect       64317758     60.01     16.40    102.28   1071748.16      541908.32\nstress-ng: metrc: [1851] udp            11456494     60.01      2.86     38.08    190919.03      279803.35\nstress-ng: metrc: [1851] sock              75378     60.00      1.57     25.98      1256.28        2736.28\nstress-ng: metrc: [1851] sockfd         11021262     60.01      2.66     22.48    183662.44      438407.22\nstress-ng: metrc: [1851] sockpair        3297858     60.06      1.56     19.38     54913.01      157461.53\nstress-ng: metrc: [1851] fork              62287     60.00      7.03      7.66      1038.11        4241.31\nstress-ng: metrc: [1851] clone             12098     60.05      5.28     22.72       201.47         432.12\nstress-ng: metrc: [1851] futex          12031488    120.00      9.46     49.86    100262.21      202829.23\nstress-ng: info:  [1851] skipped: 0\nstress-ng: info:  [1851] passed: 15: syscall (1) get (1) eventfd (1) timerfd (1) open (1) fstat (1) mmap (1) mprotect (1) udp (1) sock (1) sockfd (1) sockpair (1) fork (1) clone (1) futex (1)\nstress-ng: info:  [1851] failed: 0\nstress-ng: info:  [1851] metrics untrustworthy: 0\nstress-ng: info:  [1851] successful run completed in 1 min, 0.72 secs",
+        "workload_name": "stress_ng_tetragon_policy_hot"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": null,
+  "rejit_result": {
+    "mode": "workload_only",
+    "status": "skipped"
+  },
+  "runner": "tetragon",
+  "selected_workload": "stress_ng_tetragon_policy_hot",
+  "status": "ok"
+}

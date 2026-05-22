@@ -634,7 +634,6 @@ def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     remote_status = f"{remote_run_dir}/status"
     remote_pid = f"{remote_run_dir}/pid"
     remote_script = f"{remote_run_dir}/run-suite.sh"
-    remote_trace = f"{remote_run_dir}/trace.log"
     remote_workspace = ctx.remote_stage_dir
     local_log_dir.mkdir(parents=True, exist_ok=True)
     ctx.run_state_dir.mkdir(parents=True, exist_ok=True)
@@ -652,15 +651,8 @@ def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
         f"{log_dir_cmd}\n"
         f"{_remote_result_dir_command(remote_workspace, ctx.suite_name)}\n"
         "rc=0\n"
-        f"trace={shlex.quote(remote_trace)}\n"
-        f"status={shlex.quote(remote_status)}\n"
-        "log_stage() { printf '%s %s\\n' \"$(date -Is)\" \"$1\" >>\"$trace\"; }\n"
-        "finish() { rc=$?; log_stage \"exit rc=$rc\"; printf '%s\\n' \"$rc\" >\"$status\"; }\n"
-        "trap finish EXIT\n"
-        "log_stage start\n"
-        f"log_stage docker-run\n"
         f"sudo {suite_cmd} >{shlex.quote(remote_log)} 2>&1 || rc=$?\n"
-        "log_stage \"docker-done rc=$rc\"\n"
+        f"printf '%s\\n' \"$rc\" >{shlex.quote(remote_status)}\n"
         "exit \"$rc\"\n"
     )
     install_script_cmd = (

@@ -1,0 +1,7 @@
+app	setup	exit_code	status	artifact	elapsed_s
+tracee/monitor	workload_only	0	ok	corpus/results/x86_kvm_corpus_20260522_212550_405856	260
+tracee/monitor	ebpf_no_state	0	ok	corpus/results/x86_kvm_corpus_20260522_212946_730185	357
+bcc/set	workload_only	0	ok	corpus/results/x86_kvm_corpus_20260522_213601_930201	254
+bcc/set	ebpf_no_state	0	ok	corpus/results/x86_kvm_corpus_20260522_213958_976252	306
+tetragon/observer	workload_only	0	ok	corpus/results/x86_kvm_corpus_20260522_214505_834979	238
+tetragon/observer	ebpf_no_state	0	ok	corpus/results/x86_kvm_corpus_20260522_214926_162024	343

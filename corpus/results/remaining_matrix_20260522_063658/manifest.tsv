@@ -1,3 +1,13 @@
 app	setup	exit_code	status	artifact	elapsed_s
 tetragon/observer	workload_only	0	ok	corpus/results/x86_kvm_corpus_20260522_064013_747520	379
 tetragon/observer	ebpf_noopt_stats_on	0	ok	corpus/results/x86_kvm_corpus_20260522_064657_150013	610
+tetragon/observer	ebpf_noopt_stats_off	0	ok	corpus/results/x86_kvm_corpus_20260522_065609_372274	553
+tetragon/observer	optimized_shim_map_inline	0	ok	corpus/results/x86_kvm_corpus_20260522_070721_604229	733
+katran	workload_only	0	ok	corpus/results/x86_kvm_corpus_20260522_071732_394094	357
+katran	ebpf_noopt_stats_on	0	ok	corpus/results/x86_kvm_corpus_20260522_072319_967424	528
+katran	ebpf_noopt_stats_off	0	ok	corpus/results/x86_kvm_corpus_20260522_073158_210866	517
+katran	optimized_shim_map_inline	0	ok	corpus/results/x86_kvm_corpus_20260522_074136_764813	601
+tracee/monitor	workload_only	0	ok	corpus/results/x86_kvm_corpus_20260522_075031_626500	319
+tracee/monitor	ebpf_noopt_stats_on	0	ok	corpus/results/x86_kvm_corpus_20260522_075613_925659	586
+tracee/monitor	ebpf_noopt_stats_off	0	ok	corpus/results/x86_kvm_corpus_20260522_080555_505608	582
+tracee/monitor	optimized_shim_map_inline	0	ok	corpus/results/x86_kvm_corpus_20260522_081529_738968	780

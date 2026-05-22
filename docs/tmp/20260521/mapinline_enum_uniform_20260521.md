@@ -222,6 +222,75 @@ stackBegin GEP 别名搞复杂,脆)。
 2. **没到 16**:当前 8 站,差 ctl_array(常量-key)+ reals(hint),需补 IR 常量-key 推导。
 3. **常量传播**:uniform 生效;guarded vip_map **不生效**(指针-phi 破坏 SROA,值运行时 load)。
 
+## 常量-key 推导 + 16-site 上限核查(2026-05-22 三追加)
+按"如果编译器能发现 key 是常量就别走 call"的要求,实现了 **IR 常量-key 推导**(`resolve_const_key`):
+- 把 lookup 的 arg1(key 指针)沿 `add(ptrtoint(gep(alloca)), C)` 解析回栈 alloca + 字节 offset,
+  扫覆盖 key 字节的常量 store(要求全常量、值一致、至少一个支配该 call → sound),
+  恢复出编译期常量 key → 命中快照 entry 就**无条件折叠**(无 guard,像 uniform → const-prop 生效)。
+- **关键修复**:lift 后 frame 用 `inttoptr(ptrtoint(stackEnd)+off)` 寻址,store 不在 alloca 的
+  def-use 链上(O3 后 InstCombine 才会把 `inttoptr(ptrtoint(gep))→gep` 接回)。所以在 fold **之前**
+  加一趟 `InstCombinePass`(进 `promote_register_allocas`),把 frame 指针规范化,store 接回 alloca,
+  `resolve_const_key` 才扫得到。**ctl_array 因此自动折叠(无需 hint),sound + const-prop。**
+
+### 16 能达到,但 soft guard 撞 verifier 上限
+`--inline-hint=vip_map + reals` + ctl const-key + uniform → **sites_applied=16**(vip4+reals6+ctl2+ch2+ser2)。
+但 **BPF_PROG_LOAD 报 E2BIG(errno 7)拒绝**:
+- 不是指令数(2542→**2427**,反而更小)。
+- 是 **verifier 复杂度**(读全 315 行 verify.log 的末行确认,不是猜):
+  ```
+  BPF program is too large. Processed 1000001 insn
+  processed 1000001 insns (limit 1000000) max_states_per_insn 26 total_states 53138 peak_states 1109
+  ```
+  即 verifier 跨所有分支组合走了 >100 万 insn-step(限 100 万)。最终程序 insns=2427、
+  cond-branches=**301**、栈 -392(都没超),但 301 个分支让 verifier 状态探索爆掉。
+  vip 单独 4 个 guard 能过(之前 8-site 版本就过),**reals 再加 6 个 guard 把 processed insn 从 <1M 推过 1M**。
+  (verify.log 里能看到 vip key-match:`fp-200=scalar(var_off=(0x101640a; ...))` = key word 0x0101640a。)
+- 无条件折叠(ctl const-key、uniform)**不加分支 → 零状态探索代价**,安全。
+- 结论:soft guard 数量受 verifier 复杂度预算硬限制;katran baseline 已 ~291 分支,只剩 ~4 个 soft guard 余量。
+
+### 当前可加载的 sound 配置:10 站(loader 现状)
+vip_map 4(guarded)+ ctl_array 2(const-key,**新增,const-prop ✓**)+ ch_rings/server_id 4(uniform)。
+- test **通过**(retval 3 / IPIP 84),map_lookup 70→**54**。
+- 性能 5 次仍 **flat**(baseline 101–141 / opt 94–139,噪声内)——再证 katran lookup 非瓶颈。
+- reals **不 hint**(注释写明:6 个 soft guard 撞 verifier E2BIG)。
+
+### 三个硬事实(决定能不能到 16 + const-prop)
+1. **soft guard 不能下游 const-prop**:保留慢路径 ⇒ merge 点 phi[const, runtime] = runtime(栈无关,是 merge 本身)。
+2. **soft guard 多了撞 verifier**:每个 guard 一个分支,katran 里 10 个就 E2BIG。
+3. **无条件折叠(全局常量:uniform / 常量-key)两者都没有**:const-prop 白嫖、零分支。
+→ 旧项目的 +25.4% 来自 **hard fold**(无慢路径 = 无 merge = const-prop + 无分支 = 不撞 verifier),
+代价是对非 hint key 不 sound(workload-specialized)。**要 16 + vip/reals const-prop,只能 hard fold 或路径特化。**
+
+## E2BIG 根因订正 + 收敛 merge 实验失败(2026-05-22 四追加)
+之前把 reals guard 的 ~50K verifier 开销归因于"快慢路径指针类型分叉(PTR_TO_STACK vs
+PTR_TO_MAP_VALUE)",并实现了"收敛 merge"(慢路径把 live value 拷进同一栈 buf,两路都产出
+&buf)。**实验证明这个诊断错了**:16-site 收敛版仍 E2BIG,且 total_states **从 53138 涨到 64586**
+(更糟,因为多了 copy + null-check)。已 revert 回简单 2-way guard(且简单版更 sound:慢路径保留
+真指针,写穿透不丢)。
+
+**订正后的根因**:verifier 跟踪的是**栈槽内容的值抽象**,不只是指针类型。快路径 buf 里是
+**已知常量**,慢路径是**未知 live 值**——这是两个不同的值抽象,所以 verifier 必然把该 lookup 的
+下游 cone **按两种值各探索一遍**。这跟指针表示无关,**是"给快路径一个已知值"这件事本身的固有代价**
+(也正是常量传播有用的原因)。开销随下游 cone 大小走:
+- vip_map → real index(小标量下游)→ ~5K/guard,便宜。
+- reals → 20 字节 real 结构 → 喂 IPIP encap(大 cone)→ ~50K/guard,贵。
+
+**而且 reals 是 ARRAY(O(1) 索引,本就极廉)**:guard 它省不了多少时间,却烧 ~50K verifier 预算。
+**结论:soft guard 只值得用在本身昂贵的 lookup(HASH,如 vip_map),不值得用在廉价 ARRAY 索引(reals)。**
+所以"凑满 16"靠 guard reals 是反效果的。
+
+### 最终 sound 配置(已验证,loader 现状)
+**10 站**:vip_map 4(guarded,跳过昂贵 HASH)+ ctl_array 2(const-key 无条件,**const-prop ✓**)
++ ch_rings/server_id 4(uniform 无条件,**const-prop ✓**)。
+- test 通过(retval 3 / IPIP 84),verifier processed **703,105**(限 1M,安全)。
+- 全 sound:guard 保证只在 key==K 时用快照值,其余 key + miss 走真 lookup(live 值 + 写穿透保留)。
+- const-prop:无条件折叠(ctl/ch_rings/server_id 共 6 站)生效;vip guard 不下游 const-prop
+  (runtime key,固有)。
+- 性能 flat(katran lookup 非瓶颈,已反复验证)。
+
+reals/16:soft 路线在 katran 上既不划算(ARRAY 廉价)又撞 verifier;要 16 + const-prop 仍只剩
+hard fold(unsound)或路径特化(对 reals 的大 cone 不可行)。**保持 10 站 sound。**
+
 ## 状态
 - map_inline 多条目枚举 + uniform 消除:✅ 实现 + sound + kinsn 编译通过。
 - llvmbpf LLVM 多版本兼容宏:✅ x86-23 编译通过,arm64-15 语法兼容。

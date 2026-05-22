@@ -8,11 +8,11 @@ from .base import AppRunner
 
 def _adapt_bcc_set(workload: str, kwargs: dict[str, object]) -> dict[str, object]:
     from .bcc import find_tool_binary, inspect_bcc_setup, resolve_tools_dir
-    from .bcc_set import BCC_SET_TOOL_SPECS, BCC_SET_WORKLOAD
+    from .bcc_set import BCC_SET_TOOL_SPECS, BCC_SET_WORKLOAD_PREFIX
 
     normalized_workload = str(workload).strip()
-    if normalized_workload != BCC_SET_WORKLOAD:
-        raise RuntimeError(f"bcc_set runner requires workload {BCC_SET_WORKLOAD!r}; got {normalized_workload!r}")
+    if not normalized_workload.startswith(BCC_SET_WORKLOAD_PREFIX):
+        raise RuntimeError(f"bcc_set runner requires a stress-ng workload; got {normalized_workload!r}")
     setup_result = inspect_bcc_setup()
     tools_dir = resolve_tools_dir("", setup_result=setup_result)
     tool_binaries: dict[str, object] = {}

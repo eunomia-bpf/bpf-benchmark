@@ -18,7 +18,7 @@ from .bcc import (
     _drain_stream,
 )
 
-BCC_SET_WORKLOAD = "stress_ng_os_io_network"
+BCC_SET_WORKLOAD_PREFIX = "stress_ng_"
 
 
 @dataclass(frozen=True)
@@ -103,8 +103,8 @@ class BccSetRunner(AppRunner):
         seconds: float,
     ) -> WorkloadResult:
         requested = str(workload_spec.get("kind") or workload_spec.get("name") or "").strip()
-        if requested != BCC_SET_WORKLOAD:
-            raise RuntimeError(f"bcc/set only supports workload {BCC_SET_WORKLOAD!r}; got {requested!r}")
+        if not requested.startswith(BCC_SET_WORKLOAD_PREFIX):
+            raise RuntimeError(f"bcc/set only supports stress-ng workloads; got {requested!r}")
         return self.run_workload(seconds)
 
     def stop(self) -> None:
@@ -121,8 +121,8 @@ class BccSetRunner(AppRunner):
 
     def _workload_kind(self) -> str:
         kind = str(self.workload_spec.get("kind") or self.workload_spec.get("name") or "").strip()
-        if kind != BCC_SET_WORKLOAD:
-            raise RuntimeError(f"bcc/set only supports workload {BCC_SET_WORKLOAD!r}; got {kind!r}")
+        if not kind.startswith(BCC_SET_WORKLOAD_PREFIX):
+            raise RuntimeError(f"bcc/set only supports stress-ng workloads; got {kind!r}")
         return kind
 
     def _spawn_child(self, child: BCCRunner) -> None:

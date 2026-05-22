@@ -548,12 +548,53 @@ _STRESS_NG_MEMORY_STRESSORS = (
     "mremap",
     "madvise",
 )
+_STRESS_NG_BCC_HOOK_STRESSORS = (
+    # Cover the bundled BCC tool set: capable/syscount, opensnoop/vfsstat,
+    # biosnoop, tcpconnect/tcplife, and runqlat.
+    "cap",
+    "set",
+    "open",
+    "fstat",
+    "hdd",
+    "io",
+    "sock",
+    "sockfd",
+    "sockpair",
+    "switch",
+    "yield",
+    "futex",
+)
+_STRESS_NG_TETRAGON_POLICY_STRESSORS = (
+    # Matches the bundled Tetragon policies that showed high event cost in
+    # 60s no-eBPF/eBPF-no-state tuning: datagram/socket tracking, eventfd,
+    # and file mmap permission hooks.
+    "eventfd",
+    "mmap",
+    "udp",
+    "sock",
+    "sockfd",
+    "sockpair",
+)
+_STRESS_NG_TRACEE_SYSCALL_STRESSORS = (
+    # Tracee's all-events mode is dominated by syscall/raw tracepoint/LSM
+    # paths. Use cheap syscall generators to maximize event density.
+    "cap",
+    "set",
+    "sigfd",
+    "eventfd",
+    "kill",
+    "futex",
+    "prctl",
+)
 _STRESS_NG_WORKLOAD_STRESSORS: Mapping[str, tuple[str, ...]] = {
     "stress_ng_cpu": _STRESS_NG_CPU_STRESSORS,
     "stress_ng_filesystem": _STRESS_NG_FILESYSTEM_STRESSORS,
     "stress_ng_os": _STRESS_NG_OS_STRESSORS,
     "stress_ng_process": _STRESS_NG_PROCESS_STRESSORS,
     "stress_ng_scheduler": _STRESS_NG_SCHEDULER_STRESSORS,
+    "stress_ng_bcc_hook_hot": _STRESS_NG_BCC_HOOK_STRESSORS,
+    "stress_ng_tetragon_policy_hot": _STRESS_NG_TETRAGON_POLICY_STRESSORS,
+    "stress_ng_tracee_syscall_hot": _STRESS_NG_TRACEE_SYSCALL_STRESSORS,
     "stress_ng_os_io_network": (
         *_STRESS_NG_OS_STRESSORS,
         *_STRESS_NG_IO_STRESSORS,
