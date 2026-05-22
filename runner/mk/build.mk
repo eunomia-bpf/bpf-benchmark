@@ -11,10 +11,7 @@ STAGE2_PROGRAM_BUILD_X86 := $(STAGE2_PROGRAM_DIR)/build-x86
 STAGE2_PROGRAM_BUILD_ARM64 := $(STAGE2_PROGRAM_DIR)/build-arm64
 VENDOR_BUILD_DIR := $(ROOT_DIR)/vendor/build
 
-# run-llvmbpf JITs to the host ISA, so the runner must link an LLVM build
-# with the native target backend. The in-repo kinsn LLVM is BPF-only on x86.
-FULL_RUNNER_LLVM_DIR_CANDIDATES := /usr/lib/llvm-20/lib/cmake/llvm /usr/lib/llvm-18/lib/cmake/llvm /usr/lib/llvm-17/lib/cmake/llvm /usr/lib/llvm-15/lib/cmake/llvm /usr/lib/llvm-14/lib/cmake/llvm
-DEFAULT_RUNNER_LLVM_DIR := $(firstword $(wildcard $(FULL_RUNNER_LLVM_DIR_CANDIDATES)))
+DEFAULT_RUNNER_LLVM_DIR := $(ROOT_DIR)/llvm-backend/build-bpf-kinsn/lib/cmake/llvm
 RUNNER_LLVM_DIR := $(if $(strip $(LLVM_DIR)),$(LLVM_DIR),$(if $(strip $(RUN_LLVM_DIR)),$(RUN_LLVM_DIR),$(DEFAULT_RUNNER_LLVM_DIR)))
 RUNNER_LIBBPF_CFLAGS := -O2 -Werror -Wall -std=gnu89
 ARM64_RUNNER_LLVM_SYSROOT := $(ROOT_DIR)/.cache/sysroots/arm64-llvm15

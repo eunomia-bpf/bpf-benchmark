@@ -71,8 +71,8 @@ if(MICRO_EXEC_ENABLE_LLVMBPF)
 
     # Keep this list aligned with bpfopt/llvm/CMakeLists.txt so host-cross
     # builds can link against target LLVM libraries without executing a target
-    # llvm-config binary on the host. The in-repo kinsn LLVM build is BPF-only,
-    # so only request host target libraries when the selected LLVM provides them.
+    # llvm-config binary on the host. Some LLVM builds are target-limited, so
+    # only request host target libraries when the selected LLVM provides them.
     set(MICRO_EXEC_LLVM_COMPONENTS
         Core
         Support

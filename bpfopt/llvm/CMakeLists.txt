@@ -12,9 +12,10 @@ pkg_check_modules(SPDLOG REQUIRED IMPORTED_TARGET spdlog)
 # shelling out to llvm-config: the in-repo kinsn LLVM build does not ship a
 # working llvm-config, and the component targets carry their own transitive
 # system-lib dependencies (zlib, zstd, etc.).
-# bpfopt-llvm only emits BPF object code, so the BPF backend is mandatory. The
-# host backend (native/x86/aarch64) is only present when LLVM was built with it
-# (the in-repo kinsn LLVM is BPF-only), so add it conditionally.
+# bpfopt-llvm emits BPF object code (BPF backend mandatory). The host backend
+# is added when the LLVM build has it — the umbrella component names (x86 /
+# aarch64) are not in this config's component map, so list the per-target libs
+# explicitly (as for bpf*).
 set(BPFOPT_LLVM_COMPONENTS
   core support target analysis ipo transformutils passes bitreader
   asmparser linker mc mcparser mcdisassembler object executionengine
@@ -22,10 +23,13 @@ set(BPFOPT_LLVM_COMPONENTS
   bpfcodegen bpfasmparser bpfdisassembler bpfdesc bpfinfo
 )
 if("X86" IN_LIST LLVM_TARGETS_TO_BUILD)
-  list(APPEND BPFOPT_LLVM_COMPONENTS native x86)
+  list(APPEND BPFOPT_LLVM_COMPONENTS
+    x86codegen x86asmparser x86desc x86disassembler x86info)
 endif()
 if("AArch64" IN_LIST LLVM_TARGETS_TO_BUILD)
-  list(APPEND BPFOPT_LLVM_COMPONENTS aarch64)
+  list(APPEND BPFOPT_LLVM_COMPONENTS
+    aarch64codegen aarch64asmparser aarch64desc aarch64disassembler
+    aarch64info aarch64utils)
 endif()
 llvm_map_components_to_libnames(LLVM_LINK_FLAGS ${BPFOPT_LLVM_COMPONENTS})
 

@@ -1021,10 +1021,68 @@ decide_lookup_folds(const std::vector<uint8_t> &text, const Cli &cli,
 	return folds;
 }
 
-// Replace each folded map_lookup_elem call's result with a pointer to a private
-// constant holding the snapshot value, then let O3 const-fold the loads and DCE
-// the now-dead lookup. No stack round-trip / address-taken (unlike the bytecode
-// splice), so O3 can actually propagate the constants into registers.
+// Little-endian integer of `width` bytes from `v` at byte `off`.
+uint64_t le_value(const std::vector<uint8_t> &v, size_t off, size_t width)
+{
+	uint64_t x = 0;
+	for (size_t i = 0; i < width; i++) {
+		x |= static_cast<uint64_t>(v[off + i]) << (8 * i);
+	}
+	return x;
+}
+
+// Collect the integer loads reachable from a value pointer `p` (the lookup
+// result cast to a pointer) at cumulative byte offset `base`. Every use of `p`
+// must be a constant-offset GEP or an in-range integer load, else returns false
+// (the site is not cleanly foldable and is skipped).
+bool collect_value_loads(
+	llvm::Value *p, int64_t base, const std::vector<uint8_t> &v,
+	const llvm::DataLayout &dl,
+	std::vector<std::pair<llvm::LoadInst *, llvm::Constant *>> &out)
+{
+	for (llvm::User *u : p->users()) {
+		if (auto *ld = llvm::dyn_cast<llvm::LoadInst>(u)) {
+			if (ld->getPointerOperand() != p ||
+			    !ld->getType()->isIntegerTy()) {
+				return false;
+			}
+			const unsigned bits = ld->getType()->getIntegerBitWidth();
+			if (bits % 8 != 0) {
+				return false;
+			}
+			const size_t width = bits / 8;
+			if (base < 0 ||
+			    static_cast<size_t>(base) + width > v.size()) {
+				return false;
+			}
+			out.push_back({ ld, llvm::ConstantInt::get(
+						     ld->getType(),
+						     le_value(v,
+							      static_cast<size_t>(
+								      base),
+							      width)) });
+		} else if (auto *gep =
+				   llvm::dyn_cast<llvm::GetElementPtrInst>(u)) {
+			llvm::APInt off(64, 0);
+			if (!gep->accumulateConstantOffset(dl, off)) {
+				return false;
+			}
+			if (!collect_value_loads(gep, base + off.getSExtValue(),
+						 v, dl, out)) {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
+	return true;
+}
+
+// Fold map_lookup_elem results to constants in IR: replace the value-deref loads
+// with immediate ConstantInts and make the null check see a non-null pointer,
+// then erase the lookup. Pure register immediates (no global / .rodata, no stack
+// round-trip), so O3 propagates them and DCEs the dead lookup. A site whose
+// result is used in any other way is left untouched (skipped).
 void fold_lookups_in_module(
 	llvm::Module &module,
 	const std::vector<std::optional<std::vector<uint8_t>>> &folds)
@@ -1047,26 +1105,54 @@ void fold_lookups_in_module(
 	if (calls.size() != folds.size()) {
 		return; // ordinal/count mismatch: fold nothing (safety)
 	}
-	auto &ctx = module.getContext();
+	const auto &dl = module.getDataLayout();
 	for (size_t i = 0; i < calls.size(); i++) {
 		if (!folds[i]) {
 			continue;
 		}
 		const auto &v = *folds[i];
-		auto *init = llvm::ConstantDataArray::get(
-			ctx, llvm::ArrayRef<uint8_t>(v.data(), v.size()));
-		auto *gv = new llvm::GlobalVariable(
-			module, init->getType(), /*isConstant=*/true,
-			llvm::GlobalValue::PrivateLinkage, init,
-			"__mapinline_const");
-		gv->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
-		auto *res_ty = calls[i]->getType();
-		llvm::Constant *repl =
-			res_ty->isPointerTy() ?
-				llvm::ConstantExpr::getBitCast(gv, res_ty) :
-				llvm::ConstantExpr::getPtrToInt(gv, res_ty);
-		calls[i]->replaceAllUsesWith(repl);
-		calls[i]->eraseFromParent();
+		auto *call = calls[i];
+		// Validate every use first: null-check (icmp vs 0) or a pointer
+		// deref via inttoptr -> [gep]* -> integer load.
+		std::vector<std::pair<llvm::LoadInst *, llvm::Constant *>> loads;
+		std::vector<llvm::ICmpInst *> nullchecks;
+		std::vector<llvm::IntToPtrInst *> casts;
+		bool ok = true;
+		for (llvm::User *u : call->users()) {
+			if (auto *ic = llvm::dyn_cast<llvm::ICmpInst>(u)) {
+				nullchecks.push_back(ic);
+			} else if (auto *itp =
+					   llvm::dyn_cast<llvm::IntToPtrInst>(u)) {
+				casts.push_back(itp);
+				if (!collect_value_loads(itp, 0, v, dl, loads)) {
+					ok = false;
+					break;
+				}
+			} else {
+				ok = false;
+				break;
+			}
+		}
+		if (!ok) {
+			continue;
+		}
+		// Apply: loads -> constants; null checks see a non-null result.
+		for (auto &lf : loads) {
+			lf.first->replaceAllUsesWith(lf.second);
+			lf.first->eraseFromParent();
+		}
+		for (auto *ic : nullchecks) {
+			ic->replaceUsesOfWith(
+				call, llvm::ConstantInt::get(call->getType(), 1));
+		}
+		for (auto *itp : casts) {
+			if (itp->use_empty()) {
+				itp->eraseFromParent();
+			}
+		}
+		if (call->use_empty()) {
+			call->eraseFromParent();
+		}
 	}
 }
 
@@ -1077,6 +1163,16 @@ std::vector<uint8_t> run_map_inline_roundtrip(const std::vector<uint8_t> &input,
 	const auto folds = decide_lookup_folds(input, cli, records);
 	auto module = generate_llvm_module(input);
 	return module.withModuleDo([&](llvm::Module &module) {
+		// Set the BPF data layout before folding so GEP offset
+		// accumulation in the fold matches codegen.
+		auto machine = create_bpf_target_machine(
+			llvm::CodeGenOptLevel::Aggressive);
+		module.setTargetTriple(llvm::Triple("bpfel"));
+		module.setDataLayout(machine->createDataLayout());
+		// Promote the per-register allocas to SSA first, so a lookup
+		// result flows directly to its null check / deref uses instead of
+		// being stored to its register alloca.
+		promote_register_allocas(module, *machine);
 		fold_lookups_in_module(module, folds);
 		return extract_relocated_text(emit_bpf_object(module, true),
 					      input);

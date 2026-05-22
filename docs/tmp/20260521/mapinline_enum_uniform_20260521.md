@@ -87,6 +87,35 @@ cmake -S llvm-backend/llvm/llvm -B llvm-backend/build-bpf-kinsn-arm64 -G Ninja \
   通过 → 产出 ARM aarch64 ELF(75 MB)。即 **arm/x86 两边的 corpus 现在都链接仓库改过的
   LLVM-23**。
 
+## 重写为 IR 级折叠(2026-05-21 追加)
+之前 bytecode-splice 折叠把值 materialize 到「取地址的栈槽」,堵死了 O3 常量传播 →
+程序变大、无收益。改成 **IR 级**:
+- 在 lift 后、O3 前,先 `promote_register_allocas`(mem2reg,让 lookup 结果以 SSA 形式
+  直接流到使用点,而不是被 store 进寄存器 alloca);
+- `fold_lookups_in_module`:把 `map_lookup_elem` 结果的**值 deref load 替换成立即数
+  ConstantInt**,null 检查改成看到非空指针,然后删掉 lookup。**纯寄存器立即数,无 global /
+  .rodata,无栈往返** → O3 能真正传播 + DCE。
+- 不可折的 use(store/phi/未知)→ 跳过该 site(安全)。
+
+### 结果(katran,kinsn LLVM-23)
+- **test 通过**:retval 3(XDP_TX)、data_size_out 84(IPIP),转发正确。
+- **程序变小 + lookup 变少**:insns 2542 → **2367**(-175),map_lookup_elem 70 → **60**
+  (消掉 10 个)。**这是第一次优化后程序真的更小**(对比 bytecode-stack 方式膨胀到 2600)。
+- **但性能仍 ~flat**:baseline ~138 vs fold ~144 ns(噪声内)。原因不变:消掉的是**便宜的
+  ARRAY 查找**(直接下标),而 katran 每包瓶颈在解析 + IPIP 封装 + 校验和,不在查找。
+- 覆盖:折了 ~10 个 site(uniform ARRAY + 单条目 immutable map);**vip_map(HASH,贵)的
+  2 个 site 被 `phi` 挡住**(结果跨分支流入 phi,直线 use-walk 跳过)。要折它们需处理 phi。
+  之前 hard-fold 的「16」含 ctl_array(数据路径写,折它本就 unsound)。
+
+### 构建相关
+- kinsn LLVM 现在带 **X86 target**(`需要带 x86`):build-bpf-kinsn 编了 X86 库;
+  `bpfopt/llvm/CMakeLists.txt` 改用显式 X86 库名(x86codegen/...,umbrella `x86` 映射错)。
+- `vendor/llvmbpf/src/compiler.cpp` 的 `hasTerminator` 修复又被回退过一次,已重新修。
+
+### 结论
+IR 级折叠是**正确的架构**(真的减指令、sound、转发对),修好了 bytecode-stack 的传播问题。
+katran 收益仍微小是因为**查找非其瓶颈**;要展示 map_inline 的性能价值需用**查找密集型**程序。
+
 ## 状态
 - map_inline 多条目枚举 + uniform 消除:✅ 实现 + sound + kinsn 编译通过。
 - llvmbpf LLVM 多版本兼容宏:✅ x86-23 编译通过,arm64-15 语法兼容。
