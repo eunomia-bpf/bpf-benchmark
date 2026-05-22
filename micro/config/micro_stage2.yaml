@@ -14,6 +14,7 @@ paths:
   # runner/suites/micro.py); this fallback is the conventional host
   # build path used when running `python micro/driver.py` directly.
   program_dir: native-sim/test/build-x86
+  proof_dir: native-sim/test/build-x86/x86_sim_proofs
 
 build:
   runner_binary: runner/build/micro_exec
@@ -28,6 +29,8 @@ runtimes:
   - name: kernel_rejit
 
   - name: native_kernel
+
+  - name: native_proof
 
 benchmarks:
   # Pure helpers + one trivial single-slot HASH map. Deterministic.

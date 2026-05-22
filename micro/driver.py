@@ -598,11 +598,9 @@ def main(argv: list[str] | None = None) -> int:
 
             runtime_samples: dict[str, dict[str, object]] = {}
 
-            def append_runtime_records() -> None:
-                recorded = {run["runtime"] for run in benchmark_record["runs"]}
+            def sync_runtime_records(*, print_summary: bool = False) -> None:
+                recorded = {run["runtime"]: run for run in benchmark_record["runs"]}
                 for runtime in benchmark_runtimes:
-                    if runtime.name in recorded:
-                        continue
                     sample_entry = runtime_samples.get(runtime.name)
                     if not sample_entry:
                         continue
@@ -611,18 +609,23 @@ def main(argv: list[str] | None = None) -> int:
                         continue
                     inner_repeat = int(sample_entry["inner_repeat"])
                     result_values = [sample["result"] for sample in run_samples]
-                    benchmark_record["runs"].append({
+                    payload = {
                         "runtime": runtime.name,
                         "inner_repeat": inner_repeat,
                         "samples": run_samples,
-                    })
+                    }
+                    if existing := recorded.get(runtime.name):
+                        existing.update(payload)
+                    else:
+                        benchmark_record["runs"].append(payload)
                     last_sample = run_samples[-1]
-                    print(
-                        f"  {runtime.name:16} "
-                        f"compile last {int(last_sample.get('compile_ns') or 0)} ns | "
-                        f"exec last {int(last_sample.get('exec_ns') or 0)} ns | "
-                        f"result {result_values[-1] if result_values else '?'}"
-                    )
+                    if print_summary:
+                        print(
+                            f"  {runtime.name:16} "
+                            f"compile last {int(last_sample.get('compile_ns') or 0)} ns | "
+                            f"exec last {int(last_sample.get('exec_ns') or 0)} ns | "
+                            f"result {result_values[-1] if result_values else '?'}"
+                        )
 
             try:
                 for runtime in benchmark_runtimes:
@@ -701,11 +704,13 @@ def main(argv: list[str] | None = None) -> int:
                             )
 
                         runtime_samples[runtime.name]["samples"].append(sample)
+                        sync_runtime_records()
+                        flush_artifact("running")
 
-                append_runtime_records()
+                sync_runtime_records(print_summary=True)
                 flush_artifact("running")
             except Exception as exc:
-                append_runtime_records()
+                sync_runtime_records(print_summary=True)
                 benchmark_record["error"] = str(exc)
                 benchmark_errors.append(f"{benchmark.name}: {exc}")
                 print(f"  error {exc}", flush=True)

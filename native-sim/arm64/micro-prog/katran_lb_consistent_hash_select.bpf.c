@@ -35,7 +35,7 @@ arm64_l_24:
 	/* 0x24: mov w0, wzr */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_REG, ARM64_X0, ARM64_XZR, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, 0, 0);
 arm64_l_28:
-	/* 0x28: b 648 <katran_lb_consistent_hash_select_xdp+0x648> */
+	/* 0x28: b 648 <__native_link_arm64_ret_trampoline> */
 	ARM64_SIM_A64_JMP(0x28, 0x648, arm64_l_648);
 arm64_l_2c:
 	/* 0x2c: ldrh w12, [x8, #20] */
@@ -650,7 +650,7 @@ arm64_l_358:
 	/* 0x358: str x9, [x8] */
 	ARM64_SIM_RUN_OP3(ARM64_OP_STORE, ARM64_X8, ARM64_X9, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL);
 arm64_l_35c:
-	/* 0x35c: b 648 <katran_lb_consistent_hash_select_xdp+0x648> */
+	/* 0x35c: b 648 <__native_link_arm64_ret_trampoline> */
 	ARM64_SIM_A64_JMP(0x35c, 0x648, arm64_l_648);
 arm64_l_360:
 	/* 0x360: cmp w17, #0x6 */

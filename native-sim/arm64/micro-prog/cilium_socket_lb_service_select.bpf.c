@@ -20,7 +20,7 @@ arm64_l_10:
 	/* 0x10: mov w0, wzr */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_REG, ARM64_X0, ARM64_XZR, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, 0, 0);
 arm64_l_14:
-	/* 0x14: b 160 <cilium_socket_lb_service_select_xdp+0x160> */
+	/* 0x14: b 160 <__native_link_arm64_ret_trampoline> */
 	ARM64_SIM_A64_JMP(0x14, 0x160, arm64_l_160);
 arm64_l_18:
 	/* 0x18: add x11, x10, #0x8 */
@@ -263,7 +263,7 @@ arm64_l_154:
 	/* 0x154: str x11, [x8] */
 	ARM64_SIM_RUN_OP3(ARM64_OP_STORE, ARM64_X8, ARM64_X11, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL);
 arm64_l_158:
-	/* 0x158: b 160 <cilium_socket_lb_service_select_xdp+0x160> */
+	/* 0x158: b 160 <__native_link_arm64_ret_trampoline> */
 	ARM64_SIM_A64_JMP(0x158, 0x160, arm64_l_160);
 arm64_l_15c:
 	/* 0x15c: nop */

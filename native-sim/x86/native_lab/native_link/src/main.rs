@@ -17,12 +17,10 @@
 //!   2. Every `CALL rel32` to a discovered subprogram has its `disp32`
 //!      patched so it points at the subprogram's new offset within the
 //!      blob (entry first, then subprograms in discovery order).
-//!   3. The entry function's SysV callee-saved register save/restore is
-//!      stripped for RBX/R13-R15 when it matches the compiler's ordinary
-//!      prologue/epilogue shape. RBP is kept because the x86 BPF JIT
-//!      epilogue uses it as the frame pointer for `leave; ret`; R12 is kept
-//!      because the x86 BPF register allocator does not map a BPF callee-saved
-//!      register to host R12.
+//!   3. The entry function's compiler ABI save/restore is trimmed when it
+//!      matches ordinary x86 SysV or arm64 AAPCS callee-saved register
+//!      patterns. The runner passes a sidecar mask so the BPF JIT prologue
+//!      preserves the host registers used by the raw blob.
 //!   4. Compiler alignment NOPs are dropped (iced re-encodes some
 //!      multi-byte NOPs to shorter forms, which would break pre-computed
 //!      offset arithmetic).
@@ -67,6 +65,8 @@ use std::path::PathBuf;
 const X86_CPU_NUMBER_HELPER_KEY: &str = "__native_x86_cpu_number";
 const X86_THIS_CPU_OFF_HELPER_KEY: &str = "__native_x86_this_cpu_off";
 const ARM64_THREAD_INFO_CPU_OFFSET_HELPER_KEY: &str = "__native_arm64_thread_info_cpu_offset";
+const ARM64_RETURN_TRAMPOLINE_SYMBOL: &str = "__native_link_arm64_ret_trampoline";
+const A64_NOP: u32 = 0xd503_201f;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -387,7 +387,7 @@ fn main() -> Result<()> {
         blob,
         relocs,
         map_patches,
-        x86_callee_saved_mask,
+        callee_saved_mask,
         proof_relocs,
         proof_symbols,
     } = match elf.architecture() {
@@ -477,7 +477,7 @@ fn main() -> Result<()> {
             &blob,
             &proof_symbols,
             &proof_relocs,
-            x86_callee_saved_mask,
+            callee_saved_mask,
         )?;
         eprintln!(
             "native-link: wrote proof object {} bytes, {} reloc(s) -> {}",
@@ -487,7 +487,7 @@ fn main() -> Result<()> {
         );
         return Ok(());
     }
-    let output_x86_callee_saved_mask = read_proof_abi(&elf)?.unwrap_or(x86_callee_saved_mask);
+    let output_callee_saved_mask = read_proof_abi(&elf)?.unwrap_or(callee_saved_mask);
 
     fs::write(&args.output, &blob).with_context(|| format!("write {}", args.output.display()))?;
     eprintln!(
@@ -537,8 +537,8 @@ fn main() -> Result<()> {
     }
     if let Some(path) = &args.output_abi {
         let text = format!(
-            "version\tnative-link-abi-v1\nx86_callee_saved_mask\t{}\n",
-            output_x86_callee_saved_mask
+            "version\tnative-link-abi-v2\ncallee_saved_mask\t{}\n",
+            output_callee_saved_mask
         );
         fs::write(path, text).with_context(|| format!("write {}", path.display()))?;
         eprintln!("native-link: wrote ABI metadata -> {}", path.display());
@@ -553,7 +553,7 @@ fn write_proof_object(
     text: &[u8],
     proof_symbols: &[ProofSymbol],
     proof_relocs: &[ProofReloc],
-    x86_callee_saved_mask: u8,
+    callee_saved_mask: u8,
 ) -> Result<()> {
     let mut object = WriteObject::new(BinaryFormat::Elf, arch, Endianness::Little);
     let text_section = object.section_id(StandardSection::Text);
@@ -691,8 +691,8 @@ fn write_proof_object(
         SectionKind::ReadOnlyData,
     );
     let abi = format!(
-        "version\tnative-link-abi-v1\nx86_callee_saved_mask\t{}\n",
-        x86_callee_saved_mask
+        "version\tnative-link-abi-v2\ncallee_saved_mask\t{}\n",
+        callee_saved_mask
     );
     object.append_section_data(abi_section, abi.as_bytes(), 1);
 
@@ -720,17 +720,17 @@ fn read_proof_abi(elf: &object::File) -> Result<Option<u8>> {
         }
         match key {
             "version" => {
-                if value != "native-link-abi-v1" {
+                if value != "native-link-abi-v2" {
                     bail!("unsupported .native_link_abi version {value:?}");
                 }
                 seen_version = true;
             }
-            "x86_callee_saved_mask" => {
+            "callee_saved_mask" => {
                 let parsed: u8 = value
                     .parse()
-                    .with_context(|| format!("parse x86_callee_saved_mask {value:?}"))?;
+                    .with_context(|| format!("parse callee_saved_mask {value:?}"))?;
                 if parsed > 0xf {
-                    bail!("x86_callee_saved_mask exceeds 4 bits: {parsed}");
+                    bail!("callee_saved_mask exceeds 4 bits: {parsed}");
                 }
                 mask = Some(parsed);
             }
@@ -874,7 +874,7 @@ struct RewriteResult {
     blob: Vec<u8>,
     relocs: Vec<RelocRecord>,
     map_patches: Vec<MapPatch>,
-    x86_callee_saved_mask: u8,
+    callee_saved_mask: u8,
     proof_relocs: Vec<ProofReloc>,
     proof_symbols: Vec<ProofSymbol>,
 }
@@ -1080,7 +1080,7 @@ fn rewrite_x86(
     let mut blob: Vec<u8> = Vec::new();
     let mut patches: Vec<PatchInfo> = Vec::new();
     let mut layouts: Vec<SymbolLayout> = Vec::new();
-    let mut x86_callee_saved_mask: u8 = 0;
+    let mut callee_saved_mask: u8 = 0;
     // For each `bpf_map_lookup_elem` call site encountered in
     // entry-symbol byte order, record (symbol_addr, local_call_offset)
     // -> spec_index. Filled during the decode loop; consumed by
@@ -1101,7 +1101,7 @@ fn rewrite_x86(
             X86EntryAbiStrip::default()
         };
         if is_entry {
-            x86_callee_saved_mask = entry_abi_strip.callee_saved_mask;
+            callee_saved_mask = entry_abi_strip.callee_saved_mask;
         }
         // Decode at the symbol's original vaddr so insn.near_branch_target()
         // is meaningful in the ELF address space and we can identify
@@ -1700,7 +1700,7 @@ fn rewrite_x86(
         blob,
         relocs,
         map_patches,
-        x86_callee_saved_mask,
+        callee_saved_mask,
         proof_relocs,
         proof_symbols,
     })
@@ -2056,10 +2056,10 @@ fn arm64_mov_imm64_sequence(reg: u32, value: u64) -> Result<Vec<u32>> {
 }
 
 fn arm64_helper_call_sequence(helper_addr: u64) -> Result<Vec<u32>> {
-    const A64_X16: u32 = 16;
+    const A64_X10: u32 = 10;
 
-    let mut words = arm64_mov_imm64_sequence(A64_X16, helper_addr)?;
-    words.push(a64_blr(A64_X16)?);
+    let mut words = arm64_mov_imm64_sequence(A64_X10, helper_addr)?;
+    words.push(a64_blr(A64_X10)?);
     Ok(words)
 }
 
@@ -2379,7 +2379,6 @@ fn append_u64(blob: &mut Vec<u8>, value: u64) {
 }
 
 fn align_arm64_blob_to_8(blob: &mut Vec<u8>) {
-    const A64_NOP: u32 = 0xd503_201f;
     if blob.len() % 8 != 0 {
         append_u32(blob, A64_NOP);
     }
@@ -2611,6 +2610,90 @@ struct Arm64Patch {
     kind: Arm64PatchKind,
 }
 
+#[derive(Default)]
+struct Arm64EntryAbiStrip {
+    nop_word_indices: HashSet<usize>,
+    callee_saved_mask: u8,
+}
+
+fn plan_arm64_entry_abi_strip(bytes: &[u8]) -> Result<Arm64EntryAbiStrip> {
+    let mut out = Arm64EntryAbiStrip::default();
+    let mut save_counts = [0i32; 4];
+    let mut restore_counts = [0i32; 4];
+
+    for (word_index, word) in bytes.chunks_exact(4).enumerate() {
+        let insn = u32::from_le_bytes(word.try_into().unwrap());
+        let Some((is_load, rt, rt2)) = arm64_stp_ldp_pair_regs(insn) else {
+            continue;
+        };
+        if !arm64_entry_pair_is_strippable(rt, rt2) {
+            continue;
+        }
+
+        out.nop_word_indices.insert(word_index);
+        for reg in [rt, rt2] {
+            let Some(bit_index) = arm64_callee_saved_bit_index(reg) else {
+                continue;
+            };
+            if is_load {
+                restore_counts[bit_index] += 1;
+            } else {
+                save_counts[bit_index] += 1;
+            }
+        }
+    }
+
+    for (idx, (saves, restores)) in save_counts.iter().zip(restore_counts.iter()).enumerate() {
+        if saves != restores {
+            bail!(
+                "arm64 entry ABI strip found unbalanced save/restore for x{}: saves={}, restores={}",
+                19 + idx,
+                saves,
+                restores
+            );
+        }
+        if *saves > 0 {
+            out.callee_saved_mask |= 1u8 << idx;
+        }
+    }
+
+    Ok(out)
+}
+
+fn arm64_stp_ldp_pair_regs(insn: u32) -> Option<(bool, u32, u32)> {
+    if (insn & 0x7c00_0000) != 0x2800_0000 {
+        return None;
+    }
+    if (insn & 0xc000_0000) != 0x8000_0000 {
+        return None;
+    }
+    let rn = (insn >> 5) & 0x1f;
+    if rn != 31 {
+        return None;
+    }
+    let is_load = ((insn >> 22) & 1) != 0;
+    Some((is_load, insn & 0x1f, (insn >> 10) & 0x1f))
+}
+
+fn arm64_entry_pair_is_strippable(rt: u32, rt2: u32) -> bool {
+    let regs = [rt, rt2];
+    regs.iter()
+        .all(|reg| arm64_callee_saved_bit_index(*reg).is_some() || *reg == 30)
+        && regs
+            .iter()
+            .any(|reg| arm64_callee_saved_bit_index(*reg).is_some())
+}
+
+fn arm64_callee_saved_bit_index(reg: u32) -> Option<usize> {
+    match reg {
+        19 => Some(0),
+        20 => Some(1),
+        21 => Some(2),
+        22 => Some(3),
+        _ => None,
+    }
+}
+
 fn arm64_branch_target_word(
     addr_word_offset: &HashMap<u64, usize>,
     sym_end_word_offset: &HashMap<u64, usize>,
@@ -2650,6 +2733,7 @@ fn rewrite_arm64(
     let mut lookup_call_counter: usize = 0;
     let mut update_call_counter: usize = 0;
     let mut proof_relocs: Vec<ProofReloc> = Vec::new();
+    let mut callee_saved_mask: u8 = 0;
     const A64_MOV_X7_X0: u32 = 0xaa00_03e7;
 
     for sym in included {
@@ -2661,14 +2745,27 @@ fn rewrite_arm64(
                 sym.name
             );
         }
+        let entry_abi_strip = if is_entry {
+            plan_arm64_entry_abi_strip(&bytes)?
+        } else {
+            Arm64EntryAbiStrip::default()
+        };
+        if is_entry {
+            callee_saved_mask = entry_abi_strip.callee_saved_mask;
+        }
 
         let end = sym.address + sym.size;
         sym_start_word_offset.insert(sym.address, blob.len() / 4);
         for (local_word_index, word) in bytes.chunks_exact(4).enumerate() {
             let off = local_word_index * 4;
-            let insn = u32::from_le_bytes(word.try_into().unwrap());
+            let mut insn = u32::from_le_bytes(word.try_into().unwrap());
             let emit_word_index = blob.len() / 4;
             addr_word_offset.insert(sym.address + off as u64, emit_word_index);
+            if is_entry && entry_abi_strip.nop_word_indices.contains(&local_word_index) {
+                insn = A64_NOP;
+                blob.extend_from_slice(&insn.to_le_bytes());
+                continue;
+            }
             let reloc = relocs.get(&(sym.address, off as u64));
 
             if let Some(reloc) = reloc {
@@ -2936,6 +3033,20 @@ fn rewrite_arm64(
             }
 
             if let Some(target) = a64_branch_target(sym.address, local_word_index, insn) {
+                if !proof_mode && is_entry && arm64_is_return_trampoline_target(elf, target)? {
+                    if !a64_is_uncond_b(insn) {
+                        bail!(
+                            "arm64 branch in {} at byte offset {off:#x} conditionally targets return trampoline",
+                            sym.name
+                        );
+                    }
+                    patches.push(Arm64Patch {
+                        word_index: emit_word_index,
+                        kind: Arm64PatchKind::ReturnToTrampoline,
+                    });
+                    blob.extend_from_slice(&0u32.to_le_bytes());
+                    continue;
+                }
                 if target < sym.address || target > end {
                     bail!(
                         "arm64 branch in {} at byte offset {off:#x} targets {target:#x}, outside symbol",
@@ -2975,11 +3086,7 @@ fn rewrite_arm64(
                 });
             }
 
-            let is_canonical_return_trampoline = !proof_mode
-                && is_entry
-                && insn == A64_MOV_X7_X0
-                && sym.address + off as u64 + 4 == end;
-            if is_entry && (a64_is_ret(insn) || is_canonical_return_trampoline) {
+            if is_entry && a64_is_ret(insn) {
                 patches.push(Arm64Patch {
                     word_index: emit_word_index,
                     kind: Arm64PatchKind::ReturnToTrampoline,
@@ -3154,7 +3261,7 @@ fn rewrite_arm64(
         blob,
         relocs: Vec::new(),
         map_patches,
-        x86_callee_saved_mask: 0,
+        callee_saved_mask,
         proof_relocs,
         proof_symbols,
     })
@@ -3172,13 +3279,10 @@ fn arm64_proof_symbols(
             .get(&sym.address)
             .ok_or_else(|| anyhow!("arm64 proof symbol {} has no start", sym.name))?
             * 4;
-        let mut end = *end_words
+        let end = *end_words
             .get(&sym.address)
             .ok_or_else(|| anyhow!("arm64 proof symbol {} has no end", sym.name))?
             * 4;
-        if sym.address == included[0].address && end < blob_len {
-            end = blob_len;
-        }
         if end < start || end > blob_len {
             bail!(
                 "arm64 proof symbol {} range {start:#x}..{end:#x} outside blob size {blob_len}",
@@ -3191,7 +3295,30 @@ fn arm64_proof_symbols(
             size: (end - start) as u64,
         });
     }
+    let trampoline_offset = blob_len
+        .checked_sub(4)
+        .ok_or_else(|| anyhow!("arm64 proof blob too small for return trampoline"))?;
+    out.push(ProofSymbol {
+        name: ARM64_RETURN_TRAMPOLINE_SYMBOL.to_string(),
+        offset: trampoline_offset as u64,
+        size: 4,
+    });
     Ok(out)
+}
+
+fn arm64_is_return_trampoline_target(elf: &object::File, target: u64) -> Result<bool> {
+    for sym in elf.symbols().chain(elf.dynamic_symbols()) {
+        if sym.address() != target || sym.size() == 0 {
+            continue;
+        }
+        let name = sym
+            .name()
+            .map_err(|e| anyhow!("arm64 return trampoline symbol name: {e}"))?;
+        if name == ARM64_RETURN_TRAMPOLINE_SYMBOL {
+            return Ok(true);
+        }
+    }
+    Ok(false)
 }
 
 fn disasm_arm64_words(blob: &[u8]) {

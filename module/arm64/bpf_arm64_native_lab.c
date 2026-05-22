@@ -13,6 +13,8 @@
  *  - Blob length must be a non-zero multiple of 4 bytes.
  *  - Blob is emitted in the middle of a JITted BPF function and must fall
  *    through to the next BPF instruction; do not end it with RET.
+ *  - Sidecar bits 4..7 mirror x86 native_lab: request BPF r6..r9 use so
+ *    the arm64 BPF JIT saves x19..x22 for raw native code.
  *  - BPF r0 is arm64 x7 in the kernel BPF JIT. Set x7 before falling
  *    through if the native blob wants to choose the BPF program retval.
  *  - BPF r1 is arm64 x0 on entry, so an XDP native blob sees the xdp_buff
@@ -34,6 +36,14 @@
 #include "kinsn_common.h"
 
 #define NATIVE_LAB_MAX_BLOBS		64
+#define NATIVE_LAB_ABI_X19		(1U << 0)
+#define NATIVE_LAB_ABI_X20		(1U << 1)
+#define NATIVE_LAB_ABI_X21		(1U << 2)
+#define NATIVE_LAB_ABI_X22		(1U << 3)
+#define NATIVE_LAB_ABI_MASK		(NATIVE_LAB_ABI_X19 | \
+					 NATIVE_LAB_ABI_X20 | \
+					 NATIVE_LAB_ABI_X21 | \
+					 NATIVE_LAB_ABI_X22)
 /*
  * arch/arm64/net/bpf_jit_comp.c currently allows at most 64 arm64
  * instructions from one kinsn callback.
@@ -60,33 +70,47 @@ BTF_KFUNCS_START(bpf_arm64_native_lab_kfunc_ids)
 BTF_ID_FLAGS(func, bpf_arm64_native_lab_emit)
 BTF_KFUNCS_END(bpf_arm64_native_lab_kfunc_ids)
 
-static int decode_native_lab_payload(u64 payload, u32 *blob_id)
+static int decode_native_lab_payload(u64 payload, u32 *blob_id, u32 *abi_mask)
 {
 	payload = kinsn_payload_decode(payload);
 
 	if (payload & 0xf)
 		return -EINVAL;
-	if ((payload >> 4) & 0xffff)
+	if (((payload >> 4) & 0xf) & ~NATIVE_LAB_ABI_MASK)
+		return -EINVAL;
+	if ((payload >> 8) & 0xfff)
 		return -EINVAL;
 
 	*blob_id = (u32)(payload >> 20);
 	if (*blob_id >= NATIVE_LAB_MAX_BLOBS)
 		return -EINVAL;
+	if (abi_mask)
+		*abi_mask = (u32)((payload >> 4) & 0xf);
 
 	return 0;
 }
 
 static int instantiate_native_lab(u64 payload, struct bpf_insn *insn_buf)
 {
+	u32 abi_mask = 0;
 	u32 blob_id;
 	int err;
+	int cnt = 0;
 
-	err = decode_native_lab_payload(payload, &blob_id);
+	err = decode_native_lab_payload(payload, &blob_id, &abi_mask);
 	if (err)
 		return err;
 
-	insn_buf[0] = BPF_ALU64_IMM(BPF_MOV, BPF_REG_0, 0);
-	return 1;
+	if (abi_mask & NATIVE_LAB_ABI_X19)
+		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_6, BPF_REG_1);
+	if (abi_mask & NATIVE_LAB_ABI_X20)
+		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_7, BPF_REG_1);
+	if (abi_mask & NATIVE_LAB_ABI_X21)
+		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_8, BPF_REG_1);
+	if (abi_mask & NATIVE_LAB_ABI_X22)
+		insn_buf[cnt++] = BPF_MOV64_REG(BPF_REG_9, BPF_REG_1);
+	insn_buf[cnt++] = BPF_ALU64_IMM(BPF_MOV, BPF_REG_0, 0);
+	return cnt;
 }
 
 static int emit_native_lab_arm64(u32 *image, int *idx, bool emit, u64 payload,
@@ -100,7 +124,7 @@ static int emit_native_lab_arm64(u32 *image, int *idx, bool emit, u64 payload,
 
 	(void)prog;
 
-	err = decode_native_lab_payload(payload, &blob_id);
+	err = decode_native_lab_payload(payload, &blob_id, NULL);
 	if (err)
 		return err;
 	if (!idx)
@@ -138,7 +162,7 @@ static int emit_native_lab_arm64(u32 *image, int *idx, bool emit, u64 payload,
 
 const struct bpf_kinsn bpf_arm64_native_lab_desc = {
 	.owner = THIS_MODULE,
-	.max_insn_cnt = 1,
+	.max_insn_cnt = 5,
 	.max_emit_bytes = NATIVE_LAB_MAX_BLOB_BYTES,
 	.instantiate_insn = instantiate_native_lab,
 	.emit_arm64 = emit_native_lab_arm64,

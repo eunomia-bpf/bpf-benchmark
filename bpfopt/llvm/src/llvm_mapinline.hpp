@@ -125,6 +125,10 @@ std::vector<uint8_t> emit_bpf_object(llvm::Module &module, bool optimize_ir)
 		promote_register_allocas(module, *machine);
 	}
 
+	if (std::getenv("BPFOPT_DUMP_IR")) {
+		module.print(llvm::errs(), nullptr);
+	}
+
 	llvm::SmallVector<char, 0> object_stream;
 	llvm::raw_svector_ostream output(object_stream);
 	llvm::legacy::PassManager pass_manager;
@@ -220,9 +224,18 @@ struct InlineRecord {
 	std::vector<uint8_t> value;
 };
 
+// Optional CLI speculation hint: fold map `map_name`'s lookups assuming the
+// runtime key equals `key`, behind a soft `if (key==K)` guard with the real
+// lookup as fallback.
+struct InlineHint {
+	std::string map_name;
+	std::vector<uint8_t> key;
+};
+
 struct MapInlineArgs {
 	std::filesystem::path map_values;
 	std::vector<uint32_t> map_ids;
+	std::vector<InlineHint> hints;
 };
 
 struct MapSnapshot {
@@ -407,6 +420,32 @@ MapInlineArgs parse_map_inline_args(const std::vector<std::string> &args)
 				throw std::runtime_error("--map-ids requires LIST");
 			}
 			parsed.map_ids = parse_u32_csv(args[i]);
+		} else if (arg == "--inline-hint" ||
+			   arg.starts_with("--inline-hint=")) {
+			std::string value;
+			if (arg == "--inline-hint") {
+				if (++i >= args.size()) {
+					throw std::runtime_error(
+						"--inline-hint requires VALUE");
+				}
+				value = args[i];
+			} else {
+				value = arg.substr(
+					std::strlen("--inline-hint="));
+			}
+			// name:hex  (soft speculation; the leading '!' from the
+			// old hard-fold syntax is accepted and ignored).
+			const auto colon = value.find(':');
+			if (colon == std::string::npos || colon == 0 ||
+			    colon + 1 >= value.size()) {
+				throw std::runtime_error("invalid --inline-hint");
+			}
+			auto key_text = value.substr(colon + 1);
+			if (!key_text.empty() && key_text[0] == '!') {
+				key_text = key_text.substr(1);
+			}
+			parsed.hints.push_back({ value.substr(0, colon),
+						 parse_hex_bytes(key_text) });
 		} else {
 			throw std::runtime_error("map_inline unknown pass-local arg: " +
 						 arg);
@@ -500,597 +539,220 @@ MapSnapshot read_map_snapshot(const MapInlineArgs &args)
 	return snapshot;
 }
 
-size_t mem_access_size(uint8_t code)
+// --- IR-level map_inline ---------------------------------------------------
+// Everything below works on the lifted LLVM IR; nothing analyzes the raw
+// bytecode. llvmbpf lowers a map reference (kernel-compatible mode) to
+// `ptrtoint(@__llvmbpf_pseudo_map_idx_<8hex>)`, so a map_lookup_elem call's map
+// argument is traced back to that global symbol and the hex index maps through
+// the canonical --map-ids list to a map_id.
+std::optional<uint32_t> parse_pseudo_map_idx(llvm::StringRef name)
 {
-	switch (code & 0x18) {
-	case 0x00:
-		return 4;
-	case 0x08:
-		return 2;
-	case 0x10:
-		return 1;
-	case 0x18:
-		return 8;
-	default:
-		throw std::runtime_error("invalid BPF memory size");
-	}
-}
-
-std::optional<uint32_t> map_id_for_lookup(const std::vector<uint8_t> &text,
-					  size_t call_pc,
-					  const std::vector<uint32_t> &map_ids)
-{
-	const size_t begin = call_pc > 16 ? call_pc - 16 : 0;
-	for (size_t pc = call_pc; pc-- > begin;) {
-		if (!is_ldimm64(text, pc)) {
-			if (insn_defines_reg(text, pc, 1)) {
-				break;
-			}
-			continue;
-		}
-		if (dst_reg(text, pc) != 1 ||
-		    src_reg(text, pc) != BPF_PSEUDO_MAP_IDX) {
-			pc++;
-			continue;
-		}
-		const int32_t idx = read_imm(text, pc);
-		if (idx < 0 || static_cast<size_t>(idx) >= map_ids.size()) {
-			throw std::runtime_error("map_inline map index out of range");
-		}
-		return map_ids[static_cast<size_t>(idx)];
-	}
-	return std::nullopt;
-}
-
-std::vector<bool> stack_bytes_used(const std::vector<uint8_t> &text)
-{
-	std::vector<bool> used(512, false);
-	const size_t insn_count = text.size() / INSN_SIZE;
-	for (size_t pc = 0; pc < insn_count; pc++) {
-		const uint8_t code = text[pc * INSN_SIZE];
-		if (code == BPF_LD_IMM64) {
-			pc++;
-			continue;
-		}
-		const auto base = memory_base_reg(text, pc);
-		if (!base || *base != 10) {
-			continue;
-		}
-		const int16_t off = read_off(text, pc);
-		const size_t size = mem_access_size(code);
-		if (off >= 0 || off < -512 ||
-		    static_cast<int>(off + size) > 0) {
-			continue;
-		}
-		for (int i = off; i < off + static_cast<int>(size); i++) {
-			used[static_cast<size_t>(512 + i)] = true;
-		}
-	}
-	return used;
-}
-
-int16_t allocate_stack_slot(std::vector<bool> &used, size_t size)
-{
-	const size_t aligned = (size + 7) & ~static_cast<size_t>(7);
-	for (int start = 512 - static_cast<int>(aligned); start >= 0; start -= 8) {
-		bool free = true;
-		for (size_t i = 0; i < aligned; i++) {
-			if (used[static_cast<size_t>(start) + i]) {
-				free = false;
-				break;
-			}
-		}
-		if (!free) {
-			continue;
-		}
-		for (size_t i = 0; i < aligned; i++) {
-			used[static_cast<size_t>(start) + i] = true;
-		}
-		return static_cast<int16_t>(start - 512);
-	}
-	throw std::runtime_error("map_inline could not allocate BPF stack slot");
-}
-
-std::vector<uint8_t> build_stack_value_block(const std::vector<uint8_t> &value,
-					     int16_t slot)
-{
-	std::vector<uint8_t> block;
-	const auto append = [&](uint8_t code, uint8_t dst, uint8_t src,
-				int16_t off, int32_t imm) {
-		const size_t pc = block.size() / INSN_SIZE;
-		block.resize(block.size() + INSN_SIZE, 0);
-		block[pc * INSN_SIZE] = code;
-		set_dst_reg(block, pc, dst);
-		set_src_reg(block, pc, src);
-		write_off(block, pc, off);
-		write_imm(block, pc, imm);
-	};
-	size_t pos = 0;
-	for (; pos + 4 <= value.size(); pos += 4) {
-		int32_t imm = 0;
-		std::memcpy(&imm, value.data() + pos, sizeof(imm));
-		append(BPF_ST_MEM_W, 10, 0,
-		       static_cast<int16_t>(slot + static_cast<int16_t>(pos)),
-		       imm);
-	}
-	for (; pos < value.size(); pos++) {
-		append(BPF_ST_MEM_B, 10, 0,
-		       static_cast<int16_t>(slot + static_cast<int16_t>(pos)),
-		       value[pos]);
-	}
-	append(BPF_ALU64_MOV_X, 0, 10, 0, 0);
-	append(BPF_ALU64_ADD_K, 0, 0, 0, slot);
-	return block;
-}
-
-// Maps the data path writes via map_update/delete/push/pop. Folding a snapshot
-// value into a lookup on such a map could use a stale value. Necessary (not
-// sufficient) mutability proxy: userspace writes are invisible to this
-// bytecode-only tool; that broader decision belongs to the global facts layer.
-std::set<uint32_t>
-scan_data_path_mutable_maps(const std::vector<uint8_t> &text,
-			    const std::vector<uint32_t> &map_ids)
-{
-	std::set<uint32_t> mutable_ids;
-	const size_t insn_count = text.size() / INSN_SIZE;
-	for (size_t pc = 0; pc < insn_count; pc++) {
-		if (is_ldimm64(text, pc)) {
-			pc++;
-			continue;
-		}
-		if (text[pc * INSN_SIZE] != BPF_CALL || src_reg(text, pc) != 0) {
-			continue;
-		}
-		const int32_t fn = read_imm(text, pc);
-		if (fn != BPF_FUNC_map_update_elem &&
-		    fn != BPF_FUNC_map_delete_elem &&
-		    fn != BPF_FUNC_map_push_elem && fn != BPF_FUNC_map_pop_elem) {
-			continue;
-		}
-		if (const auto id = map_id_for_lookup(text, pc, map_ids)) {
-			mutable_ids.insert(*id);
-		}
-	}
-	return mutable_ids;
-}
-
-// Recover a compile-time-constant lookup key for the lookup at call_pc when the
-// key pointer (r2) is r10+off and every key byte was written by a constant
-// ST_MEM store before the call. Returns nullopt for runtime-built keys, which
-// are left to the future global speculation layer.
-// Recover the stack offset of the lookup key when the key pointer (r2) is
-// r10+off just before the call. Returns nullopt if r2 is not a simple frame
-// offset (e.g. it points into the packet).
-std::optional<int> find_key_stack_off(const std::vector<uint8_t> &text,
-				      size_t call_pc)
-{
-	const size_t begin = call_pc > 64 ? call_pc - 64 : 0;
-	for (size_t pc = call_pc; pc-- > begin;) {
-		if (is_ldimm64(text, pc) || !insn_defines_reg(text, pc, 2)) {
-			continue;
-		}
-		const uint8_t code = text[pc * INSN_SIZE];
-		if (code == BPF_ALU64_MOV_X && dst_reg(text, pc) == 2 &&
-		    src_reg(text, pc) == 10) {
-			return 0;
-		}
-		if (code == BPF_ALU64_ADD_K && dst_reg(text, pc) == 2) {
-			const int32_t off = read_imm(text, pc);
-			for (size_t q = pc; q-- > begin;) {
-				if (!insn_defines_reg(text, q, 2)) {
-					continue;
-				}
-				if (text[q * INSN_SIZE] == BPF_ALU64_MOV_X &&
-				    dst_reg(text, q) == 2 &&
-				    src_reg(text, q) == 10) {
-					return off;
-				}
-				return std::nullopt;
-			}
-		}
+	constexpr llvm::StringRef prefix = "__llvmbpf_pseudo_map_idx_";
+	if (!name.starts_with(prefix)) {
 		return std::nullopt;
 	}
+	const auto rest = name.drop_front(prefix.size());
+	if (rest.size() != 8) {
+		return std::nullopt; // exclude the longer _idx_value_ variant
+	}
+	uint32_t idx = 0;
+	if (rest.getAsInteger(16, idx)) {
+		return std::nullopt;
+	}
+	return idx;
+}
+
+// Trace an i64 map argument back to its pseudo-map global and return the idx.
+std::optional<uint32_t> resolve_map_idx_ir(llvm::Value *v)
+{
+	for (int hops = 0; hops < 8 && v; hops++) {
+		if (auto *ce = llvm::dyn_cast<llvm::ConstantExpr>(v)) {
+			if (ce->getOpcode() == llvm::Instruction::PtrToInt ||
+			    ce->getOpcode() == llvm::Instruction::BitCast) {
+				v = ce->getOperand(0);
+				continue;
+			}
+		}
+		if (auto *p2i = llvm::dyn_cast<llvm::PtrToIntInst>(v)) {
+			v = p2i->getOperand(0);
+			continue;
+		}
+		if (auto *bc = llvm::dyn_cast<llvm::BitCastInst>(v)) {
+			v = bc->getOperand(0);
+			continue;
+		}
+		if (auto *gv = llvm::dyn_cast<llvm::GlobalValue>(v)) {
+			return parse_pseudo_map_idx(gv->getName());
+		}
+		break;
+	}
 	return std::nullopt;
 }
 
-// Conservatively decide whether the looked-up value pointer (r0) at present_pc
-// is only ever read (fixed-offset LDX) before it dies. Any store through r0
-// (the value being mutated, e.g. a stats counter), any copy of r0 to another
-// register, or any branch before r0 is redefined returns false so the site is
-// skipped — folding such a value would change semantics or use a stale value.
-bool value_ptr_is_read_only(const std::vector<uint8_t> &text, size_t present_pc)
+std::optional<uint32_t> lookup_call_map_id(llvm::CallInst *call,
+					   const std::vector<uint32_t> &map_ids)
 {
-	const size_t insn_count = text.size() / INSN_SIZE;
-	for (size_t pc = present_pc; pc < insn_count; pc++) {
-		if (is_ldimm64(text, pc)) {
-			if (dst_reg(text, pc) == 0) {
-				return true; // r0 redefined -> value dead
-			}
-			pc++;
-			continue;
-		}
-		const uint8_t code = text[pc * INSN_SIZE];
-		const uint8_t cls = code & 0x07;
-		const auto base = memory_base_reg(text, pc);
-		if (base && *base == 0) {
-			if (cls == 0x01) {
-				// LDX *(r0+off): a read. If it loads into r0,
-				// the pointer dies afterwards.
-				if (dst_reg(text, pc) == 0) {
-					return true;
-				}
-				continue;
-			}
-			return false; // store through the value pointer
-		}
-		// STX *(rX+off) = r0: the value pointer escapes to memory (e.g.
-		// saved to a stack slot and reloaded later as a map-value ptr).
-		// We can no longer track it, so do not fold.
-		if (cls == 0x03 && src_reg(text, pc) == 0) {
-			return false;
-		}
-		if (code == BPF_CALL || code == BPF_CALLX || code == BPF_EXIT) {
-			return true; // r0 clobbered / function returns
-		}
-		if (is_jmp_class(code)) {
-			// Branches do not consume the pointer; the value is
-			// usually already loaded into another register. Keep
-			// scanning the linear range until r0 is redefined — any
-			// store through r0 textually before that is still caught.
-			continue;
-		}
-		// r0 used as an X-form source (e.g. copied out) -> escapes.
-		if ((code & 0x08) && src_reg(text, pc) == 0 &&
-		    dst_reg(text, pc) != 0) {
-			return false;
-		}
-		if (insn_defines_reg(text, pc, 0)) {
-			return true; // r0 redefined -> value dead
-		}
+	if (call->arg_size() < 1) {
+		return std::nullopt;
 	}
-	return true;
+	const auto idx = resolve_map_idx_ir(call->getArgOperand(0));
+	if (!idx || *idx >= map_ids.size()) {
+		return std::nullopt;
+	}
+	return map_ids[*idx];
 }
 
-struct GuardEntry {
-	std::vector<uint8_t> key; // empty => unconditional (uniform) fast path
-	std::vector<uint8_t> value;
-	int16_t slot = 0;
-};
-
-// Build a guarded enumeration block to splice *before* a map_lookup_elem call:
-//
-//   entry i:  r3 = *(u32)(r10 + key_off + 4c)   ; load each key word
-//             if r3 != Ki_c goto <next entry / SLOW>
-//             ...
-//             <materialize Vi on stack; r0 = &Vi>
-//             goto OVER_CALL                      ; skip the kept real lookup
-//   SLOW:     <original call ...>                 ; any unlisted key / miss
-//   OVER_CALL:<original null check ...>
-//
-// A uniform entry (empty key) emits no compares: r0 = &V unconditionally and the
-// call becomes dead (O3 removes it), eliminating the lookup. Listed exact keys
-// keep the call as the slow-path fallback, so unlisted keys stay correct. All
-// jumps are block-relative; r3 is a scratch register (r1-r5 are caller-saved and
-// treated as clobbered across the call, so overwriting r3 on the fast path —
-// which skips the call — is safe). Keys must be 4-byte aligned.
-std::vector<uint8_t> build_guard_chain_block(int key_off,
-					     const std::vector<GuardEntry> &entries)
+// Maps written by the data path (map_update/delete/push/pop), found by scanning
+// IR calls to those helper externs and resolving each call's map argument. Such
+// maps are never folded (their snapshot value may be stale).
+std::set<uint32_t> ir_mutable_maps(llvm::Module &module,
+				   const std::vector<uint32_t> &map_ids)
 {
-	const size_t n = entries.size();
-	std::vector<std::vector<uint8_t>> fast(n);
-	std::vector<size_t> nchunks(n), entry_len(n), start(n);
-	size_t total = 0;
-	for (size_t i = 0; i < n; i++) {
-		if (!entries[i].key.empty() && entries[i].key.size() % 4 != 0) {
-			return {};
+	std::set<uint32_t> mut;
+	for (int id : { BPF_FUNC_map_update_elem, BPF_FUNC_map_delete_elem,
+			BPF_FUNC_map_push_elem, BPF_FUNC_map_pop_elem }) {
+		char buf[32];
+		std::snprintf(buf, sizeof(buf), "_bpf_helper_ext_%04d", id);
+		auto *fn = module.getFunction(buf);
+		if (!fn) {
+			continue;
 		}
-		fast[i] = build_stack_value_block(entries[i].value,
-						  entries[i].slot);
-		nchunks[i] = entries[i].key.size() / 4;
-		entry_len[i] = nchunks[i] * 2 + fast[i].size() / INSN_SIZE + 1;
-		start[i] = total;
-		total += entry_len[i];
-	}
-	const size_t block_len = total;
-	std::vector<uint8_t> block;
-	const auto append = [&](uint8_t code, uint8_t dst, uint8_t src,
-				int16_t off, int32_t imm) {
-		const size_t pc = block.size() / INSN_SIZE;
-		block.resize(block.size() + INSN_SIZE, 0);
-		block[pc * INSN_SIZE] = code;
-		set_dst_reg(block, pc, dst);
-		set_src_reg(block, pc, src);
-		write_off(block, pc, off);
-		write_imm(block, pc, imm);
-	};
-	for (size_t i = 0; i < n; i++) {
-		const size_t mismatch =
-			(i + 1 < n) ? start[i + 1] : block_len; // next entry / SLOW
-		for (size_t c = 0; c < nchunks[i]; c++) {
-			int32_t kc = 0;
-			std::memcpy(&kc, entries[i].key.data() + c * 4,
-				    sizeof(kc));
-			append(BPF_LDX_MEM_W, 3, 10,
-			       static_cast<int16_t>(
-				       key_off + static_cast<int>(c * 4)),
-			       0);
-			const size_t j = block.size() / INSN_SIZE;
-			append(BPF_JMP32_JNE_K, 3, 0,
-			       static_cast<int16_t>(mismatch - j - 1), kc);
+		for (llvm::User *u : fn->users()) {
+			if (auto *ci = llvm::dyn_cast<llvm::CallInst>(u)) {
+				if (const auto m =
+					    lookup_call_map_id(ci, map_ids)) {
+					mut.insert(*m);
+				}
+			}
 		}
-		block.insert(block.end(), fast[i].begin(), fast[i].end());
-		const size_t j = block.size() / INSN_SIZE;
-		// Jump to OVER_CALL = block_len + 1 (just past the 1-insn call).
-		append(BPF_JA, 0, 0, static_cast<int16_t>(block_len + 1 - j - 1),
-		       0);
 	}
-	return block;
+	return mut;
 }
 
-// Auto soft map_inline (no hints, no hard fold). For every lookup whose map
-// snapshot supplies a value — matched by a recovered constant key, or a uniform
-// map — fold that constant value into the lookup-succeeded path while keeping
-// the real lookup as the presence guard. The lookup is not deleted, so misses
-// and other keys still take the original path; only the value is replaced. This
-// assumes the entry's value is stable (gated by skipping data-path-mutable maps
-// and value pointers that are written through); the broader userspace-mutability
-// decision is deferred to the global facts layer.
-std::vector<InlineRecord> apply_map_inline_auto(std::vector<uint8_t> &text,
-						const Cli &cli)
+// Build `key_bytes == K` over the lookup's key pointer (arg1), as a chain of
+// per-word integer compares ANDed together. Inserted at `b`'s point.
+llvm::Value *build_key_match(llvm::IRBuilder<> &b, llvm::Value *key_arg,
+			     const std::vector<uint8_t> &k)
 {
-	const auto args = parse_map_inline_args(cli.pass_args);
-	const auto snapshot = read_map_snapshot(args);
-	const auto mutable_maps = scan_data_path_mutable_maps(text, args.map_ids);
-
-	struct PendingInline {
-		size_t insert_pc;
-		std::vector<uint8_t> block;
-		InlineRecord record;
-	};
-	std::vector<PendingInline> pending;
-	auto used_stack = stack_bytes_used(text);
-	const size_t insn_count = text.size() / INSN_SIZE;
-	for (size_t pc = 0; pc < insn_count; pc++) {
-		if (is_ldimm64(text, pc)) {
-			pc++;
-			continue;
-		}
-		if (text[pc * INSN_SIZE] != BPF_CALL || src_reg(text, pc) != 0 ||
-		    read_imm(text, pc) != BPF_FUNC_map_lookup_elem) {
-			continue;
-		}
-		const auto map_id = map_id_for_lookup(text, pc, args.map_ids);
-		if (!map_id || mutable_maps.count(*map_id)) {
-			continue;
-		}
-		const auto map = snapshot.maps.find(*map_id);
-		if (map == snapshot.maps.end() ||
-		    !map_type_supports_value_inline(map->second.map_type)) {
-			continue;
-		}
-		// The looked-up value must only be read (never written back through
-		// r0); otherwise folding it would drop a real map write.
-		if (pc + 1 >= insn_count || !value_ptr_is_read_only(text, pc + 1)) {
-			continue;
-		}
-		// Choose a guard strategy:
-		//   - truly-uniform map: one unconditional fast path; the kept
-		//     call becomes dead and O3 eliminates the lookup (assumes a
-		//     stable value and in-range presence, sound for bounded-index
-		//     ARRAY maps such as the consistent-hash ring);
-		//   - 1..MAX_ENUM exact keys: a guard chain over those keys with
-		//     the real lookup retained as the slow-path fallback (sound for
-		//     any unlisted key or miss; a constant key collapses under O3).
-		constexpr size_t MAX_ENUM = 4;
-		std::vector<GuardEntry> guard;
-		int key_off = 0;
-		InlineRecord record{ *map_id, {}, {} };
-		if (snapshot.truly_uniform.count(*map_id)) {
-			const auto &v = snapshot.uniform_values.at(*map_id);
-			if (v.size() != map->second.value_size) {
-				continue;
-			}
-			guard.push_back(
-				{ {}, v, allocate_stack_slot(used_stack, v.size()) });
-			record.value = v;
-		} else {
-			std::vector<std::pair<std::vector<uint8_t>,
-					      std::vector<uint8_t>>>
-				entries;
-			for (const auto &kv : snapshot.values) {
-				if (kv.first.first == *map_id) {
-					entries.push_back(
-						{ parse_hex_bytes(kv.first.second),
-						  kv.second });
-				}
-			}
-			if (entries.empty() || entries.size() > MAX_ENUM ||
-			    map->second.key_size % 4 != 0) {
-				continue;
-			}
-			bool ok = true;
-			for (const auto &e : entries) {
-				if (e.first.size() != map->second.key_size ||
-				    e.second.size() != map->second.value_size) {
-					ok = false;
-					break;
-				}
-			}
-			if (!ok) {
-				continue;
-			}
-			const auto ko = find_key_stack_off(text, pc);
-			if (!ko) {
-				continue;
-			}
-			key_off = *ko;
-			for (const auto &e : entries) {
-				guard.push_back(
-					{ e.first, e.second,
-					  allocate_stack_slot(
-						  used_stack, e.second.size()) });
-			}
-			record.key = entries[0].first;
-			record.value = entries[0].second;
-		}
-		auto block = build_guard_chain_block(key_off, guard);
-		if (block.empty()) {
-			continue;
-		}
-		pending.push_back({ pc, std::move(block), record });
+	auto *keyptr = b.CreateIntToPtr(key_arg, b.getPtrTy());
+	llvm::Value *match = b.getTrue();
+	size_t off = 0;
+	for (; off + 4 <= k.size(); off += 4) {
+		auto *p = b.CreateGEP(b.getInt8Ty(), keyptr, b.getInt64(off));
+		auto *kv = b.CreateLoad(b.getInt32Ty(), p);
+		uint32_t c = 0;
+		std::memcpy(&c, k.data() + off, sizeof(c));
+		match = b.CreateAnd(match, b.CreateICmpEQ(kv, b.getInt32(c)));
 	}
+	for (; off < k.size(); off++) {
+		auto *p = b.CreateGEP(b.getInt8Ty(), keyptr, b.getInt64(off));
+		auto *kv = b.CreateLoad(b.getInt8Ty(), p);
+		match = b.CreateAnd(match,
+				    b.CreateICmpEQ(kv, b.getInt8(k[off])));
+	}
+	return match;
+}
 
-	// Apply highest insert_pc first so earlier pcs are not shifted.
-	std::sort(pending.begin(), pending.end(),
-		  [](const PendingInline &a, const PendingInline &b) {
-			  return a.insert_pc > b.insert_pc;
-		  });
+// Materialize `value` into a fresh entry-block stack slot (so no constant
+// global / .rodata map is introduced) and return its address as an i64 — the
+// same representation a map_lookup_elem result carries. Stores are emitted at
+// `b`'s point as i32 words + i8 tail (the proven roundtrip granularity); O3's
+// SROA forwards them into the downstream value loads.
+llvm::Value *materialize_value_ptr(llvm::IRBuilder<> &b,
+				   const std::vector<uint8_t> &value,
+				   llvm::Type *i64ty)
+{
+	llvm::Function *fn = b.GetInsertBlock()->getParent();
+	llvm::IRBuilder<> eb(&*fn->getEntryBlock().getFirstInsertionPt());
+	auto *arr = llvm::ArrayType::get(eb.getInt8Ty(), value.size());
+	auto *slot = eb.CreateAlloca(arr, nullptr, "mapinline.val");
+	size_t off = 0;
+	for (; off + 4 <= value.size(); off += 4) {
+		uint32_t w = 0;
+		std::memcpy(&w, value.data() + off, sizeof(w));
+		auto *p = b.CreateGEP(b.getInt8Ty(), slot, b.getInt64(off));
+		b.CreateStore(b.getInt32(w), p);
+	}
+	for (; off < value.size(); off++) {
+		auto *p = b.CreateGEP(b.getInt8Ty(), slot, b.getInt64(off));
+		b.CreateStore(b.getInt8(value[off]), p);
+	}
+	return b.CreatePtrToInt(slot, i64ty);
+}
+
+// Soft speculation as a real control-flow guard, NOT a select:
+//
+//   orig:  ...                          ; key bytes already on stack
+//          %m = (key == K)
+//          br %m, fast, slow
+//   fast:  <materialize V on stack>     ; skips the lookup entirely
+//          br merge
+//   slow:  %r = call map_lookup_elem(...)
+//          br merge
+//   merge: %r0 = phi [fastptr, fast], [%r, slow]
+//
+// A select would still execute the (expensive, e.g. HASH) lookup on every
+// dispatch; this branch skips it on the fast path, which is the whole point of
+// the hint. Replacing the result at the call boundary handles every downstream
+// use pattern uniformly (loads, null checks, and PHIs — vip_map's result flows
+// through a PHI, which the per-load select path could not reach). When K is a
+// provable constant, O3 folds the branch away and DCEs the call; for a runtime
+// key the guard stays and the slow lookup runs only on a miss (sound).
+void fold_guarded_branch(llvm::Module &module, llvm::CallInst *call,
+			 const std::vector<uint8_t> &key,
+			 const std::vector<uint8_t> &value)
+{
+	llvm::LLVMContext &ctx = module.getContext();
+	llvm::BasicBlock *orig = call->getParent();
+	llvm::Function *fn = orig->getParent();
+
+	// Split so `call` opens the slow block and the rest becomes the merge.
+	llvm::BasicBlock *slow = orig->splitBasicBlock(call, "mapinline.slow");
+	llvm::BasicBlock *merge =
+		slow->splitBasicBlock(call->getNextNode(), "mapinline.merge");
+
+	llvm::BasicBlock *fast =
+		llvm::BasicBlock::Create(ctx, "mapinline.fast", fn, slow);
+	llvm::IRBuilder<> fb(fast);
+	auto *fast_ptr = materialize_value_ptr(fb, value, call->getType());
+	fb.CreateBr(merge);
+
+	// Replace orig's unconditional branch (to slow) with the key guard.
+	llvm::IRBuilder<> ob(orig->getTerminator());
+	auto *match = build_key_match(ob, call->getArgOperand(1), key);
+	orig->getTerminator()->eraseFromParent();
+	llvm::BranchInst::Create(fast, slow, match, orig);
+
+	auto *phi = llvm::PHINode::Create(call->getType(), 2, "mapinline.r0",
+					  &*merge->getFirstInsertionPt());
+	call->replaceAllUsesWith(phi);
+	phi->addIncoming(fast_ptr, fast);
+	phi->addIncoming(call, slow);
+}
+
+// All-IR map_inline. For each map_lookup_elem call: resolve its map (IR symbol),
+// skip data-path-mutable maps, and fold per the snapshot:
+//   - uniform map  -> unconditional: replace the value-deref loads with
+//     constants, make the null check see non-null, erase the lookup (O3 then
+//     propagates + DCEs);
+//   - CLI speculation hint (map:key) -> soft guard: each loaded value becomes
+//     select(key==K, const, real-load); the real lookup is retained as the
+//     fallback. A constant/proven key lets O3 collapse the select and DCE the
+//     lookup; a runtime key keeps the guarded fallback (sound for other keys).
+std::vector<InlineRecord> fold_map_lookups_ir(llvm::Module &module,
+					      const MapInlineArgs &args)
+{
 	std::vector<InlineRecord> records;
-	for (const auto &item : pending) {
-		insert_insns_adjusting_jumps(text, item.insert_pc, item.block);
-		records.push_back(item.record);
-	}
-	std::reverse(records.begin(), records.end());
-	return records;
-}
-
-// --- IR-level map_inline ---------------------------------------------------
-// Decide, per map_lookup_elem call in main-program order, the constant value to
-// fold (or nullopt). Only the main program [0, subprog_start) is lifted to IR,
-// so these ordinals line up with the IR call sites. A site is folded when its
-// map is data-path-immutable, value-inlineable, the result is only read (never
-// written through), and the snapshot gives a single value (uniform map, or a
-// single exact entry). The IR rewrite is fold_lookups_in_module().
-std::vector<std::optional<std::vector<uint8_t>>>
-decide_lookup_folds(const std::vector<uint8_t> &text, const Cli &cli,
-		    std::vector<InlineRecord> &records)
-{
-	const auto args = parse_map_inline_args(cli.pass_args);
-	const auto snapshot = read_map_snapshot(args);
-	const auto mutable_maps = scan_data_path_mutable_maps(text, args.map_ids);
-	const auto subprog = subprog_start_pc(text);
-	const size_t limit = subprog ? *subprog : text.size() / INSN_SIZE;
-	std::vector<std::optional<std::vector<uint8_t>>> folds;
-	for (size_t pc = 0; pc < limit; pc++) {
-		if (is_ldimm64(text, pc)) {
-			pc++;
-			continue;
-		}
-		if (text[pc * INSN_SIZE] != BPF_CALL || src_reg(text, pc) != 0 ||
-		    read_imm(text, pc) != BPF_FUNC_map_lookup_elem) {
-			continue;
-		}
-		std::optional<std::vector<uint8_t>> value;
-		uint32_t fold_map = 0;
-		const auto map_id = map_id_for_lookup(text, pc, args.map_ids);
-		if (map_id && !mutable_maps.count(*map_id) && pc + 1 < limit &&
-		    value_ptr_is_read_only(text, pc + 1)) {
-			const auto map = snapshot.maps.find(*map_id);
-			if (map != snapshot.maps.end() &&
-			    map_type_supports_value_inline(map->second.map_type)) {
-				if (snapshot.truly_uniform.count(*map_id)) {
-					const auto &v =
-						snapshot.uniform_values.at(*map_id);
-					if (v.size() == map->second.value_size) {
-						value = v;
-					}
-				} else {
-					const std::vector<uint8_t> *only = nullptr;
-					size_t cnt = 0;
-					for (const auto &kv : snapshot.values) {
-						if (kv.first.first == *map_id) {
-							only = &kv.second;
-							cnt++;
-						}
-					}
-					if (cnt == 1 &&
-					    only->size() == map->second.value_size) {
-						value = *only;
-					}
-				}
-				if (value) {
-					fold_map = *map_id;
-				}
-			}
-		}
-		if (value) {
-			records.push_back({ fold_map, {}, *value });
-		}
-		folds.push_back(std::move(value));
-	}
-	return folds;
-}
-
-// Little-endian integer of `width` bytes from `v` at byte `off`.
-uint64_t le_value(const std::vector<uint8_t> &v, size_t off, size_t width)
-{
-	uint64_t x = 0;
-	for (size_t i = 0; i < width; i++) {
-		x |= static_cast<uint64_t>(v[off + i]) << (8 * i);
-	}
-	return x;
-}
-
-// Collect the integer loads reachable from a value pointer `p` (the lookup
-// result cast to a pointer) at cumulative byte offset `base`. Every use of `p`
-// must be a constant-offset GEP or an in-range integer load, else returns false
-// (the site is not cleanly foldable and is skipped).
-bool collect_value_loads(
-	llvm::Value *p, int64_t base, const std::vector<uint8_t> &v,
-	const llvm::DataLayout &dl,
-	std::vector<std::pair<llvm::LoadInst *, llvm::Constant *>> &out)
-{
-	for (llvm::User *u : p->users()) {
-		if (auto *ld = llvm::dyn_cast<llvm::LoadInst>(u)) {
-			if (ld->getPointerOperand() != p ||
-			    !ld->getType()->isIntegerTy()) {
-				return false;
-			}
-			const unsigned bits = ld->getType()->getIntegerBitWidth();
-			if (bits % 8 != 0) {
-				return false;
-			}
-			const size_t width = bits / 8;
-			if (base < 0 ||
-			    static_cast<size_t>(base) + width > v.size()) {
-				return false;
-			}
-			out.push_back({ ld, llvm::ConstantInt::get(
-						     ld->getType(),
-						     le_value(v,
-							      static_cast<size_t>(
-								      base),
-							      width)) });
-		} else if (auto *gep =
-				   llvm::dyn_cast<llvm::GetElementPtrInst>(u)) {
-			llvm::APInt off(64, 0);
-			if (!gep->accumulateConstantOffset(dl, off)) {
-				return false;
-			}
-			if (!collect_value_loads(gep, base + off.getSExtValue(),
-						 v, dl, out)) {
-				return false;
-			}
-		} else {
-			return false;
-		}
-	}
-	return true;
-}
-
-// Fold map_lookup_elem results to constants in IR: replace the value-deref loads
-// with immediate ConstantInts and make the null check see a non-null pointer,
-// then erase the lookup. Pure register immediates (no global / .rodata, no stack
-// round-trip), so O3 propagates them and DCEs the dead lookup. A site whose
-// result is used in any other way is left untouched (skipped).
-void fold_lookups_in_module(
-	llvm::Module &module,
-	const std::vector<std::optional<std::vector<uint8_t>>> &folds)
-{
 	auto *lookup = module.getFunction("_bpf_helper_ext_0001");
 	auto *main_fn = module.getFunction("bpf_main");
 	if (!lookup || !main_fn) {
-		return;
+		return records;
+	}
+	const auto snapshot = read_map_snapshot(args);
+	const auto mutable_maps = ir_mutable_maps(module, args.map_ids);
+	std::map<std::string, std::vector<uint8_t>> hint_key;
+	for (const auto &h : args.hints) {
+		hint_key[h.map_name] = h.key;
 	}
 	std::vector<llvm::CallInst *> calls;
 	for (auto &bb : *main_fn) {
@@ -1102,78 +764,74 @@ void fold_lookups_in_module(
 			}
 		}
 	}
-	if (calls.size() != folds.size()) {
-		return; // ordinal/count mismatch: fold nothing (safety)
-	}
-	const auto &dl = module.getDataLayout();
-	for (size_t i = 0; i < calls.size(); i++) {
-		if (!folds[i]) {
+	for (auto *call : calls) {
+		const auto map_id = lookup_call_map_id(call, args.map_ids);
+		if (!map_id || mutable_maps.count(*map_id)) {
 			continue;
 		}
-		const auto &v = *folds[i];
-		auto *call = calls[i];
-		// Validate every use first: null-check (icmp vs 0) or a pointer
-		// deref via inttoptr -> [gep]* -> integer load.
-		std::vector<std::pair<llvm::LoadInst *, llvm::Constant *>> loads;
-		std::vector<llvm::ICmpInst *> nullchecks;
-		std::vector<llvm::IntToPtrInst *> casts;
-		bool ok = true;
-		for (llvm::User *u : call->users()) {
-			if (auto *ic = llvm::dyn_cast<llvm::ICmpInst>(u)) {
-				nullchecks.push_back(ic);
-			} else if (auto *itp =
-					   llvm::dyn_cast<llvm::IntToPtrInst>(u)) {
-				casts.push_back(itp);
-				if (!collect_value_loads(itp, 0, v, dl, loads)) {
-					ok = false;
-					break;
-				}
-			} else {
-				ok = false;
-				break;
-			}
-		}
-		if (!ok) {
+		const auto mi = snapshot.maps.find(*map_id);
+		if (mi == snapshot.maps.end() ||
+		    !map_type_supports_value_inline(mi->second.map_type)) {
 			continue;
 		}
-		// Apply: loads -> constants; null checks see a non-null result.
-		for (auto &lf : loads) {
-			lf.first->replaceAllUsesWith(lf.second);
-			lf.first->eraseFromParent();
-		}
-		for (auto *ic : nullchecks) {
-			ic->replaceUsesOfWith(
-				call, llvm::ConstantInt::get(call->getType(), 1));
-		}
-		for (auto *itp : casts) {
-			if (itp->use_empty()) {
-				itp->eraseFromParent();
+		std::optional<std::vector<uint8_t>> value;
+		bool guarded = false;
+		std::vector<uint8_t> key;
+		const auto hit = hint_key.find(mi->second.name);
+		if (hit != hint_key.end()) { // CLI speculation
+			key = hit->second;
+			const auto exact = snapshot.values.find(
+				{ *map_id, bytes_hex(key) });
+			if (exact != snapshot.values.end()) {
+				value = exact->second;
+			} else if (snapshot.truly_uniform.count(*map_id)) {
+				value = snapshot.uniform_values.at(*map_id);
 			}
+			guarded = true;
+		} else if (snapshot.truly_uniform.count(*map_id)) {
+			value = snapshot.uniform_values.at(*map_id);
+		} else {
+			continue;
 		}
-		if (call->use_empty()) {
+		if (!value || value->size() != mi->second.value_size ||
+		    (guarded && key.size() != mi->second.key_size)) {
+			continue;
+		}
+		if (guarded) {
+			// Real control-flow guard: skip the lookup on a key match.
+			fold_guarded_branch(module, call, key, *value);
+		} else {
+			// Uniform map: the lookup always yields this value, so
+			// replace its result with a stack copy and delete it.
+			// O3's SROA forwards the stored bytes into the value
+			// loads and a non-null stack address satisfies any null
+			// check (sound for in-range bounded-index ARRAY maps).
+			llvm::IRBuilder<> b(call);
+			auto *ptr = materialize_value_ptr(b, *value,
+							  call->getType());
+			call->replaceAllUsesWith(ptr);
 			call->eraseFromParent();
 		}
+		records.push_back({ *map_id, key, *value });
 	}
+	return records;
 }
 
 std::vector<uint8_t> run_map_inline_roundtrip(const std::vector<uint8_t> &input,
 					      const Cli &cli,
 					      std::vector<InlineRecord> &records)
 {
-	const auto folds = decide_lookup_folds(input, cli, records);
+	const auto args = parse_map_inline_args(cli.pass_args);
 	auto module = generate_llvm_module(input);
 	return module.withModuleDo([&](llvm::Module &module) {
-		// Set the BPF data layout before folding so GEP offset
-		// accumulation in the fold matches codegen.
 		auto machine = create_bpf_target_machine(
 			llvm::CodeGenOptLevel::Aggressive);
 		module.setTargetTriple(llvm::Triple("bpfel"));
 		module.setDataLayout(machine->createDataLayout());
-		// Promote the per-register allocas to SSA first, so a lookup
-		// result flows directly to its null check / deref uses instead of
-		// being stored to its register alloca.
+		// Promote per-register allocas to SSA first so a lookup result
+		// flows directly to its uses (else it is stored to its alloca).
 		promote_register_allocas(module, *machine);
-		fold_lookups_in_module(module, folds);
+		records = fold_map_lookups_ir(module, args);
 		return extract_relocated_text(emit_bpf_object(module, true),
 					      input);
 	});

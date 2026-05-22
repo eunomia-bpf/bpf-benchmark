@@ -111,7 +111,7 @@ constexpr const char *kX86ThisCpuOffHelperKey = "__native_x86_this_cpu_off";
 constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v20";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v22";
 constexpr const char *kKallsymsCachePath = "/tmp/native_kernel_kallsyms.tsv";
 constexpr const char *kKallsymsCacheVersion = "native-kallsyms-cache-v3";
 constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
@@ -523,14 +523,14 @@ NativeStubBtfIds find_native_stub_btf_ids()
 // Build the (sidecar; call kinsn)*N; exit stub and BPF_PROG_LOAD it via
 // libbpf's bpf_prog_load + bpf_prog_load_opts.fd_array. Returns prog fd.
 int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
-                   uint32_t x86_callee_saved_mask,
+                   uint32_t callee_saved_mask,
                    uint32_t prog_type_value)
 {
     if (chunks == 0) {
         fail("chunks must be > 0");
     }
-    if (x86_callee_saved_mask > 0xf) {
-        fail("native_kernel x86 callee-saved mask exceeds 4 bits");
+    if (callee_saved_mask > 0xf) {
+        fail("native_kernel callee-saved mask exceeds 4 bits");
     }
     std::vector<bpf_insn> insns;
     insns.reserve(static_cast<size_t>(2) * chunks + 1);
@@ -539,7 +539,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
             .code = BPF_ALU64 | BPF_MOV | BPF_K,
             .dst_reg = 0,
             .src_reg = BPF_PSEUDO_KINSN_SIDECAR,
-            .off = static_cast<int16_t>(x86_callee_saved_mask),
+            .off = static_cast<int16_t>(callee_saved_mask),
             .imm = static_cast<int32_t>(i),
         };
         insns.push_back(sidecar);
@@ -742,15 +742,15 @@ uint32_t read_link_abi_file(const std::filesystem::path &path)
         const std::string key = line.substr(0, tab);
         const std::string value = line.substr(tab + 1);
         if (key == "version") {
-            if (value != "native-link-abi-v1") {
+            if (value != "native-link-abi-v2") {
                 fail("unsupported native-link ABI version in " + path.string()
                      + ": " + value);
             }
             seen_version = true;
-        } else if (key == "x86_callee_saved_mask") {
-            mask = parse_decimal_u64(value, "native-link x86 callee-saved mask");
+        } else if (key == "callee_saved_mask") {
+            mask = parse_decimal_u64(value, "native-link callee-saved mask");
             if (mask > 0xf) {
-                fail("native-link x86 callee-saved mask exceeds 4 bits");
+                fail("native-link callee-saved mask exceeds 4 bits");
             }
             seen_mask = true;
         } else {
@@ -1324,7 +1324,7 @@ struct LinkedBlob {
     uint64_t native_link_exec_ns = 0;
     uint64_t native_link_read_ns = 0;
     uint64_t map_patch_ns = 0;
-    uint32_t x86_callee_saved_mask = 0;
+    uint32_t callee_saved_mask = 0;
 };
 
 /* Libbpf-load the canonical `.bpf.o` companion so the kernel allocates
@@ -2051,7 +2051,7 @@ LinkedBlob load_or_link_native_blob(const cli_options &options,
             elapsed_ns(link_start, link_end),
         };
         auto map_patches = read_map_patch_file(source.map_patches);
-        linked.x86_callee_saved_mask = read_link_abi_file(source.abi);
+        linked.callee_saved_mask = read_link_abi_file(source.abi);
         const auto read_end = std::chrono::steady_clock::now();
         publish_cache_file(tmp.proof, cache.proof);
         publish_cache_file(tmp.blob, cache.blob);
@@ -2074,7 +2074,7 @@ LinkedBlob load_or_link_native_blob(const cli_options &options,
         0,
     };
     auto map_patches = read_map_patch_file(source.map_patches);
-    linked.x86_callee_saved_mask = read_link_abi_file(source.abi);
+    linked.callee_saved_mask = read_link_abi_file(source.abi);
     const auto read_end = std::chrono::steady_clock::now();
     const auto patch_start = std::chrono::steady_clock::now();
     patch_map_literals(linked.blob, map_patches, companion.map_addrs);
@@ -2121,7 +2121,7 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
     const auto blob_read_start = std::chrono::steady_clock::now();
     std::vector<uint8_t> blob;
     std::vector<uint8_t> relocs;
-    uint32_t x86_callee_saved_mask = 0;
+    uint32_t callee_saved_mask = 0;
     CompanionLoad companion{};
     uint64_t companion_load_ns = 0;
     uint64_t companion_open_ns = 0;
@@ -2155,7 +2155,7 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
         native_link_exec_ns = linked.native_link_exec_ns;
         native_link_read_ns = linked.native_link_read_ns;
         native_link_map_patch_ns = linked.map_patch_ns;
-        x86_callee_saved_mask = linked.x86_callee_saved_mask;
+        callee_saved_mask = linked.callee_saved_mask;
         blob = std::move(linked.blob);
         relocs = std::move(linked.relocs);
     } else {
@@ -2174,7 +2174,7 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
     int mod_btf_fd = open_module_btf_fd_by_id(stub_btf.module_btf_id);
     int prog_fd =
         load_stub_prog(stub_btf.kfunc_btf_id, mod_btf_fd, chunks,
-                       x86_callee_saved_mask, prog_type_value);
+                       callee_saved_mask, prog_type_value);
     const auto prog_load_end = std::chrono::steady_clock::now();
     close(mod_btf_fd);
 

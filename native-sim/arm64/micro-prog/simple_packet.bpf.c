@@ -26,7 +26,7 @@ arm64_l_18:
 	/* 0x18: mov w0, wzr */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_REG, ARM64_X0, ARM64_XZR, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, 0, 0);
 arm64_l_1c:
-	/* 0x1c: b 40 <simple_packet_xdp+0x40> */
+	/* 0x1c: b 40 <__native_link_arm64_ret_trampoline> */
 	ARM64_SIM_A64_JMP(0x1c, 0x40, arm64_l_40);
 arm64_l_20:
 	/* 0x20: mov w9, #0x614e */
@@ -50,7 +50,7 @@ arm64_l_38:
 	/* 0x38: strb wzr, [x8, #7] */
 	ARM64_SIM_RUN_OP3(ARM64_OP_STORE, ARM64_X8, ARM64_XZR, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_8, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 7ULL);
 arm64_l_3c:
-	/* 0x3c: b 40 <simple_packet_xdp+0x40> */
+	/* 0x3c: b 40 <__native_link_arm64_ret_trampoline> */
 	ARM64_SIM_A64_JMP(0x3c, 0x40, arm64_l_40);
 arm64_l_40:
 	/* 0x40: mov x7, x0 */

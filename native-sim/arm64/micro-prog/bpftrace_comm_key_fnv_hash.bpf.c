@@ -1,4 +1,3 @@
-#define ARM64_SIM_ENABLE_STACK 1
 #include "../arm64_sim_local_bpf.h"
 
 SEC("xdp")
@@ -21,7 +20,7 @@ arm64_l_10:
 	/* 0x10: mov w0, wzr */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_REG, ARM64_X0, ARM64_XZR, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, 0, 0);
 arm64_l_14:
-	/* 0x14: b 2a0 <bpftrace_comm_key_fnv_hash_xdp+0x2a0> */
+	/* 0x14: b 2a0 <__native_link_arm64_ret_trampoline> */
 	ARM64_SIM_A64_JMP(0x14, 0x2a0, arm64_l_2a0);
 arm64_l_18:
 	/* 0x18: add x10, x11, #0x8 */
@@ -66,8 +65,8 @@ arm64_l_4c:
 	/* 0x4c: b.ne 29c <bpftrace_comm_key_fnv_hash_xdp+0x29c> */
 	ARM64_SIM_A64_JCC(ARM64_COND_NE, 0x4c, 0x29c, arm64_l_29c);
 arm64_l_50:
-	/* 0x50: stp x20, x19, [sp, #-16]! */
-	ARM64_SIM_RUN_OP3(ARM64_OP_STP, ARM64_SP, ARM64_X20, ARM64_X19, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, ARM64_MEM_PRE), 18446744073709551600ULL);
+	/* 0x50: nop */
+	ARM64_SIM_RUN_OP3(ARM64_OP_NOP, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, 0, 0);
 arm64_l_54:
 	/* 0x54: mov x12, #0x11eb */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_IMM, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, 0, 4587ULL);
@@ -504,10 +503,10 @@ arm64_l_294:
 	/* 0x294: str x12, [x8] */
 	ARM64_SIM_RUN_OP3(ARM64_OP_STORE, ARM64_X8, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL);
 arm64_l_298:
-	/* 0x298: ldp x20, x19, [sp], #16 */
-	ARM64_SIM_RUN_OP3(ARM64_OP_LDP, ARM64_X20, ARM64_X19, ARM64_SP, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, ARM64_MEM_POST), 16ULL);
+	/* 0x298: nop */
+	ARM64_SIM_RUN_OP3(ARM64_OP_NOP, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, 0, 0);
 arm64_l_29c:
-	/* 0x29c: b 2a0 <bpftrace_comm_key_fnv_hash_xdp+0x2a0> */
+	/* 0x29c: b 2a0 <__native_link_arm64_ret_trampoline> */
 	ARM64_SIM_A64_JMP(0x29c, 0x2a0, arm64_l_2a0);
 arm64_l_2a0:
 	/* 0x2a0: mov x7, x0 */

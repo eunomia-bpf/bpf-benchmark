@@ -19,6 +19,16 @@ _HOST_ENV_BLOCKLIST = frozenset({
     "PATH", "HOME", "USER", "LOGNAME", "PWD", "OLDPWD",
     "SHLVL", "_", "TERM", "DISPLAY", "XAUTHORITY",
 })
+_SUITE_ENV_NAMES = (
+    "SAMPLES", "WARMUPS", "INNER_REPEAT", "BENCH", "SUITE", "RUNTIMES",
+    "FUZZ_ROUNDS", "TEST_MODE", "WORKLOAD_DURATION", "KEEP_WORKDIRS",
+    "BPFREJIT_BENCH_PASSES", "BPFREJIT_CORPUS_APPS", "SKIP_REJIT",
+    "CPU", "STRICT_ENV", "SHUFFLE_SEED", "REGENERATE_INPUTS", "LIST",
+    "MICRO_RUNNER_BINARY", "MICRO_PROGRAM_DIR", "MICRO_OUTPUT",
+    "PERF_COUNTERS", "BPFREJIT_CORPUS_APP_TIMEOUT",
+    "BPFREJIT_CORPUS_REJIT_TIMEOUT", "BPFREJIT_CORPUS_WORKLOAD_ONLY",
+    "BPFREJIT_CORPUS_BPF_STATS", "BPFREJIT_KEEP_ALL_WORKDIRS",
+)
 
 
 def _required(value: str, name: str, die: Any) -> str:
@@ -94,9 +104,15 @@ def build_runtime_container_command(
         "-e", "PYTHONUNBUFFERED=1",
         "-w", str(image_workspace),
     ]
-    # Forward every host env var (minus container-managed ones) so in-container
-    # drivers see Make-provided RUN_* plus suite knobs without a second config file.
-    for name, value in os.environ.items():
+    runtime_env = {
+        name: str(value)
+        for name, value in config.to_mapping().items()
+        if not isinstance(value, list) and str(value).strip()
+    }
+    for name in _SUITE_ENV_NAMES:
+        if value := os.environ.get(name, "").strip():
+            runtime_env[name] = value
+    for name, value in sorted(runtime_env.items()):
         if name in _HOST_ENV_BLOCKLIST or not value.strip():
             continue
         command.extend(["-e", f"{name}={value}"])

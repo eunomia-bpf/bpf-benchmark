@@ -419,6 +419,36 @@ python3 native-sim/x86/native_lab/tests/analyze.py
   13/13 passed for x86 in
   `native-sim/x86/results/README-20260521-215912-734470.md` and arm64 in
   `native-sim/arm64/results/README-20260521-215912-728238.md`.
+- **arm64 proof-object return branches must remain return branches in
+  kernel mode.** After switching kernel lowering to consume the proof
+  `.o`, `helper_chain_simple` exposed a second version of the same
+  class of bug: proof mode had already rewritten `ret` to
+  `b __native_link_arm64_ret_trampoline`, and kernel mode treated that
+  branch target as "entry symbol end". When map literals were appended,
+  the entry symbol end became the literal pool, so both early and normal
+  returns branched into data. Kernel mode now recognizes proof-object
+  branches to the trampoline symbol and repatches them to the final
+  kernel-stage return trampoline; conditional branches to the trampoline
+  fail fast. Validation after the fix: arm64 AWS `helper_chain_simple`
+  native-only passed in
+  `micro/results/aws_arm64_micro_20260522_195730_326099`; current
+  arm64 AWS stage2 native/kernel 13/13 passed in
+  `micro/results/aws_arm64_micro_20260522_200701_786527`; current x86
+  KVM pure/stage2 native/kernel passed in
+  `micro/results/x86_kvm_micro_20260522_201404_601577` and
+  `micro/results/x86_kvm_micro_20260522_201850_232073`.
+- **arm64 native blobs must not keep their own entry callee-saved
+  frame.** Later 2026-05-22 AWS arm64 mixed native/kernel runs showed
+  intermittent reboot while repeatedly executing `helper_only_uid_gid`.
+  The generated arm64 blob still contained compiler AAPCS entry
+  save/restore such as `stp x30, x19, [sp, #-16]!` / `ldp x30, x19,
+  [sp], #16`, unlike x86 where native-link trims the entry ABI frame and
+  asks the BPF JIT to preserve raw-blob callee-saved registers via the
+  kinsn sidecar. arm64 now uses the same model: proof mode replaces entry
+  STP/LDP save/restore pairs for x19..x22/x30 with NOPs, records a
+  generic `callee_saved_mask` in `.native_link_abi`, and the arm64
+  native_lab proof marks BPF r6..r9 as used so the BPF JIT prologue owns
+  saving x19..x22.
 - **Non-xdp prog types** (`tc_packet_checksum_fold`,
   `cgroup_skb_hash_chain`) are skipped — the stub BPF program is
   currently hard-coded to `BPF_PROG_TYPE_XDP`. Extending to sched_cls /

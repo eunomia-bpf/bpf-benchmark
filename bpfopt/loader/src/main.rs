@@ -1755,6 +1755,14 @@ mod tests {
             .arg(map_values_dir)
             .arg("--map-ids")
             .arg(join_u32_csv(&prog.map_ids))
+            // Soft speculation on the benchmark workload's runtime keys (guarded
+            // fast path + real-lookup fallback): vip_map's 5-tuple
+            // (10.100.1.1:8080/TCP), ctl_array's config slot 0, reals' selected
+            // backend index 1. Mirrors the historical ctl_array×2 + vip_map×4 +
+            // ch_rings×2 + reals×N + server_id×2 = 16-site coverage.
+            .arg("--inline-hint=vip_map:0a6401010000000000000000000000001f900600")
+            .arg("--inline-hint=ctl_array:00000000")
+            .arg("--inline-hint=reals:01000000")
             .status()?;
         if !status.success() {
             bail!("hardcoded katran map_inline exited with {status}");

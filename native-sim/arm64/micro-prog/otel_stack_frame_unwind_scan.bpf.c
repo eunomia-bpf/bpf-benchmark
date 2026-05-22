@@ -20,7 +20,7 @@ arm64_l_10:
 	/* 0x10: mov w0, wzr */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_REG, ARM64_X0, ARM64_XZR, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_32, 0, 0);
 arm64_l_14:
-	/* 0x14: b 178 <otel_stack_frame_unwind_scan_xdp+0x178> */
+	/* 0x14: b 178 <__native_link_arm64_ret_trampoline> */
 	ARM64_SIM_A64_JMP(0x14, 0x178, arm64_l_178);
 arm64_l_18:
 	/* 0x18: add x11, x10, #0x8 */
@@ -284,7 +284,7 @@ arm64_l_170:
 	/* 0x170: str x12, [x8] */
 	ARM64_SIM_RUN_OP3(ARM64_OP_STORE, ARM64_X8, ARM64_X12, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 0ULL);
 arm64_l_174:
-	/* 0x174: b 178 <otel_stack_frame_unwind_scan_xdp+0x178> */
+	/* 0x174: b 178 <__native_link_arm64_ret_trampoline> */
 	ARM64_SIM_A64_JMP(0x174, 0x178, arm64_l_178);
 arm64_l_178:
 	/* 0x178: mov x7, x0 */
