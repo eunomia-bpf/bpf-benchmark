@@ -15,7 +15,10 @@ DEFAULT_RUNNER_LLVM_DIR := $(ROOT_DIR)/llvm-backend/build-bpf-kinsn/lib/cmake/ll
 RUNNER_LLVM_DIR := $(if $(strip $(LLVM_DIR)),$(LLVM_DIR),$(if $(strip $(RUN_LLVM_DIR)),$(RUN_LLVM_DIR),$(DEFAULT_RUNNER_LLVM_DIR)))
 RUNNER_LIBBPF_CFLAGS := -O2 -Werror -Wall -std=gnu89
 ARM64_RUNNER_LLVM_SYSROOT := $(ROOT_DIR)/.cache/sysroots/arm64-llvm15
-ARM64_RUNNER_LLVM_DIR := $(ARM64_RUNNER_LLVM_SYSROOT)/usr/lib/llvm-15/lib/cmake/llvm
+# arm64 uses the in-repo kinsn LLVM (cross-built for aarch64), matching x86
+# (build.mk:14) so both arches link the same modified LLVM-23. The legacy
+# arm64-llvm15 sysroot is retained only for its -L/rpath link dirs below.
+ARM64_RUNNER_LLVM_DIR := $(ROOT_DIR)/llvm-backend/build-bpf-kinsn-arm64/lib/cmake/llvm
 ARM64_PKG_CONFIG_LIBDIR = $(AARCH64_SYSROOT_DIR)/usr/lib/aarch64-linux-gnu/pkgconfig
 ARM64_SYS_INCLUDE_FLAGS = -I/usr/aarch64-linux-gnu/include -I$(AARCH64_SYSROOT_DIR)/usr/include -I$(AARCH64_SYSROOT_DIR)/usr/include/aarch64-linux-gnu
 

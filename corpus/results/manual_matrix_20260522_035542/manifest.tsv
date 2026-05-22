@@ -1,0 +1,4 @@
+app	setup	exit_code	status	artifact
+bcc/set	workload_only	0	ok	corpus/results/x86_kvm_corpus_20260522_035837_971834
+bcc/set	ebpf_noopt_stats_on	0	ok	corpus/results/x86_kvm_corpus_20260522_040414_983443
+bcc/set	ebpf_noopt_stats_off	2	missing	

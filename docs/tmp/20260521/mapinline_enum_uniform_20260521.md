@@ -53,12 +53,27 @@ katran 这个 benchmark 包 retval=2(不转发),ch_rings/server_id/reals 在转�
 - x86 kinsn LLVM-23:已实测 `build-kinsn` 编译干净(EXIT 0)。
 - arm64 LLVM-15:宏走 `.str()` 分支,语法正确(未在 arm64 实测,无 arm64 LLVM 环境)。
 
-### 仍待办:arm64 真正用「仓库 LLVM-23」
-要让 ARM64 corpus 也用我们改过的 LLVM-23(而非 llvm-15),需要**为 arm64 交叉构建 kinsn
-LLVM-23**(目前 `llvm-backend/` 只有 x86 的 `build-bpf-kinsn`),再把 `build.mk:18` 的
-`ARM64_RUNNER_LLVM_DIR` 指过去。这是一次重的 LLVM 交叉编译(数小时),且当前 arm64 sysroot
-是按 llvm-15 装的。**版本宏已保证 arm64 即便留在 LLVM-15 也能编译**;切到 LLVM-23 是独立的
-基础设施任务。
+### arm64 也切到「仓库 LLVM-23」✅(已完成)
+在 host 上**交叉编译**(aarch64-linux-gnu 工具链 + 复用 x86 `llvm-tblgen`,非 qemu)了
+arm64 版的 kinsn LLVM-23 → `llvm-backend/build-bpf-kinsn-arm64`:
+```
+cmake -S llvm-backend/llvm/llvm -B llvm-backend/build-bpf-kinsn-arm64 -G Ninja \
+  -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_RTTI=OFF -DLLVM_ENABLE_ASSERTIONS=OFF \
+  -DBUILD_SHARED_LIBS=OFF -DLLVM_BUILD_TOOLS=OFF -DLLVM_TARGETS_TO_BUILD="AArch64;BPF" \
+  -DLLVM_ENABLE_ZSTD=OFF -DLLVM_ENABLE_ZLIB=OFF \
+  -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
+  -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ \
+  -DCMAKE_SYSROOT=.cache/aarch64-sysroot -DCMAKE_FIND_ROOT_PATH=.cache/aarch64-sysroot \
+  -DLLVM_HOST_TRIPLE=aarch64-unknown-linux-gnu \
+  -DLLVM_TABLEGEN=<x86>/build-bpf-kinsn/bin/llvm-tblgen \
+  -DLLVM_NATIVE_TOOL_DIR=<x86>/build-bpf-kinsn/bin
+```
+- 产物:`LLVM_PACKAGE_VERSION 23.0.0git`,`AArch64;BPF`,libs 是 ARM aarch64 ELF。约 7 分钟。
+- `runner/mk/build.mk:18` `ARM64_RUNNER_LLVM_DIR` 已从 `arm64-llvm15` 改到
+  `build-bpf-kinsn-arm64/lib/cmake/llvm`。
+- **验证**:arm64 runner cmake configure 干净 + `micro_exec` 编译并**链接** arm64 LLVM-23
+  通过 → 产出 ARM aarch64 ELF(75 MB)。即 **arm/x86 两边的 corpus 现在都链接仓库改过的
+  LLVM-23**。
 
 ## 状态
 - map_inline 多条目枚举 + uniform 消除:✅ 实现 + sound + kinsn 编译通过。

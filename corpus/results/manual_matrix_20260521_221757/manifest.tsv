@@ -1,0 +1,11 @@
+app	setup	exit_code	status	artifact
+bcc/set	workload_only	0	ok	corpus/results/x86_kvm_corpus_20260522_035837_971834
+bcc/set	ebpf_noopt_stats_on	0	ok	corpus/results/x86_kvm_corpus_20260522_040414_983443
+bcc/set	ebpf_noopt_stats_off	0	ok	corpus/results/x86_kvm_corpus_20260522_041848_461647
+bcc/set	optimized_shim_map_inline	0	ok	corpus/results/x86_kvm_corpus_20260522_042759_209148
+otelcol-ebpf-profiler/profiling	workload_only	0	ok	corpus/results/x86_kvm_corpus_20260522_043941_703385
+otelcol-ebpf-profiler/profiling	ebpf_noopt_stats_on	0	ok	corpus/results/x86_kvm_corpus_20260522_044521_899895
+otelcol-ebpf-profiler/profiling	ebpf_noopt_stats_off	0	ok	corpus/results/x86_kvm_corpus_20260522_045359_622598
+otelcol-ebpf-profiler/profiling	optimized_shim_map_inline	0	ok	corpus/results/x86_kvm_corpus_20260522_050233_401368
+cilium/agent	workload_only	0	ok	corpus/results/x86_kvm_corpus_20260522_052015_910703
+cilium/agent	ebpf_noopt_stats_on	0	ok	corpus/results/x86_kvm_corpus_20260522_052646_166503

@@ -1,0 +1,122 @@
+{
+  "app": "cilium/agent",
+  "baseline": {
+    "bpf": {},
+    "workloads": [
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/bin/wrk",
+              "-t4",
+              "-c50",
+              "-d60s",
+              "http://198.18.0.2:18080/"
+            ],
+            "config": {
+              "tool": "wrk",
+              "url": "http://198.18.0.2:18080/"
+            },
+            "duration_s": 62.17330617300001,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Running 1m test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   321.65ms  243.95ms   1.92s    85.87%\n    Req/Sec    38.98     16.29   100.00     62.67%\n  9226 requests in 1.00m, 1.37MB read\n  Socket errors: connect 0, read 0, write 0, timeout 49\nRequests/sec:    153.67\nTransfer/sec:     23.32KB",
+            "workload_name": "network_lossy_multi_wrk"
+          }
+        ],
+        "config": {
+          "netem": {
+            "delay_ms": 50,
+            "loss_pct": 20.0
+          },
+          "network_device": "bpfbench0"
+        },
+        "duration_s": 62.17330617300001,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "network_lossy_multi"
+      },
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/bin/wrk",
+              "-t4",
+              "-c50",
+              "-d60s",
+              "http://198.18.0.2:18080/"
+            ],
+            "config": {
+              "tool": "wrk",
+              "url": "http://198.18.0.2:18080/"
+            },
+            "duration_s": 60.15682397399999,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Running 1m test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   315.62ms  237.56ms   1.94s    86.20%\n    Req/Sec    39.60     16.33    90.00     64.22%\n  9394 requests in 1.00m, 1.39MB read\n  Socket errors: connect 0, read 0, write 0, timeout 36\nRequests/sec:    156.45\nTransfer/sec:     23.75KB",
+            "workload_name": "network_lossy_multi_wrk"
+          }
+        ],
+        "config": {
+          "netem": {
+            "delay_ms": 50,
+            "loss_pct": 20.0
+          },
+          "network_device": "bpfbench0"
+        },
+        "duration_s": 60.15682397399999,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "network_lossy_multi"
+      },
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/bin/wrk",
+              "-t4",
+              "-c50",
+              "-d60s",
+              "http://198.18.0.2:18080/"
+            ],
+            "config": {
+              "tool": "wrk",
+              "url": "http://198.18.0.2:18080/"
+            },
+            "duration_s": 61.20075099600001,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Running 1m test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   306.31ms  247.35ms   1.99s    86.48%\n    Req/Sec    28.74     14.91    90.00     65.90%\n  6565 requests in 1.00m, 0.97MB read\n  Socket errors: connect 0, read 0, write 0, timeout 81\nRequests/sec:    109.35\nTransfer/sec:     16.62KB",
+            "workload_name": "network_lossy_multi_wrk"
+          }
+        ],
+        "config": {
+          "netem": {
+            "delay_ms": 50,
+            "loss_pct": 20.0
+          },
+          "network_device": "bpfbench0"
+        },
+        "duration_s": 61.20075099600001,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "network_lossy_multi"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": null,
+  "rejit_result": {
+    "mode": "workload_only",
+    "status": "skipped"
+  },
+  "runner": "cilium",
+  "selected_workload": "network_lossy_multi",
+  "status": "ok"
+}
