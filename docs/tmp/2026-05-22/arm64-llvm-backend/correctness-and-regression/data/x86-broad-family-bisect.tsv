@@ -1,0 +1,15 @@
+case	flags	status	log
+all-cost		fail-2	data/all-cost.stderr.log
+phase7-broad	-bpf-kinsn-mode=unary=force -bpf-kinsn-mode=rotate=force	fail-2	data/phase7-broad.stderr.log
+scoped-unary-rotate	-bpf-kinsn-mode=all=disable -bpf-kinsn-mode=unary=force -bpf-kinsn-mode=rotate=force	pass	data/scoped-unary-rotate.stderr.log
+family-wide-load	-bpf-kinsn-mode=all=disable -bpf-kinsn-mode=wide-load=force	pass	data/family-wide-load.stderr.log
+family-movbe-be	-bpf-kinsn-mode=all=disable -bpf-kinsn-mode=movbe-be=force	fail-2	data/family-movbe-be.stderr.log
+family-movbe-load	-bpf-kinsn-mode=all=disable -bpf-kinsn-mode=movbe-load=force	pass	data/family-movbe-load.stderr.log
+family-indexed-load	-bpf-kinsn-mode=all=disable -bpf-kinsn-mode=indexed-load=force	pass	data/family-indexed-load.stderr.log
+family-bextr	-bpf-kinsn-mode=all=disable -bpf-kinsn-mode=bextr=force	pass	data/family-bextr.stderr.log
+family-bmi1	-bpf-kinsn-mode=all=disable -bpf-kinsn-mode=bmi1=force	pass	data/family-bmi1.stderr.log
+family-shd	-bpf-kinsn-mode=all=disable -bpf-kinsn-mode=shd=force	pass	data/family-shd.stderr.log
+family-cmov	-bpf-kinsn-mode=all=disable -bpf-kinsn-mode=cmov=force	pass	data/family-cmov.stderr.log
+family-popcnt	-bpf-kinsn-mode=all=disable -bpf-kinsn-mode=popcnt=force	pass	data/family-popcnt.stderr.log
+family-preemit-lea	-bpf-kinsn-mode=all=disable -bpf-kinsn-mode=preemit-lea=force	pass	data/family-preemit-lea.stderr.log
+family-scaled-index-mem	-bpf-kinsn-mode=all=disable -bpf-kinsn-mode=scaled-index-mem=force	pass	data/family-scaled-index-mem.stderr.log

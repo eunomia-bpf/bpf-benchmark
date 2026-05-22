@@ -1,0 +1,7 @@
+check	status	evidence
+llvm-build	pass	ninja no-op build completed with exit 0
+targeted-filecheck	pass	x86 default, arm64 target, arm64 REV, arm64 EXTR, and arm64 pseudo AsmPrinter checks passed
+x86-default-broad-object-smoke	fail	packet_vlan_tcpopt_parser hit BPFInstrInfo.cpp impossible reg-to-reg copy with broad default x86 cost policies
+x86-scoped-unary-rotate-object-smoke	pass	29 objects, 9 bpf_x86_* symbols, 0 bpf_arm64_* symbols
+arm64-all-disable-object-smoke	pass	29 objects, 0 kfunc symbols
+arm64-rev-extr-object-smoke	pass	29 objects, 9 bpf_arm64_* symbols, 0 bpf_x86_* symbols

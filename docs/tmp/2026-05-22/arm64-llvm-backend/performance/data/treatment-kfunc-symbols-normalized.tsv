@@ -1,0 +1,9 @@
+bcc_tcpconnect_ipv4_tuple_filter.bpf.o	bpf_arm64_extr_w
+bpftrace_string_search_prefix_scan.bpf.o	bpf_arm64_extr_x
+cilium_ct_nat_tuple_rewrite.bpf.o	bpf_arm64_extr_w
+flow_5tuple_rss_hash.bpf.o	bpf_arm64_extr_w
+katran_lb_consistent_hash_select.bpf.o	bpf_arm64_extr_w
+katran_lb_consistent_hash_select.bpf.o	bpf_arm64_rev16_w
+katran_lb_consistent_hash_select.bpf.o	bpf_arm64_rev_w
+payload_prefix_memcmp_scan.bpf.o	bpf_arm64_extr_x
+siphash_rotate64_mixer.bpf.o	bpf_arm64_extr_x

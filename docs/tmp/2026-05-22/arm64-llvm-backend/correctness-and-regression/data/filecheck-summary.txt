@@ -1,0 +1,6 @@
+ninja -C code/llvm-backend/build-bpf-kinsn llc FileCheck: passed
+llc/FileCheck kinsn-target.ll X86: passed
+llc/FileCheck kinsn-target.ll ARM64: passed
+llc/FileCheck kinsn-arm64-pseudos.mir: passed
+llc/FileCheck kinsn-arm64-rev-select.ll: passed
+llc/FileCheck kinsn-arm64-extr-select.ll: passed

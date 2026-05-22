@@ -1,0 +1,4 @@
+attempt	benchmarks	runs	failed_samples	status	object_count	kfunc_symbols	arm64_rev_symbols	arm64_extr_symbols	x86_symbols
+baseline	29	174	0	completed	29	0	0	0	0
+control-disabled	29	174	0	completed	29	0	0	0	0
+treatment-rev-extr	29	174	0	completed	29	9	2	7	0
