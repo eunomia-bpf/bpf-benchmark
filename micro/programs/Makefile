@@ -21,6 +21,7 @@ NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -Wall -Wextra -O2 -g -fPIC -shared -fno-
 	$(SYS_INCLUDE_FLAGS) -MMD -MP
 BPF_SRCS := $(wildcard *.bpf.c)
 BPF_OBJS := $(patsubst %.bpf.c,$(OUTPUT_DIR)/%.bpf.o,$(BPF_SRCS))
+BPF_CONFIG_STAMP := $(OUTPUT_DIR)/.bpf-compiler-config
 
 # Native_lab support: the userspace .native.so reads kernel ctx structs
 # directly via hard-coded offsets. Offsets are extracted from the running
@@ -33,11 +34,26 @@ BPF_DEPS := $(patsubst %.bpf.c,$(OUTPUT_DIR)/%.bpf.d,$(BPF_SRCS))
 NATIVE_SOS := $(patsubst %.bpf.c,$(OUTPUT_DIR)/%.native.so,$(BPF_SRCS))
 NATIVE_DEPS := $(patsubst %.bpf.c,$(OUTPUT_DIR)/%.native.d,$(BPF_SRCS))
 
-.PHONY: all clean
+.PHONY: all clean FORCE
 
 all: $(BPF_OBJS) $(NATIVE_SOS)
 
-$(OUTPUT_DIR)/%.bpf.o: %.bpf.c | $(OUTPUT_DIR)
+$(BPF_CONFIG_STAMP): FORCE | $(OUTPUT_DIR)
+	@tmp="$@.tmp"; \
+	{ \
+	    printf 'CLANG=%s\n' '$(CLANG)'; \
+	    printf 'CFLAGS=%s\n' '$(CFLAGS)'; \
+	    printf 'BPFREJIT_MICRO_BPF_COMPILER=%s\n' '$(BPFREJIT_MICRO_BPF_COMPILER)'; \
+	    printf 'BPF_KINSN_LLC=%s\n' '$(BPF_KINSN_LLC)'; \
+	    printf 'BPF_KINSN_LLC_FLAGS=%s\n' '$(BPF_KINSN_LLC_FLAGS)'; \
+	    printf 'BPF_KINSN_TRIPLE=%s\n' '$(BPF_KINSN_TRIPLE)'; \
+	    printf 'BPF_KINSN_CPU=%s\n' '$(BPF_KINSN_CPU)'; \
+	} > "$$tmp"; \
+	if ! cmp -s "$$tmp" "$@"; then mv "$$tmp" "$@"; else rm -f "$$tmp"; fi
+
+FORCE:
+
+$(OUTPUT_DIR)/%.bpf.o: %.bpf.c $(BPF_CONFIG_STAMP) | $(OUTPUT_DIR)
 ifeq ($(BPFREJIT_MICRO_BPF_COMPILER),kinsn-llvm)
 	@test -x "$(BPF_KINSN_LLC)" || { echo "BPF_KINSN_LLC must point to the kinsn-enabled llc" >&2; exit 1; }
 	$(CLANG) $(CFLAGS) -MF "$(OUTPUT_DIR)/$*.bpf.d" -MT "$@" -S -emit-llvm -c -o "$(OUTPUT_DIR)/$*.bpf.ll" "$<"
@@ -87,6 +103,7 @@ clean:
 		"$(OUTPUT_DIR)"/*.bpf.o \
 			"$(OUTPUT_DIR)"/*.bpf.d \
 			"$(OUTPUT_DIR)"/*.bpf.ll \
+			"$(BPF_CONFIG_STAMP)" \
 			"$(OUTPUT_DIR)"/*.native.so \
 			"$(OUTPUT_DIR)"/*.native.d \
 			"$(OUTPUT_DIR)"/*.bpf.bin \

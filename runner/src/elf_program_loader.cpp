@@ -23,6 +23,12 @@ constexpr uint8_t k_bpf_ld_imm64 = BPF_LD | BPF_DW | BPF_IMM;
 #define BPF_PSEUDO_KINSN_CALL 4
 #endif
 
+bool is_kinsn_symbol(std::string_view symbol_name)
+{
+    return symbol_name.starts_with("bpf_x86_") ||
+           symbol_name.starts_with("bpf_arm64_");
+}
+
 bool infer_program_abi_from_section(const char *section_name,
                                     enum bpf_prog_type &prog_type,
                                     enum bpf_attach_type &attach_type)
@@ -556,7 +562,7 @@ void patch_program_relocations(
                 insns[*insn_index].code == (BPF_JMP | BPF_CALL) &&
                 sym.st_shndx == SHN_UNDEF &&
                 symbol_name != nullptr &&
-                std::string_view(symbol_name).starts_with("bpf_x86_")) {
+                is_kinsn_symbol(symbol_name)) {
                 insns[*insn_index].src_reg = BPF_PSEUDO_KINSN_CALL;
                 insns[*insn_index].off = 0;
                 insns[*insn_index].imm = 0;

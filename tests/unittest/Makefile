@@ -60,7 +60,7 @@ define get_sys_includes
 $(shell $(1) -v -E - </dev/null 2>&1 \
 	| sed -n '/<...> search starts here:/,/End of search list./{ s| \(/.*\)|-idirafter \1|p }')
 endef
-CLANG_SYS_INCLUDES := $(call get_sys_includes,$(CLANG))
+CLANG_SYS_INCLUDES := $(if $(strip $(SYS_INCLUDE_FLAGS)),$(SYS_INCLUDE_FLAGS),$(call get_sys_includes,$(CLANG)))
 
 # Auto-discover host test sources — no manual lists to maintain.
 TEST_SRCS := $(wildcard $(UNITTEST_DIR)/*_test.c)

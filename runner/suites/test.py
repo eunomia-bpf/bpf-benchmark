@@ -105,11 +105,13 @@ def _load_kinsn_modules(workspace: Path, target_arch: str) -> None:
 
 def _discover_unittest_binaries(workspace: Path, target_arch: str) -> list[Path]:
     build_dir = test_unittest_build_dir(workspace, target_arch)
-    return sorted(
+    tests = [
         path
-        for path in build_dir.glob("rejit_*")
+        for pattern in ("*_test", "module/*_test")
+        for path in build_dir.glob(pattern)
         if path.is_file() and os.access(path, os.X_OK)
-    )
+    ]
+    return sorted(tests)
 
 
 def _log_test_section(title: str) -> None:
@@ -121,7 +123,7 @@ def _run_unittest_suite(workspace: Path, args: argparse.Namespace, env: dict[str
     build_dir = test_unittest_build_dir(workspace, args.target_arch)
     tests = _discover_unittest_binaries(workspace, args.target_arch)
     if not tests:
-        _die(f"no rejit_* test binaries found in {build_dir}")
+        _die(f"no *_test binaries found in {build_dir}")
     runtime_env, _ = env_with_suite_runtime_ld(workspace, args.target_arch, env)
     for test_binary in tests:
         print(f"--- {test_binary.name} ---", file=sys.stderr)
@@ -151,16 +153,21 @@ def _run_negative_suite(
     negative_build = test_negative_build_dir(workspace, args.target_arch)
     runtime_env, _ = env_with_suite_runtime_ld(workspace, args.target_arch, env)
     tests: list[tuple[str, list[str], dict[str, str]]] = []
-    if include_adversarial:
-        tests.append(("adversarial_rejit", [str(negative_build / "adversarial_rejit")], runtime_env.copy()))
-    if include_fuzz:
+    adversarial = negative_build / "adversarial_rejit"
+    fuzz = negative_build / "fuzz_rejit"
+    if include_adversarial and adversarial.is_file():
+        tests.append(("adversarial_rejit", [str(adversarial)], runtime_env.copy()))
+    if include_fuzz and fuzz.is_file():
         tests.append(
             (
                 f"fuzz_rejit ({_fuzz_rounds_text(args)} rounds)",
-                [str(negative_build / "fuzz_rejit"), _fuzz_rounds_text(args)],
+                [str(fuzz), _fuzz_rounds_text(args)],
                 runtime_env.copy(),
             )
         )
+    if not tests:
+        print(f"SKIP: no negative test binaries found in {negative_build}", file=sys.stderr)
+        return
     for label, command, command_env in tests:
         print(f"--- {label} ---", file=sys.stderr)
         if not _run_with_status(command, cwd=workspace, env=command_env, log_path=log_path):

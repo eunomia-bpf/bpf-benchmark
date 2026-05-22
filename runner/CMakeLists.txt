@@ -118,6 +118,7 @@ if(MICRO_EXEC_ENABLE_LLVMBPF)
         micro_exec
         PRIVATE
             MICRO_EXEC_ENABLE_LLVMBPF=1
+            BPFTIME_ENABLE_LLVM_PRELOAD=1
             SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
     )
     target_include_directories(

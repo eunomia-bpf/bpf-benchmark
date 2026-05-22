@@ -34,18 +34,18 @@ BPFTOOL_FLAGS := VMLINUX_BTF= feature-libbfd=0 feature-libbfd-liberty=0 feature-
 BCC_LIBBPF_TOOLS := capable biosnoop vfsstat opensnoop syscount tcpconnect tcplife runqlat
 BCC_LIBBPF_FLAGS = -f "$(BCC)/libbpf-tools/Makefile" -C "$(BUILD)/.bcc-libbpf/$*" VPATH="$(BCC)/libbpf-tools:$(BCC)/libbpf-tools/$(BCC_ARCH)" APPS="$(BCC_LIBBPF_TOOLS)" APP_ALIASES= BZ_APPS= OUTPUT="$(BUILD)/.bcc-libbpf/$*/output" BPFTOOL_SRC="$(BCC)/libbpf-tools/bpftool/src" LIBBPF_SRC="$(BCC)/src/cc/libbpf/src" EXTRA_CFLAGS="-I$(BCC)/src/cc/libbpf/include/uapi" ARCH="$(BCC_ARCH)" USE_BLAZESYM=0 CLANG="$(CLANG)" LLVM_STRIP=llvm-strip-18
 
-ARM64_SYSROOT := $(CACHE)/sysroots/arm64-llvm15
+ARM64_SYSROOT := $(CACHE)/sysroots/arm64-llvm17
 ARM64_DEBS    := $(CACHE)/apt-arm64-debs
-ARM64_CLANG_CONFIG := $(ARM64_SYSROOT)/usr/lib/llvm-15/lib/cmake/clang/ClangConfig.cmake
+ARM64_CLANG_CONFIG := $(ARM64_SYSROOT)/usr/lib/llvm-17/lib/cmake/clang/ClangConfig.cmake
 ARM64_BCC_LIB := $(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libbcc_bpf.so
 ARM64_BCC_PKGS := libbpfcc-dev:arm64 libbpfcc:arm64 libclang-cpp18:arm64 libllvm18:arm64 libstdc++6:arm64 libgcc-s1:arm64 libc6:arm64
-ARM64_PKGS    := llvm-15-dev:arm64 llvm-15:arm64 llvm-15-runtime:arm64 llvm-15-tools:arm64 llvm-15-linker-tools:arm64 \
-	libllvm15t64:arm64 libclang-15-dev:arm64 libclang-common-15-dev:arm64 libclang-cpp15t64:arm64 libclang1-15t64:arm64 libclang-rt-15-dev:arm64 \
+ARM64_PKGS    := llvm-17-dev:arm64 llvm-17:arm64 llvm-17-runtime:arm64 llvm-17-tools:arm64 llvm-17-linker-tools:arm64 \
+	libllvm17t64:arm64 libclang-17-dev:arm64 libclang-common-17-dev:arm64 libclang-cpp17t64:arm64 libclang1-17t64:arm64 libclang-rt-17-dev:arm64 \
 	libobjc-13-dev:arm64 libobjc4:arm64 libgc1:arm64 libffi8:arm64 libffi-dev:arm64 libxml2:arm64 libxml2-dev:arm64 \
 	libedit2:arm64 libtinfo6:arm64 libncurses-dev:arm64 libbsd0:arm64 libmd0:arm64 libzstd-dev:arm64 zlib1g:arm64 zlib1g-dev:arm64 \
 	libbpf-dev:arm64 libbpf1:arm64 libelf-dev:arm64 libelf1t64:arm64 libdw-dev:arm64 libdw1t64:arm64 liblzma-dev:arm64 liblzma5:arm64 \
 	libbz2-dev:arm64 libbz2-1.0:arm64 libpcap-dev:arm64 libpcap0.8-dev:arm64 libpcap0.8t64:arm64 \
-	binutils-dev:arm64 libbinutils:arm64 libctf-nobfd0:arm64 libctf0:arm64 libsframe1:arm64 libcereal-dev \
+	binutils-dev:arm64 libbinutils:arm64 libctf-nobfd0:arm64 libctf0:arm64 libsframe1:arm64 libcereal-dev rapidjson-dev libz3-dev:arm64 libz3-4:arm64 \
 	$(ARM64_BCC_PKGS)
 
 apps: apps-x86 apps-arm64
@@ -95,7 +95,8 @@ $(ARM64_CLANG_CONFIG):
 	sudo apt-get update
 	cd "$(ARM64_DEBS)" && apt-get download $(ARM64_PKGS)
 	for deb in "$(ARM64_DEBS)"/*.deb; do dpkg-deb -x "$$deb" "$(ARM64_SYSROOT)"; done
-	install -d "$(ARM64_SYSROOT)/usr/lib/llvm-15/lib/cmake/clang"
+	sed -i 's#/usr/lib/aarch64-linux-gnu/libz3\.so#$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libz3.so#g' "$(ARM64_SYSROOT)/usr/lib/llvm-17/lib/cmake/llvm/LLVMExports.cmake"
+	install -d "$(ARM64_SYSROOT)/usr/lib/llvm-17/lib/cmake/clang"
 	printf '%s\n' \
 	  'include_guard(GLOBAL)' \
 	  'get_filename_component(CLANG_INSTALL_PREFIX "$${CMAKE_CURRENT_LIST_DIR}/../../.." ABSOLUTE)' \
@@ -103,7 +104,7 @@ $(ARM64_CLANG_CONFIG):
 	  'set(CLANG_INCLUDE_DIRS "$${CLANG_INSTALL_PREFIX}/include")' \
 	  'set(CLANG_EXPORTED_TARGETS libclang)' \
 	  'add_library(libclang SHARED IMPORTED GLOBAL)' \
-	  'set_target_properties(libclang PROPERTIES IMPORTED_LOCATION "$${CLANG_INSTALL_PREFIX}/lib/libclang-15.so.1" IMPORTED_SONAME "libclang-15.so.1")' >"$@"
+	  'set_target_properties(libclang PROPERTIES IMPORTED_LOCATION "$${CLANG_INSTALL_PREFIX}/lib/libclang-17.so.1" IMPORTED_SONAME "libclang-17.so.1")' >"$@"
 
 $(ARM64_BCC_LIB): $(ARM64_CLANG_CONFIG)
 	install -d "$(ARM64_DEBS)" "$(ARM64_SYSROOT)"
@@ -136,7 +137,7 @@ bpftrace-x86:
 	cmake --install "$(BUILD)/.bpftrace-build/x86"
 
 bpftrace-arm64: $(ARM64_BCC_LIB)
-	CPATH="$(ARM64_SYSROOT)/usr/include:$(ARM64_SYSROOT)/usr/include/aarch64-linux-gnu:$(ARM64_SYSROOT)/usr/include/elfutils" LIBRARY_PATH="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu:$(ARM64_SYSROOT)/usr/lib/llvm-15/lib" LD_LIBRARY_PATH="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu:$(ARM64_SYSROOT)/usr/lib/llvm-15/lib" cmake -S "$(BPFTRACE)" -B "$(BUILD)/.bpftrace-build/arm64" -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$(BUILD)/arm64/bpftrace" -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=aarch64 -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ -DCMAKE_FIND_ROOT_PATH="$(ARM64_SYSROOT)" -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY -DCMAKE_PREFIX_PATH="$(ARM64_SYSROOT)/usr/lib/llvm-15;$(ARM64_SYSROOT)/usr" -DUSE_SYSTEM_BPF_BCC=ON -DBUILD_TESTING=OFF -DENABLE_MAN=OFF -DENABLE_TEST_VALIDATE_CODEGEN=OFF -DENABLE_SKB_OUTPUT=OFF -DLLVM_REQUESTED_VERSION=15 -DLLVM_DIR="$(ARM64_SYSROOT)/usr/lib/llvm-15/lib/cmake/llvm" -DClang_DIR="$(ARM64_SYSROOT)/usr/lib/llvm-15/lib/cmake/clang" -DLIBBCC_INCLUDE_DIRS="$(ARM64_SYSROOT)/usr/include" -DLIBBCC_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libbcc.so" -DLIBBCC_BPF_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libbcc_bpf.so" -DLIBBCC_LOADER_LIBRARY_STATIC="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libbcc-loader-static.a" -DLIBBPF_INCLUDE_DIRS="$(ARM64_SYSROOT)/usr/include" -DLIBBPF_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libbpf.so" -DLIBCEREAL_INCLUDE_DIRS="$(ARM64_SYSROOT)/usr/include" -DLIBELF_INCLUDE_DIRS="$(ARM64_SYSROOT)/usr/include" -DLIBELF_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libelf.so" -DLIBDW_INCLUDE_DIRS="$(ARM64_SYSROOT)/usr/include/elfutils" -DLIBDW_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libdw.so" -DLIBBFD_INCLUDE_DIRS="$(ARM64_SYSROOT)/usr/include" -DLIBBFD_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libbfd.so" -DLIBOPCODES_INCLUDE_DIRS="$(ARM64_SYSROOT)/usr/include" -DLIBOPCODES_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libopcodes.so" -DZLIB_LIBRARY="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libz.so" -DZLIB_INCLUDE_DIR="$(ARM64_SYSROOT)/usr/include" -DFFI_INCLUDE_DIR="$(ARM64_SYSROOT)/usr/include/aarch64-linux-gnu" -DFFI_LIBRARY_DIR="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu" -DFFI_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libffi.so" -DTerminfo_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libtinfo.so" -DCMAKE_CXX_FLAGS='-I$(ARM64_SYSROOT)/usr/lib/llvm-15/include'
+	CPATH="$(ARM64_SYSROOT)/usr/include:$(ARM64_SYSROOT)/usr/include/aarch64-linux-gnu:$(ARM64_SYSROOT)/usr/include/elfutils" LIBRARY_PATH="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu:$(ARM64_SYSROOT)/usr/lib/llvm-17/lib" LD_LIBRARY_PATH="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu:$(ARM64_SYSROOT)/usr/lib/llvm-17/lib" cmake -S "$(BPFTRACE)" -B "$(BUILD)/.bpftrace-build/arm64" -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$(BUILD)/arm64/bpftrace" -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=aarch64 -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ -DCMAKE_FIND_ROOT_PATH="$(ARM64_SYSROOT)" -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY -DCMAKE_PREFIX_PATH="$(ARM64_SYSROOT)/usr/lib/llvm-17;$(ARM64_SYSROOT)/usr" -DUSE_SYSTEM_BPF_BCC=ON -DBUILD_TESTING=OFF -DENABLE_MAN=OFF -DENABLE_TEST_VALIDATE_CODEGEN=OFF -DENABLE_SKB_OUTPUT=OFF -DLLVM_REQUESTED_VERSION=17 -DLLVM_DIR="$(ARM64_SYSROOT)/usr/lib/llvm-17/lib/cmake/llvm" -DClang_DIR="$(ARM64_SYSROOT)/usr/lib/llvm-17/lib/cmake/clang" -DLIBBCC_INCLUDE_DIRS="$(ARM64_SYSROOT)/usr/include" -DLIBBCC_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libbcc.so" -DLIBBCC_BPF_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libbcc_bpf.so" -DLIBBCC_LOADER_LIBRARY_STATIC="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libbcc-loader-static.a" -DLIBBPF_INCLUDE_DIRS="$(ARM64_SYSROOT)/usr/include" -DLIBBPF_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libbpf.so" -DLIBCEREAL_INCLUDE_DIRS="$(ARM64_SYSROOT)/usr/include" -DLIBELF_INCLUDE_DIRS="$(ARM64_SYSROOT)/usr/include" -DLIBELF_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libelf.so" -DLIBDW_INCLUDE_DIRS="$(ARM64_SYSROOT)/usr/include/elfutils" -DLIBDW_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libdw.so" -DLIBBFD_INCLUDE_DIRS="$(ARM64_SYSROOT)/usr/include" -DLIBBFD_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libbfd.so" -DLIBOPCODES_INCLUDE_DIRS="$(ARM64_SYSROOT)/usr/include" -DLIBOPCODES_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libopcodes.so" -DZLIB_LIBRARY="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libz.so" -DZLIB_INCLUDE_DIR="$(ARM64_SYSROOT)/usr/include" -DFFI_INCLUDE_DIR="$(ARM64_SYSROOT)/usr/include/aarch64-linux-gnu" -DFFI_LIBRARY_DIR="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu" -DFFI_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libffi.so" -DTerminfo_LIBRARIES="$(ARM64_SYSROOT)/usr/lib/aarch64-linux-gnu/libtinfo.so" -DCMAKE_CXX_FLAGS='-I$(ARM64_SYSROOT)/usr/lib/llvm-17/include'
 	cmake --build "$(BUILD)/.bpftrace-build/arm64" -j"$(JOBS)"
 	cmake --install "$(BUILD)/.bpftrace-build/arm64"
 

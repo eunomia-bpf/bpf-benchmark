@@ -144,9 +144,8 @@ RUN mkdir -p /artifacts && printf '%s\n' "${KERNEL_MANIFEST_JSON}" > /artifacts/
 COPY --link --from=runner-runtime-host-runner-build /micro_exec ${IMAGE_WORKSPACE}/runner/${RUNNER_BUILD_DIR_NAME}/micro_exec
 COPY --link --from=runner-runtime-host-micro-programs / /artifacts/user/micro-programs/${RUN_TARGET_ARCH}/
 COPY --link --from=runner-runtime-host-stage2-programs / /artifacts/user/stage2-programs/${RUN_TARGET_ARCH}/
-COPY --link --from=runner-runtime-host-unittest /rejit_*[^d] ${IMAGE_WORKSPACE}/tests/unittest/${TEST_BUILD_DIR}/
-COPY --link --from=runner-runtime-host-unittest /progs/*.bpf.o ${IMAGE_WORKSPACE}/tests/unittest/${TEST_BUILD_DIR}/progs/
-COPY --link --from=runner-runtime-host-negative /adversarial_rejit /fuzz_rejit ${IMAGE_WORKSPACE}/tests/negative/${TEST_BUILD_DIR}/
+COPY --link --from=runner-runtime-host-unittest / ${IMAGE_WORKSPACE}/tests/unittest/${TEST_BUILD_DIR}/
+COPY --link --from=runner-runtime-host-negative / ${IMAGE_WORKSPACE}/tests/negative/${TEST_BUILD_DIR}/
 
 FROM runner-runtime-runtime-base AS runner-runtime
 
@@ -172,10 +171,12 @@ COPY --link --chmod=0755 \
     ${BPFOPT_HOST_BIN_DIR}/kinsnprober \
     ${NATIVE_LINK_HOST_BIN} \
     /usr/local/bin/
+COPY --link --from=runner-runtime-host-extra-libs / /usr/local/lib/bpfrejit-runtime-libs/
 
 RUN set -eux; \
     mkdir -p /opt; \
     ln -sfn /artifacts/user /opt/bpf-benchmark; \
+    printf '%s\n' /usr/local/lib/bpfrejit-runtime-libs > /etc/ld.so.conf.d/bpfrejit-runtime-libs.conf; \
     ldconfig
 
 COPY --link --from=runner-runtime-host-kinsn-artifacts / /artifacts/kinsn
@@ -187,7 +188,6 @@ COPY runner/__init__.py ./runner/
 COPY runner/config ./runner/config
 COPY runner/libs ./runner/libs
 COPY runner/suites ./runner/suites
-COPY runner/targets ./runner/targets
 COPY micro/*.py ./micro/
 COPY micro/config ./micro/config
 COPY corpus/*.py ./corpus/
@@ -199,6 +199,7 @@ RUN mkdir -p micro/results corpus/results tests/results /var/tmp/bpfrejit-runtim
 
 ENV BPFREJIT_IMAGE_WORKSPACE=${IMAGE_WORKSPACE} \
     BPFREJIT_REPO_ARTIFACT_ROOT=/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH} \
+    BPFTIME_LLVM_SONAME=libLLVM-17.so.1 \
     PYTHONPATH=${IMAGE_WORKSPACE} \
     RUN_TARGET_ARCH=${RUN_TARGET_ARCH} \
     PATH=${IMAGE_WORKSPACE}/runner/build-llvmbpf:${IMAGE_WORKSPACE}/runner/build-arm64-llvmbpf:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
