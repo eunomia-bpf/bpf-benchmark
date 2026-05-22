@@ -1,0 +1,20 @@
+{
+  "completed_benchmarks": 0,
+  "current_benchmark": "helper_chain_simple",
+  "current_benchmark_index": 1,
+  "current_benchmark_record": {
+    "expected_result": 0,
+    "expected_retval": 2,
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+    "io_mode": "packet",
+    "name": "helper_chain_simple",
+    "runs": [],
+    "tags": [
+      "stage2",
+      "helpers",
+      "chain"
+    ]
+  },
+  "status": "running",
+  "total_benchmarks": 6
+}
