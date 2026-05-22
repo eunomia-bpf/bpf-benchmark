@@ -10,6 +10,9 @@ struct loadtime_result {
     unsigned int attr_size;
 };
 
+#define LOADTIME_VERIFIER_LOG_INITIAL_SIZE (16u * 1024u * 1024u)
+#define LOADTIME_VERIFIER_LOG_MAX_SIZE (64u * 1024u * 1024u)
+
 static char **loadtime_env_without_ld_preload(void) {
     size_t n_env = 0;
     while (environ[n_env]) n_env++;
@@ -387,13 +390,31 @@ static int loadtime_collect_maps(const struct bpf_insn *insns,
     return 0;
 }
 
+static int loadtime_join_path(char *out, size_t out_sz, const char *dir,
+                              const char *name, char *err, size_t err_sz) {
+    size_t dir_len = strlen(dir);
+    size_t name_len = strlen(name);
+    if (dir_len + 1 + name_len + 1 > out_sz) {
+        snprintf(err, err_sz, "loadtime path too long for %s", name);
+        return -1;
+    }
+    memcpy(out, dir, dir_len);
+    out[dir_len] = '/';
+    memcpy(out + dir_len + 1, name, name_len + 1);
+    return 0;
+}
+
 static int loadtime_prepare_target(const char *workdir, char *target_json,
-                                   size_t target_json_sz) {
+                                   size_t target_json_sz,
+                                   char *err, size_t err_sz) {
     const char *dir = getenv("BPFREJIT_SHIM_DIR");
     if (!dir) dir = "/tmp";
     char shared[320];
-    snprintf(shared, sizeof(shared), "%s/target.json", dir);
-    snprintf(target_json, target_json_sz, "%s/target.json", workdir);
+    if (loadtime_join_path(shared, sizeof(shared), dir, "target.json",
+                           err, err_sz) != 0 ||
+        loadtime_join_path(target_json, target_json_sz, workdir, "target.json",
+                           err, err_sz) != 0)
+        return -1;
     struct stat st;
     if (stat(shared, &st) == 0) {
         char *target_payload = NULL;
@@ -406,6 +427,83 @@ static int loadtime_prepare_target(const char *workdir, char *target_json,
     }
     const char fallback[] = "{\"arch\":\"x86_64\",\"kinsns\":{}}\n";
     return loadtime_write_file(target_json, fallback, sizeof(fallback) - 1);
+}
+
+static int loadtime_contains_libbpf_map_poison(const struct bpf_insn *insns,
+                                               uint32_t insn_cnt) {
+    const int poison_base = 2001000000;
+    const int poison_limit = 2002000000;
+    for (uint32_t pc = 0; pc < insn_cnt; pc++) {
+        const struct bpf_insn *insn = &insns[pc];
+        if ((insn->code == (BPF_JMP | BPF_CALL) ||
+             insn->code == (BPF_JMP32 | BPF_CALL)) &&
+            insn->src_reg == 0 &&
+            insn->imm >= poison_base &&
+            insn->imm < poison_limit)
+            return 1;
+        if (insn->code == (BPF_LD | BPF_DW | BPF_IMM) && pc + 1 < insn_cnt)
+            pc++;
+    }
+    return 0;
+}
+
+static int loadtime_keep_workdirs_enabled(void) {
+    const char *raw = getenv("KEEP_WORKDIRS");
+    return raw && (strcmp(raw, "1") == 0 || strcmp(raw, "all") == 0 ||
+                   strcmp(raw, "true") == 0);
+}
+
+static int loadtime_select_workdir_base(char *out, size_t out_sz,
+                                        char *err, size_t err_sz) {
+    const char *dir = getenv("BPFREJIT_SHIM_DIR");
+    if (dir && dir[0]) {
+        if (strlen(dir) + 1 > out_sz) {
+            snprintf(err, err_sz, "loadtime workdir base path too long");
+            return -1;
+        }
+        memcpy(out, dir, strlen(dir) + 1);
+        return 0;
+    }
+    if (!loadtime_keep_workdirs_enabled()) {
+        snprintf(out, out_sz, "/tmp");
+        return 0;
+    }
+
+    const char *reports_path = getenv("BPFREJIT_SHIM_LOADTIME_REPORTS");
+    if (!reports_path || !reports_path[0]) {
+        snprintf(out, out_sz, "/tmp");
+        return 0;
+    }
+
+    char details_dir[320];
+    if (strlen(reports_path) + 1 > sizeof(details_dir)) {
+        snprintf(err, err_sz, "loadtime reports path too long");
+        return -1;
+    }
+    memcpy(details_dir, reports_path, strlen(reports_path) + 1);
+    char *slash = strrchr(details_dir, '/');
+    if (!slash) {
+        snprintf(out, out_sz, "/tmp");
+        return 0;
+    }
+    *slash = 0;
+    slash = strrchr(details_dir, '/');
+    if (!slash) {
+        snprintf(out, out_sz, "/tmp");
+        return 0;
+    }
+    *slash = 0;
+
+    if (loadtime_join_path(out, out_sz, details_dir, "loadtime-workdirs",
+                           err, err_sz) != 0)
+        return -1;
+    if (mkdir_one(out) != 0) {
+        snprintf(err, err_sz,
+                 "failed to create loadtime workdir artifact root errno=%d",
+                 errno);
+        return -1;
+    }
+    return 0;
 }
 
 static int loadtime_bytecode_needs_fd_array(const struct bpf_insn *insns,
@@ -494,50 +592,59 @@ static int loadtime_probe_verifier_log(const union bpf_attr *orig_attr,
         }
     }
 
-    const size_t log_buf_size = 16 * 1024 * 1024;
-    char *log_buf = (char *)malloc(log_buf_size);
-    if (!log_buf) {
-        free_full_fd_array(fd_array, fd_array_n);
-        free(insns);
-        return -1;
-    }
-    memset(log_buf, 0, log_buf_size);
+    long pfd = -1;
+    int saved_errno = 0;
+    size_t log_buf_size = LOADTIME_VERIFIER_LOG_INITIAL_SIZE;
+    for (;;) {
+        char *log_buf = (char *)malloc(log_buf_size);
+        if (!log_buf) {
+            saved_errno = ENOMEM;
+            break;
+        }
+        memset(log_buf, 0, log_buf_size);
 
-    char attr_buf[256] = {0};
-    size_t copy = attr_size < sizeof(attr_buf) ? attr_size : sizeof(attr_buf);
-    memcpy(attr_buf, orig_attr, copy);
-    union bpf_attr *a = (union bpf_attr *)(void *)attr_buf;
-    a->insns = (uintptr_t)insns;
-    a->insn_cnt = insn_cnt;
-    a->log_level = 2;
-    a->log_buf = (uintptr_t)log_buf;
-    a->log_size = (uint32_t)log_buf_size;
-    a->fd_array = 0;
-    if (fd_array) a->fd_array = (uintptr_t)fd_array;
-    if (sizeof(attr_buf) >= 152)
-        memset(attr_buf + 148, 0, 4);
-    a->func_info = 0;
-    a->func_info_cnt = 0;
-    a->func_info_rec_size = 0;
-    a->line_info = 0;
-    a->line_info_cnt = 0;
-    a->line_info_rec_size = 0;
-    a->core_relos = 0;
-    a->core_relo_cnt = 0;
-    a->core_relo_rec_size = 0;
+        char attr_buf[256] = {0};
+        size_t copy = attr_size < sizeof(attr_buf) ? attr_size : sizeof(attr_buf);
+        memcpy(attr_buf, orig_attr, copy);
+        union bpf_attr *a = (union bpf_attr *)(void *)attr_buf;
+        a->insns = (uintptr_t)insns;
+        a->insn_cnt = insn_cnt;
+        a->log_level = 2;
+        a->log_buf = (uintptr_t)log_buf;
+        a->log_size = (uint32_t)log_buf_size;
+        a->fd_array = 0;
+        if (fd_array) a->fd_array = (uintptr_t)fd_array;
+        if (sizeof(attr_buf) >= 152)
+            memset(attr_buf + 148, 0, 4);
+        a->func_info = 0;
+        a->func_info_cnt = 0;
+        a->func_info_rec_size = 0;
+        a->line_info = 0;
+        a->line_info_cnt = 0;
+        a->line_info_rec_size = 0;
+        a->core_relos = 0;
+        a->core_relo_cnt = 0;
+        a->core_relo_rec_size = 0;
 
-    long pfd = real_syscall(SYS_bpf, BPF_PROG_LOAD, attr_buf,
-                            sizeof(attr_buf));
-    int saved_errno = errno;
-    int wfd = open(log_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (wfd >= 0) {
-        (void)!write(wfd, log_buf, strnlen(log_buf, log_buf_size));
-        real_close(wfd);
+        pfd = real_syscall(SYS_bpf, BPF_PROG_LOAD, attr_buf,
+                           sizeof(attr_buf));
+        saved_errno = errno;
+        int wfd = open(log_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        if (wfd >= 0) {
+            (void)!write(wfd, log_buf, strnlen(log_buf, log_buf_size));
+            real_close(wfd);
+        }
+        free(log_buf);
+        if (pfd >= 0 || saved_errno != ENOSPC ||
+            log_buf_size >= LOADTIME_VERIFIER_LOG_MAX_SIZE)
+            break;
+        log_buf_size *= 2;
+        if (log_buf_size > LOADTIME_VERIFIER_LOG_MAX_SIZE)
+            log_buf_size = LOADTIME_VERIFIER_LOG_MAX_SIZE;
     }
     if (pfd >= 0)
         real_close((int)pfd);
     free_full_fd_array(fd_array, fd_array_n);
-    free(log_buf);
     free(insns);
     errno = saved_errno;
     return pfd >= 0 ? 0 : -1;
@@ -556,6 +663,10 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
         snprintf(err, err_sz, "invalid BPF_PROG_LOAD attr for loadtime optimization");
         return -1;
     }
+    const struct bpf_insn *input_insns =
+        (const struct bpf_insn *)(uintptr_t)attr->insns;
+    if (loadtime_contains_libbpf_map_poison(input_insns, attr->insn_cnt))
+        return 0;
 
     char *plan_json = NULL;
     if (loadtime_read_text_file(plan_path, &plan_json) != 0) {
@@ -571,33 +682,50 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
         return -1;
     }
 
-    const char *dir = getenv("BPFREJIT_SHIM_DIR");
-    if (!dir) dir = "/tmp";
+    char workdir_base[320];
+    if (loadtime_select_workdir_base(workdir_base, sizeof(workdir_base),
+                                     err, err_sz) != 0) {
+        free(plan_json);
+        return -1;
+    }
     static uint32_t seq;
     uint32_t my_seq = __sync_fetch_and_add(&seq, 1);
-    char workdir[320];
-    snprintf(workdir, sizeof(workdir), "%s/loadtime_%d_%u", dir, getpid(), my_seq);
+    char workdir_name[64];
+    snprintf(workdir_name, sizeof(workdir_name), "loadtime_%d_%u",
+             getpid(), my_seq);
+    char workdir[360];
+    if (loadtime_join_path(workdir, sizeof(workdir), workdir_base,
+                           workdir_name, err, err_sz) != 0) {
+        free(plan_json);
+        return -1;
+    }
     if (mkdir(workdir, 0755) != 0 && errno != EEXIST) {
-        snprintf(err, err_sz, "failed to create loadtime workdir %s errno=%d",
-                 workdir, errno);
+        snprintf(err, err_sz, "failed to create loadtime workdir errno=%d",
+                 errno);
         free(plan_json);
         return -1;
     }
 
     char cur[360], nxt[360], report[360], target_json[360], map_values_dir[360];
-    snprintf(cur, sizeof(cur), "%s/input.bin", workdir);
-    snprintf(nxt, sizeof(nxt), "%s/output.next.bin", workdir);
-    snprintf(report, sizeof(report), "%s/report.json", workdir);
-    snprintf(map_values_dir, sizeof(map_values_dir), "%s/map-values", workdir);
-    if (loadtime_prepare_target(workdir, target_json, sizeof(target_json)) != 0) {
+    if (loadtime_join_path(cur, sizeof(cur), workdir, "input.bin",
+                           err, err_sz) != 0 ||
+        loadtime_join_path(nxt, sizeof(nxt), workdir, "output.next.bin",
+                           err, err_sz) != 0 ||
+        loadtime_join_path(report, sizeof(report), workdir, "report.json",
+                           err, err_sz) != 0 ||
+        loadtime_join_path(map_values_dir, sizeof(map_values_dir), workdir,
+                           "map-values", err, err_sz) != 0) {
+        free(plan_json);
+        return -1;
+    }
+    if (loadtime_prepare_target(workdir, target_json, sizeof(target_json),
+                                err, err_sz) != 0) {
         snprintf(err, err_sz, "failed to prepare target.json in %s", workdir);
         free(plan_json);
         return -1;
     }
 
     size_t input_bytes = (size_t)attr->insn_cnt * sizeof(struct bpf_insn);
-    const struct bpf_insn *input_insns =
-        (const struct bpf_insn *)(uintptr_t)attr->insns;
     if (loadtime_write_file(cur, input_insns, input_bytes) != 0) {
         snprintf(err, err_sz, "failed to write loadtime input %s errno=%d",
                  cur, errno);
@@ -618,11 +746,19 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
     }
     const char *snapshot_root = getenv("BPFREJIT_SHIM_MAP_SNAPSHOT_ROOT");
     if (snapshot_root && snapshot_root[0]) {
-        if (remap_saved_map_snapshots(map_values_dir, snapshot_root,
-                                      input_insns, attr->insn_cnt,
-                                      attr->prog_type, map_refs, map_ref_n,
-                                      map_ids, map_types, map_n,
-                                      err, err_sz) != 0) {
+        int remap_rc = remap_saved_map_snapshots(map_values_dir, snapshot_root,
+                                                 input_insns, attr->insn_cnt,
+                                                 attr->prog_type, map_refs,
+                                                 map_ref_n, map_ids, map_types,
+                                                 map_n, err, err_sz);
+        if (remap_rc == SHIM_MAP_SNAPSHOT_UNAVAILABLE) {
+            free(map_refs);
+            free(map_ids);
+            free(map_types);
+            free(plan_json);
+            return 0;
+        }
+        if (remap_rc != 0) {
             free(map_refs);
             free(map_ids);
             free(map_types);
@@ -634,9 +770,18 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
     }
 
     char fd_to_id_path[360], canon[360], canon_log[360];
-    snprintf(fd_to_id_path, sizeof(fd_to_id_path), "%s/fd-to-id.json", workdir);
-    snprintf(canon, sizeof(canon), "%s/input.canon.bin", workdir);
-    snprintf(canon_log, sizeof(canon_log), "%s/canonicalize.log", workdir);
+    if (loadtime_join_path(fd_to_id_path, sizeof(fd_to_id_path), workdir,
+                           "fd-to-id.json", err, err_sz) != 0 ||
+        loadtime_join_path(canon, sizeof(canon), workdir, "input.canon.bin",
+                           err, err_sz) != 0 ||
+        loadtime_join_path(canon_log, sizeof(canon_log), workdir,
+                           "canonicalize.log", err, err_sz) != 0) {
+        free(map_refs);
+        free(map_ids);
+        free(map_types);
+        free(plan_json);
+        return -1;
+    }
     if (loadtime_write_fd_to_id_json(fd_to_id_path, map_refs, map_ref_n) != 0) {
         snprintf(err, err_sz, "failed to write loadtime fd-to-id map %s errno=%d",
                  fd_to_id_path, errno);
@@ -675,18 +820,24 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
     char prog_id_str[] = "0";
 
     char verifier_log[360];
-    snprintf(verifier_log, sizeof(verifier_log), "%s/verifier_log_initial.log",
-             workdir);
-    if (loadtime_probe_verifier_log(attr, attr_size, cur, target_json,
-                                    map_ids, map_n, verifier_log) != 0) {
-        snprintf(err, err_sz,
-                 "loadtime initial verifier probe failed errno=%d log=%s",
-                 errno, verifier_log);
+    if (loadtime_join_path(verifier_log, sizeof(verifier_log), workdir,
+                           "verifier_log_initial.log", err, err_sz) != 0) {
         free(map_refs);
         free(map_ids);
         free(map_types);
         free(plan_json);
         return -1;
+    }
+    if (loadtime_probe_verifier_log(attr, attr_size, cur, target_json,
+                                    map_ids, map_n, verifier_log) != 0) {
+        snprintf(err, err_sz,
+                 "loadtime initial verifier probe unavailable errno=%d log=%s; skipping optimization",
+                 errno, verifier_log);
+        free(map_refs);
+        free(map_ids);
+        free(map_types);
+        free(plan_json);
+        return 0;
     }
 
     int step_seq = 0;
@@ -715,17 +866,58 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
             snprintf(cmdbuf, sizeof(cmdbuf), "%s", override_cmd);
         free(so);
 
-        char states_in[360];
-        if (step_seq == 0)
-            snprintf(states_in, sizeof(states_in), "%s/verifier_log_initial.log",
-                     workdir);
-        else
-            snprintf(states_in, sizeof(states_in), "%s/verifier_log_step%d.log",
-                     workdir, step_seq - 1);
-        snprintf(verifier_log, sizeof(verifier_log), "%s/verifier_log_step%d.log",
-                 workdir, step_seq);
-        snprintf(nxt, sizeof(nxt), "%s/output.next.%d.bin", workdir, step_seq);
-        snprintf(report, sizeof(report), "%s/report.%d.json", workdir, step_seq);
+        char states_in[360], step_name_buf[64];
+        if (step_seq == 0) {
+            if (loadtime_join_path(states_in, sizeof(states_in), workdir,
+                                   "verifier_log_initial.log", err, err_sz) != 0) {
+                free(map_refs);
+                free(map_ids);
+                free(map_types);
+                free(plan_json);
+                return -1;
+            }
+        } else {
+            snprintf(step_name_buf, sizeof(step_name_buf),
+                     "verifier_log_step%d.log", step_seq - 1);
+            if (loadtime_join_path(states_in, sizeof(states_in), workdir,
+                                   step_name_buf, err, err_sz) != 0) {
+                free(map_refs);
+                free(map_ids);
+                free(map_types);
+                free(plan_json);
+                return -1;
+            }
+        }
+        snprintf(step_name_buf, sizeof(step_name_buf),
+                 "verifier_log_step%d.log", step_seq);
+        if (loadtime_join_path(verifier_log, sizeof(verifier_log), workdir,
+                               step_name_buf, err, err_sz) != 0) {
+            free(map_refs);
+            free(map_ids);
+            free(map_types);
+            free(plan_json);
+            return -1;
+        }
+        snprintf(step_name_buf, sizeof(step_name_buf),
+                 "output.next.%d.bin", step_seq);
+        if (loadtime_join_path(nxt, sizeof(nxt), workdir, step_name_buf,
+                               err, err_sz) != 0) {
+            free(map_refs);
+            free(map_ids);
+            free(map_types);
+            free(plan_json);
+            return -1;
+        }
+        snprintf(step_name_buf, sizeof(step_name_buf),
+                 "report.%d.json", step_seq);
+        if (loadtime_join_path(report, sizeof(report), workdir, step_name_buf,
+                               err, err_sz) != 0) {
+            free(map_refs);
+            free(map_ids);
+            free(map_types);
+            free(plan_json);
+            return -1;
+        }
         unlink(nxt);
         unlink(report);
 
@@ -739,7 +931,15 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
         char resolved[4200];
         loadtime_substitute_vars(resolved, sizeof(resolved), cmdbuf, vars, 10);
         char step_log[360];
-        snprintf(step_log, sizeof(step_log), "%s/step%d.log", workdir, step_seq);
+        snprintf(step_name_buf, sizeof(step_name_buf), "step%d.log", step_seq);
+        if (loadtime_join_path(step_log, sizeof(step_log), workdir,
+                               step_name_buf, err, err_sz) != 0) {
+            free(map_refs);
+            free(map_ids);
+            free(map_types);
+            free(plan_json);
+            return -1;
+        }
         uint64_t elapsed_ms = 0;
         if (loadtime_run_shell(resolved, step_log, &elapsed_ms) != 0) {
             snprintf(err, err_sz, "loadtime bpfopt step %s failed; log=%s",
@@ -750,6 +950,37 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
             free(plan_json);
             return -1;
         }
+        struct stat nst;
+        if (stat(nxt, &nst) != 0 || nst.st_size == 0) {
+            if (loadtime_append_step_report(prog_name, prog_type_name,
+                                            name[0] ? name : "<unnamed>",
+                                            step_seq, elapsed_ms, workdir,
+                                            report) != 0) {
+                snprintf(err, err_sz,
+                         "failed to append loadtime report %s errno=%d",
+                         getenv("BPFREJIT_SHIM_LOADTIME_REPORTS") ?
+                             getenv("BPFREJIT_SHIM_LOADTIME_REPORTS") : "",
+                         errno);
+                free(map_refs);
+                free(map_ids);
+                free(map_types);
+                free(plan_json);
+                return -1;
+            }
+            step_seq++;
+            continue;
+        }
+        if (loadtime_probe_verifier_log(attr, attr_size, nxt, target_json,
+                                        map_ids, map_n, verifier_log) != 0) {
+            snprintf(err, err_sz,
+                     "loadtime verifier probe unavailable after step %s errno=%d log=%s; skipping optimization",
+                     name[0] ? name : "<unnamed>", errno, verifier_log);
+            free(map_refs);
+            free(map_ids);
+            free(map_types);
+            free(plan_json);
+            return 0;
+        }
         if (loadtime_append_step_report(prog_name, prog_type_name,
                                         name[0] ? name : "<unnamed>",
                                         step_seq, elapsed_ms, workdir,
@@ -758,22 +989,6 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
                      getenv("BPFREJIT_SHIM_LOADTIME_REPORTS") ?
                          getenv("BPFREJIT_SHIM_LOADTIME_REPORTS") : "",
                      errno);
-            free(map_refs);
-            free(map_ids);
-            free(map_types);
-            free(plan_json);
-            return -1;
-        }
-        struct stat nst;
-        if (stat(nxt, &nst) != 0 || nst.st_size == 0) {
-            step_seq++;
-            continue;
-        }
-        if (loadtime_probe_verifier_log(attr, attr_size, nxt, target_json,
-                                        map_ids, map_n, verifier_log) != 0) {
-            snprintf(err, err_sz,
-                     "loadtime verifier probe failed after step %s errno=%d log=%s",
-                     name[0] ? name : "<unnamed>", errno, verifier_log);
             free(map_refs);
             free(map_ids);
             free(map_types);

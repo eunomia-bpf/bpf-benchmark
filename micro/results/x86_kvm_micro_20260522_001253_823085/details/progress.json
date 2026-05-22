@@ -1,0 +1,20 @@
+{
+  "completed_benchmarks": 7,
+  "current_benchmark": "map_lru_hash_counter",
+  "current_benchmark_index": 8,
+  "current_benchmark_record": {
+    "expected_result": 1,
+    "expected_retval": 2,
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+    "io_mode": "packet",
+    "name": "map_lru_hash_counter",
+    "runs": [],
+    "tags": [
+      "stage2",
+      "maps",
+      "lru_hash"
+    ]
+  },
+  "status": "running",
+  "total_benchmarks": 13
+}

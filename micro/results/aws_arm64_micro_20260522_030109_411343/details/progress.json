@@ -1,0 +1,20 @@
+{
+  "completed_benchmarks": 0,
+  "current_benchmark": "helper_only_uid_gid",
+  "current_benchmark_index": 1,
+  "current_benchmark_record": {
+    "expected_result": 0,
+    "expected_retval": 2,
+    "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+    "io_mode": "packet",
+    "name": "helper_only_uid_gid",
+    "runs": [],
+    "tags": [
+      "stage2",
+      "helpers",
+      "identity"
+    ]
+  },
+  "status": "running",
+  "total_benchmarks": 13
+}

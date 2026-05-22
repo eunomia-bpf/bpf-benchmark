@@ -1,0 +1,9 @@
+{
+  "completed_benchmarks": 13,
+  "current_benchmark": null,
+  "current_benchmark_index": null,
+  "current_benchmark_record": null,
+  "error_message": "multi_map_policy: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec run-native-kernel --program /artifacts/user/stage2-programs/x86_64/multi_map_policy.bpf.o --native-program /artifacts/user/stage2-programs/x86_64/multi_map_policy.native.o --program-name multi_map_policy --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem --io-mode packet --input-size 64 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260521_234140_046144/details/jit_dumps/multi_map_policy__native_kernel__sample00.jited.bin\ncompanion JIT oracle could not align xlated BPF calls with native calls; stats_mixed_helpers: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec run-native-kernel --program /artifacts/user/stage2-programs/x86_64/stats_mixed_helpers.bpf.o --native-program /artifacts/user/stage2-programs/x86_64/stats_mixed_helpers.native.o --program-name stats_mixed_helpers --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem --io-mode packet --input-size 64 --inner-repeat 10 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260521_234140_046144/details/jit_dumps/stats_mixed_helpers__native_kernel__sample00.jited.bin\ncompanion JIT oracle could not align xlated BPF calls with native calls",
+  "status": "error",
+  "total_benchmarks": 13
+}

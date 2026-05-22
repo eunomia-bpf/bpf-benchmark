@@ -7,6 +7,8 @@
 
 /* --- snapshot helpers (MAP_IDS / MAP_VALUES / canonicalize / VERIFIER_STATES) --- */
 
+#define SHIM_MAP_SNAPSHOT_UNAVAILABLE (-2)
+
 /* Map types that can produce useful bpftool JSON snapshots for map_inline. */
 static int map_type_needs_dump(uint32_t t) {
     return t == BPF_MAP_TYPE_HASH || t == BPF_MAP_TYPE_ARRAY ||
@@ -692,7 +694,7 @@ static int find_snapshot_values_dir(char *out, size_t out_sz,
             snprintf(err, err_sz,
                      "ambiguous prior map snapshot for prog_type=%u pc=%u map=%s",
                      prog_type, ref->pc, ref->name);
-            return -1;
+            return SHIM_MAP_SNAPSHOT_UNAVAILABLE;
         }
         snprintf(out, out_sz, "%s/%s/map-values", snapshot_root, de->d_name);
         found = 1;
@@ -702,7 +704,7 @@ static int find_snapshot_values_dir(char *out, size_t out_sz,
         snprintf(err, err_sz,
                  "missing prior map snapshot for prog=%016llx pc=%u map=%s",
                  (unsigned long long)prog_hash, ref->pc, ref->name);
-        return -1;
+        return SHIM_MAP_SNAPSHOT_UNAVAILABLE;
     }
     return 0;
 }
@@ -755,19 +757,20 @@ static int remap_saved_map_snapshots(const char *map_values_dir,
             snprintf(err, err_sz,
                      "prior-run snapshot remap does not support map-in-map id %u",
                      kernel_ids[i]);
-            return -1;
+            return SHIM_MAP_SNAPSHOT_UNAVAILABLE;
         }
         char src_values[820], src_dump[900], dst_dump[512];
-        if (find_snapshot_values_dir(src_values, sizeof(src_values),
-                                     snapshot_root, prog_hash, prog_type, ref,
-                                     err, err_sz) != 0)
-            return -1;
+        int find_rc = find_snapshot_values_dir(src_values, sizeof(src_values),
+                                               snapshot_root, prog_hash,
+                                               prog_type, ref, err, err_sz);
+        if (find_rc != 0)
+            return find_rc;
         if (find_single_snapshot_file(src_values, ".dump.json", src_dump,
                                       sizeof(src_dump)) != 0) {
             snprintf(err, err_sz,
                      "missing prior map snapshot for prog=%016llx pc=%u map=%s",
                      (unsigned long long)prog_hash, ref->pc, ref->name);
-            return -1;
+            return SHIM_MAP_SNAPSHOT_UNAVAILABLE;
         }
         snprintf(dst_dump, sizeof(dst_dump), "%s/map-%u.dump.json",
                  map_values_dir, kernel_ids[i]);

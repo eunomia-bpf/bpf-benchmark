@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -85,20 +86,24 @@ constexpr const char *kVmlinuxBtfPath = "/sys/kernel/btf/vmlinux";
 constexpr const char *kDebugfsDir = "/sys/kernel/debug";
 constexpr uint32_t kMaxBlobs = 64;
 
-/* Stage 2: BPF helpers whose addresses we resolve from /proc/kallsyms
- * and pass to native-link. This is the smallest set our POC test
- * programs need; expand as new helpers show up in new tests. */
-constexpr const char *kSupportedHelpers[] = {
-    "bpf_ktime_get_ns",
-    "bpf_ktime_get_boot_ns",
-    "bpf_get_current_pid_tgid",
-    "bpf_get_current_uid_gid",
-    "bpf_get_smp_processor_id",
-    "bpf_get_prandom_u32",
-    "bpf_probe_read_kernel",
-    "bpf_map_lookup_elem",
-    "bpf_map_update_elem",
-    "bpf_map_delete_elem",
+/* Stage 2 helpers that native-link can lower. Helper addresses come from
+ * the companion program's kernel JIT image, not from /proc/kallsyms. */
+struct SupportedHelper {
+    int id;
+    const char *symbol;
+};
+
+constexpr SupportedHelper kSupportedHelpers[] = {
+    {BPF_FUNC_ktime_get_ns, "bpf_ktime_get_ns"},
+    {BPF_FUNC_ktime_get_boot_ns, "bpf_ktime_get_boot_ns"},
+    {BPF_FUNC_get_current_pid_tgid, "bpf_get_current_pid_tgid"},
+    {BPF_FUNC_get_current_uid_gid, "bpf_get_current_uid_gid"},
+    {BPF_FUNC_get_smp_processor_id, "bpf_get_smp_processor_id"},
+    {BPF_FUNC_get_prandom_u32, "bpf_get_prandom_u32"},
+    {BPF_FUNC_probe_read_kernel, "bpf_probe_read_kernel"},
+    {BPF_FUNC_map_lookup_elem, "bpf_map_lookup_elem"},
+    {BPF_FUNC_map_update_elem, "bpf_map_update_elem"},
+    {BPF_FUNC_map_delete_elem, "bpf_map_delete_elem"},
 };
 
 constexpr const char *kX86CpuNumberHelperKey = "__native_x86_cpu_number";
@@ -1012,6 +1017,238 @@ uint32_t roundup_pow2_mask(uint32_t max_entries)
     return static_cast<uint32_t>(v);
 }
 
+const char *helper_symbol_for_id(int helper_id)
+{
+    for (const auto &helper : kSupportedHelpers) {
+        if (helper.id == helper_id) {
+            return helper.symbol;
+        }
+    }
+    return nullptr;
+}
+
+bool helper_jit_inlines_without_external_call(int helper_id)
+{
+    switch (helper_id) {
+    case BPF_FUNC_get_smp_processor_id:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool target_is_inside_jit_image(uint64_t target, uint64_t base, size_t len)
+{
+    const uint64_t end = base + static_cast<uint64_t>(len);
+    return target >= base && target < end;
+}
+
+uint64_t add_signed_u64(uint64_t base, int64_t delta)
+{
+    if (delta >= 0) {
+        return base + static_cast<uint64_t>(delta);
+    }
+    return base - static_cast<uint64_t>(-delta);
+}
+
+int64_t sign_extend_u64(uint64_t value, unsigned bits)
+{
+    const uint64_t sign = 1ull << (bits - 1);
+    const uint64_t mask = (1ull << bits) - 1;
+    value &= mask;
+    return static_cast<int64_t>((value ^ sign) - sign);
+}
+
+std::vector<uint64_t> load_jited_ksyms(int program_fd, uint32_t count)
+{
+    if (count == 0) {
+        fail("kernel did not report a JIT image base symbol");
+    }
+    std::vector<uint64_t> ksyms(count);
+    bpf_prog_info info = {};
+    info.nr_jited_ksyms = count;
+    info.jited_ksyms = ptr_to_u64(ksyms.data());
+    __u32 info_len = sizeof(info);
+    const int err = bpf_obj_get_info_by_fd(program_fd, &info, &info_len);
+    if (err != 0) {
+        fail("bpf_obj_get_info_by_fd (JIT ksyms) failed: " + libbpf_error_string(err));
+    }
+    ksyms.resize(info.nr_jited_ksyms);
+    if (ksyms.empty() || ksyms[0] == 0) {
+        fail("kernel returned an empty JIT ksym table");
+    }
+    return ksyms;
+}
+
+std::vector<int32_t> collect_xlated_call_imms(const std::vector<uint8_t> &xlated)
+{
+    if (xlated.size() % sizeof(bpf_insn) != 0) {
+        fail("kernel returned a truncated xlated BPF image");
+    }
+    std::vector<int32_t> calls;
+    const auto *insns = reinterpret_cast<const bpf_insn *>(xlated.data());
+    const size_t cnt = xlated.size() / sizeof(bpf_insn);
+    for (size_t i = 0; i < cnt; i++) {
+        const bpf_insn &in = insns[i];
+        if (in.code != (BPF_JMP | BPF_CALL)) {
+            continue;
+        }
+        if (in.src_reg == BPF_PSEUDO_CALL ||
+            in.src_reg == BPF_PSEUDO_KFUNC_CALL ||
+            in.src_reg == BPF_PSEUDO_KINSN_CALL) {
+            continue;
+        }
+        if (helper_jit_inlines_without_external_call(in.imm)) {
+            continue;
+        }
+        calls.push_back(static_cast<int32_t>(in.imm));
+    }
+    return calls;
+}
+
+std::vector<uint64_t> decode_x86_external_call_targets(
+    const std::vector<uint8_t> &jited,
+    uint64_t jit_base)
+{
+    std::vector<uint64_t> targets;
+    for (size_t i = 0; i + 5 <= jited.size(); i++) {
+        if (jited[i] != 0xe8) {
+            continue;
+        }
+        int32_t disp = 0;
+        std::memcpy(&disp, jited.data() + i + 1, sizeof(disp));
+        const uint64_t next_ip = jit_base + static_cast<uint64_t>(i) + 5;
+        const uint64_t target = add_signed_u64(next_ip, disp);
+        if (!target_is_inside_jit_image(target, jit_base, jited.size())) {
+            targets.push_back(target);
+        }
+    }
+    return targets;
+}
+
+uint32_t read_le32(const uint8_t *p)
+{
+    uint32_t value = 0;
+    std::memcpy(&value, p, sizeof(value));
+    return value;
+}
+
+struct Arm64RegValue {
+    bool valid = false;
+    uint64_t value = 0;
+};
+
+bool arm64_decode_mov_wide(uint32_t word, unsigned &rd, uint64_t &value,
+                           bool &is_movk)
+{
+    const uint32_t kind = word & 0xff800000u;
+    if (kind != 0x92800000u && kind != 0xd2800000u && kind != 0xf2800000u) {
+        return false;
+    }
+    rd = word & 0x1fu;
+    const unsigned hw = (word >> 21) & 0x3u;
+    const unsigned shift = hw * 16u;
+    const uint64_t imm = (word >> 5) & 0xffffu;
+    is_movk = kind == 0xf2800000u;
+    if (kind == 0x92800000u) {
+        value = ~(imm << shift);
+    } else {
+        value = imm << shift;
+    }
+    return true;
+}
+
+std::vector<uint64_t> decode_arm64_external_call_targets(
+    const std::vector<uint8_t> &jited,
+    uint64_t jit_base)
+{
+    std::vector<uint64_t> targets;
+    Arm64RegValue regs[32];
+    for (size_t off = 0; off + 4 <= jited.size(); off += 4) {
+        const uint32_t word = read_le32(jited.data() + off);
+        unsigned rd = 0;
+        uint64_t mov_value = 0;
+        bool is_movk = false;
+        if (arm64_decode_mov_wide(word, rd, mov_value, is_movk)) {
+            const unsigned hw = (word >> 21) & 0x3u;
+            const unsigned shift = hw * 16u;
+            if (is_movk) {
+                if (regs[rd].valid) {
+                    const uint64_t mask = 0xffffull << shift;
+                    regs[rd].value = (regs[rd].value & ~mask) | mov_value;
+                }
+            } else {
+                regs[rd].valid = true;
+                regs[rd].value = mov_value;
+            }
+            continue;
+        }
+
+        if ((word & 0xfc000000u) == 0x94000000u) {
+            const int64_t disp = sign_extend_u64(word & 0x03ffffffu, 26) << 2;
+            const uint64_t pc = jit_base + static_cast<uint64_t>(off);
+            const uint64_t target = add_signed_u64(pc, disp);
+            if (!target_is_inside_jit_image(target, jit_base, jited.size())) {
+                targets.push_back(target);
+            }
+            continue;
+        }
+
+        if ((word & 0xfffffc1fu) == 0xd63f0000u) {
+            const unsigned rn = (word >> 5) & 0x1fu;
+            if (regs[rn].valid &&
+                !target_is_inside_jit_image(regs[rn].value, jit_base, jited.size())) {
+                targets.push_back(regs[rn].value);
+            }
+            regs[rn].valid = false;
+        }
+    }
+    return targets;
+}
+
+std::vector<uint64_t> decode_external_call_targets(
+    const std::vector<uint8_t> &jited,
+    uint64_t jit_base)
+{
+#if defined(__aarch64__)
+    return decode_arm64_external_call_targets(jited, jit_base);
+#else
+    return decode_x86_external_call_targets(jited, jit_base);
+#endif
+}
+
+std::vector<uint64_t> match_jit_targets_to_xlated_calls(
+    const std::vector<uint64_t> &jit_targets,
+    const std::vector<int32_t> &xlated_call_imms)
+{
+    if (xlated_call_imms.empty()) {
+        return {};
+    }
+    if (jit_targets.size() < xlated_call_imms.size()) {
+        fail("companion JIT oracle found fewer native calls than xlated BPF calls");
+    }
+
+    for (size_t start = 0; start + xlated_call_imms.size() <= jit_targets.size(); start++) {
+        const uint64_t call_base =
+            add_signed_u64(jit_targets[start], -static_cast<int64_t>(xlated_call_imms[0]));
+        bool ok = true;
+        for (size_t i = 1; i < xlated_call_imms.size(); i++) {
+            const uint64_t expected =
+                add_signed_u64(call_base, static_cast<int64_t>(xlated_call_imms[i]));
+            if (jit_targets[start + i] != expected) {
+                ok = false;
+                break;
+            }
+        }
+        if (ok) {
+            return std::vector<uint64_t>(
+                jit_targets.begin() + static_cast<std::ptrdiff_t>(start),
+                jit_targets.begin() + static_cast<std::ptrdiff_t>(start + xlated_call_imms.size()));
+        }
+    }
+    fail("companion JIT oracle could not align xlated BPF calls with native calls");
+}
+
 /* Spawn the native-link binary with the supplied argv. Returns
  * subprocess exit code. */
 int run_subprocess(const std::vector<std::string> &argv)
@@ -1100,6 +1337,7 @@ struct CompanionLoad {
     uint64_t object_load_ns = 0;
     uint64_t map_ptr_extract_ns = 0;
     uint64_t lookup_spec_ns = 0;
+    std::unordered_map<std::string, uint64_t> helper_addrs;
     std::unordered_map<std::string, uint64_t> map_addrs;
     /* Per-call-site spec for every `bpf_map_lookup_elem` invocation in
      * the entry program, listed in BPF-source order. Each entry is a
@@ -1131,6 +1369,7 @@ struct CompanionLoad {
     std::vector<LookupSite> lookup_sites;
     struct UpdateSite {
         enum class Kind { Call, Array, PerCpuArray } kind;
+        uint64_t target_addr;
         uint32_t max_entries;
         uint32_t elem_size;
         uint32_t value_size;
@@ -1140,13 +1379,14 @@ struct CompanionLoad {
     std::vector<UpdateSite> update_sites;
 };
 
-/* Walk a BPF program's original (pre-verifier) bytecode and identify,
- * for each `BPF_CALL bpf_map_lookup_elem`, which map fd is currently
- * bound to r1 (the map argument). Returns -1 in the slot when the
- * binding is ambiguous (dynamic / spilled / unrecognized pattern); the
- * caller treats that as "kernel BPF JIT couldn't inline either, so
- * fall back to the plain bpf_map_lookup_elem helper" -- which is what
- * the kernel does too.
+struct SourceHelperCall {
+    int helper_id;
+    int map_fd;
+};
+
+/* Walk a BPF program's original (pre-verifier) bytecode and identify every
+ * helper call in source order, plus the map fd currently bound to r1 when the
+ * call occurs. map_fd is -1 when the binding is ambiguous.
  *
  * Tracking is intentionally minimal:
  *   - LD_IMM64 with src_reg=BPF_PSEUDO_MAP_FD binds dst_reg -> imm (map fd).
@@ -1157,11 +1397,11 @@ struct CompanionLoad {
  * pattern clang emits at -O2 for the test programs and most real
  * BPF code. Anything fancier (spill/reload via stack, conditional
  * map selection) falls through to fd=-1 -> no inline. */
-std::vector<int> walk_map_helper_call_maps(const struct bpf_insn *insns,
-                                           size_t cnt,
-                                           int helper_id)
+std::vector<SourceHelperCall> collect_source_helper_calls(
+    const struct bpf_insn *insns,
+    size_t cnt)
 {
-    std::vector<int> sites;
+    std::vector<SourceHelperCall> sites;
     int reg_map_fd[11];
     for (int i = 0; i < 11; i++) reg_map_fd[i] = -1;
     for (size_t i = 0; i < cnt; i++) {
@@ -1184,9 +1424,17 @@ std::vector<int> walk_map_helper_call_maps(const struct bpf_insn *insns,
             continue;
         }
         if (code == (BPF_JMP | BPF_CALL)) {
-            if (in.imm == helper_id) {
-                sites.push_back(reg_map_fd[1]);
+            if (in.src_reg == BPF_PSEUDO_CALL ||
+                in.src_reg == BPF_PSEUDO_KFUNC_CALL ||
+                in.src_reg == BPF_PSEUDO_KINSN_CALL) {
+                for (int r = 0; r <= 5; r++) reg_map_fd[r] = -1;
+                continue;
             }
+            if (in.src_reg != 0) {
+                fail("native_kernel: unsupported non-helper BPF call src_reg="
+                     + std::to_string(static_cast<unsigned>(in.src_reg)));
+            }
+            sites.push_back(SourceHelperCall{in.imm, reg_map_fd[1]});
             for (int r = 0; r <= 5; r++) reg_map_fd[r] = -1;
             continue;
         }
@@ -1199,6 +1447,19 @@ std::vector<int> walk_map_helper_call_maps(const struct bpf_insn *insns,
         }
     }
     return sites;
+}
+
+std::vector<int> walk_map_helper_call_maps(const struct bpf_insn *insns,
+                                           size_t cnt,
+                                           int helper_id)
+{
+    std::vector<int> maps;
+    for (const auto &site : collect_source_helper_calls(insns, cnt)) {
+        if (site.helper_id == helper_id) {
+            maps.push_back(site.map_fd);
+        }
+    }
+    return maps;
 }
 
 CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
@@ -1511,7 +1772,8 @@ NativeLinkArgs build_native_link_args(
     NativeLinkArgs out{};
     out.linker = native_link_binary(options);
 
-    for (const char *h : kSupportedHelpers) {
+    for (const auto &helper : kSupportedHelpers) {
+        const char *h = helper.symbol;
         uint64_t addr = kallsyms_lookup(h);
         if (addr != 0) {
             out.helpers.push_back(format_name_hex(h, addr));
