@@ -5,9 +5,10 @@ import argparse
 import json
 import os
 import signal
+import shutil
 import sys
 import time
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Mapping, Sequence
@@ -36,8 +37,10 @@ from runner.libs.rejit import (
     benchmark_run_provenance,
     measure_app_phase,
     snapshot_app_maps,
+    skip_rejit_disables_shim,
     skip_rejit_enabled,
 )
+from runner.libs.workload import WorkloadResult, run_named_workload
 from runner.libs.run_artifacts import (
     ArtifactSession,
     current_process_identity,
@@ -64,6 +67,10 @@ _CORPUS_REJIT_TIMEOUT_ENV = "BPFREJIT_CORPUS_REJIT_TIMEOUT"
 _DEFAULT_CORPUS_APP_TIMEOUT_S = 1800.0
 _DEFAULT_CORPUS_REJIT_TIMEOUT_S = 900.0
 _TIMEOUT_STACK: list[tuple[float, str, float]] = []
+
+
+class _AppLifecycleComplete(Exception):
+    pass
 
 
 def _filter_suite_apps(suite: AppSuite) -> AppSuite:
@@ -122,6 +129,17 @@ def _env_float(name: str, default: float) -> float:
     return default if not raw else float(raw)
 
 
+def _env_bool(name: str, default: bool = False) -> bool:
+    raw = _env_str(name).lower()
+    if not raw:
+        return bool(default)
+    if raw in ("1", "true", "yes", "on"):
+        return True
+    if raw in ("0", "false", "no", "off"):
+        return False
+    raise SystemExit(f"{name} must be boolean: empty, 0/1, false/true, no/yes, or off/on")
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Build the driver Namespace entirely from Make-provided env vars."""
     del argv
@@ -163,6 +181,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         rejit_timeout_s=_env_float(_CORPUS_REJIT_TIMEOUT_ENV, _DEFAULT_CORPUS_REJIT_TIMEOUT_S),
         skip_rejit=_skip_rejit_enabled(),
         keep_failure_artifacts=_keep_workdirs_enabled(),
+        workload_only=_env_bool("BPFREJIT_CORPUS_WORKLOAD_ONLY"),
+        collect_bpf_stats=_env_bool("BPFREJIT_CORPUS_BPF_STATS", True),
     )
     if ns.samples < 0:
         raise SystemExit("SAMPLES must be >= 0")
@@ -174,6 +194,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         raise SystemExit(f"{_CORPUS_APP_TIMEOUT_ENV} must be >= 0")
     if ns.rejit_timeout_s < 0:
         raise SystemExit(f"{_CORPUS_REJIT_TIMEOUT_ENV} must be >= 0")
+    if not ns.collect_bpf_stats and not ns.workload_only and not skip_rejit_disables_shim():
+        raise SystemExit(
+            "BPFREJIT_CORPUS_BPF_STATS=0 requires BPFREJIT_CORPUS_WORKLOAD_ONLY=1 "
+            "or SKIP_REJIT=all"
+        )
     return ns
 
 def _print_progress(event: str, **fields: object) -> None:
@@ -441,6 +466,37 @@ def _shim_log_path(
     return log_dir / f"{_sanitize_app_filename(app.name)}.{phase}.log"
 
 
+def _run_workload_without_ebpf_app(app: AppSpec, seconds: float) -> WorkloadResult:
+    workload_name = _app_workload_name(app)
+    if app.runner == "cilium":
+        from runner.libs.app_runners.cilium import run_cilium_workload_without_app
+
+        return run_cilium_workload_without_app(workload_name, seconds)
+    if app.runner == "katran":
+        from runner.libs.app_runners.katran import run_katran_workload_without_app
+
+        return run_katran_workload_without_app(workload_name, seconds)
+    return run_named_workload(workload_name, seconds)
+
+
+def _measure_workload_without_ebpf_app(
+    app: AppSpec,
+    *,
+    workload_seconds: float,
+    samples: int,
+    warmups: int,
+) -> dict[str, object]:
+    for _ in range(max(0, int(warmups))):
+        _run_workload_without_ebpf_app(app, workload_seconds)
+    return {
+        "workloads": [
+            _run_workload_without_ebpf_app(app, workload_seconds).to_dict()
+            for _ in range(samples)
+        ],
+        "bpf": {},
+    }
+
+
 def _write_incremental_app_result(
     run_dir: Path,
     app_name: str,
@@ -491,6 +547,8 @@ def run_suite(
     samples = _sample_count(args)
     warmups = max(0, int(getattr(args, "warmups", 1) or 0))
     skip_rejit = bool(getattr(args, "skip_rejit", False))
+    workload_only = bool(getattr(args, "workload_only", False))
+    collect_bpf_stats = bool(getattr(args, "collect_bpf_stats", True))
     results_by_name: dict[str, dict[str, object]] = {}
     completed_apps: set[str] = set()
     total_apps = len(suite.apps)
@@ -501,8 +559,9 @@ def run_suite(
     # kinsnprober; that probe needs the modules already resident, otherwise
     # rotate/cond_select/endian_fusion/lea pass-emitted kfunc calls land on
     # btf_ids the kernel can't resolve (EACCES / EINVAL during PROG_LOAD).
-    kinsn_module_metadata = prepare_kinsn_modules()
-    with enable_bpf_stats():
+    kinsn_module_metadata = {} if workload_only else prepare_kinsn_modules()
+    stats_context = enable_bpf_stats() if collect_bpf_stats else nullcontext({"mode": "disabled"})
+    with stats_context:
         for app in suite.apps:
             _print_progress("app_start", app=app.name, runner=app.runner, workload=app.workload_for("corpus"))
             runner: AppRunner | None = None
@@ -512,6 +571,39 @@ def run_suite(
             try:
                 with _timeout_scope(float(getattr(args, "app_timeout_s", 0.0) or 0.0),
                                     f"{app.name} app lifecycle"):
+                    if workload_only:
+                        workload_name = _app_workload_name(app)
+                        lifecycle = LifecycleRunResult(
+                            baseline=None,
+                            rejit_result={"status": "skipped", "mode": "workload_only"},
+                            post_rejit=None,
+                            artifacts={},
+                        )
+                        phase = "workload_only"
+                        _print_progress(
+                            "measurement_start",
+                            app=app.name,
+                            runner=app.runner,
+                            phase=phase,
+                            workload=workload_name,
+                            samples=samples,
+                        )
+                        lifecycle.baseline = _measure_workload_without_ebpf_app(
+                            app,
+                            workload_seconds=workload_seconds,
+                            samples=samples,
+                            warmups=warmups,
+                        )
+                        _print_progress(
+                            "measurement_done",
+                            app=app.name,
+                            runner=app.runner,
+                            phase=phase,
+                            status="ok",
+                        )
+                        wait_for_suite_quiescence()
+                        raise _AppLifecycleComplete
+
                     runner = get_app_runner(app.runner, workload=app.workload_for("corpus"), **app.args)
                     with _temporary_env({
                         "BPFREJIT_SHIM_LOADTIME_PLAN": "",
@@ -567,7 +659,7 @@ def run_suite(
                             app=app.name,
                             runner=app.runner,
                         )
-                        snapshot_result = snapshot_app_maps(
+                        snapshot_app_maps(
                             app_pids=app_pids,
                             output_dir=baseline_map_snapshot_path,
                         )
@@ -624,7 +716,6 @@ def run_suite(
                             lifecycle.rejit_result["map_snapshot_path"] = str(
                                 baseline_map_snapshot_path
                             )
-                            lifecycle.rejit_result["map_snapshot"] = snapshot_result
                         _print_progress(
                             "loadtime_plan_done",
                             app=app.name,
@@ -671,6 +762,8 @@ def run_suite(
                         wait_for_suite_quiescence()
                     except Exception as stop_exc:
                         raise RuntimeError(f"post app stop failed: {stop_exc}") from stop_exc
+            except _AppLifecycleComplete:
+                pass
             except Exception as exc:
                 error_message = str(exc)
                 if lifecycle is None:
@@ -757,6 +850,8 @@ def run_suite(
         "samples": samples,
         "warmups": warmups,
         "skip_rejit": skip_rejit,
+        "workload_only": workload_only,
+        "bpf_stats": collect_bpf_stats,
         "workload_seconds": workload_seconds,
         "kinsn_modules": kinsn_metadata,
         "status": "error" if any_app_failed else "ok",
@@ -776,6 +871,8 @@ def build_run_metadata(
         "manifest": str(Path(args.suite).resolve()),
         "samples": int(resolved_samples),
         "workload_seconds": float(resolved_workload_seconds),
+        "workload_only": bool(getattr(args, "workload_only", False)),
+        "bpf_stats": bool(getattr(args, "collect_bpf_stats", True)),
     }
     metadata.update(benchmark_run_provenance())
     metadata.update(current_process_identity())
@@ -831,7 +928,10 @@ def _setup_runtime_env(args: argparse.Namespace) -> Path:
     import shutil
     if inside_runtime_image() and shutil.which("ip", path=env["PATH"]) is not None:
         run_checked(["ip", "link", "set", "lo", "up"], cwd=workspace, env=env, die=_setup_die)
-    ensure_bpf_stats_enabled(workspace, _setup_die)
+    if bool(getattr(args, "collect_bpf_stats", True)):
+        ensure_bpf_stats_enabled(workspace, _setup_die)
+    else:
+        _disable_bpf_stats(workspace)
     runtime_env, _ = env_with_suite_runtime_ld(workspace, args.target_arch, env)
     ensure_katran_artifacts(workspace, args.target_arch, args.native_repos, _setup_die)
     # Apply runtime env to current process (PATH, LD_LIBRARY_PATH, BPFREJIT_*, etc.)
@@ -840,6 +940,27 @@ def _setup_runtime_env(args: argparse.Namespace) -> Path:
         args.output_json = str(workspace / "corpus" / "results" / f"{args.target_name}_corpus.json")
     args.output_json = str(resolve_workspace_path(workspace, args.output_json))
     return workspace
+
+
+def _disable_bpf_stats(workspace: Path) -> None:
+    sysctl_bin = shutil.which("sysctl")
+    if sysctl_bin:
+        run_checked(
+            [sysctl_bin, "-q", "-w", "kernel.bpf_stats_enabled=0"],
+            cwd=workspace,
+            env={"PATH": os.environ.get("PATH", "") or "/usr/sbin:/usr/bin:/sbin:/bin"},
+            die=_setup_die,
+        )
+    else:
+        run_checked(
+            ["sh", "-c", "printf '0\\n' > /proc/sys/kernel/bpf_stats_enabled"],
+            cwd=workspace,
+            env=os.environ.copy(),
+            die=_setup_die,
+        )
+    stats_path = Path("/proc/sys/kernel/bpf_stats_enabled")
+    if stats_path.read_text(encoding="utf-8").strip() != "0":
+        _setup_die("failed to disable kernel.bpf_stats_enabled=0")
 
 
 def _setup_die(message: str) -> None:

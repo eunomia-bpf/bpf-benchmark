@@ -91,6 +91,7 @@ def build_runtime_container_command(
         "--pid=host", "--network=host", "--ipc=host", "--cgroupns=host",
         "-e", "BPFREJIT_INSIDE_RUNTIME_CONTAINER=1",
         "-e", "HOME=/root",
+        "-e", "PYTHONUNBUFFERED=1",
         "-w", str(image_workspace),
     ]
     # Forward every host env var (minus container-managed ones) so in-container

@@ -419,7 +419,11 @@ def run_bench(
     build_only: bool = False,
 ) -> Result:
     direct_count = direct_counts.get(bench.name)
-    direct_note = "" if build_only or direct_count is not None else f"missing direct xlated.bin in {config.name} micro result"
+    direct_note = (
+        ""
+        if build_only or not direct_counts or direct_count is not None
+        else f"missing direct xlated.bin in {config.name} micro result"
+    )
     compile_result, compile_s = compile_object(config, bench, build_dir)
     if compile_result is not None:
         compile_result.direct_bpf_insns = direct_count
@@ -559,7 +563,9 @@ def main(argv: list[str] | None = None) -> int:
 
     direct_counts = (
         load_direct_bpf_counts(config)
-        if not args.build_only and proof_config_path.name == "micro_pure_jit.yaml"
+        if not args.build_only
+        and proof_config_path.name == "micro_pure_jit.yaml"
+        and config.require_micro_result
         else {}
     )
     run_id = datetime.now().strftime("%Y%m%d-%H%M%S-%f")

@@ -237,6 +237,8 @@ def base_runtime_env() -> dict[str, str]:
             "BPFREJIT_CORPUS_APPS",
             "BPFREJIT_CORPUS_APP_TIMEOUT",
             "BPFREJIT_CORPUS_REJIT_TIMEOUT",
+            "BPFREJIT_CORPUS_WORKLOAD_ONLY",
+            "BPFREJIT_CORPUS_BPF_STATS",
             "BPFREJIT_KEEP_ALL_WORKDIRS",
             "RUN_TARGET_ARCH",
         )

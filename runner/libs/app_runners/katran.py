@@ -809,3 +809,33 @@ class KatranRunner(AppRunner):
             try: wait_for_katran_teardown(settle_s=DEFAULT_KATRAN_STOP_SETTLE_S)
             except Exception as exc: errors.append(str(exc))
         if errors: raise RuntimeError("; ".join(errors))
+
+
+def run_katran_workload_without_app(
+    kind: str,
+    duration_s: int | float,
+    *,
+    iface: str = DEFAULT_INTERFACE,
+    router_peer_iface: str | None = None,
+) -> WorkloadResult:
+    workload_kind = str(kind or "").strip().lower()
+    if workload_kind != "xdp_pktgen":
+        raise RuntimeError(f"Katran workload-only mode only supports xdp_pktgen, got {workload_kind!r}")
+    topology = KatranDsrTopology(str(iface), router_peer_iface=router_peer_iface)
+    runner = KatranRunner(workload_spec={"kind": workload_kind}, iface=str(iface), router_peer_iface=router_peer_iface)
+    try:
+        topology.__enter__()
+        time.sleep(TOPOLOGY_SETTLE_S)
+        return runner._run_pktgen_workload(duration_s)
+    finally:
+        errors: list[str] = []
+        try:
+            topology.close()
+        except Exception as exc:
+            errors.append(str(exc))
+        try:
+            wait_for_katran_teardown(settle_s=DEFAULT_KATRAN_STOP_SETTLE_S)
+        except Exception as exc:
+            errors.append(str(exc))
+        if errors:
+            raise RuntimeError("; ".join(errors))

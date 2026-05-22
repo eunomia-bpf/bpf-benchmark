@@ -41,8 +41,8 @@ arm64_l_2c:
 	/* 0x2c: stp w9, w9, [x8, #48] */
 	ARM64_SIM_RUN_OP3(ARM64_OP_STP, ARM64_X8, ARM64_X9, ARM64_X9, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 48ULL);
 arm64_l_30:
-	/* 0x30: b dc <tc_packet_checksum_fold_prog+0xdc> */
-	ARM64_SIM_A64_JMP(0x30, 0xdc, arm64_l_dc);
+	/* 0x30: b e0 <tc_packet_checksum_fold_prog+0xe0> */
+	ARM64_SIM_A64_JMP(0x30, 0xe0, arm64_l_e0);
 arm64_l_34:
 	/* 0x34: mov x12, x10 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_REG, ARM64_X12, ARM64_X10, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, 0, 0);
@@ -170,7 +170,10 @@ arm64_l_d8:
 	/* 0xd8: stp w10, w9, [x8, #48] */
 	ARM64_SIM_RUN_OP3(ARM64_OP_STP, ARM64_X8, ARM64_X10, ARM64_X9, ARM64_REG_NONE, ARM64_WIDTH_32, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 48ULL);
 arm64_l_dc:
-	/* 0xdc: mov x7, x0 */
+	/* 0xdc: b e0 <tc_packet_checksum_fold_prog+0xe0> */
+	ARM64_SIM_A64_JMP(0xdc, 0xe0, arm64_l_e0);
+arm64_l_e0:
+	/* 0xe0: mov x7, x0 */
 	ARM64_SIM_RUN_OP3(ARM64_OP_MOV_REG, ARM64_X7, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, 0, 0);
 	ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, ARM64_SIM_L_READ_REG(ARM64_X7), ARM64_WIDTH_64);
 	ARM64_SIM_RET();

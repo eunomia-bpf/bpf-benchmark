@@ -500,22 +500,6 @@ MapSnapshot read_map_snapshot(const MapInlineArgs &args)
 	return snapshot;
 }
 
-std::optional<std::vector<uint8_t>>
-lookup_snapshot_value(const MapSnapshot &snapshot, uint32_t map_id,
-		      const std::vector<uint8_t> &key)
-{
-	const auto key_hex = bytes_hex(key);
-	const auto exact = snapshot.values.find({ map_id, key_hex });
-	if (exact != snapshot.values.end()) {
-		return exact->second;
-	}
-	const auto uniform = snapshot.uniform_values.find(map_id);
-	if (uniform != snapshot.uniform_values.end()) {
-		return uniform->second;
-	}
-	return std::nullopt;
-}
-
 size_t mem_access_size(uint8_t code)
 {
 	switch (code & 0x18) {
@@ -674,15 +658,13 @@ scan_data_path_mutable_maps(const std::vector<uint8_t> &text,
 // key pointer (r2) is r10+off and every key byte was written by a constant
 // ST_MEM store before the call. Returns nullopt for runtime-built keys, which
 // are left to the future global speculation layer.
-std::optional<std::vector<uint8_t>>
-derive_const_lookup_key(const std::vector<uint8_t> &text, size_t call_pc,
-			uint32_t key_size)
+// Recover the stack offset of the lookup key when the key pointer (r2) is
+// r10+off just before the call. Returns nullopt if r2 is not a simple frame
+// offset (e.g. it points into the packet).
+std::optional<int> find_key_stack_off(const std::vector<uint8_t> &text,
+				      size_t call_pc)
 {
-	if (key_size == 0) {
-		return std::nullopt;
-	}
 	const size_t begin = call_pc > 64 ? call_pc - 64 : 0;
-	std::optional<int> key_off;
 	for (size_t pc = call_pc; pc-- > begin;) {
 		if (is_ldimm64(text, pc) || !insn_defines_reg(text, pc, 2)) {
 			continue;
@@ -690,8 +672,9 @@ derive_const_lookup_key(const std::vector<uint8_t> &text, size_t call_pc,
 		const uint8_t code = text[pc * INSN_SIZE];
 		if (code == BPF_ALU64_MOV_X && dst_reg(text, pc) == 2 &&
 		    src_reg(text, pc) == 10) {
-			key_off = 0;
-		} else if (code == BPF_ALU64_ADD_K && dst_reg(text, pc) == 2) {
+			return 0;
+		}
+		if (code == BPF_ALU64_ADD_K && dst_reg(text, pc) == 2) {
 			const int32_t off = read_imm(text, pc);
 			for (size_t q = pc; q-- > begin;) {
 				if (!insn_defines_reg(text, q, 2)) {
@@ -700,54 +683,14 @@ derive_const_lookup_key(const std::vector<uint8_t> &text, size_t call_pc,
 				if (text[q * INSN_SIZE] == BPF_ALU64_MOV_X &&
 				    dst_reg(text, q) == 2 &&
 				    src_reg(text, q) == 10) {
-					key_off = off;
+					return off;
 				}
-				break;
+				return std::nullopt;
 			}
 		}
-		break;
-	}
-	if (!key_off) {
 		return std::nullopt;
 	}
-	std::vector<uint8_t> key(key_size, 0);
-	std::vector<bool> filled(key_size, false);
-	for (size_t pc = 0; pc < call_pc; pc++) {
-		if (is_ldimm64(text, pc)) {
-			pc++;
-			continue;
-		}
-		const uint8_t code = text[pc * INSN_SIZE];
-		const uint8_t cls = code & 0x07;
-		if (cls != 0x02 && cls != 0x03) {
-			continue;
-		}
-		const auto base = memory_base_reg(text, pc);
-		if (!base || *base != 10) {
-			continue;
-		}
-		const int off = read_off(text, pc);
-		const size_t size = mem_access_size(code);
-		const int64_t imm = read_imm(text, pc);
-		for (size_t b = 0; b < size; b++) {
-			const int idx = off + static_cast<int>(b) - *key_off;
-			if (idx < 0 || idx >= static_cast<int>(key_size)) {
-				continue;
-			}
-			if (cls == 0x03) {
-				return std::nullopt; // runtime register store
-			}
-			key[static_cast<size_t>(idx)] = static_cast<uint8_t>(
-				(imm >> (8 * static_cast<int>(b))) & 0xff);
-			filled[static_cast<size_t>(idx)] = true;
-		}
-	}
-	for (bool f : filled) {
-		if (!f) {
-			return std::nullopt;
-		}
-	}
-	return key;
+	return std::nullopt;
 }
 
 // Conservatively decide whether the looked-up value pointer (r0) at present_pc
@@ -808,6 +751,82 @@ bool value_ptr_is_read_only(const std::vector<uint8_t> &text, size_t present_pc)
 	return true;
 }
 
+struct GuardEntry {
+	std::vector<uint8_t> key; // empty => unconditional (uniform) fast path
+	std::vector<uint8_t> value;
+	int16_t slot = 0;
+};
+
+// Build a guarded enumeration block to splice *before* a map_lookup_elem call:
+//
+//   entry i:  r3 = *(u32)(r10 + key_off + 4c)   ; load each key word
+//             if r3 != Ki_c goto <next entry / SLOW>
+//             ...
+//             <materialize Vi on stack; r0 = &Vi>
+//             goto OVER_CALL                      ; skip the kept real lookup
+//   SLOW:     <original call ...>                 ; any unlisted key / miss
+//   OVER_CALL:<original null check ...>
+//
+// A uniform entry (empty key) emits no compares: r0 = &V unconditionally and the
+// call becomes dead (O3 removes it), eliminating the lookup. Listed exact keys
+// keep the call as the slow-path fallback, so unlisted keys stay correct. All
+// jumps are block-relative; r3 is a scratch register (r1-r5 are caller-saved and
+// treated as clobbered across the call, so overwriting r3 on the fast path —
+// which skips the call — is safe). Keys must be 4-byte aligned.
+std::vector<uint8_t> build_guard_chain_block(int key_off,
+					     const std::vector<GuardEntry> &entries)
+{
+	const size_t n = entries.size();
+	std::vector<std::vector<uint8_t>> fast(n);
+	std::vector<size_t> nchunks(n), entry_len(n), start(n);
+	size_t total = 0;
+	for (size_t i = 0; i < n; i++) {
+		if (!entries[i].key.empty() && entries[i].key.size() % 4 != 0) {
+			return {};
+		}
+		fast[i] = build_stack_value_block(entries[i].value,
+						  entries[i].slot);
+		nchunks[i] = entries[i].key.size() / 4;
+		entry_len[i] = nchunks[i] * 2 + fast[i].size() / INSN_SIZE + 1;
+		start[i] = total;
+		total += entry_len[i];
+	}
+	const size_t block_len = total;
+	std::vector<uint8_t> block;
+	const auto append = [&](uint8_t code, uint8_t dst, uint8_t src,
+				int16_t off, int32_t imm) {
+		const size_t pc = block.size() / INSN_SIZE;
+		block.resize(block.size() + INSN_SIZE, 0);
+		block[pc * INSN_SIZE] = code;
+		set_dst_reg(block, pc, dst);
+		set_src_reg(block, pc, src);
+		write_off(block, pc, off);
+		write_imm(block, pc, imm);
+	};
+	for (size_t i = 0; i < n; i++) {
+		const size_t mismatch =
+			(i + 1 < n) ? start[i + 1] : block_len; // next entry / SLOW
+		for (size_t c = 0; c < nchunks[i]; c++) {
+			int32_t kc = 0;
+			std::memcpy(&kc, entries[i].key.data() + c * 4,
+				    sizeof(kc));
+			append(BPF_LDX_MEM_W, 3, 10,
+			       static_cast<int16_t>(
+				       key_off + static_cast<int>(c * 4)),
+			       0);
+			const size_t j = block.size() / INSN_SIZE;
+			append(BPF_JMP32_JNE_K, 3, 0,
+			       static_cast<int16_t>(mismatch - j - 1), kc);
+		}
+		block.insert(block.end(), fast[i].begin(), fast[i].end());
+		const size_t j = block.size() / INSN_SIZE;
+		// Jump to OVER_CALL = block_len + 1 (just past the 1-insn call).
+		append(BPF_JA, 0, 0, static_cast<int16_t>(block_len + 1 - j - 1),
+		       0);
+	}
+	return block;
+}
+
 // Auto soft map_inline (no hints, no hard fold). For every lookup whose map
 // snapshot supplies a value — matched by a recovered constant key, or a uniform
 // map — fold that constant value into the lookup-succeeded path while keeping
@@ -849,49 +868,76 @@ std::vector<InlineRecord> apply_map_inline_auto(std::vector<uint8_t> &text,
 		    !map_type_supports_value_inline(map->second.map_type)) {
 			continue;
 		}
-		std::vector<uint8_t> key;
-		std::optional<std::vector<uint8_t>> value;
-		if (auto k = derive_const_lookup_key(text, pc,
-						     map->second.key_size)) {
-			key = *k;
-			value = lookup_snapshot_value(snapshot, *map_id, key);
-		} else if (snapshot.truly_uniform.count(*map_id)) {
-			value = snapshot.uniform_values.at(*map_id);
-		}
-		if (!value || value->size() != map->second.value_size) {
+		// The looked-up value must only be read (never written back through
+		// r0); otherwise folding it would drop a real map write.
+		if (pc + 1 >= insn_count || !value_ptr_is_read_only(text, pc + 1)) {
 			continue;
 		}
-		// Canonical null check at pc+1 lets us splice the value-fold onto
-		// the lookup-succeeded path.
-		if (pc + 1 >= insn_count) {
-			continue;
-		}
-		const uint8_t nc = text[(pc + 1) * INSN_SIZE];
-		if ((nc != BPF_JEQ_K && nc != BPF_JNE_K) ||
-		    dst_reg(text, pc + 1) != 0 || src_reg(text, pc + 1) != 0 ||
-		    read_imm(text, pc + 1) != 0) {
-			continue;
-		}
-		size_t present_pc;
-		if (nc == BPF_JEQ_K) {
-			present_pc = pc + 2; // jump-if-null; success falls through
-		} else {
-			const int64_t target = static_cast<int64_t>(pc + 1) + 1 +
-					       read_off(text, pc + 1);
-			if (target <= static_cast<int64_t>(pc + 1) ||
-			    target > static_cast<int64_t>(insn_count)) {
+		// Choose a guard strategy:
+		//   - truly-uniform map: one unconditional fast path; the kept
+		//     call becomes dead and O3 eliminates the lookup (assumes a
+		//     stable value and in-range presence, sound for bounded-index
+		//     ARRAY maps such as the consistent-hash ring);
+		//   - 1..MAX_ENUM exact keys: a guard chain over those keys with
+		//     the real lookup retained as the slow-path fallback (sound for
+		//     any unlisted key or miss; a constant key collapses under O3).
+		constexpr size_t MAX_ENUM = 4;
+		std::vector<GuardEntry> guard;
+		int key_off = 0;
+		InlineRecord record{ *map_id, {}, {} };
+		if (snapshot.truly_uniform.count(*map_id)) {
+			const auto &v = snapshot.uniform_values.at(*map_id);
+			if (v.size() != map->second.value_size) {
 				continue;
 			}
-			present_pc = static_cast<size_t>(target);
+			guard.push_back(
+				{ {}, v, allocate_stack_slot(used_stack, v.size()) });
+			record.value = v;
+		} else {
+			std::vector<std::pair<std::vector<uint8_t>,
+					      std::vector<uint8_t>>>
+				entries;
+			for (const auto &kv : snapshot.values) {
+				if (kv.first.first == *map_id) {
+					entries.push_back(
+						{ parse_hex_bytes(kv.first.second),
+						  kv.second });
+				}
+			}
+			if (entries.empty() || entries.size() > MAX_ENUM ||
+			    map->second.key_size % 4 != 0) {
+				continue;
+			}
+			bool ok = true;
+			for (const auto &e : entries) {
+				if (e.first.size() != map->second.key_size ||
+				    e.second.size() != map->second.value_size) {
+					ok = false;
+					break;
+				}
+			}
+			if (!ok) {
+				continue;
+			}
+			const auto ko = find_key_stack_off(text, pc);
+			if (!ko) {
+				continue;
+			}
+			key_off = *ko;
+			for (const auto &e : entries) {
+				guard.push_back(
+					{ e.first, e.second,
+					  allocate_stack_slot(
+						  used_stack, e.second.size()) });
+			}
+			record.key = entries[0].first;
+			record.value = entries[0].second;
 		}
-		if (!value_ptr_is_read_only(text, present_pc)) {
+		auto block = build_guard_chain_block(key_off, guard);
+		if (block.empty()) {
 			continue;
 		}
-		const int16_t slot =
-			allocate_stack_slot(used_stack, value->size());
-		pending.push_back({ present_pc,
-				    build_stack_value_block(*value, slot),
-				    { *map_id, key, *value } });
+		pending.push_back({ pc, std::move(block), record });
 	}
 
 	// Apply highest insert_pc first so earlier pcs are not shifted.

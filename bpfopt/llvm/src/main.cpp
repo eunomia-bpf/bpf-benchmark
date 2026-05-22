@@ -45,7 +45,9 @@ namespace {
 constexpr uint8_t BPF_LD_IMM64 = 0x18;
 constexpr uint8_t BPF_LDX_MEM_B = 0x71;
 constexpr uint8_t BPF_LDX_MEM_H = 0x69;
+constexpr uint8_t BPF_LDX_MEM_W = 0x61;
 constexpr uint8_t BPF_LDX_MEM_DW = 0x79;
+constexpr uint8_t BPF_JMP32_JNE_K = 0x56;
 constexpr uint8_t BPF_ALU64_ADD_K = 0x07;
 constexpr uint8_t BPF_ALU64_ADD_X = 0x0f;
 constexpr uint8_t BPF_ALU64_LSH_K = 0x67;

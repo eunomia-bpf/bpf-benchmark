@@ -141,11 +141,11 @@ struct Args {
     /// entries keep the normal helper call.
     ///
     /// Format:
-    /// INDEX=KIND,MAX_ENTRIES,ELEM_SIZE,VALUE_SIZE,VALUE_OFFSET,PERCPU_BASE
+    /// INDEX=KIND,ADDR,MAX_ENTRIES,ELEM_SIZE,VALUE_SIZE,VALUE_OFFSET,PERCPU_BASE
     /// where KIND is call/array/percpu_array.
     #[arg(
         long = "update-site",
-        value_name = "INDEX=KIND,MAX,ELEM,VALUE_SIZE,VALUE_OFF,PERCPU"
+        value_name = "INDEX=KIND,ADDR,MAX,ELEM,VALUE_SIZE,VALUE_OFF,PERCPU"
     )]
     update_sites: Vec<String>,
 
@@ -170,6 +170,8 @@ enum LinkMode {
 enum LookupKind {
     Call,
     Hash,
+    LruHash,
+    PerCpuHash,
     Array,
     PerCpuArray,
 }
@@ -198,6 +200,7 @@ enum UpdateKind {
 #[derive(Clone, Copy, Debug)]
 struct UpdateSiteSpec {
     kind: UpdateKind,
+    target_addr: u64,
     max_entries: u32,
     elem_size: u32,
     value_size: u32,
@@ -276,6 +279,8 @@ fn parse_lookup_kind(s: &str) -> Result<LookupKind> {
     match s {
         "call" => Ok(LookupKind::Call),
         "hash" => Ok(LookupKind::Hash),
+        "lru_hash" => Ok(LookupKind::LruHash),
+        "percpu_hash" => Ok(LookupKind::PerCpuHash),
         "array" => Ok(LookupKind::Array),
         "percpu_array" => Ok(LookupKind::PerCpuArray),
         _ => bail!("unknown --lookup-site KIND {s:?}"),
@@ -292,19 +297,20 @@ fn parse_update_sites(args: &[String]) -> Result<Vec<UpdateSiteSpec>> {
             .parse()
             .map_err(|e| anyhow!("--update-site INDEX parse: {e}"))?;
         let parts: Vec<&str> = payload.split(',').collect();
-        if parts.len() != 6 {
+        if parts.len() != 7 {
             bail!(
-                "--update-site payload has {} comma-separated fields; expected 6: {payload:?}",
+                "--update-site payload has {} comma-separated fields; expected 7: {payload:?}",
                 parts.len()
             );
         }
         let spec = UpdateSiteSpec {
             kind: parse_update_kind(parts[0])?,
-            max_entries: parse_u32_auto(parts[1], "--update-site MAX_ENTRIES")?,
-            elem_size: parse_u32_auto(parts[2], "--update-site ELEM_SIZE")?,
-            value_size: parse_u32_auto(parts[3], "--update-site VALUE_SIZE")?,
-            value_offset: parse_u32_auto(parts[4], "--update-site VALUE_OFFSET")?,
-            percpu_base_addr: parse_u64_auto(parts[5], "--update-site PERCPU_BASE")?,
+            target_addr: parse_u64_auto(parts[1], "--update-site ADDR")?,
+            max_entries: parse_u32_auto(parts[2], "--update-site MAX_ENTRIES")?,
+            elem_size: parse_u32_auto(parts[3], "--update-site ELEM_SIZE")?,
+            value_size: parse_u32_auto(parts[4], "--update-site VALUE_SIZE")?,
+            value_offset: parse_u32_auto(parts[5], "--update-site VALUE_OFFSET")?,
+            percpu_base_addr: parse_u64_auto(parts[6], "--update-site PERCPU_BASE")?,
         };
         by_index.push((idx, spec));
     }
@@ -1127,6 +1133,7 @@ fn rewrite_x86(
         // inter-symbol call targets. Below we re-anchor each instruction
         // to a per-symbol IP=0 layout before encoding.
         let mut decoder = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE);
+        let mut helper_got_registers: HashMap<Register, String> = HashMap::new();
 
         // Side table: per-entry patch kind, paired with each kept Instruction
         // in the symbol-local stream. `insn_local_ip` records the byte
@@ -1172,6 +1179,21 @@ fn rewrite_x86(
                     if let Some(target_name) = got_relocations.get(&(sym.address, local_patch_off))
                     {
                         let dst = insn.op0_register();
+                        if matches!(
+                            target_name.as_str(),
+                            "bpf_map_lookup_elem" | "bpf_map_update_elem"
+                        ) {
+                            let dst_family = x86_gpr64_family(dst).ok_or_else(|| {
+                                anyhow!(
+                                    "x86 helper GOT load for {} uses unsupported register {:?}",
+                                    target_name,
+                                    dst
+                                )
+                            })?;
+                            helper_got_registers.insert(dst_family, target_name.clone());
+                            resolved_got_relocations.insert((sym.address, local_patch_off));
+                            continue;
+                        }
                         if let Some(&helper_addr) = helper_addrs.get(target_name) {
                             let movabs = build_x86_mov_reg_imm64(dst, helper_addr)?;
                             push_x86_replacement(
@@ -1310,7 +1332,14 @@ fn rewrite_x86(
                 insn.flow_control(),
                 FlowControl::Call | FlowControl::IndirectCall
             ) {
-                if let Some(name) = helper_call_sites.get(&(sym.address, local_ip)) {
+                let helper_call_name = helper_call_sites
+                    .get(&(sym.address, local_ip))
+                    .cloned()
+                    .or_else(|| {
+                        x86_indirect_call_register(&insn)
+                            .and_then(|reg| helper_got_registers.get(&reg).cloned())
+                    });
+                if let Some(name) = helper_call_name {
                     if proof_mode {
                         local.push(insn);
                         kinds.push(None);
@@ -1352,7 +1381,16 @@ fn rewrite_x86(
                                     resolved_helper_call_sites.insert((sym.address, local_ip));
                                     continue;
                                 }
-                                LookupKind::Call | LookupKind::Hash => {
+                                LookupKind::Call
+                                | LookupKind::Hash
+                                | LookupKind::LruHash
+                                | LookupKind::PerCpuHash => {
+                                    if spec.target_addr == 0 {
+                                        bail!(
+                                            "x86 lookup-site {ordinal} is {:?} but has no target address",
+                                            spec.kind
+                                        );
+                                    }
                                     lookup_call_counter += 1;
                                     lookup_call_ordinal.insert((sym.address, local_ip), ordinal);
                                     push_x86_absolute_helper_call(
@@ -1364,6 +1402,28 @@ fn rewrite_x86(
                                     )?;
                                     if matches!(spec.kind, LookupKind::Hash) {
                                         for ib in build_x86_hash_lookup_postcall(spec)? {
+                                            push_x86_synthetic(
+                                                &mut local,
+                                                &mut kinds,
+                                                &mut insn_local_ip,
+                                                &mut next_synthetic_ip,
+                                                ib,
+                                            )?;
+                                        }
+                                    }
+                                    if matches!(spec.kind, LookupKind::LruHash) {
+                                        for ib in build_x86_lru_hash_lookup_postcall(spec)? {
+                                            push_x86_synthetic(
+                                                &mut local,
+                                                &mut kinds,
+                                                &mut insn_local_ip,
+                                                &mut next_synthetic_ip,
+                                                ib,
+                                            )?;
+                                        }
+                                    }
+                                    if matches!(spec.kind, LookupKind::PerCpuHash) {
+                                        for ib in build_x86_percpu_hash_lookup_postcall(spec)? {
                                             push_x86_synthetic(
                                                 &mut local,
                                                 &mut kinds,
@@ -1398,13 +1458,28 @@ fn rewrite_x86(
                                     resolved_helper_call_sites.insert((sym.address, local_ip));
                                     continue;
                                 }
-                                UpdateKind::Call => {}
+                                UpdateKind::Call => {
+                                    if spec.target_addr == 0 {
+                                        bail!(
+                                            "x86 update-site {ordinal} is call but has no target address"
+                                        );
+                                    }
+                                    push_x86_absolute_helper_call(
+                                        &mut local,
+                                        &mut kinds,
+                                        &mut insn_local_ip,
+                                        local_ip,
+                                        spec.target_addr,
+                                    )?;
+                                    resolved_helper_call_sites.insert((sym.address, local_ip));
+                                    continue;
+                                }
                             }
                         }
                     }
 
                     let helper_addr = *helper_addrs
-                        .get(name)
+                        .get(&name)
                         .ok_or_else(|| anyhow!("missing x86 helper address: {name}"))?;
                     push_x86_absolute_helper_call(
                         &mut local,
@@ -1422,6 +1497,9 @@ fn rewrite_x86(
             // the helper-call block above. Keep non-helper instructions as
             // decoded; the ELF relocation pass below handles map literals
             // and local data references.
+            if let Some(reg) = x86_written_gpr_family(&insn) {
+                helper_got_registers.remove(&reg);
+            }
             local.push(insn);
             kinds.push(None);
             insn_local_ip.push(local_ip);
@@ -1444,6 +1522,28 @@ fn rewrite_x86(
                         if let Some(spec) = lookup_sites.get(ordinal) {
                             if matches!(spec.kind, LookupKind::Hash) {
                                 for ib in build_x86_hash_lookup_postcall(spec)? {
+                                    push_x86_synthetic(
+                                        &mut local,
+                                        &mut kinds,
+                                        &mut insn_local_ip,
+                                        &mut next_synthetic_ip,
+                                        ib,
+                                    )?;
+                                }
+                            }
+                            if matches!(spec.kind, LookupKind::LruHash) {
+                                for ib in build_x86_lru_hash_lookup_postcall(spec)? {
+                                    push_x86_synthetic(
+                                        &mut local,
+                                        &mut kinds,
+                                        &mut insn_local_ip,
+                                        &mut next_synthetic_ip,
+                                        ib,
+                                    )?;
+                                }
+                            }
+                            if matches!(spec.kind, LookupKind::PerCpuHash) {
+                                for ib in build_x86_percpu_hash_lookup_postcall(spec)? {
                                     push_x86_synthetic(
                                         &mut local,
                                         &mut kinds,
@@ -2230,6 +2330,69 @@ fn build_arm64_hash_lookup_postcall(spec: &LookupSiteSpec) -> Result<Vec<u32>> {
     Ok(words)
 }
 
+fn build_arm64_lru_hash_lookup_postcall(spec: &LookupSiteSpec) -> Result<Vec<u32>> {
+    const X0: u32 = 0;
+    const W10: u32 = 10;
+    const A64_CBZ_X0: u32 = 0xb400_0000;
+    const A64_CBNZ_W10: u32 = 0x3500_0000 | W10;
+
+    if !matches!(spec.kind, LookupKind::LruHash) {
+        bail!(
+            "lookup kind {:?} is not an arm64 lru hash post-call inline",
+            spec.kind
+        );
+    }
+    if spec.key_offset == 0 {
+        bail!("arm64 lru hash lookup inline missing htab value offset");
+    }
+    if spec.value_offset == 0 {
+        bail!("arm64 lru hash lookup inline missing lru ref offset");
+    }
+
+    let mut words = Vec::new();
+    let null_branch = words.len();
+    words.push(0);
+    words.push(a64_ldr_u8(W10, X0, spec.value_offset)?);
+    let ref_set_branch = words.len();
+    words.push(0);
+    words.push(a64_movz(W10, 1, 0)?);
+    words.push(a64_str_u8(W10, X0, spec.value_offset)?);
+    let add_target = words.len();
+    words.push(a64_add_imm64(X0, X0, spec.key_offset)?);
+    let done_target = words.len();
+    words[null_branch] = a64_patch_cbz_cbnz(A64_CBZ_X0, null_branch, done_target)?;
+    words[ref_set_branch] = a64_patch_cbz_cbnz(A64_CBNZ_W10, ref_set_branch, add_target)?;
+    Ok(words)
+}
+
+fn build_arm64_percpu_hash_lookup_postcall(spec: &LookupSiteSpec) -> Result<Vec<u32>> {
+    const X0: u32 = 0;
+    const X10: u32 = 10;
+    const A64_CBZ_X0: u32 = 0xb400_0000;
+    const A64_MRS_X10_TPIDR_EL1: u32 = 0xd538_d08a;
+
+    if !matches!(spec.kind, LookupKind::PerCpuHash) {
+        bail!(
+            "lookup kind {:?} is not an arm64 percpu hash post-call inline",
+            spec.kind
+        );
+    }
+    if spec.key_offset == 0 {
+        bail!("arm64 percpu hash lookup inline missing htab value offset");
+    }
+
+    let mut words = Vec::new();
+    let null_branch = words.len();
+    words.push(0);
+    words.push(a64_add_imm64(X0, X0, spec.key_offset)?);
+    words.push(a64_ldr_u64(X0, X0, 0)?);
+    words.push(A64_MRS_X10_TPIDR_EL1);
+    words.push(a64_add_shift64(X0, X0, X10, 0)?);
+    let done_target = words.len();
+    words[null_branch] = a64_patch_cbz_cbnz(A64_CBZ_X0, null_branch, done_target)?;
+    Ok(words)
+}
+
 fn append_u32(blob: &mut Vec<u8>, word: u32) {
     blob.extend_from_slice(&word.to_le_bytes());
 }
@@ -2510,6 +2673,7 @@ fn rewrite_arm64(
     let mut lookup_call_counter: usize = 0;
     let mut update_call_counter: usize = 0;
     let mut proof_relocs: Vec<ProofReloc> = Vec::new();
+    const A64_MOV_X7_X0: u32 = 0xaa00_03e7;
 
     for sym in included {
         let is_entry = sym.address == entry.address;
@@ -2593,17 +2757,6 @@ fn rewrite_arm64(
                             blob.extend_from_slice(&insn.to_le_bytes());
                             continue;
                         }
-                        if !helper_addrs.contains_key(&reloc.target_name) {
-                            bail!(
-                                "arm64 CALL26 in {} at byte offset {off:#x} targets unknown helper {}",
-                                sym.name,
-                                reloc.target_name
-                            );
-                        }
-                        let mut helper_addr =
-                            *helper_addrs.get(&reloc.target_name).ok_or_else(|| {
-                                anyhow!("missing arm64 helper address: {}", reloc.target_name)
-                            })?;
                         if reloc.target_name == "bpf_get_smp_processor_id" {
                             if let Some(inline) =
                                 build_arm64_get_smp_processor_id_inline(helper_addrs)?
@@ -2614,6 +2767,7 @@ fn rewrite_arm64(
                                 continue;
                             }
                         }
+                        let mut helper_addr = helper_addrs.get(&reloc.target_name).copied();
                         if reloc.target_name == "bpf_map_lookup_elem" && is_entry {
                             let ordinal = lookup_call_counter;
                             lookup_call_counter += 1;
@@ -2626,14 +2780,51 @@ fn rewrite_arm64(
                                         continue;
                                     }
                                     LookupKind::Call => {
-                                        helper_addr = spec.target_addr;
+                                        if spec.target_addr == 0 {
+                                            bail!(
+                                                "arm64 lookup-site {ordinal} is call but has no target address"
+                                            );
+                                        }
+                                        helper_addr = Some(spec.target_addr);
                                     }
                                     LookupKind::Hash => {
-                                        helper_addr = spec.target_addr;
-                                        for word in arm64_helper_call_sequence(helper_addr)? {
+                                        if spec.target_addr == 0 {
+                                            bail!(
+                                                "arm64 lookup-site {ordinal} is hash but has no target address"
+                                            );
+                                        }
+                                        for word in arm64_helper_call_sequence(spec.target_addr)? {
                                             append_u32(&mut blob, word);
                                         }
                                         for word in build_arm64_hash_lookup_postcall(spec)? {
+                                            append_u32(&mut blob, word);
+                                        }
+                                        continue;
+                                    }
+                                    LookupKind::LruHash => {
+                                        if spec.target_addr == 0 {
+                                            bail!(
+                                                "arm64 lookup-site {ordinal} is lru_hash but has no target address"
+                                            );
+                                        }
+                                        for word in arm64_helper_call_sequence(spec.target_addr)? {
+                                            append_u32(&mut blob, word);
+                                        }
+                                        for word in build_arm64_lru_hash_lookup_postcall(spec)? {
+                                            append_u32(&mut blob, word);
+                                        }
+                                        continue;
+                                    }
+                                    LookupKind::PerCpuHash => {
+                                        if spec.target_addr == 0 {
+                                            bail!(
+                                                "arm64 lookup-site {ordinal} is percpu_hash but has no target address"
+                                            );
+                                        }
+                                        for word in arm64_helper_call_sequence(spec.target_addr)? {
+                                            append_u32(&mut blob, word);
+                                        }
+                                        for word in build_arm64_percpu_hash_lookup_postcall(spec)? {
                                             append_u32(&mut blob, word);
                                         }
                                         continue;
@@ -2652,10 +2843,24 @@ fn rewrite_arm64(
                                         }
                                         continue;
                                     }
-                                    UpdateKind::Call => {}
+                                    UpdateKind::Call => {
+                                        if spec.target_addr == 0 {
+                                            bail!(
+                                                "arm64 update-site {ordinal} is call but has no target address"
+                                            );
+                                        }
+                                        helper_addr = Some(spec.target_addr);
+                                    }
                                 }
                             }
                         }
+                        let helper_addr = helper_addr.ok_or_else(|| {
+                            anyhow!(
+                                "arm64 CALL26 in {} at byte offset {off:#x} targets unknown helper {}",
+                                sym.name,
+                                reloc.target_name
+                            )
+                        })?;
                         for word in arm64_helper_call_sequence(helper_addr)? {
                             append_u32(&mut blob, word);
                         }
@@ -2789,7 +2994,11 @@ fn rewrite_arm64(
                 });
             }
 
-            if is_entry && a64_is_ret(insn) {
+            let is_canonical_return_trampoline = !proof_mode
+                && is_entry
+                && insn == A64_MOV_X7_X0
+                && sym.address + off as u64 + 4 == end;
+            if is_entry && (a64_is_ret(insn) || is_canonical_return_trampoline) {
                 patches.push(Arm64Patch {
                     word_index: emit_word_index,
                     kind: Arm64PatchKind::ReturnToTrampoline,
@@ -2870,71 +3079,9 @@ fn rewrite_arm64(
         blob[off..off + 4].copy_from_slice(&patched.to_le_bytes());
     }
 
-    const A64_MOV_X7_X0: u32 = 0xaa00_03e7;
-    let return_words: Vec<usize> = patches
-        .iter()
-        .filter_map(|p| {
-            if matches!(p.kind, Arm64PatchKind::ReturnToTrampoline) {
-                Some(p.word_index)
-            } else {
-                None
-            }
-        })
-        .collect();
-    let entry_end_word = *sym_end_word_offset
-        .get(&entry.address)
-        .ok_or_else(|| anyhow!("arm64 entry end not in index map"))?;
-    let terminal_return_word = if let Some(word) = return_words.iter().copied().max() {
-        let trailing_words_are_nops = word < entry_end_word
-            && entry_end_word == blob.len() / 4
-            && blob[(word + 1) * 4..entry_end_word * 4]
-                .chunks_exact(4)
-                .all(|chunk| u32::from_le_bytes(chunk.try_into().unwrap()) == 0xd503_201f);
-        let branch_into_trailing_padding = patches.iter().any(|p| match p.kind {
-            Arm64PatchKind::B {
-                source_symbol_address,
-                target_is_symbol_end: false,
-                target_address,
-            }
-            | Arm64PatchKind::BCond {
-                source_symbol_address,
-                target_is_symbol_end: false,
-                target_address,
-                ..
-            }
-            | Arm64PatchKind::CbzCbnz {
-                source_symbol_address,
-                target_is_symbol_end: false,
-                target_address,
-                ..
-            } => {
-                source_symbol_address == entry.address
-                    && addr_word_offset
-                        .get(&target_address)
-                        .is_some_and(|target_word| *target_word > word)
-            }
-            _ => false,
-        });
-        if trailing_words_are_nops && !branch_into_trailing_padding {
-            Some(word)
-        } else {
-            None
-        }
-    } else {
-        None
-    };
-    let ret_trampoline_word = if let Some(word) = terminal_return_word {
-        let off = word * 4;
-        blob[off..off + 4].copy_from_slice(&A64_MOV_X7_X0.to_le_bytes());
-        blob.truncate((word + 1) * 4);
-        sym_end_word_offset.insert(entry.address, word);
-        word
-    } else {
-        align_arm64_blob_to_8(&mut blob);
-        let word = blob.len() / 4;
-        append_u32(&mut blob, A64_MOV_X7_X0);
-        word
-    };
+    align_arm64_blob_to_8(&mut blob);
+    let ret_trampoline_word = blob.len() / 4;
+    append_u32(&mut blob, A64_MOV_X7_X0);
 
     for patch in patches.iter().filter(|p| {
         matches!(
@@ -2948,9 +3095,6 @@ fn rewrite_arm64(
     }) {
         let patched = match patch.kind {
             Arm64PatchKind::ReturnToTrampoline => {
-                if Some(patch.word_index) == terminal_return_word {
-                    continue;
-                }
                 a64_patch_b(patch.word_index, ret_trampoline_word)?
             }
             Arm64PatchKind::Bl {
@@ -3974,6 +4118,62 @@ fn x86_callee_saved_family(reg: Register) -> Option<Register> {
     }
 }
 
+fn x86_gpr64_family(reg: Register) -> Option<Register> {
+    match reg {
+        Register::RAX | Register::EAX | Register::AX | Register::AL | Register::AH => {
+            Some(Register::RAX)
+        }
+        Register::RCX | Register::ECX | Register::CX | Register::CL | Register::CH => {
+            Some(Register::RCX)
+        }
+        Register::RDX | Register::EDX | Register::DX | Register::DL | Register::DH => {
+            Some(Register::RDX)
+        }
+        Register::RBX | Register::EBX | Register::BX | Register::BL | Register::BH => {
+            Some(Register::RBX)
+        }
+        Register::RSP | Register::ESP | Register::SP | Register::SPL => Some(Register::RSP),
+        Register::RBP | Register::EBP | Register::BP | Register::BPL => Some(Register::RBP),
+        Register::RSI | Register::ESI | Register::SI | Register::SIL => Some(Register::RSI),
+        Register::RDI | Register::EDI | Register::DI | Register::DIL => Some(Register::RDI),
+        Register::R8 | Register::R8D | Register::R8W | Register::R8L => Some(Register::R8),
+        Register::R9 | Register::R9D | Register::R9W | Register::R9L => Some(Register::R9),
+        Register::R10 | Register::R10D | Register::R10W | Register::R10L => Some(Register::R10),
+        Register::R11 | Register::R11D | Register::R11W | Register::R11L => Some(Register::R11),
+        Register::R12 | Register::R12D | Register::R12W | Register::R12L => Some(Register::R12),
+        Register::R13 | Register::R13D | Register::R13W | Register::R13L => Some(Register::R13),
+        Register::R14 | Register::R14D | Register::R14W | Register::R14L => Some(Register::R14),
+        Register::R15 | Register::R15D | Register::R15W | Register::R15L => Some(Register::R15),
+        _ => None,
+    }
+}
+
+fn x86_indirect_call_register(insn: &Instruction) -> Option<Register> {
+    if !matches!(insn.flow_control(), FlowControl::IndirectCall) {
+        return None;
+    }
+    if insn.op_count() == 0 || insn.op0_kind() != OpKind::Register {
+        return None;
+    }
+    x86_gpr64_family(insn.op0_register())
+}
+
+fn x86_written_gpr_family(insn: &Instruction) -> Option<Register> {
+    if matches!(
+        insn.flow_control(),
+        FlowControl::Call | FlowControl::IndirectCall
+    ) {
+        return None;
+    }
+    if insn.op_count() == 0 || insn.op0_kind() != OpKind::Register {
+        return None;
+    }
+    match insn.mnemonic() {
+        Mnemonic::Cmp | Mnemonic::Test | Mnemonic::Push => None,
+        _ => x86_gpr64_family(insn.op0_register()),
+    }
+}
+
 fn x86_saved_push_reg(insn: &Instruction) -> Option<Register> {
     if insn.mnemonic() != Mnemonic::Push {
         return None;
@@ -4436,6 +4636,86 @@ fn build_x86_hash_lookup_postcall(spec: &LookupSiteSpec) -> Result<Vec<Instructi
 
     let body_len = u8::try_from(body.len())
         .map_err(|_| anyhow!("hash lookup inline body too large: {} bytes", body.len()))?;
+    let mut bytes = Vec::new();
+    bytes.extend_from_slice(&[0x48, 0x85, 0xC0]); // test rax, rax
+    bytes.extend_from_slice(&[0x74, body_len]); // je over non-null body
+    bytes.extend_from_slice(&body);
+    declared_byte_chunks(&bytes)
+}
+
+fn build_x86_lru_hash_lookup_postcall(spec: &LookupSiteSpec) -> Result<Vec<Instruction>> {
+    if !matches!(spec.kind, LookupKind::LruHash) {
+        bail!(
+            "lookup kind {:?} is not an lru-hash-style post-call inline",
+            spec.kind
+        );
+    }
+    if spec.key_offset == 0 {
+        bail!("lru hash lookup inline missing htab value offset");
+    }
+    if spec.value_offset == 0 {
+        bail!("lru hash lookup inline missing lru ref offset");
+    }
+
+    let mut body = Vec::new();
+    if spec.value_offset <= 0x7f {
+        body.extend_from_slice(&[0x80, 0x78, spec.value_offset as u8, 0x00]);
+    } else {
+        body.extend_from_slice(&[0x80, 0xB8]);
+        body.extend_from_slice(&spec.value_offset.to_le_bytes());
+        body.push(0x00);
+    }
+    let skip_set_jcc = body.len();
+    body.extend_from_slice(&[0x75, 0x00]); // jne over the ref store
+    let set_start = body.len();
+    if spec.value_offset <= 0x7f {
+        body.extend_from_slice(&[0xC6, 0x40, spec.value_offset as u8, 0x01]);
+    } else {
+        body.extend_from_slice(&[0xC6, 0x80]);
+        body.extend_from_slice(&spec.value_offset.to_le_bytes());
+        body.push(0x01);
+    }
+    let set_end = body.len();
+    let skip_set_rel =
+        u8::try_from(set_end - set_start).map_err(|_| anyhow!("lru hash ref store too large"))?;
+    body[skip_set_jcc + 1] = skip_set_rel;
+    append_x86_add_rax_imm(&mut body, spec.key_offset);
+
+    let body_len = u8::try_from(body.len()).map_err(|_| {
+        anyhow!(
+            "lru hash lookup inline body too large: {} bytes",
+            body.len()
+        )
+    })?;
+    let mut bytes = Vec::new();
+    bytes.extend_from_slice(&[0x48, 0x85, 0xC0]); // test rax, rax
+    bytes.extend_from_slice(&[0x74, body_len]); // je over non-null body
+    bytes.extend_from_slice(&body);
+    declared_byte_chunks(&bytes)
+}
+
+fn build_x86_percpu_hash_lookup_postcall(spec: &LookupSiteSpec) -> Result<Vec<Instruction>> {
+    if !matches!(spec.kind, LookupKind::PerCpuHash) {
+        bail!(
+            "lookup kind {:?} is not a percpu-hash-style post-call inline",
+            spec.kind
+        );
+    }
+    if spec.key_offset == 0 {
+        bail!("percpu hash lookup inline missing htab value offset");
+    }
+    if spec.percpu_base_addr == 0 {
+        bail!("percpu hash lookup inline missing this_cpu_off address");
+    }
+
+    let mut body = Vec::new();
+    append_x86_add_rax_imm(&mut body, spec.key_offset);
+    body.extend_from_slice(&[0x48, 0x8B, 0x00]); // mov rax, [rax]
+    body.extend_from_slice(&[0x65, 0x48, 0x03, 0x04, 0x25]); // add rax, gs:[disp32]
+    body.extend_from_slice(&(spec.percpu_base_addr as u32).to_le_bytes());
+
+    let body_len = u8::try_from(body.len())
+        .map_err(|_| anyhow!("percpu hash lookup inline body too large: {}", body.len()))?;
     let mut bytes = Vec::new();
     bytes.extend_from_slice(&[0x48, 0x85, 0xC0]); // test rax, rax
     bytes.extend_from_slice(&[0x74, body_len]); // je over non-null body

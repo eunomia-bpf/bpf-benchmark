@@ -378,6 +378,47 @@ python3 native-sim/x86/native_lab/tests/analyze.py
   runtime layers when runner/stage2 contexts change, and each AWS run
   starts a fresh instance that installs Docker again. These are build/run
   orchestration costs, not native blob correctness failures.
+- **LRU_HASH lookup must preserve the kernel post-call sequence.** A
+  2026-05-22 x86 KVM `map_lru_hash_counter` run oopsed in
+  `htab_lru_map_delete_elem` after native-link routed lookup to
+  `__htab_map_lookup_elem` but treated the returned `struct htab_elem *`
+  as a map value pointer. That skipped the kernel JIT's LRU ref-byte
+  update and value-offset add, so the workload wrote into the hash/LRU
+  node. The linker now lowers LRU_HASH lookup as call-plus-postcall using
+  kernel-derived `htab_elem.lru_node`, `bpf_lru_node.ref`, and
+  `htab_elem.key` offsets. Validation after the fix: x86 KVM stage2
+  native/kernel 13/13 passed in
+  `micro/results/x86_kvm_micro_20260522_015723_998680`; x86 KVM pure
+  native/kernel 29/29 passed in
+  `micro/results/x86_kvm_micro_20260522_020005_773095`; x86 proof
+  stage2 13/13 passed in
+  `native-sim/x86/results/README-20260521-190151-991324.md`; x86 proof
+  pure 29/29 passed in
+  `native-sim/x86/results/README-20260521-190157-769852.md`.
+- **Proof run targets now honor their object directory.**
+  `micro-proofs-run` now passes `--build-dir "$(PROOF_BUILD_DIR)"` for
+  both x86 and arm64, matching `micro-proofs-build`. The x86 stage2 proof
+  run above populated `native-sim/test/build-x86/x86_sim_proofs` instead
+  of the default x86 proof object directory.
+- **arm64 proof->kernel lowering must keep verifier-visible map
+  semantics.** A 2026-05-22 AWS arm64 `helper_chain_simple` run first
+  exposed a kernel-mode crash/reboot: kernel lowering treated the
+  proof-stage canonical `mov x7, x0` return marker as an ordinary
+  instruction, then appended map literal bytes immediately after it. The
+  normal return path could fall into that literal pool. Kernel mode now
+  treats the final arm64 canonical return marker like a return site and
+  branches over appended literals to the final native_lab return
+  trampoline. The next run no longer rebooted, but returned result `1`
+  instead of `0` because HASH lookup used the companion JIT target
+  without the kernel JIT post-call value-offset add. arm64 now uses the
+  same HASH/LRU_HASH/PERCPU_HASH call-plus-postcall lowering boundary as
+  x86. Validation after the fix: arm64 AWS stage2 native/kernel 13/13
+  passed in `micro/results/aws_arm64_micro_20260522_045503_769361`;
+  x86 KVM stage2 native/kernel 13/13 passed in
+  `micro/results/x86_kvm_micro_20260522_045841_826464`; stage2 proof
+  13/13 passed for x86 in
+  `native-sim/x86/results/README-20260521-215912-734470.md` and arm64 in
+  `native-sim/arm64/results/README-20260521-215912-728238.md`.
 - **Non-xdp prog types** (`tc_packet_checksum_fold`,
   `cgroup_skb_hash_chain`) are skipped — the stub BPF program is
   currently hard-coded to `BPF_PROG_TYPE_XDP`. Extending to sched_cls /

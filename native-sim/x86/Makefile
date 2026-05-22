@@ -36,6 +36,7 @@ micro-proofs-build:
 
 micro-proofs-run:
 	$(PYTHON) ../run_micro_sim_batch.py --arch x86 \
+		--build-dir "$(PROOF_BUILD_DIR)" \
 		--config "$(MICRO_CONFIG)" \
 		$(MICRO_SIM_PROOF_ARGS)
 

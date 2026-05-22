@@ -515,6 +515,98 @@ def _pull_remote_dir(ctx: aws_common.AwsExecutorContext, ip: str, remote_path: s
         _die(f"local tar extract failed for {ip}:{remote_path} into {local_path}")
 
 
+def _capture_remote_failure_diagnostics(
+    ctx: aws_common.AwsExecutorContext,
+    ip: str,
+    remote_run_dir: str,
+    local_diag_dir: Path,
+) -> None:
+    local_diag_dir.mkdir(parents=True, exist_ok=True)
+    quoted_run_dir = shlex.quote(remote_run_dir)
+    script = f"""
+set +e
+echo '=== host ==='
+date -Is
+uname -a
+uptime
+echo
+echo '=== remote run dir ==='
+ls -la {quoted_run_dir}
+echo
+echo '=== pid/status/log ==='
+test -f {quoted_run_dir}/pid && cat {quoted_run_dir}/pid
+test -f {quoted_run_dir}/status && cat {quoted_run_dir}/status
+test -f {quoted_run_dir}/remote.log && wc -c {quoted_run_dir}/remote.log
+test -f {quoted_run_dir}/remote.log && tail -n 200 {quoted_run_dir}/remote.log
+echo
+echo '=== script ==='
+test -f {quoted_run_dir}/run-suite.sh && sed -n '1,220p' {quoted_run_dir}/run-suite.sh
+echo
+echo '=== processes ==='
+ps -eo pid,ppid,stat,etime,cmd | grep -E 'docker|python|micro|run-suite|micro_exec' | grep -v grep
+echo
+echo '=== docker ==='
+sudo docker ps -a --no-trunc
+echo
+echo '=== kernel log tail ==='
+sudo dmesg -T | tail -n 300
+echo
+echo '=== previous boot kernel log tail ==='
+sudo journalctl -k -b -1 -n 300 --no-pager
+echo
+echo '=== reboot history ==='
+last -x | head -n 40
+echo
+echo '=== pstore ==='
+sudo find /sys/fs/pstore -maxdepth 1 -type f -printf '%f %s bytes\\n'
+for path in /sys/fs/pstore/*; do
+    test -f "$path" || continue
+    echo "--- $path ---"
+    sudo sed -n '1,220p' "$path"
+done
+""".strip()
+    completed = aws_common._ssh_exec(
+        ctx,
+        ip,
+        "bash",
+        "-c",
+        script,
+        check=False,
+        capture_output=True,
+    )
+    (local_diag_dir / "remote-diagnostics.log").write_text(
+        f"rc={completed.returncode}\n{completed.stdout}",
+        encoding="utf-8",
+    )
+    if completed.stderr:
+        (local_diag_dir / "remote-diagnostics.stderr.log").write_text(
+            completed.stderr,
+            encoding="utf-8",
+        )
+
+    tar_cmd = f"test -d {quoted_run_dir} && tar -C {quoted_run_dir} -cpf - ."
+    extract_cmd = ["tar", "-C", str(local_diag_dir), "-xpf", "-"]
+    with subprocess.Popen(
+        ["ssh", *aws_common._ssh_base_args(ctx), f"{ctx.remote_user}@{ip}", tar_cmd],
+        stdout=subprocess.PIPE,
+        cwd=ROOT_DIR,
+    ) as ssh_proc:
+        rc = subprocess.run(
+            extract_cmd,
+            stdin=ssh_proc.stdout,
+            cwd=ROOT_DIR,
+            text=False,
+            check=False,
+        ).returncode
+        ssh_proc.stdout.close()  # type: ignore[union-attr]
+        ssh_proc.wait()
+    if ssh_proc.returncode != 0 or rc != 0:
+        (local_diag_dir / "remote-run-dir-copy.failed").write_text(
+            f"ssh_rc={ssh_proc.returncode} tar_rc={rc}\n",
+            encoding="utf-8",
+        )
+
+
 def _remote_runtime_container_command(
     ctx: aws_common.AwsExecutorContext,
     remote_workspace: str,
@@ -539,6 +631,9 @@ def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     local_log = local_log_dir / f"{stamp}.remote.log"
     remote_run_dir = f"{ctx.remote_stage_dir}/runs/{stamp}"
     remote_log = f"{remote_run_dir}/remote.log"
+    remote_status = f"{remote_run_dir}/status"
+    remote_pid = f"{remote_run_dir}/pid"
+    remote_script = f"{remote_run_dir}/run-suite.sh"
     remote_workspace = ctx.remote_stage_dir
     local_log_dir.mkdir(parents=True, exist_ok=True)
     ctx.run_state_dir.mkdir(parents=True, exist_ok=True)
@@ -550,22 +645,62 @@ def _run_remote_suite(ctx: aws_common.AwsExecutorContext, ip: str) -> None:
     )
     suite_cmd = shlex.join(_remote_runtime_container_command(ctx, remote_workspace))
     log_dir_cmd = f"mkdir -p {shlex.quote(str(Path(remote_log).parent))}"
-    run_cmd = (
-        f"{log_dir_cmd} && "
-        f"{_remote_result_dir_command(remote_workspace, ctx.suite_name)} && "
-        f"sudo {suite_cmd} >{shlex.quote(remote_log)} 2>&1"
+    run_script = (
+        "#!/usr/bin/env bash\n"
+        "set -u\n"
+        f"{log_dir_cmd}\n"
+        f"{_remote_result_dir_command(remote_workspace, ctx.suite_name)}\n"
+        "rc=0\n"
+        f"sudo {suite_cmd} >{shlex.quote(remote_log)} 2>&1 || rc=$?\n"
+        f"printf '%s\\n' \"$rc\" >{shlex.quote(remote_status)}\n"
+        "exit \"$rc\"\n"
     )
-    remote_completed = aws_common._ssh_exec(ctx, ip, "bash", "-c", run_cmd, check=False)
+    install_script_cmd = (
+        f"cat >{shlex.quote(remote_script)} <<'BPFREJIT_REMOTE_SUITE'\n"
+        f"{run_script}"
+        "BPFREJIT_REMOTE_SUITE\n"
+        f"chmod +x {shlex.quote(remote_script)}"
+    )
+    aws_common._ssh_exec(ctx, ip, "bash", "-c", install_script_cmd)
+    start_cmd = (
+        f"nohup {shlex.quote(remote_script)} >/dev/null 2>&1 & "
+        f"printf '%s\\n' \"$!\" >{shlex.quote(remote_pid)}"
+    )
+    aws_common._ssh_exec(ctx, ip, "bash", "-c", start_cmd)
+    status_probe = (
+        f"status={shlex.quote(remote_status)}; "
+        f"pidfile={shlex.quote(remote_pid)}; "
+        "if test -s \"$status\"; then cat \"$status\"; exit 0; fi; "
+        "if test -s \"$pidfile\"; then "
+        "pid=$(cat \"$pidfile\"); "
+        "if kill -0 \"$pid\" 2>/dev/null; then exit 2; fi; "
+        "printf '%s\\n' 255; exit 0; "
+        "fi; "
+        "exit 2"
+    )
+    while True:
+        probe = aws_common._ssh_exec(
+            ctx, ip, "bash", "-c", status_probe, check=False, capture_output=True)
+        if probe.returncode == 0:
+            status_text = probe.stdout.strip()
+            remote_rc = int(status_text) if status_text.isdigit() else 255
+            break
+        time.sleep(15)
     if aws_common._ssh_exec(ctx, ip, "test", "-e", remote_log, check=False).returncode == 0:
         aws_common._scp_from(ctx, ip, remote_log, local_log)
     local_results = _sync_remote_results(
         ctx,
         ip,
         remote_workspace,
-        require_present=remote_completed.returncode == 0,
+        require_present=remote_rc == 0,
     )
-    if remote_completed.returncode != 0:
-        _die(f"remote {ctx.target_name}/{ctx.suite_name} suite failed; inspect {local_log}")
+    if remote_rc != 0:
+        local_diag_dir = ctx.results_dir / "logs" / f"{stamp}.diagnostics"
+        _capture_remote_failure_diagnostics(ctx, ip, remote_run_dir, local_diag_dir)
+        _die(
+            f"remote {ctx.target_name}/{ctx.suite_name} suite failed; "
+            f"inspect {local_log} and {local_diag_dir}"
+        )
     print(f"[aws-executor] Synced {ctx.target_name}/{ctx.suite_name} results to "
           + (str(local_results) if local_results is not None else "no result directory"), file=sys.stderr)
 

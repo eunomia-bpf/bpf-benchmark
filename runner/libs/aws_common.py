@@ -103,6 +103,8 @@ def _ssh_base_args(ctx: AwsExecutorContext) -> list[str]:
         "-o", "StrictHostKeyChecking=no",
         "-o", "UserKnownHostsFile=/dev/null",
         "-o", "ConnectTimeout=5",
+        "-o", "ServerAliveInterval=30",
+        "-o", "ServerAliveCountMax=1200",
         "-i", str(ctx.key_path),
     ]
 

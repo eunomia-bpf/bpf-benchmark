@@ -73,7 +73,11 @@ $(KERNEL_OFFSETS): $(KERNEL_VMLINUX) Makefile | $(OUTPUT_DIR)
 	        awk '/char\s+value\[/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_BPF_ARRAY_VALUE_OFFSET %du\n", a[1] } \
 	             /void \*\s*pptrs\[/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_BPF_ARRAY_PPTRS_OFFSET %du\n", a[1] }'; \
 	    pahole -C htab_elem '$(KERNEL_VMLINUX)' 2>/dev/null | \
-	        awk '/char\s+key\[\]/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_HTAB_ELEM_KEY_OFFSET %du\n", a[1] }'; \
+	        awk '/struct bpf_lru_node\s+lru_node;/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_HTAB_ELEM_LRU_NODE_OFFSET %du\n", a[1] } \
+	             /char\s+key\[\]/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_HTAB_ELEM_KEY_OFFSET %du\n", a[1] }'; \
+	    pahole -C bpf_lru_node '$(KERNEL_VMLINUX)' 2>/dev/null | \
+	        awk '/u8\s+ref;/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_BPF_LRU_NODE_REF_OFFSET %du\n", a[1] }'; \
+	    echo '#define K_HTAB_ELEM_LRU_REF_OFFSET (K_HTAB_ELEM_LRU_NODE_OFFSET + K_BPF_LRU_NODE_REF_OFFSET)'; \
 	    pahole -C thread_info '$(KERNEL_VMLINUX)' 2>/dev/null | \
 	        awk '/u32\s+cpu;/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_THREAD_INFO_CPU_OFFSET %du\n", a[1] }'; \
 	} > "$@"

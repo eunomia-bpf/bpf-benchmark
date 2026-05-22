@@ -595,3 +595,13 @@ class CiliumRunner(NativeProcessRunner):
         # _ensure_benchmark_interface() recreates the veth from scratch on the next start().
         if is_benchmark_interface(self.device):
             _delete_link_if_exists(BENCHMARK_IFACE)
+
+
+def run_cilium_workload_without_app(workload_name: str, seconds: float) -> WorkloadResult:
+    device = _ensure_benchmark_interface()
+    try:
+        return run_named_workload(workload_name, seconds, network_device=device)
+    finally:
+        if is_benchmark_interface(device):
+            _delete_link_if_exists(BENCHMARK_IFACE)
+            _delete_netns_if_exists(BENCHMARK_NETNS)

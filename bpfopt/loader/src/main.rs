@@ -95,6 +95,13 @@ struct Cli {
     /// BPF_PROG_TEST_RUN repeat count.
     #[arg(long, default_value_t = 1)]
     repeat: u32,
+    /// File fed as BPF_PROG_TEST_RUN data_in (overrides the katran/empty default).
+    #[arg(long, value_name = "FILE")]
+    test_input: Option<PathBuf>,
+    /// Also TEST_RUN the canonicalized original (baseline) and write
+    /// test_run_baseline.json, for original-vs-roundtrip cross-comparison.
+    #[arg(long)]
+    compare: bool,
 }
 
 struct PreparedProgram {
@@ -209,6 +216,24 @@ fn run(cli: Cli) -> Result<()> {
 
     for prog in &prepared {
         canonicalize_program(prog, &cli.bpfopt)?;
+        if cli.compare && cli.bpftestrun {
+            // Baseline: TEST_RUN the canonicalized original bytecode (no LLVM
+            // roundtrip) so it can be cross-compared against the pass output.
+            fs::copy(prog.dir.join(INPUT_BIN), prog.dir.join(OUTPUT_BIN))?;
+            let baseline_fd = verify_workdir(
+                &prog.dir,
+                &prog.map_fds,
+                prog.btf_fd,
+                &prog.func_info,
+                &prog.line_info,
+            )?;
+            run_bpftestrun(baseline_fd.as_raw_fd(), &prog.dir, &cli)?;
+            fs::copy(
+                prog.dir.join(TEST_RUN_JSON),
+                prog.dir.join("test_run_baseline.json"),
+            )?;
+            drop(baseline_fd);
+        }
         if let Some(pass) = cli.pass.as_deref() {
             run_pass_via_yaml(
                 &prog.dir,
@@ -703,7 +728,10 @@ fn verify_workdir_with_log_level(
 }
 
 fn run_bpftestrun(prog_fd: i32, prog_dir: &Path, cli: &Cli) -> Result<()> {
-    let data_in = if cli.katran_maps {
+    let data_in = if let Some(path) = cli.test_input.as_deref() {
+        fs::read(path)
+            .with_context(|| format!("failed to read test input {}", path.display()))?
+    } else if cli.katran_maps {
         fs::read(KATRAN_TEST_INPUT)
             .with_context(|| format!("failed to read Katran test input {KATRAN_TEST_INPUT}"))?
     } else {
@@ -1587,6 +1615,8 @@ mod tests {
                 bpftestrun: false,
                 katran_maps: false,
                 repeat: 1,
+                test_input: None,
+                compare: false,
             };
             if let Err(err) = run(cli) {
                 failures.push(format!("{}: {err:#}", obj.display()));
@@ -1742,6 +1772,8 @@ mod tests {
             bpftestrun: true,
             katran_maps: true,
             repeat,
+            test_input: None,
+            compare: false,
         }
     }
 
