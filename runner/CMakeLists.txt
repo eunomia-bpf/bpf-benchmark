@@ -43,7 +43,6 @@ set(MICRO_EXEC_SOURCES
     src/main.cpp
     src/native_lab_runner.cpp
     src/native_runner.cpp
-    src/perf_counters.cpp
 )
 
 if(MICRO_EXEC_ENABLE_LLVMBPF)

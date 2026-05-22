@@ -1359,7 +1359,6 @@ struct CompanionLoad {
         enum class Kind { Call, Hash, LruHash, PerCpuHash, Array, PerCpuArray } kind;
         uint64_t target_addr;
         uint32_t key_offset;
-        uint64_t map_addr;
         uint32_t max_entries;
         uint32_t elem_size;
         uint32_t index_mask;
@@ -1482,8 +1481,11 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
     bpf_program *prog = nullptr;
     bpf_program *entry_prog = nullptr;
     bpf_object__for_each_program(prog, obj) {
+        if (entry_prog != nullptr) {
+            bpf_object__close(obj);
+            fail("native_kernel companion .bpf.o has multiple BPF programs: " + bpf_path);
+        }
         entry_prog = prog;
-        break;
     }
     if (!entry_prog) {
         bpf_object__close(obj);
@@ -1641,7 +1643,6 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
                             fail("native_kernel: missing kernel map pointer for ARRAY map " + map_it->second.name);
                         }
                         site.kind = CompanionLoad::LookupSite::Kind::Array;
-                        site.map_addr = addr_it->second;
                         site.max_entries = map_it->second.max_entries;
                         site.elem_size = (map_it->second.value_size + 7u) & ~7u;
                         site.index_mask = roundup_pow2_mask(map_it->second.max_entries);
@@ -1658,7 +1659,6 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
                         }
 #endif
                         site.kind = CompanionLoad::LookupSite::Kind::PerCpuArray;
-                        site.map_addr = addr_it->second;
                         site.max_entries = map_it->second.max_entries;
                         site.elem_size = sizeof(void *);
                         site.index_mask = roundup_pow2_mask(map_it->second.max_entries);
@@ -1778,7 +1778,7 @@ std::string format_lookup_site_arg(size_t index,
     }
 
     char buf[320];
-    std::snprintf(buf, sizeof(buf), "%zu=%s,0x%llx,%u,0x0,%u,%u,%u,%u,0x%llx",
+    std::snprintf(buf, sizeof(buf), "%zu=%s,0x%llx,%u,%u,%u,%u,%u,0x%llx",
                   index,
                   kind,
                   static_cast<unsigned long long>(site.target_addr),
@@ -2132,14 +2132,14 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
     uint64_t native_link_exec_ns = 0;
     uint64_t native_link_read_ns = 0;
     uint64_t native_link_map_patch_ns = 0;
+    uint64_t bpf_bytecode_bytes = 0;
     if (file_is_elf(options.program)) {
         if (!options.native_program.has_value()) {
             fail("native_kernel: ELF --program requires --native-program");
         }
-        if (!options.program_name || options.program_name->empty()) {
-            fail("native_kernel requires --program-name");
-        }
-        const std::string &symbol = *options.program_name;
+        const auto image = load_program_image(options.program);
+        const std::string &symbol = image.program_name;
+        bpf_bytecode_bytes = image.code.size();
 
         const auto companion_load_start = std::chrono::steady_clock::now();
         companion = load_bpf_companion(options.program);
@@ -2260,7 +2260,7 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
     sample.wall_exec_ns = elapsed_ns(run_start, run_end);
     sample.result = result_word;
     sample.retval = test_opts.retval;
-    sample.code_size = { .bpf_bytecode_bytes = 0, .native_code_bytes = blob.size() };
+    sample.code_size = { .bpf_bytecode_bytes = bpf_bytecode_bytes, .native_code_bytes = blob.size() };
     sample.phases_ns = {
         {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},
         {"packet_prepare_ns", elapsed_ns(pkt_prepare_start, pkt_prepare_end)},

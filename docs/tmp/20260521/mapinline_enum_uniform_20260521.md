@@ -30,10 +30,22 @@ OVER_CALL:<原 null 检查>
 - reals 未折(其 lookup 的 key 设置不匹配 `r2=r10+off` 模式 / find_key_stack_off 失败 → skip,
   安全)。
 
-### 性能说明
-katran 这个 benchmark 包 retval=2(不转发),ch_rings/server_id/reals 在转发决策更深处,
-**这个包根本没执行到那些 lookup** → 消除它们对该包运行时≈0。要看真实收益需要一个**会转发的
-包**(走到 ch_rings→reals 链)。机制本身正确 + sound;收益取决于 workload 是否触达被折的 map。
+### 性能说明 + proto 修复(2026-05-21 追加)
+之前 host TEST_RUN 包 retval=2(不转发)的根因:`populate_katran_maps` 把 VIP 注册成
+**proto 17(UDP)**,而测试包是 **TCP(6)** → vip_map miss → 不转发 → 折的 map 没执行到。
+（corpus 真实 workload 是 `xdp_traffic`:wrk 打真 HTTP/TCP,VIP 用 TCP_PROTO;只有合成
+`xdp_pktgen` 才用 UDP。loader 合成包是 TCP,所以 populate 也该是 TCP。）
+
+**修复**:`bpfopt/loader/src/main.rs` `populate_katran_maps` `vip[18] = 17` → `6`(TCP)。
+修复后:
+- katran cargo test **通过**:优化后 retval **3(XDP_TX)**、data_size_out **84(IPIP 封装)**,
+  `assert_katran_forwarding_output` 满足 → **6-site 折叠现在落在执行的转发路径上且正确**。
+- **性能(repeat=10000,转发路径,ns/run)**:baseline ~104 vs fold ~102 → **~0-2%,噪声内**。
+
+结论:即便正确转发、折叠在热路径上,katran 的 map 查找**不是每包瓶颈**(瓶颈在解析 +
+IPIP 封装 + 校验和),所以 soft 折叠 ≈ 0%。之前传说的「~17%」其实是
+**noop(O0) baseline + hard-fold 强制转发** 的叠加假象,对比真正的 original baseline 并不存在。
+soft fold 机制正确 + sound;katran 上收益微小是因为查找非瓶颈。
 
 ## 2. LLVM 多版本兼容(llvmbpf)
 `make corpus` 默认用**仓库的 kinsn LLVM-23**(`runner/mk/build.mk:14`

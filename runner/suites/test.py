@@ -242,7 +242,6 @@ def _run_native_proof_micro_smoke(
     proof_env["BPFREJIT_MICRO_PROGRAM_DIR"] = str(program_dir)
     proof_env["BPFREJIT_MICRO_RUNNER_BINARY"] = str(runner_binary)
     proof_env["BPFREJIT_MICRO_PROOF_DIR"] = str(proof_dir)
-    proof_env["BPFREJIT_MICRO_PROOF_ARCH"] = "arm64" if args.target_arch == "arm64" else "x86"
     command = [
         args.python_bin or sys.executable,
         str(workspace / "micro" / "driver.py"),

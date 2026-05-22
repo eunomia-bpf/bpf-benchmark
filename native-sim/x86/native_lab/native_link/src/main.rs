@@ -119,19 +119,12 @@ struct Args {
     /// entry program, given in BPF-source order. The runner walks the
     /// companion `.bpf.o`'s bytecode to identify which map each call uses.
     ///
-    /// Preferred format:
-    /// INDEX=KIND,HEXADDR,KEY_OFFSET,MAP_ADDR,MAX_ENTRIES,ELEM_SIZE,INDEX_MASK,VALUE_OFFSET,PERCPU_BASE
-    /// where KIND is call/hash/array/percpu_array. The legacy
-    /// INDEX=HEXADDR,OFFSET form is still accepted for standalone tests.
-    ///
-    /// When zero `--lookup-site` flags are supplied, every
-    /// `bpf_map_lookup_elem` call falls back to the shared
-    /// `--helper bpf_map_lookup_elem=ADDR` pool with no inline (legacy
-    /// behavior, used by the standalone `tests/run_micro_one.sh`
-    /// driver that doesn't know about the bytecode oracle).
+    /// Format:
+    /// INDEX=KIND,HEXADDR,KEY_OFFSET,MAX_ENTRIES,ELEM_SIZE,INDEX_MASK,VALUE_OFFSET,PERCPU_BASE
+    /// where KIND is call/hash/lru_hash/percpu_hash/array/percpu_array.
     #[arg(
         long = "lookup-site",
-        value_name = "INDEX=KIND,ADDR,KEY_OFF,MAP,MAX,ELEM,MASK,VALUE_OFF,PERCPU"
+        value_name = "INDEX=KIND,ADDR,KEY_OFF,MAX,ELEM,MASK,VALUE_OFF,PERCPU"
     )]
     lookup_sites: Vec<String>,
 
@@ -213,38 +206,20 @@ fn parse_lookup_sites(args: &[String]) -> Result<Vec<LookupSiteSpec>> {
     for a in args {
         let (idx_s, payload) = a
             .split_once('=')
-            .ok_or_else(|| anyhow!("--lookup-site expects INDEX=HEXADDR,OFFSET; got {a:?}"))?;
+            .ok_or_else(|| anyhow!("--lookup-site expects INDEX=KIND,ADDR,KEY_OFF,MAX,ELEM,MASK,VALUE_OFF,PERCPU; got {a:?}"))?;
         let idx: usize = idx_s
             .parse()
             .map_err(|e| anyhow!("--lookup-site INDEX parse: {e}"))?;
         let parts: Vec<&str> = payload.split(',').collect();
-        let spec = if parts.len() == 2 {
-            let target_addr = parse_u64_auto(parts[0], "--lookup-site ADDR")?;
-            let key_offset = parse_u32_auto(parts[1], "--lookup-site OFFSET")?;
-            LookupSiteSpec {
-                kind: if key_offset == 0 {
-                    LookupKind::Call
-                } else {
-                    LookupKind::Hash
-                },
-                target_addr,
-                key_offset,
-                max_entries: 0,
-                elem_size: 0,
-                index_mask: 0,
-                value_offset: 0,
-                percpu_base_addr: 0,
-            }
-        } else if parts.len() == 9 {
+        let spec = if parts.len() == 8 {
             let kind = parse_lookup_kind(parts[0])?;
             let target_addr = parse_u64_auto(parts[1], "--lookup-site ADDR")?;
             let key_offset = parse_u32_auto(parts[2], "--lookup-site KEY_OFFSET")?;
-            parse_u64_auto(parts[3], "--lookup-site MAP_ADDR")?;
-            let max_entries = parse_u32_auto(parts[4], "--lookup-site MAX_ENTRIES")?;
-            let elem_size = parse_u32_auto(parts[5], "--lookup-site ELEM_SIZE")?;
-            let index_mask = parse_u32_auto(parts[6], "--lookup-site INDEX_MASK")?;
-            let value_offset = parse_u32_auto(parts[7], "--lookup-site VALUE_OFFSET")?;
-            let percpu_base_addr = parse_u64_auto(parts[8], "--lookup-site PERCPU_BASE")?;
+            let max_entries = parse_u32_auto(parts[3], "--lookup-site MAX_ENTRIES")?;
+            let elem_size = parse_u32_auto(parts[4], "--lookup-site ELEM_SIZE")?;
+            let index_mask = parse_u32_auto(parts[5], "--lookup-site INDEX_MASK")?;
+            let value_offset = parse_u32_auto(parts[6], "--lookup-site VALUE_OFFSET")?;
+            let percpu_base_addr = parse_u64_auto(parts[7], "--lookup-site PERCPU_BASE")?;
             LookupSiteSpec {
                 kind,
                 target_addr,
@@ -257,7 +232,7 @@ fn parse_lookup_sites(args: &[String]) -> Result<Vec<LookupSiteSpec>> {
             }
         } else {
             bail!(
-                "--lookup-site payload has {} comma-separated fields; expected 2 or 9: {payload:?}",
+                "--lookup-site payload has {} comma-separated fields; expected 8: {payload:?}",
                 parts.len()
             );
         };
@@ -1364,12 +1339,47 @@ fn rewrite_x86(
 
                     if name == "bpf_map_lookup_elem" && is_entry {
                         let ordinal = lookup_call_counter;
-                        if let Some(spec) = lookup_sites.get(ordinal) {
-                            match spec.kind {
-                                LookupKind::Array | LookupKind::PerCpuArray => {
-                                    lookup_call_counter += 1;
-                                    lookup_call_ordinal.insert((sym.address, local_ip), ordinal);
-                                    for ib in build_x86_array_lookup(spec)? {
+                        let spec = lookup_sites.get(ordinal).ok_or_else(|| {
+                            anyhow!(
+                                "x86 bpf_map_lookup_elem call site {ordinal} in {} is missing --lookup-site metadata",
+                                sym.name
+                            )
+                        })?;
+                        lookup_call_counter += 1;
+                        lookup_call_ordinal.insert((sym.address, local_ip), ordinal);
+                        match spec.kind {
+                            LookupKind::Array | LookupKind::PerCpuArray => {
+                                for ib in build_x86_array_lookup(spec)? {
+                                    push_x86_synthetic(
+                                        &mut local,
+                                        &mut kinds,
+                                        &mut insn_local_ip,
+                                        &mut next_synthetic_ip,
+                                        ib,
+                                    )?;
+                                }
+                                resolved_helper_call_sites.insert((sym.address, local_ip));
+                                continue;
+                            }
+                            LookupKind::Call
+                            | LookupKind::Hash
+                            | LookupKind::LruHash
+                            | LookupKind::PerCpuHash => {
+                                if spec.target_addr == 0 {
+                                    bail!(
+                                        "x86 lookup-site {ordinal} is {:?} but has no target address",
+                                        spec.kind
+                                    );
+                                }
+                                push_x86_absolute_helper_call(
+                                    &mut local,
+                                    &mut kinds,
+                                    &mut insn_local_ip,
+                                    local_ip,
+                                    spec.target_addr,
+                                )?;
+                                if matches!(spec.kind, LookupKind::Hash) {
+                                    for ib in build_x86_hash_lookup_postcall(spec)? {
                                         push_x86_synthetic(
                                             &mut local,
                                             &mut kinds,
@@ -1378,64 +1388,31 @@ fn rewrite_x86(
                                             ib,
                                         )?;
                                     }
-                                    resolved_helper_call_sites.insert((sym.address, local_ip));
-                                    continue;
                                 }
-                                LookupKind::Call
-                                | LookupKind::Hash
-                                | LookupKind::LruHash
-                                | LookupKind::PerCpuHash => {
-                                    if spec.target_addr == 0 {
-                                        bail!(
-                                            "x86 lookup-site {ordinal} is {:?} but has no target address",
-                                            spec.kind
-                                        );
+                                if matches!(spec.kind, LookupKind::LruHash) {
+                                    for ib in build_x86_lru_hash_lookup_postcall(spec)? {
+                                        push_x86_synthetic(
+                                            &mut local,
+                                            &mut kinds,
+                                            &mut insn_local_ip,
+                                            &mut next_synthetic_ip,
+                                            ib,
+                                        )?;
                                     }
-                                    lookup_call_counter += 1;
-                                    lookup_call_ordinal.insert((sym.address, local_ip), ordinal);
-                                    push_x86_absolute_helper_call(
-                                        &mut local,
-                                        &mut kinds,
-                                        &mut insn_local_ip,
-                                        local_ip,
-                                        spec.target_addr,
-                                    )?;
-                                    if matches!(spec.kind, LookupKind::Hash) {
-                                        for ib in build_x86_hash_lookup_postcall(spec)? {
-                                            push_x86_synthetic(
-                                                &mut local,
-                                                &mut kinds,
-                                                &mut insn_local_ip,
-                                                &mut next_synthetic_ip,
-                                                ib,
-                                            )?;
-                                        }
-                                    }
-                                    if matches!(spec.kind, LookupKind::LruHash) {
-                                        for ib in build_x86_lru_hash_lookup_postcall(spec)? {
-                                            push_x86_synthetic(
-                                                &mut local,
-                                                &mut kinds,
-                                                &mut insn_local_ip,
-                                                &mut next_synthetic_ip,
-                                                ib,
-                                            )?;
-                                        }
-                                    }
-                                    if matches!(spec.kind, LookupKind::PerCpuHash) {
-                                        for ib in build_x86_percpu_hash_lookup_postcall(spec)? {
-                                            push_x86_synthetic(
-                                                &mut local,
-                                                &mut kinds,
-                                                &mut insn_local_ip,
-                                                &mut next_synthetic_ip,
-                                                ib,
-                                            )?;
-                                        }
-                                    }
-                                    resolved_helper_call_sites.insert((sym.address, local_ip));
-                                    continue;
                                 }
+                                if matches!(spec.kind, LookupKind::PerCpuHash) {
+                                    for ib in build_x86_percpu_hash_lookup_postcall(spec)? {
+                                        push_x86_synthetic(
+                                            &mut local,
+                                            &mut kinds,
+                                            &mut insn_local_ip,
+                                            &mut next_synthetic_ip,
+                                            ib,
+                                        )?;
+                                    }
+                                }
+                                resolved_helper_call_sites.insert((sym.address, local_ip));
+                                continue;
                             }
                         }
                     }
@@ -1517,47 +1494,47 @@ fn rewrite_x86(
                 if let Some(name) = helper_call_sites.get(&(sym.address, local_ip)) {
                     if name == "bpf_map_lookup_elem" {
                         let ordinal = lookup_call_counter;
+                        let spec = lookup_sites.get(ordinal).ok_or_else(|| {
+                            anyhow!(
+                                "x86 bpf_map_lookup_elem call site {ordinal} in {} is missing --lookup-site metadata",
+                                sym.name
+                            )
+                        })?;
                         lookup_call_counter += 1;
                         lookup_call_ordinal.insert((sym.address, local_ip), ordinal);
-                        if let Some(spec) = lookup_sites.get(ordinal) {
-                            if matches!(spec.kind, LookupKind::Hash) {
-                                for ib in build_x86_hash_lookup_postcall(spec)? {
-                                    push_x86_synthetic(
-                                        &mut local,
-                                        &mut kinds,
-                                        &mut insn_local_ip,
-                                        &mut next_synthetic_ip,
-                                        ib,
-                                    )?;
-                                }
-                            }
-                            if matches!(spec.kind, LookupKind::LruHash) {
-                                for ib in build_x86_lru_hash_lookup_postcall(spec)? {
-                                    push_x86_synthetic(
-                                        &mut local,
-                                        &mut kinds,
-                                        &mut insn_local_ip,
-                                        &mut next_synthetic_ip,
-                                        ib,
-                                    )?;
-                                }
-                            }
-                            if matches!(spec.kind, LookupKind::PerCpuHash) {
-                                for ib in build_x86_percpu_hash_lookup_postcall(spec)? {
-                                    push_x86_synthetic(
-                                        &mut local,
-                                        &mut kinds,
-                                        &mut insn_local_ip,
-                                        &mut next_synthetic_ip,
-                                        ib,
-                                    )?;
-                                }
+                        if matches!(spec.kind, LookupKind::Hash) {
+                            for ib in build_x86_hash_lookup_postcall(spec)? {
+                                push_x86_synthetic(
+                                    &mut local,
+                                    &mut kinds,
+                                    &mut insn_local_ip,
+                                    &mut next_synthetic_ip,
+                                    ib,
+                                )?;
                             }
                         }
-                        // No spec for this ordinal -> falls through to
-                        // shared `bpf_map_lookup_elem` pool entry in
-                        // apply_elf_relocations (legacy / standalone
-                        // linker invocation).
+                        if matches!(spec.kind, LookupKind::LruHash) {
+                            for ib in build_x86_lru_hash_lookup_postcall(spec)? {
+                                push_x86_synthetic(
+                                    &mut local,
+                                    &mut kinds,
+                                    &mut insn_local_ip,
+                                    &mut next_synthetic_ip,
+                                    ib,
+                                )?;
+                            }
+                        }
+                        if matches!(spec.kind, LookupKind::PerCpuHash) {
+                            for ib in build_x86_percpu_hash_lookup_postcall(spec)? {
+                                push_x86_synthetic(
+                                    &mut local,
+                                    &mut kinds,
+                                    &mut insn_local_ip,
+                                    &mut next_synthetic_ip,
+                                    ib,
+                                )?;
+                            }
+                        }
                     }
                 }
             }
@@ -2770,65 +2747,69 @@ fn rewrite_arm64(
                         let mut helper_addr = helper_addrs.get(&reloc.target_name).copied();
                         if reloc.target_name == "bpf_map_lookup_elem" && is_entry {
                             let ordinal = lookup_call_counter;
+                            let spec = lookup_sites.get(ordinal).ok_or_else(|| {
+                                anyhow!(
+                                    "arm64 bpf_map_lookup_elem call site {ordinal} in {} is missing --lookup-site metadata",
+                                    sym.name
+                                )
+                            })?;
                             lookup_call_counter += 1;
-                            if let Some(spec) = lookup_sites.get(ordinal) {
-                                match spec.kind {
-                                    LookupKind::Array | LookupKind::PerCpuArray => {
-                                        for word in build_arm64_array_lookup(spec)? {
-                                            append_u32(&mut blob, word);
-                                        }
-                                        continue;
+                            match spec.kind {
+                                LookupKind::Array | LookupKind::PerCpuArray => {
+                                    for word in build_arm64_array_lookup(spec)? {
+                                        append_u32(&mut blob, word);
                                     }
-                                    LookupKind::Call => {
-                                        if spec.target_addr == 0 {
-                                            bail!(
-                                                "arm64 lookup-site {ordinal} is call but has no target address"
-                                            );
-                                        }
-                                        helper_addr = Some(spec.target_addr);
+                                    continue;
+                                }
+                                LookupKind::Call => {
+                                    if spec.target_addr == 0 {
+                                        bail!(
+                                            "arm64 lookup-site {ordinal} is call but has no target address"
+                                        );
                                     }
-                                    LookupKind::Hash => {
-                                        if spec.target_addr == 0 {
-                                            bail!(
-                                                "arm64 lookup-site {ordinal} is hash but has no target address"
-                                            );
-                                        }
-                                        for word in arm64_helper_call_sequence(spec.target_addr)? {
-                                            append_u32(&mut blob, word);
-                                        }
-                                        for word in build_arm64_hash_lookup_postcall(spec)? {
-                                            append_u32(&mut blob, word);
-                                        }
-                                        continue;
+                                    helper_addr = Some(spec.target_addr);
+                                }
+                                LookupKind::Hash => {
+                                    if spec.target_addr == 0 {
+                                        bail!(
+                                            "arm64 lookup-site {ordinal} is hash but has no target address"
+                                        );
                                     }
-                                    LookupKind::LruHash => {
-                                        if spec.target_addr == 0 {
-                                            bail!(
-                                                "arm64 lookup-site {ordinal} is lru_hash but has no target address"
-                                            );
-                                        }
-                                        for word in arm64_helper_call_sequence(spec.target_addr)? {
-                                            append_u32(&mut blob, word);
-                                        }
-                                        for word in build_arm64_lru_hash_lookup_postcall(spec)? {
-                                            append_u32(&mut blob, word);
-                                        }
-                                        continue;
+                                    for word in arm64_helper_call_sequence(spec.target_addr)? {
+                                        append_u32(&mut blob, word);
                                     }
-                                    LookupKind::PerCpuHash => {
-                                        if spec.target_addr == 0 {
-                                            bail!(
-                                                "arm64 lookup-site {ordinal} is percpu_hash but has no target address"
-                                            );
-                                        }
-                                        for word in arm64_helper_call_sequence(spec.target_addr)? {
-                                            append_u32(&mut blob, word);
-                                        }
-                                        for word in build_arm64_percpu_hash_lookup_postcall(spec)? {
-                                            append_u32(&mut blob, word);
-                                        }
-                                        continue;
+                                    for word in build_arm64_hash_lookup_postcall(spec)? {
+                                        append_u32(&mut blob, word);
                                     }
+                                    continue;
+                                }
+                                LookupKind::LruHash => {
+                                    if spec.target_addr == 0 {
+                                        bail!(
+                                            "arm64 lookup-site {ordinal} is lru_hash but has no target address"
+                                        );
+                                    }
+                                    for word in arm64_helper_call_sequence(spec.target_addr)? {
+                                        append_u32(&mut blob, word);
+                                    }
+                                    for word in build_arm64_lru_hash_lookup_postcall(spec)? {
+                                        append_u32(&mut blob, word);
+                                    }
+                                    continue;
+                                }
+                                LookupKind::PerCpuHash => {
+                                    if spec.target_addr == 0 {
+                                        bail!(
+                                            "arm64 lookup-site {ordinal} is percpu_hash but has no target address"
+                                        );
+                                    }
+                                    for word in arm64_helper_call_sequence(spec.target_addr)? {
+                                        append_u32(&mut blob, word);
+                                    }
+                                    for word in build_arm64_percpu_hash_lookup_postcall(spec)? {
+                                        append_u32(&mut blob, word);
+                                    }
+                                    continue;
                                 }
                             }
                         }
@@ -3570,29 +3551,37 @@ fn apply_elf_relocations(
                     }
 
                     // Per-call-site routing for `bpf_map_lookup_elem`.
-                    // If the runner supplied a `--lookup-site` for
-                    // this call's BPF-source ordinal, route this site
-                    // to a *dedicated* pool entry holding the
-                    // per-site target (`__htab_map_lookup_elem` for
-                    // HASH maps, plain `bpf_map_lookup_elem`
-                    // otherwise). This avoids the old single-shared-
-                    // pool-entry limitation that forced all
-                    // `bpf_map_lookup_elem` calls to share one target,
-                    // and lets multi-map programs get HASH-inline on
-                    // their HASH lookups while keeping ARRAY/PERCPU
-                    // lookups on the plain helper.
+                    // Route each `bpf_map_lookup_elem` call to the
+                    // mandatory per-site target supplied by the runner.
+                    // This avoids a single shared pool entry forcing all
+                    // lookup sites to share one helper target.
                     let mut dedicated_pool_addr: Option<u64> = None;
                     if target_name == "bpf_map_lookup_elem" {
                         // The reloc offset points at the disp32 of the
                         // 6-byte indirect call (`ff 15 dd dd dd dd`);
                         // the call's opcode is 2 bytes earlier.
-                        if let Some(&ord) =
-                            lookup_call_ordinal.get(&(layout.sym.address, got_call_local_off))
-                        {
-                            if let Some(spec) = lookup_sites.get(ord) {
-                                dedicated_pool_addr = Some(spec.target_addr);
-                            }
+                        let ord = *lookup_call_ordinal
+                            .get(&(layout.sym.address, got_call_local_off))
+                            .ok_or_else(|| {
+                                anyhow!(
+                                    "x86 bpf_map_lookup_elem GOT relocation in {} at {:#x} has no lookup-site ordinal",
+                                    layout.sym.name,
+                                    got_call_local_off
+                                )
+                            })?;
+                        let spec = lookup_sites.get(ord).ok_or_else(|| {
+                            anyhow!(
+                                "x86 bpf_map_lookup_elem GOT relocation in {} references missing lookup-site {ord}",
+                                layout.sym.name
+                            )
+                        })?;
+                        if spec.target_addr == 0 {
+                            bail!(
+                                "x86 lookup-site {ord} is {:?} but has no GOT-call target address",
+                                spec.kind
+                            );
                         }
+                        dedicated_pool_addr = Some(spec.target_addr);
                     }
                     let kernel_addr = if let Some(a) = dedicated_pool_addr {
                         a

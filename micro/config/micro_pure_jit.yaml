@@ -8,13 +8,6 @@ paths:
 build:
   runner_binary: runner/build/micro_exec
 
-defaults:
-  samples: 10
-  warmups: 2
-  inner_repeat: 100000
-  runtimes: [native, llvmbpf, kernel]
-  output: micro/results/dev/pure_jit.json
-
 benchmark_defaults:
   io_mode: staged
   expected_retval: 2
@@ -232,7 +225,6 @@ benchmarks:
 
   - name: tc_packet_checksum_fold
     base_name: tc_packet_checksum_fold
-    program_name: tc_packet_checksum_fold_prog
     io_mode: staged
     kernel_input_size: 1032
     input_generator: packet_checksum_fold
@@ -244,7 +236,6 @@ benchmarks:
 
   - name: cgroup_skb_hash_chain
     base_name: cgroup_skb_hash_chain
-    program_name: cgroup_skb_hash_chain_prog
     io_mode: staged
     kernel_input_size: 72
     input_generator: cgroup_skb_hash_chain

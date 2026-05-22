@@ -9,6 +9,7 @@
 #include <cerrno>
 #include <cstring>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -22,6 +23,40 @@ struct counter_definition {
 struct opened_counter {
     std::string name;
     int fd = -1;
+
+    opened_counter(std::string counter_name, int counter_fd)
+        : name(std::move(counter_name)), fd(counter_fd)
+    {
+    }
+
+    opened_counter(const opened_counter &) = delete;
+    opened_counter &operator=(const opened_counter &) = delete;
+
+    opened_counter(opened_counter &&other) noexcept
+        : name(std::move(other.name)), fd(other.fd)
+    {
+        other.fd = -1;
+    }
+
+    opened_counter &operator=(opened_counter &&other) noexcept
+    {
+        if (this != &other) {
+            if (fd >= 0) {
+                close(fd);
+            }
+            name = std::move(other.name);
+            fd = other.fd;
+            other.fd = -1;
+        }
+        return *this;
+    }
+
+    ~opened_counter()
+    {
+        if (fd >= 0) {
+            close(fd);
+        }
+    }
 };
 
 constexpr std::array<counter_definition, 10> kCounterDefinitions = {{
@@ -47,17 +82,7 @@ int open_perf_counter(const counter_definition &definition, bool include_kernel)
     attr.exclude_kernel = include_kernel ? 0 : 1;
     attr.exclude_hv = 1;
     attr.exclude_guest = 1;
-
     return static_cast<int>(syscall(__NR_perf_event_open, &attr, 0, -1, -1, 0));
-}
-
-void close_counters(const std::vector<opened_counter> &counters)
-{
-    for (const auto &counter : counters) {
-        if (counter.fd >= 0) {
-            close(counter.fd);
-        }
-    }
 }
 
 std::string errno_message(const std::string &prefix)
@@ -65,16 +90,24 @@ std::string errno_message(const std::string &prefix)
     return prefix + ": " + std::strerror(errno);
 }
 
-std::string join_messages(const std::vector<std::string> &messages)
+void checked_ioctl(int fd, unsigned long request, const std::string &operation)
 {
-    std::string joined;
-    for (size_t index = 0; index < messages.size(); ++index) {
-        if (index != 0) {
-            joined += "; ";
-        }
-        joined += messages[index];
+    if (ioctl(fd, request, 0) != 0) {
+        fail(errno_message(operation));
     }
-    return joined;
+}
+
+uint64_t read_counter_value(const opened_counter &counter)
+{
+    uint64_t value = 0;
+    const ssize_t bytes = read(counter.fd, &value, sizeof(value));
+    if (bytes != static_cast<ssize_t>(sizeof(value))) {
+        if (bytes < 0) {
+            fail(errno_message("read perf counter " + counter.name));
+        }
+        fail("short read from perf counter " + counter.name);
+    }
+    return value;
 }
 
 } // namespace
@@ -86,77 +119,41 @@ perf_counter_capture measure_perf_counters(
     perf_counter_capture capture;
     capture.requested = options.enabled;
     capture.include_kernel = options.include_kernel;
-    capture.scope = options.scope;
-
     if (!options.enabled) {
         callback();
         return capture;
     }
 
     std::vector<opened_counter> counters;
-    std::vector<std::string> errors;
-
+    counters.reserve(kCounterDefinitions.size());
     for (const auto &definition : kCounterDefinitions) {
         const int fd = open_perf_counter(definition, options.include_kernel);
         if (fd < 0) {
-            errors.push_back(errno_message(std::string("perf_event_open(") + definition.name + ")"));
-            continue;
+            fail(errno_message(std::string("perf_event_open ") + definition.name));
         }
-        counters.push_back({definition.name, fd});
-    }
-
-    if (counters.empty()) {
-        capture.error = join_messages(errors);
-        callback();
-        return capture;
-    }
-
-    auto disable_and_close = [&]() {
-        for (const auto &counter : counters) {
-            if (counter.fd >= 0) {
-                ioctl(counter.fd, PERF_EVENT_IOC_DISABLE, 0);
-            }
-        }
-        close_counters(counters);
-    };
-
-    for (const auto &counter : counters) {
-        if (ioctl(counter.fd, PERF_EVENT_IOC_RESET, 0) != 0) {
-            errors.push_back(errno_message("PERF_EVENT_IOC_RESET(" + counter.name + ")"));
-        }
-        if (ioctl(counter.fd, PERF_EVENT_IOC_ENABLE, 0) != 0) {
-            errors.push_back(errno_message("PERF_EVENT_IOC_ENABLE(" + counter.name + ")"));
-        }
-    }
-
-    try {
-        callback();
-    } catch (...) {
-        disable_and_close();
-        throw;
+        counters.emplace_back(definition.name, fd);
     }
 
     for (const auto &counter : counters) {
-        if (ioctl(counter.fd, PERF_EVENT_IOC_DISABLE, 0) != 0) {
-            errors.push_back(errno_message("PERF_EVENT_IOC_DISABLE(" + counter.name + ")"));
-        }
+        checked_ioctl(counter.fd, PERF_EVENT_IOC_RESET, "reset perf counter " + counter.name);
     }
+    for (const auto &counter : counters) {
+        checked_ioctl(counter.fd, PERF_EVENT_IOC_ENABLE, "enable perf counter " + counter.name);
+    }
+
+    callback();
 
     for (const auto &counter : counters) {
-        uint64_t value = 0;
-        const ssize_t bytes = read(counter.fd, &value, sizeof(value));
-        if (bytes != static_cast<ssize_t>(sizeof(value))) {
-            errors.push_back(errno_message("read(" + counter.name + ")"));
-            continue;
-        }
-        capture.counters.push_back({counter.name, value});
+        checked_ioctl(counter.fd, PERF_EVENT_IOC_DISABLE, "disable perf counter " + counter.name);
     }
 
-    capture.collected = !capture.counters.empty();
-    if (!errors.empty()) {
-        capture.error = join_messages(errors);
+    capture.collected = true;
+    capture.counters.reserve(counters.size());
+    for (const auto &counter : counters) {
+        capture.counters.push_back({
+            .name = counter.name,
+            .value = read_counter_value(counter),
+        });
     }
-
-    close_counters(counters);
     return capture;
 }

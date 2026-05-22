@@ -625,7 +625,7 @@ sample_result run_llvmbpf(const cli_options &options)
     constexpr int kLlvmBpfOptimizationLevel = 3;
 
     const auto program_image_start = clock_type::now();
-    const auto image = load_program_image(options.program, options.program_name);
+    const auto image = load_program_image(options.program);
     const auto program_image_end = clock_type::now();
     const std::string effective_io_mode = resolve_effective_io_mode(options, image);
 
@@ -716,11 +716,6 @@ sample_result run_llvmbpf(const cli_options &options)
             : nullptr;
     clock_type::time_point exec_start {};
     clock_type::time_point exec_end {};
-    const perf_counter_options perf_options = {
-        .enabled = options.perf_counters,
-        .include_kernel = false,
-        .scope = options.perf_scope,
-    };
     const auto run_timed_repeat = [&](auto &&exec_once) {
         const uint64_t measure_start =
             use_tsc_timing ? rdtsc_start() : monotonic_now_ns();
@@ -783,63 +778,26 @@ sample_result run_llvmbpf(const cli_options &options)
         fail("io-mode requires an XDP or skb packet context");
     };
 
-    perf_counter_capture perf_counters;
-    if (options.perf_scope == "full_repeat_avg") {
-        exec_start = clock_type::now();
-        if (packet_input.empty()) {
-            uint8_t dummy_ctx[8] = {};
-            perf_counters = measure_perf_counters(perf_options, [&]() {
-                run_map_repeat(dummy_ctx, sizeof(dummy_ctx));
-            });
-        } else {
-            lowmem_buffer packet_buffer(packet_input.size());
-            std::memcpy(packet_buffer.data(), packet_input.data(), packet_input.size());
-            std::optional<uint64_t> skb_result;
+    exec_start = clock_type::now();
+    if (packet_input.empty()) {
+        uint8_t dummy_ctx[8] = {};
+        run_map_repeat(dummy_ctx, sizeof(dummy_ctx));
+    } else {
+        lowmem_buffer packet_buffer(packet_input.size());
+        std::memcpy(packet_buffer.data(), packet_input.data(), packet_input.size());
 
-            perf_counters = measure_perf_counters(perf_options, [&]() {
-                skb_result = run_packet_context(packet_buffer);
-            });
-            if (!result_from_map) {
-                if (skb_result.has_value()) {
-                    result = *skb_result;
-                } else {
-                    result = read_u64_result(
-                        packet_buffer.data(),
-                        packet_buffer.size());
-                }
+        const auto skb_result = run_packet_context(packet_buffer);
+        if (!result_from_map) {
+            if (skb_result.has_value()) {
+                result = *skb_result;
+            } else {
+                result = read_u64_result(
+                    packet_buffer.data(),
+                    packet_buffer.size());
             }
         }
-        exec_end = clock_type::now();
-
-        for (auto &counter : perf_counters.counters) {
-            counter.value /= repeat;
-        }
-    } else {
-        perf_counters = measure_perf_counters(
-            perf_options,
-            [&]() {
-                exec_start = clock_type::now();
-                if (packet_input.empty()) {
-                    uint8_t dummy_ctx[8] = {};
-                    run_map_repeat(dummy_ctx, sizeof(dummy_ctx));
-                } else {
-                    lowmem_buffer packet_buffer(packet_input.size());
-                    std::memcpy(packet_buffer.data(), packet_input.data(), packet_input.size());
-
-                    const auto skb_result = run_packet_context(packet_buffer);
-                    if (!result_from_map) {
-                        if (skb_result.has_value()) {
-                            result = *skb_result;
-                        } else {
-                            result = read_u64_result(
-                                packet_buffer.data(),
-                                packet_buffer.size());
-                        }
-                    }
-                }
-                exec_end = clock_type::now();
-            });
     }
+    exec_end = clock_type::now();
     active_map_state = nullptr;
 
     if (tsc_freq_hz.has_value()) {
@@ -866,6 +824,5 @@ sample_result run_llvmbpf(const cli_options &options)
         {"vm_load_code_ns", elapsed_ns(load_code_start, load_code_end)},
         {"jit_compile_ns", sample.compile_ns},
     };
-    sample.perf_counters = std::move(perf_counters);
     return sample;
 }

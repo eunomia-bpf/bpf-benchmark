@@ -1343,7 +1343,7 @@ fn populate_katran_maps(maps: &[MapRef]) -> Result<()> {
     let mut vip = [0u8; 20];
     vip[..4].copy_from_slice(&[10, 100, 1, 1]);
     vip[16..18].copy_from_slice(&8080u16.to_be_bytes());
-    vip[18] = 17;
+    vip[18] = 6; // TCP — matches the TCP test packet (corpus also uses TCP_PROTO)
     let mut real_def = [0u8; 20];
     real_def[..4].copy_from_slice(&[10, 200, 0, 2]);
 

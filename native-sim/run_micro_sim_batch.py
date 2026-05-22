@@ -88,7 +88,6 @@ ARCHES = {
 @dataclass(frozen=True)
 class Bench:
     name: str
-    program_name: str
     input_generator: str
     expected_result: int
     expected_retval: int
@@ -124,7 +123,6 @@ def load_benches(config_path: Path) -> list[Bench]:
         benches.append(
             Bench(
                 name=item["name"],
-                program_name=item.get("program_name", item["name"]),
                 input_generator=generator,
                 expected_result=int(expected),
                 expected_retval=int(item.get("expected_retval", default_retval)),
@@ -198,7 +196,7 @@ def build_proof_objects(
         symbol = native_entry_symbol(
             config.objdump,
             native_obj,
-            [bench.program_name, bench.name, f"{bench.name}_xdp", f"{bench.name}_prog"],
+            [bench.name, f"{bench.name}_xdp", f"{bench.name}_prog"],
         )
         proof_obj = proof_object_dir / f"{bench.name}.proof.o"
         require_ok([

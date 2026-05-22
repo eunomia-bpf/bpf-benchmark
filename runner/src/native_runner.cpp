@@ -33,10 +33,11 @@ sample_result run_native(const cli_options &options) {
     const auto memory_start = clock_type::now(); auto input = materialize_memory(options.memory, options.input_size);
     const auto memory_end = clock_type::now();
     if (!options.native_program.has_value()) fail("run-native requires --native-program");
+    const auto image = load_program_image(options.program);
     const auto so = *options.native_program;
     const auto load_start = clock_type::now();
     void *handle = dlopen(so.c_str(), RTLD_NOW | RTLD_LOCAL); if (handle == nullptr) fail("dlopen failed for " + so.string() + ": " + dlerror());
-    const std::string symbol = options.program_name.value_or(benchmark_name_for_program(options.program) + "_xdp");
+    const std::string &symbol = image.program_name;
     dlerror();
     auto *fn = reinterpret_cast<native_prog_fn>(dlsym(handle, symbol.c_str())); const char *sym_error = dlerror();
     if (sym_error != nullptr) fail("dlsym failed for " + symbol + ": " + sym_error);
@@ -59,20 +60,16 @@ sample_result run_native(const cli_options &options) {
     skb.set_data_end(data_end_ptr);
     skb.set_len(static_cast<uint32_t>(data_end_ptr - data_ptr));
     uint32_t retval = 0; const uint32_t repeat = options.repeat > 0 ? options.repeat : 1;
-    const perf_counter_options perf_options {.enabled = options.perf_counters, .include_kernel = false, .scope = options.perf_scope};
     const auto exec_start = clock_type::now();
-    auto perf = measure_perf_counters(perf_options, [&]() {
-        for (uint32_t index = 0; index < repeat; ++index)
-            retval = static_cast<uint32_t>(fn(is_skb ? static_cast<void *>(skb.storage) : static_cast<void *>(&xdp)));
-    });
+    for (uint32_t index = 0; index < repeat; ++index)
+        retval = static_cast<uint32_t>(fn(is_skb ? static_cast<void *>(skb.storage) : static_cast<void *>(&xdp)));
     const auto exec_end = clock_type::now();
     uint64_t packet_result = 0; std::memcpy(&packet_result, data, sizeof(packet_result));
     const uint64_t result = is_skb ? skb.read_result() : packet_result;
     sample_result sample {.compile_ns = elapsed_ns(load_start, load_end), .exec_ns = elapsed_ns(exec_start, exec_end) / repeat};
     sample.timing_source = "clock_monotonic"; sample.timing_source_wall = "clock_monotonic"; sample.wall_exec_ns = sample.exec_ns;
     sample.result = result;
-    sample.retval = retval; sample.code_size = {.bpf_bytecode_bytes = 0, .native_code_bytes = native_code_bytes};
+    sample.retval = retval; sample.code_size = {.bpf_bytecode_bytes = image.code.size(), .native_code_bytes = native_code_bytes};
     sample.phases_ns = {{"memory_prepare_ns", elapsed_ns(memory_start, memory_end)}, {"native_load_ns", sample.compile_ns}};
-    sample.perf_counters = perf;
     dlclose(handle); return sample;
 }

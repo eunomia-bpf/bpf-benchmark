@@ -18,13 +18,6 @@ paths:
 build:
   runner_binary: runner/build/micro_exec
 
-defaults:
-  samples: 15
-  warmups: 2
-  inner_repeat: 100000
-  runtimes: [native_kernel, kernel]
-  output: micro/results/dev/stage2.json
-
 benchmark_defaults:
   io_mode: packet
   expected_retval: 2
@@ -47,7 +40,6 @@ benchmarks:
   # both run as root, which the micro suite always does via sudo).
   - name: helper_only_uid_gid
     base_name: helper_only_uid_gid
-    program_name: helper_only_uid_gid
     kernel_input_size: 64
     input_generator: stage2_zero64
     expected_result: 0
@@ -55,7 +47,6 @@ benchmarks:
 
   - name: helper_chain_simple
     base_name: helper_chain_simple
-    program_name: helper_chain_simple
     kernel_input_size: 64
     input_generator: stage2_zero64
     expected_result: 0
@@ -64,7 +55,6 @@ benchmarks:
   # Single map, simple update+lookup pattern.
   - name: map_array_lookup
     base_name: map_array_lookup
-    program_name: map_array_lookup
     kernel_input_size: 64
     input_generator: stage2_zero64
     expected_result: 0xDEADBEEFCAFE0001
@@ -72,7 +62,6 @@ benchmarks:
 
   - name: map_array_index_packet
     base_name: map_array_index_packet
-    program_name: map_array_index_packet
     kernel_input_size: 64
     input_generator: stage2_zero64
     expected_result: 0xDEADBEEFCAFEBABE
@@ -80,7 +69,6 @@ benchmarks:
 
   - name: map_hash_lookup
     base_name: map_hash_lookup
-    program_name: map_hash_lookup
     kernel_input_size: 64
     input_generator: stage2_zero64
     expected_result: 0x1122334455667788
@@ -88,7 +76,6 @@ benchmarks:
 
   - name: map_hash_str_key
     base_name: map_hash_str_key
-    program_name: map_hash_str_key
     kernel_input_size: 64
     input_generator: stage2_zero64
     expected_result: 0xFEEDFACEDEADBEEF
@@ -96,7 +83,6 @@ benchmarks:
 
   - name: map_percpu_array
     base_name: map_percpu_array
-    program_name: map_percpu_array
     kernel_input_size: 64
     input_generator: stage2_zero64
     expected_result: 0xFEEDFACECAFEBABE
@@ -104,7 +90,6 @@ benchmarks:
 
   - name: map_lru_hash_counter
     base_name: map_lru_hash_counter
-    program_name: map_lru_hash_counter
     kernel_input_size: 64
     input_generator: stage2_zero64
     expected_result: 1
@@ -112,7 +97,6 @@ benchmarks:
 
   - name: map_percpu_hash_counter
     base_name: map_percpu_hash_counter
-    program_name: map_percpu_hash_counter
     kernel_input_size: 64
     input_generator: stage2_zero64
     expected_result: 1
@@ -120,7 +104,6 @@ benchmarks:
 
   - name: combined_helper_map
     base_name: combined_helper_map
-    program_name: combined_helper_map
     kernel_input_size: 64
     input_generator: stage2_zero64
     expected_result: 0
@@ -128,7 +111,6 @@ benchmarks:
 
   - name: multi_map_policy
     base_name: multi_map_policy
-    program_name: multi_map_policy
     kernel_input_size: 64
     input_generator: stage2_zero64
     expected_result: 0x1234567812345678
@@ -136,7 +118,6 @@ benchmarks:
 
   - name: packet_5tuple_classify
     base_name: packet_5tuple_classify
-    program_name: packet_5tuple_classify
     kernel_input_size: 64
     input_generator: stage2_zero64
     expected_result: 0xCAFEBABE
@@ -144,7 +125,6 @@ benchmarks:
 
   - name: stats_mixed_helpers
     base_name: stats_mixed_helpers
-    program_name: stats_mixed_helpers
     kernel_input_size: 64
     input_generator: stage2_zero64
     expected_result: 1

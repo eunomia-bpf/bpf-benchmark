@@ -172,19 +172,6 @@ std::vector<function_symbol> collect_function_symbols(Elf *elf)
     return functions;
 }
 
-const function_symbol *find_function_symbol(
-    const std::vector<function_symbol> &functions,
-    size_t section_index,
-    const std::string &name)
-{
-    for (const auto &function : functions) {
-        if (function.section_index == section_index && function.name == name) {
-            return &function;
-        }
-    }
-    return nullptr;
-}
-
 const function_symbol *find_function_symbol_by_name(
     const std::vector<function_symbol> &functions,
     const std::string &name)
@@ -200,6 +187,35 @@ const function_symbol *find_function_symbol_by_name(
         found = &function;
     }
     return found;
+}
+
+std::string select_single_program_name(const std::filesystem::path &path)
+{
+    bpf_object_open_opts open_opts = {};
+    open_opts.sz = sizeof(open_opts);
+    bpf_object *raw_object = bpf_object__open_file(path.c_str(), &open_opts);
+    const int open_error = libbpf_get_error(raw_object);
+    if (open_error != 0) {
+        fail("bpf_object__open_file failed: " + libbpf_error_string(open_error));
+    }
+    bpf_object_ptr object(raw_object);
+
+    std::optional<std::string> selected;
+    bpf_program *program = nullptr;
+    while ((program = bpf_object__next_program(object.get(), program)) != nullptr) {
+        const char *name = bpf_program__name(program);
+        if (name == nullptr || name[0] == '\0') {
+            fail("BPF program has no name in object: " + path.string());
+        }
+        if (selected.has_value()) {
+            fail("object contains multiple BPF programs; split it before running micro_exec");
+        }
+        selected = name;
+    }
+    if (!selected.has_value()) {
+        fail("no program found in object: " + path.string());
+    }
+    return *selected;
 }
 
 std::string section_name_by_index(Elf *elf, size_t shstrndx, size_t section_index)
@@ -335,27 +351,6 @@ void write_ldimm64_immediate(bpf_insn *insns, size_t insn_index, size_t insn_cou
 
     insns[insn_index].imm = static_cast<int32_t>(value & 0xffffffffu);
     insns[insn_index + 1].imm = static_cast<int32_t>(value >> 32);
-}
-
-bpf_program *find_program(bpf_object *object, const std::optional<std::string> &program_name)
-{
-    bpf_program *program = nullptr;
-    if (!program_name.has_value()) {
-        program = bpf_object__next_program(object, nullptr);
-        if (program == nullptr) {
-            fail("no program found in object");
-        }
-        return program;
-    }
-
-    while ((program = bpf_object__next_program(object, program)) != nullptr) {
-        const char *current_name = bpf_program__name(program);
-        if (current_name != nullptr && *program_name == current_name) {
-            return program;
-        }
-    }
-
-    fail("unable to find program named '" + *program_name + "'");
 }
 
 void append_section_slice(
@@ -673,7 +668,7 @@ std::vector<program_descriptor> list_programs(const std::filesystem::path &path)
     return programs;
 }
 
-program_image load_program_image(const std::filesystem::path &path, const std::optional<std::string> &program_name)
+program_image load_program_image(const std::filesystem::path &path)
 {
     if (elf_version(EV_CURRENT) == EV_NONE) {
         fail("libelf initialization failed");
@@ -694,16 +689,13 @@ program_image load_program_image(const std::filesystem::path &path, const std::o
     program_image image;
     image.license = read_string_section_or_fail(elf, shstrndx, "license");
 
+    const std::string program_name = select_single_program_name(path);
     const auto function_symbols = collect_function_symbols(elf);
-    const function_symbol *selected_symbol = nullptr;
-    if (program_name.has_value()) {
-        selected_symbol = find_function_symbol_by_name(function_symbols, *program_name);
-    } else if (!function_symbols.empty()) {
-        selected_symbol = &function_symbols.front();
-    }
+    const function_symbol *selected_symbol =
+        find_function_symbol_by_name(function_symbols, program_name);
     if (selected_symbol == nullptr) {
         elf_end(elf);
-        fail("unable to find selected program symbol in ELF");
+        fail("unable to find selected program symbol in ELF: " + program_name);
     }
     const size_t target_section_index = selected_symbol->section_index;
     const std::string section_name = section_name_by_index(elf, shstrndx, target_section_index);

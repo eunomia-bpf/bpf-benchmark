@@ -47,22 +47,15 @@ class DefaultsSpec:
 @dataclass(frozen=True, slots=True)
 class CatalogTarget:
     name: str
-    kind: str
     object_path: Path
     native_object_path: Path | None = None
     proof_object_path: Path | None = None
     proof_compile_metadata_path: Path | None = None
-    proof_program_name: str | None = None
-    program_names: tuple[str, ...] = ()
-    sections: tuple[str, ...] = ()
-    prog_type: str | None = None
     io_mode: str | None = None
     input_size: int | None = None
-    input_path: Path | None = None
     input_generator: str | None = None
     expected_result: int | None = None
     expected_retval: int | None = None
-    test_method: str | None = None
     tags: tuple[str, ...] = ()
     runtime_names: tuple[str, ...] = ()
     metadata: Mapping[str, object] = field(default_factory=dict)
@@ -80,17 +73,11 @@ class CatalogBuild:
 @dataclass(frozen=True, slots=True)
 class CatalogManifest:
     manifest_path: Path
-    manifest_kind: str
-    schema_version: int
     suite_name: str
     defaults: DefaultsSpec
     build: CatalogBuild
     runtimes: tuple[CatalogRuntime, ...]
     targets: tuple[CatalogTarget, ...]
-
-    @property
-    def target_count(self) -> int:
-        return len(self.targets)
 
     @property
     def targets_by_name(self) -> Mapping[str, CatalogTarget]:
@@ -143,13 +130,10 @@ def _load_micro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
     program_dir_override = os.environ.get("BPFREJIT_MICRO_PROGRAM_DIR", "").strip()
     runner_binary_override = os.environ.get("BPFREJIT_MICRO_RUNNER_BINARY", "").strip()
     proof_dir_override = os.environ.get("BPFREJIT_MICRO_PROOF_DIR", "").strip()
-    proof_arch = os.environ.get("BPFREJIT_MICRO_PROOF_ARCH", "").strip()
     program_dir = _resolve_path(program_dir_override or data.get("paths", {}).get("program_dir"), root_dir)
     if program_dir is None:
         raise ValueError("micro manifest missing paths.program_dir")
     proof_dir = _resolve_path(proof_dir_override or data.get("paths", {}).get("proof_dir"), root_dir)
-    if not proof_arch:
-        proof_arch = str(data.get("proof_arch") or "x86")
 
     raw_runtimes = data.get("runtimes")
     if not isinstance(raw_runtimes, Sequence) or not raw_runtimes:
@@ -166,22 +150,17 @@ def _load_micro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
         native_object_path = (program_dir / f"{base_name}{native_suffix}").resolve()
         proof_object_path = None
         proof_compile_metadata_path = None
-        proof_program_name = None
         if proof_dir is not None:
             proof_object_path = (proof_dir / f"{base_name}.bpf.o").resolve()
             proof_compile_metadata_path = (proof_dir / f"{base_name}.compile.json").resolve()
-            proof_program_name = str(benchmark.get("proof_program_name", f"{base_name}_{proof_arch}_sim_xdp"))
         runtime_names = tuple(str(runtime) for runtime in benchmark.get("runtimes", ()))
         targets.append(
             CatalogTarget(
                 name=str(benchmark["name"]),
-                kind="micro",
                 object_path=object_path,
                 native_object_path=native_object_path,
                 proof_object_path=proof_object_path,
                 proof_compile_metadata_path=proof_compile_metadata_path,
-                proof_program_name=proof_program_name,
-                program_names=(str(benchmark.get("program_name", f"{base_name}_xdp")),),
                 io_mode=str(benchmark.get("io_mode", default_io_mode)),
                 input_size=int(benchmark.get("kernel_input_size", 0) or 0),
                 input_generator=str(benchmark["input_generator"]) if benchmark.get("input_generator") else None,
@@ -197,8 +176,6 @@ def _load_micro_catalog(path: Path, data: Mapping[str, Any]) -> CatalogManifest:
 
     return CatalogManifest(
         manifest_path=path,
-        manifest_kind="micro",
-        schema_version=int(data.get("schema_version", 1)),
         suite_name=str(data.get("suite_name", path.stem)),
         defaults=DefaultsSpec(
             samples=int(defaults_raw["samples"]) if defaults_raw.get("samples") is not None else None,

@@ -49,16 +49,6 @@ def validate_publication_environment(
             "Turbo boost is enabled. Consider disabling for stable measurements."
         )
 
-    perf_event_paranoid = str(host.get("perf_event_paranoid", "unknown"))
-    try:
-        perf_event_paranoid_value = int(perf_event_paranoid)
-    except ValueError:
-        perf_event_paranoid_value = None
-    if perf_event_paranoid_value is not None and perf_event_paranoid_value > 1:
-        report_publication_issue(
-            f"perf_event_paranoid={perf_event_paranoid}. Some perf counters may not be available."
-        )
-
     if cpu is None:
         report_publication_issue(
             "No CPU affinity set. Consider using --cpu for isolated measurements."

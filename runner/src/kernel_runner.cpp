@@ -94,11 +94,6 @@ struct kernel_run_measurement {
     std::chrono::steady_clock::time_point wall_end {};
 };
 
-struct kernel_run_pass_result {
-    kernel_run_measurement measurement {};
-    perf_counter_capture perf_counters {};
-};
-
 void handle_measure_signal(int)
 {
     g_measure_signal_seen = 1;
@@ -334,7 +329,7 @@ kernel_run_measurement execute_kernel_probe(kernel_probe_context &context)
     return measurement;
 }
 
-kernel_run_pass_result execute_kernel_measurement_pass(
+kernel_run_measurement execute_kernel_measurement_pass(
     kernel_probe_context &context,
     const cli_options &options)
 {
@@ -342,29 +337,7 @@ kernel_run_pass_result execute_kernel_measurement_pass(
         static_cast<void>(execute_kernel_probe(context));
     }
 
-    kernel_run_pass_result result {};
-    if (!options.perf_counters) {
-        result.measurement = execute_kernel_probe(context);
-        return result;
-    }
-
-    const perf_counter_options perf_options = {
-        .enabled = true,
-        .include_kernel = true,
-        .scope = options.perf_scope,
-    };
-    result.perf_counters = measure_perf_counters(
-        perf_options,
-        [&]() {
-            result.measurement = execute_kernel_probe(context);
-        });
-
-    if (options.perf_scope == "full_repeat_avg") {
-        for (auto &counter : result.perf_counters.counters) {
-            counter.value /= context.effective_repeat;
-        }
-    }
-    return result;
+    return execute_kernel_probe(context);
 }
 
 bool context_mode_supports_kernel_repeat(uint32_t prog_type)
@@ -668,47 +641,20 @@ void maybe_load_map_fixtures(const cli_options &options, bpf_object *object)
     load_map_fixtures(*options.fixture_path, object);
 }
 
-bpf_program *find_program(bpf_object *object, const std::optional<std::string> &program_name)
+bpf_program *find_single_program(bpf_object *object)
 {
     bpf_program *program = nullptr;
-    if (!program_name.has_value()) {
-        program = bpf_object__next_program(object, nullptr);
-        if (program == nullptr) {
-            fail("no program found in object");
-        }
-        return program;
-    }
-
+    bpf_program *selected = nullptr;
     while ((program = bpf_object__next_program(object, program)) != nullptr) {
-        const char *current_name = bpf_program__name(program);
-        if (current_name != nullptr && *program_name == current_name) {
-            return program;
+        if (selected != nullptr) {
+            fail("object contains multiple BPF programs; split it before running micro_exec");
         }
+        selected = program;
     }
-    fail("unable to find program named '" + *program_name + "'");
-}
-
-void configure_autoload(bpf_object *object, const cli_options &options)
-{
-    if (!options.program_name.has_value() || options.program_name->empty()) {
-        return;
+    if (selected == nullptr) {
+        fail("no program found in object");
     }
-
-    bpf_map *map = nullptr;
-    while ((map = bpf_object__next_map(object, map)) != nullptr) {
-        if (bpf_map__type(map) == BPF_MAP_TYPE_PROG_ARRAY) {
-            return;
-        }
-    }
-
-    bpf_program *program = nullptr;
-    while ((program = bpf_object__next_program(object, program)) != nullptr) {
-        const char *current_name = bpf_program__name(program);
-        const bool autoload = current_name != nullptr && *options.program_name == current_name;
-        if (bpf_program__set_autoload(program, autoload) != 0) {
-            fail("unable to configure program autoload");
-        }
-    }
+    return selected;
 }
 
 bool skb_payload_starts_after_l2(uint32_t prog_type)
@@ -982,7 +928,7 @@ std::vector<sample_result> run_kernel(const cli_options &options)
     }
 
     const auto object_open_start = std::chrono::steady_clock::now();
-    program_image raw_image = load_program_image(options.program, options.program_name);
+    program_image raw_image = load_program_image(options.program);
     const bool raw_kinsn_program = !raw_image.kinsn_calls.empty();
     bpf_object_ptr object;
     unique_fd raw_program_fd;
@@ -1019,7 +965,7 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         object_open_end = std::chrono::steady_clock::now();
 
         object.reset(raw_object);
-        configure_autoload(object.get(), options);
+        bpf_program *prog = find_single_program(object.get());
 
         object_load_start = std::chrono::steady_clock::now();
         const int load_error = bpf_object__load(object.get());
@@ -1031,7 +977,6 @@ std::vector<sample_result> run_kernel(const cli_options &options)
 
         maybe_load_map_fixtures(options, object.get());
 
-        bpf_program *prog = find_program(object.get(), options.program_name);
         program_fd = bpf_program__fd(prog);
         if (program_fd < 0) {
             fail("unable to obtain program fd");
@@ -1161,8 +1106,7 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         wait_for_measure_signal();
     }
 
-    auto run_pass = execute_kernel_measurement_pass(run_context, options);
-    const auto &run_measurement = run_pass.measurement;
+    const auto run_measurement = execute_kernel_measurement_pass(run_context, options);
 
     result_read_start = std::chrono::steady_clock::now();
     const uint64_t result = read_kernel_test_run_result(
@@ -1206,6 +1150,5 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         {"prog_run_wall_ns", elapsed_ns(run_measurement.wall_start, run_measurement.wall_end)},
         {result_phase_name(effective_io_mode), elapsed_ns(result_read_start, result_read_end)},
     };
-    sample.perf_counters = std::move(run_pass.perf_counters);
     return {std::move(sample)};
 }

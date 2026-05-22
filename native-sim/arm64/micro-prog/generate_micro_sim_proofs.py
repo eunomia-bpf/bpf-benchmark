@@ -199,10 +199,20 @@ def program_kind(item: dict) -> str:
     return "xdp"
 
 
+def default_program_symbol(item: dict) -> str:
+    name = item["name"]
+    tags = set(item.get("tags", []))
+    if "stage2" in tags:
+        return name
+    if "cgroup-skb" in tags or "cgroup_skb" in tags or "tc" in tags:
+        return f"{name}_prog"
+    return f"{name}_xdp"
+
+
 def load_benches(config_path: Path) -> list[Bench]:
     data = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     return [
-        Bench(item["name"], item.get("program_name", f"{item['name']}_xdp"), program_kind(item))
+        Bench(item["name"], default_program_symbol(item), program_kind(item))
         for item in data["benchmarks"]
     ]
 

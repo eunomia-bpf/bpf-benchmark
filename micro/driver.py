@@ -77,17 +77,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Shuffle benchmark order with a reproducible seed.",
     )
     parser.add_argument(
-        "--perf-counters",
-        action="store_true",
-        help="Collect perf_event counters across the full repeated run when available.",
-    )
-    parser.add_argument(
-        "--perf-scope",
-        default="full_repeat_raw",
-        choices=["full_repeat_raw", "full_repeat_avg"],
-        help="PMU scope: full_repeat_raw (default, raw totals) or full_repeat_avg (cumulative counters divided by inner repeat).",
-    )
-    parser.add_argument(
         "--regenerate-inputs",
         action="store_true",
         help="Force regeneration of generated inputs.",
@@ -259,8 +248,6 @@ def build_runner_command(
     runtime: RuntimeSpec,
     inner_repeat: int,
     memory_file: Path | None,
-    perf_counters: bool,
-    perf_scope: str,
     cpu: str | None,
     dump_jit_path: Path | None = None,
     dump_xlated_path: Path | None = None,
@@ -282,22 +269,16 @@ def build_runner_command(
         command.append("--wait-signal")
 
     program_path = benchmark.object_path
-    program_name = benchmark.program_names[0] if benchmark.program_names else None
     if runtime.name == "native_proof":
         if benchmark.proof_object_path is None:
             raise RuntimeError(f"{benchmark.name} is missing a proof object path")
         program_path = benchmark.proof_object_path
-        program_name = benchmark.proof_program_name
 
     command.extend(["--program", str(program_path)])
     if runtime.name in NATIVE_ARTIFACT_RUNTIMES:
         if benchmark.native_object_path is None:
             raise RuntimeError(f"{benchmark.name} is missing a native object path")
         command.extend(["--native-program", str(benchmark.native_object_path)])
-    if program_name:
-        command.extend(["--program-name", program_name])
-    elif benchmark.program_names:
-        command.extend(["--program-name", benchmark.program_names[0]])
     if memory_file is not None:
         command.extend(["--memory", str(memory_file)])
     if benchmark.io_mode:
@@ -306,9 +287,6 @@ def build_runner_command(
         command.extend(["--input-size", str(benchmark.kernel_input_size)])
     command.extend(["--inner-repeat", str(max(1, inner_repeat))])
 
-    if perf_counters:
-        command.append("--perf-counters")
-        command.extend(["--perf-scope", perf_scope])
     if dump_jit_path is not None:
         command.extend(["--dump-jit-path", str(dump_jit_path)])
     if dump_xlated_path is not None:
@@ -508,7 +486,6 @@ def main(argv: list[str] | None = None) -> int:
             "kernel_cmdline": read_required_text("/proc/cmdline"),
             "cpu_governor": read_optional_text("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"),
             "turbo_state": read_optional_text("/sys/devices/system/cpu/intel_pstate/no_turbo"),
-            "perf_event_paranoid": read_optional_text("/proc/sys/kernel/perf_event_paranoid"),
         },
         "build": {
             "runner_binary": str(runner_binary),
@@ -517,8 +494,6 @@ def main(argv: list[str] | None = None) -> int:
             "samples": samples,
             "warmups": warmups,
             "inner_repeat": default_inner_repeat,
-            "perf_counters": args.perf_counters,
-            "perf_scope": args.perf_scope,
             "shuffle_seed": args.shuffle_seed,
             "runtime_order_seed": runtime_order_seed,
         },
@@ -655,8 +630,6 @@ def main(argv: list[str] | None = None) -> int:
                         runtime=runtime,
                         inner_repeat=inner_repeat,
                         memory_file=memory_file,
-                        perf_counters=args.perf_counters,
-                        perf_scope=args.perf_scope,
                         cpu=args.cpu,
                     )
                     for _ in range(max(0, warmups)):
@@ -698,8 +671,6 @@ def main(argv: list[str] | None = None) -> int:
                             runtime=runtime,
                             inner_repeat=inner_repeat,
                             memory_file=memory_file,
-                            perf_counters=args.perf_counters,
-                            perf_scope=args.perf_scope,
                             cpu=args.cpu,
                             dump_jit_path=dump_jit_path,
                             dump_xlated_path=dump_xlated_path,

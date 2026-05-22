@@ -9,3 +9,6 @@ otelcol-ebpf-profiler/profiling	ebpf_noopt_stats_off	0	ok	corpus/results/x86_kvm
 otelcol-ebpf-profiler/profiling	optimized_shim_map_inline	0	ok	corpus/results/x86_kvm_corpus_20260522_050233_401368
 cilium/agent	workload_only	0	ok	corpus/results/x86_kvm_corpus_20260522_052015_910703
 cilium/agent	ebpf_noopt_stats_on	0	ok	corpus/results/x86_kvm_corpus_20260522_052646_166503
+cilium/agent	ebpf_noopt_stats_off	0	ok	corpus/results/x86_kvm_corpus_20260522_053738_559124
+cilium/agent	optimized_shim_map_inline	0	ok	corpus/results/x86_kvm_corpus_20260522_054834_450402
+tetragon/observer	workload_only	2	ok	corpus/results/x86_kvm_corpus_20260522_054834_450402

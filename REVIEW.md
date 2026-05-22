@@ -30,7 +30,7 @@ run_micro.py (orchestrator)
        └─ run-kernel          libbpf load→BPF_PROG_TEST_RUN 内核执行
 ```
 
-每个 sample 输出一行 JSON，包含 `compile_ns`、`exec_ns`、`phases_ns`、`perf_counters`。
+每个 sample 输出一行 JSON，包含 `compile_ns`、`exec_ns`、`phases_ns`。
 Python 层聚合后写入 `micro/results/*.json`，再由 `summarize_rq.py` 生成 markdown 摘要。
 
 ### IO 模式
@@ -147,6 +147,4 @@ Python 层聚合后写入 `micro/results/*.json`，再由 `summarize_rq.py` 生�
 - `kernel` runtime 需要 `sudo -n` 无密码可用
 - `llvmbpf` 通过 `MAP_32BIT` 分配低地址 packet buffer，供 XDP context 的 `u32` 指针使用
 - `llvmbpf` ELF loader 不支持 BPF-to-BPF local subprogram call（已知限制，待扩展）
-- `--perf-counters` 通过 `perf_event_open`；kernel 计数包含 kernel 态，llvmbpf 只看 user 态
-- 短执行窗口或受限 PMU 下硬件计数器可能为 0，结果 JSON 中 `perf_counters_meta.hardware_counters_observed` 会标记
 - `third-party/` 三个子目录（bpf_performance, tail-call-bench, bpf-bench）是参考项目快照，不参与编译和执行，仅用于设计借鉴

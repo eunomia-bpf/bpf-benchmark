@@ -11,22 +11,20 @@ std::string usage_text()
 {
     return
         "usage:\n"
-        "  micro_exec test-run [--program <path>|<path>] [--program-name <name>] "
+        "  micro_exec test-run [--program <path>|<path>] "
         "[--memory <path>] [--fixture-path <path>] [--btf-custom-path <path>] "
         "[--io-mode map|staged|packet|context] [--raw-packet] [--inner-repeat N] "
-        "[--warmup N] [--input-size N] [--perf-counters] "
-        "[--perf-scope full_repeat_raw|full_repeat_avg] [--dump-jit] [--dump-jit-path <path>] "
+        "[--warmup N] [--input-size N] [--dump-jit] [--dump-jit-path <path>] "
         "[--dump-xlated <path>] [--wait-signal]\n"
-        "  micro_exec run-native [--program <path>|<path>] --native-program <path> [--program-name <name>] "
+        "  micro_exec run-native [--program <path>|<path>] --native-program <path> "
         "[--memory <path>] [--io-mode staged|packet] [--inner-repeat N] [--input-size N]\n"
-        "  micro_exec run-native-kernel [--program <path>|<path>] [--native-program <path>] [--program-name <name>] "
+        "  micro_exec run-native-kernel [--program <path>|<path>] [--native-program <path>] "
         "[--memory <path>] [--io-mode staged|packet] [--native-kernel-prog-type xdp|sched_cls|cgroup_skb] "
         "[--inner-repeat N] [--input-size N]\n"
 #ifdef MICRO_EXEC_ENABLE_LLVMBPF
-        "  micro_exec run-llvmbpf [--program <path>|<path>] [--program-name <name>] "
+        "  micro_exec run-llvmbpf [--program <path>|<path>] "
         "[--memory <path>] [--io-mode map|staged|packet] [--raw-packet] "
-        "[--inner-repeat N] [--input-size N] [--perf-counters] "
-        "[--perf-scope full_repeat_raw|full_repeat_avg] [--dump-jit] [--dump-jit-path <path>]\n"
+        "[--inner-repeat N] [--input-size N] [--dump-jit] [--dump-jit-path <path>]\n"
 #endif
         "  micro_exec list-programs [--program <path>|<path>]";
 }
@@ -47,10 +45,6 @@ void validate_cli_options(const cli_options &options)
     }
     if (options.program.empty()) {
         fail("--program is required");
-    }
-    if (options.perf_scope != "full_repeat_raw" &&
-        options.perf_scope != "full_repeat_avg") {
-        fail("--perf-scope must be one of full_repeat_raw or full_repeat_avg");
     }
     if (options.wait_signal && options.command != "test-run") {
         fail("--wait-signal is only supported by test-run");
@@ -125,25 +119,6 @@ void print_sample_json(std::ostream &out, const sample_result &sample)
     }
 
     out
-        << "},"
-        << "\"perf_counters\":{";
-
-    for (size_t index = 0; index < sample.perf_counters.counters.size(); ++index) {
-        if (index != 0) {
-            out << ",";
-        }
-        const auto &counter = sample.perf_counters.counters[index];
-        out << "\"" << json_escape(counter.name) << "\":" << counter.value;
-    }
-
-    out
-        << "},"
-        << "\"perf_counters_meta\":{"
-        << "\"requested\":" << (sample.perf_counters.requested ? "true" : "false") << ","
-        << "\"collected\":" << (sample.perf_counters.collected ? "true" : "false") << ","
-        << "\"include_kernel\":" << (sample.perf_counters.include_kernel ? "true" : "false") << ","
-        << "\"scope\":\"" << json_escape(sample.perf_counters.scope) << "\","
-        << "\"error\":\"" << json_escape(sample.perf_counters.error) << "\""
         << "}"
         << "}";
 }
@@ -292,10 +267,6 @@ cli_options parse_args(int argc, char **argv)
             options.btf_custom_path = std::filesystem::path(argv[++index]);
             continue;
         }
-        if (current == "--program-name" && index + 1 < argc) {
-            options.program_name = std::string(argv[++index]);
-            continue;
-        }
         if (current == "--io-mode" && index + 1 < argc) {
             options.io_mode = argv[++index];
             continue;
@@ -322,14 +293,6 @@ cli_options parse_args(int argc, char **argv)
         }
         if (current == "--input-size" && index + 1 < argc) {
             options.input_size = static_cast<uint32_t>(std::stoul(argv[++index]));
-            continue;
-        }
-        if (current == "--perf-counters") {
-            options.perf_counters = true;
-            continue;
-        }
-        if (current == "--perf-scope" && index + 1 < argc) {
-            options.perf_scope = std::string(argv[++index]);
             continue;
         }
         if (current == "--dump-jit") {

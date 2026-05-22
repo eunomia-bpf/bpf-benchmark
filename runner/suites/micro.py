@@ -53,8 +53,6 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     args.cpu = env_str("CPU")
     args.strict_env = env_bool("STRICT_ENV")
     args.shuffle_seed = int(env_str("SHUFFLE_SEED")) if env_str("SHUFFLE_SEED") else None
-    args.perf_counters = env_bool("PERF_COUNTERS")
-    args.perf_scope = env_str("PERF_SCOPE", "full_repeat_raw")
     args.regenerate_inputs = env_bool("REGENERATE_INPUTS")
     args.list = env_bool("LIST")
     return args
@@ -105,10 +103,6 @@ def _micro_driver_argv(workspace: Path, args: argparse.Namespace) -> list[str]:
         argv.append("--strict-env")
     if args.shuffle_seed is not None:
         argv.extend(["--shuffle-seed", str(args.shuffle_seed)])
-    if args.perf_counters:
-        argv.append("--perf-counters")
-    if args.perf_scope:
-        argv.extend(["--perf-scope", str(args.perf_scope)])
     if args.regenerate_inputs:
         argv.append("--regenerate-inputs")
     if args.list:
@@ -144,7 +138,6 @@ def _run_micro_suite(workspace: Path, args: argparse.Namespace) -> None:
     env["BPFREJIT_MICRO_PROGRAM_DIR"] = str(program_dir)
     env["BPFREJIT_MICRO_RUNNER_BINARY"] = str(runner_binary)
     env["BPFREJIT_MICRO_PROOF_DIR"] = str(sim_proof_root(workspace, args.target_arch))
-    env["BPFREJIT_MICRO_PROOF_ARCH"] = "arm64" if args.target_arch == "arm64" else "x86"
 
     if "native_kernel" in _selected_runtimes(args):
         module_dir = kinsn_module_dir(workspace, args.target_arch)
