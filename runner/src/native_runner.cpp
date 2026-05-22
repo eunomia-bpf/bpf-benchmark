@@ -4,6 +4,7 @@
 #include <cstring>
 #include <dlfcn.h>
 #include <link.h>
+#include <utility>
 namespace { using clock_type = std::chrono::steady_clock; using native_prog_fn = int (*)(void *);
 constexpr size_t kEthernetHeaderSize = 14; struct native_xdp_md { uintptr_t data, data_end; };
 struct native_skb {
@@ -60,16 +61,25 @@ sample_result run_native(const cli_options &options) {
     skb.set_data_end(data_end_ptr);
     skb.set_len(static_cast<uint32_t>(data_end_ptr - data_ptr));
     uint32_t retval = 0; const uint32_t repeat = options.repeat > 0 ? options.repeat : 1;
-    const auto exec_start = clock_type::now();
-    for (uint32_t index = 0; index < repeat; ++index)
-        retval = static_cast<uint32_t>(fn(is_skb ? static_cast<void *>(skb.storage) : static_cast<void *>(&xdp)));
-    const auto exec_end = clock_type::now();
+    clock_type::time_point exec_start {};
+    clock_type::time_point exec_end {};
+    const perf_counter_options perf_options {
+        .enabled = options.perf_counters,
+        .include_kernel = false,
+    };
+    auto perf_counters = measure_perf_counters(perf_options, [&]() {
+        exec_start = clock_type::now();
+        for (uint32_t index = 0; index < repeat; ++index)
+            retval = static_cast<uint32_t>(fn(is_skb ? static_cast<void *>(skb.storage) : static_cast<void *>(&xdp)));
+        exec_end = clock_type::now();
+    });
     uint64_t packet_result = 0; std::memcpy(&packet_result, data, sizeof(packet_result));
     const uint64_t result = is_skb ? skb.read_result() : packet_result;
     sample_result sample {.compile_ns = elapsed_ns(load_start, load_end), .exec_ns = elapsed_ns(exec_start, exec_end) / repeat};
     sample.timing_source = "clock_monotonic"; sample.timing_source_wall = "clock_monotonic"; sample.wall_exec_ns = sample.exec_ns;
     sample.result = result;
     sample.retval = retval; sample.code_size = {.bpf_bytecode_bytes = image.code.size(), .native_code_bytes = native_code_bytes};
+    sample.perf_counters = std::move(perf_counters);
     sample.phases_ns = {{"memory_prepare_ns", elapsed_ns(memory_start, memory_end)}, {"native_load_ns", sample.compile_ns}};
     dlclose(handle); return sample;
 }

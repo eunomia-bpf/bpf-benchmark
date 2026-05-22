@@ -954,6 +954,135 @@ std::vector<InlineRecord> apply_map_inline_auto(std::vector<uint8_t> &text,
 	return records;
 }
 
+// --- IR-level map_inline ---------------------------------------------------
+// Decide, per map_lookup_elem call in main-program order, the constant value to
+// fold (or nullopt). Only the main program [0, subprog_start) is lifted to IR,
+// so these ordinals line up with the IR call sites. A site is folded when its
+// map is data-path-immutable, value-inlineable, the result is only read (never
+// written through), and the snapshot gives a single value (uniform map, or a
+// single exact entry). The IR rewrite is fold_lookups_in_module().
+std::vector<std::optional<std::vector<uint8_t>>>
+decide_lookup_folds(const std::vector<uint8_t> &text, const Cli &cli,
+		    std::vector<InlineRecord> &records)
+{
+	const auto args = parse_map_inline_args(cli.pass_args);
+	const auto snapshot = read_map_snapshot(args);
+	const auto mutable_maps = scan_data_path_mutable_maps(text, args.map_ids);
+	const auto subprog = subprog_start_pc(text);
+	const size_t limit = subprog ? *subprog : text.size() / INSN_SIZE;
+	std::vector<std::optional<std::vector<uint8_t>>> folds;
+	for (size_t pc = 0; pc < limit; pc++) {
+		if (is_ldimm64(text, pc)) {
+			pc++;
+			continue;
+		}
+		if (text[pc * INSN_SIZE] != BPF_CALL || src_reg(text, pc) != 0 ||
+		    read_imm(text, pc) != BPF_FUNC_map_lookup_elem) {
+			continue;
+		}
+		std::optional<std::vector<uint8_t>> value;
+		uint32_t fold_map = 0;
+		const auto map_id = map_id_for_lookup(text, pc, args.map_ids);
+		if (map_id && !mutable_maps.count(*map_id) && pc + 1 < limit &&
+		    value_ptr_is_read_only(text, pc + 1)) {
+			const auto map = snapshot.maps.find(*map_id);
+			if (map != snapshot.maps.end() &&
+			    map_type_supports_value_inline(map->second.map_type)) {
+				if (snapshot.truly_uniform.count(*map_id)) {
+					const auto &v =
+						snapshot.uniform_values.at(*map_id);
+					if (v.size() == map->second.value_size) {
+						value = v;
+					}
+				} else {
+					const std::vector<uint8_t> *only = nullptr;
+					size_t cnt = 0;
+					for (const auto &kv : snapshot.values) {
+						if (kv.first.first == *map_id) {
+							only = &kv.second;
+							cnt++;
+						}
+					}
+					if (cnt == 1 &&
+					    only->size() == map->second.value_size) {
+						value = *only;
+					}
+				}
+				if (value) {
+					fold_map = *map_id;
+				}
+			}
+		}
+		if (value) {
+			records.push_back({ fold_map, {}, *value });
+		}
+		folds.push_back(std::move(value));
+	}
+	return folds;
+}
+
+// Replace each folded map_lookup_elem call's result with a pointer to a private
+// constant holding the snapshot value, then let O3 const-fold the loads and DCE
+// the now-dead lookup. No stack round-trip / address-taken (unlike the bytecode
+// splice), so O3 can actually propagate the constants into registers.
+void fold_lookups_in_module(
+	llvm::Module &module,
+	const std::vector<std::optional<std::vector<uint8_t>>> &folds)
+{
+	auto *lookup = module.getFunction("_bpf_helper_ext_0001");
+	auto *main_fn = module.getFunction("bpf_main");
+	if (!lookup || !main_fn) {
+		return;
+	}
+	std::vector<llvm::CallInst *> calls;
+	for (auto &bb : *main_fn) {
+		for (auto &inst : bb) {
+			if (auto *ci = llvm::dyn_cast<llvm::CallInst>(&inst)) {
+				if (ci->getCalledFunction() == lookup) {
+					calls.push_back(ci);
+				}
+			}
+		}
+	}
+	if (calls.size() != folds.size()) {
+		return; // ordinal/count mismatch: fold nothing (safety)
+	}
+	auto &ctx = module.getContext();
+	for (size_t i = 0; i < calls.size(); i++) {
+		if (!folds[i]) {
+			continue;
+		}
+		const auto &v = *folds[i];
+		auto *init = llvm::ConstantDataArray::get(
+			ctx, llvm::ArrayRef<uint8_t>(v.data(), v.size()));
+		auto *gv = new llvm::GlobalVariable(
+			module, init->getType(), /*isConstant=*/true,
+			llvm::GlobalValue::PrivateLinkage, init,
+			"__mapinline_const");
+		gv->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
+		auto *res_ty = calls[i]->getType();
+		llvm::Constant *repl =
+			res_ty->isPointerTy() ?
+				llvm::ConstantExpr::getBitCast(gv, res_ty) :
+				llvm::ConstantExpr::getPtrToInt(gv, res_ty);
+		calls[i]->replaceAllUsesWith(repl);
+		calls[i]->eraseFromParent();
+	}
+}
+
+std::vector<uint8_t> run_map_inline_roundtrip(const std::vector<uint8_t> &input,
+					      const Cli &cli,
+					      std::vector<InlineRecord> &records)
+{
+	const auto folds = decide_lookup_folds(input, cli, records);
+	auto module = generate_llvm_module(input);
+	return module.withModuleDo([&](llvm::Module &module) {
+		fold_lookups_in_module(module, folds);
+		return extract_relocated_text(emit_bpf_object(module, true),
+					      input);
+	});
+}
+
 uint32_t module_fd_array_base(size_t map_count)
 {
 	if (map_count > std::numeric_limits<uint32_t>::max()) {

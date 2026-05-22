@@ -16,6 +16,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <unordered_map>
+#include <utility>
 
 namespace {
 
@@ -778,26 +779,32 @@ sample_result run_llvmbpf(const cli_options &options)
         fail("io-mode requires an XDP or skb packet context");
     };
 
-    exec_start = clock_type::now();
-    if (packet_input.empty()) {
-        uint8_t dummy_ctx[8] = {};
-        run_map_repeat(dummy_ctx, sizeof(dummy_ctx));
-    } else {
-        lowmem_buffer packet_buffer(packet_input.size());
-        std::memcpy(packet_buffer.data(), packet_input.data(), packet_input.size());
+    const perf_counter_options perf_options {
+        .enabled = options.perf_counters,
+        .include_kernel = false,
+    };
+    auto perf_counters = measure_perf_counters(perf_options, [&]() {
+        exec_start = clock_type::now();
+        if (packet_input.empty()) {
+            uint8_t dummy_ctx[8] = {};
+            run_map_repeat(dummy_ctx, sizeof(dummy_ctx));
+        } else {
+            lowmem_buffer packet_buffer(packet_input.size());
+            std::memcpy(packet_buffer.data(), packet_input.data(), packet_input.size());
 
-        const auto skb_result = run_packet_context(packet_buffer);
-        if (!result_from_map) {
-            if (skb_result.has_value()) {
-                result = *skb_result;
-            } else {
-                result = read_u64_result(
-                    packet_buffer.data(),
-                    packet_buffer.size());
+            const auto skb_result = run_packet_context(packet_buffer);
+            if (!result_from_map) {
+                if (skb_result.has_value()) {
+                    result = *skb_result;
+                } else {
+                    result = read_u64_result(
+                        packet_buffer.data(),
+                        packet_buffer.size());
+                }
             }
         }
-    }
-    exec_end = clock_type::now();
+        exec_end = clock_type::now();
+    });
     active_map_state = nullptr;
 
     if (tsc_freq_hz.has_value()) {
@@ -814,6 +821,7 @@ sample_result run_llvmbpf(const cli_options &options)
         sample.timing_source = "clock_monotonic";
     }
     sample.wall_exec_ns = elapsed_ns(exec_start, exec_end) / repeat;
+    sample.perf_counters = std::move(perf_counters);
     sample.result = result_from_map ? read_result_value(map_state) : result;
     sample.retval = static_cast<uint32_t>(retval);
     sample.phases_ns = {

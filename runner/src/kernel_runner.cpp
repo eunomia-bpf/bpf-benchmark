@@ -94,6 +94,11 @@ struct kernel_run_measurement {
     std::chrono::steady_clock::time_point wall_end {};
 };
 
+struct kernel_run_pass {
+    kernel_run_measurement measurement;
+    perf_counter_capture perf_counters;
+};
+
 void handle_measure_signal(int)
 {
     g_measure_signal_seen = 1;
@@ -329,7 +334,7 @@ kernel_run_measurement execute_kernel_probe(kernel_probe_context &context)
     return measurement;
 }
 
-kernel_run_measurement execute_kernel_measurement_pass(
+kernel_run_pass execute_kernel_measurement_pass(
     kernel_probe_context &context,
     const cli_options &options)
 {
@@ -337,7 +342,15 @@ kernel_run_measurement execute_kernel_measurement_pass(
         static_cast<void>(execute_kernel_probe(context));
     }
 
-    return execute_kernel_probe(context);
+    kernel_run_pass pass;
+    const perf_counter_options perf_options {
+        .enabled = options.perf_counters,
+        .include_kernel = true,
+    };
+    pass.perf_counters = measure_perf_counters(perf_options, [&]() {
+        pass.measurement = execute_kernel_probe(context);
+    });
+    return pass;
 }
 
 bool context_mode_supports_kernel_repeat(uint32_t prog_type)
@@ -1106,7 +1119,8 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         wait_for_measure_signal();
     }
 
-    const auto run_measurement = execute_kernel_measurement_pass(run_context, options);
+    auto run_pass = execute_kernel_measurement_pass(run_context, options);
+    const auto &run_measurement = run_pass.measurement;
 
     result_read_start = std::chrono::steady_clock::now();
     const uint64_t result = read_kernel_test_run_result(
@@ -1136,6 +1150,7 @@ std::vector<sample_result> run_kernel(const cli_options &options)
         tsc_freq_hz > 0 ? std::optional<uint64_t>(tsc_freq_hz) : std::nullopt;
     sample.result = result;
     sample.retval = run_measurement.retval;
+    sample.perf_counters = std::move(run_pass.perf_counters);
     sample.jited_prog_len = final_program_info.jited_prog_len;
     sample.xlated_prog_len = final_program_info.xlated_prog_len;
     sample.code_size = {

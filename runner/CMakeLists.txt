@@ -43,6 +43,7 @@ set(MICRO_EXEC_SOURCES
     src/main.cpp
     src/native_lab_runner.cpp
     src/native_runner.cpp
+    src/perf_counters.cpp
 )
 
 if(MICRO_EXEC_ENABLE_LLVMBPF)
@@ -52,6 +53,21 @@ if(MICRO_EXEC_ENABLE_LLVMBPF)
 
     find_package(LLVM REQUIRED CONFIG PATHS "${LLVM_DIR}" NO_DEFAULT_PATH)
     pkg_check_modules(SPDLOG REQUIRED IMPORTED_TARGET spdlog)
+
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|i[3-6]86)$")
+        set(MICRO_EXEC_NATIVE_LLVM_TARGET X86)
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64)$")
+        set(MICRO_EXEC_NATIVE_LLVM_TARGET AArch64)
+    else()
+        message(FATAL_ERROR "run-llvmbpf does not know the native LLVM target for ${CMAKE_SYSTEM_PROCESSOR}")
+    endif()
+
+    if(NOT "${MICRO_EXEC_NATIVE_LLVM_TARGET}" IN_LIST LLVM_TARGETS_TO_BUILD)
+        message(FATAL_ERROR
+            "run-llvmbpf requires LLVM target ${MICRO_EXEC_NATIVE_LLVM_TARGET}; "
+            "selected LLVM at ${LLVM_DIR} was built with LLVM_TARGETS_TO_BUILD=${LLVM_TARGETS_TO_BUILD}. "
+            "Set LLVM_DIR/RUN_LLVM_DIR to a full LLVM build or rebuild the selected LLVM with the native target enabled.")
+    endif()
 
     # Keep this list aligned with bpfopt/llvm/CMakeLists.txt so host-cross
     # builds can link against target LLVM libraries without executing a target

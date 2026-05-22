@@ -4,6 +4,7 @@
 #include <chrono>
 #include <cstdint>
 #include <filesystem>
+#include <functional>
 #include <iosfwd>
 #include <memory>
 #include <optional>
@@ -57,6 +58,7 @@ struct cli_options {
     uint32_t repeat = 1;
     uint32_t warmup_repeat = 5;
     uint32_t input_size = 0;
+    bool perf_counters = false;
     bool dump_jit = false;
     std::optional<std::filesystem::path> dump_jit_path;
     std::optional<std::filesystem::path> dump_xlated;
@@ -65,6 +67,25 @@ struct cli_options {
     std::string native_kernel_prog_type = "xdp";
     /* Override the path of the native-link binary. */
     std::string native_kernel_linker_path;
+};
+
+struct named_counter {
+    std::string name;
+    uint64_t value = 0;
+};
+
+struct perf_counter_options {
+    bool enabled = false;
+    bool include_kernel = false;
+};
+
+struct perf_counter_capture {
+    bool requested = false;
+    bool collected = false;
+    bool include_kernel = false;
+    std::string scope = "full_repeat_raw";
+    std::string error;
+    std::vector<named_counter> counters;
 };
 
 struct timing_phase {
@@ -87,6 +108,7 @@ struct sample_result {
     std::optional<uint64_t> tsc_freq_hz;
     uint64_t result = 0;
     uint32_t retval = 0;
+    perf_counter_capture perf_counters;
     std::optional<uint64_t> jited_prog_len;
     std::optional<uint64_t> xlated_prog_len;
     code_size_summary code_size;
@@ -101,6 +123,9 @@ std::string benchmark_name_for_program(const std::filesystem::path &program);
 std::vector<uint8_t> materialize_memory(const std::optional<std::filesystem::path> &memory, uint32_t size_hint);
 std::vector<program_descriptor> list_programs(const std::filesystem::path &path);
 program_image load_program_image(const std::filesystem::path &path);
+perf_counter_capture measure_perf_counters(
+    const perf_counter_options &options,
+    const std::function<void()> &callback);
 std::vector<sample_result> run_kernel(const cli_options &options);
 sample_result run_llvmbpf(const cli_options &options);
 sample_result run_native(const cli_options &options);

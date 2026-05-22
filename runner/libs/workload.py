@@ -573,6 +573,7 @@ _STRESS_NG_STRESSOR_ARGS: Mapping[str, tuple[str, ...]] = {
     "open": ("--open-max", "1024"),
     "syscall": ("--syscall-method", "fast75"),
 }
+_STRESS_NG_DEFAULT_WORKERS = 1
 _STRESS_NG_STRESSOR_WORKERS: Mapping[str, int] = {
     # stress-ng's SCTP worker shares --sctp-port across workers. With four
     # workers one process can fail intermittently while the other three pass.
@@ -625,7 +626,7 @@ def run_stress_ng_class_load(duration_s: int | float, stressors: Sequence[str], 
     temp_root = _disk_backed_tmp_root()
     command: list[str] = [stress_ng]
     for stressor in normalized_stressors:
-        workers = _STRESS_NG_STRESSOR_WORKERS.get(stressor, 4)
+        workers = _STRESS_NG_STRESSOR_WORKERS.get(stressor, _STRESS_NG_DEFAULT_WORKERS)
         command += [f"--{stressor}", str(workers)]
         command += list(_STRESS_NG_STRESSOR_ARGS.get(stressor, ()))
     command += _stress_ng_dynamic_stressor_args(normalized_stressors)

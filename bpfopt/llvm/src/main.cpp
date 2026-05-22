@@ -22,6 +22,10 @@
 
 #include "llvm/Analysis/CGSCCPassManager.h"
 #include "llvm/Config/llvm-config.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/GlobalVariable.h"
+#include "llvm/IR/Instructions.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/PassManager.h"
@@ -399,9 +403,7 @@ void run_pass(Cli &cli)
 	if (*cli.pass == "noop") {
 		output = run_llvm_roundtrip(input, false);
 	} else if (*cli.pass == "map_inline") {
-		auto map_inlined = input;
-		inlined = apply_map_inline_auto(map_inlined, cli);
-		output = run_llvm_roundtrip(map_inlined, true);
+		output = run_map_inline_roundtrip(input, cli, inlined);
 	} else {
 		output = run_llvm_roundtrip(input, true);
 	}

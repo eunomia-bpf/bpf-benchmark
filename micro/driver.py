@@ -64,6 +64,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--samples", type=int, help="Measured samples per runtime pair.")
     parser.add_argument("--warmups", type=int, help="Warmup runs per pair.")
     parser.add_argument("--inner-repeat", type=int, dest="inner_repeat", help="Repeat count inside each helper sample.")
+    parser.add_argument("--perf-counters", action="store_true", help="Collect raw perf counters for measured samples.")
     parser.add_argument("--output", help="Override JSON output path.")
     parser.add_argument("--cpu", help="Pin child processes to a specific CPU via taskset.")
     parser.add_argument(
@@ -161,6 +162,7 @@ def collect_provenance(
             "samples": samples,
             "warmups": warmups,
             "inner_repeat": inner_repeat,
+            "perf_counters": args.perf_counters,
         },
         "cpu_model": _read_cpu_model(),
         "environment": _detect_environment(),
@@ -247,6 +249,7 @@ def build_runner_command(
     benchmark: CatalogTarget,
     runtime: RuntimeSpec,
     inner_repeat: int,
+    perf_counters: bool,
     memory_file: Path | None,
     cpu: str | None,
     dump_jit_path: Path | None = None,
@@ -286,6 +289,8 @@ def build_runner_command(
     if benchmark.kernel_input_size > 0:
         command.extend(["--input-size", str(benchmark.kernel_input_size)])
     command.extend(["--inner-repeat", str(max(1, inner_repeat))])
+    if perf_counters:
+        command.append("--perf-counters")
 
     if dump_jit_path is not None:
         command.extend(["--dump-jit-path", str(dump_jit_path)])
@@ -486,6 +491,7 @@ def main(argv: list[str] | None = None) -> int:
             "kernel_cmdline": read_required_text("/proc/cmdline"),
             "cpu_governor": read_optional_text("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"),
             "turbo_state": read_optional_text("/sys/devices/system/cpu/intel_pstate/no_turbo"),
+            "perf_event_paranoid": read_optional_text("/proc/sys/kernel/perf_event_paranoid"),
         },
         "build": {
             "runner_binary": str(runner_binary),
@@ -494,6 +500,7 @@ def main(argv: list[str] | None = None) -> int:
             "samples": samples,
             "warmups": warmups,
             "inner_repeat": default_inner_repeat,
+            "perf_counters": args.perf_counters,
             "shuffle_seed": args.shuffle_seed,
             "runtime_order_seed": runtime_order_seed,
         },
@@ -629,6 +636,7 @@ def main(argv: list[str] | None = None) -> int:
                         benchmark=benchmark,
                         runtime=runtime,
                         inner_repeat=inner_repeat,
+                        perf_counters=False,
                         memory_file=memory_file,
                         cpu=args.cpu,
                     )
@@ -670,6 +678,7 @@ def main(argv: list[str] | None = None) -> int:
                             benchmark=benchmark,
                             runtime=runtime,
                             inner_repeat=inner_repeat,
+                            perf_counters=args.perf_counters,
                             memory_file=memory_file,
                             cpu=args.cpu,
                             dump_jit_path=dump_jit_path,

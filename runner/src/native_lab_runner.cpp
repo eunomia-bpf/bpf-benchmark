@@ -2222,9 +2222,18 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
         test_opts.ctx_out = &context_out;
         test_opts.ctx_size_out = sizeof(context_out);
     }
-    const auto run_start = std::chrono::steady_clock::now();
-    const int run_err = bpf_prog_test_run_opts(prog_fd, &test_opts);
-    const auto run_end = std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point run_start {};
+    std::chrono::steady_clock::time_point run_end {};
+    int run_err = 0;
+    const perf_counter_options perf_options {
+        .enabled = options.perf_counters,
+        .include_kernel = true,
+    };
+    auto perf_counters = measure_perf_counters(perf_options, [&]() {
+        run_start = std::chrono::steady_clock::now();
+        run_err = bpf_prog_test_run_opts(prog_fd, &test_opts);
+        run_end = std::chrono::steady_clock::now();
+    });
     if (run_err) {
         close(prog_fd);
         fail(std::string("bpf_prog_test_run_opts failed: ") + std::strerror(errno));
@@ -2260,6 +2269,7 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
     sample.wall_exec_ns = elapsed_ns(run_start, run_end);
     sample.result = result_word;
     sample.retval = test_opts.retval;
+    sample.perf_counters = std::move(perf_counters);
     sample.code_size = { .bpf_bytecode_bytes = bpf_bytecode_bytes, .native_code_bytes = blob.size() };
     sample.phases_ns = {
         {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},

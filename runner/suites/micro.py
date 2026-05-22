@@ -52,6 +52,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     args.output = env_str("MICRO_OUTPUT")
     args.cpu = env_str("CPU")
     args.strict_env = env_bool("STRICT_ENV")
+    args.perf_counters = env_bool("PERF_COUNTERS")
     args.shuffle_seed = int(env_str("SHUFFLE_SEED")) if env_str("SHUFFLE_SEED") else None
     args.regenerate_inputs = env_bool("REGENERATE_INPUTS")
     args.list = env_bool("LIST")
@@ -101,6 +102,8 @@ def _micro_driver_argv(workspace: Path, args: argparse.Namespace) -> list[str]:
         argv.extend(["--cpu", str(args.cpu)])
     if args.strict_env:
         argv.append("--strict-env")
+    if args.perf_counters:
+        argv.append("--perf-counters")
     if args.shuffle_seed is not None:
         argv.extend(["--shuffle-seed", str(args.shuffle_seed)])
     if args.regenerate_inputs:
