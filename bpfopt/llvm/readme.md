@@ -26,8 +26,7 @@ O3 回环的 pass label。verifier 失败就是 roundtrip 失败，不能悄悄�
   删除指令、改写 memory-address form 或构造新的 verifier proof。
 - `map_inline` 读取 `--map-values`、`--map-ids` 和
   `--inline-hint=<map>:<key_hex>`。hint 只有一种：提示某个 map entry 的 key，
-  让优化器使用 snapshot 中对应的 value；不再区分 hard/soft。旧的
-  `!<key_hex>` 写法只作为兼容语法接受并忽略 `!`。
+  让优化器使用 snapshot 中对应的 value；不再区分 hard/soft。
 - llvmbpf 的必要修改已经 push 到
   `origin/codex/bpfopt-llvm-roundtrip-20260515`。
 

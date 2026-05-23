@@ -482,8 +482,6 @@ Cli parse_cli(int argc, char **argv)
 			cli.target_output = next_value(i, argc, argv, arg);
 		} else if (arg == "--fd-to-id") {
 			cli.fd_to_id = next_value(i, argc, argv, arg);
-		} else if (arg == "--verifier-states") {
-			(void)next_value(i, argc, argv, arg);
 		} else if (arg == "--func-info") {
 			cli.func_info = next_value(i, argc, argv, arg);
 		} else if (arg == "--line-info") {

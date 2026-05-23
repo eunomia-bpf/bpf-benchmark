@@ -124,7 +124,7 @@ if [ "$skip_kinsn" != 1 ] && [ "$kernel_release" != "$running_release" ]; then
 fi
 
 modules_tmp="$tmpdir/modules"
-docker cp "$cid:/artifacts/modules/$kernel_release" "$modules_tmp"
+docker cp "$cid:/artifacts/lib/modules/$kernel_release" "$modules_tmp"
 mkdir -p /lib/modules
 rm -rf "/lib/modules/$kernel_release"
 cp -a "$modules_tmp" "/lib/modules/$kernel_release"

@@ -43,8 +43,7 @@ backend codegen.
 
 `map_inline` uses pass-local `--map-values`, `--map-ids`, and
 `--inline-hint=<map>:<key_hex>` inputs. A hint identifies one map entry whose
-snapshotted value may be used; there is no hard/soft hint split. A leading `!`
-is accepted only as compatibility syntax and is ignored. Katran
+snapshotted value may be used; there is no hard/soft hint split. Katran
 `balancer_ingress` passes loader verification and `BPF_PROG_TEST_RUN` with 16
 lookup sites reported as inlined.
 

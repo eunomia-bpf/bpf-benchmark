@@ -213,8 +213,7 @@ struct InlineRecord {
 };
 
 // Optional CLI entry hint: for map `map_name`, the hex bytes identify the
-// lookup key whose snapshotted value may be used. There is one hint kind; older
-// `!key` spelling is accepted below as compatibility syntax only.
+// lookup key whose snapshotted value may be used. There is one hint kind.
 struct InlineHint {
 	std::string map_name;
 	std::vector<uint8_t> key;
@@ -421,19 +420,15 @@ MapInlineArgs parse_map_inline_args(const std::vector<std::string> &args)
 				value = arg.substr(
 					std::strlen("--inline-hint="));
 			}
-			// name:hex. A leading '!' from the old hard-fold syntax is
-			// accepted and ignored for compatibility.
+			// name:hex
 			const auto colon = value.find(':');
 			if (colon == std::string::npos || colon == 0 ||
 			    colon + 1 >= value.size()) {
 				throw std::runtime_error("invalid --inline-hint");
 			}
 			auto key_text = value.substr(colon + 1);
-			if (!key_text.empty() && key_text[0] == '!') {
-				key_text = key_text.substr(1);
-			}
 			parsed.hints.push_back({ value.substr(0, colon),
-						 parse_hex_bytes(key_text) });
+						  parse_hex_bytes(key_text) });
 		} else {
 			throw std::runtime_error("map_inline unknown pass-local arg: " +
 						 arg);

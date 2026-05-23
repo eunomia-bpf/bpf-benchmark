@@ -21,6 +21,7 @@ SYS_INCLUDE_FLAGS := $(if $(DEB_HOST_MULTIARCH),-I/usr/include/$(DEB_HOST_MULTIA
 REPO_ROOT := $(abspath $(CURDIR)/../..)
 OUTPUT_DIR ?= $(CURDIR)/build
 CLANG ?= clang
+NATIVE_ARCH ?= $(shell uname -m)
 
 # Locate vendored libbpf static lib + headers. Mirrors what runner/
 # uses; the runner build links against build-llvmbpf/vendor/libbpf,
@@ -40,8 +41,10 @@ BPF_CFLAGS := -Wall -Wextra -O2 -g -target bpf $(SYS_INCLUDE_FLAGS) -MMD -MP
 
 # Same flags as native-sim/test/Makefile so .native.o has identical
 # constraints (no PLT, no jump tables, no red zone, no unwind tables).
+NATIVE_ARCH_CFLAGS := $(if $(filter x86_64 amd64,$(NATIVE_ARCH)),-march=native -mno-red-zone -mgeneral-regs-only) \
+    $(if $(filter arm64 aarch64,$(NATIVE_ARCH)),-mgeneral-regs-only)
 NATIVE_CFLAGS := -Wall -Wextra -O2 -g -fPIC -c -fno-plt -DMICRO_NATIVE \
-    -fomit-frame-pointer -mno-red-zone -fno-stack-protector \
+    -fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
     -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
     -mllvm -switch-to-lookup=false \
     $(SYS_INCLUDE_FLAGS) -MMD -MP

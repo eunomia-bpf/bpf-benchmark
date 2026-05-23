@@ -131,11 +131,9 @@ RUN set -eux; \
 
 COPY --link --from=runner-runtime-host-kernel-image /${KERNEL_IMAGE_NAME} /artifacts/kernel/${KERNEL_IMAGE_NAME}
 COPY --link --from=runner-runtime-host-kernel-offsets /kernel_offsets.h /artifacts/kernel/kernel_offsets.h
-COPY --link --from=runner-runtime-host-kernel-modules / /artifacts/modules
+COPY --link --from=runner-runtime-host-kernel-modules / /artifacts/lib/modules
 RUN mkdir -p /artifacts && printf '%s\n' "${KERNEL_MANIFEST_JSON}" > /artifacts/manifest.json
 RUN set -eux; \
-    mkdir -p /artifacts/lib; \
-    ln -sfn /artifacts/modules /artifacts/lib/modules; \
     kernel_release="$(python3 -c 'import json; print(json.load(open("/artifacts/manifest.json"))["kernel_release"])')"; \
     depmod -b /artifacts "$kernel_release"
 
@@ -158,7 +156,7 @@ COPY --link --from=runner-runtime-artifacts /artifacts/user/repo-artifacts /arti
 COPY --link --from=runner-runtime-artifacts /usr/local/bin/ /usr/local/bin/
 COPY --link --from=runner-runtime-artifacts /var/lib/cilium /var/lib/cilium
 COPY --link --from=runner-runtime-artifacts /artifacts/kernel /artifacts/kernel
-COPY --link --from=runner-runtime-artifacts /artifacts/modules /artifacts/modules
+COPY --link --from=runner-runtime-artifacts /artifacts/lib/modules /artifacts/lib/modules
 COPY --link --from=runner-runtime-artifacts /artifacts/manifest.json /artifacts/manifest.json
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/runner ${IMAGE_WORKSPACE}/runner
 COPY --link --from=runner-runtime-artifacts /artifacts/user/micro-programs /artifacts/user/micro-programs
@@ -172,8 +170,6 @@ COPY --link --chmod=0755 \
 
 RUN set -eux; \
     mkdir -p /opt; \
-    mkdir -p /artifacts/lib; \
-    ln -sfn /artifacts/modules /artifacts/lib/modules; \
     ln -sfn /artifacts/user /opt/bpf-benchmark; \
     ldconfig
 
