@@ -59,32 +59,33 @@ class WorkloadResult:
     Tool output is stored verbatim. Any metric extraction from stdout happens
     outside the benchmark framework.
 
-    Fields are observed externally (return code, wallclock duration, exact
-    command) or stored verbatim (stdout, stderr). `config` records non-output
-    metadata such as the workload name, namespace, network device, or netem
-    settings — values determined before the run, not derived from the run.
-    `components` carries sub-runs of composite workloads, each itself a raw
-    `WorkloadResult`.
+    Leaf fields are observed externally (return code, wallclock duration, exact
+    command) or stored verbatim (stdout, stderr). Composite records are only
+    containers for raw component records; they do not invent aggregate status,
+    duration, stdout, or stderr.
     """
 
     workload_name: str
-    command: tuple[str, ...]
-    returncode: int
-    duration_s: float
-    stdout: str
-    stderr: str
+    command: tuple[str, ...] | None
+    returncode: int | None
+    duration_s: float | None
+    stdout: str | None
+    stderr: str | None
     config: Mapping[str, object] | None = None
     components: tuple["WorkloadResult", ...] | None = None
 
     def to_dict(self) -> dict[str, object]:
-        payload: dict[str, object] = {
-            "workload_name": self.workload_name,
-            "command": list(self.command),
-            "returncode": int(self.returncode),
-            "duration_s": float(self.duration_s),
-            "stdout": self.stdout,
-            "stderr": self.stderr,
-        }
+        payload: dict[str, object] = {"workload_name": self.workload_name}
+        if self.command is not None:
+            payload["command"] = list(self.command)
+        if self.returncode is not None:
+            payload["returncode"] = int(self.returncode)
+        if self.duration_s is not None:
+            payload["duration_s"] = float(self.duration_s)
+        if self.stdout is not None:
+            payload["stdout"] = self.stdout
+        if self.stderr is not None:
+            payload["stderr"] = self.stderr
         if self.config:
             payload["config"] = dict(self.config)
         if self.components:
@@ -485,16 +486,15 @@ def _composite(
     *,
     workload_name: str,
     components: Sequence[WorkloadResult],
-    duration_s: float,
     config: Mapping[str, object] | None = None,
 ) -> WorkloadResult:
     return WorkloadResult(
         workload_name=workload_name,
-        command=(),
-        returncode=0 if all(c.returncode == 0 for c in components) else 1,
-        duration_s=float(duration_s),
-        stdout="",
-        stderr="",
+        command=None,
+        returncode=None,
+        duration_s=None,
+        stdout=None,
+        stderr=None,
         config=None if config is None else dict(config),
         components=tuple(components),
     )
@@ -1164,7 +1164,6 @@ def run_cilium_endpoint_pktgen_load(
     return _composite(
         workload_name="cilium_endpoint_pktgen",
         components=components,
-        duration_s=max(component.duration_s for component in components),
         config={"path": "bidirectional-endpoint-to-endpoint"},
     )
 
@@ -1355,11 +1354,9 @@ def _run_cilium_endpoint_matrix(seconds: int, *, wrk_binary: str) -> WorkloadRes
             results.append(_run_udp_burst(endpoint_a.ipv4, udp_server.port, seconds, namespace=BENCHMARK_NETNS))
         with NamespacedUdpServer(BENCHMARK_NETNS, BENCHMARK_PEER_IFACE_IP) as udp_server:
             results.append(_run_udp_burst(BENCHMARK_PEER_IFACE_IP, udp_server.port, seconds, namespace=endpoint_a.namespace))
-    total_duration = sum(r.duration_s for r in results)
     return _composite(
         workload_name="cilium_endpoint_matrix",
         components=results,
-        duration_s=total_duration,
     )
 
 
@@ -1449,7 +1446,6 @@ def run_network_lossy_multi_load(
     return _composite(
         workload_name="network_lossy_multi",
         components=results,
-        duration_s=sum(r.duration_s for r in results),
         config={"network_device": network_device,
                 "netem": {"loss_pct": 20.0, "delay_ms": 50}},
     )
@@ -1706,7 +1702,6 @@ def run_otel_mixed_workload(duration_s: int | float) -> WorkloadResult:
     return _composite(
         workload_name="otel_mixed_workload",
         components=components,
-        duration_s=time.monotonic() - start,
     )
 
 
