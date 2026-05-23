@@ -1,21 +1,21 @@
 {
   "bpf_stats": true,
-  "completed_at": "2026-05-22T22:41:08.545873+00:00",
+  "completed_at": "2026-05-22T23:53:32.528132+00:00",
   "config": {
     "enabled_passes": [
       "noop"
     ]
   },
   "details_dir": "details",
-  "generated_at": "2026-05-22T22:41:08.545878+00:00",
-  "last_updated_at": "2026-05-22T22:41:08.545873+00:00",
-  "launcher_boot_id": "a4f946a1-4eb1-4c5f-a5aa-bf3e2fa20f29",
-  "launcher_pid": 1835,
-  "launcher_start_ticks": 6051,
+  "generated_at": "2026-05-22T23:53:32.528136+00:00",
+  "last_updated_at": "2026-05-22T23:53:32.528132+00:00",
+  "launcher_boot_id": "9bdb56ee-25ec-4cf6-ab7f-64e4745c549f",
+  "launcher_pid": 1842,
+  "launcher_start_ticks": 6598,
   "manifest": "/home/yunwei37/workspace/bpf-benchmark/corpus/config/macro_apps.yaml",
   "run_type": "x86_kvm_corpus",
   "samples": 3,
-  "started_at": "2026-05-22T22:34:20.827419+00:00",
+  "started_at": "2026-05-22T23:46:42.346506+00:00",
   "status": "completed",
   "suite": "corpus",
   "workload_only": false,

@@ -1,0 +1,1547 @@
+{
+  "app": "cilium/agent",
+  "baseline": {
+    "bpf": {
+      "484": {
+        "bytes_jited": 509,
+        "bytes_xlated": 880,
+        "id": 484,
+        "name": "cil_xdp_entry",
+        "run_cnt_delta": 375731,
+        "run_time_ns_delta": 15858310,
+        "type": "xdp"
+      },
+      "486": {
+        "bytes_jited": 3945,
+        "bytes_xlated": 7040,
+        "id": 486,
+        "name": "cil_from_host",
+        "run_cnt_delta": 374642,
+        "run_time_ns_delta": 98734461,
+        "type": "sched_cls"
+      },
+      "487": {
+        "bytes_jited": 859,
+        "bytes_xlated": 1512,
+        "id": 487,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "488": {
+        "bytes_jited": 12954,
+        "bytes_xlated": 21584,
+        "id": 488,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "489": {
+        "bytes_jited": 405,
+        "bytes_xlated": 752,
+        "id": 489,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "491": {
+        "bytes_jited": 6566,
+        "bytes_xlated": 11024,
+        "id": 491,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "492": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 492,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "493": {
+        "bytes_jited": 8881,
+        "bytes_xlated": 15112,
+        "id": 493,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "494": {
+        "bytes_jited": 1262,
+        "bytes_xlated": 2112,
+        "id": 494,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "495": {
+        "bytes_jited": 8254,
+        "bytes_xlated": 14392,
+        "id": 495,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "496": {
+        "bytes_jited": 1262,
+        "bytes_xlated": 2112,
+        "id": 496,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "498": {
+        "bytes_jited": 8881,
+        "bytes_xlated": 15112,
+        "id": 498,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "499": {
+        "bytes_jited": 6566,
+        "bytes_xlated": 11024,
+        "id": 499,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "500": {
+        "bytes_jited": 405,
+        "bytes_xlated": 752,
+        "id": 500,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "501": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 501,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "503": {
+        "bytes_jited": 859,
+        "bytes_xlated": 1512,
+        "id": 503,
+        "name": "cil_to_host",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 1016,
+        "type": "sched_cls"
+      },
+      "504": {
+        "bytes_jited": 12981,
+        "bytes_xlated": 21632,
+        "id": 504,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "506": {
+        "bytes_jited": 8242,
+        "bytes_xlated": 14312,
+        "id": 506,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "510": {
+        "bytes_jited": 3386,
+        "bytes_xlated": 5936,
+        "id": 510,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 375731,
+        "run_time_ns_delta": 54718360,
+        "type": "sched_cls"
+      },
+      "511": {
+        "bytes_jited": 405,
+        "bytes_xlated": 752,
+        "id": 511,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "512": {
+        "bytes_jited": 8881,
+        "bytes_xlated": 15112,
+        "id": 512,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "513": {
+        "bytes_jited": 12981,
+        "bytes_xlated": 21632,
+        "id": 513,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "514": {
+        "bytes_jited": 5222,
+        "bytes_xlated": 8912,
+        "id": 514,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 420723,
+        "run_time_ns_delta": 102507757,
+        "type": "sched_cls"
+      },
+      "515": {
+        "bytes_jited": 8242,
+        "bytes_xlated": 14312,
+        "id": 515,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "517": {
+        "bytes_jited": 6566,
+        "bytes_xlated": 11024,
+        "id": 517,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "518": {
+        "bytes_jited": 2792,
+        "bytes_xlated": 4952,
+        "id": 518,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "519": {
+        "bytes_jited": 1262,
+        "bytes_xlated": 2112,
+        "id": 519,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "520": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 520,
+        "name": "cil_lxc_policy_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "521": {
+        "bytes_jited": 5760,
+        "bytes_xlated": 10104,
+        "id": 521,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "522": {
+        "bytes_jited": 1089,
+        "bytes_xlated": 1720,
+        "id": 522,
+        "name": "cil_from_contai",
+        "run_cnt_delta": 920127,
+        "run_time_ns_delta": 307762620,
+        "type": "sched_cls"
+      },
+      "523": {
+        "bytes_jited": 5210,
+        "bytes_xlated": 9224,
+        "id": 523,
+        "name": "tail_ipv4_ct_in",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "524": {
+        "bytes_jited": 6216,
+        "bytes_xlated": 10984,
+        "id": 524,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "525": {
+        "bytes_jited": 6664,
+        "bytes_xlated": 11584,
+        "id": 525,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "526": {
+        "bytes_jited": 3622,
+        "bytes_xlated": 6368,
+        "id": 526,
+        "name": "tail_nodeport_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "528": {
+        "bytes_jited": 5375,
+        "bytes_xlated": 9592,
+        "id": 528,
+        "name": "tail_ipv4_ct_eg",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "529": {
+        "bytes_jited": 6082,
+        "bytes_xlated": 11168,
+        "id": 529,
+        "name": "tail_ipv4_to_en",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "530": {
+        "bytes_jited": 5956,
+        "bytes_xlated": 10608,
+        "id": 530,
+        "name": "tail_ipv4_polic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "531": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 531,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "532": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 532,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "533": {
+        "bytes_jited": 382,
+        "bytes_xlated": 696,
+        "id": 533,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "534": {
+        "bytes_jited": 5760,
+        "bytes_xlated": 10104,
+        "id": 534,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "535": {
+        "bytes_jited": 5956,
+        "bytes_xlated": 10608,
+        "id": 535,
+        "name": "tail_ipv4_polic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "536": {
+        "bytes_jited": 5210,
+        "bytes_xlated": 9224,
+        "id": 536,
+        "name": "tail_ipv4_ct_in",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "537": {
+        "bytes_jited": 6082,
+        "bytes_xlated": 11168,
+        "id": 537,
+        "name": "tail_ipv4_to_en",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "538": {
+        "bytes_jited": 6664,
+        "bytes_xlated": 11584,
+        "id": 538,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "539": {
+        "bytes_jited": 6216,
+        "bytes_xlated": 10984,
+        "id": 539,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "540": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 540,
+        "name": "cil_lxc_policy_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "541": {
+        "bytes_jited": 3622,
+        "bytes_xlated": 6368,
+        "id": 541,
+        "name": "tail_nodeport_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "543": {
+        "bytes_jited": 2774,
+        "bytes_xlated": 4920,
+        "id": 543,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "544": {
+        "bytes_jited": 5375,
+        "bytes_xlated": 9592,
+        "id": 544,
+        "name": "tail_ipv4_ct_eg",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "545": {
+        "bytes_jited": 927,
+        "bytes_xlated": 1616,
+        "id": 545,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "546": {
+        "bytes_jited": 382,
+        "bytes_xlated": 696,
+        "id": 546,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "547": {
+        "bytes_jited": 1089,
+        "bytes_xlated": 1720,
+        "id": 547,
+        "name": "cil_from_contai",
+        "run_cnt_delta": 721,
+        "run_time_ns_delta": 1813198,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/bin/wrk",
+              "-t4",
+              "-c50",
+              "-d10s",
+              "http://198.18.0.2:18080/"
+            ],
+            "config": {
+              "tool": "wrk",
+              "url": "http://198.18.0.2:18080/"
+            },
+            "duration_s": 10.075337861000037,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Running 10s test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   285.26ms  229.69ms   1.79s    88.42%\n    Req/Sec    23.80     15.68    70.00     66.97%\n  830 requests in 10.02s, 129.95KB read\n  Socket errors: connect 0, read 0, write 0, timeout 33\nRequests/sec:     82.87\nTransfer/sec:     12.97KB",
+            "workload_name": "network_lossy_multi_wrk"
+          },
+          {
+            "command": [],
+            "components": [
+              {
+                "command": [
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.21:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": null,
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.21:18080/"
+                },
+                "duration_s": 1.0073069739999596,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.21:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.92ms   16.02ms 203.05ms   94.87%\n    Req/Sec    78.00     18.52   120.00     80.00%\n  156 requests in 1.00s, 24.69KB read\nRequests/sec:    155.69\nTransfer/sec:     24.64KB",
+                "workload_name": "cilium host-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.192:39027/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.192:39027/"
+                },
+                "duration_s": 1.004734185000018,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.192:39027/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    49.98ms   17.18ms 204.96ms   94.85%\n    Req/Sec    75.11     52.53   130.00     50.00%\n  136 requests in 1.00s, 21.53KB read\nRequests/sec:    135.91\nTransfer/sec:     21.52KB",
+                "workload_name": "cilium endpoint-to-host"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.188:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.188:18080/"
+                },
+                "duration_s": 1.0057897240000102,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.188:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.28ms   11.06ms  60.10ms   87.23%\n    Req/Sec    70.70     52.06   130.00     95.00%\n  141 requests in 1.00s, 22.29KB read\nRequests/sec:    140.68\nTransfer/sec:     22.24KB",
+                "workload_name": "cilium endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepb",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.21:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepb",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.21:18080/"
+                },
+                "duration_s": 1.0065316270000153,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.21:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.50ms   11.25ms  60.35ms   86.67%\n    Req/Sec    60.00      0.00    60.00    100.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.69\nTransfer/sec:     18.92KB",
+                "workload_name": "cilium reverse-endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://198.18.0.2:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://198.18.0.2:18080/"
+                },
+                "duration_s": 1.004689983999981,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.16ms   10.98ms  60.08ms   89.29%\n    Req/Sec    70.30     51.99   140.00     95.00%\n  140 requests in 1.00s, 22.13KB read\nRequests/sec:    139.75\nTransfer/sec:     22.09KB",
+                "workload_name": "cilium endpoint-to-external"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.21:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbenchns",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.21:18080/"
+                },
+                "duration_s": 1.0056785169999785,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.21:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    53.60ms   26.50ms 221.34ms   93.01%\n    Req/Sec   112.85     80.11   210.00     55.00%\n  225 requests in 1.00s, 35.41KB read\nRequests/sec:    224.82\nTransfer/sec:     35.38KB",
+                "workload_name": "cilium external-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.188",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "10.244.0.188",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0172088719999692,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "501007",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.21",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbenchns",
+                  "target_host": "10.244.0.21",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0147019419999879,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "372755",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "198.18.0.2",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "198.18.0.2",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.014578838000034,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "416601",
+                "workload_name": "udp_burst"
+              }
+            ],
+            "duration_s": 9.081220662999954,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "",
+            "workload_name": "cilium_endpoint_matrix"
+          }
+        ],
+        "config": {
+          "netem": {
+            "delay_ms": 50,
+            "loss_pct": 20.0
+          },
+          "network_device": "bpfbench0"
+        },
+        "duration_s": 19.15655852399999,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "network_lossy_multi"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "1000": {
+        "bytes_jited": 6804,
+        "bytes_xlated": 11648,
+        "id": 1000,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1003": {
+        "bytes_jited": 5079,
+        "bytes_xlated": 9392,
+        "id": 1003,
+        "name": "tail_ipv4_ct_in",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1006": {
+        "bytes_jited": 2908,
+        "bytes_xlated": 5120,
+        "id": 1006,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1009": {
+        "bytes_jited": 6079,
+        "bytes_xlated": 11048,
+        "id": 1009,
+        "name": "tail_ipv4_to_en",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1012": {
+        "bytes_jited": 3816,
+        "bytes_xlated": 6736,
+        "id": 1012,
+        "name": "tail_nodeport_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1015": {
+        "bytes_jited": 1137,
+        "bytes_xlated": 1808,
+        "id": 1015,
+        "name": "cil_from_contai",
+        "run_cnt_delta": 720,
+        "run_time_ns_delta": 1968289,
+        "type": "sched_cls"
+      },
+      "1018": {
+        "bytes_jited": 6254,
+        "bytes_xlated": 10880,
+        "id": 1018,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1021": {
+        "bytes_jited": 5079,
+        "bytes_xlated": 9392,
+        "id": 1021,
+        "name": "tail_ipv4_ct_in",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1024": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 1024,
+        "name": "cil_lxc_policy_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1027": {
+        "bytes_jited": 5251,
+        "bytes_xlated": 9616,
+        "id": 1027,
+        "name": "tail_ipv4_ct_eg",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1033": {
+        "bytes_jited": 394,
+        "bytes_xlated": 704,
+        "id": 1033,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1036": {
+        "bytes_jited": 5666,
+        "bytes_xlated": 10312,
+        "id": 1036,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1039": {
+        "bytes_jited": 6804,
+        "bytes_xlated": 11648,
+        "id": 1039,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1042": {
+        "bytes_jited": 2908,
+        "bytes_xlated": 5120,
+        "id": 1042,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1045": {
+        "bytes_jited": 6446,
+        "bytes_xlated": 11184,
+        "id": 1045,
+        "name": "tail_ipv4_polic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1048": {
+        "bytes_jited": 6079,
+        "bytes_xlated": 11048,
+        "id": 1048,
+        "name": "tail_ipv4_to_en",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1051": {
+        "bytes_jited": 1037,
+        "bytes_xlated": 1840,
+        "id": 1051,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "1054": {
+        "bytes_jited": 3816,
+        "bytes_xlated": 6736,
+        "id": 1054,
+        "name": "tail_nodeport_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "865": {
+        "bytes_jited": 542,
+        "bytes_xlated": 920,
+        "id": 865,
+        "name": "cil_xdp_entry",
+        "run_cnt_delta": 365364,
+        "run_time_ns_delta": 16733745,
+        "type": "xdp"
+      },
+      "868": {
+        "bytes_jited": 1249,
+        "bytes_xlated": 2160,
+        "id": 868,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "871": {
+        "bytes_jited": 879,
+        "bytes_xlated": 1536,
+        "id": 871,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "874": {
+        "bytes_jited": 9318,
+        "bytes_xlated": 15952,
+        "id": 874,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "877": {
+        "bytes_jited": 6538,
+        "bytes_xlated": 10656,
+        "id": 877,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "883": {
+        "bytes_jited": 423,
+        "bytes_xlated": 760,
+        "id": 883,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "886": {
+        "bytes_jited": 13621,
+        "bytes_xlated": 22344,
+        "id": 886,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "889": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 889,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "892": {
+        "bytes_jited": 3684,
+        "bytes_xlated": 6504,
+        "id": 892,
+        "name": "cil_from_host",
+        "run_cnt_delta": 364065,
+        "run_time_ns_delta": 95291583,
+        "type": "sched_cls"
+      },
+      "895": {
+        "bytes_jited": 8492,
+        "bytes_xlated": 14448,
+        "id": 895,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "901": {
+        "bytes_jited": 6538,
+        "bytes_xlated": 10656,
+        "id": 901,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "904": {
+        "bytes_jited": 1249,
+        "bytes_xlated": 2160,
+        "id": 904,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "907": {
+        "bytes_jited": 13632,
+        "bytes_xlated": 22360,
+        "id": 907,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "910": {
+        "bytes_jited": 2926,
+        "bytes_xlated": 5152,
+        "id": 910,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "913": {
+        "bytes_jited": 879,
+        "bytes_xlated": 1536,
+        "id": 913,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "916": {
+        "bytes_jited": 423,
+        "bytes_xlated": 760,
+        "id": 916,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "931": {
+        "bytes_jited": 8467,
+        "bytes_xlated": 14336,
+        "id": 931,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "934": {
+        "bytes_jited": 9318,
+        "bytes_xlated": 15952,
+        "id": 934,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "937": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 937,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "940": {
+        "bytes_jited": 8467,
+        "bytes_xlated": 14336,
+        "id": 940,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "943": {
+        "bytes_jited": 423,
+        "bytes_xlated": 760,
+        "id": 943,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "946": {
+        "bytes_jited": 3684,
+        "bytes_xlated": 6504,
+        "id": 946,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "949": {
+        "bytes_jited": 13632,
+        "bytes_xlated": 22360,
+        "id": 949,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "952": {
+        "bytes_jited": 2926,
+        "bytes_xlated": 5152,
+        "id": 952,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "955": {
+        "bytes_jited": 879,
+        "bytes_xlated": 1536,
+        "id": 955,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "958": {
+        "bytes_jited": 9318,
+        "bytes_xlated": 15952,
+        "id": 958,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "961": {
+        "bytes_jited": 3241,
+        "bytes_xlated": 5680,
+        "id": 961,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 365364,
+        "run_time_ns_delta": 54111563,
+        "type": "sched_cls"
+      },
+      "964": {
+        "bytes_jited": 6538,
+        "bytes_xlated": 10656,
+        "id": 964,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "967": {
+        "bytes_jited": 5206,
+        "bytes_xlated": 8656,
+        "id": 967,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 420978,
+        "run_time_ns_delta": 102796567,
+        "type": "sched_cls"
+      },
+      "970": {
+        "bytes_jited": 1249,
+        "bytes_xlated": 2160,
+        "id": 970,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "973": {
+        "bytes_jited": 1037,
+        "bytes_xlated": 1840,
+        "id": 973,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "976": {
+        "bytes_jited": 1137,
+        "bytes_xlated": 1808,
+        "id": 976,
+        "name": "cil_from_contai",
+        "run_cnt_delta": 927645,
+        "run_time_ns_delta": 295249080,
+        "type": "sched_cls"
+      },
+      "979": {
+        "bytes_jited": 16,
+        "bytes_xlated": 16,
+        "id": 979,
+        "name": "cil_lxc_policy_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "982": {
+        "bytes_jited": 6446,
+        "bytes_xlated": 11184,
+        "id": 982,
+        "name": "tail_ipv4_polic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "985": {
+        "bytes_jited": 394,
+        "bytes_xlated": 704,
+        "id": 985,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "988": {
+        "bytes_jited": 5666,
+        "bytes_xlated": 10312,
+        "id": 988,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "991": {
+        "bytes_jited": 6254,
+        "bytes_xlated": 10880,
+        "id": 991,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "997": {
+        "bytes_jited": 5251,
+        "bytes_xlated": 9616,
+        "id": 997,
+        "name": "tail_ipv4_ct_eg",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "/usr/bin/wrk",
+              "-t4",
+              "-c50",
+              "-d10s",
+              "http://198.18.0.2:18080/"
+            ],
+            "config": {
+              "tool": "wrk",
+              "url": "http://198.18.0.2:18080/"
+            },
+            "duration_s": 10.076805149999984,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Running 10s test @ http://198.18.0.2:18080/\n  4 threads and 50 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency   292.46ms  240.49ms   1.73s    87.30%\n    Req/Sec    27.66     17.72    90.00     75.84%\n  956 requests in 10.02s, 148.35KB read\n  Socket errors: connect 0, read 0, write 0, timeout 32\nRequests/sec:     95.44\nTransfer/sec:     14.81KB",
+            "workload_name": "network_lossy_multi_wrk"
+          },
+          {
+            "command": [],
+            "components": [
+              {
+                "command": [
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.3:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": null,
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.3:18080/"
+                },
+                "duration_s": 1.0046485610000104,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.3:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    49.22ms   16.21ms 207.19ms   94.97%\n    Req/Sec    79.75     44.31   140.00     85.00%\n  159 requests in 1.00s, 25.15KB read\nRequests/sec:    158.79\nTransfer/sec:     25.11KB",
+                "workload_name": "cilium host-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.214:34499/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.214:34499/"
+                },
+                "duration_s": 1.0083634630000233,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.214:34499/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.26ms   11.01ms  60.16ms   88.03%\n    Req/Sec    71.10     52.71   140.00     95.00%\n  142 requests in 1.00s, 22.17KB read\nRequests/sec:    141.49\nTransfer/sec:     22.09KB",
+                "workload_name": "cilium endpoint-to-host"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.245:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.245:18080/"
+                },
+                "duration_s": 1.005920337999953,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.245:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.44ms   11.07ms  60.18ms   86.52%\n    Req/Sec    70.50      9.99    80.00     55.00%\n  141 requests in 1.00s, 22.15KB read\nRequests/sec:    140.73\nTransfer/sec:     22.11KB",
+                "workload_name": "cilium endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepb",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.3:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepb",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.3:18080/"
+                },
+                "duration_s": 1.0050339789999612,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.3:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    47.80ms   10.99ms  60.12ms   90.00%\n    Req/Sec    60.00      0.00    60.00    100.00%\n  120 requests in 1.00s, 18.97KB read\nRequests/sec:    119.75\nTransfer/sec:     18.93KB",
+                "workload_name": "cilium reverse-endpoint-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://198.18.0.2:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbench-cepa",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://198.18.0.2:18080/"
+                },
+                "duration_s": 1.0059829289999698,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://198.18.0.2:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    48.28ms   11.02ms  60.06ms   90.78%\n    Req/Sec   141.50      3.03   150.00     90.00%\n  141 requests in 1.00s, 22.15KB read\nRequests/sec:    140.67\nTransfer/sec:     22.10KB",
+                "workload_name": "cilium endpoint-to-external"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/wrk",
+                  "-t2",
+                  "-c20",
+                  "-d1s",
+                  "http://10.244.0.3:18080/"
+                ],
+                "config": {
+                  "connections": 20,
+                  "namespace": "bpfbenchns",
+                  "threads": 2,
+                  "tool": "wrk",
+                  "url": "http://10.244.0.3:18080/"
+                },
+                "duration_s": 1.0066485820000253,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "Running 1s test @ http://10.244.0.3:18080/\n  2 threads and 20 connections\n  Thread Stats   Avg      Stdev     Max   +/- Stdev\n    Latency    47.92ms   10.85ms  60.05ms   90.07%\n    Req/Sec    70.60     52.16   140.00     95.00%\n  141 requests in 1.00s, 22.29KB read\nRequests/sec:    140.61\nTransfer/sec:     22.22KB",
+                "workload_name": "cilium external-to-endpoint"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.245",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "10.244.0.245",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.017692128999954,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "508600",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbenchns",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "10.244.0.3",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbenchns",
+                  "target_host": "10.244.0.3",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.0177495820000217,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "362433",
+                "workload_name": "udp_burst"
+              },
+              {
+                "command": [
+                  "/usr/sbin/ip",
+                  "netns",
+                  "exec",
+                  "bpfbench-cepa",
+                  "/usr/bin/python3",
+                  "-u",
+                  "-c",
+                  "\nimport socket\nimport sys\nimport time\n\nhost = sys.argv[1]\nport = int(sys.argv[2])\nduration = float(sys.argv[3])\ndeadline = time.monotonic() + duration\nsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\npayload = b\"bpfbench-cilium-udp\" * 4\nsent = 0\nwhile time.monotonic() < deadline:\n    try:\n        sock.sendto(payload, (host, port))\n        sent += 1\n    except OSError:\n        pass\nprint(sent)\n",
+                  "198.18.0.2",
+                  "18081",
+                  "1"
+                ],
+                "config": {
+                  "namespace": "bpfbench-cepa",
+                  "target_host": "198.18.0.2",
+                  "target_port": 18081,
+                  "tool": "python-udp-client"
+                },
+                "duration_s": 1.014005241999996,
+                "returncode": 0,
+                "stderr": "",
+                "stdout": "416690",
+                "workload_name": "udp_burst"
+              }
+            ],
+            "duration_s": 9.086044804999915,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "",
+            "workload_name": "cilium_endpoint_matrix"
+          }
+        ],
+        "config": {
+          "netem": {
+            "delay_ms": 50,
+            "loss_pct": 20.0
+          },
+          "network_device": "bpfbench0"
+        },
+        "duration_s": 19.1628499549999,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "network_lossy_multi"
+      }
+    ]
+  },
+  "rejit_result": {
+    "enabled_passes": [
+      "noop"
+    ],
+    "mode": "loadtime",
+    "plan_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_corpus_20260523_000203_271788/details/loadtime-plans/cilium__agent.json",
+    "report_path": "/home/yunwei37/workspace/bpf-benchmark/corpus/results/x86_kvm_corpus_20260523_000203_271788/details/loadtime-reports/cilium__agent.jsonl",
+    "status": "ok"
+  },
+  "runner": "cilium",
+  "selected_workload": "network_lossy_multi",
+  "status": "ok"
+}

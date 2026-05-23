@@ -13,11 +13,12 @@ REPO_ROOT := $(abspath $(CURDIR)/../..)
 
 CFLAGS := -Wall -Wextra -O2 -g -target bpf $(SYS_INCLUDE_FLAGS) -MMD -MP
 NATIVE_TARGET_FLAGS := $(if $(NATIVE_TARGET),--target=$(NATIVE_TARGET))
-NATIVE_ARCH_CFLAGS := $(if $(filter x86_64 amd64,$(NATIVE_ARCH)),-mno-red-zone) \
-	$(if $(filter arm64 aarch64,$(NATIVE_ARCH)),-mllvm -regalloc-csr-first-time-cost=100000)
-NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -Wall -Wextra -O2 -g -fPIC -shared -fno-plt -DMICRO_NATIVE \
+NATIVE_ARCH_CFLAGS := $(if $(filter x86_64 amd64,$(NATIVE_ARCH)),-mno-red-zone -mgeneral-regs-only) \
+	$(if $(filter arm64 aarch64,$(NATIVE_ARCH)),-mgeneral-regs-only -mllvm -regalloc-csr-first-time-cost=100000)
+NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -Wall -Wextra -O3 -g -fPIC -shared -fno-plt -DMICRO_NATIVE \
 	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
 	-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
+	-fno-vectorize -fno-slp-vectorize \
 	-mllvm -switch-to-lookup=false \
 	$(SYS_INCLUDE_FLAGS) -MMD -MP
 BPF_SRCS := $(wildcard *.bpf.c)

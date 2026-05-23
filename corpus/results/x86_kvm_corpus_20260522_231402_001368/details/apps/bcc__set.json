@@ -1,0 +1,119 @@
+{
+  "app": "bcc/set",
+  "baseline": {
+    "bpf": {},
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sockfd",
+          "1",
+          "--switch",
+          "1",
+          "--sockfd-port",
+          "14245",
+          "--timeout",
+          "60s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/438700b0"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "set",
+            "sockfd",
+            "switch"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 60.013420915999994,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [1861] setting to a 1 min, 0 secs run per stressor\nstress-ng: info:  [1861] dispatching hogs: 1 cap, 1 set, 1 sockfd, 1 switch\nstress-ng: info:  [1861] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [1861] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1861]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1861] cap            54411258     60.00     14.56     45.37    906854.07      907914.43\nstress-ng: metrc: [1861] set             4707388     60.00     11.83     43.43     78456.43       85199.34\nstress-ng: metrc: [1861] sockfd         34830705     60.00     10.29     91.65    580502.76      341678.03\nstress-ng: metrc: [1861] switch          7508283     60.00      2.46     38.47    125137.34      183422.89\nstress-ng: info:  [1861] skipped: 0\nstress-ng: info:  [1861] passed: 4: cap (1) set (1) sockfd (1) switch (1)\nstress-ng: info:  [1861] failed: 0\nstress-ng: info:  [1861] metrics untrustworthy: 0\nstress-ng: info:  [1861] successful run completed in 1 min, 0.00 secs",
+        "workload_name": "stress_ng_bcc_hook_hot"
+      },
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sockfd",
+          "1",
+          "--switch",
+          "1",
+          "--sockfd-port",
+          "14757",
+          "--timeout",
+          "60s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/438700b0"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "set",
+            "sockfd",
+            "switch"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 60.016587312,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [1869] setting to a 1 min, 0 secs run per stressor\nstress-ng: info:  [1869] dispatching hogs: 1 cap, 1 set, 1 sockfd, 1 switch\nstress-ng: info:  [1869] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [1869] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1869]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1869] cap            53820588     60.00     14.50     45.38    897009.43      898834.87\nstress-ng: metrc: [1869] set             4635894     60.00     11.32     44.18     77264.83       83536.94\nstress-ng: metrc: [1869] sockfd         33378966     60.00     10.16     90.72    556308.63      330901.21\nstress-ng: metrc: [1869] switch          7438144     60.00      2.14     38.65    123968.64      182373.78\nstress-ng: info:  [1869] skipped: 0\nstress-ng: info:  [1869] passed: 4: cap (1) set (1) sockfd (1) switch (1)\nstress-ng: info:  [1869] failed: 0\nstress-ng: info:  [1869] metrics untrustworthy: 0\nstress-ng: info:  [1869] successful run completed in 1 min, 0.00 secs",
+        "workload_name": "stress_ng_bcc_hook_hot"
+      },
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sockfd",
+          "1",
+          "--switch",
+          "1",
+          "--sockfd-port",
+          "15269",
+          "--timeout",
+          "60s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/438700b0"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "set",
+            "sockfd",
+            "switch"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 60.013409990000014,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [1876] setting to a 1 min, 0 secs run per stressor\nstress-ng: info:  [1876] dispatching hogs: 1 cap, 1 set, 1 sockfd, 1 switch\nstress-ng: info:  [1876] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [1876] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1876]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1876] cap            54302032     60.00     14.54     45.39    905033.74      905961.07\nstress-ng: metrc: [1876] set             4826499     60.00     11.53     43.95     80441.62       86990.34\nstress-ng: metrc: [1876] sockfd         34895209     60.00     10.24     91.90    581582.51      341651.62\nstress-ng: metrc: [1876] switch          7563529     60.00      2.05     38.88    126058.34      184811.51\nstress-ng: info:  [1876] skipped: 0\nstress-ng: info:  [1876] passed: 4: cap (1) set (1) sockfd (1) switch (1)\nstress-ng: info:  [1876] failed: 0\nstress-ng: info:  [1876] metrics untrustworthy: 0\nstress-ng: info:  [1876] successful run completed in 1 min, 0.00 secs",
+        "workload_name": "stress_ng_bcc_hook_hot"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": null,
+  "rejit_result": {
+    "mode": "workload_only",
+    "status": "skipped"
+  },
+  "runner": "bcc_set",
+  "selected_workload": "stress_ng_bcc_hook_hot",
+  "status": "ok"
+}

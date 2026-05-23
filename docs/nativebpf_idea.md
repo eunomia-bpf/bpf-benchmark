@@ -956,7 +956,58 @@ carried or certificate-checked); P runs with no lowering.
 
 > 也几乎不用改内核
 
-## 附录 B:三条思路在 project 内的定位
+## 附录 B:实验记录 / research log
+
+### 2026-05-22: x86 native_kernel 编译参数实验
+
+问题:纯 micro 29 里 native_kernel 相对 kernel eBPF 的 speedup 近期在
+`1.3x-1.4x` 区间波动,低于早期直觉里的 `1.6x+`。一个自然假设是 userspace
+native 编译参数太保守,可以试 `-O3`、vector/SIMD 或更激进的 LLVM codegen。
+
+实验约束:
+
+- kernel native blob 不能随便使用 x86 SIMD/FPU。除非执行路径显式包
+  `kernel_fpu_begin/end`,否则不能让任意 native blob 在内核态碰 FPU/SIMD
+  状态;而包 FPU 会给 tiny eBPF workload 引入远大于收益的固定成本,也不等价于
+  stock BPF JIT。
+- 因此先测 kernel-safe 的 `-O3` 变体:完整命令行传入
+  `NATIVE_CFLAGS='... -O3 ... -mgeneral-regs-only -fno-vectorize -fno-slp-vectorize ...'`,
+  不在 Makefile 增加新的永久 flag knob。
+- 同时构建一次不加 `-mgeneral-regs-only` 的纯 `-O3` artifact,只做 objdump
+  扫描,确认这批 pure 29 是否实际生成 SIMD/FPU 指令。
+
+结果:
+
+| Build | Result source | pure 29 correctness | post-hoc geomean speedup (`kernel / native_kernel`) |
+|---|---|---:|---:|
+| `-O3` GPR-only | `micro/results/x86_kvm_micro_20260522_230324_848316` | 29 / 29 | 1.375x |
+| adjacent `-O2` control | `micro/results/x86_kvm_micro_20260522_230955_931423` | 29 / 29 | 1.353x |
+| older `-O2` baseline | `micro/results/x86_kvm_micro_20260522_201404_601577` | 29 / 29 | 1.404x |
+
+Observation:
+
+- `-O3` GPR-only 比紧邻 `-O2` 对照高约 1.6%,但紧邻 `-O2` 又比旧 `-O2`
+  低约 3.6%。KVM run-to-run 波动已经大于这次 `-O3` / `-O2` 差异,所以不能把
+  `-O3` 作为明确性能改进写进默认策略。
+- 纯 `-O3` artifact 没有扫描到 `xmm` / `ymm` / `zmm` / FPU/SIMD 指令;对这批
+  pure micro,clang 实际没有 vectorize 出 kernel-unsafe SIMD。也就是说"打开
+  vector"没有提供可见收益。
+- `-O3` 只改变 8 / 29 个 pure native `.text`,且多数是 code size 增长:
+  `cgroup_skb_hash_chain` +289B,`packet_vlan_tcpopt_parser` +88B,
+  `bcc_tcpconnect_ipv4_tuple_filter` +32B,`bpftrace_comm_key_fnv_hash` +16B,
+  `bcc_runqlat_log2_histogram_bucket` +14B,`cilium_ct_nat_tuple_rewrite` +12B,
+  `payload_prefix_memcmp_scan` +11B,`tracee_syscall_name_table_lookup` +11B。
+
+Takeaway:
+
+- 不要把 "native_kernel 慢于直觉" 归因成简单 `-O2` vs `-O3` 问题。
+- 对 NativeBPF / native_kernel 这条线,更有价值的性能方向仍是:
+  entry/return bridge 固定成本、subprogram ABI trimming / inline、jump-table /
+  rodata 支持、helper/map lowering 与 BPF JIT ABI 对齐、以及更稳定的测量隔离。
+- SIMD/FPU 可以作为单独研究方向保留,但默认 native_kernel 热路径不应启用;若做,
+  必须把 FPU state 管理成本纳入模型,并单独证明它对目标 workload 有净收益。
+
+## 附录 C:三条思路在 project 内的定位
 
 ```text
 1. Speculative optimization of eBPF
