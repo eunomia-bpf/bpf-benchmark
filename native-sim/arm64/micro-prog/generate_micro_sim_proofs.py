@@ -241,6 +241,10 @@ def c_u64(value: int) -> str:
     return f"{value & 0xffffffffffffffff}ULL"
 
 
+def c_ptr_u64(expr: str) -> str:
+    return f"((__u64)(long){expr})"
+
+
 def parse_imm(text: str) -> int:
     text = text.strip()
     if not text.startswith("#"):
@@ -333,11 +337,28 @@ def reg_or_imm(text: str) -> bool:
     return text.strip().startswith("#")
 
 
-def encode(insn: NativeInsn) -> Encoded:
+def rodata_ident_map(rodata16: dict[str, tuple[int, int]]) -> dict[str, str]:
+    return {symbol: f"__arm64_rodata_{index}" for index, symbol in enumerate(rodata16)}
+
+
+def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> Encoded:
     op = insn.mnemonic
     ops = insn.operands
     if op == "nop":
         return Encoded("ARM64_OP_NOP")
+    if op == "adrp":
+        if not insn.reloc_symbol:
+            raise ValueError(f"unsupported adrp without relocation: {insn.raw}")
+        if insn.reloc_symbol in rodata_idents:
+            return Encoded(
+                "ARM64_OP_ADRP_RODATA",
+                reg_const(ops[0]),
+                imm=c_ptr_u64(rodata_idents[insn.reloc_symbol]),
+            )
+        if is_helper_symbol(insn.reloc_symbol):
+            raise ValueError(f"unsupported adrp helper relocation: {insn.raw}")
+        return Encoded("ARM64_OP_ADRP_GOT", reg_const(ops[0]),
+                       imm=c_ptr_u64(f"&{insn.reloc_symbol}"))
     if op == "mov":
         dst, src = ops[0], ops[1]
         if src.startswith("#"):
@@ -389,6 +410,14 @@ def encode(insn: NativeInsn) -> Encoded:
     if op in {"rev", "rev16", "sxth"}:
         op_const = {"rev": "ARM64_OP_REV", "rev16": "ARM64_OP_REV16", "sxth": "ARM64_OP_SXTH"}[op]
         return Encoded(op_const, reg_const(ops[0]), reg_const(ops[1]), width=width_const(reg_width(ops[0])))
+    if op == "ldr" and ops[0].lower() == "q0":
+        mem = parse_mem(ops, 1)
+        return Encoded("ARM64_OP_LOAD_Q0", src=mem.base, src2=mem.index,
+                       aux=mem_aux(mem), imm=c_u64(mem.offset))
+    if op == "ldr" and ops[0].lower() == "d0":
+        mem = parse_mem(ops, 1)
+        return Encoded("ARM64_OP_LOAD_D0", src=mem.base, src2=mem.index,
+                       aux=mem_aux(mem), imm=c_u64(mem.offset))
     if op in {"ldr", "ldur", "ldrb", "ldurb", "ldrh", "ldurh"}:
         width = 1 if op in {"ldrb", "ldurb"} else 2 if op in {"ldrh", "ldurh"} else reg_width(ops[0])
         mem = parse_mem(ops, 1)
@@ -399,6 +428,14 @@ def encode(insn: NativeInsn) -> Encoded:
         width = reg_width(ops[0])
         return Encoded("ARM64_OP_LDP", reg_const(ops[0]), reg_const(ops[1]), mem.base, mem.index,
                        width=width_const(width), aux=mem_aux(mem), imm=c_u64(mem.offset))
+    if op == "str" and ops[0].lower() == "q0":
+        mem = parse_mem(ops, 1)
+        return Encoded("ARM64_OP_STORE_Q0", dst=mem.base, src2=mem.index,
+                       aux=mem_aux(mem), imm=c_u64(mem.offset))
+    if op == "str" and ops[0].lower() == "d0":
+        mem = parse_mem(ops, 1)
+        return Encoded("ARM64_OP_STORE_D0", dst=mem.base, src2=mem.index,
+                       aux=mem_aux(mem), imm=c_u64(mem.offset))
     if op in {"str", "stur", "strb", "strh"}:
         width = 1 if op == "strb" else 2 if op == "strh" else reg_width(ops[0])
         mem = parse_mem(ops, 1)
@@ -453,90 +490,10 @@ def label(addr: int) -> str:
     return f"arm64_l_{addr:x}"
 
 
-def is_rodata_symbol(symbol: str | None, rodata16: dict[str, tuple[int, int]]) -> bool:
-    return bool(symbol and symbol in rodata16)
-
-
-def append_special_insn(
-    lines: list[str],
-    insn: NativeInsn,
-    rodata16: dict[str, tuple[int, int]],
-    rodata_regs: dict[str, str],
-) -> bool:
-    op = insn.mnemonic
-    ops = insn.operands
-    if insn.reloc_symbol and is_rodata_symbol(insn.reloc_symbol, rodata16):
-        if op == "adrp" and ops:
-            rodata_regs[reg_const(ops[0])] = insn.reloc_symbol
-            lines.append("\t(void)0;")
-            return True
-        if op == "add" and len(ops) >= 2:
-            dst = reg_const(ops[0])
-            src = reg_const(ops[1])
-            if src in rodata_regs:
-                rodata_regs[dst] = rodata_regs[src]
-                lines.append("\t(void)0;")
-                return True
-    if insn.reloc_symbol and not is_helper_symbol(insn.reloc_symbol):
-        if op == "adrp" and ops:
-            lines.append("\t(void)0;")
-            return True
-        if op == "ldr" and len(ops) == 2 and ops[0].lower().startswith("x"):
-            lines.append(
-                f"\tARM64_SIM_L_WRITE_REG_MAP_PTR({reg_const(ops[0])}, "
-                f"&{insn.reloc_symbol});"
-            )
-            return True
-    if op == "ldr" and len(ops) == 2 and ops[0].lower() == "q0":
-        mem = parse_mem(ops, 1)
-        symbol = rodata_regs.get(mem.base)
-        if symbol is not None and symbol in rodata16:
-            lo, hi = rodata16[symbol]
-            lines.append(f"\tARM64_SIM_L_LOAD_CONST16_Q0({c_u64(lo)}, {c_u64(hi)});")
-            return True
-    if op == "ldp" and len(ops) == 3:
-        mem = parse_mem(ops, 2)
-        symbol = rodata_regs.get(mem.base)
-        if symbol is not None and symbol in rodata16:
-            if mem.offset != 0:
-                raise ValueError(f"unsupported rodata ldp offset: {insn.raw}")
-            lo, hi = rodata16[symbol]
-            lines.append(
-                f"\tARM64_SIM_L_LOAD_CONST16_PAIR({reg_const(ops[0])}, "
-                f"{reg_const(ops[1])}, {c_u64(lo)}, {c_u64(hi)});"
-            )
-            return True
-    if op == "str" and len(ops) == 2 and ops[0].lower() == "q0":
-        mem = parse_mem(ops, 1)
-        lines.append(
-            f"\tARM64_SIM_L_STORE_Q0_MEM({mem.base}, {mem.index}, "
-            f"{mem_aux(mem)}, {c_u64(mem.offset)});"
-        )
-        return True
-    if op == "ldr" and len(ops) == 2 and ops[0].lower() == "d0":
-        mem = parse_mem(ops, 1)
-        lines.append(
-            f"\tARM64_SIM_L_LOAD_D0_MEM({mem.base}, {mem.index}, "
-            f"{mem_aux(mem)}, {c_u64(mem.offset)});"
-        )
-        return True
-    if op == "str" and len(ops) == 2 and ops[0].lower() == "d0":
-        mem = parse_mem(ops, 1)
-        lines.append(
-            f"\tARM64_SIM_L_STORE_D0_MEM({mem.base}, {mem.index}, "
-            f"{mem_aux(mem)}, {c_u64(mem.offset)});"
-        )
-        return True
-    return False
-
-
 def append_insn(lines: list[str], insn: NativeInsn, all_addrs: set[int],
                 next_addr: int | None,
-                rodata16: dict[str, tuple[int, int]],
-                rodata_regs: dict[str, str]) -> None:
+                rodata_idents: dict[str, str]) -> None:
     lines.append(f"\t/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
-    if append_special_insn(lines, insn, rodata16, rodata_regs):
-        return
     op = insn.mnemonic
     if op.startswith("b."):
         target = branch_target(insn.operands[0])
@@ -568,7 +525,7 @@ def append_insn(lines: list[str], insn: NativeInsn, all_addrs: set[int],
     if op == "ret":
         lines.append("\tARM64_SIM_A64_RET();")
         return
-    enc = encode(insn)
+    enc = encode(insn, rodata_idents)
     lines.append(
         f"\tARM64_SIM_RUN_OP3({enc.op}, {enc.dst}, {enc.src}, {enc.src2}, {enc.src3}, "
         f"{enc.width}, {enc.aux}, {enc.imm});"
@@ -609,20 +566,25 @@ def render_program(name: str, symbol: str, functions: OrderedDict[str, list[Nati
     if prelude:
         lines.append(prelude.rstrip())
         lines.append("")
+    rodata_idents = rodata_ident_map(rodata16)
+    for symbol, ident in rodata_idents.items():
+        lo, hi = rodata16[symbol]
+        lines.append(f"static const __u64 {ident}[2] = {{{c_u64(lo)}, {c_u64(hi)}}};")
+    if rodata_idents:
+        lines.append("")
     lines.extend([
         section,
         f"int {name}_arm64_sim_xdp({ctx}ctx)",
         "{",
         f"\t{entry}",
     ])
-    rodata_regs: dict[str, str] = {}
     for fn_symbol, insns in functions.items():
         if fn_symbol != symbol:
             lines.append(f"\t/* native subroutine {c_comment(fn_symbol)} */")
         for insn in insns:
             lines.append(f"{label(insn.addr)}:")
             append_insn(lines, insn, all_addrs, next_by_addr.get(insn.addr),
-                        rodata16, rodata_regs)
+                        rodata_idents)
     if linked_exit:
         lines.extend([
             "\tARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X0, ARM64_SIM_L_READ_REG(ARM64_X7), ARM64_WIDTH_64);",

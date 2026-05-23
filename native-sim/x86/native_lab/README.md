@@ -495,6 +495,8 @@ python3 native-sim/x86/native_lab/tests/analyze.py
   x86 `-march=native -mno-red-zone -mgeneral-regs-only` is the retained
   default. It passed pure 29/29 in
   `micro/results/x86_kvm_micro_20260523_195401_954208` with 1.422x
+  geomean and stage2 helper/map 13/13 in
+  `micro/results/x86_kvm_micro_20260523_201900_994229` with 1.456x
   geomean after adding C-sim-backed BMI2 memory-source proof ops for
   `rorx`/`shlx`/`shrx`/`sarx`. Regenerating the default proof sources
   after the sweep passed x86 pure proof run 29/29 in

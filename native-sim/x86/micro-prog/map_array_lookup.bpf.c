@@ -56,7 +56,7 @@ x86_l_25:
 	X86_SIM_RUN_OP(X86_OP_MOV_STORE_REG, X86_RSP, X86_RAX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 16ULL);
 x86_l_2a:
 	/* 0x2a: mov    rbx,QWORD PTR [rip+0x0] */
-	X86_SIM_L_WRITE_REG_MAP_PTR(X86_RBX, &test_array);
+	X86_SIM_RUN_OP(X86_OP_MOV_LOAD_MAP_PTR, X86_RBX, X86_REG_NONE, X86_WIDTH_64, 0, ((__u64)(long)&test_array));
 x86_l_31:
 	/* 0x31: xor    r13d,r13d */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_R13, X86_R13, X86_WIDTH_32, X86_ALU_XOR, 0);
@@ -77,7 +77,7 @@ x86_l_44:
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_RCX, X86_RCX, X86_WIDTH_32, X86_ALU_XOR, 0);
 x86_l_46:
 	/* 0x46: call   QWORD PTR [rip+0x0] */
-	X86_SIM_BPF_CALL_bpf_map_update_elem();
+	X86_SIM_RUN_OP(X86_OP_CALL_HELPER, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, X86_SIM_HELPER_bpf_map_update_elem);
 x86_l_4c:
 	/* 0x4c: mov    rdi,rbx */
 	X86_SIM_RUN_OP(X86_OP_MOV_REG, X86_RDI, X86_RBX, X86_WIDTH_64, 0, 0);
@@ -86,7 +86,7 @@ x86_l_4f:
 	X86_SIM_RUN_OP(X86_OP_MOV_REG, X86_RSI, X86_R14, X86_WIDTH_64, 0, 0);
 x86_l_52:
 	/* 0x52: call   QWORD PTR [rip+0x0] */
-	X86_SIM_BPF_CALL_bpf_map_lookup_elem();
+	X86_SIM_RUN_OP(X86_OP_CALL_HELPER, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, X86_SIM_HELPER_bpf_map_lookup_elem);
 x86_l_58:
 	/* 0x58: test   rax,rax */
 	X86_SIM_RUN_OP(X86_OP_TEST_REG, X86_RAX, X86_RAX, X86_WIDTH_64, 0, 0);

@@ -838,14 +838,14 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
     }
     if (loadtime_probe_bytecode_acceptance(attr, attr_size, cur, target_json,
                                            map_ids, map_n, verifier_log) != 0) {
-        snprintf(err, err_sz,
-                 "loadtime initial verifier probe failed errno=%d log=%s",
+        log_line("loadtime original bytecode rejected by verifier errno=%d "
+                 "log=%s; passing original BPF_PROG_LOAD through",
                  errno, verifier_log);
         free(map_refs);
         free(map_ids);
         free(map_types);
         free(plan_json);
-        return -1;
+        return 0;
     }
 
     int step_seq = 0;

@@ -50,19 +50,19 @@ x86_l_11:
 	X86_SIM_X86_JCC(X86_CC_A, 0x11, 0x66, x86_l_66);
 x86_l_13:
 	/* 0x13: call   QWORD PTR [rip+0x0] */
-	X86_SIM_BPF_CALL_bpf_get_smp_processor_id();
+	X86_SIM_RUN_OP(X86_OP_CALL_HELPER, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, X86_SIM_HELPER_bpf_get_smp_processor_id);
 x86_l_19:
 	/* 0x19: mov    DWORD PTR [rsp+0xc],eax */
 	X86_SIM_RUN_OP(X86_OP_MOV_STORE_REG, X86_RSP, X86_RAX, X86_WIDTH_32, X86_MEM_AUX(X86_REG_NONE, 0), 12ULL);
 x86_l_1d:
 	/* 0x1d: call   QWORD PTR [rip+0x0] */
-	X86_SIM_BPF_CALL_bpf_get_current_uid_gid();
+	X86_SIM_RUN_OP(X86_OP_CALL_HELPER, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, X86_SIM_HELPER_bpf_get_current_uid_gid);
 x86_l_23:
 	/* 0x23: mov    QWORD PTR [rsp+0x10],rax */
 	X86_SIM_RUN_OP(X86_OP_MOV_STORE_REG, X86_RSP, X86_RAX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 16ULL);
 x86_l_28:
 	/* 0x28: mov    rbx,QWORD PTR [rip+0x0] */
-	X86_SIM_L_WRITE_REG_MAP_PTR(X86_RBX, &cpu_ts);
+	X86_SIM_RUN_OP(X86_OP_MOV_LOAD_MAP_PTR, X86_RBX, X86_REG_NONE, X86_WIDTH_64, 0, ((__u64)(long)&cpu_ts));
 x86_l_2f:
 	/* 0x2f: xor    r13d,r13d */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_R13, X86_R13, X86_WIDTH_32, X86_ALU_XOR, 0);
@@ -83,7 +83,7 @@ x86_l_42:
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_RCX, X86_RCX, X86_WIDTH_32, X86_ALU_XOR, 0);
 x86_l_44:
 	/* 0x44: call   QWORD PTR [rip+0x0] */
-	X86_SIM_BPF_CALL_bpf_map_update_elem();
+	X86_SIM_RUN_OP(X86_OP_CALL_HELPER, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, X86_SIM_HELPER_bpf_map_update_elem);
 x86_l_4a:
 	/* 0x4a: mov    rdi,rbx */
 	X86_SIM_RUN_OP(X86_OP_MOV_REG, X86_RDI, X86_RBX, X86_WIDTH_64, 0, 0);
@@ -92,7 +92,7 @@ x86_l_4d:
 	X86_SIM_RUN_OP(X86_OP_MOV_REG, X86_RSI, X86_R14, X86_WIDTH_64, 0, 0);
 x86_l_50:
 	/* 0x50: call   QWORD PTR [rip+0x0] */
-	X86_SIM_BPF_CALL_bpf_map_lookup_elem();
+	X86_SIM_RUN_OP(X86_OP_CALL_HELPER, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, X86_SIM_HELPER_bpf_map_lookup_elem);
 x86_l_56:
 	/* 0x56: test   rax,rax */
 	X86_SIM_RUN_OP(X86_OP_TEST_REG, X86_RAX, X86_RAX, X86_WIDTH_64, 0, 0);

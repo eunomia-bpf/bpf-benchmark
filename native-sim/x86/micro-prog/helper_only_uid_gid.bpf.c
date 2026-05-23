@@ -33,7 +33,7 @@ x86_l_d:
 	X86_SIM_X86_JCC(X86_CC_A, 0xd, 0x1d, x86_l_1d);
 x86_l_f:
 	/* 0xf: call   QWORD PTR [rip+0x0] */
-	X86_SIM_BPF_CALL_bpf_get_current_uid_gid();
+	X86_SIM_RUN_OP(X86_OP_CALL_HELPER, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, X86_SIM_HELPER_bpf_get_current_uid_gid);
 x86_l_15:
 	/* 0x15: mov    QWORD PTR [rbx],rax */
 	X86_SIM_RUN_OP(X86_OP_MOV_STORE_REG, X86_RBX, X86_RAX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);

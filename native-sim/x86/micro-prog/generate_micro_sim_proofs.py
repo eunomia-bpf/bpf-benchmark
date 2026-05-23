@@ -325,6 +325,10 @@ def c_u64(value: int) -> str:
     return f"{value & 0xffffffffffffffff}ULL"
 
 
+def c_ptr_u64(expr: str) -> str:
+    return f"((__u64)(long){expr})"
+
+
 def reg_info(operand: str) -> tuple[str, int, int] | None:
     return REGS.get(operand.strip().lower())
 
@@ -408,56 +412,11 @@ def is_helper_symbol(symbol: str | None) -> bool:
     return bool(symbol and symbol.startswith("bpf_"))
 
 
-def is_rodata_symbol(symbol: str | None, rodata16: dict[str, tuple[int, int]]) -> bool:
-    return bool(symbol and symbol in rodata16)
+def rodata_ident_map(rodata16: dict[str, tuple[int, int]]) -> dict[str, str]:
+    return {symbol: f"__x86_rodata_{index}" for index, symbol in enumerate(rodata16)}
 
 
-def append_special_step(
-    lines: list[str],
-    insn: NativeInsn,
-    rodata16: dict[str, tuple[int, int]],
-    indent: str,
-) -> bool:
-    if is_helper_symbol(insn.reloc_symbol):
-        if insn.mnemonic in {"mov", "movabs"} and len(insn.operands) == 2:
-            dst_reg = reg_info(insn.operands[0])
-            if dst_reg and is_mem(insn.operands[1]):
-                lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
-                lines.append(
-                    f"{indent}X86_SIM_L_WRITE_REG_HELPER_ID({dst_reg[0]}, "
-                    f"X86_SIM_HELPER_{insn.reloc_symbol});"
-                )
-                return True
-    if insn.reloc_symbol and not is_helper_symbol(insn.reloc_symbol):
-        if insn.mnemonic in {"mov", "movabs"} and len(insn.operands) == 2:
-            dst_reg = reg_info(insn.operands[0])
-            if dst_reg and is_mem(insn.operands[1]) and not is_rodata_symbol(insn.reloc_symbol, rodata16):
-                lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
-                lines.append(
-                    f"{indent}X86_SIM_L_WRITE_REG_MAP_PTR({dst_reg[0]}, &{insn.reloc_symbol});"
-                )
-                return True
-        if insn.mnemonic == "movups" and len(insn.operands) == 2:
-            if insn.operands[0].lower() == "xmm0" and is_rodata_symbol(insn.reloc_symbol, rodata16):
-                lo, hi = rodata16[insn.reloc_symbol]
-                lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
-                lines.append(
-                    f"{indent}X86_SIM_L_LOAD_CONST16_XMM0({c_u64(lo)}, {c_u64(hi)});"
-                )
-                return True
-    if insn.mnemonic in {"movaps", "movups"} and len(insn.operands) == 2:
-        dst, src = insn.operands
-        if is_mem(dst) and src.lower() == "xmm0" and mem_base_reg(dst) == "X86_RSP":
-            lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
-            lines.append(
-                f"{indent}X86_SIM_L_STORE_XMM0_STACK((__s64)(long)"
-                f"X86_SIM_L_READ_REG_PTR(X86_RSP) + {mem_disp(dst)});"
-            )
-            return True
-    return False
-
-
-def encode(insn: NativeInsn) -> EncodedInsn:
+def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
     op = insn.mnemonic
     ops = insn.operands
 
@@ -471,6 +430,12 @@ def encode(insn: NativeInsn) -> EncodedInsn:
         return enc("X86_OP_JCC", aux=CC_AUX[op],
                    imm=c_u64(branch_target(ops[0]) if ops else 0))
     if op == "call":
+        if is_helper_symbol(insn.reloc_symbol):
+            return enc("X86_OP_CALL_HELPER", imm=f"X86_SIM_HELPER_{insn.reloc_symbol}")
+        if ops:
+            call_reg = reg_info(ops[0])
+            if call_reg is not None:
+                return enc("X86_OP_CALL_REG", src=call_reg[0])
         return enc("X86_OP_CALL", imm=c_u64(branch_target(ops[0]) if ops else 0))
     if op == "push":
         src = reg_info(ops[0]) if ops else None
@@ -506,6 +471,14 @@ def encode(insn: NativeInsn) -> EncodedInsn:
             return enc("X86_OP_MOV_REG", dst=dst_reg[0], src=src_reg[0],
                        flags=WIDTH_CONST[dst_reg[1]])
         if dst_reg and is_mem(src):
+            if is_helper_symbol(insn.reloc_symbol):
+                return enc("X86_OP_MOV_LOAD_HELPER_ID", dst=dst_reg[0],
+                           imm=f"X86_SIM_HELPER_{insn.reloc_symbol}")
+            if insn.reloc_symbol:
+                if insn.reloc_symbol in rodata_idents:
+                    raise ValueError(f"unsupported scalar rodata load: {insn.raw}")
+                return enc("X86_OP_MOV_LOAD_MAP_PTR", dst=dst_reg[0],
+                           imm=c_ptr_u64(f"&{insn.reloc_symbol}"))
             return enc("X86_OP_MOV_LOAD", dst=dst_reg[0], src=mem_base_reg(src),
                        flags=WIDTH_CONST[operand_width(src, dst_reg[1])],
                        aux=mem_aux(src),
@@ -522,6 +495,23 @@ def encode(insn: NativeInsn) -> EncodedInsn:
                        src=src_reg[0], flags=WIDTH_CONST[operand_width(dst)],
                        aux=mem_aux(dst, src_shift=src_reg[2]),
                        imm=c_u64(mem_disp(dst)))
+        raise ValueError(f"cannot encode {insn.raw}")
+
+    if op in {"movaps", "movups"}:
+        if len(ops) != 2:
+            raise ValueError(f"cannot encode {insn.raw}")
+        dst, src = ops
+        if dst.lower() == "xmm0" and is_mem(src):
+            if insn.reloc_symbol:
+                if insn.reloc_symbol not in rodata_idents:
+                    raise ValueError(f"unsupported xmm reloc load: {insn.raw}")
+                return enc("X86_OP_LOAD_XMM0", src="X86_REG_NONE",
+                           imm=c_ptr_u64(rodata_idents[insn.reloc_symbol]))
+            return enc("X86_OP_LOAD_XMM0", src=mem_base_reg(src),
+                       aux=mem_aux(src), imm=c_u64(mem_disp(src)))
+        if is_mem(dst) and src.lower() == "xmm0":
+            return enc("X86_OP_STORE_XMM0", dst=mem_base_reg(dst),
+                       aux=mem_aux(dst), imm=c_u64(mem_disp(dst)))
         raise ValueError(f"cannot encode {insn.raw}")
 
     if op in {"movzx", "movsx", "movsxd"}:
@@ -723,10 +713,8 @@ def c_comment(text: str) -> str:
 
 def append_step(lines: list[str], insn: NativeInsn, indent: str = "\t",
                 step_macro: str = "X86_SIM_RUN_OP",
-                rodata16: dict[str, tuple[int, int]] | None = None) -> None:
-    if append_special_step(lines, insn, rodata16 or {}, indent):
-        return
-    encoded = encode(insn)
+                rodata_idents: dict[str, str] | None = None) -> None:
+    encoded = encode(insn, rodata_idents or {})
     lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
     lines.append(
         f"{indent}{step_macro}("
@@ -741,8 +729,7 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
                          subroutine: bool = False,
                          step_macro: str = "X86_SIM_RUN_OP",
                          ret_statement: str = "X86_SIM_X86_RET();",
-                         rodata16: dict[str, tuple[int, int]] | None = None,
-                         helper_call_regs: set[str] | None = None) -> None:
+                         rodata_idents: dict[str, str] | None = None) -> None:
     branch_macro = "X86_SIM_X86_SUB_JCC" if subroutine else "X86_SIM_X86_JCC"
     jump_macro = "X86_SIM_X86_SUB_JMP" if subroutine else "X86_SIM_X86_JMP"
     if insn.mnemonic in CC_AUX and insn.mnemonic.startswith("j"):
@@ -770,12 +757,22 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
     if insn.mnemonic == "call":
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
         if is_helper_symbol(insn.reloc_symbol):
-            lines.append(f"{indent}X86_SIM_BPF_CALL_{insn.reloc_symbol}();")
+            encoded = encode(insn, rodata_idents or {})
+            lines.append(
+                f"{indent}{step_macro}("
+                f"{encoded.op}, {encoded.dst}, {encoded.src}, "
+                f"{encoded.flags}, {encoded.aux}, {encoded.imm});"
+            )
             return
         if insn.operands:
             call_reg = reg_info(insn.operands[0])
-            if call_reg is not None and helper_call_regs and call_reg[0] in helper_call_regs:
-                lines.append(f"{indent}X86_SIM_BPF_CALL_REG({call_reg[0]});")
+            if call_reg is not None:
+                encoded = encode(insn, rodata_idents or {})
+                lines.append(
+                    f"{indent}{step_macro}("
+                    f"{encoded.op}, {encoded.dst}, {encoded.src}, "
+                    f"{encoded.flags}, {encoded.aux}, {encoded.imm});"
+                )
                 return
         target = branch_target(insn.operands[0]) if insn.operands else 0
         if call_functions and target in call_functions:
@@ -792,7 +789,7 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
         lines.append(f"{indent}{ret_statement}")
         return
-    append_step(lines, insn, indent, step_macro, rodata16)
+    append_step(lines, insn, indent, step_macro, rodata_idents)
 
 
 def program_kind(item: dict) -> str:
@@ -829,8 +826,7 @@ def proof_kind_for_source(bench: Bench, source: Path) -> str:
 
 def render_x86_subroutine(symbol: str, insns: list[NativeInsn],
                           call_functions: dict[int, str],
-                          rodata16: dict[str, tuple[int, int]] | None = None,
-                          helper_call_regs: set[str] | None = None) -> str:
+                          rodata_idents: dict[str, str] | None = None) -> str:
     addrs = {insn.addr for insn in insns}
     next_addrs = {
         insn.addr: insns[index + 1].addr
@@ -846,8 +842,7 @@ def render_x86_subroutine(symbol: str, insns: list[NativeInsn],
                              ret_statement=(
                                  "X86_SIM_X86_SUB_RET(x86_sim_ret_dispatch);"
                              ),
-                             rodata16=rodata16,
-                             helper_call_regs=helper_call_regs)
+                             rodata_idents=rodata_idents)
     lines.append("")
     return "\n".join(lines)
 
@@ -902,15 +897,8 @@ def render_program(name: str, insns: list[NativeInsn],
         insn.addr: insns[index + 1].addr
         for index, insn in enumerate(insns[:-1])
     }
-    helper_call_regs = {
-        reg_info(insn.operands[0])[0]
-        for fn_insns in [insns, *subfunctions.values()]
-        for insn in fn_insns
-        if is_helper_symbol(insn.reloc_symbol)
-        and insn.mnemonic in {"mov", "movabs"}
-        and len(insn.operands) == 2
-        and reg_info(insn.operands[0]) is not None
-    }
+    rodata16 = rodata16 or {}
+    rodata_idents = rodata_ident_map(rodata16)
     sim_header = "../x86_sim_local_bpf.h"
     lines: list[str] = []
     if has_stack:
@@ -923,6 +911,11 @@ def render_program(name: str, insns: list[NativeInsn],
     ])
     if source_prelude:
         lines.append(source_prelude.rstrip())
+        lines.append("")
+    for symbol, ident in rodata_idents.items():
+        lo, hi = rodata16[symbol]
+        lines.append(f"static const __u64 {ident}[2] = {{{c_u64(lo)}, {c_u64(hi)}}};")
+    if rodata_idents:
         lines.append("")
     lines.extend([
         section,
@@ -937,8 +930,7 @@ def render_program(name: str, insns: list[NativeInsn],
                              next_addr=next_addrs.get(insn.addr),
                              call_functions=subroutine_label_by_addr,
                              ret_statement=ret_statement,
-                             rodata16=rodata16,
-                             helper_call_regs=helper_call_regs)
+                             rodata_idents=rodata_idents)
     if exit_addr is not None:
         lines.append(f"x86_l_{exit_addr:x}:")
         lines.append("\t/* native-link entry fallthrough exit */")
@@ -946,8 +938,7 @@ def render_program(name: str, insns: list[NativeInsn],
     if subfunctions:
         for symbol, fn_insns in subfunctions.items():
             lines.append(render_x86_subroutine(
-                symbol, fn_insns, subroutine_label_by_addr, rodata16,
-                helper_call_regs))
+                symbol, fn_insns, subroutine_label_by_addr, rodata_idents))
         lines.extend([
             "x86_sim_ret_dispatch:",
             "\tswitch (__x86_sim_ret_addr) {",
