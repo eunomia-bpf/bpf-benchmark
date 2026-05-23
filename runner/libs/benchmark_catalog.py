@@ -22,7 +22,7 @@ class MacroAppDefinition:
 
 MACRO_APP_DEFINITIONS: tuple[MacroAppDefinition, ...] = (
     MacroAppDefinition(name="bcc/set", runner="bcc_set", workload="stress_ng_bcc_hook_hot"),
-    # otel_mixed_workload: 5 stdlib SHA-256 interpreter loops
+    # otel_mixed_workload: multi-worker integer loops
     # (Python/Ruby/Node/Perl/PHP) + stress-ng --cpu 1 concurrently.
     # Interpreter loops drive samples into perf_unwind_<lang> programs;
     # stress-ng exercises perf_unwind_native (and Go-labels).

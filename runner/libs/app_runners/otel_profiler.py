@@ -12,10 +12,10 @@ from .setup_support import optional_repo_artifact_path
 
 # Multi-language interpreter sampling load is now a workload, not runner-
 # internal state: see `runner/libs/workload.py:run_otel_mixed_workload`,
-# which spawns Python/Ruby/Node/Perl/PHP SHA-256 loops plus stress-ng cpu
+# which spawns Python/Ruby/Node/Perl/PHP integer loops plus stress-ng cpu
 # concurrently for the measurement window. The catalog wires that workload
 # (`workload="otel_mixed_workload"`) so `.baseline.workloads[]` /
-# `.post_rejit.workloads[]` carry per-language raw stderr ("<lang> sha256
+# `.post_rejit.workloads[]` carry per-language raw stderr ("<lang> int_loop
 # ops=N elapsed_s=T") in components; interpretation stays outside the framework.
 #
 # IMPORTANT: BPF tail-called programs (perf_unwind_python, perf_unwind_php,
@@ -32,7 +32,7 @@ from .setup_support import optional_repo_artifact_path
 
 _MINIMAL_CONFIG = """receivers:
   profiling:
-    samples_per_second: 99
+    samples_per_second: 100000
     # `tracers: all` enables every interpreter tracer (python, php, ruby, v8,
     # perl, hotspot, dotnet, beam, labels). Without this, perf_unwind_<lang>
     # programs are loaded but never routed to: native_tracer_entry queries
