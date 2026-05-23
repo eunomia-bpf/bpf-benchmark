@@ -301,8 +301,6 @@ long syscall(long number, ...) {
                 errno = EINVAL;
                 return -1;
             }
-            if (opt_rc == 0 && opt_err[0])
-                log_line("loadtime optimization skipped: %s", opt_err);
             loadtime_active = opt_rc > 0;
         }
         in_shim = 0;

@@ -415,11 +415,13 @@ static void run_step(struct prog_entry *pd,
         return;
     }
 
-    /* bpfopt produced output? If empty, this is a utility step; advance seq
-     * but do nothing to kernel. */
+    /* Every configured pass must produce bytecode. Keeping the previous input
+     * here would silently turn a failed pass into an unoptimized round. */
     struct stat nst;
     if (stat(nxt, &nst) != 0 || nst.st_size == 0) {
-        out->ok = 1;
+        out->failure_kind = 1;
+        snprintf(out->err_msg, sizeof(out->err_msg),
+                 "bpfopt step produced no output bytecode");
         return;
     }
 
@@ -527,8 +529,6 @@ static int prog_workdir_init(struct prog_entry *pd, uint32_t want_id,
 
     const char *dir = getenv("BPFREJIT_SHIM_DIR");
     if (!dir) dir = "/tmp";
-    const char *arch = getenv("BPFREJIT_TARGET_ARCH");
-    if (!arch) arch = "x86_64";
     snprintf(w->workdir, sizeof(w->workdir), "%s/work_%u", dir, want_id);
     mkdir(w->workdir, 0755);
     snprintf(w->cur, sizeof(w->cur), "%s/output.bin", w->workdir);
@@ -543,27 +543,51 @@ static int prog_workdir_init(struct prog_entry *pd, uint32_t want_id,
         char shared[320];
         snprintf(shared, sizeof(shared), "%s/target.json", dir);
         int sfd = open(shared, O_RDONLY);
-        int wrote = 0;
-        if (sfd >= 0) {
-            int dfd = open(w->target_json, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-            if (dfd >= 0) {
-                char buf[4096]; ssize_t n;
-                while ((n = read(sfd, buf, sizeof(buf))) > 0)
-                    (void)!write(dfd, buf, n);
-                close(dfd);
-                wrote = 1;
-            }
-            real_close(sfd);
+        if (sfd < 0) {
+            snprintf(err_out, err_sz, "missing shim target.json at %s", shared);
+            free(fd2id_fds); free(fd2id_kids);
+            return -1;
         }
-        if (!wrote) {
-            int fd = open(w->target_json, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-            if (fd >= 0) {
-                char buf[64];
-                int n = snprintf(buf, sizeof(buf),
-                                 "{\"arch\":\"%s\",\"kinsns\":{}}\n", arch);
-                (void)!write(fd, buf, n);
-                close(fd);
+        int dfd = open(w->target_json, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        if (dfd < 0) {
+            snprintf(err_out, err_sz,
+                     "failed to create per-program target.json errno=%d", errno);
+            real_close(sfd);
+            free(fd2id_fds); free(fd2id_kids);
+            return -1;
+        }
+        int copy_failed = 0;
+        char buf[4096];
+        ssize_t n;
+        while ((n = read(sfd, buf, sizeof(buf))) > 0) {
+            size_t off = 0;
+            while (off < (size_t)n) {
+                ssize_t wrc = write(dfd, buf + off, (size_t)n - off);
+                if (wrc < 0) {
+                    if (errno == EINTR)
+                        continue;
+                    copy_failed = 1;
+                    break;
+                }
+                if (wrc == 0) {
+                    copy_failed = 1;
+                    break;
+                }
+                off += (size_t)wrc;
             }
+            if (copy_failed)
+                break;
+        }
+        if (n < 0)
+            copy_failed = 1;
+        real_close(dfd);
+        real_close(sfd);
+        if (copy_failed) {
+            snprintf(err_out, err_sz,
+                     "failed to copy shim target.json from %s errno=%d",
+                     shared, errno);
+            free(fd2id_fds); free(fd2id_kids);
+            return -1;
         }
     }
 
@@ -573,8 +597,14 @@ static int prog_workdir_init(struct prog_entry *pd, uint32_t want_id,
         char canon_log[320], fd_to_id_path[320];
         snprintf(canon_log, sizeof(canon_log), "%s/canonicalize.log", w->workdir);
         snprintf(fd_to_id_path, sizeof(fd_to_id_path), "%s/fd-to-id.json", w->workdir);
-        if (!map_refs_are_kernel_ids)
-            (void)write_fd_to_id_json(fd_to_id_path, fd2id_fds, fd2id_kids, fd2id_n);
+        if (!map_refs_are_kernel_ids &&
+            write_fd_to_id_json(fd_to_id_path, fd2id_fds, fd2id_kids, fd2id_n) != 0) {
+            snprintf(err_out, err_sz,
+                     "failed to write fd-to-id map %s errno=%d",
+                     fd_to_id_path, errno);
+            free(fd2id_fds); free(fd2id_kids);
+            return -1;
+        }
         if (run_canonicalize(bytecode_path, w->cur, w->target_json, map_ids_csv,
                              map_refs_are_kernel_ids ? NULL : fd_to_id_path,
                              canon_log) != 0) {

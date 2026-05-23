@@ -1,0 +1,13 @@
+{
+  "app": "cilium/agent",
+  "baseline": null,
+  "error": "repo kernel module tree is missing for the running kernel: /artifacts/lib/modules/7.0.0-rc2+",
+  "post_rejit": null,
+  "rejit_result": {
+    "mode": "workload_only",
+    "status": "skipped"
+  },
+  "runner": "cilium",
+  "selected_workload": "cilium_endpoint_pktgen",
+  "status": "error"
+}

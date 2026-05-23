@@ -133,6 +133,11 @@ COPY --link --from=runner-runtime-host-kernel-image /${KERNEL_IMAGE_NAME} /artif
 COPY --link --from=runner-runtime-host-kernel-offsets /kernel_offsets.h /artifacts/kernel/kernel_offsets.h
 COPY --link --from=runner-runtime-host-kernel-modules / /artifacts/modules
 RUN mkdir -p /artifacts && printf '%s\n' "${KERNEL_MANIFEST_JSON}" > /artifacts/manifest.json
+RUN set -eux; \
+    mkdir -p /artifacts/lib; \
+    ln -sfn /artifacts/modules /artifacts/lib/modules; \
+    kernel_release="$(python3 -c 'import json; print(json.load(open("/artifacts/manifest.json"))["kernel_release"])')"; \
+    depmod -b /artifacts "$kernel_release"
 
 COPY --link --from=runner-runtime-host-runner-build /micro_exec ${IMAGE_WORKSPACE}/runner/${RUNNER_BUILD_DIR_NAME}/micro_exec
 COPY --link --from=runner-runtime-host-micro-programs / /artifacts/user/micro-programs/${RUN_TARGET_ARCH}/
@@ -167,6 +172,8 @@ COPY --link --chmod=0755 \
 
 RUN set -eux; \
     mkdir -p /opt; \
+    mkdir -p /artifacts/lib; \
+    ln -sfn /artifacts/modules /artifacts/lib/modules; \
     ln -sfn /artifacts/user /opt/bpf-benchmark; \
     ldconfig
 

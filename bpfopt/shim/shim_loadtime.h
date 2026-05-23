@@ -425,8 +425,8 @@ static int loadtime_prepare_target(const char *workdir, char *target_json,
         free(target_payload);
         return rc;
     }
-    const char fallback[] = "{\"arch\":\"x86_64\",\"kinsns\":{}}\n";
-    return loadtime_write_file(target_json, fallback, sizeof(fallback) - 1);
+    snprintf(err, err_sz, "missing loadtime target.json at %s", shared);
+    return -1;
 }
 
 static int loadtime_contains_libbpf_map_poison(const struct bpf_insn *insns,
@@ -665,8 +665,11 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
     }
     const struct bpf_insn *input_insns =
         (const struct bpf_insn *)(uintptr_t)attr->insns;
-    if (loadtime_contains_libbpf_map_poison(input_insns, attr->insn_cnt))
-        return 0;
+    if (loadtime_contains_libbpf_map_poison(input_insns, attr->insn_cnt)) {
+        snprintf(err, err_sz,
+                 "loadtime input contains unresolved libbpf map poison placeholders");
+        return -1;
+    }
 
     char *plan_json = NULL;
     if (loadtime_read_text_file(plan_path, &plan_json) != 0) {
@@ -756,7 +759,7 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
             free(map_ids);
             free(map_types);
             free(plan_json);
-            return 0;
+            return -1;
         }
         if (remap_rc != 0) {
             free(map_refs);
@@ -831,13 +834,13 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
     if (loadtime_probe_verifier_log(attr, attr_size, cur, target_json,
                                     map_ids, map_n, verifier_log) != 0) {
         snprintf(err, err_sz,
-                 "loadtime initial verifier probe unavailable errno=%d log=%s; skipping optimization",
+                 "loadtime initial verifier probe failed errno=%d log=%s",
                  errno, verifier_log);
         free(map_refs);
         free(map_ids);
         free(map_types);
         free(plan_json);
-        return 0;
+        return -1;
     }
 
     int step_seq = 0;
@@ -952,34 +955,25 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
         }
         struct stat nst;
         if (stat(nxt, &nst) != 0 || nst.st_size == 0) {
-            if (loadtime_append_step_report(prog_name, prog_type_name,
-                                            name[0] ? name : "<unnamed>",
-                                            step_seq, elapsed_ms, workdir,
-                                            report) != 0) {
-                snprintf(err, err_sz,
-                         "failed to append loadtime report %s errno=%d",
-                         getenv("BPFREJIT_SHIM_LOADTIME_REPORTS") ?
-                             getenv("BPFREJIT_SHIM_LOADTIME_REPORTS") : "",
-                         errno);
-                free(map_refs);
-                free(map_ids);
-                free(map_types);
-                free(plan_json);
-                return -1;
-            }
-            step_seq++;
-            continue;
+            snprintf(err, err_sz,
+                     "loadtime bpfopt step %s produced no output bytecode; log=%s",
+                     name[0] ? name : "<unnamed>", step_log);
+            free(map_refs);
+            free(map_ids);
+            free(map_types);
+            free(plan_json);
+            return -1;
         }
         if (loadtime_probe_verifier_log(attr, attr_size, nxt, target_json,
                                         map_ids, map_n, verifier_log) != 0) {
             snprintf(err, err_sz,
-                     "loadtime verifier probe unavailable after step %s errno=%d log=%s; skipping optimization",
+                     "loadtime verifier probe failed after step %s errno=%d log=%s",
                      name[0] ? name : "<unnamed>", errno, verifier_log);
             free(map_refs);
             free(map_ids);
             free(map_types);
             free(plan_json);
-            return 0;
+            return -1;
         }
         if (loadtime_append_step_report(prog_name, prog_type_name,
                                         name[0] ? name : "<unnamed>",

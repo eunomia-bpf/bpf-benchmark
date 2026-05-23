@@ -1,0 +1,10 @@
+{
+  "app": "katran",
+  "baseline": null,
+  "error": "modprobe tunnel4 failed: modprobe: FATAL: Module tunnel4 not found in directory /artifacts/lib/modules/7.0.0-rc2+",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "katran",
+  "selected_workload": "xdp_pktgen",
+  "status": "error"
+}

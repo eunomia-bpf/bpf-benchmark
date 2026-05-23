@@ -1122,9 +1122,8 @@ def run_cilium_endpoint_pktgen_load(
     with _cilium_endpoint_pktgen_topology() as (endpoint_a, endpoint_b):
         directions = (
             (endpoint_a, endpoint_b, "cilium_endpoint_pktgen_forward"),
-            (endpoint_b, endpoint_a, "cilium_endpoint_pktgen_reverse"),
         )
-        results: list[WorkloadResult | None] = [None, None]
+        results: list[WorkloadResult | None] = [None] * len(directions)
         errors: list[BaseException] = []
 
         def run_direction(index: int, src: _CiliumEndpoint, dst: _CiliumEndpoint, name: str) -> None:
@@ -1162,7 +1161,7 @@ def run_cilium_endpoint_pktgen_load(
         workload_name="cilium_endpoint_pktgen",
         components=components,
         duration_s=max(component.duration_s for component in components),
-        config={"path": "bidirectional-endpoint-to-endpoint"},
+        config={"path": "single-direction-endpoint-to-endpoint"},
     )
 
 
@@ -1613,7 +1612,7 @@ _OTEL_INTERP_LOOPS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("perl",    ("-e", _OTEL_INTERP_PERL)),
     ("php",     ("-r", _OTEL_INTERP_PHP)),
 )
-_OTEL_INTERP_WORKERS_PER_LANGUAGE = 3
+_OTEL_INTERP_WORKERS_PER_LANGUAGE = 1
 
 
 def run_otel_mixed_workload(duration_s: int | float) -> WorkloadResult:
