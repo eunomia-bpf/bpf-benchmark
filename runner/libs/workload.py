@@ -1034,6 +1034,7 @@ def _run_namespaced_pktgen_udp(
     workload_name: str,
     clone_skb: int = _PKTGEN_CLONE_SKB,
     thread_index: int = 0,
+    vary_dst_port: bool = False,
 ) -> WorkloadResult:
     _ensure_kernel_module_loaded("pktgen")
     seconds = max(1, int(round(float(duration_s))))
@@ -1058,8 +1059,8 @@ def _run_namespaced_pktgen_udp(
         f"dst_mac {dst_mac}",
         "udp_src_min 1",
         "udp_src_max 65535",
-        f"udp_dst_min {int(dst_port)}",
-        f"udp_dst_max {int(dst_port)}",
+        f"udp_dst_min {1 if vary_dst_port else int(dst_port)}",
+        f"udp_dst_max {65535 if vary_dst_port else int(dst_port)}",
         "flows 65535",
         "flowlen 1",
         "clear_counters",
@@ -1105,6 +1106,7 @@ def _run_namespaced_pktgen_udp(
             "src_ip": src_ip,
             "dst_ip": dst_ip,
             "dst_port": int(dst_port),
+            "dst_port_range": [1, 65535] if vary_dst_port else [int(dst_port), int(dst_port)],
             "pkt_size": 64,
             "flows": 65535,
             "clone_skb": int(clone_skb),
@@ -1122,6 +1124,7 @@ def run_cilium_endpoint_pktgen_load(
     with _cilium_endpoint_pktgen_topology() as (endpoint_a, endpoint_b):
         directions = (
             (endpoint_a, endpoint_b, "cilium_endpoint_pktgen_forward"),
+            (endpoint_b, endpoint_a, "cilium_endpoint_pktgen_reverse"),
         )
         results: list[WorkloadResult | None] = [None] * len(directions)
         errors: list[BaseException] = []
@@ -1140,6 +1143,7 @@ def run_cilium_endpoint_pktgen_load(
                     workload_name=name,
                     clone_skb=0,
                     thread_index=index,
+                    vary_dst_port=True,
                 )
             except BaseException as exc:
                 errors.append(exc)
@@ -1161,7 +1165,7 @@ def run_cilium_endpoint_pktgen_load(
         workload_name="cilium_endpoint_pktgen",
         components=components,
         duration_s=max(component.duration_s for component in components),
-        config={"path": "single-direction-endpoint-to-endpoint"},
+        config={"path": "bidirectional-endpoint-to-endpoint"},
     )
 
 
@@ -1192,7 +1196,7 @@ def run_network_pktgen_udp_load(
     _shell_write(_PKTGEN_THREAD, f"add_device {BENCHMARK_IFACE}")
     for command in (
         "flag !SHARED",
-        f"clone_skb {_PKTGEN_CLONE_SKB}",
+        "clone_skb 0",
         "burst 1",
         "count 0",
         "delay 0",
@@ -1246,7 +1250,7 @@ def run_network_pktgen_udp_load(
             "dst_port": 18081,
             "pkt_size": 64,
             "flows": 65535,
-            "clone_skb": _PKTGEN_CLONE_SKB,
+            "clone_skb": 0,
         },
     )
 

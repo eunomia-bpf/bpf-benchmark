@@ -28,7 +28,7 @@ BPF_CFLAGS := -Wall -Wextra -O2 -g -target bpf $(SYS_INCLUDE_FLAGS) -MMD -MP
 # the helper's kernel address; no trampoline needed.
 NATIVE_TARGET_FLAGS := $(if $(NATIVE_TARGET),--target=$(NATIVE_TARGET))
 NATIVE_ARCH_CFLAGS := $(if $(filter x86_64 amd64,$(NATIVE_ARCH)),-march=native -mno-red-zone -mgeneral-regs-only) \
-    $(if $(filter arm64 aarch64,$(NATIVE_ARCH)),-mgeneral-regs-only)
+    $(if $(filter arm64 aarch64,$(NATIVE_ARCH)),-mtune=neoverse-n1 -mgeneral-regs-only)
 NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -Wall -Wextra -O3 -g -fPIC -c -fno-plt -DMICRO_NATIVE \
     -fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
     -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \

@@ -5,78 +5,6 @@
 #define BPF_F_REPLACE (1U << 2)
 #endif
 
-/* Issue a stock BPF_PROG_LOAD with the pass-output bytecode + log_level=2 to
- * capture verifier states. Writes the verifier log to log_path. The probe fd
- * is closed; we never run the probe program. Failures fall through silently
- * (the log path will exist with whatever the kernel wrote before bailing). */
-static void capture_verifier_states(const struct prog_entry *p,
-                                    const char *bytecode_path,
-                                    const char *target_json_path,
-                                    const uint32_t *map_fds, uint32_t nr_fds,
-                                    const char *log_path) {
-    int bfd = open(bytecode_path, O_RDONLY);
-    if (bfd < 0) return;
-    struct stat st;
-    if (fstat(bfd, &st) != 0 || st.st_size <= 0 ||
-        (st.st_size % (off_t)sizeof(struct bpf_insn)) != 0) {
-        real_close(bfd);
-        return;
-    }
-    size_t bytes = (size_t)st.st_size;
-    struct bpf_insn *insns = (struct bpf_insn *)malloc(bytes);
-    if (!insns) { real_close(bfd); return; }
-    ssize_t rd = read(bfd, insns, bytes);
-    real_close(bfd);
-    if (rd != (ssize_t)bytes) { free(insns); return; }
-
-    /* Full fd_array: map fds + BTF module fds at call_offset slots, parsed
-     * from target.json. */
-    int *fd_array = NULL;
-    uint32_t fd_array_n = 0;
-    (void)build_full_fd_array(target_json_path, map_fds, nr_fds,
-                              &fd_array, &fd_array_n);
-
-    /* 16 MB log buffer keeps large-program verifier logs intact. */
-    size_t log_buf_size = 16 * 1024 * 1024;
-    char *log_buf = (char *)malloc(log_buf_size);
-    if (!log_buf) {
-        free(insns);
-        free_full_fd_array(fd_array, fd_array_n);
-        return;
-    }
-    log_buf[0] = 0;
-
-    union bpf_attr a;
-    memset(&a, 0, sizeof(a));
-    a.prog_type = p->prog_type;
-    a.insns = (uintptr_t)insns;
-    a.insn_cnt = (uint32_t)(bytes / sizeof(struct bpf_insn));
-    a.license = (uintptr_t)p->license;
-    a.expected_attach_type = p->expected_attach_type;
-    a.attach_btf_id = p->attach_btf_id;
-    a.prog_flags = p->load_attr.prog_flags;
-    a.kern_version = p->load_attr.kern_version;
-    a.log_level = 2;
-    a.log_buf = (uintptr_t)log_buf;
-    a.log_size = (uint32_t)log_buf_size;
-    if (fd_array) a.fd_array = (uintptr_t)fd_array;
-
-    long pfd = real_syscall(SYS_bpf, BPF_PROG_LOAD, &a, sizeof(a));
-    /* Whether the verifier accepted or rejected, the log was populated. */
-    int saved_errno = errno;
-    size_t lg = strnlen(log_buf, log_buf_size);
-    int wfd = open(log_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (wfd >= 0) {
-        (void)!write(wfd, log_buf, lg);
-        real_close(wfd);
-    }
-    if (pfd >= 0) real_close((int)pfd);
-    free_full_fd_array(fd_array, fd_array_n);
-    free(log_buf);
-    free(insns);
-    errno = saved_errno;
-}
-
 /* Result of reload_and_reattach. */
 enum reload_status {
     RELOAD_OK = 0,         /* PROG_LOAD + all attaches succeeded */
@@ -139,8 +67,8 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
                               &fd_array, &fd_array_n);
 
     /* Use the caller-supplied verifier_log buffer (or a small heap one if
-     * absent) — log_level=2 always so we can return a useful verifier log
-     * on failure. */
+     * absent) for diagnostics on failure. Successful loads run with verifier
+     * logging disabled so large accepted programs cannot fail with ENOSPC. */
     char *log_buf = verifier_log;
     size_t log_size = log_buf_sz;
     char *owned_log = NULL;
@@ -205,9 +133,7 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
      * layout' (kernel check_btf_func) because the new bytecode has
      * different insn_off boundaries. The kernel hasn't yet finished
      * validating fresh-load metadata for transformed bytes — drop these
-     * pointer/count pairs and let the kernel synthesise minimal info.
-     * Original buffers (p->func_info_buf etc.) are kept for the in-place
-     * verifier-state probe path; reload deliberately omits them. */
+     * pointer/count pairs and let the kernel synthesise minimal info. */
     a.func_info = 0;
     a.func_info_cnt = 0;
     a.func_info_rec_size = 0;
@@ -229,16 +155,9 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
              p->kernel_prog_id, p->prog_type, a.prog_btf_fd,
              a.attach_btf_obj_fd, a.attach_prog_fd, a.attach_btf_id,
              a.expected_attach_type, nr_fds);
-    /* log_level=1 is enough for reload — we only need to diagnose verifier
-     * rejection (last failure line). Detailed state dumps for downstream
-     * passes are produced separately by capture_verifier_states() at
-     * log_level=2. Large progs (e.g. katran balancer 67939 insns) overflow
-     * even a 16 MB buffer at log_level=2, causing -ENOSPC even when the
-     * bytecode is valid. */
-    a.log_level = 1;
-    a.log_buf = (uintptr_t)log_buf;
-    /* Reserve 128B at the tail so we can always append errno post-failure. */
-    a.log_size = (uint32_t)(log_size > 128 ? log_size - 128 : log_size);
+    a.log_level = 0;
+    a.log_buf = 0;
+    a.log_size = 0;
     a.log_true_size = 0;
     if (fd_array) a.fd_array = (uintptr_t)fd_array;
     /* Clear fd_array_cnt from the captured load_attr. The original loader
@@ -266,6 +185,20 @@ static enum reload_status reload_and_reattach(struct prog_entry *p,
     long new_pfd = real_syscall(SYS_bpf, BPF_PROG_LOAD, attr_buf,
                                 sizeof(attr_buf));
     int load_errno = (new_pfd < 0) ? errno : 0;
+    if (new_pfd < 0 && log_buf && log_size > 0) {
+        memset(log_buf, 0, log_size);
+        char diag_attr_buf[256];
+        memcpy(diag_attr_buf, attr_buf, sizeof(diag_attr_buf));
+        union bpf_attr *diag = (union bpf_attr *)(void *)diag_attr_buf;
+        diag->log_level = 1;
+        diag->log_buf = (uintptr_t)log_buf;
+        diag->log_size = (uint32_t)(log_size > 128 ? log_size - 128 : log_size);
+        diag->log_true_size = 0;
+        long diag_pfd = real_syscall(SYS_bpf, BPF_PROG_LOAD, diag_attr_buf,
+                                     sizeof(diag_attr_buf));
+        if (diag_pfd >= 0)
+            real_close((int)diag_pfd);
+    }
 
     /* Snapshot the fd_array (before freeing) so the failure context below
      * can report how many slots were -1. */

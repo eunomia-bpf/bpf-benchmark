@@ -486,6 +486,52 @@ python3 native-sim/x86/native_lab/tests/analyze.py
   `micro/results/x86_kvm_micro_20260523_060507_300296` with 1.461x
   geomean kernel/native speedup, and x86 KVM pure 29/29 passed in
   `micro/results/x86_kvm_micro_20260523_061000_180428` with 1.368x.
+- **2026-05-23 compiler flag sweep.** The working todo was:
+  (1) test x86 KVM pure/stage2 with the current default candidate and a
+  conservative no-march candidate, (2) test arm64 AWS pure/stage2 with
+  Neoverse tuning, (3) keep only flags that preserve native/kernel
+  correctness and improve the measured geomean. Results and retained
+  defaults:
+  x86 `-march=native -mno-red-zone -mgeneral-regs-only` is the retained
+  default. It passed pure 29/29 in
+  `micro/results/x86_kvm_micro_20260523_195401_954208` with 1.422x
+  geomean after adding C-sim-backed BMI2 memory-source proof ops for
+  `rorx`/`shlx`/`shrx`/`sarx`. Regenerating the default proof sources
+  after the sweep passed x86 pure proof run 29/29 in
+  `native-sim/x86/results/README-20260523-131251-540824.md`; the C sim
+  keeps memory offsets as scalar values before adding them to packet
+  pointers so verifier-visible pointer arithmetic stays canonical. A no-march
+  no-BMI-disable comparison,
+  `-mno-red-zone -mgeneral-regs-only`, passed pure 29/29 in
+  `micro/results/x86_kvm_micro_20260523_194457_003330` with 1.350x.
+  x86 `-march=x86-64-v2 -mtune=native -mno-red-zone
+  -mgeneral-regs-only` passed correctness in
+  `micro/results/x86_kvm_micro_20260523_200550_865629` but fell to
+  1.216x because `siphash_rotate64_mixer` stayed at 483 ns native vs
+  68 ns kernel. Older experiments with
+  x86 `-mno-bmi2 -mno-movbe -mno-red-zone -mgeneral-regs-only` passed
+  pure 29/29 in `micro/results/x86_kvm_micro_20260523_085750_789491`
+  with 1.381x geomean and stage2 13/13 in
+  `micro/results/x86_kvm_micro_20260523_090346_724252` with 1.410x.
+  x86 `-march=x86-64-v2 -mtune=native -mno-bmi2 -mno-movbe
+  -mno-red-zone -mgeneral-regs-only` passed correctness in
+  `micro/results/x86_kvm_micro_20260523_093415_721852` but fell to
+  1.261x because `siphash_rotate64_mixer` stayed at ~480 ns native vs
+  68 ns kernel. These `-mno-bmi2`/`-mno-movbe` flags are no longer
+  retained now that proof generation covers the required instruction
+  forms.
+  arm64 `-mcpu=neoverse-n1 -mgeneral-regs-only` passed pure 29/29 in
+  `micro/results/aws_arm64_micro_20260523_080302_277860` with 1.783x
+  and stage2 13/13 in
+  `micro/results/aws_arm64_micro_20260523_082311_522450` with 1.169x.
+  arm64 `-mtune=neoverse-n1 -mgeneral-regs-only` passed pure 29/29 in
+  `micro/results/aws_arm64_micro_20260523_091516_610343` with 1.794x
+  and stage2 13/13 in
+  `micro/results/aws_arm64_micro_20260523_092823_183684` with 1.178x,
+  so the retained arm64 default is `-mtune=neoverse-n1
+  -mgeneral-regs-only`. A long `BENCH=...` subset attempt hit an x86 KVM
+  command-line-length boot panic in `virtme.exec`; the full-suite runs
+  above avoid that path and are the valid measurements.
 - **Non-xdp prog types** (`tc_packet_checksum_fold`,
   `cgroup_skb_hash_chain`) are skipped — the stub BPF program is
   currently hard-coded to `BPF_PROG_TYPE_XDP`. Extending to sched_cls /

@@ -308,6 +308,8 @@ class CiliumRunner(NativeProcessRunner):
             "--enable-monitor=false",
             "--enable-hubble=false",
             "--enable-l2-neigh-discovery=false",
+            "--enable-policy=always",
+            "--policy-audit-mode=true",
             # Crank up every BPF feature that can run without k8s/external
             # infra so cil_lxc_policy / tail_handle_ipv4_* / xdp_root /
             # bandwidth-manager / host-firewall paths all get exercised.

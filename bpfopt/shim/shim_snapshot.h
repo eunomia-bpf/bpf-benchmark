@@ -5,7 +5,7 @@
 #define BPF_PSEUDO_KINSN_CALL 4
 #endif
 
-/* --- snapshot helpers (MAP_IDS / MAP_VALUES / canonicalize / VERIFIER_STATES) --- */
+/* --- snapshot helpers (MAP_IDS / MAP_VALUES / canonicalize) --- */
 
 #define SHIM_MAP_SNAPSHOT_UNAVAILABLE (-2)
 

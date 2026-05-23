@@ -39,6 +39,12 @@
 #define X86_OP_ALU_MEM 0x23U
 #define X86_OP_CMP_REG_MEM 0x24U
 #define X86_OP_MOV_LOAD_SCALAR 0x25U
+#define X86_OP_SHIFTX 0x26U
+#define X86_OP_RORX 0x27U
+#define X86_OP_MOVBE_LOAD 0x28U
+#define X86_OP_MOVBE_STORE 0x29U
+#define X86_OP_SHIFTX_MEM 0x2aU
+#define X86_OP_RORX_MEM 0x2bU
 #define X86_OP_RET 0xffU
 
 #define X86_OP_MOV_IMM64 X86_OP_MOV_IMM
@@ -187,8 +193,25 @@ static __always_inline __u64 x86_rol(__u64 value, __u64 shift, __u8 width)
 	return ((narrowed << amount) | (narrowed >> (bits - amount))) & mask;
 }
 
+static __always_inline __u64 x86_ror(__u64 value, __u64 shift, __u8 width)
+{
+	__u32 bits = x86_width_bits(width);
+	__u64 mask = x86_width_mask(width);
+	__u64 amount = shift & (bits - 1);
+	__u64 narrowed = value & mask;
+
+	if (amount == 0)
+		return narrowed;
+	return ((narrowed >> amount) | (narrowed << (bits - amount))) & mask;
+}
+
 static __always_inline __u64 x86_bswap(__u64 value, __u8 width)
 {
+	if (width == X86_WIDTH_8)
+		return value & 0xffULL;
+	if (width == X86_WIDTH_16)
+		return (((value & 0x00ffULL) << 8) |
+			((value & 0xff00ULL) >> 8));
 	__u64 swapped = ((value & 0x00000000000000ffULL) << 56) |
 			((value & 0x000000000000ff00ULL) << 40) |
 			((value & 0x0000000000ff0000ULL) << 24) |

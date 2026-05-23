@@ -10,9 +10,8 @@ Lookup (no merge; first match is selected):
   2. <pass>/<app>.yaml -> programs.default
   3. <pass>/default.yaml -> top-level command
 
-Per-pass yaml's `log_level` is the *input* level the pass needs (predecessor's
-rejit must produce at least this verifier-log verbosity). The runner sets each
-step's outgoing `log_level` to the next step's input requirement.
+Per-pass yaml's `log_level` is retained in the socket payload for diagnostics.
+No pass consumes verifier-state side input.
 """
 from __future__ import annotations
 

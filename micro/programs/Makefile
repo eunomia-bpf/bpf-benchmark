@@ -14,7 +14,7 @@ REPO_ROOT := $(abspath $(CURDIR)/../..)
 CFLAGS := -Wall -Wextra -O2 -g -target bpf $(SYS_INCLUDE_FLAGS) -MMD -MP
 NATIVE_TARGET_FLAGS := $(if $(NATIVE_TARGET),--target=$(NATIVE_TARGET))
 NATIVE_ARCH_CFLAGS := $(if $(filter x86_64 amd64,$(NATIVE_ARCH)),-march=native -mno-red-zone -mgeneral-regs-only) \
-	$(if $(filter arm64 aarch64,$(NATIVE_ARCH)),-mgeneral-regs-only)
+	$(if $(filter arm64 aarch64,$(NATIVE_ARCH)),-mtune=neoverse-n1 -mgeneral-regs-only)
 NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -Wall -Wextra -O3 -g -fPIC -shared -fno-plt -DMICRO_NATIVE \
 	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
 	-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
@@ -30,6 +30,7 @@ BPF_OBJS := $(patsubst %.bpf.c,$(OUTPUT_DIR)/%.bpf.o,$(BPF_SRCS))
 KERNEL_VMLINUX ?= $(REPO_ROOT)/vendor/build/x86/linux/vmlinux
 KERNEL_OFFSETS_INPUT ?=
 KERNEL_OFFSETS := $(OUTPUT_DIR)/kernel_offsets.h
+KERNEL_BTF_INPUT := $(if $(wildcard $(KERNEL_VMLINUX)),$(KERNEL_VMLINUX),$(if $(wildcard $(KERNEL_VMLINUX).unstripped),$(KERNEL_VMLINUX).unstripped,$(KERNEL_VMLINUX)))
 BPF_DEPS := $(patsubst %.bpf.c,$(OUTPUT_DIR)/%.bpf.d,$(BPF_SRCS))
 NATIVE_SOS := $(patsubst %.bpf.c,$(OUTPUT_DIR)/%.native.so,$(BPF_SRCS))
 NATIVE_DEPS := $(patsubst %.bpf.c,$(OUTPUT_DIR)/%.native.d,$(BPF_SRCS))
@@ -48,37 +49,37 @@ else
 endif
 
 ifeq ($(KERNEL_OFFSETS_INPUT),)
-$(KERNEL_OFFSETS): $(KERNEL_VMLINUX) Makefile | $(OUTPUT_DIR)
+$(KERNEL_OFFSETS): $(KERNEL_BTF_INPUT) Makefile | $(OUTPUT_DIR)
 	@if [ ! -x "$$(command -v pahole)" ]; then \
 	    echo "pahole not found; install dwarves to extract kernel field offsets" >&2; \
 	    exit 1; \
 	fi
 	@{ \
-	    echo '/* Auto-generated from $(KERNEL_VMLINUX). DO NOT EDIT. */'; \
+	    echo '/* Auto-generated from $(KERNEL_BTF_INPUT). DO NOT EDIT. */'; \
 	    echo '#pragma once'; \
-	    pahole -C sk_buff '$(KERNEL_VMLINUX)' 2>/dev/null | \
+	    pahole -C sk_buff '$(KERNEL_BTF_INPUT)' 2>/dev/null | \
 	        awk '/unsigned char \*\s*data;/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_SK_BUFF_DATA_OFFSET %du\n", a[1] } \
 	             /unsigned int\s*len;/      { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_SK_BUFF_LEN_OFFSET %du\n", a[1] } \
 	             /char\s+cb\[/              { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_SK_BUFF_CB_OFFSET %du\n", a[1] }'; \
-	    pahole -C bpf_skb_data_end '$(KERNEL_VMLINUX)' 2>/dev/null | \
+	    pahole -C bpf_skb_data_end '$(KERNEL_BTF_INPUT)' 2>/dev/null | \
 	        awk '/void \*\s*data_end;/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_BPF_SKB_DATA_END_FIELD_OFFSET %du\n", a[1] }'; \
-	    pahole -C qdisc_skb_cb '$(KERNEL_VMLINUX)' 2>/dev/null | \
+	    pahole -C qdisc_skb_cb '$(KERNEL_BTF_INPUT)' 2>/dev/null | \
 	        awk '/unsigned char\s+data\[/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_QDISC_SKB_CB_DATA_OFFSET %du\n", a[1] }'; \
 	    echo '#define K_SK_BUFF_BPF_DATA_END_OFFSET (K_SK_BUFF_CB_OFFSET + K_BPF_SKB_DATA_END_FIELD_OFFSET)'; \
 	    echo '#define K_SK_BUFF_BPF_CB_OFFSET (K_SK_BUFF_CB_OFFSET + K_QDISC_SKB_CB_DATA_OFFSET)'; \
-	    pahole -C xdp_buff '$(KERNEL_VMLINUX)' 2>/dev/null | \
+	    pahole -C xdp_buff '$(KERNEL_BTF_INPUT)' 2>/dev/null | \
 	        awk '/void \*\s*data;/     { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_XDP_BUFF_DATA_OFFSET %du\n", a[1] } \
 	             /void \*\s*data_end;/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_XDP_BUFF_DATA_END_OFFSET %du\n", a[1] }'; \
-	    pahole -C bpf_array '$(KERNEL_VMLINUX)' 2>/dev/null | \
+	    pahole -C bpf_array '$(KERNEL_BTF_INPUT)' 2>/dev/null | \
 	        awk '/char\s+value\[/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_BPF_ARRAY_VALUE_OFFSET %du\n", a[1] } \
 	             /void \*\s*pptrs\[/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_BPF_ARRAY_PPTRS_OFFSET %du\n", a[1] }'; \
-	    pahole -C htab_elem '$(KERNEL_VMLINUX)' 2>/dev/null | \
+	    pahole -C htab_elem '$(KERNEL_BTF_INPUT)' 2>/dev/null | \
 	        awk '/struct bpf_lru_node\s+lru_node;/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_HTAB_ELEM_LRU_NODE_OFFSET %du\n", a[1] } \
 	             /char\s+key\[\]/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_HTAB_ELEM_KEY_OFFSET %du\n", a[1] }'; \
-	    pahole -C bpf_lru_node '$(KERNEL_VMLINUX)' 2>/dev/null | \
+	    pahole -C bpf_lru_node '$(KERNEL_BTF_INPUT)' 2>/dev/null | \
 	        awk '/u8\s+ref;/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_BPF_LRU_NODE_REF_OFFSET %du\n", a[1] }'; \
 	    echo '#define K_HTAB_ELEM_LRU_REF_OFFSET (K_HTAB_ELEM_LRU_NODE_OFFSET + K_BPF_LRU_NODE_REF_OFFSET)'; \
-	    pahole -C thread_info '$(KERNEL_VMLINUX)' 2>/dev/null | \
+	    pahole -C thread_info '$(KERNEL_BTF_INPUT)' 2>/dev/null | \
 	        awk '/u32\s+cpu;/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_THREAD_INFO_CPU_OFFSET %du\n", a[1] }'; \
 	} > "$@"
 else

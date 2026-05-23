@@ -3,7 +3,7 @@
 //!
 //! Flow:
 //!   1. libbpf-load every program in `<obj>`; write per-program
-//!      {bytecode, verifier log when requested, metadata, map-ids} into
+//!      {bytecode, metadata, map-ids} into
 //!      `<workdir>/<prog_name>/`
 //!   2. shell out to `bpftool map show -j` + `bpftool map dump -j` for each map
 //!      referenced by the loaded programs → `<workdir>/map-values/`
@@ -40,7 +40,6 @@ const PASS_CONFIG_DIR: &str = "runner/config/passes";
 #[cfg(test)]
 const CORPUS_BUILD_DIR: &str = "corpus/build";
 
-const LOG_BYTES: usize = 64 * 1024 * 1024;
 const KATRAN_CH_RING_SIZE: u32 = 65537;
 const INPUT_BIN: &str = "input.bin";
 const CANONICALIZE_INPUT_BIN: &str = "canonicalize_input.bin";
@@ -56,7 +55,6 @@ const COMPAT_OBJECT: &str = "loader-compatible.bpf.o";
 const COMPAT_BTF: &str = "loader-compatible.btf";
 const MAP_DUMP_ENTRY_LIMIT: u32 = 8192;
 const METADATA_JSON: &str = "metadata.json";
-const VERIFIER_LOG: &str = "verifier.log";
 const VERIFY_LOG: &str = "verify.log";
 const STACK_TRACE_VALUE_SIZE: u32 = 127 * 8;
 const STACK_TRACE_MAX_ENTRIES: u32 = 10240;
@@ -202,17 +200,7 @@ fn run(cli: Cli) -> Result<()> {
     let workdir = WorkDir::open(cli.workdir.clone())?;
     let map_values_dir = workdir.path.join(MAP_VALUES_DIR);
     let dump_values = cli.pass.as_deref() == Some("map_inline");
-    let initial_log_level = match cli.pass.as_deref() {
-        Some(pass) if !pass_uses_verifier_states(pass)? => 0,
-        _ => 2,
-    };
-    let (_obj, prepared) = prepare_workdir(
-        &workdir.path,
-        &cli.obj,
-        cli.katran_maps,
-        dump_values,
-        initial_log_level,
-    )?;
+    let (_obj, prepared) = prepare_workdir(&workdir.path, &cli.obj, cli.katran_maps, dump_values)?;
 
     for prog in &prepared {
         canonicalize_program(prog, &cli.bpfopt)?;
@@ -280,85 +268,41 @@ fn shell_quote_path(path: &Path) -> String {
     format!("'{}'", path.display().to_string().replace('\'', "'\\''"))
 }
 
-/// libbpf-load every program in `obj_path` and dump bytecode, verifier log,
-/// metadata, and shared map snapshots into `workdir`. Each program lands in
+/// libbpf-load every program in `obj_path` and dump bytecode, metadata, and
+/// shared map snapshots into `workdir`. Each program lands in
 /// `<workdir>/<prog_name>/`; map snapshots are shared at `<workdir>/map-values/`.
 fn prepare_workdir(
     workdir: &Path,
     obj_path: &Path,
     katran_maps: bool,
     dump_values: bool,
-    initial_log_level: u32,
 ) -> Result<(BpfObject, Vec<PreparedProgram>)> {
     let map_values_dir = workdir.join(MAP_VALUES_DIR);
     fs::create_dir_all(&map_values_dir)?;
 
     let compat = prepare_compatible_object(workdir, obj_path)?;
 
-    // Large programs can overflow the 64 MiB verifier log at log_level>=2,
-    // making BPF_PROG_LOAD return -ENOSPC and failing the whole object.
-    // Filling the log must not be fatal: if a log_level>=2 load fails, reopen
-    // and reload at log_level=0 instead of aborting.
-    let log_levels: &[u32] = if initial_log_level >= 2 {
-        &[initial_log_level, 0]
-    } else {
-        &[initial_log_level]
-    };
-    let mut loaded: Option<(BpfObject, Vec<ProgramRef>, Vec<Vec<c_char>>)> = None;
-    for (attempt, &log_level) in log_levels.iter().enumerate() {
-        let last_attempt = attempt + 1 == log_levels.len();
-        let obj = open_bpf_object(&compat.path)?;
-        normalize_open_maps(&obj)?;
-        let progs = programs(&obj)?;
-        normalize_open_programs(&progs)?;
-        let progs = apply_autoload_filter(progs, compat.autoload.as_ref())?;
-        let mut log_bufs: Vec<Vec<c_char>> =
-            (0..progs.len()).map(|_| vec![0; LOG_BYTES]).collect();
-        for (prog, buf) in progs.iter().zip(log_bufs.iter_mut()) {
-            libbpf_ok(
-                unsafe { libbpf_sys::bpf_program__set_log_level(prog.ptr, log_level) },
-                "bpf_program__set_log_level",
-            )?;
-            libbpf_ok(
-                unsafe {
-                    libbpf_sys::bpf_program__set_log_buf(
-                        prog.ptr,
-                        buf.as_mut_ptr(),
-                        LOG_BYTES as libbpf_sys::size_t,
-                    )
-                },
-                "bpf_program__set_log_buf",
-            )?;
-            unsafe { libbpf_sys::bpf_program__set_autoattach(prog.ptr, false) };
-        }
-
-        let ret = unsafe { libbpf_sys::bpf_object__load(obj.ptr) };
-        if ret < 0 {
-            if !last_attempt {
-                eprintln!(
-                    "warning: load of {} at log_level={} failed ({}); retrying at log_level=0",
-                    compat.path.display(),
-                    log_level,
-                    neg_errno(ret)
-                );
-                continue;
-            }
-            // Final attempt failed: dump whatever verifier output exists.
-            for (prog, buf) in progs.iter().zip(&log_bufs) {
-                let dir = workdir.join(&prog.name);
-                let _ = fs::create_dir_all(&dir);
-                let _ = fs::write(dir.join(VERIFIER_LOG), log_buf_to_string(buf));
-            }
-            bail!(
-                "libbpf failed to load {}: {}",
-                compat.path.display(),
-                neg_errno(ret)
-            );
-        }
-        loaded = Some((obj, progs, log_bufs));
-        break;
+    let obj = open_bpf_object(&compat.path)?;
+    normalize_open_maps(&obj)?;
+    let progs = programs(&obj)?;
+    normalize_open_programs(&progs)?;
+    let progs = apply_autoload_filter(progs, compat.autoload.as_ref())?;
+    for prog in &progs {
+        libbpf_ok(
+            unsafe { libbpf_sys::bpf_program__set_log_level(prog.ptr, 0) },
+            "bpf_program__set_log_level",
+        )?;
+        unsafe { libbpf_sys::bpf_program__set_autoattach(prog.ptr, false) };
     }
-    let (obj, progs, log_bufs) = loaded.expect("log_levels is non-empty");
+
+    let ret = unsafe { libbpf_sys::bpf_object__load(obj.ptr) };
+    if ret < 0 {
+        bail!(
+            "libbpf failed to load {}: {}",
+            compat.path.display(),
+            neg_errno(ret)
+        );
+    }
 
     let loaded_maps = maps(&obj)?;
     let btf_fd = unsafe { libbpf_sys::bpf_object__btf_fd(obj.ptr) };
@@ -367,7 +311,7 @@ fn prepare_workdir(
     }
     let mut prepared = Vec::with_capacity(progs.len());
     let mut all_map_ids = BTreeSet::new();
-    for (prog, log_buf) in progs.into_iter().zip(log_bufs) {
+    for prog in progs {
         let dir = workdir.join(&prog.name);
         fs::create_dir_all(&dir)?;
 
@@ -394,7 +338,6 @@ fn prepare_workdir(
             slice::from_raw_parts(insns.as_ptr().cast::<u8>(), mem::size_of_val(&insns[..]))
         };
         fs::write(dir.join(CANONICALIZE_INPUT_BIN), bytes)?;
-        fs::write(dir.join(VERIFIER_LOG), log_buf_to_string(&log_buf))?;
         write_json(
             &dir.join(METADATA_JSON),
             &ProgramMetadata {
@@ -591,7 +534,6 @@ fn run_pass_via_yaml(
         .replace("${INPUT}", &p(INPUT_BIN))
         .replace("${OUTPUT}", &p(OUTPUT_BIN))
         .replace("${REPORT}", &p(REPORT_JSON))
-        .replace("${VERIFIER_STATES}", &p(VERIFIER_LOG))
         .replace("${MAP_VALUES}", &map_values_dir.display().to_string())
         .replace("${MAP_IDS}", &map_ids_arg)
         .replace("${PROG_TYPE}", &metadata.prog_type.to_string());
@@ -613,10 +555,6 @@ fn run_pass_via_yaml(
     Ok(())
 }
 
-fn pass_uses_verifier_states(pass: &str) -> Result<bool> {
-    Ok(load_pass_command(pass)?.contains("${VERIFIER_STATES}"))
-}
-
 fn load_pass_command(pass: &str) -> Result<String> {
     let yaml_path = Path::new(PASS_CONFIG_DIR).join(pass).join("default.yaml");
     let yaml: serde_yaml::Value = serde_yaml::from_slice(&fs::read(&yaml_path)?)?;
@@ -635,17 +573,6 @@ fn verify_workdir(
     btf_fd: i32,
     func_info: &[libbpf_sys::bpf_func_info],
     line_info: &[libbpf_sys::bpf_line_info],
-) -> Result<OwnedFd> {
-    verify_workdir_with_log_level(prog_dir, map_fds, btf_fd, func_info, line_info, 1)
-}
-
-fn verify_workdir_with_log_level(
-    prog_dir: &Path,
-    map_fds: &[i32],
-    btf_fd: i32,
-    func_info: &[libbpf_sys::bpf_func_info],
-    line_info: &[libbpf_sys::bpf_line_info],
-    log_level: u32,
 ) -> Result<OwnedFd> {
     let metadata = read_json::<ProgramMetadata>(&prog_dir.join(METADATA_JSON))?;
     let input = prog_dir.join(OUTPUT_BIN);
@@ -669,12 +596,11 @@ fn verify_workdir_with_log_level(
 
     let name = CString::new(metadata.name.as_str())?;
     let license = CString::new("GPL").unwrap();
-    let mut log_buf = vec![0 as c_char; LOG_BYTES];
     let mut opts = libbpf_sys::bpf_prog_load_opts {
         sz: mem::size_of::<libbpf_sys::bpf_prog_load_opts>() as libbpf_sys::size_t,
-        log_level,
-        log_size: log_buf.len() as u32,
-        log_buf: log_buf.as_mut_ptr(),
+        log_level: 0,
+        log_size: 0,
+        log_buf: ptr::null_mut(),
         expected_attach_type: metadata.expected_attach_type,
         attach_btf_id: metadata.attach_btf_id,
         ..Default::default()
@@ -702,23 +628,12 @@ fn verify_workdir_with_log_level(
             &mut opts,
         )
     };
-    let log = log_buf_to_string(&log_buf);
-    fs::write(prog_dir.join(VERIFY_LOG), &log)?;
+    fs::write(prog_dir.join(VERIFY_LOG), "")?;
     if fd < 0 {
-        // A complex program at log_level>=1 can fill the verifier log buffer and
-        // make BPF_PROG_LOAD return -ENOSPC even though the program verifies.
-        // Retry once with the log disabled so the load is not log-bound.
-        const ENOSPC: i32 = 28;
-        if io::Error::last_os_error().raw_os_error() == Some(ENOSPC) && log_level != 0 {
-            return verify_workdir_with_log_level(
-                prog_dir, map_fds, btf_fd, func_info, line_info, 0,
-            );
-        }
         bail!(
-            "BPF_PROG_LOAD rejected {}: {}; verifier log: {}",
+            "BPF_PROG_LOAD rejected {}: {}",
             input.display(),
-            io::Error::last_os_error(),
-            log.trim()
+            std::io::Error::last_os_error(),
         );
     }
     Ok(unsafe { OwnedFd::from_raw_fd(fd) })
@@ -726,8 +641,7 @@ fn verify_workdir_with_log_level(
 
 fn run_bpftestrun(prog_fd: i32, prog_dir: &Path, cli: &Cli) -> Result<()> {
     let data_in = if let Some(path) = cli.test_input.as_deref() {
-        fs::read(path)
-            .with_context(|| format!("failed to read test input {}", path.display()))?
+        fs::read(path).with_context(|| format!("failed to read test input {}", path.display()))?
     } else if cli.katran_maps {
         fs::read(KATRAN_TEST_INPUT)
             .with_context(|| format!("failed to read Katran test input {KATRAN_TEST_INPUT}"))?

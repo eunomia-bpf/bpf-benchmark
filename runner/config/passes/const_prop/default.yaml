@@ -1,6 +1,6 @@
 # Default per-pass step config for const_prop.
 # Read by runner/libs/pass_config.py at execute_plan build time.
 # Daemon substitutes ${...} vars; runner sends this command verbatim.
-log_level: 2
+log_level: 1
 command: |
   bpfopt --pass const_prop --input ${INPUT} --output ${OUTPUT} --report ${REPORT} --prog-type ${PROG_TYPE} --target ${TARGET}

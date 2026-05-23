@@ -11,7 +11,6 @@ struct loadtime_result {
 };
 
 #define LOADTIME_VERIFIER_LOG_INITIAL_SIZE (16u * 1024u * 1024u)
-#define LOADTIME_VERIFIER_LOG_MAX_SIZE (64u * 1024u * 1024u)
 
 static char **loadtime_env_without_ld_preload(void) {
     size_t n_env = 0;
@@ -564,13 +563,13 @@ static int loadtime_write_fd_to_id_json(const char *path,
     return rc;
 }
 
-static int loadtime_probe_verifier_log(const union bpf_attr *orig_attr,
-                                       unsigned int attr_size,
-                                       const char *bytecode_path,
-                                       const char *target_json_path,
-                                       const uint32_t *map_ids,
-                                       uint32_t map_n,
-                                       const char *log_path) {
+static int loadtime_probe_bytecode_acceptance(const union bpf_attr *orig_attr,
+                                              unsigned int attr_size,
+                                              const char *bytecode_path,
+                                              const char *target_json_path,
+                                              const uint32_t *map_ids,
+                                              uint32_t map_n,
+                                              const char *log_path) {
     uint32_t insn_cnt = 0;
     struct bpf_insn *insns = loadtime_read_bytecode(bytecode_path, &insn_cnt);
     if (!insns)
@@ -592,55 +591,61 @@ static int loadtime_probe_verifier_log(const union bpf_attr *orig_attr,
         }
     }
 
-    long pfd = -1;
-    int saved_errno = 0;
-    size_t log_buf_size = LOADTIME_VERIFIER_LOG_INITIAL_SIZE;
-    for (;;) {
+    char attr_buf[256] = {0};
+    size_t copy = attr_size < sizeof(attr_buf) ? attr_size : sizeof(attr_buf);
+    memcpy(attr_buf, orig_attr, copy);
+    union bpf_attr *a = (union bpf_attr *)(void *)attr_buf;
+    a->insns = (uintptr_t)insns;
+    a->insn_cnt = insn_cnt;
+    a->log_level = 0;
+    a->log_buf = 0;
+    a->log_size = 0;
+    a->fd_array = 0;
+    if (fd_array) a->fd_array = (uintptr_t)fd_array;
+    if (sizeof(attr_buf) >= 152)
+        memset(attr_buf + 148, 0, 4);
+    a->func_info = 0;
+    a->func_info_cnt = 0;
+    a->func_info_rec_size = 0;
+    a->line_info = 0;
+    a->line_info_cnt = 0;
+    a->line_info_rec_size = 0;
+    a->core_relos = 0;
+    a->core_relo_cnt = 0;
+    a->core_relo_rec_size = 0;
+
+    long pfd = real_syscall(SYS_bpf, BPF_PROG_LOAD, attr_buf,
+                            sizeof(attr_buf));
+    int saved_errno = errno;
+    int wfd = open(log_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (wfd >= 0)
+        real_close(wfd);
+
+    if (pfd < 0) {
+        size_t log_buf_size = LOADTIME_VERIFIER_LOG_INITIAL_SIZE;
         char *log_buf = (char *)malloc(log_buf_size);
         if (!log_buf) {
             saved_errno = ENOMEM;
-            break;
+        } else {
+            memset(log_buf, 0, log_buf_size);
+            char diag_attr_buf[256];
+            memcpy(diag_attr_buf, attr_buf, sizeof(diag_attr_buf));
+            union bpf_attr *diag = (union bpf_attr *)(void *)diag_attr_buf;
+            diag->log_level = 1;
+            diag->log_buf = (uintptr_t)log_buf;
+            diag->log_size = (uint32_t)log_buf_size;
+            diag->log_true_size = 0;
+            long diag_pfd = real_syscall(SYS_bpf, BPF_PROG_LOAD,
+                                         diag_attr_buf, sizeof(diag_attr_buf));
+            if (diag_pfd >= 0)
+                real_close((int)diag_pfd);
+            int lfd = open(log_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+            if (lfd >= 0) {
+                (void)!write(lfd, log_buf, strnlen(log_buf, log_buf_size));
+                real_close(lfd);
+            }
+            free(log_buf);
         }
-        memset(log_buf, 0, log_buf_size);
-
-        char attr_buf[256] = {0};
-        size_t copy = attr_size < sizeof(attr_buf) ? attr_size : sizeof(attr_buf);
-        memcpy(attr_buf, orig_attr, copy);
-        union bpf_attr *a = (union bpf_attr *)(void *)attr_buf;
-        a->insns = (uintptr_t)insns;
-        a->insn_cnt = insn_cnt;
-        a->log_level = 2;
-        a->log_buf = (uintptr_t)log_buf;
-        a->log_size = (uint32_t)log_buf_size;
-        a->fd_array = 0;
-        if (fd_array) a->fd_array = (uintptr_t)fd_array;
-        if (sizeof(attr_buf) >= 152)
-            memset(attr_buf + 148, 0, 4);
-        a->func_info = 0;
-        a->func_info_cnt = 0;
-        a->func_info_rec_size = 0;
-        a->line_info = 0;
-        a->line_info_cnt = 0;
-        a->line_info_rec_size = 0;
-        a->core_relos = 0;
-        a->core_relo_cnt = 0;
-        a->core_relo_rec_size = 0;
-
-        pfd = real_syscall(SYS_bpf, BPF_PROG_LOAD, attr_buf,
-                           sizeof(attr_buf));
-        saved_errno = errno;
-        int wfd = open(log_path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-        if (wfd >= 0) {
-            (void)!write(wfd, log_buf, strnlen(log_buf, log_buf_size));
-            real_close(wfd);
-        }
-        free(log_buf);
-        if (pfd >= 0 || saved_errno != ENOSPC ||
-            log_buf_size >= LOADTIME_VERIFIER_LOG_MAX_SIZE)
-            break;
-        log_buf_size *= 2;
-        if (log_buf_size > LOADTIME_VERIFIER_LOG_MAX_SIZE)
-            log_buf_size = LOADTIME_VERIFIER_LOG_MAX_SIZE;
     }
     if (pfd >= 0)
         real_close((int)pfd);
@@ -831,8 +836,8 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
         free(plan_json);
         return -1;
     }
-    if (loadtime_probe_verifier_log(attr, attr_size, cur, target_json,
-                                    map_ids, map_n, verifier_log) != 0) {
+    if (loadtime_probe_bytecode_acceptance(attr, attr_size, cur, target_json,
+                                           map_ids, map_n, verifier_log) != 0) {
         snprintf(err, err_sz,
                  "loadtime initial verifier probe failed errno=%d log=%s",
                  errno, verifier_log);
@@ -869,28 +874,7 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
             snprintf(cmdbuf, sizeof(cmdbuf), "%s", override_cmd);
         free(so);
 
-        char states_in[360], step_name_buf[64];
-        if (step_seq == 0) {
-            if (loadtime_join_path(states_in, sizeof(states_in), workdir,
-                                   "verifier_log_initial.log", err, err_sz) != 0) {
-                free(map_refs);
-                free(map_ids);
-                free(map_types);
-                free(plan_json);
-                return -1;
-            }
-        } else {
-            snprintf(step_name_buf, sizeof(step_name_buf),
-                     "verifier_log_step%d.log", step_seq - 1);
-            if (loadtime_join_path(states_in, sizeof(states_in), workdir,
-                                   step_name_buf, err, err_sz) != 0) {
-                free(map_refs);
-                free(map_ids);
-                free(map_types);
-                free(plan_json);
-                return -1;
-            }
-        }
+        char step_name_buf[64];
         snprintf(step_name_buf, sizeof(step_name_buf),
                  "verifier_log_step%d.log", step_seq);
         if (loadtime_join_path(verifier_log, sizeof(verifier_log), workdir,
@@ -924,15 +908,14 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
         unlink(nxt);
         unlink(report);
 
-        const char *vars[10][2] = {
+        const char *vars[9][2] = {
             {"PROG_ID", prog_id_str}, {"PROG_TYPE", prog_type_name},
             {"INPUT", cur}, {"OUTPUT", nxt}, {"REPORT", report},
             {"WORKDIR", workdir}, {"TARGET", target_json},
             {"MAP_IDS", map_ids_csv}, {"MAP_VALUES", map_values_dir},
-            {"VERIFIER_STATES", states_in},
         };
         char resolved[4200];
-        loadtime_substitute_vars(resolved, sizeof(resolved), cmdbuf, vars, 10);
+        loadtime_substitute_vars(resolved, sizeof(resolved), cmdbuf, vars, 9);
         char step_log[360];
         snprintf(step_name_buf, sizeof(step_name_buf), "step%d.log", step_seq);
         if (loadtime_join_path(step_log, sizeof(step_log), workdir,
@@ -964,8 +947,8 @@ static int loadtime_optimize_prog_load(const union bpf_attr *attr,
             free(plan_json);
             return -1;
         }
-        if (loadtime_probe_verifier_log(attr, attr_size, nxt, target_json,
-                                        map_ids, map_n, verifier_log) != 0) {
+        if (loadtime_probe_bytecode_acceptance(attr, attr_size, nxt, target_json,
+                                               map_ids, map_n, verifier_log) != 0) {
             snprintf(err, err_sz,
                      "loadtime verifier probe failed after step %s errno=%d log=%s",
                      name[0] ? name : "<unnamed>", errno, verifier_log);

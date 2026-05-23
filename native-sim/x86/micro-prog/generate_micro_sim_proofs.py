@@ -640,6 +640,57 @@ def encode(insn: NativeInsn) -> EncodedInsn:
         if dst is None or src is None:
             raise ValueError(f"cannot encode {insn.raw}")
         return enc("X86_OP_XCHG", dst=dst[0], src=src[0], flags=WIDTH_CONST[dst[1]])
+    if op == "movbe":
+        if len(ops) != 2:
+            raise ValueError(f"cannot encode {insn.raw}")
+        dst_reg = reg_info(ops[0])
+        src_reg = reg_info(ops[1])
+        if dst_reg is not None and is_mem(ops[1]):
+            width = operand_width(ops[0], operand_width(ops[1], dst_reg[1]))
+            return enc("X86_OP_MOVBE_LOAD", dst=dst_reg[0],
+                       src=mem_base_reg(ops[1]), flags=WIDTH_CONST[width],
+                       aux=mem_aux(ops[1], width), imm=c_u64(mem_disp(ops[1])))
+        if is_mem(ops[0]) and src_reg is not None:
+            width = operand_width(ops[0], src_reg[1])
+            return enc("X86_OP_MOVBE_STORE", dst=mem_base_reg(ops[0]),
+                       src=src_reg[0], flags=WIDTH_CONST[width],
+                       aux=mem_aux(ops[0], width), imm=c_u64(mem_disp(ops[0])))
+        raise ValueError(f"cannot encode {insn.raw}")
+    if op in {"shlx", "shrx", "sarx"}:
+        if len(ops) != 3:
+            raise ValueError(f"cannot encode {insn.raw}")
+        dst = reg_info(ops[0])
+        src = reg_info(ops[1])
+        count = reg_info(ops[2])
+        if dst is None or count is None:
+            raise ValueError(f"cannot encode {insn.raw}")
+        alu = {"shlx": "X86_ALU_SHL", "shrx": "X86_ALU_SHR", "sarx": "X86_ALU_SAR"}[op]
+        if src is not None:
+            return enc("X86_OP_SHIFTX", dst=dst[0], src=src[0],
+                       flags=WIDTH_CONST[dst[1]], aux=count[0], imm=alu)
+        if is_mem(ops[1]):
+            packed = f"(({mem_disp(ops[1]) & 0xffffffff}ULL << 32) | {alu})"
+            return enc("X86_OP_SHIFTX_MEM", dst=dst[0],
+                       src=mem_base_reg(ops[1]), flags=WIDTH_CONST[dst[1]],
+                       aux=f"({mem_aux(ops[1], dst[1])} | X86_REG_AUX_SRC_SHIFT({count[0]}))",
+                       imm=packed)
+        raise ValueError(f"cannot encode {insn.raw}")
+    if op == "rorx":
+        if len(ops) != 3:
+            raise ValueError(f"cannot encode {insn.raw}")
+        dst = reg_info(ops[0])
+        src = reg_info(ops[1])
+        if dst is None or not is_int(ops[2]):
+            raise ValueError(f"cannot encode {insn.raw}")
+        if src is not None:
+            return enc("X86_OP_RORX", dst=dst[0], src=src[0],
+                       flags=WIDTH_CONST[dst[1]], imm=c_u64(parse_int(ops[2])))
+        if is_mem(ops[1]):
+            packed = ((mem_disp(ops[1]) & 0xffffffff) << 32) | (parse_int(ops[2]) & 0xff)
+            return enc("X86_OP_RORX_MEM", dst=dst[0],
+                       src=mem_base_reg(ops[1]), flags=WIDTH_CONST[dst[1]],
+                       aux=mem_aux(ops[1], dst[1]), imm=c_u64(packed))
+        raise ValueError(f"cannot encode {insn.raw}")
     if op == "div":
         src = reg_info(ops[0]) if ops else None
         return enc("X86_OP_DIV", src=src[0] if src else "X86_REG_NONE",

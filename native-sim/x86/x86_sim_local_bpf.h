@@ -274,6 +274,8 @@ union x86_sim_gpr {
 		__x86_l_off;                                              \
 	})
 
+#define X86_SIM_L_BARRIER_VAR(VAR) asm volatile("" : "+r"(VAR))
+
 #define X86_SIM_L_STACK_INDEX(OFF) ((__u32)((__s64)(OFF) + X86_SIM_STACK_BYTES))
 
 #define X86_SIM_L_STACK_WRITE(OFF, WIDTH, VALUE)                            \
@@ -588,6 +590,7 @@ union x86_sim_gpr {
 		__s64 __x86_l_disp = (STORE_DISP) ?                      \
 			x86_store_imm_disp(IMM) : x86_simm(IMM);          \
 		__x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX), __x86_l_disp);\
+		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                    \
 		if ((BASE_REG) != X86_REG_NONE)                          \
 			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(BASE_REG);\
 		__u64 __x86_l_value;                                     \
@@ -622,6 +625,7 @@ union x86_sim_gpr {
 			__x86_l_mem_width = __x86_l_write_width;          \
 		if ((SRC) != X86_REG_NONE)                               \
 			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(SRC);   \
+		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                    \
 		void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +           \
 				     __x86_l_disp;                       \
 		if ((SRC) == X86_RSP) {                                   \
@@ -664,6 +668,7 @@ union x86_sim_gpr {
 		    X86_REG_AUX_GET_SRC_SHIFT(AUX) != 0)                  \
 			__x86_l_value >>= X86_REG_AUX_GET_SRC_SHIFT(AUX); \
 		__x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX), __x86_l_disp); \
+		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                    \
 		if ((DST) != X86_REG_NONE)                               \
 			__x86_l_base_ptr = X86_SIM_L_READ_REG_PTR(DST);   \
 		if ((DST) == X86_RSP)                                     \
@@ -676,6 +681,38 @@ union x86_sim_gpr {
 					     __x86_l_disp;               \
 			X86_SIM_L_STORE_ADDR(__x86_l_addr,                \
 					     __x86_l_width, __x86_l_value);\
+			}                                                         \
+		} while (0)
+
+#define X86_SIM_L_EXEC_MOVBE_LOAD(DST, SRC, FLAGS, AUX, IMM)               \
+	do {                                                               \
+		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__u64 __x86_l_value = X86_SIM_L_READ_MEM_VALUE((SRC),     \
+			(AUX), (IMM), __x86_l_width, 0);                  \
+		X86_SIM_L_WRITE_REG_WIDTH((DST),                          \
+			x86_bswap(__x86_l_value, __x86_l_width),          \
+			__x86_l_width);                                    \
+	} while (0)
+
+#define X86_SIM_L_EXEC_MOVBE_STORE(DST, SRC, FLAGS, AUX, IMM)              \
+	do {                                                               \
+		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
+		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX),          \
+			x86_simm(IMM));                                   \
+		X86_SIM_L_BARRIER_VAR(__x86_l_disp);                    \
+		void *__x86_l_base_ptr = (DST) == X86_REG_NONE ?          \
+			(void *)0 : X86_SIM_L_READ_REG_PTR(DST);          \
+		__u64 __x86_l_value = x86_bswap(                          \
+			X86_SIM_L_READ_REG(SRC), __x86_l_width);          \
+		if ((DST) == X86_RSP)                                     \
+			X86_SIM_L_STACK_WRITE(                            \
+				(__s64)(long)__x86_l_base_ptr + __x86_l_disp,\
+				__x86_l_width, __x86_l_value);             \
+		else {                                                    \
+			void *__x86_l_addr = (__u8 *)__x86_l_base_ptr +   \
+					     __x86_l_disp;               \
+			X86_SIM_L_STORE_ADDR(__x86_l_addr, __x86_l_width, \
+					     __x86_l_value);              \
 		}                                                         \
 	} while (0)
 
@@ -683,6 +720,7 @@ union x86_sim_gpr {
 	do {                                                               \
 		__u8 __x86_l_width = (FLAGS) ? (FLAGS) : X86_WIDTH_64;    \
 		__s64 __x86_l_off = X86_SIM_L_MEM_OFFSET((AUX), x86_simm(IMM));\
+		X86_SIM_L_BARRIER_VAR(__x86_l_off);                     \
 		void *__x86_l_src_ptr = (SRC) == X86_REG_NONE ? (void *)0 :\
 					   X86_SIM_L_READ_REG_PTR(SRC);    \
 		__u8 __x86_l_src_tag = X86_SIM_L_REG_TAG(SRC);           \
@@ -856,16 +894,22 @@ union x86_sim_gpr {
 				x86_apply_width(__x86_l_value, __x86_l_src_width);\
 			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value,   \
 						  __x86_l_width);        \
-		} else if ((OP) == X86_OP_MOV_LOAD ||                     \
-			   (OP) == X86_OP_MOV_LOAD_SCALAR ||              \
-			   (OP) == X86_OP_MOVSX_LOAD) {                   \
-			X86_SIM_L_EXEC_MOV_LOAD((OP), (DST), (SRC), (FLAGS),\
-						(AUX), (IMM));          \
-		} else if ((OP) == X86_OP_MOV_STORE_IMM ||                \
-			   (OP) == X86_OP_MOV_STORE_REG) {                \
-			X86_SIM_L_EXEC_STORE((OP), (DST), (SRC), (FLAGS),  \
-					     (AUX), (IMM));               \
-		} else if ((OP) == X86_OP_LEA) {                          \
+			} else if ((OP) == X86_OP_MOV_LOAD ||                     \
+				   (OP) == X86_OP_MOV_LOAD_SCALAR ||              \
+				   (OP) == X86_OP_MOVSX_LOAD) {                   \
+				X86_SIM_L_EXEC_MOV_LOAD((OP), (DST), (SRC), (FLAGS),\
+							(AUX), (IMM));          \
+			} else if ((OP) == X86_OP_MOVBE_LOAD) {                   \
+				X86_SIM_L_EXEC_MOVBE_LOAD((DST), (SRC), (FLAGS),\
+							  (AUX), (IMM));     \
+			} else if ((OP) == X86_OP_MOV_STORE_IMM ||                \
+				   (OP) == X86_OP_MOV_STORE_REG) {                \
+				X86_SIM_L_EXEC_STORE((OP), (DST), (SRC), (FLAGS),  \
+						     (AUX), (IMM));               \
+			} else if ((OP) == X86_OP_MOVBE_STORE) {                  \
+				X86_SIM_L_EXEC_MOVBE_STORE((DST), (SRC), (FLAGS),\
+							   (AUX), (IMM));    \
+			} else if ((OP) == X86_OP_LEA) {                          \
 			X86_SIM_L_EXEC_LEA((DST), (SRC), (FLAGS), (AUX), (IMM));\
 		} else if ((OP) == X86_OP_ALU_IMM ||                      \
 			   (OP) == X86_OP_ADD_IMM) {                      \
@@ -924,18 +968,48 @@ union x86_sim_gpr {
 			X86_SIM_L_WRITE_REG_WIDTH((DST),                  \
 				x86_bswap(X86_SIM_L_READ_REG(DST), __x86_l_width),\
 				__x86_l_width);                          \
-		} else if ((OP) == X86_OP_POPCNT) {                       \
-			__u64 __x86_l_src = X86_SIM_L_READ_REG(SRC);      \
-			__u64 __x86_l_result =                            \
-				x86_popcount64(x86_apply_width(__x86_l_src,\
-							       __x86_l_width));\
-			__x86_cf = 0; __x86_of = 0; __x86_sf = 0;          \
-			__x86_zf = x86_apply_width(__x86_l_src, __x86_l_width) == 0;\
-			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
-						  __x86_l_width);        \
-		} else if ((OP) == X86_OP_XCHG) {                         \
-			if (__x86_l_width == X86_WIDTH_64) {              \
-				void *__x86_l_dst_ptr =                    \
+			} else if ((OP) == X86_OP_POPCNT) {                       \
+				__u64 __x86_l_src = X86_SIM_L_READ_REG(SRC);      \
+				__u64 __x86_l_result =                            \
+					x86_popcount64(x86_apply_width(__x86_l_src,\
+								       __x86_l_width));\
+				__x86_cf = 0; __x86_of = 0; __x86_sf = 0;          \
+				__x86_zf = x86_apply_width(__x86_l_src, __x86_l_width) == 0;\
+				X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
+							  __x86_l_width);        \
+			} else if ((OP) == X86_OP_SHIFTX) {                       \
+				__u64 __x86_l_src = X86_SIM_L_READ_REG(SRC);      \
+				__u64 __x86_l_count = X86_SIM_L_READ_REG(AUX);    \
+				__u64 __x86_l_result = x86_alu_result(            \
+					__x86_l_src, __x86_l_count, (IMM),        \
+					__x86_l_width);                          \
+				X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
+							  __x86_l_width);        \
+			} else if ((OP) == X86_OP_SHIFTX_MEM) {                   \
+				__u64 __x86_l_src = X86_SIM_L_READ_MEM_VALUE(     \
+					(SRC), (AUX), (IMM), (FLAGS), 1);         \
+				__u64 __x86_l_count = X86_SIM_L_READ_REG(         \
+					X86_REG_AUX_GET_SRC_SHIFT(AUX));          \
+				__u64 __x86_l_result = x86_alu_result(            \
+					__x86_l_src, __x86_l_count,              \
+					(__u8)(IMM), __x86_l_width);             \
+				X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_result,  \
+							  __x86_l_width);        \
+			} else if ((OP) == X86_OP_RORX) {                         \
+				__u64 __x86_l_src = X86_SIM_L_READ_REG(SRC);      \
+				X86_SIM_L_WRITE_REG_WIDTH((DST),                  \
+					x86_ror(__x86_l_src, (IMM), __x86_l_width),\
+					__x86_l_width);                          \
+			} else if ((OP) == X86_OP_RORX_MEM) {                     \
+				__u64 __x86_l_src = X86_SIM_L_READ_MEM_VALUE(     \
+					(SRC), (AUX), (IMM), (FLAGS), 1);         \
+				X86_SIM_L_WRITE_REG_WIDTH((DST),                  \
+					x86_ror(__x86_l_src, (__u8)(IMM),         \
+						__x86_l_width),                   \
+					__x86_l_width);                          \
+			} else if ((OP) == X86_OP_XCHG) {                         \
+				if (__x86_l_width == X86_WIDTH_64) {              \
+					void *__x86_l_dst_ptr =                    \
 					X86_SIM_L_READ_REG_PTR(DST);       \
 				void *__x86_l_src_ptr =                    \
 					X86_SIM_L_READ_REG_PTR(SRC);       \

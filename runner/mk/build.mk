@@ -20,6 +20,7 @@ ARM64_RUNNER_LLVM_SYSROOT := $(ROOT_DIR)/.cache/sysroots/arm64-llvm15
 # arm64-llvm15 sysroot is retained only for its -L/rpath link dirs below.
 ARM64_RUNNER_LLVM_DIR := $(ROOT_DIR)/llvm-backend/build-bpf-kinsn-arm64/lib/cmake/llvm
 ARM64_PKG_CONFIG_LIBDIR = $(AARCH64_SYSROOT_DIR)/usr/lib/aarch64-linux-gnu/pkgconfig
+ARM64_PKG_CONFIG = PKG_CONFIG_LIBDIR="$(ARM64_PKG_CONFIG_LIBDIR)" PKG_CONFIG_SYSROOT_DIR="$(AARCH64_SYSROOT_DIR)"
 ARM64_SYS_INCLUDE_FLAGS = -I/usr/aarch64-linux-gnu/include -I$(AARCH64_SYSROOT_DIR)/usr/include -I$(AARCH64_SYSROOT_DIR)/usr/include/aarch64-linux-gnu
 
 CONTAINER_IMAGE_ARTIFACT_ROOT := $(ARTIFACT_ROOT)/container-images
@@ -33,6 +34,8 @@ BPFOPT_LLVM_BUILD_X86 := $(ROOT_DIR)/bpfopt/llvm/build-kinsn
 BPFOPT_LLVM_BUILD_ARM64 := $(ROOT_DIR)/bpfopt/llvm/build-kinsn-arm64
 X86_BPFOPT_HOST_BIN ?= bpfopt/llvm/build-kinsn/bpfopt
 ARM64_BPFOPT_HOST_BIN ?= bpfopt/llvm/build-kinsn-arm64/bpfopt
+X86_BPFOPT_HOST_BIN_PATH := $(if $(filter /%,$(X86_BPFOPT_HOST_BIN)),$(X86_BPFOPT_HOST_BIN),$(ROOT_DIR)/$(X86_BPFOPT_HOST_BIN))
+ARM64_BPFOPT_HOST_BIN_PATH := $(if $(filter /%,$(ARM64_BPFOPT_HOST_BIN)),$(ARM64_BPFOPT_HOST_BIN),$(ROOT_DIR)/$(ARM64_BPFOPT_HOST_BIN))
 X86_KINSNPROBER_HOST_BIN := bpfopt/target/release/kinsnprober
 ARM64_KINSNPROBER_HOST_BIN := bpfopt/target/$(ARM64_RUST_TARGET)/release/kinsnprober
 
@@ -142,13 +145,13 @@ host-rust-arm64: aarch64-sysroot
 	$(ARM64_CARGO_ENV) cargo build --release --workspace --target "$(ARM64_RUST_TARGET)" --target-dir "$(ROOT_DIR)/bpfopt/target" --manifest-path "$(ROOT_DIR)/bpfopt/Cargo.toml" -p kinsnprober
 	$(ARM64_CARGO_ENV) cargo build --release --target "$(ARM64_RUST_TARGET)" --manifest-path "$(NATIVE_LINK_DIR)/Cargo.toml"
 
-host-bpfopt-llvm-x86: $(ROOT_DIR)/$(X86_BPFOPT_HOST_BIN)
+host-bpfopt-llvm-x86: $(X86_BPFOPT_HOST_BIN_PATH)
 
 $(ROOT_DIR)/bpfopt/llvm/build-kinsn/bpfopt: $(ROOT_DIR)/bpfopt/llvm/CMakeLists.txt $(ROOT_DIR)/bpfopt/llvm/src/main.cpp $(ROOT_DIR)/bpfopt/llvm/src/bpf_bytecode.hpp $(ROOT_DIR)/bpfopt/llvm/src/llvm_mapinline.hpp
 	cmake -S "$(ROOT_DIR)/bpfopt/llvm" -B "$(BPFOPT_LLVM_BUILD_X86)" -DCMAKE_BUILD_TYPE=Release -DLLVM_DIR="$(RUNNER_LLVM_DIR)"
 	cmake --build "$(BPFOPT_LLVM_BUILD_X86)" -j"$(JOBS)"
 
-host-bpfopt-llvm-arm64: $(ROOT_DIR)/$(ARM64_BPFOPT_HOST_BIN)
+host-bpfopt-llvm-arm64: $(ARM64_BPFOPT_HOST_BIN_PATH)
 
 $(ROOT_DIR)/bpfopt/llvm/build-kinsn-arm64/bpfopt: aarch64-sysroot $(ROOT_DIR)/bpfopt/llvm/CMakeLists.txt $(ROOT_DIR)/bpfopt/llvm/src/main.cpp $(ROOT_DIR)/bpfopt/llvm/src/bpf_bytecode.hpp $(ROOT_DIR)/bpfopt/llvm/src/llvm_mapinline.hpp
 	$(ARM64_PKG_CONFIG) cmake -S "$(ROOT_DIR)/bpfopt/llvm" -B "$(BPFOPT_LLVM_BUILD_ARM64)" -DCMAKE_BUILD_TYPE=Release -DLLVM_DIR="$(ARM64_RUNNER_LLVM_DIR)" -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=aarch64 -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ -DCMAKE_FIND_ROOT_PATH="$(AARCH64_SYSROOT_DIR);$(ARM64_RUNNER_LLVM_SYSROOT);/usr/aarch64-linux-gnu" -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=BOTH -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=BOTH -DCMAKE_EXE_LINKER_FLAGS="-L$(AARCH64_SYSROOT_DIR)/usr/lib/aarch64-linux-gnu -L$(ARM64_RUNNER_LLVM_SYSROOT)/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,$(AARCH64_SYSROOT_DIR)/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,$(ARM64_RUNNER_LLVM_SYSROOT)/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,$(ARM64_RUNNER_LLVM_SYSROOT)/usr/lib/llvm-15/lib"
@@ -209,7 +212,7 @@ host-x86-sim-proofs: host-micro-programs-x86
 host-arm64-sim-proofs: host-micro-programs-arm64
 	$(MAKE) -C "$(ARM64_SIM_PROOF_DIR)" PROOF_BUILD_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)/arm64_sim_proofs" MICRO_CONFIG="$(MICRO_PROOF_CONFIG)" micro-proofs-build
 
-x86-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_X86) host-kinsn-x86 host-rust-x86 host-shim-x86 host-source-apps-x86 host-runner-x86 host-micro-programs-x86 host-stage2-programs-x86 host-x86-sim-proofs $(X86_BPFOPT_HOST_BIN)
+x86-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_X86) host-kinsn-x86 host-rust-x86 host-shim-x86 host-source-apps-x86 host-runner-x86 host-micro-programs-x86 host-stage2-programs-x86 host-x86-sim-proofs host-bpfopt-llvm-x86
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	docker build --platform linux/amd64 \
 		--target runner-runtime \
@@ -235,7 +238,7 @@ x86-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_X86) host-kinsn-x86 host-rust-
 	docker save -o "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE)"
 	mv -f "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE_TAR)"
 
-arm64-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM64) host-kinsn-arm64 host-rust-arm64 host-shim-arm64 host-source-apps-arm64 host-runner-arm64 host-micro-programs-arm64 host-stage2-programs-arm64 host-arm64-native-kernel-smoke host-arm64-sim-proofs $(ARM64_BPFOPT_HOST_BIN)
+arm64-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM64) host-kinsn-arm64 host-rust-arm64 host-shim-arm64 host-source-apps-arm64 host-runner-arm64 host-micro-programs-arm64 host-stage2-programs-arm64 host-arm64-native-kernel-smoke host-arm64-sim-proofs host-bpfopt-llvm-arm64
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	docker build --platform linux/arm64 \
 		--target runner-runtime \

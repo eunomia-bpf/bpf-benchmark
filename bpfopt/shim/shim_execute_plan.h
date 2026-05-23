@@ -341,27 +341,17 @@ static void run_step(struct prog_entry *pd,
     snprintf(out->report_path, sizeof(out->report_path), "%s", report);
     snprintf(out->output_path, sizeof(out->output_path), "%s", cur);
 
-    char verifier_states_in[320], verifier_log[320];
-    if (*step_seq == 0)
-        snprintf(verifier_states_in, sizeof(verifier_states_in),
-                 "%s/verifier_log_initial.log", workdir);
-    else
-        snprintf(verifier_states_in, sizeof(verifier_states_in),
-                 "%s/verifier_log_step%d.log", workdir, *step_seq - 1);
-    snprintf(verifier_log, sizeof(verifier_log),
-             "%s/verifier_log_step%d.log", workdir, *step_seq);
     unlink(nxt);
     unlink(report);
 
-    const char *vars[10][2] = {
+    const char *vars[9][2] = {
         {"PROG_ID", prog_id_str}, {"PROG_TYPE", prog_type_name},
         {"INPUT", cur}, {"OUTPUT", nxt}, {"REPORT", report},
         {"WORKDIR", workdir}, {"TARGET", target_json},
         {"MAP_IDS", map_ids_csv}, {"MAP_VALUES", map_values_dir},
-        {"VERIFIER_STATES", verifier_states_in},
     };
     char resolved[4200];
-    substitute_vars(resolved, sizeof(resolved), command, vars, 10);
+    substitute_vars(resolved, sizeof(resolved), command, vars, 9);
 
     /* /bin/sh -c <resolved> with LD_PRELOAD stripped, stdout+stderr to log */
     char **clean_env = env_without_ld_preload();
@@ -425,10 +415,8 @@ static void run_step(struct prog_entry *pd,
         return;
     }
 
-    /* New bytecode in nxt → reload + reattach + capture verifier states.
-     * 16 MB keeps large-prog verifier logs intact — large progs (e.g.
-     * katran balancer.bpf.o, 67939 insns) overflow a 1 MB buffer at
-     * log_level=2 and the kernel returns -ENOSPC, masking the real cause. */
+    /* New bytecode in nxt -> reload + reattach. The buffer is only for
+     * diagnostics on failure; successful loads run with verifier logging off. */
     const size_t verifier_buf_sz = 16 * 1024 * 1024;
     char *verifier_buf = (char *)malloc(verifier_buf_sz);
     if (!verifier_buf) {
@@ -478,9 +466,6 @@ static void run_step(struct prog_entry *pd,
     }
     free(verifier_buf);
 
-    /* Write the new prog's verifier log for the next step. */
-    capture_verifier_states(pd, nxt, target_json, local_kernel_ids,
-                            nr_maps, verifier_log);
     rename(nxt, cur);
     pthread_mutex_lock(&state_mutex);
     pd->step_seq = *step_seq + 1;

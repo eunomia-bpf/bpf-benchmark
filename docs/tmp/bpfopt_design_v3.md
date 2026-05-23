@@ -7,7 +7,7 @@
 bpfopt-suite v3 的稳定边界是：
 
 - `bpfopt`：standalone pure bytecode CLI，只做 `struct bpf_insn[]` init canonicalization 和单 pass 变换；一次 pass invocation 只跑一个 `--pass <name>`。
-- `bpfrejit-daemon`：runner socket + JSON 边界，负责 live discovery、runner 提供 pass list 的 per-pass orchestration、minimal fd-array 构造、每个 pass 后的 `BPF_PROG_REJIT(log_level=2)`。
+- `bpfrejit-daemon`：runner socket + JSON 边界，负责 live discovery、runner 提供 pass list 的 per-pass orchestration、minimal fd-array 构造、每个 pass 后的 `BPF_PROG_REJIT` acceptance。
 
 `bpfverify`、`bpfrejit`、`bpfprof`、`bpfget`、`kernel-sys` crate 和 daemon thin dry-run module 均已删除。daemon 不调用 `BPF_PROG_LOAD`，不重建 `LoadAttr`，不传 `func_info` / `line_info` / `attach_btf_obj_fd`。所有 program metadata 由 kernel 在 `BPF_PROG_REJIT` 内从原 live `prog->aux` 复用；daemon 只提交新 bytecode、从 `prog_info.used_maps` 打开的 map fd，以及 kinsn module call 所需的 BTF module fd。
 
@@ -36,7 +36,7 @@ prefetch
 
 ```bash
 bpfopt --pass wide-mem --report wide.json < in.bin > out.bin
-bpfopt --pass const-prop --verifier-states states.json < in.bin > out.bin
+bpfopt --pass const-prop --report const-prop.json < in.bin > out.bin
 bpfopt --canonicalize-map-refs --map-ids 1,2 < original.bin > canonical.bin
 bpfopt list-passes
 ```
@@ -55,7 +55,7 @@ bpfopt list-passes
    - fork+exec `bpfopt --pass <name>`，stdin/stdout 传 raw `struct bpf_insn[]`。
    - daemon 立即调用 `daemon/src/syscall.rs` 内的 `prog_rejit()`，传当前 pass 输出、包含所需 BTF module fd 和 map fd 的 fd_array、large verifier log buffer。
    - kernel 在 `BPF_PROG_REJIT` 内从 live `prog->aux` 复用 program metadata，re-verify + re-JIT + image swap。
-   - daemon 解析本次 ReJIT `log_level=2` verifier log，写 `verifier-states.json` 供后续需要 states 的 pass 使用。
+   - daemon 将本次 ReJIT 结果作为下一 pass 的输入；pass 不消费 verifier-state side input。
 
 没有 final aggregate ReJIT。每个 pass 成功后就已经 commit 到 live program；任一 pass 失败时，该 program 停在前 K 个成功 pass 的 partial 优化状态，并返回 `failed_pass` 和 `committed_passes_before_failure`。单个 program 失败不影响其它 program 的 worker。
 
@@ -69,7 +69,7 @@ bpfopt list-passes
 2. **只传 minimal fd_array**：daemon 对 `target.json` 中 `call_offset > 0` 的 kinsn BTF module ID 逐个 `BPF_BTF_GET_FD_BY_ID`，并对 `prog_info.used_maps` / `map_ids` 逐个 `BPF_MAP_GET_FD_BY_ID`。fd_array 只包含这些 BTF module fd 和 map fd，不写 `fd_array.json` / `map_fds.json`。
 3. **不传 BTF metadata**：daemon 不传 `func_info`、`line_info`、`attach_btf_obj_fd` 给任何 syscall。`ProgramSnapshot` 不保存这些 bytes，不做 BTF normalize/replay。
 4. **snapshot-time map canonicalization**：daemon 只在 snapshot 后通过 `bpfopt --canonicalize-map-refs --map-ids ...` 做一次 map pseudo 归一化。`PSEUDO_MAP_FD` / `PSEUDO_MAP_VALUE` 根据原始 bytecode first-seen loader fd 顺序映射到 `prog_info.map_ids` index；IDX forms 在可获得 loader fd_array 时重新校准，否则按 map_ids 顺序校验保留。后续 per-pass ReJIT 不再做 fd rewrite。
-5. **states 来自真实 ReJIT**：`map_inline` / `const_prop` 的 verifier states 只能来自前一个成功的 per-pass `BPF_PROG_REJIT(log_level=2)` log parser；没有 placeholder、空 states 或 heuristic fallback。
+5. **无 verifier-state side input**：`map_inline` / `const_prop` 不再接受 verifier-state 文件；所有 pass 都直接走当前字节码的 LLVM/O3 round trip，然后立即由 ReJIT acceptance 决定是否提交。
 
 ### 2.3 Runner 边界不变
 
@@ -85,8 +85,8 @@ bpfopt list-passes
 - 必须显式传 `--pass <name>`；一次只跑一个 pass。
 - init 模式 `--canonicalize-map-refs --map-ids <ids>` 只做 map-reference canonicalization，不运行 pass。
 - 不提供 default pass pipeline，不接受 `--enabled-passes` 或 pass list。
-- side-input/output：`--target`、`--profile`、`--verifier-states`、`--map-values`、`--report` 都走文件。
-- `const_prop` 和 `map_inline` 需要真实 verifier-state side-input；离线 CLI 调用必须显式提供 `--verifier-states`。
+- side-input/output：`--target`、`--profile`、`--map-values`、`--report` 都走文件。
+- `const_prop` 和 `map_inline` 不接受 verifier-state side-input。
 - `branch_flip` 必须显式 opt-in 并提供真实 PMU profile。
 
 常见命令：
@@ -95,7 +95,7 @@ bpfopt list-passes
 bpfopt list-passes
 bpfopt --canonicalize-map-refs --map-ids 1,2 < original.bin > canonical.bin
 bpfopt --pass wide-mem --report report.json < in.bin > out.bin
-bpfopt --pass map-inline --verifier-states states.json --map-values map-values.json --map-ids 1,2 < in.bin > out.bin
+bpfopt --pass map-inline --map-values map-values.json --map-ids 1,2 < in.bin > out.bin
 bpfopt --pass branch-flip --profile profile.json < in.bin > out.bin
 ```
 
@@ -148,7 +148,7 @@ daemon 是事件源 + runner socket boundary + kernel syscall orchestrator。
 - 标准 BPF 命令优先使用 `libbpf-sys`。
 - fork-only 命令 `BPF_PROG_REJIT` 和 fork-extended original-bytecode metadata 读取在 `daemon/src/syscall.rs` 内封装。
 - `prog_rejit()` 支持 verifier log，并在 `ENOSPC` 时扩大 log buffer 后重试。
-- verifier log parser 和 `verifier_states_from_log()` 属于 `bpfopt/src/verifier_log.rs`。
+- `bpfopt` 不包含 verifier-state parser；verifier diagnostics 只作为失败 artifact 暴露。
 - `bpfopt` 可以依赖 `libbpf-sys` 的 pure data APIs，如 `bpf_insn` 类型、opcode 常量和 prog type enum，但不能调用 syscall。
 
 ## 4. Data and Protocol
@@ -185,7 +185,6 @@ daemon 构造 in-memory `fd_array`：
 - 单个 pass ReJIT errno 要保留 workdir，包含 pass name、pass input bytecode、pass output bytecode、verifier log、errno/error text。
 - 单个 program 任一 pass 失败时，返回 partial result：前 K 个 pass 已 commit，`failed_pass` 标明失败 pass。
 - 单个 program 失败不影响其它 program worker。
-- `map_inline` / `const_prop` 缺 verifier states 时必须失败。
 - `branch_flip` 缺真实 per-site PGO 时必须失败。
 
 ## 6. Implementation Layout
@@ -193,7 +192,7 @@ daemon 构造 in-memory `fd_array`：
 ```text
 bpfopt/
   Cargo.toml
-  crates/bpfopt/         # pure bytecode optimizer lib + single-pass bin
+  llvm/                  # C++ LLVM/O3 optimizer CLI
 
 daemon/
   Cargo.toml

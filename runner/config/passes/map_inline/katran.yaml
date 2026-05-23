@@ -38,7 +38,7 @@
 #
 # Other katran progs (e.g. xdp_root) get the plain default command via the
 # `programs.default` fallback below.
-log_level: 2
+log_level: 1
 programs:
   balancer_ingress:
     # Phase 3 overlay injection inlined: scan ${MAP_VALUES}/map-*.show.json
