@@ -1,0 +1,423 @@
+{
+  "app": "cilium/agent",
+  "baseline": {
+    "bpf": {},
+    "workloads": [
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepa",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.200",
+              "dst_port": 18081,
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepa",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.129",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 60.11242955200001,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.200  dst_max: 10.244.0.200\n     src_min: 10.244.0.129  src_max: 10.244.0.129\n     src_mac: 6a:43:0b:f5:13:b6 dst_mac: 42:c4:f0:51:c9:e9\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 18081  udp_dst_max: 18081\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 123681631  errors: 0\n     started: 133980173us  stopped: 193980076us idle: 0us\n     seq_num: 123681632  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.129  cur_daddr: 10.244.0.200\n     cur_udp_dst: 18081  cur_udp_src: 18974\n     cur_queue_map: 0\n     flows: 61857137\nResult: OK: 59999902(c59999902+d0) usec, 123681631 (64byte,-1frags)\n  2061363pps 1055Mb/sec (1055417856bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_forward"
+          },
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepb",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.129",
+              "dst_port": 18081,
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepb",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.200",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 60.030948196,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.129  dst_max: 10.244.0.129\n     src_min: 10.244.0.200  src_max: 10.244.0.200\n     src_mac: 46:2a:ed:d5:5d:78 dst_mac: 0a:d0:51:e7:6b:2c\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 18081  udp_dst_max: 18081\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 124297064  errors: 0\n     started: 134020118us  stopped: 193962272us idle: 0us\n     seq_num: 124297065  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.200  cur_daddr: 10.244.0.129\n     cur_udp_dst: 18081  cur_udp_src: 44601\n     cur_queue_map: 0\n     flows: 62164873\nResult: OK: 59942154(c59942154+d0) usec, 124297064 (64byte,-1frags)\n  2073616pps 1061Mb/sec (1061691392bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_reverse"
+          }
+        ],
+        "config": {
+          "path": "bidirectional-endpoint-to-endpoint"
+        },
+        "duration_s": 60.11242955200001,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "cilium_endpoint_pktgen"
+      },
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepa",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.200",
+              "dst_port": 18081,
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepa",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.129",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 60.10036699899999,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.200  dst_max: 10.244.0.200\n     src_min: 10.244.0.129  src_max: 10.244.0.129\n     src_mac: 6a:43:0b:f5:13:b6 dst_mac: 42:c4:f0:51:c9:e9\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 18081  udp_dst_max: 18081\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 123456121  errors: 0\n     started: 194430176us  stopped: 254412233us idle: 0us\n     seq_num: 123456122  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.129  cur_daddr: 10.244.0.200\n     cur_udp_dst: 18081  cur_udp_src: 55600\n     cur_queue_map: 0\n     flows: 61744472\nResult: OK: 59982057(c59982057+d0) usec, 123456121 (64byte,-1frags)\n  2058217pps 1053Mb/sec (1053807104bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_forward"
+          },
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepb",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.129",
+              "dst_port": 18081,
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepb",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.200",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 60.053182823999975,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.129  dst_max: 10.244.0.129\n     src_min: 10.244.0.200  src_max: 10.244.0.200\n     src_mac: 46:2a:ed:d5:5d:78 dst_mac: 0a:d0:51:e7:6b:2c\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 18081  udp_dst_max: 18081\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 123984362  errors: 0\n     started: 194530152us  stopped: 254418995us idle: 0us\n     seq_num: 123984363  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.200  cur_daddr: 10.244.0.129\n     cur_udp_dst: 18081  cur_udp_src: 59569\n     cur_queue_map: 0\n     flows: 62008557\nResult: OK: 59888842(c59888842+d0) usec, 123984362 (64byte,-1frags)\n  2070241pps 1059Mb/sec (1059963392bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_reverse"
+          }
+        ],
+        "config": {
+          "path": "bidirectional-endpoint-to-endpoint"
+        },
+        "duration_s": 60.10036699899999,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "cilium_endpoint_pktgen"
+      },
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepa",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.200",
+              "dst_port": 18081,
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepa",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.129",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 60.082698496000006,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.200  dst_max: 10.244.0.200\n     src_min: 10.244.0.129  src_max: 10.244.0.129\n     src_mac: 6a:43:0b:f5:13:b6 dst_mac: 42:c4:f0:51:c9:e9\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 18081  udp_dst_max: 18081\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 122917202  errors: 0\n     started: 254860161us  stopped: 314830192us idle: 0us\n     seq_num: 122917203  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.129  cur_daddr: 10.244.0.200\n     cur_udp_dst: 18081  cur_udp_src: 40953\n     cur_queue_map: 0\n     flows: 61474969\nResult: OK: 59970031(c59970031+d0) usec, 122917202 (64byte,-1frags)\n  2049643pps 1049Mb/sec (1049417216bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_forward"
+          },
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepb",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.129",
+              "dst_port": 18081,
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepb",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.200",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 60.09271704699998,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.129  dst_max: 10.244.0.129\n     src_min: 10.244.0.200  src_max: 10.244.0.200\n     src_mac: 46:2a:ed:d5:5d:78 dst_mac: 0a:d0:51:e7:6b:2c\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 18081  udp_dst_max: 18081\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 123994212  errors: 0\n     started: 254860168us  stopped: 314830206us idle: 0us\n     seq_num: 123994213  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.200  cur_daddr: 10.244.0.129\n     cur_udp_dst: 18081  cur_udp_src: 3885\n     cur_queue_map: 0\n     flows: 62013518\nResult: OK: 59970038(c59970038+d0) usec, 123994212 (64byte,-1frags)\n  2067602pps 1058Mb/sec (1058612224bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_reverse"
+          }
+        ],
+        "config": {
+          "path": "bidirectional-endpoint-to-endpoint"
+        },
+        "duration_s": 60.09271704699998,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "cilium_endpoint_pktgen"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {},
+    "workloads": [
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepa",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.44",
+              "dst_port": 18081,
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepa",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.220",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 60.040813050999986,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.44  dst_max: 10.244.0.44\n     src_min: 10.244.0.220  src_max: 10.244.0.220\n     src_mac: 4a:1e:84:c2:53:ce dst_mac: 42:c4:f0:51:c9:e9\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 18081  udp_dst_max: 18081\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 123993726  errors: 0\n     started: 385660114us  stopped: 445552226us idle: 0us\n     seq_num: 123993727  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.220  cur_daddr: 10.244.0.44\n     cur_udp_dst: 18081  cur_udp_src: 3399\n     cur_queue_map: 0\n     flows: 62013282\nResult: OK: 59892111(c59892111+d0) usec, 123993726 (64byte,-1frags)\n  2070284pps 1059Mb/sec (1059985408bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_forward"
+          },
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepb",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.220",
+              "dst_port": 18081,
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepb",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.44",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 60.009760072999995,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.220  dst_max: 10.244.0.220\n     src_min: 10.244.0.44  src_max: 10.244.0.44\n     src_mac: 9e:cf:2c:11:f9:85 dst_mac: 0a:d0:51:e7:6b:2c\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 18081  udp_dst_max: 18081\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 124747096  errors: 0\n     started: 385590166us  stopped: 445552704us idle: 0us\n     seq_num: 124747097  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.44  cur_daddr: 10.244.0.220\n     cur_udp_dst: 18081  cur_udp_src: 35895\n     cur_queue_map: 0\n     flows: 62389962\nResult: OK: 59962537(c59962537+d0) usec, 124747096 (64byte,-1frags)\n  2080417pps 1065Mb/sec (1065173504bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_reverse"
+          }
+        ],
+        "config": {
+          "path": "bidirectional-endpoint-to-endpoint"
+        },
+        "duration_s": 60.040813050999986,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "cilium_endpoint_pktgen"
+      },
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepa",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.44",
+              "dst_port": 18081,
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepa",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.220",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 60.088414622000016,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.44  dst_max: 10.244.0.44\n     src_min: 10.244.0.220  src_max: 10.244.0.220\n     src_mac: 4a:1e:84:c2:53:ce dst_mac: 42:c4:f0:51:c9:e9\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 18081  udp_dst_max: 18081\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 124276761  errors: 0\n     started: 445990172us  stopped: 505914765us idle: 0us\n     seq_num: 124276762  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.220  cur_daddr: 10.244.0.44\n     cur_udp_dst: 18081  cur_udp_src: 24298\n     cur_queue_map: 0\n     flows: 62154775\nResult: OK: 59924592(c59924592+d0) usec, 124276761 (64byte,-1frags)\n  2073885pps 1061Mb/sec (1061829120bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_forward"
+          },
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepb",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.220",
+              "dst_port": 18081,
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepb",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.44",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 60.110158227,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.220  dst_max: 10.244.0.220\n     src_min: 10.244.0.44  src_max: 10.244.0.44\n     src_mac: 9e:cf:2c:11:f9:85 dst_mac: 0a:d0:51:e7:6b:2c\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 18081  udp_dst_max: 18081\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 124647626  errors: 0\n     started: 445990180us  stopped: 505922753us idle: 0us\n     seq_num: 124647627  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.44  cur_daddr: 10.244.0.220\n     cur_udp_dst: 18081  cur_udp_src: 1959\n     cur_queue_map: 0\n     flows: 62340231\nResult: OK: 59932573(c59932573+d0) usec, 124647626 (64byte,-1frags)\n  2079797pps 1064Mb/sec (1064856064bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_reverse"
+          }
+        ],
+        "config": {
+          "path": "bidirectional-endpoint-to-endpoint"
+        },
+        "duration_s": 60.110158227,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "cilium_endpoint_pktgen"
+      },
+      {
+        "command": [],
+        "components": [
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepa",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.44",
+              "dst_port": 18081,
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepa",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.220",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 60.11073510499995,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.44  dst_max: 10.244.0.44\n     src_min: 10.244.0.220  src_max: 10.244.0.220\n     src_mac: 4a:1e:84:c2:53:ce dst_mac: 42:c4:f0:51:c9:e9\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 18081  udp_dst_max: 18081\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 124636883  errors: 0\n     started: 506480318us  stopped: 566362835us idle: 0us\n     seq_num: 124636884  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.220  cur_daddr: 10.244.0.44\n     cur_udp_dst: 18081  cur_udp_src: 56750\n     cur_queue_map: 0\n     flows: 62334782\nResult: OK: 59882516(c59882516+d0) usec, 124636883 (64byte,-1frags)\n  2081356pps 1065Mb/sec (1065654272bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_forward"
+          },
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepb",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.220",
+              "dst_port": 18081,
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepb",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.44",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 60.110792677999996,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.220  dst_max: 10.244.0.220\n     src_min: 10.244.0.44  src_max: 10.244.0.44\n     src_mac: 9e:cf:2c:11:f9:85 dst_mac: 0a:d0:51:e7:6b:2c\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 18081  udp_dst_max: 18081\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 124261063  errors: 0\n     started: 506480157us  stopped: 566362620us idle: 0us\n     seq_num: 124261064  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.44  cur_daddr: 10.244.0.220\n     cur_udp_dst: 18081  cur_udp_src: 8600\n     cur_queue_map: 0\n     flows: 62146995\nResult: OK: 59882462(c59882462+d0) usec, 124261063 (64byte,-1frags)\n  2075082pps 1062Mb/sec (1062441984bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_reverse"
+          }
+        ],
+        "config": {
+          "path": "bidirectional-endpoint-to-endpoint"
+        },
+        "duration_s": 60.110792677999996,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "cilium_endpoint_pktgen"
+      }
+    ]
+  },
+  "rejit_result": {
+    "mode": "loadtime",
+    "status": "skipped"
+  },
+  "runner": "cilium",
+  "selected_workload": "cilium_endpoint_pktgen",
+  "status": "ok"
+}

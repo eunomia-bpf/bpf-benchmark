@@ -1,0 +1,13 @@
+{
+  "app": "cilium/agent",
+  "baseline": null,
+  "error": "command failed (1): sh -c 'printf '\"'\"'%s\\n'\"'\"' '\"'\"'clone_skb 1000'\"'\"' > /proc/net/pktgen/bpfbench0'\nsh: 1: printf: printf: I/O error",
+  "post_rejit": null,
+  "rejit_result": {
+    "mode": "workload_only",
+    "status": "skipped"
+  },
+  "runner": "cilium",
+  "selected_workload": "network_pktgen_udp",
+  "status": "error"
+}
