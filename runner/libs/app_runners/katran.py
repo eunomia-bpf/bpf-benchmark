@@ -33,6 +33,18 @@ DEFAULT_IP_CANDIDATES = (
 TCP_PROTO = socket.IPPROTO_TCP
 UDP_PROTO = socket.IPPROTO_UDP
 F_LRU_BYPASS = 1 << 1
+F_QUIC_VIP = 1 << 2
+F_GLOBAL_LRU = 1 << 6
+F_HASH_SRC_DST_PORT = 1 << 7
+F_UDP_STABLE_ROUTING_VIP = 1 << 8
+F_UDP_FLOW_MIGRATION = 1 << 9
+KATRAN_PKTGEN_VIP_FLAGS = (
+    F_QUIC_VIP
+    | F_GLOBAL_LRU
+    | F_HASH_SRC_DST_PORT
+    | F_UDP_STABLE_ROUTING_VIP
+    | F_UDP_FLOW_MIGRATION
+)
 CH_RING_SIZE = 65537
 VIP_NUM = 0
 REAL_NUM = 1
@@ -563,7 +575,12 @@ class KatranServerSession:
     def __exit__(self, exc_type, exc, tb) -> None: self.close()
 
 
-def configure_katran_maps(session: KatranServerSession, *, proto: int = TCP_PROTO) -> dict[str, object]:
+def configure_katran_maps(
+    session: KatranServerSession,
+    *,
+    proto: int = TCP_PROTO,
+    flags: int = F_LRU_BYPASS,
+) -> dict[str, object]:
     vip_id = session.map_id("vip_map")
     reals_id = session.map_id("reals")
     rings_id = session.map_id("ch_rings")
@@ -572,7 +589,7 @@ def configure_katran_maps(session: KatranServerSession, *, proto: int = TCP_PROT
     _bpf_map_update_batch(
         [
             (ctl_id, pack_u32(0), pack_ctl_mac(ROUTER_LB_MAC)),
-            (vip_id, pack_vip_definition(VIP_IP, VIP_PORT, proto), pack_vip_meta(F_LRU_BYPASS, VIP_NUM)),
+            (vip_id, pack_vip_definition(VIP_IP, VIP_PORT, proto), pack_vip_meta(flags, VIP_NUM)),
             (reals_id, real_num_bytes, pack_real_definition(REAL_IP)),
             *[
                 (rings_id, pack_u32((VIP_NUM * CH_RING_SIZE) + ring_pos), real_num_bytes)
@@ -581,7 +598,7 @@ def configure_katran_maps(session: KatranServerSession, *, proto: int = TCP_PROT
         ]
     )
     return {"map_ids": {n: session.map_id(n) for n in KATRAN_REQUIRED_MAP_NAMES},
-            "vip": {"address": VIP_IP, "port": VIP_PORT, "proto": proto, "vip_num": VIP_NUM, "flags": F_LRU_BYPASS},
+            "vip": {"address": VIP_IP, "port": VIP_PORT, "proto": proto, "vip_num": VIP_NUM, "flags": flags},
             "real": {"address": REAL_IP, "real_num": REAL_NUM}, "default_gateway_mac": ROUTER_LB_MAC, "ch_ring_size": CH_RING_SIZE}
 
 
@@ -589,9 +606,9 @@ DEFAULT_INTERFACE = "katran0"
 DEFAULT_WRK_THREADS = 4
 DEFAULT_WRK_CONNECTIONS = 10
 DEFAULT_PKTGEN_PKT_SIZE = 64
-PKTGEN_THREAD = "/proc/net/pktgen/kpktgend_0"
+DEFAULT_PKTGEN_CLONE_SKB = 0
 PKTGEN_CTRL = "/proc/net/pktgen/pgctrl"
-PKTGEN_ROUTER_DEV = f"/proc/net/pktgen/{ROUTER_LB_IFACE}"
+KATRAN_PKTGEN_THREAD_IDS = (0, 1, 2, 3)
 KATRAN_WORKLOADS = {"xdp_traffic", "xdp_pktgen"}
 
 
@@ -656,7 +673,11 @@ class KatranRunner(AppRunner):
                 "topology": topology.metadata(),
                 "http_server": http_server.metadata(),
                 "live_program": session.metadata(),
-                "map_configuration": configure_katran_maps(session, proto=UDP_PROTO if self.workload_kind == "xdp_pktgen" else TCP_PROTO),
+                "map_configuration": configure_katran_maps(
+                    session,
+                    proto=UDP_PROTO if self.workload_kind == "xdp_pktgen" else TCP_PROTO,
+                    flags=KATRAN_PKTGEN_VIP_FLAGS if self.workload_kind == "xdp_pktgen" else F_LRU_BYPASS,
+                ),
             }
             time.sleep(TOPOLOGY_SETTLE_S)
         except Exception:
@@ -716,11 +737,14 @@ class KatranRunner(AppRunner):
         duration_s = max(1, int(float(seconds)))
         ensure_kernel_module_loaded("pktgen")
         self._pktgen_write(PKTGEN_CTRL, "reset")
-        self._pktgen_write(PKTGEN_THREAD, "rem_device_all")
-        self._pktgen_write(PKTGEN_THREAD, f"add_device {ROUTER_LB_IFACE}")
-        for command in (
+        aliases = tuple(f"{ROUTER_LB_IFACE}@{thread_id}" for thread_id in KATRAN_PKTGEN_THREAD_IDS)
+        for thread_id, alias in zip(KATRAN_PKTGEN_THREAD_IDS, aliases, strict=True):
+            thread_path = f"/proc/net/pktgen/kpktgend_{thread_id}"
+            self._pktgen_write(thread_path, "rem_device_all")
+            self._pktgen_write(thread_path, f"add_device {alias}")
+        pktgen_commands = (
             "flag !SHARED",
-            "clone_skb 0",
+            f"clone_skb {DEFAULT_PKTGEN_CLONE_SKB}",
             "burst 1",
             "count 0",
             "delay 0",
@@ -734,9 +758,16 @@ class KatranRunner(AppRunner):
             f"dst_mac {LB_MAC}",
             f"udp_dst_min {VIP_PORT}",
             f"udp_dst_max {VIP_PORT}",
+            "udp_src_min 1",
+            "udp_src_max 65535",
+            "flows 65535",
+            "flowlen 1",
             "clear_counters",
-        ):
-            self._pktgen_write(PKTGEN_ROUTER_DEV, command)
+        )
+        for alias in aliases:
+            device_path = f"/proc/net/pktgen/{alias}"
+            for command in pktgen_commands:
+                self._pktgen_write(device_path, command)
         command = [ip_binary(), "netns", "exec", ROUTER_NS, "sh", "-c", self._pktgen_write_script(PKTGEN_CTRL, "start")]
         start = time.monotonic()
         process = subprocess.Popen(command, cwd=ROOT_DIR, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -752,18 +783,37 @@ class KatranRunner(AppRunner):
         elapsed = time.monotonic() - start
         if process.returncode != 0:
             raise RuntimeError(f"Katran pktgen workload failed: {tail_text(stderr or stdout)}")
-        device_state = self._pktgen_read(PKTGEN_ROUTER_DEV)
+        components = tuple(
+            WorkloadResult(
+                workload_name="katran_kernel_pktgen_l2_udp_thread",
+                command=tuple(str(p) for p in command),
+                returncode=int(process.returncode or 0),
+                duration_s=elapsed,
+                stdout=tail_text(self._pktgen_read(f"/proc/net/pktgen/{alias}"), max_lines=200000, max_chars=8388608),
+                stderr="",
+                config={"tool": "kernel_pktgen", "namespace": ROUTER_NS, "iface": alias,
+                        "thread_id": int(thread_id), "shared_skb": False,
+                        "xmit_mode": "start_xmit", "pkt_size": DEFAULT_PKTGEN_PKT_SIZE,
+                        "clone_skb": DEFAULT_PKTGEN_CLONE_SKB,
+                        "src_ip": CLIENT_IP, "dst_ip": VIP_IP, "dst_port": VIP_PORT,
+                        "proto": UDP_PROTO},
+            )
+            for thread_id, alias in zip(KATRAN_PKTGEN_THREAD_IDS, aliases, strict=True)
+        )
         return WorkloadResult(
             workload_name="katran_kernel_pktgen_l2_udp",
             command=tuple(str(p) for p in command),
             returncode=int(process.returncode or 0),
             duration_s=elapsed,
-            stdout=tail_text(device_state, max_lines=200000, max_chars=8388608),
+            stdout="",
             stderr=tail_text(stderr or "", max_lines=200000, max_chars=8388608),
             config={"tool": "kernel_pktgen", "namespace": ROUTER_NS, "iface": ROUTER_LB_IFACE,
                     "shared_skb": False, "xmit_mode": "start_xmit",
                     "pkt_size": DEFAULT_PKTGEN_PKT_SIZE,
+                    "clone_skb": DEFAULT_PKTGEN_CLONE_SKB,
+                    "threads": list(KATRAN_PKTGEN_THREAD_IDS),
                     "src_ip": CLIENT_IP, "dst_ip": VIP_IP, "dst_port": VIP_PORT, "proto": UDP_PROTO},
+            components=components,
         )
 
     @staticmethod

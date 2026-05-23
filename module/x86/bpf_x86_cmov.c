@@ -1386,7 +1386,8 @@ static int emit_cmpq_sib_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_cmpq_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			 const struct bpf_prog *prog)
+			 const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	switch (payload_form(payload)) {
 	case X86_OPERAND_FORM_RR:
@@ -1407,7 +1408,8 @@ static int emit_cmpq_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_cmpb_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			 const struct bpf_prog *prog)
+			 const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	switch (payload_form(payload)) {
 	case X86_OPERAND_FORM_RR:
@@ -1426,7 +1428,8 @@ static int emit_cmpb_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_cmpl_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			 const struct bpf_prog *prog)
+			 const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	switch (payload_form(payload)) {
 	case X86_OPERAND_FORM_RR:
@@ -1445,7 +1448,8 @@ static int emit_cmpl_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_cmpw_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			 const struct bpf_prog *prog)
+			 const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	switch (payload_form(payload)) {
 	case X86_OPERAND_FORM_RR:
@@ -1492,13 +1496,15 @@ static int emit_test_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_testq_x86(u8 *image, u32 *off, bool emit,
-			  u64 payload, const struct bpf_prog *prog)
+			  u64 payload, const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_test_rr_x86(image, off, emit, payload, prog, false, true);
 }
 
 static int emit_testl_x86(u8 *image, u32 *off, bool emit,
-			  u64 payload, const struct bpf_prog *prog)
+			  u64 payload, const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_test_rr_x86(image, off, emit, payload, prog, false, false);
 }
@@ -1587,7 +1593,8 @@ static int emit_testb_mem_imm_x86(u8 *image, u32 *off, bool emit,
 }
 
 static int emit_testb_x86(u8 *image, u32 *off, bool emit,
-			  u64 payload, const struct bpf_prog *prog)
+			  u64 payload, const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	switch (payload_form(payload)) {
 	case X86_OPERAND_FORM_RR:
@@ -1605,7 +1612,8 @@ static int emit_testb_x86(u8 *image, u32 *off, bool emit,
 }
 
 static int emit_testw_dispatch_x86(u8 *image, u32 *off, bool emit,
-				   u64 payload, const struct bpf_prog *prog)
+				   u64 payload, const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	switch (payload_form(payload)) {
 	case X86_OPERAND_FORM_RR:
@@ -1642,37 +1650,43 @@ static int emit_cmov_x86(u8 *image, u32 *off, bool emit,
 }
 
 static int emit_cmovneq_x86(u8 *image, u32 *off, bool emit,
-			       u64 payload, const struct bpf_prog *prog)
+			       u64 payload, const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_cmov_x86(image, off, emit, payload, prog, 0x45, true);
 }
 
 static int emit_cmovnel_x86(u8 *image, u32 *off, bool emit,
-			       u64 payload, const struct bpf_prog *prog)
+			       u64 payload, const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_cmov_x86(image, off, emit, payload, prog, 0x45, false);
 }
 
 static int emit_cmoveq_x86(u8 *image, u32 *off, bool emit,
-			      u64 payload, const struct bpf_prog *prog)
+			      u64 payload, const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_cmov_x86(image, off, emit, payload, prog, 0x44, true);
 }
 
 static int emit_cmovel_x86(u8 *image, u32 *off, bool emit,
-			      u64 payload, const struct bpf_prog *prog)
+			      u64 payload, const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_cmov_x86(image, off, emit, payload, prog, 0x44, false);
 }
 
 static int emit_cmovbl_x86(u8 *image, u32 *off, bool emit,
-			      u64 payload, const struct bpf_prog *prog)
+			      u64 payload, const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_cmov_x86(image, off, emit, payload, prog, 0x42, false);
 }
 
 static int emit_cmovbq_x86(u8 *image, u32 *off, bool emit,
-			      u64 payload, const struct bpf_prog *prog)
+			      u64 payload, const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_cmov_x86(image, off, emit, payload, prog, 0x42, true);
 }
@@ -1700,19 +1714,22 @@ static int emit_setcc_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_setne_r_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			    const struct bpf_prog *prog)
+			    const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_setcc_x86(image, off, emit, payload, prog, 0x95);
 }
 
 static int emit_sete_r_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			   const struct bpf_prog *prog)
+			   const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_setcc_x86(image, off, emit, payload, prog, 0x94);
 }
 
 static int emit_setge_r_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			    const struct bpf_prog *prog)
+			    const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_setcc_x86(image, off, emit, payload, prog, 0x9d);
 }

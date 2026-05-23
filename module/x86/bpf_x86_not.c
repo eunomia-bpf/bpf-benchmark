@@ -192,25 +192,29 @@ static int emit_not_r_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_notb_r_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			   const struct bpf_prog *prog)
+			   const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_not_r_x86(image, off, emit, payload, prog, false, false, true);
 }
 
 static int emit_notw_r_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			   const struct bpf_prog *prog)
+			   const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_not_r_x86(image, off, emit, payload, prog, false, true, false);
 }
 
 static int emit_notl_r_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			   const struct bpf_prog *prog)
+			   const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_not_r_x86(image, off, emit, payload, prog, false, false, false);
 }
 
 static int emit_notq_r_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			   const struct bpf_prog *prog)
+			   const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_not_r_x86(image, off, emit, payload, prog, true, false, false);
 }

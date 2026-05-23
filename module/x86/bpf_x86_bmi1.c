@@ -206,7 +206,8 @@ static void emit_bextr_rrr(u8 *buf, u32 *len, u8 dst_reg, u8 src_reg,
 }
 
 static int emit_bextrq_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			   const struct bpf_prog *prog)
+			   const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	u8 buf[8];
 	u8 dst_reg, src_reg, ctl_reg;
@@ -255,13 +256,15 @@ static int emit_bmi1_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_blsiq_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			  const struct bpf_prog *prog)
+			  const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_bmi1_x86(image, off, emit, payload, prog, 3);
 }
 
 static int emit_blsrq_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			  const struct bpf_prog *prog)
+			  const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_bmi1_x86(image, off, emit, payload, prog, 1);
 }

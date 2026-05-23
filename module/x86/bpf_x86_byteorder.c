@@ -132,7 +132,8 @@ static int instantiate_bswapq(u64 payload, struct bpf_insn *insn_buf)
 }
 
 static int emit_rolw_imm_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			     const struct bpf_prog *prog)
+			     const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	u8 buf[8];
 	u8 dst_reg, imm;
@@ -180,13 +181,15 @@ static int emit_bswap_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_bswapl_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			   const struct bpf_prog *prog)
+			   const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_bswap_x86(image, off, emit, payload, prog, false);
 }
 
 static int emit_bswapq_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			   const struct bpf_prog *prog)
+			   const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_bswap_x86(image, off, emit, payload, prog, true);
 }

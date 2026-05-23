@@ -1271,7 +1271,8 @@ static int instantiate_##name(u64 payload, struct bpf_insn *insn_buf)	\
 }									\
 									\
 static int emit_##name##_x86(u8 *image, u32 *off, bool emit,		\
-			     u64 payload, const struct bpf_prog *prog)	\
+			     u64 payload, const struct bpf_prog *prog,	\
+			     const u8 *final_ip)			\
 {									\
 	return emit_x86_alu(image, off, emit, payload, prog, width,	\
 			    bpf_op, rr_opcode, imm_group);		\
@@ -1284,7 +1285,8 @@ static int instantiate_##name(u64 payload, struct bpf_insn *insn_buf)	\
 }									\
 									\
 static int emit_##name##_x86(u8 *image, u32 *off, bool emit,		\
-			     u64 payload, const struct bpf_prog *prog)	\
+			     u64 payload, const struct bpf_prog *prog,	\
+			     const u8 *final_ip)			\
 {									\
 	return emit_x86_alu_narrow(image, off, emit, payload, prog,	\
 				   width, bpf_op, rr_opcode, imm_group);	\
@@ -1408,7 +1410,8 @@ static int emit_xorb_sib_x86(u8 *image, u32 *off, bool emit,
 }
 
 static int emit_xorb_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			 const struct bpf_prog *prog)
+			 const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	struct kinsn_x86_alu_payload decoded;
 	int err;
@@ -1432,7 +1435,8 @@ static int emit_xorb_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_xorw_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			 const struct bpf_prog *prog)
+			 const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	struct kinsn_x86_alu_payload decoded;
 	int err;
@@ -1448,7 +1452,8 @@ static int emit_xorw_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_incb_x86(u8 *image, u32 *off, bool emit,
-			 u64 payload, const struct bpf_prog *prog)
+			 u64 payload, const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	struct kinsn_x86_alu_payload decoded;
 	u8 buf[4];
@@ -1510,19 +1515,22 @@ static int emit_inc_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_incl_x86(u8 *image, u32 *off, bool emit,
-			 u64 payload, const struct bpf_prog *prog)
+			 u64 payload, const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_inc_x86(image, off, emit, payload, prog, false);
 }
 
 static int emit_incq_x86(u8 *image, u32 *off, bool emit,
-			 u64 payload, const struct bpf_prog *prog)
+			 u64 payload, const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_inc_x86(image, off, emit, payload, prog, true);
 }
 
 static int emit_sbbl_x86(u8 *image, u32 *off, bool emit,
-			 u64 payload, const struct bpf_prog *prog)
+			 u64 payload, const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	struct kinsn_x86_alu_payload decoded;
 	u8 buf[8];
@@ -1552,7 +1560,8 @@ static int emit_sbbl_x86(u8 *image, u32 *off, bool emit,
 }
 
 static int emit_divl_x86(u8 *image, u32 *off, bool emit,
-			 u64 payload, const struct bpf_prog *prog)
+			 u64 payload, const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	struct kinsn_x86_alu_payload decoded;
 	u8 buf[4];

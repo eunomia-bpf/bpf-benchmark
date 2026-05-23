@@ -1,0 +1,9 @@
+{
+  "completed_benchmarks": 1,
+  "current_benchmark": null,
+  "current_benchmark_index": null,
+  "current_benchmark_record": null,
+  "error_message": "helper_chain_simple: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec run-native-kernel --program /artifacts/user/stage2-programs/x86_64/helper_chain_simple.bpf.o --native-program /artifacts/user/stage2-programs/x86_64/helper_chain_simple.native.o --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem --io-mode packet --input-size 64 --inner-repeat 100000 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260523_035611_370120/details/jit_dumps/helper_chain_simple__native_kernel__sample00.jited.bin\nnative-link: entry=helper_chain_simple (137 bytes), 1 reachable symbol(s) total\n  - helper_chain_simple (vaddr 0x0, 137 bytes) [entry]\nnative-link: wrote proof object 127 bytes, 6 reloc(s) -> /tmp/native_kernel_link_cache/b1b171630bd33a9a.tmp.1896.proof.o\nnative-link: entry=helper_chain_simple (127 bytes), 1 reachable symbol(s) total\n  - helper_chain_simple (vaddr 0x0, 127 bytes) [entry]\nnative-link: wrote 133 bytes -> /tmp/native_kernel_link_cache/b1b171630bd33a9a.tmp.1896.blob.bin (4 relocs)\nnative-link: wrote 4 relocs -> /tmp/native_kernel_link_cache/b1b171630bd33a9a.tmp.1896.relocs.bin\nnative-link: wrote 2 map patch site(s) -> /tmp/native_kernel_link_cache/b1b171630bd33a9a.tmp.1896.map-patches.tsv\nnative-link: wrote ABI metadata -> /tmp/native_kernel_link_cache/b1b171630bd33a9a.tmp.1896.abi.tsv\nbpf_prog_load (native_lab stub): Unknown error 524\nverifier log:\nprocessed 11 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+  "status": "error",
+  "total_benchmarks": 1
+}

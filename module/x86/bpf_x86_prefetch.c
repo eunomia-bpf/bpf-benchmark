@@ -68,7 +68,8 @@ static void emit_prefetcht0_mem(u8 *buf, u32 *len, u8 base_reg)
 }
 
 static int emit_prefetcht0_x86(u8 *image, u32 *off, bool emit,
-			     u64 payload, const struct bpf_prog *prog)
+			     u64 payload, const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	u8 ptr_reg;
 	u8 buf[6];

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import platform
+import json
 import re
 import select
 import shlex
@@ -18,10 +19,24 @@ from pathlib import Path
 from typing import Iterator, Mapping, Sequence
 
 from . import run_command, tail_text, which
-from .benchmark_net import BENCHMARK_IFACE, BENCHMARK_NETNS, BENCHMARK_PEER_IFACE_IP
+from .benchmark_net import (
+    BENCHMARK_IFACE,
+    BENCHMARK_IFACE_CIDR,
+    BENCHMARK_NETNS,
+    BENCHMARK_PEER_IFACE,
+    BENCHMARK_PEER_IFACE_IP,
+)
+from .kernel_modules import kernel_module_is_builtin, load_kernel_module
+
+_PKTGEN_THREAD = "/proc/net/pktgen/kpktgend_0"
+_PKTGEN_CTRL = "/proc/net/pktgen/pgctrl"
+_PKTGEN_CLONE_SKB = 1000
 
 _CILIUM_ENDPOINT_NAMESPACES = ("bpfbench-cepa", "bpfbench-cepb")
+_CILIUM_ENDPOINT_HOST_IFACES = ("lxcbench0", "lxcbench1")
 _CILIUM_ENDPOINT_IFACE = "eth0"
+_CILIUM_PLAIN_ENDPOINT_IPV4S = ("10.244.0.10", "10.244.0.11")
+_CILIUM_PLAIN_ENDPOINT_GATEWAYS = ("10.244.0.1", "10.244.0.2")
 
 
 def resolve_workload_tool(name: str) -> str:
@@ -218,9 +233,60 @@ print(sent)
 """
 
 
+def _ensure_kernel_module_loaded(module_name: str) -> None:
+    normalized = module_name.replace("-", "_")
+    if (Path("/sys/module") / normalized).exists():
+        return
+    if kernel_module_is_builtin(module_name):
+        return
+    load_kernel_module(module_name)
+    if (Path("/sys/module") / normalized).exists():
+        return
+    if kernel_module_is_builtin(module_name):
+        return
+    raise RuntimeError(f"kernel module {module_name} still is not resident after modprobe")
+
+
+def _shell_write(path: str, line: str) -> None:
+    run_command(["sh", "-c", f"printf '%s\\n' {shlex.quote(line)} > {shlex.quote(path)}"])
+
+
+def _read_text(path: str) -> str:
+    return run_command(["cat", path]).stdout or ""
+
+
+def _link_mac(name: str, *, namespace: str | None = None) -> str:
+    command = ["ip", "-j"]
+    if namespace is not None:
+        command += ["-n", namespace]
+    command += ["link", "show", "dev", name]
+    payload = json.loads(run_command(command).stdout)
+    if not isinstance(payload, list) or not payload or not isinstance(payload[0], dict):
+        raise RuntimeError(f"could not read link metadata for {name}")
+    address = str(payload[0].get("address") or "").strip()
+    if not address:
+        raise RuntimeError(f"link {name} has no MAC address")
+    return address
+
+
+def _link_exists(name: str) -> bool:
+    return run_command(["ip", "link", "show", "dev", name], check=False).returncode == 0
+
+
+def _delete_link_if_exists(name: str) -> None:
+    if _link_exists(name):
+        run_command(["ip", "link", "delete", "dev", name], check=False)
+
+
+def _delete_netns_if_exists(namespace: str) -> None:
+    if _netns_exists(namespace):
+        run_command(["ip", "netns", "delete", namespace], check=False)
+
+
 @dataclass(frozen=True)
 class _CiliumEndpoint:
     namespace: str
+    host_if: str
     ipv4: str
     gateway: str
 
@@ -798,15 +864,66 @@ def _namespace_default_gateway(namespace: str) -> str | None:
 
 def _cilium_endpoint_topology() -> tuple[_CiliumEndpoint, _CiliumEndpoint] | None:
     endpoints: list[_CiliumEndpoint] = []
-    for namespace in _CILIUM_ENDPOINT_NAMESPACES:
+    for namespace, host_if in zip(_CILIUM_ENDPOINT_NAMESPACES, _CILIUM_ENDPOINT_HOST_IFACES, strict=True):
         if not _netns_exists(namespace):
+            return None
+        if not _link_exists(host_if):
             return None
         ipv4 = _namespace_ipv4(namespace, _CILIUM_ENDPOINT_IFACE)
         gateway = _namespace_default_gateway(namespace)
         if not ipv4 or not gateway:
             return None
-        endpoints.append(_CiliumEndpoint(namespace=namespace, ipv4=ipv4, gateway=gateway))
+        endpoints.append(_CiliumEndpoint(namespace=namespace, host_if=host_if, ipv4=ipv4, gateway=gateway))
     return endpoints[0], endpoints[1]
+
+
+def _cleanup_plain_cilium_endpoint_topology() -> None:
+    for host_if in _CILIUM_ENDPOINT_HOST_IFACES:
+        _delete_link_if_exists(host_if)
+    for namespace in _CILIUM_ENDPOINT_NAMESPACES:
+        _delete_netns_if_exists(namespace)
+
+
+def _setup_plain_cilium_endpoint_topology() -> tuple[_CiliumEndpoint, _CiliumEndpoint]:
+    _cleanup_plain_cilium_endpoint_topology()
+    run_command(["sysctl", "-qw", "net.ipv4.ip_forward=1"])
+    endpoints: list[_CiliumEndpoint] = []
+    for namespace, host_if, ipv4, gateway in zip(
+        _CILIUM_ENDPOINT_NAMESPACES,
+        _CILIUM_ENDPOINT_HOST_IFACES,
+        _CILIUM_PLAIN_ENDPOINT_IPV4S,
+        _CILIUM_PLAIN_ENDPOINT_GATEWAYS,
+        strict=True,
+    ):
+        peer = f"{host_if}p"
+        run_command(["ip", "netns", "add", namespace])
+        run_command(["ip", "link", "add", "dev", host_if, "type", "veth", "peer", "name", peer])
+        run_command(["ip", "link", "set", "dev", peer, "netns", namespace])
+        run_command(["ip", "addr", "replace", f"{gateway}/32", "dev", host_if])
+        run_command(["ip", "link", "set", "dev", host_if, "up"])
+        run_command(["sysctl", "-qw", f"net.ipv4.conf.{host_if}.rp_filter=0"])
+        run_command(["ip", "-n", namespace, "link", "set", "dev", peer, "name", _CILIUM_ENDPOINT_IFACE])
+        run_command(["ip", "-n", namespace, "link", "set", "dev", "lo", "up"])
+        run_command(["ip", "-n", namespace, "link", "set", "dev", _CILIUM_ENDPOINT_IFACE, "up"])
+        run_command(["ip", "-n", namespace, "addr", "replace", f"{ipv4}/32", "dev", _CILIUM_ENDPOINT_IFACE])
+        run_command(["ip", "-n", namespace, "route", "replace", f"{gateway}/32", "dev", _CILIUM_ENDPOINT_IFACE, "scope", "link"])
+        run_command(["ip", "-n", namespace, "route", "replace", "default", "via", gateway, "dev", _CILIUM_ENDPOINT_IFACE])
+        run_command(["ip", "route", "replace", f"{ipv4}/32", "dev", host_if])
+        endpoints.append(_CiliumEndpoint(namespace=namespace, host_if=host_if, ipv4=ipv4, gateway=gateway))
+    return endpoints[0], endpoints[1]
+
+
+@contextmanager
+def _cilium_endpoint_pktgen_topology() -> Iterator[tuple[_CiliumEndpoint, _CiliumEndpoint]]:
+    existing = _cilium_endpoint_topology()
+    if existing is not None:
+        yield existing
+        return
+    endpoints = _setup_plain_cilium_endpoint_topology()
+    try:
+        yield endpoints
+    finally:
+        _cleanup_plain_cilium_endpoint_topology()
 
 
 def _run_wrk_http_load(
@@ -891,6 +1008,247 @@ def _run_udp_burst(host: str, port: int, seconds: int, *, namespace: str | None 
         stderr=completed.stderr or "",
         config={"tool": "python-udp-client", "target_host": host,
                 "target_port": int(port), "namespace": namespace},
+    )
+
+
+def _netns_shell_write(namespace: str, path: str, line: str) -> None:
+    run_command(
+        ["ip", "netns", "exec", namespace, "sh", "-c", f"printf '%s\\n' {shlex.quote(line)} > {shlex.quote(path)}"]
+    )
+
+
+def _netns_read_text(namespace: str, path: str) -> str:
+    return run_command(["ip", "netns", "exec", namespace, "cat", path]).stdout or ""
+
+
+def _run_namespaced_pktgen_udp(
+    duration_s: int | float,
+    *,
+    namespace: str,
+    iface: str,
+    src_ip: str,
+    dst_ip: str,
+    src_mac: str,
+    dst_mac: str,
+    dst_port: int,
+    workload_name: str,
+    clone_skb: int = _PKTGEN_CLONE_SKB,
+    thread_index: int = 0,
+) -> WorkloadResult:
+    _ensure_kernel_module_loaded("pktgen")
+    seconds = max(1, int(round(float(duration_s))))
+    device_path = f"/proc/net/pktgen/{iface}"
+    thread_path = f"/proc/net/pktgen/kpktgend_{int(thread_index)}"
+    _netns_shell_write(namespace, _PKTGEN_CTRL, "reset")
+    _netns_shell_write(namespace, thread_path, "rem_device_all")
+    _netns_shell_write(namespace, thread_path, f"add_device {iface}")
+    for command in (
+        "flag !SHARED",
+        f"clone_skb {int(clone_skb)}",
+        "burst 1",
+        "count 0",
+        "delay 0",
+        "xmit_mode start_xmit",
+        "pkt_size 64",
+        f"src_min {src_ip}",
+        f"src_max {src_ip}",
+        f"dst {dst_ip}",
+        f"dst_max {dst_ip}",
+        f"src_mac {src_mac}",
+        f"dst_mac {dst_mac}",
+        "udp_src_min 1",
+        "udp_src_max 65535",
+        f"udp_dst_min {int(dst_port)}",
+        f"udp_dst_max {int(dst_port)}",
+        "flows 65535",
+        "flowlen 1",
+        "clear_counters",
+    ):
+        _netns_shell_write(namespace, device_path, command)
+    start_command = [
+        "ip",
+        "netns",
+        "exec",
+        namespace,
+        "sh",
+        "-c",
+        f"printf '%s\\n' start > {shlex.quote(_PKTGEN_CTRL)}",
+    ]
+    start = time.monotonic()
+    process = subprocess.Popen(start_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    try:
+        time.sleep(seconds)
+        _netns_shell_write(namespace, _PKTGEN_CTRL, "stop")
+        stdout, stderr = process.communicate()
+    except BaseException:
+        if process.poll() is None:
+            try:
+                _netns_shell_write(namespace, _PKTGEN_CTRL, "stop")
+            finally:
+                process.kill()
+        raise
+    elapsed = time.monotonic() - start
+    if process.returncode != 0:
+        raise RuntimeError(f"{workload_name} failed: {tail_text(stderr or stdout)}")
+    device_state = _netns_read_text(namespace, device_path)
+    return _record_run(
+        workload_name=workload_name,
+        command=start_command,
+        returncode=int(process.returncode or 0),
+        duration_s=elapsed,
+        stdout=device_state,
+        stderr=stderr or "",
+        config={
+            "tool": "kernel_pktgen",
+            "namespace": namespace,
+            "iface": iface,
+            "src_ip": src_ip,
+            "dst_ip": dst_ip,
+            "dst_port": int(dst_port),
+            "pkt_size": 64,
+            "flows": 65535,
+            "clone_skb": int(clone_skb),
+        },
+    )
+
+
+def run_cilium_endpoint_pktgen_load(
+    duration_s: int | float,
+    *,
+    network_device: str | None = None,
+) -> WorkloadResult:
+    if network_device and str(network_device).strip() != BENCHMARK_IFACE:
+        raise RuntimeError(f"cilium_endpoint_pktgen requires benchmark interface {BENCHMARK_IFACE}")
+    with _cilium_endpoint_pktgen_topology() as (endpoint_a, endpoint_b):
+        directions = (
+            (endpoint_a, endpoint_b, "cilium_endpoint_pktgen_forward"),
+            (endpoint_b, endpoint_a, "cilium_endpoint_pktgen_reverse"),
+        )
+        results: list[WorkloadResult | None] = [None, None]
+        errors: list[BaseException] = []
+
+        def run_direction(index: int, src: _CiliumEndpoint, dst: _CiliumEndpoint, name: str) -> None:
+            try:
+                results[index] = _run_namespaced_pktgen_udp(
+                    duration_s,
+                    namespace=src.namespace,
+                    iface=_CILIUM_ENDPOINT_IFACE,
+                    src_ip=src.ipv4,
+                    dst_ip=dst.ipv4,
+                    src_mac=_link_mac(_CILIUM_ENDPOINT_IFACE, namespace=src.namespace),
+                    dst_mac=_link_mac(src.host_if),
+                    dst_port=18081,
+                    workload_name=name,
+                    clone_skb=0,
+                    thread_index=index,
+                )
+            except BaseException as exc:
+                errors.append(exc)
+
+        threads = [
+            threading.Thread(target=run_direction, args=(index, src, dst, name))
+            for index, (src, dst, name) in enumerate(directions)
+        ]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+        if errors:
+            raise RuntimeError("; ".join(str(error) for error in errors))
+        components = tuple(result for result in results if result is not None)
+        if len(components) != len(directions):
+            raise RuntimeError("cilium endpoint pktgen did not produce every direction result")
+    return _composite(
+        workload_name="cilium_endpoint_pktgen",
+        components=components,
+        duration_s=max(component.duration_s for component in components),
+        config={"path": "bidirectional-endpoint-to-endpoint"},
+    )
+
+
+def run_network_pktgen_udp_load(
+    duration_s: int | float,
+    *,
+    network_device: str | None = None,
+) -> WorkloadResult:
+    """Kernel pktgen UDP flood through the benchmark veth.
+
+    This is the high packet-rate Cilium workload. It avoids wrk/HTTP/netem
+    latency so the measured throughput is dominated by packets traversing the
+    Cilium TC/XDP datapath rather than userspace request handling.
+    """
+    if str(network_device or "").strip() != BENCHMARK_IFACE:
+        raise RuntimeError(f"network_pktgen_udp requires benchmark interface {BENCHMARK_IFACE}")
+    from .app_runners.cilium import _ensure_benchmark_interface
+
+    _ensure_benchmark_interface()
+    _ensure_kernel_module_loaded("pktgen")
+    seconds = max(1, int(round(float(duration_s))))
+    src_ip = BENCHMARK_IFACE_CIDR.split("/", 1)[0]
+    src_mac = _link_mac(BENCHMARK_IFACE)
+    dst_mac = _link_mac(BENCHMARK_PEER_IFACE, namespace=BENCHMARK_NETNS)
+    device_path = f"/proc/net/pktgen/{BENCHMARK_IFACE}"
+    _shell_write(_PKTGEN_CTRL, "reset")
+    _shell_write(_PKTGEN_THREAD, "rem_device_all")
+    _shell_write(_PKTGEN_THREAD, f"add_device {BENCHMARK_IFACE}")
+    for command in (
+        "flag !SHARED",
+        f"clone_skb {_PKTGEN_CLONE_SKB}",
+        "burst 1",
+        "count 0",
+        "delay 0",
+        "xmit_mode start_xmit",
+        "pkt_size 64",
+        f"src_min {src_ip}",
+        f"src_max {src_ip}",
+        f"dst {BENCHMARK_PEER_IFACE_IP}",
+        f"dst_max {BENCHMARK_PEER_IFACE_IP}",
+        f"src_mac {src_mac}",
+        f"dst_mac {dst_mac}",
+        "udp_src_min 1",
+        "udp_src_max 65535",
+        "udp_dst_min 18081",
+        "udp_dst_max 18081",
+        "flows 65535",
+        "flowlen 1",
+        "clear_counters",
+    ):
+        _shell_write(device_path, command)
+    start_command = ["sh", "-c", f"printf '%s\\n' start > {shlex.quote(_PKTGEN_CTRL)}"]
+    start = time.monotonic()
+    process = subprocess.Popen(start_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    try:
+        time.sleep(seconds)
+        _shell_write(_PKTGEN_CTRL, "stop")
+        stdout, stderr = process.communicate()
+    except BaseException:
+        if process.poll() is None:
+            try:
+                _shell_write(_PKTGEN_CTRL, "stop")
+            finally:
+                process.kill()
+        raise
+    elapsed = time.monotonic() - start
+    if process.returncode != 0:
+        raise RuntimeError(f"network pktgen workload failed: {tail_text(stderr or stdout)}")
+    device_state = _read_text(device_path)
+    return _record_run(
+        workload_name="network_pktgen_udp",
+        command=start_command,
+        returncode=int(process.returncode or 0),
+        duration_s=elapsed,
+        stdout=device_state,
+        stderr=stderr or "",
+        config={
+            "tool": "kernel_pktgen",
+            "iface": BENCHMARK_IFACE,
+            "src_ip": src_ip,
+            "dst_ip": BENCHMARK_PEER_IFACE_IP,
+            "dst_port": 18081,
+            "pkt_size": 64,
+            "flows": 65535,
+            "clone_skb": _PKTGEN_CLONE_SKB,
+        },
     )
 
 
@@ -1394,6 +1752,10 @@ def run_named_workload(
         return run_xdp_traffic_load(seconds, network_device=network_device)
     if kind == "network_lossy_multi":
         return run_network_lossy_multi_load(seconds, network_device=network_device)
+    if kind == "cilium_endpoint_pktgen":
+        return run_cilium_endpoint_pktgen_load(seconds, network_device=network_device)
+    if kind == "network_pktgen_udp":
+        return run_network_pktgen_udp_load(seconds, network_device=network_device)
     if kind in {"fio", "fio_randrw"}:
         return run_file_io(seconds)
     if kind == "noop":

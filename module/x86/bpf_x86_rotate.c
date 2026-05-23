@@ -389,7 +389,8 @@ static int emit_rol_imm_x86(u8 *image, u32 *off, bool emit,
 }
 
 static int emit_rotate32_x86(u8 *image, u32 *off, bool emit,
-			     u64 payload, const struct bpf_prog *prog)
+			     u64 payload, const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	u8 buf[16];
 	u8 dst_reg, src_reg, shift;
@@ -453,13 +454,15 @@ static int emit_rol_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_rolq_x86(u8 *image, u32 *off, bool emit,
-			 u64 payload, const struct bpf_prog *prog)
+			 u64 payload, const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_rol_x86(image, off, emit, payload, prog, 64);
 }
 
 static int emit_roll_x86(u8 *image, u32 *off, bool emit,
-			 u64 payload, const struct bpf_prog *prog)
+			 u64 payload, const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_rol_x86(image, off, emit, payload, prog, 32);
 }

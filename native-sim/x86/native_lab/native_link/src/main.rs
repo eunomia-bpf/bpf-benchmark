@@ -66,7 +66,15 @@ const X86_CPU_NUMBER_HELPER_KEY: &str = "__native_x86_cpu_number";
 const X86_THIS_CPU_OFF_HELPER_KEY: &str = "__native_x86_this_cpu_off";
 const ARM64_THREAD_INFO_CPU_OFFSET_HELPER_KEY: &str = "__native_arm64_thread_info_cpu_offset";
 const ARM64_RETURN_TRAMPOLINE_SYMBOL: &str = "__native_link_arm64_ret_trampoline";
+const NATIVE_LAB_RELOC_HELPER_CALL_RAX: u32 = 1;
 const A64_NOP: u32 = 0xd503_201f;
+
+const BPF_JMP_CALL: u8 = 0x85;
+const BPF_PSEUDO_CALL: u8 = 1;
+const BPF_PSEUDO_KFUNC_CALL: u8 = 2;
+const BPF_PSEUDO_KINSN_CALL: u8 = 4;
+const BPF_FUNC_MAP_LOOKUP_ELEM: i32 = 1;
+const BPF_FUNC_GET_SMP_PROCESSOR_ID: i32 = 8;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -103,10 +111,25 @@ struct Args {
 
     /// BPF helper to kernel-address mapping. Repeatable.
     /// Format: NAME=HEXADDR (e.g. bpf_ktime_get_ns=0xffffffff81234567).
-    /// Helper call sites against listed names are rewritten into
-    /// range-independent absolute-register calls.
+    /// Helper call sites against listed names are rewritten into relocatable
+    /// helper-call slots. Ordinary BPF helper targets should come from
+    /// --oracle-*; this option is for non-helper implementation details such
+    /// as per-cpu symbols used by inline lowerings.
     #[arg(long = "helper", value_name = "NAME=ADDR")]
     helpers: Vec<String>,
+
+    /// Companion program kernel JIT image used as the helper-call oracle.
+    #[arg(long = "oracle-jited", value_name = "PATH")]
+    oracle_jited: Option<PathBuf>,
+
+    /// Base address reported in jited_ksyms[0] for --oracle-jited.
+    #[arg(long = "oracle-jit-base", value_name = "ADDR")]
+    oracle_jit_base: Option<String>,
+
+    /// Companion program translated BPF image used to align helper call
+    /// offsets with native call targets in --oracle-jited.
+    #[arg(long = "oracle-xlated", value_name = "PATH")]
+    oracle_xlated: Option<PathBuf>,
 
     /// BPF map symbol to kernel-pointer mapping. Repeatable.
     /// Format: NAME=HEXADDR. Each GOTPCREL/PC32 relocation against the
@@ -324,6 +347,302 @@ fn parse_u32_auto(s: &str, label: &str) -> Result<u32> {
     u32::try_from(value).map_err(|_| anyhow!("{label} does not fit u32: {value}"))
 }
 
+fn lookup_site_is_late_inlined(site: Option<&LookupSiteSpec>) -> bool {
+    matches!(
+        site.map(|s| s.kind),
+        Some(LookupKind::Array | LookupKind::PerCpuArray)
+    )
+}
+
+fn collect_xlated_call_imms(
+    xlated: &[u8],
+    lookup_sites: &[LookupSiteSpec],
+) -> Result<Vec<i32>> {
+    if xlated.len() % 8 != 0 {
+        bail!("--oracle-xlated has truncated BPF instructions");
+    }
+    let mut calls = Vec::new();
+    let mut lookup_ordinal = 0usize;
+    for insn in xlated.chunks_exact(8) {
+        let code = insn[0];
+        if code != BPF_JMP_CALL {
+            continue;
+        }
+        let src_reg = insn[1] >> 4;
+        if matches!(
+            src_reg,
+            BPF_PSEUDO_CALL | BPF_PSEUDO_KFUNC_CALL | BPF_PSEUDO_KINSN_CALL
+        ) {
+            continue;
+        }
+        if src_reg != 0 {
+            bail!("--oracle-xlated has unsupported helper call src_reg={src_reg}");
+        }
+        let imm = i32::from_le_bytes([insn[4], insn[5], insn[6], insn[7]]);
+        match imm {
+            BPF_FUNC_GET_SMP_PROCESSOR_ID => continue,
+            BPF_FUNC_MAP_LOOKUP_ELEM => {
+                let site = lookup_sites.get(lookup_ordinal);
+                lookup_ordinal += 1;
+                if lookup_site_is_late_inlined(site) {
+                    continue;
+                }
+            }
+            _ => {}
+        }
+        calls.push(imm);
+    }
+    Ok(calls)
+}
+
+fn target_is_inside_jit_image(target: u64, base: u64, len: usize) -> bool {
+    let Ok(len64) = u64::try_from(len) else {
+        return false;
+    };
+    let Some(end) = base.checked_add(len64) else {
+        return false;
+    };
+    target >= base && target < end
+}
+
+fn add_signed_u64(base: u64, delta: i64) -> Result<u64> {
+    Ok(if delta >= 0 {
+        base.wrapping_add(delta as u64)
+    } else {
+        base.wrapping_sub(delta.unsigned_abs())
+    })
+}
+
+fn sign_extend_u64(value: u64, bits: u32) -> i64 {
+    let sign = 1u64 << (bits - 1);
+    let mask = (1u64 << bits) - 1;
+    ((value & mask) ^ sign).wrapping_sub(sign) as i64
+}
+
+fn decode_x86_external_call_targets(jited: &[u8], jit_base: u64) -> Result<Vec<u64>> {
+    let mut targets = Vec::new();
+    let mut decoder = Decoder::with_ip(64, jited, jit_base, DecoderOptions::NONE);
+    while decoder.can_decode() {
+        let insn = decoder.decode();
+        if !insn.is_call_near() {
+            continue;
+        }
+        let target = insn.near_branch_target();
+        if !target_is_inside_jit_image(target, jit_base, jited.len()) {
+            targets.push(target);
+        }
+    }
+    Ok(targets)
+}
+
+#[derive(Clone, Copy, Debug, Default)]
+struct Arm64RegValue {
+    valid: bool,
+    value: u64,
+}
+
+fn arm64_decode_mov_wide(word: u32) -> Option<(usize, u64, bool)> {
+    let kind = word & 0xff80_0000;
+    if !matches!(kind, 0x9280_0000 | 0xd280_0000 | 0xf280_0000) {
+        return None;
+    }
+    let rd = (word & 0x1f) as usize;
+    let shift = ((word >> 21) & 0x3) * 16;
+    let imm = u64::from((word >> 5) & 0xffff);
+    let is_movk = kind == 0xf280_0000;
+    let value = if kind == 0x9280_0000 {
+        !(imm << shift)
+    } else {
+        imm << shift
+    };
+    Some((rd, value, is_movk))
+}
+
+fn decode_arm64_external_call_targets(jited: &[u8], jit_base: u64) -> Result<Vec<u64>> {
+    if jited.len() % 4 != 0 {
+        bail!("--oracle-jited arm64 image length is not 4-byte aligned");
+    }
+    let mut targets = Vec::new();
+    let mut regs = [Arm64RegValue::default(); 32];
+    for (idx, bytes) in jited.chunks_exact(4).enumerate() {
+        let off = u64::try_from(idx)
+            .context("arm64 JIT instruction index overflow")?
+            .checked_mul(4)
+            .ok_or_else(|| anyhow!("arm64 JIT offset overflow"))?;
+        let word = u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]);
+        if let Some((rd, value, is_movk)) = arm64_decode_mov_wide(word) {
+            let shift = ((word >> 21) & 0x3) * 16;
+            if is_movk {
+                if regs[rd].valid {
+                    let mask = 0xffffu64 << shift;
+                    regs[rd].value = (regs[rd].value & !mask) | value;
+                }
+            } else {
+                regs[rd] = Arm64RegValue { valid: true, value };
+            }
+            continue;
+        }
+        if (word & 0xfc00_0000) == 0x9400_0000 {
+            let disp = sign_extend_u64(u64::from(word & 0x03ff_ffff), 26) << 2;
+            let pc = jit_base
+                .checked_add(off)
+                .ok_or_else(|| anyhow!("arm64 JIT call IP overflow"))?;
+            let target = add_signed_u64(pc, disp)?;
+            if !target_is_inside_jit_image(target, jit_base, jited.len()) {
+                targets.push(target);
+            }
+            continue;
+        }
+        if (word & 0xffff_fc1f) == 0xd63f_0000 {
+            let rn = ((word >> 5) & 0x1f) as usize;
+            if regs[rn].valid && !target_is_inside_jit_image(regs[rn].value, jit_base, jited.len())
+            {
+                targets.push(regs[rn].value);
+            }
+            regs[rn].valid = false;
+        }
+    }
+    Ok(targets)
+}
+
+fn decode_external_call_targets(
+    arch: object::Architecture,
+    jited: &[u8],
+    jit_base: u64,
+) -> Result<Vec<u64>> {
+    match arch {
+        object::Architecture::X86_64 => decode_x86_external_call_targets(jited, jit_base),
+        object::Architecture::Aarch64 => decode_arm64_external_call_targets(jited, jit_base),
+        _ => bail!("unsupported oracle JIT arch: {arch:?}"),
+    }
+}
+
+fn match_jit_targets_to_xlated_calls(
+    jit_targets: &[u64],
+    xlated_call_imms: &[i32],
+) -> Result<Vec<u64>> {
+    if xlated_call_imms.is_empty() {
+        return Ok(Vec::new());
+    }
+    if jit_targets.len() < xlated_call_imms.len() {
+        bail!("companion JIT oracle found fewer native calls than xlated BPF calls");
+    }
+    for start in 0..jit_targets.len() {
+        let call_base = add_signed_u64(jit_targets[start], -i64::from(xlated_call_imms[0]))?;
+        let mut matched = Vec::with_capacity(xlated_call_imms.len());
+        matched.push(jit_targets[start]);
+        let mut next_jit = start + 1;
+        let mut ok = true;
+        for call_imm in xlated_call_imms.iter().skip(1) {
+            let expected = add_signed_u64(call_base, i64::from(*call_imm))?;
+            let mut found = false;
+            while next_jit < jit_targets.len() {
+                if jit_targets[next_jit] == expected {
+                    matched.push(jit_targets[next_jit]);
+                    next_jit += 1;
+                    found = true;
+                    break;
+                }
+                next_jit += 1;
+            }
+            if !found {
+                ok = false;
+                break;
+            }
+        }
+        if ok {
+            return Ok(matched);
+        }
+    }
+    bail!("companion JIT oracle could not align xlated BPF calls with native calls");
+}
+
+fn load_helper_call_oracle(
+    args: &Args,
+    arch: object::Architecture,
+    lookup_sites: &[LookupSiteSpec],
+) -> Result<Vec<u64>> {
+    match (
+        &args.oracle_jited,
+        &args.oracle_jit_base,
+        &args.oracle_xlated,
+    ) {
+        (None, None, None) => Ok(Vec::new()),
+        (Some(jited_path), Some(base_text), Some(xlated_path)) => {
+            let jited =
+                fs::read(jited_path).with_context(|| format!("read {}", jited_path.display()))?;
+            let xlated =
+                fs::read(xlated_path).with_context(|| format!("read {}", xlated_path.display()))?;
+            let jit_base = parse_u64_auto(base_text, "--oracle-jit-base")?;
+            let jit_targets = decode_external_call_targets(arch, &jited, jit_base)?;
+            let xlated_call_imms = collect_xlated_call_imms(&xlated, lookup_sites)?;
+            match_jit_targets_to_xlated_calls(&jit_targets, &xlated_call_imms)
+        }
+        _ => bail!(
+            "--oracle-jited, --oracle-jit-base, and --oracle-xlated must be supplied together"
+        ),
+    }
+}
+
+fn consume_oracle_target(
+    oracle_targets: &[u64],
+    next_oracle_target: &mut usize,
+    context: &str,
+) -> Result<Option<u64>> {
+    let Some(&target) = oracle_targets.get(*next_oracle_target) else {
+        return Ok(None);
+    };
+    *next_oracle_target += 1;
+    if target == 0 {
+        bail!("companion JIT oracle returned zero target for {context}");
+    }
+    Ok(Some(target))
+}
+
+fn resolve_site_target(
+    encoded_target: u64,
+    oracle_targets: &[u64],
+    next_oracle_target: &mut usize,
+    context: &str,
+) -> Result<u64> {
+    if let Some(oracle_target) = consume_oracle_target(oracle_targets, next_oracle_target, context)?
+    {
+        if encoded_target != 0 && encoded_target != oracle_target {
+            bail!(
+                "{context} target {encoded_target:#x} conflicts with companion JIT oracle target {oracle_target:#x}"
+            );
+        }
+        return Ok(oracle_target);
+    }
+    if encoded_target == 0 {
+        bail!("{context} has no target address and companion JIT oracle is exhausted");
+    }
+    Ok(encoded_target)
+}
+
+fn resolve_helper_target(
+    helper_name: &str,
+    helper_addrs: &HashMap<String, u64>,
+    oracle_targets: &[u64],
+    next_oracle_target: &mut usize,
+    context: &str,
+) -> Result<u64> {
+    if let Some(oracle_target) = consume_oracle_target(oracle_targets, next_oracle_target, context)?
+    {
+        if let Some(&encoded_target) = helper_addrs.get(helper_name) {
+            if encoded_target != oracle_target {
+                bail!(
+                    "helper {helper_name} target {encoded_target:#x} conflicts with companion JIT oracle target {oracle_target:#x}"
+                );
+            }
+        }
+        return Ok(oracle_target);
+    }
+    helper_addrs.get(helper_name).copied().ok_or_else(|| {
+        anyhow!("{context} has no helper address and companion JIT oracle is exhausted")
+    })
+}
+
 /// A side-band relocation record. The on-disk layout must stay in sync
 /// with `struct native_lab_reloc_record` in
 /// module/x86/bpf_x86_native_lab.c (offset:u32, kind:u32, target:u64 —
@@ -383,6 +702,11 @@ fn main() -> Result<()> {
     let map_addrs = parse_name_addr_args(&args.maps, "map")?;
     let lookup_sites = parse_lookup_sites(&args.lookup_sites)?;
     let update_sites = parse_update_sites(&args.update_sites)?;
+    let oracle_targets = if proof_mode {
+        Vec::new()
+    } else {
+        load_helper_call_oracle(&args, elf.architecture(), &lookup_sites)?
+    };
     let RewriteResult {
         blob,
         relocs,
@@ -423,6 +747,7 @@ fn main() -> Result<()> {
                 &map_addrs,
                 &lookup_sites,
                 &update_sites,
+                &oracle_targets,
                 proof_mode,
                 args.show,
             )?
@@ -457,6 +782,7 @@ fn main() -> Result<()> {
                 &map_addrs,
                 &lookup_sites,
                 &update_sites,
+                &oracle_targets,
                 proof_mode,
                 args.show,
             )?
@@ -860,6 +1186,11 @@ enum PatchKind {
     /// CALL rel32 to a discovered symbol: disp targets that symbol's new
     /// global offset in the blob.
     Call { target_symbol_address: u64 },
+    /// `movabs rax, target; call *rax` slot for a kernel helper/map target.
+    /// The module can rewrite it to `call rel32; nop...` after the blob lands
+    /// in executable memory, but keeps the absolute call when rel32 is out of
+    /// range.
+    HelperCallRax { target_addr: u64 },
     /// Rewritten `mov reg, [rip+GOT]` against a map symbol. The runner
     /// patches the immediate field with the live kernel map pointer.
     MapImmediate { name: String, imm_offset: usize },
@@ -1064,6 +1395,7 @@ fn rewrite_x86(
     map_addrs: &HashMap<String, u64>,
     lookup_sites: &[LookupSiteSpec],
     update_sites: &[UpdateSiteSpec],
+    oracle_targets: &[u64],
     proof_mode: bool,
     show: bool,
 ) -> Result<RewriteResult> {
@@ -1089,6 +1421,7 @@ fn rewrite_x86(
     let mut lookup_call_ordinal: HashMap<(u64, u64), usize> = HashMap::new();
     let mut lookup_call_counter: usize = 0;
     let mut update_call_counter: usize = 0;
+    let mut next_oracle_target: usize = 0;
     let mut resolved_helper_call_sites: HashSet<(u64, u64)> = HashSet::new();
     let mut resolved_got_relocations: HashSet<(u64, u64)> = HashSet::new();
 
@@ -1365,18 +1698,18 @@ fn rewrite_x86(
                             | LookupKind::Hash
                             | LookupKind::LruHash
                             | LookupKind::PerCpuHash => {
-                                if spec.target_addr == 0 {
-                                    bail!(
-                                        "x86 lookup-site {ordinal} is {:?} but has no target address",
-                                        spec.kind
-                                    );
-                                }
-                                push_x86_absolute_helper_call(
+                                let helper_addr = resolve_site_target(
+                                    spec.target_addr,
+                                    oracle_targets,
+                                    &mut next_oracle_target,
+                                    &format!("x86 lookup-site {ordinal} ({:?})", spec.kind),
+                                )?;
+                                push_x86_helper_call_reloc(
                                     &mut local,
                                     &mut kinds,
                                     &mut insn_local_ip,
                                     local_ip,
-                                    spec.target_addr,
+                                    helper_addr,
                                 )?;
                                 if matches!(spec.kind, LookupKind::Hash) {
                                     for ib in build_x86_hash_lookup_postcall(spec)? {
@@ -1423,6 +1756,14 @@ fn rewrite_x86(
                         if let Some(spec) = update_sites.get(ordinal) {
                             match spec.kind {
                                 UpdateKind::Array | UpdateKind::PerCpuArray => {
+                                    let _ = consume_oracle_target(
+                                        oracle_targets,
+                                        &mut next_oracle_target,
+                                        &format!(
+                                            "x86 update-site {ordinal} ({:?}) late inline",
+                                            spec.kind
+                                        ),
+                                    )?;
                                     for ib in build_x86_array_update(spec)? {
                                         push_x86_synthetic(
                                             &mut local,
@@ -1436,17 +1777,18 @@ fn rewrite_x86(
                                     continue;
                                 }
                                 UpdateKind::Call => {
-                                    if spec.target_addr == 0 {
-                                        bail!(
-                                            "x86 update-site {ordinal} is call but has no target address"
-                                        );
-                                    }
-                                    push_x86_absolute_helper_call(
+                                    let helper_addr = resolve_site_target(
+                                        spec.target_addr,
+                                        oracle_targets,
+                                        &mut next_oracle_target,
+                                        &format!("x86 update-site {ordinal}"),
+                                    )?;
+                                    push_x86_helper_call_reloc(
                                         &mut local,
                                         &mut kinds,
                                         &mut insn_local_ip,
                                         local_ip,
-                                        spec.target_addr,
+                                        helper_addr,
                                     )?;
                                     resolved_helper_call_sites.insert((sym.address, local_ip));
                                     continue;
@@ -1455,10 +1797,14 @@ fn rewrite_x86(
                         }
                     }
 
-                    let helper_addr = *helper_addrs
-                        .get(&name)
-                        .ok_or_else(|| anyhow!("missing x86 helper address: {name}"))?;
-                    push_x86_absolute_helper_call(
+                    let helper_addr = resolve_helper_target(
+                        &name,
+                        helper_addrs,
+                        oracle_targets,
+                        &mut next_oracle_target,
+                        &format!("x86 helper call {name}"),
+                    )?;
+                    push_x86_helper_call_reloc(
                         &mut local,
                         &mut kinds,
                         &mut insn_local_ip,
@@ -1584,6 +1930,13 @@ fn rewrite_x86(
         blob.extend_from_slice(&encoded.code_buffer);
     }
 
+    if !proof_mode && next_oracle_target != oracle_targets.len() {
+        bail!(
+            "companion JIT oracle has {} unused x86 helper target(s)",
+            oracle_targets.len() - next_oracle_target
+        );
+    }
+
     // Apply intra-blob Call patches first (cross-symbol direct calls);
     // those need only `sym_global_offset` which is already known.
     for p in &patches {
@@ -1619,6 +1972,26 @@ fn rewrite_x86(
                 map_patches.push(MapPatch {
                     name: name.clone(),
                     offset,
+                });
+            }
+            PatchKind::HelperCallRax { target_addr } => {
+                let offset = u32::try_from(p.global_offset)
+                    .map_err(|_| anyhow!("helper call reloc offset exceeds u32"))?;
+                if p.global_offset + 12 > blob.len()
+                    || blob[p.global_offset] != 0x48
+                    || blob[p.global_offset + 1] != 0xB8
+                    || blob[p.global_offset + 10] != 0xFF
+                    || blob[p.global_offset + 11] != 0xD0
+                {
+                    bail!(
+                        "helper call slot at off {:#x} did not encode as movabs rax; call rax",
+                        p.global_offset
+                    );
+                }
+                relocs.push(RelocRecord {
+                    offset,
+                    kind: NATIVE_LAB_RELOC_HELPER_CALL_RAX,
+                    target: *target_addr,
                 });
             }
             PatchKind::JmpEnd | PatchKind::Call { .. } => {}
@@ -2760,6 +3133,7 @@ fn rewrite_arm64(
     map_addrs: &HashMap<String, u64>,
     lookup_sites: &[LookupSiteSpec],
     update_sites: &[UpdateSiteSpec],
+    oracle_targets: &[u64],
     proof_mode: bool,
     show: bool,
 ) -> Result<RewriteResult> {
@@ -2771,6 +3145,7 @@ fn rewrite_arm64(
     let relocs = arm64_text_relocations(elf, included)?;
     let mut lookup_call_counter: usize = 0;
     let mut update_call_counter: usize = 0;
+    let mut next_oracle_target: usize = 0;
     let mut proof_relocs: Vec<ProofReloc> = Vec::new();
     let mut callee_saved_mask: u8 = 0;
     const A64_MOV_X7_X0: u32 = 0xaa00_03e7;
@@ -2889,6 +3264,7 @@ fn rewrite_arm64(
                             }
                         }
                         let mut helper_addr = helper_addrs.get(&reloc.target_name).copied();
+                        let mut helper_addr_from_site = false;
                         if reloc.target_name == "bpf_map_lookup_elem" && is_entry {
                             let ordinal = lookup_call_counter;
                             let map_name = reg_map_names[0].as_ref();
@@ -2915,20 +3291,22 @@ fn rewrite_arm64(
                                     continue;
                                 }
                                 LookupKind::Call => {
-                                    if spec.target_addr == 0 {
-                                        bail!(
-                                            "arm64 lookup-site {ordinal} is call but has no target address"
-                                        );
-                                    }
-                                    helper_addr = Some(spec.target_addr);
+                                    helper_addr = Some(resolve_site_target(
+                                        spec.target_addr,
+                                        oracle_targets,
+                                        &mut next_oracle_target,
+                                        &format!("arm64 lookup-site {ordinal} (call)"),
+                                    )?);
+                                    helper_addr_from_site = true;
                                 }
                                 LookupKind::Hash => {
-                                    if spec.target_addr == 0 {
-                                        bail!(
-                                            "arm64 lookup-site {ordinal} is hash but has no target address"
-                                        );
-                                    }
-                                    for word in arm64_helper_call_sequence(spec.target_addr)? {
+                                    let target_addr = resolve_site_target(
+                                        spec.target_addr,
+                                        oracle_targets,
+                                        &mut next_oracle_target,
+                                        &format!("arm64 lookup-site {ordinal} (hash)"),
+                                    )?;
+                                    for word in arm64_helper_call_sequence(target_addr)? {
                                         append_u32(&mut blob, word);
                                     }
                                     for word in build_arm64_hash_lookup_postcall(spec)? {
@@ -2938,12 +3316,13 @@ fn rewrite_arm64(
                                     continue;
                                 }
                                 LookupKind::LruHash => {
-                                    if spec.target_addr == 0 {
-                                        bail!(
-                                            "arm64 lookup-site {ordinal} is lru_hash but has no target address"
-                                        );
-                                    }
-                                    for word in arm64_helper_call_sequence(spec.target_addr)? {
+                                    let target_addr = resolve_site_target(
+                                        spec.target_addr,
+                                        oracle_targets,
+                                        &mut next_oracle_target,
+                                        &format!("arm64 lookup-site {ordinal} (lru_hash)"),
+                                    )?;
+                                    for word in arm64_helper_call_sequence(target_addr)? {
                                         append_u32(&mut blob, word);
                                     }
                                     for word in build_arm64_lru_hash_lookup_postcall(spec)? {
@@ -2953,12 +3332,13 @@ fn rewrite_arm64(
                                     continue;
                                 }
                                 LookupKind::PerCpuHash => {
-                                    if spec.target_addr == 0 {
-                                        bail!(
-                                            "arm64 lookup-site {ordinal} is percpu_hash but has no target address"
-                                        );
-                                    }
-                                    for word in arm64_helper_call_sequence(spec.target_addr)? {
+                                    let target_addr = resolve_site_target(
+                                        spec.target_addr,
+                                        oracle_targets,
+                                        &mut next_oracle_target,
+                                        &format!("arm64 lookup-site {ordinal} (percpu_hash)"),
+                                    )?;
+                                    for word in arm64_helper_call_sequence(target_addr)? {
                                         append_u32(&mut blob, word);
                                     }
                                     for word in build_arm64_percpu_hash_lookup_postcall(spec)? {
@@ -2983,6 +3363,14 @@ fn rewrite_arm64(
                                 let spec = &update_sites[site_index];
                                 match spec.kind {
                                     UpdateKind::Array | UpdateKind::PerCpuArray => {
+                                        let _ = consume_oracle_target(
+                                            oracle_targets,
+                                            &mut next_oracle_target,
+                                            &format!(
+                                                "arm64 update-site {ordinal} ({:?}) late inline",
+                                                spec.kind
+                                            ),
+                                        )?;
                                         for word in build_arm64_array_update(spec)? {
                                             append_u32(&mut blob, word);
                                         }
@@ -2990,23 +3378,34 @@ fn rewrite_arm64(
                                         continue;
                                     }
                                     UpdateKind::Call => {
-                                        if spec.target_addr == 0 {
-                                            bail!(
-                                                "arm64 update-site {ordinal} is call but has no target address"
-                                            );
-                                        }
-                                        helper_addr = Some(spec.target_addr);
+                                        helper_addr = Some(resolve_site_target(
+                                            spec.target_addr,
+                                            oracle_targets,
+                                            &mut next_oracle_target,
+                                            &format!("arm64 update-site {ordinal}"),
+                                        )?);
+                                        helper_addr_from_site = true;
                                     }
                                 }
                             }
                         }
-                        let helper_addr = helper_addr.ok_or_else(|| {
-                            anyhow!(
-                                "arm64 CALL26 in {} at byte offset {off:#x} targets unknown helper {}",
-                                sym.name,
-                                reloc.target_name
-                            )
-                        })?;
+                        let helper_addr = if helper_addr_from_site {
+                            helper_addr.ok_or_else(|| {
+                                anyhow!(
+                                    "arm64 CALL26 in {} at byte offset {off:#x} has empty site target for {}",
+                                    sym.name,
+                                    reloc.target_name
+                                )
+                            })?
+                        } else {
+                            resolve_helper_target(
+                                &reloc.target_name,
+                                helper_addrs,
+                                oracle_targets,
+                                &mut next_oracle_target,
+                                &format!("arm64 helper call {}", reloc.target_name),
+                            )?
+                        };
                         for word in arm64_helper_call_sequence(helper_addr)? {
                             append_u32(&mut blob, word);
                         }
@@ -3168,6 +3567,13 @@ fn rewrite_arm64(
             }
         }
         sym_end_word_offset.insert(sym.address, blob.len() / 4);
+    }
+
+    if !proof_mode && next_oracle_target != oracle_targets.len() {
+        bail!(
+            "companion JIT oracle has {} unused arm64 helper target(s)",
+            oracle_targets.len() - next_oracle_target
+        );
     }
 
     let mut map_literals: HashMap<String, usize> = HashMap::new();
@@ -4499,22 +4905,32 @@ fn declared_byte_chunks(bytes: &[u8]) -> Result<Vec<Instruction>> {
     bytes.chunks(16).map(declared_bytes).collect()
 }
 
-fn build_x86_absolute_helper_call(helper_addr: u64) -> Result<Instruction> {
-    let mut bytes = Vec::new();
-    append_x86_mov_reg_imm64(&mut bytes, Register::RAX, helper_addr)?;
-    bytes.extend_from_slice(&[0xFF, 0xD0]); // call rax
+fn build_x86_helper_call_rax_slot(helper_addr: u64) -> Result<Instruction> {
+    let mut bytes = Vec::with_capacity(12);
+    bytes.extend_from_slice(&[0x48, 0xB8]);
+    bytes.extend_from_slice(&helper_addr.to_le_bytes());
+    bytes.extend_from_slice(&[0xFF, 0xD0]);
     declared_bytes(&bytes)
 }
 
-fn push_x86_absolute_helper_call(
+fn push_x86_helper_call_reloc(
     local: &mut Vec<Instruction>,
     kinds: &mut Vec<Option<PatchKind>>,
     insn_local_ip: &mut Vec<u64>,
     local_ip: u64,
     helper_addr: u64,
 ) -> Result<()> {
-    let insn = build_x86_absolute_helper_call(helper_addr)?;
-    push_x86_replacement(local, kinds, insn_local_ip, local_ip, insn, None);
+    let insn = build_x86_helper_call_rax_slot(helper_addr)?;
+    push_x86_replacement(
+        local,
+        kinds,
+        insn_local_ip,
+        local_ip,
+        insn,
+        Some(PatchKind::HelperCallRax {
+            target_addr: helper_addr,
+        }),
+    );
     Ok(())
 }
 

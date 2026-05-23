@@ -27,7 +27,7 @@ MACRO_APP_DEFINITIONS: tuple[MacroAppDefinition, ...] = (
     # Interpreter loops drive samples into perf_unwind_<lang> programs;
     # stress-ng exercises perf_unwind_native (and Go-labels).
     MacroAppDefinition(name="otelcol-ebpf-profiler/profiling", runner="otelcol-ebpf-profiler", workload="otel_mixed_workload"),
-    MacroAppDefinition(name="cilium/agent", runner="cilium", workload="network_lossy_multi"),
+    MacroAppDefinition(name="cilium/agent", runner="cilium", workload="cilium_endpoint_pktgen"),
     MacroAppDefinition(name="tetragon/observer", runner="tetragon", workload="stress_ng_tetragon_policy_hot"),
     MacroAppDefinition(name="katran", runner="katran", workload="xdp_pktgen"),
     MacroAppDefinition(name="tracee/monitor", runner="tracee", workload="stress_ng_tracee_syscall_hot"),

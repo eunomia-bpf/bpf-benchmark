@@ -230,19 +230,22 @@ static int emit_movbe_indexed_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_movbe16_indexed_x86(u8 *image, u32 *off, bool emit, u64 payload,
-				const struct bpf_prog *prog)
+				const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_movbe_indexed_x86(image, off, emit, payload, prog, BPF_H);
 }
 
 static int emit_movbe32_indexed_x86(u8 *image, u32 *off, bool emit, u64 payload,
-				const struct bpf_prog *prog)
+				const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_movbe_indexed_x86(image, off, emit, payload, prog, BPF_W);
 }
 
 static int emit_movbe64_indexed_x86(u8 *image, u32 *off, bool emit, u64 payload,
-				const struct bpf_prog *prog)
+				const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_movbe_indexed_x86(image, off, emit, payload, prog, BPF_DW);
 }

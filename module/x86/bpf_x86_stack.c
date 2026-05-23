@@ -107,13 +107,15 @@ static int emit_stack_reg_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_popq_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			 const struct bpf_prog *prog)
+			 const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_stack_reg_x86(image, off, emit, payload, prog, 0x58);
 }
 
 static int emit_pushq_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			  const struct bpf_prog *prog)
+			  const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_stack_reg_x86(image, off, emit, payload, prog, 0x50);
 }

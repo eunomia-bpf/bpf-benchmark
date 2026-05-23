@@ -369,13 +369,15 @@ static int emit_lea_x86(u8 *image, u32 *off, bool emit,
 }
 
 static int emit_lea64_x86(u8 *image, u32 *off, bool emit,
-			  u64 payload, const struct bpf_prog *prog)
+			  u64 payload, const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_lea_x86(image, off, emit, payload, prog, true);
 }
 
 static int emit_lea32_x86(u8 *image, u32 *off, bool emit,
-			  u64 payload, const struct bpf_prog *prog)
+			  u64 payload, const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_lea_x86(image, off, emit, payload, prog, false);
 }

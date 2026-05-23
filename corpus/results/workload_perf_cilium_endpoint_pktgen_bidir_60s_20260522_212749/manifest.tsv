@@ -1,0 +1,3 @@
+app	setup	status	result_dir	log
+cilium/agent	workload_only	0	corpus/results/x86_kvm_corpus_20260523_043053_421385	corpus/results/workload_perf_cilium_endpoint_pktgen_bidir_60s_20260522_212749/cilium__workload_only.log
+cilium/agent	ebpf_no_state	0	corpus/results/x86_kvm_corpus_20260523_043702_423340	corpus/results/workload_perf_cilium_endpoint_pktgen_bidir_60s_20260522_212749/cilium__ebpf_no_state.log

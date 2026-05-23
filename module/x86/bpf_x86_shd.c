@@ -195,25 +195,29 @@ static int emit_shd_imm_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_shldl_imm_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			      const struct bpf_prog *prog)
+			      const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_shd_imm_x86(image, off, emit, payload, prog, false, true);
 }
 
 static int emit_shldq_imm_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			      const struct bpf_prog *prog)
+			      const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_shd_imm_x86(image, off, emit, payload, prog, true, true);
 }
 
 static int emit_shrdl_imm_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			      const struct bpf_prog *prog)
+			      const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_shd_imm_x86(image, off, emit, payload, prog, false, false);
 }
 
 static int emit_shrdq_imm_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			      const struct bpf_prog *prog)
+			      const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_shd_imm_x86(image, off, emit, payload, prog, true, false);
 }

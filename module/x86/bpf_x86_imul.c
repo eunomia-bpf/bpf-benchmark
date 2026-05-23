@@ -82,7 +82,8 @@ static int instantiate_imulq_rr(u64 payload, struct bpf_insn *insn_buf)
 }
 
 static int emit_imulq_rr_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			     const struct bpf_prog *prog)
+			     const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	u8 dst_reg, src_reg;
 	u8 buf[4];

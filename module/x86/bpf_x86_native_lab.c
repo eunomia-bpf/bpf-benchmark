@@ -56,17 +56,18 @@
 /*
  * Stage 2 side-band relocations:
  *
- * Userspace native-link can't compute disp32 for a `call rel32`
- * targeting a kernel helper, because that disp depends on where the BPF
- * JIT will splat the blob. The blob ships with disp32 == 0 placeholders
- * and a separate `relocs` array describing each patch site. After
- * memcpy'ing the blob bytes into the JIT image, emit_x86 walks the
- * relocs and rewrites each disp32 in place.
+ * Userspace native-link can't know whether a helper call can use rel32,
+ * because that depends on where the BPF JIT will splat the blob. The blob
+ * ships a range-independent `movabs rax, target; call *rax` slot and a
+ * separate `relocs` array describing each patch site. After memcpy'ing the
+ * blob bytes into the JIT image, emit_x86 patches the slot's target and
+ * opportunistically rewrites it to `call rel32; nop...` when the final
+ * target is in range.
  *
  * relocs are uploaded via a sibling debugfs file blob<N>.relocs whose
  * payload is a tightly packed array of `struct native_lab_reloc_record`.
  */
-#define NATIVE_LAB_RELOC_CALL_REL32	1
+#define NATIVE_LAB_RELOC_HELPER_CALL_RAX	1
 #define NATIVE_LAB_MAX_RELOCS		32
 #define NATIVE_LAB_ABI_RBX		(1U << 0)
 #define NATIVE_LAB_ABI_R13		(1U << 1)
@@ -78,7 +79,7 @@
 					 NATIVE_LAB_ABI_R15)
 
 struct native_lab_reloc_record {
-	__u32 offset;   /* byte offset of the call instruction (E8) in blob */
+	__u32 offset;   /* byte offset of the movabs/call helper slot */
 	__u32 kind;     /* NATIVE_LAB_RELOC_* */
 	__u64 target;   /* absolute kernel address */
 };
@@ -164,7 +165,8 @@ static int instantiate_native_lab(u64 payload, struct bpf_insn *insn_buf)
 }
 
 static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			       const struct bpf_prog *prog)
+			       const struct bpf_prog *prog,
+			       const u8 *final_ip)
 {
 	size_t snapshot_len = 0;
 	u32 blob_id;
@@ -185,6 +187,7 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 		}
 		if (emit) {
 			u8 *emit_at = image + *off;
+			const u8 *final_emit_at = final_ip ? final_ip + *off : NULL;
 			size_t i;
 
 			memcpy(emit_at, blobs[blob_id].bytes, snapshot_len);
@@ -196,29 +199,41 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 				const struct native_lab_reloc_record *r =
 					&blobs[blob_id].relocs[i];
 				switch (r->kind) {
-				case NATIVE_LAB_RELOC_CALL_REL32: {
-					u64 patch_va;
+				case NATIVE_LAB_RELOC_HELPER_CALL_RAX: {
+					static const u8 nop7[7] = {
+						0x0f, 0x1f, 0x80, 0, 0, 0, 0
+					};
+					u64 slot_va;
 					u64 rip_after;
 					s64 disp64;
 					s32 disp;
 
-					if ((size_t)r->offset + 5 > snapshot_len) {
+					if ((size_t)r->offset + 12 > snapshot_len) {
 						err = -ERANGE;
 						break;
 					}
-					if (emit_at[r->offset] != 0xE8) {
+					if (emit_at[r->offset] != 0x48 ||
+					    emit_at[r->offset + 1] != 0xB8 ||
+					    emit_at[r->offset + 10] != 0xFF ||
+					    emit_at[r->offset + 11] != 0xD0) {
 						err = -EINVAL;
 						break;
 					}
-					patch_va = (u64)emit_at + r->offset + 1;
-					rip_after = patch_va + 4;
-					disp64 = (s64)r->target - (s64)rip_after;
-					disp = (s32)disp64;
-					if ((s64)disp != disp64) {
-						err = -ERANGE;
-						break;
+					memcpy(emit_at + r->offset + 2, &r->target, 8);
+
+					if (final_emit_at) {
+						slot_va = (u64)final_emit_at + r->offset;
+						rip_after = slot_va + 5;
+						disp64 = (s64)r->target - (s64)rip_after;
+						disp = (s32)disp64;
+						if ((s64)disp == disp64) {
+							emit_at[r->offset] = 0xE8;
+							memcpy(emit_at + r->offset + 1,
+							       &disp, 4);
+							memcpy(emit_at + r->offset + 5,
+							       nop7, sizeof(nop7));
+						}
 					}
-					memcpy((void *)patch_va, &disp, 4);
 					break;
 				}
 				default:

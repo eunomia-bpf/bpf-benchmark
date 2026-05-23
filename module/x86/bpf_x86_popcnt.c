@@ -176,7 +176,8 @@ static int instantiate_popcntq(u64 payload, struct bpf_insn *insn_buf)
 }
 
 static int emit_popcntq_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			    const struct bpf_prog *prog)
+			    const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	u8 buf[8];
 	u8 dst_reg, src_reg;

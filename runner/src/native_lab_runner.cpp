@@ -111,7 +111,7 @@ constexpr const char *kX86ThisCpuOffHelperKey = "__native_x86_this_cpu_off";
 constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v22";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v25";
 constexpr const char *kKallsymsCachePath = "/tmp/native_kernel_kallsyms.tsv";
 constexpr const char *kKallsymsCacheVersion = "native-kallsyms-cache-v3";
 constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
@@ -187,7 +187,7 @@ uint64_t lookup_kernel_map_ptr_by_fd(int map_fd)
 }
 
 constexpr size_t kRelocRecordBytes = 16;
-constexpr uint32_t kNativeLabRelocCallRel32 = 1;
+constexpr uint32_t kNativeLabRelocHelperCallRax = 1;
 
 uint32_t read_u32_le(const uint8_t *p)
 {
@@ -264,8 +264,8 @@ void upload_relocs(const std::vector<uint8_t> &relocs, size_t blob_size, uint32_
         uint64_t target = read_u64_le(relocs.data() + off + 8);
         size_t reloc_bytes = 0;
         switch (kind) {
-        case kNativeLabRelocCallRel32:
-            reloc_bytes = 5;
+        case kNativeLabRelocHelperCallRax:
+            reloc_bytes = 12;
             break;
         default:
             fail("native_lab reloc has unknown kind " + std::to_string(kind));
@@ -1015,38 +1015,6 @@ const char *helper_symbol_for_id(int helper_id)
     return nullptr;
 }
 
-bool helper_jit_inlines_without_external_call(int helper_id)
-{
-    switch (helper_id) {
-    case BPF_FUNC_get_smp_processor_id:
-        return true;
-    default:
-        return false;
-    }
-}
-
-bool target_is_inside_jit_image(uint64_t target, uint64_t base, size_t len)
-{
-    const uint64_t end = base + static_cast<uint64_t>(len);
-    return target >= base && target < end;
-}
-
-uint64_t add_signed_u64(uint64_t base, int64_t delta)
-{
-    if (delta >= 0) {
-        return base + static_cast<uint64_t>(delta);
-    }
-    return base - static_cast<uint64_t>(-delta);
-}
-
-int64_t sign_extend_u64(uint64_t value, unsigned bits)
-{
-    const uint64_t sign = 1ull << (bits - 1);
-    const uint64_t mask = (1ull << bits) - 1;
-    value &= mask;
-    return static_cast<int64_t>((value ^ sign) - sign);
-}
-
 std::vector<uint64_t> load_jited_ksyms(int program_fd, uint32_t count)
 {
     if (count == 0) {
@@ -1066,187 +1034,6 @@ std::vector<uint64_t> load_jited_ksyms(int program_fd, uint32_t count)
         fail("kernel returned an empty JIT ksym table");
     }
     return ksyms;
-}
-
-std::vector<int32_t> collect_xlated_call_imms(const std::vector<uint8_t> &xlated)
-{
-    if (xlated.size() % sizeof(bpf_insn) != 0) {
-        fail("kernel returned a truncated xlated BPF image");
-    }
-    std::vector<int32_t> calls;
-    const auto *insns = reinterpret_cast<const bpf_insn *>(xlated.data());
-    const size_t cnt = xlated.size() / sizeof(bpf_insn);
-    for (size_t i = 0; i < cnt; i++) {
-        const bpf_insn &in = insns[i];
-        if (in.code != (BPF_JMP | BPF_CALL)) {
-            continue;
-        }
-        if (in.src_reg == BPF_PSEUDO_CALL ||
-            in.src_reg == BPF_PSEUDO_KFUNC_CALL ||
-            in.src_reg == BPF_PSEUDO_KINSN_CALL) {
-            continue;
-        }
-        if (helper_jit_inlines_without_external_call(in.imm)) {
-            continue;
-        }
-        calls.push_back(static_cast<int32_t>(in.imm));
-    }
-    return calls;
-}
-
-std::vector<uint64_t> decode_x86_external_call_targets(
-    const std::vector<uint8_t> &jited,
-    uint64_t jit_base)
-{
-    std::vector<uint64_t> targets;
-    for (size_t i = 0; i + 5 <= jited.size(); i++) {
-        if (jited[i] != 0xe8) {
-            continue;
-        }
-        int32_t disp = 0;
-        std::memcpy(&disp, jited.data() + i + 1, sizeof(disp));
-        const uint64_t next_ip = jit_base + static_cast<uint64_t>(i) + 5;
-        const uint64_t target = add_signed_u64(next_ip, disp);
-        if (!target_is_inside_jit_image(target, jit_base, jited.size())) {
-            targets.push_back(target);
-        }
-    }
-    return targets;
-}
-
-uint32_t read_le32(const uint8_t *p)
-{
-    uint32_t value = 0;
-    std::memcpy(&value, p, sizeof(value));
-    return value;
-}
-
-struct Arm64RegValue {
-    bool valid = false;
-    uint64_t value = 0;
-};
-
-bool arm64_decode_mov_wide(uint32_t word, unsigned &rd, uint64_t &value,
-                           bool &is_movk)
-{
-    const uint32_t kind = word & 0xff800000u;
-    if (kind != 0x92800000u && kind != 0xd2800000u && kind != 0xf2800000u) {
-        return false;
-    }
-    rd = word & 0x1fu;
-    const unsigned hw = (word >> 21) & 0x3u;
-    const unsigned shift = hw * 16u;
-    const uint64_t imm = (word >> 5) & 0xffffu;
-    is_movk = kind == 0xf2800000u;
-    if (kind == 0x92800000u) {
-        value = ~(imm << shift);
-    } else {
-        value = imm << shift;
-    }
-    return true;
-}
-
-std::vector<uint64_t> decode_arm64_external_call_targets(
-    const std::vector<uint8_t> &jited,
-    uint64_t jit_base)
-{
-    std::vector<uint64_t> targets;
-    Arm64RegValue regs[32];
-    for (size_t off = 0; off + 4 <= jited.size(); off += 4) {
-        const uint32_t word = read_le32(jited.data() + off);
-        unsigned rd = 0;
-        uint64_t mov_value = 0;
-        bool is_movk = false;
-        if (arm64_decode_mov_wide(word, rd, mov_value, is_movk)) {
-            const unsigned hw = (word >> 21) & 0x3u;
-            const unsigned shift = hw * 16u;
-            if (is_movk) {
-                if (regs[rd].valid) {
-                    const uint64_t mask = 0xffffull << shift;
-                    regs[rd].value = (regs[rd].value & ~mask) | mov_value;
-                }
-            } else {
-                regs[rd].valid = true;
-                regs[rd].value = mov_value;
-            }
-            continue;
-        }
-
-        if ((word & 0xfc000000u) == 0x94000000u) {
-            const int64_t disp = sign_extend_u64(word & 0x03ffffffu, 26) << 2;
-            const uint64_t pc = jit_base + static_cast<uint64_t>(off);
-            const uint64_t target = add_signed_u64(pc, disp);
-            if (!target_is_inside_jit_image(target, jit_base, jited.size())) {
-                targets.push_back(target);
-            }
-            continue;
-        }
-
-        if ((word & 0xfffffc1fu) == 0xd63f0000u) {
-            const unsigned rn = (word >> 5) & 0x1fu;
-            if (regs[rn].valid &&
-                !target_is_inside_jit_image(regs[rn].value, jit_base, jited.size())) {
-                targets.push_back(regs[rn].value);
-            }
-            regs[rn].valid = false;
-        }
-    }
-    return targets;
-}
-
-std::vector<uint64_t> decode_external_call_targets(
-    const std::vector<uint8_t> &jited,
-    uint64_t jit_base)
-{
-#if defined(__aarch64__)
-    return decode_arm64_external_call_targets(jited, jit_base);
-#else
-    return decode_x86_external_call_targets(jited, jit_base);
-#endif
-}
-
-std::vector<uint64_t> match_jit_targets_to_xlated_calls(
-    const std::vector<uint64_t> &jit_targets,
-    const std::vector<int32_t> &xlated_call_imms)
-{
-    if (xlated_call_imms.empty()) {
-        return {};
-    }
-    if (jit_targets.size() < xlated_call_imms.size()) {
-        fail("companion JIT oracle found fewer native calls than xlated BPF calls");
-    }
-
-    for (size_t start = 0; start < jit_targets.size(); start++) {
-        const uint64_t call_base =
-            add_signed_u64(jit_targets[start], -static_cast<int64_t>(xlated_call_imms[0]));
-        std::vector<uint64_t> matched;
-        matched.reserve(xlated_call_imms.size());
-        matched.push_back(jit_targets[start]);
-        size_t next_jit = start + 1;
-        bool ok = true;
-        for (size_t i = 1; i < xlated_call_imms.size(); i++) {
-            const uint64_t expected =
-                add_signed_u64(call_base, static_cast<int64_t>(xlated_call_imms[i]));
-            bool found = false;
-            while (next_jit < jit_targets.size()) {
-                if (jit_targets[next_jit] == expected) {
-                    matched.push_back(jit_targets[next_jit]);
-                    next_jit++;
-                    found = true;
-                    break;
-                }
-                next_jit++;
-            }
-            if (!found) {
-                ok = false;
-                break;
-            }
-        }
-        if (ok) {
-            return matched;
-        }
-    }
-    fail("companion JIT oracle could not align xlated BPF calls with native calls");
 }
 
 /* Spawn the native-link binary with the supplied argv. Returns
@@ -1298,9 +1085,10 @@ std::filesystem::path native_link_binary(const cli_options &options)
     fail("native_kernel: native-link not found; set BPFREJIT_NATIVE_LINK_BINARY or install /usr/local/bin/native-link");
 }
 
-/* Stage 2: given an ELF .native.o input, resolve helper call targets from the
- * companion BPF program's kernel JIT image, invoke native-link first in proof
- * mode and then kernel-lower that proof object into blob + relocs files. */
+/* Stage 2: given an ELF .native.o input, pass the companion program's JIT
+ * oracle and map metadata into native-link. native-link owns target decoding
+ * and machine-code lowering; the runner only loads kernel facts and uploads
+ * the resulting blob + relocs. */
 struct LinkerOutput {
     std::filesystem::path proof;
     std::filesystem::path blob;
@@ -1311,6 +1099,9 @@ struct LinkerOutput {
 
 struct NativeLinkArgs {
     std::filesystem::path linker;
+    uint64_t oracle_jit_base = 0;
+    std::vector<uint8_t> oracle_jited;
+    std::vector<uint8_t> oracle_xlated;
     std::vector<std::string> helpers;
     std::vector<std::string> maps;
     std::vector<std::string> lookup_sites;
@@ -1337,7 +1128,9 @@ struct CompanionLoad {
     uint64_t object_load_ns = 0;
     uint64_t map_ptr_extract_ns = 0;
     uint64_t lookup_spec_ns = 0;
-    std::unordered_map<std::string, uint64_t> helper_addrs;
+    uint64_t oracle_jit_base = 0;
+    std::vector<uint8_t> oracle_jited;
+    std::vector<uint8_t> oracle_xlated;
     std::unordered_map<std::string, uint64_t> map_addrs;
     /* Per-call-site spec for every `bpf_map_lookup_elem` invocation in
      * the entry program, listed in BPF-source order. Each entry is a
@@ -1513,16 +1306,9 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
     const auto map_ptr_end = std::chrono::steady_clock::now();
     out.map_ptr_extract_ns = elapsed_ns(map_ptr_start, map_ptr_end);
 
-    /* Build per-call-site lookup spec for the entry program. We walk
-     * the BPF source bytecode in order (verifier-friendly programs
-     * have explicit BPF_LD_IMM64 pseudo_map_fd bindings just before
-     * each lookup call), pair each `bpf_map_lookup_elem` call with
-     * the map fd in r1, look up that map's type, and emit a per-site
-     * (target_addr, key_offset) pair. native-link consumes the list
-     * via repeatable --lookup-site flags and uses each entry to route
-     * the i-th call to its own literal-pool entry (avoiding the
-     * single-shared-pool limitation that previously forced every
-     * `bpf_map_lookup_elem` site to share one target). */
+    /* Build per-call-site map specs for the entry program. The runner walks
+     * source BPF only to associate helper sites with map metadata; native-link
+     * reads the companion JIT/xlated oracle and fills helper call targets. */
     const auto lookup_spec_start = std::chrono::steady_clock::now();
     {
         int entry_fd = bpf_program__fd(entry_prog);
@@ -1533,12 +1319,9 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
 
         const bpf_prog_info prog_info = load_prog_info(entry_fd);
         const auto jited_ksyms = load_jited_ksyms(entry_fd, prog_info.nr_jited_ksyms);
-        const auto jited_program = load_jited_program(entry_fd, prog_info.jited_prog_len);
-        const auto xlated_program = load_xlated_program(entry_fd, prog_info.xlated_prog_len);
-        const auto jit_targets = decode_external_call_targets(jited_program, jited_ksyms[0]);
-        const auto xlated_call_imms = collect_xlated_call_imms(xlated_program);
-        const auto xlated_call_targets =
-            match_jit_targets_to_xlated_calls(jit_targets, xlated_call_imms);
+        out.oracle_jit_base = jited_ksyms[0];
+        out.oracle_jited = load_jited_program(entry_fd, prog_info.jited_prog_len);
+        out.oracle_xlated = load_xlated_program(entry_fd, prog_info.xlated_prog_len);
 
         /* Collect map metadata by fd for quick lookup. */
         struct MapMeta {
@@ -1583,50 +1366,18 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
         size_t insn_cnt = bpf_program__insn_cnt(entry_prog);
         std::vector<SourceHelperCall> source_calls =
             collect_source_helper_calls(insns, insn_cnt);
-        size_t target_index = 0;
         for (const SourceHelperCall &call : source_calls) {
-            const char *helper_name = helper_symbol_for_id(call.helper_id);
-            if (!helper_name) {
+            if (!helper_symbol_for_id(call.helper_id)) {
                 bpf_object__close(obj);
                 fail("native_kernel: unsupported helper id "
                      + std::to_string(call.helper_id));
             }
 
             auto map_it = (call.map_fd >= 0) ? meta_by_fd.find(call.map_fd) : meta_by_fd.end();
-            const bool lookup_array_inline =
-                call.helper_id == BPF_FUNC_map_lookup_elem &&
-                map_it != meta_by_fd.end() &&
-                (map_it->second.type == BPF_MAP_TYPE_ARRAY ||
-                 map_it->second.type == BPF_MAP_TYPE_PERCPU_ARRAY);
-            const bool needs_target =
-                !helper_jit_inlines_without_external_call(call.helper_id) &&
-                !lookup_array_inline;
-            uint64_t target_addr = 0;
-            if (needs_target) {
-                if (target_index >= xlated_call_targets.size()) {
-                    bpf_object__close(obj);
-                    fail("native_kernel: companion JIT oracle ran out of call targets");
-                }
-                target_addr = xlated_call_targets[target_index++];
-                if (call.helper_id != BPF_FUNC_map_lookup_elem &&
-                    call.helper_id != BPF_FUNC_map_update_elem) {
-                    auto helper_it = out.helper_addrs.find(helper_name);
-                    if (helper_it == out.helper_addrs.end()) {
-                        out.helper_addrs.emplace(helper_name, target_addr);
-                    } else if (helper_it->second != target_addr &&
-                               call.helper_id != BPF_FUNC_map_lookup_elem &&
-                               call.helper_id != BPF_FUNC_map_delete_elem) {
-                        bpf_object__close(obj);
-                        fail(std::string("native_kernel: helper ") + helper_name
-                             + " resolved to multiple JIT targets");
-                    }
-                }
-            }
-
             if (call.helper_id == BPF_FUNC_map_lookup_elem) {
                 CompanionLoad::LookupSite site{
                     CompanionLoad::LookupSite::Kind::Call,
-                    target_addr,
+                    0,
                     0,
                     0,
                     0,
@@ -1667,18 +1418,15 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
                     } else if (t == BPF_MAP_TYPE_HASH) {
                         uint32_t rounded = (map_it->second.key_size + 7) & ~7u;
                         site.kind = CompanionLoad::LookupSite::Kind::Hash;
-                        site.target_addr = target_addr;
                         site.key_offset = htab_offsets.key + rounded;
                     } else if (t == BPF_MAP_TYPE_LRU_HASH) {
                         uint32_t rounded = (map_it->second.key_size + 7) & ~7u;
                         site.kind = CompanionLoad::LookupSite::Kind::LruHash;
-                        site.target_addr = target_addr;
                         site.key_offset = htab_offsets.key + rounded;
                         site.value_offset = htab_offsets.lru_ref;
                     } else if (t == BPF_MAP_TYPE_PERCPU_HASH) {
                         uint32_t rounded = (map_it->second.key_size + 7) & ~7u;
                         site.kind = CompanionLoad::LookupSite::Kind::PerCpuHash;
-                        site.target_addr = target_addr;
                         site.key_offset = htab_offsets.key + rounded;
 #if defined(__x86_64__)
                         if (this_cpu_off_addr == 0) {
@@ -1695,7 +1443,7 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
             if (call.helper_id == BPF_FUNC_map_update_elem) {
                 CompanionLoad::UpdateSite site{
                     CompanionLoad::UpdateSite::Kind::Call,
-                    target_addr,
+                    0,
                     0,
                     0,
                     0,
@@ -1732,10 +1480,6 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
                 continue;
             }
         }
-        if (target_index != xlated_call_targets.size()) {
-            bpf_object__close(obj);
-            fail("native_kernel: companion JIT oracle left unmatched call targets");
-        }
     }
     const auto lookup_spec_end = std::chrono::steady_clock::now();
     out.lookup_spec_ns = elapsed_ns(lookup_spec_start, lookup_spec_end);
@@ -1744,12 +1488,17 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
     return out;
 }
 
-std::string format_name_hex(const std::string &name, uint64_t value)
+std::string format_hex(uint64_t value)
 {
     char value_buf[32];
     std::snprintf(value_buf, sizeof(value_buf), "0x%llx",
                   static_cast<unsigned long long>(value));
-    return name + "=" + value_buf;
+    return value_buf;
+}
+
+std::string format_name_hex(const std::string &name, uint64_t value)
+{
+    return name + "=" + format_hex(value);
 }
 
 std::string format_lookup_site_arg(size_t index,
@@ -1827,14 +1576,9 @@ NativeLinkArgs build_native_link_args(
 {
     NativeLinkArgs out{};
     out.linker = native_link_binary(options);
-
-    std::vector<std::pair<std::string, uint64_t>> helpers(
-        companion.helper_addrs.begin(), companion.helper_addrs.end());
-    std::sort(helpers.begin(), helpers.end(),
-              [](const auto &a, const auto &b) { return a.first < b.first; });
-    for (const auto &kv : helpers) {
-        out.helpers.push_back(format_name_hex(kv.first, kv.second));
-    }
+    out.oracle_jit_base = companion.oracle_jit_base;
+    out.oracle_jited = companion.oracle_jited;
+    out.oracle_xlated = companion.oracle_xlated;
 #if defined(__x86_64__)
     {
         uint64_t cpu_number_addr = kallsyms_lookup("cpu_number");
@@ -1884,6 +1628,12 @@ std::string native_link_cache_key(const std::filesystem::path &native_elf,
     hash_file_contents(hash, bpf_obj, "companion_bpf");
     hash_file_identity(hash, link_args.linker, "native_linker");
     hash.add_string(symbol_name);
+    hash.add_string("oracle_jit_base");
+    hash.add_u64(link_args.oracle_jit_base);
+    hash.add_string("oracle_jited");
+    hash.add_bytes(link_args.oracle_jited.data(), link_args.oracle_jited.size());
+    hash.add_string("oracle_xlated");
+    hash.add_bytes(link_args.oracle_xlated.data(), link_args.oracle_xlated.size());
     for (const auto &arg : link_args.helpers) {
         hash.add_string("helper");
         hash.add_string(arg);
@@ -1961,6 +1711,21 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
         fail(msg.str());
     }
 
+    if (link_args.oracle_jit_base == 0 || link_args.oracle_jited.empty() ||
+        link_args.oracle_xlated.empty()) {
+        fail("native_kernel: companion JIT oracle is empty");
+    }
+    const std::filesystem::path oracle_jited = base.string() + ".oracle.jited.bin";
+    const std::filesystem::path oracle_xlated = base.string() + ".oracle.xlated.bin";
+    write_binary_file(
+        oracle_jited,
+        link_args.oracle_jited.data(),
+        link_args.oracle_jited.size());
+    write_binary_file(
+        oracle_xlated,
+        link_args.oracle_xlated.data(),
+        link_args.oracle_xlated.size());
+
     std::vector<std::string> argv;
     argv.push_back(link_args.linker.string());
     argv.push_back("--input");
@@ -1977,6 +1742,12 @@ LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
     argv.push_back(out.map_patches.string());
     argv.push_back("--output-abi");
     argv.push_back(out.abi.string());
+    argv.push_back("--oracle-jited");
+    argv.push_back(oracle_jited.string());
+    argv.push_back("--oracle-jit-base");
+    argv.push_back(format_hex(link_args.oracle_jit_base));
+    argv.push_back("--oracle-xlated");
+    argv.push_back(oracle_xlated.string());
 
     for (const auto &arg : link_args.helpers) {
         argv.push_back("--helper");

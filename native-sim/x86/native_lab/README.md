@@ -252,6 +252,27 @@ python3 native-sim/x86/native_lab/tests/analyze.py
   `micro/results/x86_kvm_micro_20260521_135631_031982` confirmed
   `map_percpu_hash_counter` remained at 27 ns samples with matching
   result values.
+- **Helper-call target discovery belongs in native-link, final-address
+  patching belongs in the module.** A 2026-05-23 x86 KVM change moved
+  companion JIT/xlated decoding out of `runner/src/native_lab_runner.cpp`
+  and into `native-link`: the runner now only loads the companion
+  `.bpf.o`, dumps raw JIT/xlated bytes plus map-site metadata, and invokes
+  `native-link --oracle-*`. Kernel-mode native-link emits relocatable
+  `movabs rax, helper; call *rax` slots, while `bpf_x86_native_lab`
+  patches the helper address after the blob lands in the final JIT image
+  and rewrites to `call rel32; nop7` only when the real address is in
+  range. Correctness smoke runs passed for
+  `helper_chain_simple`, `map_percpu_hash_counter`, and
+  `stats_mixed_helpers` in
+  `micro/results/x86_kvm_micro_20260523_040307_585272`,
+  `micro/results/x86_kvm_micro_20260523_040710_531023`, and
+  `micro/results/x86_kvm_micro_20260523_041140_364116`; after switching
+  x86 oracle parsing to iced-x86 instruction decoding, the focused
+  `helper_chain_simple` run
+  `micro/results/x86_kvm_micro_20260523_041806_932451` also passed. The
+  KVM dumps still showed the absolute-indirect slot for these helpers, so
+  this cleaned up ownership and preserved correctness but did not produce
+  a guaranteed hot-path speedup on that layout.
 - **Use the short x86 ARRAY bounds compare when possible.** A
   2026-05-21 focused KVM run changed inlined ARRAY/PERCPU_ARRAY lookup
   bounds checks from `cmp eax, imm32` to `cmp eax, imm8` when
@@ -449,6 +470,22 @@ python3 native-sim/x86/native_lab/tests/analyze.py
   generic `callee_saved_mask` in `.native_link_abi`, and the arm64
   native_lab proof marks BPF r6..r9 as used so the BPF JIT prologue owns
   saving x19..x22.
+- **x86 helper direct-call lowering needs final JIT IP, not the staging
+  buffer address.** On 2026-05-22 the first direct-call attempt used the
+  temporary `image + off` pointer while the x86 BPF JIT was still sizing
+  and copying code, so the computed rel32 displacement did not match the
+  final executable address. The kinsn x86 emitter now receives the final
+  JIT IP through the existing `emit_x86` callback and rewrites
+  `movabs rax, target; call *rax` slots to `call rel32; nop7` only when
+  the final target is reachable. ARRAY/PERCPU_ARRAY map updates are
+  late-inlined by native-link but still appear as external calls in the
+  companion JIT oracle, so native-link consumes those oracle targets
+  without emitting a call; ARRAY/PERCPU_ARRAY lookups remain skipped when
+  the companion JIT inlines them. Validation after the fix: x86 KVM
+  stage2 helper/map 13/13 passed in
+  `micro/results/x86_kvm_micro_20260523_060507_300296` with 1.461x
+  geomean kernel/native speedup, and x86 KVM pure 29/29 passed in
+  `micro/results/x86_kvm_micro_20260523_061000_180428` with 1.368x.
 - **Non-xdp prog types** (`tc_packet_checksum_fold`,
   `cgroup_skb_hash_chain`) are skipped — the stub BPF program is
   currently hard-coded to `BPF_PROG_TYPE_XDP`. Extending to sched_cls /

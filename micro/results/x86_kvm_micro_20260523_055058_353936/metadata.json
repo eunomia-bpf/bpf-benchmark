@@ -1,0 +1,70 @@
+{
+  "benchmarks": [
+    {
+      "error": "command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec run-native-kernel --program /artifacts/user/stage2-programs/x86_64/map_array_lookup.bpf.o --native-program /artifacts/user/stage2-programs/x86_64/map_array_lookup.native.o --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem --io-mode packet --input-size 64 --inner-repeat 100000 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260523_055058_353936/details/jit_dumps/map_array_lookup__native_kernel__sample00.jited.bin\nnative-link: entry=map_array_lookup (123 bytes), 1 reachable symbol(s) total\n  - map_array_lookup (vaddr 0x0, 123 bytes) [entry]\nnative-link: wrote proof object 113 bytes, 3 reloc(s) -> /tmp/native_kernel_link_cache/ae9bda8a7b644522.tmp.1890.proof.o\nnative-link: entry=map_array_lookup (113 bytes), 1 reachable symbol(s) total\n  - map_array_lookup (vaddr 0x0, 113 bytes) [entry]\nError: companion JIT oracle has 1 unused x86 helper target(s)\nnative-link kernel failed (rc=1): /usr/local/bin/native-link --input /tmp/native_kernel_link_cache/ae9bda8a7b644522.tmp.1890.proof.o --symbol map_array_lookup --mode kernel --output /tmp/native_kernel_link_cache/ae9bda8a7b644522.tmp.1890.blob.bin --output-relocs /tmp/native_kernel_link_cache/ae9bda8a7b644522.tmp.1890.relocs.bin --output-map-patches /tmp/native_kernel_link_cache/ae9bda8a7b644522.tmp.1890.map-patches.tsv --output-abi /tmp/native_kernel_link_cache/ae9bda8a7b644522.tmp.1890.abi.tsv --oracle-jited /tmp/native_kernel_link_cache/ae9bda8a7b644522.tmp.1890.oracle.jited.bin --oracle-jit-base 0xffffffffc0287870 --oracle-xlated /tmp/native_kernel_link_cache/ae9bda8a7b644522.tmp.1890.oracle.xlated.bin --helper __native_x86_cpu_number=0xffffffffaa2b1034 --helper __native_x86_this_cpu_off=0xffffffffaa2b1028 --map test_array=0x0 --lookup-site 0=array,0x0,0,4,8,3,304,0x0 --update-site 0=array,0x0,4,8,8,304,0x0",
+      "expected_result": 16045690984503050241,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "name": "map_array_lookup",
+      "runs": [],
+      "tags": [
+        "stage2",
+        "maps",
+        "array"
+      ]
+    }
+  ],
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec"
+  },
+  "defaults": {
+    "inner_repeat": 100000,
+    "perf_counters": false,
+    "runtime_order_seed": 0,
+    "samples": 3,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "details_dir": "details",
+  "error_message": "map_array_lookup: command failed (1): /home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec run-native-kernel --program /artifacts/user/stage2-programs/x86_64/map_array_lookup.bpf.o --native-program /artifacts/user/stage2-programs/x86_64/map_array_lookup.native.o --memory /home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem --io-mode packet --input-size 64 --inner-repeat 100000 --dump-jit-path /home/yunwei37/workspace/bpf-benchmark/micro/results/x86_kvm_micro_20260523_055058_353936/details/jit_dumps/map_array_lookup__native_kernel__sample00.jited.bin\nnative-link: entry=map_array_lookup (123 bytes), 1 reachable symbol(s) total\n  - map_array_lookup (vaddr 0x0, 123 bytes) [entry]\nnative-link: wrote proof object 113 bytes, 3 reloc(s) -> /tmp/native_kernel_link_cache/ae9bda8a7b644522.tmp.1890.proof.o\nnative-link: entry=map_array_lookup (113 bytes), 1 reachable symbol(s) total\n  - map_array_lookup (vaddr 0x0, 113 bytes) [entry]\nError: companion JIT oracle has 1 unused x86 helper target(s)\nnative-link kernel failed (rc=1): /usr/local/bin/native-link --input /tmp/native_kernel_link_cache/ae9bda8a7b644522.tmp.1890.proof.o --symbol map_array_lookup --mode kernel --output /tmp/native_kernel_link_cache/ae9bda8a7b644522.tmp.1890.blob.bin --output-relocs /tmp/native_kernel_link_cache/ae9bda8a7b644522.tmp.1890.relocs.bin --output-map-patches /tmp/native_kernel_link_cache/ae9bda8a7b644522.tmp.1890.map-patches.tsv --output-abi /tmp/native_kernel_link_cache/ae9bda8a7b644522.tmp.1890.abi.tsv --oracle-jited /tmp/native_kernel_link_cache/ae9bda8a7b644522.tmp.1890.oracle.jited.bin --oracle-jit-base 0xffffffffc0287870 --oracle-xlated /tmp/native_kernel_link_cache/ae9bda8a7b644522.tmp.1890.oracle.xlated.bin --helper __native_x86_cpu_number=0xffffffffaa2b1034 --helper __native_x86_this_cpu_off=0xffffffffaa2b1028 --map test_array=0x0 --lookup-site 0=array,0x0,0,4,8,3,304,0x0 --update-site 0=array,0x0,4,8,8,304,0x0",
+  "generated_at": "2026-05-23T05:50:58.353936+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "unknown",
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_link_mods=/home/yunwei37/workspace/bpf-benchmark/vendor/build/x86/linux/.virtme_mods/lib/modules/0.0.0 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 panic=-1 virtme.exec=`bWFrZSAtQyAvaG9tZS95dW53ZWkzNy93b3Jrc3BhY2UvYnBmLWJlbmNobWFyayBfX3J1bnRpbWUtdm0tbWljcm8gVEFSR0VUPSd4ODYta3ZtJyBSVU5fVEFSR0VUX05BTUU9J3g4Ni1rdm0nIFJVTl9UQVJHRVRfQVJDSD0neDg2XzY0JyBSVU5fRVhFQ1VUT1I9J2t2bScgUlVOVElNRV9DT05UQUlORVJfSU1BR0U9J2JwZi1iZW5jaG1hcmsvcnVubmVyLXJ1bnRpbWU6eDg2XzY0JyBSVU5USU1FX0lNQUdFX1RBUj0nL2hvbWUveXVud2VpMzcvd29ya3NwYWNlL2JwZi1iZW5jaG1hcmsvLmNhY2hlL2NvbnRhaW5lci1pbWFnZXMveDg2XzY0LXJ1bm5lci1ydW50aW1lLmltYWdlLnRhcicgUlVOX1JFTU9URV9QWVRIT05fQklOPSdweXRob24zJyBSVU5fUlVOVElNRV9QWVRIT05fQklOPSdweXRob24zJyBSVU5fQlBGVE9PTF9CSU49J2JwZnRvb2wnIFJVTl9OQVRJVkVfUkVQT1NfQ1NWPSdiY2Msa2F0cmFuLHRyYWNlZSx0ZXRyYWdvbicgUlVOX1RPS0VOPSdkMDYyODNjOCcgU0FNUExFUz0nMycgV0FSTVVQUz0nJyBJTk5FUl9SRVBFQVQ9JzEwMDAwMCcgQkVOQ0g9J21hcF9hcnJheV9sb29rdXAnIFNVSVRFPSdtaWNyby9jb25maWcvbWljcm9fc3RhZ2UyLnlhbWwnIFJVTlRJTUVTPSduYXRpdmVfa2VybmVsIGtlcm5lbCcgRlVaWl9ST1VORFM9JzEwMDAnIFRFU1RfTU9ERT0nJyBXT1JLTE9BRF9EVVJBVElPTj0nJyBLRUVQX1dPUktESVJTPScnIEJQRlJFSklUX0JFTkNIX1BBU1NFUz0nJyBCUEZSRUpJVF9DT1JQVVNfQVBQUz0nJyBTS0lQX1JFSklUPScnIENQVT0nJyBTVFJJQ1RfRU5WPScnIFNIVUZGTEVfU0VFRD0nJyBSRUdFTkVSQVRFX0lOUFVUUz0nJyBMSVNUPScnIE1JQ1JPX1JVTk5FUl9CSU5BUlk9JycgUEVSRl9DT1VOVEVSUz0nJyBCUEZSRUpJVF9DT1JQVVNfQVBQX1RJTUVPVVQ9JycgQlBGUkVKSVRfQ09SUFVTX1JFSklUX1RJTUVPVVQ9JycgQlBGUkVKSVRfQ09SUFVTX1dPUktMT0FEX09OTFk9JycgQlBGUkVKSVRfQ09SUFVTX0JQRl9TVEFUUz0nJw==` virtme_chdir=home/yunwei37/workspace/bpf-benchmark debug loglevel=7 panic=30 oops=panic init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init",
+    "kernel_version": "7.0.0-rc2+",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "unknown"
+  },
+  "last_updated_at": "2026-05-23T05:50:58.475600+00:00",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_stage2.yaml",
+  "progress": {
+    "completed_benchmarks": 1,
+    "current_benchmark": null,
+    "current_benchmark_index": null,
+    "total_benchmarks": 1
+  },
+  "provenance": {
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 285K",
+    "environment": "vm",
+    "kernel_commit": "unknown",
+    "params": {
+      "inner_repeat": 100000,
+      "perf_counters": false,
+      "samples": 3,
+      "warmups": 0
+    },
+    "repo_dirty": false,
+    "repo_git_sha": "unknown",
+    "timestamp": "2026-05-23T05:50:58.354870+00:00"
+  },
+  "run_type": "x86_kvm_micro",
+  "started_at": "2026-05-23T05:50:58.353936+00:00",
+  "status": "error",
+  "suite": "micro_stage2_maps_helpers"
+}

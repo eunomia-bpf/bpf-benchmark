@@ -1,0 +1,13 @@
+{
+  "app": "katran",
+  "baseline": null,
+  "error": "command failed (1): /usr/sbin/ip netns exec katran-router sh -c 'printf '\"'\"'%s\\n'\"'\"' '\"'\"'clone_skb 1000'\"'\"' > /proc/net/pktgen/rtlb0'\nsh: 1: printf: printf: I/O error",
+  "post_rejit": null,
+  "rejit_result": {
+    "mode": "workload_only",
+    "status": "skipped"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_pktgen",
+  "status": "error"
+}

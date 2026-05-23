@@ -1395,7 +1395,8 @@ static int emit_movb_imm_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_movb_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			 const struct bpf_prog *prog)
+			 const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	switch (mov_payload_form(kinsn_payload_decode(payload))) {
 	case X86_FORM_IMM:
@@ -1419,7 +1420,8 @@ static int emit_movb_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_movw_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			 const struct bpf_prog *prog)
+			 const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	switch (mov_payload_form(kinsn_payload_decode(payload))) {
 	case X86_FORM_STORE:
@@ -1440,7 +1442,8 @@ static int emit_movw_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_movl_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			 const struct bpf_prog *prog)
+			 const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	switch (mov_payload_form(kinsn_payload_decode(payload))) {
 	case X86_FORM_RR:
@@ -1478,7 +1481,8 @@ static int emit_movl_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_movq_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			 const struct bpf_prog *prog)
+			 const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	switch (mov_payload_form(kinsn_payload_decode(payload))) {
 	case X86_FORM_RR:
@@ -1518,7 +1522,8 @@ static int emit_movq_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_movzbl_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			   const struct bpf_prog *prog)
+			   const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	switch (mov_payload_form(kinsn_payload_decode(payload))) {
 	case X86_FORM_RR:
@@ -1542,7 +1547,8 @@ static int emit_movzbl_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_movzwl_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			   const struct bpf_prog *prog)
+			   const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	switch (mov_payload_form(kinsn_payload_decode(payload))) {
 	case X86_FORM_RR:
@@ -1566,13 +1572,15 @@ static int emit_movzwl_x86(u8 *image, u32 *off, bool emit, u64 payload,
 }
 
 static int emit_movswl_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			   const struct bpf_prog *prog)
+			   const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	return emit_movzx_rr_x86(image, off, emit, payload, prog, 0xbf, false);
 }
 
 static int emit_movsxd_x86(u8 *image, u32 *off, bool emit, u64 payload,
-			   const struct bpf_prog *prog)
+			   const struct bpf_prog *prog,
+			 const u8 *final_ip)
 {
 	struct mov_rr_payload rr;
 	u8 buf[16];

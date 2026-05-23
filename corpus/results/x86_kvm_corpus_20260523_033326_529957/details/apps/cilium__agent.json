@@ -1,0 +1,80 @@
+{
+  "app": "cilium/agent",
+  "baseline": {
+    "bpf": {},
+    "workloads": [
+      {
+        "command": [
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "config": {
+          "dst_ip": "198.18.0.2",
+          "dst_port": 18081,
+          "flows": 65535,
+          "iface": "bpfbench0",
+          "pkt_size": 64,
+          "src_ip": "198.18.0.1",
+          "tool": "kernel_pktgen"
+        },
+        "duration_s": 60.095712153,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: bpfbench0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 198.18.0.2  dst_max: 198.18.0.2\n     src_min: 198.18.0.1  src_max: 198.18.0.1\n     src_mac: 0e:7a:68:be:04:c6 dst_mac: 76:bc:ae:61:09:40\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 18081  udp_dst_max: 18081\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 95117412  errors: 0\n     started: 63240042us  stopped: 123206066us idle: 0us\n     seq_num: 95117413  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 198.18.0.1  cur_daddr: 198.18.0.2\n     cur_udp_dst: 18081  cur_udp_src: 27579\n     cur_queue_map: 0\n     flows: 47574986\nResult: OK: 59966023(c59966023+d0) usec, 95117412 (64byte,-1frags)\n  1586188pps 812Mb/sec (812128256bps) errors: 0",
+        "workload_name": "network_pktgen_udp"
+      },
+      {
+        "command": [
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "config": {
+          "dst_ip": "198.18.0.2",
+          "dst_port": 18081,
+          "flows": 65535,
+          "iface": "bpfbench0",
+          "pkt_size": 64,
+          "src_ip": "198.18.0.1",
+          "tool": "kernel_pktgen"
+        },
+        "duration_s": 60.090263038,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: bpfbench0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 198.18.0.2  dst_max: 198.18.0.2\n     src_min: 198.18.0.1  src_max: 198.18.0.1\n     src_mac: 0e:7a:68:be:04:c6 dst_mac: 4e:2b:4d:f8:ee:f9\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 18081  udp_dst_max: 18081\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 94984424  errors: 0\n     started: 124210172us  stopped: 184141840us idle: 0us\n     seq_num: 94984425  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 198.18.0.1  cur_daddr: 198.18.0.2\n     cur_udp_dst: 18081  cur_udp_src: 25659\n     cur_queue_map: 0\n     flows: 47508442\nResult: OK: 59931667(c59931667+d0) usec, 94984424 (64byte,-1frags)\n  1584878pps 811Mb/sec (811457536bps) errors: 0",
+        "workload_name": "network_pktgen_udp"
+      },
+      {
+        "command": [
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "config": {
+          "dst_ip": "198.18.0.2",
+          "dst_port": 18081,
+          "flows": 65535,
+          "iface": "bpfbench0",
+          "pkt_size": 64,
+          "src_ip": "198.18.0.1",
+          "tool": "kernel_pktgen"
+        },
+        "duration_s": 60.088076186999984,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: bpfbench0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 198.18.0.2  dst_max: 198.18.0.2\n     src_min: 198.18.0.1  src_max: 198.18.0.1\n     src_mac: 0e:7a:68:be:04:c6 dst_mac: 2e:31:1a:b5:9a:79\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 18081  udp_dst_max: 18081\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 94945424  errors: 0\n     started: 185140178us  stopped: 245033674us idle: 0us\n     seq_num: 94945425  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 198.18.0.1  cur_daddr: 198.18.0.2\n     cur_udp_dst: 18081  cur_udp_src: 52193\n     cur_queue_map: 0\n     flows: 47488960\nResult: OK: 59893496(c59893496+d0) usec, 94945424 (64byte,-1frags)\n  1585237pps 811Mb/sec (811641344bps) errors: 0",
+        "workload_name": "network_pktgen_udp"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": null,
+  "rejit_result": {
+    "mode": "workload_only",
+    "status": "skipped"
+  },
+  "runner": "cilium",
+  "selected_workload": "network_pktgen_udp",
+  "status": "ok"
+}
