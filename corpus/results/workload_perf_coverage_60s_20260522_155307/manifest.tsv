@@ -1,0 +1,3 @@
+app	setup	status	result_dir	log
+bcc/set	workload_only	0	corpus/results/x86_kvm_corpus_20260522_225556_087664	corpus/results/workload_perf_coverage_60s_20260522_155307/bcc_set__workload_only.log
+bcc/set	ebpf_no_state	0	corpus/results/x86_kvm_corpus_20260522_230217_359197	corpus/results/workload_perf_coverage_60s_20260522_155307/bcc_set__ebpf_no_state.log

@@ -1,5 +1,18 @@
 # bpfopt/llvm 移植到仓库内 kinsn LLVM-23 (2026-05-21)
 
+## 2026-05-22 策略修正
+LLVM 版 `bpfopt` 的 pass 模式统一定义为 **每个 `--pass <name>` 都执行一次
+lift → LLVM O3 → BPF lower 回环**；`noop` 也不能走 O0 或 raw-bytecode fallback。
+`--verifier-states` 不再是 LLVM 版契约的一部分，现有调用里出现时仅作为兼容参数
+忽略。`map_inline` 以后只有一种 `--inline-hint=<map>:<key_hex>`：提示某个 map
+entry key，使优化器使用 snapshot 中对应的 value；旧 `!<key_hex>` 写法只兼容接受，
+不再表达 hard/soft 区别。
+
+post-lowering 不再作为 verifier repair 层使用。LLVM BPF backend 生成 object 后，
+这里只做 relocation 和 raw instruction stream 恢复；range/signed-jump/bounds/
+dead-ALU/memory-address 等 bytecode repair 已移除，后续若要恢复必须有 verifier log
+和最小 reproducer，并优先落在 IR 或 BPF backend。
+
 ## 目标
 让 `bpfopt/llvm`(eBPF→LLVM IR→O3→eBPF 回环工具)依赖仓库里的 kinsn LLVM
 (`llvm-backend/build-bpf-kinsn`, **LLVM 23.0.0git**, 内含 kinsn pass),而不是系统的

@@ -13,50 +13,40 @@ The accepted CLI surface is intentionally narrow:
 bpfopt --canonicalize-map-refs --input in.bin --output out.bin --map-ids 1,2
 bpfopt --pass noop --input in.bin --output out.bin --report report.json --prog-type xdp
 bpfopt --pass map_inline --input in.bin --output out.bin --report report.json \
-  --prog-type xdp --verifier-states verifier.log -- \
-  --map-values map-values --map-ids 1,2 --inline-hint=map_name:!00000000
+  --prog-type xdp -- \
+  --map-values map-values --map-ids 1,2 --inline-hint=map_name:00000000
 ```
 
 `--canonicalize-map-refs` preserves the existing raw bytecode contract. Pass mode
-must be a strict LLVM roundtrip:
+must be a strict LLVM O3 roundtrip:
 
 1. lift kernel BPF bytecode with llvmbpf in kernel-compatible mode;
 2. materialize real LLVM IR for the program;
-3. run the selected LLVM pipeline;
+3. run the LLVM O3 pipeline;
 4. lower through LLVM's BPF backend into an ELF object;
 5. extract and relocate `.text`;
 6. write the new raw BPF instruction stream.
 
-There is no raw-bytecode fallback for `noop`. A verifier failure is a real
-roundtrip failure and must be fixed in the lift/lower path or surfaced to the
-caller.
+There is no raw-bytecode fallback for `noop`: `noop` is also an LLVM O3
+roundtrip and is not byte-preserving. A verifier failure is a real roundtrip
+failure and must be fixed in the lift/lower path or surfaced to the caller.
 
-Current `noop` uses the O0-oriented path: register allocas are promoted enough
-for LLVM codegen to lower the IR, but the O3 module pipeline is not enabled.
-This is the verifier-compatible mode. On May 15, 2026 it passed all 37
-`bpfopt/testobject` objects through `bpfopt-loader --pass noop --bpfopt
-bpfopt/llvm/build/bpfopt`, covering 378 individual BPF programs.
+Every `--pass <name>` invocation runs exactly one O3 lift/optimize/lower cycle.
+`map_inline` is the only pass name that currently performs a pass-specific IR
+rewrite before O3; all other pass names use the same plain O3 roundtrip.
 
-Non-`noop` pass mode currently enables the O3 pipeline. O3 is not yet
-verifier-compatible across the corpus: using the existing `dce` loader config to
-trigger O3 passes bcc, bpftrace, `cilium_bpf_host`, and `cilium_bpf_lxc`, then
-fails at `cilium_bpf_overlay.bpf.o`. The first observed failure is a map-value
-offset bounds check that is semantically redundant after LLVM optimization but
-still required for the kernel verifier to prove bounded access. O3 therefore
-needs verifier-aware range-check preservation before it can replace O0.
+Post-lowering extraction is not a verifier repair stage. After LLVM's BPF
+backend emits the object, this tool only applies ELF relocations and restores
+the raw instruction stream. It must not synthesize verifier proofs, insert
+bounds checks, delete instructions, or rewrite memory-address forms after
+backend codegen.
 
-`map_inline` has a minimal hard-hint implementation. It uses pass-local
-`--map-values`, `--map-ids`, and `--inline-hint=<map>:!<key_hex>` inputs to
-replace matching `bpf_map_lookup_elem()` calls with a non-NULL stack pointer to
-the snapshotted map value, then lifts that inlined bytecode to LLVM IR and runs
-the O3 pipeline before lowering through LLVM's BPF backend. The current
-implementation supports hard hints only; soft hints fail fast instead of
-falling back. Katran `balancer_ingress` passes loader verification and
-`BPF_PROG_TEST_RUN` through the temporary helper
-`docs/tmp/bpfopt_llvm_mapinline_katran_wrapper.sh`, with 16 lookup sites
-reported as inlined and final size `2542 -> 2500` instructions. The loader
-smoke and raw duration samples are recorded in
-`docs/tmp/katran_llvm_loader_perf_20260514.md`.
+`map_inline` uses pass-local `--map-values`, `--map-ids`, and
+`--inline-hint=<map>:<key_hex>` inputs. A hint identifies one map entry whose
+snapshotted value may be used; there is no hard/soft hint split. A leading `!`
+is accepted only as compatibility syntax and is ignored. Katran
+`balancer_ingress` passes loader verification and `BPF_PROG_TEST_RUN` with 16
+lookup sites reported as inlined.
 
 The local llvmbpf changes are kept to compatibility fixes needed by kernel
 bytecode:
@@ -93,10 +83,10 @@ sudo -n bash -lc 'ulimit -l unlimited; bpfopt/target/debug/bpfopt-loader \
   --workdir /tmp/bpfopt-llvm-work'
 ```
 
-Full O0 verifier run used during validation:
+Full O3 verifier run used during validation:
 
 ```sh
-BASE=/tmp/test-all-noop-strict-llvmbpf-o0
+BASE=/tmp/test-all-noop-strict-llvmbpf-o3
 rm -rf "$BASE"
 mkdir -p "$BASE"
 printf '{"arch":"x86_64","kinsns":{}}\n' >"$BASE/target.json"

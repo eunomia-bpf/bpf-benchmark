@@ -549,20 +549,14 @@ _STRESS_NG_MEMORY_STRESSORS = (
     "madvise",
 )
 _STRESS_NG_BCC_HOOK_STRESSORS = (
-    # Cover the bundled BCC tool set: capable/syscount, opensnoop/vfsstat,
-    # biosnoop, tcpconnect/tcplife, and runqlat.
+    # Hot BCC hook families with high BPF/user-work ratio: syscall/capability
+    # paths plus socket fd churn. Full BCC tool coverage is checked
+    # by stats-on diagnostics; low-ratio block/vfs/file-IO stressors would make
+    # the app-level performance workload mostly measure storage/user work.
+    "syscall",
     "cap",
     "set",
-    "open",
-    "fstat",
-    "hdd",
-    "io",
-    "sock",
     "sockfd",
-    "sockpair",
-    "switch",
-    "yield",
-    "futex",
 )
 _STRESS_NG_TETRAGON_POLICY_STRESSORS = (
     # Matches the bundled Tetragon policies that showed high event cost in

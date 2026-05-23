@@ -494,6 +494,18 @@ def append_special_insn(
             lo, hi = rodata16[symbol]
             lines.append(f"\tARM64_SIM_L_LOAD_CONST16_Q0({c_u64(lo)}, {c_u64(hi)});")
             return True
+    if op == "ldp" and len(ops) == 3:
+        mem = parse_mem(ops, 2)
+        symbol = rodata_regs.get(mem.base)
+        if symbol is not None and symbol in rodata16:
+            if mem.offset != 0:
+                raise ValueError(f"unsupported rodata ldp offset: {insn.raw}")
+            lo, hi = rodata16[symbol]
+            lines.append(
+                f"\tARM64_SIM_L_LOAD_CONST16_PAIR({reg_const(ops[0])}, "
+                f"{reg_const(ops[1])}, {c_u64(lo)}, {c_u64(hi)});"
+            )
+            return True
     if op == "str" and len(ops) == 2 and ops[0].lower() == "q0":
         mem = parse_mem(ops, 1)
         lines.append(

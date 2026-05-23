@@ -2644,7 +2644,10 @@ fn plan_arm64_entry_abi_strip(bytes: &[u8]) -> Result<Arm64EntryAbiStrip> {
     }
 
     for (idx, (saves, restores)) in save_counts.iter().zip(restore_counts.iter()).enumerate() {
-        if saves != restores {
+        if *saves == 0 && *restores == 0 {
+            continue;
+        }
+        if *saves == 0 || *restores == 0 {
             bail!(
                 "arm64 entry ABI strip found unbalanced save/restore for x{}: saves={}, restores={}",
                 19 + idx,
@@ -2652,9 +2655,15 @@ fn plan_arm64_entry_abi_strip(bytes: &[u8]) -> Result<Arm64EntryAbiStrip> {
                 restores
             );
         }
-        if *saves > 0 {
-            out.callee_saved_mask |= 1u8 << idx;
+        if *saves > 1 {
+            bail!(
+                "arm64 entry ABI strip found multiple save sites for x{}: saves={}, restores={}",
+                19 + idx,
+                saves,
+                restores
+            );
         }
+        out.callee_saved_mask |= 1u8 << idx;
     }
 
     Ok(out)
@@ -2713,6 +2722,36 @@ fn arm64_branch_target_word(
         .ok_or_else(|| anyhow!("arm64 branch target addr not in index map"))
 }
 
+fn a64_mov_reg64(insn: u32) -> Option<(usize, usize)> {
+    if (insn & 0xffe0_ffe0) != 0xaa00_03e0 {
+        return None;
+    }
+    let dst = (insn & 0x1f) as usize;
+    let src = ((insn >> 16) & 0x1f) as usize;
+    Some((dst, src))
+}
+
+fn arm64_call_clobber_map_regs(reg_map_names: &mut [Option<String>; 32]) {
+    for slot in reg_map_names.iter_mut().take(19) {
+        *slot = None;
+    }
+}
+
+fn arm64_select_map_call_site(
+    sites_len: usize,
+    ordinal: usize,
+    map_name: Option<&String>,
+    seen_by_map: &mut HashMap<String, usize>,
+) -> Option<usize> {
+    if ordinal < sites_len {
+        if let Some(name) = map_name {
+            seen_by_map.entry(name.clone()).or_insert(ordinal);
+        }
+        return Some(ordinal);
+    }
+    map_name.and_then(|name| seen_by_map.get(name).copied())
+}
+
 fn rewrite_arm64(
     elf: &object::File,
     entry: &SymInfo,
@@ -2735,6 +2774,9 @@ fn rewrite_arm64(
     let mut proof_relocs: Vec<ProofReloc> = Vec::new();
     let mut callee_saved_mask: u8 = 0;
     const A64_MOV_X7_X0: u32 = 0xaa00_03e7;
+    let mut reg_map_names: [Option<String>; 32] = std::array::from_fn(|_| None);
+    let mut lookup_site_by_map: HashMap<String, usize> = HashMap::new();
+    let mut update_site_by_map: HashMap<String, usize> = HashMap::new();
 
     for sym in included {
         let is_entry = sym.address == entry.address;
@@ -2767,6 +2809,11 @@ fn rewrite_arm64(
                 continue;
             }
             let reloc = relocs.get(&(sym.address, off as u64));
+            if !proof_mode {
+                if let Some((dst, src)) = a64_mov_reg64(insn) {
+                    reg_map_names[dst] = reg_map_names[src].clone();
+                }
+            }
 
             if let Some(reloc) = reloc {
                 match reloc.r_type {
@@ -2844,18 +2891,27 @@ fn rewrite_arm64(
                         let mut helper_addr = helper_addrs.get(&reloc.target_name).copied();
                         if reloc.target_name == "bpf_map_lookup_elem" && is_entry {
                             let ordinal = lookup_call_counter;
-                            let spec = lookup_sites.get(ordinal).ok_or_else(|| {
+                            let map_name = reg_map_names[0].as_ref();
+                            let site_index = arm64_select_map_call_site(
+                                lookup_sites.len(),
+                                ordinal,
+                                map_name,
+                                &mut lookup_site_by_map,
+                            )
+                            .ok_or_else(|| {
                                 anyhow!(
                                     "arm64 bpf_map_lookup_elem call site {ordinal} in {} is missing --lookup-site metadata",
                                     sym.name
                                 )
                             })?;
+                            let spec = &lookup_sites[site_index];
                             lookup_call_counter += 1;
                             match spec.kind {
                                 LookupKind::Array | LookupKind::PerCpuArray => {
                                     for word in build_arm64_array_lookup(spec)? {
                                         append_u32(&mut blob, word);
                                     }
+                                    arm64_call_clobber_map_regs(&mut reg_map_names);
                                     continue;
                                 }
                                 LookupKind::Call => {
@@ -2878,6 +2934,7 @@ fn rewrite_arm64(
                                     for word in build_arm64_hash_lookup_postcall(spec)? {
                                         append_u32(&mut blob, word);
                                     }
+                                    arm64_call_clobber_map_regs(&mut reg_map_names);
                                     continue;
                                 }
                                 LookupKind::LruHash => {
@@ -2892,6 +2949,7 @@ fn rewrite_arm64(
                                     for word in build_arm64_lru_hash_lookup_postcall(spec)? {
                                         append_u32(&mut blob, word);
                                     }
+                                    arm64_call_clobber_map_regs(&mut reg_map_names);
                                     continue;
                                 }
                                 LookupKind::PerCpuHash => {
@@ -2906,19 +2964,29 @@ fn rewrite_arm64(
                                     for word in build_arm64_percpu_hash_lookup_postcall(spec)? {
                                         append_u32(&mut blob, word);
                                     }
+                                    arm64_call_clobber_map_regs(&mut reg_map_names);
                                     continue;
                                 }
                             }
                         }
                         if reloc.target_name == "bpf_map_update_elem" && is_entry {
                             let ordinal = update_call_counter;
+                            let map_name = reg_map_names[0].as_ref();
+                            let site_index = arm64_select_map_call_site(
+                                update_sites.len(),
+                                ordinal,
+                                map_name,
+                                &mut update_site_by_map,
+                            );
                             update_call_counter += 1;
-                            if let Some(spec) = update_sites.get(ordinal) {
+                            if let Some(site_index) = site_index {
+                                let spec = &update_sites[site_index];
                                 match spec.kind {
                                     UpdateKind::Array | UpdateKind::PerCpuArray => {
                                         for word in build_arm64_array_update(spec)? {
                                             append_u32(&mut blob, word);
                                         }
+                                        arm64_call_clobber_map_regs(&mut reg_map_names);
                                         continue;
                                     }
                                     UpdateKind::Call => {
@@ -2942,6 +3010,7 @@ fn rewrite_arm64(
                         for word in arm64_helper_call_sequence(helper_addr)? {
                             append_u32(&mut blob, word);
                         }
+                        arm64_call_clobber_map_regs(&mut reg_map_names);
                         continue;
                     }
                     R_AARCH64_ADR_GOT_PAGE => {
@@ -2995,6 +3064,8 @@ fn rewrite_arm64(
                             word_index: emit_word_index,
                             kind: Arm64PatchKind::Nop,
                         });
+                        let rt = (insn & 0x1f) as usize;
+                        reg_map_names[rt] = Some(reloc.target_name.clone());
                         blob.extend_from_slice(&insn.to_le_bytes());
                         continue;
                     }
@@ -4850,5 +4921,30 @@ fn disasm(bytes: &[u8]) {
         out.clear();
         formatter.format(&insn, &mut out);
         eprintln!("{:04x}: {}", insn.ip(), out);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn arm64_entry_abi_strip_allows_multiple_epilogues() {
+        let mut bytes = Vec::new();
+        for word in [
+            0xa9024ffe, // stp x30, x19, [sp, #32]
+            0xd503201f, // nop
+            0xa9424ffe, // ldp x30, x19, [sp, #32]
+            0xa9424ffe, // ldp x30, x19, [sp, #32]
+        ] {
+            bytes.extend_from_slice(&u32::to_le_bytes(word));
+        }
+
+        let strip = plan_arm64_entry_abi_strip(&bytes).unwrap();
+        assert_eq!(strip.callee_saved_mask, 0x1);
+        assert!(strip.nop_word_indices.contains(&0));
+        assert!(strip.nop_word_indices.contains(&2));
+        assert!(strip.nop_word_indices.contains(&3));
+        assert_eq!(strip.nop_word_indices.len(), 3);
     }
 }

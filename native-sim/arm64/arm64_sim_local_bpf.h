@@ -376,6 +376,12 @@ struct arm64_sim_skb_abi {
 		__a64_v0_hi = (HI);                                      \
 	} while (0)
 
+#define ARM64_SIM_L_LOAD_CONST16_PAIR(DST, SRC, LO, HI)                    \
+	do {                                                               \
+		ARM64_SIM_L_WRITE_REG_WIDTH((DST), (LO), ARM64_WIDTH_64);\
+		ARM64_SIM_L_WRITE_REG_WIDTH((SRC), (HI), ARM64_WIDTH_64);\
+	} while (0)
+
 #define ARM64_SIM_L_STORE_Q0_STACK(OFF)                                    \
 	do {                                                               \
 		ARM64_SIM_L_STACK_WRITE((OFF), ARM64_WIDTH_64, __a64_v0);\

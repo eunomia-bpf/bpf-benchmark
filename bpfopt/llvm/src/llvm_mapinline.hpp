@@ -37,12 +37,6 @@ extract_relocated_text(const std::vector<uint8_t> &object_bytes,
 		text.insert(text.end(), input.begin() + *subprog_start * INSN_SIZE,
 			    input.end());
 	}
-	repair_verifier_range_copies(text);
-	repair_zero_extended_signed_jumps(text);
-	repair_added_pointer_mem_accesses(text);
-	repair_mod_shift_pointer_bounds(text);
-	repair_packet_byte_bounds(text);
-	eliminate_dead_alu_defs(text);
 	return text;
 }
 
@@ -118,18 +112,12 @@ void promote_register_allocas(llvm::Module &module, llvm::TargetMachine &machine
 	module_pipeline.run(module, module_am);
 }
 
-std::vector<uint8_t> emit_bpf_object(llvm::Module &module, bool optimize_ir)
+std::vector<uint8_t> emit_bpf_object(llvm::Module &module)
 {
-	auto machine = create_bpf_target_machine(
-		optimize_ir ? llvm::CodeGenOptLevel::Aggressive :
-			      llvm::CodeGenOptLevel::Less);
+	auto machine = create_bpf_target_machine(llvm::CodeGenOptLevel::Aggressive);
 	module.setTargetTriple(llvm::Triple("bpfel"));
 	module.setDataLayout(machine->createDataLayout());
-	if (optimize_ir) {
-		optimize_module(module, *machine);
-	} else {
-		promote_register_allocas(module, *machine);
-	}
+	optimize_module(module, *machine);
 
 	llvm::SmallVector<char, 0> object_stream;
 	llvm::raw_svector_ostream output(object_stream);
@@ -190,13 +178,11 @@ llvm::orc::ThreadSafeModule generate_llvm_module(const std::vector<uint8_t> &inp
 		context.generateModule(helper_symbols(input), {}, false));
 }
 
-std::vector<uint8_t> run_llvm_roundtrip(const std::vector<uint8_t> &input,
-					bool optimize_ir)
+std::vector<uint8_t> run_llvm_roundtrip(const std::vector<uint8_t> &input)
 {
 	auto module = generate_llvm_module(input);
 	return module.withModuleDo([&](llvm::Module &module) {
-		return extract_relocated_text(emit_bpf_object(module, optimize_ir),
-					      input);
+		return extract_relocated_text(emit_bpf_object(module), input);
 	});
 }
 
@@ -226,9 +212,9 @@ struct InlineRecord {
 	std::vector<uint8_t> value;
 };
 
-// Optional CLI speculation hint: fold map `map_name`'s lookups assuming the
-// runtime key equals `key`, behind a soft `if (key==K)` guard with the real
-// lookup as fallback.
+// Optional CLI entry hint: for map `map_name`, the hex bytes identify the
+// lookup key whose snapshotted value may be used. There is one hint kind; older
+// `!key` spelling is accepted below as compatibility syntax only.
 struct InlineHint {
 	std::string map_name;
 	std::vector<uint8_t> key;
@@ -435,8 +421,8 @@ MapInlineArgs parse_map_inline_args(const std::vector<std::string> &args)
 				value = arg.substr(
 					std::strlen("--inline-hint="));
 			}
-			// name:hex  (soft speculation; the leading '!' from the
-			// old hard-fold syntax is accepted and ignored).
+			// name:hex. A leading '!' from the old hard-fold syntax is
+			// accepted and ignored for compatibility.
 			const auto colon = value.find(':');
 			if (colon == std::string::npos || colon == 0 ||
 			    colon + 1 >= value.size()) {
@@ -695,7 +681,7 @@ llvm::Value *materialize_value_ptr(llvm::IRBuilder<> &b,
 	return b.CreatePtrToInt(buf, i64ty);
 }
 
-// Soft speculation as a real control-flow guard, NOT a select:
+// Hinted-entry speculation as a real control-flow guard, NOT a select:
 //
 //   orig:  %m = (key == K)
 //          br %m, fast, slow
@@ -880,7 +866,7 @@ resolve_const_key(llvm::CallInst *call, size_t key_size, llvm::DominatorTree &dt
 //      constant, skip the call" — done by us, since O3 can't see the constant
 //      through llvmbpf's ptrtoint frame arithmetic.
 //   2. uniform map -> UNCONDITIONAL fold (value is key-independent).
-//   3. CLI speculation hint on a runtime key -> guarded branch: fast path skips
+//   3. CLI entry hint on a runtime key -> guarded branch: fast path skips
 //      the lookup, slow path keeps the real lookup as a sound fallback.
 struct FoldDecision {
 	llvm::CallInst *call;
@@ -1004,8 +990,7 @@ std::vector<uint8_t> run_map_inline_roundtrip(const std::vector<uint8_t> &input,
 			module.print(llvm::errs(), nullptr);
 		}
 		records = fold_map_lookups_ir(module, args);
-		return extract_relocated_text(emit_bpf_object(module, true),
-					      input);
+		return extract_relocated_text(emit_bpf_object(module), input);
 	});
 }
 

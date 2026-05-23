@@ -1755,14 +1755,15 @@ mod tests {
             .arg(map_values_dir)
             .arg("--map-ids")
             .arg(join_u32_csv(&prog.map_ids))
-            // Soft speculation on vip_map's runtime 5-tuple key (the benchmark
+            // Entry hint for vip_map's runtime 5-tuple key (the benchmark
             // VIP 10.100.1.1:8080/TCP): guarded fast path + real-lookup fallback.
             // ctl_array is folded automatically via const-key derivation
             // (unconditional, sound, const-propagates), and ch_rings/server_id
             // via uniform overlays — no hints needed for those. reals is NOT
-            // hinted: it is a runtime-key array and six soft guards there push
+            // hinted: it is a runtime-key array and six guarded hints there push
             // the already-complex balancer past the verifier's state limit
-            // (E2BIG); folding it needs hard fold, which is out of scope here.
+            // (E2BIG); folding it needs stronger proof for an unconditional
+            // fold, which is out of scope here.
             .arg("--inline-hint=vip_map:0a6401010000000000000000000000001f900600")
             .status()?;
         if !status.success() {

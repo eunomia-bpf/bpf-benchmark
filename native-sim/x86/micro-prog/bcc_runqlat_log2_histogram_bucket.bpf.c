@@ -24,7 +24,7 @@ x86_l_f:
 	/* 0xf: jbe    16 <bcc_runqlat_log2_histogram_bucket_xdp+0x16> */
 	X86_SIM_X86_JCC(X86_CC_BE, 0xf, 0x16, x86_l_16);
 x86_l_11:
-	/* 0x11: jmp    14b <bcc_runqlat_log2_histogram_bucket_xdp+0x14b> ; native-link entry RET */
+	/* 0x11: jmp    159 <bcc_runqlat_log2_histogram_bucket_xdp+0x159> ; native-link entry RET */
 	X86_SIM_X86_RET();
 x86_l_16:
 	/* 0x16: lea    rdx,[rdi+0x8] */
@@ -99,8 +99,8 @@ x86_l_58:
 	/* 0x58: cmp    r11,0x80 */
 	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R11, X86_REG_NONE, X86_WIDTH_64, 0, 128ULL);
 x86_l_5f:
-	/* 0x5f: je     137 <bcc_runqlat_log2_histogram_bucket_xdp+0x137> */
-	X86_SIM_X86_JCC(X86_CC_E, 0x5f, 0x137, x86_l_137);
+	/* 0x5f: je     145 <bcc_runqlat_log2_histogram_bucket_xdp+0x145> */
+	X86_SIM_X86_JCC(X86_CC_E, 0x5f, 0x145, x86_l_145);
 x86_l_65:
 	/* 0x65: movzx  edx,WORD PTR [rdi+rax*8+0x10] */
 	X86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_RDX, X86_RDI, X86_WIDTH_32, X86_MEM_AUX_FULL(X86_RAX, 3, X86_WIDTH_16), 16ULL);
@@ -273,30 +273,39 @@ x86_l_12f:
 	/* 0x12f: add    r14,r10 */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_R14, X86_R10, X86_WIDTH_64, X86_ALU_ADD, 0);
 x86_l_132:
-	/* 0x132: jmp    52 <bcc_runqlat_log2_histogram_bucket_xdp+0x52> */
-	X86_SIM_X86_JMP(0x132, 0x52, x86_l_52);
-x86_l_137:
-	/* 0x137: mov    QWORD PTR [rsi],r8 */
-	X86_SIM_RUN_OP(X86_OP_MOV_STORE_REG, X86_RSI, X86_R8, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);
-x86_l_13a:
-	/* 0x13a: mov    eax,0x2 */
-	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
+	/* 0x132: mov    r8,r14 */
+	X86_SIM_RUN_OP(X86_OP_MOV_REG, X86_R8, X86_R14, X86_WIDTH_64, 0, 0);
+x86_l_135:
+	/* 0x135: mov    rax,r11 */
+	X86_SIM_RUN_OP(X86_OP_MOV_REG, X86_RAX, X86_R11, X86_WIDTH_64, 0, 0);
+x86_l_138:
+	/* 0x138: cmp    r11,0x80 */
+	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R11, X86_REG_NONE, X86_WIDTH_64, 0, 128ULL);
 x86_l_13f:
-	/* 0x13f: pop    rbx */
+	/* 0x13f: jne    65 <bcc_runqlat_log2_histogram_bucket_xdp+0x65> */
+	X86_SIM_X86_JCC(X86_CC_NE, 0x13f, 0x65, x86_l_65);
+x86_l_145:
+	/* 0x145: mov    QWORD PTR [rsi],r8 */
+	X86_SIM_RUN_OP(X86_OP_MOV_STORE_REG, X86_RSI, X86_R8, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);
+x86_l_148:
+	/* 0x148: mov    eax,0x2 */
+	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
+x86_l_14d:
+	/* 0x14d: pop    rbx */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_RBX, X86_REG_NONE, X86_WIDTH_64, 0, 0);
-x86_l_140:
-	/* 0x140: pop    r12 */
+x86_l_14e:
+	/* 0x14e: pop    r12 */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_R12, X86_REG_NONE, X86_WIDTH_64, 0, 0);
-x86_l_142:
-	/* 0x142: pop    r14 */
+x86_l_150:
+	/* 0x150: pop    r14 */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_R14, X86_REG_NONE, X86_WIDTH_64, 0, 0);
-x86_l_144:
-	/* 0x144: pop    r15 */
+x86_l_152:
+	/* 0x152: pop    r15 */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_R15, X86_REG_NONE, X86_WIDTH_64, 0, 0);
-x86_l_146:
-	/* 0x146: jmp    14b <bcc_runqlat_log2_histogram_bucket_xdp+0x14b> ; native-link entry RET */
+x86_l_154:
+	/* 0x154: jmp    159 <bcc_runqlat_log2_histogram_bucket_xdp+0x159> ; native-link entry RET */
 	X86_SIM_X86_RET();
-x86_l_14b:
+x86_l_159:
 	/* native-link entry fallthrough exit */
 	X86_SIM_X86_RET();
 }

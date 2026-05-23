@@ -24,7 +24,7 @@ x86_l_f:
 	/* 0xf: jbe    16 <tracee_syscall_name_table_lookup_xdp+0x16> */
 	X86_SIM_X86_JCC(X86_CC_BE, 0xf, 0x16, x86_l_16);
 x86_l_11:
-	/* 0x11: jmp    2ff <tracee_syscall_name_table_lookup_xdp+0x2ff> ; native-link entry RET */
+	/* 0x11: jmp    30a <tracee_syscall_name_table_lookup_xdp+0x30a> ; native-link entry RET */
 	X86_SIM_X86_RET();
 x86_l_16:
 	/* 0x16: lea    rdi,[rsi+0x8] */
@@ -498,8 +498,8 @@ x86_l_2cb:
 	/* 0x2cb: jne    80 <tracee_syscall_name_table_lookup_xdp+0x80> */
 	X86_SIM_X86_JCC(X86_CC_NE, 0x2cb, 0x80, x86_l_80);
 x86_l_2d1:
-	/* 0x2d1: jmp    2e8 <tracee_syscall_name_table_lookup_xdp+0x2e8> */
-	X86_SIM_X86_JMP(0x2d1, 0x2e8, x86_l_2e8);
+	/* 0x2d1: jmp    2f3 <tracee_syscall_name_table_lookup_xdp+0x2f3> */
+	X86_SIM_X86_JMP(0x2d1, 0x2f3, x86_l_2f3);
 x86_l_2d3:
 	/* 0x2d3: mov    eax,eax */
 	X86_SIM_RUN_OP(X86_OP_MOV_REG, X86_RAX, X86_RAX, X86_WIDTH_32, 0, 0);
@@ -513,36 +513,42 @@ x86_l_2e3:
 	/* 0x2e3: xor    r11,rax */
 	X86_SIM_RUN_OP(X86_OP_ALU_REG, X86_R11, X86_RAX, X86_WIDTH_64, X86_ALU_XOR, 0);
 x86_l_2e6:
-	/* 0x2e6: jmp    2c4 <tracee_syscall_name_table_lookup_xdp+0x2c4> */
-	X86_SIM_X86_JMP(0x2e6, 0x2c4, x86_l_2c4);
-x86_l_2e8:
-	/* 0x2e8: mov    QWORD PTR [rdx],r11 */
-	X86_SIM_RUN_OP(X86_OP_MOV_STORE_REG, X86_RDX, X86_R11, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);
-x86_l_2eb:
-	/* 0x2eb: mov    eax,0x2 */
-	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
-x86_l_2f0:
-	/* 0x2f0: pop    rbx */
-	X86_SIM_RUN_OP(X86_OP_POP, X86_RBX, X86_REG_NONE, X86_WIDTH_64, 0, 0);
-x86_l_2f1:
-	/* 0x2f1: pop    r12 */
-	X86_SIM_RUN_OP(X86_OP_POP, X86_R12, X86_REG_NONE, X86_WIDTH_64, 0, 0);
+	/* 0x2e6: inc    r9 */
+	X86_SIM_RUN_OP(X86_OP_ALU_IMM, X86_R9, X86_REG_NONE, X86_WIDTH_64, X86_ALU_INC, 1);
+x86_l_2e9:
+	/* 0x2e9: cmp    r9,0x40 */
+	X86_SIM_RUN_OP(X86_OP_CMP_IMM, X86_R9, X86_REG_NONE, X86_WIDTH_64, 0, 64ULL);
+x86_l_2ed:
+	/* 0x2ed: jne    80 <tracee_syscall_name_table_lookup_xdp+0x80> */
+	X86_SIM_X86_JCC(X86_CC_NE, 0x2ed, 0x80, x86_l_80);
 x86_l_2f3:
-	/* 0x2f3: pop    r13 */
+	/* 0x2f3: mov    QWORD PTR [rdx],r11 */
+	X86_SIM_RUN_OP(X86_OP_MOV_STORE_REG, X86_RDX, X86_R11, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);
+x86_l_2f6:
+	/* 0x2f6: mov    eax,0x2 */
+	X86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_RAX, X86_REG_NONE, X86_WIDTH_32, 0, 2ULL);
+x86_l_2fb:
+	/* 0x2fb: pop    rbx */
+	X86_SIM_RUN_OP(X86_OP_POP, X86_RBX, X86_REG_NONE, X86_WIDTH_64, 0, 0);
+x86_l_2fc:
+	/* 0x2fc: pop    r12 */
+	X86_SIM_RUN_OP(X86_OP_POP, X86_R12, X86_REG_NONE, X86_WIDTH_64, 0, 0);
+x86_l_2fe:
+	/* 0x2fe: pop    r13 */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_R13, X86_REG_NONE, X86_WIDTH_64, 0, 0);
-x86_l_2f5:
-	/* 0x2f5: pop    r14 */
+x86_l_300:
+	/* 0x300: pop    r14 */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_R14, X86_REG_NONE, X86_WIDTH_64, 0, 0);
-x86_l_2f7:
-	/* 0x2f7: pop    r15 */
+x86_l_302:
+	/* 0x302: pop    r15 */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_R15, X86_REG_NONE, X86_WIDTH_64, 0, 0);
-x86_l_2f9:
-	/* 0x2f9: pop    rbp */
+x86_l_304:
+	/* 0x304: pop    rbp */
 	X86_SIM_RUN_OP(X86_OP_POP, X86_RBP, X86_REG_NONE, X86_WIDTH_64, 0, 0);
-x86_l_2fa:
-	/* 0x2fa: jmp    2ff <tracee_syscall_name_table_lookup_xdp+0x2ff> ; native-link entry RET */
+x86_l_305:
+	/* 0x305: jmp    30a <tracee_syscall_name_table_lookup_xdp+0x30a> ; native-link entry RET */
 	X86_SIM_X86_RET();
-x86_l_2ff:
+x86_l_30a:
 	/* native-link entry fallthrough exit */
 	X86_SIM_X86_RET();
 }

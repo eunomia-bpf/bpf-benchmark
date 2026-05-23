@@ -50,34 +50,6 @@
 namespace {
 
 constexpr uint8_t BPF_LD_IMM64 = 0x18;
-constexpr uint8_t BPF_LDX_MEM_B = 0x71;
-constexpr uint8_t BPF_LDX_MEM_H = 0x69;
-constexpr uint8_t BPF_LDX_MEM_W = 0x61;
-constexpr uint8_t BPF_LDX_MEM_DW = 0x79;
-constexpr uint8_t BPF_JMP32_JNE_K = 0x56;
-constexpr uint8_t BPF_ALU64_ADD_K = 0x07;
-constexpr uint8_t BPF_ALU64_ADD_X = 0x0f;
-constexpr uint8_t BPF_ALU64_LSH_K = 0x67;
-constexpr uint8_t BPF_ALU64_MOV_X = 0xbf;
-constexpr uint8_t BPF_ALU64_RSH_K = 0x77;
-constexpr uint8_t BPF_ALU32_MOV_X = 0xbc;
-constexpr uint8_t BPF_ALU32_AND_K = 0x54;
-constexpr uint8_t BPF_ALU32_LSH_K = 0x64;
-constexpr uint8_t BPF_ALU32_MOD_K = 0x94;
-constexpr uint8_t BPF_ST_MEM_B = 0x72;
-constexpr uint8_t BPF_ST_MEM_W = 0x62;
-constexpr uint8_t BPF_JEQ_K = 0x15;
-constexpr uint8_t BPF_JMP32_JSGT_K = 0x66;
-constexpr uint8_t BPF_JMP32_JSGE_K = 0x76;
-constexpr uint8_t BPF_JMP32_JSLT_K = 0xc6;
-constexpr uint8_t BPF_JMP32_JSLE_K = 0xd6;
-constexpr uint8_t BPF_JGT_K = 0x25;
-constexpr uint8_t BPF_JGT_X = 0x2d;
-constexpr uint8_t BPF_JGE_X = 0x3d;
-constexpr uint8_t BPF_JLT_K = 0xa5;
-constexpr uint8_t BPF_JLT_X = 0xad;
-constexpr uint8_t BPF_JNE_K = 0x55;
-constexpr uint8_t BPF_JA = 0x05;
 constexpr uint8_t BPF_CALL = 0x85;
 constexpr uint8_t BPF_CALLX = BPF_CALL | 0x08;
 constexpr uint8_t BPF_EXIT = 0x95;
@@ -106,7 +78,7 @@ struct Cli {
 	std::optional<std::filesystem::path> report;
 	std::optional<std::filesystem::path> target;
 	std::optional<std::filesystem::path> target_output;
-	std::optional<std::filesystem::path> verifier_states;
+	std::optional<std::filesystem::path> fd_to_id;
 	std::optional<std::filesystem::path> func_info;
 	std::optional<std::filesystem::path> line_info;
 	std::string prog_type;
@@ -194,8 +166,6 @@ void write_text(const std::filesystem::path &path, std::string_view text)
 
 #include "bpf_bytecode.hpp"
 
-#include "bpf_repair.hpp"
-
 #include "llvm_mapinline.hpp"
 
 void shift_target_call_offsets(const std::filesystem::path &input,
@@ -249,6 +219,37 @@ void shift_target_call_offsets(const std::filesystem::path &input,
 	write_text(output, os.str());
 }
 
+std::map<int32_t, uint32_t>
+read_fd_to_id_map(const std::filesystem::path &path)
+{
+	auto value = expected_or_throw(llvm::json::parse(read_text(path)));
+	auto *root = value.getAsObject();
+	if (!root) {
+		throw std::runtime_error("--fd-to-id JSON root is not an object");
+	}
+	std::map<int32_t, uint32_t> out;
+	for (const auto &entry : *root) {
+		size_t consumed = 0;
+		const auto key = entry.getFirst().str();
+		long fd = std::stol(key, &consumed, 10);
+		if (key.empty() || consumed != key.size() ||
+		    fd < std::numeric_limits<int32_t>::min() ||
+		    fd > std::numeric_limits<int32_t>::max()) {
+			throw std::runtime_error(
+				"--fd-to-id has non-i32 loader fd key: " + key);
+		}
+		const auto id = entry.getSecond().getAsInteger();
+		if (!id || *id < 0 ||
+		    *id > std::numeric_limits<uint32_t>::max()) {
+			throw std::runtime_error(
+				"--fd-to-id has non-u32 map id for fd: " + key);
+		}
+		out.emplace(static_cast<int32_t>(fd),
+			    static_cast<uint32_t>(*id));
+	}
+	return out;
+}
+
 void canonicalize_map_refs(Cli &cli)
 {
 	if (cli.pass) {
@@ -273,6 +274,13 @@ void canonicalize_map_refs(Cli &cli)
 			"bytecode length is not a multiple of 8 bytes");
 	}
 	const auto map_ids = parse_u32_csv(cli.map_ids);
+	std::map<uint32_t, size_t> map_id_to_idx;
+	for (size_t i = 0; i < map_ids.size(); i++) {
+		map_id_to_idx.emplace(map_ids[i], i);
+	}
+	const auto fd_to_id =
+		cli.fd_to_id ? std::optional(read_fd_to_id_map(*cli.fd_to_id)) :
+			       std::nullopt;
 	std::map<int32_t, size_t> fd_to_idx;
 	const size_t insn_count = bytes.size() / INSN_SIZE;
 
@@ -288,7 +296,22 @@ void canonicalize_map_refs(Cli &cli)
 		if (src == BPF_PSEUDO_MAP_FD ||
 		    src == BPF_PSEUDO_MAP_VALUE) {
 			const int32_t fd = read_imm(bytes, pc);
-			if (!fd_to_idx.contains(fd)) {
+			if (fd_to_id) {
+				const auto id = fd_to_id->find(fd);
+				if (id == fd_to_id->end()) {
+					throw std::runtime_error(
+						"loader fd " + std::to_string(fd) +
+						" is not in --fd-to-id mapping");
+				}
+				const auto idx = map_id_to_idx.find(id->second);
+				if (idx == map_id_to_idx.end()) {
+					throw std::runtime_error(
+						"kernel map id " +
+						std::to_string(id->second) +
+						" is not in --map-ids");
+				}
+				fd_to_idx.emplace(fd, idx->second);
+			} else if (!fd_to_idx.contains(fd)) {
 				fd_to_idx.emplace(fd, fd_to_idx.size());
 			}
 		}
@@ -400,15 +423,17 @@ void run_pass(Cli &cli)
 		throw std::runtime_error(
 			"--target-output requires --canonicalize-map-refs");
 	}
+	if (cli.fd_to_id) {
+		throw std::runtime_error(
+			"--fd-to-id requires --canonicalize-map-refs");
+	}
 	const auto input = read_all(cli.input);
 	std::vector<InlineRecord> inlined;
 	std::vector<uint8_t> output;
-	if (*cli.pass == "noop") {
-		output = run_llvm_roundtrip(input, false);
-	} else if (*cli.pass == "map_inline") {
+	if (*cli.pass == "map_inline") {
 		output = run_map_inline_roundtrip(input, cli, inlined);
 	} else {
-		output = run_llvm_roundtrip(input, true);
+		output = run_llvm_roundtrip(input);
 	}
 	write_all(cli.output, output);
 	write_report(cli, input, output, inlined);
@@ -455,8 +480,10 @@ Cli parse_cli(int argc, char **argv)
 			cli.target = next_value(i, argc, argv, arg);
 		} else if (arg == "--target-output") {
 			cli.target_output = next_value(i, argc, argv, arg);
+		} else if (arg == "--fd-to-id") {
+			cli.fd_to_id = next_value(i, argc, argv, arg);
 		} else if (arg == "--verifier-states") {
-			cli.verifier_states = next_value(i, argc, argv, arg);
+			(void)next_value(i, argc, argv, arg);
 		} else if (arg == "--func-info") {
 			cli.func_info = next_value(i, argc, argv, arg);
 		} else if (arg == "--line-info") {

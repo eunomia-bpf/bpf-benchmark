@@ -29,6 +29,8 @@ NATIVE_LINK_DIR := $(ROOT_DIR)/native-sim/x86/native_lab/native_link
 ARM64_NATIVE_KERNEL_SMOKE_DIR := $(ROOT_DIR)/native-sim/arm64/native_lab_smoke
 ARM64_SIM_PROOF_DIR := $(ROOT_DIR)/native-sim/arm64
 MICRO_PROOF_CONFIG := $(if $(strip $(SUITE)),$(if $(filter /%,$(SUITE)),$(SUITE),$(ROOT_DIR)/$(SUITE)),$(ROOT_DIR)/micro/config/micro_pure_jit.yaml)
+X86_BPFOPT_HOST_BIN ?= bpfopt/target/release/bpfopt
+ARM64_BPFOPT_HOST_BIN ?= bpfopt/target/$(ARM64_RUST_TARGET)/release/bpfopt
 
 RUNNER_RUNTIME_CONTAINERFILE := $(RUNNER_CONTAINER_DIR)/runner-runtime.Dockerfile
 BPFOPT_SHIM_DIR := $(ROOT_DIR)/bpfopt/shim
@@ -191,7 +193,7 @@ host-x86-sim-proofs: host-micro-programs-x86
 host-arm64-sim-proofs: host-micro-programs-arm64
 	$(MAKE) -C "$(ARM64_SIM_PROOF_DIR)" PROOF_BUILD_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)/arm64_sim_proofs" MICRO_CONFIG="$(MICRO_PROOF_CONFIG)" micro-proofs-build
 
-x86-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_X86) host-kinsn-x86 host-rust-x86 host-shim-x86 host-source-apps-x86 host-runner-x86 host-micro-programs-x86 host-stage2-programs-x86 host-x86-sim-proofs
+x86-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_X86) host-kinsn-x86 host-rust-x86 host-shim-x86 host-source-apps-x86 host-runner-x86 host-micro-programs-x86 host-stage2-programs-x86 host-x86-sim-proofs $(X86_BPFOPT_HOST_BIN)
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	docker build --platform linux/amd64 \
 		--target runner-runtime \
@@ -212,11 +214,12 @@ x86-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_X86) host-kinsn-x86 host-rust-
 		--build-arg KERNEL_IMAGE_NAME=bzImage \
 		--build-arg KERNEL_MANIFEST_JSON="$$(printf '{"kernel_release":"%s","target_arch":"x86_64","kernel_image":"bzImage"}' "$$(cat "$(HOST_KERNEL_BUILD_DIR_X86)/include/config/kernel.release")")" \
 		--build-arg BPFOPT_HOST_BIN_DIR="bpfopt/target/release" \
+		--build-arg BPFOPT_HOST_BIN="$(X86_BPFOPT_HOST_BIN)" \
 		-t "$(X86_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	docker save -o "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE)"
 	mv -f "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE_TAR)"
 
-arm64-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM64) host-kinsn-arm64 host-rust-arm64 host-shim-arm64 host-source-apps-arm64 host-runner-arm64 host-micro-programs-arm64 host-stage2-programs-arm64 host-arm64-native-kernel-smoke host-arm64-sim-proofs
+arm64-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM64) host-kinsn-arm64 host-rust-arm64 host-shim-arm64 host-source-apps-arm64 host-runner-arm64 host-micro-programs-arm64 host-stage2-programs-arm64 host-arm64-native-kernel-smoke host-arm64-sim-proofs $(ARM64_BPFOPT_HOST_BIN)
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	docker build --platform linux/arm64 \
 		--target runner-runtime \
@@ -237,6 +240,7 @@ arm64-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM
 		--build-arg KERNEL_IMAGE_NAME=vmlinuz.efi \
 		--build-arg KERNEL_MANIFEST_JSON="$$(printf '{"kernel_release":"%s","target_arch":"arm64","kernel_image":"vmlinuz.efi"}' "$$(cat "$(HOST_KERNEL_BUILD_DIR_ARM64)/include/config/kernel.release")")" \
 		--build-arg BPFOPT_HOST_BIN_DIR="bpfopt/target/$(ARM64_RUST_TARGET)/release" \
+		--build-arg BPFOPT_HOST_BIN="$(ARM64_BPFOPT_HOST_BIN)" \
 		--build-arg NATIVE_LINK_HOST_BIN="native-sim/x86/native_lab/native_link/target/$(ARM64_RUST_TARGET)/release/native-link" \
 		-t "$(ARM64_RUNNER_RUNTIME_IMAGE)" -f "$(RUNNER_RUNTIME_CONTAINERFILE)" "$(ROOT_DIR)"
 	docker save -o "$(ARM64_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(ARM64_RUNNER_RUNTIME_IMAGE)"

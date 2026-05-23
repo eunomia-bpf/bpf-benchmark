@@ -1,0 +1,1130 @@
+{
+  "benchmarks": [
+    {
+      "expected_result": 0,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "name": "helper_only_uid_gid",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 80,
+                "native_code_bytes": 47
+              },
+              "compile_ns": 343927,
+              "exec_cycles": 2250,
+              "exec_ns": 27,
+              "jited_prog_len": 47,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 29014,
+                "object_load_ns": 244384,
+                "object_open_ns": 99543,
+                "packet_prepare_ns": 784,
+                "prog_run_wall_ns": 668,
+                "proof_compile_ns": 235296061,
+                "result_extract_ns": 331
+              },
+              "proof_compile": {
+                "arch": "x86",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O3",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_x86",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/helper_only_uid_gid.bpf.c",
+                  "-o",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/helper_only_uid_gid.bpf.o"
+                ],
+                "object": "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/helper_only_uid_gid.bpf.o",
+                "source": "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/helper_only_uid_gid.bpf.c"
+              },
+              "proof_compile_ns": 235296061,
+              "result": 0,
+              "retval": 2,
+              "runner_compile_ns": 343927,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686227140,
+              "wall_exec_ns": 610,
+              "xlated_prog_len": 80
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "helpers",
+        "identity"
+      ]
+    },
+    {
+      "expected_result": 0,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "name": "helper_chain_simple",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 544,
+                "native_code_bytes": 306
+              },
+              "compile_ns": 444875,
+              "exec_cycles": 3704,
+              "exec_ns": 239,
+              "jited_prog_len": 306,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 25514,
+                "object_load_ns": 312025,
+                "object_open_ns": 132850,
+                "packet_prepare_ns": 507,
+                "prog_run_wall_ns": 1064,
+                "proof_compile_ns": 725065134,
+                "result_extract_ns": 363
+              },
+              "proof_compile": {
+                "arch": "x86",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O3",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_x86",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/helper_chain_simple.bpf.c",
+                  "-o",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/helper_chain_simple.bpf.o"
+                ],
+                "object": "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/helper_chain_simple.bpf.o",
+                "source": "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/helper_chain_simple.bpf.c"
+              },
+              "proof_compile_ns": 725065134,
+              "result": 0,
+              "retval": 2,
+              "runner_compile_ns": 444875,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686336436,
+              "wall_exec_ns": 1005,
+              "xlated_prog_len": 544
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "helpers",
+        "chain"
+      ]
+    },
+    {
+      "expected_result": 16045690984503050241,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "name": "map_array_lookup",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 568,
+                "native_code_bytes": 315
+              },
+              "compile_ns": 318637,
+              "exec_cycles": 2736,
+              "exec_ns": 85,
+              "jited_prog_len": 315,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 18527,
+                "object_load_ns": 223586,
+                "object_open_ns": 95051,
+                "packet_prepare_ns": 508,
+                "prog_run_wall_ns": 833,
+                "proof_compile_ns": 712446636,
+                "result_extract_ns": 168
+              },
+              "proof_compile": {
+                "arch": "x86",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O3",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_x86",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/map_array_lookup.bpf.c",
+                  "-o",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/map_array_lookup.bpf.o"
+                ],
+                "object": "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/map_array_lookup.bpf.o",
+                "source": "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/map_array_lookup.bpf.c"
+              },
+              "proof_compile_ns": 712446636,
+              "result": 16045690984503050241,
+              "retval": 2,
+              "runner_compile_ns": 318637,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686225976,
+              "wall_exec_ns": 742,
+              "xlated_prog_len": 568
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "array"
+      ]
+    },
+    {
+      "expected_result": 16045690984503098046,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "name": "map_array_index_packet",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 608,
+                "native_code_bytes": 334
+              },
+              "compile_ns": 313833,
+              "exec_cycles": 2426,
+              "exec_ns": 87,
+              "jited_prog_len": 334,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 19365,
+                "object_load_ns": 224023,
+                "object_open_ns": 89810,
+                "packet_prepare_ns": 501,
+                "prog_run_wall_ns": 748,
+                "proof_compile_ns": 784542050,
+                "result_extract_ns": 321
+              },
+              "proof_compile": {
+                "arch": "x86",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O3",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_x86",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/map_array_index_packet.bpf.c",
+                  "-o",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/map_array_index_packet.bpf.o"
+                ],
+                "object": "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/map_array_index_packet.bpf.o",
+                "source": "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/map_array_index_packet.bpf.c"
+              },
+              "proof_compile_ns": 784542050,
+              "result": 16045690984503098046,
+              "retval": 2,
+              "runner_compile_ns": 313833,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686247131,
+              "wall_exec_ns": 658,
+              "xlated_prog_len": 608
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "array",
+        "packet-derived-key"
+      ]
+    },
+    {
+      "expected_result": 1234605616436508552,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "name": "map_hash_lookup",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 552,
+                "native_code_bytes": 310
+              },
+              "compile_ns": 279982,
+              "exec_cycles": 1710,
+              "exec_ns": 76,
+              "jited_prog_len": 310,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 14844,
+                "object_load_ns": 195652,
+                "object_open_ns": 84330,
+                "packet_prepare_ns": 392,
+                "prog_run_wall_ns": 518,
+                "proof_compile_ns": 716413642,
+                "result_extract_ns": 312
+              },
+              "proof_compile": {
+                "arch": "x86",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O3",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_x86",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/map_hash_lookup.bpf.c",
+                  "-o",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/map_hash_lookup.bpf.o"
+                ],
+                "object": "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/map_hash_lookup.bpf.o",
+                "source": "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/map_hash_lookup.bpf.c"
+              },
+              "proof_compile_ns": 716413642,
+              "result": 1234605616436508552,
+              "retval": 2,
+              "runner_compile_ns": 279982,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686245139,
+              "wall_exec_ns": 464,
+              "xlated_prog_len": 552
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "hash",
+        "inline-eligible"
+      ]
+    },
+    {
+      "expected_result": 18369614221520256751,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "name": "map_hash_str_key",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 584,
+                "native_code_bytes": 330
+              },
+              "compile_ns": 297689,
+              "exec_cycles": 1580,
+              "exec_ns": 79,
+              "jited_prog_len": 330,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 15630,
+                "object_load_ns": 216223,
+                "object_open_ns": 81466,
+                "packet_prepare_ns": 547,
+                "prog_run_wall_ns": 480,
+                "proof_compile_ns": 826900107,
+                "result_extract_ns": 67
+              },
+              "proof_compile": {
+                "arch": "x86",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O3",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_x86",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/map_hash_str_key.bpf.c",
+                  "-o",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/map_hash_str_key.bpf.o"
+                ],
+                "object": "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/map_hash_str_key.bpf.o",
+                "source": "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/map_hash_str_key.bpf.c"
+              },
+              "proof_compile_ns": 826900107,
+              "result": 18369614221520256751,
+              "retval": 2,
+              "runner_compile_ns": 297689,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686287286,
+              "wall_exec_ns": 429,
+              "xlated_prog_len": 584
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "hash",
+        "inline-eligible",
+        "large-key"
+      ]
+    },
+    {
+      "expected_result": 18369614221190019774,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "name": "map_percpu_array",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 600,
+                "native_code_bytes": 338
+              },
+              "compile_ns": 282646,
+              "exec_cycles": 1490,
+              "exec_ns": 49,
+              "jited_prog_len": 338,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 13987,
+                "object_load_ns": 193953,
+                "object_open_ns": 88693,
+                "packet_prepare_ns": 361,
+                "prog_run_wall_ns": 476,
+                "proof_compile_ns": 712087179,
+                "result_extract_ns": 113
+              },
+              "proof_compile": {
+                "arch": "x86",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O3",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_x86",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/map_percpu_array.bpf.c",
+                  "-o",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/map_percpu_array.bpf.o"
+                ],
+                "object": "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/map_percpu_array.bpf.o",
+                "source": "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/map_percpu_array.bpf.c"
+              },
+              "proof_compile_ns": 712087179,
+              "result": 18369614221190019774,
+              "retval": 2,
+              "runner_compile_ns": 282646,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686275305,
+              "wall_exec_ns": 404,
+              "xlated_prog_len": 600
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "percpu"
+      ]
+    },
+    {
+      "expected_result": 1,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "name": "map_lru_hash_counter",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 608,
+                "native_code_bytes": 340
+              },
+              "compile_ns": 353631,
+              "exec_cycles": 3112,
+              "exec_ns": 253,
+              "jited_prog_len": 340,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 20864,
+                "object_load_ns": 249831,
+                "object_open_ns": 103800,
+                "packet_prepare_ns": 443,
+                "prog_run_wall_ns": 897,
+                "proof_compile_ns": 839660583,
+                "result_extract_ns": 87
+              },
+              "proof_compile": {
+                "arch": "x86",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O3",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_x86",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/map_lru_hash_counter.bpf.c",
+                  "-o",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/map_lru_hash_counter.bpf.o"
+                ],
+                "object": "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/map_lru_hash_counter.bpf.o",
+                "source": "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/map_lru_hash_counter.bpf.c"
+              },
+              "proof_compile_ns": 839660583,
+              "result": 1,
+              "retval": 2,
+              "runner_compile_ns": 353631,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686267837,
+              "wall_exec_ns": 844,
+              "xlated_prog_len": 608
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "lru_hash"
+      ]
+    },
+    {
+      "expected_result": 1,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "name": "map_percpu_hash_counter",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 568,
+                "native_code_bytes": 321
+              },
+              "compile_ns": 325966,
+              "exec_cycles": 1764,
+              "exec_ns": 68,
+              "jited_prog_len": 321,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 16606,
+                "object_load_ns": 239377,
+                "object_open_ns": 86589,
+                "packet_prepare_ns": 519,
+                "prog_run_wall_ns": 532,
+                "proof_compile_ns": 763296149,
+                "result_extract_ns": 117
+              },
+              "proof_compile": {
+                "arch": "x86",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O3",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_x86",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/map_percpu_hash_counter.bpf.c",
+                  "-o",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/map_percpu_hash_counter.bpf.o"
+                ],
+                "object": "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/map_percpu_hash_counter.bpf.o",
+                "source": "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/map_percpu_hash_counter.bpf.c"
+              },
+              "proof_compile_ns": 763296149,
+              "result": 1,
+              "retval": 2,
+              "runner_compile_ns": 325966,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686257927,
+              "wall_exec_ns": 479,
+              "xlated_prog_len": 568
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "percpu_hash"
+      ]
+    },
+    {
+      "expected_result": 0,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "name": "combined_helper_map",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 560,
+                "native_code_bytes": 314
+              },
+              "compile_ns": 434367,
+              "exec_cycles": 6474,
+              "exec_ns": 89,
+              "jited_prog_len": 314,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 25179,
+                "object_load_ns": 304226,
+                "object_open_ns": 130141,
+                "packet_prepare_ns": 787,
+                "prog_run_wall_ns": 1878,
+                "proof_compile_ns": 675386094,
+                "result_extract_ns": 318
+              },
+              "proof_compile": {
+                "arch": "x86",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O3",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_x86",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/combined_helper_map.bpf.c",
+                  "-o",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/combined_helper_map.bpf.o"
+                ],
+                "object": "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/combined_helper_map.bpf.o",
+                "source": "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/combined_helper_map.bpf.c"
+              },
+              "proof_compile_ns": 675386094,
+              "result": 0,
+              "retval": 2,
+              "runner_compile_ns": 434367,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686121521,
+              "wall_exec_ns": 1756,
+              "xlated_prog_len": 560
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "percpu",
+        "helpers"
+      ]
+    },
+    {
+      "expected_result": 1311768465173141112,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "name": "multi_map_policy",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 1224,
+                "native_code_bytes": 674
+              },
+              "compile_ns": 358550,
+              "exec_cycles": 2678,
+              "exec_ns": 154,
+              "jited_prog_len": 674,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 17784,
+                "object_load_ns": 258739,
+                "object_open_ns": 99811,
+                "packet_prepare_ns": 419,
+                "prog_run_wall_ns": 817,
+                "proof_compile_ns": 1527158124,
+                "result_extract_ns": 159
+              },
+              "proof_compile": {
+                "arch": "x86",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O3",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_x86",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/multi_map_policy.bpf.c",
+                  "-o",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/multi_map_policy.bpf.o"
+                ],
+                "object": "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/multi_map_policy.bpf.o",
+                "source": "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/multi_map_policy.bpf.c"
+              },
+              "proof_compile_ns": 1527158124,
+              "result": 1311768465173141112,
+              "retval": 2,
+              "runner_compile_ns": 358550,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686165382,
+              "wall_exec_ns": 727,
+              "xlated_prog_len": 1224
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "multi-map"
+      ]
+    },
+    {
+      "expected_result": 3405691582,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "name": "packet_5tuple_classify",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 728,
+                "native_code_bytes": 397
+              },
+              "compile_ns": 438358,
+              "exec_cycles": 3926,
+              "exec_ns": 161,
+              "jited_prog_len": 397,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 24257,
+                "object_load_ns": 314380,
+                "object_open_ns": 123978,
+                "packet_prepare_ns": 642,
+                "prog_run_wall_ns": 1123,
+                "proof_compile_ns": 1328401336,
+                "result_extract_ns": 192
+              },
+              "proof_compile": {
+                "arch": "x86",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O3",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_x86",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/packet_5tuple_classify.bpf.c",
+                  "-o",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/packet_5tuple_classify.bpf.o"
+                ],
+                "object": "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/packet_5tuple_classify.bpf.o",
+                "source": "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/packet_5tuple_classify.bpf.c"
+              },
+              "proof_compile_ns": 1328401336,
+              "result": 3405691582,
+              "retval": 2,
+              "runner_compile_ns": 438358,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686236763,
+              "wall_exec_ns": 1065,
+              "xlated_prog_len": 728
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "hash",
+        "inline-eligible",
+        "packet-derived-key"
+      ]
+    },
+    {
+      "expected_result": 1,
+      "expected_retval": 2,
+      "input": "/home/yunwei37/workspace/bpf-benchmark/micro/generated-inputs/stage2_zero64.mem",
+      "io_mode": "packet",
+      "name": "stats_mixed_helpers",
+      "runs": [
+        {
+          "inner_repeat": 1,
+          "runtime": "native_proof",
+          "samples": [
+            {
+              "code_size": {
+                "bpf_bytecode_bytes": 888,
+                "native_code_bytes": 485
+              },
+              "compile_ns": 335073,
+              "exec_cycles": 3580,
+              "exec_ns": 210,
+              "jited_prog_len": 485,
+              "perf_counters": {},
+              "perf_counters_meta": {
+                "collected": false,
+                "error": "",
+                "include_kernel": true,
+                "requested": false,
+                "scope": "full_repeat_raw"
+              },
+              "phases_ns": {
+                "memory_prepare_ns": 17294,
+                "object_load_ns": 238592,
+                "object_open_ns": 96481,
+                "packet_prepare_ns": 387,
+                "prog_run_wall_ns": 1116,
+                "proof_compile_ns": 1257475182,
+                "result_extract_ns": 397
+              },
+              "proof_compile": {
+                "arch": "x86",
+                "command": [
+                  "clang",
+                  "-g",
+                  "-O3",
+                  "-target",
+                  "bpf",
+                  "-mllvm",
+                  "-bpf-stack-size=4096",
+                  "-D__TARGET_ARCH_x86",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/include/uapi",
+                  "-I",
+                  "/home/yunwei37/workspace/bpf-benchmark/vendor/libbpf/src",
+                  "-I",
+                  "/usr/include/x86_64-linux-gnu",
+                  "-c",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/stats_mixed_helpers.bpf.c",
+                  "-o",
+                  "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/stats_mixed_helpers.bpf.o"
+                ],
+                "object": "/home/yunwei37/workspace/bpf-benchmark/native-sim/test/build-x86/x86_sim_proofs/stats_mixed_helpers.bpf.o",
+                "source": "/home/yunwei37/workspace/bpf-benchmark/native-sim/x86/micro-prog/stats_mixed_helpers.bpf.c"
+              },
+              "proof_compile_ns": 1257475182,
+              "result": 1,
+              "retval": 2,
+              "runner_compile_ns": 335073,
+              "sample_index": 0,
+              "timing_source": "ktime",
+              "timing_source_wall": "rdtsc",
+              "tsc_freq_hz": 3686170896,
+              "wall_exec_ns": 971,
+              "xlated_prog_len": 888
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "stage2",
+        "maps",
+        "multi-map",
+        "helpers"
+      ]
+    }
+  ],
+  "build": {
+    "runner_binary": "/home/yunwei37/workspace/bpf-benchmark/runner/build-llvmbpf/micro_exec"
+  },
+  "completed_at": "2026-05-23T01:03:44.715945+00:00",
+  "defaults": {
+    "inner_repeat": 1,
+    "perf_counters": false,
+    "runtime_order_seed": 0,
+    "samples": 1,
+    "shuffle_seed": null,
+    "warmups": 0
+  },
+  "details_dir": "details",
+  "generated_at": "2026-05-23T01:03:43.521986+00:00",
+  "host": {
+    "cpu_affinity": null,
+    "cpu_governor": "unknown",
+    "git_sha": "unknown",
+    "hostname": "virtme-ng",
+    "kernel_cmdline": "virtme_hostname=virtme-ng nr_open=1048576 virtme_link_mods=/home/yunwei37/workspace/bpf-benchmark/vendor/build/x86/linux/.virtme_mods/lib/modules/0.0.0 virtme_initmount0=home/yunwei37/workspace/bpf-benchmark virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/tmp console=ttyS0 earlyprintk=serial,ttyS0,115200 panic=-1 virtme.exec=`bWFrZSAtQyAvaG9tZS95dW53ZWkzNy93b3Jrc3BhY2UvYnBmLWJlbmNobWFyayBfX3J1bnRpbWUtdm0tbWljcm8gVEFSR0VUPSd4ODYta3ZtJyBSVU5fVEFSR0VUX05BTUU9J3g4Ni1rdm0nIFJVTl9UQVJHRVRfQVJDSD0neDg2XzY0JyBSVU5fRVhFQ1VUT1I9J2t2bScgUlVOVElNRV9DT05UQUlORVJfSU1BR0U9J2JwZi1iZW5jaG1hcmsvcnVubmVyLXJ1bnRpbWU6eDg2XzY0JyBSVU5USU1FX0lNQUdFX1RBUj0nL2hvbWUveXVud2VpMzcvd29ya3NwYWNlL2JwZi1iZW5jaG1hcmsvLmNhY2hlL2NvbnRhaW5lci1pbWFnZXMveDg2XzY0LXJ1bm5lci1ydW50aW1lLmltYWdlLnRhcicgUlVOX1JFTU9URV9QWVRIT05fQklOPSdweXRob24zJyBSVU5fUlVOVElNRV9QWVRIT05fQklOPSdweXRob24zJyBSVU5fQlBGVE9PTF9CSU49J2JwZnRvb2wnIFJVTl9OQVRJVkVfUkVQT1NfQ1NWPSdiY2Msa2F0cmFuLHRyYWNlZSx0ZXRyYWdvbicgUlVOX1RPS0VOPSdhNDFhNTdmZScgU0FNUExFUz0nMScgV0FSTVVQUz0nMCcgSU5ORVJfUkVQRUFUPScxJyBCRU5DSD0nJyBTVUlURT0nbWljcm8vY29uZmlnL21pY3JvX3N0YWdlMi55YW1sJyBSVU5USU1FUz0nbmF0aXZlX3Byb29mJyBGVVpaX1JPVU5EUz0nMTAwMCcgVEVTVF9NT0RFPScnIFdPUktMT0FEX0RVUkFUSU9OPScnIEtFRVBfV09SS0RJUlM9JycgQlBGUkVKSVRfQkVOQ0hfUEFTU0VTPScnIEJQRlJFSklUX0NPUlBVU19BUFBTPScnIFNLSVBfUkVKSVQ9JycgQ1BVPScnIFNUUklDVF9FTlY9JycgU0hVRkZMRV9TRUVEPScnIFJFR0VORVJBVEVfSU5QVVRTPScnIExJU1Q9JycgTUlDUk9fUlVOTkVSX0JJTkFSWT0nJyBQRVJGX0NPVU5URVJTPScnIEJQRlJFSklUX0NPUlBVU19BUFBfVElNRU9VVD0nJyBCUEZSRUpJVF9DT1JQVVNfUkVKSVRfVElNRU9VVD0nJyBCUEZSRUpJVF9DT1JQVVNfV09SS0xPQURfT05MWT0nJyBCUEZSRUpJVF9DT1JQVVNfQlBGX1NUQVRTPScn` virtme_chdir=home/yunwei37/workspace/bpf-benchmark debug loglevel=7 panic=30 oops=panic init=/home/yunwei37/.local/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init",
+    "kernel_version": "7.0.0-rc2+",
+    "perf_event_paranoid": "2",
+    "platform": "Linux-7.0.0-rc2+-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "turbo_state": "unknown"
+  },
+  "last_updated_at": "2026-05-23T01:03:44.715945+00:00",
+  "manifest": "/home/yunwei37/workspace/bpf-benchmark/micro/config/micro_stage2.yaml",
+  "progress": {
+    "completed_benchmarks": 13,
+    "current_benchmark": null,
+    "current_benchmark_index": null,
+    "total_benchmarks": 13
+  },
+  "provenance": {
+    "cpu_model": "Intel(R) Core(TM) Ultra 9 285K",
+    "environment": "vm",
+    "kernel_commit": "unknown",
+    "params": {
+      "inner_repeat": 1,
+      "perf_counters": false,
+      "samples": 1,
+      "warmups": 0
+    },
+    "repo_dirty": false,
+    "repo_git_sha": "unknown",
+    "timestamp": "2026-05-23T01:03:43.522969+00:00"
+  },
+  "run_type": "x86_kvm_micro",
+  "started_at": "2026-05-23T01:03:43.521986+00:00",
+  "status": "completed",
+  "suite": "micro_stage2_maps_helpers"
+}
