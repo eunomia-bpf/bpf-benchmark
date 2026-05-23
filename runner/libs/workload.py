@@ -1612,7 +1612,7 @@ _OTEL_INTERP_LOOPS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("perl",    ("-e", _OTEL_INTERP_PERL)),
     ("php",     ("-r", _OTEL_INTERP_PHP)),
 )
-_OTEL_INTERP_WORKERS_PER_LANGUAGE = 1
+_OTEL_INTERP_WORKERS_PER_LANGUAGE = 2
 
 
 def run_otel_mixed_workload(duration_s: int | float) -> WorkloadResult:

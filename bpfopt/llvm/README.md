@@ -1,11 +1,9 @@
 # bpfopt LLVM Roundtrip
 
-`bpfopt/llvm` builds a C++ executable named `bpfopt`. It is a drop-in
-replacement for the Rust `bpfopt` bytecode CLI at the daemon/loader boundary:
+`bpfopt/llvm` builds the C++ executable named `bpfopt` used by the runner:
 stdin/stdout or `--input`/`--output` carry raw `struct bpf_insn[]` bytes, and
 the caller selects the binary by path. `bpfopt-loader` supports this with
-`--bpfopt <path>`; daemon-side integration should use the same path-selection
-model rather than changing the daemon protocol.
+`--bpfopt <path>` without changing the bytecode protocol.
 
 The accepted CLI surface is intentionally narrow:
 

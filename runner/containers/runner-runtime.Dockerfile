@@ -146,8 +146,8 @@ FROM runner-runtime-runtime-base AS runner-runtime
 
 ARG IMAGE_WORKSPACE=/home/yunwei37/workspace/bpf-benchmark
 ARG RUN_TARGET_ARCH=x86_64
-ARG BPFOPT_HOST_BIN_DIR=bpfopt/target/release
-ARG BPFOPT_HOST_BIN=bpfopt/target/release/bpfopt
+ARG BPFOPT_HOST_BIN=bpfopt/llvm/build-kinsn/bpfopt
+ARG KINSNPROBER_HOST_BIN=bpfopt/target/release/kinsnprober
 ARG NATIVE_LINK_HOST_BIN=native-sim/x86/native_lab/native_link/target/release/native-link
 
 COPY --link --from=runner-runtime-artifacts /artifacts/tracee /artifacts/tracee
@@ -164,7 +164,7 @@ COPY --link --from=runner-runtime-artifacts /artifacts/user/stage2-programs /art
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/tests ${IMAGE_WORKSPACE}/tests
 COPY --link --chmod=0755 ${BPFOPT_HOST_BIN} /usr/local/bin/bpfopt
 COPY --link --chmod=0755 \
-    ${BPFOPT_HOST_BIN_DIR}/kinsnprober \
+    ${KINSNPROBER_HOST_BIN} \
     ${NATIVE_LINK_HOST_BIN} \
     /usr/local/bin/
 

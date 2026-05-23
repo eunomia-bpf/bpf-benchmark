@@ -35,7 +35,7 @@ use serde::{Deserialize, Serialize};
 // All paths are relative to the project root; the binary expects to be invoked
 // from there (`cargo test` chdirs to the crate dir, so the smoke test does the
 // chdir itself).
-const BPFOPT_BIN: &str = "bpfopt/target/debug/bpfopt";
+const BPFOPT_BIN: &str = "bpfopt/llvm/build-kinsn/bpfopt";
 const PASS_CONFIG_DIR: &str = "runner/config/passes";
 #[cfg(test)]
 const CORPUS_BUILD_DIR: &str = "corpus/build";
@@ -295,13 +295,10 @@ fn prepare_workdir(
 
     let compat = prepare_compatible_object(workdir, obj_path)?;
 
-    // The verifier log captured here is only consumed by the Rust bpfopt's
-    // verifier-state passes; the LLVM bpfopt ignores it. Large programs can
-    // overflow the 64 MiB verifier log at log_level>=2, making BPF_PROG_LOAD
-    // return -ENOSPC and failing the whole object. Filling the log must not be
-    // fatal: if a log_level>=2 load fails, reopen and reload at log_level=0
-    // (verifier states unavailable for that object, which is fine for the LLVM
-    // path) instead of aborting.
+    // Large programs can overflow the 64 MiB verifier log at log_level>=2,
+    // making BPF_PROG_LOAD return -ENOSPC and failing the whole object.
+    // Filling the log must not be fatal: if a log_level>=2 load fails, reopen
+    // and reload at log_level=0 instead of aborting.
     let log_levels: &[u32] = if initial_log_level >= 2 {
         &[initial_log_level, 0]
     } else {
@@ -339,7 +336,7 @@ fn prepare_workdir(
         if ret < 0 {
             if !last_attempt {
                 eprintln!(
-                    "warning: load of {} at log_level={} failed ({}); retrying at log_level=0 (verifier states unavailable for this object; harmless for the LLVM bpfopt)",
+                    "warning: load of {} at log_level={} failed ({}); retrying at log_level=0",
                     compat.path.display(),
                     log_level,
                     neg_errno(ret)
@@ -1486,8 +1483,7 @@ mod tests {
             .context("resolve project root")?;
         std::env::set_current_dir(&root).context("chdir to project root")?;
         let obj = root.join("bpfopt/testobject/katran_balancer.bpf.o");
-        // Allow pointing the katran perf path at an alternate bpfopt (e.g. the
-        // LLVM O3 drop-in) via env, defaulting to the Rust bpfopt.
+        // Allow pointing the katran perf path at an alternate bpfopt via env.
         let bpfopt = std::env::var("BPFOPT_LOADER_BPFOPT")
             .map(PathBuf::from)
             .unwrap_or_else(|_| root.join(BPFOPT_BIN));
@@ -1538,26 +1534,6 @@ mod tests {
                 prog.dir.join(REPORT_JSON),
                 prog.dir.join("report_map_inline.json"),
             )?;
-            refresh_katran_verifier_log(prog)?;
-            fs::copy(
-                prog.dir.join(VERIFIER_LOG),
-                prog.dir.join("verifier_after_map_inline.log"),
-            )?;
-            // The LLVM bpfopt does a full O3 roundtrip per pass, so a single
-            // map_inline already subsumes const-prop/dce; re-running them is
-            // redundant O3 that can blow the 512B BPF stack. Allow skipping the
-            // bytecode passes to measure map_inline-only on the LLVM path.
-            if std::env::var("BPFOPT_LOADER_SKIP_BYTECODE_PASSES").is_err() {
-                promote_output_to_input(prog)?;
-                run_katran_bytecode_pass(prog, &bpfopt, "const_prop", true)?;
-                fs::copy(
-                    prog.dir.join(REPORT_JSON),
-                    prog.dir.join("report_const_prop.json"),
-                )?;
-                promote_output_to_input(prog)?;
-                run_katran_bytecode_pass(prog, &bpfopt, "dce", false)?;
-                fs::copy(prog.dir.join(REPORT_JSON), prog.dir.join("report_dce.json"))?;
-            }
             let fd = verify_workdir(
                 &prog.dir,
                 &prog.map_fds,
@@ -1634,63 +1610,6 @@ mod tests {
         Ok(())
     }
 
-    fn run_katran_bytecode_pass(
-        prog: &PreparedProgram,
-        bpfopt: &Path,
-        pass: &str,
-        needs_verifier_log: bool,
-    ) -> Result<()> {
-        let metadata = read_json::<ProgramMetadata>(&prog.dir.join(METADATA_JSON))?;
-        let mut command = Command::new(bpfopt);
-        command
-            .arg("--pass")
-            .arg(pass)
-            .arg("--input")
-            .arg(prog.dir.join(INPUT_BIN))
-            .arg("--output")
-            .arg(prog.dir.join(OUTPUT_BIN))
-            .arg("--report")
-            .arg(prog.dir.join(REPORT_JSON))
-            .arg("--prog-type")
-            .arg(metadata.prog_type.to_string());
-        if needs_verifier_log {
-            command
-                .arg("--verifier-states")
-                .arg(prog.dir.join(VERIFIER_LOG));
-        }
-        let status = command.status()?;
-        if !status.success() {
-            bail!("hardcoded katran {pass} exited with {status}");
-        }
-        Ok(())
-    }
-
-    fn refresh_katran_verifier_log(prog: &PreparedProgram) -> Result<()> {
-        drop(verify_workdir_with_log_level(
-            &prog.dir,
-            &prog.map_fds,
-            prog.btf_fd,
-            &prog.func_info,
-            &prog.line_info,
-            2,
-        )?);
-        fs::copy(prog.dir.join(VERIFY_LOG), prog.dir.join(VERIFIER_LOG))
-            .with_context(|| format!("failed to promote {} to {}", VERIFY_LOG, VERIFIER_LOG))?;
-        Ok(())
-    }
-
-    fn promote_output_to_input(prog: &PreparedProgram) -> Result<()> {
-        fs::copy(prog.dir.join(OUTPUT_BIN), prog.dir.join(INPUT_BIN)).with_context(|| {
-            format!(
-                "failed to promote {} to {} for {}",
-                OUTPUT_BIN,
-                INPUT_BIN,
-                prog.dir.display()
-            )
-        })?;
-        Ok(())
-    }
-
     fn write_katran_overlays(map_values_dir: &Path, overlay_dir: &Path) -> Result<()> {
         let mut overlays = serde_json::Map::new();
         for (map_name, overlay_file) in KATRAN_OVERLAY_MAPS {
@@ -1748,8 +1667,6 @@ mod tests {
             .arg(prog.dir.join(REPORT_JSON))
             .arg("--prog-type")
             .arg(metadata.prog_type.to_string())
-            .arg("--verifier-states")
-            .arg(prog.dir.join(VERIFIER_LOG))
             .arg("--")
             .arg("--map-values")
             .arg(map_values_dir)

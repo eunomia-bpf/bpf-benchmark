@@ -5,7 +5,8 @@ Date: 2026-05-10
 ## What this is
 
 542 BPF program inputs dumped from the corpus framework, organized per app/prog.
-Use these to debug bpfopt passes locally on the host **without running KVM corpus**.
+Use these to debug the LLVM `bpfopt` roundtrip locally on the host **without
+running KVM corpus**.
 
 ## Source
 
@@ -47,7 +48,7 @@ bpfopt/testbin/bcc_set/10_vfs_create/
 Standard CLI invocation matching what daemon does:
 
 ```sh
-target/debug/bpfopt --pass <name> \
+bpfopt/llvm/build-kinsn/bpfopt --pass <name> \
     --input bpfopt/testbin/<app>/<prog_id>_<name>/canonicalize_output.bin \
     --output /tmp/test_out.bin \
     --report /tmp/test_report.json \
@@ -75,6 +76,6 @@ e.g. `BPFREJIT_BENCH_PASSES=noop,rotate KEEP_WORKDIRS=1 ...`.
 - These are **pre-rejit baseline** bytecodes (post-canonicalize, pre-any-optimization).
 - Use these as input to test individual pass behavior, byte-identical regression checks,
   or to extract minimal reproducer for verifier-rejection bugs.
-- After modifying bpfopt source, run any pass on the relevant testbin entry to verify
-  byte-identical output / new behavior — much faster than full KVM corpus.
+- After modifying bpfopt source, run the LLVM roundtrip on the relevant testbin
+  entry to verify new behavior — much faster than full KVM corpus.
 - The data is committed to git so it's available across machines without re-running corpus.

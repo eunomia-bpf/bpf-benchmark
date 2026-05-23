@@ -16,7 +16,7 @@ Run one pass against one program in a BPF object:
 bpfopt/target/debug/bpfopt-loader \
   --obj path/to/test.bpf.o \
   --pass noop \
-  --bpfopt bpfopt/target/debug/bpfopt \
+  --bpfopt bpfopt/llvm/build-kinsn/bpfopt \
   --workdir /tmp/bpfopt-loader-work
 ```
 
@@ -111,11 +111,9 @@ The loader skips map value dumps unless `--pass map_inline` is selected. For
 existing overlay/size-skip path can handle them.
 
 The loader unit test `katran_optimization_path` is the hardcoded Katran
-optimization smoke. It does not read a yaml pass chain. The test runs
-`map_inline -> const_prop -> dce`, with Katran inline hints and overlays wired
-in the testcase. `const_prop` must use verifier state for the post-`map_inline`
-program, so the test verifier-loads the `map_inline` output with `log_level=2`
-and promotes that `verify.log` before continuing the chain.
+optimization smoke. It does not read a yaml pass chain. The test runs the LLVM
+`map_inline` roundtrip with Katran inline hints and overlays wired in the
+testcase.
 
 ## Workdir Layout
 

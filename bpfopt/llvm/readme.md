@@ -1,9 +1,8 @@
 # bpfopt LLVM Roundtrip Status
 
-`bpfopt/llvm` 是和 Rust `bpfopt` 平级的 C++ drop-in binary。它保持同一个
-bytecode CLI 契约：输入和输出都是 raw `struct bpf_insn[]`，loader 通过
-`--bpfopt bpfopt/llvm/build/bpfopt` 选择这个实现，不需要改 daemon/loader 的
-二进制协议。
+`bpfopt/llvm` 是 runner 使用的 C++ `bpfopt` binary。它保持 bytecode CLI
+契约：输入和输出都是 raw `struct bpf_insn[]`，loader 通过
+`--bpfopt bpfopt/llvm/build/bpfopt` 选择这个实现，不需要改二进制协议。
 
 所有 pass 都必须严格走 LLVM O3 roundtrip：
 

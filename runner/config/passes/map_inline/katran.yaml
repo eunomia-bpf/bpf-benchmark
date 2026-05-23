@@ -72,7 +72,6 @@ programs:
       bpfopt --pass map_inline
         --input ${INPUT} --output ${OUTPUT} --report ${REPORT}
         --prog-type ${PROG_TYPE}
-        --verifier-states ${VERIFIER_STATES}
         --
         --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}
         --inline-hint=ctl_array:00000000
@@ -103,6 +102,5 @@ programs:
       bpfopt --pass map_inline
         --input ${INPUT} --output ${OUTPUT} --report ${REPORT}
         --prog-type ${PROG_TYPE}
-        --verifier-states ${VERIFIER_STATES}
         --
         --map-values ${MAP_VALUES} --map-ids ${MAP_IDS}
