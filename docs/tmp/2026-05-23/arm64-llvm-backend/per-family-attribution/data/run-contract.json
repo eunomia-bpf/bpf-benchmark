@@ -1,0 +1,56 @@
+{
+  "date": "2026-05-23",
+  "experiment": "arm64-rev-extr-performance-attribution",
+  "workspace": "/home/ruoji/github/bpf-opt",
+  "code_repo": "/home/ruoji/github/bpf-opt/code",
+  "llvm_submodule": "/home/ruoji/github/bpf-opt/code/llvm-backend/llvm",
+  "llc": "/home/ruoji/github/bpf-opt/code/llvm-backend/build-bpf-kinsn/bin/llc",
+  "platform": "aws",
+  "arch": "arm64",
+  "region": "us-east-1",
+  "instance_type": "t4g.small",
+  "kernel": "7.0.0-rc2+",
+  "container_image": "bpf-benchmark/runner-runtime:arm64",
+  "runtimes": "native kernel",
+  "samples": 3,
+  "warmups": 0,
+  "inner_repeat": 100000,
+  "attempts": {
+    "baseline-initial": {
+      "status": "failed_before_instance_launch",
+      "exit_code": 2,
+      "reason": "AWS session expired before AMI resolution"
+    },
+    "baseline": {
+      "attempt_dir": "attempts/baseline-rerun1",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260523_075608_188688",
+      "instance_id": "i-06d826def0fce2e3c",
+      "compiler": "clang",
+      "status": "completed"
+    },
+    "control-disabled": {
+      "attempt_dir": "attempts/control-disabled",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260523_080708_446468",
+      "instance_id": "i-051214484052842f1",
+      "compiler": "kinsn-llvm",
+      "llc_flags": "-bpf-kinsn-target=arm64 -bpf-kinsn-mode=all=disable",
+      "status": "completed"
+    },
+    "treatment-rev-only": {
+      "attempt_dir": "attempts/treatment-rev-only",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260523_081737_177585",
+      "instance_id": "i-0f81d4555d47846b5",
+      "compiler": "kinsn-llvm",
+      "llc_flags": "-bpf-kinsn-target=arm64 -bpf-kinsn-mode=all=disable -bpf-kinsn-mode=unary=force",
+      "status": "completed"
+    },
+    "treatment-extr-only": {
+      "attempt_dir": "attempts/treatment-extr-only",
+      "result_dir": "/home/ruoji/github/bpf-opt/code/micro/results/aws_arm64_micro_20260523_082807_367473",
+      "instance_id": "i-0403fcb77552967c9",
+      "compiler": "kinsn-llvm",
+      "llc_flags": "-bpf-kinsn-target=arm64 -bpf-kinsn-mode=all=disable -bpf-kinsn-mode=rotate=force",
+      "status": "completed"
+    }
+  }
+}
