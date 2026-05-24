@@ -1,0 +1,10 @@
+{
+  "app": "tracee/monitor",
+  "baseline": null,
+  "error": "Tracee exited before BPF programs were tracked by shim\n{\"level\":\"warn\",\"ts\":1779627058.643259,\"msg\":\"KConfig: could not check enabled kconfig features\",\"error\":\"could not read /boot/config-7.0.0-rc2+: stat /boot/config-7.0.0-rc2+: no such file or directory\"}\n{\"level\":\"warn\",\"ts\":1779627058.6433084,\"msg\":\"KConfig: assuming kconfig values, might have unexpected behavior\"}\n{\"level\":\"warn\",\"ts\":1779627059.3492265,\"msg\":\"Event canceled because of missing kernel symbol dependency\",\"missing symbols\":[\"non_existing_symbol\"],\"event\":\"missing_ksymbol\"}\n{\"level\":\"warn\",\"ts\":1779627059.353276,\"msg\":\"Event canceled because of missing kernel symbol dependency\",\"missing symbols\":[\"non_existing_symbol\"],\"event\":\"multiple_fallbacks_test\"}\n{\"level\":\"error\",\"ts\":1779627059.3598986,\"msg\":\"Failed to register detector\",\"detector\":\"TRC-1013\",\"error\":\"detector TRC-1013 requires enrichment \\\"environment\\\" which is not enabled\"}\n{\"level\":\"error\",\"ts\":1779627059.3604248,\"msg\":\"Failed to register detector\",\"detector\":\"TRC-107\",\"error\":\"detector TRC-107 requires enrichment \\\"environment\\\" which is not enabled\"}\n{\"level\":\"fatal\",\"ts\":1779627059.853735,\"msg\":\"Tracee runner failed\",\"error\":\"cmd.Runner.Run: error initializing Tracee: ebpf.(*Tracee).Init: ebpf.(*Tracee).initBPF: failed to load BPF object: invalid argument\"}",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "tracee",
+  "selected_workload": "stress_ng_tracee_syscall_hot",
+  "status": "error"
+}
