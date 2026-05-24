@@ -356,8 +356,14 @@ def wait_for_app_shim_programs(
             if callable(snapshot):
                 snap = snapshot()
                 if isinstance(snap, Mapping):
-                    lines = list(snap.get("stderr_tail") or []) + list(snap.get("stdout_tail") or [])
-                    detail = "\n" + "\n".join(str(line) for line in lines[-40:]) if lines else ""
+                    stderr_lines = [str(line) for line in list(snap.get("stderr_tail") or [])[-80:]]
+                    stdout_lines = [str(line) for line in list(snap.get("stdout_tail") or [])[-80:]]
+                    parts = []
+                    if stderr_lines:
+                        parts.append("stderr tail:\n" + "\n".join(stderr_lines))
+                    if stdout_lines:
+                        parts.append("stdout tail:\n" + "\n".join(stdout_lines))
+                    detail = "\n" + "\n".join(parts) if parts else ""
             raise RuntimeError(f"{process_name} exited before BPF programs were tracked by shim{detail}")
         try:
             ids = _list_app_shim_program_ids(int(app_pid))

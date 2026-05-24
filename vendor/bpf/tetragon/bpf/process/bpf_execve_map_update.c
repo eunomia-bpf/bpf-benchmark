@@ -32,8 +32,12 @@ __execve_map_update_idx(struct update_data *data, int idx)
 	struct execve_map_value *curr;
 	__u32 pid;
 
+#ifdef MICRO_NATIVE
+	idx &= 0x7fff;
+#else
 	asm volatile("%[idx] &= 0x7fff;\n"
 		     : [idx] "+r"(idx));
+#endif
 	if (data->cnt == idx)
 		return 1;
 

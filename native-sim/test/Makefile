@@ -9,6 +9,7 @@ DEB_HOST_MULTIARCH := $(shell gcc -print-multiarch 2>/dev/null || dpkg-architect
 SYS_INCLUDE_FLAGS ?= $(if $(DEB_HOST_MULTIARCH),-I/usr/include/$(DEB_HOST_MULTIARCH))
 REPO_ROOT := $(abspath $(CURDIR)/../..)
 OUTPUT_DIR ?= $(CURDIR)/build
+CC ?= cc
 CLANG ?= clang
 NATIVE_TARGET ?=
 NATIVE_ARCH ?= $(shell uname -m)
@@ -43,17 +44,28 @@ KERNEL_OFFSETS_DIR ?= $(REPO_ROOT)/micro/programs/build-x86
 KERNEL_OFFSETS := $(KERNEL_OFFSETS_DIR)/kernel_offsets.h
 KERNEL_OFFSETS_INCLUDE := $(dir $(abspath $(KERNEL_OFFSETS)))
 MICRO_PROGRAMS_DIR := $(REPO_ROOT)/micro/programs
+RUNNER_LIBBPF_DIR := $(REPO_ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj
+RUNNER_LIBBPF_HDR := $(REPO_ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include
+ifeq ($(wildcard $(RUNNER_LIBBPF_DIR)/libbpf.a),)
+LIBBPF_CFLAGS :=
+LIBBPF_LDFLAGS := -lbpf -lelf -lz
+else
+LIBBPF_CFLAGS := -I$(RUNNER_LIBBPF_HDR)
+LIBBPF_LDFLAGS := $(RUNNER_LIBBPF_DIR)/libbpf.a -lelf -lz
+endif
+SHIM_SO ?= $(REPO_ROOT)/bpfopt/shim/libbpfrejit_shim.so
 
 BPF_SRCS := $(wildcard *.bpf.c)
 BPF_OBJS := $(patsubst %.bpf.c,$(OUTPUT_DIR)/%.bpf.o,$(BPF_SRCS))
 NATIVE_OBJS := $(patsubst %.bpf.c,$(OUTPUT_DIR)/%.native.o,$(BPF_SRCS))
 DEPS := $(BPF_OBJS:.o=.d) $(NATIVE_OBJS:.o=.d)
+MULTI_PROG_TOOL := $(OUTPUT_DIR)/multi_prog_tool
 
-.PHONY: all clean
+.PHONY: all clean multi-prog-tool shim-multi-prog-smoke
 all: $(BPF_OBJS) $(NATIVE_OBJS)
 
 $(OUTPUT_DIR):
-	mkdir -p "$@"
+	install -d "$@"
 
 $(KERNEL_OFFSETS):
 	$(MAKE) -C $(MICRO_PROGRAMS_DIR) OUTPUT_DIR="$(KERNEL_OFFSETS_DIR)" "$@"
@@ -64,6 +76,22 @@ $(OUTPUT_DIR)/%.bpf.o: %.bpf.c | $(OUTPUT_DIR)
 $(OUTPUT_DIR)/%.native.o: %.bpf.c $(KERNEL_OFFSETS) Makefile | $(OUTPUT_DIR)
 	$(CLANG) $(NATIVE_CFLAGS) -I"$(MICRO_PROGRAMS_DIR)" -I"$(KERNEL_OFFSETS_INCLUDE)" \
 	    -MF "$(OUTPUT_DIR)/$*.native.d" -MT "$@" -o "$@" "$<"
+
+$(MULTI_PROG_TOOL): multi_prog_tool.c | $(OUTPUT_DIR)
+	$(CC) -O2 -g -Wall -Wextra $(LIBBPF_CFLAGS) -o "$@" "$<" $(LIBBPF_LDFLAGS)
+
+multi-prog-tool: $(OUTPUT_DIR)/multi_prog_smoke.bpf.o $(OUTPUT_DIR)/multi_prog_smoke.native.o $(MULTI_PROG_TOOL)
+
+shim-multi-prog-smoke: multi-prog-tool
+	$(MAKE) -C "$(REPO_ROOT)/bpfopt/shim" SHIM_SO="$(SHIM_SO)" "$(SHIM_SO)"
+	rm -rf /tmp/native_loader_multi_prog_shim
+	install -d /tmp/native_loader_multi_prog_shim
+	sudo -n env \
+		BPFREJIT_SHIM_DIR=/tmp/native_loader_multi_prog_shim \
+		BPFREJIT_SHIM_LOG=/tmp/native_loader_multi_prog_shim/shim.log \
+		LD_PRELOAD="$(SHIM_SO)" \
+		"$(MULTI_PROG_TOOL)" "$(OUTPUT_DIR)/multi_prog_smoke.bpf.o"
+	grep -q "BPF_PROG_LOAD" /tmp/native_loader_multi_prog_shim/shim.log
 
 clean:
 	rm -rf $(OUTPUT_DIR)

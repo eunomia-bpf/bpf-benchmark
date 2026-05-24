@@ -138,13 +138,26 @@ struct Args {
     /// companion `.bpf.o`'s bytecode to identify which map each call uses.
     ///
     /// Format:
-    /// INDEX=KIND,HEXADDR,KEY_OFFSET,MAX_ENTRIES,ELEM_SIZE,INDEX_MASK,VALUE_OFFSET,PERCPU_BASE
+    /// INDEX=KIND,HEXADDR,RESERVED,MAX_ENTRIES,ELEM_SIZE,INDEX_MASK,VALUE_OFFSET,PERCPU_BASE
     /// where KIND is call/hash/lru_hash/percpu_hash/array/percpu_array.
     #[arg(
         long = "lookup-site",
-        value_name = "INDEX=KIND,ADDR,KEY_OFF,MAX,ELEM,MASK,VALUE_OFF,PERCPU"
+        value_name = "INDEX=KIND,ADDR,RESERVED,MAX,ELEM,MASK,VALUE_OFF,PERCPU"
     )]
     lookup_sites: Vec<String>,
+
+    /// Per-map fallback spec for native-only `bpf_map_lookup_elem` sites.
+    /// Used only when the target-specific linker can trace the native
+    /// callsite's map argument to a concrete map symbol.
+    ///
+    /// Format:
+    /// NAME=KIND,HEXADDR,RESERVED,MAX_ENTRIES,ELEM_SIZE,INDEX_MASK,VALUE_OFFSET,PERCPU_BASE
+    /// where KIND is call/hash/lru_hash/percpu_hash/array/percpu_array.
+    #[arg(
+        long = "lookup-map",
+        value_name = "NAME=KIND,ADDR,RESERVED,MAX,ELEM,MASK,VALUE_OFF,PERCPU"
+    )]
+    lookup_maps: Vec<String>,
 
     /// Per-call-site spec for every `bpf_map_update_elem` site in the
     /// entry program, given in BPF-source order. Only ARRAY/PERCPU_ARRAY
@@ -187,18 +200,20 @@ enum LookupKind {
     PerCpuArray,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 struct LookupSiteSpec {
     kind: LookupKind,
     /// Kernel address the call should route to when this site remains a call.
     target_addr: u64,
-    /// HASH post-call `add rax, OFFSET` immediate. Zero means no hash inline.
-    key_offset: u32,
     max_entries: u32,
     elem_size: u32,
     index_mask: u32,
     value_offset: u32,
     percpu_base_addr: u64,
+    /// Optional BPF map name observed at the source helper call. The kernel
+    /// truncates map names to BPF_OBJ_NAME_LEN - 1, so target-specific
+    /// linkers must compare this field using kernel-visible truncation.
+    map_name: Option<String>,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -224,33 +239,38 @@ fn parse_lookup_sites(args: &[String]) -> Result<Vec<LookupSiteSpec>> {
     for a in args {
         let (idx_s, payload) = a
             .split_once('=')
-            .ok_or_else(|| anyhow!("--lookup-site expects INDEX=KIND,ADDR,KEY_OFF,MAX,ELEM,MASK,VALUE_OFF,PERCPU; got {a:?}"))?;
+            .ok_or_else(|| anyhow!("--lookup-site expects INDEX=KIND,ADDR,RESERVED,MAX,ELEM,MASK,VALUE_OFF,PERCPU; got {a:?}"))?;
         let idx: usize = idx_s
             .parse()
             .map_err(|e| anyhow!("--lookup-site INDEX parse: {e}"))?;
         let parts: Vec<&str> = payload.split(',').collect();
-        let spec = if parts.len() == 8 {
+        let spec = if parts.len() == 8 || parts.len() == 9 {
             let kind = parse_lookup_kind(parts[0])?;
             let target_addr = parse_u64_auto(parts[1], "--lookup-site ADDR")?;
-            let key_offset = parse_u32_auto(parts[2], "--lookup-site KEY_OFFSET")?;
+            let _reserved = parse_u32_auto(parts[2], "--lookup-site RESERVED")?;
             let max_entries = parse_u32_auto(parts[3], "--lookup-site MAX_ENTRIES")?;
             let elem_size = parse_u32_auto(parts[4], "--lookup-site ELEM_SIZE")?;
             let index_mask = parse_u32_auto(parts[5], "--lookup-site INDEX_MASK")?;
             let value_offset = parse_u32_auto(parts[6], "--lookup-site VALUE_OFFSET")?;
             let percpu_base_addr = parse_u64_auto(parts[7], "--lookup-site PERCPU_BASE")?;
+            let map_name = if parts.len() == 9 && !parts[8].is_empty() {
+                Some(parts[8].to_string())
+            } else {
+                None
+            };
             LookupSiteSpec {
                 kind,
                 target_addr,
-                key_offset,
                 max_entries,
                 elem_size,
                 index_mask,
                 value_offset,
                 percpu_base_addr,
+                map_name,
             }
         } else {
             bail!(
-                "--lookup-site payload has {} comma-separated fields; expected 8: {payload:?}",
+                "--lookup-site payload has {} comma-separated fields; expected 8 or 9: {payload:?}",
                 parts.len()
             );
         };
@@ -266,6 +286,42 @@ fn parse_lookup_sites(args: &[String]) -> Result<Vec<LookupSiteSpec>> {
         }
     }
     Ok(by_index.into_iter().map(|(_, s)| s).collect())
+}
+
+fn parse_lookup_map_specs(args: &[String]) -> Result<HashMap<String, LookupSiteSpec>> {
+    let mut out = HashMap::new();
+    for a in args {
+        let (name, payload) = a
+            .split_once('=')
+            .ok_or_else(|| anyhow!("--lookup-map expects NAME=KIND,ADDR,RESERVED,MAX,ELEM,MASK,VALUE_OFF,PERCPU; got {a:?}"))?;
+        if name.is_empty() {
+            bail!("--lookup-map name must not be empty");
+        }
+        let parts: Vec<&str> = payload.split(',').collect();
+        if parts.len() != 8 {
+            bail!(
+                "--lookup-map payload has {} comma-separated fields; expected 8: {payload:?}",
+                parts.len()
+            );
+        }
+        let spec = LookupSiteSpec {
+            kind: parse_lookup_kind(parts[0])?,
+            target_addr: parse_u64_auto(parts[1], "--lookup-map ADDR")?,
+            max_entries: {
+                let _reserved = parse_u32_auto(parts[2], "--lookup-map RESERVED")?;
+                parse_u32_auto(parts[3], "--lookup-map MAX_ENTRIES")?
+            },
+            elem_size: parse_u32_auto(parts[4], "--lookup-map ELEM_SIZE")?,
+            index_mask: parse_u32_auto(parts[5], "--lookup-map INDEX_MASK")?,
+            value_offset: parse_u32_auto(parts[6], "--lookup-map VALUE_OFFSET")?,
+            percpu_base_addr: parse_u64_auto(parts[7], "--lookup-map PERCPU_BASE")?,
+            map_name: Some(name.to_string()),
+        };
+        if out.insert(name.to_string(), spec).is_some() {
+            bail!("duplicate --lookup-map entry for {name:?}");
+        }
+    }
+    Ok(out)
 }
 
 fn parse_lookup_kind(s: &str) -> Result<LookupKind> {
@@ -659,6 +715,7 @@ fn main() -> Result<()> {
     let helper_addrs = parse_name_addr_args(&args.helpers, "helper")?;
     let map_addrs = parse_name_addr_args(&args.maps, "map")?;
     let lookup_sites = parse_lookup_sites(&args.lookup_sites)?;
+    let lookup_maps = parse_lookup_map_specs(&args.lookup_maps)?;
     let update_sites = parse_update_sites(&args.update_sites)?;
     let oracle_targets = if proof_mode {
         Vec::new()
@@ -704,6 +761,7 @@ fn main() -> Result<()> {
                 &helper_addrs,
                 &map_addrs,
                 &lookup_sites,
+                &lookup_maps,
                 &update_sites,
                 &oracle_targets,
                 proof_mode,
@@ -1701,92 +1759,6 @@ fn build_arm64_array_update(spec: &UpdateSiteSpec) -> Result<Vec<u32>> {
     Ok(words)
 }
 
-fn build_arm64_hash_lookup_postcall(spec: &LookupSiteSpec) -> Result<Vec<u32>> {
-    const X0: u32 = 0;
-    const A64_CBZ_X0: u32 = 0xb400_0000;
-
-    if !matches!(spec.kind, LookupKind::Hash) {
-        bail!(
-            "lookup kind {:?} is not an arm64 hash post-call inline",
-            spec.kind
-        );
-    }
-    if spec.key_offset == 0 {
-        bail!("arm64 hash lookup inline missing htab value offset");
-    }
-
-    let mut words = Vec::new();
-    let null_branch = words.len();
-    words.push(0);
-    words.push(a64_add_imm64(X0, X0, spec.key_offset)?);
-    let done_target = words.len();
-    words[null_branch] = a64_patch_cbz_cbnz(A64_CBZ_X0, null_branch, done_target)?;
-    Ok(words)
-}
-
-fn build_arm64_lru_hash_lookup_postcall(spec: &LookupSiteSpec) -> Result<Vec<u32>> {
-    const X0: u32 = 0;
-    const W10: u32 = 10;
-    const A64_CBZ_X0: u32 = 0xb400_0000;
-    const A64_CBNZ_W10: u32 = 0x3500_0000 | W10;
-
-    if !matches!(spec.kind, LookupKind::LruHash) {
-        bail!(
-            "lookup kind {:?} is not an arm64 lru hash post-call inline",
-            spec.kind
-        );
-    }
-    if spec.key_offset == 0 {
-        bail!("arm64 lru hash lookup inline missing htab value offset");
-    }
-    if spec.value_offset == 0 {
-        bail!("arm64 lru hash lookup inline missing lru ref offset");
-    }
-
-    let mut words = Vec::new();
-    let null_branch = words.len();
-    words.push(0);
-    words.push(a64_ldr_u8(W10, X0, spec.value_offset)?);
-    let ref_set_branch = words.len();
-    words.push(0);
-    words.push(a64_movz(W10, 1, 0)?);
-    words.push(a64_str_u8(W10, X0, spec.value_offset)?);
-    let add_target = words.len();
-    words.push(a64_add_imm64(X0, X0, spec.key_offset)?);
-    let done_target = words.len();
-    words[null_branch] = a64_patch_cbz_cbnz(A64_CBZ_X0, null_branch, done_target)?;
-    words[ref_set_branch] = a64_patch_cbz_cbnz(A64_CBNZ_W10, ref_set_branch, add_target)?;
-    Ok(words)
-}
-
-fn build_arm64_percpu_hash_lookup_postcall(spec: &LookupSiteSpec) -> Result<Vec<u32>> {
-    const X0: u32 = 0;
-    const X10: u32 = 10;
-    const A64_CBZ_X0: u32 = 0xb400_0000;
-    const A64_MRS_X10_TPIDR_EL1: u32 = 0xd538_d08a;
-
-    if !matches!(spec.kind, LookupKind::PerCpuHash) {
-        bail!(
-            "lookup kind {:?} is not an arm64 percpu hash post-call inline",
-            spec.kind
-        );
-    }
-    if spec.key_offset == 0 {
-        bail!("arm64 percpu hash lookup inline missing htab value offset");
-    }
-
-    let mut words = Vec::new();
-    let null_branch = words.len();
-    words.push(0);
-    words.push(a64_add_imm64(X0, X0, spec.key_offset)?);
-    words.push(a64_ldr_u64(X0, X0, 0)?);
-    words.push(A64_MRS_X10_TPIDR_EL1);
-    words.push(a64_add_shift64(X0, X0, X10, 0)?);
-    let done_target = words.len();
-    words[null_branch] = a64_patch_cbz_cbnz(A64_CBZ_X0, null_branch, done_target)?;
-    Ok(words)
-}
-
 fn append_u32(blob: &mut Vec<u8>, word: u32) {
     blob.extend_from_slice(&word.to_le_bytes());
 }
@@ -2334,62 +2306,17 @@ fn rewrite_arm64(
                                     arm64_call_clobber_map_regs(&mut reg_map_names);
                                     continue;
                                 }
-                                LookupKind::Call => {
+                                LookupKind::Call
+                                | LookupKind::Hash
+                                | LookupKind::LruHash
+                                | LookupKind::PerCpuHash => {
                                     helper_addr = Some(resolve_site_target(
                                         spec.target_addr,
                                         oracle_targets,
                                         &mut next_oracle_target,
-                                        &format!("arm64 lookup-site {ordinal} (call)"),
+                                        &format!("arm64 lookup-site {ordinal} ({:?})", spec.kind),
                                     )?);
                                     helper_addr_from_site = true;
-                                }
-                                LookupKind::Hash => {
-                                    let target_addr = resolve_site_target(
-                                        spec.target_addr,
-                                        oracle_targets,
-                                        &mut next_oracle_target,
-                                        &format!("arm64 lookup-site {ordinal} (hash)"),
-                                    )?;
-                                    for word in arm64_helper_call_sequence(target_addr)? {
-                                        append_u32(&mut blob, word);
-                                    }
-                                    for word in build_arm64_hash_lookup_postcall(spec)? {
-                                        append_u32(&mut blob, word);
-                                    }
-                                    arm64_call_clobber_map_regs(&mut reg_map_names);
-                                    continue;
-                                }
-                                LookupKind::LruHash => {
-                                    let target_addr = resolve_site_target(
-                                        spec.target_addr,
-                                        oracle_targets,
-                                        &mut next_oracle_target,
-                                        &format!("arm64 lookup-site {ordinal} (lru_hash)"),
-                                    )?;
-                                    for word in arm64_helper_call_sequence(target_addr)? {
-                                        append_u32(&mut blob, word);
-                                    }
-                                    for word in build_arm64_lru_hash_lookup_postcall(spec)? {
-                                        append_u32(&mut blob, word);
-                                    }
-                                    arm64_call_clobber_map_regs(&mut reg_map_names);
-                                    continue;
-                                }
-                                LookupKind::PerCpuHash => {
-                                    let target_addr = resolve_site_target(
-                                        spec.target_addr,
-                                        oracle_targets,
-                                        &mut next_oracle_target,
-                                        &format!("arm64 lookup-site {ordinal} (percpu_hash)"),
-                                    )?;
-                                    for word in arm64_helper_call_sequence(target_addr)? {
-                                        append_u32(&mut blob, word);
-                                    }
-                                    for word in build_arm64_percpu_hash_lookup_postcall(spec)? {
-                                        append_u32(&mut blob, word);
-                                    }
-                                    arm64_call_clobber_map_regs(&mut reg_map_names);
-                                    continue;
                                 }
                             }
                         }

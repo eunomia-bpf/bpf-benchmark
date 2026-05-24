@@ -14,6 +14,10 @@ __do_bytes(void *ctx, struct msg_data *msg, unsigned long uptr, size_t bytes)
 	int err;
 
 	/* Code movement from clang forces us to inline bounds checks here */
+#ifdef MICRO_NATIVE
+	if (bytes > MSG_DATA_ARG_LEN)
+		bytes = MSG_DATA_ARG_LEN;
+#else
 	asm volatile goto(
 		"if %[bytes] < 0 goto %l[b]\n;"
 		"if %[bytes] < " XSTR(MSG_DATA_ARG_LEN) " goto %l[a]\n;"
@@ -21,12 +25,17 @@ __do_bytes(void *ctx, struct msg_data *msg, unsigned long uptr, size_t bytes)
 		: [bytes] "+r"(bytes)::a, b);
 	bytes = MSG_DATA_ARG_LEN;
 a:
+#endif
 	// < 5.3 verifier still requires value masking like 'val &= xxx'
 #ifndef __LARGE_BPF_PROG
+#ifdef MICRO_NATIVE
+	bytes &= 0x3fff;
+#else
 	asm volatile("%[bytes] &= 0x3fff;\n"
 		     :
 		     : [bytes] "+r"(bytes)
 		     :);
+#endif
 #endif
 	err = probe_read(&msg->arg[0], bytes, (char *)uptr);
 	if (err < 0)
@@ -88,10 +97,16 @@ __do_str(void *ctx, struct msg_data *msg, unsigned long arg, bool *done)
 	long ret;
 
 	/* Code movement from clang forces us to inline bounds checks here */
+#ifdef MICRO_NATIVE
+	max &= 0x7fff;
+	if (max >= 32736)
+		max = 32736;
+#else
 	asm volatile("%[max] &= 0x7fff;\n"
 		     "if %[max] < 32736 goto +1\n;"
 		     "%[max] = 32736;\n"
 		     : [max] "+r"(max));
+#endif
 
 	ret = probe_read_str(&msg->arg[0], max, (char *)arg);
 	if (ret < 0)
@@ -105,8 +120,12 @@ __do_str(void *ctx, struct msg_data *msg, unsigned long arg, bool *done)
 
 	size = ret + offsetof(struct msg_data, arg);
 	/* Code movement from clang forces us to inline bounds checks here */
+#ifdef MICRO_NATIVE
+	size &= 0x7fff;
+#else
 	asm volatile("%[size] &= 0x7fff;\n"
 		     : [size] "+r"(size));
+#endif
 	msg->common.size = size;
 	event_output_metric(ctx, MSG_OP_DATA, msg, size);
 	return ret;

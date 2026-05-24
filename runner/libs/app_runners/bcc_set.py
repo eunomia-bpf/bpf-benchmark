@@ -136,6 +136,9 @@ class BccSetRunner(AppRunner):
         # child.
         from ..agent import _shim_env_for
         tool_env.update(_shim_env_for(str(tool_binary)))
+        native_object = self._native_object_for_tool(child.tool_name)
+        if native_object is not None:
+            tool_env["BPFREJIT_SHIM_NATIVE_OBJECT"] = str(native_object)
         command = [str(tool_binary), *child.tool_args]
         child.command_used = list(command)
         process = subprocess.Popen(
@@ -175,6 +178,19 @@ class BccSetRunner(AppRunner):
             stdout_thread=stdout_thread,
             stderr_thread=stderr_thread,
         )
+
+    def _native_object_for_tool(self, tool_name: str) -> Path | None:
+        enabled = os.environ.get("BPFREJIT_SHIM_NATIVE_LOADER", "").strip().lower()
+        if enabled not in {"1", "true", "yes", "on"}:
+            return None
+        native_dir = os.environ.get("BPFREJIT_SHIM_NATIVE_OBJECT_DIR", "").strip()
+        if not native_dir:
+            arch = os.environ.get("RUN_TARGET_ARCH", "x86_64").strip() or "x86_64"
+            native_dir = f"/opt/bpf-benchmark/native-bpf/{arch}/bcc"
+        native_object = Path(native_dir) / f"{tool_name}.native.o"
+        if not native_object.is_file():
+            raise RuntimeError(f"bcc/set native object not found for {tool_name}: {native_object}")
+        return native_object
 
     def _raise_if_child_exited(self, tool_name: str, child: BCCRunner) -> None:
         process = None if child.session is None else child.session.process

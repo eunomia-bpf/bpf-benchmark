@@ -27,7 +27,8 @@ class TetragonAgentSession(AgentSession):
         except Exception as exc: return exc
 
     def __enter__(self) -> "TetragonAgentSession":
-        self.process = start_agent(self.command[0], self.command[1:], env={"HOME": os.environ.get("HOME", str(ROOT_DIR))})
+        env = {"HOME": os.environ.get("HOME", str(ROOT_DIR)), **tetragon_native_loader_env()}
+        self.process = start_agent(self.command[0], self.command[1:], env=env)
         self._start_io_threads()
         try:
             wait_for_app_shim_programs(
@@ -72,6 +73,21 @@ def inspect_tetragon_setup() -> dict[str, object]:
     return {"returncode": 0, "tetragon_binary": str(tetragon_binary), "tetragon_bpf_lib_dir": str(bpf_lib_dir),
             "stdout_tail": f"TETRAGON_BINARY={tetragon_binary}\nTETRAGON_BPF_LIB_DIR={bpf_lib_dir}\nSTRESS_NG_BINARY={which('stress-ng') or ''}",
             "stderr_tail": ""}
+
+
+def tetragon_native_loader_env() -> dict[str, str]:
+    enabled = os.environ.get("BPFREJIT_SHIM_NATIVE_LOADER", "").strip().lower()
+    if enabled not in {"1", "true", "yes", "on"}:
+        return {}
+    explicit = os.environ.get("BPFREJIT_SHIM_NATIVE_OBJECT_DIR", "").strip()
+    if explicit:
+        native_dir = Path(explicit)
+    else:
+        arch = os.environ.get("RUN_TARGET_ARCH", "x86_64").strip() or "x86_64"
+        native_dir = Path(f"/opt/bpf-benchmark/native-bpf/{arch}/tetragon")
+    if not native_dir.is_dir():
+        raise RuntimeError(f"Tetragon native object directory not found: {native_dir}")
+    return {"BPFREJIT_SHIM_NATIVE_OBJECT_DIR": str(native_dir)}
 
 
 def resolve_tetragon_binary(explicit: str | None, setup_result: Mapping[str, object]) -> str | None:

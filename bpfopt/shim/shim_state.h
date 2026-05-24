@@ -76,6 +76,16 @@ struct prog_entry {
     uint32_t *snap_kids;
     uint32_t *snap_types;
     uint32_t snap_n;
+    uint32_t fd_array_slots_needed;
+    int *fd_array_snapshot;
+    uint32_t fd_array_snapshot_n;
+    /* Native-loader programs contain raw kernel map/value pointers in the
+     * uploaded native blob. The native stub verifier does not see those maps,
+     * so the shim keeps referenced maps alive through a process-wide
+     * kernel-map-id ref table. Each prog stores only the map ids it pins. */
+    int native_loader_original_fd;
+    uint32_t *native_loader_map_kids;
+    uint32_t native_loader_map_kids_n;
     /* Live attach points for this prog. Populated by BPF_LINK_CREATE post-call,
      * BPF_PROG_ATTACH post-call, BPF_RAW_TRACEPOINT_OPEN post-call, and
      * PERF_EVENT_IOC_SET_BPF post-ioctl; fd-backed entries are pruned by
@@ -112,6 +122,41 @@ struct map_entry {
     char name[17];
 };
 static struct map_entry *map_table[BPF_STATE_BUCKETS];
+
+struct native_loader_map_ref_entry {
+    uint32_t kid;
+    int fd;
+    uint32_t refcnt;
+    struct native_loader_map_ref_entry *next;
+};
+static struct native_loader_map_ref_entry *native_loader_map_ref_table[BPF_STATE_BUCKETS];
+
+static int native_loader_map_ref_fd_is_retained_locked(int fd) {
+    if (fd < 0)
+        return 0;
+    for (int b = 0; b < BPF_STATE_BUCKETS; b++)
+        for (struct native_loader_map_ref_entry *e =
+                 native_loader_map_ref_table[b];
+             e; e = e->next)
+            if (e->fd == fd)
+                return 1;
+    return 0;
+}
+
+static int native_loader_map_ref_has_fd_in_range_locked(unsigned int first,
+                                                        unsigned int last) {
+    for (int b = 0; b < BPF_STATE_BUCKETS; b++)
+        for (struct native_loader_map_ref_entry *e =
+                 native_loader_map_ref_table[b];
+             e; e = e->next) {
+            if (e->fd < 0)
+                continue;
+            unsigned int fd = (unsigned int)e->fd;
+            if (fd >= first && fd <= last)
+                return 1;
+        }
+    return 0;
+}
 
 /* ---- link table (records BPF_LINK_CREATE for future detach/re-attach) ---- */
 struct link_entry {
@@ -227,10 +272,170 @@ static struct prog_entry *prog_find_by_kernel_id(uint32_t kid) {
             if (e->kernel_prog_id == kid) return e;
     return NULL;
 }
+
+static uint32_t resolve_kernel_id(int fd);
+
+static unsigned kernel_id_bucket(uint32_t kid) {
+    return (kid * 2654435761u) % BPF_STATE_BUCKETS;
+}
+
+static int native_loader_kid_seen(const uint32_t *kids, uint32_t n,
+                                  uint32_t kid) {
+    if (!kid)
+        return 0;
+    for (uint32_t i = 0; i < n; i++)
+        if (kids[i] == kid)
+            return 1;
+    return 0;
+}
+
+static void native_loader_map_ref_release_locked(uint32_t kid) {
+    if (!kid)
+        return;
+    struct native_loader_map_ref_entry **prev =
+        &native_loader_map_ref_table[kernel_id_bucket(kid)];
+    while (*prev) {
+        struct native_loader_map_ref_entry *entry = *prev;
+        if (entry->kid != kid) {
+            prev = &entry->next;
+            continue;
+        }
+        if (entry->refcnt > 1) {
+            entry->refcnt--;
+            return;
+        }
+        *prev = entry->next;
+        if (entry->fd >= 0 && real_close)
+            real_close(entry->fd);
+        free(entry);
+        return;
+    }
+}
+
+static int native_loader_map_ref_retain_fd_locked(int fd, uint32_t *kid_out) {
+    if (kid_out)
+        *kid_out = 0;
+    uint32_t kid = resolve_kernel_id(fd);
+    if (!kid) {
+        if (fd >= 0 && real_close)
+            real_close(fd);
+        errno = EINVAL;
+        return -1;
+    }
+
+    struct native_loader_map_ref_entry **bucket =
+        &native_loader_map_ref_table[kernel_id_bucket(kid)];
+    for (struct native_loader_map_ref_entry *entry = *bucket; entry;
+         entry = entry->next) {
+        if (entry->kid != kid)
+            continue;
+        if (entry->refcnt == UINT32_MAX) {
+            if (fd >= 0 && real_close)
+                real_close(fd);
+            errno = EOVERFLOW;
+            return -1;
+        }
+        entry->refcnt++;
+        if (fd >= 0 && real_close)
+            real_close(fd);
+        if (kid_out)
+            *kid_out = kid;
+        return 0;
+    }
+
+    struct native_loader_map_ref_entry *entry =
+        (struct native_loader_map_ref_entry *)calloc(1, sizeof(*entry));
+    if (!entry) {
+        if (fd >= 0 && real_close)
+            real_close(fd);
+        errno = ENOMEM;
+        return -1;
+    }
+    entry->kid = kid;
+    entry->fd = fd;
+    entry->refcnt = 1;
+    entry->next = *bucket;
+    *bucket = entry;
+    if (kid_out)
+        *kid_out = kid;
+    return 0;
+}
+
+static int native_loader_map_refs_take_owned_fds(int *fds,
+                                                 uint32_t fds_n,
+                                                 uint32_t **kids_out,
+                                                 uint32_t *kids_n_out) {
+    *kids_out = NULL;
+    *kids_n_out = 0;
+    if (!fds || fds_n == 0) {
+        free(fds);
+        return 0;
+    }
+
+    uint32_t *kids = (uint32_t *)calloc(fds_n, sizeof(*kids));
+    if (!kids) {
+        int saved = errno ? errno : ENOMEM;
+        for (uint32_t i = 0; i < fds_n; i++)
+            if (fds[i] >= 0 && real_close)
+                real_close(fds[i]);
+        free(fds);
+        errno = saved;
+        return -1;
+    }
+
+    uint32_t kids_n = 0;
+    pthread_mutex_lock(&state_mutex);
+    for (uint32_t i = 0; i < fds_n; i++) {
+        int fd = fds[i];
+        if (fd < 0)
+            continue;
+        uint32_t kid = 0;
+        if (native_loader_map_ref_retain_fd_locked(fd, &kid) != 0) {
+            int saved = errno ? errno : EINVAL;
+            for (uint32_t j = 0; j < kids_n; j++)
+                native_loader_map_ref_release_locked(kids[j]);
+            pthread_mutex_unlock(&state_mutex);
+            for (uint32_t j = i + 1; j < fds_n; j++)
+                if (fds[j] >= 0 && real_close)
+                    real_close(fds[j]);
+            free(kids);
+            free(fds);
+            errno = saved;
+            return -1;
+        }
+        fds[i] = -1;
+        if (native_loader_kid_seen(kids, kids_n, kid)) {
+            native_loader_map_ref_release_locked(kid);
+            continue;
+        }
+        kids[kids_n++] = kid;
+    }
+    pthread_mutex_unlock(&state_mutex);
+
+    free(fds);
+    if (kids_n == 0) {
+        free(kids);
+        return 0;
+    }
+    uint32_t *shrunk =
+        (uint32_t *)realloc(kids, (size_t)kids_n * sizeof(*kids));
+    if (shrunk)
+        kids = shrunk;
+    *kids_out = kids;
+    *kids_n_out = kids_n;
+    return 0;
+}
+
 static void prog_free(struct prog_entry *e) {
+    if (e->native_loader_original_fd >= 0 && real_close)
+        real_close(e->native_loader_original_fd);
+    for (uint32_t i = 0; i < e->native_loader_map_kids_n; i++)
+        native_loader_map_ref_release_locked(e->native_loader_map_kids[i]);
+    free(e->native_loader_map_kids);
     free(e->snap_fds);
     free(e->snap_kids);
     free(e->snap_types);
+    free(e->fd_array_snapshot);
     free(e->attached_link_fds);
     free(e->attached_perf_fds);
     free(e->prog_attaches);
@@ -428,6 +633,30 @@ static void dump_bytecode(uint64_t hash, const struct bpf_insn *insns,
                  bytes, path);
 }
 
+static int prog_load_fd_array_slots_needed(const struct bpf_insn *insns,
+                                           uint32_t insn_cnt,
+                                           uint32_t *slots_out) {
+    uint32_t slots = 0;
+    for (uint32_t i = 0; i < insn_cnt; i++) {
+        const struct bpf_insn *insn = &insns[i];
+        if (insn->code != (BPF_LD | BPF_DW | BPF_IMM))
+            continue;
+        if (insn->src_reg == BPF_PSEUDO_MAP_IDX ||
+            insn->src_reg == BPF_PSEUDO_MAP_IDX_VALUE) {
+            if (insn->imm < 0)
+                return -1;
+            uint32_t idx = (uint32_t)insn->imm;
+            if (idx == UINT32_MAX)
+                return -1;
+            if (idx + 1 > slots)
+                slots = idx + 1;
+        }
+        i++; /* skip the second LD_IMM64 slot */
+    }
+    *slots_out = slots;
+    return 0;
+}
+
 /* Each capture_* returns a heap entry the caller must insert into the right
  * table under state_mutex once the syscall's return fd is known. On OOM or
  * pre-call validation failure: NULL.
@@ -455,6 +684,14 @@ static struct prog_entry *capture_prog_load(const union bpf_attr *attr,
         snprintf(path, sizeof(path), "%s/bpfrejit_%d_%016lx.bpf", dir,
                  getpid(), hash);
     }
+    uint32_t fd_array_slots_needed = 0;
+    if (insns && insn_cnt > 0 &&
+        prog_load_fd_array_slots_needed(insns, insn_cnt,
+                                        &fd_array_slots_needed) != 0) {
+        log_line("BPF_PROG_LOAD name=%s has invalid PSEUDO_MAP_IDX immediate",
+                 name);
+        return NULL;
+    }
     log_line("BPF_PROG_LOAD type=%u (%s) name=%s insn_cnt=%u hash=%016lx "
              "license=%s expected_attach=%u attach_btf_id=%u "
              "prog_btf_fd=%u attach_btf_obj_fd=%u attach_prog_fd=%u",
@@ -469,6 +706,8 @@ static struct prog_entry *capture_prog_load(const union bpf_attr *attr,
     e->name[16] = 0;
     e->insn_cnt = insn_cnt;
     e->hash = hash;
+    e->fd_array_slots_needed = fd_array_slots_needed;
+    e->native_loader_original_fd = -1;
     e->expected_attach_type = ATTR_HAS_FIELD(attr_size, expected_attach_type)
                                   ? attr->expected_attach_type
                                   : 0;
@@ -555,6 +794,41 @@ static struct prog_entry *capture_prog_load(const union bpf_attr *attr,
         size_t n = strnlen(lic, sizeof(e->license) - 1);
         memcpy(e->license, lic, n);
         e->license[n] = 0;
+    }
+    if (fd_array_slots_needed) {
+        if (!ATTR_HAS_FIELD(attr_size, fd_array) || !attr->fd_array) {
+            log_line("BPF_PROG_LOAD name=%s uses PSEUDO_MAP_IDX slots=%u but "
+                     "has no fd_array pointer",
+                     name, fd_array_slots_needed);
+        } else {
+            uint32_t fd_array_cnt = 0;
+            const size_t fd_array_cnt_off = 148U;
+            if (attr_size >= fd_array_cnt_off + sizeof(fd_array_cnt)) {
+                memcpy(&fd_array_cnt, ((const char *)attr) + fd_array_cnt_off,
+                       sizeof(fd_array_cnt));
+            }
+            if (fd_array_cnt && fd_array_cnt < fd_array_slots_needed) {
+                log_line("BPF_PROG_LOAD name=%s fd_array_cnt=%u smaller than "
+                         "referenced slots=%u",
+                         name, fd_array_cnt, fd_array_slots_needed);
+            } else {
+                size_t fd_array_bytes =
+                    (size_t)fd_array_slots_needed *
+                    sizeof(*e->fd_array_snapshot);
+                e->fd_array_snapshot = (int *)malloc(fd_array_bytes);
+                if (!e->fd_array_snapshot) {
+                    prog_free(e);
+                    return NULL;
+                }
+                memcpy(e->fd_array_snapshot,
+                       (const void *)(uintptr_t)attr->fd_array,
+                       fd_array_bytes);
+                e->fd_array_snapshot_n = fd_array_slots_needed;
+                log_line("BPF_PROG_LOAD name=%s captured fd_array slots=%u "
+                         "attr_cnt=%u",
+                         name, fd_array_slots_needed, fd_array_cnt);
+            }
+        }
     }
     if (path[0]) memcpy(e->bytecode_path, path, sizeof(path));
     return e;

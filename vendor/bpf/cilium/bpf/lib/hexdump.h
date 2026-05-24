@@ -42,8 +42,8 @@ void hexdump_len_off(const char *msg, const char *first_layer,
 	__u16 i;
 	char *b;
 	char buf[HD_MAX_BYTES * 2 + 1] = {0};
-	void *data     = (void *)(long)ctx->data;
-	void *data_end = (void *)(long)ctx->data_end;
+	void *data     = ctx_data(ctx);
+	void *data_end = ctx_data_end(ctx);
 
 	/**
 	 * Further clamp dump len to either max of pkt or HD_MAX_BYTES

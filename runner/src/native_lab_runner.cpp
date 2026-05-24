@@ -15,6 +15,7 @@
 #include "kernel_test_run.hpp"
 #include "bpf_helpers.hpp"
 #include "kernel_offsets.h"
+#include "native_loader.hpp"
 
 #include <bpf/bpf.h>
 #include <bpf/btf.h>
@@ -84,7 +85,7 @@ constexpr NativeLabTarget kNativeLabTarget = {
 
 constexpr const char *kVmlinuxBtfPath = "/sys/kernel/btf/vmlinux";
 constexpr const char *kDebugfsDir = "/sys/kernel/debug";
-constexpr uint32_t kMaxBlobs = 64;
+constexpr uint32_t kMaxBlobs = 512;
 
 /* Stage 2 helpers that native-link can lower. Helper addresses come from
  * the companion program's kernel JIT image, not from /proc/kallsyms. */
@@ -560,20 +561,15 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
     // the module BTF fd there. fd_array[1] is what `off=1` in the
     // kinsn call insn resolves to.
     int fd_array[2] = {mod_btf_fd, mod_btf_fd};
-    std::vector<char> log_buf(32 * 1024, '\0');
-
     LIBBPF_OPTS(bpf_prog_load_opts, opts,
         .fd_array = fd_array,
-        .log_level = 1,
-        .log_size = static_cast<uint32_t>(log_buf.size()),
-        .log_buf = log_buf.data(),
     );
     int fd = bpf_prog_load(static_cast<bpf_prog_type>(prog_type_value),
                            "native_lab_stub", "GPL",
                            insns.data(), insns.size(), &opts);
     if (fd < 0) {
         fail(std::string("bpf_prog_load (native_lab stub): ")
-             + std::strerror(errno) + "\nverifier log:\n" + log_buf.data());
+             + std::strerror(errno));
     }
     return fd;
 }
@@ -1893,7 +1889,7 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
     std::vector<uint8_t> blob;
     std::vector<uint8_t> relocs;
     uint32_t callee_saved_mask = 0;
-    CompanionLoad companion{};
+    native_loader::LoadedProgram native_loaded{};
     uint64_t companion_load_ns = 0;
     uint64_t companion_open_ns = 0;
     uint64_t companion_object_load_ns = 0;
@@ -1904,6 +1900,7 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
     uint64_t native_link_read_ns = 0;
     uint64_t native_link_map_patch_ns = 0;
     uint64_t bpf_bytecode_bytes = 0;
+    uint64_t native_code_bytes = 0;
     if (file_is_elf(options.program)) {
         if (!options.native_program.has_value()) {
             fail("native_kernel: ELF --program requires --native-program");
@@ -1912,42 +1909,52 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
         const std::string &symbol = image.program_name;
         bpf_bytecode_bytes = image.code.size();
 
-        const auto companion_load_start = std::chrono::steady_clock::now();
-        companion = load_bpf_companion(options.program);
-        const auto companion_load_end = std::chrono::steady_clock::now();
-        LinkedBlob linked =
-            load_or_link_native_blob(options, *options.native_program, symbol, companion);
-        companion_load_ns = elapsed_ns(companion_load_start, companion_load_end);
-        companion_open_ns = companion.open_ns;
-        companion_object_load_ns = companion.object_load_ns;
-        companion_map_ptr_extract_ns = companion.map_ptr_extract_ns;
-        companion_lookup_spec_ns = companion.lookup_spec_ns;
-        native_link_cache_lookup_ns = linked.cache_lookup_ns;
-        native_link_exec_ns = linked.native_link_exec_ns;
-        native_link_read_ns = linked.native_link_read_ns;
-        native_link_map_patch_ns = linked.map_patch_ns;
-        callee_saved_mask = linked.callee_saved_mask;
-        blob = std::move(linked.blob);
-        relocs = std::move(linked.relocs);
+        native_loader::LoadOptions load_options{
+            .bpf_object_path = options.program,
+            .native_object_path = *options.native_program,
+            .symbol_name = symbol,
+            .prog_type = prog_type_value,
+            .native_link_path = options.native_kernel_linker_path,
+        };
+        native_loaded = native_loader::load_from_companion_object(load_options);
+        companion_load_ns = native_loaded.timings.companion_load_ns;
+        companion_open_ns = native_loaded.timings.companion_open_ns;
+        companion_object_load_ns = native_loaded.timings.companion_object_load_ns;
+        companion_map_ptr_extract_ns = native_loaded.timings.companion_map_ptr_extract_ns;
+        companion_lookup_spec_ns = native_loaded.timings.companion_lookup_spec_ns;
+        native_link_cache_lookup_ns = native_loaded.timings.cache_lookup_ns;
+        native_link_exec_ns = native_loaded.timings.native_link_exec_ns;
+        native_link_read_ns = native_loaded.timings.native_link_read_ns;
+        native_link_map_patch_ns = native_loaded.timings.map_patch_ns;
+        callee_saved_mask = native_loaded.callee_saved_mask;
+        native_code_bytes = native_loaded.native_code_bytes;
     } else {
         blob = read_blob_file(options.program);
+        native_code_bytes = blob.size();
     }
     const auto blob_read_end = std::chrono::steady_clock::now();
 
-    const auto upload_start = std::chrono::steady_clock::now();
-    ensure_debugfs_mounted();
-    uint32_t chunks = upload_blob(blob);
-    upload_relocs(relocs, blob.size(), chunks);
-    const auto upload_end = std::chrono::steady_clock::now();
+    uint64_t blob_upload_ns = native_loaded.timings.upload_ns;
+    uint64_t prog_load_ns = native_loaded.timings.prog_load_ns;
+    int prog_fd = native_loaded.prog_fd;
+    if (prog_fd < 0) {
+        const auto upload_start = std::chrono::steady_clock::now();
+        ensure_debugfs_mounted();
+        uint32_t chunks = upload_blob(blob);
+        upload_relocs(relocs, blob.size(), chunks);
+        const auto upload_end = std::chrono::steady_clock::now();
+        blob_upload_ns = elapsed_ns(upload_start, upload_end);
 
-    const auto prog_load_start = std::chrono::steady_clock::now();
-    NativeStubBtfIds stub_btf = find_native_stub_btf_ids();
-    int mod_btf_fd = open_module_btf_fd_by_id(stub_btf.module_btf_id);
-    int prog_fd =
-        load_stub_prog(stub_btf.kfunc_btf_id, mod_btf_fd, chunks,
-                       callee_saved_mask, prog_type_value);
-    const auto prog_load_end = std::chrono::steady_clock::now();
-    close(mod_btf_fd);
+        const auto prog_load_start = std::chrono::steady_clock::now();
+        NativeStubBtfIds stub_btf = find_native_stub_btf_ids();
+        int mod_btf_fd = open_module_btf_fd_by_id(stub_btf.module_btf_id);
+        prog_fd =
+            load_stub_prog(stub_btf.kfunc_btf_id, mod_btf_fd, chunks,
+                           callee_saved_mask, prog_type_value);
+        const auto prog_load_end = std::chrono::steady_clock::now();
+        close(mod_btf_fd);
+        prog_load_ns = elapsed_ns(prog_load_start, prog_load_end);
+    }
 
     if (options.dump_jit || options.dump_jit_path.has_value()) {
         const bpf_prog_info prog_info = load_prog_info(prog_fd);
@@ -1956,6 +1963,15 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
             std::filesystem::path(benchmark_name_for_program(options.program) + ".native_kernel.bin"));
         write_binary_file(dump_path, jited_program.data(), jited_program.size());
     }
+
+    auto close_native_program = [&]() {
+        if (native_loaded.prog_fd >= 0) {
+            native_loader::close_loaded_program(&native_loaded);
+        } else if (prog_fd >= 0) {
+            close(prog_fd);
+            prog_fd = -1;
+        }
+    };
 
     const bool result_from_skb_context =
         prog_type_value == BPF_PROG_TYPE_SCHED_CLS ||
@@ -1975,7 +1991,7 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
         warm.ctx_size_out = sizeof(context_out);
     }
     if (bpf_prog_test_run_opts(prog_fd, &warm) < 0) {
-        close(prog_fd);
+        close_native_program();
         fail(std::string("warmup test_run failed: ") + std::strerror(errno));
     }
 
@@ -2006,7 +2022,7 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
         run_end = std::chrono::steady_clock::now();
     });
     if (run_err) {
-        close(prog_fd);
+        close_native_program();
         fail(std::string("bpf_prog_test_run_opts failed: ") + std::strerror(errno));
     }
 
@@ -2016,24 +2032,18 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
                       (static_cast<uint64_t>(context_out.cb[1]) << 32);
     } else {
         if (packet_out.size() < sizeof(uint64_t)) {
-            close(prog_fd);
+            close_native_program();
             fail("native_kernel: packet_out too small to hold u64 result");
         }
         std::memcpy(&result_word, packet_out.data(), sizeof(result_word));
     }
 
-    close(prog_fd);
-    /* Companion bpf_object stays open until here so the maps it owns
-     * remain valid for the entire test_run. Close now that we have
-     * read out the result. */
-    if (companion.obj) {
-        bpf_object__close(companion.obj);
-    }
+    close_native_program();
 
     sample_result sample;
     sample.compile_ns = elapsed_ns(blob_read_start, blob_read_end)
-                      + elapsed_ns(upload_start, upload_end)
-                      + elapsed_ns(prog_load_start, prog_load_end);
+                      + blob_upload_ns
+                      + prog_load_ns;
     sample.exec_ns = test_opts.duration;  // kernel reports per-iter ns
     sample.timing_source = "ktime";
     sample.timing_source_wall = "wall_steady";
@@ -2041,7 +2051,7 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
     sample.result = result_word;
     sample.retval = test_opts.retval;
     sample.perf_counters = std::move(perf_counters);
-    sample.code_size = { .bpf_bytecode_bytes = bpf_bytecode_bytes, .native_code_bytes = blob.size() };
+    sample.code_size = { .bpf_bytecode_bytes = bpf_bytecode_bytes, .native_code_bytes = native_code_bytes };
     sample.phases_ns = {
         {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},
         {"packet_prepare_ns", elapsed_ns(pkt_prepare_start, pkt_prepare_end)},
@@ -2055,8 +2065,8 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
         {"native_link_exec_ns", native_link_exec_ns},
         {"native_link_read_ns", native_link_read_ns},
         {"native_link_map_patch_ns", native_link_map_patch_ns},
-        {"blob_upload_ns", elapsed_ns(upload_start, upload_end)},
-        {"prog_load_ns", elapsed_ns(prog_load_start, prog_load_end)},
+        {"blob_upload_ns", blob_upload_ns},
+        {"prog_load_ns", prog_load_ns},
         {"prog_run_wall_ns", elapsed_ns(run_start, run_end)},
     };
     return {std::move(sample)};

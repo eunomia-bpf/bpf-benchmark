@@ -108,6 +108,145 @@ static inline int bpf_get_stackid(UNUSED void *ctx, UNUSED void *map, UNUSED u64
 // definitions of bpf helper functions we need, as found in
 // https://elixir.bootlin.com/linux/v4.11/source/samples/bpf/bpf_helpers.h
 
+  #if defined(MICRO_NATIVE)
+static __attribute__((always_inline)) unsigned long __native_helper_id(unsigned long id)
+{
+  asm volatile("" : "+r"(id) : : "memory");
+  return id;
+}
+
+static __attribute__((always_inline)) unsigned long
+__native_helper_id1(unsigned long id, unsigned long a0)
+{
+  asm volatile("" : "+r"(id) : "r"(a0) : "memory");
+  return id;
+}
+
+static __attribute__((always_inline)) unsigned long
+__native_helper_id2(unsigned long id, unsigned long a0, unsigned long a1)
+{
+  asm volatile("" : "+r"(id) : "r"(a0), "r"(a1) : "memory");
+  return id;
+}
+
+static __attribute__((always_inline)) unsigned long
+__native_helper_id3(unsigned long id, unsigned long a0, unsigned long a1, unsigned long a2)
+{
+  asm volatile("" : "+r"(id) : "r"(a0), "r"(a1), "r"(a2) : "memory");
+  return id;
+}
+
+static __attribute__((always_inline)) unsigned long
+__native_helper_id4(
+  unsigned long id, unsigned long a0, unsigned long a1, unsigned long a2, unsigned long a3)
+{
+  asm volatile("" : "+r"(id) : "r"(a0), "r"(a1), "r"(a2), "r"(a3) : "memory");
+  return id;
+}
+
+static __attribute__((always_inline)) unsigned long __native_helper_id5(
+  unsigned long id,
+  unsigned long a0,
+  unsigned long a1,
+  unsigned long a2,
+  unsigned long a3,
+  unsigned long a4)
+{
+  asm volatile(
+    "" : "+r"(id) : "r"(a0), "r"(a1), "r"(a2), "r"(a3), "r"(a4) : "memory");
+  return id;
+}
+
+    #define __native_bpf_helper0(_type, _id) ((_type)__native_helper_id((unsigned long)(_id)))
+    #define __native_bpf_helper1(_type, _id, _a0)                                                \
+      ((_type)__native_helper_id1((unsigned long)(_id), (unsigned long)(_a0)))
+    #define __native_bpf_helper2(_type, _id, _a0, _a1)                                           \
+      ((_type)__native_helper_id2(                                                               \
+        (unsigned long)(_id), (unsigned long)(_a0), (unsigned long)(_a1)))
+    #define __native_bpf_helper3(_type, _id, _a0, _a1, _a2)                                      \
+      ((_type)__native_helper_id3(                                                               \
+        (unsigned long)(_id), (unsigned long)(_a0), (unsigned long)(_a1), (unsigned long)(_a2)))
+    #define __native_bpf_helper4(_type, _id, _a0, _a1, _a2, _a3)                                 \
+      ((_type)__native_helper_id4(                                                               \
+        (unsigned long)(_id),                                                                    \
+        (unsigned long)(_a0),                                                                    \
+        (unsigned long)(_a1),                                                                    \
+        (unsigned long)(_a2),                                                                    \
+        (unsigned long)(_a3)))
+    #define __native_bpf_helper5(_type, _id, _a0, _a1, _a2, _a3, _a4)                            \
+      ((_type)__native_helper_id5(                                                               \
+        (unsigned long)(_id),                                                                    \
+        (unsigned long)(_a0),                                                                    \
+        (unsigned long)(_a1),                                                                    \
+        (unsigned long)(_a2),                                                                    \
+        (unsigned long)(_a3),                                                                    \
+        (unsigned long)(_a4)))
+    #define bpf_map_lookup_elem(map, key)                                                        \
+      __native_bpf_helper2(                                                                      \
+        void *(*)(void *, void *), BPF_FUNC_map_lookup_elem, (map), (key))((map), (key))
+    #define bpf_map_update_elem(map, key, value, flags)                                          \
+      __native_bpf_helper4(                                                                      \
+        int (*)(void *, void *, void *, u64),                                                     \
+        BPF_FUNC_map_update_elem,                                                                \
+        (map),                                                                                   \
+        (key),                                                                                   \
+        (value),                                                                                 \
+        (flags))((map), (key), (value), (flags))
+    #define bpf_map_delete_elem(map, key)                                                        \
+      __native_bpf_helper2(int (*)(void *, void *), BPF_FUNC_map_delete_elem, (map), (key))(      \
+        (map), (key))
+    #define bpf_probe_read(dst, size, unsafe_ptr)                                                \
+      __native_bpf_helper3(                                                                      \
+        int (*)(void *, int, const void *), BPF_FUNC_probe_read, (dst), (size), (unsafe_ptr))(    \
+        (dst), (size), (unsafe_ptr))
+    #define bpf_ktime_get_ns()                                                                   \
+      __native_bpf_helper0(unsigned long long (*)(void), BPF_FUNC_ktime_get_ns)()
+    #define bpf_get_current_pid_tgid()                                                           \
+      __native_bpf_helper0(unsigned long long (*)(void), BPF_FUNC_get_current_pid_tgid)()
+    #define bpf_get_current_comm(buf, buf_size)                                                  \
+      __native_bpf_helper2(int (*)(void *, int), BPF_FUNC_get_current_comm, (buf), (buf_size))(   \
+        (buf), (buf_size))
+    #define bpf_tail_call(ctx, map, index)                                                       \
+      __native_bpf_helper3(                                                                      \
+        void (*)(void *, void *, int), BPF_FUNC_tail_call, (ctx), (map), (index))(                \
+        (ctx), (map), (index))
+    #define bpf_get_current_task()                                                               \
+      __native_bpf_helper0(unsigned long long (*)(void), BPF_FUNC_get_current_task)()
+    #define bpf_perf_event_output(ctx, map, flags, data, size)                                   \
+      __native_bpf_helper5(                                                                      \
+        int (*)(void *, void *, unsigned long long, void *, int),                                 \
+        BPF_FUNC_perf_event_output,                                                              \
+        (ctx),                                                                                   \
+        (map),                                                                                   \
+        (flags),                                                                                 \
+        (data),                                                                                  \
+        (size))(                                                                                 \
+        (ctx), (map), (flags), (data), (size))
+    #define bpf_get_stackid(ctx, map, flags)                                                     \
+      __native_bpf_helper3(int (*)(void *, void *, u64), BPF_FUNC_get_stackid, (ctx), (map), (flags))( \
+        (ctx), (map), (flags))
+    #define bpf_get_prandom_u32()                                                                \
+      __native_bpf_helper0(unsigned long long (*)(void), BPF_FUNC_get_prandom_u32)()
+    #define bpf_trace_printk(fmt, fmt_size, ...)                                                 \
+      __native_bpf_helper2(int (*)(const char *, int, ...), BPF_FUNC_trace_printk, (fmt), (fmt_size))( \
+        (fmt), (fmt_size), ##__VA_ARGS__)
+    #define bpf_probe_read_user(dst, size, unsafe_ptr)                                           \
+      __native_bpf_helper3(                                                                      \
+        long (*)(void *, int, const void *),                                                      \
+        BPF_FUNC_probe_read_user,                                                                \
+        (dst),                                                                                   \
+        (size),                                                                                  \
+        (unsafe_ptr))(                                                                           \
+        (dst), (size), (unsafe_ptr))
+    #define bpf_probe_read_kernel(dst, size, unsafe_ptr)                                         \
+      __native_bpf_helper3(                                                                      \
+        long (*)(void *, int, const void *),                                                      \
+        BPF_FUNC_probe_read_kernel,                                                              \
+        (dst),                                                                                   \
+        (size),                                                                                  \
+        (unsafe_ptr))(                                                                           \
+        (dst), (size), (unsafe_ptr))
+  #else
 static void *(*bpf_map_lookup_elem)(void *map, void *key) = (void *)BPF_FUNC_map_lookup_elem;
 static int (*bpf_map_update_elem)(void *map, void *key, void *value, u64 flags) = (void *)
   BPF_FUNC_map_update_elem;
@@ -132,6 +271,7 @@ static long (*bpf_probe_read_user)(void *dst, int size, const void *unsafe_ptr) 
   BPF_FUNC_probe_read_user;
 static long (*bpf_probe_read_kernel)(void *dst, int size, const void *unsafe_ptr) = (void *)
   BPF_FUNC_probe_read_kernel;
+  #endif
 
   // The sizeof in bpf_trace_printk() must include \0, else no output
   // is generated. The \n is not needed on 5.8+ kernels, but definitely on

@@ -19,7 +19,9 @@ bpf_clear_meta(struct __sk_buff *ctx)
 	WRITE_ONCE(ctx->cb[4], zero);
 
 	/* This needs to be cleared mainly for tcx. */
+#ifndef MICRO_NATIVE
 	WRITE_ONCE(ctx->tc_classid, zero);
+#endif
 }
 
 static __always_inline __maybe_unused void
@@ -67,7 +69,7 @@ redirect_self(const struct __sk_buff *ctx)
 	/* Looping back the packet into the originating netns. We xmit into the
 	 * hosts' veth device such that we end up on ingress in the peer.
 	 */
-	return (int)ctx_redirect(ctx, ctx->ifindex, 0);
+	return (int)ctx_redirect(ctx, ctx_get_ifindex(ctx), 0);
 }
 
 static __always_inline __maybe_unused bool

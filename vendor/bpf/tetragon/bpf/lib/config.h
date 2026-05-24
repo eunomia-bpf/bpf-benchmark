@@ -28,6 +28,10 @@
 			     : "=r"(out));                            \
 		(typeof(CONFIG_##name) *)out;                         \
 	}))
+#ifdef MICRO_NATIVE
+#undef CONFIG
+#define CONFIG(name) CONFIG_##name
+#endif
 
 DECLARE_CONFIG(bool, ITER_NUM);
 

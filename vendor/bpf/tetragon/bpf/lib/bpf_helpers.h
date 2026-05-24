@@ -61,8 +61,10 @@ const void *__builtin_preserve_access_index(void *);
  *    1, if matching field is present in target kernel;
  *    0, if no matching field found.
  */
+#ifndef bpf_core_field_exists
 #define bpf_core_field_exists(field) \
 	__builtin_preserve_field_info(field, BPF_FIELD_EXISTS)
+#endif
 
 /* second argument to __builtin_preserve_enum_value() built-in */
 enum bpf_enum_value_kind {
@@ -77,6 +79,9 @@ enum bpf_enum_value_kind {
  */
 FUNC_INLINE void relax_verifier(void)
 {
+#ifdef MICRO_NATIVE
+	compiler_barrier();
+#else
 	/* Calling get_smp_processor_id() in asm saves an instruction as we
 	 * don't have to store the result to ensure the call takes place.
 	 * However, we have to specifiy the call target by number and not
@@ -85,13 +90,16 @@ FUNC_INLINE void relax_verifier(void)
 	 */
 	asm volatile("call 8;\n" ::
 			     : "r0", "r1", "r2", "r3", "r4", "r5");
+#endif
 }
 
+#ifndef compiler_barrier
 FUNC_INLINE void compiler_barrier(void)
 {
 	asm volatile("" ::
 			     : "memory");
 }
+#endif
 
 #define __uint(name, val)  int(*name)[val]
 #define __type(name, val)  typeof(val) *name

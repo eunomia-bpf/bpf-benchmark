@@ -46,6 +46,19 @@ tail_call_dynamic(struct __ctx_buff *ctx, const void *map, __u32 slot)
 	 */
 	tail_call(ctx, map, slot);
 }
+#elif defined(MICRO_NATIVE)
+#define tail_call_static(ctx_ptr, map, slot)				\
+{								\
+	if (!__builtin_constant_p(slot))			\
+		__throw_build_bug();				\
+	tail_call((ctx_ptr), &(map), (slot));			\
+}
+
+static __always_inline __maybe_unused void
+tail_call_dynamic(struct __ctx_buff *ctx, const void *map, __u32 slot)
+{
+	tail_call(ctx, map, slot);
+}
 #else
 /* BPF unit tests compile some BPF code under their native arch. Tail calls
  * won't work in this context. Only compile above under __bpf__ target.

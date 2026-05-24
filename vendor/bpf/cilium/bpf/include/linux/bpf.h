@@ -6070,6 +6070,86 @@ enum {
 	 */
 };
 
+#ifdef MICRO_NATIVE
+/*
+ * Native-lab TC/SchedCLS programs receive the kernel's real struct sk_buff *,
+ * not the UAPI mirror below. The verifier normally rewrites __sk_buff field
+ * accesses into real sk_buff accesses before JIT. Native C bypasses that
+ * rewrite, so model the real offsets used by the kernel entry ABI for the
+ * fields Cilium reads directly.
+ */
+struct __sk_buff {
+	void *next;
+	void *prev;
+	void *dev;
+	void *sk;
+	__u64 tstamp;
+	__u32 cb[12];
+	__u8 __native_pad88[24];
+	__u32 len;
+	__u32 data_len;
+	__u16 mac_len;
+	__u16 hdr_len;
+	__u16 queue_mapping;
+	__u8 __native_pad126[8];
+	__u16 tc_index;
+	__u16 alloc_cpu;
+	__u16 __native_pad138;
+	union {
+		__wsum csum;
+		struct {
+			__u16 csum_start;
+			__u16 csum_offset;
+		};
+	};
+	__u32 priority;
+	__s32 ingress_ifindex;
+	__u32 hash;
+	union {
+		__u32 vlan_all;
+		struct {
+			__be16 vlan_proto;
+			__u16 vlan_tci;
+		};
+	};
+	__u32 napi_id;
+	__u32 secmark;
+	__u32 mark;
+	union {
+		__be16 inner_protocol;
+		__u8 inner_ipproto;
+	};
+	__u16 inner_transport_header;
+	__u16 inner_network_header;
+	__u16 inner_mac_header;
+	__be16 protocol;
+	__u16 transport_header;
+	__u16 network_header;
+	__u16 mac_header;
+	__u32 tail;
+	__u32 end;
+	__u32 __native_pad196;
+	unsigned char *head;
+	unsigned char *data;
+	__u32 truesize;
+};
+#define __native_skb_off(member) __builtin_offsetof(struct __sk_buff, member)
+_Static_assert(__native_skb_off(len) == 112, "native __sk_buff len offset");
+_Static_assert(__native_skb_off(data_len) == 116, "native __sk_buff data_len offset");
+_Static_assert(__native_skb_off(queue_mapping) == 124, "native __sk_buff queue_mapping offset");
+_Static_assert(__native_skb_off(tc_index) == 134, "native __sk_buff tc_index offset");
+_Static_assert(__native_skb_off(priority) == 144, "native __sk_buff priority offset");
+_Static_assert(__native_skb_off(ingress_ifindex) == 148, "native __sk_buff ingress_ifindex offset");
+_Static_assert(__native_skb_off(hash) == 152, "native __sk_buff hash offset");
+_Static_assert(__native_skb_off(vlan_all) == 156, "native __sk_buff vlan_all offset");
+_Static_assert(__native_skb_off(mark) == 168, "native __sk_buff mark offset");
+_Static_assert(__native_skb_off(protocol) == 180, "native __sk_buff protocol offset");
+_Static_assert(__native_skb_off(tail) == 188, "native __sk_buff tail offset");
+_Static_assert(__native_skb_off(end) == 192, "native __sk_buff end offset");
+_Static_assert(__native_skb_off(head) == 200, "native __sk_buff head offset");
+_Static_assert(__native_skb_off(data) == 208, "native __sk_buff data offset");
+#undef __native_skb_off
+#else
 /* user accessible mirror of in-kernel sk_buff.
  * new fields can only be added to the end of this structure
  */
@@ -6114,6 +6194,7 @@ struct __sk_buff {
 	__u32 :24;		/* Padding, future use. */
 	__u64 hwtstamp;
 };
+#endif /* MICRO_NATIVE */
 
 struct bpf_tunnel_key {
 	__u32 tunnel_id;

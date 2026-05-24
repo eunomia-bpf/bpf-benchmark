@@ -46,6 +46,13 @@ set(MICRO_EXEC_SOURCES
     src/perf_counters.cpp
 )
 
+set(NATIVE_LOADER_REPO_ROOT "${MICRO_REPO_ROOT}" CACHE PATH "" FORCE)
+set(NATIVE_LOADER_LIBBPF_PREFIX "${MICRO_LIBBPF_PREFIX}" CACHE PATH "" FORCE)
+set(NATIVE_LOADER_LIBBPF_LIBRARY "${MICRO_LIBBPF_LIBRARY}" CACHE FILEPATH "" FORCE)
+set(NATIVE_LOADER_KERNEL_OFFSETS_INCLUDE "${MICRO_KERNEL_OFFSETS_INCLUDE}" CACHE PATH "" FORCE)
+add_subdirectory("${MICRO_REPO_ROOT}/native-sim/libnativeloader"
+                 "${CMAKE_BINARY_DIR}/native_loader")
+
 if(MICRO_EXEC_ENABLE_LLVMBPF)
     if(NOT DEFINED LLVM_DIR OR "${LLVM_DIR}" STREQUAL "")
         message(FATAL_ERROR "MICRO_EXEC_ENABLE_LLVMBPF=ON requires explicit LLVM_DIR")
@@ -159,6 +166,7 @@ endif()
 
 target_link_libraries(micro_exec
     PRIVATE
+        native_loader
         vendor_libbpf
         PkgConfig::LIBELF
         PkgConfig::ZLIB

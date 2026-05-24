@@ -10,12 +10,18 @@
 #define AF_INET		2
 #define AF_INET6	10
 
+#ifdef MICRO_NATIVE
+#define NATIVE_RODATA_ALIGN(N) __attribute__((aligned(N)))
+#else
+#define NATIVE_RODATA_ALIGN(N)
+#endif
+
 const volatile bool filter_sport = false;
 const volatile bool filter_dport = false;
-const volatile __u16 target_sports[MAX_PORTS] = {};
-const volatile __u16 target_dports[MAX_PORTS] = {};
-const volatile pid_t target_pid = 0;
-const volatile __u16 target_family = 0;
+const volatile __u16 target_sports[MAX_PORTS] NATIVE_RODATA_ALIGN(2) = {};
+const volatile __u16 target_dports[MAX_PORTS] NATIVE_RODATA_ALIGN(2) = {};
+const volatile pid_t target_pid NATIVE_RODATA_ALIGN(4) = 0;
+const volatile __u16 target_family NATIVE_RODATA_ALIGN(2) = 0;
 
 struct {
 	__uint(type, BPF_MAP_TYPE_HASH);

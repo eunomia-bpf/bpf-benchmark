@@ -49,8 +49,8 @@ static __always_inline bool
 arp_validate(const struct __ctx_buff *ctx, union macaddr *mac,
 	     union macaddr *smac, __be32 *sip, __be32 *tip)
 {
-	void *data_end = (void *) (long) ctx->data_end;
-	void *data = (void *) (long) ctx->data;
+	void *data_end = ctx_data_end(ctx);
+	void *data = ctx_data(ctx);
 	struct arphdr *arp = data + ETH_HLEN;
 	struct ethhdr *eth = data;
 	struct arp_eth *arp_eth;

@@ -1,4 +1,5 @@
 output*
+tests/results/**/*.bpf
 runner/build*-llvmbpf/
 dump*
 runner/build-arm64

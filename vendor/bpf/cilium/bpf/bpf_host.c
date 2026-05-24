@@ -1187,11 +1187,11 @@ int cil_from_netdev(struct __ctx_buff *ctx)
 	/* Filter allowed vlan id's and pass them back to kernel.
 	 * We will see the packet again in from-netdev@eth0.vlanXXX.
 	 */
-	if (ctx->vlan_present) {
+	if (ctx->vlan_all) {
 		__u32 vlan_id = ctx->vlan_tci & 0xfff;
 
 		if (vlan_id) {
-			if (allow_vlan(ctx->ifindex, vlan_id))
+			if (allow_vlan(ctx_get_ifindex(ctx), vlan_id))
 				return CTX_ACT_OK;
 
 			ret = DROP_VLAN_FILTERED;
@@ -1351,10 +1351,10 @@ int cil_to_netdev(struct __ctx_buff *ctx)
 
 	/* Filter allowed vlan id's and pass them back to kernel.
 	 */
-	if (ctx->vlan_present) {
+	if (ctx->vlan_all) {
 		vlan_id = ctx->vlan_tci & 0xfff;
 		if (vlan_id) {
-			if (allow_vlan(ctx->ifindex, vlan_id))
+			if (allow_vlan(ctx_get_ifindex(ctx), vlan_id))
 				return CTX_ACT_OK;
 
 			ret = DROP_VLAN_FILTERED;

@@ -2928,6 +2928,77 @@ enum bpf_lwt_encap_mode {
     __u64 : 64;                  \
   } __attribute__((aligned(8)))
 
+#ifdef MICRO_NATIVE
+/*
+ * Native-lab TC programs receive the kernel's real struct sk_buff *, not the
+ * UAPI mirror below. Model the real offsets for the fields Katran reads
+ * directly.
+ */
+struct __sk_buff {
+  void* next;
+  void* prev;
+  void* dev;
+  void* sk;
+  __u64 tstamp;
+  __u32 cb[12];
+  __u8 __native_pad88[24];
+  __u32 len;
+  __u32 data_len;
+  __u16 mac_len;
+  __u16 hdr_len;
+  __u16 queue_mapping;
+  __u8 __native_pad126[8];
+  __u16 tc_index;
+  __u16 alloc_cpu;
+  __u16 __native_pad138;
+  union {
+    __u32 csum;
+    struct {
+      __u16 csum_start;
+      __u16 csum_offset;
+    };
+  };
+  __u32 priority;
+  __s32 ingress_ifindex;
+  __u32 hash;
+  union {
+    __u32 vlan_all;
+    struct {
+      __be16 vlan_proto;
+      __u16 vlan_tci;
+    };
+  };
+  __u32 napi_id;
+  __u32 secmark;
+  __u32 mark;
+  union {
+    __be16 inner_protocol;
+    __u8 inner_ipproto;
+  };
+  __u16 inner_transport_header;
+  __u16 inner_network_header;
+  __u16 inner_mac_header;
+  __be16 protocol;
+  __u16 transport_header;
+  __u16 network_header;
+  __u16 mac_header;
+  __u32 tail;
+  __u32 end;
+  __u32 __native_pad196;
+  unsigned char* head;
+  unsigned char* data;
+  __u32 truesize;
+};
+#define __native_skb_off(member) __builtin_offsetof(struct __sk_buff, member)
+_Static_assert(__native_skb_off(len) == 112, "native __sk_buff len offset");
+_Static_assert(__native_skb_off(mark) == 168, "native __sk_buff mark offset");
+_Static_assert(
+    __native_skb_off(protocol) == 180,
+    "native __sk_buff protocol offset");
+_Static_assert(__native_skb_off(head) == 200, "native __sk_buff head offset");
+_Static_assert(__native_skb_off(data) == 208, "native __sk_buff data offset");
+#undef __native_skb_off
+#else
 /* user accessible mirror of in-kernel sk_buff.
  * new fields can only be added to the end of this structure
  */
@@ -2968,6 +3039,25 @@ struct __sk_buff {
   __u32 gso_segs;
   __bpf_md_ptr(struct bpf_sock*, sk);
 };
+#endif /* MICRO_NATIVE */
+
+#ifdef MICRO_NATIVE
+static inline void* katran_skb_data(const struct __sk_buff* skb) {
+  return skb->data;
+}
+
+static inline void* katran_skb_data_end(const struct __sk_buff* skb) {
+  return skb->head + skb->tail;
+}
+#else
+static inline void* katran_skb_data(const struct __sk_buff* skb) {
+  return (void*)(long)skb->data;
+}
+
+static inline void* katran_skb_data_end(const struct __sk_buff* skb) {
+  return (void*)(long)skb->data_end;
+}
+#endif
 
 struct bpf_tunnel_key {
   __u32 tunnel_id;
@@ -3117,6 +3207,42 @@ enum xdp_action {
   XDP_REDIRECT,
 };
 
+#ifdef MICRO_NATIVE
+/*
+ * Native-lab XDP programs receive the kernel's real struct xdp_buff *, not the
+ * UAPI xdp_md mirror. Keep the field names Katran source uses, but give them
+ * the real kernel pointer layout.
+ */
+struct xdp_md {
+  void* data;
+  void* data_end;
+  void* data_meta;
+  void* data_hard_start;
+  void* rxq;
+  void* txq;
+  union {
+    struct {
+      __u32 frame_sz;
+      __u32 flags;
+    };
+    __u64 frame_sz_flags_init;
+  };
+};
+#define __native_xdp_off(member) __builtin_offsetof(struct xdp_md, member)
+_Static_assert(__native_xdp_off(data) == 0, "native xdp_md data offset");
+_Static_assert(__native_xdp_off(data_end) == 8, "native xdp_md data_end offset");
+_Static_assert(
+    __native_xdp_off(data_meta) == 16,
+    "native xdp_md data_meta offset");
+_Static_assert(
+    __native_xdp_off(data_hard_start) == 24,
+    "native xdp_md data_hard_start offset");
+_Static_assert(__native_xdp_off(rxq) == 32, "native xdp_md rxq offset");
+_Static_assert(__native_xdp_off(txq) == 40, "native xdp_md txq offset");
+_Static_assert(__native_xdp_off(frame_sz) == 48, "native xdp_md frame_sz offset");
+_Static_assert(__native_xdp_off(flags) == 52, "native xdp_md flags offset");
+#undef __native_xdp_off
+#else
 /* user accessible metadata for XDP packet hook
  * new fields must be added to the end of this structure
  */
@@ -3128,6 +3254,7 @@ struct xdp_md {
   __u32 ingress_ifindex; /* rxq->dev->ifindex */
   __u32 rx_queue_index; /* rxq->queue_index  */
 };
+#endif /* MICRO_NATIVE */
 
 enum sk_action {
   SK_DROP = 0,

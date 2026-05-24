@@ -46,6 +46,21 @@ def _tracee_runtime_dir() -> Path:
     return candidate
 
 
+def tracee_native_loader_env() -> dict[str, str]:
+    enabled = os.environ.get("BPFREJIT_SHIM_NATIVE_LOADER", "").strip().lower()
+    if enabled not in {"1", "true", "yes", "on"}:
+        return {}
+    explicit = os.environ.get("BPFREJIT_SHIM_NATIVE_OBJECT_DIR", "").strip()
+    if explicit:
+        native_dir = Path(explicit)
+    else:
+        arch = os.environ.get("RUN_TARGET_ARCH", "x86_64").strip() or "x86_64"
+        native_dir = Path(f"/opt/bpf-benchmark/native-bpf/{arch}/tracee")
+    if not native_dir.is_dir():
+        raise RuntimeError(f"Tracee native object directory not found: {native_dir}")
+    return {"BPFREJIT_SHIM_NATIVE_OBJECT_DIR": str(native_dir)}
+
+
 class TraceeOutputCollector:
     def __init__(self) -> None:
         self._lock = threading.Lock()
@@ -85,15 +100,17 @@ class TraceeAgentSession(AgentSession):
         tracee_tmpdir.mkdir(parents=True, exist_ok=True)
         for command in self.commands:
             self.collector = TraceeOutputCollector()
+            env = {
+                "HOME": os.environ.get("HOME", str(ROOT_DIR)),
+                "TMPDIR": str(tracee_tmpdir),
+                "TMP": str(tracee_tmpdir),
+                "TEMP": str(tracee_tmpdir),
+            }
+            env.update(tracee_native_loader_env())
             proc = start_agent(
                 command[0],
                 command[1:],
-                env={
-                    "HOME": os.environ.get("HOME", str(ROOT_DIR)),
-                    "TMPDIR": str(tracee_tmpdir),
-                    "TMP": str(tracee_tmpdir),
-                    "TEMP": str(tracee_tmpdir),
-                },
+                env=env,
             )
             self.process = proc
             self.command_used = command

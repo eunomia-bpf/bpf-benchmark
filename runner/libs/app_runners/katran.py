@@ -143,6 +143,21 @@ def resolve_katran_server_binary(explicit: Path | str | None = None) -> Path:
     raise RuntimeError(f"Katran server binary not found or not executable; tried: {candidate}")
 
 
+def katran_native_loader_env() -> dict[str, str]:
+    enabled = os.environ.get("BPFREJIT_SHIM_NATIVE_LOADER", "").strip().lower()
+    if enabled not in {"1", "true", "yes", "on"}:
+        return {}
+    explicit = os.environ.get("BPFREJIT_SHIM_NATIVE_OBJECT_DIR", "").strip()
+    if explicit:
+        native_dir = Path(explicit)
+    else:
+        arch = os.environ.get("RUN_TARGET_ARCH", "x86_64").strip() or "x86_64"
+        native_dir = Path(f"/opt/bpf-benchmark/native-bpf/{arch}/katran")
+    if not native_dir.is_dir():
+        raise RuntimeError(f"Katran native object directory not found: {native_dir}")
+    return {"BPFREJIT_SHIM_NATIVE_OBJECT_DIR": str(native_dir)}
+
+
 def ip_binary() -> str:
     for candidate in DEFAULT_IP_CANDIDATES:
         path = Path(candidate)
@@ -486,7 +501,9 @@ class KatranServerSession:
             "-logtostderr",
             "-alsologtostderr",
         ]
-        session = ManagedProcessSession(command, cwd=ROOT_DIR, env=os.environ.copy())
+        env = os.environ.copy()
+        env.update(katran_native_loader_env())
+        session = ManagedProcessSession(command, cwd=ROOT_DIR, env=env)
         try:
             session.__enter__()
             self.session = session

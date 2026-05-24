@@ -58,6 +58,34 @@ extern char **environ;
 #define SYS_perf_event_open 298 /* x86_64 */
 #endif
 
+#ifndef SYS_close_range
+#ifdef __NR_close_range
+#define SYS_close_range __NR_close_range
+#else
+#define SYS_close_range 436
+#endif
+#endif
+
+#ifndef SYS_unshare
+#ifdef __NR_unshare
+#define SYS_unshare __NR_unshare
+#else
+#define SYS_unshare 272
+#endif
+#endif
+
+#ifndef CLOSE_RANGE_UNSHARE
+#define CLOSE_RANGE_UNSHARE (1U << 1)
+#endif
+
+#ifndef CLOSE_RANGE_CLOEXEC
+#define CLOSE_RANGE_CLOEXEC (1U << 2)
+#endif
+
+#ifndef CLONE_FILES
+#define CLONE_FILES 0x00000400
+#endif
+
 #ifndef PERF_EVENT_IOC_SET_BPF
 #define PERF_EVENT_IOC_SET_BPF _IOW('$', 8, __u32)
 #endif
@@ -110,9 +138,144 @@ static __thread int in_shim;
 #include "shim_json.h"
 #include "shim_snapshot.h"
 #include "shim_loadtime.h"
+#include "shim_native_loader.h"
 
 static void *worker_thread(void *arg);  /* forward decl */
 static void *socket_thread(void *arg);  /* forward decl */
+
+static int shim_close_observed_fd(int fd) {
+    ensure_syms_resolved();
+    if (fd >= 0) {
+        pthread_mutex_lock(&state_mutex);
+        if (native_loader_map_ref_fd_is_retained_locked(fd)) {
+            pthread_mutex_unlock(&state_mutex);
+            return 0;
+        }
+        prog_forget_loader_fd(fd);
+        map_remove(fd);
+        link_remove(fd);
+        raw_tp_remove(fd);
+        perf_remove(fd);
+        prog_table_drop_attach_fd(fd);
+        pthread_mutex_unlock(&state_mutex);
+    }
+    in_shim = 1;
+    int ret = real_close(fd);
+    int saved_errno = errno;
+    in_shim = 0;
+    errno = saved_errno;
+    return ret;
+}
+
+static long shim_close_range(unsigned int first, unsigned int last,
+                             unsigned int flags) {
+    ensure_syms_resolved();
+    if (last < first) {
+        errno = EINVAL;
+        return -1;
+    }
+    if (flags & ~(CLOSE_RANGE_UNSHARE | CLOSE_RANGE_CLOEXEC)) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    if (flags & CLOSE_RANGE_CLOEXEC) {
+        in_shim = 1;
+        long ret = real_syscall(SYS_close_range, first, last, flags);
+        int saved_errno = errno;
+        in_shim = 0;
+        errno = saved_errno;
+        return ret;
+    }
+
+    pthread_mutex_lock(&state_mutex);
+    int protects_native_maps =
+        native_loader_map_ref_has_fd_in_range_locked(first, last);
+    pthread_mutex_unlock(&state_mutex);
+    if (!protects_native_maps) {
+        in_shim = 1;
+        long ret = real_syscall(SYS_close_range, first, last, flags);
+        int saved_errno = errno;
+        in_shim = 0;
+        errno = saved_errno;
+        return ret;
+    }
+
+    if (flags & CLOSE_RANGE_UNSHARE) {
+        in_shim = 1;
+        long ret = real_syscall(SYS_unshare, CLONE_FILES);
+        int saved_errno = errno;
+        in_shim = 0;
+        if (ret < 0) {
+            errno = saved_errno;
+            return -1;
+        }
+    }
+
+    DIR *fd_dir = opendir("/proc/self/fd");
+    if (!fd_dir)
+        return -1;
+    int fd_dir_fd = dirfd(fd_dir);
+    struct dirent *de;
+    while ((de = readdir(fd_dir)) != NULL) {
+        if (de->d_name[0] < '0' || de->d_name[0] > '9')
+            continue;
+        int fd = atoi(de->d_name);
+        if (fd < 0 || fd == fd_dir_fd)
+            continue;
+        unsigned int ufd = (unsigned int)fd;
+        if (ufd < first || ufd > last)
+            continue;
+        (void)shim_close_observed_fd(fd);
+    }
+    closedir(fd_dir);
+    return 0;
+}
+
+static void log_prog_array_update(const union bpf_attr *attr, long ret,
+                                  int saved_errno) {
+    if (!attr)
+        return;
+
+    char map_name[17] = {0};
+    uint32_t map_type = 0;
+    uint32_t key_size = 0;
+    uint32_t value_size = 0;
+    pthread_mutex_lock(&state_mutex);
+    struct map_entry *map = map_find((int)attr->map_fd);
+    if (map) {
+        map_type = map->map_type;
+        key_size = map->key_size;
+        value_size = map->value_size;
+        memcpy(map_name, map->name, sizeof(map_name) - 1);
+    }
+    pthread_mutex_unlock(&state_mutex);
+
+    if (map_type != BPF_MAP_TYPE_PROG_ARRAY || key_size != sizeof(uint32_t) ||
+        value_size != sizeof(uint32_t) || attr->key == 0 || attr->value == 0) {
+        return;
+    }
+
+    uint32_t key = 0;
+    uint32_t prog_fd = 0;
+    memcpy(&key, (const void *)(uintptr_t)attr->key, sizeof(key));
+    memcpy(&prog_fd, (const void *)(uintptr_t)attr->value, sizeof(prog_fd));
+
+    uint32_t prog_id = 0;
+    pthread_mutex_lock(&state_mutex);
+    struct prog_entry *prog = prog_find((int)prog_fd);
+    if (prog)
+        prog_id = prog->kernel_prog_id;
+    pthread_mutex_unlock(&state_mutex);
+
+    log_line("BPF_MAP_UPDATE_ELEM prog_array name=%s map_fd=%u key=%u "
+             "prog_fd=%u prog_id=%u flags=%llu ret=%ld errno=%d",
+             map_name, attr->map_fd, key, prog_fd, prog_id,
+             (unsigned long long)attr->flags, ret,
+             ret < 0 ? saved_errno : 0);
+    if (ret >= 0)
+        shim_native_loader_log_jit_info("prog_array-target", (int)prog_fd);
+}
 
 __attribute__((constructor)) static void shim_init(void) {
     real_syscall = dlsym(RTLD_NEXT, "syscall");
@@ -201,6 +364,13 @@ long syscall(long number, ...) {
     long a5 = va_arg(ap, long);
     va_end(ap);
 
+    if (!in_shim && number == SYS_close)
+        return shim_close_observed_fd((int)a0);
+
+    if (!in_shim && number == SYS_close_range)
+        return shim_close_range((unsigned int)a0, (unsigned int)a1,
+                                (unsigned int)a2);
+
     if (in_shim || number != SYS_bpf) {
         if (number == SYS_perf_event_open && !in_shim) {
             const struct perf_event_attr *pa =
@@ -287,7 +457,6 @@ long syscall(long number, ...) {
             pending_raw_tp = capture_raw_tp_open(attr);
             break;
         default:
-            log_line("bpf cmd=%d size=%u", cmd, size);
             break;
         }
         if (cmd == BPF_PROG_LOAD && pending_prog) {
@@ -316,6 +485,19 @@ long syscall(long number, ...) {
     uint32_t resolved_id = 0;
     if (pending_prog) {
         if (ret >= 0) {
+            long native_ret =
+                shim_maybe_replace_with_native_fd(ret, pending_prog);
+            if (native_ret < 0) {
+                int native_errno = errno;
+                real_close((int)ret);
+                prog_free(pending_prog);
+                if (loadtime_active)
+                    loadtime_result_free(&loadtime);
+                in_shim = 0;
+                errno = native_errno;
+                return -1;
+            }
+            ret = native_ret;
             pending_prog->fd = (int)ret;
             resolved_id = resolve_kernel_id((int)ret);
             pending_prog->kernel_prog_id = resolved_id;
@@ -460,6 +642,8 @@ long syscall(long number, ...) {
             free(pending_raw_tp);
         }
     }
+    if (cmd == BPF_MAP_UPDATE_ELEM && attr)
+        log_prog_array_update(attr, ret, saved_errno);
     in_shim = 0;
     if (loadtime_active)
         loadtime_result_free(&loadtime);
@@ -735,26 +919,17 @@ ssize_t sendmsg(int sockfd, const struct msghdr *msg, int flags) {
 /* Intercept close(2): release table entries if any (cheap; fd is unique
  * across kinds so at most one removes a real entry). */
 int close(int fd) {
+    if (!in_shim)
+        return shim_close_observed_fd(fd);
     ensure_syms_resolved();
-    if (!in_shim && fd >= 0) {
-        pthread_mutex_lock(&state_mutex);
-        prog_forget_loader_fd(fd);
-        map_remove(fd);
-        link_remove(fd);
-        raw_tp_remove(fd);
-        perf_remove(fd);
-        /* If this fd was a link/perf_event attached to some prog, drop it
-         * from that prog's attach lists too (no-op if fd was not a known
-         * attach). */
-        prog_table_drop_attach_fd(fd);
-        pthread_mutex_unlock(&state_mutex);
-    }
-    in_shim = 1;
-    int ret = real_close(fd);
-    int saved_errno = errno;
-    in_shim = 0;
-    errno = saved_errno;
-    return ret;
+    return real_close(fd);
+}
+
+int close_range(unsigned int first, unsigned int last, int flags) {
+    if (!in_shim)
+        return (int)shim_close_range(first, last, (unsigned int)flags);
+    ensure_syms_resolved();
+    return (int)real_syscall(SYS_close_range, first, last, flags);
 }
 
 /* Write a JSON snapshot of all tracked objects.

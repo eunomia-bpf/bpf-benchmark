@@ -230,8 +230,12 @@ FUNC_INLINE int return_error(int *s, int err)
 FUNC_INLINE char *
 args_off(struct msg_generic_kprobe *e, unsigned long off)
 {
+#ifdef MICRO_NATIVE
+	off &= 0x3fff;
+#else
 	asm volatile("%[off] &= 0x3fff;\n"
 		     : [off] "+r"(off));
+#endif
 	return e->args + (off & 0x3fff);
 }
 
@@ -242,6 +246,10 @@ args_off(struct msg_generic_kprobe *e, unsigned long off)
 FUNC_INLINE int
 return_stack_error(char *args, int orig, int err)
 {
+#ifdef MICRO_NATIVE
+	orig &= 0xfff;
+	*(int *)(args + orig) = err;
+#else
 	asm volatile("%[orig] &= 0xfff;\n"
 		     "r1 = *(u64 *)%[args];\n"
 		     "r1 += %[orig];\n"
@@ -249,6 +257,7 @@ return_stack_error(char *args, int orig, int err)
 		     : [orig] "+r"(orig), [args] "+m"(args), [err] "+r"(err)
 		     :
 		     : "r1");
+#endif
 	return sizeof(int);
 }
 
@@ -270,8 +279,12 @@ parse_iovec_array(long off, unsigned long arg, int i, unsigned long max,
 		size = max;
 	if (size > 4094)
 		return char_buf_toolarge;
+#ifdef MICRO_NATIVE
+	size &= 0xfff;
+#else
 	asm volatile("%[size] &= 0xfff;\n"
 		     : [size] "+r"(size));
+#endif
 	err = probe_read(args_off(e, off), size, (char *)iov.iov_base);
 	if (err < 0)
 		return char_buf_pagefault;
@@ -326,8 +339,7 @@ FUNC_INLINE long store_path(char *args, char *buffer, const struct path *arg,
 	void *curr = &args[4];
 	umode_t i_mode;
 
-	asm volatile("%[size] &= 0xfff;\n"
-		     : [size] "+r"(size));
+	size &= 0xfff;
 	probe_read(curr, size, buffer);
 	*s = size;
 	size += 4;
@@ -717,9 +729,7 @@ filter_char_buf_equal(struct selector_arg_filter *filter, char *arg_str, uint or
 	heap[0] = len;
 #endif
 
-	asm volatile("%[len] &= %1;\n"
-		     : [len] "+r"(len)
-		     : "i"(STRING_MAPS_HEAP_MASK));
+	len &= STRING_MAPS_HEAP_MASK;
 #ifdef __LARGE_BPF_PROG
 	if (index <= 5)
 		probe_read(&heap[1], len, arg_str);
@@ -731,9 +741,7 @@ filter_char_buf_equal(struct selector_arg_filter *filter, char *arg_str, uint or
 
 	// Pad string to multiple of key increment size
 	if (padded_len > len) {
-		asm volatile("%[len] &= %1;\n"
-			     : [len] "+r"(len)
-			     : "i"(STRING_MAPS_HEAP_MASK));
+		len &= STRING_MAPS_HEAP_MASK;
 #ifdef __LARGE_BPF_PROG
 		if (index <= 5)
 			probe_read(heap + len + 1, (padded_len - len) & STRING_MAPS_COPY_MASK, zero_heap);
@@ -778,9 +786,7 @@ filter_char_buf_prefix(struct selector_arg_filter *filter, char *arg_str, uint a
 	arg->prefixlen = arg_len * 8; // prefix is in bits
 
 	// Force the verifier to recheck the arg_len after register spilling on 4.19.
-	asm volatile("%[arg_len] &= %[mask] ;\n"
-		     : [arg_len] "+r"(arg_len)
-		     : [mask] "i"(STRING_PREFIX_MAX_LENGTH - 1));
+	arg_len &= STRING_PREFIX_MAX_LENGTH - 1;
 
 	probe_read(arg->data, arg_len & (STRING_PREFIX_MAX_LENGTH - 1), arg_str);
 
@@ -2073,11 +2079,9 @@ get_arg(struct msg_generic_kprobe *e, __u32 index)
 {
 	long argoff;
 
-	asm volatile("%[index] &= %[mask];\n"
-		     : [index] "+r"(index)
-		     : [mask] "i"(MAX_POSSIBLE_ARGS_MASK));
+	index &= MAX_POSSIBLE_ARGS_MASK;
 	argoff = e->argsoff[index];
-	asm volatile("%[argoff] &= 0x7ff;\n" : [argoff] "+r"(argoff));
+	argoff &= 0x7ff;
 	return &e->args[argoff];
 }
 
@@ -2254,8 +2258,7 @@ selector_arg_offset(void *ctx, struct bpf_map_def *tailcalls,
 #endif
 	{
 		argsoff = filters->argoff[i];
-		asm volatile("%[argsoff] &= 0x3ff;\n"
-			     : [argsoff] "+r"(argsoff));
+		argsoff &= 0x3ff;
 
 		if (argsoff <= 0)
 			return seloff;
@@ -2352,9 +2355,7 @@ installfd(struct msg_generic_kprobe *e, int fd, int name, bool follow)
 	/* Satisfies verifier but is a bit ugly, ideally we
 	 * can just '&' and drop the '>' case.
 	 */
-	asm volatile("%[fd] &= %[mask];\n"
-		     : [fd] "+r"(fd)
-		     : [mask] "i"(MAX_POSSIBLE_ARGS_MASK));
+	fd &= MAX_POSSIBLE_ARGS_MASK;
 	if (fd >= MAX_POSSIBLE_ARGS)
 		return 0;
 
@@ -2362,9 +2363,7 @@ installfd(struct msg_generic_kprobe *e, int fd, int name, bool follow)
 		return 0;
 
 	fdoff = e->argsoff[fd];
-	asm volatile("%[fdoff] &= 0x7ff;\n"
-		     : [fdoff] "+r"(fdoff)
-		     :);
+	fdoff &= 0x7ff;
 	key.pad = 0;
 	key.fd = *(__u32 *)&e->args[fdoff];
 	key.tid = get_current_pid_tgid() >> 32;
@@ -2372,9 +2371,7 @@ installfd(struct msg_generic_kprobe *e, int fd, int name, bool follow)
 	if (follow) {
 		__u32 size;
 
-		asm volatile("%[name] &= %[mask];\n"
-			     : [name] "+r"(name)
-			     : [mask] "i"(MAX_POSSIBLE_ARGS_MASK));
+		name &= MAX_POSSIBLE_ARGS_MASK;
 		if (name >= MAX_POSSIBLE_ARGS)
 			return 0;
 
@@ -2382,14 +2379,10 @@ installfd(struct msg_generic_kprobe *e, int fd, int name, bool follow)
 			return 0;
 
 		nameoff = e->argsoff[name];
-		asm volatile("%[nameoff] &= 0x7ff;\n"
-			     : [nameoff] "+r"(nameoff)
-			     :);
+		nameoff &= 0x7ff;
 
 		size = *(__u32 *)&e->args[nameoff];
-		asm volatile("%[size] &= 0xfff;\n"
-			     : [size] "+r"(size)
-			     :);
+		size &= 0xfff;
 
 		probe_read(&val->file[0], size + 4 /* size */ + 4 /* flags */,
 			   &e->args[nameoff]);
@@ -2427,34 +2420,26 @@ copyfd(struct msg_generic_kprobe *e, int oldfd, int newfd)
 	int oldfdoff, newfdoff;
 	int err = 0;
 
-	asm volatile("%[oldfd] &= %[mask];\n"
-		     : [oldfd] "+r"(oldfd)
-		     : [mask] "i"(MAX_POSSIBLE_ARGS_MASK));
+	oldfd &= MAX_POSSIBLE_ARGS_MASK;
 	if (oldfd >= MAX_POSSIBLE_ARGS)
 		return 0;
 	if (!is_arg_ok(e, oldfd))
 		return 0;
 	oldfdoff = e->argsoff[oldfd];
-	asm volatile("%[oldfdoff] &= 0x7ff;\n"
-		     : [oldfdoff] "+r"(oldfdoff)
-		     :);
+	oldfdoff &= 0x7ff;
 	key.pad = 0;
 	key.fd = *(__u32 *)&e->args[oldfdoff];
 	key.tid = get_current_pid_tgid() >> 32;
 
 	val = map_lookup_elem(&fdinstall_map, &key);
 	if (val) {
-		asm volatile("%[newfd] &= %[mask];\n"
-			     : [newfd] "+r"(newfd)
-			     : [mask] "i"(MAX_POSSIBLE_ARGS_MASK));
+		newfd &= MAX_POSSIBLE_ARGS_MASK;
 		if (newfd >= MAX_POSSIBLE_ARGS)
 			return 0;
 		if (!is_arg_ok(e, newfd))
 			return 0;
 		newfdoff = e->argsoff[newfd];
-		asm volatile("%[newfdoff] &= 0x7ff;\n"
-			     : [newfdoff] "+r"(newfdoff)
-			     :);
+		newfdoff &= 0x7ff;
 		key.pad = 0;
 		key.fd = *(__u32 *)&e->args[newfdoff];
 		key.tid = get_current_pid_tgid() >> 32;
@@ -2530,12 +2515,8 @@ rate_limit(__u64 ratelimit_interval, __u64 ratelimit_scope, struct msg_generic_k
 			key_index = (e->argsoff[i] - sizeof(arg_status_t)) & 16383;
 			if (arg_size > KEY_BYTES_PER_ARG)
 				arg_size = KEY_BYTES_PER_ARG;
-			asm volatile("%[arg_size] &= 0x3f;\n" // ensure this mask is greater than KEY_BYTES_PER_ARG
-				     : [arg_size] "+r"(arg_size)
-				     :);
-			asm volatile("%[index] &= 0xff;\n"
-				     : [index] "+r"(index)
-				     :);
+			arg_size &= 0x3f;
+			index &= 0xff;
 			probe_read(&dst[index], arg_size, &e->args[key_index]);
 			index += arg_size;
 		}
@@ -2584,9 +2565,7 @@ tracksock(struct msg_generic_kprobe *e, int socki, bool track)
 	/* Satisfies verifier but is a bit ugly, ideally we
 	 * can just '&' and drop the '>' case.
 	 */
-	asm volatile("%[socki] &= %[mask];\n"
-		     : [socki] "+r"(socki)
-		     : [mask] "i"(MAX_POSSIBLE_ARGS_MASK));
+	socki &= MAX_POSSIBLE_ARGS_MASK;
 	if (socki >= MAX_POSSIBLE_ARGS)
 		return 0;
 
@@ -2594,9 +2573,7 @@ tracksock(struct msg_generic_kprobe *e, int socki, bool track)
 		return 0;
 
 	sockoff = e->argsoff[socki];
-	asm volatile("%[sockoff] &= 0x7ff;\n"
-		     : [sockoff] "+r"(sockoff)
-		     :);
+	sockoff &= 0x7ff;
 	skt = (struct sk_type *)&e->args[sockoff];
 	sockaddr = skt->sockaddr;
 	if (!sockaddr)
@@ -2720,6 +2697,13 @@ FUNC_INLINE const struct path *get_path(long type, unsigned long arg, struct pat
 
 #define __STR(x) #x
 
+#ifdef MICRO_NATIVE
+#define set_if_not_errno_or_zero(x, y)         \
+	({                                     \
+		if ((long)(x) > 0 || (long)(x) < -4095) \
+			(x) = (y);                  \
+	})
+#else
 #define set_if_not_errno_or_zero(x, y)                  \
 	({                                              \
 		asm volatile("if %0 s< -4095 goto +1\n" \
@@ -2727,6 +2711,7 @@ FUNC_INLINE const struct path *get_path(long type, unsigned long arg, struct pat
 			     "%0 = " __STR(y) "\n"      \
 			     : "+r"(x));                \
 	})
+#endif
 
 FUNC_INLINE int try_override(void *ctx, struct bpf_map_def *override_tasks)
 {

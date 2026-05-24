@@ -508,21 +508,31 @@ statfunc void fill_file_header(u8 header[FILE_MAGIC_HDR_SIZE], io_data_t io_data
 {
     u32 len = (u32) io_data.len;
     if (io_data.is_buf) {
+#ifdef MICRO_NATIVE
+        if (len > FILE_MAGIC_HDR_SIZE)
+            len = FILE_MAGIC_HDR_SIZE;
+#else
         // inline bounds check to force compiler to use the register of len
         asm volatile("if %[size] < %[max_size] goto +1;\n"
                      "%[size] = %[max_size];\n"
                      :
                      : [size] "r"(len), [max_size] "i"(FILE_MAGIC_HDR_SIZE));
+#endif
         bpf_probe_read(header, len, io_data.ptr);
     } else {
         struct iovec io_vec;
         __builtin_memset(&io_vec, 0, sizeof(io_vec));
         bpf_probe_read(&io_vec, sizeof(struct iovec), io_data.ptr);
+#ifdef MICRO_NATIVE
+        if (len > FILE_MAGIC_HDR_SIZE)
+            len = FILE_MAGIC_HDR_SIZE;
+#else
         // inline bounds check to force compiler to use the register of len
         asm volatile("if %[size] < %[max_size] goto +1;\n"
                      "%[size] = %[max_size];\n"
                      :
                      : [size] "r"(len), [max_size] "i"(FILE_MAGIC_HDR_SIZE));
+#endif
         bpf_probe_read(header, len, io_vec.iov_base);
     }
 }

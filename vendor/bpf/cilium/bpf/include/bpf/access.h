@@ -30,6 +30,14 @@ map_array_get_32(const __u32 *array, __u32 index, const __u32 limit)
 
 	return datum;
 }
+#elif defined(MICRO_NATIVE)
+static __always_inline __maybe_unused __u32
+map_array_get_32(const __u32 *array, __u32 index, const __u32 limit)
+{
+	if ((index << 2) > limit)
+		return 0;
+	return array[index];
+}
 #else
 # define map_array_get_32(array, index, limit)	__throw_build_bug()
 #endif /* __bpf__ */

@@ -70,10 +70,15 @@ getcwd(struct msg_process *curr, __u32 offset, __u32 proc_pid)
 	if (!buffer)
 		return 0;
 
+#ifdef MICRO_NATIVE
+	offset &= 0x3ff;
+	size &= 0xfff;
+#else
 	asm volatile("%[offset] &= 0x3ff;\n"
 		     : [offset] "+r"(offset));
 	asm volatile("%[size] &= 0xfff;\n"
 		     : [size] "+r"(size));
+#endif
 	probe_read((char *)curr + offset, size, buffer);
 
 	// Unfortunate special case for '/' where nothing was added we need
@@ -358,17 +363,13 @@ copy_exe_to_bin(struct heap_exe *exe, struct binary *bin)
 		return;
 	}
 
-	asm volatile("%[len] &= %1;\n"
-		     : [len] "+r"(len)
-		     : "i"(BINARY_PATH_MAX_LEN - 1));
+	len &= BINARY_PATH_MAX_LEN - 1;
 	bin->path_length = with_errmetrics(probe_read, bin->path, len, exe->buf);
 	if (bin->path_length == 0)
 		bin->path_length = len;
 
 	revlen = len > STRING_POSTFIX_MAX_LENGTH - 1 ? STRING_POSTFIX_MAX_LENGTH - 1 : len;
-	asm volatile("%[revlen] &= %1;\n"
-		     : [revlen] "+r"(revlen)
-		     : "i"(STRING_POSTFIX_MAX_LENGTH - 1));
+	revlen &= STRING_POSTFIX_MAX_LENGTH - 1;
 	with_errmetrics(probe_read, bin->end, revlen, exe->end);
 }
 

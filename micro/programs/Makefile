@@ -72,7 +72,12 @@ $(KERNEL_OFFSETS): $(KERNEL_BTF_INPUT) Makefile | $(OUTPUT_DIR)
 	             /void \*\s*data_end;/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_XDP_BUFF_DATA_END_OFFSET %du\n", a[1] }'; \
 	    pahole -C bpf_array '$(KERNEL_BTF_INPUT)' 2>/dev/null | \
 	        awk '/char\s+value\[/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_BPF_ARRAY_VALUE_OFFSET %du\n", a[1] } \
+	             /void \*\s*ptrs\[/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_BPF_ARRAY_PTRS_OFFSET %du\n", a[1] } \
 	             /void \*\s*pptrs\[/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_BPF_ARRAY_PPTRS_OFFSET %du\n", a[1] }'; \
+	    pahole -C bpf_map '$(KERNEL_BTF_INPUT)' 2>/dev/null | \
+	        awk '/u32\s+max_entries;/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_BPF_MAP_MAX_ENTRIES_OFFSET %du\n", a[1] }'; \
+	    pahole -C bpf_prog '$(KERNEL_BTF_INPUT)' 2>/dev/null | \
+	        awk '/\\(\\*bpf_func\\)/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_BPF_PROG_BPF_FUNC_OFFSET %du\n", a[1] }'; \
 	    pahole -C htab_elem '$(KERNEL_BTF_INPUT)' 2>/dev/null | \
 	        awk '/struct bpf_lru_node\s+lru_node;/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_HTAB_ELEM_LRU_NODE_OFFSET %du\n", a[1] } \
 	             /char\s+key\[\]/ { match($$0, /\/\*[ \t]+([0-9]+)[ \t]+[0-9]+ \*\//, a); printf "#define K_HTAB_ELEM_KEY_OFFSET %du\n", a[1] }'; \

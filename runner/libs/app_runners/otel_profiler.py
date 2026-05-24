@@ -4,6 +4,7 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
+from typing import Mapping
 
 from .. import ROOT_DIR
 from .process_support import NativeProcessRunner
@@ -131,6 +132,24 @@ class OtelProfilerRunner(NativeProcessRunner):
 
     def _command_cwd(self) -> Path | None:
         return self._runtime_dir or ROOT_DIR
+
+    def _command_env(self) -> Mapping[str, str] | None:
+        enabled = os.environ.get("BPFREJIT_SHIM_NATIVE_LOADER", "").strip().lower()
+        if enabled != "1":
+            return None
+
+        explicit = os.environ.get("BPFREJIT_SHIM_NATIVE_OBJECT", "").strip()
+        if explicit:
+            native_object = Path(explicit)
+        else:
+            arch = os.environ.get("RUN_TARGET_ARCH", "x86_64").strip() or "x86_64"
+            native_object = Path(
+                f"/opt/bpf-benchmark/native-bpf/{arch}/otelcol-ebpf-profiler/"
+                "otelcol-ebpf-profiler.native.o"
+            )
+        if not native_object.is_file():
+            raise RuntimeError(f"otelcol-ebpf-profiler native object not found: {native_object}")
+        return {"BPFREJIT_SHIM_NATIVE_OBJECT": str(native_object)}
 
     def start(self) -> list[int]:
         try:

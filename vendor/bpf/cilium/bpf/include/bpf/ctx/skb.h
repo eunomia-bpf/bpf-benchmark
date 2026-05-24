@@ -62,6 +62,35 @@
  */
 #define get_hash(ctx)		ctx->hash
 
+#ifdef MICRO_NATIVE
+struct __native_skb_net_device {
+	__u8 __pad[224];
+	int ifindex;
+};
+_Static_assert(__builtin_offsetof(struct __native_skb_net_device, ifindex) == 224,
+	       "native net_device ifindex offset");
+
+static __always_inline void *
+ctx_data(const struct __sk_buff *ctx)
+{
+	return ctx->data;
+}
+
+static __always_inline void *
+ctx_data_end(const struct __sk_buff *ctx)
+{
+	return ctx->data + (ctx->len - ctx->data_len);
+}
+
+static __always_inline void *
+ctx_data_meta(const struct __sk_buff *ctx)
+{
+	const __u8 *shinfo = ctx->head + ctx->end;
+	__u8 meta_len = *(const __u8 *)(shinfo + 1);
+
+	return ctx->data - meta_len;
+}
+#else
 #define DEFINE_FUNC_CTX_POINTER(FIELD)						\
 static __always_inline void *							\
 ctx_ ## FIELD(const struct __sk_buff *ctx)					\
@@ -84,6 +113,7 @@ DEFINE_FUNC_CTX_POINTER(data_end)
 /* This defines ctx_data_meta(). */
 DEFINE_FUNC_CTX_POINTER(data_meta)
 #undef DEFINE_FUNC_CTX_POINTER
+#endif
 
 static __always_inline __maybe_unused int
 ctx_redirect(const struct __sk_buff *ctx __maybe_unused, int ifindex, __u32 flags)
@@ -112,7 +142,11 @@ ctx_full_len(const struct __sk_buff *ctx)
 static __always_inline __maybe_unused __u32
 ctx_wire_len(const struct __sk_buff *ctx)
 {
+#ifdef MICRO_NATIVE
+	return ctx->len;
+#else
 	return ctx->wire_len;
+#endif
 }
 
 static __always_inline __maybe_unused void
@@ -145,7 +179,13 @@ ctx_get_protocol(const struct __sk_buff *ctx)
 static __always_inline __maybe_unused __u32
 ctx_get_ifindex(const struct __sk_buff *ctx)
 {
+#ifdef MICRO_NATIVE
+	if (!ctx->dev)
+		return 0;
+	return ((const struct __native_skb_net_device *)ctx->dev)->ifindex;
+#else
 	return ctx->ifindex;
+#endif
 }
 
 static __always_inline __maybe_unused __u32

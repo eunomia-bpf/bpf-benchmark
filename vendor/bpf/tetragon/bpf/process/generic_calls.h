@@ -106,8 +106,7 @@ __copy_char_buf(void *ctx, long off, unsigned long arg, unsigned long bytes,
 
 	/* Bound bytes <4095 to ensure bytes does not read past end of buffer */
 	rd_bytes = bytes < 0x1000 ? bytes : 0xfff;
-	asm volatile("%[rd_bytes] &= 0xfff;\n"
-		     : [rd_bytes] "+r"(rd_bytes));
+	rd_bytes &= 0xfff;
 	err = probe_read(&s[2], rd_bytes, (char *)arg);
 	if (err < 0)
 		return return_error(s, char_buf_pagefault);
@@ -267,9 +266,7 @@ __read_arg_1(void *ctx, int type, long orig_off, unsigned long arg, int argm, ch
 			__u32 bytes = *((__u32 *)&val->file[0]);
 
 			probe_read(&args[0], sizeof(__u32), &fd);
-			asm volatile("%[bytes] &= 0xfff;\n"
-				     : [bytes] "+r"(bytes)
-				     :);
+			bytes &= 0xfff;
 			probe_read(&args[4], bytes + 4, (char *)&val->file[0]);
 			size = bytes + 4 + 4;
 
@@ -525,9 +522,7 @@ FUNC_INLINE long get_pt_regs_arg(struct pt_regs *ctx, struct event_config *confi
 	struct config_reg_arg *reg;
 	__u8 shift;
 
-	asm volatile("%[index] &= %1 ;\n"
-		     : [index] "+r"(index)
-		     : "i"(EVENT_CONFIG_MAX_REG_ARG_MASK));
+	index &= EVENT_CONFIG_MAX_REG_ARG_MASK;
 	reg = &config->reg_arg[index];
 	shift = 64 - reg->size * 8;
 
@@ -595,9 +590,7 @@ FUNC_INLINE long generic_read_arg(void *ctx, int index, long off, struct bpf_map
 	if (index >= MAX_POSSIBLE_ARGS)
 		return 0;
 
-	asm volatile("%[index] &= %1 ;\n"
-		     : [index] "+r"(index)
-		     : "i"(MAX_POSSIBLE_ARGS_MASK));
+	index &= MAX_POSSIBLE_ARGS_MASK;
 
 	ty = config->arg[index];
 	am = config->arm[index];
@@ -611,9 +604,7 @@ FUNC_INLINE long generic_read_arg(void *ctx, int index, long off, struct bpf_map
 #endif
 
 #if defined(GENERIC_TRACEPOINT) || defined(GENERIC_USDT)
-	asm volatile("%[index] &= %1 ;\n"
-		     : [index] "+r"(index)
-		     : "i"(MAX_ACCESSIBLE_ARGS_MASK));
+	index &= MAX_ACCESSIBLE_ARGS_MASK;
 
 	a = (&e->a0)[index];
 	if (am & ARGM_PRELOAD)
@@ -633,9 +624,7 @@ FUNC_INLINE long generic_read_arg(void *ctx, int index, long off, struct bpf_map
 	if (am & ARGM_PRELOAD) {
 		a = get_preload_arg(ctx, ty, &e->arg_status[index & MAX_POSSIBLE_ARGS_MASK]);
 	} else {
-		asm volatile("%[index] &= %1 ;\n"
-			     : [index] "+r"(index)
-			     : "i"(MAX_POSSIBLE_ARGS_MASK));
+		index &= MAX_POSSIBLE_ARGS_MASK;
 		if (am & ARGM_PT_REGS) {
 			a = get_pt_regs_arg(ctx, config, index);
 		} else if (am & ARGM_CURRENT_TASK) {
@@ -1145,15 +1134,11 @@ generic_actions(void *ctx, struct bpf_map_def *calls)
 	if (!f)
 		return 0;
 
-	asm volatile("%[pass] &= 0x7ff;\n"
-		     : [pass] "+r"(pass)
-		     :);
+	pass &= 0x7ff;
 	arg = (struct selector_arg_filters *)&f[pass];
 
 	actoff = pass + arg->arglen;
-	asm volatile("%[actoff] &= 0x7ff;\n"
-		     : [actoff] "+r"(actoff)
-		     :);
+	actoff &= 0x7ff;
 	actions = (struct selector_action *)&f[actoff];
 
 	postit = do_actions(ctx, actions);
@@ -1203,10 +1188,9 @@ generic_output(void *ctx, u8 op)
 
 	total = e->common.size + generic_kprobe_common_size();
 	/* Code movement from clang forces us to inline bounds checks here */
-	asm volatile("%[total] &= 0x7fff;\n"
-		     "if %[total] < 9000 goto +1\n;"
-		     "%[total] = 9000;\n"
-		     : [total] "+r"(total));
+	total &= 0x7fff;
+	if (total >= 9000)
+		total = 9000;
 	event_output_metric(ctx, op, e, total);
 	return 0;
 }
@@ -1275,8 +1259,12 @@ FUNC_INLINE int generic_retprobe(void *ctx, struct bpf_map_def *calls, unsigned 
 	 * 0x1000 should be maximum argument length, so masking
 	 * with 0x1fff is safe and verifier will be happy.
 	 */
+#ifdef MICRO_NATIVE
+	size &= 0x1fff;
+#else
 	asm volatile("%[size] &= 0x1fff;\n"
 		     : [size] "+r"(size));
+#endif
 
 	switch (do_copy) {
 	case char_buf:
@@ -1377,8 +1365,7 @@ FUNC_INLINE int generic_process_filter(void)
 		/* Verify lost that msg is not null here so recheck */
 		int curr = sel->curr;
 
-		asm volatile("%[curr] &= 0x1f;\n"
-			     : [curr] "+r"(curr));
+		curr &= 0x1f;
 		sel->active[curr] = true;
 		sel->active[SELECTORS_ACTIVE] = true;
 		sel->pass |= true;

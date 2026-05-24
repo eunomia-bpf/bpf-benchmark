@@ -166,7 +166,10 @@ SUITE_ENV_NAMES = SAMPLES WARMUPS INNER_REPEAT BENCH SUITE RUNTIMES FUZZ_ROUNDS 
 	KEEP_WORKDIRS BPFREJIT_BENCH_PASSES BPFREJIT_CORPUS_APPS SKIP_REJIT CPU STRICT_ENV SHUFFLE_SEED \
 	REGENERATE_INPUTS LIST MICRO_RUNNER_BINARY PERF_COUNTERS \
 	BPFREJIT_CORPUS_APP_TIMEOUT BPFREJIT_CORPUS_REJIT_TIMEOUT \
-	BPFREJIT_CORPUS_WORKLOAD_ONLY BPFREJIT_CORPUS_BPF_STATS
+	BPFREJIT_CORPUS_WORKLOAD_ONLY BPFREJIT_CORPUS_BPF_STATS \
+	BPFREJIT_SHIM_NATIVE_LOADER BPFREJIT_SHIM_NATIVE_OBJECT \
+	BPFREJIT_SHIM_NATIVE_OBJECT_DIR BPFREJIT_NATIVE_LOADER_SO \
+	BPFREJIT_NATIVE_LINK_BINARY
 export $(SUITE_ENV_NAMES)
 
 # Per-run identity. RUN_TOKEN must be unique per invocation so AWS remote stage
@@ -175,13 +178,15 @@ export $(SUITE_ENV_NAMES)
 RUN_TOKEN ?= $(shell od -An -N4 -tx4 /dev/urandom 2>/dev/null | tr -d ' \n')
 export RUN_TOKEN TARGET
 
-RUN_MAKE_VAR_NAMES = TARGET RUN_TARGET_NAME RUN_TARGET_ARCH RUN_EXECUTOR RUNTIME_CONTAINER_IMAGE RUNTIME_IMAGE_TAR \
-	RUN_REMOTE_PYTHON_BIN RUN_RUNTIME_PYTHON_BIN RUN_BPFTOOL_BIN RUN_NATIVE_REPOS_CSV RUN_TOKEN $(SUITE_ENV_NAMES)
-RUN_MAKE_VARS = $(foreach v,$(RUN_MAKE_VAR_NAMES),$(v)='$($(v))')
+RUN_MAKE_BASE_VAR_NAMES = TARGET RUN_TARGET_NAME RUN_TARGET_ARCH RUN_EXECUTOR RUNTIME_CONTAINER_IMAGE RUNTIME_IMAGE_TAR \
+	RUN_REMOTE_PYTHON_BIN RUN_RUNTIME_PYTHON_BIN RUN_BPFTOOL_BIN RUN_NATIVE_REPOS_CSV RUN_TOKEN
+RUN_MAKE_VARS = $(foreach v,$(RUN_MAKE_BASE_VAR_NAMES),$(v)='$($(v))') \
+	$(foreach v,$(SUITE_ENV_NAMES),$(if $($(v)),$(v)='$($(v))'))
 
-RUNTIME_ENV_NAMES = TARGET RUN_TARGET_NAME RUN_TOKEN RUN_TARGET_ARCH RUN_EXECUTOR RUN_REMOTE_PYTHON_BIN \
-	RUN_RUNTIME_PYTHON_BIN RUN_BPFTOOL_BIN RUN_NATIVE_REPOS_CSV $(SUITE_ENV_NAMES)
-RUNTIME_ENV = $(foreach v,$(RUNTIME_ENV_NAMES),-e $(v)="$($(v))")
+RUNTIME_ENV_BASE_NAMES = TARGET RUN_TARGET_NAME RUN_TOKEN RUN_TARGET_ARCH RUN_EXECUTOR RUN_REMOTE_PYTHON_BIN \
+	RUN_RUNTIME_PYTHON_BIN RUN_BPFTOOL_BIN RUN_NATIVE_REPOS_CSV
+RUNTIME_ENV = $(foreach v,$(RUNTIME_ENV_BASE_NAMES),-e $(v)="$($(v))") \
+	$(foreach v,$(SUITE_ENV_NAMES),$(if $($(v)),-e $(v)="$($(v))"))
 RUNTIME_MOUNTS = -v /sys:/sys -v /sys/fs/bpf:/sys/fs/bpf -v /sys/kernel/debug:/sys/kernel/debug \
 	-v /lib/modules:/lib/modules:ro -v /boot:/boot:ro
 RUNTIME_DOCKER = docker run --rm --privileged --pid=host --network=host --ipc=host --cgroupns=host \
@@ -208,9 +213,9 @@ selftest: selftest-$(RUN_KEY)
 negative-test: negative-test-$(RUN_KEY)
 test: test-$(RUN_KEY)
 
-selftest-kvm-x86 selftest-qemu-arm64 selftest-aws-x86 selftest-aws-arm64: TEST_MODE := selftest
-negative-test-kvm-x86 negative-test-qemu-arm64 negative-test-aws-x86 negative-test-aws-arm64: TEST_MODE := negative
-test-kvm-x86 test-qemu-arm64 test-aws-x86 test-aws-arm64: TEST_MODE := test
+selftest-kvm-x86 selftest-qemu-arm64 selftest-aws-x86 selftest-aws-arm64: TEST_MODE ?= selftest
+negative-test-kvm-x86 negative-test-qemu-arm64 negative-test-aws-x86 negative-test-aws-arm64: TEST_MODE ?= negative
+test-kvm-x86 test-qemu-arm64 test-aws-x86 test-aws-arm64: TEST_MODE ?= test
 selftest-kvm-x86 negative-test-kvm-x86 test-kvm-x86: runtime-kernel-image kvm-host-cpu
 	$(VNG) --exec "$(MAKE) -C $(ROOT_DIR) __runtime-vm-test $(RUN_MAKE_VARS)"
 

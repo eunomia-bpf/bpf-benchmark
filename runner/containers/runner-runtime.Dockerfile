@@ -161,6 +161,7 @@ COPY --link --from=runner-runtime-artifacts /artifacts/manifest.json /artifacts/
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/runner ${IMAGE_WORKSPACE}/runner
 COPY --link --from=runner-runtime-artifacts /artifacts/user/micro-programs /artifacts/user/micro-programs
 COPY --link --from=runner-runtime-artifacts /artifacts/user/stage2-programs /artifacts/user/stage2-programs
+COPY --link --from=runner-runtime-host-native-bpf / /artifacts/user/native-bpf/${RUN_TARGET_ARCH}/
 COPY --link --from=runner-runtime-artifacts ${IMAGE_WORKSPACE}/tests ${IMAGE_WORKSPACE}/tests
 COPY --link --chmod=0755 ${BPFOPT_HOST_BIN} /usr/local/bin/bpfopt
 COPY --link --chmod=0755 \
@@ -177,6 +178,7 @@ COPY --link --from=runner-runtime-host-kinsn-artifacts / /artifacts/kinsn
 
 # LD_PRELOAD shim installed at a fixed runtime path for glibc-linked apps.
 COPY --link --from=runner-runtime-host-shim /libbpfrejit_shim.so /usr/local/lib/bpfrejit/libbpfrejit_shim.so
+COPY --link --from=runner-runtime-host-runner-build /native_loader/libnative_loader.so /usr/local/lib/bpfrejit/libnative_loader.so
 COPY --chmod=0755 runner/scripts/bpfrejit-install /usr/local/bin/bpfrejit-install
 COPY runner/__init__.py ./runner/
 COPY runner/config ./runner/config
@@ -193,6 +195,7 @@ RUN mkdir -p micro/results corpus/results tests/results /var/tmp/bpfrejit-runtim
 
 ENV BPFREJIT_IMAGE_WORKSPACE=${IMAGE_WORKSPACE} \
     BPFREJIT_REPO_ARTIFACT_ROOT=/artifacts/user/repo-artifacts/${RUN_TARGET_ARCH} \
+    BPFREJIT_NATIVE_LOADER_SO=/usr/local/lib/bpfrejit/libnative_loader.so \
     PYTHONPATH=${IMAGE_WORKSPACE} \
     RUN_TARGET_ARCH=${RUN_TARGET_ARCH} \
     PATH=${IMAGE_WORKSPACE}/runner/build-llvmbpf:${IMAGE_WORKSPACE}/runner/build-arm64-llvmbpf:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin

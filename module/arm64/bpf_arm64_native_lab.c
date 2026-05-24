@@ -35,7 +35,7 @@
 
 #include "kinsn_common.h"
 
-#define NATIVE_LAB_MAX_BLOBS		64
+#define NATIVE_LAB_MAX_BLOBS		512
 #define NATIVE_LAB_ABI_X19		(1U << 0)
 #define NATIVE_LAB_ABI_X20		(1U << 1)
 #define NATIVE_LAB_ABI_X21		(1U << 2)

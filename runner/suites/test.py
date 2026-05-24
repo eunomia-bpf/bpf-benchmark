@@ -48,7 +48,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     args.run_contract_path = env_str("RUN_CONTRACT_PATH")
     args.test_mode = env_str("TEST_MODE", "test")
     args.fuzz_rounds = env_int("FUZZ_ROUNDS", 1000, _die, positive=True)
-    if args.test_mode not in {"selftest", "negative", "test", "fuzz"}:
+    if args.test_mode not in {"selftest", "negative", "test", "fuzz", "native-loader-smoke"}:
         _die(f"unsupported test mode: {args.test_mode}")
     return args
 
@@ -256,6 +256,81 @@ def _run_native_proof_micro_smoke(
         _die("native_proof micro smoke failed")
 
 
+def _run_native_loader_shim_smoke(
+    workspace: Path,
+    args: argparse.Namespace,
+    env: dict[str, str],
+    artifact_dir: Path,
+) -> None:
+    if args.target_arch != "x86_64":
+        print("SKIP: native-loader shim smoke is x86-only", file=sys.stderr)
+        return
+
+    stage2_root = stage2_program_root(workspace, args.target_arch)
+    tool = stage2_root / "multi_prog_tool"
+    bpf_object = stage2_root / "multi_prog_smoke.bpf.o"
+    native_object = stage2_root / "multi_prog_smoke.native.o"
+    shim_so = Path("/usr/local/lib/bpfrejit/libbpfrejit_shim.so")
+    native_loader_so = Path("/usr/local/lib/bpfrejit/libnative_loader.so")
+    native_link = Path("/usr/local/bin/native-link")
+    for path, label in (
+        (tool, "multi-prog tool"),
+        (bpf_object, "multi-prog BPF object"),
+        (native_object, "multi-prog native object"),
+        (shim_so, "BPF ReJIT shim"),
+        (native_loader_so, "native-loader shared library"),
+        (native_link, "native-link binary"),
+    ):
+        if label in {"multi-prog tool", "BPF ReJIT shim", "native-link binary"}:
+            if not path.is_file() or not os.access(path, os.X_OK):
+                _die(f"{label} is missing or not executable: {path}")
+        elif not path.is_file():
+            _die(f"{label} is missing: {path}")
+
+    _log_test_section("native-loader shim multi-prog smoke")
+    _load_kinsn_modules(workspace, args.target_arch)
+    shim_dir = artifact_dir / "native-loader-shim"
+    shim_dir.mkdir(parents=True, exist_ok=True)
+    log_path = artifact_dir / "native-loader-shim.log"
+    smoke_env, _ = env_with_suite_runtime_ld(workspace, args.target_arch, env)
+    smoke_env.update({
+        "LD_PRELOAD": str(shim_so),
+        "BPFREJIT_SHIM_DIR": str(shim_dir),
+        "BPFREJIT_SHIM_LOG": str(log_path),
+        "BPFREJIT_SHIM_NATIVE_LOADER": "1",
+        "BPFREJIT_SHIM_NATIVE_OBJECT": str(native_object),
+        "BPFREJIT_NATIVE_LOADER_SO": str(native_loader_so),
+        "BPFREJIT_NATIVE_LINK_BINARY": str(native_link),
+    })
+    completed = subprocess.run(
+        [str(tool), str(bpf_object)],
+        cwd=workspace,
+        env=smoke_env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    log_path.write_text(
+        (log_path.read_text(encoding="utf-8") if log_path.exists() else "") +
+        completed.stdout + completed.stderr,
+        encoding="utf-8",
+    )
+    sys.stderr.write(completed.stdout)
+    sys.stderr.write(completed.stderr)
+    if completed.returncode != 0:
+        _die(f"native-loader shim smoke failed with exit {completed.returncode}")
+    for expected in ("loaded multi_prog_first", "loaded multi_prog_second"):
+        if expected not in completed.stdout:
+            _die(f"native-loader shim smoke did not report {expected}")
+    shim_log = log_path.read_text(encoding="utf-8")
+    for expected in (
+        "native-loader replaced prog=multi_prog_firs",
+        "native-loader replaced prog=multi_prog_seco",
+    ):
+        if expected not in shim_log:
+            _die(f"native-loader shim log missing: {expected}")
+
+
 def _artifact_dir(workspace: Path, args: argparse.Namespace) -> Path:
     if args.artifact_dir:
         return resolve_workspace_path(workspace, args.artifact_dir)
@@ -334,6 +409,8 @@ def _run_test_suite(workspace: Path, args: argparse.Namespace) -> None:
         _run_negative_mode(workspace, args, env, artifact_dir)
     elif args.test_mode == "fuzz":
         _run_fuzz_mode(workspace, args, env, artifact_dir)
+    elif args.test_mode == "native-loader-smoke":
+        _run_native_loader_shim_smoke(workspace, args, env, artifact_dir)
     elif args.test_mode == "test":
         _run_test_mode(workspace, args, env)
     else:

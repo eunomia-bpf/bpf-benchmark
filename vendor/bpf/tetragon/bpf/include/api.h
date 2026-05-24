@@ -284,6 +284,89 @@ static int BPF_FUNC(get_func_arg, void *ctx, __u32 n, __u64 *value);
 static int BPF_FUNC(get_func_ret, void *ctx, __u64 *value);
 static long BPF_FUNC(get_func_ip, void *ctx);
 
+#ifdef MICRO_NATIVE_HELPER_MACROS
+#undef map_lookup_elem
+#define map_lookup_elem(map, key) bpf_map_lookup_elem((map), (key))
+#undef map_update_elem
+#define map_update_elem(map, key, value, flags) bpf_map_update_elem((map), (key), (value), (flags))
+#undef map_delete_elem
+#define map_delete_elem(map, key) bpf_map_delete_elem((map), (key))
+#undef probe_read
+#define probe_read(dst, size, unsafe_ptr) bpf_probe_read((dst), (size), (unsafe_ptr))
+#undef probe_read_str
+#define probe_read_str(dst, size, unsafe_ptr) bpf_probe_read_str((dst), (size), (unsafe_ptr))
+#undef probe_read_kernel
+#define probe_read_kernel(dst, size, unsafe_ptr) bpf_probe_read_kernel((dst), (size), (unsafe_ptr))
+#undef probe_read_user
+#define probe_read_user(dst, size, unsafe_ptr) bpf_probe_read_user((dst), (size), (unsafe_ptr))
+#undef probe_write_user
+#define probe_write_user(dst, src, len) bpf_probe_write_user((dst), (src), (len))
+#undef copy_from_user
+#define copy_from_user(dst, size, unsafe_ptr) bpf_copy_from_user((dst), (size), (unsafe_ptr))
+#undef ktime_get_ns
+#define ktime_get_ns() bpf_ktime_get_ns()
+#undef ktime_get_boot_ns
+#define ktime_get_boot_ns() bpf_ktime_get_boot_ns()
+#undef get_prandom_u32
+#define get_prandom_u32() bpf_get_prandom_u32()
+#undef get_smp_processor_id
+#define get_smp_processor_id() bpf_get_smp_processor_id()
+#undef get_current_pid_tgid
+#define get_current_pid_tgid() bpf_get_current_pid_tgid()
+#undef get_current_uid_gid
+#define get_current_uid_gid() bpf_get_current_uid_gid()
+#undef get_current_comm
+#define get_current_comm(buf, size) bpf_get_current_comm((buf), (size))
+#undef get_current_cgroup_id
+#define get_current_cgroup_id() bpf_get_current_cgroup_id()
+#undef get_current_task
+#define get_current_task() bpf_get_current_task()
+#undef get_current_task_btf
+#define get_current_task_btf() bpf_get_current_task_btf()
+#undef get_attach_cookie
+#define get_attach_cookie(ctx) bpf_get_attach_cookie((ctx))
+#undef get_func_arg
+#define get_func_arg(ctx, n, value) bpf_get_func_arg((ctx), (n), (value))
+#undef get_func_ret
+#define get_func_ret(ctx, value) bpf_get_func_ret((ctx), (value))
+#undef get_func_ip
+#define get_func_ip(ctx) bpf_get_func_ip((ctx))
+#undef ima_inode_hash
+#define ima_inode_hash(inode, dst, size) bpf_ima_inode_hash((inode), (dst), (size))
+#undef ima_file_hash
+#define ima_file_hash(file, dst, size) bpf_ima_file_hash((file), (dst), (size))
+#undef perf_event_output
+#define perf_event_output(ctx, map, flags, data, size) \
+	bpf_perf_event_output((ctx), (map), (flags), (data), (size))
+#undef ringbuf_output
+#define ringbuf_output(ringbuf, data, size, flags) \
+	bpf_ringbuf_output((ringbuf), (data), (size), (flags))
+#undef ringbuf_reserve
+#define ringbuf_reserve(ringbuf, size, flags) \
+	bpf_ringbuf_reserve((ringbuf), (size), (flags))
+#undef ringbuf_submit
+#define ringbuf_submit(data, flags) bpf_ringbuf_submit((data), (flags))
+#undef ringbuf_discard
+#define ringbuf_discard(data, flags) bpf_ringbuf_discard((data), (flags))
+#undef ringbuf_query
+#define ringbuf_query(ringbuf, flags) bpf_ringbuf_query((ringbuf), (flags))
+#undef tail_call
+#define tail_call(ctx, map, index) bpf_tail_call((ctx), (map), (index))
+#undef get_stackid
+#define get_stackid(ctx, map, flags) bpf_get_stackid((ctx), (map), (flags))
+#undef get_stack
+#define get_stack(ctx, buf, size, flags) bpf_get_stack((ctx), (buf), (size), (flags))
+#undef send_signal
+#define send_signal(sig) bpf_send_signal((sig))
+#undef override_return
+#define override_return(ctx, rc) bpf_override_return((ctx), (rc))
+#undef seq_write
+#define seq_write(seq, data, len) bpf_seq_write((seq), (data), (len))
+#undef loop
+#define loop(nr_loops, callback_fn, callback_ctx, flags) \
+	bpf_loop((nr_loops), (callback_fn), (callback_ctx), (flags))
+#endif
+
 /** LLVM built-ins, mem*() routines work for constant size */
 
 #ifndef memset
@@ -331,8 +414,53 @@ enum {
 	__FILTER_ARG_ALL,
 };
 
+#ifdef MICRO_NATIVE
+static __attribute__((unused)) int native_ascii_tolower(int c)
+{
+	if (c >= 'A' && c <= 'Z')
+		return c + ('a' - 'A');
+	return c;
+}
+
+static __attribute__((unused)) int bpf_strnstr(const char *s1__ign, const char *s2__ign,
+					       size_t len)
+{
+	for (size_t i = 0; i < len; i++) {
+		size_t j = 0;
+
+		for (; j < 100 && i + j < len; j++) {
+			char c2 = s2__ign[j];
+
+			if (!c2)
+				return (int)i;
+			if (s1__ign[i + j] != c2)
+				break;
+		}
+	}
+	return -1;
+}
+
+static __attribute__((unused)) int bpf_strncasestr(const char *s1__ign,
+						   const char *s2__ign, size_t len)
+{
+	for (size_t i = 0; i < len; i++) {
+		size_t j = 0;
+
+		for (; j < 100 && i + j < len; j++) {
+			char c2 = s2__ign[j];
+
+			if (!c2)
+				return (int)i;
+			if (native_ascii_tolower(s1__ign[i + j]) != native_ascii_tolower(c2))
+				break;
+		}
+	}
+	return -1;
+}
+#else
 // kfuncs
 extern int bpf_strnstr(const char *s1__ign, const char *s2__ign, size_t len) __weak __ksym;
 extern int bpf_strncasestr(const char *s1__ign, const char *s2__ign, size_t len) __weak __ksym;
+#endif
 
 #endif /* __BPF_API__ */

@@ -374,8 +374,8 @@ int main(int argc, char **argv)
 						  / NATIVE_LAB_CHUNK_BYTES);
 	if (chunk_count == 0)
 		chunk_count = 1;
-	if (chunk_count > 64) {
-		fprintf(stderr, "blob requires %u chunks; module supports 64\n",
+	if (chunk_count > 512) {
+		fprintf(stderr, "blob requires %u chunks; module supports 512\n",
 			chunk_count);
 		goto out_free;
 	}
