@@ -1645,6 +1645,36 @@ NativeMapShape expected_native_map_shape(const std::string &name)
     if (name == "ratelimit_heap") {
         return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 352, 1};
     }
+    if (name == "retprobe_map") {
+        return NativeMapShape{BPF_MAP_TYPE_HASH, 16, 24, 1024};
+    }
+    if (name == "fdinstall_map") {
+        return NativeMapShape{BPF_MAP_TYPE_LRU_HASH, 16, 4104, 0};
+    }
+    if (name == "stack_trace_map") {
+        return NativeMapShape{BPF_MAP_TYPE_STACK_TRACE, 4, 1016, 0};
+    }
+    if (name == "sleepable_preload") {
+        return NativeMapShape{BPF_MAP_TYPE_HASH, 8, 4100, 0};
+    }
+    if (name == "tg_ipv6_ext_heap") {
+        return NativeMapShape{BPF_MAP_TYPE_PERCPU_ARRAY, 4, 8, 1};
+    }
+    if (name == "tg_mb_sel_opts") {
+        return NativeMapShape{BPF_MAP_TYPE_ARRAY, 4, 12, 10};
+    }
+    if (name == "tg_mb_paths") {
+        return NativeMapShape{BPF_MAP_TYPE_ARRAY_OF_MAPS, 4, 4, 10};
+    }
+    if (name == "addr4lpm_maps") {
+        return NativeMapShape{BPF_MAP_TYPE_ARRAY_OF_MAPS, 4, 4, 8};
+    }
+    if (name == "addr6lpm_maps") {
+        return NativeMapShape{BPF_MAP_TYPE_ARRAY_OF_MAPS, 4, 4, 8};
+    }
+    if (name == "policy_stats") {
+        return NativeMapShape{BPF_MAP_TYPE_ARRAY, 4, 80, 1};
+    }
     if (name == "filter_map") {
         return NativeMapShape{BPF_MAP_TYPE_ARRAY, 4, 4096, 1};
     }
@@ -1719,6 +1749,16 @@ bool newest_open_process_map_is_object_scoped(const std::string &name)
            name == "enforcer_missed_notifications" ||
            name == "ratelimit_map" ||
            name == "ratelimit_heap" ||
+           name == "retprobe_map" ||
+           name == "fdinstall_map" ||
+           name == "stack_trace_map" ||
+           name == "sleepable_preload" ||
+           name == "tg_ipv6_ext_heap" ||
+           name == "tg_mb_sel_opts" ||
+           name == "tg_mb_paths" ||
+           name == "addr4lpm_maps" ||
+           name == "addr6lpm_maps" ||
+           name == "policy_stats" ||
            name == "filter_map" ||
            name == "config_map" ||
            name == "write_offload" ||

@@ -997,6 +997,28 @@ enforcer maps were resolved and the next unresolved symbol was
 `ratelimit_map` (`LRU_HASH key=224 value=8`, with dynamic max_entries allowed
 because the Tetragon agent may resize it when rate limiting is configured).
 
+`corpus/results/x86_kvm_corpus_20260524_194916_208340` confirmed the
+rate-limit maps were resolved and failed later in the same
+`generic_kprobe_process_event` entry on `stack_trace_map`. The loader now
+covers the remaining generic-kprobe support maps that are both present in the
+shim's map-create trace and defined in Tetragon source:
+`stack_trace_map` (`STACK_TRACE key=4 value=1016`, dynamic entries allowed),
+`retprobe_map` (`HASH key=16 value=24 entries=1024`), `fdinstall_map`
+(`LRU_HASH key=16 value=4104`, dynamic entries allowed),
+`sleepable_preload` (`HASH key=8 value=4100`, dynamic entries allowed),
+`tg_ipv6_ext_heap` (`PERCPU_ARRAY key=4 value=8 entries=1`),
+`tg_mb_sel_opts` (`ARRAY key=4 value=12 entries=10`), `tg_mb_paths`
+(`ARRAY_OF_MAPS key=4 value=4 entries=10`), and the IPv4/IPv6 LPM
+map-of-maps (`addr4lpm_maps` / `addr6lpm_maps`, `ARRAY_OF_MAPS key=4
+value=4 entries=8`). These are still object-scoped exact-shape matches.
+
+`corpus/results/x86_kvm_corpus_20260524_200649_820430` then loaded the first
+Tetragon tracing policy's generic-kprobe programs natively and failed on the
+second policy (`datagram`) when `generic_kprobe_process_event` referenced
+`policy_stats`. The loader now covers `policy_stats` as an object-scoped
+`ARRAY key=4 value=80 entries=1`, matching both Tetragon source and the shim's
+map-create trace.
+
 `corpus/results/x86_kvm_corpus_20260524_083558_419282` moved past the remaining
 Cilium feature-map mismatches and loaded many native host/LXC programs, but the
 VM later crashed in a native replacement for `cil_from_host`:
