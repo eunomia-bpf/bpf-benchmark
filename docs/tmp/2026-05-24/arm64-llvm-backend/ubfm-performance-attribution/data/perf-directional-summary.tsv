@@ -1,0 +1,5 @@
+treatment	scope	runtime	benchmarks	median_treatment_over_control	wins_lt_0_98	losses_gt_1_02	neutral
+ubfm	all	native	29	1.000000	2	2	25
+ubfm	all	kernel	29	0.999758	5	4	20
+ubfm	selected	native	12	1.000000	1	1	10
+ubfm	selected	kernel	12	0.996766	1	0	11

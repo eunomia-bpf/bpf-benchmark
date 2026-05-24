@@ -1,0 +1,4 @@
+attempt	status	benchmarks	samples	failed_samples	kernel	started_at	completed_at	result_dir
+baseline	completed	29	174	0	7.0.0-rc2+	2026-05-24T09:23:08.326443+00:00	2026-05-24T09:26:15.413913+00:00	result-aws_arm64_micro_20260524_092308_326443
+control-disabled	completed	29	174	0	7.0.0-rc2+	2026-05-24T09:33:11.911449+00:00	2026-05-24T09:36:21.591281+00:00	result-aws_arm64_micro_20260524_093311_911449
+treatment-ubfm-only	completed	29	174	0	7.0.0-rc2+	2026-05-24T09:43:08.758307+00:00	2026-05-24T09:46:17.172345+00:00	result-aws_arm64_micro_20260524_094308_758307

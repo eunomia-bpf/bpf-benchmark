@@ -1,0 +1,5 @@
+scope	runtime	benchmarks	median_treatment_over_control	wins_lt_0_98	losses_gt_1_02	neutral
+all	native	29	1.000000	2	6	21
+all	kernel	29	1.000000	5	3	21
+selected	native	7	1.006711	0	2	5
+selected	kernel	7	0.968354	4	0	3
