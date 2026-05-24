@@ -1,0 +1,10 @@
+{
+  "app": "bcc/set",
+  "baseline": null,
+  "error": "BCC tool runqlat exited with rc=1: libbpf: prog 'sched_switch': BPF program load failed: Invalid argument\nlibbpf: prog 'sched_switch': -- BEGIN PROG LOAD LOG --\nprocessed 775 insns (limit 1000000) max_states_per_insn 5 total_states 55 peak_states 44 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'sched_switch': failed to load: -22\nlibbpf: failed to load object 'runqlat_bpf'\nlibbpf: failed to load BPF skeleton 'runqlat_bpf': -22\nfailed to load BPF object: -22\nstderr tail:\nrunqlat:\nlibbpf: prog 'sched_switch': BPF program load failed: Invalid argument\nlibbpf: prog 'sched_switch': -- BEGIN PROG LOAD LOG --\nprocessed 775 insns (limit 1000000) max_states_per_insn 5 total_states 55 peak_states 44 mark_read 0\n-- END PROG LOAD LOG --\nlibbpf: prog 'sched_switch': failed to load: -22\nlibbpf: failed to load object 'runqlat_bpf'\nlibbpf: failed to load BPF skeleton 'runqlat_bpf': -22\nfailed to load BPF object: -22",
+  "post_rejit": null,
+  "rejit_result": null,
+  "runner": "bcc_set",
+  "selected_workload": "stress_ng_bcc_hook_hot",
+  "status": "error"
+}

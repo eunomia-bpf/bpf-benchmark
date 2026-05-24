@@ -1,0 +1,90 @@
+{
+  "arch": "x86_64",
+  "kinsns": {
+    "bpf_x86_andl": {
+      "btf_func_id": 128725,
+      "btf_id": 39,
+      "call_offset": 1
+    },
+    "bpf_x86_bswapl": {
+      "btf_func_id": 128684,
+      "btf_id": 41,
+      "call_offset": 2
+    },
+    "bpf_x86_cmoveq": {
+      "btf_func_id": 128708,
+      "btf_id": 42,
+      "call_offset": 3
+    },
+    "bpf_x86_cmovneq": {
+      "btf_func_id": 128710,
+      "btf_id": 42,
+      "call_offset": 3
+    },
+    "bpf_x86_leal": {
+      "btf_func_id": 128685,
+      "btf_id": 44,
+      "call_offset": 4
+    },
+    "bpf_x86_leaq": {
+      "btf_func_id": 128686,
+      "btf_id": 44,
+      "call_offset": 4
+    },
+    "bpf_x86_movb": {
+      "btf_func_id": 128695,
+      "btf_id": 45,
+      "call_offset": 5
+    },
+    "bpf_x86_movl": {
+      "btf_func_id": 128696,
+      "btf_id": 45,
+      "call_offset": 5
+    },
+    "bpf_x86_movq": {
+      "btf_func_id": 128697,
+      "btf_id": 45,
+      "call_offset": 5
+    },
+    "bpf_x86_movzbl": {
+      "btf_func_id": 128701,
+      "btf_id": 45,
+      "call_offset": 5
+    },
+    "bpf_x86_movzwl": {
+      "btf_func_id": 128702,
+      "btf_id": 45,
+      "call_offset": 5
+    },
+    "bpf_x86_prefetcht0": {
+      "btf_func_id": 128682,
+      "btf_id": 50,
+      "call_offset": 6
+    },
+    "bpf_x86_rolq": {
+      "btf_func_id": 128686,
+      "btf_id": 51,
+      "call_offset": 7
+    },
+    "bpf_x86_rolw": {
+      "btf_func_id": 128687,
+      "btf_id": 41,
+      "call_offset": 2
+    },
+    "bpf_x86_rorxl": {
+      "btf_func_id": 128687,
+      "btf_id": 51,
+      "call_offset": 7
+    },
+    "bpf_x86_shrq": {
+      "btf_func_id": 128743,
+      "btf_id": 39,
+      "call_offset": 1
+    },
+    "bpf_x86_testq": {
+      "btf_func_id": 128720,
+      "btf_id": 42,
+      "call_offset": 3
+    }
+  }
+}

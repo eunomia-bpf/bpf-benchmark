@@ -1,0 +1,10 @@
+{
+  "app": "bcc/set",
+  "baseline": null,
+  "error": "shim socket /var/run/bpfrejit/shim-1884.sock request failed: [Errno 111] Connection refused",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "bcc_set",
+  "selected_workload": "stress_ng_bcc_hook_hot",
+  "status": "error"
+}
