@@ -16,19 +16,29 @@ fallback silently to original BPF.
 
 ## Public API shape
 
-Preferred external contract:
+Current external contract:
 
 ```c
-int native_loader_load_from_fd(int original_prog_fd,
-                               const char *native_object_path,
-                               int *native_prog_fd_out);
+int native_loader_load_from_fd_with_source_path_and_attach(
+    int original_prog_fd,
+    const char *native_object_path,
+    const char *symbol_name,
+    const char *source_bpf_path,
+    uint32_t expected_attach_type,
+    uint32_t attach_btf_id,
+    uint32_t prog_btf_id,
+    uint32_t attach_btf_obj_id,
+    uint32_t attach_prog_id,
+    struct native_loader_c_result *out);
 ```
 
 `original_prog_fd` is the already-loaded oracle program:
 
 - in micro, the runner loads a native-lab companion object and passes that fd;
-- in corpus, the shim first lets the real app's `BPF_PROG_LOAD` succeed and
-  passes the resulting fd.
+- in corpus, the shim first lets the real app's `BPF_PROG_LOAD` succeed,
+  resolves the prebuilt native object from
+  `BPFREJIT_SHIM_NATIVE_MANIFEST`, and passes the resulting fd plus attach
+  metadata.
 
 The lib owns:
 
@@ -39,10 +49,12 @@ The lib owns:
 - patching real map kernel pointers into the linked template;
 - loading the native-lab kfunc stub and returning its fd.
 
-If one `.native.o` can contain multiple entry functions, the API must grow a
-symbol parameter or consume a build-time artifact manifest. Do not infer the
-symbol from truncated BPF program names unless the artifact manifest proves the
-mapping is unique.
+If one `.native.o` can contain multiple entry functions, the shim manifest may
+carry `symbol`. When the manifest omits `symbol`, libnativeloader infers the
+exact BTF `func_info` name from the loaded oracle fd; this is required for
+15-byte BPF program-name collisions such as BCC kprobe entry/exit pairs.
+Object selection itself stays manifest-driven and must fail on ambiguous
+matches.
 
 ## Internal request model
 
@@ -92,7 +104,8 @@ Allowed:
 - intercept the real app's `BPF_PROG_LOAD`;
 - call the real syscall first so the app loader, maps, CO-RE, BTF, and attach
   metadata stay authoritative;
-- pass the original prog fd plus prebuilt native object to native-loader;
+- resolve a prebuilt native object from a JSON manifest, pass the original prog
+  fd plus attach metadata to native-loader;
 - return native fd to the app if native load succeeds.
 
 Not allowed:
@@ -133,8 +146,7 @@ helpers that will not compile as native C without controlled shims.
       and Makefile/CMake integration.
 - [x] Move native-lab target constants, native-link invocation, output parsing,
       map pointer patching, and native stub loading out of runner-local code.
-- [x] Add `native_loader_load_from_fd()` and a micro-only companion-object
-      helper.
+- [x] Add the shared fd load path and a micro-only companion-object helper.
 - [ ] Add a typed native-link manifest path and parser tests.
 - [ ] Keep current positional CLI support only as a compatibility backend until
       the manifest path is used by both runner and shim.
@@ -157,7 +169,7 @@ helpers that will not compile as native C without controlled shims.
 ### vendor/bpf native build
 
 - [x] Add native artifact output under `vendor/build/native-bpf/<arch>/<kernel>`.
-- [ ] Generate per-app native object(s) and a manifest.
+- [x] Generate per-app native object(s) and a manifest.
 - [x] Pre-run native-link proof stage for generated native artifacts. Native
       objects are not considered corpus-ready unless the selected entry symbols
       also pass the proof-link stage.
@@ -1783,3 +1795,65 @@ JIT expands with uploaded native bytes. It is not a separate user-space loader
 stub, and the hot path should not be described as a normal kfunc call per event.
 BPF entry/stats accounting is also not native-only overhead; ordinary JITed BPF
 programs pay it too.
+
+### 2026-05-25 shim manifest cleanup
+
+Follow-up cleanup removed the old shim native-object environment contract:
+`BPFREJIT_SHIM_NATIVE_OBJECT`, `BPFREJIT_SHIM_NATIVE_OBJECT_DIR`, and the
+Cilium-specific object-name resolver. The shim now requires
+`BPFREJIT_SHIM_NATIVE_MANIFEST` when native-loader mode is enabled. Corpus app
+runners only provide that manifest path; they no longer compute per-program
+native object paths in Python.
+
+The manifest schema is intentionally small:
+
+```json
+{
+  "version": 1,
+  "app": "bcc",
+  "status": "native-objects-proof-linked",
+  "objects": [
+    {
+      "program": "kprobe__cap_cap",
+      "native_object": "capable.native.o",
+      "symbol": "kprobe__cap_capable_entry",
+      "prog_type": 2,
+      "source_map_prefix": "cilium_calls_0"
+    }
+  ]
+}
+```
+
+`program` and `native_object` are required. `program` matches the kernel/libbpf
+15-byte BPF program name. `symbol`, `prog_type`, and `source_map_prefix` are
+optional selectors. `native_object` is resolved relative to the manifest
+directory unless it is absolute. Multiple matching manifest entries are allowed
+only when they resolve to the same object/symbol; otherwise the shim fails the
+load as ambiguous.
+
+`vendor/bpf/write_native_manifest.py` generates these manifests from native
+object text symbols with optional per-object selectors. BCC truncated-name
+collisions intentionally omit `symbol` so libnativeloader can recover the exact
+BTF function name from the already-loaded oracle fd. Cilium disambiguation now
+lives in manifest `source_map_prefix` / `prog_type` selectors rather than
+hardcoded shim string logic.
+
+The C ABI exported for the shim has also been reduced to the attach-aware fd
+loader:
+`native_loader_load_from_fd_with_source_path_and_attach(...)`. The older weak
+C wrappers that accepted only fd/object or fd/object/source-path were removed;
+micro runner uses the C++ companion-object entry point directly.
+
+Validation after this cleanup:
+
+- `python3 -m py_compile` passed for the changed Python app-runner and manifest
+  generator files.
+- `make -C bpfopt/shim` passed; the remaining `shim_reload.h` `snprintf`
+  warning is pre-existing and unrelated to native-object resolution.
+- `make -C native-sim/libnativeloader` passed.
+- `make host-runner-x86` passed.
+- `make -C vendor/bpf native-bcc native-katran native-otel native-tracee native-cilium`
+  passed and regenerated per-app staged manifests.
+- `TEST_MODE=native-loader-smoke TIMEOUT=1200 make test` passed with run token
+  `209e2c80`; the containerized shim loaded the manifest and replaced both
+  programs from `multi_prog_tool`.

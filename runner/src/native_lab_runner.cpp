@@ -226,7 +226,7 @@ std::vector<sample_result> run_native_kernel(const cli_options &options)
     sample.phases_ns = {
         {"memory_prepare_ns", elapsed_ns(memory_prepare_start, memory_prepare_end)},
         {"packet_prepare_ns", elapsed_ns(pkt_prepare_start, pkt_prepare_end)},
-        {"blob_read_ns", native_load_ns},
+        {"native_load_ns", native_load_ns},
         {"companion_load_ns", companion_load_ns},
         {"companion_open_ns", companion_open_ns},
         {"companion_object_load_ns", companion_object_load_ns},

@@ -14,6 +14,7 @@ from ..workload import (
     run_named_workload,
 )
 from .base import AppRunner
+from .native_loader_env import native_loader_manifest_env
 from .process_support import AgentSession
 from .setup_support import missing_required_commands, pick_host_executable, repo_artifact_root
 
@@ -76,18 +77,7 @@ def inspect_tetragon_setup() -> dict[str, object]:
 
 
 def tetragon_native_loader_env() -> dict[str, str]:
-    enabled = os.environ.get("BPFREJIT_SHIM_NATIVE_LOADER", "").strip().lower()
-    if enabled not in {"1", "true", "yes", "on"}:
-        return {}
-    explicit = os.environ.get("BPFREJIT_SHIM_NATIVE_OBJECT_DIR", "").strip()
-    if explicit:
-        native_dir = Path(explicit)
-    else:
-        arch = os.environ.get("RUN_TARGET_ARCH", "x86_64").strip() or "x86_64"
-        native_dir = Path(f"/opt/bpf-benchmark/native-bpf/{arch}/tetragon")
-    if not native_dir.is_dir():
-        raise RuntimeError(f"Tetragon native object directory not found: {native_dir}")
-    return {"BPFREJIT_SHIM_NATIVE_OBJECT_DIR": str(native_dir)}
+    return native_loader_manifest_env("tetragon")
 
 
 def resolve_tetragon_binary(explicit: str | None, setup_result: Mapping[str, object]) -> str | None:

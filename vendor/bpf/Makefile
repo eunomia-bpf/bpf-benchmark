@@ -261,39 +261,16 @@ native-katran: $(KATRAN_NATIVE_OBJS) $(KATRAN_NATIVE_PROOF_MARKERS)
 	install -d "$(NATIVE_OUT)/katran"
 	install -d "$(KATRAN_NATIVE_STAGE_OUT)"
 	install -m 0644 $(KATRAN_NATIVE_OBJS) "$(KATRAN_NATIVE_STAGE_OUT)"
-	for obj in $(KATRAN_NATIVE_OBJS); do \
-		symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$${obj}" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
-		for sym in $${symbols}; do \
-			case "$${sym}" in jhash|jhash_*) continue;; esac; \
-			install -m 0644 "$${obj}" "$(KATRAN_NATIVE_STAGE_OUT)/$${sym}.native.o"; \
-			trunc="$$(printf '%.15s' "$${sym}")"; \
-			if [[ "$${trunc}" != "$${sym}" ]]; then \
-				install -m 0644 "$${obj}" "$(KATRAN_NATIVE_STAGE_OUT)/$${trunc}.native.o"; \
-			fi; \
-		done; \
-	done
-	install -m 0644 "$(NATIVE_OUT)/katran/healthchecking_ipip.native.o" "$(KATRAN_NATIVE_STAGE_OUT)/healthcheck_encap.native.o"
-	install -m 0644 "$(NATIVE_OUT)/katran/healthchecking_ipip.native.o" "$(KATRAN_NATIVE_STAGE_OUT)/healthcheck_enca.native.o"
-	printf '%s\n' '{' \
-		'  "version": 1,' \
-		'  "app": "katran",' \
-		'  "status": "native-objects-proof-linked",' \
-		'  "objects": [' \
-		'    {"program": "balancer_ingress", "native_object": "$(NATIVE_OUT)/katran/balancer.native.o"},' \
-		'    {"program": "healthcheck_encap", "native_object": "$(NATIVE_OUT)/katran/healthchecking_ipip.native.o"},' \
-		'    {"program": "xdp_root", "native_object": "$(NATIVE_OUT)/katran/xdp_root.native.o"}' \
-		'  ]' \
-		'}' > "$(NATIVE_OUT)/katran/manifest.json"
-	printf '%s\n' '{' \
-		'  "version": 1,' \
-		'  "app": "katran",' \
-		'  "status": "native-objects-proof-linked",' \
-		'  "objects": [' \
-		'    {"program": "balancer_ingress", "native_object": "balancer_ingress.native.o"},' \
-		'    {"program": "healthcheck_encap", "native_object": "healthcheck_encap.native.o"},' \
-		'    {"program": "xdp_root", "native_object": "xdp_root.native.o"}' \
-		'  ]' \
-		'}' > "$(KATRAN_NATIVE_STAGE_OUT)/manifest.json"
+	python3 "$(CURDIR)/write_native_manifest.py" --app katran --llvm-nm "$(LLVM_NM)" --skip-prefix jhash \
+		--output "$(NATIVE_OUT)/katran/manifest.json" \
+		--object "$(NATIVE_OUT)/katran/balancer.native.o" \
+		--object "$(NATIVE_OUT)/katran/healthchecking_ipip.native.o" \
+		--object "$(NATIVE_OUT)/katran/xdp_root.native.o"
+	python3 "$(CURDIR)/write_native_manifest.py" --app katran --llvm-nm "$(LLVM_NM)" --skip-prefix jhash \
+		--output "$(KATRAN_NATIVE_STAGE_OUT)/manifest.json" \
+		--object "$(KATRAN_NATIVE_STAGE_OUT)/balancer.native.o" \
+		--object "$(KATRAN_NATIVE_STAGE_OUT)/healthchecking_ipip.native.o" \
+		--object "$(KATRAN_NATIVE_STAGE_OUT)/xdp_root.native.o"
 
 $(NATIVE_OUT)/bcc/%.proof.ok: $(NATIVE_OUT)/bcc/%.native.o $(NATIVE_LINK)
 	install -d "$(dir $@)"
@@ -312,24 +289,12 @@ native-bcc: bcc/libbpf-tools/x86/vmlinux.h $(BCC_NATIVE_OBJS) $(BCC_NATIVE_PROOF
 	install -d "$(NATIVE_OUT)/bcc"
 	install -d "$(BCC_NATIVE_STAGE_OUT)"
 	install -m 0644 $(BCC_NATIVE_OBJS) "$(BCC_NATIVE_STAGE_OUT)"
-	printf '%s\n' '{' \
-		'  "version": 1,' \
-		'  "app": "bcc",' \
-		'  "status": "native-objects-proof-linked",' \
-		'  "objects": [' \
-		$(foreach tool,$(BCC_TOOLS_WITH_COMMA),'    {"program": "$(tool)", "native_object": "$(NATIVE_OUT)/bcc/$(tool).native.o"},') \
-		'    {"program": "$(BCC_LAST_TOOL)", "native_object": "$(NATIVE_OUT)/bcc/$(BCC_LAST_TOOL).native.o"}' \
-		'  ]' \
-		'}' > "$(NATIVE_OUT)/bcc/manifest.json"
-	printf '%s\n' '{' \
-		'  "version": 1,' \
-		'  "app": "bcc",' \
-		'  "status": "native-objects-proof-linked",' \
-		'  "objects": [' \
-		$(foreach tool,$(BCC_TOOLS_WITH_COMMA),'    {"program": "$(tool)", "native_object": "$(tool).native.o"},') \
-		'    {"program": "$(BCC_LAST_TOOL)", "native_object": "$(BCC_LAST_TOOL).native.o"}' \
-		'  ]' \
-		'}' > "$(BCC_NATIVE_STAGE_OUT)/manifest.json"
+	python3 "$(CURDIR)/write_native_manifest.py" --app bcc --llvm-nm "$(LLVM_NM)" \
+		--output "$(NATIVE_OUT)/bcc/manifest.json" \
+		$(foreach obj,$(BCC_NATIVE_OBJS),--object "$(obj)")
+	python3 "$(CURDIR)/write_native_manifest.py" --app bcc --llvm-nm "$(LLVM_NM)" \
+		--output "$(BCC_NATIVE_STAGE_OUT)/manifest.json" \
+		$(foreach tool,$(BCC_TOOLS),--object "$(BCC_NATIVE_STAGE_OUT)/$(tool).native.o")
 
 $(NATIVE_OUT)/cilium/%.proof.ok: $(NATIVE_OUT)/cilium/%.native.o $(NATIVE_LINK)
 	install -d "$(dir $@)"
@@ -348,31 +313,22 @@ native-cilium: $(CILIUM_NATIVE_OBJS) $(CILIUM_NATIVE_PROOF_MARKERS)
 	install -d "$(CILIUM_NATIVE_STAGE_OUT)"
 	rm -f "$(CILIUM_NATIVE_STAGE_OUT)"/*.native.o
 	install -m 0644 $(CILIUM_NATIVE_OBJS) "$(CILIUM_NATIVE_STAGE_OUT)"
-	printf '%s\n' '{' \
-		'  "version": 1,' \
-		'  "app": "cilium",' \
-		'  "status": "native-objects-proof-linked",' \
-		'  "objects": [' \
-		'  ]' \
-		'}' > "$(NATIVE_OUT)/cilium/manifest.json"
-	printf '%s\n' '{' \
-		'  "version": 1,' \
-		'  "app": "cilium",' \
-		'  "status": "native-objects-proof-linked",' \
-		'  "objects": [' \
-		'  ]' \
-		'}' > "$(CILIUM_NATIVE_STAGE_OUT)/manifest.json"
-	for obj in $(CILIUM_NATIVE_OBJS); do \
-		base="$$(basename "$${obj}" .native.o)"; \
-		symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$${obj}" | awk '$$2 ~ /^[Tt]$$/ && $$1 !~ /^__check_/ {print $$1}')"; \
-		for sym in $${symbols}; do \
-			install -m 0644 "$${obj}" "$(CILIUM_NATIVE_STAGE_OUT)/$${base}.$${sym}.native.o"; \
-			trunc="$$(printf '%.15s' "$${sym}")"; \
-			if [[ "$${trunc}" != "$${sym}" ]]; then \
-				install -m 0644 "$${obj}" "$(CILIUM_NATIVE_STAGE_OUT)/$${base}.$${trunc}.native.o"; \
-			fi; \
-		done; \
-	done
+	python3 "$(CURDIR)/write_native_manifest.py" --app cilium --llvm-nm "$(LLVM_NM)" \
+		--output "$(NATIVE_OUT)/cilium/manifest.json" \
+		--object "$(NATIVE_OUT)/cilium/bpf_lxc.native.o,source_map_prefix=cilium_calls_0" \
+		--object "$(NATIVE_OUT)/cilium/bpf_overlay.native.o,source_map_prefix=cilium_calls_ov" \
+		--object "$(NATIVE_OUT)/cilium/bpf_sock.native.o" \
+		--object "$(NATIVE_OUT)/cilium/bpf_host.native.o,source_map_prefix=cilium_calls_ho,source_map_prefix=cilium_calls_ne" \
+		--object "$(NATIVE_OUT)/cilium/bpf_wireguard.native.o,source_map_prefix=cilium_calls_wi" \
+		--object "$(NATIVE_OUT)/cilium/bpf_xdp.native.o,prog_type=6"
+	python3 "$(CURDIR)/write_native_manifest.py" --app cilium --llvm-nm "$(LLVM_NM)" \
+		--output "$(CILIUM_NATIVE_STAGE_OUT)/manifest.json" \
+		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_lxc.native.o,source_map_prefix=cilium_calls_0" \
+		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_overlay.native.o,source_map_prefix=cilium_calls_ov" \
+		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_sock.native.o" \
+		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_host.native.o,source_map_prefix=cilium_calls_ho,source_map_prefix=cilium_calls_ne" \
+		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_wireguard.native.o,source_map_prefix=cilium_calls_wi" \
+		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_xdp.native.o,prog_type=6"
 
 $(OTEL_NATIVE_PROOF_MARKER): $(OTEL_NATIVE_OBJECT) $(NATIVE_LINK)
 	install -d "$(dir $@)"
@@ -390,22 +346,12 @@ $(OTEL_NATIVE_PROOF_MARKER): $(OTEL_NATIVE_OBJECT) $(NATIVE_LINK)
 native-otel: $(OTEL_NATIVE_OBJECT) $(OTEL_NATIVE_PROOF_MARKER)
 	install -d "$(OTEL_NATIVE_STAGE_OUT)"
 	install -m 0644 "$(OTEL_NATIVE_OBJECT)" "$(OTEL_NATIVE_STAGE_OUT)/otelcol-ebpf-profiler.native.o"
-	printf '%s\n' '{' \
-		'  "version": 1,' \
-		'  "app": "otelcol-ebpf-profiler",' \
-		'  "status": "native-objects-proof-linked",' \
-		'  "objects": [' \
-		'    {"native_object": "$(OTEL_NATIVE_OBJECT)"}' \
-		'  ]' \
-		'}' > "$(NATIVE_OUT)/otel/manifest.json"
-	printf '%s\n' '{' \
-		'  "version": 1,' \
-		'  "app": "otelcol-ebpf-profiler",' \
-		'  "status": "native-objects-proof-linked",' \
-		'  "objects": [' \
-		'    {"native_object": "otelcol-ebpf-profiler.native.o"}' \
-		'  ]' \
-		'}' > "$(OTEL_NATIVE_STAGE_OUT)/manifest.json"
+	python3 "$(CURDIR)/write_native_manifest.py" --app otelcol-ebpf-profiler --llvm-nm "$(LLVM_NM)" \
+		--output "$(NATIVE_OUT)/otel/manifest.json" \
+		--object "$(OTEL_NATIVE_OBJECT)"
+	python3 "$(CURDIR)/write_native_manifest.py" --app otelcol-ebpf-profiler --llvm-nm "$(LLVM_NM)" \
+		--output "$(OTEL_NATIVE_STAGE_OUT)/manifest.json" \
+		--object "$(OTEL_NATIVE_STAGE_OUT)/otelcol-ebpf-profiler.native.o"
 
 $(TRACEE_NATIVE_PROOF_MARKER): $(TRACEE_NATIVE_OBJECT) $(NATIVE_LINK)
 	install -d "$(dir $@)"
@@ -438,36 +384,15 @@ native-tracee: $(TRACEE_NATIVE_OBJS) $(TRACEE_NATIVE_PROOF_MARKERS)
 	rm -f "$(TRACEE_NATIVE_STAGE_OUT)"/*.native.o
 	for obj in $(TRACEE_NATIVE_OBJS); do \
 		install -m 0644 "$${obj}" "$(TRACEE_NATIVE_STAGE_OUT)/$$(basename "$${obj}")"; \
-		symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$${obj}" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
-		for sym in $${symbols}; do \
-			install -m 0644 "$${obj}" "$(TRACEE_NATIVE_STAGE_OUT)/$${sym}.native.o"; \
-			trunc="$$(printf '%.15s' "$${sym}")"; \
-			if [[ "$${trunc}" != "$${sym}" ]]; then \
-				install -m 0644 "$${obj}" "$(TRACEE_NATIVE_STAGE_OUT)/$${trunc}.native.o"; \
-			fi; \
-		done; \
 	done
-	for src in $(TRACEE_LSM_SUPPORT_SRCS); do \
-		if [[ -f "$(NATIVE_OUT)/tracee/lsm_support/$${src}.native.o" ]]; then \
-			install -m 0644 "$(NATIVE_OUT)/tracee/lsm_support/$${src}.native.o" "$(TRACEE_NATIVE_STAGE_OUT)/$${src}.native.o"; \
-		fi; \
-	done
-	printf '%s\n' '{' \
-		'  "version": 1,' \
-		'  "app": "tracee",' \
-		'  "status": "native-objects-proof-linked",' \
-		'  "objects": [' \
-		'    {"native_object": "$(TRACEE_NATIVE_OBJECT)"}' \
-		'  ]' \
-		'}' > "$(NATIVE_OUT)/tracee/manifest.json"
-	printf '%s\n' '{' \
-		'  "version": 1,' \
-		'  "app": "tracee",' \
-		'  "status": "native-objects-proof-linked",' \
-		'  "objects": [' \
-		'    {"native_object": "tracee.native.o"}' \
-		'  ]' \
-		'}' > "$(TRACEE_NATIVE_STAGE_OUT)/manifest.json"
+	python3 "$(CURDIR)/write_native_manifest.py" --app tracee --llvm-nm "$(LLVM_NM)" \
+		--output "$(NATIVE_OUT)/tracee/manifest.json" \
+		--object "$(TRACEE_NATIVE_OBJECT)" \
+		$(foreach src,$(TRACEE_LSM_SUPPORT_SRCS),--object "$(NATIVE_OUT)/tracee/lsm_support/$(src).native.o")
+	python3 "$(CURDIR)/write_native_manifest.py" --app tracee --llvm-nm "$(LLVM_NM)" \
+		--output "$(TRACEE_NATIVE_STAGE_OUT)/manifest.json" \
+		--object "$(TRACEE_NATIVE_STAGE_OUT)/tracee.native.o" \
+		$(foreach src,$(TRACEE_LSM_SUPPORT_SRCS),--object "$(TRACEE_NATIVE_STAGE_OUT)/$(src).native.o")
 
 native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h native_compat.h $(NATIVE_LINK)
 	install -d "$(NATIVE_OUT)/tetragon"
@@ -566,35 +491,26 @@ native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h native_compat.h $(
 		compile_native "$${name}_v511" "$(CURDIR)/tetragon/bpf/cgroup/$${name}.c" "-D__LARGE_BPF_PROG -D__V511_BPF_PROG"; \
 	done; \
 		for obj in "$${native_out}"/*.native.o; do \
-		base="$$(basename "$${obj}" .native.o)"; \
-		symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$${obj}" | awk '$$2 ~ /^[Tt]$$/ && $$1 !~ /^LBB/ && $$1 !~ /^__check_/ {print $$1}')"; \
-		if [[ -z "$${symbols}" ]]; then \
+			base="$$(basename "$${obj}" .native.o)"; \
+			symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$${obj}" | awk '$$2 ~ /^[Tt]$$/ && $$1 !~ /^LBB/ && $$1 !~ /^__check_/ {print $$1}')"; \
+			if [[ -z "$${symbols}" ]]; then \
 			echo "no native text symbols in $${obj}" >&2; \
 			exit 1; \
 		fi; \
 		for sym in $${symbols}; do \
 			"$(NATIVE_LINK)" --input "$${obj}" --symbol "$${sym}" \
 				--output "$${native_out}/$${base}.$${sym}.proof.o" --mode proof; \
+			done; \
+			printf 'ok\n' > "$${native_out}/$${base}.proof.ok"; \
+			install -m 0644 "$${obj}" "$${stage_out}/$${base}.native.o"; \
 		done; \
-		printf 'ok\n' > "$${native_out}/$${base}.proof.ok"; \
-		install -m 0644 "$${obj}" "$${stage_out}/$${base}.native.o"; \
-		for sym in $${symbols}; do \
-			install -m 0644 "$${obj}" "$${stage_out}/$${sym}.native.o"; \
-			trunc="$$(printf '%.15s' "$${sym}")"; \
-			if [[ "$${trunc}" != "$${sym}" ]]; then \
-				install -m 0644 "$${obj}" "$${stage_out}/$${trunc}.native.o"; \
-			fi; \
-		done; \
-	done; \
-	printf '%s\n' '{' \
-		'  "version": 1,' \
-		'  "app": "tetragon",' \
-		'  "status": "native-objects-proof-linked"' \
-		'}' > "$${native_out}/manifest.json"; \
-	printf '%s\n' '{' \
-		'  "version": 1,' \
-		'  "app": "tetragon",' \
-		'  "status": "native-objects-proof-linked"' \
-		'}' > "$${stage_out}/manifest.json"
+		native_args=(); \
+		stage_args=(); \
+		for obj in "$${native_out}"/*.native.o; do native_args+=(--object "$${obj}"); done; \
+		for obj in "$${stage_out}"/*.native.o; do stage_args+=(--object "$${obj}"); done; \
+		python3 "$(CURDIR)/write_native_manifest.py" --app tetragon --llvm-nm "$(LLVM_NM)" --dedupe-program last \
+			--output "$${native_out}/manifest.json" "$${native_args[@]}"; \
+		python3 "$(CURDIR)/write_native_manifest.py" --app tetragon --llvm-nm "$(LLVM_NM)" --dedupe-program last \
+			--output "$${stage_out}/manifest.json" "$${stage_args[@]}"
 
 native-artifacts: native-katran native-bcc native-otel native-cilium native-tracee native-tetragon

@@ -225,13 +225,30 @@ def _run_native_loader_shim_smoke(
     shim_dir = artifact_dir / "native-loader-shim"
     shim_dir.mkdir(parents=True, exist_ok=True)
     log_path = artifact_dir / "native-loader-shim.log"
+    manifest_path = shim_dir / "manifest.json"
+    manifest_path.write_text(json.dumps({
+        "version": 1,
+        "app": "native-loader-smoke",
+        "objects": [
+            {
+                "program": "multi_prog_firs",
+                "symbol": "multi_prog_first",
+                "native_object": str(native_object),
+            },
+            {
+                "program": "multi_prog_seco",
+                "symbol": "multi_prog_second",
+                "native_object": str(native_object),
+            },
+        ],
+    }, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     smoke_env, _ = env_with_suite_runtime_ld(workspace, args.target_arch, env)
     smoke_env.update({
         "LD_PRELOAD": str(shim_so),
         "BPFREJIT_SHIM_DIR": str(shim_dir),
         "BPFREJIT_SHIM_LOG": str(log_path),
         "BPFREJIT_SHIM_NATIVE_LOADER": "1",
-        "BPFREJIT_SHIM_NATIVE_OBJECT": str(native_object),
+        "BPFREJIT_SHIM_NATIVE_MANIFEST": str(manifest_path),
         "BPFREJIT_NATIVE_LOADER_SO": str(native_loader_so),
         "BPFREJIT_NATIVE_LINK_BINARY": str(native_link),
     })

@@ -8,6 +8,9 @@ struct native_loader_c_result {
     char error[4096];
 };
 
+#define SHIM_NATIVE_LOADER_PATH_MAX 512
+#define SHIM_NATIVE_LOADER_SYMBOL_MAX 256
+
 typedef int (*native_loader_load_from_fd_with_source_path_and_attach_fn)(
     int original_prog_fd,
     const char *native_object_path,
@@ -25,22 +28,10 @@ static int shim_native_loader_enabled(void) {
     return e && strcmp(e, "1") == 0;
 }
 
-static int shim_native_loader_format_object_path(const char *dir,
-                                                 const char *prefix,
-                                                 const char *prog_name,
-                                                 char *out,
-                                                 size_t out_sz) {
-    int n;
-    if (prefix && prefix[0]) {
-        n = snprintf(out, out_sz, "%s/%s.%s.native.o", dir, prefix, prog_name);
-    } else {
-        n = snprintf(out, out_sz, "%s/%s.native.o", dir, prog_name);
-    }
-    return n >= (int)out_sz ? -1 : 0;
-}
-
 static int shim_native_loader_source_has_map_prefix(const char *source_path,
                                                     const char *prefix) {
+    if (!source_path || !source_path[0] || !prefix || !prefix[0])
+        return 0;
     int fd = open(source_path, O_RDONLY);
     if (fd < 0)
         return 0;
@@ -103,84 +94,182 @@ static int shim_native_loader_source_has_map_prefix(const char *source_path,
     return found;
 }
 
-static const char *shim_native_loader_cilium_object_prefix(
-    const struct prog_entry *prog,
-    const char *source_path) {
-    const char *name = prog ? prog->name : "";
-
-    if (prog && prog->prog_type == BPF_PROG_TYPE_XDP)
-        return "bpf_xdp";
-    if (name && strstr(name, "wireguard"))
-        return "bpf_wireguard";
-    if (name && strstr(name, "overlay"))
-        return "bpf_overlay";
-    if (name && strstr(name, "sock"))
-        return "bpf_sock";
-    if (name && (strstr(name, "lxc") || strstr(name, "contai")))
-        return "bpf_lxc";
-    if (source_path && source_path[0]) {
-        if (shim_native_loader_source_has_map_prefix(source_path, "cilium_calls_xd"))
-            return "bpf_xdp";
-        if (shim_native_loader_source_has_map_prefix(source_path, "cilium_calls_ho"))
-            return "bpf_host";
-        if (shim_native_loader_source_has_map_prefix(source_path, "cilium_calls_ne"))
-            return "bpf_host";
-        if (shim_native_loader_source_has_map_prefix(source_path, "cilium_calls_0"))
-            return "bpf_lxc";
-        if (shim_native_loader_source_has_map_prefix(source_path, "cilium_calls_ov"))
-            return "bpf_overlay";
-        if (shim_native_loader_source_has_map_prefix(source_path, "cilium_calls_wi"))
-            return "bpf_wireguard";
+static int shim_native_loader_manifest_dir(const char *manifest,
+                                           char *out,
+                                           size_t out_sz) {
+    if (!manifest || !manifest[0] || out_sz == 0)
+        return -1;
+    const char *slash = strrchr(manifest, '/');
+    if (!slash) {
+        if (snprintf(out, out_sz, ".") >= (int)out_sz)
+            return -1;
+        return 0;
     }
-    if (name && (strstr(name, "host") || strstr(name, "netdev") ||
-                 strstr(name, "nodeport") || strstr(name, "srv6") ||
-                 strstr(name, "handle") || strstr(name, "drop")))
-        return "bpf_host";
-    return NULL;
+    size_t len = (size_t)(slash - manifest);
+    if (len == 0)
+        len = 1;
+    if (len + 1 > out_sz)
+        return -1;
+    memcpy(out, manifest, len);
+    out[len] = '\0';
+    return 0;
 }
 
-static int shim_native_loader_object_path(const struct prog_entry *prog,
-                                          const char *source_path,
-                                          char *out,
-                                          size_t out_sz) {
-    const char *single = getenv("BPFREJIT_SHIM_NATIVE_OBJECT");
-    if (single && single[0]) {
-        if (snprintf(out, out_sz, "%s", single) >= (int)out_sz)
+static int shim_native_loader_manifest_join(const char *manifest,
+                                            const char *native_object,
+                                            char *out,
+                                            size_t out_sz) {
+    if (!native_object || !native_object[0])
+        return -1;
+    if (native_object[0] == '/') {
+        if (snprintf(out, out_sz, "%s", native_object) >= (int)out_sz)
             return -1;
         return 0;
     }
-
-    const char *dir = getenv("BPFREJIT_SHIM_NATIVE_OBJECT_DIR");
-    if (!dir || !dir[0])
+    char dir[SHIM_NATIVE_LOADER_PATH_MAX];
+    if (shim_native_loader_manifest_dir(manifest, dir, sizeof(dir)) != 0)
         return -1;
-    const char *prog_name = prog ? prog->name : NULL;
-    if (!prog_name || !prog_name[0])
-        return -1;
-
-    if (strstr(dir, "/cilium") != NULL) {
-        const char *prefix =
-            shim_native_loader_cilium_object_prefix(prog, source_path);
-        if (!prefix) {
-            log_line("native-loader cannot infer Cilium native object for prog=%s",
-                     prog_name);
-            return -1;
-        }
-        if (shim_native_loader_format_object_path(dir, prefix, prog_name,
-                                                  out, out_sz) != 0)
-            return -1;
-        if (access(out, R_OK) != 0) {
-            log_line("native-loader inferred Cilium object missing prog=%s "
-                     "prefix=%s path=%s errno=%d",
-                     prog_name, prefix, out, errno);
-            return -1;
-        }
-        return 0;
-    }
-
-    if (shim_native_loader_format_object_path(dir, NULL, prog_name,
-                                              out, out_sz) != 0)
+    if (snprintf(out, out_sz, "%s/%s", dir, native_object) >= (int)out_sz)
         return -1;
     return 0;
+}
+
+static int shim_native_loader_manifest_entry_matches(const char *entry,
+                                                     const struct prog_entry *prog,
+                                                     const char *source_path) {
+    char program[64] = {0};
+    if (!json_get_str(entry, "program", program, sizeof(program)) ||
+        !program[0])
+        return 0;
+    const char *prog_name = prog ? prog->name : "";
+    if (!prog_name || strcmp(program, prog_name) != 0)
+        return 0;
+
+    long prog_type = json_get_int(entry, "prog_type");
+    if (prog_type >= 0 &&
+        (!prog || (uint32_t)prog_type != prog->prog_type))
+        return 0;
+
+    char map_prefix[64] = {0};
+    if (json_get_str(entry, "source_map_prefix", map_prefix,
+                     sizeof(map_prefix)) &&
+        map_prefix[0] &&
+        !shim_native_loader_source_has_map_prefix(source_path, map_prefix))
+        return 0;
+
+    return 1;
+}
+
+static int shim_native_loader_resolve_manifest(const char *manifest_path,
+                                               const struct prog_entry *prog,
+                                               const char *source_path,
+                                               char *native_object,
+                                               size_t native_object_sz,
+                                               char *symbol,
+                                               size_t symbol_sz) {
+    char *manifest = NULL;
+    if (loadtime_read_text_file(manifest_path, &manifest) != 0)
+        return -1;
+
+    const char *objects_end = NULL;
+    const char *objects = json_array_at(manifest, "objects", &objects_end);
+    if (!objects || !objects_end) {
+        log_line("native-loader manifest has no objects array: %s",
+                 manifest_path);
+        free(manifest);
+        return -1;
+    }
+
+    int matched = 0;
+    const char *cursor = objects;
+    const char *obj_start = NULL;
+    const char *obj_end = NULL;
+    while (json_array_next_obj(&cursor, objects_end, &obj_start, &obj_end)) {
+        size_t len = (size_t)(obj_end - obj_start);
+        char *entry = (char *)malloc(len + 1);
+        if (!entry) {
+            free(manifest);
+            errno = ENOMEM;
+            return -1;
+        }
+        memcpy(entry, obj_start, len);
+        entry[len] = '\0';
+
+        if (!shim_native_loader_manifest_entry_matches(entry, prog,
+                                                       source_path)) {
+            free(entry);
+            continue;
+        }
+
+        char entry_object[SHIM_NATIVE_LOADER_PATH_MAX] = {0};
+        char entry_symbol[SHIM_NATIVE_LOADER_SYMBOL_MAX] = {0};
+        if (!json_get_str(entry, "native_object", entry_object,
+                          sizeof(entry_object)) ||
+            !entry_object[0]) {
+            log_line("native-loader manifest entry for prog=%s lacks native_object",
+                     prog ? prog->name : "");
+            free(entry);
+            free(manifest);
+            return -1;
+        }
+        (void)json_get_str(entry, "symbol", entry_symbol,
+                           sizeof(entry_symbol));
+
+        char full_object[SHIM_NATIVE_LOADER_PATH_MAX] = {0};
+        if (shim_native_loader_manifest_join(manifest_path, entry_object,
+                                             full_object,
+                                             sizeof(full_object)) != 0) {
+            free(entry);
+            free(manifest);
+            return -1;
+        }
+        if (matched &&
+            (strcmp(native_object, full_object) != 0 ||
+             strcmp(symbol, entry_symbol) != 0)) {
+            log_line("native-loader manifest has ambiguous entries for prog=%s",
+                     prog ? prog->name : "");
+            free(entry);
+            free(manifest);
+            return -1;
+        }
+        if (!matched) {
+            if (snprintf(native_object, native_object_sz, "%s", full_object) >=
+                    (int)native_object_sz ||
+                snprintf(symbol, symbol_sz, "%s", entry_symbol) >=
+                    (int)symbol_sz) {
+                free(entry);
+                free(manifest);
+                return -1;
+            }
+        }
+        matched = 1;
+        free(entry);
+    }
+
+    free(manifest);
+    if (!matched)
+        return -1;
+    if (access(native_object, R_OK) != 0) {
+        log_line("native-loader manifest object unreadable prog=%s path=%s errno=%d",
+                 prog ? prog->name : "", native_object, errno);
+        return -1;
+    }
+    return 0;
+}
+
+static int shim_native_loader_resolve_object(const struct prog_entry *prog,
+                                             const char *source_path,
+                                             char *native_object,
+                                             size_t native_object_sz,
+                                             char *symbol,
+                                             size_t symbol_sz) {
+    const char *manifest = getenv("BPFREJIT_SHIM_NATIVE_MANIFEST");
+    if (!manifest || !manifest[0])
+        return -1;
+    return shim_native_loader_resolve_manifest(manifest, prog, source_path,
+                                               native_object,
+                                               native_object_sz, symbol,
+                                               symbol_sz);
 }
 
 static int shim_native_loader_is_libbpf_probe(const struct prog_entry *prog) {
@@ -809,10 +898,13 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
         return -1;
     }
 
-    char native_object[512];
-    if (shim_native_loader_object_path(prog, source_path, native_object,
-                                       sizeof(native_object)) != 0) {
-        log_line("native-loader enabled but no native object for prog=%s",
+    char native_object[SHIM_NATIVE_LOADER_PATH_MAX];
+    char native_symbol[SHIM_NATIVE_LOADER_SYMBOL_MAX];
+    if (shim_native_loader_resolve_object(prog, source_path, native_object,
+                                          sizeof(native_object),
+                                          native_symbol,
+                                          sizeof(native_symbol)) != 0) {
+        log_line("native-loader enabled but no manifest object for prog=%s",
                  prog_name ? prog_name : "");
         shim_native_loader_close_retained_maps(retained_map_fds,
                                                retained_map_fds_n);
@@ -849,14 +941,14 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     struct native_loader_c_result result;
     memset(&result, 0, sizeof(result));
     result.prog_fd = -1;
-    if (load((int)original_fd, native_object, NULL, source_path,
+    if (load((int)original_fd, native_object, native_symbol, source_path,
              prog->expected_attach_type, prog->attach_btf_id,
              prog->prog_btf_kid, prog->attach_btf_obj_kid,
              prog->attach_prog_kid,
              &result) != 0) {
-        log_line("native-loader failed prog=%s object=%s source=%s error=%s",
-                 prog_name ? prog_name : "", native_object,
-                 source_path, result.error);
+        log_line("native-loader failed prog=%s symbol=%s object=%s source=%s error=%s",
+                 prog_name ? prog_name : "", native_symbol,
+                 native_object, source_path, result.error);
         dlclose(handle);
         shim_native_loader_close_retained_maps(result.retained_map_fds,
                                                result.retained_map_fds_n);
@@ -922,9 +1014,9 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     prog->native_loader_map_kids = retained_map_kids;
     prog->native_loader_map_kids_n = retained_map_kids_n;
     log_line("native-loader replaced prog=%s original_fd=%ld native_fd=%d "
-             "object=%s source=%s retained_map_refs=%u",
+             "symbol=%s object=%s source=%s retained_map_refs=%u",
              prog_name ? prog_name : "", original_fd, result.prog_fd,
-             native_object, source_path, retained_map_kids_n);
+             native_symbol, native_object, source_path, retained_map_kids_n);
     dlclose(handle);
     return result.prog_fd;
 }

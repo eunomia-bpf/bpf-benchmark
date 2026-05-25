@@ -70,17 +70,6 @@ struct native_loader_c_result {
     char error[4096];
 };
 
-int native_loader_load_from_fd(int original_prog_fd,
-                               const char *native_object_path,
-                               struct native_loader_c_result *out);
-
-int native_loader_load_from_fd_with_source_path(
-    int original_prog_fd,
-    const char *native_object_path,
-    const char *symbol_name,
-    const char *source_bpf_path,
-    struct native_loader_c_result *out);
-
 int native_loader_load_from_fd_with_source_path_and_attach(
     int original_prog_fd,
     const char *native_object_path,

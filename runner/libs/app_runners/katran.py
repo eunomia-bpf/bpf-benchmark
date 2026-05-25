@@ -16,6 +16,7 @@ from .. import ROOT_DIR, resolve_bpftool_binary, run_command, run_json_command, 
 from ..kernel_modules import kernel_module_is_builtin, load_kernel_module
 from ..workload import WorkloadResult, resolve_workload_tool
 from .base import AppRunner
+from .native_loader_env import native_loader_manifest_env
 from .process_support import ManagedProcessSession
 from .setup_support import repo_artifact_root
 
@@ -144,18 +145,7 @@ def resolve_katran_server_binary(explicit: Path | str | None = None) -> Path:
 
 
 def katran_native_loader_env() -> dict[str, str]:
-    enabled = os.environ.get("BPFREJIT_SHIM_NATIVE_LOADER", "").strip().lower()
-    if enabled not in {"1", "true", "yes", "on"}:
-        return {}
-    explicit = os.environ.get("BPFREJIT_SHIM_NATIVE_OBJECT_DIR", "").strip()
-    if explicit:
-        native_dir = Path(explicit)
-    else:
-        arch = os.environ.get("RUN_TARGET_ARCH", "x86_64").strip() or "x86_64"
-        native_dir = Path(f"/opt/bpf-benchmark/native-bpf/{arch}/katran")
-    if not native_dir.is_dir():
-        raise RuntimeError(f"Katran native object directory not found: {native_dir}")
-    return {"BPFREJIT_SHIM_NATIVE_OBJECT_DIR": str(native_dir)}
+    return native_loader_manifest_env("katran")
 
 
 def ip_binary() -> str:

@@ -36,6 +36,8 @@
 #include <utility>
 #include <vector>
 
+extern "C" char **environ;
+
 namespace {
 
 [[noreturn]] void fail(const std::string &message)
@@ -475,6 +477,18 @@ uint64_t lookup_kernel_map_ptr_by_fd(int map_fd)
 constexpr size_t kRelocRecordBytes = 16;
 constexpr uint32_t kNativeLabRelocHelperCallRax = 1;
 
+struct NativeLabReloc {
+    uint32_t global_offset;
+    uint32_t kind;
+    uint64_t target;
+    size_t bytes;
+};
+
+struct NativeBlobChunk {
+    size_t offset;
+    size_t len;
+};
+
 uint32_t read_u32_le(const uint8_t *p)
 {
     return static_cast<uint32_t>(p[0]) |
@@ -507,6 +521,79 @@ void append_u64_le(std::vector<uint8_t> &out, uint64_t v)
     }
 }
 
+size_t native_lab_reloc_bytes(uint32_t kind)
+{
+    switch (kind) {
+    case kNativeLabRelocHelperCallRax:
+        return 12;
+    default:
+        fail("native_lab reloc has unknown kind " + std::to_string(kind));
+    }
+}
+
+std::vector<NativeLabReloc> parse_native_lab_relocs(const std::vector<uint8_t> &relocs,
+                                                    size_t blob_size)
+{
+    if (relocs.empty()) {
+        return {};
+    }
+    if (relocs.size() % kRelocRecordBytes != 0) {
+        fail("native_lab reloc file size is not a multiple of 16 bytes");
+    }
+
+    std::vector<NativeLabReloc> out;
+    out.reserve(relocs.size() / kRelocRecordBytes);
+    for (size_t off = 0; off < relocs.size(); off += kRelocRecordBytes) {
+        const uint32_t global_offset = read_u32_le(relocs.data() + off);
+        const uint32_t kind = read_u32_le(relocs.data() + off + 4);
+        const uint64_t target = read_u64_le(relocs.data() + off + 8);
+        const size_t bytes = native_lab_reloc_bytes(kind);
+        if (static_cast<size_t>(global_offset) + bytes > blob_size) {
+            fail("native_lab reloc call offset exceeds blob bounds");
+        }
+        out.push_back(NativeLabReloc{
+            global_offset,
+            kind,
+            target,
+            bytes,
+        });
+    }
+    return out;
+}
+
+std::vector<NativeBlobChunk> plan_blob_chunks(size_t blob_size,
+                                              const std::vector<NativeLabReloc> &relocs)
+{
+    if (blob_size == 0) {
+        fail("native blob is empty");
+    }
+
+    std::vector<NativeBlobChunk> chunks;
+    size_t offset = 0;
+    while (offset < blob_size) {
+        size_t end = std::min(offset + kNativeLabTarget.chunk_bytes, blob_size);
+        /* A helper-call reloc slot must fit inside one kinsn emit chunk. */
+        for (const NativeLabReloc &reloc : relocs) {
+            const size_t reloc_start = reloc.global_offset;
+            const size_t reloc_end = reloc_start + reloc.bytes;
+            if (offset < reloc_start && reloc_start < end && end < reloc_end) {
+                end = reloc_start;
+            }
+        }
+        if (end == offset) {
+            fail("native blob chunk planner made no progress at offset " +
+                 std::to_string(offset));
+        }
+        chunks.push_back(NativeBlobChunk{offset, end - offset});
+        offset = end;
+    }
+    if (chunks.size() > kMaxBlobs) {
+        fail("native blob requires " + std::to_string(chunks.size()) +
+             " chunks but module only supports " + std::to_string(kMaxBlobs));
+    }
+    return chunks;
+}
+
 void upload_reloc_chunk(const std::vector<uint8_t> &relocs, uint32_t chunk_id)
 {
 #if defined(__aarch64__)
@@ -530,7 +617,8 @@ void upload_reloc_chunk(const std::vector<uint8_t> &relocs, uint32_t chunk_id)
 #endif
 }
 
-void upload_relocs(const std::vector<uint8_t> &relocs, size_t blob_size, uint32_t chunks)
+void upload_relocs(const std::vector<NativeLabReloc> &relocs,
+                   const std::vector<NativeBlobChunk> &chunks)
 {
     if (relocs.empty()) {
         return;
@@ -539,78 +627,65 @@ void upload_relocs(const std::vector<uint8_t> &relocs, size_t blob_size, uint32_
         fail(std::string("native_lab relocs are not supported by module ")
              + kNativeLabTarget.module_name);
     }
-    if (relocs.size() % kRelocRecordBytes != 0) {
-        fail("native_lab reloc file size is not a multiple of 16 bytes");
-    }
 
-    std::vector<std::vector<uint8_t>> by_chunk(chunks);
-    for (size_t off = 0; off < relocs.size(); off += kRelocRecordBytes) {
-        uint32_t global_offset = read_u32_le(relocs.data() + off);
-        uint32_t kind = read_u32_le(relocs.data() + off + 4);
-        uint64_t target = read_u64_le(relocs.data() + off + 8);
-        size_t reloc_bytes = 0;
-        switch (kind) {
-        case kNativeLabRelocHelperCallRax:
-            reloc_bytes = 12;
+    std::vector<std::vector<uint8_t>> by_chunk(chunks.size());
+    for (const NativeLabReloc &reloc : relocs) {
+        bool assigned = false;
+        for (size_t chunk_id = 0; chunk_id < chunks.size(); chunk_id++) {
+            const NativeBlobChunk &chunk = chunks[chunk_id];
+            const size_t chunk_end = chunk.offset + chunk.len;
+            const size_t reloc_start = reloc.global_offset;
+            const size_t reloc_end = reloc_start + reloc.bytes;
+            if (reloc_start < chunk.offset || reloc_end > chunk_end) {
+                continue;
+            }
+            const uint32_t local_offset =
+                static_cast<uint32_t>(reloc_start - chunk.offset);
+            append_u32_le(by_chunk[chunk_id], local_offset);
+            append_u32_le(by_chunk[chunk_id], reloc.kind);
+            append_u64_le(by_chunk[chunk_id], reloc.target);
+            assigned = true;
             break;
-        default:
-            fail("native_lab reloc has unknown kind " + std::to_string(kind));
         }
-        if (static_cast<size_t>(global_offset) + reloc_bytes > blob_size) {
-            fail("native_lab reloc call offset exceeds blob bounds");
+        if (!assigned) {
+            fail("native_lab reloc at offset " +
+                 std::to_string(reloc.global_offset) +
+                 " crosses planned blob chunks");
         }
-        uint32_t chunk_id = global_offset / kNativeLabTarget.chunk_bytes;
-        uint32_t local_offset = global_offset % kNativeLabTarget.chunk_bytes;
-        if (chunk_id >= chunks) {
-            fail("native_lab reloc chunk exceeds uploaded blob count");
-        }
-        if (local_offset + reloc_bytes > kNativeLabTarget.chunk_bytes) {
-            /* The slot already contains a range-independent absolute
-             * mov/call target. The module can only opportunistically patch
-             * relocs that fit inside one 128B kinsn chunk, so keep the
-             * original bytes for boundary-spanning slots. */
-            continue;
-        }
-        append_u32_le(by_chunk[chunk_id], local_offset);
-        append_u32_le(by_chunk[chunk_id], kind);
-        append_u64_le(by_chunk[chunk_id], target);
     }
 
-    for (uint32_t i = 0; i < chunks; i++) {
+    for (uint32_t i = 0; i < chunks.size(); i++) {
         if (!by_chunk[i].empty()) {
             upload_reloc_chunk(by_chunk[i], i);
         }
     }
 }
 
-uint32_t upload_blob(const std::vector<uint8_t> &blob)
+void upload_blob(const std::vector<uint8_t> &blob,
+                 const std::vector<NativeBlobChunk> &chunks)
 {
     if (blob.empty()) {
         fail("native blob is empty");
     }
-    uint32_t chunks = static_cast<uint32_t>(
-        (blob.size() + kNativeLabTarget.chunk_bytes - 1) / kNativeLabTarget.chunk_bytes);
-    if (chunks > kMaxBlobs) {
-        fail("native blob requires " + std::to_string(chunks) +
-             " chunks but module only supports " + std::to_string(kMaxBlobs));
-    }
-    for (uint32_t i = 0; i < chunks; i++) {
+    for (uint32_t i = 0; i < chunks.size(); i++) {
+        const NativeBlobChunk &chunk = chunks[i];
+        if (chunk.len == 0 || chunk.len > kNativeLabTarget.chunk_bytes ||
+            chunk.offset + chunk.len > blob.size()) {
+            fail("native blob chunk has invalid bounds");
+        }
         char path[128];
         snprintf(path, sizeof(path), kNativeLabTarget.blob_path_fmt, i);
         int fd = open(path, O_WRONLY | O_TRUNC);
         if (fd < 0) {
             fail(std::string("open ") + path + ": " + std::strerror(errno));
         }
-        size_t off = static_cast<size_t>(i) * kNativeLabTarget.chunk_bytes;
-        size_t l = std::min<size_t>(kNativeLabTarget.chunk_bytes, blob.size() - off);
-        ssize_t n = write(fd, blob.data() + off, l);
+        ssize_t n = write(fd, blob.data() + chunk.offset, chunk.len);
         int saved = errno;
         close(fd);
-        if (n != static_cast<ssize_t>(l)) {
+        if (n != static_cast<ssize_t>(chunk.len)) {
             fail(std::string("write ") + path + ": " + std::strerror(saved));
         }
     }
-    return chunks;
 }
 
 bool btf_fd_name_is(int fd, const char *expected_name)
@@ -1927,15 +2002,15 @@ std::vector<uint64_t> load_jited_ksyms(int program_fd, uint32_t count)
 std::string load_prog_btf_symbol_name(int program_fd,
                                       const bpf_prog_info &base_info)
 {
-    char fallback[sizeof(base_info.name) + 1] = {};
-    std::memcpy(fallback, base_info.name, sizeof(base_info.name));
+    char inferred_name[sizeof(base_info.name) + 1] = {};
+    std::memcpy(inferred_name, base_info.name, sizeof(base_info.name));
 
     if (base_info.btf_id == 0 || base_info.nr_func_info == 0 ||
         base_info.func_info_rec_size < sizeof(bpf_func_info)) {
-        if (fallback[0] == '\0') {
+        if (inferred_name[0] == '\0') {
             fail("loaded BPF program has no name and no BTF func_info");
         }
-        return fallback;
+        return inferred_name;
     }
 
     const uint64_t bytes =
@@ -1956,10 +2031,10 @@ std::string load_prog_btf_symbol_name(int program_fd,
         fail("bpf_obj_get_info_by_fd (func_info) failed: " + libbpf_error_string(err));
     }
     if (info.nr_func_info == 0) {
-        if (fallback[0] == '\0') {
+        if (inferred_name[0] == '\0') {
             fail("loaded BPF program has empty func_info and no name");
         }
-        return fallback;
+        return inferred_name;
     }
 
     btf *btf_obj = btf__load_from_kernel_by_id(base_info.btf_id);
@@ -1969,7 +2044,7 @@ std::string load_prog_btf_symbol_name(int program_fd,
              "): " + std::strerror(static_cast<int>(-btf_err)));
     }
 
-    const size_t fallback_len = strnlen(fallback, sizeof(base_info.name));
+    const size_t inferred_len = strnlen(inferred_name, sizeof(base_info.name));
     std::string matched_symbol;
     std::string first_symbol;
     for (uint32_t i = 0; i < info.nr_func_info; ++i) {
@@ -1998,10 +2073,10 @@ std::string load_prog_btf_symbol_name(int program_fd,
             btf__free(btf_obj);
             return entry_symbol;
         }
-        if (fallback_len > 0 && std::strncmp(name, fallback, fallback_len) == 0) {
+        if (inferred_len > 0 && std::strncmp(name, inferred_name, inferred_len) == 0) {
             if (!matched_symbol.empty() && matched_symbol != name) {
                 btf__free(btf_obj);
-                fail("loaded BPF program truncated name '" + std::string(fallback) +
+                fail("loaded BPF program truncated name '" + std::string(inferred_name) +
                      "' matches multiple BTF functions");
             }
             matched_symbol = name;
@@ -2012,17 +2087,17 @@ std::string load_prog_btf_symbol_name(int program_fd,
         btf__free(btf_obj);
         return matched_symbol;
     }
-    if (fallback_len > 0 && info.nr_func_info > 1) {
+    if (inferred_len > 0 && info.nr_func_info > 1) {
         btf__free(btf_obj);
-        fail("loaded BPF program name '" + std::string(fallback) +
+        fail("loaded BPF program name '" + std::string(inferred_name) +
              "' does not match any BTF function");
     }
     if (first_symbol.empty()) {
         btf__free(btf_obj);
-        if (fallback[0] == '\0') {
+        if (inferred_name[0] == '\0') {
             fail("loaded BPF program func_info does not contain a named BTF_KIND_FUNC");
         }
-        return fallback;
+        return inferred_name;
     }
     btf__free(btf_obj);
     return first_symbol;
@@ -2232,6 +2307,18 @@ std::string read_text_file_limited(const std::filesystem::path &path, size_t lim
     return out;
 }
 
+std::vector<char *> environment_without_ld_preload()
+{
+    std::vector<char *> clean_env;
+    for (char **env = environ; env && *env; ++env) {
+        if (std::strncmp(*env, "LD_PRELOAD=", 11) != 0) {
+            clean_env.push_back(*env);
+        }
+    }
+    clean_env.push_back(nullptr);
+    return clean_env;
+}
+
 /* Spawn the native-link binary with the supplied argv. Returns
  * subprocess exit code. */
 int run_subprocess(const std::vector<std::string> &argv,
@@ -2244,6 +2331,7 @@ int run_subprocess(const std::vector<std::string> &argv,
         raw.push_back(const_cast<char *>(s.c_str()));
     }
     raw.push_back(nullptr);
+    std::vector<char *> clean_env = environment_without_ld_preload();
 
     pid_t pid = fork();
     if (pid < 0) return -1;
@@ -2258,8 +2346,8 @@ int run_subprocess(const std::vector<std::string> &argv,
                 }
             }
         }
-        execv(raw[0], raw.data());
-        std::fprintf(stderr, "execv %s failed: %s\n", raw[0], std::strerror(errno));
+        execve(raw[0], raw.data(), clean_env.data());
+        std::fprintf(stderr, "execve %s failed: %s\n", raw[0], std::strerror(errno));
         _exit(127);
     }
     int status = 0;
@@ -3904,8 +3992,12 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
     {
         NativeLabUploadLock upload_lock;
         ensure_debugfs_mounted();
-        uint32_t chunks = upload_blob(linked.blob);
-        upload_relocs(linked.relocs, linked.blob.size(), chunks);
+        std::vector<NativeLabReloc> relocs =
+            parse_native_lab_relocs(linked.relocs, linked.blob.size());
+        std::vector<NativeBlobChunk> chunks =
+            plan_blob_chunks(linked.blob.size(), relocs);
+        upload_blob(linked.blob, chunks);
+        upload_relocs(relocs, chunks);
         upload_end = std::chrono::steady_clock::now();
 
         const auto prog_load_start = std::chrono::steady_clock::now();
@@ -3914,7 +4006,7 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
         out.prog_fd = load_stub_prog(
             stub_btf.kfunc_btf_id,
             mod_btf_fd,
-            chunks,
+            static_cast<uint32_t>(chunks.size()),
             linked.callee_saved_mask,
             prog_type,
             attrs,
@@ -4015,7 +4107,6 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     if (options.native_object_path.empty()) {
         fail("native_loader: missing native_object_path");
     }
-
     LoadedProgram out{};
     const auto companion_load_start = std::chrono::steady_clock::now();
     const bpf_prog_info prog_info = load_prog_info(options.original_prog_fd);
@@ -4141,26 +4232,6 @@ void transfer_loaded_program_to_c_result(native_loader::LoadedProgram &loaded,
 
 } // namespace
 
-extern "C" int native_loader_load_from_fd_with_source_path(
-    int original_prog_fd,
-    const char *native_object_path,
-    const char *symbol_name,
-    const char *source_bpf_path,
-    struct native_loader_c_result *out)
-{
-    return native_loader_load_from_fd_with_source_path_and_attach(
-        original_prog_fd,
-        native_object_path,
-        symbol_name,
-        source_bpf_path,
-        0,
-        0,
-        0,
-        0,
-        0,
-        out);
-}
-
 extern "C" int native_loader_load_from_fd_with_source_path_and_attach(
     int original_prog_fd,
     const char *native_object_path,
@@ -4183,7 +4254,7 @@ extern "C" int native_loader_load_from_fd_with_source_path_and_attach(
         !source_bpf_path || !source_bpf_path[0]) {
         if (out) {
             std::snprintf(out->error, sizeof(out->error),
-                          "native_loader_load_from_fd_with_source_path requires fd, native object, and source BPF path");
+                          "native_loader_load_from_fd_with_source_path_and_attach requires fd, native object, and source BPF path");
         }
         errno = EINVAL;
         return -1;
@@ -4202,47 +4273,6 @@ extern "C" int native_loader_load_from_fd_with_source_path_and_attach(
         options.prog_btf_id = prog_btf_id;
         options.attach_btf_obj_id = attach_btf_obj_id;
         options.attach_prog_id = attach_prog_id;
-        native_loader::LoadedProgram loaded = native_loader::load_from_fd(options);
-        transfer_loaded_program_to_c_result(loaded, out);
-        return 0;
-    } catch (const std::exception &e) {
-        if (out) {
-            std::snprintf(out->error, sizeof(out->error), "%s", e.what());
-        }
-        errno = EINVAL;
-        return -1;
-    } catch (...) {
-        if (out) {
-            std::snprintf(out->error, sizeof(out->error), "unknown native-loader error");
-        }
-        errno = EINVAL;
-        return -1;
-    }
-}
-
-extern "C" int native_loader_load_from_fd(int original_prog_fd,
-                                           const char *native_object_path,
-                                           struct native_loader_c_result *out)
-{
-    if (out) {
-        out->prog_fd = -1;
-        out->retained_map_fds = nullptr;
-        out->retained_map_fds_n = 0;
-        out->error[0] = '\0';
-    }
-    if (original_prog_fd < 0 || !native_object_path || !native_object_path[0]) {
-        if (out) {
-            std::snprintf(out->error, sizeof(out->error),
-                          "native_loader_load_from_fd requires fd and native object");
-        }
-        errno = EINVAL;
-        return -1;
-    }
-
-    try {
-        native_loader::FdLoadOptions options{};
-        options.original_prog_fd = original_prog_fd;
-        options.native_object_path = native_object_path;
         native_loader::LoadedProgram loaded = native_loader::load_from_fd(options);
         transfer_loaded_program_to_c_result(loaded, out);
         return 0;

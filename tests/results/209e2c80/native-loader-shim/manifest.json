@@ -1,0 +1,16 @@
+{
+  "app": "native-loader-smoke",
+  "objects": [
+    {
+      "native_object": "/opt/bpf-benchmark/stage2-programs/x86_64/multi_prog_smoke.native.o",
+      "program": "multi_prog_firs",
+      "symbol": "multi_prog_first"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/stage2-programs/x86_64/multi_prog_smoke.native.o",
+      "program": "multi_prog_seco",
+      "symbol": "multi_prog_second"
+    }
+  ],
+  "version": 1
+}

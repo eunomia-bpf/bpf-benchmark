@@ -23,6 +23,7 @@ from ..benchmark_net import (
 )
 from ..workload import WorkloadResult, run_named_workload
 from .etcd_support import LocalEtcdSession
+from .native_loader_env import native_loader_manifest_env
 from .process_support import NativeProcessRunner
 from .setup_support import optional_repo_artifact_path
 
@@ -339,18 +340,8 @@ class CiliumRunner(NativeProcessRunner):
 
 
     def _command_env(self) -> Mapping[str, str] | None:
-        enabled = os.environ.get("BPFREJIT_SHIM_NATIVE_LOADER", "").strip().lower()
-        if enabled not in {"1", "true", "yes", "on"}:
-            return None
-        explicit = os.environ.get("BPFREJIT_SHIM_NATIVE_OBJECT_DIR", "").strip()
-        if explicit:
-            native_dir = Path(explicit)
-        else:
-            arch = os.environ.get("RUN_TARGET_ARCH", "x86_64").strip() or "x86_64"
-            native_dir = Path(f"/opt/bpf-benchmark/native-bpf/{arch}/cilium")
-        if not native_dir.is_dir():
-            raise RuntimeError(f"cilium native object directory not found: {native_dir}")
-        return {"BPFREJIT_SHIM_NATIVE_OBJECT_DIR": str(native_dir)}
+        env = native_loader_manifest_env("cilium")
+        return env or None
 
     def _api_socket_path(self) -> Path:
         if self._state_dir is None:
