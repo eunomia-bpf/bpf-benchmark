@@ -1844,6 +1844,11 @@ loader:
 C wrappers that accepted only fd/object or fd/object/source-path were removed;
 micro runner uses the C++ companion-object entry point directly.
 
+A later cleanup removed the shim's hardcoded native JIT hex dump path. The
+remaining post-load logging records BPF/JIT metadata for the original and
+native fds, but no longer carries a fixed per-program dump list or exported
+`BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT` environment knob.
+
 Validation after this cleanup:
 
 - `python3 -m py_compile` passed for the changed Python app-runner and manifest
@@ -1857,3 +1862,10 @@ Validation after this cleanup:
 - `TEST_MODE=native-loader-smoke TIMEOUT=1200 make test` passed with run token
   `209e2c80`; the containerized shim loaded the manifest and replaced both
   programs from `multi_prog_tool`.
+- After deleting the fixed native JIT dump path, `TEST_MODE=native-loader-smoke
+  TIMEOUT=1200 make test` passed again with run token `95a792f5`.
+- After removing the stale JIT dump env forwarding, `TEST_MODE=native-loader-smoke
+  TIMEOUT=1200 make test` passed again with run token `4cac2d0a`.
+- After the final removal of the shim JIT dump helper/call and suite env
+  forwarding, `TEST_MODE=native-loader-smoke TIMEOUT=1200 make test` passed
+  again with run token `65fd2068`.

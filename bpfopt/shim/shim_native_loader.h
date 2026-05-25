@@ -524,24 +524,31 @@ static void shim_native_loader_log_jit_info(const char *label, int fd) {
              (unsigned long long)ksyms[1]);
 }
 
-static void shim_native_loader_log_jit_dump(const char *label, int fd,
-                                            uint32_t max_dump) {
-    if (fd < 0)
-        return;
-    if (max_dump == 0)
-        return;
+static size_t shim_native_loader_jit_dump_limit(void) {
+    const char *raw = getenv("BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT");
+    if (!raw || !raw[0])
+        return 0;
 
-    unsigned char *bytes = (unsigned char *)calloc(max_dump, 1);
-    if (!bytes) {
-        log_line("native-loader jit-dump %s fd=%d oom bytes=%u",
-                 label ? label : "", fd, max_dump);
-        return;
+    errno = 0;
+    char *end = NULL;
+    unsigned long long value = strtoull(raw, &end, 10);
+    if (errno != 0 || end == raw || (end && *end != '\0')) {
+        log_line("native-loader jit-dump invalid-limit value=%s",
+                 raw ? raw : "");
+        return 0;
     }
+    if (value > SIZE_MAX)
+        return SIZE_MAX;
+    return (size_t)value;
+}
+
+static void shim_native_loader_log_jit_dump(const char *label, int fd) {
+    size_t limit = shim_native_loader_jit_dump_limit();
+    if (fd < 0 || limit == 0)
+        return;
 
     struct bpf_prog_info info;
     memset(&info, 0, sizeof(info));
-    info.jited_prog_len = max_dump;
-    info.jited_prog_insns = (uintptr_t)bytes;
 
     union bpf_attr attr;
     memset(&attr, 0, sizeof(attr));
@@ -553,29 +560,60 @@ static void shim_native_loader_log_jit_dump(const char *label, int fd,
     if (r < 0) {
         log_line("native-loader jit-dump %s fd=%d errno=%d",
                  label ? label : "", fd, errno);
-        free(bytes);
+        return;
+    }
+    if (info.jited_prog_len == 0) {
+        log_line("native-loader jit-dump %s fd=%d len=0 dumped=0 bytes=",
+                 label ? label : "", fd);
         return;
     }
 
-    uint32_t n = info.jited_prog_len;
-    if (n > max_dump)
-        n = max_dump;
+    uint32_t jited_len = info.jited_prog_len;
+    uint8_t *insns = (uint8_t *)malloc(jited_len);
+    if (!insns) {
+        log_line("native-loader jit-dump %s fd=%d len=%u errno=%d",
+                 label ? label : "", fd, jited_len, errno ? errno : ENOMEM);
+        return;
+    }
 
-    char *hex = (char *)calloc((size_t)n * 2 + 1, 1);
+    memset(&info, 0, sizeof(info));
+    info.jited_prog_len = jited_len;
+    info.jited_prog_insns = (uintptr_t)insns;
+    memset(&attr, 0, sizeof(attr));
+    attr.info.bpf_fd = (uint32_t)fd;
+    attr.info.info_len = sizeof(info);
+    attr.info.info = (uintptr_t)&info;
+
+    r = real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &attr, sizeof(attr));
+    if (r < 0) {
+        log_line("native-loader jit-dump %s fd=%d len=%u errno=%d",
+                 label ? label : "", fd, jited_len, errno);
+        free(insns);
+        return;
+    }
+
+    size_t dumped = info.jited_prog_len;
+    if (dumped > jited_len)
+        dumped = jited_len;
+    if (dumped > limit)
+        dumped = limit;
+
+    char *hex = (char *)malloc(dumped * 2 + 1);
     if (!hex) {
-        log_line("native-loader jit-dump %s fd=%d hex-oom bytes=%u",
-                 label ? label : "", fd, n);
-        free(bytes);
+        log_line("native-loader jit-dump %s fd=%d len=%u dumped=%zu errno=%d",
+                 label ? label : "", fd, info.jited_prog_len, dumped,
+                 errno ? errno : ENOMEM);
+        free(insns);
         return;
     }
-    for (uint32_t i = 0; i < n; i++)
-        snprintf(hex + i * 2, 3, "%02x", bytes[i]);
-    hex[n * 2] = '\0';
+    for (size_t i = 0; i < dumped; i++)
+        snprintf(hex + i * 2, 3, "%02x", insns[i]);
+    hex[dumped * 2] = '\0';
 
-    log_line("native-loader jit-dump %s fd=%d len=%u dumped=%u bytes=%s",
-             label ? label : "", fd, info.jited_prog_len, n, hex);
+    log_line("native-loader jit-dump %s fd=%d len=%u dumped=%zu bytes=%s",
+             label ? label : "", fd, info.jited_prog_len, dumped, hex);
     free(hex);
-    free(bytes);
+    free(insns);
 }
 
 static void shim_native_loader_close_retained_maps(int *fds, uint32_t n) {
@@ -984,12 +1022,8 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
 
     shim_native_loader_log_jit_info("original", (int)original_fd);
     shim_native_loader_log_jit_info("native", result.prog_fd);
-    uint32_t dump_limit = 192;
-    if (strcmp(prog_name ? prog_name : "", "native_tracer_e") == 0 ||
-        strcmp(prog_name ? prog_name : "", "custom__generic") == 0) {
-        dump_limit = 8192;
-    }
-    shim_native_loader_log_jit_dump("native", result.prog_fd, dump_limit);
+    shim_native_loader_log_jit_dump("original", (int)original_fd);
+    shim_native_loader_log_jit_dump("native", result.prog_fd);
     uint32_t *retained_map_kids = NULL;
     uint32_t retained_map_kids_n = 0;
     if (native_loader_map_refs_take_owned_fds(retained_map_fds,
