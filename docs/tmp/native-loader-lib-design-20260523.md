@@ -1872,13 +1872,15 @@ Validation after this cleanup:
 
 ### 2026-05-25 x86 helper-call rel32 fail-fast validation
 
-The x86 runtime helper-call path now keeps the 12-byte slot ABI:
-`call rel32` plus the 7-byte `nop` padding. `native-link` emits that exact
-placeholder and records `NATIVE_LAB_RELOC_HELPER_CALL_REL32`; the x86
-native-lab module validates the full slot, patches only the disp32, and fails
-the load with `-ERANGE`/`-EINVAL` if the helper is out of range or the slot is
-malformed. There is no runtime `call *%rax` fallback in
-`native-link`, `libnativeloader`, or `bpf_x86_native_lab`.
+The x86 runtime helper-call path now keeps only a 5-byte `call rel32` slot.
+`native-link` emits `e8 00 00 00 00` and records
+`NATIVE_LAB_RELOC_HELPER_CALL_REL32`; the x86 native-lab module validates that
+5-byte slot, patches only the disp32, and fails the load with
+`-ERANGE`/`-EINVAL` if the helper is out of range or the slot is malformed.
+There is no runtime `call *%rax` fallback in `native-link`,
+`libnativeloader`, or `bpf_x86_native_lab`. The earlier 12-byte
+`call rel32; nop7` slot was legacy padding from the removed indirect-call
+fallback and has been deleted.
 
 This cleanup also removed the unnamed `--lookup-site` fallback in x86
 map-site selection. If a native object has a map name, it must match that
@@ -1896,15 +1898,43 @@ Validation:
   passed in `micro/results/x86_kvm_micro_20260525_200806_839921`.
   `native_kernel` returned `result=0`, `retval=2`, `exec_ns=68`; `kernel`
   returned `result=0`, `retval=2`, `exec_ns=108`. The final native JIT dump
-  contains one `e8 rel32` helper call followed by the 7-byte nop slot and
-  zero `ff d0` (`call *%rax`) sequences.
+  contains one `e8 rel32` helper call followed by the legacy 7-byte nop slot
+  and zero `ff d0` (`call *%rax`) sequences. This was the last validation
+  before the slot was shrunk to 5 bytes.
+- Focused micro rerun after deleting the legacy helper-slot padding:
+  `SUITE=micro/config/micro_stage2.yaml RUNTIMES="native_kernel kernel" BENCH=helper_only_uid_gid SAMPLES=1 WARMUPS=0 INNER_REPEAT=10 TIMEOUT=1200 make micro`
+  passed in `micro/results/x86_kvm_micro_20260525_222455_423461`.
+  `native_kernel` returned `result=0`, `retval=2`, `exec_ns=71`; `kernel`
+  returned `result=0`, `retval=2`, `exec_ns=48`. The final native JIT dump
+  contains exactly one helper `e8 rel32` call; the next bytes are the next
+  native instruction (`48 89 03`), with zero legacy helper-slot `nop7`
+  padding and zero `ff d0` (`call *%rax`) sequences.
+- First bcc/set corpus rerun after shrinking the slot failed in
+  `corpus/results/x86_kvm_corpus_20260525_223203_292653`: shim/native-loader
+  reported `native_lab reloc call offset exceeds blob bounds` before
+  replacing several bcc programs. Root cause was a stale
+  `libnativeloader` copy of the helper-call slot width
+  (`kNativeLabRelocBytes = 12`) used for pre-upload bounds checks and chunk
+  planning. The linker and kernel module already used 5-byte slots, so the
+  library was rejecting valid 5-byte helper-call relocs near blob/chunk ends.
+  Fixed by changing the loader-side reloc width to 5 bytes.
 - Focused corpus bcc/set smoke:
   `BPFREJIT_CORPUS_APPS=bcc/set BPFREJIT_SHIM_NATIVE_LOADER=1 BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT=512 SKIP_REJIT=norejit SAMPLES=1 WARMUPS=0 WORKLOAD_DURATION=5 KEEP_WORKDIRS=1 TIMEOUT=1800 make corpus`
   passed in `corpus/results/x86_kvm_corpus_20260525_201251_658504`.
   The app status is `ok`, with 25 baseline programs and 25 post programs.
   Both shim logs report 25 native replacements, 25 native JIT dump prefixes,
   zero native-loader/rel32 failures, zero `ff d0` sequences in native dump
-  prefixes, and 120 observed `e8 rel32; nop7` helper-call slots per phase.
+  prefixes, and 120 observed legacy `e8 rel32; nop7` helper-call slots per
+  phase. This was the last corpus smoke before the slot was shrunk to 5 bytes.
+- Focused corpus bcc/set smoke after fixing the loader-side slot width:
+  `BPFREJIT_CORPUS_APPS=bcc/set BPFREJIT_SHIM_NATIVE_LOADER=1 BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT=512 SKIP_REJIT=norejit SAMPLES=1 WORKLOAD_DURATION=5 KEEP_WORKDIRS=1 TIMEOUT=1800 make corpus`
+  passed in `corpus/results/x86_kvm_corpus_20260525_223827_165112`.
+  The app status is `ok`, with 25 native replacements in baseline and 25 in
+  post. Both shim logs report zero `native-loader failed`, zero
+  `reloc call offset exceeds blob bounds`, zero `ff d0`, and zero legacy
+  helper-slot `0f 1f 80 00 00 00 00` padding. The native JIT dump prefixes
+  contain 147 observed `e8` rel32 call opcodes per phase, and no
+  `e8 rel32; nop7` helper-call slots.
 
 The proof/source/native input objects may still contain indirect-looking
 helper-call idioms before final linking. The authoritative runtime check is

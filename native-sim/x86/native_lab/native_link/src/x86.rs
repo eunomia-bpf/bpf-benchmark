@@ -16,7 +16,7 @@ const X86_BPF_PROG_BPF_FUNC_OFFSET_KEY: &str = "__native_x86_bpf_prog_bpf_func_o
 const X86_TAIL_CALL_OFFSET_KEY: &str = "__native_x86_tail_call_offset";
 const X86_JMP_END_PLACEHOLDER_TARGET: u64 = 0x4000_0000;
 const NATIVE_LAB_RELOC_HELPER_CALL_REL32: u32 = 1;
-const X86_HELPER_CALL_REL32_SLOT: [u8; 12] = [0xE8, 0, 0, 0, 0, 0x0F, 0x1F, 0x80, 0, 0, 0, 0];
+const X86_HELPER_CALL_REL32_SLOT: [u8; 5] = [0xE8, 0, 0, 0, 0];
 type SymbolKey = (object::SectionIndex, u64);
 type LocalSiteKey = (object::SectionIndex, u64, u64);
 
@@ -3957,6 +3957,15 @@ mod tests {
             out.push(insn);
         }
         Ok(out)
+    }
+
+    #[test]
+    fn helper_call_reloc_slot_encodes_only_call_rel32() -> Result<()> {
+        let insn = build_x86_helper_call_rel32_slot()?;
+        let encoded = encode_x86_local_block("helper_slot", 5, &[insn], &[0])?;
+
+        assert_eq!(encoded.code_buffer, [0xE8, 0, 0, 0, 0]);
+        Ok(())
     }
 
     #[test]

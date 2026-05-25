@@ -200,9 +200,8 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 					&blobs[blob_id].relocs[i];
 				switch (r->kind) {
 				case NATIVE_LAB_RELOC_HELPER_CALL_REL32: {
-					static const u8 rel32_slot[12] = {
-						0xe8, 0, 0, 0, 0,
-						0x0f, 0x1f, 0x80, 0, 0, 0, 0
+					static const u8 rel32_slot[5] = {
+						0xe8, 0, 0, 0, 0
 					};
 					u64 slot_va;
 					u64 rip_after;

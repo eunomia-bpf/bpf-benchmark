@@ -260,7 +260,7 @@ python3 native-sim/x86/native_lab/tests/analyze.py
   `native-link --oracle-*`. Kernel-mode native-link emits relocatable
   `movabs rax, helper; call *rax` slots, while `bpf_x86_native_lab`
   patches the helper address after the blob lands in the final JIT image
-  and rewrites to `call rel32; nop7` only when the real address is in
+  and rewrites to `call rel32` only when the real address is in
   range. Correctness smoke runs passed for
   `helper_chain_simple`, `map_percpu_hash_counter`, and
   `stats_mixed_helpers` in
@@ -476,7 +476,7 @@ python3 native-sim/x86/native_lab/tests/analyze.py
   and copying code, so the computed rel32 displacement did not match the
   final executable address. The kinsn x86 emitter now receives the final
   JIT IP through the existing `emit_x86` callback and rewrites
-  `movabs rax, target; call *rax` slots to `call rel32; nop7` only when
+  `movabs rax, target; call *rax` slots to `call rel32` only when
   the final target is reachable. ARRAY/PERCPU_ARRAY map updates are
   late-inlined by native-link but still appear as external calls in the
   companion JIT oracle, so native-link consumes those oracle targets
@@ -548,19 +548,30 @@ python3 native-sim/x86/native_lab/tests/analyze.py
   It is *not* part of `expected_kinsn_modules()` and the production
   benchmark runner doesn't insmod it. Smoke scripts insmod it before
   use.
-- **Current helper-call runtime ABI is fail-fast `call rel32; nop7`.**
+- **Current helper-call runtime ABI is fail-fast `call rel32`.**
   Earlier notes in this file mention `movabs rax, helper; call *rax`
-  helper-call slots as historical input/proof experiments. The current
-  runtime x86 path keeps a 12-byte placeholder (`e8 00 00 00 00 0f 1f 80
-  00 00 00 00`) plus a side-band `NATIVE_LAB_RELOC_HELPER_CALL_REL32`
-  record. The module validates that full slot in final JIT memory, patches
-  only the `disp32`, and fails the native load with `-ERANGE`/`-EINVAL`
-  instead of falling back to an indirect helper call. A 2026-05-25 focused
-  run, `micro/results/x86_kvm_micro_20260525_200806_839921`, showed the
-  final native JIT as one `e8 rel32` helper call followed by the 7-byte nop
-  and zero `ff d0` sequences. The matching bcc/set corpus smoke,
-  `corpus/results/x86_kvm_corpus_20260525_201251_658504`, replaced 25
-  programs in each phase with zero native-loader failures and zero `ff d0`
+  helper-call slots and `call rel32; nop7` slots as historical input/proof
+  experiments. The current runtime x86 path keeps a 5-byte placeholder
+  (`e8 00 00 00 00`) plus a side-band `NATIVE_LAB_RELOC_HELPER_CALL_REL32`
+  record. The module validates that slot in final JIT memory, patches only
+  the `disp32`, and fails the native load with `-ERANGE`/`-EINVAL` instead
+  of falling back to an indirect helper call. A 2026-05-25 focused run,
+  `micro/results/x86_kvm_micro_20260525_200806_839921`, was the last
+  validation before shrinking the slot and showed zero `ff d0` sequences.
+  After shrinking the slot, the focused rerun
+  `micro/results/x86_kvm_micro_20260525_222455_423461` passed with matching
+  `result=0`/`retval=2`; the final native JIT dump contains a single
+  5-byte `e8 rel32` helper call followed immediately by the next native
+  instruction, with zero helper-slot `nop7` padding and zero `ff d0`
+  sequences.
+  A first bcc/set corpus rerun after the shrink exposed one stale
+  `libnativeloader` bounds-check constant that still treated helper-call
+  relocs as 12 bytes; that is now 5 bytes as well, so linker, loader, and
+  module agree on the runtime ABI.
+  The matching bcc/set corpus smoke after that loader fix,
+  `corpus/results/x86_kvm_corpus_20260525_223827_165112`, replaced 25
+  programs in each phase with zero native-loader failures, zero stale
+  reloc-bounds failures, zero `ff d0`, and zero helper-slot `nop7`
   sequences in the native JIT dump prefixes.
 
 ## Latest results (`results/all_micro.jsonl`)

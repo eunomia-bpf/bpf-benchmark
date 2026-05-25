@@ -392,11 +392,14 @@ constexpr const char *kX86TailCallOffsetKey = "__native_x86_tail_call_offset";
 constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v35";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v36";
 constexpr const char *kKallsymsCachePath = "/tmp/native_kernel_kallsyms.tsv";
 constexpr const char *kKallsymsCacheVersion = "native-kallsyms-cache-v3";
 constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
 constexpr const char *kNativeStubBtfCacheVersion = "native-stub-btf-cache-v1";
+constexpr const char *kHtabLookupElemSymbol = "__htab_map_lookup_elem";
+constexpr const char *kHtabOfMapLookupElemSymbol = "htab_of_map_lookup_elem";
+constexpr const char *kArrayOfMapLookupElemSymbol = "array_of_map_lookup_elem";
 constexpr int kLibbpfCoreBadRelocPoison = 195896080; // 0xbad2310
 
 #ifndef BPF_PSEUDO_KINSN_SIDECAR
@@ -488,7 +491,7 @@ uint64_t lookup_kernel_map_value_ptr_by_fd(int map_fd)
 }
 
 constexpr size_t kRelocRecordBytes = 16;
-constexpr size_t kNativeLabRelocBytes = 12;
+constexpr size_t kNativeLabRelocBytes = 5;
 constexpr uint32_t kNativeLabRelocHelperCallRel32 = 1;
 
 struct NativeLabReloc {
@@ -1478,6 +1481,9 @@ const std::unordered_map<std::string, uint64_t> &kallsyms_table()
     for (const char *symbol : kRuntimeCallSymbols) {
         wanted.push_back(symbol);
     }
+    wanted.push_back(kHtabLookupElemSymbol);
+    wanted.push_back(kHtabOfMapLookupElemSymbol);
+    wanted.push_back(kArrayOfMapLookupElemSymbol);
     const size_t wanted_count = wanted.size();
 
     const std::string boot_id =
@@ -1542,9 +1548,30 @@ uint64_t helper_kernel_addr(int helper_id)
 
 uint64_t htab_lookup_elem_kernel_addr()
 {
-    uint64_t addr = kallsyms_lookup("__htab_map_lookup_elem");
+    uint64_t addr = kallsyms_lookup(kHtabLookupElemSymbol);
     if (addr == 0) {
-        fail("native_kernel: __htab_map_lookup_elem is missing from /proc/kallsyms");
+        fail(std::string("native_kernel: ") + kHtabLookupElemSymbol +
+             " is missing from /proc/kallsyms");
+    }
+    return addr;
+}
+
+uint64_t htab_of_map_lookup_elem_kernel_addr()
+{
+    uint64_t addr = kallsyms_lookup(kHtabOfMapLookupElemSymbol);
+    if (addr == 0) {
+        fail(std::string("native_kernel: ") + kHtabOfMapLookupElemSymbol +
+             " is missing from /proc/kallsyms");
+    }
+    return addr;
+}
+
+uint64_t array_of_map_lookup_elem_kernel_addr()
+{
+    uint64_t addr = kallsyms_lookup(kArrayOfMapLookupElemSymbol);
+    if (addr == 0) {
+        fail(std::string("native_kernel: ") + kArrayOfMapLookupElemSymbol +
+             " is missing from /proc/kallsyms");
     }
     return addr;
 }
@@ -2936,6 +2963,122 @@ const MapMeta *find_map_meta_by_loaded_name(const CompanionLoad &load,
     return match;
 }
 
+bool has_native_map_shape(const NativeMapShape &shape)
+{
+    return shape.type >= 0;
+}
+
+NativeMapShape map_shape_from_meta(const MapMeta &meta)
+{
+    return NativeMapShape{
+        meta.type,
+        meta.key_size,
+        meta.value_size,
+        meta.max_entries,
+    };
+}
+
+NativeMapShape inner_map_shape_for_outer_map(const MapMeta &meta)
+{
+    if (meta.type != BPF_MAP_TYPE_HASH_OF_MAPS &&
+        meta.type != BPF_MAP_TYPE_ARRAY_OF_MAPS) {
+        return NativeMapShape{};
+    }
+
+    /* bpf_map_info in this kernel fork does not expose inner_map_id, so
+     * preserve verifier-equivalent lowering for the hot Tetragon policy
+     * map-in-map shapes by matching the loaded outer map shape. Map names in
+     * bpf_map_info are kernel-truncated, so key/max_entries disambiguate the
+     * two policy-filter outers. */
+    if (starts_with(meta.name, "policy_filter_") &&
+        meta.type == BPF_MAP_TYPE_HASH_OF_MAPS &&
+        meta.value_size == 4) {
+        if (meta.key_size == 4 && meta.max_entries == 128) {
+            return NativeMapShape{BPF_MAP_TYPE_HASH, 8, 1, 1};
+        }
+        if (meta.key_size == 8 && meta.max_entries == 1024) {
+            return NativeMapShape{BPF_MAP_TYPE_HASH, 4, 1, 128};
+        }
+    }
+
+    return NativeMapShape{};
+}
+
+bool configure_lookup_site_for_shape(CompanionLoad::LookupSite &site,
+                                     const NativeMapShape &shape,
+                                     const BpfArrayOffsets &array_offsets,
+                                     const BpfHtabOffsets &htab_offsets,
+                                     uint64_t this_cpu_off_addr)
+{
+    if (!has_native_map_shape(shape)) {
+        return false;
+    }
+
+    int t = shape.type;
+    if (t == BPF_MAP_TYPE_ARRAY) {
+        site.kind = CompanionLoad::LookupSite::Kind::Array;
+        site.max_entries = shape.max_entries;
+        site.elem_size = (shape.value_size + 7u) & ~7u;
+        site.index_mask = roundup_pow2_mask(shape.max_entries);
+        site.value_offset = array_offsets.value;
+        return true;
+    }
+    if (t == BPF_MAP_TYPE_PERCPU_ARRAY) {
+#if defined(__x86_64__)
+        if (this_cpu_off_addr == 0) {
+            fail("this_cpu_off not in /proc/kallsyms");
+        }
+#endif
+        site.kind = CompanionLoad::LookupSite::Kind::PerCpuArray;
+        site.max_entries = shape.max_entries;
+        site.elem_size = sizeof(void *);
+        site.index_mask = roundup_pow2_mask(shape.max_entries);
+        site.value_offset = array_offsets.pptrs;
+        site.percpu_base_addr = this_cpu_off_addr;
+        return true;
+    }
+    if (t == BPF_MAP_TYPE_HASH) {
+        uint32_t rounded = (shape.key_size + 7) & ~7u;
+        site.target_addr = htab_lookup_elem_kernel_addr();
+        site.kind = CompanionLoad::LookupSite::Kind::Hash;
+        site.key_offset = htab_offsets.key + rounded;
+        return true;
+    }
+    if (t == BPF_MAP_TYPE_LRU_HASH) {
+        uint32_t rounded = (shape.key_size + 7) & ~7u;
+        site.target_addr = htab_lookup_elem_kernel_addr();
+        site.kind = CompanionLoad::LookupSite::Kind::LruHash;
+        site.key_offset = htab_offsets.key + rounded;
+        site.value_offset = htab_offsets.lru_ref;
+        return true;
+    }
+    if (t == BPF_MAP_TYPE_PERCPU_HASH) {
+        uint32_t rounded = (shape.key_size + 7) & ~7u;
+        site.target_addr = htab_lookup_elem_kernel_addr();
+        site.kind = CompanionLoad::LookupSite::Kind::PerCpuHash;
+        site.key_offset = htab_offsets.key + rounded;
+#if defined(__x86_64__)
+        if (this_cpu_off_addr == 0) {
+            fail("this_cpu_off not in /proc/kallsyms");
+        }
+#endif
+        site.percpu_base_addr = this_cpu_off_addr;
+        return true;
+    }
+    if (t == BPF_MAP_TYPE_HASH_OF_MAPS) {
+        site.kind = CompanionLoad::LookupSite::Kind::Call;
+        site.target_addr = htab_of_map_lookup_elem_kernel_addr();
+        return true;
+    }
+    if (t == BPF_MAP_TYPE_ARRAY_OF_MAPS) {
+        site.kind = CompanionLoad::LookupSite::Kind::Call;
+        site.target_addr = array_of_map_lookup_elem_kernel_addr();
+        return true;
+    }
+
+    return false;
+}
+
 CompanionLoad::LookupSite lookup_site_for_map_meta(const MapMeta &meta,
                                                    const BpfArrayOffsets &array_offsets,
                                                    const BpfHtabOffsets &htab_offsets,
@@ -2953,48 +3096,9 @@ CompanionLoad::LookupSite lookup_site_for_map_meta(const MapMeta &meta,
     };
     site.map_name = meta.name;
 
-    int t = meta.type;
-    if (t == BPF_MAP_TYPE_ARRAY) {
-        site.kind = CompanionLoad::LookupSite::Kind::Array;
-        site.max_entries = meta.max_entries;
-        site.elem_size = (meta.value_size + 7u) & ~7u;
-        site.index_mask = roundup_pow2_mask(meta.max_entries);
-        site.value_offset = array_offsets.value;
-    } else if (t == BPF_MAP_TYPE_PERCPU_ARRAY) {
-#if defined(__x86_64__)
-        if (this_cpu_off_addr == 0) {
-            fail("this_cpu_off not in /proc/kallsyms");
-        }
-#endif
-        site.kind = CompanionLoad::LookupSite::Kind::PerCpuArray;
-        site.max_entries = meta.max_entries;
-        site.elem_size = sizeof(void *);
-        site.index_mask = roundup_pow2_mask(meta.max_entries);
-        site.value_offset = array_offsets.pptrs;
-        site.percpu_base_addr = this_cpu_off_addr;
-    } else if (t == BPF_MAP_TYPE_HASH) {
-        uint32_t rounded = (meta.key_size + 7) & ~7u;
-        site.target_addr = htab_lookup_elem_kernel_addr();
-        site.kind = CompanionLoad::LookupSite::Kind::Hash;
-        site.key_offset = htab_offsets.key + rounded;
-    } else if (t == BPF_MAP_TYPE_LRU_HASH) {
-        uint32_t rounded = (meta.key_size + 7) & ~7u;
-        site.target_addr = htab_lookup_elem_kernel_addr();
-        site.kind = CompanionLoad::LookupSite::Kind::LruHash;
-        site.key_offset = htab_offsets.key + rounded;
-        site.value_offset = htab_offsets.lru_ref;
-    } else if (t == BPF_MAP_TYPE_PERCPU_HASH) {
-        uint32_t rounded = (meta.key_size + 7) & ~7u;
-        site.target_addr = htab_lookup_elem_kernel_addr();
-        site.kind = CompanionLoad::LookupSite::Kind::PerCpuHash;
-        site.key_offset = htab_offsets.key + rounded;
-#if defined(__x86_64__)
-        if (this_cpu_off_addr == 0) {
-            fail("this_cpu_off not in /proc/kallsyms");
-        }
-#endif
-        site.percpu_base_addr = this_cpu_off_addr;
-    }
+    configure_lookup_site_for_shape(site, map_shape_from_meta(meta),
+                                    array_offsets, htab_offsets,
+                                    this_cpu_off_addr);
     return site;
 }
 
@@ -3113,16 +3217,27 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
 struct SourceHelperCall {
     int helper_id;
     int map_fd;
+    NativeMapShape dynamic_map_shape;
+};
+
+struct SourceMapBinding {
+    int map_fd = -1;
+    NativeMapShape dynamic_map_shape;
 };
 
 /* Walk a BPF program's original (pre-verifier) bytecode and identify every
  * helper call in source order, plus the map fd currently bound to that
  * helper's map argument register when the call occurs. map_fd is -1 when the
- * binding is ambiguous.
+ * binding is ambiguous. If a previous map-in-map lookup returned a verifier
+ * tracked inner map pointer, dynamic_map_shape records the inner map shape so
+ * the next map_lookup_elem call can use the same map-specific lowering as the
+ * kernel JIT.
  *
  * Tracking is intentionally minimal:
  *   - LD_IMM64 with src_reg=BPF_PSEUDO_MAP_FD binds dst_reg -> imm (map fd).
  *   - ALU64|MOV|X copies the binding from src_reg to dst_reg.
+ *   - map-in-map lookup return in R0 carries a known inner-map shape when the
+ *     outer map shape is recognized.
  *   - Any other write to a register clears that register's binding.
  *   - CALL clobbers r0..r5.
  * This matches the simple "load map fd into r1 just before the call"
@@ -3131,27 +3246,29 @@ struct SourceHelperCall {
  * map selection) falls through to fd=-1 -> no inline. */
 std::vector<SourceHelperCall> collect_source_helper_calls(
     const struct bpf_insn *insns,
-    size_t cnt)
+    size_t cnt,
+    const std::unordered_map<int, MapMeta> *meta_by_fd = nullptr)
 {
     std::vector<SourceHelperCall> sites;
-    int reg_map_fd[11];
-    for (int i = 0; i < 11; i++) reg_map_fd[i] = -1;
+    SourceMapBinding reg_map[11];
     for (size_t i = 0; i < cnt; i++) {
         const struct bpf_insn &in = insns[i];
         uint8_t code = in.code;
         if (code == (BPF_LD | BPF_DW | BPF_IMM)) {
             if (in.dst_reg < 11) {
-                reg_map_fd[in.dst_reg] =
-                    (in.src_reg == BPF_PSEUDO_MAP_FD) ? (int)in.imm : -1;
+                reg_map[in.dst_reg] = SourceMapBinding{};
+                if (in.src_reg == BPF_PSEUDO_MAP_FD) {
+                    reg_map[in.dst_reg].map_fd = (int)in.imm;
+                }
             }
             i++; /* skip second slot (high 32 bits of imm64) */
             continue;
         }
         if (code == (BPF_ALU64 | BPF_MOV | BPF_X)) {
             if (in.dst_reg < 11 && in.src_reg < 11) {
-                reg_map_fd[in.dst_reg] = reg_map_fd[in.src_reg];
+                reg_map[in.dst_reg] = reg_map[in.src_reg];
             } else if (in.dst_reg < 11) {
-                reg_map_fd[in.dst_reg] = -1;
+                reg_map[in.dst_reg] = SourceMapBinding{};
             }
             continue;
         }
@@ -3159,11 +3276,11 @@ std::vector<SourceHelperCall> collect_source_helper_calls(
             if (in.src_reg == BPF_PSEUDO_CALL ||
                 in.src_reg == BPF_PSEUDO_KFUNC_CALL ||
                 in.src_reg == BPF_PSEUDO_KINSN_CALL) {
-                for (int r = 0; r <= 5; r++) reg_map_fd[r] = -1;
+                for (int r = 0; r <= 5; r++) reg_map[r] = SourceMapBinding{};
                 continue;
             }
             if (in.src_reg == 0 && in.imm == kLibbpfCoreBadRelocPoison) {
-                for (int r = 0; r <= 5; r++) reg_map_fd[r] = -1;
+                for (int r = 0; r <= 5; r++) reg_map[r] = SourceMapBinding{};
                 continue;
             }
             if (in.src_reg != 0) {
@@ -3175,8 +3292,27 @@ std::vector<SourceHelperCall> collect_source_helper_calls(
                 in.imm == BPF_FUNC_perf_event_output) {
                 map_arg_reg = 2;
             }
-            sites.push_back(SourceHelperCall{in.imm, reg_map_fd[map_arg_reg]});
-            for (int r = 0; r <= 5; r++) reg_map_fd[r] = -1;
+            SourceMapBinding map_binding = reg_map[map_arg_reg];
+            sites.push_back(SourceHelperCall{
+                in.imm,
+                map_binding.map_fd,
+                map_binding.dynamic_map_shape,
+            });
+
+            NativeMapShape return_shape;
+            if (in.imm == BPF_FUNC_map_lookup_elem &&
+                map_binding.map_fd >= 0 &&
+                meta_by_fd) {
+                auto meta_it = meta_by_fd->find(map_binding.map_fd);
+                if (meta_it != meta_by_fd->end()) {
+                    return_shape = inner_map_shape_for_outer_map(meta_it->second);
+                }
+            }
+
+            for (int r = 0; r <= 5; r++) reg_map[r] = SourceMapBinding{};
+            if (has_native_map_shape(return_shape)) {
+                reg_map[0].dynamic_map_shape = return_shape;
+            }
             continue;
         }
         /* Conservative: invalidate dst_reg for any other ALU/LDX/JMP-class
@@ -3184,7 +3320,7 @@ std::vector<SourceHelperCall> collect_source_helper_calls(
          * dst_reg, conditional jumps don't either. */
         uint8_t cls = BPF_CLASS(code);
         if (cls == BPF_ALU || cls == BPF_ALU64 || cls == BPF_LDX) {
-            if (in.dst_reg < 11) reg_map_fd[in.dst_reg] = -1;
+            if (in.dst_reg < 11) reg_map[in.dst_reg] = SourceMapBinding{};
         }
     }
     return sites;
@@ -3323,7 +3459,7 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
         const struct bpf_insn *insns = bpf_program__insns(entry_prog);
         size_t insn_cnt = bpf_program__insn_cnt(entry_prog);
         std::vector<SourceHelperCall> source_calls =
-            collect_source_helper_calls(insns, insn_cnt);
+            collect_source_helper_calls(insns, insn_cnt, &meta_by_fd);
         for (const SourceHelperCall &call : source_calls) {
             if (call.helper_id == BPF_FUNC_tail_call) {
                 out.has_tail_call = true;
@@ -3349,58 +3485,17 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
                 };
                 if (map_it != meta_by_fd.end()) {
                     site.map_name = map_it->second.name;
-                    int t = map_it->second.type;
-                    if (t == BPF_MAP_TYPE_ARRAY) {
-                        auto addr_it = out.map_addrs.find(map_it->second.name);
-                        if (addr_it == out.map_addrs.end()) {
-                            bpf_object__close(obj);
-                            fail("native_kernel: missing kernel map pointer for ARRAY map " + map_it->second.name);
-                        }
-                        site.kind = CompanionLoad::LookupSite::Kind::Array;
-                        site.max_entries = map_it->second.max_entries;
-                        site.elem_size = (map_it->second.value_size + 7u) & ~7u;
-                        site.index_mask = roundup_pow2_mask(map_it->second.max_entries);
-                        site.value_offset = array_offsets.value;
-                    } else if (t == BPF_MAP_TYPE_PERCPU_ARRAY) {
-                        auto addr_it = out.map_addrs.find(map_it->second.name);
-                        if (addr_it == out.map_addrs.end()) {
-                            bpf_object__close(obj);
-                            fail("native_kernel: missing kernel map pointer for PERCPU_ARRAY map " + map_it->second.name);
-                        }
-#if defined(__x86_64__)
-                        if (this_cpu_off_addr == 0) {
-                            fail("this_cpu_off not in /proc/kallsyms");
-                        }
-#endif
-                        site.kind = CompanionLoad::LookupSite::Kind::PerCpuArray;
-                        site.max_entries = map_it->second.max_entries;
-                        site.elem_size = sizeof(void *);
-                        site.index_mask = roundup_pow2_mask(map_it->second.max_entries);
-                        site.value_offset = array_offsets.pptrs;
-                        site.percpu_base_addr = this_cpu_off_addr;
-                    } else if (t == BPF_MAP_TYPE_HASH) {
-                        uint32_t rounded = (map_it->second.key_size + 7) & ~7u;
-                        site.target_addr = htab_lookup_elem_kernel_addr();
-                        site.kind = CompanionLoad::LookupSite::Kind::Hash;
-                        site.key_offset = htab_offsets.key + rounded;
-                    } else if (t == BPF_MAP_TYPE_LRU_HASH) {
-                        uint32_t rounded = (map_it->second.key_size + 7) & ~7u;
-                        site.target_addr = htab_lookup_elem_kernel_addr();
-                        site.kind = CompanionLoad::LookupSite::Kind::LruHash;
-                        site.key_offset = htab_offsets.key + rounded;
-                        site.value_offset = htab_offsets.lru_ref;
-                    } else if (t == BPF_MAP_TYPE_PERCPU_HASH) {
-                        uint32_t rounded = (map_it->second.key_size + 7) & ~7u;
-                        site.target_addr = htab_lookup_elem_kernel_addr();
-                        site.kind = CompanionLoad::LookupSite::Kind::PerCpuHash;
-                        site.key_offset = htab_offsets.key + rounded;
-#if defined(__x86_64__)
-                        if (this_cpu_off_addr == 0) {
-                            fail("this_cpu_off not in /proc/kallsyms");
-                        }
-#endif
-                        site.percpu_base_addr = this_cpu_off_addr;
-                    }
+                    configure_lookup_site_for_shape(site,
+                                                    map_shape_from_meta(map_it->second),
+                                                    array_offsets,
+                                                    htab_offsets,
+                                                    this_cpu_off_addr);
+                } else {
+                    configure_lookup_site_for_shape(site,
+                                                    call.dynamic_map_shape,
+                                                    array_offsets,
+                                                    htab_offsets,
+                                                    this_cpu_off_addr);
                 }
                 out.lookup_sites.push_back(site);
                 continue;
@@ -3499,8 +3594,6 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
         insns = reinterpret_cast<const bpf_insn *>(out.oracle_xlated.data());
         insn_cnt = out.oracle_xlated.size() / sizeof(bpf_insn);
     }
-    std::vector<SourceHelperCall> source_calls =
-        collect_source_helper_calls(insns, insn_cnt);
     std::unordered_map<int, MapMeta> meta_by_source_fd;
     if (source_map_fds_are_process_fds) {
         for (int map_fd : collect_source_map_fds(insns, insn_cnt)) {
@@ -3513,6 +3606,8 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
             meta_by_source_fd.emplace(map_fd, meta);
         }
     }
+    std::vector<SourceHelperCall> source_calls =
+        collect_source_helper_calls(insns, insn_cnt, &meta_by_source_fd);
 
     BpfArrayOffsets array_offsets{
         K_BPF_ARRAY_VALUE_OFFSET,
@@ -3549,48 +3644,17 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
             };
             if (map_it != meta_by_source_fd.end()) {
                 site.map_name = map_it->second.name;
-                int t = map_it->second.type;
-                if (t == BPF_MAP_TYPE_ARRAY) {
-                    site.kind = CompanionLoad::LookupSite::Kind::Array;
-                    site.max_entries = map_it->second.max_entries;
-                    site.elem_size = (map_it->second.value_size + 7u) & ~7u;
-                    site.index_mask = roundup_pow2_mask(map_it->second.max_entries);
-                    site.value_offset = array_offsets.value;
-                } else if (t == BPF_MAP_TYPE_PERCPU_ARRAY) {
-#if defined(__x86_64__)
-                    if (this_cpu_off_addr == 0) {
-                        fail("this_cpu_off not in /proc/kallsyms");
-                    }
-#endif
-                    site.kind = CompanionLoad::LookupSite::Kind::PerCpuArray;
-                    site.max_entries = map_it->second.max_entries;
-                    site.elem_size = sizeof(void *);
-                    site.index_mask = roundup_pow2_mask(map_it->second.max_entries);
-                    site.value_offset = array_offsets.pptrs;
-                    site.percpu_base_addr = this_cpu_off_addr;
-                } else if (t == BPF_MAP_TYPE_HASH) {
-                    uint32_t rounded = (map_it->second.key_size + 7) & ~7u;
-                    site.target_addr = htab_lookup_elem_kernel_addr();
-                    site.kind = CompanionLoad::LookupSite::Kind::Hash;
-                    site.key_offset = htab_offsets.key + rounded;
-                } else if (t == BPF_MAP_TYPE_LRU_HASH) {
-                    uint32_t rounded = (map_it->second.key_size + 7) & ~7u;
-                    site.target_addr = htab_lookup_elem_kernel_addr();
-                    site.kind = CompanionLoad::LookupSite::Kind::LruHash;
-                    site.key_offset = htab_offsets.key + rounded;
-                    site.value_offset = htab_offsets.lru_ref;
-                } else if (t == BPF_MAP_TYPE_PERCPU_HASH) {
-                    uint32_t rounded = (map_it->second.key_size + 7) & ~7u;
-                    site.target_addr = htab_lookup_elem_kernel_addr();
-                    site.kind = CompanionLoad::LookupSite::Kind::PerCpuHash;
-                    site.key_offset = htab_offsets.key + rounded;
-#if defined(__x86_64__)
-                    if (this_cpu_off_addr == 0) {
-                        fail("this_cpu_off not in /proc/kallsyms");
-                    }
-#endif
-                    site.percpu_base_addr = this_cpu_off_addr;
-                }
+                configure_lookup_site_for_shape(site,
+                                                map_shape_from_meta(map_it->second),
+                                                array_offsets,
+                                                htab_offsets,
+                                                this_cpu_off_addr);
+            } else {
+                configure_lookup_site_for_shape(site,
+                                                call.dynamic_map_shape,
+                                                array_offsets,
+                                                htab_offsets,
+                                                this_cpu_off_addr);
             }
             out.lookup_sites.push_back(site);
         } else if (call.helper_id == BPF_FUNC_map_update_elem) {
