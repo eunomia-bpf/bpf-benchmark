@@ -420,11 +420,17 @@ static void shim_native_loader_log_jit_info(const char *label, int fd) {
         return;
     }
 
+    char tag_hex[sizeof(info.tag) * 2 + 1];
+    for (size_t i = 0; i < sizeof(info.tag); i++)
+        snprintf(tag_hex + i * 2, 3, "%02x", info.tag[i]);
+    tag_hex[sizeof(info.tag) * 2] = '\0';
+
     log_line("native-loader jit-info %s fd=%d id=%u type=%u name=%s "
-             "jited_len=%u xlated_len=%u nr_jited_ksyms=%u "
+             "tag=%s jited_len=%u xlated_len=%u nr_jited_ksyms=%u "
              "ksym0=0x%llx ksym1=0x%llx",
              label ? label : "", fd, info.id, info.type, info.name,
-             info.jited_prog_len, info.xlated_prog_len, info.nr_jited_ksyms,
+             tag_hex, info.jited_prog_len, info.xlated_prog_len,
+             info.nr_jited_ksyms,
              (unsigned long long)ksyms[0],
              (unsigned long long)ksyms[1]);
 }

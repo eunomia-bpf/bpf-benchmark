@@ -125,36 +125,21 @@ static struct map_entry *map_table[BPF_STATE_BUCKETS];
 
 struct native_loader_map_ref_entry {
     uint32_t kid;
-    int fd;
     uint32_t refcnt;
     struct native_loader_map_ref_entry *next;
 };
 static struct native_loader_map_ref_entry *native_loader_map_ref_table[BPF_STATE_BUCKETS];
+static int native_loader_fd_keeper_sock = -1;
 
 static int native_loader_map_ref_fd_is_retained_locked(int fd) {
-    if (fd < 0)
-        return 0;
-    for (int b = 0; b < BPF_STATE_BUCKETS; b++)
-        for (struct native_loader_map_ref_entry *e =
-                 native_loader_map_ref_table[b];
-             e; e = e->next)
-            if (e->fd == fd)
-                return 1;
+    (void)fd;
     return 0;
 }
 
 static int native_loader_map_ref_has_fd_in_range_locked(unsigned int first,
                                                         unsigned int last) {
-    for (int b = 0; b < BPF_STATE_BUCKETS; b++)
-        for (struct native_loader_map_ref_entry *e =
-                 native_loader_map_ref_table[b];
-             e; e = e->next) {
-            if (e->fd < 0)
-                continue;
-            unsigned int fd = (unsigned int)e->fd;
-            if (fd >= first && fd <= last)
-                return 1;
-        }
+    (void)first;
+    (void)last;
     return 0;
 }
 
@@ -305,24 +290,138 @@ static void native_loader_map_ref_release_locked(uint32_t kid) {
             return;
         }
         *prev = entry->next;
-        if (entry->fd >= 0 && real_close)
-            real_close(entry->fd);
         free(entry);
         return;
     }
 }
 
-static int native_loader_map_ref_retain_fd_locked(int fd, uint32_t *kid_out) {
-    if (kid_out)
-        *kid_out = 0;
-    uint32_t kid = resolve_kernel_id(fd);
-    if (!kid) {
-        if (fd >= 0 && real_close)
-            real_close(fd);
-        errno = EINVAL;
-        return -1;
+static void native_loader_fd_keeper_child(int sock_fd, pid_t parent_pid) {
+    if (sock_fd != 3) {
+        if (dup2(sock_fd, 3) < 0)
+            _exit(127);
+        close(sock_fd);
+        sock_fd = 3;
+    }
+    (void)prctl(PR_SET_PDEATHSIG, SIGTERM);
+    if (getppid() != parent_pid)
+        _exit(0);
+    (void)syscall(SYS_close_range, 4u, ~0u, 0u);
+
+    for (;;) {
+        char buf = 0;
+        char control[CMSG_SPACE(sizeof(int) * 240)];
+        struct iovec iov = {
+            .iov_base = &buf,
+            .iov_len = sizeof(buf),
+        };
+        struct msghdr msg;
+        memset(&msg, 0, sizeof(msg));
+        msg.msg_iov = &iov;
+        msg.msg_iovlen = 1;
+        msg.msg_control = control;
+        msg.msg_controllen = sizeof(control);
+
+        ssize_t n = recvmsg(sock_fd, &msg, 0);
+        if (n > 0)
+            continue;
+        if (n < 0 && errno == EINTR)
+            continue;
+        break;
     }
 
+    while (getppid() == parent_pid)
+        sleep(60);
+    _exit(0);
+}
+
+static int native_loader_fd_keeper_start_locked(void) {
+    int sv[2] = {-1, -1};
+    if (socketpair(AF_UNIX, SOCK_SEQPACKET | SOCK_CLOEXEC, 0, sv) != 0)
+        return -1;
+
+    pid_t parent_pid = getpid();
+    pid_t child = fork();
+    if (child < 0) {
+        int saved = errno;
+        real_close(sv[0]);
+        real_close(sv[1]);
+        errno = saved;
+        return -1;
+    }
+    if (child == 0) {
+        real_close(sv[0]);
+        native_loader_fd_keeper_child(sv[1], parent_pid);
+    }
+
+    real_close(sv[1]);
+    native_loader_fd_keeper_sock = sv[0];
+    return 0;
+}
+
+static int native_loader_fd_keeper_send_once_locked(const int *fds,
+                                                    uint32_t n) {
+    if (n == 0)
+        return 0;
+    if (native_loader_fd_keeper_sock < 0 &&
+        native_loader_fd_keeper_start_locked() != 0)
+        return -1;
+
+    char buf = 'F';
+    char control[CMSG_SPACE(sizeof(int) * 240)];
+    struct iovec iov = {
+        .iov_base = &buf,
+        .iov_len = sizeof(buf),
+    };
+    struct msghdr msg;
+    memset(&msg, 0, sizeof(msg));
+    msg.msg_iov = &iov;
+    msg.msg_iovlen = 1;
+    msg.msg_control = control;
+    msg.msg_controllen = CMSG_SPACE(sizeof(int) * n);
+
+    struct cmsghdr *cmsg = CMSG_FIRSTHDR(&msg);
+    cmsg->cmsg_level = SOL_SOCKET;
+    cmsg->cmsg_type = SCM_RIGHTS;
+    cmsg->cmsg_len = CMSG_LEN(sizeof(int) * n);
+    memcpy(CMSG_DATA(cmsg), fds, sizeof(int) * n);
+
+    ssize_t sent = sendmsg(native_loader_fd_keeper_sock, &msg, MSG_NOSIGNAL);
+    if (sent == 1)
+        return 0;
+    return -1;
+}
+
+static int native_loader_fd_keeper_send_locked(const int *fds, uint32_t n) {
+    uint32_t off = 0;
+    while (off < n) {
+        uint32_t chunk = n - off;
+        if (chunk > 240)
+            chunk = 240;
+        if (native_loader_fd_keeper_send_once_locked(fds + off, chunk) == 0) {
+            off += chunk;
+            continue;
+        }
+        int saved = errno ? errno : EIO;
+        if (native_loader_fd_keeper_sock >= 0) {
+            real_close(native_loader_fd_keeper_sock);
+            native_loader_fd_keeper_sock = -1;
+        }
+        if (saved == EBADF || saved == ENOTSOCK ||
+            saved == EPIPE || saved == ECONNRESET) {
+            if (native_loader_fd_keeper_send_once_locked(fds + off,
+                                                         chunk) == 0) {
+                off += chunk;
+                continue;
+            }
+            saved = errno ? errno : EIO;
+        }
+        errno = saved;
+        return -1;
+    }
+    return 0;
+}
+
+static int native_loader_map_ref_add_new_locked(uint32_t kid) {
     struct native_loader_map_ref_entry **bucket =
         &native_loader_map_ref_table[kernel_id_bucket(kid)];
     for (struct native_loader_map_ref_entry *entry = *bucket; entry;
@@ -330,34 +429,23 @@ static int native_loader_map_ref_retain_fd_locked(int fd, uint32_t *kid_out) {
         if (entry->kid != kid)
             continue;
         if (entry->refcnt == UINT32_MAX) {
-            if (fd >= 0 && real_close)
-                real_close(fd);
             errno = EOVERFLOW;
             return -1;
         }
         entry->refcnt++;
-        if (fd >= 0 && real_close)
-            real_close(fd);
-        if (kid_out)
-            *kid_out = kid;
         return 0;
     }
 
     struct native_loader_map_ref_entry *entry =
         (struct native_loader_map_ref_entry *)calloc(1, sizeof(*entry));
     if (!entry) {
-        if (fd >= 0 && real_close)
-            real_close(fd);
         errno = ENOMEM;
         return -1;
     }
     entry->kid = kid;
-    entry->fd = fd;
     entry->refcnt = 1;
     entry->next = *bucket;
     *bucket = entry;
-    if (kid_out)
-        *kid_out = kid;
     return 0;
 }
 
@@ -373,45 +461,131 @@ static int native_loader_map_refs_take_owned_fds(int *fds,
     }
 
     uint32_t *kids = (uint32_t *)calloc(fds_n, sizeof(*kids));
-    if (!kids) {
+    uint32_t *new_kids = (uint32_t *)calloc(fds_n, sizeof(*new_kids));
+    int *new_fds = (int *)calloc(fds_n, sizeof(*new_fds));
+    if (!kids || !new_kids || !new_fds) {
         int saved = errno ? errno : ENOMEM;
         for (uint32_t i = 0; i < fds_n; i++)
             if (fds[i] >= 0 && real_close)
                 real_close(fds[i]);
+        free(new_fds);
+        free(new_kids);
         free(fds);
+        free(kids);
         errno = saved;
         return -1;
     }
 
     uint32_t kids_n = 0;
+    uint32_t new_n = 0;
     pthread_mutex_lock(&state_mutex);
     for (uint32_t i = 0; i < fds_n; i++) {
         int fd = fds[i];
         if (fd < 0)
             continue;
-        uint32_t kid = 0;
-        if (native_loader_map_ref_retain_fd_locked(fd, &kid) != 0) {
+        uint32_t kid = resolve_kernel_id(fd);
+        if (!kid) {
             int saved = errno ? errno : EINVAL;
             for (uint32_t j = 0; j < kids_n; j++)
-                native_loader_map_ref_release_locked(kids[j]);
+                if (!native_loader_kid_seen(new_kids, new_n, kids[j]))
+                    native_loader_map_ref_release_locked(kids[j]);
             pthread_mutex_unlock(&state_mutex);
-            for (uint32_t j = i + 1; j < fds_n; j++)
+            for (uint32_t j = 0; j < fds_n; j++)
                 if (fds[j] >= 0 && real_close)
                     real_close(fds[j]);
+            free(new_fds);
+            free(new_kids);
             free(kids);
             free(fds);
             errno = saved;
             return -1;
         }
-        fds[i] = -1;
         if (native_loader_kid_seen(kids, kids_n, kid)) {
-            native_loader_map_ref_release_locked(kid);
+            real_close(fd);
+            fds[i] = -1;
             continue;
         }
         kids[kids_n++] = kid;
+
+        int existing = 0;
+        struct native_loader_map_ref_entry **bucket =
+            &native_loader_map_ref_table[kernel_id_bucket(kid)];
+        for (struct native_loader_map_ref_entry *entry = *bucket; entry;
+             entry = entry->next) {
+            if (entry->kid != kid)
+                continue;
+            if (entry->refcnt == UINT32_MAX) {
+                int saved = EOVERFLOW;
+                for (uint32_t j = 0; j + 1 < kids_n; j++)
+                    if (!native_loader_kid_seen(new_kids, new_n, kids[j]))
+                        native_loader_map_ref_release_locked(kids[j]);
+                pthread_mutex_unlock(&state_mutex);
+                for (uint32_t j = 0; j < fds_n; j++)
+                    if (fds[j] >= 0 && real_close)
+                        real_close(fds[j]);
+                free(new_fds);
+                free(new_kids);
+                free(kids);
+                free(fds);
+                errno = saved;
+                return -1;
+            }
+            entry->refcnt++;
+            existing = 1;
+            break;
+        }
+        if (existing) {
+            real_close(fd);
+            fds[i] = -1;
+            continue;
+        }
+
+        new_kids[new_n] = kid;
+        new_fds[new_n] = fd;
+        new_n++;
+    }
+
+    if (native_loader_fd_keeper_send_locked(new_fds, new_n) != 0) {
+        int saved = errno ? errno : EIO;
+        for (uint32_t j = 0; j < kids_n; j++)
+            if (!native_loader_kid_seen(new_kids, new_n, kids[j]))
+                native_loader_map_ref_release_locked(kids[j]);
+        pthread_mutex_unlock(&state_mutex);
+        for (uint32_t j = 0; j < fds_n; j++)
+            if (fds[j] >= 0 && real_close)
+                real_close(fds[j]);
+        free(new_fds);
+        free(new_kids);
+        free(kids);
+        free(fds);
+        errno = saved;
+        return -1;
+    }
+
+    for (uint32_t i = 0; i < new_n; i++) {
+        if (native_loader_map_ref_add_new_locked(new_kids[i]) != 0) {
+            int saved = errno ? errno : EINVAL;
+            for (uint32_t j = 0; j < kids_n; j++)
+                native_loader_map_ref_release_locked(kids[j]);
+            pthread_mutex_unlock(&state_mutex);
+            for (uint32_t j = 0; j < fds_n; j++)
+                if (fds[j] >= 0 && real_close)
+                    real_close(fds[j]);
+            free(new_fds);
+            free(new_kids);
+            free(kids);
+            free(fds);
+            errno = saved;
+            return -1;
+        }
     }
     pthread_mutex_unlock(&state_mutex);
 
+    for (uint32_t i = 0; i < fds_n; i++)
+        if (fds[i] >= 0 && real_close)
+            real_close(fds[i]);
+    free(new_fds);
+    free(new_kids);
     free(fds);
     if (kids_n == 0) {
         free(kids);

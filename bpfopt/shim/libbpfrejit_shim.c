@@ -27,6 +27,7 @@
 #include <linux/bpf.h>
 #include <linux/perf_event.h>
 #include <pthread.h>
+#include <sys/prctl.h>
 #include <signal.h>
 #include <spawn.h>
 #include <stdarg.h>
@@ -142,6 +143,74 @@ static __thread int in_shim;
 
 static void *worker_thread(void *arg);  /* forward decl */
 static void *socket_thread(void *arg);  /* forward decl */
+
+static int read_perf_pmu_type(const char *name, int *cache) {
+    if (*cache != -2)
+        return *cache;
+
+    char path[128];
+    snprintf(path, sizeof(path), "/sys/bus/event_source/devices/%s/type", name);
+    FILE *f = fopen(path, "r");
+    if (!f) {
+        *cache = -1;
+        return *cache;
+    }
+    int value = -1;
+    if (fscanf(f, "%d", &value) != 1)
+        value = -1;
+    fclose(f);
+    *cache = value;
+    return *cache;
+}
+
+static void format_perf_event_extra(const struct perf_event_attr *pa,
+                                    char *buf, size_t len) {
+    if (!buf || len == 0)
+        return;
+    buf[0] = '\0';
+    if (!pa)
+        return;
+
+    static int kprobe_type = -2;
+    static int uprobe_type = -2;
+    int kt = read_perf_pmu_type("kprobe", &kprobe_type);
+    int ut = read_perf_pmu_type("uprobe", &uprobe_type);
+
+    if ((int)pa->type == kt && pa->kprobe_func) {
+        const char *fn = (const char *)(uintptr_t)pa->kprobe_func;
+        snprintf(buf, len, " kprobe_func=%.*s kprobe_addr=%llu", 120, fn,
+                 (unsigned long long)pa->kprobe_addr);
+    } else if ((int)pa->type == ut && pa->uprobe_path) {
+        const char *path = (const char *)(uintptr_t)pa->uprobe_path;
+        snprintf(buf, len, " uprobe_path=%.*s probe_offset=%llu", 120, path,
+                 (unsigned long long)pa->probe_offset);
+    }
+}
+
+static void log_task_fd_query(uint32_t target_fd, uint32_t attach_type) {
+    if (target_fd == 0)
+        return;
+
+    char probe[256];
+    memset(probe, 0, sizeof(probe));
+    union bpf_attr q;
+    memset(&q, 0, sizeof(q));
+    q.task_fd_query.pid = (uint32_t)getpid();
+    q.task_fd_query.fd = target_fd;
+    q.task_fd_query.buf_len = sizeof(probe);
+    q.task_fd_query.buf = (uintptr_t)probe;
+
+    long ret = real_syscall(SYS_bpf, BPF_TASK_FD_QUERY, &q, sizeof(q));
+    int saved_errno = errno;
+    log_line("BPF_TASK_FD_QUERY target_fd=%u attach_type=%u -> ret=%ld "
+             "errno=%d fd_type=%u prog_id=%u probe_offset=%llu "
+             "probe_addr=%llu symbol=%s",
+             target_fd, attach_type, ret, ret < 0 ? saved_errno : 0,
+             q.task_fd_query.fd_type, q.task_fd_query.prog_id,
+             (unsigned long long)q.task_fd_query.probe_offset,
+             (unsigned long long)q.task_fd_query.probe_addr, probe);
+    errno = saved_errno;
+}
 
 static int shim_close_observed_fd(int fd) {
     ensure_syms_resolved();
@@ -408,10 +477,17 @@ long syscall(long number, ...) {
                 }
             }
             in_shim = 0;
-            log_line("perf_event_open type=%u config=%llu pid=%d cpu=%d "
-                     "group_fd=%d flags=%lu -> fd=%ld errno=%d",
-                     pa ? pa->type : 0, pa ? (unsigned long long)pa->config : 0,
-                     pid, cpu, group_fd, flags, ret, ret < 0 ? saved_errno : 0);
+            char perf_extra[192];
+            format_perf_event_extra(pa, perf_extra, sizeof(perf_extra));
+            log_line("perf_event_open type=%u config=%llu config1=%llu "
+                     "config2=%llu pid=%d cpu=%d group_fd=%d flags=%lu%s "
+                     "-> fd=%ld errno=%d",
+                     pa ? pa->type : 0,
+                     pa ? (unsigned long long)pa->config : 0,
+                     pa ? (unsigned long long)pa->config1 : 0,
+                     pa ? (unsigned long long)pa->config2 : 0, pid, cpu,
+                     group_fd, flags, perf_extra, ret,
+                     ret < 0 ? saved_errno : 0);
             errno = saved_errno;
             return ret;
         }
@@ -610,6 +686,9 @@ long syscall(long number, ...) {
                 (void)prog_attach_append(&pe->attached_link_fds,
                                          &pe->n_links, (int)ret);
             pthread_mutex_unlock(&state_mutex);
+            if (pending_link->attach_type == BPF_PERF_EVENT)
+                log_task_fd_query(pending_link->target_fd,
+                                  pending_link->attach_type);
         } else {
             free(pending_link);
         }

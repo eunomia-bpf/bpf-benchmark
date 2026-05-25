@@ -172,13 +172,15 @@ helpers that will not compile as native C without controlled shims.
       `healthchecking_ipip`, `healthchecking`, and `xdp_root`; single-app
       runtime smoke passes after truncated-name aliasing, x86 proof reloc
       normalization, and native `xdp_buff`/`sk_buff` context layout fixes.
-- [ ] `cilium`: compile selected datapath objects; validate tail-call map
+- [x] `cilium`: compile selected datapath objects; validate tail-call map
       updates and NodePort/CT policy chains.
       Current status: native compile/proof passes for selected datapath
       objects, including Cilium LXC/host/XDP/socket entries and tail programs.
       A single-app native-loader smoke now passes after the retained-map-fd
-      close/close_range lifetime fix. Full regression/performance is still
-      pending.
+      close/close_range lifetime fix. The full native-loader corpus runs also
+      pass with Cilium enabled in the six-app suite; app-level pktgen workload
+      throughput improves by about 2.6x with zero pktgen errors in the final
+      stats-off run.
 - [x] `tracee`: compile `tracee.bpf.c` and LSM support probes; validate
       kprobe/tracepoint/LSM attach coverage.
       Current status: native compile/proof passes for the main
@@ -186,14 +188,20 @@ helpers that will not compile as native C without controlled shims.
       native-loader smoke now passes after map-name truncation, duplicate
       inner-map aliasing, and `bpf_*` map-vs-helper fixes. Artifact:
       `corpus/results/x86_kvm_corpus_20260524_133325_153376`.
-- [ ] `tetragon`: compile process/cgroup/alignment objects; validate static Go
+- [x] `tetragon`: compile process/cgroup/alignment objects; validate static Go
       shim path before native fd replacement.
       Current status: native compile/proof passes for the selected Tetragon
-      process/cgroup objects. Runtime smoke has loaded the base sensor and
-      several `generic_kprobe_` instances through native-loader, but the full
-      observer workload is still being debugged one failure at a time.
-- [ ] `otelcol-ebpf-profiler`: compile profiler objects; validate tail-called
+      process/cgroup objects. Single-app native-loader smoke now passes after
+      object-scoped map schema fixes and the retained-map fd keeper process
+      fix. Artifact:
+      `corpus/results/x86_kvm_corpus_20260524_220355_937610`.
+- [x] `otelcol-ebpf-profiler`: compile profiler objects; validate tail-called
       unwind programs and caller-side accounting.
+      Current status: native compile/proof passes for selected profiler
+      entries. Single-app native-loader smoke now passes with no native-loader
+      failures after exact feature-probe handling for the tiny
+      `probe_bpf_perf_` capability probe. Artifact:
+      `corpus/results/x86_kvm_corpus_20260524_223229_404846`.
 
 Do not run all corpus apps at once and hope the stack passes. Enable and test
 one app at a time, starting with `bcc`; inspect the first failure, fix it, rerun
@@ -218,6 +226,19 @@ artifact locations only; framework code must not compute performance rollups.
 - micro native kernel smoke:
   `SUITE=micro/config/micro_stage2.yaml RUNTIMES=native_kernel BENCH=helper_only_uid_gid SAMPLES=1 WARMUPS=0 INNER_REPEAT=1 make micro`
   passed with run token `2a298b03`.
+- full micro regression after the post-keeper corpus app sweep:
+  `make micro` passed. Artifact:
+  `micro/results/x86_kvm_micro_20260524_232117_957138`. The suite is
+  `micro_staged_codegen` with 29 benchmarks, 29 runs each for `native`,
+  `kernel`, and `llvmbpf`, 261 total samples, and no result/retval mismatches.
+  The boot log scan found no kernel oops/panic; the only `ERROR` string was the
+  expected ACPI `_OSC` boot message.
+- final full micro regression after the all-app native-loader corpus reruns:
+  `make micro` passed. Artifact:
+  `micro/results/x86_kvm_micro_20260525_050929_891422`. The suite is
+  `micro_staged_codegen`, with 29 benchmarks, `SAMPLES=3`, `INNER_REPEAT=100000`,
+  29 runs each for `native`, `kernel`, and `llvmbpf`, and no run errors or
+  result/retval mismatches.
 - `bcc/set` native-loader corpus smoke:
   `BPFREJIT_CORPUS_APPS=bcc/set BPFREJIT_SHIM_NATIVE_LOADER=1 SKIP_REJIT=norejit SAMPLES=1 WARMUPS=0 WORKLOAD_DURATION=5 KEEP_WORKDIRS=1 make corpus`
   passed. Artifact:
@@ -225,6 +246,12 @@ artifact locations only; framework code must not compute performance rollups.
 - `bcc/set` native-loader corpus smoke after the retained-map-fd protection:
   the same single-app command passed again. Artifact:
   `corpus/results/x86_kvm_corpus_20260524_114723_064032`.
+- `bcc/set` post-keeper rerun:
+  the same single-app command passed after the retained-map fd keeper change.
+  Artifact: `corpus/results/x86_kvm_corpus_20260524_222037_811414`. The suite
+  and app status are both `ok`, selected workload is
+  `stress_ng_bcc_hook_hot`, and the shim log records 25 native replacements
+  with no native-loader failures or kernel oops/panic.
 - `katran` native artifact build/proof:
   `make -B -C vendor/bpf native-katran` passed. The stage directory now
   contains program-name aliases for `balancer_ingress`, `healthcheck_encap`,
@@ -239,6 +266,13 @@ artifact locations only; framework code must not compute performance rollups.
   `BPFREJIT_CORPUS_APPS=katran BPFREJIT_SHIM_NATIVE_LOADER=1 SKIP_REJIT=norejit SAMPLES=1 WARMUPS=0 WORKLOAD_DURATION=5 KEEP_WORKDIRS=1 make corpus`
   passed after the proof-relocation and native context-layout fixes. Artifact:
   `corpus/results/x86_kvm_corpus_20260524_122003_634530`.
+- `katran` post-keeper rerun:
+  the same single-app command passed. Artifact:
+  `corpus/results/x86_kvm_corpus_20260524_225627_645623`. The suite and app
+  status are both `ok`, selected workload is `xdp_pktgen`, baseline and post
+  phases each ran 4 workload components, and the shim log records 1 native
+  replacement for `balancer_ingres` with no native-loader failures or kernel
+  oops/panic.
 - `otelcol-ebpf-profiler/profiling` is being enabled next as a single-app
   functional native-loader smoke passed with:
   `BPFREJIT_CORPUS_APPS=otelcol-ebpf-profiler/profiling BPFREJIT_SHIM_NATIVE_LOADER=1 SKIP_REJIT=norejit SAMPLES=1 WARMUPS=0 WORKLOAD_DURATION=5 KEEP_WORKDIRS=1 make corpus`.
@@ -254,6 +288,15 @@ artifact locations only; framework code must not compute performance rollups.
   `corpus/results/x86_kvm_corpus_20260524_023927_400132`,
   `corpus/results/x86_kvm_corpus_20260524_025357_924766`,
   `corpus/results/x86_kvm_corpus_20260524_030419_873922`.
+- `otelcol-ebpf-profiler/profiling` post-keeper rerun:
+  the same single-app command passed. Artifact:
+  `corpus/results/x86_kvm_corpus_20260524_223229_404846`. The suite and app
+  status are both `ok`, selected workload is `otel_mixed_workload`, baseline
+  and post phases each ran 11 workload components, and the shim log records 14
+  native replacements with no native-loader failures or kernel oops/panic. The
+  earlier `probe_bpf_perf_` proof failures are gone; the 2-insn
+  `probe_bpf_perf_` capability probe is now logged as an exact feature-probe
+  skip instead of being proof-linked as a benchmark program.
 - `cilium/agent` native artifact build/proof:
   `make -B -C vendor/bpf native-cilium` passed. The build emits selected Cilium
   native objects under `vendor/build/native-bpf/x86/stage/cilium`, including
@@ -266,6 +309,13 @@ artifact locations only; framework code must not compute performance rollups.
   `BPFREJIT_CORPUS_APPS=cilium/agent BPFREJIT_SHIM_NATIVE_LOADER=1 SKIP_REJIT=norejit SAMPLES=1 WARMUPS=0 WORKLOAD_DURATION=5 KEEP_WORKDIRS=1 make corpus`
   passed. Artifact:
   `corpus/results/x86_kvm_corpus_20260524_114137_174517`.
+- `cilium/agent` post-keeper rerun:
+  the same single-app command passed. Artifact:
+  `corpus/results/x86_kvm_corpus_20260524_224335_973426`. The suite and app
+  status are both `ok`, selected workload is `cilium_endpoint_pktgen`,
+  baseline and post phases each ran 2 workload components, and the shim log
+  records 113 native replacements plus 70 prog-array updates with no
+  native-loader failures or kernel oops/panic.
 - `otelcol-ebpf-profiler` native artifact build/proof after the x86 helper
   fail-fast work:
   `make -B -C vendor/bpf native-otel` passed. The proof-link stage covered all
@@ -299,12 +349,39 @@ artifact locations only; framework code must not compute performance rollups.
   `corpus/results/x86_kvm_corpus_20260524_133325_153376`. The shim log records
   169 native replacements, including `trace_security_` and LSM programs, 13
   exact feature-probe skips, and no native-loader/link/kernel errors.
+- `tracee/monitor` post-keeper rerun:
+  the same single-app command passed. Artifact:
+  `corpus/results/x86_kvm_corpus_20260524_230826_179625`. The suite and app
+  status are both `ok`, selected workload is `stress_ng_tracee_syscall_hot`,
+  baseline and post phases each ran 1 workload component, and the shim log
+  records 169 native replacements with no native-loader failures or kernel
+  oops/panic.
+- `tetragon/observer` native-loader corpus smoke after the retained-map fd
+  keeper process:
+  `BPFREJIT_CORPUS_APPS=tetragon/observer BPFREJIT_SHIM_NATIVE_LOADER=1 SKIP_REJIT=norejit SAMPLES=1 WARMUPS=0 WORKLOAD_DURATION=5 KEEP_WORKDIRS=1 make corpus`
+  passed. Artifact:
+  `corpus/results/x86_kvm_corpus_20260524_220355_937610`. The suite result is
+  `status=ok`, app result is `status=ok`, selected workload is
+  `stress_ng_tetragon_policy_hot`, and the shim log records 288 native
+  replacements, 577 native-loader jit-info lines, no native-loader failures,
+  and no kernel oops/panic in `/tmp/tetragon-corpus-smoke-21.log`.
+- Current single-app functional smoke status before the post-fix rerun sweep:
+  `bcc/set`, `otelcol-ebpf-profiler/profiling`, `katran`, `cilium/agent`,
+  `tracee/monitor`, and `tetragon/observer` all have at least one single-app
+  functional smoke with no native-loader failures recorded in their shim logs.
+  The post-keeper rerun sweep has completed all six apps individually:
+  `bcc/set`, `otelcol-ebpf-profiler/profiling`, `cilium/agent`,
+  `tetragon/observer`, `katran`, and `tracee/monitor`.
 
 After every app passes individually, run:
 
 - full micro regression through `make micro`;
-- full native-loader corpus regression through `make corpus` with the native
-  loader enabled;
+- full native-loader corpus performance regression through
+  `BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit make corpus`; this
+  keeps baseline as the real app's original eBPF/JIT load path and enables
+  native fd replacement only for the post phase;
+- full workload-number regression with BPF stats disabled through
+  `BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit BPFREJIT_CORPUS_BPF_STATS=0 make corpus`;
 - per-app raw metric inspection from the generated `result.json` files.
 
 ## Issues Found While Enabling Corpus Native Loading
@@ -316,6 +393,25 @@ the micro experiment frontend. The corpus path must not do that. The corpus
 implementation therefore hooks the real app `BPF_PROG_LOAD`, lets the app load
 its own BPF program first, and passes that already-loaded fd plus a native
 object path to `libnativeloader`.
+
+### Performance-mode boundary
+
+`BPFREJIT_SHIM_NATIVE_LOADER=1` is a functional smoke mode: because the env var
+is visible to both app starts, baseline and post both run with native fd
+replacement. It does not answer whether native loading improves over the real
+app's original eBPF/JIT path. Corpus performance runs now use
+`BPFREJIT_SHIM_NATIVE_LOADER=post` with `SKIP_REJIT=norejit`, so the baseline
+phase loads original eBPF through the real app loader and the post phase starts
+the same app with native-loader enabled. This isolates native loading from the
+default loadtime bpfopt pass policy.
+
+The workload-number configuration must disable kernel BPF stats while keeping
+the real app lifecycle. The old `BPFREJIT_CORPUS_BPF_STATS=0` guard forced
+callers into `BPFREJIT_CORPUS_WORKLOAD_ONLY=1` or `SKIP_REJIT=all`; the
+workload-only path deliberately runs the workload without the eBPF app and is
+not a valid native-vs-original app comparison. The guard was removed so
+`BPFREJIT_CORPUS_BPF_STATS=0` can be combined with the normal baseline/post app
+lifecycle.
 
 ### Positional metadata coupling
 
@@ -1019,6 +1115,34 @@ second policy (`datagram`) when `generic_kprobe_process_event` referenced
 `ARRAY key=4 value=80 entries=1`, matching both Tetragon source and the shim's
 map-create trace.
 
+`corpus/results/x86_kvm_corpus_20260524_213823_386885` confirmed that
+`policy_stats` was no longer a link/schema blocker: Tetragon reached 248 native
+fd replacements with no native-loader failures before the VM panicked while
+running the `datagram` policy path under `__sk_free`. The panic signatures were
+native `generic_kprobe_` stubs reading or writing vmalloc/percpu-looking
+addresses that had been patched into the native blob as direct ARRAY or
+PERCPU_ARRAY value pointers. The leading diagnosis is lifetime rather than
+symbol resolution: Tetragon is a Go binary, and Go/x/sys can issue raw syscalls
+such as `close_range` without going through LD_PRELOAD's libc `syscall` or
+`close_range` interceptors. A hidden fd retained only in the app process fd
+table is therefore not a sufficient owner for verifier-invisible native map
+pointers. The shim is being changed to transfer retained map fds to a minimal
+keeper child process via `SCM_RIGHTS`; the child holds the map references
+outside the app's fd table so raw `close_range` cannot free maps still
+referenced by attached native programs. The shim now also logs BPF program tags
+in `native-loader jit-info` so future kernel oops tags can be matched back to
+the exact replacement line.
+
+`corpus/results/x86_kvm_corpus_20260524_220355_937610` validated that diagnosis:
+with retained map fds moved out of the app fd table into the keeper child, the
+same single-app Tetragon smoke completed with `status=ok`. The run crossed the
+previous 248-replacement crash point, reached 288 native fd replacements, and
+finished the `stress_ng_tetragon_policy_hot` workload without native-loader
+failures or kernel oops/panic. The keeper intentionally retains native-loader
+map references until app exit rather than trying to mirror per-program close
+lifetime; that is the conservative app-level loader behavior while native blobs
+hold verifier-invisible direct map/value pointers.
+
 `corpus/results/x86_kvm_corpus_20260524_083558_419282` moved past the remaining
 Cilium feature-map mismatches and loaded many native host/LXC programs, but the
 VM later crashed in a native replacement for `cil_from_host`:
@@ -1372,3 +1496,270 @@ The retry after that linker fix passed the real Tracee app path:
 both baseline and post-rejit measurement phases, and the shim log shows native
 replacement for the main Tracee kprobe/raw-tracepoint/LSM/cgroup programs
 rather than a silent fallback to original BPF.
+
+### 2026-05-25 native corpus measurement status
+
+The formal native-vs-original BPF-counter runs use app-level startup with the
+real corpus app and only switch post-rejit loads to native-loader:
+
+```
+BPFREJIT_CORPUS_APPS=<app> BPFREJIT_SHIM_NATIVE_LOADER=post \
+  SKIP_REJIT=norejit make corpus
+```
+
+This keeps baseline as upstream eBPF and post-rejit as native-loaded programs.
+The `post` mode is required for performance measurement; `1` is only a
+correctness smoke because it native-loads both phases.
+
+Completed BPF-counter runs:
+
+- BCC set:
+  `corpus/results/x86_kvm_corpus_20260525_001244_895347`. Status ok,
+  25 baseline/post programs, 25 native replacements, no native-loader failures.
+  Exact hash-based mapping produced 15 paper-qualified programs
+  (`min(run_cnt_delta) >= 100`), geomean native/original avg-run-ns ratio
+  0.9398 (1.064x speedup), wins/losses 9/6.
+- OTEL profiler:
+  `corpus/results/x86_kvm_corpus_20260525_003104_503151`. Status ok,
+  14 native replacements, no native-loader failures. Only
+  `native_tracer_entry` is paper-qualified; its native/original avg-run-ns
+  ratio is 0.0648 (15.4x speedup). The `perf_unwind_*` tail-call targets have
+  zero run counters as expected; savings are charged to the directly attached
+  caller.
+- Cilium agent:
+  `corpus/results/x86_kvm_corpus_20260525_004700_768372`. Status ok,
+  135 native replacements, no native-loader failures. Two directly attached
+  `cil_from_container` programs qualify, with geomean native/original
+  avg-run-ns ratio 0.4588 (2.18x speedup). The BPF-stats-on workload samples
+  also show pktgen throughput increasing from about 0.64 Mpps to about
+  1.58 Mpps in each direction, but final workload numbers still need the
+  stats-off configuration.
+- Katran:
+  `corpus/results/x86_kvm_corpus_20260525_015347_680652`. Status ok,
+  1 native replacement, no native-loader failures. The standalone
+  `balancer_ingres` XDP program is the only paper-qualified program; its
+  avg-run-ns ratio is 0.8288 (1.21x speedup). The BPF-stats-on workload data is
+  not yet conclusive because one post-rejit pktgen sample dropped well below
+  the other two despite the run-counter speedup. This requires stats-off
+  workload validation before claiming an app-level Katran benefit.
+- Tracee:
+  `corpus/results/x86_kvm_corpus_20260525_020803_759245`. Status ok,
+  169 native replacements, no native-loader failures. Attach-symbol matching
+  plus unique shape matching produced 39 paper-qualified programs with geomean
+  avg-run-ns ratio 0.9091 (1.10x speedup), wins/losses 20/19. The distribution
+  is mixed: `fd_install`, `security_file_permission`, raw syscall tracepoints,
+  and several file-update sites improve, while `security_task_prctl`,
+  `commit_creds`, `trace_ret_vfs_read`, and some sched/raw-tracepoint paths
+  regress. The stress-ng workload output in this stats-on run is close enough
+  that the final direction must come from the stats-off workload run.
+
+Tetragon initially looked like a severe native slowdown, but the first matching
+attempt was not trustworthy because many probes are named `generic_kprobe_` or
+`generic_retkpro` after kernel/libbpf truncation. A log-only shim update now
+records `BPF_TASK_FD_QUERY` after successful perf-event `BPF_LINK_CREATE`, so
+the analysis can key directly attached programs by attach symbol instead of
+only by name/type/size. The later run
+`corpus/results/x86_kvm_corpus_20260525_013654_901087` produced 48 successful
+task-fd-query records in both baseline and post-rejit logs, so the duplicate
+name ambiguity is now observable.
+
+The attach-symbol matched Tetragon data still shows a real problem rather than
+just a matching artifact: 8 directly attached programs qualify, with geomean
+native/original avg-run-ns ratio 3.28 (0.305x, a slowdown). The largest losses
+are high-frequency small hooks such as `fd_install`, `ip_output`,
+`tcp_sendmsg`, and `sys_enter`, where native stubs are about 5 us/run while the
+original JITed BPF is hundreds of ns/run. The same run's stress-ng workload
+output drops by roughly 3-6x for eventfd/udp/sockfd/sockpair. This must be
+validated again with BPF stats disabled, but it is currently treated as a
+native-loader/native-stub overhead issue on tiny high-frequency probes, not as
+an analysis matching bug.
+
+Stats-off workload runs use:
+
+```
+BPFREJIT_CORPUS_APPS=<app> BPFREJIT_SHIM_NATIVE_LOADER=post \
+  SKIP_REJIT=norejit BPFREJIT_CORPUS_BPF_STATS=0 make corpus
+```
+
+These runs are executed one app at a time and are the source for app-level
+workload numbers, because they remove the BPF stats accounting overhead from
+the workload path.
+
+Stats-off workload results so far:
+
+- BCC set:
+  `corpus/results/x86_kvm_corpus_20260525_022330_721266`. Status ok,
+  `bpf_stats=false`, 25 post native replacements, no native-loader failures.
+  Baseline/post each ran 3 stress-ng workload samples successfully. The stable
+  stressors are essentially flat at app level: `cap` and `set` are slightly
+  higher with native loading, while `sockfd` is slightly lower. The `syscall`
+  stressor produced one post sample with much larger bogo-ops than the other
+  five samples; that is treated as a stress-ng workload metric instability, not
+  as evidence of a real native speedup. Cross-check: this is consistent with
+  the BPF-counter result, which showed only a modest BCC per-program speedup
+  and several small regressions.
+- OTEL profiler:
+  `corpus/results/x86_kvm_corpus_20260525_023816_629087`. Status ok,
+  `bpf_stats=false`, 14 post native replacements, no native-loader failures.
+  All mixed-language workload components returned 0. Workload ops/s improves
+  strongly and consistently with native loading: Node workers are about
+  5.9-7.0x faster, Python about 1.4-1.6x, Ruby about 1.3-1.7x, PHP about
+  1.3-1.6x, Perl about 1.3-1.6x, and stress-ng CPU about 1.34x. Cross-check:
+  this agrees with the BPF-counter run where the directly attached
+  `native_tracer_entry` became about 15.4x faster; the workload improvement is
+  smaller because the profiler is only part of total process runtime, but the
+  direction is consistent and all workload processes completed successfully.
+- Cilium agent:
+  `corpus/results/x86_kvm_corpus_20260525_025332_109685`. Status ok,
+  `bpf_stats=false`, 135 post native replacements, no native-loader failures.
+  Baseline and post each ran three forward and three reverse endpoint pktgen
+  components successfully, with zero reported pktgen errors. Baseline forward
+  samples were 704994, 702202, and 708863 pps; post forward samples were
+  1847506, 1825849, and 1813845 pps. Baseline reverse samples were 704968,
+  700010, and 707154 pps; post reverse samples were 1861620, 1823601, and
+  1865035 pps. Cross-check: this app-level 2.6x-ish throughput increase is in
+  the same direction as the BPF-counter run's 2.18x per-program speedup for
+  the directly attached `cil_from_container` programs, and the zero-error
+  pktgen output argues against a fake speedup from packets being dropped or the
+  datapath being skipped.
+- Tetragon observer:
+  `corpus/results/x86_kvm_corpus_20260525_030809_301462`. Status ok,
+  `bpf_stats=false`, 288 post native replacements, no native-loader failures,
+  and 48 successful `BPF_TASK_FD_QUERY` records in both baseline and post logs.
+  All three baseline and post stress-ng workload samples returned 0, but the
+  app-level throughput regression is large and repeatable. Mean post/baseline
+  `ops/s_real` ratios are about 0.163 for `eventfd`, 0.168 for `sockfd`,
+  0.236 for `sockpair`, 0.323 for `udp`, 0.574 for `sock`, and 0.769 for
+  `mmap`. Cross-check: this agrees with the attach-symbol matched BPF-counter
+  run where the high-frequency small hooks (`fd_install`, `ip_output`,
+  `tcp_sendmsg`, `sys_enter`) slowed down heavily under native loading. The
+  current interpretation is a real native-stub overhead problem on tiny
+  Tetragon probes, not a workload failure or program-matching artifact.
+- Katran:
+  `corpus/results/x86_kvm_corpus_20260525_032310_956001`. Status ok,
+  `bpf_stats=false`, 1 post native replacement, no native-loader failures.
+  Each sample runs four pktgen threads. The per-thread output includes large
+  `errors:` counts in both baseline and post, but every thread reports
+  `Result: OK` and returns 0, so this is not a native-only correctness failure
+  in this workload. The safer app-level metric is the per-sample total pps over
+  the four threads: baseline totals are 2934983, 2881127, and 2907982 pps; post
+  totals are 3216017, 3183728, and 3255834 pps. Mean total pps improves by
+  about 1.11x. Cross-check: this is consistent with the BPF-counter run's
+  1.21x avg-run-ns speedup for standalone `balancer_ingres`; the earlier
+  stats-on low post sample did not reproduce as a post-only problem when BPF
+  stats were disabled.
+- Tracee monitor:
+  `corpus/results/x86_kvm_corpus_20260525_033753_511202`. Status ok,
+  `bpf_stats=false`, 169 post native replacements, no native-loader failures,
+  and 133 successful `BPF_TASK_FD_QUERY` records in both baseline and post
+  logs. All baseline and post stress-ng samples returned 0. Workload throughput
+  is consistently lower with native loading: mean post/baseline `ops/s_real`
+  ratios are about 0.905 for `sigfd`, 0.923 for `cap`, 0.937 for `set`, 0.944
+  for `kill`, 0.952 for `eventfd`, 0.978 for `prctl`, and 0.984 for `futex`.
+  Cross-check: this does not match the BPF-counter geomean's slight 1.10x
+  per-program win, but the counter distribution was mixed with several
+  high-frequency regressions. The current interpretation is that Tracee native
+  loading is functionally correct but app-level stress throughput is dominated
+  by the regressing hooks and/or event-processing overhead, so this app should
+  be reported as a workload slowdown despite a small per-program counter win.
+
+### 2026-05-25 full-suite reruns and final app interpretation
+
+Full BPF-counter corpus rerun:
+
+```
+BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit make corpus
+```
+
+Artifact: `corpus/results/x86_kvm_corpus_20260525_035337_555709`.
+The suite status is `ok`, `bpf_stats=true`, `samples=3`,
+`workload_seconds=30`, and all six app result files are `ok`. Post-phase shim
+logs record the same native replacement coverage as the one-app runs and no
+native-loader failures: BCC 25, OTEL 14, Cilium 135, Tetragon 288, Katran 1,
+Tracee 169.
+
+Paper-grade counter interpretation, using post-hoc analysis with
+`min(run_cnt_delta) >= 100` and native/original avg-run-ns ratios:
+
+| App | Qualified direct programs | Native/original avg-run-ns geomean | Counter interpretation |
+| --- | ---: | ---: | --- |
+| BCC set | 15 | 0.9299, 1.075x faster | Small per-program win, mixed sites. |
+| OTEL profiler | 1 | 0.0674, 14.83x faster | Strong win on `native_tracer_entry`; tail targets are charged to the caller. |
+| Cilium agent | 2 | 0.4291, 2.33x faster | Strong win on the two active `cil_from_container` paths. |
+| Tetragon observer | 8 | 4.4405, 0.225x | Severe slowdown on high-frequency tiny hooks. |
+| Katran | 1 | 0.7952, 1.26x faster | Modest XDP win on `balancer_ingres`. |
+| Tracee monitor | 40 | 0.8952, 1.12x faster | Mixed; wins and losses are almost balanced. |
+
+The Cilium full-suite counter match uses the two active `cil_from_container`
+programs by program shape because per-phase map identities change the raw load
+hashes. The two pairings are stable because both entries have the same program
+shape and nearly identical run counts/ratios; either ordering gives the same
+geomean to the reported precision.
+
+Full workload-number corpus rerun with kernel BPF stats disabled:
+
+```
+BPFREJIT_SHIM_NATIVE_LOADER=post SKIP_REJIT=norejit \
+  BPFREJIT_CORPUS_BPF_STATS=0 make corpus
+```
+
+Artifact: `corpus/results/x86_kvm_corpus_20260525_043133_695517`.
+The suite status is `ok`, `bpf_stats=false`, `samples=3`,
+`workload_seconds=30`, and all six app result files are `ok`. Post-phase native
+replacement counts are again BCC 25, OTEL 14, Cilium 135, Tetragon 288,
+Katran 1, Tracee 169, with zero native-loader failures.
+
+Stats-off workload numbers:
+
+| App | Workload metric | Baseline mean | Native mean | Native/baseline | Final workload interpretation |
+| --- | --- | ---: | ---: | ---: | --- |
+| BCC set | `cap` ops/s real | 422694.55 | 423642.64 | 1.002 | Flat. |
+| BCC set | `set` ops/s real | 30888.38 | 31010.32 | 1.004 | Flat. |
+| BCC set | `sockfd` ops/s real | 262616.37 | 262412.57 | 0.999 | Flat. |
+| BCC set | `syscall` ops/s real | 105.13 | 16.58 | 0.158 | Unstable stress-ng signal; one baseline outlier, not used as a real native effect. |
+| OTEL profiler | Node.js ops/s | 986051.6 | 8765656.6 | 8.890 | Strong app-level speedup. |
+| OTEL profiler | Python ops/s | 2294704.3 | 3737779.9 | 1.629 | Strong app-level speedup. |
+| OTEL profiler | Ruby ops/s | 5962359.1 | 8732203.5 | 1.465 | Strong app-level speedup. |
+| OTEL profiler | PHP ops/s | 9811407.1 | 14402807.9 | 1.468 | Strong app-level speedup. |
+| OTEL profiler | Perl ops/s | 2876300.8 | 3973204.0 | 1.381 | Strong app-level speedup. |
+| OTEL profiler | stress-ng CPU ops/s real | 831.9 | 989.4 | 1.189 | Modest supporting speedup. |
+| Cilium agent | forward pktgen pps | 709203 | 1862566 | 2.626 | Strong datapath speedup, zero pktgen errors. |
+| Cilium agent | reverse pktgen pps | 709441 | 1886538 | 2.659 | Strong datapath speedup, zero pktgen errors. |
+| Tetragon observer | `eventfd` ops/s real | 70249.03 | 12262.22 | 0.175 | Severe slowdown. |
+| Tetragon observer | `sockfd` ops/s real | 127668.33 | 22290.82 | 0.175 | Severe slowdown. |
+| Tetragon observer | `sockpair` ops/s real | 45123.69 | 10682.77 | 0.237 | Severe slowdown. |
+| Tetragon observer | `udp` ops/s real | 118695.17 | 35828.71 | 0.302 | Severe slowdown. |
+| Tetragon observer | `sock` ops/s real | 361.23 | 210.16 | 0.582 | Slowdown. |
+| Tetragon observer | `mmap` ops/s real | 25.92 | 21.92 | 0.845 | Small slowdown. |
+| Katran | four-thread total pktgen pps | 2905920 | 3141304 | 1.081 | Modest speedup; high pktgen errors exist in both phases and every component reports `Result: OK`. |
+| Tracee monitor | `cap` ops/s real | 79192.08 | 75231.28 | 0.950 | Slowdown. |
+| Tracee monitor | `eventfd` ops/s real | 43716.25 | 40570.35 | 0.928 | Slowdown. |
+| Tracee monitor | `futex` ops/s real | 85069.30 | 86260.28 | 1.014 | Flat/slightly up. |
+| Tracee monitor | `kill` ops/s real | 32490.32 | 31665.60 | 0.975 | Flat/slightly down. |
+| Tracee monitor | `prctl` ops/s real | 405.26 | 301.72 | 0.745 | Slowdown. |
+| Tracee monitor | `set` ops/s real | 6562.33 | 6136.21 | 0.935 | Slowdown. |
+| Tracee monitor | `sigfd` ops/s real | 199164.02 | 193618.19 | 0.972 | Flat/slightly down. |
+
+Final per-app conclusion:
+
+- BCC is functionally correct but has no meaningful app-level workload benefit;
+  the counter win is too small and mixed to survive at workload level.
+- OTEL has a real benefit. Counter data and stats-off workload numbers agree,
+  and the tail-call accounting is correctly measured at `native_tracer_entry`.
+- Cilium has a real benefit. Both counter data and endpoint pktgen throughput
+  show a large speedup, with zero pktgen errors.
+- Tetragon is functionally correct but not beneficial. The slowdown is
+  repeatable in counters and workload numbers and is consistent with native
+  stub overhead dominating tiny high-frequency hooks.
+- Katran has a modest real benefit. The counter and workload directions agree;
+  pktgen error counts are high in both phases, so they are a workload/topology
+  caveat rather than a native-only correctness failure.
+- Tracee is functionally correct but should be reported as a workload slowdown.
+  The per-program counter geomean is slightly positive, but the distribution is
+  mixed and stats-off workload metrics are mostly lower with native loading.
+
+Proof status: the staged native artifact manifests under
+`vendor/build/native-bpf/x86/stage/*/manifest.json` all report
+`native-objects-proof-linked`, and the tree contains 111 `.proof.ok` markers
+under `vendor/build/native-bpf/x86`. The final corpus runs loaded those staged
+native artifacts through the real app startup paths.

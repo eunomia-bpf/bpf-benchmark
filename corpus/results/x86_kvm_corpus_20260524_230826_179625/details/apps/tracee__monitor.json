@@ -1,0 +1,3111 @@
+{
+  "app": "tracee/monitor",
+  "baseline": {
+    "bpf": {
+      "100": {
+        "bytes_jited": 7450,
+        "bytes_xlated": 936,
+        "id": 100,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1546,
+        "run_time_ns_delta": 2184633,
+        "type": "raw_tracepoint"
+      },
+      "102": {
+        "bytes_jited": 1030,
+        "bytes_xlated": 136,
+        "id": 102,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1546,
+        "run_time_ns_delta": 5669390,
+        "type": "raw_tracepoint"
+      },
+      "104": {
+        "bytes_jited": 263,
+        "bytes_xlated": 40,
+        "id": 104,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1512,
+        "run_time_ns_delta": 250491,
+        "type": "raw_tracepoint"
+      },
+      "106": {
+        "bytes_jited": 7083,
+        "bytes_xlated": 904,
+        "id": 106,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "108": {
+        "bytes_jited": 7638,
+        "bytes_xlated": 968,
+        "id": 108,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1974677,
+        "run_time_ns_delta": 838036245,
+        "type": "raw_tracepoint"
+      },
+      "110": {
+        "bytes_jited": 7049,
+        "bytes_xlated": 888,
+        "id": 110,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 407361,
+        "run_time_ns_delta": 9719458,
+        "type": "kprobe"
+      },
+      "112": {
+        "bytes_jited": 26355,
+        "bytes_xlated": 3304,
+        "id": 112,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "114": {
+        "bytes_jited": 6945,
+        "bytes_xlated": 888,
+        "id": 114,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1546,
+        "run_time_ns_delta": 1906036,
+        "type": "kprobe"
+      },
+      "116": {
+        "bytes_jited": 50038,
+        "bytes_xlated": 6264,
+        "id": 116,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "118": {
+        "bytes_jited": 6216,
+        "bytes_xlated": 792,
+        "id": 118,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "120": {
+        "bytes_jited": 5759,
+        "bytes_xlated": 728,
+        "id": 120,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "122": {
+        "bytes_jited": 9546,
+        "bytes_xlated": 1208,
+        "id": 122,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 3,
+        "run_time_ns_delta": 3661,
+        "type": "kprobe"
+      },
+      "124": {
+        "bytes_jited": 8331,
+        "bytes_xlated": 1048,
+        "id": 124,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "126": {
+        "bytes_jited": 7383,
+        "bytes_xlated": 936,
+        "id": 126,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "128": {
+        "bytes_jited": 7722,
+        "bytes_xlated": 984,
+        "id": 128,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "130": {
+        "bytes_jited": 7722,
+        "bytes_xlated": 984,
+        "id": 130,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "132": {
+        "bytes_jited": 34708,
+        "bytes_xlated": 4344,
+        "id": 132,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 7188,
+        "type": "kprobe"
+      },
+      "134": {
+        "bytes_jited": 17925,
+        "bytes_xlated": 2248,
+        "id": 134,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 182389,
+        "run_time_ns_delta": 118367801,
+        "type": "kprobe"
+      },
+      "136": {
+        "bytes_jited": 16201,
+        "bytes_xlated": 2040,
+        "id": 136,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "138": {
+        "bytes_jited": 8736,
+        "bytes_xlated": 1112,
+        "id": 138,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "140": {
+        "bytes_jited": 9114,
+        "bytes_xlated": 1144,
+        "id": 140,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 244442,
+        "run_time_ns_delta": 148468479,
+        "type": "kprobe"
+      },
+      "142": {
+        "bytes_jited": 9191,
+        "bytes_xlated": 1160,
+        "id": 142,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1546,
+        "run_time_ns_delta": 1065989,
+        "type": "kprobe"
+      },
+      "144": {
+        "bytes_jited": 6964,
+        "bytes_xlated": 888,
+        "id": 144,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 416324,
+        "run_time_ns_delta": 136634020,
+        "type": "kprobe"
+      },
+      "146": {
+        "bytes_jited": 7276,
+        "bytes_xlated": 920,
+        "id": 146,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 6,
+        "run_time_ns_delta": 9880,
+        "type": "kprobe"
+      },
+      "148": {
+        "bytes_jited": 7762,
+        "bytes_xlated": 984,
+        "id": 148,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "150": {
+        "bytes_jited": 7119,
+        "bytes_xlated": 904,
+        "id": 150,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "152": {
+        "bytes_jited": 7957,
+        "bytes_xlated": 1000,
+        "id": 152,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "154": {
+        "bytes_jited": 7757,
+        "bytes_xlated": 984,
+        "id": 154,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "156": {
+        "bytes_jited": 8778,
+        "bytes_xlated": 1112,
+        "id": 156,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "158": {
+        "bytes_jited": 8427,
+        "bytes_xlated": 1064,
+        "id": 158,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 6,
+        "run_time_ns_delta": 10185,
+        "type": "kprobe"
+      },
+      "160": {
+        "bytes_jited": 9256,
+        "bytes_xlated": 1176,
+        "id": 160,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 1114,
+        "type": "kprobe"
+      },
+      "162": {
+        "bytes_jited": 8634,
+        "bytes_xlated": 1096,
+        "id": 162,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "164": {
+        "bytes_jited": 9125,
+        "bytes_xlated": 1160,
+        "id": 164,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "166": {
+        "bytes_jited": 1145,
+        "bytes_xlated": 160,
+        "id": 166,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "168": {
+        "bytes_jited": 1145,
+        "bytes_xlated": 160,
+        "id": 168,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "170": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 170,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 364956,
+        "run_time_ns_delta": 23241040,
+        "type": "kprobe"
+      },
+      "172": {
+        "bytes_jited": 284,
+        "bytes_xlated": 56,
+        "id": 172,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 364956,
+        "run_time_ns_delta": 15031693,
+        "type": "kprobe"
+      },
+      "174": {
+        "bytes_jited": 17455,
+        "bytes_xlated": 2208,
+        "id": 174,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 364956,
+        "run_time_ns_delta": 252223039,
+        "type": "kprobe"
+      },
+      "176": {
+        "bytes_jited": 19241,
+        "bytes_xlated": 2424,
+        "id": 176,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 364956,
+        "run_time_ns_delta": 13593608,
+        "type": "kprobe"
+      },
+      "178": {
+        "bytes_jited": 27363,
+        "bytes_xlated": 3440,
+        "id": 178,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "180": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 180,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "182": {
+        "bytes_jited": 284,
+        "bytes_xlated": 56,
+        "id": 182,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "184": {
+        "bytes_jited": 17461,
+        "bytes_xlated": 2208,
+        "id": 184,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "186": {
+        "bytes_jited": 19296,
+        "bytes_xlated": 2424,
+        "id": 186,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "188": {
+        "bytes_jited": 27935,
+        "bytes_xlated": 3504,
+        "id": 188,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "190": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 190,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "192": {
+        "bytes_jited": 284,
+        "bytes_xlated": 56,
+        "id": 192,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "194": {
+        "bytes_jited": 17461,
+        "bytes_xlated": 2208,
+        "id": 194,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "196": {
+        "bytes_jited": 19241,
+        "bytes_xlated": 2424,
+        "id": 196,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "198": {
+        "bytes_jited": 27363,
+        "bytes_xlated": 3440,
+        "id": 198,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "200": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 200,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1466718,
+        "run_time_ns_delta": 96793771,
+        "type": "kprobe"
+      },
+      "202": {
+        "bytes_jited": 17461,
+        "bytes_xlated": 2208,
+        "id": 202,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1466718,
+        "run_time_ns_delta": 945108184,
+        "type": "kprobe"
+      },
+      "204": {
+        "bytes_jited": 16957,
+        "bytes_xlated": 2144,
+        "id": 204,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "206": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 206,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "208": {
+        "bytes_jited": 17461,
+        "bytes_xlated": 2208,
+        "id": 208,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "210": {
+        "bytes_jited": 16916,
+        "bytes_xlated": 2128,
+        "id": 210,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "212": {
+        "bytes_jited": 17586,
+        "bytes_xlated": 2216,
+        "id": 212,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 165,
+        "run_time_ns_delta": 42010,
+        "type": "kprobe"
+      },
+      "214": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 214,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 162,
+        "run_time_ns_delta": 28552,
+        "type": "kprobe"
+      },
+      "216": {
+        "bytes_jited": 17019,
+        "bytes_xlated": 2136,
+        "id": 216,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 162,
+        "run_time_ns_delta": 266255,
+        "type": "kprobe"
+      },
+      "218": {
+        "bytes_jited": 30201,
+        "bytes_xlated": 3784,
+        "id": 218,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 162,
+        "run_time_ns_delta": 228811,
+        "type": "kprobe"
+      },
+      "220": {
+        "bytes_jited": 31032,
+        "bytes_xlated": 3904,
+        "id": 220,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 34,
+        "run_time_ns_delta": 55530,
+        "type": "kprobe"
+      },
+      "222": {
+        "bytes_jited": 728,
+        "bytes_xlated": 112,
+        "id": 222,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "224": {
+        "bytes_jited": 14788,
+        "bytes_xlated": 1872,
+        "id": 224,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 347,
+        "run_time_ns_delta": 47758,
+        "type": "kprobe"
+      },
+      "226": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 226,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "228": {
+        "bytes_jited": 7526,
+        "bytes_xlated": 952,
+        "id": 228,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "230": {
+        "bytes_jited": 7140,
+        "bytes_xlated": 904,
+        "id": 230,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "232": {
+        "bytes_jited": 8111,
+        "bytes_xlated": 1032,
+        "id": 232,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 167,
+        "run_time_ns_delta": 44391,
+        "type": "kprobe"
+      },
+      "234": {
+        "bytes_jited": 5714,
+        "bytes_xlated": 728,
+        "id": 234,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "236": {
+        "bytes_jited": 5923,
+        "bytes_xlated": 760,
+        "id": 236,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "238": {
+        "bytes_jited": 5930,
+        "bytes_xlated": 760,
+        "id": 238,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "24": {
+        "bytes_jited": 233,
+        "bytes_xlated": 48,
+        "id": 24,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 13899994,
+        "run_time_ns_delta": 2528907433,
+        "type": "raw_tracepoint"
+      },
+      "240": {
+        "bytes_jited": 16068,
+        "bytes_xlated": 2024,
+        "id": 240,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "242": {
+        "bytes_jited": 16003,
+        "bytes_xlated": 2016,
+        "id": 242,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "244": {
+        "bytes_jited": 7801,
+        "bytes_xlated": 984,
+        "id": 244,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "246": {
+        "bytes_jited": 7288,
+        "bytes_xlated": 920,
+        "id": 246,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "248": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 248,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "250": {
+        "bytes_jited": 7579,
+        "bytes_xlated": 952,
+        "id": 250,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "252": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 252,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "254": {
+        "bytes_jited": 74,
+        "bytes_xlated": 24,
+        "id": 254,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "256": {
+        "bytes_jited": 17121,
+        "bytes_xlated": 2152,
+        "id": 256,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "258": {
+        "bytes_jited": 7930,
+        "bytes_xlated": 1000,
+        "id": 258,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "26": {
+        "bytes_jited": 2320,
+        "bytes_xlated": 304,
+        "id": 26,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "260": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 260,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "262": {
+        "bytes_jited": 12603,
+        "bytes_xlated": 1592,
+        "id": 262,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "264": {
+        "bytes_jited": 16056,
+        "bytes_xlated": 2024,
+        "id": 264,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 6284,
+        "type": "kprobe"
+      },
+      "266": {
+        "bytes_jited": 7654,
+        "bytes_xlated": 968,
+        "id": 266,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1835655,
+        "run_time_ns_delta": 74786224,
+        "type": "kprobe"
+      },
+      "268": {
+        "bytes_jited": 7244,
+        "bytes_xlated": 920,
+        "id": 268,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1581,
+        "run_time_ns_delta": 1833971,
+        "type": "raw_tracepoint"
+      },
+      "270": {
+        "bytes_jited": 8243,
+        "bytes_xlated": 1048,
+        "id": 270,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "272": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 272,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "274": {
+        "bytes_jited": 7272,
+        "bytes_xlated": 920,
+        "id": 274,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "276": {
+        "bytes_jited": 8819,
+        "bytes_xlated": 1112,
+        "id": 276,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 3178,
+        "run_time_ns_delta": 3499057,
+        "type": "kprobe"
+      },
+      "278": {
+        "bytes_jited": 16184,
+        "bytes_xlated": 2040,
+        "id": 278,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "28": {
+        "bytes_jited": 16327,
+        "bytes_xlated": 2064,
+        "id": 28,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "280": {
+        "bytes_jited": 16184,
+        "bytes_xlated": 2040,
+        "id": 280,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "282": {
+        "bytes_jited": 8351,
+        "bytes_xlated": 1064,
+        "id": 282,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "284": {
+        "bytes_jited": 14166,
+        "bytes_xlated": 1784,
+        "id": 284,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 182537,
+        "run_time_ns_delta": 29118197,
+        "type": "kprobe"
+      },
+      "286": {
+        "bytes_jited": 14063,
+        "bytes_xlated": 1768,
+        "id": 286,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 4649,
+        "run_time_ns_delta": 4814462,
+        "type": "kprobe"
+      },
+      "288": {
+        "bytes_jited": 434,
+        "bytes_xlated": 72,
+        "id": 288,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 84,
+        "run_time_ns_delta": 9429,
+        "type": "kprobe"
+      },
+      "290": {
+        "bytes_jited": 16962,
+        "bytes_xlated": 2136,
+        "id": 290,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 84,
+        "run_time_ns_delta": 15686,
+        "type": "kprobe"
+      },
+      "292": {
+        "bytes_jited": 434,
+        "bytes_xlated": 72,
+        "id": 292,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "294": {
+        "bytes_jited": 16962,
+        "bytes_xlated": 2136,
+        "id": 294,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "296": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 296,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "298": {
+        "bytes_jited": 15860,
+        "bytes_xlated": 1992,
+        "id": 298,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "30": {
+        "bytes_jited": 276,
+        "bytes_xlated": 48,
+        "id": 30,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 13899966,
+        "run_time_ns_delta": 5873902937,
+        "type": "raw_tracepoint"
+      },
+      "300": {
+        "bytes_jited": 10108,
+        "bytes_xlated": 1272,
+        "id": 300,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "302": {
+        "bytes_jited": 15631,
+        "bytes_xlated": 1968,
+        "id": 302,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 449,
+        "type": "kprobe"
+      },
+      "304": {
+        "bytes_jited": 15374,
+        "bytes_xlated": 1936,
+        "id": 304,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 13642,
+        "type": "kprobe"
+      },
+      "306": {
+        "bytes_jited": 27742,
+        "bytes_xlated": 3480,
+        "id": 306,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 5193,
+        "type": "kprobe"
+      },
+      "308": {
+        "bytes_jited": 15871,
+        "bytes_xlated": 1992,
+        "id": 308,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "310": {
+        "bytes_jited": 16037,
+        "bytes_xlated": 2024,
+        "id": 310,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 4324,
+        "type": "kprobe"
+      },
+      "312": {
+        "bytes_jited": 7374,
+        "bytes_xlated": 936,
+        "id": 312,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 367803,
+        "run_time_ns_delta": 151396476,
+        "type": "kprobe"
+      },
+      "314": {
+        "bytes_jited": 7418,
+        "bytes_xlated": 936,
+        "id": 314,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "316": {
+        "bytes_jited": 15134,
+        "bytes_xlated": 1912,
+        "id": 316,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "318": {
+        "bytes_jited": 39495,
+        "bytes_xlated": 4952,
+        "id": 318,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 141184,
+        "run_time_ns_delta": 136125388,
+        "type": "kprobe"
+      },
+      "32": {
+        "bytes_jited": 2109,
+        "bytes_xlated": 288,
+        "id": 32,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "320": {
+        "bytes_jited": 18787,
+        "bytes_xlated": 2360,
+        "id": 320,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "322": {
+        "bytes_jited": 8332,
+        "bytes_xlated": 1048,
+        "id": 322,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "324": {
+        "bytes_jited": 324,
+        "bytes_xlated": 56,
+        "id": 324,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 7,
+        "run_time_ns_delta": 1145,
+        "type": "kprobe"
+      },
+      "326": {
+        "bytes_jited": 7066,
+        "bytes_xlated": 888,
+        "id": 326,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 7,
+        "run_time_ns_delta": 4237,
+        "type": "kprobe"
+      },
+      "328": {
+        "bytes_jited": 362,
+        "bytes_xlated": 56,
+        "id": 328,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "330": {
+        "bytes_jited": 7233,
+        "bytes_xlated": 920,
+        "id": 330,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 1023,
+        "type": "kprobe"
+      },
+      "332": {
+        "bytes_jited": 7233,
+        "bytes_xlated": 920,
+        "id": 332,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 938,
+        "type": "kprobe"
+      },
+      "334": {
+        "bytes_jited": 4575,
+        "bytes_xlated": 584,
+        "id": 334,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "337": {
+        "bytes_jited": 9099,
+        "bytes_xlated": 1144,
+        "id": 337,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "cgroup_skb"
+      },
+      "339": {
+        "bytes_jited": 9099,
+        "bytes_xlated": 1144,
+        "id": 339,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "cgroup_skb"
+      },
+      "34": {
+        "bytes_jited": 11070,
+        "bytes_xlated": 1408,
+        "id": 34,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "341": {
+        "bytes_jited": 851,
+        "bytes_xlated": 120,
+        "id": 341,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "343": {
+        "bytes_jited": 820,
+        "bytes_xlated": 120,
+        "id": 343,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "345": {
+        "bytes_jited": 16,
+        "bytes_xlated": 24,
+        "id": 345,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 230,
+        "type": "kprobe"
+      },
+      "347": {
+        "bytes_jited": 51511,
+        "bytes_xlated": 6456,
+        "id": 347,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 839,
+        "type": "raw_tracepoint"
+      },
+      "349": {
+        "bytes_jited": 6821,
+        "bytes_xlated": 872,
+        "id": 349,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 182389,
+        "run_time_ns_delta": 74997766,
+        "type": "lsm"
+      },
+      "351": {
+        "bytes_jited": 3291,
+        "bytes_xlated": 432,
+        "id": 351,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "353": {
+        "bytes_jited": 1753,
+        "bytes_xlated": 232,
+        "id": 353,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "355": {
+        "bytes_jited": 1753,
+        "bytes_xlated": 232,
+        "id": 355,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "357": {
+        "bytes_jited": 1753,
+        "bytes_xlated": 232,
+        "id": 357,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "36": {
+        "bytes_jited": 7050,
+        "bytes_xlated": 888,
+        "id": 36,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 13899986,
+        "run_time_ns_delta": 5498600041,
+        "type": "raw_tracepoint"
+      },
+      "38": {
+        "bytes_jited": 7081,
+        "bytes_xlated": 904,
+        "id": 38,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 13899964,
+        "run_time_ns_delta": 5443866234,
+        "type": "raw_tracepoint"
+      },
+      "40": {
+        "bytes_jited": 2156,
+        "bytes_xlated": 288,
+        "id": 40,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "42": {
+        "bytes_jited": 11014,
+        "bytes_xlated": 1392,
+        "id": 42,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "44": {
+        "bytes_jited": 2156,
+        "bytes_xlated": 288,
+        "id": 44,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "46": {
+        "bytes_jited": 11014,
+        "bytes_xlated": 1392,
+        "id": 46,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "48": {
+        "bytes_jited": 2156,
+        "bytes_xlated": 288,
+        "id": 48,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 403443,
+        "run_time_ns_delta": 35390020,
+        "type": "kprobe"
+      },
+      "50": {
+        "bytes_jited": 11014,
+        "bytes_xlated": 1392,
+        "id": 50,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 403443,
+        "run_time_ns_delta": 195620283,
+        "type": "kprobe"
+      },
+      "52": {
+        "bytes_jited": 2156,
+        "bytes_xlated": 288,
+        "id": 52,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "54": {
+        "bytes_jited": 11014,
+        "bytes_xlated": 1392,
+        "id": 54,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "56": {
+        "bytes_jited": 2156,
+        "bytes_xlated": 288,
+        "id": 56,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 995,
+        "type": "kprobe"
+      },
+      "58": {
+        "bytes_jited": 11014,
+        "bytes_xlated": 1392,
+        "id": 58,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 6643,
+        "type": "kprobe"
+      },
+      "60": {
+        "bytes_jited": 2156,
+        "bytes_xlated": 288,
+        "id": 60,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "62": {
+        "bytes_jited": 11014,
+        "bytes_xlated": 1392,
+        "id": 62,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "64": {
+        "bytes_jited": 23955,
+        "bytes_xlated": 3000,
+        "id": 64,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "66": {
+        "bytes_jited": 24060,
+        "bytes_xlated": 3016,
+        "id": 66,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "68": {
+        "bytes_jited": 24164,
+        "bytes_xlated": 3032,
+        "id": 68,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "70": {
+        "bytes_jited": 24258,
+        "bytes_xlated": 3048,
+        "id": 70,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "72": {
+        "bytes_jited": 9814,
+        "bytes_xlated": 1240,
+        "id": 72,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "74": {
+        "bytes_jited": 16894,
+        "bytes_xlated": 2120,
+        "id": 74,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1548,
+        "run_time_ns_delta": 3028479,
+        "type": "raw_tracepoint"
+      },
+      "76": {
+        "bytes_jited": 3744,
+        "bytes_xlated": 488,
+        "id": 76,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1548,
+        "run_time_ns_delta": 4466780,
+        "type": "raw_tracepoint"
+      },
+      "78": {
+        "bytes_jited": 65276,
+        "bytes_xlated": 8176,
+        "id": 78,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "80": {
+        "bytes_jited": 156,
+        "bytes_xlated": 40,
+        "id": 80,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 5,
+        "run_time_ns_delta": 23349,
+        "type": "kprobe"
+      },
+      "82": {
+        "bytes_jited": 5303,
+        "bytes_xlated": 680,
+        "id": 82,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "84": {
+        "bytes_jited": 4198,
+        "bytes_xlated": 544,
+        "id": 84,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "86": {
+        "bytes_jited": 57256,
+        "bytes_xlated": 7168,
+        "id": 86,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "88": {
+        "bytes_jited": 747,
+        "bytes_xlated": 112,
+        "id": 88,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "90": {
+        "bytes_jited": 51137,
+        "bytes_xlated": 6416,
+        "id": 90,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "92": {
+        "bytes_jited": 3283,
+        "bytes_xlated": 424,
+        "id": 92,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "94": {
+        "bytes_jited": 18970,
+        "bytes_xlated": 2384,
+        "id": 94,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 10257,
+        "type": "raw_tracepoint"
+      },
+      "96": {
+        "bytes_jited": 20933,
+        "bytes_xlated": 2632,
+        "id": 96,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 8087,
+        "type": "raw_tracepoint"
+      },
+      "98": {
+        "bytes_jited": 19944,
+        "bytes_xlated": 2504,
+        "id": 98,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sigfd",
+          "1",
+          "--eventfd",
+          "1",
+          "--kill",
+          "1",
+          "--futex",
+          "1",
+          "--prctl",
+          "1",
+          "--timeout",
+          "5s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/e9db6711"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "set",
+            "sigfd",
+            "eventfd",
+            "kill",
+            "futex",
+            "prctl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 5.035288006999991,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [2944] setting to a 5 secs run per stressor\nstress-ng: info:  [2944] dispatching hogs: 1 cap, 1 set, 1 sigfd, 1 eventfd, 1 kill, 1 futex, 1 prctl\nstress-ng: info:  [2944] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [2944] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2944]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2944] cap              295011      5.00      0.09      4.07     58994.86       70805.83\nstress-ng: metrc: [2944] set               26263      5.00      0.07      4.51      5252.64        5736.70\nstress-ng: metrc: [2944] sigfd            747285      5.00      0.16      6.21    149448.25      117304.07\nstress-ng: metrc: [2944] eventfd          179648      5.00      0.09      4.56     35927.86       38648.98\nstress-ng: metrc: [2944] kill             142033      5.00      0.12      4.86     28405.38       28541.51\nstress-ng: metrc: [2944] futex            852350     10.00      0.23      6.76     85233.08      121926.88\nstress-ng: metrc: [2944] prctl              1534      5.00      1.44      0.36       306.76         852.04\nstress-ng: info:  [2944] skipped: 0\nstress-ng: info:  [2944] passed: 7: cap (1) set (1) sigfd (1) eventfd (1) kill (1) futex (1) prctl (1)\nstress-ng: info:  [2944] failed: 0\nstress-ng: info:  [2944] metrics untrustworthy: 0\nstress-ng: info:  [2944] successful run completed in 5.01 secs",
+        "workload_name": "stress_ng_tracee_syscall_hot"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "375": {
+        "bytes_jited": 233,
+        "bytes_xlated": 48,
+        "id": 375,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 14721701,
+        "run_time_ns_delta": 2565840432,
+        "type": "raw_tracepoint"
+      },
+      "377": {
+        "bytes_jited": 2320,
+        "bytes_xlated": 304,
+        "id": 377,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "379": {
+        "bytes_jited": 16327,
+        "bytes_xlated": 2064,
+        "id": 379,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "381": {
+        "bytes_jited": 276,
+        "bytes_xlated": 48,
+        "id": 381,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 14721776,
+        "run_time_ns_delta": 6049802203,
+        "type": "raw_tracepoint"
+      },
+      "383": {
+        "bytes_jited": 2109,
+        "bytes_xlated": 288,
+        "id": 383,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "385": {
+        "bytes_jited": 11070,
+        "bytes_xlated": 1408,
+        "id": 385,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "387": {
+        "bytes_jited": 7050,
+        "bytes_xlated": 888,
+        "id": 387,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 14721728,
+        "run_time_ns_delta": 5642047921,
+        "type": "raw_tracepoint"
+      },
+      "389": {
+        "bytes_jited": 7081,
+        "bytes_xlated": 904,
+        "id": 389,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 14721793,
+        "run_time_ns_delta": 5618139284,
+        "type": "raw_tracepoint"
+      },
+      "391": {
+        "bytes_jited": 2156,
+        "bytes_xlated": 288,
+        "id": 391,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "393": {
+        "bytes_jited": 11014,
+        "bytes_xlated": 1392,
+        "id": 393,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "395": {
+        "bytes_jited": 2156,
+        "bytes_xlated": 288,
+        "id": 395,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "397": {
+        "bytes_jited": 11014,
+        "bytes_xlated": 1392,
+        "id": 397,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "399": {
+        "bytes_jited": 2156,
+        "bytes_xlated": 288,
+        "id": 399,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 418171,
+        "run_time_ns_delta": 32847110,
+        "type": "kprobe"
+      },
+      "401": {
+        "bytes_jited": 11014,
+        "bytes_xlated": 1392,
+        "id": 401,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 418171,
+        "run_time_ns_delta": 175858969,
+        "type": "kprobe"
+      },
+      "403": {
+        "bytes_jited": 2156,
+        "bytes_xlated": 288,
+        "id": 403,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "405": {
+        "bytes_jited": 11014,
+        "bytes_xlated": 1392,
+        "id": 405,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "407": {
+        "bytes_jited": 2156,
+        "bytes_xlated": 288,
+        "id": 407,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 990,
+        "type": "kprobe"
+      },
+      "409": {
+        "bytes_jited": 11014,
+        "bytes_xlated": 1392,
+        "id": 409,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 5975,
+        "type": "kprobe"
+      },
+      "411": {
+        "bytes_jited": 2156,
+        "bytes_xlated": 288,
+        "id": 411,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "413": {
+        "bytes_jited": 11014,
+        "bytes_xlated": 1392,
+        "id": 413,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "415": {
+        "bytes_jited": 23955,
+        "bytes_xlated": 3000,
+        "id": 415,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "417": {
+        "bytes_jited": 24060,
+        "bytes_xlated": 3016,
+        "id": 417,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "419": {
+        "bytes_jited": 24164,
+        "bytes_xlated": 3032,
+        "id": 419,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "421": {
+        "bytes_jited": 24258,
+        "bytes_xlated": 3048,
+        "id": 421,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "423": {
+        "bytes_jited": 9814,
+        "bytes_xlated": 1240,
+        "id": 423,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "425": {
+        "bytes_jited": 16894,
+        "bytes_xlated": 2120,
+        "id": 425,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1604,
+        "run_time_ns_delta": 2680454,
+        "type": "raw_tracepoint"
+      },
+      "427": {
+        "bytes_jited": 3744,
+        "bytes_xlated": 488,
+        "id": 427,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1604,
+        "run_time_ns_delta": 4004383,
+        "type": "raw_tracepoint"
+      },
+      "429": {
+        "bytes_jited": 65276,
+        "bytes_xlated": 8176,
+        "id": 429,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "431": {
+        "bytes_jited": 156,
+        "bytes_xlated": 40,
+        "id": 431,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 5,
+        "run_time_ns_delta": 15122,
+        "type": "kprobe"
+      },
+      "433": {
+        "bytes_jited": 5303,
+        "bytes_xlated": 680,
+        "id": 433,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "435": {
+        "bytes_jited": 4198,
+        "bytes_xlated": 544,
+        "id": 435,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "437": {
+        "bytes_jited": 57256,
+        "bytes_xlated": 7168,
+        "id": 437,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "439": {
+        "bytes_jited": 747,
+        "bytes_xlated": 112,
+        "id": 439,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "441": {
+        "bytes_jited": 51137,
+        "bytes_xlated": 6416,
+        "id": 441,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "443": {
+        "bytes_jited": 3283,
+        "bytes_xlated": 424,
+        "id": 443,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "445": {
+        "bytes_jited": 18970,
+        "bytes_xlated": 2384,
+        "id": 445,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 9605,
+        "type": "raw_tracepoint"
+      },
+      "447": {
+        "bytes_jited": 20933,
+        "bytes_xlated": 2632,
+        "id": 447,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 7281,
+        "type": "raw_tracepoint"
+      },
+      "449": {
+        "bytes_jited": 19944,
+        "bytes_xlated": 2504,
+        "id": 449,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "451": {
+        "bytes_jited": 7450,
+        "bytes_xlated": 936,
+        "id": 451,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1602,
+        "run_time_ns_delta": 1936034,
+        "type": "raw_tracepoint"
+      },
+      "453": {
+        "bytes_jited": 1030,
+        "bytes_xlated": 136,
+        "id": 453,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1602,
+        "run_time_ns_delta": 5302896,
+        "type": "raw_tracepoint"
+      },
+      "455": {
+        "bytes_jited": 263,
+        "bytes_xlated": 40,
+        "id": 455,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1576,
+        "run_time_ns_delta": 269387,
+        "type": "raw_tracepoint"
+      },
+      "457": {
+        "bytes_jited": 7083,
+        "bytes_xlated": 904,
+        "id": 457,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "459": {
+        "bytes_jited": 7638,
+        "bytes_xlated": 968,
+        "id": 459,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 2008062,
+        "run_time_ns_delta": 848772884,
+        "type": "raw_tracepoint"
+      },
+      "461": {
+        "bytes_jited": 7049,
+        "bytes_xlated": 888,
+        "id": 461,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 454026,
+        "run_time_ns_delta": 10827217,
+        "type": "kprobe"
+      },
+      "463": {
+        "bytes_jited": 26355,
+        "bytes_xlated": 3304,
+        "id": 463,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "465": {
+        "bytes_jited": 6945,
+        "bytes_xlated": 888,
+        "id": 465,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1602,
+        "run_time_ns_delta": 1677472,
+        "type": "kprobe"
+      },
+      "467": {
+        "bytes_jited": 50038,
+        "bytes_xlated": 6264,
+        "id": 467,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "469": {
+        "bytes_jited": 6216,
+        "bytes_xlated": 792,
+        "id": 469,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "471": {
+        "bytes_jited": 5759,
+        "bytes_xlated": 728,
+        "id": 471,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "473": {
+        "bytes_jited": 9546,
+        "bytes_xlated": 1208,
+        "id": 473,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 3,
+        "run_time_ns_delta": 3568,
+        "type": "kprobe"
+      },
+      "475": {
+        "bytes_jited": 8331,
+        "bytes_xlated": 1048,
+        "id": 475,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "477": {
+        "bytes_jited": 7383,
+        "bytes_xlated": 936,
+        "id": 477,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "479": {
+        "bytes_jited": 7722,
+        "bytes_xlated": 984,
+        "id": 479,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "481": {
+        "bytes_jited": 7722,
+        "bytes_xlated": 984,
+        "id": 481,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "483": {
+        "bytes_jited": 34708,
+        "bytes_xlated": 4344,
+        "id": 483,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 4890,
+        "type": "kprobe"
+      },
+      "485": {
+        "bytes_jited": 17925,
+        "bytes_xlated": 2248,
+        "id": 485,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 189194,
+        "run_time_ns_delta": 113454938,
+        "type": "kprobe"
+      },
+      "487": {
+        "bytes_jited": 16201,
+        "bytes_xlated": 2040,
+        "id": 487,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "489": {
+        "bytes_jited": 8736,
+        "bytes_xlated": 1112,
+        "id": 489,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "491": {
+        "bytes_jited": 9114,
+        "bytes_xlated": 1144,
+        "id": 491,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 246927,
+        "run_time_ns_delta": 144880424,
+        "type": "kprobe"
+      },
+      "493": {
+        "bytes_jited": 9191,
+        "bytes_xlated": 1160,
+        "id": 493,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1602,
+        "run_time_ns_delta": 898417,
+        "type": "kprobe"
+      },
+      "495": {
+        "bytes_jited": 6964,
+        "bytes_xlated": 888,
+        "id": 495,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 423568,
+        "run_time_ns_delta": 134851247,
+        "type": "kprobe"
+      },
+      "497": {
+        "bytes_jited": 7276,
+        "bytes_xlated": 920,
+        "id": 497,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 6,
+        "run_time_ns_delta": 8783,
+        "type": "kprobe"
+      },
+      "499": {
+        "bytes_jited": 7762,
+        "bytes_xlated": 984,
+        "id": 499,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "501": {
+        "bytes_jited": 7119,
+        "bytes_xlated": 904,
+        "id": 501,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "503": {
+        "bytes_jited": 7957,
+        "bytes_xlated": 1000,
+        "id": 503,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "505": {
+        "bytes_jited": 7757,
+        "bytes_xlated": 984,
+        "id": 505,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "507": {
+        "bytes_jited": 8778,
+        "bytes_xlated": 1112,
+        "id": 507,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "509": {
+        "bytes_jited": 8427,
+        "bytes_xlated": 1064,
+        "id": 509,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 6,
+        "run_time_ns_delta": 9207,
+        "type": "kprobe"
+      },
+      "511": {
+        "bytes_jited": 9256,
+        "bytes_xlated": 1176,
+        "id": 511,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 1214,
+        "type": "kprobe"
+      },
+      "513": {
+        "bytes_jited": 8634,
+        "bytes_xlated": 1096,
+        "id": 513,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "515": {
+        "bytes_jited": 9125,
+        "bytes_xlated": 1160,
+        "id": 515,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "517": {
+        "bytes_jited": 1145,
+        "bytes_xlated": 160,
+        "id": 517,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "519": {
+        "bytes_jited": 1145,
+        "bytes_xlated": 160,
+        "id": 519,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "521": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 521,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 378429,
+        "run_time_ns_delta": 23709094,
+        "type": "kprobe"
+      },
+      "523": {
+        "bytes_jited": 284,
+        "bytes_xlated": 56,
+        "id": 523,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 378429,
+        "run_time_ns_delta": 13862772,
+        "type": "kprobe"
+      },
+      "525": {
+        "bytes_jited": 17455,
+        "bytes_xlated": 2208,
+        "id": 525,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 378429,
+        "run_time_ns_delta": 289451985,
+        "type": "kprobe"
+      },
+      "527": {
+        "bytes_jited": 19241,
+        "bytes_xlated": 2424,
+        "id": 527,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 378429,
+        "run_time_ns_delta": 14107814,
+        "type": "kprobe"
+      },
+      "529": {
+        "bytes_jited": 27363,
+        "bytes_xlated": 3440,
+        "id": 529,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "531": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 531,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "533": {
+        "bytes_jited": 284,
+        "bytes_xlated": 56,
+        "id": 533,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "535": {
+        "bytes_jited": 17461,
+        "bytes_xlated": 2208,
+        "id": 535,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "537": {
+        "bytes_jited": 19296,
+        "bytes_xlated": 2424,
+        "id": 537,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "539": {
+        "bytes_jited": 27935,
+        "bytes_xlated": 3504,
+        "id": 539,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "541": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 541,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "543": {
+        "bytes_jited": 284,
+        "bytes_xlated": 56,
+        "id": 543,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "545": {
+        "bytes_jited": 17461,
+        "bytes_xlated": 2208,
+        "id": 545,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "547": {
+        "bytes_jited": 19241,
+        "bytes_xlated": 2424,
+        "id": 547,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "549": {
+        "bytes_jited": 27363,
+        "bytes_xlated": 3440,
+        "id": 549,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "551": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 551,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1576126,
+        "run_time_ns_delta": 99723400,
+        "type": "kprobe"
+      },
+      "553": {
+        "bytes_jited": 17461,
+        "bytes_xlated": 2208,
+        "id": 553,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1576126,
+        "run_time_ns_delta": 1058114652,
+        "type": "kprobe"
+      },
+      "555": {
+        "bytes_jited": 16957,
+        "bytes_xlated": 2144,
+        "id": 555,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "557": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 557,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "559": {
+        "bytes_jited": 17461,
+        "bytes_xlated": 2208,
+        "id": 559,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "561": {
+        "bytes_jited": 16916,
+        "bytes_xlated": 2128,
+        "id": 561,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "563": {
+        "bytes_jited": 17586,
+        "bytes_xlated": 2216,
+        "id": 563,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 167,
+        "run_time_ns_delta": 41956,
+        "type": "kprobe"
+      },
+      "565": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 565,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 164,
+        "run_time_ns_delta": 26154,
+        "type": "kprobe"
+      },
+      "567": {
+        "bytes_jited": 17019,
+        "bytes_xlated": 2136,
+        "id": 567,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 164,
+        "run_time_ns_delta": 260368,
+        "type": "kprobe"
+      },
+      "569": {
+        "bytes_jited": 30201,
+        "bytes_xlated": 3784,
+        "id": 569,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 164,
+        "run_time_ns_delta": 214221,
+        "type": "kprobe"
+      },
+      "571": {
+        "bytes_jited": 31032,
+        "bytes_xlated": 3904,
+        "id": 571,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 34,
+        "run_time_ns_delta": 56787,
+        "type": "kprobe"
+      },
+      "573": {
+        "bytes_jited": 728,
+        "bytes_xlated": 112,
+        "id": 573,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "575": {
+        "bytes_jited": 14788,
+        "bytes_xlated": 1872,
+        "id": 575,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 347,
+        "run_time_ns_delta": 80038,
+        "type": "kprobe"
+      },
+      "577": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 577,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "579": {
+        "bytes_jited": 7526,
+        "bytes_xlated": 952,
+        "id": 579,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "581": {
+        "bytes_jited": 7140,
+        "bytes_xlated": 904,
+        "id": 581,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "583": {
+        "bytes_jited": 8111,
+        "bytes_xlated": 1032,
+        "id": 583,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 167,
+        "run_time_ns_delta": 79722,
+        "type": "kprobe"
+      },
+      "585": {
+        "bytes_jited": 5714,
+        "bytes_xlated": 728,
+        "id": 585,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "587": {
+        "bytes_jited": 5923,
+        "bytes_xlated": 760,
+        "id": 587,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "589": {
+        "bytes_jited": 5930,
+        "bytes_xlated": 760,
+        "id": 589,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "591": {
+        "bytes_jited": 16068,
+        "bytes_xlated": 2024,
+        "id": 591,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "593": {
+        "bytes_jited": 16003,
+        "bytes_xlated": 2016,
+        "id": 593,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "595": {
+        "bytes_jited": 7801,
+        "bytes_xlated": 984,
+        "id": 595,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "597": {
+        "bytes_jited": 7288,
+        "bytes_xlated": 920,
+        "id": 597,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "599": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 599,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "601": {
+        "bytes_jited": 7579,
+        "bytes_xlated": 952,
+        "id": 601,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "603": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 603,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "605": {
+        "bytes_jited": 74,
+        "bytes_xlated": 24,
+        "id": 605,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "607": {
+        "bytes_jited": 17121,
+        "bytes_xlated": 2152,
+        "id": 607,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "609": {
+        "bytes_jited": 7930,
+        "bytes_xlated": 1000,
+        "id": 609,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "611": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 611,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "613": {
+        "bytes_jited": 12603,
+        "bytes_xlated": 1592,
+        "id": 613,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "615": {
+        "bytes_jited": 16056,
+        "bytes_xlated": 2024,
+        "id": 615,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 5475,
+        "type": "kprobe"
+      },
+      "617": {
+        "bytes_jited": 7654,
+        "bytes_xlated": 968,
+        "id": 617,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1958919,
+        "run_time_ns_delta": 78442148,
+        "type": "kprobe"
+      },
+      "619": {
+        "bytes_jited": 7244,
+        "bytes_xlated": 920,
+        "id": 619,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1637,
+        "run_time_ns_delta": 1708594,
+        "type": "raw_tracepoint"
+      },
+      "621": {
+        "bytes_jited": 8243,
+        "bytes_xlated": 1048,
+        "id": 621,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "623": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 623,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "625": {
+        "bytes_jited": 7272,
+        "bytes_xlated": 920,
+        "id": 625,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "627": {
+        "bytes_jited": 8819,
+        "bytes_xlated": 1112,
+        "id": 627,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 3290,
+        "run_time_ns_delta": 3111548,
+        "type": "kprobe"
+      },
+      "629": {
+        "bytes_jited": 16184,
+        "bytes_xlated": 2040,
+        "id": 629,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "631": {
+        "bytes_jited": 16184,
+        "bytes_xlated": 2040,
+        "id": 631,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "633": {
+        "bytes_jited": 8351,
+        "bytes_xlated": 1064,
+        "id": 633,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "635": {
+        "bytes_jited": 14166,
+        "bytes_xlated": 1784,
+        "id": 635,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 189342,
+        "run_time_ns_delta": 29027838,
+        "type": "kprobe"
+      },
+      "637": {
+        "bytes_jited": 14063,
+        "bytes_xlated": 1768,
+        "id": 637,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 4817,
+        "run_time_ns_delta": 4210223,
+        "type": "kprobe"
+      },
+      "639": {
+        "bytes_jited": 434,
+        "bytes_xlated": 72,
+        "id": 639,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 85,
+        "run_time_ns_delta": 7907,
+        "type": "kprobe"
+      },
+      "641": {
+        "bytes_jited": 16962,
+        "bytes_xlated": 2136,
+        "id": 641,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 85,
+        "run_time_ns_delta": 12649,
+        "type": "kprobe"
+      },
+      "643": {
+        "bytes_jited": 434,
+        "bytes_xlated": 72,
+        "id": 643,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 379,
+        "type": "kprobe"
+      },
+      "645": {
+        "bytes_jited": 16962,
+        "bytes_xlated": 2136,
+        "id": 645,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 812,
+        "type": "kprobe"
+      },
+      "647": {
+        "bytes_jited": 143,
+        "bytes_xlated": 40,
+        "id": 647,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "649": {
+        "bytes_jited": 15860,
+        "bytes_xlated": 1992,
+        "id": 649,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "651": {
+        "bytes_jited": 10108,
+        "bytes_xlated": 1272,
+        "id": 651,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "653": {
+        "bytes_jited": 15631,
+        "bytes_xlated": 1968,
+        "id": 653,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 500,
+        "type": "kprobe"
+      },
+      "655": {
+        "bytes_jited": 15374,
+        "bytes_xlated": 1936,
+        "id": 655,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 7856,
+        "type": "kprobe"
+      },
+      "657": {
+        "bytes_jited": 27742,
+        "bytes_xlated": 3480,
+        "id": 657,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 4129,
+        "type": "kprobe"
+      },
+      "659": {
+        "bytes_jited": 15871,
+        "bytes_xlated": 1992,
+        "id": 659,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "661": {
+        "bytes_jited": 16037,
+        "bytes_xlated": 2024,
+        "id": 661,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 3862,
+        "type": "kprobe"
+      },
+      "663": {
+        "bytes_jited": 7374,
+        "bytes_xlated": 936,
+        "id": 663,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 371037,
+        "run_time_ns_delta": 151842119,
+        "type": "kprobe"
+      },
+      "665": {
+        "bytes_jited": 7418,
+        "bytes_xlated": 936,
+        "id": 665,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "667": {
+        "bytes_jited": 15134,
+        "bytes_xlated": 1912,
+        "id": 667,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "669": {
+        "bytes_jited": 39495,
+        "bytes_xlated": 4952,
+        "id": 669,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 146336,
+        "run_time_ns_delta": 121130765,
+        "type": "kprobe"
+      },
+      "671": {
+        "bytes_jited": 18787,
+        "bytes_xlated": 2360,
+        "id": 671,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "673": {
+        "bytes_jited": 8332,
+        "bytes_xlated": 1048,
+        "id": 673,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "675": {
+        "bytes_jited": 324,
+        "bytes_xlated": 56,
+        "id": 675,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 7,
+        "run_time_ns_delta": 1246,
+        "type": "kprobe"
+      },
+      "677": {
+        "bytes_jited": 7066,
+        "bytes_xlated": 888,
+        "id": 677,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 7,
+        "run_time_ns_delta": 3449,
+        "type": "kprobe"
+      },
+      "679": {
+        "bytes_jited": 362,
+        "bytes_xlated": 56,
+        "id": 679,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "681": {
+        "bytes_jited": 7233,
+        "bytes_xlated": 920,
+        "id": 681,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 1187,
+        "type": "kprobe"
+      },
+      "683": {
+        "bytes_jited": 7233,
+        "bytes_xlated": 920,
+        "id": 683,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 810,
+        "type": "kprobe"
+      },
+      "685": {
+        "bytes_jited": 4575,
+        "bytes_xlated": 584,
+        "id": 685,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "688": {
+        "bytes_jited": 9099,
+        "bytes_xlated": 1144,
+        "id": 688,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "cgroup_skb"
+      },
+      "690": {
+        "bytes_jited": 9099,
+        "bytes_xlated": 1144,
+        "id": 690,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "cgroup_skb"
+      },
+      "692": {
+        "bytes_jited": 851,
+        "bytes_xlated": 120,
+        "id": 692,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "694": {
+        "bytes_jited": 820,
+        "bytes_xlated": 120,
+        "id": 694,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "raw_tracepoint"
+      },
+      "696": {
+        "bytes_jited": 16,
+        "bytes_xlated": 24,
+        "id": 696,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 123,
+        "type": "kprobe"
+      },
+      "698": {
+        "bytes_jited": 51511,
+        "bytes_xlated": 6456,
+        "id": 698,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 1,
+        "run_time_ns_delta": 906,
+        "type": "raw_tracepoint"
+      },
+      "700": {
+        "bytes_jited": 6821,
+        "bytes_xlated": 872,
+        "id": 700,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 189194,
+        "run_time_ns_delta": 77625642,
+        "type": "lsm"
+      },
+      "702": {
+        "bytes_jited": 3291,
+        "bytes_xlated": 432,
+        "id": 702,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "704": {
+        "bytes_jited": 1753,
+        "bytes_xlated": 232,
+        "id": 704,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "706": {
+        "bytes_jited": 1753,
+        "bytes_xlated": 232,
+        "id": 706,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "708": {
+        "bytes_jited": 1753,
+        "bytes_xlated": 232,
+        "id": 708,
+        "name": "native_lab_stub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/bin/stress-ng",
+          "--cap",
+          "1",
+          "--set",
+          "1",
+          "--sigfd",
+          "1",
+          "--eventfd",
+          "1",
+          "--kill",
+          "1",
+          "--futex",
+          "1",
+          "--prctl",
+          "1",
+          "--timeout",
+          "5s",
+          "--metrics-brief",
+          "--temp-path",
+          "/var/tmp/bpfrejit-runtime/e9db6711"
+        ],
+        "config": {
+          "stressors": [
+            "cap",
+            "set",
+            "sigfd",
+            "eventfd",
+            "kill",
+            "futex",
+            "prctl"
+          ],
+          "tool": "stress-ng"
+        },
+        "duration_s": 5.03092134900001,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "stress-ng: info:  [4550] setting to a 5 secs run per stressor\nstress-ng: info:  [4550] dispatching hogs: 1 cap, 1 set, 1 sigfd, 1 eventfd, 1 kill, 1 futex, 1 prctl\nstress-ng: info:  [4550] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [4550] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [4550]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [4550] cap              330565      5.00      0.08      4.44     66112.90       73105.21\nstress-ng: metrc: [4550] set               26494      5.00      0.04      4.52      5298.78        5813.59\nstress-ng: metrc: [4550] sigfd            830217      5.00      0.10      6.60    166014.23      123809.10\nstress-ng: metrc: [4550] eventfd          186261      5.00      0.11      4.74     37250.95       38455.55\nstress-ng: metrc: [4550] kill             132344      5.00      0.18      4.58     26468.05       27842.96\nstress-ng: metrc: [4550] futex            829766     10.00      0.21      6.94     82974.73      116033.68\nstress-ng: metrc: [4550] prctl              1590      5.00      1.35      0.29       317.99         968.11\nstress-ng: info:  [4550] skipped: 0\nstress-ng: info:  [4550] passed: 7: cap (1) set (1) sigfd (1) eventfd (1) kill (1) futex (1) prctl (1)\nstress-ng: info:  [4550] failed: 0\nstress-ng: info:  [4550] metrics untrustworthy: 0\nstress-ng: info:  [4550] successful run completed in 5.00 secs",
+        "workload_name": "stress_ng_tracee_syscall_hot"
+      }
+    ]
+  },
+  "rejit_result": {
+    "mode": "loadtime",
+    "status": "skipped"
+  },
+  "runner": "tracee",
+  "selected_workload": "stress_ng_tracee_syscall_hot",
+  "status": "ok"
+}

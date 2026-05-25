@@ -140,6 +140,17 @@ def _env_bool(name: str, default: bool = False) -> bool:
     raise SystemExit(f"{name} must be boolean: empty, 0/1, false/true, no/yes, or off/on")
 
 
+def _native_loader_post_only_enabled() -> bool:
+    raw = _env_str("BPFREJIT_SHIM_NATIVE_LOADER").lower()
+    if not raw or raw in {"0", "false", "no", "off", "1", "true", "yes", "on"}:
+        return False
+    if raw in {"post", "post_only", "post-only", "post_rejit"}:
+        return True
+    raise SystemExit(
+        "BPFREJIT_SHIM_NATIVE_LOADER must be empty, 0/1, true/false, or post"
+    )
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Build the driver Namespace entirely from Make-provided env vars."""
     del argv
@@ -194,11 +205,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         raise SystemExit(f"{_CORPUS_APP_TIMEOUT_ENV} must be >= 0")
     if ns.rejit_timeout_s < 0:
         raise SystemExit(f"{_CORPUS_REJIT_TIMEOUT_ENV} must be >= 0")
-    if not ns.collect_bpf_stats and not ns.workload_only and not skip_rejit_disables_shim():
-        raise SystemExit(
-            "BPFREJIT_CORPUS_BPF_STATS=0 requires BPFREJIT_CORPUS_WORKLOAD_ONLY=1 "
-            "or SKIP_REJIT=all"
-        )
     return ns
 
 def _print_progress(event: str, **fields: object) -> None:
@@ -549,6 +555,7 @@ def run_suite(
     skip_rejit = bool(getattr(args, "skip_rejit", False))
     workload_only = bool(getattr(args, "workload_only", False))
     collect_bpf_stats = bool(getattr(args, "collect_bpf_stats", True))
+    native_loader_post_only = _native_loader_post_only_enabled()
     results_by_name: dict[str, dict[str, object]] = {}
     completed_apps: set[str] = set()
     total_apps = len(suite.apps)
@@ -679,7 +686,16 @@ def run_suite(
                         raise RuntimeError(f"baseline app stop failed: {stop_exc}") from stop_exc
 
                     phase = "loadtime_plan"
-                    loadtime_env: dict[str, str] = {"BPFREJIT_SHIM_LOADTIME_PLAN": ""}
+                    loadtime_env: dict[str, str] = {
+                        "BPFREJIT_SHIM_LOADTIME_PLAN": "",
+                        "BPFREJIT_SHIM_LOG": str(_shim_log_path(
+                            app,
+                            "post_rejit",
+                            artifact_session=artifact_session,
+                        )),
+                    }
+                    if native_loader_post_only:
+                        loadtime_env["BPFREJIT_SHIM_NATIVE_LOADER"] = "1"
                     if skip_rejit:
                         _print_progress("rejit_skipped", app=app.name, runner=app.runner)
                         lifecycle.rejit_result = {"status": "skipped", "mode": "loadtime"}
@@ -696,11 +712,6 @@ def run_suite(
                             artifact_session=artifact_session,
                         )
                         loadtime_env["BPFREJIT_SHIM_LOADTIME_REPORTS"] = str(reports_path)
-                        loadtime_env["BPFREJIT_SHIM_LOG"] = str(_shim_log_path(
-                            app,
-                            "post_rejit",
-                            artifact_session=artifact_session,
-                        ))
                         if baseline_map_snapshot_path is not None:
                             loadtime_env["BPFREJIT_SHIM_MAP_SNAPSHOT_ROOT"] = str(
                                 baseline_map_snapshot_path
