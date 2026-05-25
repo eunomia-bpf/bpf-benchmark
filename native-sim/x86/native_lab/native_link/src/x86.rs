@@ -15,7 +15,8 @@ const X86_BPF_ARRAY_PTRS_OFFSET_KEY: &str = "__native_x86_bpf_array_ptrs_offset"
 const X86_BPF_PROG_BPF_FUNC_OFFSET_KEY: &str = "__native_x86_bpf_prog_bpf_func_offset";
 const X86_TAIL_CALL_OFFSET_KEY: &str = "__native_x86_tail_call_offset";
 const X86_JMP_END_PLACEHOLDER_TARGET: u64 = 0x4000_0000;
-const NATIVE_LAB_RELOC_HELPER_CALL_RAX: u32 = 1;
+const NATIVE_LAB_RELOC_HELPER_CALL_REL32: u32 = 1;
+const X86_HELPER_CALL_REL32_SLOT: [u8; 12] = [0xE8, 0, 0, 0, 0, 0x0F, 0x1F, 0x80, 0, 0, 0, 0];
 type SymbolKey = (object::SectionIndex, u64);
 type LocalSiteKey = (object::SectionIndex, u64, u64);
 
@@ -522,11 +523,10 @@ enum PatchKind {
     /// CALL rel32 to a discovered symbol: disp targets that symbol's new
     /// global offset in the blob.
     Call { target_symbol_key: SymbolKey },
-    /// `movabs rax, target; call *rax` slot for a kernel helper/map target.
-    /// The module can rewrite it to `call rel32; nop...` after the blob lands
-    /// in executable memory, but keeps the absolute call when rel32 is out of
-    /// range.
-    HelperCallRax { target_addr: u64 },
+    /// `call rel32` placeholder for a kernel helper/map target. The module
+    /// must patch the rel32 displacement after the blob lands in executable
+    /// memory.
+    HelperCallRel32 { target_addr: u64 },
     /// Rewritten `mov reg, [rip+GOT]` against a map symbol. The runner
     /// patches the immediate field with the live kernel map pointer.
     MapImmediate { name: String, imm_offset: usize },
@@ -1665,23 +1665,23 @@ pub(super) fn rewrite_x86(
                     offset,
                 });
             }
-            PatchKind::HelperCallRax { target_addr } => {
+            PatchKind::HelperCallRel32 { target_addr } => {
                 let offset = u32::try_from(p.global_offset)
                     .map_err(|_| anyhow!("helper call reloc offset exceeds u32"))?;
-                if p.global_offset + 12 > blob.len()
-                    || blob[p.global_offset] != 0x48
-                    || blob[p.global_offset + 1] != 0xB8
-                    || blob[p.global_offset + 10] != 0xFF
-                    || blob[p.global_offset + 11] != 0xD0
+                let end = p
+                    .global_offset
+                    .checked_add(X86_HELPER_CALL_REL32_SLOT.len())
+                    .ok_or_else(|| anyhow!("helper call slot offset overflow"))?;
+                if end > blob.len() || blob[p.global_offset..end] != X86_HELPER_CALL_REL32_SLOT[..]
                 {
                     bail!(
-                        "helper call slot at off {:#x} did not encode as movabs rax; call rax",
+                        "helper call slot at off {:#x} did not encode as call rel32 placeholder",
                         p.global_offset
                     );
                 }
                 relocs.push(RelocRecord {
                     offset,
-                    kind: NATIVE_LAB_RELOC_HELPER_CALL_RAX,
+                    kind: NATIVE_LAB_RELOC_HELPER_CALL_REL32,
                     target: *target_addr,
                 });
             }
@@ -1965,8 +1965,9 @@ fn collect_x86_proof_relocs(
                             .checked_sub(i128::from(local_target.address))
                             .and_then(|v| v.checked_sub(4))
                             .ok_or_else(|| anyhow!("PC32 proof text addend overflow"))?;
-                        let proof_addend = i64::try_from(adjusted)
-                            .map_err(|_| anyhow!("PC32 proof text addend {adjusted} exceeds i64"))?;
+                        let proof_addend = i64::try_from(adjusted).map_err(|_| {
+                            anyhow!("PC32 proof text addend {adjusted} exceeds i64")
+                        })?;
                         let insn_idx = layout
                             .insn_local_ip
                             .iter()
@@ -2443,9 +2444,10 @@ fn apply_elf_relocations(
                             .and_then(|v| v.checked_sub(4))
                             .ok_or_else(|| anyhow!("PC32 text target addend overflow"))?;
                         let disp = target
-                            .checked_sub(i128::try_from(disp32_off).map_err(|_| {
-                                anyhow!("PC32 text relocation offset overflow")
-                            })?)
+                            .checked_sub(
+                                i128::try_from(disp32_off)
+                                    .map_err(|_| anyhow!("PC32 text relocation offset overflow"))?,
+                            )
                             .ok_or_else(|| anyhow!("PC32 text disp overflow"))?;
                         let d = i32::try_from(disp)
                             .map_err(|_| anyhow!("PC32 text disp {disp} exceeds i32"))?;
@@ -3458,12 +3460,8 @@ fn declared_byte_chunks(bytes: &[u8]) -> Result<Vec<Instruction>> {
     bytes.chunks(16).map(declared_bytes).collect()
 }
 
-fn build_x86_helper_call_rax_slot(helper_addr: u64) -> Result<Instruction> {
-    let mut bytes = Vec::with_capacity(12);
-    bytes.extend_from_slice(&[0x48, 0xB8]);
-    bytes.extend_from_slice(&helper_addr.to_le_bytes());
-    bytes.extend_from_slice(&[0xFF, 0xD0]);
-    declared_bytes(&bytes)
+fn build_x86_helper_call_rel32_slot() -> Result<Instruction> {
+    declared_bytes(&X86_HELPER_CALL_REL32_SLOT)
 }
 
 fn push_x86_helper_call_reloc(
@@ -3473,14 +3471,14 @@ fn push_x86_helper_call_reloc(
     local_ip: u64,
     helper_addr: u64,
 ) -> Result<()> {
-    let insn = build_x86_helper_call_rax_slot(helper_addr)?;
+    let insn = build_x86_helper_call_rel32_slot()?;
     push_x86_replacement(
         local,
         kinds,
         insn_local_ip,
         local_ip,
         insn,
-        Some(PatchKind::HelperCallRax {
+        Some(PatchKind::HelperCallRel32 {
             target_addr: helper_addr,
         }),
     );

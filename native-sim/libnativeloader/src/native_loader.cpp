@@ -389,7 +389,7 @@ constexpr const char *kX86TailCallOffsetKey = "__native_x86_tail_call_offset";
 constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v33";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v34";
 constexpr const char *kKallsymsCachePath = "/tmp/native_kernel_kallsyms.tsv";
 constexpr const char *kKallsymsCacheVersion = "native-kallsyms-cache-v3";
 constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
@@ -475,13 +475,12 @@ uint64_t lookup_kernel_map_ptr_by_fd(int map_fd)
 }
 
 constexpr size_t kRelocRecordBytes = 16;
-constexpr uint32_t kNativeLabRelocHelperCallRax = 1;
+constexpr size_t kNativeLabRelocBytes = 12;
+constexpr uint32_t kNativeLabRelocHelperCallRel32 = 1;
 
 struct NativeLabReloc {
     uint32_t global_offset;
-    uint32_t kind;
     uint64_t target;
-    size_t bytes;
 };
 
 struct NativeBlobChunk {
@@ -521,16 +520,6 @@ void append_u64_le(std::vector<uint8_t> &out, uint64_t v)
     }
 }
 
-size_t native_lab_reloc_bytes(uint32_t kind)
-{
-    switch (kind) {
-    case kNativeLabRelocHelperCallRax:
-        return 12;
-    default:
-        fail("native_lab reloc has unknown kind " + std::to_string(kind));
-    }
-}
-
 std::vector<NativeLabReloc> parse_native_lab_relocs(const std::vector<uint8_t> &relocs,
                                                     size_t blob_size)
 {
@@ -547,15 +536,15 @@ std::vector<NativeLabReloc> parse_native_lab_relocs(const std::vector<uint8_t> &
         const uint32_t global_offset = read_u32_le(relocs.data() + off);
         const uint32_t kind = read_u32_le(relocs.data() + off + 4);
         const uint64_t target = read_u64_le(relocs.data() + off + 8);
-        const size_t bytes = native_lab_reloc_bytes(kind);
-        if (static_cast<size_t>(global_offset) + bytes > blob_size) {
+        if (kind != kNativeLabRelocHelperCallRel32) {
+            fail("native_lab reloc has unknown kind " + std::to_string(kind));
+        }
+        if (static_cast<size_t>(global_offset) + kNativeLabRelocBytes > blob_size) {
             fail("native_lab reloc call offset exceeds blob bounds");
         }
         out.push_back(NativeLabReloc{
             global_offset,
-            kind,
             target,
-            bytes,
         });
     }
     return out;
@@ -575,7 +564,7 @@ std::vector<NativeBlobChunk> plan_blob_chunks(size_t blob_size,
         /* A helper-call reloc slot must fit inside one kinsn emit chunk. */
         for (const NativeLabReloc &reloc : relocs) {
             const size_t reloc_start = reloc.global_offset;
-            const size_t reloc_end = reloc_start + reloc.bytes;
+            const size_t reloc_end = reloc_start + kNativeLabRelocBytes;
             if (offset < reloc_start && reloc_start < end && end < reloc_end) {
                 end = reloc_start;
             }
@@ -635,14 +624,14 @@ void upload_relocs(const std::vector<NativeLabReloc> &relocs,
             const NativeBlobChunk &chunk = chunks[chunk_id];
             const size_t chunk_end = chunk.offset + chunk.len;
             const size_t reloc_start = reloc.global_offset;
-            const size_t reloc_end = reloc_start + reloc.bytes;
+            const size_t reloc_end = reloc_start + kNativeLabRelocBytes;
             if (reloc_start < chunk.offset || reloc_end > chunk_end) {
                 continue;
             }
             const uint32_t local_offset =
                 static_cast<uint32_t>(reloc_start - chunk.offset);
             append_u32_le(by_chunk[chunk_id], local_offset);
-            append_u32_le(by_chunk[chunk_id], reloc.kind);
+            append_u32_le(by_chunk[chunk_id], kNativeLabRelocHelperCallRel32);
             append_u64_le(by_chunk[chunk_id], reloc.target);
             assigned = true;
             break;

@@ -41,6 +41,7 @@
 #include <linux/module.h>
 #include <linux/mutex.h>
 #include <linux/slab.h>
+#include <linux/string.h>
 #include <linux/uaccess.h>
 
 #include "kinsn_x86_emit.h"
@@ -56,18 +57,17 @@
 /*
  * Stage 2 side-band relocations:
  *
- * Userspace native-link can't know whether a helper call can use rel32,
+ * Userspace native-link can't compute a helper call's rel32 displacement,
  * because that depends on where the BPF JIT will splat the blob. The blob
- * ships a range-independent `movabs rax, target; call *rax` slot and a
- * separate `relocs` array describing each patch site. After memcpy'ing the
- * blob bytes into the JIT image, emit_x86 patches the slot's target and
- * opportunistically rewrites it to `call rel32; nop...` when the final
- * target is in range.
+ * ships a `call rel32` placeholder and a separate `relocs` array describing
+ * each patch site. After memcpy'ing the blob bytes into the JIT image,
+ * emit_x86 patches the displacement. Out-of-range targets fail load instead
+ * of falling back to an indirect call.
  *
  * relocs are uploaded via a sibling debugfs file blob<N>.relocs whose
  * payload is a tightly packed array of `struct native_lab_reloc_record`.
  */
-#define NATIVE_LAB_RELOC_HELPER_CALL_RAX	1
+#define NATIVE_LAB_RELOC_HELPER_CALL_REL32	1
 #define NATIVE_LAB_MAX_RELOCS		32
 #define NATIVE_LAB_ABI_RBX		(1U << 0)
 #define NATIVE_LAB_ABI_R13		(1U << 1)
@@ -79,7 +79,7 @@
 					 NATIVE_LAB_ABI_R15)
 
 struct native_lab_reloc_record {
-	__u32 offset;   /* byte offset of the movabs/call helper slot */
+	__u32 offset;   /* byte offset of the helper call placeholder */
 	__u32 kind;     /* NATIVE_LAB_RELOC_* */
 	__u64 target;   /* absolute kernel address */
 };
@@ -199,8 +199,9 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 				const struct native_lab_reloc_record *r =
 					&blobs[blob_id].relocs[i];
 				switch (r->kind) {
-				case NATIVE_LAB_RELOC_HELPER_CALL_RAX: {
-					static const u8 nop7[7] = {
+				case NATIVE_LAB_RELOC_HELPER_CALL_REL32: {
+					static const u8 rel32_slot[12] = {
+						0xe8, 0, 0, 0, 0,
 						0x0f, 0x1f, 0x80, 0, 0, 0, 0
 					};
 					u64 slot_va;
@@ -208,32 +209,29 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
 					s64 disp64;
 					s32 disp;
 
-					if ((size_t)r->offset + 12 > snapshot_len) {
+					if ((size_t)r->offset + sizeof(rel32_slot) >
+					    snapshot_len) {
 						err = -ERANGE;
 						break;
 					}
-					if (emit_at[r->offset] != 0x48 ||
-					    emit_at[r->offset + 1] != 0xB8 ||
-					    emit_at[r->offset + 10] != 0xFF ||
-					    emit_at[r->offset + 11] != 0xD0) {
+					if (memcmp(emit_at + r->offset, rel32_slot,
+						   sizeof(rel32_slot))) {
 						err = -EINVAL;
 						break;
 					}
-					memcpy(emit_at + r->offset + 2, &r->target, 8);
-
-					if (final_emit_at) {
-						slot_va = (u64)final_emit_at + r->offset;
-						rip_after = slot_va + 5;
-						disp64 = (s64)r->target - (s64)rip_after;
-						disp = (s32)disp64;
-						if ((s64)disp == disp64) {
-							emit_at[r->offset] = 0xE8;
-							memcpy(emit_at + r->offset + 1,
-							       &disp, 4);
-							memcpy(emit_at + r->offset + 5,
-							       nop7, sizeof(nop7));
-						}
+					if (!final_emit_at) {
+						err = -EINVAL;
+						break;
 					}
+					slot_va = (u64)final_emit_at + r->offset;
+					rip_after = slot_va + 5;
+					disp64 = (s64)r->target - (s64)rip_after;
+					disp = (s32)disp64;
+					if ((s64)disp != disp64) {
+						err = -ERANGE;
+						break;
+					}
+					memcpy(emit_at + r->offset + 1, &disp, 4);
 					break;
 				}
 				default:
