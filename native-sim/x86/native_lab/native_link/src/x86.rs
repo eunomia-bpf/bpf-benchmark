@@ -73,6 +73,7 @@ fn generic_lookup_site(target_addr: u64, map_name: Option<&str>) -> Option<Looku
     Some(LookupSiteSpec {
         kind: LookupKind::Call,
         target_addr,
+        key_offset: 0,
         max_entries: 0,
         elem_size: 0,
         index_mask: 0,
@@ -96,15 +97,6 @@ fn select_lookup_site(
             .iter()
             .enumerate()
             .find(|(idx, spec)| !used[*idx] && lookup_site_matches_native_map(spec, map_name))
-        {
-            used[idx] = true;
-            return Ok((idx.to_string(), spec.clone()));
-        }
-
-        if let Some((idx, spec)) = lookup_sites
-            .iter()
-            .enumerate()
-            .find(|(idx, spec)| !used[*idx] && spec.map_name.is_none())
         {
             used[idx] = true;
             return Ok((idx.to_string(), spec.clone()));
@@ -1445,6 +1437,15 @@ pub(super) fn rewrite_x86(
                                     local_ip,
                                     helper_addr,
                                 )?;
+                                for ib in build_x86_lookup_call_postprocess(&spec)? {
+                                    push_x86_synthetic(
+                                        &mut local,
+                                        &mut kinds,
+                                        &mut insn_local_ip,
+                                        &mut next_synthetic_ip,
+                                        ib,
+                                    )?;
+                                }
                                 resolved_helper_call_sites.insert(site_key);
                                 clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                                 continue;
@@ -3748,6 +3749,56 @@ fn build_x86_array_lookup(spec: &LookupSiteSpec) -> Result<Vec<Instruction>> {
     bytes.extend_from_slice(&body);
     bytes.extend_from_slice(&[0x31, 0xC0]); // xor eax, eax
 
+    declared_byte_chunks(&bytes)
+}
+
+fn append_x86_cmp_byte_rax_disp32_imm(bytes: &mut Vec<u8>, disp: u32, imm: u8) {
+    bytes.extend_from_slice(&[0x80, 0xB8]); // cmp byte ptr [rax+disp32], imm8
+    bytes.extend_from_slice(&disp.to_le_bytes());
+    bytes.push(imm);
+}
+
+fn append_x86_mov_byte_rax_disp32_imm(bytes: &mut Vec<u8>, disp: u32, imm: u8) {
+    bytes.extend_from_slice(&[0xC6, 0x80]); // mov byte ptr [rax+disp32], imm8
+    bytes.extend_from_slice(&disp.to_le_bytes());
+    bytes.push(imm);
+}
+
+fn build_x86_lookup_call_postprocess(spec: &LookupSiteSpec) -> Result<Vec<Instruction>> {
+    let mut body = Vec::new();
+    match spec.kind {
+        LookupKind::Call | LookupKind::Array | LookupKind::PerCpuArray => {}
+        LookupKind::Hash => {
+            append_x86_add_rax_imm(&mut body, spec.key_offset);
+        }
+        LookupKind::LruHash => {
+            append_x86_cmp_byte_rax_disp32_imm(&mut body, spec.value_offset, 0);
+            let skip_store = append_x86_jcc_rel8(&mut body, 0x75); // jne skip ref update
+            append_x86_mov_byte_rax_disp32_imm(&mut body, spec.value_offset, 1);
+            let after_store = body.len();
+            patch_x86_rel8(&mut body, skip_store, after_store)?;
+            append_x86_add_rax_imm(&mut body, spec.key_offset);
+        }
+        LookupKind::PerCpuHash => {
+            if spec.percpu_base_addr == 0 {
+                bail!("percpu hash lookup missing this_cpu_off address");
+            }
+            append_x86_add_rax_imm(&mut body, spec.key_offset);
+            body.extend_from_slice(&[0x48, 0x8B, 0x00]); // mov rax, [rax]
+            body.extend_from_slice(&[0x65, 0x48, 0x03, 0x04, 0x25]); // add rax, gs:[disp32]
+            body.extend_from_slice(&(spec.percpu_base_addr as u32).to_le_bytes());
+        }
+    }
+    if body.is_empty() {
+        return Ok(Vec::new());
+    }
+    let body_len = u8::try_from(body.len())
+        .map_err(|_| anyhow!("lookup call postprocess too large: {} bytes", body.len()))?;
+
+    let mut bytes = Vec::new();
+    bytes.extend_from_slice(&[0x48, 0x85, 0xC0]); // test rax, rax
+    bytes.extend_from_slice(&[0x74, body_len]); // je done
+    bytes.extend_from_slice(&body);
     declared_byte_chunks(&bytes)
 }
 

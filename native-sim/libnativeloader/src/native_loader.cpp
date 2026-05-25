@@ -191,6 +191,7 @@ struct NativeLabTarget {
     const char *blob_path_fmt;
     const char *relocs_path_fmt;
     const char *map_ptr_path;
+    const char *map_value_ptr_path;
     uint32_t chunk_bytes;
 };
 
@@ -203,6 +204,7 @@ constexpr NativeLabTarget kNativeLabTarget = {
     .blob_path_fmt = "/sys/kernel/debug/bpf_arm64_native_lab/blob%u",
     .relocs_path_fmt = nullptr,
     .map_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_ptr",
+    .map_value_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_value_ptr",
     .chunk_bytes = 256,
 };
 #else
@@ -214,6 +216,7 @@ constexpr NativeLabTarget kNativeLabTarget = {
     .blob_path_fmt = "/sys/kernel/debug/bpf_x86_native_lab/blob%u",
     .relocs_path_fmt = "/sys/kernel/debug/bpf_x86_native_lab/blob%u.relocs",
     .map_ptr_path = "/sys/kernel/debug/bpf_x86_native_lab/map_ptr",
+    .map_value_ptr_path = "/sys/kernel/debug/bpf_x86_native_lab/map_value_ptr",
     .chunk_bytes = 128,
 };
 #endif
@@ -389,7 +392,7 @@ constexpr const char *kX86TailCallOffsetKey = "__native_x86_tail_call_offset";
 constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v34";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v35";
 constexpr const char *kKallsymsCachePath = "/tmp/native_kernel_kallsyms.tsv";
 constexpr const char *kKallsymsCacheVersion = "native-kallsyms-cache-v3";
 constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
@@ -424,35 +427,34 @@ void ensure_debugfs_mounted()
     (void)mount("none", kDebugfsDir, "debugfs", 0, nullptr);
 }
 
-uint64_t lookup_kernel_map_ptr_by_fd(int map_fd)
+uint64_t lookup_native_lab_ptr_by_fd(int map_fd,
+                                     const char *path,
+                                     const char *label)
 {
     ensure_debugfs_mounted();
-    int fd = open(kNativeLabTarget.map_ptr_path, O_RDWR | O_CLOEXEC);
+    int fd = open(path, O_RDWR | O_CLOEXEC);
     if (fd < 0) {
-        fail(std::string("open ") + kNativeLabTarget.map_ptr_path + ": "
-             + std::strerror(errno));
+        fail(std::string("open ") + path + ": " + std::strerror(errno));
     }
 
     char request[32];
     int request_len = std::snprintf(request, sizeof(request), "%d\n", map_fd);
     if (request_len <= 0 || request_len >= static_cast<int>(sizeof(request))) {
         close(fd);
-        fail("native_kernel: invalid map fd for map_ptr query");
+        fail(std::string("native_kernel: invalid map fd for ") + label + " query");
     }
 
     ssize_t written = write(fd, request, static_cast<size_t>(request_len));
     int saved = errno;
     if (written != request_len) {
         close(fd);
-        fail(std::string("write ") + kNativeLabTarget.map_ptr_path + ": "
-             + std::strerror(saved));
+        fail(std::string("write ") + path + ": " + std::strerror(saved));
     }
 
     if (lseek(fd, 0, SEEK_SET) < 0) {
         saved = errno;
         close(fd);
-        fail(std::string("lseek ") + kNativeLabTarget.map_ptr_path + ": "
-             + std::strerror(saved));
+        fail(std::string("lseek ") + path + ": " + std::strerror(saved));
     }
 
     char response[64] = {};
@@ -460,8 +462,7 @@ uint64_t lookup_kernel_map_ptr_by_fd(int map_fd)
     saved = errno;
     close(fd);
     if (n <= 0) {
-        fail(std::string("read ") + kNativeLabTarget.map_ptr_path + ": "
-             + std::strerror(saved));
+        fail(std::string("read ") + path + ": " + std::strerror(saved));
     }
     response[n] = '\0';
 
@@ -469,9 +470,21 @@ uint64_t lookup_kernel_map_ptr_by_fd(int map_fd)
     char *end = nullptr;
     unsigned long long value = std::strtoull(response, &end, 0);
     if (errno != 0 || end == response || value == 0) {
-        fail(std::string("native_kernel: invalid map_ptr response: ") + response);
+        fail(std::string("native_kernel: invalid ") + label + " response: " + response);
     }
     return static_cast<uint64_t>(value);
+}
+
+uint64_t lookup_kernel_map_ptr_by_fd(int map_fd)
+{
+    return lookup_native_lab_ptr_by_fd(
+        map_fd, kNativeLabTarget.map_ptr_path, "map_ptr");
+}
+
+uint64_t lookup_kernel_map_value_ptr_by_fd(int map_fd)
+{
+    return lookup_native_lab_ptr_by_fd(
+        map_fd, kNativeLabTarget.map_value_ptr_path, "map_value_ptr");
 }
 
 constexpr size_t kRelocRecordBytes = 16;
@@ -927,11 +940,54 @@ int open_prog_fd_by_id_required(uint32_t id, const char *field_name)
 
 // Build the (sidecar; call kinsn)*N; exit stub and BPF_PROG_LOAD it via
 // libbpf's bpf_prog_load + bpf_prog_load_opts.fd_array. Returns prog fd.
+void append_dummy_map_refs(std::vector<bpf_insn> &insns,
+                           const std::vector<int> &map_ref_fds)
+{
+    if (map_ref_fds.empty()) {
+        return;
+    }
+    if (map_ref_fds.size() >
+        static_cast<size_t>(std::numeric_limits<int16_t>::max() / 2)) {
+        fail("native_kernel dummy map ref jump offset exceeds int16");
+    }
+
+    insns.push_back(bpf_insn{
+        .code = BPF_ALU64 | BPF_MOV | BPF_K,
+        .dst_reg = BPF_REG_9,
+        .src_reg = 0,
+        .off = 0,
+        .imm = 1,
+    });
+    insns.push_back(bpf_insn{
+        .code = BPF_JMP | BPF_JEQ | BPF_K,
+        .dst_reg = BPF_REG_9,
+        .src_reg = 0,
+        .off = static_cast<int16_t>(map_ref_fds.size() * 2),
+        .imm = 1,
+    });
+    for (int fd : map_ref_fds) {
+        if (fd < 0) {
+            fail("native_kernel dummy map ref has invalid fd");
+        }
+        insns.push_back(bpf_insn{
+            .code = BPF_LD | BPF_DW | BPF_IMM,
+            .dst_reg = BPF_REG_9,
+            .src_reg = BPF_PSEUDO_MAP_FD,
+            .off = 0,
+            .imm = fd,
+        });
+        insns.push_back(bpf_insn{
+            .code = 0, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0,
+        });
+    }
+}
+
 int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
                    uint32_t callee_saved_mask,
                    uint32_t prog_type_value,
                    const StubLoadAttrs &attrs,
-                   bool tail_call_reachable)
+                   bool tail_call_reachable,
+                   const std::vector<int> &map_ref_fds)
 {
     if (chunks == 0) {
         fail("chunks must be > 0");
@@ -956,12 +1012,16 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
     }
 
     std::vector<bpf_insn> insns;
-    insns.reserve(static_cast<size_t>(2) * chunks + (tail_call_reachable ? 8 : 1));
+    const size_t dummy_ref_insns =
+        map_ref_fds.empty() ? 0 : 2 + map_ref_fds.size() * 2;
+    insns.reserve(static_cast<size_t>(2) * chunks + dummy_ref_insns +
+                  (tail_call_reachable ? 8 : 1));
     if (tail_call_reachable) {
-        if (chunks > static_cast<uint32_t>((std::numeric_limits<int16_t>::max() - 1) / 2)) {
+        const size_t probe_off = 1 + static_cast<size_t>(2) * chunks +
+                                 dummy_ref_insns;
+        if (probe_off > static_cast<size_t>(std::numeric_limits<int16_t>::max())) {
             fail("native_kernel tail-call probe jump offset exceeds int16");
         }
-        const int16_t probe_off = static_cast<int16_t>(1 + 2 * chunks);
         insns.push_back(bpf_insn{
             .code = BPF_ALU64 | BPF_MOV | BPF_K,
             .dst_reg = BPF_REG_0,
@@ -973,7 +1033,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
             .code = BPF_JMP | BPF_JNE | BPF_K,
             .dst_reg = BPF_REG_0,
             .src_reg = 0,
-            .off = probe_off,
+            .off = static_cast<int16_t>(probe_off),
             .imm = 0,
         });
     }
@@ -995,6 +1055,7 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
         };
         insns.push_back(call);
     }
+    append_dummy_map_refs(insns, map_ref_fds);
     insns.push_back(bpf_insn{
         .code = BPF_JMP | BPF_EXIT, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0,
     });
@@ -1242,6 +1303,24 @@ void patch_map_literals(std::vector<uint8_t> &blob,
     }
 }
 
+std::vector<uint32_t> collect_relocated_map_ids(
+    const std::vector<MapPatchSite> &patches,
+    const std::unordered_map<std::string, uint32_t> &map_addr_ids)
+{
+    std::vector<uint32_t> ids;
+    std::unordered_set<uint32_t> seen;
+    for (const auto &patch : patches) {
+        auto it = map_addr_ids.find(patch.name);
+        if (it == map_addr_ids.end() || it->second == 0) {
+            continue;
+        }
+        if (seen.insert(it->second).second) {
+            ids.push_back(it->second);
+        }
+    }
+    return ids;
+}
+
 std::string read_first_line_required(const char *path)
 {
     FILE *f = std::fopen(path, "re");
@@ -1461,6 +1540,15 @@ uint64_t helper_kernel_addr(int helper_id)
     return kallsyms_lookup(symbol);
 }
 
+uint64_t htab_lookup_elem_kernel_addr()
+{
+    uint64_t addr = kallsyms_lookup("__htab_map_lookup_elem");
+    if (addr == 0) {
+        fail("native_kernel: __htab_map_lookup_elem is missing from /proc/kallsyms");
+    }
+    return addr;
+}
+
 struct BpfArrayOffsets {
     uint32_t value;
     uint32_t pptrs;
@@ -1480,6 +1568,7 @@ struct MapMeta {
     uint32_t value_size;
     uint32_t max_entries;
     uint64_t kernel_addr;
+    uint64_t value_addr;
 };
 
 struct HelperAlias {
@@ -2124,6 +2213,14 @@ bpf_map_info load_map_info(int map_fd)
     return info;
 }
 
+uint64_t lookup_array_value_addr_if_direct(const bpf_map_info &info, int map_fd)
+{
+    if (info.type != BPF_MAP_TYPE_ARRAY || info.max_entries != 1) {
+        return 0;
+    }
+    return lookup_kernel_map_value_ptr_by_fd(map_fd);
+}
+
 MapMeta load_map_meta_from_fd(int map_fd)
 {
     bpf_map_info info = load_map_info(map_fd);
@@ -2141,6 +2238,7 @@ MapMeta load_map_meta_from_fd(int map_fd)
         info.value_size,
         info.max_entries,
         lookup_kernel_map_ptr_by_fd(map_fd),
+        lookup_array_value_addr_if_direct(info, map_fd),
     };
 }
 
@@ -2185,6 +2283,7 @@ bool find_open_process_map_by_name(const std::string &name, MapMeta &out)
             info.value_size,
             info.max_entries,
             lookup_kernel_map_ptr_by_fd(fd),
+            lookup_array_value_addr_if_direct(info, fd),
         };
         matches.push_back(std::move(meta));
     }
@@ -2269,6 +2368,7 @@ bool find_open_process_array_data_map_by_name(const std::string &name,
             info.value_size,
             info.max_entries,
             lookup_kernel_map_ptr_by_fd(fd),
+            lookup_array_value_addr_if_direct(info, fd),
         });
     }
     closedir(fd_dir);
@@ -2400,6 +2500,7 @@ struct LinkedBlob {
     uint64_t native_link_read_ns = 0;
     uint64_t map_patch_ns = 0;
     uint32_t callee_saved_mask = 0;
+    std::vector<uint32_t> relocated_map_ids;
 };
 
 /* Libbpf-load the canonical `.bpf.o` companion so the kernel allocates
@@ -2418,7 +2519,10 @@ struct CompanionLoad {
     bool use_helper_oracle = true;
     bool has_tail_call = false;
     std::unordered_map<std::string, uint64_t> map_addrs;
+    std::unordered_map<std::string, uint32_t> map_addr_ids;
     std::unordered_map<std::string, std::string> native_map_symbols;
+    std::unordered_map<std::string, MapMeta> exact_map_addrs;
+    std::unordered_set<std::string> ambiguous_exact_maps;
     std::vector<std::string> helper_args;
     uint32_t prog_type = 0;
     std::vector<MapMeta> maps;
@@ -2462,6 +2566,48 @@ struct CompanionLoad {
     std::vector<UpdateSite> update_sites;
 };
 
+void add_exact_map_meta(CompanionLoad &load, const MapMeta &meta)
+{
+    const std::string truncated = bpf_obj_name_truncation(meta.name);
+    const std::string keys[] = {meta.name, truncated};
+
+    for (const std::string &key : keys) {
+        if (key.empty() || load.ambiguous_exact_maps.count(key)) {
+            continue;
+        }
+        auto it = load.exact_map_addrs.find(key);
+        if (it == load.exact_map_addrs.end()) {
+            load.exact_map_addrs.emplace(key, meta);
+            continue;
+        }
+        if (it->second.kernel_addr != meta.kernel_addr) {
+            load.exact_map_addrs.erase(key);
+            load.ambiguous_exact_maps.insert(key);
+        }
+    }
+}
+
+const MapMeta *find_exact_map_meta(const CompanionLoad &load,
+                                   const std::string &name)
+{
+    const std::string truncated = bpf_obj_name_truncation(name);
+    const std::string keys[] = {name, truncated};
+
+    for (const std::string &key : keys) {
+        if (key.empty()) {
+            continue;
+        }
+        if (load.ambiguous_exact_maps.count(key)) {
+            continue;
+        }
+        auto it = load.exact_map_addrs.find(key);
+        if (it != load.exact_map_addrs.end()) {
+            return &it->second;
+        }
+    }
+    return nullptr;
+}
+
 void add_map_meta(CompanionLoad &load, const MapMeta &meta)
 {
     bool duplicate = false;
@@ -2496,9 +2642,11 @@ void add_map_meta(CompanionLoad &load, const MapMeta &meta)
 
     if (ambiguous) {
         load.map_addrs.erase(meta.name);
+        load.map_addr_ids.erase(meta.name);
         load.native_map_symbols.erase(meta.name);
     } else {
         load.map_addrs[meta.name] = meta.kernel_addr;
+        load.map_addr_ids[meta.name] = meta.kernel_id;
         load.native_map_symbols[meta.name] = meta.name;
     }
 }
@@ -2523,6 +2671,7 @@ void add_map_symbol_alias_meta(CompanionLoad &load,
         load.maps.push_back(alias_meta);
     }
     load.map_addrs[alias] = meta.kernel_addr;
+    load.map_addr_ids[alias] = meta.kernel_id;
     load.native_map_symbols[alias] = alias;
 }
 
@@ -2581,6 +2730,7 @@ bool find_open_process_cilium_calls_map(MapMeta &out)
             info.value_size,
             info.max_entries,
             lookup_kernel_map_ptr_by_fd(fd),
+            lookup_array_value_addr_if_direct(info, fd),
         });
     }
     closedir(fd_dir);
@@ -2619,6 +2769,11 @@ const MapMeta *find_singleton_array_data_map(const CompanionLoad &load,
         if (candidate->kernel_addr != match->kernel_addr) {
             fail("multiple ARRAY maps match native data section " + section_name +
                  ": " + match->name + " and " + candidate->name);
+        }
+        if (candidate->value_addr != match->value_addr) {
+            fail("multiple ARRAY maps match native data section " + section_name +
+                 " with different value addresses: " + match->name +
+                 " and " + candidate->name);
         }
     }
     return match;
@@ -2675,8 +2830,12 @@ void add_known_kconfig_symbol_addrs(CompanionLoad &load)
     if (!map) {
         return;
     }
+    if (map->value_addr == 0) {
+        fail("BPF kconfig map " + map->name + " has no direct value address");
+    }
     load.map_addrs["LINUX_KERNEL_VERSION"] =
-        map->kernel_addr + K_BPF_ARRAY_VALUE_OFFSET;
+        map->value_addr;
+    load.map_addr_ids["LINUX_KERNEL_VERSION"] = map->kernel_id;
 }
 
 bool native_data_section_supported(const std::string &section_name)
@@ -2698,6 +2857,11 @@ std::string bpf_obj_name_truncation(const std::string &name)
 void add_native_map_symbol_alias(CompanionLoad &load, const std::string &name)
 {
     if (load.map_addrs.count(name)) {
+        return;
+    }
+
+    if (const MapMeta *exact = find_exact_map_meta(load, name)) {
+        add_map_symbol_alias_meta(load, name, *exact);
         return;
     }
 
@@ -2810,15 +2974,18 @@ CompanionLoad::LookupSite lookup_site_for_map_meta(const MapMeta &meta,
         site.percpu_base_addr = this_cpu_off_addr;
     } else if (t == BPF_MAP_TYPE_HASH) {
         uint32_t rounded = (meta.key_size + 7) & ~7u;
+        site.target_addr = htab_lookup_elem_kernel_addr();
         site.kind = CompanionLoad::LookupSite::Kind::Hash;
         site.key_offset = htab_offsets.key + rounded;
     } else if (t == BPF_MAP_TYPE_LRU_HASH) {
         uint32_t rounded = (meta.key_size + 7) & ~7u;
+        site.target_addr = htab_lookup_elem_kernel_addr();
         site.kind = CompanionLoad::LookupSite::Kind::LruHash;
         site.key_offset = htab_offsets.key + rounded;
         site.value_offset = htab_offsets.lru_ref;
     } else if (t == BPF_MAP_TYPE_PERCPU_HASH) {
         uint32_t rounded = (meta.key_size + 7) & ~7u;
+        site.target_addr = htab_lookup_elem_kernel_addr();
         site.kind = CompanionLoad::LookupSite::Kind::PerCpuHash;
         site.key_offset = htab_offsets.key + rounded;
 #if defined(__x86_64__)
@@ -2927,8 +3094,15 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
                 fail("native data symbol " + std::string(name) +
                      " exceeds BPF data map value_size for " + map->name);
             }
+            if (map->value_addr == 0) {
+                elf_end(elf);
+                close(fd);
+                fail("native data map " + map->name +
+                     " has no direct value address for symbol " + std::string(name));
+            }
             load.map_addrs[std::string(name)] =
-                map->kernel_addr + K_BPF_ARRAY_VALUE_OFFSET + off;
+                map->value_addr + off;
+            load.map_addr_ids[std::string(name)] = map->kernel_id;
         }
     }
     elf_end(elf);
@@ -3094,7 +3268,9 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
     bpf_object__for_each_map(map, obj) {
         int fd = bpf_map__fd(map);
         if (fd >= 0) {
-            add_map_meta(out, load_map_meta_from_fd(fd));
+            MapMeta meta = load_map_meta_from_fd(fd);
+            add_map_meta(out, meta);
+            add_exact_map_meta(out, meta);
         }
     }
     const auto map_ptr_end = std::chrono::steady_clock::now();
@@ -3204,15 +3380,18 @@ CompanionLoad load_bpf_companion(const std::filesystem::path &bpf_o_path)
                         site.percpu_base_addr = this_cpu_off_addr;
                     } else if (t == BPF_MAP_TYPE_HASH) {
                         uint32_t rounded = (map_it->second.key_size + 7) & ~7u;
+                        site.target_addr = htab_lookup_elem_kernel_addr();
                         site.kind = CompanionLoad::LookupSite::Kind::Hash;
                         site.key_offset = htab_offsets.key + rounded;
                     } else if (t == BPF_MAP_TYPE_LRU_HASH) {
                         uint32_t rounded = (map_it->second.key_size + 7) & ~7u;
+                        site.target_addr = htab_lookup_elem_kernel_addr();
                         site.kind = CompanionLoad::LookupSite::Kind::LruHash;
                         site.key_offset = htab_offsets.key + rounded;
                         site.value_offset = htab_offsets.lru_ref;
                     } else if (t == BPF_MAP_TYPE_PERCPU_HASH) {
                         uint32_t rounded = (map_it->second.key_size + 7) & ~7u;
+                        site.target_addr = htab_lookup_elem_kernel_addr();
                         site.kind = CompanionLoad::LookupSite::Kind::PerCpuHash;
                         site.key_offset = htab_offsets.key + rounded;
 #if defined(__x86_64__)
@@ -3301,7 +3480,9 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
             fail("bpf_map_get_fd_by_id(" + std::to_string(id) + "): " +
                  std::strerror(errno));
         }
-        add_map_meta(out, load_map_meta_from_fd(map_fd));
+        MapMeta meta = load_map_meta_from_fd(map_fd);
+        add_map_meta(out, meta);
+        add_exact_map_meta(out, meta);
         close(map_fd);
     }
     const auto map_ptr_end = std::chrono::steady_clock::now();
@@ -3328,6 +3509,7 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
             }
             MapMeta meta = load_map_meta_from_fd(map_fd);
             add_map_meta(out, meta);
+            add_exact_map_meta(out, meta);
             meta_by_source_fd.emplace(map_fd, meta);
         }
     }
@@ -3388,15 +3570,18 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
                     site.percpu_base_addr = this_cpu_off_addr;
                 } else if (t == BPF_MAP_TYPE_HASH) {
                     uint32_t rounded = (map_it->second.key_size + 7) & ~7u;
+                    site.target_addr = htab_lookup_elem_kernel_addr();
                     site.kind = CompanionLoad::LookupSite::Kind::Hash;
                     site.key_offset = htab_offsets.key + rounded;
                 } else if (t == BPF_MAP_TYPE_LRU_HASH) {
                     uint32_t rounded = (map_it->second.key_size + 7) & ~7u;
+                    site.target_addr = htab_lookup_elem_kernel_addr();
                     site.kind = CompanionLoad::LookupSite::Kind::LruHash;
                     site.key_offset = htab_offsets.key + rounded;
                     site.value_offset = htab_offsets.lru_ref;
                 } else if (t == BPF_MAP_TYPE_PERCPU_HASH) {
                     uint32_t rounded = (map_it->second.key_size + 7) & ~7u;
+                    site.target_addr = htab_lookup_elem_kernel_addr();
                     site.kind = CompanionLoad::LookupSite::Kind::PerCpuHash;
                     site.key_offset = htab_offsets.key + rounded;
 #if defined(__x86_64__)
@@ -3930,6 +4115,8 @@ LinkedBlob load_or_link_native_blob(const native_loader::LoadOptions &options,
             elapsed_ns(link_start, link_end),
         };
         auto map_patches = read_map_patch_file(source.map_patches);
+        linked.relocated_map_ids =
+            collect_relocated_map_ids(map_patches, companion.map_addr_ids);
         linked.callee_saved_mask = read_link_abi_file(source.abi);
         const auto read_end = std::chrono::steady_clock::now();
         publish_cache_file(tmp.proof, cache.proof);
@@ -3953,6 +4140,8 @@ LinkedBlob load_or_link_native_blob(const native_loader::LoadOptions &options,
         0,
     };
     auto map_patches = read_map_patch_file(source.map_patches);
+    linked.relocated_map_ids =
+        collect_relocated_map_ids(map_patches, companion.map_addr_ids);
     linked.callee_saved_mask = read_link_abi_file(source.abi);
     const auto read_end = std::chrono::steady_clock::now();
     const auto patch_start = std::chrono::steady_clock::now();
@@ -3972,7 +4161,8 @@ struct LoadedStub {
 LoadedStub upload_and_load_stub(const LinkedBlob &linked,
                                 uint32_t prog_type,
                                 const StubLoadAttrs &attrs,
-                                bool tail_call_reachable)
+                                bool tail_call_reachable,
+                                const std::vector<int> &map_ref_fds)
 {
     LoadedStub out{};
 
@@ -3999,7 +4189,8 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
             linked.callee_saved_mask,
             prog_type,
             attrs,
-            tail_call_reachable);
+            tail_call_reachable,
+            map_ref_fds);
         const auto prog_load_end = std::chrono::steady_clock::now();
         close(mod_btf_fd);
         out.prog_load_ns = elapsed_ns(prog_load_start, prog_load_end);
@@ -4008,20 +4199,20 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
     return out;
 }
 
-std::vector<int> reopen_relocated_map_fds(const CompanionLoad &companion)
+std::vector<int> reopen_relocated_map_fds(const std::vector<uint32_t> &map_ids)
 {
     std::vector<int> fds;
     std::unordered_set<uint32_t> seen;
-    for (const MapMeta &meta : companion.maps) {
-        if (meta.kernel_id == 0 || !seen.insert(meta.kernel_id).second) {
+    for (uint32_t id : map_ids) {
+        if (id == 0 || !seen.insert(id).second) {
             continue;
         }
-        int fd = bpf_map_get_fd_by_id(meta.kernel_id);
+        int fd = bpf_map_get_fd_by_id(id);
         if (fd < 0) {
             for (int retained_fd : fds) {
                 close(retained_fd);
             }
-            fail("bpf_map_get_fd_by_id(" + std::to_string(meta.kernel_id) +
+            fail("bpf_map_get_fd_by_id(" + std::to_string(id) +
                  ") for native relocation lifetime: " + std::strerror(errno));
         }
         fcntl(fd, F_SETFD, FD_CLOEXEC);
@@ -4062,14 +4253,17 @@ LoadedProgram load_from_companion_object(const LoadOptions &options)
         options.symbol_name,
         companion);
 
+    std::vector<int> map_ref_fds =
+        reopen_relocated_map_fds(linked.relocated_map_ids);
     LoadedStub loaded_stub = upload_and_load_stub(
         linked,
         options.prog_type,
         StubLoadAttrs{},
-        companion.has_tail_call);
+        companion.has_tail_call,
+        map_ref_fds);
 
     out.prog_fd = loaded_stub.prog_fd;
-    out.retained_map_fds = reopen_relocated_map_fds(companion);
+    out.retained_map_fds = std::move(map_ref_fds);
     out.companion_object = companion.obj;
     out.callee_saved_mask = linked.callee_saved_mask;
     out.bpf_bytecode_bytes = companion.oracle_xlated.size();
@@ -4138,14 +4332,17 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         : prog_info.attach_btf_obj_id;
     stub_attrs.attach_prog_id = options.attach_prog_id;
 
+    std::vector<int> map_ref_fds =
+        reopen_relocated_map_fds(linked.relocated_map_ids);
     LoadedStub loaded_stub = upload_and_load_stub(
         linked,
         prog_info.type,
         stub_attrs,
-        companion.has_tail_call);
+        companion.has_tail_call,
+        map_ref_fds);
 
     out.prog_fd = loaded_stub.prog_fd;
-    out.retained_map_fds = reopen_relocated_map_fds(companion);
+    out.retained_map_fds = std::move(map_ref_fds);
     out.companion_object = nullptr;
     out.callee_saved_mask = linked.callee_saved_mask;
     out.bpf_bytecode_bytes = companion.oracle_xlated.size();

@@ -1869,3 +1869,43 @@ Validation after this cleanup:
 - After the final removal of the shim JIT dump helper/call and suite env
   forwarding, `TEST_MODE=native-loader-smoke TIMEOUT=1200 make test` passed
   again with run token `65fd2068`.
+
+### 2026-05-25 x86 helper-call rel32 fail-fast validation
+
+The x86 runtime helper-call path now keeps the 12-byte slot ABI:
+`call rel32` plus the 7-byte `nop` padding. `native-link` emits that exact
+placeholder and records `NATIVE_LAB_RELOC_HELPER_CALL_REL32`; the x86
+native-lab module validates the full slot, patches only the disp32, and fails
+the load with `-ERANGE`/`-EINVAL` if the helper is out of range or the slot is
+malformed. There is no runtime `call *%rax` fallback in
+`native-link`, `libnativeloader`, or `bpf_x86_native_lab`.
+
+This cleanup also removed the unnamed `--lookup-site` fallback in x86
+map-site selection. If a native object has a map name, it must match that
+named lookup site, resolve through `--lookup-map`, or use the generic helper
+path. Reusing an arbitrary unnamed site would hide schema/order mismatches
+between shim metadata and native-link.
+
+Validation:
+
+- `cargo fmt --manifest-path native-sim/x86/native_lab/native_link/Cargo.toml`
+  passed.
+- `make host-rust-x86 host-kinsn-x86 host-runner-x86` passed.
+- Focused micro rerun:
+  `SUITE=micro/config/micro_stage2.yaml RUNTIMES="native_kernel kernel" BENCH=helper_only_uid_gid SAMPLES=1 WARMUPS=0 INNER_REPEAT=10 TIMEOUT=1200 make micro`
+  passed in `micro/results/x86_kvm_micro_20260525_200806_839921`.
+  `native_kernel` returned `result=0`, `retval=2`, `exec_ns=68`; `kernel`
+  returned `result=0`, `retval=2`, `exec_ns=108`. The final native JIT dump
+  contains one `e8 rel32` helper call followed by the 7-byte nop slot and
+  zero `ff d0` (`call *%rax`) sequences.
+- Focused corpus bcc/set smoke:
+  `BPFREJIT_CORPUS_APPS=bcc/set BPFREJIT_SHIM_NATIVE_LOADER=1 BPFREJIT_SHIM_NATIVE_JIT_DUMP_LIMIT=512 SKIP_REJIT=norejit SAMPLES=1 WARMUPS=0 WORKLOAD_DURATION=5 KEEP_WORKDIRS=1 TIMEOUT=1800 make corpus`
+  passed in `corpus/results/x86_kvm_corpus_20260525_201251_658504`.
+  The app status is `ok`, with 25 baseline programs and 25 post programs.
+  Both shim logs report 25 native replacements, 25 native JIT dump prefixes,
+  zero native-loader/rel32 failures, zero `ff d0` sequences in native dump
+  prefixes, and 120 observed `e8 rel32; nop7` helper-call slots per phase.
+
+The proof/source/native input objects may still contain indirect-looking
+helper-call idioms before final linking. The authoritative runtime check is
+the final kernel JIT dump and the module's fail-fast relocation load path.

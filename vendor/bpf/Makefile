@@ -509,8 +509,10 @@ native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h native_compat.h $(
 		for obj in "$${native_out}"/*.native.o; do native_args+=(--object "$${obj}"); done; \
 		for obj in "$${stage_out}"/*.native.o; do stage_args+=(--object "$${obj}"); done; \
 		python3 "$(CURDIR)/write_native_manifest.py" --app tetragon --llvm-nm "$(LLVM_NM)" --dedupe-program last \
+			--source-object-root "$(VENDOR)/build/x86/tetragon" --helper-disambiguate 174 \
 			--output "$${native_out}/manifest.json" "$${native_args[@]}"; \
 		python3 "$(CURDIR)/write_native_manifest.py" --app tetragon --llvm-nm "$(LLVM_NM)" --dedupe-program last \
+			--source-object-root "$(VENDOR)/build/x86/tetragon" --helper-disambiguate 174 \
 			--output "$${stage_out}/manifest.json" "$${stage_args[@]}"
 
 native-artifacts: native-katran native-bcc native-otel native-cilium native-tracee native-tetragon

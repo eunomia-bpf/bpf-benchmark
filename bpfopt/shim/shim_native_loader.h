@@ -94,6 +94,59 @@ static int shim_native_loader_source_has_map_prefix(const char *source_path,
     return found;
 }
 
+static int shim_native_loader_source_has_helper(const char *source_path,
+                                                int helper_id) {
+    if (!source_path || !source_path[0] || helper_id < 0)
+        return 0;
+    int fd = open(source_path, O_RDONLY);
+    if (fd < 0)
+        return 0;
+    struct stat st;
+    if (fstat(fd, &st) != 0 || st.st_size < 0 ||
+        ((size_t)st.st_size % sizeof(struct bpf_insn)) != 0) {
+        close(fd);
+        return 0;
+    }
+    size_t bytes = (size_t)st.st_size;
+    struct bpf_insn *insns = (struct bpf_insn *)malloc(bytes);
+    if (!insns) {
+        close(fd);
+        return 0;
+    }
+    size_t off = 0;
+    while (off < bytes) {
+        ssize_t n = read(fd, ((char *)insns) + off, bytes - off);
+        if (n < 0) {
+            if (errno == EINTR)
+                continue;
+            free(insns);
+            close(fd);
+            return 0;
+        }
+        if (n == 0) {
+            free(insns);
+            close(fd);
+            return 0;
+        }
+        off += (size_t)n;
+    }
+    close(fd);
+
+    int found = 0;
+    size_t insn_cnt = bytes / sizeof(*insns);
+    for (size_t i = 0; i < insn_cnt; i++) {
+        const struct bpf_insn *insn = &insns[i];
+        if (insn->code == (BPF_JMP | BPF_CALL) &&
+            insn->src_reg == 0 &&
+            insn->imm == helper_id) {
+            found = 1;
+            break;
+        }
+    }
+    free(insns);
+    return found;
+}
+
 static int shim_native_loader_manifest_dir(const char *manifest,
                                            char *out,
                                            size_t out_sz) {
@@ -155,6 +208,18 @@ static int shim_native_loader_manifest_entry_matches(const char *entry,
                      sizeof(map_prefix)) &&
         map_prefix[0] &&
         !shim_native_loader_source_has_map_prefix(source_path, map_prefix))
+        return 0;
+
+    long required_helper = json_get_int(entry, "source_has_helper");
+    if (required_helper >= 0 &&
+        !shim_native_loader_source_has_helper(source_path,
+                                             (int)required_helper))
+        return 0;
+
+    long forbidden_helper = json_get_int(entry, "source_lacks_helper");
+    if (forbidden_helper >= 0 &&
+        shim_native_loader_source_has_helper(source_path,
+                                            (int)forbidden_helper))
         return 0;
 
     return 1;

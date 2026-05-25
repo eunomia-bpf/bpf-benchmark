@@ -548,6 +548,20 @@ python3 native-sim/x86/native_lab/tests/analyze.py
   It is *not* part of `expected_kinsn_modules()` and the production
   benchmark runner doesn't insmod it. Smoke scripts insmod it before
   use.
+- **Current helper-call runtime ABI is fail-fast `call rel32; nop7`.**
+  Earlier notes in this file mention `movabs rax, helper; call *rax`
+  helper-call slots as historical input/proof experiments. The current
+  runtime x86 path keeps a 12-byte placeholder (`e8 00 00 00 00 0f 1f 80
+  00 00 00 00`) plus a side-band `NATIVE_LAB_RELOC_HELPER_CALL_REL32`
+  record. The module validates that full slot in final JIT memory, patches
+  only the `disp32`, and fails the native load with `-ERANGE`/`-EINVAL`
+  instead of falling back to an indirect helper call. A 2026-05-25 focused
+  run, `micro/results/x86_kvm_micro_20260525_200806_839921`, showed the
+  final native JIT as one `e8 rel32` helper call followed by the 7-byte nop
+  and zero `ff d0` sequences. The matching bcc/set corpus smoke,
+  `corpus/results/x86_kvm_corpus_20260525_201251_658504`, replaced 25
+  programs in each phase with zero native-loader failures and zero `ff d0`
+  sequences in the native JIT dump prefixes.
 
 ## Latest results (`results/all_micro.jsonl`)
 

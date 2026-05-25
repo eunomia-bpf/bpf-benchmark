@@ -284,11 +284,12 @@ static int map_ptr_release(struct inode *inode, struct file *file)
 	return 0;
 }
 
-static ssize_t map_ptr_write(struct file *file, const char __user *ubuf,
-			     size_t len, loff_t *ppos)
+static ssize_t map_ptr_query_write(struct file *file, const char __user *ubuf,
+				   size_t len, loff_t *ppos, bool direct_value)
 {
 	struct map_ptr_file_priv *priv = file->private_data;
 	struct bpf_map *map;
+	unsigned long ptr;
 	unsigned int fd;
 	char buf[32];
 	int err;
@@ -311,11 +312,41 @@ static ssize_t map_ptr_write(struct file *file, const char __user *ubuf,
 	if (IS_ERR(map))
 		return PTR_ERR(map);
 
+	ptr = (unsigned long)map;
+	if (direct_value) {
+		u64 value = 0;
+
+		if (!map->ops || !map->ops->map_direct_value_addr) {
+			err = -EOPNOTSUPP;
+			goto out_put;
+		}
+		err = map->ops->map_direct_value_addr(map, &value, 0);
+		if (err)
+			goto out_put;
+		ptr = (unsigned long)value;
+	}
+
 	priv->len = scnprintf(priv->response, sizeof(priv->response),
-			      "0x%llx\n", (unsigned long long)(unsigned long)map);
+			      "0x%llx\n", (unsigned long long)ptr);
+	err = len;
+out_put:
 	bpf_map_put(map);
+	if (err < 0)
+		return err;
 	*ppos = len;
-	return len;
+	return err;
+}
+
+static ssize_t map_ptr_write(struct file *file, const char __user *ubuf,
+			     size_t len, loff_t *ppos)
+{
+	return map_ptr_query_write(file, ubuf, len, ppos, false);
+}
+
+static ssize_t map_value_ptr_write(struct file *file, const char __user *ubuf,
+				   size_t len, loff_t *ppos)
+{
+	return map_ptr_query_write(file, ubuf, len, ppos, true);
 }
 
 static ssize_t map_ptr_read(struct file *file, char __user *ubuf, size_t len,
@@ -336,6 +367,15 @@ static const struct file_operations map_ptr_fops = {
 	.llseek = default_llseek,
 };
 
+static const struct file_operations map_value_ptr_fops = {
+	.owner = THIS_MODULE,
+	.open = map_ptr_open,
+	.release = map_ptr_release,
+	.read = map_ptr_read,
+	.write = map_value_ptr_write,
+	.llseek = default_llseek,
+};
+
 static int __init bpf_arm64_native_lab_debugfs_init(void)
 {
 	long i;
@@ -346,6 +386,8 @@ static int __init bpf_arm64_native_lab_debugfs_init(void)
 
 	debugfs_create_file("map_ptr", 0600, debugfs_root, NULL,
 			    &map_ptr_fops);
+	debugfs_create_file("map_value_ptr", 0600, debugfs_root, NULL,
+			    &map_value_ptr_fops);
 
 	for (i = 0; i < NATIVE_LAB_MAX_BLOBS; i++) {
 		char name[24];
