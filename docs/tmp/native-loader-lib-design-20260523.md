@@ -1567,12 +1567,12 @@ The attach-symbol matched Tetragon data still shows a real problem rather than
 just a matching artifact: 8 directly attached programs qualify, with geomean
 native/original avg-run-ns ratio 3.28 (0.305x, a slowdown). The largest losses
 are high-frequency small hooks such as `fd_install`, `ip_output`,
-`tcp_sendmsg`, and `sys_enter`, where native stubs are about 5 us/run while the
-original JITed BPF is hundreds of ns/run. The same run's stress-ng workload
-output drops by roughly 3-6x for eventfd/udp/sockfd/sockpair. This must be
-validated again with BPF stats disabled, but it is currently treated as a
-native-loader/native-stub overhead issue on tiny high-frequency probes, not as
-an analysis matching bug.
+`tcp_sendmsg`, and `sys_enter`, where the generated native-lab program is about
+5 us/run while the original JITed BPF is hundreds of ns/run. The same run's
+stress-ng workload output drops by roughly 3-6x for
+eventfd/udp/sockfd/sockpair. This must be validated again with BPF stats
+disabled, but it is currently treated as a generated native wrapper/blob fixed
+cost issue on tiny high-frequency probes, not as an analysis matching bug.
 
 Stats-off workload runs use:
 
@@ -1749,8 +1749,8 @@ Final per-app conclusion:
 - Cilium has a real benefit. Both counter data and endpoint pktgen throughput
   show a large speedup, with zero pktgen errors.
 - Tetragon is functionally correct but not beneficial. The slowdown is
-  repeatable in counters and workload numbers and is consistent with native
-  stub overhead dominating tiny high-frequency hooks.
+  repeatable in counters and workload numbers and is consistent with generated
+  native wrapper/blob fixed cost dominating tiny high-frequency hooks.
 - Katran has a modest real benefit. The counter and workload directions agree;
   pktgen error counts are high in both phases, so they are a workload/topology
   caveat rather than a native-only correctness failure.
@@ -1763,3 +1763,23 @@ Proof status: the staged native artifact manifests under
 `native-objects-proof-linked`, and the tree contains 111 `.proof.ok` markers
 under `vendor/build/native-bpf/x86`. The final corpus runs loaded those staged
 native artifacts through the real app startup paths.
+
+### 2026-05-25 runner fallback cleanup
+
+Follow-up cleanup removed the old `run-native-kernel --program <prelinked.blob>`
+path from the C++ runner. `run-native-kernel` now requires the same Stage 2
+shape used by normal micro native runs: `--program <companion.bpf.o>` plus
+`--native-program <native.o>`, and the runner delegates companion loading,
+native-link invocation, blob upload, and `native_lab_stub` `BPF_PROG_LOAD` to
+`native-sim/libnativeloader`.
+
+This also removes the arm64-only prelinked-blob smoke artifact under
+`native-sim/arm64/native_lab_smoke`; that test was the only remaining caller of
+the old blob path and could not exercise the shared loader library.
+
+Terminology correction: `native_lab_stub` is the kernel-visible BPF program name
+for the tiny `(sidecar; kinsn-call)*N; exit` wrapper that the native-lab kinsn
+JIT expands with uploaded native bytes. It is not a separate user-space loader
+stub, and the hot path should not be described as a normal kfunc call per event.
+BPF entry/stats accounting is also not native-only overhead; ordinary JITed BPF
+programs pay it too.

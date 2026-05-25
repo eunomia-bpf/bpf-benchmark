@@ -13,7 +13,6 @@ from typing import Sequence
 from runner.libs import ROOT_DIR
 from runner.libs.cli_support import fail
 from runner.libs.kinsn import load_kinsn_modules
-from runner.libs.results import parse_last_json_line
 from runner.libs.workspace_layout import (
     inside_runtime_image,
     kinsn_module_dir,
@@ -154,72 +153,6 @@ def _run_kernel_selftest(workspace: Path, env: dict[str, str]) -> None:
         _die("test_recompile failed")
 
 
-def _parse_single_runner_sample(stdout: str, label: str) -> dict:
-    try:
-        payload = parse_last_json_line(stdout, label=label)
-    except RuntimeError as exc:
-        _die(str(exc))
-        raise AssertionError("unreachable")
-    if isinstance(payload, dict):
-        return payload
-    if isinstance(payload, list) and len(payload) == 1 and isinstance(payload[0], dict):
-        return payload[0]
-    _die(f"{label} returned unexpected JSON shape")
-    raise AssertionError("unreachable")
-
-
-def _run_arm64_native_kernel_smoke(
-    workspace: Path,
-    args: argparse.Namespace,
-    env: dict[str, str],
-    *,
-    log_path: Path | None = None,
-) -> None:
-    if args.target_arch != "arm64":
-        return
-
-    runner_binary = runner_binary_path(workspace, args.target_arch)
-    blob = stage2_program_root(workspace, args.target_arch) / "native_kernel_smoke" / \
-        "arm64_native_kernel_xdp_result.blob"
-    if not runner_binary.is_file() or not os.access(runner_binary, os.X_OK):
-        _die(f"runner artifact is missing or not executable: {runner_binary}")
-    if not blob.is_file():
-        _die(f"arm64 native_kernel smoke blob is missing: {blob}")
-
-    _log_test_section("arm64 native_kernel smoke")
-    command = [
-        str(runner_binary),
-        "run-native-kernel",
-        "--program", str(blob),
-        "--io-mode", "staged",
-        "--input-size", "64",
-        "--inner-repeat", "1",
-    ]
-    completed = subprocess.run(
-        command,
-        cwd=workspace,
-        env=env,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if log_path is not None:
-        with log_path.open("a", encoding="utf-8") as log_file:
-            log_file.write(completed.stdout)
-            log_file.write(completed.stderr)
-    sys.stderr.write(completed.stdout)
-    sys.stderr.write(completed.stderr)
-    if completed.returncode != 0:
-        _die(f"arm64 native_kernel smoke failed with exit {completed.returncode}")
-
-    sample = _parse_single_runner_sample(completed.stdout, "arm64 native_kernel smoke")
-    if sample.get("result") != 12345678 or sample.get("retval") != 2:
-        _die(
-            "arm64 native_kernel smoke returned unexpected result: "
-            f"result={sample.get('result')} retval={sample.get('retval')}"
-        )
-
-
 def _run_native_proof_micro_smoke(
     workspace: Path,
     args: argparse.Namespace,
@@ -358,7 +291,6 @@ def _run_selftest_mode(workspace: Path, args: argparse.Namespace, env: dict[str,
     log_path = artifact_dir / "selftest.log"
     _log_test_section("Loading kinsn modules")
     _load_kinsn_modules(workspace, args.target_arch)
-    _run_arm64_native_kernel_smoke(workspace, args, env, log_path=log_path)
     _run_native_proof_micro_smoke(workspace, args, env, log_path=log_path)
     _run_negative_suite(workspace, args, env, log_path=log_path)
 
@@ -381,7 +313,6 @@ def _run_test_mode(workspace: Path, args: argparse.Namespace, env: dict[str, str
     _run_kernel_selftest(workspace, env)
     _log_test_section("Loading kinsn modules")
     _load_kinsn_modules(workspace, args.target_arch)
-    _run_arm64_native_kernel_smoke(workspace, args, env)
     _run_native_proof_micro_smoke(workspace, args, env)
     _run_negative_suite(workspace, args, env)
 

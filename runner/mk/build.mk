@@ -30,7 +30,6 @@ CONTAINER_IMAGE_ARTIFACT_ROOT := $(ARTIFACT_ROOT)/container-images
 
 ARM64_RUST_TARGET := aarch64-unknown-linux-gnu
 NATIVE_LINK_DIR := $(ROOT_DIR)/native-sim/x86/native_lab/native_link
-ARM64_NATIVE_KERNEL_SMOKE_DIR := $(ROOT_DIR)/native-sim/arm64/native_lab_smoke
 ARM64_SIM_PROOF_DIR := $(ROOT_DIR)/native-sim/arm64
 MICRO_PROOF_CONFIG := $(if $(strip $(SUITE)),$(if $(filter /%,$(SUITE)),$(SUITE),$(ROOT_DIR)/$(SUITE)),$(ROOT_DIR)/micro/config/micro_pure_jit.yaml)
 BPFOPT_LLVM_BUILD_X86 := $(ROOT_DIR)/bpfopt/llvm/build-kinsn
@@ -72,7 +71,7 @@ HOST_KERNEL_MODULES_ORDER_ARM64 := $(HOST_KERNEL_BUILD_DIR_ARM64)/modules.order
 	host-kinsn-x86 host-kinsn-arm64 host-rust-x86 host-rust-arm64 host-bpfopt-llvm-x86 host-bpfopt-llvm-arm64 \
 	host-shim-x86 host-shim-arm64 host-shim-artifacts \
 	host-runner-x86 host-runner-arm64 host-micro-programs-x86 host-micro-programs-arm64 \
-		host-stage2-programs-x86 host-stage2-programs-arm64 host-x86-sim-proofs host-arm64-native-kernel-smoke host-arm64-sim-proofs \
+		host-stage2-programs-x86 host-stage2-programs-arm64 host-x86-sim-proofs host-arm64-sim-proofs \
 		host-native-bpf-x86 host-native-bpf-arm64 \
 	apps host-source-apps host-source-apps-x86 host-source-apps-arm64 \
 	aarch64-sysroot runtime-kernel-image \
@@ -214,9 +213,6 @@ host-native-bpf-x86: host-rust-x86
 host-native-bpf-arm64:
 	install -d "$(NATIVE_BPF_ARTIFACTS_ARM64)"
 
-host-arm64-native-kernel-smoke:
-	$(MAKE) -C "$(ARM64_NATIVE_KERNEL_SMOKE_DIR)" OUTPUT_DIR="$(STAGE2_PROGRAM_BUILD_ARM64)/native_kernel_smoke" all
-
 host-x86-sim-proofs: host-micro-programs-x86
 	$(MAKE) -C "$(ROOT_DIR)/native-sim/x86" PROOF_BUILD_DIR="$(STAGE2_PROGRAM_BUILD_X86)/x86_sim_proofs" MICRO_CONFIG="$(MICRO_PROOF_CONFIG)" micro-proofs-build
 
@@ -250,7 +246,7 @@ x86-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_X86) host-kinsn-x86 host-rust-
 	docker save -o "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE)"
 	mv -f "$(X86_RUNNER_RUNTIME_IMAGE_TAR).tmp" "$(X86_RUNNER_RUNTIME_IMAGE_TAR)"
 
-arm64-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM64) host-kinsn-arm64 host-rust-arm64 host-shim-arm64 host-source-apps-arm64 host-runner-arm64 host-micro-programs-arm64 host-stage2-programs-arm64 host-arm64-native-kernel-smoke host-arm64-sim-proofs host-bpfopt-llvm-arm64 host-native-bpf-arm64
+arm64-runner-runtime-image-tar: $(HOST_KERNEL_IMAGE_ARM64) $(HOST_KERNEL_EFI_ARM64) host-kinsn-arm64 host-rust-arm64 host-shim-arm64 host-source-apps-arm64 host-runner-arm64 host-micro-programs-arm64 host-stage2-programs-arm64 host-arm64-sim-proofs host-bpfopt-llvm-arm64 host-native-bpf-arm64
 	install -d "$(CONTAINER_IMAGE_ARTIFACT_ROOT)"
 	docker build --platform linux/arm64 \
 		--target runner-runtime \

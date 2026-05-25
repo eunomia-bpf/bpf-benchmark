@@ -27,7 +27,6 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
-#include <iterator>
 #include <limits>
 #include <stdexcept>
 #include <sstream>
@@ -992,25 +991,6 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
              + std::strerror(errno));
     }
     return fd;
-}
-
-std::vector<uint8_t> read_blob_file(const std::filesystem::path &path)
-{
-    std::ifstream f(path, std::ios::binary);
-    if (!f) {
-        fail("read native blob: " + path.string());
-    }
-    return std::vector<uint8_t>((std::istreambuf_iterator<char>(f)),
-                                std::istreambuf_iterator<char>());
-}
-
-bool file_is_elf(const std::filesystem::path &path)
-{
-    std::ifstream f(path, std::ios::binary);
-    if (!f) return false;
-    char m[4] = {};
-    f.read(m, 4);
-    return m[0] == 0x7f && m[1] == 'E' && m[2] == 'L' && m[3] == 'F';
 }
 
 struct Hash64 {

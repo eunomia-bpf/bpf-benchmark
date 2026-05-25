@@ -19,7 +19,7 @@ std::string usage_text()
         "  micro_exec run-native [--program <path>|<path>] --native-program <path> "
         "[--memory <path>] [--io-mode staged|packet] [--inner-repeat N] [--input-size N] "
         "[--perf-counters]\n"
-        "  micro_exec run-native-kernel [--program <path>|<path>] [--native-program <path>] "
+        "  micro_exec run-native-kernel [--program <path>|<path>] --native-program <path> "
         "[--memory <path>] [--io-mode staged|packet] [--native-kernel-prog-type xdp|sched_cls|cgroup_skb] "
         "[--inner-repeat N] [--input-size N] [--perf-counters]\n"
 #ifdef MICRO_EXEC_ENABLE_LLVMBPF
@@ -55,8 +55,9 @@ void validate_cli_options(const cli_options &options)
         options.command != "run-native-kernel") {
         fail("--native-program is only supported by run-native and run-native-kernel");
     }
-    if (options.command == "run-native" && !options.native_program.has_value()) {
-        fail("run-native requires --native-program");
+    if ((options.command == "run-native" || options.command == "run-native-kernel") &&
+        !options.native_program.has_value()) {
+        fail(options.command + " requires --native-program");
     }
     if ((options.command == "test-run"
          || options.command == "run-native"
